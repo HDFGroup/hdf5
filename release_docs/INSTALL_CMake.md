@@ -367,109 +367,9 @@ Go through these steps:
 
 1. We suggest you obtain the latest CMake from the Kitware web site. The HDF5 2."X"."Y" product **requires a minimum CMake version 3.26**.
 
-2. If you plan to use Zlib or Szip (aka libaec):
+2. If you plan to use Zlib/Zlib-ng, Szip (aka libaec) and/or HDF5 filter plugins, refer to the instructions in [INSTALL_Filters.md](./INSTALL_Filters.md).
 
-    1. Download the binary packages and install them in a central location. For example on Windows, create a folder `extlibs` and install the packages there. Add the following CMake options:
-
-        ```
-        -DZLIB_LIBRARY:FILEPATH=some_location/lib/zlib.lib
-        -DZLIB_INCLUDE_DIR:PATH=some_location/include
-        -DZLIB_USE_EXTERNAL:BOOL=OFF
-        -DSZIP_LIBRARY:FILEPATH=some_location/lib/libszaec.lib
-        -DSZIP_INCLUDE_DIR:PATH=some_location/include
-        -Dlibaec_LIBRARY:FILEPATH=some_location/lib/libaec.lib
-        -Dlibaec_INCLUDE_DIR:PATH=some_location/include
-        -DSZIP_USE_EXTERNAL:BOOL=OFF
-        ```
-        where `some_location` is the full path to the `extlibs` folder.
-        Also if the appropriate environment variable is set, the above options are not required:
-        ```
-        set(ENV{ZLIB_ROOT} "some_location")
-        set(ENV{SZIP_ROOT} "some_location")
-        set(ENV{libaec_ROOT} "some_location")
-        ```
-
-        Note that if there is a problem finding the libraries, try adding the
-        CMake variable `CMAKE_FIND_DEBUG_MODE:BOOL=ON` to the command line.
-
-    2. Use source packages from a GIT server by adding the following CMake
-         options:
-
-        `HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="GIT"`<br/>
-        `ZLIB_GIT_URL:STRING="https://some_location/zlib"` or `ZLIBNG_GIT_URL:STRING="https://some_location/zlibng"`<br/>
-        `ZLIB_GIT_BRANCH="some_branch"` or `ZLIBNG_GIT_BRANCH="some_branch"`<br/>
-        `SZIP_GIT_URL:STRING="https://some_location/szip"`<br/>
-        `SZIP_GIT_BRANCH="some_branch"`<br/>
-        `LIBAEC_GIT_URL:STRING="https://some_location/libaec"`<br/>
-        `LIBAEC_GIT_BRANCH="some_branch"`<br/>
-
-        where `some_location` is the URL to the GIT repository and `some_branch` is a branch in the repository, usually
-        the default. Also set `CMAKE_BUILD_TYPE` to the configuration type.
-
-    3. Use source packages from a compressed file by adding the following
-        CMake options:
-
-        `HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"`<br/>
-        `ZLIB_TGZ_NAME:STRING="zlib_src.ext"` or `ZLIBNG_TGZ_NAME:STRING="zlibng_src.ext"`<br/>
-        `LIBAEC_TGZ_NAME:STRING="libaec_src.ext"`<br/>
-        `TGZPATH:STRING="some_location"`<br/>
-
-        where `some_location` is the URL or full path to the compressed
-        file and `ext` is the type of compression file. Also set `CMAKE_BUILD_TYPE`
-        to the configuration type during configuration. See the settings in the
-        `config/cmake/cacheinit.cmake` file used for testing.
-
-    4. Use original source packages from a compressed file by adding the following
-        CMake options:
-
-        `LIBAEC_TGZ_NAME:STRING="szip_src.ext"`<br/>
-        `LIBAEC_TGZ_ORIGPATH:STRING="some_location"`<br/>
-        `ZLIB_TGZ_NAME:STRING="zlib_src.ext"` or `ZLIBNG_TGZ_NAME:STRING="zlibng_src.ext"`<br/>
-        `ZLIB_TGZ_ORIGPATH:STRING="some_location"` or Z`LIBNG_TGZ_ORIGPATH:STRING="some_location"`<br/>
-        `HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"`
-
-        where `some_location` is the URL and by setting
-        ```
-        ZLIB_USE_LOCALCONTENT:BOOL=OFF
-        LIBAEC_USE_LOCALCONTENT:BOOL=OFF
-        ```
-        or full path to the compressed file and `ext` is the type of compression file.
-        Also set `CMAKE_BUILD_TYPE` to the configuration type during configuration.
-        See the settings in the `config/cmake/cacheinit.cmake` used for testing.
-
-        The files can also be retrieved from a local path if necessary `TGZPATH:STRING="some_location"` by setting
-        ```
-        ZLIB_USE_LOCALCONTENT:BOOL=ON
-        LIBAEC_USE_LOCALCONTENT:BOOL=ON
-        ```
-
-3. If you plan to use compression plugins:
-
-    1. Use source packages from an GIT server by adding the following CMake
-        options:
-
-        ```
-        HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="GIT"
-        PLUGIN_GIT_URL:STRING="http://some_location/plugins"
-        PLUGIN_GIT_BRANCH="some_branch"
-        ```
-
-        where `some_location` is the URL to the GIT repository and `some_branch` is
-        a branch in the repository, usually the default. Also set
-        `CMAKE_BUILD_TYPE` to the configuration type.
-
-    2. Use source packages from a compressed file by adding the following CMake options:
-        ```
-        HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"
-        PLUGIN_TGZ_NAME:STRING="plugin_src.ext"
-        TGZPATH:STRING="some_location"
-        ```
-         where `some_location` is the URL or full path to the compressed
-         file and `ext` is the type of compression file. Also set `CMAKE_BUILD_TYPE`
-         to the configuration type during configuration. See the settings in the
-         `config/cmake/cacheinit.cmake` file used for testing.
-
-4. If you are building on Apple Darwin platforms, you should add the following options:
+3. If you are building on Apple Darwin platforms, you should add the following options:
 
     * Compiler choice - use Xcode by setting the `CC` and `CXX` environment variables.
 
@@ -480,9 +380,9 @@ Go through these steps:
             CMAKE_ANSI_CFLAGS:STRING=-fPIC
             CTEST_USE_LAUNCHERS:BOOL=ON
 
-5. Windows developers should install NSIS or WiX to create an install image with CPack. Visual Studio Express users will not be able to package HDF5 into an install image executable.
+4. Windows developers should install NSIS or WiX to create an install image with CPack. Visual Studio Express users will not be able to package HDF5 into an install image executable.
 
-6. Developers can copy the `config/cmake/cacheinit.cmake` file and alter the settings for the developers' environment. Then the only options needed on the command line are those options that are different. Example using the default cache file:
+5. Developers can copy the `config/cmake/cacheinit.cmake` file and alter the settings for the developers' environment. Then the only options needed on the command line are those options that are different. Example using the default cache file:
 
     ```cmd
     cmake -C ../config/cmake/cacheinit.cmake ^
@@ -493,7 +393,7 @@ Go through these steps:
             ..
     ```
 
-7. CMake uses a toolchain of utilities to compile, link libraries,
+6. CMake uses a toolchain of utilities to compile, link libraries,
     create archives, and other tasks to drive the build. The toolchain
     utilities available are determined by the languages enabled. In normal
     builds, CMake automatically determines the toolchain for host builds
@@ -592,7 +492,9 @@ turn specific options on or off for testing using the following command line wit
 
     cmake -C <sourcepath>/config/cmake/cacheinit.cmake -G "<generator>"  [-D<options>]  <sourcepath>
 
-Where `<generator>` is (examples):
+Where `cacheinit.cmake` is a file used to populate an initial CMake cache with some common option settings,
+
+`<generator>` is (examples):
 * MinGW Makefiles
 * NMake Makefiles
 * Unix Makefiles
@@ -602,73 +504,9 @@ Where `<generator>` is (examples):
 * Visual Studio 16 2019
 * Visual Studio 17 2022
 
-`<options>` is:
-
-* For installed SZIP/libaec:
-
-        SZIP_INCLUDE_DIR:PATH=<path to szip includes directory>
-        SZIP_LIBRARY:FILEPATH=<path to szip/library file>
-        libaec_INCLUDE_DIR:PATH=<path to libaec includes directory>
-        libaec_LIBRARY:FILEPATH=<path to libaec/library file>
-
-    or
-
-        SZIP_ROOT:PATH=<path to szip root directory>
-        libaec_ROOT:PATH=<path to libaec root directory>
-
-* For installed ZLIB/ZLIBNG:
-
-        ZLIB_INCLUDE_DIR:PATH=<path to zlib includes directory>
-        ZLIB_LIBRARY:FILEPATH=<path to zlib/library file>
-
-    or
-
-        ZLIB_ROOT:PATH=<path to zlib root directory>
+and `<options>` are any CMake options to be added to the configuration:
 
 * `<HDF5OPTION>:BOOL=[ON | OFF]`
-
-`cacheinit.cmake` highlights are:
-
-```cmake
-# This is the CMakeCache file used by HDF Group for daily tests.
-set (CMAKE_INSTALL_FRAMEWORK_PREFIX "Library/Frameworks" CACHE STRING "Frameworks installation directory" FORCE)
-set (HDF_PACKAGE_NAMESPACE "hdf5::" CACHE STRING "Name for HDF package namespace (can be empty)" FORCE)
-set (HDF5_BUILD_CPP_LIB ON CACHE BOOL "Build C++ support" FORCE)
-set (HDF5_BUILD_FORTRAN ON CACHE BOOL "Build FORTRAN support" FORCE)
-set (HDF5_BUILD_JAVA ON CACHE BOOL "Build JAVA support" FORCE)
-set (HDF5_ENABLE_ALL_WARNINGS ON CACHE BOOL "Enable all warnings" FORCE)
-set (HDF5_ALLOW_EXTERNAL_SUPPORT "TGZ" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
-########################
-# compression options
-########################
-set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package" FORCE)
-set (ZLIB_TGZ_NAME "zlib-1.3.1.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file" FORCE)
-set (ZLIB_TGZ_ORIGPATH "https://github.com/madler/zlib/releases/download/v1.3.1" CACHE STRING "Use ZLIB from original location" FORCE)
-set (ZLIB_USE_LOCALCONTENT ON CACHE BOOL "Use local file for ZLIB FetchContent" FORCE)
-set (ZLIB_GIT_URL "https://github.com/madler/zlib.git" CACHE STRING "Use ZLIB from  GitHub repository" FORCE)
-set (ZLIB_GIT_BRANCH "develop" CACHE STRING "" FORCE)
-set (HDF5_USE_ZLIB_NG OFF CACHE BOOL "Use zlib-ng library as zlib library" FORCE)
-set (ZLIBNG_PACKAGE_NAME "zlib-ng" CACHE STRING "Name of ZLIBNG package" FORCE)
-set (ZLIBNG_TGZ_NAME "2.2.4.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file" FORCE)
-set (ZLIBNG_TGZ_ORIGPATH "https://github.com/zlib-ng/zlib-ng/archive/refs/tags" CACHE STRING "Use ZLIBNG from original location" FORCE)
-set (ZLIBNG_GIT_URL "https://github.com/zlib-ng/zlib-ng.git" CACHE STRING "Use ZLIBNG from  GitHub repository" FORCE)
-set (ZLIBNG_GIT_BRANCH "develop" CACHE STRING "" FORCE)
-set (LIBAEC_PACKAGE_NAME "libaec" CACHE STRING "Name of AEC SZIP package" FORCE)
-set (LIBAEC_TGZ_NAME "libaec-1.1.3.tar.gz" CACHE STRING "Use SZip AEC from compressed file" FORCE)
-set (LIBAEC_TGZ_ORIGPATH "https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.3" CACHE STRING "Use LIBAEC from original location" FORCE)
-set (LIBAEC_USE_LOCALCONTENT ON CACHE BOOL "Use local file for LIBAEC FetchContent" FORCE)
-set (LIBAEC_GIT_URL "https://github.com/MathisRosenhauer/libaec.git" CACHE STRING "Use LIBAEC from  GitHub repository" FORCE)
-set (LIBAEC_GIT_BRANCH "v1.1.3" CACHE STRING "" FORCE)
-########################
-# filter plugin options
-########################
-set (PLUGIN_TGZ_ORIGPATH "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot" CACHE STRING "Use PLUGINS from original location" FORCE)
-set (PLUGIN_TGZ_NAME "hdf5_plugins-master.tar.gz" CACHE STRING "Use PLUGINS from compressed file" FORCE)
-set (PLUGIN_USE_LOCALCONTENT ON CACHE BOOL "Use local file for PLUGIN FetchContent" FORCE)
-set (PLUGIN_PACKAGE_NAME "pl" CACHE STRING "Name of PLUGIN package" FORCE)
-set (PLUGIN_GIT_URL "https://github.com/HDFGroup/hdf5_plugins.git" CACHE STRING "Use plugins from HDF Group repository" FORCE)
-set (PLUGIN_GIT_BRANCH "master" CACHE STRING "" FORCE)
-```
 
 ### Step 2: Configure the Cache Settings
 
@@ -715,48 +553,9 @@ If you wish to use the Visual Studio environment, open the solution
 file in your build directory. Be sure to select either `Debug` or
 `Release` and build the solution.
 
-The external libraries (zlib, szip and plugins) can be configured
-to allow building the libraries by downloading from a GIT repository.
-The option is `HDF5_ALLOW_EXTERNAL_SUPPORT`; by adding the following
-configuration option: `-DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING="GIT"`.
-
-The options to control the GIT parameters (`config/cmake/cacheinit.cmake` file) are:
-
-```cmake
-ZLIB_GIT_URL:STRING="https://${git_url}/zlib"
-ZLIB_GIT_BRANCH="${git_branch}"
-SZIP_GIT_URL:STRING="https://${git_url}/szip"
-SZIP_GIT_BRANCH="${git_branch}"
-LIBAEC_GIT_URL:STRING="https://${git_url}/libaec"
-LIBAEC_GIT_BRANCH="${git_branch}"
-PLUGIN_GIT_URL:STRING="https://${git_url}/plugin"
-PLUGIN_GIT_BRANCH="${git_branch}"
-```
-
-`${git_url}` should be changed to your location and `${git_branch}` is
-your branch in the repository. Also define `CMAKE_BUILD_TYPE`
-to be the configuration type.
-
-Alternatively, the external libraries (zlib, szip and plugins) can be configured
-to allow building the libraries by using a compressed file.
-The option is `HDF5_ALLOW_EXTERNAL_SUPPORT` and is enabled by
-adding the following configuration option: `-DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"`.
-
-The options to control the TGZ URL (`config/cmake/cacheinit.cmake` file) are:
-
-```cmake
-ZLIB_TGZ_NAME:STRING="zlib_src.ext"
-LIBAEC_TGZ_NAME:STRING="libaec_src.ext"
-PLUGIN_TGZ_NAME:STRING="plugin_src.ext"
-TGZPATH:STRING="some_location"
-```
-
-where `some_location/xxxx_src.ext` is the URL or full path to
-the compressed file and where `ext` is the type of the compression
-file such as `.bz2`, `.tar`, `.tar.gz`, `.tgz`, or `.zip`. Also define
-`CMAKE_BUILD_TYPE` to be the configuration type.
-
-> **NOTE:** The file named by `LIBAEC_TGZ_NAME` is used to build SZIP.
+External libraries (zlib, szip and plugins) can be configured to allow
+building the libraries by downloading from a GIT repository or by using
+a compressed file. See the instructions in [INSTALL_Filters.md](./INSTALL_Filters.md) to do this.
 
 ### Step 4: Test HDF5
 
@@ -1123,8 +922,8 @@ If `BUILD_TESTING` is true:
 | `LIBAEC_USE_LOCALCONTENT` | Use local file for LIBAEC FetchContent | `OFF` |
 | `HDF5_USE_LIBAEC_STATIC` | Find static AEC library | `OFF` |
 | `PLUGIN_USE_EXTERNAL` | `Use External Library Building for PLUGINS else search` | `OFF` |
-| `PLUGIN_TGZ_ORIGPATH` | Use PLUGIN from original location | `"https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot"` |
-| `PLUGIN_TGZ_NAME` | Use PLUGIN from original compressed file | `"hdf5_plugins-master.tar.gz"` |
+| `HDF5_FILTER_PLUGINS_TGZ_ORIGPATH` | Use PLUGIN from original location | `"https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot"` |
+| `HDF5_FILTER_PLUGINS_TGZ_NAME` | Use PLUGIN from original compressed file | `"hdf5_plugins-master.tar.gz"` |
 | `PLUGIN_USE_LOCALCONTENT` | Use local file for PLUGIN FetchContent | `OFF` |
 | `H5_DEFAULT_PLUGINDIR` | Default library search folder for filter plugins | `"%ALLUSERSPROFILE%/hdf5/lib/plugin"` (**Windows**)<br/>`"/usr/local/hdf5/lib/plugin"` |
 

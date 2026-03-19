@@ -7,10 +7,12 @@ on:
     - cron: "6 0 * * *"
 
 permissions:
-    contents: write # In order to allow tag creation and file deletion
+    contents: read
 
 jobs:
   daily-build:
+    permissions:
+      contents: write # In order to allow tag creation and file deletion
     uses: ./.github/workflows/daily-build.yml
     with:
       use_ignore: check
@@ -18,6 +20,8 @@ jobs:
 
   call-workflow-publish:
     needs: [daily-build]
+    permissions:
+      contents: read
     if: ${{ ((needs.daily-build.outputs.has_changes == 'true') && (github.repository_owner == 'HDFGroup')) }}
     runs-on: ubuntu-latest
     steps:

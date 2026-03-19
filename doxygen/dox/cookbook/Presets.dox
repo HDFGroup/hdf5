@@ -658,9 +658,9 @@ The ci-StdPlugins preset sets the following cache variables:
 The ci-PluginsVars preset sets the following cache variables (see the https://\SRCURL/config/CacheURLs.cmake file for the latest versions):
 \li  "HDF5_ENABLE_PLUGIN_SUPPORT": "ON"
 \li  "H5PL_ALLOW_EXTERNAL_SUPPORT": {"type": "STRING", "value": "TGZ"}
-\li  "PLUGIN_PACKAGE_NAME": {"type": "STRING", "value": "pl"}
-\li  "PLUGIN_TGZ_ORIGPATH": {"type": "STRING", "value": "hdf5_plugins download"}
-\li  "PLUGIN_TGZ_NAME": {"type": "STRING", "value": "hdf5_plugins-master.tar.gz"}
+\li  "HDF5_FILTER_PLUGINS_PACKAGE_NAME": {"type": "STRING", "value": "h5pl"}
+\li  "HDF5_FILTER_PLUGINS_TGZ_ORIGPATH": {"type": "STRING", "value": "hdf5_plugins download"}
+\li  "HDF5_FILTER_PLUGINS_TGZ_NAME": {"type": "STRING", "value": "hdf5_plugins-master.tar.gz"}
 
 The ci-base-plugins preset sets the following cache variables (see the https://\SRCURL/config/CacheURLs.cmake file for the latest versions):
 \li  "BITGROOM_PACKAGE_NAME": {"type": "STRING", "value": "bitgroom"},

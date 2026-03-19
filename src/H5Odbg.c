@@ -61,6 +61,28 @@
 /* Local Variables */
 /*******************/
 
+/*-------------------------------------------------------------------------
+ * Function:    H5O__print_time_field
+ *
+ * Purpose:     Format and print a time_t value as a debug field.
+ *              Prints "(invalid time)" if localtime_r fails.
+ *
+ * Return:      void
+ *-------------------------------------------------------------------------
+ */
+static void
+H5O__print_time_field(FILE *stream, int indent, int fwidth, const char *label, const time_t *time_val)
+{
+    struct tm tm_buf;
+    char      buf[128];
+
+    if (HDlocaltime_r(time_val, &tm_buf) != NULL)
+        strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", &tm_buf);
+    else
+        snprintf(buf, sizeof(buf), "(invalid time)");
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, label, buf);
+} /* end H5O__print_time_field() */
+
 #ifdef H5O_DEBUG
 
 /*-------------------------------------------------------------------------
@@ -309,22 +331,10 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
 
         /* Only dump times, if they are tracked */
         if (oh->flags & H5O_HDR_STORE_TIMES) {
-            struct tm *tm;       /* Time structure */
-            char       buf[128]; /* Buffer for formatting time info */
-
-            /* Time fields */
-            tm = localtime(&oh->atime);
-            strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Access Time:", buf);
-            tm = localtime(&oh->mtime);
-            strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Modification Time:", buf);
-            tm = localtime(&oh->ctime);
-            strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Change Time:", buf);
-            tm = localtime(&oh->btime);
-            strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Birth Time:", buf);
+            H5O__print_time_field(stream, indent, fwidth, "Access Time:", &oh->atime);
+            H5O__print_time_field(stream, indent, fwidth, "Modification Time:", &oh->mtime);
+            H5O__print_time_field(stream, indent, fwidth, "Change Time:", &oh->ctime);
+            H5O__print_time_field(stream, indent, fwidth, "Birth Time:", &oh->btime);
         } /* end if */
 
         /* Attribute tracking fields */

@@ -61,9 +61,8 @@
 # Hints
 # ^^^^^
 #
-# Set ``libaec_ROOT`` to a directory which contains a libaec installation.
-# If it is known that the libaec installation contains a libaec-config.cmake
-# file, instead set ``libaec_DIR`` to the directory which contains that file.
+# Set ``libaec_ROOT`` or ``SZIP_ROOT`` to a directory which contains a libaec
+# installation.
 #
 
 include (FindPackageHandleStandardArgs)
@@ -81,7 +80,11 @@ mark_as_advanced (libaec_DIR)
 # If a libaec-config.cmake file is available for use, prefer that
 if (libaec_FOUND)
   find_package_handle_standard_args (libaec HANDLE_COMPONENTS CONFIG_MODE)
-  message (VERBOSE "Found existing libaec CMake configuration file at ${libaec_DIR}")
+  if (DEFINED libaec_DIR AND NOT libaec_DIR STREQUAL "libaec_DIR-NOTFOUND")
+    message (VERBOSE "Found existing libaec CMake configuration file at ${libaec_DIR}")
+  else ()
+    message (VERBOSE "Found existing libaec CMake configuration file")
+  endif ()
 
   # Set variables that this module returns
   if (TARGET libaec::aec)
@@ -130,7 +133,7 @@ endif ()
 # Find the libaec.h header file
 find_path (libaec_INCLUDE_DIR
   NAMES libaec.h
-  HINTS ${libaec_ROOT} ${PC_LIBAEC_INCLUDE_DIRS}
+  HINTS ${libaec_ROOT} ${SZIP_ROOT} ${PC_LIBAEC_INCLUDE_DIRS}
   DOC "Path to the libaec.h header file"
 )
 mark_as_advanced (libaec_INCLUDE_DIR)
@@ -138,7 +141,7 @@ mark_as_advanced (libaec_INCLUDE_DIR)
 # Find the szlib.h header file
 find_path (libsz_INCLUDE_DIR
   NAMES szlib.h
-  HINTS ${libaec_ROOT} ${PC_LIBAEC_INCLUDE_DIRS}
+  HINTS ${libaec_ROOT} ${SZIP_ROOT} ${PC_LIBAEC_INCLUDE_DIRS}
   DOC "Path to the szlib.h header file"
 )
 mark_as_advanced (libsz_INCLUDE_DIR)
@@ -146,7 +149,7 @@ mark_as_advanced (libsz_INCLUDE_DIR)
 # Find the libaec library
 find_library (libaec_LIBRARY
   NAMES aec libaec libaec.a
-  HINTS ${libaec_ROOT} ${PC_LIBAEC_LIBRARY_DIRS}
+  HINTS ${libaec_ROOT} ${SZIP_ROOT} ${PC_LIBAEC_LIBRARY_DIRS}
   PATH_SUFFIXES lib lib64
   DOC "Path to the libaec library file"
 )
@@ -155,7 +158,7 @@ mark_as_advanced (libaec_LIBRARY)
 # Find the libsz library
 find_library (libsz_LIBRARY
   NAMES sz libsz libsz.a
-  HINTS ${libaec_ROOT} ${PC_LIBAEC_LIBRARY_DIRS}
+  HINTS ${libaec_ROOT} ${SZIP_ROOT} ${PC_LIBAEC_LIBRARY_DIRS}
   PATH_SUFFIXES lib lib64
   DOC "Path to the libsz library file"
 )

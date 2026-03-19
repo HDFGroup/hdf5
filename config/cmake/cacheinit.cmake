@@ -48,8 +48,7 @@ if (NOT DEFINED CMAKE_DEBUG_POSTFIX)
   endif ()
 endif ()
 
-set (HDF5_ALLOW_EXTERNAL_SUPPORT "TGZ" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
-set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT TGZ)
+set (HDF5_ALLOW_EXTERNAL_SUPPORT "TGZ" CACHE STRING "If not set to NO, specifies where to obtain sources when building or using external libraries (NO GIT TGZ)" FORCE)
 
 ########################
 # compression options

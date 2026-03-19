@@ -689,7 +689,7 @@ H5C__autoadjust__ageout__insert_new_marker(H5C_t *cache_ptr)
 
     /* find an unused marker */
     i = 0;
-    while ((cache_ptr->epoch_marker_active)[i] && i < H5C__MAX_EPOCH_MARKERS)
+    while (i < H5C__MAX_EPOCH_MARKERS && (cache_ptr->epoch_marker_active)[i])
         i++;
     if (i >= H5C__MAX_EPOCH_MARKERS)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't find unused marker");

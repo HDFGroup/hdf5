@@ -356,7 +356,7 @@ H5VL__native_link_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
                 if (iter_args->recursive) {
                     /* H5Lvisit */
                     if ((ret_value = H5G_visit(&loc, ".", iter_args->idx_type, iter_args->order,
-                                               iter_args->op, iter_args->op_data)) < 0)
+                                               iter_args->op, NULL, iter_args->op_data)) < 0)
                         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link visitation failed");
                 } /* end if */
                 else {
@@ -371,7 +371,7 @@ H5VL__native_link_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
                     /* H5Lvisit_by_name */
                     if ((ret_value =
                              H5G_visit(&loc, loc_params->loc_data.loc_by_name.name, iter_args->idx_type,
-                                       iter_args->order, iter_args->op, iter_args->op_data)) < 0)
+                                       iter_args->order, iter_args->op, NULL, iter_args->op_data)) < 0)
                         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link visitation failed");
                 } /* end if */
                 else {

@@ -387,16 +387,17 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
         } while (-1 == bytes_wrote && EINTR == errno);
 
         if (-1 == bytes_wrote) { /* error */
-            int    myerrno = errno;
-            time_t mytime  = time(NULL);
+            int  myerrno = errno;
+            char time_str[32];
 
+            H5_get_localtime_str(time_str, sizeof(time_str));
             offset = HDlseek(file->fd, 0, SEEK_CUR);
 
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                         "write to backing store failed: time = %s, filename = '%s', file descriptor = %d, "
                         "errno = %d, error message = '%s', ptr = %p, total write size = %llu, bytes this "
                         "sub-write = %llu, bytes actually written = %llu, offset = %llu",
-                        ctime(&mytime), file->name, file->fd, myerrno, strerror(myerrno), (void *)ptr,
+                        time_str, file->name, file->fd, myerrno, strerror(myerrno), (void *)ptr,
                         (unsigned long long)size, (unsigned long long)bytes_in,
                         (unsigned long long)bytes_wrote, (unsigned long long)offset);
         } /* end if */
@@ -893,9 +894,10 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                     } while (-1 == bytes_read && EINTR == errno);
 
                     if (-1 == bytes_read) { /* error */
-                        int    myerrno = errno;
-                        time_t mytime  = time(NULL);
+                        int  myerrno = errno;
+                        char time_str[32];
 
+                        H5_get_localtime_str(time_str, sizeof(time_str));
                         offset = HDlseek(file->fd, 0, SEEK_CUR);
 
                         HGOTO_ERROR(
@@ -903,8 +905,8 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                             "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, "
                             "error message = '%s', file->mem = %p, total read size = %llu, bytes this "
                             "sub-read = %llu, bytes actually read = %llu, offset = %llu",
-                            ctime(&mytime), file->name, file->fd, myerrno, strerror(myerrno),
-                            (void *)file->mem, (unsigned long long)size, (unsigned long long)bytes_in,
+                            time_str, file->name, file->fd, myerrno, strerror(myerrno), (void *)file->mem,
+                            (unsigned long long)size, (unsigned long long)bytes_in,
                             (unsigned long long)bytes_read, (unsigned long long)offset);
                     } /* end if */
 

@@ -131,7 +131,11 @@ main(int argc, char *argv[])
 
             case 1: /* counting input files */
                 if (opt->fcount < 29) {
-                    (void)strcpy(opt->infiles[opt->fcount].datafile, argv[i]);
+                    if (snprintf(opt->infiles[opt->fcount].datafile, MAX_PATH_NAME_LENGTH, "%s", argv[i]) >=
+                        MAX_PATH_NAME_LENGTH) {
+                        (void)fprintf(rawerrorstream, err10, argv[i]);
+                        goto err;
+                    }
                     in                               = &(opt->infiles[opt->fcount].in);
                     opt->infiles[opt->fcount].config = 0;
                     setDefaultValues(in, opt->fcount);
@@ -148,7 +152,11 @@ main(int argc, char *argv[])
                 break;
 
             case 3: /* get configfile name */
-                (void)strcpy(opt->infiles[opt->fcount - 1].configfile, argv[i]);
+                if (snprintf(opt->infiles[opt->fcount - 1].configfile, MAX_PATH_NAME_LENGTH, "%s", argv[i]) >=
+                    MAX_PATH_NAME_LENGTH) {
+                    (void)fprintf(rawerrorstream, err10, argv[i]);
+                    goto err;
+                }
                 opt->infiles[opt->fcount - 1].config = 1;
                 break;
 
@@ -160,7 +168,7 @@ main(int argc, char *argv[])
                     (void)fprintf(rawerrorstream, err10, argv[i]);
                     goto err;
                 }
-                (void)strcpy(opt->outfile, argv[i]);
+                snprintf(opt->outfile, MAX_PATH_NAME_LENGTH, "%s", argv[i]);
                 outfile_named = true;
                 break;
 
@@ -2524,7 +2532,7 @@ parsePathInfo(struct path_info *path, char *temp)
         (void)fprintf(rawerrorstream, "%s", err1);
         return (-1);
     }
-    strcpy(path->group[i++], token);
+    snprintf(path->group[i++], MAX_PATH_NAME_LENGTH, "%s", token);
 
     while (1) {
         token = strtok(NULL, delimiter);
@@ -2534,7 +2542,7 @@ parsePathInfo(struct path_info *path, char *temp)
             (void)fprintf(rawerrorstream, "%s", err1);
             return (-1);
         }
-        strcpy(path->group[i++], token);
+        snprintf(path->group[i++], MAX_PATH_NAME_LENGTH, "%s", token);
     }
     path->count = i;
     return (0);
@@ -3973,8 +3981,7 @@ getExternalFilename(struct Input *in, FILE *strm)
 
     temp_len           = strlen(temp);
     in->externFilename = (char *)malloc((temp_len + 1) * sizeof(char));
-    (void)strcpy(in->externFilename, temp);
-    in->externFilename[temp_len] = '\0';
+    snprintf(in->externFilename, temp_len + 1, "%s", temp);
     return (0);
 }
 

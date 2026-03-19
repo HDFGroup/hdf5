@@ -728,13 +728,17 @@ parse_command_line(int argc, const char *const *argv)
                         error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
                         leave(EXIT_FAILURE);
                     }
-                    if ((g_list_of_fields = (char *)realloc(g_list_of_fields, strlen(g_list_of_fields) +
-                                                                                  strlen(str) + 2)) == NULL) {
-                        error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
-                        leave(EXIT_FAILURE);
+                    {
+                        size_t cur_len     = strlen(g_list_of_fields);
+                        size_t new_len     = cur_len + strlen(FIELD_SEP) + strlen(str) + 1;
+                        char  *realloc_tmp = (char *)realloc(g_list_of_fields, new_len);
+                        if (realloc_tmp == NULL) {
+                            error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
+                            leave(EXIT_FAILURE);
+                        }
+                        g_list_of_fields = realloc_tmp;
+                        snprintf(g_list_of_fields + cur_len, new_len - cur_len, "%s%s", FIELD_SEP, str);
                     }
-                    strcat(g_list_of_fields, FIELD_SEP);
-                    strcat(g_list_of_fields, str);
                 }
 
                 break;

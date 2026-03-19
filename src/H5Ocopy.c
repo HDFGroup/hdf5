@@ -79,7 +79,7 @@ static herr_t H5O__copy_obj(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *
                             hid_t lcpl_id);
 static herr_t H5O__copy_free_comm_dt_cb(void *item, void *key, void *op_data);
 static int    H5O__copy_comm_dt_cmp(const void *dt1, const void *dt2);
-static herr_t H5O__copy_search_comm_dt_cb(hid_t group, const char *name, const H5L_info2_t *linfo,
+static herr_t H5O__copy_search_comm_dt_cb(hid_t group, const char *name, const H5O_loc_t *obj_oloc,
                                           void *udata);
 static htri_t H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*in, out*/,
                                        H5O_copy_t *cpy_info);
@@ -1229,7 +1229,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__copy_search_comm_dt_check(H5O_loc_t *obj_oloc, H5O_copy_search_comm_dt_ud_t *udata)
+H5O__copy_search_comm_dt_check(const H5O_loc_t *obj_oloc, H5O_copy_search_comm_dt_ud_t *udata)
 {
     H5O_copy_search_comm_dt_key_t *key          = NULL;  /* Skiplist key */
     haddr_t                       *addr         = NULL;  /* Destination address */
@@ -1343,48 +1343,27 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__copy_search_comm_dt_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t *linfo,
+H5O__copy_search_comm_dt_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5O_loc_t *obj_oloc,
                             void *_udata)
 {
     H5O_copy_search_comm_dt_ud_t *udata =
         (H5O_copy_search_comm_dt_ud_t *)_udata; /* Skip list of dtypes in dest file */
-    H5G_loc_t  obj_loc;                         /* Location of object */
-    H5O_loc_t  obj_oloc;                        /* Object's object location */
-    H5G_name_t obj_path;                        /* Object's group hier. path */
-    bool       obj_found = false;               /* Object at 'name' found */
-    herr_t     ret_value = H5_ITER_CONT;        /* Return value */
+    herr_t ret_value = H5_ITER_CONT;            /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     assert(name);
-    assert(linfo);
+    assert(obj_oloc);
     assert(udata);
     assert(udata->dst_dt_list);
     assert(udata->dst_root_loc);
 
-    /* Check if this is a hard link */
-    if (linfo->type == H5L_TYPE_HARD) {
-        /* Set up opened group location to fill in */
-        obj_loc.oloc = &obj_oloc;
-        obj_loc.path = &obj_path;
-        H5G_loc_reset(&obj_loc);
-
-        /* Find the object */
-        if (H5G_loc_find(udata->dst_root_loc, name, &obj_loc /*out*/) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, H5_ITER_ERROR, "object not found");
-        obj_found = true;
-
-        /* Check object and add to skip list if appropriate */
-        if (H5O__copy_search_comm_dt_check(&obj_oloc, udata) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5_ITER_ERROR, "can't check object");
-    } /* end if */
+    /* Check object and add to skip list if appropriate */
+    if (H5O__copy_search_comm_dt_check(obj_oloc, udata) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5_ITER_ERROR, "can't check object");
 
 done:
-    /* Release resources */
-    if (obj_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, H5_ITER_ERROR, "can't free location");
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__copy_search_comm_dt_cb */
 
@@ -1541,8 +1520,8 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
 
                 /* Traverse the destination file, adding committed datatypes to the skip
                  * list */
-                if (H5G_visit(&dst_root_loc, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5O__copy_search_comm_dt_cb,
-                              &udata) < 0)
+                if (H5G_visit(&dst_root_loc, "/", H5_INDEX_NAME, H5_ITER_NATIVE, NULL,
+                              H5O__copy_search_comm_dt_cb, &udata) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed");
                 cpy_info->dst_dt_list_complete = true;
             } /* end if */

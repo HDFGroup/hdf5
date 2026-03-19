@@ -60,6 +60,28 @@ struct timezone {
 #define HDstrtok_r(X, Y, Z)   strtok_s(X, Y, Z)
 #define HDunsetenv(N)         Wsetenv(N, "", 1)
 
+/* Windows localtime_s/gmtime_s have reversed parameter order and return
+ * errno_t instead of struct tm*.  Inline wrappers adapt the POSIX signature.
+ *
+ * The #define macros are required because H5private.h uses #ifndef HDgmtime_r
+ * to decide whether to define its own passthrough macro.  Without these
+ * #defines the inline functions alone would not prevent that fallback, and
+ * the POSIX gmtime_r/localtime_r (which MSVC does not provide) would be
+ * referenced, causing LNK2019 unresolved-external errors on Windows. */
+static __inline struct tm *
+H5_gmtime_r(const time_t *timep, struct tm *result)
+{
+    return gmtime_s(result, timep) == 0 ? result : NULL;
+}
+#define HDgmtime_r(T, R) H5_gmtime_r(T, R)
+
+static __inline struct tm *
+H5_localtime_r(const time_t *timep, struct tm *result)
+{
+    return localtime_s(result, timep) == 0 ? result : NULL;
+}
+#define HDlocaltime_r(T, R) H5_localtime_r(T, R)
+
 #ifndef H5_HAVE_MINGW
 #define HDftruncate(F, L) _chsize_s(F, L)
 #define HDfseek(F, O, W)  _fseeki64(F, O, W)

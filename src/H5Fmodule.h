@@ -925,7 +925,7 @@
  *  ls -l
  * \endcode
  * on a Unix system or the detailed folder listing on an Apple or Microsoft Windows
- * system. The name passed to #H5Fcreate or #H5Fopen should include a printf(3c)-style integer
+ * system. The name passed to #H5Fcreate or #H5Fopen should include a printf(3)-style integer
  * format specifier which will be replaced with the family member number. The first family
  * member is numbered zero (0).
  *
@@ -2678,34 +2678,6 @@
  * \defgroup H5F Files (H5F)
  *
  * Use the functions in this module to manage HDF5 files.
- *
- * In the code snippets below, we show the skeletal life cycle of an HDF5 file,
- * when creating a new file (left) or when opening an existing file (right).
- * File creation is essentially controlled through \ref FCPL, and file access to
- * new and existing files is controlled through \ref FAPL. The file \c name and
- * creation or access \c mode control the interaction with the underlying
- * storage such as file systems.
- *
- * <table>
- * <tr><th>Create</th><th>Read</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5F_examples.c create
- *   </td>
- *   <td>
- *   \snippet{lineno} H5F_examples.c read
- *   </td>
- * </tr>
- * <tr><th>Update</th><th>Delete</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5F_examples.c update
- *   </td>
- *   <td>
- *   \snippet{lineno} H5F_examples.c delete
- *   </td>
- * </tr>
- * </table>
  *
  * In addition to general file management functions, there are three categories
  * of functions that deal with advanced file management tasks and use cases:

@@ -55,14 +55,14 @@ Additional Release Information
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-[Newsletter Announcement](https://www.hdfgroup.org/)
+[Newsletter Announcement](https://www.hdfgroup.org/2026/03/10/release-of-hdf5-2-1-0-newsletter-209/)
 </td>
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-ABI/API Compatibility Reports between 2.1.0 and 2.0.0 [tar file](https://\RELURL/2.1.0/downloads/hdf5-2.1.0.html.abi.reports.tar.gz) or [individual html files](https://\RELURL/2.1.0/downloads/compat_report/index.html)
+ABI/API Compatibility Reports between 2.1.0 and 2.0.0 [tar file](https://github.com/HDFGroup/hdf5/releases/download/2.1.0/hdf5-2.1.0.html.abi.reports.tar.gz) or [individual html files](https://\RELURL/2.1.0/documentation/compat_reports/index.html)
 </td>
 </tr>
 <tr>
