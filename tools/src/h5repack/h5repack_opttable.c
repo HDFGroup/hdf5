@@ -100,26 +100,21 @@ aux_tblinsert_layout(pack_opttbl_t *table, unsigned int idx, pack_info_t *pack)
 static int
 aux_inctable(pack_opttbl_t *table, unsigned n_objs)
 {
-    unsigned u;
-    int      ret_value = 0;
+    unsigned     u;
+    pack_info_t *new_objs;
 
     table->size += n_objs;
-    {
-        pack_info_t *new_objs = (pack_info_t *)realloc(table->objs, table->size * sizeof(pack_info_t));
-        if (new_objs == NULL) {
-            H5TOOLS_INFO("not enough memory for options table");
-            ret_value = -1;
-        }
-        else {
-            table->objs = new_objs;
-        }
+    new_objs = (pack_info_t *)realloc(table->objs, table->size * sizeof(pack_info_t));
+    if (new_objs == NULL) {
+        H5TOOLS_INFO("not enough memory for options table");
+        return -1;
     }
-    if (ret_value == 0) {
-        for (u = table->nelems; u < table->size; u++)
-            init_packobject(&table->objs[u]);
-    }
+    table->objs = new_objs;
 
-    return ret_value;
+    for (u = table->nelems; u < table->size; u++)
+        init_packobject(&table->objs[u]);
+
+    return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -198,7 +193,6 @@ options_add_layout(obj_list_t *obj_list, unsigned n_objs, pack_info_t *pack, pac
     if (table->nelems > 0) {
         /* go through the supplied list of names */
         for (j = 0; j < n_objs; j++) {
-            found = false;
             /* linear table search */
             for (i = 0; i < table->nelems; i++) {
                 /*already on the table */
@@ -278,7 +272,6 @@ options_add_filter(obj_list_t *obj_list, unsigned n_objs, filter_info_t filt, pa
     if (table->nelems > 0) {
         /* go through the supplied list of names */
         for (j = 0; j < n_objs; j++) {
-            found = false;
             /* linear table search */
             for (i = 0; i < table->nelems; i++) {
                 /*already on the table */
