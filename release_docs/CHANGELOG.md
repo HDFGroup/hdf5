@@ -1,3 +1,12 @@
+HDF5 version 2.1.1 released on 2026-03-19
+
+---
+
+> [!Note]
+>
+> - A typo in variable LT_HL_F_VERS_INTERFACE left H5_HL_F_SOVERS_INTERFACE empty, resulting in malformed macOS linker flags. The typo was fixed in this patch release.
+
+---
 HDF5 version 2.1.0 released on 2026-03-02
 
 # 🔺 HDF5 Changelog

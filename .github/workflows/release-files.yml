@@ -50,6 +50,7 @@ jobs:
 
       - uses: rickstaa/action-create-tag@a1c7777fcb2fee4f19b0f283ba888afa11678b72 # v1.7.2
         id: "tag_create"
+        if: ${{ inputs.use_tag == 'snapshot' }}
         with:
           commit_sha: ${{ inputs.file_sha }}
           tag: "${{ inputs.use_tag }}"
@@ -267,6 +268,7 @@ jobs:
           name: "HDF5 Release ${{ inputs.use_tag }}"
           draft: true
           prerelease: false
+          target_commitish: ${{ inputs.file_sha }}
           body_path: description.txt
           files: |
               ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
