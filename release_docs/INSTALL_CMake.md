@@ -444,23 +444,28 @@ To use a toolchain file with the supplied cmake scripts, see the
 
 ### Notes: CMake in General
 
-   1. More information about using CMake can be found at the Kitware site at
-         www.cmake.org.
+1. More information about using CMake can be found at the Kitware site at
+        www.cmake.org.
 
-   2. CMake uses the command line; however, the visual CMake tool is
-      available for the configuration step. The steps are similar for
-      all the operating systems supported by CMake.
+2. CMake uses the command line; however, the visual CMake tool is
+    available for the configuration step. The steps are similar for
+    all the operating systems supported by CMake.
 
-   3. Setting the installation location from the command line at configure time
-      a. Using the --install-prefix command line option, which is available since
-         CMake version 3.21:
-            cmake --install-prefix /my/folder/to/install/to ..
-      b. Using -DCMAKE_INSTALL_PREFIX :
-            cmake -DCMAKE_INSTALL_PREFIX=/my/folder/to/install/to ..
-      c. Using the CMAKE_INSTALL_PREFIX environment variable, which is available
-         since CMake version 3.29:
-            CMAKE_INSTALL_PREFIX=/my/folder/to/install/to cmake ..
+3. Setting the installation location from the command line at configure time
 
+    a. Using the `--install-prefix` command line option, which is available since
+        CMake version 3.21:
+
+        cmake --install-prefix /my/folder/to/install/to ..
+
+    b. Using `-DCMAKE_INSTALL_PREFIX`:
+
+        cmake -DCMAKE_INSTALL_PREFIX=/my/folder/to/install/to ..
+
+    c. Using the `CMAKE_INSTALL_PREFIX` environment variable, which is available
+        since CMake version 3.29:
+
+        CMAKE_INSTALL_PREFIX=/my/folder/to/install/to cmake ..
 
 ---
 
