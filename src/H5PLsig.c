@@ -218,7 +218,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static const EVP_MD *
-H5PL__get_hash_algorithm(uint8_t algorithm_id)
+H5PL__get_hash_algorithm(H5PL_sig_algo_t algorithm_id)
 {
     const EVP_MD *ret_value = NULL;
 
@@ -1065,7 +1065,7 @@ H5PL__read_and_validate_footer(int fd, HDoff_t file_size, const char *plugin_pat
         HGOTO_ERROR(H5E_PLUGIN, H5E_READERROR, FAIL, "cannot read signature footer");
 
     /* Decode footer (little-endian to native byte order) */
-    H5PL_sig_decode_footer(footer_buf, footer_out);
+    H5PL_sig_decode_footer(footer_buf, sizeof(footer_buf), footer_out);
 
     /* Validate magic number */
     if (footer_out->magic != H5PL_SIG_MAGIC)

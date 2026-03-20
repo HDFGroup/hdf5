@@ -165,7 +165,7 @@ append_bad_signature(const char *plugin_path)
     {
         unsigned char footer_bytes[H5PL_SIG_FOOTER_SIZE];
 
-        H5PL_sig_encode_footer(footer_bytes, &footer);
+        H5PL_sig_encode_footer(footer_bytes, sizeof(footer_bytes), &footer);
 
         if (HDwrite(fd, footer_bytes, sizeof(footer_bytes)) < 0) {
             fprintf(stderr, "Failed to write footer\n");
@@ -208,7 +208,7 @@ append_corrupt_footer(const char *plugin_path)
         footer.format_version   = 1;
         footer.reserved         = 0;
 
-        H5PL_sig_encode_footer(footer_bytes, &footer);
+        H5PL_sig_encode_footer(footer_bytes, sizeof(footer_bytes), &footer);
     }
 
     if (HDwrite(fd, footer_bytes, sizeof(footer_bytes)) < 0) {

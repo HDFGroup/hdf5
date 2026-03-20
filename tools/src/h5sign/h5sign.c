@@ -388,7 +388,7 @@ typedef const EVP_MD *(*evp_md_getter_t)(void);
 typedef struct {
     const char     *cli_name;     /* Name accepted on the command line */
     const char     *display_name; /* Human-readable name for messages */
-    uint8_t         algo_id;      /* H5PL_SIG_ALGO_* constant */
+    H5PL_sig_algo_t algo_id;      /* H5PL_SIG_ALGO_* constant */
     evp_md_getter_t md_getter;    /* OpenSSL EVP_MD factory function */
 } h5sign_algo_entry_t;
 
@@ -414,7 +414,7 @@ static const size_t algo_table_size = sizeof(algo_table) / sizeof(algo_table[0])
  *-------------------------------------------------------------------------
  */
 static const char *
-algo_display_name(uint8_t algo_id)
+algo_display_name(H5PL_sig_algo_t algo_id)
 {
     for (size_t i = 0; i < algo_table_size; i++) {
         if (algo_table[i].algo_id == algo_id)
@@ -434,7 +434,7 @@ algo_display_name(uint8_t algo_id)
  *-------------------------------------------------------------------------
  */
 static herr_t
-parse_algorithm_name(const char *name, const EVP_MD **md_out, uint8_t *algo_id_out)
+parse_algorithm_name(const char *name, const EVP_MD **md_out, H5PL_sig_algo_t *algo_id_out)
 {
     for (size_t i = 0; i < algo_table_size; i++) {
         if (HDstrcasecmp(name, algo_table[i].cli_name) == 0) {
@@ -461,7 +461,7 @@ parse_algorithm_name(const char *name, const EVP_MD **md_out, uint8_t *algo_id_o
  */
 static herr_t
 sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *hash_algorithm,
-                 uint8_t algorithm_id)
+                 H5PL_sig_algo_t algorithm_id)
 {
     int            fd = -1;
     h5_stat_t      st;
@@ -516,7 +516,7 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
         if (HDlseek(fd, (HDoff_t)(file_size - (hsize_t)H5PL_SIG_FOOTER_SIZE), SEEK_SET) >= 0) {
             h5_posix_io_ret_t nr = HDread(fd, check_buf, H5PL_SIG_FOOTER_SIZE);
             if (nr == (h5_posix_io_ret_t)H5PL_SIG_FOOTER_SIZE) {
-                H5PL_sig_decode_footer(check_buf, &check_footer);
+                H5PL_sig_decode_footer(check_buf, sizeof(check_buf), &check_footer);
                 if (check_footer.magic == H5PL_SIG_MAGIC) {
                     if (!opt_force) {
                         fprintf(rawerrorstream, "Error: Plugin file '%s' is already signed\n", plugin_path);
@@ -534,7 +534,7 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
                         uint32_t          existing_sig_len;
                         hsize_t           binary_size;
 
-                        H5PL_sig_decode_footer(check_buf, &existing_footer);
+                        H5PL_sig_decode_footer(check_buf, sizeof(check_buf), &existing_footer);
                         existing_sig_len = existing_footer.signature_length;
 
                         if (existing_sig_len == 0 ||
@@ -721,7 +721,7 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
         footer.format_version   = H5PL_SIG_FORMAT_VERSION_CURRENT;
         footer.reserved         = 0;
         footer.magic            = H5PL_SIG_MAGIC;
-        H5PL_sig_encode_footer(footer_buf, &footer);
+        H5PL_sig_encode_footer(footer_buf, sizeof(footer_buf), &footer);
 
         /* Write footer to file */
         if (write_with_retry(fd, footer_buf, sizeof(footer_buf), "footer", plugin_path, file_size) < 0) {
@@ -784,7 +784,7 @@ main(int argc, char *argv[])
 {
     EVP_PKEY     *private_key    = NULL;
     const EVP_MD *hash_algorithm = NULL;
-    uint8_t       algorithm_id   = 0;
+    H5PL_sig_algo_t algorithm_id = (H5PL_sig_algo_t)0;
     int           ret_value      = EXIT_SUCCESS;
 
     /* Initialize HDF5 tools infrastructure */
