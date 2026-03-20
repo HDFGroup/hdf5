@@ -268,7 +268,6 @@ jobs:
           name: "HDF5 Release ${{ inputs.use_tag }}"
           draft: true
           prerelease: false
-          target_commitish: ${{ inputs.file_sha }}
           body_path: description.txt
           files: |
               ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
