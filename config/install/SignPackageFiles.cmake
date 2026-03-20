@@ -13,7 +13,7 @@ elseif (CPACK_GENERATOR MATCHES "DragNDrop")
 else ()
     set (CPACK_TARGET_FILE_DIRECTORY "${CPACK_TEMPORARY_INSTALL_DIRECTORY}/${CPACK_PACKAGE_INSTALL_DIRECTORY}")
 endif ()
-file (GLOB target_list LIST_DIRECTORIES false "${CPACK_TARGET_FILE_DIRECTORY}/lib/*" "${CPACK_TARGET_FILE_DIRECTORY}/bin/*" "${CPACK_TARGET_FILE_DIRECTORY}/lib/plugin/*")
+file (GLOB target_list LIST_DIRECTORIES false "${CPACK_TARGET_FILE_DIRECTORY}/lib/*" "${CPACK_TARGET_FILE_DIRECTORY}/bin/*" "${CPACK_TARGET_FILE_DIRECTORY}/plugin/*" "${CPACK_TARGET_FILE_DIRECTORY}/lib/plugin/*")
 foreach (targetfile IN LISTS target_list)
     if (WIN32)
         # Sign the targets
