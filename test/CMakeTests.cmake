@@ -473,29 +473,27 @@ if (NOT CYGWIN)
   endif ()
 endif ()
 
-if (TEST_CACHE_IMAGE)
-  #-- Adding test for cache_image
-  add_test (
-      NAME H5TEST-cache_image-clear-objects
-      COMMAND ${CMAKE_COMMAND} -E remove cache_image_test.h5
-      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-  )
-  set_tests_properties (H5TEST-cache_image-clear-objects PROPERTIES FIXTURES_SETUP clear_cache_image)
-  add_test (
-      NAME H5TEST-cache_image-clean-objects
-      COMMAND ${CMAKE_COMMAND} -E remove cache_image_test.h5
-      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-  )
-  set_tests_properties (H5TEST-cache_image-clean-objects PROPERTIES FIXTURES_CLEANUP clear_cache_image)
-  add_test (NAME H5TEST-cache_image COMMAND $<TARGET_FILE:cache_image>)
-  set_tests_properties (H5TEST-cache_image PROPERTIES
-      FIXTURES_REQUIRED clear_cache_image
-      ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
-      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-  )
-  if ("H5TEST-cache_image" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-    set_tests_properties (H5TEST-cache_image PROPERTIES DISABLED true)
-  endif ()
+#-- Adding test for cache_image
+add_test (
+    NAME H5TEST-cache_image-clear-objects
+    COMMAND ${CMAKE_COMMAND} -E remove cache_image_test.h5
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+set_tests_properties (H5TEST-cache_image-clear-objects PROPERTIES FIXTURES_SETUP clear_cache_image)
+add_test (
+    NAME H5TEST-cache_image-clean-objects
+    COMMAND ${CMAKE_COMMAND} -E remove cache_image_test.h5
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+set_tests_properties (H5TEST-cache_image-clean-objects PROPERTIES FIXTURES_CLEANUP clear_cache_image)
+add_test (NAME H5TEST-cache_image COMMAND $<TARGET_FILE:cache_image>)
+set_tests_properties (H5TEST-cache_image PROPERTIES
+    FIXTURES_REQUIRED clear_cache_image
+    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+if ("H5TEST-cache_image" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+  set_tests_properties (H5TEST-cache_image PROPERTIES DISABLED true)
 endif ()
 
 #-- Adding test for external_env

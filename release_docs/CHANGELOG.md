@@ -123,6 +123,18 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    The direct I/O VFD attempts to determine data alignment requirements for a file on file open to try and avoid extra work when data alignment isn't required. Depending on the file access flags used when opening a file, the VFD could incorrectly determine these requirements for either writes or reads, eventually leading to a possible EINVAL return value on write or read. This has been fixed by separately determining the requirements for writes and reads and being more conservative about trying to avoid data alignment requirements.
 
+### Fixed an issue with chunked datasets using the wrong index type with parallel HDF5
+
+   Fixed a bug in parallel HDF5 that would cause chunked datasets with fixed dimensions and without filters applied to use the "none" index type instead of the "fixed array" index type.
+
+### Fixed an issue with decoding metadata cache image superblock extension messages
+
+   Fixed a bug where loading of a metadata cache image superblock extension message would fail when the image had an undefined address and size of 0.
+
+### Fixed an issue with an incorrect file format validation check when decoding metadata cache entries
+
+   Fixed a bug where a flag in H5Cimage.c wasn't getting set correctly for release builds of HDF5, leading to incorrect error checking when reconstructing metadata cache entries.
+
 ## Java Library
 
 ## Configuration
