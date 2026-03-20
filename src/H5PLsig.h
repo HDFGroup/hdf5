@@ -78,11 +78,11 @@ typedef enum {
  *       little-endian, but host byte order varies).
  */
 typedef struct H5PL_sig_footer_t {
-    uint32_t magic;            /* Magic number H5PL_SIG_MAGIC */
-    uint32_t signature_length; /* Length of RSA signature in bytes */
-    H5PL_sig_algo_t algorithm_id; /* Hash algorithm identifier */
-    uint8_t  format_version;   /* Footer format version */
-    uint16_t reserved;         /* Reserved for future use */
+    uint32_t        magic;            /* Magic number H5PL_SIG_MAGIC */
+    uint32_t        signature_length; /* Length of RSA signature in bytes */
+    H5PL_sig_algo_t algorithm_id;     /* Hash algorithm identifier */
+    uint8_t         format_version;   /* Footer format version */
+    uint16_t        reserved;         /* Reserved for future use */
 } H5PL_sig_footer_t;
 
 /*-------------------------------------------------------------------------
@@ -105,7 +105,7 @@ H5PL_sig_encode_footer(uint8_t *buf, size_t buf_size, const H5PL_sig_footer_t *f
 
     UINT32ENCODE(p, footer->magic);            /* bytes 0-3  */
     UINT32ENCODE(p, footer->signature_length); /* bytes 4-7  */
-    *p++ = (uint8_t)footer->algorithm_id;       /* byte  8    */
+    *p++ = (uint8_t)footer->algorithm_id;      /* byte  8    */
     *p++ = footer->format_version;             /* byte  9    */
     UINT16ENCODE(p, footer->reserved);         /* bytes 10-11 */
 } /* end H5PL_sig_encode_footer() */
@@ -129,11 +129,11 @@ H5PL_sig_decode_footer(const uint8_t *buf, size_t buf_size, H5PL_sig_footer_t *f
     assert(buf_size >= H5PL_SIG_FOOTER_SIZE);
     (void)buf_size; /* used only by assert */
 
-    UINT32DECODE(p, footer->magic);            /* bytes 0-3  */
-    UINT32DECODE(p, footer->signature_length); /* bytes 4-7  */
+    UINT32DECODE(p, footer->magic);                 /* bytes 0-3  */
+    UINT32DECODE(p, footer->signature_length);      /* bytes 4-7  */
     footer->algorithm_id   = (H5PL_sig_algo_t)*p++; /* byte  8    */
-    footer->format_version = *p++;             /* byte  9    */
-    UINT16DECODE(p, footer->reserved);         /* bytes 10-11 */
+    footer->format_version = *p++;                  /* byte  9    */
+    UINT16DECODE(p, footer->reserved);              /* bytes 10-11 */
 } /* end H5PL_sig_decode_footer() */
 
 #endif /* H5PLsig_H */

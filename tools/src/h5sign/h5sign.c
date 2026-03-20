@@ -782,10 +782,10 @@ done:
 int
 main(int argc, char *argv[])
 {
-    EVP_PKEY     *private_key    = NULL;
-    const EVP_MD *hash_algorithm = NULL;
-    H5PL_sig_algo_t algorithm_id = (H5PL_sig_algo_t)0;
-    int           ret_value      = EXIT_SUCCESS;
+    EVP_PKEY       *private_key    = NULL;
+    const EVP_MD   *hash_algorithm = NULL;
+    H5PL_sig_algo_t algorithm_id   = (H5PL_sig_algo_t)0;
+    int             ret_value      = EXIT_SUCCESS;
 
     /* Initialize HDF5 tools infrastructure */
     h5tools_setprogname(PROGRAMNAME);
