@@ -189,7 +189,7 @@ append_bad_signature(const char *plugin_path)
 static herr_t
 append_corrupt_footer(const char *plugin_path)
 {
-    int            fd;
+    int           fd;
     unsigned char footer_bytes[H5PL_SIG_FOOTER_SIZE];
     herr_t        ret_value = SUCCEED;
 
@@ -489,7 +489,6 @@ create_corrupted_pem(const char *path, corruption_type_t type)
 
     return SUCCEED;
 }
-
 
 /*-------------------------------------------------------------------------
  * Function:    reset_keystore_state

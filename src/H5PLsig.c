@@ -964,7 +964,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__is_signature_revoked() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5PL__hash_file_binary
  *
@@ -1115,7 +1114,6 @@ H5PL__read_and_validate_footer(int fd, HDoff_t file_size, const char *plugin_pat
                         "file too large to verify",
                         (unsigned long long)binary_size_off, (unsigned long long)H5PL_MAX_PLUGIN_SIZE);
 
-
         *binary_size_out = (size_t)binary_size_off;
     }
 
@@ -1139,14 +1137,14 @@ static herr_t
 H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *signature,
                            const H5PL_sig_footer_t *footer, const char *plugin_path)
 {
-    const EVP_MD                *hash_algorithm = NULL;
-    unsigned char                digest[EVP_MAX_MD_SIZE];
-    unsigned int                 digest_len           = 0;
-    size_t                       keys_init_failed     = 0;
-    size_t                       keys_crypto_invalid  = 0;
-    size_t                       keys_crypto_error    = 0;
-    bool                         verified             = false;
-    herr_t                       ret_value            = SUCCEED;
+    const EVP_MD *hash_algorithm = NULL;
+    unsigned char digest[EVP_MAX_MD_SIZE];
+    unsigned int  digest_len          = 0;
+    size_t        keys_init_failed    = 0;
+    size_t        keys_crypto_invalid = 0;
+    size_t        keys_crypto_error   = 0;
+    bool          verified            = false;
+    herr_t        ret_value           = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -1295,8 +1293,7 @@ H5PL__verify_signature_appended(const char *plugin_path)
 
     /* Check if signature is revoked */
     if (H5PL__is_signature_revoked(signature, footer.signature_length))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                    "plugin signature has been revoked: %s", plugin_path);
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "plugin signature has been revoked: %s", plugin_path);
 
     /* Must have at least one key */
     if (H5PL_keystore_count_g == 0)
