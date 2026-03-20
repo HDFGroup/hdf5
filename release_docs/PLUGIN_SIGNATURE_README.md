@@ -4,8 +4,8 @@
 
 1. [Overview](#overview)
 2. [Quick Start](#quick-start)
-3. [For Plugin Developers](#for-plugin-developers)
-4. [For Plugin Users](#for-plugin-users)
+3. [For Plugin Users](#for-plugin-users)
+4. [For Plugin Developers](#for-plugin-developers)
 5. [Security Considerations](#security-considerations)
 6. [Troubleshooting](#troubleshooting)
 7. [Technical Details](#technical-details)
@@ -40,6 +40,45 @@ HDF5 plugin digital signatures provide cryptographic verification of plugin auth
 2. Build your plugin as usual
 3. Sign your plugin with `h5sign -p my_plugin.so -k my_private_key.pem`
 4. Distribute the signed plugin and public key to users
+
+---
+
+## For Plugin Users
+
+### Setting Up the Keystore
+
+1. Obtain the public key from your plugin developer through a trusted channel
+2. Create a directory to serve as your keystore
+3. Place the public key `.pem` file(s) in the keystore directory
+4. Set the `HDF5_PLUGIN_KEYSTORE` environment variable to the keystore path
+
+The keystore can contain public keys from multiple developers. HDF5 will try
+all keys and accept the plugin if any key verifies successfully.
+
+### Compile-Time Keystore
+
+Alternatively, the keystore path can be set at compile time:
+
+```bash
+cmake -DHDF5_REQUIRE_SIGNED_PLUGINS=ON \
+      -DHDF5_PLUGIN_KEYSTORE_DIR=/path/to/keystore \
+      /path/to/hdf5/source
+```
+
+If `HDF5_PLUGIN_KEYSTORE_DIR` is set at compile time, it is used as the
+default. The `HDF5_PLUGIN_KEYSTORE` environment variable takes precedence
+at runtime unless the keystore is locked (see below).
+
+### Locking the Keystore (Production Environments)
+
+In multi-tenant or HPC environments, administrators can prevent users from
+overriding the keystore location via environment variable:
+
+- **Runtime lock**: Create the file `/etc/hdf5/lock_keystore` (Unix) or
+  `C:\ProgramData\HDF_Group\HDF5\lock_keystore` (Windows)
+- **Compile-time lock**: Build with `-DHDF5_LOCK_PLUGIN_KEYSTORE=ON`
+
+When locked, only the compile-time `HDF5_PLUGIN_KEYSTORE_DIR` is used.
 
 ---
 
@@ -100,45 +139,6 @@ h5sign supports passphrase-protected private keys. OpenSSL will prompt for the
 passphrase interactively. For non-interactive use (CI/CD), decrypt the key to a
 temporary file, sign, and securely delete it. Store the passphrase as a CI
 secret.
-
----
-
-## For Plugin Users
-
-### Setting Up the Keystore
-
-1. Obtain the public key from your plugin developer through a trusted channel
-2. Create a directory to serve as your keystore
-3. Place the public key `.pem` file(s) in the keystore directory
-4. Set the `HDF5_PLUGIN_KEYSTORE` environment variable to the keystore path
-
-The keystore can contain public keys from multiple developers. HDF5 will try
-all keys and accept the plugin if any key verifies successfully.
-
-### Compile-Time Keystore
-
-Alternatively, the keystore path can be set at compile time:
-
-```bash
-cmake -DHDF5_REQUIRE_SIGNED_PLUGINS=ON \
-      -DHDF5_PLUGIN_KEYSTORE_DIR=/path/to/keystore \
-      /path/to/hdf5/source
-```
-
-If `HDF5_PLUGIN_KEYSTORE_DIR` is set at compile time, it is used as the
-default. The `HDF5_PLUGIN_KEYSTORE` environment variable takes precedence
-at runtime unless the keystore is locked (see below).
-
-### Locking the Keystore (Production Environments)
-
-In multi-tenant or HPC environments, administrators can prevent users from
-overriding the keystore location via environment variable:
-
-- **Runtime lock**: Create the file `/etc/hdf5/lock_keystore` (Unix) or
-  `C:\ProgramData\HDF_Group\HDF5\lock_keystore` (Windows)
-- **Compile-time lock**: Build with `-DHDF5_LOCK_PLUGIN_KEYSTORE=ON`
-
-When locked, only the compile-time `HDF5_PLUGIN_KEYSTORE_DIR` is used.
 
 ---
 
@@ -272,7 +272,6 @@ A: Yes. All operations are local; no internet required.
 
 - **OpenSSL Documentation**: <https://www.openssl.org/docs/>
 - **HDF5 Plugin Documentation**: <https://portal.hdfgroup.org/display/support/Registered+Filter+Plugins>
-- **HDF5 Issues**: <https://github.com/HDFGroup/hdf5/issues>
 
 ---
 
