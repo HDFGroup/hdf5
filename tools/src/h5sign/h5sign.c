@@ -20,11 +20,11 @@
  *             [ Plugin Binary ] [ RSA Signature ] [ Footer ]
  *
  *           Footer (12 bytes, little-endian):
+ *             - Magic number 0x48444635 "HDF5" (4 bytes)
  *             - Signature length  (4 bytes)
  *             - Algorithm ID      (1 byte)
  *             - Format version    (1 byte)
  *             - Reserved          (2 bytes)
- *             - Magic number 0x48444635 "HDF5" (4 bytes)
  *
  *           The plugin binary loader ignores trailing data, so signed plugins
  *           load normally on all platforms.
@@ -53,8 +53,7 @@
 /* Name of tool */
 #define PROGRAMNAME "h5sign"
 
-/* Maximum plugin file size (1GB - prevents unreasonable allocations) */
-#define MAX_PLUGIN_SIZE ((hsize_t)(1024ULL * 1024ULL * 1024ULL))
+/* Use the shared maximum plugin size from H5PLsig.h */
 
 /* I/O chunk size for hashing (64KB) */
 #define HASH_CHUNK_SIZE ((size_t)(64 * 1024))
@@ -321,39 +320,6 @@ read_private_key(const char *keyfile)
     EVP_PKEY *pkey     = NULL;
     EVP_PKEY *ret_pkey = NULL;
 
-#ifndef H5_HAVE_WIN32_API
-    /* Verify key file has secure permissions before reading.
-     * Open with fopen first for fstat, then close and use BIO for PEM read. */
-    {
-        FILE *fp = fopen(keyfile, "r");
-        if (NULL == fp) {
-            fprintf(rawerrorstream, "Error: Cannot open private key file '%s': %s\n", keyfile,
-                    strerror(errno));
-            goto done;
-        }
-        /* fstat on the fd inspects the exact file we opened, not whatever the path resolves
-         * to at check time (which could differ if a symlink is swapped between stat and fopen). */
-        {
-            h5_stat_t key_stat;
-            if (HDfstat(fileno(fp), &key_stat) == 0) {
-                if (!S_ISREG(key_stat.st_mode)) {
-                    fprintf(rawerrorstream, "Error: '%s' is not a regular file\n", keyfile);
-                    fclose(fp);
-                    goto done;
-                }
-                if (key_stat.st_mode & (S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)) {
-                    fprintf(rawerrorstream, "Error: Private key file '%s' has insecure permissions (%03o)\n",
-                            keyfile, (unsigned)(key_stat.st_mode & 0777));
-                    fprintf(rawerrorstream, "       Fix with: chmod 600 '%s'\n", keyfile);
-                    fclose(fp);
-                    goto done;
-                }
-            }
-        }
-        fclose(fp);
-    }
-#endif
-
     /* Open key file using BIO (avoids OPENSSL_Applink issue on Windows) */
     if (NULL == (bio = BIO_new_file(keyfile, "r"))) {
         fprintf(rawerrorstream, "Error: Cannot open private key file '%s'\n", keyfile);
@@ -533,16 +499,16 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
         goto done;
     }
 
-    if (file_size > MAX_PLUGIN_SIZE) {
+    if (file_size > H5PL_MAX_PLUGIN_SIZE) {
         fprintf(rawerrorstream, "Error: Plugin file '%s' is too large (%llu bytes)\n", plugin_path,
                 (unsigned long long)file_size);
         fprintf(rawerrorstream, "       Maximum size is %llu bytes (1GB)\n",
-                (unsigned long long)MAX_PLUGIN_SIZE);
+                (unsigned long long)H5PL_MAX_PLUGIN_SIZE);
         ret_value = FAIL;
         goto done;
     }
 
-    /* Detect already-signed files: check for HDF5 magic number in the last footer bytes */
+    /* Detect already-signed files: check for HDF5 magic number in the footer */
     if (file_size >= (hsize_t)H5PL_SIG_FOOTER_SIZE) {
         uint8_t           check_buf[H5PL_SIG_FOOTER_SIZE];
         H5PL_sig_footer_t check_footer;
@@ -728,18 +694,6 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
     if (opt_verbose) {
         fprintf(rawoutstream, "Signature created successfully\n");
         fprintf(rawoutstream, "Signature length: %zu bytes\n", sig_len);
-    }
-
-    /* Truncate the file to exactly file_size bytes before appending.
-     * If any concurrent writer extended the file during hashing, SEEK_END would
-     * place us past the extra data, producing a signature that covers fewer bytes
-     * than the binary.  Truncating to the size we hashed guarantees that the
-     * signature is appended at precisely the byte we expect. */
-    if (HDftruncate(fd, (HDoff_t)file_size) < 0) {
-        fprintf(rawerrorstream, "Error: Cannot truncate plugin file '%s': %s\n", plugin_path,
-                strerror(errno));
-        ret_value = FAIL;
-        goto done;
     }
 
     if (HDlseek(fd, (HDoff_t)file_size, SEEK_SET) < 0) {

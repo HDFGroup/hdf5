@@ -1323,34 +1323,8 @@ H5Z_find(bool try, H5Z_filter_t id, H5Z_class2_t **cls)
         *cls = NULL;
 
         /* Don't push error on speculative lookup */
-        if (!try) {
-            /* Filter not in registered table; attempt dynamic loading so that any
-             * real load failure (e.g. signature verification) appears in the error
-             * stack rather than being silently replaced by "filter not registered". */
-            H5PL_key_t          key;
-            const H5Z_class2_t *filter_info;
-
-            key.id = (int)id;
-            if (NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, &key))) {
-                if (H5Z_register(filter_info) < 0)
-                    HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL,
-                                "unable to register dynamically loaded filter %d", id);
-                if ((idx = H5Z__find_idx(id)) >= 0) {
-                    *cls = H5Z_table_g + idx;
-                    HGOTO_DONE(SUCCEED);
-                }
-            }
-            /* H5PL_load errors (e.g. signature failure) are already on the stack;
-             * push a summary message as the outermost error. */
-#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
-            HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL,
-                        "required filter %d is not registered; if the plugin exists, "
-                        "verify it has been signed with h5sign",
-                        id);
-#else
+        if (!try)
             HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "required filter %d is not registered", id);
-#endif
-        }
     }
     else
         *cls = H5Z_table_g + idx;

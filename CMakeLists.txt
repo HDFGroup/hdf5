@@ -833,27 +833,18 @@ if (HDF5_REQUIRE_SIGNED_PLUGINS)
     message(STATUS "OpenSSL 3.0+ detected - all EVP_* APIs are compatible (not deprecated)")
   endif ()
 
-  # KeyStore directory must be configured
-  if (NOT HDF5_PLUGIN_KEYSTORE_DIR)
+  # KeyStore directory is optional at build time; the HDF5_PLUGIN_KEYSTORE
+  # environment variable can be used at runtime instead.  Require a compile-time
+  # directory only when the environment variable override is locked out.
+  if (HDF5_LOCK_PLUGIN_KEYSTORE AND NOT HDF5_PLUGIN_KEYSTORE_DIR)
     message(FATAL_ERROR
-      "HDF5_REQUIRE_SIGNED_PLUGINS=ON requires KeyStore directory:\n"
-      "  -DHDF5_PLUGIN_KEYSTORE_DIR=/etc/hdf5/trusted_keys\n"
-      "\n"
-      "KeyStore Approach:\n"
-      "  - Supports multiple trusted organizations (LLNL, ANL, HDFGroup)\n"
-      "  - Add/remove keys without recompiling\n"
-      "  - Runtime override via HDF5_PLUGIN_KEYSTORE environment variable\n"
-      "\n"
-      "Setup:\n"
-      "  mkdir -p /etc/hdf5/trusted_keys\n"
-      "  cp llnl_public.pem /etc/hdf5/trusted_keys/\n"
-      "  cp anl_public.pem /etc/hdf5/trusted_keys/\n"
-      "\n"
-      "To generate an RSA key pair:\n"
-      "  openssl genrsa -out private.pem 2048\n"
-      "  openssl rsa -in private.pem -pubout -out public.pem\n"
-      "\n"
-      "SECURITY WARNING: Never use example/default keys in production!")
+      "HDF5_LOCK_PLUGIN_KEYSTORE=ON requires a compile-time KeyStore directory:\n"
+      "  -DHDF5_PLUGIN_KEYSTORE_DIR=/etc/hdf5/trusted_keys")
+  endif ()
+
+  if (NOT HDF5_PLUGIN_KEYSTORE_DIR)
+    message(STATUS "No compile-time KeyStore directory configured; "
+      "set HDF5_PLUGIN_KEYSTORE environment variable at runtime.")
   endif ()
 
   # Configure KeyStore directory if provided
@@ -882,8 +873,8 @@ if (HDF5_REQUIRE_SIGNED_PLUGINS)
     add_compile_definitions(H5PL_KEYSTORE_DIR="${HDF5_PLUGIN_KEYSTORE_DIR}")
   endif ()
 
-  # Enable digital signature verification
-  add_compile_definitions(H5_REQUIRE_DIGITAL_SIGNATURE)
+  # Enable digital signature verification (goes into H5pubconf.h)
+  set(H5_REQUIRE_DIGITAL_SIGNATURE 1)
 
   # Security: Disable environment variable override if requested
   if (HDF5_LOCK_PLUGIN_KEYSTORE)

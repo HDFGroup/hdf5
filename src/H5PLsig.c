@@ -57,23 +57,11 @@
 
 /*
  * Thread Safety Note:
- * All file-scope static variables below (keystore, revocation list, and signature cache)
+ * All file-scope static variables below (keystore and revocation list)
  * are accessed without explicit synchronization. When HDF5_ENABLE_THREADSAFE is enabled,
  * these variables are protected by the HDF5 library-wide global lock that guards plugin
  * operations. Concurrent plugin loads are serialized at the H5PL__load level, ensuring
- * that keystore initialization, revocation list checks, and cache updates cannot race.
- *
- * If plugin loading is ever made to bypass the global lock, these data structures will
- * require explicit mutex protection or atomic operations.
- *
- * TODO: If H5PL__load is ever refactored to support fine-grained locking or lock-free
- *       concurrent plugin loading, wrap these static globals in a struct protected by
- *       a dedicated mutex (e.g., H5PL_sig_lock_g). This affects:
- *       - H5PL_keystore_g and related counters (lines 73-76)
- *       - H5PL_revoked_sigs_g and related counters (lines 84-87)
- *       - H5PL_sig_cache_g and related counters (lines 97-99)
- *       All read/write operations on these variables must be synchronized if the
- *       global library lock is removed or bypassed for plugin operations.
+ * that keystore initialization and revocation list checks cannot race.
  */
 
 /* KeyStore entry for storing multiple trusted public keys */
@@ -90,7 +78,16 @@ static size_t                 H5PL_keystore_count_g       = 0;
 static size_t                 H5PL_keystore_capacity_g    = 0;
 static bool                   H5PL_keystore_initialized_g = false;
 
-/* Revocation list for blocking specific signatures */
+/* Revocation list for blocking specific signatures.
+ * The file <keystore_dir>/H5PL_REVOKED_SIGS_FILENAME is read at keystore
+ * init time.  Each line is a 64-hex-char SHA-256 hash of a signature blob.
+ * Lines starting with '#' are comments; empty lines are ignored.
+ * The file is optional — if absent, no signatures are revoked. */
+#define H5PL_REVOKED_SIGS_FILENAME "revoked_signatures.txt"
+
+/* Size of the SHA-256 hash used to identify revoked signatures.
+ * This is the hash of the raw signature bytes, independent of the
+ * plugin's signing algorithm (SHA-256/384/512). */
 #define H5PL_SIGNATURE_HASH_SIZE 32 /* SHA-256 = 32 bytes */
 typedef struct H5PL_revoked_signature_t {
     unsigned char hash[H5PL_SIGNATURE_HASH_SIZE]; /* SHA-256 hash of signature */
@@ -102,40 +99,11 @@ static size_t                    H5PL_revoked_sigs_count_g       = 0;
 static size_t                    H5PL_revoked_sigs_capacity_g    = 0;
 static bool                      H5PL_revoked_sigs_initialized_g = false;
 
-/* Signature verification cache entry */
-typedef struct H5PL_signature_cache_entry_t {
-    char   *path;      /* Plugin file path */
-    time_t  mtime;     /* File modification time */
-    HDoff_t file_size; /* File size (guards against mtime-preserving replacement) */
-    bool    verified;  /* Verification status (true=success, false=failure) */
-} H5PL_signature_cache_entry_t;
-
-/* Signature verification cache
- * TODO (Thread Safety): Requires mutex protection if global lock is removed
- */
-static H5PL_signature_cache_entry_t *H5PL_sig_cache_g          = NULL;
-static size_t                        H5PL_sig_cache_count_g    = 0;
-static size_t                        H5PL_sig_cache_capacity_g = 0;
-
 /* Initial capacity for keystore array */
 #define H5PL_KEYSTORE_INITIAL_CAPACITY 4
 
-/* Initial capacity for signature cache */
-#define H5PL_SIG_CACHE_INITIAL_CAPACITY 8
-
-/* Maximum plugin file size (1GB - prevents unreasonable allocations) */
-#define H5PL_MAX_PLUGIN_SIZE ((HDoff_t)(1024LL * 1024LL * 1024LL))
-
 /* I/O chunk size for verification (1MB - optimized for modern I/O subsystems) */
 #define H5PL_VERIFY_CHUNK_SIZE ((size_t)(1024 * 1024))
-
-/* Signature verification failure reasons for detailed diagnostics */
-typedef enum {
-    H5PL_VERIFY_REASON_UNKNOWN,     /* Unknown/uninitialized */
-    H5PL_VERIFY_REASON_INIT_FAILED, /* EVP_PKEY_verify_init or context setup failed */
-    H5PL_VERIFY_REASON_INVALID_SIG, /* EVP_PKEY_verify = 0 (signature mismatch) */
-    H5PL_VERIFY_REASON_CRYPTO_ERROR /* EVP_PKEY_verify = -1 (OpenSSL error) */
-} H5PL_verify_failure_reason_t;
 
 /*********************/
 /* Local Prototypes  */
@@ -400,187 +368,6 @@ done:
 } /* end H5PL__create_public_RSA_from_file() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5PL__validate_directory_permissions
- *
- * Purpose:     Validate directory permissions
- *
- * Return:      SUCCEED/FAIL
- *-------------------------------------------------------------------------
- */
-#ifndef H5_HAVE_WIN32_API
-herr_t
-H5PL__validate_directory_permissions(const char *dir_path)
-{
-    h5_stat_t st;
-    herr_t    ret_value = SUCCEED;
-
-    FUNC_ENTER_PACKAGE
-
-    assert(dir_path);
-
-    /* Check if directory exists and get permissions */
-    if (HDstat(dir_path, &st) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "cannot stat keystore directory: %s", dir_path);
-
-    /* Verify it's a directory */
-    if (!S_ISDIR(st.st_mode))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "keystore path is not a directory: %s", dir_path);
-
-    /* Reject world-writable directories */
-    if (st.st_mode & S_IWOTH)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                    "SECURITY ERROR: keystore directory is world-writable (mode %o): %s\n"
-                    "This allows unprivileged users to add malicious keys.\n"
-                    "Fix with: chmod o-w %s",
-                    (unsigned)(st.st_mode & 0777), dir_path, dir_path);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5PL__validate_directory_permissions() */
-#else  /* H5_HAVE_WIN32_API */
-
-/*-------------------------------------------------------------------------
- * Function:    check_group_write_access
- *
- * Purpose:     Check whether a given SID has write access in a DACL.
- *              Returns TRUE if write access is detected or if the check
- *              fails (fail closed).
- *
- * Return:      TRUE if the group has write access (or on error), FALSE otherwise
- *-------------------------------------------------------------------------
- */
-static BOOL
-check_group_write_access(PACL pDACL, PSID pSid, ACCESS_MASK *access_out)
-{
-    TRUSTEE           trustee;
-    ACCESS_MASK       access = 0;
-    const ACCESS_MASK write_mask =
-        FILE_WRITE_DATA | FILE_ADD_FILE | FILE_APPEND_DATA | DELETE | WRITE_DAC | WRITE_OWNER;
-
-    BuildTrusteeWithSidA(&trustee, pSid);
-    if (GetEffectiveRightsFromAclA(pDACL, &trustee, &access) != ERROR_SUCCESS) {
-        if (access_out)
-            *access_out = 0;
-        return FALSE; /* API can fail on domain/restricted accounts; skip this SID */
-    }
-    if (access_out)
-        *access_out = access;
-    return (access & write_mask) ? TRUE : FALSE;
-}
-
-herr_t
-H5PL__validate_directory_permissions(const char *dir_path)
-{
-    h5_stat_t                st;
-    char                     abs_path[MAX_PATH];
-    const char              *check_path           = dir_path;
-    PSECURITY_DESCRIPTOR     pSD                  = NULL;
-    PACL                     pDACL                = NULL;
-    PSID                     pSidEveryone         = NULL;
-    PSID                     pSidUsers            = NULL;
-    PSID                     pSidAuthUsers        = NULL;
-    SID_IDENTIFIER_AUTHORITY SIDAuthWorld         = SECURITY_WORLD_SID_AUTHORITY;
-    SID_IDENTIFIER_AUTHORITY SIDAuthNT            = SECURITY_NT_AUTHORITY;
-    DWORD                    dwRes                = 0;
-    ACCESS_MASK              everyoneAccess       = 0;
-    ACCESS_MASK              usersAccess          = 0;
-    ACCESS_MASK              authUsersAccess      = 0;
-    BOOL                     hasUnsafePermissions = FALSE;
-    herr_t                   ret_value            = SUCCEED;
-
-    FUNC_ENTER_PACKAGE
-
-    assert(dir_path);
-
-    /* Check if directory exists and get permissions */
-    if (HDstat(dir_path, &st) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "cannot stat keystore directory: %s", dir_path);
-
-    /* Verify it's a directory */
-    if (!S_ISDIR(st.st_mode))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "keystore path is not a directory: %s", dir_path);
-
-    /* Windows ACL-based permission checking.
-     * GetNamedSecurityInfoA requires an absolute path with backslashes;
-     * resolve any relative or forward-slash path to a canonical absolute path. */
-    if (GetFullPathNameA(dir_path, MAX_PATH, abs_path, NULL) != 0)
-        check_path = abs_path;
-
-    /* Get the security descriptor for the directory */
-    dwRes = GetNamedSecurityInfoA(check_path, SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, &pDACL,
-                                  NULL, &pSD);
-
-    if (dwRes != ERROR_SUCCESS) {
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL,
-                    "SECURITY ERROR: Cannot retrieve ACL information for KeyStore directory: %s\n"
-                    "  Error code: %lu",
-                    dir_path, (unsigned long)dwRes);
-    }
-
-    /* A NULL DACL means unrestricted access for everyone — inherently insecure */
-    if (pDACL == NULL) {
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                    "SECURITY ERROR: KeyStore directory has a NULL DACL (unrestricted access): %s\n"
-                    "  A NULL DACL grants full access to all users and is not permitted for a KeyStore.\n"
-                    "  Fix: Configure explicit ACLs to allow write access only for Administrators:\n"
-                    "    icacls \"%s\" /inheritance:r /grant Administrators:F",
-                    dir_path, dir_path);
-    }
-
-    /* Create SIDs for "Everyone", "Users", and "Authenticated Users" groups */
-    if (!AllocateAndInitializeSid(&SIDAuthWorld, 1, SECURITY_WORLD_RID, 0, 0, 0, 0, 0, 0, 0, &pSidEveryone))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL, "SECURITY ERROR: Cannot create Everyone SID");
-
-    if (!AllocateAndInitializeSid(&SIDAuthNT, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_USERS, 0, 0, 0,
-                                  0, 0, 0, &pSidUsers))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL, "SECURITY ERROR: Cannot create Users SID");
-
-    if (!AllocateAndInitializeSid(&SIDAuthNT, 1, SECURITY_AUTHENTICATED_USER_RID, 0, 0, 0, 0, 0, 0, 0,
-                                  &pSidAuthUsers))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTCREATE, FAIL,
-                    "SECURITY ERROR: Cannot create Authenticated Users SID");
-
-    /* Check effective permissions for "Everyone", "Users", and "Authenticated Users" groups */
-    if (check_group_write_access(pDACL, pSidEveryone, &everyoneAccess))
-        hasUnsafePermissions = TRUE;
-    if (check_group_write_access(pDACL, pSidUsers, &usersAccess))
-        hasUnsafePermissions = TRUE;
-    if (check_group_write_access(pDACL, pSidAuthUsers, &authUsersAccess))
-        hasUnsafePermissions = TRUE;
-
-    /* SECURITY: Fail if directory has unsafe permissions */
-    if (hasUnsafePermissions) {
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                    "SECURITY ERROR: KeyStore directory has insecure ACL permissions: %s\n"
-                    "  The directory is writable by non-administrators.\n"
-                    "  Everyone access: 0x%lx\n"
-                    "  Users access: 0x%lx\n"
-                    "  Authenticated Users access: 0x%lx\n"
-                    "  This allows unprivileged users to inject malicious keys.\n"
-                    "  Fix: Use system-protected paths like:\n"
-                    "    C:\\Program Files\\HDF_Group\\HDF5\\trusted_keys\n"
-                    "  Or configure directory ACLs to allow write access only for Administrators:\n"
-                    "    icacls \"%s\" /inheritance:r /grant Administrators:F",
-                    dir_path, (unsigned long)everyoneAccess, (unsigned long)usersAccess,
-                    (unsigned long)authUsersAccess, dir_path);
-    }
-
-done:
-    /* Centralized cleanup of Windows security resources (NULL-safe guards) */
-    if (pSidEveryone)
-        FreeSid(pSidEveryone);
-    if (pSidUsers)
-        FreeSid(pSidUsers);
-    if (pSidAuthUsers)
-        FreeSid(pSidAuthUsers);
-    if (pSD)
-        LocalFree(pSD);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5PL__validate_directory_permissions() */
-#endif /* H5_HAVE_WIN32_API */
-
-/*-------------------------------------------------------------------------
  * Function:    H5PL__process_key_file
  *
  * Purpose:     Load a PEM key file and add it to the keystore
@@ -598,18 +385,17 @@ H5PL__process_key_file(const char *file_path)
 
     assert(file_path);
 
-    /* Try to load key */
+    /* Try to load key; skip files that fail to load (invalid PEM, etc.) */
     if (NULL != (key = H5PL__create_public_RSA_from_file(file_path))) {
-        /* Add to keystore */
-        if (H5PL__add_key_to_keystore(key, file_path) < 0) {
-            EVP_PKEY_free(key);
+        /* Add to keystore (transfers ownership of key on success) */
+        if (H5PL__add_key_to_keystore(key, file_path) < 0)
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot add key to keystore");
-        }
-        /* Key ownership transferred to keystore */
+        key = NULL; /* Ownership transferred to keystore */
     }
-    /* Skip files that fail to load (invalid PEM, etc.) */
 
 done:
+    if (key)
+        EVP_PKEY_free(key);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__process_key_file() */
 
@@ -634,10 +420,6 @@ H5PL__load_keys_from_directory(const char *dir_path)
     FUNC_ENTER_PACKAGE
 
     assert(dir_path);
-
-    /* Validate directory permissions */
-    if (H5PL__validate_directory_permissions(dir_path) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "keystore directory validation failed");
 
     /* Open directory */
     if (NULL == (dir = opendir(dir_path))) {
@@ -759,10 +541,6 @@ H5PL__load_keys_from_directory(const char *dir_path)
     FUNC_ENTER_PACKAGE
 
     assert(dir_path);
-
-    /* Validate directory permissions */
-    if (H5PL__validate_directory_permissions(dir_path) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "keystore directory validation failed");
 
     {
         WIN32_FIND_DATAA find_data;
@@ -1038,11 +816,11 @@ H5PL__load_revoked_signatures(const char *keystore_dir)
     assert(keystore_dir);
 
     /* Build path to revoked signatures file */
-    path_len = strlen(keystore_dir) + strlen("/revoked_signatures.txt") + 1;
+    path_len = strlen(keystore_dir) + 1 + strlen(H5PL_REVOKED_SIGS_FILENAME) + 1;
     if (NULL == (filepath = (char *)H5MM_malloc(path_len)))
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot allocate filepath buffer");
 
-    if (snprintf(filepath, path_len, "%s/revoked_signatures.txt", keystore_dir) >= (int)path_len)
+    if (snprintf(filepath, path_len, "%s/%s", keystore_dir, H5PL_REVOKED_SIGS_FILENAME) >= (int)path_len)
         HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "revoked signatures file path too long");
 
     /* Try to open revoked signatures file (optional - not an error if missing) */
@@ -1169,16 +947,14 @@ H5PL__is_signature_revoked(const unsigned char *signature, size_t signature_len)
         HGOTO_DONE(false);
 
     /* Check if hash is in revoked list using binary search
-     * (array is sorted in H5PL__load_revoked_signatures)
+     * (array is sorted in H5PL__load_revoked_signatures).
+     * hash[] can be passed directly as the bsearch key because
+     * H5PL_revoked_signature_t contains only a hash array at offset 0.
      */
     if (H5PL_revoked_sigs_count_g > 0) {
-        H5PL_revoked_signature_t key;
-        memcpy(key.hash, hash, H5PL_SIGNATURE_HASH_SIZE);
-
-        if (NULL != bsearch(&key, H5PL_revoked_sigs_g, H5PL_revoked_sigs_count_g,
-                            sizeof(H5PL_revoked_signature_t), H5PL__compare_signature_hashes)) {
+        if (NULL != bsearch(hash, H5PL_revoked_sigs_g, H5PL_revoked_sigs_count_g,
+                            sizeof(H5PL_revoked_signature_t), H5PL__compare_signature_hashes))
             HGOTO_DONE(true);
-        }
     }
 
 done:
@@ -1188,119 +964,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__is_signature_revoked() */
 
-/*-------------------------------------------------------------------------
- * Function:    H5PL__check_signature_cache
- *
- * Purpose:     Check signature verification cache
- *
- * Return:      SUCCEED/FAIL
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5PL__check_signature_cache(const char *plugin_path, bool *cached_result)
-{
-    h5_stat_t st;
-    herr_t    ret_value = FAIL; /* Default: cache miss */
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    assert(plugin_path);
-    assert(cached_result);
-
-    /* Get current file modification time */
-    if (HDstat(plugin_path, &st) < 0)
-        goto done; /* File stat failed - cache miss */
-
-    /* Search cache for matching entry (linear scan is acceptable here
-     * because the number of loaded plugins per process is typically small) */
-    for (size_t i = 0; i < H5PL_sig_cache_count_g; i++) {
-        if (strcmp(H5PL_sig_cache_g[i].path, plugin_path) == 0) {
-            /* Found cache entry - check if file has been modified */
-            if (H5PL_sig_cache_g[i].mtime == st.st_mtime &&
-                H5PL_sig_cache_g[i].file_size == (HDoff_t)st.st_size) {
-                /* Cache hit! File unchanged, return cached result */
-                *cached_result = H5PL_sig_cache_g[i].verified;
-                ret_value      = SUCCEED;
-                goto done;
-            }
-            else {
-                /* File modified - cache entry is stale, fall through to cache miss */
-                goto done;
-            }
-        }
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5PL__check_signature_cache() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5PL__update_signature_cache
- *
- * Purpose:     Update signature verification cache
- *
- * Return:      SUCCEED/FAIL
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5PL__update_signature_cache(const char *plugin_path, bool verified)
-{
-    h5_stat_t st;
-    size_t    entry_idx = H5PL_sig_cache_count_g; /* Default: add new entry */
-    bool      found     = false;
-    herr_t    ret_value = SUCCEED;
-
-    FUNC_ENTER_PACKAGE
-
-    assert(plugin_path);
-
-    /* Get current file modification time */
-    if (HDstat(plugin_path, &st) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "cannot stat plugin file for cache update: %s",
-                    plugin_path);
-
-    /* Check if entry already exists (update instead of add) */
-    for (size_t i = 0; i < H5PL_sig_cache_count_g; i++) {
-        if (strcmp(H5PL_sig_cache_g[i].path, plugin_path) == 0) {
-            entry_idx = i;
-            found     = true;
-            break;
-        }
-    }
-
-    if (found) {
-        /* Update existing entry */
-        H5PL_sig_cache_g[entry_idx].mtime     = st.st_mtime;
-        H5PL_sig_cache_g[entry_idx].file_size = (HDoff_t)st.st_size;
-        H5PL_sig_cache_g[entry_idx].verified  = verified;
-    }
-    else {
-        /* Add new entry - expand cache if needed */
-        if (H5PL_sig_cache_count_g >= H5PL_sig_cache_capacity_g) {
-            size_t new_capacity = H5PL_sig_cache_capacity_g == 0 ? H5PL_SIG_CACHE_INITIAL_CAPACITY
-                                                                 : H5PL_sig_cache_capacity_g * 2;
-            H5PL_signature_cache_entry_t *new_cache = (H5PL_signature_cache_entry_t *)H5MM_realloc(
-                H5PL_sig_cache_g, new_capacity * sizeof(H5PL_signature_cache_entry_t));
-
-            if (NULL == new_cache)
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot expand signature cache array");
-
-            H5PL_sig_cache_g          = new_cache;
-            H5PL_sig_cache_capacity_g = new_capacity;
-        }
-
-        if (NULL == (H5PL_sig_cache_g[entry_idx].path = H5MM_strdup(plugin_path)))
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "cannot duplicate path for signature cache");
-
-        H5PL_sig_cache_g[entry_idx].mtime     = st.st_mtime;
-        H5PL_sig_cache_g[entry_idx].file_size = (HDoff_t)st.st_size;
-        H5PL_sig_cache_g[entry_idx].verified  = verified;
-        H5PL_sig_cache_count_g++;
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5PL__update_signature_cache() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5PL__hash_file_binary
@@ -1412,24 +1075,18 @@ H5PL__read_and_validate_footer(int fd, HDoff_t file_size, const char *plugin_pat
                     "not a signed HDF5 plugin or corrupted",
                     (unsigned)H5PL_SIG_MAGIC, (unsigned)footer_out->magic);
 
-    /* Validate format version */
+    /* Validate format version.
+     * Currently only version 1 is defined; future versions may relax this
+     * to accept older formats (e.g., format_version <= CURRENT). */
     if (footer_out->format_version != H5PL_SIG_FORMAT_VERSION_CURRENT)
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "unsupported signature format version %u (expected %u)",
                     (unsigned)footer_out->format_version, (unsigned)H5PL_SIG_FORMAT_VERSION_CURRENT);
 
     /* Validate algorithm ID */
-    if (NULL == H5PL__get_hash_algorithm(footer_out->algorithm_id)) {
-        if (footer_out->algorithm_id == H5PL_SIG_ALGO_SHA3_256 ||
-            footer_out->algorithm_id == H5PL_SIG_ALGO_BLAKE3)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                        "algorithm ID 0x%02X is reserved for a future HDF5 release - "
-                        "upgrade HDF5 to verify this plugin",
-                        (unsigned)footer_out->algorithm_id);
-        else
-            HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                        "unsupported or unknown hash algorithm ID 0x%02X in plugin signature",
-                        (unsigned)footer_out->algorithm_id);
-    }
+    if (NULL == H5PL__get_hash_algorithm(footer_out->algorithm_id))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
+                    "unsupported or unknown hash algorithm ID 0x%02X in plugin signature",
+                    (unsigned)footer_out->algorithm_id);
 
     /* Validate signature length */
     if (footer_out->signature_length == 0 || footer_out->signature_length > H5PL_MAX_SIGNATURE_SIZE)
@@ -1458,12 +1115,6 @@ H5PL__read_and_validate_footer(int fd, HDoff_t file_size, const char *plugin_pat
                         "file too large to verify",
                         (unsigned long long)binary_size_off, (unsigned long long)H5PL_MAX_PLUGIN_SIZE);
 
-        /* Check for overflow when casting to size_t */
-        if (binary_size_off < 0 || (uint64_t)binary_size_off > (uint64_t)SIZE_MAX)
-            HGOTO_ERROR(
-                H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                "plugin binary size %llu exceeds SIZE_MAX - file too large to verify on this platform",
-                (unsigned long long)binary_size_off);
 
         *binary_size_out = (size_t)binary_size_off;
     }
@@ -1491,7 +1142,6 @@ H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *sign
     const EVP_MD                *hash_algorithm = NULL;
     unsigned char                digest[EVP_MAX_MD_SIZE];
     unsigned int                 digest_len           = 0;
-    H5PL_verify_failure_reason_t first_failure_reason = H5PL_VERIFY_REASON_UNKNOWN;
     size_t                       keys_init_failed     = 0;
     size_t                       keys_crypto_invalid  = 0;
     size_t                       keys_crypto_error    = 0;
@@ -1570,98 +1220,18 @@ H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *sign
         }
         else if (verify_result == 0) {
             keys_crypto_invalid++;
-            if (first_failure_reason == H5PL_VERIFY_REASON_UNKNOWN)
-                first_failure_reason = H5PL_VERIFY_REASON_INVALID_SIG;
         }
         else {
             keys_crypto_error++;
-            if (first_failure_reason == H5PL_VERIFY_REASON_UNKNOWN)
-                first_failure_reason = H5PL_VERIFY_REASON_CRYPTO_ERROR;
         }
     }
 
-    if (!verified) {
-        /* Build informative error message with key sources for debugging */
-        char        key_sources[1024] = "";
-        size_t      remaining         = sizeof(key_sources);
-        char       *ptr               = key_sources;
-        const char *diagnostic        = NULL;
-        const char *keystore_path     = NULL;
-
-        for (size_t i = 0; i < H5PL_keystore_count_g; i++) {
-            const char *source  = H5PL_keystore_g[i].source ? H5PL_keystore_g[i].source : "unknown";
-            int         written = snprintf(ptr, remaining, "%s%s", (i > 0 ? ", " : ""), source);
-
-            if (written < 0 || (size_t)written >= remaining) {
-                if (remaining > 4)
-                    memcpy(ptr, "...", 4); /* 4 = strlen("...") + 1 (NUL) */
-                break;
-            }
-            ptr += written;
-            remaining -= (size_t)written;
-        }
-
-        /* Build detailed diagnostic message based on failure pattern */
-        if (keys_init_failed == H5PL_keystore_count_g) {
-            diagnostic = "\n"
-                         "  DIAGNOSIS: All keys failed initialization (key type mismatch)\n"
-                         "  - Plugin signature algorithm may be incompatible with KeyStore keys\n"
-                         "  - Verify that KeyStore contains RSA keys matching the signature algorithm\n"
-                         "  - Check signature algorithm ID in plugin footer\n";
-        }
-        else if (keys_crypto_invalid == H5PL_keystore_count_g) {
-            diagnostic = "\n"
-                         "  DIAGNOSIS: Signature cryptographically invalid with ALL keys\n"
-                         "  - Plugin is either:\n"
-                         "    * Signed with a different key (not in KeyStore)\n"
-                         "    * Tampered after signing (binary modified)\n"
-                         "    * Corrupted during download/transfer (I/O error)\n"
-                         "  - Try:\n"
-                         "    * Obtain the correct public key from plugin developer\n"
-                         "    * Re-download the plugin file\n"
-                         "    * Verify file integrity (checksums)\n";
-        }
-        else if (keys_crypto_invalid > 0 && keys_crypto_invalid < H5PL_keystore_count_g) {
-            diagnostic = "\n"
-                         "  DIAGNOSIS: Signature failed with some keys (not all)\n"
-                         "  - Plugin may be signed with a key not in your KeyStore\n"
-                         "  - Add the correct public key to KeyStore directory\n";
-        }
-        else if (keys_crypto_error > 0) {
-            diagnostic = "\n"
-                         "  DIAGNOSIS: OpenSSL internal error\n"
-                         "  - Check OpenSSL installation and configuration\n"
-                         "  - Review system logs for OpenSSL errors\n";
-        }
-        else {
-            diagnostic = "\n"
-                         "  DIAGNOSIS: Unknown verification failure\n"
-                         "  - Enable debug output with: export HDF5_DEBUG=PL\n";
-        }
-
-        keystore_path = getenv("HDF5_PLUGIN_KEYSTORE");
-        if (keystore_path == NULL)
-            keystore_path = H5PL_SIG_KEYSTORE_DIR_STR;
-
+    if (!verified)
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                    "plugin signature verification failed\n"
-                    "  Plugin: %s\n"
-                    "  Keys tried: %zu [%s]\n"
-                    "  - Init failed: %zu\n"
-                    "  - Crypto invalid: %zu\n"
-                    "  - Crypto error: %zu\n"
-                    "%s"
-                    "\n"
-                    "  KeyStore: %s\n"
-                    "\n"
-                    "  Next steps:\n"
-                    "    1. Verify plugin was signed correctly (check signature algorithm compatibility)\n"
-                    "    2. Check KeyStore directory contains correct public keys\n"
-                    "    3. Contact plugin developer for correct public key\n"
-                    "    4. Verify file integrity (checksums, re-download if needed)\n",
-                    plugin_path, H5PL_keystore_count_g, key_sources, keys_init_failed, keys_crypto_invalid,
-                    keys_crypto_error, diagnostic ? diagnostic : "", keystore_path);
-    }
+                    "plugin signature verification failed: %s "
+                    "(tried %zu key(s): %zu init failed, %zu invalid, %zu error)",
+                    plugin_path, H5PL_keystore_count_g, keys_init_failed, keys_crypto_invalid,
+                    keys_crypto_error);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1682,34 +1252,13 @@ H5PL__verify_signature_appended(const char *plugin_path)
     h5_stat_t         st;
     HDoff_t           file_size = 0;
     H5PL_sig_footer_t footer;
-    unsigned char    *signature      = NULL;
-    size_t            binary_size    = 0;
-    char             *canonical_path = NULL;
-    herr_t            ret_value      = SUCCEED;
-    bool              cached_result;
+    unsigned char    *signature   = NULL;
+    size_t            binary_size = 0;
+    herr_t            ret_value   = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
     assert(plugin_path);
-
-#ifndef H5_HAVE_WIN32_API
-    /* Canonicalize path for consistent cache lookups (resolves symlinks, relative paths) */
-    canonical_path = HDrealpath(plugin_path, NULL);
-    if (canonical_path != NULL)
-        plugin_path = canonical_path;
-        /* If realpath fails, fall through with original path */
-#endif
-
-    /* Check signature cache first */
-    if (H5PL__check_signature_cache(plugin_path, &cached_result) == SUCCEED) {
-        if (cached_result)
-            HGOTO_DONE(SUCCEED); /* Previously verified successfully */
-        else
-            HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                        "plugin signature verification failed (cached result): %s", plugin_path);
-    }
-
-    /* Cache miss or file modified - perform full verification */
 
     /* Open plugin file */
     {
@@ -1747,37 +1296,15 @@ H5PL__verify_signature_appended(const char *plugin_path)
     /* Check if signature is revoked */
     if (H5PL__is_signature_revoked(signature, footer.signature_length))
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                    "plugin signature is revoked (blocklisted)\n"
-                    "  Plugin: %s\n"
-                    "  This specific plugin version has been revoked and will not be loaded\n"
-                    "  Reason: Signature hash found in revocation list\n"
-                    "\n"
-                    "Action required:\n"
-                    "  - Remove this plugin from your system\n"
-                    "  - Contact plugin developer for updated version\n"
-                    "  - Check HDF5_PLUGIN_KEYSTORE/revoked_signatures.txt for details",
-                    plugin_path);
+                    "plugin signature has been revoked: %s", plugin_path);
 
     /* Must have at least one key */
     if (H5PL_keystore_count_g == 0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "keystore is empty - no keys available for verification");
 
     /* Verify signature with all keys in keystore */
-    if (H5PL__verify_with_all_keys(fd, binary_size, signature, &footer, plugin_path) < 0) {
-        /* Cache the failed verification result (non-fatal if cache update fails) */
-        if (H5PL__update_signature_cache(plugin_path, false) < 0) {
-            H5PL_SIG_DEBUG_PRINT("WARNING: Failed to cache negative verification result for %s\n",
-                                 plugin_path);
-            H5E_clear_stack();
-        }
+    if (H5PL__verify_with_all_keys(fd, binary_size, signature, &footer, plugin_path) < 0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "signature verification failed");
-    }
-
-    /* Cache the successful verification result (non-fatal if cache update fails) */
-    if (H5PL__update_signature_cache(plugin_path, true) < 0) {
-        H5PL_SIG_DEBUG_PRINT("WARNING: Failed to cache positive verification result for %s\n", plugin_path);
-        H5E_clear_stack();
-    }
 
     /* Close file after verification */
     HDclose(fd);
@@ -1788,8 +1315,6 @@ done:
         HDclose(fd);
     if (signature)
         H5MM_xfree(signature);
-    if (canonical_path)
-        free(canonical_path); /* Allocated by realpath(), not H5MM */
 
     ERR_clear_error();
 
@@ -1797,35 +1322,22 @@ done:
 } /* end H5PL__verify_signature_appended() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5PL__cleanup_signature_cache
+ * Function:    H5PL__cleanup_signature_resources
  *
- * Purpose:     Clean up keystore and signature cache
+ * Purpose:     Clean up keystore and revocation list
  *
  * Return:      SUCCEED
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PL__cleanup_signature_cache(void)
+H5PL__cleanup_signature_resources(void)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Free all keys in the keystore and revocation list */
     H5PL__free_keystore();
 
-    /* Free all entries in the signature verification cache */
-    if (H5PL_sig_cache_g) {
-        size_t i;
-        for (i = 0; i < H5PL_sig_cache_count_g; i++) {
-            if (H5PL_sig_cache_g[i].path)
-                H5MM_xfree(H5PL_sig_cache_g[i].path);
-        }
-        H5MM_xfree(H5PL_sig_cache_g);
-        H5PL_sig_cache_g = NULL;
-    }
-    H5PL_sig_cache_count_g    = 0;
-    H5PL_sig_cache_capacity_g = 0;
-
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5PL__cleanup_signature_cache() */
+} /* end H5PL__cleanup_signature_resources() */
 
 #endif /* H5_REQUIRE_DIGITAL_SIGNATURE */

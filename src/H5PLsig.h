@@ -49,10 +49,6 @@
 #define H5PL_SIG_ALGO_SHA3_256   0x20 /* SHA3-256 (future) */
 #define H5PL_SIG_ALGO_BLAKE3     0x30 /* BLAKE3 (future) */
 
-/* Byte offset of the magic field within the footer buffer.
- * Layout: [sig_len: 4][algo_id: 1][format_ver: 1][reserved: 2][magic: 4] */
-#define H5PL_SIG_FOOTER_MAGIC_OFFSET (4U + 1U + 1U + 2U)
-
 /* Signature footer on-disk size (12 bytes) */
 #define H5PL_SIG_FOOTER_SIZE 12
 
@@ -64,21 +60,27 @@
  * headroom for 8192-bit keys.  Used by both the signer and verifier. */
 #define H5PL_MAX_SIGNATURE_SIZE 1024
 
+/* Maximum plugin file size (1GB).  Shared between the library verifier
+ * and the h5sign tool to keep the limit in sync. */
+#define H5PL_MAX_PLUGIN_SIZE (1024LL * 1024LL * 1024LL)
+
 /* Signature footer structure
  *
  * On-disk layout (12 bytes, little-endian):
- *   [sig_len: 4][algo_id: 1][format_ver: 1][reserved: 2][magic: 4]
+ *   [magic: 4][sig_len: 4][algo_id: 1][format_ver: 1][reserved: 2]
  *
- * Note: Always decode from byte buffer using little-endian byte order.
- *       Never read directly into this struct due to endianness portability
- *       (the on-disk format is always little-endian, but host byte order varies).
+ * Note: Magic is encoded first so it can be verified before interpreting
+ *       remaining fields.  Always decode from byte buffer using
+ *       little-endian byte order.  Never read directly into this struct
+ *       due to endianness portability (the on-disk format is always
+ *       little-endian, but host byte order varies).
  */
 typedef struct H5PL_sig_footer_t {
+    uint32_t magic;            /* Magic number H5PL_SIG_MAGIC */
     uint32_t signature_length; /* Length of RSA signature in bytes */
     uint8_t  algorithm_id;     /* Hash algorithm identifier */
     uint8_t  format_version;   /* Footer format version */
     uint16_t reserved;         /* Reserved for future use */
-    uint32_t magic;            /* Magic number H5PL_SIG_MAGIC */
 } H5PL_sig_footer_t;
 
 /*-------------------------------------------------------------------------
@@ -95,17 +97,19 @@ H5PL_sig_encode_footer(uint8_t buf[H5PL_SIG_FOOTER_SIZE], const H5PL_sig_footer_
 {
     uint8_t *p = buf;
 
+    UINT32ENCODE(p, footer->magic);
     UINT32ENCODE(p, footer->signature_length);
     *p++ = footer->algorithm_id;
     *p++ = footer->format_version;
     UINT16ENCODE(p, footer->reserved);
-    UINT32ENCODE(p, footer->magic);
 } /* end H5PL_sig_encode_footer() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5PL_sig_decode_footer
  *
  * Purpose:     Decode a 12-byte little-endian buffer into a footer struct.
+ *              Decodes magic first so it can be verified before interpreting
+ *              remaining fields.
  *
  * Note:        Requires H5encode.h for UINT32DECODE / UINT16DECODE.
  *-------------------------------------------------------------------------
@@ -115,23 +119,11 @@ H5PL_sig_decode_footer(const uint8_t buf[H5PL_SIG_FOOTER_SIZE], H5PL_sig_footer_
 {
     const uint8_t *p = buf;
 
+    UINT32DECODE(p, footer->magic);
     UINT32DECODE(p, footer->signature_length);
     footer->algorithm_id   = *p++;
     footer->format_version = *p++;
     UINT16DECODE(p, footer->reserved);
-    UINT32DECODE(p, footer->magic);
 } /* end H5PL_sig_decode_footer() */
-
-#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
-
-/*
- * KeyStore Configuration
- *
- * Key loading priority:
- *   1. Environment variable: HDF5_PLUGIN_KEYSTORE
- *   2. CMake-configured directory: HDF5_PLUGIN_KEYSTORE_DIR
- */
-
-#endif /* H5_REQUIRE_DIGITAL_SIGNATURE */
 
 #endif /* H5PLsig_H */

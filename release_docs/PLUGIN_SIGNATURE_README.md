@@ -6,10 +6,9 @@
 2. [Quick Start](#quick-start)
 3. [For Plugin Developers](#for-plugin-developers)
 4. [For Plugin Users](#for-plugin-users)
-5. [Air-Gapped Environments](#air-gapped-environments)
-6. [Security Considerations](#security-considerations)
-7. [Troubleshooting](#troubleshooting)
-8. [Technical Details](#technical-details)
+5. [Security Considerations](#security-considerations)
+6. [Troubleshooting](#troubleshooting)
+7. [Technical Details](#technical-details)
 
 ---
 
@@ -19,7 +18,6 @@ HDF5 plugin digital signatures provide cryptographic verification of plugin auth
 
 - **Prevents tampering**: Detects if a plugin binary has been modified
 - **Ensures authenticity**: Verifies the plugin comes from a trusted source
-- **Improves performance**: Caches verification results to avoid redundant checks
 - **Maintains compatibility**: Optional feature that doesn't affect unsigned plugins (when not required)
 
 ### Key Features
@@ -28,7 +26,7 @@ HDF5 plugin digital signatures provide cryptographic verification of plugin auth
 ✅ Multiple hash algorithms (SHA-256, SHA-384, SHA-512)
 ✅ PSS padding support for enhanced security
 ✅ Multi-key keystore (accept plugins from multiple trusted developers)
-✅ Signature caching with automatic invalidation
+✅ Plugins verified once per load (already cached by plugin loader)
 ✅ Detailed diagnostic error messages
 
 ---
@@ -163,10 +161,10 @@ SECURITY REMINDERS:
 Test that the signature was applied by inspecting the end of the plugin file:
 
 ```bash
-# The last 12 bytes are the footer; the last 4 bytes are the magic number
+# The last 12 bytes are the footer; the first 4 bytes of the footer are the magic number
 # On-disk the magic 0x48444635 is stored little-endian, so the bytes appear as: 35 46 44 48
 hexdump -C my_filter_plugin.so | tail -5
-# Look for the byte sequence "35 46 44 48" in the last line
+# Look for the byte sequence "35 46 44 48" starting 12 bytes from the end
 
 # To do a quick sanity-check with OpenSSL, verify the signature manually:
 openssl dgst -sha512 -verify my_public_key.pem \
@@ -464,383 +462,43 @@ HDF5 will try all keys and accept the plugin if ANY key verifies successfully.
 
 ---
 
-## Air-Gapped Environments
-
-Air-gapped environments are systems isolated from external networks (including the internet) for security purposes. These are common in classified, high-security, or critical infrastructure environments.
-
-### Air-Gap Overview
-
-Plugin signatures work seamlessly in air-gapped environments since:
-
-- ✅ No internet connectivity required for signing or verification
-- ✅ All cryptographic operations are performed locally using OpenSSL
-- ✅ Keys and plugins are transferred via approved physical media
-- ✅ Signature verification cache works normally (no external dependencies)
-
-### For Plugin Developers in Air-Gapped Environments
-
-#### Step 1: Generate Keys on Secure Offline System
-
-Generate your RSA key pair on a secure, air-gapped system dedicated to cryptographic operations:
-
-```bash
-# On secure offline workstation
-openssl genrsa -out my_private_key.pem 4096
-openssl rsa -in my_private_key.pem -pubout -out my_public_key.pem
-
-# Secure the private key
-chmod 600 my_private_key.pem
-
-# CRITICAL: This private key should NEVER leave the air-gapped environment
-```
-
-**Best Practice**: Use a dedicated Hardware Security Module (HSM) or offline signing system that never connects to any network.
-
-#### Step 2: Transfer Build Artifacts to Signing System
-
-Transfer unsigned plugin binaries to the air-gapped signing system using approved methods:
-
-**Approved Transfer Methods**:
-
-1. **Write-once media**: CD-R, DVD-R (cannot be modified after burning)
-2. **Inspected USB drives**: Sanitized, scanned for malware
-3. **Dedicated data diodes**: One-way transfer devices
-4. **Secure file transfer protocols**: When connecting isolated networks temporarily
-
-**Security Checklist**:
-
-```bash
-# On development system (may be internet-connected)
-# 1. Build plugin
-gcc -shared -fPIC -o my_plugin.so my_plugin.c -lhdf5
-
-# 2. Calculate checksum for integrity verification
-sha256sum my_plugin.so > my_plugin.so.sha256
-
-# 3. Transfer both files to air-gapped system via approved media
-#    - my_plugin.so
-#    - my_plugin.so.sha256
-```
-
-#### Step 3: Verify Integrity and Sign on Air-Gapped System
-
-On the air-gapped signing system:
-
-```bash
-# Verify integrity after transfer
-sha256sum -c my_plugin.so.sha256
-# Should output: my_plugin.so: OK
-
-# Sign the plugin
-h5sign -p my_plugin.so -k my_private_key.pem -v
-
-# Generate checksums of signed plugin
-sha256sum my_plugin.so > my_plugin.so.signed.sha256
-```
-
-#### Step 4: Transfer Signed Plugin Back
-
-Transfer the signed plugin and public key back to distribution system:
-
-**Files to transfer OUT of air-gapped environment**:
-
-- `my_plugin.so` (now signed)
-- `my_plugin.so.signed.sha256` (checksum)
-- `my_public_key.pem` (for distribution to users)
-
-**Security Note**: The private key (`my_private_key.pem`) must NEVER leave the air-gapped signing system.
-
-#### Step 5: Distribute to Air-Gapped User Environments
-
-Package for distribution to air-gapped user sites:
-
-```bash
-# Create distribution package
-mkdir my_plugin_v1.0
-cp my_plugin.so my_plugin_v1.0/
-cp my_public_key.pem my_plugin_v1.0/
-cp my_plugin.so.signed.sha256 my_plugin_v1.0/
-
-# Create installation instructions
-cat > my_plugin_v1.0/INSTALL.txt << 'EOF'
-HDF5 Plugin Installation (Air-Gapped)
-
-1. Verify integrity:
-   sha256sum -c my_plugin.so.signed.sha256
-
-2. Install public key:
-   mkdir -p /etc/hdf5/keystore
-   cp my_public_key.pem /etc/hdf5/keystore/
-
-3. Install plugin:
-   cp my_plugin.so /usr/local/hdf5/lib/plugin/
-
-4. Set keystore (if not system-wide):
-   export HDF5_PLUGIN_KEYSTORE=/etc/hdf5/keystore
-EOF
-
-# Create distribution archive
-tar -czf my_plugin_v1.0_airgapped.tar.gz my_plugin_v1.0/
-
-# Burn to write-once media or transfer via approved method
-```
-
-### For Plugin Users in Air-Gapped Environments
-
-#### Step 1: Receive and Verify Distribution Package
-
-```bash
-# Receive plugin package via approved transfer method
-# (CD-R, inspected USB, data diode, etc.)
-
-# Extract package
-tar -xzf my_plugin_v1.0_airgapped.tar.gz
-cd my_plugin_v1.0/
-
-# Verify integrity using provided checksum
-sha256sum -c my_plugin.so.signed.sha256
-# Should output: my_plugin.so: OK
-
-# If checksum fails, DO NOT INSTALL - request new copy
-```
-
-#### Step 2: Verify Public Key Authenticity
-
-Since you can't download the key from a website, use out-of-band verification:
-
-**Recommended Methods**:
-
-1. **Published Fingerprint**: Compare key fingerprint with value published in official documentation received through approved channels
-
-   ```bash
-   openssl rsa -pubin -in my_public_key.pem -outform DER | sha256sum
-   # Compare output with published fingerprint
-   ```
-
-2. **Physical Verification**: Verify fingerprint directly with developer/organization contact via phone, secure video call, or in-person meeting
-
-3. **Chain of Trust**: If distributed by trusted internal security team, verify their approval/signature on the distribution package
-
-4. **Internal Certificate Authority**: If your organization has an internal CA, verify the public key is signed by your CA
-
-#### Step 3: Set Up Keystore
-
-```bash
-# Create keystore directory (system-wide recommended for air-gapped systems)
-sudo mkdir -p /etc/hdf5/keystore
-sudo chmod 755 /etc/hdf5/keystore
-
-# Install public key
-sudo cp my_public_key.pem /etc/hdf5/keystore/
-
-# Set restrictive permissions
-sudo chmod 644 /etc/hdf5/keystore/my_public_key.pem
-
-# Make keystore permanent (add to system profile)
-echo 'export HDF5_PLUGIN_KEYSTORE=/etc/hdf5/keystore' | sudo tee /etc/profile.d/hdf5.sh
-```
-
-#### Step 4: Install Signed Plugin
-
-```bash
-# Find HDF5 plugin directory (h5cc may not be present in all installations)
-h5cc -showconfig | grep "Default plugin path"
-
-# Install plugin
-sudo cp my_plugin.so /usr/local/hdf5/lib/plugin/
-sudo chmod 755 /usr/local/hdf5/lib/plugin/my_plugin.so
-```
-
-#### Step 5: Verify Installation
-
-```bash
-# Set keystore if not system-wide
-export HDF5_PLUGIN_KEYSTORE=/etc/hdf5/keystore
-
-# Test plugin verification
-# (Create a test HDF5 file that uses the plugin, or use existing test file)
-h5dump -H test_file_using_plugin.h5
-
-# If verification succeeds, you'll see no errors
-# If verification fails, check logs for detailed error messages
-```
-
-### Air-Gap Specific Security Considerations
-
-#### Key Management in Air-Gapped Environments
-
-1. **Dedicated Signing System**
-
-   - Use a dedicated, air-gapped workstation for all signing operations
-   - Never connect this system to any network
-   - Physical security: locked room, access controls, audit logs
-   - Minimal software: Only OpenSSL, h5sign, and essential OS components
-
-2. **Private Key Storage**
-
-   - Store on encrypted volume with passphrase
-   - Consider HSM for critical keys (e.g., FIPS 140-2 Level 3+)
-   - Backup keys to encrypted offline media stored in physically separate location
-   - Implement key split custody (key parts held by different people)
-
-3. **Transfer Media Security**
-
-   - Use write-once media (CD-R, DVD-R) when possible
-   - Scan all incoming media for malware before use
-   - Sanitize all outgoing media
-   - Maintain log of all transfers (what, when, who, why)
-
-4. **Public Key Distribution**
-
-   - Include key fingerprints in printed, signed documentation
-   - Publish fingerprints through multiple independent channels
-   - Consider using your organization's internal PKI
-   - Maintain key fingerprint verification registry
-
-#### Operational Procedures
-
-**Plugin Update Workflow**:
-
-```text
-[Development Network]
-    → Build plugin
-    → Generate checksum
-    → Transfer to air-gapped signer (CD-R)
-
-[Air-Gapped Signing System]
-    → Verify checksum
-    → Sign plugin with h5sign
-    → Generate new checksum
-    → Transfer signed plugin out (CD-R)
-
-[Distribution Network]
-    → Package with public key and checksums
-    → Create distribution archive
-    → Transfer to air-gapped sites (approved method)
-
-[Air-Gapped User Site]
-    → Receive package
-    → Verify checksums
-    → Verify public key fingerprint
-    → Install to keystore and plugin directory
-    → Test verification
-```
-
-**Emergency Key Rotation** (e.g., suspected compromise):
-
-```bash
-# On air-gapped signing system:
-# 1. Generate new key pair
-openssl genrsa -out my_new_private_key.pem 4096
-openssl rsa -in my_new_private_key.pem -pubout -out my_new_public_key.pem
-
-# 2. Re-sign all plugins with new key
-for plugin in *.so; do
-    h5sign -p "$plugin" -k my_new_private_key.pem
-done
-
-# 3. Distribute new public key and re-signed plugins to all sites
-# 4. Document old key as revoked
-
-# On user sites:
-# 1. Remove old public key from keystore
-sudo rm /etc/hdf5/keystore/my_old_public_key.pem
-
-# 2. Install new public key (verify fingerprint!)
-sudo cp my_new_public_key.pem /etc/hdf5/keystore/
-
-# 3. Update plugins with newly signed versions
-```
-
-#### Audit and Compliance
-
-For regulated air-gapped environments:
-
-1. **Signing Audit Trail**
-
-   ```bash
-   # On signing system, maintain signature log
-   echo "$(date -Iseconds) | $USER | $PLUGIN | $(sha256sum $PLUGIN)" >> /var/log/h5sign/signatures.log
-   ```
-
-2. **Installation Verification**
-
-   ```bash
-   # On user systems, log successful verifications
-   # (HDF5 library can log verification events to syslog if enabled)
-   ```
-
-3. **Periodic Key Audits**
-
-   - Quarterly review of keystores across all air-gapped sites
-   - Verify only approved keys are present
-   - Check for unauthorized modifications
-
-4. **Compliance Documentation**
-
-   - Maintain records of all key generation events
-   - Document chain of custody for signing keys
-   - Keep transfer logs for all plugin distributions
-
-### Troubleshooting Air-Gapped Installations
-
-**Issue**: Cannot verify key fingerprint (no internet access)
-
-**Solution**:
-
-- Request fingerprint via official communication channel (classified email, courier, etc.)
-- Cross-reference with printed documentation received with physical media
-- Contact security office for verification through approved process
-
-**Issue**: Transfer media fails integrity check
-
-**Solution**:
-
-```bash
-# DO NOT INSTALL if integrity check fails
-# Request new distribution via approved channels
-# Report incident to security team
-```
-
-**Issue**: Need to update OpenSSL but air-gapped
-
-**Solution**:
-
-```bash
-# Download OpenSSL on internet-connected system
-# Transfer via approved method
-# Verify package signatures before installation
-# Install offline:
-sudo dpkg -i openssl_*.deb  # Debian/Ubuntu
-# or
-sudo rpm -ivh openssl-*.rpm  # RHEL/CentOS
-```
-
-### Air-Gap Checklist
-
-**Developer Checklist**:
-
-- [ ] Generate keys on dedicated air-gapped signing system
-- [ ] Never connect signing system to any network
-- [ ] Verify checksums before and after signing
-- [ ] Use write-once media for transfers when possible
-- [ ] Maintain signing audit log
-- [ ] Backup keys to encrypted offline media
-- [ ] Document and publish key fingerprints through approved channels
-
-**User Checklist**:
-
-- [ ] Verify package integrity using provided checksums
-- [ ] Verify public key fingerprint through out-of-band method
-- [ ] Use system-wide keystore with proper permissions
-- [ ] Document installed keys and plugins
-- [ ] Test plugin verification after installation
-- [ ] Maintain audit trail of installations
-- [ ] Have key revocation procedure in place
-
----
-
 ## Security Considerations
+
+Plugin signatures work seamlessly in air-gapped environments since all
+cryptographic operations are performed locally using OpenSSL. No internet
+connectivity is required for signing or verification.
+
+### Keystore Security Requirements
+
+The keystore directory contains the public keys used to verify plugin
+signatures. Protecting its integrity is critical: if an attacker can add a
+key to the keystore, they can make HDF5 trust their malicious plugins.
+
+**The administrator is responsible for securing the keystore directory.**
+HDF5 does not enforce filesystem permissions.
+
+Recommended permissions:
+
+```bash
+# Unix/Linux/macOS
+# User-specific keystore (owner-only access):
+chmod 700 ~/.hdf5/keystore
+
+# System-wide keystore (root-writable, world-readable):
+sudo chmod 755 /etc/hdf5/keystore
+sudo chown root:root /etc/hdf5/keystore
+```
+
+```powershell
+# Windows — restrict write access to Administrators:
+icacls "C:\ProgramData\HDF_Group\keystore" /inheritance:r /grant:r Administrators:F /grant:r Users:RX
+```
+
+**Key principles:**
+- Only trusted administrators should have write access to the keystore directory
+- Public keys are not secret, but their integrity must be protected
+- Use system-protected paths for shared installations
+- Audit keystore contents periodically
 
 ### Security Model Overview
 
@@ -931,7 +589,7 @@ The current system makes conscious trade-offs:
 1. **Developers**: Protect private keys (HSM preferred), rotate regularly, use strong keys (4096-bit)
 2. **Users**: Verify public key fingerprints, use checksums, trust official channels only
 3. **Organizations**: Maintain approved plugin lists, audit keystores quarterly, have incident response plan
-4. **Air-gapped**: Follow strict transfer procedures, verify integrity at each step, use write-once media
+4. **Offline/air-gapped**: All operations are local; no internet required for signing or verification
 
 **Security is a shared responsibility** between plugin developers, distributors, and users.
 
@@ -1328,13 +986,12 @@ chmod 700 $HDF5_PLUGIN_KEYSTORE
 
 #### 4. Plugin verification is slow
 
-**Cause**: Signature cache not working, or very large plugin.
+**Cause**: Very large plugin file.
 
 **Solution**:
 
-- Verification is cached after first load (instant on subsequent loads)
-- First verification of large plugins may take a few seconds
-- Check file modification time isn't changing unexpectedly:
+- Plugins are verified once per process (the plugin loader caches loaded plugins)
+- Verification of large plugins may take a few seconds due to file I/O
 
   ```bash
   stat my_plugin.so
@@ -1408,11 +1065,11 @@ Signed plugins have this structure:
 │   RSA Signature (256-1024B) │
 ├─────────────────────────────┤
 │   Footer (12 bytes):        │
+│   - Magic: HDF5 (4B)        │
 │   - Signature length (4B)   │
 │   - Algorithm ID (1B)       │
 │   - Format version (1B)     │
 │   - Reserved (2B)           │
-│   - Magic: HDF5 (4B)        │
 └─────────────────────────────┘
 ```
 
@@ -1427,35 +1084,12 @@ Signed plugins have this structure:
 | SHA-384-PSS | SHA-384 | PSS | 256-1024 bytes | Enhanced security |
 | SHA-512-PSS | SHA-512 | PSS | 256-1024 bytes | Maximum security |
 
-### Signature Cache
-
-HDF5 caches verification results for performance:
-
-- **Cache key**: Plugin path + file modification time + file size
-- **Cache invalidation**: Automatic when plugin file is modified
-- **Cache scope**: Per-process (not persisted across runs)
-- **Cache benefits**:
-  - First load: ~100ms verification time
-  - Cached load: <1ms (instant)
-
-Cache behavior:
-
-```text
-Load #1 → Full verification (slow) → Cache result
-Load #2 → Cache hit (instant) → Skip verification
-Plugin modified → Cache invalidated
-Load #3 → Full verification (slow) → Update cache
-```
-
 ### Performance Impact
 
-| Operation | Time (First Load) | Time (Cached) |
-| --------- | ----------------- | ------------- |
-| 1 MB plugin | ~5ms | <1ms |
-| 10 MB plugin | ~10ms | <1ms |
-| 100 MB plugin | ~80ms | <1ms |
-
-*Note: First-load time is dominated by I/O to read the plugin file for hashing, plus a constant ~1–5ms for the RSA signature operation. Cached loads skip all cryptographic work. Times are approximate and depend on hardware and storage speed.*
+Verification time is dominated by I/O to read the plugin file for hashing,
+plus a constant ~1-5ms for the RSA signature operation.  Plugins are already
+cached by the HDF5 plugin loader, so each plugin is verified only once per
+process.
 
 ### Crypto-Agility
 
@@ -1500,20 +1134,8 @@ A: No! A signed Linux plugin remains signed if you copy it to Windows or macOS (
 **Q: Can I use hardware security modules (HSMs)?**
 A: Yes, as long as the HSM can export keys in PEM format compatible with OpenSSL.
 
-**Q: Do plugin signatures work in air-gapped environments?**
-A: Yes! Plugin signatures are designed to work seamlessly in air-gapped environments. All cryptographic operations are performed locally using OpenSSL. No internet connectivity is required for signing or verification. See the [Air-Gapped Environments](#air-gapped-environments) section for detailed procedures.
-
-**Q: How do I transfer signed plugins to air-gapped systems?**
-A: Use approved transfer methods for your environment: write-once media (CD-R, DVD-R), inspected USB drives, data diodes, or secure file transfer protocols. Always verify integrity using checksums before and after transfer. See air-gapped section for complete workflow.
-
-**Q: How do I verify public key authenticity in air-gapped environments?**
-A: Use out-of-band verification: compare key fingerprints with values published in official documentation, verify via phone/secure call with developer, or use your organization's internal PKI/CA. Never trust keys without independent verification.
-
-**Q: Can I sign plugins offline?**
-A: Yes! In fact, signing offline on a dedicated air-gapped system is the most secure approach. Generate keys on the offline system, transfer unsigned plugins in, sign them, and transfer signed plugins out. The private key never leaves the air-gapped signing system.
-
-**Q: What if I need to rotate keys in an air-gapped environment?**
-A: Generate new keys on your air-gapped signing system, re-sign all plugins with the new key, and distribute the new public key and re-signed plugins to all sites via approved channels. Remove old keys from keystores and document the old key as revoked. See air-gapped section for emergency rotation procedure.
+**Q: Do plugin signatures work in air-gapped (offline) environments?**
+A: Yes. All cryptographic operations are performed locally using OpenSSL. No internet connectivity is required for signing or verification.
 
 ---
 
@@ -1537,6 +1159,6 @@ For issues with plugin signatures:
 
 ---
 
-**Document Version**: 1.0
-**Last Updated**: 2026-01-28
-**HDF5 Version**: 1.15.0+
+**Document Version**: 1.1
+**Last Updated**: 2026-03-19
+**HDF5 Version**: 2.2.0+

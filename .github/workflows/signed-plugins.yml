@@ -2,7 +2,7 @@ name: Test Signed Plugins
 
 on:
   push:
-    branches: [ develop, feature/dig_sig_ver, feature/* ]
+    branches: [ develop ]
   pull_request:
     branches: [ develop ]
 

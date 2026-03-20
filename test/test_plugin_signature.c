@@ -161,18 +161,11 @@ append_bad_signature(const char *plugin_path)
     footer.reserved         = 0;
     footer.magic            = H5PL_SIG_MAGIC;
 
-    /* Encode footer in little-endian (as expected by verification code)
-     * On-disk layout (12 bytes): [sig_len:4][algo_id:1][format_ver:1][reserved:2][magic:4]
-     */
+    /* Encode footer in little-endian (as expected by verification code) */
     {
-        unsigned char  footer_bytes[H5PL_SIG_FOOTER_SIZE];
-        unsigned char *p = footer_bytes;
+        unsigned char footer_bytes[H5PL_SIG_FOOTER_SIZE];
 
-        UINT32ENCODE(p, footer.signature_length);
-        *p++ = footer.algorithm_id;
-        *p++ = footer.format_version;
-        UINT16ENCODE(p, footer.reserved);
-        UINT32ENCODE(p, footer.magic);
+        H5PL_sig_encode_footer(footer_bytes, &footer);
 
         if (HDwrite(fd, footer_bytes, sizeof(footer_bytes)) < 0) {
             fprintf(stderr, "Failed to write footer\n");
@@ -197,23 +190,26 @@ static herr_t
 append_corrupt_footer(const char *plugin_path)
 {
     int            fd;
-    unsigned char  footer_bytes[H5PL_SIG_FOOTER_SIZE];
-    unsigned char *p         = footer_bytes;
-    herr_t         ret_value = SUCCEED;
+    unsigned char footer_bytes[H5PL_SIG_FOOTER_SIZE];
+    herr_t        ret_value = SUCCEED;
 
     if ((fd = HDopen(plugin_path, O_WRONLY | O_APPEND, 0)) < 0) {
         fprintf(stderr, "Failed to open plugin for corrupt footer: %s\n", plugin_path);
         return FAIL;
     }
 
-    /* Write footer with wrong magic number
-     * On-disk layout (12 bytes): [sig_len:4][algo_id:1][format_ver:1][reserved:2][magic:4]
-     */
-    UINT32ENCODE(p, (uint32_t)256); /* Signature length */
-    *p++ = H5PL_SIG_ALGO_SHA256;    /* Algorithm ID */
-    *p++ = 1;                       /* Format version */
-    UINT16ENCODE(p, (uint16_t)0);   /* Reserved */
-    UINT32ENCODE(p, 0xDEADBEEF);    /* Wrong magic */
+    /* Write footer with wrong magic number */
+    {
+        H5PL_sig_footer_t footer;
+
+        footer.magic            = 0xDEADBEEF; /* Wrong magic */
+        footer.signature_length = 256;
+        footer.algorithm_id     = H5PL_SIG_ALGO_SHA256;
+        footer.format_version   = 1;
+        footer.reserved         = 0;
+
+        H5PL_sig_encode_footer(footer_bytes, &footer);
+    }
 
     if (HDwrite(fd, footer_bytes, sizeof(footer_bytes)) < 0) {
         fprintf(stderr, "Failed to write corrupt footer\n");
@@ -494,39 +490,6 @@ create_corrupted_pem(const char *path, corruption_type_t type)
     return SUCCEED;
 }
 
-/*-------------------------------------------------------------------------
- * Function:    set_world_writable
- *
- * Purpose:     Make directory world-writable (for permission security test)
- *              Unix/Linux only
- *
- * Return:      SUCCEED/FAIL
- *-------------------------------------------------------------------------
- */
-static herr_t
-set_world_writable(const char *path)
-{
-#ifndef H5_HAVE_WIN32_API
-    h5_stat_t st;
-
-    if (HDstat(path, &st) < 0) {
-        fprintf(stderr, "Failed to stat directory: %s\n", path);
-        return FAIL;
-    }
-
-    /* Add world write permission */
-    if (chmod(path, st.st_mode | S_IWOTH) < 0) {
-        fprintf(stderr, "Failed to make directory world-writable: %s\n", path);
-        return FAIL;
-    }
-
-    return SUCCEED;
-#else
-    /* Windows - not implemented */
-    (void)path;
-    return FAIL;
-#endif
-}
 
 /*-------------------------------------------------------------------------
  * Function:    reset_keystore_state
@@ -540,11 +503,11 @@ set_world_writable(const char *path)
 static herr_t
 reset_keystore_state(void)
 {
-    /* Cleanup signature cache and keystore to force reinitialization
-     * This allows tests to use different KeyStore directories
+    /* Cleanup keystore to force reinitialization.
+     * This allows tests to use different KeyStore directories.
      */
-    if (H5PL__cleanup_signature_cache() < 0) {
-        fprintf(stderr, "Failed to cleanup signature cache\n");
+    if (H5PL__cleanup_signature_resources() < 0) {
+        fprintf(stderr, "Failed to cleanup signature resources\n");
         return FAIL;
     }
     return SUCCEED;
@@ -1278,105 +1241,6 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:    test_keystore_world_writable_rejection
- *
- * Purpose:     Test that world-writable KeyStore directories are rejected
- *              (Unix/Linux only - security check)
- *
- * Return:      SUCCEED/FAIL
- *-------------------------------------------------------------------------
- */
-static herr_t
-test_keystore_world_writable_rejection(void)
-{
-#ifndef H5_HAVE_WIN32_API
-    char  *keystore_dir = NULL;
-    char   keystore_path[1024];
-    char   valid_priv[1024], valid_pub[1024];
-    char   plugin_path[1024];
-    char  *key_path = NULL;
-    herr_t status;
-    herr_t ret_value = SUCCEED;
-
-    TESTING("world-writable directory rejection");
-
-    /* Create KeyStore directory */
-    keystore_dir = create_keystore_directory(PLUGIN_DIR, "test_keystore_writable", 0755);
-    if (!keystore_dir) {
-        H5_FAILED();
-        fprintf(stderr, "Failed to create keystore directory\n");
-        return FAIL;
-    }
-
-    /* Generate valid key pair */
-    snprintf(valid_priv, sizeof(valid_priv), "%s/writable_test_private.pem", PLUGIN_DIR);
-    snprintf(valid_pub, sizeof(valid_pub), "%s/writable_test_public.pem", PLUGIN_DIR);
-    if (generate_rsa_keypair(2048, valid_priv, valid_pub) < 0) {
-        H5_FAILED();
-        fprintf(stderr, "Failed to generate key pair\n");
-        goto error;
-    }
-
-    /* Add key to KeyStore */
-    key_path = add_key_to_keystore(keystore_dir, "testkey.pem", valid_pub);
-    if (key_path)
-        free(key_path);
-
-    /* Make directory world-writable */
-    if (set_world_writable(keystore_dir) < 0) {
-        H5_FAILED();
-        fprintf(stderr, "Failed to set world-writable permissions\n");
-        goto error;
-    }
-
-    /* Create test plugin */
-    snprintf(plugin_path, sizeof(plugin_path), "%s/plugin_writable_test.so", PLUGIN_DIR);
-    if (create_dummy_plugin(plugin_path) < 0 || sign_plugin_file(plugin_path, valid_priv) < 0) {
-        H5_FAILED();
-        fprintf(stderr, "Failed to create/sign plugin\n");
-        goto error;
-    }
-
-    /* Set environment variable to use this KeyStore */
-    snprintf(keystore_path, sizeof(keystore_path), "%s", keystore_dir);
-    HDsetenv("HDF5_PLUGIN_KEYSTORE", keystore_path, 1);
-    reset_keystore_state();
-
-    /* Verification should fail due to world-writable directory */
-    H5E_BEGIN_TRY
-    {
-        status = H5PL__verify_signature_appended(plugin_path);
-    }
-    H5E_END_TRY;
-
-    if (status >= 0) {
-        H5_FAILED();
-        fprintf(stderr, "World-writable directory was not rejected\n");
-        HDunsetenv("HDF5_PLUGIN_KEYSTORE");
-        goto error;
-    }
-
-    /* Cleanup */
-    HDunsetenv("HDF5_PLUGIN_KEYSTORE");
-    free(keystore_dir);
-
-    PASSED();
-    return SUCCEED;
-
-error:
-    if (keystore_dir)
-        free(keystore_dir);
-    return FAIL;
-
-#else
-    /* Windows - skip test */
-    TESTING("world-writable directory rejection (Unix only)");
-    SKIPPED();
-    return SUCCEED;
-#endif
-}
-
-/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Run plugin signature verification tests
@@ -1414,7 +1278,6 @@ main(void)
     nerrors += test_invalid_pem_file_handling() < 0 ? 1 : 0;
     nerrors += test_rsa4096_signature() < 0 ? 1 : 0;
     nerrors += test_keystore_symlink_rejection() < 0 ? 1 : 0;
-    nerrors += test_keystore_world_writable_rejection() < 0 ? 1 : 0;
 
     /* Clean up */
     cleanup_test_environment();

@@ -196,9 +196,9 @@ H5PL_term_package(void)
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTFREE, (-1), "problem closing search path table");
 
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
-        /* Clean up cached signature verification resources */
-        if (H5PL__cleanup_signature_cache() < 0)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTFREE, (-1), "problem cleaning up signature cache");
+        /* Clean up signature verification resources */
+        if (H5PL__cleanup_signature_resources() < 0)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTFREE, (-1), "problem cleaning up signature resources");
 #endif
 
         /* Mark the interface as uninitialized */
