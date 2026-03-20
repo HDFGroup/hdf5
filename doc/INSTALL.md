@@ -58,7 +58,7 @@ The HDF Group provides source code and pre-compiled binaries from the HDF5 GitHu
 
 ### 3.1. Build and Install HDF5 Libraries and Tools with CMake
 
-See the [release_docs/INSTALL_CMake.md](./INSTALL_CMake.md) file for detailed instructions.
+See the [INSTALL_CMake.md](./INSTALL_CMake.md) file for detailed instructions.
 
 ## 4. Quick Start Presets
 
@@ -91,7 +91,7 @@ The above example will create a `build` folder in the source parent directory, w
 
 ### 4.3. Customization
 
-See the HDF5 documentation for more on presets, especially the presets section in the [release_docs/INSTALL_CMake.md](./INSTALL_CMake.md) file.
+See the HDF5 documentation for more on presets, especially the presets section in the [INSTALL_CMake.md](./INSTALL_CMake.md) file.
 
 ### 4.4. See Also
 
