@@ -139,7 +139,182 @@ $(function(){initNavTree('group___h5_o.html','',''); });
 <p>HDF5 objects (groups, datasets, datatype objects) are usually created using functions in the object-specific modules (<a class="el" href="group___h5_g.html" title="Groups (H5G)">Groups (H5G)</a>, <a class="el" href="group___h5_d.html" title="Datasets (H5D)">Datasets (H5D)</a>, <a class="el" href="group___h5_t.html" title="Datatypes (H5T)">Datatypes (H5T)</a>). However, new objects can also be created by copying existing objects.</p>
 <p>Many functions in this module are variations on object introspection, that is, the retrieval of detailed information about HDF5 objects in a file. Objects in an HDF5 file can be "visited" in an iterative fashion.</p>
 <p>HDF5 objects are usually updated using functions in the object-specific modules. However, there are certain generic object properties, such as reference counts, that can be manipulated using functions in this module.</p>
-<p>HDF5 objects are deleted as a side effect of rendering them unreachable from the root group. The net effect is the diminution of the object's reference count to zero, which can (but should not usually) be affected by a function in this module. </p>
+<p>HDF5 objects are deleted as a side effect of rendering them unreachable from the root group. The net effect is the diminution of the object's reference count to zero, which can (but should not usually) be affected by a function in this module.</p>
+<table class="doxtable">
+<tr>
+<th>Create</th><th>Read</th></tr>
+<tr valign="top">
+<td><div class="fragment"><div class="line"><span class="lineno">   16</span>    {</div>
+<div class="line"><span class="lineno">   17</span>        __label__ fail_file;</div>
+<div class="line"><span class="lineno">   18</span>        <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file, group;</div>
+<div class="line"><span class="lineno">   19</span>        <span class="keywordtype">char</span>  src_path[] = <span class="stringliteral">&quot;/a/few/groups&quot;</span>;</div>
+<div class="line"><span class="lineno">   20</span> </div>
+<div class="line"><span class="lineno">   21</span>        <span class="keywordflow">if</span> ((file = <a class="code hl_function" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4">H5Fcreate</a>(<span class="stringliteral">&quot;o1.h5&quot;</span>, <a class="code hl_define" href="_h5_fpublic_8h.html#a5a2d6726f9ad8d2bca8df2b817e5ad6a">H5F_ACC_TRUNC</a>, H5P_DEFAULTx2)) == <a class="code hl_define" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
+<div class="line"><span class="lineno">   22</span>            ret_val = EXIT_FAILURE;</div>
+<div class="line"><span class="lineno">   23</span>            <span class="keywordflow">goto</span> fail_file;</div>
+<div class="line"><span class="lineno">   24</span>        }</div>
+<div class="line"><span class="lineno">   25</span> </div>
+<div class="line"><span class="lineno">   26</span>        <span class="comment">// create a few groups</span></div>
+<div class="line"><span class="lineno">   27</span>        {</div>
+<div class="line"><span class="lineno">   28</span>            __label__ fail_group, fail_lcpl;</div>
+<div class="line"><span class="lineno">   29</span>            <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> lcpl;</div>
+<div class="line"><span class="lineno">   30</span>            <span class="keywordflow">if</span> ((lcpl = <a class="code hl_function" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a>(<a class="code hl_define" href="_h5_ppublic_8h.html#ad2c1d10104f0262c826350ccbf7c49f2">H5P_LINK_CREATE</a>)) == <a class="code hl_define" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
+<div class="line"><span class="lineno">   31</span>                ret_val = EXIT_FAILURE;</div>
+<div class="line"><span class="lineno">   32</span>                <span class="keywordflow">goto</span> fail_lcpl;</div>
+<div class="line"><span class="lineno">   33</span>            }</div>
+<div class="line"><span class="lineno">   34</span>            <span class="keywordflow">if</span> (<a class="code hl_function" href="group___l_c_p_l.html#ga66c4c5d3f34e5cf65d00e47a5387383c">H5Pset_create_intermediate_group</a>(lcpl, 1) &lt; 0) {</div>
+<div class="line"><span class="lineno">   35</span>                ret_val = EXIT_FAILURE;</div>
+<div class="line"><span class="lineno">   36</span>                <span class="keywordflow">goto</span> fail_group;</div>
+<div class="line"><span class="lineno">   37</span>            }</div>
+<div class="line"><span class="lineno">   38</span>            <span class="keywordflow">if</span> ((group = <a class="code hl_define" href="group___h5_g.html#ga187cee27a9fc4f1a311eb19b0522c7b8">H5Gcreate</a>(file, src_path, lcpl, H5P_DEFAULTx2)) == <a class="code hl_define" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
+<div class="line"><span class="lineno">   39</span>                ret_val = EXIT_FAILURE;</div>
+<div class="line"><span class="lineno">   40</span>                <span class="keywordflow">goto</span> fail_group;</div>
+<div class="line"><span class="lineno">   41</span>            }</div>
+<div class="line"><span class="lineno">   42</span> </div>
+<div class="line"><span class="lineno">   43</span>            <a class="code hl_function" href="group___h5_g.html#ga8dbe20b390d2504f0bd3589ed8f4e221">H5Gclose</a>(group);</div>
+<div class="line"><span class="lineno">   44</span>fail_group:</div>
+<div class="line"><span class="lineno">   45</span>            <a class="code hl_function" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb">H5Pclose</a>(lcpl);</div>
+<div class="line"><span class="lineno">   46</span>fail_lcpl:;</div>
+<div class="line"><span class="lineno">   47</span>        }</div>
+<div class="line"><span class="lineno">   48</span> </div>
+<div class="line"><span class="lineno">   49</span>        <span class="comment">// create a copy</span></div>
+<div class="line"><span class="lineno">   50</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="#gaa94449be6f67f499be5ddd3fc44f4225">H5Ocopy</a>(file, <span class="stringliteral">&quot;.&quot;</span>, file, <span class="stringliteral">&quot;copy of&quot;</span>, H5P_DEFAULTx2) &lt; 0) {</div>
+<div class="line"><span class="lineno">   51</span>            ret_val = EXIT_FAILURE;</div>
+<div class="line"><span class="lineno">   52</span>        }</div>
+<div class="line"><span class="lineno">   53</span> </div>
+<div class="line"><span class="lineno">   54</span>        <a class="code hl_function" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a>(file);</div>
+<div class="line"><span class="lineno">   55</span>fail_file:;</div>
+<div class="line"><span class="lineno">   56</span>    }</div>
+</div><!-- fragment --> </td><td><div class="fragment"><div class="line"><span class="lineno">   60</span>    {</div>
+<div class="line"><span class="lineno">   61</span>        __label__ fail_info, fail_file;</div>
+<div class="line"><span class="lineno">   62</span>        <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>       file;</div>
+<div class="line"><span class="lineno">   63</span>        <span class="keywordtype">char</span>        path[] = <span class="stringliteral">&quot;/a/few/groups&quot;</span>;</div>
+<div class="line"><span class="lineno">   64</span>        <a class="code hl_struct" href="struct_h5_o__info2__t.html">H5O_info2_t</a> info;</div>
+<div class="line"><span class="lineno">   65</span> </div>
+<div class="line"><span class="lineno">   66</span>        <span class="keywordflow">if</span> ((file = <a class="code hl_function" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a>(<span class="stringliteral">&quot;o1.h5&quot;</span>, <a class="code hl_define" href="_h5_fpublic_8h.html#a1c406ffa89f4acf5a332144a2683d394">H5F_ACC_RDONLY</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>)) == <a class="code hl_define" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
+<div class="line"><span class="lineno">   67</span>            ret_val = EXIT_FAILURE;</div>
+<div class="line"><span class="lineno">   68</span>            <span class="keywordflow">goto</span> fail_file;</div>
+<div class="line"><span class="lineno">   69</span>        }</div>
+<div class="line"><span class="lineno">   70</span> </div>
+<div class="line"><span class="lineno">   71</span>        <span class="comment">// retrieve information about the object</span></div>
+<div class="line"><span class="lineno">   72</span>        <span class="keywordflow">if</span> (<a class="code hl_define" href="#ga16d8ac07f9244cfccb42b5f309ca6b3c">H5Oget_info_by_name</a>(file, path, &amp;info, <a class="code hl_define" href="_h5_opublic_8h.html#addd3f3f27f124a16a52c390b8431a878">H5O_INFO_BASIC</a> | <a class="code hl_define" href="_h5_opublic_8h.html#a06bd4abefb70371afef7446ecfb4a72a">H5O_INFO_NUM_ATTRS</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>) &lt; 0) {</div>
+<div class="line"><span class="lineno">   73</span>            ret_val = EXIT_FAILURE;</div>
+<div class="line"><span class="lineno">   74</span>            <span class="keywordflow">goto</span> fail_info;</div>
+<div class="line"><span class="lineno">   75</span>        }</div>
+<div class="line"><span class="lineno">   76</span> </div>
+<div class="line"><span class="lineno">   77</span>        <span class="comment">// determine the object type</span></div>
+<div class="line"><span class="lineno">   78</span>        <span class="keywordflow">switch</span> (info.<a class="code hl_variable" href="struct_h5_o__info2__t.html#a6e12ef8203e400ee995a41a24e981539">type</a>) {</div>
+<div class="line"><span class="lineno">   79</span>            <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="_h5_opublic_8h.html#a929ff459574495f461657f6be804cdecadab6343bd9f2c6d54d07816d5d823cf8">H5O_TYPE_GROUP</a>:</div>
+<div class="line"><span class="lineno">   80</span>                printf(<span class="stringliteral">&quot;HDF5 group\n&quot;</span>);</div>
+<div class="line"><span class="lineno">   81</span>                <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">   82</span>            <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="_h5_opublic_8h.html#a929ff459574495f461657f6be804cdeca5ca744a77f8cd2b28dda90c37807ae31">H5O_TYPE_DATASET</a>:</div>
+<div class="line"><span class="lineno">   83</span>                printf(<span class="stringliteral">&quot;HDF5 dataset\n&quot;</span>);</div>
+<div class="line"><span class="lineno">   84</span>                <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">   85</span>            <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="_h5_opublic_8h.html#a929ff459574495f461657f6be804cdecaaf17b046771c311d41bed7383874050e">H5O_TYPE_NAMED_DATATYPE</a>:</div>
+<div class="line"><span class="lineno">   86</span>                printf(<span class="stringliteral">&quot;HDF5 datatype\n&quot;</span>);</div>
+<div class="line"><span class="lineno">   87</span>                <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">   88</span>            <span class="keywordflow">default</span>:</div>
+<div class="line"><span class="lineno">   89</span>                printf(<span class="stringliteral">&quot;UFO?\n&quot;</span>);</div>
+<div class="line"><span class="lineno">   90</span>                <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">   91</span>        }</div>
+<div class="line"><span class="lineno">   92</span>        <span class="comment">// print basic information</span></div>
+<div class="line"><span class="lineno">   93</span>        printf(<span class="stringliteral">&quot;Reference count: %u\n&quot;</span>, info.<a class="code hl_variable" href="struct_h5_o__info2__t.html#a299ecaad7f9548089654d47a1b06291f">rc</a>);</div>
+<div class="line"><span class="lineno">   94</span>        printf(<span class="stringliteral">&quot;Attribute count: %lld\n&quot;</span>, info.<a class="code hl_variable" href="struct_h5_o__info2__t.html#abc37a3659a46ce6096446cfd0d9f67ff">num_attrs</a>);</div>
+<div class="line"><span class="lineno">   95</span> </div>
+<div class="line"><span class="lineno">   96</span>fail_info:</div>
+<div class="line"><span class="lineno">   97</span>        <a class="code hl_function" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a>(file);</div>
+<div class="line"><span class="lineno">   98</span>fail_file:;</div>
+<div class="line"><span class="lineno">   99</span>    }</div>
+</div><!-- fragment --> </td></tr>
+<tr>
+<th>Update</th><th>Delete</th></tr>
+<tr valign="top">
+<td><div class="fragment"><div class="line"><span class="lineno">  103</span>    {</div>
+<div class="line"><span class="lineno">  104</span>        __label__ fail_obj, fail_incr, fail_file;</div>
+<div class="line"><span class="lineno">  105</span>        <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>       file, obj;</div>
+<div class="line"><span class="lineno">  106</span>        <span class="keywordtype">char</span>        path[] = <span class="stringliteral">&quot;/a/few/groups&quot;</span>;</div>
+<div class="line"><span class="lineno">  107</span>        <a class="code hl_struct" href="struct_h5_o__info2__t.html">H5O_info2_t</a> info;</div>
+<div class="line"><span class="lineno">  108</span> </div>
+<div class="line"><span class="lineno">  109</span>        <span class="keywordflow">if</span> ((file = <a class="code hl_function" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a>(<span class="stringliteral">&quot;o1.h5&quot;</span>, <a class="code hl_define" href="_h5_fpublic_8h.html#a402673dec5c537b27a49a9a8bd6140b4">H5F_ACC_RDWR</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>)) == <a class="code hl_define" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
+<div class="line"><span class="lineno">  110</span>            ret_val = EXIT_FAILURE;</div>
+<div class="line"><span class="lineno">  111</span>            <span class="keywordflow">goto</span> fail_file;</div>
+<div class="line"><span class="lineno">  112</span>        }</div>
+<div class="line"><span class="lineno">  113</span> </div>
+<div class="line"><span class="lineno">  114</span>        <span class="comment">// open an object by path name</span></div>
+<div class="line"><span class="lineno">  115</span>        <span class="keywordflow">if</span> ((obj = <a class="code hl_function" href="#ga9f635f58c7ddf17f87c253bfbca08bc1">H5Oopen</a>(file, path, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>)) == <a class="code hl_define" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
+<div class="line"><span class="lineno">  116</span>            ret_val = EXIT_FAILURE;</div>
+<div class="line"><span class="lineno">  117</span>            <span class="keywordflow">goto</span> fail_obj;</div>
+<div class="line"><span class="lineno">  118</span>        }</div>
+<div class="line"><span class="lineno">  119</span> </div>
+<div class="line"><span class="lineno">  120</span>        <span class="comment">// bump its reference count (by 1)</span></div>
+<div class="line"><span class="lineno">  121</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="#ga2086bad6c3cd2a711c306a48c093ff55">H5Oincr_refcount</a>(obj) &lt; 0) {</div>
+<div class="line"><span class="lineno">  122</span>            ret_val = EXIT_FAILURE;</div>
+<div class="line"><span class="lineno">  123</span>            <span class="keywordflow">goto</span> fail_incr;</div>
+<div class="line"><span class="lineno">  124</span>        }</div>
+<div class="line"><span class="lineno">  125</span> </div>
+<div class="line"><span class="lineno">  126</span>        <span class="comment">// confirm the new reference count</span></div>
+<div class="line"><span class="lineno">  127</span>        <span class="keywordflow">if</span> (<a class="code hl_define" href="#gaf4f302a33faba9e1c2b5f64c62ca4ed5">H5Oget_info</a>(obj, &amp;info, <a class="code hl_define" href="_h5_opublic_8h.html#addd3f3f27f124a16a52c390b8431a878">H5O_INFO_BASIC</a>) &lt; 0) {</div>
+<div class="line"><span class="lineno">  128</span>            ret_val = EXIT_FAILURE;</div>
+<div class="line"><span class="lineno">  129</span>            <span class="keywordflow">goto</span> fail_incr;</div>
+<div class="line"><span class="lineno">  130</span>        }</div>
+<div class="line"><span class="lineno">  131</span>        printf(<span class="stringliteral">&quot;Reference count: %u\n&quot;</span>, info.<a class="code hl_variable" href="struct_h5_o__info2__t.html#a299ecaad7f9548089654d47a1b06291f">rc</a>);</div>
+<div class="line"><span class="lineno">  132</span> </div>
+<div class="line"><span class="lineno">  133</span>fail_incr:</div>
+<div class="line"><span class="lineno">  134</span>        <a class="code hl_function" href="#ga545ad7c54987013ebd50b40fe9e73c61">H5Oclose</a>(obj);</div>
+<div class="line"><span class="lineno">  135</span>fail_obj:</div>
+<div class="line"><span class="lineno">  136</span>        <a class="code hl_function" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a>(file);</div>
+<div class="line"><span class="lineno">  137</span>fail_file:;</div>
+<div class="line"><span class="lineno">  138</span>    }</div>
+</div><!-- fragment --> </td><td><div class="fragment"><div class="line"><span class="lineno">  142</span>    {</div>
+<div class="line"><span class="lineno">  143</span>        __label__ fail_obj, fail_delete, fail_file;</div>
+<div class="line"><span class="lineno">  144</span>        <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>       file, obj;</div>
+<div class="line"><span class="lineno">  145</span>        <span class="keywordtype">char</span>        path[] = <span class="stringliteral">&quot;/a/few/groups&quot;</span>;</div>
+<div class="line"><span class="lineno">  146</span>        <a class="code hl_struct" href="struct_h5_o__info2__t.html">H5O_info2_t</a> info;</div>
+<div class="line"><span class="lineno">  147</span> </div>
+<div class="line"><span class="lineno">  148</span>        <span class="keywordflow">if</span> ((file = <a class="code hl_function" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a>(<span class="stringliteral">&quot;o1.h5&quot;</span>, <a class="code hl_define" href="_h5_fpublic_8h.html#a402673dec5c537b27a49a9a8bd6140b4">H5F_ACC_RDWR</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>)) == <a class="code hl_define" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
+<div class="line"><span class="lineno">  149</span>            ret_val = EXIT_FAILURE;</div>
+<div class="line"><span class="lineno">  150</span>            <span class="keywordflow">goto</span> fail_file;</div>
+<div class="line"><span class="lineno">  151</span>        }</div>
+<div class="line"><span class="lineno">  152</span> </div>
+<div class="line"><span class="lineno">  153</span>        <span class="comment">// open an object by path name</span></div>
+<div class="line"><span class="lineno">  154</span>        <span class="keywordflow">if</span> ((obj = <a class="code hl_function" href="#ga9f635f58c7ddf17f87c253bfbca08bc1">H5Oopen</a>(file, path, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>)) == <a class="code hl_define" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
+<div class="line"><span class="lineno">  155</span>            ret_val = EXIT_FAILURE;</div>
+<div class="line"><span class="lineno">  156</span>            <span class="keywordflow">goto</span> fail_obj;</div>
+<div class="line"><span class="lineno">  157</span>        }</div>
+<div class="line"><span class="lineno">  158</span> </div>
+<div class="line"><span class="lineno">  159</span>        <span class="comment">// render it inaccessible from the root group by deleting the one and</span></div>
+<div class="line"><span class="lineno">  160</span>        <span class="comment">// only link to it; this drops the reference count by 1</span></div>
+<div class="line"><span class="lineno">  161</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="group___h5_l.html#ga5b4e7f59f5d4bdae94fd8ce6875295cf">H5Ldelete</a>(file, path, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>) &lt; 0) {</div>
+<div class="line"><span class="lineno">  162</span>            ret_val = EXIT_FAILURE;</div>
+<div class="line"><span class="lineno">  163</span>            <span class="keywordflow">goto</span> fail_delete;</div>
+<div class="line"><span class="lineno">  164</span>        }</div>
+<div class="line"><span class="lineno">  165</span> </div>
+<div class="line"><span class="lineno">  166</span>        <span class="comment">// confirm the new reference count</span></div>
+<div class="line"><span class="lineno">  167</span>        <span class="keywordflow">if</span> (<a class="code hl_define" href="#gaf4f302a33faba9e1c2b5f64c62ca4ed5">H5Oget_info</a>(obj, &amp;info, <a class="code hl_define" href="_h5_opublic_8h.html#addd3f3f27f124a16a52c390b8431a878">H5O_INFO_BASIC</a>) &lt; 0) {</div>
+<div class="line"><span class="lineno">  168</span>            ret_val = EXIT_FAILURE;</div>
+<div class="line"><span class="lineno">  169</span>            <span class="keywordflow">goto</span> fail_delete;</div>
+<div class="line"><span class="lineno">  170</span>        }</div>
+<div class="line"><span class="lineno">  171</span>        printf(<span class="stringliteral">&quot;Reference count: %u\n&quot;</span>, info.<a class="code hl_variable" href="struct_h5_o__info2__t.html#a299ecaad7f9548089654d47a1b06291f">rc</a>);</div>
+<div class="line"><span class="lineno">  172</span> </div>
+<div class="line"><span class="lineno">  173</span>        <span class="comment">// if we close the file at this point, we&#39;d be creating a tombstone,</span></div>
+<div class="line"><span class="lineno">  174</span>        <span class="comment">// an object that cannot be reached and that cannot be reclaimed by the</span></div>
+<div class="line"><span class="lineno">  175</span>        <span class="comment">// freespace manager; decrement the reference count to zero to prevent that</span></div>
+<div class="line"><span class="lineno">  176</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="group___h5_i.html#gaea2aa78caea892edf2a6a6ac70486ed9">H5Idec_ref</a>(obj) &lt; 0) {</div>
+<div class="line"><span class="lineno">  177</span>            ret_val = EXIT_FAILURE;</div>
+<div class="line"><span class="lineno">  178</span>            <span class="keywordflow">goto</span> fail_delete;</div>
+<div class="line"><span class="lineno">  179</span>        }</div>
+<div class="line"><span class="lineno">  180</span>        <span class="keywordflow">else</span></div>
+<div class="line"><span class="lineno">  181</span>            <span class="comment">// attempting to close the object would be like a double H5Oclose and fail</span></div>
+<div class="line"><span class="lineno">  182</span>            <span class="keywordflow">goto</span> fail_obj;</div>
+<div class="line"><span class="lineno">  183</span> </div>
+<div class="line"><span class="lineno">  184</span>fail_delete:</div>
+<div class="line"><span class="lineno">  185</span>        <a class="code hl_function" href="#ga545ad7c54987013ebd50b40fe9e73c61">H5Oclose</a>(obj);</div>
+<div class="line"><span class="lineno">  186</span>fail_obj:</div>
+<div class="line"><span class="lineno">  187</span>        <a class="code hl_function" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a>(file);</div>
+<div class="line"><span class="lineno">  188</span>fail_file:;</div>
+<div class="line"><span class="lineno">  189</span>    }</div>
+</div><!-- fragment --> </td></tr>
+</table>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
