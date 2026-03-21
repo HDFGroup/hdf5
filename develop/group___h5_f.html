@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-20</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-21</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -136,116 +136,6 @@ $(function(){initNavTree('group___h5_f.html','',''); });
 <div class="contents">
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Use the functions in this module to manage HDF5 files.</p>
-<p>In the code snippets below, we show the skeletal life cycle of an HDF5 file, when creating a new file (left) or when opening an existing file (right). File creation is essentially controlled through <a class="el" href="group___f_c_p_l.html" title="File Creation Properties">File Creation Properties</a>, and file access to new and existing files is controlled through <a class="el" href="group___f_a_p_l.html" title="File Access Properties">File Access Properties</a>. The file <code>name</code> and creation or access <code>mode</code> control the interaction with the underlying storage such as file systems.</p>
-<table class="doxtable">
-<tr>
-<th>Create</th><th>Read</th></tr>
-<tr valign="top">
-<td><div class="fragment"><div class="line"><span class="lineno">   14</span>    {</div>
-<div class="line"><span class="lineno">   15</span>        __label__ fail_fapl, fail_fcpl, fail_file;</div>
-<div class="line"><span class="lineno">   16</span>        <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fcpl, fapl, file;</div>
-<div class="line"><span class="lineno">   17</span> </div>
-<div class="line"><span class="lineno">   18</span>        <span class="keywordflow">if</span> ((fcpl = <a class="code hl_function" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a>(<a class="code hl_define" href="_h5_ppublic_8h.html#a206f334f1e6c973e1215a3148b45b977">H5P_FILE_CREATE</a>)) == <a class="code hl_define" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
-<div class="line"><span class="lineno">   19</span>            ret_val = EXIT_FAILURE;</div>
-<div class="line"><span class="lineno">   20</span>            <span class="keywordflow">goto</span> fail_fcpl;</div>
-<div class="line"><span class="lineno">   21</span>        }</div>
-<div class="line"><span class="lineno">   22</span>        <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">   23</span>            <span class="comment">// adjust the file creation properties</span></div>
-<div class="line"><span class="lineno">   24</span>        }</div>
-<div class="line"><span class="lineno">   25</span> </div>
-<div class="line"><span class="lineno">   26</span>        <span class="keywordflow">if</span> ((fapl = <a class="code hl_function" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a>(<a class="code hl_define" href="_h5_ppublic_8h.html#a60ec2d4334addfc0eda89614598ee38e">H5P_FILE_ACCESS</a>)) == <a class="code hl_define" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
-<div class="line"><span class="lineno">   27</span>            ret_val = EXIT_FAILURE;</div>
-<div class="line"><span class="lineno">   28</span>            <span class="keywordflow">goto</span> fail_fapl;</div>
-<div class="line"><span class="lineno">   29</span>        }</div>
-<div class="line"><span class="lineno">   30</span>        <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">   31</span>            <span class="comment">// adjust the file access properties</span></div>
-<div class="line"><span class="lineno">   32</span>        }</div>
-<div class="line"><span class="lineno">   33</span> </div>
-<div class="line"><span class="lineno">   34</span>        <span class="keywordtype">unsigned</span> mode   = <a class="code hl_define" href="_h5_fpublic_8h.html#a7a47250dc1435705233dca7297ba3d90">H5F_ACC_EXCL</a>;</div>
-<div class="line"><span class="lineno">   35</span>        <span class="keywordtype">char</span>     name[] = <span class="stringliteral">&quot;f1.h5&quot;</span>;</div>
-<div class="line"><span class="lineno">   36</span> </div>
-<div class="line"><span class="lineno">   37</span>        <span class="keywordflow">if</span> ((file = <a class="code hl_function" href="#gae64b51ee9ac0781bc4ccc599d98387f4">H5Fcreate</a>(name, mode, fcpl, fapl)) == <a class="code hl_define" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
-<div class="line"><span class="lineno">   38</span>            ret_val = EXIT_FAILURE;</div>
-<div class="line"><span class="lineno">   39</span>            <span class="keywordflow">goto</span> fail_file;</div>
-<div class="line"><span class="lineno">   40</span>        }</div>
-<div class="line"><span class="lineno">   41</span> </div>
-<div class="line"><span class="lineno">   42</span>        <span class="comment">// do something useful with FILE</span></div>
-<div class="line"><span class="lineno">   43</span> </div>
-<div class="line"><span class="lineno">   44</span>        <a class="code hl_function" href="#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a>(file);</div>
-<div class="line"><span class="lineno">   45</span>fail_file:</div>
-<div class="line"><span class="lineno">   46</span>        <a class="code hl_function" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb">H5Pclose</a>(fapl);</div>
-<div class="line"><span class="lineno">   47</span>fail_fapl:</div>
-<div class="line"><span class="lineno">   48</span>        <a class="code hl_function" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb">H5Pclose</a>(fcpl);</div>
-<div class="line"><span class="lineno">   49</span>fail_fcpl:;</div>
-<div class="line"><span class="lineno">   50</span>    }</div>
-</div><!-- fragment --> </td><td><div class="fragment"><div class="line"><span class="lineno">   54</span>    {</div>
-<div class="line"><span class="lineno">   55</span>        __label__ fail_fapl, fail_file;</div>
-<div class="line"><span class="lineno">   56</span>        <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>   fapl, file;</div>
-<div class="line"><span class="lineno">   57</span>        <a class="code hl_typedef" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> size;</div>
-<div class="line"><span class="lineno">   58</span> </div>
-<div class="line"><span class="lineno">   59</span>        <span class="keywordflow">if</span> ((fapl = <a class="code hl_function" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a>(<a class="code hl_define" href="_h5_ppublic_8h.html#a60ec2d4334addfc0eda89614598ee38e">H5P_FILE_ACCESS</a>)) == <a class="code hl_define" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
-<div class="line"><span class="lineno">   60</span>            ret_val = EXIT_FAILURE;</div>
-<div class="line"><span class="lineno">   61</span>            <span class="keywordflow">goto</span> fail_fapl;</div>
-<div class="line"><span class="lineno">   62</span>        }</div>
-<div class="line"><span class="lineno">   63</span>        <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">   64</span>            <span class="comment">// adjust the file access properties</span></div>
-<div class="line"><span class="lineno">   65</span>        }</div>
-<div class="line"><span class="lineno">   66</span> </div>
-<div class="line"><span class="lineno">   67</span>        <span class="keywordtype">unsigned</span> mode   = <a class="code hl_define" href="_h5_fpublic_8h.html#a1c406ffa89f4acf5a332144a2683d394">H5F_ACC_RDONLY</a>;</div>
-<div class="line"><span class="lineno">   68</span>        <span class="keywordtype">char</span>     name[] = <span class="stringliteral">&quot;f1.h5&quot;</span>;</div>
-<div class="line"><span class="lineno">   69</span> </div>
-<div class="line"><span class="lineno">   70</span>        <span class="keywordflow">if</span> ((file = <a class="code hl_function" href="#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a>(name, mode, fapl)) == <a class="code hl_define" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
-<div class="line"><span class="lineno">   71</span>            ret_val = EXIT_FAILURE;</div>
-<div class="line"><span class="lineno">   72</span>            <span class="keywordflow">goto</span> fail_file;</div>
-<div class="line"><span class="lineno">   73</span>        }</div>
-<div class="line"><span class="lineno">   74</span> </div>
-<div class="line"><span class="lineno">   75</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="#ga515426821321c261a825b4e4a3f576fe">H5Fget_filesize</a>(file, &amp;size) &lt; 0) {</div>
-<div class="line"><span class="lineno">   76</span>            ret_val = EXIT_FAILURE;</div>
-<div class="line"><span class="lineno">   77</span>        }</div>
-<div class="line"><span class="lineno">   78</span> </div>
-<div class="line"><span class="lineno">   79</span>        printf(<span class="stringliteral">&quot;File size: %llu bytes\n&quot;</span>, size);</div>
-<div class="line"><span class="lineno">   80</span> </div>
-<div class="line"><span class="lineno">   81</span>        <a class="code hl_function" href="#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a>(file);</div>
-<div class="line"><span class="lineno">   82</span>fail_file:</div>
-<div class="line"><span class="lineno">   83</span>        <a class="code hl_function" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb">H5Pclose</a>(fapl);</div>
-<div class="line"><span class="lineno">   84</span>fail_fapl:;</div>
-<div class="line"><span class="lineno">   85</span>    }</div>
-</div><!-- fragment --> </td></tr>
-<tr>
-<th>Update</th><th>Delete</th></tr>
-<tr valign="top">
-<td><div class="fragment"><div class="line"><span class="lineno">   89</span>    {</div>
-<div class="line"><span class="lineno">   90</span>        __label__ fail_file;</div>
-<div class="line"><span class="lineno">   91</span>        <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file;</div>
-<div class="line"><span class="lineno">   92</span> </div>
-<div class="line"><span class="lineno">   93</span>        <span class="keywordtype">unsigned</span> mode   = <a class="code hl_define" href="_h5_fpublic_8h.html#a402673dec5c537b27a49a9a8bd6140b4">H5F_ACC_RDWR</a>;</div>
-<div class="line"><span class="lineno">   94</span>        <span class="keywordtype">char</span>     name[] = <span class="stringliteral">&quot;f1.h5&quot;</span>;</div>
-<div class="line"><span class="lineno">   95</span> </div>
-<div class="line"><span class="lineno">   96</span>        <span class="keywordflow">if</span> ((file = <a class="code hl_function" href="#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a>(name, mode, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>)) == <a class="code hl_define" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
-<div class="line"><span class="lineno">   97</span>            ret_val = EXIT_FAILURE;</div>
-<div class="line"><span class="lineno">   98</span>            <span class="keywordflow">goto</span> fail_file;</div>
-<div class="line"><span class="lineno">   99</span>        }</div>
-<div class="line"><span class="lineno">  100</span> </div>
-<div class="line"><span class="lineno">  101</span>        <span class="comment">// create a cycle by hard linking the root group in the root group</span></div>
-<div class="line"><span class="lineno">  102</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="group___h5_l.html#ga69d50f7acdfd2f1dc7c4372397e63bd2">H5Lcreate_hard</a>(file, <span class="stringliteral">&quot;.&quot;</span>, file, <span class="stringliteral">&quot;loopback&quot;</span>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>) &lt; 0) {</div>
-<div class="line"><span class="lineno">  103</span>            ret_val = EXIT_FAILURE;</div>
-<div class="line"><span class="lineno">  104</span>        }</div>
-<div class="line"><span class="lineno">  105</span> </div>
-<div class="line"><span class="lineno">  106</span>        <a class="code hl_function" href="#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a>(file);</div>
-<div class="line"><span class="lineno">  107</span>fail_file:;</div>
-<div class="line"><span class="lineno">  108</span>    }</div>
-</div><!-- fragment --> </td><td><div class="fragment"><div class="line"><span class="lineno">  215</span>    {</div>
-<div class="line"><span class="lineno">  216</span><span class="preprocessor">#if H5_VERSION_GE(1, 12, 0)</span></div>
-<div class="line"><span class="lineno">  217</span> </div>
-<div class="line"><span class="lineno">  218</span>        <span class="comment">// this function is only available in HDF5 1.12.x</span></div>
-<div class="line"><span class="lineno">  219</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="#ga2e8b5e19b343123e8ab21442f9169a62">H5Fdelete</a>(<span class="stringliteral">&quot;f1.h5&quot;</span>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>) &lt; 0) {</div>
-<div class="line"><span class="lineno">  220</span>            ret_val = EXIT_FAILURE;</div>
-<div class="line"><span class="lineno">  221</span>        }</div>
-<div class="line"><span class="lineno">  222</span> </div>
-<div class="line"><span class="lineno">  223</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  224</span>    }</div>
-</div><!-- fragment --> </td></tr>
-</table>
 <p>In addition to general file management functions, there are three categories of functions that deal with advanced file management tasks and use cases:</p><ol type="1">
 <li>The control of the HDF5 <a class="el" href="group___m_d_c.html" title="Metadata Cache">Metadata Cache</a></li>
 <li>The use of (MPI-) <a class="el" href="group___p_h5_f.html" title="Parallel">Parallel</a> HDF5</li>
