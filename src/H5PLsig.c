@@ -84,7 +84,7 @@ static bool                   H5PL_keystore_initialized_g = false;
 /* Size of the SHA-256 hash used to identify revoked signatures.
  * This is the hash of the raw signature bytes, independent of the
  * plugin's signing algorithm (SHA-256/384/512). */
-#define H5PL_SIGNATURE_HASH_SIZE    32 /* SHA-256 = 32 bytes */
+#define H5PL_SIGNATURE_HASH_SIZE    32                             /* SHA-256 = 32 bytes */
 #define H5PL_SIGNATURE_HASH_HEX_LEN (H5PL_SIGNATURE_HASH_SIZE * 2) /* 64 hex chars in text file */
 typedef struct H5PL_revoked_signature_t {
     unsigned char hash[H5PL_SIGNATURE_HASH_SIZE]; /* SHA-256 hash of signature */

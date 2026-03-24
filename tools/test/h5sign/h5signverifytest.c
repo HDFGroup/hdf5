@@ -150,19 +150,19 @@ test_verify_tampered_plugin(void)
 static int
 create_revocation_file(const char *signed_plugin, const char *keystore_dir)
 {
-    int                fd        = -1;
-    h5_stat_t          st;
-    uint8_t            footer_buf[H5PL_SIG_FOOTER_SIZE];
-    H5PL_sig_footer_t  footer;
-    unsigned char     *signature = NULL;
-    size_t             binary_size;
-    unsigned char      hash[EVP_MAX_MD_SIZE];
-    unsigned int       hash_len = 0;
-    EVP_MD_CTX        *mdctx    = NULL;
-    FILE              *fp       = NULL;
-    char               filepath[512];
-    unsigned int       i;
-    int                ret = 1; /* assume failure */
+    int               fd = -1;
+    h5_stat_t         st;
+    uint8_t           footer_buf[H5PL_SIG_FOOTER_SIZE];
+    H5PL_sig_footer_t footer;
+    unsigned char    *signature = NULL;
+    size_t            binary_size;
+    unsigned char     hash[EVP_MAX_MD_SIZE];
+    unsigned int      hash_len = 0;
+    EVP_MD_CTX       *mdctx    = NULL;
+    FILE             *fp       = NULL;
+    char              filepath[512];
+    unsigned int      i;
+    int               ret = 1; /* assume failure */
 
     fd = HDopen(signed_plugin, O_RDONLY, 0);
     if (fd < 0)
