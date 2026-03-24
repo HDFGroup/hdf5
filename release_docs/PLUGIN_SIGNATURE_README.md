@@ -69,16 +69,11 @@ If `HDF5_PLUGIN_KEYSTORE_DIR` is set at compile time, it is used as the
 default. The `HDF5_PLUGIN_KEYSTORE` environment variable takes precedence
 at runtime unless the keystore is locked (see below).
 
-### Locking the Keystore (Production Environments)
+### Locking the Keystore
 
-In multi-tenant or HPC environments, administrators can prevent users from
-overriding the keystore location via environment variable:
-
-- **Runtime lock**: Create the file `/etc/hdf5/lock_keystore` (Unix) or
-  `C:\ProgramData\HDF_Group\HDF5\lock_keystore` (Windows)
-- **Compile-time lock**: Build with `-DHDF5_LOCK_PLUGIN_KEYSTORE=ON`
-
-When locked, only the compile-time `HDF5_PLUGIN_KEYSTORE_DIR` is used.
+To prevent runtime override of the keystore path via environment variable,
+build with `-DHDF5_LOCK_PLUGIN_KEYSTORE=ON`. When locked, only the
+compile-time `HDF5_PLUGIN_KEYSTORE_DIR` is used.
 
 ---
 
@@ -90,8 +85,7 @@ Generate an RSA key pair using OpenSSL (4096-bit recommended). Refer to the
 [OpenSSL documentation](https://www.openssl.org/docs/) for key generation
 commands and best practices.
 
-**Key security**: Store your private key securely and never share it. Consider
-using a hardware security module (HSM) for production environments.
+**Key security**: Store your private key securely and never share it.
 
 ### Signing Plugins
 
@@ -136,30 +130,19 @@ Provide users with:
 ### Passphrase-Protected Keys
 
 h5sign supports passphrase-protected private keys. OpenSSL will prompt for the
-passphrase interactively. For non-interactive use (CI/CD), decrypt the key to a
-temporary file, sign, and securely delete it. Store the passphrase as a CI
-secret.
+passphrase interactively.
 
 ---
 
 ## Security Considerations
 
-### Keystore Integrity
+### Key Management
 
-The keystore directory contains the public keys used to verify plugin
-signatures. **Protecting its integrity is the administrator's
-responsibility.** If an attacker can add a key to the keystore, they can
-make HDF5 trust malicious plugins.
+Public keys in the keystore are not secret, but their integrity must be
+protected — anyone who can add a key to the keystore can make HDF5 trust
+their plugins.
 
-Ensure only trusted administrators have write access to the keystore
-directory. Public keys are not secret, but their integrity must be
-protected.
-
-### Private Key Security
-
-Plugin developers are responsible for securing their private keys. Store
-them in a safe location that others cannot access. Never commit private
-keys to version control or share them publicly.
+Plugin developers are responsible for keeping their private keys secure.
 
 ### Security Model
 

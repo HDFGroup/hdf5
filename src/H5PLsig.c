@@ -84,7 +84,8 @@ static bool                   H5PL_keystore_initialized_g = false;
 /* Size of the SHA-256 hash used to identify revoked signatures.
  * This is the hash of the raw signature bytes, independent of the
  * plugin's signing algorithm (SHA-256/384/512). */
-#define H5PL_SIGNATURE_HASH_SIZE 32 /* SHA-256 = 32 bytes */
+#define H5PL_SIGNATURE_HASH_SIZE    32 /* SHA-256 = 32 bytes */
+#define H5PL_SIGNATURE_HASH_HEX_LEN (H5PL_SIGNATURE_HASH_SIZE * 2) /* 64 hex chars in text file */
 typedef struct H5PL_revoked_signature_t {
     unsigned char hash[H5PL_SIGNATURE_HASH_SIZE]; /* SHA-256 hash of signature */
 } H5PL_revoked_signature_t;
@@ -865,10 +866,11 @@ H5PL__load_revoked_signatures(const char *keystore_dir)
         if (line_len == 0 || trimmed[0] == '#')
             continue;
 
-        /* Parse hex string (must be exactly 64 hex characters for SHA-256) */
-        if (line_len != H5PL_SIGNATURE_HASH_SIZE * 2) {
+        /* Each SHA-256 byte is two hex characters → 64 chars per hash */
+        if (line_len != H5PL_SIGNATURE_HASH_HEX_LEN) {
             H5PL_SIG_DEBUG_PRINT(
-                "WARNING: Ignoring invalid revoked signature hash (expected 64 hex chars): %s\n", trimmed);
+                "WARNING: Ignoring invalid revoked signature hash (expected %d hex chars): %s\n",
+                H5PL_SIGNATURE_HASH_HEX_LEN, trimmed);
             continue;
         }
 
@@ -1061,22 +1063,10 @@ H5PL__read_and_validate_footer(int fd, HDoff_t file_size, const char *plugin_pat
                              plugin_path) < 0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_READERROR, FAIL, "cannot read signature footer");
 
-    /* Decode footer (little-endian to native byte order) */
-    H5PL_sig_decode_footer(footer_buf, sizeof(footer_buf), footer_out);
-
-    /* Validate magic number */
-    if (footer_out->magic != H5PL_SIG_MAGIC)
+    /* Decode and validate footer (magic and format version checked inside) */
+    if (!H5PL_sig_decode_footer(footer_buf, sizeof(footer_buf), footer_out))
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                    "invalid signature magic number (expected 0x%08X, got 0x%08X) - "
-                    "not a signed HDF5 plugin or corrupted",
-                    (unsigned)H5PL_SIG_MAGIC, (unsigned)footer_out->magic);
-
-    /* Validate format version.
-     * Currently only version 1 is defined; future versions may relax this
-     * to accept older formats (e.g., format_version <= CURRENT). */
-    if (footer_out->format_version != H5PL_SIG_FORMAT_VERSION_CURRENT)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "unsupported signature format version %u (expected %u)",
-                    (unsigned)footer_out->format_version, (unsigned)H5PL_SIG_FORMAT_VERSION_CURRENT);
+                    "not a signed HDF5 plugin (bad magic or unsupported format version)");
 
     /* Validate algorithm ID */
     if (NULL == H5PL__get_hash_algorithm(footer_out->algorithm_id))
@@ -1136,12 +1126,9 @@ H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *sign
 {
     const EVP_MD *hash_algorithm = NULL;
     unsigned char digest[EVP_MAX_MD_SIZE];
-    unsigned int  digest_len          = 0;
-    size_t        keys_init_failed    = 0;
-    size_t        keys_crypto_invalid = 0;
-    size_t        keys_crypto_error   = 0;
-    bool          verified            = false;
-    herr_t        ret_value           = SUCCEED;
+    unsigned int  digest_len = 0;
+    bool          verified   = false;
+    herr_t        ret_value  = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -1169,13 +1156,11 @@ H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *sign
 
         /* Create per-key verification context */
         if (NULL == (pkey_ctx = EVP_PKEY_CTX_new(public_key, NULL))) {
-            keys_init_failed++;
             ERR_clear_error();
             continue;
         }
 
         if (1 != EVP_PKEY_verify_init(pkey_ctx)) {
-            keys_init_failed++;
             EVP_PKEY_CTX_free(pkey_ctx);
             ERR_clear_error();
             continue;
@@ -1183,7 +1168,6 @@ H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *sign
 
         /* Bind hash algorithm to the context */
         if (1 != EVP_PKEY_CTX_set_signature_md(pkey_ctx, hash_algorithm)) {
-            keys_init_failed++;
             EVP_PKEY_CTX_free(pkey_ctx);
             ERR_clear_error();
             continue;
@@ -1193,7 +1177,6 @@ H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *sign
         if (H5PL_SIG_ALGO_IS_PSS(footer->algorithm_id)) {
             if (1 != EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING) ||
                 1 != EVP_PKEY_CTX_set_rsa_pss_saltlen(pkey_ctx, RSA_PSS_SALTLEN_DIGEST)) {
-                keys_init_failed++;
                 EVP_PKEY_CTX_free(pkey_ctx);
                 ERR_clear_error();
                 continue;
@@ -1213,20 +1196,11 @@ H5PL__verify_with_all_keys(int fd, size_t binary_size, const unsigned char *sign
                                  H5PL_keystore_g[key_idx].source);
             break;
         }
-        else if (verify_result == 0) {
-            keys_crypto_invalid++;
-        }
-        else {
-            keys_crypto_error++;
-        }
     }
 
     if (!verified)
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                    "plugin signature verification failed: %s "
-                    "(tried %zu key(s): %zu init failed, %zu invalid, %zu error)",
-                    plugin_path, H5PL_keystore_count_g, keys_init_failed, keys_crypto_invalid,
-                    keys_crypto_error);
+                    "plugin signature verification failed: no key in keystore matched");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

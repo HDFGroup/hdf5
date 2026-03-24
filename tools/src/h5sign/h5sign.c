@@ -516,8 +516,7 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
         if (HDlseek(fd, (HDoff_t)(file_size - (hsize_t)H5PL_SIG_FOOTER_SIZE), SEEK_SET) >= 0) {
             h5_posix_io_ret_t nr = HDread(fd, check_buf, H5PL_SIG_FOOTER_SIZE);
             if (nr == (h5_posix_io_ret_t)H5PL_SIG_FOOTER_SIZE) {
-                H5PL_sig_decode_footer(check_buf, sizeof(check_buf), &check_footer);
-                if (check_footer.magic == H5PL_SIG_MAGIC) {
+                if (H5PL_sig_decode_footer(check_buf, sizeof(check_buf), &check_footer)) {
                     if (!opt_force) {
                         fprintf(rawerrorstream, "Error: Plugin file '%s' is already signed\n", plugin_path);
                         fprintf(rawerrorstream,
@@ -527,15 +526,10 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
                         goto done;
                     }
 
-                    /* --force: strip the existing signature and footer so we can re-sign.
-                     * Decode footer from the buffer we already read. */
+                    /* --force: strip the existing signature and footer so we can re-sign */
                     {
-                        H5PL_sig_footer_t existing_footer;
-                        uint32_t          existing_sig_len;
-                        hsize_t           binary_size;
-
-                        H5PL_sig_decode_footer(check_buf, sizeof(check_buf), &existing_footer);
-                        existing_sig_len = existing_footer.signature_length;
+                        uint32_t existing_sig_len = check_footer.signature_length;
+                        hsize_t  binary_size;
 
                         if (existing_sig_len == 0 ||
                             (hsize_t)existing_sig_len + (hsize_t)H5PL_SIG_FOOTER_SIZE > file_size) {
@@ -694,6 +688,14 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
     if (opt_verbose) {
         fprintf(rawoutstream, "Signature created successfully\n");
         fprintf(rawoutstream, "Signature length: %zu bytes\n", sig_len);
+    }
+
+    /* Verify the signed file will not exceed the verifier's size limit */
+    if ((hsize_t)(file_size + sig_len + H5PL_SIG_FOOTER_SIZE) > (hsize_t)H5PL_MAX_PLUGIN_SIZE) {
+        fprintf(rawerrorstream, "Error: Signed plugin would exceed maximum size (%llu bytes)\n",
+                (unsigned long long)H5PL_MAX_PLUGIN_SIZE);
+        ret_value = FAIL;
+        goto done;
     }
 
     if (HDlseek(fd, (HDoff_t)file_size, SEEK_SET) < 0) {

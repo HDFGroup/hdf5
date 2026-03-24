@@ -36,7 +36,10 @@
 /* Magic number to identify HDF5 signed plugins */
 #define H5PL_SIG_MAGIC 0x48444635 /* "HDF5" in hex */
 
-/* Current signature format version */
+/* Current signature format version.
+ * If future versions change the footer layout, the decoder should be
+ * updated to accept older versions so that already-signed plugins
+ * remain loadable without re-signing. */
 #define H5PL_SIG_FORMAT_VERSION_CURRENT 1
 
 /* Hash Algorithm Identifiers (on-disk values, stored as uint8_t) */
@@ -113,15 +116,17 @@ H5PL_sig_encode_footer(uint8_t *buf, size_t buf_size, const H5PL_sig_footer_t *f
 /*-------------------------------------------------------------------------
  * Function:    H5PL_sig_decode_footer
  *
- * Purpose:     Decode a little-endian buffer into a footer struct.
- *              Decodes magic first so it can be verified before interpreting
- *              remaining fields.
+ * Purpose:     Decode a little-endian buffer into a footer struct and
+ *              perform minimal validation (magic and format version).
+ *
+ * Return:      true  — footer decoded and valid
+ *              false — magic mismatch or unsupported format version
  *
  * Note:        Requires H5encode.h for UINT32DECODE / UINT16DECODE.
  *              buf_size must be >= H5PL_SIG_FOOTER_SIZE (12).
  *-------------------------------------------------------------------------
  */
-static inline void
+static inline bool
 H5PL_sig_decode_footer(const uint8_t *buf, size_t buf_size, H5PL_sig_footer_t *footer)
 {
     const uint8_t *p = buf;
@@ -129,11 +134,21 @@ H5PL_sig_decode_footer(const uint8_t *buf, size_t buf_size, H5PL_sig_footer_t *f
     assert(buf_size >= H5PL_SIG_FOOTER_SIZE);
     (void)buf_size; /* used only by assert */
 
-    UINT32DECODE(p, footer->magic);                 /* bytes 0-3  */
+    /* Decode and verify magic first */
+    UINT32DECODE(p, footer->magic); /* bytes 0-3  */
+    if (footer->magic != H5PL_SIG_MAGIC)
+        return false;
+
     UINT32DECODE(p, footer->signature_length);      /* bytes 4-7  */
     footer->algorithm_id   = (H5PL_sig_algo_t)*p++; /* byte  8    */
     footer->format_version = *p++;                  /* byte  9    */
     UINT16DECODE(p, footer->reserved);              /* bytes 10-11 */
+
+    /* Verify format version */
+    if (footer->format_version != H5PL_SIG_FORMAT_VERSION_CURRENT)
+        return false;
+
+    return true;
 } /* end H5PL_sig_decode_footer() */
 
 #endif /* H5PLsig_H */

@@ -836,7 +836,10 @@ if (HDF5_REQUIRE_SIGNED_PLUGINS)
       "  -DHDF5_PLUGIN_KEYSTORE_DIR=/etc/hdf5/trusted_keys")
   endif ()
 
-  # Configure KeyStore directory if provided
+  # Configure KeyStore directory if provided.
+  # Note: the path is embedded as a string literal in the library binary.
+  # Use the HDF5_PLUGIN_KEYSTORE environment variable instead if the path
+  # should not be visible in the binary.
   if (HDF5_PLUGIN_KEYSTORE_DIR)
     add_compile_definitions(H5PL_KEYSTORE_DIR="${HDF5_PLUGIN_KEYSTORE_DIR}")
   else ()
