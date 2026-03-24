@@ -154,7 +154,7 @@ the filter and parameters specified. If objects are specified, then everything i
 be written to the output file as is, except for the specified objects. They will be written to the
 output file with the filter and parameters specified.
 
-If you type <code style="background-color:whitesmoke;">h5repack --help</code> on the command line,
+If you type <code style="background-color:whitesmoke;">h5repack \--help</code> on the command line,
 you will see a detailed usage statement with examples of modifying a filter. There are actually
 numerous filters that you can apply to a dataset:
 <table>
@@ -278,43 +278,43 @@ Following are some of the options that can be used with <code style="background-
 <th>h5copy Options</th><th>Description</th>
 </tr>
 <tr>
-<td>-i, --input
+<td>-i, \--input
 </td>
 <td>Input file name
 </td>
 </tr>
 <tr>
-<td>-o, --output
+<td>-o, \--output
 </td>
 <td>Output file name
 </td>
 </tr>
 <tr>
-<td>-s, --source
+<td>-s, \--source
 </td>
 <td>Source object name
 </td>
 </tr>
 <tr>
-<td>-d, --destination
+<td>-d, \--destination
 </td>
 <td>Destination object name
 </td>
 </tr>
 <tr>
-<td>-p, --parents
+<td>-p, \--parents
 </td>
 <td>Make parent groups as needed
 </td>
 </tr>
 <tr>
-<td>-v, --verbose
+<td>-v, \--verbose
 </td>
 <td>Verbose mode
 </td>
 </tr>
 <tr>
-<td>-f, --flag
+<td>-f, \--flag
 </td>
 <td>Flag type
 </td>
@@ -491,25 +491,25 @@ into an ASCII file, which can then be imported into Excel and other applications
 <th>Options</th><th>Description</th>
 </tr>
 <tr>
-<td> -d D, --dataset=D
+<td> -d D, \--dataset=D
 </td>
 <td>Display dataset D
 </td>
 </tr>
 <tr>
-<td> -o F, --output=F 
+<td> -o F, \--output=F 
 </td>
 <td>Output raw data into file F
 </td>
 </tr>
 <tr>
-<td> -y, --noindex
+<td> -y, \--noindex
 </td>
 <td>Suppress printing of array indices with the data
 </td>
 </tr>
 <tr>
-<td> -w N, --width=N
+<td> -w N, \--width=N
 </td>
 <td>Set N number of columns of output. A value of 0
 sets the number to 65535 (the maximum)
@@ -586,19 +586,19 @@ HDF5 dataset to a binary file with the following options:
 <th>Options</th><th>Description</th>
 </tr>
 <tr>
-<td>-d D, --dataset=D
+<td>-d D, \--dataset=D
 </td>
 <td>Display dataset D
 </td>
 </tr>
 <tr>
-<td>-o F, --output=F 
+<td>-o F, \--output=F 
 </td>
 <td>Output raw data into file F
 </td>
 </tr>
 <tr>
-<td>-b B, --binary=B
+<td>-b B, \--binary=B
 </td>
 <td>Binary file output of form B.
 Valid values are: LE, BE, NATIVE, FILE
@@ -677,7 +677,7 @@ The DDL file must be generated with the <code style="background-color:whitesmoke
 The raw data file that can be imported into HDF5 using this method may contain either numeric or string data with the following restrictions:
 \li Numeric data requires the use of the <code style="background-color:whitesmoke;">h5dump -b</code> option to produce a binary data file.
 \li String data must be written with the <code style="background-color:whitesmoke;">h5dump -y</code> and
-<code style="background-color:whitesmoke;">--width=1</code> options, generating a single column of strings without indices.
+<code style="background-color:whitesmoke;">\--width=1</code> options, generating a single column of strings without indices.
 
 Two examples follow: the first imports a dataset with a numeric datatype. Note that numeric data requires
 the use of the <code style="background-color:whitesmoke;">h5dump -b</code> option to produce a binary data
@@ -730,7 +730,7 @@ The second example imports string data. The example program that creates this fi
 from the \ref ExAPI page.
 
 Note that string data requires use of the <code style="background-color:whitesmoke;">h5dump -y</code>
-option to exclude indexes and the <code style="background-color:whitesmoke;">h5dump --width=1</code>
+option to exclude indexes and the <code style="background-color:whitesmoke;">h5dump \--width=1</code>
 option to generate a single column of strings. The <code style="background-color:whitesmoke;">-o</code>
 option outputs the data into an ASCII file.
 \code

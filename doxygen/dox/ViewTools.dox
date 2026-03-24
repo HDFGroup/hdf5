@@ -183,7 +183,7 @@ The \ref sec_cltools_h5dump and \ref sec_cltools_h5ls tools can both be used to 
 The \ref sec_cltools_h5dump tool dumps or displays the contents of an HDF5 file (textually). By default if you specify no options,
 \ref sec_cltools_h5dump will display the entire contents of a file. There are many \ref sec_cltools_h5dump options for examining specific details
 of a file. To see all of the available \ref sec_cltools_h5dump options, specify the <code style="background-color:whitesmoke;">-h</code>
-or <code style="background-color:whitesmoke;">--help</code> option: 
+or <code style="background-color:whitesmoke;">\--help</code> option: 
 \code
 h5dump -h
 \endcode
@@ -196,27 +196,27 @@ The following \ref sec_cltools_h5dump options can be helpful in viewing the cont
 <th>Comment</th>
 </tr>
 <tr>
-<td>-n, --contents</td>
+<td>-n, \--contents</td>
 <td>Displays a list of the objects in a file</td>
 <td>See @ref subsubsecViewToolsViewContent_h5dumpEx1</td>
 </tr>
 <tr>
-<td>-n 1, --contents=1</td>
+<td>-n 1, \--contents=1</td>
 <td>Displays a list of the objects and attributes in a file</td>
 <td>See @ref subsubsecViewToolsViewAttr_h5dumpEx6</td>
 </tr>
 <tr>
-<td>-H, --header</td>
+<td>-H, \--header</td>
 <td>Displays header information only (no data)</td>
 <td>See @ref subsubsecViewToolsViewContent_h5dumpEx2</td>
 </tr>
 <tr>
-<td>-A 0, --onlyattr=0</td>
+<td>-A 0, \--onlyattr=0</td>
 <td>Suppresses the display of attributes</td>
 <td>See @ref subsubsecViewToolsViewContent_h5dumpEx2</td>
 </tr>
 <tr>
-<td>-N P, --any_path=P</td>
+<td>-N P, \--any_path=P</td>
 <td>Displays any object or attribute that matches path P</td>
 <td>See @ref subsubsecViewToolsViewAttr_h5dumpEx6</td>
 </tr>
@@ -376,7 +376,7 @@ Useful \ref sec_cltools_h5dump options for examining specific datasets include:
 <th>Comment</th>
 </tr>
 <tr>
-<td>-d D, --dataset=D
+<td>-d D, \--dataset=D
 </td>
 <td>Displays dataset D
 </td>
@@ -384,7 +384,7 @@ Useful \ref sec_cltools_h5dump options for examining specific datasets include:
 </td>
 </tr>
 <tr>
-<td> -H, --header
+<td> -H, \--header
 </td>
 <td>Displays header information only
 </td>
@@ -392,7 +392,7 @@ Useful \ref sec_cltools_h5dump options for examining specific datasets include:
 </td>
 </tr>
 <tr>
-<td>-p, --properties
+<td>-p, \--properties
 </td>
 <td>Displays dataset filters, storage layout, and fill value properties
 </td>
@@ -400,7 +400,7 @@ Useful \ref sec_cltools_h5dump options for examining specific datasets include:
 </td>
 </tr>
 <tr>
-<td>-A 0, --onlyattr=0
+<td>-A 0, \--onlyattr=0
 </td>
 <td>Suppresses the display of attributes
 </td>
@@ -408,7 +408,7 @@ Useful \ref sec_cltools_h5dump options for examining specific datasets include:
 </td>
 </tr>
 <tr>
-<td>-N P, --any_path=P
+<td>-N P, \--any_path=P
 </td>
 <td>Displays any object or attribute that matches path P
 </td>
@@ -509,14 +509,14 @@ The following options can be used to see detailed information about a dataset.
 <th>Description</th>
 </tr>
 <tr>
-<td>-v, --verbose
+<td>-v, \--verbose
 </td>
 <td>Generates verbose output (lists dataset properties, attributes 
 and attribute values, but no dataset values)
 </td>
 </tr>
 <tr>
-<td>-d, --data
+<td>-d, \--data
 </td>
 <td>Displays dataset values
 </td>
@@ -557,19 +557,19 @@ The <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> op
 <th>Description</th>
 </tr>
 <tr>
-<td>-g G, --group=G
+<td>-g G, \--group=G
 </td>
 <td>Displays group G and its members
 </td>
 </tr>
 <tr>
-<td>-H, --header
+<td>-H, \--header
 </td>
 <td>Displays header information only
 </td>
 </tr>
 <tr>
-<td>-A 0, --onlyattr=0
+<td>-A 0, \--onlyattr=0
 </td>
 <td>Suppresses the display of attributes
 </td>
@@ -754,19 +754,19 @@ This can be done with the following <code style="background-color:whitesmoke;">\
 <th>Description</th>
 </tr>
 <tr>
-<td>-d D, --dataset=D
+<td>-d D, \--dataset=D
 </td>
 <td>Dataset D
 </td>
 </tr>
 <tr>
-<td>-s START, --start=START
+<td>-s START, \--start=START
 </td>
 <td>Offset or start of subsetting selection
 </td>
 </tr>
 <tr>
-<td>-S STRIDE, --stride=STRIDE
+<td>-S STRIDE, \--stride=STRIDE
 </td>
 <td>Stride (sampling along a dimension). The default (unspecified, or 1) selects 
 every element along a dimension, a value of 2 selects every other element,
@@ -774,13 +774,13 @@ a value of 3 selects every third element, ...
 </td>
 </tr>
 <tr>
-<td>-c COUNT, --count=COUNT
+<td>-c COUNT, \--count=COUNT
 </td>
 <td>Number of blocks to include in the selection
 </td>
 </tr>
 <tr>
-<td>-k BLOCK, --block=BLOCK
+<td>-k BLOCK, \--block=BLOCK
 </td>
 <td>Size of the block in a hyperslab. The default (unspecified, or 1) is for 
 the block size to be the size of a single element.

@@ -31,8 +31,8 @@ example, a 1.10 application can be built with 1.12 using either an application o
     <ul><li>Autotools: <code>h5cc -DH5_USE_110_API (C)</code></li>
     <li>CMake: <code>cmake -DCMAKE_C_FLAGS="-DH5_USE_110_API"</code> (and likewise for other <code>CMAKE_<LANG>_FLAGS</code>)</li></ul>
 \li To build an HDF5 library with the 1.10 APIs specify:<br />
-    <ul><li>Autotools: <code>--with-default-api-version=v110</code><br />
-    execute: <code>./configure --with-default-api-version=v110</code></li>
+    <ul><li>Autotools: <code>\--with-default-api-version=v110</code><br />
+    execute: <code>./configure \--with-default-api-version=v110</code></li>
     <li>CMake: <code>-DDEFAULT_API_VERSION:STRING=v110</code><br />
     If using the source code packaged with CMake configuration files (CMake-hdf5-1.12.0*), edit HDF5options.cmake, and add this line:<br />
     <code>set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DDEFAULT_API_VERSION:STRING=v110")</code></li></ul>

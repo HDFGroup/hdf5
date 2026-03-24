@@ -25,8 +25,8 @@
  * data.
  *
  * \subsection subsec_cltools_h5jam_usage Usage
- *  <h4>h5jam -i \<in_file.h5\> -u \<in_user_file\> [-o \<out_file.h5\>] [--clobber]</h4>
- *  <h4>h5unjam -i \<in_file.h5\> [-o \<out_file.h5\> ] [-u \<out_user_file\> | --delete]</h4>
+ *  <h4>h5jam -i \<in_file.h5\> -u \<in_user_file\> [-o \<out_file.h5\>] [\--clobber]</h4>
+ *  <h4>h5unjam -i \<in_file.h5\> [-o \<out_file.h5\> ] [-u \<out_user_file\> | \--delete]</h4>
  *
  * \subsection subsec_cltools_h5jam_options h5jam Options
  * \li <strong>-i in_file.h5</strong>   Specifies the input HDF5 file.
@@ -35,7 +35,7 @@
  * \li <strong>-o out_file.h5</strong>  Specifies the output HDF5 file.
  *                   If not specified, the user block will be concatenated in
  *                   place to the input HDF5 file.
- * \li <strong>--clobber</strong> Wipes out any existing user block before concatenating
+ * \li <strong>\--clobber</strong> Wipes out any existing user block before concatenating
  *                   the given user block.
  *                   The size of the new user block will be the larger of:
  *                    - the size of existing user block in the input HDF5 file
@@ -54,14 +54,14 @@
  * \li <strong>-u out_user_file</strong>
  *                  Specifies the output file containing the data from the
  *                  user block.
- *                  Cannot be used with --delete option.
- * \li <strong>--delete</strong> Remove the user block from the input HDF5 file. The content
+ *                  Cannot be used with <strong>\--delete</strong> option.
+ * \li <strong>\--delete</strong> Remove the user block from the input HDF5 file. The content
  *                  of the user block is discarded.
  *                  Cannot be used with the -u option.
  * \li <strong>-h</strong> Prints a usage message and exits.
  * \li <strong>-V</strong> Prints the HDF5 library version and exits.
  *
- * If neither <strong>--delete</strong> nor <strong>-u</strong> is specified, the user block from the input
+ * If neither <strong>\--delete</strong> nor <strong>-u</strong> is specified, the user block from the input
  * file will be displayed to stdout stream.
  *
  * Previous Chapter \ref sec_cltools_h5import - Next Chapter \ref sec_cltools_h5ls

@@ -174,7 +174,7 @@ that can help with this:
 <tr>
 <td>@ref sec_cltools_h5dump
 </td>
-<td>The -B (--superblock) option displays the size of the user block in an HDF5 file
+<td>The -B (\--superblock) option displays the size of the user block in an HDF5 file
 </td>
 </tr>
 </table>
@@ -202,7 +202,7 @@ The <code style="background-color:whitesmoke;">UB.xml</code> file contains the u
 which can be viewed with a browser.
 
 \subsection subsecViewToolsJPSSView_h5dump h5dump
-The \ref sec_cltools_h5dump utility has the <code style="background-color:whitesmoke;">-B (--superblock)</code> option for displaying the superblock in an HDF5 file.
+The \ref sec_cltools_h5dump utility has the <code style="background-color:whitesmoke;">-B (\--superblock)</code> option for displaying the superblock in an HDF5 file.
 The superblock contains information about the file such as the file signature, file consistency flags,
 the number of bytes to store addresses and size of an object, as well as the size of the user block:
 \code
@@ -255,25 +255,25 @@ There are several options that you may first want to use when examining a granul
 <th>Option</th><th>Description</th>
 </tr>
 <tr>
-<td>-H, --header
+<td>-H, \--header
 </td>
 <td>Prints header (metadata) information only
 </td>
 </tr>
 <tr>
-<td>-d D, --dataset=D
+<td>-d D, \--dataset=D
 </td>
 <td>Specifies the granule dataset
 </td>
 </tr>
 <tr>
-<td>-A 0, --onlyattr=0
+<td>-A 0, \--onlyattr=0
 </td>
 <td>Suppresses attributes
 </td>
 </tr>
 <tr>
-<td>-p, --properties
+<td>-p, \--properties
 </td>
 <td>Show properties of datasets
 (See Properties)
