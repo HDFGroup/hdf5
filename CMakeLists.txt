@@ -786,19 +786,13 @@ endif ()
 #-----------------------------------------------------------------------------
 option (HDF5_REQUIRE_SIGNED_PLUGINS "Require digitally signed plugins" OFF)
 
-# KeyStore directory for multiple trusted public keys (recommended)
-set(HDF5_PLUGIN_KEYSTORE_DIR "" CACHE PATH
-    "Directory containing trusted public keys (.pem files) for plugin verification")
-# Security Note: For production deployments where environment variables may be
-# controllable by untrusted users (e.g., HPC clusters, multi-tenant systems),
-# you can prevent runtime override of the keystore directory by enabling
-# HDF5_LOCK_PLUGIN_KEYSTORE at compile time (requires rebuild).
-
-# Security: Disable environment variable override (prevents runtime keystore redirection)
-option(HDF5_LOCK_PLUGIN_KEYSTORE "Disable HDF5_PLUGIN_KEYSTORE environment variable override (security hardening)" OFF)
+cmake_dependent_option (HDF5_LOCK_PLUGIN_KEYSTORE "Disable HDF5_PLUGIN_KEYSTORE environment variable override (security hardening)" OFF "HDF5_REQUIRE_SIGNED_PLUGINS" OFF)
 mark_as_advanced(HDF5_LOCK_PLUGIN_KEYSTORE)
 
 if (HDF5_REQUIRE_SIGNED_PLUGINS)
+  # KeyStore directory for multiple trusted public keys
+  set(HDF5_PLUGIN_KEYSTORE_DIR "" CACHE PATH
+      "Directory containing trusted public keys (.pem files) for plugin verification")
   # Find OpenSSL for RSA signature verification
   find_package(OpenSSL REQUIRED)
   if (NOT OPENSSL_FOUND)
@@ -842,35 +836,12 @@ if (HDF5_REQUIRE_SIGNED_PLUGINS)
       "  -DHDF5_PLUGIN_KEYSTORE_DIR=/etc/hdf5/trusted_keys")
   endif ()
 
-  if (NOT HDF5_PLUGIN_KEYSTORE_DIR)
-    message(STATUS "No compile-time KeyStore directory configured; "
-      "set HDF5_PLUGIN_KEYSTORE environment variable at runtime.")
-  endif ()
-
   # Configure KeyStore directory if provided
   if (HDF5_PLUGIN_KEYSTORE_DIR)
-    if (NOT EXISTS "${HDF5_PLUGIN_KEYSTORE_DIR}")
-      message(WARNING
-        "KeyStore directory does not exist: ${HDF5_PLUGIN_KEYSTORE_DIR}\n"
-        "Keys will be loaded at runtime if directory is created.")
-    elseif (NOT IS_DIRECTORY "${HDF5_PLUGIN_KEYSTORE_DIR}")
-      message(FATAL_ERROR
-        "KeyStore path is not a directory: ${HDF5_PLUGIN_KEYSTORE_DIR}")
-    else ()
-      # Directory exists - count .pem files
-      file(GLOB KEYSTORE_PEM_FILES "${HDF5_PLUGIN_KEYSTORE_DIR}/*.pem")
-      list(LENGTH KEYSTORE_PEM_FILES KEYSTORE_KEY_COUNT)
-      if (KEYSTORE_KEY_COUNT EQUAL 0)
-        message(WARNING
-          "KeyStore directory exists but contains no .pem files: ${HDF5_PLUGIN_KEYSTORE_DIR}\n"
-          "Add public key files before using HDF5.")
-      else ()
-        message(VERBOSE "KeyStore directory: ${HDF5_PLUGIN_KEYSTORE_DIR} (${KEYSTORE_KEY_COUNT} key(s) found)")
-      endif ()
-    endif ()
-
-    # Define KeyStore directory as compile definition
     add_compile_definitions(H5PL_KEYSTORE_DIR="${HDF5_PLUGIN_KEYSTORE_DIR}")
+  else ()
+    message(NOTICE "No compile-time KeyStore directory configured; "
+      "set HDF5_PLUGIN_KEYSTORE environment variable at runtime.")
   endif ()
 
   # Enable digital signature verification (goes into H5pubconf.h)
@@ -886,14 +857,7 @@ if (HDF5_REQUIRE_SIGNED_PLUGINS)
   # Only libcrypto is needed (EVP, PEM, BIO, ERR APIs); libssl (TLS) is not used
   list(APPEND LINK_LIBS OpenSSL::Crypto)
 
-  # Add Windows security libraries for ACL checking (GetNamedSecurityInfoA, etc.)
-  # These are used in H5PLsig.c for KeyStore directory permission validation
-  if (WIN32)
-    list(APPEND LINK_LIBS Advapi32)
-  endif ()
-
   message(VERBOSE "Digital signature verification enabled (OpenSSL ${OPENSSL_VERSION})")
-  message(VERBOSE "Key sources: KeyStore directory only")
 endif ()
 
 #-----------------------------------------------------------------------------

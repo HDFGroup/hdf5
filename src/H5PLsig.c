@@ -41,10 +41,6 @@
 #ifndef H5_HAVE_WIN32_API
 #include <dirent.h>
 #else
-/* Windows security APIs for ACL checking */
-#include <sddl.h>
-#include <aclapi.h>
-#include <shlobj.h>
 /* S_ISDIR may not be defined on Windows */
 #ifndef S_ISDIR
 #define S_ISDIR(m) (((m) & _S_IFMT) == _S_IFDIR)
@@ -696,13 +692,13 @@ H5PL__init_keystore(void)
         /* Only try if directory was configured */
         h5_stat_t st;
         if (HDstat(H5PL_KEYSTORE_DIR, &st) == 0) {
-            /* Directory exists, try to load */
+            /* Directory exists, try to load.  Pause the error stack so that
+             * a load failure here does not pollute the stack — the generic
+             * "no valid public keys" error below is more informative. */
+            H5E_pause_stack();
             if (H5PL__load_keys_from_directory(H5PL_KEYSTORE_DIR) < 0) {
-                /* Not immediately fatal - log the specific reason and fall through
-                 * to the generic "no valid public keys" error which provides guidance. */
                 H5PL_SIG_DEBUG_PRINT("WARNING: Failed to load keys from configured keystore: %s\n",
                                      H5PL_KEYSTORE_DIR);
-                H5E_clear_stack(); /* Clear so the generic error below is the top-level error */
             }
             else {
                 keys_loaded = true;
@@ -712,6 +708,7 @@ H5PL__init_keystore(void)
                     /* Non-fatal - continue even if revoked signatures fail to load */
                 }
             }
+            H5E_resume_stack();
         }
     }
 #endif
