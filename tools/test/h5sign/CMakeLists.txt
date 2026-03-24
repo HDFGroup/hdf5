@@ -43,6 +43,10 @@ else ()
   TARGET_C_PROPERTIES (h5signverifytest SHARED)
   target_link_libraries (h5signverifytest PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
 endif ()
+# OpenSSL needed for SHA-256 hash computation in revocation test
+if (HDF5_REQUIRE_SIGNED_PLUGINS)
+  target_link_libraries (h5signverifytest PRIVATE OpenSSL::Crypto)
+endif ()
 set_target_properties (h5signverifytest PROPERTIES FOLDER test/tools)
 
 #-----------------------------------------------------------------------------

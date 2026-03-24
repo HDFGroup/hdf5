@@ -30,6 +30,9 @@
 #include <sys/stat.h>
 #include <time.h>
 
+#include <openssl/evp.h> /* For SHA-256 hash in revocation test */
+#include "H5encode.h"    /* For UINT32DECODE in footer decode */
+
 /* Test file names */
 #define TEST_PLUGIN_SIGNED   "plugin_signed.so"
 #define TEST_PLUGIN_UNSIGNED "plugin_unsigned.so"
@@ -135,6 +138,143 @@ test_verify_tampered_plugin(void)
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    create_revocation_file
+ *
+ * Purpose:     Read a signed plugin, compute the SHA-256 hash of its
+ *              signature, and write the hex hash to
+ *              <keystore_dir>/revoked_signatures.txt.
+ *
+ * Return:      0 on success, 1 on failure
+ *-------------------------------------------------------------------------
+ */
+static int
+create_revocation_file(const char *signed_plugin, const char *keystore_dir)
+{
+    int                fd        = -1;
+    h5_stat_t          st;
+    uint8_t            footer_buf[H5PL_SIG_FOOTER_SIZE];
+    H5PL_sig_footer_t  footer;
+    unsigned char     *signature = NULL;
+    size_t             binary_size;
+    unsigned char      hash[EVP_MAX_MD_SIZE];
+    unsigned int       hash_len = 0;
+    EVP_MD_CTX        *mdctx    = NULL;
+    FILE              *fp       = NULL;
+    char               filepath[512];
+    unsigned int       i;
+    int                ret = 1; /* assume failure */
+
+    fd = HDopen(signed_plugin, O_RDONLY, 0);
+    if (fd < 0)
+        goto cleanup;
+    if (HDfstat(fd, &st) < 0)
+        goto cleanup;
+
+    /* Read footer from end of file */
+    if (HDlseek(fd, (HDoff_t)(st.st_size - H5PL_SIG_FOOTER_SIZE), SEEK_SET) < 0)
+        goto cleanup;
+    if (HDread(fd, footer_buf, H5PL_SIG_FOOTER_SIZE) != (h5_posix_io_ret_t)H5PL_SIG_FOOTER_SIZE)
+        goto cleanup;
+    if (!H5PL_sig_decode_footer(footer_buf, sizeof(footer_buf), &footer))
+        goto cleanup;
+
+    /* Read signature bytes */
+    signature = (unsigned char *)malloc(footer.signature_length);
+    if (!signature)
+        goto cleanup;
+
+    binary_size = (size_t)st.st_size - footer.signature_length - H5PL_SIG_FOOTER_SIZE;
+    if (HDlseek(fd, (HDoff_t)binary_size, SEEK_SET) < 0)
+        goto cleanup;
+    if (HDread(fd, signature, footer.signature_length) != (h5_posix_io_ret_t)footer.signature_length)
+        goto cleanup;
+
+    /* Compute SHA-256 hash of signature */
+    mdctx = EVP_MD_CTX_new();
+    if (!mdctx)
+        goto cleanup;
+    if (1 != EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL))
+        goto cleanup;
+    if (1 != EVP_DigestUpdate(mdctx, signature, footer.signature_length))
+        goto cleanup;
+    if (1 != EVP_DigestFinal_ex(mdctx, hash, &hash_len))
+        goto cleanup;
+
+    /* Write hex hash to revoked_signatures.txt */
+    snprintf(filepath, sizeof(filepath), "%s/revoked_signatures.txt", keystore_dir);
+    fp = fopen(filepath, "w");
+    if (!fp)
+        goto cleanup;
+
+    fprintf(fp, "# Revoked signature hash for testing\n");
+    for (i = 0; i < hash_len; i++)
+        fprintf(fp, "%02x", hash[i]);
+    fprintf(fp, "\n");
+
+    ret = 0; /* success */
+
+cleanup:
+    if (fp)
+        fclose(fp);
+    if (mdctx)
+        EVP_MD_CTX_free(mdctx);
+    free(signature);
+    if (fd >= 0)
+        HDclose(fd);
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    remove_revocation_file
+ *
+ * Purpose:     Remove revoked_signatures.txt from the keystore directory
+ *
+ * Return:      void
+ *-------------------------------------------------------------------------
+ */
+static void
+remove_revocation_file(const char *keystore_dir)
+{
+    char filepath[512];
+    snprintf(filepath, sizeof(filepath), "%s/revoked_signatures.txt", keystore_dir);
+    HDremove(filepath);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_verify_revoked_plugin
+ *
+ * Purpose:     Test that a signed plugin with a revoked signature
+ *              fails verification.
+ *
+ *              This test must be run after H5close() / H5open() so that
+ *              the keystore (including the revocation list) is reloaded.
+ *
+ * Return:      0 on success, 1 on failure
+ *-------------------------------------------------------------------------
+ */
+static int
+test_verify_revoked_plugin(void)
+{
+    herr_t ret;
+
+    printf("TEST: Verify revoked plugin (should fail)... ");
+
+    ret = H5PL__verify_signature_appended(TEST_PLUGIN_SIGNED);
+
+    if (ret == FAIL) {
+        printf("PASSED\n");
+        tests_passed++;
+        return 0;
+    }
+    else {
+        printf("FAILED\n");
+        printf("  Expected: FAIL, Got: SUCCEED (revoked plugin should not verify!)\n");
+        tests_failed++;
+        return 1;
+    }
+}
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Run all signature verification tests
@@ -164,10 +304,39 @@ main(void)
         return EXIT_FAILURE;
     }
 
-    /* Run all tests */
+    /* Run basic verification tests */
     test_verify_signed_plugin();
     test_verify_unsigned_plugin();
     test_verify_tampered_plugin();
+
+    /* --- Revocation test ---
+     * Close and re-open HDF5 so the keystore is re-initialized with the
+     * revocation list.  The signed plugin's signature hash is written to
+     * revoked_signatures.txt before re-opening. */
+    H5close();
+
+    if (create_revocation_file(TEST_PLUGIN_SIGNED, TEST_KEYSTORE_DIR) != 0) {
+        fprintf(stderr, "ERROR: Cannot create revocation file for testing\n");
+        return EXIT_FAILURE;
+    }
+
+    if (H5open() < 0) {
+        fprintf(stderr, "ERROR: Cannot re-initialize HDF5 library for revocation test\n");
+        remove_revocation_file(TEST_KEYSTORE_DIR);
+        return EXIT_FAILURE;
+    }
+
+    /* Re-set keystore env var (still valid, but ensures it's set after re-init) */
+    HDsetenv("HDF5_PLUGIN_KEYSTORE", TEST_KEYSTORE_DIR, 1);
+
+    test_verify_revoked_plugin();
+
+    /* Clean up revocation file so it doesn't affect other tests */
+    H5close();
+    remove_revocation_file(TEST_KEYSTORE_DIR);
+
+    /* Re-open for final cleanup */
+    H5open();
 
     /* Print summary */
     printf("\n");

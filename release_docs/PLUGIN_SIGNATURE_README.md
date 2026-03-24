@@ -152,10 +152,23 @@ HDF5 plugin signatures protect against:
 - **Tampered plugins**: Detected (signature invalidates)
 - **Untrusted sources**: Rejected (keystore verification)
 
+### Signature Revocation
+
+Individual signatures can be revoked without removing the entire public key.
+Place a file named `revoked_signatures.txt` in the keystore directory. Each
+line is the 64-character hex-encoded SHA-256 hash of the raw signature bytes
+to revoke. Lines starting with `#` are comments; empty lines are ignored.
+
+```text
+# Example revoked_signatures.txt
+# SHA-256 hash of a compromised plugin's signature
+a1b2c3d4e5f6...  (64 hex characters)
+```
+
+The revocation file is optional. If absent, no signatures are revoked.
+
 ### Known Limitations
 
-- **No automatic revocation**: If a key is compromised, the public key must
-  be manually removed from all keystores
 - **No rollback protection**: Signatures prove authenticity, not freshness
 - **No expiration**: Signed plugins remain valid indefinitely
 - **Manual trust management**: Users must manage keystore contents
@@ -175,6 +188,7 @@ internet connectivity is required for signing or verification.
 | ----- | ----- | -------- |
 | "keystore is empty" | No public keys in keystore directory | Add the developer's public key to the keystore |
 | "plugin signature verification failed" | Wrong key, tampered plugin, or corrupted download | Verify you have the correct public key; re-download the plugin |
+| "plugin signature has been revoked" | Signature listed in `revoked_signatures.txt` | Remove the hash from the revocation file, or re-sign the plugin |
 | "invalid signature magic number" | Plugin is not signed | Sign the plugin with `h5sign` |
 | Keystore not found | `HDF5_PLUGIN_KEYSTORE` not set or path does not exist | Set the environment variable to a valid keystore directory |
 
