@@ -304,6 +304,20 @@ main(void)
         return EXIT_FAILURE;
     }
 
+    /* Initialize the H5PL package through a public API call so that
+     * H5PL_term_package() runs cleanup during H5close().  Without this,
+     * the package-private test functions alone would not set H5PL_init_g,
+     * so H5close() would skip keystore cleanup and the revocation test
+     * would fail (stale keystore survives the H5close/H5open cycle). */
+    {
+        unsigned mask;
+        if (H5PLget_loading_state(&mask) < 0) {
+            fprintf(stderr, "ERROR: Cannot initialize H5PL package\n");
+            H5close();
+            return EXIT_FAILURE;
+        }
+    }
+
     /* Run basic verification tests */
     test_verify_signed_plugin();
     test_verify_unsigned_plugin();
