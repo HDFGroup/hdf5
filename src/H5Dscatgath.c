@@ -1264,12 +1264,21 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
 
             if ((H5T_BKG_YES == dset_info->type_info.need_bkg) &&
                 !H5D__SCATGATH_USE_CMPD_OPT_WRITE(dset_info, io_info->sel_pieces[i]->in_place_tconv)) {
-                /* Non-const write_buf[i].  Use pointer math here to avoid const warnings.  When
-                 * there's a background buffer write_buf[i] always points inside the non-const tconv
-                 * buf so this is OK. */
-                void *tmp_write_buf =
-                    (void *)((uint8_t *)io_info->tconv_buf +
-                             ((const uint8_t *)write_bufs[i] - (const uint8_t *)io_info->tconv_buf));
+                void *tmp_write_buf;
+
+                if (io_info->sel_pieces[i]->in_place_tconv) {
+                    H5_flexible_const_ptr_t flex_buf = {.cvp = write_bufs[i]};
+
+                    tmp_write_buf = flex_buf.vp;
+                }
+                else {
+                    /* Non-const write_buf[i].  Use pointer math here to avoid const warnings.  When
+                     * there's a background buffer write_buf[i] always points inside the non-const tconv
+                     * buf so this is OK. */
+                    tmp_write_buf =
+                        (void *)((uint8_t *)io_info->tconv_buf +
+                                 ((const uint8_t *)write_bufs[i] - (const uint8_t *)io_info->tconv_buf));
+                }
 
                 /* Do the data transform before the type conversion (since
                  * transforms must be done in the memory type). */

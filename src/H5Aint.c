@@ -72,7 +72,7 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 
-static herr_t H5A__close_cb(H5VL_object_t *attr_vol_obj, void **request);
+static herr_t H5A__close_cb(void *attr_vol_obj, void **request);
 static herr_t H5A__compact_build_table_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
                                           void *_udata /*in,out*/);
 static herr_t H5A__dense_build_table_cb(const H5A_t *attr, void *_udata);
@@ -124,10 +124,10 @@ H5FL_SEQ_DEFINE_STATIC(H5A_t_ptr);
 
 /* Attribute ID class */
 static const H5I_class_t H5I_ATTR_CLS[1] = {{
-    H5I_ATTR,                 /* ID class value */
-    0,                        /* Class flags */
-    0,                        /* # of reserved IDs for class */
-    (H5I_free_t)H5A__close_cb /* Callback routine for closing objects of this class */
+    H5I_ATTR,     /* ID class value */
+    0,            /* Class flags */
+    0,            /* # of reserved IDs for class */
+    H5A__close_cb /* Callback routine for closing objects of this class */
 }};
 
 /* Flag indicating "top" of interface has been initialized */
@@ -1277,21 +1277,22 @@ H5A__shared_free(H5A_t *attr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A__close_cb(H5VL_object_t *attr_vol_obj, void **request)
+H5A__close_cb(void *attr_vol_obj, void **request)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *attr_vol_obj_p = (H5VL_object_t *)attr_vol_obj;
+    herr_t         ret_value      = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    assert(attr_vol_obj);
+    assert(attr_vol_obj_p);
 
     /* Close the attribute */
-    if (H5VL_attr_close(attr_vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
+    if (H5VL_attr_close(attr_vol_obj_p, H5P_DATASET_XFER_DEFAULT, request) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "problem closing attribute");
 
     /* Free the VOL object */
-    if (H5VL_free_object(attr_vol_obj) < 0)
+    if (H5VL_free_object(attr_vol_obj_p) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to free VOL object");
 
 done:

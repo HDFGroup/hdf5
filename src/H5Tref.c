@@ -641,11 +641,10 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
                    H5VL_object_t H5_ATTR_UNUSED *dst_file, void *dst_buf,
                    size_t H5_ATTR_NDEBUG_UNUSED dst_size, void H5_ATTR_UNUSED *bg_buf)
 {
-    H5F_t          *src_f   = NULL;
-    hid_t           file_id = H5I_INVALID_HID;
-    H5R_ref_priv_t *dst_ref = (H5R_ref_priv_t *)dst_buf;
-    H5R_ref_priv_t  tmp_ref; /* Temporary reference to decode into */
-    herr_t          ret_value = SUCCEED;
+    H5F_t         *src_f   = NULL;
+    hid_t          file_id = H5I_INVALID_HID;
+    H5R_ref_priv_t tmp_ref; /* Temporary reference to decode into */
+    herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
     H5T_REF_LOG_DEBUG("");
@@ -655,7 +654,6 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
     assert(src_size);
     assert(dst_buf);
     assert(dst_size == H5T_REF_MEM_SIZE);
-    HDcompile_assert(sizeof(*dst_ref) == sizeof(tmp_ref));
 
     /* Memory-to-memory conversion to support vlen conversion */
     if (NULL == src_file) {
@@ -736,7 +734,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
     } /* end if */
 
     /* Set output info */
-    H5MM_memcpy(dst_ref, &tmp_ref, sizeof(tmp_ref));
+    H5MM_memcpy(dst_buf, &tmp_ref, sizeof(tmp_ref));
 
 done:
     if ((file_id != H5I_INVALID_HID) && (H5I_dec_ref(file_id) < 0))

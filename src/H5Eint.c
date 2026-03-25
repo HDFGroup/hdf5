@@ -68,11 +68,11 @@ static herr_t H5E__copy_stack_entry(H5E_entry_t *dst_entry, const H5E_entry_t *s
 static herr_t H5E__set_stack_entry(H5E_error2_t *err_entry, const char *file, const char *func, unsigned line,
                                    hid_t cls_id, hid_t maj_id, hid_t min_id, const char *desc, va_list *ap);
 static herr_t H5E__clear_entries(H5E_stack_t *estack, size_t nentries);
-static herr_t H5E__unregister_class(H5E_cls_t *cls, void **request);
+static herr_t H5E__unregister_class(void *cls, void **request);
 static int    H5E__close_msg_cb(void *obj_ptr, hid_t obj_id, void *udata);
 static void   H5E__free_msg(H5E_msg_t *msg);
-static herr_t H5E__close_msg(H5E_msg_t *err, void **request);
-static herr_t H5E__close_stack(H5E_stack_t *err_stack, void **request);
+static herr_t H5E__close_msg(void *err, void **request);
+static herr_t H5E__close_stack(void *err_stack, void **request);
 
 /*********************/
 /* Package Variables */
@@ -174,26 +174,26 @@ hid_t H5E_last_min_id_g  = H5I_INVALID_HID;
 
 /* Error class ID class */
 static const H5I_class_t H5I_ERRCLS_CLS[1] = {{
-    H5I_ERROR_CLASS,                  /* ID class value */
-    0,                                /* Class flags */
-    0,                                /* # of reserved IDs for class */
-    (H5I_free_t)H5E__unregister_class /* Callback routine for closing objects of this class */
+    H5I_ERROR_CLASS,      /* ID class value */
+    0,                    /* Class flags */
+    0,                    /* # of reserved IDs for class */
+    H5E__unregister_class /* Callback routine for closing objects of this class */
 }};
 
 /* Error message ID class */
 static const H5I_class_t H5I_ERRMSG_CLS[1] = {{
-    H5I_ERROR_MSG,             /* ID class value */
-    0,                         /* Class flags */
-    0,                         /* # of reserved IDs for class */
-    (H5I_free_t)H5E__close_msg /* Callback routine for closing objects of this class */
+    H5I_ERROR_MSG, /* ID class value */
+    0,             /* Class flags */
+    0,             /* # of reserved IDs for class */
+    H5E__close_msg /* Callback routine for closing objects of this class */
 }};
 
 /* Error stack ID class */
 static const H5I_class_t H5I_ERRSTK_CLS[1] = {{
-    H5I_ERROR_STACK,             /* ID class value */
-    0,                           /* Class flags */
-    0,                           /* # of reserved IDs for class */
-    (H5I_free_t)H5E__close_stack /* Callback routine for closing objects of this class */
+    H5I_ERROR_STACK, /* ID class value */
+    0,               /* Class flags */
+    0,               /* # of reserved IDs for class */
+    H5E__close_stack /* Callback routine for closing objects of this class */
 }};
 
 /* Library's error class */
@@ -519,21 +519,22 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E__unregister_class(H5E_cls_t *cls, void H5_ATTR_UNUSED **request)
+H5E__unregister_class(void *cls, void H5_ATTR_UNUSED **request)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5E_cls_t *cls_p     = (H5E_cls_t *)cls;
+    herr_t     ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    assert(cls);
+    assert(cls_p);
 
     /* Iterate over all the messages and delete those in this error class */
-    if (H5I_iterate(H5I_ERROR_MSG, H5E__close_msg_cb, cls, false) < 0)
+    if (H5I_iterate(H5I_ERROR_MSG, H5E__close_msg_cb, cls_p, false) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_BADITER, FAIL, "unable to free all messages in this error class");
 
     /* Free error class structure */
-    if (H5E__free_class(cls) < 0)
+    if (H5E__free_class(cls_p) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTRELEASE, FAIL, "unable to free error class");
 
 done:
@@ -644,17 +645,19 @@ H5E__free_msg(H5E_msg_t *msg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E__close_msg(H5E_msg_t *err, void H5_ATTR_UNUSED **request)
+H5E__close_msg(void *err, void H5_ATTR_UNUSED **request)
 {
+    H5E_msg_t *err_p = (H5E_msg_t *)err;
+
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    assert(err);
+    assert(err_p);
 
     /* Free resources, if application registered this message */
-    if (err->app_msg)
+    if (err_p->app_msg)
         /* Free message */
-        H5E__free_msg(err);
+        H5E__free_msg(err_p);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5E__close_msg() */
@@ -804,18 +807,20 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E__close_stack(H5E_stack_t *estack, void H5_ATTR_UNUSED **request)
+H5E__close_stack(void *estack, void H5_ATTR_UNUSED **request)
 {
+    H5E_stack_t *estack_p = (H5E_stack_t *)estack;
+
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    assert(estack);
+    assert(estack_p);
 
     /* Release the stack's error information */
-    H5E__destroy_stack(estack);
+    H5E__destroy_stack(estack_p);
 
     /* Free the stack structure */
-    estack = H5FL_FREE(H5E_stack_t, estack);
+    estack_p = H5FL_FREE(H5E_stack_t, estack_p);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5E__close_stack() */

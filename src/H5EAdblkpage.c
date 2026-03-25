@@ -257,9 +257,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5EA__dblk_page_unprotect(H5EA_dblk_page_t *dblk_page, unsigned cache_flags)
+H5EA__dblk_page_unprotect(void *_dblk_page, unsigned cache_flags)
 {
-    herr_t ret_value = SUCCEED;
+    H5EA_dblk_page_t *dblk_page = (H5EA_dblk_page_t *)_dblk_page;
+    herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 

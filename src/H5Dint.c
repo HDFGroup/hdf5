@@ -84,7 +84,7 @@ static herr_t H5D__build_file_prefix(const H5D_t *dset, H5F_prefix_open_t prefix
 static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id);
 static herr_t H5D__init_storage(H5D_t *dset, bool full_overwrite, hsize_t old_dim[]);
 static herr_t H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id);
-static herr_t H5D__close_cb(H5VL_object_t *dset_vol_obj, void **request);
+static herr_t H5D__close_cb(void *dset_vol_obj, void **request);
 static herr_t H5D__use_minimized_dset_headers(H5F_t *file, bool *minimize);
 static herr_t H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc);
 static size_t H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr);
@@ -133,10 +133,10 @@ H5_WARN_LARGE_STACK_OBJECTS_ON
 
 /* Dataset ID class */
 static const H5I_class_t H5I_DATASET_CLS[1] = {{
-    H5I_DATASET,              /* ID class value */
-    0,                        /* Class flags */
-    0,                        /* # of reserved IDs for class */
-    (H5I_free_t)H5D__close_cb /* Callback routine for closing objects of this class */
+    H5I_DATASET,  /* ID class value */
+    0,            /* Class flags */
+    0,            /* # of reserved IDs for class */
+    H5D__close_cb /* Callback routine for closing objects of this class */
 }};
 
 /* Flag indicating "top" of interface has been initialized */
@@ -332,22 +332,23 @@ H5D_term_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__close_cb(H5VL_object_t *dset_vol_obj, void **request)
+H5D__close_cb(void *dset_vol_obj, void **request)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *dset_vol_obj_p = (H5VL_object_t *)dset_vol_obj;
+    herr_t         ret_value      = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    assert(dset_vol_obj);
+    assert(dset_vol_obj_p);
 
     /* Close the dataset */
-    if (H5VL_dataset_close(dset_vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
+    if (H5VL_dataset_close(dset_vol_obj_p, H5P_DATASET_XFER_DEFAULT, request) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close dataset");
 
 done:
     /* Free the VOL object */
-    if (H5VL_free_object(dset_vol_obj) < 0)
+    if (H5VL_free_object(dset_vol_obj_p) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to free VOL object");
 
     FUNC_LEAVE_NOAPI(ret_value)

@@ -624,15 +624,20 @@ H5S__all_serialize(H5S_t *space, uint8_t **p)
 static herr_t
 H5S__all_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, bool skip)
 {
-    uint32_t version;                           /* Version number */
-    H5S_t   *tmp_space = NULL;                  /* Pointer to actual dataspace to use,
-                                                   either *space or a newly allocated one */
-    herr_t         ret_value = SUCCEED;         /* return value */
-    const uint8_t *p_end     = *p + p_size - 1; /* Pointer to last valid byte in buffer */
+    const uint8_t *p_end;
+    uint32_t       version;  /* Version number */
+    H5S_t *tmp_space = NULL; /* Pointer to actual dataspace to use, either *space or a newly allocated one */
+    herr_t ret_value = SUCCEED; /* return value */
+
     FUNC_ENTER_PACKAGE
 
     assert(p);
     assert(*p);
+
+    if (skip)
+        p_end = *p;
+    else
+        p_end = *p + p_size - 1; /* Pointer to last valid byte in buffer */
 
     /* As part of the efforts to push all selection-type specific coding
        to the callbacks, the coding for the allocation of a null dataspace

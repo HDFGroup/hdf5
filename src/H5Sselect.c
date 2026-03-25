@@ -523,13 +523,21 @@ H5S_select_valid(const H5S_t *space)
 herr_t
 H5S_select_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size)
 {
-    uint32_t       sel_type;                                   /* Pointer to the selection type */
-    herr_t         ret_value = FAIL;                           /* Return value */
-    const uint8_t *p_end     = *p + p_size - 1;                /* Pointer to last valid byte in buffer */
-    bool           skip = (p_size == SIZE_MAX ? true : false); /* If p_size is unknown, skip buffer checks */
+    uint32_t       sel_type;         /* Pointer to the selection type */
+    herr_t         ret_value = FAIL; /* Return value */
+    const uint8_t *p_end     = NULL; /* Pointer to last valid byte in buffer */
+    bool           skip      = false;
+
     FUNC_ENTER_NOAPI(FAIL)
 
     assert(space);
+
+    /* If p_size is unknown, skip buffer checks */
+    skip = (p_size == SIZE_MAX ? true : false);
+    if (skip)
+        p_end = *p;
+    else
+        p_end = *p + p_size - 1;
 
     /* Selection-type specific coding is moved to the callbacks. */
 
@@ -3069,7 +3077,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S__sel_iter_close_cb(H5S_sel_iter_t *_sel_iter, void H5_ATTR_UNUSED **request)
+H5S__sel_iter_close_cb(void *_sel_iter, void H5_ATTR_UNUSED **request)
 {
     H5S_sel_iter_t *sel_iter  = (H5S_sel_iter_t *)_sel_iter; /* The selection iterator to close */
     herr_t          ret_value = SUCCEED;                     /* Return value */

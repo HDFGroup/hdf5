@@ -1490,7 +1490,7 @@ H5O__dtype_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, 
 {
     bool           skip;
     H5T_t         *dt        = NULL;
-    const uint8_t *p_end     = p + p_size - 1;
+    const uint8_t *p_end     = NULL;
     void          *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
@@ -1508,6 +1508,10 @@ H5O__dtype_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, 
      * as a signal to skip bounds checking.
      */
     skip = (p_size == SIZE_MAX ? true : false);
+    if (skip)
+        p_end = p;
+    else
+        p_end = p + p_size - 1;
 
     /* Indicate if the object header has a checksum, or if the
      * H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS flag is set */

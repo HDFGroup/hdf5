@@ -324,9 +324,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5EA__iblock_unprotect(H5EA_iblock_t *iblock, unsigned cache_flags)
+H5EA__iblock_unprotect(void *_iblock, unsigned cache_flags)
 {
-    herr_t ret_value = SUCCEED;
+    H5EA_iblock_t *iblock    = (H5EA_iblock_t *)_iblock;
+    herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
