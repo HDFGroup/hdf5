@@ -24,6 +24,7 @@ endmacro ()
 
 #-------------------------------------------------------------------------------
 option (BUILD_USER_DEFINED_LIBS "Build With User Defined Values" OFF)
+mark_as_advanced (BUILD_USER_DEFINED_LIBS)
 if (BUILD_USER_DEFINED_LIBS)
   MACRO_USER_DEFINED_LIBS ()
 endif ()

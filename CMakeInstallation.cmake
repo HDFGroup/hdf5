@@ -40,10 +40,12 @@ include (CMakePackageConfigHelpers)
 if (WIN32)
   set (PF_ENV_EXT "(x86)")
   find_program (NSIS_EXECUTABLE NSIS.exe PATHS "$ENV{ProgramFiles}\\NSIS" "$ENV{ProgramFiles${PF_ENV_EXT}}\\NSIS")
+  mark_as_advanced (NSIS_EXECUTABLE)
   if(NOT CPACK_WIX_ROOT)
     file(TO_CMAKE_PATH "$ENV{WIX}" CPACK_WIX_ROOT)
   endif ()
   find_program (WIX_EXECUTABLE candle  PATHS "${CPACK_WIX_ROOT}/bin")
+  mark_as_advanced (WIX_EXECUTABLE)
 endif ()
 
 
@@ -206,6 +208,7 @@ install (
 # Configure the HDF5_Examples.cmake file and the examples
 #-----------------------------------------------------------------------------
 option (HDF5_PACK_EXAMPLES  "Package the HDF5 Library Examples Compressed File" OFF)
+mark_as_advanced (HDF5_PACK_EXAMPLES)
 if (HDF5_PACK_EXAMPLES)
   if (DEFINED CMAKE_TOOLCHAIN_FILE)
     get_filename_component(TOOLCHAIN ${CMAKE_TOOLCHAIN_FILE} NAME)
@@ -476,6 +479,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
     set (CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE ON)
 
     find_program (DPKGSHLIB_EXE dpkg-shlibdeps)
+    mark_as_advanced (DPKGSHLIB_EXE)
     if (DPKGSHLIB_EXE)
       list (APPEND CPACK_GENERATOR "DEB")
       set (CPACK_DEBIAN_PACKAGE_SECTION "Libraries")
@@ -483,6 +487,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
     endif ()
 
     find_program (RPMBUILD_EXE rpmbuild)
+    mark_as_advanced (RPMBUILD_EXE)
     if (RPMBUILD_EXE AND NOT HDF5_ENABLE_PARALLEL)
       list (APPEND CPACK_GENERATOR "RPM")
       set (CPACK_RPM_PACKAGE_RELEASE "1")

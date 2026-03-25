@@ -26,6 +26,7 @@ if (NOT EXAMPLES_EXTERNALLY_CONFIGURED)
   include (TestBigEndian)
   if (NOT WINDOWS)
     TEST_BIG_ENDIAN (H5EXAMPLE_WORDS_BIGENDIAN)
+    mark_as_advanced (H5EXAMPLE_WORDS_BIGENDIAN)
   endif ()
 
   include (${H5EXAMPLE_CONFIG_DIR}/HDFMacros.cmake)
@@ -65,6 +66,7 @@ endif ()
 #-----------------------------------------------------------------------------
 if(NOT DEFINED _h5public_h_contents)
   find_file (_h5public_h H5public.h ${H5EXAMPLE_HDF5_INCLUDE_DIRS})
+  mark_as_advanced (H5EXAMPLE_HDF5_INCLUDE_DIRS)
   file (READ ${_h5public_h} _h5public_h_contents)
 
   string (REGEX REPLACE ".*#define[ \t]+H5_VERS_MAJOR[ \t]+([0-9]*).*$"

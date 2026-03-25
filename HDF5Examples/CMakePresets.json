@@ -48,7 +48,7 @@
       "inherits": ["ci-base", "ci-base-examples"],
       "cacheVariables": {
         "BUILD_SHARED_LIBS": "ON",
-        "USE_SHARED_LIBS": "ON"
+        "H5EXAMPLE_USE_SHARED_LIBS": "ON"
       }
     },
     {

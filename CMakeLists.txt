@@ -1101,6 +1101,7 @@ else ()
   set (_HDF5_H5CC_C_COMPILER ${CMAKE_C_COMPILER})
 endif ()
 set (HDF5_H5CC_C_COMPILER ${_HDF5_H5CC_C_COMPILER} CACHE STRING "C compiler to use in h5cc")
+mark_as_advanced (HDF5_H5CC_C_COMPILER)
 
 #-----------------------------------------------------------------------------
 # Java implementation detection for version value
@@ -1471,3 +1472,9 @@ list (REMOVE_DUPLICATES LINK_LIBS_SETTINGS)
 # Installation
 #-----------------------------------------------------------------------------
 include (CMakeInstallation.cmake)
+
+#-----------------------------------------------------------------------------
+# Hide some miscellaneous CMake variables from the default GUI
+#-----------------------------------------------------------------------------
+mark_as_advanced (FETCHCONTENT_BASE_DIR FETCHCONTENT_FULLY_DISCONNECTED FETCHCONTENT_QUIET FETCHCONTENT_UPDATES_DISCONNECTED)
+

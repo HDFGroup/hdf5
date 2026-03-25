@@ -253,7 +253,7 @@ III. Defaults in the CMakePresets.json file
 ####      "binaryDir": "${sourceParentDir}/build/${presetName}"
 ####      "name": "ci-StdShar"
 ####        "BUILD_SHARED_LIBS": "ON",
-####        "USE_SHARED_LIBS": "ON"
+####        "H5EXAMPLE_USE_SHARED_LIBS": "ON"
 ####        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
 ####        "H5EXAMPLE_BUILD_FORTRAN": "ON"
 ####        "H5EXAMPLE_BUILD_CXX": "ON"

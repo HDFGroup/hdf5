@@ -106,6 +106,7 @@
   mark_as_advanced (HDF5_TEST_SERIAL)
 
   cmake_dependent_option (HDF5_TEST_TOOLS "Execute tools tests" ON "HDF5_BUILD_TOOLS" OFF)
+  mark_as_advanced (HDF5_TEST_TOOLS)
 
   cmake_dependent_option (HDF5_TEST_EXAMPLES "Execute tests on examples" ON "HDF5_BUILD_EXAMPLES" OFF)
   mark_as_advanced (HDF5_TEST_EXAMPLES)

@@ -14,6 +14,7 @@ set (H5EXAMPLE_BUILD_HL ${HDF5_BUILD_HL_LIB} CACHE BOOL "Build High Level exampl
 set (H5EXAMPLE_ENABLE_THREADSAFE ${HDF5_ENABLE_THREADSAFE} CACHE BOOL "Enable examples thread-safety" FORCE)
 set (H5EXAMPLE_ENABLE_PARALLEL ${HDF5_ENABLE_PARALLEL} CACHE BOOL "Enable examples parallel build (requires MPI)" FORCE)
 set (H5EXAMPLE_USE_GNU_DIRS ${HDF5_USE_GNU_DIRS} CACHE BOOL "ON to use GNU Coding Standard install directory variables, OFF to use historical settings" FORCE)
+mark_as_advanced (H5EXAMPLE_USE_GNU_DIRS)
 # set PROVIDES variables for all variables that are used in conditions in HDF5Examples.
 set (HDF5_PROVIDES_FORTRAN ${HDF5_BUILD_FORTRAN} CACHE BOOL "Provides Fortran" FORCE)
 mark_as_advanced (HDF5_PROVIDES_FORTRAN)
@@ -36,10 +37,14 @@ mark_as_advanced (HDF5_PROVIDES_SUBFILING_VFD)
 
 # Preset HDF5 cache vars to this project's libraries instead of searching
 set (H5EXAMPLE_HDF5_HEADER "H5pubconf.h" CACHE STRING "Name of HDF5 header" FORCE)
+mark_as_advanced (H5EXAMPLE_HDF5_HEADER)
 # set (H5EXAMPLE_HDF5_INCLUDE_DIRS $<TARGET_PROPERTY:${HDF5_LIBSH_TARGET},INCLUDE_DIRECTORIES> CACHE PATH "HDF5 include dirs" FORCE)
 set (H5EXAMPLE_HDF5_INCLUDE_DIRS "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR}" CACHE PATH "HDF5 include dirs" FORCE)
+mark_as_advanced (H5EXAMPLE_HDF5_INCLUDE_DIRS)
 set (H5EXAMPLE_HDF5_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE STRING "HDF5 build folder" FORCE)
+mark_as_advanced (H5EXAMPLE_HDF5_DIR)
 set (EXAMPLES_EXTERNALLY_CONFIGURED ON CACHE BOOL "Examples build is used in another project" FORCE)
+mark_as_advanced (EXAMPLES_EXTERNALLY_CONFIGURED)
 
 # Set up example-specific variables
 set (EXAMPLE_VARNAME "H5")
@@ -66,8 +71,9 @@ message (STATUS "HDF5 H5_LIBVER_DIR: ${H5_LIBVER_DIR} HDF5_API_VERSION: ${HDF5_D
 # Configure linking and include directories based on shared/static build and enabled components
 if (NOT BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)
   # Static build configuration
-  set (USE_SHARED_LIBS OFF CACHE BOOL "Use Shared Libraries for Examples" FORCE)
+  set (H5EXAMPLE_USE_SHARED_LIBS OFF CACHE BOOL "Use Shared Libraries for Examples" FORCE)
   set (H5EXAMPLE_HDF5_LINK_LIBS ${HDF5_LIB_TARGET} CACHE STRING "HDF5 target" FORCE)
+  mark_as_advanced (H5EXAMPLE_HDF5_LINK_LIBS)
   if (HDF5_BUILD_HL_LIB)
     set (H5EXAMPLE_HDF5_LINK_LIBS ${H5EXAMPLE_HDF5_LINK_LIBS} ${HDF5_HL_LIB_TARGET})
     set (H5EXAMPLE_HDF5_INCLUDE_DIRS "${H5EXAMPLE_HDF5_INCLUDE_DIRS};${HDF5_HL_SRC_DIR};${HDF5_HL_SRC_BINARY_DIR}" CACHE PATH "HDF5 include dirs" FORCE)
@@ -75,6 +81,7 @@ if (NOT BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)
   if (HDF5_BUILD_FORTRAN)
     set (H5EXAMPLE_HDF5_LINK_LIBS ${H5EXAMPLE_HDF5_LINK_LIBS} ${HDF5_F90_LIB_TARGET})
     set (H5EXAMPLE_MOD_EXT "/static" CACHE STRING "Use Static Modules for Examples" FORCE)
+    mark_as_advanced (H5EXAMPLE_MOD_EXT)
     if (HDF5_BUILD_HL_LIB)
       set (H5EXAMPLE_HDF5_LINK_LIBS ${H5EXAMPLE_HDF5_LINK_LIBS} ${HDF5_HL_F90_LIB_TARGET})
     endif ()
@@ -88,8 +95,9 @@ if (NOT BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)
   endif ()
 else ()
   # Shared build configuration
-  set (USE_SHARED_LIBS ON CACHE BOOL "Use Shared Libraries for Examples" FORCE)
+  set (H5EXAMPLE_USE_SHARED_LIBS ON CACHE BOOL "Use Shared Libraries for Examples" FORCE)
   set (H5EXAMPLE_HDF5_LINK_LIBS ${HDF5_LIBSH_TARGET} CACHE STRING "HDF5 target" FORCE)
+  mark_as_advanced (H5EXAMPLE_HDF5_LINK_LIBS)
   if (HDF5_BUILD_HL_LIB)
     set (H5EXAMPLE_HDF5_LINK_LIBS ${H5EXAMPLE_HDF5_LINK_LIBS} ${HDF5_HL_LIBSH_TARGET})
     set (H5EXAMPLE_HDF5_INCLUDE_DIRS "${H5EXAMPLE_HDF5_INCLUDE_DIRS};${HDF5_HL_SRC_DIR};${HDF5_HL_SRC_BINARY_DIR}" CACHE PATH "HDF5 include dirs" FORCE)
@@ -100,6 +108,7 @@ else ()
   if (HDF5_BUILD_FORTRAN)
     set (H5EXAMPLE_HDF5_LINK_LIBS ${H5EXAMPLE_HDF5_LINK_LIBS} ${HDF5_F90_LIBSH_TARGET})
     set (H5EXAMPLE_MOD_EXT "/shared" CACHE STRING "Use Shared Modules for Examples" FORCE)
+    mark_as_advanced (H5EXAMPLE_MOD_EXT)
     if (HDF5_BUILD_HL_LIB)
       set (H5EXAMPLE_HDF5_LINK_LIBS ${H5EXAMPLE_HDF5_LINK_LIBS} ${HDF5_HL_F90_LIBSH_TARGET})
     endif ()
@@ -150,8 +159,12 @@ message (STATUS "HDF5 Example link libs: ${H5EXAMPLE_HDF5_LINK_LIBS} Includes: $
 
 # Set up tool and executable variables for use in example tests
 set (HDF5_TOOLS_DIR ${CMAKE_TEST_OUTPUT_DIRECTORY} CACHE STRING "HDF5 Directory for all Executables" FORCE)
+mark_as_advanced (HDF5_TOOLS_DIR)
 set (H5EXAMPLE_HDF5_DUMP_EXECUTABLE $<TARGET_FILE:h5dump> CACHE STRING "HDF5 h5dump target" FORCE)
+mark_as_advanced (H5EXAMPLE_HDF5_DUMP_EXECUTABLE)
 set (H5EXAMPLE_HDF5_REPACK_EXECUTABLE $<TARGET_FILE:h5repack> CACHE STRING "HDF5 h5repack target" FORCE)
+mark_as_advanced (H5EXAMPLE_HDF5_REPACK_EXECUTABLE)
 set (H5EXAMPLE_WORDS_BIGENDIAN ${H5_WORDS_BIGENDIAN} CACHE BOOL "System is Big Endian" FORCE)
+mark_as_advanced (H5EXAMPLE_WORDS_BIGENDIAN)
 
 # End of HDF5ExampleCache.cmake

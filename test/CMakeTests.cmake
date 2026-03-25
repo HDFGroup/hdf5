@@ -1000,11 +1000,13 @@ if (BUILD_SHARED_LIBS)
 endif ()
 
 option (HDF5_TEST_SHELL_SCRIPTS "Enable shell script tests" ON)
+mark_as_advanced (HDF5_TEST_SHELL_SCRIPTS)
 if (HDF5_TEST_SHELL_SCRIPTS)
   include (ShellTests.cmake)
 endif()
 
 option (ENABLE_EXTENDED_TESTS "Enable extended tests" OFF)
+mark_as_advanced (ENABLE_EXTENDED_TESTS)
 if (ENABLE_EXTENDED_TESTS)
 ##############################################################################
 ###    S W M R  T E S T S

@@ -46,21 +46,26 @@ macro (SET_HDF_OUTPUT_DIRS package_prefix)
     set (CMAKE_RUNTIME_OUTPUT_DIRECTORY
         ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all Executables."
     )
+    mark_as_advanced (CMAKE_RUNTIME_OUTPUT_DIRECTORY)
     set (CMAKE_LIBRARY_OUTPUT_DIRECTORY
         ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all Libraries"
     )
+    mark_as_advanced (CMAKE_LIBRARY_OUTPUT_DIRECTORY)
     set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
         ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all static libraries."
     )
+    mark_as_advanced (CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
     set (CMAKE_Fortran_MODULE_DIRECTORY
         ${PROJECT_BINARY_DIR}/mod CACHE PATH "Single Directory for all fortran modules."
     )
+    mark_as_advanced (CMAKE_Fortran_MODULE_DIRECTORY)
     get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
     if (_isMultiConfig)
       set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${HDF_CFG_NAME})
       set (CMAKE_PDB_OUTPUT_DIRECTORY
           ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb files."
       )
+      mark_as_advanced (CMAKE_PDB_OUTPUT_DIRECTORY)
     else ()
       set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
     endif ()
@@ -84,6 +89,7 @@ macro (SET_HDF_OUTPUT_DIRS package_prefix)
       set (CMAKE_GENERIC_PROGRAM_FILES)
     endif ()
     set (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT 0 CACHE PATH "" FORCE)
+    mark_as_advanced (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   endif ()
 endmacro ()
 
