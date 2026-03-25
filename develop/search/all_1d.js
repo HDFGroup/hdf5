@@ -401,7 +401,7 @@ var searchData=
   ['sw_5fchanges_5f1_2e10_2edox_398',['sw_changes_1.10.dox',['../sw__changes__1_810_8dox.html',1,'']]],
   ['sw_5fchanges_5f1_2e12_2edox_399',['sw_changes_1.12.dox',['../sw__changes__1_812_8dox.html',1,'']]],
   ['sw_5fchanges_5f1_2e14_2edox_400',['sw_changes_1.14.dox',['../sw__changes__1_814_8dox.html',1,'']]],
-  ['sw_5fchanges_5f2_2ex_2edox_401',['sw_changes_2.x.dox',['../sw__changes__2_8x_8dox.html',1,'']]],
+  ['sw_5fchanges_5f2_2e0_2edox_401',['sw_changes_2.0.dox',['../sw__changes__2_80_8dox.html',1,'']]],
   ['swmr_402',['SWMR',['../_s_w_m_r_t_n.html',1,'Introduction to Single-Writer/Multiple-Reader (SWMR)'],['../_s_w_m_r_t_n.html#sec_swmr_intro',1,'Introduction to SWMR'],['../rel_spec_110.html#subsubsec_rel_spec_110_feat_new_0_smr',1,'SWMR *'],['../_s_w_m_r_t_n.html#subsec_swmr_tools',1,'Tools for Working with SWMR']]],
   ['swmr_20reader_403',['SWMR Reader',['../_s_w_m_r_t_n.html#subsubsec_swmr_model_reader',1,'']]],
   ['swmr_20writer_404',['SWMR Writer',['../_s_w_m_r_t_n.html#subsubsec_swmr_model_writer',1,'']]],

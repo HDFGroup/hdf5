@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-23</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-25</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -136,96 +136,6 @@ $(function(){initNavTree('group___h5_z.html','',''); });
 <div class="contents">
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Use the functions in this module to manage HDF5 filters.</p>
-<p>User-defined filters are created by registering a filter descriptor of type <a class="el" href="_h5version_8h.html#a3f702f77f3ab031d771be3b2b4bf4fba">H5Z_class_t</a> with the library.</p>
-<p>Available filters can be read or examined at runtime.</p>
-<p>It is conceivable that filters are stateful and that that state be updated at runtime.</p>
-<p>Filters are deleted by unregistering.</p>
-<table class="doxtable">
-<tr>
-<th>Create</th><th>Read</th></tr>
-<tr valign="top">
-<td><div class="fragment"><div class="line"><span class="lineno">   10</span><span class="keywordtype">size_t</span></div>
-<div class="line"><span class="lineno">   11</span>filter(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> flags, <span class="keywordtype">size_t</span> cd_nelmts, <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> cd_values[], <span class="keywordtype">size_t</span> nbytes, <span class="keywordtype">size_t</span> *buf_size,</div>
-<div class="line"><span class="lineno">   12</span>       <span class="keywordtype">void</span> **buf)</div>
-<div class="line"><span class="lineno">   13</span>{</div>
-<div class="line"><span class="lineno">   14</span>    buf_size = 0;</div>
-<div class="line"><span class="lineno">   15</span> </div>
-<div class="line"><span class="lineno">   16</span>    <span class="keywordflow">if</span> (flags &amp; <a class="code hl_define" href="_h5_zpublic_8h.html#a843859882318f69c9b4a38d3a88e0bfb">H5Z_FLAG_REVERSE</a>) {</div>
-<div class="line"><span class="lineno">   17</span>        <span class="comment">// read data, e.g., decompress data</span></div>
-<div class="line"><span class="lineno">   18</span>        <span class="comment">// ...</span></div>
-<div class="line"><span class="lineno">   19</span>    }</div>
-<div class="line"><span class="lineno">   20</span>    <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">   21</span>        <span class="comment">// write data, e.g., compress data</span></div>
-<div class="line"><span class="lineno">   22</span>        <span class="comment">// ...</span></div>
-<div class="line"><span class="lineno">   23</span>    }</div>
-<div class="line"><span class="lineno">   24</span> </div>
-<div class="line"><span class="lineno">   25</span>    <span class="keywordflow">return</span> nbytes;</div>
-<div class="line"><span class="lineno">   26</span>}</div>
-</div><!-- fragment --> <div class="fragment"><div class="line"><span class="lineno">   35</span>    {</div>
-<div class="line"><span class="lineno">   36</span>        __label__ fail_register;</div>
-<div class="line"><span class="lineno">   37</span>        <a class="code hl_define" href="_h5version_8h.html#a3f702f77f3ab031d771be3b2b4bf4fba">H5Z_class_t</a> cls;</div>
-<div class="line"><span class="lineno">   38</span>        cls.version         = <a class="code hl_define" href="_h5_zdevelop_8h.html#acec2c757b38aefdb817ba7c7915778a9">H5Z_CLASS_T_VERS</a>;</div>
-<div class="line"><span class="lineno">   39</span>        cls.id              = 256;</div>
-<div class="line"><span class="lineno">   40</span>        cls.encoder_present = 1;</div>
-<div class="line"><span class="lineno">   41</span>        cls.decoder_present = 1;</div>
-<div class="line"><span class="lineno">   42</span>        cls.name            = <span class="stringliteral">&quot;Identity filter&quot;</span>;</div>
-<div class="line"><span class="lineno">   43</span>        cls.can_apply       = NULL;</div>
-<div class="line"><span class="lineno">   44</span>        cls.set_local       = NULL;</div>
-<div class="line"><span class="lineno">   45</span>        cls.filter          = &amp;filter;</div>
-<div class="line"><span class="lineno">   46</span> </div>
-<div class="line"><span class="lineno">   47</span>        <span class="comment">// register the filter</span></div>
-<div class="line"><span class="lineno">   48</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="#ga93145acc38c2c60d832b7a9b0123706b">H5Zregister</a>(&amp;cls) &lt; 0) {</div>
-<div class="line"><span class="lineno">   49</span>            ret_val = EXIT_FAILURE;</div>
-<div class="line"><span class="lineno">   50</span>            <span class="keywordflow">goto</span> fail_register;</div>
-<div class="line"><span class="lineno">   51</span>        }</div>
-<div class="line"><span class="lineno">   52</span> </div>
-<div class="line"><span class="lineno">   53</span>        <span class="comment">// do something with filter</span></div>
-<div class="line"><span class="lineno">   54</span>        <span class="comment">// ...</span></div>
-<div class="line"><span class="lineno">   55</span> </div>
-<div class="line"><span class="lineno">   56</span>        <span class="comment">// unregister the filter if no longer required</span></div>
-<div class="line"><span class="lineno">   57</span>        <span class="comment">// ...</span></div>
-<div class="line"><span class="lineno">   58</span> </div>
-<div class="line"><span class="lineno">   59</span>fail_register:;</div>
-<div class="line"><span class="lineno">   60</span>    }</div>
-</div><!-- fragment --> </td><td><div class="fragment"><div class="line"><span class="lineno">   64</span>    {</div>
-<div class="line"><span class="lineno">   65</span>        __label__ fail_avail;</div>
-<div class="line"><span class="lineno">   66</span> </div>
-<div class="line"><span class="lineno">   67</span>        <a class="code hl_typedef" href="_h5_zpublic_8h.html#afae8461c70d47e63be2163af23362237">H5Z_filter_t</a> flt   = <a class="code hl_define" href="_h5_zpublic_8h.html#a9e802e9612b3647e7d3ffe4ce3b8dcce">H5Z_FILTER_DEFLATE</a>;</div>
-<div class="line"><span class="lineno">   68</span>        <span class="keywordtype">unsigned</span>     flags = 0;</div>
-<div class="line"><span class="lineno">   69</span> </div>
-<div class="line"><span class="lineno">   70</span>        <span class="comment">// check if the deflate filter is available</span></div>
-<div class="line"><span class="lineno">   71</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="#ga3594e10d70739ccda55ebb55b17b50ee">H5Zfilter_avail</a>(flt) &lt; 0) {</div>
-<div class="line"><span class="lineno">   72</span>            ret_val = EXIT_FAILURE;</div>
-<div class="line"><span class="lineno">   73</span>            <span class="keywordflow">goto</span> fail_avail;</div>
-<div class="line"><span class="lineno">   74</span>        }</div>
-<div class="line"><span class="lineno">   75</span>        <span class="comment">// retrieve the deflate filter info</span></div>
-<div class="line"><span class="lineno">   76</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="#ga9ef800ceec249c8819492545def9adba">H5Zget_filter_info</a>(flt, &amp;flags) &lt; 0) {</div>
-<div class="line"><span class="lineno">   77</span>            ret_val = EXIT_FAILURE;</div>
-<div class="line"><span class="lineno">   78</span>            <span class="keywordflow">goto</span> fail_avail;</div>
-<div class="line"><span class="lineno">   79</span>        }</div>
-<div class="line"><span class="lineno">   80</span> </div>
-<div class="line"><span class="lineno">   81</span>        <span class="comment">// check if the deflate encoder or decoder is enabled</span></div>
-<div class="line"><span class="lineno">   82</span>        <span class="keywordflow">if</span> (<a class="code hl_define" href="_h5_zpublic_8h.html#ac4ec01a86fdac6619c7c3c1fcf3bf86a">H5Z_FILTER_CONFIG_ENCODE_ENABLED</a> &amp; flags)</div>
-<div class="line"><span class="lineno">   83</span>            printf(<span class="stringliteral">&quot;Deflate encoder enabled.\n&quot;</span>);</div>
-<div class="line"><span class="lineno">   84</span>        <span class="keywordflow">if</span> (<a class="code hl_define" href="_h5_zpublic_8h.html#a4dead61ceb139a3f97505d6e52eb1b8a">H5Z_FILTER_CONFIG_DECODE_ENABLED</a> &amp; flags)</div>
-<div class="line"><span class="lineno">   85</span>            printf(<span class="stringliteral">&quot;Deflate decoder enabled.\n&quot;</span>);</div>
-<div class="line"><span class="lineno">   86</span> </div>
-<div class="line"><span class="lineno">   87</span>fail_avail:;</div>
-<div class="line"><span class="lineno">   88</span>    }</div>
-</div><!-- fragment --> </td></tr>
-<tr>
-<th>Update</th><th>Delete</th></tr>
-<tr valign="top">
-<td><div class="fragment"><div class="line"><span class="lineno">   92</span>    {</div>
-<div class="line"><span class="lineno">   93</span>        <span class="comment">// N/A</span></div>
-</div><!-- fragment --> </td><td><div class="fragment"><div class="line"><span class="lineno">   97</span>    {</div>
-<div class="line"><span class="lineno">   98</span>        <span class="comment">// unregister the identity filter</span></div>
-<div class="line"><span class="lineno">   99</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="#ga6b8bcdde70c9256c50c7c62ba66380f8">H5Zunregister</a>(256) &lt; 0) {</div>
-<div class="line"><span class="lineno">  100</span>            ret_val = EXIT_FAILURE;</div>
-<div class="line"><span class="lineno">  101</span>        }</div>
-<div class="line"><span class="lineno">  102</span>    }</div>
-</div><!-- fragment --> </td></tr>
-</table>
 <p>HDF5 supports a filter pipeline that provides the capability for standard and customized raw data processing during I/O operations. HDF5 is distributed with a small set of standard filters such as compression (gzip, SZIP, and a shuffling algorithm) and error checking (Fletcher32 checksum). For further flexibility, the library allows a user application to extend the pipeline through the creation and registration of customized filters. See <a class="el" href="_h5_p_l__u_g.html#sec_filter_plugins" title="HDF5 Filter Plugins">HDF5 Filter Plugins</a></p>
 <p>The flexibility of the filter pipeline implementation enables the definition of additional filters by a user application. A filter </p><ul>
 <li>is associated with a dataset when the dataset is created, </li>

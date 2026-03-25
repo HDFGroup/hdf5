@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-23</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-25</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -1793,7 +1793,7 @@ Collection Address<sup>O</sup><br  />
 <td colspan="4">Object Index</td></tr>
 </table>
 <ul>
-<li>Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfLengthsV0" title="FMT4SizeOfLengthsV0">Size of Lengths</a>&rdquo; field in the superblock.</li>
+<li>Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0" title="FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock.</li>
 </ul>
 <table class="doxtable">
 <caption><b>Fields: Global Heap ID</b></caption>
@@ -1804,6 +1804,7 @@ Collection Address<sup>O</sup><br  />
 <tr>
 <td>ID</td><td>This field is the index of the data object within the global heap collection.</td></tr>
 </table>
+<dl class="section note"><dt>Note</dt><dd>When used in <a class="el" href="#subsec_fmt4_dataobject_storage" title="IV.B. Disk Format: Level 2B - Data Object Data Storage">Data Object Data Storage</a>, each Global Heap ID is preceded by additional fields not shown in the layout above. For variable-length data, a 4-byte unsigned integer sequence length precedes each Global Heap ID. For reference data, a 2-byte encoding header and a 4-byte unsigned integer encoded size precede each Global Heap ID.</dd></dl>
 <h2 class="doxsection"><a class="anchor" id="subsec_fmt4_infra_globalheapvds"></a>
 III.F. Disk Format: Level 1F - Global Heap Block for Virtual Datasets</h2>
 <p>The layout for the global heap block used with virtual datasets is described below. For more information on global heaps, see &ldquo; <a class="el" href="#subsec_fmt4_infra_globalheap" title="III.E. Disk Format: Level 1E - Global Heap">III.E. Disk Format: Level 1E - Global Heap</a> &rdquo;</p>
@@ -6676,7 +6677,7 @@ Note that these six fields exist only if the value for the field &ldquo;<em>Pers
 IV.B. Disk Format: Level 2B - Data Object Data Storage</h2>
 <p>The data for an object is stored separately from the header information in the file and may not actually be located in the HDF5 file itself if the header indicates that the data is stored externally. The information for each record in the object is stored according to the dimensionality of the object (indicated in the dataspace header message). Multi-dimensional array data is stored in C order; in other words, the &ldquo;last&rdquo; dimension changes fastest.</p>
 <p>Data whose elements are composed of atomic datatypes are stored in IEEE format, unless they are specifically defined as being stored in a different machine format with the architecture-type information from the datatype header message. This means that each architecture will need to [potentially] byte-swap data values into the internal representation for that particular machine.</p>
-<p>Data with a variable-length datatype is stored in the global heap of the HDF5 file. Global heap identifiers are stored in the data object storage.</p>
+<p>Data with a variable-length datatype is stored in the global heap of the HDF5 file. Each element in the data object storage is represented as a 4-byte unsigned integer sequence length followed by a <a class="el" href="#FMT4GlobalHeapID" title="FMT4GlobalHeapID">Global Heap ID</a> that identifies the heap object containing the actual variable-length data. The sequence length indicates the number of base-type elements in the variable-length sequence and is always stored as a 4-byte unsigned integer, regardless of the &ldquo;<a class="el" href="#FMT4SizeOfLengthsV0" title="FMT4SizeOfLengthsV0">Size of Lengths</a>&rdquo; field in the superblock.</p>
 <p>Data whose elements are composed of reference datatypes are stored in several different ways depending on the particular reference type involved. Object pointers are just stored as the offset of the object header being pointed to with the size of the pointer being the same number of bytes as offsets in the file.</p>
 <p>Dataset region references are stored as a heap-ID which points to the following information within the file-heap: an offset of the object pointed to, number-type information (same format as header message), dimensionality information (same format as header message), sub-set start and end information (in other words, a coordinate location for each), and field start and end names (in other words, a [pointer to the] string indicating the first field included and a [pointer to the] string name for the last field).</p>
 <p>Data of a compound datatype is stored as a contiguous stream of the items in the structure, with each item formatted according to its datatype.<br  />

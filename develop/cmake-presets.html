@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-23</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-25</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -634,7 +634,7 @@ Each platform requires a separate build with platform-specific classifiers in Ma
 </div><!-- fragment --></dd></dl>
 <dl class="section user"><dt>See Also</dt><dd><ul>
 <li><a class="el" href="_c_b__maven_artifacts.html#subsec_maven_artifacts" title="Maven Artifact Selection">Maven Artifact Selection</a> for using pre-built Maven artifacts </li>
-<li>release_docs/INSTALL_CMake.txt Section XIII for Java FFM testing details </li>
+<li>release_docs/INSTALL_CMake.md Section XIII for Java FFM testing details </li>
 <li>release_docs/README.md for comprehensive Java documentation </li>
 <li>HDF5Examples/JAVA for Java example programs</li>
 </ul>
@@ -695,9 +695,9 @@ Default CMakePresets.json Settings</h2>
 <p>The ci-PluginsVars preset sets the following cache variables (see the <a href="https://github.com/HDFGroup/hdf5/blob/develop/config/CacheURLs.cmake">https://github.com/HDFGroup/hdf5/blob/develop/config/CacheURLs.cmake</a> file for the latest versions): </p><ul>
 <li>"HDF5_ENABLE_PLUGIN_SUPPORT": "ON" </li>
 <li>"H5PL_ALLOW_EXTERNAL_SUPPORT": {"type": "STRING", "value": "TGZ"} </li>
-<li>"PLUGIN_PACKAGE_NAME": {"type": "STRING", "value": "pl"} </li>
-<li>"PLUGIN_TGZ_ORIGPATH": {"type": "STRING", "value": "hdf5_plugins download"} </li>
-<li>"PLUGIN_TGZ_NAME": {"type": "STRING", "value": "hdf5_plugins-master.tar.gz"}</li>
+<li>"HDF5_FILTER_PLUGINS_PACKAGE_NAME": {"type": "STRING", "value": "h5pl"} </li>
+<li>"HDF5_FILTER_PLUGINS_TGZ_ORIGPATH": {"type": "STRING", "value": "hdf5_plugins download"} </li>
+<li>"HDF5_FILTER_PLUGINS_TGZ_NAME": {"type": "STRING", "value": "hdf5_plugins-master.tar.gz"}</li>
 </ul>
 <p>The ci-base-plugins preset sets the following cache variables (see the <a href="https://github.com/HDFGroup/hdf5/blob/develop/config/CacheURLs.cmake">https://github.com/HDFGroup/hdf5/blob/develop/config/CacheURLs.cmake</a> file for the latest versions): </p><ul>
 <li>"BITGROOM_PACKAGE_NAME": {"type": "STRING", "value": "bitgroom"}, </li>
