@@ -148,8 +148,7 @@ H5PL_sig_decode_footer(const uint8_t *buf, size_t buf_size, H5PL_sig_footer_t *f
      * Currently only version 1 exists.  When a new version is introduced,
      * add backward-compatible decoding here (e.g. accept versions 1..N)
      * so that plugins signed with an older format remain loadable. */
-    if (footer->format_version < 1 ||
-        footer->format_version > H5PL_SIG_FORMAT_VERSION_CURRENT)
+    if (footer->format_version < 1 || footer->format_version > H5PL_SIG_FORMAT_VERSION_CURRENT)
         return false;
 
     return true;
