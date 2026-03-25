@@ -131,8 +131,8 @@ H5PL_sig_decode_footer(const uint8_t *buf, size_t buf_size, H5PL_sig_footer_t *f
 {
     const uint8_t *p = buf;
 
-    assert(buf_size >= H5PL_SIG_FOOTER_SIZE);
-    (void)buf_size; /* used only by assert */
+    if (buf_size < H5PL_SIG_FOOTER_SIZE)
+        return false;
 
     /* Decode and verify magic first */
     UINT32DECODE(p, footer->magic); /* bytes 0-3  */
@@ -144,8 +144,12 @@ H5PL_sig_decode_footer(const uint8_t *buf, size_t buf_size, H5PL_sig_footer_t *f
     footer->format_version = *p++;                  /* byte  9    */
     UINT16DECODE(p, footer->reserved);              /* bytes 10-11 */
 
-    /* Verify format version */
-    if (footer->format_version != H5PL_SIG_FORMAT_VERSION_CURRENT)
+    /* Verify format version.
+     * Currently only version 1 exists.  When a new version is introduced,
+     * add backward-compatible decoding here (e.g. accept versions 1..N)
+     * so that plugins signed with an older format remain loadable. */
+    if (footer->format_version < 1 ||
+        footer->format_version > H5PL_SIG_FORMAT_VERSION_CURRENT)
         return false;
 
     return true;
