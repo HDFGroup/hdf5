@@ -119,6 +119,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed checking of data alignment requirements in direct I/O VFD
+
+   The direct I/O VFD attempts to determine data alignment requirements for a file on file open to try and avoid extra work when data alignment isn't required. Depending on the file access flags used when opening a file, the VFD could incorrectly determine these requirements for either writes or reads, eventually leading to a possible EINVAL return value on write or read. This has been fixed by separately determining the requirements for writes and reads and being more conservative about trying to avoid data alignment requirements.
+
 ## Java Library
 
 ## Configuration
