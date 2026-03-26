@@ -520,7 +520,7 @@ H5FD__direct_check_alignment_reqs(H5FD_direct_t *file, int o_flags)
 {
     HDoff_t orig_file_size = 0;
     ssize_t io_bytes       = 0;
-    bool    changed_size   = 0;
+    bool    changed_size   = false;
     void   *buf            = NULL;
     herr_t  ret_value      = SUCCEED;
 
