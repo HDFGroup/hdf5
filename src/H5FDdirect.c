@@ -551,15 +551,16 @@ H5FD__direct_check_alignment_reqs(H5FD_direct_t *file, int o_flags)
                 HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position");
         }
 
+        /* Attempt what should be an unaligned write. If this fails and anything
+         * other than EINVAL is returned, make no assumptions about alignment
+         * requirements (default is to always ensure alignment). If it succeeds,
+         * assume alignment isn't required.
+         */
         io_bytes = HDwrite(file->fd, (void *)((uint8_t *)buf + 1), file->fa.fbsize - 1);
         if (io_bytes >= 0)
             file->fa.must_align_writes = false;
         else if (EINVAL == errno) {
             HDoff_t align_offset = 0;
-
-            /* If anything other than EINVAL was returned, make no assumptions
-             * about alignment requirements
-             */
 
             /* Seek to aligned offset past end of file if necessary */
             if ((size_t)orig_file_size % file->fa.mboundary != 0)
@@ -582,14 +583,16 @@ H5FD__direct_check_alignment_reqs(H5FD_direct_t *file, int o_flags)
     if (HDlseek(file->fd, 1, SEEK_SET) < 0)
         HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position");
 
-    /* Make no assumptions about alignment requirements when bytes_read == 0 */
+    /* Attempt what should be an unaligned read. If this fails and anything
+     * other than EINVAL is returned, make no assumptions about alignment
+     * requirements (default is to always ensure alignment). If it succeeds,
+     * assume alignment isn't required. Make no assumptions about alignment
+     * requirements when io_bytes == 0.
+     */
     io_bytes = HDread(file->fd, (void *)((uint8_t *)buf + 1), file->fa.fbsize - 1);
     if (io_bytes > 0)
         file->fa.must_align_reads = false;
     else if (io_bytes < 0 && EINVAL == errno) {
-        /* If anything other than EINVAL was returned, make no assumptions
-         * about alignment requirements
-         */
         if (HDlseek(file->fd, 0, SEEK_SET) < 0)
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position");
 
