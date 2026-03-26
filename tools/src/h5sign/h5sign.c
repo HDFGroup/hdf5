@@ -499,15 +499,6 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
         goto done;
     }
 
-    if (file_size > H5PL_MAX_PLUGIN_SIZE) {
-        fprintf(rawerrorstream, "Error: Plugin file '%s' is too large (%llu bytes)\n", plugin_path,
-                (unsigned long long)file_size);
-        fprintf(rawerrorstream, "       Maximum size is %llu bytes (1GB)\n",
-                (unsigned long long)H5PL_MAX_PLUGIN_SIZE);
-        ret_value = FAIL;
-        goto done;
-    }
-
     /* Detect already-signed files: check for HDF5 magic number in the footer */
     if (file_size >= (hsize_t)H5PL_SIG_FOOTER_SIZE) {
         uint8_t           check_buf[H5PL_SIG_FOOTER_SIZE];
@@ -566,6 +557,19 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
             ret_value = FAIL;
             goto done;
         }
+    }
+
+    /* Check binary size after any existing signature has been stripped.
+     * The verifier enforces this same limit against the binary portion of the
+     * file, so a signed file whose total on-disk size exceeds the limit but
+     * whose binary is within range must still be signable. */
+    if (file_size > (hsize_t)H5PL_MAX_PLUGIN_SIZE) {
+        fprintf(rawerrorstream, "Error: Plugin binary '%s' is too large (%llu bytes)\n", plugin_path,
+                (unsigned long long)file_size);
+        fprintf(rawerrorstream, "       Maximum binary size is %llu bytes (1GB)\n",
+                (unsigned long long)H5PL_MAX_PLUGIN_SIZE);
+        ret_value = FAIL;
+        goto done;
     }
 
     if (opt_verbose) {
