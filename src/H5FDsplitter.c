@@ -825,9 +825,16 @@ H5FD__splitter_open(const char *name, unsigned flags, hid_t splitter_fapl_id, ha
      */
     if (!file_ptr->logfp) {
         if (file_ptr->fa.log_file_path[0] != '\0') {
-            file_ptr->logfp = fopen(file_ptr->fa.log_file_path, "w");
-            if (file_ptr->logfp == NULL)
+            int log_file_fd = -1;
+
+            if ((log_file_fd = HDopen(file_ptr->fa.log_file_path, O_WRONLY | O_CREAT | O_TRUNC,
+                                      H5_POSIX_CREATE_MODE_URWGROR)) < 0)
+                HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open log file");
+
+            if (NULL == (file_ptr->logfp = HDfdopen(log_file_fd, "w"))) {
+                HDclose(log_file_fd);
                 HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open log file");
+            }
         } /* end if logfile path given */
     }     /* end if logfile pointer/handle does not exist */
 

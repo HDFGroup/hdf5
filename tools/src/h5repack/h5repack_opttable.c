@@ -28,7 +28,7 @@ init_packobject(pack_info_t *obj)
 {
     int j, k;
 
-    strcpy(obj->path, "\0");
+    obj->path[0] = '\0';
     for (j = 0; j < H5_REPACK_MAX_NFILTERS; j++) {
         obj->filter[j].filtn     = -1;
         obj->filter[j].cd_nelmts = DEFAULT_CDELEMTS;
@@ -100,21 +100,21 @@ aux_tblinsert_layout(pack_opttbl_t *table, unsigned int idx, pack_info_t *pack)
 static int
 aux_inctable(pack_opttbl_t *table, unsigned n_objs)
 {
-    unsigned u;
-    int      ret_value = 0;
+    unsigned     u;
+    pack_info_t *new_objs;
 
     table->size += n_objs;
-    table->objs = (pack_info_t *)realloc(table->objs, table->size * sizeof(pack_info_t));
-    if (table->objs == NULL) {
+    new_objs = (pack_info_t *)realloc(table->objs, table->size * sizeof(pack_info_t));
+    if (new_objs == NULL) {
         H5TOOLS_INFO("not enough memory for options table");
-        ret_value = -1;
+        return -1;
     }
-    else {
-        for (u = table->nelems; u < table->size; u++)
-            init_packobject(&table->objs[u]);
-    }
+    table->objs = new_objs;
 
-    return ret_value;
+    for (u = table->nelems; u < table->size; u++)
+        init_packobject(&table->objs[u]);
+
+    return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -215,7 +215,7 @@ options_add_layout(obj_list_t *obj_list, unsigned n_objs, pack_info_t *pack, pac
                 /* keep the grow in a temp var */
                 idx = table->nelems + added;
                 added++;
-                strcpy(table->objs[idx].path, obj_list[j].obj);
+                snprintf(table->objs[idx].path, MAX_NC_NAME, "%s", obj_list[j].obj);
                 aux_tblinsert_layout(table, idx, pack);
             }
             /* cases where we have an already inserted name but there is a new name also
@@ -227,7 +227,7 @@ options_add_layout(obj_list_t *obj_list, unsigned n_objs, pack_info_t *pack, pac
                 /* keep the grow in a temp var */
                 idx = table->nelems + added;
                 added++;
-                strcpy(table->objs[idx].path, obj_list[j].obj);
+                snprintf(table->objs[idx].path, MAX_NC_NAME, "%s", obj_list[j].obj);
                 aux_tblinsert_layout(table, idx, pack);
             }
         } /* j */
@@ -238,7 +238,7 @@ options_add_layout(obj_list_t *obj_list, unsigned n_objs, pack_info_t *pack, pac
         for (j = 0; j < n_objs; j++) {
             idx = table->nelems + added;
             added++;
-            strcpy(table->objs[idx].path, obj_list[j].obj);
+            snprintf(table->objs[idx].path, MAX_NC_NAME, "%s", obj_list[j].obj);
             aux_tblinsert_layout(table, idx, pack);
         }
     }
@@ -287,7 +287,7 @@ options_add_filter(obj_list_t *obj_list, unsigned n_objs, filter_info_t filt, pa
                 /* keep the grow in a temp var */
                 idx = table->nelems + added;
                 added++;
-                strcpy(table->objs[idx].path, obj_list[j].obj);
+                snprintf(table->objs[idx].path, MAX_NC_NAME, "%s", obj_list[j].obj);
                 aux_tblinsert_filter(table, idx, filt);
             }
             /* cases where we have an already inserted name but there is a new name also
@@ -299,7 +299,7 @@ options_add_filter(obj_list_t *obj_list, unsigned n_objs, filter_info_t filt, pa
                 /* keep the grow in a temp var */
                 idx = table->nelems + added;
                 added++;
-                strcpy(table->objs[idx].path, obj_list[j].obj);
+                snprintf(table->objs[idx].path, MAX_NC_NAME, "%s", obj_list[j].obj);
                 aux_tblinsert_filter(table, idx, filt);
             }
         } /* j */
@@ -311,7 +311,7 @@ options_add_filter(obj_list_t *obj_list, unsigned n_objs, filter_info_t filt, pa
         for (j = 0; j < n_objs; j++) {
             idx = table->nelems + added;
             added++;
-            strcpy(table->objs[idx].path, obj_list[j].obj);
+            snprintf(table->objs[idx].path, MAX_NC_NAME, "%s", obj_list[j].obj);
             aux_tblinsert_filter(table, idx, filt);
         }
     }
@@ -338,12 +338,11 @@ options_get_object(const char *path, pack_opttbl_t *table)
 
     for (i = 0; i < table->nelems; i++) {
         /* make full path (start with "/") to compare correctly  */
-        if (strncmp(table->objs[i].path, "/", 1) != 0) {
-            strcpy(tbl_path, "/");
-            strcat(tbl_path, table->objs[i].path);
+        if (table->objs[i].path[0] != '/') {
+            snprintf(tbl_path, MAX_NC_NAME + 1, "/%s", table->objs[i].path);
         }
         else
-            strcpy(tbl_path, table->objs[i].path);
+            snprintf(tbl_path, MAX_NC_NAME + 1, "%s", table->objs[i].path);
 
         /* found it */
         if (strcmp(tbl_path, path) == 0) {

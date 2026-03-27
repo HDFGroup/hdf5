@@ -199,7 +199,8 @@ H5C__log_trace_set_up(H5C_log_info_t *log_info, const char log_location[], int m
     H5C_log_trace_udata_t *trace_udata = NULL;
     char                  *file_name   = NULL;
     size_t                 n_chars;
-    herr_t                 ret_value = SUCCEED; /* Return value */
+    int                    log_file_fd = -1;
+    herr_t                 ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -238,8 +239,12 @@ H5C__log_trace_set_up(H5C_log_info_t *log_info, const char log_location[], int m
         snprintf(file_name, n_chars, "%s.%d", log_location, mpi_rank);
 
     /* Open log file and set it to be unbuffered */
-    if (NULL == (trace_udata->outfile = fopen(file_name, "w")))
+    if ((log_file_fd = HDopen(file_name, O_WRONLY | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_URWGROR)) < 0)
+        HSYS_GOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "can't create mdc log file");
+    if (NULL == (trace_udata->outfile = HDfdopen(log_file_fd, "w"))) {
+        HDclose(log_file_fd);
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "can't create mdc log file");
+    }
     setbuf(trace_udata->outfile, NULL);
 
     /* Write the header */

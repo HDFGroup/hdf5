@@ -418,13 +418,16 @@
 #define H5_POSIX_MAX_IO_BYTES SSIZE_MAX
 #endif
 
-/* POSIX I/O mode used as the third parameter to open/_open
+/* POSIX I/O modes used as the third parameter to open/_open
  * when creating a new file (O_CREAT is set).
  */
 #if defined(H5_HAVE_WIN32_API)
-#define H5_POSIX_CREATE_MODE_RW (_S_IREAD | _S_IWRITE)
+#define H5_POSIX_CREATE_MODE_RW      (_S_IREAD | _S_IWRITE)
+#define H5_POSIX_CREATE_MODE_URWGROR (_S_IREAD | _S_IWRITE)
 #else
-#define H5_POSIX_CREATE_MODE_RW 0666
+#define H5_POSIX_CREATE_MODE_RW      0666
+/* User R/W, Group R, Other R */
+#define H5_POSIX_CREATE_MODE_URWGROR (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 #endif
 
 /* Represents an empty asynchronous request handle.

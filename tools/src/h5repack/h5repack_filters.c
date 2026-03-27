@@ -57,7 +57,7 @@ aux_copy_obj(hid_t        dcpl_id,        /* dataset creation property list */
     }
 
     objout->nfilters = nfilters;
-    strcpy(objout->path, name);
+    snprintf(objout->path, MAX_NC_NAME, "%s", name);
 
     if ((layout = H5Pget_layout(dcpl_id)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "H5Pget_layout failed");

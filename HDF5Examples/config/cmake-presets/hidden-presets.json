@@ -396,9 +396,8 @@
       "name": "ci-base",
       "configurePreset": "ci-base",
       "output": {
-        "outputOnFailure": false,
-        "shortProgress": true,
-        "verbosity": "verbose"
+        "outputOnFailure": true,
+        "shortProgress": true
       },
       "hidden": true,
       "execution": {
