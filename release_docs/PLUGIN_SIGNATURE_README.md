@@ -159,6 +159,17 @@ Place a file named `revoked_signatures.txt` in the keystore directory. Each
 line is the 64-character hex-encoded SHA-256 hash of the raw signature bytes
 to revoke. Lines starting with `#` are comments; empty lines are ignored.
 
+Note: the revocation entry is **not** the raw signature itself hex-encoded.
+It is the SHA-256 digest of the raw signature bytes, represented as 64 hex
+characters (32 bytes). This provides a fixed-length identifier regardless of
+RSA key size. To compute the hash for a signed plugin:
+
+```bash
+# Extract the raw signature, then hash it
+h5sign -p my_plugin.so -v   # displays signature details
+# Use OpenSSL to compute SHA-256 of the raw signature bytes
+```
+
 ```text
 # Example revoked_signatures.txt
 # SHA-256 hash of a compromised plugin's signature
