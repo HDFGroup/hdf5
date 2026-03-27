@@ -1162,7 +1162,7 @@ a value or name difference between two attributes, subsequent attributes were no
 Configure now generates Makefiles that build in silent make mode by default. In this mode,
 compile and link lines are significantly simplified for clarity. You can opt out of this
 default with either of the following approaches:
-\li Use the <code>\--disable-silent-rules flag</code> at configure time to override the default and view actual
+\li Use the <code>\--disable-silent-rules</code> flag at configure time to override the default and view actual
     compile and link lines during the build.
 \li Use the make command with the <code>V=1</code> option to run a verbose make.
 

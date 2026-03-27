@@ -26,7 +26,7 @@
  *  <h4>h5mkgrp [OPTIONS] FILE GROUP</h4>
  *
  * \subsection subsec_cltools_h5mkgrp_error Error Report Option
- * \li<strong>\--enable-error-stack</strong> Prints messages from the HDF5 error stack as they occur.
+ * \li <strong>\--enable-error-stack</strong> Prints messages from the HDF5 error stack as they occur.
  *            Optional value 2 also prints file open errors, <code>\--enable-error-stack=2</code>.
  *
  * \subsection subsec_cltools_h5mkgrp_options Options

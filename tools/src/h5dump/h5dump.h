@@ -42,10 +42,12 @@
  * \li <strong>\--filedriver=D</strong> Specify which driver to open the file with
  * \li <strong>\--output=F</strong>   Output raw data into file F
  * \li <strong>\--binary=B</strong>   Binary file output, of form B
- * \li <strong>\--ddl=F</strong>      Output ddl text into file F Use blank(empty) filename F to suppress ddl display
+ * \li <strong>\--ddl=F</strong>      Output ddl text into file F
+ *                                    Use blank(empty) filename F to suppress ddl display
  * \li <strong>\--page-buffer-size=N</strong> Set the page buffer cache size, N=non-negative integers
  * \li <strong>\--endpoint-url=P</strong> Supply S3 endpoint url information to "ros3" vfd.
- *                                        P is the AWS service endpoint. Has no effect if filedriver is not "ros3".
+ *                                        P is the AWS service endpoint.
+ *                                        Has no effect if filedriver is not "ros3".
  * \li <strong>\--s3-cred=\<cred\></strong>   Supply S3 authentication information to "ros3" vfd.
  *                                            \code <cred> :: "(<aws-region>,<access-id>,<access-key>)" \endcode
  *                                            \code <cred> :: "(<aws-region>,<access-id>,<access-key>,<session-token>)" \endcode
@@ -61,7 +63,7 @@
  *                                   If none of the above options are used to specify a VOL, then the VOL named by
  *                                   \b HDF5_VOL_CONNECTOR (or the native VOL connector, if that environment variable
  *                                   is unset) will be used
- * \li<strong>\--vfd-value</strong> Value (ID) of the VFL driver to use for opening the HDF5 file specified
+ * \li <strong>\--vfd-value</strong> Value (ID) of the VFL driver to use for opening the HDF5 file specified
  * \li <strong>\--vfd-name</strong> Name of the VFL driver to use for opening the HDF5 file specified
  * \li <strong>\--vfd-info</strong> VFD-specific info to pass to the VFL driver used for
  *                                    opening the HDF5 file specified
@@ -126,10 +128,10 @@
  *  \b START - is a list of integers, the number of which are equal to the
  *      number of dimensions in the dataspace being queried.<br />
  * \li <strong>\--stride=STRIDE</strong>  Hyperslab stride
- *  \b COUNT - is a list of integers, the number of which are equal to the
+ *  \b STRIDE - is a list of integers, the number of which are equal to the
  *      number of dimensions in the dataspace being queried.<br />
  * \li <strong>\--count=COUNT</strong>    Number of blocks to include in selection
- *  \b STRIDE - is a list of integers, the number of which are equal to the
+ *  \b COUNT - is a list of integers, the number of which are equal to the
  *      number of dimensions in the dataspace being queried.<br />
  * \li <strong>\--block=BLOCK</strong>    Size of block in hyperslab
  *  \b BLOCK - is a list of integers, the number of which are equal to the
