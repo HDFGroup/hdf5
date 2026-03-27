@@ -129,7 +129,7 @@ jobs:
       shell: pwsh
       run: |
         Copy-Item "C:\Program Files\OpenSSL\bin\libcrypto-3-x64.dll" build\bin\${{ matrix.config.build_type }}\
-        Copy-Item "C:\Program Files\OpenSSL\bin\libssl-3-x64.dll" build\bin\${{ matrix.config.build_type }}\"
+        Copy-Item "C:\Program Files\OpenSSL\bin\libssl-3-x64.dll" build\bin\${{ matrix.config.build_type }}\
 
     - name: Run Tests
       shell: bash
