@@ -249,10 +249,9 @@ h5dsget_label_c(hid_t_f *did, int_f *idx, _fcd label, size_t_f *size)
      */
 
     HD5packFstring(c_label, _fcdtocp(label), (size_t)*size);
-
-done:
     *size = (size_t_f)size_c; /* Don't subtract '1'  because H5DSget_label doesn't include the
                                * trailing NULL in the length calculation, Ref. HDFFV-7596 */
+done:
     if (c_label)
         free(c_label);
     return ret_value;
