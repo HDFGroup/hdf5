@@ -42,7 +42,9 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## Java Enhancements:
 
-  
+- Java dependency JAR paths are now configurable CMake cache variables, allowing system-provided JARs to be used in place of the bundled copies.
+
+
 ## Acknowledgements: 
 
 We would like to thank the many HDF5 community members who contributed to this release of HDF5.
@@ -110,6 +112,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 ## C++ Library
 
 ## Java Library
+
+### Java dependency JAR paths are now user-configurable
+
+   The CMake variables `HDF5_JAVA_LOGGING_JAR`, `HDF5_JAVA_LOGGING_NOP_JAR`, `HDF5_JAVA_LOGGING_SIMPLE_JAR`, `HDF5_JAVA_JUNIT_JAR`, and `HDF5_JAVA_HAMCREST_JAR` are now CMake cache variables with the bundled JARs as defaults. Users can override these at configure time to use system-provided JARs. See `INSTALL_CMake_options.md` for details.
 
 ## Tools
 
