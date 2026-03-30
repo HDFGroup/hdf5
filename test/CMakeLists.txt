@@ -438,6 +438,7 @@ set (H5_TESTS
     cork
     swmr
     vol
+    vol_wrap_ctx
     timer
     cmpd_dtransform
     event_set

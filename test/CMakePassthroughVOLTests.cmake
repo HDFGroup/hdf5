@@ -75,6 +75,7 @@ add_custom_target (HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by H
       fheap
       big
       vol
+      vol_wrap_ctx
       error_test
       err_compat
       tcheck_version
