@@ -8110,8 +8110,8 @@ The following information exists only when the chunk is filtered. In other words
   <td>Min Elements</td>
 </tr>
 <tr>
-  <td colspan="2">Page Bits</td>
-  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+  <td colspan="1">Page Bits</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
 </table>
 
