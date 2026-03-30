@@ -25,6 +25,41 @@ set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_JAVA_INCLUDE_DIR
 
 set (CMAKE_JAVA_INCLUDE_PATH "")
 
+#-----------------------------------------------------------------------------
+# Configurable paths for Java dependency JARs
+#-----------------------------------------------------------------------------
+set (HDF5_JAVA_LOGGING_JAR        ${HDF5_JAVA_LIB_DIR}/slf4j-api-2.0.16.jar        CACHE FILEPATH "Path to SLF4J API jar (used at compile and runtime)")
+set (HDF5_JAVA_LOGGING_NOP_JAR    ${HDF5_JAVA_LIB_DIR}/ext/slf4j-nop-2.0.16.jar    CACHE FILEPATH "Path to SLF4J NOP binding jar (suppresses logging when no other backend is present)")
+set (HDF5_JAVA_LOGGING_SIMPLE_JAR ${HDF5_JAVA_LIB_DIR}/ext/slf4j-simple-2.0.16.jar CACHE FILEPATH "Path to SLF4J simple binding jar (used in tests for basic stdout logging)")
+set (HDF5_JAVA_JUNIT_JAR          ${HDF5_JAVA_LIB_DIR}/org.junit.jar   CACHE FILEPATH "Path to JUnit 4 jar (test-only dependency)")
+set (HDF5_JAVA_HAMCREST_JAR       ${HDF5_JAVA_LIB_DIR}/org.hamcrest.jar CACHE FILEPATH "Path to Hamcrest jar (test-only dependency, required by JUnit 4)")
+
+#-----------------------------------------------------------------------------
+# Validate that all required JAR paths exist
+#-----------------------------------------------------------------------------
+set (_HDF5_REQUIRED_JAVA_JARS
+    HDF5_JAVA_LOGGING_JAR
+    HDF5_JAVA_LOGGING_NOP_JAR
+    HDF5_JAVA_LOGGING_SIMPLE_JAR
+)
+if (NOT HDF5_EXTERNALLY_CONFIGURED AND BUILD_TESTING)
+  list (APPEND _HDF5_REQUIRED_JAVA_JARS
+      HDF5_JAVA_JUNIT_JAR
+      HDF5_JAVA_HAMCREST_JAR
+  )
+endif ()
+foreach (_jar_var IN LISTS _HDF5_REQUIRED_JAVA_JARS)
+  if (DEFINED ${_jar_var} AND NOT "${${_jar_var}}" STREQUAL "")
+    if (NOT EXISTS "${${_jar_var}}")
+      message (FATAL_ERROR
+          "Configured JAR path '${${_jar_var}}' for cache variable "
+          "'${_jar_var}' does not exist. Please set -D${_jar_var}=<valid-path>."
+      )
+    endif ()
+  endif ()
+endforeach ()
+unset (_HDF5_REQUIRED_JAVA_JARS)
+
 if (Java_VERSION_STRING VERSION_GREATER_EQUAL "25.0.0")
   if (HDF5_ENABLE_JNI)
     set (HDF5_JAVA_USE_FFM FALSE)
