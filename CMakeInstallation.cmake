@@ -112,9 +112,9 @@ if (HDF5_BUILD_JAVA)
     set (HDF5_JARHDF5_JAR_NAME "jarhdf5-${HDF5_PACKAGE_VERSION}.jar")
     set (HDF5_JAVAHDF5_JAR_NAME "javahdf5-${HDF5_PACKAGE_VERSION}.jar")
   endif ()
-  # slf4j JAR names (these are dependencies, version shouldn't change with SNAPSHOT)
-  set (HDF5_SLF4J_API_JAR_NAME "slf4j-api-2.0.16.jar")
-  set (HDF5_SLF4J_NOP_JAR_NAME "slf4j-nop-2.0.16.jar")
+  # slf4j JAR names derived from configured paths so overrides are reflected in the exported config
+  get_filename_component (HDF5_SLF4J_API_JAR_NAME ${HDF5_JAVA_LOGGING_JAR} NAME)
+  get_filename_component (HDF5_SLF4J_NOP_JAR_NAME ${HDF5_JAVA_LOGGING_NOP_JAR} NAME)
 endif ()
 
 #-----------------------------------------------------------------------------
