@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-30</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-31</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -161,20 +161,20 @@ File Content and Structure</h1>
 </ul>
 <h2 class="doxsection"><a class="anchor" id="subsecViewToolsViewContent_h5dump"></a>
 h5dump</h2>
-<p>The <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> tool dumps or displays the contents of an HDF5 file (textually). By default if you specify no options, <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> will display the entire contents of a file. There are many <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> options for examining specific details of a file. To see all of the available <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> options, specify the <code style="background-color:whitesmoke;">-h</code> or <code style="background-color:whitesmoke;">&ndash;help</code> option: </p><div class="fragment"><div class="line">h5dump -h</div>
+<p>The <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> tool dumps or displays the contents of an HDF5 file (textually). By default if you specify no options, <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> will display the entire contents of a file. There are many <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> options for examining specific details of a file. To see all of the available <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> options, specify the <code style="background-color:whitesmoke;">-h</code> or <code style="background-color:whitesmoke;">--help</code> option: </p><div class="fragment"><div class="line">h5dump -h</div>
 </div><!-- fragment --><p>The following <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> options can be helpful in viewing the content and structure of a file: </p><table class="doxtable">
 <tr>
 <th>Option</th><th>Description</th><th>Comment</th></tr>
 <tr>
-<td>-n, &ndash;contents</td><td>Displays a list of the objects in a file</td><td>See <a class="el" href="#subsubsecViewToolsViewContent_h5dumpEx1" title="Example 1">Example 1</a></td></tr>
+<td>-n, --contents</td><td>Displays a list of the objects in a file</td><td>See <a class="el" href="#subsubsecViewToolsViewContent_h5dumpEx1" title="Example 1">Example 1</a></td></tr>
 <tr>
-<td>-n 1, &ndash;contents=1</td><td>Displays a list of the objects and attributes in a file</td><td>See <a class="el" href="#subsubsecViewToolsViewAttr_h5dumpEx6" title="Example 6">Example 6</a></td></tr>
+<td>-n 1, --contents=1</td><td>Displays a list of the objects and attributes in a file</td><td>See <a class="el" href="#subsubsecViewToolsViewAttr_h5dumpEx6" title="Example 6">Example 6</a></td></tr>
 <tr>
-<td>-H, &ndash;header</td><td>Displays header information only (no data)</td><td>See <a class="el" href="#subsubsecViewToolsViewContent_h5dumpEx2" title="Example 2">Example 2</a></td></tr>
+<td>-H, --header</td><td>Displays header information only (no data)</td><td>See <a class="el" href="#subsubsecViewToolsViewContent_h5dumpEx2" title="Example 2">Example 2</a></td></tr>
 <tr>
-<td>-A 0, &ndash;onlyattr=0</td><td>Suppresses the display of attributes</td><td>See <a class="el" href="#subsubsecViewToolsViewContent_h5dumpEx2" title="Example 2">Example 2</a></td></tr>
+<td>-A 0, --onlyattr=0</td><td>Suppresses the display of attributes</td><td>See <a class="el" href="#subsubsecViewToolsViewContent_h5dumpEx2" title="Example 2">Example 2</a></td></tr>
 <tr>
-<td>-N P, &ndash;any_path=P</td><td>Displays any object or attribute that matches path P</td><td>See <a class="el" href="#subsubsecViewToolsViewAttr_h5dumpEx6" title="Example 6">Example 6</a></td></tr>
+<td>-N P, --any_path=P</td><td>Displays any object or attribute that matches path P</td><td>See <a class="el" href="#subsubsecViewToolsViewAttr_h5dumpEx6" title="Example 6">Example 6</a></td></tr>
 </table>
 <h3 class="doxsection"><a class="anchor" id="subsubsecViewToolsViewContent_h5dumpEx1"></a>
 Example 1</h3>
@@ -289,15 +289,15 @@ h5dump</h2>
 <tr>
 <th>Option</th><th>Description</th><th>Comment</th></tr>
 <tr>
-<td>-d D, &ndash;dataset=D </td><td>Displays dataset D </td><td>See <a class="el" href="#subsubsecViewToolsViewDset_h5dumpEx4" title="Example 4">Example 4</a> </td></tr>
+<td>-d D, --dataset=D </td><td>Displays dataset D </td><td>See <a class="el" href="#subsubsecViewToolsViewDset_h5dumpEx4" title="Example 4">Example 4</a> </td></tr>
 <tr>
-<td>-H, &ndash;header </td><td>Displays header information only </td><td>See <a class="el" href="#subsubsecViewToolsViewDset_h5dumpEx4" title="Example 4">Example 4</a> </td></tr>
+<td>-H, --header </td><td>Displays header information only </td><td>See <a class="el" href="#subsubsecViewToolsViewDset_h5dumpEx4" title="Example 4">Example 4</a> </td></tr>
 <tr>
-<td>-p, &ndash;properties </td><td>Displays dataset filters, storage layout, and fill value properties </td><td>See <a class="el" href="#subsubsecViewToolsViewDset_h5dumpEx5" title="Example 5">Example 5</a> </td></tr>
+<td>-p, --properties </td><td>Displays dataset filters, storage layout, and fill value properties </td><td>See <a class="el" href="#subsubsecViewToolsViewDset_h5dumpEx5" title="Example 5">Example 5</a> </td></tr>
 <tr>
-<td>-A 0, &ndash;onlyattr=0 </td><td>Suppresses the display of attributes </td><td>See <a class="el" href="#subsubsecViewToolsViewContent_h5dumpEx2" title="Example 2">Example 2</a> </td></tr>
+<td>-A 0, --onlyattr=0 </td><td>Suppresses the display of attributes </td><td>See <a class="el" href="#subsubsecViewToolsViewContent_h5dumpEx2" title="Example 2">Example 2</a> </td></tr>
 <tr>
-<td>-N P, &ndash;any_path=P </td><td>Displays any object or attribute that matches path P </td><td>See <a class="el" href="#subsubsecViewToolsViewAttr_h5dumpEx6" title="Example 6">Example 6</a> </td></tr>
+<td>-N P, --any_path=P </td><td>Displays any object or attribute that matches path P </td><td>See <a class="el" href="#subsubsecViewToolsViewAttr_h5dumpEx6" title="Example 6">Example 6</a> </td></tr>
 </table>
 <h3 class="doxsection"><a class="anchor" id="subsubsecViewToolsViewDset_h5dumpEx4"></a>
 Example 4</h3>
@@ -359,9 +359,9 @@ h5ls</h2>
 <tr>
 <th>Option</th><th>Description</th></tr>
 <tr>
-<td>-v, &ndash;verbose </td><td>Generates verbose output (lists dataset properties, attributes and attribute values, but no dataset values) </td></tr>
+<td>-v, --verbose </td><td>Generates verbose output (lists dataset properties, attributes and attribute values, but no dataset values) </td></tr>
 <tr>
-<td>-d, &ndash;data </td><td>Displays dataset values </td></tr>
+<td>-d, --data </td><td>Displays dataset values </td></tr>
 </table>
 <p>The output of using <code style="background-color:whitesmoke;">-v</code> is shown below: </p><div class="fragment"><div class="line">$ h5ls -v groups.h5/MyGroup/Group_A/dset2</div>
 <div class="line">Opened <span class="stringliteral">&quot;groups.h5&quot;</span> with sec2 driver.</div>
@@ -388,11 +388,11 @@ h5dump</h2>
 <tr>
 <th>Option</th><th>Description</th></tr>
 <tr>
-<td>-g G, &ndash;group=G </td><td>Displays group G and its members </td></tr>
+<td>-g G, --group=G </td><td>Displays group G and its members </td></tr>
 <tr>
-<td>-H, &ndash;header </td><td>Displays header information only </td></tr>
+<td>-H, --header </td><td>Displays header information only </td></tr>
 <tr>
-<td>-A 0, &ndash;onlyattr=0 </td><td>Suppresses the display of attributes </td></tr>
+<td>-A 0, --onlyattr=0 </td><td>Suppresses the display of attributes </td></tr>
 </table>
 <p>To view the contents of the <code style="background-color:whitesmoke;">HDFEOS</code> group in the OMI file mentioned previously, you can specify the path and name of the group as follows: </p><div class="fragment"><div class="line">h5dump -g <span class="stringliteral">&quot;/HDFEOS&quot;</span> -H -A 0 OMI-Aura.he5</div>
 </div><!-- fragment --><p>The <code style="background-color:whitesmoke;">-A 0</code> option suppresses attributes and <code style="background-color:whitesmoke;">-H</code> suppresses printing of data values: </p><div class="fragment"><div class="line">HDF5 <span class="stringliteral">&quot;OMI-Aura.he5&quot;</span> {</div>
@@ -521,15 +521,15 @@ h5dump</h2>
 <tr>
 <th>Option</th><th>Description</th></tr>
 <tr>
-<td>-d D, &ndash;dataset=D </td><td>Dataset D </td></tr>
+<td>-d D, --dataset=D </td><td>Dataset D </td></tr>
 <tr>
-<td>-s START, &ndash;start=START </td><td>Offset or start of subsetting selection </td></tr>
+<td>-s START, --start=START </td><td>Offset or start of subsetting selection </td></tr>
 <tr>
-<td>-S STRIDE, &ndash;stride=STRIDE </td><td>Stride (sampling along a dimension). The default (unspecified, or 1) selects every element along a dimension, a value of 2 selects every other element, a value of 3 selects every third element, ... </td></tr>
+<td>-S STRIDE, --stride=STRIDE </td><td>Stride (sampling along a dimension). The default (unspecified, or 1) selects every element along a dimension, a value of 2 selects every other element, a value of 3 selects every third element, ... </td></tr>
 <tr>
-<td>-c COUNT, &ndash;count=COUNT </td><td>Number of blocks to include in the selection </td></tr>
+<td>-c COUNT, --count=COUNT </td><td>Number of blocks to include in the selection </td></tr>
 <tr>
-<td>-k BLOCK, &ndash;block=BLOCK </td><td>Size of the block in a hyperslab. The default (unspecified, or 1) is for the block size to be the size of a single element. </td></tr>
+<td>-k BLOCK, --block=BLOCK </td><td>Size of the block in a hyperslab. The default (unspecified, or 1) is for the block size to be the size of a single element. </td></tr>
 </table>
 <p>The <code style="background-color:whitesmoke;">START (s)</code>, <code style="background-color:whitesmoke;">STRIDE (S)</code>, <code style="background-color:whitesmoke;">COUNT (c)</code>, and <code style="background-color:whitesmoke;">BLOCK (k)</code> options define the shape and size of the selection. They are arrays with the same number of dimensions as the rank of the dataset's dataspace, and they all work together to define the selection. A change to one of these arrays can affect the others.</p>
 <p>When specifying these <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> options, a comma is used as the delimiter for each dimension in the option value. For example, with a 2-dimensional dataset, the option value is specified as "H,W", where H is the height and W is the width. If the offset is 0 for both dimensions, then <code style="background-color:whitesmoke;">START</code> would be specified as follows: </p><div class="fragment"><div class="line">-s <span class="stringliteral">&quot;0,0&quot;</span></div>

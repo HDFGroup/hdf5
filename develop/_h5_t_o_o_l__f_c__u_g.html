@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-30</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-31</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -146,21 +146,21 @@ Usage</h2>
 <h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5format_convert_error"></a>
 Error Report Option</h2>
 <ul>
-<li><b>&ndash;enable-error-stack</b> Prints messages from the HDF5 error stack as they occur. Optional value 2 also prints file open errors, &ndash;enable-error-stack=2.</li>
+<li><b>--enable-error-stack</b> Prints messages from the HDF5 error stack as they occur. Optional value 2 also prints file open errors, <code>--enable-error-stack=2</code>.</li>
 </ul>
 <h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5format_convert_options"></a>
 Options</h2>
 <ul>
-<li><b>&ndash;help</b> Print a usage message and exit </li>
-<li><b>&ndash;version</b> Print the library version number and exit </li>
-<li><b>&ndash;verbose</b> Turn on verbose mode </li>
-<li><b>&ndash;dname=dataset_name</b> Pathname for the dataset </li>
-<li><b>&ndash;noop</b> Perform all the steps except the actual conversion</li>
+<li><b>--help</b> Print a usage message and exit </li>
+<li><b>--version</b> Print the library version number and exit </li>
+<li><b>--verbose</b> Turn on verbose mode </li>
+<li><b>--dname=dataset_name</b> Pathname for the dataset </li>
+<li><b>--noop</b> Perform all the steps except the actual conversion</li>
 </ul>
 <h3 class="doxsection"><a class="anchor" id="subsubsec_cltools_h5format_convert_examples"></a>
 Usage Examples</h3>
 <ul>
-<li>1) h5format_convert &ndash;dname=/group/dataset file_name <pre class="fragment"> Convert the dataset &lt;/group/dataset&gt; in the HDF5 file &lt;file_name&gt;:
+<li>1) h5format_convert --dname=/group/dataset file_name <pre class="fragment"> Convert the dataset &lt;/group/dataset&gt; in the HDF5 file &lt;file_name&gt;:
  - chunked dataset: convert the chunk indexing type to version 1 B-tree
  - compact/contiguous dataset: downgrade the layout version to 3
  - virtual dataset: no action
@@ -174,7 +174,7 @@ Usage Examples</h3>
 </pre></li>
 </ul>
 <ul>
-<li>3) h5format_convert &ndash;noop &ndash;dname=/group/dataset file_name <pre class="fragment"> Go through all the steps except the actual conversion when
+<li>3) h5format_convert --noop --dname=/group/dataset file_name <pre class="fragment"> Go through all the steps except the actual conversion when
  converting the dataset &lt;/group/dataset&gt; in the HDF5 file &lt;file_name&gt;.
 </pre></li>
 </ul>

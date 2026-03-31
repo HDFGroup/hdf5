@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-30</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-31</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -416,11 +416,11 @@ Release 1.10.2 versus 1.10.1</h2>
 <p>See the Release.txt file for details.</p>
 <h4>Tools</h4>
 <p>New options were added to the <a class="el" href="_h5_t_o_o_l__c_r__u_g.html#sec_cltools_h5clear" title="h5clear">h5clear</a> utility: </p><ul>
-<li><code>&ndash;filesize</code> - Print the file's EOA and EOF </li>
-<li><code>&ndash;increment=C</code> - Set the file's EOA to the maximum of <code>(EOA, EOF) + C</code> for the file <code>C is &gt;= 0</code>; C is optional and will default to 1M when not set</li>
+<li><code>--filesize</code> - Print the file's EOA and EOF </li>
+<li><code>--increment=C</code> - Set the file's EOA to the maximum of <code>(EOA, EOF) + C</code> for the file <code>C is &gt;= 0</code>; C is optional and will default to 1M when not set</li>
 </ul>
 <p>A new option was added to <a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> </p><ul>
-<li><code>&ndash;enable-error-stack</code> - Enable the error stack</li>
+<li><code>--enable-error-stack</code> - Enable the error stack</li>
 </ul>
 <h2 class="doxsection"><a class="anchor" id="subsec_rel_spec_110_change_2versus1_compat"></a>
 Compatibility Notes and Report</h2>
@@ -678,7 +678,7 @@ Release 1.10.0 versus Release 1.8.16</h2>
 <li>Integration into Main HDF5 Library - The Java HDF5 JNI library has been integrated into the HDF5 repository.</li>
 </ul>
 <p><b>Configure option:</b> </p><ul>
-<li><code>&ndash;enable-java</code></li>
+<li><code>--enable-java</code></li>
 </ul>
 <p><b>CMake option:</b> </p><ul>
 <li><code>-DHDF5_BUILD_JAVA:BOOL=ON</code></li>
@@ -699,7 +699,7 @@ API Compatibility</h2>
 <p>See <a class="el" href="api-compat-macros.html" title="API Compatibility Macros">API Compatibility Macros</a> for details on the following.</p>
 <h4>New API Compatibility Flag</h4>
 <p>A new v18 flag was added enabling the building of HDF5 such that the default API is compatible with the HDF5 Release 1.8.x API: </p><ul>
-<li><code>&ndash;with-default-api-version=v18</code></li>
+<li><code>--with-default-api-version=v18</code></li>
 </ul>
 <h4>New versioned functions and associated compatibility macros</h4>
 <p>Two functions and a struct have been converted to a versioned form in this release. Compatibility macros have been created for each. </p><ul>

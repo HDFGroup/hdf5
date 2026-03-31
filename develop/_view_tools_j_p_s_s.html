@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-30</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-31</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -248,7 +248,7 @@ Viewing the User Block</h1>
 <tr>
 <td><a class="el" href="_h5_t_o_o_l__j_a_m__u_g.html#sec_cltools_h5unjam" title="h5unjam">h5unjam</a> </td><td>Extracts a user block from an HDF5 file </td></tr>
 <tr>
-<td><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> </td><td>The -B (&ndash;superblock) option displays the size of the user block in an HDF5 file </td></tr>
+<td><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> </td><td>The -B (--superblock) option displays the size of the user block in an HDF5 file </td></tr>
 </table>
 <h2 class="doxsection"><a class="anchor" id="subsecViewToolsJPSSView_h5unjam"></a>
 h5unjam</h2>
@@ -258,7 +258,7 @@ h5unjam</h2>
 </div><!-- fragment --><p>The input HDF5 file remains unchanged. The output HDF5 file will not contain the user block. The <code style="background-color:whitesmoke;">UB.xml</code> file contains the user block which can be viewed with a browser.</p>
 <h2 class="doxsection"><a class="anchor" id="subsecViewToolsJPSSView_h5dump"></a>
 h5dump</h2>
-<p>The <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> utility has the <code style="background-color:whitesmoke;">-B (&ndash;superblock)</code> option for displaying the superblock in an HDF5 file. The superblock contains information about the file such as the file signature, file consistency flags, the number of bytes to store addresses and size of an object, as well as the size of the user block: </p><div class="fragment"><div class="line">h5dump -B (--superblock)</div>
+<p>The <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> utility has the <code style="background-color:whitesmoke;">-B (--superblock)</code> option for displaying the superblock in an HDF5 file. The superblock contains information about the file such as the file signature, file consistency flags, the number of bytes to store addresses and size of an object, as well as the size of the user block: </p><div class="fragment"><div class="line">h5dump -B (--superblock)</div>
 </div><!-- fragment --><p>Below is an example (Unix): </p><div class="fragment"><div class="line">$ h5dump -B -H SVM09_npp_d20120229_t0849107_e0854511_b01759_c20120229145452682127_noaa_ops.h5 | more</div>
 <div class="line">HDF5 <span class="stringliteral">&quot;SVM09_npp_d20120229_t0849107_e0854511_b01759_c20120229145452682127_noaa_ops.h5&quot;</span> {</div>
 <div class="line">SUPER_BLOCK {</div>
@@ -300,13 +300,13 @@ h5dump</h2>
 <tr>
 <th>Option</th><th>Description</th></tr>
 <tr>
-<td>-H, &ndash;header </td><td>Prints header (metadata) information only </td></tr>
+<td>-H, --header </td><td>Prints header (metadata) information only </td></tr>
 <tr>
-<td>-d D, &ndash;dataset=D </td><td>Specifies the granule dataset </td></tr>
+<td>-d D, --dataset=D </td><td>Specifies the granule dataset </td></tr>
 <tr>
-<td>-A 0, &ndash;onlyattr=0 </td><td>Suppresses attributes </td></tr>
+<td>-A 0, --onlyattr=0 </td><td>Suppresses attributes </td></tr>
 <tr>
-<td>-p, &ndash;properties </td><td>Show properties of datasets (See Properties) </td></tr>
+<td>-p, --properties </td><td>Show properties of datasets (See Properties) </td></tr>
 </table>
 <p>You would specify the dataset (<code style="background-color:whitesmoke;">-d D</code>) and the <code style="background-color:whitesmoke;">-H</code> options to view the metadata associated with a specific granule. There are many attributes associated with a granule and <code style="background-color:whitesmoke;">-A 0</code> can be used to suppress those.</p>
 <p>For example: </p><div class="fragment"><div class="line">h5dump -H -A 0 -d <span class="stringliteral">&quot;/Data_Products/VIIRS-M9-SDR/VIIRS-M9-SDR_Gran_0&quot;</span> </div>

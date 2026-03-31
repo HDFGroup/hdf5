@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-30</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-31</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -149,55 +149,55 @@ file/OBJECT</h2>
 <h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5ls_error"></a>
 Error Report Option</h2>
 <ul>
-<li><b>&ndash;enable-error-stack</b> Prints messages from the HDF5 error stack as they occur. Optional value 2 also prints file open errors, &ndash;enable-error-stack=2.</li>
+<li><b>--enable-error-stack</b> Prints messages from the HDF5 error stack as they occur. Optional value 2 also prints file open errors, <code>--enable-error-stack=2</code>.</li>
 </ul>
 <h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5ls_options"></a>
 Options</h2>
 <ul>
-<li><b>&ndash;help</b> Print a usage message and exit </li>
-<li><b>&ndash;address</b> Print raw data address. If dataset is contiguous, address is offset in file of beginning of raw data. If chunked, returned list of addresses indicates offset of each chunk. Must be used with <b>&ndash;verbose option</b>. Provides no information for non-dataset objects. </li>
-<li><b>&ndash;data</b> Print the values of datasets </li>
-<li><b>&ndash;follow-symlinks</b> Follow symbolic links (soft links and external links) to display target object information.<br  />
+<li><b>--help</b> Print a usage message and exit </li>
+<li><b>--address</b> Print raw data address. If dataset is contiguous, address is offset in file of beginning of raw data. If chunked, returned list of addresses indicates offset of each chunk. Must be used with <b>--verbose</b> option. Provides no information for non-dataset objects. </li>
+<li><b>--data</b> Print the values of datasets </li>
+<li><b>--follow-symlinks</b> Follow symbolic links (soft links and external links) to display target object information.<br  />
  Without this option, h5ls identifies a symbolic link as a soft link or external link and prints the value assigned to the symbolic link; it does not provide any information regarding the target object or determine whether the link is a dangling link. </li>
-<li><b>&ndash;no-dangling-links</b> Must be used with <b>&ndash;follow-symlinks</b> option; otherwise, h5ls shows error message and returns an exit code of 1.<br  />
+<li><b>--no-dangling-links</b> Must be used with <b>--follow-symlinks</b> option; otherwise, h5ls shows error message and returns an exit code of 1.<br  />
  Check for any symbolic links (soft links or external links) that do not resolve to an existing object (dataset, group, or named datatype).<br  />
  If any dangling link is found, this situation is treated as an error and h5ls returns an exit code of 1. </li>
-<li><b>&ndash;full</b> Print full path names instead of base names </li>
-<li><b>&ndash;group</b> Show information about a group, not its contents </li>
-<li><b>&ndash;label</b> Label members of compound datasets </li>
-<li><b>&ndash;recursive</b> List all groups recursively, avoiding cycles </li>
-<li><b>&ndash;string</b> Print 1-byte integer datasets as ASCII </li>
-<li><b>&ndash;simple</b> Use a machine-readable output format </li>
-<li><b>&ndash;width=N</b> Set the number of columns of output </li>
-<li><b>&ndash;verbose</b> Generate more verbose output </li>
-<li><b>&ndash;version</b> Print the library version number and exit </li>
-<li><b>&ndash;page-buffer-size=N</b> Set the page buffer cache size, N=non-negative integers </li>
-<li><b>&ndash;vfd=DRIVER</b> Use the specified virtual file driver </li>
-<li><b>&ndash;hexdump</b> Show raw data in hexadecimal format </li>
-<li><b>&ndash;endpoint-url=P</b> Supply S3 endpoint url information to "ros3" vfd. P is the AWS service endpoint. Has no effect if vfd flag not set to "ros3". </li>
-<li><b>&ndash;s3-cred=C</b> Supply S3 authentication information to "ros3" vfd. Accepts tuple of <div class="fragment"><div class="line">(&lt;aws-region&gt;,&lt;access-<span class="keywordtype">id</span>&gt;,&lt;access-key&gt;) </div>
+<li><b>--full</b> Print full path names instead of base names </li>
+<li><b>--group</b> Show information about a group, not its contents </li>
+<li><b>--label</b> Label members of compound datasets </li>
+<li><b>--recursive</b> List all groups recursively, avoiding cycles </li>
+<li><b>--string</b> Print 1-byte integer datasets as ASCII </li>
+<li><b>--simple</b> Use a machine-readable output format </li>
+<li><b>--width=N</b> Set the number of columns of output </li>
+<li><b>--verbose</b> Generate more verbose output </li>
+<li><b>--version</b> Print the library version number and exit </li>
+<li><b>--page-buffer-size=N</b> Set the page buffer cache size, N=non-negative integers </li>
+<li><b>--vfd=DRIVER</b> Use the specified virtual file driver </li>
+<li><b>--hexdump</b> Show raw data in hexadecimal format </li>
+<li><b>--endpoint-url=P</b> Supply S3 endpoint url information to "ros3" vfd. P is the AWS service endpoint. Has no effect if vfd flag not set to "ros3". </li>
+<li><b>--s3-cred=C</b> Supply S3 authentication information to "ros3" vfd. Accepts tuple of <div class="fragment"><div class="line">(&lt;aws-region&gt;,&lt;access-<span class="keywordtype">id</span>&gt;,&lt;access-key&gt;) </div>
 </div><!-- fragment --> or <div class="fragment"><div class="line">(&lt;aws-region&gt;,&lt;access-<span class="keywordtype">id</span>&gt;,&lt;access-key&gt;,&lt;session-token&gt;) </div>
 </div><!-- fragment -->. If absent or C = <div class="fragment"><div class="line">(,,) </div>
 </div><!-- fragment --> or C = <div class="fragment"><div class="line">(,,,) </div>
 </div><!-- fragment --> defaults to no-authentication. Has no effect if vfd flag not set to "ros3". </li>
-<li><b>&ndash;hdfs-attrs=A</b> Supply configuration information to Hadoop VFD. Accepts tuple of <div class="fragment"><div class="line">(&lt;namenode name&gt;,&lt;namenode port&gt;,</div>
+<li><b>--hdfs-attrs=A</b> Supply configuration information to Hadoop VFD. Accepts tuple of <div class="fragment"><div class="line">(&lt;namenode name&gt;,&lt;namenode port&gt;,</div>
 <div class="line">                 ...&lt;kerberos cache path&gt;,&lt;username&gt;,&lt;buffer size&gt;) </div>
 </div><!-- fragment --> If absent or A == <div class="fragment"><div class="line">(,,,,) </div>
 </div><!-- fragment --> all default values are used. Has no effect if vfd flag is not 'hdfs'. </li>
-<li><b>&ndash;vol-value</b> Value (ID) of the VOL connector to use for opening the HDF5 file specified </li>
-<li><b>&ndash;vol-name</b> Name of the VOL connector to use for opening the HDF5 file specified </li>
-<li><b>&ndash;vol-info</b> VOL-specific info to pass to the VOL connector used for opening the HDF5 file specified If none of the above options are used to specify a VOL, then the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector, if that environment variable is unset) will be used </li>
-<li><b>&ndash;vfd-value</b> Value (ID) of the VFL driver to use for opening the HDF5 file specified </li>
-<li><b>&ndash;vfd-name</b> Name of the VFL driver to use for opening the HDF5 file specified </li>
-<li><b>&ndash;vfd-info</b> VFD-specific info to pass to the VFL driver used for opening the HDF5 file specified</li>
+<li><b>--vol-value</b> Value (ID) of the VOL connector to use for opening the HDF5 file specified </li>
+<li><b>--vol-name</b> Name of the VOL connector to use for opening the HDF5 file specified </li>
+<li><b>--vol-info</b> VOL-specific info to pass to the VOL connector used for opening the HDF5 file specified If none of the above options are used to specify a VOL, then the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector, if that environment variable is unset) will be used </li>
+<li><b>--vfd-value</b> Value (ID) of the VFL driver to use for opening the HDF5 file specified </li>
+<li><b>--vfd-name</b> Name of the VFL driver to use for opening the HDF5 file specified </li>
+<li><b>--vfd-info</b> VFD-specific info to pass to the VFL driver used for opening the HDF5 file specified</li>
 </ul>
 <h3 class="doxsection"><a class="anchor" id="subsubsec_cltools_h5ls_options_depre"></a>
 Deprecated Options</h3>
 <p>The following options have been removed in HDF5 1.12. Use the indicated replacement option in all work. </p><ul>
-<li><b>&ndash;external</b> Follow external links.<br  />
- Replaced by <b>&ndash;follow-symlinks</b>. </li>
-<li><b>&ndash;errors</b> Show all HDF5 error reporting<br  />
- Replaced by <b>&ndash;enable-error-stack</b>.</li>
+<li><b>--external</b> Follow external links.<br  />
+ Replaced by <b>--follow-symlinks</b>. </li>
+<li><b>--errors</b> Show all HDF5 error reporting<br  />
+ Replaced by <b>--enable-error-stack</b>.</li>
 </ul>
 <p>Previous Chapter <a class="el" href="_h5_t_o_o_l__j_a_m__u_g.html#sec_cltools_h5jam" title="h5jam">h5jam</a> - Next Chapter <a class="el" href="_h5_t_o_o_l__r_p__u_g.html#sec_cltools_h5repack" title="h5repack">h5repack</a></p>
 <hr  />

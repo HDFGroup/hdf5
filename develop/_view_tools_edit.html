@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-30</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-31</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -232,7 +232,7 @@ Apply Compression Filter to a Dataset</h1>
 <p>The <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__r_p__u_g.html#sec_cltools_h5repack" title="h5repack">h5repack</a></code> utility can be used to compress or remove compression from a dataset in a file. By default, compression cannot be added to or removed from a dataset once it has been created. However, with <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__r_p__u_g.html#sec_cltools_h5repack" title="h5repack">h5repack</a></code> you can write a file to a new file and specify a compression filter to apply to a dataset or datasets in the new file.</p>
 <p>To apply a filter to an object in an HDF5 file, specify the <code style="background-color:whitesmoke;">-f</code> option, where the string following the <code style="background-color:whitesmoke;">-f</code> option defines the filter and its parameters (if there are any) to apply to a given object or objects: </p><div class="fragment"><div class="line"><a class="code hl_function" href="h5repack_8h.html#a314b5651a0aa5175d64605dbc83e094e">h5repack</a> -f [list of objects:]&lt;name of filter&gt;=&lt;filter parameters&gt; &lt;input file&gt; &lt;output file&gt;</div>
 </div><!-- fragment --><p>If no objects are specified then everything in the input file will be written to the output file with the filter and parameters specified. If objects are specified, then everything in the input file will be written to the output file as is, except for the specified objects. They will be written to the output file with the filter and parameters specified.</p>
-<p>If you type <code style="background-color:whitesmoke;">h5repack &ndash;help</code> on the command line, you will see a detailed usage statement with examples of modifying a filter. There are actually numerous filters that you can apply to a dataset: </p><table class="doxtable">
+<p>If you type <code style="background-color:whitesmoke;">h5repack --help</code> on the command line, you will see a detailed usage statement with examples of modifying a filter. There are actually numerous filters that you can apply to a dataset: </p><table class="doxtable">
 <tr>
 <th>Filter</th><th><a class="el" href="struct_options.html">Options</a></th></tr>
 <tr>
@@ -315,19 +315,19 @@ Copy Objects to Another File</h1>
 <tr>
 <th>h5copy <a class="el" href="struct_options.html">Options</a></th><th>Description</th></tr>
 <tr>
-<td>-i, &ndash;input </td><td><a class="el" href="struct_input.html">Input</a> file name </td></tr>
+<td>-i, --input </td><td><a class="el" href="struct_input.html">Input</a> file name </td></tr>
 <tr>
-<td>-o, &ndash;output </td><td>Output file name </td></tr>
+<td>-o, --output </td><td>Output file name </td></tr>
 <tr>
-<td>-s, &ndash;source </td><td>Source object name </td></tr>
+<td>-s, --source </td><td>Source object name </td></tr>
 <tr>
-<td>-d, &ndash;destination </td><td>Destination object name </td></tr>
+<td>-d, --destination </td><td>Destination object name </td></tr>
 <tr>
-<td>-p, &ndash;parents </td><td>Make parent groups as needed </td></tr>
+<td>-p, --parents </td><td>Make parent groups as needed </td></tr>
 <tr>
-<td>-v, &ndash;verbose </td><td>Verbose mode </td></tr>
+<td>-v, --verbose </td><td>Verbose mode </td></tr>
 <tr>
-<td>-f, &ndash;flag </td><td>Flag type </td></tr>
+<td>-f, --flag </td><td>Flag type </td></tr>
 </table>
 <p>For a complete list of options and information on using <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__c_p__u_g.html#sec_cltools_h5copy" title="h5copy">h5copy</a></code>, type: </p><div class="fragment"><div class="line">h5copy --<a class="code hl_function" href="h5import_8h.html#a254c266e4e95df99708a4e96db2c0e9e">help</a></div>
 <div class="ttc" id="ah5import_8h_html_a254c266e4e95df99708a4e96db2c0e9e"><div class="ttname"><a href="h5import_8h.html#a254c266e4e95df99708a4e96db2c0e9e">help</a></div><div class="ttdeci">void help(char *)</div></div>

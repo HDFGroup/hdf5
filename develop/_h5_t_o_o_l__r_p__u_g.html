@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-30</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-31</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -150,52 +150,52 @@ Usage</h2>
 <h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5repack_error"></a>
 Error Report Option</h2>
 <ul>
-<li><b>&ndash;enable-error-stack</b> Prints messages from the HDF5 error stack as they occur. Optional value 2 also prints file open errors, &ndash;enable-error-stack=2.</li>
+<li><b>--enable-error-stack</b> Prints messages from the HDF5 error stack as they occur. Optional value 2 also prints file open errors, <code>--enable-error-stack=2</code>.</li>
 </ul>
 <h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5repack_options"></a>
 Options</h2>
 <ul>
-<li><b>&ndash;help</b> Print a usage message and exit </li>
-<li><b>&ndash;verbose=N</b> Verbose mode, print object information. N - is an integer greater than 1, 2 displays read/write timing </li>
-<li><b>&ndash;version</b> Print the library version number and exit </li>
-<li><b>&ndash;native</b> Use a native HDF5 type when repacking </li>
-<li><b>&ndash;page-buffer-size=N</b> Set the page buffer cache size, N=non-negative integers </li>
-<li><b>&ndash;src-vol-value</b> Value (ID) of the VOL connector to use for opening the input HDF5 file specified </li>
-<li><b>&ndash;src-vol-name</b> Name of the VOL connector to use for opening the input HDF5 file specified </li>
-<li><b>&ndash;src-vol-info</b> VOL-specific info to pass to the VOL connector used for opening the input HDF5 file specified </li>
-<li><b>&ndash;dst-vol-value</b> Value (ID) of the VOL connector to use for opening the output HDF5 file specified </li>
-<li><b>&ndash;dst-vol-name</b> Name of the VOL connector to use for opening the output HDF5 file specified </li>
-<li><b>&ndash;dst-vol-info</b> VOL-specific info to pass to the VOL connector used for opening the output HDF5 file specified </li>
-<li><b>&ndash;src-vfd-value</b> Value (ID) of the VFL driver to use for opening the input HDF5 file specified </li>
-<li><b>&ndash;src-vfd-name</b> Name of the VFL driver to use for opening the input HDF5 file specified </li>
-<li><b>&ndash;src-vfd-info</b> VFD-specific info to pass to the VFL driver used for opening the input HDF5 file specified </li>
-<li><b>&ndash;dst-vfd-value</b> Value (ID) of the VFL driver to use for opening the output HDF5 file specified </li>
-<li><b>&ndash;dst-vfd-name</b> Name of the VFL driver to use for opening the output HDF5 file specified </li>
-<li><b>&ndash;dst-vfd-info</b> VFD-specific info to pass to the VFL driver used for opening the output HDF5 file specified </li>
-<li><b>&ndash;latest</b> Use latest version of file format This option will take precedence over the options &ndash;low and &ndash;high </li>
-<li><b>&ndash;low=BOUND</b> The low bound for library release versions to use when creating objects in the file (default is <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>) </li>
-<li><b>&ndash;high=BOUND</b> The high bound for library release versions to use when creating objects in the file (default is <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2aa1212669916e7389d0a687a3673153b0">H5F_LIBVER_LATEST</a>) </li>
-<li><b>&ndash;merge</b> Follow external soft link recursively and merge data </li>
-<li><b>&ndash;prune</b> Do not follow external soft links and remove link </li>
-<li><b>&ndash;merge &ndash;prune</b> Follow external link, merge data and remove dangling link </li>
-<li><b>&ndash;compact=L1</b> Maximum number of links in header messages </li>
-<li><b>&ndash;indexed=L2</b> Minimum number of links in the indexed format </li>
-<li><b>&ndash;ssize=S[:F]</b> Shared object header message minimum size </li>
-<li><b>&ndash;minimum=M</b> Do not apply the filter to datasets smaller than M </li>
-<li><b>&ndash;file=E</b> Name of file E with the &ndash;file and &ndash;layout options </li>
-<li><b>&ndash;ublock=U</b> Name of file U with user block data to be added </li>
-<li><b>&ndash;block=B</b> Size of user block to be added </li>
-<li><b>&ndash;metadata_block_size=A</b> Metadata block size for <a class="el" href="group___f_a_p_l.html#ga8822e3dedc8e1414f20871a87d533cb1" title="Sets the minimum metadata block size.">H5Pset_meta_block_size</a> </li>
-<li><b>&ndash;threshold=T</b> Threshold value for <a class="el" href="group___f_a_p_l.html#gab99d5af749aeb3896fd9e3ceb273677a" title="Sets alignment properties of a file access property list.">H5Pset_alignment</a> </li>
-<li><b>&ndash;alignment=A</b> Alignment value for <a class="el" href="group___f_a_p_l.html#gab99d5af749aeb3896fd9e3ceb273677a" title="Sets alignment properties of a file access property list.">H5Pset_alignment</a> </li>
-<li><b>&ndash;sort_by=Q</b> Sort groups and attributes by index Q </li>
-<li><b>&ndash;sort_order=Z</b> Sort groups and attributes by order Z </li>
-<li><b>&ndash;filter=FILT</b> Filter type </li>
-<li><b>&ndash;layout=LAYT</b> Layout type </li>
-<li><b>&ndash;fs_strategy=FS_STRATEGY</b> File space management strategy for <a class="el" href="group___f_c_p_l.html#gae9ed9b56f290d6d24421242f1c04914e" title="Sets the file space handling strategy and persisting free-space values for a file creation property l...">H5Pset_file_space_strategy</a> </li>
-<li><b>&ndash;fs_persist=FS_PERSIST</b> Persisting or not persisting free-space for <a class="el" href="group___f_c_p_l.html#gae9ed9b56f290d6d24421242f1c04914e" title="Sets the file space handling strategy and persisting free-space values for a file creation property l...">H5Pset_file_space_strategy</a> </li>
-<li><b>&ndash;fs_threshold=FS_THRESHOLD</b> : Free-space section threshold for <a class="el" href="group___f_c_p_l.html#gae9ed9b56f290d6d24421242f1c04914e" title="Sets the file space handling strategy and persisting free-space values for a file creation property l...">H5Pset_file_space_strategy</a> </li>
-<li><b>&ndash;fs_pagesize=FS_PAGESIZE</b> File space page size for <a class="el" href="group___f_c_p_l.html#gad012d7f3c2f1e1999eb1770aae3a4963" title="Sets the file space page size for a file creation property list.">H5Pset_file_space_page_size</a></li>
+<li><b>--help</b> Print a usage message and exit </li>
+<li><b>--verbose=N</b> Verbose mode, print object information. N - is an integer greater than 1, 2 displays read/write timing </li>
+<li><b>--version</b> Print the library version number and exit </li>
+<li><b>--native</b> Use a native HDF5 type when repacking </li>
+<li><b>--page-buffer-size=N</b> Set the page buffer cache size, N=non-negative integers </li>
+<li><b>--src-vol-value</b> Value (ID) of the VOL connector to use for opening the input HDF5 file specified </li>
+<li><b>--src-vol-name</b> Name of the VOL connector to use for opening the input HDF5 file specified </li>
+<li><b>--src-vol-info</b> VOL-specific info to pass to the VOL connector used for opening the input HDF5 file specified </li>
+<li><b>--dst-vol-value</b> Value (ID) of the VOL connector to use for opening the output HDF5 file specified </li>
+<li><b>--dst-vol-name</b> Name of the VOL connector to use for opening the output HDF5 file specified </li>
+<li><b>--dst-vol-info</b> VOL-specific info to pass to the VOL connector used for opening the output HDF5 file specified </li>
+<li><b>--src-vfd-value</b> Value (ID) of the VFL driver to use for opening the input HDF5 file specified </li>
+<li><b>--src-vfd-name</b> Name of the VFL driver to use for opening the input HDF5 file specified </li>
+<li><b>--src-vfd-info</b> VFD-specific info to pass to the VFL driver used for opening the input HDF5 file specified </li>
+<li><b>--dst-vfd-value</b> Value (ID) of the VFL driver to use for opening the output HDF5 file specified </li>
+<li><b>--dst-vfd-name</b> Name of the VFL driver to use for opening the output HDF5 file specified </li>
+<li><b>--dst-vfd-info</b> VFD-specific info to pass to the VFL driver used for opening the output HDF5 file specified </li>
+<li><b>--latest</b> Use latest version of file format This option will take precedence over the options <b>--low</b> and <b>--high</b> </li>
+<li><b>--low=BOUND</b> The low bound for library release versions to use when creating objects in the file (default is <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>) </li>
+<li><b>--high=BOUND</b> The high bound for library release versions to use when creating objects in the file (default is <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2aa1212669916e7389d0a687a3673153b0">H5F_LIBVER_LATEST</a>) </li>
+<li><b>--merge</b> Follow external soft link recursively and merge data </li>
+<li><b>--prune</b> Do not follow external soft links and remove link </li>
+<li><b>--merge --prune</b> Follow external link, merge data and remove dangling link </li>
+<li><b>--compact=L1</b> Maximum number of links in header messages </li>
+<li><b>--indexed=L2</b> Minimum number of links in the indexed format </li>
+<li><b>--ssize=S[:F]</b> Shared object header message minimum size </li>
+<li><b>--minimum=M</b> Do not apply the filter to datasets smaller than M </li>
+<li><b>--file=E</b> Name of file E with the <b>--file</b> and <b>--layout</b> options </li>
+<li><b>--ublock=U</b> Name of file U with user block data to be added </li>
+<li><b>--block=B</b> Size of user block to be added </li>
+<li><b>--metadata_block_size=A</b> Metadata block size for <a class="el" href="group___f_a_p_l.html#ga8822e3dedc8e1414f20871a87d533cb1" title="Sets the minimum metadata block size.">H5Pset_meta_block_size</a> </li>
+<li><b>--threshold=T</b> Threshold value for <a class="el" href="group___f_a_p_l.html#gab99d5af749aeb3896fd9e3ceb273677a" title="Sets alignment properties of a file access property list.">H5Pset_alignment</a> </li>
+<li><b>--alignment=A</b> Alignment value for <a class="el" href="group___f_a_p_l.html#gab99d5af749aeb3896fd9e3ceb273677a" title="Sets alignment properties of a file access property list.">H5Pset_alignment</a> </li>
+<li><b>--sort_by=Q</b> Sort groups and attributes by index Q </li>
+<li><b>--sort_order=Z</b> Sort groups and attributes by order Z </li>
+<li><b>--filter=FILT</b> Filter type </li>
+<li><b>--layout=LAYT</b> Layout type </li>
+<li><b>--fs_strategy=FS_STRATEGY</b> File space management strategy for <a class="el" href="group___f_c_p_l.html#gae9ed9b56f290d6d24421242f1c04914e" title="Sets the file space handling strategy and persisting free-space values for a file creation property l...">H5Pset_file_space_strategy</a> </li>
+<li><b>--fs_persist=FS_PERSIST</b> Persisting or not persisting free-space for <a class="el" href="group___f_c_p_l.html#gae9ed9b56f290d6d24421242f1c04914e" title="Sets the file space handling strategy and persisting free-space values for a file creation property l...">H5Pset_file_space_strategy</a> </li>
+<li><b>--fs_threshold=FS_THRESHOLD</b> : Free-space section threshold for <a class="el" href="group___f_c_p_l.html#gae9ed9b56f290d6d24421242f1c04914e" title="Sets the file space handling strategy and persisting free-space values for a file creation property l...">H5Pset_file_space_strategy</a> </li>
+<li><b>--fs_pagesize=FS_PAGESIZE</b> File space page size for <a class="el" href="group___f_c_p_l.html#gad012d7f3c2f1e1999eb1770aae3a4963" title="Sets the file space page size for a file creation property list.">H5Pset_file_space_page_size</a></li>
 </ul>
 <h3 class="doxsection"><a class="anchor" id="subsubsec_cltools_h5repack_options_args"></a>
 Arguments to Certain Options</h3>
@@ -328,33 +328,33 @@ NOTE</h3>
 </div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5repack_examples"></a>
 Usage Examples</h2>
 <ul>
-<li>1) h5repack &ndash;verbose &ndash;filter=GZIP=1 file1 file2 <pre class="fragment"> GZIP compression with level 1 to all objects
+<li>1) h5repack --verbose --filter=GZIP=1 file1 file2 <pre class="fragment"> GZIP compression with level 1 to all objects
 </pre></li>
 </ul>
 <ul>
-<li>2) h5repack &ndash;verbose &ndash;filter=dset1:SZIP=8,NN file1 file2 <pre class="fragment"> SZIP compression with 8 pixels per block and NN coding method to object dset1
+<li>2) h5repack --verbose --filter=dset1:SZIP=8,NN file1 file2 <pre class="fragment"> SZIP compression with 8 pixels per block and NN coding method to object dset1
 </pre></li>
 </ul>
 <ul>
-<li>3) h5repack &ndash;verbose &ndash;layout=dset1,dset2:CHUNK=20x10 &ndash;filter=dset3,dset4,dset5:NONE file1 file2 <pre class="fragment"> Chunked layout, with a layout size of 20x10, to objects dset1 and dset2
+<li>3) h5repack --verbose --layout=dset1,dset2:CHUNK=20x10 --filter=dset3,dset4,dset5:NONE file1 file2 <pre class="fragment"> Chunked layout, with a layout size of 20x10, to objects dset1 and dset2
  and remove filters to objects dset3, dset4, dset5
 </pre></li>
 </ul>
 <ul>
-<li>4) h5repack &ndash;latest &ndash;compact=10 &ndash;ssize=20:dtype file1 file2 <pre class="fragment"> Using latest file format with maximum compact group size of 10 and
+<li>4) h5repack --latest --compact=10 --ssize=20:dtype file1 file2 <pre class="fragment"> Using latest file format with maximum compact group size of 10 and
  minimum shared datatype size of 20
 </pre></li>
 </ul>
 <ul>
-<li>5) h5repack &ndash;filter=SHUF &ndash;filter=GZIP=1 file1 file2 <pre class="fragment"> Add both filters SHUF and GZIP in this order to all datasets
+<li>5) h5repack --filter=SHUF --filter=GZIP=1 file1 file2 <pre class="fragment"> Add both filters SHUF and GZIP in this order to all datasets
 </pre></li>
 </ul>
 <ul>
-<li>6) h5repack &ndash;filter=UD=307,0,1,9 file1 file2 <pre class="fragment"> Add bzip2 filter to all datasets
+<li>6) h5repack --filter=UD=307,0,1,9 file1 file2 <pre class="fragment"> Add bzip2 filter to all datasets
 </pre></li>
 </ul>
 <ul>
-<li>7) h5repack &ndash;low=0 &ndash;high=1 file1 file2 <pre class="fragment"> Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via
+<li>7) h5repack --low=0 --high=1 file1 file2 <pre class="fragment"> Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via
  H5Pset_libver_bounds() when creating the repacked file, file2
 </pre></li>
 </ul>

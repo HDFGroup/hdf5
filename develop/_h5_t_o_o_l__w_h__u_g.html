@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-30</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-31</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -146,20 +146,20 @@ Usage</h2>
 <h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5watch_error"></a>
 Error Report Option</h2>
 <ul>
-<li><b>&ndash;enable-error-stack</b> Prints messages from the HDF5 error stack as they occur. Optional value 2 also prints file open errors, &ndash;enable-error-stack=2.</li>
+<li><b>--enable-error-stack</b> Prints messages from the HDF5 error stack as they occur. Optional value 2 also prints file open errors, <code>--enable-error-stack=2</code>.</li>
 </ul>
 <h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5watch_options"></a>
 Options</h2>
 <ul>
-<li><b>&ndash;help</b> Print a usage message and exit </li>
-<li><b>&ndash;version</b> Print the library version number and exit </li>
-<li><b>&ndash;label</b> Label members of compound typed dataset. </li>
-<li><b>&ndash;simple</b> Use a machine-readable output format. </li>
-<li><b>&ndash;dim</b> Monitor changes in size of dataset dimensions only. </li>
-<li><b>&ndash;width=N</b> Set the number of columns to N for output.<br  />
+<li><b>--help</b> Print a usage message and exit </li>
+<li><b>--version</b> Print the library version number and exit </li>
+<li><b>--label</b> Label members of compound typed dataset. </li>
+<li><b>--simple</b> Use a machine-readable output format. </li>
+<li><b>--dim</b> Monitor changes in size of dataset dimensions only. </li>
+<li><b>--width=N</b> Set the number of columns to N for output.<br  />
  A value of 0 sets the number of columns to the maximum (65535). The default width is 80 columns. </li>
-<li><b>&ndash;polling=N</b> Set the polling interval to N (in seconds) when the dataset will be checked for appended data. The default polling interval is 1. </li>
-<li><b>&ndash;fields=&lt;list_of_fields&gt;</b> Display data for the fields specified in &lt;list_of_fields&gt; for a compound data type. &lt;list_of_fields&gt; can be specified as follows: <ul>
+<li><b>--polling=N</b> Set the polling interval to N (in seconds) when the dataset will be checked for appended data. The default polling interval is 1. </li>
+<li><b>--fields=&lt;list_of_fields&gt;</b> Display data for the fields specified in &lt;list_of_fields&gt; for a compound data type. &lt;list_of_fields&gt; can be specified as follows: <ul>
 <li>
 1) A comma-separated list of field names in a compound data type. "," is the separator for field names while "." is the separator for a nested field. </li>
 <li>

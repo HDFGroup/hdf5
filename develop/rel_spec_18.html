@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-30</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-31</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -406,10 +406,10 @@ New and Changed Functions, Classes, Subroutines, Wrappers, and Macros</h3>
 <li>The global lock used by the thread-safety mechanism is not raised to the high-level library level, making it possible that the library state could change if a context switch were to occur in a high-level library call. Because of this, the combination of thread-safety and the high-level library is officially unsupported by The HDF Group.<br  />
  Though this combination has never been supported in HDF5, this was not enforced by the build systems. With this release, the combination has been explicitly flagged as unsupported in Autotools and CMake, the build systems used with HDF5.</li>
 </ul>
-<p>The new unsupported declaration will cause an Autotools configure step to fail if <code>&ndash;enable-threadsafe</code> and <code>&ndash;enable-hl</code> are combined unless additional options are specified (see below). Since the high-level library is built by default, this means that these extra configuration options will need to be used any time <code>&ndash;enable-threadsafe</code> is selected.</p>
-<p>To use Autotools to build an application with &ndash;enable-threadsafe, use one of the following approaches: </p><ul>
-<li>Use <code>&ndash;disable-h</code>l to disable the high-level library. (Recommended) </li>
-<li>Use <code>&ndash;enable-unsupported</code> to build the high-level library with the thread-safety feature.</li>
+<p>The new unsupported declaration will cause an Autotools configure step to fail if <code>--enable-threadsafe</code> and <code>--enable-hl</code> are combined unless additional options are specified (see below). Since the high-level library is built by default, this means that these extra configuration options will need to be used any time <code>--enable-threadsafe</code> is selected.</p>
+<p>To use Autotools to build an application with <code>--enable-threadsafe</code>, use one of the following approaches: </p><ul>
+<li>Use <code>--disable-hl</code> to disable the high-level library. (Recommended) </li>
+<li>Use <code>--enable-unsupported</code> to build the high-level library with the thread-safety feature.</li>
 </ul>
 <p>To use CMake to build an application with HDF5_ENABLE_THREADSAFE=ON, use one of the following approaches: </p><ul>
 <li>Use <code>HDF5_BUILD_HL_LIB=OFF</code> to disable the high-level library. (Recommended) </li>
@@ -635,7 +635,7 @@ New and Changed Functions, Classes, Subroutines, Wrappers, and Macros</h3>
 <h3 class="doxsection"><a class="anchor" id="subsubsec_rel_spec_18_change_13_build"></a>
 Build and Configuration</h3>
 <h4>Thread safety</h4>
-<p>When configuring a thread-safe HDF5 Library with <code>&ndash;enable-threadsafe</code>, it is no longer necessary to specify <code>&ndash;with-pthreads</code> if the Pthreads library is in a standard location.</p>
+<p>When configuring a thread-safe HDF5 Library with <code>--enable-threadsafe</code>, it is no longer necessary to specify <code>--with-pthreads</code> if the Pthreads library is in a standard location.</p>
 <h4>Removed Functions and Wrappers</h4>
 <p>The MPI-POSIX driver has been removed. The following C functions and the corresponding Fortran subroutines and C++ wrappers therefore are no longer included in the HDF5 distribution: </p><ul>
 <li>H5Pset_fapl_mpiposix </li>
@@ -709,35 +709,35 @@ New and Changed Functions, Classes, Subroutines, Wrappers, and Macros</h3>
 <p><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a></p>
 <p><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> has a new option for identifying objects by a full or partial path: </p><ul>
 <li><code>-NP</code> </li>
-<li><code>&ndash;any-path=P</code></li>
+<li><code>--any-path=P</code></li>
 </ul>
-<p>The <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> attributes-only option, <code>-A or &ndash;only-attr</code>, now accepts an optional parameter value of 0 (zero): </p><ul>
+<p>The <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> attributes-only option, <code>-A or --only-attr</code>, now accepts an optional parameter value of 0 (zero): </p><ul>
 <li><code>-A 0</code> </li>
-<li><code>&ndash;only-attr=0</code> Specifying this value has the effect of reversing the role of the option to display everything except attributes.</li>
+<li><code>--only-attr=0</code> Specifying this value has the effect of reversing the role of the option to display everything except attributes.</li>
 </ul>
 <p><a class="el" href="_h5_t_o_o_l__r_p__u_g.html#sec_cltools_h5repack" title="h5repack">h5repack</a></p>
-<p>The <a class="el" href="_h5_t_o_o_l__r_p__u_g.html#sec_cltools_h5repack" title="h5repack">h5repack</a> option <code>-f, &ndash;filter</code> has a new parameter, UD, to enable the use of user-defined filters: </p><ul>
+<p>The <a class="el" href="_h5_t_o_o_l__r_p__u_g.html#sec_cltools_h5repack" title="h5repack">h5repack</a> option <code>-f, --filter</code> has a new parameter, UD, to enable the use of user-defined filters: </p><ul>
 <li><code>-f UD=&lt;filter_parameters&gt;</code> </li>
-<li><code>&ndash;filter=UD=&lt;filter_parameters&gt;</code></li>
+<li><code>--filter=UD=&lt;filter_parameters&gt;</code></li>
 </ul>
 <p><a class="el" href="_h5_t_o_o_l__s_t__u_g.html#sec_cltools_h5stat" title="h5stat">h5stat</a></p>
 <p><a class="el" href="_h5_t_o_o_l__s_t__u_g.html#sec_cltools_h5stat" title="h5stat">h5stat</a> has three new options for setting print thresholds: For attributes: </p><ul>
 <li><code>-aN</code> </li>
-<li><code>&ndash;attribute=N</code></li>
+<li><code>--attribute=N</code></li>
 </ul>
 <p>For links in a group: </p><ul>
 <li><code>-lN</code> </li>
-<li><code>&ndash;links=N</code></li>
+<li><code>--links=N</code></li>
 </ul>
 <p>For dimension sizes: </p><ul>
 <li><code>-mN</code> </li>
-<li><code>&ndash;dims=N</code></li>
+<li><code>--dims=N</code></li>
 </ul>
 <h3 class="doxsection"><a class="anchor" id="subsubsec_rel_spec_18_change_12_build"></a>
 Build and Configuration</h3>
 <h4>CMake and Autotools configuration</h4>
 <p>A new configuration option can be used to change the default plugin path: </p><ul>
-<li>Autotools configure option <code>&ndash;with-default-plugindir=location</code> </li>
+<li>Autotools configure option <code>--with-default-plugindir=location</code> </li>
 <li>CMake option -DH5_DEFAULT_PLUGINDIR:PATH=location</li>
 </ul>
 <p>CMake configuration </p><ul>
@@ -751,10 +751,10 @@ Build and Configuration</h3>
 <li>h5c++ </li>
 <li>h5fc and h5pfc</li>
 </ul>
-<p>These compile scripts have been modified to change the default behavior to link to shared libraries in environments where HDF5 has been configured with <code>&ndash;disable-static</code>.</p>
+<p>These compile scripts have been modified to change the default behavior to link to shared libraries in environments where HDF5 has been configured with <code>--disable-static</code>.</p>
 <p>Command-line Tools with Changed Behavior <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a></p>
 <p><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> output now displays USER_DEFINED_FILTER where it previously displayed UNKNOWN_FILTER.</p>
-<p><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> now correctly exports subsetted data to a file using the <code>-o, &ndash;output</code> option.</p>
+<p><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> now correctly exports subsetted data to a file using the <code>-o, --output</code> option.</p>
 <h2 class="doxsection"><a class="anchor" id="subsec_rel_spec_18_change_11"></a>
 Release 1.8.11 of May 2013 versus Release 1.8.10</h2>
 <p>This section lists interface-level changes and other user-visible changes in behavior in the transition from HDF5 Release 1.8.10 to Release 1.8.11.</p>
@@ -792,7 +792,7 @@ New and Changed Functions and Subroutines</h3>
 <p><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> and <a class="el" href="_h5_t_o_o_l__i_m__u_g.html#sec_cltools_h5import" title="h5import">h5import</a></p>
 <p><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> has a new option to output the DDL structure of a file or object: </p><ul>
 <li><code>-O&lt;filename&gt;</code> </li>
-<li><code>&ndash;ddl=&lt;file_name&gt;</code> [-O above is dash-uppercase-o.]</li>
+<li><code>--ddl=&lt;file_name&gt;</code> [-O above is dash-uppercase-o.]</li>
 </ul>
 <p><a class="el" href="_h5_t_o_o_l__i_m__u_g.html#sec_cltools_h5import" title="h5import">h5import</a> can now take the output of <code>h5dump -O&lt;ddl_filename&gt; -o&lt;data_filename&gt;</code> directly as input files. See <a class="el" href="_view_tools_convert.html#secViewToolsConvertExport" title="Export from h5dump and Import into HDF5">Export from h5dump and Import into HDF5</a>.</p>
 <h4>New Configuration and Build Tool</h4>
@@ -811,7 +811,7 @@ New and Changed Functions and Subroutines</h3>
 </ul>
 <h4>Command-line Tools with Changed Behavior</h4>
 <p><a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> - When comparing two files or objects, <a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> now recognizes a unique extra attribute attached to an object as a difference and returns with an exit code of 1. Previously, <a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> did not recognize the extra attribute as a difference.</p>
-<p><a class="el" href="_h5_t_o_o_l__l_s__u_g.html#sec_cltools_h5ls" title="h5ls">h5ls</a> - The content of the <code>h5ls &ndash;help</code> output has been revised.</p>
+<p><a class="el" href="_h5_t_o_o_l__l_s__u_g.html#sec_cltools_h5ls" title="h5ls">h5ls</a> - The content of the <code>h5ls --help</code> output has been revised.</p>
 <p><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> - has been updated to display the compression ratio for user-defined filters. In <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> output, UNKNOWN_FILTER has been changed to USER_DEFINED_FILTER.</p>
 <h4>Removed Functions and Wrappers</h4>
 <p>The following C functions and the corresponding C++ wrappers have been removed: </p><ul>
@@ -893,13 +893,13 @@ New and Changed Functions</h3>
 </ul>
 <h4>Command-line Utilities with New <a class="el" href="struct_options.html">Options</a> and/or Changed Behavior</h4>
 <p><a class="el" href="_h5_t_o_o_l__r_p__u_g.html#sec_cltools_h5repack" title="h5repack">h5repack</a> has one new option and improved performance under certain circumstances: </p><ul>
-<li><code>-Mn, &ndash;metadata_block_size=n</code> Sets the metadata block size in the output file. Performance is improved when repacking large chunked datasets (for example, when dataset size exceeds 128 MB).</li>
+<li><code>-Mn, --metadata_block_size=n</code> Sets the metadata block size in the output file. Performance is improved when repacking large chunked datasets (for example, when dataset size exceeds 128 MB).</li>
 </ul>
 <p><a class="el" href="_h5_t_o_o_l__s_t__u_g.html#sec_cltools_h5stat" title="h5stat">h5stat</a> has one new option: </p><ul>
-<li><code>-S, &ndash;summary</code> Displays a summary of file space usage for a file.</li>
+<li><code>-S, --summary</code> Displays a summary of file space usage for a file.</li>
 </ul>
 <p><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> has one new option, a new capability, and updated output: </p><ul>
-<li><code>&ndash;no-compact-subset</code> Disables compact subsetting to allow the left-hand square bracket character ( <code>[</code> ) in a dataset name. </li>
+<li><code>--no-compact-subset</code> Disables compact subsetting to allow the left-hand square bracket character ( <code>[</code> ) in a dataset name. </li>
 <li>The files parameter now accommodates wildcards. With this change, <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> command-line options can be applied across multiple files without listing the files individually.</li>
 </ul>
 <p><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> output has been updated for this release to improve compliance with the HDF5 <a class="el" href="_s_p_e_c.html#sec_spec_ddl" title="DDL">DDL</a> specification and to improve readablilty. This output is now fully compliant with the HDF5 <a class="el" href="_s_p_e_c.html#sec_spec_ddl" title="DDL">DDL</a> specification, but these changes may affect some user scripts: </p><ul>
@@ -923,7 +923,7 @@ New C Functions</h3>
 <li>Adding Support for the Fortran 2003 Standard (PDF only). In general, the links below are to technical descriptions (reference manual entries, for example) of specific interfaces.</li>
 </ul>
 <p>Terminology: </p><ul>
-<li>If the Fortran compiler in use is Fortran 2003 compliant and the installed HDF5 Library was configured using both the <code>&ndash;enable-fortran</code> and <code>&ndash;enable-fortran2003</code> flags, the resulting HDF5 Fortran Library is referred to below as a Fortran 2003 environment. Without either of the Fortran 2003 compliant compiler or the <code>&ndash;enable-fortran2003</code> flag, the resulting HDF5 Fortran Library is referred to below as a Fortran 90 environment.</li>
+<li>If the Fortran compiler in use is Fortran 2003 compliant and the installed HDF5 Library was configured using both the <code>--enable-fortran</code> and <code>--enable-fortran2003</code> flags, the resulting HDF5 Fortran Library is referred to below as a Fortran 2003 environment. Without either of the Fortran 2003 compliant compiler or the <code>--enable-fortran2003</code> flag, the resulting HDF5 Fortran Library is referred to below as a Fortran 90 environment.</li>
 </ul>
 <h4>New Fortran 2003-only subroutines</h4>
 <p>New subroutines available only in Fortran 2003 environments: </p><ul>
@@ -1008,18 +1008,18 @@ New C Functions</h3>
 <h4>Command-line Utilities with Changed Behavior</h4>
 <ul>
 <li><a class="el" href="_h5_t_o_o_l__j_a_m__u_g.html#sec_cltools_h5jam" title="h5jam">h5jam</a> now checks the file that is to be inserted into the user block and does not allow the insertion if it is an HDF5 file. This is necessary because an HDF5 file in the user block will make the original HDF5 portion of the file inaccessible. </li>
-<li><a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> with the <code>&ndash;delta</code> option reports two NaN values as equal regardless of the type of NaN (as described in the reference manual entry). </li>
+<li><a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> with the <code>--delta</code> option reports two NaN values as equal regardless of the type of NaN (as described in the reference manual entry). </li>
 <li><a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a>, when comparing a file to itself, now reports no differences.</li>
 </ul>
 <h3 class="doxsection"><a class="anchor" id="subsubsec_rel_spec_18_change_8_conf"></a>
 Configure and Build Changes</h3>
 <p>configure now uses the same flags and symbols in its tests as are used to build the library.</p>
 <p>To build HDF5 with the Fortran 2003 interfaces requires the use of two configure options: </p><ul>
-<li><code>&ndash;enable-fortran</code> </li>
-<li><code>&ndash;enable-fortran2003</code></li>
+<li><code>--enable-fortran</code> </li>
+<li><code>--enable-fortran2003</code></li>
 </ul>
-<p>Note that building the Fortran 2003 interfaces requires a Fortran 2003-capable compiler and that <code>&ndash;enable-fortran2003</code> cannot be used alone.</p>
-<p>The <code>&ndash;enable-h5dump-packed-bits</code> configure option has been removed. The code that this option enabled is now always compiled into <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a>.</p>
+<p>Note that building the Fortran 2003 interfaces requires a Fortran 2003-capable compiler and that <code>--enable-fortran2003</code> cannot be used alone.</p>
+<p>The <code>--enable-h5dump-packed-bits</code> configure option has been removed. The code that this option enabled is now always compiled into <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a>.</p>
 <p>When building on Linux systems, the HDF5 Library now links with the bsd_compat library.</p>
 <h4>Parallel Library and Configuration Changes</h4>
 <p>The parallel HDF5 library now always compiles code to take advantage of MPI functionalities that allow for the use of complex derived datatypes during IO and that allow for collective IO when one or more processes do not contribute to the operation.</p>
@@ -1077,18 +1077,18 @@ New C Functions and Macros</h3>
 </ul>
 <h4>Command-line Utilities with New <a class="el" href="struct_options.html">Options</a></h4>
 <p><a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> has a new verbose with levels option to display additional attribute information: </p><ul>
-<li><code>-vn, &ndash;verbose=n</code></li>
+<li><code>-vn, --verbose=n</code></li>
 </ul>
 <p><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> has one new option to enable reporting of the HDF5 Library's error stack: </p><ul>
-<li><code>&ndash;enable-error-stack</code></li>
+<li><code>--enable-error-stack</code></li>
 </ul>
 <h4>Command-line Utility with Changed Option Name</h4>
 <p><a class="el" href="_h5_t_o_o_l__l_s__u_g.html#sec_cltools_h5ls" title="h5ls">h5ls</a> has one changed option name: </p><ul>
-<li><code>&ndash;enable-error-stack replaces &ndash;error.</code>. The &ndash;error option is deprecated but remains available.</li>
+<li><code>--enable-error-stack</code> replaces <code>--error</code>. The <code>--error</code> option is deprecated but remains available.</li>
 </ul>
 <h4>Command-line Utilities with Changed Behavior</h4>
 <p>Attribute comparison with <a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> has been corrected to compare all attributes with common names when comparing objects. Previously, <a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> compared attributes correctly only when two objects had the same number of attributes and all attribute names were identical; if there was either a value or name difference between two attributes, subsequent attributes were not compared.</p>
-<p><a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> <code>&ndash;use-system-epsilon</code> now employs the formula <code>'|a - b|'</code> instead of <code>'|a - b| / b'</code>.</p>
+<p><a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> <code>--use-system-epsilon</code> now employs the formula <code>'|a - b|'</code> instead of <code>'|a - b| / b'</code>.</p>
 <p><a class="el" href="_h5_t_o_o_l__c_p__u_g.html#sec_cltools_h5copy" title="h5copy">h5copy</a> now accepts the same file as the source and target file; this enables object copying within a file.</p>
 <p><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> now displays reference types as described in <a class="el" href="_s_p_e_c.html#sec_spec_ddl" title="DDL">DDL</a> in BNF for HDF5: </p><ul>
 <li><code>H5T_REFERENCE {H5T_STD_REF_OBJ}</code> - Object reference </li>
@@ -1096,13 +1096,13 @@ New C Functions and Macros</h3>
 </ul>
 <h4>Configure and Build Changes</h4>
 <p>Configure now generates Makefiles that build in silent make mode by default. In this mode, compile and link lines are significantly simplified for clarity. You can opt out of this default with either of the following approaches: </p><ul>
-<li>Use the <code>&ndash;disable-silent-rules flag</code> at configure time to override the default and view actual compile and link lines during the build. </li>
+<li>Use the <code>--disable-silent-rules</code> flag at configure time to override the default and view actual compile and link lines during the build. </li>
 <li>Use the make command with the <code>V=1</code> option to run a verbose make.</li>
 </ul>
-<p>The new configure option <code>&ndash;enable-unsupported</code> can be used to stop configure from preventing the use of unsupported configure option combinations. For example, use of this option enables building HDF5 with the unsupported and untested configurations of C++ in a parallel environment or Fortran with a threadsafe library. <code>WARNING: Use &ndash;enable-unsupported at your own risk! This option may result in a library that does not
+<p>The new configure option <code>--enable-unsupported</code> can be used to stop configure from preventing the use of unsupported configure option combinations. For example, use of this option enables building HDF5 with the unsupported and untested configurations of C++ in a parallel environment or Fortran with a threadsafe library. <code>WARNING: Use --enable-unsupported at your own risk! This option may result in a library that does not
 compile or does not run as expected.</code></p>
 <h4>Parallel HDF5</h4>
-<p>mpicc and mpif90 are now the default C and Fortran compilers on Linux systems when <code>&ndash;enable-parallel</code> is specified but no $CC or $FC is defined.</p>
+<p>mpicc and mpif90 are now the default C and Fortran compilers on Linux systems when <code>--enable-parallel</code> is specified but no $CC or $FC is defined.</p>
 <h2 class="doxsection"><a class="anchor" id="subsec_rel_spec_18_change_6"></a>
 Release 1.8.6 versus Release 1.8.5, February 2011</h2>
 <p>This section lists interface-level changes and other user-visible changes in behavior in the transition from HDF5 Release 1.8.5 to Release 1.8.6.</p>
@@ -1114,11 +1114,11 @@ Release 1.8.6 versus Release 1.8.5, February 2011</h2>
 <p>The function <a class="el" href="group___a_t_o_m.html#gaeb5bd7ec46787a4b6d33947dc73c2a5f" title="Returns the byte order of an atomic datatype.">H5Tget_order</a> returns this value when called on a compound datatype whose members are not all of the same endianness.</p>
 <h4>Command-line Utilities with New <a class="el" href="struct_options.html">Options</a></h4>
 <p><a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> has one new option: </p><ul>
-<li><code>&ndash;exclude-path</code></li>
+<li><code>--exclude-path</code></li>
 </ul>
 <p><a class="el" href="_h5_t_o_o_l__l_s__u_g.html#sec_cltools_h5ls" title="h5ls">h5ls</a> and <a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> have two new options: </p><ul>
-<li><code>&ndash;follow-symlinks</code> </li>
-<li><code>&ndash;no-dangling-links</code></li>
+<li><code>--follow-symlinks</code> </li>
+<li><code>--no-dangling-links</code></li>
 </ul>
 <h4>Command-line Utilities with Changed Behavior</h4>
 <ul>
@@ -1179,8 +1179,8 @@ New C Function</h3>
 </ul>
 <h4>Command-line Utility with New <a class="el" href="struct_options.html">Options</a></h4>
 <p><a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> has two new options: </p><ul>
-<li><code>&ndash;follow-links</code> </li>
-<li><code>&ndash;no-dangling-links</code></li>
+<li><code>--follow-links</code> </li>
+<li><code>--no-dangling-links</code></li>
 </ul>
 <h4>Fortran Subroutines with Changed Interface</h4>
 <p>The link type parameter values associated with the following Fortran subroutines have changed in this release: </p><ul>
@@ -1203,7 +1203,7 @@ Release 1.8.4 versus Release 1.8.3, November 2009</h2>
 <p>This section lists interface-level changes and other user-visible changes in behavior in the transition from HDF5 Release 1.8.3 to Release 1.8.4.</p>
 <h4>Embedded HDF5 Library Settings Information</h4>
 <p>Library settings are now embedded in an HDF5 executable so that an "orphaned" executable can be queried (via the Unix strings command, for example) to display the library settings used to build it. The embedded settings information is the same as that normally found in the libhdf5.settings file.</p>
-<p>This capability may be disabled with the use of the <code>&ndash;disable-embedded-libinfo</code> flag during configure.</p>
+<p>This capability may be disabled with the use of the <code>--disable-embedded-libinfo</code> flag during configure.</p>
 <h3 class="doxsection"><a class="anchor" id="subsubsec_rel_spec_18_change_4_new"></a>
 New and Changed Functions</h3>
 <h4>New Fortran Subroutine and Constant</h4>
@@ -1229,18 +1229,18 @@ New and Changed Functions</h3>
 </ul>
 <h4>Tools with Changed Interface or Behavior</h4>
 <p><a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> has one new option: </p><ul>
-<li><code>&ndash;use-system-epsilon</code> - With this option, <a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> returns a difference if and only if the difference between two data values exceeds the system value for epsilon (that is, if <code>|a-b| &gt; epsilon</code>).<br  />
+<li><code>--use-system-epsilon</code> - With this option, <a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> returns a difference if and only if the difference between two data values exceeds the system value for epsilon (that is, if <code>|a-b| &gt; epsilon</code>).<br  />
  The tool's default behavior has also changed; without this option, the tool now checks for strict equality. Prior default behavior was to use an epsilon internally defined in HDF5.<br  />
  This option has no short form.</li>
 </ul>
 <p><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> has one new option and the behavior of another set of options has changed:<br  />
  </p><ul>
-<li><code>-R or &ndash;region</code> - With this option, <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> prints the data pointed to by a region reference. Without this option, <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> prints only the reference.</li>
+<li><code>-R or --region</code> - With this option, <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> prints the data pointed to by a region reference. Without this option, <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> prints only the reference.</li>
 </ul>
 <p>Usage of the subsetting parameters has changed. All of <code>START</code>, <code>STRIDE</code>, <code>COUNT</code>, and <code>BLOCK</code> now have default values. If those defaults are satisfactory, <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> no longer requires that all four be specified when subsetting a dataset.</p>
 <h4>Changed Library Configuration</h4>
 <p>The following configuration flag is new with this release: </p><ul>
-<li><code>&ndash;disable-embedded-libinfo</code> - This flag disables the embedding of HDF5 Library settings in an HDF5 executable.</li>
+<li><code>--disable-embedded-libinfo</code> - This flag disables the embedding of HDF5 Library settings in an HDF5 executable.</li>
 </ul>
 <h2 class="doxsection"><a class="anchor" id="subsec_rel_spec_18_change_3"></a>
 Release 1.8.3 versus Release 1.8.2, May 2009</h2>
@@ -1272,14 +1272,14 @@ New Functions</h3>
 <p>The HDF5 Library now dynamically creates separate factory free lists to manage blocks of a fixed size; these blocks were previously managed within the blockfree lists. Factory free lists use the same settings as specified in H5set_free_list_limits for block free lists.</p>
 <p>While the API has not changed, users may see both a performance boost and increased memory usage.</p>
 <h4>Tools with Changed Interface or Behavior</h4>
-<p><a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> default behavior is now to detect and compare NaNs. Use the <code>-N</code> or <code>&ndash;nan</code> option (below) to turn this behavior off and avoid the performance penalty that NaN detection and comparison entalis. (NaN detection and comparison became the default in in HDF5 Release 1.6.8.)</p>
+<p><a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> default behavior is now to detect and compare NaNs. Use the <code>-N</code> or <code>--nan</code> option (below) to turn this behavior off and avoid the performance penalty that NaN detection and comparison entalis. (NaN detection and comparison became the default in in HDF5 Release 1.6.8.)</p>
 <p>This tool has two new options: </p><ul>
-<li><code>-c, &ndash;compare</code> Lists objects that are not comparable. </li>
-<li><code>-N, &ndash;nan</code> Avoids NaNs detection.</li>
+<li><code>-c, --compare</code> Lists objects that are not comparable. </li>
+<li><code>-N, --nan</code> Avoids NaNs detection.</li>
 </ul>
 <p><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> now correctly specifies an XML DTD or a schema URL.</p>
 <p><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> binary output now defaults to NATIVE. </p><ul>
-<li>The new <code>-b, &ndash;binary</code> option can be used to specify alternate binary formats.</li>
+<li>The new <code>-b, --binary</code> option can be used to specify alternate binary formats.</li>
 </ul>
 <p><a class="el" href="_h5_t_o_o_l__r_p__u_g.html#sec_cltools_h5repack" title="h5repack">h5repack</a> - When a user does not specify a chunk size, <a class="el" href="_h5_t_o_o_l__r_p__u_g.html#sec_cltools_h5repack" title="h5repack">h5repack</a> now defines the default chunk size to be the same same as the size of the hyperslab used to read the chunks.</p>
 <h2 class="doxsection"><a class="anchor" id="subsec_rel_spec_18_change_2"></a>
@@ -1327,15 +1327,15 @@ The tool's error return code has been changed to 2.</li>
 </ul>
 <p>In each case, the old syntax remains available (though undocumented) to avoid breaking existing scripts.</p>
 <p><a class="el" href="_h5_t_o_o_l__r_p__u_g.html#sec_cltools_h5repack" title="h5repack">h5repack</a> - The following new options control the addition of user block data to an existing HDF5 file: </p><ul>
-<li><code>-u U, &ndash;ublock=U</code> - Specifies the name of the file containing the user block data to be added. </li>
-<li><code>-b B, &ndash;block=B</code> - Specifies the size of the block to be added.</li>
+<li><code>-u U, --ublock=U</code> - Specifies the name of the file containing the user block data to be added. </li>
+<li><code>-b B, --block=B</code> - Specifies the size of the block to be added.</li>
 </ul>
 <p>The following new options set parameters governing the tool's use of H5Pset_alignment: </p><ul>
-<li><code>-t T, &ndash;threshold=T</code> - Specifies the threshold value for H5Pset_alignment. </li>
-<li><code>-a A, &ndash;alignment=A</code> - Specifies the alignment value for H5Pset_alignment.</li>
+<li><code>-t T, --threshold=T</code> - Specifies the threshold value for H5Pset_alignment. </li>
+<li><code>-a A, --alignment=A</code> - Specifies the alignment value for H5Pset_alignment.</li>
 </ul>
 <p><a class="el" href="_h5_t_o_o_l__r_p__u_g.html#sec_cltools_h5repack" title="h5repack">h5repack</a> </p><ul>
-<li>now supports multiple instances of the <code>'-f'</code> or <code>'&ndash;filter'</code> option, allowing the use of multiple I/O filters with an object. </li>
+<li>now supports multiple instances of the <code>'-f'</code> or <code>'--filter'</code> option, allowing the use of multiple I/O filters with an object. </li>
 <li>With no change in the command-line syntax, <a class="el" href="_h5_t_o_o_l__r_p__u_g.html#sec_cltools_h5repack" title="h5repack">h5repack</a> now retains an existing userblock when repacking an HDF5 file.</li>
 </ul>
 <p><a class="el" href="_h5_t_o_o_l__i_m__u_g.html#sec_cltools_h5import" title="h5import">h5import</a> </p><ul>
@@ -1349,7 +1349,7 @@ The tool's error return code has been changed to 2.</li>
 </ul>
 <p><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> </p><ul>
 <li>Binary output now defaults to NATIVE with the <code>'-b'</code> option, optionally accepting NATIVE, FILE, BE, and LE. </li>
-<li>The new <code>'-m T'</code> or <code>'&ndash;format T'</code> option enables a user-defined formatting string for printing floating-point numbers.</li>
+<li>The new <code>'-m T'</code> or <code>'--format T'</code> option enables a user-defined formatting string for printing floating-point numbers.</li>
 </ul>
 <p>With no change in the command-line syntax, <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> now prints a compression ratio when compression filters are in use.</p>
 <h4>Deprecated Functions</h4>
@@ -1359,8 +1359,8 @@ The tool's error return code has been changed to 2.</li>
 <h4>Changed File Installation</h4>
 <p>The file libhdf5_fortran.settings is no longer installed with the HDF5 Library; the original content of that file is now included in libhdf5.settings.</p>
 <h4>Changed Library Configuration</h4>
-<p>It is no longer necessary to manually set an SZIP library path in LD_LIBRARY_PATH when building HDF5 with shared SZIP libraries; configure will determine the correct path from the <code>&ndash;with-szlib</code> flag, prepending it to and exporting LD_LIBRARY_PATH.</p>
-<p>Note that if an SZIP library path is set in a user-supplied LD_LIBRARY_PATH, in an existing script, for example, that does not necessarily need to be changed; configure will prepend the SZIP library path extracted from <code>&ndash;with-szlib</code> to the user-supplied LD_LIBRARY_PATH.</p>
+<p>It is no longer necessary to manually set an SZIP library path in LD_LIBRARY_PATH when building HDF5 with shared SZIP libraries; configure will determine the correct path from the <code>--with-szlib</code> flag, prepending it to and exporting LD_LIBRARY_PATH.</p>
+<p>Note that if an SZIP library path is set in a user-supplied LD_LIBRARY_PATH, in an existing script, for example, that does not necessarily need to be changed; configure will prepend the SZIP library path extracted from <code>--with-szlib</code> to the user-supplied LD_LIBRARY_PATH.</p>
 <h2 class="doxsection"><a class="anchor" id="subsec_rel_spec_18_change_1"></a>
 Release 1.8.1 versus Release 1.8.0</h2>
 <p>HDF5 Release 1.8.1 is a minor release with several bugfixes and optimizations and limited new features.</p>
@@ -1515,17 +1515,17 @@ New Functions and Tools</h3>
 </ul>
 <p>An <a class="el" href="_h5_t_o_o_l__r_p__u_g.html#sec_cltools_h5repack" title="h5repack">h5repack</a> option to set the minimum number of links in indexed format was introduced in Release 1.8.0 as: </p><ul>
 <li><code>-d min_indexed_links</code> </li>
-<li><code>&ndash;indexed=min_indexed_links</code>.</li>
+<li><code>--indexed=min_indexed_links</code>.</li>
 </ul>
 <p>In Release 1.8.1, the <code>-i</code> form has been changed to <code>-d</code> as follows: </p><ul>
 <li><code>-d min_indexed_links</code> </li>
-<li><code>&ndash;indexed=min_indexed_links</code></li>
+<li><code>--indexed=min_indexed_links</code></li>
 </ul>
 <p>The command-line syntax of <a class="el" href="_h5_t_o_o_l__d_f__u_g.html#sec_cltools_h5diff" title="h5diff">h5diff</a> was changed in Release 1.8.0 to the following: </p><ul>
 <li><code>h5diff [OPTIONS] file1 file2 [object1 [object2 ] ]</code></li>
 </ul>
 <p><b>Tools with new options</b> <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> </p><ul>
-<li><code>-m T</code> or <code>&ndash;format T</code> - Sets format of floating point output</li>
+<li><code>-m T</code> or <code>--format T</code> - Sets format of floating point output</li>
 </ul>
 <h4>Changed Behavior or Output</h4>
 <p>Changed library behavior: </p><ul>
@@ -1544,7 +1544,7 @@ Tools with changed output:</h3>
 <h3 class="doxsection"><a class="anchor" id="subsubsec_rel_spec_18_change_1_config"></a>
 Changed Library Configuration</h3>
 <p>The following configuration flag is new with this release: </p><ul>
-<li><code>&ndash;disable-sharedlib-rpath</code></li>
+<li><code>--disable-sharedlib-rpath</code></li>
 </ul>
 <h3 class="doxsection"><a class="anchor" id="subsubsec_rel_spec_18_change_1_patch"></a>
 Removed Patch Requirement</h3>
@@ -1935,7 +1935,7 @@ New Functions and Tools</h3>
 <li>H5Tset_overflow </li>
 <li>H5Tget_overflow</li>
 </ul>
-<p>Several functions, subroutines, and wrappers are deprecated in this HDF5 release and may eventually be removed from the HDF5 distribution and from the HDF5 Reference Manual. A Release 1.6.x compatibility mode is provided enabling these and other Release 1.6.x compatibility features, but is available only if the HDF5 Library is configured with the default settings or with the flag <code>&ndash;with-default-api-version=v16</code>. Release 1.8.0 also provides macros that can be mapped selectively to 1.6.x and 1.8.0 function versions according to the needs of a user application. The backward compatibility mode is enabled in the Release 1.8.0 binaries distributed by NCSA. See <a class="el" href="api-compat-macros.html" title="API Compatibility Macros">API Compatibility Macros</a> for full details.</p>
+<p>Several functions, subroutines, and wrappers are deprecated in this HDF5 release and may eventually be removed from the HDF5 distribution and from the HDF5 Reference Manual. A Release 1.6.x compatibility mode is provided enabling these and other Release 1.6.x compatibility features, but is available only if the HDF5 Library is configured with the default settings or with the flag <code>--with-default-api-version=v16</code>. Release 1.8.0 also provides macros that can be mapped selectively to 1.6.x and 1.8.0 function versions according to the needs of a user application. The backward compatibility mode is enabled in the Release 1.8.0 binaries distributed by NCSA. See <a class="el" href="api-compat-macros.html" title="API Compatibility Macros">API Compatibility Macros</a> for full details.</p>
 <p>Deprecated functions are marked in the function index at the beginning of each API section in the HDF5 Reference Manual.</p>
 <p>Virtual File Driver Removed The stream virtual file driver (H5FD_STREAM) have been removed in this release. This affects the functions H5Pset_fapl_stream and H5Pget_fapl_stream and the constant H5FD_STREAM.</p>
 <p>This virtual file driver will remain available at <code>hdf5-addons.origo.ethz.ch/</code>. Note that as of this writing, this transition is still in progress; the necessary integration tools may not be available when HDF5 Release 1.8.0 first comes out.</p>
@@ -2112,40 +2112,40 @@ New Property Lists</h3>
 Changed Library Configuration</h3>
 <p>The following configuration features have changed as follows.</p>
 <p>New with this release: </p><ul>
-<li><code>&ndash;disable-dependency-tracking</code> </li>
-<li><code>&ndash;enable-hdf5v1_6</code> </li>
-<li><code> &ndash;enable-dconv-exception</code> </li>
-<li><code>&ndash;disable-dconv-exception</code> </li>
-<li><code>&ndash;enable-dconv-accuracy</code> </li>
-<li><code>&ndash;disable-dconv-accuracy</code> </li>
-<li><code>&ndash;program-prefix=PREFIX</code> </li>
-<li><code>&ndash;program-prefix=SUFFIX</code> </li>
-<li><code>&ndash;program-transform-name=PROGRAM</code> </li>
-<li><code>&ndash;enable-maintainer-mode</code> </li>
-<li><code>&ndash;disable-dependency-tracking</code> </li>
-<li><code>&ndash;enable-dependency-tracking</code> </li>
-<li><code>&ndash;enable-codestack</code> </li>
-<li><code>&ndash;enable-direct-vfd</code> </li>
-<li><code>&ndash;with-tags[=TAGS]</code></li>
+<li><code>--disable-dependency-tracking</code> </li>
+<li><code>--enable-hdf5v1_6</code> </li>
+<li><code>--enable-dconv-exception</code> </li>
+<li><code>--disable-dconv-exception</code> </li>
+<li><code>--enable-dconv-accuracy</code> </li>
+<li><code>--disable-dconv-accuracy</code> </li>
+<li><code>--program-prefix=PREFIX</code> </li>
+<li><code>--program-prefix=SUFFIX</code> </li>
+<li><code>--program-transform-name=PROGRAM</code> </li>
+<li><code>--enable-maintainer-mode</code> </li>
+<li><code>--disable-dependency-tracking</code> </li>
+<li><code>--enable-dependency-tracking</code> </li>
+<li><code>--enable-codestack</code> </li>
+<li><code>--enable-direct-vfd</code> </li>
+<li><code>--with-tags[=TAGS]</code></li>
 </ul>
 <p>New with this release, but expected to be useful only to those working inside the HDF5 Library or working very closely with HDF5 developers: </p><ul>
-<li><code>&ndash;enable-build-all</code> </li>
-<li><code>&ndash;enable-metadata-trace-file</code></li>
+<li><code>--enable-build-all</code> </li>
+<li><code>--enable-metadata-trace-file</code></li>
 </ul>
 <p>New with this release, but not actively supported: </p><ul>
-<li><code>&ndash;enable-fphdf5</code></li>
+<li><code>--enable-fphdf5</code></li>
 </ul>
 <p>Changed in this release: </p><ul>
-<li><code>&ndash;enable-shared[=PKGS]</code> </li>
-<li><code>&ndash;enable-static[=PKGS]</code> </li>
-<li><code>&ndash;enable-fast-install[=PKGS]</code></li>
+<li><code>--enable-shared[=PKGS]</code> </li>
+<li><code>--enable-static[=PKGS]</code> </li>
+<li><code>--enable-fast-install[=PKGS]</code></li>
 </ul>
 <p>Removed in this release: </p><ul>
-<li><code>&ndash;enable-hdf5v1_4</code> </li>
-<li><code>&ndash;enable-funcstack</code> </li>
-<li><code>&ndash;with-ssl=LIB</code> </li>
-<li><code>&ndash;with-gass=DIR</code> </li>
-<li><code>&ndash;with-srb=DIR</code></li>
+<li><code>--enable-hdf5v1_4</code> </li>
+<li><code>--enable-funcstack</code> </li>
+<li><code>--with-ssl=LIB</code> </li>
+<li><code>--with-gass=DIR</code> </li>
+<li><code>--with-srb=DIR</code></li>
 </ul>
 <p>The environment variables, which are deprecated in this release. </p><ul>
 <li>FC replaces F9X </li>

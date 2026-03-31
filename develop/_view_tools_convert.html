@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-30</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-31</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -151,13 +151,13 @@ Output HDF5 Dataset into an ASCII File (to Import into Excel and Other Applicati
 <tr>
 <th><a class="el" href="struct_options.html">Options</a></th><th>Description</th></tr>
 <tr>
-<td>-d D, &ndash;dataset=D </td><td>Display dataset D </td></tr>
+<td>-d D, --dataset=D </td><td>Display dataset D </td></tr>
 <tr>
-<td>-o F, &ndash;output=F </td><td>Output raw data into file F </td></tr>
+<td>-o F, --output=F </td><td>Output raw data into file F </td></tr>
 <tr>
-<td>-y, &ndash;noindex </td><td>Suppress printing of array indices with the data </td></tr>
+<td>-y, --noindex </td><td>Suppress printing of array indices with the data </td></tr>
 <tr>
-<td>-w N, &ndash;width=N </td><td>Set N number of columns of output. A value of 0 sets the number to 65535 (the maximum) </td></tr>
+<td>-w N, --width=N </td><td>Set N number of columns of output. A value of 0 sets the number to 65535 (the maximum) </td></tr>
 </table>
 <p>As an example, <code style="background-color:whitesmoke;">h5_crtdat.c</code> from the <a class="el" href="_l_b_dset_create.html" title="Creating a Dataset">Creating a Dataset</a> HDF5 Tutorial topic, creates the file <code style="background-color:whitesmoke;">dset.h5</code> with a dataset <code style="background-color:whitesmoke;">/dset</code> that is a 4 x 6 integer array. The following is displayed when viewing <code style="background-color:whitesmoke;">dset.h5</code> with <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a></code>: </p><div class="fragment"><div class="line">$ h5dump dset.h5</div>
 <div class="line">HDF5 <span class="stringliteral">&quot;dset.h5&quot;</span> {</div>
@@ -198,11 +198,11 @@ Output HDF5 Dataset into Binary File</h1>
 <tr>
 <th><a class="el" href="struct_options.html">Options</a></th><th>Description</th></tr>
 <tr>
-<td>-d D, &ndash;dataset=D </td><td>Display dataset D </td></tr>
+<td>-d D, --dataset=D </td><td>Display dataset D </td></tr>
 <tr>
-<td>-o F, &ndash;output=F </td><td>Output raw data into file F </td></tr>
+<td>-o F, --output=F </td><td>Output raw data into file F </td></tr>
 <tr>
-<td>-b B, &ndash;binary=B </td><td>Binary file output of form B. Valid values are: LE, BE, NATIVE, FILE </td></tr>
+<td>-b B, --binary=B </td><td>Binary file output of form B. Valid values are: LE, BE, NATIVE, FILE </td></tr>
 </table>
 <p>As an example, <code style="background-color:whitesmoke;">h5_crtdat.c</code> from the <a class="el" href="_l_b_dset_create.html" title="Creating a Dataset">Creating a Dataset</a> HDF5 Tutorial topic, creates the file dset.h5 with a dataset <code style="background-color:whitesmoke;">/dset</code> that is a 4 x 6 integer array. The following is displayed when viewing <code style="background-color:whitesmoke;">dset.h5</code> with <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a></code>: </p><div class="fragment"><div class="line">$ h5dump -d /dset/ dset.h5</div>
 <div class="line">HDF5 <span class="stringliteral">&quot;dset.h5&quot;</span> {</div>
@@ -245,7 +245,7 @@ Export from h5dump and Import into HDF5</h1>
 <p>The DDL file must be generated with the <code style="background-color:whitesmoke;">h5dump -p</code> option, to generate properties.</p>
 <p>The raw data file that can be imported into HDF5 using this method may contain either numeric or string data with the following restrictions: </p><ul>
 <li>Numeric data requires the use of the <code style="background-color:whitesmoke;">h5dump -b</code> option to produce a binary data file. </li>
-<li>String data must be written with the <code style="background-color:whitesmoke;">h5dump -y</code> and <code style="background-color:whitesmoke;">&ndash;width=1</code> options, generating a single column of strings without indices.</li>
+<li>String data must be written with the <code style="background-color:whitesmoke;">h5dump -y</code> and <code style="background-color:whitesmoke;">--width=1</code> options, generating a single column of strings without indices.</li>
 </ul>
 <p>Two examples follow: the first imports a dataset with a numeric datatype. Note that numeric data requires the use of the <code style="background-color:whitesmoke;">h5dump -b</code> option to produce a binary data file. The example program (<code style="background-color:whitesmoke;">h5_crtdat.c</code>) that creates this file is included with the <a class="el" href="_intro_h_d_f5.html" title="Introduction to HDF5">Introduction to HDF5</a> tutorial and can be obtained from the <a class="el" href="_l_b_examples.html" title="Examples from Learning the Basics">Examples from Learning the Basics</a> page: </p><div class="fragment"><div class="line">h5dump -p -d <span class="stringliteral">&quot;/dset&quot;</span> --ddl=dsetbin.dmp -o dset.bin -b dset.h5</div>
 <div class="line">h5import dset.bin -c dsetbin.dmp -o <span class="keyword">new</span>-dset.h5</div>
@@ -284,7 +284,7 @@ Export from h5dump and Import into HDF5</h1>
 <div class="line">}</div>
 <div class="line">}</div>
 </div><!-- fragment --><p>The second example imports string data. The example program that creates this file can be downloaded from the <a class="el" href="_ex_a_p_i.html" title="Examples by API">Examples by API</a> page.</p>
-<p>Note that string data requires use of the <code style="background-color:whitesmoke;">h5dump -y</code> option to exclude indexes and the <code style="background-color:whitesmoke;">h5dump &ndash;width=1</code> option to generate a single column of strings. The <code style="background-color:whitesmoke;">-o</code> option outputs the data into an ASCII file. </p><div class="fragment"><div class="line">h5dump -p -d <span class="stringliteral">&quot;/DS1&quot;</span> -O vlstring.dmp -o vlstring.ascii -y --width=1 h5ex_t_vlstring.h5</div>
+<p>Note that string data requires use of the <code style="background-color:whitesmoke;">h5dump -y</code> option to exclude indexes and the <code style="background-color:whitesmoke;">h5dump --width=1</code> option to generate a single column of strings. The <code style="background-color:whitesmoke;">-o</code> option outputs the data into an ASCII file. </p><div class="fragment"><div class="line">h5dump -p -d <span class="stringliteral">&quot;/DS1&quot;</span> -O vlstring.dmp -o vlstring.ascii -y --width=1 h5ex_t_vlstring.h5</div>
 <div class="line">h5import vlstring.ascii -c vlstring.dmp -o <span class="keyword">new</span>-vlstring.h5</div>
 </div><!-- fragment --><p>The output before and after running these commands is shown below: </p><div class="fragment"><div class="line">$ h5dump h5ex_t_vlstring.h5</div>
 <div class="line">HDF5 <span class="stringliteral">&quot;h5ex_t_vlstring.h5&quot;</span> {</div>

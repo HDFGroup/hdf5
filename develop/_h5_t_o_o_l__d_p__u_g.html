@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-30</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-31</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -142,105 +142,105 @@ Introduction</h2>
 <p>With h5dump, you can display objects from an HDF5 file.</p>
 <h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5dump_usage"></a>
 Usage</h2>
-<h4>h5dump [OPTIONS] [files</h4>
+<h4>h5dump [OPTIONS] [files]</h4>
 <h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5dump_error"></a>
 Error Report Option</h2>
 <ul>
-<li><b>&ndash;enable-error-stack</b> Prints messages from the HDF5 error stack as they occur. Optional value 2 also prints file open errors, &ndash;enable-error-stack=2.</li>
+<li><b>--enable-error-stack</b> Prints messages from the HDF5 error stack as they occur. Optional value 2 also prints file open errors, <code>--enable-error-stack=2</code>.</li>
 </ul>
 <h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5dump_options"></a>
 Options</h2>
 <ul>
-<li><b>&ndash;help</b> Print a usage message and exit </li>
-<li><b>&ndash;version</b> Print the library version number and exit</li>
+<li><b>--help</b> Print a usage message and exit </li>
+<li><b>--version</b> Print the library version number and exit</li>
 </ul>
 <h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5dump_options_file"></a>
 File Options</h2>
 <ul>
-<li><b>&ndash;contents</b> Print a list of the file contents, group and dataset, names and values, then exit. Optional value 1 also prints attributes, &ndash;contents=1. </li>
-<li><b>&ndash;superblock</b> Print the content of the super block </li>
-<li><b>&ndash;header</b> Print the header only; no data is displayed </li>
-<li><b>&ndash;filedriver=D</b> Specify which driver to open the file with </li>
-<li><b>&ndash;output=F</b> Output raw data into file F </li>
-<li><b>&ndash;binary=B</b> Binary file output, of form B </li>
-<li><b>&ndash;ddl=F</b> Output ddl text into file F Use blank(empty) filename F to suppress ddl display </li>
-<li><b>&ndash;page-buffer-size=N</b> Set the page buffer cache size, N=non-negative integers </li>
-<li><b>&ndash;endpoint-url=P</b> Supply S3 endpoint url information to "ros3" vfd. P is the AWS service endpoint. Has no effect if filedriver is not "ros3". </li>
-<li><b>&ndash;s3-cred=&lt;cred&gt;</b> Supply S3 authentication information to "ros3" vfd. <div class="fragment"><div class="line">&lt;cred&gt; :: <span class="stringliteral">&quot;(&lt;aws-region&gt;,&lt;access-id&gt;,&lt;access-key&gt;)&quot;</span> </div>
+<li><b>--contents</b> Print a list of the file contents, group and dataset, names and values, then exit. Optional value 1 also prints attributes, <code>--contents=1</code>. </li>
+<li><b>--superblock</b> Print the content of the super block </li>
+<li><b>--header</b> Print the header only; no data is displayed </li>
+<li><b>--filedriver=D</b> Specify which driver to open the file with </li>
+<li><b>--output=F</b> Output raw data into file F </li>
+<li><b>--binary=B</b> Binary file output, of form B </li>
+<li><b>--ddl=F</b> Output ddl text into file F Use blank(empty) filename F to suppress ddl display </li>
+<li><b>--page-buffer-size=N</b> Set the page buffer cache size, N=non-negative integers </li>
+<li><b>--endpoint-url=P</b> Supply S3 endpoint url information to "ros3" vfd. P is the AWS service endpoint. Has no effect if filedriver is not "ros3". </li>
+<li><b>--s3-cred=&lt;cred&gt;</b> Supply S3 authentication information to "ros3" vfd. <div class="fragment"><div class="line">&lt;cred&gt; :: <span class="stringliteral">&quot;(&lt;aws-region&gt;,&lt;access-id&gt;,&lt;access-key&gt;)&quot;</span> </div>
 </div><!-- fragment --> <div class="fragment"><div class="line">&lt;cred&gt; :: <span class="stringliteral">&quot;(&lt;aws-region&gt;,&lt;access-id&gt;,&lt;access-key&gt;,&lt;session-token&gt;)&quot;</span> </div>
 </div><!-- fragment --> If absent or <div class="fragment"><div class="line">\&lt;cred\&gt; -&gt; <span class="stringliteral">&quot;(,,)&quot;</span> </div>
-</div><!-- fragment --> or <div class="fragment"><div class="line">\&lt;cred\&gt; -&gt; <span class="stringliteral">&quot;(,,,)&quot;</span></div>
+</div><!-- fragment --> or <div class="fragment"><div class="line">\&lt;cred\&gt; -&gt; <span class="stringliteral">&quot;(,,,)&quot;</span> </div>
 </div><!-- fragment -->, no authentication. Has no effect if filedriver is not "ros3". </li>
-<li><b>&ndash;hdfs-attrs=&lt;attrs&gt;</b> Supply configuration information for HDFS file access. For use with <b>&ndash;filedriver=hdfs</b> <div class="fragment"><div class="line"> &lt;attrs&gt; :: (&lt;namenode name&gt;,&lt;namenode port&gt;, &lt;kerberos cache</div>
-<div class="line">path&gt;,&lt;username&gt;, &lt;buffer size&gt;) </div>
+<li><b>--hdfs-attrs=&lt;attrs&gt;</b> Supply configuration information for HDFS file access. For use with <b>--filedriver=hdfs</b> <div class="fragment"><div class="line">&lt;attrs&gt; :: (&lt;namenode name&gt;,&lt;namenode port&gt;, &lt;kerberos cache path&gt;,&lt;username&gt;, &lt;buffer size&gt;) </div>
 </div><!-- fragment --> Any absent attribute will use a default value. </li>
-<li><b>&ndash;vol-value</b> Value (ID) of the VOL connector to use for opening the HDF5 file specified </li>
-<li><b>&ndash;vol-name</b> Name of the VOL connector to use for opening the HDF5 file specified </li>
-<li><b>&ndash;vol-info</b> VOL-specific info to pass to the VOL connector used for opening the HDF5 file specified.<br  />
+<li><b>--vol-value</b> Value (ID) of the VOL connector to use for opening the HDF5 file specified </li>
+<li><b>--vol-name</b> Name of the VOL connector to use for opening the HDF5 file specified </li>
+<li><b>--vol-info</b> VOL-specific info to pass to the VOL connector used for opening the HDF5 file specified.<br  />
  If none of the above options are used to specify a VOL, then the VOL named by <b>HDF5_VOL_CONNECTOR</b> (or the native VOL connector, if that environment variable is unset) will be used </li>
-<li><b>&ndash;vfd-value</b> Value (ID) of the VFL driver to use for opening the HDF5 file specified </li>
-<li><b>&ndash;vfd-name</b> Name of the VFL driver to use for opening the HDF5 file specified </li>
-<li><b>&ndash;vfd-info</b> VFD-specific info to pass to the VFL driver used for opening the HDF5 file specified</li>
+<li><b>--vfd-value</b> Value (ID) of the VFL driver to use for opening the HDF5 file specified </li>
+<li><b>--vfd-name</b> Name of the VFL driver to use for opening the HDF5 file specified </li>
+<li><b>--vfd-info</b> VFD-specific info to pass to the VFL driver used for opening the HDF5 file specified</li>
 </ul>
 <h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5dump_options_obj"></a>
 Object Options</h2>
 <ul>
-<li><b>&ndash;attribute=P</b> Print the specified attribute If an attribute name contains a slash (/), escape the slash with a preceding backslash (). (See example section below.) </li>
-<li><b>&ndash;dataset=P</b> Print the specified dataset </li>
-<li><b>&ndash;group=P</b> Print the specified group and all members </li>
-<li><b>&ndash;soft-link=P</b> Print the value(s) of the specified soft link </li>
-<li><b>&ndash;datatype=P</b> Print the specified named datatype </li>
-<li><b>&ndash;any_path=P</b> Print any attribute, dataset, group, datatype, or link that matches P P can be the absolute path or just a relative path. </li>
-<li><b>&ndash;onlyattr</b> Print the header and value of attributes Optional value 0 suppresses printing attributes. </li>
-<li><b>&ndash;vds-view-first-missing</b> Set the VDS bounds to first missing mapped elements. </li>
-<li><b>&ndash;vds-gap-size=N</b> Set the missing file gap size, N=non-negative integers</li>
+<li><b>--attribute=P</b> Print the specified attribute. If an attribute name contains a slash (/), escape the slash with a preceding backslash (\). (See example section below.) </li>
+<li><b>--dataset=P</b> Print the specified dataset </li>
+<li><b>--group=P</b> Print the specified group and all members </li>
+<li><b>--soft-link=P</b> Print the value(s) of the specified soft link </li>
+<li><b>--datatype=P</b> Print the specified named datatype </li>
+<li><b>--any_path=P</b> Print any attribute, dataset, group, datatype, or link that matches P. P can be the absolute path or just a relative path. </li>
+<li><b>--onlyattr</b> Print the header and value of attributes. Optional value 0 suppresses printing attributes. </li>
+<li><b>--vds-view-first-missing</b> Set the VDS bounds to first missing mapped elements. </li>
+<li><b>--vds-gap-size=N</b> Set the missing file gap size, N=non-negative integers</li>
 </ul>
 <h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5dump_options_prop"></a>
 Object Property Options</h2>
 <ul>
-<li><b>&ndash;object-ids</b> Print the object ids </li>
-<li><b>&ndash;properties</b> Print dataset filters, storage layout and fill value </li>
-<li><b>&ndash;packedbits=L</b> Print packed bits as unsigned integers, using mask format L for an integer dataset specified with option -d. L is a list of offset,length values, separated by commas. Offset is the beginning bit in the data value and length is the number of bits of the mask. </li>
-<li><b>&ndash;region</b> Print dataset pointed by region references</li>
+<li><b>--object-ids</b> Print the object ids </li>
+<li><b>--properties</b> Print dataset filters, storage layout and fill value </li>
+<li><b>--packedbits=L</b> Print packed bits as unsigned integers, using mask format L for an integer dataset specified with option -d. L is a list of offset,length values, separated by commas. Offset is the beginning bit in the data value and length is the number of bits of the mask. </li>
+<li><b>--region</b> Print dataset pointed by region references</li>
 </ul>
 <h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5dump_options_fmt"></a>
 Formatting Options</h2>
 <ul>
-<li><b>&ndash;escape</b> Escape non printing characters </li>
-<li><b>&ndash;string</b> Print 1-byte integer datasets as ASCII </li>
-<li><b>&ndash;noindex</b> Do not print array indices with the data </li>
-<li><b>&ndash;format=T</b> Set the floating point output format </li>
-<li><b>&ndash;lformat=T</b> Set the floating point long double output format </li>
-<li><b>&ndash;sort_by=Q</b> Sort groups and attributes by index Q </li>
-<li><b>&ndash;sort_order=Z</b> Sort groups and attributes by order Z </li>
-<li><b>&ndash;no-compact-subset</b> Disable compact form of subsetting and allow the use of "[" in dataset names. </li>
-<li><b>&ndash;width=N</b> Set the number of columns of output. A value of 0 (zero) sets the number of columns to the maximum (65535). Default width is 80 columns.</li>
+<li><b>--escape</b> Escape non printing characters </li>
+<li><b>--string</b> Print 1-byte integer datasets as ASCII </li>
+<li><b>--noindex</b> Do not print array indices with the data </li>
+<li><b>--format=T</b> Set the floating point output format </li>
+<li><b>--lformat=T</b> Set the floating point long double output format </li>
+<li><b>--sort_by=Q</b> Sort groups and attributes by index Q </li>
+<li><b>--sort_order=Z</b> Sort groups and attributes by order Z </li>
+<li><b>--no-compact-subset</b> Disable compact form of subsetting and allow the use of "[" in dataset names. </li>
+<li><b>--width=N</b> Set the number of columns of output. A value of 0 (zero) sets the number of columns to the maximum (65535). Default width is 80 columns.</li>
 </ul>
 <h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5dump_options_xml"></a>
 XML Options</h2>
 <ul>
-<li><b>&ndash;xml</b> Output in XML using Schema </li>
-<li><b>&ndash;use-dtd</b> Output in XML using DTD </li>
-<li><b>&ndash;xml-dtd=U</b> Use the DTD or schema at U </li>
-<li><b>&ndash;xml-ns=S</b> (XML Schema) Use qualified names n the XML ":": no namespace, default: "hdf5:" E.g., to dump a file called "-f", use h5dump &ndash; -f</li>
+<li><b>--xml</b> Output in XML using Schema </li>
+<li><b>--use-dtd</b> Output in XML using DTD </li>
+<li><b>--xml-dtd=U</b> Use the DTD or schema at U </li>
+<li><b>--xml-ns=S</b> (XML Schema) Use qualified names in the XML. ":": no namespace, default: "hdf5:"</li>
 </ul>
 <h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5dump_options_subset"></a>
 Subsetting Options</h2>
 <p>Subsetting is available by using the following options with a dataset option. Subsetting is done by selecting a hyperslab from the data. Thus, the options mirror those for performing a hyperslab selection.<br  />
  One of the <b>START</b>, <b>COUNT</b>, <b>STRIDE</b>, or <b>BLOCK</b> parameters are mandatory if you do subsetting. The <b>STRIDE</b>, <b>COUNT</b>, and <b>BLOCK</b> parameters are optional and will default to 1 in each dimension. <b>START</b> is optional and will default to 0 in each dimension.</p>
 <ul>
-<li><b>&ndash;start=START</b> Offset of start of subsetting selection <b>START</b> - is a list of integers, the number of which are equal to the number of dimensions in the dataspace being queried.<br  />
+<li><b>--start=START</b> Offset of start of subsetting selection <b>START</b> - is a list of integers, the number of which are equal to the number of dimensions in the dataspace being queried.<br  />
  </li>
-<li><b>&ndash;stride=STRIDE</b> Hyperslab stride <b>COUNT</b> - is a list of integers, the number of which are equal to the number of dimensions in the dataspace being queried.<br  />
+<li><b>--stride=STRIDE</b> Hyperslab stride <b>STRIDE</b> - is a list of integers, the number of which are equal to the number of dimensions in the dataspace being queried.<br  />
  </li>
-<li><b>&ndash;count=COUNT</b> Number of blocks to include in selection <b>STRIDE</b> - is a list of integers, the number of which are equal to the number of dimensions in the dataspace being queried.<br  />
+<li><b>--count=COUNT</b> Number of blocks to include in selection <b>COUNT</b> - is a list of integers, the number of which are equal to the number of dimensions in the dataspace being queried.<br  />
  </li>
-<li><b>&ndash;block=BLOCK</b> Size of block in hyperslab <b>BLOCK</b> - is a list of integers, the number of which are equal to the number of dimensions in the dataspace being queried.<br  />
+<li><b>--block=BLOCK</b> Size of block in hyperslab <b>BLOCK</b> - is a list of integers, the number of which are equal to the number of dimensions in the dataspace being queried.<br  />
  (Alternate compact form of subsetting is described in the Reference Manual)</li>
 </ul>
 <h3 class="doxsection"><a class="anchor" id="subsubsec_cltools_h5dump_options_args"></a>
 Option Argument Conventions</h3>
 <ul>
+<li><b>--</b> - Two dashes followed by whitespace. Indicates that the following argument is not an option. For example, to dump a file called "-f", use <code>h5dump -- -f</code>. </li>
 <li><b>D</b> - is the file driver to use in opening the file. Acceptable values are available from <a href="https://support.hdfgroup.org/releases/hdf5/documentation/registered_virtual_file_drivers_vfds.md">https://support.hdfgroup.org/releases/hdf5/documentation/registered_virtual_file_drivers_vfds.md</a>. Without the file driver flag, the file will be opened with each driver in turn and in the order specified above until one driver succeeds in opening the file. See examples below for family, split, and multi driver special file name usage.</li>
 </ul>
 <ul>

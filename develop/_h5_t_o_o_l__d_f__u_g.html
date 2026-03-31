@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-30</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-31</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -152,18 +152,18 @@ Usage</h2>
 <h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5diff_error"></a>
 Error Report</h2>
 <ul>
-<li><b>&ndash;enable-error-stack</b> Prints messages from the HDF5 error stack as they occur. Optional value 2 also prints file open errors, &ndash;enable-error-stack=2.</li>
+<li><b>--enable-error-stack</b> Prints messages from the HDF5 error stack as they occur. Optional value 2 also prints file open errors, <code>--enable-error-stack=2</code>.</li>
 </ul>
 <h2 class="doxsection"><a class="anchor" id="subsec_cltools_h5diff_options"></a>
 Options</h2>
 <ul>
-<li><b>&ndash;help</b> Print a usage message and exit. </li>
-<li><b>&ndash;version</b> Print the library version number and exit. </li>
-<li><b>&ndash;report</b> Report mode. Print differences. </li>
-<li><b>&ndash;verbose</b> Verbose mode. Print differences information and list of objects. </li>
-<li><b>&ndash;verbose=N</b> Verbose mode with level. Print differences and list of objects. Level of detail depends on value of N: <ul>
+<li><b>--help</b> Print a usage message and exit. </li>
+<li><b>--version</b> Print the library version number and exit. </li>
+<li><b>--report</b> Report mode. Print differences. </li>
+<li><b>--verbose</b> Verbose mode. Print differences information and list of objects. </li>
+<li><b>--verbose=N</b> Verbose mode with level. Print differences and list of objects. Level of detail depends on value of N: <ul>
 <li>
-<b>0</b> Identical to '-v' or '&ndash;verbose'. </li>
+<b>0</b> Identical to '-v' or '--verbose'. </li>
 <li>
 <b>1</b> All level 0 information plus one-line attribute status summary. </li>
 <li>
@@ -172,52 +172,52 @@ Options</h2>
 <b>3</b> All level 2 information plus file names.</li>
 </ul>
 </li>
-<li><b>&ndash;quiet</b> Quiet mode. Do not produce output. </li>
-<li><b>&ndash;page-buffer-size=N</b> Set the page buffer cache size, N=non-negative integers </li>
-<li><b>&ndash;vol-value-1</b> Value (ID) of the VOL connector to use for opening the first HDF5 file specified </li>
-<li><b>&ndash;vol-name-1</b> Name of the VOL connector to use for opening the first HDF5 file specified </li>
-<li><b>&ndash;vol-info-1</b> VOL-specific info to pass to the VOL connector used for opening the first HDF5 file specified </li>
-<li><b>&ndash;vol-value-2</b> Value (ID) of the VOL connector to use for opening the second HDF5 file specified </li>
-<li><b>&ndash;vol-name-2</b> Name of the VOL connector to use for opening the second HDF5 file specified </li>
-<li><b>&ndash;vol-info-2</b> VOL-specific info to pass to the VOL connector used for opening the second HDF5 file specified.<br  />
+<li><b>--quiet</b> Quiet mode. Do not produce output. </li>
+<li><b>--page-buffer-size=N</b> Set the page buffer cache size, N=non-negative integers </li>
+<li><b>--vol-value-1</b> Value (ID) of the VOL connector to use for opening the first HDF5 file specified </li>
+<li><b>--vol-name-1</b> Name of the VOL connector to use for opening the first HDF5 file specified </li>
+<li><b>--vol-info-1</b> VOL-specific info to pass to the VOL connector used for opening the first HDF5 file specified </li>
+<li><b>--vol-value-2</b> Value (ID) of the VOL connector to use for opening the second HDF5 file specified </li>
+<li><b>--vol-name-2</b> Name of the VOL connector to use for opening the second HDF5 file specified </li>
+<li><b>--vol-info-2</b> VOL-specific info to pass to the VOL connector used for opening the second HDF5 file specified.<br  />
  If none of the above options are used to specify a VOL for a file, then the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector, if that environment variable is unset) will be used </li>
-<li><b>&ndash;vfd-value-1</b> Value (ID) of the VFL driver to use for opening the first HDF5 file specified </li>
-<li><b>&ndash;vfd-name-1</b> Name of the VFL driver to use for opening the first HDF5 file specified </li>
-<li><b>&ndash;vfd-info-1 </b> VFD-specific info to pass to the VFL driver used for opening the first HDF5 file specified </li>
-<li><b>&ndash;vfd-value-2 </b> Value (ID) of the VFL driver to use for opening the second HDF5 file specified </li>
-<li><b>&ndash;vfd-name-2</b> Name of the VFL driver to use for opening the second HDF5 file specified </li>
-<li><b>&ndash;vfd-info-2</b> VFD-specific info to pass to the VFL driver used for opening the second HDF5 file specified </li>
-<li><b>&ndash;follow-symlinks</b> Follow symbolic links (soft links and external links) and compare the links' target objects.<br  />
+<li><b>--vfd-value-1</b> Value (ID) of the VFL driver to use for opening the first HDF5 file specified </li>
+<li><b>--vfd-name-1</b> Name of the VFL driver to use for opening the first HDF5 file specified </li>
+<li><b>--vfd-info-1 </b> VFD-specific info to pass to the VFL driver used for opening the first HDF5 file specified </li>
+<li><b>--vfd-value-2 </b> Value (ID) of the VFL driver to use for opening the second HDF5 file specified </li>
+<li><b>--vfd-name-2</b> Name of the VFL driver to use for opening the second HDF5 file specified </li>
+<li><b>--vfd-info-2</b> VFD-specific info to pass to the VFL driver used for opening the second HDF5 file specified </li>
+<li><b>--follow-symlinks</b> Follow symbolic links (soft links and external links) and compare the links' target objects.<br  />
  If symbolic link(s) with the same name exist in the files being compared, then determine whether the target of each link is an existing object (dataset, group, or named datatype) or the link is a dangling link (a soft or external link pointing to a target object that does not yet exist). <ul>
 <li>
-If both symbolic links are dangling links, they are treated as being the same; by default, h5diff returns an exit code of 0. If, however, &ndash;no-dangling-links is used with &ndash;follow-symlinks, this situation is treated as an error and h5diff returns an exit code of 2. </li>
+If both symbolic links are dangling links, they are treated as being the same; by default, h5diff returns an exit code of 0. If, however, <b>--no-dangling-links</b> is used with <b>--follow-symlinks</b>, this situation is treated as an error and h5diff returns an exit code of 2.  </li>
 <li>
-If only one of the two links is a dangling link,they are treated as being different and h5diff returns an exit code of 1. If, however, &ndash;no-dangling-links is used with &ndash;follow-symlinks, this situation is treated as an error and h5diff returns an exit code of 2. </li>
+If only one of the two links is a dangling link, they are treated as being different and h5diff returns an exit code of 1. If, however, <b>--no-dangling-links</b> is used with <b>--follow-symlinks</b>, this situation is treated as an error and h5diff returns an exit code of 2.  </li>
 <li>
-If both symbolic links point to existing objects, h5diff compares the two objects.</li>
+If both symbolic links point to existing objects, h5diff compares the two objects.  </li>
 </ul>
 If any symbolic link specified in the call to h5diff does not exist, h5diff treats it as an error and returns an exit code of 2. </li>
-<li><b>&ndash;no-dangling-links</b> Must be used with <b>&ndash;follow-symlinks</b> option; otherwise, h5diff shows error message and returns an exit code of 2.<br  />
+<li><b>--no-dangling-links</b> Must be used with <b>--follow-symlinks</b> option; otherwise, h5diff shows error message and returns an exit code of 2.<br  />
  Check for any symbolic links (soft links or external links) that do not resolve to an existing object (dataset, group, or named datatype). If any dangling link is found, this situation is treated as an error and h5diff returns an exit code of 2. </li>
-<li><b>&ndash;compare</b> List objects that are not comparable </li>
-<li><b>&ndash;nan</b> Avoid NaNs detection </li>
-<li><b>&ndash;count=C</b> Print differences up to <b>C</b>. <b>C</b> must be a positive integer. </li>
-<li><b>&ndash;delta=D</b> Print difference if (<b>|a-b| &gt; D</b>). <b>D</b> must be a positive number, where <b>a</b> is the data point value in file1 and b is the data point value in file2. Can not use with '&ndash;relative' or '&ndash;use-system-epsilon'. </li>
-<li><b>&ndash;relative=R</b> Print difference if (<b>|(a-b)/b| &gt; R</b>). <b>R</b> must be a positive number, where <b>a</b> is the data point value in file1 and <b>b</b> is the data point value in file2. Can not use with '&ndash;delta' or '&ndash;use-system-epsilon'. </li>
-<li><b>&ndash;use-system-epsilon</b> Print difference if (<b>|a-b| &gt; EPSILON</b>), <b>EPSILON</b> is system defined value, where <b>a</b> is the data point value in file1 and <b>b</b> is the data point value in file2. If the system epsilon is not defined,one of the following predefined values will be used: <ul>
+<li><b>--compare</b> List objects that are not comparable </li>
+<li><b>--nan</b> Avoid NaNs detection </li>
+<li><b>--count=C</b> Print differences up to <b>C</b>. <b>C</b> must be a positive integer. </li>
+<li><b>--delta=D</b> Print difference if (<b>|a-b| &gt; D</b>). <b>D</b> must be a positive number, where <b>a</b> is the data point value in file1 and b is the data point value in file2. Can not use with '--relative' or '--use-system-epsilon'. </li>
+<li><b>--relative=R</b> Print difference if (<b>|(a-b)/b| &gt; R</b>). <b>R</b> must be a positive number, where <b>a</b> is the data point value in file1 and <b>b</b> is the data point value in file2. Can not use with '--delta' or '--use-system-epsilon'. </li>
+<li><b>--use-system-epsilon</b> Print difference if (<b>|a-b| &gt; EPSILON</b>), <b>EPSILON</b> is system defined value, where <b>a</b> is the data point value in file1 and <b>b</b> is the data point value in file2. If the system epsilon is not defined,one of the following predefined values will be used: <ul>
 <li>
 <code style="background-color:whitesmoke;">FLT_EPSILON = 1.19209E-07</code> for floating-point type </li>
 <li>
 <code style="background-color:whitesmoke;">DBL_EPSILON = 2.22045E-16</code> for double precision</li>
 </ul>
-type Can not use with '&ndash;relative' or '&ndash;delta'. </li>
-<li><b>&ndash;exclude-path "path"</b> Exclude the specified path to an object when comparing files or groups. If a group is excluded, all member objects will also be excluded. The specified path is excluded wherever it occurs. This flexibility enables the same option to exclude either objects that exist only in one file or common objects that are known to differ.<br  />
- When comparing files, "path" is the absolute path to the excluded object; when comparing groups, "path" is similar to the relative path from the group to the excluded object. This "path" can be taken from the first section of the output of the <b>&ndash;verbose</b> option.<br  />
+type Can not use with '--relative' or '--delta'. </li>
+<li><b>--exclude-path "path"</b> Exclude the specified path to an object when comparing files or groups. If a group is excluded, all member objects will also be excluded. The specified path is excluded wherever it occurs. This flexibility enables the same option to exclude either objects that exist only in one file or common objects that are known to differ.<br  />
+ When comparing files, "path" is the absolute path to the excluded object; when comparing groups, "path" is similar to the relative path from the group to the excluded object. This "path" can be taken from the first section of the output of the <b>--verbose</b> option.<br  />
  For example, if you are comparing the group <code style="background-color:whitesmoke;">/groupA</code> in two files and you want to exclude <code style="background-color:whitesmoke;">/groupA/groupB/groupC</code> in both files, the exclude option would read as follows:<br  />
- <code style="background-color:whitesmoke;">&ndash;exclude-path "/groupB/groupC"</code> <br  />
+ <code style="background-color:whitesmoke;">--exclude-path "/groupB/groupC"</code> <br  />
  If there are multiple paths to an object, only the specified path(s) will be excluded; the comparison will include any path not explicitly excluded.<br  />
  This option can be used repeatedly to exclude multiple paths. </li>
-<li><b>&ndash;exclude-attribute "path/to/object/with/attribute"</b> Exclude attributes on the specified path to an object when comparing files or groups.<br  />
+<li><b>--exclude-attribute "path/to/object/with/attribute"</b> Exclude attributes on the specified path to an object when comparing files or groups.<br  />
  If there are multiple paths to an object, only the specified path(s) will be excluded; the comparison will include any path not explicitly excluded.<br  />
  This option can be used repeatedly to exclude multiple paths.</li>
 </ul>
@@ -238,12 +238,12 @@ Object comparison</h3>
 <li>1) <b>Groups</b> First compares the names of member objects (relative path, from the specified group) and generates a report of objects that appear in only one group or in both groups. Common objects are then compared recursively. </li>
 <li>2) <b>Attributes and Datasets</b> Array rank and dimensions, datatypes, and data values are compared. </li>
 <li>3) <b>Datatypes</b> The comparison is based on the return value of H5Tequal. </li>
-<li>4) <b>Symbolic links</b> The paths to the target objects are compared. (The option &ndash;follow-symlinks overrides the default behavior when symbolic links are compared.)</li>
+<li>4) <b>Symbolic links</b> The paths to the target objects are compared. (The option --follow-symlinks overrides the default behavior when symbolic links are compared.)</li>
 </ul>
 <h3 class="doxsection"><a class="anchor" id="subsubsec_cltools_h5diff_subset"></a>
 Subsetting Options</h3>
 <ul>
-<li><b>&ndash;no-compact-subset</b> Disable compact form of subsetting and allow the use of "[" in dataset names.</li>
+<li><b>--no-compact-subset</b> Disable compact form of subsetting and allow the use of "[" in dataset names.</li>
 </ul>
 <p>Subsetting is available by using the fcompact form of subsetting, as follows: <code style="background-color:whitesmoke;">obj1 /foo/mydataset[START;STRIDE;COUNT;BLOCK]</code></p>
 <p>It is not required to use all parameters, but until the last parameter value used, all of the semicolons (;) are required, even when a parameter value is not specified.</p>
