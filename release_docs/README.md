@@ -4,7 +4,7 @@ This directory contains **release artifacts only**: changelogs, version history,
 release process documentation, and maintainer information.
 
 User-facing guides (installation, build instructions, platform-specific docs)
-have been moved to the [`doc/`](../doc/) directory.
+have been moved to the [`docs/`](../docs/) directory.
 
 ## Contents
 

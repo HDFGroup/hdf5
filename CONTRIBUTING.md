@@ -145,7 +145,7 @@ Here's where to find things in the source tree:
 * **`java/`**: JNI/Java language wrapper
 * **`bin/`**: Build scripts and miscellaneous tools
 * **`config/`**: Configuration files for CMake
-* **`doc/`**: User guides, installation instructions, and Doxygen API documentation
+* **`docs/`**: User guides, installation instructions, and Doxygen API documentation
 * **`release_docs/`**: Changelogs, version history, and release process
 * **`utils/`**: Small utility programs
 
@@ -245,7 +245,7 @@ Use HDF5's internal memory management instead of direct `malloc`/`free`:
    - Update documentation as needed.
 
 4. **Build and test thoroughly**
-   - Follow build instructions in `doc/INSTALL*` files.
+   - Follow build instructions in `docs/INSTALL*` files.
    - Ensure all tests pass.
 
 5. **Submit a pull request (PR)**

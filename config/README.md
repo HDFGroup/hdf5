@@ -21,11 +21,11 @@ This directory contains a few important things:
 * Example install scripts (in `examples`)
 * Installation support files (in `install`)
 
-CMake is documented in the following files in the `doc/` directory:
+CMake is documented in the following files in the `docs/` directory:
 
-* [INSTALL.md](../doc/INSTALL.md)
-* [INSTALL_CMake.md](../doc/INSTALL_CMake.md)
-* [USING_HDF5_CMake.md](../doc/USING_HDF5_CMake.md)
-* [USING_HDF5_VS.md](../doc/USING_HDF5_VS.md)
-* [INSTALL_Windows.md](../doc/INSTALL_Windows.md)
-* [USING_CMake_Examples.md](../doc/USING_CMake_Examples.md)
+* [INSTALL.md](../docs/INSTALL.md)
+* [INSTALL_CMake.md](../docs/INSTALL_CMake.md)
+* [USING_HDF5_CMake.md](../docs/USING_HDF5_CMake.md)
+* [USING_HDF5_VS.md](../docs/USING_HDF5_VS.md)
+* [INSTALL_Windows.md](../docs/INSTALL_Windows.md)
+* [USING_CMake_Examples.md](../docs/USING_CMake_Examples.md)
