@@ -64,6 +64,13 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Configuration
 
+### Consolidated documentation under docs/ directory
+
+   User-facing guides (installation, build instructions, platform-specific docs) and
+   Doxygen API documentation have been consolidated under a new top-level `docs/`
+   directory. All internal references (CMakeLists.txt, README.md, workflow files,
+   Doxygen sources, scripts, etc.) have been updated accordingly.
+
 ### Updated external building of zlib, zlib-ng and libaec to not use a patching process
 
    When building these libraries from external sources while building HDF5, the library previously used a patching process to adapt the libraries to its own build process. The sources for these libraries are no longer patched and build directly from the sources of the latest upstream releases (currently, zlib 1.3.2, zlib-ng 2.3.3 and libaec 1.1.6). This also fixed an issue with the build of zlib-ng failing due to updates that were made since the last version that HDF5 was patching the sources for.
