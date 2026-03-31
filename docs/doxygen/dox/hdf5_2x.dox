@@ -80,7 +80,7 @@ ABI/API Compatibility Reports between 2.1.0 and 2.0.0 [tar file](https://github.
 Source code and binaries are available at:
 <a href="https://github.com/HDFGroup/hdf5/releases/tag/2.1.0">HDF5 2.1.0 on GitHub</a>
 
-Please refer to [Build instructions](https://\SRCURLALL/hdf5_2.1.0/doc/INSTALL.md) for building with CMake.
+Please refer to [Build instructions](https://\SRCURLALL/hdf5_2.1.0/release_docs/INSTALL) for building with CMake.
 
 
 \subsection subsec_obtain_method_2x Methods to obtain (gz file)
