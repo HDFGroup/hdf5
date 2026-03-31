@@ -340,7 +340,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, bool will_extend, unsigned thin
     *thing             = NULL;
     *thing_elmt_buf    = NULL;
     *thing_elmt_idx    = 0;
-    *thing_unprot_func = (H5EA__unprotect_func_t)NULL;
+    *thing_unprot_func = NULL;
 
     /* Check if we should create the index block */
     if (!H5_addr_defined(hdr->idx_blk_addr)) {
@@ -368,7 +368,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, bool will_extend, unsigned thin
         *thing             = iblock;
         *thing_elmt_buf    = (uint8_t *)iblock->elmts;
         *thing_elmt_idx    = idx;
-        *thing_unprot_func = (H5EA__unprotect_func_t)H5EA__iblock_unprotect;
+        *thing_unprot_func = H5EA__iblock_unprotect;
     } /* end if */
     else {
         unsigned sblk_idx; /* Which superblock does this index fall in? */
@@ -436,7 +436,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, bool will_extend, unsigned thin
             *thing             = dblock;
             *thing_elmt_buf    = (uint8_t *)dblock->elmts;
             *thing_elmt_idx    = elmt_idx;
-            *thing_unprot_func = (H5EA__unprotect_func_t)H5EA__dblock_unprotect;
+            *thing_unprot_func = H5EA__dblock_unprotect;
         } /* end if */
         else {
             size_t sblk_off; /* Offset of super block in index block array of super blocks */
@@ -569,7 +569,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, bool will_extend, unsigned thin
                 *thing             = dblk_page;
                 *thing_elmt_buf    = (uint8_t *)dblk_page->elmts;
                 *thing_elmt_idx    = elmt_idx;
-                *thing_unprot_func = (H5EA__unprotect_func_t)H5EA__dblk_page_unprotect;
+                *thing_unprot_func = H5EA__dblk_page_unprotect;
             } /* end if */
             else {
                 /* Protect data block */
@@ -593,7 +593,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, bool will_extend, unsigned thin
                 *thing             = dblock;
                 *thing_elmt_buf    = (uint8_t *)dblock->elmts;
                 *thing_elmt_idx    = elmt_idx;
-                *thing_unprot_func = (H5EA__unprotect_func_t)H5EA__dblock_unprotect;
+                *thing_unprot_func = H5EA__dblock_unprotect;
             } /* end else */
         }     /* end else */
     }         /* end else */
@@ -608,7 +608,7 @@ done:
         *thing             = NULL;
         *thing_elmt_buf    = NULL;
         *thing_elmt_idx    = 0;
-        *thing_unprot_func = (H5EA__unprotect_func_t)NULL;
+        *thing_unprot_func = NULL;
     } /* end if */
 
     /* Check for updating array statistics */

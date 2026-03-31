@@ -303,12 +303,12 @@ See the Release.txt file for details.
 
 <h4>Tools</h4>
 New options were added to the \ref sec_cltools_h5clear utility:
-\li <code>--filesize</code> - Print the file's EOA and EOF
-\li <code>--increment=C</code> - Set the file's EOA to the maximum of <code>(EOA, EOF) + C</code>
+\li <code>\--filesize</code> - Print the file's EOA and EOF
+\li <code>\--increment=C</code> - Set the file's EOA to the maximum of <code>(EOA, EOF) + C</code>
     for the file <code>C is >= 0</code>; C is optional and will default to 1M when not set
 
 A new option was added to \ref sec_cltools_h5diff
-\li <code>--enable-error-stack</code> - Enable the error stack
+\li <code>\--enable-error-stack</code> - Enable the error stack
 
 \subsection subsec_rel_spec_110_change_2versus1_compat Compatibility Notes and Report
 
@@ -578,7 +578,7 @@ The existing version will be deprecated in a future release.
 \li Integration into Main HDF5 Library - The Java HDF5 JNI library has been integrated into the HDF5 repository.
 
 <strong>Configure option:</strong>
-\li    <code>--enable-java</code>
+\li    <code>\--enable-java</code>
 
 <strong>CMake option:</strong>
 \li    <code>-DHDF5_BUILD_JAVA:BOOL=ON</code>
@@ -605,7 +605,7 @@ See \ref api-compat-macros for details on the following.
 <h4>New API Compatibility Flag</h4>
 A new v18 flag was added enabling the building of HDF5 such that the default API is compatible
 with the HDF5 Release 1.8.x API:
-\li    <code>--with-default-api-version=v18</code>
+\li    <code>\--with-default-api-version=v18</code>
 
 <h4>New versioned functions and associated compatibility macros</h4>
 Two functions and a struct have been converted to a versioned form in this release.

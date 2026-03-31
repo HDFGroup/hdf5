@@ -5,6 +5,7 @@ project (HDF5_HL C)
 # Option to use new-style references with dimension scale APIs
 #-----------------------------------------------------------------------------
 option (HDF5_DIMENSION_SCALES_NEW_REF  "Use new-style references with dimension scale APIs" OFF)
+mark_as_advanced (HDF5_DIMENSION_SCALES_NEW_REF)
 if (HDF5_DIMENSION_SCALES_NEW_REF)
   set (H5_DIMENSION_SCALES_WITH_NEW_REF 1)
 endif ()

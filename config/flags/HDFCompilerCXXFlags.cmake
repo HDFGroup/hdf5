@@ -141,6 +141,7 @@ if (CMAKE_CXX_COMPILER_LOADED)
 
   set (_HDF5_H5CC_CXX_COMPILER ${CMAKE_CXX_COMPILER})
   set (HDF5_H5CC_CXX_COMPILER ${_HDF5_H5CC_CXX_COMPILER} CACHE STRING "C++ compiler to use in h5c++")
+  mark_as_advanced (HDF5_H5CC_CXX_COMPILER)
 endif ()
 
 #-----------------------------------------------------------------------------

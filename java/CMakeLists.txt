@@ -5,6 +5,8 @@ project (HDF5_JAVA C Java)
 # Include some macros for reusable code
 #-----------------------------------------------------------------------------
 include (UseJava)
+mark_as_advanced (CMAKE_Java_ARCHIVE)
+mark_as_advanced (CMAKE_Java_RUNTIME)
 
 if (WIN32)
   set (HDF_JRE_DIRECTORY "C:/Program Files/Java/jre")
@@ -49,6 +51,7 @@ if (Java_VERSION_STRING VERSION_GREATER_EQUAL "25.0.0")
             NO_DEFAULT_PATH
         )
     endif ()
+    mark_as_advanced (JEXTRACT_EXECUTABLE)
 
     if (NOT JEXTRACT_EXECUTABLE)
         message (FATAL_ERROR "Could not find jextract executable. "
@@ -188,6 +191,7 @@ install (
 # Option to include jre
 #-----------------------------------------------------------------------------
 option (HDF5_JAVA_PACK_JRE  "Package a JRE installer directory" OFF)
+mark_as_advanced (HDF5_JAVA_PACK_JRE)
 if (HDF5_JAVA_PACK_JRE)
   install (
       DIRECTORY ${HDF_JRE_DIRECTORY}

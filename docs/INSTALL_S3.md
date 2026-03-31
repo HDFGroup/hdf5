@@ -17,7 +17,7 @@
 <a id="section-i"></a>
 ## I. Preconditions
 
-* Refer to [release_docs/INSTALL.md](./INSTALL.md) for preconditions and instructions for building HDF5.
+* Refer to [INSTALL.md](./INSTALL.md) for preconditions and instructions for building HDF5.
 
 ---
 
@@ -148,7 +148,7 @@ If the `aws-c-s3` library is installed to a non-standard location, the environme
 CMAKE_PREFIX_PATH=<install-path> cmake -DHDF5_ENABLE_ROS3_VFD=ON ..
 ```
 
-Refer to [release_docs/INSTALL_CMake.md](./INSTALL_CMake.md) for more general instructions on building HDF5 with CMake.
+Refer to [INSTALL_CMake.md](./INSTALL_CMake.md) for more general instructions on building HDF5 with CMake.
 
 ---
 

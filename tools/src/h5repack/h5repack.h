@@ -29,73 +29,74 @@
  * \li <strong>file2</strong> Output HDF5 File
  *
  * \subsection subsec_cltools_h5repack_error Error Report Option
- * \li <strong>--enable-error-stack</strong>    Prints messages from the HDF5 error stack as they occur.
- *             Optional value 2 also prints file open errors, --enable-error-stack=2.
+ * \li <strong>\--enable-error-stack</strong>    Prints messages from the HDF5 error stack as they occur.
+ *             Optional value 2 also prints file open errors, <code>\--enable-error-stack=2</code>.
  *
  * \subsection subsec_cltools_h5repack_options Options
- * \li <strong>--help</strong>           Print a usage message and exit
- * \li <strong>--verbose=N</strong>      Verbose mode, print object information.
+ * \li <strong>\--help</strong>           Print a usage message and exit
+ * \li <strong>\--verbose=N</strong>      Verbose mode, print object information.
  *        N - is an integer greater than 1, 2 displays read/write timing
- * \li <strong>--version</strong>        Print the library version number and exit
- * \li <strong>--native</strong>         Use a native HDF5 type when repacking
- * \li <strong>--page-buffer-size=N</strong>  Set the page buffer cache size, N=non-negative integers
- * \li <strong>--src-vol-value</strong>  Value (ID) of the VOL connector to use for opening the
+ * \li <strong>\--version</strong>        Print the library version number and exit
+ * \li <strong>\--native</strong>         Use a native HDF5 type when repacking
+ * \li <strong>\--page-buffer-size=N</strong>  Set the page buffer cache size, N=non-negative integers
+ * \li <strong>\--src-vol-value</strong>  Value (ID) of the VOL connector to use for opening the
  *                             input HDF5 file specified
- * \li <strong>--src-vol-name</strong>   Name of the VOL connector to use for opening the input
+ * \li <strong>\--src-vol-name</strong>   Name of the VOL connector to use for opening the input
  *                             HDF5 file specified
- * \li <strong>--src-vol-info</strong>   VOL-specific info to pass to the VOL connector used for
+ * \li <strong>\--src-vol-info</strong>   VOL-specific info to pass to the VOL connector used for
  *                             opening the input HDF5 file specified
- * \li <strong>--dst-vol-value</strong>  Value (ID) of the VOL connector to use for opening the
+ * \li <strong>\--dst-vol-value</strong>  Value (ID) of the VOL connector to use for opening the
  *                             output HDF5 file specified
- * \li <strong>--dst-vol-name</strong>   Name of the VOL connector to use for opening the output
+ * \li <strong>\--dst-vol-name</strong>   Name of the VOL connector to use for opening the output
  *                             HDF5 file specified
- * \li <strong>--dst-vol-info</strong>   VOL-specific info to pass to the VOL connector used for
+ * \li <strong>\--dst-vol-info</strong>   VOL-specific info to pass to the VOL connector used for
  *                             opening the output HDF5 file specified
- * \li <strong>--src-vfd-value</strong>  Value (ID) of the VFL driver to use for opening the
+ * \li <strong>\--src-vfd-value</strong>  Value (ID) of the VFL driver to use for opening the
  *                             input HDF5 file specified
- * \li <strong>--src-vfd-name</strong>   Name of the VFL driver to use for opening the input
+ * \li <strong>\--src-vfd-name</strong>   Name of the VFL driver to use for opening the input
  *                             HDF5 file specified
- * \li <strong>--src-vfd-info</strong>   VFD-specific info to pass to the VFL driver used for
+ * \li <strong>\--src-vfd-info</strong>   VFD-specific info to pass to the VFL driver used for
  *                             opening the input HDF5 file specified
- * \li <strong>--dst-vfd-value</strong>  Value (ID) of the VFL driver to use for opening the
+ * \li <strong>\--dst-vfd-value</strong>  Value (ID) of the VFL driver to use for opening the
  *                             output HDF5 file specified
- * \li <strong>--dst-vfd-name</strong>   Name of the VFL driver to use for opening the output
+ * \li <strong>\--dst-vfd-name</strong>   Name of the VFL driver to use for opening the output
  *                             HDF5 file specified
- * \li <strong>--dst-vfd-info</strong>   VFD-specific info to pass to the VFL driver used for
+ * \li <strong>\--dst-vfd-info</strong>   VFD-specific info to pass to the VFL driver used for
  *                             opening the output HDF5 file specified
- * \li <strong>--latest</strong>         Use latest version of file format
+ * \li <strong>\--latest</strong>         Use latest version of file format
  *                             This option will take precedence over the options
- *                             --low and --high
- * \li <strong>--low=BOUND</strong>      The low bound for library release versions to use
+ *                             <strong>\--low</strong> and <strong>\--high</strong>
+ * \li <strong>\--low=BOUND</strong>      The low bound for library release versions to use
  *                             when creating objects in the file
  *                             (default is #H5F_LIBVER_EARLIEST)
- * \li <strong>--high=BOUND</strong>     The high bound for library release versions to use
+ * \li <strong>\--high=BOUND</strong>     The high bound for library release versions to use
  *                             when creating objects in the file
  *                             (default is #H5F_LIBVER_LATEST)
- * \li <strong>--merge</strong>          Follow external soft link recursively and merge data
- * \li <strong>--prune</strong>          Do not follow external soft links and remove link
- * \li <strong>--merge --prune</strong>  Follow external link, merge data and remove dangling link
- * \li <strong>--compact=L1</strong>    Maximum number of links in header messages
- * \li <strong>--indexed=L2</strong>    Minimum number of links in the indexed format
- * \li <strong>--ssize=S[:F]</strong>   Shared object header message minimum size
- * \li <strong>--minimum=M</strong>     Do not apply the filter to datasets smaller than M
- * \li <strong>--file=E</strong>        Name of file E with the --file and --layout options
- * \li <strong>--ublock=U</strong>      Name of file U with user block data to be added
- * \li <strong>--block=B</strong>       Size of user block to be added
- * \li <strong>--metadata_block_size=A</strong>  Metadata block size for #H5Pset_meta_block_size
- * \li <strong>--threshold=T</strong>   Threshold value for #H5Pset_alignment
- * \li <strong>--alignment=A</strong>   Alignment value for #H5Pset_alignment
- * \li <strong>--sort_by=Q</strong>     Sort groups and attributes by index Q
- * \li <strong>--sort_order=Z</strong>  Sort groups and attributes by order Z
- * \li <strong>--filter=FILT</strong>   Filter type
- * \li <strong>--layout=LAYT</strong>   Layout type
- * \li <strong>--fs_strategy=FS_STRATEGY</strong>  File space management strategy for
+ * \li <strong>\--merge</strong>          Follow external soft link recursively and merge data
+ * \li <strong>\--prune</strong>          Do not follow external soft links and remove link
+ * \li <strong>\--merge \--prune</strong>  Follow external link, merge data and remove dangling link
+ * \li <strong>\--compact=L1</strong>    Maximum number of links in header messages
+ * \li <strong>\--indexed=L2</strong>    Minimum number of links in the indexed format
+ * \li <strong>\--ssize=S[:F]</strong>   Shared object header message minimum size
+ * \li <strong>\--minimum=M</strong>     Do not apply the filter to datasets smaller than M
+ * \li <strong>\--file=E</strong>        Name of file E with the <strong>\--file</strong> and
+ *                                       <strong>\--layout</strong> options
+ * \li <strong>\--ublock=U</strong>      Name of file U with user block data to be added
+ * \li <strong>\--block=B</strong>       Size of user block to be added
+ * \li <strong>\--metadata_block_size=A</strong>  Metadata block size for #H5Pset_meta_block_size
+ * \li <strong>\--threshold=T</strong>   Threshold value for #H5Pset_alignment
+ * \li <strong>\--alignment=A</strong>   Alignment value for #H5Pset_alignment
+ * \li <strong>\--sort_by=Q</strong>     Sort groups and attributes by index Q
+ * \li <strong>\--sort_order=Z</strong>  Sort groups and attributes by order Z
+ * \li <strong>\--filter=FILT</strong>   Filter type
+ * \li <strong>\--layout=LAYT</strong>   Layout type
+ * \li <strong>\--fs_strategy=FS_STRATEGY</strong>  File space management strategy for
  *                                    #H5Pset_file_space_strategy
- * \li <strong>--fs_persist=FS_PERSIST</strong>    Persisting or not
+ * \li <strong>\--fs_persist=FS_PERSIST</strong>    Persisting or not
  *                                    persisting free-space for #H5Pset_file_space_strategy
- * \li <strong>--fs_threshold=FS_THRESHOLD</strong> : Free-space section
+ * \li <strong>\--fs_threshold=FS_THRESHOLD</strong> : Free-space section
  *                                    threshold for #H5Pset_file_space_strategy
- * \li <strong>--fs_pagesize=FS_PAGESIZE</strong>  File space page size for #H5Pset_file_space_page_size
+ * \li <strong>\--fs_pagesize=FS_PAGESIZE</strong>  File space page size for #H5Pset_file_space_page_size
  *
  * \subsubsection subsubsec_cltools_h5repack_options_args Arguments to Certain Options
  * \li <strong>M</strong> - is an integer greater than 1, size of dataset in bytes (default is 0)
@@ -207,33 +208,33 @@
  *
  * \subsection subsec_cltools_h5repack_examples Usage Examples
  *
- * \li 1) h5repack --verbose --filter=GZIP=1 file1 file2
+ * \li 1) h5repack \--verbose \--filter=GZIP=1 file1 file2
  *
  *      GZIP compression with level 1 to all objects
  *
- * \li 2) h5repack --verbose --filter=dset1:SZIP=8,NN file1 file2
+ * \li 2) h5repack \--verbose \--filter=dset1:SZIP=8,NN file1 file2
  *
  *      SZIP compression with 8 pixels per block and NN coding method to object dset1
  *
- * \li 3) h5repack --verbose --layout=dset1,dset2:CHUNK=20x10 --filter=dset3,dset4,dset5:NONE file1 file2
+ * \li 3) h5repack \--verbose \--layout=dset1,dset2:CHUNK=20x10 \--filter=dset3,dset4,dset5:NONE file1 file2
  *
  *      Chunked layout, with a layout size of 20x10, to objects dset1 and dset2
  *      and remove filters to objects dset3, dset4, dset5
  *
- * \li 4) h5repack --latest --compact=10 --ssize=20:dtype file1 file2
+ * \li 4) h5repack \--latest \--compact=10 \--ssize=20:dtype file1 file2
  *
  *      Using latest file format with maximum compact group size of 10 and
  *      minimum shared datatype size of 20
  *
- * \li 5) h5repack --filter=SHUF --filter=GZIP=1 file1 file2
+ * \li 5) h5repack \--filter=SHUF \--filter=GZIP=1 file1 file2
  *
  *      Add both filters SHUF and GZIP in this order to all datasets
  *
- * \li 6) h5repack --filter=UD=307,0,1,9 file1 file2
+ * \li 6) h5repack \--filter=UD=307,0,1,9 file1 file2
  *
  *      Add bzip2 filter to all datasets
  *
- * \li 7) h5repack --low=0 --high=1 file1 file2
+ * \li 7) h5repack \--low=0 \--high=1 file1 file2
  *
  *      Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via
  *      H5Pset_libver_bounds() when creating the repacked file, file2

@@ -316,29 +316,38 @@ CONTAINS
 
     IMPLICIT NONE
 
-    INTEGER(hid_t),   INTENT(in) :: did
-    INTEGER       ,   INTENT(in) :: idx
+    INTEGER(hid_t),   INTENT(in)    :: did
+    INTEGER       ,   INTENT(in)    :: idx
     CHARACTER(LEN=*), INTENT(INOUT) :: label
     INTEGER(size_t) , INTENT(INOUT) :: size
     INTEGER :: errcode
-    INTEGER :: c_idx
+    INTEGER(C_INT) :: c_idx
+    INTEGER(HSSIZE_T) :: label_size
 
     INTERFACE
-       INTEGER FUNCTION H5DSget_label_c(did, idx, label, size) &
-            BIND(C,NAME='h5dsget_label_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T
+       INTEGER(HSSIZE_T) FUNCTION H5DSget_label(did, idx, label, size) &
+            BIND(C, NAME='H5DSget_label')
+         IMPORT :: C_CHAR, C_INT, HID_T, SIZE_T, HSSIZE_T
          IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in)    :: did
-         INTEGER       ,   INTENT(in)    :: idx
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(INOUT) :: label
-         INTEGER(SIZE_T),  INTENT(inout) :: size
-       END FUNCTION H5DSget_label_c
+         INTEGER(HID_T), VALUE :: did
+         INTEGER(C_INT), VALUE :: idx
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: label
+         INTEGER(SIZE_T), VALUE :: size
+       END FUNCTION H5DSget_label
     END INTERFACE
 
-    c_idx = idx - 1
+    c_idx = INT(idx, C_INT) - 1_C_INT
+    label_size = H5DSget_label(did, c_idx, label, size + 1_SIZE_T)
 
-    errcode = H5DSget_label_c(did, c_idx, label, size)
+    IF (label_size < 0_HSSIZE_T) THEN
+       errcode = -1
+    ELSE
+       size = INT(label_size, SIZE_T) ! Don't subtract '1'  because H5DSget_label doesn't include the
+                                      ! trailing NULL in the length calculation, Ref. HDFFV-7596
+       errcode = 0
+       ! Replace C null terminator and pad remainder with Fortran blanks
+       IF (size < INT(LEN(label), SIZE_T)) label(size+1:) = ' '
+    END IF
 
   END SUBROUTINE H5DSget_label_f
 

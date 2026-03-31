@@ -64,6 +64,13 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Configuration
 
+### Consolidated documentation under docs/ directory
+
+   User-facing guides (installation, build instructions, platform-specific docs) and
+   Doxygen API documentation have been consolidated under a new top-level `docs/`
+   directory. All internal references (CMakeLists.txt, README.md, workflow files,
+   Doxygen sources, scripts, etc.) have been updated accordingly.
+
 ### Updated external building of zlib, zlib-ng and libaec to not use a patching process
 
    When building these libraries from external sources while building HDF5, the library previously used a patching process to adapt the libraries to its own build process. The sources for these libraries are no longer patched and build directly from the sources of the latest upstream releases (currently, zlib 1.3.2, zlib-ng 2.3.3 and libaec 1.1.6). This also fixed an issue with the build of zlib-ng failing due to updates that were made since the last version that HDF5 was patching the sources for.
@@ -130,6 +137,18 @@ We would like to thank the many HDF5 community members who contributed to this r
 ### Fixed checking of data alignment requirements in direct I/O VFD
 
    The direct I/O VFD attempts to determine data alignment requirements for a file on file open to try and avoid extra work when data alignment isn't required. Depending on the file access flags used when opening a file, the VFD could incorrectly determine these requirements for either writes or reads, eventually leading to a possible EINVAL return value on write or read. This has been fixed by separately determining the requirements for writes and reads and being more conservative about trying to avoid data alignment requirements.
+
+### Fixed an issue with chunked datasets using the wrong index type with parallel HDF5
+
+   Fixed a bug in parallel HDF5 that would cause chunked datasets with fixed dimensions and without filters applied to use the "none" index type instead of the "fixed array" index type.
+
+### Fixed an issue with decoding metadata cache image superblock extension messages
+
+   Fixed a bug where loading of a metadata cache image superblock extension message would fail when the image had an undefined address and size of 0.
+
+### Fixed an issue with an incorrect file format validation check when decoding metadata cache entries
+
+   Fixed a bug where a flag in H5Cimage.c wasn't getting set correctly for release builds of HDF5, leading to incorrect error checking when reconstructing metadata cache entries.
 
 ## Java Library
 

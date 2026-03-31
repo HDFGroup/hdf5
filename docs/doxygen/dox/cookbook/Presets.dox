@@ -582,7 +582,7 @@ ctest -R "JUnitFFM" -V
 
 \par See Also
 \li \ref subsec_maven_artifacts for using pre-built Maven artifacts
-\li release_docs/INSTALL_CMake.md Section XIII for Java FFM testing details
+\li docs/INSTALL_CMake.md Section XIII for Java FFM testing details
 \li release_docs/README.md for comprehensive Java documentation
 \li HDF5Examples/JAVA for Java example programs
 

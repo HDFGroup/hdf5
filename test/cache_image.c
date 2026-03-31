@@ -529,7 +529,7 @@ open_hdf5_file(bool create_file, bool mdci_sbem_expected, bool read_only, bool s
     }
 
     if (show_progress)
-        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* create a file access property list. */
     if (pass) {
@@ -544,7 +544,7 @@ open_hdf5_file(bool create_file, bool mdci_sbem_expected, bool read_only, bool s
     }
 
     if (show_progress)
-        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* call H5Pset_libver_bounds() on the fapl_id */
     if (pass) {
@@ -557,7 +557,7 @@ open_hdf5_file(bool create_file, bool mdci_sbem_expected, bool read_only, bool s
     }
 
     if (show_progress)
-        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* get metadata cache image config -- verify that it is the default */
     if (pass) {
@@ -581,7 +581,7 @@ open_hdf5_file(bool create_file, bool mdci_sbem_expected, bool read_only, bool s
     }
 
     if (show_progress)
-        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* set metadata cache image fapl entry if indicated */
     if ((pass) && (set_mdci_fapl)) {
@@ -601,7 +601,7 @@ open_hdf5_file(bool create_file, bool mdci_sbem_expected, bool read_only, bool s
     }
 
     if (show_progress)
-        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the persistent free space manager if indicated */
     if ((pass) && (config_fsm)) {
@@ -623,7 +623,7 @@ open_hdf5_file(bool create_file, bool mdci_sbem_expected, bool read_only, bool s
     }
 
     if (show_progress)
-        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* set evict on close if indicated */
     if ((pass) && (set_eoc)) {
@@ -636,7 +636,7 @@ open_hdf5_file(bool create_file, bool mdci_sbem_expected, bool read_only, bool s
     }
 
     if (show_progress)
-        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* open the file */
     if (pass) {
@@ -686,7 +686,7 @@ open_hdf5_file(bool create_file, bool mdci_sbem_expected, bool read_only, bool s
     }
 
     if (show_progress)
-        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* get a pointer to the files internal data structure and then
      * to the cache structure
@@ -705,7 +705,7 @@ open_hdf5_file(bool create_file, bool mdci_sbem_expected, bool read_only, bool s
     }
 
     if (show_progress)
-        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* verify expected metadata cache status */
 
@@ -724,7 +724,7 @@ open_hdf5_file(bool create_file, bool mdci_sbem_expected, bool read_only, bool s
     }
 
     if (show_progress)
-        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if (pass) {
 
@@ -767,7 +767,7 @@ open_hdf5_file(bool create_file, bool mdci_sbem_expected, bool read_only, bool s
     }
 
     if (show_progress)
-        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if ((pass) && (set_mdci_fapl)) {
 
@@ -781,7 +781,7 @@ open_hdf5_file(bool create_file, bool mdci_sbem_expected, bool read_only, bool s
     }
 
     if (show_progress)
-        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if (pass) {
 
@@ -821,7 +821,7 @@ open_hdf5_file(bool create_file, bool mdci_sbem_expected, bool read_only, bool s
     }
 
     if (show_progress)
-        fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if (pass) {
 
@@ -831,7 +831,7 @@ open_hdf5_file(bool create_file, bool mdci_sbem_expected, bool read_only, bool s
     }
 
     if (show_progress)
-        fprintf(stdout, "%s: cp = %d -- exiting.\n", fcn_name, cp++);
+        fprintf(stdout, "%s: cp = %d, pass = %d -- exiting.\n", fcn_name, cp++, pass);
 
 } /* open_hdf5_file() */
 
@@ -6476,6 +6476,12 @@ cache_image_api_error_check_4(bool single_file_vfd)
 
             pass         = false;
             failure_mssg = "h5_fileaccess() failed.\n";
+        }
+
+        if (H5Pset_libver_bounds(fapl_id, H5F_LIBVER_EARLIEST, H5F_LIBVER_V18) < 0) {
+
+            pass         = false;
+            failure_mssg = "H5Pset_libver_bounds() failed.\n";
         }
     }
 

@@ -1363,14 +1363,20 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, bo
     unsigned       i, j;                     /* local counting variables */
     size_t         enc_type_size;
     size_t         coordinate_buffer_requirement;
-    herr_t         ret_value = SUCCEED;         /* Return value */
-    const uint8_t *p_end     = *p + p_size - 1; /* Pointer to last valid byte in buffer */
+    herr_t         ret_value = SUCCEED; /* Return value */
+    const uint8_t *p_end;
+
     FUNC_ENTER_PACKAGE
 
     /* Check args */
     assert(p);
     pp = (*p);
     assert(pp);
+
+    if (skip)
+        p_end = *p;
+    else
+        p_end = *p + p_size - 1; /* Pointer to last valid byte in buffer */
 
     /* As part of the efforts to push all selection-type specific coding
        to the callbacks, the coding for the allocation of a null dataspace

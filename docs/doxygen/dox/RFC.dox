@@ -5,7 +5,7 @@ Navigate back: \ref index "Main"
 
 <table>
 <tr><th>RFC ID</th><th>Title</th></tr>
-<tr> <td>2025-11-15</td> <td><a href="https://dl.acm.org/doi/full/10.1145/3731599.3767557">Securing HDF5 Plugins with Digital Signatures</a></td></tr>
+<tr> <td>2025-11-15</td> <td>Securing HDF5 Plugins with Digital Signatures (Open access at dl.acm.org/doi/full/10.1145/3731599.3767557)</td></tr>
 <tr> <td>2024-04-22</td> <td>\ref_rfc20240422</td></tr>
 <tr> <td>2022-08-19</td> <td>\ref_rfc20220819</td></tr>
 <tr> <td>2021-05-28</td> <td>\ref_rfc20210528</td></tr>

@@ -3,7 +3,7 @@
  * Navigate back: \ref index "Main" / \ref release_specific_info
  * <hr>
 
-\section sec_rel_spec_2x HDF5 Library and Tools 2.1.0
+\section sec_rel_spec_2x HDF5 Library and Tools
 
 \subsection subsec_rel_info_2x Release Information
 
@@ -27,7 +27,7 @@
 Additional Release Information
 </td>
 <td>
-<a href="https://\SRCURLALL/hdf5_2.1.0/release_docs/CHANGELOG.md">CHANGELOG.md</a>
+<a href="https://\SRCURLALL/hdf5_2.1.1/release_docs/CHANGELOG.md">CHANGELOG.md</a>
 </td>
 </tr>
 <tr>

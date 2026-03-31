@@ -296,13 +296,13 @@ The following wrappers were added to the class H5::ObjCreatPropList for the resp
     the build systems used with HDF5.
 
 The new unsupported declaration will cause an Autotools configure step to fail if
-<code>--enable-threadsafe</code> and <code>--enable-hl</code> are combined unless additional options
+<code>\--enable-threadsafe</code> and <code>\--enable-hl</code> are combined unless additional options
 are specified (see below). Since the high-level library is built by default, this means that these
-extra configuration options will need to be used any time <code>--enable-threadsafe</code> is selected.
+extra configuration options will need to be used any time <code>\--enable-threadsafe</code> is selected.
 
-To use Autotools to build an application with --enable-threadsafe, use one of the following approaches:
-\li Use <code>--disable-h</code>l to disable the high-level library. (Recommended)
-\li Use <code>--enable-unsupported</code> to build the high-level library with the thread-safety feature.
+To use Autotools to build an application with <code>\--enable-threadsafe</code>, use one of the following approaches:
+\li Use <code>\--disable-hl</code> to disable the high-level library. (Recommended)
+\li Use <code>\--enable-unsupported</code> to build the high-level library with the thread-safety feature.
 
 To use CMake to build an application with HDF5_ENABLE_THREADSAFE=ON, use one of the following approaches:
 \li Use <code>HDF5_BUILD_HL_LIB=OFF</code> to disable the high-level library. (Recommended)
@@ -593,8 +593,8 @@ Also see \ref subsubsec_rel_spec_18_change_13_build below.
 
 \subsubsection subsubsec_rel_spec_18_change_13_build Build and Configuration
 <h4>Thread safety</h4>
-When configuring a thread-safe HDF5 Library with <code>--enable-threadsafe</code>, it is no longer
-necessary to specify <code>--with-pthreads</code> if the Pthreads library is in a standard location.
+When configuring a thread-safe HDF5 Library with <code>\--enable-threadsafe</code>, it is no longer
+necessary to specify <code>\--with-pthreads</code> if the Pthreads library is in a standard location.
 
 <h4>Removed Functions and Wrappers</h4>
 The MPI-POSIX driver has been removed. The following C functions and the corresponding
@@ -678,39 +678,39 @@ have changed to
 
 \ref sec_cltools_h5dump has a new option for identifying objects by a full or partial path:
 \li   <code>-NP</code>
-\li   <code>--any-path=P</code>
+\li   <code>\--any-path=P</code>
 
-The \ref sec_cltools_h5dump attributes-only option, <code>-A or --only-attr</code>, now accepts an optional parameter value of 0 (zero):
+The \ref sec_cltools_h5dump attributes-only option, <code>-A or \--only-attr</code>, now accepts an optional parameter value of 0 (zero):
 \li   <code>-A 0</code>
-\li   <code>--only-attr=0</code>
+\li   <code>\--only-attr=0</code>
 Specifying this value has the effect of reversing the role of the option to display everything except attributes.
 
 \ref sec_cltools_h5repack
 
-The \ref sec_cltools_h5repack option <code>-f, --filter</code> has a new parameter, UD, to enable the use of user-defined filters:
+The \ref sec_cltools_h5repack option <code>-f, \--filter</code> has a new parameter, UD, to enable the use of user-defined filters:
 \li   <code>-f UD=\<filter_parameters\></code>
-\li   <code>--filter=UD=\<filter_parameters\></code>
+\li   <code>\--filter=UD=\<filter_parameters\></code>
 
 \ref sec_cltools_h5stat
 
 \ref sec_cltools_h5stat has three new options for setting print thresholds:
 For attributes:
 \li      <code>-aN</code>
-\li      <code>--attribute=N</code>
+\li      <code>\--attribute=N</code>
 
 For links in a group:
 \li      <code>-lN</code>
-\li      <code>--links=N</code>
+\li      <code>\--links=N</code>
 
 For dimension sizes:
 \li      <code>-mN</code>
-\li      <code>--dims=N</code>
+\li      <code>\--dims=N</code>
 
 \subsubsection subsubsec_rel_spec_18_change_12_build Build and Configuration
 <h4>CMake and Autotools configuration</h4>
 
 A new configuration option can be used to change the default plugin path:
-\li Autotools configure option <code>--with-default-plugindir=location</code>
+\li Autotools configure option <code>\--with-default-plugindir=location</code>
 \li CMake option -DH5_DEFAULT_PLUGINDIR:PATH=location
 
 CMake configuration
@@ -725,14 +725,14 @@ Compile Scripts with Changed Behavior
 \li h5fc and h5pfc
 
 These compile scripts have been modified to change the default behavior to link to shared libraries
-in environments where HDF5 has been configured with <code>--disable-static</code>.
+in environments where HDF5 has been configured with <code>\--disable-static</code>.
 
 Command-line Tools with Changed Behavior
 \ref sec_cltools_h5dump
 
 \ref sec_cltools_h5dump output now displays USER_DEFINED_FILTER where it previously displayed UNKNOWN_FILTER.
 
-\ref sec_cltools_h5dump now correctly exports subsetted data to a file using the <code>-o, --output</code> option.
+\ref sec_cltools_h5dump now correctly exports subsetted data to a file using the <code>-o, \--output</code> option.
 
 \subsection subsec_rel_spec_18_change_11 Release 1.8.11 of May 2013 versus Release 1.8.10
 This section lists interface-level changes and other user-visible changes in behavior in the
@@ -780,7 +780,7 @@ See HDF5 \ref subsubsec_dataset_transfer_dyn_filter for further information.
 
 \ref sec_cltools_h5dump has a new option to output the DDL structure of a file or object:
 \li  <code>-O\<filename\></code>
-\li  <code>--ddl=\<file_name\></code>
+\li  <code>\--ddl=\<file_name\></code>
 [-O above is dash-uppercase-o.]
 
 \ref sec_cltools_h5import can now take the output of <code>h5dump -O\<ddl_filename\> -o\<data_filename\></code>
@@ -807,7 +807,7 @@ The return value of the following high-level C function has changed:
 a unique extra attribute attached to an object as a difference and returns with an exit code of 1.
 Previously, \ref sec_cltools_h5diff did not recognize the extra attribute as a difference.
 
-\ref sec_cltools_h5ls - The content of the <code>h5ls --help</code> output has been revised.
+\ref sec_cltools_h5ls - The content of the <code>h5ls \--help</code> output has been revised.
 
 \ref sec_cltools_h5dump - has been updated to display the compression ratio for user-defined filters.
 In \ref sec_cltools_h5dump output, UNKNOWN_FILTER has been changed to USER_DEFINED_FILTER.
@@ -910,15 +910,15 @@ The content of the buffer returned by the following Fortran subroutine has chang
 
 <h4>Command-line Utilities with New Options and/or Changed Behavior</h4>
 \ref sec_cltools_h5repack has one new option and improved performance under certain circumstances:
-\li <code>-Mn, --metadata_block_size=n</code> Sets the metadata block size in the output
+\li <code>-Mn, \--metadata_block_size=n</code> Sets the metadata block size in the output
     file. Performance is improved when repacking large chunked datasets (for example, when
     dataset size exceeds 128 MB).
 
 \ref sec_cltools_h5stat has one new option:
-\li <code>-S, --summary</code> Displays a summary of file space usage for a file.
+\li <code>-S, \--summary</code> Displays a summary of file space usage for a file.
 
 \ref sec_cltools_h5dump has one new option, a new capability, and updated output:
-\li <code>--no-compact-subset</code> Disables compact subsetting to allow the left-hand
+\li <code>\--no-compact-subset</code> Disables compact subsetting to allow the left-hand
     square bracket character ( <code>[</code> ) in a dataset name.
 \li The files parameter now accommodates wildcards. With this change, \ref sec_cltools_h5dump
     command-line options can be applied across multiple files without listing the files individually.
@@ -950,9 +950,9 @@ Features enabled in this upgrade are described in New Features in the HDF5 Fortr
 
 Terminology:
 \li If the Fortran compiler in use is Fortran 2003 compliant and the installed HDF5 Library was configured
-    using both the <code>--enable-fortran</code> and <code>--enable-fortran2003</code> flags, the resulting
+    using both the <code>\--enable-fortran</code> and <code>\--enable-fortran2003</code> flags, the resulting
     HDF5 Fortran Library is referred to below as a Fortran 2003 environment. Without either of the Fortran
-    2003 compliant compiler or the <code>--enable-fortran2003</code> flag, the resulting HDF5 Fortran Library
+    2003 compliant compiler or the <code>\--enable-fortran2003</code> flag, the resulting HDF5 Fortran Library
     is referred to below as a Fortran 90 environment.
 
 <h4>New Fortran 2003-only subroutines</h4>
@@ -1045,7 +1045,7 @@ New default driver:
 \li \ref sec_cltools_h5jam now checks the file that is to be inserted into the user block and
     does not allow the insertion if it is an HDF5 file. This is necessary because an HDF5 file
     in the user block will make the original HDF5 portion of the file inaccessible.
-\li \ref sec_cltools_h5diff with the <code>--delta</code> option reports two NaN values as equal regardless
+\li \ref sec_cltools_h5diff with the <code>\--delta</code> option reports two NaN values as equal regardless
     of the type of NaN (as described in the reference manual entry).
 \li \ref sec_cltools_h5diff, when comparing a file to itself, now reports no differences.
 
@@ -1053,13 +1053,13 @@ New default driver:
 configure now uses the same flags and symbols in its tests as are used to build the library.
 
 To build HDF5 with the Fortran 2003 interfaces requires the use of two configure options:
-\li    <code>--enable-fortran</code>
-\li    <code>--enable-fortran2003</code>
+\li    <code>\--enable-fortran</code>
+\li    <code>\--enable-fortran2003</code>
 
 Note that building the Fortran 2003 interfaces requires a Fortran 2003-capable compiler
-and that <code>--enable-fortran2003</code> cannot be used alone.
+and that <code>\--enable-fortran2003</code> cannot be used alone.
 
-The <code>--enable-h5dump-packed-bits</code> configure option has been removed. The code that
+The <code>\--enable-h5dump-packed-bits</code> configure option has been removed. The code that
 this option enabled is now always compiled into \ref sec_cltools_h5dump.
 
 When building on Linux systems, the HDF5 Library now links with the bsd_compat library.
@@ -1135,14 +1135,14 @@ been limited to three dimensions.
 
 <h4>Command-line Utilities with New Options</h4>
 \ref sec_cltools_h5diff has a new verbose with levels option to display additional attribute information:
-\li    <code>-vn, --verbose=n</code>
+\li    <code>-vn, \--verbose=n</code>
 
 \ref sec_cltools_h5dump has one new option to enable reporting of the HDF5 Library's error stack:
-\li    <code>--enable-error-stack</code>
+\li    <code>\--enable-error-stack</code>
 
 <h4>Command-line Utility with Changed Option Name</h4>
 \ref sec_cltools_h5ls has one changed option name:
-\li    <code>--enable-error-stack replaces --error.</code>. The --error option is deprecated but remains available.
+\li    <code>\--enable-error-stack</code> replaces <code>\--error</code>. The <code>\--error</code> option is deprecated but remains available.
 
 <h4>Command-line Utilities with Changed Behavior</h4>
 Attribute comparison with \ref sec_cltools_h5diff has been corrected to compare all attributes with common
@@ -1150,7 +1150,7 @@ names when comparing objects. Previously, \ref sec_cltools_h5diff compared attri
 two objects had the same number of attributes and all attribute names were identical; if there was either
 a value or name difference between two attributes, subsequent attributes were not compared.
 
-\ref sec_cltools_h5diff <code>--use-system-epsilon</code> now employs the formula <code>'|a - b|'</code> instead of <code>'|a - b| / b'</code>.
+\ref sec_cltools_h5diff <code>\--use-system-epsilon</code> now employs the formula <code>'|a - b|'</code> instead of <code>'|a - b| / b'</code>.
 
 \ref sec_cltools_h5copy now accepts the same file as the source and target file; this enables object copying within a file.
 
@@ -1162,20 +1162,20 @@ a value or name difference between two attributes, subsequent attributes were no
 Configure now generates Makefiles that build in silent make mode by default. In this mode,
 compile and link lines are significantly simplified for clarity. You can opt out of this
 default with either of the following approaches:
-\li Use the <code>--disable-silent-rules flag</code> at configure time to override the default and view actual
+\li Use the <code>\--disable-silent-rules</code> flag at configure time to override the default and view actual
     compile and link lines during the build.
 \li Use the make command with the <code>V=1</code> option to run a verbose make.
 
-The new configure option <code>--enable-unsupported</code> can be used to stop configure from preventing
+The new configure option <code>\--enable-unsupported</code> can be used to stop configure from preventing
 the use of unsupported configure option combinations. For example, use of this option enables building
 HDF5 with the unsupported and untested configurations of C++ in a parallel environment or Fortran
 with a threadsafe library.
-<code>WARNING: Use --enable-unsupported at your own risk! This option may result in a library that does not
+<code>WARNING: Use \--enable-unsupported at your own risk! This option may result in a library that does not
 compile or does not run as expected.</code>
 
 <h4>Parallel HDF5</h4>
 mpicc and mpif90 are now the default C and Fortran compilers on Linux systems when
-<code>--enable-parallel</code> is specified but no $CC or $FC is defined.
+<code>\--enable-parallel</code> is specified but no $CC or $FC is defined.
 
 \subsection subsec_rel_spec_18_change_6 Release 1.8.6 versus Release 1.8.5, February 2011
 This section lists interface-level changes and other user-visible changes in behavior in the
@@ -1194,11 +1194,11 @@ not all of the same endianness.
 
 <h4>Command-line Utilities with New Options</h4>
 \ref sec_cltools_h5diff has one new option:
-\li    <code>--exclude-path</code>
+\li    <code>\--exclude-path</code>
 
 \ref sec_cltools_h5ls and \ref sec_cltools_h5diff have two new options:
-\li    <code>--follow-symlinks</code>
-\li    <code>--no-dangling-links</code>
+\li    <code>\--follow-symlinks</code>
+\li    <code>\--no-dangling-links</code>
 
 <h4>Command-line Utilities with Changed Behavior</h4>
 \li \ref sec_cltools_h5diff now compares member objects and groups recursively when
@@ -1276,8 +1276,8 @@ The overloaded forms of the following C++ member functions are new in this relea
 
 <h4>Command-line Utility with New Options</h4>
 \ref sec_cltools_h5diff has two new options:
-\li <code>--follow-links</code>
-\li <code>--no-dangling-links</code>
+\li <code>\--follow-links</code>
+\li <code>\--no-dangling-links</code>
 
 <h4>Fortran Subroutines with Changed Interface</h4>
 The link type parameter values associated with the following Fortran subroutines have changed in this release:
@@ -1311,7 +1311,7 @@ Library settings are now embedded in an HDF5 executable so that an "orphaned" ex
 queried (via the Unix strings command, for example) to display the library settings used to build
 it. The embedded settings information is the same as that normally found in the libhdf5.settings file.
 
-This capability may be disabled with the use of the <code>--disable-embedded-libinfo</code> flag during configure.
+This capability may be disabled with the use of the <code>\--disable-embedded-libinfo</code> flag during configure.
 
 \subsubsection subsubsec_rel_spec_18_change_4_new New and Changed Functions
 <h4>New Fortran Subroutine and Constant</h4>
@@ -1342,7 +1342,7 @@ The following Fortran subroutines have changed syntax in this release:
 
 <h4>Tools with Changed Interface or Behavior</h4>
 \ref sec_cltools_h5diff has one new option:
-\li <code>--use-system-epsilon</code> - With this option, \ref sec_cltools_h5diff returns a difference
+\li <code>\--use-system-epsilon</code> - With this option, \ref sec_cltools_h5diff returns a difference
     if and only if the difference between two data values exceeds the system value for epsilon
     (that is, if <code>|a-b| > epsilon</code>).<br />
     The tool's default behavior has also changed; without this option, the tool now checks for strict
@@ -1350,7 +1350,7 @@ The following Fortran subroutines have changed syntax in this release:
     This option has no short form.
 
 \ref sec_cltools_h5dump has one new option and the behavior of another set of options has changed:<br />
-\li <code>-R or --region</code> - With this option, \ref sec_cltools_h5dump prints the data pointed to
+\li <code>-R or \--region</code> - With this option, \ref sec_cltools_h5dump prints the data pointed to
     by a region reference. Without this option, \ref sec_cltools_h5dump prints only the reference.
 
 Usage of the subsetting parameters has changed. All of <code>START</code>, <code>STRIDE</code>,
@@ -1359,7 +1359,7 @@ Usage of the subsetting parameters has changed. All of <code>START</code>, <code
 
 <h4>Changed Library Configuration</h4>
 The following configuration flag is new with this release:
-\li <code>--disable-embedded-libinfo</code> - This flag disables the embedding of HDF5 Library settings in an HDF5 executable.
+\li <code>\--disable-embedded-libinfo</code> - This flag disables the embedding of HDF5 Library settings in an HDF5 executable.
 
 \subsection subsec_rel_spec_18_change_3 Release 1.8.3 versus Release 1.8.2, May 2009
 This section lists API-level changes and changes in behavior in the transition from HDF5 Release 1.8.2 to Release 1.8.3.
@@ -1394,18 +1394,18 @@ While the API has not changed, users may see both a performance boost and increa
 
 <h4>Tools with Changed Interface or Behavior</h4>
 \ref sec_cltools_h5diff default behavior is now to detect and compare NaNs. Use the
-<code>-N</code> or <code>--nan</code> option (below) to turn this behavior off and avoid the
+<code>-N</code> or <code>\--nan</code> option (below) to turn this behavior off and avoid the
 performance penalty that NaN detection and comparison entalis. (NaN detection and comparison
 became the default in in HDF5 Release 1.6.8.)
 
 This tool has two new options:
-\li      <code>-c, --compare</code>      Lists objects that are not comparable.
-\li      <code>-N, --nan</code>          Avoids NaNs detection.
+\li      <code>-c, \--compare</code>      Lists objects that are not comparable.
+\li      <code>-N, \--nan</code>          Avoids NaNs detection.
 
 \ref sec_cltools_h5dump now correctly specifies an XML DTD or a schema URL.
 
 \ref sec_cltools_h5dump binary output now defaults to NATIVE.
-\li The new <code>-b, --binary</code> option can be used to specify alternate binary formats.
+\li The new <code>-b, \--binary</code> option can be used to specify alternate binary formats.
 
 \ref sec_cltools_h5repack - When a user does not specify a chunk size, \ref sec_cltools_h5repack
 now defines the default chunk size to be the same same as the size of the hyperslab used to read the chunks.
@@ -1456,16 +1456,16 @@ The optional parameter mounted has been added to the following subroutines:
 In each case, the old syntax remains available (though undocumented) to avoid breaking existing scripts.
 
 \ref sec_cltools_h5repack - The following new options control the addition of user block data to an existing HDF5 file:
-\li <code>-u U, --ublock=U</code> - Specifies the name of the file containing the user block data to be added.
-\li <code>-b B, --block=B</code> - Specifies the size of the block to be added.
+\li <code>-u U, \--ublock=U</code> - Specifies the name of the file containing the user block data to be added.
+\li <code>-b B, \--block=B</code> - Specifies the size of the block to be added.
 
 The following new options set parameters governing the tool's use of H5Pset_alignment:
-\li <code>-t T, --threshold=T</code> - Specifies the threshold value for H5Pset_alignment.
-\li <code>-a A, --alignment=A</code> - Specifies the alignment value for H5Pset_alignment.
+\li <code>-t T, \--threshold=T</code> - Specifies the threshold value for H5Pset_alignment.
+\li <code>-a A, \--alignment=A</code> - Specifies the alignment value for H5Pset_alignment.
 
 \ref sec_cltools_h5repack
 \li now supports multiple instances of the <code>'-f'</code> or
-    <code>'--filter'</code> option, allowing the use of multiple I/O filters with an object.
+    <code>'\--filter'</code> option, allowing the use of multiple I/O filters with an object.
 \li With no change in the command-line syntax, \ref sec_cltools_h5repack now retains an existing
     userblock when repacking an HDF5 file.
 
@@ -1482,7 +1482,7 @@ The following new options set parameters governing the tool's use of H5Pset_alig
 \ref sec_cltools_h5dump
 \li Binary output now defaults to NATIVE with the <code>'-b'</code> option, optionally
     accepting NATIVE, FILE, BE, and LE.
-\li The new <code>'-m T'</code> or <code>'--format T'</code> option enables a user-defined formatting string
+\li The new <code>'-m T'</code> or <code>'\--format T'</code> option enables a user-defined formatting string
     for printing floating-point numbers.
 
 With no change in the command-line syntax, \ref sec_cltools_h5dump now prints a compression ratio when
@@ -1499,12 +1499,12 @@ The file libhdf5_fortran.settings is no longer installed with the HDF5 Library; 
 
 <h4>Changed Library Configuration</h4>
 It is no longer necessary to manually set an SZIP library path in LD_LIBRARY_PATH when building HDF5
-with shared SZIP libraries; configure will determine the correct path from the <code>--with-szlib</code> flag,
+with shared SZIP libraries; configure will determine the correct path from the <code>\--with-szlib</code> flag,
 prepending it to and exporting LD_LIBRARY_PATH.
 
 Note that if an SZIP library path is set in a user-supplied LD_LIBRARY_PATH, in an existing script,
 for example, that does not necessarily need to be changed; configure will prepend the SZIP library
-path extracted from <code>--with-szlib</code> to the user-supplied LD_LIBRARY_PATH.
+path extracted from <code>\--with-szlib</code> to the user-supplied LD_LIBRARY_PATH.
 
 \subsection subsec_rel_spec_18_change_1 Release 1.8.1 versus Release 1.8.0
 HDF5 Release 1.8.1 is a minor release with several bugfixes and optimizations and limited new features.
@@ -1668,19 +1668,19 @@ to:
 An \ref sec_cltools_h5repack option to set the minimum number of links in indexed format was introduced
 in Release 1.8.0 as:
 \li <code>-d min_indexed_links</code>
-\li <code>--indexed=min_indexed_links</code>.
+\li <code>\--indexed=min_indexed_links</code>.
 
 In Release 1.8.1,
 the <code>-i</code> form has been changed to <code>-d</code> as follows:
 \li     <code>-d min_indexed_links</code>
-\li     <code>--indexed=min_indexed_links</code>
+\li     <code>\--indexed=min_indexed_links</code>
 
 The command-line syntax of \ref sec_cltools_h5diff was changed in Release 1.8.0 to the following:
 \li     <code>h5diff [OPTIONS] file1 file2 [object1 [object2 ] ]</code>
 
 <strong>Tools with new options</strong>
 \ref sec_cltools_h5dump
-\li <code>-m T</code>  or  <code>--format T</code> - Sets format of floating point output
+\li <code>-m T</code>  or  <code>\--format T</code> - Sets format of floating point output
 
 <h4>Changed Behavior or Output</h4>
 Changed library behavior:
@@ -1698,7 +1698,7 @@ Tools with changed behavior and changed output:
 
 \subsubsection subsubsec_rel_spec_18_change_1_config Changed Library Configuration
 The following configuration flag is new with this release:
-\li <code>--disable-sharedlib-rpath</code>
+\li <code>\--disable-sharedlib-rpath</code>
 
 \subsubsection subsubsec_rel_spec_18_change_1_patch Removed Patch Requirement
 The patch that was required for Cygwin with HDF5 Release 1.8.0 has been rolled into this
@@ -2097,7 +2097,7 @@ Several functions, subroutines, and wrappers are deprecated in this HDF5 release
 eventually be removed from the HDF5 distribution and from the HDF5 Reference Manual.
 A Release 1.6.x compatibility mode is provided enabling these and other Release 1.6.x
 compatibility features, but is available only if the HDF5 Library is configured with the
-default settings or with the flag <code>--with-default-api-version=v16</code>. Release 1.8.0 also provides
+default settings or with the flag <code>\--with-default-api-version=v16</code>. Release 1.8.0 also provides
 macros that can be mapped selectively to 1.6.x and 1.8.0 function versions according to the
 needs of a user application. The backward compatibility mode is enabled in the Release 1.8.0
 binaries distributed by NCSA. See \ref api-compat-macros for full details.
@@ -2273,41 +2273,41 @@ The following property lists are new with this release:
 The following configuration features have changed as follows.
 
 New with this release:
-\li    <code>--disable-dependency-tracking</code>
-\li    <code>--enable-hdf5v1_6</code>
-\li    <code> --enable-dconv-exception</code>
-\li    <code>--disable-dconv-exception</code>
-\li    <code>--enable-dconv-accuracy</code>
-\li    <code>--disable-dconv-accuracy</code>
-\li    <code>--program-prefix=PREFIX</code>
-\li    <code>--program-prefix=SUFFIX</code>
-\li    <code>--program-transform-name=PROGRAM</code>
-\li    <code>--enable-maintainer-mode</code>
-\li    <code>--disable-dependency-tracking</code>
-\li    <code>--enable-dependency-tracking</code>
-\li    <code>--enable-codestack</code>
-\li    <code>--enable-direct-vfd</code>
-\li    <code>--with-tags[=TAGS]</code>
+\li    <code>\--disable-dependency-tracking</code>
+\li    <code>\--enable-hdf5v1_6</code>
+\li    <code>\--enable-dconv-exception</code>
+\li    <code>\--disable-dconv-exception</code>
+\li    <code>\--enable-dconv-accuracy</code>
+\li    <code>\--disable-dconv-accuracy</code>
+\li    <code>\--program-prefix=PREFIX</code>
+\li    <code>\--program-prefix=SUFFIX</code>
+\li    <code>\--program-transform-name=PROGRAM</code>
+\li    <code>\--enable-maintainer-mode</code>
+\li    <code>\--disable-dependency-tracking</code>
+\li    <code>\--enable-dependency-tracking</code>
+\li    <code>\--enable-codestack</code>
+\li    <code>\--enable-direct-vfd</code>
+\li    <code>\--with-tags[=TAGS]</code>
 
 New with this release, but expected to be useful only to those working inside the HDF5 Library
 or working very closely with HDF5 developers:
-\li    <code>--enable-build-all</code>
-\li    <code>--enable-metadata-trace-file</code>
+\li    <code>\--enable-build-all</code>
+\li    <code>\--enable-metadata-trace-file</code>
     
 New with this release, but not actively supported:
-\li    <code>--enable-fphdf5</code>
+\li    <code>\--enable-fphdf5</code>
     
 Changed in this release:
-\li    <code>--enable-shared[=PKGS]</code>
-\li    <code>--enable-static[=PKGS]</code>
-\li    <code>--enable-fast-install[=PKGS]</code>
+\li    <code>\--enable-shared[=PKGS]</code>
+\li    <code>\--enable-static[=PKGS]</code>
+\li    <code>\--enable-fast-install[=PKGS]</code>
     
 Removed in this release:
-\li    <code>--enable-hdf5v1_4</code>
-\li    <code>--enable-funcstack</code>
-\li    <code>--with-ssl=LIB</code>
-\li    <code>--with-gass=DIR</code>
-\li    <code>--with-srb=DIR</code>
+\li    <code>\--enable-hdf5v1_4</code>
+\li    <code>\--enable-funcstack</code>
+\li    <code>\--with-ssl=LIB</code>
+\li    <code>\--with-gass=DIR</code>
+\li    <code>\--with-srb=DIR</code>
 
 The environment variables, which are deprecated in this release.
 \li FC replaces F9X

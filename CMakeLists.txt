@@ -328,7 +328,8 @@ set (HDF5_JAVA_JSRC_DIR            ${HDF5_SOURCE_DIR}/java/jsrc)
 set (HDF5_JAVA_LOGGING_JAR         ${HDF5_SOURCE_DIR}/java/lib/slf4j-api-2.0.16.jar)
 set (HDF5_JAVA_LOGGING_NOP_JAR     ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-nop-2.0.16.jar)
 set (HDF5_JAVA_LOGGING_SIMPLE_JAR  ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-simple-2.0.16.jar)
-set (HDF5_DOXYGEN_DIR              ${HDF5_SOURCE_DIR}/doxygen)
+set (HDF5_DOCS_DIR                 ${HDF5_SOURCE_DIR}/docs)
+set (HDF5_DOXYGEN_DIR              ${HDF5_DOCS_DIR}/doxygen)
 
 set (HDF5_SRC_INCLUDE_DIRS ${HDF5_SRC_DIR})
 
@@ -727,7 +728,7 @@ endif ()
 #-----------------------------------------------------------------------------
 if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
   # Enable instrumenting of the library's internal operations
-  cmake_dependent_option (HDF5_ENABLE_INSTRUMENT "Instrument The library" OFF HDF5_ENABLE_TRACE OFF)
+  cmake_dependent_option (HDF5_ENABLE_INSTRUMENT "Instrument the library" OFF HDF5_ENABLE_PARALLEL OFF)
 
   # Instrumenting is enabled by default for parallel debug builds
   if (HDF5_ENABLE_PARALLEL)
@@ -1183,6 +1184,7 @@ else ()
   set (_HDF5_H5CC_C_COMPILER ${CMAKE_C_COMPILER})
 endif ()
 set (HDF5_H5CC_C_COMPILER ${_HDF5_H5CC_C_COMPILER} CACHE STRING "C compiler to use in h5cc")
+mark_as_advanced (HDF5_H5CC_C_COMPILER)
 
 #-----------------------------------------------------------------------------
 # Java implementation detection for version value
@@ -1250,7 +1252,7 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
     # the case where Doxygen is not found or HDF5_BUILD_DOC is OFF.
     add_custom_target (doxygen)
 
-    add_subdirectory (doxygen)
+    add_subdirectory (docs/doxygen)
   else ()
     message (WARNING "Doxygen needs to be installed to generate the doxygen documentation")
   endif ()
@@ -1553,3 +1555,9 @@ list (REMOVE_DUPLICATES LINK_LIBS_SETTINGS)
 # Installation
 #-----------------------------------------------------------------------------
 include (CMakeInstallation.cmake)
+
+#-----------------------------------------------------------------------------
+# Hide some miscellaneous CMake variables from the default GUI
+#-----------------------------------------------------------------------------
+mark_as_advanced (FETCHCONTENT_BASE_DIR FETCHCONTENT_FULLY_DISCONNECTED FETCHCONTENT_QUIET FETCHCONTENT_UPDATES_DISCONNECTED)
+

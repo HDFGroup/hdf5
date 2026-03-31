@@ -83,18 +83,18 @@ H5FL_ARR_DEFINE(hsize_t, H5S_MAX_RANK);
 
 /* Dataspace ID class */
 static const H5I_class_t H5I_DATASPACE_CLS[1] = {{
-    H5I_DATASPACE,            /* ID class value */
-    0,                        /* Class flags */
-    3,                        /* # of reserved IDs for class */
-    (H5I_free_t)H5S__close_cb /* Callback routine for closing objects of this class */
+    H5I_DATASPACE, /* ID class value */
+    0,             /* Class flags */
+    3,             /* # of reserved IDs for class */
+    H5S__close_cb  /* Callback routine for closing objects of this class */
 }};
 
 /* Dataspace selection iterator ID class */
 static const H5I_class_t H5I_SPACE_SEL_ITER_CLS[1] = {{
-    H5I_SPACE_SEL_ITER,                /* ID class value */
-    0,                                 /* Class flags */
-    0,                                 /* # of reserved IDs for class */
-    (H5I_free_t)H5S__sel_iter_close_cb /* Callback routine for closing objects of this class */
+    H5I_SPACE_SEL_ITER,    /* ID class value */
+    0,                     /* Class flags */
+    0,                     /* # of reserved IDs for class */
+    H5S__sel_iter_close_cb /* Callback routine for closing objects of this class */
 }};
 
 /* Flag indicating "top" of interface has been initialized */

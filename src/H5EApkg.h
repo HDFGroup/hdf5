@@ -406,7 +406,7 @@ H5_DLL herr_t      H5EA__hdr_dest(H5EA_hdr_t *hdr);
 H5_DLL H5EA_iblock_t *H5EA__iblock_alloc(H5EA_hdr_t *hdr);
 H5_DLL haddr_t        H5EA__iblock_create(H5EA_hdr_t *hdr, bool *stats_changed);
 H5_DLL H5EA_iblock_t *H5EA__iblock_protect(H5EA_hdr_t *hdr, unsigned flags);
-H5_DLL herr_t         H5EA__iblock_unprotect(H5EA_iblock_t *iblock, unsigned cache_flags);
+H5_DLL herr_t         H5EA__iblock_unprotect(void *_iblock, unsigned cache_flags);
 H5_DLL herr_t         H5EA__iblock_delete(H5EA_hdr_t *hdr);
 H5_DLL herr_t         H5EA__iblock_dest(H5EA_iblock_t *iblock);
 
@@ -428,7 +428,7 @@ H5_DLL haddr_t  H5EA__dblock_create(H5EA_hdr_t *hdr, void *parent, bool *stats_c
 H5_DLL unsigned H5EA__dblock_sblk_idx(const H5EA_hdr_t *hdr, hsize_t idx);
 H5_DLL H5EA_dblock_t *H5EA__dblock_protect(H5EA_hdr_t *hdr, void *parent, haddr_t dblk_addr,
                                            size_t dblk_nelmts, unsigned flags);
-H5_DLL herr_t         H5EA__dblock_unprotect(H5EA_dblock_t *dblock, unsigned cache_flags);
+H5_DLL herr_t         H5EA__dblock_unprotect(void *_dblock, unsigned cache_flags);
 H5_DLL herr_t H5EA__dblock_delete(H5EA_hdr_t *hdr, void *parent, haddr_t dblk_addr, size_t dblk_nelmts);
 H5_DLL herr_t H5EA__dblock_dest(H5EA_dblock_t *dblock);
 
@@ -437,7 +437,7 @@ H5_DLL H5EA_dblk_page_t *H5EA__dblk_page_alloc(H5EA_hdr_t *hdr, H5EA_sblock_t *p
 H5_DLL herr_t            H5EA__dblk_page_create(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t addr);
 H5_DLL H5EA_dblk_page_t *H5EA__dblk_page_protect(H5EA_hdr_t *hdr, H5EA_sblock_t *parent,
                                                  haddr_t dblk_page_addr, unsigned flags);
-H5_DLL herr_t            H5EA__dblk_page_unprotect(H5EA_dblk_page_t *dblk_page, unsigned cache_flags);
+H5_DLL herr_t            H5EA__dblk_page_unprotect(void *_dblk_page, unsigned cache_flags);
 H5_DLL herr_t            H5EA__dblk_page_dest(H5EA_dblk_page_t *dblk_page);
 
 /* Debugging routines for dumping file structures */

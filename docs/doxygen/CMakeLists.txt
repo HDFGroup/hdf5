@@ -20,7 +20,7 @@ if (DOXYGEN_FOUND)
   set (DOXYGEN_OPTIMIZE_OUTPUT_FOR_C YES)
   set (DOXYGEN_MACRO_EXPANSION YES)
   set (DOXYGEN_OUTPUT_DIRECTORY ${HDF5_BINARY_DIR}/hdf5lib_docs)
-  set (DOXYGEN_EXAMPLES_DIRECTORY "${HDF5_DOXYGEN_DIR}/dox/cookbook ${HDF5_DOXYGEN_DIR}/examples ${HDF5_SRC_DIR} ${HDF5_SOURCE_DIR}/release_docs ${HDF5_TEST_SRC_DIR}")
+  set (DOXYGEN_EXAMPLES_DIRECTORY "${HDF5_DOXYGEN_DIR}/dox/cookbook ${HDF5_DOXYGEN_DIR}/examples ${HDF5_SRC_DIR} ${HDF5_SOURCE_DIR}/docs ${HDF5_TEST_SRC_DIR}")
   set (DOXYGEN_LAYOUT_FILE ${HDF5_DOXYGEN_DIR}/hdf5doxy_layout.xml)
   set (DOXYGEN_HTML_HEADER ${HDF5_DOXYGEN_DIR}/hdf5_header.html)
   set (DOXYGEN_HTML_FOOTER ${HDF5_DOXYGEN_DIR}/hdf5_footer.html)
@@ -39,7 +39,7 @@ if (DOXYGEN_FOUND)
   # get associated with the same underlying function.
   #
   # The versioned API macros are auto-generated from src/H5vers.txt by the
-  # bin/make_vers script, which creates doxygen/H5version_doxygen.cmake.
+  # bin/make_vers script, which creates docs/doxygen/H5version_doxygen.cmake.
   # This ensures the Doxygen configuration stays synchronized with the
   # actual default versions defined in src/H5version.h.
   set (_doxygen_predefined_entries
@@ -55,7 +55,7 @@ if (DOXYGEN_FOUND)
     "H5std_string=std::string"
     "H5G_link_t=H5L_type_t"
   )
-  # Load auto-generated versioned API macros from doxygen/H5version_doxygen.cmake
+  # Load auto-generated versioned API macros from docs/doxygen/H5version_doxygen.cmake
   include(${HDF5_DOXYGEN_DIR}/H5version_doxygen.cmake)
   list (JOIN _doxygen_predefined_entries " " DOXYGEN_PREDEFINED)
   set (DOXYGEN_WARN_AS_ERROR ${HDF5_DOXY_WARNINGS})

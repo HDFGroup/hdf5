@@ -4240,25 +4240,31 @@ done:
 static herr_t
 H5S__hyper_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, bool skip)
 {
-    H5S_t *tmp_space = NULL;                    /* Pointer to actual dataspace to use,
-                                                   either *space or a newly allocated one */
-    hsize_t        dims[H5S_MAX_RANK];          /* Dimension sizes */
-    hsize_t        start[H5S_MAX_RANK];         /* hyperslab start information */
-    hsize_t        block[H5S_MAX_RANK];         /* hyperslab block information */
-    uint32_t       version;                     /* Version number */
-    uint8_t        flags    = 0;                /* Flags */
-    uint8_t        enc_size = 0;                /* Encoded size of selection info */
-    unsigned       rank;                        /* rank of points */
-    const uint8_t *pp;                          /* Local pointer for decoding */
-    unsigned       u;                           /* Local counting variable */
-    herr_t         ret_value = FAIL;            /* return value */
-    const uint8_t *p_end     = *p + p_size - 1; /* Pointer to last valid byte in buffer */
+    H5S_t *tmp_space = NULL;            /* Pointer to actual dataspace to use,
+                                           either *space or a newly allocated one */
+    hsize_t        dims[H5S_MAX_RANK];  /* Dimension sizes */
+    hsize_t        start[H5S_MAX_RANK]; /* hyperslab start information */
+    hsize_t        block[H5S_MAX_RANK]; /* hyperslab block information */
+    uint32_t       version;             /* Version number */
+    uint8_t        flags    = 0;        /* Flags */
+    uint8_t        enc_size = 0;        /* Encoded size of selection info */
+    unsigned       rank;                /* rank of points */
+    const uint8_t *pp;                  /* Local pointer for decoding */
+    unsigned       u;                   /* Local counting variable */
+    herr_t         ret_value = FAIL;    /* return value */
+    const uint8_t *p_end;
+
     FUNC_ENTER_PACKAGE
 
     /* Check args */
     assert(p);
     pp = (*p);
     assert(pp);
+
+    if (skip)
+        p_end = *p;
+    else
+        p_end = *p + p_size - 1; /* Pointer to last valid byte in buffer */
 
     /* As part of the efforts to push all selection-type specific coding
        to the callbacks, the coding for the allocation of a null dataspace

@@ -16,6 +16,7 @@
 ##############################################################################
 
 find_program (PWSH NAMES pwsh powershell)
+mark_as_advanced (PWSH)
 if (PWSH)
     file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/use_cases_test")
     file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/swmr_test")
@@ -40,6 +41,7 @@ if (PWSH)
     #)
 elseif (UNIX)
   find_program (SH_PROGRAM bash)
+  mark_as_advanced (SH_PROGRAM)
   if (SH_PROGRAM)
     set (srcdir ${HDF5_TEST_SOURCE_DIR})
     set (H5_UTILS_TEST_BUILDDIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

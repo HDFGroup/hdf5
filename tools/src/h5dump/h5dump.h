@@ -12,6 +12,7 @@
 #ifndef H5DUMP_H
 #define H5DUMP_H
 
+/* clang-format off */
 /** \page H5TOOL_DP_UG The HDF5 h5dump Tool
  *
  * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
@@ -23,96 +24,97 @@
  *  With h5dump, you can display objects from an HDF5 file.
  *
  * \subsection subsec_cltools_h5dump_usage Usage
- * <h4>h5dump [OPTIONS] [files</h4>
+ * <h4>h5dump [OPTIONS] [files]</h4>
  *
  * \subsection subsec_cltools_h5dump_error Error Report Option
- * \li <strong>--enable-error-stack</strong> Prints messages from the HDF5 error stack as they occur.
- *             Optional value 2 also prints file open errors, --enable-error-stack=2.
+ * \li <strong>\--enable-error-stack</strong> Prints messages from the HDF5 error stack as they occur.
+ *             Optional value 2 also prints file open errors, <code>\--enable-error-stack=2</code>.
  *
  * \subsection subsec_cltools_h5dump_options Options
- * \li <strong>--help</strong>    Print a usage message and exit
- * \li <strong>--version</strong> Print the library version number and exit
+ * \li <strong>\--help</strong>    Print a usage message and exit
+ * \li <strong>\--version</strong> Print the library version number and exit
  *
  * \subsection subsec_cltools_h5dump_options_file File Options
- * \li <strong>--contents</strong>   Print a list of the file contents, group and dataset,
- *              names and values, then exit. Optional value 1 also prints attributes, --contents=1.
- * \li <strong>--superblock</strong> Print the content of the super block
- * \li <strong>--header</strong>     Print the header only; no data is displayed
- * \li <strong>--filedriver=D</strong> Specify which driver to open the file with
- * \li <strong>--output=F</strong>   Output raw data into file F
- * \li <strong>--binary=B</strong>   Binary file output, of form B
- * \li <strong>--ddl=F</strong>      Output ddl text into file F
- *                                   Use blank(empty) filename F to suppress ddl display
- * \li <strong>--page-buffer-size=N</strong> Set the page buffer cache size, N=non-negative integers
- * \li <strong>--endpoint-url=P</strong> Supply S3 endpoint url information to "ros3" vfd.
- *                                       P is the AWS service endpoint.
- *                                       Has no effect if filedriver is not "ros3".
- * \li <strong>--s3-cred=\<cred\></strong>   Supply S3 authentication information to "ros3" vfd.
- *                          \code <cred> :: "(<aws-region>,<access-id>,<access-key>)" \endcode
- *                          \code <cred> :: "(<aws-region>,<access-id>,<access-key>,<session-token>)" \endcode
- *                          If absent or \code \<cred\> -> "(,,)" \endcode or \code \<cred\> -> "(,,,)"
- * \endcode, no authentication. Has no effect if filedriver is not "ros3". \li
- * <strong>--hdfs-attrs=\<attrs\></strong> Supply configuration information for HDFS file access. For use with
- * <strong>--filedriver=hdfs</strong> \code <attrs> :: (<namenode name>,<namenode port>, <kerberos cache
- * path>,<username>, <buffer size>) \endcode Any absent attribute will use a default value. \li
- * <strong>--vol-value</strong> Value (ID) of the VOL connector to use for opening the HDF5 file specified \li
- * <strong>--vol-name</strong>  Name of the VOL connector to use for opening the HDF5 file specified \li
- * <strong>--vol-info</strong>  VOL-specific info to pass to the VOL connector used for opening the HDF5 file
- * specified.<br /> If none of the above options are used to specify a VOL, then the VOL named by \b
- * HDF5_VOL_CONNECTOR (or the native VOL connector, if that environment variable is unset) will be used
- * \li<strong>--vfd-value</strong> Value (ID) of the VFL driver to use for opening the HDF5 file specified
- * \li <strong>--vfd-name</strong> Name of the VFL driver to use for opening the HDF5 file specified
- * \li <strong>--vfd-info</strong> VFD-specific info to pass to the VFL driver used for
+ * \li <strong>\--contents</strong>   Print a list of the file contents, group and dataset,
+ *              names and values, then exit. Optional value 1 also prints attributes, <code>\--contents=1</code>.
+ * \li <strong>\--superblock</strong> Print the content of the super block
+ * \li <strong>\--header</strong>     Print the header only; no data is displayed
+ * \li <strong>\--filedriver=D</strong> Specify which driver to open the file with
+ * \li <strong>\--output=F</strong>   Output raw data into file F
+ * \li <strong>\--binary=B</strong>   Binary file output, of form B
+ * \li <strong>\--ddl=F</strong>      Output ddl text into file F
+ *                                    Use blank(empty) filename F to suppress ddl display
+ * \li <strong>\--page-buffer-size=N</strong> Set the page buffer cache size, N=non-negative integers
+ * \li <strong>\--endpoint-url=P</strong> Supply S3 endpoint url information to "ros3" vfd.
+ *                                        P is the AWS service endpoint.
+ *                                        Has no effect if filedriver is not "ros3".
+ * \li <strong>\--s3-cred=\<cred\></strong>   Supply S3 authentication information to "ros3" vfd.
+ *                                            \code <cred> :: "(<aws-region>,<access-id>,<access-key>)" \endcode
+ *                                            \code <cred> :: "(<aws-region>,<access-id>,<access-key>,<session-token>)" \endcode
+ *                                            If absent or \code \<cred\> -> "(,,)" \endcode or \code \<cred\> -> "(,,,)" \endcode,
+ *                                            no authentication. Has no effect if filedriver is not "ros3".
+ * \li <strong>\--hdfs-attrs=\<attrs\></strong> Supply configuration information for HDFS file access. For use with
+ *                                              <strong>\--filedriver=hdfs</strong>
+ *                                              \code <attrs> :: (<namenode name>,<namenode port>, <kerberos cache path>,<username>, <buffer size>) \endcode
+ *                                              Any absent attribute will use a default value.
+ * \li <strong>\--vol-value</strong> Value (ID) of the VOL connector to use for opening the HDF5 file specified
+ * \li <strong>\--vol-name</strong>  Name of the VOL connector to use for opening the HDF5 file specified
+ * \li <strong>\--vol-info</strong>  VOL-specific info to pass to the VOL connector used for opening the HDF5 file specified.<br />
+ *                                   If none of the above options are used to specify a VOL, then the VOL named by
+ *                                   \b HDF5_VOL_CONNECTOR (or the native VOL connector, if that environment variable
+ *                                   is unset) will be used
+ * \li <strong>\--vfd-value</strong> Value (ID) of the VFL driver to use for opening the HDF5 file specified
+ * \li <strong>\--vfd-name</strong> Name of the VFL driver to use for opening the HDF5 file specified
+ * \li <strong>\--vfd-info</strong> VFD-specific info to pass to the VFL driver used for
  *                                    opening the HDF5 file specified
  *
  * \subsection subsec_cltools_h5dump_options_obj Object Options
- * \li <strong>--attribute=P</strong>  Print the specified attribute
+ * \li <strong>\--attribute=P</strong>  Print the specified attribute.
  *                          If an attribute name contains a slash (/), escape the
- *                          slash with a preceding backslash (\).
+ *                          slash with a preceding backslash (\\).
  *                          (See example section below.)
- * \li <strong>--dataset=P</strong>    Print the specified dataset
- * \li <strong>--group=P</strong>      Print the specified group and all members
- * \li <strong>--soft-link=P</strong>  Print the value(s) of the specified soft link
- * \li <strong>--datatype=P</strong>   Print the specified named datatype
- * \li <strong>--any_path=P</strong>   Print any attribute, dataset, group, datatype, or link that matches P
+ * \li <strong>\--dataset=P</strong>    Print the specified dataset
+ * \li <strong>\--group=P</strong>      Print the specified group and all members
+ * \li <strong>\--soft-link=P</strong>  Print the value(s) of the specified soft link
+ * \li <strong>\--datatype=P</strong>   Print the specified named datatype
+ * \li <strong>\--any_path=P</strong>   Print any attribute, dataset, group, datatype, or link that matches P.
  *                                       P can be the absolute path or just a relative path.
- * \li <strong>--onlyattr</strong>     Print the header and value of attributes
+ * \li <strong>\--onlyattr</strong>     Print the header and value of attributes.
  *                                       Optional value 0 suppresses printing attributes.
- * \li <strong>--vds-view-first-missing</strong> Set the VDS bounds to first missing mapped elements.
- * \li <strong>--vds-gap-size=N</strong>  Set the missing file gap size, N=non-negative integers
+ * \li <strong>\--vds-view-first-missing</strong> Set the VDS bounds to first missing mapped elements.
+ * \li <strong>\--vds-gap-size=N</strong>  Set the missing file gap size, N=non-negative integers
  *
  * \subsection subsec_cltools_h5dump_options_prop Object Property Options
- * \li <strong>--object-ids</strong>   Print the object ids
- * \li <strong>--properties</strong>   Print dataset filters, storage layout and fill value
- * \li <strong>--packedbits=L</strong> Print packed bits as unsigned integers, using mask
+ * \li <strong>\--object-ids</strong>   Print the object ids
+ * \li <strong>\--properties</strong>   Print dataset filters, storage layout and fill value
+ * \li <strong>\--packedbits=L</strong> Print packed bits as unsigned integers, using mask
  *                          format L for an integer dataset specified with
  *                          option -d. L is a list of offset,length values,
  *                          separated by commas. Offset is the beginning bit in
  *                          the data value and length is the number of bits of
  *                          the mask.
- * \li <strong>--region</strong>       Print dataset pointed by region references
+ * \li <strong>\--region</strong>       Print dataset pointed by region references
  *
  * \subsection subsec_cltools_h5dump_options_fmt Formatting Options
- * \li <strong>--escape</strong>       Escape non printing characters
- * \li <strong>--string</strong>       Print 1-byte integer datasets as ASCII
- * \li <strong>--noindex</strong>      Do not print array indices with the data
- * \li <strong>--format=T</strong>     Set the floating point output format
- * \li <strong>--lformat=T</strong>    Set the floating point long double output format
- * \li <strong>--sort_by=Q</strong>    Sort groups and attributes by index Q
- * \li <strong>--sort_order=Z</strong> Sort groups and attributes by order Z
- * \li <strong>--no-compact-subset</strong>  Disable compact form of subsetting and allow the use
+ * \li <strong>\--escape</strong>       Escape non printing characters
+ * \li <strong>\--string</strong>       Print 1-byte integer datasets as ASCII
+ * \li <strong>\--noindex</strong>      Do not print array indices with the data
+ * \li <strong>\--format=T</strong>     Set the floating point output format
+ * \li <strong>\--lformat=T</strong>    Set the floating point long double output format
+ * \li <strong>\--sort_by=Q</strong>    Sort groups and attributes by index Q
+ * \li <strong>\--sort_order=Z</strong> Sort groups and attributes by order Z
+ * \li <strong>\--no-compact-subset</strong>  Disable compact form of subsetting and allow the use
  *                                       of "[" in dataset names.
- * \li <strong>--width=N</strong>      Set the number of columns of output. A value of 0 (zero)
+ * \li <strong>\--width=N</strong>      Set the number of columns of output. A value of 0 (zero)
  *                                       sets the number of columns to the maximum (65535).
  *                                       Default width is 80 columns.
  *
  * \subsection subsec_cltools_h5dump_options_xml XML Options
- * \li <strong>--xml</strong>          Output in XML using Schema
- * \li <strong>--use-dtd</strong>      Output in XML using DTD
- * \li <strong>--xml-dtd=U</strong>    Use the DTD or schema at U
- * \li <strong>--xml-ns=S</strong>     (XML Schema) Use qualified names n the XML
+ * \li <strong>\--xml</strong>          Output in XML using Schema
+ * \li <strong>\--use-dtd</strong>      Output in XML using DTD
+ * \li <strong>\--xml-dtd=U</strong>    Use the DTD or schema at U
+ * \li <strong>\--xml-ns=S</strong>     (XML Schema) Use qualified names in the XML.
  *                                       ":": no namespace, default: "hdf5:"
- *                                       E.g., to dump a file called "-f", use h5dump -- -f
  *
  * \subsection subsec_cltools_h5dump_options_subset Subsetting Options
  * Subsetting is available by using the following options with a dataset
@@ -122,21 +124,24 @@
  * The \b STRIDE, \b COUNT, and \b BLOCK parameters are optional and will default to 1 in
  * each dimension. \b START is optional and will default to 0 in each dimension.
  *
- * \li <strong>--start=START</strong>    Offset of start of subsetting selection
+ * \li <strong>\--start=START</strong>    Offset of start of subsetting selection
  *  \b START - is a list of integers, the number of which are equal to the
  *      number of dimensions in the dataspace being queried.<br />
- * \li <strong>--stride=STRIDE</strong>  Hyperslab stride
- *  \b COUNT - is a list of integers, the number of which are equal to the
- *      number of dimensions in the dataspace being queried.<br />
- * \li <strong>--count=COUNT</strong>    Number of blocks to include in selection
+ * \li <strong>\--stride=STRIDE</strong>  Hyperslab stride
  *  \b STRIDE - is a list of integers, the number of which are equal to the
  *      number of dimensions in the dataspace being queried.<br />
- * \li <strong>--block=BLOCK</strong>    Size of block in hyperslab
+ * \li <strong>\--count=COUNT</strong>    Number of blocks to include in selection
+ *  \b COUNT - is a list of integers, the number of which are equal to the
+ *      number of dimensions in the dataspace being queried.<br />
+ * \li <strong>\--block=BLOCK</strong>    Size of block in hyperslab
  *  \b BLOCK - is a list of integers, the number of which are equal to the
  *      number of dimensions in the dataspace being queried.<br />
  *      (Alternate compact form of subsetting is described in the Reference Manual)
  *
  * \subsubsection subsubsec_cltools_h5dump_options_args Option Argument Conventions
+ *
+ * \li <strong>\--</strong> - Two dashes followed by whitespace. Indicates that the following argument is
+ * not an option. For example, to dump a file called "-f", use <code>h5dump \-- -f</code>.
  * \li <strong>D</strong> - is the file driver to use in opening the file. Acceptable values are available
  * from https://support.hdfgroup.org/releases/hdf5/documentation/registered_virtual_file_drivers_vfds.md.
  * Without the file driver flag, the file will be opened with each driver in turn and in the order specified
@@ -208,6 +213,7 @@
  * have been saved in the "source"/tools/test/h5dump/testfiles/xml folder.
  *
  */
+/* clang-format on */
 
 #include "hdf5.h"
 #include "H5private.h"

@@ -26,22 +26,22 @@
  *  <h4>h5watch [OPTIONS] [OBJECT]</h4>
  *
  * \subsection subsec_cltools_h5watch_error Error Report Option
- * \li <strong>--enable-error-stack</strong> Prints messages from the HDF5 error stack as they occur.
- *             Optional value 2 also prints file open errors, --enable-error-stack=2.
+ * \li <strong>\--enable-error-stack</strong> Prints messages from the HDF5 error stack as they occur.
+ *             Optional value 2 also prints file open errors, <code>\--enable-error-stack=2</code>.
  *
  * \subsection subsec_cltools_h5watch_options Options
- * \li <strong>--help</strong>    Print a usage message and exit
- * \li <strong>--version</strong> Print the library version number and exit
- * \li <strong>--label</strong>   Label members of compound typed dataset.
- * \li <strong>--simple</strong>  Use a machine-readable output format.
- * \li <strong>--dim</strong>     Monitor changes in size of dataset dimensions only.
- * \li <strong>--width=N</strong> Set the number of columns to N for output.<br />
+ * \li <strong>\--help</strong>    Print a usage message and exit
+ * \li <strong>\--version</strong> Print the library version number and exit
+ * \li <strong>\--label</strong>   Label members of compound typed dataset.
+ * \li <strong>\--simple</strong>  Use a machine-readable output format.
+ * \li <strong>\--dim</strong>     Monitor changes in size of dataset dimensions only.
+ * \li <strong>\--width=N</strong> Set the number of columns to N for output.<br />
  *                                A value of 0 sets the number of columns to the
  *                                maximum (65535). The default width is 80 columns.
- * \li <strong>--polling=N</strong> Set the polling interval to N (in seconds) when the
+ * \li <strong>\--polling=N</strong> Set the polling interval to N (in seconds) when the
  *                                dataset will be checked for appended data.
  *                                The default polling interval is 1.
- * \li <strong>--fields=\<list_of_fields\></strong>
+ * \li <strong>\--fields=\<list_of_fields\></strong>
  *     Display data for the fields specified in \<list_of_fields\>
  *     for a compound data type.
  *     \<list_of_fields\> can be specified as follows:

@@ -3425,7 +3425,7 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
 
     /* 13) Get the size of the file.  Verify that it is less
      *     than 20 KB.  Without deletions and persistent free
-     *     space managers, size size is about 30 MB, so this
+     *     space managers, file size is about 30 MB, so this
      *     is sufficient to verify that the persistent free
      *     space managers are more or less doing their job.
      *

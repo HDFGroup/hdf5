@@ -487,7 +487,7 @@ sub create_doxygen_cmake ($) {
 
     # Output to doxygen directory (relative to src/)
     my $doxygen_dir = $prefix;
-    $doxygen_dir =~ s/src\/?$/doxygen\//;   # Replace "src/" with "doxygen/"
+    $doxygen_dir =~ s/src\/?$/docs\/doxygen\//;   # Replace "src/" with "docs/doxygen/"
 
     # Create doxygen directory if it doesn't exist
     if ($doxygen_dir ne "" && ! -d $doxygen_dir) {
@@ -549,7 +549,7 @@ for $file (@ARGV) {
     # Create header files
     print "Generating 'H5version.h'\n";
     create_public($prefix);
-    print "Generating 'doxygen/H5version_doxygen.cmake'\n";
+    print "Generating 'docs/doxygen/H5version_doxygen.cmake'\n";
     create_doxygen_cmake($prefix);
 }
 

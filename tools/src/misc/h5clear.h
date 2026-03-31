@@ -31,16 +31,16 @@
  *  <h4>h5clear [OPTIONS] file_name</h4>
  *
  * \subsection subsec_cltools_h5clear_error Error Report Option
- * \li <strong>--enable-error-stack</strong> Prints messages from the HDF5 error stack as they occur.
- *             Optional value 2 also prints file open errors, --enable-error-stack=2.
+ * \li <strong>\--enable-error-stack</strong> Prints messages from the HDF5 error stack as they occur.
+ *             Optional value 2 also prints file open errors, <code>\--enable-error-stack=2</code>.
  *
  * \subsection subsec_cltools_h5clear_options Options
- * \li <strong>--help</strong>        Print a usage message and exit
- * \li <strong>--version</strong>     Print the library version number and exit
- * \li <strong>--status</strong>      Clear the status_flags field in the file's superblock
- * \li <strong>--image</strong>       Remove the metadata cache image from the file
- * \li <strong>--filesize </strong>   Print the file's EOA and EOF
- * \li <strong>--increment=C</strong> Set the file's EOA to the maximum of (EOA, EOF) + C for
+ * \li <strong>\--help</strong>        Print a usage message and exit
+ * \li <strong>\--version</strong>     Print the library version number and exit
+ * \li <strong>\--status</strong>      Clear the status_flags field in the file's superblock
+ * \li <strong>\--image</strong>       Remove the metadata cache image from the file
+ * \li <strong>\--filesize </strong>   Print the file's EOA and EOF
+ * \li <strong>\--increment=C</strong> Set the file's EOA to the maximum of (EOA, EOF) + C for
  *                               the file \<file_name\>.
  *                               C is >= 0; C is optional and will default to 1M when not set.
  *                               This option helps to repair a crashed SWMR file when the stored
@@ -57,11 +57,11 @@
  *
  *      Remove the metadata cache image from the HDF5 file <file_name>.
  *
- * \li 3) h5clear --increment file_name
+ * \li 3) h5clear \--increment file_name
  *
  *      Set the EOA to the maximum of (EOA, EOF) + 1M for the file <file_name>.
  *
- * \li 4) h5clear --increment=512 file_name
+ * \li 4) h5clear \--increment=512 file_name
  *
  *      Set the EOA to the maximum of (EOA, EOF) + 512 for the file\<file_name>.
  *
