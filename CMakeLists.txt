@@ -524,7 +524,7 @@ set (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
 # Set variables needed for installation
 #-----------------------------------------------------------------------------
 set (HDF5_VERSION_STRING ${HDF5_PACKAGE_VERSION})
-set (HDF5_VERSION_MAJOR  ${HDF5_PACKAGE_VERSION_MAJOR})
+set (HDF5_VERSION_MAJOR  ${H5_VERS_MAJOR})
 set (HDF5_VERSION_MINOR  ${HDF5_PACKAGE_VERSION_MINOR})
 if (H5_VERS_MAJOR GREATER 1)
   if (H5_VERS_MINOR GREATER 9)
