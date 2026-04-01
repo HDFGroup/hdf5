@@ -12,7 +12,7 @@ var searchData=
   ['java_20jni_9',['Java/JNI',['../_h5_v_l__u_g.html#subsubsec_vol_lang_java',1,'']]],
   ['java_20signatures_20for_20file_20image_20operations_20api_20calls_10',['Java Signatures for File Image Operations API Calls',['../_h5_f_i_m__u_g.html#subsec_file_image_java',1,'']]],
   ['java_20wrapper_20errors_20and_20exceptions_11',['Java Wrapper Errors and Exceptions',['../_e_r_r_o_r_s_j_a_v_a.html',1,'']]],
-  ['java_5fmenu_12',['java_menu',['../md_doxygen_2examples_2menus_2java__menu.html',1,'']]],
+  ['java_5fmenu_12',['java_menu',['../md_docs_2doxygen_2examples_2menus_2java__menu.html',1,'']]],
   ['jni_13',['Java/JNI',['../_h5_v_l__u_g.html#subsubsec_vol_lang_java',1,'']]],
   ['jni_20and_20ffm_14',['Migrating Between JNI and FFM',['../_c_b__maven_artifacts.html#subsec_maven_migration',1,'']]],
   ['jni_20implementation_20java_208_15',['Using JNI Implementation (Java 8+)',['../_c_b__maven_artifacts.html#subsec_maven_jni',1,'']]],

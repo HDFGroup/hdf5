@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-03-31</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-04-01</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -139,6 +139,10 @@ $(function(){initNavTree('interfaceh5tb_1_1h5tbread__field__index__f.html','',''
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a6912acf184ebfae7da75306611891e4f" id="r_a6912acf184ebfae7da75306611891e4f"><td class="memItemLeft">subroutine&#160;</td><td class="memItemRight"><a class="el" href="#a6912acf184ebfae7da75306611891e4f">h5tbread_field_index_f</a> (loc_id, dset_name, field_index, start, nrecords, type_size, buf, errcode)</td></tr>
 <tr class="memdesc:a6912acf184ebfae7da75306611891e4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads field. The fields are identified by index.  <br /></td></tr>
+<tr class="memitem:ad9955e3af2ac3555072d909234e05a0c" id="r_ad9955e3af2ac3555072d909234e05a0c"><td class="memItemLeft">subroutine&#160;</td><td class="memItemRight"><a class="el" href="#ad9955e3af2ac3555072d909234e05a0c">h5tbread_field_index_kind_10_rank_1</a> (loc_id, dset_name, field_index, start, nrecords, type_size, buf, errcode)</td></tr>
+<tr class="memitem:ad629eeef71d9c19b09ce7086c576aafa" id="r_ad629eeef71d9c19b09ce7086c576aafa"><td class="memItemLeft">subroutine&#160;</td><td class="memItemRight"><a class="el" href="#ad629eeef71d9c19b09ce7086c576aafa">h5tbread_field_index_kind_16_rank_1</a> (loc_id, dset_name, field_index, start, nrecords, type_size, buf, errcode)</td></tr>
+<tr class="memitem:a8631356c0e75d194221b8d7f18b178d4" id="r_a8631356c0e75d194221b8d7f18b178d4"><td class="memItemLeft">subroutine&#160;</td><td class="memItemRight"><a class="el" href="#a8631356c0e75d194221b8d7f18b178d4">h5tbread_field_index_kind_4_rank_1</a> (loc_id, dset_name, field_index, start, nrecords, type_size, buf, errcode)</td></tr>
+<tr class="memitem:ad41d2b1cf7b40b3f6d400715c2133d54" id="r_ad41d2b1cf7b40b3f6d400715c2133d54"><td class="memItemLeft">subroutine&#160;</td><td class="memItemRight"><a class="el" href="#ad41d2b1cf7b40b3f6d400715c2133d54">h5tbread_field_index_kind_8_rank_1</a> (loc_id, dset_name, field_index, start, nrecords, type_size, buf, errcode)</td></tr>
 </table>
 <a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a6912acf184ebfae7da75306611891e4f" name="a6912acf184ebfae7da75306611891e4f"></a>
@@ -208,7 +212,213 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<hr/>The documentation for this interface was generated from the following file:<ul>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function/Subroutine Documentation</h2>
+<a id="ad9955e3af2ac3555072d909234e05a0c" name="ad9955e3af2ac3555072d909234e05a0c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad9955e3af2ac3555072d909234e05a0c">&#9670;&#160;</a></span>h5tbread_field_index_kind_10_rank_1()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5tbread_field_index_kind_10_rank_1 </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>loc_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), intent(in)</td>          <td class="paramname"><span class="paramname"><em>dset_name</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(in)</td>          <td class="paramname"><span class="paramname"><em>field_index</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>start</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>nrecords</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(size_t), intent(in)</td>          <td class="paramname"><span class="paramname"><em>type_size</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">real(kind=10), dimension(*), intent(inout), target</td>          <td class="paramname"><span class="paramname"><em>buf</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer</td>          <td class="paramname"><span class="paramname"><em>errcode</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad629eeef71d9c19b09ce7086c576aafa" name="ad629eeef71d9c19b09ce7086c576aafa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad629eeef71d9c19b09ce7086c576aafa">&#9670;&#160;</a></span>h5tbread_field_index_kind_16_rank_1()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5tbread_field_index_kind_16_rank_1 </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>loc_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), intent(in)</td>          <td class="paramname"><span class="paramname"><em>dset_name</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(in)</td>          <td class="paramname"><span class="paramname"><em>field_index</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>start</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>nrecords</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(size_t), intent(in)</td>          <td class="paramname"><span class="paramname"><em>type_size</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">real(kind=16), dimension(*), intent(inout), target</td>          <td class="paramname"><span class="paramname"><em>buf</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer</td>          <td class="paramname"><span class="paramname"><em>errcode</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8631356c0e75d194221b8d7f18b178d4" name="a8631356c0e75d194221b8d7f18b178d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8631356c0e75d194221b8d7f18b178d4">&#9670;&#160;</a></span>h5tbread_field_index_kind_4_rank_1()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5tbread_field_index_kind_4_rank_1 </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>loc_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), intent(in)</td>          <td class="paramname"><span class="paramname"><em>dset_name</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(in)</td>          <td class="paramname"><span class="paramname"><em>field_index</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>start</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>nrecords</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(size_t), intent(in)</td>          <td class="paramname"><span class="paramname"><em>type_size</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">real(kind=4), dimension(*), intent(inout), target</td>          <td class="paramname"><span class="paramname"><em>buf</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer</td>          <td class="paramname"><span class="paramname"><em>errcode</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad41d2b1cf7b40b3f6d400715c2133d54" name="ad41d2b1cf7b40b3f6d400715c2133d54"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad41d2b1cf7b40b3f6d400715c2133d54">&#9670;&#160;</a></span>h5tbread_field_index_kind_8_rank_1()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5tbread_field_index_kind_8_rank_1 </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>loc_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">character(len=*), intent(in)</td>          <td class="paramname"><span class="paramname"><em>dset_name</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(in)</td>          <td class="paramname"><span class="paramname"><em>field_index</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>start</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>), intent(in)</td>          <td class="paramname"><span class="paramname"><em>nrecords</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(size_t), intent(in)</td>          <td class="paramname"><span class="paramname"><em>type_size</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">real(kind=8), dimension(*), intent(inout), target</td>          <td class="paramname"><span class="paramname"><em>buf</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer</td>          <td class="paramname"><span class="paramname"><em>errcode</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>The documentation for this interface was generated from the following files:<ul>
+<li>config/toolchain/fortpregen/gfortran/<a class="el" href="_h5_t_bff__gen_8_f90.html">H5TBff_gen.F90</a></li>
 <li>hl/fortran/src/<a class="el" href="_h5_t_bff_8_f90.html">H5TBff.F90</a></li>
 </ul>
 </div><!-- contents -->

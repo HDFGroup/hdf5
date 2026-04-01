@@ -302,7 +302,7 @@ var searchData=
   ['core_20driver_299',['The Memory (aka Core) Driver',['../_h5_f__u_g.html#subsubsec_file_alternate_drivers_mem',1,'']]],
   ['core_20topics_300',['Core Topics',['../_l_b_training.html#autotoc_md11',1,'']]],
   ['core_20vfd_20tracks_20file_20modifications_301',['How the Core VFD Tracks File Modifications',['../mod_region_writes.html#subsec_mod_region_writes_intro_how',1,'']]],
-  ['core_5fmenu_302',['core_menu',['../md_doxygen_2examples_2menus_2core__menu.html',1,'']]],
+  ['core_5fmenu_302',['core_menu',['../md_docs_2doxygen_2examples_2menus_2core__menu.html',1,'']]],
   ['correct_20c_20run‐time_20everywhere_303',['Use the Same Memory Manager/Correct C Run‐time Everywhere',['../freeing_memory.html#subsec_freeing_memory_mitigation1',1,'']]],
   ['correlation_20of_20image_20and_20palette_20attributes_304',['Consistency and Correlation of Image and Palette Attributes',['../_i_m_g.html#sec_tab_spec_sect3',1,'']]],
   ['count_20message_305',['Count Message',['../_f_m_t2.html#subsubsec_fmt2_dataobject_hdr_msg_refcount',1,'IV.A.2.w. The Object Reference Count Message'],['../_f_m_t3.html#subsubsec_fmt3_dataobject_hdr_msg_refcount',1,'IV.A.2.w. The Object Reference Count Message'],['../_f_m_t4.html#subsubsec_fmt4_dataobject_hdr_msg_refcount',1,'IV.A.2.w. The Object Reference Count Message']]],

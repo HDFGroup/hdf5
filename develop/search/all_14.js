@@ -30,7 +30,7 @@ var searchData=
   ['java_20signatures_20for_20file_20image_20operations_20api_20calls_27',['Java Signatures for File Image Operations API Calls',['../_h5_f_i_m__u_g.html#subsec_file_image_java',1,'']]],
   ['java_20vol_20connector_20h5vl_20interface_28',['Java VOL Connector (H5VL) Interface',['../group___j_h5_v_l.html',1,'']]],
   ['java_20wrapper_20errors_20and_20exceptions_29',['Java Wrapper Errors and Exceptions',['../_e_r_r_o_r_s_j_a_v_a.html',1,'']]],
-  ['java_5fmenu_30',['java_menu',['../md_doxygen_2examples_2menus_2java__menu.html',1,'']]],
+  ['java_5fmenu_30',['java_menu',['../md_docs_2doxygen_2examples_2menus_2java__menu.html',1,'']]],
   ['java_5fmenu_2emd_31',['java_menu.md',['../java__menu_8md.html',1,'']]],
   ['jni_32',['Java/JNI',['../_h5_v_l__u_g.html#subsubsec_vol_lang_java',1,'']]],
   ['jni_20and_20ffm_33',['Migrating Between JNI and FFM',['../_c_b__maven_artifacts.html#subsec_maven_migration',1,'']]],

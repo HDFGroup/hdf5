@@ -308,7 +308,7 @@ var searchData=
   ['high_20level_20c_20api_20routine_305',['High-level C API Routine',['../_h5_f_i_m__u_g.html#subsubsec_file_image_api_high',1,'']]],
   ['high_20level_20dimension_20scales_306',['HDF5 High Level Dimension Scales',['../_h5_d_s__u_g.html',1,'']]],
   ['high_20level_20images_307',['HDF5 High Level Images',['../_h5_i_m__u_g.html',1,'']]],
-  ['high_20level_20library_308',['High-level Library',['../md_doxygen_2examples_2menus_2high__level__menu.html',1,'']]],
+  ['high_20level_20library_308',['High-level Library',['../md_docs_2doxygen_2examples_2menus_2high__level__menu.html',1,'']]],
   ['high_20level_20lite_309',['HDF5 High Level Lite',['../_h5_l_t__u_g.html',1,'']]],
   ['high_20level_20optimizations_310',['HDF5 High Level Optimizations',['../_h5_d_o__u_g.html',1,'']]],
   ['high_20level_20packet_20table_311',['HDF5 High Level Packet Table',['../_h5_p_t__u_g.html',1,'']]],
