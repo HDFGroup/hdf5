@@ -328,7 +328,8 @@ set (HDF5_JAVA_JSRC_DIR            ${HDF5_SOURCE_DIR}/java/jsrc)
 set (HDF5_JAVA_LOGGING_JAR         ${HDF5_SOURCE_DIR}/java/lib/slf4j-api-2.0.16.jar)
 set (HDF5_JAVA_LOGGING_NOP_JAR     ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-nop-2.0.16.jar)
 set (HDF5_JAVA_LOGGING_SIMPLE_JAR  ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-simple-2.0.16.jar)
-set (HDF5_DOXYGEN_DIR              ${HDF5_SOURCE_DIR}/doxygen)
+set (HDF5_DOCS_DIR                 ${HDF5_SOURCE_DIR}/docs)
+set (HDF5_DOXYGEN_DIR              ${HDF5_DOCS_DIR}/doxygen)
 
 set (HDF5_SRC_INCLUDE_DIRS ${HDF5_SRC_DIR})
 
@@ -1169,7 +1170,7 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
     # the case where Doxygen is not found or HDF5_BUILD_DOC is OFF.
     add_custom_target (doxygen)
 
-    add_subdirectory (doxygen)
+    add_subdirectory (docs/doxygen)
   else ()
     message (WARNING "Doxygen needs to be installed to generate the doxygen documentation")
   endif ()

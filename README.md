@@ -25,11 +25,11 @@ tools, and services at [The HDF Group's website](https://www.hdfgroup.org/).
 
 ## Quick Start
 
-- **New to HDF5?** Start with the [INSTALL.md](release_docs/INSTALL.md) guide for compilation and installation instructions.
+- **New to HDF5?** Start with the [INSTALL.md](docs/INSTALL.md) guide for compilation and installation instructions.
 
-- **Ready to build?** See [INSTALL_CMake.md](release_docs/INSTALL_CMake.md) for CMake-based builds.
+- **Ready to build?** See [INSTALL_CMake.md](docs/INSTALL_CMake.md) for CMake-based builds.
 
-- **Running on HPC?** Check out [README_HPC.md](release_docs/README_HPC.md) for parallel HDF5 configuration.
+- **Running on HPC?** Check out [README_HPC.md](docs/README_HPC.md) for parallel HDF5 configuration.
 
 ## Table of Contents
 
@@ -56,17 +56,17 @@ to the features and updates included in this release of the library.
 
 ### Platform-Specific Guides
 
-Several files in the [release_docs/][u4] directory provide platform-specific details:
+Several files in the [docs/][u4] directory provide platform-specific details:
 
 | File | Description |
 |------|-------------|
-| [INSTALL](release_docs/INSTALL.md) | General compilation and installation instructions (start here) |
-| [INSTALL_CMake.md](release_docs/INSTALL_CMake.md) | Building with CMake |
-| [README_HPC.md](release_docs/README_HPC.md) | Building and configuring Parallel HDF5 on HPC systems |
-| [INSTALL_Windows.md](release_docs/INSTALL_Windows.md) | Windows installation |
-| [INSTALL_Cygwin.md](release_docs/INSTALL_Cygwin.md) | Cygwin installation |
-| [USING_HDF5_CMake.md](release_docs/USING_HDF5_CMake.md) | Building HDF5 applications with CMake |
-| [USING_CMake_Examples.md](release_docs/USING_CMake_Examples.md) | Building and testing HDF5 examples with CMake |
+| [INSTALL](docs/INSTALL.md) | General compilation and installation instructions (start here) |
+| [INSTALL_CMake.md](docs/INSTALL_CMake.md) | Building with CMake |
+| [README_HPC.md](docs/README_HPC.md) | Building and configuring Parallel HDF5 on HPC systems |
+| [INSTALL_Windows.md](docs/INSTALL_Windows.md) | Windows installation |
+| [INSTALL_Cygwin.md](docs/INSTALL_Cygwin.md) | Cygwin installation |
+| [USING_HDF5_CMake.md](docs/USING_HDF5_CMake.md) | Building HDF5 applications with CMake |
+| [USING_CMake_Examples.md](docs/USING_CMake_Examples.md) | Building and testing HDF5 examples with CMake |
 
 ## Help and Support
 
@@ -173,5 +173,5 @@ If you use HDF5 in your research, please cite it. This repository includes a [`C
 
 [u1]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/CHANGELOG.md
 [u2]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/img/release-schedule.png
-[u3]: https://github.com/HDFGroup/hdf5/blob/develop/doxygen/img/HDF5.png
-[u4]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs
+[u3]: https://github.com/HDFGroup/hdf5/blob/develop/docs/doxygen/img/HDF5.png
+[u4]: https://github.com/HDFGroup/hdf5/blob/develop/docs

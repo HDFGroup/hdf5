@@ -106,21 +106,27 @@ static void       H5Z__xform_reduce_tree(H5Z_node *tree);
         size_t u;                                                                                            \
                                                                                                              \
         if (((RESL).type == H5Z_XFORM_SYMBOL) && ((RESR).type != H5Z_XFORM_SYMBOL)) {                        \
-            TYPE  *p;                                                                                        \
-            double tree_val;                                                                                 \
+            uint8_t *p;                                                                                      \
+            double   tree_val;                                                                               \
                                                                                                              \
             tree_val =                                                                                       \
                 ((RESR).type == H5Z_XFORM_INTEGER ? (double)(RESR).value.int_val : (RESR).value.float_val);  \
-            p = (TYPE *)(RESL).value.dat_val;                                                                \
                                                                                                              \
+            p = (uint8_t *)(RESL).value.dat_val;                                                             \
             for (u = 0; u < (SIZE); u++) {                                                                   \
-                *p = (TYPE)((double)*p OP tree_val);                                                         \
-                p++;                                                                                         \
+                TYPE data;                                                                                   \
+                TYPE result;                                                                                 \
+                                                                                                             \
+                H5MM_memcpy(&data, p, sizeof(TYPE));                                                         \
+                result = (TYPE)((double)data OP tree_val);                                                   \
+                H5MM_memcpy(p, &result, sizeof(TYPE));                                                       \
+                                                                                                             \
+                p += sizeof(TYPE);                                                                           \
             }                                                                                                \
         }                                                                                                    \
         else if (((RESR).type == H5Z_XFORM_SYMBOL) && ((RESL).type != H5Z_XFORM_SYMBOL)) {                   \
-            TYPE  *p;                                                                                        \
-            double tree_val;                                                                                 \
+            uint8_t *p;                                                                                      \
+            double   tree_val;                                                                               \
                                                                                                              \
             /* The case that the left operand is nothing, like -x or +x */                                   \
             if ((RESL).type == H5Z_XFORM_ERROR)                                                              \
@@ -129,20 +135,33 @@ static void       H5Z__xform_reduce_tree(H5Z_node *tree);
                 tree_val = ((RESL).type == H5Z_XFORM_INTEGER ? (double)(RESL).value.int_val                  \
                                                              : (RESL).value.float_val);                      \
                                                                                                              \
-            p = (TYPE *)(RESR).value.dat_val;                                                                \
+            p = (uint8_t *)(RESR).value.dat_val;                                                             \
             for (u = 0; u < (SIZE); u++) {                                                                   \
-                *p = (TYPE)(tree_val OP(double) * p);                                                        \
-                p++;                                                                                         \
+                TYPE data;                                                                                   \
+                TYPE result;                                                                                 \
+                                                                                                             \
+                H5MM_memcpy(&data, p, sizeof(TYPE));                                                         \
+                result = (TYPE)(tree_val OP(double) data);                                                   \
+                H5MM_memcpy(p, &result, sizeof(TYPE));                                                       \
+                                                                                                             \
+                p += sizeof(TYPE);                                                                           \
             }                                                                                                \
         }                                                                                                    \
         else if (((RESL).type == H5Z_XFORM_SYMBOL) && ((RESR).type == H5Z_XFORM_SYMBOL)) {                   \
-            TYPE *pl = (TYPE *)(RESL).value.dat_val;                                                         \
-            TYPE *pr = (TYPE *)(RESR).value.dat_val;                                                         \
+            uint8_t *pl = (uint8_t *)(RESL).value.dat_val;                                                   \
+            uint8_t *pr = (uint8_t *)(RESR).value.dat_val;                                                   \
                                                                                                              \
             for (u = 0; u < (SIZE); u++) {                                                                   \
-                *pl = (TYPE)(*pl OP * pr);                                                                   \
-                pl++;                                                                                        \
-                pr++;                                                                                        \
+                TYPE datal;                                                                                  \
+                TYPE datar;                                                                                  \
+                                                                                                             \
+                H5MM_memcpy(&datal, pl, sizeof(TYPE));                                                       \
+                H5MM_memcpy(&datar, pr, sizeof(TYPE));                                                       \
+                datal = (TYPE)(datal OP datar);                                                              \
+                H5MM_memcpy(pl, &datal, sizeof(TYPE));                                                       \
+                                                                                                             \
+                pl += sizeof(TYPE);                                                                          \
+                pr += sizeof(TYPE);                                                                          \
             }                                                                                                \
         }                                                                                                    \
         else                                                                                                 \

@@ -152,14 +152,12 @@ static const H5E_stack_t H5E_err_stack_def = {
 /* H5E_auto_op_t */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 #ifdef H5_USE_16_API_DEFAULT
-    {1, true, (H5E_auto1_t)H5Eprint1, (H5E_auto2_t)H5E__print2, (H5E_auto1_t)H5Eprint1,
-     (H5E_auto2_t)H5E__print2},
+    {1, true, (H5E_auto1_t)H5Eprint1, H5E__print2, (H5E_auto1_t)H5Eprint1, H5E__print2},
 #else  /* H5_USE_16_API */
-    {2, true, (H5E_auto1_t)H5Eprint1, (H5E_auto2_t)H5E__print2, (H5E_auto1_t)H5Eprint1,
-     (H5E_auto2_t)H5E__print2},
+    {2, true, (H5E_auto1_t)H5Eprint1, H5E__print2, (H5E_auto1_t)H5Eprint1, H5E__print2},
 #endif /* H5_USE_16_API_DEFAULT */
 #else  /* H5_NO_DEPRECATED_SYMBOLS */
-    {(H5E_auto2_t)H5E__print2},
+    {H5E__print2},
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     NULL, /* auto_data */
@@ -855,9 +853,10 @@ H5E__get_num(const H5E_stack_t *estack)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E__print2(hid_t err_stack, FILE *stream)
+H5E__print2(hid_t err_stack, void *_stream)
 {
-    H5E_stack_t *estack;              /* Error stack to operate on */
+    H5E_stack_t *estack; /* Error stack to operate on */
+    FILE        *stream    = (FILE *)_stream;
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE

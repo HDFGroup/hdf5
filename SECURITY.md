@@ -95,7 +95,7 @@ HDF5-specific practices:
 - **Artifact Verification:** All binaries and source tarballs on [GitHub Releases](https://github.com/HDFGroup/hdf5/releases) include SHA-256 checksums. Users should verify downloaded artifacts against these checksums.
 - **SBOM:** We provide CycloneDX SBOM fragments for core, tools, and plugins where applicable.
 - **Fuzzing:** Continuous fuzzing of HDF5 file parsing and API entry points via OSS-Fuzz.
-- **Build from Source:** General build instructions are available in [release_docs/INSTALL](release_docs/INSTALL).
+- **Build from Source:** General build instructions are available in [docs/INSTALL.md](docs/INSTALL.md).
 
 ---
 
