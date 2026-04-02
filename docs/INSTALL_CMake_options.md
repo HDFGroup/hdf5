@@ -91,6 +91,7 @@ These options control how HDF5 gets installed. Options dealing with paths are ge
 | `HDF5_USE_GNU_DIRS` | `BOOL` | `OFF` | If `ON`, uses the GNU Coding Standard CMake install directory variables when setting up for installing the HDF5 library. See [GNUInstallDirs](https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html) for more information. |
 | `HDF5_INSTALL_BIN_DIR` | `STRING` | `bin` | Specifies the directory to install executables in. |
 | `HDF5_INSTALL_LIB_DIR` | `STRING` | `lib` | Specifies the directory to install libraries in. |
+| `HDF5_INSTALL_JNI_LIB_DIR` | `STRING` | `lib` | Specifies the directory to install Java JNI libraries in. |
 | `HDF5_INSTALL_INCLUDE_DIR` | `STRING` | `include` | Specifies the directory to install header files in. |
 | `HDF5_INSTALL_MODULE_DIR` | `STRING` | `mod` (`HDF5_USE_GNU_DIRS=OFF`) <br /> `HDF5_INSTALL_INCLUDE_DIR/mod` (`HDF5_USE_GNU_DIRS=ON`) | Specifies the directory to install Fortran .mod files in. |
 | `HDF5_INSTALL_CMAKE_DIR` | `STRING` | `cmake` (`HDF5_USE_GNU_DIRS=OFF`) <br /> `HDF5_INSTALL_LIB_DIR/cmake` (`HDF5_USE_GNU_DIRS=ON`) | Specifies the directory to install CMake files in. |
