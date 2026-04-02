@@ -714,32 +714,6 @@ H5PL__init_keystore(void)
     }
 #endif
 
-    /* Must have at least one key */
-    if (!keys_loaded || H5PL_keystore_count_g == 0) {
-        const char *attempted_source    = env_keystore ? env_keystore : H5PL_SIG_KEYSTORE_DIR_STR;
-        bool        keystore_configured = (env_keystore != NULL);
-
-#ifdef H5PL_KEYSTORE_DIR
-        keystore_configured = true;
-#endif
-
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
-                    "no valid public keys found for plugin signature verification\n"
-                    "  %s%s\n"
-                    "  Keys found: 0\n"
-                    "\n"
-                    "Configure keys via:\n"
-                    "  - Environment: export HDF5_PLUGIN_KEYSTORE=/path/to/keys\n"
-                    "  - CMake: -DHDF5_PLUGIN_KEYSTORE_DIR=/path/to/keys\n"
-                    "\n"
-                    "Verify:\n"
-                    "  - Directory exists and is readable\n"
-                    "  - Directory contains .pem files\n"
-                    "  - .pem files are valid RSA public keys",
-                    keystore_configured ? "Attempted to load from: " : "No keystore configured",
-                    keystore_configured ? attempted_source : "");
-    }
-
     if (H5PL_keystore_count_g > 0) {
         H5PL_SIG_DEBUG_PRINT("HDF5 Plugin KeyStore initialized:\n");
         H5PL_SIG_DEBUG_PRINT("  Keys loaded: %zu\n", H5PL_keystore_count_g);
@@ -1268,7 +1242,17 @@ H5PL__verify_signature_appended(const char *plugin_path)
 
     /* Must have at least one key */
     if (H5PL_keystore_count_g == 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "keystore is empty - no keys available for verification");
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL,
+                    "no valid public keys found for plugin signature verification\n"
+                    "\n"
+                    "Configure keys via:\n"
+                    "  - Environment: export HDF5_PLUGIN_KEYSTORE=/path/to/keys\n"
+                    "  - CMake: -DHDF5_PLUGIN_KEYSTORE_DIR=/path/to/keys\n"
+                    "\n"
+                    "Verify:\n"
+                    "  - Directory exists and is readable\n"
+                    "  - Directory contains .pem files\n"
+                    "  - .pem files are valid RSA public keys");
 
     /* Verify signature with all keys in keystore */
     if (H5PL__verify_with_all_keys(fd, binary_size, signature, &footer, plugin_path) < 0)

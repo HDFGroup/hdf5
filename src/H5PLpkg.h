@@ -113,13 +113,6 @@ typedef const void *(*H5PL_get_plugin_info_t)(void);
 /************************************/
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
 
-/* Keystore directory string for error messages */
-#ifdef H5PL_KEYSTORE_DIR
-#define H5PL_SIG_KEYSTORE_DIR_STR H5PL_KEYSTORE_DIR
-#else
-#define H5PL_SIG_KEYSTORE_DIR_STR "(not configured)"
-#endif
-
 #define H5PL_SIG_DEBUG_PRINT(...)                                                                            \
     do {                                                                                                     \
         if (H5DEBUG(PL)) {                                                                                   \
