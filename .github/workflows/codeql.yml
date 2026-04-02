@@ -64,7 +64,7 @@ jobs:
           echo "F77=mpif90" >> $GITHUB_ENV
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Configure HDF5
         run: |
@@ -87,7 +87,7 @@ jobs:
             ..
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@e34fc2711fb7964ca6850c8a8382121f34745f3b # v4.32.4
+        uses: github/codeql-action/init@89a39a4e59826350b863aa6b6252a07ad50cf83e # v4.32.4
         with:
           languages: c-cpp
           build-mode: manual
@@ -174,14 +174,14 @@ jobs:
         shell: bash
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@e34fc2711fb7964ca6850c8a8382121f34745f3b # v4.32.4
+        uses: github/codeql-action/analyze@89a39a4e59826350b863aa6b6252a07ad50cf83e # v4.32.4
         with:
           category: "/language:c-cpp"
           output: sarif-results
           upload: failure-only
 
       - name: filter-sarif
-        uses: advanced-security/filter-sarif@f3b8118a9349d88f7b1c0c488476411145b6270d # v1
+        uses: advanced-security/filter-sarif@2da736ff05ef065cb2894ac6892e47b5eac2c3c0 # v1.1
         with:
           # Path-scoped exclusions:
           #   - Test directories are excluded entirely (no security value in test harnesses).
@@ -202,7 +202,7 @@ jobs:
           output: sarif-results/cpp.sarif
 
       - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@e34fc2711fb7964ca6850c8a8382121f34745f3b # v4.32.4
+        uses: github/codeql-action/upload-sarif@89a39a4e59826350b863aa6b6252a07ad50cf83e # v4.32.4
         with:
           sarif_file: sarif-results/cpp.sarif
 
