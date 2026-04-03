@@ -367,7 +367,6 @@ Go through these steps:
 
 1. We suggest you obtain the latest CMake from the Kitware web site. The HDF5 2."X"."Y" product **requires a minimum CMake version 3.26**.
 
-
 2. If you plan to use Zlib/Zlib-ng, Szip (aka libaec) and/or HDF5 filter plugins, refer to the instructions in [INSTALL_Filters.md](./INSTALL_Filters.md).
 
 3. If you are building on Apple Darwin platforms, you should add the following options:
