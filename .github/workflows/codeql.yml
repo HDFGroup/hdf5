@@ -211,16 +211,23 @@ jobs:
   codeql-complete:
     name: codeql-complete
     if: always()
-    needs: analyze
+    needs: [check-changes, analyze]
     runs-on: ubuntu-latest
     steps:
       - name: Check analyze result
         run: |
-          result="${{ needs.analyze.result }}"
-          if [ "$result" = "success" ] || [ "$result" = "skipped" ]; then
+          check_result="${{ needs.check-changes.result }}"
+          analyze_result="${{ needs.analyze.result }}"
+
+          if [ "$check_result" != "success" ]; then
+            echo "check-changes job failed with result: $check_result"
+            exit 1
+          fi
+
+          if [ "$analyze_result" = "success" ] || [ "$analyze_result" = "skipped" ]; then
             echo "CodeQL analysis passed or was skipped (text-only change)."
             exit 0
           else
-            echo "CodeQL analysis failed with result: $result"
+            echo "CodeQL analysis failed with result: $analyze_result"
             exit 1
           fi
