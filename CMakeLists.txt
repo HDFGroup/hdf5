@@ -331,7 +331,7 @@ set (HDF5_JAVA_LOGGING_SIMPLE_JAR  ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-simple-
 set (HDF5_JAVA_JUNIT_JAR           ${HDF5_JAVA_LIB_DIR}/org.junit.jar CACHE FILEPATH "Path to JUnit jar")
 set (HDF5_JAVA_HAMCREST_JAR        ${HDF5_JAVA_LIB_DIR}/org.hamcrest.jar CACHE FILEPATH "Path to Hamcrest jar")
 set (HDF5_DOCS_DIR                 ${HDF5_SOURCE_DIR}/docs)
-set (HDF5_DOXYGEN_DIR              ${HDF5_SOURCE_DIR}/doxygen)
+set (HDF5_DOXYGEN_DIR              ${HDF5_DOCS_DIR}/doxygen)
 
 set (HDF5_SRC_INCLUDE_DIRS ${HDF5_SRC_DIR})
 
