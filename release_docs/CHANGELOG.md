@@ -93,10 +93,6 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    A new `Findlibaec.cmake` CMake module has been added. This module is intended to locate libaec on the system for SZIP support in HDF5 when libaec was built with Autotools instead of CMake. When SZIP support is enabled in HDF5 with the `HDF5_ENABLE_SZIP_SUPPORT` option, this module will first check for an existing CMake-built libaec and use that if it's available. Otherwise, the module will heuristically search for libaec on the system. If necessary, the module can be hinted toward a particular libaec installation by setting the CMake variable `libaec_ROOT` to point to a directory. If it is known that a CMake-built libaec installation exists on the system in a non-standard location, the CMake variable `libaec_DIR` can instead be set to a directory containing a `libaec-config.cmake` file to cause the module to prefer that libaec installation.
 
-### Refactored CMake library export mechanism
-
-   The CMake build system now uses separate export targets for different library types: static libraries use `${HDF5_EXPORTED_TARGETS}_static`, Java libraries use `${HDF5_EXPORTED_TARGETS}_java`, and shared libraries continue using the main `${HDF5_EXPORTED_TARGETS}`. The generated `hdf5-config.cmake` file conditionally includes the appropriate target files (`hdf5-targets_static.cmake` and `hdf5-targets_java.cmake`), allowing downstream projects to selectively link against specific library variants. This refactoring improves build system maintainability and applies consistently across all HDF5 components (core, C++, Fortran, high-level APIs, tools, and Java JNI).
-
 ## Library
 
 ### Added optional digital signature verification for dynamically loaded plugins
@@ -154,18 +150,11 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Configuration
 
-### Removed force-setting of `ZLIB_USE_EXTERNAL` and `SZIP_USE_EXTERNAL` CMake variables to `ON`
-
-   When the CMake variable `HDF5_ALLOW_EXTERNAL_SUPPORT` is set to `GIT` or `TGZ`, the library's build process previously force-set the `ZLIB_USE_EXTERNAL` and `SZIP_USE_EXTERNAL` variables to `ON`. This prevented the ability to independently choose whether zlib and szip are built from system libraries or from external sources. These variables are no longer forced to `ON` in this case and can be set individually.
-
-
 ## Tools
 
 ## Performance
 
 ## Fortran API
-
-### Added Fortran wrappers for SWMR functionality
 
 ## High-Level Library
 
