@@ -203,7 +203,7 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
     The command above will configure, build, test, and create an install package in
     the `myhdfstuff` folder. It will have the format: `HDF5-2.X.Y-<platform>.<zip or tar.gz>`.
 
-    On Unix, `<platform>` will be "Linux". A similar `.sh` file will also be created. On Windows, `<platform>` will be "win64" or "win32". If you have an installer on your system, you will also see a similar file that ends in either `.exe` (NSIS) or `.msi` (WiX).
+    On Unix, `<platform>` will be "Linux". A similar `.sh` file will also be created. On Windows, `<platform>` will be "win-vs2022_cl" or "win-vs2022_intel". If you have an installer on your system, you will also see a similar file that ends in either `.exe` (NSIS) or `.msi` (WiX).
 
     Notes on the command line options.
 
@@ -217,7 +217,7 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
 
 6. To install, `X.Y` is the current release version.
 
-    * **On Windows (with WiX):** Execute `HDF5-2.X.Y-win32.msi` or `HDF5-2.X.Y-win64.msi`. By default this program will install the HDF5 library into the `C:\Program Files` directory and will create the following directory structure:
+    * **On Windows (with WiX):** Execute `hdf5-2.X.Y-win-vs2022_cl.msi` or `hdf5-2.X.Y-win-vs2022_intel.msi`. By default this program will install the HDF5 library into the `C:\Program Files` directory and will create the following directory structure:
 
           HDF_Group
           --HDF5
@@ -309,8 +309,8 @@ Go through these steps:
 8. Create an install image: `cpack -C Release CPackConfig.cmake`
 9. To install
 
-    * On **Windows (with WiX installed)**, execute `HDF5-2.X.Y-win32.msi or
-      HDF5-2.X.Y-win64.msi`. By default this program will install the hdf5
+    * On **Windows (with WiX installed)**, execute `hdf5-2.X.Y-win-vs2022_cl.msi` or
+      `hdf5-2.X.Y-win-vs2022_intel.msi`. By default this program will install the hdf5
       library into the `C:\Program Files` directory and will create the
       following directory structure:
 
@@ -367,9 +367,109 @@ Go through these steps:
 
 1. We suggest you obtain the latest CMake from the Kitware web site. The HDF5 2."X"."Y" product **requires a minimum CMake version 3.26**.
 
-2. If you plan to use Zlib/Zlib-ng, Szip (aka libaec) and/or HDF5 filter plugins, refer to the instructions in [INSTALL_Filters.md](./INSTALL_Filters.md).
+2. If you plan to use Zlib or Szip (aka libaec):
 
-3. If you are building on Apple Darwin platforms, you should add the following options:
+    1. Download the binary packages and install them in a central location. For example on Windows, create a folder `extlibs` and install the packages there. Add the following CMake options:
+
+        ```
+        -DZLIB_LIBRARY:FILEPATH=some_location/lib/zlib.lib
+        -DZLIB_INCLUDE_DIR:PATH=some_location/include
+        -DZLIB_USE_EXTERNAL:BOOL=OFF
+        -DSZIP_LIBRARY:FILEPATH=some_location/lib/libszaec.lib
+        -DSZIP_INCLUDE_DIR:PATH=some_location/include
+        -Dlibaec_LIBRARY:FILEPATH=some_location/lib/libaec.lib
+        -Dlibaec_INCLUDE_DIR:PATH=some_location/include
+        -DSZIP_USE_EXTERNAL:BOOL=OFF
+        ```
+        where `some_location` is the full path to the `extlibs` folder.
+        Also if the appropriate environment variable is set, the above options are not required:
+        ```
+        set(ENV{ZLIB_ROOT} "some_location")
+        set(ENV{SZIP_ROOT} "some_location")
+        set(ENV{libaec_ROOT} "some_location")
+        ```
+
+        Note that if there is a problem finding the libraries, try adding the
+        CMake variable `CMAKE_FIND_DEBUG_MODE:BOOL=ON` to the command line.
+
+    2. Use source packages from a GIT server by adding the following CMake
+         options:
+
+        `HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="GIT"`<br/>
+        `ZLIB_GIT_URL:STRING="https://some_location/zlib"` or `ZLIBNG_GIT_URL:STRING="https://some_location/zlibng"`<br/>
+        `ZLIB_GIT_BRANCH="some_branch"` or `ZLIBNG_GIT_BRANCH="some_branch"`<br/>
+        `SZIP_GIT_URL:STRING="https://some_location/szip"`<br/>
+        `SZIP_GIT_BRANCH="some_branch"`<br/>
+        `LIBAEC_GIT_URL:STRING="https://some_location/libaec"`<br/>
+        `LIBAEC_GIT_BRANCH="some_branch"`<br/>
+
+        where `some_location` is the URL to the GIT repository and `some_branch` is a branch in the repository, usually
+        the default. Also set `CMAKE_BUILD_TYPE` to the configuration type.
+
+    3. Use source packages from a compressed file by adding the following
+        CMake options:
+
+        `HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"`<br/>
+        `ZLIB_TGZ_NAME:STRING="zlib_src.ext"` or `ZLIBNG_TGZ_NAME:STRING="zlibng_src.ext"`<br/>
+        `LIBAEC_TGZ_NAME:STRING="libaec_src.ext"`<br/>
+        `TGZPATH:STRING="some_location"`<br/>
+
+        where `some_location` is the URL or full path to the compressed
+        file and `ext` is the type of compression file. Also set `CMAKE_BUILD_TYPE`
+        to the configuration type during configuration. See the settings in the
+        `config/cmake/cacheinit.cmake` file used for testing.
+
+    4. Use original source packages from a compressed file by adding the following
+        CMake options:
+
+        `LIBAEC_TGZ_NAME:STRING="szip_src.ext"`<br/>
+        `LIBAEC_TGZ_ORIGPATH:STRING="some_location"`<br/>
+        `ZLIB_TGZ_NAME:STRING="zlib_src.ext"` or `ZLIBNG_TGZ_NAME:STRING="zlibng_src.ext"`<br/>
+        `ZLIB_TGZ_ORIGPATH:STRING="some_location"` or Z`LIBNG_TGZ_ORIGPATH:STRING="some_location"`<br/>
+        `HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"`
+
+        where `some_location` is the URL and by setting
+        ```
+        ZLIB_USE_LOCALCONTENT:BOOL=OFF
+        LIBAEC_USE_LOCALCONTENT:BOOL=OFF
+        ```
+        or full path to the compressed file and `ext` is the type of compression file.
+        Also set `CMAKE_BUILD_TYPE` to the configuration type during configuration.
+        See the settings in the `config/cmake/cacheinit.cmake` used for testing.
+
+        The files can also be retrieved from a local path if necessary `TGZPATH:STRING="some_location"` by setting
+        ```
+        ZLIB_USE_LOCALCONTENT:BOOL=ON
+        LIBAEC_USE_LOCALCONTENT:BOOL=ON
+        ```
+
+3. If you plan to use compression plugins:
+
+    1. Use source packages from an GIT server by adding the following CMake
+        options:
+
+        ```
+        HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="GIT"
+        PLUGIN_GIT_URL:STRING="http://some_location/plugins"
+        PLUGIN_GIT_BRANCH="some_branch"
+        ```
+
+        where `some_location` is the URL to the GIT repository and `some_branch` is
+        a branch in the repository, usually the default. Also set
+        `CMAKE_BUILD_TYPE` to the configuration type.
+
+    2. Use source packages from a compressed file by adding the following CMake options:
+        ```
+        HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"
+        PLUGIN_TGZ_NAME:STRING="plugin_src.ext"
+        TGZPATH:STRING="some_location"
+        ```
+         where `some_location` is the URL or full path to the compressed
+         file and `ext` is the type of compression file. Also set `CMAKE_BUILD_TYPE`
+         to the configuration type during configuration. See the settings in the
+         `config/cmake/cacheinit.cmake` file used for testing.
+
+4. If you are building on Apple Darwin platforms, you should add the following options:
 
     * Compiler choice - use Xcode by setting the `CC` and `CXX` environment variables.
 
@@ -380,9 +480,9 @@ Go through these steps:
             CMAKE_ANSI_CFLAGS:STRING=-fPIC
             CTEST_USE_LAUNCHERS:BOOL=ON
 
-4. Windows developers should install NSIS or WiX to create an install image with CPack. Visual Studio Express users will not be able to package HDF5 into an install image executable.
+5. Windows developers should install NSIS or WiX to create an install image with CPack. Visual Studio Express users will not be able to package HDF5 into an install image executable.
 
-5. Developers can copy the `config/cmake/cacheinit.cmake` file and alter the settings for the developers' environment. Then the only options needed on the command line are those options that are different. Example using the default cache file:
+6. Developers can copy the `config/cmake/cacheinit.cmake` file and alter the settings for the developers' environment. Then the only options needed on the command line are those options that are different. Example using the default cache file:
 
     ```cmd
     cmake -C ../config/cmake/cacheinit.cmake ^
@@ -393,7 +493,7 @@ Go through these steps:
             ..
     ```
 
-6. CMake uses a toolchain of utilities to compile, link libraries,
+7. CMake uses a toolchain of utilities to compile, link libraries,
     create archives, and other tasks to drive the build. The toolchain
     utilities available are determined by the languages enabled. In normal
     builds, CMake automatically determines the toolchain for host builds
@@ -444,28 +544,23 @@ To use a toolchain file with the supplied cmake scripts, see the
 
 ### Notes: CMake in General
 
-1. More information about using CMake can be found at the Kitware site at
-        www.cmake.org.
+   1. More information about using CMake can be found at the Kitware site at
+         www.cmake.org.
 
-2. CMake uses the command line; however, the visual CMake tool is
-    available for the configuration step. The steps are similar for
-    all the operating systems supported by CMake.
+   2. CMake uses the command line; however, the visual CMake tool is
+      available for the configuration step. The steps are similar for
+      all the operating systems supported by CMake.
 
-3. Setting the installation location from the command line at configure time
+   3. Setting the installation location from the command line at configure time
+      a. Using the --install-prefix command line option, which is available since
+         CMake version 3.21:
+            cmake --install-prefix /my/folder/to/install/to ..
+      b. Using -DCMAKE_INSTALL_PREFIX :
+            cmake -DCMAKE_INSTALL_PREFIX=/my/folder/to/install/to ..
+      c. Using the CMAKE_INSTALL_PREFIX environment variable, which is available
+         since CMake version 3.29:
+            CMAKE_INSTALL_PREFIX=/my/folder/to/install/to cmake ..
 
-    a. Using the `--install-prefix` command line option, which is available since
-        CMake version 3.21:
-
-        cmake --install-prefix /my/folder/to/install/to ..
-
-    b. Using `-DCMAKE_INSTALL_PREFIX`:
-
-        cmake -DCMAKE_INSTALL_PREFIX=/my/folder/to/install/to ..
-
-    c. Using the `CMAKE_INSTALL_PREFIX` environment variable, which is available
-        since CMake version 3.29:
-
-        CMAKE_INSTALL_PREFIX=/my/folder/to/install/to cmake ..
 
 ---
 
@@ -497,9 +592,7 @@ turn specific options on or off for testing using the following command line wit
 
     cmake -C <sourcepath>/config/cmake/cacheinit.cmake -G "<generator>"  [-D<options>]  <sourcepath>
 
-Where `cacheinit.cmake` is a file used to populate an initial CMake cache with some common option settings,
-
-`<generator>` is (examples):
+Where `<generator>` is (examples):
 * MinGW Makefiles
 * NMake Makefiles
 * Unix Makefiles
@@ -509,9 +602,73 @@ Where `cacheinit.cmake` is a file used to populate an initial CMake cache with s
 * Visual Studio 16 2019
 * Visual Studio 17 2022
 
-and `<options>` are any CMake options to be added to the configuration:
+`<options>` is:
+
+* For installed SZIP/libaec:
+
+        SZIP_INCLUDE_DIR:PATH=<path to szip includes directory>
+        SZIP_LIBRARY:FILEPATH=<path to szip/library file>
+        libaec_INCLUDE_DIR:PATH=<path to libaec includes directory>
+        libaec_LIBRARY:FILEPATH=<path to libaec/library file>
+
+    or
+
+        SZIP_ROOT:PATH=<path to szip root directory>
+        libaec_ROOT:PATH=<path to libaec root directory>
+
+* For installed ZLIB/ZLIBNG:
+
+        ZLIB_INCLUDE_DIR:PATH=<path to zlib includes directory>
+        ZLIB_LIBRARY:FILEPATH=<path to zlib/library file>
+
+    or
+
+        ZLIB_ROOT:PATH=<path to zlib root directory>
 
 * `<HDF5OPTION>:BOOL=[ON | OFF]`
+
+`cacheinit.cmake` highlights are:
+
+```cmake
+# This is the CMakeCache file used by HDF Group for daily tests.
+set (CMAKE_INSTALL_FRAMEWORK_PREFIX "Library/Frameworks" CACHE STRING "Frameworks installation directory" FORCE)
+set (HDF_PACKAGE_NAMESPACE "hdf5::" CACHE STRING "Name for HDF package namespace (can be empty)" FORCE)
+set (HDF5_BUILD_CPP_LIB ON CACHE BOOL "Build C++ support" FORCE)
+set (HDF5_BUILD_FORTRAN ON CACHE BOOL "Build FORTRAN support" FORCE)
+set (HDF5_BUILD_JAVA ON CACHE BOOL "Build JAVA support" FORCE)
+set (HDF5_ENABLE_ALL_WARNINGS ON CACHE BOOL "Enable all warnings" FORCE)
+set (HDF5_ALLOW_EXTERNAL_SUPPORT "TGZ" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
+########################
+# compression options
+########################
+set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package" FORCE)
+set (ZLIB_TGZ_NAME "zlib-1.3.1.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file" FORCE)
+set (ZLIB_TGZ_ORIGPATH "https://github.com/madler/zlib/releases/download/v1.3.1" CACHE STRING "Use ZLIB from original location" FORCE)
+set (ZLIB_USE_LOCALCONTENT ON CACHE BOOL "Use local file for ZLIB FetchContent" FORCE)
+set (ZLIB_GIT_URL "https://github.com/madler/zlib.git" CACHE STRING "Use ZLIB from  GitHub repository" FORCE)
+set (ZLIB_GIT_BRANCH "develop" CACHE STRING "" FORCE)
+set (HDF5_USE_ZLIB_NG OFF CACHE BOOL "Use zlib-ng library as zlib library" FORCE)
+set (ZLIBNG_PACKAGE_NAME "zlib-ng" CACHE STRING "Name of ZLIBNG package" FORCE)
+set (ZLIBNG_TGZ_NAME "2.2.4.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file" FORCE)
+set (ZLIBNG_TGZ_ORIGPATH "https://github.com/zlib-ng/zlib-ng/archive/refs/tags" CACHE STRING "Use ZLIBNG from original location" FORCE)
+set (ZLIBNG_GIT_URL "https://github.com/zlib-ng/zlib-ng.git" CACHE STRING "Use ZLIBNG from  GitHub repository" FORCE)
+set (ZLIBNG_GIT_BRANCH "develop" CACHE STRING "" FORCE)
+set (LIBAEC_PACKAGE_NAME "libaec" CACHE STRING "Name of AEC SZIP package" FORCE)
+set (LIBAEC_TGZ_NAME "libaec-1.1.3.tar.gz" CACHE STRING "Use SZip AEC from compressed file" FORCE)
+set (LIBAEC_TGZ_ORIGPATH "https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.3" CACHE STRING "Use LIBAEC from original location" FORCE)
+set (LIBAEC_USE_LOCALCONTENT ON CACHE BOOL "Use local file for LIBAEC FetchContent" FORCE)
+set (LIBAEC_GIT_URL "https://github.com/MathisRosenhauer/libaec.git" CACHE STRING "Use LIBAEC from  GitHub repository" FORCE)
+set (LIBAEC_GIT_BRANCH "v1.1.3" CACHE STRING "" FORCE)
+########################
+# filter plugin options
+########################
+set (PLUGIN_TGZ_ORIGPATH "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot" CACHE STRING "Use PLUGINS from original location" FORCE)
+set (PLUGIN_TGZ_NAME "hdf5_plugins-master.tar.gz" CACHE STRING "Use PLUGINS from compressed file" FORCE)
+set (PLUGIN_USE_LOCALCONTENT ON CACHE BOOL "Use local file for PLUGIN FetchContent" FORCE)
+set (PLUGIN_PACKAGE_NAME "pl" CACHE STRING "Name of PLUGIN package" FORCE)
+set (PLUGIN_GIT_URL "https://github.com/HDFGroup/hdf5_plugins.git" CACHE STRING "Use plugins from HDF Group repository" FORCE)
+set (PLUGIN_GIT_BRANCH "master" CACHE STRING "" FORCE)
+```
 
 ### Step 2: Configure the Cache Settings
 
@@ -558,9 +715,48 @@ If you wish to use the Visual Studio environment, open the solution
 file in your build directory. Be sure to select either `Debug` or
 `Release` and build the solution.
 
-External libraries (zlib, szip and plugins) can be configured to allow
-building the libraries by downloading from a GIT repository or by using
-a compressed file. See the instructions in [INSTALL_Filters.md](./INSTALL_Filters.md) to do this.
+The external libraries (zlib, szip and plugins) can be configured
+to allow building the libraries by downloading from a GIT repository.
+The option is `HDF5_ALLOW_EXTERNAL_SUPPORT`; by adding the following
+configuration option: `-DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING="GIT"`.
+
+The options to control the GIT parameters (`config/cmake/cacheinit.cmake` file) are:
+
+```cmake
+ZLIB_GIT_URL:STRING="https://${git_url}/zlib"
+ZLIB_GIT_BRANCH="${git_branch}"
+SZIP_GIT_URL:STRING="https://${git_url}/szip"
+SZIP_GIT_BRANCH="${git_branch}"
+LIBAEC_GIT_URL:STRING="https://${git_url}/libaec"
+LIBAEC_GIT_BRANCH="${git_branch}"
+PLUGIN_GIT_URL:STRING="https://${git_url}/plugin"
+PLUGIN_GIT_BRANCH="${git_branch}"
+```
+
+`${git_url}` should be changed to your location and `${git_branch}` is
+your branch in the repository. Also define `CMAKE_BUILD_TYPE`
+to be the configuration type.
+
+Alternatively, the external libraries (zlib, szip and plugins) can be configured
+to allow building the libraries by using a compressed file.
+The option is `HDF5_ALLOW_EXTERNAL_SUPPORT` and is enabled by
+adding the following configuration option: `-DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"`.
+
+The options to control the TGZ URL (`config/cmake/cacheinit.cmake` file) are:
+
+```cmake
+ZLIB_TGZ_NAME:STRING="zlib_src.ext"
+LIBAEC_TGZ_NAME:STRING="libaec_src.ext"
+PLUGIN_TGZ_NAME:STRING="plugin_src.ext"
+TGZPATH:STRING="some_location"
+```
+
+where `some_location/xxxx_src.ext` is the URL or full path to
+the compressed file and where `ext` is the type of the compression
+file such as `.bz2`, `.tar`, `.tar.gz`, `.tgz`, or `.zip`. Also define
+`CMAKE_BUILD_TYPE` to be the configuration type.
+
+> **NOTE:** The file named by `LIBAEC_TGZ_NAME` is used to build SZIP.
 
 ### Step 4: Test HDF5
 
@@ -676,7 +872,38 @@ the following options must be disabled:
 <a id="section-vii"></a>
 ## VII. CMake Option Defaults for HDF5
 
-See [INSTALL_CMake_options](./INSTALL_CMake_options.md).
+The `config/cmake/cacheinit.cmake` or `CMakePresets.json` file can override the following values.
+
+### General Build Options
+
+| Option Name | Description | Default Value |
+| :--- | :--- | :--- |
+| `BUILD_SHARED_LIBS` | Build Shared Libraries | `ON` |
+| `BUILD_STATIC_LIBS` | Build Static Libraries | `ON` |
+| `BUILD_STATIC_EXECS` | Build Static Executables | `OFF` |
+| `BUILD_TESTING` | Build HDF5 Unit Testing | `ON` |
+| `HDF5_DISABLE_PDB_FILES` | Do not install PDB files (**Windows only**) | `OFF` |
+
+### HDF5 Build Options
+
+| Option Name | Description | Default Value |
+| :--- | :--- | :--- |
+| `HDF5_BUILD_CPP_LIB` | Build HDF5 C++ Library | `OFF` |
+| `HDF5_BUILD_EXAMPLES` | Build HDF5 Library Examples | `ON` |
+| `HDF5_BUILD_FORTRAN` | Build FORTRAN support | `OFF` |
+| `HDF5_BUILD_JAVA` | Build JAVA support | `OFF` |
+| `HDF5_BUILD_HL_LIB` | Build HIGH Level HDF5 Library | `ON` |
+| `HDF5_BUILD_TOOLS` | Build HDF5 Tools | `ON` |
+| `HDF5_BUILD_PARALLEL_TOOLS` | Build Parallel HDF5 Tools | `OFF` |
+| `HDF5_BUILD_STATIC_TOOLS` | Build Static Tools Not Shared Tools | `OFF` |
+
+### HDF5 Maven Integration Options
+
+| Option Name | Description | Default Value |
+| :--- | :--- | :--- |
+| `HD5_ENABLE_MAVEN_DEPLOY` | Enable Maven repository deployment| `OFF` |
+| `HDF5_MAVEN_SNAPSHOT` | Build Maven snapshot versions| `OFF` |
+| `HDF5_ENABLE_JNI` | Force JNI implementation (default: auto-detect) | `ON` |
 
 #### Java Implementation Selection (as of HDF5 2.0)
 
@@ -751,6 +978,179 @@ The HDF5 Java examples are available as a separate Maven artifact: `org.hdfgroup
 - Native library error handling validates JAR structure in Maven-only environments.
 - Fork-based testing allows validation on repository forks before canonical deployment.
 - Dynamic repository workflows adapt to any GitHub repository automatically.
+
+### HDF5 Folder Build Options
+
+Defaults relative to `$<INSTALL_PREFIX>`.
+
+| Option Name | Default Value |
+| :--- | :--- |
+| `HDF5_INSTALL_BIN_DIR` | `bin` |
+| `HDF5_INSTALL_LIB_DIR` | `lib` |
+| `HDF5_INSTALL_INCLUDE_DIR` | `include` |
+| `HDF5_INSTALL_MODULE_DIR` | `mod` |
+| `HDF5_INSTALL_CMAKE_DIR` | `cmake` |
+| `HDF5_INSTALL_DATA_DIR` | `.` when `MSVC` is true,<br/>`share` otherwise |
+| `HDF5_INSTALL_DOC_DIR` | `HDF5_INSTALL_DATA_DIR` |
+
+`HDF5_USE_GNU_DIRS=ON` means use of the GNU Coding Standard install directory variables, and `HDF5_USE_GNU_DIRS=OFF` will use historical settings. The default value is `OFF`.
+
+Defaults defined by the 'GNU Coding Standards'.
+
+| Option Name | Default Value |
+| :--- | :--- |
+| `HDF5_INSTALL_BIN_DIR` | `bin` |
+| `HDF5_INSTALL_LIB_DIR` | `lib` |
+| `HDF5_INSTALL_INCLUDE_DIR` | `include` |
+| `HDF5_INSTALL_MODULE_DIR` | `HDF5_INSTALL_INCLUDE_DIR/mod` |
+| `HDF5_INSTALL_CMAKE_DIR` | `HDF5_INSTALL_LIB_DIR/cmake` |
+| `HDF5_INSTALL_DATA_DIR` | `share` |
+| `HDF5_INSTALL_DOC_DIR` | `HDF5_INSTALL_DATA_DIR/doc/hdf5` |
+
+### HDF5 Advanced Options
+
+| Option Name | Description | Default Value |
+| :--- | :--- | :--- |
+| `HDF5_ONLY_SHARED_LIBS` | Only Build Shared Libraries | `OFF` |
+| `HDF5_ALLOW_UNSUPPORTED` | Allow unsupported combinations of configure options | `OFF` |
+| `HDF5_ENABLE_PARALLEL` | Enable parallel build (**requires MPI**) | `OFF` |
+| `HDF5_ENABLE_THREADSAFE` | Enable Threadsafety | `OFF` |
+| `HDF5_ENABLE_CONCURRENCY` | Enable multi-threaded concurrency | `OFF` |
+| `HDF5_DIMENSION_SCALES_NEW_REF` | Use new-style references with dimension scale APIs | `OFF` |
+| `HDF5_EXTERNAL_LIB_PREFIX` | Use prefix for custom library naming | `""` |
+| `HDF5_EXTERNAL_LIB_SUFFIX` | Use suffix for custom library naming | `""` |
+| `HDF5_DISABLE_COMPILER_WARNINGS` | Disable compiler warnings | `OFF` |
+| `HDF5_ENABLE_ALL_WARNINGS` | Enable all warnings | `OFF` |
+| `HDF5_SHOW_ALL_WARNINGS` | Show all warnings (i.e. not suppress "noisy" ones internally) | `OFF` |
+| `HDF5_ENABLE_COVERAGE` | Enable code coverage for Libraries and Programs | `OFF` |
+| `HDF5_ENABLE_DEBUG_APIS` | Turn on extra debug output in all packages | `OFF` |
+| `HDF5_ENABLE_DEPRECATED_SYMBOLS` | Enable deprecated public API symbols | `ON` |
+| `HDF5_ENABLE_EMBEDDED_LIBINFO` | embed library info into executables | `ON` |
+| `HDF5_ENABLE_PREADWRITE` | Use pread/pwrite in sec2/log/core VFDs in place of read/write (when available) | `ON` |
+| `HDF5_ENABLE_TRACE` | Enable API tracing capability | `OFF` |
+| `HDF5_ENABLE_USING_MEMCHECKER` | Indicate that a memory checker is used | `OFF` |
+| `HDF5_ENABLE_MAP_API` | Build the map API | `OFF` |
+| `HDF5_GENERATE_HEADERS` | Rebuild Generated Files | `OFF` |
+| `HDF5_JAVA_PACK_JRE` | Package a JRE installer directory | `OFF` |
+| `HDF5_NO_PACKAGES` | Do not include CPack Packaging | `OFF` |
+| `HDF5_PACK_EXAMPLES` | Package the HDF5 Library Examples Compressed File | `OFF` |
+| `HDF5_PACK_MACOSX_FRAMEWORK` | Package the HDF5 Library in a Frameworks | `OFF` |
+| `HDF5_BUILD_FRAMEWORKS` | TRUE to build as frameworks libraries, FALSE to build according to BUILD_SHARED_LIBS | `FALSE` |
+| `HDF5_PACKAGE_EXTLIBS` | CPACK - include external libraries | `OFF` |
+| `HDF5_STRICT_FORMAT_CHECKS` | Whether to perform strict file format checks | `OFF` |
+| `HDF5_WANT_DATA_ACCURACY` | IF data accuracy is guaranteed during data conversions | `ON` |
+| `HDF5_WANT_DCONV_EXCEPTION` | exception handling functions is checked during data conversions | `ON` |
+| `HDF5_DEFAULT_API_VERSION` | Enable default API (v16, v18, v110, v112, v114, v200) | `"v200"` |
+| `HDF5_USE_FOLDERS` | Enable folder grouping of projects in IDEs | `ON` |
+| `HDF5_MSVC_NAMING_CONVENTION` | Use MSVC Naming conventions for Shared Libraries | `OFF` |
+| `HDF5_MINGW_STATIC_GCC_LIBS` | Statically link libgcc/libstdc++ | `OFF` |
+| `HDF5_BUILD_WITH_INSTALL_NAME` | Build with library install_name set to the installation path (if `APPLE` true) | `OFF` |
+| `HDF5_ENABLE_INSTRUMENT` | Instrument the library (if `CMAKE_BUILD_TYPE MATCHES Debug`) | `OFF` |
+| `HDF5_ENABLE_ANALYZER_TOOLS` | enable the use of Clang tools | `OFF` |
+| `HDF5_ENABLE_SANITIZERS` | execute the Clang sanitizer | `OFF` |
+| `HDF5_ENABLE_FORMATTERS` | format source files | `OFF` |
+| `HDF5_BUILD_DOC` | `Build documentation` | `OFF` |
+| `HDF5_ENABLE_DOXY_WARNINGS` | Enable fail if doxygen parsing has warnings | `OFF` |
+| `HDF5_H5CC_C_COMPILER` | C compiler to use in h5cc | `${CMAKE_C_COMPILER}` |
+| `HDF5_H5CC_CXX_COMPILER` | C++ compiler to use in h5cc | `${CMAKE_CXX_COMPILER}` |
+| `HDF5_H5CC_Fortran_COMPILER` | Fortran compiler to use in h5cc | `${CMAKE_Fortran_COMPILER}` |
+
+```
+if (HDF5_BUILD_FORTRAN)
+    HDF5_INSTALL_MOD_FORTRAN "Copy FORTRAN mod files to include directory (NO SHARED STATIC)"    SHARED
+    if (BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)          default HDF5_INSTALL_MOD_FORTRAN is    SHARED
+    if (BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS)      default HDF5_INSTALL_MOD_FORTRAN is    SHARED
+    if (NOT BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)      default HDF5_INSTALL_MOD_FORTRAN is    STATIC
+    if (NOT BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS)  default HDF5_INSTALL_MOD_FORTRAN is    SHARED
+```
+
+### HDF5 VFD Options
+
+| Option Name | Description | Default Value |
+| :--- | :--- | :--- |
+| `HDF5_ENABLE_DIRECT_VFD` | Build the Direct I/O Virtual File Driver | `OFF` |
+| `HDF5_ENABLE_MIRROR_VFD` | Build the Mirror Virtual File Driver | `OFF` |
+| `HDF5_ENABLE_ROS3_VFD` | Build the ROS3 Virtual File Driver | `OFF` |
+| `HDF5_ENABLE_HDFS` | Enable HDFS | `OFF` |
+| `HDF5_ENABLE_SUBFILING_VFD` | Build Parallel HDF5 Subfiling VFD | `OFF` |
+
+### HDF5 Advanced Test Options
+
+If `BUILD_TESTING` is true:
+
+| Option Name | Description | Default Value |
+| :--- | :--- | :--- |
+| `HDF5_TEST_SERIAL` | Execute non-parallel tests | `ON` |
+| `HDF5_TEST_TOOLS` | Execute tools tests | `ON` |
+| `HDF5_TEST_EXAMPLES` | Execute tests on examples | `ON` |
+| `HDF5_TEST_SWMR` | Execute SWMR tests | `ON` |
+| `HDF5_TEST_PARALLEL` | Execute parallel tests | `ON` |
+| `HDF5_TEST_FORTRAN` | Execute fortran tests | `ON` |
+| `HDF5_TEST_CPP` | Execute cpp tests | `ON` |
+| `HDF5_TEST_JAVA` | Execute java tests | `ON` |
+| `HDF_TEST_EXPRESS` | Control testing framework (0-3) | `"3"` |
+| `HDF5_TEST_PASSTHROUGH_VOL` | Execute tests with different passthrough VOL connectors | `OFF` |
+| `HDF5_TEST_FHEAP_PASSTHROUGH_VOL` | Execute fheap test with different passthrough VOL connectors | `ON` |
+| `HDF5_TEST_VFD` | Execute tests with different VFDs | `OFF` |
+| `HDF5_TEST_FHEAP_VFD` | Execute fheap test with different VFDs | `ON` |
+| `HDF5_TEST_SHELL_SCRIPTS` | Enable shell script tests | `ON` |
+| `HDF5_DISABLE_TESTS_REGEX` | Regex pattern to set execution of specific tests to DISABLED | `""` |
+| `HDF5_USING_ANALYSIS_TOOL` | Indicate that an analysis checker is used | `ON` |
+
+
+### External Library Options
+
+| Option Name | Description | Default Value |
+| :--- | :--- | :--- |
+| `HDF5_ALLOW_EXTERNAL_SUPPORT` | Allow External Library Building (NO GIT TGZ) | `"NO"` |
+| `HDF5_ENABLE_PLUGIN_SUPPORT` | Enable PLUGIN Filters | `OFF` |
+| `HDF5_ENABLE_SZIP_SUPPORT` | Use SZip Filter | `OFF` |
+| `HDF5_MODULE_MODE_ZLIB` | Prefer module mode to find ZLIB | `ON` |
+| `HDF5_ENABLE_ZLIB_SUPPORT` | Enable Zlib Filters | `OFF` |
+| `ZLIB_USE_LOCALCONTENT` | Use local file for ZLIB FetchContent | `OFF` |
+| `HDF5_USE_ZLIB_STATIC` | Find static zlib library | `OFF` |
+| `ZLIB_USE_EXTERNAL` | Use External Library Building for ZLIB | `OFF` |
+| `ZLIB_TGZ_ORIGPATH` | Use ZLIB from original location | `"https://github.com/madler/zlib/releases/download/v1.3.1"` |
+| `ZLIB_TGZ_NAME` | Use ZLIB from original compressed file | `"zlib-1.3.1.tar.gz"` |
+| `HDF5_USE_ZLIB_NG` | Use zlib-ng library as zlib library | `OFF` |
+| `ZLIBNG_USE_EXTERNAL` | Use External Library Building for ZLIBNG | `OFF` |
+| `ZLIBNG_TGZ_ORIGPATH` | Use ZLIBNG from original location | `"https://github.com/zlib-ng/zlib-ng/releases/tag/2.2.4"` |
+| `ZLIBNG_TGZ_NAME` | Use ZLIBNG from original compressed file | `"2.2.4.tar.gz"` |
+| `SZIP_USE_EXTERNAL` | Use External Library Building for SZIP else search | `OFF` |
+| `HDF5_ENABLE_SZIP_ENCODING` | Use SZip Encoding (if `HDF5_ENABLE_SZIP_SUPPORT` set) | `ON` |
+| `LIBAEC_TGZ_ORIGPATH` | Use LIBAEC from original location | `"https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.3"` |
+| `LIBAEC_TGZ_NAME` | Use LIBAEC from original compressed file | `"libaec-1.1.3.tar.gz"` |
+| `LIBAEC_USE_LOCALCONTENT` | Use local file for LIBAEC FetchContent | `OFF` |
+| `HDF5_USE_LIBAEC_STATIC` | Find static AEC library | `OFF` |
+| `PLUGIN_USE_EXTERNAL` | `Use External Library Building for PLUGINS else search` | `OFF` |
+| `PLUGIN_TGZ_ORIGPATH` | Use PLUGIN from original location | `"https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot"` |
+| `PLUGIN_TGZ_NAME` | Use PLUGIN from original compressed file | `"hdf5_plugins-master.tar.gz"` |
+| `PLUGIN_USE_LOCALCONTENT` | Use local file for PLUGIN FetchContent | `OFF` |
+| `H5_DEFAULT_PLUGINDIR` | Default library search folder for filter plugins | `"%ALLUSERSPROFILE%/hdf5/lib/plugin"` (**Windows**)<br/>`"/usr/local/hdf5/lib/plugin"` |
+
+> **NOTE:** The `BUILD_STATIC_EXECS` ("Build Static Executables") option is only valid on some UNIX operating systems. It adds the `-static` flag to `cflags`. This flag is not available on Windows and some modern Linux systems will ignore the flag.
+
+> **NOTE:** The `HDF5_USE_GNU_DIRS` option is usually recommended for Linux platforms, but may be useful on other platforms. See the CMake documentation for more details.
+
+### Unsupported Library Options
+
+The threadsafe, C++ and Java interfaces are not compatible with the `HDF5_ENABLE_PARALLEL` option. Unless
+`HDF5_ALLOW_UNSUPPORTED` has been specified, the following options must be disabled: `HDF5_ENABLE_THREADSAFE`,
+`HDF5_BUILD_CPP_LIB`, `HDF5_BUILD_JAVA`.
+
+The high-level, C++, Fortran and Java interfaces are not compatible with the `HDF5_ENABLE_THREADSAFE` option because the
+lock is not hoisted into the higher-level API calls.  Unless `HDF5_ALLOW_UNSUPPORTED` has been specified, the following
+options must be disabled: `HDF5_BUILD_HL_LIB`, `HDF5_BUILD_CPP_LIB`, `HDF5_BUILD_FORTRAN`, `HDF5_BUILD_JAVA`.
+
+The multi-threaded concurrency and threadsafe options are mutually exclusive, only one or the other may be enabled.
+
+The multi-threaded concurrency, C++, and Java interfaces are not compatible with the `HDF5_ENABLE_PARALLEL` option. Unless
+`HDF5_ALLOW_UNSUPPORTED` has been specified, the following options must be disabled: `HDF5_ENABLE_CONCURRENCY`,
+`HDF5_BUILD_CPP_LIB`, `HDF5_BUILD_JAVA`.
+
+The high-level, C++, Fortran, and Java interfaces are not compatible with the `HDF5_ENABLE_CONCURRENCY` option because the
+lock is not hoisted into the higher-level API calls.  Unless `HDF5_ALLOW_UNSUPPORTED` has been specified, the following
+options must be disabled: `HDF5_BUILD_HL_LIB`, `HDF5_BUILD_CPP_LIB`, `HDF5_BUILD_FORTRAN`, `HDF5_BUILD_JAVA`.
 
 ---
 
