@@ -105,7 +105,7 @@ h5sign -p my_plugin.so -k my_private_key.pem -a sha512-pss
 h5sign -p my_plugin.so -k my_private_key.pem -v
 ```
 
-The tool appends the RSA signature and a 12-byte footer to the end of the
+The tool appends the RSA signature and a 10-byte footer to the end of the
 plugin file. The binary loader ignores trailing data, so the signed plugin
 loads normally on all platforms.
 
@@ -224,12 +224,11 @@ Signed plugins have this structure:
 +-----------------------------+
 |   RSA Signature (256-1024B) |
 +-----------------------------+
-|   Footer (12 bytes):        |
-|   - Magic: HDF5 (4B)       |
-|   - Signature length (4B)   |
+|   Footer (10 bytes):        |
 |   - Algorithm ID (1B)       |
+|   - Signature length (4B)   |
+|   - Magic: HDF5 (4B)       |
 |   - Format version (1B)     |
-|   - Reserved (2B)           |
 +-----------------------------+
 ```
 
@@ -265,7 +264,7 @@ A: Yes. Users only need your single public key.
 A: HDF5 refuses to load the plugin and returns an error.
 
 **Q: Does signing increase plugin size?**
-A: Minimally — 256-512 bytes for the signature plus 12 bytes for the footer.
+A: Minimally — 256-512 bytes for the signature plus 10 bytes for the footer.
 
 **Q: Are signatures platform-specific?**
 A: No. A signed plugin retains its signature across platforms (though the

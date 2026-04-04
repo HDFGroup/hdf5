@@ -19,12 +19,11 @@
  *           File format after signing:
  *             [ Plugin Binary ] [ RSA Signature ] [ Footer ]
  *
- *           Footer (12 bytes, little-endian):
- *             - Magic number 0x48444635 "HDF5" (4 bytes)
- *             - Signature length  (4 bytes)
+ *           Footer (10 bytes, little-endian):
  *             - Algorithm ID      (1 byte)
+ *             - Signature length  (4 bytes)
+ *             - Magic number 0x48444635 "HDF5" (4 bytes)
  *             - Format version    (1 byte)
- *             - Reserved          (2 bytes)
  *
  *           The plugin binary loader ignores trailing data, so signed plugins
  *           load normally on all platforms.
@@ -725,7 +724,6 @@ sign_plugin_file(const char *plugin_path, EVP_PKEY *private_key, const EVP_MD *h
         footer.signature_length = (uint32_t)sig_len;
         footer.algorithm_id     = algorithm_id;
         footer.format_version   = H5PL_SIG_FORMAT_VERSION_CURRENT;
-        footer.reserved         = 0;
         footer.magic            = H5PL_SIG_MAGIC;
         H5PL_sig_encode_footer(footer_buf, sizeof(footer_buf), &footer);
 

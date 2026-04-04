@@ -54,8 +54,8 @@ typedef enum {
     H5PL_SIG_ALGO_BLAKE3     = 0x30  /* BLAKE3 (future) */
 } H5PL_sig_algo_t;
 
-/* Signature footer on-disk size (12 bytes) */
-#define H5PL_SIG_FOOTER_SIZE 12
+/* Signature footer on-disk size (10 bytes) */
+#define H5PL_SIG_FOOTER_SIZE 10
 
 /* True when algo id selects an RSA-PSS padding variant */
 #define H5PL_SIG_ALGO_IS_PSS(id) ((id) >= H5PL_SIG_ALGO_SHA256_PSS && (id) <= H5PL_SIG_ALGO_SHA512_PSS)
@@ -71,21 +71,29 @@ typedef enum {
 
 /* Signature footer structure
  *
- * On-disk layout (12 bytes, little-endian):
- *   [magic: 4][sig_len: 4][algo_id: 1][format_ver: 1][reserved: 2]
+ * On-disk layout (10 bytes, little-endian):
+ *   [algo_id: 1][sig_len: 4][magic: 4][format_ver: 1]
  *
- * Note: Magic is encoded first so it can be verified before interpreting
- *       remaining fields.  Always decode from byte buffer using
- *       little-endian byte order.  Never read directly into this struct
- *       due to endianness portability (the on-disk format is always
- *       little-endian, but host byte order varies).
+ * Magic and version are placed at the end so they reside at a fixed
+ * offset from EOF regardless of any future footer growth.  This lets
+ * any library version locate the magic, check the version, and give
+ * a meaningful error (e.g. "unsupported version") rather than
+ * "not signed".
+ *
+ * During decoding, magic is still verified *first* — before any other
+ * field is interpreted — to avoid parsing untrusted data from an
+ * unsigned file.
+ *
+ * Always decode from byte buffer using little-endian byte order.
+ * Never read directly into this struct due to endianness portability
+ * (the on-disk format is always little-endian, but host byte order
+ * varies).
  */
 typedef struct H5PL_sig_footer_t {
     uint32_t        magic;            /* Magic number H5PL_SIG_MAGIC */
     uint32_t        signature_length; /* Length of RSA signature in bytes */
     H5PL_sig_algo_t algorithm_id;     /* Hash algorithm identifier */
     uint8_t         format_version;   /* Footer format version */
-    uint16_t        reserved;         /* Reserved for future use */
 } H5PL_sig_footer_t;
 
 /*-------------------------------------------------------------------------
@@ -94,8 +102,8 @@ typedef struct H5PL_sig_footer_t {
  * Purpose:     Encode a signature footer struct into a little-endian buffer
  *              suitable for appending to a signed plugin file.
  *
- * Note:        Requires H5encode.h for UINT32ENCODE / UINT16ENCODE.
- *              buf_size must be >= H5PL_SIG_FOOTER_SIZE (12).
+ * Note:        Requires H5encode.h for UINT32ENCODE.
+ *              buf_size must be >= H5PL_SIG_FOOTER_SIZE (10).
  *-------------------------------------------------------------------------
  */
 static inline void
@@ -106,11 +114,10 @@ H5PL_sig_encode_footer(uint8_t *buf, size_t buf_size, const H5PL_sig_footer_t *f
     assert(buf_size >= H5PL_SIG_FOOTER_SIZE);
     (void)buf_size; /* used only by assert */
 
-    UINT32ENCODE(p, footer->magic);            /* bytes 0-3  */
-    UINT32ENCODE(p, footer->signature_length); /* bytes 4-7  */
-    *p++ = (uint8_t)footer->algorithm_id;      /* byte  8    */
+    *p++ = (uint8_t)footer->algorithm_id;      /* byte  0    */
+    UINT32ENCODE(p, footer->signature_length); /* bytes 1-4  */
+    UINT32ENCODE(p, footer->magic);            /* bytes 5-8  */
     *p++ = footer->format_version;             /* byte  9    */
-    UINT16ENCODE(p, footer->reserved);         /* bytes 10-11 */
 } /* end H5PL_sig_encode_footer() */
 
 /*-------------------------------------------------------------------------
@@ -122,27 +129,35 @@ H5PL_sig_encode_footer(uint8_t *buf, size_t buf_size, const H5PL_sig_footer_t *f
  * Return:      true  — footer decoded and valid
  *              false — magic mismatch or unsupported format version
  *
- * Note:        Requires H5encode.h for UINT32DECODE / UINT16DECODE.
- *              buf_size must be >= H5PL_SIG_FOOTER_SIZE (12).
+ * Note:        Requires H5encode.h for UINT32DECODE.
+ *              buf_size must be >= H5PL_SIG_FOOTER_SIZE (10).
+ *
+ *              On-disk order is [algo_id][sig_len][magic][version], but
+ *              magic is decoded and verified first (at offset 5) to avoid
+ *              interpreting untrusted fields from an unsigned file.
  *-------------------------------------------------------------------------
  */
 static inline bool
 H5PL_sig_decode_footer(const uint8_t *buf, size_t buf_size, H5PL_sig_footer_t *footer)
 {
-    const uint8_t *p = buf;
+    const uint8_t *p;
 
     if (buf_size < H5PL_SIG_FOOTER_SIZE)
         return false;
 
-    /* Decode and verify magic first */
-    UINT32DECODE(p, footer->magic); /* bytes 0-3  */
+    /* Decode and verify magic first (at offset 5) */
+    p = buf + 5;
+    UINT32DECODE(p, footer->magic); /* bytes 5-8  */
     if (footer->magic != H5PL_SIG_MAGIC)
         return false;
 
-    UINT32DECODE(p, footer->signature_length);      /* bytes 4-7  */
-    footer->algorithm_id   = (H5PL_sig_algo_t)*p++; /* byte  8    */
+    /* Magic valid — now decode remaining fields from the beginning */
+    p = buf;
+    footer->algorithm_id = (H5PL_sig_algo_t)*p++;  /* byte  0    */
+    UINT32DECODE(p, footer->signature_length);      /* bytes 1-4  */
+    /* skip magic (already decoded above) */
+    p += 4;                                         /* bytes 5-8  */
     footer->format_version = *p++;                  /* byte  9    */
-    UINT16DECODE(p, footer->reserved);              /* bytes 10-11 */
 
     /* Verify format version.
      * Currently only version 1 exists.  When a new version is introduced,
