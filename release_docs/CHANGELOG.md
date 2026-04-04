@@ -130,6 +130,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    The direct I/O VFD attempts to determine data alignment requirements for a file on file open to try and avoid extra work when data alignment isn't required. Depending on the file access flags used when opening a file, the VFD could incorrectly determine these requirements for either writes or reads, eventually leading to a possible EINVAL return value on write or read. This has been fixed by separately determining the requirements for writes and reads and being more conservative about trying to avoid data alignment requirements.
 
+### Fixed integer overflow in array datatype element count computation
+
+   Fixed a bug in H5O__dtype_decode_helper() where the loop computing the total number of elements in an array datatype had no per-step overflow check. On 64-bit systems, large dimension sizes could cause the element count to wrap around, bypassing the post-loop overflow check and producing silently incorrect results in downstream type conversion and size calculations.
+
 ### Fixed an issue with chunked datasets using the wrong index type with parallel HDF5
 
    Fixed a bug in parallel HDF5 that would cause chunked datasets with fixed dimensions and without filters applied to use the "none" index type instead of the "fixed array" index type.
