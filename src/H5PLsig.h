@@ -152,12 +152,12 @@ H5PL_sig_decode_footer(const uint8_t *buf, size_t buf_size, H5PL_sig_footer_t *f
         return false;
 
     /* Magic valid — now decode remaining fields from the beginning */
-    p = buf;
-    footer->algorithm_id = (H5PL_sig_algo_t)*p++;  /* byte  0    */
-    UINT32DECODE(p, footer->signature_length);      /* bytes 1-4  */
+    p                    = buf;
+    footer->algorithm_id = (H5PL_sig_algo_t)*p++; /* byte  0    */
+    UINT32DECODE(p, footer->signature_length);    /* bytes 1-4  */
     /* skip magic (already decoded above) */
-    p += 4;                                         /* bytes 5-8  */
-    footer->format_version = *p++;                  /* byte  9    */
+    p += 4;                        /* bytes 5-8  */
+    footer->format_version = *p++; /* byte  9    */
 
     /* Verify format version.
      * Currently only version 1 exists.  When a new version is introduced,
