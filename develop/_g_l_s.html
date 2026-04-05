@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-04-04</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-04-05</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -139,7 +139,7 @@ $(function(){initNavTree('_g_l_s.html','',''); });
 A</h1>
 <dl>
 <dt>Array datatype </dt>
-<dd>A family of HDF5 datatypes whose elements are arrays of a fixed rank (≤ 32) and fixed finite extent. All array elements must be of the same HDF5 datatype. </dd>
+<dd>A family of HDF5 datatypes whose elements are arrays of a fixed rank (=&lt; 32) and fixed finite extent. All array elements must be of the same HDF5 datatype. </dd>
 </dl>
 <dl>
 <dt>Array variable </dt>
@@ -541,7 +541,7 @@ The encoding of a complex data item as a linear byte stream. </li>
 </dl>
 <dl>
 <dt>String datatype </dt>
-<dd></dd>
+<dd>An HDF5 datatype used to store character sequences. HDF5 supports both fixed-length and variable-length strings, as well as different character sets (ASCII and UTF-8). String datatypes are one of the ten major datatype classes and may be used for dataset elements, attributes, or object and link names. </dd>
 </dl>
 <dl>
 <dt>Super block </dt>
