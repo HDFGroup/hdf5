@@ -74,7 +74,7 @@ h5repack_init(pack_opt_t *options, int verbose, bool latest)
     options->verbose    = verbose;
     options->latest     = latest;
     options->layout_g   = H5D_LAYOUT_ERROR;
-    options->low_bound  = H5F_LIBVER_EARLIEST;
+    options->low_bound  = H5F_LIBVER_V18;
     options->high_bound = H5F_LIBVER_LATEST;
     options->fin_fapl   = H5P_DEFAULT;
     options->fout_fapl  = H5P_DEFAULT;

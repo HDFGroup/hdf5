@@ -68,7 +68,7 @@
  *                             <strong>\--low</strong> and <strong>\--high</strong>
  * \li <strong>\--low=BOUND</strong>      The low bound for library release versions to use
  *                             when creating objects in the file
- *                             (default is #H5F_LIBVER_EARLIEST)
+ *                             (default is #H5F_LIBVER_V18)
  * \li <strong>\--high=BOUND</strong>     The high bound for library release versions to use
  *                             when creating objects in the file
  *                             (default is #H5F_LIBVER_LATEST)

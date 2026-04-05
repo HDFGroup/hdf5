@@ -40,7 +40,7 @@ usage: h5repack [OPTIONS] file1 file2
                            --low and --high
    --low=BOUND             The low bound for library release versions to use
                            when creating objects in the file
-                           (default is H5F_LIBVER_EARLIEST)
+                           (default is H5F_LIBVER_V18)
    --high=BOUND            The high bound for library release versions to use
                            when creating objects in the file
                            (default is H5F_LIBVER_LATEST)

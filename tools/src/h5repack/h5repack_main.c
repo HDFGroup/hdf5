@@ -160,7 +160,7 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream,
                    "   --low=BOUND             The low bound for library release versions to use\n");
     PRINTVALSTREAM(rawoutstream, "                           when creating objects in the file\n");
-    PRINTVALSTREAM(rawoutstream, "                           (default is H5F_LIBVER_EARLIEST)\n");
+    PRINTVALSTREAM(rawoutstream, "                           (default is H5F_LIBVER_V18)\n");
     PRINTVALSTREAM(rawoutstream,
                    "   --high=BOUND            The high bound for library release versions to use\n");
     PRINTVALSTREAM(rawoutstream, "                           when creating objects in the file\n");
