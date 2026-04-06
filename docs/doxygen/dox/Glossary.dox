@@ -7,7 +7,7 @@ Navigate back: \ref index "Main"
 
 <DL>
   <DT>Array datatype</DT>
-  <DD>A family of HDF5 datatypes whose elements are arrays of a fixed rank (≤
+  <DD>A family of HDF5 datatypes whose elements are arrays of a fixed rank (=<
   32) and fixed finite extent. All array elements must be of the same HDF5
   datatype.</DD>
 </DL>
@@ -499,7 +499,11 @@ and an HDF5 path name in that file.</DD>
 
 <DL>
   <DT>String datatype</DT>
-  <DD></DD>
+  <DD>An HDF5 datatype used to store character sequences. HDF5 supports both
+  fixed-length and variable-length strings, as well as different character sets
+  (ASCII and UTF-8). String datatypes are one of the ten major datatype classes
+  and may be used for dataset elements, attributes, or object and link
+  names.</DD>
 </DL>
 
 <DL>
