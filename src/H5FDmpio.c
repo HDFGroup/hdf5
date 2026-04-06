@@ -952,11 +952,6 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
     } /* end if */
 #endif
 
-    /* DEBUG: print rank and filename to diagnose t_2Gio MPI_ERR_NO_SUCH_FILE failures */
-    fprintf(stderr, "H5FD__mpio_open: rank=%d name=\"%s\" mpi_amode=0x%x\n", mpi_rank,
-            (name ? name : "(null)"), mpi_amode);
-    fflush(stderr);
-
     if (MPI_SUCCESS != (mpi_code = MPI_File_open(comm, name, mpi_amode, info, &fh)))
         HMPI_GOTO_ERROR(NULL, "MPI_File_open failed", mpi_code)
     file_opened = true;
