@@ -208,11 +208,15 @@ jobs:
 
   # Gate job: always runs even when 'analyze' is skipped (e.g., text-only PRs).
   # Use "CodeQL / codeql-complete" as the required status check instead of "CodeQL / Analyze".
+  # When analysis is skipped, uploads an empty SARIF so the "Require code scanning
+  # results" branch protection rule is satisfied.
   codeql-complete:
     name: codeql-complete
     if: always()
     needs: [check-changes, analyze]
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
     steps:
       - name: Check analyze result
         run: |
@@ -226,8 +230,28 @@ jobs:
 
           if [ "$analyze_result" = "success" ] || [ "$analyze_result" = "skipped" ]; then
             echo "CodeQL analysis passed or was skipped (text-only change)."
-            exit 0
           else
             echo "CodeQL analysis failed with result: $analyze_result"
             exit 1
           fi
+
+      - name: Create empty SARIF file
+        if: needs.analyze.result == 'skipped'
+        run: |
+          cat <<'EOF' > "${{ github.workspace }}/empty.sarif"
+          {
+            "version": "2.1.0",
+            "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+            "runs": [{
+              "tool": { "driver": { "name": "CodeQL", "rules": [] } },
+              "results": []
+            }]
+          }
+          EOF
+
+      - name: Upload empty SARIF for skipped analysis
+        if: needs.analyze.result == 'skipped'
+        uses: github/codeql-action/upload-sarif@e34fc2711fb7964ca6850c8a8382121f34745f3b # v4.32.4
+        with:
+          sarif_file: ${{ github.workspace }}/empty.sarif
+          category: "/language:c-cpp"
