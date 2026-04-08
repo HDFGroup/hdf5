@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-04-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-04-08</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -190,7 +190,7 @@ Why Chunking ?</h3>
 <p>Writing or reading a chunked dataset is transparent to the application. You would use the same set of operations that you would use for a contiguous dataset. For example: </p><div class="fragment"><div class="line"><a class="code hl_define" href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen</a> (...);</div>
 <div class="line"><a class="code hl_function" href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d">H5Sselect_hyperslab</a> (...);</div>
 <div class="line"><a class="code hl_function" href="group___h5_d.html#ga8287d5a7be7b8e55ffeff68f7d26811c">H5Dread</a> (...);</div>
-<div class="ttc" id="a_h5version_8h_html_a7dba2e5b2045f31c0932123ffb54f7a3"><div class="ttname"><a href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen</a></div><div class="ttdeci">#define H5Dopen</div><div class="ttdef"><b>Definition</b> H5version.h:1135</div></div>
+<div class="ttc" id="a_h5version_8h_html_a7dba2e5b2045f31c0932123ffb54f7a3"><div class="ttname"><a href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen</a></div><div class="ttdeci">#define H5Dopen</div><div class="ttdef"><b>Definition</b> H5version.h:1219</div></div>
 <div class="ttc" id="agroup___h5_d_html_ga8287d5a7be7b8e55ffeff68f7d26811c"><div class="ttname"><a href="group___h5_d.html#ga8287d5a7be7b8e55ffeff68f7d26811c">H5Dread</a></div><div class="ttdeci">herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, void *buf)</div><div class="ttdoc">Reads raw data from a dataset into a provided buffer.</div></div>
 <div class="ttc" id="agroup___h5_s_html_ga6adfdf1b95dc108a65bf66e97d38536d"><div class="ttname"><a href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d">H5Sselect_hyperslab</a></div><div class="ttdeci">herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[], const hsize_t stride[], const hsize_t count[], const hsize_t block[])</div><div class="ttdoc">Selects a hyperslab region to add to the current selected region.</div></div>
 </div><!-- fragment --><h3 class="doxsection"><a class="anchor" id="susubsecLBDsetLayoutChunkProb"></a>

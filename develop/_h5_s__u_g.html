@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-04-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-04-08</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -841,7 +841,7 @@ A file with three datasets</div></div>
 <div class="line">status = <a class="code hl_function" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095">H5Rdestroy</a>(&amp;ref[0]);</div>
 <div class="line">status = <a class="code hl_function" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095">H5Rdestroy</a>(&amp;ref[1]);</div>
 <div class="ttc" id="a_h5_spublic_8h_html_a5f96eeee84b987f18470737f85af0484"><div class="ttname"><a href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a></div><div class="ttdeci">#define H5S_ALL</div><div class="ttdef"><b>Definition</b> H5Spublic.h:33</div></div>
-<div class="ttc" id="agroup___h5_d_html_ga0647ba4bbd26d5230cc07f3a5685b2cf"><div class="ttname"><a href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate</a></div><div class="ttdeci">#define H5Dcreate</div><div class="ttdef"><b>Definition</b> H5version.h:1124</div></div>
+<div class="ttc" id="agroup___h5_d_html_ga0647ba4bbd26d5230cc07f3a5685b2cf"><div class="ttname"><a href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate</a></div><div class="ttdeci">#define H5Dcreate</div><div class="ttdef"><b>Definition</b> H5version.h:1208</div></div>
 <div class="ttc" id="agroup___h5_r_html_ga026114e6c23588bf89bb473eb9e4d095"><div class="ttname"><a href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095">H5Rdestroy</a></div><div class="ttdeci">herr_t H5Rdestroy(H5R_ref_t *ref_ptr)</div><div class="ttdoc">Closes a reference.</div></div>
 <div class="ttc" id="agroup___p_d_t_s_t_d_html_gaf5cb0d5cec3d40d8b3ac27512f86895e"><div class="ttname"><a href="group___p_d_t_s_t_d.html#gaf5cb0d5cec3d40d8b3ac27512f86895e">H5T_STD_REF_DSETREG</a></div><div class="ttdeci">#define H5T_STD_REF_DSETREG</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:571</div></div>
 </div><!-- fragment --><p>When creating region references, the following rules are enforced. </p><ul>
@@ -891,7 +891,7 @@ Reading References to Regions</h3>
 <div class="line">printf(<span class="stringliteral">&quot;\n&quot;</span>);</div>
 <div class="line"> </div>
 <div class="line">status = <a class="code hl_function" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095">H5Rdestroy</a>(&amp;ref_out[0]);</div>
-<div class="ttc" id="a_h5version_8h_html_a7dba2e5b2045f31c0932123ffb54f7a3"><div class="ttname"><a href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen</a></div><div class="ttdeci">#define H5Dopen</div><div class="ttdef"><b>Definition</b> H5version.h:1135</div></div>
+<div class="ttc" id="a_h5version_8h_html_a7dba2e5b2045f31c0932123ffb54f7a3"><div class="ttname"><a href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen</a></div><div class="ttdeci">#define H5Dopen</div><div class="ttdef"><b>Definition</b> H5version.h:1219</div></div>
 <div class="ttc" id="agroup___h5_r_html_ga400154b014acd1736bae9a127f4e9a1a"><div class="ttname"><a href="group___h5_r.html#ga400154b014acd1736bae9a127f4e9a1a">H5Ropen_region</a></div><div class="ttdeci">hid_t H5Ropen_region(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id)</div><div class="ttdoc">Sets up a dataspace and selection as specified by a region reference.</div></div>
 <div class="ttc" id="agroup___h5_r_html_gaa6692bd3a5b490c8db05b90a5888d0dd"><div class="ttname"><a href="group___h5_r.html#gaa6692bd3a5b490c8db05b90a5888d0dd">H5Ropen_object</a></div><div class="ttdeci">hid_t H5Ropen_object(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id)</div><div class="ttdoc">Opens the HDF5 object referenced.</div></div>
 <div class="ttc" id="agroup___h5_s_html_ga1a44dde97206f40f366f99d9c39b6046"><div class="ttname"><a href="group___h5_s.html#ga1a44dde97206f40f366f99d9c39b6046">H5Sget_select_npoints</a></div><div class="ttdeci">hssize_t H5Sget_select_npoints(hid_t spaceid)</div><div class="ttdoc">Determines the number of elements in a dataspace selection.</div></div>
@@ -1014,7 +1014,7 @@ Deprecated Reading References to Regions</h3>
 <div class="line">}</div>
 <div class="line">printf(<span class="stringliteral">&quot;\n&quot;</span>);</div>
 <div class="ttc" id="agroup___h5_r_html_ga1702d609e85b9edd3d1e526a0276484f"><div class="ttname"><a href="group___h5_r.html#ga1702d609e85b9edd3d1e526a0276484f">H5Rget_region</a></div><div class="ttdeci">hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref)</div><div class="ttdoc">Sets up a dataspace and selection as specified by a region reference.</div></div>
-<div class="ttc" id="agroup___h5_r_html_ga5dc19b9d1833af66c5e1f819f2c05c4a"><div class="ttname"><a href="group___h5_r.html#ga5dc19b9d1833af66c5e1f819f2c05c4a">H5Rdereference</a></div><div class="ttdeci">#define H5Rdereference</div><div class="ttdef"><b>Definition</b> H5version.h:1471</div></div>
+<div class="ttc" id="agroup___h5_r_html_ga5dc19b9d1833af66c5e1f819f2c05c4a"><div class="ttname"><a href="group___h5_r.html#ga5dc19b9d1833af66c5e1f819f2c05c4a">H5Rdereference</a></div><div class="ttdeci">#define H5Rdereference</div><div class="ttdef"><b>Definition</b> H5version.h:1555</div></div>
 </div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="subsec_dataspace_funcs"></a>
 Functions</h2>
 <table class="doxtable">
