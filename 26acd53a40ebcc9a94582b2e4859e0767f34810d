@@ -1,0 +1,31 @@
+src/H5PLsig.h
+  c4223fb183dd3756 36-42,62-63,79-81,83-87,111,122-126,139,155,160-164
+tools/src/h5sign/h5sign.c
+  c4223fb183dd3756 22,25
+test/test_plugin_signature.c
+  c4223fb183dd3756 208-213
+docs/PLUGIN_SIGNATURE_README.md
+  c4223fb183dd3756 108,227,230,267
+release_docs/CHANGELOG.md
+  c4223fb183dd3756 118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.6",
+  "base_commit_sha": "26acd53a40ebcc9a94582b2e4859e0767f34810d",
+  "prompts": {
+    "c4223fb183dd3756": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ba4011fe-b4e8-42fa-aa8c-36604730e21b",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "M. Scot Breitenfeld",
+      "messages": [],
+      "total_additions": 43,
+      "total_deletions": 36,
+      "accepted_lines": 43,
+      "overriden_lines": 0
+    }
+  }
+}
