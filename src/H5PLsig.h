@@ -33,8 +33,13 @@
  *   - Simple read-from-end for verification
  */
 
-/* Magic number to identify HDF5 signed plugins */
-#define H5PL_SIG_MAGIC 0x48444635 /* "HDF5" in hex */
+/* 8-byte magic to identify HDF5 signed plugins.
+ * Modelled on the HDF5 file signature ("\211HDF\r\n\032\n") but distinct.
+ * Contains non-ASCII bytes to detect transport corruption and reduce
+ * the chance of a false positive in arbitrary binary data. */
+#define H5PL_SIG_MAGIC_LEN 8
+static const uint8_t H5PL_SIG_MAGIC[H5PL_SIG_MAGIC_LEN] = {
+    0x89, 'H', 'P', 'S', '\r', '\n', 0x1A, '\n'};
 
 /* Current signature format version.
  * If future versions change the footer layout, the decoder should be
@@ -54,8 +59,8 @@ typedef enum {
     H5PL_SIG_ALGO_BLAKE3     = 0x30  /* BLAKE3 (future) */
 } H5PL_sig_algo_t;
 
-/* Signature footer on-disk size (10 bytes) */
-#define H5PL_SIG_FOOTER_SIZE 10
+/* Signature footer on-disk size (14 bytes) */
+#define H5PL_SIG_FOOTER_SIZE 14
 
 /* True when algo id selects an RSA-PSS padding variant */
 #define H5PL_SIG_ALGO_IS_PSS(id) ((id) >= H5PL_SIG_ALGO_SHA256_PSS && (id) <= H5PL_SIG_ALGO_SHA512_PSS)
@@ -71,14 +76,15 @@ typedef enum {
 
 /* Signature footer structure
  *
- * On-disk layout (10 bytes, little-endian):
- *   [algo_id: 1][sig_len: 4][magic: 4][format_ver: 1]
+ * On-disk layout (14 bytes, little-endian where applicable):
+ *   [algo_id: 1][sig_len: 4][magic: 8][format_ver: 1]
+ *    byte 0      bytes 1-4   bytes 5-12  byte 13
  *
- * Magic and version are placed at the end so they reside at a fixed
- * offset from EOF regardless of any future footer growth.  This lets
- * any library version locate the magic, check the version, and give
- * a meaningful error (e.g. "unsupported version") rather than
- * "not signed".
+ * Magic (8 bytes) and version (1 byte) are placed at the end so they
+ * reside at a fixed offset from EOF regardless of any future footer
+ * growth.  This lets any library version locate the magic, check the
+ * version, and give a meaningful error (e.g. "unsupported version")
+ * rather than "not signed".
  *
  * During decoding, magic is still verified *first* — before any other
  * field is interpreted — to avoid parsing untrusted data from an
@@ -90,7 +96,6 @@ typedef enum {
  * varies).
  */
 typedef struct H5PL_sig_footer_t {
-    uint32_t        magic;            /* Magic number H5PL_SIG_MAGIC */
     uint32_t        signature_length; /* Length of RSA signature in bytes */
     H5PL_sig_algo_t algorithm_id;     /* Hash algorithm identifier */
     uint8_t         format_version;   /* Footer format version */
@@ -103,7 +108,7 @@ typedef struct H5PL_sig_footer_t {
  *              suitable for appending to a signed plugin file.
  *
  * Note:        Requires H5encode.h for UINT32ENCODE.
- *              buf_size must be >= H5PL_SIG_FOOTER_SIZE (10).
+ *              buf_size must be >= H5PL_SIG_FOOTER_SIZE (14).
  *-------------------------------------------------------------------------
  */
 static inline void
@@ -114,10 +119,11 @@ H5PL_sig_encode_footer(uint8_t *buf, size_t buf_size, const H5PL_sig_footer_t *f
     assert(buf_size >= H5PL_SIG_FOOTER_SIZE);
     (void)buf_size; /* used only by assert */
 
-    *p++ = (uint8_t)footer->algorithm_id;      /* byte  0    */
-    UINT32ENCODE(p, footer->signature_length); /* bytes 1-4  */
-    UINT32ENCODE(p, footer->magic);            /* bytes 5-8  */
-    *p++ = footer->format_version;             /* byte  9    */
+    *p++ = (uint8_t)footer->algorithm_id;      /* byte  0      */
+    UINT32ENCODE(p, footer->signature_length); /* bytes 1-4    */
+    memcpy(p, H5PL_SIG_MAGIC, H5PL_SIG_MAGIC_LEN); /* bytes 5-12 */
+    p += H5PL_SIG_MAGIC_LEN;
+    *p++ = footer->format_version;             /* byte  13     */
 } /* end H5PL_sig_encode_footer() */
 
 /*-------------------------------------------------------------------------
@@ -130,7 +136,7 @@ H5PL_sig_encode_footer(uint8_t *buf, size_t buf_size, const H5PL_sig_footer_t *f
  *              false — magic mismatch or unsupported format version
  *
  * Note:        Requires H5encode.h for UINT32DECODE.
- *              buf_size must be >= H5PL_SIG_FOOTER_SIZE (10).
+ *              buf_size must be >= H5PL_SIG_FOOTER_SIZE (14).
  *
  *              On-disk order is [algo_id][sig_len][magic][version], but
  *              magic is decoded and verified first (at offset 5) to avoid
@@ -146,18 +152,16 @@ H5PL_sig_decode_footer(const uint8_t *buf, size_t buf_size, H5PL_sig_footer_t *f
         return false;
 
     /* Decode and verify magic first (at offset 5) */
-    p = buf + 5;
-    UINT32DECODE(p, footer->magic); /* bytes 5-8  */
-    if (footer->magic != H5PL_SIG_MAGIC)
+    if (memcmp(buf + 5, H5PL_SIG_MAGIC, H5PL_SIG_MAGIC_LEN) != 0)
         return false;
 
     /* Magic valid — now decode remaining fields from the beginning */
     p                    = buf;
-    footer->algorithm_id = (H5PL_sig_algo_t)*p++; /* byte  0    */
-    UINT32DECODE(p, footer->signature_length);    /* bytes 1-4  */
-    /* skip magic (already decoded above) */
-    p += 4;                        /* bytes 5-8  */
-    footer->format_version = *p++; /* byte  9    */
+    footer->algorithm_id = (H5PL_sig_algo_t)*p++; /* byte  0      */
+    UINT32DECODE(p, footer->signature_length);    /* bytes 1-4    */
+    /* skip magic (already verified above) */
+    p += H5PL_SIG_MAGIC_LEN;                     /* bytes 5-12   */
+    footer->format_version = *p++;                /* byte  13     */
 
     /* Verify format version.
      * Currently only version 1 exists.  When a new version is introduced,

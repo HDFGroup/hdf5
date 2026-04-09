@@ -158,7 +158,6 @@ append_bad_signature(const char *plugin_path)
     footer.signature_length = sizeof(bad_signature);
     footer.algorithm_id     = H5PL_SIG_ALGO_SHA256;
     footer.format_version   = 1;
-    footer.magic            = H5PL_SIG_MAGIC;
 
     /* Encode footer in little-endian (as expected by verification code) */
     {
@@ -201,12 +200,17 @@ append_corrupt_footer(const char *plugin_path)
     {
         H5PL_sig_footer_t footer;
 
-        footer.magic            = 0xDEADBEEF; /* Wrong magic */
         footer.signature_length = 256;
         footer.algorithm_id     = H5PL_SIG_ALGO_SHA256;
         footer.format_version   = 1;
 
         H5PL_sig_encode_footer(footer_bytes, sizeof(footer_bytes), &footer);
+
+        /* Corrupt the magic bytes (at offset 5) */
+        footer_bytes[5] = 0xDE;
+        footer_bytes[6] = 0xAD;
+        footer_bytes[7] = 0xBE;
+        footer_bytes[8] = 0xEF;
     }
 
     if (HDwrite(fd, footer_bytes, sizeof(footer_bytes)) < 0) {

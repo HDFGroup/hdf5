@@ -115,7 +115,7 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ### Added `h5sign` tool for signing plugins with RSA digital signatures
 
-   The `h5sign` command-line tool signs HDF5 plugin shared libraries by appending an RSA signature and a 10-byte footer. It supports SHA-256, SHA-384, SHA-512, and their PSS variants, and accepts passphrase-protected private keys. Use `-f` / `--force` to strip an existing signature before re-signing. The tool is built automatically when `HDF5_REQUIRE_SIGNED_PLUGINS` is enabled.
+   The `h5sign` command-line tool signs HDF5 plugin shared libraries by appending an RSA signature and a 14-byte footer. It supports SHA-256, SHA-384, SHA-512, and their PSS variants, and accepts passphrase-protected private keys. Use `-f` / `--force` to strip an existing signature before re-signing. The tool is built automatically when `HDF5_REQUIRE_SIGNED_PLUGINS` is enabled.
 
 ## High-Level APIs
 
