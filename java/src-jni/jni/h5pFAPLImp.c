@@ -93,17 +93,18 @@ done:
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pset_fapl_core
- * Signature: (JJZ)I
+ * Signature: (JJJZ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1fapl_1core(JNIEnv *env, jclass clss, jlong fapl_id, jlong increment,
-                                       jboolean backing_store)
+Java_hdf_hdf5lib_H5_H5Pset_1fapl_1core(JNIEnv *env, jclass clss, jlong fapl_id, jlong initial_size,
+                                       jlong increment, jboolean backing_store)
 {
     herr_t retVal = FAIL;
 
     UNUSED(clss);
 
-    if ((retVal = H5Pset_fapl_core((hid_t)fapl_id, (size_t)increment, (bool)backing_store)) < 0)
+    if ((retVal = H5Pset_fapl_core((hid_t)fapl_id, (size_t)initial_size, (size_t)increment,
+                                   (bool)backing_store)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -113,39 +114,48 @@ done:
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pget_fapl_core
- * Signature: (J[J[Z)I
+ * Signature: (J[J[J[Z)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1fapl_1core(JNIEnv *env, jclass clss, jlong fapl_id, jlongArray increment,
-                                       jbooleanArray backing_store)
+Java_hdf_hdf5lib_H5_H5Pget_1fapl_1core(JNIEnv *env, jclass clss, jlong fapl_id, jlongArray initial_size,
+                                       jlongArray increment, jbooleanArray backing_store)
 {
     jboolean  isCopy;
+    jlong    *initialArray = NULL;
     jboolean *backArray = NULL;
-    jlong    *incArray  = NULL;
-    herr_t    status    = FAIL;
+    jlong    *incArray     = NULL;
+    herr_t    status       = FAIL;
 
     UNUSED(clss);
 
+    if (NULL == initial_size)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pget_fapl_core: initial_size is NULL");
     if (NULL == increment)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pget_fapl_core: increment is NULL");
     if (NULL == backing_store)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pget_fapl_core: backing_store is NULL");
 
+    PIN_LONG_ARRAY(ENVONLY, initial_size, initialArray, &isCopy, "H5Pget_fapl_core: initialArray not pinned");
     PIN_LONG_ARRAY(ENVONLY, increment, incArray, &isCopy, "H5Pget_fapl_core: incArray not pinned");
     PIN_BOOL_ARRAY(ENVONLY, backing_store, backArray, &isCopy, "H5Pget_fapl_core: backArray not pinned");
 
     {
         /* Direct cast (size_t *)variable fails on 32-bit environment */
-        long long inc_temp = *incArray;
-        size_t    inc_t    = (size_t)inc_temp;
+        long long init_temp = *initialArray;
+        long long inc_temp  = *incArray;
+        size_t    init_t    = (size_t)init_temp;
+        size_t    inc_t     = (size_t)inc_temp;
 
-        if ((status = H5Pget_fapl_core((hid_t)fapl_id, &inc_t, (bool *)backArray)) < 0)
+        if ((status = H5Pget_fapl_core((hid_t)fapl_id, &init_t, &inc_t, (bool *)backArray)) < 0)
             H5_LIBRARY_ERROR(ENVONLY);
 
+        *initialArray = (jlong)init_t;
         *incArray = (jlong)inc_t;
     }
 
 done:
+    if (initialArray)
+        UNPIN_LONG_ARRAY(ENVONLY, initial_size, initialArray, (status < 0) ? JNI_ABORT : 0);
     if (backArray)
         UNPIN_BOOL_ARRAY(ENVONLY, backing_store, backArray, (status < 0) ? JNI_ABORT : 0);
     if (incArray)

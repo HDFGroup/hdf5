@@ -859,6 +859,7 @@ h5pget_alignment_c(hid_t_f *prp_id, hsize_t_f *threshold, hsize_t_f *alignment)
  *  to use malloc() and free()
  * INPUTS
  *  prp_id - property list identifier
+ *  initial_size - Initial size of the backing memory buffer in bytes
  *  increment - File block size in bytes
  *  flag - Boolean flag indicating whether to write the
  *  file contents to disk when the file is closed.
@@ -867,14 +868,16 @@ h5pget_alignment_c(hid_t_f *prp_id, hsize_t_f *threshold, hsize_t_f *alignment)
  * SOURCE
  */
 int_f
-h5pset_fapl_core_c(hid_t_f *prp_id, size_t_f *increment, int_f *flag)
+h5pset_fapl_core_c(hid_t_f *prp_id, size_t_f *initial_size, size_t_f *increment, int_f *flag)
 /******/
 {
     int    ret_value = -1;
     hid_t  c_prp_id;
     herr_t ret = -1;
+    size_t c_initial_size;
     size_t c_increment;
     bool   c_backing_store;
+    c_initial_size = (size_t)*initial_size;
     c_increment     = (size_t)*increment;
     c_backing_store = (bool)*flag;
 
@@ -882,7 +885,7 @@ h5pset_fapl_core_c(hid_t_f *prp_id, size_t_f *increment, int_f *flag)
      * Call H5Pset_fapl_core function.
      */
     c_prp_id = (hid_t)*prp_id;
-    ret      = H5Pset_fapl_core(c_prp_id, c_increment, c_backing_store);
+    ret      = H5Pset_fapl_core(c_prp_id, c_initial_size, c_increment, c_backing_store);
     if (ret < 0)
         return ret_value;
     ret_value = 0;
@@ -897,28 +900,31 @@ h5pset_fapl_core_c(hid_t_f *prp_id, size_t_f *increment, int_f *flag)
  *  property list is set to the core drive
  * INPUTS
  *  prp_id - property list identifier
+ *  Outputs      initial_size - Initial size of the backing memory buffer in bytes
  *  Outputs      increment - File block size in bytes
  * RETURNS
  *  0 on success, -1 on failure
  * SOURCE
  */
 int_f
-h5pget_fapl_core_c(hid_t_f *prp_id, size_t_f *increment, int_f *flag)
+h5pget_fapl_core_c(hid_t_f *prp_id, size_t_f *initial_size, size_t_f *increment, int_f *flag)
 /******/
 {
     int    ret_value = -1;
     hid_t  c_prp_id;
-    herr_t ret         = -1;
-    size_t c_increment = 0;
+    herr_t ret            = -1;
+    size_t c_initial_size = 0;
+    size_t c_increment    = 0;
     bool   c_backing_store;
     *flag = 0;
     /*
      * Call H5Pset_fapl_core function.
      */
     c_prp_id = (hid_t)*prp_id;
-    ret      = H5Pget_fapl_core(c_prp_id, &c_increment, &c_backing_store);
+    ret      = H5Pget_fapl_core(c_prp_id, &c_initial_size, &c_increment, &c_backing_store);
     if (ret < 0)
         return ret_value;
+    *initial_size = (size_t_f)c_initial_size;
     *increment = (size_t_f)c_increment;
     if (c_backing_store > 0)
         *flag = 1;

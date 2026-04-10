@@ -39,16 +39,18 @@ typedef struct H5FD_core_region_t {
 } H5FD_core_region_t;
 
 /* The description of a file belonging to this driver. The 'eoa' and 'eof'
- * determine the amount of hdf5 address space in use and the high-water mark
- * of the file (the current size of the underlying memory).
+ * determine the amount of hdf5 address space in use and the visible end of
+ * the file, while 'alloc_size' tracks the size of the reserved memory buffer.
  */
 typedef struct H5FD_core_t {
     H5FD_t         pub;              /* public stuff, must be first          */
     char          *name;             /* for equivalence testing              */
     unsigned char *mem;              /* the underlying memory                */
     haddr_t        eoa;              /* end of allocated region              */
-    haddr_t        eof;              /* current allocated size               */
+    haddr_t        eof;              /* current visible file size            */
+    size_t         alloc_size;       /* current allocated buffer size        */
     size_t         increment;        /* multiples for mem allocation         */
+    size_t         initial_size;     /* initial allocation size              */
     bool           backing_store;    /* write to file name on flush          */
     bool           write_tracking;   /* Whether to track writes              */
     size_t         bstore_page_size; /* backing store page size              */
@@ -90,6 +92,7 @@ typedef struct H5FD_core_t {
 /* Driver-specific file access properties */
 typedef struct H5FD_core_fapl_t {
     size_t increment;      /* how much to grow memory */
+    size_t initial_size;   /* size of initial memory allocation */
     bool   backing_store;  /* write to file name on flush */
     bool   write_tracking; /* Whether to track writes */
     size_t page_size;      /* Page size for tracked writes */
@@ -189,8 +192,8 @@ static const H5FD_class_t H5FD_core_g = {
 
 /* Default configurations, if none provided */
 static const H5FD_core_fapl_t H5FD_core_default_config_g = {
-    (size_t)H5_MB, true, H5FD_CORE_WRITE_TRACKING_FLAG, H5FD_CORE_WRITE_TRACKING_PAGE_SIZE};
-static const H5FD_core_fapl_t H5FD_core_default_paged_config_g = {(size_t)H5_MB, true, true, (size_t)4096};
+    (size_t)H5_MB, 0, true, H5FD_CORE_WRITE_TRACKING_FLAG, H5FD_CORE_WRITE_TRACKING_PAGE_SIZE};
+static const H5FD_core_fapl_t H5FD_core_default_paged_config_g = {(size_t)H5_MB, 0, true, true, (size_t)4096};
 
 /* Define a free list to manage the region type */
 H5FL_DEFINE(H5FD_core_region_t);
@@ -519,6 +522,7 @@ H5Pset_core_write_tracking(hid_t plist_id, bool is_enabled, size_t page_size)
     /* Set VFD info values */
     memset(&fa, 0, sizeof(H5FD_core_fapl_t));
     fa.increment      = old_fa->increment;
+    fa.initial_size   = old_fa->initial_size;
     fa.backing_store  = old_fa->backing_store;
     fa.write_tracking = is_enabled;
     fa.page_size      = page_size;
@@ -569,21 +573,24 @@ done:
 } /* end H5Pget_core_write_tracking() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5Pset_fapl_core
+ * Function:    H5Pset_fapl_core2
  *
  * Purpose:     Modify the file access property list to use the H5FD_CORE
- *              driver defined in this source file.  The INCREMENT specifies
- *              how much to grow the memory each time we need more.
+ *              driver defined in this source file.  INITIAL_SIZE specifies
+ *              the size of the initial memory buffer (0 = lazy allocation).
+ *              INCREMENT specifies how much to grow the memory each time
+ *              more is needed (0 = use the compiled-in default).
  *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_fapl_core(hid_t fapl_id, size_t increment, bool backing_store)
+H5Pset_fapl_core2(hid_t fapl_id, size_t initial_size, size_t increment, bool backing_store)
 {
     H5P_genplist_t  *plist;               /* Property list pointer */
     H5FD_core_fapl_t fa;                  /* Core VFD info */
+    size_t           eff_increment;       /* Effective increment */
     herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -592,9 +599,14 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment, bool backing_store)
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
+    eff_increment = (increment > 0) ? increment : H5FD_CORE_INCREMENT;
+    if (initial_size > 0 && initial_size < eff_increment)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "initial_size must be zero or at least increment");
+
     /* Set VFD info values */
     memset(&fa, 0, sizeof(H5FD_core_fapl_t));
     fa.increment      = increment;
+    fa.initial_size   = initial_size;
     fa.backing_store  = backing_store;
     fa.write_tracking = H5FD_CORE_WRITE_TRACKING_FLAG;
     fa.page_size      = H5FD_CORE_WRITE_TRACKING_PAGE_SIZE;
@@ -605,19 +617,46 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment, bool backing_store)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_fapl_core() */
+} /* end H5Pset_fapl_core2() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5Pget_fapl_core
+ * Function:    H5Pset_fapl_core1 (deprecated)
  *
- * Purpose:     Queries properties set by the H5Pset_fapl_core() function.
+ * Purpose:     Deprecated wrapper for H5Pset_fapl_core2().  Calls v2 with
+ *              initial_size=0 (lazy allocation) to preserve the pre-2.0
+ *              behavior.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+herr_t
+H5Pset_fapl_core1(hid_t fapl_id, size_t increment, bool backing_store)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    ret_value = H5Pset_fapl_core2(fapl_id, 0, increment, backing_store);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_fapl_core1() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_fapl_core2
+ *
+ * Purpose:     Queries properties set by the H5Pset_fapl_core2() function.
  *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_fapl_core(hid_t fapl_id, size_t *increment /*out*/, bool *backing_store /*out*/)
+H5Pget_fapl_core2(hid_t fapl_id, size_t *initial_size /*out*/, size_t *increment /*out*/,
+                  bool *backing_store /*out*/)
 {
     H5P_genplist_t         *plist;               /* Property list pointer */
     const H5FD_core_fapl_t *fa;                  /* Core VFD info */
@@ -632,6 +671,8 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment /*out*/, bool *backing_store /
     if (NULL == (fa = (const H5FD_core_fapl_t *)H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
 
+    if (initial_size)
+        *initial_size = fa->initial_size;
     if (increment)
         *increment = fa->increment;
     if (backing_store)
@@ -639,7 +680,32 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment /*out*/, bool *backing_store /
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_fapl_core() */
+} /* end H5Pget_fapl_core2() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_fapl_core1 (deprecated)
+ *
+ * Purpose:     Deprecated wrapper for H5Pget_fapl_core2().  Omits the
+ *              initial_size output parameter that was added in v2.0.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+herr_t
+H5Pget_fapl_core1(hid_t fapl_id, size_t *increment /*out*/, bool *backing_store /*out*/)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    ret_value = H5Pget_fapl_core2(fapl_id, NULL, increment, backing_store);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_fapl_core1() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__core_fapl_get
@@ -664,6 +730,7 @@ H5FD__core_fapl_get(H5FD_t *_file)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     fa->increment      = file->increment;
+    fa->initial_size   = file->initial_size;
     fa->backing_store  = (bool)(file->fd >= 0);
     fa->write_tracking = file->write_tracking;
     fa->page_size      = file->bstore_page_size;
@@ -774,7 +841,8 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
      * default value. But if the file access property list was zero then use
      * the default value instead.
      */
-    file->increment = (fa->increment > 0) ? fa->increment : H5FD_CORE_INCREMENT;
+    file->increment    = (fa->increment > 0) ? fa->increment : H5FD_CORE_INCREMENT;
+    file->initial_size = fa->initial_size;
 
     /* If save data in backing store. */
     file->backing_store = fa->backing_store;
@@ -811,24 +879,30 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
 #endif /* H5_HAVE_WIN32_API */
     }  /* end if */
 
-    /* If an existing file is opened, load the whole file into memory. */
-    if (!(H5F_ACC_CREAT & flags)) {
-        size_t size;
+    {
+        size_t source_size = 0;
+        size_t alloc_size  = 0;
 
-        /* Retrieve file size */
-        if (file_image_info.buffer && file_image_info.size > 0)
-            size = file_image_info.size;
-        else
-            size = (size_t)sb.st_size;
+        if (!(H5F_ACC_CREAT & flags)) {
+            /* Retrieve file size */
+            if (file_image_info.buffer && file_image_info.size > 0)
+                source_size = file_image_info.size;
+            else
+                source_size = (size_t)sb.st_size;
+        } /* end if */
+
+        alloc_size = source_size;
+        if (alloc_size < file->initial_size)
+            alloc_size = file->initial_size;
 
         /* Check if we should allocate the memory buffer and read in existing data */
-        if (size) {
+        if (alloc_size) {
             /* Allocate memory for the file's data, using the file image callback if available. */
             if (file->fi_callbacks.image_malloc) {
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(NULL)
                     {
-                        file->mem = file->fi_callbacks.image_malloc(size, H5FD_FILE_IMAGE_OP_FILE_OPEN,
+                        file->mem = file->fi_callbacks.image_malloc(alloc_size, H5FD_FILE_IMAGE_OP_FILE_OPEN,
                                                                     file->fi_callbacks.udata);
                     }
                 H5_AFTER_USER_CB(NULL)
@@ -836,22 +910,23 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                     HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "image malloc callback failed");
             } /* end if */
             else {
-                if (NULL == (file->mem = H5MM_malloc(size)))
+                if (NULL == (file->mem = H5MM_malloc(alloc_size)))
                     HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate memory block");
             } /* end else */
 
             /* Set up data structures */
-            file->eof = size;
+            file->alloc_size = alloc_size;
+            H5_CHECKED_ASSIGN(file->eof, haddr_t, source_size, size_t);
 
             /* If there is an initial file image, copy it, using the callback if possible */
-            if (file_image_info.buffer && file_image_info.size > 0) {
+            if (file_image_info.buffer && source_size > 0) {
                 if (file->fi_callbacks.image_memcpy) {
                     void *tmp;
 
                     /* Prepare & restore library for user callback */
                     H5_BEFORE_USER_CB(NULL)
                         {
-                            tmp = file->fi_callbacks.image_memcpy(file->mem, file_image_info.buffer, size,
+                            tmp = file->fi_callbacks.image_memcpy(file->mem, file_image_info.buffer, source_size,
                                                                   H5FD_FILE_IMAGE_OP_FILE_OPEN,
                                                                   file->fi_callbacks.udata);
                         }
@@ -860,28 +935,28 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                         HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL, "image_memcpy callback failed");
                 } /* end if */
                 else
-                    H5MM_memcpy(file->mem, file_image_info.buffer, size);
+                    H5MM_memcpy(file->mem, file_image_info.buffer, source_size);
             } /* end if */
             /* Read in existing data from the file if there is no image */
-            else {
+            else if (source_size > 0) {
                 /* Read in existing data, being careful of interrupted system calls,
                  * partial results, and the end of the file.
                  */
+                size_t   bytes_left = source_size;
+                uint8_t *mem        = file->mem; /* memory pointer for writes */
+                HDoff_t  offset     = 0;         /* offset for reading */
 
-                uint8_t *mem    = file->mem; /* memory pointer for writes */
-                HDoff_t  offset = 0;         /* offset for reading */
-
-                while (size > 0) {
+                while (bytes_left > 0) {
                     h5_posix_io_t     bytes_in   = 0;  /* # of bytes to read       */
                     h5_posix_io_ret_t bytes_read = -1; /* # of bytes actually read */
 
                     /* Trying to read more bytes than the return type can handle is
                      * undefined behavior in POSIX.
                      */
-                    if (size > H5_POSIX_MAX_IO_BYTES)
+                    if (bytes_left > H5_POSIX_MAX_IO_BYTES)
                         bytes_in = H5_POSIX_MAX_IO_BYTES;
                     else
-                        bytes_in = (h5_posix_io_t)size;
+                        bytes_in = (h5_posix_io_t)bytes_left;
 
                     do {
 #ifdef H5_HAVE_PREADWRITE
@@ -906,19 +981,22 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                             "error message = '%s', file->mem = %p, total read size = %llu, bytes this "
                             "sub-read = %llu, bytes actually read = %llu, offset = %llu",
                             time_str, file->name, file->fd, myerrno, strerror(myerrno), (void *)file->mem,
-                            (unsigned long long)size, (unsigned long long)bytes_in,
+                            (unsigned long long)bytes_left, (unsigned long long)bytes_in,
                             (unsigned long long)bytes_read, (unsigned long long)offset);
                     } /* end if */
 
                     assert(bytes_read >= 0);
-                    assert((size_t)bytes_read <= size);
+                    assert((size_t)bytes_read <= bytes_left);
 
                     mem += bytes_read;
-                    size -= (size_t)bytes_read;
+                    bytes_left -= (size_t)bytes_read;
                 } /* end while */
-            }     /* end else */
-        }         /* end if */
-    }             /* end if */
+            }     /* end else if */
+
+            if (alloc_size > source_size)
+                memset(file->mem + source_size, 0, alloc_size - source_size);
+        } /* end if */
+    }     /* end scope */
 
     /* Get the write tracking & page size */
     file->write_tracking   = fa->write_tracking;
@@ -1179,13 +1257,19 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__core_get_eof
  *
- * Purpose:     Returns the end-of-file marker, which is the greater of
- *              either the size of the underlying memory or the HDF5
- *              end-of-address markers.
+ * Purpose:     Returns the end-of-file marker.
+ *
+ *              file->eof tracks the high-water mark of bytes actually
+ *              written into the buffer.  file->eoa is the end of the
+ *              HDF5 address space (space the library has reserved but may
+ *              not have written yet).  Because alloc_size is now separate
+ *              from eof, a freshly-created file has eof==0 even though
+ *              eoa may already be non-zero; we therefore return the
+ *              greater of the two so callers always see at least the
+ *              allocated address space.
  *
  * Return:      End of file address, the first address past
- *              the end of the "file", either the memory
- *              or the HDF5 file. (Can't fail)
+ *              the end of the "file". (Can't fail)
  *
  *-------------------------------------------------------------------------
  */
@@ -1196,7 +1280,7 @@ H5FD__core_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    FUNC_LEAVE_NOAPI(file->eof)
+    FUNC_LEAVE_NOAPI(MAX(file->eof, file->eoa))
 } /* end H5FD__core_get_eof() */
 
 /*-------------------------------------------------------------------------
@@ -1329,6 +1413,7 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
                  size_t size, const void *buf)
 {
     H5FD_core_t *file      = (H5FD_core_t *)_file;
+    haddr_t      end_addr  = 0;       /* End of written region */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1340,51 +1425,65 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
     if (CORE_REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
 
+    end_addr = addr + size;
+
     /*
      * Allocate more memory if necessary, careful of overflow. Also, if the
      * allocation fails then the file should remain in a usable state.  Be
      * careful of non-Posix realloc() that doesn't understand what to do when
      * the first argument is null.
      */
-    if (addr + size > file->eof) {
+    if (end_addr > (haddr_t)file->alloc_size) {
         unsigned char *x;
-        size_t         new_eof;
+        size_t         new_alloc_size;
+        size_t         old_alloc_size = file->alloc_size;
+
+        /* alloc_size >= initial_size is maintained by open and truncate */
+        assert(file->alloc_size >= file->initial_size);
 
         /* Determine new size of memory buffer */
-        H5_CHECKED_ASSIGN(new_eof, size_t, file->increment * ((addr + size) / file->increment), hsize_t);
-        if ((addr + size) % file->increment)
-            new_eof += file->increment;
+        H5_CHECKED_ASSIGN(new_alloc_size, size_t, file->increment * (end_addr / file->increment), hsize_t);
+        if (end_addr % file->increment)
+            new_alloc_size += file->increment;
 
         /* (Re)allocate memory for the file buffer, using callbacks if available */
         if (file->fi_callbacks.image_realloc) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
                 {
-                    x = file->fi_callbacks.image_realloc(file->mem, new_eof, H5FD_FILE_IMAGE_OP_FILE_RESIZE,
+                    x = file->fi_callbacks.image_realloc(file->mem, new_alloc_size, H5FD_FILE_IMAGE_OP_FILE_RESIZE,
                                                          file->fi_callbacks.udata);
                 }
             H5_AFTER_USER_CB(FAIL)
             if (NULL == x)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL,
                             "unable to allocate memory block of %llu bytes with callback",
-                            (unsigned long long)new_eof);
+                            (unsigned long long)new_alloc_size);
         } /* end if */
         else {
-            if (NULL == (x = H5MM_realloc(file->mem, new_eof)))
+            if (NULL == (x = H5MM_realloc(file->mem, new_alloc_size)))
                 HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate memory block of %llu bytes",
-                            (unsigned long long)new_eof);
+                            (unsigned long long)new_alloc_size);
         } /* end else */
 
-        memset(x + file->eof, 0, (size_t)(new_eof - file->eof));
+        if (old_alloc_size < new_alloc_size)
+            memset(x + old_alloc_size, 0, new_alloc_size - old_alloc_size);
         file->mem = x;
+        file->alloc_size = new_alloc_size;
+    } /* end if */
 
-        file->eof = new_eof;
+    /* If the write leaves a gap, make the hole read back as zero */
+    if (addr > file->eof) {
+        size_t gap_size = 0;
+
+        H5_CHECKED_ASSIGN(gap_size, size_t, addr - file->eof, haddr_t);
+        memset(file->mem + file->eof, 0, gap_size);
     } /* end if */
 
     /* Add the buffer region to the dirty list if using that optimization */
     if (file->dirty_list) {
         haddr_t start = addr;
-        haddr_t end   = addr + (haddr_t)size - 1;
+        haddr_t end   = end_addr - 1;
 
         if (H5FD__core_add_dirty_region(file, start, end) != SUCCEED)
             HGOTO_ERROR(
@@ -1395,6 +1494,9 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
 
     /* Write from BUF to memory */
     H5MM_memcpy(file->mem + addr, buf, size);
+
+    if (file->eof < end_addr)
+        file->eof = end_addr;
 
     /* Mark memory buffer as modified */
     file->dirty = true;
@@ -1497,7 +1599,7 @@ static herr_t
 H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
 {
     H5FD_core_t *file = (H5FD_core_t *)_file;
-    size_t       new_eof;             /* New size of memory buffer */
+    size_t       new_alloc_size;      /* New size of memory buffer */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1506,18 +1608,21 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
 
     /* if we are closing and not using backing store, do nothing */
     if (!closing || file->backing_store) {
-        if (closing) /* set eof to eoa */
-            new_eof = file->eoa;
+        if (closing) /* shrink buffer to eoa (the actual file data size) */
+            H5_CHECKED_ASSIGN(new_alloc_size, size_t, file->eoa, haddr_t);
         else { /* set eof to smallest multiple of increment that exceeds eoa */
             /* Determine new size of memory buffer */
-            H5_CHECKED_ASSIGN(new_eof, size_t, file->increment * (file->eoa / file->increment), hsize_t);
+            H5_CHECKED_ASSIGN(new_alloc_size, size_t, file->increment * (file->eoa / file->increment), hsize_t);
             if (file->eoa % file->increment)
-                new_eof += file->increment;
+                new_alloc_size += file->increment;
+            if (new_alloc_size < file->initial_size)
+                new_alloc_size = file->initial_size;
         } /* end else */
 
         /* Extend the file to make sure it's large enough */
-        if (!H5_addr_eq(file->eof, (haddr_t)new_eof)) {
+        if (file->alloc_size != new_alloc_size) {
             unsigned char *x; /* Pointer to new buffer for file data */
+            size_t         old_alloc_size = file->alloc_size;
 
             /* (Re)allocate memory for the file buffer, using callback if available */
             if (file->fi_callbacks.image_realloc) {
@@ -1525,7 +1630,7 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
                 H5_BEFORE_USER_CB(FAIL)
                     {
                         x = file->fi_callbacks.image_realloc(
-                            file->mem, new_eof, H5FD_FILE_IMAGE_OP_FILE_RESIZE, file->fi_callbacks.udata);
+                            file->mem, new_alloc_size, H5FD_FILE_IMAGE_OP_FILE_RESIZE, file->fi_callbacks.udata);
                     }
                 H5_AFTER_USER_CB(FAIL)
                 if (NULL == x)
@@ -1533,15 +1638,16 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
                                 "unable to allocate memory block with callback");
             } /* end if */
             else {
-                if (NULL == (x = H5MM_realloc(file->mem, new_eof)))
+                if (NULL == (x = H5MM_realloc(file->mem, new_alloc_size)))
                     HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate memory block");
             } /* end else */
 
-            if (file->eof < new_eof)
-                memset(x + file->eof, 0, (size_t)(new_eof - file->eof));
+            if (old_alloc_size < new_alloc_size)
+                memset(x + old_alloc_size, 0, new_alloc_size - old_alloc_size);
             file->mem = x;
+            file->alloc_size = new_alloc_size;
 
-            /* Update backing store, if using it and if closing */
+            /* Truncate backing store to eoa (== new_alloc_size when closing) */
             if (closing && (file->fd >= 0) && file->backing_store) {
 #ifdef H5_HAVE_WIN32_API
                 LARGE_INTEGER li;       /* 64-bit (union) integer for SetFilePointer() call */
@@ -1551,7 +1657,7 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
                 DWORD dwError;          /* DWORD error code from GetLastError() */
                 BOOL  bError;           /* Boolean error flag */
 
-                /* Windows uses this odd QuadPart union for 32/64-bit portability */
+                /* new_alloc_size == file->eoa when closing (see above) */
                 li.QuadPart = (LONGLONG)file->eoa;
 
                 /* Extend the file to make sure it's large enough.
@@ -1570,15 +1676,22 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
                 if (0 == bError)
                     HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly");
 #else  /* H5_HAVE_WIN32_API */
-                if (-1 == HDftruncate(file->fd, (HDoff_t)new_eof))
+                /* new_alloc_size == file->eoa when closing (see above) */
+                if (-1 == HDftruncate(file->fd, (HDoff_t)file->eoa))
                     HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly");
 #endif /* H5_HAVE_WIN32_API */
 
             } /* end if */
-
-            /* Update the eof value */
-            file->eof = new_eof;
         } /* end if */
+
+        if (closing)
+            file->eof = file->eoa;
+        else {
+            if (file->eof > (haddr_t)file->alloc_size)
+                H5_CHECKED_ASSIGN(file->eof, haddr_t, file->alloc_size, size_t);
+            if (file->eof < file->eoa)
+                file->eof = file->eoa;
+        } /* end else */
     }     /* end if(file->eof < file->eoa) */
 
 done:

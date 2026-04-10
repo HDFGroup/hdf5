@@ -45,19 +45,19 @@
 
 /* Re-establish only the API version under test */
 #if TEST_API_VERSION == 16
-#define H5_USE_16_API 1
+  #define H5_USE_16_API 1
 #elif TEST_API_VERSION == 18
-#define H5_USE_18_API 1
+  #define H5_USE_18_API 1
 #elif TEST_API_VERSION == 110
-#define H5_USE_110_API 1
+  #define H5_USE_110_API 1
 #elif TEST_API_VERSION == 112
-#define H5_USE_112_API 1
+  #define H5_USE_112_API 1
 #elif TEST_API_VERSION == 114
-#define H5_USE_114_API 1
+  #define H5_USE_114_API 1
 #elif TEST_API_VERSION == 200
-#define H5_USE_200_API 1
+  #define H5_USE_200_API 1
 #else
-#error "TEST_API_VERSION not set to a valid value"
+  #error "TEST_API_VERSION not set to a valid value"
 #endif
 
 #include "h5test.h"
@@ -65,21 +65,22 @@
 /*
  * Helper macro: check that a _vers macro equals an expected value.
  */
-#define CHECK_VERS(func_name, expected)                                                                      \
-    do {                                                                                                     \
-        if (func_name##_vers != (expected)) {                                                                \
-            fprintf(stderr, "FAIL: %s_vers = %d, expected %d\n", #func_name, func_name##_vers, (expected));  \
-            nerrors++;                                                                                       \
-        }                                                                                                    \
+#define CHECK_VERS(func_name, expected)                                  \
+    do {                                                                 \
+        if (func_name##_vers != (expected)) {                            \
+            fprintf(stderr, "FAIL: %s_vers = %d, expected %d\n",      \
+                    #func_name, func_name##_vers, (expected));            \
+            nerrors++;                                                    \
+        }                                                                \
     } while (0)
 
-#define CHECK_VERS_T(type_name, expected)                                                                    \
-    do {                                                                                                     \
-        if (type_name##_t_vers != (expected)) {                                                              \
-            fprintf(stderr, "FAIL: %s_t_vers = %d, expected %d\n", #type_name, type_name##_t_vers,           \
-                    (expected));                                                                             \
-            nerrors++;                                                                                       \
-        }                                                                                                    \
+#define CHECK_VERS_T(type_name, expected)                                \
+    do {                                                                 \
+        if (type_name##_t_vers != (expected)) {                          \
+            fprintf(stderr, "FAIL: %s_t_vers = %d, expected %d\n",    \
+                    #type_name, type_name##_t_vers, (expected));          \
+            nerrors++;                                                    \
+        }                                                                \
     } while (0)
 
 int
@@ -119,10 +120,12 @@ main(void)
     CHECK_VERS(H5Ovisit, 1);
     CHECK_VERS(H5Ovisit_by_name, 1);
     CHECK_VERS(H5Pencode, 1);
+    CHECK_VERS(H5Pget_fapl_core, 1);
     CHECK_VERS(H5Pget_filter, 1);
     CHECK_VERS(H5Pget_filter_by_id, 1);
     CHECK_VERS(H5Pinsert, 1);
     CHECK_VERS(H5Pregister, 1);
+    CHECK_VERS(H5Pset_fapl_core, 1);
     CHECK_VERS(H5Rdereference, 1);
     CHECK_VERS(H5Rget_obj_type, 1);
     CHECK_VERS(H5Sencode, 1);
@@ -167,10 +170,12 @@ main(void)
     CHECK_VERS(H5Ovisit, 1);
     CHECK_VERS(H5Ovisit_by_name, 1);
     CHECK_VERS(H5Pencode, 1);
+    CHECK_VERS(H5Pget_fapl_core, 1);
     CHECK_VERS(H5Pget_filter, 2);
     CHECK_VERS(H5Pget_filter_by_id, 2);
     CHECK_VERS(H5Pinsert, 2);
     CHECK_VERS(H5Pregister, 2);
+    CHECK_VERS(H5Pset_fapl_core, 1);
     CHECK_VERS(H5Rdereference, 1);
     CHECK_VERS(H5Rget_obj_type, 2);
     CHECK_VERS(H5Sencode, 1);
@@ -215,10 +220,12 @@ main(void)
     CHECK_VERS(H5Ovisit, 1);
     CHECK_VERS(H5Ovisit_by_name, 1);
     CHECK_VERS(H5Pencode, 1);
+    CHECK_VERS(H5Pget_fapl_core, 1);
     CHECK_VERS(H5Pget_filter, 2);
     CHECK_VERS(H5Pget_filter_by_id, 2);
     CHECK_VERS(H5Pinsert, 2);
     CHECK_VERS(H5Pregister, 2);
+    CHECK_VERS(H5Pset_fapl_core, 1);
     CHECK_VERS(H5Rdereference, 2);
     CHECK_VERS(H5Rget_obj_type, 2);
     CHECK_VERS(H5Sencode, 1);
@@ -263,10 +270,12 @@ main(void)
     CHECK_VERS(H5Ovisit, 3);
     CHECK_VERS(H5Ovisit_by_name, 3);
     CHECK_VERS(H5Pencode, 2);
+    CHECK_VERS(H5Pget_fapl_core, 1);
     CHECK_VERS(H5Pget_filter, 2);
     CHECK_VERS(H5Pget_filter_by_id, 2);
     CHECK_VERS(H5Pinsert, 2);
     CHECK_VERS(H5Pregister, 2);
+    CHECK_VERS(H5Pset_fapl_core, 1);
     CHECK_VERS(H5Rdereference, 2);
     CHECK_VERS(H5Rget_obj_type, 2);
     CHECK_VERS(H5Sencode, 2);
@@ -311,10 +320,12 @@ main(void)
     CHECK_VERS(H5Ovisit, 3);
     CHECK_VERS(H5Ovisit_by_name, 3);
     CHECK_VERS(H5Pencode, 2);
+    CHECK_VERS(H5Pget_fapl_core, 1);
     CHECK_VERS(H5Pget_filter, 2);
     CHECK_VERS(H5Pget_filter_by_id, 2);
     CHECK_VERS(H5Pinsert, 2);
     CHECK_VERS(H5Pregister, 2);
+    CHECK_VERS(H5Pset_fapl_core, 1);
     CHECK_VERS(H5Rdereference, 2);
     CHECK_VERS(H5Rget_obj_type, 2);
     CHECK_VERS(H5Sencode, 2);
@@ -359,10 +370,12 @@ main(void)
     CHECK_VERS(H5Ovisit, 3);
     CHECK_VERS(H5Ovisit_by_name, 3);
     CHECK_VERS(H5Pencode, 2);
+    CHECK_VERS(H5Pget_fapl_core, 2);
     CHECK_VERS(H5Pget_filter, 2);
     CHECK_VERS(H5Pget_filter_by_id, 2);
     CHECK_VERS(H5Pinsert, 2);
     CHECK_VERS(H5Pregister, 2);
+    CHECK_VERS(H5Pset_fapl_core, 2);
     CHECK_VERS(H5Rdereference, 2);
     CHECK_VERS(H5Rget_obj_type, 2);
     CHECK_VERS(H5Sencode, 2);

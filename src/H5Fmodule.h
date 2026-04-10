@@ -856,12 +856,17 @@
  *
  * <em>Managing file access for in-memory files</em>
  * \code
- *   herr_t H5Pset_fapl_core (hid_t access_properties, size_t block_size, bool backing_store)
- *   herr_t H5Pget_fapl_core (hid_t access_properties, size_t *block_size, bool *backing_store)
+ *   herr_t H5Pset_fapl_core (hid_t access_properties, size_t initial_size, size_t block_size,
+ *                            bool backing_store)
+ *   herr_t H5Pget_fapl_core (hid_t access_properties, size_t *initial_size, size_t *block_size,
+ *                            bool *backing_store)
  * \endcode
  *
  * #H5Pset_fapl_core sets the file access property list to use the Memory driver; any previously
  * defined driver properties are erased from the property list.
+ *
+ * If initial_size is nonzero, the backing memory buffer is allocated to that size when the file is
+ * opened or created. If initial_size is zero, the existing lazy-allocation behavior is preserved.
  *
  * Memory for the file will always be allocated in units of the specified block_size.
  *
@@ -879,7 +884,7 @@
  * #H5F_ACC_RDONLY, no change to the file will be allowed either in memory or on file.
  *
  * If the file access property list is set to use the Memory driver, #H5Pget_fapl_core will return
- * block_size and backing_store with the relevant file access property settings.
+ * initial_size, block_size, and backing_store with the relevant file access property settings.
  *
  * Note the following important points regarding in-memory files:
  * <ul><li>Local temporary files are created and accessed directly from memory without ever
@@ -1634,7 +1639,9 @@
  *
  * If a driver sets both the #H5FD_FEAT_ALLOW_FILE_IMAGE flag and the #H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS
  * flag, then that driver will allocate a buffer of the required size, copy the contents of the initial image
- * buffer from the file access property list, and then open the copy as if it had just loaded it from file. If
+ * buffer from the file access property list, and then open the copy as if it had just loaded it from file. For
+ * the Core VFD, the required size may exceed the image size if a larger initial buffer size was requested via
+ * #H5Pset_fapl_core. If
  * the file image allocation callbacks are defined, the driver shall use them for all memory management tasks.
  * Otherwise it will use the standard malloc, memcpy, realloc, and free C library calls for this purpose.
  *
@@ -1927,7 +1934,9 @@
  * \li Construct the image_malloc() call so that it returns the value in the init_ptr field of the user data
  *     structure and increments the init_ref_count. As a sanity check, the function should fail if the
  * requested size does not match the init_size field in the user data structure or if any of the modified
- * fields have values other than their initial values. \li Construct the image_memcpy() call so that it does
+ * fields have values other than their initial values. If a larger initial Core VFD buffer size is configured
+ * with #H5Pset_fapl_core, the callback must instead tolerate the larger open-time allocation request.
+ * \li Construct the image_memcpy() call so that it does
  * nothing. As a sanity check, it should be made to fail if the source, destination, and size parameters do
  * not match the init_ptr and init_size fields as appropriate. \li Construct the image_realloc() call so that
  * it performs a standard realloc. Sanity checking, assuming that the realloc is successful, should be as

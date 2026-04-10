@@ -313,10 +313,13 @@ test_core(void)
     char          filename[1024];                 /* filename                     */
     void         *os_file_handle = NULL;          /* OS file handle               */
     hsize_t       file_size;                      /* file size                    */
+    size_t        initial_size;                   /* core VFD initial size        */
+    size_t        initial_size_out;               /* retrieved initial size       */
     size_t        increment;                      /* core VFD increment           */
     bool          backing_store;                  /* use backing store?           */
     bool          use_write_tracking;             /* write tracking flag          */
     size_t        write_tracking_page_size;       /* write tracking page size     */
+    herr_t        err_ret = FAIL;                 /* temporary error return value */
     int          *data_w = NULL;                  /* data written to the dataset  */
     int          *data_r = NULL;                  /* data read from the dataset   */
     int           val;                            /* data value                   */
@@ -343,8 +346,17 @@ test_core(void)
         if (HDremove(filename) < 0)
             FAIL_PUTS_ERROR("unable to remove backing store file");
 
+    /* initial_size must be zero or at least increment */
+    H5E_BEGIN_TRY
+    {
+        err_ret = H5Pset_fapl_core(fapl_id, (size_t)(CORE_INCREMENT - 1), (size_t)CORE_INCREMENT, false);
+    }
+    H5E_END_TRY
+    if (err_ret >= 0)
+        FAIL_PUTS_ERROR("accepted core VFD initial_size smaller than increment");
+
     /* Create and close file w/ backing store off */
-    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, false) < 0)
+    if (H5Pset_fapl_core(fapl_id, 0, (size_t)CORE_INCREMENT, false) < 0)
         TEST_ERROR;
 
     /* Check that the VFD feature flags are correct.
@@ -387,7 +399,8 @@ test_core(void)
      ************************************************************************/
 
     /* Turn the backing store on */
-    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, true) < 0)
+    initial_size = 0;
+    if (H5Pset_fapl_core(fapl_id, initial_size, (size_t)CORE_INCREMENT, true) < 0)
         TEST_ERROR;
 
     /* Check that write tracking is off by default and that the default
@@ -419,8 +432,10 @@ test_core(void)
     /* Get the basic VFD properties from the fapl and ensure that
      * they are correct.
      */
-    if (H5Pget_fapl_core(fapl_id_out, &increment, &backing_store) < 0)
+    if (H5Pget_fapl_core(fapl_id_out, &initial_size_out, &increment, &backing_store) < 0)
         TEST_ERROR;
+    if (initial_size_out != initial_size)
+        FAIL_PUTS_ERROR("incorrect initial size from file fapl");
     if (increment != (size_t)CORE_INCREMENT)
         FAIL_PUTS_ERROR("incorrect increment from file fapl");
     if (backing_store != true)
@@ -465,6 +480,70 @@ test_core(void)
         TEST_ERROR;
 
     /************************************************************************
+     * Check that a non-zero initial_size survives a file open and access
+     * property-list round trip.
+     ************************************************************************/
+
+    initial_size = (size_t)(CORE_INCREMENT * 4);
+    if (H5Pset_fapl_core(fapl_id, initial_size, (size_t)CORE_INCREMENT, true) < 0)
+        TEST_ERROR;
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR;
+    if ((fapl_id_out = H5Fget_access_plist(fid)) < 0)
+        TEST_ERROR;
+    if (H5Pget_fapl_core(fapl_id_out, &initial_size_out, &increment, &backing_store) < 0)
+        TEST_ERROR;
+    if (initial_size_out != initial_size)
+        FAIL_PUTS_ERROR("incorrect initial size from access plist after open");
+    if (increment != (size_t)CORE_INCREMENT)
+        FAIL_PUTS_ERROR("incorrect increment from access plist after open");
+    if (backing_store != true)
+        FAIL_PUTS_ERROR("incorrect backing store flag from access plist after open");
+    if (H5Pclose(fapl_id_out) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /************************************************************************
+     * Verify that opening an existing file whose on-disk size is smaller
+     * than initial_size works correctly: the pre-allocated buffer must
+     * not corrupt the existing content, and initial_size must round-trip.
+     ************************************************************************/
+
+    /* The file written above is on disk.  Open it with an initial_size
+     * that is much larger (8x CORE_INCREMENT) to exercise the
+     * max(source_size, initial_size) allocation path in H5FD__core_open.
+     * Use backing_store=false so on-disk content is not touched. */
+    initial_size = (size_t)(CORE_INCREMENT * 8);
+    if (H5Pset_fapl_core(fapl_id, initial_size, (size_t)CORE_INCREMENT, false) < 0)
+        TEST_ERROR;
+    if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id)) < 0)
+        FAIL_PUTS_ERROR("failed to open existing file smaller than initial_size");
+
+    /* initial_size must survive the open */
+    if ((fapl_id_out = H5Fget_access_plist(fid)) < 0)
+        TEST_ERROR;
+    if (H5Pget_fapl_core(fapl_id_out, &initial_size_out, &increment, &backing_store) < 0)
+        TEST_ERROR;
+    if (initial_size_out != initial_size)
+        FAIL_PUTS_ERROR("initial_size not preserved after open of file smaller than initial_size");
+    if (H5Pclose(fapl_id_out) < 0)
+        TEST_ERROR;
+
+    /* Existing file content must still be readable */
+    {
+        ssize_t image_size;
+
+        if ((image_size = H5Fget_file_image(fid, NULL, 0)) < 0)
+            FAIL_PUTS_ERROR("H5Fget_file_image failed for file opened with large initial_size");
+        if (image_size == 0)
+            FAIL_PUTS_ERROR("file image is empty after open with initial_size > file size");
+    }
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /************************************************************************
      * Make changes to the file with the backing store flag OFF to ensure
      * that they ARE NOT propagated.
      ************************************************************************/
@@ -472,7 +551,7 @@ test_core(void)
     /* Open the file with backing store off for read and write.
      * Changes won't be saved in file.
      */
-    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, false) < 0)
+    if (H5Pset_fapl_core(fapl_id, 0, (size_t)CORE_INCREMENT, false) < 0)
         TEST_ERROR;
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
@@ -555,7 +634,7 @@ test_core(void)
     /* Open the file with backing store on for read and write.
      * Changes will be saved in file.
      */
-    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, true) < 0)
+    if (H5Pset_fapl_core(fapl_id, 0, (size_t)CORE_INCREMENT, true) < 0)
         TEST_ERROR;
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
@@ -626,7 +705,7 @@ test_core(void)
      ************************************************************************/
 
     /* Create and close a file */
-    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, true) < 0)
+    if (H5Pset_fapl_core(fapl_id, 0, (size_t)CORE_INCREMENT, true) < 0)
         TEST_ERROR;
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
@@ -634,7 +713,7 @@ test_core(void)
         TEST_ERROR;
 
     /* Try to delete the file with the backing store off (shouldn't delete anything) */
-    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, false) < 0)
+    if (H5Pset_fapl_core(fapl_id, 0, (size_t)CORE_INCREMENT, false) < 0)
         TEST_ERROR;
     if (H5Fdelete(filename, fapl_id) < 0)
         TEST_ERROR;
@@ -642,7 +721,7 @@ test_core(void)
         FAIL_PUTS_ERROR("file deleted when backing store set to false");
 
     /* Try to delete the file with the backing store on (should work) */
-    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, true) < 0)
+    if (H5Pset_fapl_core(fapl_id, 0, (size_t)CORE_INCREMENT, true) < 0)
         TEST_ERROR;
     if (H5Fdelete(filename, fapl_id) < 0)
         TEST_ERROR;

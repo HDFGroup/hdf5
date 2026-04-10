@@ -109,7 +109,7 @@ file_image_daisy_chain_test(void H5_ATTR_UNUSED *params)
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((fapl_id >= 0), "creating fapl");
 
-        err = H5Pset_fapl_core(fapl_id, (size_t)(64 * 1024), false);
+        err = H5Pset_fapl_core(fapl_id, 0, (size_t)(64 * 1024), false);
         VRFY((err >= 0), "setting core file driver in fapl.");
 
         file_id = H5Fcreate(file_name, 0, H5P_DEFAULT, fapl_id);
@@ -198,7 +198,7 @@ file_image_daisy_chain_test(void H5_ATTR_UNUSED *params)
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((fapl_id >= 0), "creating fapl");
 
-        err = H5Pset_fapl_core(fapl_id, (size_t)(64 * 1024), false);
+        err = H5Pset_fapl_core(fapl_id, 0, (size_t)(64 * 1024), false);
         VRFY((err >= 0), "setting core file driver in fapl.");
 
         err = H5Pset_file_image(fapl_id, image_ptr, (size_t)image_len);
@@ -280,7 +280,7 @@ file_image_daisy_chain_test(void H5_ATTR_UNUSED *params)
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((fapl_id >= 0), "creating fapl");
 
-        err = H5Pset_fapl_core(fapl_id, (size_t)(64 * 1024), false);
+        err = H5Pset_fapl_core(fapl_id, 0, (size_t)(64 * 1024), false);
         VRFY((err >= 0), "setting core file driver in fapl.");
 
         err = H5Pset_file_image(fapl_id, image_ptr, (size_t)image_len);

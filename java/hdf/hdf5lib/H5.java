@@ -17230,6 +17230,8 @@ public class H5 implements java.io.Serializable {
      *
      * @param fapl_id
      *            IN: File access property list identifier
+     * @param initial_size
+     *            OUT: initial size of the backing memory buffer
      * @param increment
      *            OUT: how much to grow the memory each time
      * @param backing_store
@@ -17238,23 +17240,29 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *            Error from the HDF5 Library.
      * @exception NullPointerException
-     *            increment or backing_store is null.
+     *            initial_size, increment, or backing_store is null.
      *
      **/
-    public static void H5Pget_fapl_core(long fapl_id, long[] increment, boolean[] backing_store)
+    public static void H5Pget_fapl_core(long fapl_id, long[] initial_size, long[] increment,
+                                        boolean[] backing_store)
         throws HDF5LibraryException, NullPointerException
     {
-        if (increment == null || increment.length < 1 || backing_store == null || backing_store.length < 1) {
-            throw new NullPointerException("increment or backing_store is null or has insufficient length");
+        if (initial_size == null || initial_size.length < 1 || increment == null || increment.length < 1 ||
+            backing_store == null || backing_store.length < 1) {
+            throw new NullPointerException(
+                "initial_size, increment, or backing_store is null or has insufficient length");
         }
 
         try (Arena arena = Arena.ofConfined()) {
+            MemorySegment initial_size_segment = arena.allocate(ValueLayout.JAVA_LONG, 1);
             MemorySegment increment_segment     = arena.allocate(ValueLayout.JAVA_LONG, 1);
             MemorySegment backing_store_segment = arena.allocate(ValueLayout.JAVA_BOOLEAN, 1);
-            int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Pget_fapl_core(fapl_id, increment_segment,
+            int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Pget_fapl_core(fapl_id, initial_size_segment,
+                                                                       increment_segment,
                                                                        backing_store_segment);
             if (retVal < 0)
                 h5libraryError();
+            initial_size[0] = initial_size_segment.get(ValueLayout.JAVA_LONG, 0);
             increment[0]     = increment_segment.get(ValueLayout.JAVA_LONG, 0);
             backing_store[0] = backing_store_segment.get(ValueLayout.JAVA_BOOLEAN, 0);
         }
@@ -17267,6 +17275,8 @@ public class H5 implements java.io.Serializable {
      *
      * @param fapl_id
      *            IN: File access property list identifier
+     * @param initial_size
+     *            IN: initial size of the backing memory buffer
      * @param increment
      *            IN: how much to grow the memory each time
      * @param backing_store
@@ -17278,10 +17288,11 @@ public class H5 implements java.io.Serializable {
      *            Error from the HDF5 Library.
      *
      **/
-    public static int H5Pset_fapl_core(long fapl_id, long increment, boolean backing_store)
+    public static int H5Pset_fapl_core(long fapl_id, long initial_size, long increment, boolean backing_store)
         throws HDF5LibraryException
     {
-        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Pset_fapl_core(fapl_id, increment, backing_store);
+        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Pset_fapl_core(fapl_id, initial_size, increment,
+                                                                   backing_store);
         if (retVal < 0) {
             h5libraryError();
         }
