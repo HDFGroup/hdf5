@@ -45,19 +45,19 @@
 
 /* Re-establish only the API version under test */
 #if TEST_API_VERSION == 16
-  #define H5_USE_16_API 1
+#define H5_USE_16_API 1
 #elif TEST_API_VERSION == 18
-  #define H5_USE_18_API 1
+#define H5_USE_18_API 1
 #elif TEST_API_VERSION == 110
-  #define H5_USE_110_API 1
+#define H5_USE_110_API 1
 #elif TEST_API_VERSION == 112
-  #define H5_USE_112_API 1
+#define H5_USE_112_API 1
 #elif TEST_API_VERSION == 114
-  #define H5_USE_114_API 1
+#define H5_USE_114_API 1
 #elif TEST_API_VERSION == 200
-  #define H5_USE_200_API 1
+#define H5_USE_200_API 1
 #else
-  #error "TEST_API_VERSION not set to a valid value"
+#error "TEST_API_VERSION not set to a valid value"
 #endif
 
 #include "h5test.h"
@@ -65,22 +65,21 @@
 /*
  * Helper macro: check that a _vers macro equals an expected value.
  */
-#define CHECK_VERS(func_name, expected)                                  \
-    do {                                                                 \
-        if (func_name##_vers != (expected)) {                            \
-            fprintf(stderr, "FAIL: %s_vers = %d, expected %d\n",      \
-                    #func_name, func_name##_vers, (expected));            \
-            nerrors++;                                                    \
-        }                                                                \
+#define CHECK_VERS(func_name, expected)                                                                      \
+    do {                                                                                                     \
+        if (func_name##_vers != (expected)) {                                                                \
+            fprintf(stderr, "FAIL: %s_vers = %d, expected %d\n", #func_name, func_name##_vers, (expected));  \
+            nerrors++;                                                                                       \
+        }                                                                                                    \
     } while (0)
 
-#define CHECK_VERS_T(type_name, expected)                                \
-    do {                                                                 \
-        if (type_name##_t_vers != (expected)) {                          \
-            fprintf(stderr, "FAIL: %s_t_vers = %d, expected %d\n",    \
-                    #type_name, type_name##_t_vers, (expected));          \
-            nerrors++;                                                    \
-        }                                                                \
+#define CHECK_VERS_T(type_name, expected)                                                                    \
+    do {                                                                                                     \
+        if (type_name##_t_vers != (expected)) {                                                              \
+            fprintf(stderr, "FAIL: %s_t_vers = %d, expected %d\n", #type_name, type_name##_t_vers,           \
+                    (expected));                                                                             \
+            nerrors++;                                                                                       \
+        }                                                                                                    \
     } while (0)
 
 int

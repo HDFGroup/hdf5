@@ -63,9 +63,9 @@ typedef struct {
     H5FD_file_image_op_t memcpy_src;
     H5FD_file_image_op_t realloc_src;
     H5FD_file_image_op_t free_src;
-    size_t               malloc_size;    /* Size requested by malloc callback */
-    size_t               memcpy_size;    /* Size copied by memcpy callback */
-    size_t               realloc_size;   /* Size requested by realloc callback */
+    size_t               malloc_size;  /* Size requested by malloc callback */
+    size_t               memcpy_size;  /* Size copied by memcpy callback */
+    size_t               realloc_size; /* Size requested by realloc callback */
 } udata_t;
 
 /******************************************************************************
@@ -183,7 +183,7 @@ malloc_cb(size_t size, H5FD_file_image_op_t op, void *udata)
     udata_t *u = (udata_t *)udata;
 
     u->used_callbacks |= MALLOC;
-    u->malloc_src = op;
+    u->malloc_src  = op;
     u->malloc_size = size;
     return malloc(size);
 }
@@ -203,7 +203,7 @@ memcpy_cb(void *dest, const void *src, size_t size, H5FD_file_image_op_t op, voi
     udata_t *u = (udata_t *)udata;
 
     u->used_callbacks |= MEMCPY;
-    u->memcpy_src = op;
+    u->memcpy_src  = op;
     u->memcpy_size = size;
     return memcpy(dest, src, size);
 }
@@ -223,7 +223,7 @@ realloc_cb(void *ptr, size_t size, H5FD_file_image_op_t op, void *udata)
     udata_t *u = (udata_t *)udata;
 
     u->used_callbacks |= REALLOC;
-    u->realloc_src = op;
+    u->realloc_src  = op;
     u->realloc_size = size;
     return realloc(ptr, size);
 }

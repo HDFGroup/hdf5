@@ -1588,14 +1588,14 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate fapl failed", isValidId(fapl));
 
             // Set core (memory) VFD with 1MB increment and backing store enabled
-            long initialSize  = 0;
-            long increment    = 1024 * 1024; // 1MB increments
-            boolean backingStore = true;      // Enable backing store
+            long initialSize     = 0;
+            long increment       = 1024 * 1024; // 1MB increments
+            boolean backingStore = true;        // Enable backing store
             int result           = hdf5_h.H5Pset_fapl_core(fapl, initialSize, increment, backingStore);
             assertTrue("H5Pset_fapl_core failed", isSuccess(result));
 
             // Get core VFD settings
-            MemorySegment initialSizeSeg = arena.allocate(ValueLayout.JAVA_LONG);
+            MemorySegment initialSizeSeg  = arena.allocate(ValueLayout.JAVA_LONG);
             MemorySegment incrementSeg    = arena.allocate(ValueLayout.JAVA_LONG);
             MemorySegment backingStoreSeg = arena.allocate(ValueLayout.JAVA_BOOLEAN);
             result = hdf5_h.H5Pget_fapl_core(fapl, initialSizeSeg, incrementSeg, backingStoreSeg);

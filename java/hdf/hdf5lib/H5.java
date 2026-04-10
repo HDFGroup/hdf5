@@ -17254,15 +17254,14 @@ public class H5 implements java.io.Serializable {
         }
 
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment initial_size_segment = arena.allocate(ValueLayout.JAVA_LONG, 1);
+            MemorySegment initial_size_segment  = arena.allocate(ValueLayout.JAVA_LONG, 1);
             MemorySegment increment_segment     = arena.allocate(ValueLayout.JAVA_LONG, 1);
             MemorySegment backing_store_segment = arena.allocate(ValueLayout.JAVA_BOOLEAN, 1);
-            int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Pget_fapl_core(fapl_id, initial_size_segment,
-                                                                       increment_segment,
-                                                                       backing_store_segment);
+            int retVal                          = org.hdfgroup.javahdf5.hdf5_h.H5Pget_fapl_core(
+                fapl_id, initial_size_segment, increment_segment, backing_store_segment);
             if (retVal < 0)
                 h5libraryError();
-            initial_size[0] = initial_size_segment.get(ValueLayout.JAVA_LONG, 0);
+            initial_size[0]  = initial_size_segment.get(ValueLayout.JAVA_LONG, 0);
             increment[0]     = increment_segment.get(ValueLayout.JAVA_LONG, 0);
             backing_store[0] = backing_store_segment.get(ValueLayout.JAVA_BOOLEAN, 0);
         }
@@ -17291,8 +17290,8 @@ public class H5 implements java.io.Serializable {
     public static int H5Pset_fapl_core(long fapl_id, long initial_size, long increment, boolean backing_store)
         throws HDF5LibraryException
     {
-        int retVal = org.hdfgroup.javahdf5.hdf5_h.H5Pset_fapl_core(fapl_id, initial_size, increment,
-                                                                   backing_store);
+        int retVal =
+            org.hdfgroup.javahdf5.hdf5_h.H5Pset_fapl_core(fapl_id, initial_size, increment, backing_store);
         if (retVal < 0) {
             h5libraryError();
         }

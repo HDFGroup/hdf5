@@ -320,8 +320,8 @@ test_core(void)
     bool          use_write_tracking;             /* write tracking flag          */
     size_t        write_tracking_page_size;       /* write tracking page size     */
     herr_t        err_ret = FAIL;                 /* temporary error return value */
-    int          *data_w = NULL;                  /* data written to the dataset  */
-    int          *data_r = NULL;                  /* data read from the dataset   */
+    int          *data_w  = NULL;                 /* data written to the dataset  */
+    int          *data_r  = NULL;                 /* data read from the dataset   */
     int           val;                            /* data value                   */
     int          *pw = NULL, *pr = NULL;          /* pointers for iterating over
                                                      data arrays (write & read)   */

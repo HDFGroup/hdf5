@@ -11468,8 +11468,8 @@ public class H5 implements java.io.Serializable {
      *            Error from the HDF5 Library.
      *
      **/
-    public synchronized static native void H5Pget_fapl_core(long fapl_id, long[] initial_size, long[] increment,
-                                                            boolean[] backing_store)
+    public synchronized static native void H5Pget_fapl_core(long fapl_id, long[] initial_size,
+                                                            long[] increment, boolean[] backing_store)
         throws HDF5LibraryException, NullPointerException;
 
     /**

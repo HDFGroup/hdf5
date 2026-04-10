@@ -122,7 +122,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1core(JNIEnv *env, jclass clss, jlong fapl_id, 
 {
     jboolean  isCopy;
     jlong    *initialArray = NULL;
-    jboolean *backArray = NULL;
+    jboolean *backArray    = NULL;
     jlong    *incArray     = NULL;
     herr_t    status       = FAIL;
 
@@ -150,7 +150,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1core(JNIEnv *env, jclass clss, jlong fapl_id, 
             H5_LIBRARY_ERROR(ENVONLY);
 
         *initialArray = (jlong)init_t;
-        *incArray = (jlong)inc_t;
+        *incArray     = (jlong)inc_t;
     }
 
 done:

@@ -926,8 +926,8 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                     /* Prepare & restore library for user callback */
                     H5_BEFORE_USER_CB(NULL)
                         {
-                            tmp = file->fi_callbacks.image_memcpy(file->mem, file_image_info.buffer, source_size,
-                                                                  H5FD_FILE_IMAGE_OP_FILE_OPEN,
+                            tmp = file->fi_callbacks.image_memcpy(file->mem, file_image_info.buffer,
+                                                                  source_size, H5FD_FILE_IMAGE_OP_FILE_OPEN,
                                                                   file->fi_callbacks.udata);
                         }
                     H5_AFTER_USER_CB(NULL)
@@ -1451,8 +1451,8 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
                 {
-                    x = file->fi_callbacks.image_realloc(file->mem, new_alloc_size, H5FD_FILE_IMAGE_OP_FILE_RESIZE,
-                                                         file->fi_callbacks.udata);
+                    x = file->fi_callbacks.image_realloc(
+                        file->mem, new_alloc_size, H5FD_FILE_IMAGE_OP_FILE_RESIZE, file->fi_callbacks.udata);
                 }
             H5_AFTER_USER_CB(FAIL)
             if (NULL == x)
@@ -1468,7 +1468,7 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
 
         if (old_alloc_size < new_alloc_size)
             memset(x + old_alloc_size, 0, new_alloc_size - old_alloc_size);
-        file->mem = x;
+        file->mem        = x;
         file->alloc_size = new_alloc_size;
     } /* end if */
 
@@ -1612,7 +1612,8 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
             H5_CHECKED_ASSIGN(new_alloc_size, size_t, file->eoa, haddr_t);
         else { /* set eof to smallest multiple of increment that exceeds eoa */
             /* Determine new size of memory buffer */
-            H5_CHECKED_ASSIGN(new_alloc_size, size_t, file->increment * (file->eoa / file->increment), hsize_t);
+            H5_CHECKED_ASSIGN(new_alloc_size, size_t, file->increment * (file->eoa / file->increment),
+                              hsize_t);
             if (file->eoa % file->increment)
                 new_alloc_size += file->increment;
             if (new_alloc_size < file->initial_size)
@@ -1629,8 +1630,9 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(FAIL)
                     {
-                        x = file->fi_callbacks.image_realloc(
-                            file->mem, new_alloc_size, H5FD_FILE_IMAGE_OP_FILE_RESIZE, file->fi_callbacks.udata);
+                        x = file->fi_callbacks.image_realloc(file->mem, new_alloc_size,
+                                                             H5FD_FILE_IMAGE_OP_FILE_RESIZE,
+                                                             file->fi_callbacks.udata);
                     }
                 H5_AFTER_USER_CB(FAIL)
                 if (NULL == x)
@@ -1644,7 +1646,7 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
 
             if (old_alloc_size < new_alloc_size)
                 memset(x + old_alloc_size, 0, new_alloc_size - old_alloc_size);
-            file->mem = x;
+            file->mem        = x;
             file->alloc_size = new_alloc_size;
 
             /* Truncate backing store to eoa (== new_alloc_size when closing) */
@@ -1682,7 +1684,7 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
 #endif /* H5_HAVE_WIN32_API */
 
             } /* end if */
-        } /* end if */
+        }     /* end if */
 
         if (closing)
             file->eof = file->eoa;

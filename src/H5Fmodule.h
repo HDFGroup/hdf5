@@ -1639,11 +1639,11 @@
  *
  * If a driver sets both the #H5FD_FEAT_ALLOW_FILE_IMAGE flag and the #H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS
  * flag, then that driver will allocate a buffer of the required size, copy the contents of the initial image
- * buffer from the file access property list, and then open the copy as if it had just loaded it from file. For
- * the Core VFD, the required size may exceed the image size if a larger initial buffer size was requested via
- * #H5Pset_fapl_core. If
- * the file image allocation callbacks are defined, the driver shall use them for all memory management tasks.
- * Otherwise it will use the standard malloc, memcpy, realloc, and free C library calls for this purpose.
+ * buffer from the file access property list, and then open the copy as if it had just loaded it from file.
+ * For the Core VFD, the required size may exceed the image size if a larger initial buffer size was requested
+ * via #H5Pset_fapl_core. If the file image allocation callbacks are defined, the driver shall use them for
+ * all memory management tasks. Otherwise it will use the standard malloc, memcpy, realloc, and free C library
+ * calls for this purpose.
  *
  * If the VFD sets the #H5FD_FEAT_ALLOW_FILE_IMAGE flag, and an initial file image is defined by an
  * application, the VFD should ensure that file creation operations (as opposed to file open operations)

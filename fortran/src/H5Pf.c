@@ -877,7 +877,7 @@ h5pset_fapl_core_c(hid_t_f *prp_id, size_t_f *initial_size, size_t_f *increment,
     size_t c_initial_size;
     size_t c_increment;
     bool   c_backing_store;
-    c_initial_size = (size_t)*initial_size;
+    c_initial_size  = (size_t)*initial_size;
     c_increment     = (size_t)*increment;
     c_backing_store = (bool)*flag;
 
@@ -925,7 +925,7 @@ h5pget_fapl_core_c(hid_t_f *prp_id, size_t_f *initial_size, size_t_f *increment,
     if (ret < 0)
         return ret_value;
     *initial_size = (size_t_f)c_initial_size;
-    *increment = (size_t_f)c_increment;
+    *increment    = (size_t_f)c_increment;
     if (c_backing_store > 0)
         *flag = 1;
     ret_value = 0;
