@@ -19,7 +19,7 @@ iter_cb(hid_t group, const char *name, const H5L_info_t *info, void *op_data)
             printf(" soft link.\n");
             break;
         case H5L_TYPE_EXTERNAL:
-            printf("n external link.\n");
+            printf(" external link.\n");
             break;
         default:
             printf(" UFO link.\n");
