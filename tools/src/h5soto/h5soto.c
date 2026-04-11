@@ -639,6 +639,9 @@ h5soto_hash_type_value(const void *value, hid_t type_id, uint64_t *hash)
     if (!value || !hash || class_id < 0 || 0 == size)
         return FAIL;
 
+    /* Hash atomic values by their stored bytes, but recurse into nested or
+     * indirect types so the hash follows logical contents instead of metadata
+     * such as heap addresses. */
     switch (class_id) {
         case H5T_INTEGER:
         case H5T_FLOAT:
@@ -654,6 +657,8 @@ h5soto_hash_type_value(const void *value, hid_t type_id, uint64_t *hash)
             if (H5Tis_variable_str(type_id) > 0) {
                 const char *str = *(const char *const *)value;
 
+                /* Variable-length strings are stored through a heap pointer;
+                 * hash the pointed-to bytes, not the pointer value. */
                 h5soto_hash_str(hash, str);
             }
             else
@@ -694,6 +699,8 @@ h5soto_hash_type_value(const void *value, hid_t type_id, uint64_t *hash)
                 return FAIL;
             }
 
+            /* Hash each logical array element with the array's base type so
+             * nested arrays/compounds are expanded consistently. */
             for (size_t i = 0; i < count; i++) {
                 const unsigned char *elem = (const unsigned char *)value + (i * base_size);
 
@@ -721,6 +728,8 @@ h5soto_hash_type_value(const void *value, hid_t type_id, uint64_t *hash)
                 return FAIL;
             }
 
+            /* Include the sequence length so equal prefixes with different
+             * extents do not collide, then hash each element in order. */
             h5soto_hash_u64(hash, (uint64_t)vlen->len);
 
             for (size_t i = 0; i < vlen->len; i++) {
@@ -742,6 +751,8 @@ h5soto_hash_type_value(const void *value, hid_t type_id, uint64_t *hash)
             if (nmembers < 0)
                 return FAIL;
 
+            /* Walk members in declaration order and hash each member value at
+             * its byte offset, avoiding any dependence on struct padding. */
             for (int i = 0; i < nmembers; i++) {
                 hid_t  member_type = H5I_INVALID_HID;
                 size_t offset      = 0;
@@ -1063,6 +1074,8 @@ h5soto_hash_dataset_signature(hid_t dset_id, uint64_t *signature_out)
     if ((dcpl_id = H5Dget_create_plist(dset_id)) < 0)
         goto error;
 
+    /* Fold in the dataset's declared type, dataspace, creation properties, and
+     * attributes before hashing the stored element values. */
     if (h5soto_hash_encoded_object(&hash, H5Tencode, type_id) < 0)
         goto error;
     if (h5soto_hash_encoded_object(&hash, h5soto_encode_space, space_id) < 0)
@@ -1077,6 +1090,8 @@ h5soto_hash_dataset_signature(hid_t dset_id, uint64_t *signature_out)
     if (stype == H5S_NO_CLASS)
         goto error;
 
+    /* NULL dataspaces have no payload to read; their encoded dataspace above is
+     * the complete shape contribution to the signature. */
     if (stype != H5S_NULL) {
         hssize_t npoints_ss = H5Sget_simple_extent_npoints(space_id);
         if (npoints_ss < 0)
@@ -1098,6 +1113,9 @@ h5soto_hash_dataset_signature(hid_t dset_id, uint64_t *signature_out)
         if (h5soto_checked_mul_size(npoints, type_size, &total_bytes) < 0)
             goto error;
 
+        /* Only fixed-size simple datasets can be streamed in slabs. Vlen/vstr
+         * reads need a single buffer that matches the full dataspace so
+         * H5Treclaim can release the referenced heap data correctly. */
         if (!reclaim && stype == H5S_SIMPLE && total_bytes > H5SOTO_HASH_MAX_BUF_BYTES) {
             /* Large non-vlen dataset: read in slabs to bound memory usage */
             if (h5soto_hash_dataset_data_chunked(dset_id, type_id, space_id, type_size, &hash) < 0)
@@ -1677,6 +1695,8 @@ h5soto_print_verbose_summary(const char *filename, uint64_t latest_revision, uin
 
     printf("File versions: %" PRIu64 " (revisions 0-%" PRIu64 ")\n", latest_revision + 1, latest_revision);
 
+    /* Compare each revision against its immediate predecessor so the summary
+     * reports the stepwise changes across the requested range. */
     for (uint64_t revision = from_revision + 1; revision <= to_revision; revision++) {
         size_t            i = 0;
         size_t            j = 0;
@@ -1695,6 +1715,8 @@ h5soto_print_verbose_summary(const char *filename, uint64_t latest_revision, uin
             goto done;
         }
 
+        /* Both inventories are kept sorted by object path, so a single merge
+         * pass can classify additions, removals, and same-path updates. */
         while (i < prev_inventory.nentries || j < curr_inventory.nentries) {
             if (i == prev_inventory.nentries) {
                 if (h5soto_ref_list_append(&added, &curr_inventory.entries[j++]) < 0)
@@ -1719,6 +1741,8 @@ h5soto_print_verbose_summary(const char *filename, uint64_t latest_revision, uin
                     goto diff_error;
             }
             else {
+                /* Matching paths represent the same object identity across
+                 * revisions; a kind or signature change makes it "modified". */
                 if (prev_inventory.entries[i].kind != curr_inventory.entries[j].kind ||
                     prev_inventory.entries[i].signature != curr_inventory.entries[j].signature) {
                     if (h5soto_ref_list_append(&modified, &curr_inventory.entries[j]) < 0)
@@ -1748,6 +1772,8 @@ h5soto_print_verbose_summary(const char *filename, uint64_t latest_revision, uin
         h5soto_ref_list_free(&removed);
         h5soto_ref_list_free(&added);
 
+        /* Reuse the current inventory as the baseline for the next revision
+         * comparison and reinitialize curr_inventory for the next load. */
         h5soto_inventory_free(&prev_inventory);
         prev_inventory = curr_inventory;
         h5soto_inventory_init(&curr_inventory);
@@ -1809,6 +1835,8 @@ h5soto_parse_command_line(int argc, const char *const *argv, h5soto_options_t *o
     if (!options)
         return -1;
 
+    /* Start from a fully disabled/default configuration and let option parsing
+     * set only the fields explicitly requested on the command line. */
     memset(options, 0, sizeof(*options));
 
     if (argc == 1) {
@@ -1817,9 +1845,13 @@ h5soto_parse_command_line(int argc, const char *const *argv, h5soto_options_t *o
         return -1;
     }
 
+    /* Parse flags and their raw argument payloads first; cross-option
+     * consistency checks happen after the full command line is known. */
     while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'h':
+                /* Positive return means "handled locally, main should exit
+                 * without treating this as an error." */
                 usage(h5tools_getprogname());
                 h5tools_setstatus(EXIT_SUCCESS);
                 return 1;
@@ -1884,6 +1916,8 @@ h5soto_parse_command_line(int argc, const char *const *argv, h5soto_options_t *o
         }
     }
 
+    /* Exactly one non-option argument is expected: the onion-backed file to
+     * inspect or materialize. */
     if (argc <= H5_optind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
@@ -1900,6 +1934,8 @@ h5soto_parse_command_line(int argc, const char *const *argv, h5soto_options_t *o
 
     /* Cross-option validation */
     {
+        /* These modes describe mutually exclusive top-level actions; any
+         * remaining options only refine the selected action. */
         int mode_count =
             (options->materialize ? 1 : 0) + (options->verbose ? 1 : 0) + (options->list ? 1 : 0);
         if (mode_count > 1) {
@@ -1980,10 +2016,13 @@ main(int argc, char *argv[])
     char            *default_output  = NULL;
     int              parse_status    = 0;
 
+    /* Initialize the shared h5tools runtime before any parsing or HDF5 work. */
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
     h5tools_init();
 
+    /* Parsing can either fail (<0), fully handle the request already (>0, such
+     * as --help/--version), or succeed normally (0). */
     parse_status = h5soto_parse_command_line(argc, (const char *const *)argv, &options);
     if (parse_status < 0) {
         h5tools_setstatus(EXIT_FAILURE);
@@ -2009,12 +2048,15 @@ main(int argc, char *argv[])
         goto done;
     }
 
-    /* Resolve "latest" sentinel to the actual latest revision number */
+    /* Resolve any parsed "latest" sentinel once so the mode-specific paths can
+     * work with concrete revision numbers. */
     if (options.materialize && options.materialize_revision == H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST)
         options.materialize_revision = latest_revision;
     if (options.list && options.list_revision == H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST)
         options.list_revision = latest_revision;
 
+    /* Dispatch the single requested top-level action. Command-line validation
+     * already guaranteed these modes are mutually exclusive. */
     if (options.materialize) {
         const char *output_filename = options.output_filename;
 
@@ -2026,6 +2068,8 @@ main(int argc, char *argv[])
         }
 
         if (!output_filename) {
+            /* Derive a stable default output name only when the caller did not
+             * provide one explicitly. */
             if (NULL == (default_output =
                              h5soto_default_output_name(options.filename, options.materialize_revision))) {
                 error_msg("unable to allocate a default output file name\n");
@@ -2070,6 +2114,8 @@ main(int argc, char *argv[])
         uint64_t from_rev = options.has_from ? options.from_revision : 0;
         uint64_t to_rev   = options.has_to ? options.to_revision : latest_revision;
 
+        /* Default the verbose range to the full history, then clamp it against
+         * the discovered latest revision before diffing inventories. */
         if (from_rev > latest_revision) {
             error_msg("--from %" PRIu64 " exceeds latest revision %" PRIu64 "\n", from_rev, latest_revision);
             h5tools_setstatus(EXIT_FAILURE);
@@ -2096,6 +2142,8 @@ main(int argc, char *argv[])
         printf("%" PRIu64 "\n", latest_revision + 1);
 
 done:
+    /* Funnel every exit through one path so transient allocations are released
+     * before leave() shuts down h5tools and exits the process. */
     free(default_output);
     leave(h5tools_getstatus());
 }
