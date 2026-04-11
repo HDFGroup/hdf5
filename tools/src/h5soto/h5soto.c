@@ -46,9 +46,9 @@ typedef enum h5soto_entry_kind_t {
 } h5soto_entry_kind_t;
 
 typedef struct h5soto_entry_t {
-    char                *path;
-    h5soto_entry_kind_t  kind;
-    uint64_t             signature;
+    char               *path;
+    h5soto_entry_kind_t kind;
+    uint64_t            signature;
 } h5soto_entry_t;
 
 typedef struct h5soto_inventory_t {
@@ -81,9 +81,9 @@ typedef struct h5soto_attr_copy_ctx_t {
 } h5soto_attr_copy_ctx_t;
 
 typedef struct h5soto_string_list_t {
-    char  **items;
-    size_t  nitems;
-    size_t  capacity;
+    char **items;
+    size_t nitems;
+    size_t capacity;
 } h5soto_string_list_t;
 
 typedef struct h5soto_ref_list_t {
@@ -93,9 +93,9 @@ typedef struct h5soto_ref_list_t {
 } h5soto_ref_list_t;
 
 typedef struct h5soto_group_iter_ctx_t {
-    const char       *group_path;
+    const char        *group_path;
     h5soto_walk_ctx_t *walk_ctx;
-    herr_t            status;
+    herr_t             status;
 } h5soto_group_iter_ctx_t;
 
 typedef struct h5soto_child_name_ctx_t {
@@ -112,26 +112,25 @@ typedef struct h5soto_options_t {
     uint64_t    materialize_revision; /* H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST = "latest" */
     bool        force;                /* overwrite existing output file */
     bool        list;
-    uint64_t    list_revision;        /* H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST = "latest" */
+    uint64_t    list_revision; /* H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST = "latest" */
     bool        has_from;
     uint64_t    from_revision;
     bool        has_to;
     uint64_t    to_revision;
 } h5soto_options_t;
 
-static const char            *s_opts = "hVm:o:vE*fl:12";
-static struct h5_long_options l_opts[] = {
-    {"help", no_arg, 'h'},
-    {"version", no_arg, 'V'},
-    {"materialize", require_arg, 'm'},
-    {"output", require_arg, 'o'},
-    {"verbose", no_arg, 'v'},
-    {"enable-error-stack", optional_arg, 'E'},
-    {"force", no_arg, 'f'},
-    {"list", require_arg, 'l'},
-    {"from", require_arg, '1'},
-    {"to", require_arg, '2'},
-    {NULL, 0, '\0'}};
+static const char            *s_opts   = "hVm:o:vE*fl:12";
+static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
+                                          {"version", no_arg, 'V'},
+                                          {"materialize", require_arg, 'm'},
+                                          {"output", require_arg, 'o'},
+                                          {"verbose", no_arg, 'v'},
+                                          {"enable-error-stack", optional_arg, 'E'},
+                                          {"force", no_arg, 'f'},
+                                          {"list", require_arg, 'l'},
+                                          {"from", require_arg, '1'},
+                                          {"to", require_arg, '2'},
+                                          {NULL, 0, '\0'}};
 
 static void usage(const char *prog);
 static void leave(int ret) H5_ATTR_NORETURN;
@@ -203,7 +202,8 @@ h5soto_inventory_free(h5soto_inventory_t *inventory)
 }
 
 static herr_t
-h5soto_inventory_append(h5soto_inventory_t *inventory, const char *path, h5soto_entry_kind_t kind, uint64_t signature)
+h5soto_inventory_append(h5soto_inventory_t *inventory, const char *path, h5soto_entry_kind_t kind,
+                        uint64_t signature)
 {
     h5soto_entry_t *new_entries = NULL;
     size_t          new_cap     = 0;
@@ -220,7 +220,8 @@ h5soto_inventory_append(h5soto_inventory_t *inventory, const char *path, h5soto_
         if (new_cap < inventory->capacity)
             goto error;
 
-        if (NULL == (new_entries = (h5soto_entry_t *)realloc(inventory->entries, new_cap * sizeof(*new_entries))))
+        if (NULL ==
+            (new_entries = (h5soto_entry_t *)realloc(inventory->entries, new_cap * sizeof(*new_entries))))
             goto error;
 
         inventory->entries  = new_entries;
@@ -271,9 +272,9 @@ h5soto_string_list_free(h5soto_string_list_t *list)
 static herr_t
 h5soto_string_list_append(h5soto_string_list_t *list, const char *value)
 {
-    char  **new_items = NULL;
-    size_t  new_cap   = 0;
-    char   *copy      = NULL;
+    char **new_items = NULL;
+    size_t new_cap   = 0;
+    char  *copy      = NULL;
 
     if (!list || !value)
         return FAIL;
@@ -533,10 +534,10 @@ done:
 static bool
 h5soto_onion_sidecar_exists(const char *filename)
 {
-    size_t  onion_len  = 0;
-    char   *onion_path = NULL;
-    FILE   *probe      = NULL;
-    bool    exists     = false;
+    size_t onion_len  = 0;
+    char  *onion_path = NULL;
+    FILE  *probe      = NULL;
+    bool   exists     = false;
 
     if (!filename)
         return false;
@@ -660,11 +661,11 @@ h5soto_hash_type_value(const void *value, hid_t type_id, uint64_t *hash)
             break;
 
         case H5T_ARRAY: {
-            hid_t  base_type = H5I_INVALID_HID;
-            int    ndims     = 0;
+            hid_t   base_type = H5I_INVALID_HID;
+            int     ndims     = 0;
             hsize_t dims[H5S_MAX_RANK];
-            size_t count     = 1;
-            size_t base_size = 0;
+            size_t  count     = 1;
+            size_t  base_size = 0;
 
             if ((base_type = H5Tget_super(type_id)) < 0)
                 return FAIL;
@@ -768,7 +769,8 @@ h5soto_hash_type_value(const void *value, hid_t type_id, uint64_t *hash)
 }
 
 static herr_t
-h5soto_alloc_typed_buffer(hid_t type_id, hid_t space_id, void **buf_out, size_t *npoints_out, bool *reclaim_out)
+h5soto_alloc_typed_buffer(hid_t type_id, hid_t space_id, void **buf_out, size_t *npoints_out,
+                          bool *reclaim_out)
 {
     H5S_class_t stype      = H5S_NO_CLASS;
     hssize_t    npoints_ss = 0;
@@ -820,14 +822,14 @@ h5soto_alloc_typed_buffer(hid_t type_id, hid_t space_id, void **buf_out, size_t 
 static herr_t
 h5soto_hash_attributes_cb(hid_t obj_id, const char *attr_name, const H5A_info_t *ainfo, void *op_data)
 {
-    h5soto_attr_hash_ctx_t *ctx      = (h5soto_attr_hash_ctx_t *)op_data;
-    hid_t                  attr_id   = H5I_INVALID_HID;
-    hid_t                  type_id   = H5I_INVALID_HID;
-    hid_t                  space_id  = H5I_INVALID_HID;
-    void                  *buf       = NULL;
-    bool                   reclaim   = false;
-    size_t                 npoints   = 0;
-    herr_t                 ret_value = FAIL;
+    h5soto_attr_hash_ctx_t *ctx       = (h5soto_attr_hash_ctx_t *)op_data;
+    hid_t                   attr_id   = H5I_INVALID_HID;
+    hid_t                   type_id   = H5I_INVALID_HID;
+    hid_t                   space_id  = H5I_INVALID_HID;
+    void                   *buf       = NULL;
+    bool                    reclaim   = false;
+    size_t                  npoints   = 0;
+    herr_t                  ret_value = FAIL;
 
     (void)ainfo;
 
@@ -941,20 +943,20 @@ h5soto_hash_named_datatype_signature(hid_t type_id, uint64_t *signature_out)
 /* Read a simple dataset in first-dimension slabs to bound peak memory usage. */
 static herr_t
 h5soto_hash_dataset_data_chunked(hid_t dset_id, hid_t type_id, hid_t space_id, size_t type_size,
-                                  uint64_t *hash)
+                                 uint64_t *hash)
 {
-    int     ndims          = 0;
+    int     ndims = 0;
     hsize_t dims[H5S_MAX_RANK];
     hsize_t start[H5S_MAX_RANK];
     hsize_t count[H5S_MAX_RANK];
-    hid_t   fspace_sel     = H5I_INVALID_HID;
-    void   *buf            = NULL;
-    size_t  row_elems      = 1;
+    hid_t   fspace_sel = H5I_INVALID_HID;
+    void   *buf        = NULL;
+    size_t  row_elems  = 1;
     size_t  row_bytes;
     hsize_t rows_per_chunk;
     size_t  chunk_elems;
     size_t  chunk_bytes;
-    herr_t  ret_value      = FAIL;
+    herr_t  ret_value = FAIL;
 
     ndims = H5Sget_simple_extent_dims(space_id, dims, NULL);
     if (ndims < 1)
@@ -991,7 +993,7 @@ h5soto_hash_dataset_data_chunked(hid_t dset_id, hid_t type_id, hid_t space_id, s
     memcpy(count, dims, sizeof(hsize_t) * (size_t)ndims);
 
     for (hsize_t row = 0; row < dims[0]; row += rows_per_chunk) {
-        hsize_t nrows     = rows_per_chunk;
+        hsize_t nrows = rows_per_chunk;
         size_t  sel_elems;
         hsize_t m;
         hid_t   mspace = H5I_INVALID_HID;
@@ -1036,18 +1038,18 @@ done:
 static herr_t
 h5soto_hash_dataset_signature(hid_t dset_id, uint64_t *signature_out)
 {
-    hid_t       type_id    = H5I_INVALID_HID;
-    hid_t       space_id   = H5I_INVALID_HID;
-    hid_t       dcpl_id    = H5I_INVALID_HID;
-    void       *buf        = NULL;
-    bool        reclaim    = false;
-    size_t      npoints    = 0;
-    size_t      type_size  = 0;
+    hid_t       type_id     = H5I_INVALID_HID;
+    hid_t       space_id    = H5I_INVALID_HID;
+    hid_t       dcpl_id     = H5I_INVALID_HID;
+    void       *buf         = NULL;
+    bool        reclaim     = false;
+    size_t      npoints     = 0;
+    size_t      type_size   = 0;
     size_t      total_bytes = 0;
-    H5S_class_t stype      = H5S_NO_CLASS;
-    htri_t      has_vlen   = 0;
-    htri_t      is_vstr    = 0;
-    uint64_t    hash       = H5SOTO_FNV_OFFSET;
+    H5S_class_t stype       = H5S_NO_CLASS;
+    htri_t      has_vlen    = 0;
+    htri_t      is_vstr     = 0;
+    uint64_t    hash        = H5SOTO_FNV_OFFSET;
 
     if (!signature_out)
         return FAIL;
@@ -1137,7 +1139,8 @@ error:
 }
 
 static herr_t
-h5soto_hash_link_signature(hid_t parent_id, const char *name, const H5L_info2_t *linfo, uint64_t *signature_out)
+h5soto_hash_link_signature(hid_t parent_id, const char *name, const H5L_info2_t *linfo,
+                           uint64_t *signature_out)
 {
     unsigned char *buf  = NULL;
     uint64_t       hash = H5SOTO_FNV_OFFSET;
@@ -1196,20 +1199,18 @@ h5soto_object_signature(hid_t obj_id, h5soto_entry_kind_t kind, uint64_t *signat
 static hid_t
 h5soto_open_revision(const char *filename, uint64_t revision_num)
 {
-    hid_t                   backing_fapl_id = H5I_INVALID_HID;
-    hid_t                   onion_fapl_id   = H5I_INVALID_HID;
-    hid_t                   file_id         = H5I_INVALID_HID;
-    uint32_t                page_size       = 0;
-    H5FD_onion_fapl_info_t  onion_fa        = {
-        H5FD_ONION_FAPL_INFO_VERSION_CURR,
-        H5I_INVALID_HID,
-        0,
-        H5FD_ONION_STORE_TARGET_ONION,
-        revision_num,
-        0,
-        0,
-        ""
-    };
+    hid_t                  backing_fapl_id = H5I_INVALID_HID;
+    hid_t                  onion_fapl_id   = H5I_INVALID_HID;
+    hid_t                  file_id         = H5I_INVALID_HID;
+    uint32_t               page_size       = 0;
+    H5FD_onion_fapl_info_t onion_fa        = {H5FD_ONION_FAPL_INFO_VERSION_CURR,
+                                              H5I_INVALID_HID,
+                                              0,
+                                              H5FD_ONION_STORE_TARGET_ONION,
+                                              revision_num,
+                                              0,
+                                              0,
+                                              ""};
 
     if (h5soto_read_onion_page_size(filename, &page_size) < 0)
         goto done;
@@ -1239,21 +1240,19 @@ done:
 static herr_t
 h5soto_get_latest_revision(const char *filename, uint64_t *latest_revision_out)
 {
-    hid_t                   backing_fapl_id = H5I_INVALID_HID;
-    hid_t                   onion_fapl_id   = H5I_INVALID_HID;
-    uint32_t                page_size       = 0;
-    H5FD_onion_fapl_info_t  onion_fa        = {
-        H5FD_ONION_FAPL_INFO_VERSION_CURR,
-        H5I_INVALID_HID,
-        0,
-        H5FD_ONION_STORE_TARGET_ONION,
-        H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
-        0,
-        0,
-        ""
-    };
-    uint64_t latest_revision = 0;
-    herr_t   ret_value       = FAIL;
+    hid_t                  backing_fapl_id = H5I_INVALID_HID;
+    hid_t                  onion_fapl_id   = H5I_INVALID_HID;
+    uint32_t               page_size       = 0;
+    H5FD_onion_fapl_info_t onion_fa        = {H5FD_ONION_FAPL_INFO_VERSION_CURR,
+                                              H5I_INVALID_HID,
+                                              0,
+                                              H5FD_ONION_STORE_TARGET_ONION,
+                                              H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+                                              0,
+                                              0,
+                                              ""};
+    uint64_t               latest_revision = 0;
+    herr_t                 ret_value       = FAIL;
 
     if (!latest_revision_out)
         return FAIL;
@@ -1291,8 +1290,8 @@ static herr_t
 h5soto_walk_group_member(hid_t group_id, const char *group_path, const char *name, const H5L_info2_t *linfo,
                          h5soto_walk_ctx_t *ctx)
 {
-    hid_t               obj_id    = H5I_INVALID_HID;
-    H5I_type_t          id_type   = H5I_BADID;
+    hid_t               obj_id  = H5I_INVALID_HID;
+    H5I_type_t          id_type = H5I_BADID;
     H5O_info2_t         oinfo;
     h5soto_entry_kind_t kind;
     uint64_t            signature = 0;
@@ -1364,7 +1363,7 @@ h5soto_group_iter_cb(hid_t group_id, const char *name, const H5L_info2_t *linfo,
 static herr_t
 h5soto_walk_group(hid_t group_id, const char *group_path, h5soto_walk_ctx_t *ctx)
 {
-    hsize_t                 idx    = 0;
+    hsize_t                 idx = 0;
     h5soto_group_iter_ctx_t iter_ctx;
 
     iter_ctx.group_path = group_path;
@@ -1380,8 +1379,8 @@ h5soto_walk_group(hid_t group_id, const char *group_path, h5soto_walk_ctx_t *ctx
 static herr_t
 h5soto_build_inventory_for_revision(const char *filename, uint64_t revision, h5soto_inventory_t *inventory)
 {
-    hid_t             file_id  = H5I_INVALID_HID;
-    hid_t             root_id  = H5I_INVALID_HID;
+    hid_t             file_id = H5I_INVALID_HID;
+    hid_t             root_id = H5I_INVALID_HID;
     h5soto_walk_ctx_t walk_ctx;
     H5O_info2_t       root_info;
     uint64_t          signature = 0;
@@ -1429,15 +1428,15 @@ done:
 static herr_t
 h5soto_copy_attribute_cb(hid_t src_id, const char *attr_name, const H5A_info_t *ainfo, void *op_data)
 {
-    h5soto_attr_copy_ctx_t *ctx      = (h5soto_attr_copy_ctx_t *)op_data;
-    hid_t                  attr_id   = H5I_INVALID_HID;
-    hid_t                  type_id   = H5I_INVALID_HID;
-    hid_t                  space_id  = H5I_INVALID_HID;
-    hid_t                  out_attr  = H5I_INVALID_HID;
-    void                  *buf       = NULL;
-    bool                   reclaim   = false;
-    size_t                 npoints   = 0;
-    herr_t                 ret_value = FAIL;
+    h5soto_attr_copy_ctx_t *ctx       = (h5soto_attr_copy_ctx_t *)op_data;
+    hid_t                   attr_id   = H5I_INVALID_HID;
+    hid_t                   type_id   = H5I_INVALID_HID;
+    hid_t                   space_id  = H5I_INVALID_HID;
+    hid_t                   out_attr  = H5I_INVALID_HID;
+    void                   *buf       = NULL;
+    bool                    reclaim   = false;
+    size_t                  npoints   = 0;
+    herr_t                  ret_value = FAIL;
 
     (void)ainfo;
 
@@ -1571,8 +1570,7 @@ h5soto_default_output_name(const char *input_filename, uint64_t revision)
 }
 
 static herr_t
-h5soto_materialize_revision(const char *filename, uint64_t revision, const char *output_filename,
-                             bool force)
+h5soto_materialize_revision(const char *filename, uint64_t revision, const char *output_filename, bool force)
 {
     hid_t                src_file     = H5I_INVALID_HID;
     hid_t                dst_file     = H5I_INVALID_HID;
@@ -1597,8 +1595,8 @@ h5soto_materialize_revision(const char *filename, uint64_t revision, const char 
 
     if ((dst_fcpl = H5Fget_create_plist(src_file)) < 0)
         goto done;
-    if ((dst_file = H5Fcreate(output_filename, force ? H5F_ACC_TRUNC : H5F_ACC_EXCL, dst_fcpl,
-                               H5P_DEFAULT)) < 0) {
+    if ((dst_file = H5Fcreate(output_filename, force ? H5F_ACC_TRUNC : H5F_ACC_EXCL, dst_fcpl, H5P_DEFAULT)) <
+        0) {
         if (!force)
             error_msg("output file '%s' already exists; use --force to overwrite\n", output_filename);
         goto done;
@@ -1616,7 +1614,8 @@ h5soto_materialize_revision(const char *filename, uint64_t revision, const char 
         goto done;
 
     for (size_t i = 0; i < child_names.nitems; i++)
-        if (H5Lmove(tmp_group_id, child_names.items[i], dst_file, child_names.items[i], H5P_DEFAULT, H5P_DEFAULT) < 0)
+        if (H5Lmove(tmp_group_id, child_names.items[i], dst_file, child_names.items[i], H5P_DEFAULT,
+                    H5P_DEFAULT) < 0)
             goto done;
 
     if (H5Ldelete(dst_file, H5SOTO_TMP_ROOT_NAME, H5P_DEFAULT) < 0)
@@ -1664,7 +1663,7 @@ h5soto_print_revision_listing(const char *filename, uint64_t revision, uint64_t 
 
 static herr_t
 h5soto_print_verbose_summary(const char *filename, uint64_t latest_revision, uint64_t from_revision,
-                              uint64_t to_revision)
+                             uint64_t to_revision)
 {
     h5soto_inventory_t prev_inventory;
     h5soto_inventory_t curr_inventory;
@@ -1739,9 +1738,11 @@ h5soto_print_verbose_summary(const char *filename, uint64_t latest_revision, uin
         for (size_t idx = 0; idx < added.nitems; idx++)
             printf("  added: %s (%s)\n", added.items[idx]->path, h5soto_kind_name(added.items[idx]->kind));
         for (size_t idx = 0; idx < removed.nitems; idx++)
-            printf("  removed: %s (%s)\n", removed.items[idx]->path, h5soto_kind_name(removed.items[idx]->kind));
+            printf("  removed: %s (%s)\n", removed.items[idx]->path,
+                   h5soto_kind_name(removed.items[idx]->kind));
         for (size_t idx = 0; idx < modified.nitems; idx++)
-            printf("  modified: %s (%s)\n", modified.items[idx]->path, h5soto_kind_name(modified.items[idx]->kind));
+            printf("  modified: %s (%s)\n", modified.items[idx]->path,
+                   h5soto_kind_name(modified.items[idx]->kind));
 
         h5soto_ref_list_free(&modified);
         h5soto_ref_list_free(&removed);
@@ -1770,8 +1771,8 @@ done:
 static int
 h5soto_parse_revision_arg(const char *arg, uint64_t *revision_out)
 {
-    char               *endptr = NULL;
-    unsigned long long  value  = 0;
+    char              *endptr = NULL;
+    unsigned long long value  = 0;
 
     if (!arg || !*arg || !revision_out)
         return -1;
@@ -1899,8 +1900,8 @@ h5soto_parse_command_line(int argc, const char *const *argv, h5soto_options_t *o
 
     /* Cross-option validation */
     {
-        int mode_count = (options->materialize ? 1 : 0) + (options->verbose ? 1 : 0) +
-                         (options->list ? 1 : 0);
+        int mode_count =
+            (options->materialize ? 1 : 0) + (options->verbose ? 1 : 0) + (options->list ? 1 : 0);
         if (mode_count > 1) {
             error_msg("--materialize, --verbose, and --list are mutually exclusive\n");
             return -1;
@@ -1935,14 +1936,19 @@ usage(const char *prog)
     fprintf(rawoutstream, "  OPTIONS\n");
     fprintf(rawoutstream, "   -h, --help                   Print a usage message and exit\n");
     fprintf(rawoutstream, "   -V, --version                Print version number and exit\n");
-    fprintf(rawoutstream, "   -v, --verbose                Print per-revision object-level change summaries\n");
-    fprintf(rawoutstream, "       --from=REV               With --verbose: start diff summary at revision REV\n");
-    fprintf(rawoutstream, "       --to=REV                 With --verbose: end diff summary at revision REV\n");
+    fprintf(rawoutstream,
+            "   -v, --verbose                Print per-revision object-level change summaries\n");
+    fprintf(rawoutstream,
+            "       --from=REV               With --verbose: start diff summary at revision REV\n");
+    fprintf(rawoutstream,
+            "       --to=REV                 With --verbose: end diff summary at revision REV\n");
     fprintf(rawoutstream, "   -l, --list=REV               List all objects present in revision REV\n");
     fprintf(rawoutstream, "   -m, --materialize=REV        Create a standalone HDF5 file for revision REV\n");
     fprintf(rawoutstream, "   -o, --output=FILE            Output file path for --materialize\n");
-    fprintf(rawoutstream, "   -f, --force                  Overwrite existing output file (--materialize only)\n");
-    fprintf(rawoutstream, "       --enable-error-stack     Print messages from the HDF5 error stack as they occur\n");
+    fprintf(rawoutstream,
+            "   -f, --force                  Overwrite existing output file (--materialize only)\n");
+    fprintf(rawoutstream,
+            "       --enable-error-stack     Print messages from the HDF5 error stack as they occur\n");
     fprintf(rawoutstream, "\n");
     fprintf(rawoutstream, "REV may be a revision number (0-based) or the string \"latest\".\n");
     fprintf(rawoutstream, "\n");
@@ -1950,11 +1956,13 @@ usage(const char *prog)
     fprintf(rawoutstream, "  %s file.h5                                  # print revision count\n", prog);
     fprintf(rawoutstream, "  %s --verbose file.h5                        # show full change history\n", prog);
     fprintf(rawoutstream, "  %s --verbose --from=2 --to=4 file.h5        # show revisions 2-4 only\n", prog);
-    fprintf(rawoutstream, "  %s --list=3 file.h5                         # list objects in revision 3\n", prog);
-    fprintf(rawoutstream, "  %s --list=latest file.h5                    # list objects in latest revision\n", prog);
-    fprintf(rawoutstream, "  %s --materialize=3 --output=rev3.h5 file.h5 # extract revision 3\n", prog);
-    fprintf(rawoutstream, "  %s --materialize=latest --force file.h5     # extract latest, overwrite output\n",
+    fprintf(rawoutstream, "  %s --list=3 file.h5                         # list objects in revision 3\n",
             prog);
+    fprintf(rawoutstream, "  %s --list=latest file.h5                    # list objects in latest revision\n",
+            prog);
+    fprintf(rawoutstream, "  %s --materialize=3 --output=rev3.h5 file.h5 # extract revision 3\n", prog);
+    fprintf(rawoutstream,
+            "  %s --materialize=latest --force file.h5     # extract latest, overwrite output\n", prog);
 }
 
 static void
@@ -2002,8 +2010,7 @@ main(int argc, char *argv[])
     }
 
     /* Resolve "latest" sentinel to the actual latest revision number */
-    if (options.materialize &&
-        options.materialize_revision == H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST)
+    if (options.materialize && options.materialize_revision == H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST)
         options.materialize_revision = latest_revision;
     if (options.list && options.list_revision == H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST)
         options.list_revision = latest_revision;
@@ -2036,8 +2043,8 @@ main(int argc, char *argv[])
 
         if (h5soto_materialize_revision(options.filename, options.materialize_revision, output_filename,
                                         options.force) < 0) {
-            error_msg("failed to materialize revision %" PRIu64 " into '%s'\n",
-                      options.materialize_revision, output_filename);
+            error_msg("failed to materialize revision %" PRIu64 " into '%s'\n", options.materialize_revision,
+                      output_filename);
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
@@ -2064,8 +2071,7 @@ main(int argc, char *argv[])
         uint64_t to_rev   = options.has_to ? options.to_revision : latest_revision;
 
         if (from_rev > latest_revision) {
-            error_msg("--from %" PRIu64 " exceeds latest revision %" PRIu64 "\n", from_rev,
-                      latest_revision);
+            error_msg("--from %" PRIu64 " exceeds latest revision %" PRIu64 "\n", from_rev, latest_revision);
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
