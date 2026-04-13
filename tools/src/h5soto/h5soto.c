@@ -593,13 +593,13 @@ done:
 static herr_t
 h5soto_encode_space(hid_t obj_id, void *buf, size_t *nalloc)
 {
-    return H5Sencode(obj_id, buf, nalloc, H5P_DEFAULT);
+    return H5Sencode2(obj_id, buf, nalloc, H5P_DEFAULT);
 }
 
 static herr_t
 h5soto_encode_plist(hid_t obj_id, void *buf, size_t *nalloc)
 {
-    return H5Pencode(obj_id, buf, nalloc, H5P_DEFAULT);
+    return H5Pencode2(obj_id, buf, nalloc, H5P_DEFAULT);
 }
 
 static herr_t h5soto_hash_type_value(const void *value, hid_t type_id, uint64_t *hash);
