@@ -1697,9 +1697,12 @@ test_create_dataset_enum_types(void H5_ATTR_UNUSED *params)
         goto error;
     }
 
-    for (i = 0; i < ARRAY_LENGTH(enum_type_test_table); i++)
-        if (H5Tenum_insert(enum_native, enum_type_test_table[i], &i) < 0)
+    for (i = 0; i < ARRAY_LENGTH(enum_type_test_table); i++) {
+        int enum_val = (int)i;
+
+        if (H5Tenum_insert(enum_native, enum_type_test_table[i], &enum_val) < 0)
             TEST_ERROR;
+    }
 
     if ((enum_non_native = H5Tenum_create(H5T_STD_U32LE)) < 0) {
         H5_FAILED();
@@ -1708,11 +1711,12 @@ test_create_dataset_enum_types(void H5_ATTR_UNUSED *params)
     }
 
     for (i = 0; i < DATASET_ENUM_TYPE_TEST_NUM_MEMBERS; i++) {
-        char val_name[15];
+        char     val_name[15];
+        uint32_t enum_val = (uint32_t)i;
 
         snprintf(val_name, 15, "%s%zu", DATASET_ENUM_TYPE_TEST_VAL_BASE_NAME, i);
 
-        if (H5Tenum_insert(enum_non_native, val_name, &i) < 0)
+        if (H5Tenum_insert(enum_non_native, val_name, &enum_val) < 0)
             TEST_ERROR;
     }
 

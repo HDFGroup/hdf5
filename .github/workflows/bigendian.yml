@@ -63,5 +63,5 @@ jobs:
       - name: Run Tests
         shell: alpine.sh --root {0}
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }}
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} --timeout 1800
         working-directory: build
