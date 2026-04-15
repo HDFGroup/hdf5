@@ -915,6 +915,20 @@ if ("H5TEST-error_test" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
   set_tests_properties (H5TEST-error_test PROPERTIES DISABLED true)
 endif ()
 
+#-- Adding tests for API version defaulting
+#   API_VERSION_TEST_NUMBERS is defined in CMakeLists.txt and already in scope
+foreach (api_num IN LISTS API_VERSION_TEST_NUMBERS)
+  add_test (NAME H5TEST-tapi_version_default_v${api_num}
+      COMMAND $<TARGET_FILE:tapi_version_default_v${api_num}>
+  )
+  set_tests_properties (H5TEST-tapi_version_default_v${api_num} PROPERTIES
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+  )
+  if ("H5TEST-tapi_version_default_v${api_num}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (H5TEST-tapi_version_default_v${api_num} PROPERTIES DISABLED true)
+  endif ()
+endforeach ()
+
 #-- Adding test for links_env
 add_test (NAME H5TEST-links_env-clear-objects
     COMMAND ${CMAKE_COMMAND} -E remove

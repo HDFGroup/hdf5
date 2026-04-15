@@ -94,7 +94,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
       - name: Install CMake
-        uses: lukka/get-cmake@f176ccd3f28bda569c43aae4894f06b2435a3375 # latest
+        uses: lukka/get-cmake@ea83089aa35e08e459464341fe24ad024ee2466f # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -106,7 +106,7 @@ jobs:
           cmake --version
 
       - name: Set up JDK 21
-        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -127,7 +127,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Windows)
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v6
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -174,7 +174,7 @@ jobs:
         shell: bash
 
       - name: Sign files with Trusted Signing
-        uses: azure/trusted-signing-action@87c2e83e6868da99d3380aa309851b32ed9a8346 # v1.1.0
+        uses: azure/trusted-signing-action@b443cf8ea4124818d2ea9f043cba29fc3ec47b16 # v1.2.0
         with:
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -240,7 +240,7 @@ jobs:
         run: choco install ninja
 
       - name: Get Sources
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Setup Doxygen
         uses: ./.github/actions/setup-doxygen
@@ -251,7 +251,7 @@ jobs:
           arch: arm64
 
       - name: Install CMake
-        uses: lukka/get-cmake@f176ccd3f28bda569c43aae4894f06b2435a3375 # latest
+        uses: lukka/get-cmake@ea83089aa35e08e459464341fe24ad024ee2466f # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -263,7 +263,7 @@ jobs:
           cmake --version
 
       - name: Set up JDK 21
-        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -291,7 +291,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Windows ARM64)
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v6
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -346,7 +346,7 @@ jobs:
         shell: bash
 
       - name: Sign files with Trusted Signing
-        uses: azure/trusted-signing-action@87c2e83e6868da99d3380aa309851b32ed9a8346 # v1.1.0
+        uses: azure/trusted-signing-action@b443cf8ea4124818d2ea9f043cba29fc3ec47b16 # v1.2.0
         with:
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -414,7 +414,7 @@ jobs:
           sudo apt-get install ninja-build graphviz
 
       - name: Get Actions
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           sparse-checkout: .github/actions
 
@@ -422,7 +422,7 @@ jobs:
         uses: ./.github/actions/setup-doxygen
 
       - name: Install CMake
-        uses: lukka/get-cmake@f176ccd3f28bda569c43aae4894f06b2435a3375 # latest
+        uses: lukka/get-cmake@ea83089aa35e08e459464341fe24ad024ee2466f # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -434,7 +434,7 @@ jobs:
           cmake --version
 
       - name: Set up JDK 21
-        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -454,7 +454,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux)
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v6
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -596,7 +596,7 @@ jobs:
           clang -v
 
       - name: Install CMake
-        uses: lukka/get-cmake@f176ccd3f28bda569c43aae4894f06b2435a3375 # latest
+        uses: lukka/get-cmake@ea83089aa35e08e459464341fe24ad024ee2466f # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -630,7 +630,7 @@ jobs:
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
 
       - name: Set up JDK 19
-        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -650,7 +650,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (MacOS_latest)
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v6
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -818,13 +818,13 @@ jobs:
           sudo apt-get install ninja-build
 
       - name: Install CMake
-        uses: lukka/get-cmake@f176ccd3f28bda569c43aae4894f06b2435a3375 # latest
+        uses: lukka/get-cmake@ea83089aa35e08e459464341fe24ad024ee2466f # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
 
       - name: Install aws-c-s3 (Cached installation)
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v6
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
         with:
           name: libaws-c-s3-Release
 
@@ -857,7 +857,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux S3)
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v6
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -920,7 +920,7 @@ jobs:
           version: '2025.0'
 
       - name: Install CMake
-        uses: lukka/get-cmake@f176ccd3f28bda569c43aae4894f06b2435a3375 # latest
+        uses: lukka/get-cmake@ea83089aa35e08e459464341fe24ad024ee2466f # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -941,7 +941,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Windows_intel)
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v6
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -991,7 +991,7 @@ jobs:
         shell: pwsh
 
       - name: Sign files with Trusted Signing (Windows_intel)
-        uses: azure/trusted-signing-action@87c2e83e6868da99d3380aa309851b32ed9a8346 # v1.1.0
+        uses: azure/trusted-signing-action@b443cf8ea4124818d2ea9f043cba29fc3ec47b16 # v1.2.0
         with:
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -1066,7 +1066,7 @@ jobs:
           version: '2025.0'
 
       - name: Install CMake
-        uses: lukka/get-cmake@f176ccd3f28bda569c43aae4894f06b2435a3375 # latest
+        uses: lukka/get-cmake@ea83089aa35e08e459464341fe24ad024ee2466f # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -1086,7 +1086,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux_intel)
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v6
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}

@@ -433,6 +433,19 @@ sub parse_line ($) {
             $curr_sym_number++;
         }
 
+        # For API versions earlier than the function's introduction,
+        # default to the earliest version (version 1) for maximum compatibility
+        my $intro_vers = $vers_list[0];
+        foreach my $hash_vers (@versions) {
+            if ($hash_vers < $intro_vers) {
+                if ($line_type == 1) {
+                    $api_vers_to_function_vers{$hash_vers}{$name} = 1;
+                } else {
+                    $api_vers_to_type_vers{$hash_vers}{$name} = 1;
+                }
+            }
+        }
+
         # Store the number of symbol versions in a hash table, indexed by the name
         if ($line_type == 1) {
             $functions{$name} = $#vers_list + 1;
@@ -520,6 +533,160 @@ sub create_doxygen_cmake ($) {
 }
 
 ##############################################################################
+# Create the generated test file for verifying API version defaulting
+#
+sub create_test ($) {
+    my $prefix = shift;         # Get the prefix for the source file (e.g., "src/")
+    my $file = "tapi_version_default.c";
+
+    # Output to test directory (relative to src/)
+    my $test_dir = $prefix;
+    $test_dir =~ s/src\/?$/test\//;
+
+    # Validate the substitution succeeded
+    if ($test_dir eq $prefix && $prefix ne "") {
+        die "create_test: prefix '$prefix' does not end in 'src/' -- cannot derive test directory";
+    }
+
+    # Create test directory if it doesn't exist
+    if ($test_dir ne "" && ! -d $test_dir) {
+        mkdir $test_dir or die "unable to create directory: $test_dir";
+    }
+
+    # Open new test file
+    open TEST, ">${test_dir}${file}" or die "unable to create test file: ${test_dir}${file}";
+
+    # Print copyright and warning
+    print_copyright(*TEST);
+    print_warning(*TEST);
+
+    # Print test description
+    print TEST "/*\n";
+    print TEST " * Purpose: Tests that versioned API function macros default to the earliest\n";
+    print TEST " *          version for functions introduced after the configured global API\n";
+    print TEST " *          version. For example, with H5_USE_16_API, H5Sencode (introduced\n";
+    print TEST " *          in v1.8) should map to H5Sencode1, not H5Sencode2.\n";
+    print TEST " *\n";
+    print TEST " *          This test is compiled multiple times with different\n";
+    print TEST " *          -DH5_USE_*_API and -DTEST_API_VERSION=* flags to verify each\n";
+    print TEST " *          API version level.\n";
+    print TEST " */\n";
+
+    # Emit preamble that clears all global API version defaults.
+    # When the project is configured with a default API version (e.g.,
+    # HDF5_DEFAULT_API_VERSION=v16), H5pubconf.h defines H5_USE_16_API_DEFAULT,
+    # which causes H5version.h to activate H5_USE_16_API. If the test also
+    # defines -DH5_USE_200_API, both blocks would be active and the earliest
+    # one wins (setting everything to version 1). To isolate each test to
+    # exactly one API version, we include H5pubconf.h first (setting its
+    # include guard), then #undef all API version macros, and re-establish
+    # only the version under test before including the rest of the headers.
+    print TEST "/* Include config header first to set its include guard */\n";
+    print TEST "#include \"H5pubconf.h\"\n\n";
+    print TEST "/* Clear all API version macros that may have been set by the\n";
+    print TEST " * global default configuration, so only the version under test\n";
+    print TEST " * is active when H5version.h is processed.\n";
+    print TEST " */\n";
+    foreach my $api_vers (@versions) {
+        print TEST "#undef H5_USE_${api_vers}_API_DEFAULT\n";
+        print TEST "#undef H5_USE_${api_vers}_API\n";
+    }
+    print TEST "\n";
+    print TEST "/* Re-establish only the API version under test */\n";
+    my $first_preamble = 1;
+    foreach my $api_vers (@versions) {
+        if ($first_preamble) {
+            print TEST "#if TEST_API_VERSION == $api_vers\n";
+            $first_preamble = 0;
+        }
+        else {
+            print TEST "#elif TEST_API_VERSION == $api_vers\n";
+        }
+        print TEST "  #define H5_USE_${api_vers}_API 1\n";
+    }
+    print TEST "#else\n";
+    print TEST "  #error \"TEST_API_VERSION not set to a valid value\"\n";
+    print TEST "#endif\n\n";
+
+    print TEST "#include \"h5test.h\"\n\n";
+
+    # Print CHECK_VERS macro for functions
+    print TEST "/*\n";
+    print TEST " * Helper macro: check that a _vers macro equals an expected value.\n";
+    print TEST " */\n";
+    print TEST "#define CHECK_VERS(func_name, expected)                                  \\\n";
+    print TEST "    do {                                                                 \\\n";
+    print TEST "        if (func_name##_vers != (expected)) {                            \\\n";
+    print TEST "            fprintf(stderr, \"FAIL: %s_vers = %d, expected %d\\n\",      \\\n";
+    print TEST "                    #func_name, func_name##_vers, (expected));            \\\n";
+    print TEST "            nerrors++;                                                    \\\n";
+    print TEST "        }                                                                \\\n";
+    print TEST "    } while (0)\n\n";
+
+    # Print CHECK_VERS_T macro for typedefs
+    print TEST "#define CHECK_VERS_T(type_name, expected)                                \\\n";
+    print TEST "    do {                                                                 \\\n";
+    print TEST "        if (type_name##_t_vers != (expected)) {                          \\\n";
+    print TEST "            fprintf(stderr, \"FAIL: %s_t_vers = %d, expected %d\\n\",    \\\n";
+    print TEST "                    #type_name, type_name##_t_vers, (expected));          \\\n";
+    print TEST "            nerrors++;                                                    \\\n";
+    print TEST "        }                                                                \\\n";
+    print TEST "    } while (0)\n\n";
+
+    # Print main function
+    print TEST "int\n";
+    print TEST "main(void)\n";
+    print TEST "{\n";
+    print TEST "    int nerrors = 0;\n\n";
+    print TEST "    TESTING(\"API version defaulting for versioned functions\");\n\n";
+
+    # Generate test sections for each API version
+    my $first = 1;
+    foreach my $api_vers (@versions) {
+        if ($first) {
+            print TEST "#if TEST_API_VERSION == $api_vers\n";
+            $first = 0;
+        }
+        else {
+            print TEST "#elif TEST_API_VERSION == $api_vers\n";
+        }
+        print TEST "    printf(\"Configured with H5_USE_${api_vers}_API\\n\");\n\n";
+
+        # Print checks for all functions at this API version
+        for my $name (sort keys %{$api_vers_to_function_vers{$api_vers}}) {
+            my $expected = $api_vers_to_function_vers{$api_vers}{$name};
+            print TEST "    CHECK_VERS($name, $expected);\n";
+        }
+        print TEST "\n";
+
+        # Print checks for all typedefs at this API version
+        for my $name (sort keys %{$api_vers_to_type_vers{$api_vers}}) {
+            my $expected = $api_vers_to_type_vers{$api_vers}{$name};
+            print TEST "    CHECK_VERS_T($name, $expected);\n";
+        }
+        print TEST "\n";
+    }
+
+    # Close the #if/#elif chain
+    print TEST "#else\n";
+    print TEST "#error \"TEST_API_VERSION not set to a valid value\"\n";
+    print TEST "#endif\n\n";
+
+    # Print result checking and return
+    print TEST "    if (nerrors) {\n";
+    print TEST "        H5_FAILED();\n";
+    print TEST "        fprintf(stderr, \"    %d version check%s failed\\n\", nerrors, nerrors > 1 ? \"s\" : \"\");\n";
+    print TEST "        return 1;\n";
+    print TEST "    }\n\n";
+    print TEST "    PASSED();\n";
+    print TEST "    return 0;\n";
+    print TEST "}\n";
+
+    # Close test file
+    close TEST;
+}
+
+##############################################################################
 # Read symbol version file (given as command-line argument) in and process it
 # into internal data structures, then create header files.
 #
@@ -551,5 +718,7 @@ for $file (@ARGV) {
     create_public($prefix);
     print "Generating 'docs/doxygen/H5version_doxygen.cmake'\n";
     create_doxygen_cmake($prefix);
+    print "Generating 'test/tapi_version_default.c'\n";
+    create_test($prefix);
 }
 

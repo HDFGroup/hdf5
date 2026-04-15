@@ -203,7 +203,7 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
     The command above will configure, build, test, and create an install package in
     the `myhdfstuff` folder. It will have the format: `HDF5-2.X.Y-<platform>.<zip or tar.gz>`.
 
-    On Unix, `<platform>` will be "Linux". A similar `.sh` file will also be created. On Windows, `<platform>` will be "win64" or "win32". If you have an installer on your system, you will also see a similar file that ends in either `.exe` (NSIS) or `.msi` (WiX).
+    On Unix, `<platform>` will be "Linux". A similar `.sh` file will also be created. On Windows, `<platform>` will be "win-vs2022_cl" or "win-vs2022_intel". If you have an installer on your system, you will also see a similar file that ends in either `.exe` (NSIS) or `.msi` (WiX).
 
     Notes on the command line options.
 
@@ -217,7 +217,7 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
 
 6. To install, `X.Y` is the current release version.
 
-    * **On Windows (with WiX):** Execute `HDF5-2.X.Y-win32.msi` or `HDF5-2.X.Y-win64.msi`. By default this program will install the HDF5 library into the `C:\Program Files` directory and will create the following directory structure:
+    * **On Windows (with WiX):** Execute `hdf5-2.X.Y-win-vs2022_cl.msi` or `hdf5-2.X.Y-win-vs2022_intel.msi`. By default this program will install the HDF5 library into the `C:\Program Files` directory and will create the following directory structure:
 
           HDF_Group
           --HDF5
@@ -309,8 +309,8 @@ Go through these steps:
 8. Create an install image: `cpack -C Release CPackConfig.cmake`
 9. To install
 
-    * On **Windows (with WiX installed)**, execute `HDF5-2.X.Y-win32.msi or
-      HDF5-2.X.Y-win64.msi`. By default this program will install the hdf5
+    * On **Windows (with WiX installed)**, execute `hdf5-2.X.Y-win-vs2022_cl.msi` or
+      `hdf5-2.X.Y-win-vs2022_intel.msi`. By default this program will install the hdf5
       library into the `C:\Program Files` directory and will create the
       following directory structure:
 

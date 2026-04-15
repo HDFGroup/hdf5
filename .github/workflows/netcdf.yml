@@ -43,7 +43,7 @@ jobs:
         sudo apt install -y libaec-dev zlib1g-dev automake autoconf libcurl4-openssl-dev libjpeg-dev wget curl bzip2 m4 flex bison cmake libzip-dev doxygen openssl libtool libtool-bin
 
     - name: Checkout HDF5
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Configure
       run: |
@@ -78,7 +78,7 @@ jobs:
       working-directory: ${{ runner.workspace }}/build
 
     - name: Checkout netCDF
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         repository: unidata/netcdf-c
         path: netcdf-c

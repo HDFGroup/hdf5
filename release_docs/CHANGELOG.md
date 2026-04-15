@@ -42,7 +42,9 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## Java Enhancements:
 
-  
+- Java dependency JAR paths are now configurable CMake cache variables, allowing system-provided JARs to be used in place of the bundled copies.
+
+
 ## Acknowledgements: 
 
 We would like to thank the many HDF5 community members who contributed to this release of HDF5.
@@ -103,6 +105,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    `H5Ovisit()` would previously internally traverse each object's path name from the iteration root group in order to retrieve information about that object, causing severe performance degradation with a deeply nested group structure. Modified the algorithm to instead retrieve information directly from the object. To get this benefit, users should use `H5Ovisit3()`, or use `H5Ovisit2()` with neither `H5O_INFO_HDR` nor `H5O_INFO_META_SIZE` selected in the `fields` parameter. Performance of `H5Ocopy()`, `H5Iget_name()`, and external links with a callback set should also improve in similar situations.
 
+### Versioned API functions now default to earliest version for older API settings
+
+   When a global API compatibility version is set (e.g., `H5_USE_16_API`), functions introduced after that version previously defaulted to their latest version, which could break applications. For example, an application using `H5_USE_16_API` that called `H5Sencode()` (introduced in 1.8, versioned in 1.12) would get `H5Sencode2()` instead of `H5Sencode1()`, potentially causing compilation or runtime failures. Versioned functions now default to their earliest (version 1) variant when the configured API level predates the function's introduction, providing maximum compatibility. See issue [#6278](https://github.com/HDFGroup/hdf5/issues/6278).
+
 ## Parallel Library
 
 ## Fortran Library
@@ -110,6 +116,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 ## C++ Library
 
 ## Java Library
+
+### Java dependency JAR paths are now user-configurable
+
+   The CMake variables `HDF5_JAVA_LOGGING_JAR`, `HDF5_JAVA_LOGGING_NOP_JAR`, `HDF5_JAVA_LOGGING_SIMPLE_JAR`, `HDF5_JAVA_JUNIT_JAR`, and `HDF5_JAVA_HAMCREST_JAR` are now CMake cache variables with the bundled JARs as defaults. Users can override these at configure time to use system-provided JARs. See `INSTALL_CMake_options.md` for details.
 
 ## Tools
 
@@ -133,6 +143,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 ### Fixed checking of data alignment requirements in direct I/O VFD
 
    The direct I/O VFD attempts to determine data alignment requirements for a file on file open to try and avoid extra work when data alignment isn't required. Depending on the file access flags used when opening a file, the VFD could incorrectly determine these requirements for either writes or reads, eventually leading to a possible EINVAL return value on write or read. This has been fixed by separately determining the requirements for writes and reads and being more conservative about trying to avoid data alignment requirements.
+
+### Fixed integer overflow in array datatype element count computation
+
+   Fixed a bug in H5O__dtype_decode_helper() where the loop computing the total number of elements in an array datatype had no per-step overflow check. On 64-bit systems, large dimension sizes could cause the element count to wrap around, bypassing the post-loop overflow check and producing silently incorrect results in downstream type conversion and size calculations.
 
 ### Fixed an issue with chunked datasets using the wrong index type with parallel HDF5
 

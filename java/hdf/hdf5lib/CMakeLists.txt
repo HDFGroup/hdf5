@@ -233,6 +233,9 @@ if (HDF5_ENABLE_MAVEN_DEPLOY)
   # Export both JARs for installation
   SET_GLOBAL_VARIABLE (HDF5_JAVA_JARS_TO_EXPORT "${HDF5_JAVA_JARS_TO_EXPORT};${HDF5_JAVA_UNIVERSAL_JAR_FILE}")
   SET_GLOBAL_VARIABLE (HDF5_MAVEN_PLATFORM_JAR_FILE "${HDF5_JAVA_PLATFORM_JAR_FILE}")
+
+  # Set HDF5_JAVA_LIBRARY for examples to depend on
+  SET_GLOBAL_VARIABLE (HDF5_JAVA_LIBRARY ${HDF5_JAVA_UNIVERSAL_TARGET})
 else ()
   # Standard JAR creation without Maven classifiers
   # Include FFM bindings if this is an FFM build
@@ -265,6 +268,9 @@ else ()
   get_target_property (${HDF5_JAVA_HDF5_LIB_TARGET}_JAR_FILE ${HDF5_JAVA_HDF5_LIB_TARGET} JAR_FILE)
   SET_GLOBAL_VARIABLE (HDF5_JAVA_JARS "${HDF5_JAVA_JARS};${${HDF5_JAVA_HDF5_LIB_TARGET}_JAR_FILE}")
   SET_GLOBAL_VARIABLE (HDF5_JAVA_JARS_TO_EXPORT "${HDF5_JAVA_JARS_TO_EXPORT};${${HDF5_JAVA_HDF5_LIB_TARGET}_JAR_FILE}")
+
+  # Set HDF5_JAVA_LIBRARY for examples to depend on
+  SET_GLOBAL_VARIABLE (HDF5_JAVA_LIBRARY ${HDF5_JAVA_HDF5_LIB_TARGET})
 endif ()
 message (STATUS "HDF5 java jar: ${HDF5_JAVA_JARS}")
 
@@ -275,9 +281,6 @@ message (STATUS "HDF5 java export jar: ${HDF5_JAVA_JARS}")
 
 add_dependencies (${HDF5_JAVA_HDF5_LIB_TARGET} ${HDF5_JAVA_JSRC_LIB_TARGET})
 set_target_properties (${HDF5_JAVA_HDF5_LIB_TARGET} PROPERTIES FOLDER libraries/java)
-
-# Set HDF5_JAVA_LIBRARY for examples to depend on
-SET_GLOBAL_VARIABLE (HDF5_JAVA_LIBRARY ${HDF5_JAVA_HDF5_LIB_TARGET})
 
 #-----------------------------------------------------------------------------
 # Maven POM Generation
