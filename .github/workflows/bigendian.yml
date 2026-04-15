@@ -31,6 +31,7 @@ jobs:
             build-base
             cmake
             python3
+            gfortran
 
       - name: Verify big-endian
         shell: alpine.sh --root {0}
@@ -49,7 +50,7 @@ jobs:
           -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
           -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=OFF \
           -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
-          -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+          -DHDF5_BUILD_FORTRAN:BOOL=ON \
           -DHDF5_BUILD_JAVA:BOOL=OFF \
           -DHDF5_BUILD_DOC:BOOL=OFF \
           ..
