@@ -38,8 +38,7 @@
  * Contains non-ASCII bytes to detect transport corruption and reduce
  * the chance of a false positive in arbitrary binary data. */
 #define H5PL_SIG_MAGIC_LEN 8
-static const uint8_t H5PL_SIG_MAGIC[H5PL_SIG_MAGIC_LEN] = {
-    0x89, 'H', 'P', 'S', '\r', '\n', 0x1A, '\n'};
+static const uint8_t H5PL_SIG_MAGIC[H5PL_SIG_MAGIC_LEN] = {0x89, 'H', 'P', 'S', '\r', '\n', 0x1A, '\n'};
 
 /* Current signature format version.
  * If future versions change the footer layout, the decoder should be
@@ -119,11 +118,11 @@ H5PL_sig_encode_footer(uint8_t *buf, size_t buf_size, const H5PL_sig_footer_t *f
     assert(buf_size >= H5PL_SIG_FOOTER_SIZE);
     (void)buf_size; /* used only by assert */
 
-    *p++ = (uint8_t)footer->algorithm_id;      /* byte  0      */
-    UINT32ENCODE(p, footer->signature_length); /* bytes 1-4    */
+    *p++ = (uint8_t)footer->algorithm_id;          /* byte  0      */
+    UINT32ENCODE(p, footer->signature_length);     /* bytes 1-4    */
     memcpy(p, H5PL_SIG_MAGIC, H5PL_SIG_MAGIC_LEN); /* bytes 5-12 */
     p += H5PL_SIG_MAGIC_LEN;
-    *p++ = footer->format_version;             /* byte  13     */
+    *p++ = footer->format_version; /* byte  13     */
 } /* end H5PL_sig_encode_footer() */
 
 /*-------------------------------------------------------------------------
@@ -160,8 +159,8 @@ H5PL_sig_decode_footer(const uint8_t *buf, size_t buf_size, H5PL_sig_footer_t *f
     footer->algorithm_id = (H5PL_sig_algo_t)*p++; /* byte  0      */
     UINT32DECODE(p, footer->signature_length);    /* bytes 1-4    */
     /* skip magic (already verified above) */
-    p += H5PL_SIG_MAGIC_LEN;                     /* bytes 5-12   */
-    footer->format_version = *p++;                /* byte  13     */
+    p += H5PL_SIG_MAGIC_LEN;       /* bytes 5-12   */
+    footer->format_version = *p++; /* byte  13     */
 
     /* Verify format version.
      * Currently only version 1 exists.  When a new version is introduced,
