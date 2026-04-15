@@ -317,3 +317,9 @@ jobs:
         uses: ./.github/workflows/i386.yml
         with:
             build_mode: "Release"
+
+    call-release-cmake-bigendian:
+        name: "Big-Endian (s390x) Workflows"
+        uses: ./.github/workflows/bigendian.yml
+        with:
+            build_mode: "Release"
