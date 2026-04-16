@@ -649,9 +649,10 @@ H5FD__sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         } while (-1 == bytes_read && EINTR == errno);
 
         if (-1 == bytes_read) { /* error */
-            int    myerrno = errno;
-            time_t mytime  = time(NULL);
+            int  myerrno = errno;
+            char time_str[32];
 
+            H5_get_localtime_str(time_str, sizeof(time_str));
 #ifndef H5_HAVE_PREADWRITE
             offset = HDlseek(file->fd, 0, SEEK_CUR);
 #endif
@@ -660,7 +661,7 @@ H5FD__sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
                         "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, "
                         "error message = '%s', buf = %p, total read size = %zu, bytes this sub-read = %llu, "
                         "offset = %llu",
-                        ctime(&mytime), file->filename, file->fd, myerrno, strerror(myerrno), buf, size,
+                        time_str, file->filename, file->fd, myerrno, strerror(myerrno), buf, size,
                         (unsigned long long)bytes_in, (unsigned long long)offset);
         } /* end if */
 
@@ -760,9 +761,10 @@ H5FD__sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
         } while (-1 == bytes_wrote && EINTR == errno);
 
         if (-1 == bytes_wrote) { /* error */
-            int    myerrno = errno;
-            time_t mytime  = time(NULL);
+            int  myerrno = errno;
+            char time_str[32];
 
+            H5_get_localtime_str(time_str, sizeof(time_str));
 #ifndef H5_HAVE_PREADWRITE
             offset = HDlseek(file->fd, 0, SEEK_CUR);
 #endif
@@ -771,7 +773,7 @@ H5FD__sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
                         "file write failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, "
                         "error message = '%s', buf = %p, total write size = %zu, bytes this sub-write = "
                         "%llu, offset = %llu",
-                        ctime(&mytime), file->filename, file->fd, myerrno, strerror(myerrno), buf, size,
+                        time_str, file->filename, file->fd, myerrno, strerror(myerrno), buf, size,
                         (unsigned long long)bytes_in, (unsigned long long)offset);
         } /* end if */
 

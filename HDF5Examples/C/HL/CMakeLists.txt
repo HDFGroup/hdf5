@@ -215,7 +215,6 @@ if (H5EXAMPLE_BUILD_TESTING)
       )
       set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES
           DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       if (HDF5_PROVIDES_TOOLS)
         add_test (
@@ -232,7 +231,6 @@ if (H5EXAMPLE_BUILD_TESTING)
         )
         set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-${testname} PROPERTIES
             DEPENDS ${EXAMPLE_VARNAME}_${testname}
-            ENVIRONMENT "${CROSSCOMPILING_PATH}"
         )
       endif ()
     endif ()
@@ -261,7 +259,6 @@ if (H5EXAMPLE_BUILD_TESTING)
       )
       set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES
           DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       if (HDF5_PROVIDES_TOOLS)
         add_test (
@@ -279,7 +276,6 @@ if (H5EXAMPLE_BUILD_TESTING)
         )
         set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-${testname} PROPERTIES
             DEPENDS ${EXAMPLE_VARNAME}_${testname}
-            ENVIRONMENT "${CROSSCOMPILING_PATH}"
         )
       endif ()
     endif ()
@@ -302,12 +298,10 @@ if (H5EXAMPLE_BUILD_TESTING)
     add_test (NAME ${EXAMPLE_VARNAME}_h5ex_lite1 COMMAND $<TARGET_FILE:${EXAMPLE_VARNAME}_h5ex_lite1>)
     set_tests_properties (${EXAMPLE_VARNAME}_h5ex_lite1 PROPERTIES
         DEPENDS ${EXAMPLE_VARNAME}_h5ex_lite-clearall
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
     add_test (NAME ${EXAMPLE_VARNAME}_h5ex_lite2 COMMAND $<TARGET_FILE:${EXAMPLE_VARNAME}_h5ex_lite2>)
     set_tests_properties (${EXAMPLE_VARNAME}_h5ex_lite2 PROPERTIES
         DEPENDS ${EXAMPLE_VARNAME}_h5ex_lite1
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
   else ()
     add_test (
@@ -324,7 +318,6 @@ if (H5EXAMPLE_BUILD_TESTING)
     )
     set_tests_properties (${EXAMPLE_VARNAME}_h5ex_lite1 PROPERTIES
         DEPENDS ${EXAMPLE_VARNAME}_h5ex_lite-clearall
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
     add_test (
         NAME ${EXAMPLE_VARNAME}_h5ex_lite2
@@ -340,7 +333,6 @@ if (H5EXAMPLE_BUILD_TESTING)
     )
     set_tests_properties (${EXAMPLE_VARNAME}_h5ex_lite2 PROPERTIES
         DEPENDS ${EXAMPLE_VARNAME}_h5ex_lite1
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
   endif ()
 endif ()

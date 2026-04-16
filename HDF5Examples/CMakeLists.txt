@@ -26,6 +26,7 @@ if (NOT EXAMPLES_EXTERNALLY_CONFIGURED)
   include (TestBigEndian)
   if (NOT WINDOWS)
     TEST_BIG_ENDIAN (H5EXAMPLE_WORDS_BIGENDIAN)
+    mark_as_advanced (H5EXAMPLE_WORDS_BIGENDIAN)
   endif ()
 
   include (${H5EXAMPLE_CONFIG_DIR}/HDFMacros.cmake)
@@ -65,6 +66,7 @@ endif ()
 #-----------------------------------------------------------------------------
 if(NOT DEFINED _h5public_h_contents)
   find_file (_h5public_h H5public.h ${H5EXAMPLE_HDF5_INCLUDE_DIRS})
+  mark_as_advanced (H5EXAMPLE_HDF5_INCLUDE_DIRS)
   file (READ ${_h5public_h} _h5public_h_contents)
 
   string (REGEX REPLACE ".*#define[ \t]+H5_VERS_MAJOR[ \t]+([0-9]*).*$"
@@ -145,14 +147,6 @@ if (${H5_LIBVER_DIR} GREATER 16)
     if (H5EXAMPLE_BUILD_FORTRAN AND HDF5_PROVIDES_FORTRAN)
       set (H5EXAMPLE_LINK_Fortran_LIBS ${H5EXAMPLE_HDF5_LINK_LIBS})
 
-      # Parallel IO usage requires MPI to be Linked and Included
-      if (H5_HAVE_PARALLEL)
-        set (H5EXAMPLE_LINK_Fortran_LIBS ${H5EXAMPLE_LINK_Fortran_LIBS} ${MPI_Fortran_LIBRARIES})
-        if (MPI_Fortran_LINK_FLAGS)
-          set (CMAKE_Fortran_EXE_LINKER_FLAGS "${MPI_Fortran_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
-        endif ()
-      endif ()
-
       configure_file (${H5EXAMPLE_F90_SRC_DIR}/H5D/h5_version.h.in ${PROJECT_BINARY_DIR}/FORTRAN/H5D/h5_version.h @ONLY)
       configure_file (${H5EXAMPLE_F90_SRC_DIR}/H5D/h5_version.h.in ${PROJECT_BINARY_DIR}/FORTRAN/H5G/h5_version.h @ONLY)
     else ()
@@ -223,6 +217,7 @@ endif ()
 # Build examples
 #-----------------------------------------------------------------------------
 add_subdirectory (C)
+# Fortran MPI setup (find_package, link flags) is handled in FORTRAN/CMakeLists.txt
 if (H5EXAMPLE_BUILD_FORTRAN AND HDF5_PROVIDES_FORTRAN)
   add_subdirectory (FORTRAN)
 endif ()

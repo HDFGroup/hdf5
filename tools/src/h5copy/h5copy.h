@@ -27,21 +27,21 @@
  *  <h4>h5copy [OPTIONS] [OBJECTS...]</h4>
  *
  * \subsection subsec_cltools_h5copy_objs Objects
- * \li <strong>--input</strong>        input file name
- * \li <strong>--output</strong>       output file name
- * \li <strong>--source</strong>       source object name
- * \li <strong>--destination</strong>  destination object name
+ * \li <strong>\--input</strong>        input file name
+ * \li <strong>\--output</strong>       output file name
+ * \li <strong>\--source</strong>       source object name
+ * \li <strong>\--destination</strong>  destination object name
  *
  * \subsection subsec_cltools_h5copy_error Error Report Option
- * \li <strong>--enable-error-stack</strong> Prints messages from the HDF5 error stack as they occur.
-                          Optional value 2 also prints file open errors, --enable-error-stack=2.
+ * \li <strong>\--enable-error-stack</strong> Prints messages from the HDF5 error stack as they occur.
+ *                        Optional value 2 also prints file open errors, <code>\--enable-error-stack=2</code>.
  *
  * \subsection subsec_cltools_h5copy_options Options
- * \li <strong>--help</strong>    Print a usage message and exit
- * \li <strong>--parents</strong> No error if existing, make parent groups as needed
- * \li <strong>--verbose</strong> Print information about OBJECTS and OPTIONS
- * \li <strong>--version</strong> Print the library version number and exit
- * \li <strong>--flag</strong>    Flag type
+ * \li <strong>\--help</strong>    Print a usage message and exit
+ * \li <strong>\--parents</strong> No error if existing, make parent groups as needed
+ * \li <strong>\--verbose</strong> Print information about OBJECTS and OPTIONS
+ * \li <strong>\--version</strong> Print the library version number and exit
+ * \li <strong>\--flag</strong>    Flag type
  *
  * \subsubsection subsubsec_cltools_h5copy_options_args Flag Type Options
  *  Flag type is one of the following strings:

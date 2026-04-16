@@ -69,7 +69,6 @@ if (H5EXAMPLE_BUILD_TESTING)
     endif ()
     set_tests_properties (${EXAMPLE_VARNAME}_cpp_ex_${testname} PROPERTIES
         FIXTURES_REQUIRED clear_${EXAMPLE_VARNAME}_cpp_ex
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
     if (last_test)
       set_tests_properties (${EXAMPLE_VARNAME}_cpp_ex_${testname} PROPERTIES DEPENDS ${last_test})

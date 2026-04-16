@@ -92,7 +92,6 @@ endif ()
 #set_tests_properties (FORTRAN_testhdf5_fortran PROPERTIES PASS_REGULAR_EXPRESSION "[ ]*0 error.s")
 set_tests_properties (FORTRAN_testhdf5_fortran PROPERTIES
     FIXTURES_REQUIRED clear_testhdf5_fortran
-    ENVIRONMENT "${CROSSCOMPILING_PATH}"
 )
 if ("FORTRAN_testhdf5_fortran" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
   set_tests_properties (FORTRAN_testhdf5_fortran PROPERTIES DISABLED true)
@@ -119,7 +118,6 @@ endif ()
 set_tests_properties (FORTRAN_testhdf5_fortran_1_8 PROPERTIES
     DEPENDS FORTRAN_testhdf5_fortran
     FIXTURES_REQUIRED clear_testhdf5_fortran
-    ENVIRONMENT "${CROSSCOMPILING_PATH}"
 )
 if ("FORTRAN_testhdf5_fortran_1_8" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
   set_tests_properties (FORTRAN_testhdf5_fortran_1_8 PROPERTIES DISABLED true)
@@ -146,7 +144,6 @@ endif ()
 set_tests_properties (FORTRAN_fortranlib_test_F03 PROPERTIES
     DEPENDS FORTRAN_testhdf5_fortran_1_8
     FIXTURES_REQUIRED clear_testhdf5_fortran
-    ENVIRONMENT "${CROSSCOMPILING_PATH}"
 )
 if ("FORTRAN_fortranlib_test_F03" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
   set_tests_properties (FORTRAN_fortranlib_test_F03 PROPERTIES DISABLED true)
@@ -171,7 +168,6 @@ else ()
 endif ()
 set_tests_properties (FORTRAN_vol_connector PROPERTIES
     FIXTURES_REQUIRED clear_testhdf5_fortran
-    ENVIRONMENT "${CROSSCOMPILING_PATH}"
 )
 if ("FORTRAN_vol_connector" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
   set_tests_properties (FORTRAN_vol_connector PROPERTIES DISABLED true)
@@ -188,7 +184,6 @@ add_test (
 )
 set_tests_properties (FORTRAN_fflush1 PROPERTIES
     DEPENDS FORTRAN_flush1-clear-objects
-    ENVIRONMENT "${CROSSCOMPILING_PATH}"
 )
 if ("FORTRAN_fflush1" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
   set_tests_properties (FORTRAN_fflush1 PROPERTIES DISABLED true)
@@ -200,7 +195,6 @@ add_test (
     COMMAND $<TARGET_FILE:fflush2>
 )
 set_tests_properties (FORTRAN_fflush2 PROPERTIES
-    ENVIRONMENT "${CROSSCOMPILING_PATH}"
     DEPENDS FORTRAN_fflush1
 )
 if ("FORTRAN_fflush2" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")

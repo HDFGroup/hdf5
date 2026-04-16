@@ -29,11 +29,11 @@
         },
         "ZLIB_TGZ_ORIGPATH": {
           "type": "STRING",
-          "value": "https://github.com/madler/zlib/releases/download/v1.3.1"
+          "value": "https://github.com/madler/zlib/releases/download/v1.3.2"
         },
         "ZLIB_TGZ_NAME": {
           "type": "STRING",
-          "value": "zlib-1.3.1.tar.gz"
+          "value": "zlib-1.3.2.tar.gz"
         },
         "ZLIBNG_PACKAGE_NAME": {
           "type": "STRING",
@@ -45,7 +45,7 @@
         },
         "ZLIBNG_TGZ_NAME": {
           "type": "STRING",
-          "value": "2.2.4.tar.gz"
+          "value": "2.3.3.tar.gz"
         },
         "LIBAEC_PACKAGE_NAME": {
           "type": "STRING",
@@ -53,11 +53,11 @@
         },
         "LIBAEC_TGZ_ORIGPATH": {
           "type": "STRING",
-          "value": "https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.3"
+          "value": "https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.6"
         },
         "LIBAEC_TGZ_NAME": {
           "type": "STRING",
-          "value": "libaec-1.1.3.tar.gz"
+          "value": "libaec-1.1.6.tar.gz"
         }
       }
     },
@@ -76,7 +76,9 @@
         "HDF5_USE_ZLIB_STATIC": "ON",
         "HDF5_USE_LIBAEC_STATIC": "ON",
         "HDF5_ENABLE_SZIP_SUPPORT": "ON",
-        "HDF5_ENABLE_ZLIB_SUPPORT": "ON"
+        "HDF5_ENABLE_ZLIB_SUPPORT": "ON",
+        "ZLIB_USE_EXTERNAL": "ON",
+        "SZIP_USE_EXTERNAL": "ON"
       }
     },
     {
@@ -207,18 +209,20 @@
           "type": "STRING",
           "value": "TGZ"
         },
-        "PLUGIN_PACKAGE_NAME": {
+        "HDF5_FILTER_PLUGINS_PACKAGE_NAME": {
           "type": "STRING",
-          "value": "pl"
+          "value": "h5pl"
         },
-        "PLUGIN_TGZ_ORIGPATH": {
+        "HDF5_FILTER_PLUGINS_TGZ_ORIGPATH": {
           "type": "STRING",
           "value": "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot"
         },
-        "PLUGIN_TGZ_NAME": {
+        "HDF5_FILTER_PLUGINS_TGZ_NAME": {
           "type": "STRING",
           "value": "hdf5_plugins-master.tar.gz"
-        }
+        },
+        "HDF_ENABLE_BLOSC_ZLIB_SUPPORT": "OFF",
+        "BLOSC_ZLIB_USE_EXTERNAL": "0"
       }
     },
     {
@@ -230,7 +234,8 @@
         "ci-base-tgz"
       ],
       "cacheVariables": {
-        "PLUGIN_USE_LOCALCONTENT": "OFF"
+        "PLUGIN_USE_LOCALCONTENT": "OFF",
+        "PLUGIN_USE_EXTERNAL": "ON"
       }
     },
     {
@@ -341,6 +346,16 @@
       "description": "MSVC Standard Config for x64 (Release)",
       "inherits": [
         "ci-x64-Release-MSVC",
+        "ci-CPP",
+        "ci-Java",
+        "ci-StdShar"
+      ]
+    },
+    {
+      "name": "ci-StdShar-MSVC-ARM64",
+      "description": "MSVC Standard Config for ARM64 (Release)",
+      "inherits": [
+        "ci-arm64-Release-MSVC",
         "ci-CPP",
         "ci-Java",
         "ci-StdShar"
@@ -665,6 +680,14 @@
       ]
     },
     {
+      "name": "ci-StdShar-MSVC-ARM64",
+      "description": "MSVC Standard Build for ARM64 (Release)",
+      "configurePreset": "ci-StdShar-MSVC-ARM64",
+      "inherits": [
+        "ci-arm64-Release-MSVC"
+      ]
+    },
+    {
       "name": "ci-StdShar-MSVC-FFM",
       "description": "MSVC Standard Build for x64 with Java FFM (Requires Java 25+) (Release)",
       "configurePreset": "ci-StdShar-MSVC-FFM",
@@ -939,6 +962,13 @@
       ]
     },
     {
+      "name": "ci-StdShar-MSVC-ARM64",
+      "configurePreset": "ci-StdShar-MSVC-ARM64",
+      "inherits": [
+        "ci-arm64-Release-MSVC"
+      ]
+    },
+    {
       "name": "ci-StdShar-MSVC-FFM",
       "configurePreset": "ci-StdShar-MSVC-FFM",
       "inherits": [
@@ -1190,6 +1220,11 @@
       "inherits": "ci-x64-Release-MSVC"
     },
     {
+      "name": "ci-StdShar-MSVC-ARM64",
+      "configurePreset": "ci-StdShar-MSVC-ARM64",
+      "inherits": "ci-arm64-Release-MSVC"
+    },
+    {
       "name": "ci-StdShar-MSVC-FFM",
       "configurePreset": "ci-StdShar-MSVC-FFM",
       "inherits": "ci-x64-Release-MSVC"
@@ -1329,6 +1364,27 @@
         {
           "type": "package",
           "name": "ci-StdShar-MSVC"
+        }
+      ]
+    },
+    {
+      "name": "ci-StdShar-MSVC-ARM64",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-StdShar-MSVC-ARM64"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-MSVC-ARM64"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-MSVC-ARM64"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-MSVC-ARM64"
         }
       ]
     },

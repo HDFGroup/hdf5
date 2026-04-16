@@ -32,7 +32,7 @@ I. Preconditions
 
    2. You have installed the HDF5 library built with CMake, by executing
       the HDF Install Utility (the *.msi file in the binary package for
-      Windows or the *.sh on Linux). You can obtain pre-built binaries
+      Windows or the *.rpm or *.deb on Linux). You can obtain pre-built binaries
       from The HDF Group's website at www.hdfgroup.org.
 
    3. Set the HDF5_ROOT CMake variable, -DHDF5_ROOT=<install_path>
@@ -253,7 +253,7 @@ III. Defaults in the CMakePresets.json file
 ####      "binaryDir": "${sourceParentDir}/build/${presetName}"
 ####      "name": "ci-StdShar"
 ####        "BUILD_SHARED_LIBS": "ON",
-####        "USE_SHARED_LIBS": "ON"
+####        "H5EXAMPLE_USE_SHARED_LIBS": "ON"
 ####        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
 ####        "H5EXAMPLE_BUILD_FORTRAN": "ON"
 ####        "H5EXAMPLE_BUILD_CXX": "ON"

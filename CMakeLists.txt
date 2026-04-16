@@ -325,10 +325,13 @@ set (HDF5_JAVA_SRCJNI_PATH         ${HDF5_SOURCE_DIR}/java/src-jni)
 set (HDF5_JAVA_SRCJNI_JNI_SRC_DIR  ${HDF5_SOURCE_DIR}/java/src-jni/jni)
 set (HDF5_JAVA_LIB_DIR             ${HDF5_SOURCE_DIR}/java/lib)
 set (HDF5_JAVA_JSRC_DIR            ${HDF5_SOURCE_DIR}/java/jsrc)
-set (HDF5_JAVA_LOGGING_JAR         ${HDF5_SOURCE_DIR}/java/lib/slf4j-api-2.0.16.jar)
-set (HDF5_JAVA_LOGGING_NOP_JAR     ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-nop-2.0.16.jar)
-set (HDF5_JAVA_LOGGING_SIMPLE_JAR  ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-simple-2.0.16.jar)
-set (HDF5_DOXYGEN_DIR              ${HDF5_SOURCE_DIR}/doxygen)
+set (HDF5_JAVA_LOGGING_JAR         ${HDF5_SOURCE_DIR}/java/lib/slf4j-api-2.0.16.jar CACHE FILEPATH "Path to SLF4J API jar")
+set (HDF5_JAVA_LOGGING_NOP_JAR     ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-nop-2.0.16.jar CACHE FILEPATH "Path to SLF4J NOP binding jar")
+set (HDF5_JAVA_LOGGING_SIMPLE_JAR  ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-simple-2.0.16.jar CACHE FILEPATH "Path to SLF4J simple binding jar")
+set (HDF5_JAVA_JUNIT_JAR           ${HDF5_JAVA_LIB_DIR}/org.junit.jar CACHE FILEPATH "Path to JUnit jar")
+set (HDF5_JAVA_HAMCREST_JAR        ${HDF5_JAVA_LIB_DIR}/org.hamcrest.jar CACHE FILEPATH "Path to Hamcrest jar")
+set (HDF5_DOCS_DIR                 ${HDF5_SOURCE_DIR}/docs)
+set (HDF5_DOXYGEN_DIR              ${HDF5_DOCS_DIR}/doxygen)
 
 set (HDF5_SRC_INCLUDE_DIRS ${HDF5_SRC_DIR})
 
@@ -436,17 +439,6 @@ if (H5_HL_F_SOVERS_EXISTS)
   math (EXPR H5_HL_F_SOVERS_MAJOR ${H5_HL_F_SOVERS_INTERFACE}-${H5_HL_F_SOVERS_RELEASE})
   message (VERBOSE "SOVERSION_HL_F: ${H5_HL_F_SOVERS_MAJOR}.${H5_HL_F_SOVERS_RELEASE}.${H5_HL_F_SOVERS_MINOR}")
 endif ()
-string (REGEX MATCH ".*LT_JAVA_VERS_INTERFACE[ \t]+=[ \t]+([0-9]*).*$" H5_JAVA_SOVERS_EXISTS ${_lt_vers_am_contents})
-if(H5_JAVA_SOVERS_EXISTS)
-  string (REGEX REPLACE ".*LT_JAVA_VERS_INTERFACE[ \t]+=[ \t]+([0-9]*).*$"
-      "\\1" H5_JAVA_SOVERS_INTERFACE ${_lt_vers_am_contents})
-  string (REGEX REPLACE ".*LT_JAVA_VERS_REVISION[ \t]+=[ \t]+([0-9]*).*$"
-      "\\1" H5_JAVA_SOVERS_MINOR ${_lt_vers_am_contents})
-  string (REGEX REPLACE ".*LT_JAVA_VERS_AGE[ \t]+=[ \t]+([0-9]*).*$"
-      "\\1" H5_JAVA_SOVERS_RELEASE ${_lt_vers_am_contents})
-  math (EXPR H5_JAVA_SOVERS_MAJOR ${H5_JAVA_SOVERS_INTERFACE}-${H5_JAVA_SOVERS_RELEASE})
-  message (VERBOSE "SOVERSION_JAVA: ${H5_JAVA_SOVERS_MAJOR}.${H5_JAVA_SOVERS_RELEASE}.${H5_JAVA_SOVERS_MINOR}")
-endif ()
 
 #-----------------------------------------------------------------------------
 # Basic HDF5 stuff here
@@ -507,13 +499,6 @@ else ()
   set (HDF5_HL_F_PACKAGE_SOVERSION "${H5_LIB_SOVERS_MAJOR}.${H5_LIB_SOVERS_RELEASE}.${H5_LIB_SOVERS_MINOR}")
   set (HDF5_HL_F_PACKAGE_SOVERSION_MAJOR "${H5_LIB_SOVERS_MAJOR}")
 endif ()
-if (H5_JAVA_SOVERS_EXISTS)
-  set (HDF5_JAVA_PACKAGE_SOVERSION "${H5_JAVA_SOVERS_MAJOR}.${H5_JAVA_SOVERS_RELEASE}.${H5_JAVA_SOVERS_MINOR}")
-  set (HDF5_JAVA_PACKAGE_SOVERSION_MAJOR "${H5_JAVA_SOVERS_MAJOR}")
-else ()
-  set (HDF5_JAVA_PACKAGE_SOVERSION "${H5_LIB_SOVERS_MAJOR}.${H5_LIB_SOVERS_RELEASE}.${H5_LIB_SOVERS_MINOR}")
-  set (HDF5_JAVA_PACKAGE_SOVERSION_MAJOR "${H5_LIB_SOVERS_MAJOR}")
-endif ()
 set (HDF5_PACKAGE_STRING "${HDF5_PACKAGE_NAME} ${HDF5_PACKAGE_VERSION_STRING}")
 set (HDF5_PACKAGE_TARNAME "${HDF5_PACKAGE}${HDF_PACKAGE_EXT}")
 set (HDF5_PACKAGE_URL "https://www.hdfgroup.org")
@@ -549,8 +534,6 @@ include (${HDF_CONFIG_DIR}/HDFMacros.cmake)
 
 HDF_DIR_PATHS(${HDF5_PACKAGE_NAME})
 
-include (${HDF_RESOURCES_DIR}/HDFLibMacros.cmake)
-include (${HDF_RESOURCES_DIR}/HDF5PluginMacros.cmake)
 include (${HDF_CONFIG_DIR}/HDF5Macros.cmake)
 
 #-----------------------------------------------------------------------------
@@ -729,7 +712,7 @@ endif ()
 #-----------------------------------------------------------------------------
 if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
   # Enable instrumenting of the library's internal operations
-  cmake_dependent_option (HDF5_ENABLE_INSTRUMENT "Instrument The library" OFF HDF5_ENABLE_TRACE OFF)
+  cmake_dependent_option (HDF5_ENABLE_INSTRUMENT "Instrument the library" OFF HDF5_ENABLE_PARALLEL OFF)
 
   # Instrumenting is enabled by default for parallel debug builds
   if (HDF5_ENABLE_PARALLEL)
@@ -787,52 +770,46 @@ endif ()
 # Option to Enable MPI Parallel
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_PARALLEL)
-  find_package (MPI REQUIRED)
-  if (MPI_C_FOUND)
-    set (H5_HAVE_PARALLEL 1)
+  find_package (MPI REQUIRED COMPONENTS C)
+  set (H5_HAVE_PARALLEL 1)
 
-    # Require MPI standard 3.0 and greater
-    if (MPI_VERSION LESS 3)
-      message (FATAL_ERROR "HDF5 requires MPI standard 3.0 or greater")
-    endif ()
-
-    # MPI checks, only do these if MPI_C_FOUND is true, otherwise they always fail
-    # and once set, they are cached as false and not regenerated
-    set (CMAKE_REQUIRED_LIBRARIES "${MPI_C_LIBRARIES}")
-    set (CMAKE_REQUIRED_INCLUDES "${MPI_C_INCLUDE_DIRS}")
-    # Used by Fortran + MPI
-    CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
-    CHECK_SYMBOL_EXISTS (MPI_Info_c2f "mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
-
-    # Used by Parallel Compression feature
-    set (PARALLEL_FILTERED_WRITES ON)
-    CHECK_SYMBOL_EXISTS (MPI_Ibarrier "mpi.h" H5_HAVE_MPI_Ibarrier)
-    CHECK_SYMBOL_EXISTS (MPI_Issend "mpi.h" H5_HAVE_MPI_Issend)
-    CHECK_SYMBOL_EXISTS (MPI_Iprobe "mpi.h" H5_HAVE_MPI_Iprobe)
-    CHECK_SYMBOL_EXISTS (MPI_Irecv "mpi.h" H5_HAVE_MPI_Irecv)
-    if (H5_HAVE_MPI_Ibarrier AND H5_HAVE_MPI_Issend AND H5_HAVE_MPI_Iprobe AND H5_HAVE_MPI_Irecv)
-      set (H5_HAVE_PARALLEL_FILTERED_WRITES 1)
-    else ()
-      message (WARNING "The MPI_Ibarrier/MPI_Issend/MPI_Iprobe/MPI_Irecv functions could not be located.
-               Parallel writes of filtered data will be disabled.")
-      set (PARALLEL_FILTERED_WRITES OFF)
-    endif ()
-
-    # Used by big I/O feature
-    set (LARGE_PARALLEL_IO ON)
-    CHECK_SYMBOL_EXISTS (MPI_Get_elements_x "mpi.h" H5_HAVE_MPI_Get_elements_x)
-    CHECK_SYMBOL_EXISTS (MPI_Type_size_x "mpi.h" H5_HAVE_MPI_Type_size_x)
-    if (NOT H5_HAVE_MPI_Get_elements_x OR NOT H5_HAVE_MPI_Type_size_x)
-      message (WARNING "The MPI_Get_elements_x and/or MPI_Type_size_x functions could not be located.
-               Reading/Writing >2GB of data in a single parallel I/O operation will be disabled.")
-      set (LARGE_PARALLEL_IO OFF)
-    endif ()
-
-    # Used by Subfiling VFD feature
-    CHECK_SYMBOL_EXISTS (MPI_Comm_split_type "mpi.h" H5_HAVE_MPI_Comm_split_type)
-  else ()
-    message (FATAL_ERROR "Parallel libraries not found")
+  # Require MPI standard 3.0 and greater
+  if (MPI_VERSION LESS 3)
+    message (FATAL_ERROR "HDF5 requires MPI standard 3.0 or greater")
   endif ()
+
+  set (CMAKE_REQUIRED_LIBRARIES "${MPI_C_LIBRARIES}")
+  set (CMAKE_REQUIRED_INCLUDES "${MPI_C_INCLUDE_DIRS}")
+  # Used by Fortran + MPI
+  CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
+  CHECK_SYMBOL_EXISTS (MPI_Info_c2f "mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
+
+  # Used by Parallel Compression feature
+  set (PARALLEL_FILTERED_WRITES ON)
+  CHECK_SYMBOL_EXISTS (MPI_Ibarrier "mpi.h" H5_HAVE_MPI_Ibarrier)
+  CHECK_SYMBOL_EXISTS (MPI_Issend "mpi.h" H5_HAVE_MPI_Issend)
+  CHECK_SYMBOL_EXISTS (MPI_Iprobe "mpi.h" H5_HAVE_MPI_Iprobe)
+  CHECK_SYMBOL_EXISTS (MPI_Irecv "mpi.h" H5_HAVE_MPI_Irecv)
+  if (H5_HAVE_MPI_Ibarrier AND H5_HAVE_MPI_Issend AND H5_HAVE_MPI_Iprobe AND H5_HAVE_MPI_Irecv)
+    set (H5_HAVE_PARALLEL_FILTERED_WRITES 1)
+  else ()
+    message (WARNING "The MPI_Ibarrier/MPI_Issend/MPI_Iprobe/MPI_Irecv functions could not be located.
+             Parallel writes of filtered data will be disabled.")
+    set (PARALLEL_FILTERED_WRITES OFF)
+  endif ()
+
+  # Used by big I/O feature
+  set (LARGE_PARALLEL_IO ON)
+  CHECK_SYMBOL_EXISTS (MPI_Get_elements_x "mpi.h" H5_HAVE_MPI_Get_elements_x)
+  CHECK_SYMBOL_EXISTS (MPI_Type_size_x "mpi.h" H5_HAVE_MPI_Type_size_x)
+  if (NOT H5_HAVE_MPI_Get_elements_x OR NOT H5_HAVE_MPI_Type_size_x)
+    message (WARNING "The MPI_Get_elements_x and/or MPI_Type_size_x functions could not be located.
+             Reading/Writing >2GB of data in a single parallel I/O operation will be disabled.")
+    set (LARGE_PARALLEL_IO OFF)
+  endif ()
+
+  # Used by Subfiling VFD feature
+  CHECK_SYMBOL_EXISTS (MPI_Comm_split_type "mpi.h" H5_HAVE_MPI_Comm_split_type)
 endif ()
 
 # Parallel IO usage requires MPI to be Linked and Included
@@ -965,11 +942,18 @@ include (UserMacros.cmake)
 include (config/CacheURLs.cmake)
 
 #-----------------------------------------------------------------------------
-# Include filter (zlib, szip, etc.) macros
+# Include filter (zlib, szip, etc.) support
 #-----------------------------------------------------------------------------
-if (HDF5_ENABLE_ZLIB_SUPPORT OR HDF5_ENABLE_SZIP_SUPPORT)
-  include (CMakeFilters.cmake)
-endif ()
+unset (SETTINGS_EXTERNAL_FILTERS)
+include (${HDF_CONFIG_DIR}/HDF5UseZLIB.cmake)
+include (${HDF_CONFIG_DIR}/HDF5UseLibaec.cmake)
+
+# Process list of filters for libhdf5.settings (and the H5build_settings string)
+list (REMOVE_DUPLICATES SETTINGS_EXTERNAL_FILTERS)
+string (REPLACE ";" " " SETTINGS_EXTERNAL_FILTERS "${SETTINGS_EXTERNAL_FILTERS}")
+
+# Print out compression libraries linked for debugging
+message (VERBOSE "LINK_COMP_LIBS=${LINK_COMP_LIBS}")
 
 #-----------------------------------------------------------------------------
 # Include external VOL connectors
@@ -1096,12 +1080,13 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to override the compiler for h5cc
 #-----------------------------------------------------------------------------
-if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
+if (HDF5_ENABLE_PARALLEL)
   set (_HDF5_H5CC_C_COMPILER ${MPI_C_COMPILER})
 else ()
   set (_HDF5_H5CC_C_COMPILER ${CMAKE_C_COMPILER})
 endif ()
 set (HDF5_H5CC_C_COMPILER ${_HDF5_H5CC_C_COMPILER} CACHE STRING "C compiler to use in h5cc")
+mark_as_advanced (HDF5_H5CC_C_COMPILER)
 
 #-----------------------------------------------------------------------------
 # Java implementation detection for version value
@@ -1118,26 +1103,12 @@ if (HDF5_BUILD_JAVA)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Add the HDF5 Library Target to the build
-#-----------------------------------------------------------------------------
-add_subdirectory (src)
-
-if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
-  if ((H5_ZLIB_FOUND AND ZLIB_USE_EXTERNAL) OR (H5_SZIP_FOUND AND SZIP_USE_EXTERNAL))
-    if (BUILD_STATIC_LIBS)
-      add_dependencies (${HDF5_LIB_TARGET} ${LINK_COMP_LIBS})
-    endif ()
-    if (BUILD_SHARED_LIBS)
-      add_dependencies (${HDF5_LIBSH_TARGET} ${LINK_COMP_LIBS})
-    endif ()
-  endif ()
-endif ()
-
-#-----------------------------------------------------------------------------
 # Option to build documentation
+# NOTE: This block must appear before add_subdirectory(src) so that
+# DOXYGEN_FOUND and related variables are visible in src/CMakeLists.txt
+# and all subsequent subdirectories that define doc targets.
 #-----------------------------------------------------------------------------
 if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOXYGEN_DIR}")
-# check if Doxygen is installed
   find_package (Doxygen)
   if (DOXYGEN_FOUND)
     option (HDF5_ENABLE_DOXY_WARNINGS "Enable fail if doxygen parsing has warnings." OFF)
@@ -1147,24 +1118,52 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
     else ()
       set (HDF5_DOXY_WARNINGS "NO")
     endif ()
-    message (VERBOSE "Doxygen version: ${DOXYGEN_VERSION}")
+    message (STATUS "Found Doxygen version: ${DOXYGEN_VERSION}")
 
     # Set the default directory for the Java sources for doxygen
     if (Java_VERSION_STRING VERSION_GREATER_EQUAL "25.0.0")
       if (HDF5_ENABLE_JNI)
         set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRCJNI_PATH})
-     else ()
+      else ()
         set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRC_PATH})
       endif ()
     else ()
       set (DOXYGEN_JAVA_DIR ${HDF5_JAVA_SRCJNI_PATH})
     endif ()
 
-    add_subdirectory (doxygen)
+    # Doxygen content and configuration files shared by all doc targets.
+    # Defined here once to avoid duplication. CONFIGURE_DEPENDS tells
+    # Ninja/Make to re-run CMake when a file is added or removed from these
+    # directories. The per-null-build cost of checking small, stable
+    # documentation directories is negligible compared to source code globs.
+    # GLOB_RECURSE is required so that files added inside subdirectories
+    # (e.g. dox/cookbook/, dox/high_level/, examples/tables/) also trigger
+    # CMake re-configuration.
+    file (GLOB_RECURSE HDF5_DOXYGEN_CONTENT_INPUTS CONFIGURE_DEPENDS
+      "${HDF5_DOXYGEN_DIR}/*.dox"
+      "${HDF5_DOXYGEN_DIR}/*.html"
+      "${HDF5_DOXYGEN_DIR}/*.css"
+      "${HDF5_DOXYGEN_DIR}/*.xml"
+      "${HDF5_DOXYGEN_DIR}/*.js"
+      "${HDF5_DOXYGEN_DIR}/*.md"
+    )
+
+    # Define the umbrella doxygen target once, here, so that ownership is
+    # unambiguous. Subdirectories and the end-of-file doc block add
+    # dependencies to it; the fallback at the bottom of this file handles
+    # the case where Doxygen is not found or HDF5_BUILD_DOC is OFF.
+    add_custom_target (doxygen)
+
+    add_subdirectory (docs/doxygen)
   else ()
     message (WARNING "Doxygen needs to be installed to generate the doxygen documentation")
   endif ()
 endif ()
+
+#-----------------------------------------------------------------------------
+# Add the HDF5 Library Target to the build
+#-----------------------------------------------------------------------------
+add_subdirectory (src)
 
 #-----------------------------------------------------------------------------
 # Dashboard and Testing Settings
@@ -1223,9 +1222,9 @@ if (HDF5_ENABLE_PLUGIN_SUPPORT)
   else ()
     include (CMakePlugins.cmake)
 
-    if (HDF5_PACKAGE_EXTLIBS AND NOT HDF5_NO_PACKAGES AND PLUGIN_FOUND)
-      PACKAGE_PLUGIN_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
-    endif ()
+#    if (HDF5_PACKAGE_EXTLIBS AND NOT HDF5_NO_PACKAGES AND HDF5_PLUGINS_FOUND)
+#      PACKAGE_PLUGIN_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
+#    endif ()
   endif ()
 endif ()
 
@@ -1317,4 +1316,150 @@ if (EXISTS "${HDF5_SOURCE_DIR}/HDF5Examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR
   endif ()
 endif ()
 
+#-----------------------------------------------------------------------------
+# Define Doxygen documentation target
+# This block must appear AFTER all add_subdirectory() calls so that every
+# language/tool subdirectory has had the opportunity to append its sources
+# to the HDF5_DOXYGEN_LIB_INPUTS and HDF5_DOXYGEN_HL_INPUTS global
+# properties via set_property(GLOBAL APPEND ...).
+#-----------------------------------------------------------------------------
+if (HDF5_BUILD_DOC AND DOXYGEN_FOUND)
+
+  # -----------------------------------------------------------------------
+  # Retrieve explicitly tracked source lists contributed by subdirectories.
+  # -----------------------------------------------------------------------
+  get_property (_hdf5_doxy_inputs GLOBAL PROPERTY HDF5_DOXYGEN_LIB_INPUTS)
+
+  # Merge HL inputs when the HL library is enabled — there is only one
+  # Doxyfile / output directory, so a single Doxygen invocation covers both.
+  if (HDF5_BUILD_HL_LIB)
+    get_property (_hdf5_hl_doxy_inputs GLOBAL PROPERTY HDF5_DOXYGEN_HL_INPUTS)
+    list (APPEND _hdf5_doxy_inputs ${_hdf5_hl_doxy_inputs})
+  endif ()
+
+  # Java sources: only when Java bindings are enabled. DOXYGEN_JAVA_DIR
+  # (set in the HDF5_BUILD_DOC block above) selects the correct path
+  # regardless of whether the JNI or pure-Java tree was chosen.
+  if (HDF5_BUILD_JAVA)
+    list (APPEND _hdf5_doxy_inputs
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/H5.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/HDF5Constants.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/HDFArray.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/HDFNativeData.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5Exception.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5IdException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5AttributeException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5BtreeException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DataFiltersException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DatasetInterfaceException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DataspaceInterfaceException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DataStorageException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5DatatypeInterfaceException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5ExternalFileListException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5FileInterfaceException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5FunctionArgumentException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5FunctionEntryExitException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5HeapException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5InternalErrorException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5JavaException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5LibraryException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5LowLevelIOException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5MetaDataCacheException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5ObjectHeaderException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5PropertyListInterfaceException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5ReferenceException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5ResourceUnavailableException.java"
+      "${DOXYGEN_JAVA_DIR}/hdf/hdf5lib/exceptions/HDF5SymbolTableException.java"
+    )
+  endif ()
+
+  # Shared doxygen content inputs (*.dox, *.html, *.css, etc.) — defined
+  # earlier in the HDF5_BUILD_DOC block via file(GLOB_RECURSE).
+  list (APPEND _hdf5_doxy_inputs ${HDF5_DOXYGEN_CONTENT_INPUTS})
+
+  # -----------------------------------------------------------------------
+  # hdf5lib_doc: single documentation target for the entire HDF5 API
+  # -----------------------------------------------------------------------
+  # Make the stamp file config-agnostic so multi-config generators (VS,
+  # Xcode, Ninja Multi-Config) deduplicate the custom command and only run
+  # Doxygen once. Doxygen writes to a single, config-agnostic output
+  # directory, so per-config stamps would race over the same HTML files.
+  set (_hdf5lib_doc_stamp "${HDF5_SRC_BINARY_DIR}/hdf5lib_doc.stamp")
+
+  # Use add_custom_command with a stamp file so that CMake can perform a
+  # timestamp-based up-to-date check. A bare add_custom_target(... COMMAND
+  # ...) would unconditionally invoke Doxygen on every build.
+  add_custom_command (
+    OUTPUT  "${_hdf5lib_doc_stamp}"
+    COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile
+    COMMAND ${CMAKE_COMMAND} -E touch "${_hdf5lib_doc_stamp}"
+    DEPENDS ${_hdf5_doxy_inputs}
+            ${HDF5_BINARY_DIR}/Doxyfile
+    WORKING_DIRECTORY "${HDF5_SOURCE_DIR}"
+    COMMENT "Generating HDF5 API documentation with Doxygen"
+    VERBATIM
+  )
+
+  # Part of ALL so that HDF5_BUILD_DOC=ON builds docs during a normal build.
+  # SOURCES exposes the dependency list in IDE project trees (CLion, VS, Xcode).
+  add_custom_target (hdf5lib_doc ALL
+    DEPENDS "${_hdf5lib_doc_stamp}"
+    SOURCES ${_hdf5_doxy_inputs}
+  )
+  add_dependencies (doxygen hdf5lib_doc)
+
+endif ()
+
+# Always define the umbrella doxygen target so that scripts and IDEs can
+# unconditionally reference it (e.g. cmake --build . --target doxygen).
+# When HDF5_BUILD_DOC=OFF or Doxygen is absent this becomes a no-op.
+if (NOT TARGET doxygen)
+  add_custom_target (doxygen
+    COMMENT "Doxygen documentation not enabled (HDF5_BUILD_DOC=OFF or Doxygen not found)"
+  )
+endif ()
+
+#-----------------------------------------------------------------------------
+# Set LINK_LIBS_SETTINGS: linker-flag-formatted version of LINK_LIBS +
+# LINK_COMP_LIBS for the libhdf5.settings file.
+#-----------------------------------------------------------------------------
+include (${HDF_CONFIG_DIR}/HDF5Pkgconfig.cmake)
+
+set (LINK_LIBS_SETTINGS "")
+foreach (_lib IN LISTS LINK_LIBS LINK_COMP_LIBS)
+  unset (_lib_flags)
+  unset (_lib_cflags)
+  unset (_lib_skipped)
+  extract_lib_pkgconfig_info ("${_lib}" _lib_flags _lib_cflags _lib_skipped)
+  if (NOT _lib_skipped AND _lib_flags)
+    if (MSVC)
+      foreach (_flag IN LISTS _lib_flags)
+        if (_flag MATCHES "^-l")
+          string (REGEX REPLACE "^-l" "" _clean_flag "${_flag}")
+          list (APPEND LINK_LIBS_SETTINGS "${_clean_flag}")
+        elseif (IS_ABSOLUTE "${_flag}")
+          cmake_path (GET _flag STEM _clean_flag)
+          list (APPEND LINK_LIBS_SETTINGS "${_clean_flag}")
+        elseif (NOT _flag MATCHES "^-L")
+          # Append as-is if it's not a library path (-L)
+          list (APPEND LINK_LIBS_SETTINGS "${_flag}")
+        endif ()
+      endforeach ()
+    else ()
+      # Standard behavior for non-MSVC platforms (use pkg-config formatted flags).
+      list (APPEND LINK_LIBS_SETTINGS ${_lib_flags})
+    endif ()
+  endif ()
+endforeach ()
+list (REMOVE_DUPLICATES LINK_LIBS_SETTINGS)
+
+#-----------------------------------------------------------------------------
+# Installation
+#-----------------------------------------------------------------------------
 include (CMakeInstallation.cmake)
+
+#-----------------------------------------------------------------------------
+# Hide some miscellaneous CMake variables from the default GUI
+#-----------------------------------------------------------------------------
+mark_as_advanced (FETCHCONTENT_BASE_DIR FETCHCONTENT_FULLY_DISCONNECTED FETCHCONTENT_QUIET FETCHCONTENT_UPDATES_DISCONNECTED)
+

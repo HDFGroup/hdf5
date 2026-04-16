@@ -783,7 +783,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location");
             break;
 
-        case H5T_ARRAY:
+        case H5T_ARRAY: {
+            size_t expected_size; /* for validating array datatype size consistency */
             /*
              * Array datatypes...
              */
@@ -809,6 +810,9 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
             for (unsigned u = 0; u < dt->shared->u.array.ndims; u++) {
                 UINT32DECODE(*pp, dt->shared->u.array.dim[u]);
+                if (dt->shared->u.array.dim[u] != 0 &&
+                    dt->shared->u.array.nelem > SIZE_MAX / dt->shared->u.array.dim[u])
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_OVERFLOW, FAIL, "array element count overflows size_t");
                 dt->shared->u.array.nelem *= dt->shared->u.array.dim[u];
             }
 
@@ -825,6 +829,22 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
             if (H5O__dtype_decode_helper(ioflags, pp, dt->shared->parent, skip, p_end) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode array parent type");
 
+            /* Check for multiplication overflow */
+            if (dt->shared->parent->shared->size > 0 &&
+                dt->shared->u.array.nelem > SIZE_MAX / dt->shared->parent->shared->size)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL,
+                            "array datatype size calculation would overflow");
+
+            expected_size = dt->shared->parent->shared->size * dt->shared->u.array.nelem;
+
+            /* Verify the stored size matches the calculated size */
+            if (dt->shared->size != expected_size)
+                HGOTO_ERROR(
+                    H5E_DATATYPE, H5E_BADVALUE, FAIL,
+                    "array datatype size mismatch: expected %zu (element_size=%zu * nelem=%zu), got %zu",
+                    expected_size, dt->shared->parent->shared->size, dt->shared->u.array.nelem,
+                    dt->shared->size);
+
             /* Check if the parent of this array has a version greater than the
              * array itself. */
             H5O_DTYPE_CHECK_VERSION(dt, version, dt->shared->parent->shared->version, ioflags, "array", FAIL)
@@ -838,6 +858,7 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
             if (dt->shared->parent->shared->force_conv == true)
                 dt->shared->force_conv = true;
             break;
+        }
 
         case H5T_COMPLEX: {
             bool homogeneous;
@@ -1472,7 +1493,7 @@ H5O__dtype_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, 
 {
     bool           skip;
     H5T_t         *dt        = NULL;
-    const uint8_t *p_end     = p + p_size - 1;
+    const uint8_t *p_end     = NULL;
     void          *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
@@ -1490,6 +1511,10 @@ H5O__dtype_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, 
      * as a signal to skip bounds checking.
      */
     skip = (p_size == SIZE_MAX ? true : false);
+    if (skip)
+        p_end = p;
+    else
+        p_end = p + p_size - 1;
 
     /* Indicate if the object header has a checksum, or if the
      * H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS flag is set */

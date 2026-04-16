@@ -680,7 +680,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
                 else {
                     char msgType[10];
 
-                    strcpy(msgType, msgPtr + 1);
+                    snprintf(msgType, sizeof(msgType), "%s", msgPtr + 1);
                     msgPtr[0] = '\0';
                     ssize     = atoi(H5_optarg);
                     if (!strncmp(msgType, "dspace", 6))
@@ -725,7 +725,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             case 'S': {
                 char strategy[MAX_NC_NAME];
 
-                strcpy(strategy, H5_optarg);
+                snprintf(strategy, MAX_NC_NAME, "%s", H5_optarg);
                 if (!strcmp(strategy, "FSM_AGGR"))
                     options->fs_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR;
                 else if (!strcmp(strategy, "PAGE"))

@@ -52,7 +52,7 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5FD__free_cls(H5FD_class_t *cls, void **request);
+static herr_t H5FD__free_cls(void *cls, void **request);
 static herr_t H5FD__query(const H5FD_t *f, unsigned long *flags /*out*/);
 
 /*********************/
@@ -89,10 +89,10 @@ static unsigned long H5FD_file_serial_no_g;
 
 /* File driver ID class */
 static const H5I_class_t H5I_VFL_CLS[1] = {{
-    H5I_VFL,                   /* ID class value */
-    0,                         /* Class flags */
-    0,                         /* # of reserved IDs for class */
-    (H5I_free_t)H5FD__free_cls /* Callback routine for closing objects of this class */
+    H5I_VFL,       /* ID class value */
+    0,             /* Class flags */
+    0,             /* # of reserved IDs for class */
+    H5FD__free_cls /* Callback routine for closing objects of this class */
 }};
 
 /*-------------------------------------------------------------------------
@@ -283,32 +283,33 @@ H5FD_term_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__free_cls(H5FD_class_t *cls, void H5_ATTR_UNUSED **request)
+H5FD__free_cls(void *cls, void H5_ATTR_UNUSED **request)
 {
-    herr_t ret_value = SUCCEED;
+    H5FD_class_t *cls_p     = (H5FD_class_t *)cls;
+    herr_t        ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    assert(cls);
+    assert(cls_p);
 
     /* If the file driver has a terminate callback, call it to give the file
      * driver a chance to free singletons or other resources which will become
      * invalid once the class structure is freed.
      */
-    if (cls->terminate) {
+    if (cls_p->terminate) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
             {
-                ret_value = cls->terminate();
+                ret_value = cls_p->terminate();
             }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEOBJ, FAIL, "virtual file driver '%s' did not terminate cleanly",
-                        cls->name);
+                        cls_p->name);
     }
 
-    H5MM_xfree(cls);
+    H5MM_xfree(cls_p);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

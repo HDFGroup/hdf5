@@ -109,7 +109,6 @@ macro (ADD_H5_TEST resultfile resultcode)
     )
   endif ()
   set_tests_properties (H5STAT-${resultfile} PROPERTIES
-      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
   )
   if ("H5STAT-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -140,7 +139,6 @@ macro (ADD_H5_ERR_TEST resultfile resultcode errtext)
     )
   endif ()
   set_tests_properties (H5STAT-${resultfile} PROPERTIES
-      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
   )
   if ("H5STAT-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -171,7 +169,6 @@ macro (ADD_H5_CMP_TEST resultfile resultcode errtext)
     )
   endif ()
   set_tests_properties (H5STAT-${resultfile} PROPERTIES
-      ENVIRONMENT "${CROSSCOMPILING_PATH}"
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
   )
   if ("H5STAT-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -203,7 +200,7 @@ macro (ADD_H5_S3TEST resultfile resultcode credtype urlscheme urlpath)
   endif ()
   set_tests_properties (H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES
       FIXTURES_REQUIRED h5stat_s3_proxy
-      ENVIRONMENT "${h5stat_s3tests_env};${CROSSCOMPILING_PATH}"
+      ENVIRONMENT "${h5stat_s3tests_env}"
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/S3TEST
   )
   if ("H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")

@@ -24,7 +24,7 @@ endif ()
 if (NOT TEST_OUTPUT) # the output file to capture the test program output
   message (FATAL_ERROR "Require TEST_OUTPUT to be defined")
 endif ()
-if (NOT TEST_EXPECT)
+if (NOT DEFINED TEST_EXPECT)
   message (VERBOSE "Optional TEST_EXPECT is not defined")
 endif ()
 

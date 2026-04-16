@@ -214,52 +214,6 @@ done:
 } /* end h5dsset_label_c() */
 
 /*-------------------------------------------------------------------------
- * Function: h5dsget_label_c
- *
- * Purpose: Calls H5DSget_label
- *
- * Return: Success: 0, Failure: -1
- *
- * Comments:
- *
- *-------------------------------------------------------------------------
- */
-int_f
-h5dsget_label_c(hid_t_f *did, int_f *idx, _fcd label, size_t_f *size)
-{
-    char   *c_label   = NULL;
-    ssize_t size_c    = -1;
-    int_f   ret_value = 0;
-
-    /*
-     * Allocate buffer to hold label
-     */
-    if ((c_label = (char *)malloc((size_t)*size + 1)) == NULL)
-        HGOTO_DONE(FAIL);
-
-    /*
-     * call H5DSget_label function.
-     */
-
-    if ((size_c = H5DSget_label((hid_t)*did, (unsigned)*idx, c_label, (size_t)*size + 1)) < 0)
-        HGOTO_DONE(FAIL);
-
-    /*
-     * Convert C name to FORTRAN and place it in the given buffer
-     */
-
-    HD5packFstring(c_label, _fcdtocp(label), (size_t)*size);
-
-done:
-    *size = (size_t_f)size_c; /* Don't subtract '1'  because H5DSget_label doesn't include the
-                               * trailing NULL in the length calculation, Ref. HDFFV-7596 */
-    if (c_label)
-        free(c_label);
-    return ret_value;
-
-} /* end h5dsget_label_c() */
-
-/*-------------------------------------------------------------------------
  * Function: h5dsget_scale_name_c
  *
  * Purpose: Calls H5DSget_scale_name

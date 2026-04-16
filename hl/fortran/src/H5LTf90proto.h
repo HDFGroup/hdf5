@@ -45,9 +45,6 @@ H5FC_HL_DLL
 int_f h5dsset_label_c(hid_t_f *did, int_f *idx, _fcd label, size_t_f *labellen);
 
 H5FC_HL_DLL
-int_f h5dsget_label_c(hid_t_f *did, int_f *idx, _fcd label, size_t_f *size);
-
-H5FC_HL_DLL
 int_f h5dsget_scale_name_c(hid_t_f *did, _fcd label, size_t_f *size);
 
 H5FC_HL_DLL

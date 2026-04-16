@@ -2744,11 +2744,11 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, hsize_t *buf_size
     flags = *p++;
     if (flags & H5C__MDCI_ENTRY_DIRTY_FLAG)
         is_dirty = true;
+    if (flags & H5C__MDCI_ENTRY_IS_FD_PARENT_FLAG)
+        is_fd_parent = true;
 #ifndef NDEBUG /* only used in assertions */
     if (flags & H5C__MDCI_ENTRY_IN_LRU_FLAG)
         in_lru = true;
-    if (flags & H5C__MDCI_ENTRY_IS_FD_PARENT_FLAG)
-        is_fd_parent = true;
     if (flags & H5C__MDCI_ENTRY_IS_FD_CHILD_FLAG)
         is_fd_child = true;
 #endif

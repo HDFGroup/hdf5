@@ -71,7 +71,7 @@ typedef struct H5F_olist_t {
 /* Local Prototypes */
 /********************/
 
-static herr_t H5F__close_cb(H5VL_object_t *file_vol_obj, void **request);
+static herr_t H5F__close_cb(void *file_vol_obj, void **request);
 static herr_t H5F__set_vol_conn(H5F_t *file);
 static herr_t H5F__get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list,
                                bool app_ref, size_t *obj_id_count_ptr);
@@ -117,10 +117,10 @@ H5FL_DEFINE(H5F_shared_t);
 
 /* File ID class */
 static const H5I_class_t H5I_FILE_CLS[1] = {{
-    H5I_FILE,                 /* ID class value */
-    0,                        /* Class flags */
-    0,                        /* # of reserved IDs for class */
-    (H5I_free_t)H5F__close_cb /* Callback routine for closing objects of this class */
+    H5I_FILE,     /* ID class value */
+    0,            /* Class flags */
+    0,            /* # of reserved IDs for class */
+    H5F__close_cb /* Callback routine for closing objects of this class */
 }};
 
 /*-------------------------------------------------------------------------
@@ -236,22 +236,23 @@ H5F_term_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__close_cb(H5VL_object_t *file_vol_obj, void **request)
+H5F__close_cb(void *file_vol_obj, void **request)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *file_vol_obj_p = (H5VL_object_t *)file_vol_obj;
+    herr_t         ret_value      = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    assert(file_vol_obj);
+    assert(file_vol_obj_p);
 
     /* Close the file */
-    if (H5VL_file_close(file_vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
+    if (H5VL_file_close(file_vol_obj_p, H5P_DATASET_XFER_DEFAULT, request) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
 
     /* Free the VOL object; it is unnecessary to unwrap the VOL
      * object before freeing it, as the object was not wrapped */
-    if (H5VL_free_object(file_vol_obj) < 0)
+    if (H5VL_free_object(file_vol_obj_p) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object");
 
 done:

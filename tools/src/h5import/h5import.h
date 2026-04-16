@@ -401,9 +401,9 @@ struct infilesformat {
 };
 
 struct Options {
-    struct infilesformat infiles[30];  /* structure to hold the list of input file names. Limited to 30*/
-    char                 outfile[256]; /* output file name */
-    int                  fcount;       /* number of input files */
+    struct infilesformat infiles[30]; /* structure to hold the list of input file names. Limited to 30*/
+    char                 outfile[MAX_PATH_NAME_LENGTH]; /* output file name */
+    int                  fcount;                        /* number of input files */
 };
 
 static char keytable[NUM_KEYS][30] = {"PATH",

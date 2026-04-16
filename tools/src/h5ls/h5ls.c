@@ -183,7 +183,7 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "   -d, --data      Print the values of datasets\n");
     PRINTVALSTREAM(rawoutstream, "   --enable-error-stack\n");
     PRINTVALSTREAM(rawoutstream,
-                   "                   Prints messages from the HDF5 error stack as they occur.\n");
+                   "                   Print messages from the HDF5 error stack as they occur.\n");
     PRINTVALSTREAM(rawoutstream, "   --follow-symlinks\n");
     PRINTVALSTREAM(rawoutstream,
                    "                   Follow symbolic links (soft links and external links)\n");
@@ -2285,14 +2285,15 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
             /* Modification time */
             if (oinfo->mtime > 0) {
                 char       buf[256];
-                struct tm *tm;
+                struct tm  tm_buf;
+                struct tm *tm_result;
 
                 if (simple_output_g)
-                    tm = gmtime(&(oinfo->mtime));
+                    tm_result = HDgmtime_r(&(oinfo->mtime), &tm_buf);
                 else
-                    tm = localtime(&(oinfo->mtime));
-                if (tm) {
-                    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+                    tm_result = HDlocaltime_r(&(oinfo->mtime), &tm_buf);
+                if (tm_result) {
+                    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", &tm_buf);
                     h5tools_str_reset(&buffer);
                     h5tools_str_append(&buffer, "    %-10s %s\n", "Modified:", buf);
                     h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos,

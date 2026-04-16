@@ -41,18 +41,13 @@ jobs:
         mpi: [ 'msmpi', 'intelmpi']
     name: "Parallel ${{ matrix.mpi }} Windows-${{ inputs.build_mode }}"
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install Dependencies (Windows)
         run: choco install ninja
 
-      - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.13.2"
-
       - name: Install CMake
-        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
+        uses: lukka/get-cmake@ea83089aa35e08e459464341fe24ad024ee2466f # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -62,7 +57,7 @@ jobs:
 
       - name: Setup MPI (${{ matrix.mpi }})
         id: setup-mpi
-        uses: mpi4py/setup-mpi@8ac56ec7ab12f2dffdcf55ffaf50f1920ebcc004 # v1
+        uses: mpi4py/setup-mpi@dbbb80b116bea57fc1788daf7dbbf7ab3df3a0f1 # v1
         with:
           mpi: ${{ matrix.mpi }}
 
@@ -87,7 +82,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Windows)
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -157,7 +152,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (${{ matrix.mpi }})
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: windows-${{ matrix.mpi }}-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -170,7 +165,7 @@ jobs:
     name: "Parallel ${{ matrix.mpi }} Linux-${{ inputs.build_mode }}"
     steps:
       - name: Get Actions
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           sparse-checkout: .github/actions
 
@@ -182,20 +177,15 @@ jobs:
           sudo apt install gcc-12 g++-12 gfortran-12
           sudo apt install libaec0 libaec-dev
 
-      - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.13.2"
-
       - name: Install CMake
-        uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # latest
+        uses: lukka/get-cmake@ea83089aa35e08e459464341fe24ad024ee2466f # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
 
       - name: Setup MPI (${{ matrix.mpi }})
         id: setup-mpi
-        uses: mpi4py/setup-mpi@8ac56ec7ab12f2dffdcf55ffaf50f1920ebcc004 # v1
+        uses: mpi4py/setup-mpi@dbbb80b116bea57fc1788daf7dbbf7ab3df3a0f1 # v1
         with:
           mpi: ${{ matrix.mpi }}
 
@@ -220,7 +210,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (${{ matrix.mpi }})
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -282,7 +272,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (${{ matrix.mpi }})
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: linux-${{ matrix.mpi }}-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -294,19 +284,14 @@ jobs:
         mpi: [ 'mpich', 'openmpi']
     name: "Parallel ${{ matrix.mpi }} macos-${{ inputs.build_mode }}"
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install Dependencies (MacOS_latest)
         run: brew install ninja
 
-      - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.13.2"
-
       - name: Setup MPI (${{ matrix.mpi }})
         id: setup-mpi
-        uses: mpi4py/setup-mpi@8ac56ec7ab12f2dffdcf55ffaf50f1920ebcc004 # v1
+        uses: mpi4py/setup-mpi@dbbb80b116bea57fc1788daf7dbbf7ab3df3a0f1 # v1
         with:
           mpi: ${{ matrix.mpi }}
 
@@ -330,7 +315,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (${{ matrix.mpi }})
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -392,7 +377,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (${{ matrix.mpi }})
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: macos-${{ matrix.mpi }}-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log

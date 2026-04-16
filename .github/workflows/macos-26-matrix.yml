@@ -189,7 +189,7 @@ jobs:
         fi
 
     - name: Get Sources
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Configure
       run: |
@@ -218,6 +218,7 @@ jobs:
         if [[ "${{ matrix.plugins }}" == "ON" ]]; then
           CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ENABLE_PLUGIN_SUPPORT=ON"
           CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ALLOW_EXTERNAL_SUPPORT=TGZ"
+          CMAKE_OPTS="$CMAKE_OPTS -DPLUGIN_USE_EXTERNAL=ON"
           CMAKE_OPTS="$CMAKE_OPTS -DPLUGIN_USE_LOCALCONTENT=OFF"
         fi
 
@@ -264,7 +265,7 @@ jobs:
         CTEST_TIMEOUT: 3600
 
     - name: Upload Test Results
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
       if: always()
       with:
         name: test-results-${{ matrix.name }}

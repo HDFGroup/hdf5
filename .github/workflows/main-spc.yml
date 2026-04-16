@@ -27,19 +27,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # SETUP
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Linux Dependencies
         run: |
            sudo apt-get update
-           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
            echo "CC=gcc-12" >> $GITHUB_ENV
            echo "CXX=g++-12" >> $GITHUB_ENV
            echo "FC=gfortran-12" >> $GITHUB_ENV
- 
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       # CONFIGURE
       - name: Configure
@@ -86,19 +89,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # SETUP
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Linux Dependencies
         run: |
            sudo apt-get update
-           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
            echo "CC=gcc-12" >> $GITHUB_ENV
            echo "CXX=g++-12" >> $GITHUB_ENV
            echo "FC=gfortran-12" >> $GITHUB_ENV
- 
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       # CONFIGURE
       - name: Configure
@@ -140,19 +146,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # SETUP
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Linux Dependencies
         run: |
            sudo apt-get update
-           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
            echo "CC=gcc-12" >> $GITHUB_ENV
            echo "CXX=g++-12" >> $GITHUB_ENV
            echo "FC=gfortran-12" >> $GITHUB_ENV
- 
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       # CONFIGURE
       - name: Configure
@@ -194,19 +203,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # SETUP
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Linux Dependencies
         run: |
            sudo apt-get update
-           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
            echo "CC=gcc-12" >> $GITHUB_ENV
            echo "CXX=g++-12" >> $GITHUB_ENV
            echo "FC=gfortran-12" >> $GITHUB_ENV
- 
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       # CONFIGURE
       - name: Configure
@@ -246,19 +258,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # SETUP
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Linux Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt-get install ninja-build graphviz
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
           sudo apt install gcc-12 g++-12 gfortran-12
           echo "CC=gcc-12" >> $GITHUB_ENV
           echo "CXX=g++-12" >> $GITHUB_ENV
           echo "FC=gfortran-12" >> $GITHUB_ENV
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       # CONFIGURE
       - name: Configure
@@ -298,19 +313,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # SETUP
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Linux Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt-get install ninja-build graphviz
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
           sudo apt install gcc-12 g++-12 gfortran-12
           echo "CC=gcc-12" >> $GITHUB_ENV
           echo "CXX=g++-12" >> $GITHUB_ENV
           echo "FC=gfortran-12" >> $GITHUB_ENV
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       # CONFIGURE
       - name: Configure
@@ -351,24 +369,22 @@ jobs:
     runs-on: windows-latest
     steps:
       # SETUP
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Dependencies (Windows)
         run: choco install ninja
 
-      - name: Install Dependencies
-        uses: ssciwr/doxygen-install@501e53b879da7648ab392ee226f5b90e42148449 # v1
-        with:
-          version: "1.13.2"
-
       - name: install oneAPI (Windows)
-        uses: fortran-lang/setup-fortran@47809fdb6e637da656ce9ada436527b240c1287f # v1
+        uses: fortran-lang/setup-fortran@2a1b9c55897d827a9dfeb114408f3615e53b2b72 # v1
         id: setup-fortran
         with:
           compiler: intel
           version: '2025.0'
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Configure (Windows)
         shell: pwsh
@@ -403,19 +419,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # SETUP
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Linux Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt-get install ninja-build graphviz
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-          sudo apt install gcc-12 g++-12 gfortran-12 zlib1g-dev 
+          sudo apt install gcc-12 g++-12 gfortran-12 zlib1g-dev
           echo "CC=gcc-12" >> $GITHUB_ENV
           echo "CXX=g++-12" >> $GITHUB_ENV
           echo "FC=gfortran-12" >> $GITHUB_ENV
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       # CONFIGURE
       - name: Configure
@@ -439,6 +458,7 @@ jobs:
             -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
             -DZLIB_USE_LOCALCONTENT:BOOL=OFF \
             -DZLIB_USE_EXTERNAL:BOOL=OFF \
+            -DHDF5_USE_ZLIB_STATIC:BOOL=OFF \
             -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
             -DHDF5_ENABLE_SZIP_ENCODING:BOOL=OFF \
             -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF \
@@ -460,19 +480,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # SETUP
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Linux Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt-get install ninja-build graphviz
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
           sudo apt install gcc-12 g++-12 gfortran-12
           echo "CC=gcc-12" >> $GITHUB_ENV
           echo "CXX=g++-12" >> $GITHUB_ENV
           echo "FC=gfortran-12" >> $GITHUB_ENV
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       # CONFIGURE
       - name: Configure
@@ -513,19 +536,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # SETUP
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Linux Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt-get install ninja-build graphviz
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
           sudo apt install gcc-12 g++-12 gfortran-12
           echo "CC=gcc-12" >> $GITHUB_ENV
           echo "CXX=g++-12" >> $GITHUB_ENV
           echo "FC=gfortran-12" >> $GITHUB_ENV
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       # CONFIGURE
       - name: Configure
@@ -546,8 +572,8 @@ jobs:
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
             -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
-            -DHDF5_ENABLE_SZIP_SUPPORT:=BOOL=OFF \
-            -DHDF5_ENABLE_SZIP_ENCODING:=BOOL=OFF \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
+            -DHDF5_ENABLE_SZIP_ENCODING:BOOL=OFF \
             $GITHUB_WORKSPACE
         shell: bash
 
@@ -566,19 +592,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # SETUP
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Linux Dependencies
         run: |
            sudo apt-get update
-           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
            echo "CC=gcc-12" >> $GITHUB_ENV
            echo "CXX=g++-12" >> $GITHUB_ENV
            echo "FC=gfortran-12" >> $GITHUB_ENV
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       # CONFIGURE
       - name: Configure
@@ -614,19 +643,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # SETUP
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
       - name: Install Linux Dependencies
         run: |
            sudo apt-get update
-           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
            echo "CC=gcc-12" >> $GITHUB_ENV
            echo "CXX=g++-12" >> $GITHUB_ENV
            echo "FC=gfortran-12" >> $GITHUB_ENV
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       # CONFIGURE
       - name: Configure

@@ -20,13 +20,13 @@ jobs:
     name: "nvhpc ${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     env:
-      CUDAVERDOT: "13.0"
-      NVERDOT: "25.9"
-      NVERDASH: "25-9"
+      CUDAVERDOT: "13.1"
+      NVERDOT: "26.3"
+      NVERDASH: "26-3"
 
     steps:
       - name: Get Sources
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
@@ -36,13 +36,13 @@ jobs:
           haskell: true
           large-packages: true
           tool-cache: false
-          swap-storage: true 
+          swap-storage: true
 
       - name: Install Dependencies
         shell: bash
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt-get install ninja-build graphviz
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
           sudo apt install -y libaec-dev zlib1g-dev wget curl bzip2 flex bison cmake libzip-dev openssl build-essential
 

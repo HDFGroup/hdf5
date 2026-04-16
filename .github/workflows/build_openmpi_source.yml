@@ -30,7 +30,7 @@ jobs:
           sudo apt-get install build-essential libtool libtool-bin
 
       - name: Get OpenMPI source
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: 'open-mpi/ompi'
           path: 'ompi'
@@ -49,7 +49,7 @@ jobs:
 
       - name: Cache OpenMPI (GCC) installation
         id: cache-openmpi-ubuntu-gcc
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v4
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v4
         with:
           path: ${{ runner.workspace }}/openmpi
           key: ${{ runner.os }}-${{ runner.arch }}-gcc-openmpi-${{ steps.get-sha.outputs.sha }}-${{ inputs.build_mode }}
@@ -81,7 +81,7 @@ jobs:
         run: tar -cvf openmpi.tar -C ${{ runner.workspace }} openmpi
 
       - name: Save OpenMPI installation artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
         with:
           name: openmpi
           path: openmpi.tar

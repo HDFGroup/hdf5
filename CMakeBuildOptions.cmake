@@ -36,15 +36,23 @@ option (HDF5_ENABLE_PREADWRITE "Use pread/pwrite in sec2/log/core VFDs in place 
 mark_as_advanced (HDF5_ENABLE_PREADWRITE)
 
 option (HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols" ON)
+mark_as_advanced (HDF5_ENABLE_DEPRECATED_SYMBOLS)
 
 option (HDF5_MINGW_STATIC_GCC_LIBS "Statically link libgcc/libstdc++" OFF)
 mark_as_advanced (HDF5_MINGW_STATIC_GCC_LIBS)
 
 option (HDF5_ENABLE_TRACE "Enable API tracing capability" OFF)
 mark_as_advanced (HDF5_ENABLE_TRACE)
+if (HDF5_ENABLE_TRACE)
+  message (DEPRECATION "HDF5_ENABLE_TRACE has been deprecated and may be removed in a future release of HDF5")
+endif ()
 
-option (HDF5_ENABLE_EMBEDDED_LIBINFO "Embed library info into executables" ON)
+option (HDF5_ENABLE_EMBEDDED_LIBINFO "Embed library info into executables" OFF)
 mark_as_advanced (HDF5_ENABLE_EMBEDDED_LIBINFO)
+if (HDF5_ENABLE_EMBEDDED_LIBINFO)
+  message (DEPRECATION "HDF5_ENABLE_EMBEDDED_LIBINFO has been deprecated and may be removed in a future release of HDF5")
+endif ()
+
 
 option (HDF5_ENABLE_HDFS "Enable HDFS" OFF)
 
@@ -71,6 +79,7 @@ mark_as_advanced (HDF5_BUILD_PARALLEL_TOOLS)
 option (HDF5_BUILD_TOOLS "Build HDF5 Tools" ON)
 
 option (HDF5_ENABLE_PLUGIN_SUPPORT "Enable PLUGIN Filters" OFF)
+mark_as_advanced (HDF5_ENABLE_PLUGIN_SUPPORT)
 
 option (HDF5_BUILD_HL_LIB "Build HIGH Level HDF5 Library" ON)
 
@@ -89,4 +98,14 @@ mark_as_advanced (HDF5_MAVEN_SNAPSHOT)
 option (HDF5_BUILD_EXAMPLES "Build HDF5 Library Examples" ON)
 
 option (BUILD_TESTING "Build HDF5 Unit Testing" ON)
+
+#################################
+# Options with multiple choices #
+#################################
+set (allow_external_support_types "NO" "GIT" "TGZ")
+set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "If not set to NO, specifies where to obtain sources when building or using external libraries (NO GIT TGZ)")
+set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS ${allow_external_support_types})
+if (NOT "${HDF5_ALLOW_EXTERNAL_SUPPORT}" IN_LIST allow_external_support_types)
+  message (FATAL_ERROR "HDF5_ALLOW_EXTERNAL_SUPPORT must be set to one of ${allow_external_support_types}")
+endif ()
 

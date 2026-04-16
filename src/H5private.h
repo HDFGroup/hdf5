@@ -418,13 +418,16 @@
 #define H5_POSIX_MAX_IO_BYTES SSIZE_MAX
 #endif
 
-/* POSIX I/O mode used as the third parameter to open/_open
+/* POSIX I/O modes used as the third parameter to open/_open
  * when creating a new file (O_CREAT is set).
  */
 #if defined(H5_HAVE_WIN32_API)
-#define H5_POSIX_CREATE_MODE_RW (_S_IREAD | _S_IWRITE)
+#define H5_POSIX_CREATE_MODE_RW      (_S_IREAD | _S_IWRITE)
+#define H5_POSIX_CREATE_MODE_URWGROR (_S_IREAD | _S_IWRITE)
 #else
-#define H5_POSIX_CREATE_MODE_RW 0666
+#define H5_POSIX_CREATE_MODE_RW      0666
+/* User R/W, Group R, Other R */
+#define H5_POSIX_CREATE_MODE_URWGROR (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 #endif
 
 /* Represents an empty asynchronous request handle.
@@ -697,6 +700,12 @@ H5_DLL herr_t HDqsort_fallback(void *base, size_t nel, size_t size,
 #endif
 #ifndef HDlstat
 #define HDlstat(S, B) lstat(S, B)
+#endif
+#ifndef HDgmtime_r
+#define HDgmtime_r(T, R) gmtime_r(T, R)
+#endif
+#ifndef HDlocaltime_r
+#define HDlocaltime_r(T, R) localtime_r(T, R)
 #endif
 #ifndef HDmkdir
 #define HDmkdir(S, M) mkdir(S, M)
@@ -1814,6 +1823,7 @@ H5_DLL uint32_t H5_hash_string(const char *str);
 H5_DLL time_t H5_make_time(struct tm *tm);
 H5_DLL void   H5_nanosleep(uint64_t nanosec);
 H5_DLL double H5_get_time(void);
+H5_DLL void   H5_get_localtime_str(char *buf, size_t buf_size);
 
 /* Functions for building paths, etc. */
 H5_DLL herr_t H5_build_extpath(const char *name, char **extpath /*out*/);

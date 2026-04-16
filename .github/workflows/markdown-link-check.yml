@@ -6,13 +6,16 @@ on:
   schedule:
       - cron: "0 10 * * 6"
 
+permissions:
+  contents: read
+
 # The config file handles things like http 500 errors from sites like GitLab
 # and http 200 responses
 jobs:
   markdown-link-check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # master
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # master
     - uses: gaurav-nelson/github-action-markdown-link-check@5c5dfc0ac2e225883c0e5f03a85311ec2830d368 # v1
       with:
         config-file: '.github/workflows/markdown_config.json'

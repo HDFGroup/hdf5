@@ -960,7 +960,7 @@ H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
     } /* end if */
     /* output; compress */
     else {
-        assert(nbytes == d_nelmts * cd_values[4]);
+        assert(nbytes == (size_t)d_nelmts * (size_t)cd_values[4]);
 
         size_out = nbytes;
 

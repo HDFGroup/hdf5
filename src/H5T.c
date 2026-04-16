@@ -485,7 +485,7 @@ static herr_t H5T__register_int(H5T_pers_t pers, const char *name, H5T_t *src, H
 static herr_t H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_conv_func_t *conv);
 static htri_t H5T__compiler_conv(H5T_t *src, H5T_t *dst);
 static herr_t H5T__set_size(H5T_t *dt, size_t size);
-static herr_t H5T__close_cb(H5T_t *dt, void **request);
+static herr_t H5T__close_cb(void *dt, void **request);
 static herr_t H5T__init_path_table(void);
 static bool   H5T__path_table_search(const H5T_t *src, const H5T_t *dst, int *idx, int *last_cmp);
 static H5T_path_t *H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name,
@@ -767,10 +767,10 @@ H5FL_DEFINE_STATIC(H5T_path_t);
 
 /* Datatype ID class */
 static const H5I_class_t H5I_DATATYPE_CLS[1] = {{
-    H5I_DATATYPE,             /* ID class value */
-    0,                        /* Class flags    */
-    8,                        /* # of reserved IDs for class */
-    (H5I_free_t)H5T__close_cb /* Callback routine for closing objects of this class */
+    H5I_DATATYPE, /* ID class value */
+    0,            /* Class flags    */
+    8,            /* # of reserved IDs for class */
+    H5T__close_cb /* Callback routine for closing objects of this class */
 }};
 
 /* Flag indicating "top" of interface has been initialized */
@@ -2480,31 +2480,32 @@ H5T_term_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__close_cb(H5T_t *dt, void **request)
+H5T__close_cb(void *dt, void **request)
 {
+    H5T_t *dt_p      = (H5T_t *)dt;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    assert(dt);
+    assert(dt_p);
 
     /* If this datatype is VOL-managed (i.e.: has a VOL object),
      * close it through the VOL connector.
      */
-    if (NULL != dt->vol_obj) {
+    if (NULL != dt_p->vol_obj) {
         /* Close the connector-managed datatype data */
-        if (H5VL_datatype_close(dt->vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
+        if (H5VL_datatype_close(dt_p->vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close datatype");
 
         /* Free the VOL object */
-        if (H5VL_free_object(dt->vol_obj) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to free VOL object");
-        dt->vol_obj = NULL;
+        if (H5VL_free_object(dt_p->vol_obj) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "unable to free VOL object");
+        dt_p->vol_obj = NULL;
     } /* end if */
 
     /* Close the datatype */
-    if (H5T_close(dt) < 0)
+    if (H5T_close(dt_p) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close datatype");
 
 done:

@@ -1058,12 +1058,14 @@ done:
  * Purpose:  Determine whether filters can be ignored.
  *
  * Description:
- *      When the filters are optional (i.e., H5Z_FLAG_OPTIONAL is provided,)
+ *      When the filters are optional (i.e., H5Z_FLAG_OPTIONAL is provided),
  *      if any of the following conditions is met, the filters will be ignored:
  *          - dataspace is either H5S_NULL or H5S_SCALAR
- *          - datatype is variable-length (string or non-string)
  *      However, if any of these conditions exists and a filter is not
  *      optional, the function will produce an error.
+ *      This function runs before the can_apply callback of the filters and
+ *      its negated return value is effectively OR'ed to the return value
+ *      of can_apply.
  *
  * Return:   Non-negative(true/false) on success
  *           Negative on failure
@@ -1071,14 +1073,12 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5Z_ignore_filters(hid_t dcpl_id, const H5T_t *type, const H5S_t *space)
+H5Z_ignore_filters(hid_t dcpl_id, const H5S_t *space)
 {
-    H5P_genplist_t *dc_plist;                /* Dataset creation property list object */
-    H5O_pline_t     pline;                   /* Object's I/O pipeline information */
-    H5S_class_t     space_class;             /* To check class of space */
-    H5T_class_t     type_class;              /* To check if type is VL */
-    bool            bad_for_filters = false; /* Suitable to have filters */
-    htri_t          ret_value       = false; /* true for ignoring filters */
+    H5P_genplist_t *dc_plist;          /* Dataset creation property list object */
+    H5O_pline_t     pline;             /* Object's I/O pipeline information */
+    H5S_class_t     space_class;       /* To check class of space */
+    htri_t          ret_value = false; /* true for ignoring filters */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1091,15 +1091,10 @@ H5Z_ignore_filters(hid_t dcpl_id, const H5T_t *type, const H5S_t *space)
 
     /* Get datatype and dataspace classes for quick access */
     space_class = H5S_GET_EXTENT_TYPE(space);
-    type_class  = H5T_get_class(type, false);
-
-    /* These conditions are not suitable for filters */
-    bad_for_filters = (H5S_NULL == space_class || H5S_SCALAR == space_class || H5T_VLEN == type_class ||
-                       (H5T_STRING == type_class && true == H5T_is_variable_str(type)));
 
     /* When these conditions occur, if there are required filters in pline,
        then report a failure, otherwise, set flag that they can be ignored */
-    if (bad_for_filters) {
+    if (space_class == H5S_NULL || space_class == H5S_SCALAR) {
         size_t ii;
         if (pline.nused > 0) {
             for (ii = 0; ii < pline.nused; ii++) {

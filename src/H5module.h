@@ -1471,27 +1471,6 @@
  * Use the functions in this module to manage the life cycle of HDF5 library
  * instances.
  *
- * <table>
- * <tr><th>Create</th><th>Read</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5_examples.c create
- *   </td>
- *   <td>
- *   \snippet{lineno} H5_examples.c read
- *   </td>
- * <tr><th>Update</th><th>Delete</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5_examples.c update
- *   </td>
- *   <td>
- *   \snippet{lineno} H5_examples.c closing_shop
- *   \snippet{lineno} H5_examples.c delete
- *   </td>
- * </tr>
- * </table>
- *
  */
 
 #endif /* H5module_H */

@@ -94,7 +94,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                 else
                     sobj[k + 1] = '\0';
 
-                strcpy(obj_list[n].obj, sobj);
+                snprintf(obj_list[n].obj, MAX_NC_NAME, "%s", sobj);
                 memset(sobj, 0, sizeof(sobj));
                 n++;
                 k = -1;
@@ -530,7 +530,7 @@ parse_layout(const char *str, unsigned *n_objs, pack_info_t *pack, /* info about
                     sobj[k] = '\0';
                 else
                     sobj[k + 1] = '\0';
-                strcpy(obj_list[n].obj, sobj);
+                snprintf(obj_list[n].obj, MAX_NC_NAME, "%s", sobj);
                 memset(sobj, 0, sizeof(sobj));
                 n++;
                 k = -1;

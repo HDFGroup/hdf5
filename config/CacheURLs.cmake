@@ -13,38 +13,56 @@
 ########################
 # compression options
 ########################
+set (ZLIB_VERSION "1.3.2" CACHE INTERNAL "Version of zlib to use when building from external source")
 set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package")
 mark_as_advanced (ZLIB_PACKAGE_NAME)
-set (ZLIB_TGZ_NAME "zlib-1.3.1.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file")
-set (ZLIB_TGZ_ORIGPATH "https://github.com/madler/zlib/releases/download/v1.3.1" CACHE STRING "Use ZLIB from original location")
+set (ZLIB_TGZ_NAME "zlib-${ZLIB_VERSION}.tar.gz" CACHE STRING "Base name of zlib compressed file")
+set (ZLIB_TGZ_ORIGPATH "https://github.com/madler/zlib/releases/download/v${ZLIB_VERSION}" CACHE STRING "URL to retrieve external zlib compressed file from")
 mark_as_advanced (ZLIB_TGZ_NAME)
 mark_as_advanced (ZLIB_TGZ_ORIGPATH)
-set (ZLIB_GIT_URL "https://github.com/madler/zlib.git" CACHE STRING "Use ZLIB from  GitHub repository")
-set (ZLIB_GIT_BRANCH "develop" CACHE STRING "")
+set (ZLIB_GIT_URL "https://github.com/madler/zlib.git" CACHE STRING "GIT URL to retrieve external zlib source from")
+set (ZLIB_GIT_TAG "v${ZLIB_VERSION}" CACHE STRING "GIT tag to retrieve external zlib source from")
 mark_as_advanced (ZLIB_GIT_URL)
-mark_as_advanced (ZLIB_GIT_BRANCH)
+mark_as_advanced (ZLIB_GIT_TAG)
+# DEPRECATED
+unset (ZLIB_GIT_BRANCH)
+if (DEFINED ZLIB_GIT_BRANCH)
+  message (DEPRECATION "ZLIB_GIT_BRANCH has been deprecated in favor of ZLIB_GIT_TAG")
+endif ()
 
-set (ZLIBNG_PACKAGE_NAME "zlib-ng" CACHE STRING "Name of ZLIBNG package")
+set (ZLIBNG_VERSION "2.3.3" CACHE INTERNAL "Version of zlib-ng to use when building from external source")
+set (ZLIBNG_PACKAGE_NAME "ZLIBNG" CACHE STRING "Name of zlib-ng package")
 mark_as_advanced (ZLIBNG_PACKAGE_NAME)
-set (ZLIBNG_TGZ_NAME "2.2.4.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file")
-set (ZLIBNG_TGZ_ORIGPATH "https://github.com/zlib-ng/zlib-ng/archive/refs/tags" CACHE STRING "Use ZLIBNG from original location")
+set (ZLIBNG_TGZ_NAME "${ZLIBNG_VERSION}.tar.gz" CACHE STRING "Base name of zlib-ng compressed file")
+set (ZLIBNG_TGZ_ORIGPATH "https://github.com/zlib-ng/zlib-ng/archive/refs/tags" CACHE STRING "URL to retrieve external zlib-ng compressed file from")
 mark_as_advanced (ZLIBNG_TGZ_NAME)
 mark_as_advanced (ZLIBNG_TGZ_ORIGPATH)
-set (ZLIBNG_GIT_URL "https://github.com/zlib-ng/zlib-ng.git" CACHE STRING "Use ZLIBNG from  GitHub repository")
-set (ZLIBNG_GIT_BRANCH "develop" CACHE STRING "")
+set (ZLIBNG_GIT_URL "https://github.com/zlib-ng/zlib-ng.git" CACHE STRING "GIT URL to retrieve external zlib-ng source from")
+set (ZLIBNG_GIT_TAG "${ZLIBNG_VERSION}" CACHE STRING "GIT tag to retrieve external zlib-ng source from")
 mark_as_advanced (ZLIBNG_GIT_URL)
-mark_as_advanced (ZLIBNG_GIT_BRANCH)
+mark_as_advanced (ZLIBNG_GIT_TAG)
+# DEPRECATED
+unset (ZLIBNG_GIT_BRANCH)
+if (DEFINED ZLIBNG_GIT_BRANCH)
+  message (DEPRECATION "ZLIBNG_GIT_BRANCH has been deprecated in favor of ZLIBNG_GIT_TAG")
+endif ()
 
+set (LIBAEC_VERSION "1.1.6" CACHE INTERNAL "Version of LIBAEC to use when building from external source")
 set (LIBAEC_PACKAGE_NAME "libaec" CACHE STRING "Name of AEC SZIP package")
 mark_as_advanced (LIBAEC_PACKAGE_NAME)
-set (LIBAEC_TGZ_NAME "libaec-1.1.3.tar.gz" CACHE STRING "Use SZip AEC from compressed file")
-set (LIBAEC_TGZ_ORIGPATH "https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.3" CACHE STRING "Use LIBAEC from original location")
+set (LIBAEC_TGZ_NAME "libaec-${LIBAEC_VERSION}.tar.gz" CACHE STRING "Base name of LIBAEC compressed file")
+set (LIBAEC_TGZ_ORIGPATH "https://github.com/MathisRosenhauer/libaec/releases/download/v${LIBAEC_VERSION}" CACHE STRING "URL to retrieve external LIBAEC compressed file from")
 mark_as_advanced (LIBAEC_TGZ_NAME)
 mark_as_advanced (LIBAEC_TGZ_ORIGPATH)
-set (LIBAEC_GIT_URL "https://github.com/MathisRosenhauer/libaec.git" CACHE STRING "Use LIBAEC from  GitHub repository")
-set (LIBAEC_GIT_BRANCH "v1.1.3" CACHE STRING "")
+set (LIBAEC_GIT_URL "https://github.com/MathisRosenhauer/libaec.git" CACHE STRING "GIT URL to retrieve external LIBAEC source from")
+set (LIBAEC_GIT_TAG "v${LIBAEC_VERSION}" CACHE STRING "GIT tag to retrieve external LIBAEC source from")
 mark_as_advanced (LIBAEC_GIT_URL)
-mark_as_advanced (LIBAEC_GIT_BRANCH)
+mark_as_advanced (LIBAEC_GIT_TAG)
+# DEPRECATED
+unset (LIBAEC_GIT_BRANCH)
+if (DEFINED LIBAEC_GIT_BRANCH)
+  message (DEPRECATION "LIBAEC_GIT_BRANCH has been deprecated in favor of LIBAEC_GIT_TAG")
+endif ()
 
 ########################
 # API test options
@@ -57,17 +75,32 @@ mark_as_advanced (KWSYS_TGZ_NAME)
 ########################
 # filter plugin options
 ########################
-
-set (PLUGIN_TGZ_ORIGPATH "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot" CACHE STRING "Use PLUGINS from original location")
-set (PLUGIN_TGZ_NAME "hdf5_plugins-master.tar.gz" CACHE STRING "Use PLUGINS from compressed file")
-mark_as_advanced (PLUGIN_TGZ_ORIGPATH)
-mark_as_advanced (PLUGIN_TGZ_NAME)
-set (PLUGIN_PACKAGE_NAME "pl" CACHE STRING "Name of PLUGIN package")
-mark_as_advanced (PLUGIN_PACKAGE_NAME)
-set (PLUGIN_GIT_URL "https://github.com/HDFGroup/hdf5_plugins.git" CACHE STRING "Use plugins from HDF Group repository")
-set (PLUGIN_GIT_BRANCH "master" CACHE STRING "")
-mark_as_advanced (PLUGIN_GIT_URL)
-mark_as_advanced (PLUGIN_GIT_BRANCH)
+set (HDF5_FILTER_PLUGINS_PACKAGE_NAME "h5pl" CACHE STRING "Name of HDF5 filter plugins package")
+mark_as_advanced (HDF5_FILTER_PLUGINS_PACKAGE_NAME)
+set (HDF5_FILTER_PLUGINS_TGZ_NAME "hdf5_plugins-master.tar.gz" CACHE STRING "Base name of HDF5 filter plugins compressed file")
+set (HDF5_FILTER_PLUGINS_TGZ_ORIGPATH "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot" CACHE STRING "URL to retrieve external HDF5 filter plugins compressed file from")
+mark_as_advanced (HDF5_FILTER_PLUGINS_TGZ_NAME)
+mark_as_advanced (HDF5_FILTER_PLUGINS_TGZ_ORIGPATH)
+set (HDF5_FILTER_PLUGINS_GIT_URL "https://github.com/HDFGroup/hdf5_plugins.git" CACHE STRING "GIT URL to retrieve external HDF5 filter plugins source from")
+set (HDF5_FILTER_PLUGINS_GIT_TAG "master" CACHE STRING "GIT tag to retrieve external HDF5 filter plugins source from")
+mark_as_advanced (HDF5_FILTER_PLUGINS_GIT_URL)
+mark_as_advanced (HDF5_FILTER_PLUGINS_GIT_TAG)
+# DEPRECATED
+if (DEFINED PLUGIN_PACKAGE_NAME)
+  message (DEPRECATION "PLUGIN_PACKAGE_NAME has been deprecated in favor of HDF5_FILTER_PLUGINS_PACKAGE_NAME")
+endif ()
+if (DEFINED PLUGIN_TGZ_NAME)
+  message (DEPRECATION "PLUGIN_TGZ_NAME has been deprecated in favor of HDF5_FILTER_PLUGINS_TGZ_NAME")
+endif ()
+if (DEFINED PLUGIN_TGZ_ORIGPATH)
+  message (DEPRECATION "PLUGIN_TGZ_ORIGPATH has been deprecated in favor of HDF5_FILTER_PLUGINS_TGZ_ORIGPATH")
+endif ()
+if (DEFINED PLUGIN_GIT_URL)
+  message (DEPRECATION "PLUGIN_GIT_URL has been deprecated in favor of HDF5_FILTER_PLUGINS_GIT_URL")
+endif ()
+if (DEFINED PLUGIN_GIT_BRANCH)
+  message (DEPRECATION "PLUGIN_GIT_BRANCH has been deprecated in favor of HDF5_FILTER_PLUGINS_GIT_TAG")
+endif ()
 
 ###########
 # bitgroom
@@ -102,13 +135,14 @@ mark_as_advanced (BSHUF_PACKAGE_NAME)
 # blosc
 ########
 
+set (HDF5_BLOSC_VERSION "1.21.6" CACHE INTERNAL "Version of Blosc to use when building from external source")
 set (BLOSC_GIT_URL "https://github.com/Blosc/c-blosc.git" CACHE STRING "Use BLOSC from Github repository")
 set (BLOSC_GIT_BRANCH "main" CACHE STRING "")
 mark_as_advanced (BLOSC_GIT_URL)
 mark_as_advanced (BLOSC_GIT_BRANCH)
 
 set (BLOSC_TGZ_ORIGPATH "https://github.com/Blosc/c-blosc/archive/refs/tags" CACHE STRING "Use PLUGINS from original location")
-set (BLOSC_TGZ_NAME "c-blosc-1.21.6.tar.gz" CACHE STRING "Use BLOSC from compressed file")
+set (BLOSC_TGZ_NAME "c-blosc-${HDF5_BLOSC_VERSION}.tar.gz" CACHE STRING "Use BLOSC from compressed file")
 mark_as_advanced (BLOSC_TGZ_ORIGPATH)
 mark_as_advanced (BLOSC_TGZ_NAME)
 
@@ -132,13 +166,14 @@ mark_as_advanced (BLOSC_ZLIB_PACKAGE_NAME)
 # blosc2
 ########
 
+set (HDF5_BLOSC2_VERSION "2.17.1" CACHE INTERNAL "Version of Blosc2 to use when building from external source")
 set (BLOSC2_GIT_URL "https://github.com/Blosc/c-blosc2.git" CACHE STRING "Use BLOSC2 from Github repository")
 set (BLOSC2_GIT_BRANCH "main" CACHE STRING "")
 mark_as_advanced (BLOSC2_GIT_URL)
 mark_as_advanced (BLOSC2_GIT_BRANCH)
 
 set (BLOSC2_TGZ_ORIGPATH "https://github.com/Blosc/c-blosc2/archive/refs/tags" CACHE STRING "Use PLUGINS from original location")
-set (BLOSC2_TGZ_NAME "c-blosc2-2.17.1.tar.gz" CACHE STRING "Use BLOSC2 from compressed file")
+set (BLOSC2_TGZ_NAME "c-blosc2-${HDF5_BLOSC2_VERSION}.tar.gz" CACHE STRING "Use BLOSC2 from compressed file")
 mark_as_advanced (BLOSC2_TGZ_ORIGPATH)
 mark_as_advanced (BLOSC2_TGZ_NAME)
 
@@ -282,13 +317,14 @@ mark_as_advanced (ZFP_PACKAGE_NAME)
 # zstd
 ######
 
-set (ZSTD_GIT_URL "https://github.com/facebook/zstd.git" CACHE STRING "Use ZSTD from  GitHub repository")
+set (HDF5_ZSTD_VERSION "1.5.7" CACHE INTERNAL "Version of Zstd to use when building from external source")
+set (ZSTD_GIT_URL "https://github.com/facebook/zstd.git" CACHE STRING "Use ZSTD from GitHub repository")
 set (ZSTD_GIT_BRANCH "dev" CACHE STRING "")
 mark_as_advanced (ZSTD_GIT_URL)
 mark_as_advanced (ZSTD_GIT_BRANCH)
 
-set (ZSTD_TGZ_ORIGPATH "https://github.com/facebook/zstd/releases/download/v1.5.7" CACHE STRING "Use PLUGINS from original location")
-set (ZSTD_TGZ_NAME "zstd-1.5.7.tar.gz" CACHE STRING "Use ZSTD from compressed file")
+set (ZSTD_TGZ_ORIGPATH "https://github.com/facebook/zstd/releases/download/v${HDF5_ZSTD_VERSION}" CACHE STRING "Use PLUGINS from original location")
+set (ZSTD_TGZ_NAME "zstd-${HDF5_ZSTD_VERSION}.tar.gz" CACHE STRING "Use ZSTD from compressed file")
 mark_as_advanced (ZSTD_TGZ_ORIGPATH)
 mark_as_advanced (ZSTD_TGZ_NAME)
 

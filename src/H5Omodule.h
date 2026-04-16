@@ -131,25 +131,5 @@
  * reference count to zero, which can (but should not usually) be affected
  * by a function in this module.
  *
- * <table>
- * <tr><th>Create</th><th>Read</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5O_examples.c create
- *   </td>
- *   <td>
- *   \snippet{lineno} H5O_examples.c read
- *   </td>
- * <tr><th>Update</th><th>Delete</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5O_examples.c update
- *   </td>
- *   <td>
- *   \snippet{lineno} H5O_examples.c delete
- *   </td>
- * </tr>
- * </table>
- *
  */
 #endif /* H5Omodule_H */

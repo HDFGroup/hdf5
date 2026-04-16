@@ -108,7 +108,7 @@ import org.slf4j.LoggerFactory;
  * </tr>
  * <tr>
  * <td>void * <br />
- * (i.e., pointer to `Any')</td>
+ * (i.e., pointer to `Any`)</td>
  * <td>Special -- see @ref HDFARRAY</td>
  * </tr>
  * </table>
@@ -181,7 +181,7 @@ import org.slf4j.LoggerFactory;
  * static native C order.
  * <p>
  * The upshot is that any Java array of numbers (either primitive or sub-classes of type <b>Number</b>) can be
- * passed as an ``Object'', and the Java API will translate to and from the appropriate packed array of bytes
+ * passed as an `Object`, and the Java API will translate to and from the appropriate packed array of bytes
  * needed by the C library. So the function above would be declared:
  *
  * @code

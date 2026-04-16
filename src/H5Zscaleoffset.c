@@ -1298,7 +1298,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         size_t used_bytes;
         size_t unused_bytes;
 
-        assert(nbytes == d_nelmts * p.size);
+        assert(nbytes == (size_t)d_nelmts * (size_t)p.size);
 
         /* before preprocess, convert to memory endianness order if needed */
         if (need_convert)

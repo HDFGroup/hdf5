@@ -97,7 +97,7 @@ static void             *H5VL__wrap_obj(void *obj, H5I_type_t obj_type);
 static H5VL_connector_t *H5VL__conn_create(H5VL_class_t *cls);
 static herr_t            H5VL__conn_find(H5PL_vol_key_t *key, H5VL_connector_t **connector);
 static herr_t            H5VL__conn_free(H5VL_connector_t *connector);
-static herr_t            H5VL__conn_free_id(H5VL_connector_t *connector, void H5_ATTR_UNUSED **request);
+static herr_t            H5VL__conn_free_id(void *connector, void H5_ATTR_UNUSED **request);
 static void             *H5VL__object(hid_t id, H5I_type_t obj_type);
 static herr_t            H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx);
 
@@ -118,10 +118,10 @@ bool H5_PKG_INIT_VAR = false;
 
 /* VOL ID class */
 static const H5I_class_t H5I_VOL_CLS[1] = {{
-    H5I_VOL,                       /* ID class value */
-    0,                             /* Class flags */
-    0,                             /* # of reserved IDs for class */
-    (H5I_free_t)H5VL__conn_free_id /* Callback routine for closing objects of this class */
+    H5I_VOL,           /* ID class value */
+    0,                 /* Class flags */
+    0,                 /* # of reserved IDs for class */
+    H5VL__conn_free_id /* Callback routine for closing objects of this class */
 }};
 
 /* Declare a free list to manage the H5VL_class_t struct */
@@ -1122,17 +1122,18 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__conn_free_id(H5VL_connector_t *connector, void H5_ATTR_UNUSED **request)
+H5VL__conn_free_id(void *connector, void H5_ATTR_UNUSED **request)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5VL_connector_t *connector_p = (H5VL_connector_t *)connector;
+    herr_t            ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    assert(connector);
+    assert(connector_p);
 
     /* Decrement refcount on connector */
-    if (H5VL_conn_dec_rc(connector) < 0)
+    if (H5VL_conn_dec_rc(connector_p) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector");
 
 done:

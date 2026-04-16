@@ -222,6 +222,29 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_make_time() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5_get_localtime_str
+ *
+ * Purpose:     Formats the current local time into a string buffer using
+ *              the thread-safe HDlocaltime_r wrapper.  On failure, writes
+ *              "(unknown)" so callers always get a printable result.
+ *
+ * Return:      void
+ *-------------------------------------------------------------------------
+ */
+void
+H5_get_localtime_str(char *buf, size_t buf_size)
+{
+    time_t    now;
+    struct tm tm_buf;
+
+    time(&now);
+    if (HDlocaltime_r(&now, &tm_buf) != NULL)
+        strftime(buf, buf_size, "%c", &tm_buf); /* %c is locale-dependent; fine for diagnostics */
+    else
+        snprintf(buf, buf_size, "(unknown)");
+} /* end H5_get_localtime_str() */
+
 #ifdef H5_HAVE_WIN32_API
 
 /* Offset between 1/1/1601 and 1/1/1970 in 100 nanosecond units */

@@ -261,9 +261,10 @@ H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, s
                   const void *_mesg)
 {
     const time_t *mesg = (const time_t *)_mesg;
-    struct tm    *tm;
+    struct tm     tm_buf;
+    herr_t        ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     assert(f);
@@ -271,11 +272,14 @@ H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, s
     assert(mesg);
 
     /* encode */
-    tm = gmtime(mesg);
-    snprintf((char *)p, p_size, "%04d%02d%02d%02d%02d%02d", 1900 + tm->tm_year, 1 + tm->tm_mon, tm->tm_mday,
-             tm->tm_hour, tm->tm_min, tm->tm_sec);
+    if (HDgmtime_r(mesg, &tm_buf) == NULL)
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "gmtime_r failed on time value");
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    snprintf((char *)p, p_size, "%04d%02d%02d%02d%02d%02d", 1900 + tm_buf.tm_year, 1 + tm_buf.tm_mon,
+             tm_buf.tm_mday, tm_buf.tm_hour, tm_buf.tm_min, tm_buf.tm_sec);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__mtime_encode() */
 
 /*-------------------------------------------------------------------------
@@ -402,7 +406,7 @@ static herr_t
 H5O__mtime_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int indent, int fwidth)
 {
     const time_t *mesg = (const time_t *)_mesg;
-    struct tm    *tm;
+    struct tm     tm_buf;
     char          buf[128];
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -415,9 +419,10 @@ H5O__mtime_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int i
     assert(fwidth >= 0);
 
     /* debug */
-    tm = localtime(mesg);
-
-    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+    if (HDlocaltime_r(mesg, &tm_buf) != NULL)
+        strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", &tm_buf);
+    else
+        snprintf(buf, sizeof(buf), "(invalid time)");
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Time:", buf);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

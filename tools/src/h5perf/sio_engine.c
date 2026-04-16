@@ -338,10 +338,12 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
             fullname[size - 1] = '\0';
         }
 
-        if ((strlen(fullname) + strlen(base_name) + 1) < size) {
+        {
             /* Append the base_name with a slash first. Multiple slashes are
              * handled below. */
             h5_stat_t buf;
+            size_t    cur_len;
+            int       nchars;
 
             memset(&buf, 0, sizeof(h5_stat_t));
             if (HDstat(fullname, &buf) < 0)
@@ -349,15 +351,13 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
                 if (HDmkdir(fullname, 0755) < 0 && errno != EEXIST) {
                     /* We couldn't make the "/tmp/${USER,LOGIN}" subdirectory.
                      * Default to PREFIX's original prefix value. */
-                    strcpy(fullname, prefix);
+                    snprintf(fullname, size, "%s", prefix);
                 }
 
-            strcat(fullname, "/");
-            strcat(fullname, base_name);
-        }
-        else {
-            /* Buffer is too small */
-            return NULL;
+            cur_len = strlen(fullname);
+            nchars  = snprintf(fullname + cur_len, size - cur_len, "/%s", base_name);
+            if (nchars < 0 || (size_t)nchars >= size - cur_len)
+                return NULL;
         }
     }
     else if (strlen(base_name) >= size) {
@@ -365,15 +365,17 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
         return NULL;
     }
     else {
-        strcpy(fullname, base_name);
+        snprintf(fullname, size, "%s", base_name);
     }
 
     /* Append a suffix */
     if (suffix) {
-        if (strlen(fullname) + strlen(suffix) >= size)
+        size_t cur_len = strlen(fullname);
+
+        if (cur_len + strlen(suffix) >= size)
             return NULL;
 
-        strcat(fullname, suffix);
+        snprintf(fullname + cur_len, size - cur_len, "%s", suffix);
     }
 
     /* Remove any double slashes in the filename */

@@ -74,6 +74,7 @@ else ()
   set (_HDF5_H5CC_Fortran_COMPILER ${CMAKE_Fortran_COMPILER})
 endif ()
 set (HDF5_H5CC_Fortran_COMPILER ${_HDF5_H5CC_Fortran_COMPILER} CACHE STRING "Fortran compiler to use in h5fc")
+mark_as_advanced (HDF5_H5CC_Fortran_COMPILER)
 
 #-----------------------------------------------------------------------------
 # The build mode flags are not added to CMAKE_Fortran_FLAGS, so create a separate

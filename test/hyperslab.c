@@ -737,12 +737,12 @@ error:
 static herr_t
 test_transpose(size_t nx, size_t ny)
 {
-    int    *src = NULL;
-    int    *dst = NULL;
-    hsize_t src_stride[2], dst_stride[2];
-    hsize_t size[2];
-    char    s[256];
-    hsize_t i, j;
+    hssize_t src_stride[2], dst_stride[2];
+    int     *src = NULL;
+    int     *dst = NULL;
+    hsize_t  size[2];
+    char     s[256];
+    hsize_t  i, j;
 
     snprintf(s, sizeof(s), "Testing 2d transpose by stride %4lux%-lud", (unsigned long)nx, (unsigned long)ny);
     printf("%-70s", s);
@@ -762,12 +762,12 @@ test_transpose(size_t nx, size_t ny)
     size[0]       = nx;
     size[1]       = ny;
     src_stride[0] = 0;
-    src_stride[1] = sizeof(*src);
-    dst_stride[0] = (hsize_t)((1 - nx * ny) * sizeof(*src));
-    dst_stride[1] = (hsize_t)(nx * sizeof(*src));
+    src_stride[1] = (hssize_t)sizeof(*src);
+    dst_stride[0] = (hssize_t)((1 - nx * ny) * sizeof(*src));
+    dst_stride[1] = (hssize_t)(nx * sizeof(*src));
 
     /* Copy and transpose */
-    H5VM_stride_copy(2, (hsize_t)sizeof(*src), size, dst_stride, dst, src_stride, src);
+    H5VM_stride_copy_s(2, (hsize_t)sizeof(*src), size, dst_stride, dst, src_stride, src);
 
     /* Check */
     for (i = 0; i < nx; i++) {
@@ -830,12 +830,14 @@ error:
 static herr_t
 test_sub_super(size_t nx, size_t ny)
 {
-    uint8_t *full  = NULL;  /*original image        */
-    uint8_t *half  = NULL;  /*image at 1/2 resolution    */
-    uint8_t *twice = NULL;  /*2x2 pixels            */
-    hsize_t  src_stride[4]; /*source stride info        */
-    hsize_t  dst_stride[4]; /*destination stride info    */
-    hsize_t  size[4];       /*number of sample points    */
+    hssize_t src_stride_s[4]; /*signed source stride info        */
+    hssize_t dst_stride_s[4]; /*signed destination stride info    */
+    uint8_t *full  = NULL;    /*original image        */
+    uint8_t *half  = NULL;    /*image at 1/2 resolution    */
+    uint8_t *twice = NULL;    /*2x2 pixels            */
+    hsize_t  src_stride[4];   /*source stride info        */
+    hsize_t  dst_stride[4];   /*destination stride info    */
+    hsize_t  size[4];         /*number of sample points    */
     hsize_t  i, j;
     char     s[256];
 
@@ -895,21 +897,21 @@ test_sub_super(size_t nx, size_t ny)
     fflush(stdout);
 
     /* Setup stride */
-    size[0]       = nx;
-    size[1]       = ny;
-    size[2]       = 2;
-    size[3]       = 2;
-    src_stride[0] = 0;
-    src_stride[1] = 1;
-    src_stride[2] = 0;
-    src_stride[3] = 0;
-    dst_stride[0] = (hsize_t)(2 * ny);
-    dst_stride[1] = (hsize_t)(2 * sizeof(uint8_t) - 4 * ny);
-    dst_stride[2] = (hsize_t)(2 * ny - 2 * sizeof(uint8_t));
-    dst_stride[3] = sizeof(uint8_t);
+    size[0]         = nx;
+    size[1]         = ny;
+    size[2]         = 2;
+    size[3]         = 2;
+    src_stride_s[0] = 0;
+    src_stride_s[1] = 1;
+    src_stride_s[2] = 0;
+    src_stride_s[3] = 0;
+    dst_stride_s[0] = (hssize_t)(2 * ny);
+    dst_stride_s[1] = (hssize_t)(2 * sizeof(uint8_t) - 4 * ny);
+    dst_stride_s[2] = (hssize_t)(2 * ny - 2 * sizeof(uint8_t));
+    dst_stride_s[3] = (hssize_t)sizeof(uint8_t);
 
     /* Copy */
-    H5VM_stride_copy(4, (hsize_t)sizeof(uint8_t), size, dst_stride, twice, src_stride, half);
+    H5VM_stride_copy_s(4, (hsize_t)sizeof(uint8_t), size, dst_stride_s, twice, src_stride_s, half);
 
     /* Check */
     s[0] = '\0';
@@ -1071,8 +1073,13 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
         off = H5VM_array_offset(ARRAY_OFFSET_NDIMS, dims, coords);
 
         /* Check offset of coordinate */
-        if (a[off] != off)
+        if (a[off] != off) {
+            fprintf(stderr,
+                    "incorrect offset for coordinate (%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ")."
+                    " expected %" PRIuHSIZE ", got %" PRIuHSIZE "\n",
+                    coords[0], coords[1], coords[2], off, a[off]);
             TEST_ERROR;
+        }
 
         /* Get coordinates of offset */
         if (H5VM_array_calc(off, ARRAY_OFFSET_NDIMS, dims, new_coords) < 0)

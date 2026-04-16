@@ -2562,7 +2562,7 @@ diff_float_complex_element(unsigned char *mem1, unsigned char *mem2, hsize_t ele
 
     nfound += diff_float_complex(temp1_real, temp1_imag, temp2_real, temp2_imag, elem_idx, opts);
 
-    H5TOOLS_ENDDEBUG(": %" PRIuHSIZE " zero:%d - errstat:%d", nfound, both_zero, opts->err_stat);
+    H5TOOLS_ENDDEBUG(": %" PRIuHSIZE " - errstat:%d", nfound, opts->err_stat);
     return nfound;
 }
 
@@ -2596,7 +2596,7 @@ diff_double_complex_element(unsigned char *mem1, unsigned char *mem2, hsize_t el
 
     nfound += diff_double_complex(temp1_real, temp1_imag, temp2_real, temp2_imag, elem_idx, opts);
 
-    H5TOOLS_ENDDEBUG(": %" PRIuHSIZE " zero:%d - errstat:%d", nfound, both_zero, opts->err_stat);
+    H5TOOLS_ENDDEBUG(": %" PRIuHSIZE " - errstat:%d", nfound, opts->err_stat);
     return nfound;
 }
 
@@ -2630,7 +2630,7 @@ diff_ldouble_complex_element(unsigned char *mem1, unsigned char *mem2, hsize_t e
 
     nfound += diff_ldouble_complex(temp1_real, temp1_imag, temp2_real, temp2_imag, elem_idx, opts);
 
-    H5TOOLS_ENDDEBUG(": %" PRIuHSIZE " zero:%d - errstat:%d", nfound, both_zero, opts->err_stat);
+    H5TOOLS_ENDDEBUG(": %" PRIuHSIZE " - errstat:%d", nfound, opts->err_stat);
     return nfound;
 }
 #endif
@@ -3393,7 +3393,7 @@ diff_complex_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
         nfound += diff_ldouble_complex(temp1_real, temp1_imag, temp2_real, temp2_imag, elem_idx, opts);
     }
 
-    H5TOOLS_ENDDEBUG(": %" PRIuHSIZE " zero:%d - errstat:%d", nfound, both_zero, opts->err_stat);
+    H5TOOLS_ENDDEBUG(": %" PRIuHSIZE " - errstat:%d", nfound, opts->err_stat);
     return nfound;
 }
 

@@ -4990,8 +4990,12 @@ resize_configs_are_equal(const H5C_auto_size_ctl_t *a, const H5C_auto_size_ctl_t
 {
     if (a->version != b->version)
         return (false);
+    else if ((a->rpt_fcn == NULL) != (b->rpt_fcn == NULL))
+        return (false);
+#ifndef H5_HAVE_MINGW
     else if (a->rpt_fcn != b->rpt_fcn)
         return (false);
+#endif
     else if (compare_init && (a->set_initial_size != b->set_initial_size))
         return (false);
     else if (compare_init && (a->initial_size != b->initial_size))

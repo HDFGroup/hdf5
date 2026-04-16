@@ -448,14 +448,15 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
     H5FD_onion_history_t         *history   = &file->history;
     H5FD_onion_record_loc_t      *new_list  = NULL;
 
-    time_t     rawtime;
-    struct tm *info;
+    time_t    rawtime;
+    struct tm tm_buf;
 
     FUNC_ENTER_PACKAGE
 
     time(&rawtime);
-    info = gmtime(&rawtime);
-    strftime(rec->time_of_creation, sizeof(rec->time_of_creation), "%Y%m%dT%H%M%SZ", info);
+    if (HDgmtime_r(&rawtime, &tm_buf) == NULL)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "unable to convert time");
+    strftime(rec->time_of_creation, sizeof(rec->time_of_creation), "%Y%m%dT%H%M%SZ", &tm_buf);
 
     rec->logical_eof = file->logical_eof;
 

@@ -144,25 +144,17 @@ add_executable (H5match_types
 target_include_directories (H5match_types PRIVATE "${HDF5_SRC_BINARY_DIR};${HDF5_SRC_INCLUDE_DIRS};${HDF5_F90_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 # check if a pre-generated H5fortran_types.F90 file is present
 if (NOT EXISTS "${HDF5_GENERATED_SOURCE_DIR}/H5fortran_types.F90")
+  if (CMAKE_CROSSCOMPILING AND NOT CMAKE_CROSSCOMPILING_EMULATOR)
+    message (FATAL_ERROR "No pre-generated H5fortran_types.F90 file found - cannot generate without cross-compiling emulator")
+  endif ()
   message (STATUS "No pre-generated H5fortran_types.F90 file found - generating one")
   # execute the H5match_types program
-  if (CMAKE_CROSSCOMPILING)
-    add_custom_command (TARGET H5match_types POST_BUILD
-        BYPRODUCTS ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E env ${CROSSCOMPILING_PATH}
-        COMMAND    $<TARGET_FILE:H5match_types>
-        WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
-        COMMENT "Generating the H5fortran_types.F90 and H5f90i_gen.h files"
-    )
-  else ()
-    add_custom_command (TARGET H5match_types POST_BUILD
-        BYPRODUCTS ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
-        COMMAND    $<TARGET_FILE:H5match_types>
-        WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
-        COMMENT "Generating the H5fortran_types.F90 and H5f90i_gen.h files"
-    )
-  endif ()
+  add_custom_command (TARGET H5match_types POST_BUILD
+      BYPRODUCTS ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5match_types>
+      WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
+      COMMENT "Generating the H5fortran_types.F90 and H5f90i_gen.h files"
+  )
 else ()
   message (STATUS "Using existing pre-generated H5fortran_types.F90 file")
   add_custom_command (
@@ -281,7 +273,7 @@ if (BUILD_STATIC_LIBS)
       LINKER_LANGUAGE C
   )
   add_dependencies (${HDF5_F90_C_LIB_TARGET} H5gen_i)
-  set (install_targets ${HDF5_F90_C_LIB_TARGET})
+  set (install_targets_static ${HDF5_F90_C_LIB_TARGET})
 endif ()
 
 if (BUILD_SHARED_LIBS)
@@ -301,7 +293,7 @@ if (BUILD_SHARED_LIBS)
       LINKER_LANGUAGE C
   )
   add_dependencies (${HDF5_F90_C_LIBSH_TARGET} H5gen_iSH)
-  set (install_targets ${install_targets} ${HDF5_F90_C_LIBSH_TARGET})
+  set (install_targets_shared ${HDF5_F90_C_LIBSH_TARGET})
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -337,24 +329,16 @@ set (f90_F_GEN_SOURCES
 )
 # check if a pre-generated H5fortran_types.F90 file is present
 if (NOT EXISTS "${HDF5_GENERATED_SOURCE_DIR}/H5_gen.F90")
-  message (STATUS "No pre-generated H5_gen.F90 file found - generating one")
-  if (CMAKE_CROSSCOMPILING)
-    add_custom_command (TARGET H5_buildiface POST_BUILD
-        BYPRODUCTS ${HDF5_F90_BINARY_DIR}/H5_gen.F90
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E env ${CROSSCOMPILING_PATH}
-        COMMAND    $<TARGET_FILE:H5_buildiface>
-        WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
-        COMMENT "Generating the H5_gen.F90 file"
-    )
-  else ()
-    add_custom_command (TARGET H5_buildiface POST_BUILD
-        BYPRODUCTS ${HDF5_F90_BINARY_DIR}/H5_gen.F90
-        COMMAND    $<TARGET_FILE:H5_buildiface>
-        WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
-        COMMENT "Generating the H5_gen.F90 file"
-    )
+  if (CMAKE_CROSSCOMPILING AND NOT CMAKE_CROSSCOMPILING_EMULATOR)
+    message (FATAL_ERROR "No pre-generated H5_gen.F90 file found - cannot generate without cross-compiling emulator")
   endif ()
+  message (STATUS "No pre-generated H5_gen.F90 file found - generating one")
+  add_custom_command (TARGET H5_buildiface POST_BUILD
+      BYPRODUCTS ${HDF5_F90_BINARY_DIR}/H5_gen.F90
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5_buildiface>
+      WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
+      COMMENT "Generating the H5_gen.F90 file"
+  )
 else ()
   message (STATUS "Using existing pre-generated H5_gen.F90 file")
   add_custom_command (
@@ -482,9 +466,9 @@ if (BUILD_STATIC_LIBS)
       LINKER_LANGUAGE Fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
   )
-  H5_SET_LIB_OPTIONS (${HDF5_F90_LIB_TARGET} ${HDF5_F90_LIB_NAME} STATIC 0)
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_F90_LIB_TARGET}")
-  set (install_targets ${install_targets} ${HDF5_F90_LIB_TARGET})
+  H5_SET_LIB_OPTIONS (${HDF5_F90_LIB_TARGET} ${HDF5_F90_LIB_NAME} STATIC 0)
+  set (install_targets_static ${install_targets_static} ${HDF5_F90_LIB_TARGET})
   add_dependencies (${HDF5_F90_LIB_TARGET} H5gen)
 endif ()
 
@@ -520,7 +504,7 @@ if (BUILD_SHARED_LIBS)
   )
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_F90_LIBSH_TARGET}")
   H5_SET_LIB_OPTIONS (${HDF5_F90_LIBSH_TARGET} ${HDF5_F90_LIB_NAME} SHARED "F")
-  set (install_targets ${install_targets} ${HDF5_F90_LIBSH_TARGET})
+  set (install_targets_shared ${install_targets_shared} ${HDF5_F90_LIBSH_TARGET})
   add_dependencies(${HDF5_F90_LIBSH_TARGET} H5genSH)
 endif ()
 
@@ -621,21 +605,36 @@ if (HDF5_EXPORTED_TARGETS)
   if (BUILD_SHARED_LIBS)
     INSTALL_TARGET_PDB (${HDF5_F90_C_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} fortlibraries)
     #INSTALL_TARGET_PDB (${HDF5_F90_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} fortlibraries)
+
+    install (
+        TARGETS ${install_targets_shared}
+        EXPORT ${HDF5_EXPORTED_TARGETS}
+        LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT fortlibraries
+        ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT fortlibraries
+        RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT fortlibraries
+        FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT fortlibraries
+        INCLUDES DESTINATION include
+    )
   endif ()
   if (BUILD_STATIC_LIBS)
     INSTALL_TARGET_PDB (${HDF5_F90_C_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} fortlibraries)
     #INSTALL_TARGET_PDB (${HDF5_F90_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} fortlibraries)
-  endif ()
 
-  install (
-      TARGETS ${install_targets}
-      EXPORT ${HDF5_EXPORTED_TARGETS}
-      LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT fortlibraries
-      ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT fortlibraries
-      RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT fortlibraries
-      FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT fortlibraries
-      INCLUDES DESTINATION include
-  )
+    if (BUILD_SHARED_LIBS)
+      set (_static_export ${HDF5_EXPORTED_TARGETS}_static)
+    else ()
+      set (_static_export ${HDF5_EXPORTED_TARGETS})
+    endif ()
+    install (
+        TARGETS ${install_targets_static}
+        EXPORT ${_static_export}
+        LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT fortlibraries
+        ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT fortlibraries
+        RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT fortlibraries
+        FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT fortlibraries
+        INCLUDES DESTINATION include
+    )
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -662,7 +661,7 @@ if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
 endif ()
 
 set (_PKG_CONFIG_EXTRA_CFLAGS)
-set (_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} -l${PKG_CONFIG_LIBNAME}")
+set (_PKG_CONFIG_LIBS "-l${PKG_CONFIG_LIBNAME}")
 set (_PKG_CONFIG_REQUIRES "${HDF5_LIB_NAME} = ${HDF5_PACKAGE_VERSION}")
 set (_PKG_CONFIG_LIBS_PRIVATE "-l${HDF5_F90_C_LIB_NAME}")
 set (_PKG_CONFIG_REQUIRES_PRIVATE "${HDF5_LIB_NAME} = ${HDF5_PACKAGE_VERSION}")
@@ -704,4 +703,17 @@ if (H5_HAVE_PKGCONFIG)
         COMPONENT fortlibraries
     )
   endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
+# Option to build documentation
+#-----------------------------------------------------------------------------
+if (DOXYGEN_FOUND)
+  # Contribute the static (non-generated) Fortran F90 sources to the main
+  # library documentation input list. Generated files (H5_gen.F90,
+  # H5fortran_types.F90) are build-time artefacts and are omitted since
+  # Doxygen does not require them for the API reference.
+  set_property (GLOBAL APPEND PROPERTY HDF5_DOXYGEN_LIB_INPUTS
+    ${f90_F_BASE_SOURCES}
+  )
 endif ()

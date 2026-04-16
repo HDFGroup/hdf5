@@ -196,7 +196,7 @@
         } /* end if */                                                                                       \
     }     /* end if */
 
-/* Flags for a message class's "sharability" */
+/* Flags for a message class's "shareability" */
 #define H5O_SHARE_IS_SHARABLE 0x01
 #define H5O_SHARE_IN_OHDR     0x02
 

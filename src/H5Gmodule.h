@@ -861,26 +861,6 @@
  *
  * Use the functions in this module to manage HDF5 groups.
  *
- * <table>
- * <tr><th>Create</th><th>Read</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5G_examples.c create
- *   </td>
- *   <td>
- *   \snippet{lineno} H5G_examples.c read
- *   </td>
- * <tr><th>Update</th><th>Delete</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5G_examples.c update
- *   </td>
- *   <td>
- *   \snippet{lineno} H5G_examples.c delete
- *   </td>
- * </tr>
- * </table>
- *
  * \details \Bold{Groups in HDF5:} A group associates names with objects and
  *          provides a mechanism for mapping a name to an object. Since all
  *          objects appear in at least one group (with the possible exception of

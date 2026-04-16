@@ -1037,8 +1037,8 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
             MPI_Abort(MPI_COMM_WORLD, 0);
         } /* end if */
 
-        strcpy(filenames[0], fname1);
-        strcpy(filenames[1], fname2);
+        snprintf(filenames[0], MAX_FILENAME, "%s", fname1);
+        snprintf(filenames[1], MAX_FILENAME, "%s", fname2);
 
         /* Alert the worker tasks that there's going to be work. */
         for (int i = 1; i < g_nTasks; i++)

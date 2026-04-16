@@ -1,4 +1,4 @@
-v2.1.0 --- January X , 2026
+v2.2.0 --- January X , 2026
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
@@ -15,13 +15,20 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 ## 📖 Contents
 * [Executive Summary](CHANGELOG.md#execsummary)
 * [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
+* [Deprecations](CHANGELOG.md#-deprecations)
 * [New Features & Improvements](CHANGELOG.md#-new-features--improvements)
 * [Bug Fixes](CHANGELOG.md#-bug-fixes)
 * [Support for new platforms and languages](CHANGELOG.md#-support-for-new-platforms-and-languages)
 * [Platforms Tested](CHANGELOG.md#%EF%B8%8F-platforms-tested)
 * [Known Problems](CHANGELOG.md#-known-problems)
 
-# 🔆 Executive Summary: HDF5 Version 2.1.0
+# 🔆 Executive Summary: HDF5 Version 2.2.0
+
+> [!IMPORTANT]
+>
+> - The format of the GitHub tag for HDF5 releases has been changed to Major.Minor.Patch, consistent with the versioning policy change to follow the Semantic Versioning Specification described in this [Wiki page](https://github.com/HDFGroup/hdf5/wiki/HDF5-Version-Numbers-and-Branch-Strategy).  The previous tag format hdf5_Major_Minor_Patch that was created in addition for the 2.0.0 and 2.1.0 releases will not be continued.   
+> - An RPM package is not provided for this release of HDF5 as an issue with the package was found during testing. The HDF Group is investigating alternative packaging methods for future releases.
+
 
 ## Performance Enhancements:
 
@@ -29,30 +36,60 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 ## Significant Advancements:
 
 
-## Updated Foundation:
-
-> [!IMPORTANT]
->
-> - Transitioned to [CMake-only](CHANGELOG.md#cmake) builds, and Autotools is no longer in use.
-> - Renamed library state variables, notably `HDF5_ENABLE_PARALLEL` is now `HDF5_PROVIDES_PARALLEL`, see PR [#5716](https://github.com/HDFGroup/hdf5/pull/5716) for more details.
-> - The default setting for `H5Fset_libver_bounds` has been updated to set the lower bound to the HDF5 library version 1.8. This change ensures that users can take advantage of the library's optimal performance and the latest features by default. If users need their files to be compatible with older versions of the HDF5 library, they will need to adjust this lower bound manually.
-
 ## Enhanced Features:
 
+- Made several improvements to the CMake logic for handling filter libraries
 
 ## Java Enhancements:
 
-  
+- Java dependency JAR paths are now configurable CMake cache variables, allowing system-provided JARs to be used in place of the bundled copies.
+
+
 ## Acknowledgements: 
 
 We would like to thank the many HDF5 community members who contributed to this release of HDF5.
 
 # ⚠️ Breaking Changes
 
+# 🪦 Deprecations
+
+- The CMake variable `ZLIB_GIT_BRANCH` has been deprecated in favor of `ZLIB_GIT_TAG`
+- The CMake variable `ZLIBNG_GIT_BRANCH` has been deprecated in favor of `ZLIBNG_GIT_TAG`
+- The CMake variable `LIBAEC_GIT_BRANCH` has been deprecated in favor of `LIBAEC_GIT_TAG`
+- The CMake variable `PLUGIN_GIT_BRANCH` has been deprecated in favor of `HDF5_FILTER_PLUGINS_GIT_TAG`
+- The CMake variable `PLUGIN_GIT_URL` has been deprecated in favor of `HDF5_FILTER_PLUGINS_GIT_URL`
+- The CMake variable `PLUGIN_TGZ_NAME` has been deprecated in favor of `HDF5_FILTER_PLUGINS_TGZ_NAME`
+- The CMake variable `PLUGIN_TGZ_ORIGPATH` has been deprecated in favor of `HDF5_FILTER_PLUGINS_TGZ_ORIGPATH`
+- The CMake variable `PLUGIN_PACKAGE_NAME` has been deprecated in favor of `HDF5_FILTER_PLUGINS_PACKAGE_NAME`
 
 # 🚀 New Features & Improvements
 
 ## Configuration
+
+### Consolidated documentation under docs/ directory
+
+   User-facing guides (installation, build instructions, platform-specific docs) and
+   Doxygen API documentation have been consolidated under a new top-level `docs/`
+   directory. All internal references (CMakeLists.txt, README.md, workflow files,
+   Doxygen sources, scripts, etc.) have been updated accordingly.
+
+### Updated external building of zlib, zlib-ng and libaec to not use a patching process
+
+   When building these libraries from external sources while building HDF5, the library previously used a patching process to adapt the libraries to its own build process. The sources for these libraries are no longer patched and build directly from the sources of the latest upstream releases (currently, zlib 1.3.2, zlib-ng 2.3.3 and libaec 1.1.6). This also fixed an issue with the build of zlib-ng failing due to updates that were made since the last version that HDF5 was patching the sources for.
+
+   Fixes GitHub issue #6204
+
+### Fixed an issue where CMake-built installations of zlib libraries couldn't be located on a system
+
+   An incorrect package name was being supplied to CMake's find_package() function when attempting to locate zlib libraries on the system in Config mode. The package name has been corrected and CMake-built zlib libraries can now be located.
+
+### Fixed an issue where static zlib libraries couldn't be found on the system
+
+   The value of the HDF5 CMake variable `HDF5_USE_ZLIB_STATIC` was previously used incorrectly when locating zlib libraries on the system with CMake's find_package() function, causing it to have no effect. This has been fixed and static zlib libraries can now be located.
+
+### Added a CMake module to locate zlib-ng for zlib support
+
+   A new `FindZLIBNG.cmake` CMake module has been added. This module is intended to locate zlib-ng on the system for zlib support in HDF5 when zlib-ng was built with Autotools instead of CMake. When zlib-ng support is enabled in HDF5 with the `HDF5_ENABLE_ZLIB_SUPPORT` and `HDF5_USE_ZLIB_NG` options, this module will first check for an existing CMake-built zlib-ng and use that if it's available. Otherwise, the module will heuristically search for zlib-ng on the system. If necessary, the module can be hinted toward a particular zlib-ng installation by setting the CMake variable `ZLIBNG_ROOT` to point to a directory.
 
 ### Added a CMake module to locate libaec for SZIP support
 
@@ -60,34 +97,13 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
-### Added predefined datatypes for FP6 data
+### Improve performance of H5Ovisit() with deeply nested group structures
 
-   Predefined datatypes have been added for FP6 data in [E2M3 and E3M2 formats](https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf).
+   `H5Ovisit()` would previously internally traverse each object's path name from the iteration root group in order to retrieve information about that object, causing severe performance degradation with a deeply nested group structure. Modified the algorithm to instead retrieve information directly from the object. To get this benefit, users should use `H5Ovisit3()`, or use `H5Ovisit2()` with neither `H5O_INFO_HDR` nor `H5O_INFO_META_SIZE` selected in the `fields` parameter. Performance of `H5Ocopy()`, `H5Iget_name()`, and external links with a callback set should also improve in similar situations.
 
-   The following new macros have been added:
+### Versioned API functions now default to earliest version for older API settings
 
-   - `H5T_FLOAT_F6E2M3`
-   - `H5T_FLOAT_F6E3M2`
-
-   These macros map to IDs of HDF5 datatypes representing a 6-bit floating-point datatype with 1 sign bit and either 2 exponent bits and 3 mantissa bits (E2M3 format) or 3 exponent bits and 2 mantissa bits (E3M2 format).
-
-   Note that support for a native FP6 datatype has not been added yet. This means that any datatype conversions to/from the new FP6 datatypes will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native FP6 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches one of the above floating-point formats. In this case, the application can specify one of the above macros for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
-
-   Also note that HDF5 currently has incomplete support for datatype conversions involving non-IEEE floating-point format datatypes. Refer to the 'Known Problems' section for information about datatype conversions with these new datatypes.
-
-### Added predefined datatype for FP4 data
-
-   A predefined datatype has been added for FP4 data in [E2M1 format](https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf).
-
-   The following new macro has been added:
-
-   - `H5T_FLOAT_F4E2M1`
-
-   This macro maps to the ID of an HDF5 datatype representing a 4-bit floating-point datatype with 1 sign bit, 2 exponent bits and 1 mantissa bit.
-
-   Note that support for a native FP4 datatype has not been added yet. This means that any datatype conversions to/from the new FP4 datatype will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native FP4 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches the above floating-point format. In this case, the application can specify the above macro for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
-
-   Also note that HDF5 currently has incomplete support for datatype conversions involving non-IEEE floating-point format datatypes. Refer to the 'Known Problems' section for information about datatype conversions with these new datatypes.
+   When a global API compatibility version is set (e.g., `H5_USE_16_API`), functions introduced after that version previously defaulted to their latest version, which could break applications. For example, an application using `H5_USE_16_API` that called `H5Sencode()` (introduced in 1.8, versioned in 1.12) would get `H5Sencode2()` instead of `H5Sencode1()`, potentially causing compilation or runtime failures. Versioned functions now default to their earliest (version 1) variant when the configured API level predates the function's introduction, providing maximum compatibility. See issue [#6278](https://github.com/HDFGroup/hdf5/issues/6278).
 
 ## Parallel Library
 
@@ -96,6 +112,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 ## C++ Library
 
 ## Java Library
+
+### Java dependency JAR paths are now user-configurable
+
+   The CMake variables `HDF5_JAVA_LOGGING_JAR`, `HDF5_JAVA_LOGGING_NOP_JAR`, `HDF5_JAVA_LOGGING_SIMPLE_JAR`, `HDF5_JAVA_JUNIT_JAR`, and `HDF5_JAVA_HAMCREST_JAR` are now CMake cache variables with the bundled JARs as defaults. Users can override these at configure time to use system-provided JARs. See `INSTALL_CMake_options.md` for details.
 
 ## Tools
 
@@ -112,31 +132,25 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
-### Fixed a double-free bug in H5D__chunk_copy
+### Fixed checking of data alignment requirements in direct I/O VFD
 
-   Fixed a double-free bug in the internal H5D__chunk_copy() function which occurred when a buffer was re-allocated without updating the original pointer freed later on.
+   The direct I/O VFD attempts to determine data alignment requirements for a file on file open to try and avoid extra work when data alignment isn't required. Depending on the file access flags used when opening a file, the VFD could incorrectly determine these requirements for either writes or reads, eventually leading to a possible EINVAL return value on write or read. This has been fixed by separately determining the requirements for writes and reads and being more conservative about trying to avoid data alignment requirements.
 
-   Fixes GitHub issues [#6123](https://github.com/HDFGroup/hdf5/issues/6123)
-                       [#6124](https://github.com/HDFGroup/hdf5/issues/6124)
-                       [#6125](https://github.com/HDFGroup/hdf5/issues/6125)
-                       [#6126](https://github.com/HDFGroup/hdf5/issues/6126)
-                       [#6133](https://github.com/HDFGroup/hdf5/issues/6133)
-### Fixes potential security issues
+### Fixed integer overflow in array datatype element count computation
 
-   The get_name API functions allow passing NULL when querying the object name length. However, passing a non-NULL buffer with size == 0 will result in security vulnerability of invalid write. That was because the library wrote a null terminator to the buffer regardless of what the size of the buffer was as long as the buffer was non-NULL.
-   These functions are now fixed to treat (buffer != NULL, size == 0) as a length-only query to eliminate Valgrind error of invalid write.
+   Fixed a bug in H5O__dtype_decode_helper() where the loop computing the total number of elements in an array datatype had no per-step overflow check. On 64-bit systems, large dimension sizes could cause the element count to wrap around, bypassing the post-loop overflow check and producing silently incorrect results in downstream type conversion and size calculations.
 
-### Fixed a performance issue with chunked dataset I/O
+### Fixed an issue with chunked datasets using the wrong index type with parallel HDF5
 
-   When dataset chunks are unable to be placed in the dataset chunk cache (for example, if a chunk
-   is too large), the library falls back to an alternative approach for I/O on dataset chunks. An
-   issue with the logic in this approach prevented chunked dataset I/O from making use of the library's
-   data sieve buffer I/O optimization functionality. For chunk shapes that are non-contiguous with
-   the memory layout of a buffer, this could result in severely degraded I/O performance, with the
-   worst-case behavior causing I/O to be performed on a single data element at a time.
+   Fixed a bug in parallel HDF5 that would cause chunked datasets with fixed dimensions and without filters applied to use the "none" index type instead of the "fixed array" index type.
 
-   The data sieve buffer functionality has been extended to cover the case of uncached chunks and
-   will be used as long as the underlying Virtual File Driver supports data sieving.
+### Fixed an issue with decoding metadata cache image superblock extension messages
+
+   Fixed a bug where loading of a metadata cache image superblock extension message would fail when the image had an undefined address and size of 0.
+
+### Fixed an issue with an incorrect file format validation check when decoding metadata cache entries
+
+   Fixed a bug where a flag in H5Cimage.c wasn't getting set correctly for release builds of HDF5, leading to incorrect error checking when reconstructing metadata cache entries.
 
 ## Java Library
 
@@ -147,14 +161,6 @@ We would like to thank the many HDF5 community members who contributed to this r
 ## Performance
 
 ## Fortran API
-
-### Added Fortran wrappers for SWMR functionality
-
-   Added four new Fortran wrappers that provide direct access to SWMR (Single Writer Multiple Reader) C APIs:
-   - `h5fstart_swmr_write_f` - Enables SWMR writing mode for a file
-   - `h5dflush_f`            - Flushes dataset buffers to disk
-   - `h5pset_append_flush_f` - Sets append flush property values including optional callback function
-   - `h5pget_append_flush_f` - Retrieves append flush property values including callback function
 
 ## High-Level Library
 

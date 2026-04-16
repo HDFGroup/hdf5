@@ -84,7 +84,7 @@ static herr_t H5D__build_file_prefix(const H5D_t *dset, H5F_prefix_open_t prefix
 static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id);
 static herr_t H5D__init_storage(H5D_t *dset, bool full_overwrite, hsize_t old_dim[]);
 static herr_t H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id);
-static herr_t H5D__close_cb(H5VL_object_t *dset_vol_obj, void **request);
+static herr_t H5D__close_cb(void *dset_vol_obj, void **request);
 static herr_t H5D__use_minimized_dset_headers(H5F_t *file, bool *minimize);
 static herr_t H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc);
 static size_t H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr);
@@ -133,10 +133,10 @@ H5_WARN_LARGE_STACK_OBJECTS_ON
 
 /* Dataset ID class */
 static const H5I_class_t H5I_DATASET_CLS[1] = {{
-    H5I_DATASET,              /* ID class value */
-    0,                        /* Class flags */
-    0,                        /* # of reserved IDs for class */
-    (H5I_free_t)H5D__close_cb /* Callback routine for closing objects of this class */
+    H5I_DATASET,  /* ID class value */
+    0,            /* Class flags */
+    0,            /* # of reserved IDs for class */
+    H5D__close_cb /* Callback routine for closing objects of this class */
 }};
 
 /* Flag indicating "top" of interface has been initialized */
@@ -332,22 +332,23 @@ H5D_term_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__close_cb(H5VL_object_t *dset_vol_obj, void **request)
+H5D__close_cb(void *dset_vol_obj, void **request)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *dset_vol_obj_p = (H5VL_object_t *)dset_vol_obj;
+    herr_t         ret_value      = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    assert(dset_vol_obj);
+    assert(dset_vol_obj_p);
 
     /* Close the dataset */
-    if (H5VL_dataset_close(dset_vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
+    if (H5VL_dataset_close(dset_vol_obj_p, H5P_DATASET_XFER_DEFAULT, request) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close dataset");
 
 done:
     /* Free the VOL object */
-    if (H5VL_free_object(dset_vol_obj) < 0)
+    if (H5VL_free_object(dset_vol_obj_p) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to free VOL object");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1265,7 +1266,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
         H5O_efl_t    *efl;                    /* Dataset's external file list info */
         htri_t        ignore_filters = false; /* Ignore optional filters or not */
 
-        if ((ignore_filters = H5Z_ignore_filters(new_dset->shared->dcpl_id, dt, space)) < 0)
+        if ((ignore_filters = H5Z_ignore_filters(new_dset->shared->dcpl_id, space)) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "H5Z_has_optional_filter() failed");
 
         if (false == ignore_filters) {
@@ -1326,19 +1327,6 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
     if (H5O_fill_set_version(file, &new_dset->shared->dcpl_cache.fill) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of fill value");
 
-    /* Check if the file driver would like to force early space allocation */
-    if (H5F_HAS_FEATURE(file, H5FD_FEAT_ALLOCATE_EARLY))
-        new_dset->shared->dcpl_cache.fill.alloc_time = H5D_ALLOC_TIME_EARLY;
-
-    /*
-     * Check if this dataset is going into a parallel file and set space allocation time.
-     * If the dataset has filters applied to it, writes to the dataset must be collective,
-     * so we don't need to force early space allocation. Otherwise, we force early space
-     * allocation to facilitate independent raw data operations.
-     */
-    if (H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI) && (new_dset->shared->dcpl_cache.pline.nused == 0))
-        new_dset->shared->dcpl_cache.fill.alloc_time = H5D_ALLOC_TIME_EARLY;
-
     /* Set the dataset's I/O operations */
     if (H5D__layout_set_io_ops(new_dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize I/O operations");
@@ -1351,6 +1339,19 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
     /* Check if the layout version is above the high bound for the file */
     if (new_dset->shared->layout.version > H5O_layout_ver_bounds[H5F_HIGH_BOUND(file)])
         HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, NULL, "layout version out of bounds");
+
+    /* Check if the file driver would like to force early space allocation */
+    if (H5F_HAS_FEATURE(file, H5FD_FEAT_ALLOCATE_EARLY))
+        new_dset->shared->dcpl_cache.fill.alloc_time = H5D_ALLOC_TIME_EARLY;
+
+    /*
+     * Check if this dataset is going into a parallel file and set space allocation time.
+     * If the dataset has filters applied to it, writes to the dataset must be collective,
+     * so we don't need to force early space allocation. Otherwise, we force early space
+     * allocation to facilitate independent raw data operations.
+     */
+    if (H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI) && (new_dset->shared->dcpl_cache.pline.nused == 0))
+        new_dset->shared->dcpl_cache.fill.alloc_time = H5D_ALLOC_TIME_EARLY;
 
     /* Update the dataset's object header info. */
     if (H5D__update_oh_info(file, new_dset, new_dset->shared->dapl_id) < 0)
