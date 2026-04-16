@@ -4857,7 +4857,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, NULL, "data pipeline read failed");
 
                     /* Make sure the chunk is the correct size after being unfiltered */
-                    if (my_chunk_alloc != chunk_size)
+                    if (chunk_nbytes != chunk_size)
                         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL,
                                     "chunk size is incorrect after being unfiltered");
 
@@ -4876,7 +4876,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                 }     /* end if */
 
                 /* Assert that the chunk is the correct size and the buffer is big enough */
-                assert(my_chunk_alloc == chunk_size);
+                assert(chunk_nbytes == chunk_size);
                 assert(buf_alloc >= chunk_size);
 
                 /* Increment # of cache misses */
