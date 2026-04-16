@@ -18631,7 +18631,7 @@ test_bad_decode_size_vlen(hid_t file)
         TEST_ERROR;
 
     /* Write data */
-    if (H5Dwrite(dsid, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0)
+    if (H5Dwrite(dsid, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
         TEST_ERROR;
 
     /* Close dataset */
@@ -18648,7 +18648,7 @@ test_bad_decode_size_vlen(hid_t file)
 
     /* Read data back (should fail) */
     H5E_BEGIN_TRY {
-        ret = H5Dread(dsid, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
+        ret = H5Dread(dsid, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
     } H5E_END_TRY
 
     if (ret != FAIL)
