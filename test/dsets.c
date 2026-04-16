@@ -360,7 +360,7 @@ static size_t filter_count(unsigned int flags, size_t cd_nelmts, const unsigned 
 static size_t filter_bad_decode_size(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                                      size_t nbytes, size_t *buf_size, void **buf);
 static size_t filter_bad_buf_size(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
-                                     size_t nbytes, size_t *buf_size, void **buf);
+                                  size_t nbytes, size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_COUNT[1] = {{
@@ -18417,12 +18417,12 @@ test_deflate_vlen(hid_t H5_ATTR_UNUSED file)
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_BAD_DECODE_SIZE[1] = {{
-    H5Z_CLASS_T_VERS, /* H5Z_class_t version */
+    H5Z_CLASS_T_VERS,           /* H5Z_class_t version */
     H5Z_FILTER_BAD_DECODE_SIZE, /* Filter id number */
-    1, 1,             /* Encoding and decoding enabled */
+    1, 1,                       /* Encoding and decoding enabled */
     "bad_decode_size",          /* Filter name for debugging */
-    NULL,             /* The "can apply" callback */
-    NULL,             /* The "set local" callback */
+    NULL,                       /* The "can apply" callback */
+    NULL,                       /* The "set local" callback */
     filter_bad_decode_size,     /* The actual filter function */
 }};
 
@@ -18438,8 +18438,8 @@ const H5Z_class2_t H5Z_BAD_DECODE_SIZE[1] = {{
  */
 static size_t
 filter_bad_decode_size(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
-             const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes, size_t *buf_size,
-             void **buf)
+                       const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes, size_t *buf_size,
+                       void **buf)
 {
     if (flags & H5Z_FLAG_REVERSE) {
         /* Increase data size by one */
@@ -18451,7 +18451,7 @@ filter_bad_decode_size(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
 
             if (NULL == (tmp_buf = realloc(*buf, nbytes)))
                 TEST_ERROR;
-            *buf = tmp_buf;
+            *buf      = tmp_buf;
             *buf_size = nbytes;
         }
 
@@ -18487,7 +18487,7 @@ test_bad_decode_size(hid_t file)
     hid_t         dcpl          = H5I_INVALID_HID; /* Dataset creation property list ID */
     const hsize_t dims[1]       = {1};             /* Dataspace dimensions */
     const hsize_t chunk_dims[1] = {1};             /* Chunk dimensions */
-    const int     wdata         = 2112;              /* Write buffer */
+    const int     wdata         = 2112;            /* Write buffer */
     int           rdata         = 0;               /* Read buffer */
     herr_t        ret;                             /* Generic return value */
 
@@ -18533,9 +18533,11 @@ test_bad_decode_size(hid_t file)
         TEST_ERROR;
 
     /* Read data back (should fail) */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         ret = H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
 
     if (ret != FAIL)
         TEST_ERROR;
@@ -18595,8 +18597,8 @@ test_bad_decode_size_vlen(hid_t file)
     const hsize_t dims[1]       = {1};             /* Dataspace dimensions */
     const hsize_t chunk_dims[1] = {1};             /* Chunk dimensions */
     char          wdata0[]      = "don't panic";   /* vlen string element */
-    char          *wdata[1]     = {wdata0};               /* Write buffer */
-    char          *rdata[1]     = {NULL};               /* Read buffer */
+    char         *wdata[1]      = {wdata0};        /* Write buffer */
+    char         *rdata[1]      = {NULL};          /* Read buffer */
     herr_t        ret;                             /* Generic return value */
 
     TESTING("filter returning incorrect data size after unfiltering with vlen type");
@@ -18626,8 +18628,8 @@ test_bad_decode_size_vlen(hid_t file)
         TEST_ERROR;
 
     /* Create new dataset with vlen string type */
-    if ((dsid = H5Dcreate2(file, DSET_BAD_DECODE_SIZE_VLEN_NAME, tid, sid, H5P_DEFAULT, dcpl,
-                           H5P_DEFAULT)) < 0)
+    if ((dsid = H5Dcreate2(file, DSET_BAD_DECODE_SIZE_VLEN_NAME, tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) <
+        0)
         TEST_ERROR;
 
     /* Write data */
@@ -18647,9 +18649,11 @@ test_bad_decode_size_vlen(hid_t file)
         TEST_ERROR;
 
     /* Read data back (should fail) */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         ret = H5Dread(dsid, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
 
     if (ret != FAIL)
         TEST_ERROR;
@@ -18659,9 +18663,12 @@ test_bad_decode_size_vlen(hid_t file)
         TEST_ERROR;
 
     /* Attempt to copy dataset (should fail) */
-     H5E_BEGIN_TRY {
-        ret = H5Ocopy(file, DSET_BAD_DECODE_SIZE_VLEN_NAME, file, DSET_BAD_DECODE_SIZE_VLEN_CP_NAME, H5P_DEFAULT, H5P_DEFAULT);
-    } H5E_END_TRY
+    H5E_BEGIN_TRY
+    {
+        ret = H5Ocopy(file, DSET_BAD_DECODE_SIZE_VLEN_NAME, file, DSET_BAD_DECODE_SIZE_VLEN_CP_NAME,
+                      H5P_DEFAULT, H5P_DEFAULT);
+    }
+    H5E_END_TRY
 
     if (ret != FAIL)
         TEST_ERROR;
@@ -18700,12 +18707,12 @@ error:
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_BAD_BUF_SIZE[1] = {{
-    H5Z_CLASS_T_VERS, /* H5Z_class_t version */
+    H5Z_CLASS_T_VERS,        /* H5Z_class_t version */
     H5Z_FILTER_BAD_BUF_SIZE, /* Filter id number */
-    1, 1,             /* Encoding and decoding enabled */
+    1, 1,                    /* Encoding and decoding enabled */
     "bad_buf_size",          /* Filter name for debugging */
-    NULL,             /* The "can apply" callback */
-    NULL,             /* The "set local" callback */
+    NULL,                    /* The "can apply" callback */
+    NULL,                    /* The "set local" callback */
     filter_bad_buf_size,     /* The actual filter function */
 }};
 
@@ -18724,8 +18731,8 @@ bool enable_bad_buf_size;
 
 static size_t
 filter_bad_buf_size(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
-             const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes, size_t *buf_size,
-             void H5_ATTR_UNUSED **buf)
+                    const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes, size_t *buf_size,
+                    void H5_ATTR_UNUSED **buf)
 {
     /* No-op except for invalid returned buf_size */
     if (enable_bad_buf_size)
@@ -18754,7 +18761,7 @@ test_bad_buf_size(hid_t file)
     hid_t         dcpl          = H5I_INVALID_HID; /* Dataset creation property list ID */
     const hsize_t dims[1]       = {1};             /* Dataspace dimensions */
     const hsize_t chunk_dims[1] = {1};             /* Chunk dimensions */
-    const int     wdata         = 2112;              /* Write buffer */
+    const int     wdata         = 2112;            /* Write buffer */
     int           rdata         = 0;               /* Read buffer */
     herr_t        ret;                             /* Generic return value */
 
@@ -18785,9 +18792,11 @@ test_bad_buf_size(hid_t file)
 
     /* Write data with bad buffer size enabled (should fail) */
     enable_bad_buf_size = true;
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         ret = H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata);
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
 
     if (ret != FAIL)
         TEST_ERROR;
@@ -18811,9 +18820,11 @@ test_bad_buf_size(hid_t file)
 
     /* Read data back with bad buffer size enabled (should fail) */
     enable_bad_buf_size = true;
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         ret = H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
 
     if (ret != FAIL)
         TEST_ERROR;
