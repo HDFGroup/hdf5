@@ -320,6 +320,7 @@ jobs:
 
     call-release-cmake-bigendian:
         name: "Big-Endian (s390x) Workflows"
+        if: github.event_name != 'pull_request'
         uses: ./.github/workflows/bigendian.yml
         with:
             build_mode: "Release"
