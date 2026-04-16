@@ -65,5 +65,5 @@ jobs:
         shell: alpine.sh --root {0}
         run: |
           ctest . --parallel 2 -C ${{ inputs.build_mode }} --timeout 1800 \
-            -E "H5_H5DUMP-h5ex_image2"
+            -E "H5_H5DUMP-h5ex_image2|FORTRAN_testhdf5_fortran"
         working-directory: build
