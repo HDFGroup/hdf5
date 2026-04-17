@@ -147,6 +147,12 @@
  *  If there are multiple paths to an object, only the specified path(s) will be excluded;
  *  the comparison will include any path not explicitly excluded.<br />
  *  This option can be used repeatedly to exclude multiple paths.
+ * \li <strong>-B "attr_name"</strong>, <strong>\--exclude-attr-name "attr_name"</strong> Exclude
+ *  any attribute with the specified name from comparison across all objects in the files.<br />
+ *  Unlike \--exclude-attribute, this matches by attribute name regardless of which object
+ *  the attribute belongs to.<br />
+ *  To exclude multiple attribute names, specify this option once per name:
+ *  <code style="background-color:whitesmoke;">-B name1 -B name2</code>
  *
  * \subsubsection subsubsec_cltools_h5diff_modee Modes of output
  * \li <strong>Default mode</strong> print the number of differences found and where they occurred

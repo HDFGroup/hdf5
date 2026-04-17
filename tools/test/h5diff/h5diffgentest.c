@@ -3816,6 +3816,8 @@ test_exclude_attr_name(const char *fname1, const char *fname2)
     int     data[4]  = {1, 2, 3, 4};
     int     ts1      = 100;
     int     ts2      = 200;
+    int     sid1     = 99;
+    int     sid2     = 101;
     int     val      = 42;
     herr_t  status   = SUCCEED;
 
@@ -3863,13 +3865,19 @@ test_exclude_attr_name(const char *fname1, const char *fname2)
     write_attr(fid1, 0, NULL, "timestamp", H5T_NATIVE_INT, &ts1);
     write_attr(fid2, 0, NULL, "timestamp", H5T_NATIVE_INT, &ts2);
 
+    /* "source_id" attribute - different values between files */
+    write_attr(fid1, 0, NULL, "source_id", H5T_NATIVE_INT, &sid1);
+    write_attr(fid2, 0, NULL, "source_id", H5T_NATIVE_INT, &sid2);
+
     /* "data_value" attribute - same values in both files */
     write_attr(fid1, 0, NULL, "data_value", H5T_NATIVE_INT, &val);
     write_attr(fid2, 0, NULL, "data_value", H5T_NATIVE_INT, &val);
 
-    /* also put differing "timestamp" on group1 to test across multiple objects */
+    /* also put differing "timestamp" and "source_id" on group1 */
     write_attr(gid1, 0, NULL, "timestamp", H5T_NATIVE_INT, &ts1);
     write_attr(gid2, 0, NULL, "timestamp", H5T_NATIVE_INT, &ts2);
+    write_attr(gid1, 0, NULL, "source_id", H5T_NATIVE_INT, &sid1);
+    write_attr(gid2, 0, NULL, "source_id", H5T_NATIVE_INT, &sid2);
 
 out:
     if (fid1 > 0)

@@ -229,6 +229,7 @@ set (LIST_OTHER_TEST_FILES
     h5diff_488.txt
     h5diff_489.txt
     h5diff_490.txt
+    h5diff_491.txt
     h5diff_50.txt
     h5diff_51.txt
     h5diff_52.txt
@@ -1369,12 +1370,14 @@ ADD_H5_TEST (h5diff_487 RESULT_CODE 1 -v --exclude-path "/group1/dset" ${EXCLUDE
 # ##############################################################################
 # # Test --exclude-attr-name: exclude specific attribute names from comparison
 # ##############################################################################
-# Without exclusion: files differ (timestamp attribute has different values)
+# Without exclusion: files differ (timestamp and source_id attributes have different values)
 ADD_H5_TEST (h5diff_488 RESULT_CODE 1 -v ${EXCLUDE_ATTR_NAME_FILE1} ${EXCLUDE_ATTR_NAME_FILE2})
-# Exclude the differing attribute by name: files should be equal
-ADD_H5_TEST (h5diff_489 RESULT_CODE 0 -v --exclude-attr-name "timestamp" ${EXCLUDE_ATTR_NAME_FILE1} ${EXCLUDE_ATTR_NAME_FILE2})
-# Exclude multiple attr names; also verify short form -B works
-ADD_H5_TEST (h5diff_490 RESULT_CODE 0 -v -B "timestamp" ${EXCLUDE_ATTR_NAME_FILE1} ${EXCLUDE_ATTR_NAME_FILE2})
+# Exclude only timestamp
+ADD_H5_TEST (h5diff_489 RESULT_CODE 1 -v --exclude-attr-name "timestamp" ${EXCLUDE_ATTR_NAME_FILE1} ${EXCLUDE_ATTR_NAME_FILE2})
+# Verify short form -B works
+ADD_H5_TEST (h5diff_490 RESULT_CODE 0 -v -B "timestamp" -B "source_id" ${EXCLUDE_ATTR_NAME_FILE1} ${EXCLUDE_ATTR_NAME_FILE2})
+# Verify multiple --exclude-attr-name options exclude both differing attributes
+ADD_H5_TEST (h5diff_491 RESULT_CODE 0 -v --exclude-attr-name "timestamp" --exclude-attr-name "source_id" ${EXCLUDE_ATTR_NAME_FILE1} ${EXCLUDE_ATTR_NAME_FILE2})
 
 # ##############################################################################
 # # diff various multiple vlen and fixed strings in a compound type dataset

@@ -837,12 +837,14 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "         excluded.\n");
     PRINTVALSTREAM(rawoutstream, "         This option can be used repeatedly to exclude multiple paths.\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "   --exclude-attr-name \"attr_name\"\n");
+    PRINTVALSTREAM(rawoutstream, "   -B \"attr_name\", --exclude-attr-name \"attr_name\"\n");
     PRINTVALSTREAM(rawoutstream, "         Exclude any attribute with the specified name from comparison.\n");
     PRINTVALSTREAM(rawoutstream,
                    "         Unlike --exclude-attribute, this matches the attribute name across all\n");
     PRINTVALSTREAM(rawoutstream, "         objects in the files being compared.\n");
-    PRINTVALSTREAM(rawoutstream, "         This option can be used repeatedly to exclude multiple names.\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "         To exclude multiple attribute names, specify this option once per name:\n");
+    PRINTVALSTREAM(rawoutstream, "         e.g. -B name1 -B name2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, " Modes of output:\n");
     PRINTVALSTREAM(rawoutstream,
