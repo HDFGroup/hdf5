@@ -315,7 +315,7 @@ free_exclude_attr_name_list(diff_opt_t *opts)
     }
 
     opts->exclude_attr_names = NULL;
-    opts->exclude_attr_name = 0;
+    opts->exclude_attr_name  = 0;
 }
 
 /*-------------------------------------------------------------------------
