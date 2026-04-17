@@ -146,7 +146,7 @@ H5_DLL herr_t       H5E__push_stack(H5E_stack_t *estack, bool app_entry, const c
                                     unsigned line, hid_t cls_id, hid_t maj_id, hid_t min_id, const char *fmt,
                                     va_list *ap);
 H5_DLL herr_t       H5E__print(const H5E_stack_t *estack, FILE *stream, bool bk_compat);
-H5_DLL herr_t       H5E__print2(hid_t err_stack, FILE *stream);
+H5_DLL herr_t       H5E__print2(hid_t err_stack, void *_stream);
 H5_DLL herr_t       H5E__walk(const H5E_stack_t *estack, H5E_direction_t direction, const H5E_walk_op_t *op,
                               void *client_data);
 H5_DLL herr_t       H5E__get_auto(const H5E_stack_t *estack, H5E_auto_op_t *op, void **client_data);

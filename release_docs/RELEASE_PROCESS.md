@@ -220,8 +220,8 @@ For more information on the HDF5 versioning and backward and forward compatibili
 [u2]: https://github.com/HDFGroup/hdf5/blob/develop/README.md
 [u3]: https://github.com/HDFGroup/hdf5/blob/develop/LICENSE
 [u4]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs
-[u5]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL
-[u7]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_CMake.md
+[u5]: https://github.com/HDFGroup/hdf5/blob/develop/docs/INSTALL.md
+[u7]: https://github.com/HDFGroup/hdf5/blob/develop/docs/INSTALL_CMake.md
 [u8]: https://github.com/HDFGroup/hdf5/blob/develop/.github/workflows/release.yml
 [u9]: https://github.com/HDFGroup/hdf5/blob/develop/config/lt_vers.am
 [u11]: https://github.com/HDFGroup/hdf5/blob/develop/src/H5public.h
@@ -230,4 +230,4 @@ For more information on the HDF5 versioning and backward and forward compatibili
 [u14]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.14
 [u15]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot
 [u16]: https://github.com/HDFGroup/hdf5/wiki/HDF5-Version-Numbers-and-Branch-Strategy
-[u17]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/USING_CMake_Examples.md
+[u17]: https://github.com/HDFGroup/hdf5/blob/develop/docs/USING_CMake_Examples.md

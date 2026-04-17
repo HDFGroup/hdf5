@@ -777,7 +777,7 @@ if the library was built with C++ and Fortran.
 
 <h4>USING_HDF5_CMake.md:</h4>
 
-See <a href="https://\SRCURL/release_docs/USING_CMake_Examples.md">USING_CMake_Examples.md</a>.
+See <a href="https://\SRCURL/docs/USING_CMake_Examples.md">USING_CMake_Examples.md</a>.
 
 \section secLBCompilingVS Using Visual Studio
 
@@ -972,7 +972,7 @@ or on WINDOWS you may need to add the path to the bin folder to PATH.
 \section secLBCompilingCMake Compiling an Application with CMake
 
 \subsection subsecLBCompilingCMakeScripts CMake Scripts for Building Applications
-See <a href="https://\SRCURL/release_docs/USING_CMake_Examples.md">Using CMake to Build Applications</a> to build applications with different languages and options.
+See <a href="https://\SRCURL/docs/USING_CMake_Examples.md">Using CMake to Build Applications</a> to build applications with different languages and options.
 
 For a more complete script (and to help resolve issues) see the script provided with the HDF5 Examples project.
 
@@ -980,7 +980,7 @@ For a more complete script (and to help resolve issues) see the script provided 
 The installed HDF5 can be verified by compiling the HDF5 Examples project, included with the CMake built HDF5 binaries
 in the share folder or you can go to the <a href="https://\SRCURL/HDF5Examples">HDF5 Examples</a> in the HDF5 github repository.
 
-Go into the share directory and follow the instructions in <a href="https://\SRCURL/release_docs/USING_CMake_Examples.md">Using CMake to Build Examples</a> to build the examples.
+Go into the share directory and follow the instructions in <a href="https://\SRCURL/docs/USING_CMake_Examples.md">Using CMake to Build Examples</a> to build the examples.
 
 In general, users must first set the HDF5_ROOT environment variable to the installed location of the CMake
 configuration files for HDF5.
@@ -998,7 +998,7 @@ For example, on Linux the following path might be set:
 \subsection subsecLBCompilingCMakeTroubless Troubleshooting CMake
 <h4>How do you use find_package with HDF5?</h4>
 To use find_package you will first need to make sure that HDF5_ROOT is set correctly. For setting this
-environment variable see the Preconditions in the <a href="https://\SRCURL/release_docs/USING_HDF5_CMake.md">USING_HDF5_CMake.md</a> file in the share directory.
+environment variable see the Preconditions in the <a href="https://\SRCURL/docs/USING_HDF5_CMake.md">USING_HDF5_CMake.md</a> file in the share directory.
 
 See the CMakeLists.txt file provided with these examples for how to use find_package with HDF5.
 

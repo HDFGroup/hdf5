@@ -20,7 +20,7 @@ CMake builds include a number of CMake specific files for support of CMake's fin
 
 ## Introduction
 The table below shows the equivalent CMake build options that match those from Autotools. See the
-[release_docs/INSTALL_CMake.md](./INSTALL_CMake.md) file for more information on the CMake build system and options.
+[INSTALL_CMake.md](./INSTALL_CMake.md) file for more information on the CMake build system and options.
 
 ## Autotools to CMake Options
 | Autotools Build Options | CMake Build Options | Notes |

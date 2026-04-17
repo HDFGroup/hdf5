@@ -42,6 +42,8 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## Java Enhancements:
 
+- Java dependency JAR paths are now configurable CMake cache variables, allowing system-provided JARs to be used in place of the bundled copies.
+
 
 ## Acknowledgements:
 
@@ -63,6 +65,13 @@ We would like to thank the many HDF5 community members who contributed to this r
 # 🚀 New Features & Improvements
 
 ## Configuration
+
+### Consolidated documentation under docs/ directory
+
+   User-facing guides (installation, build instructions, platform-specific docs) and
+   Doxygen API documentation have been consolidated under a new top-level `docs/`
+   directory. All internal references (CMakeLists.txt, README.md, workflow files,
+   Doxygen sources, scripts, etc.) have been updated accordingly.
 
 ### Updated external building of zlib, zlib-ng and libaec to not use a patching process
 
@@ -86,15 +95,15 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    A new `Findlibaec.cmake` CMake module has been added. This module is intended to locate libaec on the system for SZIP support in HDF5 when libaec was built with Autotools instead of CMake. When SZIP support is enabled in HDF5 with the `HDF5_ENABLE_SZIP_SUPPORT` option, this module will first check for an existing CMake-built libaec and use that if it's available. Otherwise, the module will heuristically search for libaec on the system. If necessary, the module can be hinted toward a particular libaec installation by setting the CMake variable `libaec_ROOT` to point to a directory. If it is known that a CMake-built libaec installation exists on the system in a non-standard location, the CMake variable `libaec_DIR` can instead be set to a directory containing a `libaec-config.cmake` file to cause the module to prefer that libaec installation.
 
-### Refactored CMake library export mechanism
-
-   The CMake build system now uses separate export targets for different library types: static libraries use `${HDF5_EXPORTED_TARGETS}_static`, Java libraries use `${HDF5_EXPORTED_TARGETS}_java`, and shared libraries continue using the main `${HDF5_EXPORTED_TARGETS}`. The generated `hdf5-config.cmake` file conditionally includes the appropriate target files (`hdf5-targets_static.cmake` and `hdf5-targets_java.cmake`), allowing downstream projects to selectively link against specific library variants. This refactoring improves build system maintainability and applies consistently across all HDF5 components (core, C++, Fortran, high-level APIs, tools, and Java JNI).
-
 ## Library
 
 ### Improve performance of H5Ovisit() with deeply nested group structures
 
    `H5Ovisit()` would previously internally traverse each object's path name from the iteration root group in order to retrieve information about that object, causing severe performance degradation with a deeply nested group structure. Modified the algorithm to instead retrieve information directly from the object. To get this benefit, users should use `H5Ovisit3()`, or use `H5Ovisit2()` with neither `H5O_INFO_HDR` nor `H5O_INFO_META_SIZE` selected in the `fields` parameter. Performance of `H5Ocopy()`, `H5Iget_name()`, and external links with a callback set should also improve in similar situations.
+
+### Versioned API functions now default to earliest version for older API settings
+
+   When a global API compatibility version is set (e.g., `H5_USE_16_API`), functions introduced after that version previously defaulted to their latest version, which could break applications. For example, an application using `H5_USE_16_API` that called `H5Sencode()` (introduced in 1.8, versioned in 1.12) would get `H5Sencode2()` instead of `H5Sencode1()`, potentially causing compilation or runtime failures. Versioned functions now default to their earliest (version 1) variant when the configured API level predates the function's introduction, providing maximum compatibility. See issue [#6278](https://github.com/HDFGroup/hdf5/issues/6278).
 
 ## Parallel Library
 
@@ -103,6 +112,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 ## C++ Library
 
 ## Java Library
+
+### Java dependency JAR paths are now user-configurable
+
+   The CMake variables `HDF5_JAVA_LOGGING_JAR`, `HDF5_JAVA_LOGGING_NOP_JAR`, `HDF5_JAVA_LOGGING_SIMPLE_JAR`, `HDF5_JAVA_JUNIT_JAR`, and `HDF5_JAVA_HAMCREST_JAR` are now CMake cache variables with the bundled JARs as defaults. Users can override these at configure time to use system-provided JARs. See `INSTALL_CMake_options.md` for details.
 
 ## Tools
 
@@ -127,6 +140,10 @@ New default lower library version bound for output `h5repack` files is `H5F_LIBV
 
    The direct I/O VFD attempts to determine data alignment requirements for a file on file open to try and avoid extra work when data alignment isn't required. Depending on the file access flags used when opening a file, the VFD could incorrectly determine these requirements for either writes or reads, eventually leading to a possible EINVAL return value on write or read. This has been fixed by separately determining the requirements for writes and reads and being more conservative about trying to avoid data alignment requirements.
 
+### Fixed integer overflow in array datatype element count computation
+
+   Fixed a bug in H5O__dtype_decode_helper() where the loop computing the total number of elements in an array datatype had no per-step overflow check. On 64-bit systems, large dimension sizes could cause the element count to wrap around, bypassing the post-loop overflow check and producing silently incorrect results in downstream type conversion and size calculations.
+
 ### Fixed an issue with chunked datasets using the wrong index type with parallel HDF5
 
    Fixed a bug in parallel HDF5 that would cause chunked datasets with fixed dimensions and without filters applied to use the "none" index type instead of the "fixed array" index type.
@@ -143,18 +160,11 @@ New default lower library version bound for output `h5repack` files is `H5F_LIBV
 
 ## Configuration
 
-### Removed force-setting of `ZLIB_USE_EXTERNAL` and `SZIP_USE_EXTERNAL` CMake variables to `ON`
-
-   When the CMake variable `HDF5_ALLOW_EXTERNAL_SUPPORT` is set to `GIT` or `TGZ`, the library's build process previously force-set the `ZLIB_USE_EXTERNAL` and `SZIP_USE_EXTERNAL` variables to `ON`. This prevented the ability to independently choose whether zlib and szip are built from system libraries or from external sources. These variables are no longer forced to `ON` in this case and can be set individually.
-
-
 ## Tools
 
 ## Performance
 
 ## Fortran API
-
-### Added Fortran wrappers for SWMR functionality
 
 ## High-Level Library
 

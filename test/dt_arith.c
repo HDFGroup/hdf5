@@ -157,11 +157,11 @@ static int without_hardware_g = 0;
             }                                                                                                \
                                                                                                              \
             if (n < SRC_PREC - 2) {                                                                          \
-                value1 = (TYPE)(value1 << 1);                                                                \
+                value1 = (TYPE)((uint64_t)value1 << 1);                                                      \
                 value2 = (TYPE)((value1 - 1) | value1);                                                      \
             }                                                                                                \
             else if (n == SRC_PREC - 2) { /*to avoid overflow of negative values for signed integer*/        \
-                value1 = (TYPE)(value1 << 1);                                                                \
+                value1 = (TYPE)((uint64_t)value1 << 1);                                                      \
                 value2 = (TYPE)((~value1) | value1);                                                         \
             }                                                                                                \
         }                                                                                                    \
@@ -176,7 +176,7 @@ static int without_hardware_g = 0;
                 saved_p += SRC_SIZE;                                                                         \
             }                                                                                                \
             if (n < SRC_PREC - 1)                                                                            \
-                value2 = (TYPE)(value2 << 1);                                                                \
+                value2 = (TYPE)((uint64_t)value2 << 1);                                                      \
         }                                                                                                    \
     } while (0)
 

@@ -83,8 +83,8 @@ With CMake both libraries have to be explicitly enabled. The source code distrib
 Users can overwrite the defaults by using
  -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF
 with the “cmake –C” command. See the
-<a href="https://\SRCURL/release_docs/INSTALL_CMake.md">INSTALL_CMake.md</a> file
-under the release_docs directory in the HDF5 source distribution.
+<a href="https://\SRCURL/docs/INSTALL_CMake.md">INSTALL_CMake.md</a> file
+under the docs directory in the HDF5 source distribution.
 
 If compression is not requested or found at configuration time, the compression method is not
 registered with the library and cannot be applied when data is written or read. For example, the

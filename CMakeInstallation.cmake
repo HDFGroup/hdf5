@@ -112,9 +112,9 @@ if (HDF5_BUILD_JAVA)
     set (HDF5_JARHDF5_JAR_NAME "jarhdf5-${HDF5_PACKAGE_VERSION}.jar")
     set (HDF5_JAVAHDF5_JAR_NAME "javahdf5-${HDF5_PACKAGE_VERSION}.jar")
   endif ()
-  # slf4j JAR names (these are dependencies, version shouldn't change with SNAPSHOT)
-  set (HDF5_SLF4J_API_JAR_NAME "slf4j-api-2.0.16.jar")
-  set (HDF5_SLF4J_NOP_JAR_NAME "slf4j-nop-2.0.16.jar")
+  # slf4j JAR names derived from configured paths so overrides are reflected in the exported config
+  get_filename_component (HDF5_SLF4J_API_JAR_NAME ${HDF5_JAVA_LOGGING_JAR} NAME)
+  get_filename_component (HDF5_SLF4J_NOP_JAR_NAME ${HDF5_JAVA_LOGGING_NOP_JAR} NAME)
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -232,7 +232,7 @@ if (HDF5_PACK_EXAMPLES)
   )
   install (
       FILES
-          ${HDF5_SOURCE_DIR}/release_docs/USING_CMake_Examples.md
+          ${HDF5_DOCS_DIR}/USING_CMake_Examples.md
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       COMPONENT hdfdocuments
   )
@@ -271,40 +271,40 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       COMPONENT hdfdocuments
   )
-  if (EXISTS "${HDF5_SOURCE_DIR}/release_docs" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/release_docs")
+  if (EXISTS "${HDF5_DOCS_DIR}" AND IS_DIRECTORY "${HDF5_DOCS_DIR}")
     set (release_files
-        ${HDF5_SOURCE_DIR}/release_docs/USING_HDF5_CMake.md
+        ${HDF5_DOCS_DIR}/USING_HDF5_CMake.md
         ${HDF5_SOURCE_DIR}/release_docs/CHANGELOG.md
     )
     if (WIN32)
       set (release_files
           ${release_files}
-          ${HDF5_SOURCE_DIR}/release_docs/USING_HDF5_VS.md
+          ${HDF5_DOCS_DIR}/USING_HDF5_VS.md
       )
     endif ()
     if (HDF5_PACK_INSTALL_DOCS)
       set (release_files
           ${release_files}
-          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_CMake.md
+          ${HDF5_DOCS_DIR}/INSTALL_CMake.md
           ${HDF5_SOURCE_DIR}/release_docs/HISTORY-1_8.txt
-          ${HDF5_SOURCE_DIR}/release_docs/INSTALL
+          ${HDF5_DOCS_DIR}/INSTALL.md
       )
       if (WIN32)
         set (release_files
             ${release_files}
-            ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Windows.md
+            ${HDF5_DOCS_DIR}/INSTALL_Windows.md
         )
       endif ()
       if (CYGWIN)
         set (release_files
             ${release_files}
-            ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Cygwin.md
+            ${HDF5_DOCS_DIR}/INSTALL_Cygwin.md
         )
       endif ()
       if (HDF5_ENABLE_PARALLEL)
         set (release_files
             ${release_files}
-            ${HDF5_SOURCE_DIR}/release_docs/README_HPC.md
+            ${HDF5_DOCS_DIR}/README_HPC.md
         )
       endif ()
     endif ()

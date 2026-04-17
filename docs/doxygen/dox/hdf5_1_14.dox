@@ -83,7 +83,7 @@ ABI/API compatibility reports between 1.14.6 and 1.14.5 [tar file](https://\RELU
 Source code and binaries are available at:
 <a href="https://\RELURL/v1_14/v1_14_6/downloads/index.html">https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_6</a>
 
-Please refer to [Build instructions](https://\SRCURL/release_docs/INSTALL) for building with either CMake or Autotools.
+For detailed information on how to build, please refer to the [build instructions](https://\SRCURL/docs/INSTALL.md).
 
 
 \subsection subsec_obtain_method_114 Methods to obtain (gz file)
