@@ -20,7 +20,88 @@
 /* Name of tool */
 #define PROGRAMNAME "h5diff"
 
-static void ph5diff_worker(int);
+static void ph5diff_worker(int, diff_opt_t *);
+
+#ifdef H5_HAVE_PARALLEL
+/* Pack an exclude_path_list into a flat buffer of null-terminated strings.
+ * Returns the number of entries written. */
+static int
+pack_exclude_list(const struct exclude_path_list *head, char *buf, int bufsiz)
+{
+    int         count = 0;
+    int         pos   = 0;
+    const char *name;
+    int         len;
+
+    while (head) {
+        name = head->obj_path;
+        len  = (int)strlen(name) + 1;
+        if (pos + len > bufsiz)
+            break;
+        memcpy(buf + pos, name, (size_t)len);
+        pos += len;
+        count++;
+        head = head->next;
+    }
+    return count;
+}
+
+/* Reconstruct an exclude_path_list from a packed buffer produced by pack_exclude_list. */
+static struct exclude_path_list *
+unpack_exclude_list(const char *buf, int count)
+{
+    struct exclude_path_list *head = NULL;
+    struct exclude_path_list *prev = NULL;
+    const char               *p    = buf;
+    int                       i;
+
+    for (i = 0; i < count; i++) {
+        struct exclude_path_list *node = (struct exclude_path_list *)malloc(sizeof(*node));
+        if (!node)
+            break;
+        node->obj_path = strdup(p);
+        node->obj_type = H5TRAV_TYPE_UNKNOWN;
+        node->next     = NULL;
+        if (!head)
+            head = node;
+        else
+            prev->next = node;
+        prev = node;
+        p += strlen(p) + 1;
+    }
+    return head;
+}
+
+/* Broadcast a single exclude_path_list from rank 0 to all other ranks.
+ * Rank 0 sends; all others receive and return a newly-allocated list.
+ * Rank 0 returns its existing list unchanged. */
+static struct exclude_path_list *
+bcast_exclude_list(struct exclude_path_list *head, int nID)
+{
+#define EXCL_BUF_SIZE 8192
+    char                     *excl_buf;
+    int                       excl_count = 0;
+    struct exclude_path_list *result     = head;
+
+    excl_buf = (char *)malloc(EXCL_BUF_SIZE);
+    if (!excl_buf)
+        return head;
+
+    if (nID == 0)
+        excl_count = pack_exclude_list(head, excl_buf, EXCL_BUF_SIZE);
+
+    MPI_Bcast(&excl_count, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    if (excl_count > 0) {
+        MPI_Bcast(excl_buf, EXCL_BUF_SIZE, MPI_CHAR, 0, MPI_COMM_WORLD);
+        if (nID != 0)
+            result = unpack_exclude_list(excl_buf, excl_count);
+    }
+
+    free(excl_buf);
+    return result;
+#undef EXCL_BUF_SIZE
+}
+#endif /* H5_HAVE_PARALLEL */
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -80,7 +161,16 @@ main(int argc, char *argv[])
         if (nID == 0) {
             parse_command_line(argc, (const char *const *)argv, &fname1, &fname2, &objname1, &objname2,
                                &opts);
+        }
 
+        /* Broadcast exclude lists from manager to workers so that workers
+         * have valid pointer fields when processing diff_opt_t received over
+         * MPI (which is a flat byte copy and carries stale pointer values). */
+        opts.exclude            = bcast_exclude_list(opts.exclude, nID);
+        opts.exclude_attr       = bcast_exclude_list(opts.exclude_attr, nID);
+        opts.exclude_attr_names = bcast_exclude_list(opts.exclude_attr_names, nID);
+
+        if (nID == 0) {
             h5diff(fname1, fname2, objname1, objname2, &opts);
 
             MPI_Barrier(MPI_COMM_WORLD);
@@ -91,7 +181,7 @@ main(int argc, char *argv[])
         }
         /* All other tasks become workers and wait for assignments. */
         else {
-            ph5diff_worker(nID);
+            ph5diff_worker(nID, &opts);
 
             MPI_Barrier(MPI_COMM_WORLD);
         } /* end else */
@@ -113,7 +203,7 @@ main(int argc, char *argv[])
  *-------------------------------------------------------------------------
  */
 static void
-ph5diff_worker(int nID)
+ph5diff_worker(int nID, diff_opt_t *parsed_opts)
 {
     hid_t file1_id = H5I_INVALID_HID;
     hid_t file2_id = H5I_INVALID_HID;
@@ -161,6 +251,13 @@ ph5diff_worker(int nID)
 
             /* Recv parameters for diff from manager task */
             MPI_Recv(&args, sizeof(args), MPI_BYTE, 0, MPI_TAG_ARGS, MPI_COMM_WORLD, &Status);
+
+            /* diff_opt_t is transmitted as a flat byte copy, so any pointer
+             * fields contain manager-process addresses that are invalid here.
+             * Restore them from our locally-parsed opts. */
+            args.opts.exclude            = parsed_opts->exclude;
+            args.opts.exclude_attr       = parsed_opts->exclude_attr;
+            args.opts.exclude_attr_names = parsed_opts->exclude_attr_names;
 
             /* Do the diff */
             diffs.nfound  = diff(file1_id, args.name1, file2_id, args.name2, &(args.opts), &(args.argdata));
