@@ -3798,11 +3798,6 @@ out:
 /*-------------------------------------------------------------------------
  *
  * Purpose: Create test files for excluding specific attribute names.
- *          Both files have identical datasets with two attributes:
- *            "timestamp" - different values (the one to exclude)
- *            "data_value" - identical values
- *          Without exclusion h5diff should report 1 difference.
- *          With --exclude-attr-name "timestamp" it should report 0 differences.
  *
  *-------------------------------------------------------------------------*/
 int
