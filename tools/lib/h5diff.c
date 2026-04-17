@@ -298,6 +298,24 @@ free_exclude_attr_list(diff_opt_t *opts)
 }
 
 /*-------------------------------------------------------------------------
+ * Function: free_exclude_attr_name_list
+ *
+ * Purpose:  free exclude attribute name list from diff options
+ *------------------------------------------------------------------------*/
+static void
+free_exclude_attr_name_list(diff_opt_t *opts)
+{
+    struct exclude_path_list *curr = opts->exclude_attr_names;
+    struct exclude_path_list *next;
+
+    while (NULL != curr) {
+        next = curr->next;
+        free(curr);
+        curr = next;
+    }
+}
+
+/*-------------------------------------------------------------------------
  * Function: build_match_list
  *
  * Purpose:  get list of matching path_name from info1 and info2
@@ -1296,6 +1314,7 @@ done:
     opts->err_stat = opts->err_stat | ret_value;
 
     free_exclude_attr_list(opts);
+    free_exclude_attr_name_list(opts);
 
     /* free table */
     if (table)

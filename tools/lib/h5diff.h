@@ -72,6 +72,8 @@ typedef struct {
     int                       exclude_attr_path;      /* exclude path to an object */
     struct exclude_path_list *exclude;                /* keep exclude path list */
     struct exclude_path_list *exclude_attr;           /* keep exclude attribute list */
+    int                       exclude_attr_name;      /* exclude specific named attributes */
+    struct exclude_path_list *exclude_attr_names;     /* list of attribute names to exclude */
     int                       count_bool;             /* count, compare up to count */
     hsize_t                   count;                  /* count value */
     diff_err_t                err_stat;  /* an error occurred (2, error, 1, differences, 0, no error) */

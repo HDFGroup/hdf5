@@ -133,6 +133,12 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
          excluded.
          This option can be used repeatedly to exclude multiple paths.
 
+   --exclude-attr-name "attr_name"
+         Exclude any attribute with the specified name from comparison.
+         Unlike --exclude-attribute, this matches the attribute name across all
+         objects in the files being compared.
+         This option can be used repeatedly to exclude multiple names.
+
  Modes of output:
   Default mode: print the number of differences found and where they occurred
   -r Report mode: print the above plus the differences

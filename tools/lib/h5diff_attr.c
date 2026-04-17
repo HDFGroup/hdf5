@@ -631,6 +631,23 @@ diff_attr(hid_t loc1_id, hid_t loc2_id, const char *path1, const char *path2, di
 
     for (u = 0; u < (unsigned)match_list_attrs->nattrs; u++) {
         H5TOOLS_DEBUG("match_list_attrs loop[%d] - errstat:%d", u, attr_opts.err_stat);
+
+        /* check if this attribute name is in the exclude-attr-name list */
+        if (attr_opts.exclude_attr_name) {
+            struct exclude_path_list *excl = attr_opts.exclude_attr_names;
+            bool                      skip = false;
+
+            while (excl) {
+                if (strcmp(excl->obj_path, match_list_attrs->attrs[u].name) == 0) {
+                    skip = true;
+                    break;
+                }
+                excl = excl->next;
+            }
+            if (skip)
+                continue;
+        }
+
         if ((match_list_attrs->attrs[u].exist[0]) && (match_list_attrs->attrs[u].exist[1])) {
             name1 = name2 = match_list_attrs->attrs[u].name;
             H5TOOLS_DEBUG("name - %s", name1);
