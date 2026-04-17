@@ -838,8 +838,7 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "         This option can be used repeatedly to exclude multiple paths.\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   --exclude-attr-name \"attr_name\"\n");
-    PRINTVALSTREAM(rawoutstream,
-                   "         Exclude any attribute with the specified name from comparison.\n");
+    PRINTVALSTREAM(rawoutstream, "         Exclude any attribute with the specified name from comparison.\n");
     PRINTVALSTREAM(rawoutstream,
                    "         Unlike --exclude-attribute, this matches the attribute name across all\n");
     PRINTVALSTREAM(rawoutstream, "         objects in the files being compared.\n");

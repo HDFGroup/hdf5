@@ -3808,16 +3808,16 @@ out:
 int
 test_exclude_attr_name(const char *fname1, const char *fname2)
 {
-    hid_t   fid1        = H5I_INVALID_HID;
-    hid_t   fid2        = H5I_INVALID_HID;
-    hid_t   gid1        = H5I_INVALID_HID;
-    hid_t   gid2        = H5I_INVALID_HID;
-    hsize_t dims1[1]    = {4};
-    int     data[4]     = {1, 2, 3, 4};
-    int     ts1         = 100;
-    int     ts2         = 200;
-    int     val         = 42;
-    herr_t  status      = SUCCEED;
+    hid_t   fid1     = H5I_INVALID_HID;
+    hid_t   fid2     = H5I_INVALID_HID;
+    hid_t   gid1     = H5I_INVALID_HID;
+    hid_t   gid2     = H5I_INVALID_HID;
+    hsize_t dims1[1] = {4};
+    int     data[4]  = {1, 2, 3, 4};
+    int     ts1      = 100;
+    int     ts2      = 200;
+    int     val      = 42;
+    herr_t  status   = SUCCEED;
 
     fid1 = H5Fcreate(fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid1 < 0) {
