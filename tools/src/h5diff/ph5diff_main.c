@@ -22,7 +22,6 @@
 
 static void ph5diff_worker(int);
 
-#ifdef H5_HAVE_PARALLEL
 /* Pack all three exclude lists into a single flat buffer for MPI_TAG_OPTS.
  * Format: [int n1][names...][int n2][names...][int n3][names...]
  * Returns total bytes written. */
@@ -121,7 +120,6 @@ recv_opts(diff_opt_t *opts, int src)
     free(buf);
 #undef OPTS_BUF_SIZE
 }
-#endif /* H5_HAVE_PARALLEL */
 
 /*-------------------------------------------------------------------------
  * Function: main
