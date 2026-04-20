@@ -26,6 +26,7 @@
 /* Operational tags used to init and complete diff */
 #define MPI_TAG_END      7
 #define MPI_TAG_PARALLEL 8
+#define MPI_TAG_OPTS     9
 
 struct diff_mpi_args {
     char        name1[256];
