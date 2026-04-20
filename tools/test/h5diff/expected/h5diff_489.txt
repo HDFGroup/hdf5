@@ -25,3 +25,9 @@ position        source_id of </group1> source_id of </group1> difference
 ------------------------------------------------------------
                 99              101             2              
 1 differences found
+attribute: <timestamp of </group1>> and <timestamp of </group1>>
+size:           H5S_SCALAR           H5S_SCALAR
+position        timestamp of </group1> timestamp of </group1> difference          
+------------------------------------------------------------
+                100             200             100            
+1 differences found

@@ -133,12 +133,15 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
          excluded.
          This option can be used repeatedly to exclude multiple paths.
 
-   -B "attr_name", --exclude-attr-name "attr_name"
-         Exclude any attribute with the specified name from comparison.
-         Unlike --exclude-attribute, this matches the attribute name across all
-         objects in the files being compared.
-         To exclude multiple attribute names, specify this option once per name:
-         e.g. -B name1 -B name2
+   -B "path/to/attr", --exclude-attr "path/to/attr"
+         Exclude the specified attribute from comparison. The path uses the
+         same convention as h5dump: the last component is the attribute name
+         and the preceding path is the object that owns it.
+         For example, to exclude attribute "timestamp" on object "/group1",
+         specify: -B "/group1/timestamp"
+         To target an attribute on the root group: -B "/timestamp"
+         This option can be used repeatedly to exclude multiple attributes:
+         e.g. -B /group1/attr1 -B /group2/attr2
 
  Modes of output:
   Default mode: print the number of differences found and where they occurred

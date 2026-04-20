@@ -37,7 +37,7 @@ static struct h5_long_options l_opts[] = {{"compare", no_arg, 'c'},
                                           {"verbose", optional_arg, 'v'},
                                           {"no-dangling-links", no_arg, 'x'},
                                           {"exclude-attribute", require_arg, 'A'},
-                                          {"exclude-attr-name", require_arg, 'B'},
+                                          {"exclude-attr", require_arg, 'B'},
                                           {"no-compact-subset", no_arg, 'C'},
                                           {"exclude-path", require_arg, 'E'},
                                           {"page-buffer-size", require_arg, 'K'},
@@ -149,7 +149,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
     /* init for exclude-attribute option */
     exclude_attr_head = NULL;
 
-    /* init for exclude-attr-name option */
+    /* init for exclude-attr option */
     exclude_attr_name_head = NULL;
 
     /* parse command line options */
@@ -472,7 +472,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
     if (opts->exclude_attr_path)
         opts->exclude_attr = exclude_attr_head;
 
-    /* if exclude-attr-name option is used, keep the exclude attr name list */
+    /* if exclude-attr option is used, keep the exclude attr list */
     if (opts->exclude_attr_name)
         opts->exclude_attr_names = exclude_attr_name_head;
 
@@ -837,14 +837,20 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "         excluded.\n");
     PRINTVALSTREAM(rawoutstream, "         This option can be used repeatedly to exclude multiple paths.\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "   -B \"attr_name\", --exclude-attr-name \"attr_name\"\n");
-    PRINTVALSTREAM(rawoutstream, "         Exclude any attribute with the specified name from comparison.\n");
+    PRINTVALSTREAM(rawoutstream, "   -B \"path/to/attr\", --exclude-attr \"path/to/attr\"\n");
     PRINTVALSTREAM(rawoutstream,
-                   "         Unlike --exclude-attribute, this matches the attribute name across all\n");
-    PRINTVALSTREAM(rawoutstream, "         objects in the files being compared.\n");
+                   "         Exclude the specified attribute from comparison. The path uses the\n");
     PRINTVALSTREAM(rawoutstream,
-                   "         To exclude multiple attribute names, specify this option once per name:\n");
-    PRINTVALSTREAM(rawoutstream, "         e.g. -B name1 -B name2\n");
+                   "         same convention as h5dump: the last component is the attribute name\n");
+    PRINTVALSTREAM(rawoutstream, "         and the preceding path is the object that owns it.\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "         For example, to exclude attribute \"timestamp\" on object \"/group1\",\n");
+    PRINTVALSTREAM(rawoutstream, "         specify: -B \"/group1/timestamp\"\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "         To target an attribute on the root group: -B \"/timestamp\"\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "         This option can be used repeatedly to exclude multiple attributes:\n");
+    PRINTVALSTREAM(rawoutstream, "         e.g. -B /group1/attr1 -B /group2/attr2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, " Modes of output:\n");
     PRINTVALSTREAM(rawoutstream,

@@ -776,7 +776,7 @@ set (EXCLUDE_FILE2_2 h5diff_exclude2-2.h5)
 # Only one file contains unique objs. Common objs are same.
 set (EXCLUDE_FILE3_1 h5diff_exclude3-1.h5)
 set (EXCLUDE_FILE3_2 h5diff_exclude3-2.h5)
-# files for testing exclude-attr-name
+# files for testing exclude-attr (full-path attribute exclusion)
 set (EXCLUDE_ATTR_NAME_FILE1 h5diff_exclude_attr_name1.h5)
 set (EXCLUDE_ATTR_NAME_FILE2 h5diff_exclude_attr_name2.h5)
 # compound type with multiple vlen string types
@@ -1368,16 +1368,16 @@ ADD_H5_TEST (h5diff_486 RESULT_CODE 0 -v --exclude-path "/group1" ${EXCLUDE_FILE
 ADD_H5_TEST (h5diff_487 RESULT_CODE 1 -v --exclude-path "/group1/dset" ${EXCLUDE_FILE3_1} ${EXCLUDE_FILE3_2})
 
 # ##############################################################################
-# # Test --exclude-attr-name: exclude specific attribute names from comparison
+# # Test --exclude-attr: exclude specific attribute by full path from comparison
 # ##############################################################################
 # Without exclusion: files differ (timestamp and source_id attributes have different values)
 ADD_H5_TEST (h5diff_488 RESULT_CODE 1 -v ${EXCLUDE_ATTR_NAME_FILE1} ${EXCLUDE_ATTR_NAME_FILE2})
-# Exclude only timestamp
-ADD_H5_TEST (h5diff_489 RESULT_CODE 1 -v --exclude-attr-name "timestamp" ${EXCLUDE_ATTR_NAME_FILE1} ${EXCLUDE_ATTR_NAME_FILE2})
-# Verify short form -B works
-ADD_H5_TEST (h5diff_490 RESULT_CODE 0 -v -B "timestamp" -B "source_id" ${EXCLUDE_ATTR_NAME_FILE1} ${EXCLUDE_ATTR_NAME_FILE2})
-# Verify multiple --exclude-attr-name options exclude both differing attributes
-ADD_H5_TEST (h5diff_491 RESULT_CODE 0 -v --exclude-attr-name "timestamp" --exclude-attr-name "source_id" ${EXCLUDE_ATTR_NAME_FILE1} ${EXCLUDE_ATTR_NAME_FILE2})
+# Exclude only root's timestamp (group1 attrs still differ)
+ADD_H5_TEST (h5diff_489 RESULT_CODE 1 -v --exclude-attr "/timestamp" ${EXCLUDE_ATTR_NAME_FILE1} ${EXCLUDE_ATTR_NAME_FILE2})
+# Verify short form -B works, excluding all differing attrs by full path
+ADD_H5_TEST (h5diff_490 RESULT_CODE 0 -v -B "/timestamp" -B "/source_id" -B "/group1/timestamp" -B "/group1/source_id" ${EXCLUDE_ATTR_NAME_FILE1} ${EXCLUDE_ATTR_NAME_FILE2})
+# Verify multiple --exclude-attr options exclude all differing attributes by full path
+ADD_H5_TEST (h5diff_491 RESULT_CODE 0 -v --exclude-attr "/timestamp" --exclude-attr "/source_id" --exclude-attr "/group1/timestamp" --exclude-attr "/group1/source_id" ${EXCLUDE_ATTR_NAME_FILE1} ${EXCLUDE_ATTR_NAME_FILE2})
 
 # ##############################################################################
 # # diff various multiple vlen and fixed strings in a compound type dataset
