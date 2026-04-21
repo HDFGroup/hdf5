@@ -264,7 +264,7 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                     dt->shared->u.vlen.cls = &H5T_vlen_mem_str_g;
                 } /* end else-if */
                 else
-                    assert(0 && "Invalid VL type");
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid VL type for memory location");
 
                 /* Release owned file */
                 if (dt->shared->owned_vol_obj) {
@@ -1019,7 +1019,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
                     free(*(char **)elem);
             }
             else {
-                assert(0 && "Invalid VL type");
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid VL type for reclaim");
             } /* end else */
             break;
 
