@@ -18456,7 +18456,7 @@ filter_bad_decode_size(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
         }
 
         /* Initialize extra bytes to 0 */
-        //((char *)(*buf))[nbytes - 1] = '\0';
+        ((char *)(*buf))[nbytes - 1] = '\0';
     }
 
     /* No-op for forward execution/compression */
@@ -18596,16 +18596,12 @@ test_bad_decode_size_vlen(hid_t file)
     hid_t         tid           = H5I_INVALID_HID; /* Datatype ID */
     const hsize_t dims[1]       = {1};             /* Dataspace dimensions */
     const hsize_t chunk_dims[1] = {1};             /* Chunk dimensions */
-    char          wdata0[32];                      /* vlen string element */
+    char          wdata0[] = "don't panic";                      /* vlen string element */
     char         *wdata[1] = {wdata0};             /* Write buffer */
     char         *rdata[1] = {NULL};               /* Read buffer */
     herr_t        ret;                             /* Generic return value */
 
     TESTING("filter returning incorrect data size after unfiltering with vlen type");
-
-    /* Initialize wdata0 */
-    strncpy(wdata0, "don't panic", sizeof(wdata0));
-    wdata0[sizeof(wdata0) - 1] = '\0';
 
     /* Create dcpl with special filter */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)

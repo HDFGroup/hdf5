@@ -6879,8 +6879,6 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     /* General information about chunk copy */
     const H5T_t       *dt_src   = udata->dt_src;
     void              *bkg      = udata->bkg;      /* Background buffer for datatype conversion */
-    void              *buf      = udata->buf;      /* Chunk buffer for I/O & datatype conversions */
-    size_t             buf_size = udata->buf_size; /* Size of chunk buffer */
     const H5O_pline_t *pline    = udata->pline;    /* I/O pipeline for applying filters */
 
     /* needed for compressed variable length data */
@@ -6926,7 +6924,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     } /* end if */
 
     /* Resize the buf if it is too small to hold the data */
-    if (nbytes > buf_size) {
+    if (nbytes > udata->buf_size) {
         void *new_buf; /* New buffer for data */
 
         /* Re-allocate memory for copying the chunk */
@@ -6934,16 +6932,14 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR,
                         "memory allocation failed for raw data chunk");
         udata->buf = new_buf;
+        udata->buf_size = nbytes;
 
         /* No need to reallocate bkg since it should always be big enough */
-
-        buf             = udata->buf;
-        udata->buf_size = buf_size = nbytes;
     } /* end if */
 
     if (udata->chunk_in_cache && udata->chunk) {
         assert(!H5_addr_defined(chunk_rec->chunk_addr));
-        H5MM_memcpy(buf, udata->chunk, nbytes);
+        H5MM_memcpy(udata->buf, udata->chunk, nbytes);
         udata->chunk = NULL;
     }
     else {
@@ -6981,11 +6977,11 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
             assert(H5_addr_defined(ent->chunk_block.offset));
 
             H5_CHECKED_ASSIGN(nbytes, size_t, shared_fo->layout.u.chunk.size, hsize_t);
-            H5MM_memcpy(buf, ent->chunk, nbytes);
+            H5MM_memcpy(udata->buf, ent->chunk, nbytes);
         }
         else {
             /* read chunk data from the source file */
-            if (H5F_block_read(udata->file_src, H5FD_MEM_DRAW, chunk_rec->chunk_addr, nbytes, buf) < 0)
+            if (H5F_block_read(udata->file_src, H5FD_MEM_DRAW, chunk_rec->chunk_addr, nbytes, udata->buf) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, H5_ITER_ERROR, "unable to read raw data chunk");
         }
     }
@@ -6995,8 +6991,9 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     if (must_filter && (is_vlen || fix_ref) && !udata->chunk_in_cache) {
         unsigned filter_mask = chunk_rec->filter_mask;
 
-        if (H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes, &buf_size,
-                         &buf) < 0)
+        /* Execute filter pipeline */
+        if (H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes, &udata->buf_size,
+                         &udata->buf) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "data pipeline read failed");
 
         /* Make sure the chunk is the correct size after being unfiltered */
@@ -7016,17 +7013,17 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         size_t       reclaim_buf_size = udata->reclaim_buf_size;
 
         /* Convert from source file to memory */
-        if (H5T_convert(tpath_src_mem, dt_src, dt_mem, udata->nelmts, (size_t)0, (size_t)0, buf, bkg) < 0)
+        if (H5T_convert(tpath_src_mem, dt_src, dt_mem, udata->nelmts, (size_t)0, (size_t)0, udata->buf, bkg) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, H5_ITER_ERROR, "datatype conversion failed");
 
         /* Copy into another buffer, to reclaim memory later */
-        H5MM_memcpy(reclaim_buf, buf, reclaim_buf_size);
+        H5MM_memcpy(reclaim_buf, udata->buf, reclaim_buf_size);
 
         /* Set background buffer to all zeros */
         memset(bkg, 0, udata->bkg_size);
 
         /* Convert from memory to destination file */
-        if (H5T_convert(tpath_mem_dst, dt_mem, dt_dst, udata->nelmts, (size_t)0, (size_t)0, buf, bkg) < 0)
+        if (H5T_convert(tpath_mem_dst, dt_mem, dt_dst, udata->nelmts, (size_t)0, (size_t)0, udata->buf, bkg) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, H5_ITER_ERROR, "datatype conversion failed");
 
         /* Reclaim space from variable length data */
@@ -7038,14 +7035,14 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         /* (background buffer has already been zeroed out, if not expanding) */
         if (udata->cpy_info->expand_ref) {
             /* Copy the reference elements */
-            if (H5O_copy_expand_ref(udata->file_src, dt_src, buf, nbytes, udata->idx_info_dst->f, bkg,
+            if (H5O_copy_expand_ref(udata->file_src, dt_src, udata->buf, nbytes, udata->idx_info_dst->f, bkg,
                                     udata->cpy_info) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy reference attribute");
         } /* end if */
 
         /* After fix ref, copy the new reference elements to the buffer to write out */
         assert(nbytes <= udata->bkg_size);
-        H5MM_memcpy(buf, bkg, nbytes);
+        H5MM_memcpy(udata->buf, bkg, nbytes);
     } /* end if */
 
     /* Set up destination chunk callback information for insertion */
@@ -7059,13 +7056,11 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     /* Need to compress variable-length or reference data elements or a chunk found in cache before writing to
      * file */
     if (must_filter && (is_vlen || fix_ref || udata->chunk_in_cache)) {
-        if (H5Z_pipeline(pline, 0, &(udata_dst.filter_mask), H5Z_NO_EDC, filter_cb, &nbytes, &buf_size,
-                         &buf) < 0)
+        if (H5Z_pipeline(pline, 0, &(udata_dst.filter_mask), H5Z_NO_EDC, filter_cb, &nbytes, &udata->buf_size,
+                         &udata->buf) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "output pipeline failed");
 
         H5_CHECKED_ASSIGN(udata_dst.chunk_block.length, hsize_t, nbytes, size_t);
-        udata->buf      = buf;
-        udata->buf_size = buf_size;
     } /* end if */
 
     udata->chunk_in_cache = false;
@@ -7081,7 +7076,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
     /* Write chunk data to destination file */
     assert(H5_addr_defined(udata_dst.chunk_block.offset));
-    if (H5F_block_write(udata->idx_info_dst->f, H5FD_MEM_DRAW, udata_dst.chunk_block.offset, nbytes, buf) < 0)
+    if (H5F_block_write(udata->idx_info_dst->f, H5FD_MEM_DRAW, udata_dst.chunk_block.offset, nbytes, udata->buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, H5_ITER_ERROR, "unable to write raw data to file");
 
     /* Set metadata tag in API context */
