@@ -1,0 +1,99 @@
+# ============================================================================
+# HDF5 AI Sustainability Initiative — Revamp Sandbox CI
+# ============================================================================
+# Basic build + test pipeline for the ACFI development clone.
+# Scope: C library only (C++ interface excluded per project scope).
+# Runs on push to develop and on PRs targeting develop.
+#
+# This workflow is intentionally minimal for Phase 1. Later phases will
+# layer in static analysis gates, coverage checks, and the full
+# verification pipeline defined in the PRD.
+# ============================================================================
+
+name: Revamp Sandbox CI
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop]
+  workflow_dispatch:   # manual trigger for on-demand runs
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: "Ubuntu CMake (C library)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ninja-build \
+            cmake \
+            gcc \
+            g++ \
+            zlib1g-dev \
+            libaec-dev \
+            pip
+          # Install Lizard for complexity analysis (Phase 1 tooling)
+          pip install lizard --break-system-packages
+
+      - name: Configure (CMake)
+        run: |
+          cmake -B build -G Ninja \
+            -C config/cmake/cacheinit.cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=ON \
+            -DBUILD_STATIC_LIBS=OFF \
+            -DHDF5_BUILD_CPP_LIB=OFF \
+            -DHDF5_BUILD_FORTRAN=OFF \
+            -DHDF5_BUILD_JAVA=OFF \
+            -DHDF5_BUILD_TOOLS=ON \
+            -DHDF5_BUILD_EXAMPLES=OFF \
+            -DHDF5_ENABLE_Z_LIB_SUPPORT=ON \
+            -DHDF5_ENABLE_SZIP_SUPPORT=OFF \
+            -DLIBAEC_USE_LOCALCONTENT=OFF \
+            -DZLIB_USE_LOCALCONTENT=OFF
+
+      - name: Build
+        run: cmake --build build --parallel $(nproc)
+
+      - name: Test (serial)
+        working-directory: build
+        run: ctest --output-on-failure --parallel $(nproc) -E "MPI|parallel"
+        # Exclude parallel tests — this CI runner has no MPI.
+        # Full parallel testing handled by HDF Group's own CDash runs.
+
+      # ---- Phase 1 tooling: Lizard complexity snapshot -------------------
+      - name: Lizard complexity snapshot
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        run: |
+          echo "::group::Lizard — top 20 most complex functions"
+          lizard src/ \
+            --sort cyclomatic_complexity \
+            --length 0 \
+            --CCN 15 \
+            --warnings_only \
+            || true   # don't fail CI on warnings, this is informational
+          echo "::endgroup::"
+
+      # ---- Artifact: build log for debugging ----------------------------
+      - name: Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build/CMakeFiles/CMakeOutput.log
+          retention-days: 7
