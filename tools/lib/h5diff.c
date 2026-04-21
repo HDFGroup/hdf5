@@ -20,6 +20,42 @@
 static diff_err_t handle_worker_request(char *worker_tasks, int *n_busy_tasks, diff_opt_t *opts,
                                         hsize_t *n_diffs);
 static diff_err_t dispatch_diff_to_worker(struct diff_mpi_args *args, char *worker_tasks, int *n_busy_tasks);
+
+/* Maximum byte size for serialized exclude lists appended to MPI_TAG_ARGS. */
+#define EXCLUDE_LISTS_BUFSIZ 8192
+
+/* Serialize the three exclude lists from opts into buf.
+ * Format per list: [int count][path\0 ...].  Returns bytes written. */
+static int
+pack_exclude_lists(const diff_opt_t *opts, char *buf, int bufsiz)
+{
+    const struct exclude_path_list *lists[3];
+    int                             pos = 0;
+    int                             i;
+
+    lists[0] = opts->exclude;
+    lists[1] = opts->exclude_attr;
+    lists[2] = opts->exclude_attr_names;
+
+    for (i = 0; i < 3; i++) {
+        const struct exclude_path_list *node      = lists[i];
+        int                             count_pos = pos;
+        int                             n         = 0;
+
+        pos += (int)sizeof(int);
+        while (node && pos < bufsiz) {
+            int len = (int)strlen(node->obj_path) + 1;
+            if (pos + len > bufsiz)
+                break;
+            memcpy(buf + pos, node->obj_path, (size_t)len);
+            pos += len;
+            n++;
+            node = node->next;
+        }
+        memcpy(buf + count_pos, &n, sizeof(int));
+    }
+    return pos;
+}
 #endif
 
 /*-------------------------------------------------------------------------
@@ -1865,6 +1901,10 @@ dispatch_diff_to_worker(struct diff_mpi_args *args, char *worker_tasks, int *n_b
 {
     int        target_task = -1;
     diff_err_t ret_value   = H5DIFF_NO_ERR;
+    char      *buf         = NULL;
+    char       lists_buf[EXCLUDE_LISTS_BUFSIZ];
+    int        lists_len;
+    int        total_len;
 
     /* Must have a free worker task */
     assert(*n_busy_tasks < g_nTasks - 1);
@@ -1873,7 +1913,6 @@ dispatch_diff_to_worker(struct diff_mpi_args *args, char *worker_tasks, int *n_b
      * Manager task never does work, so workerTasks[0] is
      * really worker task 0, or MPI rank 1.
      */
-    target_task = -1;
     for (int n = 1; n < g_nTasks; n++)
         if (worker_tasks[n - 1]) {
             target_task = n - 1;
@@ -1884,9 +1923,19 @@ dispatch_diff_to_worker(struct diff_mpi_args *args, char *worker_tasks, int *n_b
     if (target_task < 0)
         H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "couldn't find a free worker task to dispatch diff request to");
 
-    /* Send diff arguments to worker */
-    if (MPI_SUCCESS != (MPI_Send(args, sizeof(struct diff_mpi_args), MPI_BYTE, target_task + 1, MPI_TAG_ARGS,
-                                 MPI_COMM_WORLD)))
+    /* Pack diff_mpi_args followed by the serialized exclude lists into a
+     * single variable-length message so workers never need to leave their
+     * MPI_Probe loop for a separate opts exchange. */
+    lists_len = pack_exclude_lists(&args->opts, lists_buf, EXCLUDE_LISTS_BUFSIZ);
+    total_len = (int)sizeof(struct diff_mpi_args) + lists_len;
+
+    if (NULL == (buf = (char *)malloc((size_t)total_len)))
+        H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "malloc failed for MPI args buffer");
+
+    memcpy(buf, args, sizeof(struct diff_mpi_args));
+    memcpy(buf + sizeof(struct diff_mpi_args), lists_buf, (size_t)lists_len);
+
+    if (MPI_SUCCESS != MPI_Send(buf, total_len, MPI_BYTE, target_task + 1, MPI_TAG_ARGS, MPI_COMM_WORLD))
         H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "couldn't send diff arguments to worker task");
 
     /* Mark worker task as busy */
@@ -1894,6 +1943,7 @@ dispatch_diff_to_worker(struct diff_mpi_args *args, char *worker_tasks, int *n_b
     (*n_busy_tasks)++;
 
 done:
+    free(buf);
     return ret_value;
 }
 #endif

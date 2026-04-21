@@ -26,8 +26,10 @@
 /* Operational tags used to init and complete diff */
 #define MPI_TAG_END      7
 #define MPI_TAG_PARALLEL 8
-#define MPI_TAG_OPTS     9
 
+/* NOTE: object names are capped at 256 characters in parallel mode.
+ * Extending this to support arbitrary lengths would require making
+ * MPI_TAG_ARGS variable-length (e.g. via MPI_Pack). */
 struct diff_mpi_args {
     char        name1[256];
     char        name2[256];

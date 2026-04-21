@@ -22,41 +22,8 @@
 
 static void ph5diff_worker(int);
 
-/* Pack all three exclude lists into a single flat buffer for MPI_TAG_OPTS.
- * Format: [int n1][names...][int n2][names...][int n3][names...]
- * Returns total bytes written. */
-static int
-pack_opts(const diff_opt_t *opts, char *buf, int bufsiz)
-{
-    const struct exclude_path_list *lists[3];
-    int                             pos = 0;
-    int                             i;
-
-    lists[0] = opts->exclude;
-    lists[1] = opts->exclude_attr;
-    lists[2] = opts->exclude_attr_names;
-
-    for (i = 0; i < 3; i++) {
-        const struct exclude_path_list *node      = lists[i];
-        int                             count_pos = pos;
-        int                             n         = 0;
-
-        pos += (int)sizeof(int); /* reserve space for count */
-        while (node && pos < bufsiz) {
-            int len = (int)strlen(node->obj_path) + 1;
-            if (pos + len > bufsiz)
-                break;
-            memcpy(buf + pos, node->obj_path, (size_t)len);
-            pos += len;
-            n++;
-            node = node->next;
-        }
-        memcpy(buf + count_pos, &n, sizeof(int));
-    }
-    return pos;
-}
-
-/* Rebuild a single exclude_path_list from a packed region.
+/* Rebuild one exclude_path_list from a packed region.
+ * Each entry is a NUL-terminated string; preceded by an int count.
  * Advances *p past the list data. */
 static struct exclude_path_list *
 unpack_one_list(const char **p)
@@ -85,40 +52,16 @@ unpack_one_list(const char **p)
     return head;
 }
 
-/* Send packed exclude lists to a single worker via MPI_TAG_OPTS. */
+/* Free an exclude list allocated by unpack_one_list (obj_path is strdup'd). */
 static void
-send_opts_to_worker(const diff_opt_t *opts, int target)
+free_unpacked_list(struct exclude_path_list *list)
 {
-#define OPTS_BUF_SIZE 8192
-    char *buf = (char *)malloc(OPTS_BUF_SIZE);
-    int   len;
-
-    if (!buf)
-        return;
-    len = pack_opts(opts, buf, OPTS_BUF_SIZE);
-    MPI_Send(buf, len, MPI_BYTE, target, MPI_TAG_OPTS, MPI_COMM_WORLD);
-    free(buf);
-#undef OPTS_BUF_SIZE
-}
-
-/* Receive and unpack opts sent via MPI_TAG_OPTS; fills exclude list fields in opts. */
-static void
-recv_opts(diff_opt_t *opts, int src)
-{
-#define OPTS_BUF_SIZE 8192
-    char       *buf = (char *)malloc(OPTS_BUF_SIZE);
-    MPI_Status  status;
-    const char *p;
-
-    if (!buf)
-        return;
-    MPI_Recv(buf, OPTS_BUF_SIZE, MPI_BYTE, src, MPI_TAG_OPTS, MPI_COMM_WORLD, &status);
-    p                        = buf;
-    opts->exclude            = unpack_one_list(&p);
-    opts->exclude_attr       = unpack_one_list(&p);
-    opts->exclude_attr_names = unpack_one_list(&p);
-    free(buf);
-#undef OPTS_BUF_SIZE
+    while (list) {
+        struct exclude_path_list *next = list->next;
+        free(list->obj_path);
+        free(list);
+        list = next;
+    }
 }
 
 /*-------------------------------------------------------------------------
@@ -175,20 +118,13 @@ main(int argc, char *argv[])
     /* Parallel h5diff */
     else {
 
-        /* Have the manager process the command-line */
+        /* Manager parses the command line and drives the diff; workers stay
+         * in their probe loop until dismissed.  Exclude lists are carried
+         * inline in each MPI_TAG_ARGS message so workers never need a
+         * separate communication step and can always receive MPI_TAG_END. */
         if (nID == 0) {
-            int i;
-
             parse_command_line(argc, (const char *const *)argv, &fname1, &fname2, &objname1, &objname2,
                                &opts);
-
-            /* Send exclude lists to each worker via point-to-point so that
-             * workers can restore the pointer fields in diff_opt_t after
-             * receiving it as a flat byte copy over MPI.  Using point-to-point
-             * (rather than MPI_Bcast) means workers stay in their probe loop
-             * and can still receive MPI_TAG_END if we exit early. */
-            for (i = 1; i < g_nTasks; i++)
-                send_opts_to_worker(&opts, i);
 
             h5diff(fname1, fname2, objname1, objname2, &opts);
 
@@ -224,21 +160,16 @@ main(int argc, char *argv[])
 static void
 ph5diff_worker(int nID)
 {
-    hid_t      file1_id    = H5I_INVALID_HID;
-    hid_t      file2_id    = H5I_INVALID_HID;
-    diff_opt_t worker_opts = {0}; /* exclude lists populated via MPI_TAG_OPTS */
+    hid_t file1_id = H5I_INVALID_HID;
+    hid_t file2_id = H5I_INVALID_HID;
 
     while (1) {
         MPI_Status Status;
 
         MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
 
-        /* Receive exclude list options from manager (sent before MPI_TAG_PARALLEL) */
-        if (Status.MPI_TAG == MPI_TAG_OPTS) {
-            recv_opts(&worker_opts, 0);
-        }
         /* Check for filenames */
-        else if (Status.MPI_TAG == MPI_TAG_PARALLEL) {
+        if (Status.MPI_TAG == MPI_TAG_PARALLEL) {
             char filenames[2][MAX_FILENAME];
 
             /* Retrieve filenames */
@@ -262,9 +193,11 @@ ph5diff_worker(int nID)
         }
         /* Check for work */
         else if (Status.MPI_TAG == MPI_TAG_ARGS) {
-            struct diff_mpi_args args;
-            struct diffs_found   diffs;
-            unsigned             i;
+            struct diff_mpi_args      args;
+            struct diffs_found        diffs;
+            unsigned                  i;
+            int                       msg_size;
+            char                     *buf;
 
             /* Make certain we've received the filenames and opened the files already */
             if (file1_id < 0 || file2_id < 0) {
@@ -273,19 +206,43 @@ ph5diff_worker(int nID)
                 break;
             }
 
-            /* Recv parameters for diff from manager task */
-            MPI_Recv(&args, sizeof(args), MPI_BYTE, 0, MPI_TAG_ARGS, MPI_COMM_WORLD, &Status);
+            /* Determine exact message size and receive into a heap buffer. */
+            MPI_Get_count(&Status, MPI_BYTE, &msg_size);
 
-            /* diff_opt_t is transmitted as a flat byte copy, so any pointer
-             * fields contain manager-process addresses that are invalid here.
-             * Restore them from worker_opts, populated via MPI_TAG_OPTS. */
-            args.opts.exclude            = worker_opts.exclude;
-            args.opts.exclude_attr       = worker_opts.exclude_attr;
-            args.opts.exclude_attr_names = worker_opts.exclude_attr_names;
+            if (NULL == (buf = (char *)malloc((size_t)msg_size))) {
+                printf("ph5diff_worker: ERROR: malloc failed for recv buffer\n");
+                MPI_Abort(MPI_COMM_WORLD, 0);
+                break;
+            }
+
+            MPI_Recv(buf, msg_size, MPI_BYTE, 0, MPI_TAG_ARGS, MPI_COMM_WORLD, &Status);
+
+            /* Unpack the fixed diff_mpi_args header. */
+            memcpy(&args, buf, sizeof(struct diff_mpi_args));
+
+            /* Unpack the exclude lists that follow the fixed header.  These
+             * lists are freshly allocated here and must be freed after diff()
+             * since workers call diff() directly, bypassing the diff_match()
+             * path where the serial code frees them. */
+            {
+                const char *p        = buf + sizeof(struct diff_mpi_args);
+                args.opts.exclude            = unpack_one_list(&p);
+                args.opts.exclude_attr       = unpack_one_list(&p);
+                args.opts.exclude_attr_names = unpack_one_list(&p);
+            }
+
+            free(buf);
 
             /* Do the diff */
             diffs.nfound  = diff(file1_id, args.name1, file2_id, args.name2, &(args.opts), &(args.argdata));
             diffs.not_cmp = args.opts.not_cmp;
+
+            /* Free the unpacked exclude lists.  The serial free path
+             * (free_exclude_attr_list et al. in diff_match) is never reached
+             * by workers, so we must release the memory here. */
+            free_unpacked_list(args.opts.exclude);
+            free_unpacked_list(args.opts.exclude_attr);
+            free_unpacked_list(args.opts.exclude_attr_names);
 
             if ((outBuffOffset == 0) && !overflow_file)
                 /* Nothing to print. Send diffs to manager */
