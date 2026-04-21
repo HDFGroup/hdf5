@@ -325,6 +325,10 @@ H5HL_protect(H5F_t *f, haddr_t addr, unsigned flags)
 
     /* Get the pointer to the heap */
     heap = prfx->heap;
+    if (NULL == heap)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "local heap is NULL");
+    if (NULL == heap->dblk_image)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "local heap data block image is NULL");
 
     /* Check if the heap is already pinned in memory */
     /* (for re-entrant situation) */
@@ -423,13 +427,18 @@ H5HL_unprotect(H5HL_t *heap)
     if (heap->prots == 0) {
         /* Check for separate heap data block */
         if (heap->single_cache_obj) {
+            /* Validate prefix pointer before unpinning */
+            if (NULL == heap->prfx)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "local heap prefix is NULL");
+
             /* Mark local heap prefix as evictable again */
             if (FAIL == H5AC_unpin_entry(heap->prfx))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin local heap data block");
         }
         else {
-            /* Sanity check */
-            assert(heap->dblk);
+            /* Validate data block pointer before unpinning */
+            if (NULL == heap->dblk)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "local heap data block is NULL");
 
             /* Mark local heap data block as evictable again */
             /* (data block still pins prefix) */
