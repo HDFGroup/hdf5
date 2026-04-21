@@ -18596,9 +18596,9 @@ test_bad_decode_size_vlen(hid_t file)
     hid_t         tid           = H5I_INVALID_HID; /* Datatype ID */
     const hsize_t dims[1]       = {1};             /* Dataspace dimensions */
     const hsize_t chunk_dims[1] = {1};             /* Chunk dimensions */
-    char          wdata0[] = "don't panic";                      /* vlen string element */
-    char         *wdata[1] = {wdata0};             /* Write buffer */
-    char         *rdata[1] = {NULL};               /* Read buffer */
+    char          wdata0[]      = "don't panic";   /* vlen string element */
+    char         *wdata[1]      = {wdata0};        /* Write buffer */
+    char         *rdata[1]      = {NULL};          /* Read buffer */
     herr_t        ret;                             /* Generic return value */
 
     TESTING("filter returning incorrect data size after unfiltering with vlen type");
