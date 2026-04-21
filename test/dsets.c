@@ -18456,7 +18456,7 @@ filter_bad_decode_size(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
         }
 
         /* Initialize extra bytes to 0 */
-        ((char *)(*buf))[nbytes - 1] = '\0';
+        //((char *)(*buf))[nbytes - 1] = '\0';
     }
 
     /* No-op for forward execution/compression */
@@ -18603,6 +18603,7 @@ test_bad_decode_size_vlen(hid_t file)
 
     TESTING("filter returning incorrect data size after unfiltering with vlen type");
 
+    /* Initialize wdata0 */
     strncpy(wdata0, "don't panic", sizeof(wdata0));
     wdata0[sizeof(wdata0) - 1] = '\0';
 
