@@ -22,24 +22,55 @@
 
 static void ph5diff_worker(int);
 
-/* Rebuild one exclude_path_list from a packed region.
- * Each entry is a NUL-terminated string; preceded by an int count.
- * Advances *p past the list data. */
+/* ---------------------------------------------------------------------------
+ * MPI_Unpack helpers — mirror of the pack helpers in h5diff.c.
+ *
+ * Wire format (MPI_PACKED, MPI_TAG_ARGS):
+ *   name1  : 1 MPI_INT (len) + len MPI_CHAR
+ *   name2  : 1 MPI_INT (len) + len MPI_CHAR
+ *   scalars: all int-like and double fields of diff_opt_t (see pack_diff_args)
+ *   exclude            : exclude list (see unpack_exclude_list)
+ *   exclude_attr       : exclude list
+ *   exclude_attr_names : exclude list
+ *   sset[0]            : subset (see unpack_sset)
+ *   sset[1]            : subset
+ *   argdata            : diff_args_t (packed field-by-field)
+ *
+ * Each exclude list: 1 MPI_INT (count), then for each node:
+ *   1 MPI_INT (str len) + len MPI_CHAR
+ *
+ * Each subset: 1 MPI_INT (has_sset flag); if non-zero:
+ *   for each of start/stride/count/block:
+ *     1 MPI_INT (nelem) + nelem MPI_UNSIGNED_LONG_LONG
+ * --------------------------------------------------------------------------- */
+
 static struct exclude_path_list *
-unpack_one_list(const char **p)
+unpack_exclude_list(const void *buf, int bufsiz, int *pos)
 {
     struct exclude_path_list *head  = NULL;
     struct exclude_path_list *prev  = NULL;
     int                       count = 0;
     int                       i;
 
-    memcpy(&count, *p, sizeof(int));
-    *p += sizeof(int);
+    MPI_Unpack(buf, bufsiz, pos, &count, 1, MPI_INT, MPI_COMM_WORLD);
     for (i = 0; i < count; i++) {
-        struct exclude_path_list *node = (struct exclude_path_list *)malloc(sizeof(*node));
-        if (!node)
+        int                       slen = 0;
+        char                     *tmp;
+        struct exclude_path_list *node;
+
+        MPI_Unpack(buf, bufsiz, pos, &slen, 1, MPI_INT, MPI_COMM_WORLD);
+        tmp = (char *)malloc((size_t)slen + 1);
+        if (!tmp)
             break;
-        node->obj_path = strdup(*p);
+        MPI_Unpack(buf, bufsiz, pos, tmp, slen, MPI_CHAR, MPI_COMM_WORLD);
+        tmp[slen] = '\0';
+
+        node = (struct exclude_path_list *)malloc(sizeof(*node));
+        if (!node) {
+            free(tmp);
+            break;
+        }
+        node->obj_path = tmp; /* already heap-allocated above */
         node->obj_type = H5TRAV_TYPE_UNKNOWN;
         node->next     = NULL;
         if (!head)
@@ -47,21 +78,129 @@ unpack_one_list(const char **p)
         else
             prev->next = node;
         prev = node;
-        *p += strlen(*p) + 1;
     }
     return head;
 }
 
-/* Free an exclude list allocated by unpack_one_list (obj_path is strdup'd). */
 static void
 free_unpacked_list(struct exclude_path_list *list)
 {
     while (list) {
         struct exclude_path_list *next = list->next;
-        free(list->obj_path);
+        free((void *)list->obj_path);
         free(list);
         list = next;
     }
+}
+
+static struct subset_t *
+unpack_sset(const void *buf, int bufsiz, int *pos)
+{
+    int              has_sset = 0;
+    struct subset_t *sset;
+    hsize_t        **fields[4];
+    unsigned int    *lens[4];
+    int              f;
+
+    MPI_Unpack(buf, bufsiz, pos, &has_sset, 1, MPI_INT, MPI_COMM_WORLD);
+    if (!has_sset)
+        return NULL;
+
+    sset = (struct subset_t *)calloc(1, sizeof(*sset));
+    if (!sset)
+        return NULL;
+
+    /* Unpack start, stride, count, block in order */
+    fields[0] = &sset->start.data;
+    fields[1] = &sset->stride.data;
+    fields[2] = &sset->count.data;
+    fields[3] = &sset->block.data;
+    lens[0]   = &sset->start.len;
+    lens[1]   = &sset->stride.len;
+    lens[2]   = &sset->count.len;
+    lens[3]   = &sset->block.len;
+
+    for (f = 0; f < 4; f++) {
+        int nelem = 0;
+        MPI_Unpack(buf, bufsiz, pos, &nelem, 1, MPI_INT, MPI_COMM_WORLD);
+        *lens[f] = (unsigned int)nelem;
+        if (nelem > 0) {
+            *fields[f] = (hsize_t *)malloc((size_t)nelem * sizeof(hsize_t));
+            if (*fields[f])
+                MPI_Unpack(buf, bufsiz, pos, *fields[f], nelem, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD);
+        }
+    }
+    return sset;
+}
+
+static void
+free_unpacked_sset(struct subset_t *sset)
+{
+    if (!sset)
+        return;
+    free(sset->start.data);
+    free(sset->stride.data);
+    free(sset->count.data);
+    free(sset->block.data);
+    free(sset);
+}
+
+static void
+unpack_diff_args(const void *buf, int bufsiz, struct diff_mpi_args *args)
+{
+    int pos  = 0;
+    int slen = 0;
+
+    /* name1 */
+    MPI_Unpack(buf, bufsiz, &pos, &slen, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, args->name1, slen, MPI_CHAR, MPI_COMM_WORLD);
+    args->name1[slen] = '\0';
+
+    /* name2 */
+    MPI_Unpack(buf, bufsiz, &pos, &slen, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, args->name2, slen, MPI_CHAR, MPI_COMM_WORLD);
+    args->name2[slen] = '\0';
+
+    /* scalar diff_opt_t fields — must match pack order in pack_diff_args() */
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_quiet,            1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_report,           1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_verbose,          1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_verbose_level,    1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_list_not_cmp,     1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.print_header,          1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.print_percentage,      1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.print_dims,            1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.delta_bool,            1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.delta,                 1, MPI_DOUBLE, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.use_system_epsilon,    1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.percent_bool,          1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.percent,               1, MPI_DOUBLE, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.follow_links,          1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.no_dangle_links,       1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.cmn_objs,              1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.not_cmp,               1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.contents,              1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.do_nans,               1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.disable_compact_subset, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.exclude_path,          1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.exclude_attr_path,     1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.exclude_attr_name,     1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.count_bool,            1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.count,                 1, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.err_stat,              1, MPI_INT, MPI_COMM_WORLD);
+
+    /* pointer fields: exclude lists */
+    args->opts.exclude            = unpack_exclude_list(buf, bufsiz, &pos);
+    args->opts.exclude_attr       = unpack_exclude_list(buf, bufsiz, &pos);
+    args->opts.exclude_attr_names = unpack_exclude_list(buf, bufsiz, &pos);
+
+    /* pointer fields: sset[2] */
+    args->opts.sset[0] = unpack_sset(buf, bufsiz, &pos);
+    args->opts.sset[1] = unpack_sset(buf, bufsiz, &pos);
+
+    /* argdata */
+    MPI_Unpack(buf, bufsiz, &pos, args->argdata.type, 2, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->argdata.is_same_trgobj, 1, MPI_INT, MPI_COMM_WORLD);
 }
 
 /*-------------------------------------------------------------------------
@@ -119,9 +258,11 @@ main(int argc, char *argv[])
     else {
 
         /* Manager parses the command line and drives the diff; workers stay
-         * in their probe loop until dismissed.  Exclude lists are carried
-         * inline in each MPI_TAG_ARGS message so workers never need a
-         * separate communication step and can always receive MPI_TAG_END. */
+         * in their probe loop until dismissed.  All fields of diff_mpi_args —
+         * including the dynamically-allocated exclude lists and sset pointers —
+         * are serialized with MPI_Pack into each MPI_TAG_ARGS message, so
+         * workers always stay in their probe loop and can receive MPI_TAG_END
+         * at any time without a separate communication step. */
         if (nID == 0) {
             parse_command_line(argc, (const char *const *)argv, &fname1, &fname2, &objname1, &objname2,
                                &opts);
@@ -193,11 +334,11 @@ ph5diff_worker(int nID)
         }
         /* Check for work */
         else if (Status.MPI_TAG == MPI_TAG_ARGS) {
-            struct diff_mpi_args      args;
-            struct diffs_found        diffs;
-            unsigned                  i;
-            int                       msg_size;
-            char                     *buf;
+            struct diff_mpi_args args;
+            struct diffs_found   diffs;
+            unsigned             i;
+            int                  msg_size;
+            void                *buf;
 
             /* Make certain we've received the filenames and opened the files already */
             if (file1_id < 0 || file2_id < 0) {
@@ -207,42 +348,33 @@ ph5diff_worker(int nID)
             }
 
             /* Determine exact message size and receive into a heap buffer. */
-            MPI_Get_count(&Status, MPI_BYTE, &msg_size);
+            MPI_Get_count(&Status, MPI_PACKED, &msg_size);
 
-            if (NULL == (buf = (char *)malloc((size_t)msg_size))) {
+            if (NULL == (buf = malloc((size_t)msg_size))) {
                 printf("ph5diff_worker: ERROR: malloc failed for recv buffer\n");
                 MPI_Abort(MPI_COMM_WORLD, 0);
                 break;
             }
 
-            MPI_Recv(buf, msg_size, MPI_BYTE, 0, MPI_TAG_ARGS, MPI_COMM_WORLD, &Status);
+            MPI_Recv(buf, msg_size, MPI_PACKED, 0, MPI_TAG_ARGS, MPI_COMM_WORLD, &Status);
 
-            /* Unpack the fixed diff_mpi_args header. */
-            memcpy(&args, buf, sizeof(struct diff_mpi_args));
-
-            /* Unpack the exclude lists that follow the fixed header.  These
-             * lists are freshly allocated here and must be freed after diff()
-             * since workers call diff() directly, bypassing the diff_match()
-             * path where the serial code frees them. */
-            {
-                const char *p        = buf + sizeof(struct diff_mpi_args);
-                args.opts.exclude            = unpack_one_list(&p);
-                args.opts.exclude_attr       = unpack_one_list(&p);
-                args.opts.exclude_attr_names = unpack_one_list(&p);
-            }
-
+            /* Unpack all fields: scalars, then exclude lists, then ssets, then argdata. */
+            memset(&args, 0, sizeof(args));
+            unpack_diff_args(buf, msg_size, &args);
             free(buf);
 
             /* Do the diff */
             diffs.nfound  = diff(file1_id, args.name1, file2_id, args.name2, &(args.opts), &(args.argdata));
             diffs.not_cmp = args.opts.not_cmp;
 
-            /* Free the unpacked exclude lists.  The serial free path
+            /* Free the unpacked pointer fields.  The serial free path
              * (free_exclude_attr_list et al. in diff_match) is never reached
              * by workers, so we must release the memory here. */
             free_unpacked_list(args.opts.exclude);
             free_unpacked_list(args.opts.exclude_attr);
             free_unpacked_list(args.opts.exclude_attr_names);
+            free_unpacked_sset(args.opts.sset[0]);
+            free_unpacked_sset(args.opts.sset[1]);
 
             if ((outBuffOffset == 0) && !overflow_file)
                 /* Nothing to print. Send diffs to manager */
