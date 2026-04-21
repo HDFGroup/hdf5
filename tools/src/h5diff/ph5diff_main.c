@@ -87,7 +87,7 @@ free_unpacked_list(struct exclude_path_list *list)
 {
     while (list) {
         struct exclude_path_list *next = list->next;
-        free((void *)list->obj_path);
+        free(list->obj_path);
         free(list);
         list = next;
     }

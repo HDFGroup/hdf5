@@ -137,7 +137,7 @@ calc_pack_buf_size(const struct diff_mpi_args *args)
 static void
 pack_diff_args(const struct diff_mpi_args *args, void *buf, int bufsiz, int *pos)
 {
-    diff_opt_t *o = &args->opts;
+    const diff_opt_t *o = &args->opts;
 
     /* Object names as length-prefixed strings */
     int n1len = (int)strlen(args->name1) + 1;
@@ -150,31 +150,31 @@ pack_diff_args(const struct diff_mpi_args *args, void *buf, int bufsiz, int *pos
     /* diff_opt_t scalars, in declaration order.
      * Pointer fields (exclude*, sset, obj_name) and worker-local workspace
      * fields (m_tid, dims, acc, etc.) are handled separately or omitted. */
-    MPI_Pack((void *)&o->mode_quiet,           1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->mode_report,          1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->mode_verbose,         1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->mode_verbose_level,   1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->mode_list_not_cmp,    1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->print_header,         1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->print_percentage,     1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->print_dims,           1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->delta_bool,           1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->delta,                1, MPI_DOUBLE,            buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->use_system_epsilon,   1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->percent_bool,         1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->percent,              1, MPI_DOUBLE,            buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->mode_quiet,           1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->mode_report,          1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->mode_verbose,         1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->mode_verbose_level,   1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->mode_list_not_cmp,    1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->print_header,         1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->print_percentage,     1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->print_dims,           1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->delta_bool,           1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->delta,                1, MPI_DOUBLE,            buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->use_system_epsilon,   1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->percent_bool,         1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->percent,              1, MPI_DOUBLE,            buf, bufsiz, pos, MPI_COMM_WORLD);
     int follow = (int)o->follow_links;
     MPI_Pack(&follow,                          1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->no_dangle_links,      1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->cmn_objs,             1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->not_cmp,              1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->contents,             1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->do_nans,              1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->disable_compact_subset, 1, MPI_INT,             buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->exclude_path,         1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->exclude_attr_path,    1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->exclude_attr_name,    1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack((void *)&o->count_bool,           1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->no_dangle_links,      1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->cmn_objs,             1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->not_cmp,              1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->contents,             1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->do_nans,              1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->disable_compact_subset, 1, MPI_INT,             buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->exclude_path,         1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->exclude_attr_path,    1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->exclude_attr_name,    1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->count_bool,           1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
     unsigned long long count_v = (unsigned long long)o->count;
     MPI_Pack(&count_v,                         1, MPI_UNSIGNED_LONG_LONG, buf, bufsiz, pos, MPI_COMM_WORLD);
     int err_v = (int)o->err_stat;
@@ -451,6 +451,7 @@ free_exclude_path_list(diff_opt_t *opts)
 
     while (NULL != curr) {
         next = curr->next;
+        free(curr->obj_path);
         free(curr);
         curr = next;
     }
@@ -469,6 +470,7 @@ free_exclude_attr_list(diff_opt_t *opts)
 
     while (NULL != curr) {
         next = curr->next;
+        free(curr->obj_path);
         free(curr);
         curr = next;
     }
@@ -487,6 +489,7 @@ free_exclude_attr_name_list(diff_opt_t *opts)
 
     while (NULL != curr) {
         next = curr->next;
+        free(curr->obj_path);
         free(curr);
         curr = next;
     }

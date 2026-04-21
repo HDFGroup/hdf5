@@ -232,7 +232,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 }
 
                 /* init */
-                exclude_node->obj_path = H5_optarg;
+                exclude_node->obj_path = strdup(H5_optarg);
                 exclude_node->obj_type = H5TRAV_TYPE_UNKNOWN;
                 exclude_prev           = exclude_head;
 
@@ -264,7 +264,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 }
 
                 /* init */
-                exclude_attr_node->obj_path = H5_optarg;
+                exclude_attr_node->obj_path = strdup(H5_optarg);
                 exclude_attr_node->obj_type = H5TRAV_TYPE_UNKNOWN;
                 exclude_attr_prev           = exclude_attr_head;
 
@@ -292,7 +292,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 }
 
                 /* init */
-                exclude_attr_name_node->obj_path = H5_optarg;
+                exclude_attr_name_node->obj_path = strdup(H5_optarg);
                 exclude_attr_name_node->obj_type = H5TRAV_TYPE_UNKNOWN;
                 exclude_attr_name_prev           = exclude_attr_name_head;
 
