@@ -37,10 +37,11 @@ jobs:
         uses: uraimo/run-on-arch-action@v2
         with:
           arch: s390x
-          distro: alpine_latest
+          distro: ubuntu22.04
           githubToken: ${{ github.token }}
           install: |
-            apk add --no-cache build-base cmake python3 gfortran
+            apt-get update -q -y
+            apt-get install -q -y build-essential cmake python3 gfortran
           run: |
             python3 -c "import sys; assert sys.byteorder == 'big', 'Not big-endian!'; print('Confirmed big-endian')"
             mkdir build
