@@ -69,14 +69,10 @@ static int   opt_force     = 0;
  * parameters.
  */
 static const char            *s_opts   = "hp:k:a:fvV";
-static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
-                                          {"plugin", require_arg, 'p'},
-                                          {"key", require_arg, 'k'},
-                                          {"algorithm", require_arg, 'a'},
-                                          {"force", no_arg, 'f'},
-                                          {"verbose", no_arg, 'v'},
-                                          {"version", no_arg, 'V'},
-                                          {NULL, 0, '\0'}};
+static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},     {"plugin", require_arg, 'p'},
+                                          {"key", require_arg, 'k'}, {"algorithm", require_arg, 'a'},
+                                          {"force", no_arg, 'f'},    {"verbose", no_arg, 'v'},
+                                          {"version", no_arg, 'V'},  {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
  * Function:    write_with_retry
