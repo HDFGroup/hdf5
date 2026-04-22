@@ -41,7 +41,8 @@ jobs:
           githubToken: ${{ github.token }}
           install: |
             apt-get update -q -y
-            apt-get install -q -y build-essential cmake python3 gfortran
+            apt-get install -q -y build-essential python3 python3-pip gfortran
+            pip3 install cmake
           run: |
             python3 -c "import sys; assert sys.byteorder == 'big', 'Not big-endian!'; print('Confirmed big-endian')"
             mkdir build
