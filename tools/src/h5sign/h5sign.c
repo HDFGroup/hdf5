@@ -75,6 +75,7 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"algorithm", require_arg, 'a'},
                                           {"force", no_arg, 'f'},
                                           {"verbose", no_arg, 'v'},
+                                          {"version", no_arg, 'V'},
                                           {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
@@ -141,7 +142,7 @@ usage(const char *prog)
     fprintf(rawoutstream, "                          the existing signature before signing\n");
     fprintf(rawoutstream, "  -v, --verbose           Verbose output (show signature details)\n");
     fprintf(rawoutstream, "  -h, --help              Print this help message\n");
-    fprintf(rawoutstream, "  -V                      Print HDF5 library version\n");
+    fprintf(rawoutstream, "  -V, --version           Print version number and exit\n");
     fprintf(rawoutstream, "\n");
     fprintf(rawoutstream, "DESCRIPTION\n");
     fprintf(rawoutstream, "  This tool appends an RSA signature to a plugin file. The signature\n");
