@@ -335,20 +335,6 @@ create_keystore_directory(const char *base_dir, const char *dir_name, unsigned p
         return NULL;
     }
 
-#ifdef H5_HAVE_WIN32_API
-    /* Restrict ACLs so the keystore permission check passes.
-     * Remove inherited permissions and grant write only to Administrators
-     * and the current user (mimicking a secure keystore on Windows). */
-    {
-        char cmd[1280];
-        snprintf(cmd, sizeof(cmd),
-                 "icacls \"%s\" /inheritance:r /grant \"Administrators:(OI)(CI)F\""
-                 " /grant \"%%USERNAME%%:(OI)(CI)F\" >NUL 2>&1",
-                 full_path);
-        (void)system(cmd);
-    }
-#endif
-
     ret_value = strdup(full_path);
     return ret_value;
 }
