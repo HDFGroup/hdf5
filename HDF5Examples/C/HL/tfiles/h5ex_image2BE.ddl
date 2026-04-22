@@ -33878,7 +33878,7 @@ GROUP "/" {
       }
    }
    DATASET "image8bit" {
-      DATATYPE  H5T_STD_U8LE
+      DATATYPE  H5T_STD_U8BE
       DATASPACE  SIMPLE { ( 400, 300 ) / ( 400, 300 ) }
       DATA {
       (0,0): 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -41397,7 +41397,7 @@ GROUP "/" {
       }
    }
    DATASET "palette" {
-      DATATYPE  H5T_STD_U8LE
+      DATATYPE  H5T_STD_U8BE
       DATASPACE  SIMPLE { ( 256, 3 ) / ( 256, 3 ) }
       DATA {
       (0,0): 0, 0, 255,
