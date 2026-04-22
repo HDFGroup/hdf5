@@ -135,4 +135,5 @@ jobs:
       shell: bash
       run: |
         cd build
-        ctest --build-config ${{ matrix.config.build_type }} --parallel 4 --output-on-failure
+        ctest --build-config ${{ matrix.config.build_type }} --parallel 4 --output-on-failure \
+          -R "H5SIGN|H5PLUGIN-signature"
