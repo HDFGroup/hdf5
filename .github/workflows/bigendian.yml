@@ -23,47 +23,29 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Setup Alpine (s390x)
-        uses: jirutka/setup-alpine@ae3b3ddba35054804fc4a3507b519fa7e8152050 # v1
+      - name: Build and Test (s390x big-endian)
+        uses: uraimo/run-on-arch-action@v2
         with:
           arch: s390x
-          packages: >
-            build-base
-            cmake
-            python3
-            gfortran
-
-      - name: Verify big-endian
-        shell: alpine.sh --root {0}
-        run: |
-          python3 -c "import sys; assert sys.byteorder == 'big', 'Not big-endian!'; print('Confirmed big-endian')"
-
-      - name: Configure
-        shell: alpine.sh --root {0}
-        run: |
-          mkdir build
-          cd build
-          cmake -C ../config/cmake/cacheinit.cmake -G "Unix Makefiles" \
-          --log-level=VERBOSE \
-          -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-          -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
-          -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
-          -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=OFF \
-          -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
-          -DHDF5_BUILD_FORTRAN:BOOL=ON \
-          -DHDF5_BUILD_JAVA:BOOL=OFF \
-          -DHDF5_BUILD_DOC:BOOL=OFF \
-          ..
-
-      - name: Build
-        shell: alpine.sh --root {0}
-        run: |
-          cmake --build . --parallel 2 --config ${{ inputs.build_mode }}
-        working-directory: build
-
-      - name: Run Tests
-        shell: alpine.sh --root {0}
-        run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} --timeout 1800 \
-            -E "H5_H5DUMP-h5ex_image2|FORTRAN_testhdf5_fortran"
-        working-directory: build
+          distro: alpine_latest
+          githubToken: ${{ github.token }}
+          install: |
+            apk add --no-cache build-base cmake python3 gfortran
+          run: |
+            python3 -c "import sys; assert sys.byteorder == 'big', 'Not big-endian!'; print('Confirmed big-endian')"
+            mkdir build
+            cd build
+            cmake -C ../config/cmake/cacheinit.cmake -G "Unix Makefiles" \
+            --log-level=VERBOSE \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
+            -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=OFF \
+            -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=ON \
+            -DHDF5_BUILD_JAVA:BOOL=OFF \
+            -DHDF5_BUILD_DOC:BOOL=OFF \
+            ..
+            cmake --build . --parallel 2 --config ${{ inputs.build_mode }}
+            ctest . --parallel 2 -C ${{ inputs.build_mode }} --timeout 1800 \
+              -E "H5_H5DUMP-h5ex_image2"
