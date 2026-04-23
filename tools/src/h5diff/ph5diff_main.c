@@ -76,12 +76,7 @@ main(int argc, char *argv[])
     /* Parallel h5diff */
     else {
 
-        /* Manager parses the command line and drives the diff; workers stay
-         * in their probe loop until dismissed.  All fields of diff_mpi_args —
-         * including the dynamically-allocated exclude lists and sset pointers —
-         * are serialized with MPI_Pack into each MPI_TAG_ARGS message, so
-         * workers always stay in their probe loop and can receive MPI_TAG_END
-         * at any time without a separate communication step. */
+        /* Have the manager process the command-line */
         if (nID == 0) {
             parse_command_line(argc, (const char *const *)argv, &fname1, &fname2, &objname1, &objname2,
                                &opts);
