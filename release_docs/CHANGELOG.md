@@ -119,9 +119,9 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Tools
 
-### Default lower library version bound in `h5repack` changed to `H5F_LIBVER_V18`
+### Default low and high library version bounds in `h5repack` now use the HDF5 library's default
 
-New default lower library version bound for output `h5repack` files is `H5F_LIBVER_V18`. This change brings the tool's library version defaults in line with the HDF5 v2 defaults. To revert to using the previous library version bound settings, apply the `--low=0` command option.
+The `h5repack` tool now obtains its default low and high library version bounds from the HDF5 library's default (`H5P_FILE_ACCESS_DEFAULT`). To revert to the previous behavior, apply the `--low=0` command option.
 
 ## High-Level APIs
 
