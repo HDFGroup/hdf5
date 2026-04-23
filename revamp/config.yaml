@@ -1,0 +1,42 @@
+# config.yaml — Revamp Pipeline Configuration
+# =============================================
+# Central configuration for all pipeline layers.
+# Owner: Abhinav (Pipeline & CI Lead)
+
+pipeline:
+  max_files_per_diff: 10          # Hard cap on files changed per refactoring diff
+  target_branch: develop          # HDF5 branch to operate against
+  sandbox_repo: https://github.com/sp26-hdfgroup/hdf5-sandbox
+  upstream_repo: https://github.com/HDFGroup/hdf5
+
+indexing:
+  parser: tree-sitter             # C language parser
+  embedding_model: text-embedding-3-small
+  chroma_db_path: .chroma/        # Local ChromaDB store
+
+analysis:
+  complexity_tool: lizard
+  ccn_threshold: 15               # Cyclomatic complexity warning threshold
+  static_tools:
+    - cppcheck
+    - clang-tidy
+  security_tool: codeql
+  memory_tool: address-sanitizer
+
+llm:
+  primary_model: claude-sonnet-4-20250514
+  verifier_model: gpt-4o
+  local_fallback: deepseek-coder
+  max_tokens: 4096
+
+gates:
+  build: true
+  static: true
+  dual_llm: true
+  memory: true
+  test: true
+  scorer: true
+
+reports:
+  output_dir: reports/
+  complexity_top_n: 50            # Functions to track in timeline report

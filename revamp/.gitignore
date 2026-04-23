@@ -1,0 +1,45 @@
+# .gitignore — Revamp Pipeline
+# ==============================
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ChromaDB local store
+.chroma/
+
+# Lizard outputs (committed snapshots go in reports/)
+lizard_*.csv
+*.lizard
+
+# CMake / HDF5 build artifacts
+/build/
+CMakeCache.txt
+CMakeFiles/
+
+# LLM API keys — never commit
+.env
+*.key
+secrets.yaml
+
+# macOS
+.DS_Store
+
+# Reports (generated outputs — committed selectively)
+reports/diff_queue/*.patch
+reports/evaluation/*.json
+
+# Editor
+.vscode/
+.idea/
+*.swp

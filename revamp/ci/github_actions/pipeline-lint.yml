@@ -1,0 +1,43 @@
+# ci/github_actions/pipeline-lint.yml
+# =====================================
+# Lints and tests the Revamp pipeline code itself (not HDF5).
+# Runs on every push to any branch of the revamp repo.
+#
+# Separate from ci-basic.yml which lives in the hdf5-sandbox and
+# tests the HDF5 build.
+#
+# Owner: Abhinav (Pipeline & CI Lead)
+
+name: Revamp Pipeline Lint & Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint-and-test:
+    name: "Python lint + unit tests"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install ruff pytest
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Unit tests
+        run: pytest tests/ -v --tb=short
+        # Note: most tests will be skipped until stubs are implemented.
+        # This workflow ensures the test harness itself is always runnable.

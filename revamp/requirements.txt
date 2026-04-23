@@ -1,0 +1,35 @@
+# requirements.txt — Revamp Pipeline Dependencies
+# =================================================
+# Install with: pip install -r requirements.txt
+#
+# Core pipeline
+pyyaml>=6.0
+lizard>=1.17.0
+chromadb>=0.4.0
+tree-sitter>=0.21.0
+tree-sitter-c>=0.21.0
+
+# LLM clients
+anthropic>=0.25.0
+openai>=1.0.0
+
+# Static analysis (installed separately — not pip)
+# - cppcheck: brew install cppcheck / apt install cppcheck
+# - clang-tidy: via llvm toolchain
+# - codeql: github.com/github/codeql-cli-binaries
+
+# Embeddings + RAG
+sentence-transformers>=2.2.0
+numpy>=1.24.0
+
+# Coverage parsing
+gcovr>=7.0
+
+# Reporting
+pandas>=2.0.0
+plotly>=5.0.0
+jinja2>=3.1.0
+
+# Testing
+pytest>=8.0.0
+pytest-cov>=4.0.0
