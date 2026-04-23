@@ -116,8 +116,8 @@ unpack_sset(const void *buf, int bufsiz, int *pos)
         if (nelem > 0) {
             *fields[f] = (hsize_t *)malloc((size_t)nelem * sizeof(hsize_t));
             if (*fields[f])
-                MPI_CHECK(MPI_Unpack(buf, bufsiz, pos, *fields[f], nelem, MPI_UNSIGNED_LONG_LONG,
-                                            MPI_COMM_WORLD));
+                MPI_CHECK(
+                    MPI_Unpack(buf, bufsiz, pos, *fields[f], nelem, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD));
         }
     }
     return sset;
@@ -160,18 +160,14 @@ unpack_diff_args(const void *buf, int bufsiz, struct diff_mpi_args *args)
     MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_quiet, 1, MPI_INT, MPI_COMM_WORLD));
     MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_report, 1, MPI_INT, MPI_COMM_WORLD));
     MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_verbose, 1, MPI_INT, MPI_COMM_WORLD));
-    MPI_CHECK(
-        MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_verbose_level, 1, MPI_INT, MPI_COMM_WORLD));
-    MPI_CHECK(
-        MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_list_not_cmp, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_verbose_level, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_list_not_cmp, 1, MPI_INT, MPI_COMM_WORLD));
     MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.print_header, 1, MPI_INT, MPI_COMM_WORLD));
-    MPI_CHECK(
-        MPI_Unpack(buf, bufsiz, &pos, &args->opts.print_percentage, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.print_percentage, 1, MPI_INT, MPI_COMM_WORLD));
     MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.print_dims, 1, MPI_INT, MPI_COMM_WORLD));
     MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.delta_bool, 1, MPI_INT, MPI_COMM_WORLD));
     MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.delta, 1, MPI_DOUBLE, MPI_COMM_WORLD));
-    MPI_CHECK(
-        MPI_Unpack(buf, bufsiz, &pos, &args->opts.use_system_epsilon, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.use_system_epsilon, 1, MPI_INT, MPI_COMM_WORLD));
     MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.percent_bool, 1, MPI_INT, MPI_COMM_WORLD));
     MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.percent, 1, MPI_DOUBLE, MPI_COMM_WORLD));
     {
@@ -179,22 +175,17 @@ unpack_diff_args(const void *buf, int bufsiz, struct diff_mpi_args *args)
         MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &v, 1, MPI_INT, MPI_COMM_WORLD));
         args->opts.follow_links = (bool)v;
     }
-    MPI_CHECK(
-        MPI_Unpack(buf, bufsiz, &pos, &args->opts.no_dangle_links, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.no_dangle_links, 1, MPI_INT, MPI_COMM_WORLD));
     MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.cmn_objs, 1, MPI_INT, MPI_COMM_WORLD));
     MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.not_cmp, 1, MPI_INT, MPI_COMM_WORLD));
     MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.contents, 1, MPI_INT, MPI_COMM_WORLD));
     MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.do_nans, 1, MPI_INT, MPI_COMM_WORLD));
-    MPI_CHECK(
-        MPI_Unpack(buf, bufsiz, &pos, &args->opts.disable_compact_subset, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.disable_compact_subset, 1, MPI_INT, MPI_COMM_WORLD));
     MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.exclude_path, 1, MPI_INT, MPI_COMM_WORLD));
-    MPI_CHECK(
-        MPI_Unpack(buf, bufsiz, &pos, &args->opts.exclude_attr_path, 1, MPI_INT, MPI_COMM_WORLD));
-    MPI_CHECK(
-        MPI_Unpack(buf, bufsiz, &pos, &args->opts.exclude_attr_name, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.exclude_attr_path, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.exclude_attr_name, 1, MPI_INT, MPI_COMM_WORLD));
     MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.count_bool, 1, MPI_INT, MPI_COMM_WORLD));
-    MPI_CHECK(
-        MPI_Unpack(buf, bufsiz, &pos, &args->opts.count, 1, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.count, 1, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD));
     {
         int v;
         MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &v, 1, MPI_INT, MPI_COMM_WORLD));

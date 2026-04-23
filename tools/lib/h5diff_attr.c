@@ -642,8 +642,8 @@ diff_attr(hid_t loc1_id, hid_t loc2_id, const char *path1, const char *path2, di
                 const char *last_slash = strrchr(stored, '/');
 
                 if (last_slash != NULL) {
-                    const char *excl_attr = last_slash + 1;
-                    size_t      obj_len   = (size_t)(last_slash - stored);
+                    const char *excl_attr  = last_slash + 1;
+                    size_t      obj_len    = (size_t)(last_slash - stored);
                     bool        name_match = (strcmp(excl_attr, match_list_attrs->attrs[u].name) == 0);
                     bool        path_match;
 
