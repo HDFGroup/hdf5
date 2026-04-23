@@ -50,4 +50,7 @@ struct diffs_found {
     int     not_cmp;
 };
 
+void free_unpacked_sset(struct subset_t *sset);
+void unpack_diff_args(const void *buf, int bufsiz, struct diff_mpi_args *args);
+
 #endif /* PH5DIFF_H */
