@@ -49,12 +49,12 @@ pack_exclude_list(const struct exclude_path_list *list, void *buf, int bufsiz, i
 
     for (node = list; node; node = node->next)
         count++;
-    MPI_Pack(&count, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_CHECK(MPI_Pack(&count, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
 
     for (node = list; node; node = node->next) {
         int len = (int)strlen(node->obj_path) + 1;
-        MPI_Pack(&len, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-        MPI_Pack(node->obj_path, len, MPI_CHAR, buf, bufsiz, pos, MPI_COMM_WORLD);
+        MPI_CHECK(MPI_Pack(&len, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+        MPI_CHECK(MPI_Pack(node->obj_path, len, MPI_CHAR, buf, bufsiz, pos, MPI_COMM_WORLD));
     }
 }
 
@@ -64,16 +64,17 @@ pack_sset(const struct subset_t *sset, void *buf, int bufsiz, int *pos)
 {
     int has_sset = (sset != NULL) ? 1 : 0;
 
-    MPI_Pack(&has_sset, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_CHECK(MPI_Pack(&has_sset, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
     if (!sset)
         return;
 
     const subset_d *sds[4] = {&sset->start, &sset->stride, &sset->count, &sset->block};
     for (int i = 0; i < 4; i++) {
         unsigned int len = sds[i]->len;
-        MPI_Pack(&len, 1, MPI_UNSIGNED, buf, bufsiz, pos, MPI_COMM_WORLD);
+        MPI_CHECK(MPI_Pack(&len, 1, MPI_UNSIGNED, buf, bufsiz, pos, MPI_COMM_WORLD));
         if (len > 0)
-            MPI_Pack(sds[i]->data, (int)len, MPI_UNSIGNED_LONG_LONG, buf, bufsiz, pos, MPI_COMM_WORLD);
+            MPI_CHECK(
+                MPI_Pack(sds[i]->data, (int)len, MPI_UNSIGNED_LONG_LONG, buf, bufsiz, pos, MPI_COMM_WORLD));
     }
 }
 
@@ -142,43 +143,45 @@ pack_diff_args(const struct diff_mpi_args *args, void *buf, int bufsiz, int *pos
     /* Object names as length-prefixed strings */
     int n1len = (int)strlen(args->name1) + 1;
     int n2len = (int)strlen(args->name2) + 1;
-    MPI_Pack(&n1len, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(args->name1, n1len, MPI_CHAR, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&n2len, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(args->name2, n2len, MPI_CHAR, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_CHECK(MPI_Pack(&n1len, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(args->name1, n1len, MPI_CHAR, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&n2len, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(args->name2, n2len, MPI_CHAR, buf, bufsiz, pos, MPI_COMM_WORLD));
 
     /* diff_opt_t scalars, in declaration order.
      * Pointer fields (exclude*, sset, obj_name) and worker-local workspace
-     * fields (m_tid, dims, acc, etc.) are handled separately or omitted. */
-    MPI_Pack(&o->mode_quiet, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->mode_report, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->mode_verbose, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->mode_verbose_level, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->mode_list_not_cmp, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->print_header, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->print_percentage, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->print_dims, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->delta_bool, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->delta, 1, MPI_DOUBLE, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->use_system_epsilon, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->percent_bool, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->percent, 1, MPI_DOUBLE, buf, bufsiz, pos, MPI_COMM_WORLD);
+     * fields (m_tid, dims, acc, etc.) are handled separately or omitted.
+     * bool and enum fields are widened to int before packing so that the
+     * unpacker can always read a full MPI_INT without a size mismatch. */
+    MPI_CHECK(MPI_Pack(&o->mode_quiet, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->mode_report, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->mode_verbose, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->mode_verbose_level, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->mode_list_not_cmp, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->print_header, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->print_percentage, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->print_dims, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->delta_bool, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->delta, 1, MPI_DOUBLE, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->use_system_epsilon, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->percent_bool, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->percent, 1, MPI_DOUBLE, buf, bufsiz, pos, MPI_COMM_WORLD));
     int follow = (int)o->follow_links;
-    MPI_Pack(&follow, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->no_dangle_links, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->cmn_objs, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->not_cmp, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->contents, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->do_nans, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->disable_compact_subset, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->exclude_path, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->exclude_attr_path, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->exclude_attr_name, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->count_bool, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_CHECK(MPI_Pack(&follow, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->no_dangle_links, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->cmn_objs, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->not_cmp, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->contents, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->do_nans, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->disable_compact_subset, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->exclude_path, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->exclude_attr_path, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->exclude_attr_name, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->count_bool, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
     unsigned long long count_v = (unsigned long long)o->count;
-    MPI_Pack(&count_v, 1, MPI_UNSIGNED_LONG_LONG, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_CHECK(MPI_Pack(&count_v, 1, MPI_UNSIGNED_LONG_LONG, buf, bufsiz, pos, MPI_COMM_WORLD));
     int err_v = (int)o->err_stat;
-    MPI_Pack(&err_v, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_CHECK(MPI_Pack(&err_v, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
 
     /* Dynamic exclude lists */
     pack_exclude_list(o->exclude, buf, bufsiz, pos);
@@ -193,9 +196,9 @@ pack_diff_args(const struct diff_mpi_args *args, void *buf, int bufsiz, int *pos
     int type0 = (int)args->argdata.type[0];
     int type1 = (int)args->argdata.type[1];
     int same  = (int)args->argdata.is_same_trgobj;
-    MPI_Pack(&type0, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&type1, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&same, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_CHECK(MPI_Pack(&type0, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&type1, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&same, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
 }
 #endif
 
