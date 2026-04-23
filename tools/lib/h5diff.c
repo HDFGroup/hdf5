@@ -35,7 +35,7 @@ static diff_err_t dispatch_diff_to_worker(struct diff_mpi_args *args, char *work
  *             4 x [len (MPI_UNSIGNED), len x hsize_t (MPI_UNSIGNED_LONG_LONG)]
  *   argdata: type[0], type[1], is_same_trgobj (3 x MPI_INT)
  *
- * NOTE: diff_mpi_args.name1/name2 are still char[256]; the wire format
+ * diff_mpi_args.name1/name2 are const char* pointers; the wire format
  * supports arbitrary lengths but the struct imposes the cap today.
  * Lifting it requires making the fields dynamic (see ph5diff.h comment).
  * --------------------------------------------------------------------------*/
@@ -99,8 +99,8 @@ calc_pack_buf_size(const struct diff_mpi_args *args)
     total += 23 * one_int + 2 * one_dbl + one_ull;
 
     /* 3 exclude lists */
-    const struct exclude_path_list *lists[3] = {
-        args->opts.exclude, args->opts.exclude_attr, args->opts.exclude_attr_names};
+    const struct exclude_path_list *lists[3] = {args->opts.exclude, args->opts.exclude_attr,
+                                                args->opts.exclude_attr_names};
     for (int i = 0; i < 3; i++) {
         total += one_int; /* count */
         for (const struct exclude_path_list *n = lists[i]; n; n = n->next) {
@@ -150,39 +150,39 @@ pack_diff_args(const struct diff_mpi_args *args, void *buf, int bufsiz, int *pos
     /* diff_opt_t scalars, in declaration order.
      * Pointer fields (exclude*, sset, obj_name) and worker-local workspace
      * fields (m_tid, dims, acc, etc.) are handled separately or omitted. */
-    MPI_Pack(&o->mode_quiet,           1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->mode_report,          1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->mode_verbose,         1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->mode_verbose_level,   1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->mode_list_not_cmp,    1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->print_header,         1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->print_percentage,     1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->print_dims,           1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->delta_bool,           1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->delta,                1, MPI_DOUBLE,            buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->use_system_epsilon,   1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->percent_bool,         1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->percent,              1, MPI_DOUBLE,            buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->mode_quiet, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->mode_report, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->mode_verbose, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->mode_verbose_level, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->mode_list_not_cmp, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->print_header, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->print_percentage, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->print_dims, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->delta_bool, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->delta, 1, MPI_DOUBLE, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->use_system_epsilon, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->percent_bool, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->percent, 1, MPI_DOUBLE, buf, bufsiz, pos, MPI_COMM_WORLD);
     int follow = (int)o->follow_links;
-    MPI_Pack(&follow,                          1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->no_dangle_links,      1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->cmn_objs,             1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->not_cmp,              1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->contents,             1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->do_nans,              1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->disable_compact_subset, 1, MPI_INT,             buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->exclude_path,         1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->exclude_attr_path,    1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->exclude_attr_name,    1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&o->count_bool,           1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&follow, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->no_dangle_links, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->cmn_objs, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->not_cmp, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->contents, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->do_nans, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->disable_compact_subset, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->exclude_path, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->exclude_attr_path, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->exclude_attr_name, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&o->count_bool, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
     unsigned long long count_v = (unsigned long long)o->count;
-    MPI_Pack(&count_v,                         1, MPI_UNSIGNED_LONG_LONG, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&count_v, 1, MPI_UNSIGNED_LONG_LONG, buf, bufsiz, pos, MPI_COMM_WORLD);
     int err_v = (int)o->err_stat;
-    MPI_Pack(&err_v,                           1, MPI_INT,               buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&err_v, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
 
     /* Dynamic exclude lists */
-    pack_exclude_list(o->exclude,            buf, bufsiz, pos);
-    pack_exclude_list(o->exclude_attr,       buf, bufsiz, pos);
+    pack_exclude_list(o->exclude, buf, bufsiz, pos);
+    pack_exclude_list(o->exclude_attr, buf, bufsiz, pos);
     pack_exclude_list(o->exclude_attr_names, buf, bufsiz, pos);
 
     /* Subsetting parameters */
@@ -195,7 +195,7 @@ pack_diff_args(const struct diff_mpi_args *args, void *buf, int bufsiz, int *pos
     int same  = (int)args->argdata.is_same_trgobj;
     MPI_Pack(&type0, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
     MPI_Pack(&type1, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
-    MPI_Pack(&same,  1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
+    MPI_Pack(&same, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD);
 }
 #endif
 
@@ -632,8 +632,6 @@ build_match_list(const char *objname1, trav_info_t *info1, const char *objname2,
         }
         curr2++;
     } /* end while */
-
-    free_exclude_path_list(opts);
 
 done:
     *table_out = table;
@@ -1441,19 +1439,14 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
              * handling incoming requests from worker tasks.
              */
 
-            /* Check length of object names before handling and dispatching work */
-            if (strlen(obj1_fullpath) > 255 || strlen(obj2_fullpath) > 255)
-                H5TOOLS_GOTO_ERROR(H5DIFF_ERR,
-                                   "parallel h5diff only supports object names up to 255 characters");
-
             /* If no worker tasks are available, handle requests until one is */
             if (busyTasks == g_nTasks - 1)
                 if (H5DIFF_ERR == handle_worker_request(workerTasks, &busyTasks, opts, &nfound))
                     H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "couldn't handle parallel worker task request");
 
             /* Set up args to pass to worker task. */
-            strcpy(args.name1, obj1_fullpath);
-            strcpy(args.name2, obj2_fullpath);
+            args.name1   = obj1_fullpath;
+            args.name2   = obj2_fullpath;
             args.opts    = *opts;
             args.argdata = argdata;
 
@@ -1496,6 +1489,7 @@ done:
 
     opts->err_stat = opts->err_stat | ret_value;
 
+    free_exclude_path_list(opts);
     free_exclude_attr_list(opts);
     free_exclude_attr_name_list(opts);
 

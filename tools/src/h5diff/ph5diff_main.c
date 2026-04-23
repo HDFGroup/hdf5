@@ -82,17 +82,6 @@ unpack_exclude_list(const void *buf, int bufsiz, int *pos)
     return head;
 }
 
-static void
-free_unpacked_list(struct exclude_path_list *list)
-{
-    while (list) {
-        struct exclude_path_list *next = list->next;
-        free(list->obj_path);
-        free(list);
-        list = next;
-    }
-}
-
 static struct subset_t *
 unpack_sset(const void *buf, int bufsiz, int *pos)
 {
@@ -153,41 +142,43 @@ unpack_diff_args(const void *buf, int bufsiz, struct diff_mpi_args *args)
 
     /* name1 */
     MPI_Unpack(buf, bufsiz, &pos, &slen, 1, MPI_INT, MPI_COMM_WORLD);
+    args->name1 = (char *)malloc((size_t)slen + 1);
     MPI_Unpack(buf, bufsiz, &pos, args->name1, slen, MPI_CHAR, MPI_COMM_WORLD);
     args->name1[slen] = '\0';
 
     /* name2 */
     MPI_Unpack(buf, bufsiz, &pos, &slen, 1, MPI_INT, MPI_COMM_WORLD);
+    args->name2 = (char *)malloc((size_t)slen + 1);
     MPI_Unpack(buf, bufsiz, &pos, args->name2, slen, MPI_CHAR, MPI_COMM_WORLD);
     args->name2[slen] = '\0';
 
     /* scalar diff_opt_t fields — must match pack order in pack_diff_args() */
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_quiet,            1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_report,           1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_verbose,          1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_verbose_level,    1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_list_not_cmp,     1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.print_header,          1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.print_percentage,      1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.print_dims,            1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.delta_bool,            1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.delta,                 1, MPI_DOUBLE, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.use_system_epsilon,    1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.percent_bool,          1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.percent,               1, MPI_DOUBLE, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.follow_links,          1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.no_dangle_links,       1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.cmn_objs,              1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.not_cmp,               1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.contents,              1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.do_nans,               1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_quiet, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_report, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_verbose, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_verbose_level, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_list_not_cmp, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.print_header, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.print_percentage, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.print_dims, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.delta_bool, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.delta, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.use_system_epsilon, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.percent_bool, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.percent, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.follow_links, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.no_dangle_links, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.cmn_objs, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.not_cmp, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.contents, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.do_nans, 1, MPI_INT, MPI_COMM_WORLD);
     MPI_Unpack(buf, bufsiz, &pos, &args->opts.disable_compact_subset, 1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.exclude_path,          1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.exclude_attr_path,     1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.exclude_attr_name,     1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.count_bool,            1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.count,                 1, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD);
-    MPI_Unpack(buf, bufsiz, &pos, &args->opts.err_stat,              1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.exclude_path, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.exclude_attr_path, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.exclude_attr_name, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.count_bool, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.count, 1, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD);
+    MPI_Unpack(buf, bufsiz, &pos, &args->opts.err_stat, 1, MPI_INT, MPI_COMM_WORLD);
 
     /* pointer fields: exclude lists */
     args->opts.exclude            = unpack_exclude_list(buf, bufsiz, &pos);
@@ -367,12 +358,13 @@ ph5diff_worker(int nID)
             diffs.nfound  = diff(file1_id, args.name1, file2_id, args.name2, &(args.opts), &(args.argdata));
             diffs.not_cmp = args.opts.not_cmp;
 
-            /* Free the unpacked pointer fields.  The serial free path
-             * (free_exclude_attr_list et al. in diff_match) is never reached
-             * by workers, so we must release the memory here. */
-            free_unpacked_list(args.opts.exclude);
-            free_unpacked_list(args.opts.exclude_attr);
-            free_unpacked_list(args.opts.exclude_attr_names);
+            /* Free heap memory allocated during unpacking.
+             * The exclude lists are freed by diff() itself via the serial
+             * free_exclude_*_list paths inside diff_match/build_match_list,
+             * so we must not free them here. name1/name2 and sset are not
+             * touched by those paths and must be freed explicitly. */
+            free(args.name1);
+            free(args.name2);
             free_unpacked_sset(args.opts.sset[0]);
             free_unpacked_sset(args.opts.sset[1]);
 

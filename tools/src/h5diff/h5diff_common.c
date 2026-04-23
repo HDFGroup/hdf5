@@ -846,8 +846,7 @@ usage(void)
     PRINTVALSTREAM(rawoutstream,
                    "         For example, to exclude attribute \"timestamp\" on object \"/group1\",\n");
     PRINTVALSTREAM(rawoutstream, "         specify: -B \"/group1/timestamp\"\n");
-    PRINTVALSTREAM(rawoutstream,
-                   "         To target an attribute on the root group: -B \"/timestamp\"\n");
+    PRINTVALSTREAM(rawoutstream, "         To target an attribute on the root group: -B \"/timestamp\"\n");
     PRINTVALSTREAM(rawoutstream,
                    "         This option can be used repeatedly to exclude multiple attributes:\n");
     PRINTVALSTREAM(rawoutstream, "         e.g. -B /group1/attr1 -B /group2/attr2\n");
