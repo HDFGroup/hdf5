@@ -91,7 +91,7 @@ static H5FD_onion_fapl_info_t onion_fa_in_g = {
 /*-------------------------------------------------------------------------
  * Function: usage
  *
- * Purpose: print usage
+ * Purpose: Print detailed usage information with explanations for various option values.
  *
  * Return: void
  *
