@@ -331,8 +331,8 @@ done:
 int
 named_datatype_free(named_dt_t **named_dt_head_p, int ignore_err)
 {
-    named_dt_t *dt         = *named_dt_head_p;
-    int         ret_value  = -1;
+    named_dt_t *dt        = *named_dt_head_p;
+    int         ret_value = -1;
 
     while (dt) {
         /* Pop the datatype off the stack and free it */
@@ -693,7 +693,7 @@ check_options(pack_opt_t *options)
                     case H5Z_FILTER_SZIP:
                     case H5Z_FILTER_DEFLATE:
                         printf(" All with %s, parameter %d\n", get_sfilter(filtn),
-                            options->filter_g[k].cd_values[0]);
+                               options->filter_g[k].cd_values[0]);
                         break;
                     default:
                         printf(" User Defined %d\n", filtn);
@@ -786,13 +786,13 @@ done:
 static int
 check_objects(const char *fname, pack_opt_t *options)
 {
-    hid_t         fid   = H5I_INVALID_HID;
-    hid_t         did   = H5I_INVALID_HID;
-    hid_t         sid   = H5I_INVALID_HID;
+    hid_t         fid = H5I_INVALID_HID;
+    hid_t         did = H5I_INVALID_HID;
+    hid_t         sid = H5I_INVALID_HID;
     unsigned int  i;
     int           ifil;
-    trav_table_t *travt = NULL;
-    int ret_value       = 0;
+    trav_table_t *travt     = NULL;
+    int           ret_value = 0;
 
     /* nothing to do */
     if (options->op_tbl->nelems == 0)
@@ -849,11 +849,11 @@ check_objects(const char *fname, pack_opt_t *options)
             switch (obj->filter[ifil].filtn) {
                 /* chunk size must be smaller than pixels per block */
                 case H5Z_FILTER_SZIP: {
-                    int j;
-                    hsize_t csize = 1;
-                    unsigned ppb  = obj->filter[ifil].cd_values[0];
-                    hsize_t dims[H5S_MAX_RANK];
-                    int rank;
+                    int      j;
+                    hsize_t  csize = 1;
+                    unsigned ppb   = obj->filter[ifil].cd_values[0];
+                    hsize_t  dims[H5S_MAX_RANK];
+                    int      rank;
 
                     if (obj->chunk.rank > 0) {
                         rank = obj->chunk.rank;
@@ -911,8 +911,8 @@ done:
  * Return: 1 yes, 0 no
  *-------------------------------------------------------------------------
  */
-static
-int have_request(pack_opt_t *options)
+static int
+have_request(pack_opt_t *options)
 {
 
     if (options->all_filter || options->all_layout || options->op_tbl->nelems)
@@ -929,8 +929,8 @@ int have_request(pack_opt_t *options)
  * Return: name of filter, exit on error
  *-------------------------------------------------------------------------
  */
-static const char
-*get_sfilter(H5Z_filter_t filtn)
+static const char *
+get_sfilter(H5Z_filter_t filtn)
 {
     if (filtn < 0)
         return NULL;
