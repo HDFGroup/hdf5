@@ -168,7 +168,7 @@ mark_as_advanced (BLOSC_ZLIB_PACKAGE_NAME)
 
 set (HDF5_BLOSC2_VERSION "2.17.1" CACHE INTERNAL "Version of Blosc2 to use when building from external source")
 set (BLOSC2_GIT_URL "https://github.com/Blosc/c-blosc2.git" CACHE STRING "Use BLOSC2 from Github repository")
-set (BLOSC2_GIT_BRANCH "v${HDF5_BLOSC2_VERSION}" CACHE STRING "")
+set (BLOSC2_GIT_BRANCH "main" CACHE STRING "")
 mark_as_advanced (BLOSC2_GIT_URL)
 mark_as_advanced (BLOSC2_GIT_BRANCH)
 
