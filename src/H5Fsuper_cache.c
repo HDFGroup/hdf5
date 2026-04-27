@@ -547,7 +547,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata, 
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "driver info block address exceeds end of file");
 
         /* Validate base and extension addresses against stored_eof */
-        if (sblock->base_addr >= udata->stored_eof)
+        if (sblock->base_addr > udata->stored_eof)
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "base address exceeds stored EOF");
         if (H5_addr_defined(sblock->ext_addr) && sblock->ext_addr >= udata->stored_eof)
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "superblock extension address exceeds stored EOF");
@@ -629,7 +629,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata, 
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "root group address beyond stored EOF");
 
         /* Validate base and extension addresses against stored_eof */
-        if (sblock->base_addr >= udata->stored_eof)
+        if (sblock->base_addr > udata->stored_eof)
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "base address exceeds stored EOF");
         if (H5_addr_defined(sblock->ext_addr) && sblock->ext_addr >= udata->stored_eof)
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "superblock extension address exceeds stored EOF");
