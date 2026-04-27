@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-04-22</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-04-27</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -255,7 +255,7 @@ Figure 6</div></div>
 <tr>
 <th>File Name</th><td>File.h5</td><td>File_with_compression.h5 (gzip level 6)</td></tr>
 <tr>
-<th>Read Time</th><td>0.1 seconds</td><td>0.37 seconds</td></tr>
+<th>Read Time</th><td>0.1 seconds</td><td>345 seconds</td></tr>
 </table>
 <p>We experimented with the HDF5 parameters such cache size and chunk size and modified our application to use different access patterns. The details of the experiments and achieved results will be discussed in the <a class="el" href="#sec_improve_compressed_perf_tune" title="Tuning for Performance">Tuning for Performance</a> section. Here we provide the results just to show the difference in the read performance the change in the parameters made.</p>
 <p>The table below, Table 2, shows the result of reading data as in the example above with the difference that the application used a chunked cache size of 3MB instead of the default 1MB. Reading performance from the compressed dataset was only 4 times slower than for reading the uncompressed data. </p><table class="doxtable">
