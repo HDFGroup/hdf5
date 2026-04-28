@@ -625,14 +625,19 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata, 
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "root address is undefined");
         if (sblock->root_addr == 0)
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "root address cannot be 0");
-        if (sblock->root_addr >= udata->stored_eof)
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "root group address beyond stored EOF");
 
-        /* Validate base and extension addresses against stored_eof */
-        if (sblock->base_addr > udata->stored_eof)
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "base address exceeds stored EOF");
-        if (H5_addr_defined(sblock->ext_addr) && sblock->ext_addr >= udata->stored_eof)
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "superblock extension address exceeds stored EOF");
+        /* Validate addresses against stored_eof.
+           Skip for multi-file and split drivers which use relative/fractional addresses 
+           that are not actual file offsets. */
+        if (udata->f->shared->lf->cls->value != H5_VFD_MULTI &&
+            udata->f->shared->lf->cls->value != H5_VFD_SPLIT) {
+            if (sblock->base_addr > udata->stored_eof)
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "base address exceeds stored EOF");
+            if (sblock->root_addr >= udata->stored_eof)
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "root group address beyond stored EOF");
+            if (H5_addr_defined(sblock->ext_addr) && sblock->ext_addr >= udata->stored_eof)
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "superblock extension address exceeds stored EOF");
+        }
 
         /* checksum verification already done in verify_chksum cb */
 
