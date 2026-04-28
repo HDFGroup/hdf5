@@ -629,8 +629,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata, 
         /* Validate addresses against stored_eof.
            Skip for multi-file and split drivers which use relative/fractional addresses
            that are not actual file offsets. */
-        if (udata->f->shared->lf->cls->value != H5_VFD_MULTI &&
-            udata->f->shared->lf->cls->value != H5_VFD_SPLIT) {
+        if (udata->f->shared->lf->cls->value != H5_VFD_MULTI) {
             if (sblock->base_addr > udata->stored_eof)
                 HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "base address exceeds stored EOF");
             if (sblock->root_addr >= udata->stored_eof)
