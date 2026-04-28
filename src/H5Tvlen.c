@@ -282,7 +282,8 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                 H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
                 H5VL_file_get_args_t  vol_cb_args; /* Arguments to VOL callback */
 
-                assert(file);
+                if (NULL == file)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "file pointer is NULL for disk VL type");
 
                 /* Mark this type as being stored on disk */
                 dt->shared->u.vlen.loc = H5T_LOC_DISK;
@@ -749,7 +750,8 @@ H5T__vlen_disk_isnull(const H5VL_object_t *file, void *_vl, bool *isnull)
     FUNC_ENTER_PACKAGE
 
     /* Check parameters */
-    assert(file);
+    if (NULL == file)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "file pointer is NULL");
     assert(vl);
     assert(isnull);
 
@@ -787,7 +789,8 @@ H5T__vlen_disk_setnull(H5VL_object_t *file, void *_vl, void *bg)
     FUNC_ENTER_PACKAGE
 
     /* check parameters */
-    assert(file);
+    if (NULL == file)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "file pointer is NULL");
     assert(vl);
 
     /* Free heap object for old data */
@@ -828,7 +831,8 @@ H5T__vlen_disk_read(H5VL_object_t *file, void *_vl, void *buf, size_t len)
     FUNC_ENTER_PACKAGE
 
     /* Check parameters */
-    assert(file);
+    if (NULL == file)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "file pointer is NULL");
     assert(vl);
     assert(buf);
 
@@ -865,7 +869,8 @@ H5T__vlen_disk_write(H5VL_object_t *file, const H5T_vlen_alloc_info_t H5_ATTR_UN
     /* check parameters */
     assert(vl);
     assert(seq_len == 0 || buf);
-    assert(file);
+    if (NULL == file)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "file pointer is NULL");
 
     /* Free heap object for old data, if non-NULL */
     if (bg != NULL)
@@ -901,7 +906,8 @@ H5T__vlen_disk_delete(H5VL_object_t *file, void *_vl)
     FUNC_ENTER_PACKAGE
 
     /* Check parameters */
-    assert(file);
+    if (NULL == file)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "file pointer is NULL");
 
     /* Free heap object for old data */
     if (vl != NULL) {
