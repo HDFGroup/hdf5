@@ -58,7 +58,7 @@ jobs:
           usesh: true
           prepare: |
             echo "https://ftp.openbsd.org/pub/OpenBSD" > /etc/installurl
-            pkg_add cmake gmake pkgconf curl
+            pkg_add cmake pkgconf curl
           run: |
             set -e
 
@@ -72,7 +72,6 @@ jobs:
             cmake -C ../config/cmake/cacheinit.cmake \
               --log-level=VERBOSE \
               -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_MAKE_PROGRAM=gmake \
               -DBUILD_SHARED_LIBS:BOOL=ON \
               -DHDF5_ENABLE_ALL_WARNINGS:BOOL=ON \
               -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
