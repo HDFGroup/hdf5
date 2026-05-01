@@ -45,7 +45,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        openbsd-version: ['7.5']
+        openbsd-version: ['7.8']
 
     steps:
       - name: Checkout repository
@@ -58,7 +58,7 @@ jobs:
           usesh: true
           prepare: |
             echo "https://ftp.openbsd.org/pub/OpenBSD" > /etc/installurl
-            pkg_add cmake gmake pkgconf curl gcc-11.2.0p11
+            pkg_add cmake gmake pkgconf curl gcc
           run: |
             set -e
 

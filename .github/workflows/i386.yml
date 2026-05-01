@@ -19,22 +19,18 @@ jobs:
   i386_build_and_test:
     name: "i386 ${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
+    container:
+      image: i386/debian:bookworm
     steps:
+      - name: Install dependencies
+        run: |
+          apt-get update -y
+          apt-get install -y build-essential cmake libaec-dev libgit2-dev
+
       - name: Get Sources
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: setup alpine
-        uses: jirutka/setup-alpine@ae3b3ddba35054804fc4a3507b519fa7e8152050 # v1
-        with:
-          arch: x86
-          packages: >
-            build-base
-            libaec-dev
-            libgit2-dev
-            cmake
-
       - name: Configure
-        shell: alpine.sh --root {0}
         run: |
           mkdir build
           cd build
@@ -50,13 +46,9 @@ jobs:
           ..
 
       - name: Build
-        shell: alpine.sh --root {0}
-        run: |
-          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: build
 
       - name: Run Tests
-        shell: alpine.sh --root {0}
-        run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }}
+        run: ctest . --parallel 2 -C ${{ inputs.build_mode }}
         working-directory: build
