@@ -70,6 +70,7 @@ jobs:
             --exclude "reddit.com"
             --exclude "twitter.com"
             --exclude "linkedin.com"
+            --exclude "web.cels.anl.gov"
             "${{ steps.build_docs.outputs.html_path }}/**/*.html"
           output: lychee-report.md
           format: markdown
