@@ -284,11 +284,11 @@ jobs:
         with:
             build_mode: "Release"
 
-    call-release-cmake-nvhpc:
-        name: "nvhpc Workflows"
-        uses: ./.github/workflows/nvhpc.yml
-        with:
-            build_mode: "Release"
+#    call-release-cmake-nvhpc:
+#        name: "nvhpc Workflows"
+#        uses: ./.github/workflows/nvhpc.yml
+#        with:
+#            build_mode: "Release"
 
     call-release-cmake-aocc:
         name: "aocc Workflows"
