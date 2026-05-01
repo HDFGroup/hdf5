@@ -33,8 +33,10 @@ jobs:
       - name: Install dependencies
         run: |
           docker exec i386_build bash -c "
+            echo 'deb http://deb.debian.org/debian bookworm-backports main' > /etc/apt/sources.list.d/backports.list
             apt-get update -y
-            apt-get install -y build-essential cmake libaec-dev libgit2-dev
+            apt-get install -y build-essential libaec-dev libgit2-dev
+            apt-get install -y -t bookworm-backports cmake
           "
 
       - name: Configure
