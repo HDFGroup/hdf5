@@ -94,7 +94,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
       - name: Install CMake
-        uses: lukka/get-cmake@ea83089aa35e08e459464341fe24ad024ee2466f # latest
+        uses: lukka/get-cmake@7bfc9baacbbdcb5e37957ad05c3546b3e222be3c # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -216,14 +216,14 @@ jobs:
 
       # Save files created by CTest script
       - name: Save published binary (Windows)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
               name: zip-vs2022_cl-binary
               path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Save published msi binary (Windows)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
               name: msi-vs2022_cl-binary
               path: ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi
@@ -251,7 +251,7 @@ jobs:
           arch: arm64
 
       - name: Install CMake
-        uses: lukka/get-cmake@ea83089aa35e08e459464341fe24ad024ee2466f # latest
+        uses: lukka/get-cmake@7bfc9baacbbdcb5e37957ad05c3546b3e222be3c # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -388,14 +388,14 @@ jobs:
 
       # Save files created by CTest script
       - name: Save published binary (Windows ARM64)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
               name: zip-vs2022_cl_arm64-binary
               path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl_arm64.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Save published msi binary (Windows ARM64)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
               name: msi-vs2022_cl_arm64-binary
               path: ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl_arm64.msi
@@ -422,7 +422,7 @@ jobs:
         uses: ./.github/actions/setup-doxygen
 
       - name: Install CMake
-        uses: lukka/get-cmake@ea83089aa35e08e459464341fe24ad024ee2466f # latest
+        uses: lukka/get-cmake@7bfc9baacbbdcb5e37957ad05c3546b3e222be3c # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -520,21 +520,21 @@ jobs:
 
       # Save files created by CTest script
       - name: Save published binary (Linux)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
               name: tgz-ubuntu-2404_gcc-binary
               path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Save published binary deb (Linux)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
               name: deb-ubuntu-2404_gcc-binary
               path: ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Save published binary rpm (Linux)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
               name: rpm-ubuntu-2404_gcc-binary
               path: ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
@@ -542,7 +542,7 @@ jobs:
 
       # Save doxygen files created by CTest script
       - name: Save published doxygen (Linux)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
               name: docs-doxygen
               path: ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/hdf5lib_docs/html
@@ -573,7 +573,7 @@ jobs:
 
       - name: Upload Maven artifacts (Linux)
         if: ${{ inputs.maven_enabled == true }}
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
               name: Linux-${{ inputs.preset_name }}-artifacts
               path: ${{ runner.workspace }}/maven-artifacts
@@ -596,7 +596,7 @@ jobs:
           clang -v
 
       - name: Install CMake
-        uses: lukka/get-cmake@ea83089aa35e08e459464341fe24ad024ee2466f # latest
+        uses: lukka/get-cmake@7bfc9baacbbdcb5e37957ad05c3546b3e222be3c # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -793,14 +793,14 @@ jobs:
 
       # Save files created by CTest script
       - name: Save published binary (MacOS_latest)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
               name: tgz-macos14_clang-binary
               path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Save published dmg binary (MacOS_latest)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
               name: tgz-macos14_clang-dmg-binary
               path: ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.dmg
@@ -818,7 +818,7 @@ jobs:
           sudo apt-get install ninja-build
 
       - name: Install CMake
-        uses: lukka/get-cmake@ea83089aa35e08e459464341fe24ad024ee2466f # latest
+        uses: lukka/get-cmake@7bfc9baacbbdcb5e37957ad05c3546b3e222be3c # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -895,7 +895,7 @@ jobs:
 
       # Save files created by CTest script
       - name: Save published binary (Linux S3)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
               name: tgz-ubuntu-2404_gcc_s3-binary
               path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc_s3.tar.gz
@@ -920,7 +920,7 @@ jobs:
           version: '2025.0'
 
       - name: Install CMake
-        uses: lukka/get-cmake@ea83089aa35e08e459464341fe24ad024ee2466f # latest
+        uses: lukka/get-cmake@7bfc9baacbbdcb5e37957ad05c3546b3e222be3c # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -1033,14 +1033,14 @@ jobs:
 
       # Save files created by CTest script
       - name: Save published binary (Windows_intel)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
               name: zip-vs2022_intel-binary
               path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Save published msi binary (Windows_intel)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
               name: msi-vs2022_intel-binary
               path: ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.msi
@@ -1066,7 +1066,7 @@ jobs:
           version: '2025.0'
 
       - name: Install CMake
-        uses: lukka/get-cmake@ea83089aa35e08e459464341fe24ad024ee2466f # latest
+        uses: lukka/get-cmake@7bfc9baacbbdcb5e37957ad05c3546b3e222be3c # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -1127,7 +1127,7 @@ jobs:
 
       # Save files created by CTest script
       - name: Save published binary (Linux_intel)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
               name: tgz-ubuntu-2404_intel-binary
               path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_intel.tar.gz
