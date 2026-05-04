@@ -2187,7 +2187,8 @@ datatype_list2(hid_t type, const char H5_ATTR_UNUSED *name)
  *-------------------------------------------------------------------------
  */
 static herr_t
-list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, void *_iter)
+list_obj(const char *name, const H5O_info2_t *oinfo, bool already_visited,
+         const trav_seen_t *visited_obj_info, void *_iter)
 {
     H5O_type_t        obj_type = oinfo->type; /* Type of the object */
     iter_t           *iter     = (iter_t *)_iter;
@@ -2221,10 +2222,10 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
                            (hsize_t)0);
 
     /* Check if we've seen this object before */
-    if (first_seen) {
+    if (already_visited) {
         h5tools_str_reset(&buffer);
         h5tools_str_append(&buffer, ", same as ");
-        print_string(&buffer, first_seen, true);
+        print_string(&buffer, visited_obj_info->path, true);
         if (!iter->symlink_target) {
             h5tools_str_append(&buffer, "\n");
         }
@@ -2611,7 +2612,7 @@ visit_obj(hid_t file, const char *oname, iter_t *iter)
         iter->gid = file;
 
         /* Specified name is a non-group object -- list that object */
-        list_obj(oname, &oi, NULL, iter);
+        list_obj(oname, &oi, false, NULL, iter);
     } /* end else */
 
 done:

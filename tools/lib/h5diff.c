@@ -446,9 +446,10 @@ done:
  * Purpose:  Call back function from h5trav_visit().
  *------------------------------------------------------------------------*/
 static herr_t
-trav_grp_objs(const char *path, const H5O_info2_t *oinfo, const char *already_visited, void *udata)
+trav_grp_objs(const char *path, const H5O_info2_t *oinfo, bool already_visited,
+              const trav_seen_t *visited_obj_info, void *udata)
 {
-    trav_info_visit_obj(path, oinfo, already_visited, udata);
+    trav_info_visit_obj(path, oinfo, already_visited, visited_obj_info, udata);
 
     return 0;
 }
