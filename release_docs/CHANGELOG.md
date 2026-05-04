@@ -132,6 +132,14 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Added checks for data filter behavior
+
+   The library now verifies that the returned data size from a data filter's filter callback function can fit inside the returned data buffer size. The library also checks that, when data is filtered then unfiltered (filtered in reverse), the returned data size is exactly the same as the original data size.
+
+### Fixed bugs with chunk buffer handling
+
+   Fixed a bug in the deflate filter that caused it to report the wrong buffer size. Fixed a bug in the chunk copy code that could cause a background buffer overflow. Fixed a bug in the chunk copy code that could cause a double free if the filter realloced the data buffer.
+
 ### Fixed checking of data alignment requirements in direct I/O VFD
 
    The direct I/O VFD attempts to determine data alignment requirements for a file on file open to try and avoid extra work when data alignment isn't required. Depending on the file access flags used when opening a file, the VFD could incorrectly determine these requirements for either writes or reads, eventually leading to a possible EINVAL return value on write or read. This has been fixed by separately determining the requirements for writes and reads and being more conservative about trying to avoid data alignment requirements.

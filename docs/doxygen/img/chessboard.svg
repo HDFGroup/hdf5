@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 176 176" width="176" height="176">
+  <rect width="176" height="176" fill="#CCCCCC"/>
+  <!-- Row 0 -->
+  <rect x="0"   y="0"   width="22" height="22" fill="#000000"/>
+  <rect x="44"  y="0"   width="22" height="22" fill="#000000"/>
+  <rect x="88"  y="0"   width="22" height="22" fill="#000000"/>
+  <rect x="132" y="0"   width="22" height="22" fill="#000000"/>
+  <!-- Row 1 -->
+  <rect x="22"  y="22"  width="22" height="22" fill="#000000"/>
+  <rect x="66"  y="22"  width="22" height="22" fill="#000000"/>
+  <rect x="110" y="22"  width="22" height="22" fill="#000000"/>
+  <rect x="154" y="22"  width="22" height="22" fill="#000000"/>
+  <!-- Row 2 -->
+  <rect x="0"   y="44"  width="22" height="22" fill="#000000"/>
+  <rect x="44"  y="44"  width="22" height="22" fill="#000000"/>
+  <rect x="88"  y="44"  width="22" height="22" fill="#000000"/>
+  <rect x="132" y="44"  width="22" height="22" fill="#000000"/>
+  <!-- Row 3 -->
+  <rect x="22"  y="66"  width="22" height="22" fill="#000000"/>
+  <rect x="66"  y="66"  width="22" height="22" fill="#000000"/>
+  <rect x="110" y="66"  width="22" height="22" fill="#000000"/>
+  <rect x="154" y="66"  width="22" height="22" fill="#000000"/>
+  <!-- Row 4 -->
+  <rect x="0"   y="88"  width="22" height="22" fill="#000000"/>
+  <rect x="44"  y="88"  width="22" height="22" fill="#000000"/>
+  <rect x="88"  y="88"  width="22" height="22" fill="#000000"/>
+  <rect x="132" y="88"  width="22" height="22" fill="#000000"/>
+  <!-- Row 5 -->
+  <rect x="22"  y="110" width="22" height="22" fill="#000000"/>
+  <rect x="66"  y="110" width="22" height="22" fill="#000000"/>
+  <rect x="110" y="110" width="22" height="22" fill="#000000"/>
+  <rect x="154" y="110" width="22" height="22" fill="#000000"/>
+  <!-- Row 6 -->
+  <rect x="0"   y="132" width="22" height="22" fill="#000000"/>
+  <rect x="44"  y="132" width="22" height="22" fill="#000000"/>
+  <rect x="88"  y="132" width="22" height="22" fill="#000000"/>
+  <rect x="132" y="132" width="22" height="22" fill="#000000"/>
+  <!-- Row 7 -->
+  <rect x="22"  y="154" width="22" height="22" fill="#000000"/>
+  <rect x="66"  y="154" width="22" height="22" fill="#000000"/>
+  <rect x="110" y="154" width="22" height="22" fill="#000000"/>
+  <rect x="154" y="154" width="22" height="22" fill="#000000"/>
+</svg>
