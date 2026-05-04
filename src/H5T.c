@@ -7014,6 +7014,11 @@ H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                         ret_value = changed;
                 } /* end if */
 
+                /* Validate file pointer for disk-based VL types */
+                if (loc == H5T_LOC_DISK && NULL == file)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL,
+                                "NULL file pointer for disk-based VL datatype");
+
                 /* Mark this VL sequence */
                 if ((changed = H5T__vlen_set_loc(dt, file, loc)) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
