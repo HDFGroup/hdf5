@@ -164,7 +164,7 @@ If you use HDF5 in your research, please cite it. This repository includes a [`C
 
 ### HDF5 filter plugins testing
 
-[![HDF5 plugins testing](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5_plugins/main.yml/?branch=master&label=HDF5%20filter%20plugins)](https://github.com/HDFGroup/hdf5_plugins/actions/workflows/main.yml?query=branch%3Amaster)
+[![HDF5 plugins testing](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5_plugins/main.yml?branch=master&label=HDF5%20filter%20plugins)](https://github.com/HDFGroup/hdf5_plugins/actions/workflows/main.yml?query=branch%3Amaster)
 
 ### VOL and VFD Testing
 
