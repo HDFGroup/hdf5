@@ -149,6 +149,18 @@
 #define HDF5_ROS3_VFD_FORCE_PATH_STYLE "HDF5_ROS3_VFD_FORCE_PATH_STYLE"
 
 /**
+ * \def HDF5_ROS3_VFD_DEFAULT_PAGE_SIZE
+ * The default size, in bytes, of an I/O "page". By default, the ROS3
+ * VFD tries to reduce requests to S3 by performing I/O in fixed-size
+ * blocks and caching these blocks in an "I/O page cache".
+ * This value may be specified for the \p page_size parameter to
+ * H5Pset_fapl_ros3_paging() in order to set the default I/O "page" size.
+ *
+ * \since 2.2.0
+ */
+#define HDF5_ROS3_VFD_DEFAULT_PAGE_SIZE 16777216
+
+/**
  * \struct H5FD_ros3_fapl_t
  * \brief Configuration structure for H5Pset_fapl_ros3() / H5Pget_fapl_ros3().
  *
@@ -340,6 +352,90 @@ H5_DLL herr_t H5Pget_fapl_ros3_endpoint(hid_t fapl_id, size_t size, char *endpoi
  * \since 2.0.0
  */
 H5_DLL herr_t H5Pset_fapl_ros3_endpoint(hid_t fapl_id, const char *endpoint);
+
+/**
+ * \ingroup FAPL
+ *
+ * \brief Queries a File Access Property List for #H5FD_ROS3 I/O page caching parameters.
+ *
+ * \fapl_id
+ * \param[out] page_size Pointer for returning the currently set size, in bytes, of an I/O page.
+ *                       May be NULL, in which case no value is returned.
+ * \param[out] page_cache_size Pointer for returning the currently set maximum size, in bytes,
+ *                       of the #H5FD_ROS3 I/O page cache. This is an upper limit of the amount
+ *                       of bytes which will be allocated for caching I/O pages, excluding a small
+ *                       amount of additional metadata bytes allocated for each page. May be NULL,
+ *                       in which case no value is returned.
+ * \param[out] lock_super_page Pointer for returning the currently set boolean value for whether
+ *                             the I/O page containing a file's superblock metadata should be
+ *                             locked in the I/O page cache. This will prevent that page from
+ *                             being evicted from the page cache when trying to make space for
+ *                             other I/O pages. May be NULL, in which case no value is returned.
+ * \returns \herr_t
+ *
+ * \since 2.2.0
+ */
+H5_DLL herr_t H5Pget_fapl_ros3_paging(hid_t fapl_id, size_t *page_size, size_t *page_cache_size,
+                                      bool *lock_super_page);
+
+/**
+ * \ingroup FAPL
+ *
+ * \brief Modifies the specified File Access Property List to set I/O page caching
+ *        parameters for the #H5FD_ROS3 driver.
+ *
+ * \fapl_id
+ * \param[in] page_size Specifies the size, in bytes, of an I/O page. The default value
+ *                      is #HDF5_ROS3_VFD_DEFAULT_PAGE_SIZE.
+ * \param[in] page_cache_size Specifies the total size, in bytes, of the I/O page cache.
+ *                            The default value is 64MiB.
+ * \param[in] lock_super_page Specifies whether or not to keep the I/O page containing a
+ *                            file's superblock metadata locked in the I/O cache and unable
+ *                            to be evicted. The default value is true.
+ *
+ * \details H5Pset_fapl_ros3_paging() sets parameters that control how the #H5FD_ROS3
+ *          driver caches I/O to reduce requests to S3. By default, the #H5FD_ROS3
+ *          driver performs I/O in large, fixed-size (#HDF5_ROS3_VFD_DEFAULT_PAGE_SIZE)
+ *          blocks which are cached in memory and used to serve I/O requests. This
+ *          function can be used to modify the default parameters to better suit a
+ *          particular I/O pattern.
+ *
+ *          The macro #HDF5_ROS3_VFD_DEFAULT_PAGE_SIZE may be used to specify that the
+ *          default page size is desired. The macro #H5F_PAGE_BUFFER_SIZE_DEFAULT may
+ *          be used to specify that the default page cache size (currently, 64MiB) is
+ *          desired. Setting either \p page_size or \p page_cache_size to 0 will disable
+ *          I/O page caching in the #H5FD_ROS3 driver. This can be useful for reading
+ *          small amounts of data from a file when the default \p page_size is much
+ *          larger than the amount of data being read.
+ *
+ *          \p page_cache_size is an upper limit of the amount of bytes which will be
+ *          allocated for caching I/O pages, excluding a small amount of additional
+ *          metadata bytes allocated for each page. The page cache will only keep whole
+ *          pages, so \p page_cache_size should ideally be set to some multiple of
+ *          \p page_size. If \p page_cache_size is specified as a value smaller than
+ *          \p page_size, \p page_size will be adjusted down to be equal to
+ *          \p page_cache_size and the page cache will only hold a single page.
+ *
+ *          \p lock_super_page determines whether the I/O page containing a file's
+ *          superblock metadata should be locked in the page cache and prevented from
+ *          being evicted when trying to make space for other I/O pages. Depending on
+ *          the layout of a file, this can be useful for keeping specific often-used
+ *          metadata in the page cache.
+ *
+ * \parblock
+ * \note When \p lock_super_page is specified as true, the first I/O page cached when
+ *       attempting to locate a file's superblock is assumed to contain the superblock
+ *       metadata. If a file contains a user block that is as large as, or larger than,
+ *       the page size, this will cause the I/O page containing the file's superblock
+ *       metadata to <strong>NOT</strong> be locked in the I/O page cache. For this case,
+ *       the page size should be adjusted accordingly to be at least as large as the
+ *       user block plus some bytes for the superblock metadata.
+ * \endparblock
+ *
+ * \since 2.2.0
+ */
+H5_DLL herr_t H5Pset_fapl_ros3_paging(hid_t fapl_id, size_t page_size, size_t page_cache_size,
+                                      bool lock_super_page);
 
 #ifdef __cplusplus
 }

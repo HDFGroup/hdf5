@@ -34,9 +34,6 @@
 /* Define to turn on stats collection and reporting */
 /* #define ROS3_STATS */
 
-/* Max size of the cache, in bytes */
-#define ROS3_MAX_CACHE_SIZE 16777216
-
 /* The driver identification number, initialized at runtime */
 hid_t H5FD_ROS3_id_g = H5I_INVALID_HID;
 
@@ -51,8 +48,46 @@ static bool H5FD_ros3_init_s = false;
 /* Endpoint URL property name */
 #define ROS3_ENDPOINT_PROP_NAME "ros3_endpoint_prop"
 
+/* I/O page caching parameters property name */
+#define ROS3_PAGING_PARAMS_PROP_NAME "ros3_paging_params"
+
 /* Default page buffer size */
 #define ROS3_DEF_PAGE_BUF_SIZE ((size_t)64 * (size_t)1024 * (size_t)1024)
+
+/* Insert entry at head of LRU linked list */
+#define ROS3_PAGE_CACHE_LRU_INSERT(file_ptr, page)                                                           \
+    do {                                                                                                     \
+        if (!(file_ptr)->page_cache.LRU_head) {                                                              \
+            (file_ptr)->page_cache.LRU_head = (page);                                                        \
+            (file_ptr)->page_cache.LRU_tail = (page);                                                        \
+        }                                                                                                    \
+        else {                                                                                               \
+            (file_ptr)->page_cache.LRU_head->prev = (page);                                                  \
+            (page)->next                          = (file_ptr)->page_cache.LRU_head;                         \
+            (file_ptr)->page_cache.LRU_head       = (page);                                                  \
+        }                                                                                                    \
+    } while (0)
+
+#define ROS3_PAGE_CACHE_LRU_REMOVE(file_ptr, page)                                                           \
+    do {                                                                                                     \
+        if ((file_ptr)->page_cache.LRU_head == (page)) {                                                     \
+            (file_ptr)->page_cache.LRU_head = (page)->next;                                                  \
+            if ((file_ptr)->page_cache.LRU_head)                                                             \
+                (file_ptr)->page_cache.LRU_head->prev = NULL;                                                \
+        }                                                                                                    \
+        else                                                                                                 \
+            (page)->prev->next = (page)->next;                                                               \
+                                                                                                             \
+        if ((file_ptr)->page_cache.LRU_tail == (page)) {                                                     \
+            (file_ptr)->page_cache.LRU_tail = (page)->prev;                                                  \
+            if ((file_ptr)->page_cache.LRU_tail)                                                             \
+                (file_ptr)->page_cache.LRU_tail->next = NULL;                                                \
+        }                                                                                                    \
+        else                                                                                                 \
+            (page)->next->prev = (page)->prev;                                                               \
+                                                                                                             \
+        (page)->next = (page)->prev = NULL;                                                                  \
+    } while (0)
 
 #ifdef ROS3_STATS
 
@@ -78,6 +113,34 @@ typedef struct H5FD_ros3_stats_bin {
 } H5FD_ros3_stats_bin_t;
 
 #endif /* ROS3_STATS */
+
+typedef struct H5FD_ros_page_hash_t {
+    UT_hash_handle hh; /* Hash table handle */
+
+    haddr_t addr;      /* Page size-aligned file address for page */
+    size_t  page_size; /* Size of page data buffer (buf) in bytes */
+
+    /* Fields for LRU eviction linked list */
+    struct H5FD_ros_page_hash_t *next;
+    struct H5FD_ros_page_hash_t *prev;
+
+    uint8_t buf[]; /* Page data buffer; flexible array member */
+} H5FD_ros_page_hash_t;
+
+/* Structure for partitioning an I/O request into smaller requests
+ * along page size boundaries
+ */
+typedef struct H5FD_ros3_paged_io_req_t {
+    haddr_t addr;
+    size_t  io_size;
+} H5FD_ros3_paged_io_req_t;
+
+/* Parameters for I/O page caching */
+typedef struct H5FD_ros3_paging_params_t {
+    size_t page_size;
+    size_t page_cache_size;
+    bool   lock_super_page;
+} H5FD_ros3_paging_params_t;
 
 /***************************************************************************
  * Stores all information needed to maintain access to a single HDF5 file
@@ -105,14 +168,28 @@ typedef struct H5FD_ros3_stats_bin {
  *     Responsible for communicating with remote host and presenting file
  *     contents as indistinguishable from a file on the local filesystem.
  *
- * cache
- * cache_size (in bytes)
+ * page_cache
  *
- *     A simple cache of the first N bytes of the file. Especially useful
- *     at file open, when we perform several reads that would otherwise
- *     be uncached.
+ *     Holds fields for implementing a simple I/O page cache used for
+ *     optimizing I/O.
  *
- * *** present only if ROS3_SATS is set to enable stats collection ***
+ *     hash_table - Pointer to the head node of a uthash hash table that
+ *     is used for looking up cached I/O pages by page size-aligned
+ *     addresses.
+ *
+ *     page_size - The size of each I/O page that is cached. Fixed upon
+ *     file open.
+ *
+ *     max_num_pages - The maximum number of I/O pages that can be cached
+ *     before pages need to be evicted to make space for others. Based on
+ *     the size specified for the page buffer if not configured directly.
+ *
+ *     lock_super_page - Boolean indicating whether the page which (usually)
+ *     contains the superblock and nearby metadata should be locked in the
+ *     cache to prevent its eviction. Note that a large userblock size
+ *     could prevent this approach from being effective.
+ *
+ * *** present only if ROS3_STATS is set to enable stats collection ***
  *
  * `meta` (H5FD_ros3_stats_bin_t[])
  * `raw` (H5FD_ros3_stats_bin_t[])
@@ -134,8 +211,18 @@ typedef struct H5FD_ros3_t {
     haddr_t          eoa;
     H5FD_ros3_fapl_t fa;
     s3r_t           *s3r_handle;
-    uint8_t         *cache;
-    size_t           cache_size;
+
+    struct {
+        H5FD_ros_page_hash_t *hash_table;
+        size_t                page_size;
+        size_t                page_cache_size;
+        size_t                max_num_pages;
+        bool                  lock_super_page;
+        H5FD_ros_page_hash_t *LRU_head;
+        H5FD_ros_page_hash_t *LRU_tail;
+        bool                  disabled;
+    } page_cache;
+
 #ifdef ROS3_STATS
     H5FD_ros3_stats_bin_t meta[ROS3_STATS_BIN_COUNT + 1];
     H5FD_ros3_stats_bin_t raw[ROS3_STATS_BIN_COUNT + 1];
@@ -172,6 +259,11 @@ static herr_t H5FD__ros3_str_endpoint_copy(const char *name, size_t size, void *
 static int    H5FD__ros3_str_endpoint_cmp(const void *_value1, const void *_value2, size_t size);
 static herr_t H5FD__ros3_str_endpoint_close(const char *name, size_t size, void *_value);
 static herr_t H5FD__ros3_str_endpoint_delete(hid_t prop_id, const char *name, size_t size, void *_value);
+
+static herr_t H5FD__ros3_init_page_cache(H5FD_ros3_t *file);
+static herr_t H5FD__ros3_determine_io_reqs(H5FD_ros3_t *file, haddr_t addr, size_t io_size,
+                                           H5FD_ros3_paged_io_req_t **io_reqs_out, size_t *num_io_reqs_out);
+static herr_t H5FD__ros3_page_cache_make_space(H5FD_ros3_t *file);
 
 #ifdef ROS3_STATS
 static herr_t H5FD__ros3_reset_stats(H5FD_ros3_t *file);
@@ -931,6 +1023,146 @@ done:
 } /* end H5Pget_fapl_ros3_endpoint() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_paging_params_cmp
+ *
+ * Purpose:     Compares two H5FD_ros3_paging_params_t structures
+ *
+ * Return:      -1/0/1
+ *-------------------------------------------------------------------------
+ */
+static int
+H5FD__ros3_paging_params_cmp(const void *value1, const void *value2, size_t H5_ATTR_UNUSED size)
+{
+    const H5FD_ros3_paging_params_t *params1 = (const H5FD_ros3_paging_params_t *)value1;
+    const H5FD_ros3_paging_params_t *params2 = (const H5FD_ros3_paging_params_t *)value2;
+
+    if (params1->page_size != params2->page_size)
+        return (params1->page_size > params2->page_size) - (params1->page_size < params2->page_size);
+    if (params1->page_cache_size != params2->page_cache_size)
+        return (params1->page_cache_size > params2->page_cache_size) -
+               (params1->page_cache_size < params2->page_cache_size);
+    if (params1->lock_super_page != params2->lock_super_page)
+        return (params1->lock_super_page > params2->lock_super_page) -
+               (params1->lock_super_page < params2->lock_super_page);
+
+    return 0;
+} /* end H5FD__ros3_paging_params_cmp() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_fapl_ros3_paging
+ *
+ * Purpose:     Sets I/O page caching parameters for the ros3 VFD.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_fapl_ros3_paging(hid_t fapl_id, size_t page_size, size_t page_cache_size, bool lock_super_page)
+{
+    H5FD_ros3_paging_params_t paging_params = {0};
+    H5P_genplist_t           *plist         = NULL;
+    htri_t                    paging_params_exist;
+    herr_t                    ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    if (fapl_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, false)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list");
+    if (H5FD_ROS3 != H5P_peek_driver(plist))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "ROS3 driver is not set on FAPL");
+
+    if ((paging_params_exist = H5P_exist_plist(plist, ROS3_PAGING_PARAMS_PROP_NAME)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
+                    "failed to check if I/O page caching parameters property exists in plist");
+
+    paging_params.page_size = page_size;
+
+    if (page_cache_size == H5F_PAGE_BUFFER_SIZE_DEFAULT)
+        paging_params.page_cache_size = ROS3_DEF_PAGE_BUF_SIZE;
+    else
+        paging_params.page_cache_size = page_cache_size;
+
+    paging_params.lock_super_page = lock_super_page;
+
+    /* If page size is larger than page cache size, round page size down
+     * to page cache size so that page cache size is an upper limit but
+     * can still hold at least 1 page.
+     */
+    if (paging_params.page_size != 0 && paging_params.page_cache_size != 0) {
+        if (paging_params.page_size > paging_params.page_cache_size)
+            paging_params.page_size = paging_params.page_cache_size;
+    }
+
+    if (paging_params_exist) {
+        if (H5P_set(plist, ROS3_PAGING_PARAMS_PROP_NAME, &paging_params) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set I/O page caching parameters");
+    }
+    else {
+        if (H5P_insert(plist, ROS3_PAGING_PARAMS_PROP_NAME, sizeof(H5FD_ros3_paging_params_t), &paging_params,
+                       NULL, NULL, NULL, NULL, NULL, NULL, H5FD__ros3_paging_params_cmp, NULL) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL,
+                        "unable to register I/O page caching parameters property in plist");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_fapl_ros3_paging() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_fapl_ros3_paging
+ *
+ * Purpose:     Retrieves any I/O page caching parameters set for the ros3
+ *              VFD.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_fapl_ros3_paging(hid_t fapl_id, size_t *page_size, size_t *page_cache_size, bool *lock_super_page)
+{
+    H5P_genplist_t *plist = NULL;
+    htri_t          paging_params_exist;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list");
+    if (H5FD_ROS3 != H5P_peek_driver(plist))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "ROS3 driver is not set on FAPL");
+
+    if ((paging_params_exist = H5P_exist_plist(plist, ROS3_PAGING_PARAMS_PROP_NAME)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
+                    "failed to check if I/O page caching parameters property exists in plist");
+    if (paging_params_exist) {
+        H5FD_ros3_paging_params_t paging_params = {0};
+
+        if (H5P_get(plist, ROS3_PAGING_PARAMS_PROP_NAME, &paging_params) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get I/O page caching parameters");
+
+        if (page_size)
+            *page_size = paging_params.page_size;
+        if (page_cache_size)
+            *page_cache_size = paging_params.page_cache_size;
+        if (lock_super_page)
+            *lock_super_page = paging_params.lock_super_page;
+    }
+    else {
+        if (page_size)
+            *page_size = HDF5_ROS3_VFD_DEFAULT_PAGE_SIZE;
+        if (page_cache_size)
+            *page_cache_size = ROS3_DEF_PAGE_BUF_SIZE;
+        if (lock_super_page)
+            *lock_super_page = true;
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_fapl_ros3_paging() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5FD__ros3_open
  *
  * Purpose:     Create and/or open a file as an HDF5 file
@@ -952,14 +1184,15 @@ done:
 static H5FD_t *
 H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_ros3_t            *file          = NULL;
-    s3r_t                  *handle        = NULL;
-    const H5FD_ros3_fapl_t *fa            = NULL;
-    H5P_genplist_t         *plist         = NULL;
-    char                   *fapl_token    = NULL;
-    char                   *fapl_endpoint = NULL;
-    H5FD_t                 *ret_value     = NULL;
-    htri_t                  endpt_exists  = false;
+    H5FD_ros3_t            *file                = NULL;
+    s3r_t                  *handle              = NULL;
+    const H5FD_ros3_fapl_t *fa                  = NULL;
+    H5P_genplist_t         *plist               = NULL;
+    char                   *fapl_token          = NULL;
+    char                   *fapl_endpoint       = NULL;
+    H5FD_t                 *ret_value           = NULL;
+    htri_t                  endpt_exists        = false;
+    htri_t                  paging_params_exist = false;
 
     FUNC_ENTER_PACKAGE
 
@@ -1022,22 +1255,48 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     file->s3r_handle = handle;
     H5MM_memcpy(&(file->fa), fa, sizeof(H5FD_ros3_fapl_t));
 
+    if ((paging_params_exist = H5P_exist_plist(plist, ROS3_PAGING_PARAMS_PROP_NAME)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL,
+                    "failed to check if I/O page caching parameters property exists in plist");
+    if (paging_params_exist) {
+        H5FD_ros3_paging_params_t paging_params = {0};
+
+        if (H5P_get(plist, ROS3_PAGING_PARAMS_PROP_NAME, &paging_params) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "unable to get I/O page caching parameters");
+
+        file->page_cache.page_size       = paging_params.page_size;
+        file->page_cache.page_cache_size = paging_params.page_cache_size;
+        file->page_cache.lock_super_page = paging_params.lock_super_page;
+    }
+    else {
+        file->page_cache.page_size       = HDF5_ROS3_VFD_DEFAULT_PAGE_SIZE;
+        file->page_cache.page_cache_size = H5F_PAGE_BUFFER_SIZE_DEFAULT;
+        file->page_cache.lock_super_page = true;
+    }
+
+    if (file->page_cache.page_size == 0 || file->page_cache.page_cache_size == 0)
+        file->page_cache.disabled = true;
+
+    /* Determine the maximum number of pages to keep around in the page cache */
+    if (!file->page_cache.disabled) {
+        size_t page_buf_size = 0;
+
+        if (file->page_cache.page_cache_size != H5F_PAGE_BUFFER_SIZE_DEFAULT)
+            page_buf_size = file->page_cache.page_cache_size;
+        else {
+            if (H5P_get(plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get page buffer size");
+            if (page_buf_size == H5F_PAGE_BUFFER_SIZE_DEFAULT)
+                page_buf_size = ROS3_DEF_PAGE_BUF_SIZE;
+        }
+
+        file->page_cache.max_num_pages = (page_buf_size / file->page_cache.page_size);
+    }
+
 #ifdef ROS3_STATS
     if (H5FD__ros3_reset_stats(file) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, NULL, "unable to reset file statistics");
 #endif
-
-    /* Cache the initial bytes of the file */
-    {
-        size_t filesize = H5FD__s3comms_s3r_get_filesize(file->s3r_handle);
-
-        file->cache_size = (filesize < ROS3_MAX_CACHE_SIZE) ? filesize : ROS3_MAX_CACHE_SIZE;
-
-        if (NULL == (file->cache = (uint8_t *)H5MM_calloc(file->cache_size)))
-            HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, NULL, "unable to allocate cache memory");
-        if (H5FD__s3comms_s3r_read(file->s3r_handle, 0, file->cache_size, file->cache, file->cache_size) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_READERROR, NULL, "unable to execute read");
-    }
 
     ret_value = (H5FD_t *)file;
 
@@ -1047,8 +1306,7 @@ done:
             if (H5FD__s3comms_s3r_close(handle) < 0)
                 HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "unable to close s3 file handle");
         if (file != NULL) {
-            file->cache = H5MM_xfree(file->cache);
-            file        = H5FL_FREE(H5FD_ros3_t, file);
+            file = H5FL_FREE(H5FD_ros3_t, file);
         }
     }
 
@@ -1084,8 +1342,17 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
         HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close S3 request handle");
 
     /* Release the file info */
-    file->cache = H5MM_xfree(file->cache);
-    file        = H5FL_FREE(H5FD_ros3_t, file);
+    if (file->page_cache.hash_table) {
+        H5FD_ros_page_hash_t *p, *tmp;
+
+        HASH_ITER(hh, file->page_cache.hash_table, p, tmp)
+        {
+            HASH_DEL(file->page_cache.hash_table, p);
+            H5MM_free(p);
+        }
+    }
+
+    file = H5FL_FREE(H5FD_ros3_t, file);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1333,14 +1600,18 @@ static herr_t
 H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
                 size_t size, void *buf)
 {
-    H5FD_ros3_t *file      = (H5FD_ros3_t *)_file;
-    size_t       filesize  = 0;
-    herr_t       ret_value = SUCCEED;
+    H5FD_ros3_paged_io_req_t *io_reqs      = NULL;
+    H5FD_ros_page_hash_t     *new_page     = NULL;
+    H5FD_ros3_t              *file         = (H5FD_ros3_t *)_file;
+    uint8_t                  *buf_ptr      = (uint8_t *)buf;
+    size_t                    filesize     = 0;
+    size_t                    num_io_pages = 0;
+    bool                      is_cached    = false;
+    herr_t                    ret_value    = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
     assert(file);
-    assert(file->cache);
     assert(file->s3r_handle);
     assert(buf);
 
@@ -1349,13 +1620,65 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     if ((addr > filesize) || ((addr + size) > filesize))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "range exceeds file address");
 
-    /* Copy from the cache when accessing the first N bytes of the file.
-     * Saves network I/O operations when opening files.
+    /* If this is the first read for the file and page caching is not disabled,
+     * read an initial "page size" worth of bytes and add the page to the page
+     * cache. This initial page is mostly used to optimize locating the file's
+     * superblock, as well as general metadata reads following that process.
+     * Note that while reading the superblock of a file, it can't be determined
+     * at that time whether paged aggregation will be enabled or not, so the
+     * first "page size" bytes (rather than just an estimated amount of superblock
+     * bytes) are always cached for possible later use. Also note that it can't
+     * be determined at that time whether a userblock exists or how large it is,
+     * so a userblock size >= "page size" will effectively make this cache
+     * useless.
      */
-    if (addr + size <= file->cache_size) {
-        memcpy(buf, file->cache + addr, size);
+    if (!file->page_cache.disabled && !file->page_cache.hash_table) {
+        if (H5FD__ros3_init_page_cache(file) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize I/O page cache");
+        assert(file->page_cache.hash_table);
     }
-    else {
+
+    /* If the I/O request falls within the already-cached superblock page and
+     * either paged aggregation is enabled or the superblock page is locked
+     * in the cache, just serve the request from the cache. When paged aggregation
+     * is enabled, this can save a possible request to S3. When paged aggregation
+     * is not enabled, this saves a tiny bit of overhead from below since it's
+     * known that there will be only one I/O request page.
+     *
+     * Since no modifications are made to the page cache when paged aggregation
+     * is enabled other than caching the superblock page, the superblock page
+     * should always be available for use in this case. When paged aggregation
+     * isn't enabled, this optimization is only used when the superblock page
+     * is locked in the cache and thus should be found by a hash table lookup.
+     */
+    is_cached =
+        !file->page_cache.disabled &&                               /* Page caching is enabled */
+        (addr + size <= file->page_cache.page_size) &&              /* Addr + size falls within cached page */
+        (file->pub.paged_aggr || file->page_cache.lock_super_page); /* Paged aggr. or locked cached page */
+    if (is_cached) {
+        H5FD_ros_page_hash_t *super_page      = NULL;
+        haddr_t               super_page_addr = 0;
+
+        HASH_FIND(hh, file->page_cache.hash_table, &super_page_addr, sizeof(haddr_t), super_page);
+        if (!super_page)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "unable to locate superblock page in page cache");
+
+        /* No need to promote page in LRU - if paged aggregation is enabled,
+         * page caching (and thus the LRU eviction list) is not enabled.
+         * Otherwise, the superblock page is locked in the cache and not part
+         * of the LRU eviction policy.
+         */
+
+        memcpy(buf, super_page->buf + addr, size);
+        HGOTO_DONE(SUCCEED);
+    }
+
+    /* If page caching is disabled or if paged aggregation is enabled, just
+     * issue reads to S3 directly. When paged aggregation is enabled, it's
+     * assumed that higher layers are already performing caching and so
+     * additional caching is not needed here.
+     */
+    if (file->page_cache.disabled || file->pub.paged_aggr) {
         /*
          * Note that the VFD interface doesn't specify the size of buf.
          * Assume that the caller knows what they're doing.
@@ -1367,11 +1690,338 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         if (H5FD__ros3_log_read_stats(file, type, (uint64_t)size) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "unable to log read stats");
 #endif
+
+        HGOTO_DONE(SUCCEED);
+    }
+
+    /* If paged aggregation is not enabled, serve this I/O request from the page
+     * cache as able and otherwise issue reads to S3.
+     */
+
+    /* Split I/O request among page boundaries as necessary */
+    if (H5FD__ros3_determine_io_reqs(file, addr, size, &io_reqs, &num_io_pages) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "unable to partition read request into I/O pages");
+
+    for (size_t i = 0; i < num_io_pages; i++) {
+        H5FD_ros_page_hash_t *io_page   = NULL;
+        haddr_t               page_addr = HADDR_UNDEF;
+        bool                  can_cache = true;
+
+        /* If page caching is enabled, check if the page is in the cache */
+        if (!file->page_cache.disabled) {
+            /* The first I/O request may not be "page size"-aligned; all others will be. */
+            if (i == 0)
+                page_addr = (io_reqs[i].addr / file->page_cache.page_size) * file->page_cache.page_size;
+            else
+                page_addr = io_reqs[i].addr;
+
+            HASH_FIND(hh, file->page_cache.hash_table, &page_addr, sizeof(haddr_t), io_page);
+            if (io_page) {
+                /* Serve read from the page cache if the page was found */
+                memcpy(buf_ptr, io_page->buf + (io_reqs[i].addr - io_page->addr), io_reqs[i].io_size);
+                buf_ptr += io_reqs[i].io_size;
+
+                /* If the page that was found is not the superblock page OR if it is
+                 * the superblock page and the page isn't locked in the cache (can be
+                 * evicted), promote the page to the head of the LRU eviction list
+                 * (making it a less likely candidate for eviction) if it's not already
+                 * at the head of the list.
+                 */
+                if (io_page->addr != 0 || !file->page_cache.lock_super_page) {
+                    /* At this point, the page should already be in the LRU eviction list. */
+                    assert(file->page_cache.LRU_head);
+                    assert((file->page_cache.LRU_head == io_page) || io_page->prev);
+
+                    if (file->page_cache.LRU_head != io_page) {
+                        ROS3_PAGE_CACHE_LRU_REMOVE(file, io_page);
+                        ROS3_PAGE_CACHE_LRU_INSERT(file, io_page);
+                    }
+                }
+
+                continue;
+            }
+        }
+
+        /* If the I/O request wasn't served from the page cache, check if the
+         * request can be cached before issuing it. A lack of space in the
+         * cache isn't considered here, as old pages will be evicted as necessary.
+         */
+        if (file->page_cache.disabled)
+            can_cache = false;
+        else {
+            /* If the cache can only hold one page and the superblock page is
+             * locked in the cache, we cannot cache any more pages.
+             */
+            if (file->page_cache.lock_super_page && file->page_cache.max_num_pages == 1) {
+                assert(HASH_COUNT(file->page_cache.hash_table) == 1); /* superblock page should be cached */
+                can_cache = false;
+            }
+        }
+
+        /* If the I/O request can be cached, allocate a new page for it and insert
+         * it into the page cache after the request is finished.
+         */
+        if (can_cache) {
+            size_t alloc_size = sizeof(*new_page) + file->page_cache.page_size;
+            size_t read_size  = 0;
+
+            /* Allocate a new page and read the entire page's bytes */
+            if (NULL == (new_page = H5MM_malloc(alloc_size)))
+                HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate I/O page");
+            new_page->addr      = page_addr;
+            new_page->page_size = file->page_cache.page_size;
+            new_page->next      = NULL;
+            new_page->prev      = NULL;
+            memset(&new_page->hh, 0, sizeof(UT_hash_handle));
+
+            read_size = MIN(new_page->page_size, filesize - new_page->addr);
+            if (H5FD__s3comms_s3r_read(file->s3r_handle, new_page->addr, read_size, new_page->buf,
+                                       new_page->page_size) < 0)
+                HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "unable to execute read");
+
+#ifdef ROS3_STATS
+            if (H5FD__ros3_log_read_stats(file, type, (uint64_t)read_size) < 0)
+                HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "unable to log read stats");
+#endif
+
+            memcpy(buf_ptr, new_page->buf + (io_reqs[i].addr - new_page->addr), io_reqs[i].io_size);
+
+            /* If page cache is full, evict oldest page before inserting a new page */
+            if (H5FD__ros3_page_cache_make_space(file) < 0)
+                HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to make space in page cache");
+
+            /* Add page to page cache */
+            HASH_ADD(hh, file->page_cache.hash_table, addr, sizeof(haddr_t), new_page);
+            if (!new_page->hh.tbl)
+                HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to add I/O page to hash table");
+
+            /* Add page to head of LRU eviction list */
+            ROS3_PAGE_CACHE_LRU_INSERT(file, new_page);
+
+            new_page = NULL; /* Now owned by hash table */
+        }
+        else {
+            /* Unable to cache this I/O request in the page cache. Just read
+             * from S3 directly. Note that the VFD interface doesn't specify
+             * the size of buf. Assume that the caller knows what they're doing.
+             */
+            if (H5FD__s3comms_s3r_read(file->s3r_handle, io_reqs[i].addr, io_reqs[i].io_size, buf_ptr,
+                                       io_reqs[i].io_size) < 0)
+                HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "unable to execute read");
+
+#ifdef ROS3_STATS
+            if (H5FD__ros3_log_read_stats(file, type, (uint64_t)io_reqs[i].io_size) < 0)
+                HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "unable to log read stats");
+#endif
+        }
+
+        buf_ptr += io_reqs[i].io_size;
     }
 
 done:
+    H5MM_free(new_page);
+    H5MM_free(io_reqs);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__ros3_read() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_init_page_cache
+ *
+ * Purpose:     Initializes an I/O "page" cache for optimizing I/O. Reads
+ *              the first "page size" bytes of the file (or the entire file
+ *              if it's smaller than "page size") and stores the page in
+ *              a hash table for quick lookups by "page size"-aligned
+ *              addresses.
+ *
+ *              If the 'lock_super_page' field in the file struct is false,
+ *              this initial page will be added to an LRU list of pages
+ *              which can be evicted when attempting to add another page to
+ *              the page cache. Otherwise, this page will be omitted from
+ *              that list, preventing it from being evicted until file
+ *              close.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_init_page_cache(H5FD_ros3_t *file)
+{
+    H5FD_ros_page_hash_t *super_page = NULL;
+    size_t                file_size  = 0;
+    size_t                alloc_size = 0;
+    size_t                read_size  = 0;
+    herr_t                ret_value  = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(file);
+    assert(!file->page_cache.disabled);
+    assert(file->page_cache.page_size > 0);
+
+    /* Already initialized */
+    if (file->page_cache.hash_table)
+        HGOTO_DONE(SUCCEED);
+
+    alloc_size = sizeof(*super_page) + file->page_cache.page_size;
+
+    if (NULL == (super_page = H5MM_calloc(alloc_size)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate I/O page");
+    super_page->addr      = 0;
+    super_page->page_size = file->page_cache.page_size;
+
+    /* Read either the entire file or "page size" bytes, whichever is smaller.
+     * If the file size is smaller than the "page size", the remaining bytes
+     * in the page will be zeroes.
+     */
+    file_size = H5FD__s3comms_s3r_get_filesize(file->s3r_handle);
+    read_size = (file_size < file->page_cache.page_size) ? file_size : file->page_cache.page_size;
+    if (H5FD__s3comms_s3r_read(file->s3r_handle, 0, read_size, super_page->buf, file->page_cache.page_size) <
+        0)
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "unable to execute read");
+
+    /* Add page to page cache */
+    HASH_ADD(hh, file->page_cache.hash_table, addr, sizeof(haddr_t), super_page);
+    if (!file->page_cache.hash_table)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate I/O page hash table");
+    if (!super_page->hh.tbl)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to add I/O page to hash table");
+
+    /* Add the superblock page to the list of pages that can be
+     * evicted if it isn't setup to be locked in the cache.
+     */
+    if (!file->page_cache.lock_super_page)
+        ROS3_PAGE_CACHE_LRU_INSERT(file, super_page);
+
+    super_page = NULL; /* Now owned by hash table */
+
+done:
+    if (ret_value < 0) {
+        H5MM_free(super_page);
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_determine_io_reqs
+ *
+ * Purpose:     Given an offset and length for an I/O request, partitions
+ *              the I/O request among "page size"-aligned boundaries and
+ *              returns a new array of smaller I/O requests.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_determine_io_reqs(H5FD_ros3_t *file, haddr_t addr, size_t io_size,
+                             H5FD_ros3_paged_io_req_t **io_reqs_out, size_t *num_io_reqs_out)
+{
+    H5FD_ros3_paged_io_req_t *io_reqs         = NULL;
+    haddr_t                   cur_addr        = HADDR_UNDEF;
+    haddr_t                   first_page_addr = HADDR_UNDEF;
+    haddr_t                   last_page_addr  = HADDR_UNDEF;
+    size_t                    page_size       = 0;
+    size_t                    num_pages       = 0;
+    size_t                    num_pages_left  = 0;
+    herr_t                    ret_value       = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(file);
+    assert(!file->page_cache.disabled);
+    assert(file->page_cache.page_size > 0);
+    assert(io_reqs_out);
+    assert(num_io_reqs_out);
+
+    if (io_size == 0) {
+        *io_reqs_out     = NULL;
+        *num_io_reqs_out = 0;
+        HGOTO_DONE(SUCCEED);
+    }
+
+    page_size = file->page_cache.page_size;
+
+    first_page_addr = ((addr / page_size) * page_size);
+    last_page_addr  = ((addr + io_size - 1) / page_size) * page_size;
+    num_pages       = (last_page_addr / page_size + 1) - (first_page_addr / page_size);
+
+    assert(num_pages > 0);
+    if (NULL == (io_reqs = H5MM_malloc(num_pages * sizeof(*io_reqs))))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate array of I/O requests");
+
+    /* Setup I/O request to first page */
+    io_reqs[0].addr    = addr;
+    io_reqs[0].io_size = MIN(io_size, page_size - (size_t)(addr - first_page_addr));
+    assert(io_reqs[0].io_size <= io_size);
+    io_size -= io_reqs[0].io_size;
+
+    num_pages_left = num_pages - 1;
+    cur_addr       = addr + io_reqs[0].io_size;
+
+    /* Setup I/O requests for any pages between first and last */
+    if (num_pages_left > 1) {
+        for (size_t i = 1; i < num_pages - 1; i++) {
+            io_reqs[i].addr    = cur_addr;
+            io_reqs[i].io_size = page_size;
+
+            cur_addr += page_size;
+            assert(io_reqs[i].io_size <= io_size);
+            io_size -= io_reqs[i].io_size;
+
+            num_pages_left--;
+        }
+    }
+
+    /* Setup I/O request for last page, if applicable */
+    if (num_pages_left) {
+        assert(num_pages_left == 1);
+        io_reqs[num_pages - 1].addr    = cur_addr;
+        io_reqs[num_pages - 1].io_size = io_size;
+        io_size -= io_reqs[num_pages - 1].io_size;
+    }
+
+    assert(io_size == 0);
+
+    *io_reqs_out     = io_reqs;
+    *num_io_reqs_out = num_pages;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__ros3_determine_io_pages() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_page_cache_make_space
+ *
+ * Purpose:     If necessary, evicts the oldest page in the page cache (by
+ *              LRU policy) to make space for a new page.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_page_cache_make_space(H5FD_ros3_t *file)
+{
+    H5FD_ros_page_hash_t *oldest_page = NULL;
+    herr_t                ret_value   = SUCCEED;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    assert(file);
+
+    /* If there's space in the cache, no need to evict a page */
+    if (HASH_COUNT(file->page_cache.hash_table) < file->page_cache.max_num_pages)
+        HGOTO_DONE(SUCCEED);
+
+    oldest_page = file->page_cache.LRU_tail;
+    ROS3_PAGE_CACHE_LRU_REMOVE(file, oldest_page);
+    HASH_DEL(file->page_cache.hash_table, oldest_page);
+
+    H5MM_free(oldest_page);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__ros3_page_cache_make_space() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__ros3_write
