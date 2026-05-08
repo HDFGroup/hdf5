@@ -169,7 +169,7 @@ trav_token_visited(hid_t loc_id, trav_seen_hash_t *objects_seen, H5O_token_t *to
 
     HASH_FIND(hh, objects_seen, token, sizeof(H5O_token_t), entry);
 
-    if (visited_obj_ret)
+    if (entry && visited_obj_ret)
         *visited_obj_ret = &entry->obj;
 
     return (entry != NULL);
