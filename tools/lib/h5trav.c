@@ -310,8 +310,10 @@ traverse(hid_t file_id, const char *grp_name, bool visit_start, bool recurse, co
         udata.fields        = fields;
 
         /* Check for multiple links to top group */
-        if (oinfo.rc > 1)
-            trav_token_add(&udata.objects_seen, &oinfo.token, grp_name, NULL);
+        if (oinfo.rc > 1) {
+            if (trav_token_add(&udata.objects_seen, &oinfo.token, grp_name, NULL) < 0)
+                H5TOOLS_GOTO_ERROR(-1, "couldn't add visited object to hash table");
+        }
 
         /* Check for iteration of links vs. visiting all links recursively */
         if (recurse) {
