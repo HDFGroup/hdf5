@@ -83,17 +83,12 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
         size_t nalloc  = *buf_size; /* Number of bytes for output buffer */
         void  *new_buf = NULL;
 
-        /* Copy the compressed input to a small temp buffer, then resize *buf
-         * in-place to the expected output size.  On Windows, HeapReAlloc can
-         * often extend an existing block without moving it, avoiding the cost
-         * of finding and committing a fresh large allocation. */
+        /* Copy the compressed input so inflate can write the uncompressed
+         * output back into *buf directly.  The caller has already grown *buf
+         * to nalloc = chunk_size, so no up-front resize is needed here. */
         if (NULL == (inbuf = H5MM_malloc(nbytes)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for deflate uncompression");
         H5MM_memcpy(inbuf, *buf, nbytes);
-
-        if (NULL == (new_buf = H5resize_memory(*buf, nalloc)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for deflate uncompression");
-        *buf = new_buf;
 
         /* Set the uncompression parameters */
         memset(&z_strm, 0, sizeof(z_strm));
