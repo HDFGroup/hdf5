@@ -58,6 +58,7 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
                     size_t *buf_size, void **buf)
 {
     void  *outbuf = NULL; /* Pointer to new buffer */
+    void  *inbuf  = NULL; /* Temporary copy of compressed input */
     int    status;        /* Status from zlib operation */
     size_t ret_value = 0; /* Return value */
 
@@ -79,17 +80,26 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
 #else
         z_stream z_strm; /* zlib parameters */
 #endif
-        size_t nalloc = *buf_size; /* Number of bytes for output (compressed) buffer */
+        size_t nalloc  = *buf_size; /* Number of bytes for output buffer */
+        void  *new_buf = NULL;
 
-        /* Allocate space for the compressed buffer */
-        if (NULL == (outbuf = H5MM_malloc(nalloc)))
+        /* Copy the compressed input to a small temp buffer, then resize *buf
+         * in-place to the expected output size.  On Windows, HeapReAlloc can
+         * often extend an existing block without moving it, avoiding the cost
+         * of finding and committing a fresh large allocation. */
+        if (NULL == (inbuf = H5MM_malloc(nbytes)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for deflate uncompression");
+        H5MM_memcpy(inbuf, *buf, nbytes);
+
+        if (NULL == (new_buf = H5resize_memory(*buf, nalloc)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for deflate uncompression");
+        *buf = new_buf;
 
         /* Set the uncompression parameters */
         memset(&z_strm, 0, sizeof(z_strm));
-        z_strm.next_in = (Bytef *)*buf;
+        z_strm.next_in = (Bytef *)inbuf;
         H5_CHECKED_ASSIGN(z_strm.avail_in, unsigned, nbytes, size_t);
-        z_strm.next_out = (Bytef *)outbuf;
+        z_strm.next_out = (Bytef *)*buf;
         H5_CHECKED_ASSIGN(z_strm.avail_out, unsigned, nalloc, size_t);
 
         /* Initialize the uncompression routines */
@@ -126,11 +136,8 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
             else {
                 /* If we're not done and just ran out of buffer space, get more */
                 if (0 == z_strm.avail_out) {
-                    void *new_outbuf; /* Pointer to new output buffer */
-
-                    /* Allocate a buffer twice as big */
                     nalloc *= 2;
-                    if (NULL == (new_outbuf = H5MM_realloc(outbuf, nalloc))) {
+                    if (NULL == (new_buf = H5resize_memory(*buf, nalloc))) {
 #if defined(H5_HAVE_ZLIBNG_H)
                         (void)zng_inflateEnd(&z_strm);
 #else
@@ -139,21 +146,20 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0,
                                     "memory allocation failed for deflate uncompression");
                     } /* end if */
-                    outbuf = new_outbuf;
+                    *buf = new_buf;
 
                     /* Update pointers to buffer for next set of uncompressed data */
-                    z_strm.next_out  = (unsigned char *)outbuf + z_strm.total_out;
+                    z_strm.next_out  = (unsigned char *)*buf + z_strm.total_out;
                     z_strm.avail_out = (uInt)(nalloc - z_strm.total_out);
                 } /* end if */
             }     /* end else */
         } while (status == Z_OK);
 
-        /* Free the input buffer */
-        H5MM_xfree(*buf);
+        /* Free the temporary compressed-input copy */
+        H5MM_xfree(inbuf);
+        inbuf = NULL;
 
         /* Set return values */
-        *buf      = outbuf;
-        outbuf    = NULL;
         *buf_size = nalloc;
         ret_value = z_strm.total_out;
 
@@ -220,6 +226,8 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
 done:
     if (outbuf)
         H5MM_xfree(outbuf);
+    if (inbuf)
+        H5MM_xfree(inbuf);
     FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5_HAVE_FILTER_DEFLATE */
