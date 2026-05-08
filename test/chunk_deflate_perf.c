@@ -4,11 +4,12 @@
  * iterations (issue #4481).
  *
  * Usage:
- *   chunk_deflate_perf [nchunks [chunk_dim [passes]]]
+ *   chunk_deflate_perf [nchunks [chunk_dim [passes [file]]]]
  *     nchunks   – number of 1-D chunks to write (default 500)
  *     chunk_dim – elements per chunk edge, chunk is chunk_dim^3 int32s
  *                 (default 64 → 64*64*64*4 = 1 MiB per chunk)
  *     passes    – how many full read passes to run (default 5)
+ *     file      – output HDF5 file path (default chunk_deflate_perf.h5)
  *
  * Build (standalone, outside CMake):
  *   cc -O2 -o chunk_deflate_perf chunk_deflate_perf.c \
@@ -27,7 +28,7 @@
 
 #include "hdf5.h"
 
-#define FILENAME "chunk_deflate_perf.h5"
+#define FILENAME_DEFAULT "chunk_deflate_perf.h5"
 #define DSET     "data"
 
 static double
@@ -173,13 +174,14 @@ print_stats(const char *label, const double *t, hsize_t n)
 int
 main(int argc, char **argv)
 {
-    hsize_t nchunks = 500;
-    hsize_t cdim    = 64;
-    int     passes  = 5;
-    hid_t   file_id = H5I_INVALID_HID;
-    double *times   = NULL;
-    char    label[32];
-    int     ret = EXIT_FAILURE;
+    hsize_t     nchunks  = 500;
+    hsize_t     cdim     = 64;
+    int         passes   = 5;
+    const char *filename = FILENAME_DEFAULT;
+    hid_t       file_id  = H5I_INVALID_HID;
+    double     *times    = NULL;
+    char        label[32];
+    int         ret      = EXIT_FAILURE;
 
     if (argc > 1)
         nchunks = (hsize_t)atol(argv[1]);
@@ -187,10 +189,12 @@ main(int argc, char **argv)
         cdim = (hsize_t)atol(argv[2]);
     if (argc > 3)
         passes = atoi(argv[3]);
+    if (argc > 4)
+        filename = argv[4];
 
-    printf("chunk_deflate_perf: nchunks=%llu  chunk_dim=%llu (%llu MiB/chunk)  passes=%d\n",
+    printf("chunk_deflate_perf: nchunks=%llu  chunk_dim=%llu (%llu MiB/chunk)  passes=%d  file=%s\n",
            (unsigned long long)nchunks, (unsigned long long)cdim,
-           (unsigned long long)(cdim * cdim * cdim * sizeof(int)) / (1024 * 1024), passes);
+           (unsigned long long)(cdim * cdim * cdim * sizeof(int)) / (1024 * 1024), passes, filename);
 
     times = (double *)malloc(nchunks * sizeof(double));
     if (!times) {
@@ -199,7 +203,7 @@ main(int argc, char **argv)
     }
 
     /* Create file and write dataset */
-    file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (file_id < 0) {
         fprintf(stderr, "H5Fcreate failed\n");
         goto done;
@@ -211,7 +215,7 @@ main(int argc, char **argv)
 
     /* Re-open read-only so the chunk cache is empty each time */
     for (int p = 0; p < passes; p++) {
-        file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
+        file_id = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
         if (file_id < 0) {
             fprintf(stderr, "H5Fopen failed (pass %d)\n", p);
             goto done;
@@ -230,7 +234,7 @@ main(int argc, char **argv)
         hsize_t q = nchunks / 4;
         if (q > 1) {
             printf("\n  (Re-running pass %d split into quarters to show drift)\n", passes);
-            file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
+            file_id = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
             if (file_id < 0) {
                 fprintf(stderr, "H5Fopen failed\n");
                 goto done;
@@ -246,7 +250,7 @@ main(int argc, char **argv)
     }
 
     ret = EXIT_SUCCESS;
-    printf("\nDone. File: %s\n", FILENAME);
+    printf("\nDone. File: %s\n", filename);
 
 done:
     if (file_id >= 0)
