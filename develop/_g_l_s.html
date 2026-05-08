@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-04-29</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-05-08</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -331,8 +331,10 @@ H</h1>
 <code>block</code> - the extent of an individual pattern block </li>
 </ol>
 <p class="interdd">For example, the black squares on a (two-dimensional) chessboard with origin at <code>(0,0)</code> can be represented as the union of two hyperslabs representing the even <code>(0,2,4,6)</code> and odd <code>(1,3,5,7)</code> rows, respectively.</p>
-<p class="interdd"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Chessboard480.svg/176px-Chessboard480.svg.png" alt="" class="inline"/> </p>
-<p class="interdd">The hyperslab parameters for the even rows are: <code>start (0,0)</code>, <code>stride (2,2)</code>, <code>count (4,4)</code>, <code>block
+<div class="image">
+<object type="image/svg+xml" data="chessboard.svg" style="pointer-events: none;"></object>
+</div>
+ <p class="interdd">The hyperslab parameters for the even rows are: <code>start (0,0)</code>, <code>stride (2,2)</code>, <code>count (4,4)</code>, <code>block
         (1,1)</code>. Likewise the parameters for the odd rows are: <code>start
         (1,1)</code>, <code>stride (2,2)</code>, <code>count
         (4,4)</code>, <code>block (1,1)</code>.</p>
