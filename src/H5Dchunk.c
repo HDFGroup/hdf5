@@ -4853,8 +4853,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                         void *new_chunk;
 
                         if (NULL == (new_chunk = H5D__chunk_mem_realloc(
-                                         chunk, chunk_size,
-                                         udata->new_unfilt_chunk ? old_pline : pline)))
+                                         chunk, chunk_size, udata->new_unfilt_chunk ? old_pline : pline)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                                         "memory reallocation failed for raw data chunk");
                         chunk     = new_chunk;

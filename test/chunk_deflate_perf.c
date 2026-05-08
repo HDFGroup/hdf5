@@ -173,13 +173,13 @@ print_stats(const char *label, const double *t, hsize_t n)
 int
 main(int argc, char **argv)
 {
-    hsize_t nchunks  = 500;
-    hsize_t cdim     = 64;
-    int     passes   = 5;
-    hid_t   file_id  = H5I_INVALID_HID;
-    double *times    = NULL;
+    hsize_t nchunks = 500;
+    hsize_t cdim    = 64;
+    int     passes  = 5;
+    hid_t   file_id = H5I_INVALID_HID;
+    double *times   = NULL;
     char    label[32];
-    int     ret      = EXIT_FAILURE;
+    int     ret = EXIT_FAILURE;
 
     if (argc > 1)
         nchunks = (hsize_t)atol(argv[1]);
