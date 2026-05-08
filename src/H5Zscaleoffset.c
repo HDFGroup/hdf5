@@ -1187,7 +1187,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
 
         /* no need to process data */
         if (scale_factor == (int)(cd_values[H5Z_SCALEOFFSET_PARM_SIZE] * 8)) {
-            ret_value = *buf_size;
+            ret_value = nbytes;
             goto done;
         }
         minbits = (uint32_t)scale_factor;
