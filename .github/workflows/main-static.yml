@@ -146,7 +146,7 @@ jobs:
         if: ${{ matrix.ostype == 'macos' }}
 
       - name: Install CMake
-        uses: lukka/get-cmake@ea83089aa35e08e459464341fe24ad024ee2466f # latest
+        uses: lukka/get-cmake@7bfc9baacbbdcb5e37957ad05c3546b3e222be3c # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest

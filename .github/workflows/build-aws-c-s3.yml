@@ -78,7 +78,7 @@ jobs:
 
       - name: Cache/Restore aws-c-s3 (GCC) installation
         id: cache-aws-c-s3-ubuntu-gcc
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v4
         with:
           path: ${{ runner.workspace }}/aws-c-s3-build
           key: ${{ runner.os }}-${{ runner.arch }}-gcc-aws-c-s3-${{ steps.get-sha.outputs.sha }}-${{ inputs.build_mode }}
@@ -247,7 +247,7 @@ jobs:
         run: tar -cvf libaws-c-s3.tar -C ${{ runner.workspace }} aws-c-s3-build
 
       - name: Save aws-c-s3 installation artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
           name: libaws-c-s3-${{ inputs.build_mode }}
           path: libaws-c-s3.tar

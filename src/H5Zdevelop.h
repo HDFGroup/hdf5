@@ -362,9 +362,15 @@ extern "C" {
  *          a particular version of the library, which may be inconvenient.
  *
  *          If successful, the \Emph{filter operation} callback function
- *          returns the number of valid bytes of data contained in \c buf. In
- *          the case of failure, the return value is 0 (zero) and all pointer
- *          arguments are left unchanged.
+ *          returns the number of valid bytes of data contained in \c buf. The
+ *          returned \c *buf_size must be large enough to hold the returned (via
+ *          the return value) data size. In the case of failure, the return
+ *          value is 0 (zero) and all pointer arguments are left unchanged.
+ *
+ *          When the filter is run in reverse mode, the \Emph{filter operation}
+ *          callback function must return, if successful, a data size that is
+ *          exactly equal to the original data size (\c nbytes) before the
+ *          filter was run in forward mode.
  *
  * \version 1.8.6 Return type for the \Emph{can apply} callback function,
  *                \ref H5Z_can_apply_func_t, changed to \ref htri_t.

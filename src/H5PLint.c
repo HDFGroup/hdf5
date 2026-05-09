@@ -195,6 +195,12 @@ H5PL_term_package(void)
         if (H5PL__close_path_table() < 0)
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTFREE, (-1), "problem closing search path table");
 
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+        /* Clean up signature verification resources */
+        if (H5PL__cleanup_signature_resources() < 0)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTFREE, (-1), "problem cleaning up signature resources");
+#endif
+
         /* Mark the interface as uninitialized */
         if (0 == ret_value)
             H5_PKG_INIT_VAR = false;
@@ -339,6 +345,12 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
     *plugin_info = NULL;
     if (plugin_type)
         *plugin_type = H5PL_TYPE_ERROR;
+
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+    /* Verify plugin signature before loading */
+    if (H5PL__verify_signature_appended(path) < 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "plugin signature verification failed for: %s", path);
+#endif
 
     /* There are different reasons why a library can't be open, e.g. wrong architecture.
      * If we can't open the library, just return.

@@ -45,25 +45,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        openbsd-version: ['7.5']
+        openbsd-version: ['7.8']
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Build and test on OpenBSD
-        uses: vmactions/openbsd-vm@271a1ba62300483cfc58345ff9f425f1349a2cab # v1.3.4
+        uses: vmactions/openbsd-vm@d7d892b7b9ba97ed2747b0fc201be65037d64c3e # v1.4.0
         with:
           release: ${{ matrix.openbsd-version }}
           usesh: true
           prepare: |
             echo "https://ftp.openbsd.org/pub/OpenBSD" > /etc/installurl
-            pkg_add cmake gmake pkgconf curl gcc-11.2.0p11
+            pkg_add cmake pkgconf curl
           run: |
             set -e
-
-            # Set up library path for gcc
-            export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
             # Get number of processors (OpenBSD uses sysctl in /sbin)
             NPROC=$(/sbin/sysctl -n hw.ncpu)
@@ -75,9 +72,6 @@ jobs:
             cmake -C ../config/cmake/cacheinit.cmake \
               --log-level=VERBOSE \
               -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_C_COMPILER=egcc \
-              -DCMAKE_CXX_COMPILER=eg++ \
-              -DCMAKE_MAKE_PROGRAM=gmake \
               -DBUILD_SHARED_LIBS:BOOL=ON \
               -DHDF5_ENABLE_ALL_WARNINGS:BOOL=ON \
               -DHDF5_ENABLE_PARALLEL:BOOL=OFF \

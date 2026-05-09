@@ -59,7 +59,7 @@ jobs:
         run: mkdir -p HDF5
 
       - name: Get HDF5 release assets
-        uses: robinraju/release-downloader@daf26c55d821e836577a15f77d86ddc078948b05 # More reliable alternative v1.12
+        uses: robinraju/release-downloader@28fc21f50d76778e7023361aa1f863e717d3d56f # More reliable alternative v1.13
         with:
           repository: HDFGroup/hdf5
           tag: ${{ inputs.use_tag }}
@@ -85,7 +85,7 @@ jobs:
 
       - name: Setup AWS CLI
         if: ${{ !inputs.dry_run }}
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

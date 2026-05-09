@@ -108,6 +108,21 @@ typedef H5PL_type_t (*H5PL_get_plugin_type_t)(void);
 typedef const void *(*H5PL_get_plugin_info_t)(void);
 #endif /* H5_HAVE_WIN32_API */
 
+/************************************/
+/* Digital Signature Platform Macros */
+/************************************/
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+
+#define H5PL_SIG_DEBUG_PRINT(...)                                                                            \
+    do {                                                                                                     \
+        if (H5DEBUG(PL)) {                                                                                   \
+            fprintf(H5DEBUG(PL), __VA_ARGS__);                                                               \
+            fflush(H5DEBUG(PL));                                                                             \
+        }                                                                                                    \
+    } while (0)
+
+#endif /* H5_REQUIRE_DIGITAL_SIGNATURE */
+
 /****************************/
 /* Package Private Typedefs */
 /****************************/
@@ -155,5 +170,11 @@ H5_DLL const char *H5PL__get_path(unsigned int index);
 H5_DLL herr_t H5PL__path_table_iterate(H5PL_iterate_type_t iter_type, H5PL_iterate_t iter_op, void *op_data);
 H5_DLL herr_t H5PL__find_plugin_in_path_table(const H5PL_search_params_t *search_params, bool *found /*out*/,
                                               const void **plugin_info /*out*/);
+
+/* Digital signature verification */
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+H5_DLL herr_t H5PL__verify_signature_appended(const char *plugin_path);
+H5_DLL herr_t H5PL__cleanup_signature_resources(void);
+#endif
 
 #endif /* H5PLpkg_H */

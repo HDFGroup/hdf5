@@ -162,6 +162,10 @@ If you use HDF5 in your research, please cite it. This repository includes a [`C
 [![netCDF build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/netcdf.yml?branch=develop&label=netCDF)](https://github.com/HDFGroup/hdf5/actions/workflows/netcdf.yml?query=branch%3Adevelop)
 [![h5py build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/h5py.yml?branch=develop&label=h5py)](https://github.com/HDFGroup/hdf5/actions/workflows/h5py.yml?query=branch%3Adevelop)
 
+### HDF5 filter plugins testing
+
+[![HDF5 plugins testing](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5_plugins/main.yml?branch=master&label=HDF5%20filter%20plugins)](https://github.com/HDFGroup/hdf5_plugins/actions/workflows/main.yml?query=branch%3Amaster)
+
 ### VOL and VFD Testing
 
 [![HDF5 VOL connectors build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/vol.yml?branch=develop&label=VOL%20Connectors)](https://github.com/HDFGroup/hdf5/actions/workflows/vol.yml?query=branch%3Adevelop)

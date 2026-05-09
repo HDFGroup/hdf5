@@ -205,7 +205,7 @@
  * <caption>Table 1: Reading by 1x1x717 hyperslab (or “rows”) from original and compressed datasets.
  * Performance drops more than 3000 times.</caption>
  * <tr><th>File Name</th><td>File.h5</td><td>File_with_compression.h5 (gzip level 6)</td></tr>
- * <tr><th>Read Time</th><td>0.1 seconds</td><td>0.37 seconds</td></tr>
+ * <tr><th>Read Time</th><td>0.1 seconds</td><td>345 seconds</td></tr>
  * </table>
  *
  * We experimented with the HDF5 parameters such cache size and chunk size and modified our

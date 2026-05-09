@@ -653,7 +653,7 @@
 # endif
 #endif
 
-#cmakedefine WORDS_BIGENDIAN @H5_WORDS_BIGENDIANR@
+#cmakedefine WORDS_BIGENDIAN @H5_WORDS_BIGENDIAN@
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 #cmakedefine H5__FILE_OFFSET_BITS
@@ -666,5 +666,8 @@
 
 /* Define to `long' if <sys/types.h> does not define. */
 #cmakedefine H5_ssize_t
+
+/* Define if plugin digital signature verification is required */
+#cmakedefine H5_REQUIRE_DIGITAL_SIGNATURE @H5_REQUIRE_DIGITAL_SIGNATURE@
 
 #endif
