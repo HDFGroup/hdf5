@@ -4823,9 +4823,15 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
 
                 /* Assign chunk_nbytes and check for overflow */
                 H5_CHECKED_ASSIGN(chunk_nbytes, size_t, chunk_disk_size, hsize_t);
-                buf_alloc = chunk_nbytes;
 
-                /* Allocate chunk buffer at the on-disk (compressed) size */
+                /* Allocate at MAX(chunk_disk_size, chunk_size) so the buffer is
+                 * large enough for the uncompressed output before filters run.
+                 * This ensures *buf_size accurately reflects the allocation that
+                 * filters receive, avoiding a buffer overflow if any filter writes
+                 * up to *buf_size bytes into *buf.  For incompressible chunks
+                 * chunk_disk_size >= chunk_size so buf_alloc stays at chunk_nbytes. */
+                buf_alloc = (chunk_nbytes < chunk_size) ? chunk_size : chunk_nbytes;
+
                 if (NULL ==
                     (chunk = H5D__chunk_mem_alloc(buf_alloc, (udata->new_unfilt_chunk ? old_pline : pline))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
@@ -4840,19 +4846,6 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                 if (old_pline && old_pline->nused) {
                     H5Z_EDC_t err_detect; /* Error detection info */
                     H5Z_cb_t  filter_cb;  /* I/O filter callback function */
-
-                    /* Hint the pipeline to at least chunk_size before calling filters.
-                     * Filters like deflate use *buf_size as the initial size for their
-                     * output buffer; setting it to chunk_size lets them pre-allocate at
-                     * the right size and avoid repeated realloc() doubling, which on
-                     * Windows fragments the heap and causes read times to increase
-                     * steadily across iterations. The inbuf itself stays at
-                     * chunk_disk_size — only the pipeline hint is enlarged.
-                     * For incompressible data chunk_disk_size > chunk_size, so keep
-                     * buf_alloc at chunk_nbytes in that case to satisfy H5Z_pipeline's
-                     * post-filter size validation. */
-                    if (buf_alloc < chunk_size)
-                        buf_alloc = chunk_size;
 
                     /* Retrieve filter settings from API context */
                     if (H5CX_get_err_detect(&err_detect) < 0)
