@@ -586,9 +586,6 @@ jobs:
     runs-on: macos-latest
     needs: [check-secret]
     steps:
-      - name: Install Dependencies (MacOS_latest)
-        run: brew install ninja
-
       - name: check clang version
         shell: bash
         run: |
