@@ -28,7 +28,7 @@ permissions:
 
 # Using concurrency to cancel any in-progress job or run
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
