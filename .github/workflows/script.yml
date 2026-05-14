@@ -253,9 +253,6 @@ jobs:
         with:
           sparse-checkout: .github/actions
 
-      - name: Install Dependencies (MacOS_latest)
-        run: brew install ninja curl
-
       - name: check clang version
         shell: bash
         run: |

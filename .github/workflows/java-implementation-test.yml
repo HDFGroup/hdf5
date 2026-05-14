@@ -145,7 +145,7 @@ jobs:
       - name: Setup Build Environment (macOS)
         if: runner.os == 'macOS'
         run: |
-          brew install ninja libaec
+          brew install libaec
 
       - name: Setup Build Environment (Windows)
         if: runner.os == 'Windows'

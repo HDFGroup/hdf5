@@ -286,9 +286,6 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Install Dependencies (MacOS_latest)
-        run: brew install ninja
-
       - name: Setup MPI (${{ matrix.mpi }})
         id: setup-mpi
         uses: mpi4py/setup-mpi@dbbb80b116bea57fc1788daf7dbbf7ab3df3a0f1 # v1

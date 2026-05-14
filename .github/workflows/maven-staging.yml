@@ -244,7 +244,7 @@ jobs:
       - name: Install Dependencies (macOS)
         if: ${{ runner.os == 'macOS' }}
         run: |
-          brew install ninja graphviz
+          brew install graphviz
 
       - name: Install Dependencies (Windows)
         if: ${{ runner.os == 'Windows' }}

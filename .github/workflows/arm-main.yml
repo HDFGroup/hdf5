@@ -285,9 +285,6 @@ jobs:
       - name: Setup Doxygen
         uses: ./.github/actions/setup-doxygen
 
-      - name: Install Dependencies (macOS)
-        run: brew install ninja curl
-
       - name: Install CMake
         uses: lukka/get-cmake@7bfc9baacbbdcb5e37957ad05c3546b3e222be3c # latest
         with:

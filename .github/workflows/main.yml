@@ -158,10 +158,6 @@ jobs:
 
       # CMake gets libaec from fetchcontent
 
-      - name: Install Dependencies (macOS)
-        run: brew install ninja curl
-        if: ${{ matrix.ostype == 'macos' }}
-
       - name: Install CMake
         uses: lukka/get-cmake@7bfc9baacbbdcb5e37957ad05c3546b3e222be3c # latest
         with:
