@@ -12,7 +12,9 @@
 
 package test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -1942,6 +1944,290 @@ public class TestH5D {
             if (dtype_arr_enum_id > 0)
                 try {
                     H5.H5Tclose(dtype_arr_enum_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    /*
+     * Build a 1-D dataset of type COMPOUND { seq: VLEN { int32 }, n: int32 }
+     * inside the per-test file (H5fid) and write canonical data via H5DwriteVL.
+     * Closes the vlen/compound/dataspace ids internally and returns only the
+     * open dataset id; the caller closes the dataset and re-fetches the type
+     * via H5Dget_type if needed.
+     */
+    private long writeCompoundOfVlenDataset(String dsetName) throws Exception
+    {
+        long vlen_tid  = HDF5Constants.H5I_INVALID_HID;
+        long cmpd_tid  = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dset_id   = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            vlen_tid = H5.H5Tvlen_create(HDF5Constants.H5T_NATIVE_INT);
+            assertTrue("writeCompoundOfVlenDataset: H5Tvlen_create: ", vlen_tid >= 0);
+
+            long hvlSize    = H5.H5Tget_size(vlen_tid);
+            long intSize    = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_INT);
+            long packedSize = hvlSize + intSize;
+            cmpd_tid        = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, packedSize);
+            assertTrue("writeCompoundOfVlenDataset: H5Tcreate compound: ", cmpd_tid >= 0);
+            H5.H5Tinsert(cmpd_tid, "seq", 0, vlen_tid);
+            H5.H5Tinsert(cmpd_tid, "n", hvlSize, HDF5Constants.H5T_NATIVE_INT);
+            H5.H5Tpack(cmpd_tid);
+
+            long[] dims = {2};
+            dspace_id   = H5.H5Screate_simple(1, dims, null);
+            assertTrue("writeCompoundOfVlenDataset: H5Screate_simple: ", dspace_id >= 0);
+
+            dset_id = H5.H5Dcreate(H5fid, dsetName, cmpd_tid, dspace_id, HDF5Constants.H5P_DEFAULT,
+                                   HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            assertTrue("writeCompoundOfVlenDataset: H5Dcreate: ", dset_id >= 0);
+
+            ArrayList<Integer> seq0 = new ArrayList<>();
+            seq0.add(1);
+            seq0.add(2);
+            seq0.add(3);
+            ArrayList<Integer> seq1 = new ArrayList<>();
+            seq1.add(5);
+            seq1.add(6);
+
+            ArrayList[] write_data = new ArrayList[2];
+            ArrayList<Object> rec0 = new ArrayList<>();
+            rec0.add(seq0);
+            rec0.add(Integer.valueOf(4));
+            write_data[0]          = rec0;
+            ArrayList<Object> rec1 = new ArrayList<>();
+            rec1.add(seq1);
+            rec1.add(Integer.valueOf(7));
+            write_data[1] = rec1;
+
+            H5.H5DwriteVL(dset_id, cmpd_tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                          HDF5Constants.H5P_DEFAULT, write_data);
+            H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
+        }
+        finally {
+            if (dspace_id >= 0)
+                try {
+                    H5.H5Sclose(dspace_id);
+                }
+                catch (Exception ex) {
+                }
+            if (cmpd_tid >= 0)
+                try {
+                    H5.H5Tclose(cmpd_tid);
+                }
+                catch (Exception ex) {
+                }
+            if (vlen_tid >= 0)
+                try {
+                    H5.H5Tclose(vlen_tid);
+                }
+                catch (Exception ex) {
+                }
+        }
+
+        return dset_id;
+    }
+
+    /*
+     * Read a 1-D dataset whose type is COMPOUND { seq: VLEN { int32 }, n: int32 }.
+     * Uses the canonical calling pattern: pass ArrayList[] with null slots
+     * and let the native code allocate each per-row record.
+     */
+    @Test
+    public void testH5Dread_compound_of_vlen()
+    {
+        long dset_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_type_id = HDF5Constants.H5I_INVALID_HID;
+        final int N_ROWS  = 2;
+
+        try {
+            dset_id      = writeCompoundOfVlenDataset("cmpd_of_vlen_rd");
+            file_type_id = H5.H5Dget_type(dset_id);
+            assertTrue("testH5Dread_compound_of_vlen: H5Dget_type: ", file_type_id >= 0);
+
+            ArrayList[] read_data = new ArrayList[N_ROWS];
+            H5.H5DreadVL(dset_id, file_type_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                         HDF5Constants.H5P_DEFAULT, read_data);
+
+            assertNotNull("testH5Dread_compound_of_vlen: read_data[0] not null", read_data[0]);
+            assertNotNull("testH5Dread_compound_of_vlen: read_data[1] not null", read_data[1]);
+            assertEquals("testH5Dread_compound_of_vlen: row 0 record has 2 members", 2,
+                         read_data[0].size());
+            assertEquals("testH5Dread_compound_of_vlen: row 1 record has 2 members", 2,
+                         read_data[1].size());
+
+            Object seq0obj = read_data[0].get(0);
+            Object seq1obj = read_data[1].get(0);
+            assertTrue("testH5Dread_compound_of_vlen: row 0 seq is ArrayList, got " +
+                           (seq0obj == null ? "null" : seq0obj.getClass().getName()),
+                       seq0obj instanceof ArrayList);
+            assertTrue("testH5Dread_compound_of_vlen: row 1 seq is ArrayList, got " +
+                           (seq1obj == null ? "null" : seq1obj.getClass().getName()),
+                       seq1obj instanceof ArrayList);
+
+            ArrayList<?> seq0_read = (ArrayList<?>)seq0obj;
+            ArrayList<?> seq1_read = (ArrayList<?>)seq1obj;
+            assertEquals("testH5Dread_compound_of_vlen: row 0 seq length", 3, seq0_read.size());
+            assertEquals("testH5Dread_compound_of_vlen: row 1 seq length", 2, seq1_read.size());
+            assertEquals("testH5Dread_compound_of_vlen: row 0 seq[0]", Integer.valueOf(1),
+                         seq0_read.get(0));
+            assertEquals("testH5Dread_compound_of_vlen: row 0 seq[1]", Integer.valueOf(2),
+                         seq0_read.get(1));
+            assertEquals("testH5Dread_compound_of_vlen: row 0 seq[2]", Integer.valueOf(3),
+                         seq0_read.get(2));
+            assertEquals("testH5Dread_compound_of_vlen: row 1 seq[0]", Integer.valueOf(5),
+                         seq1_read.get(0));
+            assertEquals("testH5Dread_compound_of_vlen: row 1 seq[1]", Integer.valueOf(6),
+                         seq1_read.get(1));
+            assertEquals("testH5Dread_compound_of_vlen: row 0 n", Integer.valueOf(4),
+                         read_data[0].get(1));
+            assertEquals("testH5Dread_compound_of_vlen: row 1 n", Integer.valueOf(7),
+                         read_data[1].get(1));
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Dread_compound_of_vlen: " + err);
+        }
+        finally {
+            if (file_type_id >= 0)
+                try {
+                    H5.H5Tclose(file_type_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    /*
+     * Same compound-of-vlen read as testH5Dread_compound_of_vlen, but the caller
+     * pre-allocates each row's ArrayList. Should behave the same as the
+     * no-pre-allocation test.
+     */
+    @Test
+    public void testH5Dread_compound_of_vlen_preallocated()
+    {
+        long dset_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_type_id = HDF5Constants.H5I_INVALID_HID;
+        final int N_ROWS  = 2;
+
+        try {
+            dset_id      = writeCompoundOfVlenDataset("cmpd_of_vlen_rd_prealloc");
+            file_type_id = H5.H5Dget_type(dset_id);
+            assertTrue("testH5Dread_compound_of_vlen_preallocated: H5Dget_type: ",
+                       file_type_id >= 0);
+
+            ArrayList[] read_data = new ArrayList[N_ROWS];
+            for (int i = 0; i < N_ROWS; i++)
+                read_data[i] = new ArrayList<Object>();
+
+            H5.H5DreadVL(dset_id, file_type_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                         HDF5Constants.H5P_DEFAULT, read_data);
+
+            assertEquals("testH5Dread_compound_of_vlen_preallocated: row 0 record has 2 members", 2,
+                         read_data[0].size());
+            assertEquals("testH5Dread_compound_of_vlen_preallocated: row 1 record has 2 members", 2,
+                         read_data[1].size());
+
+            Object seq0obj = read_data[0].get(0);
+            assertTrue("testH5Dread_compound_of_vlen_preallocated: row 0 seq is ArrayList, got " +
+                           (seq0obj == null ? "null" : seq0obj.getClass().getName()),
+                       seq0obj instanceof ArrayList);
+            ArrayList<?> seq0_read = (ArrayList<?>)seq0obj;
+            assertEquals("testH5Dread_compound_of_vlen_preallocated: row 0 seq length", 3,
+                         seq0_read.size());
+            assertEquals("testH5Dread_compound_of_vlen_preallocated: row 0 seq[0]",
+                         Integer.valueOf(1), seq0_read.get(0));
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Dread_compound_of_vlen_preallocated: " + err);
+        }
+        finally {
+            if (file_type_id >= 0)
+                try {
+                    H5.H5Tclose(file_type_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    /*
+     * Round-trip a compound-of-vlen dataset through H5DwriteVL and H5DreadVL.
+     * Reuses the writeCompoundOfVlenDataset helper to exercise the write path,
+     * then reads back and asserts the full row contents.
+     */
+    @Test
+    public void testH5Dwrite_compound_of_vlen()
+    {
+        long dset_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_type_id = HDF5Constants.H5I_INVALID_HID;
+        final int N_ROWS  = 2;
+
+        try {
+            dset_id      = writeCompoundOfVlenDataset("cmpd_of_vlen_wr");
+            file_type_id = H5.H5Dget_type(dset_id);
+            assertTrue("testH5Dwrite_compound_of_vlen: H5Dget_type: ", file_type_id >= 0);
+
+            ArrayList[] read_data = new ArrayList[N_ROWS];
+            H5.H5DreadVL(dset_id, file_type_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                         HDF5Constants.H5P_DEFAULT, read_data);
+
+            assertNotNull("testH5Dwrite_compound_of_vlen: read_data[0] not null", read_data[0]);
+            assertNotNull("testH5Dwrite_compound_of_vlen: read_data[1] not null", read_data[1]);
+            assertEquals("testH5Dwrite_compound_of_vlen: row 0 record has 2 members", 2,
+                         read_data[0].size());
+            assertEquals("testH5Dwrite_compound_of_vlen: row 1 record has 2 members", 2,
+                         read_data[1].size());
+
+            ArrayList<?> seq0_read = (ArrayList<?>)read_data[0].get(0);
+            ArrayList<?> seq1_read = (ArrayList<?>)read_data[1].get(0);
+            assertEquals("testH5Dwrite_compound_of_vlen: row 0 seq length", 3, seq0_read.size());
+            assertEquals("testH5Dwrite_compound_of_vlen: row 1 seq length", 2, seq1_read.size());
+            assertEquals("testH5Dwrite_compound_of_vlen: row 0 seq[0]", Integer.valueOf(1),
+                         seq0_read.get(0));
+            assertEquals("testH5Dwrite_compound_of_vlen: row 0 seq[1]", Integer.valueOf(2),
+                         seq0_read.get(1));
+            assertEquals("testH5Dwrite_compound_of_vlen: row 0 seq[2]", Integer.valueOf(3),
+                         seq0_read.get(2));
+            assertEquals("testH5Dwrite_compound_of_vlen: row 1 seq[0]", Integer.valueOf(5),
+                         seq1_read.get(0));
+            assertEquals("testH5Dwrite_compound_of_vlen: row 1 seq[1]", Integer.valueOf(6),
+                         seq1_read.get(1));
+            assertEquals("testH5Dwrite_compound_of_vlen: row 0 n", Integer.valueOf(4),
+                         read_data[0].get(1));
+            assertEquals("testH5Dwrite_compound_of_vlen: row 1 n", Integer.valueOf(7),
+                         read_data[1].get(1));
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Dwrite_compound_of_vlen: " + err);
+        }
+        finally {
+            if (file_type_id >= 0)
+                try {
+                    H5.H5Tclose(file_type_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
                 }
                 catch (Exception ex) {
                 }
