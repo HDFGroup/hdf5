@@ -469,11 +469,21 @@ function (external_zlib_ng_library)
     endif ()
   endforeach ()
 
-  # Optionally add namespace alias for targets
+  # Optionally add namespace alias for targets.  zlib-ng exports some of
+  # its public target names (e.g. zlib-ng-static) as aliases to the real
+  # underlying target; CMake refuses add_library(NEW ALIAS EXISTING)
+  # when EXISTING is itself an alias (aliases cannot chain).  Resolve
+  # through ALIASED_TARGET before creating the namespaced alias.
   if (HDF_PACKAGE_NAMESPACE)
     foreach (zlib_ng_target ${zlib_ng_targets})
       if (NOT TARGET ${HDF_PACKAGE_NAMESPACE}${zlib_ng_target})
-        add_library (${HDF_PACKAGE_NAMESPACE}${zlib_ng_target} ALIAS ${zlib_ng_target})
+        get_target_property (_aliased_target ${zlib_ng_target} ALIASED_TARGET)
+        if (_aliased_target)
+          add_library (${HDF_PACKAGE_NAMESPACE}${zlib_ng_target} ALIAS ${_aliased_target})
+        else ()
+          add_library (${HDF_PACKAGE_NAMESPACE}${zlib_ng_target} ALIAS ${zlib_ng_target})
+        endif ()
+        unset (_aliased_target)
       endif ()
     endforeach ()
   endif ()
