@@ -4252,6 +4252,7 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
     /* retrieve the java.util.ArrayList interface class */
     jclass    arrCList      = ENVPTR->FindClass(ENVONLY, "java/util/ArrayList");
     jmethodID arrListMethod = ENVPTR->GetMethodID(ENVONLY, arrCList, "<init>", "(I)V");
+    jmethodID arrAddMethod  = ENVPTR->GetMethodID(ENVONLY, arrCList, "add", "(Ljava/lang/Object;)Z");
 
     /* Cache class types */
     /* jclass cBool   = ENVPTR->FindClass(ENVONLY, "java/lang/Boolean"); */
@@ -4308,15 +4309,14 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
         case H5T_COMPOUND: {
             int nmembs = H5Tget_nmembers(mem_type_id);
 
-            /* The list we're going to return: */
             if (NULL == (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
                 H5_OUT_OF_MEMORY_ERROR(ENVONLY, "translate_atomic_rbuf: failed to allocate list read buffer");
 
-            /* Convert each element to a compound object */
             for (i = 0; i < (size_t)nmembs; i++) {
                 H5T_class_t memb_vlClass;
                 size_t      memb_vlSize;
                 size_t      memb_offset;
+                jobject     memb_jobj;
 
                 if ((memb = H5Tget_member_type(mem_type_id, (unsigned int)i)) < 0)
                     H5_LIBRARY_ERROR(ENVONLY);
@@ -4326,7 +4326,12 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
                 if (!(memb_vlSize = H5Tget_size(memb)))
                     H5_LIBRARY_ERROR(ENVONLY);
 
-                translate_atomic_rbuf(ENVONLY, memb, memb_vlClass, char_buf + i * typeSize + memb_offset);
+                memb_jobj = translate_atomic_rbuf(ENVONLY, memb, memb_vlClass, char_buf + memb_offset);
+                if (memb_jobj) {
+                    ENVPTR->CallBooleanMethod(ENVONLY, jList, arrAddMethod, memb_jobj);
+                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+                    ENVPTR->DeleteLocalRef(ENVONLY, memb_jobj);
+                }
                 H5Tclose(memb);
             }
             jobj = jList;
@@ -4626,8 +4631,7 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
                     H5_LIBRARY_ERROR(ENVONLY);
 
                 jobject arr_obj = ENVPTR->GetObjectArrayElement(ENVONLY, array, (jsize)i);
-                translate_atomic_wbuf(ENVONLY, arr_obj, memb, memb_vlClass,
-                                      char_buf + i * typeSize + memb_offset);
+                translate_atomic_wbuf(ENVONLY, arr_obj, memb, memb_vlClass, char_buf + memb_offset);
                 ENVPTR->DeleteLocalRef(ENVONLY, arr_obj);
                 H5Tclose(memb);
             }

@@ -15,6 +15,7 @@ JUnit version 4.13.2
 .testH5Dget_storage_size_empty
 .testH5Diterate
 .testH5Dget_access_plist
+.testH5Dread_vlen_of_nested_compound
 .testH5Dget_space_closed
 .testH5DArray_string_buffer
 .testH5Dread_vlen_of_compound_nullslots
@@ -28,5 +29,5 @@ JUnit version 4.13.2
 
 Time:  XXXX
 
-OK (26 tests)
+OK (27 tests)
 

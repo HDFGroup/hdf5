@@ -2347,4 +2347,144 @@ public class TestH5D {
                 }
         }
     }
+
+    /*
+     * Read a 1-D dataset whose type is VLEN { COMPOUND { id: int, sub: COMPOUND { P: int, Q: int } } }.
+     * Per-row canonical shape (per testH5Dwrite_readCompound contract):
+     *   row r ArrayList of vlen elements
+     *     each element is ArrayList of 2 members [Integer id, ArrayList sub]
+     *       sub is ArrayList of 2 members [Integer P, Integer Q]
+     */
+    @Test
+    public void testH5Dread_vlen_of_nested_compound()
+    {
+        long inner_tid = HDF5Constants.H5I_INVALID_HID;
+        long outer_tid = HDF5Constants.H5I_INVALID_HID;
+        long vlen_tid  = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dset_id   = HDF5Constants.H5I_INVALID_HID;
+        final int N_ROWS = 2;
+
+        try {
+            long intSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_INT);
+
+            // inner = compound { P:int, Q:int }
+            inner_tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 2 * intSize);
+            H5.H5Tinsert(inner_tid, "P", 0, HDF5Constants.H5T_NATIVE_INT);
+            H5.H5Tinsert(inner_tid, "Q", intSize, HDF5Constants.H5T_NATIVE_INT);
+            H5.H5Tpack(inner_tid);
+
+            // outer = compound { id:int, sub:inner }
+            long innerSize = H5.H5Tget_size(inner_tid);
+            outer_tid      = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, intSize + innerSize);
+            H5.H5Tinsert(outer_tid, "id", 0, HDF5Constants.H5T_NATIVE_INT);
+            H5.H5Tinsert(outer_tid, "sub", intSize, inner_tid);
+            H5.H5Tpack(outer_tid);
+
+            // vlen of outer
+            vlen_tid    = H5.H5Tvlen_create(outer_tid);
+            long[] dims = {N_ROWS};
+            dspace_id   = H5.H5Screate_simple(1, dims, null);
+
+            dset_id = H5.H5Dcreate(H5fid, "vlen_of_nested_cmpd", vlen_tid, dspace_id,
+                                   HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                                   HDF5Constants.H5P_DEFAULT);
+            assertTrue("testH5Dread_vlen_of_nested_compound: H5Dcreate: ", dset_id >= 0);
+
+            //   row 0: 1 element  [ { id=1, sub={ P=2, Q=3 } } ]
+            //   row 1: 2 elements [ { id=4, sub={ P=5, Q=6 } }, { id=7, sub={ P=8, Q=9 } } ]
+            ArrayList<Object> row0_elem0_sub = new ArrayList<>();
+            row0_elem0_sub.add(Integer.valueOf(2));
+            row0_elem0_sub.add(Integer.valueOf(3));
+            ArrayList<Object> row0_elem0 = new ArrayList<>();
+            row0_elem0.add(Integer.valueOf(1));
+            row0_elem0.add(row0_elem0_sub);
+            ArrayList<Object> row0 = new ArrayList<>();
+            row0.add(row0_elem0);
+
+            ArrayList<Object> row1_elem0_sub = new ArrayList<>();
+            row1_elem0_sub.add(Integer.valueOf(5));
+            row1_elem0_sub.add(Integer.valueOf(6));
+            ArrayList<Object> row1_elem0 = new ArrayList<>();
+            row1_elem0.add(Integer.valueOf(4));
+            row1_elem0.add(row1_elem0_sub);
+            ArrayList<Object> row1_elem1_sub = new ArrayList<>();
+            row1_elem1_sub.add(Integer.valueOf(8));
+            row1_elem1_sub.add(Integer.valueOf(9));
+            ArrayList<Object> row1_elem1 = new ArrayList<>();
+            row1_elem1.add(Integer.valueOf(7));
+            row1_elem1.add(row1_elem1_sub);
+            ArrayList<Object> row1 = new ArrayList<>();
+            row1.add(row1_elem0);
+            row1.add(row1_elem1);
+
+            ArrayList[] write_data = new ArrayList[N_ROWS];
+            write_data[0]          = row0;
+            write_data[1]          = row1;
+
+            H5.H5DwriteVL(dset_id, vlen_tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                          HDF5Constants.H5P_DEFAULT, write_data);
+            H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
+
+            ArrayList[] read_data = new ArrayList[N_ROWS];
+            H5.H5DreadVL(dset_id, vlen_tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                         HDF5Constants.H5P_DEFAULT, read_data);
+
+            assertNotNull("row 0 not null", read_data[0]);
+            assertNotNull("row 1 not null", read_data[1]);
+            assertEquals("row 0 has 1 element", 1, read_data[0].size());
+            assertEquals("row 1 has 2 elements", 2, read_data[1].size());
+
+            ArrayList<?> r0e0 = (ArrayList<?>)read_data[0].get(0);
+            assertEquals("row 0 elem 0 has 2 members", 2, r0e0.size());
+            assertEquals("row 0 elem 0 id", Integer.valueOf(1), r0e0.get(0));
+            ArrayList<?> r0e0sub = (ArrayList<?>)r0e0.get(1);
+            assertEquals("row 0 elem 0 sub has 2 members", 2, r0e0sub.size());
+            assertEquals("row 0 elem 0 sub.P", Integer.valueOf(2), r0e0sub.get(0));
+            assertEquals("row 0 elem 0 sub.Q", Integer.valueOf(3), r0e0sub.get(1));
+
+            ArrayList<?> r1e1 = (ArrayList<?>)read_data[1].get(1);
+            assertEquals("row 1 elem 1 has 2 members", 2, r1e1.size());
+            assertEquals("row 1 elem 1 id", Integer.valueOf(7), r1e1.get(0));
+            ArrayList<?> r1e1sub = (ArrayList<?>)r1e1.get(1);
+            assertEquals("row 1 elem 1 sub.P", Integer.valueOf(8), r1e1sub.get(0));
+            assertEquals("row 1 elem 1 sub.Q", Integer.valueOf(9), r1e1sub.get(1));
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Dread_vlen_of_nested_compound: " + err);
+        }
+        finally {
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dspace_id >= 0)
+                try {
+                    H5.H5Sclose(dspace_id);
+                }
+                catch (Exception ex) {
+                }
+            if (vlen_tid >= 0)
+                try {
+                    H5.H5Tclose(vlen_tid);
+                }
+                catch (Exception ex) {
+                }
+            if (outer_tid >= 0)
+                try {
+                    H5.H5Tclose(outer_tid);
+                }
+                catch (Exception ex) {
+                }
+            if (inner_tid >= 0)
+                try {
+                    H5.H5Tclose(inner_tid);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
 }
