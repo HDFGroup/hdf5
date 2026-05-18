@@ -146,7 +146,7 @@ extern "C" {
  *          \p dset_name attached to the object specified by the
  *          identifier loc_id.
  *
- *          \p type_size can be obtained with \c sizeof() if the data is stored
+ *          \p type_size can be obtained with \c sizeof() if the data is
  *          stored in a predefined C struct, otherwise, use H5Tget_size() on
  *          the compound datatype.
  *
@@ -187,7 +187,7 @@ H5HL_DLL herr_t H5TBmake_table(const char *table_title, hid_t loc_id, const char
  *          identifier \p loc_id. The dataset is extended to hold the
  *          new records.
  *
- *          \p type_size can be obtained with \c sizeof() if the data is stored
+ *          \p type_size can be obtained with \c sizeof() if the data is
  *          stored in a predefined C struct, otherwise, use H5Tget_size() on
  *          the compound datatype.
  *
@@ -219,7 +219,7 @@ H5HL_DLL herr_t H5TBappend_records(hid_t loc_id, const char *dset_name, hsize_t 
  *          index position start of the table named \p dset_name attached
  *          to the object specified by the identifier \p loc_id.
  *
- *          \p type_size can be obtained with \c sizeof() if the data is stored
+ *          \p type_size can be obtained with \c sizeof() if the data is
  *          stored in a predefined C struct, otherwise, use H5Tget_size() on
  *          the compound datatype.
  *
@@ -254,7 +254,7 @@ H5HL_DLL herr_t H5TBwrite_records(hid_t loc_id, const char *dset_name, hsize_t s
  *          dataset named \p dset_name attached to the object specified
  *          by the identifier \p loc_id.
  *
- *          \p type_size can be obtained with \c sizeof() if the data is stored
+ *          \p type_size can be obtained with \c sizeof() if the data is
  *          stored in a predefined C struct, otherwise, use H5Tget_size() on
  *          the compound datatype.
  *
@@ -292,7 +292,7 @@ H5HL_DLL herr_t H5TBwrite_fields_name(hid_t loc_id, const char *dset_name, const
  *          dataset named \p dset_name attached to the object
  *          specified by the identifier \p loc_id.
  *
- *          \p type_size can be obtained with \c sizeof() if the data is stored
+ *          \p type_size can be obtained with \c sizeof() if the data is
  *          stored in a predefined C struct, otherwise, use H5Tget_size() on
  *          the compound datatype.
  *
