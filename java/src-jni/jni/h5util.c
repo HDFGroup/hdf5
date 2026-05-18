@@ -4832,28 +4832,20 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
             if (!(vlSize = H5Tget_size(memb)))
                 H5_LIBRARY_ERROR(ENVONLY);
 
-            /* Convert each element to a list */
             for (i = 0; i < (size_t)count; i++) {
                 hvl_t vl_elem;
+                jList = NULL;
 
-                found_jList = JNI_TRUE;
-                jList       = NULL;
-
-                /* Get the number of sequence elements */
                 memcpy(&vl_elem, char_buf + i * sizeof(hvl_t), sizeof(hvl_t));
                 jsize nelmts = (jsize)vl_elem.len;
                 if (vl_elem.len != (size_t)nelmts)
                     H5_JNI_FATAL_ERROR(ENVONLY, "translate_rbuf: overflow of number of VL elements");
-
                 if (nelmts < 0)
                     H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_rbuf: number of VL elements < 0");
 
-                /* The list we're going to return: */
-                if (i < (size_t)ret_buflen) {
+                if (i < (size_t)ret_buflen)
                     jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i);
-                }
                 if (NULL == jList) {
-                    found_jList = JNI_FALSE;
                     if (NULL ==
                         (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
                         H5_OUT_OF_MEMORY_ERROR(ENVONLY,
@@ -4861,16 +4853,14 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                 }
 
                 translate_rbuf(ENVONLY, jList, memb, vlClass, (jsize)nelmts, vl_elem.p);
-                if (found_jList == JNI_FALSE) {
-                    jboolean addResult =
-                        ENVPTR->CallBooleanMethod(ENVONLY, ret_buf, arrAddMethod, (jobject)jList);
-                    if (!addResult)
-                        H5_JNI_FATAL_ERROR(ENVONLY, "translate_rbuf: cannot add VL element");
-                }
-                else {
+
+                // ret_buflen == 0 indicates ret_buf is an ArrayList (recursive call); use add.
+                // Otherwise ret_buf is a Java array; install jList at slot i.
+                if (ret_buflen == 0)
+                    ENVPTR->CallBooleanMethod(ENVONLY, ret_buf, arrAddMethod, (jobject)jList);
+                else
                     ENVPTR->SetObjectArrayElement(ENVONLY, ret_buf, (jsize)i, (jobject)jList);
-                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-                }
+                CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
                 ENVPTR->DeleteLocalRef(ENVONLY, jList);
             }
             break;

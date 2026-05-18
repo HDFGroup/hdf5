@@ -2233,4 +2233,118 @@ public class TestH5D {
                 }
         }
     }
+
+    /*
+     * Read a 1-D dataset whose type is VLEN { COMPOUND { A: int, B: int } } using the
+     * canonical null-row-slot read pattern. Exercises the translate_rbuf H5T_VLEN
+     * top-level case; pre-fix this read SIGSEGVed because the function's
+     * found_jList-FALSE branch called ArrayList.add() on the caller's Java array.
+     */
+    @Test
+    public void testH5Dread_vlen_of_compound_nullslots()
+    {
+        long cmpd_tid  = HDF5Constants.H5I_INVALID_HID;
+        long vlen_tid  = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dset_id   = HDF5Constants.H5I_INVALID_HID;
+        final int N_ROWS = 2;
+
+        try {
+            long intSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_INT);
+
+            cmpd_tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 2 * intSize);
+            H5.H5Tinsert(cmpd_tid, "A", 0, HDF5Constants.H5T_NATIVE_INT);
+            H5.H5Tinsert(cmpd_tid, "B", intSize, HDF5Constants.H5T_NATIVE_INT);
+            H5.H5Tpack(cmpd_tid);
+
+            vlen_tid = H5.H5Tvlen_create(cmpd_tid);
+            long[] dims = {N_ROWS};
+            dspace_id = H5.H5Screate_simple(1, dims, null);
+
+            dset_id = H5.H5Dcreate(H5fid, "vlen_of_cmpd_rd", vlen_tid, dspace_id,
+                                   HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                                   HDF5Constants.H5P_DEFAULT);
+            assertTrue("testH5Dread_vlen_of_compound_nullslots: H5Dcreate: ", dset_id >= 0);
+
+            // row 0: 1 element  [ { A=1, B=2 } ]
+            // row 1: 2 elements [ { A=3, B=4 }, { A=5, B=6 } ]
+            ArrayList<Object> row0_elem0 = new ArrayList<>();
+            row0_elem0.add(Integer.valueOf(1));
+            row0_elem0.add(Integer.valueOf(2));
+            ArrayList<Object> row0 = new ArrayList<>();
+            row0.add(row0_elem0);
+
+            ArrayList<Object> row1_elem0 = new ArrayList<>();
+            row1_elem0.add(Integer.valueOf(3));
+            row1_elem0.add(Integer.valueOf(4));
+            ArrayList<Object> row1_elem1 = new ArrayList<>();
+            row1_elem1.add(Integer.valueOf(5));
+            row1_elem1.add(Integer.valueOf(6));
+            ArrayList<Object> row1 = new ArrayList<>();
+            row1.add(row1_elem0);
+            row1.add(row1_elem1);
+
+            ArrayList[] write_data = new ArrayList[N_ROWS];
+            write_data[0]          = row0;
+            write_data[1]          = row1;
+
+            H5.H5DwriteVL(dset_id, vlen_tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                          HDF5Constants.H5P_DEFAULT, write_data);
+            H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
+
+            // Null row slots: pre-fix this would SIGSEGV inside translate_rbuf.
+            ArrayList[] read_data = new ArrayList[N_ROWS];
+            H5.H5DreadVL(dset_id, vlen_tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                         HDF5Constants.H5P_DEFAULT, read_data);
+
+            assertNotNull("testH5Dread_vlen_of_compound_nullslots: row 0 not null", read_data[0]);
+            assertNotNull("testH5Dread_vlen_of_compound_nullslots: row 1 not null", read_data[1]);
+            assertEquals("testH5Dread_vlen_of_compound_nullslots: row 0 has 1 element", 1,
+                         read_data[0].size());
+            assertEquals("testH5Dread_vlen_of_compound_nullslots: row 1 has 2 elements", 2,
+                         read_data[1].size());
+
+            ArrayList<?> r0e0 = (ArrayList<?>)read_data[0].get(0);
+            assertEquals("row 0 elem 0 A", Integer.valueOf(1), r0e0.get(0));
+            assertEquals("row 0 elem 0 B", Integer.valueOf(2), r0e0.get(1));
+
+            ArrayList<?> r1e0 = (ArrayList<?>)read_data[1].get(0);
+            assertEquals("row 1 elem 0 A", Integer.valueOf(3), r1e0.get(0));
+            assertEquals("row 1 elem 0 B", Integer.valueOf(4), r1e0.get(1));
+
+            ArrayList<?> r1e1 = (ArrayList<?>)read_data[1].get(1);
+            assertEquals("row 1 elem 1 A", Integer.valueOf(5), r1e1.get(0));
+            assertEquals("row 1 elem 1 B", Integer.valueOf(6), r1e1.get(1));
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Dread_vlen_of_compound_nullslots: " + err);
+        }
+        finally {
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dspace_id >= 0)
+                try {
+                    H5.H5Sclose(dspace_id);
+                }
+                catch (Exception ex) {
+                }
+            if (vlen_tid >= 0)
+                try {
+                    H5.H5Tclose(vlen_tid);
+                }
+                catch (Exception ex) {
+                }
+            if (cmpd_tid >= 0)
+                try {
+                    H5.H5Tclose(cmpd_tid);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
 }
