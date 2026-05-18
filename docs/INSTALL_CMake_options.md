@@ -88,13 +88,13 @@ These options control how HDF5 gets installed. Options dealing with paths are ge
 
 | CMake option | Type | Default | Description |
 |:-------------|:-----|:--------|:------------|
-| `HDF5_USE_GNU_DIRS` | `BOOL` | `OFF` | If `ON`, uses the GNU Coding Standard CMake install directory variables when setting up for installing the HDF5 library. See [GNUInstallDirs](https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html) for more information. |
+| `HDF5_USE_GNU_DIRS` | `BOOL` | Varies by platform | If `ON`, uses the GNU Coding Standard CMake install directory variables when setting up for installing the HDF5 library. See [GNUInstallDirs](https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html) for more information. |
 | `HDF5_INSTALL_BIN_DIR` | `STRING` | `bin` | Specifies the directory to install executables in. |
 | `HDF5_INSTALL_LIB_DIR` | `STRING` | `lib` | Specifies the directory to install libraries in. |
 | `HDF5_INSTALL_JNI_LIB_DIR` | `STRING` | `lib` | Specifies the directory to install Java JNI libraries in. |
 | `HDF5_INSTALL_INCLUDE_DIR` | `STRING` | `include` | Specifies the directory to install header files in. |
 | `HDF5_INSTALL_MODULE_DIR` | `STRING` | `mod` (`HDF5_USE_GNU_DIRS=OFF`) <br /> `HDF5_INSTALL_INCLUDE_DIR/mod` (`HDF5_USE_GNU_DIRS=ON`) | Specifies the directory to install Fortran .mod files in. |
-| `HDF5_INSTALL_CMAKE_DIR` | `STRING` | `cmake` (`HDF5_USE_GNU_DIRS=OFF`) <br /> `HDF5_INSTALL_LIB_DIR/cmake` (`HDF5_USE_GNU_DIRS=ON`) | Specifies the directory to install CMake files in. |
+| `HDF5_INSTALL_CMAKE_DIR` | `STRING` | `cmake` (`HDF5_USE_GNU_DIRS=OFF`) <br /> `HDF5_INSTALL_LIB_DIR/cmake/hdf5` (`HDF5_USE_GNU_DIRS=ON`) | Specifies the directory to install CMake files in. |
 | `HDF5_INSTALL_DATA_DIR` | `STRING` | `.` (for `MSVC` and `HDF5_USE_GNU_DIRS=OFF`) <br /> `share` (`HDF5_USE_GNU_DIRS=ON`) | Specifies the directory to install miscellaneous data files in. |
 | `HDF5_INSTALL_DOC_DIR` | `STRING` | `HDF5_INSTALL_DATA_DIR` (`HDF5_USE_GNU_DIRS=OFF`) <br /> `HDF5_INSTALL_DATA_DIR/doc/hdf5` (`HDF5_USE_GNU_DIRS=ON`) | Specifies the directory to install documentation files in. |
 | `HDF5_BUILD_WITH_INSTALL_NAME` | `BOOL` | `OFF` | **MacOS only** If `ON`, builds shared library CMake targets with the "install_name" field set to the installation path. See the related CMake property [INSTALL_NAME_DIR](https://cmake.org/cmake/help/latest/prop_tgt/INSTALL_NAME_DIR.html#prop_tgt:INSTALL_NAME_DIR). |
@@ -315,7 +315,7 @@ These are options which can be set for controlling how the HDF5 example programs
 | `H5EXAMPLE_USE_110_API` | `BOOL` | `OFF` | If `ON`, compile the HDF5 library examples programs using the HDF5 1.10 API. |
 | `H5EXAMPLE_USE_18_API` | `BOOL` | `OFF` | If `ON`, compile the HDF5 library examples programs using the HDF5 1.8 API. |
 | `H5EXAMPLE_USE_16_API` | `BOOL` | `OFF` | If `ON`, compile the HDF5 library examples programs using the HDF5 1.6 API. |
-| `H5EXAMPLE_USE_GNU_DIRS` | `BOOL` | `OFF` | If `ON`, uses the GNU Coding Standard CMake install directory variables when setting up for installing the HDF5 library example programs. See [GNUInstallDirs](https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html) for more information. |
+| `H5EXAMPLE_USE_GNU_DIRS` | `BOOL` | Varies by platform | If `ON`, uses the GNU Coding Standard CMake install directory variables when setting up for installing the HDF5 library example programs. See [GNUInstallDirs](https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html) for more information. |
 | `H5EXAMPLE_DISABLE_COMPILER_WARNINGS` | `BOOL` | `OFF` | If `ON`, disables most or all compiler warnings when building the HDF5 library example programs. |
 | `H5EXAMPLE_BUILD_FRAMEWORKS` | `BOOL` | `OFF` | If `ON`, the HDF5 library example programs will be built as a framework bundle when built on MacOS. |
 
