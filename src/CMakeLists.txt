@@ -705,6 +705,7 @@ set (H5PL_SOURCES
     ${HDF5_SRC_DIR}/H5PLint.c
     ${HDF5_SRC_DIR}/H5PLpath.c
     ${HDF5_SRC_DIR}/H5PLplugin_cache.c
+    ${HDF5_SRC_DIR}/H5PLsig.c
 )
 
 set (H5PL_PUBLIC_HDRS
@@ -716,6 +717,7 @@ IDE_GENERATED_PROPERTIES ("H5PL" "${H5PL_HDRS}" "${H5PL_SOURCES}" )
 set (H5PL_PRIVATE_HDRS
     ${HDF5_SRC_DIR}/H5PLpkg.h
     ${HDF5_SRC_DIR}/H5PLprivate.h
+    ${HDF5_SRC_DIR}/H5PLsig.h
 )
 
 

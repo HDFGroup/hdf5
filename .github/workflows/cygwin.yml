@@ -39,7 +39,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install Cygwin
-        uses: cygwin/cygwin-install-action@b09c8ce7e6add6720f12f30042d7c972cf4a75ec # master
+        uses: cygwin/cygwin-install-action@4ef15ca7fd18a18f1000989fcfd968e06d146ce8 # master
         with:
           packages: cmake gcc-fortran make ninja zlib-devel flex bison perl
 
@@ -122,7 +122,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Cygwin)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
             name: gcc-cygwin-log
             path: ${{ runner.workspace }}/hdf5/hdf5.log

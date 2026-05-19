@@ -98,6 +98,12 @@ if (BUILD_SHARED_LIBS)
             "$<TARGET_FILE:${H5REPACK_TOOL_PLUGIN_LIB_VTARGET}>"
             "${CMAKE_BINARY_DIR}/plugins/$<TARGET_FILE_NAME:${H5REPACK_TOOL_PLUGIN_LIB_VTARGET}>"
   )
+
+  #-----------------------------------------------------------------------------
+  # Sign the plugins if signature verification is enabled
+  #-----------------------------------------------------------------------------
+  sign_plugin_target(${H5REPACK_TOOL_PLUGIN_LIB_TARGET} "${CMAKE_BINARY_DIR}/plugins")
+  sign_plugin_target(${H5REPACK_TOOL_PLUGIN_LIB_VTARGET} "${CMAKE_BINARY_DIR}/plugins")
 endif ()
 
 if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)

@@ -40,6 +40,11 @@ if (BUILD_SHARED_LIBS)
             "$<TARGET_FILE:${H5DUMP_TOOL_PLUGIN_LIB_TARGET}>"
             "${CMAKE_BINARY_DIR}/plugins/$<TARGET_FILE_NAME:${H5DUMP_TOOL_PLUGIN_LIB_TARGET}>"
   )
+
+  #-----------------------------------------------------------------------------
+  # Sign the plugin if signature verification is enabled
+  #-----------------------------------------------------------------------------
+  sign_plugin_target(${H5DUMP_TOOL_PLUGIN_LIB_TARGET} "${CMAKE_BINARY_DIR}/plugins")
 endif ()
 
 if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)
