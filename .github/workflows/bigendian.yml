@@ -2,6 +2,9 @@ name: hdf5 dev big-endian (s390x)
 
 # Triggers the workflow on a call from another workflow
 on:
+  push:
+    branches:
+      - feature/ci-bigendian-s390x
   workflow_call:
     inputs:
       build_mode:
@@ -24,10 +27,11 @@ permissions:
 
 env:
   CTEST_OUTPUT_ON_FAILURE: 1
+  BUILD_MODE: ${{ inputs.build_mode || 'Release' }}
 
 jobs:
   bigendian_build_and_test:
-    name: "s390x (big-endian) ${{ inputs.build_mode }}"
+    name: "s390x (big-endian) ${{ inputs.build_mode || 'Release' }}"
     runs-on: ubuntu-latest
     steps:
       - name: Get Sources
@@ -55,7 +59,7 @@ jobs:
           cd build
           cmake -C ../config/cmake/cacheinit.cmake -G "Unix Makefiles" \
           --log-level=VERBOSE \
-          -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+          -DCMAKE_BUILD_TYPE=${{ env.BUILD_MODE }} \
           -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
           -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
           -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=OFF \
@@ -68,12 +72,12 @@ jobs:
       - name: Build
         shell: alpine.sh --root {0}
         run: |
-          cmake --build . --parallel 2 --config ${{ inputs.build_mode }}
+          cmake --build . --parallel 2 --config ${{ env.BUILD_MODE }}
         working-directory: build
 
       - name: Run Tests
         shell: alpine.sh --root {0}
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} --timeout 1800 \
+          ctest . --parallel 2 -C ${{ env.BUILD_MODE }} --timeout 1800 \
             -E "FORTRAN_testhdf5_fortran"
         working-directory: build
