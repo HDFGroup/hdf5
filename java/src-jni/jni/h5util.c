@@ -4830,10 +4830,10 @@ void
 translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t type_class, jsize count,
                void *raw_buf)
 {
-    hid_t        memb        = H5I_INVALID_HID;
-    int          ret_buflen  = -1;
-    jboolean     found_jList = JNI_TRUE;
-    jobjectArray jList       = NULL;
+    hid_t        memb       = H5I_INVALID_HID;
+    int          ret_buflen = -1;
+    jboolean     retIsList  = JNI_FALSE;
+    jobjectArray jList      = NULL;
     jobject      jobj        = NULL;
     H5T_class_t  vlClass;
     size_t       vlSize;
@@ -4850,9 +4850,19 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
     if (!(typeSize = H5Tget_size(mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
 
-    ret_buflen = ENVPTR->GetArrayLength(ENVONLY, ret_buf);
-    if (ret_buflen < 0)
-        H5_JNI_FATAL_ERROR(ENVONLY, "ret_buflen: Array length cannot be negative");
+    /* Top-level calls pass a Java Object[] array; recursive calls pass an
+     * ArrayList. Detect which so we never call GetArrayLength on a non-array
+     * (undefined behavior) and so the append-vs-set decision is unambiguous. */
+    retIsList = ENVPTR->IsInstanceOf(ENVONLY, ret_buf, arrCList);
+    if (retIsList) {
+        /* Lists are always appended to; no slot reuse. */
+        ret_buflen = 0;
+    }
+    else {
+        ret_buflen = ENVPTR->GetArrayLength(ENVONLY, ret_buf);
+        if (ret_buflen < 0)
+            H5_JNI_FATAL_ERROR(ENVONLY, "ret_buflen: Array length cannot be negative");
+    }
 
     switch (type_class) {
         case H5T_VLEN: {
@@ -4885,9 +4895,8 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
 
                 translate_rbuf(ENVONLY, jList, memb, vlClass, (jsize)nelmts, vl_elem.p);
 
-                // ret_buflen == 0 indicates ret_buf is an ArrayList (recursive call); use add.
-                // Otherwise ret_buf is a Java array; install jList at slot i.
-                if (ret_buflen == 0)
+                /* ArrayList (recursive call): append. Java array: install at slot i. */
+                if (retIsList)
                     ENVPTR->CallBooleanMethod(ENVONLY, ret_buf, arrAddMethod, (jobject)jList);
                 else
                     ENVPTR->SetObjectArrayElement(ENVONLY, ret_buf, (jsize)i, (jobject)jList);
@@ -4938,7 +4947,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
 
                     H5Tclose(memb);
                 }
-                if (ret_buflen == 0)
+                if (retIsList)
                     ENVPTR->CallBooleanMethod(ENVONLY, ret_buf, arrAddMethod, jList);
                 else
                     ENVPTR->SetObjectArrayElement(ENVONLY, ret_buf, (jsize)i, jList);
@@ -4967,18 +4976,14 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
 
             /* Convert each element to a list */
             for (i = 0; i < (size_t)count; i++) {
-                found_jList = JNI_TRUE;
-                jList       = NULL;
+                jList = NULL;
 
                 /* Get the object element */
                 memcpy((char *)objBuf, char_buf + i * typeSize, typeSize);
 
-                /* The list we're going to return: */
-                if (i < (size_t)ret_buflen) {
-                    if (NULL ==
-                        (jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i)))
-                        found_jList = JNI_FALSE;
-                }
+                /* Reuse a pre-allocated slot if the caller supplied one. */
+                if (i < (size_t)ret_buflen)
+                    jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i);
                 if (NULL == jList) {
                     if (NULL ==
                         (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
@@ -4987,7 +4992,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                 }
 
                 translate_rbuf(ENVONLY, jList, memb, vlClass, (jsize)typeCount, objBuf);
-                if (found_jList == JNI_FALSE)
+                if (retIsList)
                     ENVPTR->CallBooleanMethod(ENVONLY, ret_buf, arrAddMethod, jList);
                 else
                     ENVPTR->SetObjectArrayElement(ENVONLY, ret_buf, (jsize)i, jList);
@@ -5011,7 +5016,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
             for (i = 0; i < (size_t)count; i++) {
                 jobj = translate_atomic_rbuf(ENVONLY, mem_type_id, type_class, char_buf + i * typeSize);
                 if (jobj) {
-                    if (ret_buflen == 0)
+                    if (retIsList)
                         ENVPTR->CallBooleanMethod(ENVONLY, ret_buf, arrAddMethod, (jobject)jobj);
                     else
                         ENVPTR->SetObjectArrayElement(ENVONLY, ret_buf, (jsize)i, (jobject)jobj);
@@ -5042,18 +5047,14 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
 
             /* Convert each element to a list of 2 floating-point elements */
             for (i = 0; i < (size_t)count; i++) {
-                found_jList = JNI_TRUE;
-                jList       = NULL;
+                jList = NULL;
 
                 /* Get the object element */
                 memcpy((char *)objBuf, char_buf + i * typeSize, typeSize);
 
-                /* The list we're going to return: */
-                if (i < (size_t)ret_buflen) {
-                    if (NULL ==
-                        (jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i)))
-                        found_jList = JNI_FALSE;
-                }
+                /* Reuse a pre-allocated slot if the caller supplied one. */
+                if (i < (size_t)ret_buflen)
+                    jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i);
                 if (NULL == jList) {
                     if (NULL ==
                         (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
@@ -5062,7 +5063,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                 }
 
                 translate_rbuf(ENVONLY, jList, memb, base_class, (jsize)typeCount, objBuf);
-                if (found_jList == JNI_FALSE)
+                if (retIsList)
                     ENVPTR->CallBooleanMethod(ENVONLY, ret_buf, arrAddMethod, jList);
                 else
                     ENVPTR->SetObjectArrayElement(ENVONLY, ret_buf, (jsize)i, jList);
