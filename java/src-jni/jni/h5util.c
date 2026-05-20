@@ -4584,8 +4584,13 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
             /* Convert ArrayList to plain array */
             if (mToArray == NULL)
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-            jobjectArray array   = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, in_obj, mToArray);
-            jsize        jnelmts = ENVPTR->GetArrayLength(ENVONLY, array);
+            if (NULL == in_obj)
+                H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_atomic_wbuf: VL in_obj is NULL");
+            jobjectArray array = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, in_obj, mToArray);
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+            if (NULL == array)
+                H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_atomic_wbuf: ArrayList.toArray returned NULL");
+            jsize jnelmts = ENVPTR->GetArrayLength(ENVONLY, array);
 
             if (jnelmts < 0)
                 H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_atomic_wbuf: number of VL elements < 0");
@@ -4600,6 +4605,8 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
             translate_wbuf(ENVONLY, array, memb, vlClass, (jsize)jnelmts, vl_elem.p);
 
             memcpy(char_buf, &vl_elem, sizeof(hvl_t));
+
+            ENVPTR->DeleteLocalRef(ENVONLY, array);
             break;
         } /* H5T_VLEN */
         case H5T_COMPOUND: {
@@ -4609,8 +4616,13 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
             /* invoke the toArray method */
             if (mToArray == NULL)
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-            jobjectArray array   = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, in_obj, mToArray);
-            jsize        jnelmts = ENVPTR->GetArrayLength(ENVONLY, array);
+            if (NULL == in_obj)
+                H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_atomic_wbuf: compound in_obj is NULL");
+            jobjectArray array = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, in_obj, mToArray);
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+            if (NULL == array)
+                H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_atomic_wbuf: ArrayList.toArray returned NULL");
+            jsize jnelmts = ENVPTR->GetArrayLength(ENVONLY, array);
 
             if (jnelmts != nmembs)
                 H5_BAD_ARGUMENT_ERROR(
@@ -4635,6 +4647,8 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
                 ENVPTR->DeleteLocalRef(ENVONLY, arr_obj);
                 H5Tclose(memb);
             }
+
+            ENVPTR->DeleteLocalRef(ENVONLY, array);
             break;
         } /* H5T_COMPOUND */
         case H5T_ARRAY: {
@@ -4651,8 +4665,13 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
             /* invoke the toArray method */
             if (mToArray == NULL)
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-            jobjectArray array   = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, in_obj, mToArray);
-            jsize        jnelmts = ENVPTR->GetArrayLength(ENVONLY, array);
+            if (NULL == in_obj)
+                H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_atomic_wbuf: array in_obj is NULL");
+            jobjectArray array = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, in_obj, mToArray);
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+            if (NULL == array)
+                H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_atomic_wbuf: ArrayList.toArray returned NULL");
+            jsize jnelmts = ENVPTR->GetArrayLength(ENVONLY, array);
 
             if (jnelmts < 0)
                 H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_atomic_wbuf: number of array elements < 0");
@@ -4663,6 +4682,8 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
             translate_wbuf(ENVONLY, array, memb, vlClass, (jsize)jnelmts, objBuf);
 
             memcpy(char_buf, (char *)objBuf, vlSize * (size_t)jnelmts);
+
+            ENVPTR->DeleteLocalRef(ENVONLY, array);
             break;
         } /* H5T_ARRAY */
         case H5T_ENUM:
@@ -4768,8 +4789,13 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
             /* Convert each array element - invoke the toArray method */
             if (mToArray == NULL)
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-            jobjectArray array   = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, in_obj, mToArray);
-            jsize        jnelmts = ENVPTR->GetArrayLength(ENVONLY, array);
+            if (NULL == in_obj)
+                H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_atomic_wbuf: complex in_obj is NULL");
+            jobjectArray array = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, in_obj, mToArray);
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+            if (NULL == array)
+                H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_atomic_wbuf: ArrayList.toArray returned NULL");
+            jsize jnelmts = ENVPTR->GetArrayLength(ENVONLY, array);
 
             if (jnelmts < 0)
                 H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_atomic_wbuf: number of array elements < 0");
@@ -4784,6 +4810,7 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
             if (objBuf)
                 free(objBuf);
 
+            ENVPTR->DeleteLocalRef(ENVONLY, array);
             break;
         }
         case H5T_TIME:
@@ -5102,8 +5129,11 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
                 /* invoke the toArray method */
                 if (mToArray == NULL)
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                jobjectArray array   = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, jList, mToArray);
-                jsize        jnelmts = ENVPTR->GetArrayLength(ENVONLY, array);
+                jobjectArray array = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, jList, mToArray);
+                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                if (NULL == array)
+                    H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: ArrayList.toArray returned NULL");
+                jsize jnelmts = ENVPTR->GetArrayLength(ENVONLY, array);
 
                 if (jnelmts < 0)
                     H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: number of VL elements < 0");
@@ -5117,6 +5147,7 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
 
                 memcpy(char_buf + i * sizeof(hvl_t), &vl_elem, sizeof(hvl_t));
 
+                ENVPTR->DeleteLocalRef(ENVONLY, array);
                 ENVPTR->DeleteLocalRef(ENVONLY, jList);
             } /* end for (i = 0; i < count; i++) */
             break;
@@ -5132,8 +5163,11 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
                 /* invoke the toArray method */
                 if (mToArray == NULL)
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                jobjectArray array   = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, jList, mToArray);
-                jsize        jnelmts = ENVPTR->GetArrayLength(ENVONLY, array);
+                jobjectArray array = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, jList, mToArray);
+                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                if (NULL == array)
+                    H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: ArrayList.toArray returned NULL");
+                jsize jnelmts = ENVPTR->GetArrayLength(ENVONLY, array);
 
                 if (jnelmts != nmembs)
                     H5_BAD_ARGUMENT_ERROR(
@@ -5161,6 +5195,7 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
                     H5Tclose(memb);
                 }
 
+                ENVPTR->DeleteLocalRef(ENVONLY, array);
                 ENVPTR->DeleteLocalRef(ENVONLY, jList);
             } /* end for (i = 0; i < count; i++) */
             break;
@@ -5181,8 +5216,11 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
                 /* invoke the toArray method */
                 if (mToArray == NULL)
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                jobjectArray array   = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, jList, mToArray);
-                jsize        jnelmts = ENVPTR->GetArrayLength(ENVONLY, array);
+                jobjectArray array = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, jList, mToArray);
+                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                if (NULL == array)
+                    H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: ArrayList.toArray returned NULL");
+                jsize jnelmts = ENVPTR->GetArrayLength(ENVONLY, array);
 
                 if (jnelmts < 0)
                     H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: number of array elements < 0");
@@ -5190,6 +5228,7 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
                 translate_wbuf(ENVONLY, array, memb, vlClass, jnelmts,
                                char_buf + i * vlSize * (size_t)jnelmts);
 
+                ENVPTR->DeleteLocalRef(ENVONLY, array);
                 ENVPTR->DeleteLocalRef(ENVONLY, jList);
             } /* end for (i = 0; i < count; i++) */
             break;
@@ -5229,8 +5268,11 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
                 /* invoke the toArray method */
                 if (mToArray == NULL)
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                jobjectArray array   = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, jList, mToArray);
-                jsize        jnelmts = ENVPTR->GetArrayLength(ENVONLY, array);
+                jobjectArray array = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, jList, mToArray);
+                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                if (NULL == array)
+                    H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: ArrayList.toArray returned NULL");
+                jsize jnelmts = ENVPTR->GetArrayLength(ENVONLY, array);
 
                 if (jnelmts < 0)
                     H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: number of array elements < 0");
@@ -5238,6 +5280,7 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
                 translate_wbuf(ENVONLY, array, memb, base_class, jnelmts,
                                char_buf + i * base_size * (size_t)jnelmts);
 
+                ENVPTR->DeleteLocalRef(ENVONLY, array);
                 ENVPTR->DeleteLocalRef(ENVONLY, jList);
             } /* end for (i = 0; i < count; i++) */
 
