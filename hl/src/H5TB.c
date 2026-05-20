@@ -497,6 +497,11 @@ H5TBwrite_fields_name(hid_t loc_id, const char *dset_name, const char *field_nam
         member_name = NULL;
     } /* end for */
 
+    /* check to make sure at least one field was found, no reason to continue if none exist;
+       ret_val is already -1 from initialization, so goto out returns failure */
+    if (j == 0)
+        goto out;
+
     /* get the dataspace handle */
     if ((file_space_id = H5Dget_space(did)) < 0)
         goto out;
@@ -3021,11 +3026,23 @@ H5TBget_field_info(hid_t loc_id, const char *dset_name, char *field_names[], siz
     for (i = 0; i < nfields; i++) {
         /* get the member name */
         if (field_names) {
-            char *member_name;
+            char  *member_name;
+            size_t name_len;
 
             if (NULL == (member_name = H5Tget_member_name(tid, (unsigned)i)))
                 goto out;
-            strcpy(field_names[i], member_name);
+
+            name_len = strlen(member_name);
+            if (name_len >= HLTB_MAX_FIELD_LEN) {
+                memcpy(field_names[i], member_name, HLTB_MAX_FIELD_LEN - 1);
+                field_names[i][HLTB_MAX_FIELD_LEN - 1] = '\0';
+            }
+            else {
+                /* name_len < HLTB_MAX_FIELD_LEN, so name_len + 1 <= HLTB_MAX_FIELD_LEN.
+                 * Callers must provide buffers of at least HLTB_MAX_FIELD_LEN bytes each
+                 * (documented in H5TBpublic.h), so this copy is within bounds. */
+                memcpy(field_names[i], member_name, name_len + 1);
+            }
             H5free_memory(member_name);
         } /* end if */
 
@@ -3111,7 +3128,7 @@ H5TB_find_field(const char *field, const char *field_list)
         start = end + 1;
     } /* end while */
 
-    if (strncmp(start, field, strlen(field)) == 0)
+    if (strcmp(start, field) == 0)
         return true;
 
     return false;

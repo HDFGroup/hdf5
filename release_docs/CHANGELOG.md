@@ -180,6 +180,59 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## High-Level Library
 
+### Fixed critical buffer overflow vulnerability in H5TBget_field_info() (CWE-120)
+
+   `H5TBget_field_info()` copied field names into caller-provided buffers using unbounded `strcpy()`,
+   allowing a malicious HDF5 file with overly long field names to overflow those buffers. The copy
+   now uses bounds-checked `memcpy()`: names shorter than `HLTB_MAX_FIELD_LEN` (255) are copied
+   exactly (preserving backward compatibility); names at or above that limit are safely truncated to
+   254 characters plus a NUL terminator.
+
+### Made HLTB_MAX_FIELD_LEN public
+
+   `HLTB_MAX_FIELD_LEN` (255) has been moved from the private header `H5TBprivate.h` to the public
+   header `H5TBpublic.h`. Applications can now use this constant to correctly size their
+   `field_names[]` buffers when calling `H5TBget_field_info()`.
+
+### Fixed H5TBread_fields_name/H5TBwrite_fields_name matching the wrong field when one field name is a prefix of another
+
+   H5TB_find_field() used strncmp() limited to strlen(field) when comparing the last entry of the supplied comma-separated field list against a table member name. This matched any user-supplied name whose leading characters equaled an existing field name (for example, requesting "PressureExtra" on a table containing "Pressure" would silently operate on the "Pressure" field). The comparison has been changed to strcmp() so full names must match exactly. In addition, H5TBwrite_fields_name() now returns an error when none of the requested field names are found (previously it silently performed a no-op write), matching the existing behavior of H5TBread_fields_name().
+
+   Fixes GitHub issue #5633
+
+### Fixed prefix-based false matches when checking "CLASS" attribute strings in the High-Level API
+
+   `H5DSis_scale()`, `H5DS_is_reserved()`, `H5IMis_image()`, and `H5IMis_palette()` all compared a
+   dataset's "CLASS" attribute against an expected class name using
+   `strncmp(buf, CLASS, MIN(strlen(CLASS), strlen(buf)))`. Because the comparison was limited to the
+   shorter of the two strings, any non-empty value whose leading characters matched the expected class
+   name was accepted — for example, a CLASS of `"IMAGE_EXTRA"` was treated as an IMAGE dataset, and
+   `"DIMENSION_S"` (null-padded to 16 bytes) was treated as a DIMENSION_SCALE. (`H5DSis_scale()` already
+   required the attribute datatype to be exactly 16 bytes, which incidentally prevented false matches
+   against shorter class names such as `"IMAGE"` or `"PALETTE"`; the other three functions had no such
+   guard and were directly exposed.) These
+   comparisons now use `strcmp()` so only an exact class name is accepted.
+
+   Additional fixes applied to all four routines:
+
+   - **VLEN-string CLASS attributes are now handled correctly.** Previously, reading a VLEN-typed
+     attribute into a fixed `char *` buffer would overwrite it with a heap-allocated `char *` pointer
+     rather than the string content, which is undefined behaviour and could corrupt memory or produce
+     garbage comparison results.
+     All four routines now read VLEN CLASS attributes properly (via `H5Treclaim`) and compare the
+     string content: `H5DSis_scale()`, `H5IMis_image()`, and `H5IMis_palette()` return 1 when the
+     value matches exactly, and `H5DS_is_reserved()` correctly identifies reserved class names stored
+     as VLEN strings.
+   - **NUL-termination hardening.** The read buffer is now allocated one byte larger than the stored
+     attribute size, and a NUL terminator is explicitly written after the attribute data. This protects
+     `strcmp` from over-reading files where the CLASS attribute was written without strictly honouring
+     `H5T_STR_NULLTERM`.
+   - **Resource leak fix in `H5IMis_image()` and `H5IMis_palette()`.** The `out:` error-handling block
+     previously closed only the dataset ID, leaving the attribute ID (`aid`) and attribute datatype ID
+     (`atid`) open on every error path. Both IDs are now properly closed on error.
+
+   Related to GitHub issue #5633
+
 ## Fortran High-Level APIs
 
 ## Documentation

@@ -47,6 +47,12 @@
 #define NRECORDS     8
 #define NRECORDS_ADD 3
 
+#define BOUNDARY_NFIELDS      5
+#define BOUNDARY_NRECORDS     2
+#define BOUNDARY_FILE         "test_boundary.h5"
+#define BOUNDARY_SHORT_NAME   "ShortName"
+#define BOUNDARY_OVERLONG_LEN 1000 /* arbitrary length well above HLTB_MAX_FIELD_LEN */
+
 /*-------------------------------------------------------------------------
  * structure used for all tests, a particle with properties
  *-------------------------------------------------------------------------
@@ -1011,15 +1017,22 @@ test_table(hid_t fid, int do_write)
                                   field_offset_pos, field_sizes_pos, position_in) < 0)
             goto out;
 
-        /* read back the all table */
+        /* write an invalid field name whose prefix matches a real field, should fail */
+        if (H5TBwrite_fields_name(fid, "table9", "PressureExtra", start, nrecords, sizeof(float), 0,
+                                  field_sizes_pre, pressure_in) >= 0)
+            goto out;
+
+        /* Read back the whole table.  Verify two things:
+         *  1. The valid writes (Pressure records 2-4, Latitude/Longitude records 2-4)
+         *     are intact.
+         *  2. The failing PressureExtra write left no partial mutation: records
+         *     outside the written range still carry the fill value (-99.0F). */
         start    = 0;
         nrecords = NRECORDS;
         if (H5TBread_table(fid, "table9", type_size_mem, field_offset, field_size, rbuf) < 0)
             goto out;
 
         {
-
-            /* compare the read values with the initial values */
             for (i = 0; i < NRECORDS; i++) {
                 if (i >= 2 && i <= 4) {
                     if (rbuf[i].lati != position_in[i - NRECORDS_ADD + 1].lati ||
@@ -1030,6 +1043,11 @@ test_table(hid_t fid, int do_write)
                                 position_in[i].lati);
                         goto out;
                     }
+                }
+                else {
+                    /* Records outside the written range must still be at fill value */
+                    if (!H5_FLT_ABS_EQUAL(rbuf[i].pressure, fill1[0].pressure))
+                        goto out;
                 }
             }
         }
@@ -1069,6 +1087,11 @@ test_table(hid_t fid, int do_write)
 
     /* read an invalid field, should fail */
     if (H5TBread_fields_name(fid, "table10", "DoesNotExist", start, nrecords, sizeof(float), 0,
+                             field_sizes_pre, pressure_out) >= 0)
+        goto out;
+
+    /* read an invalid field name whose prefix matches a real field, should fail */
+    if (H5TBread_fields_name(fid, "table10", "PressureExtra", start, nrecords, sizeof(float), 0,
                              field_sizes_pre, pressure_out) >= 0)
         goto out;
 
@@ -1466,8 +1489,12 @@ test_table(hid_t fid, int do_write)
 
     /* allocate */
     names_out = (char **)malloc(sizeof(char *) * (size_t)NFIELDS);
+    if (!names_out)
+        goto out;
     for (i = 0; i < NFIELDS; i++) {
         names_out[i] = (char *)malloc(sizeof(char) * 255);
+        if (!names_out[i])
+            goto out;
     }
 
     /* Get field info */
@@ -1480,13 +1507,179 @@ test_table(hid_t fid, int do_write)
         }
     }
 
-    /* release */
+    /* Release */
     for (i = 0; i < NFIELDS; i++) {
         free(names_out[i]);
     }
     free(names_out);
 
     PASSED();
+
+    /*-------------------------------------------------------------------------
+     *
+     * Test backward compatibility: smaller buffers for short field names
+     *
+     *-------------------------------------------------------------------------
+     */
+
+    HL_TESTING2("field info with small buffers (backward compatibility)");
+
+    names_out = (char **)malloc(sizeof(char *) * (size_t)NFIELDS);
+    if (!names_out)
+        goto out;
+    for (i = 0; i < NFIELDS; i++) {
+        names_out[i] = (char *)malloc(sizeof(char) * 32);
+        if (!names_out[i])
+            goto out;
+    }
+
+    if (H5TBget_field_info(fid, "table1", names_out, sizes_out, offset_out, &size_out) < 0)
+        goto out;
+
+    for (i = 0; i < NFIELDS; i++) {
+        if ((strcmp(field_names[i], names_out[i]) != 0)) {
+            goto out;
+        }
+    }
+
+    /* Release */
+    for (i = 0; i < NFIELDS; i++) {
+        free(names_out[i]);
+    }
+    free(names_out);
+
+    PASSED();
+
+    /*-------------------------------------------------------------------------
+     *
+     * Test field name length boundaries around HLTB_MAX_FIELD_LEN
+     *
+     *-------------------------------------------------------------------------
+     */
+
+    HL_TESTING2("field name length boundaries");
+
+    {
+        hid_t   fid_boundary = H5I_INVALID_HID;
+        hid_t   boundary_field_types[BOUNDARY_NFIELDS];
+        size_t  boundary_field_offsets[BOUNDARY_NFIELDS];
+        char  **boundary_names_out = NULL;
+        size_t  boundary_sizes_out[BOUNDARY_NFIELDS];
+        size_t  boundary_offset_out[BOUNDARY_NFIELDS];
+        size_t  boundary_size_out;
+        hsize_t boundary_nfields;
+        hsize_t boundary_nrecords;
+        /* one below max name length: no truncation */
+        char *field_below_max = (char *)malloc(HLTB_MAX_FIELD_LEN - 1);
+        /* exactly max name length: fits at boundary, no truncation */
+        char *field_at_max = (char *)malloc(HLTB_MAX_FIELD_LEN);
+        /* one above max name length: truncated when read back */
+        char *field_over_max = (char *)malloc(HLTB_MAX_FIELD_LEN + 1);
+        /* far above max: truncated when read back */
+        char *field_far_over = (char *)malloc(BOUNDARY_OVERLONG_LEN + 1);
+
+        if (!field_below_max || !field_at_max || !field_over_max || !field_far_over)
+            goto boundary_out;
+
+        memset(field_below_max, 'A', HLTB_MAX_FIELD_LEN - 2);
+        field_below_max[HLTB_MAX_FIELD_LEN - 2] = '\0';
+        memset(field_at_max, 'B', HLTB_MAX_FIELD_LEN - 1);
+        field_at_max[HLTB_MAX_FIELD_LEN - 1] = '\0';
+        memset(field_over_max, 'C', HLTB_MAX_FIELD_LEN);
+        field_over_max[HLTB_MAX_FIELD_LEN] = '\0';
+        memset(field_far_over, 'D', BOUNDARY_OVERLONG_LEN);
+        field_far_over[BOUNDARY_OVERLONG_LEN] = '\0';
+
+        const char *boundary_field_names[BOUNDARY_NFIELDS] = {field_below_max, field_at_max, field_over_max,
+                                                              field_far_over, BOUNDARY_SHORT_NAME};
+
+        if ((fid_boundary = H5Fcreate(BOUNDARY_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            goto boundary_out;
+
+        for (i = 0; i < BOUNDARY_NFIELDS; i++) {
+            boundary_field_types[i]   = H5T_NATIVE_INT;
+            boundary_field_offsets[i] = i * sizeof(int);
+        }
+
+        int boundary_data[BOUNDARY_NRECORDS][BOUNDARY_NFIELDS] = {{1, 2, 3, 4, 5}, {6, 7, 8, 9, 10}};
+
+        if (H5TBmake_table("Boundary Test", fid_boundary, "boundary_table", BOUNDARY_NFIELDS,
+                           BOUNDARY_NRECORDS, BOUNDARY_NFIELDS * sizeof(int), boundary_field_names,
+                           boundary_field_offsets, boundary_field_types, 10, NULL, 0, boundary_data) < 0)
+            goto boundary_out;
+
+        boundary_names_out = (char **)malloc(sizeof(char *) * BOUNDARY_NFIELDS);
+        if (!boundary_names_out)
+            goto boundary_out;
+        for (i = 0; i < BOUNDARY_NFIELDS; i++) {
+            boundary_names_out[i] = (char *)malloc(HLTB_MAX_FIELD_LEN);
+            if (!boundary_names_out[i])
+                goto boundary_out;
+        }
+
+        if (H5TBget_field_info(fid_boundary, "boundary_table", boundary_names_out, boundary_sizes_out,
+                               boundary_offset_out, &boundary_size_out) < 0)
+            goto boundary_out;
+
+        /* HLTB_MAX_FIELD_LEN-2 char name: fits without truncation */
+        if (strlen(boundary_names_out[0]) != HLTB_MAX_FIELD_LEN - 2 ||
+            strncmp(boundary_names_out[0], field_below_max, HLTB_MAX_FIELD_LEN - 2) != 0)
+            goto boundary_out;
+        /* HLTB_MAX_FIELD_LEN-1 char name: fits exactly at boundary, no truncation */
+        if (strlen(boundary_names_out[1]) != HLTB_MAX_FIELD_LEN - 1 ||
+            strncmp(boundary_names_out[1], field_at_max, HLTB_MAX_FIELD_LEN - 1) != 0)
+            goto boundary_out;
+        /* HLTB_MAX_FIELD_LEN char name: truncated to HLTB_MAX_FIELD_LEN-1 chars */
+        if (strlen(boundary_names_out[2]) != HLTB_MAX_FIELD_LEN - 1 ||
+            strncmp(boundary_names_out[2], field_over_max, HLTB_MAX_FIELD_LEN - 1) != 0)
+            goto boundary_out;
+        /* far-over-max name: truncated to HLTB_MAX_FIELD_LEN-1 chars */
+        if (strlen(boundary_names_out[3]) != HLTB_MAX_FIELD_LEN - 1 ||
+            strncmp(boundary_names_out[3], field_far_over, HLTB_MAX_FIELD_LEN - 1) != 0)
+            goto boundary_out;
+        /* short name: unchanged */
+        if (strcmp(boundary_names_out[4], BOUNDARY_SHORT_NAME) != 0)
+            goto boundary_out;
+
+        if (H5TBget_table_info(fid_boundary, "boundary_table", &boundary_nfields, &boundary_nrecords) < 0)
+            goto boundary_out;
+        if (boundary_nfields != BOUNDARY_NFIELDS || boundary_nrecords != BOUNDARY_NRECORDS)
+            goto boundary_out;
+
+        for (i = 0; i < BOUNDARY_NFIELDS; i++)
+            free(boundary_names_out[i]);
+        free(boundary_names_out);
+        free(field_below_max);
+        free(field_at_max);
+        free(field_over_max);
+        free(field_far_over);
+
+        if (H5Fclose(fid_boundary) < 0)
+            goto out;
+
+        PASSED();
+        goto boundary_cleanup;
+
+boundary_out:
+        H5_FAILED();
+        if (boundary_names_out) {
+            for (i = 0; i < BOUNDARY_NFIELDS; i++)
+                free(boundary_names_out[i]);
+            free(boundary_names_out);
+        }
+        free(field_below_max);
+        free(field_at_max);
+        free(field_over_max);
+        free(field_far_over);
+        H5E_BEGIN_TRY
+        {
+            H5Fclose(fid_boundary);
+        }
+        H5E_END_TRY
+        return -1;
+
+boundary_cleanup:;
+    }
 
     /*-------------------------------------------------------------------------
      * end
