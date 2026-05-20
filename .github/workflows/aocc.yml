@@ -52,7 +52,7 @@ jobs:
 
       - name: Cache OpenMPI ${{ env.MPIVERDOT }} installation
         id: cache-openmpi-5_0_7
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v4
         with:
           path: /home/runner/work/hdf5/hdf5/openmpi-${{ env.MPIVERDOT }}-install
           key: ${{ runner.os }}-${{ runner.arch }}-openmpi-5_0_7-cache

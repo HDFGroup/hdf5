@@ -114,6 +114,7 @@ done
 # different, occasionally the wrong file is deleted, interrupting the flow of
 # the test.  Running each of these tests in its own directory should eliminate
 # the problem.
+rm -rf swmr_test
 mkdir swmr_test
 for FILE in swmr*; do
     case "$FILE" in

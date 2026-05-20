@@ -993,6 +993,7 @@ typedef enum {
     H5_PKG_MM, /* Core memory management   */
     H5_PKG_O,  /* Object headers           */
     H5_PKG_P,  /* Property lists           */
+    H5_PKG_PL, /* Plugins                  */
     H5_PKG_S,  /* Dataspaces               */
     H5_PKG_T,  /* Datatypes                */
     H5_PKG_V,  /* Vector functions         */

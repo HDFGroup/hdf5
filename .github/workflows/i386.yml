@@ -23,40 +23,49 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: setup alpine
-        uses: jirutka/setup-alpine@ae3b3ddba35054804fc4a3507b519fa7e8152050 # v1
-        with:
-          arch: x86
-          packages: >
-            build-base
-            libaec-dev
-            libgit2-dev
-            cmake
+      - name: Start i386 container
+        run: |
+          docker run -d --name i386_build --platform linux/386 \
+            -e CTEST_OUTPUT_ON_FAILURE=1 \
+            -v "${{ github.workspace }}:/workspace" \
+            i386/debian:bookworm sleep infinity
+
+      - name: Install dependencies
+        run: |
+          docker exec i386_build bash -c "
+            echo 'deb http://deb.debian.org/debian bookworm-backports main' > /etc/apt/sources.list.d/backports.list
+            apt-get update -y
+            apt-get install -y build-essential libaec-dev libgit2-dev
+            apt-get install -y -t bookworm-backports cmake
+          "
 
       - name: Configure
-        shell: alpine.sh --root {0}
         run: |
-          mkdir build
-          cd build
-          cmake -C ../config/cmake/cacheinit.cmake -G "Unix Makefiles" \
-          --log-level=VERBOSE \
-          -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-          -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
-          -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
-          -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=OFF \
-          -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
-          -DHDF5_BUILD_FORTRAN:BOOL=OFF \
-          -DHDF5_BUILD_JAVA:BOOL=OFF \
-          ..
+          docker exec -w /workspace i386_build bash -c "
+            mkdir build
+            cd build
+            cmake -C ../config/cmake/cacheinit.cmake -G 'Unix Makefiles' \
+              --log-level=VERBOSE \
+              -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+              -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
+              -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
+              -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=OFF \
+              -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+              -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+              -DHDF5_BUILD_JAVA:BOOL=OFF \
+              ..
+          "
 
       - name: Build
-        shell: alpine.sh --root {0}
         run: |
-          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
-        working-directory: build
+          docker exec -w /workspace/build i386_build \
+            cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
 
       - name: Run Tests
-        shell: alpine.sh --root {0}
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }}
-        working-directory: build
+          docker exec -w /workspace/build i386_build \
+            ctest . --parallel 2 -C ${{ inputs.build_mode }}
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f i386_build

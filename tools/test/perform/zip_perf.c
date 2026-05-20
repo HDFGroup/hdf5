@@ -166,7 +166,9 @@ static void
 compress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen)
 {
 #if defined(H5_HAVE_ZLIBNG_H)
-    int rc = zng_compress2(dest, destLen, source, sourceLen, compress_level);
+    size_t destLen_sz = (size_t)*destLen;
+    int    rc         = zng_compress2(dest, &destLen_sz, source, sourceLen, compress_level);
+    *destLen          = (uLongf)destLen_sz;
 #else
     int rc = compress2(dest, destLen, source, sourceLen, compress_level);
 #endif

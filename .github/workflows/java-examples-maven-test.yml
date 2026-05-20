@@ -43,7 +43,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Cache Maven dependencies
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-examples-${{ hashFiles('**/pom-examples.xml*') }}
@@ -171,7 +171,7 @@ jobs:
 
       - name: Upload failure artifacts (Linux ${{ matrix.category }})
         if: steps.test-examples.outputs.test-status == 'FAILED'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
           name: java-examples-failure-linux-${{ matrix.category }}-${{ github.run_id }}
           path: |
@@ -206,7 +206,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Cache Maven dependencies
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-examples-${{ hashFiles('**/pom-examples.xml*') }}
@@ -291,7 +291,7 @@ jobs:
 
       - name: Upload failure artifacts (Windows ${{ matrix.category }})
         if: steps.test-examples.outputs.test-status == 'FAILED'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
           name: java-examples-failure-windows-${{ matrix.category }}-${{ github.run_id }}
           path: |
@@ -325,7 +325,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Cache Maven dependencies
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-examples-${{ hashFiles('**/pom-examples.xml*') }}
@@ -417,7 +417,7 @@ jobs:
 
       - name: Upload failure artifacts (macOS ${{ matrix.category }})
         if: steps.test-examples.outputs.test-status == 'FAILED'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
           name: java-examples-failure-macos-${{ matrix.category }}-${{ github.run_id }}
           path: |
@@ -467,7 +467,7 @@ jobs:
           echo "Test summary report generated"
 
       - name: Upload Test Summary
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
           name: java-examples-test-summary-${{ github.run_id }}
           path: java-examples-test-summary.md

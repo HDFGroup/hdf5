@@ -349,6 +349,7 @@ macro (ADD_H5_UD_TEST testname resultcode resultfile)
             -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
             -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
             -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
+            $<$<BOOL:${HDF5_REQUIRE_SIGNED_PLUGINS}>:-DTEST_KEYSTORE_DIR=${CMAKE_BINARY_DIR}/test_keystore>
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5LS_UD-${testname}-${resultfile} PROPERTIES
