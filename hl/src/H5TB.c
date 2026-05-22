@@ -3038,8 +3038,9 @@ H5TBget_field_info(hid_t loc_id, const char *dset_name, char *field_names[], siz
                 field_names[i][HLTB_MAX_FIELD_LEN - 1] = '\0';
             }
             else {
-                /* name_len < HLTB_MAX_FIELD_LEN, so name_len + 1 <= HLTB_MAX_FIELD_LEN.
-                 * Callers must provide buffers of at least HLTB_MAX_FIELD_LEN bytes each
+                /* name fits within the limit: copy only name_len + 1 bytes (more efficient
+                 * than copying HLTB_MAX_FIELD_LEN - 1 bytes).  name_len + 1 <= HLTB_MAX_FIELD_LEN,
+                 * and callers must provide buffers of at least HLTB_MAX_FIELD_LEN bytes each
                  * (documented in H5TBpublic.h), so this copy is within bounds. */
                 memcpy(field_names[i], member_name, name_len + 1);
             }

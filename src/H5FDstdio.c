@@ -393,8 +393,8 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
 
         /* Use the value in the property list */
         if (H5Pget_file_locking(fapl_id, &unused, &file->ignore_disabled_file_locks) < 0) {
+            fclose(file->fp);
             free(file);
-            fclose(f);
             H5Epush_ret(__func__, H5E_ERR_CLS, H5E_FILE, H5E_CANTGET,
                         "unable to get use disabled file locks property", NULL);
         }
@@ -407,23 +407,23 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     file->fd = fileno(file->fp);
 #endif /* H5_HAVE_WIN32_API */
     if (file->fd < 0) {
+        fclose(file->fp);
         free(file);
-        fclose(f);
         H5Epush_ret(__func__, H5E_ERR_CLS, H5E_FILE, H5E_CANTOPENFILE, "unable to get file descriptor", NULL);
     } /* end if */
 
 #ifdef H5_HAVE_WIN32_API
     file->hFile = (HANDLE)_get_osfhandle(file->fd);
     if (INVALID_HANDLE_VALUE == file->hFile) {
+        fclose(file->fp);
         free(file);
-        fclose(f);
         H5Epush_ret(__func__, H5E_ERR_CLS, H5E_FILE, H5E_CANTOPENFILE, "unable to get Windows file handle",
                     NULL);
     } /* end if */
 
     if (!GetFileInformationByHandle((HANDLE)file->hFile, &fileinfo)) {
+        fclose(file->fp);
         free(file);
-        fclose(f);
         H5Epush_ret(__func__, H5E_ERR_CLS, H5E_FILE, H5E_CANTOPENFILE,
                     "unable to get Windows file descriptor information", NULL);
     } /* end if */
@@ -433,8 +433,8 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     file->dwVolumeSerialNumber = fileinfo.dwVolumeSerialNumber;
 #else  /* H5_HAVE_WIN32_API */
     if (fstat(file->fd, &sb) < 0) {
+        fclose(file->fp);
         free(file);
-        fclose(f);
         H5Epush_ret(__func__, H5E_ERR_CLS, H5E_FILE, H5E_BADFILE, "unable to fstat file", NULL);
     } /* end if */
     file->device = sb.st_dev;
