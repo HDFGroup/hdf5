@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-05-20</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-05-23</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -173,6 +173,11 @@ Functions/Subroutines</h2></td></tr>
 <tr class="memdesc:ga9fc3119bc7a56d7e5d242637b794ff1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Overwrites a field.  <br /></td></tr>
 <tr class="memitem:ga25b403d2677d61d33a646f81e54df073" id="r_ga25b403d2677d61d33a646f81e54df073"><td class="memItemLeft">subroutine&#160;</td><td class="memItemRight"><a class="el" href="group___f_h5_t_b.html#ga25b403d2677d61d33a646f81e54df073">h5tbwrite_field_name_f</a> (loc_id, dset_name, field_name, start, nrecords, type_size, buf, errcode)</td></tr>
 <tr class="memdesc:ga25b403d2677d61d33a646f81e54df073"><td class="mdescLeft">&#160;</td><td class="mdescRight">Overwrites field.  <br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:ad3f398f22b682b48d553acf5bbcefdeb" id="r_ad3f398f22b682b48d553acf5bbcefdeb"><td class="memItemLeft">integer, parameter&#160;</td><td class="memItemRight"><a class="el" href="namespaceh5tb.html#ad3f398f22b682b48d553acf5bbcefdeb">hltb_max_field_len_f</a> = 255</td></tr>
+<tr class="memdesc:ad3f398f22b682b48d553acf5bbcefdeb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum length of a field name buffer returned by h5tbget_field_info_f. Matches HLTB_MAX_FIELD_LEN defined in <a class="el" href="_h5_t_bpublic_8h.html">H5TBpublic.h</a>. Declare field_names character arrays with at least this length: CHARACTER(LEN=HLTB_MAX_FIELD_LEN_F) :: field_names(nfields).  <br /></td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->

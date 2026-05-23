@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-05-20</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-05-23</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -686,7 +686,7 @@ A return value &lt;0 indicates an error.</dd></dl>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">loc_id</td><td>Location identifier. The identifier may be that of a file or group. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dset_name</td><td>The name of the dataset to read </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">field_names</td><td>An array containing the names of the fields </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">field_names</td><td>An array of character buffers to receive the field names. Each buffer must be at least <a class="el" href="_h5_t_bpublic_8h.html#a6e334305f873c1186fd7059586c5b696">HLTB_MAX_FIELD_LEN</a> bytes. Field names longer than <a class="el" href="_h5_t_bpublic_8h.html#a6e334305f873c1186fd7059586c5b696">HLTB_MAX_FIELD_LEN</a> - 1 characters are silently truncated. Callers that subsequently use the returned names for strict field lookups (e.g., via <a class="el" href="#ga6d4baea1ae71f3a4863bbbb40609811d" title="Reads one or several fields. The fields are identified by name.">H5TBread_fields_name()</a> or <a class="el" href="#ga1284baf9489d596c76fa0458c7b3def6" title="Overwrites fields.">H5TBwrite_fields_name()</a>) should be aware that a truncated name may inadvertently match a different, shorter field whose name is a prefix of the original. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">field_sizes</td><td>An array containing the size of the fields </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">field_offsets</td><td>An array containing the offsets of the fields </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">type_size</td><td>The size of the HDF5 datatype associated with the table. (More specifically, the size in bytes of the HDF5 compound datatype used to define a row, or record, in the table)</td></tr>
@@ -959,7 +959,7 @@ A return value &lt;0 indicates an error.</dd></dl>
     <tr><td class="paramdir">[in]</td><td class="paramname">nfields</td><td>The number of fields </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">nrecords</td><td>The number of records </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">type_size</td><td>The size in bytes of the structure associated with the table; This value is obtained with <code>sizeof()</code>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">field_names</td><td>An array containing the names of the fields </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">field_names</td><td>An array containing the names of the fields. Names longer than <a class="el" href="_h5_t_bpublic_8h.html#a6e334305f873c1186fd7059586c5b696">HLTB_MAX_FIELD_LEN</a> - 1 characters are silently truncated when read back by <a class="el" href="#gae9aa3c0aa43f468b56eb82cb04dff0b2" title="Gets information about a table.">H5TBget_field_info()</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">field_offset</td><td>An array containing the offsets of the fields </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">field_types</td><td>An array containing the type of the fields </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">chunk_size</td><td>The chunk size </td></tr>
