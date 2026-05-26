@@ -2054,10 +2054,8 @@ public class TestH5D {
 
             assertNotNull("testH5Dread_compound_of_vlen: read_data[0] not null", read_data[0]);
             assertNotNull("testH5Dread_compound_of_vlen: read_data[1] not null", read_data[1]);
-            assertEquals("testH5Dread_compound_of_vlen: row 0 record has 2 members", 2,
-                         read_data[0].size());
-            assertEquals("testH5Dread_compound_of_vlen: row 1 record has 2 members", 2,
-                         read_data[1].size());
+            assertEquals("testH5Dread_compound_of_vlen: row 0 record has 2 members", 2, read_data[0].size());
+            assertEquals("testH5Dread_compound_of_vlen: row 1 record has 2 members", 2, read_data[1].size());
 
             Object seq0obj = read_data[0].get(0);
             Object seq1obj = read_data[1].get(0);
@@ -2072,20 +2070,13 @@ public class TestH5D {
             ArrayList<?> seq1_read = (ArrayList<?>)seq1obj;
             assertEquals("testH5Dread_compound_of_vlen: row 0 seq length", 3, seq0_read.size());
             assertEquals("testH5Dread_compound_of_vlen: row 1 seq length", 2, seq1_read.size());
-            assertEquals("testH5Dread_compound_of_vlen: row 0 seq[0]", Integer.valueOf(1),
-                         seq0_read.get(0));
-            assertEquals("testH5Dread_compound_of_vlen: row 0 seq[1]", Integer.valueOf(2),
-                         seq0_read.get(1));
-            assertEquals("testH5Dread_compound_of_vlen: row 0 seq[2]", Integer.valueOf(3),
-                         seq0_read.get(2));
-            assertEquals("testH5Dread_compound_of_vlen: row 1 seq[0]", Integer.valueOf(5),
-                         seq1_read.get(0));
-            assertEquals("testH5Dread_compound_of_vlen: row 1 seq[1]", Integer.valueOf(6),
-                         seq1_read.get(1));
-            assertEquals("testH5Dread_compound_of_vlen: row 0 n", Integer.valueOf(4),
-                         read_data[0].get(1));
-            assertEquals("testH5Dread_compound_of_vlen: row 1 n", Integer.valueOf(7),
-                         read_data[1].get(1));
+            assertEquals("testH5Dread_compound_of_vlen: row 0 seq[0]", Integer.valueOf(1), seq0_read.get(0));
+            assertEquals("testH5Dread_compound_of_vlen: row 0 seq[1]", Integer.valueOf(2), seq0_read.get(1));
+            assertEquals("testH5Dread_compound_of_vlen: row 0 seq[2]", Integer.valueOf(3), seq0_read.get(2));
+            assertEquals("testH5Dread_compound_of_vlen: row 1 seq[0]", Integer.valueOf(5), seq1_read.get(0));
+            assertEquals("testH5Dread_compound_of_vlen: row 1 seq[1]", Integer.valueOf(6), seq1_read.get(1));
+            assertEquals("testH5Dread_compound_of_vlen: row 0 n", Integer.valueOf(4), read_data[0].get(1));
+            assertEquals("testH5Dread_compound_of_vlen: row 1 n", Integer.valueOf(7), read_data[1].get(1));
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -2122,8 +2113,7 @@ public class TestH5D {
         try {
             dset_id      = writeCompoundOfVlenDataset("cmpd_of_vlen_rd_prealloc");
             file_type_id = H5.H5Dget_type(dset_id);
-            assertTrue("testH5Dread_compound_of_vlen_preallocated: H5Dget_type: ",
-                       file_type_id >= 0);
+            assertTrue("testH5Dread_compound_of_vlen_preallocated: H5Dget_type: ", file_type_id >= 0);
 
             ArrayList[] read_data = new ArrayList[N_ROWS];
             for (int i = 0; i < N_ROWS; i++)
@@ -2142,10 +2132,9 @@ public class TestH5D {
                            (seq0obj == null ? "null" : seq0obj.getClass().getName()),
                        seq0obj instanceof ArrayList);
             ArrayList<?> seq0_read = (ArrayList<?>)seq0obj;
-            assertEquals("testH5Dread_compound_of_vlen_preallocated: row 0 seq length", 3,
-                         seq0_read.size());
-            assertEquals("testH5Dread_compound_of_vlen_preallocated: row 0 seq[0]",
-                         Integer.valueOf(1), seq0_read.get(0));
+            assertEquals("testH5Dread_compound_of_vlen_preallocated: row 0 seq length", 3, seq0_read.size());
+            assertEquals("testH5Dread_compound_of_vlen_preallocated: row 0 seq[0]", Integer.valueOf(1),
+                         seq0_read.get(0));
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -2190,29 +2179,20 @@ public class TestH5D {
 
             assertNotNull("testH5Dwrite_compound_of_vlen: read_data[0] not null", read_data[0]);
             assertNotNull("testH5Dwrite_compound_of_vlen: read_data[1] not null", read_data[1]);
-            assertEquals("testH5Dwrite_compound_of_vlen: row 0 record has 2 members", 2,
-                         read_data[0].size());
-            assertEquals("testH5Dwrite_compound_of_vlen: row 1 record has 2 members", 2,
-                         read_data[1].size());
+            assertEquals("testH5Dwrite_compound_of_vlen: row 0 record has 2 members", 2, read_data[0].size());
+            assertEquals("testH5Dwrite_compound_of_vlen: row 1 record has 2 members", 2, read_data[1].size());
 
             ArrayList<?> seq0_read = (ArrayList<?>)read_data[0].get(0);
             ArrayList<?> seq1_read = (ArrayList<?>)read_data[1].get(0);
             assertEquals("testH5Dwrite_compound_of_vlen: row 0 seq length", 3, seq0_read.size());
             assertEquals("testH5Dwrite_compound_of_vlen: row 1 seq length", 2, seq1_read.size());
-            assertEquals("testH5Dwrite_compound_of_vlen: row 0 seq[0]", Integer.valueOf(1),
-                         seq0_read.get(0));
-            assertEquals("testH5Dwrite_compound_of_vlen: row 0 seq[1]", Integer.valueOf(2),
-                         seq0_read.get(1));
-            assertEquals("testH5Dwrite_compound_of_vlen: row 0 seq[2]", Integer.valueOf(3),
-                         seq0_read.get(2));
-            assertEquals("testH5Dwrite_compound_of_vlen: row 1 seq[0]", Integer.valueOf(5),
-                         seq1_read.get(0));
-            assertEquals("testH5Dwrite_compound_of_vlen: row 1 seq[1]", Integer.valueOf(6),
-                         seq1_read.get(1));
-            assertEquals("testH5Dwrite_compound_of_vlen: row 0 n", Integer.valueOf(4),
-                         read_data[0].get(1));
-            assertEquals("testH5Dwrite_compound_of_vlen: row 1 n", Integer.valueOf(7),
-                         read_data[1].get(1));
+            assertEquals("testH5Dwrite_compound_of_vlen: row 0 seq[0]", Integer.valueOf(1), seq0_read.get(0));
+            assertEquals("testH5Dwrite_compound_of_vlen: row 0 seq[1]", Integer.valueOf(2), seq0_read.get(1));
+            assertEquals("testH5Dwrite_compound_of_vlen: row 0 seq[2]", Integer.valueOf(3), seq0_read.get(2));
+            assertEquals("testH5Dwrite_compound_of_vlen: row 1 seq[0]", Integer.valueOf(5), seq1_read.get(0));
+            assertEquals("testH5Dwrite_compound_of_vlen: row 1 seq[1]", Integer.valueOf(6), seq1_read.get(1));
+            assertEquals("testH5Dwrite_compound_of_vlen: row 0 n", Integer.valueOf(4), read_data[0].get(1));
+            assertEquals("testH5Dwrite_compound_of_vlen: row 1 n", Integer.valueOf(7), read_data[1].get(1));
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -2243,10 +2223,10 @@ public class TestH5D {
     @Test
     public void testH5Dread_vlen_of_compound_nullslots()
     {
-        long cmpd_tid  = HDF5Constants.H5I_INVALID_HID;
-        long vlen_tid  = HDF5Constants.H5I_INVALID_HID;
-        long dspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dset_id   = HDF5Constants.H5I_INVALID_HID;
+        long cmpd_tid    = HDF5Constants.H5I_INVALID_HID;
+        long vlen_tid    = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id   = HDF5Constants.H5I_INVALID_HID;
+        long dset_id     = HDF5Constants.H5I_INVALID_HID;
         final int N_ROWS = 2;
 
         try {
@@ -2257,13 +2237,12 @@ public class TestH5D {
             H5.H5Tinsert(cmpd_tid, "B", intSize, HDF5Constants.H5T_NATIVE_INT);
             H5.H5Tpack(cmpd_tid);
 
-            vlen_tid = H5.H5Tvlen_create(cmpd_tid);
+            vlen_tid    = H5.H5Tvlen_create(cmpd_tid);
             long[] dims = {N_ROWS};
-            dspace_id = H5.H5Screate_simple(1, dims, null);
+            dspace_id   = H5.H5Screate_simple(1, dims, null);
 
-            dset_id = H5.H5Dcreate(H5fid, "vlen_of_cmpd_rd", vlen_tid, dspace_id,
-                                   HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            dset_id = H5.H5Dcreate(H5fid, "vlen_of_cmpd_rd", vlen_tid, dspace_id, HDF5Constants.H5P_DEFAULT,
+                                   HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
             assertTrue("testH5Dread_vlen_of_compound_nullslots: H5Dcreate: ", dset_id >= 0);
 
             // row 0: 1 element  [ { A=1, B=2 } ]
@@ -2358,11 +2337,11 @@ public class TestH5D {
     @Test
     public void testH5Dread_vlen_of_nested_compound()
     {
-        long inner_tid = HDF5Constants.H5I_INVALID_HID;
-        long outer_tid = HDF5Constants.H5I_INVALID_HID;
-        long vlen_tid  = HDF5Constants.H5I_INVALID_HID;
-        long dspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dset_id   = HDF5Constants.H5I_INVALID_HID;
+        long inner_tid   = HDF5Constants.H5I_INVALID_HID;
+        long outer_tid   = HDF5Constants.H5I_INVALID_HID;
+        long vlen_tid    = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id   = HDF5Constants.H5I_INVALID_HID;
+        long dset_id     = HDF5Constants.H5I_INVALID_HID;
         final int N_ROWS = 2;
 
         try {
@@ -2386,9 +2365,9 @@ public class TestH5D {
             long[] dims = {N_ROWS};
             dspace_id   = H5.H5Screate_simple(1, dims, null);
 
-            dset_id = H5.H5Dcreate(H5fid, "vlen_of_nested_cmpd", vlen_tid, dspace_id,
-                                   HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            dset_id =
+                H5.H5Dcreate(H5fid, "vlen_of_nested_cmpd", vlen_tid, dspace_id, HDF5Constants.H5P_DEFAULT,
+                             HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
             assertTrue("testH5Dread_vlen_of_nested_compound: H5Dcreate: ", dset_id >= 0);
 
             //   row 0: 1 element  [ { id=1, sub={ P=2, Q=3 } } ]

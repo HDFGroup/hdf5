@@ -4834,7 +4834,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
     int          ret_buflen = -1;
     jboolean     retIsList  = JNI_FALSE;
     jobjectArray jList      = NULL;
-    jobject      jobj        = NULL;
+    jobject      jobj       = NULL;
     H5T_class_t  vlClass;
     size_t       vlSize;
     size_t       i, x;
@@ -5124,7 +5124,8 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
             for (i = 0; i < (size_t)count; i++) {
                 hvl_t vl_elem;
 
-                if (NULL == (jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)in_buf, (jsize)i))) {
+                if (NULL ==
+                    (jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)in_buf, (jsize)i))) {
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                     H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: in_buf element is NULL");
                 }
@@ -5158,7 +5159,8 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
         case H5T_COMPOUND: {
             /* Convert each list to a compound element */
             for (i = 0; i < (size_t)count; i++) {
-                if (NULL == (jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)in_buf, (jsize)i))) {
+                if (NULL ==
+                    (jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)in_buf, (jsize)i))) {
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                     H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: in_buf element is NULL");
                 }
@@ -5215,7 +5217,8 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
 
             /* Convert each list to an array element */
             for (i = 0; i < (size_t)count; i++) {
-                if (NULL == (jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)in_buf, (jsize)i))) {
+                if (NULL ==
+                    (jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)in_buf, (jsize)i))) {
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                     H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: in_buf element is NULL");
                 }
@@ -5269,7 +5272,8 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
 
             /* Convert each list to an array element */
             for (i = 0; i < (size_t)count; i++) {
-                if (NULL == (jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)in_buf, (jsize)i))) {
+                if (NULL ==
+                    (jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)in_buf, (jsize)i))) {
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                     H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: in_buf element is NULL");
                 }
