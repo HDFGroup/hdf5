@@ -163,6 +163,10 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
 #define DSET_DEPREC_NAME_COMPACT "deprecated_compact"
 #define DSET_DEPREC_NAME_FILTER  "deprecated_filter"
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
+#define DSET_BAD_DECODE_SIZE_NAME         "bad_decode_size"
+#define DSET_BAD_DECODE_SIZE_VLEN_NAME    "bad_decode_size_vlen"
+#define DSET_BAD_DECODE_SIZE_VLEN_CP_NAME "bad_decode_size_vlen_copy"
+#define DSET_BAD_BUF_SIZE_NAME            "bad_buf_size"
 
 /* Dataset names for testing Fixed Array Indexing */
 #define DSET_FIXED_MAX   "DSET_FIXED_MAX"
@@ -197,6 +201,8 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
 #define H5Z_FILTER_EXPAND2         313
 #define H5Z_FILTER_DO_NOT_RUN      314
 #define H5Z_FILTER_UPDATE_CD       315
+#define H5Z_FILTER_BAD_DECODE_SIZE 316
+#define H5Z_FILTER_BAD_BUF_SIZE    317
 
 /* Flags for testing filters */
 #define DISABLE_FLETCHER32 0
@@ -351,6 +357,10 @@ static size_t filter_expand2(unsigned int flags, size_t cd_nelmts, const unsigne
                              size_t nbytes, size_t *buf_size, void **buf);
 static size_t filter_count(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
                            size_t *buf_size, void **buf);
+static size_t filter_bad_decode_size(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                                     size_t nbytes, size_t *buf_size, void **buf);
+static size_t filter_bad_buf_size(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                                  size_t nbytes, size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_COUNT[1] = {{
@@ -18405,6 +18415,460 @@ test_deflate_vlen(hid_t H5_ATTR_UNUSED file)
 #endif /* H5_HAVE_FILTER_DEFLATE */
 } /* end test_deflate_vlen() */
 
+/* This message derives from H5Z */
+const H5Z_class2_t H5Z_BAD_DECODE_SIZE[1] = {{
+    H5Z_CLASS_T_VERS,           /* H5Z_class_t version */
+    H5Z_FILTER_BAD_DECODE_SIZE, /* Filter id number */
+    1, 1,                       /* Encoding and decoding enabled */
+    "bad_decode_size",          /* Filter name for debugging */
+    NULL,                       /* The "can apply" callback */
+    NULL,                       /* The "set local" callback */
+    filter_bad_decode_size,     /* The actual filter function */
+}};
+
+/*-------------------------------------------------------------------------
+ * Function:    filter_bad_decode_size
+ *
+ * Purpose:     Filter that returns a data size after unfiltering that is
+ *              one byte larger than the original data.
+ *
+ * Return:      Success:        Data chunk size
+ *              Failure:        0
+ *-------------------------------------------------------------------------
+ */
+static size_t
+filter_bad_decode_size(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                       const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes, size_t *buf_size,
+                       void **buf)
+{
+    if (flags & H5Z_FLAG_REVERSE) {
+        /* Increase data size by one */
+        nbytes++;
+
+        /* Realloc buffer if necessary */
+        if (nbytes > *buf_size) {
+            void *tmp_buf;
+
+            if (NULL == (tmp_buf = realloc(*buf, nbytes)))
+                TEST_ERROR;
+            *buf      = tmp_buf;
+            *buf_size = nbytes;
+        }
+
+        /* Initialize extra bytes to 0 */
+        ((char *)(*buf))[nbytes - 1] = '\0';
+    }
+
+    /* No-op for forward execution/compression */
+
+    return nbytes;
+
+error:
+    return 0;
+} /* end filter_bad_decode_size() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_bad_decode_size
+ *
+ * Purpose:     Tests that the library properly fails when the data size
+ *              of a chunk does not match the expected value after being
+ *              unfiltered (filtered in reverse, i.e. uncompressed).
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_bad_decode_size(hid_t file)
+{
+    hid_t         dsid          = H5I_INVALID_HID; /* Dataset ID */
+    hid_t         sid           = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t         dcpl          = H5I_INVALID_HID; /* Dataset creation property list ID */
+    const hsize_t dims[1]       = {1};             /* Dataspace dimensions */
+    const hsize_t chunk_dims[1] = {1};             /* Chunk dimensions */
+    const int     wdata         = 2112;            /* Write buffer */
+    int           rdata         = 0;               /* Read buffer */
+    herr_t        ret;                             /* Generic return value */
+
+    TESTING("filter returning incorrect data size after unfiltering");
+
+    /* Create dcpl with special filter */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* Note: filters can only be applied to chunked datasets */
+    if (H5Pset_chunk(dcpl, 1, chunk_dims) < 0)
+        TEST_ERROR;
+
+    /* Register and apply "bad decode size" filter */
+    if (H5Zregister(H5Z_BAD_DECODE_SIZE) < 0)
+        TEST_ERROR;
+    if (H5Pset_filter(dcpl, H5Z_FILTER_BAD_DECODE_SIZE, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
+        TEST_ERROR;
+
+    /* Create the data space */
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    /* Create new dataset with fixed-width integer type */
+    if ((dsid = H5Dcreate2(file, DSET_BAD_DECODE_SIZE_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl,
+                           H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Write data */
+    if (H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0)
+        TEST_ERROR;
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0)
+        TEST_ERROR;
+
+    /* Flush the file (to clear the cache) */
+    if (H5Fflush(file, H5F_SCOPE_GLOBAL) < 0)
+        TEST_ERROR;
+
+    /* Re-open dataset */
+    if ((dsid = H5Dopen2(file, DSET_BAD_DECODE_SIZE_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Read data back (should fail) */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
+    }
+    H5E_END_TRY
+
+    if (ret != FAIL)
+        TEST_ERROR;
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0)
+        TEST_ERROR;
+
+    /* Close dataspace */
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* Close dataset creation property list */
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    /* Unregister filter */
+    if (H5Zunregister(H5Z_FILTER_BAD_DECODE_SIZE) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+        H5Zunregister(H5Z_FILTER_BAD_DECODE_SIZE);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_bad_decode_size() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_bad_decode_size_vlen
+ *
+ * Purpose:     Tests that the library properly fails when the data size
+ *              of a chunk does not match the expected value after being
+ *              unfiltered (filtered in reverse, i.e. uncompressed). This
+ *              test uses a variable length type to trigger decompression
+ *              during H5Ocopy, which should fail.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_bad_decode_size_vlen(hid_t file)
+{
+    hid_t         dsid          = H5I_INVALID_HID; /* Dataset ID */
+    hid_t         sid           = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t         dcpl          = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t         tid           = H5I_INVALID_HID; /* Datatype ID */
+    const hsize_t dims[1]       = {1};             /* Dataspace dimensions */
+    const hsize_t chunk_dims[1] = {1};             /* Chunk dimensions */
+    char          wdata0[]      = "don't panic";   /* vlen string element */
+    char         *wdata[1]      = {wdata0};        /* Write buffer */
+    char         *rdata[1]      = {NULL};          /* Read buffer */
+    herr_t        ret;                             /* Generic return value */
+
+    TESTING("filter returning incorrect data size after unfiltering with vlen type");
+
+    /* Create dcpl with special filter */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* Note: filters can only be applied to chunked datasets */
+    if (H5Pset_chunk(dcpl, 1, chunk_dims) < 0)
+        TEST_ERROR;
+
+    /* Register and apply "bad decode size" filter */
+    if (H5Zregister(H5Z_BAD_DECODE_SIZE) < 0)
+        TEST_ERROR;
+    if (H5Pset_filter(dcpl, H5Z_FILTER_BAD_DECODE_SIZE, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
+        TEST_ERROR;
+
+    /* Define variable-length (NULL-terminated) string datatype */
+    if ((tid = H5Tcopy(H5T_C_S1)) < 0)
+        TEST_ERROR;
+    if (H5Tset_size(tid, H5T_VARIABLE) < 0)
+        TEST_ERROR;
+
+    /* Create the data space */
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    /* Create new dataset with vlen string type */
+    if ((dsid = H5Dcreate2(file, DSET_BAD_DECODE_SIZE_VLEN_NAME, tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) <
+        0)
+        TEST_ERROR;
+
+    /* Write data */
+    if (H5Dwrite(dsid, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
+        TEST_ERROR;
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0)
+        TEST_ERROR;
+
+    /* Flush the file (to clear the cache) */
+    if (H5Fflush(file, H5F_SCOPE_GLOBAL) < 0)
+        TEST_ERROR;
+
+    /* Re-open dataset */
+    if ((dsid = H5Dopen2(file, DSET_BAD_DECODE_SIZE_VLEN_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Read data back (should fail) */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dread(dsid, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+    }
+    H5E_END_TRY
+
+    if (ret != FAIL)
+        TEST_ERROR;
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0)
+        TEST_ERROR;
+
+    /* Attempt to copy dataset (should fail) */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Ocopy(file, DSET_BAD_DECODE_SIZE_VLEN_NAME, file, DSET_BAD_DECODE_SIZE_VLEN_CP_NAME,
+                      H5P_DEFAULT, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+
+    if (ret != FAIL)
+        TEST_ERROR;
+
+    /* Close datatype */
+    if (H5Tclose(tid) < 0)
+        TEST_ERROR;
+
+    /* Close dataspace */
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* Close dataset creation property list */
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    /* Unregister filter */
+    if (H5Zunregister(H5Z_FILTER_BAD_DECODE_SIZE) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dsid);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+        H5Zunregister(H5Z_FILTER_BAD_DECODE_SIZE);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_bad_decode_size_vlen() */
+
+/* This message derives from H5Z */
+const H5Z_class2_t H5Z_BAD_BUF_SIZE[1] = {{
+    H5Z_CLASS_T_VERS,        /* H5Z_class_t version */
+    H5Z_FILTER_BAD_BUF_SIZE, /* Filter id number */
+    1, 1,                    /* Encoding and decoding enabled */
+    "bad_buf_size",          /* Filter name for debugging */
+    NULL,                    /* The "can apply" callback */
+    NULL,                    /* The "set local" callback */
+    filter_bad_buf_size,     /* The actual filter function */
+}};
+
+/*-------------------------------------------------------------------------
+ * Function:    filter_bad_buf_size
+ *
+ * Purpose:     Filter that (incorrectly) reports a data buffer size that
+ *              is one byte too small to hold the data size, but only if
+ *              enable_bad_buf_size is set to true.
+ *
+ * Return:      Success:        Data chunk size
+ *              Failure:        0
+ *-------------------------------------------------------------------------
+ */
+bool enable_bad_buf_size;
+
+static size_t
+filter_bad_buf_size(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                    const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes, size_t *buf_size,
+                    void H5_ATTR_UNUSED **buf)
+{
+    /* No-op except for invalid returned buf_size */
+    if (enable_bad_buf_size)
+        *buf_size = nbytes - 1;
+
+    return nbytes;
+} /* end filter_bad_buf_size() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_bad_buf_size
+ *
+ * Purpose:     Tests that the library properly fails when the buffer size
+ *              returned by a filter is too small to hold the data length
+ *              returned by that filter.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_bad_buf_size(hid_t file)
+{
+    hid_t         dsid          = H5I_INVALID_HID; /* Dataset ID */
+    hid_t         sid           = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t         dcpl          = H5I_INVALID_HID; /* Dataset creation property list ID */
+    const hsize_t dims[1]       = {1};             /* Dataspace dimensions */
+    const hsize_t chunk_dims[1] = {1};             /* Chunk dimensions */
+    const int     wdata         = 2112;            /* Write buffer */
+    int           rdata         = 0;               /* Read buffer */
+    herr_t        ret;                             /* Generic return value */
+
+    TESTING("filter returning incorrect buffer size");
+
+    /* Create dcpl with special filter */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* Note: filters can only be applied to chunked datasets */
+    if (H5Pset_chunk(dcpl, 1, chunk_dims) < 0)
+        TEST_ERROR;
+
+    /* Register and apply "bad decode size" filter */
+    if (H5Zregister(H5Z_BAD_BUF_SIZE) < 0)
+        TEST_ERROR;
+    if (H5Pset_filter(dcpl, H5Z_FILTER_BAD_BUF_SIZE, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
+        TEST_ERROR;
+
+    /* Create the data space */
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    /* Create new dataset with fixed-width integer type */
+    if ((dsid = H5Dcreate2(file, DSET_BAD_BUF_SIZE_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl,
+                           H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Write data with bad buffer size enabled (should fail) */
+    enable_bad_buf_size = true;
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata);
+    }
+    H5E_END_TRY
+
+    if (ret != FAIL)
+        TEST_ERROR;
+
+    /* Write data with bad buffer size disabled */
+    enable_bad_buf_size = false;
+    if (H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0)
+        TEST_ERROR;
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0)
+        TEST_ERROR;
+
+    /* Flush the file (to clear the cache) */
+    if (H5Fflush(file, H5F_SCOPE_GLOBAL) < 0)
+        TEST_ERROR;
+
+    /* Re-open dataset */
+    if ((dsid = H5Dopen2(file, DSET_BAD_BUF_SIZE_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Read data back with bad buffer size enabled (should fail) */
+    enable_bad_buf_size = true;
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
+    }
+    H5E_END_TRY
+
+    if (ret != FAIL)
+        TEST_ERROR;
+
+    /* Read data back with bad buffer size disabled */
+    enable_bad_buf_size = false;
+    if (H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0)
+        TEST_ERROR;
+
+    /* Verify read data */
+    if (rdata != wdata)
+        TEST_ERROR;
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0)
+        TEST_ERROR;
+
+    /* Close dataspace */
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* Close dataset creation property list */
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    /* Unregister filter */
+    if (H5Zunregister(H5Z_FILTER_BAD_BUF_SIZE) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+        H5Zunregister(H5Z_FILTER_BAD_BUF_SIZE);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_bad_buf_size() */
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -18640,6 +19104,10 @@ main(void)
                 nerrors += (test_bt2_hdr_fd(driver_name, fapl) < 0 ? 1 : 0);
 
                 nerrors += (test_downsize_vlen_scalar_dataset(file) < 0 ? 1 : 0);
+
+                nerrors += (test_bad_decode_size(file) < 0 ? 1 : 0);
+                nerrors += (test_bad_decode_size_vlen(file) < 0 ? 1 : 0);
+                nerrors += (test_bad_buf_size(file) < 0 ? 1 : 0);
 
                 if (H5Fclose(file) < 0)
                     goto error;

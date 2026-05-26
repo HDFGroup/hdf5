@@ -122,7 +122,7 @@ jobs:
 
     # Save log files created by CTest script
     - name: Save log (Linux_coverage)
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
       with:
         name: clang-coverage-log
         path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -225,7 +225,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux_Leak)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
           name: leak-ubuntu-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -328,7 +328,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux_Address)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
           name: address-ubuntu-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -432,7 +432,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux_UndefinedBehavior)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
           name: undefined-ubuntu-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log

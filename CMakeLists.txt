@@ -767,6 +767,88 @@ if (HDF5_ENABLE_HDFS)
 endif ()
 
 #-----------------------------------------------------------------------------
+# Option to Require Digitally Signed plugins
+#-----------------------------------------------------------------------------
+option (HDF5_REQUIRE_SIGNED_PLUGINS "Require digitally signed plugins" OFF)
+
+cmake_dependent_option (HDF5_LOCK_PLUGIN_KEYSTORE "Disable HDF5_PLUGIN_KEYSTORE environment variable override (security hardening)" OFF "HDF5_REQUIRE_SIGNED_PLUGINS" OFF)
+mark_as_advanced(HDF5_LOCK_PLUGIN_KEYSTORE)
+
+if (HDF5_REQUIRE_SIGNED_PLUGINS)
+  # KeyStore directory for multiple trusted public keys
+  set(HDF5_PLUGIN_KEYSTORE_DIR "" CACHE PATH
+      "Directory containing trusted public keys (.pem files) for plugin verification")
+  # Find OpenSSL for RSA signature verification
+  find_package(OpenSSL REQUIRED)
+  if (NOT OPENSSL_FOUND)
+    message(FATAL_ERROR "OpenSSL is required for HDF5_REQUIRE_SIGNED_PLUGINS but was not found")
+  endif ()
+
+  # Check minimum OpenSSL version
+  # The signature verification implementation uses modern EVP API (EVP_DigestVerifyInit,
+  # EVP_DigestVerifyUpdate, EVP_DigestVerifyFinal) which requires OpenSSL 1.1.0+
+  if (OPENSSL_VERSION VERSION_LESS "1.1.0")
+    message(FATAL_ERROR
+      "OpenSSL 1.1.0 or later is required for HDF5_REQUIRE_SIGNED_PLUGINS\n"
+      "  Found: OpenSSL ${OPENSSL_VERSION}\n"
+      "  Required: OpenSSL 1.1.0 or later\n"
+      "\n"
+      "The signature verification implementation uses modern EVP API which is not\n"
+      "available in OpenSSL 1.0.2 and earlier versions.\n"
+      "\n"
+      "Solutions:\n"
+      "  1. Upgrade to OpenSSL 3.0 or later (recommended)\n"
+      "     - OpenSSL 3.0 is LTS (supported until 2026-09-07)\n"
+      "     - OpenSSL 3.4+ is also supported\n"
+      "  2. Use LibreSSL 2.7.0 or later (compatible alternative)\n"
+      "  3. Disable signed plugins: -DHDF5_REQUIRE_SIGNED_PLUGINS=OFF\n"
+      "\n"
+      "Note: OpenSSL 1.0.2 reached end-of-life in December 2019\n"
+      "      CentOS 7 users should install openssl11 package")
+  endif ()
+
+  # Informational message for OpenSSL 3.0+ (APIs are compatible, not deprecated)
+  if (OPENSSL_VERSION VERSION_GREATER_EQUAL "3.0.0")
+    message(STATUS "OpenSSL 3.0+ detected - all EVP_* APIs are compatible (not deprecated)")
+  endif ()
+
+  # KeyStore directory is optional at build time; the HDF5_PLUGIN_KEYSTORE
+  # environment variable can be used at runtime instead.  Require a compile-time
+  # directory only when the environment variable override is locked out.
+  if (HDF5_LOCK_PLUGIN_KEYSTORE AND NOT HDF5_PLUGIN_KEYSTORE_DIR)
+    message(FATAL_ERROR
+      "HDF5_LOCK_PLUGIN_KEYSTORE=ON requires a compile-time KeyStore directory:\n"
+      "  -DHDF5_PLUGIN_KEYSTORE_DIR=/etc/hdf5/trusted_keys")
+  endif ()
+
+  # Configure KeyStore directory if provided.
+  # Note: the path is embedded as a string literal in the library binary.
+  # Use the HDF5_PLUGIN_KEYSTORE environment variable instead if the path
+  # should not be visible in the binary.
+  if (HDF5_PLUGIN_KEYSTORE_DIR)
+    add_compile_definitions(H5PL_KEYSTORE_DIR="${HDF5_PLUGIN_KEYSTORE_DIR}")
+  else ()
+    message(NOTICE "No compile-time KeyStore directory configured; "
+      "set HDF5_PLUGIN_KEYSTORE environment variable at runtime.")
+  endif ()
+
+  # Enable digital signature verification (goes into H5pubconf.h)
+  set(H5_REQUIRE_DIGITAL_SIGNATURE 1)
+
+  # Security: Disable environment variable override if requested
+  if (HDF5_LOCK_PLUGIN_KEYSTORE)
+    add_compile_definitions(H5PL_DISABLE_ENV_KEYSTORE)
+    message(VERBOSE "HDF5_PLUGIN_KEYSTORE environment variable override: DISABLED (security hardening)")
+  endif ()
+
+  # Add OpenSSL to link libraries for the HDF5 library
+  # Only libcrypto is needed (EVP, PEM, BIO, ERR APIs); libssl (TLS) is not used
+  list(APPEND LINK_LIBS OpenSSL::Crypto)
+
+  message(VERBOSE "Digital signature verification enabled (OpenSSL ${OPENSSL_VERSION})")
+endif ()
+
+#-----------------------------------------------------------------------------
 # Option to Enable MPI Parallel
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_PARALLEL)

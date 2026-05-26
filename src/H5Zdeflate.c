@@ -173,9 +173,11 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
         const Bytef *z_src = (const Bytef *)(*buf);
         Bytef       *z_dst; /*destination buffer		*/
 #if defined(H5_HAVE_ZLIBNG_H)
-        uLongf z_dst_nbytes = (uLongf)zng_compressBound(nbytes);
+        size_t z_dst_buf_size = zng_compressBound(nbytes); /* 5730 */
+        size_t z_dst_nbytes   = z_dst_buf_size;
 #else
-        uLongf z_dst_nbytes = (uLongf)compressBound(nbytes);
+        uLongf z_dst_buf_size = (uLongf)compressBound(nbytes);
+        uLongf z_dst_nbytes   = z_dst_buf_size;
 #endif
         uLong z_src_nbytes = (uLong)nbytes;
         int   aggression; /* Compression aggression setting */
@@ -208,9 +210,10 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
             H5MM_xfree(*buf);
 
             /* Set return values */
-            *buf      = outbuf;
-            outbuf    = NULL;
-            *buf_size = nbytes;
+            *buf   = outbuf;
+            outbuf = NULL;
+            H5_CHECK_OVERFLOW(z_dst_buf_size, uLongf, size_t);
+            *buf_size = (size_t)z_dst_buf_size;
             ret_value = z_dst_nbytes;
         } /* end else */
     }     /* end else */

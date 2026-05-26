@@ -2221,6 +2221,7 @@ H5DSis_scale(hid_t did)
     hid_t       aid = H5I_INVALID_HID; /* attribute ID */
     htri_t      attr_class;            /* has the "CLASS" attribute */
     htri_t      is_ds = -1;            /* set to "not a dimension scale" */
+    htri_t      isvl;                  /* result of H5Tis_variable_str */
     H5I_type_t  it;                    /* type of identifier */
     char       *buf = NULL;            /* buffer to read name of attribute */
     size_t      string_size;           /* size of storage for the attribute */
@@ -2261,54 +2262,71 @@ H5DSis_scale(hid_t did)
             is_ds = 0;
             goto out;
         }
-        /* check to make sure string is null-terminated;
-           if not, then it is not dimension scale */
-        if ((strpad = H5Tget_strpad(tid)) < 0)
+        if ((isvl = H5Tis_variable_str(tid)) < 0)
             goto out;
-        if (H5T_STR_NULLTERM != strpad) {
-            is_ds = 0;
-            goto out;
+
+        if (isvl > 0) {
+            /* Variable-length string: H5Aread allocates the string and writes
+             * its address into the buffer; use H5Treclaim to free it after use. */
+            char *vl_str = NULL;
+            hid_t asid   = H5I_INVALID_HID;
+
+            if ((asid = H5Aget_space(aid)) < 0)
+                goto out;
+            if (H5Aread(aid, tid, &vl_str) < 0) {
+                H5Sclose(asid);
+                goto out;
+            }
+            is_ds = (vl_str && strcmp(vl_str, DIMENSION_SCALE_CLASS) == 0) ? 1 : 0;
+            H5Treclaim(tid, asid, H5P_DEFAULT, &vl_str);
+            H5Sclose(asid);
         }
+        else {
+            /* check to make sure string is null-terminated;
+               if not, then it is not dimension scale */
+            if ((strpad = H5Tget_strpad(tid)) < 0)
+                goto out;
+            if (H5T_STR_NULLTERM != strpad) {
+                is_ds = 0;
+                goto out;
+            }
 
-        /* According to Spec string is ASCII and its size should be 16 to hold
-           "DIMENSION_SCALE" string */
-        if ((string_size = H5Tget_size(tid)) == 0)
-            goto out;
-        if (string_size != 16) {
-            is_ds = 0;
-            goto out;
+            /* According to Spec string is ASCII and its size should be 16 to hold
+               "DIMENSION_SCALE" string */
+            if ((string_size = H5Tget_size(tid)) == 0)
+                goto out;
+            if (string_size != 16) {
+                is_ds = 0;
+                goto out;
+            }
+
+            /* Allocate one extra byte and force null termination so strcmp never
+             * reads past the buffer even if some tool wrote the attribute without
+             * honoring the H5T_STR_NULLTERM invariant. */
+            buf = (char *)malloc((size_t)string_size * sizeof(char) + 1);
+            if (buf == NULL)
+                goto out;
+
+            /* Read the attribute */
+            if (H5Aread(aid, tid, buf) < 0)
+                goto out;
+            buf[string_size] = '\0';
+
+            /* compare strings */
+            if (strcmp(buf, DIMENSION_SCALE_CLASS) == 0)
+                is_ds = 1;
+            else
+                is_ds = 0;
         }
-
-        buf = (char *)malloc((size_t)string_size * sizeof(char));
-        if (buf == NULL)
-            goto out;
-
-        /* Read the attribute */
-        if (H5Aread(aid, tid, buf) < 0)
-            goto out;
-
-        /* compare strings */
-        if (strncmp(buf, DIMENSION_SCALE_CLASS, MIN(strlen(DIMENSION_SCALE_CLASS), strlen(buf))) == 0)
-            is_ds = 1;
-
-        free(buf);
-
-        if (H5Tclose(tid) < 0)
-            goto out;
-
-        if (H5Aclose(aid) < 0)
-            goto out;
     }
 out:
-    if (is_ds < 0) {
-        free(buf);
-        H5E_BEGIN_TRY
-        {
-            H5Aclose(aid);
-            H5Tclose(tid);
-        }
-        H5E_END_TRY
+    free(buf);
+    H5E_BEGIN_TRY
+    {
+        H5Aclose(aid);
+        H5Tclose(tid);
     }
+    H5E_END_TRY
     return is_ds;
 }
 
@@ -2441,6 +2459,7 @@ static herr_t
 H5DS_is_reserved(hid_t did, bool *is_reserved)
 {
     htri_t has_class;
+    htri_t isvl;
     hid_t  tid = H5I_INVALID_HID;
     hid_t  aid = H5I_INVALID_HID;
     char  *buf = NULL;  /* Name of attribute */
@@ -2463,28 +2482,53 @@ H5DS_is_reserved(hid_t did, bool *is_reserved)
     if (H5T_STRING != H5Tget_class(tid))
         goto error;
 
-    /* Check to make sure string is null-terminated */
-    if (H5T_STR_NULLTERM != H5Tget_strpad(tid))
+    if ((isvl = H5Tis_variable_str(tid)) < 0)
         goto error;
 
-    /* Allocate buffer large enough to hold string */
-    if ((string_size = H5Tget_size(tid)) == 0)
-        goto error;
-    if (NULL == (buf = malloc(string_size * sizeof(char))))
-        goto error;
+    if (isvl > 0) {
+        /* Variable-length string: H5Aread allocates the string and writes
+         * its address into the buffer; use H5Treclaim to free it after use. */
+        char *vl_str = NULL;
+        hid_t asid   = H5I_INVALID_HID;
 
-    /* Read the attribute */
-    if (H5Aread(aid, tid, buf) < 0)
-        goto error;
+        if ((asid = H5Aget_space(aid)) < 0)
+            goto error;
+        if (H5Aread(aid, tid, &vl_str) < 0) {
+            H5Sclose(asid);
+            goto error;
+        }
+        *is_reserved = vl_str && (strcmp(vl_str, IMAGE_CLASS) == 0 || strcmp(vl_str, PALETTE_CLASS) == 0 ||
+                                  strcmp(vl_str, TABLE_CLASS) == 0);
+        H5Treclaim(tid, asid, H5P_DEFAULT, &vl_str);
+        H5Sclose(asid);
+    }
+    else {
+        /* Check to make sure string is null-terminated */
+        if (H5T_STR_NULLTERM != H5Tget_strpad(tid))
+            goto error;
 
-    if (strncmp(buf, IMAGE_CLASS, MIN(strlen(IMAGE_CLASS), strlen(buf))) == 0 ||
-        strncmp(buf, PALETTE_CLASS, MIN(strlen(PALETTE_CLASS), strlen(buf))) == 0 ||
-        strncmp(buf, TABLE_CLASS, MIN(strlen(TABLE_CLASS), strlen(buf))) == 0)
-        *is_reserved = true;
-    else
-        *is_reserved = false;
+        /* Allocate buffer large enough to hold string */
+        if ((string_size = H5Tget_size(tid)) == 0)
+            goto error;
+        /* Allocate one extra byte and force null termination so strcmp never
+         * reads past the buffer even if some tool wrote the attribute without
+         * honoring the H5T_STR_NULLTERM invariant. */
+        if (NULL == (buf = malloc(string_size * sizeof(char) + 1)))
+            goto error;
 
-    free(buf);
+        /* Read the attribute */
+        if (H5Aread(aid, tid, buf) < 0)
+            goto error;
+        buf[string_size] = '\0';
+
+        if (strcmp(buf, IMAGE_CLASS) == 0 || strcmp(buf, PALETTE_CLASS) == 0 || strcmp(buf, TABLE_CLASS) == 0)
+            *is_reserved = true;
+        else
+            *is_reserved = false;
+
+        free(buf);
+        buf = NULL;
+    }
 
     if (H5Tclose(tid) < 0)
         goto error;

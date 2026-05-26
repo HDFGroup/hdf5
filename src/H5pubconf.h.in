@@ -667,4 +667,7 @@
 /* Define to `long' if <sys/types.h> does not define. */
 #cmakedefine H5_ssize_t
 
+/* Define if plugin digital signature verification is required */
+#cmakedefine H5_REQUIRE_DIGITAL_SIGNATURE @H5_REQUIRE_DIGITAL_SIGNATURE@
+
 #endif

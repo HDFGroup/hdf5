@@ -97,6 +97,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Added optional digital signature verification for dynamically loaded plugins
+
+   When built with `-DHDF5_REQUIRE_SIGNED_PLUGINS=ON` and OpenSSL, HDF5 will cryptographically verify each plugin before loading it. Plugins are signed with the new `h5sign` tool, which appends an RSA signature and a compact footer to the plugin binary. Verification uses a keystore directory of trusted public keys, configurable at compile time (`-DHDF5_PLUGIN_KEYSTORE_DIR=<path>`) or at runtime via the `HDF5_PLUGIN_KEYSTORE` environment variable. Individual signatures can be revoked without removing the entire public key by listing their SHA-256 hashes in a `revoked_signatures.txt` file in the keystore directory. Supported algorithms include SHA-256, SHA-384, and SHA-512 with both PKCS#1 v1.5 and PSS padding. See `docs/PLUGIN_SIGNATURE_README.md` for details.
+
 ### Improve performance of H5Ovisit() with deeply nested group structures
 
    `H5Ovisit()` would previously internally traverse each object's path name from the iteration root group in order to retrieve information about that object, causing severe performance degradation with a deeply nested group structure. Modified the algorithm to instead retrieve information directly from the object. To get this benefit, users should use `H5Ovisit3()`, or use `H5Ovisit2()` with neither `H5O_INFO_HDR` nor `H5O_INFO_META_SIZE` selected in the `fields` parameter. Performance of `H5Ocopy()`, `H5Iget_name()`, and external links with a callback set should also improve in similar situations.
@@ -119,6 +123,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Tools
 
+### Added `h5sign` tool for signing plugins with RSA digital signatures
+
+   The `h5sign` command-line tool signs HDF5 plugin shared libraries by appending an RSA signature and a 14-byte footer. It supports SHA-256, SHA-384, SHA-512, and their PSS variants, and accepts passphrase-protected private keys. Use `-f` / `--force` to strip an existing signature before re-signing. The tool is built automatically when `HDF5_REQUIRE_SIGNED_PLUGINS` is enabled.
+
 ## High-Level APIs
 
 ## C Packet Table API
@@ -131,6 +139,14 @@ We would like to thank the many HDF5 community members who contributed to this r
 # 🪲 Bug Fixes
 
 ## Library
+
+### Added checks for data filter behavior
+
+   The library now verifies that the returned data size from a data filter's filter callback function can fit inside the returned data buffer size. The library also checks that, when data is filtered then unfiltered (filtered in reverse), the returned data size is exactly the same as the original data size.
+
+### Fixed bugs with chunk buffer handling
+
+   Fixed a bug in the deflate filter that caused it to report the wrong buffer size. Fixed a bug in the chunk copy code that could cause a background buffer overflow. Fixed a bug in the chunk copy code that could cause a double free if the filter realloced the data buffer.
 
 ### Fixed checking of data alignment requirements in direct I/O VFD
 
@@ -163,6 +179,59 @@ We would like to thank the many HDF5 community members who contributed to this r
 ## Fortran API
 
 ## High-Level Library
+
+### Fixed critical buffer overflow vulnerability in H5TBget_field_info() (CWE-120)
+
+   `H5TBget_field_info()` copied field names into caller-provided buffers using unbounded `strcpy()`,
+   allowing a malicious HDF5 file with overly long field names to overflow those buffers. The copy
+   now uses bounds-checked `memcpy()`: names shorter than `HLTB_MAX_FIELD_LEN` (255) are copied
+   exactly (preserving backward compatibility); names at or above that limit are safely truncated to
+   254 characters plus a NUL terminator.
+
+### Made HLTB_MAX_FIELD_LEN public
+
+   `HLTB_MAX_FIELD_LEN` (255) has been moved from the private header `H5TBprivate.h` to the public
+   header `H5TBpublic.h`. Applications can now use this constant to correctly size their
+   `field_names[]` buffers when calling `H5TBget_field_info()`.
+
+### Fixed H5TBread_fields_name/H5TBwrite_fields_name matching the wrong field when one field name is a prefix of another
+
+   H5TB_find_field() used strncmp() limited to strlen(field) when comparing the last entry of the supplied comma-separated field list against a table member name. This matched any user-supplied name whose leading characters equaled an existing field name (for example, requesting "PressureExtra" on a table containing "Pressure" would silently operate on the "Pressure" field). The comparison has been changed to strcmp() so full names must match exactly. In addition, H5TBwrite_fields_name() now returns an error when none of the requested field names are found (previously it silently performed a no-op write), matching the existing behavior of H5TBread_fields_name().
+
+   Fixes GitHub issue #5633
+
+### Fixed prefix-based false matches when checking "CLASS" attribute strings in the High-Level API
+
+   `H5DSis_scale()`, `H5DS_is_reserved()`, `H5IMis_image()`, and `H5IMis_palette()` all compared a
+   dataset's "CLASS" attribute against an expected class name using
+   `strncmp(buf, CLASS, MIN(strlen(CLASS), strlen(buf)))`. Because the comparison was limited to the
+   shorter of the two strings, any non-empty value whose leading characters matched the expected class
+   name was accepted — for example, a CLASS of `"IMAGE_EXTRA"` was treated as an IMAGE dataset, and
+   `"DIMENSION_S"` (null-padded to 16 bytes) was treated as a DIMENSION_SCALE. (`H5DSis_scale()` already
+   required the attribute datatype to be exactly 16 bytes, which incidentally prevented false matches
+   against shorter class names such as `"IMAGE"` or `"PALETTE"`; the other three functions had no such
+   guard and were directly exposed.) These
+   comparisons now use `strcmp()` so only an exact class name is accepted.
+
+   Additional fixes applied to all four routines:
+
+   - **VLEN-string CLASS attributes are now handled correctly.** Previously, reading a VLEN-typed
+     attribute into a fixed `char *` buffer would overwrite it with a heap-allocated `char *` pointer
+     rather than the string content, which is undefined behaviour and could corrupt memory or produce
+     garbage comparison results.
+     All four routines now read VLEN CLASS attributes properly (via `H5Treclaim`) and compare the
+     string content: `H5DSis_scale()`, `H5IMis_image()`, and `H5IMis_palette()` return 1 when the
+     value matches exactly, and `H5DS_is_reserved()` correctly identifies reserved class names stored
+     as VLEN strings.
+   - **NUL-termination hardening.** The read buffer is now allocated one byte larger than the stored
+     attribute size, and a NUL terminator is explicitly written after the attribute data. This protects
+     `strcmp` from over-reading files where the CLASS attribute was written without strictly honouring
+     `H5T_STR_NULLTERM`.
+   - **Resource leak fix in `H5IMis_image()` and `H5IMis_palette()`.** The `out:` error-handling block
+     previously closed only the dataset ID, leaving the attribute ID (`aid`) and attribute datatype ID
+     (`atid`) open on every error path. Both IDs are now properly closed on error.
+
+   Related to GitHub issue #5633
 
 ## Fortran High-Level APIs
 

@@ -42,6 +42,12 @@
   USE h5fortran_types
   USE hdf5
 
+  !> Maximum length of a field name buffer returned by h5tbget_field_info_f.
+  !! Matches HLTB_MAX_FIELD_LEN defined in H5TBpublic.h.
+  !! Declare field_names character arrays with at least this length:
+  !!   CHARACTER(LEN=HLTB_MAX_FIELD_LEN_F) :: field_names(nfields)
+  INTEGER, PARAMETER :: HLTB_MAX_FIELD_LEN_F = 255
+
   INTERFACE h5tbwrite_field_name_f
 #ifdef H5_DOXYGEN
      MODULE PROCEDURE h5tbwrite_field_name_f
@@ -209,6 +215,8 @@ CONTAINS
 !! \param nrecords      The number of records.
 !! \param type_size     The size in bytes of the structure associated with the table. Obtained with sizeof or storage_size.
 !! \param field_names   An array containing the names of the fields.
+!!                      Names longer than HLTB_MAX_FIELD_LEN_F - 1 characters
+!!                      are silently truncated when read back by h5tbget_field_info_f().
 !! \param field_offset  An array containing the offsets of the fields.
 !! \param field_types   An array containing the type of the fields.
 !! \param chunk_size    The chunk size.
@@ -325,7 +333,9 @@ CONTAINS
 !! \param nfields       The number of fields
 !! \param nrecords      The number of records
 !! \param type_size     The size in bytes of the structure associated with the table; This value is obtained with sizeof().
-!! \param field_names   An array containing the names of the fields
+!! \param field_names   An array containing the names of the fields.
+!!                      Names longer than HLTB_MAX_FIELD_LEN_F - 1 characters
+!!                      are silently truncated when read back by h5tbget_field_info_f().
 !! \param field_offset  An array containing the offsets of the fields
 !! \param field_types   An array containing the type of the fields
 !! \param chunk_size    The chunk size
@@ -1057,10 +1067,15 @@ CONTAINS
 !! \param loc_id        Location identifier. The identifier may be that of a file or group.
 !! \param dset_name     The name of the dataset to read.
 !! \param nfields       The number of fields.
-!! \param field_names   An array containing the names of the fields.
+!! \param field_names   An array of character buffers to receive the field names.
+!!                      Each element must be declared with at least HLTB_MAX_FIELD_LEN_F
+!!                      characters. Field names longer than HLTB_MAX_FIELD_LEN_F - 1
+!!                      characters are silently truncated. A truncated name may
+!!                      inadvertently match a different, shorter field when subsequently
+!!                      passed to h5tbread_fields_name_f() or h5tbwrite_fields_name_f().
 !! \param field_sizes   An array containing the size of the fields.
-!! \param field_offsets	An array containing the offsets of the fields.
-!! \param type_size	The size of the HDF5 datatype associated with the table
+!! \param field_offsets An array containing the offsets of the fields.
+!! \param type_size     The size of the HDF5 datatype associated with the table
 !!                      (i.e., the size in bytes of the HDF5 compound datatype used to define a row, or record, in the table).
 !! \param errcode       \fortran_error
 !! \param maxlen_out    Maximum character length of the field names.

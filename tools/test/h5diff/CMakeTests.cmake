@@ -713,6 +713,7 @@ macro (ADD_H5_UD_TEST testname resultcode resultfile)
             -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
             -D "TEST_ENV_VALUE=${ud_search_path}"
             -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
+            $<$<BOOL:${HDF5_REQUIRE_SIGNED_PLUGINS}>:-DTEST_KEYSTORE_DIR=${CMAKE_BINARY_DIR}/test_keystore>
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     if ("${vol_prefix}H5DIFF_UD-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")

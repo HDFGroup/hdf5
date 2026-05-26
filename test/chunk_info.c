@@ -490,7 +490,6 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     void   *inbuf      = NULL;     /* Pointer to new buffer */
     hsize_t chunk_size = CHK_SIZE; /* Size of a chunk, can be compressed or not */
     hsize_t ii, jj;                /* Array indices */
-    int     n;                     /* Used as chunk index, but int to avoid conversion warning */
     herr_t  ret;                   /* Temporary returned value for verifying failure */
 
     TESTING("getting chunk information in file with version prior to 1.10");
@@ -547,7 +546,11 @@ test_get_chunk_info_highest_v18(hid_t fapl)
 
     /* Perform compression from the source to the destination buffer */
 #if defined(H5_HAVE_ZLIBNG_H)
-    ret = zng_compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+    {
+        size_t z_dst_nbytes_sz = (size_t)z_dst_nbytes;
+        ret                    = zng_compress2(z_dst, &z_dst_nbytes_sz, z_src, z_src_nbytes, aggression);
+        z_dst_nbytes           = (uLongf)z_dst_nbytes_sz;
+    }
 #else
     ret = compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
 #endif
@@ -578,9 +581,8 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     /* Write only NUM_CHUNKS_WRITTEN chunks at the following logical coords:
      * (0,2) (0,3) (1,2) (1,3)
      */
-    n = 0;
     for (ii = START_CHK_X; ii < END_CHK_X; ii++)
-        for (jj = START_CHK_Y; jj < END_CHK_Y; jj++, n++) {
+        for (jj = START_CHK_Y; jj < END_CHK_Y; jj++) {
             offset[0] = ii * CHUNK_NX;
             offset[1] = jj * CHUNK_NY;
             ret       = H5Dwrite_chunk(dset, H5P_DEFAULT, flt_msk, offset, chunk_size, (void *)inbuf);

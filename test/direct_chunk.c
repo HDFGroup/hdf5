@@ -212,7 +212,11 @@ test_direct_chunk_write(hid_t file)
 
     /* Perform compression from the source to the destination buffer */
 #if defined(H5_HAVE_ZLIBNG_H)
-    ret = zng_compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+    {
+        size_t z_dst_nbytes_sz = (size_t)z_dst_nbytes;
+        ret                    = zng_compress2(z_dst, &z_dst_nbytes_sz, z_src, z_src_nbytes, aggression);
+        z_dst_nbytes           = (uLongf)z_dst_nbytes_sz;
+    }
 #else
     ret = compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
 #endif
@@ -295,7 +299,11 @@ test_direct_chunk_write(hid_t file)
 
     /* Perform compression from the source to the destination buffer */
 #if defined(H5_HAVE_ZLIBNG_H)
-    ret = zng_compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+    {
+        size_t z_dst_nbytes_sz = (size_t)z_dst_nbytes;
+        ret                    = zng_compress2(z_dst, &z_dst_nbytes_sz, z_src, z_src_nbytes, aggression);
+        z_dst_nbytes           = (uLongf)z_dst_nbytes_sz;
+    }
 #else
     ret = compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
 #endif
@@ -1686,7 +1694,10 @@ test_direct_chunk_read_no_cache(hid_t file)
 
             /* Perform decompression from the source to the destination buffer */
 #if defined(H5_HAVE_ZLIBNG_H)
-            ret = zng_uncompress(z_dst, &z_dst_nbytes, z_src, z_src_nbytes);
+            {
+                size_t z_dst_nbytes_sz = (size_t)z_dst_nbytes;
+                ret                    = zng_uncompress(z_dst, &z_dst_nbytes_sz, z_src, z_src_nbytes);
+            }
 #else
             ret = uncompress(z_dst, &z_dst_nbytes, z_src, z_src_nbytes);
 #endif
@@ -1892,7 +1903,10 @@ test_direct_chunk_read_cache(hid_t file, bool flush)
 
             /* Perform decompression from the source to the destination buffer */
 #if defined(H5_HAVE_ZLIBNG_H)
-            ret = zng_uncompress(z_dst, &z_dst_nbytes, z_src, z_src_nbytes);
+            {
+                size_t z_dst_nbytes_sz = (size_t)z_dst_nbytes;
+                ret                    = zng_uncompress(z_dst, &z_dst_nbytes_sz, z_src, z_src_nbytes);
+            }
 #else
             ret = uncompress(z_dst, &z_dst_nbytes, z_src, z_src_nbytes);
 #endif
