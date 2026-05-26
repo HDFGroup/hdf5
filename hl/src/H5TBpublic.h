@@ -140,10 +140,6 @@ extern "C" {
  * \param[in] nrecords      The number of records
  * \param[in] type_size     The size in bytes of the structure
  *                          associated with the table
- * \param[in] field_names   An array containing the names of
- *                          the fields
- *                          associated with the table;
- *                          This value is obtained with \c sizeof().
  * \param[in] field_names   An array containing the names of the fields.
  *                          Names longer than #HLTB_MAX_FIELD_LEN - 1 characters
  *                          are silently truncated when read back by
