@@ -45,14 +45,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        openbsd-version: ['7.8']
+        openbsd-version: ['7.9']
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Build and test on OpenBSD
-        uses: vmactions/openbsd-vm@d7d892b7b9ba97ed2747b0fc201be65037d64c3e # v1.4.0
+        uses: vmactions/openbsd-vm@23b3fb94fbb4729a51b1c937f609483e759c8f28
         with:
           release: ${{ matrix.openbsd-version }}
           usesh: true
