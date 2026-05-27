@@ -101,6 +101,7 @@ jobs:
             }
 
             const areas = [];
+            const allCodeOwners = new Set(); // every owner named anywhere in CODEOWNERS
             for (const rawLine of coText.split('\n')) {
               const line = rawLine.trim();
               if (!line || line.startsWith('#')) continue;
@@ -110,6 +111,8 @@ jobs:
               const owners  = tokens.slice(1)
                                     .filter(t => t.startsWith('@'))
                                     .map(t => t.slice(1)); // strip @
+
+              owners.forEach(o => allCodeOwners.add(o));
 
               // Skip the global catch-all — it would fire on every file
               if (pattern === '*') continue;
@@ -211,15 +214,19 @@ jobs:
             if (context.eventName !== 'pull_request_review') {
               const prAuthor = context.payload.pull_request.user.login;
 
-              // Always assign the PR author — they are responsible for the PR
-              // regardless of which areas they touched or own.
-              try {
-                await github.rest.issues.addAssignees({
-                  owner, repo, issue_number: pr_number, assignees: [prAuthor],
-                });
-                core.info(`Assigned PR to author ${prAuthor}`);
-              } catch (e) {
-                core.warning(`Could not assign PR to author: ${e.message}`);
+              // Assign the PR author only if they are a code owner.
+              // External contributors (not in CODEOWNERS) get no auto-assignee.
+              if (allCodeOwners.has(prAuthor)) {
+                try {
+                  await github.rest.issues.addAssignees({
+                    owner, repo, issue_number: pr_number, assignees: [prAuthor],
+                  });
+                  core.info(`Assigned PR to author ${prAuthor} (is a code owner)`);
+                } catch (e) {
+                  core.warning(`Could not assign PR to author: ${e.message}`);
+                }
+              } else {
+                core.info(`Author ${prAuthor} is not a code owner — skipping assignee`);
               }
 
               async function pendingReviewCount(username) {
