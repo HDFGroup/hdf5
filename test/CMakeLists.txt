@@ -570,9 +570,6 @@ foreach (h5_test ${H5_TESTS} ${H5_EXPRESS_TESTS} ${H5_S3TESTS})
     ADD_H5_EXE(${h5_test})
   endif ()
 endforeach ()
-if (CMAKE_C_COMPILER_ID MATCHES "NVHPC")
-  target_compile_options(dt_arith PRIVATE -Mnovect)
-endif()
 
 ##############################################################################
 ###           M U L T I P L E  S O U R C E   T E S T S                     ###
