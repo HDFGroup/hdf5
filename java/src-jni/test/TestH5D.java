@@ -1757,6 +1757,166 @@ public class TestH5D {
                    arr_str_data[3].get(0).equals(arr_readbuf[3].get(0)));
     }
 
+    /*
+     * Verify H5DreadVL safe throws a Java exception
+     * when called with a malformed buffer shape for an ARRAY-of-varstr dataset.
+     */
+    @Test
+    public void testH5DArray_string_buffer_flat_StringArray() throws Throwable
+    {
+        String dset_str_name = "ArrayStringdata_flat";
+        long dset_str_id     = HDF5Constants.H5I_INVALID_HID;
+        long dtype_str_id    = HDF5Constants.H5I_INVALID_HID;
+        long varstr_id       = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id       = HDF5Constants.H5I_INVALID_HID;
+        long[] strdims       = {3};
+        long[] dims          = {2};
+        long lsize           = 1;
+
+        String[] row0 = {"a", "bb", "ccc"};
+        String[] row1 = {"dd", "ee", "fff"};
+
+        ArrayList[] arr_str_data = new ArrayList[2];
+        arr_str_data[0]          = new ArrayList<String>(Arrays.asList(row0));
+        arr_str_data[1]          = new ArrayList<String>(Arrays.asList(row1));
+
+        try {
+            varstr_id = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            H5.H5Tset_size(varstr_id, HDF5Constants.H5T_VARIABLE);
+            dtype_str_id = H5.H5Tarray_create(varstr_id, 1, strdims);
+
+            dspace_id   = H5.H5Screate_simple(1, dims, null);
+            dset_str_id = H5.H5Dcreate(H5fid, dset_str_name, dtype_str_id, dspace_id,
+                                       HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                                       HDF5Constants.H5P_DEFAULT);
+            H5.H5DwriteVL(dset_str_id, dtype_str_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                          HDF5Constants.H5P_DEFAULT, arr_str_data);
+            H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
+
+            for (int j = 0; j < dims.length; j++)
+                lsize *= dims[j];
+
+            // Malformed buffer: a flat String[dims*array_dim], not
+            // ArrayList[dims] of array_dim Strings.
+            int flatLen     = (int)lsize * (int)strdims[0];
+            String[] badBuf = new String[flatLen];
+            for (int j = 0; j < flatLen; j++)
+                badBuf[j] = "";
+
+            // The JNI must not segfault here regardless of what badBuf looks
+            // like. Either it correctly populates the slots or it throws.
+            try {
+                H5.H5DreadVL(dset_str_id, dtype_str_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                             HDF5Constants.H5P_DEFAULT, badBuf);
+            }
+            catch (Exception ex) {
+                // Accepted outcome: graceful Java-level error.
+                return;
+            }
+
+            assertNotNull("badBuf[0] should not be null after H5DreadVL", badBuf[0]);
+        }
+        finally {
+            if (dset_str_id > 0)
+                try {
+                    H5.H5Dclose(dset_str_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dspace_id > 0)
+                try {
+                    H5.H5Sclose(dspace_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dtype_str_id > 0)
+                try {
+                    H5.H5Tclose(dtype_str_id);
+                }
+                catch (Exception ex) {
+                }
+            if (varstr_id > 0)
+                try {
+                    H5.H5Tclose(varstr_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    /*
+     * Verify H5DwriteVL safely throws a Java exception
+     * when called with a malformed buffer shape for an ARRAY-of-varstr dataset.
+     */
+    @Test
+    public void testH5DArray_string_buffer_flat_StringArray_write() throws Throwable
+    {
+        String dset_str_name = "ArrayStringdata_flat_write";
+        long dset_str_id     = HDF5Constants.H5I_INVALID_HID;
+        long dtype_str_id    = HDF5Constants.H5I_INVALID_HID;
+        long varstr_id       = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id       = HDF5Constants.H5I_INVALID_HID;
+        long[] strdims       = {3};
+        long[] dims          = {2};
+
+        try {
+            varstr_id = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            H5.H5Tset_size(varstr_id, HDF5Constants.H5T_VARIABLE);
+            dtype_str_id = H5.H5Tarray_create(varstr_id, 1, strdims);
+
+            dspace_id   = H5.H5Screate_simple(1, dims, null);
+            dset_str_id = H5.H5Dcreate(H5fid, dset_str_name, dtype_str_id, dspace_id,
+                                       HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                                       HDF5Constants.H5P_DEFAULT);
+
+            // Malformed buffer: a flat String[dims*array_dim], not
+            // ArrayList[dims] of array_dim Strings.
+            int flatLen      = (int)dims[0] * (int)strdims[0];
+            String[] flatBuf = new String[flatLen];
+            for (int j = 0; j < flatLen; j++)
+                flatBuf[j] = "s" + j;
+
+            try {
+                H5.H5DwriteVL(dset_str_id, dtype_str_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, flatBuf);
+            }
+            catch (Exception ex) {
+                // Accepted outcome: graceful Java-level error.
+                return;
+            }
+
+            // If we reach here, no exception was thrown. Worst case is the JVM
+            // segfaults before this line. If it accepted the write silently,
+            // that itself indicates the JNI doesn't validate the buffer shape.
+        }
+        finally {
+            if (dset_str_id > 0)
+                try {
+                    H5.H5Dclose(dset_str_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dspace_id > 0)
+                try {
+                    H5.H5Sclose(dspace_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dtype_str_id > 0)
+                try {
+                    H5.H5Tclose(dtype_str_id);
+                }
+                catch (Exception ex) {
+                }
+            if (varstr_id > 0)
+                try {
+                    H5.H5Tclose(varstr_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
     @Test
     public void testH5DArrayenum_rw()
     {

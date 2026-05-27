@@ -4476,7 +4476,14 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
             /* Convert each element */
             if (is_variable) {
                 char **var_str_buf = (char **)raw_buf;
-                if (NULL == (jobj = ENVPTR->NewStringUTF(ENVONLY, *var_str_buf))) {
+                /* Passing NULL to NewStringUTF leads to a crash. A NULL pointer here
+                 * usually means H5Dread did not fill this slot (e.g., if
+                 * caller passed an over-sized buffer). If this happens, return null 
+                 * rather than dereferencing. */
+                if (*var_str_buf == NULL) {
+                    jobj = NULL;
+                }
+                else if (NULL == (jobj = ENVPTR->NewStringUTF(ENVONLY, *var_str_buf))) {
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
                     H5_OUT_OF_MEMORY_ERROR(ENVONLY, "translate_atomic_rbuf: out of memory - unable to "
                                                     "construct string from UTF characters");
@@ -4886,6 +4893,9 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
 
                 if (i < (size_t)ret_buflen)
                     jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i);
+                if (jList != NULL && !ENVPTR->IsInstanceOf(ENVONLY, jList, arrCList))
+                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                          "translate_rbuf: VLEN slot is not a java.util.ArrayList");
                 if (NULL == jList) {
                     if (NULL ==
                         (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
@@ -4915,6 +4925,9 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                 if (i < (size_t)ret_buflen) {
                     jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i);
                 }
+                if (jList != NULL && !ENVPTR->IsInstanceOf(ENVONLY, jList, arrCList))
+                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                          "translate_rbuf: COMPOUND slot is not a java.util.ArrayList");
                 if (NULL == jList) {
                     if (NULL ==
                         (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
@@ -4981,9 +4994,15 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                 /* Get the object element */
                 memcpy((char *)objBuf, char_buf + i * typeSize, typeSize);
 
-                /* Reuse a pre-allocated slot if the caller supplied one. */
-                if (i < (size_t)ret_buflen)
-                    jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i);
+                /* The list we're going to return: */
+                if (i < (size_t)ret_buflen) {
+                    if (NULL ==
+                        (jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i)))
+                        found_jList = JNI_FALSE;
+                }
+                if (jList != NULL && !ENVPTR->IsInstanceOf(ENVONLY, jList, arrCList))
+                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                          "translate_rbuf: ARRAY slot is not a java.util.ArrayList");
                 if (NULL == jList) {
                     if (NULL ==
                         (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
@@ -5052,9 +5071,15 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                 /* Get the object element */
                 memcpy((char *)objBuf, char_buf + i * typeSize, typeSize);
 
-                /* Reuse a pre-allocated slot if the caller supplied one. */
-                if (i < (size_t)ret_buflen)
-                    jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i);
+                /* The list we're going to return: */
+                if (i < (size_t)ret_buflen) {
+                    if (NULL ==
+                        (jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i)))
+                        found_jList = JNI_FALSE;
+                }
+                if (jList != NULL && !ENVPTR->IsInstanceOf(ENVONLY, jList, arrCList))
+                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                          "translate_rbuf: COMPLEX slot is not a java.util.ArrayList");
                 if (NULL == jList) {
                     if (NULL ==
                         (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
@@ -5130,6 +5155,10 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
                     H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: in_buf element is NULL");
                 }
 
+                if (!ENVPTR->IsInstanceOf(ENVONLY, jList, arrCList))
+                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                          "translate_wbuf: VLEN slot is not a java.util.ArrayList");
+
                 /* invoke the toArray method */
                 if (mToArray == NULL)
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
@@ -5164,6 +5193,10 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                     H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: in_buf element is NULL");
                 }
+
+                if (!ENVPTR->IsInstanceOf(ENVONLY, jList, arrCList))
+                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                          "translate_wbuf: COMPOUND slot is not a java.util.ArrayList");
 
                 int nmembs = H5Tget_nmembers(mem_type_id);
 
@@ -5223,6 +5256,10 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
                     H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: in_buf element is NULL");
                 }
 
+                if (!ENVPTR->IsInstanceOf(ENVONLY, jList, arrCList))
+                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                          "translate_wbuf: ARRAY slot is not a java.util.ArrayList");
+
                 /* invoke the toArray method */
                 if (mToArray == NULL)
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
@@ -5277,6 +5314,10 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                     H5_NULL_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: in_buf element is NULL");
                 }
+
+                if (!ENVPTR->IsInstanceOf(ENVONLY, jList, arrCList))
+                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                          "translate_wbuf: COMPLEX slot is not a java.util.ArrayList");
 
                 /* invoke the toArray method */
                 if (mToArray == NULL)

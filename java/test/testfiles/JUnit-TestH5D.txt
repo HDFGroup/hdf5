@@ -3,26 +3,33 @@ JUnit version 4.13.2
 .testH5DVLwrVL
 .testH5Dget_storage_size
 .testH5DArraywr
+.testH5Diterate_write
 .testH5Dcreate
 .testH5Dget_offset
-I.testH5Dget_type
+.testH5Dget_type
 .testH5DVLwr
 .testH5Dfill
 .testH5Dopen
 .testH5Dcreate_anon
 .testH5Dfill_null
 .testH5Dget_storage_size_empty
+.testH5Diterate
 .testH5Dget_access_plist
-.testH5Dvlen_get_buf_size
+.testH5Dread_vlen_of_nested_compound
+.testH5DArray_string_buffer_flat_StringArray
 .testH5Dget_space_closed
+.testH5DArray_string_buffer_flat_StringArray_write
 .testH5DArray_string_buffer
+.testH5Dread_vlen_of_compound_nullslots
+.testH5Dread_compound_of_vlen
 .testH5Dget_space_status
 .testH5Dvlen_write_read
+.testH5Dread_compound_of_vlen_preallocated
 .testH5Dget_space
 .testH5Dget_type_closed
-.testH5Dwrite_readCompound
+.testH5Dwrite_compound_of_vlen
 
 Time:  XXXX
 
-OK (22 tests)
+OK (29 tests)
 
