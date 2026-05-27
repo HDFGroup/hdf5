@@ -211,19 +211,15 @@ jobs:
             if (context.eventName !== 'pull_request_review') {
               const prAuthor = context.payload.pull_request.user.login;
 
-              // If the author is a code owner for any touched area, assign
-              // them to the PR. They can't self-review, but being the assignee
-              // signals they are responsible for those areas.
-              const authorOwnedAreas = touchedAreas.filter(a => a.owners.includes(prAuthor));
-              if (authorOwnedAreas.length > 0) {
-                try {
-                  await github.rest.issues.addAssignees({
-                    owner, repo, issue_number: pr_number, assignees: [prAuthor],
-                  });
-                  core.info(`Assigned PR to author ${prAuthor} (owns: ${authorOwnedAreas.map(a => a.label).join(', ')})`);
-                } catch (e) {
-                  core.warning(`Could not assign PR to author: ${e.message}`);
-                }
+              // Always assign the PR author — they are responsible for the PR
+              // regardless of which areas they touched or own.
+              try {
+                await github.rest.issues.addAssignees({
+                  owner, repo, issue_number: pr_number, assignees: [prAuthor],
+                });
+                core.info(`Assigned PR to author ${prAuthor}`);
+              } catch (e) {
+                core.warning(`Could not assign PR to author: ${e.message}`);
               }
 
               async function pendingReviewCount(username) {
