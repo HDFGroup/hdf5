@@ -91,14 +91,14 @@ static H5FD_onion_fapl_info_t onion_fa_in_g = {
 /*-------------------------------------------------------------------------
  * Function: usage
  *
- * Purpose: print usage
+ * Purpose: Print detailed usage information with explanations for various option values.
  *
  * Return: void
  *
  *-------------------------------------------------------------------------
  */
 static void
-usage(const char *prog)
+usage(const char *prog, const pack_opt_t *options)
 {
     FLUSHSTREAM(rawoutstream);
     PRINTSTREAM(rawoutstream, "usage: %s [OPTIONS] file1 file2\n", prog);
@@ -160,11 +160,11 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream,
                    "   --low=BOUND             The low bound for library release versions to use\n");
     PRINTVALSTREAM(rawoutstream, "                           when creating objects in the file\n");
-    PRINTVALSTREAM(rawoutstream, "                           (default is H5F_LIBVER_EARLIEST)\n");
+    PRINTSTREAM(rawoutstream, "                           (default is %d)\n", (int)options->low_bound);
     PRINTVALSTREAM(rawoutstream,
                    "   --high=BOUND            The high bound for library release versions to use\n");
     PRINTVALSTREAM(rawoutstream, "                           when creating objects in the file\n");
-    PRINTVALSTREAM(rawoutstream, "                           (default is H5F_LIBVER_LATEST)\n");
+    PRINTSTREAM(rawoutstream, "                           (default is %d)\n", (int)options->high_bound);
     PRINTVALSTREAM(rawoutstream,
                    "   --merge                 Follow external soft link recursively and merge data\n");
     PRINTVALSTREAM(rawoutstream,
@@ -558,7 +558,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
                 break;
 
             case 'h':
-                usage(h5tools_getprogname());
+                usage(h5tools_getprogname(), options);
                 h5tools_setstatus(EXIT_SUCCESS);
                 ret_value = 1;
                 goto done;
@@ -872,21 +872,21 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
 
             if (!strcmp(infile, outfile)) {
                 error_msg("file names cannot be the same\n");
-                usage(h5tools_getprogname());
+                usage(h5tools_getprogname(), options);
                 h5tools_setstatus(EXIT_FAILURE);
                 ret_value = -1;
             }
         }
         else {
             error_msg("file names missing\n");
-            usage(h5tools_getprogname());
+            usage(h5tools_getprogname(), options);
             h5tools_setstatus(EXIT_FAILURE);
             ret_value = -1;
         }
     }
     else if (has_i != 1 || has_o != 1) {
         error_msg("filenames must be either both -i -o or both positional\n");
-        usage(h5tools_getprogname());
+        usage(h5tools_getprogname(), options);
         h5tools_setstatus(EXIT_FAILURE);
         ret_value = -1;
     }
@@ -898,7 +898,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             onion_fa_in_g.revision_num = strtoull(in_vfd_info.info, NULL, 10);
             if (errno == ERANGE) {
                 printf("Invalid onion revision specified for the input file\n");
-                usage(h5tools_getprogname());
+                usage(h5tools_getprogname(), options);
                 exit(EXIT_FAILURE);
             }
         }
