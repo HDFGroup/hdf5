@@ -760,6 +760,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
              */
             /* Set the type of VL information, either sequence or string */
             dt->shared->u.vlen.type = (H5T_vlen_type_t)(flags & 0x0f);
+            if (dt->shared->u.vlen.type != H5T_VLEN_SEQUENCE && dt->shared->u.vlen.type != H5T_VLEN_STRING)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid VL datatype type");
             if (dt->shared->u.vlen.type == H5T_VLEN_STRING) {
                 dt->shared->u.vlen.pad  = (H5T_str_t)((flags >> 4) & 0x0f);
                 dt->shared->u.vlen.cset = (H5T_cset_t)((flags >> 8) & 0x0f);
