@@ -45,6 +45,17 @@ extern "C" {
  * Navigate back: \ref index "Main" / \ref UG
  */
 
+/**
+ * Maximum length (including null terminator) of a table field name in the
+ * HDF5 Table API. Field names passed to H5TBmake_table() that exceed
+ * HLTB_MAX_FIELD_LEN - 1 characters are silently truncated when read back
+ * by H5TBget_field_info(). Caller-provided output buffers in field_names[]
+ * must be at least this many bytes each.
+ *
+ * \since 2.2.0
+ */
+#define HLTB_MAX_FIELD_LEN 255
+
 /**\defgroup H5TB HDF5 Table APIs (H5TB)
  *
  * <em>Creating and manipulating HDF5 datasets intended to be
@@ -130,8 +141,10 @@ extern "C" {
  * \param[in] type_size     The size in bytes of the structure
  *                          associated with the table;
  *                          This value is obtained with \c sizeof().
- * \param[in] field_names   An array containing the names of
- *                          the fields
+ * \param[in] field_names   An array containing the names of the fields.
+ *                          Names longer than #HLTB_MAX_FIELD_LEN - 1 characters
+ *                          are silently truncated when read back by
+ *                          H5TBget_field_info().
  * \param[in] field_offset  An array containing the offsets of
  *                          the fields
  * \param[in] field_types   An array containing the type of
@@ -457,7 +470,15 @@ H5HL_DLL herr_t H5TBget_table_info(hid_t loc_id, const char *dset_name, hsize_t 
  *
  * \fg_loc_id
  * \param[in] dset_name         The name of the dataset to read
- * \param[out] field_names      An array containing the names of the fields
+ * \param[out] field_names      An array of character buffers to receive the field names.
+ *                              Each buffer must be at least #HLTB_MAX_FIELD_LEN bytes.
+ *                              Field names longer than #HLTB_MAX_FIELD_LEN - 1 characters
+ *                              are silently truncated. Callers that subsequently use the
+ *                              returned names for strict field lookups (e.g., via
+ *                              H5TBread_fields_name() or H5TBwrite_fields_name()) should
+ *                              be aware that a truncated name may inadvertently match a
+ *                              different, shorter field whose name is a prefix of the
+ *                              original.
  * \param[out] field_sizes      An array containing the size of the fields
  * \param[out] field_offsets    An array containing the offsets of the fields
  * \param[out] type_size        The size of the HDF5 datatype associated
