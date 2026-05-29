@@ -14,7 +14,7 @@
 # ── Core C library ────────────────────────────────────────────────────────────
 /src/                 @fortnern @jhendersonHDF @mattjala @vchoi-hdfgroup @glennsong09
 /src/H5FDsubfiling/   @jhendersonHDF @brtnfld @fortnern
-/utils                @brtnfld @mattjala @jhendersonHDF
+/utils/               @brtnfld @mattjala @jhendersonHDF
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
 /test/                @fortnern @jhendersonHDF @mattjala @vchoi-hdfgroup @glennsong09

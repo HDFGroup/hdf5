@@ -1,5 +1,7 @@
 'use strict';
 
+const MARKER = '<!-- hdf5-review-checklist-v1 -->';
+
 function labelFromPattern(pattern) {
   // /fortran/ → "fortran", /.github/.well-known → ".github/.well-known"
   return pattern.replace(/^\//, '').replace(/\/$/, '') || pattern;
@@ -47,8 +49,142 @@ function matchesPattern(file, pattern) {
   }
 }
 
+// Returns Map<pattern, file[]> — each file attributed to exactly one area
+// (the most-precedent match; last entry in areas[] wins, as in CODEOWNERS).
+// Using a single attribution pass here means linesChanged and touchesPublicHeader
+// in chooseReviewers both operate on the identical file set — no double-counting.
+function attributeFiles(changedFileData, areas) {
+  const filesByArea = new Map(areas.map(a => [a.pattern, []]));
+  for (const file of changedFileData) {
+    for (let i = areas.length - 1; i >= 0; i--) {
+      if (matchesPattern(file.filename, areas[i].pattern)) {
+        filesByArea.get(areas[i].pattern).push(file);
+        break;
+      }
+    }
+  }
+  return filesByArea;
+}
+
+// Returns Set of logins whose most-recent substantive review state is APPROVED.
+// COMMENTED reviews are ignored — they don't change the approval state.
+// A CHANGES_REQUESTED or DISMISSED review after an APPROVED one cancels the approval.
+function computeApprovals(reviews) {
+  const latest = {};
+  for (const review of reviews) {
+    if (!review.user) continue; // ghost / deleted account
+    const { state } = review;
+    if (state === 'APPROVED' || state === 'CHANGES_REQUESTED' || state === 'DISMISSED') {
+      latest[review.user.login] = state;
+    }
+  }
+  return new Set(
+    Object.entries(latest)
+      .filter(([, s]) => s === 'APPROVED')
+      .map(([login]) => login)
+  );
+}
+
+// Pure reviewer selection. Returns { selected, updatedRequested, log }.
+//
+// `touchedAreas` entries must carry `.files` (array of file objects with
+// `.filename`) and `.linesChanged` (number), produced by attributeFiles().
+//
+// Returns:
+//   selected         — Set<login> of newly chosen reviewers (to be requested)
+//   updatedRequested — Set<login> of existingRequested ∪ selected (for callers
+//                      that need the full post-assignment picture before API calls)
+//   log              — string[] of per-decision messages for core.info()
+function chooseReviewers(touchedAreas, {
+  prAuthor,
+  existingRequested,
+  reviewerLoad,
+  LINE_THRESHOLD,
+  AREA_THRESHOLDS,
+  PUBLIC_HEADER,
+}) {
+  const selected         = new Set();
+  const updatedRequested = new Set(existingRequested);
+  const log              = [];
+
+  for (const area of touchedAreas) {
+    if (area.owners.some(o => updatedRequested.has(o))) {
+      log.push(`Area "${area.label}": already has owner assigned — skipping`);
+      continue;
+    }
+
+    const threshold        = (AREA_THRESHOLDS && AREA_THRESHOLDS[area.label]) ?? LINE_THRESHOLD;
+    const touchesPublicHeader = area.files.some(f => PUBLIC_HEADER.test(f.filename));
+    const isComplex        = area.linesChanged >= threshold || touchesPublicHeader;
+
+    if (isComplex) {
+      const pick   = area.owners.find(u => u !== prAuthor) ?? null;
+      const reason = touchesPublicHeader
+        ? 'public header modified'
+        : `${area.linesChanged} lines ≥ ${threshold}`;
+      log.push(`Area "${area.label}" is complex (${reason}) — primary owner: ${pick ?? '(none)'}`);
+      if (pick) { selected.add(pick); updatedRequested.add(pick); }
+      continue;
+    }
+
+    // Routine change: cohesion — reuse an already-assigned owner if they also
+    // cover this area, to avoid splitting related areas across reviewers.
+    const cohesionPick = [...selected].find(u => area.owners.includes(u) && u !== prAuthor);
+    if (cohesionPick) {
+      updatedRequested.add(cohesionPick);
+      log.push(`Area "${area.label}": reusing ${cohesionPick} for cohesion`);
+      continue;
+    }
+
+    const candidates = area.owners.filter(u => u !== prAuthor);
+    if (candidates.length === 0) {
+      log.push(`Area "${area.label}": all owners are the PR author — no reviewer assigned`);
+      continue;
+    }
+
+    // Load-balance: pick the candidate with the fewest open review requests.
+    // Ties are broken by CODEOWNERS order (stable sort preserves input order).
+    const counts = candidates.map(u => ({ u, n: (reviewerLoad && reviewerLoad[u]) || 0 }));
+    counts.sort((a, b) => a.n - b.n);
+    const pick = counts[0].u;
+    log.push(`Area "${area.label}": load [${counts.map(c => `${c.u}=${c.n}`).join(', ')}] → ${pick}`);
+    selected.add(pick);
+    updatedRequested.add(pick);
+  }
+
+  return { selected, updatedRequested, log };
+}
+
+// Builds the markdown checklist comment body (pure, no I/O).
+function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
+  const rowData = touchedAreas.map(area => {
+    const approver  = area.owners.find(o => approvedUsers.has(o));
+    const assigned  = approver ?? area.owners.find(o => confirmedRequested.has(o));
+    const signedOff = !!approver;
+    const box       = signedOff ? 'x' : ' ';
+    const tick      = signedOff ? ' ✅' : '';
+    const mention   = assigned ? ` — @${assigned}` : '';
+    return { text: `- [${box}] **${area.label}**${tick}${mention}`, signedOff };
+  });
+
+  const allDone = rowData.every(r => r.signedOff);
+  const rows    = rowData.map(r => r.text);
+
+  const parts = [
+    MARKER,
+    '## Review Checklist',
+    '',
+    'This PR touches the following areas. Each needs at least one',
+    'sign-off from its listed owners before merging — an approval',
+    'covering only one area does **not** satisfy the others.',
+    '',
+    ...rows,
+  ];
+  if (allDone) parts.push('', '> ✅ All areas have been signed off.');
+  return parts.join('\n');
+}
+
 module.exports = async function run({ github, context, core }) {
-  const MARKER = '<!-- hdf5-review-checklist-v1 -->';
   const { owner, repo } = context.repo;
   const pr_number = context.payload.pull_request.number;
 
@@ -79,13 +215,6 @@ module.exports = async function run({ github, context, core }) {
 
   // ----------------------------------------------------------------
   // 1. Parse CODEOWNERS into a list of { pattern, label, owners }
-  //
-  // Rules:
-  //  - Skip blank lines and lines starting with #
-  //  - Skip the global wildcard (*) — it covers everything and
-  //    would make every PR require every reviewer
-  //  - Owners are the @-prefixed tokens after the pattern
-  //  - Label is derived from the pattern path for display
   // ----------------------------------------------------------------
   let coText;
   try {
@@ -98,8 +227,8 @@ module.exports = async function run({ github, context, core }) {
     return;
   }
 
-  const areas = [];
-  const allCodeOwners = new Set(); // every owner named anywhere in CODEOWNERS
+  const areas         = [];
+  const allCodeOwners = new Set();
   for (const rawLine of coText.split('\n')) {
     const line = rawLine.trim();
     if (!line || line.startsWith('#')) continue;
@@ -108,19 +237,13 @@ module.exports = async function run({ github, context, core }) {
     const pattern = tokens[0];
     const owners  = tokens.slice(1)
                           .filter(t => t.startsWith('@'))
-                          .map(t => t.slice(1)); // strip @
+                          .map(t => t.slice(1));
 
     owners.forEach(o => allCodeOwners.add(o));
-
-    // Skip the global catch-all — it would fire on every file
     if (pattern === '*') continue;
     if (owners.length === 0) continue;
 
-    areas.push({
-      pattern,
-      label: labelFromPattern(pattern),
-      owners,
-    });
+    areas.push({ pattern, label: labelFromPattern(pattern), owners });
   }
 
   if (areas.length === 0) {
@@ -130,120 +253,103 @@ module.exports = async function run({ github, context, core }) {
 
   // ----------------------------------------------------------------
   // 2. Collect all changed files with line counts.
-  //    Keeps the full file objects so per-area line totals can be
-  //    used to decide whether auto-assignment is warranted.
   // ----------------------------------------------------------------
   const changedFileData = [];
-  for (let page = 1; ; page++) {
-    const { data } = await github.rest.pulls.listFiles({
-      owner, repo, pull_number: pr_number, per_page: 100, page,
-    });
-    changedFileData.push(...data);
-    if (data.length < 100) break;
+  try {
+    for (let page = 1; ; page++) {
+      const { data } = await github.rest.pulls.listFiles({
+        owner, repo, pull_number: pr_number, per_page: 100, page,
+      });
+      changedFileData.push(...data);
+      if (data.length < 100) break;
+    }
+  } catch (error) {
+    core.setFailed(`Failed to list PR files: ${error.message}`);
+    return;
   }
 
   // ----------------------------------------------------------------
-  // 3. Find which CODEOWNERS areas are touched by this PR, and
-  //    total the lines changed within each area.
+  // 3. Attribute files to areas (each file → one area, most-precedent).
+  //    Derive per-area line totals and file lists from the same map so
+  //    linesChanged and touchesPublicHeader always agree.
   // ----------------------------------------------------------------
-  const areaLineChanges = {};
-  for (const file of changedFileData) {
-    let matchedArea = null;
-    for (let i = areas.length - 1; i >= 0; i--) {
-      if (matchesPattern(file.filename, areas[i].pattern)) {
-        matchedArea = areas[i];
-        break;
-      }
-    }
-    if (matchedArea) {
-      areaLineChanges[matchedArea.pattern] = (areaLineChanges[matchedArea.pattern] || 0) + file.changes;
-    }
-  }
-
+  const filesByArea  = attributeFiles(changedFileData, areas);
   const touchedAreas = areas
-    .map(area => ({
-      ...area,
-      linesChanged: areaLineChanges[area.pattern] || 0,
-    }))
+    .map(area => {
+      const files = filesByArea.get(area.pattern) || [];
+      return {
+        ...area,
+        files,
+        linesChanged: files.reduce((sum, f) => sum + f.changes, 0),
+      };
+    })
     .filter(area => area.linesChanged > 0);
 
   if (touchedAreas.length === 0) {
     core.info('No CODEOWNERS-tracked areas changed — skipping checklist.');
-    const allComments = await github.paginate(github.rest.issues.listComments, {
-      owner, repo, issue_number: pr_number, per_page: 100,
-    });
-    const stale = allComments.find(c => c.body.includes(MARKER));
-    if (stale) {
-      await github.rest.issues.updateComment({
-        owner, repo, comment_id: stale.id,
-        body: MARKER + '\n_No CODEOWNERS-tracked areas are touched by this PR — no review checklist required._',
+    try {
+      const allComments = await github.paginate(github.rest.issues.listComments, {
+        owner, repo, issue_number: pr_number, per_page: 100,
       });
-      core.info(`Cleared stale checklist comment #${stale.id}`);
+      const stale = allComments.find(c => c.body.includes(MARKER));
+      if (stale) {
+        await github.rest.issues.updateComment({
+          owner, repo, comment_id: stale.id,
+          body: MARKER + '\n_No CODEOWNERS-tracked areas are touched by this PR — no review checklist required._',
+        });
+        core.info(`Cleared stale checklist comment #${stale.id}`);
+      }
+    } catch (e) {
+      core.warning(`Could not clean up stale checklist comment: ${e.message}`);
     }
     return;
   }
 
   // ----------------------------------------------------------------
   // 4. Determine current approvals.
-  //    Track latest review state per user so a subsequent
-  //    "request changes" cancels an earlier approval.
   // ----------------------------------------------------------------
   const allReviews = [];
-  for (let page = 1; ; page++) {
-    const { data } = await github.rest.pulls.listReviews({
-      owner, repo, pull_number: pr_number, per_page: 100, page,
-    });
-    allReviews.push(...data);
-    if (data.length < 100) break;
-  }
-
-  const latestStateByUser = {};
-  for (const review of allReviews) {
-    const state = review.state;
-    if (state === 'APPROVED' || state === 'CHANGES_REQUESTED' || state === 'DISMISSED') {
-      latestStateByUser[review.user.login] = state;
+  try {
+    for (let page = 1; ; page++) {
+      const { data } = await github.rest.pulls.listReviews({
+        owner, repo, pull_number: pr_number, per_page: 100, page,
+      });
+      allReviews.push(...data);
+      if (data.length < 100) break;
     }
+  } catch (error) {
+    core.warning(`Failed to fetch reviews; approval state may be stale: ${error.message}`);
   }
-  const approvedUsers = new Set(
-    Object.entries(latestStateByUser)
-      .filter(([, state]) => state === 'APPROVED')
-      .map(([login]) => login)
-  );
+  const approvedUsers = computeApprovals(allReviews);
 
   // ----------------------------------------------------------------
   // 5. Fetch current PR state (requested reviewers).
-  //    Done outside the PR-only block so the checklist can also
-  //    show who is assigned when triggered by a review event.
   // ----------------------------------------------------------------
-  const { data: prData } = await github.rest.pulls.get({
-    owner, repo, pull_number: pr_number,
-  });
-  const requestedReviewers = new Set(
-    prData.requested_reviewers.map(r => r.login)
+  let prData;
+  try {
+    ({ data: prData } = await github.rest.pulls.get({
+      owner, repo, pull_number: pr_number,
+    }));
+  } catch (error) {
+    core.setFailed(`Failed to fetch PR data: ${error.message}`);
+    return;
+  }
+  const existingRequested = new Set(
+    prData.requested_reviewers.map(r => r.login).filter(Boolean)
   );
 
+  // confirmedRequested tracks what was actually successfully requested
+  // (used in buildBody so the checklist never shows an owner whose
+  // requestReviewers call silently failed).
+  let confirmedRequested = new Set(existingRequested);
+
   // ----------------------------------------------------------------
-  // 6. For each touched area pick the ONE owner with the fewest
-  //    open review requests in this repo right now, then request
-  //    only that person. This load-balances across owners without
-  //    needing persistent state.
-  //
-  //    Ties (equal queue depth) are broken by CODEOWNERS order —
-  //    the first-listed owner wins. In a quiet repo where everyone
-  //    has zero open requests this effectively always picks the
-  //    first owner for that area.
-  //
-  //    Skipped entirely if an area owner is already requested
-  //    (manual assignment or a previous run) — don't override.
-  //    Only runs on pull_request events, not review submissions.
+  // 6. Auto-assign reviewers (pull_request events only, not reviews).
   // ----------------------------------------------------------------
   if (context.eventName !== 'pull_request_review') {
     const prAuthor = context.payload.pull_request.user.login;
 
     // Assign the PR author only if they are a code owner.
-    // External contributors (not in CODEOWNERS) get no auto-assignee.
-    // Note: addAssignees uses github.rest.issues.* but is covered
-    // by pull-requests: write — no issues: write permission needed.
     if (allCodeOwners.has(prAuthor)) {
       try {
         await github.rest.issues.addAssignees({
@@ -259,80 +365,42 @@ module.exports = async function run({ github, context, core }) {
 
     // One paginated pulls.list call instead of N Search API calls — the Search API
     // allows only 30 req/min; with several candidates per area that limit is easy to hit.
-    const openPRs = await github.paginate(github.rest.pulls.list, {
-      owner, repo, state: 'open', per_page: 100,
+    // Note: cost scales with the number of open PRs in the repo.
+    let reviewerLoad = {};
+    try {
+      const openPRs = await github.paginate(github.rest.pulls.list, {
+        owner, repo, state: 'open', per_page: 100,
+      });
+      for (const openPR of openPRs) {
+        if (openPR.number === pr_number) continue;
+        for (const r of openPR.requested_reviewers) {
+          if (r.login) reviewerLoad[r.login] = (reviewerLoad[r.login] || 0) + 1;
+        }
+      }
+    } catch (e) {
+      core.warning(`Could not fetch open PRs for load balancing; falling back to CODEOWNERS order: ${e.message}`);
+    }
+
+    const { selected, log } = chooseReviewers(touchedAreas, {
+      prAuthor,
+      existingRequested,
+      reviewerLoad,
+      LINE_THRESHOLD,
+      AREA_THRESHOLDS,
+      PUBLIC_HEADER,
     });
-    const reviewerLoad = {};
-    for (const openPR of openPRs) {
-      if (openPR.number === pr_number) continue;
-      for (const r of openPR.requested_reviewers) {
-        reviewerLoad[r.login] = (reviewerLoad[r.login] || 0) + 1;
-      }
-    }
-    function pendingReviewCount(username) {
-      return reviewerLoad[username] || 0;
-    }
+    for (const msg of log) core.info(msg);
 
-    async function selectReviewer(owners) {
-      const candidates = owners.filter(u => u !== prAuthor);
-      if (candidates.length === 0) return null;
-      if (candidates.length === 1) return candidates[0];
-
-      const counts = candidates.map(u => ({ u, n: pendingReviewCount(u) }));
-      counts.sort((a, b) => a.n - b.n || candidates.indexOf(a.u) - candidates.indexOf(b.u));
-      core.info(`Review load for [${candidates.join(', ')}]: ${counts.map(c => `${c.u}=${c.n}`).join(', ')} → assigning ${counts[0].u}`);
-      return counts[0].u;
-    }
-
-    const selected = new Set();
-    for (const area of touchedAreas) {
-      if (area.owners.some(o => requestedReviewers.has(o))) {
-        core.info(`Area "${area.label}" already has an owner assigned — skipping.`);
-        continue;
-      }
-
-      // Complexity is checked BEFORE cohesion: a complex area always
-      // requires the senior (first-listed) owner; cohesion must not
-      // override that guarantee by reusing a junior owner.
-      const threshold = AREA_THRESHOLDS[area.label] ?? LINE_THRESHOLD;
-      const touchesPublicHeader = changedFileData.some(f =>
-        matchesPattern(f.filename, area.pattern) && PUBLIC_HEADER.test(f.filename)
-      );
-      const isComplex = area.linesChanged >= threshold || touchesPublicHeader;
-
-      if (isComplex) {
-        const pick = area.owners.find(u => u !== prAuthor) ?? null;
-        const reason = touchesPublicHeader ? 'public header modified' : `${area.linesChanged} lines ≥ ${threshold}`;
-        core.info(`Area "${area.label}" is complex (${reason}) — primary owner: ${pick}`);
-        if (pick) { selected.add(pick); requestedReviewers.add(pick); }
-        continue;
-      }
-
-      // Routine change: cohesion — reuse an already-assigned owner
-      // if they also own this area, to avoid splitting related areas
-      // across multiple reviewers unnecessarily.
-      const cohesionPick = [...selected].find(
-        u => area.owners.includes(u) && u !== prAuthor
-      );
-      if (cohesionPick) {
-        requestedReviewers.add(cohesionPick);
-        core.info(`Area "${area.label}": reusing ${cohesionPick} for cohesion`);
-        continue;
-      }
-
-      const pick = await selectReviewer(area.owners);
-      core.info(`Area "${area.label}": ${area.linesChanged} lines (< ${threshold}), no public headers — load-balanced pick: ${pick}`);
-      if (pick) { selected.add(pick); requestedReviewers.add(pick); }
-    }
-
-    // Request one at a time: a single invalid/non-collaborator login
-    // must not prevent the remaining reviewers from being requested.
+    // Request one at a time so a single invalid login cannot block the rest.
+    // Only add to confirmedRequested on success — the checklist must not show
+    // an owner whose request call failed.
     for (const reviewer of selected) {
       try {
         await github.rest.pulls.requestReviewers({
           owner, repo, pull_number: pr_number,
           reviewers: [reviewer],
         });
+        confirmedRequested.add(reviewer);
       } catch (e) {
         core.warning(`Could not request reviewer ${reviewer}: ${e.message}`);
       }
@@ -341,58 +409,37 @@ module.exports = async function run({ github, context, core }) {
 
   // ----------------------------------------------------------------
   // 7. Build the checklist body.
-  //    Each row shows the specific owner assigned for that area:
-  //    - pending:   the owner currently in requested_reviewers
-  //    - signed off: the owner who approved
-  //    This avoids listing all owners (bystander effect) while
-  //    still making clear who is responsible for each area.
   // ----------------------------------------------------------------
-  const rowData = touchedAreas.map(area => {
-    const approver  = area.owners.find(o => approvedUsers.has(o));
-    const assigned  = approver ?? area.owners.find(o => requestedReviewers.has(o));
-    const signedOff = !!approver;
-    const box       = signedOff ? 'x' : ' ';
-    const tick      = signedOff ? ' ✅' : '';
-    const mention   = assigned ? ` — @${assigned}` : '';
-    return { text: `- [${box}] **${area.label}**${tick}${mention}`, signedOff };
-  });
-
-  const allDone = rowData.every(r => r.signedOff);
-  const rows = rowData.map(r => r.text);
-
-  const bodyParts = [
-    MARKER,
-    '## Review Checklist',
-    '',
-    'This PR touches the following areas. Each needs at least one',
-    'sign-off from its listed owners before merging — an approval',
-    'covering only one area does **not** satisfy the others.',
-    '',
-    ...rows,
-  ];
-  if (allDone) bodyParts.push('', '> ✅ All areas have been signed off.');
-  const body = bodyParts.join('\n');
+  const body = buildBody(touchedAreas, approvedUsers, confirmedRequested);
 
   // ----------------------------------------------------------------
-  // 8. Create or update the checklist comment (idempotent via marker)
+  // 8. Create or update the checklist comment (idempotent via marker).
   // ----------------------------------------------------------------
-  const comments = await github.paginate(github.rest.issues.listComments, {
-    owner, repo, issue_number: pr_number, per_page: 100,
-  });
-  const existing = comments.find(c => c.body.includes(MARKER));
-
-  if (existing) {
-    await github.rest.issues.updateComment({
-      owner, repo, comment_id: existing.id, body,
+  try {
+    const comments = await github.paginate(github.rest.issues.listComments, {
+      owner, repo, issue_number: pr_number, per_page: 100,
     });
-    core.info(`Updated checklist comment #${existing.id}`);
-  } else {
-    await github.rest.issues.createComment({
-      owner, repo, issue_number: pr_number, body,
-    });
-    core.info('Created checklist comment');
+    const existing = comments.find(c => c.body.includes(MARKER));
+
+    if (existing) {
+      await github.rest.issues.updateComment({
+        owner, repo, comment_id: existing.id, body,
+      });
+      core.info(`Updated checklist comment #${existing.id}`);
+    } else {
+      await github.rest.issues.createComment({
+        owner, repo, issue_number: pr_number, body,
+      });
+      core.info('Created checklist comment');
+    }
+  } catch (error) {
+    core.setFailed(`Failed to post checklist comment: ${error.message}`);
   }
 };
 
-module.exports.matchesPattern  = matchesPattern;
+module.exports.matchesPattern   = matchesPattern;
 module.exports.labelFromPattern = labelFromPattern;
+module.exports.attributeFiles   = attributeFiles;
+module.exports.computeApprovals = computeApprovals;
+module.exports.chooseReviewers  = chooseReviewers;
+module.exports.buildBody        = buildBody;
