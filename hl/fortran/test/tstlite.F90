@@ -430,7 +430,7 @@ CONTAINS
     INTEGER          :: type_class
     INTEGER(SIZE_T)  :: type_size
     TYPE(C_PTR) :: f_ptr
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+#ifdef H5_HAVE_Fortran_INTEGER_SIZEOF_16
     INTEGER, PARAMETER :: int_kind_32 = SELECTED_INT_KIND(36) !should map to INTEGER*16 on most modern processors
     INTEGER(int_kind_32), DIMENSION(DIM1,DIM2,DIM3), TARGET :: dset_data_i32, data_out_i32
     CHARACTER(LEN=7), PARAMETER :: dsetname16a = "dset16a"     ! Dataset name
@@ -458,7 +458,7 @@ CONTAINS
              buf2(i,j,k) = INT(n)
              buf3(i,j,k) = INT(n)
              buf4(i,j,k) = INT(n)
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+#ifdef H5_HAVE_Fortran_INTEGER_SIZEOF_16
              dset_data_i32(i,j,k) = HUGE(1_int_kind_32)-INT(n,int_kind_32)
 #endif
              n = n + 1
@@ -612,7 +612,7 @@ CONTAINS
     ! CHECKING NON-NATIVE INTEGER TYPES
     !-------------------------------------------------------------------------
 
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+#ifdef H5_HAVE_Fortran_INTEGER_SIZEOF_16
     ! (A) CHECKING INTEGER*16
     !
     !    (i.a) write dataset using F2003 interface

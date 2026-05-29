@@ -95,7 +95,7 @@ MODULE H5D
   PRIVATE h5dwrite_reference_obj, h5dwrite_reference_dsetreg, h5dwrite_char_scalar, h5dwrite_ptr
   PRIVATE h5dread_reference_obj, h5dread_reference_dsetreg, h5dread_char_scalar, h5dread_ptr
   PRIVATE h5dfill_integer, h5dfill_c_float, h5dfill_c_double, h5dfill_char, h5dfill_ptr
-#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
+#ifdef H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
   PRIVATE h5dfill_c_long_double
 #endif
 
@@ -180,7 +180,7 @@ MODULE H5D
      MODULE PROCEDURE h5dfill_integer
      MODULE PROCEDURE h5dfill_c_float
      MODULE PROCEDURE h5dfill_c_double
-#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
+#ifdef H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
      MODULE PROCEDURE h5dfill_c_long_double
 #endif
      MODULE PROCEDURE h5dfill_char
@@ -2308,7 +2308,7 @@ CONTAINS
 
   END SUBROUTINE h5dfill_c_double
 
-#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
+#ifdef H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
   SUBROUTINE h5dfill_c_long_double(fill_value, space_id, buf,  hdferr)
     IMPLICIT NONE
     REAL(KIND=C_LONG_DOUBLE), INTENT(IN), TARGET :: fill_value
