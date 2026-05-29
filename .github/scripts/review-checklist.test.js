@@ -97,6 +97,14 @@ test('double-star glob: docs/file.h does not match /src/**/*.h', () => {
   assert.strictEqual(matchesPattern('docs/file.h', '/src/**/*.h'), false);
 });
 
+test('double-star glob: src/file.h matches /src/**/*.h (zero-depth directory)', () => {
+  assert.strictEqual(matchesPattern('src/file.h', '/src/**/*.h'), true);
+});
+
+test('unanchored directory: tools/src/foo.c matches src/', () => {
+  assert.strictEqual(matchesPattern('tools/src/foo.c', 'src/'), true);
+});
+
 // ----------------------------------------------------------------
 // labelFromPattern
 // ----------------------------------------------------------------

@@ -17,14 +17,24 @@ function matchesPattern(file, pattern) {
   if (p.endsWith('/')) {
     return anchored
       ? file.startsWith(p)
-      : (file === p.slice(0, -1) || file.startsWith(p));
+      : (file === p.slice(0, -1) || file.startsWith(p) || file.includes('/' + p));
   }
 
-  // Glob pattern: convert * and ** to regex equivalents
+  // Glob pattern: convert * and ** to regex equivalents.
+  // Process ** before * so the single-star replacement cannot corrupt double-star tokens.
   if (p.includes('*')) {
-    const escaped = p
-      .replace(/[.+^${}()|[\]\\]/g, '\\$&')
-      .split('**').map(s => s.replace(/\*/g, '[^/]*')).join('.*');
+    // Escape regex metacharacters, leaving * intact for the steps below
+    let escaped = p.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+    // /**/ → zero or more path components (zero depth = just a single slash separator)
+    escaped = escaped.replace(/\/\*\*\//g, '/(?:.+/)?');
+    // **/ at start → any leading directories (including none)
+    escaped = escaped.replace(/^\*\*\//, '(?:.+/)?');
+    // /** at end → any trailing path (including none)
+    escaped = escaped.replace(/\/\*\*$/, '(?:/.+)?');
+    // bare ** → anything (fallback for patterns like **)
+    escaped = escaped.replace(/\*\*/g, '.*');
+    // single * → within one path component only
+    escaped = escaped.replace(/\*/g, '[^/]*');
     const re = new RegExp((anchored ? '^' : '(^|/)') + escaped + '($|/)');
     return re.test(file);
   }
@@ -77,10 +87,16 @@ module.exports = async function run({ github, context, core }) {
   //  - Owners are the @-prefixed tokens after the pattern
   //  - Label is derived from the pattern path for display
   // ----------------------------------------------------------------
-  const { data: coData } = await github.rest.repos.getContent({
-    owner, repo, path: '.github/CODEOWNERS',
-  });
-  const coText = Buffer.from(coData.content, 'base64').toString('utf-8');
+  let coText;
+  try {
+    const { data: coData } = await github.rest.repos.getContent({
+      owner, repo, path: '.github/CODEOWNERS',
+    });
+    coText = Buffer.from(coData.content, 'base64').toString('utf-8');
+  } catch (error) {
+    core.setFailed(`Failed to load CODEOWNERS: ${error.message}`);
+    return;
+  }
 
   const areas = [];
   const allCodeOwners = new Set(); // every owner named anywhere in CODEOWNERS
@@ -241,15 +257,20 @@ module.exports = async function run({ github, context, core }) {
       core.info(`Author ${prAuthor} is not a code owner — skipping assignee`);
     }
 
-    const searchCache = {};
-    async function pendingReviewCount(username) {
-      if (username in searchCache) return searchCache[username];
-      const { data } = await github.rest.search.issuesAndPullRequests({
-        q: `is:pr is:open review-requested:${username} repo:${owner}/${repo}`,
-        per_page: 1,
-      });
-      searchCache[username] = data.total_count;
-      return data.total_count;
+    // One paginated pulls.list call instead of N Search API calls — the Search API
+    // allows only 30 req/min; with several candidates per area that limit is easy to hit.
+    const openPRs = await github.paginate(github.rest.pulls.list, {
+      owner, repo, state: 'open', per_page: 100,
+    });
+    const reviewerLoad = {};
+    for (const openPR of openPRs) {
+      if (openPR.number === pr_number) continue;
+      for (const r of openPR.requested_reviewers) {
+        reviewerLoad[r.login] = (reviewerLoad[r.login] || 0) + 1;
+      }
+    }
+    function pendingReviewCount(username) {
+      return reviewerLoad[username] || 0;
     }
 
     async function selectReviewer(owners) {
@@ -257,9 +278,7 @@ module.exports = async function run({ github, context, core }) {
       if (candidates.length === 0) return null;
       if (candidates.length === 1) return candidates[0];
 
-      const counts = await Promise.all(
-        candidates.map(async u => ({ u, n: await pendingReviewCount(u) }))
-      );
+      const counts = candidates.map(u => ({ u, n: pendingReviewCount(u) }));
       counts.sort((a, b) => a.n - b.n || candidates.indexOf(a.u) - candidates.indexOf(b.u));
       core.info(`Review load for [${candidates.join(', ')}]: ${counts.map(c => `${c.u}=${c.n}`).join(', ')} → assigning ${counts[0].u}`);
       return counts[0].u;
