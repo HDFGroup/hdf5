@@ -1,0 +1,21 @@
+name: Review Checklist Tests
+
+on:
+  push:
+    paths:
+      - .github/scripts/review-checklist.js
+      - .github/scripts/review-checklist.test.js
+  pull_request:
+    paths:
+      - .github/scripts/review-checklist.js
+      - .github/scripts/review-checklist.test.js
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node .github/scripts/review-checklist.test.js
