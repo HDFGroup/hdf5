@@ -434,20 +434,21 @@ PropList::getProperty(const char *name) const
     // Get property size first
     size_t size = getPropSize(name);
 
-    // Allocate buffer then get the property
-    char *prop_strg_C = new char[size + 1]();
+    H5std_string prop_strg;
+    prop_strg.resize(size+1);
 
-    herr_t ret_value = H5Pget(id, name, prop_strg_C); // call C API
+    // Get the property directly into the string's buffer
+    herr_t ret_value = H5Pget(id, name, &prop_strg[0]); // call C API\
 
     // Throw exception if H5Pget returns failure
     if (ret_value < 0) {
-        delete[] prop_strg_C;
         throw PropListIException(inMemFunc("getProperty"), "H5Pget failed");
     }
-
-    // Return property value as a string after deleting temp C-string
-    H5std_string prop_strg(prop_strg_C);
-    delete[] prop_strg_C;
+    // Truncate at the first null character to account for the C API's null-termination
+    size_t null_pos = prop_strg.find('\0');
+    if (null_pos != H5std_string::npos) {
+        prop_strg.resize(null_pos);
+    }
     return (prop_strg);
 }
 //--------------------------------------------------------------------------

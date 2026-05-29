@@ -300,21 +300,13 @@ H5Location::getComment(const char *name, size_t buf_size) const
         if (tmp_len == 0)
             tmp_len = static_cast<size_t>(comment_len);
 
-        // Temporary buffer for char* comment
-        char *comment_C = new char[tmp_len + 1]();
-
-        // Used overloaded function
-        ssize_t temp_len = getComment(name, tmp_len + 1, comment_C);
+        comment.resize(tmp_len + 1);
+        ssize_t temp_len = getComment(name, tmp_len + 1, &comment[0]);
         if (temp_len < 0) {
-            delete[] comment_C;
             throw LocationException("H5Location::getComment", "H5Oget_comment_by_name failed");
         }
 
-        // Convert the C comment to return
-        comment = comment_C;
-
-        // Clean up resource
-        delete[] comment_C;
+        comment.resize(temp_len);
     }
 
     // Return the string comment
@@ -1653,17 +1645,17 @@ H5Location::getLinkval(const char *name, size_t size) const
 
     // if link has value, retrieve the value, otherwise, return null string
     if (val_size > 0) {
-        // Create buffer for C string
-        value_C = new char[val_size + 1]();
-
-        ret_value = H5Lget_val(getId(), name, value_C, val_size, H5P_DEFAULT);
+        value.resize(val_size + 1);
+        ret_value = H5Lget_val(getId(), name, &value[0], val_size, H5P_DEFAULT);
         if (ret_value < 0) {
-            delete[] value_C;
             throwException("getLinkval", "H5Lget_val failed");
         }
 
-        value = H5std_string(value_C);
-        delete[] value_C;
+        // Truncate at the first null character to get the size correct
+        size_t null_pos = value.find('\0');
+        if (null_pos != H5std_string::npos) {
+            value.resize(null_pos);
+        }
     }
     return (value);
 }
@@ -1823,20 +1815,16 @@ H5Location::getObjnameByIdx(hsize_t idx) const
     // (unfortunate in/out type sign mismatch)
     size_t actual_name_len = static_cast<size_t>(name_len) + 1;
 
-    // Create buffer for C string
-    char *name_C = new char[actual_name_len]();
-
-    name_len = H5Lget_name_by_idx(getId(), ".", H5_INDEX_NAME, H5_ITER_INC, idx, name_C, actual_name_len,
-                                  H5P_DEFAULT);
+    H5std_string name;
+    name.resize(actual_name_len);
+    name_len = H5Lget_name_by_idx(getId(), ".", H5_INDEX_NAME, H5_ITER_INC, idx, &name[0], actual_name_len,
+                                   H5P_DEFAULT);
 
     if (name_len < 0) {
-        delete[] name_C;
         throwException("getObjnameByIdx", "H5Lget_name_by_idx failed");
     }
-
-    // clean up and return the string
-    H5std_string name = H5std_string(name_C);
-    delete[] name_C;
+    // Correct size
+    name.resize(name_len);
     return (name);
 }
 
@@ -1876,19 +1864,13 @@ H5Location::getObjnameByIdx(hsize_t idx, char *name, size_t size) const
 ssize_t
 H5Location::getObjnameByIdx(hsize_t idx, H5std_string &name, size_t size) const
 {
-    // Create buffer for C string
-    char *name_C = new char[size + 1]();
-
-    // call overloaded function to get the name
-    ssize_t name_len = getObjnameByIdx(idx, name_C, size + 1);
+    name.resize(size + 1);
+    ssize_t name_len = getObjnameByIdx(idx, &name[0], size + 1);
     if (name_len < 0) {
-        delete[] name_C;
         throwException("getObjnameByIdx", "H5Lget_name_by_idx failed");
     }
-
-    // clean up and return the string
-    name = H5std_string(name_C);
-    delete[] name_C;
+    // Correct to final size
+    name.resize(name_len);
     return (name_len);
 }
 

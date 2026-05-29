@@ -317,17 +317,14 @@ Attribute::getName() const
         // (unfortunate in/out type sign mismatch)
         size_t actual_name_size = static_cast<size_t>(name_size) + 1;
 
-        // Create buffer for C string
-        char *name_C = new char[actual_name_size]();
+        // Create space for C string
+        attr_name.resize(actual_name_size);
 
-        // Use overloaded function
-        name_size = getName(name_C, actual_name_size);
+        // Use overloaded function, write directly into internal buffer
+        name_size = getName(&attr_name[0], actual_name_size);
 
-        // Convert the C attribute name to return
-        attr_name = name_C;
-
-        // Clean up resource
-        delete[] name_C;
+        // Resize back to the actual length (excluding NUL)
+        attr_name.resize(name_size);
     }
 
     // Return attribute's name
@@ -385,17 +382,19 @@ Attribute::getName(H5std_string &attr_name, size_t len) const
     }
     // If length is provided, get that number of characters in name
     else {
-        // Create buffer for C string
-        char *name_C = new char[len + 1]();
+        // Resize string to accommodate the requested length and terminal ASCII NUL
+        attr_name.resize(len + 1);
 
         // Use overloaded function
-        name_size = getName(name_C, len + 1);
+        name_size = getName(&attr_name[0], len + 1);
 
-        // Convert the C attribute name to return
-        attr_name = name_C;
-
-        // Clean up resource
-        delete[] name_C;
+        // Truncate at the first null character to handle truncation/short buffers correctly
+        size_t null_pos = attr_name.find('\0');
+        if (null_pos != H5std_string::npos) {
+            attr_name.resize(null_pos);
+        } else {
+            attr_name.resize(name_size);
+        }
     }
     // Otherwise, keep attr_name intact
 
@@ -498,16 +497,19 @@ Attribute::p_read_fixed_len(const DataType &mem_type, H5std_string &strg) const
 
     // If there is data, allocate buffer and read it.
     if (attr_size > 0) {
-        char  *strg_C    = new char[attr_size + 1];
-        herr_t ret_value = H5Aread(id, mem_type.getId(), strg_C);
+        // Resize the string to the attribute's size and read directly into it
+        strg.resize(attr_size+1);
+        herr_t ret_value = H5Aread(id, mem_type.getId(), &strg[0]);
         if (ret_value < 0) {
-            delete[] strg_C; // de-allocate for fixed-len string
             throw AttributeIException("Attribute::read", "H5Aread failed");
         }
-        // Get string from the C char* and release resource allocated locally
-        strg_C[attr_size] = '\0';
-        strg              = strg_C;
-        delete[] strg_C;
+        // Replicate original C-string truncation (stops at first NUL character)
+        size_t null_pos = strg.find('\0');
+        if (null_pos != H5std_string::npos) {
+            strg.resize(null_pos);
+        }else{
+            strg.resize(attr_size);
+        }
     }
 }
 

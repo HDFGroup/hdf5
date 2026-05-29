@@ -483,17 +483,14 @@ H5Object::getObjName() const
         // (unfortunate in/out type sign mismatch)
         size_t actual_name_size = static_cast<size_t>(name_size) + 1;
 
-        // Create buffer for C string
-        char *name_C = new char[actual_name_size]();
+        // Resize string to accommodate the name and terminal ASCII NUL
+        obj_name.resize(actual_name_size);
+        
+        // Write directly into the string's contiguous buffer
+        name_size = getObjName(&obj_name[0], actual_name_size);
 
-        // Use overloaded function
-        name_size = getObjName(name_C, actual_name_size);
-
-        // Convert the C object name to return
-        obj_name = name_C;
-
-        // Clean up resource
-        delete[] name_C;
+        // Resize back to the actual length (excluding NUL)
+        obj_name.resize(name_size);
     }
 
     // Return object's name
@@ -524,17 +521,14 @@ H5Object::getObjName(H5std_string &obj_name, size_t len) const
     }
     // If length is provided, get that number of characters in name
     else {
-        // Create buffer for C string
-        char *name_C = new char[len + 1]();
+        // Resize string to accommodate the requested length and terminal ASCII NUL
+        obj_name.resize(len + 1);
 
-        // Use overloaded function
-        name_size = getObjName(name_C, len + 1);
+        // Write directly into the string's contiguous buffer
+        name_size = getObjName(&obj_name[0], len + 1);
 
-        // Convert the C object name to return
-        obj_name = name_C;
-
-        // Clean up resource
-        delete[] name_C;
+        // Resize back to the actual length
+        obj_name.resize(name_size);
     }
     // Otherwise, keep obj_name intact
 

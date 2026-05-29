@@ -205,19 +205,20 @@ EnumType::insert(const H5std_string &name, void *value) const
 H5std_string
 EnumType::nameOf(void *value, size_t size) const
 {
-    char *name_C = new char[size + 1](); // temporary C-string for C API
+    H5std_string name;
+    name.resize(size+1);
 
-    // Calls C routine H5Tenum_nameof to get the name of the specified enum type
-    herr_t ret_value = H5Tenum_nameof(id, value, name_C, size);
-
+    // Calls C routine H5Tenum_nameof to get the name of the specified enum type directly into the string buffer
+    herr_t ret_value = H5Tenum_nameof(id, value, &name[0], size + 1);
     // If H5Tenum_nameof returns a negative value, raise an exception,
     if (ret_value < 0) {
-        delete[] name_C;
         throw DataTypeIException("EnumType::nameOf", "H5Tenum_nameof failed");
     }
-    // otherwise, create the string to hold the datatype name and return it
-    H5std_string name(name_C);
-    delete[] name_C;
+    // Truncate at the first null character to account for the C API's null-termination
+    size_t null_pos = name.find('\0');
+    if (null_pos != H5std_string::npos) {
+        name.resize(null_pos);
+    }
     return (name);
 }
 

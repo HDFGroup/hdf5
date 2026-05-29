@@ -718,19 +718,13 @@ DataSet::p_read_fixed_len(const hid_t mem_type_id, const hid_t mem_space_id, con
 
     // If there is data, allocate buffer and read it.
     if (data_size > 0) {
-        // Create buffer for C string
-        char *strg_C = new char[data_size + 1]();
-
-        herr_t ret_value = H5Dread(id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, strg_C);
-
+        // Resize the string to the dataset's size and read directly into it
+        strg.resize(data_size+1);
+        herr_t ret_value = H5Dread(id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, &strg[0]);
         if (ret_value < 0) {
-            delete[] strg_C; // de-allocate for fixed-len string
             throw DataSetIException("DataSet::read", "H5Dread failed for fixed length string");
         }
-
-        // Get string from the C char* and release resource allocated locally
-        strg = H5std_string(strg_C, data_size);
-        delete[] strg_C;
+        strg.resize(data_size);
     }
 }
 
