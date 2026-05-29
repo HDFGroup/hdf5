@@ -1785,10 +1785,10 @@ public class TestH5D {
             H5.H5Tset_size(varstr_id, HDF5Constants.H5T_VARIABLE);
             dtype_str_id = H5.H5Tarray_create(varstr_id, 1, strdims);
 
-            dspace_id   = H5.H5Screate_simple(1, dims, null);
-            dset_str_id = H5.H5Dcreate(H5fid, dset_str_name, dtype_str_id, dspace_id,
-                                       HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                       HDF5Constants.H5P_DEFAULT);
+            dspace_id = H5.H5Screate_simple(1, dims, null);
+            dset_str_id =
+                H5.H5Dcreate(H5fid, dset_str_name, dtype_str_id, dspace_id, HDF5Constants.H5P_DEFAULT,
+                             HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
             H5.H5DwriteVL(dset_str_id, dtype_str_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
                           HDF5Constants.H5P_DEFAULT, arr_str_data);
             H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
@@ -1864,10 +1864,10 @@ public class TestH5D {
             H5.H5Tset_size(varstr_id, HDF5Constants.H5T_VARIABLE);
             dtype_str_id = H5.H5Tarray_create(varstr_id, 1, strdims);
 
-            dspace_id   = H5.H5Screate_simple(1, dims, null);
-            dset_str_id = H5.H5Dcreate(H5fid, dset_str_name, dtype_str_id, dspace_id,
-                                       HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                       HDF5Constants.H5P_DEFAULT);
+            dspace_id = H5.H5Screate_simple(1, dims, null);
+            dset_str_id =
+                H5.H5Dcreate(H5fid, dset_str_name, dtype_str_id, dspace_id, HDF5Constants.H5P_DEFAULT,
+                             HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
 
             // Malformed buffer: a flat String[dims*array_dim], not
             // ArrayList[dims] of array_dim Strings.

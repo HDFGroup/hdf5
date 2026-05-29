@@ -4478,7 +4478,7 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
                 char **var_str_buf = (char **)raw_buf;
                 /* Passing NULL to NewStringUTF leads to a crash. A NULL pointer here
                  * usually means H5Dread did not fill this slot (e.g., if
-                 * caller passed an over-sized buffer). If this happens, return null 
+                 * caller passed an over-sized buffer). If this happens, return null
                  * rather than dereferencing. */
                 if (*var_str_buf == NULL) {
                     jobj = NULL;
@@ -4894,8 +4894,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                 if (i < (size_t)ret_buflen)
                     jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i);
                 if (jList != NULL && !ENVPTR->IsInstanceOf(ENVONLY, jList, arrCList))
-                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
-                                          "translate_rbuf: VLEN slot is not a java.util.ArrayList");
+                    H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_rbuf: VLEN slot is not a java.util.ArrayList");
                 if (NULL == jList) {
                     if (NULL ==
                         (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
@@ -5001,8 +5000,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                         found_jList = JNI_FALSE;
                 }
                 if (jList != NULL && !ENVPTR->IsInstanceOf(ENVONLY, jList, arrCList))
-                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
-                                          "translate_rbuf: ARRAY slot is not a java.util.ArrayList");
+                    H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_rbuf: ARRAY slot is not a java.util.ArrayList");
                 if (NULL == jList) {
                     if (NULL ==
                         (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
@@ -5156,8 +5154,7 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
                 }
 
                 if (!ENVPTR->IsInstanceOf(ENVONLY, jList, arrCList))
-                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
-                                          "translate_wbuf: VLEN slot is not a java.util.ArrayList");
+                    H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: VLEN slot is not a java.util.ArrayList");
 
                 /* invoke the toArray method */
                 if (mToArray == NULL)
@@ -5257,8 +5254,7 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
                 }
 
                 if (!ENVPTR->IsInstanceOf(ENVONLY, jList, arrCList))
-                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
-                                          "translate_wbuf: ARRAY slot is not a java.util.ArrayList");
+                    H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: ARRAY slot is not a java.util.ArrayList");
 
                 /* invoke the toArray method */
                 if (mToArray == NULL)
