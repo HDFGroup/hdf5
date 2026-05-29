@@ -50,7 +50,7 @@ jobs:
             // ----------------------------------------------------------------
             const LINE_THRESHOLD  = 300;   // default for all areas
             const AREA_THRESHOLDS = {      // per-area overrides
-              '/test/': 500,               // test files are verbose; raise bar for senior
+              'test': 500,                 // test files are verbose; raise bar for senior
             };
             const PUBLIC_HEADER   = /public\.h$|develop\.h$/;
 
@@ -78,26 +78,33 @@ jobs:
             // a CODEOWNERS-style gitignore pattern.
             function matchesPattern(file, pattern) {
               let p = pattern;
+              const anchored = p.startsWith('/');
 
-              // Strip leading slash — CODEOWNERS anchors to root with it,
-              // but GitHub API paths have no leading slash
-              if (p.startsWith('/')) p = p.slice(1);
+              if (anchored) p = p.slice(1);
 
               // Directory pattern: /fortran/ → matches fortran/<anything>
-              if (p.endsWith('/')) return file.startsWith(p);
+              if (p.endsWith('/')) {
+                return anchored
+                  ? file.startsWith(p)
+                  : (file === p.slice(0, -1) || file.startsWith(p));
+              }
 
               // Glob pattern: convert * and ** to regex equivalents
               if (p.includes('*')) {
                 const re = new RegExp(
-                  '^' +
-                  p.replace(/\./g, '\\.').split('**').map(s => s.replace(/\*/g, '[^/]*')).join('.*') +
+                  (anchored ? '^' : '(^|/)') +
+                  p.replace(/./g, '\\.').split('**').map(s => s.replace(/\*/g, '[^/]*')).join('.*') +
                   '($|/)'
                 );
                 return re.test(file);
               }
 
               // Plain path: exact match or directory prefix
-              return file === p || file.startsWith(p + '/');
+              if (anchored) {
+                return file === p || file.startsWith(p + '/');
+              } else {
+                return file === p || file.endsWith('/' + p) || file.includes('/' + p + '/');
+              }
             }
 
             const areas = [];
@@ -148,16 +155,25 @@ jobs:
             // 3. Find which CODEOWNERS areas are touched by this PR, and
             //    total the lines changed within each area.
             // ----------------------------------------------------------------
+            const areaLineChanges = {};
+            for (const file of changedFileData) {
+              let matchedArea = null;
+              for (let i = areas.length - 1; i >= 0; i--) {
+                if (matchesPattern(file.filename, areas[i].pattern)) {
+                  matchedArea = areas[i];
+                  break;
+                }
+              }
+              if (matchedArea) {
+                areaLineChanges[matchedArea.pattern] = (areaLineChanges[matchedArea.pattern] || 0) + file.changes;
+              }
+            }
+
             const touchedAreas = areas
-              .map(area => {
-                const areaFiles = changedFileData.filter(f =>
-                  matchesPattern(f.filename, area.pattern)
-                );
-                return {
-                  ...area,
-                  linesChanged: areaFiles.reduce((n, f) => n + f.changes, 0),
-                };
-              })
+              .map(area => ({
+                ...area,
+                linesChanged: areaLineChanges[area.pattern] || 0,
+              }))
               .filter(area => area.linesChanged > 0);
 
             if (touchedAreas.length === 0) {
@@ -181,7 +197,10 @@ jobs:
 
             const latestStateByUser = {};
             for (const review of allReviews) {
-              latestStateByUser[review.user.login] = review.state;
+              const state = review.state;
+              if (state === 'APPROVED' || state === 'CHANGES_REQUESTED' || state === 'DISMISSED') {
+                latestStateByUser[review.user.login] = state;
+              }
             }
             const approvedUsers = new Set(
               Object.entries(latestStateByUser)
@@ -234,11 +253,14 @@ jobs:
                 core.info(`Author ${prAuthor} is not a code owner — skipping assignee`);
               }
 
+              const searchCache = {};
               async function pendingReviewCount(username) {
+                if (username in searchCache) return searchCache[username];
                 const { data } = await github.rest.search.issuesAndPullRequests({
                   q: `is:pr is:open review-requested:${username} repo:${owner}/${repo}`,
                   per_page: 1,
                 });
+                searchCache[username] = data.total_count;
                 return data.total_count;
               }
 
@@ -277,7 +299,7 @@ jobs:
 
                 // A change is "complex" if it hits the line threshold OR
                 // touches a public/developer API header in this area.
-                const threshold = AREA_THRESHOLDS[area.pattern] ?? LINE_THRESHOLD;
+                const threshold = AREA_THRESHOLDS[area.label] ?? LINE_THRESHOLD;
                 const touchesPublicHeader = changedFileData.some(f =>
                   matchesPattern(f.filename, area.pattern) && PUBLIC_HEADER.test(f.filename)
                 );
@@ -350,7 +372,7 @@ jobs:
             // ----------------------------------------------------------------
             // 8. Create or update the checklist comment (idempotent via marker)
             // ----------------------------------------------------------------
-            const { data: comments } = await github.rest.issues.listComments({
+            const comments = await github.paginate(github.rest.issues.listComments, {
               owner, repo, issue_number: pr_number, per_page: 100,
             });
             const existing = comments.find(c => c.body.includes(MARKER));
