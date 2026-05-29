@@ -207,6 +207,11 @@ jobs:
             //    only that person. This load-balances across owners without
             //    needing persistent state.
             //
+            //    Ties (equal queue depth) are broken by CODEOWNERS order —
+            //    the first-listed owner wins. In a quiet repo where everyone
+            //    has zero open requests this effectively always picks the
+            //    first owner for that area.
+            //
             //    Skipped entirely if an area owner is already requested
             //    (manual assignment or a previous run) — don't override.
             //    Only runs on pull_request events, not review submissions.
@@ -328,11 +333,8 @@ jobs:
             });
 
             const allDone = rows.every(r => r.includes('[x]'));
-            const summary = allDone
-              ? '> ✅ All areas have been signed off.'
-              : '> ⏳ Waiting for sign-off on all areas listed above.';
 
-            const body = [
+            const bodyParts = [
               MARKER,
               '## Review Checklist',
               '',
@@ -341,9 +343,9 @@ jobs:
               'covering only one area does **not** satisfy the others.',
               '',
               ...rows,
-              '',
-              summary,
-            ].join('\n');
+            ];
+            if (allDone) bodyParts.push('', '> ✅ All areas have been signed off.');
+            const body = bodyParts.join('\n');
 
             // ----------------------------------------------------------------
             // 8. Create or update the checklist comment (idempotent via marker)
