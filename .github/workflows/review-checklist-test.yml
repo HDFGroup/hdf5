@@ -6,6 +6,7 @@ on:
       - .github/scripts/review-checklist.js
       - .github/scripts/review-checklist.test.js
   pull_request:
+    branches: [develop]
     paths:
       - .github/scripts/review-checklist.js
       - .github/scripts/review-checklist.test.js
@@ -16,6 +17,7 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    if: github.repository == 'HDFGroup/hdf5' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
     steps:
       - uses: actions/checkout@v4
       - run: node .github/scripts/review-checklist.test.js
