@@ -13,6 +13,10 @@ on:
   pull_request_review:
     types: [submitted]
 
+concurrency:
+  group: review-checklist-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 permissions:
   pull-requests: write
   contents: read
@@ -47,6 +51,14 @@ jobs:
             // PUBLIC_HEADER: files matching this pattern are always treated as
             //   complex regardless of line count — any change to the public or
             //   developer API surface warrants the senior owner.
+            //
+            // NOTE: Fork PRs (head.repo != base.repo) are intentionally excluded.
+            //   They run with a read-only token and cannot post comments or request
+            //   reviewers. Fork coverage would require a pull_request_target job.
+            //
+            // NOTE: Team owners (@org/team) in CODEOWNERS are not supported.
+            //   Only individual GitHub logins are handled. If teams are added,
+            //   extend parsing and reviewer requests to use team_reviewers.
             // ----------------------------------------------------------------
             const LINE_THRESHOLD  = 300;   // default for all areas
             const AREA_THRESHOLDS = {      // per-area overrides
@@ -91,11 +103,10 @@ jobs:
 
               // Glob pattern: convert * and ** to regex equivalents
               if (p.includes('*')) {
-                const re = new RegExp(
-                  (anchored ? '^' : '(^|/)') +
-                  p.replace(/./g, '\\.').split('**').map(s => s.replace(/\*/g, '[^/]*')).join('.*') +
-                  '($|/)'
-                );
+                const escaped = p
+                  .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+                  .split('**').map(s => s.replace(/\*/g, '[^/]*')).join('.*');
+                const re = new RegExp((anchored ? '^' : '(^|/)') + escaped + '($|/)');
                 return re.test(file);
               }
 
@@ -103,7 +114,7 @@ jobs:
               if (anchored) {
                 return file === p || file.startsWith(p + '/');
               } else {
-                return file === p || file.endsWith('/' + p) || file.includes('/' + p + '/');
+                return file === p || file.startsWith(p + '/') || file.endsWith('/' + p) || file.includes('/' + p + '/');
               }
             }
 
@@ -178,6 +189,17 @@ jobs:
 
             if (touchedAreas.length === 0) {
               core.info('No CODEOWNERS-tracked areas changed — skipping checklist.');
+              const allComments = await github.paginate(github.rest.issues.listComments, {
+                owner, repo, issue_number: pr_number, per_page: 100,
+              });
+              const stale = allComments.find(c => c.body.includes(MARKER));
+              if (stale) {
+                await github.rest.issues.updateComment({
+                  owner, repo, comment_id: stale.id,
+                  body: MARKER + '\n_No CODEOWNERS-tracked areas are touched by this PR — no review checklist required._',
+                });
+                core.info(`Cleared stale checklist comment #${stale.id}`);
+              }
               return;
             }
 
@@ -240,6 +262,8 @@ jobs:
 
               // Assign the PR author only if they are a code owner.
               // External contributors (not in CODEOWNERS) get no auto-assignee.
+              // Note: addAssignees uses github.rest.issues.* but is covered
+              // by pull-requests: write — no issues: write permission needed.
               if (allCodeOwners.has(prAuthor)) {
                 try {
                   await github.rest.issues.addAssignees({
@@ -284,54 +308,50 @@ jobs:
                   continue;
                 }
 
-                // Cohesion: if someone already assigned to this PR also owns
-                // this area, reuse them. Prevents e.g. src/ going to @mattjala
-                // while test/ independently picks @fortnern — the same person
-                // should review related areas wherever the owner lists overlap.
-                const cohesionPick = [...selected].find(
-                  u => area.owners.includes(u) && u !== prAuthor
-                );
-                if (cohesionPick) {
-                  requestedReviewers.add(cohesionPick); // already in selected
-                  core.info(`Area "${area.label}": reusing ${cohesionPick} for cohesion`);
-                  continue;
-                }
-
-                // A change is "complex" if it hits the line threshold OR
-                // touches a public/developer API header in this area.
+                // Complexity is checked BEFORE cohesion: a complex area always
+                // requires the senior (first-listed) owner; cohesion must not
+                // override that guarantee by reusing a junior owner.
                 const threshold = AREA_THRESHOLDS[area.label] ?? LINE_THRESHOLD;
                 const touchesPublicHeader = changedFileData.some(f =>
                   matchesPattern(f.filename, area.pattern) && PUBLIC_HEADER.test(f.filename)
                 );
                 const isComplex = area.linesChanged >= threshold || touchesPublicHeader;
 
-                let pick;
                 if (isComplex) {
-                  // Complex change: always assign the first (senior) owner in
-                  // CODEOWNERS, regardless of their current review load.
-                  pick = area.owners.find(u => u !== prAuthor) ?? null;
+                  const pick = area.owners.find(u => u !== prAuthor) ?? null;
                   const reason = touchesPublicHeader ? 'public header modified' : `${area.linesChanged} lines ≥ ${threshold}`;
                   core.info(`Area "${area.label}" is complex (${reason}) — primary owner: ${pick}`);
-                } else {
-                  // Routine change: assign whoever has the lightest review load.
-                  pick = await selectReviewer(area.owners);
-                  core.info(`Area "${area.label}": ${area.linesChanged} lines (< ${threshold}), no public headers — load-balanced pick: ${pick}`);
+                  if (pick) { selected.add(pick); requestedReviewers.add(pick); }
+                  continue;
                 }
 
-                if (pick) {
-                  selected.add(pick);
-                  requestedReviewers.add(pick);
+                // Routine change: cohesion — reuse an already-assigned owner
+                // if they also own this area, to avoid splitting related areas
+                // across multiple reviewers unnecessarily.
+                const cohesionPick = [...selected].find(
+                  u => area.owners.includes(u) && u !== prAuthor
+                );
+                if (cohesionPick) {
+                  requestedReviewers.add(cohesionPick);
+                  core.info(`Area "${area.label}": reusing ${cohesionPick} for cohesion`);
+                  continue;
                 }
+
+                const pick = await selectReviewer(area.owners);
+                core.info(`Area "${area.label}": ${area.linesChanged} lines (< ${threshold}), no public headers — load-balanced pick: ${pick}`);
+                if (pick) { selected.add(pick); requestedReviewers.add(pick); }
               }
 
-              if (selected.size > 0) {
+              // Request one at a time: a single invalid/non-collaborator login
+              // must not prevent the remaining reviewers from being requested.
+              for (const reviewer of selected) {
                 try {
                   await github.rest.pulls.requestReviewers({
                     owner, repo, pull_number: pr_number,
-                    reviewers: [...selected],
+                    reviewers: [reviewer],
                   });
                 } catch (e) {
-                  core.warning(`Could not request reviewers: ${e.message}`);
+                  core.warning(`Could not request reviewer ${reviewer}: ${e.message}`);
                 }
               }
             }
@@ -344,17 +364,18 @@ jobs:
             //    This avoids listing all owners (bystander effect) while
             //    still making clear who is responsible for each area.
             // ----------------------------------------------------------------
-            const rows = touchedAreas.map(area => {
+            const rowData = touchedAreas.map(area => {
               const approver  = area.owners.find(o => approvedUsers.has(o));
               const assigned  = approver ?? area.owners.find(o => requestedReviewers.has(o));
               const signedOff = !!approver;
               const box       = signedOff ? 'x' : ' ';
               const tick      = signedOff ? ' ✅' : '';
               const mention   = assigned ? ` — @${assigned}` : '';
-              return `- [${box}] **${area.label}**${tick}${mention}`;
+              return { text: `- [${box}] **${area.label}**${tick}${mention}`, signedOff };
             });
 
-            const allDone = rows.every(r => r.includes('[x]'));
+            const allDone = rowData.every(r => r.signedOff);
+            const rows = rowData.map(r => r.text);
 
             const bodyParts = [
               MARKER,
