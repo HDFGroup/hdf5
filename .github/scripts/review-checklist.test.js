@@ -1,4 +1,5 @@
 'use strict';
+// Run with: node .github/scripts/review-checklist.test.js
 
 const assert = require('assert');
 const { matchesPattern, labelFromPattern } = require('./review-checklist.js');
