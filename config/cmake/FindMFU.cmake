@@ -85,7 +85,7 @@ endif()
 
 # Report the results.
 if (NOT MFU_FOUND)
-  message (STATUS "MFU (mpiFileUtils) was not found. "
+  message (FATAL_ERROR "MFU (mpiFileUtils) was not found. "
       "MFU is an HPC parallel file utilities library (https://github.com/hpc/mpifileutils). "
       "Set the MFU_ROOT environment variable to the install prefix (export MFU_ROOT=<path>), "
       "or set MFU_LIBRARY and MFU_INCLUDE_DIR explicitly. "
