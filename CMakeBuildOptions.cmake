@@ -73,7 +73,7 @@ mark_as_advanced (HDF5_ENABLE_MAP_API)
 
 option (HDF5_BUILD_DOC "Build documentation" OFF)
 
-option (HDF5_BUILD_PARALLEL_TOOLS "Build parallel HDF5 file walker tool (h5dwalk); requires MFU, CIRCLE, and DTCMP HPC libraries (see https://github.com/hpc/mpifileutils). Also requires HDF5_ENABLE_PARALLEL=ON." OFF)
+option (HDF5_BUILD_PARALLEL_TOOLS "Build h5dwalk parallel tool. Requires HDF5_ENABLE_PARALLEL=ON and MFU/CIRCLE/DTCMP (mpiFileUtils)." OFF)
 mark_as_advanced (HDF5_BUILD_PARALLEL_TOOLS)
 
 option (HDF5_BUILD_TOOLS "Build HDF5 Tools" ON)
