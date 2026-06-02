@@ -9,8 +9,8 @@ Free-space section bins:
 File space management strategy: H5F_FSPACE_STRATEGY_PAGE
 File space page size: 4096 bytes
 Summary of file space information:
-  File metadata: 1602 bytes
+  File metadata: 1949 bytes
   Raw data: 400 bytes
-  Amount/Percent of tracked free space: 6190 bytes/75.6%
+  Amount/Percent of tracked free space: 5843 bytes/71.3%
   Unaccounted space: 0 bytes
 Total space: 8192 bytes

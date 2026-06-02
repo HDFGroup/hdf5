@@ -156,7 +156,7 @@ main(void)
 
     int FORTRAN_NUM_INTEGER_KINDS = H5_FORTRAN_NUM_INTEGER_KINDS;
     int H5_FORTRAN_NUM_REAL_KINDS;
-#if H5_FORTRAN_HAVE_C_LONG_DOUBLE != 0
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
     int found_long_double = 0;
 #endif
 
@@ -213,7 +213,7 @@ main(void)
             writeTypedef("float", "double", RealKinds[i]);
             strcpy(Real_C_TYPES[i], "C_DOUBLE");
         }
-#if H5_FORTRAN_HAVE_C_LONG_DOUBLE != 0
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
         else if (sizeof(long double) == RealKinds_SizeOf[i] && found_long_double == 0) {
             writeTypedef("float", "long double", RealKinds[i]);
             strcpy(Real_C_TYPES[i], "C_LONG_DOUBLE");
@@ -376,7 +376,7 @@ main(void)
             return -1;
     }
     /* real_f */
-#if H5_FORTRAN_HAVE_C_LONG_DOUBLE != 0
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
     if (H5_FORTRAN_NATIVE_REAL_SIZEOF == sizeof(long double)) {
         writeToFilesChr("float", "Fortran_REAL", "real_f", H5_FORTRAN_NATIVE_REAL_KIND, "C_LONG_DOUBLE");
     }
@@ -403,7 +403,7 @@ main(void)
     }
 
     /* double_f */
-#if H5_FORTRAN_HAVE_C_LONG_DOUBLE != 0
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
     if (H5_FORTRAN_NATIVE_DOUBLE_SIZEOF == sizeof(long double)) {
         writeToFilesChr("float", "Fortran_DOUBLE", "double_f", H5_FORTRAN_NATIVE_DOUBLE_KIND,
                         "C_LONG_DOUBLE");

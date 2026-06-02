@@ -974,7 +974,7 @@ END SUBROUTINE test_array_compound_atomic
     INTEGER, PARAMETER :: int_kind_4 = SELECTED_INT_KIND(4) !should map to INTEGER*2 on most modern processors
     INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(9) !should map to INTEGER*4 on most modern processors
     INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(18) !should map to INTEGER*8 on most modern processors
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+#ifdef H5_HAVE_Fortran_INTEGER_SIZEOF_16
     INTEGER, PARAMETER :: int_kind_32 = SELECTED_INT_KIND(36) !should map to INTEGER*16 on most modern processors
     INTEGER(int_kind_32), DIMENSION(1:4), TARGET :: dset_data_i32, data_out_i32
     INTEGER(HID_T) :: dset_id32     ! Dataset identifier
@@ -1052,7 +1052,7 @@ END SUBROUTINE test_array_compound_atomic
        dset_data_i4(i)  = HUGE(0_int_kind_4)-INT(i,int_kind_4)
        dset_data_i8(i)  = HUGE(0_int_kind_8)-INT(i,int_kind_8)
        dset_data_i16(i) = HUGE(0_int_kind_16)-INT(i,int_kind_16)
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+#ifdef H5_HAVE_Fortran_INTEGER_SIZEOF_16
        dset_data_i32(i) = HUGE(0_int_kind_32)-INT(i,int_kind_32)
 #endif
        dset_data_r(i) = 4.0*ATAN(1.0)-REAL(i-1)
@@ -1080,7 +1080,7 @@ END SUBROUTINE test_array_compound_atomic
     CALL check("H5Dcreate_f",error, total_error)
     CALL H5Dcreate_f(file_id, dsetname8, h5kind_to_type(int_kind_16,H5_INTEGER_KIND), dspace_id, dset_id16, error)
     CALL check("H5Dcreate_f",error, total_error)
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+#ifdef H5_HAVE_Fortran_INTEGER_SIZEOF_16
     CALL H5Dcreate_f(file_id, dsetname16, h5kind_to_type(int_kind_32,H5_INTEGER_KIND), dspace_id, dset_id32, error)
     CALL check("H5Dcreate_f",error, total_error)
 #endif
@@ -1107,7 +1107,7 @@ END SUBROUTINE test_array_compound_atomic
     f_ptr = C_LOC(dset_data_i16(1))
     CALL h5dwrite_f(dset_id16, h5kind_to_type(int_kind_16,H5_INTEGER_KIND), f_ptr, error)
     CALL check("H5Dwrite_f",error, total_error)
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+#ifdef H5_HAVE_Fortran_INTEGER_SIZEOF_16
     f_ptr = C_LOC(dset_data_i32(1))
     CALL h5dwrite_f(dset_id32, h5kind_to_type(int_kind_32,H5_INTEGER_KIND), f_ptr, error)
     CALL check("H5Dwrite_f",error, total_error)
@@ -1151,7 +1151,7 @@ END SUBROUTINE test_array_compound_atomic
     f_ptr = C_LOC(data_out_i16(1))
     CALL h5dread_f(dset_id16, h5kind_to_type(int_kind_16,H5_INTEGER_KIND), f_ptr,  error)
     CALL check("h5dread_f",error, total_error)
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+#ifdef H5_HAVE_Fortran_INTEGER_SIZEOF_16
     f_ptr = C_LOC(data_out_i32(1))
     CALL h5dread_f(dset_id32, h5kind_to_type(int_kind_32,H5_INTEGER_KIND), f_ptr,  error)
     CALL check("h5dread_f",error, total_error)
@@ -1175,7 +1175,7 @@ END SUBROUTINE test_array_compound_atomic
        CALL verify("h5kind_to_type",dset_data_i8(i),data_out_i8(i),total_error)
        CALL verify("h5kind_to_type",dset_data_i16(i),data_out_i16(i),total_error)
 
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+#ifdef H5_HAVE_Fortran_INTEGER_SIZEOF_16
        CALL verify("h5kind_to_type",dset_data_i32(i),data_out_i32(i),total_error)
 #endif
        CALL verify("h5kind_to_type",dset_data_r(i),data_out_r(i),total_error)
