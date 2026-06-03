@@ -1926,6 +1926,17 @@ out:
  *
  * Return:      Updated buffer pointer on success, NULL on failure
  *
+ * Note:        This function must ALWAYS leave buf untouched on failure to
+ *              maintain realloc-like behavior.  buf is passed by value, so the
+ *              caller's pointer variable is never written by this function;
+ *              failure is signaled solely through the NULL return value.  In
+ *              library-managed mode the underlying memory is freed on failure,
+ *              so callers must not access the original buf after a NULL return.
+ *              Callers must use the tmp-pointer pattern:
+ *                  char *tmp = realloc_and_append(...);
+ *                  if (!tmp) <handle failure without touching buf>;
+ *                  buf = tmp;
+ *
  *-------------------------------------------------------------------------
  */
 static char *
@@ -1956,6 +1967,8 @@ realloc_and_append(bool _no_user_buf, size_t *len, char *buf, const char *str_to
         }
         else
             buf = tmp_realloc;
+
+        /* The function cannot fail after this point */
     }
     /* Mode 2: User-provided buffer - fixed size, no reallocation
      * (else case is implicit - no action needed) */
