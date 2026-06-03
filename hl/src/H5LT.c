@@ -1964,10 +1964,9 @@ realloc_and_append(bool _no_user_buf, size_t *len, char *buf, const char *str_to
             buf = NULL;
             goto out;
         }
-        else
-            buf = tmp_realloc;
 
         /* The function cannot fail after this point */
+        buf = tmp_realloc;
     }
     /* Mode 2: User-provided buffer - fixed size, no reallocation
      * (else case is implicit - no action needed) */
