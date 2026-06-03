@@ -1932,7 +1932,7 @@ out:
  *              on failure, so callers must not access or free it after a NULL
  *              return.  The safe idiom is direct assignment:
  *                  buf = realloc_and_append(...);
- *                  if (!buf) goto out;   /* buf is NULL; original already freed */
+ *                  if (!buf) goto out;   - buf is now NULL; original already freed
  *              Use a temporary only when additional resources must be released
  *              before the NULL check (e.g. freeing a scratch buffer).
  *
