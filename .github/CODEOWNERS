@@ -14,7 +14,7 @@
 # ── Core C library ────────────────────────────────────────────────────────────
 /src/                 @fortnern @jhendersonHDF @mattjala @vchoi-hdfgroup @glennsong09
 /src/H5FDsubfiling/   @jhendersonHDF @brtnfld @fortnern
-/utils/               @brtnfld @mattjala @jhendersonHDF
+/utils/               @brtnfld @mattjala @jhendersonHDF @bmribler
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
 /test/                @fortnern @jhendersonHDF @mattjala @vchoi-hdfgroup @glennsong09
@@ -24,7 +24,7 @@
 /hl/                  @brtnfld @mattjala
 
 # ── Tools ─────────────────────────────────────────────────────────────────────
-/tools/               @jhendersonHDF @mattjala
+/tools/               @jhendersonHDF @mattjala @bmribler
 
 # ── Examples ──────────────────────────────────────────────────────────────────
 /HDF5Examples/        @brtnfld @jhendersonHDF @mattjala @vchoi-hdfgroup @glennsong09
@@ -36,12 +36,13 @@
 /config/              @jhendersonHDF @mattjala @lrknox
 
 # ── Documentation ─────────────────────────────────────────────────────────────
-/docs/                              @brtnfld @gheber @vchoi-hdfgroup @glennsong09 @lrknox
-/docs/INSTALL*                      @lrknox @hyoklee
-/release_docs/                      @lrknox @hyoklee @glennsong09
+/docs/                @brtnfld @gheber @vchoi-hdfgroup @glennsong09 @lrknox
+/docs/INSTALL*        @lrknox @hyoklee
+/release_docs/        @lrknox @hyoklee @glennsong09
 
 # ── CI / GitHub Actions ───────────────────────────────────────────────────────
 /.github/             @hyoklee @lrknox @jhendersonHDF @glennsong09
 
 # The HDF Group website verification — must stay in sync with hdfgroup.org
-/.github/.well-known  @lkurz
+/.github/.well-known  @lkurz @lrknox
+
