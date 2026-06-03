@@ -86,7 +86,7 @@ jobs:
       should-test: ${{ steps.should-test.outputs.result }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
 
@@ -263,7 +263,7 @@ jobs:
           distribution: ${{ matrix.implementation == 'ffm' && 'oracle' || 'temurin' }}
 
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Setup jextract (FFM builds only)
         if: ${{ matrix.implementation == 'ffm' }}
@@ -677,7 +677,7 @@ jobs:
           merge-multiple: false
 
       - name: Checkout code for version extraction
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           path: source
 
@@ -785,7 +785,7 @@ jobs:
       matrix: ${{ fromJson(needs.determine-matrix.outputs.matrix) }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Set up JDK (Java 25 for FFM builds)
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
