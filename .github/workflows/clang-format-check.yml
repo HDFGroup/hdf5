@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'skip-ci')"
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
     - name: Run clang-format style check for C and Java code
       uses: DoozyX/clang-format-lint-action@bcb4eb2cb0d707ee4f3e5cc3b456eb075f12cf73 # v0.20
