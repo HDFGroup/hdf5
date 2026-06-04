@@ -4865,11 +4865,10 @@ void
 translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t type_class, jsize count,
                void *raw_buf, size_t buf_size)
 {
-    hid_t        memb       = H5I_INVALID_HID;
-    int          ret_buflen = -1;
-    jboolean     retIsList  = JNI_FALSE;
-    jobjectArray jList      = NULL;
-    jobject      jobj       = NULL;
+    hid_t        memb      = H5I_INVALID_HID;
+    jboolean     retIsList = JNI_FALSE;
+    jobjectArray jList     = NULL;
+    jobject      jobj      = NULL;
     H5T_class_t  vlClass;
     size_t       vlSize;
     size_t       i, x;
@@ -4886,18 +4885,11 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
         H5_LIBRARY_ERROR(ENVONLY);
 
     /* Top-level calls pass a Java Object[] array; recursive calls pass an
-     * ArrayList. Detect which so we never call GetArrayLength on a non-array
-     * (undefined behavior) and so the append-vs-set decision is unambiguous. */
+     * ArrayList. Detect which so the append-vs-set decision is unambiguous.
+     *
+     * Caller-side pre-allocation of per-element slots is not supported.
+     * Any object already present in a Java array slot is overwritten. */
     retIsList = ENVPTR->IsInstanceOf(ENVONLY, ret_buf, arrCList);
-    if (retIsList) {
-        /* Lists are always appended to; no slot reuse. */
-        ret_buflen = 0;
-    }
-    else {
-        ret_buflen = ENVPTR->GetArrayLength(ENVONLY, ret_buf);
-        if (ret_buflen < 0)
-            H5_JNI_FATAL_ERROR(ENVONLY, "ret_buflen: Array length cannot be negative");
-    }
 
     switch (type_class) {
         case H5T_VLEN: {
@@ -4910,7 +4902,6 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
 
             for (i = 0; i < (size_t)count; i++) {
                 hvl_t vl_elem;
-                jList = NULL;
 
                 CHECK_RAWBUF_BOUNDS(ENVONLY, i * sizeof(hvl_t), sizeof(hvl_t), buf_size, "translate_rbuf");
                 memcpy(&vl_elem, char_buf + i * sizeof(hvl_t), sizeof(hvl_t));
@@ -4920,16 +4911,8 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                 if (nelmts < 0)
                     H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_rbuf: number of VL elements < 0");
 
-                if (i < (size_t)ret_buflen)
-                    jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i);
-                if (jList != NULL && !ENVPTR->IsInstanceOf(ENVONLY, jList, arrCList))
-                    H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_rbuf: VLEN slot is not a java.util.ArrayList");
-                if (NULL == jList) {
-                    if (NULL ==
-                        (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
-                        H5_OUT_OF_MEMORY_ERROR(ENVONLY,
-                                               "translate_rbuf: failed to allocate list read buffer");
-                }
+                if (NULL == (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
+                    H5_OUT_OF_MEMORY_ERROR(ENVONLY, "translate_rbuf: failed to allocate list read buffer");
 
                 translate_rbuf(ENVONLY, jList, memb, vlClass, (jsize)nelmts, vl_elem.p,
                                (size_t)nelmts * vlSize);
@@ -4945,24 +4928,11 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
             break;
         } /* H5T_VLEN */
         case H5T_COMPOUND: {
-            /* Convert each compound element to a list. If a per-row slot was
-             * pre-allocated by the caller, reuse it, otherwise allocate a new
-             * ArrayList. */
+            /* Convert each compound element to a fresh ArrayList of its members. */
             for (i = 0; i < (size_t)count; i++) {
-                jList = NULL;
+                if (NULL == (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
+                    H5_OUT_OF_MEMORY_ERROR(ENVONLY, "translate_rbuf: failed to allocate list read buffer");
 
-                if (i < (size_t)ret_buflen) {
-                    jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i);
-                }
-                if (jList != NULL && !ENVPTR->IsInstanceOf(ENVONLY, jList, arrCList))
-                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
-                                          "translate_rbuf: COMPOUND slot is not a java.util.ArrayList");
-                if (NULL == jList) {
-                    if (NULL ==
-                        (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
-                        H5_OUT_OF_MEMORY_ERROR(ENVONLY,
-                                               "translate_rbuf: failed to allocate list read buffer");
-                }
                 int nmembs = H5Tget_nmembers(mem_type_id);
                 /* Append each member's value to this row's ArrayList */
                 for (x = 0; x < (size_t)nmembs; x++) {
@@ -5018,26 +4988,15 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
             if (NULL == (objBuf = malloc(typeSize)))
                 H5_OUT_OF_MEMORY_ERROR(ENVONLY, "translate_rbuf: failed to allocate buffer");
 
-            /* Convert each element to a list */
+            /* Convert each element to a fresh list */
             for (i = 0; i < (size_t)count; i++) {
-                jList = NULL;
-
                 /* Get the object element */
                 CHECK_RAWBUF_BOUNDS(ENVONLY, i * typeSize, typeSize, buf_size, "translate_rbuf");
                 memcpy((char *)objBuf, char_buf + i * typeSize, typeSize);
 
                 /* The list we're going to return: */
-                if (i < (size_t)ret_buflen) {
-                    jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i);
-                }
-                if (jList != NULL && !ENVPTR->IsInstanceOf(ENVONLY, jList, arrCList))
-                    H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_rbuf: ARRAY slot is not a java.util.ArrayList");
-                if (NULL == jList) {
-                    if (NULL ==
-                        (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
-                        H5_OUT_OF_MEMORY_ERROR(ENVONLY,
-                                               "translate_rbuf: failed to allocate list read buffer");
-                }
+                if (NULL == (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
+                    H5_OUT_OF_MEMORY_ERROR(ENVONLY, "translate_rbuf: failed to allocate list read buffer");
 
                 translate_rbuf(ENVONLY, jList, memb, vlClass, (jsize)typeCount, objBuf, typeSize);
                 if (retIsList)
@@ -5095,27 +5054,15 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
             if (NULL == (objBuf = malloc(typeSize)))
                 H5_OUT_OF_MEMORY_ERROR(ENVONLY, "translate_atomic_rbuf: failed to allocate buffer");
 
-            /* Convert each element to a list of 2 floating-point elements */
+            /* Convert each element to a fresh list of 2 floating-point elements */
             for (i = 0; i < (size_t)count; i++) {
-                jList = NULL;
-
                 /* Get the object element */
                 CHECK_RAWBUF_BOUNDS(ENVONLY, i * typeSize, typeSize, buf_size, "translate_rbuf");
                 memcpy((char *)objBuf, char_buf + i * typeSize, typeSize);
 
                 /* The list we're going to return: */
-                if (i < (size_t)ret_buflen) {
-                    jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i);
-                }
-                if (jList != NULL && !ENVPTR->IsInstanceOf(ENVONLY, jList, arrCList))
-                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
-                                          "translate_rbuf: COMPLEX slot is not a java.util.ArrayList");
-                if (NULL == jList) {
-                    if (NULL ==
-                        (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
-                        H5_OUT_OF_MEMORY_ERROR(ENVONLY,
-                                               "translate_rbuf: failed to allocate list read buffer");
-                }
+                if (NULL == (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
+                    H5_OUT_OF_MEMORY_ERROR(ENVONLY, "translate_rbuf: failed to allocate list read buffer");
 
                 translate_rbuf(ENVONLY, jList, memb, base_class, (jsize)typeCount, objBuf, typeSize);
                 if (retIsList)

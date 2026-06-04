@@ -2259,64 +2259,6 @@ public class TestH5D {
     }
 
     /*
-     * Same compound-of-vlen read as testH5Dread_compound_of_vlen, but the caller
-     * pre-allocates each row's ArrayList. Should behave the same as the
-     * no-pre-allocation test.
-     */
-    @Test
-    public void testH5Dread_compound_of_vlen_preallocated()
-    {
-        long dset_id      = HDF5Constants.H5I_INVALID_HID;
-        long file_type_id = HDF5Constants.H5I_INVALID_HID;
-        final int N_ROWS  = 2;
-
-        try {
-            dset_id      = writeCompoundOfVlenDataset("cmpd_of_vlen_rd_prealloc");
-            file_type_id = H5.H5Dget_type(dset_id);
-            assertTrue("testH5Dread_compound_of_vlen_preallocated: H5Dget_type: ", file_type_id >= 0);
-
-            ArrayList[] read_data = new ArrayList[N_ROWS];
-            for (int i = 0; i < N_ROWS; i++)
-                read_data[i] = new ArrayList<Object>();
-
-            H5.H5DreadVL(dset_id, file_type_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                         HDF5Constants.H5P_DEFAULT, read_data);
-
-            assertEquals("testH5Dread_compound_of_vlen_preallocated: row 0 record has 2 members", 2,
-                         read_data[0].size());
-            assertEquals("testH5Dread_compound_of_vlen_preallocated: row 1 record has 2 members", 2,
-                         read_data[1].size());
-
-            Object seq0obj = read_data[0].get(0);
-            assertTrue("testH5Dread_compound_of_vlen_preallocated: row 0 seq is ArrayList, got " +
-                           (seq0obj == null ? "null" : seq0obj.getClass().getName()),
-                       seq0obj instanceof ArrayList);
-            ArrayList<?> seq0_read = (ArrayList<?>)seq0obj;
-            assertEquals("testH5Dread_compound_of_vlen_preallocated: row 0 seq length", 3, seq0_read.size());
-            assertEquals("testH5Dread_compound_of_vlen_preallocated: row 0 seq[0]", Integer.valueOf(1),
-                         seq0_read.get(0));
-        }
-        catch (Throwable err) {
-            err.printStackTrace();
-            fail("testH5Dread_compound_of_vlen_preallocated: " + err);
-        }
-        finally {
-            if (file_type_id >= 0)
-                try {
-                    H5.H5Tclose(file_type_id);
-                }
-                catch (Exception ex) {
-                }
-            if (dset_id >= 0)
-                try {
-                    H5.H5Dclose(dset_id);
-                }
-                catch (Exception ex) {
-                }
-        }
-    }
-
-    /*
      * Round-trip a compound-of-vlen dataset through H5DwriteVL and H5DreadVL.
      * Reuses the writeCompoundOfVlenDataset helper to exercise the write path,
      * then reads back and asserts the full row contents.
@@ -2375,13 +2317,14 @@ public class TestH5D {
     }
 
     /*
-     * Read a 1-D dataset whose type is VLEN { COMPOUND { A: int, B: int } } using the
-     * canonical null-row-slot read pattern. Exercises the translate_rbuf H5T_VLEN
-     * top-level case; pre-fix this read SIGSEGVed because the function's
-     * found_jList-FALSE branch called ArrayList.add() on the caller's Java array.
+     * Read a 1-D dataset whose type is VLEN { COMPOUND { A: int, B: int } }. The
+     * caller passes a freshly allocated array with null row slots, which is the
+     * canonical read pattern: the JNI installs a freshly allocated ArrayList into
+     * each slot. Exercises the translate_rbuf H5T_VLEN top-level case for a
+     * compound element type.
      */
     @Test
-    public void testH5Dread_vlen_of_compound_nullslots()
+    public void testH5Dread_vlen_of_compound()
     {
         long cmpd_tid    = HDF5Constants.H5I_INVALID_HID;
         long vlen_tid    = HDF5Constants.H5I_INVALID_HID;
@@ -2403,7 +2346,7 @@ public class TestH5D {
 
             dset_id = H5.H5Dcreate(H5fid, "vlen_of_cmpd_rd", vlen_tid, dspace_id, HDF5Constants.H5P_DEFAULT,
                                    HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-            assertTrue("testH5Dread_vlen_of_compound_nullslots: H5Dcreate: ", dset_id >= 0);
+            assertTrue("testH5Dread_vlen_of_compound: H5Dcreate: ", dset_id >= 0);
 
             // row 0: 1 element  [ { A=1, B=2 } ]
             // row 1: 2 elements [ { A=3, B=4 }, { A=5, B=6 } ]
@@ -2431,17 +2374,15 @@ public class TestH5D {
                           HDF5Constants.H5P_DEFAULT, write_data);
             H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
 
-            // Null row slots: pre-fix this would SIGSEGV inside translate_rbuf.
+            // Freshly allocated array with null row slots; the JNI fills each slot.
             ArrayList[] read_data = new ArrayList[N_ROWS];
             H5.H5DreadVL(dset_id, vlen_tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
                          HDF5Constants.H5P_DEFAULT, read_data);
 
-            assertNotNull("testH5Dread_vlen_of_compound_nullslots: row 0 not null", read_data[0]);
-            assertNotNull("testH5Dread_vlen_of_compound_nullslots: row 1 not null", read_data[1]);
-            assertEquals("testH5Dread_vlen_of_compound_nullslots: row 0 has 1 element", 1,
-                         read_data[0].size());
-            assertEquals("testH5Dread_vlen_of_compound_nullslots: row 1 has 2 elements", 2,
-                         read_data[1].size());
+            assertNotNull("testH5Dread_vlen_of_compound: row 0 not null", read_data[0]);
+            assertNotNull("testH5Dread_vlen_of_compound: row 1 not null", read_data[1]);
+            assertEquals("testH5Dread_vlen_of_compound: row 0 has 1 element", 1, read_data[0].size());
+            assertEquals("testH5Dread_vlen_of_compound: row 1 has 2 elements", 2, read_data[1].size());
 
             ArrayList<?> r0e0 = (ArrayList<?>)read_data[0].get(0);
             assertEquals("row 0 elem 0 A", Integer.valueOf(1), r0e0.get(0));
@@ -2457,7 +2398,7 @@ public class TestH5D {
         }
         catch (Throwable err) {
             err.printStackTrace();
-            fail("testH5Dread_vlen_of_compound_nullslots: " + err);
+            fail("testH5Dread_vlen_of_compound: " + err);
         }
         finally {
             if (dset_id >= 0)
