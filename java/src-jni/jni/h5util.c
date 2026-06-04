@@ -75,6 +75,7 @@ jobject       translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t 
                                     size_t buf_size);
 void          translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_t type_class,
                                     void *raw_buf, size_t buf_size);
+static herr_t h5validate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_t type_class);
 
 /*
  * Raises an error if reading/writing LEN bytes at offset OFF would
@@ -5336,6 +5337,357 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
 done:
 
     return;
+}
+
+hssize_t
+h5d_io_npoints(JNIEnv *env, hid_t mem_space_id, hid_t file_space_id, hid_t dataset_id)
+{
+    hssize_t ret_value = -1;
+    hid_t    sid       = H5I_INVALID_HID;
+
+    if (mem_space_id != H5S_ALL) {
+        if ((ret_value = H5Sget_select_npoints(mem_space_id)) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
+    }
+    else if (file_space_id != H5S_ALL) {
+        if ((ret_value = H5Sget_select_npoints(file_space_id)) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
+    }
+    else {
+        if ((sid = H5Dget_space(dataset_id)) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
+        if ((ret_value = H5Sget_simple_extent_npoints(sid)) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
+    }
+
+done:
+    if (sid >= 0)
+        H5Sclose(sid);
+    return ret_value;
+}
+
+hssize_t
+h5a_io_npoints(JNIEnv *env, hid_t attr_id)
+{
+    hssize_t ret_value = -1;
+    hid_t    sid       = H5I_INVALID_HID;
+
+    if ((sid = H5Aget_space(attr_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+    if ((ret_value = H5Sget_simple_extent_npoints(sid)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (sid >= 0)
+        H5Sclose(sid);
+    return ret_value;
+}
+
+/*
+ * Verify that a single Java object matches the structure expected when writing
+ * one element of type mem_type_id. Mirrors the per-element handling of
+ * translate_atomic_wbuf/translate_wbuf, but only inspects types -- it converts
+ * nothing and writes nothing. Composite classes recurse through h5validate_wbuf.
+ */
+static herr_t
+h5validate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_t type_class)
+{
+    herr_t      ret_value = FAIL;
+    hid_t       memb      = H5I_INVALID_HID;
+    H5T_class_t vlClass;
+    size_t      typeSize;
+    size_t      i;
+
+    jclass    arrCList = ENVPTR->FindClass(ENVONLY, "java/util/ArrayList");
+    jmethodID mToArray = ENVPTR->GetMethodID(ENVONLY, arrCList, "toArray", "()[Ljava/lang/Object;");
+
+    if (!(typeSize = H5Tget_size(mem_type_id)))
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    switch (type_class) {
+        case H5T_VLEN:
+        case H5T_ARRAY:
+        case H5T_COMPLEX: {
+            jobjectArray array;
+            jsize        nelmts;
+
+            if (NULL == in_obj)
+                H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                      "h5validate_wbuf: expected a java.util.ArrayList element, got null");
+            if (!ENVPTR->IsInstanceOf(ENVONLY, in_obj, arrCList))
+                H5_BAD_ARGUMENT_ERROR(ENVONLY, "h5validate_wbuf: expected a java.util.ArrayList element");
+
+            if (!(memb = H5Tget_super(mem_type_id)))
+                H5_LIBRARY_ERROR(ENVONLY);
+            if ((vlClass = H5Tget_class(memb)) < 0)
+                H5_LIBRARY_ERROR(ENVONLY);
+
+            array = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, in_obj, mToArray);
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+            if (NULL == array)
+                H5_BAD_ARGUMENT_ERROR(ENVONLY, "h5validate_wbuf: ArrayList.toArray returned NULL");
+            nelmts = ENVPTR->GetArrayLength(ENVONLY, array);
+
+            if (type_class == H5T_COMPLEX && nelmts != 2)
+                H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                      "h5validate_wbuf: complex element must contain exactly 2 values");
+            if (type_class == H5T_ARRAY) {
+                size_t baseSize;
+                if (!(baseSize = H5Tget_size(memb)))
+                    H5_LIBRARY_ERROR(ENVONLY);
+                if ((size_t)nelmts != typeSize / baseSize)
+                    H5_BAD_ARGUMENT_ERROR(
+                        ENVONLY, "h5validate_wbuf: array element count does not match array datatype");
+            }
+
+            if (h5validate_wbuf(ENVONLY, array, memb, vlClass, nelmts) < 0)
+                goto done;
+
+            ENVPTR->DeleteLocalRef(ENVONLY, array);
+            break;
+        }
+        case H5T_COMPOUND: {
+            jobjectArray array;
+            jsize        nelmts;
+            int          nmembs = H5Tget_nmembers(mem_type_id);
+
+            if (nmembs < 0)
+                H5_LIBRARY_ERROR(ENVONLY);
+            if (NULL == in_obj)
+                H5_BAD_ARGUMENT_ERROR(
+                    ENVONLY, "h5validate_wbuf: expected a java.util.ArrayList compound element, got null");
+            if (!ENVPTR->IsInstanceOf(ENVONLY, in_obj, arrCList))
+                H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                      "h5validate_wbuf: expected a java.util.ArrayList compound element");
+
+            array = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, in_obj, mToArray);
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+            if (NULL == array)
+                H5_BAD_ARGUMENT_ERROR(ENVONLY, "h5validate_wbuf: ArrayList.toArray returned NULL");
+            nelmts = ENVPTR->GetArrayLength(ENVONLY, array);
+            if (nelmts != nmembs)
+                H5_BAD_ARGUMENT_ERROR(
+                    ENVONLY, "h5validate_wbuf: compound element member count does not match datatype");
+
+            for (i = 0; i < (size_t)nmembs; i++) {
+                H5T_class_t memb_class;
+                jobject     memb_obj;
+
+                if ((memb = H5Tget_member_type(mem_type_id, (unsigned)i)) < 0)
+                    H5_LIBRARY_ERROR(ENVONLY);
+                if ((memb_class = H5Tget_class(memb)) < 0)
+                    H5_LIBRARY_ERROR(ENVONLY);
+
+                memb_obj = ENVPTR->GetObjectArrayElement(ENVONLY, array, (jsize)i);
+                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                if (h5validate_atomic_wbuf(ENVONLY, memb_obj, memb, memb_class) < 0)
+                    goto done;
+                ENVPTR->DeleteLocalRef(ENVONLY, memb_obj);
+                H5Tclose(memb);
+                memb = H5I_INVALID_HID;
+            }
+
+            ENVPTR->DeleteLocalRef(ENVONLY, array);
+            break;
+        }
+        case H5T_INTEGER:
+        case H5T_ENUM:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE: {
+            const char *clsname;
+            switch (typeSize) {
+                case 1:
+                    clsname = "java/lang/Byte";
+                    break;
+                case 2:
+                    clsname = "java/lang/Short";
+                    break;
+                case 4:
+                    clsname = "java/lang/Integer";
+                    break;
+                case 8:
+                    clsname = "java/lang/Long";
+                    break;
+                default:
+                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                          "h5validate_wbuf: no matching boxed type for integer element size");
+            }
+            if (NULL == in_obj || !ENVPTR->IsInstanceOf(ENVONLY, in_obj, ENVPTR->FindClass(ENVONLY, clsname)))
+                H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                      "h5validate_wbuf: integer element is not the expected boxed type");
+            break;
+        }
+        case H5T_FLOAT: {
+            const char *clsname;
+            switch (typeSize) {
+                case 4:
+                    clsname = "java/lang/Float";
+                    break;
+                case 8:
+                    clsname = "java/lang/Double";
+                    break;
+                default:
+                    H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                          "h5validate_wbuf: no matching boxed type for float element size");
+            }
+            if (NULL == in_obj || !ENVPTR->IsInstanceOf(ENVONLY, in_obj, ENVPTR->FindClass(ENVONLY, clsname)))
+                H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                      "h5validate_wbuf: float element is not the expected boxed type");
+            break;
+        }
+        case H5T_STRING: {
+            /* A null element is permitted; translate_atomic_wbuf writes a zeroed value. */
+            if (NULL != in_obj &&
+                !ENVPTR->IsInstanceOf(ENVONLY, in_obj, ENVPTR->FindClass(ENVONLY, "java/lang/String")))
+                H5_BAD_ARGUMENT_ERROR(ENVONLY, "h5validate_wbuf: string element is not a java.lang.String");
+            break;
+        }
+        case H5T_REFERENCE: {
+            /* translate_atomic_wbuf reads a Java byte[] for references. */
+            if (NULL == in_obj || !ENVPTR->IsInstanceOf(ENVONLY, in_obj, ENVPTR->FindClass(ENVONLY, "[B")))
+                H5_BAD_ARGUMENT_ERROR(ENVONLY, "h5validate_wbuf: reference element is not a byte[]");
+            break;
+        }
+        case H5T_TIME:
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
+        default:
+            H5_UNIMPLEMENTED(ENVONLY, "h5validate_wbuf: invalid class type");
+    } /* switch(type_class) */
+
+    ret_value = SUCCEED;
+
+done:
+    if (memb >= 0)
+        H5Tclose(memb);
+    return ret_value;
+}
+
+herr_t
+h5validate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t type_class, jsize count)
+{
+    herr_t ret_value = FAIL;
+    size_t i;
+
+    for (i = 0; i < (size_t)count; i++) {
+        jobject elem = ENVPTR->GetObjectArrayElement(ENVONLY, in_buf, (jsize)i);
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+        if (h5validate_atomic_wbuf(ENVONLY, elem, mem_type_id, type_class) < 0) {
+            if (elem)
+                ENVPTR->DeleteLocalRef(ENVONLY, elem);
+            goto done;
+        }
+        if (elem)
+            ENVPTR->DeleteLocalRef(ENVONLY, elem);
+    }
+
+    ret_value = SUCCEED;
+
+done:
+    return ret_value;
+}
+
+/*
+ * Capacity check for a packed ("raw") read/write buffer: a Java array of
+ * `buf_len` elements of `elem_size` bytes must be large enough to hold
+ * `npoints` values of type `mem_type_id`. This is the invariant that keeps
+ * H5Dread/H5Dwrite from running past the pinned Java array when the buffer kind
+ * or length does not match the datatype/selection. Raises a descriptive
+ * IllegalArgumentException and returns a negative value on mismatch.
+ */
+static herr_t
+h5validate_raw_capacity(JNIEnv *env, hid_t mem_type_id, hssize_t npoints, jsize buf_len, size_t elem_size,
+                        const char *where)
+{
+    herr_t ret_value = FAIL;
+    size_t typeSize;
+    size_t have, need;
+    char   msg[192];
+
+    if (buf_len < 0) {
+        snprintf(msg, sizeof(msg), "%s: buffer length < 0", where);
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, msg);
+    }
+    if (!(typeSize = H5Tget_size(mem_type_id)))
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    have = (size_t)buf_len * elem_size;
+    need = (size_t)npoints * typeSize;
+    if (have < need) {
+        snprintf(msg, sizeof(msg), "%s: buffer holds %zu bytes but the selection requires %zu bytes", where,
+                 have, need);
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, msg);
+    }
+
+    ret_value = SUCCEED;
+done:
+    return ret_value;
+}
+
+/*
+ * Slot-count check for a String[]-style read/write buffer (fixed/variable
+ * strings and references): the array must have at least one slot per selected
+ * point. The library fills/consumes one Java String (or byte[]) per element.
+ */
+static herr_t
+h5validate_slot_count(JNIEnv *env, hssize_t npoints, jsize buf_len, const char *where)
+{
+    herr_t ret_value = FAIL;
+    char   msg[160];
+
+    if (buf_len < 0 || (hssize_t)buf_len < npoints) {
+        snprintf(msg, sizeof(msg), "%s: buffer has %d slots but the selection requires %lld", where,
+                 (int)buf_len, (long long)npoints);
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, msg);
+    }
+
+    ret_value = SUCCEED;
+done:
+    return ret_value;
+}
+
+herr_t
+h5d_validate_raw_buf(JNIEnv *env, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
+                     hid_t dataset_id, jsize buf_len, size_t elem_size, const char *where)
+{
+    hssize_t npoints;
+
+    if ((npoints = h5d_io_npoints(env, mem_space_id, file_space_id, dataset_id)) < 0)
+        return FAIL;
+    return h5validate_raw_capacity(env, mem_type_id, npoints, buf_len, elem_size, where);
+}
+
+herr_t
+h5a_validate_raw_buf(JNIEnv *env, hid_t mem_type_id, hid_t attr_id, jsize buf_len, size_t elem_size,
+                     const char *where)
+{
+    hssize_t npoints;
+
+    if ((npoints = h5a_io_npoints(env, attr_id)) < 0)
+        return FAIL;
+    return h5validate_raw_capacity(env, mem_type_id, npoints, buf_len, elem_size, where);
+}
+
+herr_t
+h5d_validate_slot_buf(JNIEnv *env, hid_t mem_space_id, hid_t file_space_id, hid_t dataset_id, jsize buf_len,
+                      const char *where)
+{
+    hssize_t npoints;
+
+    if ((npoints = h5d_io_npoints(env, mem_space_id, file_space_id, dataset_id)) < 0)
+        return FAIL;
+    return h5validate_slot_count(env, npoints, buf_len, where);
+}
+
+herr_t
+h5a_validate_slot_buf(JNIEnv *env, hid_t attr_id, jsize buf_len, const char *where)
+{
+    hssize_t npoints;
+
+    if ((npoints = h5a_io_npoints(env, attr_id)) < 0)
+        return FAIL;
+    return h5validate_slot_count(env, npoints, buf_len, where);
 }
 
 #ifdef __cplusplus

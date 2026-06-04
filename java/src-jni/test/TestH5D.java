@@ -436,7 +436,7 @@ public class TestH5D {
         try {
             if (H5did >= 0)
                 H5.H5Dwrite(H5did, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                            HDF5Constants.H5P_DEFAULT, dset_data[0]);
+                            HDF5Constants.H5P_DEFAULT, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -2299,6 +2299,233 @@ public class TestH5D {
         catch (Throwable err) {
             err.printStackTrace();
             fail("testH5Dwrite_compound_of_vlen: " + err);
+        }
+        finally {
+            if (file_type_id >= 0)
+                try {
+                    H5.H5Tclose(file_type_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    /*
+     * Negative tests for the API-level buffer-contract verification in H5DwriteVL.
+     * Each supplies a malformed buffer for a COMPOUND { seq: VLEN int, n: int }
+     * dataset and asserts a clean IllegalArgumentException is raised before any
+     * native write, rather than a SIGSEGV or silent corruption.
+     */
+
+    /* Buffer shorter than the selection must be rejected (would otherwise overrun
+     * the raw write buffer in H5Dwrite). */
+    @Test
+    public void testH5DwriteVL_undersized_buffer()
+    {
+        long dset_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_type_id = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            dset_id      = writeCompoundOfVlenDataset("cmpd_of_vlen_wr_undersized");
+            file_type_id = H5.H5Dget_type(dset_id);
+
+            // Dataset has 2 rows; supply only 1.
+            ArrayList<Integer> seq = new ArrayList<>();
+            seq.add(1);
+            ArrayList<Object> rec = new ArrayList<>();
+            rec.add(seq);
+            rec.add(Integer.valueOf(2));
+            ArrayList[] bad = new ArrayList[1];
+            bad[0]          = rec;
+
+            try {
+                H5.H5DwriteVL(dset_id, file_type_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, bad);
+                fail("testH5DwriteVL_undersized_buffer: expected IllegalArgumentException");
+            }
+            catch (IllegalArgumentException expected) {
+                // expected
+            }
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5DwriteVL_undersized_buffer: " + err);
+        }
+        finally {
+            if (file_type_id >= 0)
+                try {
+                    H5.H5Tclose(file_type_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    /* A compound member whose Java type is wrong (String where an Integer is
+     * expected) must be rejected instead of crashing in translate_atomic_wbuf. */
+    @Test
+    public void testH5DwriteVL_compound_wrong_member_type()
+    {
+        long dset_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_type_id = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            dset_id      = writeCompoundOfVlenDataset("cmpd_of_vlen_wr_badmember");
+            file_type_id = H5.H5Dget_type(dset_id);
+
+            ArrayList[] bad = new ArrayList[2];
+
+            ArrayList<Integer> seq0 = new ArrayList<>();
+            seq0.add(1);
+            ArrayList<Object> rec0 = new ArrayList<>();
+            rec0.add(seq0);
+            rec0.add(Integer.valueOf(4));
+            bad[0] = rec0;
+
+            // row 1: the 'n' member is a String, not an Integer.
+            ArrayList<Integer> seq1 = new ArrayList<>();
+            seq1.add(5);
+            ArrayList<Object> rec1 = new ArrayList<>();
+            rec1.add(seq1);
+            rec1.add("not an int");
+            bad[1] = rec1;
+
+            try {
+                H5.H5DwriteVL(dset_id, file_type_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, bad);
+                fail("testH5DwriteVL_compound_wrong_member_type: expected IllegalArgumentException");
+            }
+            catch (IllegalArgumentException expected) {
+                // expected
+            }
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5DwriteVL_compound_wrong_member_type: " + err);
+        }
+        finally {
+            if (file_type_id >= 0)
+                try {
+                    H5.H5Tclose(file_type_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    /* A VLEN member that is not an ArrayList (here a String) must be rejected
+     * instead of being mis-read as a list. */
+    @Test
+    public void testH5DwriteVL_vlen_element_not_arraylist()
+    {
+        long dset_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_type_id = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            dset_id      = writeCompoundOfVlenDataset("cmpd_of_vlen_wr_notlist");
+            file_type_id = H5.H5Dget_type(dset_id);
+
+            ArrayList[] bad = new ArrayList[2];
+
+            // row 0: the 'seq' member should be an ArrayList but is a String.
+            ArrayList<Object> rec0 = new ArrayList<>();
+            rec0.add("not a list");
+            rec0.add(Integer.valueOf(4));
+            bad[0] = rec0;
+
+            ArrayList<Integer> seq1 = new ArrayList<>();
+            seq1.add(5);
+            ArrayList<Object> rec1 = new ArrayList<>();
+            rec1.add(seq1);
+            rec1.add(Integer.valueOf(7));
+            bad[1] = rec1;
+
+            try {
+                H5.H5DwriteVL(dset_id, file_type_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, bad);
+                fail("testH5DwriteVL_vlen_element_not_arraylist: expected IllegalArgumentException");
+            }
+            catch (IllegalArgumentException expected) {
+                // expected
+            }
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5DwriteVL_vlen_element_not_arraylist: " + err);
+        }
+        finally {
+            if (file_type_id >= 0)
+                try {
+                    H5.H5Tclose(file_type_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    /* A compound row with the wrong number of members must be rejected. */
+    @Test
+    public void testH5DwriteVL_compound_wrong_member_count()
+    {
+        long dset_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_type_id = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            dset_id      = writeCompoundOfVlenDataset("cmpd_of_vlen_wr_badcount");
+            file_type_id = H5.H5Dget_type(dset_id);
+
+            ArrayList[] bad = new ArrayList[2];
+
+            // row 0: only one member instead of two ('n' is missing).
+            ArrayList<Integer> seq0 = new ArrayList<>();
+            seq0.add(1);
+            ArrayList<Object> rec0 = new ArrayList<>();
+            rec0.add(seq0);
+            bad[0] = rec0;
+
+            ArrayList<Integer> seq1 = new ArrayList<>();
+            seq1.add(5);
+            ArrayList<Object> rec1 = new ArrayList<>();
+            rec1.add(seq1);
+            rec1.add(Integer.valueOf(7));
+            bad[1] = rec1;
+
+            try {
+                H5.H5DwriteVL(dset_id, file_type_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, bad);
+                fail("testH5DwriteVL_compound_wrong_member_count: expected IllegalArgumentException");
+            }
+            catch (IllegalArgumentException expected) {
+                // expected
+            }
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5DwriteVL_compound_wrong_member_count: " + err);
         }
         finally {
             if (file_type_id >= 0)

@@ -167,6 +167,12 @@ Java_hdf_hdf5lib_H5_H5Aread(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_t
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
+    /* For fixed-length data the byte buffer must cover the attribute. */
+    if (!vl_data_class &&
+        h5a_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)attr_id, ENVPTR->GetArrayLength(ENVONLY, buf),
+                             sizeof(jbyte), "H5Aread") < 0)
+        goto done;
+
     if (vl_data_class) {
         /* Get size of data array */
         if ((vl_array_len = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0)
@@ -255,6 +261,12 @@ Java_hdf_hdf5lib_H5_H5Awrite(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
+    /* For fixed-length data the byte buffer must cover the attribute. */
+    if (!vl_data_class &&
+        h5a_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)attr_id, ENVPTR->GetArrayLength(ENVONLY, buf),
+                             sizeof(jbyte), "H5Awrite") < 0)
+        goto done;
+
     if (vl_data_class) {
         /* Get size of data array */
         if ((vl_array_len = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
@@ -340,6 +352,12 @@ Java_hdf_hdf5lib_H5_H5Aread_1short(JNIEnv *env, jclass clss, jlong attr_id, jlon
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
+    /* Verify the buffer is large enough for the attribute. */
+    if (!vl_data_class &&
+        h5a_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)attr_id, ENVPTR->GetArrayLength(ENVONLY, buf),
+                             sizeof(jshort), "H5Aread_short") < 0)
+        goto done;
+
     if (vl_data_class) {
         /* Get size of data array */
         if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
@@ -410,6 +428,11 @@ Java_hdf_hdf5lib_H5_H5Awrite_1short(JNIEnv *env, jclass clss, jlong attr_id, jlo
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
     }
 
+    /* Verify the buffer is large enough for the attribute. */
+    if (h5a_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)attr_id, n, sizeof(jshort), "H5Awrite_short") <
+        0)
+        goto done;
+
     dims[0] = (hsize_t)n;
     if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -468,6 +491,12 @@ Java_hdf_hdf5lib_H5_H5Aread_1int(JNIEnv *env, jclass clss, jlong attr_id, jlong 
 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+
+    /* Verify the buffer is large enough for the attribute. */
+    if (!vl_data_class &&
+        h5a_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)attr_id, ENVPTR->GetArrayLength(ENVONLY, buf),
+                             sizeof(jint), "H5Aread_int") < 0)
+        goto done;
 
     if (vl_data_class) {
         /* Get size of data array */
@@ -539,6 +568,10 @@ Java_hdf_hdf5lib_H5_H5Awrite_1int(JNIEnv *env, jclass clss, jlong attr_id, jlong
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
     }
 
+    /* Verify the buffer is large enough for the attribute. */
+    if (h5a_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)attr_id, n, sizeof(jint), "H5Awrite_int") < 0)
+        goto done;
+
     dims[0] = (hsize_t)n;
     if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -597,6 +630,12 @@ Java_hdf_hdf5lib_H5_H5Aread_1long(JNIEnv *env, jclass clss, jlong attr_id, jlong
 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+
+    /* Verify the buffer is large enough for the attribute. */
+    if (!vl_data_class &&
+        h5a_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)attr_id, ENVPTR->GetArrayLength(ENVONLY, buf),
+                             sizeof(jlong), "H5Aread_long") < 0)
+        goto done;
 
     if (vl_data_class) {
         /* Get size of data array */
@@ -668,6 +707,10 @@ Java_hdf_hdf5lib_H5_H5Awrite_1long(JNIEnv *env, jclass clss, jlong attr_id, jlon
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
     }
 
+    /* Verify the buffer is large enough for the attribute. */
+    if (h5a_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)attr_id, n, sizeof(jlong), "H5Awrite_long") < 0)
+        goto done;
+
     dims[0] = (hsize_t)n;
     if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -726,6 +769,12 @@ Java_hdf_hdf5lib_H5_H5Aread_1float(JNIEnv *env, jclass clss, jlong attr_id, jlon
 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+
+    /* Verify the buffer is large enough for the attribute. */
+    if (!vl_data_class &&
+        h5a_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)attr_id, ENVPTR->GetArrayLength(ENVONLY, buf),
+                             sizeof(jfloat), "H5Aread_float") < 0)
+        goto done;
 
     if (vl_data_class) {
         /* Get size of data array */
@@ -797,6 +846,11 @@ Java_hdf_hdf5lib_H5_H5Awrite_1float(JNIEnv *env, jclass clss, jlong attr_id, jlo
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
     }
 
+    /* Verify the buffer is large enough for the attribute. */
+    if (h5a_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)attr_id, n, sizeof(jfloat), "H5Awrite_float") <
+        0)
+        goto done;
+
     dims[0] = (hsize_t)n;
     if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -855,6 +909,12 @@ Java_hdf_hdf5lib_H5_H5Aread_1double(JNIEnv *env, jclass clss, jlong attr_id, jlo
 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+
+    /* Verify the buffer is large enough for the attribute. */
+    if (!vl_data_class &&
+        h5a_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)attr_id, ENVPTR->GetArrayLength(ENVONLY, buf),
+                             sizeof(jdouble), "H5Aread_double") < 0)
+        goto done;
 
     if (vl_data_class) {
         /* Get size of data array */
@@ -925,6 +985,11 @@ Java_hdf_hdf5lib_H5_H5Awrite_1double(JNIEnv *env, jclass clss, jlong attr_id, jl
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Awrite_double: buf length < 0");
     }
 
+    /* Verify the buffer is large enough for the attribute. */
+    if (h5a_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)attr_id, n, sizeof(jdouble), "H5Awrite_double") <
+        0)
+        goto done;
+
     dims[0] = (hsize_t)n;
     if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -985,6 +1050,10 @@ Java_hdf_hdf5lib_H5_H5Aread_1string(JNIEnv *env, jclass clss, jlong attr_id, jlo
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread_string: read buffer length <= 0");
     }
+
+    /* The buffer must have one slot per element in the attribute. */
+    if (h5a_validate_slot_buf(env, (hid_t)attr_id, n, "H5Aread_string") < 0)
+        goto done;
 
     if (!(str_len = H5Tget_size((hid_t)mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1051,6 +1120,10 @@ Java_hdf_hdf5lib_H5_H5Awrite_1string(JNIEnv *env, jclass clss, jlong attr_id, jl
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Awrite_string: write buffer length <= 0");
     }
 
+    /* The buffer must have one slot per element in the attribute. */
+    if (h5a_validate_slot_buf(env, (hid_t)attr_id, n, "H5Awrite_string") < 0)
+        goto done;
+
     if (!(str_len = H5Tget_size((hid_t)mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
 
@@ -1109,6 +1182,7 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
     size_t      typeSize;
     H5T_class_t type_class;
     jsize       vl_array_len = 0;
+    hssize_t    npoints;
     htri_t      vl_data_class;
     herr_t      status      = FAIL;
     htri_t      is_variable = 0;
@@ -1125,6 +1199,12 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
     if ((is_variable = H5Tis_variable_str(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+
+    /* The buffer must hold at least one slot per point in the attribute. */
+    if ((npoints = h5a_io_npoints(env, (hid_t)attr_id)) < 0)
+        goto done;
+    if ((hssize_t)vl_array_len < npoints)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5AreadVL: read buffer is smaller than the attribute");
 
     if (!(typeSize = H5Tget_size(mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1175,6 +1255,7 @@ Java_hdf_hdf5lib_H5_H5AwriteVL(JNIEnv *env, jclass clss, jlong attr_id, jlong me
     size_t      typeSize;
     H5T_class_t type_class;
     jsize       vl_array_len = 0;
+    hssize_t    npoints;
     htri_t      vl_data_class;
     herr_t      status      = FAIL;
     htri_t      is_variable = 0;
@@ -1195,14 +1276,24 @@ Java_hdf_hdf5lib_H5_H5AwriteVL(JNIEnv *env, jclass clss, jlong attr_id, jlong me
     if ((is_variable = H5Tis_variable_str(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
+    /* Verify the buffer holds at least one element per point in the attribute. */
+    if ((npoints = h5a_io_npoints(env, (hid_t)attr_id)) < 0)
+        goto done;
+    if ((hssize_t)vl_array_len < npoints)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5AwriteVL: write buffer is smaller than the attribute");
+
     if (!(typeSize = H5Tget_size(mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (writeBuf = calloc((size_t)vl_array_len, typeSize)))
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Awrite: failed to allocate raw VL write buffer");
-
     if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+
+    /* Verify the buffer structure matches mem_type_id before converting it. */
+    if (h5validate_wbuf(ENVONLY, buf, mem_type_id, type_class, vl_array_len) < 0)
+        goto done;
+
+    if (NULL == (writeBuf = calloc((size_t)vl_array_len, typeSize)))
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Awrite: failed to allocate raw VL write buffer");
 
     translate_wbuf(ENVONLY, buf, mem_type_id, type_class, vl_array_len, writeBuf,
                    (size_t)vl_array_len * typeSize);
@@ -1252,6 +1343,11 @@ Java_hdf_hdf5lib_H5_H5Aread_1VLStrings(JNIEnv *env, jclass clss, jlong attr_id, 
 
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aread_VLStrings: read buffer is NULL");
+
+    /* The buffer must have one slot per element in the attribute. */
+    if (h5a_validate_slot_buf(env, (hid_t)attr_id, ENVPTR->GetArrayLength(ENVONLY, buf),
+                              "H5Aread_VLStrings") < 0)
+        goto done;
 
     if ((isStr = H5Tdetect_class((hid_t)mem_type_id, H5T_STRING)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1457,6 +1553,11 @@ Java_hdf_hdf5lib_H5_H5Awrite_1VLStrings(JNIEnv *env, jclass clss, jlong attr_id,
 
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite_VLStrings: write buffer is NULL");
+
+    /* The buffer must have one slot per element in the attribute. */
+    if (h5a_validate_slot_buf(env, (hid_t)attr_id, ENVPTR->GetArrayLength(ENVONLY, buf),
+                              "H5Awrite_VLStrings") < 0)
+        goto done;
 
     if ((isStr = H5Tdetect_class((hid_t)mem_type_id, H5T_STRING)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1692,6 +1793,10 @@ Java_hdf_hdf5lib_H5_H5Aread_1reg_1ref(JNIEnv *env, jclass clss, jlong attr_id, j
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread_reg_ref: buf length < 0");
     }
+
+    /* The buffer must have one slot per element in the attribute. */
+    if (h5a_validate_slot_buf(env, (hid_t)attr_id, n, "H5Aread_reg_ref") < 0)
+        goto done;
 
     if (NULL == (ref_data = (H5R_ref_t *)calloc(1, (size_t)n * sizeof(H5R_ref_t))))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Aread_reg_ref: failed to allocate read buffer");

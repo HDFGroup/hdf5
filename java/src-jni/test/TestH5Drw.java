@@ -380,7 +380,7 @@ public class TestH5Drw {
     @Test
     public void testH5Dread_128bit_floats()
     {
-        byte[][][] dset_data = new byte[DIM_X][DIM128_Y][8];
+        byte[][][] dset_data = new byte[DIM_X][DIM128_Y][16];
 
         try {
             openH5file(H5_FLTS_FILE, DATASETF128);
