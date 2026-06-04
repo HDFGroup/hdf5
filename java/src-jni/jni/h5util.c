@@ -71,9 +71,22 @@ static int    render_bin_output_region_data_points(FILE *stream, hid_t region_sp
                                                    hsize_t *ptdata);
 static int    render_bin_output_region_points(FILE *stream, hid_t region_space, hid_t region_id,
                                               hid_t container);
-jobject       translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, void *raw_buf);
+jobject       translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, void *raw_buf,
+                                    size_t buf_size);
 void          translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_t type_class,
-                                    void *raw_buf);
+                                    void *raw_buf, size_t buf_size);
+
+/*
+ * Raises an error if reading/writing LEN bytes at offset OFF would
+ * overrun a buffer of size BUFSZ.  OFF and LEN are byte values,
+ * BUFSZ is the number of valid bytes at the buffer base.
+ * WHERE is a string literal naming the calling routine.
+ * ENV is the JNI environment pointer used to raise the error.  */
+#define CHECK_RAWBUF_BOUNDS(env, off, len, bufsz, where)                                                     \
+    do {                                                                                                     \
+        if ((size_t)(len) > (size_t)(bufsz) || (size_t)(off) > (size_t)(bufsz) - (size_t)(len))              \
+            H5_BAD_ARGUMENT_ERROR(env, where ": raw buffer access out of bounds");                           \
+    } while (0)
 
 /* Strings for output */
 #define H5_TOOLS_GROUP    "GROUP"
@@ -4237,7 +4250,7 @@ done:
 } /* end Java_hdf_hdf5lib_H5_H5export_1attribute */
 
 jobject
-translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, void *raw_buf)
+translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, void *raw_buf, size_t buf_size)
 {
     jobject      jobj  = NULL;
     hid_t        memb  = H5I_INVALID_HID;
@@ -4277,6 +4290,10 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
     if (!(typeSize = H5Tget_size(mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
 
+    /* The element occupies [0, typeSize) of raw_buf, verify it fits. */
+    if (typeSize > buf_size)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_atomic_rbuf: raw buffer smaller than element");
+
     switch (type_class) {
         case H5T_VLEN: {
             if (!(memb = H5Tget_super(mem_type_id)))
@@ -4302,7 +4319,7 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
             if (NULL == (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
                 H5_OUT_OF_MEMORY_ERROR(ENVONLY, "translate_atomic_rbuf: failed to allocate list read buffer");
 
-            translate_rbuf(ENVONLY, jList, memb, vlClass, (jsize)nelmts, vl_elem.p);
+            translate_rbuf(ENVONLY, jList, memb, vlClass, (jsize)nelmts, vl_elem.p, (size_t)nelmts * vlSize);
             jobj = jList;
             break;
         } /* H5T_VLEN */
@@ -4326,7 +4343,9 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
                 if (!(memb_vlSize = H5Tget_size(memb)))
                     H5_LIBRARY_ERROR(ENVONLY);
 
-                memb_jobj = translate_atomic_rbuf(ENVONLY, memb, memb_vlClass, char_buf + memb_offset);
+                CHECK_RAWBUF_BOUNDS(ENVONLY, memb_offset, memb_vlSize, buf_size, "translate_atomic_rbuf");
+                memb_jobj =
+                    translate_atomic_rbuf(ENVONLY, memb, memb_vlClass, char_buf + memb_offset, memb_vlSize);
                 if (memb_jobj) {
                     ENVPTR->CallBooleanMethod(ENVONLY, jList, arrAddMethod, memb_jobj);
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
@@ -4363,7 +4382,7 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
             if (NULL == (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
                 H5_OUT_OF_MEMORY_ERROR(ENVONLY, "translate_atomic_rbuf: failed to allocate list read buffer");
 
-            translate_rbuf(ENVONLY, jList, memb, vlClass, (jsize)typeCount, objBuf);
+            translate_rbuf(ENVONLY, jList, memb, vlClass, (jsize)typeCount, objBuf, typeSize);
             jobj = jList;
 
             if (objBuf)
@@ -4524,7 +4543,7 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
             if (NULL == (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
                 H5_OUT_OF_MEMORY_ERROR(ENVONLY, "translate_atomic_rbuf: failed to allocate list read buffer");
 
-            translate_rbuf(ENVONLY, jList, memb, base_class, (jsize)typeCount, objBuf);
+            translate_rbuf(ENVONLY, jList, memb, base_class, (jsize)typeCount, objBuf, typeSize);
             jobj = jList;
 
             if (objBuf)
@@ -4546,7 +4565,8 @@ done:
 }
 
 void
-translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_t type_class, void *raw_buf)
+translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_t type_class, void *raw_buf,
+                      size_t buf_size)
 {
     hid_t       memb = H5I_INVALID_HID;
     H5T_class_t vlClass;
@@ -4579,6 +4599,10 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
     if (!(typeSize = H5Tget_size(mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
 
+    /* The element occupies [0, typeSize) of raw_buf, verify it fits. */
+    if (typeSize > buf_size)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_atomic_wbuf: raw buffer smaller than element");
+
     switch (type_class) {
         case H5T_VLEN: {
             if (!(memb = H5Tget_super(mem_type_id)))
@@ -4609,7 +4633,8 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
             if (NULL == (vl_elem.p = malloc((size_t)jnelmts * vlSize)))
                 H5_OUT_OF_MEMORY_ERROR(ENVONLY, "translate_atomic_wbuf: failed to allocate vlen ptr buffer");
 
-            translate_wbuf(ENVONLY, array, memb, vlClass, (jsize)jnelmts, vl_elem.p);
+            translate_wbuf(ENVONLY, array, memb, vlClass, (jsize)jnelmts, vl_elem.p,
+                           (size_t)jnelmts * vlSize);
 
             memcpy(char_buf, &vl_elem, sizeof(hvl_t));
 
@@ -4650,7 +4675,9 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
                     H5_LIBRARY_ERROR(ENVONLY);
 
                 jobject arr_obj = ENVPTR->GetObjectArrayElement(ENVONLY, array, (jsize)i);
-                translate_atomic_wbuf(ENVONLY, arr_obj, memb, memb_vlClass, char_buf + memb_offset);
+                CHECK_RAWBUF_BOUNDS(ENVONLY, memb_offset, memb_vlSize, buf_size, "translate_atomic_wbuf");
+                translate_atomic_wbuf(ENVONLY, arr_obj, memb, memb_vlClass, char_buf + memb_offset,
+                                      memb_vlSize);
                 ENVPTR->DeleteLocalRef(ENVONLY, arr_obj);
                 H5Tclose(memb);
             }
@@ -4686,7 +4713,7 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
             if (NULL == (objBuf = malloc((size_t)jnelmts * vlSize)))
                 H5_OUT_OF_MEMORY_ERROR(ENVONLY, "translate_atomic_wbuf: failed to allocate buffer");
 
-            translate_wbuf(ENVONLY, array, memb, vlClass, (jsize)jnelmts, objBuf);
+            translate_wbuf(ENVONLY, array, memb, vlClass, (jsize)jnelmts, objBuf, (size_t)jnelmts * vlSize);
 
             memcpy(char_buf, (char *)objBuf, vlSize * (size_t)jnelmts);
 
@@ -4810,7 +4837,8 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
             if (NULL == (objBuf = malloc((size_t)jnelmts * base_size)))
                 H5_OUT_OF_MEMORY_ERROR(ENVONLY, "translate_atomic_wbuf: failed to allocate buffer");
 
-            translate_wbuf(ENVONLY, array, memb, base_class, (jsize)jnelmts, objBuf);
+            translate_wbuf(ENVONLY, array, memb, base_class, (jsize)jnelmts, objBuf,
+                           (size_t)jnelmts * base_size);
 
             memcpy(char_buf, (char *)objBuf, base_size * (size_t)jnelmts);
 
@@ -4835,7 +4863,7 @@ done:
 
 void
 translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t type_class, jsize count,
-               void *raw_buf)
+               void *raw_buf, size_t buf_size)
 {
     hid_t        memb       = H5I_INVALID_HID;
     int          ret_buflen = -1;
@@ -4884,6 +4912,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                 hvl_t vl_elem;
                 jList = NULL;
 
+                CHECK_RAWBUF_BOUNDS(ENVONLY, i * sizeof(hvl_t), sizeof(hvl_t), buf_size, "translate_rbuf");
                 memcpy(&vl_elem, char_buf + i * sizeof(hvl_t), sizeof(hvl_t));
                 jsize nelmts = (jsize)vl_elem.len;
                 if (vl_elem.len != (size_t)nelmts)
@@ -4902,7 +4931,8 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                                                "translate_rbuf: failed to allocate list read buffer");
                 }
 
-                translate_rbuf(ENVONLY, jList, memb, vlClass, (jsize)nelmts, vl_elem.p);
+                translate_rbuf(ENVONLY, jList, memb, vlClass, (jsize)nelmts, vl_elem.p,
+                               (size_t)nelmts * vlSize);
 
                 /* ArrayList (recursive call): append. Java array: install at slot i. */
                 if (retIsList)
@@ -4949,8 +4979,10 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                     if (!(memb_vlSize = H5Tget_size(memb)))
                         H5_LIBRARY_ERROR(ENVONLY);
 
+                    CHECK_RAWBUF_BOUNDS(ENVONLY, i * typeSize + memb_offset, memb_vlSize, buf_size,
+                                        "translate_rbuf");
                     jobj = translate_atomic_rbuf(ENVONLY, memb, memb_vlClass,
-                                                 char_buf + i * typeSize + memb_offset);
+                                                 char_buf + i * typeSize + memb_offset, memb_vlSize);
                     if (jobj) {
                         ENVPTR->CallBooleanMethod(ENVONLY, jList, arrAddMethod, (jobject)jobj);
                         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
@@ -4991,13 +5023,12 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                 jList = NULL;
 
                 /* Get the object element */
+                CHECK_RAWBUF_BOUNDS(ENVONLY, i * typeSize, typeSize, buf_size, "translate_rbuf");
                 memcpy((char *)objBuf, char_buf + i * typeSize, typeSize);
 
                 /* The list we're going to return: */
                 if (i < (size_t)ret_buflen) {
-                    if (NULL ==
-                        (jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i)))
-                        found_jList = JNI_FALSE;
+                    jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i);
                 }
                 if (jList != NULL && !ENVPTR->IsInstanceOf(ENVONLY, jList, arrCList))
                     H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_rbuf: ARRAY slot is not a java.util.ArrayList");
@@ -5008,7 +5039,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                                                "translate_rbuf: failed to allocate list read buffer");
                 }
 
-                translate_rbuf(ENVONLY, jList, memb, vlClass, (jsize)typeCount, objBuf);
+                translate_rbuf(ENVONLY, jList, memb, vlClass, (jsize)typeCount, objBuf, typeSize);
                 if (retIsList)
                     ENVPTR->CallBooleanMethod(ENVONLY, ret_buf, arrAddMethod, jList);
                 else
@@ -5031,7 +5062,9 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
         case H5T_STRING: {
             /* Convert each element to a list */
             for (i = 0; i < (size_t)count; i++) {
-                jobj = translate_atomic_rbuf(ENVONLY, mem_type_id, type_class, char_buf + i * typeSize);
+                CHECK_RAWBUF_BOUNDS(ENVONLY, i * typeSize, typeSize, buf_size, "translate_rbuf");
+                jobj = translate_atomic_rbuf(ENVONLY, mem_type_id, type_class, char_buf + i * typeSize,
+                                             typeSize);
                 if (jobj) {
                     if (retIsList)
                         ENVPTR->CallBooleanMethod(ENVONLY, ret_buf, arrAddMethod, (jobject)jobj);
@@ -5067,13 +5100,12 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                 jList = NULL;
 
                 /* Get the object element */
+                CHECK_RAWBUF_BOUNDS(ENVONLY, i * typeSize, typeSize, buf_size, "translate_rbuf");
                 memcpy((char *)objBuf, char_buf + i * typeSize, typeSize);
 
                 /* The list we're going to return: */
                 if (i < (size_t)ret_buflen) {
-                    if (NULL ==
-                        (jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i)))
-                        found_jList = JNI_FALSE;
+                    jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i);
                 }
                 if (jList != NULL && !ENVPTR->IsInstanceOf(ENVONLY, jList, arrCList))
                     H5_BAD_ARGUMENT_ERROR(ENVONLY,
@@ -5085,7 +5117,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                                                "translate_rbuf: failed to allocate list read buffer");
                 }
 
-                translate_rbuf(ENVONLY, jList, memb, base_class, (jsize)typeCount, objBuf);
+                translate_rbuf(ENVONLY, jList, memb, base_class, (jsize)typeCount, objBuf, typeSize);
                 if (retIsList)
                     ENVPTR->CallBooleanMethod(ENVONLY, ret_buf, arrAddMethod, jList);
                 else
@@ -5114,7 +5146,7 @@ done:
 
 void
 translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t type_class, jsize count,
-               void *raw_buf)
+               void *raw_buf, size_t buf_size)
 {
     hid_t        memb  = H5I_INVALID_HID;
     jobjectArray jList = NULL;
@@ -5173,8 +5205,10 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
                 if (NULL == (vl_elem.p = malloc((size_t)jnelmts * vlSize)))
                     H5_OUT_OF_MEMORY_ERROR(ENVONLY, "translate_wbuf: failed to allocate vlen ptr buffer");
 
-                translate_wbuf(ENVONLY, array, memb, vlClass, (jsize)jnelmts, vl_elem.p);
+                translate_wbuf(ENVONLY, array, memb, vlClass, (jsize)jnelmts, vl_elem.p,
+                               (size_t)jnelmts * vlSize);
 
+                CHECK_RAWBUF_BOUNDS(ENVONLY, i * sizeof(hvl_t), sizeof(hvl_t), buf_size, "translate_wbuf");
                 memcpy(char_buf + i * sizeof(hvl_t), &vl_elem, sizeof(hvl_t));
 
                 ENVPTR->DeleteLocalRef(ENVONLY, array);
@@ -5226,8 +5260,10 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
                         H5_LIBRARY_ERROR(ENVONLY);
 
                     jobject arr_obj = ENVPTR->GetObjectArrayElement(ENVONLY, array, (jsize)x);
+                    CHECK_RAWBUF_BOUNDS(ENVONLY, i * typeSize + memb_offset, memb_vlSize, buf_size,
+                                        "translate_wbuf");
                     translate_atomic_wbuf(ENVONLY, arr_obj, memb, memb_vlClass,
-                                          char_buf + i * typeSize + memb_offset);
+                                          char_buf + i * typeSize + memb_offset, memb_vlSize);
                     ENVPTR->DeleteLocalRef(ENVONLY, arr_obj);
                     H5Tclose(memb);
                 }
@@ -5268,8 +5304,10 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
                 if (jnelmts < 0)
                     H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: number of array elements < 0");
 
+                CHECK_RAWBUF_BOUNDS(ENVONLY, i * vlSize * (size_t)jnelmts, vlSize * (size_t)jnelmts, buf_size,
+                                    "translate_wbuf");
                 translate_wbuf(ENVONLY, array, memb, vlClass, jnelmts,
-                               char_buf + i * vlSize * (size_t)jnelmts);
+                               char_buf + i * vlSize * (size_t)jnelmts, vlSize * (size_t)jnelmts);
 
                 ENVPTR->DeleteLocalRef(ENVONLY, array);
                 ENVPTR->DeleteLocalRef(ENVONLY, jList);
@@ -5287,7 +5325,9 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
             for (i = 0; i < (size_t)count; i++) {
                 if (NULL == (jobj = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)in_buf, (jsize)i)))
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                translate_atomic_wbuf(ENVONLY, jobj, mem_type_id, type_class, char_buf + i * typeSize);
+                CHECK_RAWBUF_BOUNDS(ENVONLY, i * typeSize, typeSize, buf_size, "translate_wbuf");
+                translate_atomic_wbuf(ENVONLY, jobj, mem_type_id, type_class, char_buf + i * typeSize,
+                                      typeSize);
                 ENVPTR->DeleteLocalRef(ENVONLY, jobj);
             }
             break;
@@ -5327,8 +5367,10 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
                 if (jnelmts < 0)
                     H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: number of array elements < 0");
 
+                CHECK_RAWBUF_BOUNDS(ENVONLY, i * base_size * (size_t)jnelmts, base_size * (size_t)jnelmts,
+                                    buf_size, "translate_wbuf");
                 translate_wbuf(ENVONLY, array, memb, base_class, jnelmts,
-                               char_buf + i * base_size * (size_t)jnelmts);
+                               char_buf + i * base_size * (size_t)jnelmts, base_size * (size_t)jnelmts);
 
                 ENVPTR->DeleteLocalRef(ENVONLY, array);
                 ENVPTR->DeleteLocalRef(ENVONLY, jList);

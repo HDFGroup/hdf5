@@ -222,7 +222,8 @@ Java_hdf_hdf5lib_H5_H5Dread(JNIEnv *env, jclass clss, jlong dataset_id, jlong me
         if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
             H5_LIBRARY_ERROR(ENVONLY);
 
-        translate_rbuf(env, buf, mem_type_id, type_class, vl_array_len, readBuf);
+        translate_rbuf(env, buf, mem_type_id, type_class, vl_array_len, readBuf,
+                       (size_t)vl_array_len * typeSize);
     }
 
 done:
@@ -299,7 +300,8 @@ Java_hdf_hdf5lib_H5_H5Dwrite(JNIEnv *env, jclass clss, jlong dataset_id, jlong m
         if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
             H5_LIBRARY_ERROR(ENVONLY);
 
-        translate_wbuf(ENVONLY, buf, mem_type_id, type_class, vl_array_len, writeBuf);
+        translate_wbuf(ENVONLY, buf, mem_type_id, type_class, vl_array_len, writeBuf,
+                       (size_t)vl_array_len * typeSize);
     }
 
     if ((status = H5Dwrite((hid_t)dataset_id, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
@@ -1163,7 +1165,7 @@ Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong 
     if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    translate_rbuf(env, buf, mem_type_id, type_class, vl_array_len, readBuf);
+    translate_rbuf(env, buf, mem_type_id, type_class, vl_array_len, readBuf, (size_t)vl_array_len * typeSize);
 
 done:
     if (readBuf) {
@@ -1221,7 +1223,8 @@ Java_hdf_hdf5lib_H5_H5DwriteVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong
     if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    translate_wbuf(ENVONLY, buf, mem_type_id, type_class, vl_array_len, writeBuf);
+    translate_wbuf(ENVONLY, buf, mem_type_id, type_class, vl_array_len, writeBuf,
+                   (size_t)vl_array_len * typeSize);
 
     if ((status = H5Dwrite((hid_t)dataset_id, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
                            (hid_t)xfer_plist_id, writeBuf)) < 0)
