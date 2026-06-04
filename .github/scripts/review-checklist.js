@@ -199,6 +199,9 @@ module.exports = async function run({ github, context, core }) {
   //   complex regardless of line count — any change to the public or
   //   developer API surface warrants the senior owner.
   //
+  //   Covers: hdf5.h (umbrella), H5*public.h / H5*develop.h (per-module),
+  //   VFD driver headers included by hdf5.h, and VOL connector headers.
+  //
   // NOTE: Fork PRs (head.repo != base.repo) are intentionally excluded.
   //   They run with a read-only token and cannot post comments or request
   //   reviewers. Fork coverage would require a pull_request_target job.
@@ -211,7 +214,7 @@ module.exports = async function run({ github, context, core }) {
   const AREA_THRESHOLDS = {      // per-area overrides
     'test': 500,                 // test files are verbose; raise bar for senior
   };
-  const PUBLIC_HEADER   = /public\.h$|develop\.h$/;
+  const PUBLIC_HEADER = /(?:^|\/)hdf5\.h$|public\.h$|develop\.h$|H5FD(?:core|direct|family|hdfs|ioc|log|mirror|mpio?|multi|onion|ros3|sec2|splitter|stdio|subfiling|windows)\.h$|H5VL(?:connector|connector_passthru|native|passthru)\.h$/;
 
   // ----------------------------------------------------------------
   // 1. Parse CODEOWNERS into a list of { pattern, label, owners }
