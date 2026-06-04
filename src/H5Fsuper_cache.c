@@ -631,7 +631,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata, 
         if (H5F_HAS_FEATURE(udata->f, H5FD_FEAT_DEFAULT_VFD_COMPATIBLE)) {
             if (sblock->base_addr > udata->stored_eof)
                 HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "base address exceeds stored EOF");
-            if (sblock->root_addr >= udata->stored_eof)
+            if (sblock->root_addr >= (udata->stored_eof - sblock->base_addr))
                 HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "root group address beyond stored EOF");
             if (H5_addr_defined(sblock->ext_addr) && sblock->ext_addr >= udata->stored_eof)
                 HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "superblock extension address exceeds stored EOF");
