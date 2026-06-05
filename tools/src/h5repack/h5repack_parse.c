@@ -20,16 +20,15 @@
  * is ever refactored to a heap allocation.
  * free(NULL) is a safe no-op per C99, so no NULL guard is needed.
  * Exits on overflow, consistent with all other error handling in parse_filter. */
-#define PARSE_BUF_WRITE(buf, buf_sz, idx, ch, obj_list_ptr, input_str)                                      \
-    do {                                                                                                      \
-        if ((size_t)(idx) >= (buf_sz) - 1) {                                                                 \
-            free(obj_list_ptr);                                                                               \
+#define PARSE_BUF_WRITE(buf, buf_sz, idx, ch, obj_list_ptr, input_str)                                       \
+    do {                                                                                                     \
+        if ((size_t)(idx) >= (buf_sz)-1) {                                                                   \
+            free(obj_list_ptr);                                                                              \
             error_msg("filter parameter field too long in <%s>\n", (input_str));                             \
-            exit(EXIT_FAILURE);                                                                               \
-        }                                                                                                     \
-        (buf)[(idx)] = (ch);                                                                                  \
+            exit(EXIT_FAILURE);                                                                              \
+        }                                                                                                    \
+        (buf)[(idx)] = (ch);                                                                                 \
     } while (0)
-
 
 /*-------------------------------------------------------------------------
  * Function: parse_filter
