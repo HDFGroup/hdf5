@@ -7,6 +7,9 @@
 cmake_minimum_required (VERSION 3.26)
 project (HDF5_TEST C)
 
+# Include plugin signing helper function
+include(${HDF5_SOURCE_DIR}/config/cmake/SignPlugin.cmake)
+
 #-----------------------------------------------------------------------------
 # Generate the H5srcdir_str.h file containing user settings needed by compilation
 #-----------------------------------------------------------------------------
@@ -139,6 +142,64 @@ if (BUILD_SHARED_LIBS)
   file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/filter_plugin_dir2")
 
   #-----------------------------------------------------------------------------
+  # Generate test RSA key pair for plugin signing if signature verification is enabled
+  #-----------------------------------------------------------------------------
+  if (HDF5_REQUIRE_SIGNED_PLUGINS)
+    find_program(OPENSSL_EXECUTABLE openssl)
+    if (NOT OPENSSL_EXECUTABLE)
+      message(FATAL_ERROR
+        "OpenSSL executable not found but is required for HDF5_REQUIRE_SIGNED_PLUGINS.\n"
+        "Please install OpenSSL or disable HDF5_REQUIRE_SIGNED_PLUGINS.")
+    endif ()
+
+    set(TEST_PRIVATE_KEY "${CMAKE_BINARY_DIR}/private.pem")
+    set(TEST_PUBLIC_KEY "${CMAKE_BINARY_DIR}/public.pem")
+
+    # Check if keys already exist
+    if (NOT EXISTS "${TEST_PRIVATE_KEY}" OR NOT EXISTS "${TEST_PUBLIC_KEY}")
+      message(STATUS "Generating test RSA key pair for plugin signing...")
+
+      # Generate private key
+      execute_process(
+        COMMAND ${OPENSSL_EXECUTABLE} genrsa -out "${TEST_PRIVATE_KEY}" 2048
+        RESULT_VARIABLE GENKEY_RESULT
+        OUTPUT_QUIET
+        ERROR_QUIET
+      )
+
+      if (NOT GENKEY_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to generate test private key")
+      endif ()
+
+      # Generate public key
+      execute_process(
+        COMMAND ${OPENSSL_EXECUTABLE} rsa -in "${TEST_PRIVATE_KEY}" -pubout -out "${TEST_PUBLIC_KEY}"
+        RESULT_VARIABLE GENPUB_RESULT
+        OUTPUT_QUIET
+        ERROR_QUIET
+      )
+
+      if (NOT GENPUB_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to generate test public key")
+      endif ()
+
+      message(STATUS "Test RSA key pair generated successfully:")
+      message(STATUS "  Private key: ${TEST_PRIVATE_KEY}")
+      message(STATUS "  Public key: ${TEST_PUBLIC_KEY}")
+    else ()
+      message(STATUS "Using existing test RSA key pair:")
+      message(STATUS "  Private key: ${TEST_PRIVATE_KEY}")
+      message(STATUS "  Public key: ${TEST_PUBLIC_KEY}")
+    endif ()
+
+    # Create a test keystore directory containing the test public key
+    set(TEST_KEYSTORE_DIR "${CMAKE_BINARY_DIR}/test_keystore")
+    file(MAKE_DIRECTORY "${TEST_KEYSTORE_DIR}")
+    file(COPY_FILE "${TEST_PUBLIC_KEY}" "${TEST_KEYSTORE_DIR}/test_public.pem")
+    message(STATUS "Test keystore: ${TEST_KEYSTORE_DIR}")
+  endif ()
+
+  #-----------------------------------------------------------------------------
   # Define Filter Plugin Test Sources
   #-----------------------------------------------------------------------------
   set (FILTER_PLUGINS_FOR_DIR1
@@ -180,6 +241,11 @@ if (BUILD_SHARED_LIBS)
           "$<TARGET_FILE:${HDF5_TEST_PLUGIN_TARGET}>"
           "${CMAKE_BINARY_DIR}/filter_plugin_dir1/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_TARGET}>"
     )
+
+    #-----------------------------------------------------------------------------
+    # Sign the filter plugin if signature verification is enabled
+    #-----------------------------------------------------------------------------
+    sign_plugin_target(${HDF5_TEST_PLUGIN_TARGET} "${CMAKE_BINARY_DIR}/filter_plugin_dir1")
   endforeach ()
 
   foreach (plugin_name ${FILTER_PLUGINS_FOR_DIR2})
@@ -212,6 +278,11 @@ if (BUILD_SHARED_LIBS)
           "$<TARGET_FILE:${HDF5_TEST_PLUGIN_TARGET}>"
           "${CMAKE_BINARY_DIR}/filter_plugin_dir2/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_TARGET}>"
     )
+
+    #-----------------------------------------------------------------------------
+    # Sign the filter plugin if signature verification is enabled
+    #-----------------------------------------------------------------------------
+    sign_plugin_target(${HDF5_TEST_PLUGIN_TARGET} "${CMAKE_BINARY_DIR}/filter_plugin_dir2")
   endforeach ()
 
   #################################################################################
@@ -256,6 +327,11 @@ if (BUILD_SHARED_LIBS)
           "$<TARGET_FILE:${HDF5_VFD_PLUGIN_LIB_TARGET}>"
           "${CMAKE_BINARY_DIR}/null_vfd_plugin_dir/$<TARGET_FILE_NAME:${HDF5_VFD_PLUGIN_LIB_TARGET}>"
     )
+
+    #-----------------------------------------------------------------------------
+    # Sign the VFD plugin if signature verification is enabled
+    #-----------------------------------------------------------------------------
+    sign_plugin_target(${HDF5_VFD_PLUGIN_LIB_TARGET} "${CMAKE_BINARY_DIR}/null_vfd_plugin_dir")
   endforeach ()
 
   #################################################################################
@@ -300,6 +376,11 @@ if (BUILD_SHARED_LIBS)
           "$<TARGET_FILE:${HDF5_VOL_PLUGIN_LIB_TARGET}>"
           "${CMAKE_BINARY_DIR}/null_vol_plugin_dir/$<TARGET_FILE_NAME:${HDF5_VOL_PLUGIN_LIB_TARGET}>"
     )
+
+    #-----------------------------------------------------------------------------
+    # Sign the VOL plugin if signature verification is enabled
+    #-----------------------------------------------------------------------------
+    sign_plugin_target(${HDF5_VOL_PLUGIN_LIB_TARGET} "${CMAKE_BINARY_DIR}/null_vol_plugin_dir")
   endforeach ()
 endif ()
 
@@ -821,6 +902,25 @@ if (BUILD_SHARED_LIBS)
   #-----------------------------------------------------------------------------
   if (HDF5_ENABLE_FORMATTERS)
     clang_format (HDF5_TEST_vol_plugin_FORMAT vol_plugin)
+  endif ()
+
+  # Plugin signature verification test (only when signature verification is enabled)
+  if (HDF5_REQUIRE_SIGNED_PLUGINS)
+    add_executable (test_plugin_signature ${HDF5_TEST_SOURCE_DIR}/test_plugin_signature.c)
+    target_include_directories (test_plugin_signature PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    TARGET_C_PROPERTIES (test_plugin_signature SHARED)
+    target_link_libraries (test_plugin_signature PRIVATE ${HDF5_TEST_LIBSH_TARGET})
+    set_target_properties (test_plugin_signature PROPERTIES FOLDER test)
+
+    # Link OpenSSL for signature verification
+    target_link_libraries (test_plugin_signature PRIVATE OpenSSL::Crypto)
+
+    #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TEST_test_plugin_signature_FORMAT test_plugin_signature)
+    endif ()
   endif ()
 endif ()
 

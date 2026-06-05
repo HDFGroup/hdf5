@@ -1002,12 +1002,30 @@ if (BUILD_SHARED_LIBS)
   endif ()
 
   add_test (NAME H5PLUGIN-filter_plugin COMMAND $<TARGET_FILE:filter_plugin>)
+  set (H5PLUGIN_FILTER_ENV "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/filter_plugin_dir1${CMAKE_SEP}${CMAKE_BINARY_DIR}/filter_plugin_dir2${CMAKE_SEP};HDF5_VOL_CONNECTOR=;srcdir=${HDF5_TEST_BINARY_DIR}")
+  if (HDF5_REQUIRE_SIGNED_PLUGINS)
+    list (APPEND H5PLUGIN_FILTER_ENV "HDF5_PLUGIN_KEYSTORE=${CMAKE_BINARY_DIR}/test_keystore")
+  endif ()
   set_tests_properties (H5PLUGIN-filter_plugin PROPERTIES
-      ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/filter_plugin_dir1${CMAKE_SEP}${CMAKE_BINARY_DIR}/filter_plugin_dir2${CMAKE_SEP};HDF5_VOL_CONNECTOR=;srcdir=${HDF5_TEST_BINARY_DIR}"
+      ENVIRONMENT "${H5PLUGIN_FILTER_ENV}"
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
   )
   if ("H5PLUGIN-filter_plugin" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
     set_tests_properties (H5PLUGIN-filter_plugin PROPERTIES DISABLED true)
+  endif ()
+
+  # Add plugin signature verification test (only when signature verification is enabled)
+  if (HDF5_REQUIRE_SIGNED_PLUGINS)
+    add_test (NAME H5PLUGIN-signature-verification COMMAND $<TARGET_FILE:test_plugin_signature>)
+    set_tests_properties (H5PLUGIN-signature-verification PROPERTIES
+        ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR};HDF5_TEST_PRIVATE_KEY=${CMAKE_BINARY_DIR}/private.pem;HDF5_PLUGIN_KEYSTORE=${CMAKE_BINARY_DIR}/test_keystore"
+        ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:${CMAKE_TEST_OUTPUT_DIRECTORY}"
+        WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
+        LABELS "H5PLUGIN"
+    )
+    if ("H5PLUGIN-signature-verification" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5PLUGIN-signature-verification PROPERTIES DISABLED true)
+    endif ()
   endif ()
 endif ()
 
@@ -1102,8 +1120,12 @@ if (BUILD_SHARED_LIBS)
   endif ()
 
   add_test (NAME H5PLUGIN-vol_plugin COMMAND $<TARGET_FILE:vol_plugin>)
+  set (H5PLUGIN_VOL_ENV "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/null_vol_plugin_dir;srcdir=${HDF5_TEST_BINARY_DIR};HDF5_VOL_CONNECTOR=")
+  if (HDF5_REQUIRE_SIGNED_PLUGINS)
+    list (APPEND H5PLUGIN_VOL_ENV "HDF5_PLUGIN_KEYSTORE=${CMAKE_BINARY_DIR}/test_keystore")
+  endif ()
   set_tests_properties (H5PLUGIN-vol_plugin PROPERTIES
-      ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/null_vol_plugin_dir;srcdir=${HDF5_TEST_BINARY_DIR};HDF5_VOL_CONNECTOR="
+      ENVIRONMENT "${H5PLUGIN_VOL_ENV}"
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
   )
   if ("H5PLUGIN-vol_plugin" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")

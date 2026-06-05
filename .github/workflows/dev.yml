@@ -195,9 +195,6 @@ jobs:
       - name: Setup Doxygen
         uses: ./.github/actions/setup-doxygen
 
-      - name: Install Dependencies (MacOS_latest)
-        run: brew install ninja
-
       - name: Check Clang Version
         shell: bash
         run: |

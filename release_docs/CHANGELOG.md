@@ -97,6 +97,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Added optional digital signature verification for dynamically loaded plugins
+
+   When built with `-DHDF5_REQUIRE_SIGNED_PLUGINS=ON` and OpenSSL, HDF5 will cryptographically verify each plugin before loading it. Plugins are signed with the new `h5sign` tool, which appends an RSA signature and a compact footer to the plugin binary. Verification uses a keystore directory of trusted public keys, configurable at compile time (`-DHDF5_PLUGIN_KEYSTORE_DIR=<path>`) or at runtime via the `HDF5_PLUGIN_KEYSTORE` environment variable. Individual signatures can be revoked without removing the entire public key by listing their SHA-256 hashes in a `revoked_signatures.txt` file in the keystore directory. Supported algorithms include SHA-256, SHA-384, and SHA-512 with both PKCS#1 v1.5 and PSS padding. See `docs/PLUGIN_SIGNATURE_README.md` for details.
+
 ### Improve performance of H5Ovisit() with deeply nested group structures
 
    `H5Ovisit()` would previously internally traverse each object's path name from the iteration root group in order to retrieve information about that object, causing severe performance degradation with a deeply nested group structure. Modified the algorithm to instead retrieve information directly from the object. To get this benefit, users should use `H5Ovisit3()`, or use `H5Ovisit2()` with neither `H5O_INFO_HDR` nor `H5O_INFO_META_SIZE` selected in the `fields` parameter. Performance of `H5Ocopy()`, `H5Iget_name()`, and external links with a callback set should also improve in similar situations.
@@ -118,6 +122,10 @@ We would like to thank the many HDF5 community members who contributed to this r
    The CMake variables `HDF5_JAVA_LOGGING_JAR`, `HDF5_JAVA_LOGGING_NOP_JAR`, `HDF5_JAVA_LOGGING_SIMPLE_JAR`, `HDF5_JAVA_JUNIT_JAR`, and `HDF5_JAVA_HAMCREST_JAR` are now CMake cache variables with the bundled JARs as defaults. Users can override these at configure time to use system-provided JARs. See `INSTALL_CMake_options.md` for details.
 
 ## Tools
+
+### Added `h5sign` tool for signing plugins with RSA digital signatures
+
+   The `h5sign` command-line tool signs HDF5 plugin shared libraries by appending an RSA signature and a 14-byte footer. It supports SHA-256, SHA-384, SHA-512, and their PSS variants, and accepts passphrase-protected private keys. Use `-f` / `--force` to strip an existing signature before re-signing. The tool is built automatically when `HDF5_REQUIRE_SIGNED_PLUGINS` is enabled.
 
 ## High-Level APIs
 
