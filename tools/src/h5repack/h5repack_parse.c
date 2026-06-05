@@ -14,6 +14,22 @@
 #include "h5tools.h"
 #include "h5tools_utils.h"
 
+/* Bounds-check a running index against a fixed parse buffer before writing.
+ * All three parse buffers (scomp, stype, smask) are the same size, so a
+ * single macro covers every site.  Frees obj_list and exits on overflow,
+ * consistent with all other error handling in parse_filter. */
+#define PARSE_BUF_WRITE(buf, idx, ch, obj_list_ptr, input_str)                                               \
+    do {                                                                                                      \
+        if ((size_t)(idx) >= sizeof(buf) - 1) {                                                               \
+            if (obj_list_ptr)                                                                                 \
+                free(obj_list_ptr);                                                                           \
+            error_msg("filter parameter field too long in <%s>\n", (input_str));                             \
+            exit(EXIT_FAILURE);                                                                               \
+        }                                                                                                     \
+        (buf)[(idx)] = (ch);                                                                                  \
+    } while (0)
+
+
 /*-------------------------------------------------------------------------
  * Function: parse_filter
  *
@@ -111,8 +127,8 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
     /* get filter additional parameters */
     m = 0;
     for (i = (size_t)(end_obj + 1), k = 0, j = 0; i < len; i++, k++) {
-        c        = str[i];
-        scomp[k] = c;
+        c = str[i];
+        PARSE_BUF_WRITE(scomp, k, c, obj_list, str);
         if (c == '=' || i == len - 1) {
             if (c == '=') {      /*one more parameter */
                 scomp[k] = '\0'; /*cut space */
@@ -139,7 +155,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                             exit(EXIT_FAILURE);
                         }
                         if (l == -1)
-                            stype[m] = c;
+                            PARSE_BUF_WRITE(stype, m, c, obj_list, str);
                         else {
                             smask[l] = c;
                             l++;
@@ -189,7 +205,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                             exit(EXIT_FAILURE);
                         }
                         if (l == -1)
-                            stype[m] = c;
+                            PARSE_BUF_WRITE(stype, m, c, obj_list, str);
                         else {
                             smask[l] = c;
                             l++;
@@ -255,7 +271,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                             error_msg("filter flag parameter is not a digit in <%s>\n", str);
                             exit(EXIT_FAILURE);
                         }
-                        stype[q] = c;
+                        PARSE_BUF_WRITE(stype, q, c, obj_list, str);
                     } /* for u */
                     stype[q] = '\0';
                 } /*if */
@@ -274,7 +290,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                             error_msg("compression parameter is not a digit in <%s>\n", str);
                             exit(EXIT_FAILURE);
                         }
-                        stype[m] = c;
+                        PARSE_BUF_WRITE(stype, m, c, obj_list, str);
                     } /* u */
 
                     stype[m] = '\0';
