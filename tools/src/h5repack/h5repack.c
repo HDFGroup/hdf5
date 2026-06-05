@@ -10,8 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5private.h"
 #include "h5repack.h"
+#include "H5private.h"
 
 /*-------------------------------------------------------------------------
  * File: h5repack.c
@@ -70,18 +70,20 @@ h5repack_init(pack_opt_t *options, int verbose, bool latest)
     int k, n;
 
     memset(options, 0, sizeof(pack_opt_t));
-    options->min_comp   = 0;
-    options->verbose    = verbose;
-    options->latest     = latest;
-    options->layout_g   = H5D_LAYOUT_ERROR;
-    options->low_bound  = H5F_LIBVER_EARLIEST;
-    options->high_bound = H5F_LIBVER_LATEST;
-    options->fin_fapl   = H5P_DEFAULT;
-    options->fout_fapl  = H5P_DEFAULT;
-    options->fin_vol    = false;
-    options->fin_vfd    = false;
-    options->fout_vol   = false;
-    options->fout_vfd   = false;
+    options->min_comp = 0;
+    options->verbose  = verbose;
+    options->latest   = latest;
+    options->layout_g = H5D_LAYOUT_ERROR;
+    if (H5Pget_libver_bounds(H5P_FILE_ACCESS_DEFAULT, &options->low_bound, &options->high_bound) < 0) {
+        error_msg("H5Pget_libver_bounds(H5P_FILE_ACCESS_DEFAULT) failed\n");
+        return -1;
+    }
+    options->fin_fapl  = H5P_DEFAULT;
+    options->fout_fapl = H5P_DEFAULT;
+    options->fin_vol   = false;
+    options->fin_vfd   = false;
+    options->fout_vol  = false;
+    options->fout_vfd  = false;
 
     for (n = 0; n < H5_REPACK_MAX_NFILTERS; n++) {
         options->filter_g[n].filtn     = -1;

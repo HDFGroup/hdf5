@@ -48,7 +48,7 @@
 #define @H5_FC_FUNC_@
 
 /* Define if Fortran C_BOOL is different from default LOGICAL */
-#define H5_FORTRAN_C_BOOL_IS_UNIQUE @H5_FORTRAN_C_BOOL_IS_UNIQUE@
+#cmakedefine H5_FORTRAN_C_BOOL_IS_UNIQUE
 
 /* Define if we have Fortran intrinsic C_SIZEOF */
 #cmakedefine H5_FORTRAN_HAVE_C_SIZEOF @H5_FORTRAN_HAVE_C_SIZEOF@

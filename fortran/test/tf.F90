@@ -20,8 +20,8 @@
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! CONTAINS SUBROUTINES
-!  write_test_status, check, verify, verifyLogical, verifyString, h5_fixname_f,
-!  h5_cleanup_f, h5_exit_f, h5_env_nocleanup_f,dreal_eqv
+!  write_test_status, check, h5_fixname_f,
+!  h5_cleanup_f, h5_exit_f, h5_env_nocleanup_f
 !
 !*****
 

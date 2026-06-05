@@ -1,0 +1,43 @@
+name: Review Checklist
+
+# Posts a per-area sign-off checklist on every PR and auto-checks each item
+# when one of that area's designated owners submits an approval.
+#
+# Reviewer lists are derived entirely from .github/CODEOWNERS — no duplication.
+# To add an area or change owners, edit only CODEOWNERS.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [develop]
+  pull_request_review:
+    types: [submitted]
+
+concurrency:
+  group: review-checklist-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  pull-requests: write
+  issues: write
+  contents: read
+
+jobs:
+  checklist:
+    runs-on: ubuntu-latest
+    # Only run on PRs targeting develop from within the same repo (not forks).
+    # For review events, only run on approvals targeting develop.
+    if: |
+      github.event.pull_request.base.ref == 'develop' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      (github.event_name == 'pull_request' ||
+       (github.event_name == 'pull_request_review' &&
+        github.event.review.state == 'approved'))
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const run = require('./.github/scripts/review-checklist.js');
+            await run({ github, context, core });

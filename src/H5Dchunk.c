@@ -855,10 +855,9 @@ H5D__chunk_set_sizes(H5D_t *dset)
 
     /* Set encoding length in layout */
     if (dset->shared->layout.u.chunk.enc_bytes_per_dim) {
-        if (dset->shared->layout.u.chunk.enc_bytes_per_dim != max_enc_bytes_per_dim)
+        if (dset->shared->layout.u.chunk.enc_bytes_per_dim < max_enc_bytes_per_dim)
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
-                        "stored chunk dimension encoding length does not match value calculated from chunk "
-                        "dimensions");
+                        "stored chunk dimension encoding length is insufficient to encode chunk dimensions");
     }
     else
         dset->shared->layout.u.chunk.enc_bytes_per_dim = max_enc_bytes_per_dim;

@@ -1547,47 +1547,68 @@ main(void)
     if (h5_using_default_driver(NULL)) {
         /*-------------------------------------------------------------------------
          * test --metadata_block_size option
-         * Also verify that output file using the metadata_block_size option is
-         * larger than the output file one not using it.
-         * H5REPACK_FNAME4 is used because it is the same as the test file used for the
-         * shell script version of this test (h5repack.sh).
+         * Verify the option's effect on output file size across every valid
+         * low library version bound. H5REPACK_FNAME4 is used because it is
+         * the same as the test file used for the shell script version of
+         * this test (h5repack.sh).
+         *
+         * The relationship between meta_block_size and the output file size
+         * depends on the file's low library version bound:
+         *   - H5F_LIBVER_EARLIEST: a larger meta_block_size grows the
+         *     output file (more pre-allocated metadata space).
+         *   - H5F_LIBVER_V18 and later: a larger meta_block_size shrinks
+         *     the output file (better metadata aggregation reduces
+         *     unaccounted padding).
          *-------------------------------------------------------------------------
          */
         TESTING("    metadata block size option");
-        /* First run without metadata option. No need to verify the correctness */
-        /* since this has been verified by earlier tests. Just record the file */
-        /* size of the output file. */
-        if (h5repack_init(&pack_options, 0, false) < 0)
-            GOERROR;
-        if (h5repack(H5REPACK_FNAME4, H5REPACK_FNAME4OUT, &pack_options) < 0)
-            GOERROR;
-        memset(&file_stat, 0, sizeof(h5_stat_t));
-        if (HDstat(H5REPACK_FNAME4OUT, &file_stat) < 0)
-            GOERROR;
-        fsize1 = file_stat.st_size;
-        if (h5repack_end(&pack_options) < 0)
-            GOERROR;
+        for (H5F_libver_t lb = H5F_LIBVER_EARLIEST; lb < H5F_LIBVER_NBOUNDS; lb++) {
+            /* First run without metadata option. No need to verify the
+             * correctness since this has been verified by earlier tests;
+             * just record the output file size. */
+            if (h5repack_init(&pack_options, 0, false) < 0)
+                GOERROR;
+            pack_options.low_bound  = lb;
+            pack_options.high_bound = H5F_LIBVER_LATEST;
+            if (h5repack(H5REPACK_FNAME4, H5REPACK_FNAME4OUT, &pack_options) < 0)
+                GOERROR;
+            memset(&file_stat, 0, sizeof(h5_stat_t));
+            if (HDstat(H5REPACK_FNAME4OUT, &file_stat) < 0)
+                GOERROR;
+            fsize1 = file_stat.st_size;
+            if (h5repack_end(&pack_options) < 0)
+                GOERROR;
 
-        /* run it again with metadata option */
-        if (h5repack_init(&pack_options, 0, false) < 0)
-            GOERROR;
-        pack_options.meta_block_size = 8192;
-        if (h5repack(H5REPACK_FNAME4, H5REPACK_FNAME4OUT, &pack_options) < 0)
-            GOERROR;
-        if (h5diff(H5REPACK_FNAME4, H5REPACK_FNAME4OUT, NULL, NULL, &diff_options) > 0)
-            GOERROR;
-        if (h5repack_verify(H5REPACK_FNAME4, H5REPACK_FNAME4OUT, &pack_options) <= 0)
-            GOERROR;
-        /* record the file size of the output file */
-        memset(&file_stat, 0, sizeof(h5_stat_t));
-        if (HDstat(H5REPACK_FNAME4OUT, &file_stat) < 0)
-            GOERROR;
-        fsize2 = file_stat.st_size;
-        /* verify second file size is larger than the first one */
-        if (fsize2 <= fsize1)
-            GOERROR;
-        if (h5repack_end(&pack_options) < 0)
-            GOERROR;
+            /* Second run with metadata option. */
+            if (h5repack_init(&pack_options, 0, false) < 0)
+                GOERROR;
+            pack_options.low_bound       = lb;
+            pack_options.high_bound      = H5F_LIBVER_LATEST;
+            pack_options.meta_block_size = 8192;
+            if (h5repack(H5REPACK_FNAME4, H5REPACK_FNAME4OUT, &pack_options) < 0)
+                GOERROR;
+            if (h5diff(H5REPACK_FNAME4, H5REPACK_FNAME4OUT, NULL, NULL, &diff_options) > 0)
+                GOERROR;
+            if (h5repack_verify(H5REPACK_FNAME4, H5REPACK_FNAME4OUT, &pack_options) <= 0)
+                GOERROR;
+            /* record the file size of the output file */
+            memset(&file_stat, 0, sizeof(h5_stat_t));
+            if (HDstat(H5REPACK_FNAME4OUT, &file_stat) < 0)
+                GOERROR;
+            fsize2 = file_stat.st_size;
+            /* Verify file-size ordering according to the low library
+             * version bound. */
+            if (lb == H5F_LIBVER_EARLIEST) {
+                if (fsize2 <= fsize1)
+                    GOERROR;
+            }
+            else {
+                if (fsize2 >= fsize1)
+                    GOERROR;
+            }
+            if (h5repack_end(&pack_options) < 0)
+                GOERROR;
+        }
         PASSED();
     }
 

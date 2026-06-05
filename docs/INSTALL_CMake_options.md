@@ -195,7 +195,7 @@ These are options which are specific to parallel HDF5.
 |:-------------|:-----|:--------|:------------|
 | `HDF5_ENABLE_PARALLEL` | `BOOL` | `OFF` | If `ON`, enables building of parallel HDF5. Requires an MPI implementation of at least the [MPI 3.0 standard](https://www.mpi-forum.org/docs/mpi-3.0/mpi30-report.pdf). |
 | `HDF5_ENABLE_SUBFILING_VFD` | `BOOL` | `OFF` | If `ON`, enables building of the HDF5 [Subfiling VFD](https://github.com/HDFGroup/hdf5doc/blob/master/RFCs/HDF5_Library/VFD_Subfiling/user_guide/HDF5_Subfiling_VFD_User_s_Guide.pdf). Requires C11 threads, Win32 threads or Pthreads. |
-| `HDF5_BUILD_PARALLEL_TOOLS` | `BOOL` | `OFF` | If `ON`, enables building of parallel HDF5 tools. Currently experimental. |
+| `HDF5_BUILD_PARALLEL_TOOLS` | `BOOL` | `OFF` | If `ON`, enables building of MPI-enabled HDF5 tools. Currently experimental. |
 | `MPI_C_COMPILER` | `FILEPATH` | Varies | Path to the program to be used for compiling MPI C source code. Usually auto-detected by CMake. |
 | `MPIEXEC_EXECUTABLE` | `FILEPATH` | Varies | Path to the program to be used for running MPI programs. Usually auto-detected by CMake. |
 | `MPIEXEC_MAX_NUMPROCS` | `STRING` | Varies | Maximum number of MPI processes to use when running MPI programs. Usually auto-detected by CMake. |

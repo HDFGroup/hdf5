@@ -997,7 +997,7 @@ CONTAINS
     INTEGER, INTENT(IN) :: flag
     INTEGER :: i
 
-!#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+!#ifdef H5_HAVE_Fortran_INTEGER_SIZEOF_16
 !    ! (1) The array index assumes INTEGER*16 the last integer in the series, and
 !    ! (2) it should map to INTEGER*16 on most modern processors
 !    H5T_NATIVE_INTEGER_KIND(H5_FORTRAN_NUM_INTEGER_KINDS)=SELECTED_INT_KIND(36)
@@ -1016,7 +1016,7 @@ CONTAINS
           h5_type = H5T_NATIVE_REAL_C_FLOAT
        ELSE IF(ikind.EQ.KIND(1.0_C_DOUBLE))THEN
           h5_type = H5T_NATIVE_REAL_C_DOUBLE
-#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
+#ifdef H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
        ELSE IF(ikind.EQ.KIND(1.0_C_LONG_DOUBLE))THEN
           h5_type = H5T_NATIVE_REAL_C_LONG_DOUBLE
 #endif
