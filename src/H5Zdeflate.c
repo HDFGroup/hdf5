@@ -176,7 +176,9 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
         size_t z_dst_buf_size = zng_compressBound(nbytes); /* 5730 */
         size_t z_dst_nbytes   = z_dst_buf_size;
 #else
-        uLongf z_dst_buf_size = (uLongf)compressBound(nbytes);
+        if ((size_t)(uLong)nbytes != nbytes)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "nbytes too large to cast to uLong for zlib compression");
+        uLongf z_dst_buf_size = (uLongf)compressBound((uLong)nbytes);
         uLongf z_dst_nbytes   = z_dst_buf_size;
 #endif
         uLong z_src_nbytes = (uLong)nbytes;

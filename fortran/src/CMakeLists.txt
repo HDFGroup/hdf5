@@ -8,12 +8,6 @@ cmake_minimum_required (VERSION 3.26)
 project (HDF5_F90_SRC C Fortran)
 
 #-----------------------------------------------------------------------------
-if (H5_NO_DEPRECATED_SYMBOLS)
-  set (CMAKE_NO_DEPRECATED_SYMBOLS 1)
-else ()
-  set (CMAKE_NO_DEPRECATED_SYMBOLS 0)
-endif ()
-
 # configure def file for shared libs on windows
 if (WIN32)
   if (BUILD_SHARED_LIBS)
@@ -34,64 +28,8 @@ if (WIN32)
   endif ()
 endif ()
 
-if (H5_HAVE_MPI_F08) # MPI-3 module mpi_f08 supported
-  set (CMAKE_H5_HAVE_MPI_F08 1)
-else ()
+if (NOT H5_HAVE_MPI_F08) # MPI-3 module mpi_f08 supported
   set (H5_NOMPI_F08 ";")
-  set (CMAKE_H5_HAVE_MPI_F08 0)
-endif ()
-
-if (H5_HAVE_DARWIN) # Used in testing
-  set (CMAKE_H5_HAVE_DARWIN 1)
-else ()
-  set (CMAKE_H5_HAVE_DARWIN 0)
-endif ()
-
-# configure for Fortran preprocessor
-
-# Define Parallel variable for passing to H5config_f.inc.cmake
-set (CMAKE_H5_HAVE_PARALLEL 0)
-set (CMAKE_H5_HAVE_SUBFILING_VFD 0)
-if (H5_HAVE_PARALLEL)
-  set (CMAKE_H5_HAVE_PARALLEL 1)
-  if (H5_HAVE_SUBFILING_VFD)
-    set (CMAKE_H5_HAVE_SUBFILING_VFD 1)
-  endif ()
-endif ()
-
-set (CMAKE_H5_HAVE_FLOAT128 0)
-if (H5_HAVE_FLOAT128)
-  set (CMAKE_H5_HAVE_FLOAT128 1)
-endif ()
-
-set (CMAKE_H5_FORTRAN_HAVE_STORAGE_SIZE 0)
-if (H5_FORTRAN_HAVE_STORAGE_SIZE)
-  set (CMAKE_H5_FORTRAN_HAVE_STORAGE_SIZE 1)
-endif ()
-
-set (CMAKE_H5_FORTRAN_HAVE_SIZEOF 0)
-if (H5_FORTRAN_HAVE_SIZEOF)
-  set (CMAKE_H5_FORTRAN_HAVE_SIZEOF 1)
-endif ()
-
-set (CMAKE_H5_FORTRAN_HAVE_C_SIZEOF 0)
-if (H5_FORTRAN_HAVE_C_SIZEOF)
-  set (CMAKE_H5_FORTRAN_HAVE_C_SIZEOF 1)
-endif ()
-
-set (CMAKE_H5_HAVE_ISO_FORTRAN_ENV 0)
-if (H5_HAVE_ISO_FORTRAN_ENV)
-  set (CMAKE_H5_HAVE_ISO_FORTRAN_ENV 1)
-endif ()
-
-set (CMAKE_H5_FORTRAN_HAVE_CHAR_ALLOC 0)
-if (H5_FORTRAN_HAVE_CHAR_ALLOC)
-  set (CMAKE_H5_FORTRAN_HAVE_CHAR_ALLOC 1)
-endif ()
-
-set (CMAKE_H5_MPI_LOGICAL_KIND 0)
-if (H5_MPI_LOGICAL_KIND)
-  set (CMAKE_H5_MPI_LOGICAL_KIND 1)
 endif ()
 
 configure_file (${HDF5_F90_SRC_SOURCE_DIR}/H5config_f.inc.cmake ${HDF5_F90_BINARY_DIR}/H5config_f.inc @ONLY)

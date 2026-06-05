@@ -85,14 +85,12 @@ endif()
 
 # Report the results.
 if (NOT MFU_FOUND)
-  set (MFU_DIR_MESSAGE
-      "Mfu was not found. Make sure MFU_LIBRARY and MFU_INCLUDE_DIR are set or set the MFU_INSTALL environment variable."
+  message (FATAL_ERROR "MFU (mpiFileUtils) was not found. "
+      "MFU is an HPC parallel file utilities library (https://github.com/hpc/mpifileutils). "
+      "Set the MFU_ROOT environment variable to the install prefix (export MFU_ROOT=<path>), "
+      "or set MFU_LIBRARY and MFU_INCLUDE_DIR explicitly. "
+      "Note: HDF5_BUILD_PARALLEL_TOOLS also requires CIRCLE (libcircle, https://github.com/hpc/libcircle) "
+      "and DTCMP (https://github.com/hpc/dtcmp), which are dependencies of mpiFileUtils and "
+      "are expected to be installed under the same MFU_ROOT prefix."
   )
-  if (NOT MFU_FIND_QUIETLY)
-    message (VERBOSE "${MFU_DIR_MESSAGE}")
-  else ()
-    if (MFU_FIND_REQUIRED)
-      message (FATAL_ERROR "MFU was NOT found and is required.")
-    endif ()
-  endif ()
 endif ()

@@ -93,6 +93,8 @@ static int test_iterators(void);
 static int test_data(void);
 static int read_data(const char *fname, int ndims, hsize_t *dims, float **buf);
 static int test_attach_detach(void);
+static int test_is_scale_class_prefix(void);
+static int test_is_reserved_class_prefix(void);
 
 #define RANK1     1
 #define RANK      2
@@ -211,6 +213,8 @@ main(void)
     nerrors += test_iterators() < 0 ? 1 : 0;
     nerrors += test_types() < 0 ? 1 : 0;
     nerrors += test_data() < 0 ? 1 : 0;
+    nerrors += test_is_scale_class_prefix() < 0 ? 1 : 0;
+    nerrors += test_is_reserved_class_prefix() < 0 ? 1 : 0;
 
     if (nerrors)
         goto error;
@@ -5435,6 +5439,269 @@ out:
         H5Dclose(var3_id);
         H5Dclose(dsid);
         H5Gclose(gid);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+    H5_FAILED();
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
+ * write_class_attr: create a scalar "CLASS" attribute on did using the
+ * given type tid and write val through it.  Closes the attribute and
+ * dataspace before returning; the caller owns tid.
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+write_class_attr(hid_t did, hid_t tid, const void *val)
+{
+    hid_t  aspace_id = H5I_INVALID_HID;
+    hid_t  aid       = H5I_INVALID_HID;
+    herr_t ret       = FAIL;
+
+    if ((aspace_id = H5Screate(H5S_SCALAR)) < 0)
+        goto done;
+    if ((aid = H5Acreate2(did, "CLASS", tid, aspace_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto done;
+    if (H5Awrite(aid, tid, val) < 0)
+        goto done;
+    ret = SUCCEED;
+done:
+    if (aid != H5I_INVALID_HID)
+        H5Aclose(aid);
+    if (aspace_id != H5I_INVALID_HID)
+        H5Sclose(aspace_id);
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * test_is_scale_class_prefix
+ *
+ * Verify that H5DSis_scale() rejects a CLASS attribute whose value shares a
+ * prefix with "DIMENSION_SCALE" but is not equal to it, and that
+ * variable-length CLASS strings are handled correctly. H5DSis_scale() only
+ * reaches the string comparison when the CLASS attribute has datatype size
+ * 16, so the fixed-length attribute is created explicitly at that size with
+ * "DIMENSION_S" and null-padded to 16 bytes.
+ *-------------------------------------------------------------------------
+ */
+static int
+test_is_scale_class_prefix(void)
+{
+    hid_t   fid     = H5I_INVALID_HID;
+    hid_t   sid     = H5I_INVALID_HID;
+    hid_t   did     = H5I_INVALID_HID;
+    hid_t   atid    = H5I_INVALID_HID;
+    hsize_t dims[1] = {1};
+    /* DIMENSION_SCALE_CLASS is "DIMENSION_SCALE"; the spec stores the CLASS
+     * attribute as a fixed-length string of exactly this many bytes. */
+    const size_t ds_class_len                             = sizeof(DIMENSION_SCALE_CLASS); /* includes null */
+    char         class_buf[sizeof(DIMENSION_SCALE_CLASS)] = {0};
+
+    HL_TESTING2("H5DSis_scale rejects CLASS values that only share a prefix");
+
+    memcpy(class_buf, "DIMENSION_S", sizeof("DIMENSION_S") - 1);
+
+    if ((fid = H5Fcreate("test_ds_class_prefix.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        goto out;
+    if ((did = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+
+    if ((atid = H5Tcopy(H5T_C_S1)) < 0)
+        goto out;
+    if (H5Tset_size(atid, ds_class_len) < 0)
+        goto out;
+    if (H5Tset_strpad(atid, H5T_STR_NULLTERM) < 0)
+        goto out;
+    if (write_class_attr(did, atid, class_buf) < 0)
+        goto out;
+    if (H5Tclose(atid) < 0)
+        goto out;
+    atid = H5I_INVALID_HID;
+
+    /* CLASS is "DIMENSION_S" (prefix of DIMENSION_SCALE), so H5DSis_scale() must return 0. */
+    if (H5DSis_scale(did) != 0)
+        goto out;
+
+    if (H5Dclose(did) < 0)
+        goto out;
+    did = H5I_INVALID_HID;
+
+    /* VLEN-string CLASS attribute tests for H5DSis_scale: exact match → 1,
+     * prefix/wrong value → 0. */
+    {
+        static const struct {
+            const char *dset_name;
+            const char *class_val;
+            int         expected;
+        } vl_cases[] = {
+            {"dset_vlen_match", "DIMENSION_SCALE", 1},
+            {"dset_vlen_prefix", "DIMENSION_S", 0},
+            {"dset_vlen_nomatch", "NOT_A_SCALE", 0},
+        };
+        size_t k;
+
+        for (k = 0; k < sizeof(vl_cases) / sizeof(vl_cases[0]); k++) {
+            const char *vl_val = vl_cases[k].class_val;
+
+            if ((did = H5Dcreate2(fid, vl_cases[k].dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT,
+                                  H5P_DEFAULT)) < 0)
+                goto out;
+            if ((atid = H5Tcopy(H5T_C_S1)) < 0)
+                goto out;
+            if (H5Tset_size(atid, H5T_VARIABLE) < 0)
+                goto out;
+            if (write_class_attr(did, atid, &vl_val) < 0)
+                goto out;
+            if (H5Tclose(atid) < 0)
+                goto out;
+            atid = H5I_INVALID_HID;
+            if (H5DSis_scale(did) != vl_cases[k].expected)
+                goto out;
+            if (H5Dclose(did) < 0)
+                goto out;
+            did = H5I_INVALID_HID;
+        }
+    }
+
+    if (H5Sclose(sid) < 0)
+        goto out;
+    if (H5Fclose(fid) < 0)
+        goto out;
+
+    PASSED();
+    return 0;
+
+out:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(atid);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+    H5_FAILED();
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
+ * test_is_reserved_class_prefix
+ *
+ * Verify that H5DS_is_reserved (exercised through H5DSattach_scale) correctly
+ * identifies CLASS values "IMAGE", "PALETTE", and "TABLE" as reserved, while
+ * prefix-only matches and variable-length CLASS strings are handled correctly.
+ *-------------------------------------------------------------------------
+ */
+static int
+test_is_reserved_class_prefix(void)
+{
+    hid_t   fid     = H5I_INVALID_HID;
+    hid_t   sid     = H5I_INVALID_HID;
+    hid_t   did     = H5I_INVALID_HID;
+    hid_t   dsid    = H5I_INVALID_HID;
+    hid_t   atid    = H5I_INVALID_HID;
+    hsize_t dims[1] = {4};
+
+    HL_TESTING2("H5DS_is_reserved rejects CLASS prefix; recognizes VL reserved CLASS");
+
+    if ((fid = H5Fcreate("test_ds_reserved_prefix.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        goto out;
+
+    /* Dataset that will receive the scale, tagged with CLASS="IMAGE_EXTRA".
+     * H5DS_is_reserved must return false: "IMAGE_EXTRA" is not a reserved
+     * class name even though it shares a prefix with "IMAGE". */
+    if ((did = H5Dcreate2(fid, "data", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if (H5LTset_attribute_string(fid, "data", "CLASS", "IMAGE_EXTRA") < 0)
+        goto out;
+
+    /* Dimension-scale dataset */
+    if ((dsid = H5Dcreate2(fid, "ds", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if (H5DSset_scale(dsid, "xdim") < 0)
+        goto out;
+
+    /* Attaching a scale to a non-reserved dataset must succeed. */
+    if (H5DSattach_scale(did, dsid, 0) < 0)
+        goto out;
+
+    if (H5Dclose(did) < 0)
+        goto out;
+    did = H5I_INVALID_HID;
+
+    /* VLEN-string CLASS attribute tests for H5DS_is_reserved (via
+     * H5DSattach_scale): all three reserved names must block attachment;
+     * a non-reserved name must allow it. */
+    {
+        static const struct {
+            const char *dset_name;
+            const char *class_val;
+            bool        attach_should_fail;
+        } vl_cases[] = {
+            {"data_vl_image", "IMAGE", true},
+            {"data_vl_palette", "PALETTE", true},
+            {"data_vl_table", "TABLE", true},
+            {"data_vl_unreserved", "NOT_RESERVED", false},
+        };
+        size_t k;
+
+        for (k = 0; k < sizeof(vl_cases) / sizeof(vl_cases[0]); k++) {
+            const char *vl_val = vl_cases[k].class_val;
+            herr_t      ret;
+
+            if ((did = H5Dcreate2(fid, vl_cases[k].dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT,
+                                  H5P_DEFAULT)) < 0)
+                goto out;
+            if ((atid = H5Tcopy(H5T_C_S1)) < 0)
+                goto out;
+            if (H5Tset_size(atid, H5T_VARIABLE) < 0)
+                goto out;
+            if (write_class_attr(did, atid, &vl_val) < 0)
+                goto out;
+            if (H5Tclose(atid) < 0)
+                goto out;
+            atid = H5I_INVALID_HID;
+
+            H5E_BEGIN_TRY
+            {
+                ret = H5DSattach_scale(did, dsid, 0);
+            }
+            H5E_END_TRY
+
+            if (vl_cases[k].attach_should_fail && ret >= 0)
+                goto out;
+            if (!vl_cases[k].attach_should_fail && ret < 0)
+                goto out;
+
+            if (H5Dclose(did) < 0)
+                goto out;
+            did = H5I_INVALID_HID;
+        }
+    }
+
+    if (H5Dclose(dsid) < 0)
+        goto out;
+    dsid = H5I_INVALID_HID;
+    if (H5Sclose(sid) < 0)
+        goto out;
+    if (H5Fclose(fid) < 0)
+        goto out;
+
+    PASSED();
+    return 0;
+
+out:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(atid);
+        H5Dclose(dsid);
+        H5Dclose(did);
+        H5Sclose(sid);
         H5Fclose(fid);
     }
     H5E_END_TRY

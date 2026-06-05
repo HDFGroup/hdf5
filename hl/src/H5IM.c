@@ -967,6 +967,101 @@ out:
 }
 
 /*-------------------------------------------------------------------------
+ * Function: H5IM__class_attr_equals
+ *
+ * Purpose: Opens dset_name under loc_id, reads its "CLASS" attribute
+ *          (fixed-length or variable-length string), and returns 1 if the
+ *          value equals expected, 0 if it does not, or -1 on error.
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5IM__class_attr_equals(hid_t loc_id, const char *dset_name, const char *expected)
+{
+    hid_t   did       = H5I_INVALID_HID;
+    hid_t   atid      = H5I_INVALID_HID;
+    hid_t   aid       = H5I_INVALID_HID;
+    char   *attr_data = NULL;
+    htri_t  has_class;
+    htri_t  isvl;
+    hsize_t storage_size;
+    htri_t  ret = -1;
+
+    if (dset_name == NULL)
+        return -1;
+
+    if ((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
+        goto out;
+
+    if ((has_class = H5Aexists(did, "CLASS")) < 0)
+        goto out;
+
+    if (has_class == 0) {
+        ret = 0;
+        goto out;
+    }
+
+    if ((aid = H5Aopen(did, "CLASS", H5P_DEFAULT)) < 0)
+        goto out;
+
+    if ((atid = H5Aget_type(aid)) < 0)
+        goto out;
+
+    if (H5T_STRING != H5Tget_class(atid))
+        goto out;
+
+    if ((isvl = H5Tis_variable_str(atid)) < 0)
+        goto out;
+
+    if (isvl > 0) {
+        /* Variable-length string: H5Aread allocates the string and writes
+         * its address into the buffer; use H5Treclaim to free it after use. */
+        char *vl_str = NULL;
+        hid_t sid    = H5I_INVALID_HID;
+
+        if ((sid = H5Aget_space(aid)) < 0)
+            goto out;
+        if (H5Aread(aid, atid, &vl_str) < 0) {
+            H5Sclose(sid);
+            goto out;
+        }
+        ret = (vl_str && strcmp(vl_str, expected) == 0) ? 1 : 0;
+        H5Treclaim(atid, sid, H5P_DEFAULT, &vl_str);
+        H5Sclose(sid);
+    }
+    else {
+        if (H5T_STR_NULLTERM != H5Tget_strpad(atid))
+            goto out;
+
+        if ((storage_size = H5Aget_storage_size(aid)) == 0)
+            goto out;
+
+        /* Allocate one extra byte; force null termination in case the attribute
+         * was written without honoring H5T_STR_NULLTERM. */
+        attr_data = (char *)malloc((size_t)storage_size * sizeof(char) + 1);
+        if (attr_data == NULL)
+            goto out;
+
+        if (H5Aread(aid, atid, attr_data) < 0)
+            goto out;
+        attr_data[storage_size] = '\0';
+
+        ret = (strcmp(attr_data, expected) == 0) ? 1 : 0;
+    }
+
+out:
+    free(attr_data);
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(atid);
+        H5Aclose(aid);
+        H5Dclose(did);
+    }
+    H5E_END_TRY
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
  * Function: H5IMis_image
  *
  * Purpose:
@@ -982,83 +1077,7 @@ out:
 herr_t
 H5IMis_image(hid_t loc_id, const char *dset_name)
 {
-    hid_t   did;
-    htri_t  has_class;
-    hid_t   atid;
-    hid_t   aid = -1;
-    char   *attr_data;    /* Name of attribute */
-    hsize_t storage_size; /* Size of storage for attribute */
-    herr_t  ret;
-
-    /* check the arguments */
-    if (dset_name == NULL)
-        return -1;
-
-    /* Assume initially fail condition */
-    ret = -1;
-
-    /* Open the dataset. */
-    if ((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
-        return -1;
-
-    /* Try to find the attribute "CLASS" on the dataset */
-    if ((has_class = H5Aexists(did, "CLASS")) < 0)
-        goto out;
-
-    if (has_class == 0) {
-        H5Dclose(did);
-        return 0;
-    }
-    else {
-
-        if ((aid = H5Aopen(did, "CLASS", H5P_DEFAULT)) < 0)
-            goto out;
-
-        if ((atid = H5Aget_type(aid)) < 0)
-            goto out;
-
-        /* check to make sure attribute is a string */
-        if (H5T_STRING != H5Tget_class(atid))
-            goto out;
-
-        /* check to make sure string is null-terminated */
-        if (H5T_STR_NULLTERM != H5Tget_strpad(atid))
-            goto out;
-
-        /* allocate buffer large enough to hold string */
-        if ((storage_size = H5Aget_storage_size(aid)) == 0)
-            goto out;
-
-        attr_data = (char *)malloc((size_t)storage_size * sizeof(char) + 1);
-        if (attr_data == NULL)
-            goto out;
-
-        if (H5Aread(aid, atid, attr_data) < 0)
-            goto out;
-
-        if (strncmp(attr_data, IMAGE_CLASS, MIN(strlen(IMAGE_CLASS), strlen(attr_data))) == 0)
-            ret = 1;
-        else
-            ret = 0;
-
-        free(attr_data);
-
-        if (H5Tclose(atid) < 0)
-            goto out;
-
-        if (H5Aclose(aid) < 0)
-            goto out;
-    }
-
-    /* Close the dataset. */
-    if (H5Dclose(did) < 0)
-        return -1;
-
-    return ret;
-
-out:
-    H5Dclose(did);
-    return -1;
+    return H5IM__class_attr_equals(loc_id, dset_name, IMAGE_CLASS);
 }
 
 /*-------------------------------------------------------------------------
@@ -1077,81 +1096,5 @@ out:
 herr_t
 H5IMis_palette(hid_t loc_id, const char *dset_name)
 {
-    hid_t   did;
-    htri_t  has_class;
-    hid_t   atid;
-    hid_t   aid = -1;
-    char   *attr_data;    /* Name of attribute */
-    hsize_t storage_size; /* Size of storage for attribute */
-    herr_t  ret;
-
-    /* check the arguments */
-    if (dset_name == NULL)
-        return -1;
-
-    /* Assume initially fail condition */
-    ret = -1;
-
-    /* Open the dataset. */
-    if ((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
-        return -1;
-
-    /* Try to find the attribute "CLASS" on the dataset */
-    if ((has_class = H5Aexists(did, "CLASS")) < 0)
-        goto out;
-
-    if (has_class == 0) {
-        H5Dclose(did);
-        return 0;
-    }
-    else {
-
-        if ((aid = H5Aopen(did, "CLASS", H5P_DEFAULT)) < 0)
-            goto out;
-
-        if ((atid = H5Aget_type(aid)) < 0)
-            goto out;
-
-        /* check to make sure attribute is a string */
-        if (H5T_STRING != H5Tget_class(atid))
-            goto out;
-
-        /* check to make sure string is null-terminated */
-        if (H5T_STR_NULLTERM != H5Tget_strpad(atid))
-            goto out;
-
-        /* allocate buffer large enough to hold string */
-        if ((storage_size = H5Aget_storage_size(aid)) == 0)
-            goto out;
-
-        attr_data = (char *)malloc((size_t)storage_size * sizeof(char) + 1);
-        if (attr_data == NULL)
-            goto out;
-
-        if (H5Aread(aid, atid, attr_data) < 0)
-            goto out;
-
-        if (strncmp(attr_data, PALETTE_CLASS, MIN(strlen(PALETTE_CLASS), strlen(attr_data))) == 0)
-            ret = 1;
-        else
-            ret = 0;
-
-        free(attr_data);
-
-        if (H5Tclose(atid) < 0)
-            goto out;
-
-        if (H5Aclose(aid) < 0)
-            goto out;
-    }
-
-    /* Close the dataset. */
-    if (H5Dclose(did) < 0)
-        return -1;
-
-    return ret;
-
-out:
-    H5Dclose(did);
-    return -1;
+    return H5IM__class_attr_equals(loc_id, dset_name, PALETTE_CLASS);
 }

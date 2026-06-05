@@ -59,7 +59,7 @@ The table below shows the equivalent CMake build options that match those from A
 | tests[Compile the HDF5 tests [default=yes]] | BUILD_TESTING "Build HDF5 Unit Testing" [ON] |  |
 | test-express[Set HDF5 testing intensity level (0-3) [0 = exhaustive testing; 3 = quicker testing; default=3] | HDF_TEST_EXPRESS "Control testing framework (0-3)" ["3"] |  |
 | tools[Compile the HDF5 tools [default=yes]] | HDF5_BUILD_TOOLS "Build HDF5 Tools" [ON] |  |
-| parallel-tools[Enable building parallel tools. [default=no]] | HDF5_BUILD_PARALLEL_TOOLS  "Build Parallel HDF5 Tools" [OFF] |  |
+| parallel-tools[Enable building parallel tools. [default=no]] | HDF5_BUILD_PARALLEL_TOOLS  "Build MPI-enabled HDF5 tools" [OFF] |  |
 | **Autotools Doc Options** | **CMake Doc Options** | **Notes** |
 | doxygen[Compile the HDF5 doxygen files [default=no]] | HDF5_BUILD_DOC "Build documentation" [OFF] |  |
 | doxygen-errors[Error on HDF5 doxygen warnings [default=no]] | HDF5_ENABLE_DOXY_WARNINGS "Enable fail if doxygen parsing has warnings." [OFF] |  |

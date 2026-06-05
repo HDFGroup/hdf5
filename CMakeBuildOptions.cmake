@@ -73,7 +73,7 @@ mark_as_advanced (HDF5_ENABLE_MAP_API)
 
 option (HDF5_BUILD_DOC "Build documentation" OFF)
 
-option (HDF5_BUILD_PARALLEL_TOOLS "Build Parallel HDF5 Tools" OFF)
+option (HDF5_BUILD_PARALLEL_TOOLS "Build MPI-enabled HDF5 tools" OFF)
 mark_as_advanced (HDF5_BUILD_PARALLEL_TOOLS)
 
 option (HDF5_BUILD_TOOLS "Build HDF5 Tools" ON)
