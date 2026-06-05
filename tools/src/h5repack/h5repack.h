@@ -68,10 +68,10 @@
  *                             <strong>\--low</strong> and <strong>\--high</strong>
  * \li <strong>\--low=BOUND</strong>      The low bound for library release versions to use
  *                             when creating objects in the file
- *                             (default is #H5F_LIBVER_EARLIEST)
+ *                             (default is the HDF5 library's default low bound)
  * \li <strong>\--high=BOUND</strong>     The high bound for library release versions to use
  *                             when creating objects in the file
- *                             (default is #H5F_LIBVER_LATEST)
+ *                             (default is the HDF5 library's default high bound)
  * \li <strong>\--merge</strong>          Follow external soft link recursively and merge data
  * \li <strong>\--prune</strong>          Do not follow external soft links and remove link
  * \li <strong>\--merge \--prune</strong>  Follow external link, merge data and remove dangling link

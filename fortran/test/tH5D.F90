@@ -645,7 +645,7 @@ CONTAINS
     INTEGER(KIND=int_kind_16), TARGET :: data0_i16 = 4
     INTEGER, DIMENSION(1:DIM0) :: data_int
     INTEGER, TARGET :: data0_int = 4
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+#ifdef H5_HAVE_Fortran_INTEGER_SIZEOF_16
     INTEGER, PARAMETER :: int_kind_32 = SELECTED_INT_KIND(36) !should map to INTEGER*16 on most modern processors
     INTEGER(KIND=int_kind_32), DIMENSION(1:DIM0), TARGET :: data_i32
     INTEGER(KIND=int_kind_32), TARGET :: data0_i32 = 4
@@ -656,7 +656,7 @@ CONTAINS
     REAL(KIND=real_kind_8), DIMENSION(1:DIM0), TARGET :: data_r8
     REAL(KIND=real_kind_4) , TARGET :: data0_r4 = 4.0
     REAL(KIND=real_kind_8), TARGET :: data0_r8 = 4.0
-#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
+#ifdef H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
     INTEGER, PARAMETER :: real_kind_16 = C_LONG_DOUBLE
     REAL(KIND=real_kind_16) , DIMENSION(1:DIM0), TARGET :: data_r16
     REAL(KIND=real_kind_16) , TARGET :: data0_r16 = 4.0
@@ -679,12 +679,12 @@ CONTAINS
     data_i4  = -2
     data_i16 = -2
     data_int = -2
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+#ifdef H5_HAVE_Fortran_INTEGER_SIZEOF_16
     data_i32 = -2
 #endif
     data_r4  = -2.0_real_kind_4
     data_r8 = -2.0_real_kind_8
-#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
+#ifdef H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
     data_r16 = -2.0_real_kind_16
 #endif
     data_chr = "H"
@@ -767,7 +767,7 @@ CONTAINS
        ENDIF
     ENDDO
 
-#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
+#ifdef H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
     CALL h5dfill_f(data0_r16, space_id, data_r16, error)
     CALL check("h5dfill_f", error, total_error)
     DO i = 1, DIM0
@@ -792,7 +792,7 @@ CONTAINS
     data_i1  = -2
     data_i4  = -2
     data_i16 = -2
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+#ifdef H5_HAVE_Fortran_INTEGER_SIZEOF_16
     data_i32 = -2
 #endif
     data_r4  = -2.0_real_kind_4
@@ -867,7 +867,7 @@ CONTAINS
        ENDIF
     ENDDO
 
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+#ifdef H5_HAVE_Fortran_INTEGER_SIZEOF_16
 
     f_ptr1 = C_LOC(data0_i32)
     f_ptr2 = C_LOC(data_i32(1))
@@ -936,7 +936,7 @@ CONTAINS
        ENDIF
     ENDDO
 
-#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
+#ifdef H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
     f_ptr1 = C_LOC(data0_r16)
     f_ptr2 = C_LOC(data_r16(1))
 
