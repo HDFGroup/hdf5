@@ -1596,12 +1596,12 @@ main(int argc, char *argv[])
                         *indx = '\0';
 
                     PRINTSTREAM(rawoutstream,
-                                "<%sHDF5-File xmlns:%s=\"http://hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd\" "
+                                "<%sHDF5-File xmlns:%s=\"%s\" "
                                 "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
                                 "xsi:schemaLocation=\"https://github.com/HDFGroup/hdf5/blob/develop/tools/"
                                 "test/h5dump/testfiles/xml "
                                 "%s\">\n",
-                                xmlnsprefix, ns, DEFAULT_XSD);
+                                xmlnsprefix, ns, DEFAULT_XSD, DEFAULT_XSD);
                     free(ns);
                 }
             }
