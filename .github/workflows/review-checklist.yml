@@ -7,7 +7,7 @@ name: Review Checklist
 # To add an area or change owners, edit only CODEOWNERS.
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened]
     branches: [develop]
   pull_request_review:
@@ -25,12 +25,13 @@ permissions:
 jobs:
   checklist:
     runs-on: ubuntu-latest
-    # Only run on PRs targeting develop from within the same repo (not forks).
-    # For review events, only run on approvals targeting develop.
+    # Run on all PRs targeting develop, including those from forks.
+    # pull_request_target always executes this workflow from the base repo
+    # (HDFGroup/hdf5) with a full write token — it never runs code from the
+    # fork. For review events, only run on approvals targeting develop.
     if: |
       github.event.pull_request.base.ref == 'develop' &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      (github.event_name == 'pull_request' ||
+      (github.event_name == 'pull_request_target' ||
        (github.event_name == 'pull_request_review' &&
         github.event.review.state == 'approved'))
 
