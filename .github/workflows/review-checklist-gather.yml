@@ -1,0 +1,22 @@
+name: Review Checklist (Gather)
+
+# Runs in the PR's (potentially fork) read-only context.
+# Saves the PR number as an artifact so the privileged review-checklist
+# workflow can pick it up without ever executing code from the fork.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [develop]
+
+jobs:
+  gather:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Save PR number
+        run: echo "${{ github.event.pull_request.number }}" > pr_number.txt
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: pr-number
+          path: pr_number.txt
+          retention-days: 1

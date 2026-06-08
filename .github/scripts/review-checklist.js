@@ -184,9 +184,9 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
   return parts.join('\n');
 }
 
-module.exports = async function run({ github, context, core }) {
+module.exports = async function run({ github, context, core, prNumber }) {
   const { owner, repo } = context.repo;
-  const pr_number = context.payload.pull_request.number;
+  const pr_number = prNumber ?? context.payload.pull_request.number;
 
   // ----------------------------------------------------------------
   // Configuration
