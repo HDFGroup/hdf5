@@ -202,10 +202,6 @@ module.exports = async function run({ github, context, core, prNumber }) {
   //   Covers: hdf5.h (umbrella), H5*public.h / H5*develop.h (per-module),
   //   VFD driver headers included by hdf5.h, and VOL connector headers.
   //
-  // NOTE: Fork PRs (head.repo != base.repo) are intentionally excluded.
-  //   They run with a read-only token and cannot post comments or request
-  //   reviewers. Fork coverage would require a pull_request_target job.
-  //
   // NOTE: Team owners (@org/team) in CODEOWNERS are not supported.
   //   Only individual GitHub logins are handled. If teams are added,
   //   extend parsing and reviewer requests to use team_reviewers.
@@ -350,7 +346,7 @@ module.exports = async function run({ github, context, core, prNumber }) {
   // 6. Auto-assign reviewers (pull_request events only, not reviews).
   // ----------------------------------------------------------------
   if (context.eventName !== 'pull_request_review') {
-    const prAuthor = context.payload.pull_request.user.login;
+    const prAuthor = prData.user.login;
 
     // Assign the PR author only if they are a code owner.
     if (allCodeOwners.has(prAuthor)) {
