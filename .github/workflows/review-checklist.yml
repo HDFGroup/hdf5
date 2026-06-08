@@ -12,6 +12,9 @@ name: Review Checklist
 # pull_request_target.
 
 on:
+  # zizmor: ignore[pull-request-target]
+  # Safe: checkout has no ref: override so the base branch (develop) is always
+  # used — the fork's code is never checked out or executed.
   pull_request_target:
     types: [opened, synchronize, reopened]
     branches: [develop]
