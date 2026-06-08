@@ -6,21 +6,20 @@ name: Review Checklist
 # Reviewer lists are derived entirely from .github/CODEOWNERS — no duplication.
 # To add an area or change owners, edit only CODEOWNERS.
 #
-# Uses a two-workflow pattern to support fork PRs without pull_request_target:
-# - review-checklist-gather.yml runs in the PR's read-only context and saves
-#   the PR number as an artifact.
-# - This workflow runs with a full write token, downloads that artifact, and
-#   does the work. It never executes code from the fork.
+# Uses pull_request_target so the workflow runs with the base repo's full token
+# even for fork PRs. The checkout and script execution always use the base
+# branch (develop), never the fork's code — this is the safe posture for
+# pull_request_target.
 
 on:
-  workflow_run:
-    workflows: ["Review Checklist (Gather)"]
-    types: [completed]
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+    branches: [develop]
   pull_request_review:
     types: [submitted]
 
 concurrency:
-  group: review-checklist-${{ github.event.pull_request.number || github.event.workflow_run.head_sha }}
+  group: review-checklist-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 permissions:
@@ -31,31 +30,20 @@ permissions:
 jobs:
   checklist:
     runs-on: ubuntu-latest
+    # Run on all PRs targeting develop, including those from forks.
+    # pull_request_target always executes this workflow from the base repo
+    # (HDFGroup/hdf5) with a full write token — it never runs code from the
+    # fork. For review events, only run on approvals targeting develop.
     if: |
-      (github.event_name == 'workflow_run' &&
-       github.event.workflow_run.conclusion == 'success') ||
-      (github.event_name == 'pull_request_review' &&
-       github.event.review.state == 'approved' &&
-       github.event.pull_request.base.ref == 'develop')
+      github.event.pull_request.base.ref == 'develop' &&
+      (github.event_name == 'pull_request_target' ||
+       (github.event_name == 'pull_request_review' &&
+        github.event.review.state == 'approved'))
 
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      - name: Download PR number
-        if: github.event_name == 'workflow_run'
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: pr-number
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
-            const fs = require('fs');
-            let prNumber;
-            if (context.eventName === 'workflow_run') {
-              prNumber = parseInt(fs.readFileSync('pr_number.txt', 'utf8').trim());
-            } else {
-              prNumber = context.payload.pull_request.number;
-            }
             const run = require('./.github/scripts/review-checklist.js');
-            await run({ github, context, core, prNumber });
+            await run({ github, context, core });
