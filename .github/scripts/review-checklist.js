@@ -184,9 +184,9 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
   return parts.join('\n');
 }
 
-module.exports = async function run({ github, context, core, prNumber, isReview }) {
+module.exports = async function run({ github, context, core }) {
   const { owner, repo } = context.repo;
-  const pr_number = prNumber ?? context.payload.pull_request.number;
+  const pr_number = context.payload.pull_request.number;
 
   // ----------------------------------------------------------------
   // Configuration
@@ -345,7 +345,7 @@ module.exports = async function run({ github, context, core, prNumber, isReview 
   // ----------------------------------------------------------------
   // 6. Auto-assign reviewers (pull_request events only, not reviews).
   // ----------------------------------------------------------------
-  if (!isReview && context.eventName !== 'pull_request_review') {
+  if (context.eventName !== 'pull_request_review') {
     const prAuthor = prData.user.login;
 
     // Assign the PR author only if they are a code owner.
