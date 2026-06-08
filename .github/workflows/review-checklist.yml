@@ -33,15 +33,16 @@ permissions:
 jobs:
   checklist:
     runs-on: ubuntu-latest
-    # Run on all PRs targeting develop, including those from forks.
-    # pull_request_target always executes this workflow from the base repo
-    # (HDFGroup/hdf5) with a full write token — it never runs code from the
-    # fork. For review events, only run on approvals targeting develop.
+    # pull_request_target: runs for all PRs targeting develop (including forks)
+    #   with a full write token — safe because the base branch is always checked out.
+    # pull_request_review: GitHub grants only a read-only token when the PR is
+    #   from a fork, so restrict to same-repo PRs only to avoid a 403 on comment.
     if: |
       github.event.pull_request.base.ref == 'develop' &&
       (github.event_name == 'pull_request_target' ||
        (github.event_name == 'pull_request_review' &&
-        github.event.review.state == 'approved'))
+        github.event.review.state == 'approved' &&
+        github.event.pull_request.head.repo.full_name == github.repository))
 
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
