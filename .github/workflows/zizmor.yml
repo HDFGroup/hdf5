@@ -2,6 +2,7 @@ name: zizmor
 
 # Static security analysis for GitHub Actions workflows.
 # Findings appear as inline annotations on PRs and in the Security tab.
+# Runs zizmor directly via pip to avoid a third-party action dependency.
 
 on:
   push:
@@ -23,4 +24,12 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
-      - uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
+      - run: pip install zizmor==1.25.2
+      - run: zizmor --format sarif . > zizmor-results.sarif
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: github/codeql-action/upload-sarif@8272c299f21ca24af15dfe9ac0971ba969e5e0d5 # v3.36.2
+        if: always()
+        with:
+          sarif_file: zizmor-results.sarif
+          category: zizmor
