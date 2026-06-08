@@ -28,6 +28,7 @@ jobs:
           echo 'zizmor==1.25.2 --hash=sha256:c4246f1344d8dbeffc044d7bb11b131773a7db7eb57d9073c45942dfd3543a1f' > /tmp/zizmor-req.txt
           pip install --require-hashes -r /tmp/zizmor-req.txt
       - run: zizmor --format sarif . > zizmor-results.sarif
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
