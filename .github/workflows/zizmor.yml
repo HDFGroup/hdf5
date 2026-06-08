@@ -24,7 +24,9 @@ jobs:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           persist-credentials: false
-      - run: pip install --require-hashes zizmor==1.25.2 --hash=sha256:c4246f1344d8dbeffc044d7bb11b131773a7db7eb57d9073c45942dfd3543a1f
+      - run: |
+          echo 'zizmor==1.25.2 --hash=sha256:c4246f1344d8dbeffc044d7bb11b131773a7db7eb57d9073c45942dfd3543a1f' > /tmp/zizmor-req.txt
+          pip install --require-hashes -r /tmp/zizmor-req.txt
       - run: zizmor --format sarif . > zizmor-results.sarif
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
