@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.hdfgroup</groupId>
+    <artifactId>hdf5-jni-native</artifactId>
+    <version>@HDF5_PACKAGE_VERSION@@HDF5_MAVEN_VERSION_SUFFIX@</version>
+    <packaging>jar</packaging>
+
+    <name>HDF5 JNI bridge native library</name>
+    <description>Bundled hdf5_java JNI bridge shared library under natives/ (SciJava native-lib-loader layout). Use with org.hdfgroup:hdf5-native and org.hdfgroup:hdf5-java-jni.</description>
+    <url>https://github.com/HDFGroup/hdf5</url>
+
+    <licenses>
+        <license>
+            <name>BSD-style License</name>
+            <url>https://github.com/HDFGroup/hdf5/blob/develop/LICENSE</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <organization>The HDF Group</organization>
+            <organizationUrl>https://www.hdfgroup.org</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/HDFGroup/hdf5.git</connection>
+        <developerConnection>scm:git:git@github.com:HDFGroup/hdf5.git</developerConnection>
+        <url>https://github.com/HDFGroup/hdf5</url>
+        <tag>@HDF5_PACKAGE_VERSION@</tag>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/HDFGroup/hdf5/issues</url>
+    </issueManagement>
+
+</project>
