@@ -368,3 +368,29 @@ if (NOT _HDF5_SZIP_LIBSZ_TARGET STREQUAL "" AND NOT _HDF5_SZIP_LIBAEC_TARGET STR
     )
   endif ()
 endif ()
+
+# JNI bridge JAR (JNI Maven builds only)
+if (HDF5JAVA_MAVEN_NATIVE_JNI)
+  set (_HDF5_JNI_NATIVE_MAVEN_JAR
+    "${CMAKE_CURRENT_BINARY_DIR}/hdf5-jni-native-${HDF5_PACKAGE_VERSION}${HDF5_MAVEN_VERSION_SUFFIX}-${HDF5_JAR_CLASSIFIER}.jar"
+  )
+  set (_HDF5_JNI_NATIVE_STAGE "${CMAKE_CURRENT_BINARY_DIR}/native-bundle/hdf5-jni-native")
+  set (_HDF5_JNI_NATIVE_PREFIX "${_HDF5_JNI_NATIVE_STAGE}/natives/${HDF5_NATIVE_LOADER_PLATFORM}")
+  set (_HDF5_JNI_NATIVE_MANIFEST "${CMAKE_CURRENT_BINARY_DIR}/native-bundle/META-INF_MANIFEST_JNI_NATIVE.mf")
+
+  hdf5java_add_native_maven_jar (
+    ARTIFACT_ID hdf5-jni-native
+    BUNDLE_NAME hdf5-jni-native
+    JAR_OUT "${_HDF5_JNI_NATIVE_MAVEN_JAR}"
+    STAGE_DIR "${_HDF5_JNI_NATIVE_STAGE}"
+    NATIVES_PREFIX "${_HDF5_JNI_NATIVE_PREFIX}"
+    MANIFEST_PATH "${_HDF5_JNI_NATIVE_MANIFEST}"
+    POM_TEMPLATE pom-jni-native.xml.in
+    POM_OUT pom-hdf5-jni-native.xml
+    TARGET_NAME hdf5_jni_native_maven_jar
+    COMMENT "Creating Maven native bundle hdf5-jni-native (${HDF5_JAR_CLASSIFIER}, ${HDF5_NATIVE_LOADER_PLATFORM})"
+    COPY_COMMANDS
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${HDF5_JAVA_JNI_LIB_TARGET}> ${_HDF5_JNI_NATIVE_PREFIX}/
+    DEPENDS ${HDF5_JAVA_JNI_LIB_TARGET}
+  )
+endif ()
