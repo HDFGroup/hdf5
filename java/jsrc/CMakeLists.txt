@@ -15,7 +15,12 @@ file (WRITE ${PROJECT_BINARY_DIR}/Manifest.txt
 "
 )
 
-set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVA_LOGGING_JAR}")
+set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVA_LOGGING_JAR};${HDF5_JAVA_NATIVE_LIB_LOADER_JAR}")
+
+# jextract-generated hdf5_h references Hdf5NativeLoader in a static initializer
+if (HDF5_JAVA_USE_FFM)
+  list (APPEND HDF5_JAVA_JSRC_SOURCES ${HDF5_SOURCE_DIR}/java/hdf/hdf5lib/Hdf5NativeLoader.java)
+endif ()
 
 # Set version suffix for snapshots vs releases
 if (HDF5_ENABLE_MAVEN_DEPLOY AND HDF5_MAVEN_SNAPSHOT)
