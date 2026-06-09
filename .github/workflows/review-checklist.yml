@@ -11,10 +11,12 @@ name: Review Checklist
 # branch (develop), never the fork's code — this is the safe posture for
 # pull_request_target.
 #
-# Note: approval boxes are re-evaluated on every push (synchronize) by
-# re-reading all existing reviews via the API. There is no separate
-# pull_request_review trigger — it requires a write token that GitHub does
-# not grant for fork PRs, and most PRs here come from forks.
+# Approval boxes are also updated immediately when a review is submitted, via
+# a two-workflow pattern: review-checklist-gather.yml fires on pull_request_review
+# (read-only token) and this workflow fires on its completion via workflow_run
+# (full write token, no fork approval gate). Requires the repo setting
+# "Fork pull request workflows from outside collaborators" to be
+# "Require approval for first-time contributors".
 
 on:
   # zizmor: ignore[pull-request-target]
@@ -23,9 +25,12 @@ on:
   pull_request_target:
     types: [opened, synchronize, reopened]
     branches: [develop]
+  workflow_run:
+    workflows: ["Review Checklist (gather)"]
+    types: [completed]
 
 concurrency:
-  group: review-checklist-${{ github.event.pull_request.number }}
+  group: review-checklist-${{ github.event.pull_request.number || github.event.workflow_run.head_sha }}
   cancel-in-progress: true
 
 permissions:
@@ -36,7 +41,9 @@ permissions:
 jobs:
   checklist:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.base.ref == 'develop'
+    if: >
+      (github.event_name == 'pull_request_target' && github.event.pull_request.base.ref == 'develop') ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:

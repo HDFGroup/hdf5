@@ -186,7 +186,27 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
 
 module.exports = async function run({ github, context, core }) {
   const { owner, repo } = context.repo;
-  const pr_number = context.payload.pull_request.number;
+  let pr_number;
+
+  if (context.eventName === 'workflow_run') {
+    // workflow_run.pull_requests is empty for fork PRs — look up by head SHA instead.
+    const headSha = context.payload.workflow_run.head_sha;
+    const openPRs = await github.paginate(github.rest.pulls.list, {
+      owner, repo, state: 'open', per_page: 100,
+    });
+    const pr = openPRs.find(p => p.head.sha === headSha);
+    if (!pr) {
+      core.info('No open PR found matching this workflow_run — skipping');
+      return;
+    }
+    if (pr.base.ref !== 'develop') {
+      core.info(`PR #${pr.number} targets ${pr.base.ref}, not develop — skipping`);
+      return;
+    }
+    pr_number = pr.number;
+  } else {
+    pr_number = context.payload.pull_request.number;
+  }
 
   // ----------------------------------------------------------------
   // Configuration
@@ -345,7 +365,7 @@ module.exports = async function run({ github, context, core }) {
   // ----------------------------------------------------------------
   // 6. Auto-assign reviewers (pull_request events only, not reviews).
   // ----------------------------------------------------------------
-  if (context.eventName !== 'pull_request_review') {
+  if (context.eventName !== 'pull_request_review' && context.eventName !== 'workflow_run') {
     const prAuthor = prData.user.login;
 
     // Assign the PR author only if they are a code owner.
