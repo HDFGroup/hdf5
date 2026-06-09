@@ -46,6 +46,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 ## Java Enhancements:
 
 - Java dependency JAR paths are now configurable CMake cache variables, allowing system-provided JARs to be used in place of the bundled copies.
+- Maven native artifacts (`hdf5-native`, `hdf5-zlib-native`, `hdf5-szip-native`) built with the Maven CI presets now ship shared zlib and libaec so the built-in deflate/GZIP and SZIP filters work from the classpath via `H5.loadH5Lib()` without `HDF5_PLUGIN_PATH` or a system HDF5 install. `hdf5-zlib-native` includes common zlib library name aliases on each platform (for example `z.dll`, `zlib.dll`, and `zlib1.dll` on Windows).
 
 
 ## Acknowledgements:
