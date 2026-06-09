@@ -164,3 +164,41 @@ function (hdf5java_add_native_maven_jar)
     COMPONENT maven
   )
 endfunction ()
+
+# SciJava BaseJniExtractor looks for System.mapLibraryName("hdf5") under natives/<platform>/.
+if (HDF5_MAVEN_PLATFORM STREQUAL "linux")
+  set (_HDF5_NATIVE_SCIJAVA_MAPPED_NAME "libhdf5.so")
+elseif (HDF5_MAVEN_PLATFORM STREQUAL "macos")
+  set (_HDF5_NATIVE_SCIJAVA_MAPPED_NAME "libhdf5.dylib")
+elseif (HDF5_MAVEN_PLATFORM STREQUAL "windows")
+  set (_HDF5_NATIVE_SCIJAVA_MAPPED_NAME "hdf5.dll")
+else ()
+  set (_HDF5_NATIVE_SCIJAVA_MAPPED_NAME "")
+endif ()
+if (_HDF5_NATIVE_SCIJAVA_MAPPED_NAME STREQUAL "")
+  message (FATAL_ERROR "HDF5JavaNativeBundles.cmake: add SciJava mapped library name for platform '${HDF5_MAVEN_PLATFORM}'")
+endif ()
+
+set (_HDF5_NATIVE_MAVEN_JAR
+  "${CMAKE_CURRENT_BINARY_DIR}/hdf5-native-${HDF5_PACKAGE_VERSION}${HDF5_MAVEN_VERSION_SUFFIX}-${HDF5_JAR_CLASSIFIER}.jar"
+)
+set (_HDF5_NATIVE_STAGE "${CMAKE_CURRENT_BINARY_DIR}/native-bundle/hdf5-native")
+set (_HDF5_NATIVE_PREFIX "${_HDF5_NATIVE_STAGE}/natives/${HDF5_NATIVE_LOADER_PLATFORM}")
+set (_HDF5_NATIVE_MANIFEST "${CMAKE_CURRENT_BINARY_DIR}/native-bundle/META-INF_MANIFEST_NATIVE.mf")
+
+hdf5java_add_native_maven_jar (
+  ARTIFACT_ID hdf5-native
+  BUNDLE_NAME hdf5-native
+  JAR_OUT "${_HDF5_NATIVE_MAVEN_JAR}"
+  STAGE_DIR "${_HDF5_NATIVE_STAGE}"
+  NATIVES_PREFIX "${_HDF5_NATIVE_PREFIX}"
+  MANIFEST_PATH "${_HDF5_NATIVE_MANIFEST}"
+  POM_TEMPLATE pom-native.xml.in
+  POM_OUT pom-hdf5-native.xml
+  TARGET_NAME hdf5_native_maven_jar
+  COMMENT "Creating Maven native bundle hdf5-native (${HDF5_JAR_CLASSIFIER}, ${HDF5_NATIVE_LOADER_PLATFORM})"
+  COPY_COMMANDS
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${HDF5_LIBSH_TARGET}> ${_HDF5_NATIVE_PREFIX}/
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${HDF5_LIBSH_TARGET}> ${_HDF5_NATIVE_PREFIX}/${_HDF5_NATIVE_SCIJAVA_MAPPED_NAME}
+  DEPENDS ${HDF5_LIBSH_TARGET}
+)
