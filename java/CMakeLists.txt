@@ -8,6 +8,11 @@ include (UseJava)
 mark_as_advanced (CMAKE_Java_ARCHIVE)
 mark_as_advanced (CMAKE_Java_RUNTIME)
 
+# Development component provides Java_JAR_EXECUTABLE for native Maven bundles
+if (HDF5_ENABLE_MAVEN_DEPLOY)
+  find_package (Java COMPONENTS Development)
+endif ()
+
 if (WIN32)
   set (HDF_JRE_DIRECTORY "C:/Program Files/Java/jre")
 else ()
@@ -163,6 +168,75 @@ if (Java_VERSION_STRING VERSION_GREATER_EQUAL "25.0.0")
         message (FATAL_ERROR "jextract did not generate expected file: ${EXPECTED_FFM_FILE}")
     endif ()
 
+    # Post-process jextract output: vanilla SYMBOL_LOOKUP breaks bundled Maven natives (see
+    # java/cmake/ffm-jextract-hdf5_h_2/README.txt). Needle and replacement live there.
+    set (_HDF5_FFM_JEXTRACT_PATCH_DIR "${CMAKE_CURRENT_LIST_DIR}/cmake/ffm-jextract-hdf5_h_2")
+    set (_HDF5_FFM_JEXTRACT_NEEDLE "${_HDF5_FFM_JEXTRACT_PATCH_DIR}/needle.txt")
+    set (_HDF5_FFM_JEXTRACT_REPLACEMENT "${_HDF5_FFM_JEXTRACT_PATCH_DIR}/replacement.txt")
+    if (NOT EXISTS "${_HDF5_FFM_JEXTRACT_NEEDLE}")
+        message (
+            FATAL_ERROR
+            "FFM jextract post-process needle missing: ${_HDF5_FFM_JEXTRACT_NEEDLE}"
+        )
+    endif ()
+    if (NOT EXISTS "${_HDF5_FFM_JEXTRACT_REPLACEMENT}")
+        message (
+            FATAL_ERROR
+            "FFM jextract post-process replacement missing: ${_HDF5_FFM_JEXTRACT_REPLACEMENT}"
+        )
+    endif ()
+    file (READ "${_HDF5_FFM_JEXTRACT_NEEDLE}" _HDF5_h2_old)
+    string (REPLACE "\r\n" "\n" _HDF5_h2_old "${_HDF5_h2_old}")
+    file (READ "${_HDF5_FFM_JEXTRACT_REPLACEMENT}" _HDF5_h2_new)
+    string (REPLACE "\r\n" "\n" _HDF5_h2_new "${_HDF5_h2_new}")
+
+    set (_HDF5_HDF5_H_2 "")
+    file (
+        GLOB _HDF5_FFM_H2_CANDIDATES
+        "${JEXTRACT_OUTPUT_DIR}/org/hdfgroup/javahdf5/hdf5_h*.java"
+    )
+    foreach (_HDF5_h2_candidate IN LISTS _HDF5_FFM_H2_CANDIDATES)
+        if (NOT EXISTS "${_HDF5_h2_candidate}")
+            continue ()
+        endif ()
+        file (READ "${_HDF5_h2_candidate}" _HDF5_h2_probe)
+        string (REPLACE "\r\n" "\n" _HDF5_h2_probe "${_HDF5_h2_probe}")
+        string (
+            FIND "${_HDF5_h2_probe}"
+            "static final SymbolLookup SYMBOL_LOOKUP = SymbolLookup.libraryLookup"
+            _HDF5_h2_has_lookup
+        )
+        if (NOT _HDF5_h2_has_lookup EQUAL -1)
+            set (_HDF5_HDF5_H_2 "${_HDF5_h2_candidate}")
+            break ()
+        endif ()
+    endforeach ()
+    if ("${_HDF5_HDF5_H_2}" STREQUAL "")
+        message (
+            FATAL_ERROR
+            "jextract did not generate a header class with SYMBOL_LOOKUP under "
+            "${JEXTRACT_OUTPUT_DIR}/org/hdfgroup/javahdf5/"
+        )
+    endif ()
+
+    file (READ "${_HDF5_HDF5_H_2}" _HDF5_h2_src)
+    string (FIND "${_HDF5_h2_src}" "HDF5_FFM_NATIVE_LOOKUP" _HDF5_h2_already_patched)
+    if (_HDF5_h2_already_patched EQUAL -1)
+        string (REPLACE "\r\n" "\n" _HDF5_h2_src "${_HDF5_h2_src}")
+        set (_HDF5_h2_out "${_HDF5_h2_src}")
+        string (REPLACE "${_HDF5_h2_old}" "${_HDF5_h2_new}" _HDF5_h2_out "${_HDF5_h2_out}")
+        if ("${_HDF5_h2_out}" STREQUAL "${_HDF5_h2_src}")
+            message (
+                FATAL_ERROR
+                "Post-jextract patch of ${_HDF5_HDF5_H_2} failed (needle not found). "
+                "jextract output may have changed; update needle.txt under "
+                "${_HDF5_FFM_JEXTRACT_PATCH_DIR}."
+            )
+        endif ()
+        message (STATUS "Patched ${_HDF5_HDF5_H_2} using ${_HDF5_FFM_JEXTRACT_NEEDLE}")
+        file (WRITE "${_HDF5_HDF5_H_2}" "${_HDF5_h2_out}")
+    endif ()
+
     message (STATUS "FFM bindings generated successfully at ${JEXTRACT_OUTPUT_DIR}")
   endif ()
 else ()
@@ -218,6 +292,7 @@ install (
         ${HDF5_JAVA_LOGGING_JAR}
         ${HDF5_JAVA_LOGGING_NOP_JAR}
         ${HDF5_JAVA_LOGGING_SIMPLE_JAR}
+        ${HDF5_JAVA_NATIVE_LIB_LOADER_JAR}
     DESTINATION ${HDF5_INSTALL_JAR_DIR}
     COMPONENT libraries
 )
