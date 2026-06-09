@@ -136,8 +136,8 @@ jobs:
                 echo "  Platform: $PLATFORM, Implementation: auto"
               fi
 
-              # Find main HDF5 JAR files (jarhdf5-*.jar) and examples JAR files (hdf5-java-examples-*.jar)
-              artifact_jars=$(find "$artifact_dir" \( -name "jarhdf5-*.jar" -o -name "hdf5-java-examples-*.jar" \) ! -name "*sources*" ! -name "*javadoc*" 2>/dev/null || true)
+              # Main Java JAR, examples, and native bundle JARs (libhdf5 / zlib / szip / JNI bridge)
+              artifact_jars=$(find "$artifact_dir" \( -name "jarhdf5-*.jar" -o -name "hdf5-java-examples-*.jar" -o -name "hdf5-native-*.jar" -o -name "hdf5-zlib-native-*.jar" -o -name "hdf5-szip-native-*.jar" -o -name "hdf5-jni-native-*.jar" \) ! -name "*sources*" ! -name "*javadoc*" 2>/dev/null || true)
 
               if [ -n "$artifact_jars" ]; then
                 echo "  Found HDF5 JARs:"
@@ -303,6 +303,7 @@ jobs:
         env:
           HDF5_VERSION: ${{ needs.validate-artifacts.outputs.hdf5-version }}
           PLATFORM_CLASSIFIER: ${{ needs.validate-artifacts.outputs.platform-classifier }}
+          DEFAULT_POM_FILE: ${{ needs.validate-artifacts.outputs.pom-file }}
         run: |
           echo "=== Maven Deployment Debug Info ==="
           echo "Version: ${HDF5_VERSION}"
@@ -364,6 +365,26 @@ jobs:
               CURRENT_CLASSIFIER=""  # Examples JAR has no platform classifier
               classifier_opts=""
               echo "Artifact type: Java Examples (platform-independent)"
+            elif [[ "${jar_basename}" == hdf5-native-*.jar ]]; then
+              ARTIFACT_ID="hdf5-native"
+              CURRENT_CLASSIFIER="$platform"
+              classifier_opts="-Dclassifier=${CURRENT_CLASSIFIER}"
+              echo "Artifact type: HDF5 native shared library bundle"
+            elif [[ "${jar_basename}" == hdf5-jni-native-*.jar ]]; then
+              ARTIFACT_ID="hdf5-jni-native"
+              CURRENT_CLASSIFIER="$platform"
+              classifier_opts="-Dclassifier=${CURRENT_CLASSIFIER}"
+              echo "Artifact type: HDF5 JNI bridge native bundle"
+            elif [[ "${jar_basename}" == hdf5-zlib-native-*.jar ]]; then
+              ARTIFACT_ID="hdf5-zlib-native"
+              CURRENT_CLASSIFIER="$platform"
+              classifier_opts="-Dclassifier=${CURRENT_CLASSIFIER}"
+              echo "Artifact type: HDF5 zlib native shared library bundle"
+            elif [[ "${jar_basename}" == hdf5-szip-native-*.jar ]]; then
+              ARTIFACT_ID="hdf5-szip-native"
+              CURRENT_CLASSIFIER="$platform"
+              classifier_opts="-Dclassifier=${CURRENT_CLASSIFIER}"
+              echo "Artifact type: HDF5 szip (libaec) native shared library bundle"
             else
               # Main HDF5 Java library - determine implementation
               # Check JAR contents to detect FFM vs JNI
@@ -400,10 +421,25 @@ jobs:
               fi
             fi
 
+            POM_FOR_DEPLOY="$DEFAULT_POM_FILE"
+            if [[ "${jar_basename}" == hdf5-native-*.jar ]]; then
+              NATIVE_POM="$(dirname "$jar_file")/pom-hdf5-native.xml"
+              [[ -f "$NATIVE_POM" ]] && POM_FOR_DEPLOY="$NATIVE_POM"
+            elif [[ "${jar_basename}" == hdf5-jni-native-*.jar ]]; then
+              JNI_NATIVE_POM="$(dirname "$jar_file")/pom-hdf5-jni-native.xml"
+              [[ -f "$JNI_NATIVE_POM" ]] && POM_FOR_DEPLOY="$JNI_NATIVE_POM"
+            elif [[ "${jar_basename}" == hdf5-zlib-native-*.jar ]]; then
+              ZLIB_NATIVE_POM="$(dirname "$jar_file")/pom-hdf5-zlib-native.xml"
+              [[ -f "$ZLIB_NATIVE_POM" ]] && POM_FOR_DEPLOY="$ZLIB_NATIVE_POM"
+            elif [[ "${jar_basename}" == hdf5-szip-native-*.jar ]]; then
+              SZIP_NATIVE_POM="$(dirname "$jar_file")/pom-hdf5-szip-native.xml"
+              [[ -f "$SZIP_NATIVE_POM" ]] && POM_FOR_DEPLOY="$SZIP_NATIVE_POM"
+            fi
+
             # Check if this is a dry run
             if [ "${{ inputs.dry_run }}" == "true" ]; then
               echo "🧪 DRY RUN: Would deploy ${jar_basename} as ${ARTIFACT_ID} with classifier ${CURRENT_CLASSIFIER:-none}"
-              echo "Command would be: mvn deploy:deploy-file -DgroupId=org.hdfgroup -DartifactId=${ARTIFACT_ID} -Dversion=${HDF5_VERSION} -Dfile=${jar_file} ${classifier_opts}"
+              echo "Command would be: mvn deploy:deploy-file -DgroupId=org.hdfgroup -DartifactId=${ARTIFACT_ID} -Dversion=${HDF5_VERSION} -Dfile=${jar_file} -DpomFile=${POM_FOR_DEPLOY} ${classifier_opts}"
               success_count=$((success_count + 1))
             else
               echo "🚀 Deploying ${jar_basename}..."
@@ -414,7 +450,7 @@ jobs:
                 -DartifactId=\"${ARTIFACT_ID}\" \
                 -Dversion=\"${HDF5_VERSION}\" \
                 -Dfile=\"${jar_file}\" \
-                -DpomFile=\"${{ needs.validate-artifacts.outputs.pom-file }}\" \
+                -DpomFile=\"${POM_FOR_DEPLOY}\" \
                 -DrepositoryId=\"${{ inputs.repository_id }}\" \
                 -Durl=\"${{ inputs.repository_url }}\" \
                 ${classifier_opts} \

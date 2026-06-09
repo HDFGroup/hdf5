@@ -55,8 +55,8 @@ jobs:
         run: |
           echo "=== Identifying HDF5 JAR files ==="
 
-          # Find HDF5 JAR files (not dependencies)
-          HDF5_JARS=$(find ./maven-artifacts -name "*hdf5*.jar" -o -name "jarhdf5*.jar")
+          # Prefer Java API JARs (jarhdf5); exclude native bundles
+          HDF5_JARS=$(find ./maven-artifacts \( -name "jarhdf5*.jar" -o \( -name "*hdf5*.jar" ! -name "hdf5-native-*" ! -name "hdf5-zlib-native-*" ! -name "hdf5-szip-native-*" ! -name "hdf5-jni-native-*" \) \) ! -name "*sources*" ! -name "*javadoc*" ! -name "*slf4j*")
           DEP_JARS=$(find ./maven-artifacts -name "*.jar" ! -name "*hdf5*" ! -name "jarhdf5*")
 
           echo "HDF5 JARs found:"
@@ -95,8 +95,11 @@ jobs:
 
               # Build classpath (use platform-specific artifacts)
               MAVEN_ARTIFACTS_DIR="../../../maven-artifacts"
-              HDF5_JAR=$(find "$MAVEN_ARTIFACTS_DIR" -name "*hdf5*.jar" -o -name "jarhdf5*.jar" | head -1)
-              DEP_JARS=$(find "$MAVEN_ARTIFACTS_DIR" -name "slf4j-api*.jar" -o -name "slf4j-simple*.jar")
+              HDF5_JAR=$(find "$MAVEN_ARTIFACTS_DIR" -name "jarhdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+              if [ -z "$HDF5_JAR" ]; then
+                HDF5_JAR=$(find "$MAVEN_ARTIFACTS_DIR" -name "*hdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" ! -name "*slf4j*" ! -name "hdf5-native-*" ! -name "hdf5-zlib-native-*" ! -name "hdf5-szip-native-*" ! -name "hdf5-jni-native-*" | head -1)
+              fi
+              DEP_JARS=$(find "$MAVEN_ARTIFACTS_DIR" \( -name "slf4j-api*.jar" -o -name "slf4j-simple*.jar" \))
 
               if [ -z "$HDF5_JAR" ]; then
                 echo "❌ No HDF5 JAR found"
@@ -353,8 +356,11 @@ jobs:
 
               # Build classpath (use platform-specific artifacts)
               MAVEN_ARTIFACTS_DIR="../../../maven-artifacts"
-              HDF5_JAR=$(find "$MAVEN_ARTIFACTS_DIR" -name "*hdf5*.jar" -o -name "jarhdf5*.jar" | head -1)
-              DEP_JARS=$(find "$MAVEN_ARTIFACTS_DIR" -name "slf4j-api*.jar" -o -name "slf4j-simple*.jar")
+              HDF5_JAR=$(find "$MAVEN_ARTIFACTS_DIR" -name "jarhdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+              if [ -z "$HDF5_JAR" ]; then
+                HDF5_JAR=$(find "$MAVEN_ARTIFACTS_DIR" -name "*hdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" ! -name "*slf4j*" ! -name "hdf5-native-*" ! -name "hdf5-zlib-native-*" ! -name "hdf5-szip-native-*" ! -name "hdf5-jni-native-*" | head -1)
+              fi
+              DEP_JARS=$(find "$MAVEN_ARTIFACTS_DIR" \( -name "slf4j-api*.jar" -o -name "slf4j-simple*.jar" \))
 
               if [ -z "$HDF5_JAR" ]; then
                 echo "❌ No HDF5 JAR found"
