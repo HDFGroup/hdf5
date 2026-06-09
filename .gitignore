@@ -13,6 +13,7 @@
 # Other files, most of which are created by scripts in bin/
 /build*
 src/H5config.h.in
+target/
 
 /.classpath
 .claude/
