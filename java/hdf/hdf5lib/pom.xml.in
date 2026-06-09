@@ -11,7 +11,7 @@
     <packaging>jar</packaging>
 
     <name>HDF5 Java Bindings</name>
-    <description>Java bindings for the HDF5 scientific data format library</description>
+    <description>Java bindings for the HDF5 scientific data format library. Depends on org.hdfgroup:hdf5-native (optional Maven profile) for bundled libhdf5 via SciJava native-lib-loader, or use a system HDF5 install with java.library.path / LD_LIBRARY_PATH.</description>
     <url>https://github.com/HDFGroup/hdf5</url>
 
     <licenses>
@@ -48,6 +48,7 @@
         <hdf5.version>@HDF5_PACKAGE_VERSION@</hdf5.version>
         <hdf5.platform>@HDF5_MAVEN_PLATFORM@</hdf5.platform>
         <hdf5.architecture>@HDF5_MAVEN_ARCHITECTURE@</hdf5.architecture>
+        <native-lib-loader.version>2.5.0</native-lib-loader.version>
     </properties>
 
     <dependencies>
@@ -56,6 +57,12 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>2.0.16</version>
+        </dependency>
+        <!-- Bundled native JAR loading (SciJava natives/ layout) -->
+        <dependency>
+            <groupId>org.scijava</groupId>
+            <artifactId>native-lib-loader</artifactId>
+            <version>${native-lib-loader.version}</version>
         </dependency>
     </dependencies>
 
@@ -183,6 +190,87 @@
                 <classifier>macos-aarch64</classifier>
             </properties>
         </profile>
+
+        <!-- Optional bundled libhdf5 JARs (not propagated to Maven consumers unless they add them explicitly) -->
+        <profile>
+            <id>hdf5-bundled-native-linux-x86_64</id>
+            <activation>
+                <os><family>unix</family><name>Linux</name><arch>amd64</arch></os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.hdfgroup</groupId>
+                    <artifactId>hdf5-native</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>linux-x86_64</classifier>
+                    <optional>true</optional>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>hdf5-bundled-native-linux-aarch64</id>
+            <activation>
+                <os><family>unix</family><name>Linux</name><arch>aarch64</arch></os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.hdfgroup</groupId>
+                    <artifactId>hdf5-native</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>linux-aarch64</classifier>
+                    <optional>true</optional>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>hdf5-bundled-native-windows-amd64</id>
+            <activation>
+                <os><family>windows</family><arch>amd64</arch></os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.hdfgroup</groupId>
+                    <artifactId>hdf5-native</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>windows-x86_64</classifier>
+                    <optional>true</optional>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>hdf5-bundled-native-macos-x86_64</id>
+            <activation>
+                <os><family>mac</family><arch>x86_64</arch></os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.hdfgroup</groupId>
+                    <artifactId>hdf5-native</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>macos-x86_64</classifier>
+                    <optional>true</optional>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>hdf5-bundled-native-macos-aarch64</id>
+            <activation>
+                <os><family>mac</family><arch>aarch64</arch></os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.hdfgroup</groupId>
+                    <artifactId>hdf5-native</artifactId>
+                    <version>${project.version}</version>
+                    <classifier>macos-aarch64</classifier>
+                    <optional>true</optional>
+                </dependency>
+            </dependencies>
+        </profile>
+
+@HDF5_MAVEN_ZLIB_NATIVE_PROFILES@
+
+@HDF5_MAVEN_SZIP_NATIVE_PROFILES@
 
         <!-- Development snapshot profile -->
         <profile>
