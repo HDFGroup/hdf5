@@ -1,0 +1,4 @@
+a12578dde1ba00bd9b816d388a0b879928d00bab3c83c240f7013bf4196c579a  java/lib/slf4j-api-2.0.16.jar
+deca6c04ed35515a0a911fa44c0e836bee92c0c59d2e8fa9bab8ffbc464a9ba7  java/lib/ext/slf4j-nop-2.0.16.jar
+effc32018658bea09d1e08c7d1060ccad46c086960f583d07dd7ffe9c1172a47  java/lib/ext/slf4j-simple-2.0.16.jar
+7ec0dcf847cabdd6487c4724c3cede107a46bdb6585a9dcb63f54c0276b04b40  java/lib/native-lib-loader-2.5.0.jar
