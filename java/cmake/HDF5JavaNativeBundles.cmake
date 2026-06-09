@@ -202,3 +202,169 @@ hdf5java_add_native_maven_jar (
     COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${HDF5_LIBSH_TARGET}> ${_HDF5_NATIVE_PREFIX}/${_HDF5_NATIVE_SCIJAVA_MAPPED_NAME}
   DEPENDS ${HDF5_LIBSH_TARGET}
 )
+
+# Optional zlib JAR: libhdf5's built-in deflate filter needs libz when linked dynamically.
+set (_HDF5_ZLIB_NATIVE_TARGET "")
+if (H5_ZLIB_FOUND AND NOT HDF5_USE_ZLIB_STATIC)
+  foreach (_zlib_candidate IN ITEMS ${H5_ZLIB_LIBRARY} ZLIB::ZLIB zlib zlib-ng)
+    if (TARGET ${_zlib_candidate} AND _HDF5_ZLIB_NATIVE_TARGET STREQUAL "")
+      set (_HDF5_ZLIB_NATIVE_TARGET "${_zlib_candidate}")
+    endif ()
+  endforeach ()
+endif ()
+
+if (NOT _HDF5_ZLIB_NATIVE_TARGET STREQUAL "")
+  get_target_property (_HDF5_ZLIB_ALIASED_TARGET ${_HDF5_ZLIB_NATIVE_TARGET} ALIASED_TARGET)
+  if (_HDF5_ZLIB_ALIASED_TARGET)
+    set (_HDF5_ZLIB_NATIVE_TARGET "${_HDF5_ZLIB_ALIASED_TARGET}")
+  endif ()
+
+  get_target_property (_HDF5_ZLIB_TARGET_TYPE ${_HDF5_ZLIB_NATIVE_TARGET} TYPE)
+  if (NOT _HDF5_ZLIB_TARGET_TYPE STREQUAL "STATIC_LIBRARY")
+    if (HDF5_MAVEN_PLATFORM STREQUAL "linux")
+      set (_HDF5_ZLIB_NATIVE_SCIJAVA_MAPPED_NAME "libz.so")
+    elseif (HDF5_MAVEN_PLATFORM STREQUAL "macos")
+      set (_HDF5_ZLIB_NATIVE_SCIJAVA_MAPPED_NAME "libz.dylib")
+    elseif (HDF5_MAVEN_PLATFORM STREQUAL "windows")
+      set (_HDF5_ZLIB_NATIVE_SCIJAVA_MAPPED_NAME "z.dll")
+    else ()
+      set (_HDF5_ZLIB_NATIVE_SCIJAVA_MAPPED_NAME "")
+    endif ()
+
+    if (_HDF5_ZLIB_NATIVE_SCIJAVA_MAPPED_NAME STREQUAL "")
+      message (FATAL_ERROR "HDF5JavaNativeBundles.cmake: add SciJava mapped zlib name for platform '${HDF5_MAVEN_PLATFORM}'")
+    endif ()
+
+    set (_HDF5_ZLIB_NATIVE_STAGE "${CMAKE_CURRENT_BINARY_DIR}/native-bundle/hdf5-zlib-native")
+    set (_HDF5_ZLIB_NATIVE_PREFIX "${_HDF5_ZLIB_NATIVE_STAGE}/natives/${HDF5_NATIVE_LOADER_PLATFORM}")
+
+    set (_HDF5_ZLIB_NATIVE_EXTRA_ALIASES "")
+    if (HDF5_MAVEN_PLATFORM STREQUAL "windows")
+      list (APPEND _HDF5_ZLIB_NATIVE_EXTRA_ALIASES "zlib.dll" "zlib1.dll")
+    elseif (HDF5_MAVEN_PLATFORM STREQUAL "linux")
+      list (APPEND _HDF5_ZLIB_NATIVE_EXTRA_ALIASES "libz.so.1")
+    elseif (HDF5_MAVEN_PLATFORM STREQUAL "macos")
+      list (APPEND _HDF5_ZLIB_NATIVE_EXTRA_ALIASES "libz.1.dylib")
+    endif ()
+
+    set (_HDF5_ZLIB_NATIVE_ALIAS_COMMANDS "")
+    foreach (_zlib_alias IN LISTS _HDF5_ZLIB_NATIVE_EXTRA_ALIASES)
+      if (NOT _zlib_alias STREQUAL _HDF5_ZLIB_NATIVE_SCIJAVA_MAPPED_NAME)
+        list (APPEND _HDF5_ZLIB_NATIVE_ALIAS_COMMANDS
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:${_HDF5_ZLIB_NATIVE_TARGET}>
+            ${_HDF5_ZLIB_NATIVE_PREFIX}/${_zlib_alias}
+        )
+      endif ()
+    endforeach ()
+
+    hdf5java_generate_maven_native_profiles (HDF5_MAVEN_ZLIB_NATIVE_PROFILES "hdf5-zlib-native"
+      "hdf5-bundled-zlib-native"
+      "        <!-- Bundled zlib JARs: libhdf5's deflate/GZIP filter depends on libz when linked dynamically -->" TRUE)
+
+    set (_HDF5_ZLIB_NATIVE_MAVEN_JAR
+      "${CMAKE_CURRENT_BINARY_DIR}/hdf5-zlib-native-${HDF5_PACKAGE_VERSION}${HDF5_MAVEN_VERSION_SUFFIX}-${HDF5_JAR_CLASSIFIER}.jar"
+    )
+    set (_HDF5_ZLIB_NATIVE_MANIFEST "${CMAKE_CURRENT_BINARY_DIR}/native-bundle/META-INF_MANIFEST_ZLIB_NATIVE.mf")
+
+    hdf5java_add_native_maven_jar (
+      ARTIFACT_ID hdf5-zlib-native
+      BUNDLE_NAME hdf5-zlib-native
+      JAR_OUT "${_HDF5_ZLIB_NATIVE_MAVEN_JAR}"
+      STAGE_DIR "${_HDF5_ZLIB_NATIVE_STAGE}"
+      NATIVES_PREFIX "${_HDF5_ZLIB_NATIVE_PREFIX}"
+      MANIFEST_PATH "${_HDF5_ZLIB_NATIVE_MANIFEST}"
+      POM_TEMPLATE pom-zlib-native.xml.in
+      POM_OUT pom-hdf5-zlib-native.xml
+      TARGET_NAME hdf5_zlib_native_maven_jar
+      COMMENT "Creating Maven native bundle hdf5-zlib-native (${HDF5_JAR_CLASSIFIER}, ${HDF5_NATIVE_LOADER_PLATFORM})"
+      COPY_COMMANDS
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${_HDF5_ZLIB_NATIVE_TARGET}> ${_HDF5_ZLIB_NATIVE_PREFIX}/
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${_HDF5_ZLIB_NATIVE_TARGET}> ${_HDF5_ZLIB_NATIVE_PREFIX}/${_HDF5_ZLIB_NATIVE_SCIJAVA_MAPPED_NAME}
+        ${_HDF5_ZLIB_NATIVE_ALIAS_COMMANDS}
+      DEPENDS ${_HDF5_ZLIB_NATIVE_TARGET}
+    )
+  endif ()
+endif ()
+
+# Optional szip JAR: bundle libaec and libsz when libhdf5 uses dynamic SZIP support.
+set (_HDF5_SZIP_LIBSZ_TARGET "")
+set (_HDF5_SZIP_LIBAEC_TARGET "")
+if (H5_SZIP_FOUND AND NOT HDF5_USE_LIBAEC_STATIC)
+  foreach (_libsz_candidate IN ITEMS
+      ${HDF_PACKAGE_NAMESPACE}sz-shared sz-shared libaec::sz)
+    if (TARGET ${_libsz_candidate} AND _HDF5_SZIP_LIBSZ_TARGET STREQUAL "")
+      set (_HDF5_SZIP_LIBSZ_TARGET "${_libsz_candidate}")
+    endif ()
+  endforeach ()
+  foreach (_libaec_candidate IN ITEMS
+      ${HDF_PACKAGE_NAMESPACE}aec-shared aec-shared libaec::aec)
+    if (TARGET ${_libaec_candidate} AND _HDF5_SZIP_LIBAEC_TARGET STREQUAL "")
+      set (_HDF5_SZIP_LIBAEC_TARGET "${_libaec_candidate}")
+    endif ()
+  endforeach ()
+endif ()
+
+if (NOT _HDF5_SZIP_LIBSZ_TARGET STREQUAL "" AND NOT _HDF5_SZIP_LIBAEC_TARGET STREQUAL "")
+  get_target_property (_HDF5_SZIP_LIBSZ_ALIASED ${_HDF5_SZIP_LIBSZ_TARGET} ALIASED_TARGET)
+  if (_HDF5_SZIP_LIBSZ_ALIASED)
+    set (_HDF5_SZIP_LIBSZ_TARGET "${_HDF5_SZIP_LIBSZ_ALIASED}")
+  endif ()
+  get_target_property (_HDF5_SZIP_LIBAEC_ALIASED ${_HDF5_SZIP_LIBAEC_TARGET} ALIASED_TARGET)
+  if (_HDF5_SZIP_LIBAEC_ALIASED)
+    set (_HDF5_SZIP_LIBAEC_TARGET "${_HDF5_SZIP_LIBAEC_ALIASED}")
+  endif ()
+
+  get_target_property (_HDF5_SZIP_LIBSZ_TYPE ${_HDF5_SZIP_LIBSZ_TARGET} TYPE)
+  get_target_property (_HDF5_SZIP_LIBAEC_TYPE ${_HDF5_SZIP_LIBAEC_TARGET} TYPE)
+  if (NOT _HDF5_SZIP_LIBSZ_TYPE STREQUAL "STATIC_LIBRARY"
+      AND NOT _HDF5_SZIP_LIBAEC_TYPE STREQUAL "STATIC_LIBRARY")
+    if (HDF5_MAVEN_PLATFORM STREQUAL "linux")
+      set (_HDF5_SZIP_NATIVE_SCIJAVA_LIBSZ "libsz.so")
+      set (_HDF5_SZIP_NATIVE_SCIJAVA_LIBAEC "libaec.so")
+    elseif (HDF5_MAVEN_PLATFORM STREQUAL "macos")
+      set (_HDF5_SZIP_NATIVE_SCIJAVA_LIBSZ "libsz.dylib")
+      set (_HDF5_SZIP_NATIVE_SCIJAVA_LIBAEC "libaec.dylib")
+    elseif (HDF5_MAVEN_PLATFORM STREQUAL "windows")
+      set (_HDF5_SZIP_NATIVE_SCIJAVA_LIBSZ "sz.dll")
+      set (_HDF5_SZIP_NATIVE_SCIJAVA_LIBAEC "aec.dll")
+    else ()
+      set (_HDF5_SZIP_NATIVE_SCIJAVA_LIBSZ "")
+      set (_HDF5_SZIP_NATIVE_SCIJAVA_LIBAEC "")
+    endif ()
+
+    if (_HDF5_SZIP_NATIVE_SCIJAVA_LIBSZ STREQUAL "" OR _HDF5_SZIP_NATIVE_SCIJAVA_LIBAEC STREQUAL "")
+      message (FATAL_ERROR "HDF5JavaNativeBundles.cmake: add SciJava mapped libaec/libsz names for platform '${HDF5_MAVEN_PLATFORM}'")
+    endif ()
+
+    hdf5java_generate_maven_native_profiles (HDF5_MAVEN_SZIP_NATIVE_PROFILES "hdf5-szip-native"
+      "hdf5-bundled-szip-native"
+      "        <!-- Bundled libaec (szip) JARs: libhdf5's SZIP filter depends on libsz/libaec when linked dynamically -->" TRUE)
+
+    set (_HDF5_SZIP_NATIVE_MAVEN_JAR
+      "${CMAKE_CURRENT_BINARY_DIR}/hdf5-szip-native-${HDF5_PACKAGE_VERSION}${HDF5_MAVEN_VERSION_SUFFIX}-${HDF5_JAR_CLASSIFIER}.jar"
+    )
+    set (_HDF5_SZIP_NATIVE_STAGE "${CMAKE_CURRENT_BINARY_DIR}/native-bundle/hdf5-szip-native")
+    set (_HDF5_SZIP_NATIVE_PREFIX "${_HDF5_SZIP_NATIVE_STAGE}/natives/${HDF5_NATIVE_LOADER_PLATFORM}")
+    set (_HDF5_SZIP_NATIVE_MANIFEST "${CMAKE_CURRENT_BINARY_DIR}/native-bundle/META-INF_MANIFEST_SZIP_NATIVE.mf")
+
+    hdf5java_add_native_maven_jar (
+      ARTIFACT_ID hdf5-szip-native
+      BUNDLE_NAME hdf5-szip-native
+      JAR_OUT "${_HDF5_SZIP_NATIVE_MAVEN_JAR}"
+      STAGE_DIR "${_HDF5_SZIP_NATIVE_STAGE}"
+      NATIVES_PREFIX "${_HDF5_SZIP_NATIVE_PREFIX}"
+      MANIFEST_PATH "${_HDF5_SZIP_NATIVE_MANIFEST}"
+      POM_TEMPLATE pom-szip-native.xml.in
+      POM_OUT pom-hdf5-szip-native.xml
+      TARGET_NAME hdf5_szip_native_maven_jar
+      COMMENT "Creating Maven native bundle hdf5-szip-native (${HDF5_JAR_CLASSIFIER}, ${HDF5_NATIVE_LOADER_PLATFORM})"
+      COPY_COMMANDS
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${_HDF5_SZIP_LIBAEC_TARGET}> ${_HDF5_SZIP_NATIVE_PREFIX}/
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${_HDF5_SZIP_LIBAEC_TARGET}> ${_HDF5_SZIP_NATIVE_PREFIX}/${_HDF5_SZIP_NATIVE_SCIJAVA_LIBAEC}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${_HDF5_SZIP_LIBSZ_TARGET}> ${_HDF5_SZIP_NATIVE_PREFIX}/
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${_HDF5_SZIP_LIBSZ_TARGET}> ${_HDF5_SZIP_NATIVE_PREFIX}/${_HDF5_SZIP_NATIVE_SCIJAVA_LIBSZ}
+      DEPENDS ${_HDF5_SZIP_LIBAEC_TARGET} ${_HDF5_SZIP_LIBSZ_TARGET}
+    )
+  endif ()
+endif ()
