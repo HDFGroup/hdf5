@@ -366,7 +366,7 @@ jobs:
 
   build_v2_0_win:
     name: "Intel DBG v2.0.0 default API no deprecated"
-    runs-on: windows-latest
+    runs-on: windows-2025
     steps:
       # SETUP
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
