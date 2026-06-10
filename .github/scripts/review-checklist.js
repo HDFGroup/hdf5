@@ -359,10 +359,10 @@ module.exports = async function run({ github, context, core }) {
     prData.requested_reviewers.map(r => r.login).filter(Boolean)
   );
 
-  // confirmedRequested tracks what was actually successfully requested
-  // (used in buildBody so the checklist never shows an owner whose
-  // requestReviewers call silently failed).
-  let confirmedRequested = new Set(existingRequested);
+  // confirmedRequested tracks who is actually assigned for checklist display.
+  // Starts empty — populated below only with the load-balanced selection so
+  // the checklist never shows owners that were not chosen by the script.
+  let confirmedRequested = new Set();
 
   // ----------------------------------------------------------------
   // 6. Auto-assign reviewers (pull_request events only, not reviews).
@@ -402,15 +402,37 @@ module.exports = async function run({ github, context, core }) {
       core.warning(`Could not fetch open PRs for load balancing; falling back to CODEOWNERS order: ${e.message}`);
     }
 
+    const isNewPR = context.payload.action === 'opened' || context.payload.action === 'reopened';
+
+    // On open/reopen: ignore existing assignments so GitHub's CODEOWNERS
+    // auto-assignment doesn't suppress our load-balanced selection.
+    // On synchronize: respect existing assignments (reviewer may have already started).
     const { selected, log } = chooseReviewers(touchedAreas, {
       prAuthor,
-      existingRequested,
+      existingRequested: isNewPR ? new Set() : existingRequested,
       reviewerLoad,
       LINE_THRESHOLD,
       AREA_THRESHOLDS,
       PUBLIC_HEADER,
     });
     for (const msg of log) core.info(msg);
+
+    if (isNewPR) {
+      // Remove any CODEOWNERS auto-assigned by GitHub that aren't in our selection.
+      // Only removes code owners — leaves manually-added non-owner reviewers untouched.
+      for (const reviewer of existingRequested) {
+        if (allCodeOwners.has(reviewer) && !selected.has(reviewer)) {
+          try {
+            await github.rest.pulls.removeRequestedReviewers({
+              owner, repo, pull_number: pr_number, reviewers: [reviewer],
+            });
+            core.info(`Removed auto-assigned reviewer ${reviewer} (not selected by load balancer)`);
+          } catch (e) {
+            core.warning(`Could not remove reviewer ${reviewer}: ${e.message}`);
+          }
+        }
+      }
+    }
 
     // Request one at a time so a single invalid login cannot block the rest.
     // Only add to confirmedRequested on success — the checklist must not show
@@ -426,6 +448,15 @@ module.exports = async function run({ github, context, core }) {
         core.warning(`Could not request reviewer ${reviewer}: ${e.message}`);
       }
     }
+
+    // On synchronize, also carry forward existing assignments so the checklist
+    // continues to show who was originally assigned.
+    if (!isNewPR) {
+      for (const reviewer of existingRequested) confirmedRequested.add(reviewer);
+    }
+  } else {
+    // For workflow_run (review events): show whoever is currently assigned.
+    for (const reviewer of existingRequested) confirmedRequested.add(reviewer);
   }
 
   // ----------------------------------------------------------------
