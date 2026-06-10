@@ -417,10 +417,10 @@ module.exports = async function run({ github, context, core }) {
     });
     for (const msg of log) core.info(msg);
 
-    if (isNewPR) {
-      // Remove any CODEOWNERS auto-assigned by GitHub that aren't in our selection.
-      // Only removes code owners — leaves manually-added non-owner reviewers untouched.
-      for (const reviewer of existingRequested) {
+    // Helper: remove CODEOWNERS auto-assigned reviewers not in our selection.
+    // Only removes code owners — leaves manually-added non-owner reviewers untouched.
+    async function enforceSelection(currentRequested) {
+      for (const reviewer of currentRequested) {
         if (allCodeOwners.has(reviewer) && !selected.has(reviewer)) {
           try {
             await github.rest.pulls.removeRequestedReviewers({
@@ -434,24 +434,54 @@ module.exports = async function run({ github, context, core }) {
       }
     }
 
-    // Request one at a time so a single invalid login cannot block the rest.
-    // Only add to confirmedRequested on success — the checklist must not show
-    // an owner whose request call failed.
-    for (const reviewer of selected) {
-      try {
-        await github.rest.pulls.requestReviewers({
-          owner, repo, pull_number: pr_number,
-          reviewers: [reviewer],
-        });
-        confirmedRequested.add(reviewer);
-      } catch (e) {
-        core.warning(`Could not request reviewer ${reviewer}: ${e.message}`);
-      }
-    }
+    if (isNewPR) {
+      // First pass: clean up whatever GitHub auto-assigned before the workflow ran.
+      await enforceSelection(existingRequested);
 
-    // On synchronize, also carry forward existing assignments so the checklist
-    // continues to show who was originally assigned.
-    if (!isNewPR) {
+      // Request one at a time so a single invalid login cannot block the rest.
+      // Only add to confirmedRequested on success — the checklist must not show
+      // an owner whose request call failed.
+      for (const reviewer of selected) {
+        try {
+          await github.rest.pulls.requestReviewers({
+            owner, repo, pull_number: pr_number,
+            reviewers: [reviewer],
+          });
+          confirmedRequested.add(reviewer);
+        } catch (e) {
+          core.warning(`Could not request reviewer ${reviewer}: ${e.message}`);
+        }
+      }
+
+      // Second pass: GitHub's auto-assignment can fire after the workflow starts,
+      // so wait briefly then re-check and remove any extras that appeared.
+      await new Promise(resolve => setTimeout(resolve, 15000));
+      let retryPR;
+      try {
+        ({ data: retryPR } = await github.rest.pulls.get({ owner, repo, pull_number: pr_number }));
+      } catch (e) {
+        core.warning(`Could not re-fetch PR for reviewer cleanup retry: ${e.message}`);
+      }
+      if (retryPR) {
+        const retryRequested = new Set(
+          retryPR.requested_reviewers.map(r => r.login).filter(Boolean)
+        );
+        await enforceSelection(retryRequested);
+      }
+    } else {
+      // synchronize: don't re-assign, just ensure coverage if no owner is assigned yet.
+      for (const reviewer of selected) {
+        try {
+          await github.rest.pulls.requestReviewers({
+            owner, repo, pull_number: pr_number,
+            reviewers: [reviewer],
+          });
+          confirmedRequested.add(reviewer);
+        } catch (e) {
+          core.warning(`Could not request reviewer ${reviewer}: ${e.message}`);
+        }
+      }
+      // Carry forward existing assignments for checklist display.
       for (const reviewer of existingRequested) confirmedRequested.add(reviewer);
     }
   } else {
