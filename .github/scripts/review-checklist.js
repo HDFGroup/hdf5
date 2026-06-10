@@ -469,19 +469,8 @@ module.exports = async function run({ github, context, core }) {
         await enforceSelection(retryRequested);
       }
     } else {
-      // synchronize: don't re-assign, just ensure coverage if no owner is assigned yet.
-      for (const reviewer of selected) {
-        try {
-          await github.rest.pulls.requestReviewers({
-            owner, repo, pull_number: pr_number,
-            reviewers: [reviewer],
-          });
-          confirmedRequested.add(reviewer);
-        } catch (e) {
-          core.warning(`Could not request reviewer ${reviewer}: ${e.message}`);
-        }
-      }
-      // Carry forward existing assignments for checklist display.
+      // synchronize/reopened: never re-assign reviewers — respect manual removals.
+      // Just carry forward whoever is currently assigned for checklist display.
       for (const reviewer of existingRequested) confirmedRequested.add(reviewer);
     }
   } else {
