@@ -159,11 +159,13 @@ function chooseReviewers(touchedAreas, {
 function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
   const rowData = touchedAreas.map(area => {
     const approver  = area.owners.find(o => approvedUsers.has(o));
-    const assigned  = approver ?? area.owners.find(o => confirmedRequested.has(o));
     const signedOff = !!approver;
     const box       = signedOff ? 'x' : ' ';
     const tick      = signedOff ? ' ✅' : '';
-    const mention   = assigned ? ` — @${assigned}` : '';
+    // Show all requested owners for this area so swapping a reviewer is
+    // reflected immediately on the next push, not just the first CODEOWNERS entry.
+    const requested = area.owners.filter(o => confirmedRequested.has(o));
+    const mention   = requested.length > 0 ? ` — ${requested.map(o => `@${o}`).join(', ')}` : '';
     return { text: `- [${box}] **${area.label}**${tick}${mention}`, signedOff };
   });
 
