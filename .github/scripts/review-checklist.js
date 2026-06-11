@@ -158,14 +158,16 @@ function chooseReviewers(touchedAreas, {
 // Builds the markdown checklist comment body (pure, no I/O).
 function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
   const rowData = touchedAreas.map(area => {
-    const signedOff = area.owners.some(o => approvedUsers.has(o));
+    const approver  = area.owners.find(o => approvedUsers.has(o));
+    const signedOff = !!approver;
     const box       = signedOff ? 'x' : ' ';
     const tick      = signedOff ? ' ✅' : '';
-    // Show all currently-assigned reviewers for this area (may be > 1 if a
-    // reviewer was manually added). Use confirmedRequested, not the approver,
-    // so the mention is stable when a non-requested owner happens to approve.
+    // Signed off: show who approved. Pending: show all confirmed-requested reviewers
+    // (may be > 1 if a reviewer was manually added alongside the load-balanced pick).
     const requested = area.owners.filter(o => confirmedRequested.has(o));
-    const mention   = requested.length > 0 ? ` — ${requested.map(o => `@${o}`).join(', ')}` : '';
+    const mention   = approver
+      ? ` — @${approver}`
+      : requested.length > 0 ? ` — ${requested.map(o => `@${o}`).join(', ')}` : '';
     return { text: `- [${box}] **${area.label}**${tick}${mention}`, signedOff };
   });
 
