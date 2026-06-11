@@ -1,7 +1,0 @@
-rules:
-  template-injection:
-    ignore:
-      - .github/actions/setup-jextract/action.yml
-      - .github/workflows/ctest.yml
-      - .github/workflows/maven-deploy.yml
-      - .github/workflows/maven-staging.yml
