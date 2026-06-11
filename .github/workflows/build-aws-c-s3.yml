@@ -248,7 +248,6 @@ jobs:
           cmake --build aws-c-s3/build --parallel 3 --config $INPUT_BUILD_MODE --target install
 
       - name: Tar aws-c-s3 installation to preserve permissions for artifact
-        env:
         run: tar -cvf libaws-c-s3.tar -C $RUNNER_WORKSPACE aws-c-s3-build
 
       - name: Save aws-c-s3 installation artifact

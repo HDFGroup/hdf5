@@ -165,7 +165,6 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
       - name: List files in the space
-        env:
         run: |
               ls -l $RUNNER_WORKSPACE/build
 
@@ -245,7 +244,6 @@ jobs:
         if: ${{ inputs.thread_safety == 'TS' && inputs.concurrent != 'CC'}}
 
       - name: Configure (Concurrency)
-        env:
         run: |
            mkdir "$RUNNER_WORKSPACE/build"
            cd "$RUNNER_WORKSPACE/build"
@@ -287,7 +285,6 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
       - name: List files in the space
-        env:
         run: |
                ls -l $RUNNER_WORKSPACE/build
 
@@ -427,7 +424,6 @@ jobs:
         shell: bash
 
       - name: List files in the space
-        env:
         run: |
               ls -l $RUNNER_WORKSPACE/build
 

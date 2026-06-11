@@ -72,7 +72,6 @@ jobs:
         path: ${{ github.workspace }}
 
     - name: List files for the space (Linux_coverage)
-      env:
       run: |
         ls -l ${{ github.workspace }}
         ls $RUNNER_WORKSPACE
@@ -86,7 +85,6 @@ jobs:
         source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
     - name: List files for the hdf5 (Linux_coverage)
-      env:
       run: |
         ls $RUNNER_WORKSPACE/hdf5
 
@@ -181,7 +179,6 @@ jobs:
           path: ${{ github.workspace }}
 
       - name: List files for the space (Linux_Leak)
-        env:
         run: |
           ls -l ${{ github.workspace }}
           ls $RUNNER_WORKSPACE
@@ -195,7 +192,6 @@ jobs:
           source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (Linux_Leak)
-        env:
         run: |
           ls $RUNNER_WORKSPACE/hdf5
 
@@ -293,7 +289,6 @@ jobs:
           path: ${{ github.workspace }}
 
       - name: List files for the space (Linux_Address)
-        env:
         run: |
           ls -l ${{ github.workspace }}
           ls $RUNNER_WORKSPACE
@@ -307,7 +302,6 @@ jobs:
           source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (Linux_Address)
-        env:
         run: |
           ls $RUNNER_WORKSPACE/hdf5
 
@@ -405,7 +399,6 @@ jobs:
           path: ${{ github.workspace }}
 
       - name: List files for the space (Linux_UndefinedBehavior)
-        env:
         run: |
           ls -l ${{ github.workspace }}
           ls $RUNNER_WORKSPACE
@@ -419,7 +412,6 @@ jobs:
           source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (Linux_UndefinedBehavior)
-        env:
         run: |
           ls $RUNNER_WORKSPACE/hdf5
 

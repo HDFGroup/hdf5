@@ -58,7 +58,6 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (Linux)
-        env:
         run: |
               ls -l ${{ github.workspace }}
               ls $RUNNER_WORKSPACE
@@ -67,14 +66,12 @@ jobs:
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
       - name: List files for the space (Linux)
-        env:
         run: |
               ls -l ${{ github.workspace }}
               ls $RUNNER_WORKSPACE
 
       - name: Configure
         shell: bash
-        env:
         run: |
             mkdir "$RUNNER_WORKSPACE/build"
             cd "$RUNNER_WORKSPACE/build"
@@ -163,7 +160,6 @@ jobs:
         run: Get-Location
 
       - name: List files for the space (Windows)
-        env:
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
               Get-ChildItem -Path $RUNNER_WORKSPACE
@@ -176,7 +172,6 @@ jobs:
 
       - name: Configure (Windows)
         shell: pwsh
-        env:
         run: |
           mkdir "$env:RUNNER_WORKSPACE/build"
           Set-Location -Path "$env:RUNNER_WORKSPACE\\build"
@@ -243,7 +238,6 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (MacOS_latest)
-        env:
         run: |
               ls ${{ github.workspace }}
               ls $RUNNER_WORKSPACE
@@ -253,7 +247,6 @@ jobs:
 
       - name: Configure
         shell: bash
-        env:
         run: |
           mkdir "$RUNNER_WORKSPACE/build"
           cd "$RUNNER_WORKSPACE/build"
@@ -341,7 +334,6 @@ jobs:
           path: ${{ github.workspace }}
 
       - name: List files for the space (Linux_clang)
-        env:
         run: |
           ls -l ${{ github.workspace }}
           ls $RUNNER_WORKSPACE
@@ -351,7 +343,6 @@ jobs:
 
       - name: Configure
         shell: bash
-        env:
         run: |
           mkdir "$RUNNER_WORKSPACE/build"
           cd "$RUNNER_WORKSPACE/build"

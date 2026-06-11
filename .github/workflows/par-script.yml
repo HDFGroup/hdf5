@@ -96,7 +96,6 @@ jobs:
         run: Get-Location
 
       - name: List files for the space (Windows)
-        env:
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
               Get-ChildItem -Path $RUNNER_WORKSPACE
@@ -113,7 +112,6 @@ jobs:
           source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (${{ matrix.mpi }})
-        env:
         run: |
             Get-ChildItem -Path $RUNNER_WORKSPACE/hdf5
         shell: pwsh
@@ -231,7 +229,6 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (Linux)
-        env:
         run: |
               ls -l ${{ github.workspace }}
               ls $RUNNER_WORKSPACE
@@ -245,7 +242,6 @@ jobs:
           source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (${{ matrix.mpi }})
-        env:
         run: |
             ls $RUNNER_WORKSPACE/hdf5
 
@@ -344,7 +340,6 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (${{ matrix.mpi }})
-        env:
         run: |
             ls -l ${{ github.workspace }}
             ls $RUNNER_WORKSPACE
@@ -358,7 +353,6 @@ jobs:
           source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (${{ matrix.mpi }})
-        env:
         run: |
             ls $RUNNER_WORKSPACE/hdf5
 
