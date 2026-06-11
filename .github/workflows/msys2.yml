@@ -59,12 +59,15 @@ jobs:
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Configure
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          cd "$RUNNER_WORKSPACE/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             -G Ninja \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
             -DCMAKE_TOOLCHAIN_FILE="" \
             -DHDF5_GENERATE_HEADERS:BOOL=OFF \
             -DBUILD_SHARED_LIBS:BOOL=ON \
@@ -77,17 +80,23 @@ jobs:
             $GITHUB_WORKSPACE
 
       - name: Build
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          cmake --build . --parallel 2 --config ${{ inputs.build_mode }}
+          cmake --build . --parallel 2 --config $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Tests
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -E "dt_arith|err_compat"
+          ctest . --parallel 2 -C $INPUT_BUILD_MODE -E "dt_arith|err_compat"
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Expected to Fail Tests
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -R "dt_arith|err_compat"
+          ctest . --parallel 2 -C $INPUT_BUILD_MODE -R "dt_arith|err_compat"
         working-directory: ${{ runner.workspace }}/build
         continue-on-error: true

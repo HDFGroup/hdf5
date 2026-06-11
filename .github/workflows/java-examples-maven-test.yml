@@ -74,13 +74,15 @@ jobs:
 
       - name: Test Examples Category ${{ matrix.category }}
         id: test-examples
+        env:
+          MATRIX_CATEGORY: ${{ matrix.category }}
         run: |
-          cd HDF5Examples/JAVA/${{ matrix.category }}
+          cd HDF5Examples/JAVA/$MATRIX_CATEGORY
 
-          echo "=== Testing ${{ matrix.category }} Examples ==="
+          echo "=== Testing $MATRIX_CATEGORY Examples ==="
 
           # Create test results directory
-          mkdir -p ../../../test-results/${{ matrix.category }}
+          mkdir -p ../../../test-results/$MATRIX_CATEGORY
 
           FAILED_EXAMPLES=""
           TOTAL_EXAMPLES=0
@@ -114,9 +116,9 @@ jobs:
                 echo "✓ Compilation successful for $example_name"
 
                 # Run the example and capture output
-                if timeout 30s java -cp ".:$CLASSPATH" "$example_name" > "../../../test-results/${{ matrix.category }}/${example_name}.output" 2>&1; then
+                if timeout 30s java -cp ".:$CLASSPATH" "$example_name" > "../../../test-results/$MATRIX_CATEGORY/${example_name}.output" 2>&1; then
                   # Validate output using pattern matching
-                  output_file="../../../test-results/${{ matrix.category }}/${example_name}.output"
+                  output_file="../../../test-results/$MATRIX_CATEGORY/${example_name}.output"
 
                   # Check for common success patterns
                   if grep -q -i -E "(dataset|datatype|group|success|created|written|read)" "$output_file" && \
@@ -131,7 +133,7 @@ jobs:
                   fi
                 else
                   # Check if failure is due to expected native library issue (acceptable for Maven-only testing)
-                  output_file="../../../test-results/${{ matrix.category }}/${example_name}.output"
+                  output_file="../../../test-results/$MATRIX_CATEGORY/${example_name}.output"
                   if grep -q "UnsatisfiedLinkError.*hdf5_java.*java.library.path" "$output_file"; then
                     echo "✓ Expected native library error for Maven-only testing: $example_name"
                     echo "  (This confirms JAR structure is correct)"
@@ -152,7 +154,7 @@ jobs:
           done
 
           # Summary
-          echo "=== ${{ matrix.category }} Summary ==="
+          echo "=== $MATRIX_CATEGORY Summary ==="
           echo "Total examples: $TOTAL_EXAMPLES"
           echo "Passed: $PASSED_EXAMPLES"
           echo "Failed: $((TOTAL_EXAMPLES - PASSED_EXAMPLES))"
@@ -214,13 +216,15 @@ jobs:
       - name: Test Examples Category ${{ matrix.category }}
         id: test-examples
         shell: pwsh
+        env:
+          MATRIX_CATEGORY: ${{ matrix.category }}
         run: |
-          cd HDF5Examples/JAVA/${{ matrix.category }}
+          cd HDF5Examples/JAVA/$env:MATRIX_CATEGORY
 
-          Write-Host "=== Testing ${{ matrix.category }} Examples ==="
+          Write-Host "=== Testing $env:MATRIX_CATEGORY Examples ==="
 
           # Create test results directory
-          New-Item -ItemType Directory -Force -Path "../../../test-results/${{ matrix.category }}"
+          New-Item -ItemType Directory -Force -Path "../../../test-results/$env:MATRIX_CATEGORY"
 
           $FAILED_EXAMPLES = @()
           $TOTAL_EXAMPLES = 0
@@ -239,7 +243,7 @@ jobs:
 
               # Run the example and capture output
               $timeout_cmd = "timeout 30s java -cp '.;../../../maven-artifacts/*' $example_name"
-              $output_file = "../../../test-results/${{ matrix.category }}/${example_name}.output"
+              $output_file = "../../../test-results/$env:MATRIX_CATEGORY/${example_name}.output"
 
               try {
                 & cmd /c "$timeout_cmd > `"$output_file`" 2>&1"
@@ -272,7 +276,7 @@ jobs:
           }
 
           # Summary
-          Write-Host "=== ${{ matrix.category }} Summary ==="
+          Write-Host "=== $env:MATRIX_CATEGORY Summary ==="
           Write-Host "Total examples: $TOTAL_EXAMPLES"
           Write-Host "Passed: $PASSED_EXAMPLES"
           Write-Host "Failed: $($TOTAL_EXAMPLES - $PASSED_EXAMPLES)"
@@ -332,13 +336,15 @@ jobs:
 
       - name: Test Examples Category ${{ matrix.category }}
         id: test-examples
+        env:
+          MATRIX_CATEGORY: ${{ matrix.category }}
         run: |
-          cd HDF5Examples/JAVA/${{ matrix.category }}
+          cd HDF5Examples/JAVA/$MATRIX_CATEGORY
 
-          echo "=== Testing ${{ matrix.category }} Examples ==="
+          echo "=== Testing $MATRIX_CATEGORY Examples ==="
 
           # Create test results directory
-          mkdir -p ../../../test-results/${{ matrix.category }}
+          mkdir -p ../../../test-results/$MATRIX_CATEGORY
 
           FAILED_EXAMPLES=""
           TOTAL_EXAMPLES=0
@@ -372,9 +378,9 @@ jobs:
                 echo "✓ Compilation successful for $example_name"
 
                 # Run the example and capture output
-                if timeout 30s java -cp ".:$CLASSPATH" "$example_name" > "../../../test-results/${{ matrix.category }}/${example_name}.output" 2>&1; then
+                if timeout 30s java -cp ".:$CLASSPATH" "$example_name" > "../../../test-results/$MATRIX_CATEGORY/${example_name}.output" 2>&1; then
                   # Validate output using pattern matching
-                  output_file="../../../test-results/${{ matrix.category }}/${example_name}.output"
+                  output_file="../../../test-results/$MATRIX_CATEGORY/${example_name}.output"
 
                   # Check for common success patterns
                   if grep -q -i -E "(dataset|datatype|group|success|created|written|read)" "$output_file" && \
@@ -398,7 +404,7 @@ jobs:
           done
 
           # Summary
-          echo "=== ${{ matrix.category }} Summary ==="
+          echo "=== $MATRIX_CATEGORY Summary ==="
           echo "Total examples: $TOTAL_EXAMPLES"
           echo "Passed: $PASSED_EXAMPLES"
           echo "Failed: $((TOTAL_EXAMPLES - PASSED_EXAMPLES))"
@@ -446,12 +452,15 @@ jobs:
           # and generate appropriate alerts/issues for multi-platform failures
 
       - name: Generate Test Summary Report
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+          INPUT_MAVEN_ARTIFACTS_VERSION: ${{ inputs.maven_artifacts_version }}
         run: |
           cat > java-examples-test-summary.md << 'EOF'
           # Java Examples Maven Testing Summary
 
-          **Build Mode**: ${{ inputs.build_mode }}
-          **Maven Version**: ${{ inputs.maven_artifacts_version }}
+          **Build Mode**: $INPUT_BUILD_MODE
+          **Maven Version**: $INPUT_MAVEN_ARTIFACTS_VERSION
           **Date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
 
           ## Platform Results

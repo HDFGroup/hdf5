@@ -206,14 +206,15 @@ jobs:
         id: publish-abi-reports
         env:
           FILE_BASE: ${{ inputs.file_base }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          mkdir "${{ runner.workspace }}/buildabi"
-          mkdir "${{ runner.workspace }}/buildabi/hdf5"
-          cp $FILE_BASE-hdf5_compat_report.html ${{ runner.workspace }}/buildabi/hdf5
-          cp $FILE_BASE-hdf5_hl_compat_report.html ${{ runner.workspace }}/buildabi/hdf5
-          cp $FILE_BASE-hdf5_cpp_compat_report.html ${{ runner.workspace }}/buildabi/hdf5
-          cp $FILE_BASE-java_compat_report.html ${{ runner.workspace }}/buildabi/hdf5
-          cd "${{ runner.workspace }}/buildabi"
+          mkdir "$RUNNER_WORKSPACE/buildabi"
+          mkdir "$RUNNER_WORKSPACE/buildabi/hdf5"
+          cp $FILE_BASE-hdf5_compat_report.html $RUNNER_WORKSPACE/buildabi/hdf5
+          cp $FILE_BASE-hdf5_hl_compat_report.html $RUNNER_WORKSPACE/buildabi/hdf5
+          cp $FILE_BASE-hdf5_cpp_compat_report.html $RUNNER_WORKSPACE/buildabi/hdf5
+          cp $FILE_BASE-java_compat_report.html $RUNNER_WORKSPACE/buildabi/hdf5
+          cd "$RUNNER_WORKSPACE/buildabi"
           tar -zcvf $FILE_BASE.html.abi.reports.tar.gz hdf5
         shell: bash
 

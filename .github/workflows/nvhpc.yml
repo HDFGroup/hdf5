@@ -48,28 +48,36 @@ jobs:
 
       - name: Install NVHPC
         shell: bash
+        env:
+          ENV_NVERDASH: ${{ env.NVERDASH }}
+          ENV_NVERDOT: ${{ env.NVERDOT }}
+          ENV_CUDAVERDOT: ${{ env.CUDAVERDOT }}
         run: |
           curl https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA-HPC-SDK | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg
           echo 'deb [signed-by=/usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /' | sudo tee /etc/apt/sources.list.d/nvhpc.list
           sudo apt-get update -y
-          sudo apt-get install -y nvhpc-${{ env.NVERDASH }}
+          sudo apt-get install -y nvhpc-$ENV_NVERDASH
           echo "NVHPCSDK=/opt/nvidia/hpc_sdk" >> $GITHUB_ENV
-          echo "OMPI_CXX=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/bin/nvc++" >> $GITHUB_ENV
-          echo "OMPI_CC=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/bin/nvc" >> $GITHUB_ENV
-          echo "OMPI_FC=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/bin/nvfortran" >> $GITHUB_ENV
-          echo "CC=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/comm_libs/hpcx/bin/mpicc" >> $GITHUB_ENV
-          echo "FC=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/comm_libs/hpcx/bin/mpifort" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/cuda/${{ env.CUDAVERDOT }}/lib64:/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/lib" >> $GITHUB_ENV
+          echo "OMPI_CXX=/opt/nvidia/hpc_sdk/Linux_x86_64/$ENV_NVERDOT/compilers/bin/nvc++" >> $GITHUB_ENV
+          echo "OMPI_CC=/opt/nvidia/hpc_sdk/Linux_x86_64/$ENV_NVERDOT/compilers/bin/nvc" >> $GITHUB_ENV
+          echo "OMPI_FC=/opt/nvidia/hpc_sdk/Linux_x86_64/$ENV_NVERDOT/compilers/bin/nvfortran" >> $GITHUB_ENV
+          echo "CC=/opt/nvidia/hpc_sdk/Linux_x86_64/$ENV_NVERDOT/comm_libs/hpcx/bin/mpicc" >> $GITHUB_ENV
+          echo "FC=/opt/nvidia/hpc_sdk/Linux_x86_64/$ENV_NVERDOT/comm_libs/hpcx/bin/mpifort" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/$ENV_NVERDOT/cuda/$ENV_CUDAVERDOT/lib64:/opt/nvidia/hpc_sdk/Linux_x86_64/$ENV_NVERDOT/compilers/lib" >> $GITHUB_ENV
           echo "DESTDIR=/tmp" >> $GITHUB_ENV
 
       - name: Configure
         shell: bash
+        env:
+          ENV_NVERDOT: ${{ env.NVERDOT }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/comm_libs/hpcx/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/bin:$PATH
-          mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
+          export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/$ENV_NVERDOT/comm_libs/hpcx/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/$ENV_NVERDOT/compilers/bin:$PATH
+          mkdir "$RUNNER_WORKSPACE/build"
+          cd "$RUNNER_WORKSPACE/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
-          -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+          -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
           -DHDF5_ENABLE_PARALLEL:BOOL=ON \
           -DMPIEXEC_NUMPROC_FLAG:STRING=-np \
           -DMPIEXEC_MAX_NUMPROCS:STRING=2 \
@@ -83,27 +91,35 @@ jobs:
 
       - name: Build
         shell: bash
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+          cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
 
       # Skipping dt_arith and dtransform while we investigate long double failures
       - name: Run Tests
         shell: bash
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          ctest . -E "MPI_TEST|H5TEST-dt_arith" --parallel 2 -C ${{ inputs.build_mode }}
+          ctest . -E "MPI_TEST|H5TEST-dt_arith" --parallel 2 -C $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Expected To Fail Tests
         shell: bash
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          ctest . -R "H5TEST-dt_arith" --parallel 2 -C ${{ inputs.build_mode }}
+          ctest . -R "H5TEST-dt_arith" --parallel 2 -C $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
         continue-on-error: true
 
       - name: Run Parallel Tests
         shell: bash
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           export UCX_WARN_UNUSED_ENV_VARS=n
-          ctest . -R MPI_TEST -E "_by_chunk|_by_pattern" -C ${{ inputs.build_mode }}
+          ctest . -R MPI_TEST -E "_by_chunk|_by_pattern" -C $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build

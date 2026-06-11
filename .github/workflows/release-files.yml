@@ -70,8 +70,10 @@ jobs:
     steps:
       - name: Get file base name
         id: get-file-base
+        env:
+          INPUT_FILE_BASE: ${{ inputs.file_base }}
         run: |
-          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          FILE_NAME_BASE=$(echo "$INPUT_FILE_BASE")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
 
       # Get files created by tarball script
@@ -184,32 +186,38 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: Create sha256 sums for files
+        env:
+          GET_FILE_BASE_FILE_BASE: ${{ steps.get-file-base.outputs.FILE_BASE }}
         run: |
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip > ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-macos14_clang.dmg >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc_s3.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_intel.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.msi >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum $GET_FILE_BASE_FILE_BASE.doxygen.zip > $GET_FILE_BASE_FILE_BASE.sha256sums.txt
+          sha256sum $GET_FILE_BASE_FILE_BASE.tar.gz >> $GET_FILE_BASE_FILE_BASE.sha256sums.txt
+          sha256sum $GET_FILE_BASE_FILE_BASE.zip >> $GET_FILE_BASE_FILE_BASE.sha256sums.txt
+          sha256sum $GET_FILE_BASE_FILE_BASE-macos14_clang.tar.gz >> $GET_FILE_BASE_FILE_BASE.sha256sums.txt
+          sha256sum $GET_FILE_BASE_FILE_BASE-macos14_clang.dmg >> $GET_FILE_BASE_FILE_BASE.sha256sums.txt
+          sha256sum $GET_FILE_BASE_FILE_BASE-ubuntu-2404_gcc.tar.gz >> $GET_FILE_BASE_FILE_BASE.sha256sums.txt
+          sha256sum $GET_FILE_BASE_FILE_BASE-ubuntu-2404_gcc.deb >> $GET_FILE_BASE_FILE_BASE.sha256sums.txt
+          sha256sum $GET_FILE_BASE_FILE_BASE-ubuntu-2404_gcc.rpm >> $GET_FILE_BASE_FILE_BASE.sha256sums.txt
+          sha256sum $GET_FILE_BASE_FILE_BASE-ubuntu-2404_gcc_s3.tar.gz >> $GET_FILE_BASE_FILE_BASE.sha256sums.txt
+          sha256sum $GET_FILE_BASE_FILE_BASE-win-vs2022_cl.zip >> $GET_FILE_BASE_FILE_BASE.sha256sums.txt
+          sha256sum $GET_FILE_BASE_FILE_BASE-win-vs2022_cl.msi >> $GET_FILE_BASE_FILE_BASE.sha256sums.txt
+          sha256sum $GET_FILE_BASE_FILE_BASE-ubuntu-2404_intel.tar.gz >> $GET_FILE_BASE_FILE_BASE.sha256sums.txt
+          sha256sum $GET_FILE_BASE_FILE_BASE-win-vs2022_intel.zip >> $GET_FILE_BASE_FILE_BASE.sha256sums.txt
+          sha256sum $GET_FILE_BASE_FILE_BASE-win-vs2022_intel.msi >> $GET_FILE_BASE_FILE_BASE.sha256sums.txt
+          sha256sum $GET_FILE_BASE_FILE_BASE.html.abi.reports.tar.gz >> $GET_FILE_BASE_FILE_BASE.sha256sums.txt
 
       - name: Create sha256 sums for files  for nonversioned files
         if: ${{ (inputs.use_environ == 'release') }}
+        env:
+          GET_FILE_BASE_FILE_BASE: ${{ steps.get-file-base.outputs.FILE_BASE }}
         run: |
-          sha256sum hdf5.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum hdf5.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum hdf5.zip >> $GET_FILE_BASE_FILE_BASE.sha256sums.txt
+          sha256sum hdf5.tar.gz >> $GET_FILE_BASE_FILE_BASE.sha256sums.txt
 
       - name: Store snapshot name
+        env:
+          GET_FILE_BASE_FILE_BASE: ${{ steps.get-file-base.outputs.FILE_BASE }}
         run: |
-          echo "${{ steps.get-file-base.outputs.FILE_BASE }}" > ./last-file.txt
+          echo "$GET_FILE_BASE_FILE_BASE" > ./last-file.txt
 
       - name: Get description.txt for release/snapshot
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -248,12 +256,14 @@ jobs:
       - name: Release tag name
         id: create_release_tag_name
         if: ${{ (inputs.use_environ == 'release') }}
+        env:
+          INPUT_USE_TAG: ${{ inputs.use_tag }}
         run: |
-          if [[ '${{ inputs.use_tag }}' == 'snapshot' ]]
+          if [[ '$INPUT_USE_TAG' == 'snapshot' ]]
           then
             TAG_NAME_BASE=$(echo "snapshot")
           else
-            TAG_NAME_BASE=$(echo "${{ inputs.use_tag }}")
+            TAG_NAME_BASE=$(echo "$INPUT_USE_TAG")
           fi
           echo "TAG_BASE=$TAG_NAME_BASE" >> $GITHUB_OUTPUT
         shell: bash
@@ -290,9 +300,11 @@ jobs:
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: List files for the space (Linux)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls -l ${{ github.workspace }}
-              ls ${{ runner.workspace }}
+              ls $RUNNER_WORKSPACE
 
       - name: dev-only-docs
         uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0

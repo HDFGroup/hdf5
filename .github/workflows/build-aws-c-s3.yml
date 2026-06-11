@@ -34,7 +34,9 @@ jobs:
 
       - name: Status of artifact check
         if: steps.check_artifact.outputs.exists == 'true'
-        run: echo "Artifact 'libaws-c-s3-${{ inputs.build_mode }}' exists.."
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+        run: echo "Artifact 'libaws-c-s3-$INPUT_BUILD_MODE' exists.."
 
   # Build the aws-c-s3 library from source using the specified tag
   # and cache the results, currently only on Ubuntu. The result is
@@ -155,96 +157,101 @@ jobs:
 
       - name: Build aws-c-s3 from source
         if: ${{ (steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true') }}
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           # Build aws-lc
           echo "Building aws-lc"
           cmake -S aws-lc -B aws-lc/build \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
+            -DCMAKE_INSTALL_PREFIX=$RUNNER_WORKSPACE/aws-c-s3-build \
             -DBUILD_SHARED_LIBS=1
-          cmake --build aws-lc/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          cmake --build aws-lc/build --parallel 3 --config $INPUT_BUILD_MODE --target install
           # Build s2n-tls
           echo "Building s2n-tls"
           cmake -S s2n-tls -B s2n-tls/build \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
-            -DCMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
+            -DCMAKE_INSTALL_PREFIX=$RUNNER_WORKSPACE/aws-c-s3-build \
+            -DCMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/aws-c-s3-build \
             -DBUILD_SHARED_LIBS=1
-          cmake --build s2n-tls/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          cmake --build s2n-tls/build --parallel 3 --config $INPUT_BUILD_MODE --target install
           # Build aws-c-common
           echo "Building aws-c-common"
           cmake -S aws-c-common -B aws-c-common/build \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
+            -DCMAKE_INSTALL_PREFIX=$RUNNER_WORKSPACE/aws-c-s3-build \
             -DBUILD_SHARED_LIBS=1
-          cmake --build aws-c-common/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          cmake --build aws-c-common/build --parallel 3 --config $INPUT_BUILD_MODE --target install
           # Build aws-checksums
           echo "Building aws-checksums"
           cmake -S aws-checksums -B aws-checksums/build \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
-            -DCMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
+            -DCMAKE_INSTALL_PREFIX=$RUNNER_WORKSPACE/aws-c-s3-build \
+            -DCMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/aws-c-s3-build \
             -DBUILD_SHARED_LIBS=1
-          cmake --build aws-checksums/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          cmake --build aws-checksums/build --parallel 3 --config $INPUT_BUILD_MODE --target install
           # Build aws-c-cal
           echo "Building aws-c-cal"
           cmake -S aws-c-cal -B aws-c-cal/build \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
-            -DCMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
+            -DCMAKE_INSTALL_PREFIX=$RUNNER_WORKSPACE/aws-c-s3-build \
+            -DCMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/aws-c-s3-build \
             -DBUILD_SHARED_LIBS=1
-          cmake --build aws-c-cal/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          cmake --build aws-c-cal/build --parallel 3 --config $INPUT_BUILD_MODE --target install
           # Build aws-c-io
           echo "Building aws-c-io"
           cmake -S aws-c-io -B aws-c-io/build \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
-            -DCMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
+            -DCMAKE_INSTALL_PREFIX=$RUNNER_WORKSPACE/aws-c-s3-build \
+            -DCMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/aws-c-s3-build \
             -DBUILD_SHARED_LIBS=1
-          cmake --build aws-c-io/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          cmake --build aws-c-io/build --parallel 3 --config $INPUT_BUILD_MODE --target install
           # Build aws-c-compression
           echo "Building aws-c-compression"
           cmake -S aws-c-compression -B aws-c-compression/build \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
-            -DCMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
+            -DCMAKE_INSTALL_PREFIX=$RUNNER_WORKSPACE/aws-c-s3-build \
+            -DCMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/aws-c-s3-build \
             -DBUILD_SHARED_LIBS=1
-          cmake --build aws-c-compression/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          cmake --build aws-c-compression/build --parallel 3 --config $INPUT_BUILD_MODE --target install
           # Build aws-c-http
           echo "Building aws-c-http"
           cmake -S aws-c-http -B aws-c-http/build \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
-            -DCMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
+            -DCMAKE_INSTALL_PREFIX=$RUNNER_WORKSPACE/aws-c-s3-build \
+            -DCMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/aws-c-s3-build \
             -DBUILD_SHARED_LIBS=1
-          cmake --build aws-c-http/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          cmake --build aws-c-http/build --parallel 3 --config $INPUT_BUILD_MODE --target install
           # Build aws-c-sdkutils
           echo "Building aws-c-sdkutils"
           cmake -S aws-c-sdkutils -B aws-c-sdkutils/build \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
-            -DCMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
+            -DCMAKE_INSTALL_PREFIX=$RUNNER_WORKSPACE/aws-c-s3-build \
+            -DCMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/aws-c-s3-build \
             -DBUILD_SHARED_LIBS=1
-          cmake --build aws-c-sdkutils/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          cmake --build aws-c-sdkutils/build --parallel 3 --config $INPUT_BUILD_MODE --target install
           # Build aws-c-auth
           echo "Building aws-c-auth"
           cmake -S aws-c-auth -B aws-c-auth/build \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
-            -DCMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
+            -DCMAKE_INSTALL_PREFIX=$RUNNER_WORKSPACE/aws-c-s3-build \
+            -DCMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/aws-c-s3-build \
             -DBUILD_SHARED_LIBS=1
-          cmake --build aws-c-auth/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          cmake --build aws-c-auth/build --parallel 3 --config $INPUT_BUILD_MODE --target install
           # Build aws-c-s3
           echo "Building aws-c-s3"
           cmake -S aws-c-s3 -B aws-c-s3/build \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
-            -DCMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
+            -DCMAKE_INSTALL_PREFIX=$RUNNER_WORKSPACE/aws-c-s3-build \
+            -DCMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/aws-c-s3-build \
             -DBUILD_SHARED_LIBS=1
-          cmake --build aws-c-s3/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          cmake --build aws-c-s3/build --parallel 3 --config $INPUT_BUILD_MODE --target install
 
       - name: Tar aws-c-s3 installation to preserve permissions for artifact
-        run: tar -cvf libaws-c-s3.tar -C ${{ runner.workspace }} aws-c-s3-build
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+        run: tar -cvf libaws-c-s3.tar -C $RUNNER_WORKSPACE aws-c-s3-build
 
       - name: Save aws-c-s3 installation artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5

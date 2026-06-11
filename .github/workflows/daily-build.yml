@@ -56,8 +56,10 @@ jobs:
 
     - name: Read inputs
       id: getinputs
+      env:
+        INPUT_USE_IGNORE: ${{ inputs.use_ignore }}
       run: |
-        echo "INPUTS_IGNORE=${{ inputs.use_ignore }}" >> $GITHUB_OUTPUT
+        echo "INPUTS_IGNORE=$INPUT_USE_IGNORE" >> $GITHUB_OUTPUT
 
     - run: echo "use_ignore is ${{ steps.getinputs.outputs.INPUTS_IGNORE }}."
 

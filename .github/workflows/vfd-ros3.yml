@@ -83,20 +83,26 @@ jobs:
 
       - name: Untar libaws-c-s3 installation (Ubuntu)
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          tar xvf libaws-c-s3.tar -C ${{ runner.workspace }}
+          tar xvf libaws-c-s3.tar -C $RUNNER_WORKSPACE
 
       - name: List contents of libaws-c-s3 installation (Ubuntu)
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          ls -lR ${{ runner.workspace }}/aws-c-s3-build
+          ls -lR $RUNNER_WORKSPACE/aws-c-s3-build
 
       - name: Setup environment (Ubuntu)
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
         shell: bash
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          echo "LD_LIBRARY_PATH=${{ runner.workspace }}/aws-c-s3-build/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
-          echo "CMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=$RUNNER_WORKSPACE/aws-c-s3-build/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/aws-c-s3-build" >> $GITHUB_ENV
 
       - name: Install aws-c-s3 (MacOS)
         if: ${{ matrix.os_name == 'MacOS Clang' }}
@@ -116,10 +122,12 @@ jobs:
 
       - name: Verify Java Setup
         if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
+        env:
+          INPUT_FORCE_JAVA_IMPLEMENTATION: ${{ inputs.force_java_implementation }}
         run: |
           java -version
           echo "JAVA_HOME=$JAVA_HOME"
-          echo "Selected Java implementation: ${{ inputs.force_java_implementation }}"
+          echo "Selected Java implementation: $INPUT_FORCE_JAVA_IMPLEMENTATION"
 
       - name: Set environment for MSVC (Windows)
         if: ${{ matrix.os_name == 'Windows MSVC' }}
@@ -140,13 +148,18 @@ jobs:
       # For Windows, use vcpkg toolchain file to allow find_package() calls to resolve
       - name: "Configure (vcpkg; ROS3 testing: ${{ matrix.test_ros3 }})"
         if: ${{ matrix.os_name == 'Windows MSVC' }}
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+          MATRIX_TEST_ROS3: ${{ matrix.test_ros3 }}
+          INPUT_FORCE_JAVA_IMPLEMENTATION == 'JNI': ${{ inputs.force_java_implementation == 'jni' }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          cd "$RUNNER_WORKSPACE/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             --log-level=VERBOSE \
             -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
             -DHDF5_ENABLE_WARNINGS_AS_ERRORS=ON \
@@ -158,20 +171,25 @@ jobs:
             -DLIBAEC_USE_LOCALCONTENT=OFF \
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
-            -DHDF5_ENABLE_ROS3_VFD_DOCKER_PROXY=${{ matrix.test_ros3 }} \
+            -DHDF5_ENABLE_ROS3_VFD_DOCKER_PROXY=$MATRIX_TEST_ROS3 \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
-            -DHDF5_ENABLE_JNI:BOOL=${{ inputs.force_java_implementation == 'jni' }} \
+            -DHDF5_ENABLE_JNI:BOOL=$INPUT_FORCE_JAVA_IMPLEMENTATION == 'JNI' \
             $GITHUB_WORKSPACE
         shell: bash
 
       - name: "Configure (ROS3 testing: ${{ matrix.test_ros3 }})"
         if: ${{ matrix.os_name != 'Windows MSVC' }}
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+          MATRIX_TEST_ROS3: ${{ matrix.test_ros3 }}
+          INPUT_FORCE_JAVA_IMPLEMENTATION == 'JNI': ${{ inputs.force_java_implementation == 'jni' }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          cd "$RUNNER_WORKSPACE/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             --log-level=VERBOSE \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
             -DHDF5_ENABLE_WARNINGS_AS_ERRORS=ON \
@@ -183,21 +201,25 @@ jobs:
             -DLIBAEC_USE_LOCALCONTENT=OFF \
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
-            -DHDF5_ENABLE_ROS3_VFD_DOCKER_PROXY=${{ matrix.test_ros3 }} \
+            -DHDF5_ENABLE_ROS3_VFD_DOCKER_PROXY=$MATRIX_TEST_ROS3 \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
-            -DHDF5_ENABLE_JNI:BOOL=${{ inputs.force_java_implementation == 'jni' }} \
+            -DHDF5_ENABLE_JNI:BOOL=$INPUT_FORCE_JAVA_IMPLEMENTATION == 'JNI' \
             $GITHUB_WORKSPACE
         shell: bash
 
       - name: Build
-        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+        run: cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Tests
         if: matrix.test_ros3 == 'ON'
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           # For now, just run S3 tests
-          ctest . -C ${{ inputs.build_mode }} -R "S3TEST"
+          ctest . -C $INPUT_BUILD_MODE -R "S3TEST"
         working-directory: ${{ runner.workspace }}/build
 
   # Build and test the ROS3 VFD using aws-c-s3 from source (Linux) or package managers (Windows/macOS)
@@ -235,20 +257,26 @@ jobs:
 
       - name: Untar libaws-c-s3 installation (Ubuntu)
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          tar xvf libaws-c-s3.tar -C ${{ runner.workspace }}
+          tar xvf libaws-c-s3.tar -C $RUNNER_WORKSPACE
 
       - name: List contents of libaws-c-s3 installation (Ubuntu)
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          ls -lR ${{ runner.workspace }}/aws-c-s3-build
+          ls -lR $RUNNER_WORKSPACE/aws-c-s3-build
 
       - name: Setup environment (Ubuntu)
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
         shell: bash
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          echo "LD_LIBRARY_PATH=${{ runner.workspace }}/aws-c-s3-build/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
-          echo "CMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=$RUNNER_WORKSPACE/aws-c-s3-build/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/aws-c-s3-build" >> $GITHUB_ENV
 
       # Windows: Install aws-c-s3 via vcpkg
       - name: Install aws-c-s3 (Windows)
@@ -274,10 +302,12 @@ jobs:
 
       - name: Verify Java Setup
         if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
+        env:
+          INPUT_FORCE_JAVA_IMPLEMENTATION: ${{ inputs.force_java_implementation }}
         run: |
           java -version
           echo "JAVA_HOME=$JAVA_HOME"
-          echo "Selected Java implementation: ${{ inputs.force_java_implementation }}"
+          echo "Selected Java implementation: $INPUT_FORCE_JAVA_IMPLEMENTATION"
 
       - name: Set environment for MSVC (Windows)
         if: ${{ matrix.os_name == 'Windows MSVC' }}
@@ -298,13 +328,18 @@ jobs:
       # For Windows, use vcpkg toolchain file to allow find_package() calls to resolve
       - name: "Configure (vcpkg; ROS3 testing: ${{ matrix.test_ros3 }})"
         if: ${{ matrix.os_name == 'Windows MSVC' }}
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+          MATRIX_TEST_ROS3: ${{ matrix.test_ros3 }}
+          INPUT_FORCE_JAVA_IMPLEMENTATION == 'JNI': ${{ inputs.force_java_implementation == 'jni' }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          cd "$RUNNER_WORKSPACE/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             --log-level=VERBOSE \
             -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
             -DHDF5_ENABLE_WARNINGS_AS_ERRORS=ON \
@@ -316,20 +351,25 @@ jobs:
             -DLIBAEC_USE_LOCALCONTENT=OFF \
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
-            -DHDF5_ENABLE_ROS3_VFD_DOCKER_PROXY=${{ matrix.test_ros3 }} \
+            -DHDF5_ENABLE_ROS3_VFD_DOCKER_PROXY=$MATRIX_TEST_ROS3 \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
-            -DHDF5_ENABLE_JNI:BOOL=${{ inputs.force_java_implementation == 'jni' }} \
+            -DHDF5_ENABLE_JNI:BOOL=$INPUT_FORCE_JAVA_IMPLEMENTATION == 'JNI' \
             $GITHUB_WORKSPACE
         shell: bash
 
       - name: "Configure (ROS3 testing: ${{ matrix.test_ros3 }})"
         if: ${{ matrix.os_name != 'Windows MSVC' }}
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+          MATRIX_TEST_ROS3: ${{ matrix.test_ros3 }}
+          INPUT_FORCE_JAVA_IMPLEMENTATION == 'JNI': ${{ inputs.force_java_implementation == 'jni' }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          cd "$RUNNER_WORKSPACE/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             --log-level=VERBOSE \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
             -DHDF5_ENABLE_WARNINGS_AS_ERRORS=ON \
@@ -341,30 +381,38 @@ jobs:
             -DLIBAEC_USE_LOCALCONTENT=OFF \
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
-            -DHDF5_ENABLE_ROS3_VFD_DOCKER_PROXY=${{ matrix.test_ros3 }} \
+            -DHDF5_ENABLE_ROS3_VFD_DOCKER_PROXY=$MATRIX_TEST_ROS3 \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
-            -DHDF5_ENABLE_JNI:BOOL=${{ inputs.force_java_implementation == 'jni' }} \
+            -DHDF5_ENABLE_JNI:BOOL=$INPUT_FORCE_JAVA_IMPLEMENTATION == 'JNI' \
             $GITHUB_WORKSPACE
         shell: bash
 
       - name: Build
-        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+        run: cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Tests
         if: matrix.test_ros3 == 'ON'
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           # For now, just run S3 tests
-          ctest . -C ${{ inputs.build_mode }} -R "S3TEST"
+          ctest . -C $INPUT_BUILD_MODE -R "S3TEST"
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Package
-        run: cpack -C ${{ inputs.build_mode }} -V
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+        run: cpack -C $INPUT_BUILD_MODE -V
         working-directory: ${{ runner.workspace }}/build
 
       - name: List files in the space
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-              ls -l ${{ runner.workspace }}/build
+              ls -l $RUNNER_WORKSPACE/build
 
       # Save files created by CTest script
       - name: Save published binary (Windows)

@@ -61,10 +61,11 @@ jobs:
     steps:
       - name: Identify GPG Status
         id: set-gpg-state
-        env: 
+        env:
             gpg_secret: ${{ secrets.GPG_PRIVATE_KEY }}
+            ENV_GPG_SECRET: ${{ env.gpg_secret }}
         run: |
-          if [[ '${{ env.gpg_secret }}' == '' ]]
+          if [[ '$ENV_GPG_SECRET' == '' ]]
           then
             GPG_VAL=$(echo 'notexists')
           else
@@ -284,6 +285,8 @@ jobs:
       - name: Create Maven settings.xml
         env:
           REPOSITORY_ID: ${{ inputs.repository_id }}
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
         run: |
           mkdir -p ~/.m2
           cat > ~/.m2/settings.xml << EOF
@@ -295,8 +298,8 @@ jobs:
             <servers>
               <server>
                 <id>${REPOSITORY_ID}</id>
-                <username>${{ secrets.MAVEN_USERNAME }}</username>
-                <password>${{ secrets.MAVEN_PASSWORD }}</password>
+                <username>$MAVEN_USERNAME</username>
+                <password>$MAVEN_PASSWORD</password>
               </server>
             </servers>
           </settings>
@@ -304,8 +307,10 @@ jobs:
 
       - name: Import GPG key (if provided)
         if: ${{ needs.check-secret.outputs.gpg-state == 'exists' }}
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
-          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
           echo "GPG key imported for artifact signing"
 
       - name: Deploy JAR artifacts
@@ -318,6 +323,11 @@ jobs:
           DEPLOY_SNAPSHOTS: ${{ inputs.deploy_snapshots }}
           VALIDATE_ARTIFACTS_JAR_FILES: ${{ needs.validate-artifacts.outputs.jar-files }}
           VALIDATE_ARTIFACTS_POM_FILE: ${{ needs.validate-artifacts.outputs.pom-file }}
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          GPG_PRIVATE_KEY != '': ${{ secrets.GPG_PRIVATE_KEY != '' }}
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
         run: |
           echo "=== Maven Deployment Debug Info ==="
           echo "Version: ${HDF5_VERSION}"
@@ -326,9 +336,9 @@ jobs:
           echo "Platform Classifier: ${PLATFORM_CLASSIFIER}"
           echo "Dry Run: $DRY_RUN"
           echo "Deploy Snapshots: $DEPLOY_SNAPSHOTS"
-          echo "Username: ${{ secrets.MAVEN_USERNAME }}"
+          echo "Username: $MAVEN_USERNAME"
           echo "Password length: ${#MAVEN_PASSWORD} chars"
-          echo "GPG Private Key available: ${{ secrets.GPG_PRIVATE_KEY != '' }}"
+          echo "GPG Private Key available: $GPG_PRIVATE_KEY != ''"
 
           # Check Maven configuration
           echo "=== Maven Configuration ==="
@@ -337,8 +347,8 @@ jobs:
 
           # Set GPG options if available
           GPG_OPTS=""
-          if [ -n "${{ secrets.GPG_PRIVATE_KEY }}" ]; then
-            GPG_OPTS="-Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}"
+          if [ -n "$GPG_PRIVATE_KEY" ]; then
+            GPG_OPTS="-Dgpg.passphrase=$GPG_PASSPHRASE"
             echo "GPG signing enabled"
           else
             echo "GPG signing disabled (no private key)"
@@ -451,7 +461,7 @@ jobs:
                 curl -I "$REPOSITORY_URL" || echo "Repository not accessible via curl"
 
                 echo "Testing authentication..."
-                curl -u "${{ secrets.MAVEN_USERNAME }}:${{ secrets.MAVEN_PASSWORD }}" \
+                curl -u "$MAVEN_USERNAME:$MAVEN_PASSWORD" \
                      -I "$REPOSITORY_URL" || echo "Authentication test failed"
               fi
             fi
@@ -471,6 +481,7 @@ jobs:
         env:
           HDF5_VERSION: ${{ needs.validate-artifacts.outputs.hdf5-version }}
           REPOSITORY_URL: ${{ inputs.repository_url }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
         run: |
           echo "=== Deployment Verification ==="
 
@@ -484,7 +495,7 @@ jobs:
             # Extract owner/repo from URL
             REPO_PATH=$(echo "$REPOSITORY_URL" | sed 's|.*maven.pkg.github.com/||')
 
-            curl -s -H "Authorization: token ${{ secrets.MAVEN_PASSWORD }}" \
+            curl -s -H "Authorization: token $MAVEN_PASSWORD" \
               "https://api.github.com/users/HDFGroup/packages?package_type=maven" | \
               grep -q "hdf5-java" && echo "✓ Package verified in GitHub Packages" || echo "⚠ Package verification pending"
           fi
@@ -500,13 +511,15 @@ jobs:
       - name: Generate deployment summary
         env:
           REPOSITORY_URL: ${{ inputs.repository_url }}
+          NEEDS_VALIDATE_ARTIFACTS_OUTPUTS_HDF5_VERSION: ${{ needs.validate-artifacts.outputs.hdf5-version }}
+          NEEDS_DEPLOY_MAVEN_RESULT: ${{ needs.deploy-maven.result || 'skipped (dry-run)' }}
         run: |
           cat > maven-deployment-summary.md << EOF
           # Maven Deployment Summary
 
-          **Version**: ${{ needs.validate-artifacts.outputs.hdf5-version }}
+          **Version**: $NEEDS_VALIDATE_ARTIFACTS_OUTPUTS_HDF5_VERSION
           **Repository**: ${REPOSITORY_URL}
-          **Deployment Status**: ${{ needs.deploy-maven.result || 'skipped (dry-run)' }}
+          **Deployment Status**: $NEEDS_DEPLOY_MAVEN_RESULT
 
           ## HDF5 Java Library
 
@@ -514,7 +527,7 @@ jobs:
           <dependency>
               <groupId>org.hdfgroup</groupId>
               <artifactId>hdf5-java</artifactId>
-              <version>${{ needs.validate-artifacts.outputs.hdf5-version }}</version>
+              <version>$NEEDS_VALIDATE_ARTIFACTS_OUTPUTS_HDF5_VERSION</version>
               <classifier>linux-x86_64</classifier> <!-- or windows-x86_64, macos-x86_64, macos-aarch64 -->
           </dependency>
           \`\`\`
@@ -525,7 +538,7 @@ jobs:
           <dependency>
               <groupId>org.hdfgroup</groupId>
               <artifactId>hdf5-java-examples</artifactId>
-              <version>${{ needs.validate-artifacts.outputs.hdf5-version }}</version>
+              <version>$NEEDS_VALIDATE_ARTIFACTS_OUTPUTS_HDF5_VERSION</version>
           </dependency>
           \`\`\`
 
@@ -533,10 +546,10 @@ jobs:
 
           \`\`\`kotlin
           // HDF5 Java Library
-          implementation("org.hdfgroup:hdf5-java:${{ needs.validate-artifacts.outputs.hdf5-version }}:linux-x86_64")
+          implementation("org.hdfgroup:hdf5-java:$NEEDS_VALIDATE_ARTIFACTS_OUTPUTS_HDF5_VERSION:linux-x86_64")
 
           // HDF5 Java Examples (62 examples)
-          implementation("org.hdfgroup:hdf5-java-examples:${{ needs.validate-artifacts.outputs.hdf5-version }}")
+          implementation("org.hdfgroup:hdf5-java-examples:$NEEDS_VALIDATE_ARTIFACTS_OUTPUTS_HDF5_VERSION")
           \`\`\`
 
           ## Available Packages

@@ -64,8 +64,9 @@ jobs:
       env:
         GITHUB_SHA: ${{ github.sha }}
         GITHUB_WF_SHA: ${{ github.workflow_sha }}
+        ENV_GITHUB_WF_SHA: ${{ env.GITHUB_WF_SHA }}
       run: |
-        SHORT_SHA=$(echo "${{ env.GITHUB_WF_SHA }}" | cut -c1-7)
+        SHORT_SHA=$(echo "$ENV_GITHUB_WF_SHA" | cut -c1-7)
         echo "BRANCH_SHA=$SHORT_SHA" >> $GITHUB_OUTPUT
 
     - name: Check for changed source
@@ -114,16 +115,22 @@ jobs:
 
       - name: Set file base name
         id: set-file-base
+        env:
+          INPUT_USE_ENVIRON: ${{ inputs.use_environ }}
+          NEEDS_CHECK_COMMITS_OUTPUTS_BRANCH_REF: ${{ needs.check_commits.outputs.branch_ref }}
+          NEEDS_CHECK_COMMITS_OUTPUTS_BRANCH_SHA: ${{ needs.check_commits.outputs.branch_sha }}
+          INPUT_USE_TAG: ${{ inputs.use_tag }}
+          VERSION_SOURCE_TAG: ${{ steps.version.outputs.SOURCE_TAG }}
         run: |
-          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          if [[ '$INPUT_USE_ENVIRON' == 'snapshots' ]]
           then
-            FILE_NAME_BASE=$(echo "hdf5-${{ needs.check_commits.outputs.branch_ref }}-${{ needs.check_commits.outputs.branch_sha }}")
+            FILE_NAME_BASE=$(echo "hdf5-$NEEDS_CHECK_COMMITS_OUTPUTS_BRANCH_REF-$NEEDS_CHECK_COMMITS_OUTPUTS_BRANCH_SHA")
           else
-            if [[ '${{ inputs.use_tag }}' == 'snapshot' ]]
+            if [[ '$INPUT_USE_TAG' == 'snapshot' ]]
             then
               FILE_NAME_BASE=$(echo "snapshot")
             else
-              FILE_NAME_BASE=$(echo "hdf5-${{ steps.version.outputs.SOURCE_TAG }}")
+              FILE_NAME_BASE=$(echo "hdf5-$VERSION_SOURCE_TAG")
             fi
           fi
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
@@ -132,9 +139,11 @@ jobs:
       - name: Create snapshot file base name
         id: create-file-base
         if: ${{ (inputs.use_environ == 'snapshots') }}
+        env:
+          NEEDS_CHECK_COMMITS_OUTPUTS_BRANCH_REF: ${{ needs.check_commits.outputs.branch_ref }}
         run: |
           cd "$GITHUB_WORKSPACE/hdfsrc"
-          bin/release -d $GITHUB_WORKSPACE --branch ${{ needs.check_commits.outputs.branch_ref }} --revision gzip zip
+          bin/release -d $GITHUB_WORKSPACE --branch $NEEDS_CHECK_COMMITS_OUTPUTS_BRANCH_REF --revision gzip zip
         shell: bash
 
       - name: Create release file base name
@@ -148,17 +157,22 @@ jobs:
       - name: Copy the release file source to a non-versioned file name
         id: cp-to-non-versioned
         if: ${{ (inputs.use_environ == 'release') }}
+        env:
+          VERSION_SOURCE_TAG: ${{ steps.version.outputs.SOURCE_TAG }}
         run: |
-          cp hdf5-${{ steps.version.outputs.SOURCE_TAG }}.tar.gz hdf5.tar.gz
-          cp hdf5-${{ steps.version.outputs.SOURCE_TAG }}.zip hdf5.zip
+          cp hdf5-$VERSION_SOURCE_TAG.tar.gz hdf5.tar.gz
+          cp hdf5-$VERSION_SOURCE_TAG.zip hdf5.zip
         shell: bash
 
       - name: Rename release file base name
         id: ren-basename
         if: ${{ (inputs.use_environ == 'release') && (inputs.use_tag  == 'snapshot') }}
+        env:
+          VERSION_SOURCE_TAG: ${{ steps.version.outputs.SOURCE_TAG }}
+          INPUT_USE_TAG: ${{ inputs.use_tag }}
         run: |
-          mv hdf5-${{ steps.version.outputs.SOURCE_TAG }}.tar.gz ${{ inputs.use_tag }}.tar.gz
-          mv hdf5-${{ steps.version.outputs.SOURCE_TAG }}.zip ${{ inputs.use_tag }}.zip
+          mv hdf5-$VERSION_SOURCE_TAG.tar.gz $INPUT_USE_TAG.tar.gz
+          mv hdf5-$VERSION_SOURCE_TAG.zip $INPUT_USE_TAG.zip
         shell: bash
 
       - name: List files in the repository

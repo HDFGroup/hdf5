@@ -70,13 +70,16 @@ jobs:
 
       # CONFIGURE
       - name: Configure
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          cd "$RUNNER_WORKSPACE/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             -G "Visual Studio 17 2022" -A ARM64 \
             --log-level=VERBOSE \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
             -DHDF5_ENABLE_DOXY_WARNINGS:BOOL=ON \
             -DHDF5_BUILD_FORTRAN:BOOL=OFF \
             -DHDF5_BUILD_JAVA=ON \
@@ -92,12 +95,15 @@ jobs:
         if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent != 'CC'}}
 
       - name: Configure (Thread-Safe)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          cd "$RUNNER_WORKSPACE/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             -G "Visual Studio 17 2022" -A ARM64 \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
             -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
             -DHDF5_ENABLE_CONCURRENCY:BOOL=OFF \
             -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
@@ -116,12 +122,15 @@ jobs:
         if: ${{ inputs.thread_safety == 'TS' && inputs.concurrent != 'CC'}}
 
       - name: Configure (Concurrency)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          cd "$RUNNER_WORKSPACE/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             -G "Visual Studio 17 2022" -A ARM64 \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
             -DHDF5_ENABLE_THREADSAFE:BOOL=OFF \
             -DHDF5_ENABLE_CONCURRENCY:BOOL=ON \
@@ -140,21 +149,29 @@ jobs:
 
       # BUILD
       - name: Build
-        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+        run: cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
       - name: Run Tests
-        run: ctest . --parallel 2 -C ${{ inputs.build_mode }}
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+        run: ctest . --parallel 2 -C $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Package
-        run: cpack -C ${{ inputs.build_mode }} -V
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+        run: cpack -C $INPUT_BUILD_MODE -V
         working-directory: ${{ runner.workspace }}/build
 
       - name: List files in the space
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-              ls -l ${{ runner.workspace }}/build
+              ls -l $RUNNER_WORKSPACE/build
 
       # Save files created by CTest script
       - name: Save published binary (Windows)
@@ -184,13 +201,16 @@ jobs:
 
       # CONFIGURE
       - name: Configure
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-           mkdir "${{ runner.workspace }}/build"
-           cd "${{ runner.workspace }}/build"
+           mkdir "$RUNNER_WORKSPACE/build"
+           cd "$RUNNER_WORKSPACE/build"
            cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
              -G Ninja \
              --log-level=VERBOSE \
-             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+             -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
              -DHDF5_ENABLE_DOXY_WARNINGS:BOOL=ON \
              -DHDF5_BUILD_DOC:BOOL=ON \
              -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
@@ -204,12 +224,15 @@ jobs:
         if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent != 'CC'}}
 
       - name: Configure (Thread-Safe)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-           mkdir "${{ runner.workspace }}/build"
-           cd "${{ runner.workspace }}/build"
+           mkdir "$RUNNER_WORKSPACE/build"
+           cd "$RUNNER_WORKSPACE/build"
            cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
              -G Ninja \
-             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+             -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
              -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
              -DHDF5_ENABLE_CONCURRENCY:BOOL=OFF \
              -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
@@ -228,9 +251,11 @@ jobs:
         if: ${{ inputs.thread_safety == 'TS' && inputs.concurrent != 'CC'}}
 
       - name: Configure (Concurrency)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-           mkdir "${{ runner.workspace }}/build"
-           cd "${{ runner.workspace }}/build"
+           mkdir "$RUNNER_WORKSPACE/build"
+           cd "$RUNNER_WORKSPACE/build"
            cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
              -G Ninja \
              -DHDF5_ENABLE_THREADSAFE:BOOL=OFF \
@@ -250,21 +275,29 @@ jobs:
 
       # BUILD
       - name: Build
-        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+        run: cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
       - name: Run Tests
-        run: ctest . --parallel 2 -C ${{ inputs.build_mode }}
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+        run: ctest . --parallel 2 -C $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Package
-        run: cpack -C ${{ inputs.build_mode }} -V
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+        run: cpack -C $INPUT_BUILD_MODE -V
         working-directory: ${{ runner.workspace }}/build
 
       - name: List files in the space
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-               ls -l ${{ runner.workspace }}/build
+               ls -l $RUNNER_WORKSPACE/build
 
       - name: Save published binary (linux)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
@@ -299,13 +332,16 @@ jobs:
 
       # CONFIGURE
       - name: Configure
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          cd "$RUNNER_WORKSPACE/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             -G Ninja \
             --log-level=VERBOSE \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
             -DHDF5_ENABLE_DOXY_WARNINGS:BOOL=ON \
             -DHDF5_BUILD_FORTRAN:BOOL=OFF \
             -DHDF5_BUILD_DOC:BOOL=ON \
@@ -323,12 +359,15 @@ jobs:
         if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent != 'CC'}}
 
       - name: Configure (Thread-Safe)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          cd "$RUNNER_WORKSPACE/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             -G Ninja \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
             -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
             -DHDF5_ENABLE_CONCURRENCY:BOOL=OFF \
             -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
@@ -348,12 +387,15 @@ jobs:
         if: ${{ inputs.thread_safety == 'TS' && inputs.concurrent != 'CC'}}
 
       - name: Configure (Concurrency)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          cd "$RUNNER_WORKSPACE/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             -G Ninja \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
             -DHDF5_ENABLE_THREADSAFE:BOOL=OFF \
             -DHDF5_ENABLE_CONCURRENCY:BOOL=ON \
             -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
@@ -371,27 +413,35 @@ jobs:
 
       # BUILD
       - name: Build
-        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+        run: cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
       - name: Run Tests
-        run: ctest . --parallel 2 -C ${{ inputs.build_mode }}
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+        run: ctest . --parallel 2 -C $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Package
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           # Disable indexing to prevent file locking during CPack
           sudo mdutil -i off / || true
 
           # Run cpack with retry
-          cpack -C ${{ inputs.build_mode }} -V || (sleep 5 && cpack -C ${{ inputs.build_mode }} -V)
+          cpack -C $INPUT_BUILD_MODE -V || (sleep 5 && cpack -C $INPUT_BUILD_MODE -V)
         working-directory: ${{ runner.workspace }}/build
         shell: bash
 
       - name: List files in the space
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-              ls -l ${{ runner.workspace }}/build
+              ls -l $RUNNER_WORKSPACE/build
 
       - name: Save published binary (Mac_latest)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5

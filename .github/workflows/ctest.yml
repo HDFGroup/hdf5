@@ -66,10 +66,11 @@ jobs:
     steps:
       - name: Identify Signing Status
         id: set-signing-state
-        env: 
+        env:
             signing_secret: ${{ secrets.AZURE_ENDPOINT }}
+            ENV_SIGNING_SECRET: ${{ env.signing_secret }}
         run: |
-          if [[ '${{ env.signing_secret }}' == '' ]]
+          if [[ '$ENV_SIGNING_SECRET' == '' ]]
           then
             SIGN_VAL=$(echo 'notexists')
           else
@@ -141,9 +142,11 @@ jobs:
         run: Get-Location
 
       - name: List files for the space (Windows)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
-              Get-ChildItem -Path ${{ runner.workspace }}
+              Get-ChildItem -Path $RUNNER_WORKSPACE
         shell: pwsh
 
       - name: Uncompress source (Windows)
@@ -174,8 +177,9 @@ jobs:
           SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
           PRESET_NAME: ${{ inputs.preset_name }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          cd "${{ runner.workspace }}/hdf5/$SET_FILE_BASE_SOURCE_BASE"
+          cd "$RUNNER_WORKSPACE/hdf5/$SET_FILE_BASE_SOURCE_BASE"
           cmake --workflow --preset=$PRESET_NAME-MSVC --fresh
         shell: bash
 
@@ -201,13 +205,14 @@ jobs:
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
           PRESET_NAME: ${{ inputs.preset_name }}
           SET_FILE_BASE_FILE_BASE: ${{ steps.set-file-base.outputs.FILE_BASE }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/$env:SET_FILE_BASE_SOURCE_BASE/LICENSE -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/$env:PRESET_NAME-MSVC/README.md -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/$env:PRESET_NAME-MSVC/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          mkdir "$RUNNER_WORKSPACE/build/hdf5"
+          Copy-Item -Path $RUNNER_WORKSPACE/hdf5/$env:SET_FILE_BASE_SOURCE_BASE/LICENSE -Destination $RUNNER_WORKSPACE/build/hdf5/
+          Copy-Item -Path $RUNNER_WORKSPACE/hdf5/build/$env:PRESET_NAME-MSVC/README.md -Destination $RUNNER_WORKSPACE/build/hdf5/
+          Copy-Item -Path $RUNNER_WORKSPACE/hdf5/build/$env:PRESET_NAME-MSVC/* -Destination $RUNNER_WORKSPACE/build/hdf5/ -Include *.zip
+          cd "$RUNNER_WORKSPACE/build"
           7z a -tzip $env:SET_FILE_BASE_FILE_BASE-win-vs2022_cl.zip hdf5
         shell: pwsh
 
@@ -216,15 +221,18 @@ jobs:
         env:
           PRESET_NAME: ${{ inputs.preset_name }}
           SET_FILE_BASE_FILE_BASE: ${{ steps.set-file-base.outputs.FILE_BASE }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          mkdir "${{ runner.workspace }}/buildmsi"
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/$env:PRESET_NAME-MSVC/* -Destination ${{ runner.workspace }}/buildmsi/$env:SET_FILE_BASE_FILE_BASE-win-vs2022_cl.msi -Include *.msi
+          mkdir "$RUNNER_WORKSPACE/buildmsi"
+          Copy-Item -Path $RUNNER_WORKSPACE/hdf5/build/$env:PRESET_NAME-MSVC/* -Destination $RUNNER_WORKSPACE/buildmsi/$env:SET_FILE_BASE_FILE_BASE-win-vs2022_cl.msi -Include *.msi
         shell: pwsh
 
       - name: List files in the space (Windows)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
-              Get-ChildItem -Path ${{ runner.workspace }}
+              Get-ChildItem -Path $RUNNER_WORKSPACE
         shell: pwsh
 
       # Save files created by CTest script
@@ -318,9 +326,11 @@ jobs:
         run: Get-Location
 
       - name: List files for the space (Windows ARM64)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
-              Get-ChildItem -Path ${{ runner.workspace }}
+              Get-ChildItem -Path $RUNNER_WORKSPACE
         shell: pwsh
 
       - name: Uncompress source (Windows ARM64)
@@ -359,8 +369,9 @@ jobs:
           SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/arm64
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
           PRESET_NAME: ${{ inputs.preset_name }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          cd "${{ runner.workspace }}/hdf5/$SET_FILE_BASE_SOURCE_BASE"
+          cd "$RUNNER_WORKSPACE/hdf5/$SET_FILE_BASE_SOURCE_BASE"
           cmake --workflow --preset=$PRESET_NAME-MSVC-ARM64 --fresh
         shell: bash
 
@@ -386,13 +397,14 @@ jobs:
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
           PRESET_NAME: ${{ inputs.preset_name }}
           SET_FILE_BASE_FILE_BASE: ${{ steps.set-file-base.outputs.FILE_BASE }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/$env:SET_FILE_BASE_SOURCE_BASE/LICENSE -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/$env:PRESET_NAME-MSVC-ARM64/README.md -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/$env:PRESET_NAME-MSVC-ARM64/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          mkdir "$RUNNER_WORKSPACE/build/hdf5"
+          Copy-Item -Path $RUNNER_WORKSPACE/hdf5/$env:SET_FILE_BASE_SOURCE_BASE/LICENSE -Destination $RUNNER_WORKSPACE/build/hdf5/
+          Copy-Item -Path $RUNNER_WORKSPACE/hdf5/build/$env:PRESET_NAME-MSVC-ARM64/README.md -Destination $RUNNER_WORKSPACE/build/hdf5/
+          Copy-Item -Path $RUNNER_WORKSPACE/hdf5/build/$env:PRESET_NAME-MSVC-ARM64/* -Destination $RUNNER_WORKSPACE/build/hdf5/ -Include *.zip
+          cd "$RUNNER_WORKSPACE/build"
           7z a -tzip $env:SET_FILE_BASE_FILE_BASE-win-vs2022_cl_arm64.zip hdf5
         shell: pwsh
 
@@ -401,15 +413,18 @@ jobs:
         env:
           PRESET_NAME: ${{ inputs.preset_name }}
           SET_FILE_BASE_FILE_BASE: ${{ steps.set-file-base.outputs.FILE_BASE }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          mkdir "${{ runner.workspace }}/buildmsi"
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/$env:PRESET_NAME-MSVC-ARM64/* -Destination ${{ runner.workspace }}/buildmsi/$env:SET_FILE_BASE_FILE_BASE-win-vs2022_cl_arm64.msi -Include *.msi
+          mkdir "$RUNNER_WORKSPACE/buildmsi"
+          Copy-Item -Path $RUNNER_WORKSPACE/hdf5/build/$env:PRESET_NAME-MSVC-ARM64/* -Destination $RUNNER_WORKSPACE/buildmsi/$env:SET_FILE_BASE_FILE_BASE-win-vs2022_cl_arm64.msi -Include *.msi
         shell: pwsh
 
       - name: List files in the space (Windows ARM64)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
-              Get-ChildItem -Path ${{ runner.workspace }}
+              Get-ChildItem -Path $RUNNER_WORKSPACE
         shell: pwsh
 
       # Save files created by CTest script
@@ -490,9 +505,11 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (Linux)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls -l ${{ github.workspace }}
-              ls ${{ runner.workspace }}
+              ls $RUNNER_WORKSPACE
 
       - name: Uncompress source (Linux)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
@@ -504,8 +521,9 @@ jobs:
           MAVEN_ENABLED: ${{ inputs.maven_enabled }}
           USE_ENVIRON: ${{ inputs.use_environ }}
           PRESET_NAME: ${{ inputs.preset_name }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          cd "${{ runner.workspace }}/hdf5/$SET_FILE_BASE_SOURCE_BASE"
+          cd "$RUNNER_WORKSPACE/hdf5/$SET_FILE_BASE_SOURCE_BASE"
           if [ "$MAVEN_ENABLED" == "true" ]; then
             if [ "$USE_ENVIRON" == "release" ]; then
               echo "Building with Maven release preset"
@@ -528,13 +546,14 @@ jobs:
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
           RUN_CTEST_ACTIVE_PRESET: ${{ steps.run-ctest.outputs.ACTIVE_PRESET }}
           SET_FILE_BASE_FILE_BASE: ${{ steps.set-file-base.outputs.FILE_BASE }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-          cp ${{ runner.workspace }}/hdf5/$SET_FILE_BASE_SOURCE_BASE/LICENSE ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/$RUN_CTEST_ACTIVE_PRESET/README.md ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/$RUN_CTEST_ACTIVE_PRESET/*.tar.gz ${{ runner.workspace }}/build/hdf5
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          mkdir "$RUNNER_WORKSPACE/build/hdf5"
+          cp $RUNNER_WORKSPACE/hdf5/$SET_FILE_BASE_SOURCE_BASE/LICENSE $RUNNER_WORKSPACE/build/hdf5
+          cp $RUNNER_WORKSPACE/hdf5/build/$RUN_CTEST_ACTIVE_PRESET/README.md $RUNNER_WORKSPACE/build/hdf5
+          cp $RUNNER_WORKSPACE/hdf5/build/$RUN_CTEST_ACTIVE_PRESET/*.tar.gz $RUNNER_WORKSPACE/build/hdf5
+          cd "$RUNNER_WORKSPACE/build"
           tar -zcvf $SET_FILE_BASE_FILE_BASE-ubuntu-2404_gcc.tar.gz hdf5
         shell: bash
 
@@ -543,9 +562,10 @@ jobs:
         env:
           RUN_CTEST_ACTIVE_PRESET: ${{ steps.run-ctest.outputs.ACTIVE_PRESET }}
           SET_FILE_BASE_FILE_BASE: ${{ steps.set-file-base.outputs.FILE_BASE }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          mkdir "${{ runner.workspace }}/builddeb"
-          cp ${{ runner.workspace }}/hdf5/build/$RUN_CTEST_ACTIVE_PRESET/*.deb ${{ runner.workspace }}/builddeb/$SET_FILE_BASE_FILE_BASE-ubuntu-2404_gcc.deb
+          mkdir "$RUNNER_WORKSPACE/builddeb"
+          cp $RUNNER_WORKSPACE/hdf5/build/$RUN_CTEST_ACTIVE_PRESET/*.deb $RUNNER_WORKSPACE/builddeb/$SET_FILE_BASE_FILE_BASE-ubuntu-2404_gcc.deb
         shell: bash
 
       - name: Publish rpm binary (Linux)
@@ -553,15 +573,18 @@ jobs:
         env:
           RUN_CTEST_ACTIVE_PRESET: ${{ steps.run-ctest.outputs.ACTIVE_PRESET }}
           SET_FILE_BASE_FILE_BASE: ${{ steps.set-file-base.outputs.FILE_BASE }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          mkdir "${{ runner.workspace }}/buildrpm"
-          cp ${{ runner.workspace }}/hdf5/build/$RUN_CTEST_ACTIVE_PRESET/*.rpm ${{ runner.workspace }}/buildrpm/$SET_FILE_BASE_FILE_BASE-ubuntu-2404_gcc.rpm
+          mkdir "$RUNNER_WORKSPACE/buildrpm"
+          cp $RUNNER_WORKSPACE/hdf5/build/$RUN_CTEST_ACTIVE_PRESET/*.rpm $RUNNER_WORKSPACE/buildrpm/$SET_FILE_BASE_FILE_BASE-ubuntu-2404_gcc.rpm
         shell: bash
 
       - name: List files in the space (Linux)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls ${{ github.workspace }}
-              ls -l ${{ runner.workspace }}
+              ls -l $RUNNER_WORKSPACE
 
       # Save files created by CTest script
       - name: Save published binary (Linux)
@@ -598,24 +621,25 @@ jobs:
         if: ${{ inputs.maven_enabled == true }}
         env:
           RUN_CTEST_ACTIVE_PRESET: ${{ steps.run-ctest.outputs.ACTIVE_PRESET }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           echo "Collecting Maven artifacts for deployment..."
-          mkdir -p ${{ runner.workspace }}/maven-artifacts
+          mkdir -p $RUNNER_WORKSPACE/maven-artifacts
 
           # Determine the build directory based on Maven preset used
-          BUILD_DIR="${{ runner.workspace }}/hdf5/build/$RUN_CTEST_ACTIVE_PRESET"
+          BUILD_DIR="$RUNNER_WORKSPACE/hdf5/build/$RUN_CTEST_ACTIVE_PRESET"
 
           echo "Looking for artifacts in: ${BUILD_DIR}"
 
           # Copy JAR files
-          find "${BUILD_DIR}" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+          find "${BUILD_DIR}" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" -exec cp {} $RUNNER_WORKSPACE/maven-artifacts/ \;
 
           # Copy POM files
-          find "${BUILD_DIR}" -name "pom.xml" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+          find "${BUILD_DIR}" -name "pom.xml" -exec cp {} $RUNNER_WORKSPACE/maven-artifacts/ \;
 
           # List collected artifacts
           echo "Collected Maven artifacts:"
-          ls -la ${{ runner.workspace }}/maven-artifacts/
+          ls -la $RUNNER_WORKSPACE/maven-artifacts/
         shell: bash
 
       - name: Upload Maven artifacts (Linux)
@@ -657,10 +681,11 @@ jobs:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
           P12_PASSWORD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
           KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
         run: |
             # create variables
             CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-            KEYCHAIN_FILE=${{ vars.KEYCHAIN_NAME }}.keychain
+            KEYCHAIN_FILE=$KEYCHAIN_NAME.keychain
             # import certificate from secrets
             echo $BUILD_CERTIFICATE_BASE64 | base64 --decode > $CERTIFICATE_PATH
             security -v create-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
@@ -704,9 +729,11 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (MacOS_latest)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls ${{ github.workspace }}
-              ls ${{ runner.workspace }}
+              ls $RUNNER_WORKSPACE
 
       - name: Uncompress source (MacOS_latest)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
@@ -726,8 +753,9 @@ jobs:
           SIGNER: ${{ vars.SIGNER }}
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
           PRESET_NAME: ${{ inputs.preset_name }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          cd "${{ runner.workspace }}/hdf5/$SET_FILE_BASE_SOURCE_BASE"
+          cd "$RUNNER_WORKSPACE/hdf5/$SET_FILE_BASE_SOURCE_BASE"
           cmake --workflow --preset=$PRESET_NAME-macos-Clang --fresh
         shell: bash
 
@@ -741,24 +769,28 @@ jobs:
           NOTARY_KEY: ${{ vars.NOTARY_KEY }}
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
           PRESET_NAME: ${{ inputs.preset_name }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          ENV_SIGNER: ${{ env.SIGNER }}
         run: |
-          /usr/bin/codesign --force --timestamp --options runtime --entitlements ${{ runner.workspace }}/hdf5/$SET_FILE_BASE_SOURCE_BASE/config/install/distribution.entitlements --verbose=4 --strict --sign ${{ env.SIGNER }} --deep ${{ runner.workspace }}/hdf5/build/$PRESET_NAME-macos-Clang/*.dmg
+          /usr/bin/codesign --force --timestamp --options runtime --entitlements $RUNNER_WORKSPACE/hdf5/$SET_FILE_BASE_SOURCE_BASE/config/install/distribution.entitlements --verbose=4 --strict --sign $ENV_SIGNER --deep $RUNNER_WORKSPACE/hdf5/build/$PRESET_NAME-macos-Clang/*.dmg
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
         shell: bash
 
       - name: Check dmg timestamp (MacOS_latest)
         env:
           PRESET_NAME: ${{ inputs.preset_name }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          /usr/bin/codesign -dvv ${{ runner.workspace }}/hdf5/build/$PRESET_NAME-macos-Clang/*.dmg
+          /usr/bin/codesign -dvv $RUNNER_WORKSPACE/hdf5/build/$PRESET_NAME-macos-Clang/*.dmg
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
         shell: bash
 
       - name: Verify dmg (MacOS_latest)
         env:
           PRESET_NAME: ${{ inputs.preset_name }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          /usr/bin/hdiutil verify ${{ runner.workspace }}/hdf5/build/$PRESET_NAME-macos-Clang/*.dmg
+          /usr/bin/hdiutil verify $RUNNER_WORKSPACE/hdf5/build/$PRESET_NAME-macos-Clang/*.dmg
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
         shell: bash
 
@@ -771,17 +803,24 @@ jobs:
           NOTARY_USER: ${{ vars.NOTARY_USER }}
           NOTARY_KEY: ${{ vars.NOTARY_KEY }}
           PRESET_NAME: ${{ inputs.preset_name }}
+          ENV_NOTARY_USER: ${{ env.NOTARY_USER }}
+          ENV_NOTARY_KEY: ${{ env.NOTARY_KEY }}
+          ENV_SIGNER: ${{ env.SIGNER }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          jsonout=$(/usr/bin/xcrun notarytool submit --wait --output-format json --apple-id ${{ env.NOTARY_USER }} --password ${{ env.NOTARY_KEY }} --team-id ${{ env.SIGNER }} ${{ runner.workspace }}/hdf5/build/$PRESET_NAME-macos-Clang/*.dmg)
+          jsonout=$(/usr/bin/xcrun notarytool submit --wait --output-format json --apple-id $ENV_NOTARY_USER --password $ENV_NOTARY_KEY --team-id $ENV_SIGNER $RUNNER_WORKSPACE/hdf5/build/$PRESET_NAME-macos-Clang/*.dmg)
           echo "JSONOUT=$jsonout" >> $GITHUB_OUTPUT
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
         shell: bash
 
       - name: Get ID token (MacOS_latest)
         id: get-id-token
+        env:
+          FROMJSON_STEPS_NOTARIZE_DMG_OUTPUTS_JSONOUT_: ${{ fromJson(steps.notarize-dmg.outputs.JSONOUT) }}
+          FROMJSON_STEPS_NOTARIZE_DMG_OUTPUTS_JSONOUT__ID: ${{ fromJson(steps.notarize-dmg.outputs.JSONOUT).id }}
         run: |
-          echo "notary result is ${{ fromJson(steps.notarize-dmg.outputs.JSONOUT) }}"
-          token=${{ fromJson(steps.notarize-dmg.outputs.JSONOUT).id }}
+          echo "notary result is $FROMJSON_STEPS_NOTARIZE_DMG_OUTPUTS_JSONOUT_"
+          token=$FROMJSON_STEPS_NOTARIZE_DMG_OUTPUTS_JSONOUT__ID
           echo "ID_TOKEN=$token" >> "$GITHUB_OUTPUT"
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
         shell: bash
@@ -795,10 +834,13 @@ jobs:
           NOTARY_USER: ${{ vars.NOTARY_USER }}
           NOTARY_KEY: ${{ vars.NOTARY_KEY }}
           GET_ID_TOKEN_ID_TOKEN: ${{ steps.get-id-token.outputs.ID_TOKEN }}
+          ENV_NOTARY_USER: ${{ env.NOTARY_USER }}
+          ENV_NOTARY_KEY: ${{ env.NOTARY_KEY }}
+          ENV_SIGNER: ${{ env.SIGNER }}
         run: |
           {
             echo 'NOTARYOUT<<EOF'
-            /usr/bin/xcrun notarytool info --apple-id ${{ env.NOTARY_USER }} --password ${{ env.NOTARY_KEY }} --team-id ${{ env.SIGNER }} $GET_ID_TOKEN_ID_TOKEN
+            /usr/bin/xcrun notarytool info --apple-id $ENV_NOTARY_USER --password $ENV_NOTARY_KEY --team-id $ENV_SIGNER $GET_ID_TOKEN_ID_TOKEN
             echo EOF
           } >> $GITHUB_OUTPUT
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
@@ -822,8 +864,9 @@ jobs:
           NOTARY_USER: ${{ vars.NOTARY_USER }}
           NOTARY_KEY: ${{ vars.NOTARY_KEY }}
           PRESET_NAME: ${{ inputs.preset_name }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          /usr/bin/xcrun stapler staple ${{ runner.workspace }}/hdf5/build/$PRESET_NAME-macos-Clang/*.dmg
+          /usr/bin/xcrun stapler staple $RUNNER_WORKSPACE/hdf5/build/$PRESET_NAME-macos-Clang/*.dmg
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
         shell: bash
         continue-on-error: true
@@ -834,13 +877,14 @@ jobs:
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
           PRESET_NAME: ${{ inputs.preset_name }}
           SET_FILE_BASE_FILE_BASE: ${{ steps.set-file-base.outputs.FILE_BASE }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-          cp ${{ runner.workspace }}/hdf5/$SET_FILE_BASE_SOURCE_BASE/LICENSE ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/$PRESET_NAME-macos-Clang/README.md ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/$PRESET_NAME-macos-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          mkdir "$RUNNER_WORKSPACE/build/hdf5"
+          cp $RUNNER_WORKSPACE/hdf5/$SET_FILE_BASE_SOURCE_BASE/LICENSE $RUNNER_WORKSPACE/build/hdf5
+          cp $RUNNER_WORKSPACE/hdf5/build/$PRESET_NAME-macos-Clang/README.md $RUNNER_WORKSPACE/build/hdf5
+          cp $RUNNER_WORKSPACE/hdf5/build/$PRESET_NAME-macos-Clang/*.tar.gz $RUNNER_WORKSPACE/build/hdf5
+          cd "$RUNNER_WORKSPACE/build"
           tar -zcvf $SET_FILE_BASE_FILE_BASE-macos14_clang.tar.gz hdf5
         shell: bash
 
@@ -849,15 +893,18 @@ jobs:
         env:
           PRESET_NAME: ${{ inputs.preset_name }}
           SET_FILE_BASE_FILE_BASE: ${{ steps.set-file-base.outputs.FILE_BASE }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          mkdir "${{ runner.workspace }}/builddmg"
-          cp ${{ runner.workspace }}/hdf5/build/$PRESET_NAME-macos-Clang/*.dmg ${{ runner.workspace }}/builddmg/$SET_FILE_BASE_FILE_BASE-macos14_clang.dmg
+          mkdir "$RUNNER_WORKSPACE/builddmg"
+          cp $RUNNER_WORKSPACE/hdf5/build/$PRESET_NAME-macos-Clang/*.dmg $RUNNER_WORKSPACE/builddmg/$SET_FILE_BASE_FILE_BASE-macos14_clang.dmg
         shell: bash
 
       - name: List files in the space (MacOS_latest)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls ${{ github.workspace }}
-              ls -l ${{ runner.workspace }}
+              ls -l $RUNNER_WORKSPACE
 
       # Save files created by CTest script
       - name: Save published binary (MacOS_latest)
@@ -897,18 +944,24 @@ jobs:
           name: libaws-c-s3-Release
 
       - name: Untar libaws-c-s3 installation
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          tar xvf libaws-c-s3.tar -C ${{ runner.workspace }}
+          tar xvf libaws-c-s3.tar -C $RUNNER_WORKSPACE
 
       - name: List contents of libaws-c-s3 installation
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          ls -lR ${{ runner.workspace }}/aws-c-s3-build
+          ls -lR $RUNNER_WORKSPACE/aws-c-s3-build
 
       - name: Setup environment
         shell: bash
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          echo "LD_LIBRARY_PATH=${{ runner.workspace }}/aws-c-s3-build/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
-          echo "CMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=$RUNNER_WORKSPACE/aws-c-s3-build/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/aws-c-s3-build" >> $GITHUB_ENV
 
       - name: Set file base name (Linux S3)
         id: set-file-base
@@ -935,9 +988,11 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (Linux S3)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls -l ${{ github.workspace }}
-              ls ${{ runner.workspace }}
+              ls $RUNNER_WORKSPACE
 
       - name: Uncompress source (Linux S3)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
@@ -946,8 +1001,9 @@ jobs:
         env:
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
           PRESET_NAME: ${{ inputs.preset_name }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          cd "${{ runner.workspace }}/hdf5/$SET_FILE_BASE_SOURCE_BASE"
+          cd "$RUNNER_WORKSPACE/hdf5/$SET_FILE_BASE_SOURCE_BASE"
           cmake --workflow --preset=$PRESET_NAME-GNUC-S3 --fresh
         shell: bash
 
@@ -957,20 +1013,23 @@ jobs:
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
           PRESET_NAME: ${{ inputs.preset_name }}
           SET_FILE_BASE_FILE_BASE: ${{ steps.set-file-base.outputs.FILE_BASE }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-          cp ${{ runner.workspace }}/hdf5/$SET_FILE_BASE_SOURCE_BASE/LICENSE ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/$PRESET_NAME-GNUC-S3/README.md ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/$PRESET_NAME-GNUC-S3/*.tar.gz ${{ runner.workspace }}/build/hdf5
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          mkdir "$RUNNER_WORKSPACE/build/hdf5"
+          cp $RUNNER_WORKSPACE/hdf5/$SET_FILE_BASE_SOURCE_BASE/LICENSE $RUNNER_WORKSPACE/build/hdf5
+          cp $RUNNER_WORKSPACE/hdf5/build/$PRESET_NAME-GNUC-S3/README.md $RUNNER_WORKSPACE/build/hdf5
+          cp $RUNNER_WORKSPACE/hdf5/build/$PRESET_NAME-GNUC-S3/*.tar.gz $RUNNER_WORKSPACE/build/hdf5
+          cd "$RUNNER_WORKSPACE/build"
           tar -zcvf $SET_FILE_BASE_FILE_BASE-ubuntu-2404_gcc_s3.tar.gz hdf5
         shell: bash
 
       - name: List files in the space (Linux S3)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls ${{ github.workspace }}
-              ls -l ${{ runner.workspace }}
+              ls -l $RUNNER_WORKSPACE
 
       # Save files created by CTest script
       - name: Save published binary (Linux S3)
@@ -1034,9 +1093,11 @@ jobs:
         run: Get-Location
 
       - name: List files for the space (Windows_intel)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
-              Get-ChildItem -Path ${{ runner.workspace }}
+              Get-ChildItem -Path $RUNNER_WORKSPACE
         shell: pwsh
 
       - name: Uncompress source (Windows_intel)
@@ -1070,8 +1131,9 @@ jobs:
           SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
           PRESET_NAME: ${{ inputs.preset_name }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          cd "${{ runner.workspace }}/hdf5/$env:SET_FILE_BASE_SOURCE_BASE"
+          cd "$RUNNER_WORKSPACE/hdf5/$env:SET_FILE_BASE_SOURCE_BASE"
           cmake --workflow --preset=$env:PRESET_NAME-win-Intel --fresh
         shell: pwsh
 
@@ -1097,13 +1159,14 @@ jobs:
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
           PRESET_NAME: ${{ inputs.preset_name }}
           SET_FILE_BASE_FILE_BASE: ${{ steps.set-file-base.outputs.FILE_BASE }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/$env:SET_FILE_BASE_SOURCE_BASE/LICENSE -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/$env:PRESET_NAME-Intel/README.md -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/$env:PRESET_NAME-Intel/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          mkdir "$RUNNER_WORKSPACE/build/hdf5"
+          Copy-Item -Path $RUNNER_WORKSPACE/hdf5/$env:SET_FILE_BASE_SOURCE_BASE/LICENSE -Destination $RUNNER_WORKSPACE/build/hdf5/
+          Copy-Item -Path $RUNNER_WORKSPACE/hdf5/build/$env:PRESET_NAME-Intel/README.md -Destination $RUNNER_WORKSPACE/build/hdf5/
+          Copy-Item -Path $RUNNER_WORKSPACE/hdf5/build/$env:PRESET_NAME-Intel/* -Destination $RUNNER_WORKSPACE/build/hdf5/ -Include *.zip
+          cd "$RUNNER_WORKSPACE/build"
           7z a -tzip $env:SET_FILE_BASE_FILE_BASE-win-vs2022_intel.zip hdf5
         shell: pwsh
 
@@ -1112,15 +1175,18 @@ jobs:
         env:
           PRESET_NAME: ${{ inputs.preset_name }}
           SET_FILE_BASE_FILE_BASE: ${{ steps.set-file-base.outputs.FILE_BASE }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          mkdir "${{ runner.workspace }}/buildmsi"
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/$env:PRESET_NAME-Intel/* -Destination ${{ runner.workspace }}/buildmsi/$env:SET_FILE_BASE_FILE_BASE-win-vs2022_intel.msi -Include *.msi
+          mkdir "$RUNNER_WORKSPACE/buildmsi"
+          Copy-Item -Path $RUNNER_WORKSPACE/hdf5/build/$env:PRESET_NAME-Intel/* -Destination $RUNNER_WORKSPACE/buildmsi/$env:SET_FILE_BASE_FILE_BASE-win-vs2022_intel.msi -Include *.msi
         shell: pwsh
 
       - name: List files in the space (Windows_intel)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
-              Get-ChildItem -Path ${{ runner.workspace }}
+              Get-ChildItem -Path $RUNNER_WORKSPACE
         shell: pwsh
 
       # Save files created by CTest script
@@ -1188,9 +1254,11 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (Linux_intel)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls -l ${{ github.workspace }}
-              ls ${{ runner.workspace }}
+              ls $RUNNER_WORKSPACE
 
       - name: Uncompress source (Linux_intel)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
@@ -1201,8 +1269,9 @@ jobs:
           CC: ${{ steps.setup-fortran.outputs.cc }}
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
           PRESET_NAME: ${{ inputs.preset_name }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          cd "${{ runner.workspace }}/hdf5/$SET_FILE_BASE_SOURCE_BASE"
+          cd "$RUNNER_WORKSPACE/hdf5/$SET_FILE_BASE_SOURCE_BASE"
           cmake --workflow --preset=$PRESET_NAME-Intel --fresh
         shell: bash
 
@@ -1212,20 +1281,23 @@ jobs:
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
           PRESET_NAME: ${{ inputs.preset_name }}
           SET_FILE_BASE_FILE_BASE: ${{ steps.set-file-base.outputs.FILE_BASE }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          mkdir "${{ runner.workspace }}/build/hdf5"
-          cp ${{ runner.workspace }}/hdf5/$SET_FILE_BASE_SOURCE_BASE/LICENSE ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/$PRESET_NAME-Intel/README.md ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/$PRESET_NAME-Intel/*.tar.gz ${{ runner.workspace }}/build/hdf5
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          mkdir "$RUNNER_WORKSPACE/build/hdf5"
+          cp $RUNNER_WORKSPACE/hdf5/$SET_FILE_BASE_SOURCE_BASE/LICENSE $RUNNER_WORKSPACE/build/hdf5
+          cp $RUNNER_WORKSPACE/hdf5/build/$PRESET_NAME-Intel/README.md $RUNNER_WORKSPACE/build/hdf5
+          cp $RUNNER_WORKSPACE/hdf5/build/$PRESET_NAME-Intel/*.tar.gz $RUNNER_WORKSPACE/build/hdf5
+          cd "$RUNNER_WORKSPACE/build"
           tar -zcvf $SET_FILE_BASE_FILE_BASE-ubuntu-2404_intel.tar.gz hdf5
         shell: bash
 
       - name: List files in the space (Linux_intel)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls ${{ github.workspace }}
-              ls -l ${{ runner.workspace }}
+              ls -l $RUNNER_WORKSPACE
 
       # Save files created by CTest script
       - name: Save published binary (Linux_intel)

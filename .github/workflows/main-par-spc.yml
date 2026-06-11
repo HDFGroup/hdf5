@@ -41,12 +41,15 @@ jobs:
 
       - name: Configure
         shell: bash
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          cd "$RUNNER_WORKSPACE/build"
           CC=mpicc cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             --log-level=VERBOSE \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
             -DHDF5_ENABLE_WARNINGS_AS_ERRORS=ON \
@@ -66,16 +69,22 @@ jobs:
 
       # BUILD
       - name: Build
-        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+        run: cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
       - name: Run Tests
-        run: ctest . -E MPI_TEST --parallel 2 -C ${{ inputs.build_mode }}
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+        run: ctest . -E MPI_TEST --parallel 2 -C $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
         if: ${{ inputs.thread_safety != 'TS' }}
 
       - name: Run Parallel Tests
-        run: ctest . -R MPI_TEST -C ${{ inputs.build_mode }}
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+        run: ctest . -R MPI_TEST -C $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
         if: ${{ matrix.run_tests && (inputs.thread_safety != 'TS') }}

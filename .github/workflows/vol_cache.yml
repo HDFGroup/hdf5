@@ -75,11 +75,14 @@ jobs:
       # FetchContent's OVERRIDE_FIND_PACKAGE)
       - name: Configure HDF5 with cache VOL connector
         shell: bash
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           mkdir ${{ github.workspace }}/hdf5/build
           cd ${{ github.workspace }}/hdf5/build
-          cmake -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/hdf5_build \
+          cmake -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
+            -DCMAKE_INSTALL_PREFIX=$RUNNER_WORKSPACE/hdf5_build \
             -DBUILD_STATIC_LIBS=OFF \
             -DHDF5_TEST_API:BOOL=ON \
             -DHDF5_TEST_API_ENABLE_ASYNC:BOOL=ON \
@@ -106,8 +109,10 @@ jobs:
       - name: Build HDF5 and cache VOL connector
         shell: bash
         working-directory: ${{ github.workspace }}/hdf5/build
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+          cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
           echo "LD_LIBRARY_PATH=/usr/local/lib:${{ github.workspace }}/hdf5/build/bin" >> $GITHUB_ENV
 
       - name: Create cache VOL connector configuration file for testing
@@ -147,13 +152,15 @@ jobs:
       # Until cache VOL tests are namespaced properly, run them directly
       - name: Test HDF5 cache VOL connector with external tests
         working-directory: ${{ github.workspace }}/hdf5/build
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          ctest --build-config ${{ inputs.build_mode }} -R "^test_file$" .
-          ctest --build-config ${{ inputs.build_mode }} -R "^test_group$" .
-          ctest --build-config ${{ inputs.build_mode }} -R "^test_dataset$" .
-          ctest --build-config ${{ inputs.build_mode }} -R "^test_dataset_async_api$" .
-          ctest --build-config ${{ inputs.build_mode }} -R "^test_write_multi$" .
-          ctest --build-config ${{ inputs.build_mode }} -R "^test_multdset$" .
+          ctest --build-config $INPUT_BUILD_MODE -R "^test_file$" .
+          ctest --build-config $INPUT_BUILD_MODE -R "^test_group$" .
+          ctest --build-config $INPUT_BUILD_MODE -R "^test_dataset$" .
+          ctest --build-config $INPUT_BUILD_MODE -R "^test_dataset_async_api$" .
+          ctest --build-config $INPUT_BUILD_MODE -R "^test_write_multi$" .
+          ctest --build-config $INPUT_BUILD_MODE -R "^test_multdset$" .
 
       - name: Test HDF5 cache VOL connector with HDF5 API tests
         working-directory: ${{ github.workspace }}/hdf5/build
@@ -163,5 +170,7 @@ jobs:
         # all the tests. Leave the step in, but skip it to leave an indication
         # that this should be re-enabled in the future.
         if: ${{ ! matrix.async }}
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          ctest --build-config ${{ inputs.build_mode }} -R "HDF5_VOL_vol-cache" -E "H5DIFF" .
+          ctest --build-config $INPUT_BUILD_MODE -R "HDF5_VOL_vol-cache" -E "H5DIFF" .

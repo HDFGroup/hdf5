@@ -29,11 +29,14 @@ jobs:
 
       - name: Configure
         shell: bash
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          cd "$RUNNER_WORKSPACE/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
-          -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+          -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
           -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
           -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
           -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
@@ -47,8 +50,10 @@ jobs:
 
       - name: Build
         shell: bash
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+          cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
 
       - name: Install HDF5

@@ -40,13 +40,15 @@ jobs:
           "
 
       - name: Configure
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           docker exec -w /workspace i386_build bash -c "
             mkdir build
             cd build
             cmake -C ../config/cmake/cacheinit.cmake -G 'Unix Makefiles' \
               --log-level=VERBOSE \
-              -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+              -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
               -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
               -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
               -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=OFF \
@@ -57,14 +59,18 @@ jobs:
           "
 
       - name: Build
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           docker exec -w /workspace/build i386_build \
-            cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+            cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
 
       - name: Run Tests
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           docker exec -w /workspace/build i386_build \
-            ctest . --parallel 2 -C ${{ inputs.build_mode }}
+            ctest . --parallel 2 -C $INPUT_BUILD_MODE
 
       - name: Cleanup
         if: always()

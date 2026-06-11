@@ -130,7 +130,9 @@ jobs:
 
       #Useful for debugging
       - name: Dump matrix context
-        run: echo '${{ toJSON(matrix) }}'
+        env:
+          TOJSON_MATRIX_: ${{ toJSON(matrix) }}
+        run: echo '$TOJSON_MATRIX_'
 
       - name: Install Dependencies (Linux)
         run: |
@@ -162,28 +164,42 @@ jobs:
 
       # CONFIGURE
       - name: Configure
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          MATRIX_GENERATOR: ${{ matrix.generator }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+          MATRIX_PARALLEL: ${{ matrix.parallel }}
+          MATRIX_CPP: ${{ matrix.cpp }}
+          MATRIX_FORTRAN: ${{ matrix.fortran }}
+          MATRIX_ZLIBFC: ${{ matrix.zlibfc }}
+          MATRIX_LIBAECFC: ${{ matrix.libaecfc }}
+          MATRIX_LOCALAEC: ${{ matrix.localaec }}
+          MATRIX_LOCALZLIB: ${{ matrix.localzlib }}
+          MATRIX_MIRROR_VFD: ${{ matrix.mirror_vfd }}
+          MATRIX_DIRECT_VFD: ${{ matrix.direct_vfd }}
+          MATRIX_ROS3_VFD: ${{ matrix.ros3_vfd }}
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          cd "$RUNNER_WORKSPACE/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
-            ${{ matrix.generator }} \
+            $MATRIX_GENERATOR \
             --log-level=VERBOSE \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
             -DBUILD_SHARED_LIBS:BOOL=OFF \
             -DBUILD_STATIC_LIBS:BOOL=ON \
             -DHDF5_ENABLE_ALL_WARNINGS:BOOL=ON \
-            -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} \
-            -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} \
-            -DHDF5_BUILD_FORTRAN:BOOL=${{ matrix.fortran }} \
+            -DHDF5_ENABLE_PARALLEL:BOOL=$MATRIX_PARALLEL \
+            -DHDF5_BUILD_CPP_LIB:BOOL=$MATRIX_CPP \
+            -DHDF5_BUILD_FORTRAN:BOOL=$MATRIX_FORTRAN \
             -DHDF5_BUILD_JAVA:BOOL=OFF \
             -DHDF5_BUILD_DOC:BOOL=OFF \
-            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=${{ matrix.zlibfc }} \
-            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=${{ matrix.libaecfc }} \
-            -DLIBAEC_USE_LOCALCONTENT:BOOL=${{ matrix.localaec }} \
-            -DZLIB_USE_LOCALCONTENT:BOOL=${{ matrix.localzlib }} \
-            -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
-            -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
-            -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=$MATRIX_ZLIBFC \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=$MATRIX_LIBAECFC \
+            -DLIBAEC_USE_LOCALCONTENT:BOOL=$MATRIX_LOCALAEC \
+            -DZLIB_USE_LOCALCONTENT:BOOL=$MATRIX_LOCALZLIB \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=$MATRIX_MIRROR_VFD \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=$MATRIX_DIRECT_VFD \
+            -DHDF5_ENABLE_ROS3_VFD:BOOL=$MATRIX_ROS3_VFD \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
             -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
             -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
@@ -192,12 +208,16 @@ jobs:
 
       # BUILD
       - name: Build
-        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+        run: cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
       - name: Run Tests
-        run: ctest . --parallel 2 -C ${{ inputs.build_mode }}
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+        run: ctest . --parallel 2 -C $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
         if: ${{ matrix.run_tests }}
 

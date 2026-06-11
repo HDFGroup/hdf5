@@ -49,15 +49,18 @@ jobs:
 
       # CMAKE CONFIGURE
       - name: CMake Configure
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-           mkdir "${{ runner.workspace }}/build"
-           cd "${{ runner.workspace }}/build"
+           mkdir "$RUNNER_WORKSPACE/build"
+           cd "$RUNNER_WORKSPACE/build"
            cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
              -G Ninja \
              --log-level=VERBOSE \
              -DCMAKE_TOOLCHAIN_FILE:STRING=config/toolchain/mingw64.cmake \
              -DCMAKE_CROSSCOMPILING_EMULATOR:PATH=$GITHUB_WORKSPACE/config/toolchain/mingw-w64-x86-64-wine.sh \
-             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+             -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
              -DHDF5_ENABLE_DOXY_WARNINGS:BOOL=ON \
              -DHDF5_BUILD_DOC:BOOL=ON \
              -DHDF5_BUILD_JAVA:BOOL=OFF \
@@ -75,7 +78,9 @@ jobs:
 
       # BUILD
       - name: CMake Build
-        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+        run: cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
@@ -90,12 +95,16 @@ jobs:
 #        continue-on-error: true
 
       - name: CMake Run Package
-        run: cpack -C ${{ inputs.build_mode }} -V
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+        run: cpack -C $INPUT_BUILD_MODE -V
         working-directory: ${{ runner.workspace }}/build
 
       - name: List files in the space
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-               ls -l ${{ runner.workspace }}/build
+               ls -l $RUNNER_WORKSPACE/build
 
       - name: Save published binary (linux)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5

@@ -33,8 +33,10 @@ jobs:
     steps:
       - name: Get file base name
         id: get-file-base
+        env:
+          INPUT_FILE_BASE: ${{ inputs.file_base }}
         run: |
-          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          FILE_NAME_BASE=$(echo "$INPUT_FILE_BASE")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
 
       - name: PreRelease delete from tag

@@ -37,11 +37,14 @@ jobs:
 
       - name: Configure HDF5 with external passthrough VOL connector
         shell: bash
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           mkdir ${{ github.workspace }}/hdf5/build
           cd ${{ github.workspace }}/hdf5/build
-          cmake -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/hdf5_build \
+          cmake -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
+            -DCMAKE_INSTALL_PREFIX=$RUNNER_WORKSPACE/hdf5_build \
             -DBUILD_STATIC_LIBS=OFF \
             -DHDF5_TEST_API:BOOL=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=ON \
@@ -58,10 +61,14 @@ jobs:
       - name: Build HDF5 and external passthrough VOL connector
         shell: bash
         working-directory: ${{ github.workspace }}/hdf5/build
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+          cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
 
       - name: Test HDF5 external passthrough VOL connector with HDF5 API tests
         working-directory: ${{ github.workspace }}/hdf5/build
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          ctest --build-config ${{ inputs.build_mode }} -R "HDF5_VOL_vol-external-passthrough" .
+          ctest --build-config $INPUT_BUILD_MODE -R "HDF5_VOL_vol-external-passthrough" .

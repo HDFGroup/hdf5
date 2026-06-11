@@ -40,6 +40,11 @@ jobs:
                  aws-region: ${{ secrets.AWS_REGION }}
 
         - name: Sync dir to S3 bucket
+          env:
+            INPUT_LOCAL_DIR: ${{ inputs.local_dir }}
+            AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+            TARGET_PATH: ${{ vars.TARGET_PATH }}
+            INPUT_TARGET_DIR: ${{ inputs.target_dir }}
           run: |
-                aws s3 sync ./HDF5/${{ inputs.local_dir }} s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}
+                aws s3 sync ./HDF5/$INPUT_LOCAL_DIR s3://$AWS_S3_BUCKET/$TARGET_PATH/$INPUT_TARGET_DIR
 

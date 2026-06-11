@@ -66,10 +66,13 @@ jobs:
     steps:
       - name: Generate test matrix
         id: generate-matrix
+        env:
+          INPUT_JAVA_VERSIONS: ${{ inputs.java_versions || '11,17,21,25' }}
+          INPUT_PLATFORMS: ${{ inputs.platforms || 'ubuntu-latest' }}
         run: |
           # Parse inputs
-          JAVA_VERSIONS="${{ inputs.java_versions || '11,17,21,25' }}"
-          PLATFORMS="${{ inputs.platforms || 'ubuntu-latest' }}"
+          JAVA_VERSIONS="$INPUT_JAVA_VERSIONS"
+          PLATFORMS="$INPUT_PLATFORMS"
 
           # Expand platforms if needed
           if [[ "$PLATFORMS" == "all-platforms" ]]; then
@@ -163,27 +166,34 @@ jobs:
             ${{ runner.os }}-java${{ matrix.java-version }}-
 
       - name: Verify Java version and implementation compatibility
+        env:
+          MATRIX_JAVA_VERSION: ${{ matrix.java-version }}
+          MATRIX_IMPLEMENTATION: ${{ matrix.implementation }}
         run: |
           java -version
-          echo "Testing Java ${{ matrix.java-version }} with ${{ matrix.implementation }} implementation"
+          echo "Testing Java $MATRIX_JAVA_VERSION with $MATRIX_IMPLEMENTATION implementation"
 
           # Additional validation for FFM
-          if [[ "${{ matrix.implementation }}" == "ffm" ]]; then
-            if [[ ${{ matrix.java-version }} -lt 25 ]]; then
-              echo "::error::FFM implementation requires Java 25, got Java ${{ matrix.java-version }}"
+          if [[ "$MATRIX_IMPLEMENTATION" == "ffm" ]]; then
+            if [[ $MATRIX_JAVA_VERSION -lt 25 ]]; then
+              echo "::error::FFM implementation requires Java 25, got Java $MATRIX_JAVA_VERSION"
               exit 1
             fi
-            echo "FFM implementation validated for Java ${{ matrix.java-version }}"
+            echo "FFM implementation validated for Java $MATRIX_JAVA_VERSION"
           fi
 
       - name: Run implementation tests
         shell: bash
+        env:
+          MATRIX_JAVA_VERSION: ${{ matrix.java-version }}
+          MATRIX_IMPLEMENTATION: ${{ matrix.implementation }}
+          INPUT_TEST_MODE: ${{ inputs.test_mode || 'build' }}
         run: |
           chmod +x .github/scripts/test-java-implementations.sh
           .github/scripts/test-java-implementations.sh \
-            ${{ matrix.java-version }} \
-            ${{ matrix.implementation }} \
-            ${{ inputs.test_mode || 'build' }}
+            $MATRIX_JAVA_VERSION \
+            $MATRIX_IMPLEMENTATION \
+            $INPUT_TEST_MODE
 
       - name: Upload build artifacts on failure
         if: failure()
@@ -283,26 +293,32 @@ jobs:
 
     steps:
       - name: Generate test report
+        env:
+          INPUT_JAVA_VERSIONS: ${{ inputs.java_versions || '11,17,21,25' }}
+          INPUT_TEST_MODE: ${{ inputs.test_mode || 'build' }}
+          INPUT_PLATFORMS: ${{ inputs.platforms || 'ubuntu-latest' }}
+          NEEDS_TEST_IMPLEMENTATIONS_RESULT: ${{ needs.test-implementations.result }}
+          NEEDS_VALIDATE_ARTIFACTS_RESULT: ${{ needs.validate-artifacts.result }}
         run: |
           echo "## Java Implementation Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           echo "### Test Configuration" >> $GITHUB_STEP_SUMMARY
-          echo "- **Java Versions**: ${{ inputs.java_versions || '11,17,21,25' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Test Mode**: ${{ inputs.test_mode || 'build' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Platforms**: ${{ inputs.platforms || 'ubuntu-latest' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Java Versions**: $INPUT_JAVA_VERSIONS" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test Mode**: $INPUT_TEST_MODE" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platforms**: $INPUT_PLATFORMS" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Report job statuses
-          if [[ "${{ needs.test-implementations.result }}" == "success" ]]; then
+          if [[ "$NEEDS_TEST_IMPLEMENTATIONS_RESULT" == "success" ]]; then
             echo "✅ **Implementation Tests**: PASSED" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ **Implementation Tests**: FAILED" >> $GITHUB_STEP_SUMMARY
           fi
 
-          if [[ "${{ needs.validate-artifacts.result }}" == "success" ]]; then
+          if [[ "$NEEDS_VALIDATE_ARTIFACTS_RESULT" == "success" ]]; then
             echo "✅ **Artifact Validation**: PASSED" >> $GITHUB_STEP_SUMMARY
-          elif [[ "${{ needs.validate-artifacts.result }}" == "skipped" ]]; then
+          elif [[ "$NEEDS_VALIDATE_ARTIFACTS_RESULT" == "skipped" ]]; then
             echo "⏭️ **Artifact Validation**: SKIPPED" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ **Artifact Validation**: FAILED" >> $GITHUB_STEP_SUMMARY

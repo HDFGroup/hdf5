@@ -49,11 +49,14 @@ jobs:
 
       - name: Configure HDF5 with REST VOL connector
         shell: bash
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           mkdir ${{ github.workspace }}/hdf5/build
           cd ${{ github.workspace }}/hdf5/build
-          cmake -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/hdf5_build \
+          cmake -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
+            -DCMAKE_INSTALL_PREFIX=$RUNNER_WORKSPACE/hdf5_build \
             -DBUILD_STATIC_LIBS=OFF \
             -DHDF5_BUILD_HL_LIB:BOOL=ON \
             -DHDF5_TEST_API:BOOL=ON \
@@ -72,8 +75,10 @@ jobs:
       - name: Build and install HDF5 and REST VOL connector
         shell: bash
         working-directory: ${{ github.workspace }}/hdf5/build
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+          cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
           cmake --install .
           echo "LD_LIBRARY_PATH=${{ github.workspace }}/hdf5/build/bin" >> $GITHUB_ENV
 
@@ -159,9 +164,12 @@ jobs:
 
       - name: Test HDF5 REST VOL connector with external tests
         working-directory: ${{github.workspace}}/hdf5/build/
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           sudo \
-          HDF5_PLUGIN_PATH="${{ runner.workspace }}/hdf5_build/lib" \
+          HDF5_PLUGIN_PATH="$RUNNER_WORKSPACE/hdf5_build/lib" \
           HDF5_VOL_CONNECTOR=REST \
           ADMIN_USERNAME=admin ADMIN_PASSWORD=admin \
           USER_NAME=test_user1 USER_PASSWORD=test \
@@ -171,7 +179,7 @@ jobs:
           HSDS_ENDPOINT=http+unix://%2Ftmp%2Fhs%2Fsn_1.sock \
           ROOT_DIR=${{github.workspace}}/hsdsdata \
           BUCKET_NAME=hsdstest \
-          ctest --build-config ${{ inputs.build_mode }} -R "test_rest_vol" .
+          ctest --build-config $INPUT_BUILD_MODE -R "test_rest_vol" .
 
       - name: Test HDF5 REST VOL connector with HDF5 API tests
         working-directory: ${{github.workspace}}/hdf5/build/
@@ -180,9 +188,12 @@ jobs:
         # but skip it to leave an indication that this should be re-enabled
         # in the future.
         if: false
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           sudo \
-          HDF5_PLUGIN_PATH="${{ runner.workspace }}/hdf5_build/lib" \
+          HDF5_PLUGIN_PATH="$RUNNER_WORKSPACE/hdf5_build/lib" \
           HDF5_VOL_CONNECTOR=REST \
           ADMIN_USERNAME=admin ADMIN_PASSWORD=admin \
           USER_NAME=test_user1 USER_PASSWORD=test \
@@ -192,4 +203,4 @@ jobs:
           HSDS_ENDPOINT=http+unix://%2Ftmp%2Fhs%2Fsn_1.sock \
           ROOT_DIR=${{github.workspace}}/hsdsdata \
           BUCKET_NAME=hsdstest \
-          ctest --build-config ${{ inputs.build_mode }} -R "h5_api" -E "H5COPY|H5DIFF|H5LS|H5DUMP|H5REPACK" .
+          ctest --build-config $INPUT_BUILD_MODE -R "h5_api" -E "H5COPY|H5DIFF|H5LS|H5DUMP|H5REPACK" .

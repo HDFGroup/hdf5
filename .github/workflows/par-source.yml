@@ -68,16 +68,20 @@ jobs:
           name: openmpi
 
       - name: Untar MPI installation (OpenMPI)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          tar xvf openmpi.tar -C ${{ runner.workspace }}
+          tar xvf openmpi.tar -C $RUNNER_WORKSPACE
 
       - name: Set path (OpenMPI)
         shell: bash
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          echo "${{ runner.workspace }}/openmpi/bin" >> $GITHUB_PATH
-          echo "LD_LIBRARY_PATH=${{ runner.workspace }}/openmpi/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
-          echo "CC=${{ runner.workspace }}/openmpi/bin/mpicc" >> $GITHUB_ENV
-          echo "FC=${{ runner.workspace }}/openmpi/bin/mpif90" >> $GITHUB_ENV
+          echo "$RUNNER_WORKSPACE/openmpi/bin" >> $GITHUB_PATH
+          echo "LD_LIBRARY_PATH=$RUNNER_WORKSPACE/openmpi/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "CC=$RUNNER_WORKSPACE/openmpi/bin/mpicc" >> $GITHUB_ENV
+          echo "FC=$RUNNER_WORKSPACE/openmpi/bin/mpif90" >> $GITHUB_ENV
 
       - name: Install CMake
         uses: lukka/get-cmake@591817e96fcad43505fb4eae36172462abb3a42e # latest
@@ -87,12 +91,16 @@ jobs:
 
       - name: Set file base name (OpenMPI)
         id: set-file-base
+        env:
+          INPUT_FILE_BASE: ${{ inputs.file_base }}
+          INPUT_USE_ENVIRON: ${{ inputs.use_environ }}
+          INPUT_SNAP_NAME: ${{ inputs.snap_name }}
         run: |
-          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          FILE_NAME_BASE=$(echo "$INPUT_FILE_BASE")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          if [[ '$INPUT_USE_ENVIRON' == 'release' ]]
           then
-            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+            SOURCE_NAME_BASE=$(echo "$INPUT_SNAP_NAME")
           else
             SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
@@ -106,9 +114,11 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (OpenMPI)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
             ls -l ${{ github.workspace }}
-            ls ${{ runner.workspace }}
+            ls $RUNNER_WORKSPACE
 
       - name: Uncompress source (OpenMPI)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
@@ -119,8 +129,10 @@ jobs:
           source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (OpenMPI)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-            ls ${{ runner.workspace }}/hdf5
+            ls $RUNNER_WORKSPACE/hdf5
 
       - name: Create options file (OpenMPI)
         uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
@@ -152,9 +164,14 @@ jobs:
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
 
       - name: Run CTest script (OpenMPI)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          REPO_FULL_NAME: ${{ github.event.repository.full_name }}
+          SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-OpenMPI-source,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C ${{ inputs.build_mode }} -O hdf5.log
+          cd "$RUNNER_WORKSPACE/hdf5"
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-$REPO_FULL_NAME-OpenMPI-source,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=$SET_FILE_BASE_SOURCE_BASE -C $INPUT_BUILD_MODE -O hdf5.log
         shell: bash
         continue-on-error: true
 
@@ -185,16 +202,20 @@ jobs:
           name: mpich
 
       - name: Untar MPI installation (MPICH)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          tar xvf mpich.tar -C ${{ runner.workspace }}
+          tar xvf mpich.tar -C $RUNNER_WORKSPACE
 
       - name: Set path (MPICH)
         shell: bash
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          echo "${{ runner.workspace }}/mpich/bin" >> $GITHUB_PATH
-          echo "LD_LIBRARY_PATH=${{ runner.workspace }}/mpich/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
-          echo "CC=${{ runner.workspace }}/mpich/bin/mpicc" >> $GITHUB_ENV
-          echo "FC=${{ runner.workspace }}/mpich/bin/mpif90" >> $GITHUB_ENV
+          echo "$RUNNER_WORKSPACE/mpich/bin" >> $GITHUB_PATH
+          echo "LD_LIBRARY_PATH=$RUNNER_WORKSPACE/mpich/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "CC=$RUNNER_WORKSPACE/mpich/bin/mpicc" >> $GITHUB_ENV
+          echo "FC=$RUNNER_WORKSPACE/mpich/bin/mpif90" >> $GITHUB_ENV
 
       - name: Install CMake
         uses: lukka/get-cmake@591817e96fcad43505fb4eae36172462abb3a42e # latest
@@ -204,12 +225,16 @@ jobs:
 
       - name: Set file base name (MPICH)
         id: set-file-base
+        env:
+          INPUT_FILE_BASE: ${{ inputs.file_base }}
+          INPUT_USE_ENVIRON: ${{ inputs.use_environ }}
+          INPUT_SNAP_NAME: ${{ inputs.snap_name }}
         run: |
-          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          FILE_NAME_BASE=$(echo "$INPUT_FILE_BASE")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          if [[ '$INPUT_USE_ENVIRON' == 'release' ]]
           then
-            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+            SOURCE_NAME_BASE=$(echo "$INPUT_SNAP_NAME")
           else
             SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
@@ -223,9 +248,11 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (MPICH)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
             ls -l ${{ github.workspace }}
-            ls ${{ runner.workspace }}
+            ls $RUNNER_WORKSPACE
 
       - name: Uncompress source (MPICH)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
@@ -236,8 +263,10 @@ jobs:
           source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (MPICH)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-            ls ${{ runner.workspace }}/hdf5
+            ls $RUNNER_WORKSPACE/hdf5
 
       - name: Create options file (MPICH)
         uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
@@ -269,9 +298,14 @@ jobs:
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
 
       - name: Run CTest script (MPICH)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          REPO_FULL_NAME: ${{ github.event.repository.full_name }}
+          SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-MPICH-source,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C ${{ inputs.build_mode }} -O hdf5.log
+          cd "$RUNNER_WORKSPACE/hdf5"
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-$REPO_FULL_NAME-MPICH-source,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=$SET_FILE_BASE_SOURCE_BASE -C $INPUT_BUILD_MODE -O hdf5.log
         shell: bash
         continue-on-error: true
 

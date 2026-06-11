@@ -40,10 +40,13 @@ jobs:
 
       - name: Install ${{ env.AOCCVERDOT }} AOCC
         shell: bash
+        env:
+          ENV_AOCCVERDASH: ${{ env.AOCCVERDASH }}
+          ENV_AOCCVERDOT: ${{ env.AOCCVERDOT }}
         run: |
-          wget https://download.amd.com/developer/eula/aocc/aocc-${{ env.AOCCVERDASH }}/aocc-compiler-${{ env.AOCCVERDOT }}.tar
-          tar -xvf aocc-compiler-${{ env.AOCCVERDOT }}.tar
-          cd aocc-compiler-${{ env.AOCCVERDOT }}
+          wget https://download.amd.com/developer/eula/aocc/aocc-$ENV_AOCCVERDASH/aocc-compiler-$ENV_AOCCVERDOT.tar
+          tar -xvf aocc-compiler-$ENV_AOCCVERDOT.tar
+          cd aocc-compiler-$ENV_AOCCVERDOT
           bash install.sh
           source /home/runner/work/hdf5/hdf5/setenv_AOCC.sh
           which clang
@@ -59,25 +62,33 @@ jobs:
 
       - name: Install OpenMPI ${{ env.MPIVERDOT }}
         if: ${{ steps.cache-openmpi-5_0_7.outputs.cache-hit != 'true' }}
+        env:
+          ENV_AOCCVERDOT: ${{ env.AOCCVERDOT }}
+          ENV_MPIVERDOT: ${{ env.MPIVERDOT }}
         run: |
-          export LD_LIBRARY_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-${{ env.AOCCVERDOT }}/lib:/usr/local/lib
-          wget https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-${{ env.MPIVERDOT }}.tar.gz
-          tar zxvf openmpi-${{ env.MPIVERDOT }}.tar.gz
-          cd openmpi-${{ env.MPIVERDOT }}
-          ./configure CC=/home/runner/work/hdf5/hdf5/aocc-compiler-${{ env.AOCCVERDOT }}/bin/clang FC=/home/runner/work/hdf5/hdf5/aocc-compiler-${{ env.AOCCVERDOT }}/bin/flang --prefix=/home/runner/work/hdf5/hdf5/openmpi-${{ env.MPIVERDOT }}-install
+          export LD_LIBRARY_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-$ENV_AOCCVERDOT/lib:/usr/local/lib
+          wget https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-$ENV_MPIVERDOT.tar.gz
+          tar zxvf openmpi-$ENV_MPIVERDOT.tar.gz
+          cd openmpi-$ENV_MPIVERDOT
+          ./configure CC=/home/runner/work/hdf5/hdf5/aocc-compiler-$ENV_AOCCVERDOT/bin/clang FC=/home/runner/work/hdf5/hdf5/aocc-compiler-$ENV_AOCCVERDOT/bin/flang --prefix=/home/runner/work/hdf5/hdf5/openmpi-$ENV_MPIVERDOT-install
           make
           make install
 
       - name: Configure
         shell: bash
+        env:
+          ENV_AOCCVERDOT: ${{ env.AOCCVERDOT }}
+          ENV_MPIVERDOT: ${{ env.MPIVERDOT }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          export LD_LIBRARY_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-${{ env.AOCCVERDOT }}/lib:/home/runner/work/hdf5/hdf5/openmpi-${{ env.MPIVERDOT }}-install/lib:/usr/local/lib
-          export LD_RUN_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-${{ env.AOCCVERDOT }}/lib:/home/runner/work/hdf5/hdf5/openmpi-${{ env.MPIVERDOT }}-install/lib:/usr/local/lib
-          export PATH=/home/runner/work/hdf5/hdf5/openmpi-${{ env.MPIVERDOT }}-install/bin:/usr/local/bin:$PATH
-          mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
+          export LD_LIBRARY_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-$ENV_AOCCVERDOT/lib:/home/runner/work/hdf5/hdf5/openmpi-$ENV_MPIVERDOT-install/lib:/usr/local/lib
+          export LD_RUN_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-$ENV_AOCCVERDOT/lib:/home/runner/work/hdf5/hdf5/openmpi-$ENV_MPIVERDOT-install/lib:/usr/local/lib
+          export PATH=/home/runner/work/hdf5/hdf5/openmpi-$ENV_MPIVERDOT-install/bin:/usr/local/bin:$PATH
+          mkdir "$RUNNER_WORKSPACE/build"
+          cd "$RUNNER_WORKSPACE/build"
           CC=mpicc cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
-          -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+          -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
           -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
           -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
           -DHDF5_ENABLE_PARALLEL:BOOL=ON \
@@ -93,18 +104,24 @@ jobs:
 
       - name: Build
         shell: bash
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+          cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Tests
         shell: bash
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          ctest . -E MPI_TEST --parallel 2 -C ${{ inputs.build_mode }}
+          ctest . -E MPI_TEST --parallel 2 -C $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Parallel Tests
         shell: bash
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          ctest . -R MPI_TEST -E "_by_chunk|_by_pattern" -C ${{ inputs.build_mode }}
+          ctest . -R MPI_TEST -E "_by_chunk|_by_pattern" -C $INPUT_BUILD_MODE
         working-directory: ${{ runner.workspace }}/build

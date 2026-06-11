@@ -34,52 +34,63 @@ jobs:
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Display test configuration
+        env:
+          INPUT_TEST_MODE: ${{ inputs.test_mode }}
+          INPUT_TARGET_REPOSITORY: ${{ inputs.target_repository }}
+          GH_ACTOR: ${{ github.actor }}
+          GH_REPOSITORY: ${{ github.repository }}
         run: |
           echo "=== Maven Deployment Test Configuration ==="
-          echo "Test Mode: ${{ inputs.test_mode }}"
-          echo "Target Repository: ${{ inputs.target_repository }}"
-          echo "GitHub Actor: ${{ github.actor }}"
-          echo "Repository: ${{ github.repository }}"
-          echo "Expected packages URL: https://github.com/${{ github.repository }}/packages"
+          echo "Test Mode: $INPUT_TEST_MODE"
+          echo "Target Repository: $INPUT_TARGET_REPOSITORY"
+          echo "GitHub Actor: $GH_ACTOR"
+          echo "Repository: $GH_REPOSITORY"
+          echo "Expected packages URL: https://github.com/$GH_REPOSITORY/packages"
           echo ""
 
       - name: Check repository permissions
+        env:
+          GH_REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           echo "=== Repository Permission Check ==="
 
           # Check repository context
-          if [[ "${{ github.repository }}" == "HDFGroup/hdf5" ]]; then
-            echo "✓ Running on canonical repository (${{ github.repository }})"
+          if [[ "$GH_REPOSITORY" == "HDFGroup/hdf5" ]]; then
+            echo "✓ Running on canonical repository ($GH_REPOSITORY)"
             echo "   Packages will be published to HDFGroup/hdf5"
           else
-            echo "✓ Running on fork/test repository (${{ github.repository }})"
-            echo "   Packages will be published to ${{ github.repository }} for validation"
+            echo "✓ Running on fork/test repository ($GH_REPOSITORY)"
+            echo "   Packages will be published to $GH_REPOSITORY for validation"
             echo "   This allows full testing before merging to canonical repository"
           fi
 
           # Check if we have packages permission
           echo "Checking packages permission..."
-          if [[ "${{ github.token }}" != "" ]]; then
+          if [[ "$GH_TOKEN" != "" ]]; then
             echo "✓ GITHUB_TOKEN is available"
           else
             echo "❌ GITHUB_TOKEN not available"
           fi
 
       - name: Test GitHub Packages API access
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPOSITORY: ${{ github.repository }}
         run: |
           echo "=== Testing GitHub Packages API Access ==="
 
           # Test basic API access
           echo "Testing GitHub API access..."
-          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          curl -s -H "Authorization: token $GITHUB_TOKEN" \
                -H "Accept: application/vnd.github.v3+json" \
                "https://api.github.com/user" | jq '.login // "API_ERROR"'
 
           # Test packages API access
           echo "Testing GitHub Packages API access..."
-          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          curl -s -H "Authorization: token $GITHUB_TOKEN" \
                -H "Accept: application/vnd.github.v3+json" \
-               "https://api.github.com/repos/${{ github.repository }}/packages?package_type=maven" \
+               "https://api.github.com/repos/$GH_REPOSITORY/packages?package_type=maven" \
                | jq 'length // "API_ERROR"' || echo "No packages found yet"
 
       - name: Generate test Maven artifacts
@@ -148,6 +159,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Validate deployment results
+        env:
+          INPUT_TARGET_REPOSITORY: ${{ inputs.target_repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPOSITORY: ${{ github.repository }}
         run: |
           echo "=== Validating Deployment Results ==="
 
@@ -156,12 +171,12 @@ jobs:
           sleep 30
 
           # Check GitHub Packages for the deployed artifact
-          if [[ "${{ inputs.target_repository }}" == "github-packages" ]]; then
+          if [[ "$INPUT_TARGET_REPOSITORY" == "github-packages" ]]; then
             echo "Checking GitHub Packages..."
 
-            packages=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            packages=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
                             -H "Accept: application/vnd.github.v3+json" \
-                            "https://api.github.com/repos/${{ github.repository }}/packages?package_type=maven")
+                            "https://api.github.com/repos/$GH_REPOSITORY/packages?package_type=maven")
 
             echo "Available packages:"
             echo "$packages" | jq '.[] | {name: .name, html_url: .html_url}' || echo "No packages or jq not available"
@@ -181,12 +196,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Display next steps
+        env:
+          NEEDS_GENERATE_TEST_ARTIFACTS_RESULT: ${{ needs.generate-test-artifacts.result }}
+          NEEDS_TEST_MAVEN_DEPLOYMENT_RESULT: ${{ needs.test-maven-deployment.result }}
+          INPUT_TEST_MODE: ${{ inputs.test_mode }}
+          GH_REPOSITORY: ${{ github.repository }}
         run: |
           echo "=== Test Results and Next Steps ==="
-          echo "Generation Status: ${{ needs.generate-test-artifacts.result }}"
-          echo "Deployment Status: ${{ needs.test-maven-deployment.result }}"
+          echo "Generation Status: $NEEDS_GENERATE_TEST_ARTIFACTS_RESULT"
+          echo "Deployment Status: $NEEDS_TEST_MAVEN_DEPLOYMENT_RESULT"
 
-          if [[ "${{ inputs.test_mode }}" == "dry-run" ]]; then
+          if [[ "$INPUT_TEST_MODE" == "dry-run" ]]; then
             echo "🧪 DRY RUN COMPLETED"
             echo ""
             echo "✓ Permission configuration tested"
@@ -195,13 +215,13 @@ jobs:
             echo ""
             echo "Next steps:"
             echo "1. If no errors above, run with 'live-deployment' mode"
-            echo "2. Check https://github.com/${{ github.repository }}/packages for deployed artifacts"
+            echo "2. Check https://github.com/$GH_REPOSITORY/packages for deployed artifacts"
             echo "3. Test consuming the artifacts in a sample Maven project"
           else
             echo "🚀 LIVE DEPLOYMENT COMPLETED"
             echo ""
             echo "Check deployment results at:"
-            echo "- GitHub Packages: https://github.com/${{ github.repository }}/packages"
+            echo "- GitHub Packages: https://github.com/$GH_REPOSITORY/packages"
             echo "- Workflow logs above for any deployment errors"
             echo ""
             echo "Next steps:"

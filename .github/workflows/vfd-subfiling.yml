@@ -72,11 +72,14 @@ jobs:
 
       - name: Configure HDF5 with Subfiling VFD
         shell: bash
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          mkdir ${{ runner.workspace }}/build
-          cd ${{ runner.workspace }}/build
-          cmake -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/hdf5_build \
+          mkdir $RUNNER_WORKSPACE/build
+          cd $RUNNER_WORKSPACE/build
+          cmake -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
+            -DCMAKE_INSTALL_PREFIX=$RUNNER_WORKSPACE/hdf5_build \
             -DBUILD_STATIC_LIBS=OFF \
             -DHDF5_TEST_VFD:BOOL=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=ON \
@@ -88,15 +91,20 @@ jobs:
       - name: Build HDF5
         shell: bash
         working-directory: ${{ runner.workspace }}/build
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
-          echo "LD_LIBRARY_PATH=${{ runner.workspace }}/build/bin" >> $GITHUB_ENV
+          cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
+          echo "LD_LIBRARY_PATH=$RUNNER_WORKSPACE/build/bin" >> $GITHUB_ENV
 
       - name: Test HDF5 Subfiling VFD
         working-directory: ${{ runner.workspace }}/build
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           # For now, just run the tests directly setup for use with the
           # Subfiling VFD. We can expand on this once the library's tests
           # are better separated into categories for VFD testing.
-          ctest --build-config ${{ inputs.build_mode }} \
+          ctest --build-config $INPUT_BUILD_MODE \
               -R "MPI_TEST_t_subfiling_vfd|MPI_TEST_t_vfd|H5_ph5_subfiling"

@@ -45,12 +45,16 @@ jobs:
 
       - name: Set file base name (Cygwin)
         id: set-file-base
+        env:
+          INPUT_FILE_BASE: ${{ inputs.file_base }}
+          INPUT_USE_ENVIRON: ${{ inputs.use_environ }}
+          INPUT_SNAP_NAME: ${{ inputs.snap_name }}
         run: |
-          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          FILE_NAME_BASE=$(echo "$INPUT_FILE_BASE")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          if [[ '$INPUT_USE_ENVIRON' == 'release' ]]
           then
-            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+            SOURCE_NAME_BASE=$(echo "$INPUT_SNAP_NAME")
           else
             SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
@@ -65,9 +69,11 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (Cygwin)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
             ls -l ${{ github.workspace }}
-            ls ${{ runner.workspace }}
+            ls $RUNNER_WORKSPACE
 
       - name: Uncompress source (Cygwin)
         working-directory: ${{ github.workspace }}
@@ -80,8 +86,10 @@ jobs:
           source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (Cygwin)
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-            ls ${{ runner.workspace }}/hdf5
+            ls $RUNNER_WORKSPACE/hdf5
 
       - name: Create options file (Cygwin)
         uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
@@ -114,10 +122,13 @@ jobs:
         shell: C:\cygwin\bin\bash.exe -eo pipefail -o igncr '{0}'
         env:
             CTEST_OUTPUT_ON_FAILURE: true
+            RUNNER_WORKSPACE: ${{ runner.workspace }}
+            REPO_FULL_NAME: ${{ github.event.repository.full_name }}
+            SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
         run: |
           export PATH=/usr/bin:$PATH
-          cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-CYG,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -O hdf5.log
+          cd "$RUNNER_WORKSPACE/hdf5"
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-$REPO_FULL_NAME-CYG,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=$SET_FILE_BASE_SOURCE_BASE -C Release -O hdf5.log
         continue-on-error: true
 
       # Save log files created by CTest script

@@ -33,11 +33,14 @@ jobs:
 
       - name: Configure HDF5
         shell: bash
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           mkdir ${{ github.workspace }}/hdf5/build
           cd ${{ github.workspace }}/hdf5/build
-          cmake -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/hdf5_build \
+          cmake -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
+            -DCMAKE_INSTALL_PREFIX=$RUNNER_WORKSPACE/hdf5_build \
             -DBUILD_STATIC_LIBS=OFF \
             -DHDF5_TEST_API:BOOL=ON \
             -DHDF5_TEST_API_ENABLE_ASYNC:BOOL=ON \
@@ -52,11 +55,14 @@ jobs:
       - name: Build and install HDF5
         shell: bash
         working-directory: ${{ github.workspace }}/hdf5/build
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+          cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
           cmake --install .
           echo "LD_LIBRARY_PATH=${{ github.workspace }}/hdf5/build/bin" >> $GITHUB_ENV
-          echo "PATH=${{ runner.workspace }}/hdf5_build/bin:${PATH}" >> $GITHUB_ENV
+          echo "PATH=$RUNNER_WORKSPACE/hdf5_build/bin:${PATH}" >> $GITHUB_ENV
 
       # Since the HDF5 ADIOS2 VOL connector is part of the ADIOS2 repository,
       # it is difficult to use CMake's FetchContent functionality to fetch
@@ -85,13 +91,16 @@ jobs:
         env:
           CXX: mpic++
           CC: mpicc
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          ENV_ADIOS2_COMMIT_SHORT: ${{ env.ADIOS2_COMMIT_SHORT }}
         run: |
           mkdir adios2/build
           cd adios2/build
-          cmake -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/adios2-${{ env.ADIOS2_COMMIT_SHORT }}-install \
+          cmake -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
+            -DCMAKE_INSTALL_PREFIX=$RUNNER_WORKSPACE/adios2-$ENV_ADIOS2_COMMIT_SHORT-install \
             -DADIOS2_USE_HDF5:BOOL=ON \
-            -DHDF5_ROOT=${{ runner.workspace }}/hdf5_build/ \
+            -DHDF5_ROOT=$RUNNER_WORKSPACE/hdf5_build/ \
             ..
           make -j2
           make -j2 install
@@ -104,8 +113,11 @@ jobs:
           key: ${{ runner.os }}-${{ runner.arch }}-adios2-${{ env.ADIOS2_COMMIT }}-${{ inputs.build_mode }}-cache
 
       - name: Set environment variables for tests
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          ENV_ADIOS2_COMMIT_SHORT: ${{ env.ADIOS2_COMMIT_SHORT }}
         run: |
-          echo "HDF5_PLUGIN_PATH=${{ runner.workspace }}/adios2-${{ env.ADIOS2_COMMIT_SHORT }}-install/lib" >> $GITHUB_ENV
+          echo "HDF5_PLUGIN_PATH=$RUNNER_WORKSPACE/adios2-$ENV_ADIOS2_COMMIT_SHORT-install/lib" >> $GITHUB_ENV
           echo "HDF5_VOL_CONNECTOR=ADIOS2_VOL" >> $GITHUB_ENV
 
       # Skip parallel testing for now as it appears to hang
@@ -116,5 +128,7 @@ jobs:
         # but skip it to leave an indication that this should be re-enabled
         # in the future.
         if: false
+        env:
+          INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          ctest --build-config ${{ inputs.build_mode }} -R "h5_api" -E "parallel" .
+          ctest --build-config $INPUT_BUILD_MODE -R "h5_api" -E "parallel" .
