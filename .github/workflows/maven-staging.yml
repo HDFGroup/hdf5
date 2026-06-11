@@ -126,8 +126,11 @@ jobs:
 
       - name: Determine if Maven testing should run
         id: should-test
+        env:
+          TEST_MAVEN_DEPLOYMENT: ${{ inputs.test_maven_deployment }}
+          CHANGES_MAVEN: ${{ steps.changes.outputs.maven }}
         run: |
-          if [ "${{ steps.changes.outputs.maven }}" == "true" ] || [ "${{ inputs.test_maven_deployment }}" == "true" ]; then
+          if [ "$CHANGES_MAVEN" == "true" ] || [ "$TEST_MAVEN_DEPLOYMENT" == "true" ]; then
             echo "result=true" >> $GITHUB_OUTPUT
             echo "Maven testing will be performed"
           else
@@ -145,9 +148,12 @@ jobs:
     steps:
       - name: Determine build matrix
         id: set-matrix
+        env:
+          JAVA_IMPLEMENTATION: ${{ inputs.java_implementation || 'auto' }}
+          PLATFORMS_INPUT: ${{ inputs.platforms || 'all-platforms' }}
         run: |
-          JAVA_IMPL="${{ inputs.java_implementation || 'auto' }}"
-          PLATFORMS="${{ inputs.platforms || 'all-platforms' }}"
+          JAVA_IMPL="$JAVA_IMPLEMENTATION"
+          PLATFORMS="$PLATFORMS_INPUT"
 
           # Determine which implementations to build
           case "$JAVA_IMPL" in
@@ -274,6 +280,8 @@ jobs:
       - name: Set preset name
         id: set-preset
         shell: bash
+        env:
+          USE_SNAPSHOT_VERSION: ${{ inputs.use_snapshot_version }}
         run: |
           # Determine implementation suffix for preset based on matrix
           JAVA_IMPL="${{ matrix.implementation }}"
@@ -289,7 +297,7 @@ jobs:
 
           # Determine snapshot setting
           SNAPSHOT_SUFFIX=""
-          if [ "${{ inputs.use_snapshot_version }}" == "true" ] || [ "${{ github.event_name }}" == "pull_request" ]; then
+          if [ "$USE_SNAPSHOT_VERSION" == "true" ] || [ "${{ github.event_name }}" == "pull_request" ]; then
             SNAPSHOT_SUFFIX="-Snapshot"
           fi
 
@@ -304,6 +312,8 @@ jobs:
       - name: Build HDF5 with Maven support
         id: buildhdf5
         shell: bash
+        env:
+          SET_PRESET_PRESET: ${{ steps.set-preset.outputs.preset }}
         run: |
           # macOS: Disable Spotlight indexing to prevent file locking during CPack
           if [[ "$RUNNER_OS" == "macOS" ]]; then
@@ -316,22 +326,24 @@ jobs:
           # Run workflow with retry logic for macOS CPack failures
           if [[ "$RUNNER_OS" == "macOS" ]]; then
             echo "Running CMake workflow with macOS retry logic..."
-            if ! cmake --workflow --preset="${{ steps.set-preset.outputs.preset }}" --fresh; then
+            if ! cmake --workflow --preset="$SET_PRESET_PRESET" --fresh; then
               echo "⚠️ First attempt failed, retrying in 5 seconds..."
               sleep 5
-              cmake --workflow --preset="${{ steps.set-preset.outputs.preset }}" --fresh
+              cmake --workflow --preset="$SET_PRESET_PRESET" --fresh
             fi
           else
             # Non-macOS: run normally without retry
-            cmake --workflow --preset="${{ steps.set-preset.outputs.preset }}" --fresh
+            cmake --workflow --preset="$SET_PRESET_PRESET" --fresh
           fi
 
       - name: Extract version information
         id: version-info
         shell: bash
+        env:
+          SET_PRESET_PRESET: ${{ steps.set-preset.outputs.preset }}
         run: |
           # Find the generated POM file across all possible locations
-          BUILD_ROOT="${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}"
+          BUILD_ROOT="${{ runner.workspace }}/build/$SET_PRESET_PRESET"
           echo "Looking for POM file in: $BUILD_ROOT"
 
           # Try multiple search patterns for cross-platform compatibility
@@ -375,11 +387,13 @@ jobs:
 
       - name: Collect Maven artifacts
         shell: bash
+        env:
+          SET_PRESET_PRESET: ${{ steps.set-preset.outputs.preset }}
         run: |
           echo "Collecting Maven artifacts for testing..."
           mkdir -p "${{ runner.workspace }}/maven-artifacts"
 
-          BUILD_ROOT="${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}"
+          BUILD_ROOT="${{ runner.workspace }}/build/$SET_PRESET_PRESET"
           echo "Looking for Maven artifacts in build root: $BUILD_ROOT"
 
           if [ ! -d "$BUILD_ROOT" ]; then
@@ -626,8 +640,10 @@ jobs:
 
       - name: Install HDF5 binaries for testing
         shell: bash
+        env:
+          SET_PRESET_PRESET: ${{ steps.set-preset.outputs.preset }}
         run: |
-          BUILD_ROOT="${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}"
+          BUILD_ROOT="${{ runner.workspace }}/build/$SET_PRESET_PRESET"
           INSTALL_DIR="${{ runner.workspace }}/hdf5-install"
 
           echo "Installing HDF5 binaries to: $INSTALL_DIR"
@@ -683,6 +699,8 @@ jobs:
 
       - name: Extract version for testing
         id: extract-version
+        env:
+          USE_SNAPSHOT_VERSION: ${{ inputs.use_snapshot_version }}
         run: |
           # Extract version from first available POM file
           POM_FILE=$(find ./artifacts -name "pom.xml" 2>/dev/null | head -1)
@@ -699,7 +717,7 @@ jobs:
               H5_RELEASE=$(grep '#define H5_VERS_RELEASE' source/src/H5public.h | awk '{print $3}')
 
               # Determine if this should be a SNAPSHOT version
-              if [ "${{ inputs.use_snapshot_version }}" == "true" ] || [ "${{ github.event_name }}" == "pull_request" ]; then
+              if [ "$USE_SNAPSHOT_VERSION" == "true" ] || [ "${{ github.event_name }}" == "pull_request" ]; then
                 VERSION="${H5_MAJOR}.${H5_MINOR}.${H5_RELEASE}-SNAPSHOT"
               else
                 VERSION="${H5_MAJOR}.${H5_MINOR}.${H5_RELEASE}"
@@ -714,9 +732,11 @@ jobs:
           fi
 
       - name: Test Maven deployment (dry run)
+        env:
+          EXTRACT_VERSION_VERSION: ${{ steps.extract-version.outputs.version }}
         run: |
           echo "=== Maven Deployment Test (Dry Run) ==="
-          echo "Version: ${{ steps.extract-version.outputs.version }}"
+          echo "Version: $EXTRACT_VERSION_VERSION"
 
           echo "Repository: GitHub Packages (staging)"
 

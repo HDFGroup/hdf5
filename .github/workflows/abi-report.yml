@@ -40,10 +40,12 @@ jobs:
 
       - name: Convert hdf5 reference name (Linux)
         id: convert-hdf5lib-refname
+        env:
+          FILE_REF: ${{ inputs.file_ref }}
         run:  |
-          FILE_DOTS=$(echo "${{ inputs.file_ref }}" | sed -r "s/([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+).*/\1\.\2\.\3-\4/")
+          FILE_DOTS=$(echo "$FILE_REF" | sed -r "s/([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+).*/\1\.\2\.\3-\4/")
           echo "HDF5R_DOTS=$FILE_DOTS" >> $GITHUB_OUTPUT
-          FILE_DOTSMAIN=$(echo "${{ inputs.file_ref }}" | sed -r "s/([0-9]+)\.([0-9]+)\.([0-9]+).*/\1\.\2\.\3/")
+          FILE_DOTSMAIN=$(echo "$FILE_REF" | sed -r "s/([0-9]+)\.([0-9]+)\.([0-9]+).*/\1\.\2\.\3/")
           echo "HDF5R_DOTSMAIN=$FILE_DOTSMAIN" >> $GITHUB_OUTPUT
 
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -59,7 +61,9 @@ jobs:
           ls -l ${{ github.workspace }}
 
       - name: Uncompress gh binary (Linux)
-        run: tar -zxvf ${{ github.workspace }}/${{ inputs.file_base }}-ubuntu-2404_gcc.tar.gz
+        env:
+          FILE_BASE: ${{ inputs.file_base }}
+        run: tar -zxvf ${{ github.workspace }}/$FILE_BASE-ubuntu-2404_gcc.tar.gz
 
       - name: Uncompress hdf5 binary (Linux)
         run:  |
@@ -81,20 +85,25 @@ jobs:
           echo "HDF5_VERS=$FILE_VERS" >> $GITHUB_OUTPUT
 
       - name: Download reference version
+        env:
+          FILE_REF: ${{ inputs.file_ref }}
+          CONVERT_HDF5LIB_REFNAME_HDF5R_DOTS: ${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTS }}
         run: |
           mkdir "${{ github.workspace }}/hdf5R"
           cd "${{ github.workspace }}/hdf5R"
-          wget -q https://github.com/HDFGroup/hdf5/releases/download/${{ inputs.file_ref }}/hdf5-${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTS }}-ubuntu-2404_gcc.tar.gz
-          tar zxf hdf5-${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTS }}-ubuntu-2404_gcc.tar.gz
+          wget -q https://github.com/HDFGroup/hdf5/releases/download/$FILE_REF/hdf5-$CONVERT_HDF5LIB_REFNAME_HDF5R_DOTS-ubuntu-2404_gcc.tar.gz
+          tar zxf hdf5-$CONVERT_HDF5LIB_REFNAME_HDF5R_DOTS-ubuntu-2404_gcc.tar.gz
 
       - name: List files for the space (Linux)
         run: |
           ls -l ${{ github.workspace }}/hdf5R
 
       - name: Uncompress hdf5 reference binary (Linux)
+        env:
+          FILE_REF: ${{ inputs.file_ref }}
         run:  |
           cd "${{ github.workspace }}/hdf5R"
-          tar -zxvf ${{ github.workspace }}/hdf5R/hdf5/HDF5-${{ inputs.file_ref }}-Linux.tar.gz --strip-components 1
+          tar -zxvf ${{ github.workspace }}/hdf5R/hdf5/HDF5-$FILE_REF-Linux.tar.gz --strip-components 1
 
       - name: List files for the HDFR space (Linux)
         run: |
@@ -110,54 +119,82 @@ jobs:
           echo "HDF5R_VERS=$FILE_NAME_HDF5R" >> $GITHUB_OUTPUT
 
       - name: List files for the lib spaces (Linux)
+        env:
+          SET_HDF5LIB_NAME_HDF5_ROOT: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
+          SET_HDF5LIB_REFNAME_HDF5R_ROOT: ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}
         run: |
-          ls -l ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib
-          ls -l ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib
+          ls -l $SET_HDF5LIB_NAME_HDF5_ROOT/lib
+          ls -l $SET_HDF5LIB_REFNAME_HDF5R_ROOT/lib
 
       - name: Run Java API report
+        env:
+          SET_HDF5LIB_REFNAME_HDF5R_ROOT: ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}
+          CONVERT_HDF5LIB_REFNAME_HDF5R_DOTSMAIN: ${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTSMAIN }}
+          SET_HDF5LIB_NAME_HDF5_ROOT: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
+          SET_HDF5LIB_NAME_HDF5_VERS: ${{ steps.set-hdf5lib-name.outputs.HDF5_VERS }}
         run: |
-          japi-compliance-checker ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/jarhdf5-${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTSMAIN }}.jar ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/jarhdf5-${{ steps.set-hdf5lib-name.outputs.HDF5_VERS }}.jar
+          japi-compliance-checker $SET_HDF5LIB_REFNAME_HDF5R_ROOT/lib/jarhdf5-$CONVERT_HDF5LIB_REFNAME_HDF5R_DOTSMAIN.jar $SET_HDF5LIB_NAME_HDF5_ROOT/lib/jarhdf5-$SET_HDF5LIB_NAME_HDF5_VERS.jar
         continue-on-error: true
 
       - name: Run ABI report
+        env:
+          SET_HDF5LIB_REFNAME_HDF5R_ROOT: ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}
+          SET_HDF5LIB_NAME_HDF5_ROOT: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
+          FILE_BASE: ${{ inputs.file_base }}
         run: |
-          abi-dumper ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/libhdf5.so -o ABI-0.dump -public-headers ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/include
-          abi-dumper ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/libhdf5.so -o ABI-1.dump -public-headers ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/include
-          abi-compliance-checker -l ${{ inputs.file_base }} -old ABI-0.dump -new ABI-1.dump
+          abi-dumper $SET_HDF5LIB_REFNAME_HDF5R_ROOT/lib/libhdf5.so -o ABI-0.dump -public-headers $SET_HDF5LIB_REFNAME_HDF5R_ROOT/include
+          abi-dumper $SET_HDF5LIB_NAME_HDF5_ROOT/lib/libhdf5.so -o ABI-1.dump -public-headers $SET_HDF5LIB_NAME_HDF5_ROOT/include
+          abi-compliance-checker -l $FILE_BASE -old ABI-0.dump -new ABI-1.dump
         continue-on-error: true
 
       - name: Run hl ABI report
+        env:
+          SET_HDF5LIB_REFNAME_HDF5R_ROOT: ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}
+          SET_HDF5LIB_NAME_HDF5_ROOT: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
+          FILE_BASE: ${{ inputs.file_base }}
         run: |
-          abi-dumper ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/libhdf5_hl.so -o ABI-2.dump -public-headers ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/include
-          abi-dumper ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/libhdf5_hl.so -o ABI-3.dump -public-headers ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/include
-          abi-compliance-checker -l ${{ inputs.file_base }}_hl -old ABI-2.dump -new ABI-3.dump
+          abi-dumper $SET_HDF5LIB_REFNAME_HDF5R_ROOT/lib/libhdf5_hl.so -o ABI-2.dump -public-headers $SET_HDF5LIB_REFNAME_HDF5R_ROOT/include
+          abi-dumper $SET_HDF5LIB_NAME_HDF5_ROOT/lib/libhdf5_hl.so -o ABI-3.dump -public-headers $SET_HDF5LIB_NAME_HDF5_ROOT/include
+          abi-compliance-checker -l ${FILE_BASE}_hl -old ABI-2.dump -new ABI-3.dump
         continue-on-error: true
 
       - name: Run cpp ABI report
+        env:
+          SET_HDF5LIB_REFNAME_HDF5R_ROOT: ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}
+          SET_HDF5LIB_NAME_HDF5_ROOT: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
+          FILE_BASE: ${{ inputs.file_base }}
         run: |
-          abi-dumper ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/libhdf5_cpp.so -o ABI-4.dump -public-headers ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/include
-          abi-dumper ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/libhdf5_cpp.so -o ABI-5.dump -public-headers ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/include
-          abi-compliance-checker -l ${{ inputs.file_base }}_cpp -old ABI-4.dump -new ABI-5.dump
+          abi-dumper $SET_HDF5LIB_REFNAME_HDF5R_ROOT/lib/libhdf5_cpp.so -o ABI-4.dump -public-headers $SET_HDF5LIB_REFNAME_HDF5R_ROOT/include
+          abi-dumper $SET_HDF5LIB_NAME_HDF5_ROOT/lib/libhdf5_cpp.so -o ABI-5.dump -public-headers $SET_HDF5LIB_NAME_HDF5_ROOT/include
+          abi-compliance-checker -l ${FILE_BASE}_cpp -old ABI-4.dump -new ABI-5.dump
         continue-on-error: true
 
       - name: Run hl_cpp ABI report
+        env:
+          SET_HDF5LIB_REFNAME_HDF5R_ROOT: ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}
+          SET_HDF5LIB_NAME_HDF5_ROOT: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
+          FILE_BASE: ${{ inputs.file_base }}
         run: |
-          abi-dumper ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/libhdf5_hl_cpp.so -o ABI-6.dump -public-headers ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/include
-          abi-dumper ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/libhdf5_hl_cpp.so -o ABI-7.dump -public-headers ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/include
-          abi-compliance-checker -l ${{ inputs.file_base }}_hl_cpp -old ABI-6.dump -new ABI-7.dump
+          abi-dumper $SET_HDF5LIB_REFNAME_HDF5R_ROOT/lib/libhdf5_hl_cpp.so -o ABI-6.dump -public-headers $SET_HDF5LIB_REFNAME_HDF5R_ROOT/include
+          abi-dumper $SET_HDF5LIB_NAME_HDF5_ROOT/lib/libhdf5_hl_cpp.so -o ABI-7.dump -public-headers $SET_HDF5LIB_NAME_HDF5_ROOT/include
+          abi-compliance-checker -l ${FILE_BASE}_hl_cpp -old ABI-6.dump -new ABI-7.dump
         continue-on-error: true
 
       - name: Copy ABI reports
+        env:
+          CONVERT_HDF5LIB_REFNAME_HDF5R_DOTSMAIN: ${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTSMAIN }}
+          SET_HDF5LIB_NAME_HDF5_VERS: ${{ steps.set-hdf5lib-name.outputs.HDF5_VERS }}
+          FILE_BASE: ${{ inputs.file_base }}
         run: |
-          cp compat_reports/jarhdf5-/${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTSMAIN }}_to_${{ steps.set-hdf5lib-name.outputs.HDF5_VERS }}/compat_report.html ${{ inputs.file_base }}-java_compat_report.html
-          ls -l compat_reports/${{ inputs.file_base }}/X_to_Y
-          cp compat_reports/${{ inputs.file_base }}/X_to_Y/compat_report.html ${{ inputs.file_base }}-hdf5_compat_report.html
-          ls -l compat_reports/${{ inputs.file_base }}_hl/X_to_Y
-          cp compat_reports/${{ inputs.file_base }}_hl/X_to_Y/compat_report.html ${{ inputs.file_base }}-hdf5_hl_compat_report.html
-          ls -l compat_reports/${{ inputs.file_base }}_cpp/X_to_Y
-          cp compat_reports/${{ inputs.file_base }}_cpp/X_to_Y/compat_report.html ${{ inputs.file_base }}-hdf5_cpp_compat_report.html
-          ls -l compat_reports/${{ inputs.file_base }}_hl_cpp/X_to_Y
-          cp compat_reports/${{ inputs.file_base }}_hl_cpp/X_to_Y/compat_report.html ${{ inputs.file_base }}-hdf5_hl_cpp_compat_report.html
+          cp compat_reports/jarhdf5-/${CONVERT_HDF5LIB_REFNAME_HDF5R_DOTSMAIN}_to_${SET_HDF5LIB_NAME_HDF5_VERS}/compat_report.html $FILE_BASE-java_compat_report.html
+          ls -l compat_reports/$FILE_BASE/X_to_Y
+          cp compat_reports/$FILE_BASE/X_to_Y/compat_report.html $FILE_BASE-hdf5_compat_report.html
+          ls -l compat_reports/${FILE_BASE}_hl/X_to_Y
+          cp compat_reports/${FILE_BASE}_hl/X_to_Y/compat_report.html $FILE_BASE-hdf5_hl_compat_report.html
+          ls -l compat_reports/${FILE_BASE}_cpp/X_to_Y
+          cp compat_reports/${FILE_BASE}_cpp/X_to_Y/compat_report.html $FILE_BASE-hdf5_cpp_compat_report.html
+          ls -l compat_reports/${FILE_BASE}_hl_cpp/X_to_Y
+          cp compat_reports/${FILE_BASE}_hl_cpp/X_to_Y/compat_report.html $FILE_BASE-hdf5_hl_cpp_compat_report.html
         continue-on-error: true
 
       - name: List files for the report spaces (Linux)
@@ -167,15 +204,17 @@ jobs:
 
       - name: Publish ABI reports
         id: publish-abi-reports
+        env:
+          FILE_BASE: ${{ inputs.file_base }}
         run: |
           mkdir "${{ runner.workspace }}/buildabi"
           mkdir "${{ runner.workspace }}/buildabi/hdf5"
-          cp ${{ inputs.file_base }}-hdf5_compat_report.html ${{ runner.workspace }}/buildabi/hdf5
-          cp ${{ inputs.file_base }}-hdf5_hl_compat_report.html ${{ runner.workspace }}/buildabi/hdf5
-          cp ${{ inputs.file_base }}-hdf5_cpp_compat_report.html ${{ runner.workspace }}/buildabi/hdf5
-          cp ${{ inputs.file_base }}-java_compat_report.html ${{ runner.workspace }}/buildabi/hdf5
+          cp $FILE_BASE-hdf5_compat_report.html ${{ runner.workspace }}/buildabi/hdf5
+          cp $FILE_BASE-hdf5_hl_compat_report.html ${{ runner.workspace }}/buildabi/hdf5
+          cp $FILE_BASE-hdf5_cpp_compat_report.html ${{ runner.workspace }}/buildabi/hdf5
+          cp $FILE_BASE-java_compat_report.html ${{ runner.workspace }}/buildabi/hdf5
           cd "${{ runner.workspace }}/buildabi"
-          tar -zcvf ${{ inputs.file_base }}.html.abi.reports.tar.gz hdf5
+          tar -zcvf $FILE_BASE.html.abi.reports.tar.gz hdf5
         shell: bash
 
       - name: Save output as artifact

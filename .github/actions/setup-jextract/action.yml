@@ -162,13 +162,18 @@ runs:
     - name: Set environment variables
       id: setup-jextract
       shell: bash
+      env:
+        SETUP_JEXTRACT_WINDOWS_JEXTRACT_HOME: ${{ steps.setup-jextract-windows.outputs.jextract-home }}
+        SETUP_JEXTRACT_WINDOWS_JEXTRACT_VERSION: ${{ steps.setup-jextract-windows.outputs.jextract-version }}
+        SETUP_JEXTRACT_UNIX_JEXTRACT_HOME: ${{ steps.setup-jextract-unix.outputs.jextract-home }}
+        SETUP_JEXTRACT_UNIX_JEXTRACT_VERSION: ${{ steps.setup-jextract-unix.outputs.jextract-version }}
       run: |
         if [[ "$RUNNER_OS" == "Windows" ]]; then
-          JEXTRACT_HOME="${{ steps.setup-jextract-windows.outputs.jextract-home }}"
-          JEXTRACT_VERSION="${{ steps.setup-jextract-windows.outputs.jextract-version }}"
+          JEXTRACT_HOME="$SETUP_JEXTRACT_WINDOWS_JEXTRACT_HOME"
+          JEXTRACT_VERSION="$SETUP_JEXTRACT_WINDOWS_JEXTRACT_VERSION"
         else
-          JEXTRACT_HOME="${{ steps.setup-jextract-unix.outputs.jextract-home }}"
-          JEXTRACT_VERSION="${{ steps.setup-jextract-unix.outputs.jextract-version }}"
+          JEXTRACT_HOME="$SETUP_JEXTRACT_UNIX_JEXTRACT_HOME"
+          JEXTRACT_VERSION="$SETUP_JEXTRACT_UNIX_JEXTRACT_VERSION"
         fi
 
         echo "JEXTRACT_HOME=$JEXTRACT_HOME" >> $GITHUB_ENV

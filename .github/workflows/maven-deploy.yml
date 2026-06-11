@@ -187,17 +187,21 @@ jobs:
 
       - name: Extract version information
         id: extract-version
+        env:
+          FIND_POM_POM_FILE: ${{ steps.find-pom.outputs.pom-file }}
         run: |
           # Extract version from POM file
-          VERSION=$(grep -o '<version>[^<]*</version>' "${{ steps.find-pom.outputs.pom-file }}" | head -1 | sed 's/<[^>]*>//g')
+          VERSION=$(grep -o '<version>[^<]*</version>' "$FIND_POM_POM_FILE" | head -1 | sed 's/<[^>]*>//g')
           echo "hdf5-version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Extracted HDF5 version: ${VERSION}"
 
       - name: Determine platform classifier
         id: platform-info
+        env:
+          FIND_JARS_JAR_FILES: ${{ steps.find-jars.outputs.jar-files }}
         run: |
           # Extract platform classifier from JAR filename
-          JAR_FILE=$(echo "${{ steps.find-jars.outputs.jar-files }}" | cut -d',' -f1)
+          JAR_FILE=$(echo "$FIND_JARS_JAR_FILES" | cut -d',' -f1)
           CLASSIFIER=""
 
           if [[ "${JAR_FILE}" == *"linux"* ]]; then
@@ -216,16 +220,19 @@ jobs:
           echo "Platform classifier: ${CLASSIFIER}"
 
       - name: Quick artifact validation
+        env:
+          FIND_JARS_JAR_FILES: ${{ steps.find-jars.outputs.jar-files }}
+          FIND_POM_POM_FILE: ${{ steps.find-pom.outputs.pom-file }}
         run: |
           echo "=== Quick Artifact Validation ==="
 
           # Count artifacts
-          jar_count=$(echo "${{ steps.find-jars.outputs.jar-files }}" | tr ',' '\n' | wc -l)
+          jar_count=$(echo "$FIND_JARS_JAR_FILES" | tr ',' '\n' | wc -l)
           echo "Found ${jar_count} JAR file(s) for deployment"
 
           # Basic validation (artifacts should already be validated by staging workflow)
           # Parse format: jar_path|platform|implementation,jar_path|platform|implementation,...
-          echo "${{ steps.find-jars.outputs.jar-files }}" | tr ',' '\n' | while IFS='|' read -r jar_file platform impl; do
+          echo "$FIND_JARS_JAR_FILES" | tr ',' '\n' | while IFS='|' read -r jar_file platform impl; do
             # Skip empty entries
             [ -z "$jar_file" ] && continue
 
@@ -239,8 +246,8 @@ jobs:
           done
 
           # Quick POM validation
-          if [ -f "${{ steps.find-pom.outputs.pom-file }}" ]; then
-            echo "✓ POM file found: $(basename "${{ steps.find-pom.outputs.pom-file }}")"
+          if [ -f "$FIND_POM_POM_FILE" ]; then
+            echo "✓ POM file found: $(basename "$FIND_POM_POM_FILE")"
           else
             echo "ERROR: POM file not found"
             exit 1
@@ -275,9 +282,11 @@ jobs:
           distribution: 'temurin'
 
       - name: Create Maven settings.xml
+        env:
+          REPOSITORY_ID: ${{ inputs.repository_id }}
         run: |
           mkdir -p ~/.m2
-          cat > ~/.m2/settings.xml << 'EOF'
+          cat > ~/.m2/settings.xml << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -285,7 +294,7 @@ jobs:
                     https://maven.apache.org/xsd/settings-1.0.0.xsd">
             <servers>
               <server>
-                <id>${{ inputs.repository_id }}</id>
+                <id>${REPOSITORY_ID}</id>
                 <username>${{ secrets.MAVEN_USERNAME }}</username>
                 <password>${{ secrets.MAVEN_PASSWORD }}</password>
               </server>
@@ -303,14 +312,20 @@ jobs:
         env:
           HDF5_VERSION: ${{ needs.validate-artifacts.outputs.hdf5-version }}
           PLATFORM_CLASSIFIER: ${{ needs.validate-artifacts.outputs.platform-classifier }}
+          REPOSITORY_URL: ${{ inputs.repository_url }}
+          REPOSITORY_ID: ${{ inputs.repository_id }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          DEPLOY_SNAPSHOTS: ${{ inputs.deploy_snapshots }}
+          VALIDATE_ARTIFACTS_JAR_FILES: ${{ needs.validate-artifacts.outputs.jar-files }}
+          VALIDATE_ARTIFACTS_POM_FILE: ${{ needs.validate-artifacts.outputs.pom-file }}
         run: |
           echo "=== Maven Deployment Debug Info ==="
           echo "Version: ${HDF5_VERSION}"
-          echo "Repository: ${{ inputs.repository_url }}"
-          echo "Repository ID: ${{ inputs.repository_id }}"
+          echo "Repository: $REPOSITORY_URL"
+          echo "Repository ID: $REPOSITORY_ID"
           echo "Platform Classifier: ${PLATFORM_CLASSIFIER}"
-          echo "Dry Run: ${{ inputs.dry_run }}"
-          echo "Deploy Snapshots: ${{ inputs.deploy_snapshots }}"
+          echo "Dry Run: $DRY_RUN"
+          echo "Deploy Snapshots: $DEPLOY_SNAPSHOTS"
           echo "Username: ${{ secrets.MAVEN_USERNAME }}"
           echo "Password length: ${#MAVEN_PASSWORD} chars"
           echo "GPG Private Key available: ${{ secrets.GPG_PRIVATE_KEY != '' }}"
@@ -335,7 +350,7 @@ jobs:
 
           echo "=== Starting JAR Deployment ==="
           # Parse jar-files output: format is "jar_path|platform|implementation,jar_path|platform|implementation,..."
-          echo "${{ needs.validate-artifacts.outputs.jar-files }}" | tr ',' '\n' | while IFS='|' read -r jar_file platform impl; do
+          echo "$VALIDATE_ARTIFACTS_JAR_FILES" | tr ',' '\n' | while IFS='|' read -r jar_file platform impl; do
             # Skip empty entries
             [ -z "$jar_file" ] && continue
 
@@ -401,7 +416,7 @@ jobs:
             fi
 
             # Check if this is a dry run
-            if [ "${{ inputs.dry_run }}" == "true" ]; then
+            if [ "$DRY_RUN" == "true" ]; then
               echo "🧪 DRY RUN: Would deploy ${jar_basename} as ${ARTIFACT_ID} with classifier ${CURRENT_CLASSIFIER:-none}"
               echo "Command would be: mvn deploy:deploy-file -DgroupId=org.hdfgroup -DartifactId=${ARTIFACT_ID} -Dversion=${HDF5_VERSION} -Dfile=${jar_file} ${classifier_opts}"
               success_count=$((success_count + 1))
@@ -414,9 +429,9 @@ jobs:
                 -DartifactId=\"${ARTIFACT_ID}\" \
                 -Dversion=\"${HDF5_VERSION}\" \
                 -Dfile=\"${jar_file}\" \
-                -DpomFile=\"${{ needs.validate-artifacts.outputs.pom-file }}\" \
-                -DrepositoryId=\"${{ inputs.repository_id }}\" \
-                -Durl=\"${{ inputs.repository_url }}\" \
+                -DpomFile=\"$VALIDATE_ARTIFACTS_POM_FILE\" \
+                -DrepositoryId=\"$REPOSITORY_ID\" \
+                -Durl=\"$REPOSITORY_URL\" \
                 ${classifier_opts} \
                 ${GPG_OPTS} \
                 -B -X"
@@ -433,11 +448,11 @@ jobs:
                 # Try to get more specific error information
                 echo "=== Debugging deployment failure ==="
                 echo "Testing repository connectivity..."
-                curl -I "${{ inputs.repository_url }}" || echo "Repository not accessible via curl"
+                curl -I "$REPOSITORY_URL" || echo "Repository not accessible via curl"
 
                 echo "Testing authentication..."
                 curl -u "${{ secrets.MAVEN_USERNAME }}:${{ secrets.MAVEN_PASSWORD }}" \
-                     -I "${{ inputs.repository_url }}" || echo "Authentication test failed"
+                     -I "$REPOSITORY_URL" || echo "Authentication test failed"
               fi
             fi
           done
@@ -455,6 +470,7 @@ jobs:
       - name: Verify deployment
         env:
           HDF5_VERSION: ${{ needs.validate-artifacts.outputs.hdf5-version }}
+          REPOSITORY_URL: ${{ inputs.repository_url }}
         run: |
           echo "=== Deployment Verification ==="
 
@@ -462,11 +478,11 @@ jobs:
           sleep 10
 
           # For GitHub Packages, we can verify using the API
-          if [[ "${{ inputs.repository_url }}" == *"maven.pkg.github.com"* ]]; then
+          if [[ "$REPOSITORY_URL" == *"maven.pkg.github.com"* ]]; then
             echo "Verifying GitHub Packages deployment..."
 
             # Extract owner/repo from URL
-            REPO_PATH=$(echo "${{ inputs.repository_url }}" | sed 's|.*maven.pkg.github.com/||')
+            REPO_PATH=$(echo "$REPOSITORY_URL" | sed 's|.*maven.pkg.github.com/||')
 
             curl -s -H "Authorization: token ${{ secrets.MAVEN_PASSWORD }}" \
               "https://api.github.com/users/HDFGroup/packages?package_type=maven" | \
@@ -482,44 +498,46 @@ jobs:
     if: ${{ always() && needs.validate-artifacts.result == 'success' }}
     steps:
       - name: Generate deployment summary
+        env:
+          REPOSITORY_URL: ${{ inputs.repository_url }}
         run: |
-          cat > maven-deployment-summary.md << 'EOF'
+          cat > maven-deployment-summary.md << EOF
           # Maven Deployment Summary
 
           **Version**: ${{ needs.validate-artifacts.outputs.hdf5-version }}
-          **Repository**: ${{ inputs.repository_url }}
+          **Repository**: ${REPOSITORY_URL}
           **Deployment Status**: ${{ needs.deploy-maven.result || 'skipped (dry-run)' }}
 
           ## HDF5 Java Library
 
-          ```xml
+          \`\`\`xml
           <dependency>
               <groupId>org.hdfgroup</groupId>
               <artifactId>hdf5-java</artifactId>
               <version>${{ needs.validate-artifacts.outputs.hdf5-version }}</version>
               <classifier>linux-x86_64</classifier> <!-- or windows-x86_64, macos-x86_64, macos-aarch64 -->
           </dependency>
-          ```
+          \`\`\`
 
           ## HDF5 Java Examples
 
-          ```xml
+          \`\`\`xml
           <dependency>
               <groupId>org.hdfgroup</groupId>
               <artifactId>hdf5-java-examples</artifactId>
               <version>${{ needs.validate-artifacts.outputs.hdf5-version }}</version>
           </dependency>
-          ```
+          \`\`\`
 
           ## Gradle Dependencies
 
-          ```kotlin
+          \`\`\`kotlin
           // HDF5 Java Library
           implementation("org.hdfgroup:hdf5-java:${{ needs.validate-artifacts.outputs.hdf5-version }}:linux-x86_64")
 
           // HDF5 Java Examples (62 examples)
           implementation("org.hdfgroup:hdf5-java-examples:${{ needs.validate-artifacts.outputs.hdf5-version }}")
-          ```
+          \`\`\`
 
           ## Available Packages
           - **hdf5-java**: Platform-specific HDF5 Java bindings (4 platform variants)
