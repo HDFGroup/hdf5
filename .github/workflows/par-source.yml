@@ -68,11 +68,13 @@ jobs:
           name: openmpi
 
       - name: Untar MPI installation (OpenMPI)
+        env:
         run: |
           tar xvf openmpi.tar -C $RUNNER_WORKSPACE
 
       - name: Set path (OpenMPI)
         shell: bash
+        env:
         run: |
           echo "$RUNNER_WORKSPACE/openmpi/bin" >> $GITHUB_PATH
           echo "LD_LIBRARY_PATH=$RUNNER_WORKSPACE/openmpi/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
@@ -110,6 +112,7 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (OpenMPI)
+        env:
         run: |
             ls -l ${{ github.workspace }}
             ls $RUNNER_WORKSPACE
@@ -123,6 +126,7 @@ jobs:
           source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (OpenMPI)
+        env:
         run: |
             ls $RUNNER_WORKSPACE/hdf5
 
@@ -193,11 +197,13 @@ jobs:
           name: mpich
 
       - name: Untar MPI installation (MPICH)
+        env:
         run: |
           tar xvf mpich.tar -C $RUNNER_WORKSPACE
 
       - name: Set path (MPICH)
         shell: bash
+        env:
         run: |
           echo "$RUNNER_WORKSPACE/mpich/bin" >> $GITHUB_PATH
           echo "LD_LIBRARY_PATH=$RUNNER_WORKSPACE/mpich/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
@@ -235,6 +241,7 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (MPICH)
+        env:
         run: |
             ls -l ${{ github.workspace }}
             ls $RUNNER_WORKSPACE
@@ -248,6 +255,7 @@ jobs:
           source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (MPICH)
+        env:
         run: |
             ls $RUNNER_WORKSPACE/hdf5
 

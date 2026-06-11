@@ -300,6 +300,7 @@ jobs:
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: List files for the space (Linux)
+        env:
         run: |
               ls -l ${{ github.workspace }}
               ls $RUNNER_WORKSPACE

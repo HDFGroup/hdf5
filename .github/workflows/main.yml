@@ -371,6 +371,7 @@ jobs:
 #        if: ${{ (matrix.ostype == 'macos') }}
 
       - name: List files in the space
+        env:
         run: |
               ls -l $RUNNER_WORKSPACE/build
 

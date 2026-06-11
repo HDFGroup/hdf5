@@ -83,17 +83,20 @@ jobs:
 
       - name: Untar libaws-c-s3 installation (Ubuntu)
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
+        env:
         run: |
           tar xvf libaws-c-s3.tar -C $RUNNER_WORKSPACE
 
       - name: List contents of libaws-c-s3 installation (Ubuntu)
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
+        env:
         run: |
           ls -lR $RUNNER_WORKSPACE/aws-c-s3-build
 
       - name: Setup environment (Ubuntu)
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
         shell: bash
+        env:
         run: |
           echo "LD_LIBRARY_PATH=$RUNNER_WORKSPACE/aws-c-s3-build/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "CMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/aws-c-s3-build" >> $GITHUB_ENV
@@ -249,17 +252,20 @@ jobs:
 
       - name: Untar libaws-c-s3 installation (Ubuntu)
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
+        env:
         run: |
           tar xvf libaws-c-s3.tar -C $RUNNER_WORKSPACE
 
       - name: List contents of libaws-c-s3 installation (Ubuntu)
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
+        env:
         run: |
           ls -lR $RUNNER_WORKSPACE/aws-c-s3-build
 
       - name: Setup environment (Ubuntu)
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
         shell: bash
+        env:
         run: |
           echo "LD_LIBRARY_PATH=$RUNNER_WORKSPACE/aws-c-s3-build/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "CMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/aws-c-s3-build" >> $GITHUB_ENV
@@ -393,6 +399,7 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
       - name: List files in the space
+        env:
         run: |
               ls -l $RUNNER_WORKSPACE/build
 

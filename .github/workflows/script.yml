@@ -89,6 +89,7 @@ jobs:
         run: Get-Location
 
       - name: List files for the space (Windows)
+        env:
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
               Get-ChildItem -Path $RUNNER_WORKSPACE
@@ -105,6 +106,7 @@ jobs:
           source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (Windows)
+        env:
         run: |
           Get-ChildItem -Path $RUNNER_WORKSPACE/hdf5
         shell: pwsh
@@ -198,6 +200,7 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (Linux)
+        env:
         run: |
             ls -l ${{ github.workspace }}
             ls $RUNNER_WORKSPACE
@@ -211,6 +214,7 @@ jobs:
           source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (Linux)
+        env:
         run: |
             ls $RUNNER_WORKSPACE/hdf5
 
@@ -316,6 +320,7 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (MacOS_latest)
+        env:
         run: |
               ls ${{ github.workspace }}
               ls $RUNNER_WORKSPACE
@@ -337,6 +342,7 @@ jobs:
           version: 14
 
       - name: List files for the hdf5 (MacOS_latest)
+        env:
         run: |
               ls $RUNNER_WORKSPACE/hdf5
 
@@ -411,15 +417,18 @@ jobs:
           name: libaws-c-s3-Release
 
       - name: Untar libaws-c-s3 installation
+        env:
         run: |
           tar xvf libaws-c-s3.tar -C $RUNNER_WORKSPACE
 
       - name: List contents of libaws-c-s3 installation
+        env:
         run: |
           ls -laR $RUNNER_WORKSPACE/aws-c-s3-build
 
       - name: Setup environment
         shell: bash
+        env:
         run: |
           echo "LD_LIBRARY_PATH=$RUNNER_WORKSPACE/aws-c-s3-build/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "CMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/aws-c-s3-build" >> $GITHUB_ENV
@@ -449,6 +458,7 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (Linux S3)
+        env:
         run: |
               ls -l ${{ github.workspace }}
               ls $RUNNER_WORKSPACE
@@ -462,6 +472,7 @@ jobs:
           source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (Linux S3)
+        env:
         run: |
               ls $RUNNER_WORKSPACE/hdf5
 
@@ -565,6 +576,7 @@ jobs:
         run: Get-Location
 
       - name: List files for the space (Windows_intel)
+        env:
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
               Get-ChildItem -Path $RUNNER_WORKSPACE
@@ -581,6 +593,7 @@ jobs:
           source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (Windows_intel)
+        env:
         run: |
               Get-ChildItem -Path $RUNNER_WORKSPACE/hdf5
         shell: pwsh
@@ -685,6 +698,7 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (Linux_intel)
+        env:
         run: |
               ls -l ${{ github.workspace }}
               ls $RUNNER_WORKSPACE
@@ -698,6 +712,7 @@ jobs:
           source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (Linux_Linux)
+        env:
         run: |
           ls $RUNNER_WORKSPACE/hdf5
 
@@ -805,6 +820,7 @@ jobs:
           path: ${{ github.workspace }}
 
       - name: List files for the space (Linux_clang)
+        env:
         run: |
           ls -l ${{ github.workspace }}
           ls $RUNNER_WORKSPACE
@@ -818,6 +834,7 @@ jobs:
           source-base: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
 
       - name: List files for the hdf5 (Linux_clang)
+        env:
         run: |
           ls $RUNNER_WORKSPACE/hdf5
 

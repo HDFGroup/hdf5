@@ -142,6 +142,7 @@ jobs:
         run: Get-Location
 
       - name: List files for the space (Windows)
+        env:
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
               Get-ChildItem -Path $env:RUNNER_WORKSPACE
@@ -223,6 +224,7 @@ jobs:
         shell: pwsh
 
       - name: List files in the space (Windows)
+        env:
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
               Get-ChildItem -Path $env:RUNNER_WORKSPACE
@@ -319,6 +321,7 @@ jobs:
         run: Get-Location
 
       - name: List files for the space (Windows ARM64)
+        env:
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
               Get-ChildItem -Path $env:RUNNER_WORKSPACE
@@ -408,6 +411,7 @@ jobs:
         shell: pwsh
 
       - name: List files in the space (Windows ARM64)
+        env:
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
               Get-ChildItem -Path $env:RUNNER_WORKSPACE
@@ -491,6 +495,7 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (Linux)
+        env:
         run: |
               ls -l ${{ github.workspace }}
               ls $env:RUNNER_WORKSPACE
@@ -560,6 +565,7 @@ jobs:
         shell: bash
 
       - name: List files in the space (Linux)
+        env:
         run: |
               ls ${{ github.workspace }}
               ls -l $env:RUNNER_WORKSPACE
@@ -706,6 +712,7 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (MacOS_latest)
+        env:
         run: |
               ls ${{ github.workspace }}
               ls $env:RUNNER_WORKSPACE
@@ -867,6 +874,7 @@ jobs:
         shell: bash
 
       - name: List files in the space (MacOS_latest)
+        env:
         run: |
               ls ${{ github.workspace }}
               ls -l $env:RUNNER_WORKSPACE
@@ -909,15 +917,18 @@ jobs:
           name: libaws-c-s3-Release
 
       - name: Untar libaws-c-s3 installation
+        env:
         run: |
           tar xvf libaws-c-s3.tar -C $env:RUNNER_WORKSPACE
 
       - name: List contents of libaws-c-s3 installation
+        env:
         run: |
           ls -lR $env:RUNNER_WORKSPACE/aws-c-s3-build
 
       - name: Setup environment
         shell: bash
+        env:
         run: |
           echo "LD_LIBRARY_PATH=$env:RUNNER_WORKSPACE/aws-c-s3-build/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "CMAKE_PREFIX_PATH=$env:RUNNER_WORKSPACE/aws-c-s3-build" >> $GITHUB_ENV
@@ -947,6 +958,7 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (Linux S3)
+        env:
         run: |
               ls -l ${{ github.workspace }}
               ls $env:RUNNER_WORKSPACE
@@ -980,6 +992,7 @@ jobs:
         shell: bash
 
       - name: List files in the space (Linux S3)
+        env:
         run: |
               ls ${{ github.workspace }}
               ls -l $env:RUNNER_WORKSPACE
@@ -1046,6 +1059,7 @@ jobs:
         run: Get-Location
 
       - name: List files for the space (Windows_intel)
+        env:
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
               Get-ChildItem -Path $env:RUNNER_WORKSPACE
@@ -1130,6 +1144,7 @@ jobs:
         shell: pwsh
 
       - name: List files in the space (Windows_intel)
+        env:
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
               Get-ChildItem -Path $env:RUNNER_WORKSPACE
@@ -1200,6 +1215,7 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: List files for the space (Linux_intel)
+        env:
         run: |
               ls -l ${{ github.workspace }}
               ls $env:RUNNER_WORKSPACE
@@ -1235,6 +1251,7 @@ jobs:
         shell: bash
 
       - name: List files in the space (Linux_intel)
+        env:
         run: |
               ls ${{ github.workspace }}
               ls -l $env:RUNNER_WORKSPACE

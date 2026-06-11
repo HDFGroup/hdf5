@@ -100,6 +100,7 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
       - name: List files in the space
+        env:
         run: |
                ls -l $RUNNER_WORKSPACE/build
 

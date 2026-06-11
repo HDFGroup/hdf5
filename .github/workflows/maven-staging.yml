@@ -497,6 +497,7 @@ jobs:
       - name: Validate artifacts
         id: artifacts-check
         shell: bash
+        env:
         run: |
           ARTIFACT_COUNT=$(find "$RUNNER_WORKSPACE/maven-artifacts" -name "*.jar" | wc -l)
           POM_COUNT=$(find "$RUNNER_WORKSPACE/maven-artifacts" -name "pom.xml" | wc -l)
@@ -639,6 +640,7 @@ jobs:
 
       - name: Run validation script
         shell: bash
+        env:
         run: |
           if [ -f .github/scripts/validate-maven-artifacts.sh ]; then
             echo "Running Maven artifact validation..."
