@@ -209,6 +209,7 @@ jobs:
       # CONFIGURE
       - name: Configure
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           MATRIX_GENERATOR: ${{ matrix.generator }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
           MATRIX_SHARED: ${{ matrix.shared }}
@@ -258,6 +259,7 @@ jobs:
 
       - name: Configure (Thread-Safe)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           MATRIX_GENERATOR: ${{ matrix.generator }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
           IS_NOT_WINDOWS: ${{ matrix.ostype != 'windows' }}
@@ -299,6 +301,7 @@ jobs:
 
       - name: Configure (Concurrency)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           MATRIX_GENERATOR: ${{ matrix.generator }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
           IS_NOT_WINDOWS: ${{ matrix.ostype != 'windows' }}
@@ -372,6 +375,7 @@ jobs:
 
       - name: List files in the space
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls -l $RUNNER_WORKSPACE/build
 

@@ -97,6 +97,7 @@ jobs:
 
       - name: List files for the space (Windows)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
               Get-ChildItem -Path $RUNNER_WORKSPACE
@@ -114,6 +115,7 @@ jobs:
 
       - name: List files for the hdf5 (${{ matrix.mpi }})
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
             Get-ChildItem -Path $RUNNER_WORKSPACE/hdf5
         shell: pwsh
@@ -151,6 +153,7 @@ jobs:
 
       - name: Run CTest script (${{ matrix.mpi }})
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           REPO_FULL_NAME: ${{ github.event.repository.full_name }}
           MATRIX_MPI: ${{ matrix.mpi }}
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
@@ -232,6 +235,7 @@ jobs:
 
       - name: List files for the space (Linux)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls -l ${{ github.workspace }}
               ls $RUNNER_WORKSPACE
@@ -246,6 +250,7 @@ jobs:
 
       - name: List files for the hdf5 (${{ matrix.mpi }})
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
             ls $RUNNER_WORKSPACE/hdf5
 
@@ -282,6 +287,7 @@ jobs:
 
       - name: Run CTest script (${{ matrix.mpi }})
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           REPO_FULL_NAME: ${{ github.event.repository.full_name }}
           MATRIX_MPI: ${{ matrix.mpi }}
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
@@ -345,6 +351,7 @@ jobs:
 
       - name: List files for the space (${{ matrix.mpi }})
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
             ls -l ${{ github.workspace }}
             ls $RUNNER_WORKSPACE
@@ -359,6 +366,7 @@ jobs:
 
       - name: List files for the hdf5 (${{ matrix.mpi }})
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
             ls $RUNNER_WORKSPACE/hdf5
 
@@ -395,6 +403,7 @@ jobs:
 
       - name: Run CTest script (${{ matrix.mpi }})
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           REPO_FULL_NAME: ${{ github.event.repository.full_name }}
           MATRIX_MPI: ${{ matrix.mpi }}
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}

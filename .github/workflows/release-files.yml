@@ -301,6 +301,7 @@ jobs:
 
       - name: List files for the space (Linux)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls -l ${{ github.workspace }}
               ls $RUNNER_WORKSPACE

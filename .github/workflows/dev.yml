@@ -59,6 +59,7 @@ jobs:
 
       - name: List files for the space (Linux)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls -l ${{ github.workspace }}
               ls $RUNNER_WORKSPACE
@@ -68,6 +69,7 @@ jobs:
 
       - name: List files for the space (Linux)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls -l ${{ github.workspace }}
               ls $RUNNER_WORKSPACE
@@ -75,6 +77,7 @@ jobs:
       - name: Configure
         shell: bash
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
             mkdir "$RUNNER_WORKSPACE/build"
             cd "$RUNNER_WORKSPACE/build"
@@ -164,6 +167,7 @@ jobs:
 
       - name: List files for the space (Windows)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
               Get-ChildItem -Path $RUNNER_WORKSPACE
@@ -177,6 +181,7 @@ jobs:
       - name: Configure (Windows)
         shell: pwsh
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           mkdir "$env:RUNNER_WORKSPACE/build"
           Set-Location -Path "$env:RUNNER_WORKSPACE\\build"
@@ -244,6 +249,7 @@ jobs:
 
       - name: List files for the space (MacOS_latest)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls ${{ github.workspace }}
               ls $RUNNER_WORKSPACE
@@ -254,6 +260,7 @@ jobs:
       - name: Configure
         shell: bash
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           mkdir "$RUNNER_WORKSPACE/build"
           cd "$RUNNER_WORKSPACE/build"
@@ -342,6 +349,7 @@ jobs:
 
       - name: List files for the space (Linux_clang)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           ls -l ${{ github.workspace }}
           ls $RUNNER_WORKSPACE
@@ -352,6 +360,7 @@ jobs:
       - name: Configure
         shell: bash
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           mkdir "$RUNNER_WORKSPACE/build"
           cd "$RUNNER_WORKSPACE/build"

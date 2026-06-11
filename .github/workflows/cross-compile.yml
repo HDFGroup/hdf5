@@ -50,6 +50,7 @@ jobs:
       # CMAKE CONFIGURE
       - name: CMake Configure
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
            mkdir "$RUNNER_WORKSPACE/build"
@@ -101,6 +102,7 @@ jobs:
 
       - name: List files in the space
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
                ls -l $RUNNER_WORKSPACE/build
 

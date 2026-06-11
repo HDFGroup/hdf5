@@ -73,6 +73,7 @@ jobs:
 
     - name: List files for the space (Linux_coverage)
       env:
+        RUNNER_WORKSPACE: ${{ runner.workspace }}
       run: |
         ls -l ${{ github.workspace }}
         ls $RUNNER_WORKSPACE
@@ -87,6 +88,7 @@ jobs:
 
     - name: List files for the hdf5 (Linux_coverage)
       env:
+        RUNNER_WORKSPACE: ${{ runner.workspace }}
       run: |
         ls $RUNNER_WORKSPACE/hdf5
 
@@ -121,6 +123,7 @@ jobs:
 
     - name: Run CTest (Linux_coverage)
       env:
+        RUNNER_WORKSPACE: ${{ runner.workspace }}
         REPO_FULL_NAME: ${{ github.event.repository.full_name }}
         SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
       run: |
@@ -182,6 +185,7 @@ jobs:
 
       - name: List files for the space (Linux_Leak)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           ls -l ${{ github.workspace }}
           ls $RUNNER_WORKSPACE
@@ -196,6 +200,7 @@ jobs:
 
       - name: List files for the hdf5 (Linux_Leak)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           ls $RUNNER_WORKSPACE/hdf5
 
@@ -233,6 +238,7 @@ jobs:
 
       - name: Run CTest (Linux_Leak)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           REPO_FULL_NAME: ${{ github.event.repository.full_name }}
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
         run: |
@@ -294,6 +300,7 @@ jobs:
 
       - name: List files for the space (Linux_Address)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           ls -l ${{ github.workspace }}
           ls $RUNNER_WORKSPACE
@@ -308,6 +315,7 @@ jobs:
 
       - name: List files for the hdf5 (Linux_Address)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           ls $RUNNER_WORKSPACE/hdf5
 
@@ -345,6 +353,7 @@ jobs:
 
       - name: Run CTest (Linux_Address)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           REPO_FULL_NAME: ${{ github.event.repository.full_name }}
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
         run: |
@@ -406,6 +415,7 @@ jobs:
 
       - name: List files for the space (Linux_UndefinedBehavior)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           ls -l ${{ github.workspace }}
           ls $RUNNER_WORKSPACE
@@ -420,6 +430,7 @@ jobs:
 
       - name: List files for the hdf5 (Linux_UndefinedBehavior)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           ls $RUNNER_WORKSPACE/hdf5
 
@@ -458,6 +469,7 @@ jobs:
 
       - name: Run CTest (Linux_UndefinedBehavior)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           REPO_FULL_NAME: ${{ github.event.repository.full_name }}
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
         run: |

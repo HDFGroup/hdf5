@@ -13,6 +13,7 @@ runs:
       shell: bash
       env:
         SOURCE_BASE: ${{ inputs.source-base }}
+        RUNNER_WORKSPACE: ${{ runner.workspace }}
       run: |
         mkdir -p $RUNNER_WORKSPACE/hdf5
         ln -sf ${{ github.workspace }}/$SOURCE_BASE/config/cmake/scripts/CTestScript.cmake $RUNNER_WORKSPACE/hdf5/CTestScript.cmake
@@ -23,6 +24,7 @@ runs:
       shell: pwsh
       env:
         SOURCE_BASE: ${{ inputs.source-base }}
+        RUNNER_WORKSPACE: ${{ runner.workspace }}
       run: |
         New-Item -ItemType Directory -Path $env:RUNNER_WORKSPACE/hdf5 -Force | Out-Null
         New-Item -ItemType SymbolicLink -Path $env:RUNNER_WORKSPACE/hdf5/CTestScript.cmake -Target ${{ github.workspace }}/$env:SOURCE_BASE/config/cmake/scripts/CTestScript.cmake -Force

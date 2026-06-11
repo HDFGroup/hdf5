@@ -70,6 +70,7 @@ jobs:
         shell: bash
         env:
           ENV_NVERDOT: ${{ env.NVERDOT }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/$ENV_NVERDOT/comm_libs/hpcx/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/$ENV_NVERDOT/compilers/bin:$PATH

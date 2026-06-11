@@ -79,6 +79,7 @@ jobs:
         env:
           ENV_AOCCVERDOT: ${{ env.AOCCVERDOT }}
           ENV_MPIVERDOT: ${{ env.MPIVERDOT }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           export LD_LIBRARY_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-$ENV_AOCCVERDOT/lib:/home/runner/work/hdf5/hdf5/openmpi-$ENV_MPIVERDOT-install/lib:/usr/local/lib

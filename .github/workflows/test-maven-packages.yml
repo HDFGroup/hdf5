@@ -294,6 +294,7 @@ jobs:
 
       - name: Verify HDF5 installation
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           echo "HDF5 installation contents:"
           ls -la "$RUNNER_WORKSPACE/hdf5-install"
@@ -566,6 +567,7 @@ jobs:
 
       - name: Verify HDF5 installation
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           echo "HDF5 installation contents:"
           ls -la "$RUNNER_WORKSPACE/hdf5-install"

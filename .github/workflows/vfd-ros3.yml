@@ -84,12 +84,14 @@ jobs:
       - name: Untar libaws-c-s3 installation (Ubuntu)
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           tar xvf libaws-c-s3.tar -C $RUNNER_WORKSPACE
 
       - name: List contents of libaws-c-s3 installation (Ubuntu)
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           ls -lR $RUNNER_WORKSPACE/aws-c-s3-build
 
@@ -97,6 +99,7 @@ jobs:
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
         shell: bash
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           echo "LD_LIBRARY_PATH=$RUNNER_WORKSPACE/aws-c-s3-build/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "CMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/aws-c-s3-build" >> $GITHUB_ENV
@@ -146,6 +149,7 @@ jobs:
       - name: "Configure (vcpkg; ROS3 testing: ${{ matrix.test_ros3 }})"
         if: ${{ matrix.os_name == 'Windows MSVC' }}
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
           MATRIX_TEST_ROS3: ${{ matrix.test_ros3 }}
           ENABLE_JNI: ${{ inputs.force_java_implementation == 'jni' }}
@@ -176,6 +180,7 @@ jobs:
       - name: "Configure (ROS3 testing: ${{ matrix.test_ros3 }})"
         if: ${{ matrix.os_name != 'Windows MSVC' }}
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
           MATRIX_TEST_ROS3: ${{ matrix.test_ros3 }}
           ENABLE_JNI: ${{ inputs.force_java_implementation == 'jni' }}
@@ -253,12 +258,14 @@ jobs:
       - name: Untar libaws-c-s3 installation (Ubuntu)
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           tar xvf libaws-c-s3.tar -C $RUNNER_WORKSPACE
 
       - name: List contents of libaws-c-s3 installation (Ubuntu)
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           ls -lR $RUNNER_WORKSPACE/aws-c-s3-build
 
@@ -266,6 +273,7 @@ jobs:
         if: ${{ matrix.os_name == 'Ubuntu GCC' }}
         shell: bash
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           echo "LD_LIBRARY_PATH=$RUNNER_WORKSPACE/aws-c-s3-build/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "CMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/aws-c-s3-build" >> $GITHUB_ENV
@@ -321,6 +329,7 @@ jobs:
       - name: "Configure (vcpkg; ROS3 testing: ${{ matrix.test_ros3 }})"
         if: ${{ matrix.os_name == 'Windows MSVC' }}
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
           MATRIX_TEST_ROS3: ${{ matrix.test_ros3 }}
           ENABLE_JNI: ${{ inputs.force_java_implementation == 'jni' }}
@@ -351,6 +360,7 @@ jobs:
       - name: "Configure (ROS3 testing: ${{ matrix.test_ros3 }})"
         if: ${{ matrix.os_name != 'Windows MSVC' }}
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
           MATRIX_TEST_ROS3: ${{ matrix.test_ros3 }}
           ENABLE_JNI: ${{ inputs.force_java_implementation == 'jni' }}
@@ -400,6 +410,7 @@ jobs:
 
       - name: List files in the space
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls -l $RUNNER_WORKSPACE/build
 

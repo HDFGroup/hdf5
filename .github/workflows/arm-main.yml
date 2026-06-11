@@ -71,6 +71,7 @@ jobs:
       # CONFIGURE
       - name: Configure
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           mkdir "$RUNNER_WORKSPACE/build"
@@ -95,6 +96,7 @@ jobs:
 
       - name: Configure (Thread-Safe)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           mkdir "$RUNNER_WORKSPACE/build"
@@ -121,6 +123,7 @@ jobs:
 
       - name: Configure (Concurrency)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           mkdir "$RUNNER_WORKSPACE/build"
@@ -166,6 +169,7 @@ jobs:
 
       - name: List files in the space
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls -l $RUNNER_WORKSPACE/build
 
@@ -198,6 +202,7 @@ jobs:
       # CONFIGURE
       - name: Configure
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
            mkdir "$RUNNER_WORKSPACE/build"
@@ -220,6 +225,7 @@ jobs:
 
       - name: Configure (Thread-Safe)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
            mkdir "$RUNNER_WORKSPACE/build"
@@ -246,6 +252,7 @@ jobs:
 
       - name: Configure (Concurrency)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
            mkdir "$RUNNER_WORKSPACE/build"
            cd "$RUNNER_WORKSPACE/build"
@@ -288,6 +295,7 @@ jobs:
 
       - name: List files in the space
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
                ls -l $RUNNER_WORKSPACE/build
 
@@ -325,6 +333,7 @@ jobs:
       # CONFIGURE
       - name: Configure
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           mkdir "$RUNNER_WORKSPACE/build"
@@ -351,6 +360,7 @@ jobs:
 
       - name: Configure (Thread-Safe)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           mkdir "$RUNNER_WORKSPACE/build"
@@ -378,6 +388,7 @@ jobs:
 
       - name: Configure (Concurrency)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           mkdir "$RUNNER_WORKSPACE/build"
@@ -428,6 +439,7 @@ jobs:
 
       - name: List files in the space
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls -l $RUNNER_WORKSPACE/build
 

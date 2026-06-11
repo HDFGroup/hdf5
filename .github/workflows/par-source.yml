@@ -69,12 +69,14 @@ jobs:
 
       - name: Untar MPI installation (OpenMPI)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           tar xvf openmpi.tar -C $RUNNER_WORKSPACE
 
       - name: Set path (OpenMPI)
         shell: bash
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           echo "$RUNNER_WORKSPACE/openmpi/bin" >> $GITHUB_PATH
           echo "LD_LIBRARY_PATH=$RUNNER_WORKSPACE/openmpi/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
@@ -113,6 +115,7 @@ jobs:
 
       - name: List files for the space (OpenMPI)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
             ls -l ${{ github.workspace }}
             ls $RUNNER_WORKSPACE
@@ -127,6 +130,7 @@ jobs:
 
       - name: List files for the hdf5 (OpenMPI)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
             ls $RUNNER_WORKSPACE/hdf5
 
@@ -161,6 +165,7 @@ jobs:
 
       - name: Run CTest script (OpenMPI)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           REPO_FULL_NAME: ${{ github.event.repository.full_name }}
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
@@ -198,12 +203,14 @@ jobs:
 
       - name: Untar MPI installation (MPICH)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           tar xvf mpich.tar -C $RUNNER_WORKSPACE
 
       - name: Set path (MPICH)
         shell: bash
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           echo "$RUNNER_WORKSPACE/mpich/bin" >> $GITHUB_PATH
           echo "LD_LIBRARY_PATH=$RUNNER_WORKSPACE/mpich/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
@@ -242,6 +249,7 @@ jobs:
 
       - name: List files for the space (MPICH)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
             ls -l ${{ github.workspace }}
             ls $RUNNER_WORKSPACE
@@ -256,6 +264,7 @@ jobs:
 
       - name: List files for the hdf5 (MPICH)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
             ls $RUNNER_WORKSPACE/hdf5
 
@@ -290,6 +299,7 @@ jobs:
 
       - name: Run CTest script (MPICH)
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           REPO_FULL_NAME: ${{ github.event.repository.full_name }}
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}

@@ -60,6 +60,7 @@ jobs:
 
       - name: Configure
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           mkdir "$RUNNER_WORKSPACE/build"

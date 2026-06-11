@@ -35,6 +35,7 @@ jobs:
         shell: bash
         env:
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           mkdir ${{ github.workspace }}/hdf5/build
           cd ${{ github.workspace }}/hdf5/build
@@ -56,6 +57,7 @@ jobs:
         working-directory: ${{ github.workspace }}/hdf5/build
         env:
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
           cmake --install .
@@ -90,6 +92,7 @@ jobs:
           CXX: mpic++
           CC: mpicc
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           ENV_ADIOS2_COMMIT_SHORT: ${{ env.ADIOS2_COMMIT_SHORT }}
         run: |
           mkdir adios2/build
@@ -111,6 +114,7 @@ jobs:
 
       - name: Set environment variables for tests
         env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
           ENV_ADIOS2_COMMIT_SHORT: ${{ env.ADIOS2_COMMIT_SHORT }}
         run: |
           echo "HDF5_PLUGIN_PATH=$RUNNER_WORKSPACE/adios2-$ENV_ADIOS2_COMMIT_SHORT-install/lib" >> $GITHUB_ENV
