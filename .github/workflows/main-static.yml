@@ -165,7 +165,6 @@ jobs:
       # CONFIGURE
       - name: Configure
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
           MATRIX_GENERATOR: ${{ matrix.generator }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
           MATRIX_PARALLEL: ${{ matrix.parallel }}

@@ -73,7 +73,6 @@ jobs:
       - name: Configure HDF5 with Subfiling VFD
         shell: bash
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           mkdir $RUNNER_WORKSPACE/build
@@ -93,7 +92,6 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
         env:
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
           echo "LD_LIBRARY_PATH=$RUNNER_WORKSPACE/build/bin" >> $GITHUB_ENV

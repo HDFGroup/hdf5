@@ -90,7 +90,6 @@ jobs:
 
       - name: List files for the space (Windows)
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
               Get-ChildItem -Path $RUNNER_WORKSPACE
@@ -108,7 +107,6 @@ jobs:
 
       - name: List files for the hdf5 (Windows)
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           Get-ChildItem -Path $RUNNER_WORKSPACE/hdf5
         shell: pwsh
@@ -139,7 +137,6 @@ jobs:
 
       - name: Run CTest script (Windows)
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
           REPO_FULL_NAME: ${{ github.event.repository.full_name }}
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
         run: |
@@ -204,7 +201,6 @@ jobs:
 
       - name: List files for the space (Linux)
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
             ls -l ${{ github.workspace }}
             ls $RUNNER_WORKSPACE
@@ -219,7 +215,6 @@ jobs:
 
       - name: List files for the hdf5 (Linux)
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
             ls $RUNNER_WORKSPACE/hdf5
 
@@ -249,7 +244,6 @@ jobs:
 
       - name: Run CTest (Linux)
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
           REPO_FULL_NAME: ${{ github.event.repository.full_name }}
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
         run: |
@@ -327,7 +321,6 @@ jobs:
 
       - name: List files for the space (MacOS_latest)
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls ${{ github.workspace }}
               ls $RUNNER_WORKSPACE
@@ -350,7 +343,6 @@ jobs:
 
       - name: List files for the hdf5 (MacOS_latest)
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls $RUNNER_WORKSPACE/hdf5
 
@@ -381,7 +373,6 @@ jobs:
       - name: Run CTest (MacOS_latest)
         id: run-ctest
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
           REPO_FULL_NAME: ${{ github.event.repository.full_name }}
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
         run: |
@@ -427,20 +418,17 @@ jobs:
 
       - name: Untar libaws-c-s3 installation
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           tar xvf libaws-c-s3.tar -C $RUNNER_WORKSPACE
 
       - name: List contents of libaws-c-s3 installation
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           ls -laR $RUNNER_WORKSPACE/aws-c-s3-build
 
       - name: Setup environment
         shell: bash
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           echo "LD_LIBRARY_PATH=$RUNNER_WORKSPACE/aws-c-s3-build/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "CMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/aws-c-s3-build" >> $GITHUB_ENV
@@ -471,7 +459,6 @@ jobs:
 
       - name: List files for the space (Linux S3)
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls -l ${{ github.workspace }}
               ls $RUNNER_WORKSPACE
@@ -486,7 +473,6 @@ jobs:
 
       - name: List files for the hdf5 (Linux S3)
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls $RUNNER_WORKSPACE/hdf5
 
@@ -516,7 +502,6 @@ jobs:
 
       - name: Run CTest (Linux S3)
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
           REPO_FULL_NAME: ${{ github.event.repository.full_name }}
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
         run: |
@@ -592,7 +577,6 @@ jobs:
 
       - name: List files for the space (Windows_intel)
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
               Get-ChildItem -Path $RUNNER_WORKSPACE
@@ -610,7 +594,6 @@ jobs:
 
       - name: List files for the hdf5 (Windows_intel)
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               Get-ChildItem -Path $RUNNER_WORKSPACE/hdf5
         shell: pwsh
@@ -645,7 +628,6 @@ jobs:
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
           REPO_FULL_NAME: ${{ github.event.repository.full_name }}
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
         run: |
@@ -717,7 +699,6 @@ jobs:
 
       - name: List files for the space (Linux_intel)
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
               ls -l ${{ github.workspace }}
               ls $RUNNER_WORKSPACE
@@ -732,7 +713,6 @@ jobs:
 
       - name: List files for the hdf5 (Linux_Linux)
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           ls $RUNNER_WORKSPACE/hdf5
 
@@ -764,7 +744,6 @@ jobs:
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
           REPO_FULL_NAME: ${{ github.event.repository.full_name }}
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
         run: |
@@ -842,7 +821,6 @@ jobs:
 
       - name: List files for the space (Linux_clang)
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           ls -l ${{ github.workspace }}
           ls $RUNNER_WORKSPACE
@@ -857,7 +835,6 @@ jobs:
 
       - name: List files for the hdf5 (Linux_clang)
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           ls $RUNNER_WORKSPACE/hdf5
 
@@ -891,7 +868,6 @@ jobs:
 
       - name: Run CTest (Linux_clang)
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
           REPO_FULL_NAME: ${{ github.event.repository.full_name }}
           SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
         run: |

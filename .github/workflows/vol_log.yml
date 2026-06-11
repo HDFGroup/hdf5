@@ -35,7 +35,6 @@ jobs:
         shell: bash
         env:
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           mkdir ${{ github.workspace }}/hdf5/build
           cd ${{ github.workspace }}/hdf5/build
@@ -57,7 +56,6 @@ jobs:
         working-directory: ${{ github.workspace }}/hdf5/build
         env:
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           cmake --build . --parallel 3 --config $INPUT_BUILD_MODE
           cmake --install .
@@ -75,7 +73,6 @@ jobs:
           CXX: mpic++
           CC: mpicc
           LD_LIBRARY_PATH: ${{ runner.workspace }}/hdf5_build/lib
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           cd vol-log-based
           autoreconf -i

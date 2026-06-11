@@ -51,7 +51,6 @@ jobs:
         shell: bash
         env:
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           mkdir ${{ github.workspace }}/hdf5/build
           cd ${{ github.workspace }}/hdf5/build
@@ -165,7 +164,6 @@ jobs:
       - name: Test HDF5 REST VOL connector with external tests
         working-directory: ${{github.workspace}}/hdf5/build/
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           sudo \
@@ -189,7 +187,6 @@ jobs:
         # in the future.
         if: false
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
         run: |
           sudo \

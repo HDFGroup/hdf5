@@ -206,7 +206,6 @@ jobs:
         id: publish-abi-reports
         env:
           FILE_BASE: ${{ inputs.file_base }}
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           mkdir "$RUNNER_WORKSPACE/buildabi"
           mkdir "$RUNNER_WORKSPACE/buildabi/hdf5"

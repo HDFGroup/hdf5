@@ -348,7 +348,6 @@ jobs:
         shell: bash
         env:
           SET_PRESET_PRESET: ${{ steps.set-preset.outputs.preset }}
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           # Find the generated POM file across all possible locations
           BUILD_ROOT="$RUNNER_WORKSPACE/build/$SET_PRESET_PRESET"
@@ -397,7 +396,6 @@ jobs:
         shell: bash
         env:
           SET_PRESET_PRESET: ${{ steps.set-preset.outputs.preset }}
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           echo "Collecting Maven artifacts for testing..."
           mkdir -p "$RUNNER_WORKSPACE/maven-artifacts"
@@ -500,7 +498,6 @@ jobs:
         id: artifacts-check
         shell: bash
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           ARTIFACT_COUNT=$(find "$RUNNER_WORKSPACE/maven-artifacts" -name "*.jar" | wc -l)
           POM_COUNT=$(find "$RUNNER_WORKSPACE/maven-artifacts" -name "pom.xml" | wc -l)
@@ -519,7 +516,6 @@ jobs:
       - name: Verify JAR contents (CRITICAL - Prevents Incomplete Packages)
         shell: bash
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
           MATRIX_IMPLEMENTATION: ${{ matrix.implementation }}
         run: |
           echo "::group::Verify JAR contents"
@@ -645,7 +641,6 @@ jobs:
       - name: Run validation script
         shell: bash
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           if [ -f .github/scripts/validate-maven-artifacts.sh ]; then
             echo "Running Maven artifact validation..."
@@ -658,7 +653,6 @@ jobs:
         shell: bash
         env:
           SET_PRESET_PRESET: ${{ steps.set-preset.outputs.preset }}
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           BUILD_ROOT="$RUNNER_WORKSPACE/build/$SET_PRESET_PRESET"
           INSTALL_DIR="$RUNNER_WORKSPACE/hdf5-install"

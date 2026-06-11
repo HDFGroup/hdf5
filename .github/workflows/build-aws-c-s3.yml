@@ -159,7 +159,6 @@ jobs:
         if: ${{ (steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true') }}
         env:
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           # Build aws-lc
           echo "Building aws-lc"
@@ -250,7 +249,6 @@ jobs:
 
       - name: Tar aws-c-s3 installation to preserve permissions for artifact
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: tar -cvf libaws-c-s3.tar -C $RUNNER_WORKSPACE aws-c-s3-build
 
       - name: Save aws-c-s3 installation artifact
