@@ -158,12 +158,12 @@ function chooseReviewers(touchedAreas, {
 // Builds the markdown checklist comment body (pure, no I/O).
 function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
   const rowData = touchedAreas.map(area => {
-    const approver  = area.owners.find(o => approvedUsers.has(o));
-    const signedOff = !!approver;
+    const signedOff = area.owners.some(o => approvedUsers.has(o));
     const box       = signedOff ? 'x' : ' ';
     const tick      = signedOff ? ' ✅' : '';
-    // Show all requested owners for this area so swapping a reviewer is
-    // reflected immediately on the next push, not just the first CODEOWNERS entry.
+    // Show all currently-assigned reviewers for this area (may be > 1 if a
+    // reviewer was manually added). Use confirmedRequested, not the approver,
+    // so the mention is stable when a non-requested owner happens to approve.
     const requested = area.owners.filter(o => confirmedRequested.has(o));
     const mention   = requested.length > 0 ? ` — ${requested.map(o => `@${o}`).join(', ')}` : '';
     return { text: `- [${box}] **${area.label}**${tick}${mention}`, signedOff };
