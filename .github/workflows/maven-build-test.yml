@@ -90,7 +90,7 @@ jobs:
       - name: Deploy to GitHub Packages
         env:
           NEEDS_BUILD_MAVEN_PACKAGES_OUTPUTS_VERSION: ${{ needs.build-maven-packages.outputs.version }}
-          FORMAT__HTTPS___MAVEN_PKG_GITHUB_COM__0____GITHUB_REPOSITORY_: ${{ format('https://maven.pkg.github.com/{0}', github.repository) }}
+          MAVEN_PKG_URL: ${{ format('https://maven.pkg.github.com/{0}', github.repository) }}
           GH_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -128,7 +128,7 @@ jobs:
                     -Dclassifier="$CLASSIFIER" \
                     -DpomFile="$POM_FILE" \
                     -DrepositoryId=github \
-                    -Durl=$FORMAT__HTTPS___MAVEN_PKG_GITHUB_COM__0____GITHUB_REPOSITORY_ \
+                    -Durl=$MAVEN_PKG_URL \
                     -Dusername=$GH_ACTOR \
                     -Dpassword=$GITHUB_TOKEN
                 fi
@@ -176,10 +176,10 @@ jobs:
       - name: Test JNI examples
         env:
           NEEDS_BUILD_MAVEN_PACKAGES_OUTPUTS_VERSION: ${{ needs.build-maven-packages.outputs.version }}
-          FORMAT__HTTPS___MAVEN_PKG_GITHUB_COM__0____GITHUB_REPOSITORY_: ${{ format('https://maven.pkg.github.com/{0}', github.repository) }}
+          MAVEN_PKG_URL: ${{ format('https://maven.pkg.github.com/{0}', github.repository) }}
         run: |
           cd HDF5Examples/JAVA
-          ./test-maven-jni.sh "$NEEDS_BUILD_MAVEN_PACKAGES_OUTPUTS_VERSION" "$FORMAT__HTTPS___MAVEN_PKG_GITHUB_COM__0____GITHUB_REPOSITORY_"
+          ./test-maven-jni.sh "$NEEDS_BUILD_MAVEN_PACKAGES_OUTPUTS_VERSION" "$MAVEN_PKG_URL"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
@@ -231,10 +231,10 @@ jobs:
       - name: Test FFM examples
         env:
           NEEDS_BUILD_MAVEN_PACKAGES_OUTPUTS_VERSION: ${{ needs.build-maven-packages.outputs.version }}
-          FORMAT__HTTPS___MAVEN_PKG_GITHUB_COM__0____GITHUB_REPOSITORY_: ${{ format('https://maven.pkg.github.com/{0}', github.repository) }}
+          MAVEN_PKG_URL: ${{ format('https://maven.pkg.github.com/{0}', github.repository) }}
         run: |
           cd HDF5Examples/JAVA
-          ./test-maven-ffm.sh "$NEEDS_BUILD_MAVEN_PACKAGES_OUTPUTS_VERSION" "$FORMAT__HTTPS___MAVEN_PKG_GITHUB_COM__0____GITHUB_REPOSITORY_"
+          ./test-maven-ffm.sh "$NEEDS_BUILD_MAVEN_PACKAGES_OUTPUTS_VERSION" "$MAVEN_PKG_URL"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}

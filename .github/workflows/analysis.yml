@@ -128,7 +128,7 @@ jobs:
         SET_FILE_BASE_SOURCE_BASE: ${{ steps.set-file-base.outputs.SOURCE_BASE }}
       run: |
         cd "$RUNNER_WORKSPACE/hdf5"
-        ctest -S HDF5config.cmake,CTEST_SITE_EXT=$REPO_FULL_NAME_COV,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=$SET_FILE_BASE_SOURCE_BASE -C Debug -O hdf5.log
+        ctest -S HDF5config.cmake,CTEST_SITE_EXT=${REPO_FULL_NAME}_COV,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=$SET_FILE_BASE_SOURCE_BASE -C Debug -O hdf5.log
       shell: bash
       continue-on-error: true
 

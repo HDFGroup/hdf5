@@ -152,7 +152,7 @@ jobs:
           RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
           MATRIX_TEST_ROS3: ${{ matrix.test_ros3 }}
-          INPUT_FORCE_JAVA_IMPLEMENTATION == 'JNI': ${{ inputs.force_java_implementation == 'jni' }}
+          ENABLE_JNI: ${{ inputs.force_java_implementation == 'jni' }}
         run: |
           mkdir "$RUNNER_WORKSPACE/build"
           cd "$RUNNER_WORKSPACE/build"
@@ -173,7 +173,7 @@ jobs:
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD_DOCKER_PROXY=$MATRIX_TEST_ROS3 \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
-            -DHDF5_ENABLE_JNI:BOOL=$INPUT_FORCE_JAVA_IMPLEMENTATION == 'JNI' \
+            -DHDF5_ENABLE_JNI:BOOL=$ENABLE_JNI \
             $GITHUB_WORKSPACE
         shell: bash
 
@@ -183,7 +183,7 @@ jobs:
           RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
           MATRIX_TEST_ROS3: ${{ matrix.test_ros3 }}
-          INPUT_FORCE_JAVA_IMPLEMENTATION == 'JNI': ${{ inputs.force_java_implementation == 'jni' }}
+          ENABLE_JNI: ${{ inputs.force_java_implementation == 'jni' }}
         run: |
           mkdir "$RUNNER_WORKSPACE/build"
           cd "$RUNNER_WORKSPACE/build"
@@ -203,7 +203,7 @@ jobs:
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD_DOCKER_PROXY=$MATRIX_TEST_ROS3 \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
-            -DHDF5_ENABLE_JNI:BOOL=$INPUT_FORCE_JAVA_IMPLEMENTATION == 'JNI' \
+            -DHDF5_ENABLE_JNI:BOOL=$ENABLE_JNI \
             $GITHUB_WORKSPACE
         shell: bash
 
@@ -332,7 +332,7 @@ jobs:
           RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
           MATRIX_TEST_ROS3: ${{ matrix.test_ros3 }}
-          INPUT_FORCE_JAVA_IMPLEMENTATION == 'JNI': ${{ inputs.force_java_implementation == 'jni' }}
+          ENABLE_JNI: ${{ inputs.force_java_implementation == 'jni' }}
         run: |
           mkdir "$RUNNER_WORKSPACE/build"
           cd "$RUNNER_WORKSPACE/build"
@@ -353,7 +353,7 @@ jobs:
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD_DOCKER_PROXY=$MATRIX_TEST_ROS3 \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
-            -DHDF5_ENABLE_JNI:BOOL=$INPUT_FORCE_JAVA_IMPLEMENTATION == 'JNI' \
+            -DHDF5_ENABLE_JNI:BOOL=$ENABLE_JNI \
             $GITHUB_WORKSPACE
         shell: bash
 
@@ -363,7 +363,7 @@ jobs:
           RUNNER_WORKSPACE: ${{ runner.workspace }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
           MATRIX_TEST_ROS3: ${{ matrix.test_ros3 }}
-          INPUT_FORCE_JAVA_IMPLEMENTATION == 'JNI': ${{ inputs.force_java_implementation == 'jni' }}
+          ENABLE_JNI: ${{ inputs.force_java_implementation == 'jni' }}
         run: |
           mkdir "$RUNNER_WORKSPACE/build"
           cd "$RUNNER_WORKSPACE/build"
@@ -383,7 +383,7 @@ jobs:
             -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DHDF5_ENABLE_ROS3_VFD_DOCKER_PROXY=$MATRIX_TEST_ROS3 \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
-            -DHDF5_ENABLE_JNI:BOOL=$INPUT_FORCE_JAVA_IMPLEMENTATION == 'JNI' \
+            -DHDF5_ENABLE_JNI:BOOL=$ENABLE_JNI \
             $GITHUB_WORKSPACE
         shell: bash
 

@@ -224,7 +224,7 @@ jobs:
           MATRIX_LOCALZLIB: ${{ matrix.localzlib }}
           MATRIX_MIRROR_VFD: ${{ matrix.mirror_vfd }}
           MATRIX_DIRECT_VFD: ${{ matrix.direct_vfd }}
-          INPUT_FORCE_JAVA_IMPLEMENTATION == 'JNI': ${{ inputs.force_java_implementation == 'jni' }}
+          ENABLE_JNI: ${{ inputs.force_java_implementation == 'jni' }}
         run: |
           mkdir "$RUNNER_WORKSPACE/build"
           cd "$RUNNER_WORKSPACE/build"
@@ -252,7 +252,7 @@ jobs:
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
             -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
             -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
-            -DHDF5_ENABLE_JNI:BOOL=$INPUT_FORCE_JAVA_IMPLEMENTATION == 'JNI' \
+            -DHDF5_ENABLE_JNI:BOOL=$ENABLE_JNI \
             $GITHUB_WORKSPACE
         shell: bash
         if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent != 'CC'}}
@@ -262,7 +262,7 @@ jobs:
           RUNNER_WORKSPACE: ${{ runner.workspace }}
           MATRIX_GENERATOR: ${{ matrix.generator }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
-          _MATRIX_OSTYPE_____WINDOWS__: ${{ (matrix.ostype != 'windows') }}
+          IS_NOT_WINDOWS: ${{ matrix.ostype != 'windows' }}
           MATRIX_PARALLEL: ${{ matrix.parallel }}
           MATRIX_ZLIBFC: ${{ matrix.zlibfc }}
           MATRIX_LIBAECFC: ${{ matrix.libaecfc }}
@@ -277,7 +277,7 @@ jobs:
             $MATRIX_GENERATOR \
             -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
             -DBUILD_SHARED_LIBS:BOOL=ON \
-            -DBUILD_STATIC_LIBS:BOOL=$_MATRIX_OSTYPE_____WINDOWS__ \
+            -DBUILD_STATIC_LIBS:BOOL=$IS_NOT_WINDOWS \
             -DHDF5_ENABLE_ALL_WARNINGS:BOOL=ON \
             -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
             -DHDF5_ENABLE_CONCURRENCY:BOOL=OFF \
@@ -304,7 +304,7 @@ jobs:
           RUNNER_WORKSPACE: ${{ runner.workspace }}
           MATRIX_GENERATOR: ${{ matrix.generator }}
           INPUT_BUILD_MODE: ${{ inputs.build_mode }}
-          _MATRIX_OSTYPE_____WINDOWS__: ${{ (matrix.ostype != 'windows') }}
+          IS_NOT_WINDOWS: ${{ matrix.ostype != 'windows' }}
           MATRIX_PARALLEL: ${{ matrix.parallel }}
           MATRIX_LOCALAEC: ${{ matrix.localaec }}
           MATRIX_LOCALZLIB: ${{ matrix.localzlib }}
@@ -317,7 +317,7 @@ jobs:
             $MATRIX_GENERATOR \
             -DCMAKE_BUILD_TYPE=$INPUT_BUILD_MODE \
             -DBUILD_SHARED_LIBS=ON \
-            -DBUILD_STATIC_LIBS=$_MATRIX_OSTYPE_____WINDOWS__ \
+            -DBUILD_STATIC_LIBS=$IS_NOT_WINDOWS \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
             -DHDF5_ENABLE_THREADSAFE:BOOL=OFF \
             -DHDF5_ENABLE_CONCURRENCY:BOOL=ON \
