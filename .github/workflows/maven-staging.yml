@@ -128,8 +128,9 @@ jobs:
         id: should-test
         env:
           TEST_MAVEN_DEPLOYMENT: ${{ inputs.test_maven_deployment }}
+          MAVEN_CHANGED: ${{ steps.changes.outputs.maven }}
         run: |
-          if [ "${{ steps.changes.outputs.maven }}" == "true" ] || [ "$TEST_MAVEN_DEPLOYMENT" == "true" ]; then
+          if [ "$MAVEN_CHANGED" == "true" ] || [ "$TEST_MAVEN_DEPLOYMENT" == "true" ]; then
             echo "result=true" >> $GITHUB_OUTPUT
             echo "Maven testing will be performed"
           else
