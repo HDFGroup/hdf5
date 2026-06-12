@@ -368,6 +368,7 @@ module.exports = async function run({ github, context, core }) {
   const existingRequested = new Set(
     prData.requested_reviewers.map(r => r.login).filter(Boolean)
   );
+  const isDraft = prData.draft === true;
 
   // confirmedRequested tracks who is actually assigned for checklist display.
   // Starts empty — populated below only with the load-balanced selection so
@@ -412,7 +413,7 @@ module.exports = async function run({ github, context, core }) {
       core.warning(`Could not fetch open PRs for load balancing; falling back to CODEOWNERS order: ${e.message}`);
     }
 
-    const isNewPR = context.payload.action === 'opened' || context.payload.action === 'reopened';
+    const isNewPR = ['opened', 'reopened', 'ready_for_review'].includes(context.payload.action);
 
     // On open/reopen: ignore existing assignments so GitHub's CODEOWNERS
     // auto-assignment doesn't suppress our load-balanced selection.
@@ -427,11 +428,11 @@ module.exports = async function run({ github, context, core }) {
     });
     for (const msg of log) core.info(msg);
 
-    // Helper: remove CODEOWNERS auto-assigned reviewers not in our selection.
+    // Helper: remove CODEOWNERS auto-assigned reviewers not in the given keep-set.
     // Only removes code owners — leaves manually-added non-owner reviewers untouched.
-    async function enforceSelection(currentRequested) {
+    async function enforceSelection(currentRequested, keepSet = selected) {
       for (const reviewer of currentRequested) {
-        if (allCodeOwners.has(reviewer) && !selected.has(reviewer)) {
+        if (allCodeOwners.has(reviewer) && !keepSet.has(reviewer)) {
           try {
             await github.rest.pulls.removeRequestedReviewers({
               owner, repo, pull_number: pr_number, reviewers: [reviewer],
@@ -445,38 +446,46 @@ module.exports = async function run({ github, context, core }) {
     }
 
     if (isNewPR) {
-      // First pass: clean up whatever GitHub auto-assigned before the workflow ran.
-      await enforceSelection(existingRequested);
+      if (isDraft) {
+        // Draft PR: assign the author but hold all reviewer requests until
+        // the PR is marked ready for review.  Still enforce cleanup so
+        // GitHub's CODEOWNERS auto-assignment doesn't sneak anyone in.
+        await enforceSelection(existingRequested, new Set());
+        core.info('Draft PR — reviewer assignment deferred until ready for review');
+      } else {
+        // First pass: clean up whatever GitHub auto-assigned before the workflow ran.
+        await enforceSelection(existingRequested);
 
-      // Request one at a time so a single invalid login cannot block the rest.
-      // Only add to confirmedRequested on success — the checklist must not show
-      // an owner whose request call failed.
-      for (const reviewer of selected) {
-        try {
-          await github.rest.pulls.requestReviewers({
-            owner, repo, pull_number: pr_number,
-            reviewers: [reviewer],
-          });
-          confirmedRequested.add(reviewer);
-        } catch (e) {
-          core.warning(`Could not request reviewer ${reviewer}: ${e.message}`);
+        // Request one at a time so a single invalid login cannot block the rest.
+        // Only add to confirmedRequested on success — the checklist must not show
+        // an owner whose request call failed.
+        for (const reviewer of selected) {
+          try {
+            await github.rest.pulls.requestReviewers({
+              owner, repo, pull_number: pr_number,
+              reviewers: [reviewer],
+            });
+            confirmedRequested.add(reviewer);
+          } catch (e) {
+            core.warning(`Could not request reviewer ${reviewer}: ${e.message}`);
+          }
         }
-      }
 
-      // Second pass: GitHub's auto-assignment can fire after the workflow starts,
-      // so wait briefly then re-check and remove any extras that appeared.
-      await new Promise(resolve => setTimeout(resolve, 15000));
-      let retryPR;
-      try {
-        ({ data: retryPR } = await github.rest.pulls.get({ owner, repo, pull_number: pr_number }));
-      } catch (e) {
-        core.warning(`Could not re-fetch PR for reviewer cleanup retry: ${e.message}`);
-      }
-      if (retryPR) {
-        const retryRequested = new Set(
-          retryPR.requested_reviewers.map(r => r.login).filter(Boolean)
-        );
-        await enforceSelection(retryRequested);
+        // Second pass: GitHub's auto-assignment can fire after the workflow starts,
+        // so wait briefly then re-check and remove any extras that appeared.
+        await new Promise(resolve => setTimeout(resolve, 15000));
+        let retryPR;
+        try {
+          ({ data: retryPR } = await github.rest.pulls.get({ owner, repo, pull_number: pr_number }));
+        } catch (e) {
+          core.warning(`Could not re-fetch PR for reviewer cleanup retry: ${e.message}`);
+        }
+        if (retryPR) {
+          const retryRequested = new Set(
+            retryPR.requested_reviewers.map(r => r.login).filter(Boolean)
+          );
+          await enforceSelection(retryRequested);
+        }
       }
     } else {
       // synchronize/reopened: never re-assign reviewers — respect manual removals.
