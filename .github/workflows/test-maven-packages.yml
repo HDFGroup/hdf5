@@ -88,7 +88,7 @@ jobs:
                       <repositories>
                           <repository>
                               <id>github-hdfgroup-hdf5</id>
-                              <url>${{ inputs.repository_url }}</url>
+                              <url>$REPOSITORY_URL</url>
                               <snapshots><enabled>true</enabled></snapshots>
                               <releases><enabled>true</enabled></releases>
                           </repository>
@@ -105,16 +105,19 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
 
       - name: Verify JNI artifact exists and download
+        env:
+          ARTIFACT_VERSION: ${{ inputs.version }}
+          REPOSITORY_URL: ${{ inputs.repository_url }}
         run: |
           echo "::group::Download JNI artifact"
           # Clear cached SNAPSHOT to force fresh download
-          rm -rf ~/.m2/repository/org/hdfgroup/hdf5-java-jni/${{ inputs.version }}
+          rm -rf ~/.m2/repository/org/hdfgroup/hdf5-java-jni/"$ARTIFACT_VERSION"
 
           # Determine platform classifier
           PLATFORM_CLASSIFIER="linux-x86_64"
           ARTIFACT_ID="hdf5-java-jni"
-          VERSION="${{ inputs.version }}"
-          REPO_URL="${{ inputs.repository_url }}"
+          VERSION="$ARTIFACT_VERSION"
+          REPO_URL="$REPOSITORY_URL"
 
           echo "Downloading: org.hdfgroup:${ARTIFACT_ID}:${VERSION} with classifier ${PLATFORM_CLASSIFIER}"
 
@@ -254,9 +257,11 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
 
       - name: Verify JAR contents (JNI)
+        env:
+          ARTIFACT_VERSION: ${{ inputs.version }}
         run: |
           echo "::group::Verify JAR contents"
-          JAR_PATH=$(find ~/.m2/repository/org/hdfgroup/hdf5-java-jni/${{ inputs.version }} -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+          JAR_PATH=$(find ~/.m2/repository/org/hdfgroup/hdf5-java-jni/"$ARTIFACT_VERSION" -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
 
           if [ -z "$JAR_PATH" ]; then
             echo "::error::Could not find downloaded JAR file"
@@ -295,13 +300,15 @@ jobs:
           fi
 
       - name: Test JNI examples
-        run: |
-          cd HDF5Examples/JAVA
-          ./test-maven-jni.sh "${{ inputs.version }}" "${{ inputs.repository_url }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
           HDF5_HOME: ${{ runner.workspace }}/hdf5-install
+          ARTIFACT_VERSION: ${{ inputs.version }}
+          REPOSITORY_URL: ${{ inputs.repository_url }}
+        run: |
+          cd HDF5Examples/JAVA
+          ./test-maven-jni.sh "$ARTIFACT_VERSION" "$REPOSITORY_URL"
 
       - name: Upload test artifacts (JNI)
         if: always()
@@ -328,6 +335,10 @@ jobs:
           distribution: 'oracle'
 
       - name: Configure Maven settings for GitHub Packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          REPOSITORY_URL: ${{ inputs.repository_url }}
         run: |
           mkdir -p ~/.m2
           cat > ~/.m2/settings.xml <<EOF
@@ -349,7 +360,7 @@ jobs:
                       <repositories>
                           <repository>
                               <id>github-hdfgroup-hdf5</id>
-                              <url>${{ inputs.repository_url }}</url>
+                              <url>$REPOSITORY_URL</url>
                               <snapshots><enabled>true</enabled></snapshots>
                               <releases><enabled>true</enabled></releases>
                           </repository>
@@ -361,21 +372,21 @@ jobs:
               </activeProfiles>
           </settings>
           EOF
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
 
       - name: Verify FFM artifact exists and download
+        env:
+          ARTIFACT_VERSION: ${{ inputs.version }}
+          REPOSITORY_URL: ${{ inputs.repository_url }}
         run: |
           echo "::group::Download FFM artifact"
           # Clear cached SNAPSHOT to force fresh download
-          rm -rf ~/.m2/repository/org/hdfgroup/hdf5-java-ffm/${{ inputs.version }}
+          rm -rf ~/.m2/repository/org/hdfgroup/hdf5-java-ffm/"$ARTIFACT_VERSION"
 
           # Determine platform classifier
           PLATFORM_CLASSIFIER="linux-x86_64"
           ARTIFACT_ID="hdf5-java-ffm"
-          VERSION="${{ inputs.version }}"
-          REPO_URL="${{ inputs.repository_url }}"
+          VERSION="$ARTIFACT_VERSION"
+          REPO_URL="$REPOSITORY_URL"
 
           echo "Downloading: org.hdfgroup:${ARTIFACT_ID}:${VERSION} with classifier ${PLATFORM_CLASSIFIER}"
 
@@ -515,9 +526,11 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
 
       - name: Verify JAR contents (FFM)
+        env:
+          ARTIFACT_VERSION: ${{ inputs.version }}
         run: |
           echo "::group::Verify JAR contents"
-          JAR_PATH=$(find ~/.m2/repository/org/hdfgroup/hdf5-java-ffm/${{ inputs.version }} -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+          JAR_PATH=$(find ~/.m2/repository/org/hdfgroup/hdf5-java-ffm/"$ARTIFACT_VERSION" -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
 
           if [ -z "$JAR_PATH" ]; then
             echo "::error::Could not find downloaded JAR file"
@@ -556,13 +569,15 @@ jobs:
           fi
 
       - name: Test FFM examples
-        run: |
-          cd HDF5Examples/JAVA
-          ./test-maven-ffm.sh "${{ inputs.version }}" "${{ inputs.repository_url }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
           HDF5_HOME: ${{ runner.workspace }}/hdf5-install
+          ARTIFACT_VERSION: ${{ inputs.version }}
+          REPOSITORY_URL: ${{ inputs.repository_url }}
+        run: |
+          cd HDF5Examples/JAVA
+          ./test-maven-ffm.sh "$ARTIFACT_VERSION" "$REPOSITORY_URL"
 
       - name: Upload test artifacts (FFM)
         if: always()
@@ -579,11 +594,14 @@ jobs:
     if: always()
     steps:
       - name: Check test results
+        env:
+          ARTIFACT_VERSION: ${{ inputs.version }}
+          REPOSITORY_URL: ${{ inputs.repository_url }}
         run: |
           echo "## Maven Package Test Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** ${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Repository:** ${{ inputs.repository_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** $ARTIFACT_VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository:** $REPOSITORY_URL" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           JNI_RESULT="${{ needs.test-jni-package.result }}"
