@@ -378,6 +378,21 @@ test('buildBody: area with no confirmed reviewer shows no @-mention', () => {
   assert.ok(!body.includes('@alice'));
 });
 
+test('buildBody: mention shows approver when a non-requested owner signs off', () => {
+  // alice was load-balanced as the reviewer; bob (also an owner) approves instead
+  const areas = [makeArea('src', ['alice', 'bob'], 10)];
+  const body  = buildBody(areas, new Set(['bob']), new Set(['alice']));
+  assert.ok(body.includes('- [x] **src** ✅'));
+  assert.ok(body.includes('— @bob'));
+  assert.ok(!body.includes('@alice'));
+});
+
+test('buildBody: shows multiple requested reviewers when more than one is assigned', () => {
+  const areas = [makeArea('src', ['alice', 'bob'], 10)];
+  const body  = buildBody(areas, new Set(), new Set(['alice', 'bob']));
+  assert.ok(body.includes('— @alice, @bob'));
+});
+
 test('buildBody: always contains the marker', () => {
   const areas = [makeArea('src', ['alice'], 10)];
   const body  = buildBody(areas, new Set(), new Set());
