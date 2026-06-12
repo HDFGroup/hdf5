@@ -413,7 +413,19 @@ module.exports = async function run({ github, context, core }) {
       core.warning(`Could not fetch open PRs for load balancing; falling back to CODEOWNERS order: ${e.message}`);
     }
 
-    const isNewPR = ['opened', 'reopened', 'ready_for_review'].includes(context.payload.action);
+    // On synchronize: if no checklist comment exists yet the opened run was
+    // cancelled before it could clean up CODEOWNERS auto-assignments — treat
+    // this as a new PR so the full cleanup + load-balanced assignment runs.
+    let openedWasSkipped = false;
+    if (context.payload.action === 'synchronize') {
+      const existingComments = await github.paginate(github.rest.issues.listComments, {
+        owner, repo, issue_number: pr_number, per_page: 100,
+      });
+      openedWasSkipped = !existingComments.some(c => c.body.includes(MARKER));
+    }
+
+    const isNewPR = ['opened', 'reopened', 'ready_for_review'].includes(context.payload.action) ||
+                    openedWasSkipped;
 
     // On open/reopen: ignore existing assignments so GitHub's CODEOWNERS
     // auto-assignment doesn't suppress our load-balanced selection.
