@@ -1545,3 +1545,13 @@ include (CMakeInstallation.cmake)
 #-----------------------------------------------------------------------------
 mark_as_advanced (FETCHCONTENT_BASE_DIR FETCHCONTENT_FULLY_DISCONNECTED FETCHCONTENT_QUIET FETCHCONTENT_UPDATES_DISCONNECTED)
 
+#-----------------------------------------------------------------------------
+# libFuzzer harnesses (OSS-Fuzz). Off by default; when enabled, build them with
+# the `oss-fuzz-fuzzers` target. Placed after all add_subdirectory() calls so the
+# HDF5 library targets are defined.
+#-----------------------------------------------------------------------------
+option (HDF5_ENABLE_FUZZERS "Build the libFuzzer harnesses in test/fuzzing" OFF)
+if (HDF5_ENABLE_FUZZERS)
+  add_subdirectory (test/fuzzing)
+endif ()
+
