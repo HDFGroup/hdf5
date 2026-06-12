@@ -500,13 +500,46 @@ module.exports = async function run({ github, context, core }) {
         }
       }
     } else {
-      // synchronize/reopened: never re-assign reviewers — respect manual removals.
-      // Just carry forward whoever is currently assigned for checklist display.
-      for (const reviewer of existingRequested) confirmedRequested.add(reviewer);
+      // synchronize/reopened: enforce the correct reviewer selection before
+      // building any @mentions — never surface CODEOWNERS extras.
+      const { selected: idealSelected } = chooseReviewers(touchedAreas, {
+        prAuthor,
+        existingRequested: new Set(),
+        reviewerLoad,
+        LINE_THRESHOLD,
+        AREA_THRESHOLDS,
+        PUBLIC_HEADER,
+      });
+      await enforceSelection(existingRequested, idealSelected);
+
+      // Re-fetch so confirmedRequested reflects the actual post-cleanup state.
+      let syncPR;
+      try {
+        ({ data: syncPR } = await github.rest.pulls.get({ owner, repo, pull_number: pr_number }));
+      } catch (e) {
+        core.warning(`Could not re-fetch PR after synchronize cleanup: ${e.message}`);
+      }
+      const cleanRequested = syncPR
+        ? new Set(syncPR.requested_reviewers.map(r => r.login).filter(Boolean))
+        : existingRequested;
+      for (const reviewer of cleanRequested) confirmedRequested.add(reviewer);
     }
   } else {
-    // For workflow_run (review events): show whoever is currently assigned.
-    for (const reviewer of existingRequested) confirmedRequested.add(reviewer);
+    // workflow_run (review submitted): filter @mentions to the ideal load-balanced
+    // pick — no open-PR load data here so falls back to CODEOWNERS order.
+    const { selected: idealSelected } = chooseReviewers(touchedAreas, {
+      prAuthor: prData.user.login,
+      existingRequested: new Set(),
+      reviewerLoad: {},
+      LINE_THRESHOLD,
+      AREA_THRESHOLDS,
+      PUBLIC_HEADER,
+    });
+    for (const reviewer of existingRequested) {
+      if (!allCodeOwners.has(reviewer) || idealSelected.has(reviewer)) {
+        confirmedRequested.add(reviewer);
+      }
+    }
   }
 
   // ----------------------------------------------------------------
