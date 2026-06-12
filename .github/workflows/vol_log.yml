@@ -33,11 +33,14 @@ jobs:
       # Log-based VOL currently doesn't have CMake support
       - name: Configure HDF5
         shell: bash
+        env:
+          BUILD_MODE: ${{ inputs.build_mode }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          mkdir ${{ github.workspace }}/hdf5/build
-          cd ${{ github.workspace }}/hdf5/build
-          cmake -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/hdf5_build \
+          mkdir $GITHUB_WORKSPACE/hdf5/build
+          cd $GITHUB_WORKSPACE/hdf5/build
+          cmake -DCMAKE_BUILD_TYPE=$BUILD_MODE \
+            -DCMAKE_INSTALL_PREFIX=$RUNNER_WORKSPACE/hdf5_build \
             -DBUILD_STATIC_LIBS=OFF \
             -DHDF5_TEST_API:BOOL=ON \
             -DHDF5_TEST_API_ENABLE_ASYNC:BOOL=ON \
@@ -46,17 +49,20 @@ jobs:
             -DHDF5_ALLOW_UNSUPPORTED:BOOL=ON \
             -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
             -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
-            ${{ github.workspace }}/hdf5
+            $GITHUB_WORKSPACE/hdf5
           cat src/libhdf5.settings
 
       - name: Build and install HDF5
         shell: bash
         working-directory: ${{ github.workspace }}/hdf5/build
+        env:
+          BUILD_MODE: ${{ inputs.build_mode }}
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+          cmake --build . --parallel 3 --config $BUILD_MODE
           cmake --install .
-          echo "LD_LIBRARY_PATH=${{ github.workspace }}/hdf5/build/bin" >> $GITHUB_ENV
-          echo "PATH=${{ runner.workspace }}/hdf5_build/bin:${PATH}" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/hdf5/build/bin" >> $GITHUB_ENV
+          echo "PATH=$RUNNER_WORKSPACE/hdf5_build/bin:${PATH}" >> $GITHUB_ENV
 
       - name: Checkout Log-based VOL
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -69,12 +75,13 @@ jobs:
           CXX: mpic++
           CC: mpicc
           LD_LIBRARY_PATH: ${{ runner.workspace }}/hdf5_build/lib
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           cd vol-log-based
           autoreconf -i
-          ./configure --prefix=${{ runner.workspace }}/vol-log-based-build --with-hdf5=${{ runner.workspace }}/hdf5_build/ --enable-shared --enable-zlib
+          ./configure --prefix=$RUNNER_WORKSPACE/vol-log-based-build --with-hdf5=$RUNNER_WORKSPACE/hdf5_build/ --enable-shared --enable-zlib
           make -j2 && make install
-          export HDF5_PLUGIN_PATH="${{ runner.workspace }}/vol-log-based-build/lib"
+          export HDF5_PLUGIN_PATH="$RUNNER_WORKSPACE/vol-log-based-build/lib"
           export HDF5_VOL_CONNECTOR="LOG under_vol=0;under_info={}"
           make check
           echo "HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH}" >> $GITHUB_ENV
@@ -88,5 +95,7 @@ jobs:
         # but skip it to leave an indication that this should be re-enabled
         # in the future.
         if: false
+        env:
+          BUILD_MODE: ${{ inputs.build_mode }}
         run: |
-          ctest --build-config ${{ inputs.build_mode }} -R "h5_api" -E "parallel" .
+          ctest --build-config $BUILD_MODE -R "h5_api" -E "parallel" .
