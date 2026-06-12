@@ -159,11 +159,15 @@ function chooseReviewers(touchedAreas, {
 function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
   const rowData = touchedAreas.map(area => {
     const approver  = area.owners.find(o => approvedUsers.has(o));
-    const assigned  = approver ?? area.owners.find(o => confirmedRequested.has(o));
     const signedOff = !!approver;
     const box       = signedOff ? 'x' : ' ';
     const tick      = signedOff ? ' ✅' : '';
-    const mention   = assigned ? ` — @${assigned}` : '';
+    // Signed off: show who approved. Pending: show all confirmed-requested reviewers
+    // (may be > 1 if a reviewer was manually added alongside the load-balanced pick).
+    const requested = area.owners.filter(o => confirmedRequested.has(o));
+    const mention   = approver
+      ? ` — @${approver}`
+      : requested.length > 0 ? ` — ${requested.map(o => `@${o}`).join(', ')}` : '';
     return { text: `- [${box}] **${area.label}**${tick}${mention}`, signedOff };
   });
 
@@ -357,10 +361,10 @@ module.exports = async function run({ github, context, core }) {
     prData.requested_reviewers.map(r => r.login).filter(Boolean)
   );
 
-  // confirmedRequested tracks what was actually successfully requested
-  // (used in buildBody so the checklist never shows an owner whose
-  // requestReviewers call silently failed).
-  let confirmedRequested = new Set(existingRequested);
+  // confirmedRequested tracks who is actually assigned for checklist display.
+  // Starts empty — populated below only with the load-balanced selection so
+  // the checklist never shows owners that were not chosen by the script.
+  let confirmedRequested = new Set();
 
   // ----------------------------------------------------------------
   // 6. Auto-assign reviewers (pull_request events only, not reviews).
@@ -400,9 +404,14 @@ module.exports = async function run({ github, context, core }) {
       core.warning(`Could not fetch open PRs for load balancing; falling back to CODEOWNERS order: ${e.message}`);
     }
 
+    const isNewPR = context.payload.action === 'opened' || context.payload.action === 'reopened';
+
+    // On open/reopen: ignore existing assignments so GitHub's CODEOWNERS
+    // auto-assignment doesn't suppress our load-balanced selection.
+    // On synchronize: respect existing assignments (reviewer may have already started).
     const { selected, log } = chooseReviewers(touchedAreas, {
       prAuthor,
-      existingRequested,
+      existingRequested: isNewPR ? new Set() : existingRequested,
       reviewerLoad,
       LINE_THRESHOLD,
       AREA_THRESHOLDS,
@@ -410,20 +419,65 @@ module.exports = async function run({ github, context, core }) {
     });
     for (const msg of log) core.info(msg);
 
-    // Request one at a time so a single invalid login cannot block the rest.
-    // Only add to confirmedRequested on success — the checklist must not show
-    // an owner whose request call failed.
-    for (const reviewer of selected) {
-      try {
-        await github.rest.pulls.requestReviewers({
-          owner, repo, pull_number: pr_number,
-          reviewers: [reviewer],
-        });
-        confirmedRequested.add(reviewer);
-      } catch (e) {
-        core.warning(`Could not request reviewer ${reviewer}: ${e.message}`);
+    // Helper: remove CODEOWNERS auto-assigned reviewers not in our selection.
+    // Only removes code owners — leaves manually-added non-owner reviewers untouched.
+    async function enforceSelection(currentRequested) {
+      for (const reviewer of currentRequested) {
+        if (allCodeOwners.has(reviewer) && !selected.has(reviewer)) {
+          try {
+            await github.rest.pulls.removeRequestedReviewers({
+              owner, repo, pull_number: pr_number, reviewers: [reviewer],
+            });
+            core.info(`Removed auto-assigned reviewer ${reviewer} (not selected by load balancer)`);
+          } catch (e) {
+            core.warning(`Could not remove reviewer ${reviewer}: ${e.message}`);
+          }
+        }
       }
     }
+
+    if (isNewPR) {
+      // First pass: clean up whatever GitHub auto-assigned before the workflow ran.
+      await enforceSelection(existingRequested);
+
+      // Request one at a time so a single invalid login cannot block the rest.
+      // Only add to confirmedRequested on success — the checklist must not show
+      // an owner whose request call failed.
+      for (const reviewer of selected) {
+        try {
+          await github.rest.pulls.requestReviewers({
+            owner, repo, pull_number: pr_number,
+            reviewers: [reviewer],
+          });
+          confirmedRequested.add(reviewer);
+        } catch (e) {
+          core.warning(`Could not request reviewer ${reviewer}: ${e.message}`);
+        }
+      }
+
+      // Second pass: GitHub's auto-assignment can fire after the workflow starts,
+      // so wait briefly then re-check and remove any extras that appeared.
+      await new Promise(resolve => setTimeout(resolve, 15000));
+      let retryPR;
+      try {
+        ({ data: retryPR } = await github.rest.pulls.get({ owner, repo, pull_number: pr_number }));
+      } catch (e) {
+        core.warning(`Could not re-fetch PR for reviewer cleanup retry: ${e.message}`);
+      }
+      if (retryPR) {
+        const retryRequested = new Set(
+          retryPR.requested_reviewers.map(r => r.login).filter(Boolean)
+        );
+        await enforceSelection(retryRequested);
+      }
+    } else {
+      // synchronize/reopened: never re-assign reviewers — respect manual removals.
+      // Just carry forward whoever is currently assigned for checklist display.
+      for (const reviewer of existingRequested) confirmedRequested.add(reviewer);
+    }
+  } else {
+    // For workflow_run (review events): show whoever is currently assigned.
+    for (const reviewer of existingRequested) confirmedRequested.add(reviewer);
   }
 
   // ----------------------------------------------------------------

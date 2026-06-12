@@ -144,6 +144,10 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ## Library
 
+### HTTP 403 errors in the ROS3 VFD for object keys with special characters
+
+   The ROS3 VFD did not URI-encode the S3 object key when building the HTTP request path, so keys containing characters that AWS Signature Version 4 requires to be percent-encoded — such as the '=' in Hive-style `key=value` partition prefixes, '+', or spaces — produced a signed request whose signature did not match S3's server-side recomputation. S3 rejects such requests with `SignatureDoesNotMatch`, which surfaces as an HTTP 403 error (indistinguishable from a permissions error on a HEAD request), even though tools like the AWS CLI could access the same object. The object key is now percent-encoded exactly once when the request path is built, matching the behavior of other S3 clients. Note that URLs must now be passed to the ROS3 VFD with their object keys unencoded; a key that was pre-encoded as a workaround for this issue will now be double-encoded and fail to resolve.
+
 ### Fixed file descriptor leaks in stdio VFD error paths
 
    Fixed multiple resource leaks in the H5FDstdio driver where file descriptors were not properly closed on error paths. The error handling code was incorrectly attempting to close a local variable instead of the file pointer stored in the file structure, leading to file descriptor leaks. This issue affected 5 error paths in `H5FD_stdio_open()` and could cause file descriptor exhaustion in long-running applications.
