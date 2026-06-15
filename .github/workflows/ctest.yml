@@ -916,6 +916,12 @@ jobs:
           compiler: intel
           version: '2025.0'
 
+      - name: Setup Java
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          java-version: 21
+          distribution: 'temurin'
+
       - name: Install CMake
         uses: lukka/get-cmake@591817e96fcad43505fb4eae36172462abb3a42e # latest
         with:
