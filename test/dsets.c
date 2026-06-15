@@ -2741,16 +2741,19 @@ test_get_filter_info(void)
     if (H5Zget_filter_info(H5Z_FILTER_SZIP, &flags) < 0)
         TEST_ERROR;
 
-    if (H5Z_SZIP->encoder_present) {
-        if (((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) ||
-            ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
+    /* DECODE must always be available; ENCODE presence determines the other flag */
+    if ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0)
+        TEST_ERROR;
+    if (flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) {
+        /* Both encode and decode should be reported when the encoder is present */
+        if ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0)
             TEST_ERROR;
-    } /* end if */
+    }
     else {
-        if (((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) != 0) ||
-            ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
+        /* Without an encoder only the decode flag should be set */
+        if ((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) != 0)
             TEST_ERROR;
-    }  /* end else */
+    }
 #endif /* H5_HAVE_FILTER_SZIP */
 
     /* Verify that get_filter_info throws an error when given a bad filter */
@@ -3337,7 +3340,7 @@ test_missing_filter(hid_t file)
     } /* end if */
 #ifdef H5_HAVE_FILTER_DEFLATE
     /* Register deflate filter (use internal function to avoid range checks) */
-    if (H5Z_register(H5Z_DEFLATE) < 0) {
+    if (H5Z__reregister_deflate() < 0) {
         H5_FAILED();
         printf("    Line %d: Can't unregister deflate filter\n", __LINE__);
         goto error;

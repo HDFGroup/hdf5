@@ -111,7 +111,6 @@ const char *LIBVER_NAMES[] = {"earliest", /* H5F_LIBVER_EARLIEST = 0  */
                               "v112",     /* H5F_LIBVER_V112 = 3      */
                               "v114",     /* H5F_LIBVER_V114 = 4      */
                               "v200",     /* H5F_LIBVER_V200 = 5      */
-                              "latest",   /* H5F_LIBVER_LATEST        */
                               NULL};
 
 /* Previous error reporting function */

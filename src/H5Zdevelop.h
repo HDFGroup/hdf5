@@ -26,9 +26,28 @@
 /*****************/
 
 /**
- * Current version of the H5Z_class_t struct
+ * Current version of the H5Z_class_t struct (used by H5Z_class2_t)
  */
 #define H5Z_CLASS_T_VERS (1)
+
+/**
+ * Version constant for the new H5Z_class3_t struct \since 2.2.0
+ */
+#define H5Z_CLASS3_T_VERS (2)
+
+/**
+ * Highest accepted version field value in H5Zregister().  Plugin authors
+ * should set the version field to the literal value documented for their
+ * chosen struct (1 for H5Z_class2_t, 2 for H5Z_class3_t) rather than
+ * referencing this constant directly. \since 2.2.0
+ */
+#define H5Z_CLASS_T_VERS_MAX (2)
+
+/**
+ * Maximum byte length of the \c name field in H5Z_class3_t (not counting NUL).
+ * H5Zregister() rejects names longer than this value. \since 2.2.0
+ */
+#define H5Z_CLASS3_NAME_MAX_LEN 255u
 
 /*******************/
 /* Public Typedefs */
@@ -171,6 +190,112 @@ typedef struct H5Z_class2_t {
 } H5Z_class2_t;
 //! <!-- [H5Z_class2_t_snip] -->
 
+/**
+ * \brief Callback to configure a filter from a key=value parameter string.
+ *
+ * \param[in]     params         Comma-separated key=value parameter string, or NULL.
+ * \param[in,out] flags          Caller's flags; callback may modify them.
+ * \param[in,out] cd_nelmts      On input 0; on output, number of cd_values slots written
+ *                               (or required when cd_values is NULL).
+ *                               \b Must \b not \b be \b NULL; the HDF5 library
+ *                               guarantees this precondition when invoking the
+ *                               callback through #H5Pappend_filter.
+ * \param[out]    cd_values      Array to populate, or NULL for a size query.
+ * \param[in]     cd_values_size Capacity of cd_values in elements (0 when cd_values is NULL).
+ *
+ * \return Non-negative on success; negative on failure.
+ *
+ * \details Must return the same cd_nelmts on both the size-query pass
+ *          (cd_values == NULL) and the populate pass (cd_values != NULL).
+ *
+ *          The public typed accessors #H5Zconfig_has_key, #H5Zconfig_get_int,
+ *          #H5Zconfig_get_double, #H5Zconfig_get_bool, and #H5Zconfig_get_str
+ *          are safe to call from inside this callback: they are pure parsers
+ *          over the caller-provided \p params buffer and do not take the
+ *          HDF5 API lock, so they will not deadlock in concurrency-mode
+ *          (\c HDF5_ENABLE_CONCURRENCY) builds where this callback is invoked
+ *          from within #H5Pappend_filter.
+ *
+ * \since 2.2.0
+ */
+typedef herr_t (*H5Z_set_config_func_t)(const char *params, unsigned *flags, size_t *cd_nelmts,
+                                        unsigned cd_values[], size_t cd_values_size);
+
+/**
+ * \brief Callback to reconstruct a human-readable parameter string from cd_values.
+ *
+ * \param[in]  flags      Definition flags stored in the pipeline.
+ * \param[in]  cd_nelmts  Number of elements in cd_values.
+ * \param[in]  cd_values  Client data values.
+ * \param[out] buf        Buffer to receive the parameter string, or NULL for size query.
+ * \param[in,out] buf_size On entry, total capacity of \p buf in bytes, <b>including</b> the
+ *                        NUL terminator slot (i.e., <tt>*buf_size >= strlen(output) + 1</tt>).
+ *                        On return, set to the number of characters written, excluding the NUL
+ *                        terminator. When \p buf is NULL the callback sets \p *buf_size to the
+ *                        required character count (excluding NUL) and returns success, enabling
+ *                        a size query. Because the capacity includes the NUL slot, implementations
+ *                        may write with <tt>snprintf(buf, *buf_size, ...)</tt> directly.
+ *
+ * \return Non-negative on success; negative on failure.
+ *
+ * \note Implementations that format \c float or \c double values \b must use
+ *       the C99 \c \%a format specifier (e.g., \c snprintf(buf,*buf_size,"\%a",val))
+ *       rather than \c \%g, \c \%f, or \c \%e. \c \%a encodes the exact
+ *       IEEE 754 bit pattern as a hexadecimal float literal, guaranteeing that
+ *       \c strtod parses the output back to the identical value with no
+ *       rounding. This makes exact round-trips possible for filters that store
+ *       \c float or \c double parameters via the cd_values packing convention.
+ *       Decimal float input (e.g., \c rate=3.5) remains valid for user
+ *       convenience; the asymmetry (decimal in, hex-float out) is intentional.
+ *
+ * \since 2.2.0
+ */
+typedef herr_t (*H5Z_get_config_func_t)(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
+                                        char *buf, size_t *buf_size);
+
+/**
+ * \brief Extended filter callback type for H5Z_class3_t.
+ *
+ * Extends \c H5Z_func_t with two additional parameters: the active data-transfer
+ * property list (\p dxpl_id) and the chunk's scaled coordinates (\p scaled, \p ndims).
+ * \c H5Z_class2_t continues to use \c H5Z_func_t; this type is used only by
+ * \c H5Z_class3_t.
+ *
+ * \since 2.2.0
+ */
+typedef size_t (*H5Z_func2_t)(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[],
+                              hid_t dxpl_id, const hsize_t *scaled, size_t ndims, size_t nbytes,
+                              size_t *buf_size, void **buf);
+
+/**
+ * \brief Version 3 filter class structure with optional string-configuration callbacks.
+ *
+ * Plugin authors use H5Z_class3_t directly rather than relying on the H5Z_class_t alias.
+ * This struct is NOT derived from H5Z_class2_t; it is an independent flat struct.
+ *
+ * \since 2.2.0
+ */
+//! <!-- [H5Z_class3_t_snip] -->
+typedef struct H5Z_class3_t {
+    int          version;            /**< H5Z_CLASS3_T_VERS                         */
+    H5Z_filter_t id;                 /**< Filter ID number                           */
+    unsigned     encoder_present;    /**< Does this filter have an encoder?          */
+    unsigned     decoder_present;    /**< Does this filter have a decoder?           */
+    const char  *name;               /**< Canonical string identifier (e.g., "zfp"); must not be NULL; used as
+                                        display name */
+    const char *description;         /**< Human-readable description of the filter (e.g., "Deflate (zlib)
+                                        general-purpose compression"); may be NULL */
+    H5Z_can_apply_func_t  can_apply; /**< The "can apply" callback for a filter      */
+    H5Z_set_local_func_t  set_local; /**< The "set local" callback for a filter      */
+    H5Z_func2_t           filter;    /**< Extended filter callback: dxpl_id + scaled */
+    H5Z_set_config_func_t set_config; /**< String configuration callback; may be NULL */
+    H5Z_get_config_func_t get_config; /**< Parameter string reconstruction; may be NULL */
+    void                 *write_blob; /**< Reserved: set to NULL; defined by RFC-HDFG-2026-* */
+    void                 *read_blob;  /**< Reserved: set to NULL; defined by RFC-HDFG-2026-* */
+    void                 *close_blob; /**< Reserved: set to NULL; defined by RFC-HDFG-2026-* */
+} H5Z_class3_t;
+//! <!-- [H5Z_class3_t_snip] -->
+
 /********************/
 /* Public Variables */
 /********************/
@@ -182,6 +307,164 @@ typedef struct H5Z_class2_t {
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * \ingroup H5Z
+ *
+ * \brief Check whether a key is present in a TOML-subset filter parameter string.
+ *
+ * \param[in] params  TOML-subset key=value parameter string, or NULL.
+ * \param[in] key     Key to search for (case-insensitive).
+ *
+ * \return Positive if the key is present, 0 if absent, negative on error.
+ *
+ * \details Bare keys (no '=' sign, boolean flags) return positive.
+ *          This function validates the entire parameter string on every call;
+ *          duplicate keys or malformed syntax return negative.
+ *
+ * \since 2.2.0
+ */
+H5_DLL htri_t H5Zconfig_has_key(const char *params, const char *key);
+
+/**
+ * \ingroup H5Z
+ *
+ * \brief Look up a TOML integer value in a filter parameter string.
+ *
+ * \param[in]  params  TOML-subset key=value parameter string.
+ * \param[in]  key     Key to search for (case-insensitive).
+ * \param[out] out     Receives the parsed int64_t value.
+ *
+ * \return Positive if found and converted, 0 if not found, negative on error.
+ *
+ * \details Accepts decimal, 0x (hex), 0o (octal), 0b (binary) integers with
+ *          optional leading sign and TOML underscore digit separators.
+ *          Returns negative (H5E_BADVALUE) if the key exists but its value
+ *          is not a TOML integer (type mismatch).
+ *
+ * \since 2.2.0
+ */
+H5_DLL htri_t H5Zconfig_get_int(const char *params, const char *key, int64_t *out);
+
+/**
+ * \ingroup H5Z
+ *
+ * \brief Look up a TOML float value in a filter parameter string.
+ *
+ * \param[in]  params  TOML-subset key=value parameter string.
+ * \param[in]  key     Key to search for (case-insensitive).
+ * \param[out] out     Receives the parsed double value.
+ *
+ * \return Positive if found and converted, 0 if not found, negative on error.
+ *
+ * \details The decimal separator is always '.', regardless of locale.
+ *          TOML special floats (inf, nan) are rejected with H5E_BADVALUE.
+ *          Returns negative if the key exists but its value is not a TOML
+ *          float (type mismatch).
+ *
+ * \since 2.2.0
+ */
+H5_DLL htri_t H5Zconfig_get_double(const char *params, const char *key, double *out);
+
+/**
+ * \ingroup H5Z
+ *
+ * \brief Look up a TOML boolean value in a filter parameter string.
+ *
+ * \param[in]  params  TOML-subset key=value parameter string.
+ * \param[in]  key     Key to search for (case-insensitive).
+ * \param[out] out     Receives TRUE or FALSE.
+ *
+ * \return Positive if found, 0 if not found, negative on error.
+ *
+ * \details Accepts "true" or "false" (lowercase only, per TOML).
+ *          Bare keys (boolean flags with no '=' sign) are treated as TRUE.
+ *          Returns negative if the key exists but its value is not a TOML
+ *          boolean (type mismatch).
+ *
+ * \since 2.2.0
+ */
+H5_DLL htri_t H5Zconfig_get_bool(const char *params, const char *key, hbool_t *out);
+
+/**
+ * \ingroup H5Z
+ *
+ * \brief Look up a TOML string value in a filter parameter string.
+ *
+ * \param[in]     params    TOML-subset key=value parameter string.
+ * \param[in]     key       Key to search for (case-insensitive).
+ * \param[out]    buf       Buffer to receive the decoded string (without quotes),
+ *                          or NULL for a size query.
+ * \param[in,out] buf_size  On entry, capacity of buf; on return, bytes required
+ *                          (excluding NUL terminator).  May be NULL when buf is NULL.
+ *
+ * \return Positive if found, 0 if not found, negative on error.
+ *
+ * \details Only quoted values (double-quoted with backslash escapes, or
+ *          single-quoted with no escape processing) are accepted.
+ *          Unquoted integers, floats, booleans, and bare keys produce a
+ *          type mismatch error (H5E_BADVALUE).
+ *          If the buffer is too small, H5E_OVERFLOW is pushed.
+ *
+ * \since 2.2.0
+ */
+H5_DLL htri_t H5Zconfig_get_str(const char *params, const char *key, char *buf, size_t *buf_size);
+
+/**
+ * \ingroup H5Z
+ * \brief Pack a double value into two consecutive unsigned int cd_values slots.
+ * \since 2.2.0
+ */
+H5_DLL herr_t H5Zcd_pack_double(double val, unsigned *slots, size_t cap, size_t *n_used);
+
+/**
+ * \ingroup H5Z
+ * \brief Unpack a double value from two consecutive unsigned int cd_values slots.
+ * \since 2.2.0
+ */
+H5_DLL herr_t H5Zcd_unpack_double(const unsigned *slots, size_t n_slots, double *val);
+
+/**
+ * \ingroup H5Z
+ * \brief Pack a float value into one unsigned int cd_values slot.
+ * \since 2.2.0
+ */
+H5_DLL herr_t H5Zcd_pack_float(float val, unsigned *slots, size_t cap, size_t *n_used);
+
+/**
+ * \ingroup H5Z
+ * \brief Unpack a float value from one unsigned int cd_values slot.
+ * \since 2.2.0
+ */
+H5_DLL herr_t H5Zcd_unpack_float(const unsigned *slots, size_t n_slots, float *val);
+
+/**
+ * \ingroup H5Z
+ * \brief Pack a NUL-terminated string into cd_values slots.
+ * \since 2.2.0
+ */
+H5_DLL herr_t H5Zcd_pack_string(const char *str, unsigned *slots, size_t cap, size_t *n_used);
+
+/**
+ * \ingroup H5Z
+ * \brief Unpack a NUL-terminated string from cd_values slots.
+ * \since 2.2.0
+ */
+H5_DLL herr_t H5Zcd_unpack_string(const unsigned *slots, size_t n_slots, char *buf, size_t bufsz);
+
+/**
+ * \ingroup H5Z
+ * \brief Pack an int64_t value into two consecutive unsigned int cd_values slots (little-endian).
+ * \since 2.2.0
+ */
+H5_DLL herr_t H5Zcd_pack_int64(int64_t val, unsigned *slots, size_t cap, size_t *n_used);
+
+/**
+ * \ingroup H5Z
+ * \brief Unpack an int64_t value from two consecutive unsigned int cd_values slots.
+ * \since 2.2.0
+ */
+H5_DLL herr_t H5Zcd_unpack_int64(const unsigned *slots, size_t n_slots, int64_t *val);
 
 /**
  * \ingroup H5Z

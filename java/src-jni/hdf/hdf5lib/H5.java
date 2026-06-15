@@ -8425,6 +8425,82 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5P
      *
+     * H5Pappend_filter adds a filter to the pipeline using a human-readable key=value parameter string.
+     *
+     * @param plist_id
+     *            IN: Property list identifier.
+     * @param filter_id
+     *            IN: Filter to be added.
+     * @param flags
+     *            IN: Bit vector specifying general filter properties.
+     * @param params
+     *            IN: Parameter string in "key=value" format, or null for no parameters.
+     *
+     * @return a non-negative value if successful
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public synchronized static int H5Pappend_filter(long plist_id, int filter_id, int flags, String params)
+        throws HDF5LibraryException
+    {
+        return H5Pappend_filter_str(plist_id, filter_id, flags, params);
+    }
+
+    private synchronized static native int H5Pappend_filter_str(long plist_id, int filter_id, int flags,
+                                                                String params) throws HDF5LibraryException;
+
+    /**
+     * @ingroup JH5P
+     *
+     * H5Pappend_filter adds a filter to the pipeline using raw cd_values parameters.
+     *
+     * @param plist_id
+     *            IN: Property list identifier.
+     * @param filter_id
+     *            IN: Filter to be added.
+     * @param flags
+     *            IN: Bit vector specifying general filter properties.
+     * @param cd_values
+     *            IN: Auxiliary data for the filter, or null for no parameters.
+     *
+     * @return a non-negative value if successful
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public synchronized static int H5Pappend_filter(long plist_id, int filter_id, int flags, int[] cd_values)
+        throws HDF5LibraryException
+    {
+        return H5Pappend_filter_raw(plist_id, filter_id, flags, cd_values);
+    }
+
+    private synchronized static native int H5Pappend_filter_raw(long plist_id, int filter_id, int flags,
+                                                                int[] cd_values) throws HDF5LibraryException;
+
+    /**
+     * @ingroup JH5P
+     *
+     * H5Pget_filter_params_by_idx retrieves a filter's parameter string by pipeline index.
+     *
+     * @param plist_id
+     *            IN: Property list identifier.
+     * @param idx
+     *            IN: Zero-based filter index in pipeline.
+     * @param params
+     *            OUT: One-element String array to receive the parameter string.
+     *
+     * @return a non-negative value if successful
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public synchronized static native int H5Pget_filter_params_by_idx(long plist_id, int idx, String[] params)
+        throws HDF5LibraryException;
+
+    /**
+     * @ingroup JH5P
+     *
      * H5Pget_nfilters returns the number of filters defined in the filter pipeline associated with the
      * property list plist.
      *
@@ -15650,6 +15726,24 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5Z
      *
+     * H5Zget_filter_info2 retrieves registry-level information about a filter,
+     * including its canonical name, description, and whether it implements the
+     * set_config / get_config callbacks (H5Z_class3_t plugin class).
+     *
+     * @param filter
+     *            IN: filter number.
+     *
+     * @return an H5Z_class_info_t object, or null on failure
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public synchronized static native hdf.hdf5lib.structs.H5Z_class_info_t H5Zget_filter_info2(int filter)
+        throws HDF5LibraryException;
+
+    /**
+     * @ingroup JH5Z
+     *
      * H5Zunregister unregisters a filter.
      *
      * @param filter
@@ -15661,6 +15755,104 @@ public class H5 implements java.io.Serializable {
      *            Error from the HDF5 Library.
      **/
     public synchronized static native int H5Zunregister(int filter) throws HDF5LibraryException;
+
+    /**
+     * @ingroup JH5Z
+     *
+     * H5Zconfig_has_key checks whether a key exists in a filter parameter string.
+     *
+     * @param params
+     *            IN: Full parameter string (e.g. "level = 6, mode = \"fast\"").
+     * @param key
+     *            IN: Name of the parameter to look for.
+     *
+     * @return positive if found, 0 if not found, negative on error
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public synchronized static native int H5Zconfig_has_key(String params, String key)
+        throws HDF5LibraryException;
+
+    /**
+     * @ingroup JH5Z
+     *
+     * H5Zconfig_get_param retrieves an integer parameter from a filter parameter string.
+     *
+     * @param params
+     *            IN: Full parameter string (e.g. "level = 6").
+     * @param key
+     *            IN: Name of the integer parameter to look up.
+     * @param out
+     *            OUT: One-element long array; out[0] receives the integer value if found.
+     *
+     * @return positive if found, 0 if not found, negative on error
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public synchronized static native int H5Zconfig_get_param(String params, String key, long[] out)
+        throws HDF5LibraryException;
+
+    /**
+     * @ingroup JH5Z
+     *
+     * H5Zconfig_get_param retrieves a floating-point parameter from a filter parameter string.
+     *
+     * @param params
+     *            IN: Full parameter string (e.g. "threshold = 1.5").
+     * @param key
+     *            IN: Name of the float parameter to look up.
+     * @param out
+     *            OUT: One-element double array; out[0] receives the value if found.
+     *
+     * @return positive if found, 0 if not found, negative on error
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public synchronized static native int H5Zconfig_get_param(String params, String key, double[] out)
+        throws HDF5LibraryException;
+
+    /**
+     * @ingroup JH5Z
+     *
+     * H5Zconfig_get_param retrieves a boolean parameter from a filter parameter string.
+     *
+     * @param params
+     *            IN: Full parameter string (e.g. "enabled = true").
+     * @param key
+     *            IN: Name of the boolean parameter to look up.
+     * @param out
+     *            OUT: One-element boolean array; out[0] receives the value if found.
+     *
+     * @return positive if found, 0 if not found, negative on error
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public synchronized static native int H5Zconfig_get_param(String params, String key, boolean[] out)
+        throws HDF5LibraryException;
+
+    /**
+     * @ingroup JH5Z
+     *
+     * H5Zconfig_get_param retrieves a string parameter from a filter parameter string.
+     *
+     * @param params
+     *            IN: Full parameter string (e.g. "coding = \"entropy\"").
+     * @param key
+     *            IN: Name of the string parameter to look up.
+     * @param value
+     *            OUT: One-element String array; value[0] receives the found value string.
+     *
+     * @return positive if found, 0 if not found, negative on error
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public synchronized static native int H5Zconfig_get_param(String params, String key, String[] value)
+        throws HDF5LibraryException;
 
     // /////// unimplemented ////////
 

@@ -97,6 +97,42 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Added string-based filter configuration API (RFC-HDFG-2026-001)
+
+   A new API allows filters to be configured using human-readable `key=value`
+   parameter strings (TOML-subset syntax) in addition to the existing integer
+   `cd_values` arrays.
+
+   **New C API functions:**
+   - `H5Pappend_filter(plist, filter_id, flags, params)` — appends a filter to
+     a dataset creation property list; `params` is an `H5Z_params_t` that
+     carries either a `key=value` string or a raw `cd_values` array.
+   - `H5Pget_filter_params_by_idx(plist, idx, buf, buf_size, content_len)` —
+     retrieves the parameter string for the filter at pipeline index `idx`.
+   - `H5Zconfig_get_int`, `H5Zconfig_get_double`, `H5Zconfig_get_bool`,
+     `H5Zconfig_get_str` — typed accessors that extract individual parameters
+     from a `key=value` string; intended for use inside filter `set_config`
+     callbacks.
+
+   **New filter class fields:**  `H5Z_class3_t` gains a `name` string field
+   (canonical identifier used in config strings) and a `description` string
+   field (human-readable display name), plus `set_config` / `get_config`
+   callbacks that translate between `key=value` strings and internal state.
+
+   **TOML subset parser:**  The [tomlc17](https://github.com/cktan/tomlc17)
+   library is now vendored in `src/tomlc17/` and compiled unconditionally into
+   libhdf5.  Hex-float literals (`0x1.8p+1`) in parameter strings are
+   transparently rewritten to decimal before parsing.
+
+   **On-disk format:** No new pipeline version is introduced.  Parameter
+   strings are converted to `cd_values` by the filter's `set_config` callback
+   at `H5Pappend_filter` time and stored using the existing v2 pipeline
+   message.  On read, `H5Pget_filter_params_by_idx` reconstructs the string
+   via the filter's `get_config` callback.  This means the on-disk format is
+   unchanged and full backward read compatibility is preserved.
+
+   Fixes GitHub issue [#6153](https://github.com/HDFGroup/hdf5/issues/6153)
+
 ### Added optional digital signature verification for dynamically loaded plugins
 
    When built with `-DHDF5_REQUIRE_SIGNED_PLUGINS=ON` and OpenSSL, HDF5 will cryptographically verify each plugin before loading it. Plugins are signed with the new `h5sign` tool, which appends an RSA signature and a compact footer to the plugin binary. Verification uses a keystore directory of trusted public keys, configurable at compile time (`-DHDF5_PLUGIN_KEYSTORE_DIR=<path>`) or at runtime via the `HDF5_PLUGIN_KEYSTORE` environment variable. Individual signatures can be revoked without removing the entire public key by listing their SHA-256 hashes in a `revoked_signatures.txt` file in the keystore directory. Supported algorithms include SHA-256, SHA-384, and SHA-512 with both PKCS#1 v1.5 and PSS padding. See `docs/PLUGIN_SIGNATURE_README.md` for details.
@@ -113,9 +149,36 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Fortran Library
 
+### Added Fortran bindings for the string-based filter configuration API
+
+   - `h5pappend_filter_f` — generic interface with two overloads: string
+     `params` variant and raw `cd_values` variant.
+   - `h5pget_filter_params_by_idx_f` — retrieves the parameter string for a
+     filter by pipeline index.
+   - `h5zconfig_get_param_f` — generic interface dispatching to
+     `h5zconfig_get_param_int_f`, `_double_f`, `_logical_f`, and `_str_f`
+     based on the value argument type.
+
 ## C++ Library
 
+### Added C++ wrappers for the string-based filter configuration API
+
+   - `DSetCreatPropList::appendFilter` — two overloads: string `params` and
+     raw `cd_values`.
+   - `DSetCreatPropList::getFilterParams` — retrieves a filter's parameter
+     string by pipeline index.
+   - `H5FilterParam::config_get_param` — four overloads dispatching on value
+     type (`int64_t`, `double`, `bool`, `H5std_string`).
+
 ## Java Library
+
+### Added Java wrappers for the string-based filter configuration API
+
+   - `H5.H5Pappend_filter` — two overloads: `String params` and `int[] cd_values`.
+   - `H5.H5Pget_filter_params_by_idx` — retrieves a filter's parameter string
+     by pipeline index.
+   - `H5.H5Zconfig_get_int`, `H5Zconfig_get_double`, `H5Zconfig_get_bool`,
+     `H5Zconfig_get_str` — typed parameter accessors.
 
 ### Java dependency JAR paths are now user-configurable
 

@@ -54,7 +54,8 @@ static herr_t                 H5Z__scaleoffset_set_parms_fillval(H5P_genplist_t 
                                                                  int need_convert);
 static herr_t                 H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
-                                      size_t nbytes, size_t *buf_size, void **buf);
+                                      hid_t dxpl_id, const hsize_t *scaled, size_t ndims, size_t nbytes,
+                                      size_t *buf_size, void **buf);
 static void   H5Z__scaleoffset_convert(void *buf, unsigned d_nelmts, unsigned dtype_size);
 static H5_ATTR_CONST unsigned H5Z__scaleoffset_log2(unsigned long long num);
 static void   H5Z__scaleoffset_precompress_i(void *data, unsigned d_nelmts, enum H5Z_scaleoffset_t type,
@@ -87,17 +88,27 @@ static herr_t H5Z__scaleoffset_decompress(unsigned char *data, unsigned d_nelmts
                                           size_t buf_size, parms_atomic p);
 static void   H5Z__scaleoffset_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer,
                                         size_t buffer_size, parms_atomic p);
+static herr_t H5Z__scaleoffset_set_config(const char *params, unsigned *flags, size_t *cd_nelmts,
+                                          unsigned cd_values[], size_t cd_values_size);
+static herr_t H5Z__scaleoffset_get_config(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
+                                          char *buf, size_t *buf_size);
 
 /* This message derives from H5Z */
-H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
-    H5Z_CLASS_T_VERS,           /* H5Z_class_t version */
-    H5Z_FILTER_SCALEOFFSET,     /* Filter id number        */
-    1,                          /* Assume encoder present: check before registering */
-    1,                          /* decoder_present flag (set to true) */
-    "scaleoffset",              /* Filter name for debugging    */
-    H5Z__can_apply_scaleoffset, /* The "can apply" callback     */
-    H5Z__set_local_scaleoffset, /* The "set local" callback     */
-    H5Z__filter_scaleoffset,    /* The actual filter function    */
+H5_ATTR_VISIBILITY_HIDDEN H5Z_class3_t H5Z_SCALEOFFSET[1] = {{
+    H5Z_CLASS3_T_VERS,      /* H5Z_class_t version */
+    H5Z_FILTER_SCALEOFFSET, /* Filter id number */
+    1,                      /* Assume encoder present: check before registering */
+    1,                      /* decoder_present flag (set to true) */
+    "scaleoffset",          /* name */
+    "Scale+offset lossy compression for integer/float data", /* description */
+    H5Z__can_apply_scaleoffset,                              /* The "can apply" callback */
+    H5Z__set_local_scaleoffset,                              /* The "set local" callback */
+    H5Z__filter_scaleoffset,                                 /* The actual filter function */
+    H5Z__scaleoffset_set_config,                             /* String config setter */
+    H5Z__scaleoffset_get_config,                             /* String config getter */
+    NULL,                                                    /* write_blob (reserved) */
+    NULL,                                                    /* read_blob  (reserved) */
+    NULL,                                                    /* close_blob (reserved) */
 }};
 
 /* Local macros */
@@ -741,6 +752,134 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
     } while (0)
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Z__scaleoffset_set_config
+ *
+ * Purpose:     Parse TOML "scale_type = \"float_dscale\"|\"float_escale\"|\"int\",
+ *                          scale_factor = N" into cd_values.
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Z__scaleoffset_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts,
+                            unsigned cd_values[], size_t cd_values_size)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    *cd_nelmts = H5Z_SCALEOFFSET_USER_NPARMS; /* 2 user params */
+
+    if (cd_values) {
+        unsigned scale_type;
+        unsigned scale_factor;
+        htri_t   found;
+        int64_t  lval;
+        char     val_buf[64];
+        size_t   bufsz = sizeof(val_buf);
+
+        if (cd_values_size < H5Z_SCALEOFFSET_USER_NPARMS)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cd_values buffer too small for scaleoffset");
+
+        /* scaleoffset has no usable defaults: both keys are required by RFC §7 */
+        if (!params || *params == '\0')
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                        "scaleoffset filter requires 'scale_type' and 'scale_factor' parameters");
+
+        {
+            static const char *const known[] = {"scale_type", "scale_factor", NULL};
+
+            if (H5Z__config_validate_keys(params, known) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                            "unknown parameter key in scaleoffset filter config");
+        }
+
+        /* scale_type = "float_dscale" | "float_escale" | "int" (required) */
+        found = H5Z__config_get_str(params, "scale_type", val_buf, &bufsz);
+        if (found < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "malformed params string for scaleoffset filter");
+        if (found == 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "scaleoffset filter requires 'scale_type' parameter");
+
+        if (strcmp(val_buf, "float_dscale") == 0)
+            scale_type = (unsigned)H5Z_SO_FLOAT_DSCALE;
+        else if (strcmp(val_buf, "float_escale") == 0)
+            scale_type = (unsigned)H5Z_SO_FLOAT_ESCALE;
+        else if (strcmp(val_buf, "int") == 0)
+            scale_type = (unsigned)H5Z_SO_INT;
+        else
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                        "scaleoffset 'scale_type' must be \"float_dscale\", \"float_escale\", "
+                        "or \"int\", got '%s'",
+                        val_buf);
+
+        /* scale_factor = <non-negative integer> (required) */
+        found = H5Z__config_get_int(params, "scale_factor", &lval);
+        if (found < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "malformed params string for scaleoffset filter");
+        if (found == 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "scaleoffset filter requires 'scale_factor' parameter");
+        if (lval < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                        "scaleoffset 'scale_factor' must be a non-negative integer, got %" PRId64, lval);
+        scale_factor = (unsigned)lval;
+
+        cd_values[H5Z_SCALEOFFSET_PARM_SCALETYPE]   = scale_type;
+        cd_values[H5Z_SCALEOFFSET_PARM_SCALEFACTOR] = scale_factor;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z__scaleoffset_get_config
+ *
+ * Purpose:     Reconstruct TOML "scale_type = \"...\", scale_factor = N"
+ *              from cd_values.
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Z__scaleoffset_get_config(unsigned H5_ATTR_UNUSED flags, size_t cd_nelmts, const unsigned cd_values[],
+                            char *buf, size_t *buf_size)
+{
+    char        tmp[128];
+    int         rv;
+    size_t      n;
+    const char *stype;
+    unsigned    scale_type;
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    scale_type = (cd_nelmts >= 1) ? cd_values[H5Z_SCALEOFFSET_PARM_SCALETYPE] : (unsigned)H5Z_SO_FLOAT_DSCALE;
+
+    if (scale_type == (unsigned)H5Z_SO_FLOAT_DSCALE)
+        stype = "float_dscale";
+    else if (scale_type == (unsigned)H5Z_SO_FLOAT_ESCALE)
+        stype = "float_escale";
+    else
+        stype = "int";
+
+    rv = snprintf(tmp, sizeof(tmp), "scale_type = \"%s\", scale_factor = %u", stype,
+                  (cd_nelmts >= 2) ? cd_values[H5Z_SCALEOFFSET_PARM_SCALEFACTOR] : 0u);
+    if (rv < 0 || (size_t)rv >= sizeof(tmp))
+        HGOTO_ERROR(H5E_PLINE, H5E_OVERFLOW, FAIL, "snprintf failed in scaleoffset get_config");
+    n = (size_t)rv;
+
+    if (buf) {
+        if (!buf_size || *buf_size < n + 1)
+            HGOTO_ERROR(H5E_PLINE, H5E_OVERFLOW, FAIL,
+                        "output buffer too small for scaleoffset get_config string");
+        H5MM_memcpy(buf, tmp, n);
+        buf[n] = '\0';
+    }
+    if (buf_size)
+        *buf_size = n;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
  * Function:    H5Z__can_apply_scaleoffset
  *
  * Purpose:    Check the parameters for scaleoffset compression for
@@ -1095,8 +1234,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
-                        size_t *buf_size, void **buf)
+H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
+                        hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
+                        size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
 {
     size_t                 ret_value = 0; /* return value */
     size_t                 size_out  = 0; /* size of output buffer */

@@ -984,6 +984,8 @@ set (H5WB_PRIVATE_HDRS
 
 set (H5Z_SOURCES
     ${HDF5_SRC_DIR}/H5Z.c
+    ${HDF5_SRC_DIR}/H5Zcd.c
+    ${HDF5_SRC_DIR}/H5Zconfig.c
     ${HDF5_SRC_DIR}/H5Zdeflate.c
     ${HDF5_SRC_DIR}/H5Zfletcher32.c
     ${HDF5_SRC_DIR}/H5Znbit.c
@@ -996,6 +998,13 @@ if (H5_ZLIB_HEADER)
   message(VERBOSE "H5_ZLIB_HEADER for library=${H5_ZLIB_HEADER}")
   set_source_files_properties(${HDF5_SRC_DIR}/H5Zdeflate.c
                PROPERTIES COMPILE_DEFINITIONS H5_ZLIB_HEADER="${H5_ZLIB_HEADER}"
+  )
+endif ()
+
+list (APPEND H5Z_SOURCES ${HDF5_SRC_DIR}/tomlc17/tomlc17.c)
+if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+  set_source_files_properties (${HDF5_SRC_DIR}/tomlc17/tomlc17.c
+    PROPERTIES COMPILE_OPTIONS "-fvisibility=hidden"
   )
 endif ()
 

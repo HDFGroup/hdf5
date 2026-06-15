@@ -9,6 +9,8 @@ GROUP "/" {
       }
       FILTERS {
          COMPRESSION DEFLATE { LEVEL 2 }
+         PARAMS_STRING "level = 2"
+         DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -27,6 +29,8 @@ GROUP "/" {
       }
       FILTERS {
          COMPRESSION DEFLATE { LEVEL 2 }
+         PARAMS_STRING "level = 2"
+         DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -45,6 +49,8 @@ GROUP "/" {
       }
       FILTERS {
          COMPRESSION DEFLATE { LEVEL 2 }
+         PARAMS_STRING "level = 2"
+         DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -63,6 +69,8 @@ GROUP "/" {
       }
       FILTERS {
          COMPRESSION DEFLATE { LEVEL 2 }
+         PARAMS_STRING "level = 2"
+         DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -81,6 +89,8 @@ GROUP "/" {
       }
       FILTERS {
          COMPRESSION DEFLATE { LEVEL 2 }
+         PARAMS_STRING "level = 2"
+         DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -99,6 +109,8 @@ GROUP "/" {
       }
       FILTERS {
          COMPRESSION DEFLATE { LEVEL 2 }
+         PARAMS_STRING "level = 2"
+         DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -117,6 +129,8 @@ GROUP "/" {
       }
       FILTERS {
          COMPRESSION DEFLATE { LEVEL 2 }
+         PARAMS_STRING "level = 2"
+         DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET

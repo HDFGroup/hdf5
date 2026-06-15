@@ -1388,6 +1388,116 @@ done:
     return (jstring)str;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1virtual_1prefix */
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pappend_filter (string form)
+ * Signature: (JIILjava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5Pappend_1filter_1str(JNIEnv *env, jclass clss, jlong plist_id, jint filter_id,
+                                           jint flags, jstring params)
+{
+    H5Z_params_t p;
+    const char  *c_params = NULL;
+    jboolean     isCopy;
+    herr_t       status = FAIL;
+
+    UNUSED(clss);
+
+    if (params)
+        PIN_JAVA_STRING(ENVONLY, params, c_params, &isCopy, "H5Pappend_filter: params string not pinned");
+
+    p.type  = H5Z_PARAMS_STRING;
+    p.u.str = c_params;
+
+    if ((status = H5Pappend_filter((hid_t)plist_id, (H5Z_filter_t)filter_id, (unsigned)flags, &p)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (c_params)
+        UNPIN_JAVA_STRING(ENVONLY, params, c_params);
+
+    return (jint)status;
+} /* end Java_hdf_hdf5lib_H5_H5Pappend_1filter_1str */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pappend_filter (raw cd_values form)
+ * Signature: (JII[I)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5Pappend_1filter_1raw(JNIEnv *env, jclass clss, jlong plist_id, jint filter_id,
+                                           jint flags, jintArray cd_values)
+{
+    H5Z_params_t p;
+    jint        *c_cd_values = NULL;
+    jboolean     isCopy;
+    herr_t       status    = FAIL;
+    jsize        cd_nelmts = 0;
+
+    UNUSED(clss);
+
+    if (cd_values) {
+        cd_nelmts = ENVPTR->GetArrayLength(ENVONLY, cd_values);
+        if (cd_nelmts < 0)
+            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pappend_filter: cd_values array length < 0");
+        PIN_INT_ARRAY(ENVONLY, cd_values, c_cd_values, &isCopy, "H5Pappend_filter: cd_values not pinned");
+    }
+
+    p.type            = H5Z_PARAMS_CDVALUES;
+    p.u.raw.cd_nelmts = (size_t)cd_nelmts;
+    p.u.raw.cd_values = (const unsigned *)c_cd_values;
+
+    if ((status = H5Pappend_filter((hid_t)plist_id, (H5Z_filter_t)filter_id, (unsigned)flags, &p)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (c_cd_values)
+        UNPIN_INT_ARRAY(ENVONLY, cd_values, c_cd_values, JNI_ABORT);
+
+    return (jint)status;
+} /* end Java_hdf_hdf5lib_H5_H5Pappend_1filter_1raw */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_filter_params_by_idx
+ * Signature: (JI[Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1filter_1params_1by_1idx(JNIEnv *env, jclass clss, jlong plist_id, jint idx,
+                                                    jobjectArray params)
+{
+    jstring str;
+    char   *buf    = NULL;
+    size_t  plen   = 0;
+    herr_t  status = FAIL;
+
+    UNUSED(clss);
+
+    if (NULL == (buf = (char *)malloc(H5Z_CONFIG_STRING_MAX + 1)))
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_filter_params_by_idx: malloc failed");
+
+    if ((status = H5Pget_filter_params_by_idx((hid_t)plist_id, (unsigned)idx, buf, H5Z_CONFIG_STRING_MAX,
+                                              &plen)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    buf[plen < H5Z_CONFIG_STRING_MAX ? plen : H5Z_CONFIG_STRING_MAX] = '\0';
+
+    if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, buf))) {
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_filter_params_by_idx: could not create string");
+    }
+
+    ENVPTR->SetObjectArrayElement(ENVONLY, params, 0, str);
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+done:
+    if (buf)
+        free(buf);
+
+    return (jint)status;
+} /* end Java_hdf_hdf5lib_H5_H5Pget_1filter_1params_1by_1idx */
+
 #ifdef __cplusplus
 } /* end extern "C" */
 #endif /* __cplusplus */

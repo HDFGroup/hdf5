@@ -86,6 +86,15 @@ typedef int H5Z_filter_t;
 /** Maximum filter id \since 1.0.0 */
 #define H5Z_FILTER_MAX 65535
 
+/** Maximum number of cd_values elements per filter in H5Pappend_filter \since 2.2.0 */
+#define H5Z_MAX_CD_NELMTS 65535u
+
+/** Maximum length of a filter parameter string (including NUL terminator) \since 2.2.0 */
+#define H5Z_CONFIG_STRING_MAX 4096
+
+/** Maximum number of key-value parameters in a filter parameter string \since 2.2.0 */
+#define H5Z_CONFIG_MAX_PARAMS 64
+
 /* General macros */
 /**
  * Symbol to remove all filters in H5Premove_filter()
@@ -289,6 +298,49 @@ typedef enum H5Z_cb_return_t {
 typedef H5Z_cb_return_t (*H5Z_filter_func_t)(H5Z_filter_t filter, void *buf, size_t buf_size, void *op_data);
 //! <!-- [H5Z_filter_func_t_snip] -->
 
+/**
+ * \brief Selects how filter parameters are specified in H5Pappend_filter().
+ * \since 2.2.0
+ */
+typedef enum {
+    H5Z_PARAMS_CDVALUES = 0, /**< raw cd_values array (same as H5Pset_filter) */
+    H5Z_PARAMS_STRING   = 1, /**< human-readable key=value string              */
+    H5Z_PARAMS_BLOB     = 2  /**< reserved: in-file blob config data (future RFC);
+                                     H5Pappend_filter returns H5E_UNSUPPORTED    */
+} H5Z_params_type_t;
+
+/**
+ * \brief Tagged-union parameter descriptor passed to H5Pappend_filter().
+ * \since 2.2.0
+ */
+typedef struct {
+    H5Z_params_type_t type;
+    union {
+        struct {
+            size_t          cd_nelmts;
+            const unsigned *cd_values;
+        } raw;
+        const char *str;
+    } u;
+} H5Z_params_t;
+
+#ifdef __cplusplus
+/* C++ does not support C99 compound literals.
+   H5Z_PARAMS_RAW can be expressed as a brace-initialised aggregate.
+   H5Z_PARAMS_STR cannot: a C++ aggregate initialiser cannot carry a
+   runtime pointer argument without risking silent argument loss.
+   C++ callers MUST use the named-variable form instead. */
+#define H5Z_PARAMS_RAW(n, vals) (H5Z_params_t{H5Z_PARAMS_CDVALUES, {{(n), (vals)}}})
+#define H5Z_PARAMS_STR(s)                                                                                    \
+    static_assert(false, "H5Z_PARAMS_STR is not available in C++. "                                          \
+                         "Use the named-variable form: "                                                     \
+                         "H5Z_params_t p; p.type = H5Z_PARAMS_STRING; p.u.str = (s);")
+#else
+/* C99: compound literals with designated initialisers */
+#define H5Z_PARAMS_RAW(n, vals) ((H5Z_params_t){H5Z_PARAMS_CDVALUES, {.raw = {(n), (vals)}}})
+#define H5Z_PARAMS_STR(s)       ((H5Z_params_t){H5Z_PARAMS_STRING, {.str = (s)}})
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -364,6 +416,67 @@ H5_DLL htri_t H5Zfilter_avail(H5Z_filter_t id);
  * \since 1.6.0
  */
 H5_DLL herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags);
+
+/**
+ * \brief Registry-level information about a filter (output of
+ *        #H5Zget_filter_info2).
+ *
+ * String fields point into library-owned storage; their lifetime extends
+ * until the filter is unregistered (e.g. via #H5Zunregister or library
+ * shutdown).  Do not free them and do not use them after the filter is
+ * unregistered.
+ *
+ * \since 2.2.0
+ */
+typedef struct H5Z_class_info_t {
+    H5Z_filter_t id;            /**< Numeric filter identifier         */
+    unsigned int config_flags;  /**< Bitwise OR of
+                                     #H5Z_FILTER_CONFIG_ENCODE_ENABLED and
+                                     #H5Z_FILTER_CONFIG_DECODE_ENABLED   */
+    const char *name;           /**< Canonical name (\c H5Z_class3_t::name);
+                                     \c NULL only for a class2-registered
+                                     filter that has no name field        */
+    const char *description;    /**< Free-form description
+                                     (\c H5Z_class3_t::description); may be
+                                     \c NULL                              */
+    hbool_t has_set_config;     /**< true iff the filter exposes a
+                                     \c set_config callback (v3 plugins) */
+    hbool_t has_get_config;     /**< true iff the filter exposes a
+                                     \c get_config callback (v3 plugins) */
+    hbool_t has_blob_callbacks; /**< true iff the filter exposes a
+                                       \c write_blob callback (v3 plugins;
+                                       reserved for future in-file blob
+                                       config data support, RFC to follow) */
+} H5Z_class_info_t;
+
+/**
+ * \ingroup H5Z
+ *
+ * \brief Retrieves registry-level information about a registered filter
+ *
+ * \param[in]  filter Filter identifier
+ * \param[out] info   Filled with the filter's class-level information
+ *
+ * \return \herr_t
+ *
+ * \details H5Zget_filter_info2() is the v3 successor to #H5Zget_filter_info.
+ *          Where the v1 call returns only the encode/decode config-flag bits,
+ *          this call also exposes the filter's canonical \c name, its
+ *          human-readable \c description, and whether the
+ *          plugin implements the v3 \c set_config / \c get_config callbacks.
+ *
+ *          The function attempts to load the filter plugin if it is not yet
+ *          registered (same dynamic-load policy as #H5Zfilter_avail).  If the
+ *          filter cannot be located, the function fails with
+ *          H5E_NOFILTER.
+ *
+ *          String fields in \p info point into library-owned storage and
+ *          must not be freed.  They remain valid until the filter is
+ *          unregistered.
+ *
+ * \since 2.2.0
+ */
+H5_DLL herr_t H5Zget_filter_info2(H5Z_filter_t filter, H5Z_class_info_t *info /*out*/);
 
 #ifdef __cplusplus
 }

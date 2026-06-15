@@ -8,6 +8,8 @@ DATASET "nbit" {
    }
    FILTERS {
       COMPRESSION NBIT
+      PARAMS_STRING "cd_values=8:0:50:1:4:0:17:0"
+      DESCRIPTION "N-bit packing for non-byte-aligned integer/float storage"
    }
    FILLVALUE {
       FILL_TIME H5D_FILL_TIME_IFSET

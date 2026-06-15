@@ -260,6 +260,14 @@ PROGRAM fortranlibtest
   CALL write_test_status(ret_total_error, ' Filters test', total_error)
 
   ret_total_error = 0
+  CALL filter_config_test(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Filter config (string API) test', total_error)
+
+  ret_total_error = 0
+  CALL get_filter_info2_test(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Filter info2 (h5zget_filter_info_f v2) test', total_error)
+
+  ret_total_error = 0
   CALL szip_test(szip_flag, cleanup, ret_total_error)
 
   IF (.NOT. szip_flag) THEN ! test not available

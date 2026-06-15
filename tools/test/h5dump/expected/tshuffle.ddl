@@ -8,6 +8,8 @@ DATASET "shuffle" {
    }
    FILTERS {
       PREPROCESSING SHUFFLE
+      PARAMS_STRING "cd_values=4"
+      DESCRIPTION "Byte shuffle preprocessing to improve downstream compression"
    }
    FILLVALUE {
       FILL_TIME H5D_FILL_TIME_IFSET

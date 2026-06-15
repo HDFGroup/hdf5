@@ -14,6 +14,8 @@ DATASET "szip" {
          BYTE_ORDER LSB
          HEADER RAW
       }
+      PARAMS_STRING "coding = \"nn\", pixels_per_block = 4"
+      DESCRIPTION "SZIP lossless compression for scientific data"
    }
    FILLVALUE {
       FILL_TIME H5D_FILL_TIME_IFSET

@@ -233,47 +233,162 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                  *-------------------------------------------------------------------------
                  */
                 else if (strcmp(scomp, "UD") == 0) {
-                    l = -1; /* filter number index check */
-                    f = -1; /* filter flag index check */
-                    p = -1; /* CD_VAL count check */
-                    for (m = 0, q = 0, u = i + 1; u < len; u++, m++, q++) {
-                        if (str[u] == ',') {
-                            stype[q] = '\0'; /* end digit */
-                            if (l == -1) {
-                                filt->filtn = atoi(stype);
-                                l           = 0;
+                    /* RFC-HDFG-2026-001 §9: UD= accepts two forms.
+                     *   Legacy: UD=id,flags,nelmts,v1,v2,...,vN  (third field is a digit)
+                     *   New:    UD=id,flags,key=value,...        (third field is TOML)
+                     * Peek at the third field to decide which path to take. */
+                    bool   is_str_form = false;
+                    size_t scan;
+                    int    cm        = 0;
+                    size_t third_pos = 0;
+                    for (scan = i + 1; scan < len; scan++) {
+                        if (str[scan] == ',') {
+                            cm++;
+                            if (cm == 2) {
+                                third_pos = scan + 1;
+                                break;
                             }
-                            else if (f == -1) {
-                                filt->filt_flag = (unsigned)strtoul(stype, NULL, 0);
-                                f               = 0;
-                            }
-                            else if (p == -1) {
-                                filt->cd_nelmts = strtoull(stype, NULL, 0);
-                                p               = 0;
-                            }
-                            else {
-                                if (filt->cd_nelmts > 0)
-                                    filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
-                            }
-                            q = 0;
-                            u++; /* skip ',' */
                         }
-                        c = str[u];
-                        if (!isdigit(c) && l == -1) {
+                    }
+                    /* Distinguish the two forms by scanning for '=' anywhere
+                     * from the third field to the end of the string.
+                     *
+                     * Legacy form:  UD=id,flags,nelmts,v1,v2,...,vN
+                     *   - The third field ("nelmts") and every subsequent
+                     *     field ("v1"…"vN") are pure decimal integers and
+                     *     can never contain '='.  Scanning to len is safe.
+                     *
+                     * TOML/string form:  UD=id,flags,key=value[,...]
+                     *   - At least one "key=value" pair always contains '=',
+                     *     regardless of whether the key starts with a digit
+                     *     (e.g. "2bit=true"), a letter, or a special char. */
+                    if (cm == 2 && third_pos < len) {
+                        size_t s;
+                        for (s = third_pos; s < len; s++) {
+                            if (str[s] == '=') {
+                                is_str_form = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (is_str_form) {
+                        /* Parse id, flags, then capture remainder as params_str.
+                         * cd_nelmts stays 0; H5Pappend_filter+set_config will populate. */
+                        size_t pos = i + 1;
+                        size_t nlen, plen;
+                        char   num[32];
+
+                        /* id */
+                        nlen = 0;
+                        while (pos < len && str[pos] != ',') {
+                            if (!isdigit((unsigned char)str[pos])) {
+                                if (obj_list)
+                                    free(obj_list);
+                                error_msg("UD= (TOML form): filter id is not a digit in <%s>\n", str);
+                                exit(EXIT_FAILURE);
+                            }
+                            if (nlen + 1 >= sizeof(num)) {
+                                if (obj_list)
+                                    free(obj_list);
+                                error_msg("UD= (TOML form): filter id too long in <%s>\n", str);
+                                exit(EXIT_FAILURE);
+                            }
+                            num[nlen++] = str[pos++];
+                        }
+                        num[nlen] = '\0';
+                        {
+                            char  *end;
+                            long   id_val = strtol(num, &end, 10);
+                            if (*end != '\0' || id_val < 0 || id_val > H5Z_FILTER_MAX) {
+                                if (obj_list)
+                                    free(obj_list);
+                                error_msg("UD= (TOML form): filter id out of range in <%s>\n", str);
+                                exit(EXIT_FAILURE);
+                            }
+                            filt->filtn = (H5Z_filter_t)id_val;
+                        }
+                        pos++; /* skip ',' */
+
+                        /* flags */
+                        nlen = 0;
+                        while (pos < len && str[pos] != ',') {
+                            if (!isdigit((unsigned char)str[pos])) {
+                                if (obj_list)
+                                    free(obj_list);
+                                error_msg("UD= (TOML form): filter flag is not a digit in <%s>\n", str);
+                                exit(EXIT_FAILURE);
+                            }
+                            if (nlen + 1 >= sizeof(num)) {
+                                if (obj_list)
+                                    free(obj_list);
+                                error_msg("UD= (TOML form): filter flag too long in <%s>\n", str);
+                                exit(EXIT_FAILURE);
+                            }
+                            num[nlen++] = str[pos++];
+                        }
+                        num[nlen]       = '\0';
+                        filt->filt_flag = (unsigned)strtoul(num, NULL, 0);
+                        pos++; /* skip ',' */
+
+                        /* remainder is the TOML parameter string */
+                        plen = len - pos;
+                        if (plen >= sizeof(filt->params_str)) {
                             if (obj_list)
                                 free(obj_list);
-                            error_msg("filter number parameter is not a digit in <%s>\n", str);
+                            error_msg("UD= (TOML form): TOML parameter string too long "
+                                      "(max %zu bytes) in <%s>\n",
+                                      sizeof(filt->params_str) - 1, str);
                             exit(EXIT_FAILURE);
                         }
-                        else if (!isdigit(c) && f == -1) {
-                            if (obj_list)
-                                free(obj_list);
-                            error_msg("filter flag parameter is not a digit in <%s>\n", str);
-                            exit(EXIT_FAILURE);
-                        }
-                        PARSE_BUF_WRITE(stype, sizeof(stype), q, c, obj_list, str);
-                    } /* for u */
-                    stype[q] = '\0';
+                        memcpy(filt->params_str, str + pos, plen);
+                        filt->params_str[plen] = '\0';
+                        filt->cd_nelmts        = 0;
+                        m                      = len - i - 1; /* advance outer loop to end */
+                    }
+                    else {
+                        l = -1; /* filter number index check */
+                        f = -1; /* filter flag index check */
+                        p = -1; /* CD_VAL count check */
+                        for (m = 0, q = 0, u = i + 1; u < len; u++, m++, q++) {
+                            if (str[u] == ',') {
+                                stype[q] = '\0'; /* end digit */
+                                if (l == -1) {
+                                    filt->filtn = atoi(stype);
+                                    l           = 0;
+                                }
+                                else if (f == -1) {
+                                    filt->filt_flag = (unsigned)strtoul(stype, NULL, 0);
+                                    f               = 0;
+                                }
+                                else if (p == -1) {
+                                    filt->cd_nelmts = strtoull(stype, NULL, 0);
+                                    p               = 0;
+                                }
+                                else {
+                                    if (filt->cd_nelmts > 0)
+                                        filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
+                                }
+                                q = 0;
+                                u++; /* skip ',' */
+                            }
+                            c = str[u];
+                            if (!isdigit(c) && l == -1) {
+                                if (obj_list)
+                                    free(obj_list);
+                                error_msg("filter number parameter is not a digit in <%s>\n", str);
+                                exit(EXIT_FAILURE);
+                            }
+                            else if (!isdigit(c) && f == -1) {
+                                if (obj_list)
+                                    free(obj_list);
+                                error_msg("filter flag parameter is not a digit in <%s>\n", str);
+                                exit(EXIT_FAILURE);
+                            }
+                            PARSE_BUF_WRITE(stype, sizeof(stype), q, c, obj_list, str);
+                        } /* for u */
+                        stype[q] = '\0';
+                    }
                 } /*if */
 
                 /*-------------------------------------------------------------------------

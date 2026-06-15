@@ -56,6 +56,7 @@ MODULE H5P
   PRIVATE h5pget_integer, h5pget_char, h5pget_ptr
   PRIVATE h5pregister_integer, h5pregister_ptr
   PRIVATE h5pinsert_integer, h5pinsert_char, h5pinsert_ptr
+  PRIVATE h5pappend_filter_str_f, h5pappend_filter_raw_f
 #ifdef H5_HAVE_PARALLEL
   PRIVATE MPI_INTEGER_KIND
   PRIVATE h5pset_fapl_mpio_f90, h5pget_fapl_mpio_f90
@@ -114,6 +115,12 @@ MODULE H5P
      ! Recommended procedure:
      MODULE PROCEDURE h5pinsert_ptr
   END INTERFACE
+
+
+  INTERFACE h5pappend_filter_f
+     MODULE PROCEDURE h5pappend_filter_str_f
+     MODULE PROCEDURE h5pappend_filter_raw_f
+  END INTERFACE h5pappend_filter_f
 
   INTERFACE
      INTEGER(C_INT) FUNCTION H5Pset_fill_value(prp_id, type_id, fillvalue) &
@@ -1507,29 +1514,220 @@ CONTAINS
 !!
 !! See C API: @ref H5Pset_filter()
 !!
-  SUBROUTINE h5pset_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr)
+  SUBROUTINE h5pset_filter_f(prp_id, filter, flags, cd_nelmts, cd_values, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id
-    INTEGER, INTENT(IN) :: filter
-    INTEGER, INTENT(IN) :: flags
-    INTEGER(SIZE_T), INTENT(IN) :: cd_nelmts
-    INTEGER, DIMENSION(*), INTENT(IN) :: cd_values
-    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T),  INTENT(IN)              :: prp_id
+    INTEGER,         INTENT(IN)              :: filter
+    INTEGER,         INTENT(IN)              :: flags
+    INTEGER(SIZE_T), INTENT(IN)              :: cd_nelmts
+    INTEGER,         DIMENSION(*), INTENT(IN) :: cd_values
+    INTEGER,         INTENT(OUT)             :: hdferr
     INTERFACE
-       INTEGER FUNCTION h5pset_filter_c(prp_id, filter, flags, cd_nelmts, cd_values) &
-            BIND(C,NAME='h5pset_filter_c')
-         IMPORT :: HID_T, SIZE_T
-         IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: prp_id
-         INTEGER, INTENT(IN) :: filter
-         INTEGER, INTENT(IN) :: flags
-         INTEGER(SIZE_T), INTENT(IN) :: cd_nelmts
-         INTEGER, DIMENSION(*), INTENT(IN) :: cd_values
-       END FUNCTION h5pset_filter_c
+       INTEGER(C_INT) FUNCTION H5Pset_filter(plist_id, filter_c, flags_c, cd_nelmts_c, cd_values_c) &
+            BIND(C,NAME='H5Pset_filter')
+         IMPORT :: HID_T, C_INT, SIZE_T
+         INTEGER(HID_T), VALUE                         :: plist_id
+         INTEGER(C_INT), VALUE                         :: filter_c
+         INTEGER(C_INT), VALUE                         :: flags_c
+         INTEGER(SIZE_T), VALUE                        :: cd_nelmts_c
+         INTEGER(C_INT), DIMENSION(*), INTENT(IN)      :: cd_values_c
+       END FUNCTION H5Pset_filter
     END INTERFACE
 
-    hdferr = h5pset_filter_c(prp_id, filter, flags, cd_nelmts, cd_values )
+    hdferr = INT(H5Pset_filter(prp_id, INT(filter, C_INT), INT(flags, C_INT), &
+                               INT(cd_nelmts, SIZE_T), cd_values))
   END SUBROUTINE h5pset_filter_f
+
+#ifdef H5_DOXYGEN
+!>
+!! \ingroup FH5P
+!!
+!! \brief Configures a filter and appends it to the dataset creation property list.
+!!
+!! \param prp_id     Property list identifier.
+!! \param filter     Filter to be added to the pipeline.
+!! \param flags      Bit vector specifying general filter properties.
+!! \param params     Parameter string in \c "key=value" format; append C_NULL_CHAR.
+!! \param hdferr     \fortran_error
+!!
+!! See C API: @ref H5Pappend_filter()
+!!
+  SUBROUTINE h5pappend_filter_f(prp_id, filter, flags, params, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T),   INTENT(IN)  :: prp_id
+    INTEGER,          INTENT(IN)  :: filter
+    INTEGER,          INTENT(IN)  :: flags
+    CHARACTER(LEN=*), INTENT(IN)  :: params
+    INTEGER,          INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pappend_filter_f
+!>
+!! \ingroup FH5P
+!!
+!! \brief Configures a filter and appends it to the dataset creation property list.
+!!
+!! \param prp_id     Property list identifier.
+!! \param filter     Filter to be added to the pipeline.
+!! \param flags      Bit vector specifying general filter properties.
+!! \param cd_nelmts  Number of elements in \p cd_values.
+!! \param cd_values  Filter parameter array.
+!! \param hdferr     \fortran_error
+!!
+!! See C API: @ref H5Pappend_filter()
+!!
+  SUBROUTINE h5pappend_filter_f(prp_id, filter, flags, cd_nelmts, cd_values, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T),  INTENT(IN)               :: prp_id
+    INTEGER,         INTENT(IN)               :: filter
+    INTEGER,         INTENT(IN)               :: flags
+    INTEGER(SIZE_T), INTENT(IN)               :: cd_nelmts
+    INTEGER,         DIMENSION(*), INTENT(IN)  :: cd_values
+    INTEGER,         INTENT(OUT)              :: hdferr
+  END SUBROUTINE h5pappend_filter_f
+
+#else
+
+  SUBROUTINE h5pappend_filter_str_f(prp_id, filter, flags, params, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T),   INTENT(IN)  :: prp_id
+    INTEGER,          INTENT(IN)  :: filter
+    INTEGER,          INTENT(IN)  :: flags
+    CHARACTER(LEN=*), INTENT(IN)  :: params
+    INTEGER,          INTENT(OUT) :: hdferr
+
+    CHARACTER(LEN=LEN_TRIM(params)+1,KIND=C_CHAR) :: c_params
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pappend_filter_str_c(plist_id, filter_c, flags_c, params_c) &
+            BIND(C,NAME='H5Pappend_filter_str_c')
+         IMPORT :: HID_T, C_INT, C_CHAR
+         INTEGER(HID_T), VALUE                            :: plist_id
+         INTEGER(C_INT), VALUE                            :: filter_c
+         INTEGER(C_INT), VALUE                            :: flags_c
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: params_c
+       END FUNCTION H5Pappend_filter_str_c
+    END INTERFACE
+    c_params = TRIM(params)//C_NULL_CHAR
+    hdferr   = INT(H5Pappend_filter_str_c(prp_id, INT(filter, C_INT), INT(flags, C_INT), c_params))
+  END SUBROUTINE h5pappend_filter_str_f
+
+  SUBROUTINE h5pappend_filter_raw_f(prp_id, filter, flags, cd_nelmts, cd_values, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T),  INTENT(IN)              :: prp_id
+    INTEGER,         INTENT(IN)              :: filter
+    INTEGER,         INTENT(IN)              :: flags
+    INTEGER(SIZE_T), INTENT(IN)              :: cd_nelmts
+    INTEGER,         DIMENSION(*), INTENT(IN) :: cd_values
+    INTEGER,         INTENT(OUT)             :: hdferr
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pappend_filter_raw_c(plist_id, filter_c, flags_c, cd_nelmts_c, cd_vals) &
+            BIND(C,NAME='H5Pappend_filter_raw_c')
+         IMPORT :: HID_T, C_INT, SIZE_T
+         INTEGER(HID_T), VALUE                         :: plist_id
+         INTEGER(C_INT), VALUE                         :: filter_c
+         INTEGER(C_INT), VALUE                         :: flags_c
+         INTEGER(SIZE_T), VALUE                        :: cd_nelmts_c
+         INTEGER(C_INT), DIMENSION(*), INTENT(IN)      :: cd_vals
+       END FUNCTION H5Pappend_filter_raw_c
+    END INTERFACE
+    hdferr = INT(H5Pappend_filter_raw_c(prp_id, INT(filter, C_INT), INT(flags, C_INT), &
+                                        INT(cd_nelmts, SIZE_T), cd_values))
+  END SUBROUTINE h5pappend_filter_raw_f
+
+#endif
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Retrieves a filter's parameter string by pipeline index.
+!!
+!! \param prp_id      Property list identifier.
+!! \param idx         Zero-based index of filter in pipeline.
+!! \param hdferr      \fortran_error
+!! \param params_buf  Buffer to receive the parameter string (CHARACTER(LEN=*), optional).
+!! \param params_len  Number of characters in the result, excluding NUL (SIZE_T, optional).
+!!
+!! \details H5Pget_filter_params_by_idx_f() reconstructs the human-readable parameter
+!!          string for the filter at pipeline index \p idx.  At least one of
+!!          \p params_buf or \p params_len must be present; supplying neither
+!!          is an error (\p hdferr is set to -1).
+!!
+!!          The three supported calling modes are:
+!!
+!!          - <b>Size query</b> — omit \p params_buf, provide \p params_len.
+!!            Passes a NULL buffer to the C layer and returns the required
+!!            character count (excluding NUL) in \p params_len.
+!!
+!!          - <b>Fill only</b> — provide \p params_buf, omit \p params_len.
+!!            The buffer must be pre-allocated large enough; no length is
+!!            returned.
+!!
+!!          - <b>Fill and verify</b> — provide both.  The buffer is filled and
+!!            \p params_len is set to the actual character count, allowing the
+!!            caller to detect truncation (\p params_len > LEN(\p params_buf)).
+!!
+!!          Recommended two-pass usage:
+!!          \code{.f90}
+!!            integer(SIZE_T) :: plen
+!!            character(len=:), allocatable :: pbuf
+!!            call h5pget_filter_params_by_idx_f(dcpl, idx, hdferr, params_len=plen)
+!!            allocate(character(len=plen) :: pbuf)
+!!            call h5pget_filter_params_by_idx_f(dcpl, idx, hdferr, params_buf=pbuf, params_len=plen)
+!!          \endcode
+!!
+!! See C API: @ref H5Pget_filter_params_by_idx()
+!!
+  SUBROUTINE h5pget_filter_params_by_idx_f(prp_id, idx, hdferr, params_buf, params_len)
+    IMPLICIT NONE
+    INTEGER(HID_T),   INTENT(IN)            :: prp_id
+    INTEGER,          INTENT(IN)            :: idx
+    INTEGER,          INTENT(OUT)           :: hdferr
+    CHARACTER(LEN=*), INTENT(OUT), OPTIONAL :: params_buf
+    INTEGER(SIZE_T),  INTENT(OUT), OPTIONAL :: params_len
+
+    CHARACTER(LEN=1,KIND=C_CHAR), ALLOCATABLE, TARGET :: c_buf(:)
+    INTEGER(SIZE_T) :: tmp_len
+    INTEGER(SIZE_T) :: buf_size
+    TYPE(C_PTR)     :: buf_ptr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pget_filter_params_by_idx(plist_id, idx_c, params_buf_c, &
+                                                            params_buf_size, params_len_c) &
+            BIND(C, NAME='H5Pget_filter_params_by_idx')
+         IMPORT :: HID_T, C_INT, C_PTR, SIZE_T
+         INTEGER(HID_T),  VALUE       :: plist_id
+         INTEGER(C_INT),  VALUE       :: idx_c
+         TYPE(C_PTR),     VALUE       :: params_buf_c
+         INTEGER(SIZE_T), VALUE       :: params_buf_size
+         INTEGER(SIZE_T), INTENT(OUT) :: params_len_c
+       END FUNCTION H5Pget_filter_params_by_idx
+    END INTERFACE
+
+    IF (.NOT. PRESENT(params_buf) .AND. .NOT. PRESENT(params_len)) THEN
+       hdferr = -1
+       RETURN
+    END IF
+
+    IF (PRESENT(params_buf)) THEN
+       buf_size = INT(LEN(params_buf), SIZE_T) + 1_SIZE_T
+       ALLOCATE(c_buf(buf_size))
+       buf_ptr = C_LOC(c_buf(1))
+    ELSE
+       buf_size = 0_SIZE_T
+       buf_ptr  = C_NULL_PTR
+    END IF
+
+    hdferr = INT(H5Pget_filter_params_by_idx(prp_id, INT(idx, C_INT), buf_ptr, buf_size, tmp_len))
+
+    IF (hdferr >= 0) THEN
+       IF (PRESENT(params_len)) params_len = tmp_len
+       IF (PRESENT(params_buf)) &
+          CALL HD5c2fstring(params_buf, c_buf, &
+                            MIN(tmp_len, INT(LEN(params_buf), SIZE_T)), &
+                            MIN(tmp_len, INT(LEN(params_buf), SIZE_T)) + 1_SIZE_T)
+    END IF
+
+    IF (ALLOCATED(c_buf)) DEALLOCATE(c_buf)
+
+  END SUBROUTINE h5pget_filter_params_by_idx_f
 
 !>
 !! \ingroup FH5P

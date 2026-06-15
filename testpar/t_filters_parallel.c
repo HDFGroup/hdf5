@@ -9927,6 +9927,390 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
 }
 #endif
 
+/*
+ * par-01: All ranks configure H5Z_FILTER_DEFLATE via the string API and verify
+ *         that the resulting cd_values are identical on every rank (semantically
+ *         consistent DCPL).  Then write+read one chunk per rank to confirm
+ *         end-to-end correctness.
+ */
+static void
+test_par_append_filter_dcpl_consistency(hid_t fapl_id)
+{
+    hid_t        file_id   = H5I_INVALID_HID;
+    hid_t        group_id  = H5I_INVALID_HID;
+    hid_t        dcpl_id   = H5I_INVALID_HID;
+    hid_t        dxpl_id   = H5I_INVALID_HID;
+    hid_t        dset_id   = H5I_INVALID_HID;
+    hid_t        fspace_id = H5I_INVALID_HID;
+    hid_t        mspace_id = H5I_INVALID_HID;
+    hsize_t      dims[2]   = {(hsize_t)(mpi_size * 4), 4};
+    hsize_t      chunk[2]  = {4, 4};
+    hsize_t      start[2], count[2], block[2];
+    C_DATATYPE  *wbuf = NULL;
+    C_DATATYPE  *rbuf = NULL;
+    size_t       nbytes;
+    H5Z_filter_t filter_id;
+    unsigned     flags        = 0;
+    size_t       cd_nelmts    = 8;
+    unsigned     cd_values[8] = {0};
+    unsigned     cd_level;    /* deflate level extracted from cd_values */
+    unsigned     cd_level_r0; /* rank 0's deflate level, broadcast */
+    char         filter_name[64];
+    unsigned     filter_config;
+    H5Z_params_t p;
+    int          mpi_code;
+    herr_t       ret;
+
+    if (MAINPROCESS)
+        puts("Testing par-01: H5Pappend_filter DCPL consistency across MPI ranks");
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "H5Fopen succeeded");
+
+    group_id = H5Gcreate2(file_id, "par_append_consistency", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gcreate2 succeeded");
+
+    /* Build DCPL via string API on every rank independently */
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((dcpl_id >= 0), "H5Pcreate DCPL succeeded");
+    VRFY((H5Pset_chunk(dcpl_id, 2, chunk) >= 0), "H5Pset_chunk succeeded");
+
+    p   = H5Z_PARAMS_STR("level=6");
+    ret = H5Pappend_filter(dcpl_id, H5Z_FILTER_DEFLATE, 0, &p);
+    VRFY((ret >= 0), "H5Pappend_filter(level=6) succeeded");
+
+    /* Extract cd_values[0] (deflate level) and verify all ranks agree */
+    VRFY((H5Pget_nfilters(dcpl_id) == 1), "DCPL has exactly one filter");
+
+    filter_id = H5Pget_filter2(dcpl_id, 0, &flags, &cd_nelmts, cd_values, sizeof(filter_name), filter_name,
+                               &filter_config);
+    VRFY((filter_id == H5Z_FILTER_DEFLATE), "Filter is deflate");
+    VRFY((cd_nelmts == 1), "cd_nelmts is 1");
+
+    cd_level = cd_values[0];
+    VRFY((cd_level == 6), "Deflate level is 6 on this rank");
+
+    cd_level_r0 = cd_level;
+    mpi_code    = MPI_Bcast(&cd_level_r0, 1, MPI_UNSIGNED, 0, comm);
+    VRFY((mpi_code == MPI_SUCCESS), "MPI_Bcast cd_level succeeded");
+    VRFY((cd_level == cd_level_r0), "Deflate cd_values are consistent across all ranks");
+
+    /* Create dataset, write one chunk per rank, read back and verify */
+    fspace_id = H5Screate_simple(2, dims, NULL);
+    VRFY((fspace_id >= 0), "H5Screate_simple filespace succeeded");
+
+    dset_id = H5Dcreate2(group_id, "dset", HDF5_DATATYPE_NAME, fspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "H5Dcreate2 succeeded");
+    VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose filespace succeeded");
+    fspace_id = H5I_INVALID_HID;
+
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_id >= 0), "H5Pcreate DXPL succeeded");
+    VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) >= 0), "H5Pset_dxpl_mpio succeeded");
+
+    nbytes = 4 * 4 * sizeof(C_DATATYPE);
+    wbuf   = (C_DATATYPE *)malloc(nbytes);
+    VRFY((wbuf != NULL), "malloc wbuf succeeded");
+    for (size_t i = 0; i < 16; i++)
+        wbuf[i] = (C_DATATYPE)(mpi_rank * 16 + (int)i);
+
+    start[0] = (hsize_t)(mpi_rank * 4);
+    start[1] = 0;
+    count[0] = 1;
+    count[1] = 1;
+    block[0] = 4;
+    block[1] = 4;
+
+    fspace_id = H5Dget_space(dset_id);
+    VRFY((fspace_id >= 0), "H5Dget_space succeeded");
+    VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, block) >= 0),
+         "H5Sselect_hyperslab succeeded");
+
+    mspace_id = H5Screate_simple(2, block, NULL);
+    VRFY((mspace_id >= 0), "H5Screate_simple mspace succeeded");
+    ret = H5Dwrite(dset_id, HDF5_DATATYPE_NAME, mspace_id, fspace_id, dxpl_id, wbuf);
+    VRFY((ret >= 0), "H5Dwrite succeeded");
+    VRFY((H5Sclose(mspace_id) >= 0), "H5Sclose mspace succeeded");
+    mspace_id = H5I_INVALID_HID;
+    VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose fspace succeeded");
+    fspace_id = H5I_INVALID_HID;
+    VRFY((H5Dclose(dset_id) >= 0), "H5Dclose succeeded");
+
+    /* Re-open and read back */
+    dset_id = H5Dopen2(group_id, "dset", H5P_DEFAULT);
+    VRFY((dset_id >= 0), "H5Dopen2 succeeded");
+
+    rbuf = (C_DATATYPE *)calloc(1, nbytes);
+    VRFY((rbuf != NULL), "calloc rbuf succeeded");
+
+    fspace_id = H5Dget_space(dset_id);
+    VRFY((fspace_id >= 0), "H5Dget_space succeeded");
+    VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, block) >= 0),
+         "H5Sselect_hyperslab succeeded");
+
+    mspace_id = H5Screate_simple(2, block, NULL);
+    VRFY((mspace_id >= 0), "H5Screate_simple mspace succeeded");
+    ret = H5Dread(dset_id, HDF5_DATATYPE_NAME, mspace_id, fspace_id, dxpl_id, rbuf);
+    VRFY((ret >= 0), "H5Dread succeeded");
+    VRFY((H5Sclose(mspace_id) >= 0), "H5Sclose mspace succeeded");
+    VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose fspace succeeded");
+
+    VRFY((memcmp(rbuf, wbuf, nbytes) == 0), "Data verification succeeded");
+
+    free(wbuf);
+    free(rbuf);
+
+    VRFY((H5Dclose(dset_id) >= 0), "H5Dclose succeeded");
+    VRFY((H5Pclose(dxpl_id) >= 0), "H5Pclose DXPL succeeded");
+    VRFY((H5Pclose(dcpl_id) >= 0), "H5Pclose DCPL succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "H5Gclose succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+}
+
+/*
+ * par-02: Verify that H5Pappend_filter with an unrecognised key in the
+ *         parameter string fails on every rank and that the failure is
+ *         detected collectively (no MPI deadlock).
+ */
+static void
+test_par_append_filter_error_propagation(hid_t fapl_id)
+{
+    hid_t        dcpl_id = H5I_INVALID_HID;
+    H5Z_params_t p;
+    herr_t       ret;
+    int          local_err  = 0;
+    int          global_err = 0;
+    int          mpi_code;
+
+    (void)fapl_id; /* not needed for this per-rank property-list test */
+
+    if (MAINPROCESS)
+        puts("Testing par-02: H5Pappend_filter error propagation without deadlock");
+
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((dcpl_id >= 0), "H5Pcreate DCPL succeeded");
+
+    /* deflate's set_config rejects unknown keys */
+    H5E_BEGIN_TRY
+    {
+        p   = H5Z_PARAMS_STR("bogus_key=99");
+        ret = H5Pappend_filter(dcpl_id, H5Z_FILTER_DEFLATE, 0, &p);
+    }
+    H5E_END_TRY
+
+    if (ret < 0)
+        local_err = 1;
+
+    /* Collective reduce — if any rank deadlocked we would never get here */
+    mpi_code = MPI_Allreduce(&local_err, &global_err, 1, MPI_INT, MPI_SUM, comm);
+    VRFY((mpi_code == MPI_SUCCESS), "MPI_Allreduce succeeded");
+    VRFY((global_err == mpi_size), "All ranks received H5Pappend_filter error for unknown key");
+
+    VRFY((H5Pclose(dcpl_id) >= 0), "H5Pclose DCPL succeeded");
+}
+
+/*
+ * par-03: Rank 0 uses deflate level=9; all other ranks use level=1.
+ *         The test verifies that the per-rank cd_values differ (documenting
+ *         the inconsistency) and that attempting H5Dcreate collectively does
+ *         not deadlock, regardless of whether the call succeeds.
+ */
+static void
+test_par_append_filter_rank_inconsistent_dcpl(hid_t fapl_id)
+{
+    hid_t        file_id   = H5I_INVALID_HID;
+    hid_t        group_id  = H5I_INVALID_HID;
+    hid_t        dcpl_id   = H5I_INVALID_HID;
+    hid_t        dset_id   = H5I_INVALID_HID;
+    hid_t        fspace_id = H5I_INVALID_HID;
+    hsize_t      dims[2]   = {(hsize_t)(mpi_size * 4), 4};
+    hsize_t      chunk[2]  = {4, 4};
+    H5Z_filter_t filter_id;
+    unsigned     flags        = 0;
+    size_t       cd_nelmts    = 8;
+    unsigned     cd_values[8] = {0};
+    unsigned     filter_config;
+    char         filter_name[64];
+    unsigned     local_level; /* this rank's deflate level */
+    unsigned     rank0_level; /* rank-0's deflate level, broadcast */
+    H5Z_params_t p;
+    int          mpi_code;
+    herr_t       ret;
+
+    if (MAINPROCESS)
+        puts("Testing par-03: Rank-inconsistent DCPL detected via cd_values comparison");
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "H5Fopen succeeded");
+
+    group_id = H5Gcreate2(file_id, "par_append_inconsistent", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gcreate2 succeeded");
+
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((dcpl_id >= 0), "H5Pcreate DCPL succeeded");
+    VRFY((H5Pset_chunk(dcpl_id, 2, chunk) >= 0), "H5Pset_chunk succeeded");
+
+    /* Deliberately diverge: rank 0 uses level=9, all others use level=1 */
+    p   = (mpi_rank == 0) ? H5Z_PARAMS_STR("level=9") : H5Z_PARAMS_STR("level=1");
+    ret = H5Pappend_filter(dcpl_id, H5Z_FILTER_DEFLATE, 0, &p);
+    VRFY((ret >= 0), "H5Pappend_filter succeeded on each rank");
+
+    /* Read back cd_values and broadcast rank-0's level; non-0 ranks must differ */
+    filter_id = H5Pget_filter2(dcpl_id, 0, &flags, &cd_nelmts, cd_values, sizeof(filter_name), filter_name,
+                               &filter_config);
+    VRFY((filter_id == H5Z_FILTER_DEFLATE), "Filter is deflate");
+    VRFY((cd_nelmts == 1), "cd_nelmts is 1");
+
+    local_level = cd_values[0];
+    rank0_level = local_level;
+    mpi_code    = MPI_Bcast(&rank0_level, 1, MPI_UNSIGNED, 0, comm);
+    VRFY((mpi_code == MPI_SUCCESS), "MPI_Bcast rank0_level succeeded");
+
+    if (mpi_size > 1 && mpi_rank != 0)
+        VRFY((local_level != rank0_level),
+             "Non-0 rank cd_values differ from rank-0 (inconsistency confirmed)");
+
+    /* Attempt collective H5Dcreate — may succeed or fail; must not deadlock */
+    fspace_id = H5Screate_simple(2, dims, NULL);
+    VRFY((fspace_id >= 0), "H5Screate_simple succeeded");
+
+    H5E_BEGIN_TRY
+    {
+        dset_id =
+            H5Dcreate2(group_id, "dset", HDF5_DATATYPE_NAME, fspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+
+    VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose succeeded");
+    fspace_id = H5I_INVALID_HID;
+
+    if (dset_id >= 0)
+        VRFY((H5Dclose(dset_id) >= 0), "H5Dclose succeeded");
+
+    VRFY((H5Pclose(dcpl_id) >= 0), "H5Pclose DCPL succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "H5Gclose succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+}
+
+/*
+ * par-04: All ranks configure a shuffle→deflate pipeline entirely via the
+ *         string API, then write and read back one chunk per rank to verify
+ *         end-to-end correctness of the string-configured pipeline.
+ */
+static void
+test_par_append_filter_builtin_string_pipeline(hid_t fapl_id)
+{
+    hid_t        file_id   = H5I_INVALID_HID;
+    hid_t        group_id  = H5I_INVALID_HID;
+    hid_t        dcpl_id   = H5I_INVALID_HID;
+    hid_t        dxpl_id   = H5I_INVALID_HID;
+    hid_t        dset_id   = H5I_INVALID_HID;
+    hid_t        fspace_id = H5I_INVALID_HID;
+    hid_t        mspace_id = H5I_INVALID_HID;
+    hsize_t      dims[2]   = {(hsize_t)(mpi_size * 4), 4};
+    hsize_t      chunk[2]  = {4, 4};
+    hsize_t      start[2], count[2], block[2];
+    C_DATATYPE  *wbuf = NULL;
+    C_DATATYPE  *rbuf = NULL;
+    size_t       nbytes;
+    H5Z_params_t p;
+    herr_t       ret;
+
+    if (MAINPROCESS)
+        puts("Testing par-04: Multi-rank write+read via string-API shuffle+deflate pipeline");
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "H5Fopen succeeded");
+
+    group_id = H5Gcreate2(file_id, "par_append_string_pipeline", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gcreate2 succeeded");
+
+    /* Build pipeline via string API: shuffle (no params) then deflate level=6 */
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((dcpl_id >= 0), "H5Pcreate DCPL succeeded");
+    VRFY((H5Pset_chunk(dcpl_id, 2, chunk) >= 0), "H5Pset_chunk succeeded");
+
+    p   = H5Z_PARAMS_STR(NULL); /* shuffle accepts empty params */
+    ret = H5Pappend_filter(dcpl_id, H5Z_FILTER_SHUFFLE, 0, &p);
+    VRFY((ret >= 0), "H5Pappend_filter(shuffle) succeeded");
+
+    p   = H5Z_PARAMS_STR("level=6");
+    ret = H5Pappend_filter(dcpl_id, H5Z_FILTER_DEFLATE, 0, &p);
+    VRFY((ret >= 0), "H5Pappend_filter(deflate level=6) succeeded");
+
+    /* Create dataset */
+    fspace_id = H5Screate_simple(2, dims, NULL);
+    VRFY((fspace_id >= 0), "H5Screate_simple filespace succeeded");
+
+    dset_id = H5Dcreate2(group_id, "dset", HDF5_DATATYPE_NAME, fspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "H5Dcreate2 succeeded");
+    VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose filespace succeeded");
+    fspace_id = H5I_INVALID_HID;
+
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_id >= 0), "H5Pcreate DXPL succeeded");
+    VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) >= 0), "H5Pset_dxpl_mpio succeeded");
+
+    /* Each rank writes one 4×4 chunk */
+    nbytes = 4 * 4 * sizeof(C_DATATYPE);
+    wbuf   = (C_DATATYPE *)malloc(nbytes);
+    VRFY((wbuf != NULL), "malloc wbuf succeeded");
+    for (size_t i = 0; i < 16; i++)
+        wbuf[i] = (C_DATATYPE)(mpi_rank * 16 + (int)i);
+
+    start[0] = (hsize_t)(mpi_rank * 4);
+    start[1] = 0;
+    count[0] = 1;
+    count[1] = 1;
+    block[0] = 4;
+    block[1] = 4;
+
+    fspace_id = H5Dget_space(dset_id);
+    VRFY((fspace_id >= 0), "H5Dget_space succeeded");
+    VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, block) >= 0),
+         "H5Sselect_hyperslab write succeeded");
+
+    mspace_id = H5Screate_simple(2, block, NULL);
+    VRFY((mspace_id >= 0), "H5Screate_simple mspace succeeded");
+    ret = H5Dwrite(dset_id, HDF5_DATATYPE_NAME, mspace_id, fspace_id, dxpl_id, wbuf);
+    VRFY((ret >= 0), "H5Dwrite succeeded");
+    VRFY((H5Sclose(mspace_id) >= 0), "H5Sclose mspace succeeded");
+    mspace_id = H5I_INVALID_HID;
+    VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose fspace succeeded");
+    fspace_id = H5I_INVALID_HID;
+    VRFY((H5Dclose(dset_id) >= 0), "H5Dclose succeeded");
+
+    /* Re-open and read back */
+    dset_id = H5Dopen2(group_id, "dset", H5P_DEFAULT);
+    VRFY((dset_id >= 0), "H5Dopen2 succeeded");
+
+    rbuf = (C_DATATYPE *)calloc(1, nbytes);
+    VRFY((rbuf != NULL), "calloc rbuf succeeded");
+
+    fspace_id = H5Dget_space(dset_id);
+    VRFY((fspace_id >= 0), "H5Dget_space succeeded");
+    VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, block) >= 0),
+         "H5Sselect_hyperslab read succeeded");
+
+    mspace_id = H5Screate_simple(2, block, NULL);
+    VRFY((mspace_id >= 0), "H5Screate_simple mspace succeeded");
+    ret = H5Dread(dset_id, HDF5_DATATYPE_NAME, mspace_id, fspace_id, dxpl_id, rbuf);
+    VRFY((ret >= 0), "H5Dread succeeded");
+    VRFY((H5Sclose(mspace_id) >= 0), "H5Sclose mspace succeeded");
+    VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose fspace succeeded");
+
+    VRFY((memcmp(rbuf, wbuf, nbytes) == 0), "Data verification succeeded");
+
+    free(wbuf);
+    free(rbuf);
+
+    VRFY((H5Dclose(dset_id) >= 0), "H5Dclose succeeded");
+    VRFY((H5Pclose(dxpl_id) >= 0), "H5Pclose DXPL succeeded");
+    VRFY((H5Pclose(dcpl_id) >= 0), "H5Pclose DCPL succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "H5Gclose succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+}
+
 int
 main(int argc, char **argv)
 {
@@ -10310,6 +10694,24 @@ main(int argc, char **argv)
 
     VRFY((H5Pclose(dxpl_id) >= 0), "DXPL close succeeded");
     dxpl_id = H5I_INVALID_HID;
+
+    if (nerrors)
+        goto exit;
+
+    /* RFC-HDFG-2026-001: parallel consistency tests (par-01 through par-04) */
+    if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) > 0) {
+        if (MAINPROCESS)
+            puts("\n=== RFC-HDFG-2026-001 Parallel String-API Tests ===\n");
+
+        test_par_append_filter_dcpl_consistency(fapl_id);
+        test_par_append_filter_error_propagation(fapl_id);
+        test_par_append_filter_rank_inconsistent_dcpl(fapl_id);
+        test_par_append_filter_builtin_string_pipeline(fapl_id);
+    }
+    else {
+        if (MAINPROCESS)
+            puts("Skipping RFC-HDFG-2026-001 parallel tests - deflate unavailable");
+    }
 
     if (nerrors)
         goto exit;
