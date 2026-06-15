@@ -286,7 +286,7 @@ H5Z__toml_parse_params(const char *params, toml_result_t *tr_out, toml_datum_t *
      * H5Z_CONFIG_STRING_MAX, but enforce it here too so that the
      * downstream `len * 8` worst-case allocation in H5Z__rewrite_hexfloats
      * cannot overflow size_t. */
-    if (params && strlen(params) >= H5Z_CONFIG_STRING_MAX)
+    if (params && strlen(params) > H5Z_CONFIG_STRING_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "filter parameter string exceeds H5Z_CONFIG_STRING_MAX (%d bytes)",
                     H5Z_CONFIG_STRING_MAX);
@@ -408,7 +408,7 @@ H5Z__config_validate_keys(const char *params, const char *const *known_keys)
     if (!params || *params == '\0')
         HGOTO_DONE(SUCCEED);
 
-    if (strlen(params) >= H5Z_CONFIG_STRING_MAX)
+    if (strlen(params) > H5Z_CONFIG_STRING_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "filter parameter string exceeds H5Z_CONFIG_STRING_MAX (%d bytes)",
                     H5Z_CONFIG_STRING_MAX);

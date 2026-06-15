@@ -1778,13 +1778,21 @@ error:
 static int
 test_config_string_max_boundary(void)
 {
-    hid_t      dcpl       = H5I_INVALID_HID;
-    char      *ok_str     = NULL;
-    const char prefix[]   = "level = 6";
-    size_t     prefix_len = sizeof(prefix) - 1;
+    hid_t      dcpl          = H5I_INVALID_HID;
+    char      *ok_str        = NULL;
+    const char prefix[]      = "level = 6";
+    size_t     prefix_len    = sizeof(prefix) - 1;
     herr_t     ret;
+    htri_t     deflate_avail;
 
     TESTING("H5Pappend_filter: param string == H5Z_CONFIG_STRING_MAX is accepted");
+    /* Deflate (zlib) required as the test filter — skip if not compiled in */
+    if ((deflate_avail = H5Zfilter_avail(H5Z_FILTER_DEFLATE)) < 0)
+        TEST_ERROR;
+    if (!deflate_avail) {
+        SKIPPED();
+        return 0;
+    }
     if (NULL == (ok_str = (char *)malloc(H5Z_CONFIG_STRING_MAX + 1)))
         TEST_ERROR;
     /* Valid TOML string of exactly H5Z_CONFIG_STRING_MAX bytes:
