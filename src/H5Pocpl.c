@@ -1892,8 +1892,7 @@ H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const 
 
             /* Re-validate flags: the callback may have modified them */
             if (flags & ~((unsigned)H5Z_FLAG_DEFMASK))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "set_config callback returned invalid flags");
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "set_config callback returned invalid flags");
         }
     }
     else {

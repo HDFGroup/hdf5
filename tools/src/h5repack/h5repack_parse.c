@@ -298,8 +298,8 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                         }
                         num[nlen] = '\0';
                         {
-                            char  *end;
-                            long   id_val = strtol(num, &end, 10);
+                            char *end;
+                            long  id_val = strtol(num, &end, 10);
                             if (*end != '\0' || id_val < 0 || id_val > H5Z_FILTER_MAX) {
                                 if (obj_list)
                                     free(obj_list);

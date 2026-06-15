@@ -12546,7 +12546,7 @@ public class H5 implements java.io.Serializable {
                 else {
                     /* Pass 2: allocate exact buffer and populate */
                     MemorySegment buf = arena.allocate(plen + 1);
-                    retVal = (int)mh.invokeExact(plist_id, idx, buf, plen + 1, plen_seg);
+                    retVal            = (int)mh.invokeExact(plist_id, idx, buf, plen + 1, plen_seg);
                     if (retVal >= 0)
                         params[0] = buf.getString(0);
                 }
@@ -23851,11 +23851,11 @@ public class H5 implements java.io.Serializable {
             if (status < 0)
                 h5libraryError();
 
-            int id                      = (int)idHandle.get(infoSeg, 0L);
-            int config_flags            = (int)flagsHandle.get(infoSeg, 0L);
-            boolean has_set_config      = (boolean)hasSetConfigHandle.get(infoSeg, 0L);
-            boolean has_get_config      = (boolean)hasGetConfigHandle.get(infoSeg, 0L);
-            boolean has_blob_callbacks  = (boolean)hasBlobCallbacksHandle.get(infoSeg, 0L);
+            int id                     = (int)idHandle.get(infoSeg, 0L);
+            int config_flags           = (int)flagsHandle.get(infoSeg, 0L);
+            boolean has_set_config     = (boolean)hasSetConfigHandle.get(infoSeg, 0L);
+            boolean has_get_config     = (boolean)hasGetConfigHandle.get(infoSeg, 0L);
+            boolean has_blob_callbacks = (boolean)hasBlobCallbacksHandle.get(infoSeg, 0L);
 
             MemorySegment namePtr = (MemorySegment)nameHandle.get(infoSeg, 0L);
             String name           = (namePtr == null || namePtr.equals(MemorySegment.NULL))
