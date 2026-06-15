@@ -173,6 +173,9 @@ jobs:
             thread_safety: ""
             build_mode: "Release"
             force_java_implementation: "jni"
+            java_version: 11
+            win_runner: "windows-2022"
+            win_vs_generator: "Visual Studio 17 2022"
 
     call-jni-latest-java:
         name: "JNI Latest Java Testing"

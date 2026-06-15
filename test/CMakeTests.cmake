@@ -664,7 +664,7 @@ endif ()
 add_test (NAME H5TEST-tcheck_version-release COMMAND $<TARGET_FILE:tcheck_version> "-tr")
 set_tests_properties (H5TEST-tcheck_version-release PROPERTIES
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-) 
+)
 if ("H5TEST-tcheck_version-release" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
   set_tests_properties (H5TEST-tcheck_version-release PROPERTIES DISABLED true)
 endif ()
@@ -705,8 +705,9 @@ if (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY)
           -D "TEST_PORT=${h5test_s3tests_port}"
           -D "TEST_ARGS:STRING=s3proxy-local-fs"
           -D "TEST_BUCKET:STRING=hdf5ros3"
-          -D "TEST_FILES:STRING=t8.shakespeare.txt;Poe_Raven.txt;charsets.h5"
-          -D "TEST_ACLS:STRING=skip;anon;anon"
+          -D "TEST_FILES:STRING=t8.shakespeare.txt;Poe_Raven.txt;charsets.h5;charsets.h5"
+          -D "TEST_ACLS:STRING=skip;anon;anon;skip"
+          -D "TEST_KEYS:STRING=t8.shakespeare.txt;Poe_Raven.txt;charsets.h5;src=h5test/fmt=hive+style@cloud/charsets.h5"
           -D "TEST_EXPECT=0"
           -D "TEST_ENV_VAR:STRING=AWS_SHARED_CREDENTIALS_FILE"
           -D "TEST_ENV_VALUE:STRING=${CMAKE_BINARY_DIR}/credentials"
