@@ -301,8 +301,6 @@ done_filter_params:;
                     j = 0;
                 else
                     filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
-
-                i += m; /* jump */
             }
             else if (i == len - 1) { /*no more parameters */
                 scomp[k + 1] = '\0';
