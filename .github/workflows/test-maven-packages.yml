@@ -108,6 +108,8 @@ jobs:
         env:
           ARTIFACT_VERSION: ${{ inputs.version }}
           REPOSITORY_URL: ${{ inputs.repository_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
         run: |
           echo "::group::Download JNI artifact"
           # Clear cached SNAPSHOT to force fresh download
@@ -252,9 +254,6 @@ jobs:
 
           echo "✅ Artifact installed successfully"
           echo "::endgroup::"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
 
       - name: Verify JAR contents (JNI)
         env:
@@ -377,6 +376,8 @@ jobs:
         env:
           ARTIFACT_VERSION: ${{ inputs.version }}
           REPOSITORY_URL: ${{ inputs.repository_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
         run: |
           echo "::group::Download FFM artifact"
           # Clear cached SNAPSHOT to force fresh download
@@ -521,9 +522,6 @@ jobs:
 
           echo "✅ Artifact installed successfully"
           echo "::endgroup::"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
 
       - name: Verify JAR contents (FFM)
         env:
