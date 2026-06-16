@@ -66,10 +66,10 @@ jobs:
     steps:
       - name: Generate test matrix
         id: generate-matrix
+        env:
+          JAVA_VERSIONS: ${{ inputs.java_versions || '11,17,21,25' }}
+          PLATFORMS: ${{ inputs.platforms || 'ubuntu-latest' }}
         run: |
-          # Parse inputs
-          JAVA_VERSIONS="${{ inputs.java_versions || '11,17,21,25' }}"
-          PLATFORMS="${{ inputs.platforms || 'ubuntu-latest' }}"
 
           # Expand platforms if needed
           if [[ "$PLATFORMS" == "all-platforms" ]]; then
@@ -178,12 +178,14 @@ jobs:
 
       - name: Run implementation tests
         shell: bash
+        env:
+          TEST_MODE: ${{ inputs.test_mode || 'build' }}
         run: |
           chmod +x .github/scripts/test-java-implementations.sh
           .github/scripts/test-java-implementations.sh \
             ${{ matrix.java-version }} \
             ${{ matrix.implementation }} \
-            ${{ inputs.test_mode || 'build' }}
+            "$TEST_MODE"
 
       - name: Upload build artifacts on failure
         if: failure()
@@ -283,14 +285,18 @@ jobs:
 
     steps:
       - name: Generate test report
+        env:
+          JAVA_VERSIONS: ${{ inputs.java_versions || '11,17,21,25' }}
+          TEST_MODE: ${{ inputs.test_mode || 'build' }}
+          PLATFORMS: ${{ inputs.platforms || 'ubuntu-latest' }}
         run: |
           echo "## Java Implementation Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           echo "### Test Configuration" >> $GITHUB_STEP_SUMMARY
-          echo "- **Java Versions**: ${{ inputs.java_versions || '11,17,21,25' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Test Mode**: ${{ inputs.test_mode || 'build' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Platforms**: ${{ inputs.platforms || 'ubuntu-latest' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Java Versions**: $JAVA_VERSIONS" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test Mode**: $TEST_MODE" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platforms**: $PLATFORMS" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Report job statuses

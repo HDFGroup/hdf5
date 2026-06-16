@@ -157,17 +157,25 @@ function chooseReviewers(touchedAreas, {
 
 // Builds the markdown checklist comment body (pure, no I/O).
 function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
+  // Reviewers manually assigned who are not CODEOWNERS for any touched area.
+  // Used as a fallback for areas that have no CODEOWNER assigned — their
+  // approval also counts as sign-off for that area.
+  const allAreaOwners     = new Set(touchedAreas.flatMap(a => a.owners));
+  const nonOwnerReviewers = [...confirmedRequested].filter(o => !allAreaOwners.has(o));
+
   const rowData = touchedAreas.map(area => {
-    const approver  = area.owners.find(o => approvedUsers.has(o));
+    const ownerReviewers = area.owners.filter(o => confirmedRequested.has(o));
+    // If no CODEOWNER is assigned for this area, fall back to non-CODEOWNER
+    // reviewers so manually-assigned people are shown and their approval counts.
+    const effectiveReviewers = ownerReviewers.length > 0 ? ownerReviewers : nonOwnerReviewers;
+    const approver  = effectiveReviewers.find(o => approvedUsers.has(o));
     const signedOff = !!approver;
     const box       = signedOff ? 'x' : ' ';
     const tick      = signedOff ? ' ✅' : '';
-    // Signed off: show who approved. Pending: show all confirmed-requested reviewers
-    // (may be > 1 if a reviewer was manually added alongside the load-balanced pick).
-    const requested = area.owners.filter(o => confirmedRequested.has(o));
+    // Signed off: show who approved. Pending: show all effective reviewers.
     const mention   = approver
       ? ` — @${approver}`
-      : requested.length > 0 ? ` — ${requested.map(o => `@${o}`).join(', ')}` : '';
+      : effectiveReviewers.length > 0 ? ` — ${effectiveReviewers.map(o => `@${o}`).join(', ')}` : '';
     return { text: `- [${box}] **${area.label}**${tick}${mention}`, signedOff };
   });
 

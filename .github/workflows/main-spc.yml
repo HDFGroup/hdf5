@@ -366,7 +366,7 @@ jobs:
 
   build_v2_0_win:
     name: "Intel DBG v2.0.0 default API no deprecated"
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
       # SETUP
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -385,6 +385,12 @@ jobs:
         with:
           compiler: intel
           version: '2025.0'
+
+      - name: Setup Java
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          java-version: 11
+          distribution: 'temurin'
 
       - name: Configure (Windows)
         shell: pwsh

@@ -84,11 +84,13 @@ jobs:
           cache: 'maven'
 
       - name: Install HDF5 native libraries
+        env:
+          INSTALL_METHOD: ${{ inputs.install_method }}
         run: |
           echo "=== Installing HDF5 Native Libraries ==="
-          echo "Installation method: ${{ inputs.install_method }}"
+          echo "Installation method: $INSTALL_METHOD"
 
-          if [ "${{ inputs.install_method }}" == "system-package" ]; then
+          if [ "$INSTALL_METHOD" == "system-package" ]; then
             echo "Installing from system packages..."
             sudo apt-get update
             sudo apt-get install -y libhdf5-dev hdf5-tools
@@ -100,13 +102,13 @@ jobs:
             find /usr/lib -name "libhdf5.so*" 2>/dev/null || echo "Library not found in /usr/lib"
             find /usr/local/lib -name "libhdf5.so*" 2>/dev/null || true
 
-          elif [ "${{ inputs.install_method }}" == "from-source" ]; then
+          elif [ "$INSTALL_METHOD" == "from-source" ]; then
             echo "Building from source not yet implemented"
             echo "Falling back to system package installation"
             sudo apt-get update
             sudo apt-get install -y libhdf5-dev hdf5-tools
 
-          elif [ "${{ inputs.install_method }}" == "from-binary" ]; then
+          elif [ "$INSTALL_METHOD" == "from-binary" ]; then
             echo "Installing from binary package not yet implemented"
             echo "Falling back to system package installation"
             sudo apt-get update
@@ -152,26 +154,31 @@ jobs:
           SETTINGSEOF
 
           # Replace placeholder with actual URL
-          sed -i "s|MAVEN_REPO_URL_PLACEHOLDER|${{ inputs.maven_repository }}|g" ~/.m2/settings.xml
+          sed -i "s|MAVEN_REPO_URL_PLACEHOLDER|$MAVEN_REPOSITORY|g" ~/.m2/settings.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAVEN_REPOSITORY: ${{ inputs.maven_repository }}
 
       - name: Download JNI Maven artifact
-        run: |
-          echo "Downloading hdf5-java-jni:${{ inputs.maven_version }}"
-          mvn dependency:get \
-            -Dartifact=org.hdfgroup:hdf5-java-jni:${{ inputs.maven_version }} \
-            -DremoteRepositories=${{ inputs.maven_repository }} \
-            -Dtransitive=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAVEN_VERSION: ${{ inputs.maven_version }}
+          MAVEN_REPOSITORY: ${{ inputs.maven_repository }}
+        run: |
+          echo "Downloading hdf5-java-jni:$MAVEN_VERSION"
+          mvn dependency:get \
+            -Dartifact=org.hdfgroup:hdf5-java-jni:"$MAVEN_VERSION" \
+            -DremoteRepositories="$MAVEN_REPOSITORY" \
+            -Dtransitive=true
 
       - name: Verify JAR and native library integration
+        env:
+          MAVEN_VERSION: ${{ inputs.maven_version }}
         run: |
           echo "=== Testing JNI Integration ==="
 
           # Find downloaded JAR
-          JAR_PATH=$(find ~/.m2/repository/org/hdfgroup/hdf5-java-jni/${{ inputs.maven_version }} -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+          JAR_PATH=$(find ~/.m2/repository/org/hdfgroup/hdf5-java-jni/"$MAVEN_VERSION" -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
 
           if [ -z "$JAR_PATH" ]; then
             echo "❌ Could not find downloaded JAR"
@@ -226,11 +233,13 @@ jobs:
           java -cp ".:$JAR_PATH" -Djava.library.path="$JAVA_LIBRARY_PATH" TestH5Init
 
       - name: Run representative examples
+        env:
+          MAVEN_VERSION: ${{ inputs.maven_version }}
         run: |
           cd HDF5Examples/JAVA
 
           # Find JAR
-          JAR_PATH=$(find ~/.m2/repository/org/hdfgroup/hdf5-java-jni/${{ inputs.maven_version }} -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+          JAR_PATH=$(find ~/.m2/repository/org/hdfgroup/hdf5-java-jni/"$MAVEN_VERSION" -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
 
           # Set library path
           export LD_LIBRARY_PATH=/usr/lib:/usr/local/lib:$LD_LIBRARY_PATH
@@ -320,26 +329,31 @@ jobs:
           SETTINGSEOF2
 
           # Replace placeholder with actual URL
-          sed -i "s|MAVEN_REPO_URL_PLACEHOLDER|${{ inputs.maven_repository }}|g" ~/.m2/settings.xml
+          sed -i "s|MAVEN_REPO_URL_PLACEHOLDER|$MAVEN_REPOSITORY|g" ~/.m2/settings.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAVEN_REPOSITORY: ${{ inputs.maven_repository }}
 
       - name: Download FFM Maven artifact
-        run: |
-          echo "Downloading hdf5-java-ffm:${{ inputs.maven_version }}"
-          mvn dependency:get \
-            -Dartifact=org.hdfgroup:hdf5-java-ffm:${{ inputs.maven_version }} \
-            -DremoteRepositories=${{ inputs.maven_repository }} \
-            -Dtransitive=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAVEN_VERSION: ${{ inputs.maven_version }}
+          MAVEN_REPOSITORY: ${{ inputs.maven_repository }}
+        run: |
+          echo "Downloading hdf5-java-ffm:$MAVEN_VERSION"
+          mvn dependency:get \
+            -Dartifact=org.hdfgroup:hdf5-java-ffm:"$MAVEN_VERSION" \
+            -DremoteRepositories="$MAVEN_REPOSITORY" \
+            -Dtransitive=true
 
       - name: Test FFM with system HDF5
+        env:
+          MAVEN_VERSION: ${{ inputs.maven_version }}
         run: |
           echo "=== Testing FFM Integration ==="
 
           # Find downloaded JAR
-          JAR_PATH=$(find ~/.m2/repository/org/hdfgroup/hdf5-java-ffm/${{ inputs.maven_version }} -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+          JAR_PATH=$(find ~/.m2/repository/org/hdfgroup/hdf5-java-ffm/"$MAVEN_VERSION" -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
 
           if [ -z "$JAR_PATH" ]; then
             echo "❌ Could not find downloaded JAR"
@@ -360,12 +374,16 @@ jobs:
     if: always()
     steps:
       - name: Generate summary
+        env:
+          MAVEN_VERSION: ${{ inputs.maven_version }}
+          MAVEN_REPOSITORY: ${{ inputs.maven_repository }}
+          INSTALL_METHOD: ${{ inputs.install_method }}
         run: |
           echo "# Binary Installation Test Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** ${{ inputs.maven_version }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Repository:** ${{ inputs.maven_repository }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Install Method:** ${{ inputs.install_method }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** $MAVEN_VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository:** $MAVEN_REPOSITORY" >> $GITHUB_STEP_SUMMARY
+          echo "**Install Method:** $INSTALL_METHOD" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           JNI_RESULT="${{ needs.test-jni-binary.result }}"
