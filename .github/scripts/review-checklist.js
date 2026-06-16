@@ -9,6 +9,18 @@ function labelFromPattern(pattern) {
   return pattern.replace(/^\//, '').replace(/\/$/, '') || pattern;
 }
 
+// Converts a CODEOWNERS glob pattern to a RegExp.
+// Process ** before * so single-star replacement cannot corrupt double-star tokens.
+function convertGlobToRegex(p, anchored) {
+  let escaped = p.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+  escaped = escaped.replace(/\/\*\*\//g, '/(?:.+/)?');  // /**/ → zero or more subdirectories
+  escaped = escaped.replace(/^\*\*\//, '(?:.+/)?');      // **/ at start → optional leading dirs
+  escaped = escaped.replace(/\/\*\*$/, '(?:/.+)?');      // /** at end → optional trailing path
+  escaped = escaped.replace(/\*\*/g, '.*');               // bare ** → anything
+  escaped = escaped.replace(/\*/g, '[^/]*');              // * → single path component
+  return new RegExp((anchored ? '^' : '(^|/)') + escaped + '($|/)');
+}
+
 // Returns true if `file` (repo-relative, no leading slash) matches
 // a CODEOWNERS-style gitignore pattern.
 function matchesPattern(file, pattern) {
@@ -24,23 +36,8 @@ function matchesPattern(file, pattern) {
       : (file === p.slice(0, -1) || file.startsWith(p) || file.includes('/' + p));
   }
 
-  // Glob pattern: convert * and ** to regex equivalents.
-  // Process ** before * so the single-star replacement cannot corrupt double-star tokens.
   if (p.includes('*')) {
-    // Escape regex metacharacters, leaving * intact for the steps below
-    let escaped = p.replace(/[.+^${}()|[\]\\]/g, '\\$&');
-    // /**/ → zero or more path components (zero depth = just a single slash separator)
-    escaped = escaped.replace(/\/\*\*\//g, '/(?:.+/)?');
-    // **/ at start → any leading directories (including none)
-    escaped = escaped.replace(/^\*\*\//, '(?:.+/)?');
-    // /** at end → any trailing path (including none)
-    escaped = escaped.replace(/\/\*\*$/, '(?:/.+)?');
-    // bare ** → anything (fallback for patterns like **)
-    escaped = escaped.replace(/\*\*/g, '.*');
-    // single * → within one path component only
-    escaped = escaped.replace(/\*/g, '[^/]*');
-    const re = new RegExp((anchored ? '^' : '(^|/)') + escaped + '($|/)');
-    return re.test(file);
+    return convertGlobToRegex(p, anchored).test(file);
   }
 
   // Plain path: exact match or directory prefix
@@ -438,15 +435,11 @@ module.exports = async function run({ github, context, core }) {
   // ----------------------------------------------------------------
   // 3. Collect changed files with per-file line counts.
   // ----------------------------------------------------------------
-  const changedFileData = [];
+  let changedFileData;
   try {
-    for (let page = 1; ; page++) {
-      const { data } = await github.rest.pulls.listFiles({
-        owner, repo, pull_number: pr_number, per_page: 100, page,
-      });
-      changedFileData.push(...data);
-      if (data.length < 100) break;
-    }
+    changedFileData = await github.paginate(github.rest.pulls.listFiles, {
+      owner, repo, pull_number: pr_number, per_page: 100,
+    });
   } catch (error) {
     core.setFailed(`Failed to list PR files: ${error.message}`);
     return;
@@ -486,15 +479,11 @@ module.exports = async function run({ github, context, core }) {
   // ----------------------------------------------------------------
   // 5. Fetch reviews and current PR state.
   // ----------------------------------------------------------------
-  const allReviews = [];
+  let allReviews = [];
   try {
-    for (let page = 1; ; page++) {
-      const { data } = await github.rest.pulls.listReviews({
-        owner, repo, pull_number: pr_number, per_page: 100, page,
-      });
-      allReviews.push(...data);
-      if (data.length < 100) break;
-    }
+    allReviews = await github.paginate(github.rest.pulls.listReviews, {
+      owner, repo, pull_number: pr_number, per_page: 100,
+    });
   } catch (error) {
     core.warning(`Failed to fetch reviews; approval state may be stale: ${error.message}`);
   }
