@@ -453,7 +453,7 @@ done_filter_params:;
              *-------------------------------------------------------------------------
              */
         case H5Z_FILTER_SZIP:
-            pixels_per_block = filt->cd_values[1];
+            pixels_per_block = filt->cd_values[H5Z_SZIP_PARM_PPB];
             if ((pixels_per_block % 2) == 1) {
                 if (obj_list)
                     free(obj_list);
