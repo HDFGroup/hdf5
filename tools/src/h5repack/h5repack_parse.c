@@ -161,7 +161,6 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                             l++;
                             if (l == 2) {
                                 smask[l] = '\0';
-                                i        = len - 1; /* end outer loop */
                                 if (strcmp(smask, "NN") == 0)
                                     filt->cd_values[j++] = H5_SZIP_NN_OPTION_MASK;
                                 else if (strcmp(smask, "EC") == 0)
@@ -170,7 +169,8 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                                     error_msg("szip mask must be 'NN' or 'EC' \n");
                                     exit(EXIT_FAILURE);
                                 }
-                                break; /* exit inner u loop; i=len-1 ends the outer loop */
+                                filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
+                                goto done_filter_params;
                             }
                         }
                     } /* u */
@@ -212,7 +212,6 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                             l++;
                             if (l == 2) {
                                 smask[l] = '\0';
-                                i        = len - 1; /* end outer loop */
                                 if (strcmp(smask, "IN") == 0)
                                     filt->cd_values[j++] = H5Z_SO_INT;
                                 else if (strcmp(smask, "DS") == H5Z_SO_FLOAT_DSCALE)
@@ -221,7 +220,8 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                                     error_msg("scale type must be 'IN' or 'DS' \n");
                                     exit(EXIT_FAILURE);
                                 }
-                                break; /* exit inner u loop; i=len-1 ends the outer loop */
+                                filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
+                                goto done_filter_params;
                             }
                         }
                     } /* u */
@@ -304,6 +304,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                     filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
 
                 i += m; /* jump */
+done_filter_params:;
             }
             else if (i == len - 1) { /*no more parameters */
                 scomp[k + 1] = '\0';
