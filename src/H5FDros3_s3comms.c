@@ -1975,8 +1975,16 @@ H5FD__s3comms_format_http_request_message(const H5FD__s3comms_aws_params_t *aws_
                         aws_error_str(aws_last_error()));
     }
 
-    if (AWS_OP_SUCCESS != aws_byte_buf_append_dynamic(&path_buf, &key_cursor))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory for HTTP request string: %s",
+    /* The object key must be URI-encoded ('/' is preserved) when it is
+     * added to the request path. S3 computes request signatures from a
+     * singly URI-encoded path and the signing configuration sets
+     * use_double_uri_encode to false, so the path is signed and sent
+     * exactly as built here. If reserved characters in the key, such as
+     * '=' in Hive-style "key=value" partition names, are sent literally,
+     * S3 rejects the request with SignatureDoesNotMatch (HTTP 403).
+     */
+    if (AWS_OP_SUCCESS != aws_byte_buf_append_encoding_uri_path(&path_buf, &key_cursor))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't URI-encode object key for HTTP request: %s",
                     aws_error_str(aws_last_error()));
 
     H5_WARN_AGGREGATE_RETURN_OFF
