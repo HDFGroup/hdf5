@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-05-23</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-06-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -469,7 +469,7 @@ Functions</h2></td></tr>
 <p>The dataset's datatype and dataspace are specified by <code class="param">type_id</code> and <code class="param">space_id</code>, respectively. These are the datatype and dataspace of the dataset as it will exist in the file, which may differ from the datatype and dataspace in application memory.</p>
 <p>Names within a group are unique: <a class="el" href="#ga6b86f2683ae6a78d48d33c45257744a2" title="Creates a dataset at the specified location.">H5Dcreate1()</a> will return an error if a link with the name specified in name already exists at the location specified in <code class="param">loc_id</code>.</p>
 <p>As is the case for any object in a group, the length of a dataset name is not limited.</p>
-<p><code class="param">dcpl_id</code> is an <a class="el" href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a> property list created with <code class="param">H5reate1()</code> and initialized with various property list functions described in Property List Interface.</p>
+<p><code class="param">dcpl_id</code> is an <a class="el" href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a> property list created with <code class="param"><a class="el" href="#ga6b86f2683ae6a78d48d33c45257744a2" title="Creates a dataset at the specified location.">H5Dcreate1()</a></code> and initialized with various property list functions described in Property List Interface.</p>
 <p><a class="el" href="#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate()</a> and <a class="el" href="#ga15a77e82383d821fee8ecbf9ab8408cb" title="Creates a dataset in a file without linking it into the file structure.">H5Dcreate_anon()</a> return an error if the dataset's datatype includes a variable-length (VL) datatype and the fill value is undefined, i.e., set to <code>NULL</code> in the dataset creation property list. Such a VL datatype may be directly included, indirectly included as part of a compound or array datatype, or indirectly included as part of a nested compound or array datatype.</p>
 <p><a class="el" href="#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate()</a> and <a class="el" href="#ga15a77e82383d821fee8ecbf9ab8408cb" title="Creates a dataset in a file without linking it into the file structure.">H5Dcreate_anon()</a> return a dataset identifier for success or a negative value for failure. The dataset identifier should eventually be closed by calling <a class="el" href="#gae47c3f38db49db127faf221624c30609" title="Closes the specified dataset.">H5Dclose()</a> to release the resources it uses.</p>
 <p>See <a class="el" href="#ga15a77e82383d821fee8ecbf9ab8408cb" title="Creates a dataset in a file without linking it into the file structure.">H5Dcreate_anon()</a> for a discussion of the differences between <a class="el" href="#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate()</a> and <a class="el" href="#ga15a77e82383d821fee8ecbf9ab8408cb" title="Creates a dataset in a file without linking it into the file structure.">H5Dcreate_anon()</a>.</p>

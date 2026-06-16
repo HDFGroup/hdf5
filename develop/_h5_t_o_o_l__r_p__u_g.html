@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-05-23</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-06-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -173,8 +173,8 @@ Options</h2>
 <li><b>--dst-vfd-name</b> Name of the VFL driver to use for opening the output HDF5 file specified </li>
 <li><b>--dst-vfd-info</b> VFD-specific info to pass to the VFL driver used for opening the output HDF5 file specified </li>
 <li><b>--latest</b> Use latest version of file format This option will take precedence over the options <b>--low</b> and <b>--high</b> </li>
-<li><b>--low=BOUND</b> The low bound for library release versions to use when creating objects in the file (default is <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>) </li>
-<li><b>--high=BOUND</b> The high bound for library release versions to use when creating objects in the file (default is <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2aa1212669916e7389d0a687a3673153b0">H5F_LIBVER_LATEST</a>) </li>
+<li><b>--low=BOUND</b> The low bound for library release versions to use when creating objects in the file (default is the HDF5 library's default low bound) </li>
+<li><b>--high=BOUND</b> The high bound for library release versions to use when creating objects in the file (default is the HDF5 library's default high bound) </li>
 <li><b>--merge</b> Follow external soft link recursively and merge data </li>
 <li><b>--prune</b> Do not follow external soft links and remove link </li>
 <li><b>--merge --prune</b> Follow external link, merge data and remove dangling link </li>
