@@ -169,7 +169,6 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                                     error_msg("szip mask must be 'NN' or 'EC' \n");
                                     exit(EXIT_FAILURE);
                                 }
-                                filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
                                 goto done_filter_params;
                             }
                         }
@@ -220,7 +219,6 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                                     error_msg("scale type must be 'IN' or 'DS' \n");
                                     exit(EXIT_FAILURE);
                                 }
-                                filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
                                 goto done_filter_params;
                             }
                         }
@@ -298,13 +296,13 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                     stype[m] = '\0';
                 } /*if */
 
+done_filter_params:;
                 if ((strcmp(scomp, "UD") == 0) && (filt->cd_nelmts == 0))
                     j = 0;
                 else
                     filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
 
                 i += m; /* jump */
-done_filter_params:;
             }
             else if (i == len - 1) { /*no more parameters */
                 scomp[k + 1] = '\0';
