@@ -71,7 +71,7 @@ jobs:
 
   Intel_oneapi_windows:
     name: "windows-oneapi ${{ inputs.build_mode }}"
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
       - name: Get Sources (Windows)
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -85,6 +85,12 @@ jobs:
         with:
           compiler: intel
           version: '2025.2'
+
+      - name: Setup Java
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          java-version: 11
+          distribution: 'temurin'
 
       - name: Configure (Windows)
         shell: pwsh
