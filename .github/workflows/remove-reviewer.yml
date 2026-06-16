@@ -18,8 +18,9 @@ permissions:
 jobs:
   remove:
     runs-on: ubuntu-latest
-    # Only fire on PR comments that contain the slash command
+    # Only fire on PR comments in the main repo that contain the slash command
     if: |
+      github.repository == 'HDFGroup/hdf5' &&
       github.event.issue.pull_request != null &&
       contains(github.event.comment.body, '/remove-reviewer')
 
