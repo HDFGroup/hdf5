@@ -2,9 +2,23 @@
 
 const MARKER = '<!-- hdf5-review-checklist-v1 -->';
 
+// ── Pure helpers ──────────────────────────────────────────────────────────────
+
 function labelFromPattern(pattern) {
   // /fortran/ → "fortran", /.github/.well-known → ".github/.well-known"
   return pattern.replace(/^\//, '').replace(/\/$/, '') || pattern;
+}
+
+// Converts a CODEOWNERS glob pattern to a RegExp.
+// Process ** before * so single-star replacement cannot corrupt double-star tokens.
+function convertGlobToRegex(p, anchored) {
+  let escaped = p.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+  escaped = escaped.replace(/\/\*\*\//g, '/(?:.+/)?');  // /**/ → zero or more subdirectories
+  escaped = escaped.replace(/^\*\*\//, '(?:.+/)?');      // **/ at start → optional leading dirs
+  escaped = escaped.replace(/\/\*\*$/, '(?:/.+)?');      // /** at end → optional trailing path
+  escaped = escaped.replace(/\*\*/g, '.*');               // bare ** → anything
+  escaped = escaped.replace(/\*/g, '[^/]*');              // * → single path component
+  return new RegExp((anchored ? '^' : '(^|/)') + escaped + '($|/)');
 }
 
 // Returns true if `file` (repo-relative, no leading slash) matches
@@ -22,23 +36,8 @@ function matchesPattern(file, pattern) {
       : (file === p.slice(0, -1) || file.startsWith(p) || file.includes('/' + p));
   }
 
-  // Glob pattern: convert * and ** to regex equivalents.
-  // Process ** before * so the single-star replacement cannot corrupt double-star tokens.
   if (p.includes('*')) {
-    // Escape regex metacharacters, leaving * intact for the steps below
-    let escaped = p.replace(/[.+^${}()|[\]\\]/g, '\\$&');
-    // /**/ → zero or more path components (zero depth = just a single slash separator)
-    escaped = escaped.replace(/\/\*\*\//g, '/(?:.+/)?');
-    // **/ at start → any leading directories (including none)
-    escaped = escaped.replace(/^\*\*\//, '(?:.+/)?');
-    // /** at end → any trailing path (including none)
-    escaped = escaped.replace(/\/\*\*$/, '(?:/.+)?');
-    // bare ** → anything (fallback for patterns like **)
-    escaped = escaped.replace(/\*\*/g, '.*');
-    // single * → within one path component only
-    escaped = escaped.replace(/\*/g, '[^/]*');
-    const re = new RegExp((anchored ? '^' : '(^|/)') + escaped + '($|/)');
-    return re.test(file);
+    return convertGlobToRegex(p, anchored).test(file);
   }
 
   // Plain path: exact match or directory prefix
@@ -113,9 +112,9 @@ function chooseReviewers(touchedAreas, {
       continue;
     }
 
-    const threshold        = (AREA_THRESHOLDS && AREA_THRESHOLDS[area.label]) ?? LINE_THRESHOLD;
+    const threshold           = (AREA_THRESHOLDS && AREA_THRESHOLDS[area.label]) ?? LINE_THRESHOLD;
     const touchesPublicHeader = area.files.some(f => PUBLIC_HEADER.test(f.filename));
-    const isComplex        = area.linesChanged >= threshold || touchesPublicHeader;
+    const isComplex           = area.linesChanged >= threshold || touchesPublicHeader;
 
     if (isComplex) {
       const pick   = area.owners.find(u => u !== prAuthor) ?? null;
@@ -168,11 +167,16 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
     // If no CODEOWNER is assigned for this area, fall back to non-CODEOWNER
     // reviewers so manually-assigned people are shown and their approval counts.
     const effectiveReviewers = ownerReviewers.length > 0 ? ownerReviewers : nonOwnerReviewers;
-    const approver  = effectiveReviewers.find(o => approvedUsers.has(o));
+    // Any owner's approval counts for sign-off, not only the assigned reviewer's.
+    // Fall back to effectiveReviewers for areas with no CODEOWNER (non-owner assignee).
+    const approver  = area.owners.find(o => approvedUsers.has(o))
+      || effectiveReviewers.find(o => approvedUsers.has(o));
     const signedOff = !!approver;
     const box       = signedOff ? 'x' : ' ';
     const tick      = signedOff ? ' ✅' : '';
-    // Signed off: show who approved. Pending: show all effective reviewers.
+    // Signed off: show who approved. Pending: show all confirmed reviewers for
+    // this area (normally just the load-balanced pick, plus any CODEOWNER who
+    // was manually added on top of it).
     const mention   = approver
       ? ` — @${approver}`
       : effectiveReviewers.length > 0 ? ` — ${effectiveReviewers.map(o => `@${o}`).join(', ')}` : '';
@@ -186,9 +190,8 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
     MARKER,
     '## Review Checklist',
     '',
-    'This PR touches the following areas. Each needs at least one',
-    'sign-off from its listed owners before merging — an approval',
-    'covering only one area does **not** satisfy the others.',
+    'This PR touches the following areas. Each needs a sign-off',
+    'from its listed owners before merging.',
     '',
     ...rows,
   ];
@@ -196,8 +199,187 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
   return parts.join('\n');
 }
 
+// ── GitHub API helpers ────────────────────────────────────────────────────────
+
+// Returns true if the PR already has a checklist comment (MARKER present).
+async function checklistExists(github, { owner, repo, pr_number }) {
+  const comments = await github.paginate(github.rest.issues.listComments, {
+    owner, repo, issue_number: pr_number, per_page: 100,
+  });
+  return comments.some(c => c.body.includes(MARKER));
+}
+
+// Removes CODEOWNERS-auto-assigned reviewers whose login is NOT in keepSet.
+// Non-owner reviewers are never touched.
+async function removeUnselected(github, core, { owner, repo, pr_number }, allCodeOwners, currentRequested, keepSet) {
+  for (const reviewer of currentRequested) {
+    if (allCodeOwners.has(reviewer) && !keepSet.has(reviewer)) {
+      try {
+        await github.rest.pulls.removeRequestedReviewers({
+          owner, repo, pull_number: pr_number, reviewers: [reviewer],
+        });
+        core.info(`Removed auto-assigned reviewer ${reviewer} (not in load-balanced selection)`);
+      } catch (e) {
+        core.warning(`Could not remove reviewer ${reviewer}: ${e.message}`);
+      }
+    }
+  }
+}
+
+// Requests each reviewer individually (so one bad login can't block the rest).
+// Returns the Set of logins that were successfully requested.
+async function requestReviewers(github, core, { owner, repo, pr_number }, selected) {
+  const confirmed = new Set();
+  for (const reviewer of selected) {
+    try {
+      await github.rest.pulls.requestReviewers({
+        owner, repo, pull_number: pr_number, reviewers: [reviewer],
+      });
+      confirmed.add(reviewer);
+    } catch (e) {
+      core.warning(`Could not request reviewer ${reviewer}: ${e.message}`);
+    }
+  }
+  return confirmed;
+}
+
+// Waits for GitHub's async CODEOWNERS auto-assignment to fire, then re-fetches
+// the PR and removes any code owners that snuck in outside the selection set.
+async function removeUnselectedAfterDelay(github, core, { owner, repo, pr_number }, allCodeOwners, keepSet) {
+  await new Promise(resolve => setTimeout(resolve, 15000));
+  let retryPR;
+  try {
+    ({ data: retryPR } = await github.rest.pulls.get({ owner, repo, pull_number: pr_number }));
+  } catch (e) {
+    core.warning(`Could not re-fetch PR for reviewer cleanup retry: ${e.message}`);
+    return;
+  }
+  const retryRequested = new Set(retryPR.requested_reviewers.map(r => r.login).filter(Boolean));
+  await removeUnselected(github, core, { owner, repo, pr_number }, allCodeOwners, retryRequested, keepSet);
+}
+
+// ── Reviewer coordination ─────────────────────────────────────────────────────
+//
+// Determines who should be in confirmedRequested (the checklist display set).
+// Returns a Set<login>.  There are four distinct paths:
+//
+//   read-only   (workflow_run, pull_request_review)
+//               → reflect whoever GitHub currently has as requested reviewers
+//
+//   synchronize (normal push to open PR, checklist already exists)
+//               → preserve the existing assignment unchanged
+//
+//   new-PR      (opened / reopened / ready_for_review, or opening-race where
+//                opened was cancelled by synchronize or review_requested before
+//                the checklist existed)
+//     draft     → clear auto-assignments; defer requests until ready for review
+//     non-draft → full flow: clear → request → wait 15 s → re-clear
+//
+async function coordinateReviewers(github, context, core, {
+  owner, repo, pr_number, prData, allCodeOwners, touchedAreas, reviewerLoad,
+  LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
+}) {
+  const existingRequested = new Set(prData.requested_reviewers.map(r => r.login).filter(Boolean));
+  const pr                = { owner, repo, pr_number };
+
+  // ── read-only events ─────────────────────────────────────────────────────
+  if (context.eventName === 'pull_request_review' || context.eventName === 'workflow_run') {
+    core.info('Read-only event — reflecting current reviewer assignments');
+    return new Set(existingRequested);
+  }
+
+  const prAuthor = prData.user.login;
+  const isDraft  = prData.draft === true;
+  const action   = context.payload.action;
+
+  // Assign the PR to its author when they are a code owner.
+  if (allCodeOwners.has(prAuthor)) {
+    try {
+      await github.rest.issues.addAssignees({
+        owner, repo, issue_number: pr_number, assignees: [prAuthor],
+      });
+      core.info(`Assigned PR to author ${prAuthor} (is a code owner)`);
+    } catch (e) {
+      core.warning(`Could not assign PR to author: ${e.message}`);
+    }
+  } else {
+    core.info(`Author ${prAuthor} is not a code owner — skipping assignee`);
+  }
+
+  // ── opening race detection ───────────────────────────────────────────────
+  // For fork PRs, GitHub fires opened + synchronize in quick succession; for
+  // any PR, CODEOWNERS auto-assignment fires review_requested shortly after
+  // opened. With cancel-in-progress: true the last event's run wins, and the
+  // opened cleanup is cancelled — leaving auto-assignments intact.
+  // Detect this by checking whether a checklist comment exists yet; if not,
+  // treat the event as a new-PR event and run full selection.
+  const isOpeningRace = (action === 'synchronize' || action === 'review_requested') &&
+                        !(await checklistExists(github, pr));
+
+  const isNewPR = ['opened', 'reopened', 'ready_for_review'].includes(action) ||
+                  isOpeningRace;
+
+  // ── preserve-existing (synchronize / reviewer change) ────────────────────
+  if (!isNewPR) {
+    core.info(`${action} — preserving existing reviewer assignments`);
+    return new Set(existingRequested);
+  }
+
+  // ── new-PR: load-balanced selection ──────────────────────────────────────
+  const { selected, log } = chooseReviewers(touchedAreas, {
+    prAuthor,
+    existingRequested: new Set(), // ignore existing — this is a fresh assignment
+    reviewerLoad,
+    LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
+  });
+  for (const msg of log) core.info(msg);
+
+  if (isDraft) {
+    // Draft: remove any auto-assignments but hold reviewer requests until
+    // the PR is marked ready for review.
+    await removeUnselected(github, core, pr, allCodeOwners, existingRequested, new Set());
+    core.info('Draft PR — reviewer assignment deferred until ready for review');
+    return new Set();
+  }
+
+  // Non-draft: enforce selection, request reviewers, then re-enforce after
+  // GitHub's async CODEOWNERS auto-assignment fires.
+  await removeUnselected(github, core, pr, allCodeOwners, existingRequested, selected);
+  const confirmed = await requestReviewers(github, core, pr, selected);
+  await removeUnselectedAfterDelay(github, core, pr, allCodeOwners, selected);
+  return confirmed;
+}
+
+// ── Entry point ───────────────────────────────────────────────────────────────
+
 module.exports = async function run({ github, context, core }) {
   const { owner, repo } = context.repo;
+
+  // ----------------------------------------------------------------
+  // Configuration
+  //
+  // LINE_THRESHOLD: lines changed within a single area at or above
+  //   which the change is considered complex → first (senior) owner
+  //   in CODEOWNERS is always assigned.
+  //
+  // PUBLIC_HEADER: files matching this pattern are always treated as
+  //   complex regardless of line count — any change to the public or
+  //   developer API surface warrants the senior owner.
+  //
+  //   Covers: hdf5.h (umbrella), H5*public.h / H5*develop.h (per-module),
+  //   VFD driver headers included by hdf5.h, and VOL connector headers.
+  //
+  // NOTE: Team owners (@org/team) in CODEOWNERS are not supported.
+  //   Only individual GitHub logins are handled. If teams are added,
+  //   extend parsing and reviewer requests to use team_reviewers.
+  // ----------------------------------------------------------------
+  const LINE_THRESHOLD  = 300;
+  const AREA_THRESHOLDS = { 'test': 500 }; // test files are verbose; raise bar for senior
+  const PUBLIC_HEADER   = /(?:^|\/)hdf5\.h$|public\.h$|develop\.h$|H5FD(?:core|direct|family|hdfs|ioc|log|mirror|mpio?|multi|onion|ros3|sec2|splitter|stdio|subfiling|windows)\.h$|H5VL(?:connector|connector_passthru|native|passthru)\.h$/;
+
+  // ----------------------------------------------------------------
+  // 1. Resolve the PR number from the triggering event.
+  // ----------------------------------------------------------------
   let pr_number;
 
   if (context.eventName === 'workflow_run') {
@@ -221,31 +403,7 @@ module.exports = async function run({ github, context, core }) {
   }
 
   // ----------------------------------------------------------------
-  // Configuration
-  //
-  // LINE_THRESHOLD: lines changed within a single area at or above
-  //   which the change is considered complex → first (senior) owner
-  //   in CODEOWNERS is always assigned.
-  //
-  // PUBLIC_HEADER: files matching this pattern are always treated as
-  //   complex regardless of line count — any change to the public or
-  //   developer API surface warrants the senior owner.
-  //
-  //   Covers: hdf5.h (umbrella), H5*public.h / H5*develop.h (per-module),
-  //   VFD driver headers included by hdf5.h, and VOL connector headers.
-  //
-  // NOTE: Team owners (@org/team) in CODEOWNERS are not supported.
-  //   Only individual GitHub logins are handled. If teams are added,
-  //   extend parsing and reviewer requests to use team_reviewers.
-  // ----------------------------------------------------------------
-  const LINE_THRESHOLD  = 300;   // default for all areas
-  const AREA_THRESHOLDS = {      // per-area overrides
-    'test': 500,                 // test files are verbose; raise bar for senior
-  };
-  const PUBLIC_HEADER = /(?:^|\/)hdf5\.h$|public\.h$|develop\.h$|H5FD(?:core|direct|family|hdfs|ioc|log|mirror|mpio?|multi|onion|ros3|sec2|splitter|stdio|subfiling|windows)\.h$|H5VL(?:connector|connector_passthru|native|passthru)\.h$/;
-
-  // ----------------------------------------------------------------
-  // 1. Parse CODEOWNERS into a list of { pattern, label, owners }
+  // 2. Parse CODEOWNERS into { pattern, label, owners }[].
   // ----------------------------------------------------------------
   let coText;
   try {
@@ -266,9 +424,7 @@ module.exports = async function run({ github, context, core }) {
 
     const tokens  = line.split(/\s+/);
     const pattern = tokens[0];
-    const owners  = tokens.slice(1)
-                          .filter(t => t.startsWith('@'))
-                          .map(t => t.slice(1));
+    const owners  = tokens.slice(1).filter(t => t.startsWith('@')).map(t => t.slice(1));
 
     owners.forEach(o => allCodeOwners.add(o));
     if (pattern === '*') continue;
@@ -283,36 +439,26 @@ module.exports = async function run({ github, context, core }) {
   }
 
   // ----------------------------------------------------------------
-  // 2. Collect all changed files with line counts.
+  // 3. Collect changed files with per-file line counts.
   // ----------------------------------------------------------------
-  const changedFileData = [];
+  let changedFileData;
   try {
-    for (let page = 1; ; page++) {
-      const { data } = await github.rest.pulls.listFiles({
-        owner, repo, pull_number: pr_number, per_page: 100, page,
-      });
-      changedFileData.push(...data);
-      if (data.length < 100) break;
-    }
+    changedFileData = await github.paginate(github.rest.pulls.listFiles, {
+      owner, repo, pull_number: pr_number, per_page: 100,
+    });
   } catch (error) {
     core.setFailed(`Failed to list PR files: ${error.message}`);
     return;
   }
 
   // ----------------------------------------------------------------
-  // 3. Attribute files to areas (each file → one area, most-precedent).
-  //    Derive per-area line totals and file lists from the same map so
-  //    linesChanged and touchesPublicHeader always agree.
+  // 4. Attribute files to areas; derive per-area line totals.
   // ----------------------------------------------------------------
   const filesByArea  = attributeFiles(changedFileData, areas);
   const touchedAreas = areas
     .map(area => {
       const files = filesByArea.get(area.pattern) || [];
-      return {
-        ...area,
-        files,
-        linesChanged: files.reduce((sum, f) => sum + f.changes, 0),
-      };
+      return { ...area, files, linesChanged: files.reduce((sum, f) => sum + f.changes, 0) };
     })
     .filter(area => area.linesChanged > 0);
 
@@ -337,165 +483,58 @@ module.exports = async function run({ github, context, core }) {
   }
 
   // ----------------------------------------------------------------
-  // 4. Determine current approvals.
+  // 5. Fetch reviews and current PR state.
   // ----------------------------------------------------------------
-  const allReviews = [];
+  let allReviews = [];
   try {
-    for (let page = 1; ; page++) {
-      const { data } = await github.rest.pulls.listReviews({
-        owner, repo, pull_number: pr_number, per_page: 100, page,
-      });
-      allReviews.push(...data);
-      if (data.length < 100) break;
-    }
+    allReviews = await github.paginate(github.rest.pulls.listReviews, {
+      owner, repo, pull_number: pr_number, per_page: 100,
+    });
   } catch (error) {
     core.warning(`Failed to fetch reviews; approval state may be stale: ${error.message}`);
   }
   const approvedUsers = computeApprovals(allReviews);
 
-  // ----------------------------------------------------------------
-  // 5. Fetch current PR state (requested reviewers).
-  // ----------------------------------------------------------------
   let prData;
   try {
-    ({ data: prData } = await github.rest.pulls.get({
-      owner, repo, pull_number: pr_number,
-    }));
+    ({ data: prData } = await github.rest.pulls.get({ owner, repo, pull_number: pr_number }));
   } catch (error) {
     core.setFailed(`Failed to fetch PR data: ${error.message}`);
     return;
   }
-  const existingRequested = new Set(
-    prData.requested_reviewers.map(r => r.login).filter(Boolean)
-  );
-
-  // confirmedRequested tracks who is actually assigned for checklist display.
-  // Starts empty — populated below only with the load-balanced selection so
-  // the checklist never shows owners that were not chosen by the script.
-  let confirmedRequested = new Set();
 
   // ----------------------------------------------------------------
-  // 6. Auto-assign reviewers (pull_request events only, not reviews).
+  // 6. Build reviewer load map (one paginated list call instead of N
+  //    Search API calls — the Search API caps at 30 req/min).
   // ----------------------------------------------------------------
-  if (context.eventName !== 'pull_request_review' && context.eventName !== 'workflow_run') {
-    const prAuthor = prData.user.login;
-
-    // Assign the PR author only if they are a code owner.
-    if (allCodeOwners.has(prAuthor)) {
-      try {
-        await github.rest.issues.addAssignees({
-          owner, repo, issue_number: pr_number, assignees: [prAuthor],
-        });
-        core.info(`Assigned PR to author ${prAuthor} (is a code owner)`);
-      } catch (e) {
-        core.warning(`Could not assign PR to author: ${e.message}`);
-      }
-    } else {
-      core.info(`Author ${prAuthor} is not a code owner — skipping assignee`);
-    }
-
-    // One paginated pulls.list call instead of N Search API calls — the Search API
-    // allows only 30 req/min; with several candidates per area that limit is easy to hit.
-    // Note: cost scales with the number of open PRs in the repo.
-    let reviewerLoad = {};
-    try {
-      const openPRs = await github.paginate(github.rest.pulls.list, {
-        owner, repo, state: 'open', per_page: 100,
-      });
-      for (const openPR of openPRs) {
-        if (openPR.number === pr_number) continue;
-        for (const r of openPR.requested_reviewers) {
-          if (r.login) reviewerLoad[r.login] = (reviewerLoad[r.login] || 0) + 1;
-        }
-      }
-    } catch (e) {
-      core.warning(`Could not fetch open PRs for load balancing; falling back to CODEOWNERS order: ${e.message}`);
-    }
-
-    const isNewPR = context.payload.action === 'opened' || context.payload.action === 'reopened';
-
-    // On open/reopen: ignore existing assignments so GitHub's CODEOWNERS
-    // auto-assignment doesn't suppress our load-balanced selection.
-    // On synchronize: respect existing assignments (reviewer may have already started).
-    const { selected, log } = chooseReviewers(touchedAreas, {
-      prAuthor,
-      existingRequested: isNewPR ? new Set() : existingRequested,
-      reviewerLoad,
-      LINE_THRESHOLD,
-      AREA_THRESHOLDS,
-      PUBLIC_HEADER,
+  let reviewerLoad = {};
+  try {
+    const openPRs = await github.paginate(github.rest.pulls.list, {
+      owner, repo, state: 'open', per_page: 100,
     });
-    for (const msg of log) core.info(msg);
-
-    // Helper: remove CODEOWNERS auto-assigned reviewers not in our selection.
-    // Only removes code owners — leaves manually-added non-owner reviewers untouched.
-    async function enforceSelection(currentRequested) {
-      for (const reviewer of currentRequested) {
-        if (allCodeOwners.has(reviewer) && !selected.has(reviewer)) {
-          try {
-            await github.rest.pulls.removeRequestedReviewers({
-              owner, repo, pull_number: pr_number, reviewers: [reviewer],
-            });
-            core.info(`Removed auto-assigned reviewer ${reviewer} (not selected by load balancer)`);
-          } catch (e) {
-            core.warning(`Could not remove reviewer ${reviewer}: ${e.message}`);
-          }
-        }
+    for (const openPR of openPRs) {
+      if (openPR.number === pr_number) continue;
+      for (const r of openPR.requested_reviewers) {
+        if (r.login) reviewerLoad[r.login] = (reviewerLoad[r.login] || 0) + 1;
       }
     }
-
-    if (isNewPR) {
-      // First pass: clean up whatever GitHub auto-assigned before the workflow ran.
-      await enforceSelection(existingRequested);
-
-      // Request one at a time so a single invalid login cannot block the rest.
-      // Only add to confirmedRequested on success — the checklist must not show
-      // an owner whose request call failed.
-      for (const reviewer of selected) {
-        try {
-          await github.rest.pulls.requestReviewers({
-            owner, repo, pull_number: pr_number,
-            reviewers: [reviewer],
-          });
-          confirmedRequested.add(reviewer);
-        } catch (e) {
-          core.warning(`Could not request reviewer ${reviewer}: ${e.message}`);
-        }
-      }
-
-      // Second pass: GitHub's auto-assignment can fire after the workflow starts,
-      // so wait briefly then re-check and remove any extras that appeared.
-      await new Promise(resolve => setTimeout(resolve, 15000));
-      let retryPR;
-      try {
-        ({ data: retryPR } = await github.rest.pulls.get({ owner, repo, pull_number: pr_number }));
-      } catch (e) {
-        core.warning(`Could not re-fetch PR for reviewer cleanup retry: ${e.message}`);
-      }
-      if (retryPR) {
-        const retryRequested = new Set(
-          retryPR.requested_reviewers.map(r => r.login).filter(Boolean)
-        );
-        await enforceSelection(retryRequested);
-      }
-    } else {
-      // synchronize/reopened: never re-assign reviewers — respect manual removals.
-      // Just carry forward whoever is currently assigned for checklist display.
-      for (const reviewer of existingRequested) confirmedRequested.add(reviewer);
-    }
-  } else {
-    // For workflow_run (review events): show whoever is currently assigned.
-    for (const reviewer of existingRequested) confirmedRequested.add(reviewer);
+  } catch (e) {
+    core.warning(`Could not fetch open PRs for load balancing; falling back to CODEOWNERS order: ${e.message}`);
   }
 
   // ----------------------------------------------------------------
-  // 7. Build the checklist body.
+  // 7. Coordinate reviewer assignment → confirmed set for display.
+  // ----------------------------------------------------------------
+  const confirmedRequested = await coordinateReviewers(github, context, core, {
+    owner, repo, pr_number, prData, allCodeOwners, touchedAreas, reviewerLoad,
+    LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
+  });
+
+  // ----------------------------------------------------------------
+  // 8. Build and post (or update) the checklist comment.
   // ----------------------------------------------------------------
   const body = buildBody(touchedAreas, approvedUsers, confirmedRequested);
 
-  // ----------------------------------------------------------------
-  // 8. Create or update the checklist comment (idempotent via marker).
-  // ----------------------------------------------------------------
   try {
     const comments = await github.paginate(github.rest.issues.listComments, {
       owner, repo, issue_number: pr_number, per_page: 100,
@@ -503,14 +542,10 @@ module.exports = async function run({ github, context, core }) {
     const existing = comments.find(c => c.body.includes(MARKER));
 
     if (existing) {
-      await github.rest.issues.updateComment({
-        owner, repo, comment_id: existing.id, body,
-      });
+      await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
       core.info(`Updated checklist comment #${existing.id}`);
     } else {
-      await github.rest.issues.createComment({
-        owner, repo, issue_number: pr_number, body,
-      });
+      await github.rest.issues.createComment({ owner, repo, issue_number: pr_number, body });
       core.info('Created checklist comment');
     }
   } catch (error) {
