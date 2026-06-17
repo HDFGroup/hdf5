@@ -188,9 +188,8 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
     MARKER,
     '## Review Checklist',
     '',
-    'This PR touches the following areas. Each needs at least one',
-    'sign-off from its listed owners before merging — an approval',
-    'covering only one area does **not** satisfy the others.',
+    'This PR touches the following areas. Each needs a sign-off',
+    'from its listed owners before merging.',
     '',
     ...rows,
   ];
