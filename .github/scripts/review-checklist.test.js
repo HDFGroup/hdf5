@@ -399,6 +399,34 @@ test('buildBody: always contains the marker', () => {
   assert.ok(body.includes('<!-- hdf5-review-checklist-v1 -->'));
 });
 
+// Non-CODEOWNER reviewer fallback (added by #6446): when no owner of the area
+// is in confirmedRequested, a manually-assigned non-owner reviewer is shown and
+// their approval counts as sign-off.
+
+test('buildBody: non-owner reviewer shown as pending when no area owner is assigned', () => {
+  // alice owns /src/ but was not requested; charlie (not an owner) was manually assigned
+  const areas = [makeArea('src', ['alice'], 10)];
+  const body  = buildBody(areas, new Set(), new Set(['charlie']));
+  assert.ok(body.includes('- [ ] **src**'));
+  assert.ok(body.includes('— @charlie'));
+  assert.ok(!body.includes('@alice'));
+});
+
+test('buildBody: non-owner reviewer approval signs off area when no CODEOWNER is assigned', () => {
+  const areas = [makeArea('src', ['alice'], 10)];
+  const body  = buildBody(areas, new Set(['charlie']), new Set(['charlie']));
+  assert.ok(body.includes('- [x] **src** ✅'));
+  assert.ok(body.includes('— @charlie'));
+});
+
+test('buildBody: non-owner reviewer approval does NOT sign off when a CODEOWNER was assigned', () => {
+  // alice (owner) was assigned; charlie (non-owner) also approves — alice's sign-off is still required
+  const areas = [makeArea('src', ['alice'], 10)];
+  const body  = buildBody(areas, new Set(['charlie']), new Set(['alice', 'charlie']));
+  assert.ok(body.includes('- [ ] **src**'));
+  assert.ok(!body.includes('✅'));
+});
+
 // ----------------------------------------------------------------
 // Summary
 // ----------------------------------------------------------------
