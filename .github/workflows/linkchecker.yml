@@ -71,6 +71,7 @@ jobs:
             --exclude "twitter.com"
             --exclude "linkedin.com"
             --exclude "web.cels.anl.gov"
+            --exclude "www.doxygen.org"
             "${{ steps.build_docs.outputs.html_path }}/**/*.html"
           output: lychee-report.md
           format: markdown
