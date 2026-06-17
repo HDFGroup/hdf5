@@ -6348,8 +6348,8 @@ about the region stored in the global heap.
 </tr>
 <tr>
   <td>0-3</td>
-  <td><strong>Type.</strong> This four-bit value contains the revised reference types. The values
-      defined are:
+  <td><strong>Type.</strong> This four-bit value contains the revised generic reference type. The value
+      defined is:
       <table width=100%>
       <tr>
         <th width="20%">Value</th>
@@ -6357,21 +6357,10 @@ about the region stored in the global heap.
       </tr>
       <tr>
         <td align="center"><code>2</code></td>
-        <td>Object Reference (#H5R_OBJECT2): A reference to another object in this file or an
-            external file.</td>
+        <td>It covers all three revised reference types: Object Reference (#H5R_OBJECT2), Dataset Region Reference (#H5R_DATASET_REGION2), and Attribute Reference (#H5R_ATTR).
       </tr>
       <tr>
-        <td align="center"><code>3</code></td>
-        <td>Dataset Region Reference (#H5R_DATASET_REGION2): A reference to a region within a
-            dataset in this file or an external file.</td>
-      </tr>
-      <tr>
-        <td align="center"><code>4</code></td>
-        <td>Attribute Reference (#H5R_ATTR): A reference to an attribute attached to an object
-            in this file or an external file.</td>
-      </tr>
-      <tr>
-        <td align="center"><code>5-15</code></td>
+        <td align="center"><code>3-15</code></td>
         <td>Reserved</td>
       </tr>
       </table>
@@ -8792,7 +8781,7 @@ link may have changed. If the link does not work, use the latest version of this
   <td colspan="4"><br />Filter Description List <em>(variable size)</em><br /><br /></td>
 </tr>
 </table>
-
+u
 <table>
 <caption align="top"><strong>Fields: Filter Pipeline Message - Version 2</strong></caption>
 <tr>
@@ -8910,7 +8899,7 @@ link may have changed. If the link does not work, use the latest version of this
 <tr valign=top>
   <td>Name Length</td>
   <td>Each filter has an optional null-terminated ASCII name and this field holds the length of the name
-      including the null termination padded with nulls to be a multiple of eight. If the filter has no name
+      including the null termination. If the filter has no name
       then a value of zero is stored in this field.<br />
       Filters with IDs less than 256 (in other words, filters that are defined in this format documentation)
       do not store the <em>Name Length</em> or <em>Name</em> fields.</td>
@@ -8941,7 +8930,7 @@ link may have changed. If the link does not work, use the latest version of this
 </tr>
 <tr valign=top>
   <td>Name</td>
-  <td>If the <em>Name Length</em> field is non-zero then it will contain the size of this field, padded
+  <td>If the <em>Name Length</em> field is non-zero then it will contain the size of this field, not padded
       to a multiple of eight. This field contains a null-terminated, ASCII character string to serve as
       a comment/name for the filter.</td>
 </tr>
@@ -12044,7 +12033,7 @@ See the reference manual description for these two public routines.
 </tr>
 <tr>
   <td>Length</td>
-  <td>The size in bytes from <em>Length</em> to the end of the selection info.</td>
+  <td>The size in bytes from <em>Rank</em> to the end of the selection info.</td>
 </tr>
 <tr>
   <td>Rank</td>
