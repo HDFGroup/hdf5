@@ -387,10 +387,11 @@ test('buildBody: mention shows approver when a non-requested owner signs off', (
   assert.ok(!body.includes('@alice'));
 });
 
-test('buildBody: shows multiple requested reviewers when more than one is assigned', () => {
+test('buildBody: shows only primary (first) reviewer when more than one is assigned', () => {
   const areas = [makeArea('src', ['alice', 'bob'], 10)];
   const body  = buildBody(areas, new Set(), new Set(['alice', 'bob']));
-  assert.ok(body.includes('— @alice, @bob'));
+  assert.ok(body.includes('— @alice'));
+  assert.ok(!body.includes('@bob'));
 });
 
 test('buildBody: always contains the marker', () => {

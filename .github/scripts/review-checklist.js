@@ -174,10 +174,10 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
     const signedOff = !!approver;
     const box       = signedOff ? 'x' : ' ';
     const tick      = signedOff ? ' ✅' : '';
-    // Signed off: show who approved. Pending: show all effective reviewers.
+    // Signed off: show who approved. Pending: show the primary (first) reviewer.
     const mention   = approver
       ? ` — @${approver}`
-      : effectiveReviewers.length > 0 ? ` — ${effectiveReviewers.map(o => `@${o}`).join(', ')}` : '';
+      : effectiveReviewers.length > 0 ? ` — @${effectiveReviewers[0]}` : '';
     return { text: `- [${box}] **${area.label}**${tick}${mention}`, signedOff };
   });
 
