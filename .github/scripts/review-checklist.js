@@ -167,7 +167,10 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
     // If no CODEOWNER is assigned for this area, fall back to non-CODEOWNER
     // reviewers so manually-assigned people are shown and their approval counts.
     const effectiveReviewers = ownerReviewers.length > 0 ? ownerReviewers : nonOwnerReviewers;
-    const approver  = effectiveReviewers.find(o => approvedUsers.has(o));
+    // Any owner's approval counts for sign-off, not only the assigned reviewer's.
+    // Fall back to effectiveReviewers for areas with no CODEOWNER (non-owner assignee).
+    const approver  = area.owners.find(o => approvedUsers.has(o))
+      || effectiveReviewers.find(o => approvedUsers.has(o));
     const signedOff = !!approver;
     const box       = signedOff ? 'x' : ' ';
     const tick      = signedOff ? ' ✅' : '';
