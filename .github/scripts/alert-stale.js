@@ -1,8 +1,8 @@
-// Once an issue/PR has carried a staleness label past its alert threshold,
+// PR-only: once a PR has carried a staleness label past its alert threshold,
 // ping a human to decide instead of auto-closing -- assignees first, then
-// (for PRs) requested reviewers, then the author. Alerts only once per
-// staleness episode: the "needs-decision" label prevents re-pinging on
-// every scheduled run until a maintainer clears it.
+// requested reviewers, then the author. Alerts only once per staleness
+// episode: the "needs-decision" label prevents re-pinging on every
+// scheduled run until a maintainer clears it.
 const ALERT_LABEL = "needs-decision";
 const ALERT_DAYS_BY_STALE_LABEL = {
   stale: 14,
@@ -60,6 +60,8 @@ async function runAlertStale({ github, context, core }) {
     });
 
     for (const item of items) {
+      if (!item.pull_request) continue; // PR-only workflow; ignore issues even if labeled manually
+
       const labelNames = item.labels.map((l) => (typeof l === "string" ? l : l.name));
       if (labelNames.includes(ALERT_LABEL)) continue; // already alerted this episode
 

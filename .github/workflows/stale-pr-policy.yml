@@ -1,11 +1,12 @@
-# Flags inactive issues/PRs instead of letting them sit indefinitely.
-# Ready (non-draft) PRs and issues use actions/stale for labeling.
-# Draft PRs get a longer window and only reset on an explicit "still working
-# on this" comment, since a stale draft can otherwise look "fresh" from CI
-# pushes alone. Nothing is ever auto-closed: once a PR has been stale past
-# its alert threshold, the assignee (falling back to requested reviewers,
-# then the author) is pinged to decide whether to close it or keep it open.
-name: Stale PR/issue policy
+# Flags inactive PRs instead of letting them sit indefinitely. Issues are
+# intentionally untouched by this workflow.
+# Ready (non-draft) PRs use actions/stale for labeling. Draft PRs get a
+# longer window and only reset on an explicit "still working on this"
+# comment, since a stale draft can otherwise look "fresh" from CI pushes
+# alone. Nothing is ever auto-closed: once a PR has been stale past its
+# alert threshold, the assignee (falling back to requested reviewers, then
+# the author) is pinged to decide whether to close it or keep it open.
+name: Stale PR policy
 
 on:
   workflow_dispatch:
@@ -26,16 +27,11 @@ jobs:
       - uses: actions/stale@eb5cf3af3ac0a1aa4c9c45633dd1ae542a27a899 # v10.3.0
         with:
           exempt-draft-pr: true
-          days-before-issue-stale: 60
+          days-before-issue-stale: -1 # issues are out of scope for this workflow
           days-before-pr-stale: 30
           days-before-close: -1 # never auto-close; see alert-stale job
-          stale-issue-label: stale
           stale-pr-label: stale
-          exempt-issue-labels: "pinned,security"
           exempt-pr-labels: "pinned,security"
-          stale-issue-message: >
-            This issue has had no activity for 60 days and has been marked stale.
-            Comment to keep it open, or it will be flagged for maintainer review.
           stale-pr-message: >
             This pull request has had no activity for 30 days and has been marked stale.
             Push a commit or comment to keep it open, or it will be flagged for maintainer review.
