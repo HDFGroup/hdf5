@@ -36,11 +36,10 @@ async function findLabelAddedAt(github, owner, repo, issue_number, labelName) {
 async function pickAlertTargets(github, owner, repo, item) {
   if (item.assignees?.length) return item.assignees.map((u) => u.login);
 
-  if (item.pull_request) {
-    const { data } = await github.rest.pulls.listRequestedReviewers({ owner, repo, pull_number: item.number });
-    const reviewers = (data.users || []).map((u) => u.login);
-    if (reviewers.length) return reviewers;
-  }
+  // Caller guarantees item is a PR (see the `pull_request` filter in runAlertStale).
+  const { data } = await github.rest.pulls.listRequestedReviewers({ owner, repo, pull_number: item.number });
+  const reviewers = (data.users || []).map((u) => u.login);
+  if (reviewers.length) return reviewers;
 
   return item.user ? [item.user.login] : [];
 }

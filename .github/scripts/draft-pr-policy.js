@@ -2,7 +2,7 @@
 // comment matching KEEP_ALIVE_RE resets the clock -- a CI-triggered push
 // or bot comment shouldn't make an abandoned draft look "fresh".
 const LABEL = "draft-stale";
-const STALE_DAYS = 90;
+const STALE_DAYS = 60;
 const KEEP_ALIVE_RE = /\bstill working on (this|it)\b/i;
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
