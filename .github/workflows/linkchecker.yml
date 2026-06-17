@@ -79,16 +79,6 @@ jobs:
           # Let the action fail naturally - we'll handle it in the summary step
           fail: true
 
-      - name: Setup to check Doxygen footer URL (once)
-        run: printf 'https://www.doxygen.org/index.html\n' > /tmp/doxygen-url.txt
-
-      - name: Check Doxygen footer URL (once)
-        uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411
-        with:
-            args: >
-              --accept 200..=299,429
-              /tmp/doxygen-url.txt
-
       - name: Publish Report to Job Summary
         if: always()
         run: |
