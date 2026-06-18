@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-06-17</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-06-18</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -4095,17 +4095,13 @@ Member Type Message<br  />
 <tr>
 <th width="10%">Bits</th><th>Meaning</th></tr>
 <tr>
-<td>0-3</td><td><b>Type.</b> This four-bit value contains the revised reference types. The values defined are: <table width="100%">
+<td>0-3</td><td><b>Type.</b> This four-bit value contains the revised generic reference type. The value defined is: <table width="100%">
 <tr>
 <th width="20%">Value</th><th align="left">Description</th></tr>
 <tr>
-<td align="center"><code>2</code></td><td>Object Reference (<a class="el" href="_h5_rpublic_8h.html#a7d148ddc165e65b01efabfd738ac056ea58376ddd57d594982e0034a3ca2e5bad">H5R_OBJECT2</a>): A reference to another object in this file or an external file.</td></tr>
+<td align="center"><code>2</code></td><td>It covers all three revised reference types: Object Reference (<a class="el" href="_h5_rpublic_8h.html#a7d148ddc165e65b01efabfd738ac056ea58376ddd57d594982e0034a3ca2e5bad">H5R_OBJECT2</a>), Dataset Region Reference (<a class="el" href="_h5_rpublic_8h.html#a7d148ddc165e65b01efabfd738ac056ea2099d2dee8001ab3ce2e7041af5c93d6">H5R_DATASET_REGION2</a>), and Attribute Reference (<a class="el" href="_h5_rpublic_8h.html#a7d148ddc165e65b01efabfd738ac056eae63b3cfa3688767f46335fad6db981a5">H5R_ATTR</a>). </td></tr>
 <tr>
-<td align="center"><code>3</code></td><td>Dataset Region Reference (<a class="el" href="_h5_rpublic_8h.html#a7d148ddc165e65b01efabfd738ac056ea2099d2dee8001ab3ce2e7041af5c93d6">H5R_DATASET_REGION2</a>): A reference to a region within a dataset in this file or an external file.</td></tr>
-<tr>
-<td align="center"><code>4</code></td><td>Attribute Reference (<a class="el" href="_h5_rpublic_8h.html#a7d148ddc165e65b01efabfd738ac056eae63b3cfa3688767f46335fad6db981a5">H5R_ATTR</a>): A reference to an attribute attached to an object in this file or an external file.</td></tr>
-<tr>
-<td align="center"><code>5-15</code></td><td>Reserved</td></tr>
+<td align="center"><code>3-15</code></td><td>Reserved</td></tr>
 </table>
 </td></tr>
 <tr>
@@ -5534,7 +5530,7 @@ Filter Description List <em>(variable size)</em><br  />
 <br  />
 </td></tr>
 </table>
-<table class="doxtable">
+<p>u </p><table class="doxtable">
 <caption align="top"><b>Fields: Filter Pipeline Message - Version 2</b></caption>
 <tr>
 <th width="30%">Field Name</th><th>Description</th></tr>
@@ -5601,7 +5597,7 @@ Links to any relevant information, including licensing information </li>
 </table>
 </td></tr>
 <tr valign="top">
-<td>Name Length</td><td>Each filter has an optional null-terminated ASCII name and this field holds the length of the name including the null termination padded with nulls to be a multiple of eight. If the filter has no name then a value of zero is stored in this field.<br  />
+<td>Name Length</td><td>Each filter has an optional null-terminated ASCII name and this field holds the length of the name including the null termination. If the filter has no name then a value of zero is stored in this field.<br  />
  Filters with IDs less than 256 (in other words, filters that are defined in this format documentation) do not store the <em>Name Length</em> or <em>Name</em> fields.</td></tr>
 <tr valign="top">
 <td>Flags</td><td>The flags indicate certain properties for a filter. The bit values defined so far are: <table class="doxtable">
@@ -5616,7 +5612,7 @@ Links to any relevant information, including licensing information </li>
 <tr valign="top">
 <td>Number of Client Data Values</td><td>Each filter can store integer values to control how the filter operates. The number of entries in the <em>Client Data</em> array is stored in this field.</td></tr>
 <tr valign="top">
-<td>Name</td><td>If the <em>Name Length</em> field is non-zero then it will contain the size of this field, padded to a multiple of eight. This field contains a null-terminated, ASCII character string to serve as a comment/name for the filter.</td></tr>
+<td>Name</td><td>If the <em>Name Length</em> field is non-zero then it will contain the size of this field, not padded to a multiple of eight. This field contains a null-terminated, ASCII character string to serve as a comment/name for the filter.</td></tr>
 <tr valign="top">
 <td>Client Data</td><td>This is an array of four-byte integers which will be passed to the filter function. The <em>Client Data Number of Values</em> determines the number of elements in the array.</td></tr>
 </table>
@@ -7675,7 +7671,7 @@ Points Selection Info <em>(variable size)</em><br  />
 <tr>
 <th width="30%">Field Name</th><th>Description</th></tr>
 <tr>
-<td>Length</td><td>The size in bytes from <em>Length</em> to the end of the selection info.</td></tr>
+<td>Length</td><td>The size in bytes from <em>Rank</em> to the end of the selection info.</td></tr>
 <tr>
 <td>Rank</td><td>The number of dimensions.</td></tr>
 <tr>
