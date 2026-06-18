@@ -1,11 +1,11 @@
 # Flags inactive PRs instead of letting them sit indefinitely. Issues are
 # intentionally untouched by this workflow.
 # Ready (non-draft) PRs use actions/stale for labeling. Draft PRs get a
-# longer window and only reset on an explicit "still working on this"
-# comment, since a stale draft can otherwise look "fresh" from CI pushes
-# alone. Nothing is ever auto-closed: once a PR has been stale past its
-# alert threshold, the assignee (falling back to requested reviewers, then
-# the author) is pinged to decide whether to close it or keep it open.
+# longer window and only reset by checking a keep-alive box in the bot's
+# own comment, since a stale draft can otherwise look "fresh" from CI
+# pushes alone. Nothing is ever auto-closed: once a PR has been stale past
+# its alert threshold, the assignee (falling back to requested reviewers,
+# then the author) is pinged to decide whether to close it or keep it open.
 name: Stale PR policy
 
 on:

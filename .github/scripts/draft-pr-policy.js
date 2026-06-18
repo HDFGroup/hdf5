@@ -1,9 +1,13 @@
-// Draft PRs get a longer inactivity window than ready PRs, and only a
-// comment matching KEEP_ALIVE_RE resets the clock -- a CI-triggered push
-// or bot comment shouldn't make an abandoned draft look "fresh".
+// Draft PRs get a longer inactivity window than ready PRs, and only checking
+// the keep-alive box in the bot's own comment resets the clock -- a
+// CI-triggered push or unrelated comment shouldn't make an abandoned draft
+// look "fresh". Checking a box is also easier to discover and use than
+// remembering an exact phrase to comment.
 const LABEL = "draft-stale";
 const STALE_DAYS = 60;
-const KEEP_ALIVE_RE = /\bstill working on (this|it)\b/i;
+const KEEPALIVE_MARKER = "<!-- draft-stale-keepalive -->";
+const KEEPALIVE_CHECKBOX = "- [ ] Still working on this -- check this box to keep the draft open";
+const KEEPALIVE_CHECKED_RE = /-\s*\[[xX]\]\s*Still working on this/;
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const daysSince = (isoDate) => (Date.now() - new Date(isoDate).getTime()) / MS_PER_DAY;
@@ -23,15 +27,10 @@ async function ensureLabel(github, owner, repo) {
   }
 }
 
-async function findLabelAddedAt(github, owner, repo, issue_number) {
-  const events = await github.paginate(github.rest.issues.listEvents, { owner, repo, issue_number, per_page: 100 });
-  const labeledEvents = events.filter((e) => e.event === "labeled" && e.label?.name === LABEL);
-  return labeledEvents.length ? labeledEvents[labeledEvents.length - 1].created_at : null;
-}
-
-async function hasKeepAliveComment(github, owner, repo, issue_number, since) {
-  const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number, since, per_page: 100 });
-  return comments.some((c) => KEEP_ALIVE_RE.test(c.body || ""));
+async function findKeepAliveComment(github, owner, repo, issue_number) {
+  const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number, per_page: 100 });
+  const marked = comments.filter((c) => c.body?.includes(KEEPALIVE_MARKER));
+  return marked.length ? marked[marked.length - 1] : null; // most recent stale episode's comment
 }
 
 async function runDraftPolicy({ github, context, core }) {
@@ -52,19 +51,18 @@ async function runDraftPolicy({ github, context, core }) {
           repo,
           issue_number: pr.number,
           body:
+            `${KEEPALIVE_MARKER}\n` +
             `This draft has had no activity for ${STALE_DAYS} days and has been marked \`${LABEL}\`.\n\n` +
-            `Comment "still working on this" to keep it alive — a commit or other automated update alone won't reset this. ` +
+            `${KEEPALIVE_CHECKBOX}\n\n` +
+            `Checking the box is the only thing that resets this -- a commit or other automated update alone won't. ` +
             `Otherwise it will be flagged for maintainer review.`,
         });
       }
       continue;
     }
 
-    const labelAddedAt = await findLabelAddedAt(github, owner, repo, pr.number);
-    if (!labelAddedAt) continue; // label present but no matching event found (e.g. applied manually); leave for next run
-
-    const keptAlive = await hasKeepAliveComment(github, owner, repo, pr.number, labelAddedAt);
-    if (keptAlive) {
+    const keepAliveComment = await findKeepAliveComment(github, owner, repo, pr.number);
+    if (keepAliveComment && KEEPALIVE_CHECKED_RE.test(keepAliveComment.body)) {
       await github.rest.issues.removeLabel({ owner, repo, issue_number: pr.number, name: LABEL }).catch(() => {});
       await github.rest.issues.createComment({
         owner,
