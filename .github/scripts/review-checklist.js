@@ -167,11 +167,16 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
     // If no CODEOWNER is assigned for this area, fall back to non-CODEOWNER
     // reviewers so manually-assigned people are shown and their approval counts.
     const effectiveReviewers = ownerReviewers.length > 0 ? ownerReviewers : nonOwnerReviewers;
-    const approver  = effectiveReviewers.find(o => approvedUsers.has(o));
+    // Any owner's approval counts for sign-off, not only the assigned reviewer's.
+    // Fall back to effectiveReviewers for areas with no CODEOWNER (non-owner assignee).
+    const approver  = area.owners.find(o => approvedUsers.has(o))
+      || effectiveReviewers.find(o => approvedUsers.has(o));
     const signedOff = !!approver;
     const box       = signedOff ? 'x' : ' ';
     const tick      = signedOff ? ' ✅' : '';
-    // Signed off: show who approved. Pending: show all effective reviewers.
+    // Signed off: show who approved. Pending: show all confirmed reviewers for
+    // this area (normally just the load-balanced pick, plus any CODEOWNER who
+    // was manually added on top of it).
     const mention   = approver
       ? ` — @${approver}`
       : effectiveReviewers.length > 0 ? ` — ${effectiveReviewers.map(o => `@${o}`).join(', ')}` : '';
@@ -185,9 +190,8 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
     MARKER,
     '## Review Checklist',
     '',
-    'This PR touches the following areas. Each needs at least one',
-    'sign-off from its listed owners before merging — an approval',
-    'covering only one area does **not** satisfy the others.',
+    'This PR touches the following areas. Each needs a sign-off',
+    'from its listed owners before merging.',
     '',
     ...rows,
   ];
@@ -265,8 +269,9 @@ async function removeUnselectedAfterDelay(github, core, { owner, repo, pr_number
 //   synchronize (normal push to open PR, checklist already exists)
 //               → preserve the existing assignment unchanged
 //
-//   new-PR      (opened / reopened / ready_for_review, or first-synchronize
-//                race where opened was cancelled before the checklist existed)
+//   new-PR      (opened / reopened / ready_for_review, or opening-race where
+//                opened was cancelled by synchronize or review_requested before
+//                the checklist existed)
 //     draft     → clear auto-assignments; defer requests until ready for review
 //     non-draft → full flow: clear → request → wait 15 s → re-clear
 //
@@ -301,21 +306,22 @@ async function coordinateReviewers(github, context, core, {
     core.info(`Author ${prAuthor} is not a code owner — skipping assignee`);
   }
 
-  // ── synchronize race detection ───────────────────────────────────────────
-  // When a fork PR is created, GitHub fires both `opened` and `synchronize`.
-  // With cancel-in-progress: true the synchronize run can win and the opened
-  // cleanup is cancelled — leaving all CODEOWNERS auto-assignments intact.
+  // ── opening race detection ───────────────────────────────────────────────
+  // For fork PRs, GitHub fires opened + synchronize in quick succession; for
+  // any PR, CODEOWNERS auto-assignment fires review_requested shortly after
+  // opened. With cancel-in-progress: true the last event's run wins, and the
+  // opened cleanup is cancelled — leaving auto-assignments intact.
   // Detect this by checking whether a checklist comment exists yet; if not,
-  // treat this synchronize as a new-PR event.
-  const isFirstSyncRace = action === 'synchronize' &&
-                          !(await checklistExists(github, pr));
+  // treat the event as a new-PR event and run full selection.
+  const isOpeningRace = (action === 'synchronize' || action === 'review_requested') &&
+                        !(await checklistExists(github, pr));
 
   const isNewPR = ['opened', 'reopened', 'ready_for_review'].includes(action) ||
-                  isFirstSyncRace;
+                  isOpeningRace;
 
-  // ── synchronize (normal) ─────────────────────────────────────────────────
+  // ── preserve-existing (synchronize / reviewer change) ────────────────────
   if (!isNewPR) {
-    core.info('synchronize — preserving existing reviewer assignments');
+    core.info(`${action} — preserving existing reviewer assignments`);
     return new Set(existingRequested);
   }
 
