@@ -13,6 +13,7 @@
 #include "h5trav.h"
 #include "h5tools.h"
 #include "H5private.h"
+#include "H5VLprivate.h"
 
 /* Replace uthash's default key comparison function with a wrapper around H5Otoken_cmp */
 #undef HASH_KEYCMP
@@ -50,12 +51,13 @@ typedef struct {
 } trav_visitor_t;
 
 typedef struct {
-    trav_seen_hash_t     *objects_seen;  /* Hash table of objects seen already */
-    const trav_visitor_t *visitor;       /* Information for visiting each link/object */
-    bool                  is_absolute;   /* Whether the traversal has absolute paths */
-    const char           *base_grp_name; /* Name of the group that serves as the base
-                                          * for iteration */
-    unsigned fields;                     /* Fields needed in H5O_info2_t struct */
+    trav_seen_hash_t     *objects_seen;   /* Hash table of objects seen already */
+    const trav_visitor_t *visitor;        /* Information for visiting each link/object */
+    bool                  is_absolute;    /* Whether the traversal has absolute paths */
+    size_t                obj_token_size; /* Amount of bytes used in an object token */
+    const char           *base_grp_name;  /* Name of the group that serves as the base
+                                           * for iteration */
+    unsigned fields;                      /* Fields needed in H5O_info2_t struct */
 } trav_ud_traverse_t;
 
 typedef struct {
@@ -116,9 +118,56 @@ h5trav_set_verbose(int print_verbose)
 }
 
 /*-------------------------------------------------------------------------
- * "h5trav info" public functions. used in h5diff
+ * Function: trav_token_get_size
+ *
+ * Purpose:  Given an object ID, retrieves the size of an object token from
+ *           the VOL connector the object is opened with
+ *
+ * Return:   Non-negative on success/negative on failure
  *-------------------------------------------------------------------------
  */
+static herr_t
+trav_token_get_size(hid_t obj_id, size_t *token_size)
+{
+    H5VL_file_cont_info_t cont_info     = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
+    H5VL_file_get_args_t  file_get_args = {0};
+    hid_t                 connector_id  = H5I_INVALID_HID;
+    hid_t                 file_id       = H5I_INVALID_HID;
+    void                 *file_obj      = NULL;
+    herr_t                ret_value     = SUCCEED;
+
+    if (H5I_FILE == H5Iget_type(obj_id))
+        file_id = obj_id;
+    else if ((file_id = H5Iget_file_id(obj_id)) < 0)
+        H5TOOLS_GOTO_ERROR(FAIL, "couldn't get file ID from object ID");
+
+    if ((connector_id = H5VLget_connector_id(file_id)) < 0)
+        H5TOOLS_GOTO_ERROR(FAIL, "couldn't get VOL connector ID from file ID");
+
+    if (NULL == (file_obj = H5VLobject(file_id)))
+        H5TOOLS_GOTO_ERROR(FAIL, "couldn't get file object from ID");
+
+    file_get_args.op_type                 = H5VL_FILE_GET_CONT_INFO;
+    file_get_args.args.get_cont_info.info = &cont_info;
+    if (H5VLfile_get(file_obj, connector_id, &file_get_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        H5TOOLS_GOTO_ERROR(FAIL, "couldn't get container info");
+
+    if (cont_info.token_size > H5O_MAX_TOKEN_SIZE)
+        H5TOOLS_GOTO_ERROR(FAIL, "invalid object token size");
+
+    *token_size = cont_info.token_size;
+
+done:
+    H5E_BEGIN_TRY
+    {
+        if (file_id != obj_id)
+            H5Oclose(file_id);
+        H5VLclose(connector_id);
+    }
+    H5E_END_TRY
+
+    return ret_value;
+}
 
 /*-------------------------------------------------------------------------
  * Function: trav_token_add
@@ -129,10 +178,16 @@ h5trav_set_verbose(int print_verbose)
  *-------------------------------------------------------------------------
  */
 static herr_t
-trav_token_add(trav_seen_hash_t **objects_seen_ptr, H5O_token_t *token, const char *path,
+trav_token_add(trav_seen_hash_t **objects_seen_ptr, H5O_token_t *token, size_t token_size, const char *path,
                trav_seen_t **visited_obj_ret)
 {
     trav_seen_hash_t *entry = NULL;
+
+    assert(token_size <= H5O_MAX_TOKEN_SIZE);
+
+    /* Nothing to do if object tokens are 0 bytes in size */
+    if (0 == token_size)
+        return SUCCEED;
 
     if (NULL == (entry = malloc(sizeof(*entry))))
         return FAIL;
@@ -145,7 +200,7 @@ trav_token_add(trav_seen_hash_t **objects_seen_ptr, H5O_token_t *token, const ch
     /* HASH_ADD modifies what's pointed to by objects_seen_ptr when it
      * initializes the hash table after being called for the first time
      */
-    HASH_ADD(hh, (*objects_seen_ptr), obj.token, sizeof(H5O_token_t), entry);
+    HASH_ADD(hh, (*objects_seen_ptr), obj.token, token_size, entry);
 
     if (visited_obj_ret)
         *visited_obj_ret = &entry->obj;
@@ -162,12 +217,18 @@ trav_token_add(trav_seen_hash_t **objects_seen_ptr, H5O_token_t *token, const ch
  *-------------------------------------------------------------------------
  */
 static bool
-trav_token_visited(hid_t loc_id, trav_seen_hash_t *objects_seen, H5O_token_t *token,
+trav_token_visited(hid_t loc_id, trav_seen_hash_t *objects_seen, H5O_token_t *token, size_t token_size,
                    trav_seen_t **visited_obj_ret)
 {
     trav_seen_hash_t *entry = NULL;
 
-    HASH_FIND(hh, objects_seen, token, sizeof(H5O_token_t), entry);
+    assert(token_size <= H5O_MAX_TOKEN_SIZE);
+
+    /* Nothing to do if object tokens are 0 bytes in size */
+    if (0 == token_size)
+        return false;
+
+    HASH_FIND(hh, objects_seen, token, token_size, entry);
 
     if (entry && visited_obj_ret)
         *visited_obj_ret = &entry->obj;
@@ -242,9 +303,11 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info2_t *linfo, void *_uda
          *  already visited, if it isn't there already
          */
         if (oinfo.rc > 1) {
-            already_visited = trav_token_visited(loc_id, udata->objects_seen, &oinfo.token, &visited_obj);
+            already_visited = trav_token_visited(loc_id, udata->objects_seen, &oinfo.token,
+                                                 udata->obj_token_size, &visited_obj);
             if (!already_visited) {
-                if (trav_token_add(&udata->objects_seen, &oinfo.token, full_name, &visited_obj) < 0)
+                if (trav_token_add(&udata->objects_seen, &oinfo.token, udata->obj_token_size, full_name,
+                                   &visited_obj) < 0)
                     return H5_ITER_ERROR;
             }
         }
@@ -290,7 +353,18 @@ traverse(hid_t file_id, const char *grp_name, bool visit_start, bool recurse, co
 {
     trav_ud_traverse_t udata = {0}; /* User data for iteration callback */
     H5O_info2_t        oinfo;       /* Object info for starting group */
+    size_t             token_size;
+    herr_t             status;
     int                ret_value = 0;
+
+    /* Determine how large an object token is so we can properly hash them */
+    H5E_BEGIN_TRY
+    {
+        status = trav_token_get_size(file_id, &token_size);
+    }
+    H5E_END_TRY;
+    if (status < 0)
+        token_size = sizeof(H5O_token_t);
 
     /* Get info for starting object */
     if (H5Oget_info_by_name3(file_id, grp_name, &oinfo, fields, H5P_DEFAULT) < 0)
@@ -303,15 +377,16 @@ traverse(hid_t file_id, const char *grp_name, bool visit_start, bool recurse, co
     /* Go visiting, if the object is a group */
     if (oinfo.type == H5O_TYPE_GROUP) {
         /* Set up user data structure */
-        udata.objects_seen  = NULL;
-        udata.visitor       = visitor;
-        udata.is_absolute   = (*grp_name == '/');
-        udata.base_grp_name = grp_name;
-        udata.fields        = fields;
+        udata.objects_seen   = NULL;
+        udata.visitor        = visitor;
+        udata.is_absolute    = (*grp_name == '/');
+        udata.obj_token_size = token_size;
+        udata.base_grp_name  = grp_name;
+        udata.fields         = fields;
 
         /* Check for multiple links to top group */
         if (oinfo.rc > 1) {
-            if (trav_token_add(&udata.objects_seen, &oinfo.token, grp_name, NULL) < 0)
+            if (trav_token_add(&udata.objects_seen, &oinfo.token, token_size, grp_name, NULL) < 0)
                 H5TOOLS_GOTO_ERROR(-1, "couldn't add visited object to hash table");
         }
 
@@ -344,6 +419,11 @@ done:
 
     return ret_value;
 }
+
+/*-------------------------------------------------------------------------
+ * "h5trav info" public functions. used in h5diff
+ *-------------------------------------------------------------------------
+ */
 
 /*-------------------------------------------------------------------------
  * Function: trav_info_add
@@ -728,7 +808,7 @@ trav_table_add(trav_table_t *table, const char *path, const H5O_info2_t *oinfo)
     table->objs[new_obj_idx].links     = NULL;
 
     /* Add object to the hash table tracking its objects table index */
-    if (oinfo) {
+    if (oinfo && table->obj_token_size != 0) {
         if (NULL == (entry = malloc(sizeof(*entry))))
             return FAIL;
         memcpy(&entry->token, &oinfo->token, sizeof(H5O_token_t));
@@ -737,7 +817,7 @@ trav_table_add(trav_table_t *table, const char *path, const H5O_info2_t *oinfo)
         /* HASH_ADD modifies what's pointed to by table->priv_data when it
          * initializes the hash table after being called for the first time
          */
-        HASH_ADD(hh, (*(trav_table_hash_t **)&table->priv_data), token, sizeof(H5O_token_t), entry);
+        HASH_ADD(hh, (*(trav_table_hash_t **)&table->priv_data), token, table->obj_token_size, entry);
     }
 
     return SUCCEED;
@@ -762,6 +842,10 @@ trav_table_addlink(trav_table_t *table, const H5O_token_t *obj_token, const char
     if (!table)
         return FAIL;
 
+    /* Nothing to do if object tokens are 0 bytes in size */
+    if (0 == table->obj_token_size)
+        return SUCCEED;
+
     /* Variable must be called "loc_id" for use in HASH_FIND's key comparison
      * function (redirected to calling trav_token_visited_cmp(loc_id, ...))
      */
@@ -770,7 +854,7 @@ trav_table_addlink(trav_table_t *table, const H5O_token_t *obj_token, const char
     /* Look for object in hash table tracking index values. If not found, fall
      * back to linear scan
      */
-    HASH_FIND(hh, ((trav_table_hash_t *)table->priv_data), obj_token, sizeof(H5O_token_t), entry);
+    HASH_FIND(hh, ((trav_table_hash_t *)table->priv_data), obj_token, table->obj_token_size, entry);
     if (entry) {
         i = entry->index;
 
@@ -863,11 +947,22 @@ trav_table_init(hid_t fid, trav_table_t **tbl)
 {
     trav_table_t *table = (trav_table_t *)malloc(sizeof(trav_table_t));
     if (table) {
+        herr_t status;
+
         table->fid       = fid;
         table->size      = 0;
         table->nobjs     = 0;
         table->objs      = NULL;
         table->priv_data = NULL;
+
+        /* Determine how large an object token is so we can properly hash them */
+        H5E_BEGIN_TRY
+        {
+            status = trav_token_get_size(fid, &table->obj_token_size);
+        }
+        H5E_END_TRY;
+        if (status < 0)
+            table->obj_token_size = sizeof(H5O_token_t);
     }
     *tbl = table;
 }

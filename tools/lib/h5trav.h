@@ -112,6 +112,7 @@ typedef struct trav_obj_t {
 
 typedef struct trav_table_t {
     hid_t       fid;
+    size_t      obj_token_size;
     size_t      size;
     size_t      nobjs;
     trav_obj_t *objs;
