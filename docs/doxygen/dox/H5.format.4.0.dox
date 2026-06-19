@@ -7597,16 +7597,16 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <td colspan="4"><br />Data Address<sup>O</sup> <em>(optional)</em><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4">Dimension 0 Size</td>
+  <td colspan="4">Dimension 1 Size</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Dimension 1 Size</td>
+  <td colspan="4">Dimension 2 Size</td>
 </tr>
 <tr align="center">
   <td colspan="4">...</td>
 </tr>
-<tr>
-  <td colspan="4">Dataset Element Size <em>(optional)</em></td>
+<tr align="center">
+  <td colspan="4">Dimension \#n Size</td>
 </tr>
 <tr>
   <td colspan="4">Compact Data Size <em>(optional)</em></td>
@@ -7652,8 +7652,10 @@ another datatype) and the dataspace for a dataset describes the location of the 
 <tr valign=top>
   <td>Dimensionality</td>
   <td>An array has a fixed dimensionality. This field specifies the number of dimension size fields later
-      in the message. The value stored for chunked storage is 1 greater than the number of dimensions in
-      the dataset&rsquo;s dataspace. For example, 2 is stored for a 1 dimensional dataset.</td>
+      in the message. 
+      <br />For chunked storage, the value stored is one greater than the dataset&rsquo;s actual number of
+      dimemsions. For example, a 1-dimensional dataset stores a value of 2.
+      This increment accounts for the dataset element size which occupies the final dimension entry.</td>
 </tr>
 <tr valign=top>
   <td>Layout Class</td>
@@ -7688,14 +7690,15 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 <tr valign=top>
   <td>Dimension \#n Size</td>
-  <td>For contiguous and compact storage the dimensions define the entire size of the array while for chunked storage
-      they define the size of a single chunk. In all cases, they are in units of array elements (not bytes). The
-      first dimension stored in the list of dimensions is the slowest changing dimension and the last dimension
-      stored is the fastest changing dimension.</td>
-</tr>
-<tr>
-  <td>Dataset Element Size</td>
-  <td>The size of a dataset element, in bytes. This field is only present for chunked storage.</td>
+  <td>For contiguous and compact storage the dimensions define the entire size of the array.
+      They are in units of array elements (not bytes).
+      The first dimension stored in the list of dimensions is the slowest changing dimension and the last dimension
+      stored is the fastest changing dimension.
+      <br />For chunked storage, the dimensions define the size of a single chunk.  They are in 
+      units of array elements (not bytes).
+      The first dimension stored in the list of dimensions is the slowest changing dimension and the 
+      (n - 1) dimension stored is the fastest changing dimension.
+      The last dimension stored is the dataset element size.</td>
 </tr>
 <tr>
   <td>Compact Data Size</td>
@@ -7870,19 +7873,16 @@ Class-specific information for chunked storage (layout class 2):
   <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4">Dimension 0 Size</td>
+  <td colspan="4">Dimension 1 Size</td>
 </tr>
 <tr>
-  <td colspan="4">Dimension 1 Size</td>
+  <td colspan="4">Dimension 2 Size</td>
 </tr>
 <tr>
   <td colspan="4">...</td>
 </tr>
 <tr>
   <td colspan="4">Dimension \#n Size</td>
-</tr>
-<tr>
-  <td colspan="4">Dataset Element Size</td>
 </tr>
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
@@ -7896,8 +7896,11 @@ Class-specific information for chunked storage (layout class 2):
 </tr>
 <tr>
   <td>Dimensionality</td>
-  <td>>A chunk has a fixed dimensionality. This field specifies the number of dimension size fields
-       later in the message.</td>
+  <td>A chunk has a fixed dimensionality. 
+      This field specifies the number of dimension size fields
+      later in the message.  The value stored is 1 greater than the dataset&rsquo;s actual
+      number of dimensions. For example, a 1-dimensional dataset stores a value of 2.
+      This increment accounts for the dataset element size which occupies the final dimension entry.</td>
 </tr>
 <tr>
   <td>Address</td>
@@ -7910,11 +7913,8 @@ Class-specific information for chunked storage (layout class 2):
   <td>Dimension \#n Size</td>
   <td>These values define the dimension size of a single chunk, in units of array elements (not bytes).
       The first dimension stored in the list of dimensions is the slowest changing dimension and the
-      last dimension stored is the fastest changing dimension.</td>
-</tr>
-<tr>
-  <td>Dataset Element Size</td>
-  <td>The size of a dataset element, in bytes.</td>
+      (n - 1) dimension stored is the fastest changing dimension.
+      The final dimension stored is the dataset element size.</td>
 </tr>
 </table>
 
@@ -8037,10 +8037,10 @@ information for the virtual layout class as well as indexing information for the
   <td bgcolor=#DDDDDD><em>This space inserted only to align table nicely</em></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 0 Size <em>(variable size)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension 1 Size <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 1 Size <em>(variable size)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension 2 Size <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr>
   <td colspan="4"><br />...<br /><br /></td>
@@ -8088,8 +8088,14 @@ information for the virtual layout class as well as indexing information for the
 </tr>
 <tr>
   <td>Dimensionality</td>
-  <td>A chunk has fixed dimension. This field specifies the number of <em>Dimension Size</em> fields
-      later in the message.</td>
+  <td>A chunk has a fixed dimensionality.
+      This field specifies the number of dimension size fields
+      later in the message.
+      The value stored is 1 greater than the dataset&rsquo;s actual
+      number of dimensions. For example, a 1-dimensional dataset stores a value of 2.
+      This increment accounts for the dataset element size which occupies the final dimension entry.
+    </td>
+</tr>
 </tr>
 <tr>
   <td>Dimension Size Encoded Length</td>
@@ -8099,7 +8105,8 @@ information for the virtual layout class as well as indexing information for the
   <td>Dimension \#n Size</td>
   <td>These values define the dimension size of a single chunk, in units of array elements (not bytes).
       The first dimension stored in the list of dimensions is the slowest changing dimension and the
-      last dimension stored is the fastest changing dimension.</td>
+      (n - 1) dimension stored is the fastest changing dimension.
+      The final dimension stored is the dataset element size.</td>
 </tr>
 <tr>
   <td>Chunk Indexing Type</td>
