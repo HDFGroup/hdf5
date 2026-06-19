@@ -12600,20 +12600,9 @@ See the reference manual description for these two public routines.
 </table>
 
 \section subsec_fmt4_appendixd_encoderv VIII.B. Reference Encoding (Revised)
-For the following reference type, the Reference Header and Reference Block are stored together
-as the dataset's raw data:
-<ul>
-  <li>Object Reference (#H5R_OBJECT2) (without reference to an external file)</li>
-</ul>
 
-For the following reference types, the Reference Header plus the @ref FMT4GlobalHeapID "Global Heap ID"
-are stored as the dataset's raw data in the file. The global heap ID is used to locate the
-Reference Block stored in the global heap:
-<ul>
-  <li>Object Reference (#H5R_OBJECT2) (with reference to an external file)</li>
-  <li>Dataset Region Reference (#H5R_DATASET_REGION2) (with/without reference to an external file)</li>
-  <li>Attribute Reference (#H5R_ATTR) (with/without reference to an external file)</li>
-</ul>
+Reference information is stored as the dataset's raw data.  The layout format is described below as 
+the Reference Header and the Reference Block.
 
 <table>
 <caption><strong>Layout: Reference Header</strong></caption>
@@ -12623,7 +12612,7 @@ Reference Block stored in the global heap:
   <th width="25%">byte</th>
   <th>byte</th>
 </tr>
-<tr>
+<tr align="center">
   <td>Reference Type</td>
   <td>Flags</td>
   <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
@@ -12686,34 +12675,34 @@ Reference Block stored in the global heap:
   <th width="25%">byte</th>
   <th>byte</th>
 </tr>
-<tr>
+<tr align="center">
   <td>Token Size</td>
   <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
-<tr>
+<tr align="center">
   <td colspan="4"><br />Token <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr>
   <td colspan="2">Length of External File Name</td>
   <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
-<tr>
+<tr align="center">
   <td colspan="4"><br />External File Name <em>(variable size)</em><br /><br /></td>
 </tr>
-<tr>
+<tr align="center">
   <td colspan="4">Size of Dataspace Selection</td>
 </tr>
-<tr>
+<tr align="center">
   <td colspan="4">Rank of Dataspace Selection</td>
 </tr>
-<tr>
+<tr align="center">
   <td colspan="4"><br />Dataspace Selection Information <em>(variable size)</em><br /><br /></td>
 </tr>
-<tr>
+<tr align="center">
   <td colspan="2">Length of Attribute Name </td>
   <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
-<tr>
+<tr align="center">
   <td colspan="4"><br />Attribute Name <em>(variable size)</em><br /><br /></td>
 </tr>
 </table>
@@ -12742,7 +12731,19 @@ Reference Block stored in the global heap:
   <td>This is the name of the external file being referenced.<br />
       This field exists if bit 0 of <em>flags</em> is set.
 </td>
+<tr>
+  <td>Size of Dataspace Selection</td>
+  <td>This is the size of the Dataspace Selection Information.<br />
+      This field exists if the <em>Reference Type</em> is #H5R_DATASET_REGION2.
+</td>
 </tr>
+<tr>
+  <td>Rank of Dataspace Selection</td>
+  <td>This is the number of dimensions in the dataspace.<br />
+      This field exists if the <em>Reference Type</em> is #H5R_DATASET_REGION2.
+</td>
+</tr>
+
 <tr>
   <td>Dataspace Selection Information</td>
   <td>See @ref FMT4DataspaceSEL "Dataspace Selection".<br />
@@ -12759,6 +12760,74 @@ Reference Block stored in the global heap:
       This field exists if the <em>Reference Type</em> is #H5R_ATTR.</td>
 </tr>
 </table>
+
+<br />
+Depending on the <em>reference type</em> and the <em>flags</em> fields in the Reference Header, 
+the Reference Block is stored using one of two methods:
+<ul>
+  <li>Direct method</li>
+      <br />The Reference Header and Reference Block are stored together directly as the dataset's raw data.
+      This method is used by:
+      <ul>
+        <li>Object Reference (H5R_OBJECT2) without reference to an external file</li>
+      </ul>
+  <li>Indirect method</li>
+      <br />The Reference Header, the size of the blob, and the Global Heap ID are stored as the dataset's raw data.
+      The blob size gives the size of the Reference Block stored in the global heap, 
+      and the @ref FMT4GlobalHeapID "Global Heap ID" is used to locate it.
+      This method is used by:
+        <ul>
+        <li>Object Reference (#H5R_OBJECT2) (with reference to an external file)</li>
+        <li>Dataset Region Reference (#H5R_DATASET_REGION2) (with/without reference to an external file)</li>
+        <li>Attribute Reference (#H5R_ATTR) (with/without reference to an external file)</li>
+        </ul>
+      The layout for this method after the Reference Header is as follows:
+
+<table>
+<caption><strong>Layout: Indirect Method</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align="center">
+  <td colspan="4">Blob Size</td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Collection Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4">Object Index</td>
+</tr>
+
+</table>
+
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+
+<br />
+<table>
+<caption><strong>Fields: Indirect Method</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Blob Size</td>
+  <td>This is the size of the Reference Block stored in the global heap.</td>
+</tr>
+<tr>
+  <td>Collection Address</td>
+  <td>See @ref FMT4GlobalHeapID "Global Heap ID".</td>
+</tr>
+<tr>
+  <td>Object Index</td>
+  <td>See @ref FMT4GlobalHeapID "Global Heap ID".</td>
+</tr>
+</table>
+
+</ul>
 
 \section subsec_fmt4_appendixd_encodedp VIII.C. Reference Encoding (Backward Compatibility)
 The two references described below are maintained to preserve compatibility with previous versions
