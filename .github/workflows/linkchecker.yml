@@ -52,7 +52,6 @@ jobs:
             --user-agent "Mozilla/5.0 (compatible; Lychee/v0.1)"
             --skip-missing
             --exclude ".*%23.*"
-            --exclude "www.doxygen.org.index.html"
             --exclude "eigen.tuxfamily.org"
             --exclude "gnu.org"
             --exclude "en.wikipedia.org"
