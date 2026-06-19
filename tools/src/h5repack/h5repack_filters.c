@@ -394,8 +394,8 @@ apply_filters(const char    *name,    /* object name from traverse list */
                     unsigned options_mask;
                     unsigned pixels_per_block;
 
-                    options_mask     = obj->filter[i].cd_values[0];
-                    pixels_per_block = obj->filter[i].cd_values[1];
+                    options_mask     = obj->filter[i].cd_values[H5Z_SZIP_PARM_MASK];
+                    pixels_per_block = obj->filter[i].cd_values[H5Z_SZIP_PARM_PPB];
 
                     /* set up for szip data */
                     if (H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths) < 0)
