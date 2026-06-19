@@ -349,8 +349,17 @@ async function coordinateReviewers(github, context, core, {
   // own CODEOWNERS engine happening to be the surviving event in a
   // cancel-in-progress race with a concurrent push, so it's not airtight,
   // but it's the best signal the API exposes.
+  //
+  // The bot's own removeUnselected/removeRequestedReviewers calls (draft-opened
+  // CODEOWNERS cleanup, stale-exclusion enforcement below) fire this very
+  // review_request_removed event and self-trigger another run. Without this
+  // guard that self-triggered run would read its own bookkeeping removal as a
+  // deliberate human decision and add the login to the *persisted* exclusion
+  // set — permanently blocking that owner from ever being auto-assigned to
+  // this PR again, even after a draft becomes ready for review.
+  const isBotSender = context.payload.sender?.type === 'Bot';
   const updatedExcluded = new Set(excludedReviewers);
-  if (action === 'review_request_removed' && context.payload.requested_reviewer) {
+  if (action === 'review_request_removed' && context.payload.requested_reviewer && !isBotSender) {
     updatedExcluded.add(context.payload.requested_reviewer.login);
     core.info(`${context.payload.requested_reviewer.login} explicitly removed — excluding from future auto-reassignment`);
   } else if (action === 'review_requested' && context.payload.requested_reviewer) {
