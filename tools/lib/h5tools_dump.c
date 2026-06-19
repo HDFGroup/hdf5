@@ -3178,6 +3178,36 @@ h5tools_print_fill_value(h5tools_str_t *buffer /*in,out*/, const h5tool_format_t
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    h5tools_dump_filter_extra
+ *
+ * Purpose:     RFC-HDFG-2026-001 §9: emits PARAMS_STRING and DESCRIPTION
+ *              lines for a single filter, nested inside that filter's own
+ *              FILTERS{} entry rather than as siblings of it.
+ *
+ * Return:      void
+ *-------------------------------------------------------------------------
+ */
+static void
+h5tools_dump_filter_extra(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx,
+                          h5tools_str_t *buffer, hsize_t *curr_pos, size_t ncols, const char *params_str,
+                          const char *description)
+{
+    if (params_str) {
+        ctx->need_prefix = true;
+        h5tools_str_reset(buffer);
+        h5tools_str_append(buffer, "%s \"%s\"", PARAMS_STRING, params_str);
+        h5tools_render_element(stream, info, ctx, buffer, curr_pos, ncols, (hsize_t)0, (hsize_t)0);
+    }
+
+    if (description) {
+        ctx->need_prefix = true;
+        h5tools_str_reset(buffer);
+        h5tools_str_append(buffer, "%s \"%s\"", FILTER_DESCRIPTION, description);
+        h5tools_render_element(stream, info, ctx, buffer, curr_pos, ncols, (hsize_t)0, (hsize_t)0);
+    }
+}
+
+/*-------------------------------------------------------------------------
  * Function:    dump_dcpl
  *
  * Purpose:     prints several dataset create property list properties
@@ -3553,6 +3583,11 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
 
         if (nfilters) {
             for (i = 0; i < nfilters; i++) {
+                char        params_str_buf[H5Z_CONFIG_STRING_MAX + 1];
+                char       *params_str   = NULL; /* escaped, NULL if none to print */
+                const char *filter_descr = NULL; /* library-owned, no free needed */
+                bool        have_extra; /* true if this filter has a PARAMS_STRING and/or DESCRIPTION */
+
                 cd_nelmts = NELMTS(cd_values);
                 filtn     = H5Pget_filter2(dcpl_id, (unsigned)i, &filt_flags, &cd_nelmts, cd_values,
                                            sizeof(f_name), f_name, NULL);
@@ -3560,25 +3595,122 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                 if (filtn < 0)
                     continue; /* nothing to print for invalid filter */
 
+                /* RFC-HDFG-2026-001 §9: -p prints PARAMS_STRING and DESCRIPTION
+                 * nested inside this filter's own FILTERS{} entry. */
+                if (dcpl_id >= 0 && ctx->show_filter_params) {
+                    size_t plen = 0;
+                    if (H5Pget_filter_params_by_idx(dcpl_id, (unsigned)i, params_str_buf,
+                                                     sizeof(params_str_buf), &plen) >= 0 &&
+                        plen > 0) {
+                        /* escape embedded double-quote characters as \" so the
+                         * outer quoted form is unambiguous. */
+                        size_t ebuf_size = 2 * plen + 1;
+                        char  *ebuf      = (char *)malloc(ebuf_size);
+                        if (ebuf) {
+                            size_t in_i, out_i = 0;
+                            for (in_i = 0; in_i < plen; in_i++) {
+                                if (params_str_buf[in_i] == '\\' || params_str_buf[in_i] == '"')
+                                    ebuf[out_i++] = '\\';
+                                ebuf[out_i++] = params_str_buf[in_i];
+                            }
+                            ebuf[out_i] = '\0';
+                            params_str  = ebuf;
+                        }
+                    }
+
+                    {
+                        H5Z_class_info_t finfo;
+                        if (H5Zget_filter_info2(filtn, &finfo) >= 0 && finfo.description != NULL)
+                            filter_descr = finfo.description;
+                    }
+                }
+                have_extra = (params_str != NULL) || (filter_descr != NULL);
+
                 ctx->need_prefix = true;
 
                 h5tools_str_reset(&buffer);
                 switch (filtn) {
                     case H5Z_FILTER_DEFLATE:
-                        h5tools_str_append(&buffer, "%s %s %s %d %s", DEFLATE, BEGIN, DEFLATE_LEVEL,
-                                           cd_values[0], END);
-                        h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
-                                               (hsize_t)0, (hsize_t)0);
+                        if (have_extra) {
+                            h5tools_str_append(&buffer, "%s %s", DEFLATE, BEGIN);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+
+                            ctx->indent_level++;
+
+                            ctx->need_prefix = true;
+
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, "%s %d", DEFLATE_LEVEL, cd_values[0]);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+
+                            h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols,
+                                                      params_str, filter_descr);
+
+                            ctx->indent_level--;
+
+                            ctx->need_prefix = true;
+
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, "%s", END);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
+                        else {
+                            h5tools_str_append(&buffer, "%s %s %s %d %s", DEFLATE, BEGIN, DEFLATE_LEVEL,
+                                               cd_values[0], END);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
                         break;
                     case H5Z_FILTER_SHUFFLE:
-                        h5tools_str_append(&buffer, "%s", SHUFFLE);
-                        h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
-                                               (hsize_t)0, (hsize_t)0);
+                        if (have_extra) {
+                            h5tools_str_append(&buffer, "%s %s", SHUFFLE, BEGIN);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+
+                            ctx->indent_level++;
+                            h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols,
+                                                      params_str, filter_descr);
+                            ctx->indent_level--;
+
+                            ctx->need_prefix = true;
+
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, "%s", END);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
+                        else {
+                            h5tools_str_append(&buffer, "%s", SHUFFLE);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
                         break;
                     case H5Z_FILTER_FLETCHER32:
-                        h5tools_str_append(&buffer, "%s", FLETCHER32);
-                        h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
-                                               (hsize_t)0, (hsize_t)0);
+                        if (have_extra) {
+                            h5tools_str_append(&buffer, "%s %s", FLETCHER32, BEGIN);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+
+                            ctx->indent_level++;
+                            h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols,
+                                                      params_str, filter_descr);
+                            ctx->indent_level--;
+
+                            ctx->need_prefix = true;
+
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, "%s", END);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
+                        else {
+                            h5tools_str_append(&buffer, "%s", FLETCHER32);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
                         break;
                     case H5Z_FILTER_SZIP:
                         szip_options_mask     = cd_values[0];
@@ -3636,6 +3768,9 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                                                    (hsize_t)0, (hsize_t)0);
                         }
 
+                        h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols, params_str,
+                                                  filter_descr);
+
                         ctx->indent_level--;
 
                         ctx->need_prefix = true;
@@ -3646,15 +3781,62 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                                                (hsize_t)0, (hsize_t)0);
                         break;
                     case H5Z_FILTER_NBIT:
-                        h5tools_str_append(&buffer, "%s", NBIT);
-                        h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
-                                               (hsize_t)0, (hsize_t)0);
+                        if (have_extra) {
+                            h5tools_str_append(&buffer, "%s %s", NBIT, BEGIN);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+
+                            ctx->indent_level++;
+                            h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols,
+                                                      params_str, filter_descr);
+                            ctx->indent_level--;
+
+                            ctx->need_prefix = true;
+
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, "%s", END);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
+                        else {
+                            h5tools_str_append(&buffer, "%s", NBIT);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
                         break;
                     case H5Z_FILTER_SCALEOFFSET:
-                        h5tools_str_append(&buffer, "%s %s %s %d %s", SCALEOFFSET, BEGIN, SCALEOFFSET_MINBIT,
-                                           cd_values[0], END);
-                        h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
-                                               (hsize_t)0, (hsize_t)0);
+                        if (have_extra) {
+                            h5tools_str_append(&buffer, "%s %s", SCALEOFFSET, BEGIN);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+
+                            ctx->indent_level++;
+
+                            ctx->need_prefix = true;
+
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, "%s %d", SCALEOFFSET_MINBIT, cd_values[0]);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+
+                            h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols,
+                                                      params_str, filter_descr);
+
+                            ctx->indent_level--;
+
+                            ctx->need_prefix = true;
+
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, "%s", END);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
+                        else {
+                            h5tools_str_append(&buffer, "%s %s %s %d %s", SCALEOFFSET, BEGIN,
+                                               SCALEOFFSET_MINBIT, cd_values[0], END);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
                         break;
                     default:
                         h5tools_str_append(&buffer, "%s %s", "USER_DEFINED_FILTER", BEGIN);
@@ -3689,6 +3871,10 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
                                                    (hsize_t)0, (hsize_t)0);
                         }
+
+                        h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols, params_str,
+                                                  filter_descr);
+
                         ctx->indent_level--;
 
                         ctx->need_prefix = true;
@@ -3700,47 +3886,8 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                         break;
                 } /*switch*/
 
-                /* RFC-HDFG-2026-001 §9: -p prints PARAMS_STRING and DESCRIPTION
-                 * alongside the existing FILTERS{} entries. */
-                if (dcpl_id >= 0 && ctx->show_filter_params) {
-                    char   pbuf[H5Z_CONFIG_STRING_MAX + 1];
-                    size_t plen = 0;
-                    if (H5Pget_filter_params_by_idx(dcpl_id, (unsigned)i, pbuf, sizeof(pbuf), &plen) >= 0 &&
-                        plen > 0) {
-                        /* escape embedded double-quote characters as \" so the
-                         * outer quoted form is unambiguous. */
-                        size_t ebuf_size = 2 * plen + 1;
-                        char  *ebuf      = (char *)malloc(ebuf_size);
-                        if (ebuf) {
-                            size_t in_i, out_i = 0;
-                            for (in_i = 0; in_i < plen; in_i++) {
-                                if (pbuf[in_i] == '\\' || pbuf[in_i] == '"')
-                                    ebuf[out_i++] = '\\';
-                                ebuf[out_i++] = pbuf[in_i];
-                            }
-                            ebuf[out_i] = '\0';
-
-                            ctx->need_prefix = true;
-                            h5tools_str_reset(&buffer);
-                            h5tools_str_append(&buffer, "%s \"%s\"", PARAMS_STRING, ebuf);
-                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
-                                                   (hsize_t)0, (hsize_t)0);
-                            free(ebuf);
-                        }
-                    }
-
-                    /* Emit DESCRIPTION when the filter is registered and has one. */
-                    {
-                        H5Z_class_info_t finfo;
-                        if (H5Zget_filter_info2(filtn, &finfo) >= 0 && finfo.description != NULL) {
-                            ctx->need_prefix = true;
-                            h5tools_str_reset(&buffer);
-                            h5tools_str_append(&buffer, "%s \"%s\"", FILTER_DESCRIPTION, finfo.description);
-                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
-                                                   (hsize_t)0, (hsize_t)0);
-                        }
-                    }
-                }
+                if (params_str)
+                    free(params_str);
             } /*i*/
         }     /*nfilters*/
         else {

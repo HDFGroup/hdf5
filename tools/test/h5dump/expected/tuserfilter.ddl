@@ -11,8 +11,8 @@ DATASET "myfilter" {
          FILTER_ID 405
          COMMENT myfilter
          PARAMS { 5 6 }
+         PARAMS_STRING "cd_values=5:6"
       }
-      PARAMS_STRING "cd_values=5:6"
    }
    FILLVALUE {
       FILL_TIME H5D_FILL_TIME_IFSET

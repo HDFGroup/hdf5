@@ -7,8 +7,9 @@ DATASET "fletcher32" {
       SIZE XXXX (0.XXX:1 COMPRESSION)
    }
    FILTERS {
-      CHECKSUM FLETCHER32
-      DESCRIPTION "Fletcher32 checksum for end-to-end data integrity"
+      CHECKSUM FLETCHER32 {
+         DESCRIPTION "Fletcher32 checksum for end-to-end data integrity"
+      }
    }
    FILLVALUE {
       FILL_TIME H5D_FILL_TIME_IFSET
