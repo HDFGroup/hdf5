@@ -1778,10 +1778,10 @@ error:
 static int
 test_config_string_max_boundary(void)
 {
-    hid_t      dcpl          = H5I_INVALID_HID;
-    char      *ok_str        = NULL;
-    const char prefix[]      = "level = 6";
-    size_t     prefix_len    = sizeof(prefix) - 1;
+    hid_t      dcpl       = H5I_INVALID_HID;
+    char      *ok_str     = NULL;
+    const char prefix[]   = "level = 6";
+    size_t     prefix_len = sizeof(prefix) - 1;
     herr_t     ret;
     htri_t     deflate_avail;
 

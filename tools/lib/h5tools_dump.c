@@ -3600,7 +3600,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                 if (dcpl_id >= 0 && ctx->show_filter_params) {
                     size_t plen = 0;
                     if (H5Pget_filter_params_by_idx(dcpl_id, (unsigned)i, params_str_buf,
-                                                     sizeof(params_str_buf), &plen) >= 0 &&
+                                                    sizeof(params_str_buf), &plen) >= 0 &&
                         plen > 0) {
                         /* escape embedded double-quote characters as \" so the
                          * outer quoted form is unambiguous. */
