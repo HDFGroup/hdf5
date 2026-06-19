@@ -33,6 +33,32 @@ async function findKeepAliveComment(github, owner, repo, issue_number) {
   return marked.length ? marked[marked.length - 1] : null; // most recent stale episode's comment
 }
 
+// pr.updated_at is bumped by metadata-only changes (reviewer requested/removed, labels,
+// milestone, assignee, etc.), which would let a draft dodge the staleness check forever
+// without any real work happening. Use the latest commit/comment/review activity instead.
+async function lastRealActivityAt(github, owner, repo, pr) {
+  const timestamps = [new Date(pr.created_at).getTime()];
+
+  const commits = await github.paginate(github.rest.pulls.listCommits, { owner, repo, pull_number: pr.number, per_page: 100 });
+  for (const c of commits) {
+    const date = c.commit?.committer?.date || c.commit?.author?.date;
+    if (date) timestamps.push(new Date(date).getTime());
+  }
+
+  const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: pr.number, per_page: 100 });
+  for (const c of comments) timestamps.push(new Date(c.created_at).getTime());
+
+  const reviews = await github.paginate(github.rest.pulls.listReviews, { owner, repo, pull_number: pr.number, per_page: 100 });
+  for (const r of reviews) {
+    if (r.submitted_at) timestamps.push(new Date(r.submitted_at).getTime());
+  }
+
+  const reviewComments = await github.paginate(github.rest.pulls.listReviewComments, { owner, repo, pull_number: pr.number, per_page: 100 });
+  for (const rc of reviewComments) timestamps.push(new Date(rc.created_at).getTime());
+
+  return Math.max(...timestamps);
+}
+
 async function runDraftPolicy({ github, context, core }) {
   const { owner, repo } = context.repo;
   await ensureLabel(github, owner, repo);
@@ -44,7 +70,8 @@ async function runDraftPolicy({ github, context, core }) {
     const labelNames = pr.labels.map((l) => l.name);
 
     if (!labelNames.includes(LABEL)) {
-      if (daysSince(pr.updated_at) >= STALE_DAYS) {
+      const lastActivity = await lastRealActivityAt(github, owner, repo, pr);
+      if (daysSince(lastActivity) >= STALE_DAYS) {
         await github.rest.issues.addLabels({ owner, repo, issue_number: pr.number, labels: [LABEL] });
         await github.rest.issues.createComment({
           owner,
