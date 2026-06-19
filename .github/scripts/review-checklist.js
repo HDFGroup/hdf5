@@ -286,10 +286,8 @@ async function requestReviewers(github, core, { owner, repo, pr_number }, select
 //
 // Determines who should be in confirmedRequested (the checklist display set).
 // Returns { confirmedRequested: Set<login>, excludedReviewers: Set<login> }.
-// The bot is purely additive everywhere except two deliberate exceptions —
-// it only ever fills in a load-balanced reviewer for an area that doesn't
-// already have one (human-added or auto-assigned), and never removes a
-// reviewer who's already there. Stripping is reserved for:
+// The bot strips reviewers only in three deliberate cases; everywhere else it
+// is purely additive (fills in a load-balanced pick for uncovered areas only):
 //
 //   explicit removal  → review_request_removed adds that login to the
 //                 persisted excludedReviewers set (see EXCLUDED_PREFIX).
@@ -303,11 +301,14 @@ async function requestReviewers(github, core, { owner, repo, pr_number }, select
 //               → GitHub's CODEOWNERS auto-assignment fires immediately on
 //                 creation regardless of draft status, dumping every
 //                 touched-area owner onto the PR before anyone's decided
-//                 review is even wanted yet. This is the other point the bot
-//                 clears reviewers — scoped to touchedAreaOwners, see below —
-//                 because it's the one point where "just-auto-assigned
-//                 CODEOWNERS noise" and "this PR's actual reviewer state" are
-//                 mechanically guaranteed to be the same thing.
+//                 review is even wanted yet. Cleared in full — no checklist
+//                 posted until the PR is ready for review.
+//
+//   non-draft, just (re)opened
+//               → Same CODEOWNERS avalanche. Pruned to the load-balanced
+//                 single pick per area before the checklist is first posted,
+//                 so reviewers aren't @-mentioned en masse before the final
+//                 reviewer set is known.
 //
 // Everywhere else:
 //
@@ -324,13 +325,13 @@ async function requestReviewers(github, core, { owner, repo, pr_number }, select
 //                 point to distinguish "noise from this PR's creation" from
 //                 "a real assignment from before it became a draft."
 //
-//   non-draft   → additive fill: chooseReviewers is given the *real*
+//   non-draft, any other event
+//               → additive fill: chooseReviewers is given the *real*
 //                 existingRequested, so it naturally skips any area that
 //                 already has an owner requested (manual or automatic) and
 //                 only picks for areas that don't. Idempotent and safe to run
-//                 on every event — no race detection or new-PR/synchronize
-//                 distinction is needed, because there's nothing destructive
-//                 left to gate.
+//                 on every event — no race detection needed, nothing
+//                 destructive left to gate.
 //
 async function coordinateReviewers(github, context, core, {
   owner, repo, pr_number, prData, allCodeOwners, catchAllOwners, touchedAreas, reviewerLoad,
@@ -402,6 +403,8 @@ async function coordinateReviewers(github, context, core, {
     core.info(`Author ${prAuthor} is not a code owner — skipping assignee`);
   }
 
+  const touchedAreaOwners = new Set([...touchedAreas.flatMap(a => a.owners), ...catchAllOwners]);
+
   if (isDraft) {
     if (action === 'opened' || action === 'reopened') {
       // (Re)opened directly as a draft — clear the CODEOWNERS avalanche from
@@ -410,7 +413,6 @@ async function coordinateReviewers(github, context, core, {
       // of touched paths). Deliberately not the repo-wide allCodeOwners — a
       // reviewer who owns unrelated areas (e.g. manually added for their
       // judgment, not their path ownership) is never touched.
-      const touchedAreaOwners = new Set([...touchedAreas.flatMap(a => a.owners), ...catchAllOwners]);
       await removeUnselected(github, core, pr, touchedAreaOwners, existingRequested, new Set());
       core.info('Draft PR opened — clearing auto-assigned reviewers, deferring until ready for review');
       return { confirmedRequested: new Set(), excludedReviewers: updatedExcluded };
@@ -421,9 +423,6 @@ async function coordinateReviewers(github, context, core, {
     return { confirmedRequested: new Set(existingRequested), excludedReviewers: updatedExcluded };
   }
 
-  // Non-draft: fill in a load-balanced reviewer only for areas that don't
-  // already have one requested. Never removes anyone already on the PR.
-  //
   // Excluded owners are dropped from each area's candidate pool first — an
   // area that just lost its only owner to an explicit removal must not have
   // chooseReviewers immediately hand that exact person right back as "the
@@ -432,6 +431,34 @@ async function coordinateReviewers(github, context, core, {
     ...area,
     owners: area.owners.filter(o => !updatedExcluded.has(o)),
   }));
+
+  if (action === 'opened' || action === 'reopened') {
+    // Non-draft, just (re)opened — same CODEOWNERS avalanche problem as the
+    // draft case: GitHub has already auto-assigned every touched-area owner.
+    // Prune to a load-balanced single pick per area BEFORE posting the
+    // checklist so reviewers aren't @-mentioned en masse. Pass an empty
+    // existingRequested so chooseReviewers treats every area as uncovered and
+    // picks fresh rather than seeing "already has an owner" and returning nothing.
+    const { selected, log } = chooseReviewers(eligibleAreas, {
+      prAuthor,
+      existingRequested: new Set(),
+      reviewerLoad,
+      LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
+    });
+    for (const msg of log) core.info(msg);
+
+    await removeUnselected(github, core, pr, touchedAreaOwners, existingRequested, selected);
+
+    const toRequest = new Set([...selected].filter(l => !existingRequested.has(l)));
+    if (toRequest.size > 0) await requestReviewers(github, core, pr, toRequest);
+
+    core.info(`Non-draft PR opened — pruned to load-balanced selection: ${[...selected].join(', ') || '(none)'}`);
+    return { confirmedRequested: selected, excludedReviewers: updatedExcluded };
+  }
+
+  // Non-draft, any other event: fill in a load-balanced reviewer only for
+  // areas that don't already have one requested. Never removes anyone already
+  // on the PR.
   const { selected, log } = chooseReviewers(eligibleAreas, {
     prAuthor,
     existingRequested, // real existing set — areas with an owner already present are skipped
