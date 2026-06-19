@@ -190,6 +190,15 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ## Tools
 
+### Fixed h5repack silently dropping a declared cd_nelmts for user-defined filters
+
+   `h5repack -f UD=<filtn>,<flag>,<cd_nelmts>` with no values following `cd_nelmts` silently
+   treated the declared count as 0 instead of validating it, because the trailing token (with
+   no comma after it) was never committed to `cd_nelmts` inside the parser. `parse_filter()` now
+   commits the trailing token to whichever UD field is still pending, so a declared, unfulfilled
+   `cd_nelmts` is correctly rejected with "incorrect number of compression parameters" instead of
+   being silently coerced to 0.
+
 ## Performance
 
 ## Fortran API
