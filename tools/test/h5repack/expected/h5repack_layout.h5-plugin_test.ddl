@@ -12,8 +12,8 @@ GROUP "/" {
             FILTER_ID 257
             COMMENT dynlib1
             PARAMS { 9 }
+            PARAMS_STRING "cd_values=9"
          }
-         PARAMS_STRING "cd_values=9"
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -35,8 +35,8 @@ GROUP "/" {
             FILTER_ID 257
             COMMENT dynlib1
             PARAMS { 9 }
+            PARAMS_STRING "cd_values=9"
          }
-         PARAMS_STRING "cd_values=9"
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -58,8 +58,8 @@ GROUP "/" {
             FILTER_ID 257
             COMMENT dynlib1
             PARAMS { 9 }
+            PARAMS_STRING "cd_values=9"
          }
-         PARAMS_STRING "cd_values=9"
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -81,8 +81,8 @@ GROUP "/" {
             FILTER_ID 257
             COMMENT dynlib1
             PARAMS { 9 }
+            PARAMS_STRING "cd_values=9"
          }
-         PARAMS_STRING "cd_values=9"
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -104,8 +104,8 @@ GROUP "/" {
             FILTER_ID 257
             COMMENT dynlib1
             PARAMS { 9 }
+            PARAMS_STRING "cd_values=9"
          }
-         PARAMS_STRING "cd_values=9"
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -127,8 +127,8 @@ GROUP "/" {
             FILTER_ID 257
             COMMENT dynlib1
             PARAMS { 9 }
+            PARAMS_STRING "cd_values=9"
          }
-         PARAMS_STRING "cd_values=9"
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -150,8 +150,8 @@ GROUP "/" {
             FILTER_ID 257
             COMMENT dynlib1
             PARAMS { 9 }
+            PARAMS_STRING "cd_values=9"
          }
-         PARAMS_STRING "cd_values=9"
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
