@@ -1,0 +1,72 @@
+# Flags inactive PRs instead of letting them sit indefinitely. Issues are
+# intentionally untouched by this workflow.
+# Ready (non-draft) PRs use actions/stale for labeling. Draft PRs get a
+# longer window and only reset by checking a keep-alive box in the bot's
+# own comment, since a stale draft can otherwise look "fresh" from CI
+# pushes alone. Nothing is ever auto-closed: once a PR has been stale past
+# its alert threshold, the assignee (falling back to requested reviewers,
+# then the author) is pinged to decide whether to close it or keep it open.
+name: Stale PR policy
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  mark-stale:
+    if: github.repository_owner == 'HDFGroup'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/stale@eb5cf3af3ac0a1aa4c9c45633dd1ae542a27a899 # v10.3.0
+        with:
+          exempt-draft-pr: true
+          days-before-issue-stale: -1 # issues are out of scope for this workflow
+          days-before-pr-stale: 30
+          days-before-close: -1 # never auto-close; see alert-stale job
+          stale-pr-label: stale
+          exempt-pr-labels: "pinned,security"
+          stale-pr-message: >
+            This pull request has had no activity for 30 days and has been marked stale.
+            Push a commit or comment to keep it open, or it will be flagged for maintainer review.
+
+  draft-pr-policy:
+    if: github.repository_owner == 'HDFGroup'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const { runDraftPolicy } = require('${{ github.workspace }}/.github/scripts/draft-pr-policy.js');
+            await runDraftPolicy({ github, context, core });
+
+  alert-stale:
+    needs: [mark-stale, draft-pr-policy]
+    if: github.repository_owner == 'HDFGroup'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const { runAlertStale } = require('${{ github.workspace }}/.github/scripts/alert-stale.js');
+            await runAlertStale({ github, context, core });
