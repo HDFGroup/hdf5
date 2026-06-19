@@ -2,6 +2,34 @@
 
 const MARKER = '<!-- hdf5-review-checklist-v1 -->';
 
+// Persisted record of reviewers explicitly removed via review_request_removed.
+// The checklist comment is the only durable storage available to this script,
+// so the exclusion list rides along as a second hidden marker in its body.
+// Once excluded, a reviewer is re-removed any time they reappear on the PR —
+// there's no reliable way to tell GitHub's own CODEOWNERS engine re-assigning
+// them on a later push apart from a deliberate re-add, so the explicit
+// removal is treated as the durable, sticky decision by default. A direct
+// review_requested for that exact login overrides it — see coordinateReviewers.
+const EXCLUDED_PREFIX = '<!-- hdf5-review-checklist-excluded:';
+const EXCLUDED_SUFFIX = '-->';
+
+// Extracts the persisted exclusion list from an existing checklist comment
+// body. Returns an empty Set if there's no comment yet or no marker in it.
+function parseExcluded(commentBody) {
+  if (!commentBody) return new Set();
+  const start = commentBody.indexOf(EXCLUDED_PREFIX);
+  if (start === -1) return new Set();
+  const end = commentBody.indexOf(EXCLUDED_SUFFIX, start);
+  if (end === -1) return new Set();
+  const list = commentBody.slice(start + EXCLUDED_PREFIX.length, end);
+  return new Set(list.split(',').map(s => s.trim()).filter(Boolean));
+}
+
+// Serializes the exclusion list back into its hidden-marker comment form.
+function serializeExcluded(excluded) {
+  return `${EXCLUDED_PREFIX}${[...excluded].join(',')}${EXCLUDED_SUFFIX}`;
+}
+
 // ── Pure helpers ──────────────────────────────────────────────────────────────
 
 function labelFromPattern(pattern) {
@@ -162,11 +190,17 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
   const allAreaOwners     = new Set(touchedAreas.flatMap(a => a.owners));
   const nonOwnerReviewers = [...confirmedRequested].filter(o => !allAreaOwners.has(o));
 
+  // Tracks which nonOwnerReviewers ended up displayed in some area's row (as
+  // the no-CODEOWNER fallback), so we know who's left over for the catch-all
+  // "additional reviewers" line below.
+  const usedAsFallback = new Set();
+
   const rowData = touchedAreas.map(area => {
     const ownerReviewers = area.owners.filter(o => confirmedRequested.has(o));
     // If no CODEOWNER is assigned for this area, fall back to non-CODEOWNER
     // reviewers so manually-assigned people are shown and their approval counts.
     const effectiveReviewers = ownerReviewers.length > 0 ? ownerReviewers : nonOwnerReviewers;
+    if (ownerReviewers.length === 0) nonOwnerReviewers.forEach(o => usedAsFallback.add(o));
     // Any owner's approval counts for sign-off, not only the assigned reviewer's.
     // Fall back to effectiveReviewers for areas with no CODEOWNER (non-owner assignee).
     const approver  = area.owners.find(o => approvedUsers.has(o))
@@ -186,6 +220,13 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
   const allDone = rowData.every(r => r.signedOff);
   const rows    = rowData.map(r => r.text);
 
+  // Reviewers on the PR who aren't an owner of any touched area and weren't
+  // pulled in as a no-CODEOWNER fallback either — e.g. a project lead added
+  // by hand for their judgment, not their path ownership. They don't gate any
+  // area's sign-off, but should still be visible rather than silently absent
+  // from the checklist.
+  const extraReviewers = nonOwnerReviewers.filter(o => !usedAsFallback.has(o));
+
   const parts = [
     MARKER,
     '## Review Checklist',
@@ -195,25 +236,23 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested) {
     '',
     ...rows,
   ];
+  if (extraReviewers.length > 0) {
+    const mentions = extraReviewers.map(o => approvedUsers.has(o) ? `@${o} ✅` : `@${o}`).join(', ');
+    parts.push('', `**Additional reviewers** (not owners of a touched area): ${mentions}`);
+  }
   if (allDone) parts.push('', '> ✅ All areas have been signed off.');
   return parts.join('\n');
 }
 
 // ── GitHub API helpers ────────────────────────────────────────────────────────
 
-// Returns true if the PR already has a checklist comment (MARKER present).
-async function checklistExists(github, { owner, repo, pr_number }) {
-  const comments = await github.paginate(github.rest.issues.listComments, {
-    owner, repo, issue_number: pr_number, per_page: 100,
-  });
-  return comments.some(c => c.body.includes(MARKER));
-}
-
-// Removes CODEOWNERS-auto-assigned reviewers whose login is NOT in keepSet.
-// Non-owner reviewers are never touched.
-async function removeUnselected(github, core, { owner, repo, pr_number }, allCodeOwners, currentRequested, keepSet) {
+// Removes auto-assignable reviewers (per prunableOwners — see the
+// touchedAreaOwners comment in coordinateReviewers) whose login is NOT in
+// keepSet. Anyone outside prunableOwners — including a CODEOWNER for areas
+// this PR doesn't touch — is never touched.
+async function removeUnselected(github, core, { owner, repo, pr_number }, prunableOwners, currentRequested, keepSet) {
   for (const reviewer of currentRequested) {
-    if (allCodeOwners.has(reviewer) && !keepSet.has(reviewer)) {
+    if (prunableOwners.has(reviewer) && !keepSet.has(reviewer)) {
       try {
         await github.rest.pulls.removeRequestedReviewers({
           owner, repo, pull_number: pr_number, reviewers: [reviewer],
@@ -243,54 +282,111 @@ async function requestReviewers(github, core, { owner, repo, pr_number }, select
   return confirmed;
 }
 
-// Waits for GitHub's async CODEOWNERS auto-assignment to fire, then re-fetches
-// the PR and removes any code owners that snuck in outside the selection set.
-async function removeUnselectedAfterDelay(github, core, { owner, repo, pr_number }, allCodeOwners, keepSet) {
-  await new Promise(resolve => setTimeout(resolve, 15000));
-  let retryPR;
-  try {
-    ({ data: retryPR } = await github.rest.pulls.get({ owner, repo, pull_number: pr_number }));
-  } catch (e) {
-    core.warning(`Could not re-fetch PR for reviewer cleanup retry: ${e.message}`);
-    return;
-  }
-  const retryRequested = new Set(retryPR.requested_reviewers.map(r => r.login).filter(Boolean));
-  await removeUnselected(github, core, { owner, repo, pr_number }, allCodeOwners, retryRequested, keepSet);
-}
-
 // ── Reviewer coordination ─────────────────────────────────────────────────────
 //
 // Determines who should be in confirmedRequested (the checklist display set).
-// Returns a Set<login>.  There are four distinct paths:
+// Returns { confirmedRequested: Set<login>, excludedReviewers: Set<login> }.
+// The bot is purely additive everywhere except two deliberate exceptions —
+// it only ever fills in a load-balanced reviewer for an area that doesn't
+// already have one (human-added or auto-assigned), and never removes a
+// reviewer who's already there. Stripping is reserved for:
+//
+//   explicit removal  → review_request_removed adds that login to the
+//                 persisted excludedReviewers set (see EXCLUDED_PREFIX).
+//                 Anyone in that set is stripped from every event from then
+//                 on, however they reappear, until a direct review_requested
+//                 for that exact login overrides it (the strongest available
+//                 signal that someone, right now, individually decided this
+//                 person should be back — see the updatedExcluded comment).
+//
+//   draft, just (re)opened as one
+//               → GitHub's CODEOWNERS auto-assignment fires immediately on
+//                 creation regardless of draft status, dumping every
+//                 touched-area owner onto the PR before anyone's decided
+//                 review is even wanted yet. This is the other point the bot
+//                 clears reviewers — scoped to touchedAreaOwners, see below —
+//                 because it's the one point where "just-auto-assigned
+//                 CODEOWNERS noise" and "this PR's actual reviewer state" are
+//                 mechanically guaranteed to be the same thing.
+//
+// Everywhere else:
 //
 //   read-only   (workflow_run, pull_request_review)
-//               → reflect whoever GitHub currently has as requested reviewers
+//               → reflect whoever GitHub currently has as requested
+//                 reviewers (minus excludedReviewers); never mutates anything
 //
-//   synchronize (normal push to open PR, checklist already exists)
-//               → preserve the existing assignment unchanged
+//   draft, any other event
+//               → leave existing reviewers alone, request no new ones. A PR
+//                 that was non-draft, picked up reviewers, and was *then*
+//                 converted to draft must not have those reviewers wiped out
+//                 by a later push — converted_to_draft isn't even in this
+//                 workflow's trigger list, so there's no reliable single
+//                 point to distinguish "noise from this PR's creation" from
+//                 "a real assignment from before it became a draft."
 //
-//   new-PR      (opened / reopened / ready_for_review, or opening-race where
-//                opened was cancelled by synchronize or review_requested before
-//                the checklist existed)
-//     draft     → clear auto-assignments; defer requests until ready for review
-//     non-draft → full flow: clear → request → wait 15 s → re-clear
+//   non-draft   → additive fill: chooseReviewers is given the *real*
+//                 existingRequested, so it naturally skips any area that
+//                 already has an owner requested (manual or automatic) and
+//                 only picks for areas that don't. Idempotent and safe to run
+//                 on every event — no race detection or new-PR/synchronize
+//                 distinction is needed, because there's nothing destructive
+//                 left to gate.
 //
 async function coordinateReviewers(github, context, core, {
-  owner, repo, pr_number, prData, allCodeOwners, touchedAreas, reviewerLoad,
-  LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
+  owner, repo, pr_number, prData, allCodeOwners, catchAllOwners, touchedAreas, reviewerLoad,
+  excludedReviewers, LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
 }) {
-  const existingRequested = new Set(prData.requested_reviewers.map(r => r.login).filter(Boolean));
-  const pr                = { owner, repo, pr_number };
+  const pr     = { owner, repo, pr_number };
+  const action = context.payload.action;
+
+  // A removal happening right now joins the persisted exclusion set
+  // immediately, so it's enforced starting with this very run. A direct
+  // review_requested for that exact login is the override: the strongest
+  // available signal of "someone, right now, individually decided this
+  // person should be back" — clear the exclusion so they aren't immediately
+  // stripped again on the next run. This can't be told apart from GitHub's
+  // own CODEOWNERS engine happening to be the surviving event in a
+  // cancel-in-progress race with a concurrent push, so it's not airtight,
+  // but it's the best signal the API exposes.
+  const updatedExcluded = new Set(excludedReviewers);
+  if (action === 'review_request_removed' && context.payload.requested_reviewer) {
+    updatedExcluded.add(context.payload.requested_reviewer.login);
+    core.info(`${context.payload.requested_reviewer.login} explicitly removed — excluding from future auto-reassignment`);
+  } else if (action === 'review_requested' && context.payload.requested_reviewer) {
+    const login = context.payload.requested_reviewer.login;
+    if (updatedExcluded.delete(login)) {
+      core.info(`${login} explicitly re-requested — clearing prior exclusion`);
+    }
+  }
+
+  const existingRequested = new Set(
+    prData.requested_reviewers.map(r => r.login).filter(Boolean).filter(l => !updatedExcluded.has(l))
+  );
 
   // ── read-only events ─────────────────────────────────────────────────────
   if (context.eventName === 'pull_request_review' || context.eventName === 'workflow_run') {
     core.info('Read-only event — reflecting current reviewer assignments');
-    return new Set(existingRequested);
+    return { confirmedRequested: new Set(existingRequested), excludedReviewers: updatedExcluded };
+  }
+
+  // Enforce the exclusion list against whatever's actually still on the PR —
+  // covers both this run's own removal and a prior exclusion GitHub may have
+  // since re-populated.
+  const stillExcludedButPresent = prData.requested_reviewers
+    .map(r => r.login).filter(Boolean).filter(l => updatedExcluded.has(l));
+  for (const login of stillExcludedButPresent) {
+    try {
+      await github.rest.pulls.removeRequestedReviewers({
+        owner, repo, pull_number: pr_number, reviewers: [login],
+      });
+      core.info(`Removed excluded reviewer ${login} (explicitly removed previously)`);
+    } catch (e) {
+      core.warning(`Could not remove excluded reviewer ${login}: ${e.message}`);
+    }
   }
 
   const prAuthor = prData.user.login;
   const isDraft  = prData.draft === true;
-  const action   = context.payload.action;
 
   // Assign the PR to its author when they are a code owner.
   if (allCodeOwners.has(prAuthor)) {
@@ -306,48 +402,51 @@ async function coordinateReviewers(github, context, core, {
     core.info(`Author ${prAuthor} is not a code owner — skipping assignee`);
   }
 
-  // ── opening race detection ───────────────────────────────────────────────
-  // For fork PRs, GitHub fires opened + synchronize in quick succession; for
-  // any PR, CODEOWNERS auto-assignment fires review_requested shortly after
-  // opened. With cancel-in-progress: true the last event's run wins, and the
-  // opened cleanup is cancelled — leaving auto-assignments intact.
-  // Detect this by checking whether a checklist comment exists yet; if not,
-  // treat the event as a new-PR event and run full selection.
-  const isOpeningRace = (action === 'synchronize' || action === 'review_requested') &&
-                        !(await checklistExists(github, pr));
-
-  const isNewPR = ['opened', 'reopened', 'ready_for_review'].includes(action) ||
-                  isOpeningRace;
-
-  // ── preserve-existing (synchronize / reviewer change) ────────────────────
-  if (!isNewPR) {
-    core.info(`${action} — preserving existing reviewer assignments`);
-    return new Set(existingRequested);
+  if (isDraft) {
+    if (action === 'opened' || action === 'reopened') {
+      // (Re)opened directly as a draft — clear the CODEOWNERS avalanche from
+      // this PR's creation. Owners of areas this PR actually touches, plus
+      // catch-all "*" owners (who GitHub auto-assigns on every PR regardless
+      // of touched paths). Deliberately not the repo-wide allCodeOwners — a
+      // reviewer who owns unrelated areas (e.g. manually added for their
+      // judgment, not their path ownership) is never touched.
+      const touchedAreaOwners = new Set([...touchedAreas.flatMap(a => a.owners), ...catchAllOwners]);
+      await removeUnselected(github, core, pr, touchedAreaOwners, existingRequested, new Set());
+      core.info('Draft PR opened — clearing auto-assigned reviewers, deferring until ready for review');
+      return { confirmedRequested: new Set(), excludedReviewers: updatedExcluded };
+    }
+    // Any other event while draft (synchronize, review_requested, ...):
+    // leave whoever's there alone, request no one new.
+    core.info('Draft PR — leaving existing reviewer assignments untouched, no new requests while draft');
+    return { confirmedRequested: new Set(existingRequested), excludedReviewers: updatedExcluded };
   }
 
-  // ── new-PR: load-balanced selection ──────────────────────────────────────
-  const { selected, log } = chooseReviewers(touchedAreas, {
+  // Non-draft: fill in a load-balanced reviewer only for areas that don't
+  // already have one requested. Never removes anyone already on the PR.
+  //
+  // Excluded owners are dropped from each area's candidate pool first — an
+  // area that just lost its only owner to an explicit removal must not have
+  // chooseReviewers immediately hand that exact person right back as "the
+  // pick for an area with no owner."
+  const eligibleAreas = touchedAreas.map(area => ({
+    ...area,
+    owners: area.owners.filter(o => !updatedExcluded.has(o)),
+  }));
+  const { selected, log } = chooseReviewers(eligibleAreas, {
     prAuthor,
-    existingRequested: new Set(), // ignore existing — this is a fresh assignment
+    existingRequested, // real existing set — areas with an owner already present are skipped
     reviewerLoad,
     LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
   });
   for (const msg of log) core.info(msg);
 
-  if (isDraft) {
-    // Draft: remove any auto-assignments but hold reviewer requests until
-    // the PR is marked ready for review.
-    await removeUnselected(github, core, pr, allCodeOwners, existingRequested, new Set());
-    core.info('Draft PR — reviewer assignment deferred until ready for review');
-    return new Set();
+  if (selected.size === 0) {
+    core.info('Every touched area already has a reviewer — nothing to add');
+    return { confirmedRequested: new Set(existingRequested), excludedReviewers: updatedExcluded };
   }
 
-  // Non-draft: enforce selection, request reviewers, then re-enforce after
-  // GitHub's async CODEOWNERS auto-assignment fires.
-  await removeUnselected(github, core, pr, allCodeOwners, existingRequested, selected);
   const confirmed = await requestReviewers(github, core, pr, selected);
-  await removeUnselectedAfterDelay(github, core, pr, allCodeOwners, selected);
-  return confirmed;
+  return { confirmedRequested: new Set([...existingRequested, ...confirmed]), excludedReviewers: updatedExcluded };
 }
 
 // ── Entry point ───────────────────────────────────────────────────────────────
@@ -416,8 +515,12 @@ module.exports = async function run({ github, context, core }) {
     return;
   }
 
-  const areas         = [];
-  const allCodeOwners = new Set();
+  const areas          = [];
+  const allCodeOwners  = new Set();
+  // Owners of the bare "*" pattern. GitHub's CODEOWNERS engine auto-assigns
+  // them on every PR regardless of which paths are touched, since "*" matches
+  // everything — they must be prunable even though "*" isn't a real area.
+  const catchAllOwners = new Set();
   for (const rawLine of coText.split('\n')) {
     const line = rawLine.trim();
     if (!line || line.startsWith('#')) continue;
@@ -427,7 +530,10 @@ module.exports = async function run({ github, context, core }) {
     const owners  = tokens.slice(1).filter(t => t.startsWith('@')).map(t => t.slice(1));
 
     owners.forEach(o => allCodeOwners.add(o));
-    if (pattern === '*') continue;
+    if (pattern === '*') {
+      owners.forEach(o => catchAllOwners.add(o));
+      continue;
+    }
     if (owners.length === 0) continue;
 
     areas.push({ pattern, label: labelFromPattern(pattern), owners });
@@ -470,9 +576,13 @@ module.exports = async function run({ github, context, core }) {
       });
       const stale = allComments.find(c => c.body.includes(MARKER));
       if (stale) {
+        // Preserve the exclusion list even though there's nothing to check off
+        // right now — it should still apply if this PR touches tracked areas again.
+        const preservedExcluded = serializeExcluded(parseExcluded(stale.body));
         await github.rest.issues.updateComment({
           owner, repo, comment_id: stale.id,
-          body: MARKER + '\n_No CODEOWNERS-tracked areas are touched by this PR — no review checklist required._',
+          body: MARKER + '\n_No CODEOWNERS-tracked areas are touched by this PR — no review checklist required._'
+            + '\n' + preservedExcluded,
         });
         core.info(`Cleared stale checklist comment #${stale.id}`);
       }
@@ -523,27 +633,35 @@ module.exports = async function run({ github, context, core }) {
   }
 
   // ----------------------------------------------------------------
-  // 7. Coordinate reviewer assignment → confirmed set for display.
+  // 7. Read the persisted exclusion list off the existing checklist comment
+  //    (if any), then coordinate reviewer assignment.
   // ----------------------------------------------------------------
-  const confirmedRequested = await coordinateReviewers(github, context, core, {
-    owner, repo, pr_number, prData, allCodeOwners, touchedAreas, reviewerLoad,
-    LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
+  let existingComment;
+  try {
+    const comments = await github.paginate(github.rest.issues.listComments, {
+      owner, repo, issue_number: pr_number, per_page: 100,
+    });
+    existingComment = comments.find(c => c.body.includes(MARKER));
+  } catch (error) {
+    core.warning(`Could not fetch existing checklist comment: ${error.message}`);
+  }
+  const excludedReviewers = parseExcluded(existingComment && existingComment.body);
+
+  const { confirmedRequested, excludedReviewers: updatedExcluded } = await coordinateReviewers(github, context, core, {
+    owner, repo, pr_number, prData, allCodeOwners, catchAllOwners, touchedAreas, reviewerLoad,
+    excludedReviewers, LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
   });
 
   // ----------------------------------------------------------------
   // 8. Build and post (or update) the checklist comment.
   // ----------------------------------------------------------------
-  const body = buildBody(touchedAreas, approvedUsers, confirmedRequested);
+  const body = buildBody(touchedAreas, approvedUsers, confirmedRequested) +
+    '\n' + serializeExcluded(updatedExcluded);
 
   try {
-    const comments = await github.paginate(github.rest.issues.listComments, {
-      owner, repo, issue_number: pr_number, per_page: 100,
-    });
-    const existing = comments.find(c => c.body.includes(MARKER));
-
-    if (existing) {
-      await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
-      core.info(`Updated checklist comment #${existing.id}`);
+    if (existingComment) {
+      await github.rest.issues.updateComment({ owner, repo, comment_id: existingComment.id, body });
+      core.info(`Updated checklist comment #${existingComment.id}`);
     } else {
       await github.rest.issues.createComment({ owner, repo, issue_number: pr_number, body });
       core.info('Created checklist comment');
@@ -553,9 +671,11 @@ module.exports = async function run({ github, context, core }) {
   }
 };
 
-module.exports.matchesPattern   = matchesPattern;
-module.exports.labelFromPattern = labelFromPattern;
-module.exports.attributeFiles   = attributeFiles;
-module.exports.computeApprovals = computeApprovals;
-module.exports.chooseReviewers  = chooseReviewers;
-module.exports.buildBody        = buildBody;
+module.exports.matchesPattern    = matchesPattern;
+module.exports.labelFromPattern  = labelFromPattern;
+module.exports.attributeFiles    = attributeFiles;
+module.exports.computeApprovals  = computeApprovals;
+module.exports.chooseReviewers   = chooseReviewers;
+module.exports.buildBody         = buildBody;
+module.exports.parseExcluded     = parseExcluded;
+module.exports.serializeExcluded = serializeExcluded;
