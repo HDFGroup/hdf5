@@ -212,14 +212,14 @@ public class TestH5Z {
                 int nfilters = H5.H5Pget_nfilters(dcpl_id);
                 assertEquals("nfilters after H5Pappend_filter", 1, nfilters);
 
-                // Verify the cd_values round-trip via H5Pget_filter2.
+                // Verify the cd_values round-trip via H5Pget_filter.
                 int[] cd_out      = new int[1];
                 int[] flags_out   = new int[1];
                 long[] cd_nelmts  = new long[] {1};
                 String[] name_out = new String[] {""};
                 int filter_id =
-                    H5.H5Pget_filter2(dcpl_id, 0, flags_out, cd_nelmts, cd_out, 256, name_out, null);
-                assertEquals("filter id from H5Pget_filter2", HDF5Constants.H5Z_FILTER_DEFLATE, filter_id);
+                    H5.H5Pget_filter(dcpl_id, 0, flags_out, cd_nelmts, cd_out, 256, name_out, new int[1]);
+                assertEquals("filter id from H5Pget_filter", HDF5Constants.H5Z_FILTER_DEFLATE, filter_id);
                 assertEquals("cd_nelmts", 1L, cd_nelmts[0]);
                 assertEquals("cd_values[0] (deflate level)", 9, cd_out[0]);
             }
@@ -274,9 +274,9 @@ public class TestH5Z {
         try {
             String cfg = "level = 6";
             long[] val = new long[1];
-            int ret    = H5.H5Zconfig_get_int(cfg, "level", val);
-            assertTrue("H5Zconfig_get_int returned non-negative", ret >= 0);
-            assertEquals("H5Zconfig_get_int value", 6L, val[0]);
+            int ret    = H5.H5Zconfig_get_param(cfg, "level", val);
+            assertTrue("H5Zconfig_get_param (int) returned non-negative", ret >= 0);
+            assertEquals("H5Zconfig_get_param (int) value", 6L, val[0]);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -290,9 +290,9 @@ public class TestH5Z {
         try {
             String cfg   = "scale = 1.5";
             double[] val = new double[1];
-            int ret      = H5.H5Zconfig_get_double(cfg, "scale", val);
-            assertTrue("H5Zconfig_get_double returned non-negative", ret >= 0);
-            assertEquals("H5Zconfig_get_double value", 1.5, val[0], 1e-10);
+            int ret      = H5.H5Zconfig_get_param(cfg, "scale", val);
+            assertTrue("H5Zconfig_get_param (double) returned non-negative", ret >= 0);
+            assertEquals("H5Zconfig_get_param (double) value", 1.5, val[0], 1e-10);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -306,14 +306,14 @@ public class TestH5Z {
         try {
             String cfg    = "lossless = true";
             boolean[] val = new boolean[1];
-            int ret       = H5.H5Zconfig_get_bool(cfg, "lossless", val);
-            assertTrue("H5Zconfig_get_bool returned non-negative", ret >= 0);
-            assertTrue("H5Zconfig_get_bool value", val[0]);
+            int ret       = H5.H5Zconfig_get_param(cfg, "lossless", val);
+            assertTrue("H5Zconfig_get_param (bool) returned non-negative", ret >= 0);
+            assertTrue("H5Zconfig_get_param (bool) value", val[0]);
 
             String cfg2 = "lossless = false";
-            int ret2    = H5.H5Zconfig_get_bool(cfg2, "lossless", val);
-            assertTrue("H5Zconfig_get_bool (false) returned non-negative", ret2 >= 0);
-            assertFalse("H5Zconfig_get_bool value (false)", val[0]);
+            int ret2    = H5.H5Zconfig_get_param(cfg2, "lossless", val);
+            assertTrue("H5Zconfig_get_param (bool, false) returned non-negative", ret2 >= 0);
+            assertFalse("H5Zconfig_get_param (bool) value (false)", val[0]);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -327,9 +327,9 @@ public class TestH5Z {
         try {
             String cfg   = "mode = \"fast\"";
             String[] val = new String[1];
-            int ret      = H5.H5Zconfig_get_str(cfg, "mode", val);
-            assertTrue("H5Zconfig_get_str returned non-negative", ret >= 0);
-            assertEquals("H5Zconfig_get_str value", "fast", val[0]);
+            int ret      = H5.H5Zconfig_get_param(cfg, "mode", val);
+            assertTrue("H5Zconfig_get_param (str) returned non-negative", ret >= 0);
+            assertEquals("H5Zconfig_get_param (str) value", "fast", val[0]);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -343,8 +343,8 @@ public class TestH5Z {
         try {
             String cfg = "level = 5";
             long[] val = new long[1];
-            int ret    = H5.H5Zconfig_get_int(cfg, "missing_key", val);
-            assertTrue("H5Zconfig_get_int with missing key returns 0 (not found)", ret == 0);
+            int ret    = H5.H5Zconfig_get_param(cfg, "missing_key", val);
+            assertTrue("H5Zconfig_get_param with missing key returns 0 (not found)", ret == 0);
         }
         catch (Throwable err) {
             err.printStackTrace();

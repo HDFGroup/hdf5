@@ -104,13 +104,13 @@ We would like to thank the many HDF5 community members who contributed to this r
    `cd_values` arrays.
 
    **New C API functions:**
-   - `H5Pappend_filter(plist, filter_id, flags, params)` — appends a filter to
+   - `H5Pappend_filter(plist, filter_id, flags, params)` - appends a filter to
      a dataset creation property list; `params` is an `H5Z_params_t` that
      carries either a `key=value` string or a raw `cd_values` array.
    - `H5Pget_filter_params_by_idx(plist, idx, buf, buf_size, content_len)` —
      retrieves the parameter string for the filter at pipeline index `idx`.
    - `H5Zconfig_get_int`, `H5Zconfig_get_double`, `H5Zconfig_get_bool`,
-     `H5Zconfig_get_str` — typed accessors that extract individual parameters
+     `H5Zconfig_get_str` - typed accessors that extract individual parameters
      from a `key=value` string; intended for use inside filter `set_config`
      callbacks.
 
@@ -151,11 +151,11 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ### Added Fortran bindings for the string-based filter configuration API
 
-   - `h5pappend_filter_f` — generic interface with two overloads: string
+   - `h5pappend_filter_f` - generic interface with two overloads: string
      `params` variant and raw `cd_values` variant.
-   - `h5pget_filter_params_by_idx_f` — retrieves the parameter string for a
+   - `h5pget_filter_params_by_idx_f` - retrieves the parameter string for a
      filter by pipeline index.
-   - `h5zconfig_get_param_f` — generic interface dispatching to
+   - `h5zconfig_get_param_f` - generic interface dispatching to
      `h5zconfig_get_param_int_f`, `_double_f`, `_logical_f`, and `_str_f`
      based on the value argument type.
 
@@ -163,22 +163,22 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ### Added C++ wrappers for the string-based filter configuration API
 
-   - `DSetCreatPropList::appendFilter` — two overloads: string `params` and
+   - `DSetCreatPropList::appendFilter` - two overloads: string `params` and
      raw `cd_values`.
-   - `DSetCreatPropList::getFilterParams` — retrieves a filter's parameter
+   - `DSetCreatPropList::getFilterParams` - retrieves a filter's parameter
      string by pipeline index.
-   - `H5FilterParam::config_get_param` — four overloads dispatching on value
+   - `H5FilterParam::config_get_param` - four overloads dispatching on value
      type (`int64_t`, `double`, `bool`, `H5std_string`).
 
 ## Java Library
 
 ### Added Java wrappers for the string-based filter configuration API
 
-   - `H5.H5Pappend_filter` — two overloads: `String params` and `int[] cd_values`.
-   - `H5.H5Pget_filter_params_by_idx` — retrieves a filter's parameter string
+   - `H5.H5Pappend_filter` - two overloads: `String params` and `int[] cd_values`.
+   - `H5.H5Pget_filter_params_by_idx` - retrieves a filter's parameter string
      by pipeline index.
    - `H5.H5Zconfig_get_int`, `H5Zconfig_get_double`, `H5Zconfig_get_bool`,
-     `H5Zconfig_get_str` — typed parameter accessors.
+     `H5Zconfig_get_str` - typed parameter accessors.
 
 ### Java dependency JAR paths are now user-configurable
 
@@ -209,7 +209,7 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ### HTTP 403 errors in the ROS3 VFD for object keys with special characters
 
-   The ROS3 VFD did not URI-encode the S3 object key when building the HTTP request path, so keys containing characters that AWS Signature Version 4 requires to be percent-encoded — such as the '=' in Hive-style `key=value` partition prefixes, '+', or spaces — produced a signed request whose signature did not match S3's server-side recomputation. S3 rejects such requests with `SignatureDoesNotMatch`, which surfaces as an HTTP 403 error (indistinguishable from a permissions error on a HEAD request), even though tools like the AWS CLI could access the same object. The object key is now percent-encoded exactly once when the request path is built, matching the behavior of other S3 clients. Note that URLs must now be passed to the ROS3 VFD with their object keys unencoded; a key that was pre-encoded as a workaround for this issue will now be double-encoded and fail to resolve.
+   The ROS3 VFD did not URI-encode the S3 object key when building the HTTP request path, so keys containing characters that AWS Signature Version 4 requires to be percent-encoded - such as the '=' in Hive-style `key=value` partition prefixes, '+', or spaces - produced a signed request whose signature did not match S3's server-side recomputation. S3 rejects such requests with `SignatureDoesNotMatch`, which surfaces as an HTTP 403 error (indistinguishable from a permissions error on a HEAD request), even though tools like the AWS CLI could access the same object. The object key is now percent-encoded exactly once when the request path is built, matching the behavior of other S3 clients. Note that URLs must now be passed to the ROS3 VFD with their object keys unencoded; a key that was pre-encoded as a workaround for this issue will now be double-encoded and fail to resolve.
 
 ### Fixed file descriptor leaks in stdio VFD error paths
 
@@ -295,7 +295,7 @@ The `h5repack` tool now obtains its default low and high library version bounds 
    dataset's "CLASS" attribute against an expected class name using
    `strncmp(buf, CLASS, MIN(strlen(CLASS), strlen(buf)))`. Because the comparison was limited to the
    shorter of the two strings, any non-empty value whose leading characters matched the expected class
-   name was accepted — for example, a CLASS of `"IMAGE_EXTRA"` was treated as an IMAGE dataset, and
+   name was accepted - for example, a CLASS of `"IMAGE_EXTRA"` was treated as an IMAGE dataset, and
    `"DIMENSION_S"` (null-padded to 16 bytes) was treated as a DIMENSION_SCALE. (`H5DSis_scale()` already
    required the attribute datatype to be exactly 16 bytes, which incidentally prevented false matches
    against shorter class names such as `"IMAGE"` or `"PALETTE"`; the other three functions had no such

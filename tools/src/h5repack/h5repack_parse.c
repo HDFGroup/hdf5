@@ -350,7 +350,10 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                         l = -1; /* filter number index check */
                         f = -1; /* filter flag index check */
                         p = -1; /* CD_VAL count check */
-                        for (m = 0, q = 0, u = i + 1; u < len; u++, m++, q++) {
+                        m = 0;
+                        q = 0;
+                        u = i + 1;
+                        while (u < len) {
                             if (str[u] == ',') {
                                 stype[q] = '\0'; /* end digit */
                                 if (l == -1) {
@@ -371,6 +374,8 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                                 }
                                 q = 0;
                                 u++; /* skip ',' */
+                                if (u >= len)
+                                    break;
                             }
                             c = str[u];
                             if (!isdigit(c) && l == -1) {
@@ -386,7 +391,10 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                                 exit(EXIT_FAILURE);
                             }
                             PARSE_BUF_WRITE(stype, sizeof(stype), q, c, obj_list, str);
-                        } /* for u */
+                            u++;
+                            m++;
+                            q++;
+                        } /* while u */
                         stype[q] = '\0';
                     }
                 } /*if */
