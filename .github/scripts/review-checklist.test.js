@@ -9,6 +9,8 @@ const {
   computeApprovals,
   chooseReviewers,
   buildBody,
+  parseExcluded,
+  serializeExcluded,
 } = require('./review-checklist.js');
 
 let passed = 0;
@@ -423,8 +425,78 @@ test('buildBody: non-owner reviewer approval does NOT sign off when a CODEOWNER 
   // alice (owner) was assigned; charlie (non-owner) also approves — alice's sign-off is still required
   const areas = [makeArea('src', ['alice'], 10)];
   const body  = buildBody(areas, new Set(['charlie']), new Set(['alice', 'charlie']));
-  assert.ok(body.includes('- [ ] **src**'));
-  assert.ok(!body.includes('✅'));
+  const srcRow = body.split('\n').find(l => l.startsWith('- ['));
+  assert.ok(srcRow.startsWith('- [ ] **src**'));
+  assert.ok(!srcRow.includes('✅'));
+});
+
+// "Additional reviewers" line: a requested reviewer who isn't an owner of any
+// touched area and wasn't pulled in as a no-CODEOWNER fallback either (e.g. a
+// project lead added by hand for unrelated areas, not path ownership).
+
+test('buildBody: reviewer not tied to any area appears in Additional reviewers line', () => {
+  const areas = [makeArea('tools', ['mattjala'], 10), makeArea('release_docs', ['lrknox'], 5)];
+  const body  = buildBody(areas, new Set(), new Set(['mattjala', 'lrknox', 'fortnern']));
+  assert.ok(body.includes('**Additional reviewers** (not owners of a touched area): @fortnern'));
+});
+
+test('buildBody: Additional reviewers approval is shown with a checkmark', () => {
+  const areas = [makeArea('tools', ['mattjala'], 10)];
+  const body  = buildBody(areas, new Set(['fortnern']), new Set(['mattjala', 'fortnern']));
+  assert.ok(body.includes('@fortnern ✅'));
+  const toolsRow = body.split('\n').find(l => l.startsWith('- ['));
+  assert.ok(!toolsRow.includes('✅')); // fortnern's approval doesn't sign off an area he doesn't own
+});
+
+test('buildBody: no Additional reviewers line when every reviewer owns a touched area', () => {
+  const areas = [makeArea('src', ['alice'], 10)];
+  const body  = buildBody(areas, new Set(), new Set(['alice']));
+  assert.ok(!body.includes('Additional reviewers'));
+});
+
+test('buildBody: reviewer used as no-CODEOWNER fallback is not double-listed as an extra', () => {
+  const areas = [makeArea('orphan', ['nobody_requested'], 10)];
+  const body  = buildBody(areas, new Set(), new Set(['charlie']));
+  assert.ok(!body.includes('Additional reviewers'));
+  assert.ok(body.includes('— @charlie'));
+});
+
+// ----------------------------------------------------------------
+// parseExcluded / serializeExcluded — persisted "explicitly removed" list
+// ----------------------------------------------------------------
+
+test('parseExcluded: no comment body yet returns an empty set', () => {
+  const excluded = parseExcluded(undefined);
+  assert.strictEqual(excluded.size, 0);
+});
+
+test('parseExcluded: comment with no exclusion marker returns an empty set', () => {
+  const excluded = parseExcluded('<!-- hdf5-review-checklist-v1 -->\nsome body text');
+  assert.strictEqual(excluded.size, 0);
+});
+
+test('parseExcluded: extracts logins from the hidden marker', () => {
+  const body = '<!-- hdf5-review-checklist-v1 -->\nbody\n<!-- hdf5-review-checklist-excluded:alice,bob-->';
+  const excluded = parseExcluded(body);
+  assert.ok(excluded.has('alice'));
+  assert.ok(excluded.has('bob'));
+  assert.strictEqual(excluded.size, 2);
+});
+
+test('parseExcluded: empty exclusion list round-trips to an empty set', () => {
+  const body = '<!-- hdf5-review-checklist-v1 -->\nbody\n<!-- hdf5-review-checklist-excluded:-->';
+  const excluded = parseExcluded(body);
+  assert.strictEqual(excluded.size, 0);
+});
+
+test('serializeExcluded: empty set produces the empty marker', () => {
+  assert.strictEqual(serializeExcluded(new Set()), '<!-- hdf5-review-checklist-excluded:-->');
+});
+
+test('serializeExcluded: round-trips through parseExcluded', () => {
+  const original = new Set(['alice', 'bob']);
+  const roundTripped = parseExcluded(serializeExcluded(original));
+  assert.deepStrictEqual([...roundTripped].sort(), ['alice', 'bob']);
 });
 
 // ----------------------------------------------------------------
