@@ -12622,18 +12622,27 @@ public class H5 implements java.io.Serializable {
 
         int retVal = -1;
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment flags_segment         = arena.allocateFrom(ValueLayout.JAVA_INT, flags);
-            MemorySegment cd_nelmts_segment     = arena.allocate(ValueLayout.JAVA_INT, 1);
-            MemorySegment cd_values_segment     = arena.allocateFrom(ValueLayout.JAVA_INT, cd_values);
+            MemorySegment flags_segment         = arena.allocate(ValueLayout.JAVA_INT, 1);
+            // cd_nelmts maps to size_t* (8 bytes on 64-bit); allocate JAVA_LONG so the C write
+            // does not overflow into the adjacent cd_values_segment allocation.
+            MemorySegment cd_nelmts_segment     = arena.allocate(ValueLayout.JAVA_LONG, 1);
+            MemorySegment cd_values_segment     = arena.allocate(ValueLayout.JAVA_INT,
+                                                                 Math.max(cd_values.length, 1));
             MemorySegment name_segment          = arena.allocate(namelen + 1);
             MemorySegment filter_config_segment = arena.allocate(ValueLayout.JAVA_INT, 1);
+
+            cd_nelmts_segment.set(ValueLayout.JAVA_LONG, 0, cd_nelmts[0]); // pass capacity on input
 
             if ((retVal = org.hdfgroup.javahdf5.hdf5_h.H5Pget_filter2(
                      plist, filter_number, flags_segment, cd_nelmts_segment, cd_values_segment, namelen,
                      name_segment, filter_config_segment)) < 0) {
                 h5libraryError();
             }
-            cd_nelmts[0]     = cd_values_segment.get(ValueLayout.JAVA_INT, 0);
+            flags[0]         = flags_segment.get(ValueLayout.JAVA_INT, 0);
+            cd_nelmts[0]     = cd_nelmts_segment.get(ValueLayout.JAVA_LONG, 0);
+            long returnedN   = cd_nelmts[0];
+            for (int i = 0; i < Math.min(cd_values.length, (int)returnedN); i++)
+                cd_values[i] = cd_values_segment.getAtIndex(ValueLayout.JAVA_INT, i);
             filter_config[0] = filter_config_segment.get(ValueLayout.JAVA_INT, 0);
             name[0]          = name_segment.getString(0, StandardCharsets.UTF_8);
         }
