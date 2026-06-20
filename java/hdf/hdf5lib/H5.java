@@ -12463,30 +12463,10 @@ public class H5 implements java.io.Serializable {
     {
         if (plist_id < 0)
             throw new HDF5FunctionArgumentException("Negative property list identifier");
-
-        int retVal = -1;
-        int nelmts = (cd_values != null) ? cd_values.length : 0;
-        /* H5Z_params_t layout (64-bit): int type(4) + pad(4) + union(16) = 24 bytes */
-        final int H5Z_PARAMS_CDVALUES = 0;
-        try (Arena arena = Arena.ofConfined()) {
-            MemorySegment cd_seg = arena.allocate(ValueLayout.JAVA_INT, Math.max(nelmts, 1));
-            for (int i = 0; i < nelmts; i++)
-                cd_seg.setAtIndex(ValueLayout.JAVA_INT, i, cd_values[i]);
-            MemorySegment params_struct = arena.allocate(24, 8);
-            params_struct.set(ValueLayout.JAVA_INT, 0, H5Z_PARAMS_CDVALUES);
-            params_struct.set(ValueLayout.JAVA_LONG, 8, (long)nelmts);
-            params_struct.set(ValueLayout.ADDRESS, 16, nelmts > 0 ? cd_seg : MemorySegment.NULL);
-            retVal = org.hdfgroup.javahdf5.hdf5_h.H5Pappend_filter(plist_id, filter_id, flags, params_struct);
-        }
-        catch (HDF5LibraryException e) {
-            throw e;
-        }
-        catch (Throwable t) {
-            throw new HDF5LibraryException("H5Pappend_filter failed: " + t.getMessage());
-        }
-        if (retVal < 0)
-            h5libraryError();
-        return retVal;
+        // H5Pappend_filter with CDVALUES is identical to H5Pset_filter; delegate to avoid
+        // constructing an H5Z_params_t struct in FFM heap memory.
+        int[] values = (cd_values != null) ? cd_values : new int[0];
+        return H5Pset_filter(plist_id, filter_id, flags, (long)values.length, values);
     }
 
     /**
