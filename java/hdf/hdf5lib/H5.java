@@ -12519,8 +12519,8 @@ public class H5 implements java.io.Serializable {
             MemorySegment plen_seg = arena.allocate(ValueLayout.JAVA_LONG);
 
             /* Pass 1: size query — buf=NULL, buf_size=0 to get true string length */
-            retVal = org.hdfgroup.javahdf5.hdf5_h.H5Pget_filter_params_by_idx(plist_id, idx,
-                                                                               MemorySegment.NULL, 0L, plen_seg);
+            retVal = org.hdfgroup.javahdf5.hdf5_h.H5Pget_filter_params_by_idx(
+                plist_id, idx, MemorySegment.NULL, 0L, plen_seg);
             if (retVal >= 0) {
                 long plen = plen_seg.get(ValueLayout.JAVA_LONG, 0);
                 if (plen == 0) {
@@ -12530,7 +12530,7 @@ public class H5 implements java.io.Serializable {
                     /* Pass 2: allocate exact buffer and populate */
                     MemorySegment buf = arena.allocate(plen + 1);
                     retVal = org.hdfgroup.javahdf5.hdf5_h.H5Pget_filter_params_by_idx(plist_id, idx, buf,
-                                                                                       plen + 1, plen_seg);
+                                                                                      plen + 1, plen_seg);
                     if (retVal >= 0)
                         params[0] = buf.getString(0);
                 }
@@ -23908,7 +23908,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment params_seg = arena.allocateFrom(params);
             MemorySegment key_seg    = arena.allocateFrom(key);
-            retVal = org.hdfgroup.javahdf5.hdf5_h.H5Zconfig_has_key(params_seg, key_seg);
+            retVal                   = org.hdfgroup.javahdf5.hdf5_h.H5Zconfig_has_key(params_seg, key_seg);
         }
         catch (HDF5LibraryException e) {
             throw e;
@@ -23950,7 +23950,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment params_seg = arena.allocateFrom(params);
             MemorySegment key_seg    = arena.allocateFrom(key);
             MemorySegment out_seg    = arena.allocate(ValueLayout.JAVA_LONG);
-            retVal                   = org.hdfgroup.javahdf5.hdf5_h.H5Zconfig_get_int(params_seg, key_seg, out_seg);
+            retVal = org.hdfgroup.javahdf5.hdf5_h.H5Zconfig_get_int(params_seg, key_seg, out_seg);
             if (retVal > 0)
                 out[0] = out_seg.get(ValueLayout.JAVA_LONG, 0);
         }
@@ -24043,7 +24043,7 @@ public class H5 implements java.io.Serializable {
             MemorySegment params_seg = arena.allocateFrom(params);
             MemorySegment key_seg    = arena.allocateFrom(key);
             MemorySegment out_seg    = arena.allocate(ValueLayout.JAVA_INT);
-            retVal                   = org.hdfgroup.javahdf5.hdf5_h.H5Zconfig_get_bool(params_seg, key_seg, out_seg);
+            retVal = org.hdfgroup.javahdf5.hdf5_h.H5Zconfig_get_bool(params_seg, key_seg, out_seg);
             if (retVal > 0)
                 out[0] = out_seg.get(ValueLayout.JAVA_INT, 0) != 0;
         }
