@@ -5,7 +5,15 @@
  * page outline panel can be generated.
  */
 #side-nav {
-  display: none
+  display: none;
+}
+
+/*
+ * Align the page navigation panel to the right hand side
+ */
+#page-nav {
+  margin-left: auto;
+  margin-right: 0;
 }
 
 /* Only reset margin on smaller screens */
@@ -31,7 +39,7 @@ body {
 
 /* Additional specificity - target the content container directly */
 #doc-content > div {
-  margin-left: 0; /* Reset any inherited margins */
+  margin-left: auto; /* Reset any inherited margins */
   padding-left: 0; /* Reset any inherited padding */
 }
 
@@ -207,3 +215,7 @@ div[style*="background:#FFDDDD"] a:hover {
 .dynheader:hover {
     text-decoration: underline;
 }
+
+/* Hide footer and surrounding lines/space */
+li.footer { display: none; }
+div.navpath { display: none; }
