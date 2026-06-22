@@ -7654,7 +7654,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <td>An array has a fixed dimensionality. This field specifies the number of dimension size fields later
       in the message. 
       <br />For chunked storage, the value stored is one greater than the dataset&rsquo;s actual number of
-      dimemsions. For example, a 1-dimensional dataset stores a value of 2.
+      dimensions. For example, a 1-dimensional dataset stores a value of 2.
       This increment accounts for the dataset element size which occupies the final dimension entry.</td>
 </tr>
 <tr valign=top>
