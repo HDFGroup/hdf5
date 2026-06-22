@@ -731,6 +731,9 @@ function makeCoordinateBaseArgs(overrides) {
     reviewerLoad: {},
     excludedReviewers: new Set(),
     allReviews: [],
+    // Most scenarios model an already-established PR (checklist already
+    // posted); tests exercising the fresh-PR race override this explicitly.
+    hasExistingComment: true,
     LINE_THRESHOLD: 300,
     AREA_THRESHOLDS: {},
     PUBLIC_HEADER: /public\.h$/,
@@ -782,6 +785,45 @@ asyncTest('coordinateReviewers: plain synchronize (no dismissed reviews) is left
 
   assert.strictEqual(github.calls.removeRequestedReviewers.length, 0);
   assert.strictEqual(github.calls.requestReviewers.length, 0);
+  assert.deepStrictEqual([...confirmedRequested].sort(), ['glennsong09', 'hyoklee', 'jhendersonHDF']);
+});
+
+asyncTest('coordinateReviewers: review_requested survives the opened race and still prunes (PR #6479 scenario)', async () => {
+  // GitHub's CODEOWNERS engine fires one review_requested per auto-assigned
+  // owner; each re-triggers this workflow, and concurrency: cancel-in-progress
+  // means any of those runs — not necessarily the "opened" run — can be the
+  // one that actually executes. hasExistingComment: false (no checklist
+  // posted yet) is what lets a surviving review_requested run still prune
+  // the avalanche instead of falling through to additive-fill and keeping
+  // all three.
+  const github = makeGithubMock();
+  const context = {
+    eventName: 'pull_request_target',
+    payload: { action: 'review_requested', requested_reviewer: { login: 'jhendersonHDF' }, sender: { type: 'User' } },
+  };
+  const args = makeCoordinateBaseArgs({ hasExistingComment: false });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.strictEqual(confirmedRequested.size, 1);
+  assert.ok(github.calls.removeRequestedReviewers.length > 0);
+});
+
+asyncTest('coordinateReviewers: review_requested on an already-established PR is NOT treated as a fresh-PR prune', async () => {
+  // Contrast case: once a checklist comment exists, a routine review_requested
+  // later in the PR's life (e.g. a human manually adding a reviewer) must stay
+  // on the additive-fill path — it must not be reinterpreted as "first
+  // coordination pass" and prune reviewers an established PR already has.
+  const github = makeGithubMock();
+  const context = {
+    eventName: 'pull_request_target',
+    payload: { action: 'review_requested', requested_reviewer: { login: 'jhendersonHDF' }, sender: { type: 'User' } },
+  };
+  const args = makeCoordinateBaseArgs({ hasExistingComment: true });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.strictEqual(github.calls.removeRequestedReviewers.length, 0);
   assert.deepStrictEqual([...confirmedRequested].sort(), ['glennsong09', 'hyoklee', 'jhendersonHDF']);
 });
 
