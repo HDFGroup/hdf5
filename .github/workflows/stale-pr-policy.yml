@@ -12,13 +12,15 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "0 6 * * *"
+  issue_comment:
+    types: [created]
 
 permissions:
   contents: read
 
 jobs:
   mark-stale:
-    if: github.repository_owner == 'HDFGroup'
+    if: github.repository_owner == 'HDFGroup' && github.event_name != 'issue_comment'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -53,7 +55,7 @@ jobs:
 
   alert-stale:
     needs: [mark-stale, draft-pr-policy]
-    if: github.repository_owner == 'HDFGroup'
+    if: github.repository_owner == 'HDFGroup' && github.event_name != 'issue_comment'
     runs-on: ubuntu-latest
     permissions:
       contents: read
