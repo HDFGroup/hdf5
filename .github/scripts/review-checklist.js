@@ -286,6 +286,13 @@ async function requestReviewers(github, core, { owner, repo, pr_number }, select
 // on a synchronize event: for each area whose dismissed reviewer isn't yet
 // re-requested, identify the fresh CODEOWNERS pick that needs to be removed.
 //
+// freshPick is left null (no removal) when the candidate also owns a
+// DIFFERENT touched area — removeRequestedReviewers strips them from the
+// whole PR, not just this area, so removing them here would silently
+// uncover that other area even though it has nothing to do with this
+// dismissal. Erring toward leaving an extra reviewer on the PR is safer
+// than erring toward an unintentionally uncovered area.
+//
 // Pure — no I/O. Exported for testing.
 function planSynchronizeSwaps(eligibleAreas, allReviews, {
   prAuthor, existingRequested, updatedExcluded, touchedAreaOwners,
@@ -300,9 +307,12 @@ function planSynchronizeSwaps(eligibleAreas, allReviews, {
     const dismissedOwner = area.owners.find(o => dismissedLogins.has(o) && o !== prAuthor);
     if (!dismissedOwner || existingRequested.has(dismissedOwner)) continue;
     // Find a different owner of this area that was auto-assigned by CODEOWNERS.
-    const freshPick = [...existingRequested].find(r =>
+    const candidate = [...existingRequested].find(r =>
       area.owners.includes(r) && r !== dismissedOwner && touchedAreaOwners.has(r)
-    ) || null;
+    );
+    const neededElsewhere = candidate &&
+      eligibleAreas.some(other => other !== area && other.owners.includes(candidate));
+    const freshPick = (candidate && !neededElsewhere) ? candidate : null;
     swaps.push({ area, dismissedOwner, freshPick });
   }
   return swaps;
@@ -499,7 +509,9 @@ async function coordinateReviewers(github, context, core, {
       prAuthor, existingRequested, updatedExcluded, touchedAreaOwners,
     });
     for (const { area, dismissedOwner, freshPick } of swaps) {
-      if (freshPick) {
+      // freshPick may already be gone if an earlier iteration in this same
+      // loop removed them (e.g. they were the fresh pick for two areas).
+      if (freshPick && !updatedExcluded.has(freshPick) && [...existingRequested].includes(freshPick)) {
         try {
           await github.rest.pulls.removeRequestedReviewers({
             owner, repo, pull_number: pr_number, reviewers: [freshPick],
@@ -508,13 +520,17 @@ async function coordinateReviewers(github, context, core, {
           core.info(`synchronize: swapped ${freshPick} → ${dismissedOwner} for area "${area.label}"`);
         } catch (e) { core.warning(`Could not remove ${freshPick}: ${e.message}`); }
       }
-      try {
-        await github.rest.pulls.requestReviewers({
-          owner, repo, pull_number: pr_number, reviewers: [dismissedOwner],
-        });
-        existingRequested.add(dismissedOwner);
-        core.info(`synchronize: re-requested dismissed reviewer ${dismissedOwner} for area "${area.label}"`);
-      } catch (e) { core.warning(`Could not re-request ${dismissedOwner}: ${e.message}`); }
+      // dismissedOwner may already have been re-requested by an earlier
+      // iteration (e.g. they own two areas dismissed by the same review).
+      if (!existingRequested.has(dismissedOwner)) {
+        try {
+          await github.rest.pulls.requestReviewers({
+            owner, repo, pull_number: pr_number, reviewers: [dismissedOwner],
+          });
+          existingRequested.add(dismissedOwner);
+          core.info(`synchronize: re-requested dismissed reviewer ${dismissedOwner} for area "${area.label}"`);
+        } catch (e) { core.warning(`Could not re-request ${dismissedOwner}: ${e.message}`); }
+      }
     }
   }
 

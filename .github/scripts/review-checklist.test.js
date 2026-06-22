@@ -585,6 +585,72 @@ test('planSynchronizeSwaps: manually added non-CODEOWNER is not treated as a fre
   assert.strictEqual(swaps[0].freshPick, null); // outsider not swapped out
 });
 
+test('planSynchronizeSwaps: fresh pick covering a second, unrelated touched area is not removed', () => {
+  // joe covers both areas; jordan was dismissed only on area "a". Removing joe
+  // to restore jordan would silently uncover area "b", which has nothing to
+  // do with the dismissal.
+  const areaA = makeArea('a', ['jordan', 'joe'], 5);
+  const areaB = makeArea('b', ['joe', 'glenn'], 5);
+  const reviews = [{ user: { login: 'jordan' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({
+    prAuthor: 'author',
+    existingRequested: new Set(['joe']),
+    touchedAreaOwners: new Set(['jordan', 'joe', 'glenn']),
+  });
+  const swaps = planSynchronizeSwaps([areaA, areaB], reviews, ctx);
+  assert.strictEqual(swaps.length, 1);
+  assert.strictEqual(swaps[0].area.label, 'a');
+  assert.strictEqual(swaps[0].dismissedOwner, 'jordan');
+  assert.strictEqual(swaps[0].freshPick, null); // joe is NOT removed — still needed for area "b"
+});
+
+test('planSynchronizeSwaps: fresh pick is removed when not needed by any other area', () => {
+  // Sanity check that the "needed elsewhere" guard doesn't over-fire: when the
+  // candidate truly owns only the one area in question, they ARE swapped out.
+  const areaA = makeArea('a', ['jordan', 'joe'], 5);
+  const areaB = makeArea('b', ['glenn'], 5); // joe is not an owner of area b
+  const reviews = [{ user: { login: 'jordan' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({
+    prAuthor: 'author',
+    existingRequested: new Set(['joe']),
+    touchedAreaOwners: new Set(['jordan', 'joe', 'glenn']),
+  });
+  const swaps = planSynchronizeSwaps([areaA, areaB], reviews, ctx);
+  assert.strictEqual(swaps.length, 1);
+  assert.strictEqual(swaps[0].freshPick, 'joe');
+});
+
+test('planSynchronizeSwaps: two areas independently dismissed for the same owner both restore them', () => {
+  // jordan owns both areas and was dismissed on the PR as a whole (one review
+  // covers both); each area independently plans to re-request him. The
+  // consuming loop re-requesting him twice is idempotent, not a correctness bug.
+  const areaA = makeArea('a', ['jordan', 'joe'], 5);
+  const areaB = makeArea('b', ['jordan', 'glenn'], 5);
+  const reviews = [{ user: { login: 'jordan' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({
+    prAuthor: 'author',
+    existingRequested: new Set(['joe', 'glenn']),
+    touchedAreaOwners: new Set(['jordan', 'joe', 'glenn']),
+  });
+  const swaps = planSynchronizeSwaps([areaA, areaB], reviews, ctx);
+  assert.strictEqual(swaps.length, 2);
+  assert.ok(swaps.every(s => s.dismissedOwner === 'jordan'));
+});
+
+test('planSynchronizeSwaps: dismissedOwner already covering a different area is not re-flagged', () => {
+  // jordan was dismissed but is already requested (e.g. restored by a prior
+  // area's swap, or independently re-requested) — no duplicate swap planned.
+  const areaA = makeArea('a', ['jordan', 'joe'], 5);
+  const reviews = [{ user: { login: 'jordan' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({
+    prAuthor: 'author',
+    existingRequested: new Set(['jordan']),
+    touchedAreaOwners: new Set(['jordan', 'joe']),
+  });
+  const swaps = planSynchronizeSwaps([areaA], reviews, ctx);
+  assert.strictEqual(swaps.length, 0);
+});
+
 // ----------------------------------------------------------------
 // Summary
 // ----------------------------------------------------------------
