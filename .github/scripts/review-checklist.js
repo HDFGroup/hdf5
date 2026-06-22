@@ -30,6 +30,20 @@ function serializeExcluded(excluded) {
   return `${EXCLUDED_PREFIX}${[...excluded].join(',')}${EXCLUDED_SUFFIX}`;
 }
 
+// Returns commentBody with its exclusion-marker section replaced by the
+// serialized form of `excluded`. Appends the marker if the body doesn't
+// already have one. Centralized here (rather than duplicated by other
+// writers, e.g. the /remove-reviewer slash command) so the marker format
+// only needs to be understood in one place.
+function withExcluded(commentBody, excluded) {
+  const marker = serializeExcluded(excluded);
+  const start = commentBody.indexOf(EXCLUDED_PREFIX);
+  if (start === -1) return `${commentBody}\n${marker}`;
+  const end = commentBody.indexOf(EXCLUDED_SUFFIX, start);
+  if (end === -1) return `${commentBody}\n${marker}`;
+  return commentBody.slice(0, start) + marker + commentBody.slice(end + EXCLUDED_SUFFIX.length);
+}
+
 // ── Pure helpers ──────────────────────────────────────────────────────────────
 
 function labelFromPattern(pattern) {
@@ -340,11 +354,19 @@ function planSynchronizeSwaps(eligibleAreas, allReviews, {
 //                 review is even wanted yet. Cleared in full — no checklist
 //                 posted until the PR is ready for review.
 //
-//   non-draft, just (re)opened
-//               → Same CODEOWNERS avalanche. Pruned to the load-balanced
-//                 single pick per area before the checklist is first posted,
-//                 so reviewers aren't @-mentioned en masse before the final
-//                 reviewer set is known.
+//   non-draft, just (re)opened or just marked ready_for_review
+//               → Same CODEOWNERS avalanche — GitHub auto-requests CODEOWNERS
+//                 reviewers both on creation and again when a draft is marked
+//                 ready for review. Pruned to the load-balanced single pick
+//                 per area before the checklist is first posted, so reviewers
+//                 aren't @-mentioned en masse before the final reviewer set
+//                 is known.
+//
+//   synchronize with a dismissed reviewer
+//               → see planSynchronizeSwaps: re-requests a reviewer whose
+//                 approval a new push just dismissed, swapping out a fresh
+//                 CODEOWNERS pick for the same area if one was auto-assigned
+//                 (never removing a pick still needed by another area).
 //
 // Everywhere else:
 //
@@ -477,11 +499,14 @@ async function coordinateReviewers(github, context, core, {
     owners: area.owners.filter(o => !updatedExcluded.has(o)),
   }));
 
-  if (action === 'opened' || action === 'reopened') {
+  if (action === 'opened' || action === 'reopened' || action === 'ready_for_review') {
     // Non-draft, just (re)opened — same CODEOWNERS avalanche problem as the
     // draft case: GitHub has already auto-assigned every touched-area owner.
-    // Prune to a load-balanced single pick per area BEFORE posting the
-    // checklist so reviewers aren't @-mentioned en masse. Pass an empty
+    // ready_for_review gets the same treatment: GitHub auto-requests CODEOWNERS
+    // reviewers again when a draft is marked ready, dumping the avalanche on a
+    // PR that may have sat in draft (untouched, per the isDraft branch above)
+    // for a while. Prune to a load-balanced single pick per area BEFORE posting
+    // the checklist so reviewers aren't @-mentioned en masse. Pass an empty
     // existingRequested so chooseReviewers treats every area as uncovered and
     // picks fresh rather than seeing "already has an owner" and returning nothing.
     const { selected, log } = chooseReviewers(eligibleAreas, {
@@ -497,7 +522,7 @@ async function coordinateReviewers(github, context, core, {
     const toRequest = new Set([...selected].filter(l => !existingRequested.has(l)));
     if (toRequest.size > 0) await requestReviewers(github, core, pr, toRequest);
 
-    core.info(`Non-draft PR opened — pruned to load-balanced selection: ${[...selected].join(', ') || '(none)'}`);
+    core.info(`Non-draft PR ${action} — pruned to load-balanced selection: ${[...selected].join(', ') || '(none)'}`);
     return { confirmedRequested: selected, excludedReviewers: updatedExcluded };
   }
 
@@ -776,6 +801,7 @@ module.exports = async function run({ github, context, core }) {
   }
 };
 
+module.exports.MARKER               = MARKER;
 module.exports.matchesPattern       = matchesPattern;
 module.exports.labelFromPattern     = labelFromPattern;
 module.exports.attributeFiles       = attributeFiles;
@@ -784,4 +810,6 @@ module.exports.chooseReviewers      = chooseReviewers;
 module.exports.buildBody            = buildBody;
 module.exports.parseExcluded        = parseExcluded;
 module.exports.serializeExcluded    = serializeExcluded;
+module.exports.withExcluded         = withExcluded;
+module.exports.coordinateReviewers  = coordinateReviewers;
 module.exports.planSynchronizeSwaps = planSynchronizeSwaps;
