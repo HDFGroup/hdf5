@@ -11,6 +11,7 @@ const {
   buildBody,
   parseExcluded,
   serializeExcluded,
+  planSynchronizeSwaps,
 } = require('./review-checklist.js');
 
 let passed = 0;
@@ -497,6 +498,91 @@ test('serializeExcluded: round-trips through parseExcluded', () => {
   const original = new Set(['alice', 'bob']);
   const roundTripped = parseExcluded(serializeExcluded(original));
   assert.deepStrictEqual([...roundTripped].sort(), ['alice', 'bob']);
+});
+
+// ----------------------------------------------------------------
+// planSynchronizeSwaps
+// ----------------------------------------------------------------
+
+function makeSyncCtx(overrides) {
+  return {
+    prAuthor:        'lrknox',
+    existingRequested: new Set(),
+    updatedExcluded: new Set(),
+    touchedAreaOwners: new Set(['jhendersonHDF', 'hyoklee', 'glennsong09', 'lrknox']),
+    ...overrides,
+  };
+}
+
+test('planSynchronizeSwaps: dismissed reviewer swaps out fresh CODEOWNERS pick (PR 6475 scenario)', () => {
+  // Jordan reviewed and got dismissed; GitHub auto-assigned Joe (hyoklee) for the fixup push.
+  const areas = [makeArea('.github', ['hyoklee', 'lrknox', 'jhendersonHDF', 'glennsong09'], 5)];
+  const reviews = [{ user: { login: 'jhendersonHDF' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({ existingRequested: new Set(['hyoklee']) });
+  const swaps = planSynchronizeSwaps(areas, reviews, ctx);
+  assert.strictEqual(swaps.length, 1);
+  assert.strictEqual(swaps[0].dismissedOwner, 'jhendersonHDF');
+  assert.strictEqual(swaps[0].freshPick, 'hyoklee');
+});
+
+test('planSynchronizeSwaps: no swaps when dismissed reviewer is already re-requested', () => {
+  const areas = [makeArea('.github', ['hyoklee', 'jhendersonHDF'], 5)];
+  const reviews = [{ user: { login: 'jhendersonHDF' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({ existingRequested: new Set(['jhendersonHDF']) });
+  const swaps = planSynchronizeSwaps(areas, reviews, ctx);
+  assert.strictEqual(swaps.length, 0);
+});
+
+test('planSynchronizeSwaps: no fresh pick when GitHub assigned no one for the area', () => {
+  // Dismissed reviewer exists but GitHub didn't auto-assign anyone new.
+  const areas = [makeArea('.github', ['hyoklee', 'jhendersonHDF'], 5)];
+  const reviews = [{ user: { login: 'jhendersonHDF' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({ existingRequested: new Set() });
+  const swaps = planSynchronizeSwaps(areas, reviews, ctx);
+  assert.strictEqual(swaps.length, 1);
+  assert.strictEqual(swaps[0].dismissedOwner, 'jhendersonHDF');
+  assert.strictEqual(swaps[0].freshPick, null);
+});
+
+test('planSynchronizeSwaps: dismissed reviewer who is excluded is skipped', () => {
+  const areas = [makeArea('.github', ['hyoklee', 'jhendersonHDF'], 5)];
+  const reviews = [{ user: { login: 'jhendersonHDF' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({
+    existingRequested: new Set(['hyoklee']),
+    updatedExcluded: new Set(['jhendersonHDF']),
+  });
+  const swaps = planSynchronizeSwaps(areas, reviews, ctx);
+  assert.strictEqual(swaps.length, 0);
+});
+
+test('planSynchronizeSwaps: PR author as dismissed reviewer is skipped', () => {
+  const areas = [makeArea('.github', ['lrknox', 'jhendersonHDF'], 5)];
+  const reviews = [{ user: { login: 'lrknox' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({ existingRequested: new Set(['jhendersonHDF']) });
+  const swaps = planSynchronizeSwaps(areas, reviews, ctx);
+  assert.strictEqual(swaps.length, 0);
+});
+
+test('planSynchronizeSwaps: no dismissed reviews produces no swaps', () => {
+  const areas = [makeArea('.github', ['hyoklee', 'jhendersonHDF'], 5)];
+  const reviews = [{ user: { login: 'jhendersonHDF' }, state: 'APPROVED' }];
+  const ctx = makeSyncCtx({ existingRequested: new Set(['hyoklee']) });
+  const swaps = planSynchronizeSwaps(areas, reviews, ctx);
+  assert.strictEqual(swaps.length, 0);
+});
+
+test('planSynchronizeSwaps: manually added non-CODEOWNER is not treated as a fresh pick', () => {
+  // 'outsider' is in existingRequested but NOT in touchedAreaOwners (manually added).
+  // Should not be removed as a fresh CODEOWNERS pick.
+  const areas = [makeArea('.github', ['hyoklee', 'jhendersonHDF'], 5)];
+  const reviews = [{ user: { login: 'jhendersonHDF' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({
+    existingRequested: new Set(['outsider']),
+    touchedAreaOwners: new Set(['hyoklee', 'jhendersonHDF', 'glennsong09']),
+  });
+  const swaps = planSynchronizeSwaps(areas, reviews, ctx);
+  assert.strictEqual(swaps.length, 1);
+  assert.strictEqual(swaps[0].freshPick, null); // outsider not swapped out
 });
 
 // ----------------------------------------------------------------

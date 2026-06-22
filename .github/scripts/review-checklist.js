@@ -282,6 +282,32 @@ async function requestReviewers(github, core, { owner, repo, pr_number }, select
   return confirmed;
 }
 
+// Returns [{area, dismissedOwner, freshPick|null}] describing swaps to apply
+// on a synchronize event: for each area whose dismissed reviewer isn't yet
+// re-requested, identify the fresh CODEOWNERS pick that needs to be removed.
+//
+// Pure — no I/O. Exported for testing.
+function planSynchronizeSwaps(eligibleAreas, allReviews, {
+  prAuthor, existingRequested, updatedExcluded, touchedAreaOwners,
+}) {
+  const dismissedLogins = new Set(
+    (allReviews || [])
+      .filter(r => r.state === 'DISMISSED' && r.user && !updatedExcluded.has(r.user.login))
+      .map(r => r.user.login)
+  );
+  const swaps = [];
+  for (const area of eligibleAreas) {
+    const dismissedOwner = area.owners.find(o => dismissedLogins.has(o) && o !== prAuthor);
+    if (!dismissedOwner || existingRequested.has(dismissedOwner)) continue;
+    // Find a different owner of this area that was auto-assigned by CODEOWNERS.
+    const freshPick = [...existingRequested].find(r =>
+      area.owners.includes(r) && r !== dismissedOwner && touchedAreaOwners.has(r)
+    ) || null;
+    swaps.push({ area, dismissedOwner, freshPick });
+  }
+  return swaps;
+}
+
 // ── Reviewer coordination ─────────────────────────────────────────────────────
 //
 // Determines who should be in confirmedRequested (the checklist display set).
@@ -335,7 +361,7 @@ async function requestReviewers(github, core, { owner, repo, pr_number }, select
 //
 async function coordinateReviewers(github, context, core, {
   owner, repo, pr_number, prData, allCodeOwners, catchAllOwners, touchedAreas, reviewerLoad,
-  excludedReviewers, LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
+  excludedReviewers, allReviews, LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
 }) {
   const pr     = { owner, repo, pr_number };
   const action = context.payload.action;
@@ -463,6 +489,33 @@ async function coordinateReviewers(github, context, core, {
 
     core.info(`Non-draft PR opened — pruned to load-balanced selection: ${[...selected].join(', ') || '(none)'}`);
     return { confirmedRequested: selected, excludedReviewers: updatedExcluded };
+  }
+
+  // Synchronize: a new commit dismissed a prior reviewer's approval.
+  // Re-request that reviewer instead of keeping a fresh CODEOWNERS pick —
+  // they already have context and only need to see what changed.
+  if (action === 'synchronize') {
+    const swaps = planSynchronizeSwaps(eligibleAreas, allReviews, {
+      prAuthor, existingRequested, updatedExcluded, touchedAreaOwners,
+    });
+    for (const { area, dismissedOwner, freshPick } of swaps) {
+      if (freshPick) {
+        try {
+          await github.rest.pulls.removeRequestedReviewers({
+            owner, repo, pull_number: pr_number, reviewers: [freshPick],
+          });
+          existingRequested.delete(freshPick);
+          core.info(`synchronize: swapped ${freshPick} → ${dismissedOwner} for area "${area.label}"`);
+        } catch (e) { core.warning(`Could not remove ${freshPick}: ${e.message}`); }
+      }
+      try {
+        await github.rest.pulls.requestReviewers({
+          owner, repo, pull_number: pr_number, reviewers: [dismissedOwner],
+        });
+        existingRequested.add(dismissedOwner);
+        core.info(`synchronize: re-requested dismissed reviewer ${dismissedOwner} for area "${area.label}"`);
+      } catch (e) { core.warning(`Could not re-request ${dismissedOwner}: ${e.message}`); }
+    }
   }
 
   // Non-draft, any other event: fill in a load-balanced reviewer only for
@@ -685,7 +738,7 @@ module.exports = async function run({ github, context, core }) {
 
   const { confirmedRequested, excludedReviewers: updatedExcluded } = await coordinateReviewers(github, context, core, {
     owner, repo, pr_number, prData, allCodeOwners, catchAllOwners, touchedAreas, reviewerLoad,
-    excludedReviewers, LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
+    excludedReviewers, allReviews, LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
   });
 
   // ----------------------------------------------------------------
@@ -707,11 +760,12 @@ module.exports = async function run({ github, context, core }) {
   }
 };
 
-module.exports.matchesPattern    = matchesPattern;
-module.exports.labelFromPattern  = labelFromPattern;
-module.exports.attributeFiles    = attributeFiles;
-module.exports.computeApprovals  = computeApprovals;
-module.exports.chooseReviewers   = chooseReviewers;
-module.exports.buildBody         = buildBody;
-module.exports.parseExcluded     = parseExcluded;
-module.exports.serializeExcluded = serializeExcluded;
+module.exports.matchesPattern       = matchesPattern;
+module.exports.labelFromPattern     = labelFromPattern;
+module.exports.attributeFiles       = attributeFiles;
+module.exports.computeApprovals     = computeApprovals;
+module.exports.chooseReviewers      = chooseReviewers;
+module.exports.buildBody            = buildBody;
+module.exports.parseExcluded        = parseExcluded;
+module.exports.serializeExcluded    = serializeExcluded;
+module.exports.planSynchronizeSwaps = planSynchronizeSwaps;
