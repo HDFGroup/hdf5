@@ -1,11 +1,19 @@
 JUnit version 4.13.2
 .testH5Zfilter_avail
+.testH5Zconfig_get_param_double
+.testH5Pget_filter_params_by_idx
+.testH5Zconfig_get_param_missing_key
+.testH5Zconfig_get_param_int
+.testH5Zconfig_get_param_str
 .testH5Zget_filter_info2
 .testH5Zget_filter_info2_invalid
+.testH5Zconfig_get_param_bool
 .testH5Zunregister_predefined
+.testH5Pappend_filter_string
+.testH5Pappend_filter_cdvalues
 .testH5Zget_filter_info
 
 Time:  XXXX
 
-OK (5 tests)
+OK (13 tests)
 
