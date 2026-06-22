@@ -81,7 +81,6 @@ jobs:
           -DCMAKE_CXX_FLAGS="-tp=x86-64-v3" \
           -DMPIEXEC_MAX_NUMPROCS:STRING="2" \
           -DMPIEXEC_PREFLAGS:STRING="--mca;opal_warn_on_missing_libcuda;0" \
-          -DCMAKE_C_FLAGS="-Mnovect" \
           $GITHUB_WORKSPACE
 
       - name: Build
