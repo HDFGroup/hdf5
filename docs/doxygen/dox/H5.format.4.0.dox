@@ -7584,29 +7584,32 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <th width="25%">byte</th>
   <th>byte</th>
 </tr>
-<tr align="center">
+<tr>
   <td>Version</td>
   <td>Dimensionality</td>
   <td>Layout Class</td>
   <td>Reserved <em>(zero)</em></td>
 </tr>
-<tr align="center">
+<tr>
   <td colspan="4">Reserved <em>(zero)</em></td>
 </tr>
-<tr align="center">
+<tr>
   <td colspan="4"><br />Data Address<sup>O</sup> <em>(optional)</em><br /><br /></td>
 </tr>
-<tr align="center">
+<tr>
+  <td colspan="4">Dimension 0 Size</td>
+</tr>
+<tr>
   <td colspan="4">Dimension 1 Size</td>
 </tr>
-<tr align="center">
-  <td colspan="4">Dimension 2 Size</td>
-</tr>
-<tr align="center">
+<tr>
   <td colspan="4">...</td>
 </tr>
-<tr align="center">
-  <td colspan="4">Dimension \#n Size</td>
+<tr>
+  <td colspan="4">Dimension \#(n - 1) Size</td>
+</tr>
+<tr>
+  <td colspan="4">Dataset Element Size</td>
 </tr>
 <tr>
   <td colspan="4">Compact Data Size <em>(optional)</em></td>
@@ -7701,9 +7704,17 @@ another datatype) and the dataspace for a dataset describes the location of the 
       The last dimension stored is the dataset element size.</td>
 </tr>
 <tr>
+  <td>Dataset Element Size</td>
+  <td>The size of a dataset element, in bytes.  
+      This field is only present for chunked data storage
+      and is stored as the last dimension entry in the array of dimensions.
+      See previous field description.</td>
+</tr>
+<tr>
   <td>Compact Data Size</td>
   <td>This field is only present for compact data storage. It contains the size of the raw data for the
       dataset array, in bytes.</td>
+</tr>
 <tr>
   <td>Compact Data</td>
   <td>This field is only present for compact data storage. It contains the raw data for the dataset
@@ -7873,16 +7884,19 @@ Class-specific information for chunked storage (layout class 2):
   <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4">Dimension 1 Size</td>
+  <td colspan="4">Dimension 0 Size</td>
 </tr>
 <tr>
-  <td colspan="4">Dimension 2 Size</td>
+  <td colspan="4">Dimension 1 Size</td>
 </tr>
 <tr>
   <td colspan="4">...</td>
 </tr>
 <tr>
-  <td colspan="4">Dimension \#n Size</td>
+  <td colspan="4">Dimension \#(n - 1) Size</td>
+</tr>
+<tr>
+  <td colspan="4">Dataset Element Size</td>
 </tr>
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
@@ -7915,6 +7929,13 @@ Class-specific information for chunked storage (layout class 2):
       The first dimension stored in the list of dimensions is the slowest changing dimension and the
       (n - 1) dimension stored is the fastest changing dimension.
       The final dimension stored is the dataset element size.</td>
+</tr>
+<tr>
+  <td>Dataset Element Size</td>
+  <td>The size of a dataset element, in bytes.  
+      This field is only present for chunked data storage
+      and is stored as the last dimension entry in the array of dimensions.
+      See previous field description.</td>
 </tr>
 </table>
 
@@ -8037,16 +8058,19 @@ information for the virtual layout class as well as indexing information for the
   <td bgcolor=#DDDDDD><em>This space inserted only to align table nicely</em></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 1 Size <em>(variable size)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension 0 Size <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 2 Size <em>(variable size)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension 1 Size <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr>
   <td colspan="4"><br />...<br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension \#n Size <em>(variable size)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(n - 1) Size <em>(variable size)</em><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Dataset Element Size <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr>
   <td>Chunk Indexing Type</td>
@@ -8107,6 +8131,13 @@ information for the virtual layout class as well as indexing information for the
       The first dimension stored in the list of dimensions is the slowest changing dimension and the
       (n - 1) dimension stored is the fastest changing dimension.
       The final dimension stored is the dataset element size.</td>
+</tr>
+<tr>
+  <td>Dataset Element Size</td>
+  <td>The size of a dataset elemnt, in bytes.  
+      This field is only present for chunked data storage
+      and is stored as the last dimension entry in the array of dimensions.
+      See previous field description.</td>
 </tr>
 <tr>
   <td>Chunk Indexing Type</td>
