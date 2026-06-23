@@ -1491,6 +1491,10 @@ if (HDF5_BUILD_DOC AND DOXYGEN_FOUND)
   )
   add_dependencies (doxygen hdf5lib_doc)
 
+  if (HDF5_BUILD_JAVA AND TARGET hdf5_java_doc)
+    add_dependencies (hdf5lib_doc hdf5_java_doc)
+  endif ()
+
 endif ()
 
 # Always define the umbrella doxygen target so that scripts and IDEs can
