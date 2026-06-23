@@ -8134,7 +8134,7 @@ information for the virtual layout class as well as indexing information for the
 </tr>
 <tr>
   <td>Dataset Element Size</td>
-  <td>The size of a dataset elemnt, in bytes.  
+  <td>The size of a dataset element, in bytes.  
       This field is only present for chunked data storage
       and is stored as the last dimension entry in the array of dimensions.
       See previous field description.</td>
