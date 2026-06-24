@@ -7910,7 +7910,7 @@ Class-specific information for chunked storage (layout class 2):
 </tr>
 <tr>
   <td>Dimensionality</td>
-  <td>A chunk has a fixed dimensionality. 
+  <td>\anchor FMT4Dimensionality A chunk has a fixed dimensionality. 
       This field specifies the number of dimension size fields
       later in the message.  The value stored is 1 greater than the dataset&rsquo;s actual
       number of dimensions. For example, a 1-dimensional dataset stores a value of 2.
@@ -7925,14 +7925,15 @@ Class-specific information for chunked storage (layout class 2):
 </tr>
 <tr>
   <td>Dimension \#n Size</td>
-  <td>These values define the dimension size of a single chunk, in units of array elements (not bytes).
+  <td>\anchor FMT4DimInfoN These values define the dimension size of a single chunk, 
+      in units of array elements (not bytes).
       The first dimension stored in the list of dimensions is the slowest changing dimension and the
       (n - 1) dimension stored is the fastest changing dimension.
       The final dimension stored is the dataset element size.</td>
 </tr>
 <tr>
   <td>Dataset Element Size</td>
-  <td>The size of a dataset element, in bytes.  
+  <td>\anchor FMT4DsetElmSz The size of a dataset element, in bytes.  
       This field is only present for chunked data storage
       and is stored as the last dimension entry in the array of dimensions.
       See previous field description.</td>
@@ -8112,12 +8113,7 @@ information for the virtual layout class as well as indexing information for the
 </tr>
 <tr>
   <td>Dimensionality</td>
-  <td>A chunk has a fixed dimensionality.
-      This field specifies the number of dimension size fields
-      later in the message.
-      The value stored is 1 greater than the dataset&rsquo;s actual
-      number of dimensions. For example, a 1-dimensional dataset stores a value of 2.
-      This increment accounts for the dataset element size which occupies the final dimension entry.
+  <td>See @ref FMT4Dimensionality "Dimensionality" description in version 3 Data Layout message.
     </td>
 </tr>
 </tr>
@@ -8127,17 +8123,11 @@ information for the virtual layout class as well as indexing information for the
 </tr>
 <tr>
   <td>Dimension \#n Size</td>
-  <td>These values define the dimension size of a single chunk, in units of array elements (not bytes).
-      The first dimension stored in the list of dimensions is the slowest changing dimension and the
-      (n - 1) dimension stored is the fastest changing dimension.
-      The final dimension stored is the dataset element size.</td>
+  <td>See @ref FMT4DimInfoN "Dimension \#n Size" description in version 3 Data Layout message.</td>
 </tr>
 <tr>
   <td>Dataset Element Size</td>
-  <td>The size of a dataset element, in bytes.  
-      This field is only present for chunked data storage
-      and is stored as the last dimension entry in the array of dimensions.
-      See previous field description.</td>
+  <td>See @ref FMT4DsetElmSz "Dataset Element Size" description in version 3 Data Layout message.</td>
 </tr>
 <tr>
   <td>Chunk Indexing Type</td>
@@ -8175,11 +8165,11 @@ information for the virtual layout class as well as indexing information for the
   <td>This variable-sized field encodes information specific to an indexing type. More information on
       what is encoded with each type can be found below this table.
       <ul>
-        <li>See @ref FMT4IndexInfoSingle "<i>Single Chunk</i>" below.</li>
-        <li>See @ref FMT4IndexInfoImplicit "<i>Implicit</i>" below.</li>
-        <li>See @ref FMT4IndexInfoFixed "<i>Fixed Array</i>" below.</li>
-        <li>See @ref FMT4IndexInfoExtensible "<i>Extensible Array</i>" below.</li>
-        <li>See @ref FMT4IndexInfoV2Btrees "<i>Version 2 B-tree</i>" below.</li>
+        <li>See <em>@ref FMT4IndexInfoSingle "Single Chunk"</em> below.</li>
+        <li>See <em>@ref FMT4IndexInfoImplicit "Implicit"</em> below.</li>
+        <li>See <em>@ref FMT4IndexInfoFixed "Fixed Array"</em> below.</li>
+        <li>See <em>@ref FMT4IndexInfoExtensible "Extensible Array"</em> below.</li>
+        <li>See <em>@ref FMT4IndexInfoV2Btrees "Version 2 B-tree"</em> below.</li>
       </ul></td>
 </tr>
 <tr>
