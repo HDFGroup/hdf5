@@ -1290,7 +1290,17 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
                 page_buf_size = ROS3_DEF_PAGE_BUF_SIZE;
         }
 
+        if (page_buf_size == 0)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid page buffer size (0) specified");
+
+        /* Specified page buffer size should be the final say on the amount of bytes
+         * allocated; round page size down to page buffer size if the latter is smaller.
+         */
+        if (page_buf_size < file->page_cache.page_size)
+            file->page_cache.page_size = page_buf_size;
+
         file->page_cache.max_num_pages = (page_buf_size / file->page_cache.page_size);
+        assert(file->page_cache.max_num_pages >= 1);
     }
 
 #ifdef ROS3_STATS
@@ -1901,7 +1911,7 @@ done:
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD__ros3_init_page_cache() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__ros3_determine_io_reqs
@@ -1988,7 +1998,7 @@ H5FD__ros3_determine_io_reqs(H5FD_ros3_t *file, haddr_t addr, size_t io_size,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__ros3_determine_io_pages() */
+} /* end H5FD__ros3_determine_io_reqs() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__ros3_page_cache_make_space

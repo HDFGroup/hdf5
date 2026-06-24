@@ -1158,11 +1158,14 @@ error:
 static int
 test_ros3_paging_apis(void)
 {
-    size_t page_size;
-    size_t page_cache_size;
-    hid_t  fid     = H5I_INVALID_HID;
-    hid_t  fapl_id = H5I_INVALID_HID;
-    bool   lock_super_page;
+    unsigned page_buf_min_meta;
+    unsigned page_buf_min_raw;
+    size_t   page_size;
+    size_t   page_cache_size;
+    size_t   page_buf_size;
+    hid_t    fid     = H5I_INVALID_HID;
+    hid_t    fapl_id = H5I_INVALID_HID;
+    bool     lock_super_page;
 
     TESTING("ros3 I/O paging parameter APIs");
 
@@ -1240,6 +1243,24 @@ test_ros3_paging_apis(void)
     if ((fid = H5Fopen(url_h5_public, H5F_ACC_RDONLY, fapl_id)) < 0)
         TEST_ERROR;
     if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Set page buffer size to smaller than page size - should round page size down; no way to verify
+     * currently
+     */
+    if (H5Pget_page_buffer_size(fapl_id, &page_buf_size, &page_buf_min_meta, &page_buf_min_raw) < 0)
+        TEST_ERROR;
+    if (H5Pset_page_buffer_size(fapl_id, HDF5_ROS3_VFD_DEFAULT_PAGE_SIZE - 1, 50, 50) < 0)
+        TEST_ERROR;
+
+    /* Check that parameters are accepted - no validation performed since H5FD_ros3_t fields are internal */
+    if ((fid = H5Fopen(url_h5_public, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Restore page buffer settings */
+    if (H5Pset_page_buffer_size(fapl_id, page_buf_size, page_buf_min_meta, page_buf_min_raw) < 0)
         TEST_ERROR;
 
     /* Disable locking of the superblock page into the page cache */
