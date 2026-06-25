@@ -1040,7 +1040,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G__get_name_by_addr_cb(hid_t gid, const char *path, const H5O_loc_t *obj_oloc, void *_udata)
+H5G__get_name_by_addr_cb(hid_t H5_ATTR_UNUSED gid, const char *path, const H5O_loc_t *obj_oloc, void *_udata)
 {
     H5G_gnba_iter_t *udata     = (H5G_gnba_iter_t *)_udata; /* User data for iteration */
     herr_t           ret_value = H5_ITER_CONT;              /* Return value */
