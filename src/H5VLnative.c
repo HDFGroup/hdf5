@@ -561,6 +561,10 @@ H5VL_native_get_file_struct(void *obj, H5I_type_t type, H5F_t **file)
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Check arguments */
+    assert(obj);
+    assert(file);
+
     *file = NULL;
 
     switch (type) {

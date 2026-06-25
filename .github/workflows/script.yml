@@ -484,7 +484,7 @@ jobs:
   # Windows w/ OneAPI
   #
     name: "Windows Intel CTest"
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
       - name: Get Actions
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -500,6 +500,12 @@ jobs:
         with:
           compiler: intel
           version: '2025.0'
+
+      - name: Setup Java
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          java-version: 21
+          distribution: 'temurin'
 
       - name: Install CMake
         uses: lukka/get-cmake@591817e96fcad43505fb4eae36172462abb3a42e # latest

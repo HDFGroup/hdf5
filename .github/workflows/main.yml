@@ -35,6 +35,16 @@ on:
         required: false
         default: "jni"
         type: string
+      win_runner:
+        description: "Windows runner version to use (windows-2022, windows-latest, etc.)"
+        required: false
+        default: "windows-latest"
+        type: string
+      win_vs_generator:
+        description: "CMake generator to use for Visual Studio"
+        required: false
+        default: "Visual Studio 18 2026"
+        type: string
 
 permissions:
   contents: read
@@ -71,7 +81,7 @@ jobs:
           # No Fortran, parallel, or VFDs that rely on POSIX things
           - name: "Windows MSVC"
             ostype: windows
-            os: windows-latest
+            os: ${{ inputs.win_runner }}
             shared: ON
             cpp: ON
             fortran: OFF
@@ -84,7 +94,7 @@ jobs:
             parallel: OFF
             mirror_vfd: OFF
             direct_vfd: OFF
-            generator: "-G \"Visual Studio 17 2022\" -A x64"
+            generator: "-G \"${{ inputs.win_vs_generator }}\" -A x64"
             run_tests: true
 
           # Linux (Ubuntu) w/ gcc

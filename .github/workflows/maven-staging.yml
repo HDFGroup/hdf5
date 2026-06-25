@@ -126,8 +126,11 @@ jobs:
 
       - name: Determine if Maven testing should run
         id: should-test
+        env:
+          TEST_MAVEN_DEPLOYMENT: ${{ inputs.test_maven_deployment }}
+          MAVEN_CHANGED: ${{ steps.changes.outputs.maven }}
         run: |
-          if [ "${{ steps.changes.outputs.maven }}" == "true" ] || [ "${{ inputs.test_maven_deployment }}" == "true" ]; then
+          if [ "$MAVEN_CHANGED" == "true" ] || [ "$TEST_MAVEN_DEPLOYMENT" == "true" ]; then
             echo "result=true" >> $GITHUB_OUTPUT
             echo "Maven testing will be performed"
           else
@@ -145,9 +148,10 @@ jobs:
     steps:
       - name: Determine build matrix
         id: set-matrix
+        env:
+          JAVA_IMPL: ${{ inputs.java_implementation || 'auto' }}
+          PLATFORMS: ${{ inputs.platforms || 'all-platforms' }}
         run: |
-          JAVA_IMPL="${{ inputs.java_implementation || 'auto' }}"
-          PLATFORMS="${{ inputs.platforms || 'all-platforms' }}"
 
           # Determine which implementations to build
           case "$JAVA_IMPL" in
@@ -274,6 +278,8 @@ jobs:
       - name: Set preset name
         id: set-preset
         shell: bash
+        env:
+          USE_SNAPSHOT_VERSION: ${{ inputs.use_snapshot_version }}
         run: |
           # Determine implementation suffix for preset based on matrix
           JAVA_IMPL="${{ matrix.implementation }}"
@@ -289,7 +295,7 @@ jobs:
 
           # Determine snapshot setting
           SNAPSHOT_SUFFIX=""
-          if [ "${{ inputs.use_snapshot_version }}" == "true" ] || [ "${{ github.event_name }}" == "pull_request" ]; then
+          if [ "$USE_SNAPSHOT_VERSION" == "true" ] || [ "${{ github.event_name }}" == "pull_request" ]; then
             SNAPSHOT_SUFFIX="-Snapshot"
           fi
 
@@ -683,6 +689,8 @@ jobs:
 
       - name: Extract version for testing
         id: extract-version
+        env:
+          USE_SNAPSHOT_VERSION: ${{ inputs.use_snapshot_version }}
         run: |
           # Extract version from first available POM file
           POM_FILE=$(find ./artifacts -name "pom.xml" 2>/dev/null | head -1)
@@ -699,7 +707,7 @@ jobs:
               H5_RELEASE=$(grep '#define H5_VERS_RELEASE' source/src/H5public.h | awk '{print $3}')
 
               # Determine if this should be a SNAPSHOT version
-              if [ "${{ inputs.use_snapshot_version }}" == "true" ] || [ "${{ github.event_name }}" == "pull_request" ]; then
+              if [ "$USE_SNAPSHOT_VERSION" == "true" ] || [ "${{ github.event_name }}" == "pull_request" ]; then
                 VERSION="${H5_MAJOR}.${H5_MINOR}.${H5_RELEASE}-SNAPSHOT"
               else
                 VERSION="${H5_MAJOR}.${H5_MINOR}.${H5_RELEASE}"

@@ -52,8 +52,10 @@ static H5FD_onion_fapl_info_t onion_fa_g = {
 };
 
 /* module-scoped variables for XML option */
-#define DEFAULT_XSD "http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd"
-#define DEFAULT_DTD "http://www.hdfgroup.org/HDF5/XML/DTD/HDF5-File.dtd"
+#define DEFAULT_XSD                                                                                          \
+    "https://raw.githubusercontent.com/HDFGroup/hdf5/develop/tools/test/h5dump/testfiles/xml/HDF5-File.xsd"
+#define DEFAULT_DTD                                                                                          \
+    "https://raw.githubusercontent.com/HDFGroup/hdf5/develop/tools/test/h5dump/testfiles/xml/HDF5-File.dtd"
 
 /* Standard DDL output */
 static const dump_functions ddl_function_table = {
@@ -1594,11 +1596,12 @@ main(int argc, char *argv[])
                         *indx = '\0';
 
                     PRINTSTREAM(rawoutstream,
-                                "<%sHDF5-File xmlns:%s=\"http://hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd\" "
+                                "<%sHDF5-File xmlns:%s=\"%s\" "
                                 "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-                                "xsi:schemaLocation=\"http://hdfgroup.org/HDF5/XML/schema/HDF5-File "
-                                "http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd\">\n",
-                                xmlnsprefix, ns);
+                                "xsi:schemaLocation=\"https://github.com/HDFGroup/hdf5/blob/develop/tools/"
+                                "test/h5dump/testfiles/xml "
+                                "%s\">\n",
+                                xmlnsprefix, ns, DEFAULT_XSD, DEFAULT_XSD);
                     free(ns);
                 }
             }

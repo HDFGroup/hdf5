@@ -144,6 +144,18 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ## Library
 
+### HTTP 403 errors in the ROS3 VFD for object keys with special characters
+
+   The ROS3 VFD did not URI-encode the S3 object key when building the HTTP request path, so keys containing characters that AWS Signature Version 4 requires to be percent-encoded — such as the '=' in Hive-style `key=value` partition prefixes, '+', or spaces — produced a signed request whose signature did not match S3's server-side recomputation. S3 rejects such requests with `SignatureDoesNotMatch`, which surfaces as an HTTP 403 error (indistinguishable from a permissions error on a HEAD request), even though tools like the AWS CLI could access the same object. The object key is now percent-encoded exactly once when the request path is built, matching the behavior of other S3 clients. Note that URLs must now be passed to the ROS3 VFD with their object keys unencoded; a key that was pre-encoded as a workaround for this issue will now be double-encoded and fail to resolve.
+
+### Fixed file descriptor leaks in stdio VFD error paths
+
+   Fixed multiple resource leaks in the H5FDstdio driver where file descriptors were not properly closed on error paths. The error handling code was incorrectly attempting to close a local variable instead of the file pointer stored in the file structure, leading to file descriptor leaks. This issue affected 5 error paths in `H5FD_stdio_open()` and could cause file descriptor exhaustion in long-running applications.
+
+### Added defensive NULL pointer checks in native VOL connector
+
+   Added assertion checks for NULL pointer parameters in `H5VL_native_get_file_struct()` to catch programming errors earlier and improve code robustness.
+
 ### Added checks for data filter behavior
 
    The library now verifies that the returned data size from a data filter's filter callback function can fit inside the returned data buffer size. The library also checks that, when data is filtered then unfiltered (filtered in reverse), the returned data size is exactly the same as the original data size.
@@ -197,6 +209,16 @@ The `h5repack` tool now obtains its default low and high library version bounds 
    `HLTB_MAX_FIELD_LEN` (255) has been moved from the private header `H5TBprivate.h` to the public
    header `H5TBpublic.h`. Applications can now use this constant to correctly size their
    `field_names[]` buffers when calling `H5TBget_field_info()`.
+
+### Fixed memory leaks and improved safety in H5LT functions
+
+   - Fixed memory leak in `H5LTtext_to_dtype()` by adding NULL check after `strdup()` call
+   - Added defensive NULL checks and pointer nullification after `free()` calls to prevent use-after-free bugs
+   - Improved documentation for `realloc_and_append()` internal function with detailed parameter contracts and preconditions
+
+### Eliminated code duplication in H5LT datatype conversion
+
+   Refactored `H5LT_dtype_to_text()` by extracting common super-type handling logic into a new helper function `H5LT_append_dtype_super_text()`. This eliminates approximately 80 lines of duplicated code that was previously repeated across 4 datatype cases (ENUM, VLEN, ARRAY, COMPLEX), improving maintainability and reducing the risk of inconsistent behavior.
 
 ### Fixed H5TBread_fields_name/H5TBwrite_fields_name matching the wrong field when one field name is a prefix of another
 

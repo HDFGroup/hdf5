@@ -240,14 +240,19 @@ jobs:
     if: always()
     steps:
       - name: Generate test summary
+        env:
+          INPUT_PLATFORMS: ${{ inputs.platforms }}
+          INPUT_JAVA_IMPL: ${{ inputs.java_implementation }}
+          INPUT_TEST_DEPLOYMENT: ${{ inputs.test_deployment }}
+          INPUT_TEST_EXAMPLES: ${{ inputs.test_examples }}
         run: |
           echo "# Maven Build and Test Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Configuration:**" >> $GITHUB_STEP_SUMMARY
-          echo "- Platforms: ${{ inputs.platforms }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Java Implementation: ${{ inputs.java_implementation }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Deployment Test: ${{ inputs.test_deployment }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Examples Test: ${{ inputs.test_examples }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Platforms: $INPUT_PLATFORMS" >> $GITHUB_STEP_SUMMARY
+          echo "- Java Implementation: $INPUT_JAVA_IMPL" >> $GITHUB_STEP_SUMMARY
+          echo "- Deployment Test: $INPUT_TEST_DEPLOYMENT" >> $GITHUB_STEP_SUMMARY
+          echo "- Examples Test: $INPUT_TEST_EXAMPLES" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           echo "## Results" >> $GITHUB_STEP_SUMMARY
@@ -262,7 +267,7 @@ jobs:
           fi
 
           # Deployment results
-          if [ "${{ inputs.test_deployment }}" == "true" ]; then
+          if [ "$INPUT_TEST_DEPLOYMENT" == "true" ]; then
             if [ "${{ needs.deploy-to-packages.result }}" == "success" ]; then
               echo "✅ **Package Deployment:** PASSED" >> $GITHUB_STEP_SUMMARY
               echo "   - Repository: https://github.com/${{ github.repository }}/packages" >> $GITHUB_STEP_SUMMARY
@@ -296,7 +301,7 @@ jobs:
           FFM_OK=$([[ "${{ needs.test-ffm-package.result }}" =~ ^(success|skipped)$ ]] && echo "true" || echo "false")
 
           if [ "${{ needs.build-maven-packages.result }}" == "success" ] && \
-             ([ "${{ inputs.test_deployment }}" == "false" ] || \
+             ([ "$INPUT_TEST_DEPLOYMENT" == "false" ] || \
               ([ "${{ needs.deploy-to-packages.result }}" == "success" ] && \
                [ "$JNI_OK" == "true" ] && [ "$FFM_OK" == "true" ])); then
             echo "## 🎉 All Tests Passed!" >> $GITHUB_STEP_SUMMARY
@@ -321,6 +326,8 @@ jobs:
           fi
 
       - name: Check overall status
+        env:
+          INPUT_TEST_DEPLOYMENT: ${{ inputs.test_deployment }}
         run: |
           BUILD_RESULT="${{ needs.build-maven-packages.result }}"
           DEPLOY_RESULT="${{ needs.deploy-to-packages.result }}"
@@ -332,7 +339,7 @@ jobs:
             exit 1
           fi
 
-          if [ "${{ inputs.test_deployment }}" == "true" ]; then
+          if [ "$INPUT_TEST_DEPLOYMENT" == "true" ]; then
             if [ "$DEPLOY_RESULT" != "success" ] && [ "$DEPLOY_RESULT" != "skipped" ]; then
               echo "❌ Deployment failed"
               exit 1

@@ -71,7 +71,7 @@ jobs:
             mirror_vfd: OFF
             direct_vfd: OFF
             ros3_vfd: OFF
-            generator: "-G \"Visual Studio 17 2022\" -A x64"
+            generator: "-G \"Visual Studio 18 2026\" -A x64"
             run_tests: true
 
           - name: "Ubuntu Static gcc"

@@ -305,6 +305,19 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_shared_select_write() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5F_shared_vector_read
+ *
+ * Purpose:     Reads `count` blocks of data from a file/server/etc.
+ *              to matching memory buffers (from the `bufs` array). The
+ *              file offsets are provided in the `addrs` array, the data
+ *              sizes are specified in the `sizes` array and data memory
+ *              types are specified in the `types` array. The addresses
+ *              are relative to the base address for the file. All arrays
+ *              are of length `count`.
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5F_shared_vector_read(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
                        size_t sizes[], void *bufs[])

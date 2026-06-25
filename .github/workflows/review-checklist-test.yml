@@ -1,0 +1,23 @@
+name: Review Checklist Tests
+
+on:
+  push:
+    paths:
+      - .github/scripts/review-checklist.js
+      - .github/scripts/review-checklist.test.js
+  pull_request:
+    branches: [develop]
+    paths:
+      - .github/scripts/review-checklist.js
+      - .github/scripts/review-checklist.test.js
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    if: github.repository == 'HDFGroup/hdf5' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - run: node .github/scripts/review-checklist.test.js
