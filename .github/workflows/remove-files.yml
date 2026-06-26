@@ -56,8 +56,8 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc_s3.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2026_cl.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2026_cl.msi
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_intel.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.msi
