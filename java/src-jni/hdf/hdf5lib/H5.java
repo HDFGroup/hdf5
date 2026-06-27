@@ -4795,17 +4795,11 @@ public class H5 implements java.io.Serializable {
      * @param flags
      *            File access flags. Possible values include:
      *            <ul>
-     *            <li>
-     *            @ref H5F_ACC_RDWR Allow read and write access to file.</li>
-     *            <li>
-     *            @ref H5F_ACC_RDONLY Allow read-only access to file.</li>
-     *            <li>
-     *            @ref H5F_ACC_TRUNC Truncate file, if it already exists, erasing all data previously stored
-     *                               in the file.</li>
-     *            <li>
-     *            @ref H5F_ACC_EXCL Fail if file already exists.</li>
-     *            <li>
-     *            @ref H5P_DEFAULT Apply default file access and creation properties.</li>
+     *            <li>@ref H5F_ACC_RDWR Allow read and write access to file.</li>
+     *            <li>@ref H5F_ACC_RDONLY Allow read-only access to file.</li>
+     *            <li>@ref H5F_ACC_TRUNC Truncate file, if it already exists, erasing all data previously
+     * stored in the file.</li> <li>@ref H5F_ACC_EXCL Fail if file already exists.</li> <li>@ref H5P_DEFAULT
+     * Apply default file access and creation properties.</li>
      *            </ul>
      *
      * @param create_id
