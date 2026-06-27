@@ -12461,8 +12461,7 @@ public class H5 implements java.io.Serializable {
      * H5Pget_filter2 returns information about a filter, specified by its filter number, in a filter
      * pipeline, specified by the property list with which it is associated.
      *
-     * @see public static int H5Pget_filter(int plist, int filter_number, int[] flags, int[] cd_nelmts, int[]
-     *      cd_values, int namelen, String[] name, int[] filter_config)
+     * @see #H5Pget_filter(long, int, int[], long[], int[], long, String[], int[])
      *
      **/
     private static int H5Pget_filter2(long plist, int filter_number, int[] flags, long[] cd_nelmts,
@@ -18636,7 +18635,7 @@ public class H5 implements java.io.Serializable {
      *
      * H5Rget_obj_type2 Retrieves the type of object that an object reference points to.
      *
-     * @see public static int H5Rget_obj_type(int loc_id, int ref_type, byte ref[])
+     * @see #H5Rget_obj_type(long, int, byte[])
      **/
     private static int H5Rget_obj_type2(long loc_id, int ref_type, byte ref[], int[] obj_type)
         throws HDF5LibraryException, NullPointerException, HDF5FunctionArgumentException

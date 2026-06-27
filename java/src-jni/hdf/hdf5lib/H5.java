@@ -733,8 +733,7 @@ public class H5 implements java.io.Serializable {
      *
      * H5Acreate2 an attribute, attr_name, which is attached to the object specified by the identifier loc_id.
      *
-     * @see public static long H5Acreate( long loc_id, String attr_name, long type_id, long space_id, long
-     *                                    acpl_id, long aapl_id )
+     * @see #H5Acreate(long, String, long, long, long, long)
      **/
     private synchronized static native long _H5Acreate2(long loc_id, String attr_name, long type_id,
                                                         long space_id, long acpl_id, long aapl_id)
@@ -2550,8 +2549,7 @@ public class H5 implements java.io.Serializable {
      *
      * H5Dcreate2 creates a new dataset named name at the location specified by loc_id.
      *
-     * @see public static int H5Dcreate(int loc_id, String name, int type_id, int space_id, int lcpl_id, int
-     *                                  dcpl_id, int dapl_id)
+     * @see #H5Dcreate(long, String, long, long, long, long, long)
      **/
     private synchronized static native long _H5Dcreate2(long loc_id, String name, long type_id, long space_id,
                                                         long lcpl_id, long dcpl_id, long dapl_id)
@@ -2826,7 +2824,7 @@ public class H5 implements java.io.Serializable {
      * H5Dopen2 opens the existing dataset specified by a location identifier and name, loc_id and name,
      * respectively.
      *
-     * @see public static int H5Dopen(int loc_id, String name, int dapl_id)
+     * @see #H5Dopen(long, String, long)
      **/
     private synchronized static native long _H5Dopen2(long loc_id, String name, long dapl_id)
         throws HDF5LibraryException, NullPointerException;
@@ -8482,8 +8480,7 @@ public class H5 implements java.io.Serializable {
      * H5Pget_filter2 returns information about a filter, specified by its filter number, in a filter
      * pipeline, specified by the property list with which it is associated.
      *
-     * @see public static int H5Pget_filter(int plist, int filter_number, int[] flags, int[] cd_nelmts, int[]
-     *      cd_values, int namelen, String[] name, int[] filter_config)
+     * @see #H5Pget_filter(long, int, int[], long[], int[], long, String[], int[])
      *
      **/
     private synchronized static native int H5Pget_filter2(long plist, int filter_number, int[] flags,
@@ -12222,7 +12219,7 @@ public class H5 implements java.io.Serializable {
      *
      * H5Rget_obj_type2 Retrieves the type of object that an object reference points to.
      *
-     * @see public static int H5Rget_obj_type(int loc_id, int ref_type, byte ref[])
+     * @see #H5Rget_obj_type(long, int, byte[])
      **/
     private synchronized static native int H5Rget_obj_type2(long loc_id, int ref_type, byte ref[],
                                                             int[] obj_type)
