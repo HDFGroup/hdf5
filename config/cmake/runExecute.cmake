@@ -170,6 +170,12 @@ if (DEFINED TEST_ERRREF AND NOT "${TEST_ERRREF}" STREQUAL "")
   endif ()
 endif ()
 
+# if ERROR_APPEND is set, append the stderr stream to the stdout stream
+# (restores behavior removed during runTest.cmake -> runExecute.cmake refactor)
+if (ERROR_APPEND AND NOT "${TEST_ERR_FILTERED_STREAM}" STREQUAL "")
+  string (APPEND TEST_OUTPUT_FILTERED_STREAM "${TEST_ERR_FILTERED_STREAM}")
+endif ()
+
 # if the return value is !=${TEST_EXPECT} bail out
 if (NOT TEST_RESULT EQUAL TEST_EXPECT)
   if (NOT TEST_NOERRDISPLAY)
@@ -243,11 +249,11 @@ set(TEST_MASKS_ERROR "")
 list (APPEND TEST_MASKS_ERROR "Time:[^\n]+\n")
 list (APPEND TEST_MASKS_ERROR "thread [0-9]*:")
 list (APPEND TEST_MASKS_ERROR ": ([^\n]*)[.]c ")
-list (APPEND TEST_MASKS_ERROR " line [0-9]*")
+list (APPEND TEST_MASKS_ERROR " line [0-9]+")
 list (APPEND TEST_MASKS_ERROR "v[1-9]*[.][0-9]*[.]")
-list (APPEND TEST_MASKS_ERROR "HDF5 [1-9]*[.][0-9]*[.][0-9]*[^)]*")
-list (APPEND TEST_MASKS_ERROR "H5Eget_auto[1-2]*")
-list (APPEND TEST_MASKS_ERROR "H5Eset_auto[1-2]*")
+list (APPEND TEST_MASKS_ERROR "[1-9][0-9]*[.][0-9]*[.][0-9]*[^)]*")
+list (APPEND TEST_MASKS_ERROR "H5Eget_auto[1-2]+")
+list (APPEND TEST_MASKS_ERROR "H5Eset_auto[1-2]+")
 
 set(TEST_MASKS_ERROR_REPLACE "")
 list (APPEND TEST_MASKS_ERROR_REPLACE "Time:  XXXX\n")
