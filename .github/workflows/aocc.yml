@@ -45,7 +45,7 @@ jobs:
           tar -xvf aocc-compiler-${{ env.AOCCVERDOT }}.tar
           cd aocc-compiler-${{ env.AOCCVERDOT }}
           bash install.sh
-          source /home/runner/work/hdf5/hdf5/setenv_AOCC.sh
+          source /home/runner/work/hdf5/hdf5/aocc-compiler-${{ env.AOCCVERDOT }}/setenv_AOCC.sh
           which clang
           which flang
           clang -v
