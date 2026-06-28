@@ -553,6 +553,45 @@ async function coordinateReviewers(github, context, core, {
     return { confirmedRequested: selected, excludedReviewers: updatedExcluded };
   }
 
+  // Per-area avalanche detection: GitHub's CODEOWNERS engine re-fires whenever a
+  // commit first touches a new CODEOWNERS-covered area — not only on PR open,
+  // but also on synchronize. If multiple owners of the same area are currently
+  // requested, that's an auto-assignment avalanche that was never pruned. Reduce
+  // each such area to the single load-balanced pick now, before the
+  // synchronize-swap or additive-fill logic runs, so those paths see an already-
+  // correct one-per-area baseline. (PR #6484: user pushed a commit that first
+  // touched .github; GitHub assigned all 4 .github CODEOWNERS simultaneously.)
+  const avalancheAreas = eligibleAreas.filter(
+    area => area.owners.filter(o => existingRequested.has(o)).length > 1
+  );
+  if (avalancheAreas.length > 0) {
+    const { selected: avalanchePruned, log: pruneLog } = chooseReviewers(avalancheAreas, {
+      prAuthor,
+      existingRequested: new Set(), // pick fresh: treat each area as uncovered
+      reviewerLoad,
+      LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
+    });
+    for (const msg of pruneLog) core.info(msg);
+
+    const avalancheOwners = new Set(avalancheAreas.flatMap(a => a.owners));
+    // Keep the pruned single pick per area; leave non-avalanche owners untouched.
+    const keepSet = new Set([
+      ...[...existingRequested].filter(r => !avalancheOwners.has(r)),
+      ...avalanchePruned,
+    ]);
+    await removeUnselected(github, core, pr, avalancheOwners, existingRequested, keepSet);
+
+    // Update existingRequested so the swap and additive-fill steps see the
+    // post-prune state — not the stale avalanche.
+    for (const login of avalancheOwners) existingRequested.delete(login);
+    for (const login of avalanchePruned) existingRequested.add(login);
+
+    core.info(
+      `Pruned per-area CODEOWNERS avalanche — area(s): ${avalancheAreas.map(a => a.label).join(', ')}; ` +
+      `kept: ${[...avalanchePruned].join(', ') || '(none)'}`
+    );
+  }
+
   // Synchronize: a new commit dismissed a prior reviewer's approval.
   // Re-request that reviewer instead of keeping a fresh CODEOWNERS pick —
   // they already have context and only need to see what changed.
