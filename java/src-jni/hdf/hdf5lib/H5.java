@@ -205,7 +205,8 @@ import org.slf4j.LoggerFactory;
  * selected point.</li>
  * <li>compound, variable-length sequence, array, complex: an Object[] of nested java.util.ArrayLists. Each
  * element is an ArrayList; a compound is an ArrayList of its members in order, a VLEN/array/complex is an
- * ArrayList of its elements, and scalar leaves are the boxed type (Integer, Double, String, ...). Slots are
+ * ArrayList of its elements, and scalar leaves are the boxed type (Integer, Double, String, ...) except
+ * reference and opaque leaves, which are a byte[] holding the element's raw bytes. Slots are
  * not pre-allocated by the caller on read.</li>
  * </ul>
  * <p>

@@ -4393,7 +4393,6 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
         } /* H5T_ARRAY */
         case H5T_ENUM:
         case H5T_BITFIELD:
-        case H5T_OPAQUE:
         case H5T_INTEGER: {
             /* Convert each element */
             switch (typeSize) {
@@ -4466,7 +4465,11 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
             }
             break;
         } /* H5T_FLOAT */
+        case H5T_OPAQUE:
         case H5T_REFERENCE: {
+            /* Opaque elements are arbitrary-sized byte blobs with no matching
+             * Java scalar type, so they use the same byte[]-per-element model
+             * as references. */
             /* Convert each element to a list */
             jboolean bb;
             jbyte   *barray = NULL;
@@ -4723,7 +4726,6 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
         } /* H5T_ARRAY */
         case H5T_ENUM:
         case H5T_BITFIELD:
-        case H5T_OPAQUE:
         case H5T_INTEGER: {
             /* Convert each element */
             switch (typeSize) {
@@ -4772,7 +4774,10 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
             }
             break;
         } /* H5T_FLOAT */
+        case H5T_OPAQUE:
         case H5T_REFERENCE: {
+            /* Opaque elements are arbitrary-sized byte blobs and use the same
+             * byte[]-per-element model as references. */
             /* Convert each array element */
             jbyte *barray = (jbyte *)ENVPTR->GetByteArrayElements(ENVONLY, in_obj, 0);
             memcpy(char_buf, ((char *)barray), typeSize);
@@ -4862,6 +4867,29 @@ done:
     return;
 }
 
+/*
+ * Buffer data model (see also the "Buffer data model" section in H5.java).
+ *
+ * translate_rbuf()/translate_wbuf() convert between the packed ("raw") C buffer
+ * that the HDF5 library reads into / writes from and the Java object tree that
+ * the public API exposes. The expected Java representation per memory-datatype
+ * class is:
+ *
+ *   - integer/enum/bitfield, float: the boxed scalar type (Byte/Short/Integer/
+ *     Long for integers sized 1/2/4/8, Float/Double for floats).
+ *   - fixed- or variable-length string: a java.lang.String (null permitted on
+ *     write, where it is written as a zeroed element).
+ *   - reference, opaque: a Java byte[] holding one element's raw bytes. Opaque
+ *     elements are arbitrary-sized blobs with no matching Java scalar type, so
+ *     they follow the same model as references.
+ *   - compound, variable-length sequence, array, complex: a java.util.ArrayList.
+ *     A compound is an ArrayList of its members in declaration order; a VLEN/
+ *     array/complex is an ArrayList of its elements; scalar leaves are the boxed
+ *     types above. Nesting is handled by recursing through translate_atomic_*.
+ *
+ * On read the top-level container is the caller's Java Object[]; recursive calls
+ * append to ArrayLists. Per-element slots are not pre-allocated by the caller.
+ */
 void
 translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t type_class, jsize count,
                void *raw_buf, size_t buf_size)
@@ -5092,6 +5120,13 @@ done:
     return;
 }
 
+/*
+ * Write counterpart to translate_rbuf(); see the "Buffer data model" comment on
+ * translate_rbuf() (and in H5.java) for the Java-to-C representation of each
+ * datatype class. On write the Java buffer is validated up front by
+ * h5validate_wbuf() so a mismatch raises IllegalArgumentException at the API
+ * boundary instead of corrupting the packed buffer here.
+ */
 void
 translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t type_class, jsize count,
                void *raw_buf, size_t buf_size)
@@ -5492,8 +5527,7 @@ h5validate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class
         }
         case H5T_INTEGER:
         case H5T_ENUM:
-        case H5T_BITFIELD:
-        case H5T_OPAQUE: {
+        case H5T_BITFIELD: {
             const char *clsname;
             switch (typeSize) {
                 case 1:
@@ -5542,10 +5576,13 @@ h5validate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class
                 H5_BAD_ARGUMENT_ERROR(ENVONLY, "h5validate_wbuf: string element is not a java.lang.String");
             break;
         }
+        case H5T_OPAQUE:
         case H5T_REFERENCE: {
-            /* translate_atomic_wbuf reads a Java byte[] for references. */
+            /* translate_atomic_wbuf reads a Java byte[] for references and for
+             * opaque elements (opaque is an arbitrary-sized byte blob). */
             if (NULL == in_obj || !ENVPTR->IsInstanceOf(ENVONLY, in_obj, ENVPTR->FindClass(ENVONLY, "[B")))
-                H5_BAD_ARGUMENT_ERROR(ENVONLY, "h5validate_wbuf: reference element is not a byte[]");
+                H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                                      "h5validate_wbuf: reference/opaque element is not a byte[]");
             break;
         }
         case H5T_TIME:
