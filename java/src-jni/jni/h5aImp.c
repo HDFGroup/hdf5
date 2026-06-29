@@ -153,7 +153,7 @@ Java_hdf_hdf5lib_H5_H5Aread(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_t
     jbyte      *readBuf = NULL;
     hsize_t     dims[H5S_MAX_RANK];
     hid_t       sid = H5I_INVALID_HID;
-    size_t      typeSize;
+    size_t      typeSize     = 0; // Only used by vl_data_class types
     H5T_class_t type_class;
     jsize       vl_array_len = 0; // Only used by vl_data_class types
     htri_t      vl_data_class;
@@ -247,7 +247,7 @@ Java_hdf_hdf5lib_H5_H5Awrite(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_
     jbyte      *writeBuf = NULL;
     hsize_t     dims[H5S_MAX_RANK];
     hid_t       sid = H5I_INVALID_HID;
-    size_t      typeSize;
+    size_t      typeSize     = 0; // Only used by vl_data_class types
     H5T_class_t type_class;
     jsize       vl_array_len = 0; // Only used by vl_data_class types
     htri_t      vl_data_class;
