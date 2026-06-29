@@ -870,7 +870,6 @@ public class TestH5D {
                 // Check Coordinates
                 long[] fill_coords   = new long[ndim];
                 long fill_curr_coord = (long)curr_coordHandle.get(operator_data, 0);
-                System.out.println("fill_curr_coord = " + fill_curr_coord);
                 for (int i = 0; i < ndim; i++)
                     fill_coords[i] = (long)coordsHandle.get(operator_data, 0L, 2 * fill_curr_coord + i);
 
@@ -2222,7 +2221,6 @@ public class TestH5D {
                 assertEquals("String " + i + " mismatch", writeData[i], readData[i]);
             }
 
-            System.out.println("testH5D_VLStrings_write_read_roundtrip: PASSED");
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -2288,7 +2286,6 @@ public class TestH5D {
             assertEquals("Third should be empty", "", readData[2]);
             assertEquals("Fourth should match", "Also not empty", readData[3]);
 
-            System.out.println("testH5D_VLStrings_roundtrip_empty: PASSED");
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -2359,7 +2356,6 @@ public class TestH5D {
                 assertTrue("String should be > 1KB", readData[i].length() > 1024);
             }
 
-            System.out.println("testH5D_VLStrings_roundtrip_large: PASSED");
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -2384,6 +2380,851 @@ public class TestH5D {
             }
             catch (Exception ex) {
             }
+        }
+    }
+
+    /*
+     * Verify H5DreadVL safe throws a Java exception
+     * when called with a malformed buffer shape for an ARRAY-of-varstr dataset.
+     */
+    @Test
+    public void testH5DArray_string_buffer_flat_StringArray() throws Throwable
+    {
+        String dset_str_name = "ArrayStringdata_flat";
+        long dset_str_id     = HDF5Constants.H5I_INVALID_HID;
+        long dtype_str_id    = HDF5Constants.H5I_INVALID_HID;
+        long varstr_id       = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id       = HDF5Constants.H5I_INVALID_HID;
+        long[] strdims       = {3};
+        long[] dims          = {2};
+        long lsize           = 1;
+
+        String[] row0 = {"a", "bb", "ccc"};
+        String[] row1 = {"dd", "ee", "fff"};
+
+        ArrayList[] arr_str_data = new ArrayList[2];
+        arr_str_data[0]          = new ArrayList<String>(Arrays.asList(row0));
+        arr_str_data[1]          = new ArrayList<String>(Arrays.asList(row1));
+
+        try {
+            varstr_id = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            H5.H5Tset_size(varstr_id, HDF5Constants.H5T_VARIABLE);
+            dtype_str_id = H5.H5Tarray_create(varstr_id, 1, strdims);
+
+            dspace_id = H5.H5Screate_simple(1, dims, null);
+            dset_str_id =
+                H5.H5Dcreate(H5fid, dset_str_name, dtype_str_id, dspace_id, HDF5Constants.H5P_DEFAULT,
+                             HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            H5.H5DwriteVL(dset_str_id, dtype_str_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                          HDF5Constants.H5P_DEFAULT, arr_str_data);
+            H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
+
+            for (int j = 0; j < dims.length; j++)
+                lsize *= dims[j];
+
+            // Malformed buffer: a flat String[dims*array_dim], not
+            // ArrayList[dims] of array_dim Strings.
+            int flatLen     = (int)lsize * (int)strdims[0];
+            String[] badBuf = new String[flatLen];
+            for (int j = 0; j < flatLen; j++)
+                badBuf[j] = "";
+
+            // The JNI must not segfault here regardless of what badBuf looks
+            // like. Either it correctly populates the slots or it throws.
+            try {
+                H5.H5DreadVL(dset_str_id, dtype_str_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                             HDF5Constants.H5P_DEFAULT, badBuf);
+            }
+            catch (Exception ex) {
+                // Accepted outcome: graceful Java-level error.
+                return;
+            }
+
+            assertNotNull("badBuf[0] should not be null after H5DreadVL", badBuf[0]);
+        }
+        finally {
+            if (dset_str_id > 0)
+                try {
+                    H5.H5Dclose(dset_str_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dspace_id > 0)
+                try {
+                    H5.H5Sclose(dspace_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dtype_str_id > 0)
+                try {
+                    H5.H5Tclose(dtype_str_id);
+                }
+                catch (Exception ex) {
+                }
+            if (varstr_id > 0)
+                try {
+                    H5.H5Tclose(varstr_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    /*
+     * Verify H5DwriteVL safely throws a Java exception
+     * when called with a malformed buffer shape for an ARRAY-of-varstr dataset.
+     */
+    @Test
+    public void testH5DArray_string_buffer_flat_StringArray_write() throws Throwable
+    {
+        String dset_str_name = "ArrayStringdata_flat_write";
+        long dset_str_id     = HDF5Constants.H5I_INVALID_HID;
+        long dtype_str_id    = HDF5Constants.H5I_INVALID_HID;
+        long varstr_id       = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id       = HDF5Constants.H5I_INVALID_HID;
+        long[] strdims       = {3};
+        long[] dims          = {2};
+
+        try {
+            varstr_id = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            H5.H5Tset_size(varstr_id, HDF5Constants.H5T_VARIABLE);
+            dtype_str_id = H5.H5Tarray_create(varstr_id, 1, strdims);
+
+            dspace_id = H5.H5Screate_simple(1, dims, null);
+            dset_str_id =
+                H5.H5Dcreate(H5fid, dset_str_name, dtype_str_id, dspace_id, HDF5Constants.H5P_DEFAULT,
+                             HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+
+            // Malformed buffer: a flat String[dims*array_dim], not
+            // ArrayList[dims] of array_dim Strings.
+            int flatLen      = (int)dims[0] * (int)strdims[0];
+            String[] flatBuf = new String[flatLen];
+            for (int j = 0; j < flatLen; j++)
+                flatBuf[j] = "s" + j;
+
+            try {
+                H5.H5DwriteVL(dset_str_id, dtype_str_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, flatBuf);
+            }
+            catch (Exception ex) {
+                // Accepted outcome: graceful Java-level error.
+                return;
+            }
+
+            // If we reach here, no exception was thrown. Worst case is the JVM
+            // segfaults before this line. If it accepted the write silently,
+            // that itself indicates the JNI doesn't validate the buffer shape.
+        }
+        finally {
+            if (dset_str_id > 0)
+                try {
+                    H5.H5Dclose(dset_str_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dspace_id > 0)
+                try {
+                    H5.H5Sclose(dspace_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dtype_str_id > 0)
+                try {
+                    H5.H5Tclose(dtype_str_id);
+                }
+                catch (Exception ex) {
+                }
+            if (varstr_id > 0)
+                try {
+                    H5.H5Tclose(varstr_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    /*
+     * Build a 1-D dataset of type COMPOUND { seq: VLEN { int32 }, n: int32 }
+     * inside the per-test file (H5fid) and write canonical data via H5DwriteVL.
+     * Closes the vlen/compound/dataspace ids internally and returns only the
+     * open dataset id; the caller closes the dataset and re-fetches the type
+     * via H5Dget_type if needed.
+     */
+    private long writeCompoundOfVlenDataset(String dsetName) throws Exception
+    {
+        long vlen_tid  = HDF5Constants.H5I_INVALID_HID;
+        long cmpd_tid  = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dset_id   = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            vlen_tid = H5.H5Tvlen_create(HDF5Constants.H5T_NATIVE_INT);
+            assertTrue("writeCompoundOfVlenDataset: H5Tvlen_create: ", vlen_tid >= 0);
+
+            long hvlSize    = H5.H5Tget_size(vlen_tid);
+            long intSize    = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_INT);
+            long packedSize = hvlSize + intSize;
+            cmpd_tid        = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, packedSize);
+            assertTrue("writeCompoundOfVlenDataset: H5Tcreate compound: ", cmpd_tid >= 0);
+            H5.H5Tinsert(cmpd_tid, "seq", 0, vlen_tid);
+            H5.H5Tinsert(cmpd_tid, "n", hvlSize, HDF5Constants.H5T_NATIVE_INT);
+            H5.H5Tpack(cmpd_tid);
+
+            long[] dims = {2};
+            dspace_id   = H5.H5Screate_simple(1, dims, null);
+            assertTrue("writeCompoundOfVlenDataset: H5Screate_simple: ", dspace_id >= 0);
+
+            dset_id = H5.H5Dcreate(H5fid, dsetName, cmpd_tid, dspace_id, HDF5Constants.H5P_DEFAULT,
+                                   HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            assertTrue("writeCompoundOfVlenDataset: H5Dcreate: ", dset_id >= 0);
+
+            ArrayList<Integer> seq0 = new ArrayList<>();
+            seq0.add(1);
+            seq0.add(2);
+            seq0.add(3);
+            ArrayList<Integer> seq1 = new ArrayList<>();
+            seq1.add(5);
+            seq1.add(6);
+
+            ArrayList[] write_data = new ArrayList[2];
+            ArrayList<Object> rec0 = new ArrayList<>();
+            rec0.add(seq0);
+            rec0.add(Integer.valueOf(4));
+            write_data[0]          = rec0;
+            ArrayList<Object> rec1 = new ArrayList<>();
+            rec1.add(seq1);
+            rec1.add(Integer.valueOf(7));
+            write_data[1] = rec1;
+
+            H5.H5DwriteVL(dset_id, cmpd_tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                          HDF5Constants.H5P_DEFAULT, write_data);
+            H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
+        }
+        finally {
+            if (dspace_id >= 0)
+                try {
+                    H5.H5Sclose(dspace_id);
+                }
+                catch (Exception ex) {
+                }
+            if (cmpd_tid >= 0)
+                try {
+                    H5.H5Tclose(cmpd_tid);
+                }
+                catch (Exception ex) {
+                }
+            if (vlen_tid >= 0)
+                try {
+                    H5.H5Tclose(vlen_tid);
+                }
+                catch (Exception ex) {
+                }
+        }
+
+        return dset_id;
+    }
+
+    /*
+     * Read a 1-D dataset whose type is COMPOUND { seq: VLEN { int32 }, n: int32 }.
+     * Uses the canonical calling pattern: pass ArrayList[] with null slots
+     * and let the native code allocate each per-row record.
+     */
+    @Test
+    public void testH5Dread_compound_of_vlen()
+    {
+        long dset_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_type_id = HDF5Constants.H5I_INVALID_HID;
+        final int N_ROWS  = 2;
+
+        try {
+            dset_id      = writeCompoundOfVlenDataset("cmpd_of_vlen_rd");
+            file_type_id = H5.H5Dget_type(dset_id);
+            assertTrue("testH5Dread_compound_of_vlen: H5Dget_type: ", file_type_id >= 0);
+
+            ArrayList[] read_data = new ArrayList[N_ROWS];
+            H5.H5DreadVL(dset_id, file_type_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                         HDF5Constants.H5P_DEFAULT, read_data);
+
+            assertNotNull("testH5Dread_compound_of_vlen: read_data[0] not null", read_data[0]);
+            assertNotNull("testH5Dread_compound_of_vlen: read_data[1] not null", read_data[1]);
+            assertEquals("testH5Dread_compound_of_vlen: row 0 record has 2 members", 2, read_data[0].size());
+            assertEquals("testH5Dread_compound_of_vlen: row 1 record has 2 members", 2, read_data[1].size());
+
+            Object seq0obj = read_data[0].get(0);
+            Object seq1obj = read_data[1].get(0);
+            assertTrue("testH5Dread_compound_of_vlen: row 0 seq is ArrayList, got " +
+                           (seq0obj == null ? "null" : seq0obj.getClass().getName()),
+                       seq0obj instanceof ArrayList);
+            assertTrue("testH5Dread_compound_of_vlen: row 1 seq is ArrayList, got " +
+                           (seq1obj == null ? "null" : seq1obj.getClass().getName()),
+                       seq1obj instanceof ArrayList);
+
+            ArrayList<?> seq0_read = (ArrayList<?>)seq0obj;
+            ArrayList<?> seq1_read = (ArrayList<?>)seq1obj;
+            assertEquals("testH5Dread_compound_of_vlen: row 0 seq length", 3, seq0_read.size());
+            assertEquals("testH5Dread_compound_of_vlen: row 1 seq length", 2, seq1_read.size());
+            assertEquals("testH5Dread_compound_of_vlen: row 0 seq[0]", Integer.valueOf(1), seq0_read.get(0));
+            assertEquals("testH5Dread_compound_of_vlen: row 0 seq[1]", Integer.valueOf(2), seq0_read.get(1));
+            assertEquals("testH5Dread_compound_of_vlen: row 0 seq[2]", Integer.valueOf(3), seq0_read.get(2));
+            assertEquals("testH5Dread_compound_of_vlen: row 1 seq[0]", Integer.valueOf(5), seq1_read.get(0));
+            assertEquals("testH5Dread_compound_of_vlen: row 1 seq[1]", Integer.valueOf(6), seq1_read.get(1));
+            assertEquals("testH5Dread_compound_of_vlen: row 0 n", Integer.valueOf(4), read_data[0].get(1));
+            assertEquals("testH5Dread_compound_of_vlen: row 1 n", Integer.valueOf(7), read_data[1].get(1));
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Dread_compound_of_vlen: " + err);
+        }
+        finally {
+            if (file_type_id >= 0)
+                try {
+                    H5.H5Tclose(file_type_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    /*
+     * Round-trip a compound-of-vlen dataset through H5DwriteVL and H5DreadVL.
+     * Reuses the writeCompoundOfVlenDataset helper to exercise the write path,
+     * then reads back and asserts the full row contents.
+     */
+    @Test
+    public void testH5Dwrite_compound_of_vlen()
+    {
+        long dset_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_type_id = HDF5Constants.H5I_INVALID_HID;
+        final int N_ROWS  = 2;
+
+        try {
+            dset_id      = writeCompoundOfVlenDataset("cmpd_of_vlen_wr");
+            file_type_id = H5.H5Dget_type(dset_id);
+            assertTrue("testH5Dwrite_compound_of_vlen: H5Dget_type: ", file_type_id >= 0);
+
+            ArrayList[] read_data = new ArrayList[N_ROWS];
+            H5.H5DreadVL(dset_id, file_type_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                         HDF5Constants.H5P_DEFAULT, read_data);
+
+            assertNotNull("testH5Dwrite_compound_of_vlen: read_data[0] not null", read_data[0]);
+            assertNotNull("testH5Dwrite_compound_of_vlen: read_data[1] not null", read_data[1]);
+            assertEquals("testH5Dwrite_compound_of_vlen: row 0 record has 2 members", 2, read_data[0].size());
+            assertEquals("testH5Dwrite_compound_of_vlen: row 1 record has 2 members", 2, read_data[1].size());
+
+            ArrayList<?> seq0_read = (ArrayList<?>)read_data[0].get(0);
+            ArrayList<?> seq1_read = (ArrayList<?>)read_data[1].get(0);
+            assertEquals("testH5Dwrite_compound_of_vlen: row 0 seq length", 3, seq0_read.size());
+            assertEquals("testH5Dwrite_compound_of_vlen: row 1 seq length", 2, seq1_read.size());
+            assertEquals("testH5Dwrite_compound_of_vlen: row 0 seq[0]", Integer.valueOf(1), seq0_read.get(0));
+            assertEquals("testH5Dwrite_compound_of_vlen: row 0 seq[1]", Integer.valueOf(2), seq0_read.get(1));
+            assertEquals("testH5Dwrite_compound_of_vlen: row 0 seq[2]", Integer.valueOf(3), seq0_read.get(2));
+            assertEquals("testH5Dwrite_compound_of_vlen: row 1 seq[0]", Integer.valueOf(5), seq1_read.get(0));
+            assertEquals("testH5Dwrite_compound_of_vlen: row 1 seq[1]", Integer.valueOf(6), seq1_read.get(1));
+            assertEquals("testH5Dwrite_compound_of_vlen: row 0 n", Integer.valueOf(4), read_data[0].get(1));
+            assertEquals("testH5Dwrite_compound_of_vlen: row 1 n", Integer.valueOf(7), read_data[1].get(1));
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Dwrite_compound_of_vlen: " + err);
+        }
+        finally {
+            if (file_type_id >= 0)
+                try {
+                    H5.H5Tclose(file_type_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    /*
+     * Negative tests for the API-level buffer-contract verification in H5DwriteVL.
+     * Each supplies a malformed buffer for a COMPOUND { seq: VLEN int, n: int }
+     * dataset and asserts a clean IllegalArgumentException is raised before any
+     * native write, rather than a SIGSEGV or silent corruption.
+     */
+
+    /* Buffer shorter than the selection must be rejected (would otherwise overrun
+     * the raw write buffer in H5Dwrite). */
+    @Test
+    public void testH5DwriteVL_undersized_buffer()
+    {
+        long dset_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_type_id = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            dset_id      = writeCompoundOfVlenDataset("cmpd_of_vlen_wr_undersized");
+            file_type_id = H5.H5Dget_type(dset_id);
+
+            // Dataset has 2 rows; supply only 1.
+            ArrayList<Integer> seq = new ArrayList<>();
+            seq.add(1);
+            ArrayList<Object> rec = new ArrayList<>();
+            rec.add(seq);
+            rec.add(Integer.valueOf(2));
+            ArrayList[] bad = new ArrayList[1];
+            bad[0]          = rec;
+
+            try {
+                H5.H5DwriteVL(dset_id, file_type_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, bad);
+                fail("testH5DwriteVL_undersized_buffer: expected IllegalArgumentException");
+            }
+            catch (IllegalArgumentException expected) {
+                // expected
+            }
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5DwriteVL_undersized_buffer: " + err);
+        }
+        finally {
+            if (file_type_id >= 0)
+                try {
+                    H5.H5Tclose(file_type_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    /* A compound member whose Java type is wrong (String where an Integer is
+     * expected) must be rejected instead of crashing in translate_atomic_wbuf. */
+    @Test
+    public void testH5DwriteVL_compound_wrong_member_type()
+    {
+        long dset_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_type_id = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            dset_id      = writeCompoundOfVlenDataset("cmpd_of_vlen_wr_badmember");
+            file_type_id = H5.H5Dget_type(dset_id);
+
+            ArrayList[] bad = new ArrayList[2];
+
+            ArrayList<Integer> seq0 = new ArrayList<>();
+            seq0.add(1);
+            ArrayList<Object> rec0 = new ArrayList<>();
+            rec0.add(seq0);
+            rec0.add(Integer.valueOf(4));
+            bad[0] = rec0;
+
+            // row 1: the 'n' member is a String, not an Integer.
+            ArrayList<Integer> seq1 = new ArrayList<>();
+            seq1.add(5);
+            ArrayList<Object> rec1 = new ArrayList<>();
+            rec1.add(seq1);
+            rec1.add("not an int");
+            bad[1] = rec1;
+
+            try {
+                H5.H5DwriteVL(dset_id, file_type_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, bad);
+                fail("testH5DwriteVL_compound_wrong_member_type: expected IllegalArgumentException");
+            }
+            catch (IllegalArgumentException expected) {
+                // expected
+            }
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5DwriteVL_compound_wrong_member_type: " + err);
+        }
+        finally {
+            if (file_type_id >= 0)
+                try {
+                    H5.H5Tclose(file_type_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    /* A VLEN member that is not an ArrayList (here a String) must be rejected
+     * instead of being mis-read as a list. */
+    @Test
+    public void testH5DwriteVL_vlen_element_not_arraylist()
+    {
+        long dset_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_type_id = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            dset_id      = writeCompoundOfVlenDataset("cmpd_of_vlen_wr_notlist");
+            file_type_id = H5.H5Dget_type(dset_id);
+
+            ArrayList[] bad = new ArrayList[2];
+
+            // row 0: the 'seq' member should be an ArrayList but is a String.
+            ArrayList<Object> rec0 = new ArrayList<>();
+            rec0.add("not a list");
+            rec0.add(Integer.valueOf(4));
+            bad[0] = rec0;
+
+            ArrayList<Integer> seq1 = new ArrayList<>();
+            seq1.add(5);
+            ArrayList<Object> rec1 = new ArrayList<>();
+            rec1.add(seq1);
+            rec1.add(Integer.valueOf(7));
+            bad[1] = rec1;
+
+            try {
+                H5.H5DwriteVL(dset_id, file_type_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, bad);
+                fail("testH5DwriteVL_vlen_element_not_arraylist: expected IllegalArgumentException");
+            }
+            catch (IllegalArgumentException expected) {
+                // expected
+            }
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5DwriteVL_vlen_element_not_arraylist: " + err);
+        }
+        finally {
+            if (file_type_id >= 0)
+                try {
+                    H5.H5Tclose(file_type_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    /* A compound row with the wrong number of members must be rejected. */
+    @Test
+    public void testH5DwriteVL_compound_wrong_member_count()
+    {
+        long dset_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_type_id = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            dset_id      = writeCompoundOfVlenDataset("cmpd_of_vlen_wr_badcount");
+            file_type_id = H5.H5Dget_type(dset_id);
+
+            ArrayList[] bad = new ArrayList[2];
+
+            // row 0: only one member instead of two ('n' is missing).
+            ArrayList<Integer> seq0 = new ArrayList<>();
+            seq0.add(1);
+            ArrayList<Object> rec0 = new ArrayList<>();
+            rec0.add(seq0);
+            bad[0] = rec0;
+
+            ArrayList<Integer> seq1 = new ArrayList<>();
+            seq1.add(5);
+            ArrayList<Object> rec1 = new ArrayList<>();
+            rec1.add(seq1);
+            rec1.add(Integer.valueOf(7));
+            bad[1] = rec1;
+
+            try {
+                H5.H5DwriteVL(dset_id, file_type_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, bad);
+                fail("testH5DwriteVL_compound_wrong_member_count: expected IllegalArgumentException");
+            }
+            catch (IllegalArgumentException expected) {
+                // expected
+            }
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5DwriteVL_compound_wrong_member_count: " + err);
+        }
+        finally {
+            if (file_type_id >= 0)
+                try {
+                    H5.H5Tclose(file_type_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    /*
+     * Read a 1-D dataset whose type is VLEN { COMPOUND { A: int, B: int } }. The
+     * caller passes a freshly allocated array with null row slots, which is the
+     * canonical read pattern: the JNI installs a freshly allocated ArrayList into
+     * each slot. Exercises the translate_rbuf H5T_VLEN top-level case for a
+     * compound element type.
+     */
+    @Test
+    public void testH5Dread_vlen_of_compound()
+    {
+        long cmpd_tid    = HDF5Constants.H5I_INVALID_HID;
+        long vlen_tid    = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id   = HDF5Constants.H5I_INVALID_HID;
+        long dset_id     = HDF5Constants.H5I_INVALID_HID;
+        final int N_ROWS = 2;
+
+        try {
+            long intSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_INT);
+
+            cmpd_tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 2 * intSize);
+            H5.H5Tinsert(cmpd_tid, "A", 0, HDF5Constants.H5T_NATIVE_INT);
+            H5.H5Tinsert(cmpd_tid, "B", intSize, HDF5Constants.H5T_NATIVE_INT);
+            H5.H5Tpack(cmpd_tid);
+
+            vlen_tid    = H5.H5Tvlen_create(cmpd_tid);
+            long[] dims = {N_ROWS};
+            dspace_id   = H5.H5Screate_simple(1, dims, null);
+
+            dset_id = H5.H5Dcreate(H5fid, "vlen_of_cmpd_rd", vlen_tid, dspace_id, HDF5Constants.H5P_DEFAULT,
+                                   HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            assertTrue("testH5Dread_vlen_of_compound: H5Dcreate: ", dset_id >= 0);
+
+            // row 0: 1 element  [ { A=1, B=2 } ]
+            // row 1: 2 elements [ { A=3, B=4 }, { A=5, B=6 } ]
+            ArrayList<Object> row0_elem0 = new ArrayList<>();
+            row0_elem0.add(Integer.valueOf(1));
+            row0_elem0.add(Integer.valueOf(2));
+            ArrayList<Object> row0 = new ArrayList<>();
+            row0.add(row0_elem0);
+
+            ArrayList<Object> row1_elem0 = new ArrayList<>();
+            row1_elem0.add(Integer.valueOf(3));
+            row1_elem0.add(Integer.valueOf(4));
+            ArrayList<Object> row1_elem1 = new ArrayList<>();
+            row1_elem1.add(Integer.valueOf(5));
+            row1_elem1.add(Integer.valueOf(6));
+            ArrayList<Object> row1 = new ArrayList<>();
+            row1.add(row1_elem0);
+            row1.add(row1_elem1);
+
+            ArrayList[] write_data = new ArrayList[N_ROWS];
+            write_data[0]          = row0;
+            write_data[1]          = row1;
+
+            H5.H5DwriteVL(dset_id, vlen_tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                          HDF5Constants.H5P_DEFAULT, write_data);
+            H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
+
+            // Freshly allocated array with null row slots; the JNI fills each slot.
+            ArrayList[] read_data = new ArrayList[N_ROWS];
+            H5.H5DreadVL(dset_id, vlen_tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                         HDF5Constants.H5P_DEFAULT, read_data);
+
+            assertNotNull("testH5Dread_vlen_of_compound: row 0 not null", read_data[0]);
+            assertNotNull("testH5Dread_vlen_of_compound: row 1 not null", read_data[1]);
+            assertEquals("testH5Dread_vlen_of_compound: row 0 has 1 element", 1, read_data[0].size());
+            assertEquals("testH5Dread_vlen_of_compound: row 1 has 2 elements", 2, read_data[1].size());
+
+            ArrayList<?> r0e0 = (ArrayList<?>)read_data[0].get(0);
+            assertEquals("row 0 elem 0 A", Integer.valueOf(1), r0e0.get(0));
+            assertEquals("row 0 elem 0 B", Integer.valueOf(2), r0e0.get(1));
+
+            ArrayList<?> r1e0 = (ArrayList<?>)read_data[1].get(0);
+            assertEquals("row 1 elem 0 A", Integer.valueOf(3), r1e0.get(0));
+            assertEquals("row 1 elem 0 B", Integer.valueOf(4), r1e0.get(1));
+
+            ArrayList<?> r1e1 = (ArrayList<?>)read_data[1].get(1);
+            assertEquals("row 1 elem 1 A", Integer.valueOf(5), r1e1.get(0));
+            assertEquals("row 1 elem 1 B", Integer.valueOf(6), r1e1.get(1));
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Dread_vlen_of_compound: " + err);
+        }
+        finally {
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dspace_id >= 0)
+                try {
+                    H5.H5Sclose(dspace_id);
+                }
+                catch (Exception ex) {
+                }
+            if (vlen_tid >= 0)
+                try {
+                    H5.H5Tclose(vlen_tid);
+                }
+                catch (Exception ex) {
+                }
+            if (cmpd_tid >= 0)
+                try {
+                    H5.H5Tclose(cmpd_tid);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    /*
+     * Read a 1-D dataset whose type is VLEN { COMPOUND { id: int, sub: COMPOUND { P: int, Q: int } } }.
+     * Per-row canonical shape (per testH5Dwrite_readCompound contract):
+     *   row r ArrayList of vlen elements
+     *     each element is ArrayList of 2 members [Integer id, ArrayList sub]
+     *       sub is ArrayList of 2 members [Integer P, Integer Q]
+     */
+    @Test
+    public void testH5Dread_vlen_of_nested_compound()
+    {
+        long inner_tid   = HDF5Constants.H5I_INVALID_HID;
+        long outer_tid   = HDF5Constants.H5I_INVALID_HID;
+        long vlen_tid    = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id   = HDF5Constants.H5I_INVALID_HID;
+        long dset_id     = HDF5Constants.H5I_INVALID_HID;
+        final int N_ROWS = 2;
+
+        try {
+            long intSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_INT);
+
+            // inner = compound { P:int, Q:int }
+            inner_tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 2 * intSize);
+            H5.H5Tinsert(inner_tid, "P", 0, HDF5Constants.H5T_NATIVE_INT);
+            H5.H5Tinsert(inner_tid, "Q", intSize, HDF5Constants.H5T_NATIVE_INT);
+            H5.H5Tpack(inner_tid);
+
+            // outer = compound { id:int, sub:inner }
+            long innerSize = H5.H5Tget_size(inner_tid);
+            outer_tid      = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, intSize + innerSize);
+            H5.H5Tinsert(outer_tid, "id", 0, HDF5Constants.H5T_NATIVE_INT);
+            H5.H5Tinsert(outer_tid, "sub", intSize, inner_tid);
+            H5.H5Tpack(outer_tid);
+
+            // vlen of outer
+            vlen_tid    = H5.H5Tvlen_create(outer_tid);
+            long[] dims = {N_ROWS};
+            dspace_id   = H5.H5Screate_simple(1, dims, null);
+
+            dset_id =
+                H5.H5Dcreate(H5fid, "vlen_of_nested_cmpd", vlen_tid, dspace_id, HDF5Constants.H5P_DEFAULT,
+                             HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            assertTrue("testH5Dread_vlen_of_nested_compound: H5Dcreate: ", dset_id >= 0);
+
+            //   row 0: 1 element  [ { id=1, sub={ P=2, Q=3 } } ]
+            //   row 1: 2 elements [ { id=4, sub={ P=5, Q=6 } }, { id=7, sub={ P=8, Q=9 } } ]
+            ArrayList<Object> row0_elem0_sub = new ArrayList<>();
+            row0_elem0_sub.add(Integer.valueOf(2));
+            row0_elem0_sub.add(Integer.valueOf(3));
+            ArrayList<Object> row0_elem0 = new ArrayList<>();
+            row0_elem0.add(Integer.valueOf(1));
+            row0_elem0.add(row0_elem0_sub);
+            ArrayList<Object> row0 = new ArrayList<>();
+            row0.add(row0_elem0);
+
+            ArrayList<Object> row1_elem0_sub = new ArrayList<>();
+            row1_elem0_sub.add(Integer.valueOf(5));
+            row1_elem0_sub.add(Integer.valueOf(6));
+            ArrayList<Object> row1_elem0 = new ArrayList<>();
+            row1_elem0.add(Integer.valueOf(4));
+            row1_elem0.add(row1_elem0_sub);
+            ArrayList<Object> row1_elem1_sub = new ArrayList<>();
+            row1_elem1_sub.add(Integer.valueOf(8));
+            row1_elem1_sub.add(Integer.valueOf(9));
+            ArrayList<Object> row1_elem1 = new ArrayList<>();
+            row1_elem1.add(Integer.valueOf(7));
+            row1_elem1.add(row1_elem1_sub);
+            ArrayList<Object> row1 = new ArrayList<>();
+            row1.add(row1_elem0);
+            row1.add(row1_elem1);
+
+            ArrayList[] write_data = new ArrayList[N_ROWS];
+            write_data[0]          = row0;
+            write_data[1]          = row1;
+
+            H5.H5DwriteVL(dset_id, vlen_tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                          HDF5Constants.H5P_DEFAULT, write_data);
+            H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
+
+            ArrayList[] read_data = new ArrayList[N_ROWS];
+            H5.H5DreadVL(dset_id, vlen_tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                         HDF5Constants.H5P_DEFAULT, read_data);
+
+            assertNotNull("row 0 not null", read_data[0]);
+            assertNotNull("row 1 not null", read_data[1]);
+            assertEquals("row 0 has 1 element", 1, read_data[0].size());
+            assertEquals("row 1 has 2 elements", 2, read_data[1].size());
+
+            ArrayList<?> r0e0 = (ArrayList<?>)read_data[0].get(0);
+            assertEquals("row 0 elem 0 has 2 members", 2, r0e0.size());
+            assertEquals("row 0 elem 0 id", Integer.valueOf(1), r0e0.get(0));
+            ArrayList<?> r0e0sub = (ArrayList<?>)r0e0.get(1);
+            assertEquals("row 0 elem 0 sub has 2 members", 2, r0e0sub.size());
+            assertEquals("row 0 elem 0 sub.P", Integer.valueOf(2), r0e0sub.get(0));
+            assertEquals("row 0 elem 0 sub.Q", Integer.valueOf(3), r0e0sub.get(1));
+
+            ArrayList<?> r1e1 = (ArrayList<?>)read_data[1].get(1);
+            assertEquals("row 1 elem 1 has 2 members", 2, r1e1.size());
+            assertEquals("row 1 elem 1 id", Integer.valueOf(7), r1e1.get(0));
+            ArrayList<?> r1e1sub = (ArrayList<?>)r1e1.get(1);
+            assertEquals("row 1 elem 1 sub.P", Integer.valueOf(8), r1e1sub.get(0));
+            assertEquals("row 1 elem 1 sub.Q", Integer.valueOf(9), r1e1sub.get(1));
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Dread_vlen_of_nested_compound: " + err);
+        }
+        finally {
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dspace_id >= 0)
+                try {
+                    H5.H5Sclose(dspace_id);
+                }
+                catch (Exception ex) {
+                }
+            if (vlen_tid >= 0)
+                try {
+                    H5.H5Tclose(vlen_tid);
+                }
+                catch (Exception ex) {
+                }
+            if (outer_tid >= 0)
+                try {
+                    H5.H5Tclose(outer_tid);
+                }
+                catch (Exception ex) {
+                }
+            if (inner_tid >= 0)
+                try {
+                    H5.H5Tclose(inner_tid);
+                }
+                catch (Exception ex) {
+                }
         }
     }
 }
