@@ -45,7 +45,7 @@ jobs:
           tar -xvf aocc-compiler-${{ env.AOCCVERDOT }}.tar
           cd aocc-compiler-${{ env.AOCCVERDOT }}
           bash install.sh
-          source $GITHUB_WORKSPACE/aocc-compiler-${{ env.AOCCVERDOT }}/setenv_AOCC.sh
+          source $GITHUB_WORKSPACE/setenv_AOCC.sh
           which clang
           which flang
           clang -v
