@@ -772,20 +772,26 @@ asyncTest('coordinateReviewers: ready_for_review on a draft-opened PR (still dra
   assert.deepStrictEqual([...confirmedRequested].sort(), ['glennsong09', 'hyoklee', 'jhendersonHDF']);
 });
 
-asyncTest('coordinateReviewers: plain synchronize (no dismissed reviews) is left to additive fill, not pruned', async () => {
-  // Contrast case: a synchronize with no dismissed reviews must NOT trigger
-  // avalanche-style pruning — only opened/reopened/ready_for_review do. All
-  // three avalanche-style owners stay; nothing is removed, nothing new is
-  // requested since the area is already covered.
+asyncTest('coordinateReviewers: plain synchronize (no dismissed reviews, no avalanche) is left to additive fill', async () => {
+  // When only one CODEOWNER is requested per area (normal steady state after
+  // prior pruning), a plain synchronize with no dismissed reviews must stay on
+  // the additive-fill path: the area is already covered, nothing is removed,
+  // nothing new is requested.
   const github = makeGithubMock();
   const context = { eventName: 'pull_request_target', payload: { action: 'synchronize', sender: { type: 'User' } } };
-  const args = makeCoordinateBaseArgs();
+  const args = makeCoordinateBaseArgs({
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'hyoklee' }], // one .github owner — normal steady state
+    },
+  });
 
   const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
 
   assert.strictEqual(github.calls.removeRequestedReviewers.length, 0);
   assert.strictEqual(github.calls.requestReviewers.length, 0);
-  assert.deepStrictEqual([...confirmedRequested].sort(), ['glennsong09', 'hyoklee', 'jhendersonHDF']);
+  assert.ok(confirmedRequested.has('hyoklee'));
 });
 
 asyncTest('coordinateReviewers: review_requested survives the opened race and still prunes (PR #6479 scenario)', async () => {
@@ -814,17 +820,82 @@ asyncTest('coordinateReviewers: review_requested on an already-established PR is
   // later in the PR's life (e.g. a human manually adding a reviewer) must stay
   // on the additive-fill path — it must not be reinterpreted as "first
   // coordination pass" and prune reviewers an established PR already has.
+  // Use one requested reviewer per area so the per-area avalanche detector
+  // does not also fire — this isolates the isFirstCoordinationPass behavior.
   const github = makeGithubMock();
   const context = {
     eventName: 'pull_request_target',
-    payload: { action: 'review_requested', requested_reviewer: { login: 'jhendersonHDF' }, sender: { type: 'User' } },
+    payload: { action: 'review_requested', requested_reviewer: { login: 'hyoklee' }, sender: { type: 'User' } },
   };
-  const args = makeCoordinateBaseArgs({ hasExistingComment: true });
+  const args = makeCoordinateBaseArgs({
+    hasExistingComment: true,
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'hyoklee' }], // one .github owner — no avalanche to detect
+    },
+  });
 
   const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
 
   assert.strictEqual(github.calls.removeRequestedReviewers.length, 0);
-  assert.deepStrictEqual([...confirmedRequested].sort(), ['glennsong09', 'hyoklee', 'jhendersonHDF']);
+  assert.ok(confirmedRequested.has('hyoklee'));
+});
+
+// ----------------------------------------------------------------
+// coordinateReviewers — per-area CODEOWNERS avalanche detection (PR #6484)
+//
+// When a synchronize push first touches a new CODEOWNERS area, GitHub
+// auto-assigns ALL that area's owners simultaneously. The surviving
+// review_requested run (after cancel-in-progress) may then fall into
+// the additive-fill path, see the area as "already has owners → skip",
+// and leave all of them listed. The per-area avalanche detector must
+// prune that area to one load-balanced pick even on synchronize.
+// ----------------------------------------------------------------
+
+asyncTest('coordinateReviewers: synchronize with per-area avalanche prunes the area to one pick', async () => {
+  // Model PR #6484: PR has an existing checklist (hasExistingComment: true),
+  // a synchronize push touched a new area (.github), GitHub assigned 3 of its
+  // owners, the surviving run must prune to one.
+  const github = makeGithubMock();
+  const context = {
+    eventName: 'pull_request_target',
+    payload: { action: 'synchronize', sender: { type: 'User' } },
+  };
+  // Default args: 3 .github owners in requested_reviewers, hasExistingComment: true.
+  // That satisfies "existing PR + multiple CODEOWNERS for same area" = avalanche.
+  const args = makeCoordinateBaseArgs();
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.strictEqual(confirmedRequested.size, 1, 'Should prune to exactly one reviewer');
+  // Exactly 2 removed (the 2 non-picked avalanche owners).
+  assert.strictEqual(github.calls.removeRequestedReviewers.length, 2);
+  // The kept reviewer is never re-requested (already on the PR).
+  assert.strictEqual(github.calls.requestReviewers.length, 0);
+});
+
+asyncTest('coordinateReviewers: synchronize with one owner per area does not prune', async () => {
+  // Contrast: when each area already has exactly one CODEOWNER requested
+  // (normal steady state), synchronize must NOT trigger avalanche pruning.
+  const github = makeGithubMock();
+  const context = {
+    eventName: 'pull_request_target',
+    payload: { action: 'synchronize', sender: { type: 'User' } },
+  };
+  const args = makeCoordinateBaseArgs({
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'hyoklee' }], // only one .github owner — no avalanche
+    },
+  });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  // hyoklee stays, nothing pruned.
+  assert.ok(confirmedRequested.has('hyoklee'));
+  assert.strictEqual(github.calls.removeRequestedReviewers.length, 0);
 });
 
 // ----------------------------------------------------------------
