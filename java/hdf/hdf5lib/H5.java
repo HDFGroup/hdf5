@@ -5740,6 +5740,31 @@ public class H5 implements java.io.Serializable {
 
             ArrayList[] arrayData = (ArrayList[])buf;
 
+            // Reject an undersized buffer up front: the native H5Dwrite uses the
+            // selection to decide how many elements to read from the buffer, so
+            // a buffer shorter than the selection would read past the end.
+            long expected_elems = -1;
+            try {
+                if (mem_space_id != HDF5Constants.H5S_ALL)
+                    expected_elems = org.hdfgroup.javahdf5.hdf5_h.H5Sget_select_npoints(mem_space_id);
+                else if (file_space_id != HDF5Constants.H5S_ALL)
+                    expected_elems = org.hdfgroup.javahdf5.hdf5_h.H5Sget_select_npoints(file_space_id);
+                else {
+                    long all_space = org.hdfgroup.javahdf5.hdf5_h.H5Dget_space(dataset_id);
+                    if (all_space >= 0) {
+                        expected_elems =
+                            org.hdfgroup.javahdf5.hdf5_h.H5Sget_simple_extent_npoints(all_space);
+                        org.hdfgroup.javahdf5.hdf5_h.H5Sclose(all_space);
+                    }
+                }
+            }
+            catch (Exception e) {
+                expected_elems = -1;
+            }
+            if (expected_elems >= 0 && buf.length < expected_elems)
+                throw new IllegalArgumentException("H5DwriteVL: data buffer has " + buf.length +
+                                                   " elements but the selection requires " + expected_elems);
+
             // Check the datatype class to determine conversion strategy
             int typeClass = H5Tget_class(mem_type_id);
 
@@ -5762,8 +5787,10 @@ public class H5 implements java.io.Serializable {
                                                                     file_space_id, xfer_plist_id, stringArray);
             }
             else {
-                // For VL datatypes, convert to hvl_t structures
-                hvlArray = VLDataConverter.convertToHVL(arrayData, arena);
+                // For VL datatypes, convert to hvl_t structures. convertToHVLAuto uses
+                // mem_type_id so a VLEN whose base type is a compound is packed in the
+                // native HDF5 layout instead of being misread as a nested VLEN.
+                hvlArray = VLDataConverter.convertToHVLAuto(arrayData, mem_type_id, arena);
                 status   = org.hdfgroup.javahdf5.hdf5_h.H5Dwrite(dataset_id, mem_type_id, mem_space_id,
                                                                  file_space_id, xfer_plist_id, hvlArray);
             }

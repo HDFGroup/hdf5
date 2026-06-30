@@ -70,6 +70,81 @@ public class VLDataConverter {
     }
 
     /**
+     * Convert an ArrayList array into an hvl_t array for a top-level VLEN datatype,
+     * using {@code vlenTypeId} to drive the element encoding. When the VLEN base
+     * type is a compound (or otherwise needs native-layout packing) each element is
+     * encoded with {@link #encodeValue}; for primitive/string base types the
+     * type-blind {@link #convertToHVL} path is used unchanged.
+     *
+     * @param javaData    rows, one ArrayList per VLEN element list
+     * @param vlenTypeId  the H5T_VLEN datatype identifier
+     * @param arena       arena for memory allocation
+     * @return MemorySegment containing the hvl_t array
+     * @throws HDF5JavaException if conversion fails
+     */
+    public static MemorySegment convertToHVLAuto(ArrayList[] javaData, long vlenTypeId, Arena arena)
+        throws HDF5JavaException
+    {
+        long base       = HDF5Constants.H5I_INVALID_HID;
+        boolean useTyped = false;
+        try {
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Tget_class(vlenTypeId) == HDF5Constants.H5T_VLEN) {
+                base     = org.hdfgroup.javahdf5.hdf5_h.H5Tget_super(vlenTypeId);
+                useTyped = (org.hdfgroup.javahdf5.hdf5_h.H5Tget_class(base) == HDF5Constants.H5T_COMPOUND);
+            }
+        }
+        catch (Exception e) {
+            useTyped = false;
+        }
+
+        try {
+            if (!useTyped) {
+                return convertToHVL(javaData, arena);
+            }
+
+            if (javaData == null || javaData.length == 0)
+                throw new HDF5JavaException("Input data array is null or empty");
+
+            long baseSize          = org.hdfgroup.javahdf5.hdf5_h.H5Tget_size(base);
+            MemorySegment hvlArray = hvl_t.allocateArray(javaData.length, arena);
+
+            for (int i = 0; i < javaData.length; i++) {
+                MemorySegment hvlElement = hvl_t.asSlice(hvlArray, i);
+                ArrayList<?> row         = javaData[i];
+
+                if (row == null) {
+                    hvl_t.len(hvlElement, 0);
+                    hvl_t.p(hvlElement, MemorySegment.NULL);
+                    continue;
+                }
+
+                int len = row.size();
+                hvl_t.len(hvlElement, len);
+                if (len == 0) {
+                    hvl_t.p(hvlElement, MemorySegment.NULL);
+                    continue;
+                }
+
+                MemorySegment elemBuf = arena.allocate(baseSize * len);
+                for (int j = 0; j < len; j++)
+                    encodeValue(elemBuf, j * baseSize, base, row.get(j), arena);
+                hvl_t.p(hvlElement, elemBuf);
+            }
+
+            return hvlArray;
+        }
+        finally {
+            if (base >= 0) {
+                try {
+                    org.hdfgroup.javahdf5.hdf5_h.H5Tclose(base);
+                }
+                catch (Exception e) {
+                }
+            }
+        }
+    }
+
+    /**
      * Convert HDF5 hvl_t MemorySegment array back to Java ArrayList array.
      * Uses two-phase approach: immediately extract all raw data from HDF5 memory,
      * then process the copied data to prevent access after H5Treclaim.
@@ -1028,6 +1103,9 @@ public class VLDataConverter {
             else if (isVLType(elementType)) {
                 return convertRawDataToNestedVLList(rawData, elementType);
             }
+            else if (isCompoundType(elementType)) {
+                return convertRawDataToCompoundList(rawData, elementType);
+            }
             else {
                 return detectAndConvertUnknownType(rawData, elementType);
             }
@@ -1241,6 +1319,32 @@ public class VLDataConverter {
             }
         }
 
+        return result;
+    }
+
+    /**
+     * Decode raw bytes holding {@code rawData.length} packed compound elements (the
+     * element type of a VLEN-of-compound) into a list of per-element ArrayLists.
+     * Each element is decoded with {@link #decodeValue}, so nested compounds and
+     * compound members of any class are handled recursively.
+     */
+    private static ArrayList<Object> convertRawDataToCompoundList(RawVLData rawData, long compoundType)
+        throws HDF5JavaException
+    {
+        ArrayList<Object> result = new ArrayList<>(rawData.length);
+        long compoundSize        = org.hdfgroup.javahdf5.hdf5_h.H5Tget_size(compoundType);
+        if (compoundSize <= 0)
+            throw new HDF5JavaException("Invalid compound element size: " + compoundSize);
+
+        MemorySegment seg = MemorySegment.ofArray(rawData.data);
+        for (int i = 0; i < rawData.length; i++) {
+            long elemOff = (long)i * compoundSize;
+            if (elemOff + compoundSize > rawData.data.length) {
+                result.add(null);
+                continue;
+            }
+            result.add(decodeValue(seg, elemOff, compoundType));
+        }
         return result;
     }
 
@@ -1849,6 +1953,285 @@ public class VLDataConverter {
     }
 
     /**
+     * @return true if the datatype's class is H5T_COMPOUND
+     */
+    private static boolean isCompoundType(long datatype)
+    {
+        try {
+            return H5.H5Tget_class(datatype) == HDF5Constants.H5T_COMPOUND;
+        }
+        catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Encode a single Java value into {@code dst} at byte offset {@code off}, laid
+     * out exactly as HDF5 represents a value of {@code typeId} in memory. Handles
+     * integers, floats, fixed/variable-length strings, nested compounds and VLEN
+     * members (recursively), which is what allows compounds containing VLEN fields
+     * and VLEN-of-compound elements to round-trip through the native library.
+     *
+     * <p>A value whose Java type does not match the HDF5 member type (for example a
+     * String supplied for an integer member, or a non-ArrayList supplied for a VLEN
+     * or compound member) is rejected with {@link IllegalArgumentException} instead
+     * of silently writing garbage.</p>
+     */
+    private static void encodeValue(MemorySegment dst, long off, long typeId, Object value, Arena arena)
+        throws HDF5JavaException
+    {
+        int cls   = org.hdfgroup.javahdf5.hdf5_h.H5Tget_class(typeId);
+        long size = org.hdfgroup.javahdf5.hdf5_h.H5Tget_size(typeId);
+
+        if (cls == HDF5Constants.H5T_INTEGER) {
+            long v;
+            if (value instanceof Integer)
+                v = ((Integer)value).longValue();
+            else if (value instanceof Long)
+                v = (Long)value;
+            else if (value instanceof Short)
+                v = ((Short)value).longValue();
+            else if (value instanceof Byte)
+                v = ((Byte)value).longValue();
+            else
+                throw new IllegalArgumentException("integer member requires an Integer/Long value, got " +
+                                                   (value == null ? "null" : value.getClass().getName()));
+            for (int b = 0; b < size; b++)
+                dst.set(ValueLayout.JAVA_BYTE, off + b, (byte)((v >> (b * 8)) & 0xFF));
+        }
+        else if (cls == HDF5Constants.H5T_FLOAT) {
+            if (!(value instanceof Double) && !(value instanceof Float))
+                throw new IllegalArgumentException("float member requires a Double/Float value, got " +
+                                                   (value == null ? "null" : value.getClass().getName()));
+            double d = (value instanceof Double) ? (Double)value : ((Float)value).doubleValue();
+            if (size == 4) {
+                int bits = Float.floatToRawIntBits((float)d);
+                for (int b = 0; b < 4; b++)
+                    dst.set(ValueLayout.JAVA_BYTE, off + b, (byte)((bits >> (b * 8)) & 0xFF));
+            }
+            else {
+                long bits = Double.doubleToRawLongBits(d);
+                for (int b = 0; b < size; b++)
+                    dst.set(ValueLayout.JAVA_BYTE, off + b, (byte)((bits >> (b * 8)) & 0xFF));
+            }
+        }
+        else if (cls == HDF5Constants.H5T_STRING) {
+            String strValue;
+            if (value instanceof String)
+                strValue = (String)value;
+            else if (value == null)
+                strValue = "";
+            else
+                throw new IllegalArgumentException("string member requires a String value, got " +
+                                                   value.getClass().getName());
+            byte[] strBytes = strValue.getBytes(StandardCharsets.UTF_8);
+
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Tis_variable_str(typeId) > 0) {
+                // Variable-length string - store as a char* allocated by HDF5.
+                MemorySegment hdf5StringMem =
+                    org.hdfgroup.javahdf5.hdf5_h.H5allocate_memory(strBytes.length + 1, false);
+                if (hdf5StringMem == null || hdf5StringMem.equals(MemorySegment.NULL))
+                    throw new HDF5JavaException("Failed to allocate HDF5 memory for string: " + strValue);
+                MemorySegment boundedMem =
+                    hdf5StringMem.reinterpret(strBytes.length + 1, Arena.global(), null);
+                boundedMem.copyFrom(MemorySegment.ofArray(strBytes));
+                boundedMem.set(ValueLayout.JAVA_BYTE, strBytes.length, (byte)0);
+                writeAddress(dst, off, boundedMem.address());
+            }
+            else {
+                // Fixed-length string - copy bytes directly and zero-pad.
+                int copyLen = (int)Math.min(strBytes.length, size);
+                for (int j = 0; j < copyLen; j++)
+                    dst.set(ValueLayout.JAVA_BYTE, off + j, strBytes[j]);
+                for (long j = copyLen; j < size; j++)
+                    dst.set(ValueLayout.JAVA_BYTE, off + j, (byte)0);
+            }
+        }
+        else if (cls == HDF5Constants.H5T_VLEN) {
+            if (!(value instanceof ArrayList))
+                throw new IllegalArgumentException("VLEN member requires an ArrayList value, got " +
+                                                   (value == null ? "null" : value.getClass().getName()));
+            ArrayList<?> list = (ArrayList<?>)value;
+            long base         = org.hdfgroup.javahdf5.hdf5_h.H5Tget_super(typeId);
+            try {
+                long baseSize = org.hdfgroup.javahdf5.hdf5_h.H5Tget_size(base);
+                int len       = list.size();
+                // hvl_t { size_t len; void *p; } written field-by-field to tolerate
+                // unaligned compound member offsets.
+                for (int b = 0; b < 8; b++)
+                    dst.set(ValueLayout.JAVA_BYTE, off + b, (byte)(((long)len >> (b * 8)) & 0xFF));
+                if (len == 0) {
+                    writeAddress(dst, off + 8, 0L);
+                }
+                else {
+                    MemorySegment elemBuf = arena.allocate(baseSize * len);
+                    for (int i = 0; i < len; i++)
+                        encodeValue(elemBuf, i * baseSize, base, list.get(i), arena);
+                    writeAddress(dst, off + 8, elemBuf.address());
+                }
+            }
+            finally {
+                try {
+                    org.hdfgroup.javahdf5.hdf5_h.H5Tclose(base);
+                }
+                catch (Exception e) {
+                }
+            }
+        }
+        else if (cls == HDF5Constants.H5T_COMPOUND) {
+            if (!(value instanceof ArrayList))
+                throw new IllegalArgumentException("compound member requires an ArrayList value, got " +
+                                                   (value == null ? "null" : value.getClass().getName()));
+            ArrayList<?> rec = (ArrayList<?>)value;
+            int nm           = org.hdfgroup.javahdf5.hdf5_h.H5Tget_nmembers(typeId);
+            if (rec.size() != nm)
+                throw new IllegalArgumentException("compound value has " + rec.size() +
+                                                   " members, expected " + nm);
+            for (int i = 0; i < nm; i++) {
+                long mt = org.hdfgroup.javahdf5.hdf5_h.H5Tget_member_type(typeId, i);
+                long mo = org.hdfgroup.javahdf5.hdf5_h.H5Tget_member_offset(typeId, i);
+                try {
+                    encodeValue(dst, off + mo, mt, rec.get(i), arena);
+                }
+                finally {
+                    try {
+                        org.hdfgroup.javahdf5.hdf5_h.H5Tclose(mt);
+                    }
+                    catch (Exception e) {
+                    }
+                }
+            }
+        }
+        else {
+            throw new HDF5JavaException("Unsupported compound/VLEN member type class: " + cls);
+        }
+    }
+
+    /**
+     * Decode a single value of HDF5 type {@code typeId} from {@code src} at byte
+     * offset {@code off}. Inverse of {@link #encodeValue}. Returns Integer, Double,
+     * String, or (for VLEN/compound members) a nested ArrayList.
+     */
+    private static Object decodeValue(MemorySegment src, long off, long typeId) throws HDF5JavaException
+    {
+        int cls   = org.hdfgroup.javahdf5.hdf5_h.H5Tget_class(typeId);
+        long size = org.hdfgroup.javahdf5.hdf5_h.H5Tget_size(typeId);
+
+        if (cls == HDF5Constants.H5T_INTEGER) {
+            long v = 0;
+            for (int b = 0; b < size && b < 8; b++)
+                v |= ((long)(src.get(ValueLayout.JAVA_BYTE, off + b) & 0xFF)) << (b * 8);
+            if (size <= 4) {
+                // sign-extend from the most-significant decoded byte
+                int iv = (int)v;
+                if (size < 4) {
+                    int shift = (int)(8 * (4 - size));
+                    iv = (iv << shift) >> shift;
+                }
+                return Integer.valueOf(iv);
+            }
+            return Long.valueOf(v);
+        }
+        else if (cls == HDF5Constants.H5T_FLOAT) {
+            if (size == 4) {
+                int bits = 0;
+                for (int b = 0; b < 4; b++)
+                    bits |= (src.get(ValueLayout.JAVA_BYTE, off + b) & 0xFF) << (b * 8);
+                return Double.valueOf(Float.intBitsToFloat(bits));
+            }
+            long bits = 0;
+            for (int b = 0; b < size && b < 8; b++)
+                bits |= ((long)(src.get(ValueLayout.JAVA_BYTE, off + b) & 0xFF)) << (b * 8);
+            return Double.valueOf(Double.longBitsToDouble(bits));
+        }
+        else if (cls == HDF5Constants.H5T_STRING) {
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Tis_variable_str(typeId) > 0) {
+                long addr = readAddress(src, off);
+                if (addr == 0L)
+                    return "";
+                try {
+                    MemorySegment p = MemorySegment.ofAddress(addr).reinterpret(Long.MAX_VALUE);
+                    return p.getString(0, StandardCharsets.UTF_8);
+                }
+                catch (Exception e) {
+                    return "";
+                }
+            }
+            byte[] strBytes = new byte[(int)size];
+            for (int j = 0; j < size; j++)
+                strBytes[j] = src.get(ValueLayout.JAVA_BYTE, off + j);
+            String strValue = new String(strBytes, StandardCharsets.UTF_8);
+            int nullIdx     = strValue.indexOf('\0');
+            if (nullIdx >= 0)
+                strValue = strValue.substring(0, nullIdx);
+            return strValue;
+        }
+        else if (cls == HDF5Constants.H5T_VLEN) {
+            long len = 0;
+            for (int b = 0; b < 8; b++)
+                len |= ((long)(src.get(ValueLayout.JAVA_BYTE, off + b) & 0xFF)) << (b * 8);
+            long addr = readAddress(src, off + 8);
+
+            ArrayList<Object> list = new ArrayList<>((int)len);
+            if (len == 0 || addr == 0L)
+                return list;
+            long base = org.hdfgroup.javahdf5.hdf5_h.H5Tget_super(typeId);
+            try {
+                long baseSize    = org.hdfgroup.javahdf5.hdf5_h.H5Tget_size(base);
+                MemorySegment el = MemorySegment.ofAddress(addr).reinterpret(baseSize * len);
+                for (long i = 0; i < len; i++)
+                    list.add(decodeValue(el, i * baseSize, base));
+            }
+            finally {
+                try {
+                    org.hdfgroup.javahdf5.hdf5_h.H5Tclose(base);
+                }
+                catch (Exception e) {
+                }
+            }
+            return list;
+        }
+        else if (cls == HDF5Constants.H5T_COMPOUND) {
+            int nm                 = org.hdfgroup.javahdf5.hdf5_h.H5Tget_nmembers(typeId);
+            ArrayList<Object> rec = new ArrayList<>(nm);
+            for (int i = 0; i < nm; i++) {
+                long mt = org.hdfgroup.javahdf5.hdf5_h.H5Tget_member_type(typeId, i);
+                long mo = org.hdfgroup.javahdf5.hdf5_h.H5Tget_member_offset(typeId, i);
+                try {
+                    rec.add(decodeValue(src, off + mo, mt));
+                }
+                finally {
+                    try {
+                        org.hdfgroup.javahdf5.hdf5_h.H5Tclose(mt);
+                    }
+                    catch (Exception e) {
+                    }
+                }
+            }
+            return rec;
+        }
+        else {
+            throw new HDF5JavaException("Unsupported compound/VLEN member type class for read: " + cls);
+        }
+    }
+
+    /** Write an 8-byte native pointer value little-endian, tolerating unaligned offsets. */
+    private static void writeAddress(MemorySegment dst, long off, long addr)
+    {
+        for (int b = 0; b < 8; b++)
+            dst.set(ValueLayout.JAVA_BYTE, off + b, (byte)((addr >> (b * 8)) & 0xFF));
+    }
+
+    /** Read an 8-byte native pointer value little-endian, tolerating unaligned offsets. */
+    private static long readAddress(MemorySegment src, long off)
+    {
+        long addr = 0;
+        for (int b = 0; b < 8; b++)
+            addr |= ((long)(src.get(ValueLayout.JAVA_BYTE, off + b) & 0xFF)) << (b * 8);
+        return addr;
+    }
+
+    /**
      * Convert ArrayList array with heterogeneous types to compound datatype buffer
      * Used for H5T_COMPOUND datatypes where each ArrayList contains mixed field types
      *
@@ -1899,83 +2282,20 @@ public class VLDataConverter {
                     ArrayList<?> record = data[structIdx];
 
                     if (record == null || record.size() != nmembers) {
-                        throw new HDF5JavaException("ArrayList at index " + structIdx + " has " +
-                                                    (record == null ? "null" : record.size()) +
-                                                    " elements, expected " + nmembers);
+                        throw new IllegalArgumentException("compound record at index " + structIdx + " has " +
+                                                           (record == null ? "null" : record.size()) +
+                                                           " members, expected " + nmembers);
                     }
 
                     long structOffset = structIdx * compoundSize;
 
-                    // Pack each field into the compound structure
+                    // Pack each field into the compound structure. encodeValue handles
+                    // every member class (including nested compounds and VLEN members)
+                    // and matches the native HDF5 in-memory layout.
                     for (int fieldIdx = 0; fieldIdx < nmembers; fieldIdx++) {
-                        Object fieldValue  = record.get(fieldIdx);
-                        long fieldOffset   = structOffset + memberOffsets[fieldIdx];
-                        int memberClass    = memberClasses[fieldIdx];
-                        long memberSize    = memberSizes[fieldIdx];
-                        boolean isVLString = isVLStrings[fieldIdx];
-
-                        if (memberClass == HDF5Constants.H5T_INTEGER) {
-                            // Integer field - write bytes for unaligned HDF5 compound offsets
-                            int intValue = (fieldValue instanceof Integer) ? (Integer)fieldValue : 0;
-                            buffer.set(ValueLayout.JAVA_BYTE, fieldOffset, (byte)(intValue & 0xFF));
-                            buffer.set(ValueLayout.JAVA_BYTE, fieldOffset + 1,
-                                       (byte)((intValue >> 8) & 0xFF));
-                            buffer.set(ValueLayout.JAVA_BYTE, fieldOffset + 2,
-                                       (byte)((intValue >> 16) & 0xFF));
-                            buffer.set(ValueLayout.JAVA_BYTE, fieldOffset + 3,
-                                       (byte)((intValue >> 24) & 0xFF));
-                        }
-                        else if (memberClass == HDF5Constants.H5T_FLOAT) {
-                            // Double field - write bytes for unaligned HDF5 compound offsets
-                            double doubleValue = (fieldValue instanceof Double) ? (Double)fieldValue : 0.0;
-                            long longBits      = Double.doubleToRawLongBits(doubleValue);
-                            for (int byteIdx = 0; byteIdx < 8; byteIdx++) {
-                                buffer.set(ValueLayout.JAVA_BYTE, fieldOffset + byteIdx,
-                                           (byte)((longBits >> (byteIdx * 8)) & 0xFF));
-                            }
-                        }
-                        else if (memberClass == HDF5Constants.H5T_STRING) {
-                            if (isVLString) {
-                                // Variable-length string - store as pointer
-                                String strValue = (fieldValue instanceof String) ? (String)fieldValue : "";
-                                byte[] strBytes = strValue.getBytes(StandardCharsets.UTF_8);
-
-                                // Allocate with HDF5's memory allocator for VL strings
-                                MemorySegment hdf5StringMem = org.hdfgroup.javahdf5.hdf5_h.H5allocate_memory(
-                                    strBytes.length + 1, false);
-                                if (hdf5StringMem == null || hdf5StringMem.equals(MemorySegment.NULL)) {
-                                    throw new HDF5JavaException(
-                                        "Failed to allocate HDF5 memory for string: " + strValue);
-                                }
-
-                                MemorySegment boundedMem =
-                                    hdf5StringMem.reinterpret(strBytes.length + 1, Arena.global(), null);
-                                boundedMem.copyFrom(MemorySegment.ofArray(strBytes));
-                                boundedMem.set(ValueLayout.JAVA_BYTE, strBytes.length, (byte)0);
-
-                                // Store pointer
-                                buffer.set(ValueLayout.ADDRESS, fieldOffset, boundedMem);
-                            }
-                            else {
-                                // Fixed-length string - copy bytes directly
-                                String strValue = (fieldValue instanceof String) ? (String)fieldValue : "";
-                                byte[] strBytes = strValue.getBytes(StandardCharsets.UTF_8);
-                                int copyLen     = (int)Math.min(strBytes.length, memberSize);
-
-                                // Copy string bytes
-                                for (int j = 0; j < copyLen; j++) {
-                                    buffer.set(ValueLayout.JAVA_BYTE, fieldOffset + j, strBytes[j]);
-                                }
-                                // Pad with zeros
-                                for (int j = copyLen; j < memberSize; j++) {
-                                    buffer.set(ValueLayout.JAVA_BYTE, fieldOffset + j, (byte)0);
-                                }
-                            }
-                        }
-                        else {
-                            throw new HDF5JavaException("Unsupported compound member type class: " +
-                                                        memberClass);
-                        }
+                        Object fieldValue = record.get(fieldIdx);
+                        long fieldOffset  = structOffset + memberOffsets[fieldIdx];
+                        encodeValue(buffer, fieldOffset, memberTypeIds[fieldIdx], fieldValue, arena);
                     }
                 }
             }
@@ -1998,6 +2318,11 @@ public class VLDataConverter {
         catch (Exception e) {
             if (e instanceof HDF5JavaException) {
                 throw e;
+            }
+            // Let validation failures (wrong member count/type) surface as
+            // IllegalArgumentException to the caller instead of being masked.
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException)e;
             }
             throw new HDF5JavaException("Compound datatype conversion failed: " + e.getMessage());
         }
@@ -2077,75 +2402,51 @@ public class VLDataConverter {
                     ArrayList<Object> record = new ArrayList<>();
                     long structOffset        = structIdx * compoundSize;
 
-                    // Read each field from the compound structure
+                    // Read each field from the compound structure. decodeValue handles
+                    // every member class (including nested compounds and VLEN members)
+                    // and matches the native HDF5 in-memory layout.
                     for (int fieldIdx = 0; fieldIdx < nmembers; fieldIdx++) {
-                        long fieldOffset   = structOffset + memberOffsets[fieldIdx];
-                        int memberClass    = memberClasses[fieldIdx];
-                        long memberSize    = memberSizes[fieldIdx];
-                        boolean isVLString = isVLStrings[fieldIdx];
-
-                        if (memberClass == HDF5Constants.H5T_INTEGER) {
-                            // Read integer field (little-endian byte order)
-                            int intValue =
-                                (buffer.get(ValueLayout.JAVA_BYTE, fieldOffset) & 0xFF) |
-                                ((buffer.get(ValueLayout.JAVA_BYTE, fieldOffset + 1) & 0xFF) << 8) |
-                                ((buffer.get(ValueLayout.JAVA_BYTE, fieldOffset + 2) & 0xFF) << 16) |
-                                (buffer.get(ValueLayout.JAVA_BYTE, fieldOffset + 3) << 24);
-                            record.add(intValue);
-                        }
-                        else if (memberClass == HDF5Constants.H5T_FLOAT) {
-                            // Read double field (8 bytes, little-endian)
-                            long longBits = 0;
-                            for (int byteIdx = 0; byteIdx < 8; byteIdx++) {
-                                long byteVal =
-                                    buffer.get(ValueLayout.JAVA_BYTE, fieldOffset + byteIdx) & 0xFFL;
-                                longBits |= (byteVal << (byteIdx * 8));
-                            }
-                            double doubleValue = Double.longBitsToDouble(longBits);
-                            record.add(doubleValue);
-                        }
-                        else if (memberClass == HDF5Constants.H5T_STRING) {
-                            if (isVLString) {
-                                // Variable-length string - read pointer
-                                MemorySegment stringPtr = buffer.get(ValueLayout.ADDRESS, fieldOffset);
-                                if (stringPtr != null && !stringPtr.equals(MemorySegment.NULL)) {
-                                    try {
-                                        String str = stringPtr.getString(0, StandardCharsets.UTF_8);
-                                        record.add(str);
-                                    }
-                                    catch (Exception e) {
-                                        record.add("");
-                                    }
-                                }
-                                else {
-                                    record.add("");
-                                }
-                            }
-                            else {
-                                // Fixed-length string - read bytes
-                                byte[] strBytes = new byte[(int)memberSize];
-                                for (int j = 0; j < memberSize; j++) {
-                                    strBytes[j] = buffer.get(ValueLayout.JAVA_BYTE, fieldOffset + j);
-                                }
-                                // Convert to string and trim null terminators
-                                String strValue = new String(strBytes, StandardCharsets.UTF_8);
-                                int nullIdx     = strValue.indexOf('\0');
-                                if (nullIdx >= 0) {
-                                    strValue = strValue.substring(0, nullIdx);
-                                }
-                                record.add(strValue);
-                            }
-                        }
-                        else {
-                            throw new HDF5JavaException("Unsupported compound member type class for read: " +
-                                                        memberClass);
-                        }
+                        long fieldOffset = structOffset + memberOffsets[fieldIdx];
+                        record.add(decodeValue(buffer, fieldOffset, memberTypeIds[fieldIdx]));
                     }
 
                     result[structIdx] = record;
                 }
             }
             finally {
+                // If the compound contains any VLEN data, HDF5 allocated memory for it
+                // while filling the read buffer; reclaim it now that the values have
+                // been copied into the returned ArrayLists.
+                try {
+                    if (hdf.hdf5lib.H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_VLEN)) {
+                        long reclaim_space = HDF5Constants.H5I_INVALID_HID;
+                        try {
+                            reclaim_space = isDataset
+                                                ? org.hdfgroup.javahdf5.hdf5_h.H5Dget_space(attr_or_dataset_id)
+                                                : org.hdfgroup.javahdf5.hdf5_h.H5Aget_space(attr_or_dataset_id);
+                            if (reclaim_space >= 0) {
+                                org.hdfgroup.javahdf5.hdf5_h.H5Treclaim(
+                                    mem_type_id, reclaim_space, org.hdfgroup.javahdf5.hdf5_h.H5P_DEFAULT(),
+                                    buffer);
+                            }
+                        }
+                        finally {
+                            if (reclaim_space >= 0) {
+                                try {
+                                    org.hdfgroup.javahdf5.hdf5_h.H5Sclose(reclaim_space);
+                                }
+                                catch (Exception e) {
+                                    // Ignore close errors
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception reclaimEx) {
+                    System.err.println("Warning: H5Treclaim failed in readCompoundDatatype: " +
+                                       reclaimEx.getMessage());
+                }
+
                 // Close member type IDs
                 for (int i = 0; i < nmembers; i++) {
                     if (memberTypeIds[i] >= 0) {
