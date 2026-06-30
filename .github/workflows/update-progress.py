@@ -85,6 +85,10 @@ class GitHubProjectTracker:
                       id, title, url
                       milestone { title }
                     }
+                    ... on PullRequest {
+                      id, title, url
+                      milestone { title }
+                    }
                   }
                 }
               }

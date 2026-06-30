@@ -7584,29 +7584,32 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <th width="25%">byte</th>
   <th>byte</th>
 </tr>
-<tr align="center">
+<tr>
   <td>Version</td>
   <td>Dimensionality</td>
   <td>Layout Class</td>
   <td>Reserved <em>(zero)</em></td>
 </tr>
-<tr align="center">
+<tr>
   <td colspan="4">Reserved <em>(zero)</em></td>
 </tr>
-<tr align="center">
+<tr>
   <td colspan="4"><br />Data Address<sup>O</sup> <em>(optional)</em><br /><br /></td>
 </tr>
-<tr align="center">
+<tr>
   <td colspan="4">Dimension 0 Size</td>
 </tr>
-<tr align="center">
+<tr>
   <td colspan="4">Dimension 1 Size</td>
 </tr>
-<tr align="center">
+<tr>
   <td colspan="4">...</td>
 </tr>
 <tr>
-  <td colspan="4">Dataset Element Size <em>(optional)</em></td>
+  <td colspan="4">Dimension \#(d - 1) Size</td>
+</tr>
+<tr>
+  <td colspan="4">Dataset Element Size <em>(stored as Dimension \#d)</em></td>
 </tr>
 <tr>
   <td colspan="4">Compact Data Size <em>(optional)</em></td>
@@ -7651,9 +7654,13 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 <tr valign=top>
   <td>Dimensionality</td>
-  <td>An array has a fixed dimensionality. This field specifies the number of dimension size fields later
-      in the message. The value stored for chunked storage is 1 greater than the number of dimensions in
-      the dataset&rsquo;s dataspace. For example, 2 is stored for a 1 dimensional dataset.</td>
+  <td>\anchor FMT4V12Dimensionality An array has a fixed dimensionality.
+      Let <b>d</b> be the number of dimensions in the dataset&rsquo;s dataspace.
+      For compact and contiguous storage, this field stores <b>d</b>.
+      <br />
+      For chunked storage, this field stores <b>d + 1</b>: entries 0 through d&minus;1 are the chunk
+      dimension sizes, and entry d holds the Dataset Element Size (see below).
+      For example, a 1-dimensional chunked dataset stores a value of 2.</td>
 </tr>
 <tr valign=top>
   <td>Layout Class</td>
@@ -7687,20 +7694,28 @@ another datatype) and the dataspace for a dataset describes the location of the 
       has not yet been allocated for this array.</td>
 </tr>
 <tr valign=top>
-  <td>Dimension \#n Size</td>
-  <td>For contiguous and compact storage the dimensions define the entire size of the array while for chunked storage
-      they define the size of a single chunk. In all cases, they are in units of array elements (not bytes). The
-      first dimension stored in the list of dimensions is the slowest changing dimension and the last dimension
-      stored is the fastest changing dimension.</td>
+  <td>Dimension \#i Size (i = 0 to (d-1))</td>
+  <td>\anchor FMT4V12DimInfoN For contiguous and compact storage the dimensions define the entire size of the array
+      in units of array elements (not bytes).
+      Dimension 0 is the slowest-changing axis and Dimension d&minus;1 is the fastest-changing axis.
+      <br />For chunked storage, the dimensions define the size of a single chunk in units of array
+      elements (not bytes).
+      Dimension 0 is the slowest-changing axis and Dimension d&minus;1 is the fastest-changing axis.
+      Dimension d stores the Dataset Element Size (see below) and is not a chunk dimension.</td>
 </tr>
 <tr>
   <td>Dataset Element Size</td>
-  <td>The size of a dataset element, in bytes. This field is only present for chunked storage.</td>
+  <td>\anchor FMT4V12DsetElmSz The size of a dataset element, in bytes.
+      This field is only present for chunked data storage.
+      Although logically distinct from the chunk dimensions, this value is encoded as
+      dimension entry d where d is the number of dataset dimensions,
+      which is why the Dimensionality field stores d + 1.</td>
 </tr>
 <tr>
   <td>Compact Data Size</td>
   <td>This field is only present for compact data storage. It contains the size of the raw data for the
       dataset array, in bytes.</td>
+</tr>
 <tr>
   <td>Compact Data</td>
   <td>This field is only present for compact data storage. It contains the raw data for the dataset
@@ -7879,14 +7894,16 @@ Class-specific information for chunked storage (layout class 2):
   <td colspan="4">...</td>
 </tr>
 <tr>
-  <td colspan="4">Dimension \#n Size</td>
+  <td colspan="4">Dimension \#(d - 1) Size</td>
 </tr>
 <tr>
-  <td colspan="4">Dataset Element Size</td>
+  <td colspan="4">Dataset Element Size <em>(stored as Dimension \#d)</em></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li In the above table, <b>d</b> is the number of dimensions in the dataset&rsquo;s dataspace;
+    see @ref FMT4V12Dimensionality "Dimensionality" in versions 1 and 2 Data Layout message, in particular the chunked storage portion.
 
 <table>
 <caption><strong>Fields: Chunked Storage Property Description</strong></caption>
@@ -7896,8 +7913,7 @@ Class-specific information for chunked storage (layout class 2):
 </tr>
 <tr>
   <td>Dimensionality</td>
-  <td>>A chunk has a fixed dimensionality. This field specifies the number of dimension size fields
-       later in the message.</td>
+  <td>\anchor FMT4Dimensionality See @ref FMT4V12Dimensionality "Dimensionality" description in versions 1 and 2 Data Layout message, in particular the chunked storage portion.</td>
 </tr>
 <tr>
   <td>Address</td>
@@ -7907,14 +7923,12 @@ Class-specific information for chunked storage (layout class 2):
       that storage has not yet been allocated for this array.</td>
 </tr>
 <tr>
-  <td>Dimension \#n Size</td>
-  <td>These values define the dimension size of a single chunk, in units of array elements (not bytes).
-      The first dimension stored in the list of dimensions is the slowest changing dimension and the
-      last dimension stored is the fastest changing dimension.</td>
+  <td>Dimension \#i Size (i = 0 to (d-1))</td>
+  <td>\anchor FMT4DimInfoN See @ref FMT4V12DimInfoN "Dimension \#i Size" description in versions 1 and 2 Data Layout message, in particular the chunked storage portion.</td>
 </tr>
 <tr>
   <td>Dataset Element Size</td>
-  <td>The size of a dataset element, in bytes.</td>
+  <td>\anchor FMT4DsetElmSz See @ref FMT4V12DsetElmSz "Dataset Element Size" description in versions 1 and 2 Data Layout message.</td>
 </tr>
 </table>
 
@@ -7966,7 +7980,7 @@ information for the virtual layout class as well as indexing information for the
 </tr>
 <tr>
   <td>Layout Class</td>
-  <td>The layout class specifies specifies the type of storage for the data and how the other fields
+  <td>The layout class specifies the type of storage for the data and how the other fields
       of the layout message are to be interpreted.
       <table>
       <tr>
@@ -8046,7 +8060,10 @@ information for the virtual layout class as well as indexing information for the
   <td colspan="4"><br />...<br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension \#n Size <em>(variable size)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d - 1) Size <em>(variable size)</em><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Dataset Element Size <em>(stored as Dimension \#d)</em> <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr>
   <td>Chunk Indexing Type</td>
@@ -8061,6 +8078,8 @@ information for the virtual layout class as well as indexing information for the
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li In the above table, <b>d</b> is the number of dimensions in the dataset&rsquo;s dataspace;
+    see @ref FMT4V12Dimensionality "Dimensionality" in versions 1 and 2 Data Layout message, in particular the chunked storage portion.
 
 <table>
 <caption><strong>Fields: Chunked Storage Property Description</strong></caption>
@@ -8088,18 +8107,19 @@ information for the virtual layout class as well as indexing information for the
 </tr>
 <tr>
   <td>Dimensionality</td>
-  <td>A chunk has fixed dimension. This field specifies the number of <em>Dimension Size</em> fields
-      later in the message.</td>
+  <td>See @ref FMT4V12Dimensionality "Dimensionality" description in versions 1 and 2 Data Layout message, in particular the chunked storage portion.</td>
 </tr>
 <tr>
   <td>Dimension Size Encoded Length</td>
   <td>This is the size in bytes used to encode <em>Dimension Size</em>.</td>
 </tr>
 <tr>
-  <td>Dimension \#n Size</td>
-  <td>These values define the dimension size of a single chunk, in units of array elements (not bytes).
-      The first dimension stored in the list of dimensions is the slowest changing dimension and the
-      last dimension stored is the fastest changing dimension.</td>
+  <td>Dimension \#i Size (i = 0 to (d-1))</td>
+  <td>See @ref FMT4V12DimInfoN "Dimension \#i Size" description in versions 1 and 2 Data Layout message, in particular the chunked storage portion.</td>
+</tr>
+<tr>
+  <td>Dataset Element Size</td>
+  <td>See @ref FMT4V12DsetElmSz "Dataset Element Size" description in versions 1 and 2 Data Layout message.</td>
 </tr>
 <tr>
   <td>Chunk Indexing Type</td>
@@ -8137,11 +8157,11 @@ information for the virtual layout class as well as indexing information for the
   <td>This variable-sized field encodes information specific to an indexing type. More information on
       what is encoded with each type can be found below this table.
       <ul>
-        <li>See @ref FMT4IndexInfoSingle "<i>Single Chunk</i>" below.</li>
-        <li>See @ref FMT4IndexInfoImplicit "<i>Implicit</i>" below.</li>
-        <li>See @ref FMT4IndexInfoFixed "<i>Fixed Array</i>" below.</li>
-        <li>See @ref FMT4IndexInfoExtensible "<i>Extensible Array</i>" below.</li>
-        <li>See @ref FMT4IndexInfoV2Btrees "<i>Version 2 B-tree</i>" below.</li>
+        <li>See <em>@ref FMT4IndexInfoSingle "Single Chunk"</em> below.</li>
+        <li>See <em>@ref FMT4IndexInfoImplicit "Implicit"</em> below.</li>
+        <li>See <em>@ref FMT4IndexInfoFixed "Fixed Array"</em> below.</li>
+        <li>See <em>@ref FMT4IndexInfoExtensible "Extensible Array"</em> below.</li>
+        <li>See <em>@ref FMT4IndexInfoV2Btrees "Version 2 B-tree"</em> below.</li>
       </ul></td>
 </tr>
 <tr>
@@ -8180,7 +8200,7 @@ information for the virtual layout class as well as indexing information for the
 <ol>
 <li>\anchor FMT4IndexInfoSingle <h4>Index-specific information for <i>Single Chunk</i>:</h4>
 The following information exists only when the chunk is filtered. In other words, when
-<code>DONT_FILTER_PARTIAL_BOUND_CHUNKS</code> (bit 0) is enabled in the field <em>flags</em>.
+<code>SINGLE_INDEX_WITH_FILTER</code> (bit 1) is enabled in the field <em>flags</em>.
 <table>
 <caption><strong>Layout: Single Chunk Indexing Information</strong></caption>
 <tr>
