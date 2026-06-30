@@ -14,7 +14,8 @@ limitations under the License.
 
 #include <unistd.h>
 
-extern int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+extern int
+LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     char filename[256];
     sprintf(filename, "/tmp/libfuzzer.%d", getpid());
@@ -28,15 +29,15 @@ extern int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     hid_t fuzz_h5_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
     if (fuzz_h5_id != H5I_INVALID_HID) {
-      hid_t  dataset_id = H5Dopen2(fuzz_h5_id, "dsetname", H5P_DEFAULT);
-      if (dataset_id != H5I_INVALID_HID) {
-          hid_t attribute_id = H5Aopen_name(dataset_id, "theattr");
-          if (attribute_id != H5I_INVALID_HID) {
-            H5Aclose(attribute_id);
-          }
-          H5Dclose(dataset_id);
-      }
-      H5Fclose(fuzz_h5_id);
+        hid_t dataset_id = H5Dopen2(fuzz_h5_id, "dsetname", H5P_DEFAULT);
+        if (dataset_id != H5I_INVALID_HID) {
+            hid_t attribute_id = H5Aopen_name(dataset_id, "theattr");
+            if (attribute_id != H5I_INVALID_HID) {
+                H5Aclose(attribute_id);
+            }
+            H5Dclose(dataset_id);
+        }
+        H5Fclose(fuzz_h5_id);
     }
     return 0;
 }
