@@ -85,7 +85,7 @@ public class VLDataConverter {
     public static MemorySegment convertToHVLAuto(ArrayList[] javaData, long vlenTypeId, Arena arena)
         throws HDF5JavaException
     {
-        long base       = HDF5Constants.H5I_INVALID_HID;
+        long base        = HDF5Constants.H5I_INVALID_HID;
         boolean useTyped = false;
         try {
             if (org.hdfgroup.javahdf5.hdf5_h.H5Tget_class(vlenTypeId) == HDF5Constants.H5T_VLEN) {
@@ -2126,7 +2126,7 @@ public class VLDataConverter {
                 int iv = (int)v;
                 if (size < 4) {
                     int shift = (int)(8 * (4 - size));
-                    iv = (iv << shift) >> shift;
+                    iv        = (iv << shift) >> shift;
                 }
                 return Integer.valueOf(iv);
             }
@@ -2192,7 +2192,7 @@ public class VLDataConverter {
             return list;
         }
         else if (cls == HDF5Constants.H5T_COMPOUND) {
-            int nm                 = org.hdfgroup.javahdf5.hdf5_h.H5Tget_nmembers(typeId);
+            int nm                = org.hdfgroup.javahdf5.hdf5_h.H5Tget_nmembers(typeId);
             ArrayList<Object> rec = new ArrayList<>(nm);
             for (int i = 0; i < nm; i++) {
                 long mt = org.hdfgroup.javahdf5.hdf5_h.H5Tget_member_type(typeId, i);
@@ -2421,9 +2421,9 @@ public class VLDataConverter {
                     if (hdf.hdf5lib.H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_VLEN)) {
                         long reclaim_space = HDF5Constants.H5I_INVALID_HID;
                         try {
-                            reclaim_space = isDataset
-                                                ? org.hdfgroup.javahdf5.hdf5_h.H5Dget_space(attr_or_dataset_id)
-                                                : org.hdfgroup.javahdf5.hdf5_h.H5Aget_space(attr_or_dataset_id);
+                            reclaim_space =
+                                isDataset ? org.hdfgroup.javahdf5.hdf5_h.H5Dget_space(attr_or_dataset_id)
+                                          : org.hdfgroup.javahdf5.hdf5_h.H5Aget_space(attr_or_dataset_id);
                             if (reclaim_space >= 0) {
                                 org.hdfgroup.javahdf5.hdf5_h.H5Treclaim(
                                     mem_type_id, reclaim_space, org.hdfgroup.javahdf5.hdf5_h.H5P_DEFAULT(),

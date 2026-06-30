@@ -5581,8 +5581,7 @@ h5validate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class
             /* translate_atomic_wbuf reads a Java byte[] for references and for
              * opaque elements (opaque is an arbitrary-sized byte blob). */
             if (NULL == in_obj || !ENVPTR->IsInstanceOf(ENVONLY, in_obj, ENVPTR->FindClass(ENVONLY, "[B")))
-                H5_BAD_ARGUMENT_ERROR(ENVONLY,
-                                      "h5validate_wbuf: reference/opaque element is not a byte[]");
+                H5_BAD_ARGUMENT_ERROR(ENVONLY, "h5validate_wbuf: reference/opaque element is not a byte[]");
             break;
         }
         case H5T_TIME:

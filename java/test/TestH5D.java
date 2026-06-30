@@ -2220,7 +2220,6 @@ public class TestH5D {
             for (int i = 0; i < 6; i++) {
                 assertEquals("String " + i + " mismatch", writeData[i], readData[i]);
             }
-
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -2285,7 +2284,6 @@ public class TestH5D {
             assertEquals("Second should match", "Not empty", readData[1]);
             assertEquals("Third should be empty", "", readData[2]);
             assertEquals("Fourth should match", "Also not empty", readData[3]);
-
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -2355,7 +2353,6 @@ public class TestH5D {
                 assertEquals("Large string " + i + " mismatch", writeData[i], readData[i]);
                 assertTrue("String should be > 1KB", readData[i].length() > 1024);
             }
-
         }
         catch (Exception ex) {
             ex.printStackTrace();

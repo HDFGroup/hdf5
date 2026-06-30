@@ -176,8 +176,8 @@ Java_hdf_hdf5lib_H5_H5Dread(JNIEnv *env, jclass clss, jlong dataset_id, jlong me
                             jboolean isCriticalPinning)
 {
     jboolean    readBufIsCopy;
-    jbyte      *readBuf = NULL;
-    size_t      typeSize     = 0; // Only used by vl_data_class types
+    jbyte      *readBuf  = NULL;
+    size_t      typeSize = 0; // Only used by vl_data_class types
     H5T_class_t type_class;
     jsize       vl_array_len = 0; // Only used by vl_data_class types
     htri_t      vl_data_class;
@@ -266,7 +266,7 @@ Java_hdf_hdf5lib_H5_H5Dwrite(JNIEnv *env, jclass clss, jlong dataset_id, jlong m
 {
     jboolean    writeBufIsCopy;
     jbyte      *writeBuf = NULL;
-    size_t      typeSize     = 0; // Only used by vl_data_class types
+    size_t      typeSize = 0; // Only used by vl_data_class types
     H5T_class_t type_class;
     jsize       vl_array_len = 0; // Only used by vl_data_class types
     htri_t      vl_data_class;

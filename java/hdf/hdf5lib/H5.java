@@ -5752,8 +5752,7 @@ public class H5 implements java.io.Serializable {
                 else {
                     long all_space = org.hdfgroup.javahdf5.hdf5_h.H5Dget_space(dataset_id);
                     if (all_space >= 0) {
-                        expected_elems =
-                            org.hdfgroup.javahdf5.hdf5_h.H5Sget_simple_extent_npoints(all_space);
+                        expected_elems = org.hdfgroup.javahdf5.hdf5_h.H5Sget_simple_extent_npoints(all_space);
                         org.hdfgroup.javahdf5.hdf5_h.H5Sclose(all_space);
                     }
                 }
