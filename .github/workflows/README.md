@@ -45,7 +45,7 @@ There are a few that only get triggered manually.
 - call-workflows.yml
 - codespell.yml checks spelling
 - cve.yml executes test_hdf5_cve.sh script
-- hdfeos5.yml configures and builds HDF5 then tests HDF-EOS5
+- hdfeos5.yml configures and builds HDF5 then tests HDF-EOS5 (runs on a daily schedule, not on pull requests)
 - linkchecker.yml verifies the links in generated doxygen files
 - netcdf.yml configures and builds HDF5 then tests NetCDF
 
