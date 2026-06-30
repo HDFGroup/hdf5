@@ -50,7 +50,7 @@
 #define NBIT_DECOMPRESS_FILE "bad_nbit_decompress.h5"
 #define FLETCHER32_FILE      "bad_fletcher32.h5"
 
-#define NBIT_DATASET      "Nbit_float_data_le"
+#define NBIT_DATASET       "Nbit_float_data_le"
 #define FLETCHER32_DATASET "Fletcher_float_data_be"
 
 #define NX   7
@@ -151,8 +151,8 @@ create_nbit_files(void)
      *   [0]=nparms(8) [1]=need_not_compress(0) [2]=nelmts(6) [3]=class(atomic)
      *   [4]=size(4)   [5]=order(LE)            [6]=precision(20) [7]=offset(7)
      */
-    static const unsigned char cd_pattern[] = {8,  0, 0, 0, 0, 0, 0, 0, 6,  0, 0, 0, 1, 0, 0, 0,
-                                               4,  0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 7, 0, 0, 0};
+    static const unsigned char cd_pattern[] = {8, 0, 0, 0, 0, 0, 0, 0, 6,  0, 0, 0, 1, 0, 0, 0,
+                                               4, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 7, 0, 0, 0};
     /* Version-1 pipeline filter record header for the N-Bit filter:
      *   filter id = 5, name length = 8, flags = 1, cd_nelmts = 8, name "nbit"
      */
