@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get Actions
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           sparse-checkout: .github/actions
 
@@ -80,7 +80,7 @@ jobs:
           echo "FC=${{ runner.workspace }}/openmpi/bin/mpif90" >> $GITHUB_ENV
 
       - name: Install CMake
-        uses: lukka/get-cmake@591817e96fcad43505fb4eae36172462abb3a42e # latest
+        uses: lukka/get-cmake@f5b8fbb4d77cec1acc5a5f9f0df4beffaf5d98d9 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -123,7 +123,7 @@ jobs:
             ls ${{ runner.workspace }}/hdf5
 
       - name: Create options file (OpenMPI)
-        uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
+        uses: "DamianReeves/write-file-action@d4ee8a06aec5db0c57a036b86f2f428e1f8b00e7" # master
         with:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
@@ -171,7 +171,7 @@ jobs:
     name: "Parallel Mpich GCC-${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Install Linux Dependencies (MPICH)
         run: |
@@ -197,7 +197,7 @@ jobs:
           echo "FC=${{ runner.workspace }}/mpich/bin/mpif90" >> $GITHUB_ENV
 
       - name: Install CMake
-        uses: lukka/get-cmake@591817e96fcad43505fb4eae36172462abb3a42e # latest
+        uses: lukka/get-cmake@f5b8fbb4d77cec1acc5a5f9f0df4beffaf5d98d9 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -240,7 +240,7 @@ jobs:
             ls ${{ runner.workspace }}/hdf5
 
       - name: Create options file (MPICH)
-        uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
+        uses: "DamianReeves/write-file-action@d4ee8a06aec5db0c57a036b86f2f428e1f8b00e7" # master
         with:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite

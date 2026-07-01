@@ -41,13 +41,13 @@ jobs:
         mpi: [ 'msmpi', 'intelmpi']
     name: "Parallel ${{ matrix.mpi }} Windows-${{ inputs.build_mode }}"
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Install Dependencies (Windows)
         run: choco install ninja
 
       - name: Install CMake
-        uses: lukka/get-cmake@591817e96fcad43505fb4eae36172462abb3a42e # latest
+        uses: lukka/get-cmake@f5b8fbb4d77cec1acc5a5f9f0df4beffaf5d98d9 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -57,7 +57,7 @@ jobs:
 
       - name: Setup MPI (${{ matrix.mpi }})
         id: setup-mpi
-        uses: mpi4py/setup-mpi@dbbb80b116bea57fc1788daf7dbbf7ab3df3a0f1 # v1
+        uses: mpi4py/setup-mpi@f200dce75b64188be849b46657dcf86c721937b2 # v1
         with:
           mpi: ${{ matrix.mpi }}
 
@@ -113,7 +113,7 @@ jobs:
         shell: pwsh
 
       - name: Create options file (${{ matrix.mpi }})
-        uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
+        uses: "DamianReeves/write-file-action@d4ee8a06aec5db0c57a036b86f2f428e1f8b00e7" # master
         with:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
@@ -165,7 +165,7 @@ jobs:
     name: "Parallel ${{ matrix.mpi }} Linux-${{ inputs.build_mode }}"
     steps:
       - name: Get Actions
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           sparse-checkout: .github/actions
 
@@ -178,14 +178,14 @@ jobs:
           sudo apt install libaec0 libaec-dev
 
       - name: Install CMake
-        uses: lukka/get-cmake@591817e96fcad43505fb4eae36172462abb3a42e # latest
+        uses: lukka/get-cmake@f5b8fbb4d77cec1acc5a5f9f0df4beffaf5d98d9 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
 
       - name: Setup MPI (${{ matrix.mpi }})
         id: setup-mpi
-        uses: mpi4py/setup-mpi@dbbb80b116bea57fc1788daf7dbbf7ab3df3a0f1 # v1
+        uses: mpi4py/setup-mpi@f200dce75b64188be849b46657dcf86c721937b2 # v1
         with:
           mpi: ${{ matrix.mpi }}
 
@@ -233,7 +233,7 @@ jobs:
             ls ${{ runner.workspace }}/hdf5
 
       - name: Create options file (${{ matrix.mpi }})
-        uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
+        uses: "DamianReeves/write-file-action@d4ee8a06aec5db0c57a036b86f2f428e1f8b00e7" # master
         with:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
@@ -284,11 +284,11 @@ jobs:
         mpi: [ 'mpich', 'openmpi']
     name: "Parallel ${{ matrix.mpi }} macos-${{ inputs.build_mode }}"
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Setup MPI (${{ matrix.mpi }})
         id: setup-mpi
-        uses: mpi4py/setup-mpi@dbbb80b116bea57fc1788daf7dbbf7ab3df3a0f1 # v1
+        uses: mpi4py/setup-mpi@f200dce75b64188be849b46657dcf86c721937b2 # v1
         with:
           mpi: ${{ matrix.mpi }}
 
@@ -335,7 +335,7 @@ jobs:
             ls ${{ runner.workspace }}/hdf5
 
       - name: Create options file (${{ matrix.mpi }})
-        uses: "DamianReeves/write-file-action@1d019960841941be46b139298996df6f139cc7a4" # master
+        uses: "DamianReeves/write-file-action@d4ee8a06aec5db0c57a036b86f2f428e1f8b00e7" # master
         with:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
