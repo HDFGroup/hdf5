@@ -955,6 +955,18 @@ H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
     /* copy a filter parameter to d_nelmts */
     d_nelmts = cd_values[2];
 
+    /* cd_values[4] stores the datatype size, which is used together with
+     * d_nelmts to size the (de)compression buffer.  A zero size is invalid,
+     * and a d_nelmts * size product that overflows size_t would produce an
+     * undersized allocation and out-of-bounds accesses (this matters on
+     * platforms with a 32-bit size_t).  Reject both, as they can only arise
+     * from a corrupted or crafted file.
+     */
+    if (cd_values[4] == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid nbit datatype size");
+    if (d_nelmts != 0 && (size_t)cd_values[4] > SIZE_MAX / d_nelmts)
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, 0, "nbit (de)compression buffer size overflow");
+
     /* input; decompress */
     if (flags & H5Z_FLAG_REVERSE) {
         size_out = d_nelmts * (size_t)cd_values[4]; /* cd_values[4] stores datatype size */

@@ -256,7 +256,8 @@ error:
 
 /*-------------------------------------------------------------------------
  * Create a single Fletcher32-filtered float dataset, then set its one chunk's
- * stored size to 0 to trigger the checksum-length underflow.
+ * stored size to 2 (smaller than the 4-byte checksum) to trigger the
+ * checksum-length underflow.
  *-------------------------------------------------------------------------
  */
 static int
