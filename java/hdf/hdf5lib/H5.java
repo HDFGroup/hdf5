@@ -274,7 +274,7 @@ import org.slf4j.LoggerFactory;
  * This code is the called by Java programs to access the entry points of the HDF5 library. Each routine wraps
  * a single HDF5 entry point, generally with the arguments and return codes analogous to the C interface.
  *
- * @see H5, C-API
+ * @ref H5, C-API
  *
  * @ref H5_UG, User Guide
  *
@@ -832,7 +832,7 @@ public class H5 implements java.io.Serializable {
      * An HDF5 attribute is a small metadata object describing the nature and/or intended usage of a primary
      *data object. A primary data object may be a dataset, group, or committed datatype.
      *
-     * @see H5A, C-API
+     * @ref H5A, C-API
      *
      * @ref H5A_UG, User Guide
      **/
@@ -3529,7 +3529,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @defgroup JH5D Java Datasets (H5D) Interface
      *
-     * @see H5D, C-API
+     * @ref H5D, C-API
      *
      * @ref H5D_UG, User Guide
      **/
@@ -5964,7 +5964,7 @@ public class H5 implements java.io.Serializable {
      *
      * @defgroup JH5E Java Error (H5E) Interface
      *
-     * @see H5E, C-API
+     * @ref H5E, C-API
      *
      * @ref H5E_UG, User Guide
      */
@@ -6578,7 +6578,7 @@ public class H5 implements java.io.Serializable {
      *
      * @defgroup JH5ES Java Event Set (H5ES) Interface
      *
-     * @see H5ES, C-API
+     * @ref H5ES, C-API
      *
      * @ref H5ES_UG, User Guide
      */
@@ -6608,7 +6608,7 @@ public class H5 implements java.io.Serializable {
      *
      * @defgroup JH5F Java File (H5F) Interface
      *
-     * @see H5F, C-API
+     * @ref H5F, C-API
      *
      * @ref H5F_UG, User Guide
      */
@@ -7636,7 +7636,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @defgroup JH5G Java Group (H5G) Interface
      *
-     * @see H5G, C-API
+     * @ref H5G, C-API
      *
      * @ref H5G_UG, User Guide
      **/
@@ -8634,7 +8634,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @defgroup JH5I Java Identifier (H5I) Interface
      *
-     * @see H5I, C-API
+     * @ref H5I, C-API
      *
      * @ref H5I_UG, User Guide
      **/
@@ -9037,7 +9037,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @defgroup JH5L Java Link (H5L) Interface
      *
-     * @see H5L, C-API
+     * @ref H5L, C-API
      *
      * @ref H5L_UG, User Guide
      **/
@@ -9999,7 +9999,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @defgroup JH5O Java Object (H5O) Interface
      *
-     * @see H5O, C-API
+     * @ref H5O, C-API
      *
      * @ref H5O_UG, User Guide
      **/
@@ -11308,7 +11308,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @defgroup JH5P Java Property List (H5P) Interface
      *
-     * @see H5P, C-API
+     * @ref H5P, C-API
      *
      * @ref H5P_UG, User Guide
      **/
@@ -18063,7 +18063,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @defgroup JH5PL Java Plugin (H5PL) Interface
      *
-     * @see H5PL, C-API
+     * @ref H5PL, C-API
      *
      * @ref H5PL_UG, User Guide
      **/
@@ -18353,7 +18353,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @defgroup JH5R Java Reference (H5R) Interface
      *
-     * @see H5R, C-API
+     * @ref H5R, C-API
      *
      * @ref H5R_UG, User Guide
      * @deprecated As of HDF5 1.12.0 in favor of H5Rcreate_object(), H5Rcreate_region() and H5Rcreate_attr()
