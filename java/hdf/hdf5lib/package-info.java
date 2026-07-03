@@ -76,7 +76,7 @@
  * in the C. Functions that return a value or else FAIL are declared the equivalent to the C function.
  * However, in most
  * cases the Java method will raise an exception instead of returning an error code.
- * @see @ref ERRORS.
+ * See also @ref ERRORS.
  * <p>
  * Java does not support pass by reference of arguments, so arguments that are returned through <b>OUT</b>
  * parameters

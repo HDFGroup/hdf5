@@ -92,7 +92,7 @@ import org.slf4j.LoggerFactory;
  * This code is the called by Java programs to access the entry points of the HDF5 library. Each routine wraps
  * a single HDF5 entry point, generally with the arguments and return codes analogous to the C interface.
  * <p>
- * For details of the HDF5 library, @see @ref RM
+ * For details of the HDF5 library, see also @ref RM
  * <hr>
  * <p>
  * <b>Mapping of arguments for Java</b>
@@ -147,7 +147,7 @@ import org.slf4j.LoggerFactory;
  * rather than just return <i>int</i> as in the C. Functions that return a value are declared
  * equivalent to the C function.
  * However, in most cases the Java method will raise an exception instead of returning an error code.
- * @see @ref ERRORS.
+ * See also @ref ERRORS.
  * <p>
  * Java does not support pass by reference of arguments, so arguments that are returned through <b>OUT</b>
  * parameters must be wrapped in an object or array. The Java API for HDF consistently wraps arguments in
@@ -263,7 +263,7 @@ import org.slf4j.LoggerFactory;
  *          @ref ERRORS hdf.hdf5lib.HDF5Exception<br />
  *          <a href="https://hdfgroup.org/HDF5/">HDF5</a>
  *
- * For details of the HDF5 library, @see @ref RM
+ * For details of the HDF5 library, see also @ref RM
  */
 
 /**
