@@ -251,7 +251,7 @@ import org.slf4j.LoggerFactory;
  *
  * @see H5, C-API
  *
- * @see @ref H5_UG, User Guide
+ * @ref H5_UG, User Guide
  *
  */
 public class H5 implements java.io.Serializable {
@@ -644,7 +644,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5A, C-API
      *
-     * @see @ref H5A_UG, User Guide
+     * @ref H5A_UG, User Guide
      **/
 
     /**
@@ -2459,7 +2459,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5D, C-API
      *
-     * @see @ref H5D_UG, User Guide
+     * @ref H5D_UG, User Guide
      **/
 
     /**
@@ -4242,7 +4242,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5E, C-API
      *
-     * @see @ref H5E_UG, User Guide
+     * @ref H5E_UG, User Guide
      */
 
     /**
@@ -4664,7 +4664,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5ES, C-API
      *
-     * @see @ref H5ES_UG, User Guide
+     * @ref H5ES_UG, User Guide
      */
 
     // /////// unimplemented ////////
@@ -4694,7 +4694,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5F, C-API
      *
-     * @see @ref H5F_UG, User Guide
+     * @ref H5F_UG, User Guide
      */
 
     /**
@@ -5436,7 +5436,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5G, C-API
      *
-     * @see @ref H5G_UG, User Guide
+     * @ref H5G_UG, User Guide
      **/
 
     /**
@@ -6051,7 +6051,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5I, C-API
      *
-     * @see @ref H5I_UG, User Guide
+     * @ref H5I_UG, User Guide
      **/
 
     /**
@@ -6320,7 +6320,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5L, C-API
      *
-     * @see @ref H5L_UG, User Guide
+     * @ref H5L_UG, User Guide
      **/
 
     /**
@@ -6859,7 +6859,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5O, C-API
      *
-     * @see @ref H5O_UG, User Guide
+     * @ref H5O_UG, User Guide
      **/
 
     /**
@@ -7732,7 +7732,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5P, C-API
      *
-     * @see @ref H5P_UG, User Guide
+     * @ref H5P_UG, User Guide
      **/
 
     /**
@@ -11891,7 +11891,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5PL, C-API
      *
-     * @see @ref H5PL_UG, User Guide
+     * @ref H5PL_UG, User Guide
      **/
 
     /**
@@ -12048,7 +12048,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5R, C-API
      *
-     * @see @ref H5R_UG, User Guide
+     * @ref H5R_UG, User Guide
      **/
 
     private synchronized static native int H5Rcreate(byte[] ref, long loc_id, String name, int ref_type,
@@ -12654,7 +12654,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5S, C-API
      *
-     * @see @ref H5S_UG, User Guide
+     * @ref H5S_UG, User Guide
      **/
 
     /**
@@ -13644,7 +13644,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5T, C-API
      *
-     * @see @ref H5T_UG, User Guide
+     * @ref H5T_UG, User Guide
      **/
 
     /**
@@ -15413,7 +15413,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5VL, C-API
      *
-     * @see @ref H5VL_UG, User Guide
+     * @ref H5VL_UG, User Guide
      **/
 
     /**
@@ -15605,7 +15605,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5Z, C-API
      *
-     * @see @ref H5Z_UG, User Guide
+     * @ref H5Z_UG, User Guide
      **/
 
     /**
