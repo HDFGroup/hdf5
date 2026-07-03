@@ -24,6 +24,8 @@ jobs:
         contents: write # In order to allow EndBug/add-and-commit to commit changes
     steps:
     - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      with:
+        persist-credentials: false # Prevents tokens from being written to Git config files
 
     - name: Fix C and Java formatting issues detected by clang-format
       uses: DoozyX/clang-format-lint-action@bcb4eb2cb0d707ee4f3e5cc3b456eb075f12cf73 # v0.20
