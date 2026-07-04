@@ -28,7 +28,7 @@ public interface H5O_iterate_t extends H5O_iterate2_t.Function {
      *
      *  application callback for each group
      *
-     *  @param loc_id    the ID for the group or dataset being iterated over
+     *  @param obj       the ID for the group or dataset being iterated over
      *  @param name      the name of the current object
      *  @param info      the object's "info" struct
      *  @param op_data   the operator data passed in to H5Oiterate
