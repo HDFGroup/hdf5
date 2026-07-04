@@ -1046,10 +1046,13 @@ H5C__load_entry(H5F_t *f,
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "can't retrieve image size");
     assert(len > 0);
 
-    /* Check for possible speculative read off the end of the file */
-    if (type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG)
+    /* Check for possible reads off the end of the file before allocating */
+    if (type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG) {
         if (H5C__verify_len_eoa(f, type, addr, &len, false) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "invalid len with respect to EOA");
+    }
+    else if (H5C__verify_len_eoa(f, type, addr, &len, true) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "invalid len with respect to EOA");
 
     /* Allocate the buffer for reading the on-disk entry image */
     if (NULL == (image = (uint8_t *)H5MM_malloc(len + H5C_IMAGE_EXTRA_SPACE)))

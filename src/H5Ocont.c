@@ -23,9 +23,11 @@
  */
 
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
+#define H5F_FRIEND     /*suppress error about including H5Fpkg   */
 
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5Fpkg.h"      /* Files				*/
 #include "H5FLprivate.h" /* Free Lists				*/
 #include "H5Opkg.h"      /* Object headers			*/
 
@@ -105,6 +107,12 @@ H5O__cont_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
     H5F_DECODE_LENGTH(f, p, cont->size);
     if (cont->size == 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid continuation chunk size (0)");
+    if (!H5_addr_defined(cont->addr))
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid continuation chunk address");
+    if (H5_addr_overflow(cont->addr, cont->size))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "continuation chunk address plus size overflows");
+    if (H5_addr_gt(cont->addr + cont->size, H5F_get_eoa(f, H5FD_MEM_OHDR)))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "continuation chunk address plus size exceeds file eoa");
 
     /* Set return value */
     ret_value = cont;
