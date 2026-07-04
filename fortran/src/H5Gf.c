@@ -9,7 +9,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -20,128 +20,6 @@
 
 #include "H5f90.h"
 #include "H5Eprivate.h"
-
-/****if* H5Gf/h5gcreate_c
- * NAME
- *  h5gcreate_c
- * PURPOSE
- *  Call H5Gcreate to create a group
- * INPUTS
- *  loc_id - file or group identifier
- *  name - name of the group
- *  namelen - name length
- *  size_hint - length of names in the group
- * OUTPUTS
- *  grp_id - group identifier
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 5, 1999
- * HISTORY
- *  Changed to call H5Gcreate2 because H5Gcreate flip-flops and
- *  H5Gcreate1 can be compiled out of the library
- *  QAK - 2007/08/23
- * SOURCE
- */
-int_f
-h5gcreate_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size_hint, hid_t_f *grp_id,
-            hid_t_f *lcpl_id, hid_t_f *gcpl_id, hid_t_f *gapl_id)
-/******/
-{
-    hid_t c_gcpl_id = -1; /* Group creation property list */
-    char *c_name    = NULL;
-    hid_t c_grp_id;
-    int_f ret_value = -1;
-
-    /*
-     * Convert FORTRAN name to C name
-     */
-    if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        goto DONE;
-
-    /*
-     * Call H5Gcreate function.
-     */
-    if (*size_hint == (size_t_f)OBJECT_NAMELEN_DEFAULT_F) {
-        c_grp_id = H5Gcreate2((hid_t)*loc_id, c_name, (hid_t)*lcpl_id, (hid_t)*gcpl_id, (hid_t)*gapl_id);
-    }
-    else {
-        /* Create the group creation property list */
-        if ((c_gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
-            goto DONE;
-
-        /* Set the local heap size hint */
-        if (H5Pset_local_heap_size_hint(c_gcpl_id, (size_t)*size_hint) < 0)
-            goto DONE;
-
-        /* Create the group */
-        c_grp_id = H5Gcreate2((hid_t)*loc_id, c_name, H5P_DEFAULT, c_gcpl_id, H5P_DEFAULT);
-    }
-    if (c_grp_id < 0)
-        goto DONE;
-
-    /* Everything OK, set values to return */
-    *grp_id   = (hid_t_f)c_grp_id;
-    ret_value = 0;
-
-DONE:
-    if (c_gcpl_id > 0)
-        H5Pclose(c_gcpl_id);
-    if (c_name)
-        HDfree(c_name);
-    return ret_value;
-}
-
-/****if* H5Gf/h5gopen_c
- * NAME
- *  h5gopen_c
- * PURPOSE
- *  Call H5Gopen to open a dataset
- * INPUTS
- *  loc_id - file or group identifier
- *  name - name of the group
- *  namelen - name length
- *  gapl_id - Group access property list identifier
- * OUTPUTS
- *  grp_id - group identifier
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 5, 1999
- *
- * SOURCE
- */
-int_f
-h5gopen_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *gapl_id, hid_t_f *grp_id)
-/******/
-{
-    char *c_name = NULL;
-    hid_t c_grp_id;
-    int   ret_value = -1;
-
-    /*
-     * Convert FORTRAN name to C name
-     */
-    if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        goto DONE;
-
-    /*
-     * Call H5Gopen function.
-     */
-    if ((c_grp_id = H5Gopen2((hid_t)*loc_id, c_name, (hid_t)*gapl_id)) < 0)
-        goto DONE;
-
-    /* Everything OK, set values to return */
-    *grp_id   = (hid_t_f)c_grp_id;
-    ret_value = 0;
-
-DONE:
-    if (c_name)
-        HDfree(c_name);
-    return ret_value;
-}
 
 /****if* H5Gf/h5gget_obj_info_idx_c
  * NAME
@@ -160,9 +38,6 @@ DONE:
  *  obj_type - type of the object
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 5, 1999
  * SOURCE
  */
 int_f
@@ -190,7 +65,7 @@ h5gget_obj_info_idx_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *idx, _f
      */
     c_obj_namelen = (size_t)*obj_namelen;
     if (c_obj_namelen)
-        if (NULL == (c_obj_name = (char *)HDmalloc(c_obj_namelen + 1)))
+        if (NULL == (c_obj_name = (char *)malloc(c_obj_namelen + 1)))
             goto DONE;
 
     /* Get a temporary group ID for the group to query */
@@ -222,9 +97,9 @@ DONE:
         H5Gclose(gid);
 
     if (c_obj_name)
-        HDfree(c_obj_name);
+        free(c_obj_name);
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 
@@ -241,9 +116,6 @@ DONE:
  *  nmemebers - number of members
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 5, 1999
  * SOURCE
  */
 int_f
@@ -269,33 +141,7 @@ h5gn_members_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *nmembers)
 
 DONE:
     if (c_name)
-        HDfree(c_name);
-    return ret_value;
-}
-
-/****if* H5Gf/h5gclose_c
- * NAME
- *  h5gclose_c
- * PURPOSE
- *  Call H5Gclose to close the group
- * INPUTS
- *  grp_id - identifier of the group to be closed
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 5, 1999
- * SOURCE
- */
-
-int_f
-h5gclose_c(hid_t_f *grp_id)
-/******/
-{
-    int ret_value = 0;
-
-    if (H5Gclose((hid_t)*grp_id) < 0)
-        ret_value = -1;
+        free(c_name);
     return ret_value;
 }
 
@@ -314,9 +160,6 @@ h5gclose_c(hid_t_f *grp_id)
  *  new_namelen - new_name length
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Mingshi Chen
- *  Friday, August 6, 1999
  * SOURCE
  */
 
@@ -375,9 +218,9 @@ h5glink_c(hid_t_f *loc_id, int_f *link_type, _fcd current_name, int_f *current_n
 
 DONE:
     if (c_current_name)
-        HDfree(c_current_name);
+        free(c_current_name);
     if (c_new_name)
-        HDfree(c_new_name);
+        free(c_new_name);
 
     return ret_value;
 }
@@ -400,9 +243,6 @@ DONE:
  *  new_namelen - new_name length
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, September 25, 2002
  * HISTORY
  *
  * SOURCE
@@ -462,9 +302,9 @@ h5glink2_c(hid_t_f *cur_loc_id, _fcd cur_name, int_f *cur_namelen, int_f *link_t
 
 DONE:
     if (c_cur_name)
-        HDfree(c_cur_name);
+        free(c_cur_name);
     if (c_new_name)
-        HDfree(c_new_name);
+        free(c_new_name);
     return ret_value;
 }
 
@@ -478,9 +318,6 @@ DONE:
  *  name - name of the object to unlink
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Mingshi Chen
- *  Friday, August 6, 1999
  * SOURCE
  */
 
@@ -506,7 +343,7 @@ h5gunlink_c(hid_t_f *loc_id, _fcd name, int_f *namelen)
 
 DONE:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 
@@ -523,9 +360,6 @@ DONE:
  *  dst_namelen - new name length
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Mingshi Chen
- *  Friday, August 6, 1999
  * SOURCE
  */
 
@@ -554,9 +388,9 @@ h5gmove_c(hid_t_f *loc_id, _fcd src_name, int_f *src_namelen, _fcd dst_name, int
 
 DONE:
     if (c_src_name)
-        HDfree(c_src_name);
+        free(c_src_name);
     if (c_dst_name)
-        HDfree(c_dst_name);
+        free(c_dst_name);
     return ret_value;
 }
 
@@ -574,10 +408,6 @@ DONE:
  *  dst_namelen - new name length
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, September 25, 2002
- *
  * SOURCE
  */
 
@@ -607,9 +437,9 @@ h5gmove2_c(hid_t_f *src_loc_id, _fcd src_name, int_f *src_namelen, hid_t_f *dst_
 
 DONE:
     if (c_src_name)
-        HDfree(c_src_name);
+        free(c_src_name);
     if (c_dst_name)
-        HDfree(c_dst_name);
+        free(c_dst_name);
     return ret_value;
 }
 
@@ -627,9 +457,6 @@ DONE:
  *  value - name to be returned
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Mingshi Chen
- *  Friday, August 6, 1999
  * SOURCE
  */
 
@@ -651,9 +478,9 @@ h5gget_linkval_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size, _fc
      *  Allocate buffer to hold name of the value
      */
     if (*size)
-        c_value = (char *)HDmalloc((size_t)*size);
+        c_value = (char *)malloc((size_t)*size);
     if (c_value == NULL) {
-        HDfree(c_name);
+        free(c_name);
         return ret_value;
     }
 
@@ -671,9 +498,9 @@ h5gget_linkval_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size, _fc
 
 DONE:
     if (c_value)
-        HDfree(c_value);
+        free(c_value);
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 
@@ -690,11 +517,6 @@ DONE:
  *  commentlen - new comment length
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Mingshi Chen
- *  Friday, August 6, 1999
- * HISTORY
- *  Elena Pourmal
  * SOURCE
  */
 int_f
@@ -721,9 +543,9 @@ h5gset_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, _fcd comment, int_f
 
 DONE:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     if (c_comment)
-        HDfree(c_comment);
+        free(c_comment);
     return ret_value;
 }
 
@@ -740,9 +562,6 @@ DONE:
  *  comment - the new comment
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Mingshi Chen
- *  Friday, August 6, 1999
  * SOURCE
  */
 int_f
@@ -764,7 +583,7 @@ h5gget_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *bufsize, 
      */
     c_bufsize = (size_t)*bufsize;
     if (c_bufsize) {
-        if (NULL == (c_comment = (char *)HDmalloc(c_bufsize + 1)))
+        if (NULL == (c_comment = (char *)malloc(c_bufsize + 1)))
             goto DONE;
     } /* end if */
 
@@ -782,9 +601,9 @@ h5gget_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *bufsize, 
 
 DONE:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     if (c_comment)
-        HDfree(c_comment);
+        free(c_comment);
     return ret_value;
 }
 
@@ -803,9 +622,6 @@ DONE:
  *  grp_id - group identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 15, 2008
  * SOURCE
  */
 int_f
@@ -835,9 +651,6 @@ done:
  *  gcpl_id - Group creation property list identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 15, 2008
  * SOURCE
  */
 int_f
@@ -850,205 +663,5 @@ h5gget_create_plist_c(hid_t_f *grp_id, hid_t_f *gcpl_id)
         HGOTO_DONE(FAIL);
 
 done:
-    return ret_value;
-}
-
-/****if* H5Gf/h5gget_info_c
- * NAME
- *  h5gget_info_c
- * PURPOSE
- *  Call H5Gget_info
- * INPUTS
- *  group_id - Group identifier
- * OUTPUTS
- *
- *  storage_type - Type of storage for links in group:
- *                             H5G_STORAGE_TYPE_COMPACT: Compact storage
- *                             H5G_STORAGE_TYPE_DENSE: Indexed storage
- *                             H5G_STORAGE_TYPE_SYMBOL_TABLE: Symbol tables, the original HDF5 structure
- *
- *  nlinks - Number of links in group
- *  max_corder - Current maximum creation order value for group
- *  mounted - Whether group has a file mounted on it (0 = false, 1 = true)
- *
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 15, 2008
- * HISTORY
- *
- *  - Added 'mounted' parameter
- *  M. Scot Breitenfeld
- *  July 16, 2008
- * SOURCE
- */
-int_f
-h5gget_info_c(hid_t_f *group_id, int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted)
-/******/
-{
-
-    int_f      ret_value = 0; /* Return value */
-    H5G_info_t ginfo;
-
-    /*
-     * Call H5Gget_info function.
-     */
-    if (H5Gget_info((hid_t)*group_id, &ginfo) < 0)
-        HGOTO_DONE(FAIL);
-
-    /* Unpack the structure */
-
-    *storage_type = (int_f)ginfo.storage_type;
-    *nlinks       = (int_f)ginfo.nlinks;
-    *max_corder   = (int_f)ginfo.max_corder;
-    *mounted      = 0;
-    if (ginfo.mounted)
-        *mounted = 1;
-
-done:
-    return ret_value;
-}
-
-/****if* H5Gf/h5gget_info_by_idx_c
- * NAME
- *  h5gget_info_by_idx_c
- * PURPOSE
- *  Call H5Gget_info_by_idx
- * INPUTS
- *
- *  loc_id - File or group identifier
- *  group_name - Name of group containing group for which information is to be retrieved
- *  group_namelen - name length
- *  index_type - Index type
- *  order - Order of the count in the index
- *  n - Position in the index of the group for which information is retrieved
- *  lapl_id - Link access property list
- * OUTPUTS
- *
- *  storage_type - Type of storage for links in group:
- *                             H5G_STORAGE_TYPE_COMPACT: Compact storage
- *                             H5G_STORAGE_TYPE_DENSE: Indexed storage
- *                             H5G_STORAGE_TYPE_SYMBOL_TABLE: Symbol tables, the original HDF5 structure
- *
- *  nlinks - Number of links in group
- *  max_corder - Current maximum creation order value for group
- *  mounted - Whether group has a file mounted on it (0 = false, 1 = true)
- *
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 18, 2008
- * HISTORY
- *
- *  - Added 'mounted' parameter
- *    M. Scot Breitenfeld
- *    July 16, 2008
- * SOURCE
- */
-int_f
-h5gget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, int_f *index_type,
-                     int_f *order, hsize_t_f *n, hid_t_f *lapl_id, int_f *storage_type, int_f *nlinks,
-                     int_f *max_corder, int_f *mounted)
-/******/
-{
-    char      *c_group_name = NULL; /* Buffer to hold group name C string */
-    int_f      ret_value    = 0;    /* Return value */
-    H5G_info_t ginfo;
-    /*
-     * Convert FORTRAN name to C name
-     */
-    if ((c_group_name = HD5f2cstring(group_name, (size_t)*group_namelen)) == NULL)
-        HGOTO_DONE(FAIL);
-
-    /*
-     * Call H5Gget_info_by_idx function.
-     */
-    if (H5Gget_info_by_idx((hid_t)*loc_id, c_group_name, (H5_index_t)*index_type, (H5_iter_order_t)*order,
-                           (hsize_t)*n, &ginfo, (hid_t)*lapl_id) < 0)
-        HGOTO_DONE(FAIL);
-
-    /* Unpack the structure */
-
-    *storage_type = (int_f)ginfo.storage_type;
-    *nlinks       = (int_f)ginfo.nlinks;
-    *max_corder   = (int_f)ginfo.max_corder;
-    *mounted      = 0;
-    if (ginfo.mounted)
-        *mounted = 1;
-
-done:
-    if (c_group_name)
-        HDfree(c_group_name);
-    return ret_value;
-}
-
-/****if* H5Gf/h5gget_info_by_name_c
- * NAME
- *  h5gget_info_by_name_c
- * PURPOSE
- *  Call H5Gget_info_by_name
- * INPUTS
- *
- *  loc_id - File or group identifier
- *  group_name - Name of group containing group for which information is to be retrieved
- *  group_namelen - name length
- *  lapl_id - Link access property list
- * OUTPUTS
- *
- *  storage_type - Type of storage for links in group:
- *                             H5G_STORAGE_TYPE_COMPACT: Compact storage
- *                             H5G_STORAGE_TYPE_DENSE: Indexed storage
- *                             H5G_STORAGE_TYPE_SYMBOL_TABLE: Symbol tables, the original HDF5 structure
- *
- *  nlinks - Number of links in group
- *  max_corder - Current maximum creation order value for group
- *  mounted - Whether group has a file mounted on it (0 = false, 1 = true)
- *
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 18, 2008
- * HISTORY
- *
- *  - Added 'mounted' parameter
- *    M. Scot Breitenfeld
- *    July 16, 2008
- * SOURCE
- */
-int_f
-h5gget_info_by_name_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, hid_t_f *lapl_id,
-                      int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted)
-/******/
-{
-    char      *c_group_name = NULL; /* Buffer to hold group name C string */
-    int_f      ret_value    = 0;    /* Return value */
-    H5G_info_t ginfo;
-    /*
-     * Convert FORTRAN name to C name
-     */
-    if ((c_group_name = HD5f2cstring(group_name, (size_t)*group_namelen)) == NULL)
-        HGOTO_DONE(FAIL);
-
-    /*
-     * Call H5Gget_info_by_name function.
-     */
-    if (H5Gget_info_by_name((hid_t)*loc_id, c_group_name, &ginfo, (hid_t)*lapl_id) < 0)
-        HGOTO_DONE(FAIL);
-
-    /* Unpack the structure */
-
-    *storage_type = (int_f)ginfo.storage_type;
-    *nlinks       = (int_f)ginfo.nlinks;
-    *max_corder   = (int_f)ginfo.max_corder;
-    *mounted      = 0;
-    if (ginfo.mounted)
-        *mounted = 1;
-
-done:
-    if (c_group_name)
-        HDfree(c_group_name);
     return ret_value;
 }

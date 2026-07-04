@@ -15,7 +15,7 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the COPYING file, which can be found at the root of the source code       *
+!   the LICENSE file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
@@ -380,7 +380,7 @@ CONTAINS
 !>
 !! \ingroup FH5IM
 !!
-!! \brief This function dettaches a palette to an existing image dataset.
+!! \brief This function detaches a palette to an existing image dataset.
 !!
 !! \param loc_id     Location identifier. The identifier may be that of a file or group.
 !! \param image_name The name of the image dataset.

@@ -1,0 +1,31 @@
+
+/** \mainpage notitle
+
+This is the documentation set for HDF5.
+It includes specifications and documentation
+of software and tools developed and maintained by
+<a href="https://www.hdfgroup.org/">The HDF Group</a>. It is impractical to document
+the entire HDF5 ecosystem in one place, and you should also consult the documentation
+sets of the many outstanding community projects.
+
+For a first contact with HDF5, the best place is to have a look at the \link
+GettingStarted getting started \endlink page that shows you how to write and
+compile your first program with HDF5.
+
+The \b main \b documentation is organized by documentation flavor. Most
+technical documentation consists to varying degrees of information related to
+<em>tasks</em>, <em>concepts</em>, or <em>reference</em> material. As its title
+suggests, the \link RM Reference Manual \endlink is 100% reference material,
+while the \link Cookbook \endlink is focused on tasks. The different guide-type
+documents cover a mix of tasks, concepts, and reference, to help a specific
+<em>audience</em> succeed.
+
+\ref release_specific_info
+
+\par Offline reading
+     You can download the hdf5-\<version\>.doxygen.zip file for offline reading from HDF5 <a href="https://github.com/HDFGroup/hdf5/releases">releases</a>.
+
+\par ToDo List
+     There is plenty of \ref todo unfinished business.
+
+*/

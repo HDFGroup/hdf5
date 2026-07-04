@@ -1,0 +1,203 @@
+name: hdf5 dev CI
+
+# Triggers the workflow on a call from another workflow
+on:
+  workflow_call:
+    inputs:
+      cmake_version:
+        description: "3.26.0 or later, latest"
+        required: true
+        type: string
+      thread_safety:
+        description: "TS or empty"
+        required: true
+        type: string
+      concurrent:
+        description: "CC or empty"
+        required: true
+        type: string
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+      save_binary:
+        description: "binary-ext-name or missing"
+        required: false
+        default: "skip"
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+jobs:
+  # A workflow that builds the library and runs all the tests
+  Static_build_and_test:
+    strategy:
+      # The current matrix has one dimensions:
+      #
+      # * config name
+      #
+      # Most configuration information is added via the 'include' mechanism,
+      # which will append the key-value pairs in the configuration where the
+      # names match.
+      matrix:
+        name:
+          - "Windows Static MSVC"
+          - "Ubuntu Static gcc"
+          - "MacOS Static Clang"
+
+        # This is where we list the bulk of the options for each configuration.
+        # The key-value pair values are usually appropriate for being CMake
+        # configure values, so be aware of that.
+
+        include:
+
+          - name: "Windows Static MSVC"
+            ostype: windows
+            os: windows-latest
+            shared: OFF
+            cpp: ON
+            fortran: OFF
+            java: OFF
+            docs: OFF
+            libaecfc: ON
+            localaec: OFF
+            zlibfc: ON
+            localzlib: OFF
+            parallel: OFF
+            mirror_vfd: OFF
+            direct_vfd: OFF
+            ros3_vfd: OFF
+            generator: "-G \"Visual Studio 18 2026\" -A x64"
+            run_tests: true
+
+          - name: "Ubuntu Static gcc"
+            ostype: ubuntu
+            os: ubuntu-latest
+            shared: OFF
+            cpp: ON
+            fortran: ON
+            java: OFF
+            docs: OFF
+            libaecfc: ON
+            localaec: OFF
+            zlibfc: ON
+            localzlib: OFF
+            parallel: OFF
+            mirror_vfd: ON
+            direct_vfd: ON
+            ros3_vfd: OFF
+            generator: "-G Ninja"
+            run_tests: true
+
+          - name: "MacOS Static Clang"
+            ostype: macos
+            os: macos-latest
+            shared: OFF
+            cpp: ON
+            fortran: OFF
+            java: OFF
+            docs: OFF
+            libaecfc: ON
+            localaec: OFF
+            zlibfc: ON
+            localzlib: OFF
+            parallel: OFF
+            mirror_vfd: ON
+            direct_vfd: OFF
+            ros3_vfd: OFF
+            generator: "-G Ninja"
+            run_tests: true
+
+    if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent != 'CC'}}
+    # Sets the job's name from the properties
+    name: "${{ matrix.name }}-${{ inputs.build_mode }}-${{ inputs.thread_safety }}-${{ inputs.concurrent }}"
+
+    # The type of runner that the job will run on
+    runs-on: ${{ matrix.os }}
+
+  # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
+      #Useful for debugging
+      - name: Dump matrix context
+        run: echo '${{ toJSON(matrix) }}'
+
+      - name: Install Dependencies (Linux)
+        run: |
+           sudo apt-get update
+           sudo apt-get install ninja-build graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+        if: matrix.ostype == 'ubuntu'
+
+      # CMake gets libaec from fetchcontent
+
+      - name: Install CMake
+        uses: lukka/get-cmake@f5b8fbb4d77cec1acc5a5f9f0df4beffaf5d98d9 # latest
+        with:
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
+
+      - name: Check CMake Version
+        shell: bash
+        run: |
+          which cmake
+          cmake --version
+
+      - name: Set environment for MSVC (Windows)
+        run: |
+          # Set these environment variables so CMake picks the correct compiler
+          echo "CXX=cl.exe" >> $GITHUB_ENV
+          echo "CC=cl.exe" >> $GITHUB_ENV
+        if:  matrix.ostype == 'windows'
+
+      # CONFIGURE
+      - name: Configure
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            ${{ matrix.generator }} \
+            --log-level=VERBOSE \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DBUILD_SHARED_LIBS:BOOL=OFF \
+            -DBUILD_STATIC_LIBS:BOOL=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS:BOOL=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} \
+            -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} \
+            -DHDF5_BUILD_FORTRAN:BOOL=${{ matrix.fortran }} \
+            -DHDF5_BUILD_JAVA:BOOL=OFF \
+            -DHDF5_BUILD_DOC:BOOL=OFF \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=${{ matrix.zlibfc }} \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=${{ matrix.libaecfc }} \
+            -DLIBAEC_USE_LOCALCONTENT:BOOL=${{ matrix.localaec }} \
+            -DZLIB_USE_LOCALCONTENT:BOOL=${{ matrix.localzlib }} \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
+            -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
+            -DHDF5_PACK_EXAMPLES:BOOL=ON \
+            -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
+            -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
+            $GITHUB_WORKSPACE
+        shell: bash
+
+      # BUILD
+      - name: Build
+        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      # RUN TESTS
+      - name: Run Tests
+        run: ctest . --parallel 2 -C ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+        if: ${{ matrix.run_tests }}
+

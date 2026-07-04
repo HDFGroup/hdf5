@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -28,7 +28,7 @@
 #include "H5VLpkg.h" /* Virtual Object Layer                 */
 
 /* Filename */
-const char *FILENAME[] = {"vol_test_file", NULL};
+static const char *FILENAME[] = {"vol_test_file", NULL};
 
 #define NATIVE_VOL_TEST_GROUP_NAME     "test_group"
 #define NATIVE_VOL_TEST_DATASET_NAME   "test_dataset"
@@ -174,6 +174,9 @@ static const H5VL_class_t reg_opt_vol_g = {
 };
 
 static herr_t fake_get_cap_flags(const void *info, uint64_t *cap_flags);
+static herr_t fake_vol_info_to_str(const void *info, char **str);
+static herr_t fake_vol_str_to_info(const char *str, void **info);
+static herr_t fake_vol_free_info(void *info);
 
 #define FAKE_VOL_NAME  "fake"
 #define FAKE_VOL_VALUE ((H5VL_class_value_t)501)
@@ -193,12 +196,12 @@ static const H5VL_class_t fake_vol_g = {
     NULL,                /* terminate    */
     {
         /* info_cls */
-        (size_t)0, /* size    */
-        NULL,      /* copy    */
-        NULL,      /* compare */
-        NULL,      /* free    */
-        NULL,      /* to_str  */
-        NULL,      /* from_str */
+        (size_t)0,            /* size    */
+        NULL,                 /* copy    */
+        NULL,                 /* compare */
+        fake_vol_free_info,   /* free    */
+        fake_vol_info_to_str, /* to_str  */
+        fake_vol_str_to_info, /* from_str */
     },
     {
         /* wrap_cls */
@@ -514,7 +517,7 @@ reg_opt_link_optional(void *obj, const H5VL_loc_params_t *loc_params, H5VL_optio
         return -1;
     if (loc_params->obj_type != H5I_GROUP)
         return -1;
-    if (HDstrcmp(loc_params->loc_data.loc_by_name.name, ".") != 0)
+    if (strcmp(loc_params->loc_data.loc_by_name.name, ".") != 0)
         return -1;
     if (loc_params->loc_data.loc_by_name.lapl_id != H5P_LINK_ACCESS_DEFAULT)
         return -1;
@@ -557,6 +560,78 @@ reg_opt_datatype_get(void H5_ATTR_UNUSED *obj, H5VL_datatype_get_args_t *args, h
 
     return ret_value;
 } /* end reg_opt_datatype_get() */
+
+/*-------------------------------------------------------------------------
+ * Function:    fake_vol_info_to_str
+ *
+ * Purpose:     Convert the fake VOL info to a string
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+fake_vol_info_to_str(const void *info, char **str)
+{
+    const int    val       = *(const int *)info;
+    const size_t str_size  = 16; /* The size of the string */
+    herr_t       ret_value = SUCCEED;
+
+    /* Verify the info is correct before continuing */
+    if (val != INT_MAX) {
+        printf("The value of info (%d) is incorrect\n", val);
+        return FAIL;
+    }
+
+    /* Allocate the string long enough for the info */
+    if (NULL == (*str = (char *)calloc(1, str_size)))
+        return FAIL;
+
+    snprintf(*str, str_size, "%d", val);
+
+    return ret_value;
+} /* end fake_vol_info_to_str() */
+
+/*-------------------------------------------------------------------------
+ * Function:    fake_vol_str_to_info
+ *
+ * Purpose:     Convert a string to a VOL info
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+fake_vol_str_to_info(const char *str, void **info /*out*/)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    *((int **)info) = (int *)malloc(sizeof(int));
+
+    **((int **)info) = atoi(str);
+
+    return ret_value;
+} /* end fake_vol_str_to_info() */
+
+/*-------------------------------------------------------------------------
+ * Function:    fake_vol_free_info
+ *
+ * Purpose:     Free the memory of a VOL info
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+fake_vol_free_info(void *info)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    if (info)
+        free(info);
+
+    return ret_value;
+} /* end fake_vol_free_info() */
 
 /*-------------------------------------------------------------------------
  * Function:    fake_get_cap_flags
@@ -633,25 +708,25 @@ test_vol_registration(void)
     {
         vol_id = H5VLregister_connector(&fake_vol_g, lapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (H5I_INVALID_HID != vol_id)
         FAIL_PUTS_ERROR("should not be able to register a connector with an incorrect property list");
     if (H5Pclose(lapl_id) < 0)
         TEST_ERROR;
 
     /* Test registering a VOL connector with an incompatible version # */
-    if (NULL == (bad_fake_vol_class = HDmalloc(sizeof(H5VL_class_t))))
+    if (NULL == (bad_fake_vol_class = malloc(sizeof(H5VL_class_t))))
         TEST_ERROR;
-    HDmemcpy(bad_fake_vol_class, &fake_vol_g, sizeof(H5VL_class_t));
+    memcpy(bad_fake_vol_class, &fake_vol_g, sizeof(H5VL_class_t));
     bad_fake_vol_class->version = H5VL_VERSION + 1;
     H5E_BEGIN_TRY
     {
         vol_id = H5VLregister_connector(bad_fake_vol_class, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (H5I_INVALID_HID != vol_id)
         FAIL_PUTS_ERROR("should not be able to register a connector with an incompatible version #");
-    HDfree(bad_fake_vol_class);
+    free(bad_fake_vol_class);
     bad_fake_vol_class = NULL;
 
     /* Load a VOL interface
@@ -715,7 +790,7 @@ test_vol_registration(void)
     {
         ret = H5VLunregister_connector(native_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (FAIL != ret)
         FAIL_PUTS_ERROR("should not be able to unregister the native VOL connector");
 
@@ -729,10 +804,10 @@ error:
         H5Pclose(lapl_id);
         H5Pclose(vipl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (bad_fake_vol_class)
-        HDfree(bad_fake_vol_class);
+        free(bad_fake_vol_class);
 
     return FAIL;
 } /* end test_vol_registration() */
@@ -782,7 +857,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_basic_file_operation(const char *env_h5_drvr)
+test_basic_file_operation(const char *driver_name)
 {
     hid_t fid        = H5I_INVALID_HID;
     hid_t fid_reopen = H5I_INVALID_HID;
@@ -790,6 +865,8 @@ test_basic_file_operation(const char *env_h5_drvr)
     hid_t fapl_id2   = H5I_INVALID_HID;
     hid_t fcpl_id    = H5I_INVALID_HID;
 
+    htri_t      use_locking_env     = FAIL;
+    htri_t      ignore_disabled_env = FAIL;
     char        filename[1024];
     ssize_t     obj_count;
     hid_t       obj_id_list[1];
@@ -819,11 +896,27 @@ test_basic_file_operation(const char *env_h5_drvr)
     if (H5Pset_metadata_read_attempts(fapl_id, 9) < 0)
         TEST_ERROR;
 
-    /* H5Fcreate */
+    /* Similar to the above, make sure the FAPL has an appropriate file locking
+     * setting if the HDF5_USE_FILE_LOCKING environment variable was set so that
+     * the H5Pequal call will work correctly.
+     */
+    h5_check_file_locking_env_var(&use_locking_env, &ignore_disabled_env);
+    if (use_locking_env != FAIL) {
+        bool default_use_locking           = true;
+        bool default_ignore_disabled_locks = true;
+
+        if (H5Pget_file_locking(H5P_DEFAULT, &default_use_locking, &default_ignore_disabled_locks) < 0)
+            TEST_ERROR;
+
+        if (H5Pset_file_locking(fapl_id, (bool)use_locking_env,
+                                (ignore_disabled_env == FAIL) ? default_ignore_disabled_locks
+                                                              : (bool)ignore_disabled_env) < 0)
+            TEST_ERROR;
+    }
+
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
 
-    /* H5Fget_obj_count */
     if ((obj_count = H5Fget_obj_count(fid, H5F_OBJ_FILE)) < 0)
         TEST_ERROR;
     if ((obj_count = H5Fget_obj_count(fid, H5F_OBJ_ALL)) < 0)
@@ -831,85 +924,71 @@ test_basic_file_operation(const char *env_h5_drvr)
     if ((obj_count = H5Fget_obj_count((hid_t)H5F_OBJ_ALL, H5F_OBJ_DATASET)) < 0)
         TEST_ERROR;
 
-    /* H5Fget_obj_ids */
     if ((obj_count = H5Fget_obj_ids(fid, H5F_OBJ_ALL, 2, obj_id_list)) < 0)
         TEST_ERROR;
     if ((obj_count = H5Fget_obj_ids((hid_t)H5F_OBJ_ALL, H5F_OBJ_DATASET, 2, obj_id_list)) < 0)
         TEST_ERROR;
 
     /* Can't compare VFD properties for several VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                  HDstrcmp(env_h5_drvr, "family") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0 &&
-                  HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0 &&
-                  HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0)) {
-        /* H5Fget_access_plist */
+    if ((bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0 &&
+               strcmp(driver_name, "family") != 0 && strcmp(driver_name, "direct") != 0 &&
+               strcmp(driver_name, "core") != 0 && strcmp(driver_name, "core_paged") != 0 &&
+               strcmp(driver_name, "mpio") != 0 && strcmp(driver_name, "splitter") != 0)) {
         if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
             TEST_ERROR;
-        if (H5Pequal(fapl_id, fapl_id2) != TRUE)
+        if (H5Pequal(fapl_id, fapl_id2) != true)
             TEST_ERROR;
         if (H5Pclose(fapl_id2) < 0)
             TEST_ERROR;
     } /* end if */
 
-    /* H5Fget_create_plist */
     if ((fcpl_id = H5Fget_create_plist(fid)) < 0)
         TEST_ERROR;
     if (H5Pclose(fcpl_id) < 0)
         TEST_ERROR;
 
-    /* H5Fget_filesize */
     if (H5Fget_filesize(fid, &file_size) < 0)
         TEST_ERROR;
 
     /* Can't retrieve VFD handle for split / multi / family VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                  HDstrcmp(env_h5_drvr, "family") != 0)) {
-        /* H5Fget_vfd_handle */
+    if ((bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0 &&
+               strcmp(driver_name, "family") != 0)) {
         if (H5Fget_vfd_handle(fid, H5P_DEFAULT, &os_file_handle) < 0)
             TEST_ERROR;
     } /* end if */
 
-    /* H5Fget_intent */
     if (H5Fget_intent(fid, &intent) < 0)
         TEST_ERROR;
 
-    /* H5Fget_info2 */
     if (H5Fget_info2(fid, &finfo) < 0)
         TEST_ERROR;
 
-    /* H5Fget_name */
     if (H5Fget_name(fid, name, 32) < 0)
         TEST_ERROR;
 
-    /* H5Fclear_elink_file_cache */
     if (H5Fclear_elink_file_cache(fid) < 0)
         TEST_ERROR;
 
-    /* H5Fflush */
     if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
         TEST_ERROR;
 
-    /* H5Fclose */
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
-    /* H5Fis_accessible */
     if (H5Fis_accessible(filename, fapl_id) < 0)
         TEST_ERROR;
 
-    /* H5Fopen */
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
 
     /* Can't compare VFD properties for several VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                  HDstrcmp(env_h5_drvr, "family") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0 &&
-                  HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0 &&
-                  HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0)) {
-        /* H5Fget_access_plist */
+    if ((bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0 &&
+               strcmp(driver_name, "family") != 0 && strcmp(driver_name, "direct") != 0 &&
+               strcmp(driver_name, "core") != 0 && strcmp(driver_name, "core_paged") != 0 &&
+               strcmp(driver_name, "mpio") != 0 && strcmp(driver_name, "splitter") != 0)) {
         if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
             TEST_ERROR;
-        if (H5Pequal(fapl_id, fapl_id2) != TRUE)
+        if (H5Pequal(fapl_id, fapl_id2) != true)
             TEST_ERROR;
         if (H5Pclose(fapl_id2) < 0)
             TEST_ERROR;
@@ -919,14 +998,13 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't compare VFD properties for several VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                  HDstrcmp(env_h5_drvr, "family") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0 &&
-                  HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0 &&
-                  HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0)) {
-        /* H5Fget_access_plist */
+    if ((bool)(strcmp(driver_name, "split") != 0 && strcmp(driver_name, "multi") != 0 &&
+               strcmp(driver_name, "family") != 0 && strcmp(driver_name, "direct") != 0 &&
+               strcmp(driver_name, "core") != 0 && strcmp(driver_name, "core_paged") != 0 &&
+               strcmp(driver_name, "mpio") != 0 && strcmp(driver_name, "splitter") != 0)) {
         if ((fapl_id2 = H5Fget_access_plist(fid_reopen)) < 0)
             TEST_ERROR;
-        if (H5Pequal(fapl_id, fapl_id2) != TRUE)
+        if (H5Pequal(fapl_id, fapl_id2) != true)
             TEST_ERROR;
         if (H5Pclose(fapl_id2) < 0)
             TEST_ERROR;
@@ -939,7 +1017,6 @@ test_basic_file_operation(const char *env_h5_drvr)
 
     h5_delete_test_file(FILENAME[0], fapl_id);
 
-    /* H5Pclose */
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
@@ -955,7 +1032,7 @@ error:
         H5Pclose(fapl_id2);
         H5Pclose(fcpl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 
@@ -980,7 +1057,7 @@ test_basic_group_operation(void)
     hid_t      gcpl_id = H5I_INVALID_HID;
     char       filename[1024];
     H5G_info_t info;
-    hbool_t    driver_is_parallel;
+    bool       driver_is_parallel;
 
     TESTING("Basic VOL group operations");
 
@@ -991,27 +1068,22 @@ test_basic_group_operation(void)
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
 
-    /* H5Gcreate */
     if ((gid = H5Gcreate2(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    /* H5Gget_create_plist */
     if ((gcpl_id = H5Gget_create_plist(gid)) < 0)
         TEST_ERROR;
     if (H5Pclose(gcpl_id) < 0)
         TEST_ERROR;
 
-    /* H5Gget_info */
     if (H5Gget_info(gid, &info) < 0)
         TEST_ERROR;
     if (H5Gget_info(fid, &info) < 0)
         TEST_ERROR;
 
-    /* H5Gget_info_by_name */
     if (H5Gget_info_by_name(fid, NATIVE_VOL_TEST_GROUP_NAME, &info, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    /* H5Gget_info_by_idx */
     if (H5Gget_info_by_idx(fid, "/", H5_INDEX_NAME, H5_ITER_NATIVE, 0, &info, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
@@ -1022,19 +1094,15 @@ test_basic_group_operation(void)
         if (H5Gflush(gid) < 0)
             TEST_ERROR;
 
-    /* H5Gclose */
     if (H5Gclose(gid) < 0)
         TEST_ERROR;
 
-    /* H5Gopen */
     if ((gid = H5Gopen2(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    /* H5Gcreate_anon */
     if ((gid_a = H5Gcreate_anon(fid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    /* H5Grefresh */
     if (H5Grefresh(gid) < 0)
         TEST_ERROR;
 
@@ -1047,7 +1115,6 @@ test_basic_group_operation(void)
 
     h5_delete_test_file(FILENAME[0], fapl_id);
 
-    /* H5Pclose */
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
@@ -1062,7 +1129,7 @@ error:
         H5Pclose(fapl_id);
         H5Pclose(gcpl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 
@@ -1098,7 +1165,7 @@ test_basic_dataset_operation(void)
     haddr_t            offset;
     H5D_space_status_t status;
 
-    hbool_t driver_is_parallel;
+    bool driver_is_parallel;
 
     int in_buf[N_ELEMENTS];
     int out_buf[N_ELEMENTS];
@@ -1118,7 +1185,6 @@ test_basic_dataset_operation(void)
         out_buf[i] = 0;
     }
 
-    /* H5Dcreate */
     curr_dims = 0;
     if ((sid = H5Screate_simple(1, &curr_dims, &max_dims)) < 0)
         TEST_ERROR;
@@ -1131,7 +1197,6 @@ test_basic_dataset_operation(void)
                           H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    /* H5Dcreate_anon */
     if ((did_a = H5Dcreate_anon(fid, H5T_NATIVE_INT, sid, dcpl_id, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
@@ -1140,7 +1205,6 @@ test_basic_dataset_operation(void)
     if (H5Pclose(dcpl_id) < 0)
         TEST_ERROR;
 
-    /* H5Dset_extent */
     curr_dims = N_ELEMENTS;
     if (H5Dset_extent(did, &curr_dims) < 0)
         TEST_ERROR;
@@ -1152,35 +1216,28 @@ test_basic_dataset_operation(void)
         if (H5Dflush(did) < 0)
             TEST_ERROR;
 
-    /* H5Dwrite */
     if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, in_buf) < 0)
         TEST_ERROR;
 
-    /* H5Drefresh */
     if (H5Drefresh(did) < 0)
         TEST_ERROR;
 
-    /* H5Dclose */
     if (H5Dclose(did) < 0)
         TEST_ERROR;
     if (H5Dclose(did_a) < 0)
         TEST_ERROR;
 
-    /* H5Dopen */
     if ((did = H5Dopen2(fid, NATIVE_VOL_TEST_DATASET_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    /* H5Dget_space */
     if ((sid = H5Dget_space(did)) < 0)
         TEST_ERROR;
     if (H5Sclose(sid) < 0)
         TEST_ERROR;
 
-    /* H5Dget_space_status */
     if (H5Dget_space_status(did, &status) < 0)
         TEST_ERROR;
 
-    /* H5Dget_type */
     if ((tid = H5Dget_type(did)) < 0)
         TEST_ERROR;
     if (H5Tclose(tid) < 0)
@@ -1192,13 +1249,11 @@ test_basic_dataset_operation(void)
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
-    /* H5Dget_create_plist */
     if ((dcpl_id = H5Dget_create_plist(did)) < 0)
         TEST_ERROR;
     if (H5Pclose(dcpl_id) < 0)
         TEST_ERROR;
 
-    /* H5Dget_access_plist */
     if ((dapl_id = H5Dget_access_plist(did)) < 0)
         TEST_ERROR;
     if (H5Pclose(dapl_id) < 0)
@@ -1216,7 +1271,6 @@ test_basic_dataset_operation(void)
     if (HADDR_UNDEF != (offset = H5Dget_offset(did)))
         TEST_ERROR;
 
-    /* H5Dread */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, out_buf) < 0)
         TEST_ERROR;
 
@@ -1231,7 +1285,6 @@ test_basic_dataset_operation(void)
 
     h5_delete_test_file(FILENAME[0], fapl_id);
 
-    /* H5Pclose */
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
@@ -1250,7 +1303,7 @@ error:
         H5Pclose(dapl_id);
         H5Pclose(dcpl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 
@@ -1296,44 +1349,35 @@ test_basic_attribute_operation(void)
     if ((sid = H5Screate_simple(1, &dims, &dims)) < 0)
         TEST_ERROR;
 
-    /* H5Acreate */
     if ((aid = H5Acreate2(fid, NATIVE_VOL_TEST_ATTRIBUTE_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT,
                           H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    /* H5Awrite */
     if (H5Awrite(aid, H5T_NATIVE_INT, &data_in) < 0)
         TEST_ERROR;
 
-    /* H5Aread */
     if (H5Aread(aid, H5T_NATIVE_INT, &data_out) < 0)
         TEST_ERROR;
     if (data_in != data_out)
         TEST_ERROR;
 
-    /* H5Aclose */
     if (H5Aclose(aid) < 0)
         TEST_ERROR;
 
-    /* H5Aopen */
     if ((aid = H5Aopen(fid, NATIVE_VOL_TEST_ATTRIBUTE_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
     if (H5Aclose(aid) < 0)
         TEST_ERROR;
 
-    /* H5Adelete */
     if (H5Adelete(fid, NATIVE_VOL_TEST_ATTRIBUTE_NAME) < 0)
         TEST_ERROR;
 
-    /* H5Acreate_by_name */
     if ((aid_name = H5Acreate_by_name(fid, NATIVE_VOL_TEST_GROUP_NAME, NATIVE_VOL_TEST_ATTRIBUTE_NAME,
                                       H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
-    /* H5Aclose */
     if (H5Aclose(aid_name) < 0)
         TEST_ERROR;
 
-    /* H5Adelete_by_name */
     if (H5Adelete_by_name(fid, NATIVE_VOL_TEST_GROUP_NAME, NATIVE_VOL_TEST_ATTRIBUTE_NAME, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
@@ -1346,7 +1390,6 @@ test_basic_attribute_operation(void)
 
     h5_delete_test_file(FILENAME[0], fapl_id);
 
-    /* H5Pclose */
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
@@ -1363,7 +1406,7 @@ error:
         H5Aclose(aid);
         H5Aclose(aid_name);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 
@@ -1400,23 +1443,19 @@ test_basic_object_operation(void)
     if ((gid = H5Gcreate2(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    /* H5Oget_info */
     if (H5Oget_info3(fid, &object_info, H5O_INFO_ALL) < 0)
         TEST_ERROR;
 
     //! [H5Oget_info_by_name3_snip]
 
-    /* H5Oget_info_by_name */
     if (H5Oget_info_by_name3(fid, NATIVE_VOL_TEST_GROUP_NAME, &object_info, H5O_INFO_ALL, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
     //! [H5Oget_info_by_name3_snip]
 
-    /* H5Oexists_by_name */
-    if (H5Oexists_by_name(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT) != TRUE)
+    if (H5Oexists_by_name(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT) != true)
         TEST_ERROR;
 
-    /* H5Oopen/close */
     if ((oid = H5Oopen(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
     if (H5Oclose(oid) < 0)
@@ -1429,7 +1468,6 @@ test_basic_object_operation(void)
 
     h5_delete_test_file(FILENAME[0], fapl_id);
 
-    /* H5Pclose */
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
@@ -1443,7 +1481,7 @@ error:
         H5Pclose(fapl_id);
         H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 
@@ -1477,7 +1515,6 @@ test_basic_link_operation(void)
     if ((gid = H5Gcreate2(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    /* H5Lcreate_hard */
     if (H5Lcreate_hard(fid, "/", gid, NATIVE_VOL_TEST_HARD_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
@@ -1485,18 +1522,15 @@ test_basic_link_operation(void)
     if (H5Lcreate_soft("/", fid, NATIVE_VOL_TEST_SOFT_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    /* H5Lexists */
     if (H5Lexists(gid, NATIVE_VOL_TEST_HARD_LINK_NAME, H5P_DEFAULT) < 0)
         TEST_ERROR;
     if (H5Lexists(fid, NATIVE_VOL_TEST_SOFT_LINK_NAME, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    /* H5Lcopy */
     if (H5Lcopy(gid, NATIVE_VOL_TEST_HARD_LINK_NAME, fid, NATIVE_VOL_TEST_COPY_LINK_NAME, H5P_DEFAULT,
                 H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    /* H5Lmove */
     if (H5Lmove(fid, NATIVE_VOL_TEST_COPY_LINK_NAME, gid, NATIVE_VOL_TEST_MOVE_LINK_NAME, H5P_DEFAULT,
                 H5P_DEFAULT) < 0)
         TEST_ERROR;
@@ -1508,7 +1542,6 @@ test_basic_link_operation(void)
 
     h5_delete_test_file(FILENAME[0], fapl_id);
 
-    /* H5Pclose */
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
@@ -1522,7 +1555,7 @@ error:
         H5Fclose(gid);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 
@@ -1540,13 +1573,13 @@ error:
 static herr_t
 test_basic_datatype_operation(void)
 {
-    hid_t   fid      = H5I_INVALID_HID;
-    hid_t   fapl_id  = H5I_INVALID_HID;
-    hid_t   tid      = H5I_INVALID_HID;
-    hid_t   tid_anon = H5I_INVALID_HID;
-    hid_t   tcpl_id  = H5I_INVALID_HID;
-    char    filename[1024];
-    hbool_t driver_is_parallel;
+    hid_t fid      = H5I_INVALID_HID;
+    hid_t fapl_id  = H5I_INVALID_HID;
+    hid_t tid      = H5I_INVALID_HID;
+    hid_t tid_anon = H5I_INVALID_HID;
+    hid_t tcpl_id  = H5I_INVALID_HID;
+    char  filename[1024];
+    bool  driver_is_parallel;
 
     TESTING("Basic VOL datatype operations");
 
@@ -1559,7 +1592,6 @@ test_basic_datatype_operation(void)
     if ((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
         TEST_ERROR;
 
-    /* H5Tcommit */
     if (H5Tcommit2(fid, NATIVE_VOL_TEST_DATATYPE_NAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
@@ -1570,23 +1602,18 @@ test_basic_datatype_operation(void)
         if (H5Tflush(tid) < 0)
             TEST_ERROR;
 
-    /* H5Trefresh */
     if (H5Trefresh(tid) < 0)
         TEST_ERROR;
 
-    /* H5Tclose */
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
-    /* H5Topen */
     if ((tid = H5Topen2(fid, NATIVE_VOL_TEST_DATATYPE_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    /* H5Tget_create_plist */
     if ((tcpl_id = H5Tget_create_plist(tid)) < 0)
         TEST_ERROR;
 
-    /* H5Tcommit_anon */
     if ((tid_anon = H5Tcopy(H5T_NATIVE_INT)) < 0)
         TEST_ERROR;
     if (H5Tcommit_anon(fid, tid_anon, H5P_DEFAULT, H5P_DEFAULT) < 0)
@@ -1603,7 +1630,6 @@ test_basic_datatype_operation(void)
 
     h5_delete_test_file(FILENAME[0], fapl_id);
 
-    /* H5Pclose */
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
@@ -1619,7 +1645,7 @@ error:
         H5Tclose(tid);
         H5Tclose(tid_anon);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 
@@ -1655,10 +1681,11 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
     int                  fake_obj, fake_arg;
     int                  op_val = -1, op_val2 = -1;
     int                  find_op_val;
-    herr_t               ret = SUCCEED;
+    H5CX_node_t          api_ctx = {{0}, NULL}; /* API context node to push */
+    herr_t               ret     = SUCCEED;
 
     /* Test registering optional operation */
-    HDsnprintf(op_name, sizeof(op_name), "%s-op1", subcls_name);
+    snprintf(op_name, sizeof(op_name), "%s-op1", subcls_name);
     if (H5VLregister_opt_operation(subcls, op_name, &op_val) < 0)
         TEST_ERROR;
 
@@ -1677,7 +1704,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
         TEST_ERROR;
 
     /* Test registering second optional operation */
-    HDsnprintf(op_name, sizeof(op_name), "%s-op2", subcls_name);
+    snprintf(op_name, sizeof(op_name), "%s-op2", subcls_name);
     if (H5VLregister_opt_operation(subcls, op_name, &op_val2) < 0)
         TEST_ERROR;
 
@@ -1698,15 +1725,15 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
     /* Push a new API context on the stack */
     /* (Necessary for the named datatype construction routines) */
     if (H5VL_SUBCLS_DATATYPE == subcls)
-        H5CX_push();
+        H5CX_push(&api_ctx);
 
     /* Create fake object on fake VOL connector */
-    if (H5I_INVALID_HID == (obj_id = H5VL_register_using_vol_id(id_type, &fake_obj, fake_vol_id, TRUE)))
+    if (H5I_INVALID_HID == (obj_id = H5VL__register_using_vol_id_test(id_type, &fake_obj, fake_vol_id)))
         TEST_ERROR;
 
     /* Pop the API context off the stack */
     if (H5VL_SUBCLS_DATATYPE == subcls)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     /* Attempt to issue operation on fake VOL connector */
     fake_obj            = -1;
@@ -1722,7 +1749,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
             ret = (*reg_opt_op.obj_op)(__FILE__, __func__, __LINE__, obj_id, &vol_cb_args, H5P_DEFAULT,
                                        H5ES_NONE);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (FAIL != ret)
         FAIL_PUTS_ERROR("should not be able to perform an optional operation with a NULL callback");
     if ((-1) != fake_obj)
@@ -1753,16 +1780,17 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
 
     /* Push a new API context on the stack */
     /* (Necessary for the named datatype construction routines) */
+    memset(&api_ctx, 0, sizeof(api_ctx));
     if (H5VL_SUBCLS_DATATYPE == subcls)
-        H5CX_push();
+        H5CX_push(&api_ctx);
 
     /* Create fake object on reg_opt VOL connector */
-    if (H5I_INVALID_HID == (obj_id = H5VL_register_using_vol_id(id_type, &fake_obj, reg_opt_vol_id, TRUE)))
+    if (H5I_INVALID_HID == (obj_id = H5VL__register_using_vol_id_test(id_type, &fake_obj, reg_opt_vol_id)))
         TEST_ERROR;
 
     /* Pop the API context off the stack */
     if (H5VL_SUBCLS_DATATYPE == subcls)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     /* Issue first operation */
     fake_obj            = -1;
@@ -1881,7 +1909,7 @@ test_register_opt_operation(void)
     {
         ret = H5VLregister_opt_operation(H5VL_SUBCLS_NONE, "fail", &op_val);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (FAIL != ret)
         FAIL_PUTS_ERROR("should not be able to register an optional operation for the 'NONE' VOL subclass");
     if ((-1) != op_val)
@@ -1890,7 +1918,7 @@ test_register_opt_operation(void)
     {
         ret = H5VLregister_opt_operation(H5VL_SUBCLS_INFO, "fail2", &op_val);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (FAIL != ret)
         FAIL_PUTS_ERROR("should not be able to register an optional operation for the 'INFO' VOL subclass");
     if ((-1) != op_val)
@@ -1899,7 +1927,7 @@ test_register_opt_operation(void)
     {
         ret = H5VLregister_opt_operation(H5VL_SUBCLS_WRAP, "fail3", &op_val);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (FAIL != ret)
         FAIL_PUTS_ERROR("should not be able to register an optional operation for the 'WRAP' VOL subclass");
     if ((-1) != op_val)
@@ -1908,7 +1936,7 @@ test_register_opt_operation(void)
     {
         ret = H5VLregister_opt_operation(H5VL_SUBCLS_BLOB, "fail4", &op_val);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (FAIL != ret)
         FAIL_PUTS_ERROR("should not be able to register an optional operation for the 'BLOB' VOL subclass");
     if ((-1) != op_val)
@@ -1917,7 +1945,7 @@ test_register_opt_operation(void)
     {
         ret = H5VLregister_opt_operation(H5VL_SUBCLS_TOKEN, "fail5", &op_val);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (FAIL != ret)
         FAIL_PUTS_ERROR("should not be able to register an optional operation for the 'TOKEN' VOL subclass");
     if ((-1) != op_val)
@@ -1928,7 +1956,7 @@ test_register_opt_operation(void)
     {
         ret = H5VLregister_opt_operation(H5VL_SUBCLS_FILE, "fail6", NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (FAIL != ret)
         FAIL_PUTS_ERROR("should not be able to register an optional operation with a NULL 'op_val'");
 
@@ -1937,7 +1965,7 @@ test_register_opt_operation(void)
     {
         ret = H5VLfind_opt_operation(H5VL_SUBCLS_DATASET, "fail", &op_val);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (FAIL != ret)
         FAIL_PUTS_ERROR("should not be able to find a non-existent optional operation");
 
@@ -1946,7 +1974,7 @@ test_register_opt_operation(void)
     {
         ret = H5VLunregister_opt_operation(H5VL_SUBCLS_DATASET, "fail");
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (FAIL != ret)
         FAIL_PUTS_ERROR("should not be able to unregister a non-existent optional operation");
 
@@ -1979,7 +2007,7 @@ error:
         H5VLunregister_connector(fake_vol_id);
         H5VLunregister_connector(reg_opt_vol_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_register_opt_operation() */
@@ -2002,10 +2030,11 @@ test_async_vol_props(void)
     hid_t                    fapl_id = H5I_INVALID_HID;
     hid_t                    vol_id  = H5I_INVALID_HID;
     H5VL_pass_through_info_t passthru_info;
-    uint64_t                 cap_flags    = H5VL_CAP_FLAG_NONE;
     char                    *conn_env_str = NULL;
 
     TESTING("Async VOL props");
+
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
 
     /* Retrieve the file access property for testing */
     fapl_id = h5_fileaccess();
@@ -2017,9 +2046,9 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Override possible environment variable & re-initialize default VOL connector */
-    conn_env_str = HDgetenv(HDF5_VOL_CONNECTOR);
-    if (conn_env_str) {
-        if (NULL == (conn_env_str = HDstrdup(conn_env_str)))
+    conn_env_str = getenv(HDF5_VOL_CONNECTOR);
+    if (conn_env_str && *conn_env_str) {
+        if (NULL == (conn_env_str = strdup(conn_env_str)))
             TEST_ERROR;
         if (HDunsetenv(HDF5_VOL_CONNECTOR) < 0)
             TEST_ERROR;
@@ -2030,11 +2059,11 @@ test_async_vol_props(void)
     /* Test query w/default VOL, which should indicate no async, since native connector
      * doesn't support async.
      */
-    if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
         FAIL_STACK_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_ASYNC) > 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC) > 0)
         TEST_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) == 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_NATIVE_FILES) == 0)
         TEST_ERROR;
 
     /* Close FAPL */
@@ -2046,7 +2075,7 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Set environment variable to use 'fake async' connector & re-init default connector */
-    if (HDsetenv(HDF5_VOL_CONNECTOR, "fake_async", TRUE) < 0)
+    if (HDsetenv(HDF5_VOL_CONNECTOR, "fake_async", true) < 0)
         TEST_ERROR;
     if (H5VL__reparse_def_vol_conn_variable_test() < 0)
         TEST_ERROR;
@@ -2055,12 +2084,12 @@ test_async_vol_props(void)
     fapl_id = h5_fileaccess();
 
     /* Test query w/fake async VOL, which should succeed */
-    cap_flags = H5VL_CAP_FLAG_NONE;
-    if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
         FAIL_STACK_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC) == 0)
         TEST_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
         TEST_ERROR;
 
     /* Reset environment variable & re-init default connector */
@@ -2081,12 +2110,12 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Test query w/fake async VOL, which should succeed */
-    cap_flags = H5VL_CAP_FLAG_NONE;
-    if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
         FAIL_STACK_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC) == 0)
         TEST_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
         TEST_ERROR;
 
     /* Stack the [internal] passthrough VOL connector on top of the fake async connector */
@@ -2096,12 +2125,12 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Test query w/passthru -> fake async VOL, which should succeed */
-    cap_flags = H5VL_CAP_FLAG_NONE;
-    if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
         FAIL_STACK_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC) == 0)
         TEST_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
         TEST_ERROR;
 
     /* Unregister the fake async VOL ID */
@@ -2114,9 +2143,9 @@ test_async_vol_props(void)
 
     /* Restore environment variable, if there was one */
     if (conn_env_str) {
-        if (HDsetenv(HDF5_VOL_CONNECTOR, conn_env_str, TRUE) < 0)
+        if (HDsetenv(HDF5_VOL_CONNECTOR, conn_env_str, true) < 0)
             TEST_ERROR;
-        HDfree(conn_env_str);
+        free(conn_env_str);
 
         if (H5VL__reparse_def_vol_conn_variable_test() < 0)
             TEST_ERROR;
@@ -2132,8 +2161,8 @@ error:
         H5Pclose(fapl_id);
         H5VLunregister_connector(vol_id);
     }
-    H5E_END_TRY;
-    HDfree(conn_env_str);
+    H5E_END_TRY
+    free(conn_env_str);
 
     return FAIL;
 } /* end test_async_vol_props() */
@@ -2150,12 +2179,14 @@ error:
 static herr_t
 test_vol_cap_flags(void)
 {
-    hid_t                    fapl_id       = H5I_INVALID_HID;
-    hid_t                    vol_id        = H5I_INVALID_HID;
-    uint64_t                 vol_cap_flags = H5VL_CAP_FLAG_NONE;
+    hid_t                    fapl_id = H5I_INVALID_HID;
+    hid_t                    vol_id  = H5I_INVALID_HID;
+    char                    *vol_env = NULL;
     H5VL_pass_through_info_t passthru_info;
 
-    TESTING("VOL capacity flags");
+    TESTING("VOL capability flags");
+
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
 
     /* Register a fake VOL */
     if ((vol_id = H5VLregister_connector(&fake_vol_g, H5P_DEFAULT)) < 0)
@@ -2168,14 +2199,37 @@ test_vol_cap_flags(void)
         TEST_ERROR;
 
     /* Verify the correctness of the VOL capacity flags */
-    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags) < 0)
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
         TEST_ERROR;
 
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC))
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC))
         TEST_ERROR;
 
-    if (vol_cap_flags & H5VL_CAP_FLAG_ATTR_BASIC)
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)
         TEST_ERROR;
+
+    /* If using the native VOL by default, check flags again with H5P_DEFAULT */
+    vol_env = getenv(HDF5_VOL_CONNECTOR);
+    if (!vol_env || (0 == strcmp(vol_env, "native"))) {
+        H5VL_connector_t *connector;
+        hid_t             connector_id;
+
+        if (H5Pget_vol_id(H5P_DEFAULT, &connector_id) < 0)
+            TEST_ERROR;
+        if (NULL == (connector = H5I_object(connector_id)))
+            TEST_ERROR;
+
+        vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
+
+        if (H5Pget_vol_cap_flags(H5P_DEFAULT, &vol_cap_flags_g) < 0)
+            TEST_ERROR;
+
+        if (vol_cap_flags_g != connector->cls->cap_flags)
+            TEST_ERROR;
+
+        if (H5VLclose(connector_id) < 0)
+            TEST_ERROR;
+    }
 
     /* Stack the [internal] passthrough VOL connector on top of the fake connector */
     passthru_info.under_vol_id   = vol_id;
@@ -2185,15 +2239,15 @@ test_vol_cap_flags(void)
         FAIL_STACK_ERROR;
 
     /* Verify the correctness of the VOL capacity flags */
-    vol_cap_flags = H5VL_CAP_FLAG_NONE;
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
 
-    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags) < 0)
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
         TEST_ERROR;
 
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC))
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC))
         TEST_ERROR;
 
-    if (vol_cap_flags & H5VL_CAP_FLAG_ATTR_BASIC)
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)
         TEST_ERROR;
 
     if (H5Pclose(fapl_id) < 0)
@@ -2212,7 +2266,7 @@ error:
         H5VLunregister_connector(vol_id);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_vol_cap_flags() */
@@ -2237,14 +2291,14 @@ test_get_vol_name(void)
 
     TESTING("getting connector name");
 
-    conn_env_str = HDgetenv(HDF5_VOL_CONNECTOR);
-    if (NULL == (conn_env_str = HDgetenv("HDF5_VOL_CONNECTOR")))
+    conn_env_str = getenv(HDF5_VOL_CONNECTOR);
+    if (!conn_env_str || *conn_env_str == '\0')
         conn_env_str = "native";
 
     /* Skip the connectors other than the native and pass_through connector */
-    if (HDstrcmp(conn_env_str, "native") && HDstrcmp(conn_env_str, "pass_through")) {
+    if (strcmp(conn_env_str, "native") && strcmp(conn_env_str, "pass_through")) {
         SKIPPED();
-        HDprintf("    only test the native or internal pass_through connector\n");
+        printf("    only test the native or internal pass_through connector\n");
         return SUCCEED;
     }
 
@@ -2260,8 +2314,8 @@ test_get_vol_name(void)
         TEST_ERROR;
 
     /* When comparing the pass_through connector, ignore the rest information (under_vol=0;under_info={}) */
-    if ((!HDstrcmp(conn_env_str, "native") && HDstrcmp(vol_name, "native")) ||
-        (!HDstrcmp(conn_env_str, "pass_through") && HDstrcmp(vol_name, "pass_through")))
+    if ((!strcmp(conn_env_str, "native") && strcmp(vol_name, "native")) ||
+        (!strcmp(conn_env_str, "pass_through") && strcmp(vol_name, "pass_through")))
         TEST_ERROR;
 
     if (H5Fclose(file_id) < 0)
@@ -2282,7 +2336,7 @@ error:
         H5Fclose(file_id);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_get_vol_name() */
@@ -2330,7 +2384,7 @@ test_wrap_register(void)
     {
         wrap_id = H5VLwrap_register(vol_obj, H5I_GROUP);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (H5I_INVALID_HID != wrap_id)
         FAIL_PUTS_ERROR("should not be able to call H5VLwrap_register in an application");
@@ -2357,10 +2411,81 @@ error:
         H5Fclose(file_id);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_wrap_register() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_info_to_str()
+ *
+ * Purpose:     Tests the conversion between a VOL info and a string
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_info_to_str(void)
+{
+    hid_t fapl_id  = H5I_INVALID_HID;
+    hid_t vol_id   = H5I_INVALID_HID;
+    int   info     = INT_MAX;
+    char *ret_str  = NULL;
+    int  *ret_info = NULL;
+
+    TESTING("conversion between a VOL info and a string");
+
+    /* Register a fake VOL */
+    if ((vol_id = H5VLregister_connector(&fake_vol_g, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_vol(fapl_id, vol_id, NULL) < 0)
+        TEST_ERROR;
+
+    /* Serialize the VOL info into a string */
+    if (H5VLconnector_info_to_str(&info, vol_id, &ret_str) < 0)
+        TEST_ERROR;
+
+    /* Parse the string and construct it into a VOL info */
+    if (H5VLconnector_str_to_info(ret_str, vol_id, (void **)(&ret_info)) < 0)
+        TEST_ERROR;
+
+    if (*ret_info != info)
+        FAIL_PUTS_ERROR("the returned VOL info doesn't match the original info");
+
+    /* Free the VOL info being returned */
+    if (H5VLfree_connector_info(vol_id, ret_info) < 0)
+        TEST_ERROR;
+
+    /* Free the string being returned */
+    if (ret_str)
+        free(ret_str);
+
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    /* Unregister the fake VOL ID */
+    if (H5VLunregister_connector(vol_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5VLunregister_connector(vol_id);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY
+
+    return FAIL;
+} /* end test_info_to_str() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_query_optional
@@ -2436,7 +2561,7 @@ error:
         H5Fclose(file_id);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_query_optional() */
@@ -2453,22 +2578,20 @@ error:
 int
 main(void)
 {
-    const char *env_h5_drvr; /* File driver value from environment */
+    const char *driver_name; /* File driver value from environment */
     int         nerrors = 0;
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
-    h5_reset();
+    h5_test_init();
 
-    HDputs("Testing basic Virtual Object Layer (VOL) functionality.");
+    puts("Testing basic Virtual Object Layer (VOL) functionality.");
 
     nerrors += test_vol_registration() < 0 ? 1 : 0;
     nerrors += test_register_opt_operation() < 0 ? 1 : 0;
     nerrors += test_native_vol_init() < 0 ? 1 : 0;
-    nerrors += test_basic_file_operation(env_h5_drvr) < 0 ? 1 : 0;
+    nerrors += test_basic_file_operation(driver_name) < 0 ? 1 : 0;
     nerrors += test_basic_group_operation() < 0 ? 1 : 0;
     nerrors += test_basic_dataset_operation() < 0 ? 1 : 0;
     nerrors += test_basic_attribute_operation() < 0 ? 1 : 0;
@@ -2479,15 +2602,16 @@ main(void)
     nerrors += test_vol_cap_flags() < 0 ? 1 : 0;
     nerrors += test_get_vol_name() < 0 ? 1 : 0;
     nerrors += test_wrap_register() < 0 ? 1 : 0;
+    nerrors += test_info_to_str() < 0 ? 1 : 0;
     nerrors += test_query_optional() < 0 ? 1 : 0;
 
     if (nerrors) {
-        HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
-        HDexit(EXIT_FAILURE);
+        printf("***** %d Virtual Object Layer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        exit(EXIT_FAILURE);
     }
 
-    HDputs("All Virtual Object Layer (VOL) tests passed.");
+    puts("All Virtual Object Layer (VOL) tests passed.");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 } /* end main() */

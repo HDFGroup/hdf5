@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -18,9 +18,14 @@
 #include "hdf5.h"
 
 #ifdef H5_HAVE_FILTER_DEFLATE
-#include <zlib.h>
+#if defined(H5_HAVE_ZLIB_H) && !defined(H5_ZLIB_HEADER)
+#define H5_ZLIB_HEADER "zlib.h"
+#endif
+#if defined(H5_ZLIB_HEADER)
+#include H5_ZLIB_HEADER /* "zlib.h" */
+#endif
 
-#if !defined(WIN32) && !defined(__MINGW32__)
+#if !defined(WIN32) && !defined(__MINGW32__) && !defined(_WIN32)
 
 #include <errno.h>
 #include <fcntl.h>
@@ -28,6 +33,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <sys/types.h>
 
 #ifdef H5_HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -37,15 +43,11 @@
 #include <sys/time.h>
 #endif
 
-#ifdef H5_HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-
 #ifdef H5_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
-const char *FILENAME[] = {"direct_write", "unix.raw", NULL};
+static const char *FILENAME[] = {"direct_write", "unix.raw", NULL};
 
 /*
  * Print the current location on the standard output stream.
@@ -242,7 +244,13 @@ create_file(hid_t fapl_id)
         z_dst     = (Bytef *)outbuf[i];
 
         /* Perform compression from the source to the destination buffer */
+#if defined(H5_HAVE_ZLIBNG_H)
+        size_t z_dst_nbytes_sz = (size_t)z_dst_nbytes;
+        ret                    = zng_compress2(z_dst, &z_dst_nbytes_sz, z_src, z_src_nbytes, aggression);
+        z_dst_nbytes           = (uLongf)z_dst_nbytes_sz;
+#else
         ret = compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+#endif
 
         data_size[i] = (size_t)z_dst_nbytes;
         total_size += data_size[i];
@@ -272,7 +280,7 @@ error:
         H5Pclose(cparms);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -338,7 +346,7 @@ error:
         H5Pclose(dxpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -403,7 +411,7 @@ error:
         H5Pclose(dxpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -495,7 +503,7 @@ error:
         H5Pclose(dxpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -587,7 +595,7 @@ error:
         H5Pclose(dxpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -693,7 +701,7 @@ main(void)
 int
 main(void)
 {
-    HDfprintf(stdout, "No compression IO performance because zlib was not configured\n");
+    fprintf(stdout, "No compression IO performance because zlib was not configured\n");
     return EXIT_SUCCESS;
 }
 

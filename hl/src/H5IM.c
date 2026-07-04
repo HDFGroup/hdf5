@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -20,14 +20,8 @@
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: June 13, 2001
- *
  * Comments:
  *  based on HDF5 Image and Palette Specification
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -72,19 +66,12 @@ H5IMmake_image_8bit(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t 
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: June 13, 2001
- *
  * Comments:
  *  based on HDF5 Image and Palette Specification
  *
  * Interlace Mode Dimensions in the Dataspace
  * INTERLACE_PIXEL [height][width][pixel components]
  * INTERLACE_PLANE [pixel components][height][width]
- *
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -103,13 +90,13 @@ H5IMmake_image_24bit(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t
 
     /* Initialize the image dimensions */
 
-    if (HDstrncmp(interlace, "INTERLACE_PIXEL", 15) == 0) {
+    if (strncmp(interlace, "INTERLACE_PIXEL", 15) == 0) {
         /* Number of color planes is defined as the third dimension */
         dims[0] = height;
         dims[1] = width;
         dims[2] = IMAGE24_RANK;
     }
-    else if (HDstrncmp(interlace, "INTERLACE_PLANE", 15) == 0) {
+    else if (strncmp(interlace, "INTERLACE_PLANE", 15) == 0) {
         /* Number of color planes is defined as the first dimension */
         dims[0] = IMAGE24_RANK;
         dims[1] = height;
@@ -148,13 +135,7 @@ H5IMmake_image_24bit(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t
  *
  * Return:
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: May 28, 2001
- *
  * Comments:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -177,7 +158,7 @@ find_palette(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const
      * cause the iterator to immediately return that positive value,
      * indicating short-circuit success
      */
-    if (HDstrncmp(name, "PALETTE", 7) == 0)
+    if (strncmp(name, "PALETTE", 7) == 0)
         ret = H5_ITER_STOP;
 
     return ret;
@@ -190,14 +171,8 @@ find_palette(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const
  *
  * Return: Success: 1, Failure: 0
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: May 11, 2001
- *
  * Comments:
  *  The function uses H5Aiterate2 with the operator function find_palette
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -216,14 +191,8 @@ H5IM_find_palette(hid_t loc_id)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: July 25, 2001
- *
  * Comments:
  *  based on HDF5 Image and Palette Specification
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -292,13 +261,13 @@ H5IMget_image_info(hid_t loc_id, const char *dset_name, hsize_t *width, hsize_t 
     if (has_attr > 0) {
         /* This is a 24 bit image */
 
-        if (HDstrncmp(interlace, "INTERLACE_PIXEL", 15) == 0) {
+        if (strncmp(interlace, "INTERLACE_PIXEL", 15) == 0) {
             /* Number of color planes is defined as the third dimension */
             *height = dims[0];
             *width  = dims[1];
             *planes = dims[2];
         }
-        else if (HDstrncmp(interlace, "INTERLACE_PLANE", 15) == 0) {
+        else if (strncmp(interlace, "INTERLACE_PLANE", 15) == 0) {
             /* Number of color planes is defined as the first dimension */
             *planes = dims[0];
             *height = dims[1];
@@ -383,14 +352,8 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: June 13, 2001
- *
  * Comments:
  *  based on HDF5 Image and Palette Specification
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -430,14 +393,8 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: May 01, 2001
- *
  * Comments:
  *  based on HDF5 Image and Palette Specification
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -482,18 +439,12 @@ H5IMmake_palette(hid_t loc_id, const char *pal_name, const hsize_t *pal_dims, co
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: May 01, 2001
- *
  * Comments:
  *  based on HDF5 Image and Palette Specification
  *
  *  An image (dataset) within an HDF5 file may optionally specify an array of
  *  palettes to be viewed with. The dataset will have an attribute
  *  which contains an array of object reference pointers which refer to palettes in the file.
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -587,7 +538,7 @@ H5IMlink_palette(hid_t loc_id, const char *image_name, const char *pal_name)
 
         dim_ref = (hsize_t)n_refs + 1;
 
-        refbuf = (hobj_ref_t *)HDmalloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
+        refbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
 
         if (H5Aread(aid, atid, refbuf) < 0)
             goto out;
@@ -628,7 +579,7 @@ H5IMlink_palette(hid_t loc_id, const char *image_name, const char *pal_name)
         if (H5Aclose(aid) < 0)
             goto out;
 
-        HDfree(refbuf);
+        free(refbuf);
 
     } /* ok_pal > 0 */
 
@@ -649,18 +600,12 @@ out:
 /*-------------------------------------------------------------------------
  * Function: H5IMunlink_palette
  *
- * Purpose: This function dettaches a palette from an existing image dataset
+ * Purpose: This function detaches a palette from an existing image dataset
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: September 10, 2001
- *
  * Comments:
  *  based on HDF5 Image and Palette Specification
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -750,13 +695,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: July 22, 2001
- *
  * Comments:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -835,14 +774,8 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: July 22, 2001
- *
  * Comments:
  *  based on HDF5 Image and Palette Specification
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -891,7 +824,7 @@ H5IMget_palette_info(hid_t loc_id, const char *image_name, int pal_number, hsize
 
         dim_ref = (hsize_t)n_refs;
 
-        refbuf = (hobj_ref_t *)HDmalloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
+        refbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
 
         if (H5Aread(aid, atid, refbuf) < 0)
             goto out;
@@ -920,7 +853,7 @@ H5IMget_palette_info(hid_t loc_id, const char *image_name, int pal_number, hsize
             goto out;
         if (H5Aclose(aid) < 0)
             goto out;
-        HDfree(refbuf);
+        free(refbuf);
     }
 
     /* Close the image dataset. */
@@ -944,14 +877,8 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: August 30, 2001
- *
  * Comments:
  *  based on HDF5 Image and Palette Specification
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1000,7 +927,7 @@ H5IMget_palette(hid_t loc_id, const char *image_name, int pal_number, unsigned c
 
         dim_ref = (hsize_t)n_refs;
 
-        refbuf = (hobj_ref_t *)HDmalloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
+        refbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
 
         if (H5Aread(aid, atid, refbuf) < 0)
             goto out;
@@ -1022,7 +949,7 @@ H5IMget_palette(hid_t loc_id, const char *image_name, int pal_number, unsigned c
             goto out;
         if (H5Aclose(aid) < 0)
             goto out;
-        HDfree(refbuf);
+        free(refbuf);
     }
 
     /* Close the image dataset. */
@@ -1040,20 +967,109 @@ out:
 }
 
 /*-------------------------------------------------------------------------
+ * Function: H5IM__class_attr_equals
+ *
+ * Purpose: Opens dset_name under loc_id, reads its "CLASS" attribute
+ *          (fixed-length or variable-length string), and returns 1 if the
+ *          value equals expected, 0 if it does not, or -1 on error.
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5IM__class_attr_equals(hid_t loc_id, const char *dset_name, const char *expected)
+{
+    hid_t   did       = H5I_INVALID_HID;
+    hid_t   atid      = H5I_INVALID_HID;
+    hid_t   aid       = H5I_INVALID_HID;
+    char   *attr_data = NULL;
+    htri_t  has_class;
+    htri_t  isvl;
+    hsize_t storage_size;
+    htri_t  ret = -1;
+
+    if (dset_name == NULL)
+        return -1;
+
+    if ((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
+        goto out;
+
+    if ((has_class = H5Aexists(did, "CLASS")) < 0)
+        goto out;
+
+    if (has_class == 0) {
+        ret = 0;
+        goto out;
+    }
+
+    if ((aid = H5Aopen(did, "CLASS", H5P_DEFAULT)) < 0)
+        goto out;
+
+    if ((atid = H5Aget_type(aid)) < 0)
+        goto out;
+
+    if (H5T_STRING != H5Tget_class(atid))
+        goto out;
+
+    if ((isvl = H5Tis_variable_str(atid)) < 0)
+        goto out;
+
+    if (isvl > 0) {
+        /* Variable-length string: H5Aread allocates the string and writes
+         * its address into the buffer; use H5Treclaim to free it after use. */
+        char *vl_str = NULL;
+        hid_t sid    = H5I_INVALID_HID;
+
+        if ((sid = H5Aget_space(aid)) < 0)
+            goto out;
+        if (H5Aread(aid, atid, &vl_str) < 0) {
+            H5Sclose(sid);
+            goto out;
+        }
+        ret = (vl_str && strcmp(vl_str, expected) == 0) ? 1 : 0;
+        H5Treclaim(atid, sid, H5P_DEFAULT, &vl_str);
+        H5Sclose(sid);
+    }
+    else {
+        if (H5T_STR_NULLTERM != H5Tget_strpad(atid))
+            goto out;
+
+        if ((storage_size = H5Aget_storage_size(aid)) == 0)
+            goto out;
+
+        /* Allocate one extra byte; force null termination in case the attribute
+         * was written without honoring H5T_STR_NULLTERM. */
+        attr_data = (char *)malloc((size_t)storage_size * sizeof(char) + 1);
+        if (attr_data == NULL)
+            goto out;
+
+        if (H5Aread(aid, atid, attr_data) < 0)
+            goto out;
+        attr_data[storage_size] = '\0';
+
+        ret = (strcmp(attr_data, expected) == 0) ? 1 : 0;
+    }
+
+out:
+    free(attr_data);
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(atid);
+        H5Aclose(aid);
+        H5Dclose(did);
+    }
+    H5E_END_TRY
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
  * Function: H5IMis_image
  *
  * Purpose:
  *
  * Return: true, false, fail
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: August 30, 2001
- *
  * Comments:
  *  based on HDF5 Image and Palette Specification
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1061,83 +1077,7 @@ out:
 herr_t
 H5IMis_image(hid_t loc_id, const char *dset_name)
 {
-    hid_t   did;
-    htri_t  has_class;
-    hid_t   atid;
-    hid_t   aid = -1;
-    char   *attr_data;    /* Name of attribute */
-    hsize_t storage_size; /* Size of storage for attribute */
-    herr_t  ret;
-
-    /* check the arguments */
-    if (dset_name == NULL)
-        return -1;
-
-    /* Assume initially fail condition */
-    ret = -1;
-
-    /* Open the dataset. */
-    if ((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
-        return -1;
-
-    /* Try to find the attribute "CLASS" on the dataset */
-    if ((has_class = H5Aexists(did, "CLASS")) < 0)
-        goto out;
-
-    if (has_class == 0) {
-        H5Dclose(did);
-        return 0;
-    }
-    else {
-
-        if ((aid = H5Aopen(did, "CLASS", H5P_DEFAULT)) < 0)
-            goto out;
-
-        if ((atid = H5Aget_type(aid)) < 0)
-            goto out;
-
-        /* check to make sure attribute is a string */
-        if (H5T_STRING != H5Tget_class(atid))
-            goto out;
-
-        /* check to make sure string is null-terminated */
-        if (H5T_STR_NULLTERM != H5Tget_strpad(atid))
-            goto out;
-
-        /* allocate buffer large enough to hold string */
-        if ((storage_size = H5Aget_storage_size(aid)) == 0)
-            goto out;
-
-        attr_data = (char *)HDmalloc((size_t)storage_size * sizeof(char) + 1);
-        if (attr_data == NULL)
-            goto out;
-
-        if (H5Aread(aid, atid, attr_data) < 0)
-            goto out;
-
-        if (HDstrncmp(attr_data, IMAGE_CLASS, MIN(HDstrlen(IMAGE_CLASS), HDstrlen(attr_data))) == 0)
-            ret = 1;
-        else
-            ret = 0;
-
-        HDfree(attr_data);
-
-        if (H5Tclose(atid) < 0)
-            goto out;
-
-        if (H5Aclose(aid) < 0)
-            goto out;
-    }
-
-    /* Close the dataset. */
-    if (H5Dclose(did) < 0)
-        return -1;
-
-    return ret;
-
-out:
-    H5Dclose(did);
-    return -1;
+    return H5IM__class_attr_equals(loc_id, dset_name, IMAGE_CLASS);
 }
 
 /*-------------------------------------------------------------------------
@@ -1147,14 +1087,8 @@ out:
  *
  * Return: true, false, fail
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: August 30, 2001
- *
  * Comments:
  *  based on HDF5 Image and Palette Specification
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1162,81 +1096,5 @@ out:
 herr_t
 H5IMis_palette(hid_t loc_id, const char *dset_name)
 {
-    hid_t   did;
-    htri_t  has_class;
-    hid_t   atid;
-    hid_t   aid = -1;
-    char   *attr_data;    /* Name of attribute */
-    hsize_t storage_size; /* Size of storage for attribute */
-    herr_t  ret;
-
-    /* check the arguments */
-    if (dset_name == NULL)
-        return -1;
-
-    /* Assume initially fail condition */
-    ret = -1;
-
-    /* Open the dataset. */
-    if ((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
-        return -1;
-
-    /* Try to find the attribute "CLASS" on the dataset */
-    if ((has_class = H5Aexists(did, "CLASS")) < 0)
-        goto out;
-
-    if (has_class == 0) {
-        H5Dclose(did);
-        return 0;
-    }
-    else {
-
-        if ((aid = H5Aopen(did, "CLASS", H5P_DEFAULT)) < 0)
-            goto out;
-
-        if ((atid = H5Aget_type(aid)) < 0)
-            goto out;
-
-        /* check to make sure attribute is a string */
-        if (H5T_STRING != H5Tget_class(atid))
-            goto out;
-
-        /* check to make sure string is null-terminated */
-        if (H5T_STR_NULLTERM != H5Tget_strpad(atid))
-            goto out;
-
-        /* allocate buffer large enough to hold string */
-        if ((storage_size = H5Aget_storage_size(aid)) == 0)
-            goto out;
-
-        attr_data = (char *)HDmalloc((size_t)storage_size * sizeof(char) + 1);
-        if (attr_data == NULL)
-            goto out;
-
-        if (H5Aread(aid, atid, attr_data) < 0)
-            goto out;
-
-        if (HDstrncmp(attr_data, PALETTE_CLASS, MIN(HDstrlen(PALETTE_CLASS), HDstrlen(attr_data))) == 0)
-            ret = 1;
-        else
-            ret = 0;
-
-        HDfree(attr_data);
-
-        if (H5Tclose(atid) < 0)
-            goto out;
-
-        if (H5Aclose(aid) < 0)
-            goto out;
-    }
-
-    /* Close the dataset. */
-    if (H5Dclose(did) < 0)
-        return -1;
-
-    return ret;
-
-out:
-    H5Dclose(did);
-    return -1;
+    return H5IM__class_attr_equals(loc_id, dset_name, PALETTE_CLASS);
 }

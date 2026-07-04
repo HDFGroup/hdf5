@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -13,10 +13,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5HLcache.c
- *              Feb  5 2008
- *              Quincey Koziol
  *
- * Purpose:     Implement local heap metadata cache methods.
+ * Purpose:     Implement local heap metadata cache methods
  *
  *-------------------------------------------------------------------------
  */
@@ -30,12 +28,14 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions            */
-#include "H5Eprivate.h"  /* Error handling               */
-#include "H5HLpkg.h"     /* Local Heaps                  */
-#include "H5MFprivate.h" /* File memory management       */
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5WBprivate.h" /* Wrapped Buffers              */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Metadata Cache                           */
+#include "H5Cprivate.h"  /* Cache                                    */
+#include "H5Eprivate.h"  /* Error Handling                           */
+#include "H5Fprivate.h"  /* Files                                    */
+#include "H5FLprivate.h" /* Free Lists                               */
+#include "H5HLpkg.h"     /* Local Heaps                              */
+#include "H5MMprivate.h" /* Memory Management                        */
 
 /****************/
 /* Local Macros */
@@ -67,21 +67,22 @@
 static herr_t H5HL__cache_prefix_get_initial_load_size(void *udata, size_t *image_len);
 static herr_t H5HL__cache_prefix_get_final_load_size(const void *_image, size_t image_len, void *udata,
                                                      size_t *actual_len);
-static void  *H5HL__cache_prefix_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5HL__cache_prefix_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5HL__cache_prefix_image_len(const void *thing, size_t *image_len);
 static herr_t H5HL__cache_prefix_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5HL__cache_prefix_free_icr(void *thing);
 
 /* Local heap data block */
 static herr_t H5HL__cache_datablock_get_initial_load_size(void *udata, size_t *image_len);
-static void  *H5HL__cache_datablock_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5HL__cache_datablock_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5HL__cache_datablock_image_len(const void *thing, size_t *image_len);
 static herr_t H5HL__cache_datablock_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5HL__cache_datablock_notify(H5C_notify_action_t action, void *_thing);
 static herr_t H5HL__cache_datablock_free_icr(void *thing);
 
 /* Header deserialization */
-static herr_t H5HL__hdr_deserialize(H5HL_t *heap, const uint8_t *image, H5HL_cache_prfx_ud_t *udata);
+static herr_t H5HL__hdr_deserialize(H5HL_t *heap, const uint8_t *image, size_t len,
+                                    H5HL_cache_prfx_ud_t *udata);
 
 /* Free list de/serialization */
 static herr_t H5HL__fl_deserialize(H5HL_t *heap);
@@ -137,38 +138,39 @@ const H5AC_class_t H5AC_LHEAP_DBLK[1] = {{
 /*-------------------------------------------------------------------------
  * Function:    H5HL__hdr_deserialize()
  *
- * Purpose:	Decode a local heap's header
+ * Purpose:     Decode a local heap's header
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
- *
- * Programmer:  Quincey Koziol
- *              December 15, 2016
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL__hdr_deserialize(H5HL_t *heap, const uint8_t *image, H5HL_cache_prfx_ud_t *udata)
+H5HL__hdr_deserialize(H5HL_t *heap, const uint8_t *image, size_t len, H5HL_cache_prfx_ud_t *udata)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    const uint8_t *p_end     = image + len - 1; /* End of image buffer */
+    herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
-    /* Sanity checks */
-    HDassert(heap);
-    HDassert(image);
-    HDassert(udata);
+    assert(heap);
+    assert(image);
+    assert(udata);
 
-    /* Check magic number */
-    if (HDmemcmp(image, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad local heap signature")
+    /* Magic number */
+    if (H5_IS_BUFFER_OVERFLOW(image, H5_SIZEOF_MAGIC, p_end))
+        HGOTO_ERROR(H5E_HEAP, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+    if (memcmp(image, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad local heap signature");
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
+    if (H5_IS_BUFFER_OVERFLOW(image, 1, p_end))
+        HGOTO_ERROR(H5E_HEAP, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
     if (H5HL_VERSION != *image++)
-        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "wrong version number in local heap")
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "wrong version number in local heap");
 
     /* Reserved */
+    if (H5_IS_BUFFER_OVERFLOW(image, 3, p_end))
+        HGOTO_ERROR(H5E_HEAP, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
     image += 3;
 
     /* Store the prefix's address & length */
@@ -176,15 +178,27 @@ H5HL__hdr_deserialize(H5HL_t *heap, const uint8_t *image, H5HL_cache_prfx_ud_t *
     heap->prfx_size = udata->sizeof_prfx;
 
     /* Heap data size */
-    H5F_DECODE_LENGTH_LEN(image, heap->dblk_size, udata->sizeof_size);
+    if (H5_IS_BUFFER_OVERFLOW(image, udata->sizeof_size, p_end))
+        HGOTO_ERROR(H5E_HEAP, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+    H5_DECODE_LENGTH_LEN(image, heap->dblk_size, udata->sizeof_size);
 
     /* Free list head */
-    H5F_DECODE_LENGTH_LEN(image, heap->free_block, udata->sizeof_size);
+    if (H5_IS_BUFFER_OVERFLOW(image, udata->sizeof_size, p_end))
+        HGOTO_ERROR(H5E_HEAP, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+    H5_DECODE_LENGTH_LEN(image, heap->free_block, udata->sizeof_size);
     if (heap->free_block != H5HL_FREE_NULL && heap->free_block >= heap->dblk_size)
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad heap free list")
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad heap free list");
 
     /* Heap data address */
+    if (H5_IS_BUFFER_OVERFLOW(image, udata->sizeof_addr, p_end))
+        HGOTO_ERROR(H5E_HEAP, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
     H5F_addr_decode_len(udata->sizeof_addr, &image, &(heap->dblk_addr));
+
+    /* Check that the datablock address is valid (might not be true
+     * in a corrupt file)
+     */
+    if (!H5_addr_defined(heap->dblk_addr))
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad datablock address");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -196,9 +210,6 @@ done:
  * Purpose:     Deserialize the free list for a heap data block
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Oct 12 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -212,8 +223,9 @@ H5HL__fl_deserialize(H5HL_t *heap)
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(heap);
-    HDassert(!heap->freelist);
+    assert(heap);
+    assert(!heap->freelist);
+    HDcompile_assert(sizeof(hsize_t) == sizeof(uint64_t));
 
     /* Build free list */
     free_block = heap->free_block;
@@ -221,26 +233,30 @@ H5HL__fl_deserialize(H5HL_t *heap)
         const uint8_t *image; /* Pointer into image buffer */
 
         /* Sanity check */
-        if (free_block >= heap->dblk_size)
-            HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "bad heap free list")
+
+        if (free_block > UINT64_MAX - (2 * heap->sizeof_size))
+            HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "decoded heap block address overflow");
+
+        if ((free_block + (2 * heap->sizeof_size)) > heap->dblk_size)
+            HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "bad heap free list");
 
         /* Allocate & initialize free list node */
         if (NULL == (fl = H5FL_MALLOC(H5HL_free_t)))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "memory allocation failed")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "memory allocation failed");
         fl->offset = (size_t)free_block;
         fl->prev   = tail;
         fl->next   = NULL;
 
         /* Decode offset of next free block */
         image = heap->dblk_image + free_block;
-        H5F_DECODE_LENGTH_LEN(image, free_block, heap->sizeof_size);
+        H5_DECODE_LENGTH_LEN(image, free_block, heap->sizeof_size);
         if (0 == free_block)
-            HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "free block size is zero?")
+            HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "free block size is zero?");
 
         /* Decode length of this free block */
-        H5F_DECODE_LENGTH_LEN(image, fl->size, heap->sizeof_size);
+        H5_DECODE_LENGTH_LEN(image, fl->size, heap->sizeof_size);
         if ((fl->offset + fl->size) > heap->dblk_size)
-            HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "bad heap free list")
+            HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "bad heap free list");
 
         /* Append node onto list */
         if (tail)
@@ -267,9 +283,6 @@ done:
  *
  * Return:      Nothing (void)
  *
- * Programmer:  Quincey Koziol
- *              Oct 12 2008
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -280,21 +293,21 @@ H5HL__fl_serialize(const H5HL_t *heap)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check arguments */
-    HDassert(heap);
+    assert(heap);
 
     /* Serialize the free list into the heap data's image */
     for (fl = heap->freelist; fl; fl = fl->next) {
         uint8_t *image; /* Pointer into raw data buffer */
 
-        HDassert(fl->offset == H5HL_ALIGN(fl->offset));
+        assert(fl->offset == H5HL_ALIGN(fl->offset));
         image = heap->dblk_image + fl->offset;
 
         if (fl->next)
-            H5F_ENCODE_LENGTH_LEN(image, fl->next->offset, heap->sizeof_size)
+            H5_ENCODE_LENGTH_LEN(image, fl->next->offset, heap->sizeof_size);
         else
-            H5F_ENCODE_LENGTH_LEN(image, H5HL_FREE_NULL, heap->sizeof_size)
+            H5_ENCODE_LENGTH_LEN(image, H5HL_FREE_NULL, heap->sizeof_size);
 
-        H5F_ENCODE_LENGTH_LEN(image, fl->size, heap->sizeof_size)
+        H5_ENCODE_LENGTH_LEN(image, fl->size, heap->sizeof_size);
     }
 
     FUNC_LEAVE_NOAPI_VOID
@@ -310,9 +323,6 @@ H5HL__fl_serialize(const H5HL_t *heap)
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -321,7 +331,7 @@ H5HL__cache_prefix_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *im
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(image_len);
+    assert(image_len);
 
     /* Set the image length size */
     *image_len = H5HL_SPEC_READ_SIZE;
@@ -338,14 +348,10 @@ H5HL__cache_prefix_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *im
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  Quincey Koziol
- *              November 18, 2016
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL__cache_prefix_get_final_load_size(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED image_len,
-                                       void *_udata, size_t *actual_len)
+H5HL__cache_prefix_get_final_load_size(const void *_image, size_t image_len, void *_udata, size_t *actual_len)
 {
     const uint8_t        *image = (const uint8_t *)_image;        /* Pointer into raw data buffer */
     H5HL_cache_prfx_ud_t *udata = (H5HL_cache_prfx_ud_t *)_udata; /* User data for callback */
@@ -355,16 +361,16 @@ H5HL__cache_prefix_get_final_load_size(const void *_image, size_t H5_ATTR_NDEBUG
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(image);
-    HDassert(udata);
-    HDassert(actual_len);
-    HDassert(*actual_len == image_len);
+    assert(image);
+    assert(udata);
+    assert(actual_len);
+    assert(*actual_len == image_len);
 
-    HDmemset(&heap, 0, sizeof(H5HL_t));
+    memset(&heap, 0, sizeof(H5HL_t));
 
     /* Deserialize the heap's header */
-    if (H5HL__hdr_deserialize(&heap, (const uint8_t *)image, udata) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, FAIL, "can't decode local heap header")
+    if (H5HL__hdr_deserialize(&heap, (const uint8_t *)image, image_len, udata) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, FAIL, "can't decode local heap header");
 
     /* Set the final size for the cache image */
     *actual_len = heap.prfx_size;
@@ -372,7 +378,7 @@ H5HL__cache_prefix_get_final_load_size(const void *_image, size_t H5_ATTR_NDEBUG
     /* Check if heap block exists */
     if (heap.dblk_size)
         /* Check if heap data block is contiguous with header */
-        if (H5F_addr_eq((heap.prfx_addr + heap.prfx_size), heap.dblk_addr))
+        if (H5_addr_eq((heap.prfx_addr + heap.prfx_size), heap.dblk_addr))
             /* Note that the heap should be a single object in the cache */
             *actual_len += heap.dblk_size;
 
@@ -383,47 +389,44 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5HL__cache_prefix_deserialize
  *
- * Purpose:	Given a buffer containing the on disk image of the local
- *		heap prefix, deserialize it, load its contents into a newly allocated
- *		instance of H5HL_prfx_t, and return a pointer to the new instance.
+ * Purpose:     Given a buffer containing the on disk image of the local
+ *              heap prefix, deserialize it, load its contents into a newly
+ *              allocated instance of H5HL_prfx_t, and return a pointer to
+ *              the new instance.
  *
- * Return:      Success:        Pointer to in core representation
- *              Failure:        NULL
- *
- * Programmer:  John Mainzer
- *              6/21/14
- *
+ * Return:      Success:    Pointer to in core representation
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
-H5HL__cache_prefix_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, void *_udata,
-                               hbool_t H5_ATTR_UNUSED *dirty)
+H5HL__cache_prefix_deserialize(const void *_image, size_t len, void *_udata, bool H5_ATTR_UNUSED *dirty)
 {
     H5HL_t               *heap      = NULL;                           /* Local heap */
     H5HL_prfx_t          *prfx      = NULL;                           /* Heap prefix deserialized */
     const uint8_t        *image     = (const uint8_t *)_image;        /* Pointer into decoding buffer */
+    const uint8_t        *p_end     = image + len - 1;                /* End of image buffer */
     H5HL_cache_prfx_ud_t *udata     = (H5HL_cache_prfx_ud_t *)_udata; /* User data for callback */
     void                 *ret_value = NULL;                           /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(image);
-    HDassert(len > 0);
-    HDassert(udata);
-    HDassert(udata->sizeof_size > 0);
-    HDassert(udata->sizeof_addr > 0);
-    HDassert(udata->sizeof_prfx > 0);
-    HDassert(H5F_addr_defined(udata->prfx_addr));
-    HDassert(dirty);
+    assert(image);
+    assert(len > 0);
+    assert(udata);
+    assert(udata->sizeof_size > 0);
+    assert(udata->sizeof_addr > 0);
+    assert(udata->sizeof_prfx > 0);
+    assert(H5_addr_defined(udata->prfx_addr));
+    assert(dirty);
 
     /* Allocate space in memory for the heap */
     if (NULL == (heap = H5HL__new(udata->sizeof_size, udata->sizeof_addr, udata->sizeof_prfx)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate local heap structure");
 
     /* Deserialize the heap's header */
-    if (H5HL__hdr_deserialize(heap, (const uint8_t *)image, udata) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, NULL, "can't decode local heap header")
+    if (H5HL__hdr_deserialize(heap, (const uint8_t *)image, len, udata) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, NULL, "can't decode local heap header");
 
     /* Allocate the heap prefix */
     if (NULL == (prfx = H5HL__prfx_new(heap)))
@@ -432,13 +435,13 @@ H5HL__cache_prefix_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
     /* Check if heap block exists */
     if (heap->dblk_size) {
         /* Check if heap data block is contiguous with header */
-        if (H5F_addr_eq((heap->prfx_addr + heap->prfx_size), heap->dblk_addr)) {
+        if (H5_addr_eq((heap->prfx_addr + heap->prfx_size), heap->dblk_addr)) {
             /* Note that the heap should be a single object in the cache */
-            heap->single_cache_obj = TRUE;
+            heap->single_cache_obj = true;
 
             /* Allocate space for the heap data image */
             if (NULL == (heap->dblk_image = H5FL_BLK_MALLOC(lheap_chunk, heap->dblk_size)))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed");
 
             /* Set image to the start of the data block.  This is necessary
              * because there may be a gap between the used portion of the
@@ -446,17 +449,19 @@ H5HL__cache_prefix_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
             image = ((const uint8_t *)_image) + heap->prfx_size;
 
             /* Copy the heap data from the speculative read buffer */
+            if (H5_IS_BUFFER_OVERFLOW(image, heap->dblk_size, p_end))
+                HGOTO_ERROR(H5E_HEAP, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
             H5MM_memcpy(heap->dblk_image, image, heap->dblk_size);
 
             /* Build free list */
             if (H5HL__fl_deserialize(heap) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't initialize free list")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't initialize free list");
         }
         else
             /* Note that the heap should _NOT_ be a single
              * object in the cache
              */
-            heap->single_cache_obj = FALSE;
+            heap->single_cache_obj = false;
     }
 
     /* Set return value */
@@ -487,9 +492,6 @@ done:
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -500,10 +502,9 @@ H5HL__cache_prefix_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(prfx);
-    HDassert(prfx->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(prfx->cache_info.type == H5AC_LHEAP_PRFX);
-    HDassert(image_len);
+    assert(prfx);
+    assert(prfx->cache_info.type == H5AC_LHEAP_PRFX);
+    assert(image_len);
 
     /* Set the prefix's size */
     *image_len = prfx->heap->prfx_size;
@@ -528,9 +529,6 @@ H5HL__cache_prefix_image_len(const void *_thing, size_t *image_len)
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              7/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -544,24 +542,23 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(image);
-    HDassert(prfx);
-    HDassert(prfx->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(prfx->cache_info.type == H5AC_LHEAP_PRFX);
-    HDassert(H5F_addr_eq(prfx->cache_info.addr, prfx->heap->prfx_addr));
-    HDassert(prfx->heap);
+    assert(f);
+    assert(image);
+    assert(prfx);
+    assert(prfx->cache_info.type == H5AC_LHEAP_PRFX);
+    assert(H5_addr_eq(prfx->cache_info.addr, prfx->heap->prfx_addr));
+    assert(prfx->heap);
 
     /* Get the pointer to the heap */
     heap = prfx->heap;
-    HDassert(heap);
+    assert(heap);
 
 #ifndef NDEBUG
     /* Compute the buffer size */
     size_t buf_size = heap->prfx_size; /* expected size of the image buffer */
     if (heap->single_cache_obj)
         buf_size += heap->dblk_size;
-    HDassert(len == buf_size);
+    assert(len == buf_size);
 #endif
 
     /* Update the free block value from the free list */
@@ -574,8 +571,8 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
     *image++ = 0; /*reserved*/
     *image++ = 0; /*reserved*/
     *image++ = 0; /*reserved*/
-    H5F_ENCODE_LENGTH_LEN(image, heap->dblk_size, heap->sizeof_size);
-    H5F_ENCODE_LENGTH_LEN(image, heap->free_block, heap->sizeof_size);
+    H5_ENCODE_LENGTH_LEN(image, heap->dblk_size, heap->sizeof_size);
+    H5_ENCODE_LENGTH_LEN(image, heap->free_block, heap->sizeof_size);
     H5F_addr_encode_len(heap->sizeof_addr, &image, heap->dblk_addr);
 
     /* Check if the local heap is a single object in cache */
@@ -588,7 +585,7 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
              * the prefix and the data block due to alignment constraints.
              */
             gap = heap->prfx_size - (size_t)(image - (uint8_t *)_image);
-            HDmemset(image, 0, gap);
+            memset(image, 0, gap);
             image += gap;
         }
 
@@ -599,14 +596,14 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
         H5MM_memcpy(image, heap->dblk_image, heap->dblk_size);
 
         /* Sanity check */
-        HDassert((size_t)(image - (uint8_t *)_image) + heap->dblk_size == len);
+        assert((size_t)(image - (uint8_t *)_image) + heap->dblk_size == len);
     }
     else {
         /* Sanity check */
-        HDassert((size_t)(image - (uint8_t *)_image) <= len);
+        assert((size_t)(image - (uint8_t *)_image) <= len);
 
         /* Clear rest of local heap */
-        HDmemset(image, 0, len - (size_t)(image - (uint8_t *)_image));
+        memset(image, 0, len - (size_t)(image - (uint8_t *)_image));
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -622,15 +619,8 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
  *		from a failed speculative load attempt.  See comments below for
  *		details.
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
- *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              6/21/14
  *
  *-------------------------------------------------------------------------
  */
@@ -643,14 +633,13 @@ H5HL__cache_prefix_free_icr(void *_thing)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(prfx);
-    HDassert(prfx->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
-    HDassert(prfx->cache_info.type == H5AC_LHEAP_PRFX);
-    HDassert(H5F_addr_eq(prfx->cache_info.addr, prfx->heap->prfx_addr));
+    assert(prfx);
+    assert(prfx->cache_info.type == H5AC_LHEAP_PRFX);
+    assert(H5_addr_eq(prfx->cache_info.addr, prfx->heap->prfx_addr));
 
     /* Destroy local heap prefix */
     if (H5HL__prfx_dest(prfx) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't destroy local heap prefix")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't destroy local heap prefix");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -666,9 +655,6 @@ done:
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -679,9 +665,9 @@ H5HL__cache_datablock_get_initial_load_size(void *_udata, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(heap);
-    HDassert(heap->dblk_size > 0);
-    HDassert(image_len);
+    assert(heap);
+    assert(heap->dblk_size > 0);
+    assert(image_len);
 
     /* Set the image length size */
     *image_len = heap->dblk_size;
@@ -699,13 +685,10 @@ H5HL__cache_datablock_get_initial_load_size(void *_udata, size_t *image_len)
  * Return:      Success:        Pointer to in core representation
  *              Failure:        NULL
  *
- * Programmer:  John Mainzer
- *              6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static void *
-H5HL__cache_datablock_deserialize(const void *image, size_t len, void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
+H5HL__cache_datablock_deserialize(const void *image, size_t len, void *_udata, bool H5_ATTR_UNUSED *dirty)
 {
     H5HL_dblk_t *dblk      = NULL;             /* Local heap data block deserialized */
     H5HL_t      *heap      = (H5HL_t *)_udata; /* User data for callback */
@@ -714,13 +697,13 @@ H5HL__cache_datablock_deserialize(const void *image, size_t len, void *_udata, h
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(image);
-    HDassert(len > 0);
-    HDassert(heap);
-    HDassert(heap->dblk_size == len);
-    HDassert(!heap->single_cache_obj);
-    HDassert(NULL == heap->dblk);
-    HDassert(dirty);
+    assert(image);
+    assert(len > 0);
+    assert(heap);
+    assert(heap->dblk_size == len);
+    assert(!heap->single_cache_obj);
+    assert(NULL == heap->dblk);
+    assert(dirty);
 
     /* Allocate space in memory for the heap data block */
     if (NULL == (dblk = H5HL__dblk_new(heap)))
@@ -760,9 +743,6 @@ done:
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -773,12 +753,11 @@ H5HL__cache_datablock_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(dblk);
-    HDassert(dblk->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(dblk->cache_info.type == H5AC_LHEAP_DBLK);
-    HDassert(dblk->heap);
-    HDassert(dblk->heap->dblk_size > 0);
-    HDassert(image_len);
+    assert(dblk);
+    assert(dblk->cache_info.type == H5AC_LHEAP_DBLK);
+    assert(dblk->heap);
+    assert(dblk->heap->dblk_size > 0);
+    assert(image_len);
 
     *image_len = dblk->heap->dblk_size;
 
@@ -794,9 +773,6 @@ H5HL__cache_datablock_image_len(const void *_thing, size_t *image_len)
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -809,15 +785,14 @@ H5HL__cache_datablock_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *imag
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(image);
-    HDassert(dblk);
-    HDassert(dblk->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(dblk->cache_info.type == H5AC_LHEAP_DBLK);
-    HDassert(dblk->heap);
+    assert(f);
+    assert(image);
+    assert(dblk);
+    assert(dblk->cache_info.type == H5AC_LHEAP_DBLK);
+    assert(dblk->heap);
     heap = dblk->heap;
-    HDassert(heap->dblk_size == len);
-    HDassert(!heap->single_cache_obj);
+    assert(heap->dblk_size == len);
+    assert(!heap->single_cache_obj);
 
     /* Update the free block value from the free list */
     heap->free_block = heap->freelist ? heap->freelist->offset : H5HL_FREE_NULL;
@@ -840,9 +815,6 @@ H5HL__cache_datablock_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *imag
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
- * Programmer:	Quincey Koziol
- *		November 19, 2016
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -854,7 +826,7 @@ H5HL__cache_datablock_notify(H5C_notify_action_t action, void *_thing)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(dblk);
+    assert(dblk);
 
     switch (action) {
         case H5AC_NOTIFY_ACTION_AFTER_INSERT:
@@ -863,12 +835,12 @@ H5HL__cache_datablock_notify(H5C_notify_action_t action, void *_thing)
 
         case H5AC_NOTIFY_ACTION_AFTER_LOAD:
             /* Sanity checks */
-            HDassert(dblk->heap);
-            HDassert(dblk->heap->prfx);
+            assert(dblk->heap);
+            assert(dblk->heap->prfx);
 
             /* Pin the heap's prefix */
             if (FAIL == H5AC_pin_protected_entry(dblk->heap->prfx))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTPIN, FAIL, "unable to pin local heap prefix")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTPIN, FAIL, "unable to pin local heap prefix");
             break;
 
         case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
@@ -883,16 +855,16 @@ H5HL__cache_datablock_notify(H5C_notify_action_t action, void *_thing)
 
         case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
             /* Sanity checks */
-            HDassert(dblk->heap);
-            HDassert(dblk->heap->prfx);
+            assert(dblk->heap);
+            assert(dblk->heap->prfx);
 
             /* Unpin the local heap prefix */
             if (FAIL == H5AC_unpin_entry(dblk->heap->prfx))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin local heap prefix")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin local heap prefix");
             break;
 
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown action from metadata cache");
             break;
     }
 
@@ -905,15 +877,8 @@ done:
  *
  * Purpose:	Free the in memory representation of the supplied local heap data block.
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
- *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              6/21/14
  *
  *-------------------------------------------------------------------------
  */
@@ -926,13 +891,12 @@ H5HL__cache_datablock_free_icr(void *_thing)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(dblk);
-    HDassert(dblk->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
-    HDassert(dblk->cache_info.type == H5AC_LHEAP_DBLK);
+    assert(dblk);
+    assert(dblk->cache_info.type == H5AC_LHEAP_DBLK);
 
     /* Destroy the data block */
     if (H5HL__dblk_dest(dblk) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy local heap data block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy local heap data block");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -1,0 +1,71 @@
+name: hdf5 dev i386
+
+# Triggers the workflow on a call from another workflow
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+jobs:
+  i386_build_and_test:
+    name: "i386 ${{ inputs.build_mode }}"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Sources
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Start i386 container
+        run: |
+          docker run -d --name i386_build --platform linux/386 \
+            -e CTEST_OUTPUT_ON_FAILURE=1 \
+            -v "${{ github.workspace }}:/workspace" \
+            i386/debian:bookworm sleep infinity
+
+      - name: Install dependencies
+        run: |
+          docker exec i386_build bash -c "
+            echo 'deb http://deb.debian.org/debian bookworm-backports main' > /etc/apt/sources.list.d/backports.list
+            apt-get update -y
+            apt-get install -y build-essential libaec-dev libgit2-dev
+            apt-get install -y -t bookworm-backports cmake
+          "
+
+      - name: Configure
+        run: |
+          docker exec -w /workspace i386_build bash -c "
+            mkdir build
+            cd build
+            cmake -C ../config/cmake/cacheinit.cmake -G 'Unix Makefiles' \
+              --log-level=VERBOSE \
+              -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+              -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
+              -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
+              -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=OFF \
+              -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+              -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+              -DHDF5_BUILD_JAVA:BOOL=OFF \
+              ..
+          "
+
+      - name: Build
+        run: |
+          docker exec -w /workspace/build i386_build \
+            cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+
+      - name: Run Tests
+        run: |
+          docker exec -w /workspace/build i386_build \
+            ctest . --parallel 2 -C ${{ inputs.build_mode }}
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f i386_build

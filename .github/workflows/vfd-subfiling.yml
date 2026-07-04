@@ -1,0 +1,102 @@
+name: Test HDF5 Subfiling VFD
+
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "Build type (CMAKE_BUILD_TYPE)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+jobs:
+  build_and_test:
+    strategy:
+      # Let jobs run to completion even if one fails
+      fail-fast: false
+      matrix:
+        os_name: ["Ubuntu"]
+#        os_name: ["Ubuntu", "MacOS"]
+        mpi_lib: ["OpenMPI"]
+#        mpi_lib: ["OpenMPI", "MPICH"]
+        include:
+          - os_name: "Ubuntu"
+            os: ubuntu-latest
+            mpi_lib: "OpenMPI"
+#          - os_name: "Ubuntu"
+#            os: ubuntu-latest
+#            mpi_lib: "MPICH"
+#          - os_name: "MacOS"
+#            os: macos-latest
+#            mpi_lib: "OpenMPI"
+#          - os_name: "MacOS"
+#            os: macos-latest
+#            mpi_lib: "MPICH"
+
+    # Sets the job's name from the properties
+    name: "Test HDF5 Subfiling VFD (${{ inputs.build_mode }}) on ${{ matrix.os_name }} with ${{ matrix.mpi_lib }}"
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      # - name: Install Linux Dependencies
+      #  run: |
+      #    sudo apt-get update
+      #    sudo apt-get install 
+      #  if: ${{ matrix.os == 'ubuntu-latest' }}
+
+      # For now, just install OpenMPI or MPICH with the package
+      # manager. Eventually, we should pick one or 2 release
+      # versions of each, then build and cache those installations
+      - name: Install OpenMPI
+        run: |
+          sudo apt-get update
+          sudo apt-get install libopenmpi-dev
+          echo "CC=mpicc" >> $GITHUB_ENV
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.mpi_lib == 'OpenMPI' }}
+
+      - name: Install MPICH
+        run: |
+          sudo apt-get update
+          sudo apt-get install libmpich-dev
+          echo "CC=mpicc" >> $GITHUB_ENV
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.mpi_lib == 'MPICH' }}
+
+      - name: Checkout HDF5
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Configure HDF5 with Subfiling VFD
+        shell: bash
+        run: |
+          mkdir ${{ runner.workspace }}/build
+          cd ${{ runner.workspace }}/build
+          cmake -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/hdf5_build \
+            -DBUILD_STATIC_LIBS=OFF \
+            -DHDF5_TEST_VFD:BOOL=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+            -DHDF5_ENABLE_SUBFILING_VFD:BOOL=ON \
+            -DMPIEXEC_MAX_NUMPROCS=2 \
+            $GITHUB_WORKSPACE
+          cat src/libhdf5.settings
+
+      - name: Build HDF5
+        shell: bash
+        working-directory: ${{ runner.workspace }}/build
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+          echo "LD_LIBRARY_PATH=${{ runner.workspace }}/build/bin" >> $GITHUB_ENV
+
+      - name: Test HDF5 Subfiling VFD
+        working-directory: ${{ runner.workspace }}/build
+        run: |
+          # For now, just run the tests directly setup for use with the
+          # Subfiling VFD. We can expand on this once the library's tests
+          # are better separated into categories for VFD testing.
+          ctest --build-config ${{ inputs.build_mode }} \
+              -R "MPI_TEST_t_subfiling_vfd|MPI_TEST_t_vfd|H5_ph5_subfiling"

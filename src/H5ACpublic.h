@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -13,19 +13,16 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5ACpublic.h
- *                      Jul 10 1997
- *                      Robb Matzke
  *
- * Purpose:             Public include file for cache functions.
+ * Purpose:             Public include file for cache functions
  *
  *-------------------------------------------------------------------------
  */
 #ifndef H5ACpublic_H
 #define H5ACpublic_H
 
-/* Public headers needed by this file */
-#include "H5public.h"
-#include "H5Cpublic.h"
+#include "H5public.h"  /* Generic Functions                        */
+#include "H5Cpublic.h" /* Cache                                    */
 
 /****************************************************************************
  *
@@ -73,13 +70,13 @@
  *
  *     The trace file is a debugging feature that allow the capture of
  *     top level metadata cache requests for purposes of debugging and/or
- *     optimization.  This field should normally be set to FALSE, as
+ *     optimization.  This field should normally be set to false, as
  *     trace file collection imposes considerable overhead.
  *
- *     This field should only be set to TRUE when the trace_file_name
+ *     This field should only be set to true when the trace_file_name
  *     contains the full path of the desired trace file, and either
  *     there is no open trace file on the cache, or the close_trace_file
- *     field is also TRUE.
+ *     field is also true.
  *
  * close_trace_file: Boolean field indicating whether the current trace
  *     file (if any) should be closed.
@@ -87,11 +84,11 @@
  *      *** DEPRECATED *** Use H5Fstart/stop logging functions instead
  *
  *     See the above comments on the open_trace_file field.  This field
- *     should be set to FALSE unless there is an open trace file on the
+ *     should be set to false unless there is an open trace file on the
  *     cache that you wish to close.
  *
  * trace_file_name: Full path of the trace file to be opened if the
- *     open_trace_file field is TRUE.
+ *     open_trace_file field is true.
  *
  *      *** DEPRECATED *** Use H5Fstart/stop logging functions instead
  *
@@ -123,7 +120,7 @@
  *
  * set_initial_size: Boolean flag indicating whether the size of the
  *      initial size of the cache is to be set to the value given in
- *      the initial_size field.  If set_initial_size is FALSE, the
+ *      the initial_size field.  If set_initial_size is false, the
  *      initial_size field is ignored.
  *
  * initial_size: If enabled, this field contain the size the cache is
@@ -431,11 +428,30 @@
  *
  ****************************************************************************/
 
+/**
+ * Current version number of the metadata cache configuration structure
+ * \since 1.8.0
+ */
 #define H5AC__CURR_CACHE_CONFIG_VERSION 1
-#define H5AC__MAX_TRACE_FILE_NAME_LEN   1024
-
+/**
+ * Maximum allowed length (in characters) of a metadata cache trace file name
+ * \since 1.8.0
+ */
+#define H5AC__MAX_TRACE_FILE_NAME_LEN 1024
+/**
+ * Only process 0 performs metadata writes to disk; other processes retain dirty
+ * metadata and mark entries clean only after process 0 flushes them and broadcasts
+ * the results at a sync point.
+ * \since 1.8.6
+ */
 #define H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY 0
-#define H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED    1
+/**
+ * Process 0 determines which metadata entries to flush, but the actual writes are
+ * distributed across processes at a sync point, with coordination ensuring each
+ * entry is flushed exactly once and marked clean everywhere.
+ * \since 1.8.6
+ */
+#define H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED 1
 
 /**
  * H5AC_cache_config_t is a public structure intended for use in public APIs.
@@ -470,7 +486,7 @@ typedef struct H5AC_cache_config_t {
      * in use. This field should be set to #H5AC__CURR_CACHE_CONFIG_VERSION
      * (defined in H5ACpublic.h). */
 
-    hbool_t rpt_fcn_enabled;
+    bool rpt_fcn_enabled;
     /**< Boolean flag indicating whether the adaptive cache resize report
      * function is enabled. This field should almost always be set to disabled
      * (0). Since resize algorithm activity is reported via stdout, it MUST be
@@ -478,7 +494,7 @@ typedef struct H5AC_cache_config_t {
      * The report function is not supported code, and can be expected to change
      * between versions of the library. Use it at your own risk. */
 
-    hbool_t open_trace_file;
+    bool open_trace_file;
     /**< Boolean field indicating whether the
      * \ref H5AC_cache_config_t.trace_file_name "trace_file_name"
      * field should be used to open a trace file for the cache.\n
@@ -499,7 +515,7 @@ typedef struct H5AC_cache_config_t {
      * in reproduction in the lab. If you use it absent the direction
      * of The HDF Group, you are on your own. */
 
-    hbool_t close_trace_file;
+    bool close_trace_file;
     /**< Boolean field indicating whether the current trace file
      *(if any) should be closed.\n
      * See the above comments on the \ref H5AC_cache_config_t.open_trace_file
@@ -526,7 +542,7 @@ typedef struct H5AC_cache_config_t {
      * seen in the field, so as to aid in reproduction in the lab. If you use
      * it absent the direction of The HDF Group, you are on your own. */
 
-    hbool_t evictions_enabled;
+    bool evictions_enabled;
     /**< A boolean flag indicating whether evictions from the metadata cache
      * are enabled. This flag is initially set to enabled (1).\n
      * In rare circumstances, the raw data throughput quirements may be so high
@@ -546,7 +562,7 @@ typedef struct H5AC_cache_config_t {
      * Evictions will be re-enabled when this field is set back to \c 1.
      * This should be done as soon as possible. */
 
-    hbool_t set_initial_size;
+    bool set_initial_size;
     /**< Boolean flag indicating whether the cache should be created
      * with a user specified initial size. */
 
@@ -562,7 +578,7 @@ typedef struct H5AC_cache_config_t {
      * The value must lie in the interval [0.0, 1.0]. 0.01 is a good place to
      * start in the serial case. In the parallel case, a larger value is needed
      * -- see the overview of the metadata cache in the
-     * “Metadata Caching in HDF5” section of the -- <em>\ref UG</em>
+     * \ref TNMDC section of the -- <em>\ref UG</em>
      * for details. */
 
     size_t max_size;
@@ -607,7 +623,7 @@ typedef struct H5AC_cache_config_t {
      * If you set it to 1.0, you will effectively disable cache size increases.
      */
 
-    hbool_t apply_max_increment;
+    bool apply_max_increment;
     /**< Boolean flag indicating whether an upper limit should be applied to
      * the size of cache size increases. */
 
@@ -669,7 +685,7 @@ typedef struct H5AC_cache_config_t {
      * If you set it to 1.0, you will effectively
      * disable cache size decreases. 0.9 is a reasonable starting point. */
 
-    hbool_t apply_max_decrement;
+    bool apply_max_decrement;
     /**< Boolean flag indicating ether an upper limit should be applied to
      * the size of cache size decreases. */
 
@@ -683,7 +699,7 @@ typedef struct H5AC_cache_config_t {
      * cache before the cache size reduction algorithm tries to evict it. 3 is a
      * reasonable value. */
 
-    hbool_t apply_empty_reserve;
+    bool apply_empty_reserve;
     /**< Boolean flag indicating whether the ageout based decrement
      * algorithms will maintain a empty reserve when decreasing cache size. */
 
@@ -720,10 +736,24 @@ typedef struct H5AC_cache_config_t {
 } H5AC_cache_config_t;
 //! <!-- [H5AC_cache_config_t_snip] -->
 
+/**
+ * Current version number of the metadata cache image configuration structure
+ * \since 1.10.1
+ */
 #define H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION 1
 
+/**
+ * No limit on number of times a prefetched entry can appear in subsequent
+ * cache images
+ * \since 1.10.1
+ */
 #define H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE -1
-#define H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX  100
+/**
+ * Limit on number of times a prefetched entry can appear in subsequent
+ * cache images
+ * \since 1.10.1
+ */
+#define H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX 100
 
 //! <!-- [H5AC_cache_image_config_t_snip] -->
 /**
@@ -739,11 +769,11 @@ typedef struct H5AC_cache_image_config_t {
      *  to the cache must have a known version number, or an error will be
      *  flagged.
      */
-    hbool_t generate_image;
+    bool generate_image;
     /**< Boolean flag indicating whether a cache image should be created on file
      *   close.
      */
-    hbool_t save_resize_status;
+    bool save_resize_status;
     /**< Boolean flag indicating whether the cache image should include the
      *  adaptive cache resize configuration and status.  Note that this field
      *  is ignored at present.

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -49,10 +49,14 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
     hid_t                 fcpl_in  = H5I_INVALID_HID;  /* file creation property for input file */
     hid_t                 fcpl_out = H5I_INVALID_HID;  /* file creation property for output file */
     H5F_fspace_strategy_t in_strategy, out_strategy;   /* file space handling strategy for in/output file */
-    hbool_t               in_persist, out_persist;     /* free-space persist status for in/output file */
+    bool                  in_persist, out_persist;     /* free-space persist status for in/output file */
     hsize_t               in_threshold, out_threshold; /* free-space section threshold for in/output file */
     hsize_t               in_pagesize, out_pagesize;   /* file space page size for input/output file */
+    pack_info_t          *pack_info = NULL;            /* repack options */
     int                   ret_value = 0;
+
+    if (NULL == (pack_info = (pack_info_t *)calloc(1, sizeof(pack_info_t))))
+        H5TOOLS_GOTO_ERROR((-1), "unable to allocate memory");
 
     /* open the output file */
     if ((fidout = H5Fopen(out_fname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
@@ -149,12 +153,13 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
                  *-------------------------------------------------------------------------
                  */
                 if (options->all_layout == 1) {
-                    pack_info_t pack;
 
-                    init_packobject(&pack);
-                    pack.layout = options->layout_g;
-                    pack.chunk  = options->chunk_g;
-                    if (verify_layout(pid, &pack) == 0)
+                    memset(pack_info, 0, sizeof(pack_info_t));
+
+                    init_packobject(pack_info);
+                    pack_info->layout = options->layout_g;
+                    pack_info->chunk  = options->chunk_g;
+                    if (verify_layout(pid, pack_info) == 0)
                         ok = 0;
                 }
 
@@ -234,7 +239,7 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
      * the same as the input file's free-space persist status
      */
     if (options->fs_persist) {
-        if (out_persist != (hbool_t)(options->fs_persist == (-1) ? FALSE : options->fs_persist))
+        if (out_persist != (bool)(options->fs_persist == (-1) ? false : options->fs_persist))
             H5TOOLS_GOTO_ERROR((-1), "free-space persist status not set as unexpected");
     }
     else {
@@ -286,7 +291,9 @@ done:
         if (travt)
             trav_table_free(travt);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
+
+    free(pack_info);
 
     return ret_value;
 } /* h5repack_verify() */
@@ -356,7 +363,7 @@ verify_layout(hid_t pid, pack_info_t *obj)
  */
 
 int
-h5repack_cmp_pl(const char *fname1, hid_t fname1_fapl, const char *fname2, hid_t fname2_fapl)
+h5repack_cmp_pl(const char *fname1, const char *fname2, pack_opt_t *options)
 {
     hid_t         fid1   = H5I_INVALID_HID; /* file ID */
     hid_t         fid2   = H5I_INVALID_HID; /* file ID */
@@ -377,11 +384,11 @@ h5repack_cmp_pl(const char *fname1, hid_t fname1_fapl, const char *fname2, hid_t
      *-------------------------------------------------------------------------
      */
     /* Open the files */
-    if ((fid1 = h5tools_fopen(fname1, H5F_ACC_RDONLY, fname1_fapl, (fname1_fapl != H5P_DEFAULT), NULL, 0)) <
-        0)
+    if ((fid1 = h5tools_fopen(fname1, H5F_ACC_RDONLY, options->fin_fapl,
+                              (options->fin_vol || options->fin_vfd), NULL, 0)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fname1, H5FOPENERROR);
-    if ((fid2 = h5tools_fopen(fname2, H5F_ACC_RDONLY, fname2_fapl, (fname2_fapl != H5P_DEFAULT), NULL, 0)) <
-        0)
+    if ((fid2 = h5tools_fopen(fname2, H5F_ACC_RDONLY, options->fout_fapl,
+                              (options->fout_vol || options->fout_vfd), NULL, 0)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fname2, H5FOPENERROR);
 
     /*-------------------------------------------------------------------------
@@ -475,7 +482,7 @@ done:
         if (trav)
             trav_table_free(trav);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return ret_value;
 }
@@ -497,15 +504,15 @@ done:
 static int
 verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
 {
-    int          nfilters_dcpl; /* number of filters in DCPL*/
-    unsigned     filt_flags;    /* filter flags */
-    H5Z_filter_t filtn;         /* filter identification number */
-    unsigned     cd_values[20]; /* filter client data values */
-    size_t       cd_nelmts;     /* filter client number of values */
-    char         f_name[256];   /* filter name */
-    size_t       size;          /* type size */
-    int          i;             /* index */
-    unsigned     j;             /* index */
+    int          nfilters_dcpl;               /* number of filters in DCPL*/
+    unsigned     filt_flags;                  /* filter flags */
+    H5Z_filter_t filtn;                       /* filter identification number */
+    unsigned     cd_values[DEFAULT_CDELEMTS]; /* filter client data values */
+    size_t       cd_nelmts;                   /* filter client number of values */
+    char         f_name[256];                 /* filter name */
+    size_t       size;                        /* type size */
+    int          i;                           /* index */
+    unsigned     j;                           /* index */
 
     /* get information about filters */
     if ((nfilters_dcpl = H5Pget_nfilters(pid)) < 0)

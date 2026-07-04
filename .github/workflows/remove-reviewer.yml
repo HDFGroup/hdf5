@@ -1,0 +1,104 @@
+name: Remove Reviewer
+
+# Responds to /remove-reviewer @username comments on PRs.
+# Only collaborators with write access or above can use the command.
+#
+# Usage (in any PR comment):
+#   /remove-reviewer @jhendersonHDF
+#   /remove-reviewer @jhendersonHDF @mattjala   ← multiple at once
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  remove:
+    runs-on: ubuntu-latest
+    # Only fire on PR comments in the main repo that contain the slash command
+    if: |
+      github.repository == 'HDFGroup/hdf5' &&
+      github.event.issue.pull_request != null &&
+      contains(github.event.comment.body, '/remove-reviewer')
+
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const body      = context.payload.comment.body;
+            const commenter = context.payload.comment.user.login;
+            const { owner, repo } = context.repo;
+            const pr_number = context.payload.issue.number;
+
+            // Parse all @usernames after /remove-reviewer
+            const match = body.match(/\/remove-reviewer((?:\s+@[\w-]+)+)/i);
+            if (!match) return;
+
+            const toRemove = [...match[1].matchAll(/@([\w-]+)/g)].map(m => m[1]);
+            if (toRemove.length === 0) return;
+
+            // Acknowledge the command with a reaction so the team knows it ran
+            await github.rest.reactions.createForIssueComment({
+              owner, repo,
+              comment_id: context.payload.comment.id,
+              content: 'eyes',
+            }).catch(() => {});
+
+            // Security: commenter must have write or admin access
+            let permission;
+            try {
+              const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+                owner, repo, username: commenter,
+              });
+              permission = data.permission;
+            } catch {
+              permission = 'none';
+            }
+
+            if (!['write', 'admin'].includes(permission)) {
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: pr_number,
+                body: `@${commenter} — write access is required to remove reviewers.`,
+              });
+              return;
+            }
+
+            // Fetch all reviews to detect who has already submitted one
+            const reviews = await github.paginate(github.rest.pulls.listReviews, {
+              owner, repo, pull_number: pr_number, per_page: 100,
+            });
+            const hasReviewed = new Set(reviews.map(r => r.user.login));
+
+            // Remove each requested reviewer
+            const removed = [], alreadyReviewed = [], failed = [];
+            for (const username of toRemove) {
+              if (hasReviewed.has(username)) {
+                alreadyReviewed.push(username);
+                continue;
+              }
+              try {
+                await github.rest.pulls.removeRequestedReviewers({
+                  owner, repo, pull_number: pr_number,
+                  reviewers: [username],
+                });
+                removed.push(username);
+              } catch (e) {
+                failed.push(`${username} (${e.message})`);
+              }
+            }
+
+            // Post a single summary reply
+            const lines = [];
+            if (removed.length)
+              lines.push(`Removed: ${removed.map(u => `@${u}`).join(', ')}`);
+            if (alreadyReviewed.length)
+              lines.push(`Cannot remove (already reviewed): ${alreadyReviewed.map(u => `@${u}`).join(', ')}`);
+            if (failed.length)
+              lines.push(`Could not remove: ${failed.join(', ')}`);
+            await github.rest.issues.createComment({
+              owner, repo, issue_number: pr_number,
+              body: lines.join('\n'),
+            });

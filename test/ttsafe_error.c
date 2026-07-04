@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -24,13 +24,13 @@
  *
  *     ttsafe_error.h5
  *
- * Created: Apr 28 2000
- * Programmer: Chee Wai LEE
- *
  ********************************************************************/
 #include "ttsafe.h"
+#define H5VL_FRIEND /* Suppress error about including H5VLpkg    */
+#define H5VL_TESTING
+#include "H5VLpkg.h" /* Virtual Object Layer                 */
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
 
 #define NUM_THREAD 16
 #define FILENAME   "ttsafe_error.h5"
@@ -47,26 +47,26 @@ typedef struct err_num_struct {
 } err_num_t;
 
 /* Global variables */
-hid_t               error_file_g  = H5I_INVALID_HID;
-int                 error_flag_g  = 0;
-int                 error_count_g = 0;
-err_num_t           expected_g[EXPECTED_ERROR_DEPTH];
-H5TS_mutex_simple_t error_mutex_g;
+hid_t        error_file_g  = H5I_INVALID_HID;
+int          error_flag_g  = 0;
+int          error_count_g = 0;
+err_num_t    expected_g[EXPECTED_ERROR_DEPTH];
+H5TS_mutex_t error_mutex_g;
 
 /* Prototypes */
-static herr_t error_callback(hid_t, void *);
-static herr_t walk_error_callback(unsigned, const H5E_error2_t *, void *);
-static void  *tts_error_thread(void *);
+static herr_t                  error_callback(hid_t, void *);
+static herr_t                  walk_error_callback(unsigned, const H5E_error2_t *, void *);
+static H5TS_THREAD_RETURN_TYPE tts_error_thread(void *);
 
 void
-tts_error(void)
+tts_error(void H5_ATTR_UNUSED *params)
 {
     hid_t         def_fapl = H5I_INVALID_HID;
     hid_t         vol_id   = H5I_INVALID_HID;
     hid_t         dataset  = H5I_INVALID_HID;
     H5TS_thread_t threads[NUM_THREAD];
-    H5TS_attr_t   attribute;
     int           value, i;
+    int           is_native;
     herr_t        status;
 
     /* Must initialize these at runtime */
@@ -103,16 +103,8 @@ tts_error(void)
     expected_g[10].maj_num = H5E_LINK;
     expected_g[10].min_num = H5E_EXISTS;
 
-    /* set up mutex for global count of errors */
-    H5TS_mutex_init(&error_mutex_g);
-
-    /* make thread scheduling global */
-    H5TS_attr_init(&attribute);
-
-#ifdef H5_HAVE_SYSTEM_SCOPE_THREADS
-    /* set thread scope to system */
-    H5TS_attr_setscope(&attribute, H5TS_SCOPE_SYSTEM);
-#endif /* H5_HAVE_SYSTEM_SCOPE_THREADS */
+    status = H5TS_mutex_init(&error_mutex_g, H5TS_MUTEX_TYPE_PLAIN);
+    CHECK_I(status, "H5TS_mutex_init");
 
     def_fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(def_fapl, H5I_INVALID_HID, "H5Pcreate");
@@ -120,7 +112,10 @@ tts_error(void)
     status = H5Pget_vol_id(def_fapl, &vol_id);
     CHECK(status, FAIL, "H5Pget_vol_id");
 
-    if (vol_id == H5VL_NATIVE) {
+    is_native = H5VL__is_native_connector_test(vol_id);
+    CHECK(is_native, FAIL, "H5VL__is_native_connector_test");
+
+    if (is_native) {
         /* Create a hdf5 file using H5F_ACC_TRUNC access, default file
          * creation plist and default file access plist
          */
@@ -128,15 +123,17 @@ tts_error(void)
         CHECK(error_file_g, H5I_INVALID_HID, "H5Fcreate");
 
         for (i = 0; i < NUM_THREAD; i++)
-            threads[i] = H5TS_create_thread(tts_error_thread, &attribute, NULL);
+            if (H5TS_thread_create(&threads[i], tts_error_thread, NULL) < 0)
+                TestErrPrintf("thread # %d did not start", i);
 
         for (i = 0; i < NUM_THREAD; i++)
-            H5TS_wait_for_thread(threads[i]);
+            if (H5TS_thread_join(threads[i], NULL) < 0)
+                TestErrPrintf("thread %d failed to join", i);
 
         if (error_flag_g) {
             TestErrPrintf(
                 "At least one thread reported a value that was different from the expected value\n");
-            HDprintf(
+            printf(
                 "(Update the expected_g[] array in tts_error for this test if the error stack changed!)\n");
         }
 
@@ -158,15 +155,16 @@ tts_error(void)
         CHECK(status, FAIL, "H5Fclose");
     } /* end if */
     else
-        HDprintf("Non-native VOL connector used, skipping test\n");
+        printf("Non-native VOL connector used, skipping test\n");
 
     status = H5Idec_ref(vol_id);
     CHECK(status, FAIL, "H5Idec_ref");
 
-    H5TS_attr_destroy(&attribute);
+    status = H5TS_mutex_destroy(&error_mutex_g);
+    CHECK_I(status, "H5TS_mutex_destroy");
 } /* end tts_error() */
 
-static void *
+static H5TS_THREAD_RETURN_TYPE
 tts_error_thread(void H5_ATTR_UNUSED *arg)
 {
     hid_t       dataspace = H5I_INVALID_HID;
@@ -218,15 +216,15 @@ tts_error_thread(void H5_ATTR_UNUSED *arg)
     status = H5Eset_auto2(H5E_DEFAULT, old_error_cb, old_error_client_data);
     CHECK(status, FAIL, "H5Eset_auto2");
 
-    return NULL;
+    return (H5TS_thread_ret_t)0;
 } /* end tts_error_thread() */
 
 static herr_t
 error_callback(hid_t H5_ATTR_UNUSED estack_id, void *client_data)
 {
-    H5TS_mutex_lock_simple(&error_mutex_g);
+    H5TS_mutex_lock(&error_mutex_g);
     error_count_g++;
-    H5TS_mutex_unlock_simple(&error_mutex_g);
+    H5TS_mutex_unlock(&error_mutex_g);
     return H5Ewalk2(H5E_DEFAULT, H5E_WALK_DOWNWARD, walk_error_callback, client_data);
 }
 
@@ -245,24 +243,26 @@ walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void H5_ATTR_UNUSE
     }
 
     /* Unexpected error stack entry, print some info and set flag */
-    HDfprintf(stderr, "Unexpected error stack entry!\n");
-    HDfprintf(stderr, "Stack entry: %d\n", n);
-    HDfprintf(stderr,
-              "Actual: maj_num = %" PRIxHID ", min_num = %" PRIxHID
-              ", line = %u, func = '%s', file = '%s', desc = '%s'\n",
-              err_desc->maj_num, err_desc->min_num, err_desc->line, err_desc->func_name, err_desc->file_name,
-              err_desc->desc);
-    HDfprintf(stderr, "Expected: maj_num = %" PRIxHID ", min_num = %" PRIxHID "\n", expected_g[n].maj_num,
-              expected_g[n].min_num);
+    fprintf(stderr, "Unexpected error stack entry!\n");
+    fprintf(stderr, "Stack entry: %d\n", n);
+    fprintf(stderr,
+            "Actual: maj_num = %" PRIxHID ", min_num = %" PRIxHID
+            ", line = %u, func = '%s', file = '%s', desc = '%s'\n",
+            err_desc->maj_num, err_desc->min_num, err_desc->line, err_desc->func_name, err_desc->file_name,
+            err_desc->desc);
+    fprintf(stderr, "Expected: maj_num = %" PRIxHID ", min_num = %" PRIxHID "\n", expected_g[n].maj_num,
+            expected_g[n].min_num);
     error_flag_g = -1;
 
     return SUCCEED;
 }
 
 void
-cleanup_error(void)
+cleanup_error(void H5_ATTR_UNUSED *params)
 {
-    HDunlink(FILENAME);
+    if (GetTestCleanup()) {
+        HDunlink(FILENAME);
+    }
 }
 
-#endif /*H5_HAVE_THREADSAFE*/
+#endif /* H5_HAVE_THREADSAFE_API */

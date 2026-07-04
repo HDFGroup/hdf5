@@ -1,5 +1,10 @@
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_TOOLS_SRC_H5PERF C)
+
+# --------------------------------------------------------------------
+# CMake configuration for h5perf tool and its parallel variant
+# Defines build, linking, formatting, and installation rules for h5perf tools
+# --------------------------------------------------------------------
 
 # --------------------------------------------------------------------
 # h5perf_serial
@@ -10,7 +15,7 @@ set (h5perf_serial_SOURCES
 )
 add_executable (h5perf_serial ${h5perf_serial_SOURCES})
 target_include_directories (h5perf_serial PRIVATE "${HDF5_TEST_SRC_DIR};${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-if (BUILD_STATIC_LIBS)
+if (HDF5_BUILD_STATIC_TOOLS)
   TARGET_C_PROPERTIES (h5perf_serial STATIC)
   target_link_libraries (h5perf_serial PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 else ()
@@ -36,7 +41,7 @@ if (H5_HAVE_PARALLEL)
   )
   add_executable (h5perf ${h5perf_SOURCES})
   target_include_directories (h5perf PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-  if (BUILD_STATIC_LIBS)
+  if (HDF5_BUILD_STATIC_TOOLS)
     TARGET_C_PROPERTIES (h5perf STATIC)
     target_link_libraries (h5perf PRIVATE ${LINK_LIBS} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET}  "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>")
   else ()
@@ -46,16 +51,22 @@ if (H5_HAVE_PARALLEL)
   set_target_properties (h5perf PROPERTIES FOLDER perform)
   set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5perf")
 
-  set (H5_DEP_EXECUTABLES h5perf)
+  set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5perf)
 
   if (HDF5_ENABLE_FORMATTERS)
     clang_format (HDF5_TOOLS_SRC_H5PERF_h5perf_FORMAT h5perf)
   endif ()
 endif ()
 
-#-----------------------------------------------------------------------------
+##############################################################################
+##############################################################################
+###           I N S T A L L A T I O N                                      ###
+##############################################################################
+##############################################################################
+
+# --------------------------------------------------------------------
 # Rules for Installation of tools using make Install target
-#-----------------------------------------------------------------------------
+# --------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)
   foreach (exec ${H5_DEP_EXECUTABLES})
     INSTALL_PROGRAM_PDB (${exec} ${HDF5_INSTALL_BIN_DIR} toolsapplications)

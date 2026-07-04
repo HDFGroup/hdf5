@@ -1,18 +1,23 @@
 name: clang-format Check
 on:
   pull_request:
+
+permissions:
+  contents: read
+
 jobs:
   formatting-check:
     name: Formatting Check
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'skip-ci')"
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
     - name: Run clang-format style check for C and Java code
-      uses: DoozyX/clang-format-lint-action@v0.13
+      uses: DoozyX/clang-format-lint-action@bcb4eb2cb0d707ee4f3e5cc3b456eb075f12cf73 # v0.20
       with:
         source: '.'
         extensions: 'c,h,cpp,hpp,java'
-        clangFormatVersion: 13
+        clangFormatVersion: 17
         style: file
         exclude: './config ./hl/src/H5LTanalyze.c ./hl/src/H5LTparse.c ./hl/src/H5LTparse.h ./src/H5Epubgen.h ./src/H5Einit.h ./src/H5Eterm.h ./src/H5Edefin.h ./src/H5version.h ./src/H5overflow.h'

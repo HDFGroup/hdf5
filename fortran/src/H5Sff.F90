@@ -16,7 +16,7 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the COPYING file, which can be found at the root of the source code       *
+!   the LICENSE file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
@@ -37,8 +37,9 @@
 !
 
 MODULE H5S
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR, C_INT
+
   USE H5GLOBAL
+  IMPLICIT NONE
 
 CONTAINS
 !>
@@ -58,10 +59,10 @@ CONTAINS
 
     IMPLICIT NONE
     INTEGER, INTENT(IN) :: rank
-    INTEGER(HSIZE_T), INTENT(IN) :: dims(rank)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(1:rank) :: dims
     INTEGER(HID_T), INTENT(OUT) :: space_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HSIZE_T), OPTIONAL, INTENT(IN) :: maxdims(rank)
+    INTEGER(HSIZE_T), INTENT(IN), OPTIONAL, DIMENSION(1:rank) :: maxdims
     INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:) :: f_maxdims
 
     INTERFACE
@@ -70,7 +71,7 @@ CONTAINS
          IMPLICIT NONE
          INTEGER, INTENT(IN) :: rank
          INTEGER(HSIZE_T), INTENT(IN) :: dims(rank)
-         INTEGER(HSIZE_T), DIMENSION(:),INTENT(IN) :: maxdims(rank)
+         INTEGER(HSIZE_T), INTENT(IN) :: maxdims(rank)
          INTEGER(HID_T), INTENT(OUT) :: space_id
        END FUNCTION h5screate_simple_c
     END INTERFACE
@@ -81,9 +82,9 @@ CONTAINS
        RETURN
     ENDIF
     IF (PRESENT(maxdims)) THEN
-       f_maxdims = maxdims
+       f_maxdims(1:rank) = maxdims(1:rank)
     ELSE
-       f_maxdims = dims
+       f_maxdims(1:rank) = dims(1:rank)
     ENDIF
     hdferr = h5screate_simple_c(rank, dims, f_maxdims, space_id)
     DEALLOCATE(f_maxdims)
@@ -311,7 +312,7 @@ CONTAINS
 !! \brief Gets the list of element points currently selected.
 !!
 !! \param space_id   Dataspace identifier.
-!! \param startpoint Element point to start with.
+!! \param startpoint Element point to start with, \Bold{0-based indices}.
 !! \param num_points Number of element points to get.
 !! \param buf        Buffer with element points selected.
 !! \param hdferr     \fortran_error
@@ -434,6 +435,91 @@ CONTAINS
     hdferr = h5sselect_all_c(space_id)
 
   END SUBROUTINE h5sselect_all_f
+
+!>
+!! \ingroup FH5S
+!!
+!! \brief Checks if two selections are the same shape.
+!!
+!! \param space1_id Dataspace identifier
+!! \param space2_id Dataspace identifier
+!! \param same      Value of check
+!! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5Sselect_shape_same()
+!!
+  SUBROUTINE H5Sselect_shape_same_f(space1_id, space2_id, same, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: space1_id
+    INTEGER(HID_T), INTENT(IN)  :: space2_id
+    LOGICAL       , INTENT(OUT) :: same
+    INTEGER       , INTENT(OUT) :: hdferr
+
+    INTEGER(C_INT) :: c_same
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Sselect_shape_same(space1_id, space2_id) BIND(C,NAME='H5Sselect_shape_same')
+         IMPORT :: C_INT, HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: space1_id
+         INTEGER(HID_T), VALUE :: space2_id
+       END FUNCTION H5Sselect_shape_same
+    END INTERFACE
+
+    c_same = H5Sselect_shape_same(space1_id, space2_id)
+
+    same = .FALSE.
+    IF(c_same .GT. 0_C_INT) same = .TRUE.
+
+    hdferr = 0
+    IF(c_same .LT. 0_C_INT) hdferr = -1
+
+  END SUBROUTINE H5Sselect_shape_same_f
+
+!>
+!! \ingroup FH5S
+!!
+!! \brief Checks if current selection intersects with a block.
+!!
+!! \param space_id   Dataspace identifier
+!! \param istart     Starting coordinate of the block
+!! \param iend	     Opposite ("ending") coordinate of the block
+!! \param intersects Dataspace intersects with the block specified
+!! \param hdferr     \fortran_error
+!!
+!! See C API: @ref H5Sselect_intersect_block()
+!!
+
+  SUBROUTINE H5Sselect_intersect_block_f(space_id, istart, iend, intersects, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T)  ,               INTENT(IN)  :: space_id
+    INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: istart
+    INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: iend
+    LOGICAL, INTENT(OUT) :: intersects
+    INTEGER, INTENT(OUT) :: hdferr
+
+    INTEGER(C_INT) :: c_intersects
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Sselect_intersect_block(space_id, istart, iend) &
+            BIND(C,NAME='H5Sselect_intersect_block')
+         IMPORT :: C_INT, HID_T, HSIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE  :: space_id
+         INTEGER(HSIZE_T), DIMENSION(*) :: istart
+         INTEGER(HSIZE_T), DIMENSION(*) :: iend
+       END FUNCTION H5Sselect_intersect_block
+    END INTERFACE
+
+    c_intersects = H5Sselect_intersect_block(space_id, istart, iend)
+
+    intersects = .FALSE.
+    IF(c_intersects .GT. 0_C_INT) intersects = .TRUE.
+
+    hdferr = 0
+    IF(c_intersects .LT. 0_C_INT) hdferr = -1
+
+  END SUBROUTINE H5Sselect_intersect_block_f
 
 !>
 !! \ingroup FH5S
@@ -807,7 +893,11 @@ CONTAINS
 !! \param operator Flag, valid values are:
 !!                 \li H5S_SELECT_SET_F
 !!                 \li H5S_SELECT_OR_F
-!! \param start    Array with hyperslab offsets.
+!!                 \li H5S_SELECT_AND_F
+!!                 \li H5S_SELECT_XOR_F
+!!                 \li H5S_SELECT_NOTB_F
+!!                 \li H5S_SELECT_NOTA_F
+!! \param start    Array with hyperslab offsets, \Bold{0-based indices}.
 !! \param count    Number of blocks included in the hyperslab.
 !! \param hdferr   \fortran_error
 !! \param stride   Array with hyperslab strides.
@@ -823,8 +913,8 @@ CONTAINS
     INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: start
     INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: count
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HSIZE_T), DIMENSION(:), OPTIONAL, INTENT(IN) :: stride
-    INTEGER(HSIZE_T), DIMENSION(:), OPTIONAL, INTENT(IN) :: BLOCK
+    INTEGER(HSIZE_T), DIMENSION(:), INTENT(IN), OPTIONAL :: stride
+    INTEGER(HSIZE_T), DIMENSION(:), INTENT(IN), OPTIONAL :: BLOCK
     INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: def_block
     INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: def_stride
     INTEGER :: rank
@@ -914,8 +1004,6 @@ CONTAINS
 !                          H5S_SELECT_XOR_F
 !                          H5S_SELECT_NOTB_F
 !                          H5S_SELECT_NOTA_F
-!                          H5S_SELECT_APPEND_F
-!                          H5S_SELECT_PREPEND_F
 !            start            - array with hyperslab offsets
 !            count            - number of blocks included in the
 !                          hyperslab
@@ -927,13 +1015,6 @@ CONTAINS
 ! OPTIONAL PARAMETERS
 !            stride            - array with hyperslab strides
 !            block            - array with hyperslab block sizes
-!
-! AUTHOR
-!      Elena Pourmal
-!            October 7, 2002
-!
-! HISTORY
-!
 !
 ! NOTES
 ! Commented out until 1.6 ? 10/08/2002
@@ -1043,13 +1124,6 @@ CONTAINS
 !                               Failure: -1
 ! OPTIONAL PARAMETERS            - NONE
 !
-! AUTHOR
-!      Elena Pourmal
-!            October 7, 2002
-!
-! HISTORY
-!
-!
 ! NOTES commented out until 1.6 release(?) 10/08/2002
 !
 !
@@ -1105,13 +1179,6 @@ CONTAINS
 !                               Success:  0
 !                               Failure: -1
 ! OPTIONAL PARAMETERS            - NONE
-!
-! AUTHOR
-!      Elena Pourmal
-!            October 7, 2002
-!
-! HISTORY
-!
 !
 ! NOTESCommented out until 1.6 release(?) 10/08/2002 EIP
 !
@@ -1225,7 +1292,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(OUT) :: buf
     INTEGER(SIZE_T), INTENT(INOUT) :: nalloc
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: fapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: fapl_id
     INTEGER(HID_T) :: fapl_id_default
 
     INTERFACE
@@ -1379,5 +1446,149 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE H5Sis_regular_hyperslab_f
+
+!>
+!! \ingroup FH5S
+!!
+!! \brief Closes a dataspace selection iterator.
+!!
+!! \param sel_iter_id Dataspace selection iterator identifier
+!! \param hdferr      \fortran_error
+!!
+!! See C API: @ref H5Ssel_iter_close()
+!!
+  SUBROUTINE h5ssel_iter_close_f(sel_iter_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: sel_iter_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Ssel_iter_close(sel_iter_id) &
+            BIND(C,NAME='H5Ssel_iter_close')
+         IMPORT :: HID_T, C_INT
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: sel_iter_id
+       END FUNCTION H5Ssel_iter_close
+    END INTERFACE
+
+    hdferr = INT(h5ssel_iter_close(sel_iter_id), C_INT)
+
+  END SUBROUTINE h5ssel_iter_close_f
+
+!>
+!! \ingroup FH5S
+!!
+!! \brief Creates a dataspace selection iterator for a dataspace's selection.
+!!
+!! \param space_id    Dataspace identifier
+!! \param elmt_size   Size of element in the selection
+!! \param flags       Selection iterator flag, valid values are:
+!!                    \li H5S_SEL_ITER_GET_SEQ_LIST_SORTED_F, ref. @ref H5S_SEL_ITER_GET_SEQ_LIST_SORTED
+!!                    \li H5S_SEL_ITER_SHARE_WITH_DATASPACE_F, ref. @ref H5S_SEL_ITER_SHARE_WITH_DATASPACE
+!! \param ds_iter_id  Dataspace selection iterator identifier
+!! \param hdferr      \fortran_error
+!!
+!! See C API: @ref H5Ssel_iter_create()
+!!
+  SUBROUTINE h5ssel_iter_create_f(space_id, elmt_size, flags, ds_iter_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN)  :: space_id
+    INTEGER(SIZE_T), INTENT(IN)  :: elmt_size
+    INTEGER        , INTENT(IN)  :: flags
+    INTEGER(HID_T) , INTENT(OUT) :: ds_iter_id
+    INTEGER        , INTENT(OUT) :: hdferr
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Ssel_iter_create(space_id, elmt_size, flags) &
+            BIND(C,NAME='H5Ssel_iter_create')
+         IMPORT :: HID_T, C_INT, SIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T) , VALUE :: space_id
+         INTEGER(SIZE_T), VALUE :: elmt_size
+         INTEGER(C_INT) , VALUE :: flags
+       END FUNCTION H5Ssel_iter_create
+    END INTERFACE
+
+    ds_iter_id = H5Ssel_iter_create(space_id, elmt_size, INT(flags, C_INT))
+
+    hdferr = 0
+    IF(ds_iter_id.LT.0) hdferr = -1
+
+  END SUBROUTINE h5ssel_iter_create_f
+
+!>
+!! \ingroup FH5S
+!!
+!! \brief Retrieves a list of offset / length sequences for the elements in an iterator.
+!!
+!! \param sel_iter_id Dataspace selection iterator identifier
+!! \param maxseq Maximum number of sequences to retrieve
+!! \param maxbytes Maximum number of bytes to retrieve in sequences
+!! \param nseq Number of sequences retrieved
+!! \param nbytes Number of bytes retrieved, in all sequences
+!! \param off Array of sequence offsets
+!! \param len Array of sequence lengths
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5Ssel_iter_get_seq_list()
+!!
+  SUBROUTINE h5ssel_iter_get_seq_list_f(sel_iter_id, maxseq, maxbytes, nseq, nbytes, off, len, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN) :: sel_iter_id
+    INTEGER(SIZE_T), INTENT(IN) :: maxseq
+    INTEGER(SIZE_T), INTENT(IN) :: maxbytes
+    INTEGER(SIZE_T), INTENT(OUT) :: nseq
+    INTEGER(SIZE_T), INTENT(OUT) :: nbytes
+    INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: off
+    INTEGER(SIZE_T), DIMENSION(*), INTENT(OUT) :: len
+    INTEGER, INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Ssel_iter_get_seq_list(sel_iter_id, maxseq, maxbytes, nseq, nbytes, off, len) &
+                      BIND(C,NAME='H5Ssel_iter_get_seq_list')
+         IMPORT :: HID_T, C_INT, SIZE_T, HSIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T) , VALUE :: sel_iter_id
+         INTEGER(SIZE_T), VALUE :: maxseq
+         INTEGER(SIZE_T), VALUE :: maxbytes
+         INTEGER(SIZE_T) :: nseq
+         INTEGER(SIZE_T) :: nbytes
+         INTEGER(HSIZE_T), DIMENSION(*) :: off
+         INTEGER(SIZE_T), DIMENSION(*) :: len
+       END FUNCTION H5Ssel_iter_get_seq_list
+    END INTERFACE
+
+    hdferr = INT(H5Ssel_iter_get_seq_list(sel_iter_id, maxseq, maxbytes, nseq, nbytes, off, len), C_INT)
+
+  END SUBROUTINE h5ssel_iter_get_seq_list_f
+
+!>
+!! \ingroup FH5S
+!!
+!! \brief Resets a dataspace selection iterator back to an initial state.
+!!
+!! \param sel_iter_id Identifier of the dataspace selection iterator to reset
+!! \param space_id    Identifier of the dataspace with selection to iterate over
+!! \param hdferr      \fortran_error
+!!
+!! See C API: @ref H5Ssel_iter_reset()
+!!
+  SUBROUTINE h5ssel_iter_reset_f(sel_iter_id, space_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: sel_iter_id
+    INTEGER(HID_T), INTENT(IN) :: space_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Ssel_iter_reset(sel_iter_id, space_id) &
+            BIND(C,NAME='H5Ssel_iter_reset')
+         IMPORT :: HID_T, C_INT
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: sel_iter_id
+         INTEGER(HID_T), VALUE :: space_id
+       END FUNCTION H5Ssel_iter_reset
+    END INTERFACE
+
+    hdferr = INT(h5ssel_iter_reset(sel_iter_id, space_id), C_INT)
+
+  END SUBROUTINE h5ssel_iter_reset_f
+
 
 END MODULE H5S

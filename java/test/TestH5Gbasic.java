@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -88,11 +88,10 @@ public class TestH5Gbasic {
         System.out.println();
     }
 
-    @Test //(expected = HDF5LibraryException.class)
+    @Test(expected = HDF5LibraryException.class)
     public void testH5Gclose_invalid() throws Throwable
     {
         long gid = H5.H5Gclose(-1);
-        assertTrue(gid == 0);
     }
 
     @Test(expected = NullPointerException.class)

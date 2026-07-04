@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -17,6 +17,12 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.lang.foreign.MemoryLayout;
+import java.lang.foreign.MemoryLayout.PathElement;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SequenceLayout;
+import java.lang.foreign.ValueLayout;
+import java.lang.invoke.VarHandle;
 import java.util.ArrayList;
 
 import hdf.hdf5lib.H5;
@@ -27,6 +33,7 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5L_info_t;
 
+import org.hdfgroup.javahdf5.H5L_info2_t;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -517,7 +524,7 @@ public class TestH5Lcreate {
         assertTrue("Link Type", link_type == HDF5Constants.H5L_TYPE_EXTERNAL);
         assertFalse("H5Lget_value ", link_value[0] == null);
         assertFalse("H5Lget_value ", link_value[1] == null);
-        assertTrue("Link Value ", link_value[0].compareTo("DT1") == 0);
+        assertTrue("Link Value " + link_value[0], link_value[0].compareTo("DT1") == 0);
     }
 
     @Test(expected = HDF5LibraryException.class)
@@ -686,8 +693,8 @@ public class TestH5Lcreate {
             err.printStackTrace();
             fail("H5.H5Lget_info_by_idx: " + err);
         }
-        assertFalse("testH5Lget_value_by_idx_ext ", link_info == null);
-        assertTrue("testH5Lget_value_by_idx_ext link type " + link_info.type,
+        assertFalse("testH5Lget_value_by_idx ", link_info == null);
+        assertTrue("testH5Lget_value_by_idx link type " + link_info.type,
                    link_info.type == HDF5Constants.H5L_TYPE_EXTERNAL);
         try {
             link_type =
@@ -721,8 +728,8 @@ public class TestH5Lcreate {
             err.printStackTrace();
             fail("H5.H5Lget_info_by_idx: " + err);
         }
-        assertFalse("testH5Lget_value_by_idx_ext ", link_info == null);
-        assertTrue("testH5Lget_value_by_idx_ext link type " + link_info.type,
+        assertFalse("testH5Lget_value_by_idx ", link_info == null);
+        assertTrue("testH5Lget_value_by_idx link type " + link_info.type,
                    link_info.type == HDF5Constants.H5L_TYPE_EXTERNAL);
         try {
             link_type =
@@ -856,14 +863,15 @@ public class TestH5Lcreate {
             }
         }
         class H5L_iter_data implements H5L_iterate_opdata_t {
-            public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static void add_iter_data(idata id) { iterdata.add(id); }
         }
         H5L_iterate_opdata_t iter_data = new H5L_iter_data();
         class H5L_iter_callback implements H5L_iterate_t {
-            public int callback(long group, String name, H5L_info_t info, H5L_iterate_opdata_t op_data)
+            public int apply(long group, MemorySegment name, MemorySegment info, MemorySegment op_data)
             {
-                idata id = new idata(name, info.type);
-                ((H5L_iter_data)op_data).iterdata.add(id);
+                idata id = new idata(name.getString(0), H5L_info2_t.type(info));
+                ((H5L_iter_data)iter_data).add_iter_data(id);
                 return 0;
             }
         }
@@ -928,14 +936,15 @@ public class TestH5Lcreate {
             }
         }
         class H5L_iter_data implements H5L_iterate_opdata_t {
-            public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static void add_iter_data(idata id) { iterdata.add(id); }
         }
         H5L_iterate_opdata_t iter_data = new H5L_iter_data();
         class H5L_iter_callback implements H5L_iterate_t {
-            public int callback(long group, String name, H5L_info_t info, H5L_iterate_opdata_t op_data)
+            public int apply(long group, MemorySegment name, MemorySegment info, MemorySegment op_data)
             {
-                idata id = new idata(name, info.type);
-                ((H5L_iter_data)op_data).iterdata.add(id);
+                idata id = new idata(name.getString(0), H5L_info2_t.type(info));
+                ((H5L_iter_data)iter_data).add_iter_data(id);
                 return 0;
             }
         }

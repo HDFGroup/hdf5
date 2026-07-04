@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -54,6 +54,7 @@
 #define H5D_ACS_VDS_PREFIX_NAME           "vds_prefix"           /* VDS file prefix */
 #define H5D_ACS_APPEND_FLUSH_NAME         "append_flush"         /* Append flush actions */
 #define H5D_ACS_EFILE_PREFIX_NAME         "external file prefix" /* External file prefix */
+#define H5D_ACS_USE_TREE_NAME             "tree"                 /* Whether to use spatial tree */
 
 /* ======== Data transfer properties ======== */
 #define H5D_XFER_MAX_TEMP_BUF_NAME          "max_temp_buf"        /* Maximum temp buffer size */
@@ -78,12 +79,16 @@
 #define H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME                                                              \
     "local_no_collective_cause" /* cause of broken collective I/O in each process */
 #define H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME                                                             \
-    "global_no_collective_cause"                      /* cause of broken collective I/O in all processes */
-#define H5D_XFER_EDC_NAME         "err_detect"        /* EDC */
-#define H5D_XFER_FILTER_CB_NAME   "filter_cb"         /* Filter callback function */
-#define H5D_XFER_CONV_CB_NAME     "type_conv_cb"      /* Type conversion callback function */
-#define H5D_XFER_XFORM_NAME       "data_transform"    /* Data transform */
-#define H5D_XFER_DSET_IO_SEL_NAME "dset_io_selection" /* Dataset I/O selection */
+    "global_no_collective_cause" /* cause of broken collective I/O in all processes */
+#define H5D_XFER_EDC_NAME                      "err_detect"            /* EDC */
+#define H5D_XFER_FILTER_CB_NAME                "filter_cb"             /* Filter callback function */
+#define H5D_XFER_CONV_CB_NAME                  "type_conv_cb"          /* Type conversion callback function */
+#define H5D_XFER_XFORM_NAME                    "data_transform"        /* Data transform */
+#define H5D_XFER_DSET_IO_SEL_NAME              "dset_io_selection"     /* Dataset I/O selection */
+#define H5D_XFER_SELECTION_IO_MODE_NAME        "selection_io_mode"     /* Selection I/O mode */
+#define H5D_XFER_NO_SELECTION_IO_CAUSE_NAME    "no_selection_io_cause" /* Cause for no selection I/O */
+#define H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME "actual_selection_io_mode" /* Actual selection I/O mode */
+#define H5D_XFER_MODIFY_WRITE_BUF_NAME         "modify_write_buf"         /* Modify write buffers */
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
 /* Collective chunk instrumentation properties */
 #define H5D_XFER_COLL_CHUNK_LINK_HARD_NAME        "coll_chunk_link_hard"
@@ -101,8 +106,8 @@
 #define H5D_XFER_COLL_RANK0_BCAST_NAME "coll_rank0_bcast"
 
 /* Definitions for general collective I/O instrumentation properties */
-#define H5D_XFER_COLL_RANK0_BCAST_SIZE sizeof(hbool_t)
-#define H5D_XFER_COLL_RANK0_BCAST_DEF  FALSE
+#define H5D_XFER_COLL_RANK0_BCAST_SIZE sizeof(bool)
+#define H5D_XFER_COLL_RANK0_BCAST_DEF  false
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
 /* Default temporary buffer size */
@@ -120,12 +125,22 @@
 /* Default virtual dataset list size */
 #define H5D_VIRTUAL_DEF_LIST_SIZE 8
 
+/* Threshold for use of a tree for VDS mappings */
+#define H5D_VIRTUAL_TREE_THRESHOLD 50
+
+#ifdef H5D_MODULE
+#define H5D_OBJ_ID(D) (((H5D_obj_create_t *)(D))->dcpl_id)
+#else /* H5D_MODULE */
+#define H5D_OBJ_ID(D) (H5D_get_dcpl_id(D))
+#endif
+
 /****************************/
 /* Library Private Typedefs */
 /****************************/
 
 /* Typedef for dataset in memory (defined in H5Dpkg.h) */
-typedef struct H5D_t H5D_t;
+typedef struct H5D_t            H5D_t;
+typedef struct H5D_obj_create_t H5D_obj_create_t;
 
 /* Typedef for cached dataset creation property list information */
 typedef struct H5D_dcpl_cache_t {
@@ -167,9 +182,11 @@ H5_DLL H5G_name_t *H5D_nameof(H5D_t *dataset);
 H5_DLL herr_t      H5D_flush_all(H5F_t *f);
 H5_DLL hid_t       H5D_get_create_plist(const H5D_t *dset);
 H5_DLL hid_t       H5D_get_access_plist(const H5D_t *dset);
+H5_DLL hid_t       H5D_get_dcpl_id(const H5D_obj_create_t *d);
+H5_DLL herr_t      H5D_flush_layout_to_dcpl(const H5D_t *dset);
 
 /* Functions that operate on chunked storage */
-H5_DLL herr_t H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr);
+H5_DLL herr_t H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, bool reset_addr);
 
 /* Functions that operate on virtual storage */
 H5_DLL herr_t H5D_virtual_check_mapping_pre(const H5S_t *vspace, const H5S_t *src_space,

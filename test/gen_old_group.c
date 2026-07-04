@@ -4,21 +4,18 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Oct 24, 2005
- *
  * Purpose:     This program is run to generate an HDF5 data file with an
  *              empty "symbol table" group.
  *
  *              This file is used in the v1.7 branch (after the "compact group"
- *              checkin) to test compatibility.  Compile and run this
+ *              commit) to test compatibility.  Compile and run this
  *              program (with the 1.6.x branch), it will generate a file*
  *              called "group_old.h5".  You need to move it to the test
  *              directory in the HDF5 v1.7 source tree.  The test/stab.c
@@ -33,8 +30,8 @@
 int
 main(void)
 {
-    hid_t fid = -1; /* File ID */
-    hid_t gid = -1; /* Group creation property list ID */
+    hid_t fid = H5I_INVALID_HID; /* File ID */
+    hid_t gid = H5I_INVALID_HID; /* Group creation property list ID */
 
     /* Create file for test groups */
     if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -58,6 +55,6 @@ error:
         H5Dclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }

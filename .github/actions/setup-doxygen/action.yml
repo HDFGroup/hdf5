@@ -1,0 +1,14 @@
+name: 'Setup Doxygen'
+description: 'Install Doxygen with version that supports Fortran cross-references'
+inputs:
+  version:
+    description: 'Doxygen version to install'
+    required: false
+    default: '1.16.1'
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Doxygen
+      uses: ssciwr/doxygen-install@f13be1686235deee0aeb6cdf56640170691dc96b # v1
+      with:
+        version: ${{ inputs.version }}

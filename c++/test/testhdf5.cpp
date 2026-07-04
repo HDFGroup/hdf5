@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -32,8 +32,6 @@
         PerformTests() -- Perform requested testing
         GetTestSummary() -- Retrieve Summary request value
         TestSummary() -- Display test summary
-        GetTestCleanup() -- Retrieve Cleanup request value
-        TestCleanup() -- Clean up files from testing
         GetTestNumErrs() -- Retrieve the number of testing errors
 
  ***************************************************************************/
@@ -57,42 +55,42 @@ main(int argc, char *argv[])
         // caused deliberately and expected.
         Exception::dontPrint();
         /* Initialize testing framework */
-        TestInit(argv[0], NULL, NULL);
+        TestInit(argv[0], NULL, NULL, NULL, NULL, 0);
 
         // testing file creation and opening in tfile.cpp
-        AddTest("tfile", test_file, cleanup_file, "File I/O Operations", NULL);
+        AddTest("tfile", test_file, NULL, cleanup_file, NULL, 0, "File I/O Operations");
         // testing dataset functionalities in dset.cpp
-        AddTest("dsets", test_dset, cleanup_dsets, "Dataset I/O Operations", NULL);
+        AddTest("dsets", test_dset, NULL, cleanup_dsets, NULL, 0, "Dataset I/O Operations");
         // testing dataspace functionalities in th5s.cpp
-        AddTest("th5s", test_h5s, cleanup_h5s, "Dataspaces", NULL);
+        AddTest("th5s", test_h5s, NULL, cleanup_h5s, NULL, 0, "Dataspaces");
         // testing attribute functionalities in tattr.cpp
-        AddTest("tattr", test_attr, cleanup_attr, "Attributes", NULL);
+        AddTest("tattr", test_attr, NULL, cleanup_attr, NULL, 0, "Attributes");
         // testing object functionalities in tobject.cpp
-        AddTest("tobject", test_object, cleanup_object, "Objects", NULL);
+        AddTest("tobject", test_object, NULL, cleanup_object, NULL, 0, "Objects");
         // testing reference functionalities in trefer.cpp
-        AddTest("trefer", test_reference, cleanup_reference, "References", NULL);
+        AddTest("trefer", test_reference, NULL, cleanup_reference, NULL, 0, "References");
         // testing variable-length strings in tvlstr.cpp
-        AddTest("tvlstr", test_vlstrings, cleanup_vlstrings, "Variable-Length Strings", NULL);
-        AddTest("ttypes", test_types, cleanup_types, "Generic Data Types", NULL);
-        AddTest("tarray", test_array, cleanup_array, "Array Datatypes", NULL);
-        AddTest("tcompound", test_compound, cleanup_compound, "Compound Data Types", NULL);
-        AddTest("tdspl", test_dsproplist, cleanup_dsproplist, "Dataset Property List", NULL);
-        AddTest("tfilter", test_filters, cleanup_filters, "Various Filters", NULL);
-        AddTest("tlinks", test_links, cleanup_links, "Various Links", NULL);
+        AddTest("tvlstr", test_vlstrings, NULL, cleanup_vlstrings, NULL, 0, "Variable-Length Strings");
+        AddTest("ttypes", test_types, NULL, cleanup_types, NULL, 0, "Generic Data Types");
+        AddTest("tarray", test_array, NULL, cleanup_array, NULL, 0, "Array Datatypes");
+        AddTest("tcompound", test_compound, NULL, cleanup_compound, NULL, 0, "Compound Data Types");
+        AddTest("tdspl", test_dsproplist, NULL, cleanup_dsproplist, NULL, 0, "Dataset Property List");
+        AddTest("tfilter", test_filters, NULL, cleanup_filters, NULL, 0, "Various Filters");
+        AddTest("tlinks", test_links, NULL, cleanup_links, NULL, 0, "Various Links");
         /* Comment out tests that are not done yet. - BMR, Feb 2001
-                AddTest("select", test_select, cleanup_select,  "Selections", NULL);
-                AddTest("time", test_time, cleanup_time,  "Time Datatypes", NULL);
-                AddTest("vltypes", test_vltypes, cleanup_vltypes,  "Variable-Length Datatypes", NULL);
+                AddTest("select", test_select, NULL, cleanup_select, NULL, 0, "Selections");
+                AddTest("time", test_time, NULL, cleanup_time, NULL, 0, "Time Datatypes");
+                AddTest("vltypes", test_vltypes, NULL, cleanup_vltypes, NULL, 0, "Variable-Length Datatypes");
         */
-        AddTest("iterate", test_iterate, cleanup_iterate, "Group & Attribute Iteration", NULL);
+        AddTest("iterate", test_iterate, NULL, cleanup_iterate, NULL, 0, "Group & Attribute Iteration");
         /*
-                AddTest("genprop", test_genprop, cleanup_genprop,  "Generic Properties", NULL);
-                AddTest("id", test_ids, NULL,  "User-Created Identifiers", NULL);
+                AddTest("genprop", test_genprop, NULL, cleanup_genprop, NULL, 0, "Generic Properties");
+                AddTest("id", test_ids, NULL, NULL, NULL, 0, "User-Created Identifiers");
 
         Comment out tests that are not done yet */
 
         /* Tentative - BMR 2007/1/12
-                AddTest("enum", test_enum, cleanup_enum,  "Enum Data Types", NULL);
+                AddTest("enum", test_enum, NULL, cleanup_enum, NULL, 0, "Enum Data Types");
         */
     }
     catch (Exception &E) {
@@ -100,7 +98,7 @@ main(int argc, char *argv[])
     }
 
     /* Display testing information */
-    TestInfo(argv[0]);
+    TestInfo(stdout);
 
     /* Parse command line arguments */
     TestParseCmdLine(argc, argv);
@@ -110,11 +108,7 @@ main(int argc, char *argv[])
 
     /* Display test summary, if requested */
     if (GetTestSummary())
-        TestSummary();
-
-    /* Clean up test files, if allowed */
-    if (GetTestCleanup() && !getenv(HDF5_NOCLEANUP))
-        TestCleanup();
+        TestSummary(stdout);
 
     /* Release test infrastructure */
     TestShutdown();

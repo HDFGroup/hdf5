@@ -1,4 +1,9 @@
-cmake_minimum_required (VERSION 3.18)
+# CMake configuration for building and testing the h5import tool
+# Adds test executable for h5importtest with proper include, linking, and formatting
+# Includes test scripts if test tools and serial tests are enabled
+# Supports both static and shared builds
+
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_TOOLS_TEST_H5IMPORT C)
 
 # --------------------------------------------------------------------

@@ -9,7 +9,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -43,9 +43,6 @@ int IntKinds_SizeOf[] = H5_FORTRAN_INTEGER_KINDS_SIZEOF;
  *                 H5f90global.F90
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 3, 1999
  * SOURCE
  */
 int_f
@@ -186,7 +183,7 @@ h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes)
     /*
      * FIND H5T_NATIVE_REAL_C_LONG_DOUBLE
      */
-#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE != 0
+#ifdef H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
     if (sizeof(real_C_LONG_DOUBLE_f) == sizeof(float)) {
         if ((types[13] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0)
             return ret_value;
@@ -195,7 +192,7 @@ h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes)
         if ((types[13] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0)
             return ret_value;
     } /*end if */
-#if H5_FORTRAN_HAVE_C_LONG_DOUBLE != 0
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
     else if (sizeof(real_C_LONG_DOUBLE_f) == sizeof(long double)) {
         if (H5_PAC_C_MAX_REAL_PRECISION >= H5_PAC_FC_MAX_REAL_PRECISION) {
             if ((types[13] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0)
@@ -247,6 +244,24 @@ h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes)
     if ((floatingtypes[2] = (hid_t_f)H5Tcopy(H5T_IEEE_F64BE)) < 0)
         return ret_value;
     if ((floatingtypes[3] = (hid_t_f)H5Tcopy(H5T_IEEE_F64LE)) < 0)
+        return ret_value;
+    if ((floatingtypes[4] = (hid_t_f)H5Tcopy(H5T_IEEE_F16BE)) < 0)
+        return ret_value;
+    if ((floatingtypes[5] = (hid_t_f)H5Tcopy(H5T_IEEE_F16LE)) < 0)
+        return ret_value;
+    if ((floatingtypes[6] = (hid_t_f)H5Tcopy(H5T_FLOAT_BFLOAT16BE)) < 0)
+        return ret_value;
+    if ((floatingtypes[7] = (hid_t_f)H5Tcopy(H5T_FLOAT_BFLOAT16LE)) < 0)
+        return ret_value;
+    if ((floatingtypes[8] = (hid_t_f)H5Tcopy(H5T_FLOAT_F8E4M3)) < 0)
+        return ret_value;
+    if ((floatingtypes[9] = (hid_t_f)H5Tcopy(H5T_FLOAT_F8E5M2)) < 0)
+        return ret_value;
+    if ((floatingtypes[10] = (hid_t_f)H5Tcopy(H5T_FLOAT_F6E2M3)) < 0)
+        return ret_value;
+    if ((floatingtypes[11] = (hid_t_f)H5Tcopy(H5T_FLOAT_F6E3M2)) < 0)
+        return ret_value;
+    if ((floatingtypes[12] = (hid_t_f)H5Tcopy(H5T_FLOAT_F4E2M1)) < 0)
         return ret_value;
 
     if ((integertypes[0] = (hid_t_f)H5Tcopy(H5T_STD_I8BE)) < 0)
@@ -301,7 +316,8 @@ h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes)
         return ret_value;
     if ((integertypes[26] = (hid_t_f)H5Tcopy(H5T_C_S1)) < 0)
         return ret_value;
-
+    if ((integertypes[27] = (hid_t_f)H5Tcopy(H5T_STD_REF)) < 0)
+        return ret_value;
     /*
      *  Define Fortran H5T_STRING type to store non-fixed size strings
      */
@@ -343,9 +359,6 @@ h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes)
  *  in the H5f90global.F90
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 3, 1999
  * SOURCE
  */
 int_f
@@ -386,6 +399,7 @@ h5close_types_c(hid_t_f *types, int_f *lentypes, hid_t_f *floatingtypes, int_f *
  *  h5d_size_flags  - H5D interface flags of type size_t
  *  h5e_flags       - H5E interface flags
  *  h5e_hid_flags   - H5E interface flags of type hid_t
+ *  h5es_flags      - H5ES interface flags
  *  h5f_flags       - H5F interface flags
  *  h5fd_flags      - H5FD interface flags
  *  h5fd_hid_flags  - H5FD interface flags of type hid_t
@@ -403,31 +417,16 @@ h5close_types_c(hid_t_f *types, int_f *lentypes, hid_t_f *floatingtypes, int_f *
  *  None
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 3, 1999
- * HISTORY
- *  Added Z flags. EIP,  March 12, 2003
- *  Added more FD flags and new H5LIB flags
- *  Added more FD flags for HDF5 file driver
- *           EIP, April 9, 2005
- *  Added Generic flags introduced in version 1.8
- *           MSB, January, 2008
- *  Added types in lines h5*_flags = ( )variable to match input
- *  Added E flags
- *           MSB, July 9, 2009
- *  Added type h5d_flags of type size_t
- *           MSB, Feb. 28, 2014
- *  Added type h5s_hid_flags of type hid_t
- *           MSB, Oct. 10, 2016
  * SOURCE
  */
 int_f
 h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid_t_f *h5e_hid_flags,
-               int_f *h5f_flags, int_f *h5fd_flags, hid_t_f *h5fd_hid_flags, int_f *h5g_flags,
-               int_f *h5i_flags, int_f *h5l_flags, int_f *h5o_flags, hid_t_f *h5p_flags, int_f *h5p_flags_int,
-               int_f *h5r_flags, int_f *h5s_flags, hid_t_f *h5s_hid_flags, hsize_t_f *h5s_hsize_flags,
-               int_f *h5t_flags, int_f *h5z_flags, int_f *h5_generic_flags, haddr_t_f *h5_haddr_generic_flags)
+               H5ES_status_t *h5es_flags, hid_t_f *h5es_hid_flags, int_f *h5f_flags, int_f *h5fd_flags,
+               hid_t_f *h5fd_hid_flags, int_f *h5g_flags, int_f *h5i_flags, int_f *h5l_flags,
+               int_f *h5o_flags, hid_t_f *h5p_flags, int_f *h5p_flags_int, int_f *h5r_flags, int_f *h5s_flags,
+               hid_t_f *h5s_hid_flags, hsize_t_f *h5s_hsize_flags, int_f *h5t_flags, int_f *h5vl_flags,
+               uint64_t *h5vl_int64_flags, int_f *h5z_flags, int_f *h5_generic_flags,
+               haddr_t_f *h5_haddr_generic_flags)
 /******/
 {
     /*
@@ -465,6 +464,41 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5d_flags[26] = (int_f)H5D_VDS_FIRST_MISSING;
     h5d_flags[27] = (int_f)H5D_VDS_LAST_AVAILABLE;
     h5d_flags[28] = (int_f)H5D_VIRTUAL;
+    h5d_flags[29] = (int_f)H5D_SELECTION_IO_MODE_DEFAULT;
+    h5d_flags[30] = (int_f)H5D_SELECTION_IO_MODE_OFF;
+    h5d_flags[31] = (int_f)H5D_SELECTION_IO_MODE_ON;
+
+    h5d_flags[32] = (int_f)H5D_MPIO_COLLECTIVE;
+    h5d_flags[33] = (int_f)H5D_MPIO_SET_INDEPENDENT;
+    h5d_flags[34] = (int_f)H5D_MPIO_DATATYPE_CONVERSION;
+    h5d_flags[35] = (int_f)H5D_MPIO_DATA_TRANSFORMS;
+    h5d_flags[36] = (int_f)H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED;
+    h5d_flags[37] = (int_f)H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES;
+    h5d_flags[38] = (int_f)H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+    h5d_flags[39] = (int_f)H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED;
+    h5d_flags[40] = (int_f)H5D_MPIO_ERROR_WHILE_CHECKING_COLLECTIVE_POSSIBLE;
+    h5d_flags[41] = (int_f)H5D_MPIO_NO_SELECTION_IO;
+    h5d_flags[42] = (int_f)H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE;
+
+    h5d_flags[43] = (int_f)H5D_SEL_IO_DISABLE_BY_API;
+    h5d_flags[44] = (int_f)H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+    h5d_flags[45] = (int_f)H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER;
+    h5d_flags[46] = (int_f)H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
+    h5d_flags[47] = (int_f)H5D_SEL_IO_PAGE_BUFFER;
+    h5d_flags[48] = (int_f)H5D_SEL_IO_DATASET_FILTER;
+    h5d_flags[49] = (int_f)H5D_SEL_IO_CHUNK_CACHE;
+    h5d_flags[50] = (int_f)H5D_SEL_IO_TCONV_BUF_TOO_SMALL;
+    h5d_flags[51] = (int_f)H5D_SEL_IO_BKG_BUF_TOO_SMALL;
+    h5d_flags[52] = (int_f)H5D_SEL_IO_DEFAULT_OFF;
+    h5d_flags[53] = (int_f)H5D_MPIO_NO_SELECTION_IO_CAUSES;
+
+    h5d_flags[54] = (int_f)H5D_MPIO_NO_CHUNK_OPTIMIZATION;
+    h5d_flags[55] = (int_f)H5D_MPIO_LINK_CHUNK;
+    h5d_flags[56] = (int_f)H5D_MPIO_MULTI_CHUNK;
+
+    h5d_flags[57] = (int_f)H5D_SCALAR_IO;
+    h5d_flags[58] = (int_f)H5D_VECTOR_IO;
+    h5d_flags[59] = (int_f)H5D_SELECTION_IO;
 
     /*
      *  H5E flags
@@ -475,6 +509,15 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5e_flags[1] = (int_f)H5E_MINOR;
     h5e_flags[2] = (int_f)H5E_WALK_UPWARD;
     h5e_flags[3] = (int_f)H5E_WALK_DOWNWARD;
+    /*
+     *  H5ES flags
+     */
+    h5es_hid_flags[0] = (hid_t_f)H5ES_NONE;
+
+    h5es_flags[0] = H5ES_STATUS_IN_PROGRESS;
+    h5es_flags[1] = H5ES_STATUS_SUCCEED;
+    h5es_flags[2] = H5ES_STATUS_CANCELED;
+    h5es_flags[3] = H5ES_STATUS_FAIL;
 
     /*
      *  H5F flags
@@ -505,10 +548,18 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5f_flags[18] = (int_f)H5F_LIBVER_ERROR;
     h5f_flags[19] = (int_f)H5F_LIBVER_NBOUNDS;
     h5f_flags[20] = (int_f)H5F_UNLIMITED;
-    h5f_flags[21] = (int_f)H5F_LIBVER_V18;
-    h5f_flags[22] = (int_f)H5F_LIBVER_V110;
-    h5f_flags[23] = (int_f)H5F_LIBVER_V112;
-    h5f_flags[24] = (int_f)H5F_LIBVER_V114;
+    h5f_flags[21] = (int_f)H5F_FSPACE_STRATEGY_FSM_AGGR;
+    h5f_flags[22] = (int_f)H5F_FSPACE_STRATEGY_PAGE;
+    h5f_flags[23] = (int_f)H5F_FSPACE_STRATEGY_AGGR;
+    h5f_flags[24] = (int_f)H5F_FSPACE_STRATEGY_NONE;
+    h5f_flags[25] = (int_f)H5F_FSPACE_STRATEGY_NTYPES;
+    h5f_flags[26] = (int_f)H5F_LIBVER_V18;
+    h5f_flags[27] = (int_f)H5F_LIBVER_V110;
+    h5f_flags[28] = (int_f)H5F_LIBVER_V112;
+    h5f_flags[29] = (int_f)H5F_LIBVER_V114;
+    h5f_flags[30] = (int_f)H5F_LIBVER_V200;
+    h5f_flags[31] = (int_f)H5F_ACC_SWMR_READ;
+    h5f_flags[32] = (int_f)H5F_ACC_SWMR_WRITE;
 
     /*
      *  H5FD flags
@@ -537,17 +588,17 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5fd_flags[20] = (int_f)SELECT_IOC_TOTAL;
     h5fd_flags[21] = (int_f)ioc_selection_options;
 #else
-    h5fd_flags[11]    = 0;
-    h5fd_flags[12]    = 0;
-    h5fd_flags[13]    = 0;
-    h5fd_flags[14]    = 0;
-    h5fd_flags[15]    = 0;
-    h5fd_flags[16]    = 0;
-    h5fd_flags[17]    = 0;
-    h5fd_flags[18]    = 0;
-    h5fd_flags[19]    = 0;
-    h5fd_flags[20]    = 0;
-    h5fd_flags[21]    = 0;
+    h5fd_flags[11] = 0;
+    h5fd_flags[12] = 0;
+    h5fd_flags[13] = 0;
+    h5fd_flags[14] = 0;
+    h5fd_flags[15] = 0;
+    h5fd_flags[16] = 0;
+    h5fd_flags[17] = 0;
+    h5fd_flags[18] = 0;
+    h5fd_flags[19] = 0;
+    h5fd_flags[20] = 0;
+    h5fd_flags[21] = 0;
 #endif
 
     /*
@@ -737,11 +788,20 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
      */
     h5r_flags[0] = (int_f)H5R_OBJECT;
     h5r_flags[1] = (int_f)H5R_DATASET_REGION;
+    h5r_flags[2] = (int_f)H5R_BADTYPE;
+    h5r_flags[3] = (int_f)H5R_OBJECT1;
+    h5r_flags[4] = (int_f)H5R_DATASET_REGION1;
+    h5r_flags[5] = (int_f)H5R_OBJECT2;
+    h5r_flags[6] = (int_f)H5R_DATASET_REGION2;
+    h5r_flags[7] = (int_f)H5R_ATTR;
+    h5r_flags[8] = (int_f)H5R_MAXTYPE;
 
     /*
      *  H5S flags
      */
     h5s_hid_flags[0] = (hid_t_f)H5S_ALL;
+    h5s_hid_flags[1] = (hid_t_f)H5S_BLOCK;
+    h5s_hid_flags[2] = (hid_t_f)H5S_PLIST;
 
     h5s_hsize_flags[0] = (hsize_t_f)H5S_UNLIMITED;
 
@@ -766,6 +826,9 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5s_flags[15] = (int_f)H5S_SEL_POINTS;
     h5s_flags[16] = (int_f)H5S_SEL_HYPERSLABS;
     h5s_flags[17] = (int_f)H5S_SEL_ALL;
+
+    h5s_flags[18] = (int_f)H5S_SEL_ITER_GET_SEQ_LIST_SORTED;
+    h5s_flags[19] = (int_f)H5S_SEL_ITER_SHARE_WITH_DATASPACE;
 
     /*
      *  H5T flags
@@ -805,6 +868,67 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5t_flags[32] = (int_f)H5T_ARRAY;
     h5t_flags[33] = (int_f)H5T_DIR_ASCEND;
     h5t_flags[34] = (int_f)H5T_DIR_DESCEND;
+    h5t_flags[35] = (int_f)H5T_COMPLEX;
+
+    /*
+     *  H5VL flags
+     */
+
+    /*
+     * Capability flags for VOL connectors
+     */
+
+    h5vl_flags[0] = (int_f)H5VL_VERSION;
+    h5vl_flags[1] = (int_f)H5_VOL_INVALID;
+    h5vl_flags[2] = (int_f)H5_VOL_NATIVE;
+
+    h5vl_int64_flags[0]  = H5VL_CAP_FLAG_NONE;
+    h5vl_int64_flags[1]  = H5VL_CAP_FLAG_THREADSAFE;
+    h5vl_int64_flags[2]  = H5VL_CAP_FLAG_ASYNC;
+    h5vl_int64_flags[3]  = H5VL_CAP_FLAG_NATIVE_FILES;
+    h5vl_int64_flags[4]  = H5VL_CAP_FLAG_ATTR_BASIC;
+    h5vl_int64_flags[5]  = H5VL_CAP_FLAG_ATTR_MORE;
+    h5vl_int64_flags[6]  = H5VL_CAP_FLAG_DATASET_BASIC;
+    h5vl_int64_flags[7]  = H5VL_CAP_FLAG_DATASET_MORE;
+    h5vl_int64_flags[8]  = H5VL_CAP_FLAG_FILE_BASIC;
+    h5vl_int64_flags[9]  = H5VL_CAP_FLAG_FILE_MORE;
+    h5vl_int64_flags[10] = H5VL_CAP_FLAG_GROUP_BASIC;
+    h5vl_int64_flags[11] = H5VL_CAP_FLAG_GROUP_MORE;
+    h5vl_int64_flags[12] = H5VL_CAP_FLAG_LINK_BASIC;
+    h5vl_int64_flags[13] = H5VL_CAP_FLAG_LINK_MORE;
+    h5vl_int64_flags[14] = H5VL_CAP_FLAG_MAP_BASIC;
+    h5vl_int64_flags[15] = H5VL_CAP_FLAG_MAP_MORE;
+    h5vl_int64_flags[16] = H5VL_CAP_FLAG_OBJECT_BASIC;
+    h5vl_int64_flags[17] = H5VL_CAP_FLAG_OBJECT_MORE;
+    h5vl_int64_flags[18] = H5VL_CAP_FLAG_REF_BASIC;
+    h5vl_int64_flags[19] = H5VL_CAP_FLAG_REF_MORE;
+    h5vl_int64_flags[20] = H5VL_CAP_FLAG_OBJ_REF;
+    h5vl_int64_flags[21] = H5VL_CAP_FLAG_REG_REF;
+    h5vl_int64_flags[22] = H5VL_CAP_FLAG_ATTR_REF;
+    h5vl_int64_flags[23] = H5VL_CAP_FLAG_STORED_DATATYPES;
+    h5vl_int64_flags[24] = H5VL_CAP_FLAG_CREATION_ORDER;
+    h5vl_int64_flags[25] = H5VL_CAP_FLAG_ITERATE;
+    h5vl_int64_flags[26] = H5VL_CAP_FLAG_STORAGE_SIZE;
+    h5vl_int64_flags[27] = H5VL_CAP_FLAG_BY_IDX;
+    h5vl_int64_flags[28] = H5VL_CAP_FLAG_GET_PLIST;
+    h5vl_int64_flags[29] = H5VL_CAP_FLAG_FLUSH_REFRESH;
+    h5vl_int64_flags[30] = H5VL_CAP_FLAG_EXTERNAL_LINKS;
+    h5vl_int64_flags[31] = H5VL_CAP_FLAG_HARD_LINKS;
+    h5vl_int64_flags[32] = H5VL_CAP_FLAG_SOFT_LINKS;
+    h5vl_int64_flags[33] = H5VL_CAP_FLAG_UD_LINKS;
+    h5vl_int64_flags[34] = H5VL_CAP_FLAG_TRACK_TIMES;
+    h5vl_int64_flags[35] = H5VL_CAP_FLAG_MOUNT;
+    h5vl_int64_flags[36] = H5VL_CAP_FLAG_FILTERS;
+    h5vl_int64_flags[37] = H5VL_CAP_FLAG_FILL_VALUES;
+
+    h5vl_int64_flags[38] = H5VL_OPT_QUERY_SUPPORTED;
+    h5vl_int64_flags[39] = H5VL_OPT_QUERY_READ_DATA;
+    h5vl_int64_flags[40] = H5VL_OPT_QUERY_WRITE_DATA;
+    h5vl_int64_flags[41] = H5VL_OPT_QUERY_QUERY_METADATA;
+    h5vl_int64_flags[42] = H5VL_OPT_QUERY_MODIFY_METADATA;
+    h5vl_int64_flags[43] = H5VL_OPT_QUERY_COLLECTIVE;
+    h5vl_int64_flags[44] = H5VL_OPT_QUERY_NO_ASYNC;
+    h5vl_int64_flags[45] = H5VL_OPT_QUERY_MULTI_OBJ;
 
     /*
      *  H5Z flags
@@ -874,10 +998,6 @@ h5init1_flags_c(int_f *h5lib_flags)
  *  Calls H5open call to initialize C HDF5 library
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Friday, November 17, 2000
- *
  * SOURCE
  */
 int_f
@@ -898,8 +1018,6 @@ h5open_c(void)
  *  Calls H5close call to close C HDF5 library
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
  * SOURCE
  */
 int_f
@@ -930,9 +1048,6 @@ h5close_c(void)
  *  relnum - the release version of the library
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, September 24, 2002
  * SOURCE
  *
  */
@@ -970,9 +1085,6 @@ h5get_libversion_c(int_f *majnum, int_f *minnum, int_f *relnum)
  *  None
  * RETURNS
  *  0 on success, aborts on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, September 24, 2002
  * SOURCE
  */
 int_f
@@ -999,9 +1111,6 @@ h5check_version_c(int_f *majnum, int_f *minnum, int_f *relnum)
  *  Calls H5garbage_collect to collect on all free-lists of all types
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, September 24, 2002
  * SOURCE
  */
 int_f
@@ -1023,9 +1132,6 @@ h5garbage_collect_c(void)
  *  Calls H5dont_atexit not to install atexit cleanup routine
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, September 24, 2002
  * SOURCE
  */
 int_f
@@ -1037,5 +1143,51 @@ h5dont_atexit_c(void)
     if (H5dont_atexit() < 0)
         return ret_value;
     ret_value = 0;
+    return ret_value;
+}
+
+/****if* H5_f/h5free_string_array_memory_c
+ * NAME
+ *  h5free_string_array_memory_c
+ * PURPOSE
+ *  Frees internal memory allocated for a char** string array
+ * INPUTS
+ *  array_ptr - pointer to char** array
+ *  num_files - number of strings in the array
+ * RETURNS
+ *  0 on success, -1 on failure
+ * SOURCE
+ */
+int_f
+h5free_string_array_memory_c(void **array_ptr, size_t_f *num_files)
+/******/
+{
+    int    ret_value = 0;
+    char **array;
+    size_t len;
+
+    if (array_ptr == NULL || num_files == NULL) {
+        return ret_value; /* Nothing to free */
+    }
+
+    array = (char **)(*array_ptr);
+    len   = (size_t)(*num_files);
+
+    if (array == NULL || len == 0) {
+        return ret_value; /* Nothing to free */
+    }
+
+    /* Free each individual string */
+    for (size_t i = 0; i < len; i++) {
+        if (array[i] != NULL) {
+            H5free_memory(array[i]);
+            array[i] = NULL;
+        }
+    }
+
+    /* Free the array of pointers */
+    H5free_memory(array);
+    *array_ptr = NULL;
+
     return ret_value;
 }

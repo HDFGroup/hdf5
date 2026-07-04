@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -39,7 +39,7 @@
 /* The maximum size allowed for blobs */
 #define H5VL_MAX_BLOB_ID_SIZE (16) /* Allow for 128-bits blob IDs */
 
-/* # of optional operations reserved for the native VOL connector */
+/** The number of optional operations reserved for the native VOL connector \since 1.14.0 */
 #define H5VL_RESERVED_NATIVE_OPTIONAL 1024
 
 /*******************/
@@ -197,7 +197,7 @@ typedef struct H5VL_attr_specific_args_t {
         /* H5VL_ATTR_EXISTS */
         struct {
             const char *name;   /* Name of attribute to check */
-            hbool_t    *exists; /* Whether attribute exists (OUT) */
+            bool       *exists; /* Whether attribute exists (OUT) */
         } exists;
 
         /* H5VL_ATTR_ITER */
@@ -441,6 +441,14 @@ typedef enum H5VL_file_specific_t {
     H5VL_FILE_FLUSH,         /* Flush file                       */
     H5VL_FILE_REOPEN,        /* Reopen the file                  */
     H5VL_FILE_IS_ACCESSIBLE, /* Check if a file is accessible    */
+                             /* Note for VOL connector authors:  */
+                             /*  Only return an error from this  */
+                             /*  callback if it is not possible  */
+                             /*  to determine if a file (or      */
+                             /*  container) is accessible.       */
+                             /*  It is _not_ an error to return  */
+                             /*  a 'false' value for the         */
+                             /*  'accessible' argument.          */
     H5VL_FILE_DELETE,        /* Delete a file                    */
     H5VL_FILE_IS_EQUAL       /* Check if two files are the same  */
 } H5VL_file_specific_t;
@@ -466,7 +474,7 @@ typedef struct H5VL_file_specific_args_t {
         struct {
             const char *filename;   /* Name of file to check */
             hid_t       fapl_id;    /* File access property list to use */
-            hbool_t    *accessible; /* Whether file is accessible with FAPL settings (OUT) */
+            bool       *accessible; /* Whether file is accessible with FAPL settings (OUT) */
         } is_accessible;
 
         /* H5VL_FILE_DELETE */
@@ -477,8 +485,8 @@ typedef struct H5VL_file_specific_args_t {
 
         /* H5VL_FILE_IS_EQUAL */
         struct {
-            void    *obj2;      /* Second file object to compare against */
-            hbool_t *same_file; /* Whether files are the same (OUT) */
+            void *obj2;      /* Second file object to compare against */
+            bool *same_file; /* Whether files are the same (OUT) */
         } is_equal;
     } args;
 } H5VL_file_specific_args_t;
@@ -633,7 +641,7 @@ typedef enum H5VL_link_specific_t {
 
 /* Parameters for link 'iterate' operation */
 typedef struct H5VL_link_iterate_args_t {
-    hbool_t         recursive; /* Whether iteration is recursive */
+    bool            recursive; /* Whether iteration is recursive */
     H5_index_t      idx_type;  /* Type of index to iterate over */
     H5_iter_order_t order;     /* Order of index iteration */
     hsize_t        *idx_p;     /* Start/stop iteration index (OUT) */
@@ -652,7 +660,7 @@ typedef struct H5VL_link_specific_args_t {
 
         /* H5VL_LINK_EXISTS */
         struct {
-            hbool_t *exists; /* Whether link exists (OUT) */
+            bool *exists; /* Whether link exists (OUT) */
         } exists;
 
         /* H5VL_LINK_ITER */
@@ -735,7 +743,7 @@ typedef struct H5VL_object_specific_args_t {
 
         /* H5VL_OBJECT_EXISTS */
         struct {
-            hbool_t *exists; /* Whether object exists (OUT) */
+            bool *exists; /* Whether object exists (OUT) */
         } exists;
 
         /* H5VL_OBJECT_LOOKUP */
@@ -821,7 +829,7 @@ typedef struct H5VL_blob_specific_args_t {
 
         /* H5VL_BLOB_ISNULL */
         struct {
-            hbool_t *isnull; /* Whether blob ID is "null" (OUT) */
+            bool *isnull; /* Whether blob ID is "null" (OUT) */
         } is_null;
 
         /* H5VL_BLOB_SETNULL */
@@ -845,7 +853,8 @@ typedef struct H5VL_info_class_t {
 } H5VL_info_class_t;
 
 /* VOL object wrap / retrieval callbacks */
-/* (These only need to be implemented by "pass through" VOL connectors) */
+/* (These must be implemented by "pass through" VOL connectors, and should not be implemented by terminal VOL
+ * connectors) */
 typedef struct H5VL_wrap_class_t {
     void *(*get_object)(const void *obj); /* Callback to retrieve underlying object       */
     herr_t (*get_wrap_ctx)(
@@ -1010,13 +1019,13 @@ typedef struct H5VL_token_class_t {
 //! <!-- [H5VL_class_t_snip] -->
 typedef struct H5VL_class_t {
     /* Overall connector fields & callbacks */
-    unsigned           version;          /**< VOL connector class struct version #     */
-    H5VL_class_value_t value;            /**< Value to identify connector              */
-    const char        *name;             /**< Connector name (MUST be unique!)         */
-    unsigned           conn_version;     /**< Version # of connector                   */
-    uint64_t           cap_flags;        /**< Capability flags for connector           */
-    herr_t (*initialize)(hid_t vipl_id); /**< Connector initialization callback        */
-    herr_t (*terminate)(void);           /**< Connector termination callback           */
+    unsigned           version;          /**< VOL connector class struct version number */
+    H5VL_class_value_t value;            /**< Value to identify connector               */
+    const char        *name;             /**< Connector name (MUST be unique!)          */
+    unsigned           conn_version;     /**< Version number of connector               */
+    uint64_t           cap_flags;        /**< Capability flags for connector            */
+    herr_t (*initialize)(hid_t vipl_id); /**< Connector initialization callback         */
+    herr_t (*terminate)(void);           /**< Connector termination callback            */
 
     /* VOL framework */
     H5VL_info_class_t info_cls; /**< VOL info fields & callbacks  */
@@ -1096,14 +1105,6 @@ H5_DLL void *H5VLobject(hid_t obj_id);
  * \ingroup H5VLDEV
  */
 H5_DLL hid_t H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id);
-/**
- * \ingroup H5VLDEV
- */
-H5_DLL hid_t H5VLpeek_connector_id_by_name(const char *name);
-/**
- * \ingroup H5VLDEV
- */
-H5_DLL hid_t H5VLpeek_connector_id_by_value(H5VL_class_value_t value);
 
 /* User-defined optional operations */
 H5_DLL herr_t H5VLregister_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val);

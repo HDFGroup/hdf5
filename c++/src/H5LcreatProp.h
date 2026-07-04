@@ -5,7 +5,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -21,7 +21,7 @@ namespace H5 {
     wrappers for the HDF5 link creation property list.
 */
 // Inheritance: PropList -> IdComponent
-class H5_DLLCPP LinkCreatPropList : public PropList {
+class H5CPP_DLL LinkCreatPropList : public PropList {
   public:
     ///\brief Default link creation property list.
     static const LinkCreatPropList &DEFAULT;
@@ -58,7 +58,7 @@ class H5_DLLCPP LinkCreatPropList : public PropList {
     H5T_cset_t getCharEncoding() const;
 
     // Noop destructor
-    virtual ~LinkCreatPropList() override;
+    virtual ~LinkCreatPropList() override = default;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 

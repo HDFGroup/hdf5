@@ -4,16 +4,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Neil Fortner
- *              Thursday, August 14, 2008
- *
  * Purpose: Tests closing the library after reference counts have been
  *          manipulated.
  */
@@ -30,7 +27,7 @@
  * 1 to MAX_NINC).  Assumes integers i and ninc are in scope. */
 #define RAND_INC(id)                                                                                         \
     do {                                                                                                     \
-        ninc = (HDrand() % MAX_NINC) + 1;                                                                    \
+        ninc = (rand() % MAX_NINC) + 1;                                                                      \
                                                                                                              \
         for (i = 0; i < ninc; i++)                                                                           \
             if (H5Iinc_ref(ids[id]) != i + 2)                                                                \
@@ -54,13 +51,13 @@ typedef enum {
     T_NUMCLASSES
 } id_class_t;
 
-const char *FILENAME[] = {"app_ref", NULL};
+static const char *FILENAME[] = {"app_ref", NULL};
 
-const char *IDNAME[T_NUMCLASSES] = {"File",        "Property List", "Property Class", "Datatype",
-                                    "Dataspace",   "Dataset",       "Attribute",      "Group",
-                                    "Error Class", "Error Message", "Error Stack"};
+static const char *IDNAME[T_NUMCLASSES] = {"File",        "Property List", "Property Class", "Datatype",
+                                           "Dataspace",   "Dataset",       "Attribute",      "Group",
+                                           "Error Class", "Error Message", "Error Stack"};
 
-int rc[T_NUMCLASSES];
+static int rc[T_NUMCLASSES];
 
 void Abrt_Handler(int sig);
 
@@ -72,9 +69,9 @@ Abrt_Handler(int H5_ATTR_UNUSED sig)
 
     const char *string = " ID reference count: ";
     for (i = 0; i < T_NUMCLASSES; i++) {
-        HDfprintf(stderr, "%s%s", IDNAME[i], string);
+        fprintf(stderr, "%s%s", IDNAME[i], string);
         n = (int)(strlen(IDNAME[i]) + strlen(string));
-        HDfprintf(stderr, "%*d\n", (n < ERR_WIDTH) ? (ERR_WIDTH - n) : 0, rc[i]);
+        fprintf(stderr, "%*d\n", (n < ERR_WIDTH) ? (ERR_WIDTH - n) : 0, rc[i]);
     }
 }
 
@@ -82,30 +79,28 @@ Abrt_Handler(int H5_ATTR_UNUSED sig)
 int
 main(void)
 {
-    const char *env_h5_drvr; /* File Driver value from environment */
+    const char *driver_name; /* File Driver value from environment */
     hid_t       ids[T_NUMCLASSES];
     hid_t       fapl; /* File Access Property List */
     int         ninc;
     int         i;
     char        filename[1024];
 
-    h5_reset();
+    h5_test_init();
     h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
 
-    HDsrand((unsigned)HDtime(NULL));
+    srand((unsigned)time(NULL));
 
     TESTING("library shutdown with reference count > 1");
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Don't run this test with the multi/split VFD. A bug in library shutdown
      * ordering causes problems with the multi VFD when IDs are left dangling.
      */
-    if (!HDstrcmp(env_h5_drvr, "multi") || !HDstrcmp(env_h5_drvr, "split")) {
-        HDputs("\n -- SKIPPED for incompatible VFD --");
+    if (!strcmp(driver_name, "multi") || !strcmp(driver_name, "split")) {
+        puts("\n -- SKIPPED for incompatible VFD --");
         return 0;
     }
 
@@ -177,18 +172,18 @@ main(void)
 
     RAND_INC(T_ESTACK);
 
-    HDsignal(SIGABRT, &Abrt_Handler);
+    signal(SIGABRT, &Abrt_Handler);
 
     if (H5close() < 0)
         TEST_ERROR;
 
     PASSED();
 
-    /* Restore the default error handler (set in h5_reset()) */
+    /* Restore the default error handler (set in h5_test_init()) */
     h5_restore_err();
 
     /* Clean up any file(s) created */
-    h5_reset();
+    h5_test_init();
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     h5_cleanup(FILENAME, fapl);
 
@@ -196,7 +191,7 @@ main(void)
 
 error:
 
-    HDputs("***** APPLICATION REFERENCE COUNT TESTS FAILED *****");
+    puts("***** APPLICATION REFERENCE COUNT TESTS FAILED *****");
 
     return EXIT_FAILURE;
 }

@@ -4,15 +4,11 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-/* Programmer:  Robb Matzke
- *              Thursday, April 16, 1998
- */
 
 #ifndef H5Zprivate_H
 #define H5Zprivate_H
@@ -82,12 +78,12 @@ H5_DLL herr_t H5Z_modify(const struct H5O_pline_t *pline, H5Z_filter_t filter, u
 H5_DLL herr_t H5Z_pipeline(const struct H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*in,out*/,
                            H5Z_EDC_t edc_read, H5Z_cb_t cb_struct, size_t *nbytes /*in,out*/,
                            size_t *buf_size /*in,out*/, void **buf /*in,out*/);
-H5_DLL H5Z_class2_t      *H5Z_find(H5Z_filter_t id);
-H5_DLL herr_t             H5Z_can_apply(hid_t dcpl_id, hid_t type_id);
-H5_DLL herr_t             H5Z_set_local(hid_t dcpl_id, hid_t type_id);
-H5_DLL herr_t             H5Z_can_apply_direct(const struct H5O_pline_t *pline);
-H5_DLL herr_t             H5Z_set_local_direct(const struct H5O_pline_t *pline);
-H5_DLL htri_t             H5Z_ignore_filters(hid_t dcpl_id, const H5T_t *type, const H5S_t *space);
+H5_DLL herr_t H5Z_find(bool attempt, H5Z_filter_t id, H5Z_class2_t **cls);
+H5_DLL herr_t H5Z_can_apply(hid_t dcpl_id, hid_t type_id);
+H5_DLL herr_t H5Z_set_local(hid_t dcpl_id, hid_t type_id);
+H5_DLL herr_t H5Z_can_apply_direct(const struct H5O_pline_t *pline);
+H5_DLL herr_t H5Z_set_local_direct(const struct H5O_pline_t *pline);
+H5_DLL htri_t H5Z_ignore_filters(hid_t dcpl_id, const H5S_t *space);
 H5_DLL H5Z_filter_info_t *H5Z_filter_info(const struct H5O_pline_t *pline, H5Z_filter_t filter);
 H5_DLL htri_t             H5Z_filter_in_pline(const struct H5O_pline_t *pline, H5Z_filter_t filter);
 H5_DLL htri_t             H5Z_all_filters_avail(const struct H5O_pline_t *pline);
@@ -103,7 +99,7 @@ H5_DLL herr_t            H5Z_xform_copy(H5Z_data_xform_t **data_xform_prop);
 H5_DLL herr_t            H5Z_xform_destroy(H5Z_data_xform_t *data_xform_prop);
 H5_DLL herr_t            H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void *array, size_t array_size,
                                         const H5T_t *buf_type);
-H5_DLL hbool_t           H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop);
+H5_DLL bool              H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop);
 H5_DLL const char       *H5Z_xform_extract_xform_str(const H5Z_data_xform_t *data_xform_prop);
 
 #endif

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -24,7 +24,6 @@
  * write operation has returned success, all reads issued afterward should
  * get the same data the write has written.
  *
- * Created: Albert Cheng, 2013/8/28.
  *************************************************************/
 
 /***********************************************************
@@ -72,10 +71,10 @@
 #define NLINKEDBLOCKS_DFT 512     /* default 512 */
 #define SIZE_BLKADDR      4       /* expected sizeof blkaddr */
 #define Hgoto_error(val)                                                                                     \
-    {                                                                                                        \
+    do {                                                                                                     \
         ret_value = val;                                                                                     \
         goto done;                                                                                           \
-    }
+    } while (0)
 
 /* type declarations */
 typedef enum part_t {
@@ -104,15 +103,15 @@ part_t      launch_g;
 void
 usage(const char *prog)
 {
-    HDfprintf(stderr, "usage: %s [OPTIONS]\n", prog);
-    HDfprintf(stderr, "  OPTIONS\n");
-    HDfprintf(stderr, "     -h            Print a usage message and exit\n");
-    HDfprintf(stderr, "     -l w|r        launch writer or reader only. [default: launch both]\n");
-    HDfprintf(stderr, "     -b N          Block size [default: %d]\n", BLOCKSIZE_DFT);
-    HDfprintf(stderr, "     -p N          Partition size [default: %d]\n", PARTITION_DFT);
-    HDfprintf(stderr, "     -n N          Number of linked blocks [default: %d]\n", NLINKEDBLOCKS_DFT);
-    HDfprintf(stderr, "     where N is an integer value\n");
-    HDfprintf(stderr, "\n");
+    fprintf(stderr, "usage: %s [OPTIONS]\n", prog);
+    fprintf(stderr, "  OPTIONS\n");
+    fprintf(stderr, "     -h            Print a usage message and exit\n");
+    fprintf(stderr, "     -l w|r        launch writer or reader only. [default: launch both]\n");
+    fprintf(stderr, "     -b N          Block size [default: %d]\n", BLOCKSIZE_DFT);
+    fprintf(stderr, "     -p N          Partition size [default: %d]\n", PARTITION_DFT);
+    fprintf(stderr, "     -n N          Number of linked blocks [default: %d]\n", NLINKEDBLOCKS_DFT);
+    fprintf(stderr, "     where N is an integer value\n");
+    fprintf(stderr, "\n");
 }
 
 /* Setup test parameters by parsing command line options.
@@ -136,28 +135,28 @@ parse_option(int argc, char *const argv[])
         switch (c) {
             case 'h':
                 usage(progname_g);
-                HDexit(EXIT_SUCCESS);
+                exit(EXIT_SUCCESS);
                 break;
             case 'b': /* number of planes to write/read */
-                if ((blocksize_g = HDatoi(optarg)) <= 0) {
-                    HDfprintf(stderr, "bad blocksize %s, must be a positive integer\n", optarg);
+                if ((blocksize_g = atoi(optarg)) <= 0) {
+                    fprintf(stderr, "bad blocksize %s, must be a positive integer\n", optarg);
                     usage(progname_g);
                     Hgoto_error(-1);
-                };
+                }
                 break;
             case 'n': /* number of planes to write/read */
-                if ((nlinkedblock_g = HDatoi(optarg)) < 2) {
-                    HDfprintf(stderr, "bad number of linked blocks %s, must be greater than 1.\n", optarg);
+                if ((nlinkedblock_g = atoi(optarg)) < 2) {
+                    fprintf(stderr, "bad number of linked blocks %s, must be greater than 1.\n", optarg);
                     usage(progname_g);
                     Hgoto_error(-1);
-                };
+                }
                 break;
             case 'p': /* number of planes to write/read */
-                if ((part_size_g = HDatoi(optarg)) <= 0) {
-                    HDfprintf(stderr, "bad partition size %s, must be a positive integer\n", optarg);
+                if ((part_size_g = atoi(optarg)) <= 0) {
+                    fprintf(stderr, "bad partition size %s, must be a positive integer\n", optarg);
                     usage(progname_g);
                     Hgoto_error(-1);
-                };
+                }
                 break;
             case 'l': /* launch reader or writer only */
                 switch (*optarg) {
@@ -168,28 +167,28 @@ parse_option(int argc, char *const argv[])
                         launch_g = UC_WRITER;
                         break;
                     default:
-                        HDfprintf(stderr, "launch value(%c) should be w or r only.\n", *optarg);
+                        fprintf(stderr, "launch value(%c) should be w or r only.\n", *optarg);
                         usage(progname_g);
                         Hgoto_error(-1);
                         break;
                 } /* end inner switch */
-                HDprintf("launch = %d\n", launch_g);
+                printf("launch = %d\n", launch_g);
                 break;
             case '?':
-                HDfprintf(stderr, "getopt returned '%c'.\n", c);
+                fprintf(stderr, "getopt returned '%c'.\n", c);
                 usage(progname_g);
                 Hgoto_error(-1);
             default:
-                HDfprintf(stderr, "getopt returned unexpected value.\n");
-                HDfprintf(stderr, "Unexpected value is %d\n", c);
+                fprintf(stderr, "getopt returned unexpected value.\n");
+                fprintf(stderr, "Unexpected value is %d\n", c);
                 Hgoto_error(-1);
         } /* end outer switch */
     }     /* end while */
 
     /* verify partition size must be >= blocksize */
     if (part_size_g < blocksize_g) {
-        HDfprintf(stderr, "Blocksize %d should not be bigger than partition size %d\n", blocksize_g,
-                  part_size_g);
+        fprintf(stderr, "Blocksize %d should not be bigger than partition size %d\n", blocksize_g,
+                part_size_g);
         Hgoto_error(-1);
     }
 
@@ -216,10 +215,10 @@ setup_parameters(int argc, char *const argv[])
     }
 
     /* show parameters and return */
-    HDprintf("blocksize = %ld\n", (long)blocksize_g);
-    HDprintf("part_size = %ld\n", (long)part_size_g);
-    HDprintf("nlinkedblock = %ld\n", (long)nlinkedblock_g);
-    HDprintf("launch = %d\n", launch_g);
+    printf("blocksize = %ld\n", (long)blocksize_g);
+    printf("part_size = %ld\n", (long)part_size_g);
+    printf("nlinkedblock = %ld\n", (long)nlinkedblock_g);
+    printf("launch = %d\n", launch_g);
 
     return 0;
 }
@@ -237,13 +236,13 @@ create_wo_file(void)
 
     /* Create the data file */
     if ((write_fd_g = HDopen(DATAFILE, O_RDWR | O_TRUNC | O_CREAT, H5_POSIX_CREATE_MODE_RW)) < 0) {
-        HDprintf("WRITER: error from open\n");
+        printf("WRITER: error from open\n");
         return -1;
     }
     blkaddr = 0;
     /* write it to partition 0 */
     if ((bytes_wrote = HDwrite(write_fd_g, &blkaddr, (size_t)SIZE_BLKADDR)) != SIZE_BLKADDR) {
-        HDprintf("blkaddr write failed\n");
+        printf("blkaddr write failed\n");
         return -1;
     }
 
@@ -267,18 +266,15 @@ write_wo_file(void)
         blkaddr = i * part_size_g + i;
 
         /* store old block address in byte 0-3 */
-        HDmemcpy(&buffer[0], &blkaddr_old, sizeof(blkaddr_old));
+        memcpy(&buffer[0], &blkaddr_old, sizeof(blkaddr_old));
 
         /* fill the rest with the lowest byte of i */
-        HDmemset(&buffer[4], i & 0xff, (size_t)(BLOCKSIZE_DFT - 4));
+        memset(&buffer[4], i & 0xff, (size_t)(BLOCKSIZE_DFT - 4));
 
         /* write the block */
-#ifdef DEBUG
-        HDprintf("writing block at %d\n", blkaddr);
-#endif
         HDlseek(write_fd_g, (HDoff_t)blkaddr, SEEK_SET);
         if ((bytes_wrote = HDwrite(write_fd_g, buffer, (size_t)blocksize_g)) != blocksize_g) {
-            HDprintf("blkaddr write failed in partition %d\n", i);
+            printf("blkaddr write failed in partition %d\n", i);
             return -1;
         }
 
@@ -287,17 +283,14 @@ write_wo_file(void)
     } /* end for */
 
     /* write the last blkaddr in partition 0 */
-    HDlseek(write_fd_g, (HDoff_t)0, SEEK_SET);
+    HDlseek(write_fd_g, 0, SEEK_SET);
     if ((bytes_wrote = HDwrite(write_fd_g, &blkaddr_old, (size_t)sizeof(blkaddr_old))) !=
         sizeof(blkaddr_old)) {
-        HDprintf("blkaddr write failed in partition %d\n", 0);
+        printf("blkaddr write failed in partition %d\n", 0);
         return -1;
     }
 
     /* all writes done. return success. */
-#ifdef DEBUG
-    HDprintf("wrote %d blocks\n", nlinkedblock_g);
-#endif
     return 0;
 }
 
@@ -305,49 +298,37 @@ int
 read_wo_file(void)
 {
     int               read_fd;
-    int               blkaddr           = 0;
-    h5_posix_io_ret_t bytes_read        = -1; /* # of bytes actually read */
-    int               linkedblocks_read = 0;
+    int               blkaddr    = 0;
+    h5_posix_io_ret_t bytes_read = -1; /* # of bytes actually read */
     char              buffer[BLOCKSIZE_DFT];
 
     /* Open the data file */
     if ((read_fd = HDopen(DATAFILE, O_RDONLY)) < 0) {
-        HDprintf("READER: error from open\n");
+        printf("READER: error from open\n");
         return -1;
     }
 
     /* keep reading the initial block address until it is non-zero before proceeding. */
     while (blkaddr == 0) {
-        HDlseek(read_fd, (HDoff_t)0, SEEK_SET);
+        HDlseek(read_fd, 0, SEEK_SET);
         if ((bytes_read = HDread(read_fd, &blkaddr, (size_t)sizeof(blkaddr))) != sizeof(blkaddr)) {
-            HDprintf("blkaddr read failed in partition %d\n", 0);
+            printf("blkaddr read failed in partition %d\n", 0);
             return -1;
         }
     }
-    linkedblocks_read++;
 
     /* got a non-zero blkaddr. Proceed down the linked blocks. */
-#ifdef DEBUG
-    HDprintf("got initial block address=%d\n", blkaddr);
-#endif
     while (blkaddr != 0) {
         HDlseek(read_fd, (HDoff_t)blkaddr, SEEK_SET);
         if ((bytes_read = HDread(read_fd, buffer, (size_t)blocksize_g)) != blocksize_g) {
-            HDprintf("blkaddr read failed in partition %d\n", 0);
+            printf("blkaddr read failed in partition %d\n", 0);
             return -1;
         }
-        linkedblocks_read++;
 
         /* retrieve the block address in byte 0-3 */
-        HDmemcpy(&blkaddr, &buffer[0], sizeof(blkaddr));
-#ifdef DEBUG
-        HDprintf("got next block address=%d\n", blkaddr);
-#endif
+        memcpy(&blkaddr, &buffer[0], sizeof(blkaddr));
     }
 
-#ifdef DEBUG
-    HDprintf("read %d blocks\n", linkedblocks_read);
-#endif
     return 0;
 }
 
@@ -384,24 +365,24 @@ main(int argc, char *argv[])
     /* Create file */
     /* ============*/
     if (launch_g != UC_READER) {
-        HDprintf("Creating skeleton data file for test...\n");
+        printf("Creating skeleton data file for test...\n");
         if (create_wo_file() < 0) {
-            HDfprintf(stderr, "***encounter error\n");
+            fprintf(stderr, "***encounter error\n");
             Hgoto_error(1);
         }
         else
-            HDprintf("File created.\n");
+            printf("File created.\n");
     }
     /* flush output before possible fork */
-    HDfflush(stdout);
+    fflush(stdout);
 
     if (launch_g == UC_READWRITE) {
         /* fork process */
-        if ((childpid = HDfork()) < 0) {
-            HDperror("fork");
+        if ((childpid = fork()) < 0) {
+            perror("fork");
             Hgoto_error(1);
-        };
-    };
+        }
+    }
     mypid = HDgetpid();
 
     /* ============= */
@@ -410,15 +391,15 @@ main(int argc, char *argv[])
     if (launch_g != UC_WRITER) {
         /* child process launch the reader */
         if (0 == childpid) {
-            HDprintf("%d: launch reader process\n", mypid);
+            printf("%d: launch reader process\n", mypid);
             if (read_wo_file() < 0) {
-                HDfprintf(stderr, "read_wo_file encountered error\n");
-                HDexit(EXIT_FAILURE);
+                fprintf(stderr, "read_wo_file encountered error\n");
+                exit(EXIT_FAILURE);
             }
 
             /* Reader is done. Clean up by removing the data file */
             HDremove(DATAFILE);
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
         }
     }
 
@@ -426,11 +407,8 @@ main(int argc, char *argv[])
     /* launch writer */
     /* ============= */
     /* this process continues to launch the writer */
-#ifdef DEBUG
-    HDprintf("%d: continue as the writer process\n", mypid);
-#endif
     if (write_wo_file() < 0) {
-        HDfprintf(stderr, "write_wo_file encountered error\n");
+        fprintf(stderr, "write_wo_file encountered error\n");
         Hgoto_error(1);
     }
 
@@ -438,18 +416,18 @@ main(int argc, char *argv[])
     /* If readwrite, collect exit code of child process */
     /* ================================================ */
     if (launch_g == UC_READWRITE) {
-        if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0) {
-            HDperror("waitpid");
+        if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0) {
+            perror("waitpid");
             Hgoto_error(1);
         }
         if (WIFEXITED(child_status)) {
             if ((child_ret_value = WEXITSTATUS(child_status)) != 0) {
-                HDprintf("%d: child process exited with non-zero code (%d)\n", mypid, child_ret_value);
+                printf("%d: child process exited with non-zero code (%d)\n", mypid, child_ret_value);
                 Hgoto_error(2);
             }
         }
         else {
-            HDprintf("%d: child process terminated abnormally\n", mypid);
+            printf("%d: child process terminated abnormally\n", mypid);
             Hgoto_error(2);
         }
     }
@@ -457,10 +435,10 @@ main(int argc, char *argv[])
 done:
     /* Print result and exit */
     if (ret_value != 0) {
-        HDprintf("Error(s) encountered\n");
+        printf("Error(s) encountered\n");
     }
     else {
-        HDprintf("All passed\n");
+        printf("All passed\n");
     }
 
     return ret_value;
@@ -471,7 +449,7 @@ done:
 int
 main(void)
 {
-    HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
+    fprintf(stderr, "Non-POSIX platform. Skipping.\n");
     return EXIT_SUCCESS;
 } /* end main() */
 

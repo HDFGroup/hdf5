@@ -4,7 +4,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -90,7 +90,7 @@ while (verification_done LESS "1")
     else ()
       message (STATUS "execute: ${TEST_PROGRAM} ${param1} ${param2}")
       execute_process (
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} ${TEST_PROGRAM} ${param1} ${param2}
+          COMMAND ${TEST_PROGRAM} ${param1} ${param2}
           RESULT_VARIABLE TEST_RESULT
           OUTPUT_FILE ${TEST_OUTPUT}
           ERROR_FILE ${TEST_OUTPUT}.err
@@ -133,7 +133,7 @@ while (verification_done LESS "2")
     else ()
       message (STATUS "execute: ${TEST_PROGRAM} ${param1}")
       execute_process (
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} ${TEST_PROGRAM} ${param1}
+          COMMAND ${TEST_PROGRAM} ${param1}
           RESULT_VARIABLE TEST_RESULT
           OUTPUT_FILE ${TEST_OUTPUT}
           ERROR_FILE ${TEST_OUTPUT}.err

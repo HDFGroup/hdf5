@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -23,6 +23,6 @@
 #define H5_FORTRAN_INTEGER_KINDS_SIZEOF @PAC_FC_ALL_INTEGER_KINDS_SIZEOF@
 #define H5_FORTRAN_REAL_KINDS @PAC_FC_ALL_REAL_KINDS@
 #define H5_FORTRAN_REAL_KINDS_SIZEOF @PAC_FC_ALL_REAL_KINDS_SIZEOF@
-#define H5_HAVE_Fortran_INTEGER_SIZEOF_16 @H5_HAVE_Fortran_INTEGER_SIZEOF_16@
-#define H5_FORTRAN_HAVE_C_LONG_DOUBLE @H5_FORTRAN_HAVE_C_LONG_DOUBLE@
-#define H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE @H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE@
+#cmakedefine H5_HAVE_Fortran_INTEGER_SIZEOF_16
+#cmakedefine H5_FORTRAN_HAVE_C_LONG_DOUBLE
+#cmakedefine H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE

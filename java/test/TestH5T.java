@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -209,7 +209,7 @@ public class TestH5T {
     {
         long filetype_id = HDF5Constants.H5I_INVALID_HID;
         int ndims        = 0;
-        long[] adims     = {3, 5};
+        long[] adims     = {3L, 5L};
         long[] rdims     = new long[2];
 
         try {
@@ -241,11 +241,65 @@ public class TestH5T {
     }
 
     @Test
+    public void testH5Tcomplex_create()
+    {
+        String class_name;
+        long[] fields1   = {0, 0, 0, 0, 0};
+        long[] fields2   = {0, 0, 0, 0, 0};
+        long filetype_id = HDF5Constants.H5I_INVALID_HID;
+        long dt_size     = -1;
+        int typeclass    = -1;
+        int typeorder    = HDF5Constants.H5T_ORDER_ERROR;
+        int prec1        = 0;
+        int prec2        = 0;
+
+        try {
+            filetype_id = H5.H5Tcomplex_create(HDF5Constants.H5T_IEEE_F32LE);
+            assertTrue("testH5Tcomplex_create:H5Tcomplex_create", filetype_id >= 0);
+
+            typeclass = H5.H5Tget_class(filetype_id);
+            assertTrue("H5.H5Tget_class", typeclass > 0);
+            class_name = H5.H5Tget_class_name(typeclass);
+            assertTrue("H5.H5Tget_class_name", class_name.compareTo("H5T_COMPLEX") == 0);
+
+            dt_size = H5.H5Tget_size(filetype_id);
+            assertTrue("H5.H5Tget_size", dt_size == 8);
+
+            typeorder = H5.H5Tget_order(filetype_id);
+            assertTrue("H5.H5Tget_order", typeorder == HDF5Constants.H5T_ORDER_LE);
+
+            prec1 = H5.H5Tget_precision(HDF5Constants.H5T_IEEE_F32LE);
+            prec2 = H5.H5Tget_precision(filetype_id);
+            assertTrue("H5.H5Tget_precision", prec1 == prec2);
+
+            H5.H5Tget_fields(HDF5Constants.H5T_IEEE_F32LE, fields1);
+            H5.H5Tget_fields(filetype_id, fields2);
+            assertTrue("H5.H5Tget_fields[spos]", fields1[0] == fields2[0]);
+            assertTrue("H5.H5Tget_fields[epos]", fields1[1] == fields2[1]);
+            assertTrue("H5.H5Tget_fields[esize]", fields1[2] == fields2[2]);
+            assertTrue("H5.H5Tget_fields[mpos]", fields1[3] == fields2[3]);
+            assertTrue("H5.H5Tget_fields[msize]", fields1[4] == fields2[4]);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Tcomplex_create " + err);
+        }
+        finally {
+            if (filetype_id >= 0)
+                try {
+                    H5.H5Tclose(filetype_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    @Test
     public void testH5Tenum_functions()
     {
         long filetype_id = HDF5Constants.H5I_INVALID_HID;
         String enum_type = "Enum_type";
-        byte[] enum_val  = new byte[1];
+        byte[] enum_val  = new byte[4];
         String enum_name = null;
 
         // Create a enumerate datatype

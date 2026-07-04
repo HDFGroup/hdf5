@@ -1,0 +1,93 @@
+name: hdf5 dev MSys2 CI
+
+# Triggers the workflow on a call from another workflow
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+jobs:
+
+  Build_and_test:
+
+    # The type of runner that the job will run on
+    runs-on: ${{ matrix.sys == 'clangarm64' && 'windows-11-arm' || 'windows-latest' }}
+    strategy:
+      matrix:
+        include:
+          - { icon: '⬛', sys: mingw32 }
+          - { icon: '🟦', sys: mingw64 }
+          - { icon: '🟨', sys: ucrt64  }
+          - { icon: '🟧', sys: clang64 }
+          - { icon: '🟪', sys: clangarm64 }
+    name: ${{ matrix.icon }} MSYS2-${{ matrix.sys }}-${{ inputs.build_mode }}
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - name: '${{ matrix.icon }} Setup MSYS2'
+        uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2
+        with:
+          msystem: ${{matrix.sys}}
+          update: true
+          install: >-
+           base-devel
+           git
+           gcc
+           make
+           development
+          pacboy: >-
+           toolchain:p
+           cmake:p
+           ninja:p
+
+      - name: Set git to use LF
+        run: |
+          git config --global core.autocrlf input
+
+      - name: Get Sources
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Configure
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_TOOLCHAIN_FILE="" \
+            -DHDF5_GENERATE_HEADERS:BOOL=OFF \
+            -DBUILD_SHARED_LIBS:BOOL=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS:BOOL=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+            -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_JAVA:BOOL=OFF \
+            -DHDF5_BUILD_DOC:BOOL=OFF \
+            $GITHUB_WORKSPACE
+
+      - name: Build
+        run: |
+          cmake --build . --parallel 2 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Run Tests
+        run: |
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -E "dt_arith|err_compat"
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Run Expected to Fail Tests
+        run: |
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -R "dt_arith|err_compat"
+        working-directory: ${{ runner.workspace }}/build
+        continue-on-error: true

@@ -1,0 +1,94 @@
+name: FreeBSD CI
+
+# Triggers the workflow on push or pull request or on demand
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'docs/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'LICENSE**'
+      - '**.md'
+  pull_request:
+    branches: [ develop ]
+    paths-ignore:
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'docs/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'LICENSE**'
+      - '**.md'
+
+# Using concurrency to cancel any in-progress job or run
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+jobs:
+  freebsd-build-and-test:
+    runs-on: ubuntu-latest
+    name: FreeBSD ${{ matrix.freebsd-version }} Build and Test
+
+    # Don't run the action if the commit message says to skip CI
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        freebsd-version: ['14.3', '15.0']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Build and test on FreeBSD
+        uses: vmactions/freebsd-vm@5a72679103d223925653750faa878a143340fbd0 # v1
+        with:
+          release: ${{ matrix.freebsd-version }}
+          usesh: true
+          prepare: |
+            pkg install -y cmake ninja pkgconf bash curl
+          run: |
+            set -e
+
+            # Configure the build
+            mkdir build
+            cd build
+            cmake -C ../config/cmake/cacheinit.cmake \
+              -G Ninja \
+              --log-level=VERBOSE \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DBUILD_SHARED_LIBS:BOOL=ON \
+              -DHDF5_ENABLE_ALL_WARNINGS:BOOL=ON \
+              -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+              -DHDF5_BUILD_CPP_LIB:BOOL=ON \
+              -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+              -DHDF5_BUILD_JAVA:BOOL=OFF \
+              -DHDF5_BUILD_DOC:BOOL=OFF \
+              -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
+              -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON \
+              -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF \
+              -DZLIB_USE_LOCALCONTENT:BOOL=OFF \
+              -DHDF5_TEST_API:BOOL=ON \
+              -DHDF5_TEST_SHELL_SCRIPTS:BOOL=OFF \
+              -DENABLE_EXTENDED_TESTS:BOOL=OFF \
+              ..
+            echo ""
+
+            # Build
+            cmake --build . --parallel 3 --config Release
+            echo ""
+
+            # Run tests
+            ctest . --parallel 2 -C Release
+            echo ""

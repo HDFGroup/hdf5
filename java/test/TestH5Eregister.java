@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -16,6 +16,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import hdf.hdf5lib.H5;
+import hdf.hdf5lib.exceptions.HDF5FunctionArgumentException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -57,7 +58,7 @@ public class TestH5Eregister {
         H5.H5Eregister_class("clsname", "libname", null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Eunregister_class_invalid_classid() throws Throwable
     {
         H5.H5Eunregister_class(-1);

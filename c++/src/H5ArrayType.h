@@ -5,7 +5,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -21,7 +21,7 @@ namespace H5 {
      the HDF5's Array Datatypes.
 */
 // Inheritance: DataType -> H5Object -> H5Location -> IdComponent
-class H5_DLLCPP ArrayType : public DataType {
+class H5CPP_DLL ArrayType : public DataType {
   public:
     // Constructor that creates a new array data type based on the
     // specified base type.
@@ -60,7 +60,7 @@ class H5_DLLCPP ArrayType : public DataType {
     ArrayType(const hid_t existing_id);
 
     // Noop destructor
-    virtual ~ArrayType() override;
+    virtual ~ArrayType() override = default;
 
     // Default constructor
     ArrayType();

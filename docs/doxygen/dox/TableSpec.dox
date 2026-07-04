@@ -1,0 +1,106 @@
+
+/** \page TBLSPEC HDF5 Table Specification Version 1.0
+
+Navigate back: \ref index "Main" / \ref SPEC
+<hr>
+
+The HDF5 specification defines the standard objects and storage for the standard HDF5
+objects. (For information about the HDF5 library, model and specification, see the HDF
+documentation.) This document is an additional specification to define a standard profile
+for how to store tables in HDF5. Table data in HDF5 is stored as HDF5 datasets with standard
+attributes to define the properties of the tables.
+
+\section sec_tab_spec_intro Introduction
+A generic table is a sequence of records, each record has a name and a type. Table data
+is stored as an HDF5 one dimensional compound dataset. A table is defined as a collection
+of records whose values are stored in fixed-length fields. All records have the same structure
+and all values in each field have the same data type.
+
+The dataset for a table is distinguished from other datasets by giving it an attribute
+"CLASS=TABLE". Optional attributes allow the storage of a title for the Table and for
+each column, and a fill value for each column.
+
+\section sec_tab_spec_attr Table Attributes
+The attributes for the Table are strings. They are written with the #H5LTset_attribute_string
+Lite API function. "Required" attributes must always be used. "Optional" attributes must be
+used when required.
+<table>
+<caption><b>Table 1. Attributes of an Image Dataset</b></caption>
+<tr>
+<th><b>Attribute Name</b></th>
+<th><b>Required</b><br /><b>Optional</b></th>
+<th><b>Type</b></th>
+<th><b>String Size</b></th>
+<th><b>Value</b></th>
+<th><b>Description</b></th>
+</tr>
+<tr>
+<td>CLASS</td>
+<td>Required</td>
+<td>String</td>
+<td>5</td>
+<td>&quot;TABLE&quot;</td>
+<td>This attribute is type #H5T_C_S1, with size 5. For all Tables, the value of this attribute is
+<b>TABLE</b>. This attribute identifies this data set as intended to be interpreted as Table that
+conforms to the specifications on this page.</td>
+</tr>
+<tr>
+<td>VERSION</td>
+<td>Required</td>
+<td>String</td>
+<td>3</td>
+<td>&quot;0.2&quot;</td>
+<td>This attribute is of type #H5T_C_S1, with size corresponding to the length of the version string.
+This attribute identifies the version number of this specification to which it conforms. The current
+version number is "0.2".</td>
+</tr>
+<tr>
+<td>TITLE</td>
+<td>Optional</td>
+<td>String</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>The <b>TITLE</b> is an optional String that is to be used as the informative title of the whole table.
+The <b>TITLE</b> is set with the parameter table_title of the function #H5TBmake_table.</td>
+</tr>
+<tr>
+<td>FIELD_(n)_NAME</td>
+<td>Required</td>
+<td>String</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>The <b>FIELD_(n)_NAME</b> is an optional String that is to be used as the informative title of column n
+of the table. For each of the fields the word <b>FIELD_</b> is concatenated with the zero based field (n)
+index together with the name of the field.</td>
+</tr>
+<tr>
+<td>FIELD_(n)_FILL</td>
+<td>Optional</td>
+<td>String</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>The <b>FIELD_(n)_FILL</b> is an optional String that is the fill value for column n of the table.
+For each of the fields the word <b>FIELD_</b> is concatenated with the zero based field (n) index
+together with the fill value, if present. This value is written only when a fill value is defined
+for the table.</td>
+</tr>
+</table>
+
+The following section of code shows the calls necessary to the creation of a table.
+\code
+// Create a new HDF5 file using default properties.
+file_id = H5Fcreate("my_table.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+// Call the make table function
+H5TBmake_table("Table Title", file_id, "Table1", NFIELDS, NRECORDS, dst_size, field_names, dst_offset, field_type, chunk_size, fill_data, compress, p_data);
+
+// Close the file.
+status = H5Fclose(file_id);
+\endcode
+
+For more information see the @ref H5TB reference manual page and the @ref H5TB_UG, which includes examples.
+
+<hr>
+Navigate back: \ref index "Main" / \ref SPEC
+
+*/

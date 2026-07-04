@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -22,21 +22,17 @@
 #define H5cpputil_H
 
 #include "h5test.h"
+#include "testframe.h"
 
 using namespace H5;
 using std::cerr;
 using std::endl;
 
-#define MESSAGE(V, A)                                                                                        \
-    {                                                                                                        \
-        if (HDGetTestVerbosity() > (V))                                                                      \
-            print_func A;                                                                                    \
-    }
 #define SUBTEST(TEST)                                                                                        \
-    {                                                                                                        \
+    do {                                                                                                     \
         printf("   Subtest: %-52s", TEST);                                                                   \
         fflush(stdout);                                                                                      \
-    }
+    } while (0)
 
 int  check_values(hsize_t i, hsize_t j, int apoint, int acheck);
 void check_values(const char *value, const char *msg, int line, const char *file_name);
@@ -49,14 +45,14 @@ class InvalidActionException : public Exception {
   public:
     InvalidActionException(const H5std_string &func_name, const H5std_string &message = DEFAULT_MSG);
     InvalidActionException();
-    ~InvalidActionException() throw() override;
+    ~InvalidActionException() override = default;
 };
 
 class TestFailedException : public Exception {
   public:
     TestFailedException(const H5std_string &func_name, const H5std_string &message = DEFAULT_MSG);
     TestFailedException();
-    ~TestFailedException() throw() override;
+    ~TestFailedException() override = default;
 };
 
 // Overloaded/Template functions to verify values and display proper info
@@ -142,36 +138,36 @@ verify_val(Type1 x, Type2 value, float epsilon, const char *msg, int line, const
 #ifdef __cplusplus
 extern "C" {
 #endif
-void test_array();
-void test_attr();
-void test_compound();
-void test_dsproplist();
-void test_file();
-void test_filters();
-void test_links();
-void test_h5s();
-void test_iterate();
-void test_object();
-void test_reference();
-void test_types();
-void test_vlstrings();
-void test_dset();
+void test_array(void *params);
+void test_attr(void *params);
+void test_compound(void *params);
+void test_dsproplist(void *params);
+void test_file(void *params);
+void test_filters(void *params);
+void test_links(void *params);
+void test_h5s(void *params);
+void test_iterate(void *params);
+void test_object(void *params);
+void test_reference(void *params);
+void test_types(void *params);
+void test_vlstrings(void *params);
+void test_dset(void *params);
 
 /* Prototypes for the cleanup routines */
-void cleanup_array();
-void cleanup_attr();
-void cleanup_compound();
-void cleanup_dsproplist();
-void cleanup_dsets();
-void cleanup_file();
-void cleanup_filters();
-void cleanup_h5s();
-void cleanup_iterate();
-void cleanup_links();
-void cleanup_object();
-void cleanup_reference();
-void cleanup_types();
-void cleanup_vlstrings();
+void cleanup_array(void *params);
+void cleanup_attr(void *params);
+void cleanup_compound(void *params);
+void cleanup_dsproplist(void *params);
+void cleanup_dsets(void *params);
+void cleanup_file(void *params);
+void cleanup_filters(void *params);
+void cleanup_h5s(void *params);
+void cleanup_iterate(void *params);
+void cleanup_links(void *params);
+void cleanup_object(void *params);
+void cleanup_reference(void *params);
+void cleanup_types(void *params);
+void cleanup_vlstrings(void *params);
 
 #ifdef __cplusplus
 }

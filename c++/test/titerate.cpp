@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -30,17 +30,17 @@ using namespace H5;
 #define NDATASETS 50
 
 /* Number of attributes for attribute iteration test */
-//#define NATTR 50
+// #define NATTR 50
 
 /* Number of groups for second group iteration test */
-//#define ITER_NGROUPS 150
+// #define ITER_NGROUPS 150
 
 /* General maximum length of names used */
 #define NAMELEN 80
 
 /* 1-D dataset with fixed dimensions */
-//#define SPACE1_RANK     1
-//#define SPACE1_DIM1     4
+// #define SPACE1_RANK     1
+// #define SPACE1_DIM1     4
 
 const H5std_string FILE_ITERATE("titerate.h5");
 const H5std_string GROUP1("Top Group");
@@ -78,7 +78,7 @@ static void printelems(const Group &group, const H5std_string &dsname, const H5s
 static int
 iter_strcmp(const void *s1, const void *s2)
 {
-    return (HDstrcmp(*reinterpret_cast<const char *const *>(s1), *reinterpret_cast<const char *const *>(s2)));
+    return (strcmp(*reinterpret_cast<const char *const *>(s1), *reinterpret_cast<const char *const *>(s2)));
 }
 
 /*-------------------------------------------------------------------------
@@ -95,7 +95,7 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR
     static int count  = 0;
     static int count2 = 0;
 
-    HDstrcpy(info->name, name);
+    strcpy(info->name, name);
 
     switch (info->command) {
         case RET_ZERO:
@@ -125,9 +125,6 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              Friday, September 9, 2016
  *-------------------------------------------------------------------------
  */
 static void
@@ -165,21 +162,21 @@ test_iter_group(FileAccPropList &fapl)
             DataSet dataset = file.createDataSet(name, datatype, filespace);
 
             /* Keep a copy of the dataset names */
-            lnames[i] = HDstrdup(name);
-            check_values(lnames[i], "HDstrdup returns NULL", __LINE__, __FILE__);
+            lnames[i] = strdup(name);
+            check_values(lnames[i], "strdup returns NULL", __LINE__, __FILE__);
         }
 
         /* Create a group and named datatype under root group for testing */
         Group grp(file.createGroup(GROUP1, 0));
-        lnames[NDATASETS] = HDstrdup("grp");
-        check_values(lnames[NDATASETS], "HDstrdup returns NULL", __LINE__, __FILE__);
+        lnames[NDATASETS] = strdup("grp");
+        check_values(lnames[NDATASETS], "strdup returns NULL", __LINE__, __FILE__);
 
         datatype.commit(file, "dtype");
-        lnames[NDATASETS + 1] = HDstrdup("dtype");
-        check_values(lnames[NDATASETS], "HDstrdup returns NULL", __LINE__, __FILE__);
+        lnames[NDATASETS + 1] = strdup("dtype");
+        check_values(lnames[NDATASETS], "strdup returns NULL", __LINE__, __FILE__);
 
         /* Sort the dataset names */
-        HDqsort(lnames, NDATASETS + 2, sizeof(char *), iter_strcmp);
+        qsort(lnames, NDATASETS + 2, sizeof(char *), iter_strcmp);
 
         /* Iterate through the datasets in the root group in various ways */
 
@@ -267,7 +264,7 @@ test_iter_group(FileAccPropList &fapl)
 
         /* Free the dataset names */
         for (int i = 0; i < NDATASETS + 2; i++)
-            HDfree(lnames[i]);
+            free(lnames[i]);
 
         // Everything will be closed as they go out of scope
 
@@ -304,7 +301,7 @@ test_iter_group(FileAccPropList &fapl)
             TestErrPrintf("Group iteration function walked too far!\n");
 
         /* Verify that the correct name is retrieved */
-        if(HDstrcmp(info.name, lnames[(size_t)(idx - 1)]) != 0)
+        if(strcmp(info.name, lnames[(size_t)(idx - 1)]) != 0)
             TestErrPrintf("Group iteration function didn't return name correctly for link - lnames[%u] = '%s'!\n", (unsigned)(idx - 1), lnames[(size_t)(idx - 1)]);
     } /* end while */
     verify_val(ret, -1, "H5Literate", __LINE__, __FILE__);
@@ -330,7 +327,7 @@ test_iter_group(FileAccPropList &fapl)
             TestErrPrintf("Group iteration function walked too far!\n");
 
         /* Verify that the correct name is retrieved */
-        if(HDstrcmp(info.name, lnames[(size_t)(idx - 1)]) != 0)
+        if(strcmp(info.name, lnames[(size_t)(idx - 1)]) != 0)
             TestErrPrintf("Group iteration function didn't return name correctly for link - lnames[%u] = '%s'!\n", (unsigned)(idx - 1), lnames[(size_t)(idx - 1)]);
     } /* end while */
     verify_val(ret, -1, "H5Literate", __LINE__, __FILE__);
@@ -384,9 +381,6 @@ printelems(const Group &group, const H5std_string &dsname, const H5std_string &a
  * Function:    test_HDFFV_9920
  *
  * Purpose      Tests the fix for HDFFV-9920
- *
- * Programmer   Binh-Minh Ribler
- *              Friday, September 9, 2016
  *-------------------------------------------------------------------------
  */
 static void
@@ -443,14 +437,13 @@ test_HDFFV_9920()
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              Tuesday, September 6, 2016
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_iterate()
+test_iterate(void *params)
 {
+    (void)params;
+
     // Output message about test being performed
     MESSAGE(5, ("Testing Iterate Feature\n"));
 
@@ -473,8 +466,12 @@ test_iterate()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-cleanup_iterate()
+cleanup_iterate(void *params)
 {
-    HDremove(FILE_ITERATE.c_str());
-    HDremove(FILE_NAME.c_str());
+    (void)params;
+
+    if (GetTestCleanup()) {
+        HDremove(FILE_ITERATE.c_str());
+        HDremove(FILE_NAME.c_str());
+    }
 } // cleanup_iterate

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -48,13 +48,6 @@
 /* Whether to display log message when callback is invoked */
 /* (Uncomment to enable) */
 /* #define ENABLE_PASSTHRU_LOGGING */
-
-/* Hack for missing va_copy() in old Visual Studio editions
- * (from H5win2_defs.h - used on VS2012 and earlier)
- */
-#if defined(_WIN32) && defined(_MSC_VER) && (_MSC_VER < 1800)
-#define va_copy(D, S) ((D) = (S))
-#endif
 
 /************/
 /* Typedefs */
@@ -242,7 +235,7 @@ static herr_t H5VL_pass_through_optional(void *obj, H5VL_optional_args_t *args, 
 /*******************/
 
 /* Pass through VOL connector class struct */
-static const H5VL_class_t H5VL_pass_through_g = {
+const H5VL_class_t H5VL_pass_through_g = {
     H5VL_VERSION,                            /* VOL class struct version */
     (H5VL_class_value_t)H5VL_PASSTHRU_VALUE, /* value        */
     H5VL_PASSTHRU_NAME,                      /* name         */
@@ -364,9 +357,6 @@ static const H5VL_class_t H5VL_pass_through_g = {
     H5VL_pass_through_optional /* optional */
 };
 
-/* The connector identification number, initialized at runtime */
-static hid_t H5VL_PASSTHRU_g = H5I_INVALID_HID;
-
 /*-------------------------------------------------------------------------
  * Function:    H5VL__pass_through_new_obj
  *
@@ -374,9 +364,6 @@ static hid_t H5VL_PASSTHRU_g = H5I_INVALID_HID;
  *
  * Return:      Success:    Pointer to the new pass through object
  *              Failure:    NULL
- *
- * Programmer:  Quincey Koziol
- *              Monday, December 3, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -405,9 +392,6 @@ H5VL_pass_through_new_obj(void *under_obj, hid_t under_vol_id)
  * Return:      Success:    0
  *              Failure:    -1
  *
- * Programmer:  Quincey Koziol
- *              Monday, December 3, 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -425,30 +409,6 @@ H5VL_pass_through_free_obj(H5VL_pass_through_t *obj)
 
     return 0;
 } /* end H5VL__pass_through_free_obj() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5VL_pass_through_register
- *
- * Purpose:     Register the pass-through VOL connector and retrieve an ID
- *              for it.
- *
- * Return:      Success:    The ID for the pass-through VOL connector
- *              Failure:    -1
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, November 28, 2018
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5VL_pass_through_register(void)
-{
-    /* Singleton register the pass-through VOL connector ID */
-    if (H5VL_PASSTHRU_g < 0)
-        H5VL_PASSTHRU_g = H5VLregister_connector(&H5VL_pass_through_g, H5P_DEFAULT);
-
-    return H5VL_PASSTHRU_g;
-} /* end H5VL_pass_through_register() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_pass_through_init
@@ -494,9 +454,6 @@ H5VL_pass_through_term(void)
 #ifdef ENABLE_PASSTHRU_LOGGING
     printf("------- PASS THROUGH VOL TERM\n");
 #endif
-
-    /* Reset VOL ID */
-    H5VL_PASSTHRU_g = H5I_INVALID_HID;
 
     return 0;
 } /* end H5VL_pass_through_term() */
@@ -659,7 +616,7 @@ H5VL_pass_through_info_to_str(const void *_info, char **str)
 
     /* Allocate space for our info */
     size_t strSize = 32 + under_vol_str_len;
-    *str           = (char *)H5allocate_memory(strSize, (hbool_t)0);
+    *str           = (char *)H5allocate_memory(strSize, (bool)0);
     assert(*str);
 
     /* Encode our info */
@@ -693,7 +650,8 @@ H5VL_pass_through_str_to_info(const char *str, void **_info)
 #endif
 
     /* Retrieve the underlying VOL connector value and info */
-    sscanf(str, "under_vol=%u;", &under_vol_value);
+    if (sscanf(str, "under_vol=%u;", &under_vol_value) != 1)
+        return -1;
     under_vol_id         = H5VLregister_connector_by_value((H5VL_class_value_t)under_vol_value, H5P_DEFAULT);
     under_vol_info_start = strchr(str, '{');
     under_vol_info_end   = strrchr(str, '}');
@@ -1796,7 +1754,7 @@ H5VL_pass_through_file_specific(void *file, H5VL_file_specific_args_t *args, hid
     H5VL_pass_through_t       *new_o;
     H5VL_file_specific_args_t  my_args;
     H5VL_file_specific_args_t *new_args;
-    H5VL_pass_through_info_t  *info;
+    H5VL_pass_through_info_t  *info         = NULL;
     hid_t                      under_vol_id = -1;
     herr_t                     ret_value;
 
@@ -2695,7 +2653,7 @@ H5VL_pass_through_request_wait(void *obj, uint64_t timeout, H5VL_request_status_
 
     ret_value = H5VLrequest_wait(o->under_object, o->under_vol_id, timeout, status);
 
-    if (ret_value >= 0 && *status != H5ES_STATUS_IN_PROGRESS)
+    if (ret_value >= 0 && *status != H5VL_REQUEST_STATUS_IN_PROGRESS)
         H5VL_pass_through_free_obj(o);
 
     return ret_value;

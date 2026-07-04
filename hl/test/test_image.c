@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -49,6 +49,7 @@ typedef struct rgb_t {
 static int test_simple(void);
 static int test_data(void);
 static int test_generate(void);
+static int test_class_prefix(void);
 static int read_data(const char *file_name, hsize_t *width, hsize_t *height);
 static int read_palette(const char *file_name, rgb_t *palette, size_t palette_size);
 
@@ -68,14 +69,15 @@ main(void)
     nerrors += test_simple() < 0 ? 1 : 0;
     nerrors += test_data() < 0 ? 1 : 0;
     nerrors += test_generate() < 0 ? 1 : 0;
+    nerrors += test_class_prefix() < 0 ? 1 : 0;
 
     if (nerrors)
         goto error;
-    HDprintf("All image tests passed.\n");
+    printf("All image tests passed.\n");
     return 0;
 
 error:
-    HDprintf("***** %d IMAGE TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d IMAGE TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     return 1;
 }
 
@@ -111,14 +113,14 @@ test_simple(void)
     hsize_t        pal_dims_out[2];          /* palette dimensions */
 
     /* Allocate image buffers */
-    buf1 = (unsigned char *)HDmalloc(WIDTH * HEIGHT);
-    HDassert(buf1);
-    buf2 = (unsigned char *)HDmalloc(WIDTH * HEIGHT * 3);
-    HDassert(buf2);
-    buf1_out = (unsigned char *)HDmalloc(WIDTH * HEIGHT);
-    HDassert(buf1_out);
-    buf2_out = (unsigned char *)HDmalloc(WIDTH * HEIGHT * 3);
-    HDassert(buf2_out);
+    buf1 = (unsigned char *)malloc(WIDTH * HEIGHT);
+    assert(buf1);
+    buf2 = (unsigned char *)malloc(WIDTH * HEIGHT * 3);
+    assert(buf2);
+    buf1_out = (unsigned char *)malloc(WIDTH * HEIGHT);
+    assert(buf1_out);
+    buf2_out = (unsigned char *)malloc(WIDTH * HEIGHT * 3);
+    assert(buf2_out);
 
     /* create an image */
     space = WIDTH * HEIGHT / PAL_ENTRIES;
@@ -274,13 +276,13 @@ test_simple(void)
      */
 
     if (buf1)
-        HDfree(buf1);
+        free(buf1);
     if (buf2)
-        HDfree(buf2);
+        free(buf2);
     if (buf1_out)
-        HDfree(buf1_out);
+        free(buf1_out);
     if (buf2_out)
-        HDfree(buf2_out);
+        free(buf2_out);
 
     /* Close the file. */
     if (H5Fclose(fid) < 0)
@@ -293,18 +295,18 @@ test_simple(void)
     /* error zone, gracefully close */
 out:
     if (buf1)
-        HDfree(buf1);
+        free(buf1);
     if (buf2)
-        HDfree(buf2);
+        free(buf2);
     if (buf1_out)
-        HDfree(buf1_out);
+        free(buf1_out);
     if (buf2_out)
-        HDfree(buf2_out);
+        free(buf2_out);
     H5E_BEGIN_TRY
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     H5_FAILED();
     return FAIL;
 }
@@ -329,7 +331,7 @@ test_data(void)
     if ((fid = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
 
-    HDprintf("Testing read ascii image data and generate images\n");
+    printf("Testing read ascii image data and generate images\n");
 
     /*-------------------------------------------------------------------------
      * read 8bit image data
@@ -480,7 +482,7 @@ test_data(void)
         goto out;
 
     /* Release memory buffer */
-    HDfree(image_data);
+    free(image_data);
 
     return 0;
 
@@ -488,13 +490,13 @@ test_data(void)
 out:
     /* Release memory buffer */
     if (image_data)
-        HDfree(image_data);
+        free(image_data);
 
     H5E_BEGIN_TRY
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -531,16 +533,16 @@ test_generate(void)
     if ((fid = H5Fcreate(FILE3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
 
-    HDprintf("Testing read and process data and make indexed images\n");
+    printf("Testing read and process data and make indexed images\n");
 
     /*-------------------------------------------------------------------------
      * read data; the file data format is described below
      *-------------------------------------------------------------------------
      */
 
-    f = HDfopen(data_file, "r");
+    f = fopen(data_file, "r");
     if (f == NULL) {
-        HDprintf("Could not find file %s. Try set $srcdir \n", data_file);
+        printf("Could not find file %s. Try set $srcdir \n", data_file);
         goto out;
     }
 
@@ -579,12 +581,12 @@ test_generate(void)
     !
     */
 
-    if (HDfscanf(f, "%d %d %d", &imax, &jmax, &kmax) < 0 && HDferror(f)) {
-        HDprintf("fscanf error in file %s.\n", data_file);
+    if (fscanf(f, "%d %d %d", &imax, &jmax, &kmax) < 0 && ferror(f)) {
+        printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
-    if (HDfscanf(f, "%f %f %f", &valex, &xmin, &xmax) < 0 && HDferror(f)) {
-        HDprintf("fscanf error in file %s.\n", data_file);
+    if (fscanf(f, "%f %f %f", &valex, &xmin, &xmax) < 0 && ferror(f)) {
+        printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
@@ -606,21 +608,21 @@ test_generate(void)
     if (n_elements > INT_MAX / (int)sizeof(float))
         goto out;
 
-    data = (float *)HDmalloc((size_t)n_elements * sizeof(float));
+    data = (float *)malloc((size_t)n_elements * sizeof(float));
     if (NULL == data)
         goto out;
-    image_data = (unsigned char *)HDmalloc((size_t)n_elements * sizeof(unsigned char));
+    image_data = (unsigned char *)malloc((size_t)n_elements * sizeof(unsigned char));
     if (NULL == image_data)
         goto out;
 
     for (i = 0; i < n_elements; i++) {
-        if (HDfscanf(f, "%f ", &value) < 0 && HDferror(f)) {
-            HDprintf("fscanf error in file %s.\n", data_file);
+        if (fscanf(f, "%f ", &value) < 0 && ferror(f)) {
+            printf("fscanf error in file %s.\n", data_file);
             goto out;
         } /* end if */
         data[i] = value;
     }
-    HDfclose(f);
+    fclose(f);
     f = NULL;
 
     /*-------------------------------------------------------------------------
@@ -712,8 +714,8 @@ test_generate(void)
         goto out;
 
     /* Release memory buffers */
-    HDfree(data);
-    HDfree(image_data);
+    free(data);
+    free(image_data);
 
     /* Indicate success */
     return 0;
@@ -722,19 +724,149 @@ test_generate(void)
 out:
     /* Release memory buffers */
     if (data)
-        HDfree(data);
+        free(data);
     if (image_data)
-        HDfree(image_data);
+        free(image_data);
 
     H5E_BEGIN_TRY
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (f)
-        HDfclose(f);
+        fclose(f);
     H5_FAILED();
     return retval;
+}
+
+/*-------------------------------------------------------------------------
+ * test_class_prefix
+ *
+ * Verify that H5IMis_image() and H5IMis_palette() reject CLASS attribute
+ * values that merely share a prefix with (or are a prefix of) "IMAGE" /
+ * "PALETTE", and that variable-length CLASS strings are handled correctly.
+ *-------------------------------------------------------------------------
+ */
+static int
+test_class_prefix(void)
+{
+    hid_t   fid     = H5I_INVALID_HID;
+    hid_t   sid     = H5I_INVALID_HID;
+    hid_t   did     = H5I_INVALID_HID;
+    hid_t   vl_atid = H5I_INVALID_HID;
+    hid_t   vl_aid  = H5I_INVALID_HID;
+    hid_t   vl_spc  = H5I_INVALID_HID;
+    hsize_t dims[1] = {1};
+    size_t  i;
+
+    static const struct {
+        const char *dset_name;
+        const char *class_val;
+        herr_t (*check_func)(hid_t, const char *);
+    } cases[] = {
+        /* longer-than and prefix-of IMAGE / PALETTE: none must match */
+        {"bogus_image_long", "IMAGE_EXTRA", H5IMis_image},
+        {"bogus_image_short", "I", H5IMis_image},
+        {"bogus_palette_long", "PALETTE_EXTRA", H5IMis_palette},
+        {"bogus_palette_short", "PAL", H5IMis_palette},
+    };
+
+    HL_TESTING2("CLASS prefix/vlen handling in H5IMis_image/H5IMis_palette");
+
+    if ((fid = H5Fcreate("test_image_class_prefix.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        goto out;
+
+    for (i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
+        if ((did = H5Dcreate2(fid, cases[i].dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT,
+                              H5P_DEFAULT)) < 0)
+            goto out;
+        if (H5Dclose(did) < 0)
+            goto out;
+        did = H5I_INVALID_HID;
+        if (H5LTset_attribute_string(fid, cases[i].dset_name, "CLASS", cases[i].class_val) < 0)
+            goto out;
+        if (cases[i].check_func(fid, cases[i].dset_name) != 0)
+            goto out;
+    }
+
+    /* VLEN-string CLASS attribute tests: exact matches must return 1,
+     * non-matches and cross-checks must return 0. */
+    {
+        static const struct {
+            const char *dset_name;
+            const char *class_val;
+            herr_t (*check_func)(hid_t, const char *);
+            int expected;
+        } vl_cases[] = {
+            /* exact matches */
+            {"vlen_image", "IMAGE", H5IMis_image, 1},
+            {"vlen_palette", "PALETTE", H5IMis_palette, 1},
+            /* wrong value — must not match */
+            {"vlen_image_extra", "IMAGE_EXTRA", H5IMis_image, 0},
+            {"vlen_palette_extra", "PALETTE_EXTRA", H5IMis_palette, 0},
+            /* cross-check — correct value, wrong function */
+            {"vlen_cross", "IMAGE", H5IMis_palette, 0},
+        };
+        size_t j;
+
+        if ((vl_atid = H5Tcopy(H5T_C_S1)) < 0)
+            goto out;
+        if (H5Tset_size(vl_atid, H5T_VARIABLE) < 0)
+            goto out;
+        if ((vl_spc = H5Screate(H5S_SCALAR)) < 0)
+            goto out;
+
+        for (j = 0; j < sizeof(vl_cases) / sizeof(vl_cases[0]); j++) {
+            const char *vl_val = vl_cases[j].class_val;
+
+            if ((did = H5Dcreate2(fid, vl_cases[j].dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT,
+                                  H5P_DEFAULT)) < 0)
+                goto out;
+            if ((vl_aid = H5Acreate2(did, "CLASS", vl_atid, vl_spc, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                goto out;
+            if (H5Awrite(vl_aid, vl_atid, &vl_val) < 0)
+                goto out;
+            if (H5Aclose(vl_aid) < 0)
+                goto out;
+            vl_aid = H5I_INVALID_HID;
+            if (H5Dclose(did) < 0)
+                goto out;
+            did = H5I_INVALID_HID;
+            if (vl_cases[j].check_func(fid, vl_cases[j].dset_name) != vl_cases[j].expected)
+                goto out;
+        }
+
+        if (H5Tclose(vl_atid) < 0)
+            goto out;
+        vl_atid = H5I_INVALID_HID;
+        if (H5Sclose(vl_spc) < 0)
+            goto out;
+        vl_spc = H5I_INVALID_HID;
+    }
+
+    if (H5Sclose(sid) < 0)
+        goto out;
+    if (H5Fclose(fid) < 0)
+        goto out;
+
+    PASSED();
+    return 0;
+
+out:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(vl_atid);
+        H5Aclose(vl_aid);
+        H5Sclose(vl_spc);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+    H5_FAILED();
+    return FAIL;
 }
 
 /*-------------------------------------------------------------------------
@@ -773,38 +905,38 @@ read_data(const char *fname, /*IN*/
      *-------------------------------------------------------------------------
      */
 
-    if (NULL == (f = HDfopen(data_file, "r"))) {
-        HDprintf("Could not open file %s. Try set $srcdir \n", data_file);
+    if (NULL == (f = fopen(data_file, "r"))) {
+        printf("Could not open file %s. Try set $srcdir \n", data_file);
         goto out;
     }
 
-    if (HDfscanf(f, "%s", str) < 0 && HDferror(f)) {
-        HDprintf("fscanf error in file %s.\n", data_file);
+    if (fscanf(f, "%s", str) < 0 && ferror(f)) {
+        printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (HDfscanf(f, "%d", &color_planes) < 0 && HDferror(f)) {
-        HDprintf("fscanf error in file %s.\n", data_file);
+    if (fscanf(f, "%d", &color_planes) < 0 && ferror(f)) {
+        printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (HDfscanf(f, "%s", str) < 0 && HDferror(f)) {
-        HDprintf("fscanf error in file %s.\n", data_file);
+    if (fscanf(f, "%s", str) < 0 && ferror(f)) {
+        printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (HDfscanf(f, "%d", &h) < 0 && HDferror(f)) {
-        HDprintf("fscanf error in file %s.\n", data_file);
+    if (fscanf(f, "%d", &h) < 0 && ferror(f)) {
+        printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (HDfscanf(f, "%s", str) < 0 && HDferror(f)) {
-        HDprintf("fscanf error in file %s.\n", data_file);
+    if (fscanf(f, "%s", str) < 0 && ferror(f)) {
+        printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (HDfscanf(f, "%d", &w) < 0 && HDferror(f)) {
-        HDprintf("fscanf error in file %s.\n", data_file);
+    if (fscanf(f, "%d", &w) < 0 && ferror(f)) {
+        printf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
@@ -825,10 +957,10 @@ read_data(const char *fname, /*IN*/
 
     /* Release the buffer, if it was previously allocated */
     if (image_data)
-        HDfree(image_data);
+        free(image_data);
 
     /* Allocate the image data buffer */
-    image_data = (unsigned char *)HDmalloc((size_t)n_elements * sizeof(unsigned char));
+    image_data = (unsigned char *)malloc((size_t)n_elements * sizeof(unsigned char));
     if (NULL == image_data)
         goto out;
 
@@ -837,8 +969,8 @@ read_data(const char *fname, /*IN*/
 
     /* Read data elements */
     for (i = 0; i < n_elements; i++) {
-        if (HDfscanf(f, "%d", &n) < 0 && HDferror(f)) {
-            HDprintf("fscanf error in file %s.\n", data_file);
+        if (fscanf(f, "%d", &n) < 0 && ferror(f)) {
+            printf("fscanf error in file %s.\n", data_file);
             goto out;
         } /* end if */
         image_data[i] = (unsigned char)n;
@@ -849,7 +981,7 @@ read_data(const char *fname, /*IN*/
 
 out:
     if (f)
-        HDfclose(f);
+        fclose(f);
 
     return ret_val;
 } /* end read_data() */
@@ -889,40 +1021,40 @@ read_palette(const char *fname, rgb_t *palette, size_t palette_size)
         return -1;
 
     /* open the input file */
-    if (!(file = HDfopen(data_file, "r"))) {
-        HDprintf("Could not open file %s. Try set $srcdir \n", data_file);
+    if (!(file = fopen(data_file, "r"))) {
+        printf("Could not open file %s. Try set $srcdir \n", data_file);
         return -1;
     }
 
     /* read the file ident string */
-    if (HDfgets(buffer, sizeof(buffer), file) == NULL) {
-        HDfclose(file);
+    if (fgets(buffer, sizeof(buffer), file) == NULL) {
+        fclose(file);
         return -1;
     }
 
     /* ensure it matches the palette file ident string */
-    if (HDstrncmp(buffer, STRING_JASC, sizeof(STRING_JASC) - 1) != 0 &&
-        HDstrncmp(buffer, STRING_CWPAL, sizeof(STRING_CWPAL) - 1) != 0) {
-        HDfclose(file);
+    if (strncmp(buffer, STRING_JASC, sizeof(STRING_JASC) - 1) != 0 &&
+        strncmp(buffer, STRING_CWPAL, sizeof(STRING_CWPAL) - 1) != 0) {
+        fclose(file);
         return -1;
     }
 
     /* read the version string */
-    if (HDfgets(buffer, sizeof(buffer), file) == NULL) {
-        HDfclose(file);
+    if (fgets(buffer, sizeof(buffer), file) == NULL) {
+        fclose(file);
         return -1;
     }
 
     /* ensure it matches the palette file version string */
-    if (HDstrncmp(buffer, VERSION_JASC, sizeof(VERSION_JASC) - 1) != 0 &&
-        HDstrncmp(buffer, VERSION_CWPAL, sizeof(VERSION_CWPAL) - 1) != 0) {
-        HDfclose(file);
+    if (strncmp(buffer, VERSION_JASC, sizeof(VERSION_JASC) - 1) != 0 &&
+        strncmp(buffer, VERSION_CWPAL, sizeof(VERSION_CWPAL) - 1) != 0) {
+        fclose(file);
         return -1;
     }
 
     /* read the number of colors */
-    if (HDfgets(buffer, sizeof(buffer), file) == NULL) {
-        HDfclose(file);
+    if (fgets(buffer, sizeof(buffer), file) == NULL) {
+        fclose(file);
         return -1;
     }
 
@@ -930,27 +1062,27 @@ read_palette(const char *fname, rgb_t *palette, size_t palette_size)
     check for missing version or number of colors
     in this case it reads the first entry
     */
-    if (HDstrlen(buffer) > 4) {
-        HDfclose(file);
+    if (strlen(buffer) > 4) {
+        fclose(file);
         return -1;
     }
 
-    if (HDsscanf(buffer, "%u", &nentries) != 1) {
-        HDfclose(file);
+    if (sscanf(buffer, "%u", &nentries) != 1) {
+        fclose(file);
         return -1;
     }
 
     /* ensure there are a sensible number of colors in the palette */
     if ((nentries > 256) || (nentries > palette_size)) {
-        HDfclose(file);
+        fclose(file);
         return (-1);
     }
 
     /* read the palette entries */
     for (u = 0; u < nentries; u++) {
         /* extract the red, green and blue color components.  */
-        if (HDfscanf(file, "%u %u %u", &red, &green, &blue) != 3) {
-            HDfclose(file);
+        if (fscanf(file, "%u %u %u", &red, &green, &blue) != 3) {
+            fclose(file);
             return -1;
         }
         /* store this palette entry */
@@ -960,7 +1092,7 @@ read_palette(const char *fname, rgb_t *palette, size_t palette_size)
     }
 
     /* close file */
-    HDfclose(file);
+    fclose(file);
 
     return (int)nentries;
 }

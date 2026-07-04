@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -239,14 +239,14 @@ test_array_funcs(void)
     {
         cset = H5Tget_cset(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(cset, FAIL, "H5Tget_cset");
 
     H5E_BEGIN_TRY
     {
         strpad = H5Tget_strpad(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(strpad, FAIL, "H5Tget_strpad");
 
     /* Close datatype */
@@ -686,7 +686,7 @@ test_array_compound_atomic(void)
     /* Check the 1st field's name */
     mname = H5Tget_member_name(tid2, 0);
     CHECK_PTR(mname, "H5Tget_member_name");
-    if (HDstrcmp(mname, "i") != 0)
+    if (strcmp(mname, "i") != 0)
         TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
     H5free_memory(mname);
 
@@ -705,7 +705,7 @@ test_array_compound_atomic(void)
     /* Check the 2nd field's name */
     mname = H5Tget_member_name(tid2, 1);
     CHECK_PTR(mname, "H5Tget_member_name");
-    if (HDstrcmp(mname, "f") != 0)
+    if (strcmp(mname, "f") != 0)
         TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
     H5free_memory(mname);
 
@@ -908,7 +908,7 @@ test_array_compound_array(void)
     /* Check the 1st field's name */
     mname = H5Tget_member_name(tid2, 0);
     CHECK_PTR(mname, "H5Tget_member_name");
-    if (HDstrcmp(mname, "i") != 0)
+    if (strcmp(mname, "i") != 0)
         TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
     H5free_memory(mname);
 
@@ -927,7 +927,7 @@ test_array_compound_array(void)
     /* Check the 2nd field's name */
     mname = H5Tget_member_name(tid2, 1);
     CHECK_PTR(mname, "H5Tget_member_name");
-    if (HDstrcmp(mname, "f") != 0)
+    if (strcmp(mname, "f") != 0)
         TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
     H5free_memory(mname);
 
@@ -1055,7 +1055,7 @@ test_array_alloc_custom(size_t size, void *info)
      */
     extra = MAX(sizeof(void *), sizeof(size_t));
 
-    if ((ret_value = HDmalloc(extra + size)) != NULL) {
+    if ((ret_value = malloc(extra + size)) != NULL) {
         *(size_t *)ret_value = size;
         *mem_used += size;
     } /* end if */
@@ -1093,7 +1093,7 @@ test_array_free_custom(void *_mem, void *info)
     if (_mem != NULL) {
         mem = ((unsigned char *)_mem) - extra;
         *mem_used -= *(size_t *)((void *)mem);
-        HDfree(mem);
+        free(mem);
     } /* end if */
 
 } /* end test_array_free_custom() */
@@ -1136,7 +1136,7 @@ test_array_vlen_atomic(void)
     /* Initialize array data to write */
     for (i = 0; i < SPACE1_DIM1; i++)
         for (j = 0; j < ARRAY1_DIM1; j++) {
-            wdata[i][j].p   = HDmalloc((size_t)(i + j + 1) * sizeof(unsigned int));
+            wdata[i][j].p   = malloc((size_t)(i + j + 1) * sizeof(unsigned int));
             wdata[i][j].len = (size_t)(i + j + 1);
             for (k = 0; k < (i + j + 1); k++)
                 ((unsigned int *)wdata[i][j].p)[k] = (unsigned int)(i * 100 + j * 10 + k);
@@ -1150,9 +1150,9 @@ test_array_vlen_atomic(void)
     sid1 = H5Screate_simple(SPACE1_RANK, sdims1, NULL);
     CHECK(sid1, FAIL, "H5Screate_simple");
 
-    /* Create a compound datatype to refer to */
+    /* Create a variable-length datatype to refer to */
     tid2 = H5Tvlen_create(H5T_NATIVE_UINT);
-    CHECK(tid2, FAIL, "H5Tcreate");
+    CHECK(tid2, FAIL, "H5Tvlen_create");
 
     /* Create an array datatype to refer to */
     tid1 = H5Tarray_create2(tid2, ARRAY1_RANK, tdims1);
@@ -1357,7 +1357,7 @@ test_array_vlen_array(void)
     /* Initialize array data to write */
     for (i = 0; i < SPACE1_DIM1; i++)
         for (j = 0; j < ARRAY1_DIM1; j++) {
-            wdata[i][j].p   = HDmalloc((size_t)(i + j + 1) * sizeof(unsigned int) * (size_t)ARRAY1_DIM1);
+            wdata[i][j].p   = malloc((size_t)(i + j + 1) * sizeof(unsigned int) * (size_t)ARRAY1_DIM1);
             wdata[i][j].len = (size_t)(i + j + 1);
             for (k = 0; k < (i + j + 1); k++)
                 for (l = 0; l < ARRAY1_DIM1; l++)
@@ -1583,6 +1583,164 @@ test_array_vlen_array(void)
 
 } /* end test_array_vlen_array() */
 
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+static void
+test_array_complex(void)
+{
+    H5_float_complex wdata[SPACE1_DIM1][ARRAY1_DIM1]; /* Information to write         */
+    H5_float_complex rdata[SPACE1_DIM1][ARRAY1_DIM1]; /* Information read in          */
+    H5T_class_t      mclass;                          /* Datatype class for VL        */
+    hsize_t          sdims1[] = {SPACE1_DIM1};        /* Dataset dimensions           */
+    hsize_t          tdims1[] = {ARRAY1_DIM1};        /* Array type dimensions        */
+    hid_t            fid1;                            /* HDF5 File IDs                */
+    hid_t            dataset;                         /* Dataset ID                   */
+    hid_t            sid1;                            /* Dataspace ID                 */
+    hid_t            tid1;                            /* Array Datatype ID            */
+    hid_t            tid2;                            /* Complex Number Datatype ID   */
+    hid_t            tid3;                            /* Atomic Datatype ID           */
+    int              ndims;                           /* Array rank for reading       */
+    hsize_t          rdims1[H5S_MAX_RANK];            /* Array dimensions for reading */
+    herr_t           ret;                             /* Generic return value         */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing 1-D Array of Complex Number Datatypes Functionality\n"));
+
+    memset(wdata, 0, sizeof(wdata));
+    memset(rdata, 0, sizeof(rdata));
+
+    /* Initialize array data to write */
+    for (size_t i = 0; i < SPACE1_DIM1; i++)
+        for (size_t j = 0; j < ARRAY1_DIM1; j++)
+            wdata[i][j] = H5_CMPLXF((float)(i * 100), (float)(j * 10));
+
+    /* Create file */
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Create dataspace for datasets */
+    sid1 = H5Screate_simple(SPACE1_RANK, sdims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create a complex number datatype to refer to */
+    tid2 = H5Tcomplex_create(H5T_IEEE_F32LE);
+    CHECK(tid2, FAIL, "H5Tcomplex_create");
+
+    /* Create an array datatype to refer to */
+    tid1 = H5Tarray_create2(tid2, ARRAY1_RANK, tdims1);
+    CHECK(tid1, FAIL, "H5Tarray_create2");
+
+    /* Close complex number datatype */
+    ret = H5Tclose(tid2);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Create a dataset */
+    dataset = H5Dcreate2(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
+
+    /* Write dataset to disk */
+    ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Re-open file */
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fopen");
+
+    /* Open the dataset */
+    dataset = H5Dopen2(fid1, "Dataset1", H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
+
+    /* Get the dataspace */
+    sid1 = H5Dget_space(dataset);
+    CHECK(sid1, FAIL, "H5Dget_space");
+
+    /* Get the datatype */
+    tid1 = H5Dget_type(dataset);
+    CHECK(tid1, FAIL, "H5Dget_type");
+
+    /* Check the array rank */
+    ndims = H5Tget_array_ndims(tid1);
+    VERIFY(ndims, ARRAY1_RANK, "H5Tget_array_ndims");
+
+    /* Get the array dimensions */
+    ret = H5Tget_array_dims2(tid1, rdims1);
+    CHECK(ret, FAIL, "H5Tget_array_dims2");
+
+    /* Check the array dimensions */
+    for (size_t i = 0; i < (size_t)ndims; i++)
+        if (rdims1[i] != tdims1[i]) {
+            TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%" PRIuHSIZE
+                          ", tdims1[%d]=%" PRIuHSIZE "\n",
+                          (int)i, rdims1[i], (int)i, tdims1[i]);
+        }
+
+    /* Get the complex number datatype */
+    tid2 = H5Tget_super(tid1);
+    CHECK(tid2, FAIL, "H5Tget_super");
+
+    /* Get the 2nd field's class */
+    mclass = H5Tget_class(tid2);
+    VERIFY(mclass, H5T_COMPLEX, "H5Tget_class");
+
+    /* Check the complex number datatype's base type */
+    tid3 = H5Tget_super(tid2);
+    CHECK(tid3, FAIL, "H5Tget_super");
+
+    if ((ret = H5Tequal(tid3, H5T_IEEE_F32LE)) <= 0)
+        TestErrPrintf("VL base datatype is incorrect!, ret=%d\n", (int)ret);
+
+    /* Close the array's base type datatype */
+    ret = H5Tclose(tid3);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close complex number datatype */
+    ret = H5Tclose(tid2);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Read dataset from disk */
+    ret = H5Dread(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Compare data read in */
+    for (size_t i = 0; i < SPACE1_DIM1; i++) {
+        for (size_t j = 0; j < ARRAY1_DIM1; j++) {
+            if (0 != memcmp(&wdata[i][j], &rdata[i][j], sizeof(H5_float_complex)))
+                TestErrPrintf(
+                    "Complex number data doesn't match!, wdata[%d][%d]=%f%+fi, rdata[%d][%d]=%f%+fi\n",
+                    (int)i, (int)j, (double)crealf(wdata[i][j]), (double)cimagf(wdata[i][j]), (int)i, (int)j,
+                    (double)crealf(wdata[i][j]), (double)cimagf(wdata[i][j]));
+        }
+    }
+
+    /* Close Datatype */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+}
+#endif
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_bkg
  *
@@ -1632,9 +1790,9 @@ test_array_bkg(void)
 
     /* Initialize the data */
     /* ------------------- */
-    dtsinfo = (CmpDTSinfo *)HDmalloc(sizeof(CmpDTSinfo));
-    CHECK_PTR(dtsinfo, "HDmalloc");
-    HDmemset(dtsinfo, 0, sizeof(CmpDTSinfo));
+    dtsinfo = (CmpDTSinfo *)malloc(sizeof(CmpDTSinfo));
+    CHECK_PTR(dtsinfo, "malloc");
+    memset(dtsinfo, 0, sizeof(CmpDTSinfo));
     for (i = 0; i < LENGTH; i++) {
         for (j = 0; j < ALEN; j++) {
             cf[i].a[j] = 100 * (i + 1) + j;
@@ -1662,11 +1820,11 @@ test_array_bkg(void)
     /* Initialize the names of data members */
     /* ------------------------------------ */
     for (i = 0; i < dtsinfo->nsubfields; i++)
-        dtsinfo->name[i] = (char *)HDcalloc((size_t)20, sizeof(char));
+        dtsinfo->name[i] = (char *)calloc((size_t)20, sizeof(char));
 
-    HDstrcpy(dtsinfo->name[0], "One");
-    HDstrcpy(dtsinfo->name[1], "Two");
-    HDstrcpy(dtsinfo->name[2], "Three");
+    strcpy(dtsinfo->name[0], "One");
+    strcpy(dtsinfo->name[1], "Two");
+    strcpy(dtsinfo->name[2], "Three");
 
     /* Create file */
     /* ----------- */
@@ -1734,7 +1892,7 @@ test_array_bkg(void)
     /* Release memory resources */
     /* ------------------------ */
     for (i = 0; i < dtsinfo->nsubfields; i++)
-        HDfree(dtsinfo->name[i]);
+        free(dtsinfo->name[i]);
 
     /* Release IDs */
     /* ----------- */
@@ -1849,7 +2007,7 @@ test_array_bkg(void)
 
     /* Reset the data to read in */
     /* ------------------------- */
-    HDmemset(cfr, 0, sizeof(CmpField) * LENGTH);
+    memset(cfr, 0, sizeof(CmpField) * LENGTH);
 
     status = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, cfr);
     CHECK(status, FAIL, "H5Dread");
@@ -1885,7 +2043,7 @@ test_array_bkg(void)
     status = H5Fclose(fid);
     CHECK(status, FAIL, "H5Fclose");
 
-    HDfree(dtsinfo);
+    free(dtsinfo);
 } /* end test_array_bkg() */
 
 /*-------------------------------------------------------------------------
@@ -1918,7 +2076,8 @@ test_compat(void)
     size_t      off;                  /* Offset of compound field         */
     hid_t       mtid;                 /* Datatype ID for field            */
     int         i;                    /* Index variables                  */
-    hbool_t     driver_is_default_compatible;
+    bool        vol_is_native;
+    bool        driver_is_default_compatible;
     herr_t      ret; /* Generic return value             */
 
     /* Output message about test being performed */
@@ -1934,16 +2093,25 @@ test_compat(void)
      *  the tarrold.h5 file.
      */
 
-    if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible) < 0)
-        TestErrPrintf("can't check if VFD is default VFD compatible\n");
+    /* Check if VFD used is native file format compatible */
+    CHECK(h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible), FAIL,
+          "h5_driver_is_default_vfd_compatible");
     if (!driver_is_default_compatible) {
-        HDprintf(" -- SKIPPED --\n");
+        MESSAGE(5, (" -- SKIPPED --\n"));
         return;
     }
 
     /* Open the testfile */
     fid1 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK_I(fid1, "H5Fopen");
+
+    /* Check if native VOL is being used */
+    CHECK(h5_using_native_vol(H5P_DEFAULT, fid1, &vol_is_native), FAIL, "h5_using_native_vol");
+    if (!vol_is_native) {
+        CHECK(H5Fclose(fid1), FAIL, "H5Fclose");
+        MESSAGE(5, (" -- SKIPPED --\n"));
+        return;
+    }
 
     /* Only try to proceed if the file is around */
     if (fid1 >= 0) {
@@ -1966,7 +2134,7 @@ test_compat(void)
         /* Check the 1st field's name */
         mname = H5Tget_member_name(tid1, 0);
         CHECK_PTR(mname, "H5Tget_member_name");
-        if (HDstrcmp(mname, "i") != 0)
+        if (strcmp(mname, "i") != 0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
         H5free_memory(mname);
 
@@ -1985,7 +2153,7 @@ test_compat(void)
         /* Check the 2nd field's name */
         mname = H5Tget_member_name(tid1, 1);
         CHECK_PTR(mname, "H5Tget_member_name");
-        if (HDstrcmp(mname, "f") != 0)
+        if (strcmp(mname, "f") != 0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
         H5free_memory(mname);
 
@@ -2004,7 +2172,7 @@ test_compat(void)
         /* Check the 3rd field's name */
         mname = H5Tget_member_name(tid1, 2);
         CHECK_PTR(mname, "H5Tget_member_name");
-        if (HDstrcmp(mname, "l") != 0)
+        if (strcmp(mname, "l") != 0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
         H5free_memory(mname);
 
@@ -2047,7 +2215,7 @@ test_compat(void)
         /* Check the 1st field's name */
         mname = H5Tget_member_name(tid1, 0);
         CHECK_PTR(mname, "H5Tget_member_name");
-        if (mname && HDstrcmp(mname, "i") != 0)
+        if (mname && strcmp(mname, "i") != 0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
         if (mname)
             H5free_memory(mname);
@@ -2067,7 +2235,7 @@ test_compat(void)
         /* Check the 2nd field's name */
         mname = H5Tget_member_name(tid1, 1);
         CHECK_PTR(mname, "H5Tget_member_name");
-        if (mname && HDstrcmp(mname, "f") != 0)
+        if (mname && strcmp(mname, "f") != 0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
         if (mname)
             H5free_memory(mname);
@@ -2115,7 +2283,7 @@ test_compat(void)
         /* Check the 3rd field's name */
         mname = H5Tget_member_name(tid1, 2);
         CHECK_PTR(mname, "H5Tget_member_name");
-        if (mname && HDstrcmp(mname, "l") != 0)
+        if (mname && strcmp(mname, "l") != 0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
         if (mname)
             H5free_memory(mname);
@@ -2163,7 +2331,7 @@ test_compat(void)
         /* Check the 4th field's name */
         mname = H5Tget_member_name(tid1, 3);
         CHECK_PTR(mname, "H5Tget_member_name");
-        if (mname && HDstrcmp(mname, "d") != 0)
+        if (mname && strcmp(mname, "d") != 0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
         if (mname)
             H5free_memory(mname);
@@ -2193,7 +2361,7 @@ test_compat(void)
         CHECK_I(ret, "H5Fclose");
     } /* end if */
     else
-        HDprintf("***cannot open the pre-created compound datatype test file (%s)\n", testfile);
+        printf("***cannot open the pre-created compound datatype test file (%s)\n", testfile);
 
 } /* end test_compat() */
 
@@ -2207,7 +2375,7 @@ test_compat(void)
  *-------------------------------------------------------------------------
  */
 void
-test_array(void)
+test_array(void H5_ATTR_UNUSED *params)
 {
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Array Datatypes\n"));
@@ -2221,6 +2389,10 @@ test_array(void)
     test_array_vlen_atomic();     /* Test 1-D array of atomic VL datatypes                                */
     test_array_vlen_array();      /* Test 1-D array of 1-D array VL datatypes                             */
     test_array_funcs();           /* Test type functions with array types                                 */
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    test_array_complex();
+#endif
 
     test_array_bkg(); /* Read compound datatype with array fields and background fields read  */
 
@@ -2236,13 +2408,16 @@ test_array(void)
  *
  * Return:      void
  *
- * Programmer:  Quincey Koziol
- *              June 8, 1999
- *
  *-------------------------------------------------------------------------
  */
 void
-cleanup_array(void)
+cleanup_array(void H5_ATTR_UNUSED *params)
 {
-    HDremove(FILENAME);
+    if (GetTestCleanup()) {
+        H5E_BEGIN_TRY
+        {
+            H5Fdelete(FILENAME, H5P_DEFAULT);
+        }
+        H5E_END_TRY
+    }
 } /* end cleanup_array() */

@@ -1,0 +1,402 @@
+name: hdf5 dev CI
+
+# Triggers the workflow on a call from another workflow
+on:
+  workflow_call:
+    inputs:
+      cmake_version:
+        description: "3.26.0 or later, latest"
+        required: true
+        type: string
+      thread_safety:
+        description: "TS or empty"
+        required: true
+        type: string
+      concurrent:
+        description: "CC or empty"
+        required: true
+        type: string
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+      save_binary:
+        description: "binary-ext-name or missing"
+        required: false
+        default: "skip"
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+jobs:
+  build_and_test_win:
+    name: "Windows MSVC-${{ inputs.build_mode }}-${{ inputs.thread_safety }}-${{ inputs.concurrent }}"
+    runs-on: windows-11-arm
+    if: ${{ inputs.build_mode != 'Debug' }}
+    steps:
+      - name: Get Sources
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
+      - name: Install CMake
+        uses: lukka/get-cmake@f5b8fbb4d77cec1acc5a5f9f0df4beffaf5d98d9 # latest
+        with:
+          cmakeVersion: ${{ inputs.cmake_version }}
+          ninjaVersion: latest
+
+      - name: Check CMake Version
+        shell: bash
+        run: |
+          which cmake
+          cmake --version
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set environment for MSVC (Windows)
+        run: |
+          # Set these environment variables so CMake picks the correct compiler
+          echo "CXX=cl.exe" >> $GITHUB_ENV
+          echo "CC=cl.exe" >> $GITHUB_ENV
+
+      # CONFIGURE
+      - name: Configure
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            -G "Visual Studio 17 2022" -A ARM64 \
+            --log-level=VERBOSE \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DHDF5_ENABLE_DOXY_WARNINGS:BOOL=ON \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_JAVA=ON \
+            -DHDF5_BUILD_DOC:BOOL=ON \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
+            -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF \
+            -DZLIB_USE_LOCALCONTENT:BOOL=OFF \
+            -DHDF5_PACK_EXAMPLES:BOOL=ON \
+            -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
+            $GITHUB_WORKSPACE
+        shell: bash
+        if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent != 'CC'}}
+
+      - name: Configure (Thread-Safe)
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            -G "Visual Studio 17 2022" -A ARM64 \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
+            -DHDF5_ENABLE_CONCURRENCY:BOOL=OFF \
+            -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_JAVA:BOOL=OFF \
+            -DHDF5_BUILD_HL_LIB:BOOL=OFF \
+            -DHDF5_BUILD_DOC:BOOL=OFF \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
+            -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF \
+            -DZLIB_USE_LOCALCONTENT:BOOL=OFF \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=OFF \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=OFF \
+            $GITHUB_WORKSPACE
+        shell: bash
+        if: ${{ inputs.thread_safety == 'TS' && inputs.concurrent != 'CC'}}
+
+      - name: Configure (Concurrency)
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            -G "Visual Studio 17 2022" -A ARM64 \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_ENABLE_THREADSAFE:BOOL=OFF \
+            -DHDF5_ENABLE_CONCURRENCY:BOOL=ON \
+            -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_JAVA:BOOL=OFF \
+            -DHDF5_BUILD_HL_LIB:BOOL=OFF \
+            -DHDF5_BUILD_DOC=OFF \
+            -DLIBAEC_USE_LOCALCONTENT=OFF \
+            -DZLIB_USE_LOCALCONTENT=OFF \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=OFF \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=OFF \
+            $GITHUB_WORKSPACE
+        shell: bash
+        if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent == 'CC'}}
+
+      # BUILD
+      - name: Build
+        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      # RUN TESTS
+      - name: Run Tests
+        run: ctest . --parallel 2 -C ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Run Package
+        run: cpack -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: List files in the space
+        run: |
+              ls -l ${{ runner.workspace }}/build
+
+      # Save files created by CTest script
+      - name: Save published binary (Windows)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: zip-vs2022_cl-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-winarm64.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if:  ${{ (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.save_binary != 'skip') }}
+
+  build_and_test_linux:
+    name: "Ubuntu gcc-${{ inputs.build_mode }}-${{ inputs.thread_safety }}-${{ inputs.concurrent }}"
+    runs-on: ubuntu-24.04-arm
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
+      - name: Install Dependencies (Linux)
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build graphviz
+          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+
+      # CONFIGURE
+      - name: Configure
+        run: |
+           mkdir "${{ runner.workspace }}/build"
+           cd "${{ runner.workspace }}/build"
+           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+             -G Ninja \
+             --log-level=VERBOSE \
+             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+             -DHDF5_ENABLE_DOXY_WARNINGS:BOOL=ON \
+             -DHDF5_BUILD_DOC:BOOL=ON \
+             -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
+             -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON \
+             -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF \
+             -DZLIB_USE_LOCALCONTENT:BOOL=OFF \
+             -DHDF5_PACK_EXAMPLES:BOOL=ON \
+             -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
+             $GITHUB_WORKSPACE
+        shell: bash
+        if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent != 'CC'}}
+
+      - name: Configure (Thread-Safe)
+        run: |
+           mkdir "${{ runner.workspace }}/build"
+           cd "${{ runner.workspace }}/build"
+           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+             -G Ninja \
+             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+             -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
+             -DHDF5_ENABLE_CONCURRENCY:BOOL=OFF \
+             -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+             -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+             -DHDF5_BUILD_JAVA:BOOL=OFF \
+             -DHDF5_BUILD_HL_LIB:BOOL=OFF \
+             -DHDF5_BUILD_DOC:BOOL=OFF \
+             -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
+             -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON \
+             -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF \
+             -DZLIB_USE_LOCALCONTENT:BOOL=OFF \
+             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
+             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
+             $GITHUB_WORKSPACE
+        shell: bash
+        if: ${{ inputs.thread_safety == 'TS' && inputs.concurrent != 'CC'}}
+
+      - name: Configure (Concurrency)
+        run: |
+           mkdir "${{ runner.workspace }}/build"
+           cd "${{ runner.workspace }}/build"
+           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+             -G Ninja \
+             -DHDF5_ENABLE_THREADSAFE:BOOL=OFF \
+             -DHDF5_ENABLE_CONCURRENCY:BOOL=ON \
+             -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+             -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+             -DHDF5_BUILD_JAVA:BOOL=OFF \
+             -DHDF5_BUILD_HL_LIB:BOOL=OFF \
+             -DHDF5_BUILD_DOC=OFF \
+             -DLIBAEC_USE_LOCALCONTENT=OFF \
+             -DZLIB_USE_LOCALCONTENT=OFF \
+             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
+             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
+             $GITHUB_WORKSPACE
+        shell: bash
+        if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent == 'CC'}}
+
+      # BUILD
+      - name: Build
+        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      # RUN TESTS
+      - name: Run Tests
+        run: ctest . --parallel 2 -C ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Run Package
+        run: cpack -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: List files in the space
+        run: |
+               ls -l ${{ runner.workspace }}/build
+
+      - name: Save published binary (linux)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+          name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
+          path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
+          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if:  ${{ (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.save_binary != 'skip') }}
+
+  build_and_test_mac_latest:
+    name: "MacOS Clang-${{ inputs.build_mode }}-${{ inputs.thread_safety }}-${{ inputs.concurrent }}"
+    runs-on: macos-15
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
+      - name: Install CMake
+        uses: lukka/get-cmake@f5b8fbb4d77cec1acc5a5f9f0df4beffaf5d98d9 # latest
+        with:
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
+
+      - name: Check CMake Version
+        shell: bash
+        run: |
+          which cmake
+          cmake --version
+
+      # CONFIGURE
+      - name: Configure
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            -G Ninja \
+            --log-level=VERBOSE \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DHDF5_ENABLE_DOXY_WARNINGS:BOOL=ON \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_DOC:BOOL=ON \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON \
+            -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF \
+            -DZLIB_USE_LOCALCONTENT:BOOL=OFF \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=OFF \
+            -DHDF5_PACK_EXAMPLES:BOOL=ON \
+            -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
+            -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
+            $GITHUB_WORKSPACE
+        shell: bash
+        if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent != 'CC'}}
+
+      - name: Configure (Thread-Safe)
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
+            -DHDF5_ENABLE_CONCURRENCY:BOOL=OFF \
+            -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_JAVA:BOOL=OFF \
+            -DHDF5_BUILD_HL_LIB:BOOL=OFF \
+            -DHDF5_BUILD_DOC:BOOL=OFF \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON \
+            -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF \
+            -DZLIB_USE_LOCALCONTENT:BOOL=OFF \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=OFF \
+            -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
+            $GITHUB_WORKSPACE
+        shell: bash
+        if: ${{ inputs.thread_safety == 'TS' && inputs.concurrent != 'CC'}}
+
+      - name: Configure (Concurrency)
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DHDF5_ENABLE_THREADSAFE:BOOL=OFF \
+            -DHDF5_ENABLE_CONCURRENCY:BOOL=ON \
+            -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_JAVA:BOOL=OFF \
+            -DHDF5_BUILD_HL_LIB:BOOL=OFF \
+            -DHDF5_BUILD_DOC=OFF \
+            -DLIBAEC_USE_LOCALCONTENT=OFF \
+            -DZLIB_USE_LOCALCONTENT=OFF \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=OFF \
+            $GITHUB_WORKSPACE
+        shell: bash
+        if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent == 'CC'}}
+
+      # BUILD
+      - name: Build
+        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      # RUN TESTS
+      - name: Run Tests
+        run: ctest . --parallel 2 -C ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Run Package
+        run: |
+          # Disable indexing to prevent file locking during CPack
+          sudo mdutil -i off / || true
+
+          # Run cpack with retry
+          cpack -C ${{ inputs.build_mode }} -V || (sleep 5 && cpack -C ${{ inputs.build_mode }} -V)
+        working-directory: ${{ runner.workspace }}/build
+        shell: bash
+
+      - name: List files in the space
+        run: |
+              ls -l ${{ runner.workspace }}/build
+
+      - name: Save published binary (Mac_latest)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: tgz-macos14_clang-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if: ${{ (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.save_binary != 'skip') }}

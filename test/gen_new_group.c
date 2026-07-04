@@ -4,16 +4,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Oct 24, 2005
- *
  * Purpose:     This program is run to generate an HDF5 data file with both
  *              empty and compact groups.
  *
@@ -31,12 +28,12 @@
 int
 main(void)
 {
-    hid_t fid  = -1; /* File ID */
-    hid_t fapl = -1; /* File access property list ID */
-    hid_t fcpl = -1; /* File creation property list ID */
-    hid_t gid  = -1; /* Group creation property list ID */
-    hid_t sid  = -1; /* Dataspace ID */
-    hid_t did  = -1; /* Dataset ID */
+    hid_t fid  = H5I_INVALID_HID; /* File ID */
+    hid_t fapl = H5I_INVALID_HID; /* File access property list ID */
+    hid_t fcpl = H5I_INVALID_HID; /* File creation property list ID */
+    hid_t gid  = H5I_INVALID_HID; /* Group creation property list ID */
+    hid_t sid  = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t did  = H5I_INVALID_HID; /* Dataset ID */
 
     /* Create file creation property list */
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
@@ -117,6 +114,6 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }

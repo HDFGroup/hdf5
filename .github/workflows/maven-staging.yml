@@ -1,0 +1,1330 @@
+name: Maven Staging Repository Test
+
+# Triggers on pull requests that modify Maven-related files
+on:
+  pull_request:
+    branches: [ develop, main ]
+    paths:
+      - 'java/src/hdf/hdf5lib/**'
+      - 'HDF5Examples/JAVA/**'
+      - '.github/workflows/maven-*.yml'
+      - '.github/workflows/java-examples-*.yml'
+      - 'CMakePresets.json'
+      - '**/CMakeLists.txt'
+      - 'java/src/hdf/hdf5lib/pom.xml.in'
+      - 'HDF5Examples/JAVA/pom-examples.xml.in'
+  workflow_call:
+    inputs:
+      test_maven_deployment:
+        description: 'Test Maven deployment to staging'
+        type: boolean
+        required: false
+        default: true
+      use_snapshot_version:
+        description: 'Use snapshot version (-SNAPSHOT suffix)'
+        type: boolean
+        required: false
+        default: true
+      platforms:
+        description: 'Build platforms for Maven artifacts'
+        type: string
+        required: false
+        default: 'all-platforms'
+      java_implementation:
+        description: 'Java implementation to test'
+        type: string
+        required: false
+        default: 'both'
+    outputs:
+      version:
+        description: 'Maven artifact version that was built'
+        value: ${{ jobs.test-maven-deployment.outputs.version }}
+  workflow_dispatch:
+    inputs:
+      test_maven_deployment:
+        description: 'Test Maven deployment to staging'
+        type: boolean
+        required: false
+        default: true
+      use_snapshot_version:
+        description: 'Use snapshot version (-SNAPSHOT suffix)'
+        type: boolean
+        required: false
+        default: true
+      platforms:
+        description: 'Build platforms for Maven artifacts'
+        type: choice
+        required: false
+        default: 'all-platforms'
+        options:
+          - 'linux-only'
+          - 'linux-windows'
+          - 'linux-macos'
+          - 'all-platforms'
+      java_implementation:
+        description: 'Java implementation to test'
+        type: choice
+        required: false
+        default: 'both'
+        options:
+          - 'both'
+          - 'ffm'
+          - 'jni'
+          - 'auto'
+
+permissions:
+  contents: read
+  packages: write
+  pull-requests: write
+
+jobs:
+  detect-changes:
+    name: Detect Maven-related Changes
+    runs-on: ubuntu-latest
+    outputs:
+      maven-changes: ${{ steps.changes.outputs.maven }}
+      should-test: ${{ steps.should-test.outputs.result }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Detect changes in Maven-related files
+        id: changes
+        run: |
+          # Check if this is a manual trigger
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "maven=true" >> $GITHUB_OUTPUT
+            echo "Manual workflow dispatch - Maven testing enabled"
+            exit 0
+          fi
+
+          # For push events, check the last commit
+          if [ "${{ github.event_name }}" == "push" ]; then
+            echo "maven=true" >> $GITHUB_OUTPUT
+            echo "Push event - Maven testing enabled"
+            exit 0
+          fi
+
+          # For pull requests, check changed files
+          if [ -n "${{ github.base_ref }}" ]; then
+            git fetch origin ${{ github.base_ref }}
+            MAVEN_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E "(java/src/hdf/hdf5lib/|HDF5Examples/JAVA/|maven|pom\.xml|CMakePresets\.json)" || true)
+          else
+            # Fallback: assume changes if base_ref not available
+            MAVEN_FILES="true"
+          fi
+
+          if [ -n "$MAVEN_FILES" ]; then
+            echo "maven=true" >> $GITHUB_OUTPUT
+            echo "Maven-related changes detected"
+          else
+            echo "maven=false" >> $GITHUB_OUTPUT
+            echo "No Maven-related changes detected"
+          fi
+
+      - name: Determine if Maven testing should run
+        id: should-test
+        env:
+          TEST_MAVEN_DEPLOYMENT: ${{ inputs.test_maven_deployment }}
+          MAVEN_CHANGED: ${{ steps.changes.outputs.maven }}
+        run: |
+          if [ "$MAVEN_CHANGED" == "true" ] || [ "$TEST_MAVEN_DEPLOYMENT" == "true" ]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+            echo "Maven testing will be performed"
+          else
+            echo "result=false" >> $GITHUB_OUTPUT
+            echo "Maven testing will be skipped"
+          fi
+
+  determine-matrix:
+    name: Determine Build Matrix
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.should-test == 'true' }}
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Determine build matrix
+        id: set-matrix
+        env:
+          JAVA_IMPL: ${{ inputs.java_implementation || 'auto' }}
+          PLATFORMS: ${{ inputs.platforms || 'all-platforms' }}
+        run: |
+
+          # Determine which implementations to build
+          case "$JAVA_IMPL" in
+            "ffm")
+              IMPLEMENTATIONS='["ffm"]'
+              ;;
+            "jni")
+              IMPLEMENTATIONS='["jni"]'
+              ;;
+            "both")
+              IMPLEMENTATIONS='["ffm", "jni"]'
+              ;;
+            "auto"|*)
+              # Auto means build based on Java version (defaults handled by presets)
+              # We'll build once with auto setting
+              IMPLEMENTATIONS='["auto"]'
+              ;;
+          esac
+
+          # Determine which platforms to build
+          case "$PLATFORMS" in
+            "linux-only")
+              PLATFORM_LIST='[{"name": "Linux", "os": "ubuntu-latest", "compiler": "GNUC", "arch": "x86_64"}]'
+              ;;
+            "linux-windows")
+              PLATFORM_LIST='[{"name": "Linux", "os": "ubuntu-latest", "compiler": "GNUC", "arch": "x86_64"}, {"name": "Windows", "os": "windows-latest", "compiler": "MSVC", "arch": "x86_64"}]'
+              ;;
+            "linux-macos")
+              PLATFORM_LIST='[{"name": "Linux", "os": "ubuntu-latest", "compiler": "GNUC", "arch": "x86_64"}, {"name": "macOS-x86_64", "os": "macos-14", "compiler": "Clang", "arch": "x86_64"}, {"name": "macOS-aarch64", "os": "macos-latest", "compiler": "Clang", "arch": "aarch64"}]'
+              ;;
+            "all-platforms"|*)
+              PLATFORM_LIST='[{"name": "Linux", "os": "ubuntu-latest", "compiler": "GNUC", "arch": "x86_64"}, {"name": "Windows", "os": "windows-latest", "compiler": "MSVC", "arch": "x86_64"}, {"name": "macOS-x86_64", "os": "macos-14", "compiler": "Clang", "arch": "x86_64"}, {"name": "macOS-aarch64", "os": "macos-latest", "compiler": "Clang", "arch": "aarch64"}]'
+              ;;
+          esac
+
+          # Create the full matrix combining platforms and implementations
+          MATRIX="{\"include\":["
+          FIRST=true
+          for platform in $(echo "$PLATFORM_LIST" | jq -c '.[]'); do
+            for impl in $(echo "$IMPLEMENTATIONS" | jq -r '.[]'); do
+              if [ "$FIRST" = true ]; then
+                FIRST=false
+              else
+                MATRIX+=","
+              fi
+
+              # Extract platform details
+              PLATFORM_NAME=$(echo "$platform" | jq -r '.name')
+              PLATFORM_OS=$(echo "$platform" | jq -r '.os')
+              PLATFORM_COMPILER=$(echo "$platform" | jq -r '.compiler')
+              PLATFORM_ARCH=$(echo "$platform" | jq -r '.arch')
+
+              # Create artifact name suffix
+              # Platform name already includes arch for macOS (e.g., macOS-x86_64)
+              PLATFORM_LOWER="${PLATFORM_NAME,,}"
+              if [[ "$PLATFORM_LOWER" == *"-"* ]]; then
+                # Platform name already has arch suffix (macOS case)
+                BASE_NAME="$PLATFORM_LOWER"
+              else
+                # Add arch suffix (Linux, Windows case)
+                BASE_NAME="${PLATFORM_LOWER}-${PLATFORM_ARCH}"
+              fi
+
+              if [ "$impl" = "auto" ]; then
+                ARTIFACT_SUFFIX="$BASE_NAME"
+              else
+                ARTIFACT_SUFFIX="${BASE_NAME}-${impl}"
+              fi
+
+              MATRIX+="{\"platform\":\"$PLATFORM_NAME\",\"os\":\"$PLATFORM_OS\",\"compiler\":\"$PLATFORM_COMPILER\",\"arch\":\"$PLATFORM_ARCH\",\"implementation\":\"$impl\",\"artifact-suffix\":\"$ARTIFACT_SUFFIX\"}"
+            done
+          done
+          MATRIX+="]}"
+
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+          echo "Generated matrix:"
+          echo "$MATRIX" | jq '.'
+
+  build-maven-artifacts:
+    name: "Build Maven Artifacts (${{ matrix.platform }} - ${{ matrix.implementation }})"
+    needs: [detect-changes, determine-matrix]
+    if: ${{ needs.detect-changes.outputs.should-test == 'true' }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.determine-matrix.outputs.matrix) }}
+    steps:
+      - name: Install Dependencies (Linux)
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build graphviz
+
+      - name: Install Dependencies (macOS)
+        if: ${{ runner.os == 'macOS' }}
+        run: |
+          brew install graphviz
+
+      - name: Install Dependencies (Windows)
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+          choco install ninja
+          choco install graphviz
+
+      - name: Enable Developer Command Prompt (Windows)
+        if: ${{ runner.os == 'Windows' }}
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+
+      - name: Set up JDK (Java 25 for FFM builds)
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        with:
+          java-version: ${{ matrix.implementation == 'ffm' && '25' || '21' }}
+          distribution: ${{ matrix.implementation == 'ffm' && 'oracle' || 'temurin' }}
+
+      - name: Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup jextract (FFM builds only)
+        if: ${{ matrix.implementation == 'ffm' }}
+        uses: ./.github/actions/setup-jextract
+        with:
+          java-version: '25'
+
+      - name: Set preset name
+        id: set-preset
+        shell: bash
+        env:
+          USE_SNAPSHOT_VERSION: ${{ inputs.use_snapshot_version }}
+        run: |
+          # Determine implementation suffix for preset based on matrix
+          JAVA_IMPL="${{ matrix.implementation }}"
+          case "$JAVA_IMPL" in
+            "ffm")
+              IMPL_SUFFIX="-FFM"
+              ;;
+            "jni"|"auto"|*)
+              # JNI and auto use default Maven presets (JNI is default as of HDF5 2.0)
+              IMPL_SUFFIX=""
+              ;;
+          esac
+
+          # Determine snapshot setting
+          SNAPSHOT_SUFFIX=""
+          if [ "$USE_SNAPSHOT_VERSION" == "true" ] || [ "${{ github.event_name }}" == "pull_request" ]; then
+            SNAPSHOT_SUFFIX="-Snapshot"
+          fi
+
+          # Build preset name: ci-MinShar-{COMPILER}-Maven{-FFM}{-Snapshot}
+          # Note: Generic Maven presets default to JNI (no suffix needed)
+          PRESET_NAME="ci-MinShar-${{ matrix.compiler }}-Maven${IMPL_SUFFIX}${SNAPSHOT_SUFFIX}"
+
+          echo "preset=$PRESET_NAME" >> $GITHUB_OUTPUT
+          echo "Using preset: $PRESET_NAME"
+          echo "Platform: ${{ matrix.platform }}, Compiler: ${{ matrix.compiler }}, Implementation: $JAVA_IMPL"
+
+      - name: Build HDF5 with Maven support
+        id: buildhdf5
+        shell: bash
+        run: |
+          # macOS: Disable Spotlight indexing to prevent file locking during CPack
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            echo "Disabling Spotlight indexing temporarily"
+            sudo mdutil -i off / || true
+          fi
+
+          cd "${{ github.workspace }}"
+
+          # Run workflow with retry logic for macOS CPack failures
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            echo "Running CMake workflow with macOS retry logic..."
+            if ! cmake --workflow --preset="${{ steps.set-preset.outputs.preset }}" --fresh; then
+              echo "⚠️ First attempt failed, retrying in 5 seconds..."
+              sleep 5
+              cmake --workflow --preset="${{ steps.set-preset.outputs.preset }}" --fresh
+            fi
+          else
+            # Non-macOS: run normally without retry
+            cmake --workflow --preset="${{ steps.set-preset.outputs.preset }}" --fresh
+          fi
+
+      - name: Extract version information
+        id: version-info
+        shell: bash
+        run: |
+          # Find the generated POM file across all possible locations
+          BUILD_ROOT="${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}"
+          echo "Looking for POM file in: $BUILD_ROOT"
+
+          # Try multiple search patterns for cross-platform compatibility
+          POM_FILE=""
+
+          # Search patterns in order of preference
+          if [ -z "$POM_FILE" ]; then
+            POM_FILE=$(find "$BUILD_ROOT" -name "pom.xml" -path "*/java/*" 2>/dev/null | head -1)
+          fi
+
+          if [ -z "$POM_FILE" ]; then
+            POM_FILE=$(find "$BUILD_ROOT" -name "pom.xml" 2>/dev/null | head -1)
+          fi
+
+          # Try Maven artifacts directory if build structure differs
+          if [ -z "$POM_FILE" ] && [ -d "${{ runner.workspace }}/maven-artifacts" ]; then
+            POM_FILE=$(find "${{ runner.workspace }}/maven-artifacts" -name "pom.xml" 2>/dev/null | head -1)
+          fi
+
+          if [ -n "$POM_FILE" ] && [ -f "$POM_FILE" ]; then
+            # Extract version using robust pattern that works across platforms
+            VERSION=$(grep -o '<version>[^<]*</version>' "$POM_FILE" | head -1 | sed 's/<[^>]*>//g' | tr -d '\r\n')
+
+            # Validate version format
+            if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+.*$ ]]; then
+              echo "version=$VERSION" >> $GITHUB_OUTPUT
+              echo "✓ Detected version: $VERSION"
+              echo "✓ POM file: $POM_FILE"
+            else
+              echo "version=unknown" >> $GITHUB_OUTPUT
+              echo "❌ Invalid version format detected: $VERSION"
+              exit 1
+            fi
+          else
+            echo "version=unknown" >> $GITHUB_OUTPUT
+            echo "❌ Could not find POM file"
+            echo "Available files in build root:"
+            find "$BUILD_ROOT" -name "*.xml" -o -name "pom*" 2>/dev/null | head -10 || echo "No XML files found"
+            exit 1
+          fi
+
+      - name: Collect Maven artifacts
+        shell: bash
+        run: |
+          echo "Collecting Maven artifacts for testing..."
+          mkdir -p "${{ runner.workspace }}/maven-artifacts"
+
+          BUILD_ROOT="${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}"
+          echo "Looking for Maven artifacts in build root: $BUILD_ROOT"
+
+          if [ ! -d "$BUILD_ROOT" ]; then
+            echo "ERROR: Build root directory does not exist: $BUILD_ROOT"
+            exit 1
+          fi
+
+          # Debug: Show what's in the build directory
+          echo "Build directory contents:"
+          find "$BUILD_ROOT" -maxdepth 3 -type d 2>/dev/null | head -20 || echo "Directory listing completed"
+
+          # Find build directory (try multiple patterns)
+          BUILD_DIR=$(find "$BUILD_ROOT" -name "*Maven*" -type d 2>/dev/null | head -1)
+
+          if [ -z "$BUILD_DIR" ]; then
+            # Try looking for java directory as fallback (more specific patterns)
+            BUILD_DIR=$(find "$BUILD_ROOT" -path "*/java/*" -type d 2>/dev/null | head -1)
+            if [ -z "$BUILD_DIR" ]; then
+              BUILD_DIR=$(find "$BUILD_ROOT" -name "java" -type d 2>/dev/null | head -1)
+            fi
+          fi
+
+          if [ -z "$BUILD_DIR" ]; then
+            # Try looking for any directory with JAR files
+            JAR_FILE=$(find "$BUILD_ROOT" -name "*.jar" -type f 2>/dev/null | head -1)
+            if [ -n "$JAR_FILE" ]; then
+              BUILD_DIR=$(dirname "$JAR_FILE")
+              echo "Found JAR file in: $BUILD_DIR"
+            fi
+          fi
+
+          if [ -z "$BUILD_DIR" ]; then
+            # Last resort: look for the build directory itself if it contains artifacts
+            if find "$BUILD_ROOT" -name "*.jar" -o -name "pom.xml" | grep -q .; then
+              BUILD_DIR="$BUILD_ROOT"
+              echo "Using build root as artifacts directory"
+            fi
+          fi
+
+          if [ -z "$BUILD_DIR" ]; then
+            echo "ERROR: Could not find Maven build directory with any of the patterns"
+            echo "Available directories:"
+            find "$BUILD_ROOT" -maxdepth 2 -type d
+            exit 1
+          fi
+
+          echo "Looking for artifacts in: $BUILD_DIR"
+
+          # Debug: Show all JAR files in build directory
+          echo "All JAR files in build directory:"
+          find "$BUILD_DIR" -name "*.jar" -type f 2>/dev/null | head -20 || true
+
+          # Debug: Show specifically what we're looking for
+          echo "SLF4J JAR files in build directory:"
+          find "$BUILD_DIR" -name "*slf4j*.jar" -type f
+
+          # Copy JAR files (excluding test and H5Ex_ example JARs)
+          find "$BUILD_DIR" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" -exec cp {} "${{ runner.workspace }}/maven-artifacts/" \;
+
+          # Also look for Maven dependencies in common locations
+          echo "Looking for Maven dependencies in additional locations..."
+
+          # Check if there's a Maven repository in the build area
+          if [ -d "$BUILD_ROOT" ]; then
+            find "$BUILD_ROOT" -name "*slf4j*.jar" -type f -exec cp {} "${{ runner.workspace }}/maven-artifacts/" \;
+          fi
+
+          # Check common Maven local repository locations
+          MAVEN_REPO_PATHS=(
+            "$HOME/.m2/repository"
+            "$BUILD_ROOT/.m2/repository"
+            "${{ runner.workspace }}/.m2/repository"
+          )
+
+          for repo_path in "${MAVEN_REPO_PATHS[@]}"; do
+            if [ -d "$repo_path" ]; then
+              echo "Checking Maven repository: $repo_path"
+              find "$repo_path" -name "slf4j-api*.jar" -o -name "slf4j-simple*.jar" 2>/dev/null | head -2 | while read jar_file; do
+                if [ -f "$jar_file" ]; then
+                  echo "Found dependency: $jar_file"
+                  cp "$jar_file" "${{ runner.workspace }}/maven-artifacts/"
+                fi
+              done
+            fi
+          done
+
+          # Copy POM files
+          find "$BUILD_DIR" -name "pom.xml" -exec cp {} "${{ runner.workspace }}/maven-artifacts/" \;
+
+          # List collected artifacts
+          echo "Collected Maven artifacts:"
+          ls -la "${{ runner.workspace }}/maven-artifacts/"
+
+      - name: Validate artifacts
+        id: artifacts-check
+        shell: bash
+        run: |
+          ARTIFACT_COUNT=$(find "${{ runner.workspace }}/maven-artifacts" -name "*.jar" | wc -l)
+          POM_COUNT=$(find "${{ runner.workspace }}/maven-artifacts" -name "pom.xml" | wc -l)
+
+          echo "Found $ARTIFACT_COUNT JAR files and $POM_COUNT POM files"
+
+          if [ $ARTIFACT_COUNT -gt 0 ] && [ $POM_COUNT -gt 0 ]; then
+            echo "created=true" >> $GITHUB_OUTPUT
+            echo "✅ Artifacts successfully created"
+          else
+            echo "created=false" >> $GITHUB_OUTPUT
+            echo "❌ Artifact creation failed"
+            exit 1
+          fi
+
+      - name: Verify JAR contents (CRITICAL - Prevents Incomplete Packages)
+        shell: bash
+        run: |
+          echo "::group::Verify JAR contents"
+          echo "============================================"
+          echo "Verifying Maven artifacts contain HDF5 classes"
+          echo "============================================"
+
+          ARTIFACT_DIR="${{ runner.workspace }}/maven-artifacts"
+          VERIFICATION_FAILED=false
+          IMPL="${{ matrix.implementation }}"
+
+          # Find the main HDF5 JAR (not slf4j dependencies)
+          HDF5_JAR=$(find "$ARTIFACT_DIR" -name "*hdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" ! -name "*slf4j*" | head -1)
+
+          if [ -z "$HDF5_JAR" ]; then
+            # Try alternative naming (jarhdf5)
+            HDF5_JAR=$(find "$ARTIFACT_DIR" -name "jarhdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+          fi
+
+          if [ -z "$HDF5_JAR" ]; then
+            echo "::error::Could not find HDF5 JAR file in artifacts"
+            echo "Available JAR files:"
+            find "$ARTIFACT_DIR" -name "*.jar" -ls
+            exit 1
+          fi
+
+          echo "Found HDF5 JAR: $HDF5_JAR"
+          echo "JAR size: $(du -h "$HDF5_JAR" | cut -f1)"
+          echo ""
+
+          # Determine implementation type (FFM or JNI)
+          if [ "$IMPL" = "ffm" ]; then
+            echo "Verifying FFM implementation..."
+            echo "Expected package: org.hdfgroup.javahdf5.*"
+
+            # Check for key FFM classes
+            if jar tf "$HDF5_JAR" | grep -q "org/hdfgroup/javahdf5/hdf5_h.class"; then
+              CLASS_COUNT=$(jar tf "$HDF5_JAR" | grep "org/hdfgroup/javahdf5.*\.class" | wc -l)
+              echo "✅ JAR contains HDF5 FFM classes"
+              echo "   Found $CLASS_COUNT FFM classes"
+
+              # List some sample classes to verify content
+              echo "   Sample classes:"
+              jar tf "$HDF5_JAR" | grep "org/hdfgroup/javahdf5.*\.class" | head -5 2>/dev/null | sed 's/^/   - /' || true
+            else
+              echo "::error::JAR does not contain HDF5 FFM classes!"
+              echo "JAR only contains:"
+              jar tf "$HDF5_JAR" | head -30 2>/dev/null || true
+              VERIFICATION_FAILED=true
+            fi
+
+          else
+            # JNI or auto (defaults to JNI)
+            echo "Verifying JNI implementation..."
+            echo "Expected package: hdf.hdf5lib.*"
+
+            # Check for key JNI classes
+            if jar tf "$HDF5_JAR" | grep -q "hdf/hdf5lib/H5.class"; then
+              CLASS_COUNT=$(jar tf "$HDF5_JAR" | grep "hdf/hdf5lib.*\.class" | wc -l)
+              echo "✅ JAR contains HDF5 JNI classes"
+              echo "   Found $CLASS_COUNT JNI classes"
+
+              # Verify key classes are present
+              MISSING_CLASSES=""
+              for key_class in "hdf/hdf5lib/H5.class" "hdf/hdf5lib/HDF5Constants.class" "hdf/hdf5lib/HDFNativeData.class"; do
+                if ! jar tf "$HDF5_JAR" | grep -q "$key_class"; then
+                  MISSING_CLASSES="$MISSING_CLASSES $key_class"
+                fi
+              done
+
+              if [ -n "$MISSING_CLASSES" ]; then
+                echo "::warning::Some expected classes are missing:$MISSING_CLASSES"
+              fi
+
+              # List some sample classes to verify content
+              echo "   Sample classes:"
+              jar tf "$HDF5_JAR" | grep "hdf/hdf5lib.*\.class" | head -5 2>/dev/null | sed 's/^/   - /' || true
+            else
+              echo "::error::JAR does not contain HDF5 JNI classes!"
+              echo "JAR only contains:"
+              jar tf "$HDF5_JAR" | head -30 2>/dev/null || true
+              VERIFICATION_FAILED=true
+            fi
+          fi
+
+          # Additional checks
+          echo ""
+          echo "Additional JAR checks:"
+
+          # Check JAR size (should be > 50KB for real HDF5 classes)
+          JAR_SIZE=$(stat -f%z "$HDF5_JAR" 2>/dev/null || stat -c%s "$HDF5_JAR" 2>/dev/null || echo "0")
+          if [ "$JAR_SIZE" -lt 51200 ]; then
+            echo "::warning::JAR size is suspiciously small: $JAR_SIZE bytes (expected > 50KB)"
+            echo "   This may indicate the JAR only contains dependencies."
+          else
+            echo "✅ JAR size is reasonable: $(($JAR_SIZE / 1024)) KB"
+          fi
+
+          # Count total files in JAR
+          TOTAL_FILES=$(jar tf "$HDF5_JAR" | wc -l)
+          echo "✅ Total files in JAR: $TOTAL_FILES"
+
+          echo "::endgroup::"
+
+          if [ "$VERIFICATION_FAILED" = true ]; then
+            echo ""
+            echo "::error::❌ JAR verification failed!"
+            echo "::error::The Maven artifact does not contain HDF5 classes."
+            echo "::error::This would result in an incomplete/broken package being deployed."
+            echo "::error::"
+            echo "::error::Possible causes:"
+            echo "::error::  1. CMake add_jar not executing correctly"
+            echo "::error::  2. Wrong JAR file being collected"
+            echo "::error::  3. Build failure that went undetected"
+            echo "::error::"
+            echo "::error::Please review the build logs and CMake configuration."
+            exit 1
+          fi
+
+          echo ""
+          echo "✅ JAR verification passed - artifact is complete!"
+
+      - name: Run validation script
+        shell: bash
+        run: |
+          if [ -f .github/scripts/validate-maven-artifacts.sh ]; then
+            echo "Running Maven artifact validation..."
+            .github/scripts/validate-maven-artifacts.sh "${{ runner.workspace }}/maven-artifacts"
+          else
+            echo "Validation script not found - skipping validation"
+          fi
+
+      - name: Install HDF5 binaries for testing
+        shell: bash
+        run: |
+          BUILD_ROOT="${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}"
+          INSTALL_DIR="${{ runner.workspace }}/hdf5-install"
+
+          echo "Installing HDF5 binaries to: $INSTALL_DIR"
+          cd "$BUILD_ROOT"
+          cmake --install . --prefix "$INSTALL_DIR"
+
+          echo "Installation contents:"
+          ls -la "$INSTALL_DIR"
+          if [ -d "$INSTALL_DIR/lib" ]; then
+            echo "Libraries:"
+            ls -la "$INSTALL_DIR/lib" | grep -E '\.so|\.dylib|\.dll' || echo "No shared libraries found"
+          fi
+
+      - name: Upload Maven artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+          name: maven-staging-artifacts-${{ matrix.artifact-suffix }}
+          path: ${{ runner.workspace }}/maven-artifacts
+          retention-days: 7
+
+      - name: Upload HDF5 installation for testing
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+          name: hdf5-install-${{ matrix.artifact-suffix }}
+          path: ${{ runner.workspace }}/hdf5-install
+          retention-days: 7
+
+  test-maven-deployment:
+    name: Test Maven Deployment
+    runs-on: ubuntu-latest
+    needs: [detect-changes, determine-matrix, build-maven-artifacts]
+    if: ${{ always() && needs.detect-changes.outputs.should-test == 'true' }}
+    outputs:
+      version: ${{ steps.extract-version.outputs.version }}
+    steps:
+      - name: Set up JDK 21
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Download all Maven artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+          pattern: maven-staging-artifacts-*
+          path: ./artifacts
+          merge-multiple: false
+
+      - name: Checkout code for version extraction
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          path: source
+
+      - name: Extract version for testing
+        id: extract-version
+        env:
+          USE_SNAPSHOT_VERSION: ${{ inputs.use_snapshot_version }}
+        run: |
+          # Extract version from first available POM file
+          POM_FILE=$(find ./artifacts -name "pom.xml" 2>/dev/null | head -1)
+          if [ -n "$POM_FILE" ]; then
+            VERSION=$(grep -o '<version>[^<]*</version>' "$POM_FILE" | head -1 | sed 's/<[^>]*>//g')
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "✅ Extracted version from POM: $VERSION"
+          else
+            # Fallback: Extract version from H5public.h
+            echo "⚠️ No POM file found, extracting version from source..."
+            if [ -f "source/src/H5public.h" ]; then
+              H5_MAJOR=$(grep '#define H5_VERS_MAJOR' source/src/H5public.h | awk '{print $3}')
+              H5_MINOR=$(grep '#define H5_VERS_MINOR' source/src/H5public.h | awk '{print $3}')
+              H5_RELEASE=$(grep '#define H5_VERS_RELEASE' source/src/H5public.h | awk '{print $3}')
+
+              # Determine if this should be a SNAPSHOT version
+              if [ "$USE_SNAPSHOT_VERSION" == "true" ] || [ "${{ github.event_name }}" == "pull_request" ]; then
+                VERSION="${H5_MAJOR}.${H5_MINOR}.${H5_RELEASE}-SNAPSHOT"
+              else
+                VERSION="${H5_MAJOR}.${H5_MINOR}.${H5_RELEASE}"
+              fi
+
+              echo "version=$VERSION" >> $GITHUB_OUTPUT
+              echo "✅ Extracted version from H5public.h: $VERSION"
+            else
+              echo "::error::Could not extract version from POM or source files"
+              exit 1
+            fi
+          fi
+
+      - name: Test Maven deployment (dry run)
+        run: |
+          echo "=== Maven Deployment Test (Dry Run) ==="
+          echo "Version: ${{ steps.extract-version.outputs.version }}"
+
+          echo "Repository: GitHub Packages (staging)"
+
+          # List artifacts to be deployed by platform
+          echo "Artifacts ready for deployment:"
+          for platform_dir in ./artifacts/*/; do
+            if [ -d "$platform_dir" ]; then
+              platform_name=$(basename "$platform_dir")
+              echo "Platform: $platform_name"
+              find "$platform_dir" -name "*.jar" -exec basename {} \; | sed 's/^/  - /'
+            fi
+          done
+
+          # Create test Maven settings
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+            <servers>
+              <server>
+                <id>github</id>
+                <username>${env.GITHUB_ACTOR}</username>
+                <password>${env.GITHUB_TOKEN}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
+          # Simulate deployment validation for each platform
+          total_jars=0
+          valid_jars=0
+
+          for jar_file in $(find ./artifacts -name "*.jar"); do
+            jar_name=$(basename "$jar_file")
+            platform=$(dirname "$jar_file" | sed 's|./artifacts/||')
+            total_jars=$((total_jars + 1))
+
+            echo "[$platform] Testing: $jar_name"
+
+            # Test JAR integrity
+            if jar tf "$jar_file" > /dev/null 2>&1; then
+              echo "  ✓ JAR integrity verified"
+              valid_jars=$((valid_jars + 1))
+            else
+              echo "  ❌ JAR integrity check failed"
+            fi
+          done
+
+          echo "Validation summary: $valid_jars/$total_jars JARs passed integrity check"
+
+          if [ $valid_jars -ne $total_jars ]; then
+            echo "❌ Some artifacts failed validation"
+            exit 1
+          fi
+
+          echo "🎉 Dry run deployment test passed!"
+
+  test-java-examples-maven:
+    name: "Test Java Examples with Maven Artifacts (${{ matrix.platform }} - ${{ matrix.implementation }})"
+    runs-on: ${{ matrix.os }}
+    needs: [detect-changes, determine-matrix, build-maven-artifacts]
+    if: ${{ always() && needs.detect-changes.outputs.should-test == 'true' && needs.build-maven-artifacts.result == 'success' }}
+    continue-on-error: true  # Non-blocking failures
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.determine-matrix.outputs.matrix) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Set up JDK (Java 25 for FFM builds)
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        with:
+          java-version: ${{ matrix.implementation == 'ffm' && '25' || '21' }}
+          distribution: ${{ matrix.implementation == 'ffm' && 'oracle' || 'temurin' }}
+
+      - name: Install timeout command on macOS
+        if: ${{ startsWith(matrix.platform, 'macOS') }}
+        run: |
+          # Install GNU coreutils which includes gtimeout
+          brew install coreutils
+          echo "Installed gtimeout: $(which gtimeout)"
+
+      - name: Download Maven artifacts (${{ matrix.platform }} - ${{ matrix.implementation }})
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+          name: maven-staging-artifacts-${{ matrix.artifact-suffix }}
+          path: ./maven-artifacts/${{ matrix.platform }}
+        continue-on-error: true
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-examples-${{ hashFiles('**/pom-examples.xml*') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-examples-
+            ${{ runner.os }}-maven-
+
+      - name: Test Java Examples (Unix)
+        if: ${{ matrix.platform != 'Windows' }}
+        id: test-examples-unix
+        shell: bash
+        run: |
+          echo "=== Java Examples Maven Integration Test (${{ matrix.platform }}) ==="
+
+          # Test one representative example from each category
+          cd HDF5Examples/JAVA
+
+          # Get absolute path to maven artifacts for this platform
+          MAVEN_ARTIFACTS_DIR="$(realpath ../../maven-artifacts/${{ matrix.platform }})"
+          echo "Maven artifacts directory (${{ matrix.platform }}): $MAVEN_ARTIFACTS_DIR"
+
+          # Find HDF5 JAR files (not dependencies like slf4j) - use platform-specific artifacts
+          HDF5_JAR=$(find "$MAVEN_ARTIFACTS_DIR" -name "*hdf5*.jar" -o -name "jarhdf5*.jar" 2>/dev/null | head -1)
+          if [ -z "$HDF5_JAR" ]; then
+            echo "❌ No HDF5 JAR files found for testing"
+            echo "Available JAR files:"
+            find "$MAVEN_ARTIFACTS_DIR" -name "*.jar"
+            exit 1
+          fi
+
+          echo "Using HDF5 JAR file: $HDF5_JAR"
+
+          # Detect JAR type by checking for FFM-specific classes
+          # FFM JARs contain org.hdfgroup.javahdf5 package, JNI JARs contain hdf.hdf5lib
+          if jar tf "$HDF5_JAR" | grep -q "org/hdfgroup/javahdf5/hdf5_h.class"; then
+            JAR_TYPE="ffm"
+            echo "Detected FFM JAR (contains org.hdfgroup.javahdf5 package)"
+          else
+            JAR_TYPE="jni"
+            echo "Detected JNI JAR (contains hdf.hdf5lib package)"
+          fi
+
+          # Determine which examples directory to use based on detected JAR type
+          # This ensures we test with examples that match the JAR's implementation
+          if [ "$JAR_TYPE" = "jni" ]; then
+            EXAMPLES_DIR="compat"
+            echo "Using JNI-compatible examples from compat/ directory"
+          else
+            EXAMPLES_DIR="."
+            echo "Using FFM examples from root directory"
+          fi
+
+          # Also find any dependency JARs - only include slf4j-api and slf4j-simple, exclude slf4j-nop to avoid conflicts
+          DEP_JARS=$(find "$MAVEN_ARTIFACTS_DIR" -name "slf4j-api*.jar" -o -name "slf4j-simple*.jar")
+          if [ -n "$DEP_JARS" ]; then
+            echo "Found dependency JARs:"
+            echo "$DEP_JARS"
+          else
+            echo "No SLF4J dependency JARs found in artifacts, downloading them directly..."
+
+            # Download SLF4J dependencies directly using Maven
+            SLF4J_VERSION="2.0.16"
+            TEMP_POM="$MAVEN_ARTIFACTS_DIR/temp-pom.xml"
+
+            # Create a minimal POM to download dependencies using echo
+            echo '<?xml version="1.0" encoding="UTF-8"?>' > "$TEMP_POM"
+            echo '<project xmlns="http://maven.apache.org/POM/4.0.0"' >> "$TEMP_POM"
+            echo '         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' >> "$TEMP_POM"
+            echo '         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">' >> "$TEMP_POM"
+            echo '    <modelVersion>4.0.0</modelVersion>' >> "$TEMP_POM"
+            echo '    <groupId>temp</groupId>' >> "$TEMP_POM"
+            echo '    <artifactId>temp</artifactId>' >> "$TEMP_POM"
+            echo '    <version>1.0</version>' >> "$TEMP_POM"
+            echo '    <dependencies>' >> "$TEMP_POM"
+            echo '        <dependency>' >> "$TEMP_POM"
+            echo '            <groupId>org.slf4j</groupId>' >> "$TEMP_POM"
+            echo '            <artifactId>slf4j-api</artifactId>' >> "$TEMP_POM"
+            echo '            <version>2.0.16</version>' >> "$TEMP_POM"
+            echo '        </dependency>' >> "$TEMP_POM"
+            echo '        <dependency>' >> "$TEMP_POM"
+            echo '            <groupId>org.slf4j</groupId>' >> "$TEMP_POM"
+            echo '            <artifactId>slf4j-simple</artifactId>' >> "$TEMP_POM"
+            echo '            <version>2.0.16</version>' >> "$TEMP_POM"
+            echo '        </dependency>' >> "$TEMP_POM"
+            echo '    </dependencies>' >> "$TEMP_POM"
+            echo '</project>' >> "$TEMP_POM"
+
+            # Download dependencies
+            if (cd "$MAVEN_ARTIFACTS_DIR" && mvn -f temp-pom.xml dependency:copy-dependencies -DoutputDirectory=. -DincludeScope=runtime -q); then
+              # Clean up temporary POM
+              rm -f "$TEMP_POM"
+
+              # Re-scan for dependency JARs
+              DEP_JARS=$(find "$MAVEN_ARTIFACTS_DIR" -name "slf4j-api*.jar" -o -name "slf4j-simple*.jar")
+              if [ -n "$DEP_JARS" ]; then
+                echo "Successfully downloaded SLF4J dependencies:"
+                echo "$DEP_JARS"
+              else
+                echo "Failed to download SLF4J dependencies"
+              fi
+            else
+              echo "Error downloading dependencies with Maven"
+              rm -f "$TEMP_POM"
+            fi
+          fi
+
+          FAILED_EXAMPLES=""
+          TOTAL_EXAMPLES=0
+          PASSED_EXAMPLES=0
+
+          # Save current directory (HDF5Examples/JAVA)
+          JAVA_DIR="$(pwd)"
+
+          # Test representative examples from each category
+          for category in H5D H5T H5G TUTR; do
+            if [ -d "$EXAMPLES_DIR/$category" ]; then
+              cd "$JAVA_DIR/$EXAMPLES_DIR/$category"
+
+              # Find first .java file in category
+              EXAMPLE_FILE=$(ls *.java | head -1)
+              if [ -f "$EXAMPLE_FILE" ]; then
+                TOTAL_EXAMPLES=$((TOTAL_EXAMPLES + 1))
+                example_name=$(basename "$EXAMPLE_FILE" .java)
+                echo "--- Testing $category/$example_name ---"
+
+                # Build classpath with HDF5 JAR and dependencies (already absolute paths)
+                CLASSPATH="$HDF5_JAR"
+                if [ -n "$DEP_JARS" ]; then
+                  for dep_jar in $DEP_JARS; do
+                    CLASSPATH="$CLASSPATH:$dep_jar"
+                  done
+                fi
+
+                echo "Using classpath: $CLASSPATH"
+
+                # Set compilation flags based on detected JAR type
+                # This ensures we use correct flags for the actual JAR implementation
+                if [ "$JAR_TYPE" = "ffm" ]; then
+                  # FFM requires preview features (Java 25)
+                  JAVAC_FLAGS="--enable-preview --release 25"
+                  JAVA_FLAGS="--enable-preview"
+                else
+                  # JNI uses standard Java
+                  JAVAC_FLAGS=""
+                  JAVA_FLAGS=""
+                fi
+
+                # Test compilation
+                COMPILE_OUTPUT=$(javac $JAVAC_FLAGS -cp "$CLASSPATH" "$EXAMPLE_FILE" 2>&1)
+                if [ $? -eq 0 ]; then
+                  echo "✓ Compilation successful for $category/$example_name"
+
+                  # Test execution (with cross-platform timeout)
+                  if command -v gtimeout >/dev/null 2>&1; then
+                    # macOS with GNU coreutils timeout
+                    EXEC_RESULT=$(gtimeout 10s java $JAVA_FLAGS -cp ".:$CLASSPATH" "$example_name" >/tmp/${example_name}.out 2>&1; echo $?)
+                  elif command -v timeout >/dev/null 2>&1; then
+                    # Linux/Windows with timeout command
+                    EXEC_RESULT=$(timeout 10s java $JAVA_FLAGS -cp ".:$CLASSPATH" "$example_name" >/tmp/${example_name}.out 2>&1; echo $?)
+                  else
+                    # Fallback - run without timeout (Java examples should complete quickly)
+                    echo "Note: Running without timeout"
+                    java $JAVA_FLAGS -cp ".:$CLASSPATH" "$example_name" >/tmp/${example_name}.out 2>&1
+                    EXEC_RESULT=$?
+                  fi
+
+                  if [ "$EXEC_RESULT" -eq 0 ]; then
+                    # Basic output validation
+                    if grep -q -i -E "(dataset|datatype|group|success|created|written|read)" /tmp/${example_name}.out && \
+                       ! grep -q -i -E "(error|exception|failed|cannot)" /tmp/${example_name}.out; then
+                      echo "✓ Execution and validation successful for $category/$example_name"
+                      PASSED_EXAMPLES=$((PASSED_EXAMPLES + 1))
+                    else
+                      echo "✗ Output validation failed for $category/$example_name"
+                      echo "Output:"
+                      cat /tmp/${example_name}.out
+                      FAILED_EXAMPLES="$FAILED_EXAMPLES $category/$example_name"
+                    fi
+                  else
+                    # Check if failure is due to expected native library issue (acceptable for Maven-only testing)
+                    if grep -q "UnsatisfiedLinkError.*hdf5_java.*java.library.path" /tmp/${example_name}.out; then
+                      echo "✓ Expected native library error for Maven-only testing: $category/$example_name"
+                      echo "  (This confirms JAR structure is correct)"
+                      PASSED_EXAMPLES=$((PASSED_EXAMPLES + 1))
+                    else
+                      echo "✗ Unexpected execution failure for $category/$example_name"
+                      echo "Output:"
+                      cat /tmp/${example_name}.out
+                      FAILED_EXAMPLES="$FAILED_EXAMPLES $category/$example_name"
+                    fi
+                  fi
+                else
+                  echo "✗ Compilation failed for $category/$example_name"
+                  echo "Compilation error output:"
+                  echo "$COMPILE_OUTPUT"
+                  FAILED_EXAMPLES="$FAILED_EXAMPLES $category/$example_name"
+                fi
+              fi
+            fi
+          done
+
+          echo "=== Java Examples Test Summary (${{ matrix.platform }}) ==="
+          echo "Total representative examples tested: $TOTAL_EXAMPLES"
+          echo "Passed: $PASSED_EXAMPLES"
+          echo "Failed: $((TOTAL_EXAMPLES - PASSED_EXAMPLES))"
+
+          if [ -n "$FAILED_EXAMPLES" ]; then
+            echo "Failed examples:$FAILED_EXAMPLES"
+            echo "❌ Some Java examples failed - but continuing (non-blocking)"
+            echo "test-status=FAILED" >> $GITHUB_OUTPUT
+          else
+            echo "✅ All representative Java examples passed!"
+            echo "test-status=PASSED" >> $GITHUB_OUTPUT
+          fi
+
+          echo "total-examples=$TOTAL_EXAMPLES" >> $GITHUB_OUTPUT
+          echo "passed-examples=$PASSED_EXAMPLES" >> $GITHUB_OUTPUT
+
+      - name: Test Java Examples (Windows)
+        if: ${{ matrix.platform == 'Windows' }}
+        id: test-examples-windows
+        shell: pwsh
+        run: |
+          Write-Host "=== Java Examples Maven Integration Test (Windows) ==="
+
+          # Test one representative example from each category
+          Set-Location HDF5Examples/JAVA
+
+          # Get absolute path to maven artifacts for this platform
+          $MAVEN_ARTIFACTS_DIR = Resolve-Path "../../maven-artifacts/${{ matrix.platform }}"
+          Write-Host "Maven artifacts directory (Windows): $MAVEN_ARTIFACTS_DIR"
+
+          # Find HDF5 JAR files (not dependencies like slf4j)
+          $HDF5_JAR = Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "*hdf5*.jar" -Recurse | Select-Object -First 1
+          if (-not $HDF5_JAR) {
+            $HDF5_JAR = Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "jarhdf5*.jar" -Recurse | Select-Object -First 1
+          }
+
+          if (-not $HDF5_JAR) {
+            Write-Host "❌ No HDF5 JAR files found for testing"
+            Write-Host "Available JAR files:"
+            Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "*.jar" -Recurse
+            exit 1
+          }
+
+          Write-Host "Using HDF5 JAR file: $($HDF5_JAR.FullName)"
+
+          # Detect JAR type by checking for FFM-specific classes
+          # FFM JARs contain org.hdfgroup.javahdf5 package, JNI JARs contain hdf.hdf5lib
+          $jar_contents = & jar tf $HDF5_JAR.FullName
+          if ($jar_contents -match "org/hdfgroup/javahdf5/hdf5_h.class") {
+            $JAR_TYPE = "ffm"
+            Write-Host "Detected FFM JAR (contains org.hdfgroup.javahdf5 package)"
+          } else {
+            $JAR_TYPE = "jni"
+            Write-Host "Detected JNI JAR (contains hdf.hdf5lib package)"
+          }
+
+          # Determine which examples directory to use based on detected JAR type
+          # This ensures we test with examples that match the JAR's implementation
+          if ($JAR_TYPE -eq "jni") {
+            $EXAMPLES_DIR = "compat"
+            Write-Host "Using JNI-compatible examples from compat/ directory"
+          } else {
+            $EXAMPLES_DIR = "."
+            Write-Host "Using FFM examples from root directory"
+          }
+
+          # Find dependency JARs - only include slf4j-api and slf4j-simple
+          $DEP_JARS = @()
+          $DEP_JARS += Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "slf4j-api*.jar" -Recurse
+          $DEP_JARS += Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "slf4j-simple*.jar" -Recurse
+
+          if ($DEP_JARS.Count -gt 0) {
+            Write-Host "Found dependency JARs:"
+            $DEP_JARS | ForEach-Object { Write-Host "  $($_.FullName)" }
+          } else {
+            Write-Host "No SLF4J dependency JARs found in artifacts, downloading them directly..."
+
+            # Download SLF4J dependencies directly using Maven
+            $SLF4J_VERSION = "2.0.16"
+            $TEMP_POM = "$MAVEN_ARTIFACTS_DIR\temp-pom.xml"
+
+            # Create a minimal POM to download dependencies using PowerShell strings
+            Write-Host "Creating temporary POM at: $TEMP_POM"
+            '<?xml version="1.0" encoding="UTF-8"?>' | Out-File $TEMP_POM -Encoding UTF8
+            '<project xmlns="http://maven.apache.org/POM/4.0.0"' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '    <modelVersion>4.0.0</modelVersion>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '    <groupId>temp</groupId>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '    <artifactId>temp</artifactId>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '    <version>1.0</version>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '    <dependencies>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '        <dependency>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '            <groupId>org.slf4j</groupId>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '            <artifactId>slf4j-api</artifactId>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '            <version>2.0.16</version>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '        </dependency>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '        <dependency>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '            <groupId>org.slf4j</groupId>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '            <artifactId>slf4j-simple</artifactId>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '            <version>2.0.16</version>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '        </dependency>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '    </dependencies>' | Out-File $TEMP_POM -Append -Encoding UTF8
+            '</project>' | Out-File $TEMP_POM -Append -Encoding UTF8
+
+            # Download dependencies
+            try {
+              Write-Host "Running Maven command: mvn -f $TEMP_POM dependency:copy-dependencies -DoutputDirectory=$MAVEN_ARTIFACTS_DIR -DincludeScope=runtime -q"
+              $mvn_result = & mvn -f $TEMP_POM dependency:copy-dependencies "-DoutputDirectory=$MAVEN_ARTIFACTS_DIR" -DincludeScope=runtime -q
+              $mvn_exit_code = $LASTEXITCODE
+
+              # Clean up temporary POM
+              Remove-Item $TEMP_POM -Force -ErrorAction SilentlyContinue
+
+              if ($mvn_exit_code -eq 0) {
+                # Re-scan for dependency JARs
+                $DEP_JARS = @()
+                $DEP_JARS += Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "slf4j-api*.jar" -Recurse
+                $DEP_JARS += Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "slf4j-simple*.jar" -Recurse
+
+                if ($DEP_JARS.Count -gt 0) {
+                  Write-Host "Successfully downloaded SLF4J dependencies:"
+                  $DEP_JARS | ForEach-Object { Write-Host "  $($_.FullName)" }
+                } else {
+                  Write-Host "Maven succeeded but no SLF4J JARs found"
+                }
+              } else {
+                Write-Host "Maven command failed with exit code: $mvn_exit_code"
+                Write-Host "Maven output: $mvn_result"
+              }
+            } catch {
+              Write-Host "Error downloading dependencies: $($_.Exception.Message)"
+            }
+          }
+
+          $FAILED_EXAMPLES = @()
+          $TOTAL_EXAMPLES = 0
+          $PASSED_EXAMPLES = 0
+
+          # Save current directory (HDF5Examples/JAVA)
+          $JAVA_DIR = Get-Location
+
+          # Test representative examples from each category
+          foreach ($category in @("H5D", "H5T", "H5G", "TUTR")) {
+            $category_path = Join-Path $EXAMPLES_DIR $category
+            $full_category_path = Join-Path $JAVA_DIR $category_path
+            if (Test-Path $full_category_path) {
+              Set-Location $full_category_path
+
+              # Find first .java file in category
+              $EXAMPLE_FILE = Get-ChildItem -Filter "*.java" | Select-Object -First 1
+              if ($EXAMPLE_FILE) {
+                $TOTAL_EXAMPLES++
+                $example_name = $EXAMPLE_FILE.BaseName
+                Write-Host "--- Testing $category/$example_name ---"
+
+                # Build classpath with HDF5 JAR and dependencies
+                $CLASSPATH = $HDF5_JAR.FullName
+                foreach ($dep_jar in $DEP_JARS) {
+                  $CLASSPATH += ";$($dep_jar.FullName)"
+                }
+
+                Write-Host "Using classpath: $CLASSPATH"
+
+                # Set compilation flags based on detected JAR type
+                # This ensures we use correct flags for the actual JAR implementation
+                if ($JAR_TYPE -eq "ffm") {
+                  # FFM requires preview features (Java 25)
+                  $JAVAC_FLAGS = @("--enable-preview", "--release", "25")
+                  $JAVA_FLAGS = @("--enable-preview")
+                } else {
+                  # JNI uses standard Java
+                  $JAVAC_FLAGS = @()
+                  $JAVA_FLAGS = @()
+                }
+
+                # Test compilation
+                $javac_args = $JAVAC_FLAGS + @("-cp", $CLASSPATH, $EXAMPLE_FILE.Name)
+                $compileResult = & javac $javac_args 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                  Write-Host "✓ Compilation successful for $category/$example_name"
+
+                  # Test execution (with PowerShell timeout)
+                  $output_file = "../../../$example_name.out"
+
+                  # Use PowerShell's Start-Process with timeout for Windows
+                  try {
+                    # Create temporary files for stdout and stderr
+                    $stdout_file = "$output_file.stdout"
+                    $stderr_file = "$output_file.stderr"
+
+                    # Build java arguments with optional FFM flags
+                    $java_args = $JAVA_FLAGS + @("-cp", ".;$CLASSPATH", $example_name)
+                    $process = Start-Process -FilePath "java" -ArgumentList $java_args -RedirectStandardOutput $stdout_file -RedirectStandardError $stderr_file -NoNewWindow -PassThru
+
+                    # Wait for the process with timeout
+                    if ($process.WaitForExit(10000)) {  # 10 seconds in milliseconds
+                      $execResult = $process.ExitCode
+
+                      # Combine stdout and stderr into single output file
+                      $stdout_content = if (Test-Path $stdout_file) {
+                        try { Get-Content $stdout_file -Raw -ErrorAction SilentlyContinue } catch { "" }
+                      } else { "" }
+                      $stderr_content = if (Test-Path $stderr_file) {
+                        try { Get-Content $stderr_file -Raw -ErrorAction SilentlyContinue } catch { "" }
+                      } else { "" }
+
+                      $combined_content = "$stdout_content$stderr_content"
+                      if ([string]::IsNullOrWhiteSpace($combined_content)) {
+                        $combined_content = "No output generated"
+                      }
+                      $combined_content | Out-File $output_file -Encoding UTF8
+
+                      # Clean up temporary files
+                      if (Test-Path $stdout_file) { Remove-Item $stdout_file -Force }
+                      if (Test-Path $stderr_file) { Remove-Item $stderr_file -Force }
+                    } else {
+                      # Process timed out
+                      try { $process.Kill() } catch { }
+                      $execResult = 1
+                      "Process timed out after 10 seconds" | Out-File $output_file -Encoding UTF8
+
+                      # Clean up temporary files
+                      if (Test-Path $stdout_file) { Remove-Item $stdout_file -Force }
+                      if (Test-Path $stderr_file) { Remove-Item $stderr_file -Force }
+                    }
+                  } catch {
+                    $execResult = 1
+                    "Execution error: $($_.Exception.Message)" | Out-File $output_file -Encoding UTF8
+                  }
+
+                  if ($execResult -eq 0) {
+                    # Basic output validation
+                    $content = Get-Content $output_file -Raw
+                    if (($content -match "(?i)(dataset|datatype|group|success|created|written|read)") -and
+                        ($content -notmatch "(?i)(error|exception|failed|cannot)")) {
+                      Write-Host "✓ Execution and validation successful for $category/$example_name"
+                      $PASSED_EXAMPLES++
+                    } else {
+                      Write-Host "✗ Output validation failed for $category/$example_name"
+                      Write-Host "Output:"
+                      Get-Content $output_file
+                      $FAILED_EXAMPLES += "$category/$example_name"
+                    }
+                  } else {
+                    # Check if failure is due to expected native library issue
+                    $content = Get-Content $output_file -Raw
+                    if ($content -match "UnsatisfiedLinkError.*hdf5_java.*java.library.path") {
+                      Write-Host "✓ Expected native library error for Maven-only testing: $category/$example_name"
+                      Write-Host "  (This confirms JAR structure is correct)"
+                      $PASSED_EXAMPLES++
+                    } else {
+                      Write-Host "✗ Unexpected execution failure for $category/$example_name"
+                      Write-Host "Output:"
+                      Get-Content $output_file
+                      $FAILED_EXAMPLES += "$category/$example_name"
+                    }
+                  }
+                } else {
+                  Write-Host "✗ Compilation failed for $category/$example_name"
+                  Write-Host "Compilation error output:"
+                  Write-Host $compileResult
+                  $FAILED_EXAMPLES += "$category/$example_name"
+                }
+              }
+            }
+          }
+
+          Write-Host "=== Java Examples Test Summary (Windows) ==="
+          Write-Host "Total representative examples tested: $TOTAL_EXAMPLES"
+          Write-Host "Passed: $PASSED_EXAMPLES"
+          Write-Host "Failed: $($TOTAL_EXAMPLES - $PASSED_EXAMPLES)"
+
+          if ($FAILED_EXAMPLES.Count -gt 0) {
+            Write-Host "Failed examples: $($FAILED_EXAMPLES -join ' ')"
+            Write-Host "❌ Some Java examples failed - but continuing (non-blocking)"
+            echo "test-status=FAILED" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Host "✅ All representative Java examples passed!"
+            echo "test-status=PASSED" >> $env:GITHUB_OUTPUT
+          }
+
+          echo "total-examples=$TOTAL_EXAMPLES" >> $env:GITHUB_OUTPUT
+          echo "passed-examples=$PASSED_EXAMPLES" >> $env:GITHUB_OUTPUT
+
+      - name: Upload failure artifacts (Java Examples)
+        if: steps.test-examples-unix.outputs.test-status == 'FAILED' || steps.test-examples-windows.outputs.test-status == 'FAILED'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+          name: java-examples-staging-failure-${{ matrix.platform }}-${{ github.run_id }}
+          path: |
+            /tmp/*.out
+            *.out
+            HDF5Examples/JAVA/*/*.class
+            HDF5Examples/JAVA/*/*.h5
+          retention-days: 7
+
+  cleanup:
+    name: Cleanup Staging Artifacts
+    runs-on: ubuntu-latest
+    needs: [detect-changes, determine-matrix, build-maven-artifacts, test-maven-deployment]
+    if: ${{ always() && needs.detect-changes.outputs.should-test == 'true' }}
+    steps:
+      - name: Cleanup summary
+        run: |
+          echo "=== Maven Staging Cleanup ==="
+          echo "Artifacts will be automatically cleaned up after 7 days"
+          echo "Build artifacts are stored in GitHub Actions artifacts"
+          echo "No persistent staging repository cleanup needed"

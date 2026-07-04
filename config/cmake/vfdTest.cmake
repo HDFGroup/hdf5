@@ -4,15 +4,35 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
+# -----------------------------------------------------------------------------
+# vfdTest.cmake - Test script for HDF5 Virtual File Driver (VFD) functionality
+#
+# This script runs a test program using a specified VFD, captures its output and error,
+# and compares the exit status to the expected value. It can also append error output
+# to the main output if requested, and cleans up test files unless HDF5_NOCLEANUP is set.
+#
+# Required variables:
+#   - TEST_PROGRAM: The test program to execute
+#   - TEST_FOLDER: Directory containing test files
+#   - TEST_VFD: Name of the VFD to use (sets HDF5_DRIVER)
+#   - TEST_OUTPUT: Output file name (used for stdout/stderr)
+#   - TEST_ARGS: Arguments to pass to the test program
+#   - TEST_EXPECT: Expected exit code
+# Optional variables:
+#   - TEST_EMULATOR: (optional) Emulator to use (e.g., for cross-platform)
+#   - ERROR_APPEND: (optional) If set, append error output to main output
+#   - TEST_NOERRDISPLAY: (optional) If set, suppress error output display on failure
+#   - TEST_DELETE_LIST: (optional) List of files to delete after test
+#
 # vfdTest.cmake executes a command and captures the output in a file. Command uses specified VFD.
 # Exit status of command can also be compared.
 
-# arguments checking
+# Check that all required arguments are defined
 if (NOT TEST_PROGRAM)
   message (FATAL_ERROR "Require TEST_PROGRAM to be defined")
 endif ()
@@ -23,6 +43,7 @@ if (NOT TEST_VFD)
   message (FATAL_ERROR "Require TEST_VFD to be defined")
 endif ()
 
+# Remove any existing output files before running the test
 if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
 endif ()
@@ -31,16 +52,12 @@ if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
 endif ()
 
-# if there is not an error reference file add the error output to the stdout file
-#if (NOT TEST_ERRREF)
-#  set (ERROR_APPEND 1)
-#endif ()
-
 message (STATUS "USING ${TEST_VFD} ON COMMAND: ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_ARGS}")
 
+# Set the HDF5_DRIVER environment variable to the requested VFD
 set (ENV{HDF5_DRIVER} "${TEST_VFD}")
 
-# run the test program, capture the stdout/stderr and the result var
+# Run the test program, capturing stdout and stderr to separate files
 execute_process (
     COMMAND ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_ARGS}
     WORKING_DIRECTORY ${TEST_FOLDER}
@@ -53,13 +70,13 @@ execute_process (
 
 message (STATUS "COMMAND Result: ${TEST_RESULT}")
 
-# if the .err file exists and ERRROR_APPEND is enabled
+# If ERROR_APPEND is enabled and the .err file exists, append error output to main output
 if (ERROR_APPEND AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}_${TEST_VFD}.err")
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT}_${TEST_VFD}.err TEST_STREAM)
   file (APPEND ${TEST_FOLDER}/${TEST_OUTPUT}_${TEST_VFD}.out "${TEST_STREAM}")
 endif ()
 
-# if the return value is !=${TEST_EXPECT} bail out
+# If the return value is not as expected, display output and fail
 if (NOT TEST_RESULT EQUAL TEST_EXPECT)
   if (NOT TEST_NOERRDISPLAY)
     if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}_${TEST_VFD}.out")
@@ -72,6 +89,7 @@ endif ()
 
 message (STATUS "COMMAND Error: ${TEST_ERROR}")
 
+# Clean up output files unless HDF5_NOCLEANUP is set in the environment
 if (NOT DEFINED ENV{HDF5_NOCLEANUP})
   if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
     file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
@@ -81,6 +99,7 @@ if (NOT DEFINED ENV{HDF5_NOCLEANUP})
     file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
   endif ()
 
+  # Optionally remove additional files listed in TEST_DELETE_LIST
   if (TEST_DELETE_LIST)
     foreach (dfile in ${TEST_DELETE_LIST})
       file (REMOVE ${dfile})
@@ -88,5 +107,5 @@ if (NOT DEFINED ENV{HDF5_NOCLEANUP})
   endif ()
 endif ()
 
-# everything went fine...
+# Everything went fine...
 message (STATUS "Passed: The ${TEST_PROGRAM} program used vfd ${TEST_VFD}")

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -25,20 +25,17 @@
  *        dataset), there is a small chance that consecutive reads occur
  *        before a write to that shared variable.
  *
- * Created: Oct 5 1999
- * Programmer: Chee Wai LEE
- *
  ********************************************************************/
 
 #include "ttsafe.h"
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
 
 #define FILENAME    "ttsafe_acreate.h5"
 #define DATASETNAME "IntData"
 #define NUM_THREADS 16
 
-void *tts_acreate_thread(void *);
+H5TS_THREAD_RETURN_TYPE tts_acreate_thread(void *);
 
 typedef struct acreate_data_struct {
     hid_t dataset;
@@ -48,7 +45,7 @@ typedef struct acreate_data_struct {
 } ttsafe_name_data_t;
 
 void
-tts_acreate(void)
+tts_acreate(void H5_ATTR_UNUSED *params)
 {
     /* Thread declarations */
     H5TS_thread_t threads[NUM_THREADS];
@@ -66,7 +63,11 @@ tts_acreate(void)
     int    buffer, i;
     herr_t status;
 
-    ttsafe_name_data_t *attrib_data;
+    ttsafe_name_data_t *attrib_data[NUM_THREADS];
+
+    char *attribute_name = NULL;
+
+    memset(attrib_data, 0, sizeof(attrib_data));
 
     /*
      * Create an HDF5 file using H5F_ACC_TRUNC access, default file
@@ -100,20 +101,24 @@ tts_acreate(void)
      * with the dataset
      */
     for (i = 0; i < NUM_THREADS; i++) {
-        attrib_data                = (ttsafe_name_data_t *)HDmalloc(sizeof(ttsafe_name_data_t));
-        attrib_data->dataset       = dataset;
-        attrib_data->datatype      = datatype;
-        attrib_data->dataspace     = dataspace;
-        attrib_data->current_index = i;
-        threads[i]                 = H5TS_create_thread(tts_acreate_thread, NULL, attrib_data);
+        attrib_data[i]                = (ttsafe_name_data_t *)malloc(sizeof(ttsafe_name_data_t));
+        attrib_data[i]->dataset       = dataset;
+        attrib_data[i]->datatype      = datatype;
+        attrib_data[i]->dataspace     = dataspace;
+        attrib_data[i]->current_index = i;
+        if (H5TS_thread_create(&threads[i], tts_acreate_thread, attrib_data[i]) < 0)
+            TestErrPrintf("thread # %d did not start", i);
     }
 
     for (i = 0; i < NUM_THREADS; i++)
-        H5TS_wait_for_thread(threads[i]);
+        if (H5TS_thread_join(threads[i], NULL) < 0)
+            TestErrPrintf("thread %d failed to join", i);
 
     /* verify the correctness of the test */
     for (i = 0; i < NUM_THREADS; i++) {
-        attribute = H5Aopen(dataset, gen_name(i), H5P_DEFAULT);
+        attribute_name = gen_name(i);
+
+        attribute = H5Aopen(dataset, attribute_name, H5P_DEFAULT);
         CHECK(attribute, H5I_INVALID_HID, "H5Aopen");
 
         if (attribute < 0)
@@ -126,6 +131,8 @@ tts_acreate(void)
             status = H5Aclose(attribute);
             CHECK(status, FAIL, "H5Aclose");
         }
+
+        free(attribute_name);
     }
 
     /* close remaining resources */
@@ -137,9 +144,13 @@ tts_acreate(void)
     CHECK(status, FAIL, "H5Dclose");
     status = H5Fclose(file);
     CHECK(status, FAIL, "H5Fclose");
+
+    for (i = 0; i < NUM_THREADS; i++)
+        if (attrib_data[i])
+            free(attrib_data[i]);
 } /* end tts_acreate() */
 
-void *
+H5TS_THREAD_RETURN_TYPE
 tts_acreate_thread(void *client_data)
 {
     hid_t  attribute = H5I_INVALID_HID;
@@ -158,19 +169,24 @@ tts_acreate_thread(void *client_data)
     CHECK(attribute, H5I_INVALID_HID, "H5Acreate2");
 
     /* Write data to the attribute */
-    attribute_data  = (int *)HDmalloc(sizeof(int));
+    attribute_data  = (int *)malloc(sizeof(int));
     *attribute_data = attrib_data->current_index;
     status          = H5Awrite(attribute, H5T_NATIVE_INT, attribute_data);
     CHECK(status, FAIL, "H5Awrite");
     status = H5Aclose(attribute);
     CHECK(status, FAIL, "H5Aclose");
-    return NULL;
+
+    free(attribute_data);
+    free(attribute_name);
+    return (H5TS_thread_ret_t)0;
 } /* end tts_acreate_thread() */
 
 void
-cleanup_acreate(void)
+cleanup_acreate(void H5_ATTR_UNUSED *params)
 {
-    HDunlink(FILENAME);
+    if (GetTestCleanup()) {
+        HDunlink(FILENAME);
+    }
 }
 
-#endif /*H5_HAVE_THREADSAFE*/
+#endif /* H5_HAVE_THREADSAFE_API */

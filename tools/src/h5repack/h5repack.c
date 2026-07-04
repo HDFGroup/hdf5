@@ -4,16 +4,14 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5private.h"
 #include "h5repack.h"
-#include "h5tools.h"
-#include "h5tools_utils.h"
+#include "H5private.h"
 
 /*-------------------------------------------------------------------------
  * File: h5repack.c
@@ -67,24 +65,30 @@ h5repack(const char *infile, const char *outfile, pack_opt_t *options)
  *-------------------------------------------------------------------------
  */
 int
-h5repack_init(pack_opt_t *options, int verbose, hbool_t latest)
+h5repack_init(pack_opt_t *options, int verbose, bool latest)
 {
     int k, n;
 
-    HDmemset(options, 0, sizeof(pack_opt_t));
-    options->min_comp   = 0;
-    options->verbose    = verbose;
-    options->latest     = latest;
-    options->layout_g   = H5D_LAYOUT_ERROR;
-    options->low_bound  = H5F_LIBVER_EARLIEST;
-    options->high_bound = H5F_LIBVER_LATEST;
-    options->fin_fapl   = H5P_DEFAULT;
-    options->fout_fapl  = H5P_DEFAULT;
+    memset(options, 0, sizeof(pack_opt_t));
+    options->min_comp = 0;
+    options->verbose  = verbose;
+    options->latest   = latest;
+    options->layout_g = H5D_LAYOUT_ERROR;
+    if (H5Pget_libver_bounds(H5P_FILE_ACCESS_DEFAULT, &options->low_bound, &options->high_bound) < 0) {
+        error_msg("H5Pget_libver_bounds(H5P_FILE_ACCESS_DEFAULT) failed\n");
+        return -1;
+    }
+    options->fin_fapl  = H5P_DEFAULT;
+    options->fout_fapl = H5P_DEFAULT;
+    options->fin_vol   = false;
+    options->fin_vfd   = false;
+    options->fout_vol  = false;
+    options->fout_vfd  = false;
 
     for (n = 0; n < H5_REPACK_MAX_NFILTERS; n++) {
         options->filter_g[n].filtn     = -1;
         options->filter_g[n].cd_nelmts = 0;
-        for (k = 0; k < CD_VALUES; k++)
+        for (k = 0; k < DEFAULT_CDELEMTS; k++)
             options->filter_g[n].cd_values[k] = 0;
     }
 
@@ -132,7 +136,7 @@ h5repack_addfilter(const char *str, pack_opt_t *options)
         n = options->n_filter_g++; /* increase # of global filters */
         if (options->n_filter_g > H5_REPACK_MAX_NFILTERS) {
             error_msg("maximum number of filters exceeded for <%s>\n", str);
-            HDfree(obj_list);
+            free(obj_list);
             return -1;
         }
 
@@ -141,7 +145,7 @@ h5repack_addfilter(const char *str, pack_opt_t *options)
     else
         options_add_filter(obj_list, n_objs, filter, options->op_tbl);
 
-    HDfree(obj_list);
+    free(obj_list);
     return 0;
 } /* end h5repack_addfilter() */
 
@@ -156,48 +160,53 @@ h5repack_addfilter(const char *str, pack_opt_t *options)
 int
 h5repack_addlayout(const char *str, pack_opt_t *options)
 {
-    obj_list_t *obj_list = NULL; /*one object list for the -t and -c option entry */
-    unsigned    n_objs;          /*number of objects in the current -t or -c option entry */
-    pack_info_t pack;            /*info about layout to extract from parse */
-    int         j;
-    int         ret_value = -1;
-
-    init_packobject(&pack);
+    obj_list_t  *obj_list = NULL; /* one object list for the -t and -c option entry */
+    unsigned     n_objs;          /* number of objects in the current -t or -c option entry */
+    pack_info_t *pack = NULL;     /* info about layout to extract from parse */
+    int          j;
+    int          ret_value = -1;
 
     if (options->all_layout == 1) {
         error_msg("invalid layout input: 'all' option is present with other objects <%s>\n", str);
         return ret_value;
     }
 
+    if (NULL == (pack = (pack_info_t *)calloc(1, sizeof(pack_info_t))))
+        return ret_value;
+
+    init_packobject(pack);
+
     /* parse the layout option */
-    obj_list = parse_layout(str, &n_objs, &pack, options);
+    obj_list = parse_layout(str, &n_objs, pack, options);
     if (obj_list) {
         /* set layout option */
-        options->layout_g = pack.layout;
+        options->layout_g = pack->layout;
 
         /* no individual dataset specified */
         if (options->all_layout == 1) {
-            if (pack.layout == H5D_CHUNKED) {
+            if (pack->layout == H5D_CHUNKED) {
                 /* -2 means the NONE option, remove chunking
                  and set the global layout to contiguous */
-                if (pack.chunk.rank == -2) /* TODO: fix 'magic number' */
+                if (pack->chunk.rank == -2) /* TODO: fix 'magic number' */
                     options->layout_g = H5D_CONTIGUOUS;
                 /* otherwise set the global chunking type */
                 else {
-                    options->chunk_g.rank = pack.chunk.rank;
-                    for (j = 0; j < pack.chunk.rank; j++)
-                        options->chunk_g.chunk_lengths[j] = pack.chunk.chunk_lengths[j];
+                    options->chunk_g.rank = pack->chunk.rank;
+                    for (j = 0; j < pack->chunk.rank; j++)
+                        options->chunk_g.chunk_lengths[j] = pack->chunk.chunk_lengths[j];
                 }
             }
         }
 
         /* individual dataset specified */
         if (options->all_layout == 0)
-            ret_value = options_add_layout(obj_list, n_objs, &pack, options->op_tbl);
+            ret_value = options_add_layout(obj_list, n_objs, pack, options->op_tbl);
 
-        HDfree(obj_list);
+        free(obj_list);
         ret_value = 0;
     } /* end if obj_list exists */
+
+    free(pack);
 
     return ret_value;
 } /* end h5repack_addlayout() */
@@ -253,13 +262,13 @@ copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, t
         for (i = 0; i < travt->nobjs; i++) {
             if (travt->objs[i].type == H5TRAV_TYPE_NAMED_DATATYPE) {
                 /* Push onto the stack */
-                if (NULL == (dt = (named_dt_t *)HDmalloc(sizeof(named_dt_t))))
+                if (NULL == (dt = (named_dt_t *)malloc(sizeof(named_dt_t))))
                     H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "buffer allocation failed failed");
                 dt->next         = *named_dt_head_p;
                 *named_dt_head_p = dt;
 
                 /* Update the token/address and id */
-                HDmemcpy(&dt->obj_token, &travt->objs[i].obj_token, sizeof(H5O_token_t));
+                memcpy(&dt->obj_token, &travt->objs[i].obj_token, sizeof(H5O_token_t));
                 dt->id_out = H5I_INVALID_HID;
 
                 /* Check if this type is the one requested */
@@ -276,13 +285,13 @@ copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, t
      */
     if (!dt_ret) {
         /* Push the new datatype onto the stack */
-        if (NULL == (dt_ret = (named_dt_t *)HDmalloc(sizeof(named_dt_t))))
+        if (NULL == (dt_ret = (named_dt_t *)malloc(sizeof(named_dt_t))))
             H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "buffer allocation failed failed");
         dt_ret->next     = *named_dt_head_p;
         *named_dt_head_p = dt_ret;
 
         /* Update the token/address and id */
-        HDmemcpy(&dt_ret->obj_token, &oinfo.token, sizeof(H5O_token_t));
+        memcpy(&dt_ret->obj_token, &oinfo.token, sizeof(H5O_token_t));
         dt_ret->id_out = H5I_INVALID_HID;
     } /* end if requested datatype not found */
 
@@ -330,7 +339,7 @@ named_datatype_free(named_dt_t **named_dt_head_p, int ignore_err)
         if (H5Tclose(dt->id_out) < 0 && !ignore_err)
             H5TOOLS_GOTO_ERROR((-1), "H5Tclose failed");
         dt = dt->next;
-        HDfree(*named_dt_head_p);
+        free(*named_dt_head_p);
         *named_dt_head_p = dt;
     }
 
@@ -373,7 +382,7 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
     H5O_info2_t   oinfo; /* object info */
     int           j;
     unsigned      u;
-    hbool_t       is_ref     = 0;
+    bool          is_ref     = 0;
     H5T_class_t   type_class = -1;
     int           ret_value  = 0;
 
@@ -481,9 +490,9 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
              *-----------------------------------------------------------------
              */
 
-            buf = (void *)HDmalloc((size_t)(nelmts * msize));
+            buf = (void *)calloc(1, (size_t)(nelmts * msize));
             if (buf == NULL) {
-                H5TOOLS_GOTO_ERROR((-1), "HDmalloc failed");
+                H5TOOLS_GOTO_ERROR((-1), "malloc failed");
             } /* end if */
             if (options->verbose == 2) {
                 H5_timer_init(&timer);
@@ -523,18 +532,18 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
 
             /* Check if we have VL data and string in the attribute's  datatype that must
              * be reclaimed */
-            if (TRUE == h5tools_detect_vlen(wtype_id))
+            if (true == h5tools_detect_vlen(wtype_id))
                 H5Treclaim(wtype_id, space_id, H5P_DEFAULT, buf);
 
-            HDfree(buf);
+            free(buf);
             buf = NULL;
         } /*H5T_REFERENCE*/
 
         if (options->verbose > 0) {
             if (options->verbose == 2)
-                HDprintf(FORMAT_OBJ_ATTR_TIME, "attr", read_time, write_time, name);
+                printf(FORMAT_OBJ_ATTR_TIME, "attr", read_time, write_time, name);
             else
-                HDprintf(FORMAT_OBJ_ATTR, "attr", name);
+                printf(FORMAT_OBJ_ATTR, "attr", name);
         }
 
         /*---------------------------------------------------------------------
@@ -562,11 +571,11 @@ done:
             /* Check if we have VL data and string in the attribute's
              * datatype that must be reclaimed
              */
-            if (TRUE == h5tools_detect_vlen(wtype_id))
+            if (true == h5tools_detect_vlen(wtype_id))
                 H5Treclaim(wtype_id, space_id, H5P_DEFAULT, buf);
 
             /* Free buf */
-            HDfree(buf);
+            free(buf);
         }
 
         H5Aclose(attr_out);
@@ -575,7 +584,7 @@ done:
         H5Tclose(ftype_id);
         H5Aclose(attr_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return ret_value;
 } /* end copy_attr() */
@@ -602,7 +611,7 @@ check_options(pack_opt_t *options)
      */
     if (options->verbose > 0 && have_request(options)) {
         if (options->all_layout == 1) {
-            HDprintf("All objects to modify layout are...\n");
+            printf("All objects to modify layout are...\n");
             switch (options->layout_g) {
                 case H5D_COMPACT:
                     strcpy(slayout, "compact");
@@ -624,17 +633,17 @@ check_options(pack_opt_t *options)
                     strcpy(slayout, "invalid layout\n");
                     H5TOOLS_GOTO_DONE((-1));
             }
-            HDprintf(" Apply %s layout to all", slayout);
+            printf(" Apply %s layout to all", slayout);
             if (H5D_CHUNKED == options->layout_g) {
-                HDprintf("with dimension [ ");
+                printf("with dimension [ ");
                 for (j = 0; j < options->chunk_g.rank; j++)
-                    HDprintf("%d ", (int)options->chunk_g.chunk_lengths[j]);
-                HDprintf("]");
+                    printf("%d ", (int)options->chunk_g.chunk_lengths[j]);
+                printf("]");
             }
-            HDprintf("\n");
+            printf("\n");
         }
         else
-            HDprintf("No all objects to modify layout\n");
+            printf("No all objects to modify layout\n");
     } /* end if verbose */
 
     for (i = 0; i < options->op_tbl->nelems; i++) {
@@ -642,16 +651,16 @@ check_options(pack_opt_t *options)
 
         if (options->op_tbl->objs[i].chunk.rank > 0) {
             if (options->verbose > 0) {
-                HDprintf(" <%s> with chunk size ", name);
+                printf(" <%s> with chunk size ", name);
                 for (k = 0; k < options->op_tbl->objs[i].chunk.rank; k++)
-                    HDprintf("%d ", (int)options->op_tbl->objs[i].chunk.chunk_lengths[k]);
-                HDprintf("\n");
+                    printf("%d ", (int)options->op_tbl->objs[i].chunk.chunk_lengths[k]);
+                printf("\n");
             }
             has_ck = 1;
         }
         else if (options->op_tbl->objs[i].chunk.rank == -2) { /* TODO: replace 'magic number' */
             if (options->verbose > 0)
-                HDprintf(" <%s> %s\n", name, "NONE (contiguous)");
+                printf(" <%s> %s\n", name, "NONE (contiguous)");
             has_ck = 1;
         }
     } /* end for each object in options */
@@ -666,49 +675,49 @@ check_options(pack_opt_t *options)
 
     if (options->verbose > 0 && have_request(options)) {
         if (options->all_filter == 1) {
-            HDprintf("All objects to apply filter are...\n");
+            printf("All objects to apply filter are...\n");
             for (k = 0; k < options->n_filter_g; k++) {
                 H5Z_filter_t filtn = options->filter_g[k].filtn;
                 if (filtn < 0) {
-                    HDprintf(" Unknown\n");
+                    printf(" Unknown\n");
                     continue;
                 }
                 switch (filtn) {
                     case H5Z_FILTER_NONE:
-                        HDprintf(" Uncompress all\n");
+                        printf(" Uncompress all\n");
                         break;
                     case H5Z_FILTER_SHUFFLE:
                     case H5Z_FILTER_FLETCHER32:
-                        HDprintf(" All with %s\n", get_sfilter(filtn));
+                        printf(" All with %s\n", get_sfilter(filtn));
                         break;
                     case H5Z_FILTER_SZIP:
                     case H5Z_FILTER_DEFLATE:
-                        HDprintf(" All with %s, parameter %d\n", get_sfilter(filtn),
-                                 options->filter_g[k].cd_values[0]);
+                        printf(" All with %s, parameter %d\n", get_sfilter(filtn),
+                               options->filter_g[k].cd_values[0]);
                         break;
                     default:
-                        HDprintf(" User Defined %d\n", filtn);
+                        printf(" User Defined %d\n", filtn);
                         break;
                 } /* end switch */
             }     /* end for each filter */
         }         /* end if options->all_filter == 1 (TODO: meaning) */
         else
-            HDprintf("No all objects to apply filter\n");
+            printf("No all objects to apply filter\n");
     } /* end if verbose */
 
     for (i = 0; i < options->op_tbl->nelems; i++) {
-        pack_info_t pack = options->op_tbl->objs[i];
-        char       *name = pack.path;
+        pack_info_t *pack = &options->op_tbl->objs[i];
+        char        *name = pack->path;
 
-        for (j = 0; j < pack.nfilters; j++) {
+        for (j = 0; j < pack->nfilters; j++) {
             if (options->verbose > 0) {
-                if (pack.filter[j].filtn >= 0) {
-                    if (pack.filter[j].filtn > H5Z_FILTER_SCALEOFFSET) {
-                        HDprintf(" <%s> with %s filter %d\n", name, get_sfilter(pack.filter[j].filtn),
-                                 pack.filter[j].filtn);
+                if (pack->filter[j].filtn >= 0) {
+                    if (pack->filter[j].filtn > H5Z_FILTER_SCALEOFFSET) {
+                        printf(" <%s> with %s filter %d\n", name, get_sfilter(pack->filter[j].filtn),
+                               pack->filter[j].filtn);
                     }
                     else {
-                        HDprintf(" <%s> with %s filter\n", name, get_sfilter(pack.filter[j].filtn));
+                        printf(" <%s> with %s filter\n", name, get_sfilter(pack->filter[j].filtn));
                     }
                 }
             }
@@ -740,14 +749,18 @@ check_options(pack_opt_t *options)
      */
     if (options->ublock_filename != NULL && options->ublock_size == 0) {
         if (options->verbose > 0) {
-            HDprintf("Warning: user block size missing for file %s. Assigning a default size of 1024...\n",
-                     options->ublock_filename);
+            printf("Warning: user block size missing for file %s. Assigning a default size of 1024...\n",
+                   options->ublock_filename);
             options->ublock_size = 1024;
         }
     }
 
-    if (options->ublock_filename == NULL && options->ublock_size != 0)
-        H5TOOLS_GOTO_ERROR((-1), "file name missing for user block");
+    if (options->ublock_filename == NULL && options->ublock_size != 0) {
+        if (options->verbose > 0) {
+            printf("Warning: user block file name missing. Reserving a size of %" PRIuHSIZE "...\n",
+                   options->ublock_size);
+        }
+    }
 
     /*------------------------------------------------------------------------
      * Verify alignment options; threshold is zero default but alignment not
@@ -789,7 +802,7 @@ check_objects(const char *fname, pack_opt_t *options)
      * open the file
      *-------------------------------------------------------------------------
      */
-    if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, options->fin_fapl, (options->fin_fapl != H5P_DEFAULT),
+    if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, options->fin_fapl, (options->fin_vol || options->fin_vfd),
                              NULL, 0)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fname, H5FOPENERROR);
 
@@ -813,39 +826,39 @@ check_objects(const char *fname, pack_opt_t *options)
      */
 
     if (options->verbose > 0)
-        HDprintf("Opening file. Searching %zu objects to modify ...\n", travt->nobjs);
+        printf("Opening file. Searching %zu objects to modify ...\n", travt->nobjs);
 
     for (i = 0; i < options->op_tbl->nelems; i++) {
-        pack_info_t obj  = options->op_tbl->objs[i];
-        char       *name = obj.path;
+        pack_info_t *obj  = &options->op_tbl->objs[i];
+        char        *name = obj->path;
 
         if (options->verbose > 0)
-            HDprintf(" <%s>", name);
+            printf(" <%s>", name);
 
         /* the input object names are present in the file and are valid */
         if (h5trav_getindext(name, travt) < 0)
             H5TOOLS_GOTO_ERROR((-1), "%s Could not find <%s> in file <%s>. Exiting...\n",
                                (options->verbose > 0 ? "\n" : ""), name, fname);
         if (options->verbose > 0)
-            HDprintf("...Found\n");
+            printf("...Found\n");
 
-        for (ifil = 0; ifil < obj.nfilters; ifil++) {
-            if (obj.filter[ifil].filtn < 0)
+        for (ifil = 0; ifil < obj->nfilters; ifil++) {
+            if (obj->filter[ifil].filtn < 0)
                 H5TOOLS_GOTO_ERROR((-1), "invalid filter");
             /* check for extra filter conditions */
-            switch (obj.filter[ifil].filtn) {
+            switch (obj->filter[ifil].filtn) {
                 /* chunk size must be smaller than pixels per block */
                 case H5Z_FILTER_SZIP: {
                     int      j;
                     hsize_t  csize = 1;
-                    unsigned ppb   = obj.filter[ifil].cd_values[0];
+                    unsigned ppb   = obj->filter[ifil].cd_values[0];
                     hsize_t  dims[H5S_MAX_RANK];
                     int      rank;
 
-                    if (obj.chunk.rank > 0) {
-                        rank = obj.chunk.rank;
+                    if (obj->chunk.rank > 0) {
+                        rank = obj->chunk.rank;
                         for (j = 0; j < rank; j++)
-                            csize *= obj.chunk.chunk_lengths[j];
+                            csize *= obj->chunk.chunk_lengths[j];
                     }
                     else {
                         if ((did = H5Dopen2(fid, name, H5P_DEFAULT)) < 0)
@@ -854,7 +867,7 @@ check_objects(const char *fname, pack_opt_t *options)
                             H5TOOLS_GOTO_ERROR((-1), "H5Dget_space failed");
                         if ((rank = H5Sget_simple_extent_ndims(sid)) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_ndims failed");
-                        HDmemset(dims, 0, sizeof dims);
+                        memset(dims, 0, sizeof dims);
                         if (H5Sget_simple_extent_dims(sid, dims, NULL) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_dims failed");
                         for (j = 0; j < rank; j++)
@@ -866,7 +879,7 @@ check_objects(const char *fname, pack_opt_t *options)
                     }
 
                     if (csize < ppb) {
-                        HDprintf(" <warning: SZIP settings, chunk size is smaller than pixels per block>\n");
+                        printf(" <warning: SZIP settings, chunk size is smaller than pixels per block>\n");
                         H5TOOLS_GOTO_DONE(0);
                     }
                 } /* end case SZIP */
@@ -884,7 +897,7 @@ done:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (travt)
         trav_table_free(travt);
     return ret_value;

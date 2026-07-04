@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -13,10 +13,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Oname.c
- *                      Aug 12 1997
- *                      Robb Matzke
  *
- * Purpose:             Object name message.
+ * Purpose:             Object name (comment) message
  *
  *-------------------------------------------------------------------------
  */
@@ -31,9 +29,10 @@
 /* PRIVATE PROTOTYPES */
 static void *H5O__name_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags, size_t p_size,
                               const uint8_t *p);
-static herr_t H5O__name_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__name_encode(H5F_t *f, bool disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                               const void *_mesg);
 static void  *H5O__name_copy(const void *_mesg, void *_dest);
-static size_t H5O__name_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static size_t H5O__name_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__name_reset(void *_mesg);
 static herr_t H5O__name_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
@@ -67,41 +66,37 @@ const H5O_msg_class_t H5O_MSG_NAME[1] = {{
  * Purpose:     Decode a name message and return a pointer to a new
  *              native message struct.
  *
- * Return:      Success:        Ptr to new message in native struct.
- *
- *              Failure:        NULL
- *
- * Programmer:  Robb Matzke
- *              Aug 12 1997
- *
+ * Return:      Success:    Ptr to new message in native struct.
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__name_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                 unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+H5O__name_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
+                 unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
+                 const uint8_t *p)
 {
-    H5O_name_t *mesg;
-    void       *ret_value = NULL; /* Return value */
+    H5O_name_t *mesg      = NULL;
+    void       *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
-    /* decode */
     if (NULL == (mesg = (H5O_name_t *)H5MM_calloc(sizeof(H5O_name_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    if (NULL == (mesg->s = (char *)H5MM_strdup((const char *)p)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-    /* Set return value */
+    if (NULL == (mesg->s = (char *)H5MM_strndup((const char *)p, p_size - 1)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
     ret_value = mesg;
 
 done:
     if (NULL == ret_value)
-        if (mesg)
-            mesg = (H5O_name_t *)H5MM_xfree(mesg);
+        if (mesg) {
+            H5MM_xfree(mesg->s);
+            H5MM_xfree(mesg);
+        }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__name_decode() */
@@ -113,26 +108,23 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Aug 12 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__name_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
-                 const void *_mesg)
+H5O__name_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, size_t H5_ATTR_UNUSED p_size,
+                 uint8_t *p, const void *_mesg)
 {
     const H5O_name_t *mesg = (const H5O_name_t *)_mesg;
 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
-    HDassert(mesg && mesg->s);
+    assert(f);
+    assert(p);
+    assert(mesg && mesg->s);
 
     /* encode */
-    HDstrcpy((char *)p, mesg->s);
+    strcpy((char *)p, mesg->s);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__name_encode() */
@@ -147,9 +139,6 @@ H5O__name_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
  *
  *              Failure:        NULL
  *
- * Programmer:  Robb Matzke
- *              Aug 12 1997
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -162,15 +151,15 @@ H5O__name_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(mesg);
+    assert(mesg);
 
     if (!dest && NULL == (dest = (H5O_name_t *)H5MM_calloc(sizeof(H5O_name_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* copy */
     *dest = *mesg;
     if (NULL == (dest->s = H5MM_xstrdup(mesg->s)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Set return value */
     ret_value = dest;
@@ -195,13 +184,10 @@ done:
  *
  *              Failure:        Negative
  *
- * Programmer:  Robb Matzke
- *              Aug 12 1997
- *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O__name_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
+H5O__name_size(const H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_name_t *mesg      = (const H5O_name_t *)_mesg;
     size_t            ret_value = 0; /* Return value */
@@ -209,10 +195,10 @@ H5O__name_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
+    assert(f);
+    assert(mesg);
 
-    ret_value = mesg->s ? HDstrlen(mesg->s) + 1 : 0;
+    ret_value = mesg->s ? strlen(mesg->s) + 1 : 0;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__name_size() */
@@ -225,9 +211,6 @@ H5O__name_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Aug 12 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -238,7 +221,7 @@ H5O__name_reset(void *_mesg)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(mesg);
+    assert(mesg);
 
     /* reset */
     mesg->s = (char *)H5MM_xfree(mesg->s);
@@ -253,9 +236,6 @@ H5O__name_reset(void *_mesg)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Aug 12 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -266,13 +246,13 @@ H5O__name_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(mesg);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s `%s'\n", indent, "", fwidth, "Name:", mesg->s);
+    fprintf(stream, "%*s%-*s `%s'\n", indent, "", fwidth, "Name:", mesg->s);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__name_debug() */

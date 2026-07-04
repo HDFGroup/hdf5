@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -30,6 +30,7 @@ import hdf.hdf5lib.structs.H5AC_cache_config_t;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -411,9 +412,9 @@ public class TestH5Pfapl {
             fail("H5Pget_libver_bounds: " + err);
         }
         assertTrue("testH5Pget_libver_bounds", ret_val >= 0);
-        // Check the Earliest Version if the library
-        assertEquals(HDF5Constants.H5F_LIBVER_EARLIEST, libver[0]);
-        // Check the Latest Version if the library
+        // Check the Earliest Version of the library
+        assertEquals(HDF5Constants.H5F_LIBVER_V18, libver[0]);
+        // Check the Latest Version of the library
         assertEquals(HDF5Constants.H5F_LIBVER_LATEST, libver[1]);
     }
 
@@ -435,9 +436,9 @@ public class TestH5Pfapl {
             fail("H5Pset_libver_bounds: " + err);
         }
         assertTrue("testH5Pset_libver_bounds", ret_val >= 0);
-        // Check the Earliest Version if the library
+        // Check the Earliest Version of the library
         assertEquals(HDF5Constants.H5F_LIBVER_EARLIEST, libver[0]);
-        // Check the Latest Version if the library
+        // Check the Latest Version of the library
         assertEquals(HDF5Constants.H5F_LIBVER_LATEST, libver[1]);
     }
 
@@ -720,8 +721,8 @@ public class TestH5Pfapl {
         double[] rdcc_w0   = {0};
         try {
             H5.H5Pget_cache(fapl_id, null, rdcc_nelmts, rdcc_nbytes, rdcc_w0);
-            assertTrue("H5P_cache default", rdcc_nelmts[0] == 521);
-            assertTrue("H5P_cache default", rdcc_nbytes[0] == (1024 * 1024));
+            assertTrue("H5P_cache default", rdcc_nelmts[0] == 8191);
+            assertTrue("H5P_cache default", rdcc_nbytes[0] == (8 * 1024 * 1024));
             assertTrue("H5P_cache default", rdcc_w0[0] == 0.75);
         }
         catch (Throwable err) {
@@ -748,8 +749,8 @@ public class TestH5Pfapl {
         double[] rdcc_w0   = {0};
         try {
             H5.H5Pget_chunk_cache(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0);
-            assertTrue("H5P_chunk_cache default", rdcc_nslots[0] == 521);
-            assertTrue("H5P_chunk_cache default", rdcc_nbytes[0] == (1024 * 1024));
+            assertTrue("H5P_chunk_cache default", rdcc_nslots[0] == 8191);
+            assertTrue("H5P_chunk_cache default", rdcc_nbytes[0] == (8 * 1024 * 1024));
             assertTrue("H5P_chunk_cache default", rdcc_w0[0] == 0.75);
         }
         catch (Throwable err) {
@@ -1081,7 +1082,8 @@ public class TestH5Pfapl {
                        member_addr[HDF5Constants.H5FD_MEM_DEFAULT] == sH5FD_MEM_HADDR);
             assertTrue("H5Pget_fapl_muti: member_addr=" + member_addr[HDF5Constants.H5FD_MEM_SUPER],
                        member_addr[HDF5Constants.H5FD_MEM_SUPER] == sH5FD_MEM_SUPER_HADDR);
-            assertTrue("H5Pget_fapl_muti: member_addr=" + member_addr[HDF5Constants.H5FD_MEM_BTREE],
+            assertTrue("H5Pget_fapl_muti: member_addr=" + member_addr[HDF5Constants.H5FD_MEM_BTREE] + "--" +
+                           sH5FD_MEM_BTREE_HADDR,
                        member_addr[HDF5Constants.H5FD_MEM_BTREE] == sH5FD_MEM_BTREE_HADDR);
             assertTrue("H5Pget_fapl_muti: member_addr=" + member_addr[HDF5Constants.H5FD_MEM_DRAW],
                        member_addr[HDF5Constants.H5FD_MEM_DRAW] == sH5FD_MEM_DRAW_HADDR);
@@ -1313,7 +1315,7 @@ public class TestH5Pfapl {
         deleteH5file();
     }
 
-    @Test
+    @Ignore
     public void testH5Pset_fapl_windows()
     {
         if (HDF5Constants.H5FD_WINDOWS < 0)

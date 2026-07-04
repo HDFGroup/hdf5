@@ -1,0 +1,289 @@
+/**** Table of content in the side-nav ****/
+
+/*
+ * Collapse the navigation tree to zero height instead of removing it from the layout.
+ * This allows the Doxygen scripts to correctly calculate the side-panel's width
+ * and apply the proper 'margin-left' to the main content, preventing overlap.
+ */
+#nav-tree {
+    height: 0;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    border: none;
+}
+
+/* Make sure the side panel itself allows overflow */
+#side-nav {
+  overflow: visible; /* Don't clip the TOC */
+  width: 245px; /* Set initial width (default is usually around 250px) */
+  min-width: 200px; /* Prevent it from getting too small */
+}
+
+/* Ensure main content and header never go behind the side panel */
+#doc-content,
+#top {
+  margin-left: 255px !important; /* 245px sidebar + 10px gap */
+}
+
+/* Only reset margin on smaller screens */
+@media screen and (max-width: 767px) {
+  #doc-content,
+  #top {
+    margin-left: 0 !important;
+  }
+}
+
+/* Force layout fix for very wide screens */
+@media screen and (min-width: 1200px) {
+  #doc-content,
+  #top {
+    margin-left: 260px !important; /* Slightly wider gap for large screens */
+  }
+}
+
+/* Backup approach: ensure body layout works properly */
+body {
+  overflow-x: hidden; /* Prevent horizontal scrolling issues */
+}
+
+/* Additional specificity - target the content container directly */
+#doc-content > div {
+  margin-left: 0; /* Reset any inherited margins */
+  padding-left: 0; /* Reset any inherited padding */
+}
+
+/* Switch positions of "The HDF5 Field Guide" and "Last Updated" lines */
+#projectalign {
+  display: flex !important;
+  flex-direction: column-reverse !important;
+}
+
+/* Style the header text lines */
+#projectname {
+  font-weight: normal !important; /* Remove bold from the date line */
+}
+
+#projectbrief {
+  font-weight: bold !important; /* Make "The HDF5 Field Guide" bold */
+  font-size: 1.1em; /* Slightly larger for better prominence */
+}
+
+/* Hide the "HDF5" text and keep only the date */
+#projectname::before {
+  content: "" !important; /* Remove any auto-generated content */
+}
+
+/* Replace the entire project name content with just the date */
+#projectname {
+  font-size: 0; /* Hide the original text */
+}
+
+#projectname #projectnumber {
+  font-size: 1rem; /* Restore normal font size for the date */
+  font-weight: normal !important;
+}
+
+/* Fix search box overlap issue and ensure proper sidebar positioning */
+@media screen and (min-width: 768px) {
+  /* Create a dedicated row for the search box */
+  #navrow1 {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #navrow1 .tablist {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    order: 1;
+  }
+
+  /* Create second row container for search elements */
+  #navrow1 .tablist > li:last-child,
+  #navrow1 .tablist > li:nth-last-child(2) {
+    order: 2;
+    margin-top: 0.2em; /* Reduced from 0.5em to 0.2em */
+  }
+
+  /* Style the search box container */
+  #navrow1 .tablist > li:last-child {
+    width: auto; /* Let it size based on content */
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding-left: 1em;
+  }
+
+  /* Style the Full-Text Search tab on second line */
+  #navrow1 .tablist > li:nth-last-child(2) {
+    padding-left: 1em; /* Align with search box */
+    margin-right: 1em; /* Space between tab and search box */
+  }
+
+  /* Reset absolute positioning for search box */
+  .tabs #MSearchBox {
+    position: relative !important;
+    right: auto !important;
+    margin: 0 !important;
+    width: 200px !important; /* Make search box smaller (default is wider) */
+    height: 28px !important; /* Slightly reduce height */
+  }
+
+  /* Make the search field inside the box smaller too */
+  #MSearchField {
+    font-size: 0.9em !important; /* Smaller font size */
+    height: 24px !important; /* Match the container height */
+  }
+
+  /* Make sure the side nav stays fixed position */
+  #side-nav {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    height: 100vh !important;
+    z-index: 100 !important;
+  }
+}
+
+/* Style the TOC to fill the entire side panel with proper scrolling */
+div.toc {
+  margin: 0;
+  padding: 1em 0 0 0;
+  width: 100%;
+  height: calc(100vh - 2em); /* Fixed height to enable proper scrolling */
+  float: none;
+  position: relative;
+  border-radius: 0px;
+  border-style: none;
+  overflow: auto; /* Both horizontal and vertical scrolling */
+  box-sizing: border-box;
+}
+
+div.toc h3 {
+  margin-left: 0.5em;
+  margin-bottom: 0.2em;
+}
+
+/* Make sure nested lists also scroll properly */
+div.toc ul {
+  margin: 0.2em 0 0.4em 0.5em;
+  width: max-content; /* Allow content to determine width */
+  min-width: 100%;
+}
+
+/* Ensure the TOC root container can expand */
+div.toc > ul {
+  width: max-content;
+  min-width: 100%;
+}
+
+/* Ensure TOC entries don't wrap and enable horizontal scrolling */
+div.toc li a {
+    white-space: nowrap;
+    display: inline-block; /* Changed from block to inline-block */
+    width: auto; /* Let content determine width */
+    min-width: 100%; /* Ensure it takes at least full container width */
+}
+
+/*
+ * Prevent long TOC entries from wrapping.
+ * This keeps each entry on a single line and makes the panel
+ * horizontally scrollable if an entry is too wide.
+ */
+#side-nav div.toc li a {
+    white-space: nowrap;
+}
+
+span.cpp11,span.cpp14,span.cpp17 {
+  color: #119911;
+  font-weight: bold;
+}
+
+.newin3x {
+  color: #a37c1a;
+  font-weight: bold;
+}
+
+div.warningbox {
+  max-width:60em;
+  border-style: solid solid solid solid;
+  border-color: red;
+  border-width: 3px;
+}
+
+div.eimainmenu {
+  text-align:     center;
+}
+
+/* center version number on main page */
+h3.version {
+  text-align:     center;
+}
+
+
+td.width20em p.endtd {
+  width:  20em;
+}
+
+/* needed for huge screens */
+.ui-resizable-e {
+  background-repeat: repeat-y;
+}
+
+/* Style external links -- nav-tree is different */
+
+#nav-tree .label a {
+  padding:2px 16px 2px 2px;
+}
+
+a {
+  outline: none;
+  text-decoration: none;
+  padding: 2px 1px 0;
+}
+
+a[href^="http"]::after,
+a[href^="https://"]::after
+{
+  content: "";
+  width: 11px;
+  height: 11px;
+  margin-left: 4px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5-.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z'/%3E%3Cpath fill-rule='evenodd' d='M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z'/%3E%3C/svg%3E");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  display: inline-block;
+}
+
+/* Improve the survey banner background color */
+div[style*="background:#FFDDDD"] {
+  background: #E3F2FD !important; /* Professional light blue */
+  border-bottom: 1px solid #BBDEFB; /* Subtle border for definition */
+  color: #1565C0 !important; /* Darker blue text for better contrast */
+  transition: background-color 0.3s ease; /* Smooth transition effect */
+}
+
+/* Style the survey banner link */
+div[style*="background:#FFDDDD"] a {
+  color: #0D47A1 !important; /* Even darker blue for the link */
+  text-decoration: underline;
+  font-weight: 500; /* Slightly bolder for emphasis */
+}
+
+div[style*="background:#FFDDDD"] a:hover {
+  color: #1976D2 !important; /* Lighter blue on hover */
+  text-decoration: none;
+}
+
+/* Style the C++ diagrams */
+/* Make inheritance diagram header look clickable */
+.dynheader {
+    cursor: pointer;
+    color: #0066cc;
+}
+
+.dynheader:hover {
+    text-decoration: underline;
+}

@@ -4,16 +4,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Thursday, July 23, 1998
- *
  * Purpose:     Support functions for the various tools.
  */
 #ifndef H5TOOLS_H
@@ -27,23 +24,24 @@
 #define OPTIONAL_LINE_BREAK "\001" /* Special strings embedded in the output */
 #define START_OF_DATA       0x0001
 #define END_OF_DATA         0x0002
+#define DEFAULT_CDELEMTS    256
 
 #define H5TOOLS_DUMP_MAX_RANK H5S_MAX_RANK
 
 /* Stream macros */
 #define FLUSHSTREAM(S)                                                                                       \
     if (S != NULL)                                                                                           \
-    HDfflush(S)
+    fflush(S)
 #define PRINTSTREAM(S, F, ...)                                                                               \
     if (S != NULL)                                                                                           \
-    HDfprintf(S, F, __VA_ARGS__)
+    fprintf(S, F, __VA_ARGS__)
 #define PRINTVALSTREAM(S, V)                                                                                 \
     if (S != NULL)                                                                                           \
-    HDfprintf(S, V)
+    fprintf(S, V)
 #define PUTSTREAM(X, S)                                                                                      \
     do {                                                                                                     \
         if (S != NULL)                                                                                       \
-            HDfputs(X, S);                                                                                   \
+            fputs(X, S);                                                                                     \
     } while (0)
 
 /*
@@ -173,14 +171,24 @@ typedef struct h5tools_dump_header_t {
     const char *extlinkblockend;
     const char *udlinkblockbegin;
     const char *udlinkblockend;
-    const char *strblockbegin;
-    const char *strblockend;
+    const char *arrblockbegin;
+    const char *arrblockend;
+    const char *cmpdblockbegin;
+    const char *cmpdblockend;
     const char *enumblockbegin;
     const char *enumblockend;
-    const char *structblockbegin;
-    const char *structblockend;
+    const char *opaqblockbegin;
+    const char *opaqblockend;
+    const char *refblockbegin;
+    const char *refblockend;
+    const char *strblockbegin;
+    const char *strblockend;
     const char *vlenblockbegin;
     const char *vlenblockend;
+    const char *complexblockbegin;
+    const char *complexblockend;
+    const char *structblockbegin;
+    const char *structblockend;
     const char *subsettingblockbegin;
     const char *subsettingblockend;
     const char *startblockbegin;
@@ -222,84 +230,103 @@ typedef struct h5tool_format_t {
      * data in hexadecimal format without translating from what appears on
      * disk.
      *
-     *   raw:        If set then print all data as hexadecimal without
-     *               performing any conversion from disk.
+     *   raw:                  If set then print all data as hexadecimal without
+     *                         performing any conversion from disk.
      *
-     *   fmt_raw:    The printf() format for each byte of raw data. The
-     *               default is `%02x'.
+     *   fmt_raw:              The printf() format for each byte of raw data. The
+     *                         default is `%02x'.
      *
-     *   fmt_int:    The printf() format to use when rendering data which is
-     *               typed `int'. The default is `%d'.
+     *   fmt_schar:            The printf() format to use when rendering data which is
+     *                         typed `signed char'. The default is `%d'. This format is
+     *                         used only if the `ascii' field is zero.
      *
-     *   fmt_uint:   The printf() format to use when rendering data which is
-     *               typed `unsigned'. The default is `%u'.
+     *   fmt_uchar:            The printf() format to use when rendering data which is
+     *                         typed `unsigned char'. The default is `%u'. This format
+     *                         is used only if the `ascii' field is zero.
      *
-     *   fmt_schar:  The printf() format to use when rendering data which is
-     *               typed `signed char'. The default is `%d'. This format is
-     *               used only if the `ascii' field is zero.
+     *   fmt_short:            The printf() format to use when rendering data which is
+     *                         typed `short'. The default is `%d'.
      *
-     *   fmt_uchar:  The printf() format to use when rendering data which is
-     *               typed `unsigned char'. The default is `%u'. This format
-     *               is used only if the `ascii' field is zero.
+     *   fmt_ushort:           The printf() format to use when rendering data which is
+     *                         typed `unsigned short'. The default is `%u'.
      *
-     *   fmt_short:  The printf() format to use when rendering data which is
-     *               typed `short'. The default is `%d'.
+     *   fmt_int:              The printf() format to use when rendering data which is
+     *                         typed `int'. The default is `%d'.
      *
-     *   fmt_ushort: The printf() format to use when rendering data which is
-     *               typed `unsigned short'. The default is `%u'.
+     *   fmt_uint:             The printf() format to use when rendering data which is
+     *                         typed `unsigned'. The default is `%u'.
      *
-     *   fmt_long:   The printf() format to use when rendering data which is
-     *               typed `long'. The default is `%ld'.
+     *   fmt_long:             The printf() format to use when rendering data which is
+     *                         typed `long'. The default is `%ld'.
      *
-     *   fmt_ulong:  The printf() format to use when rendering data which is
-     *               typed `unsigned long'. The default is `%lu'.
+     *   fmt_ulong:            The printf() format to use when rendering data which is
+     *                         typed `unsigned long'. The default is `%lu'.
      *
-     *   fmt_llong:  The printf() format to use when rendering data which is
-     *               typed `long long'. The default depends on what printf()
-     *               format is available to print this datatype.
+     *   fmt_llong:            The printf() format to use when rendering data which is
+     *                         typed `long long'. The default depends on what printf()
+     *                         format is available to print this datatype.
      *
-     *   fmt_ullong: The printf() format to use when rendering data which is
-     *               typed `unsigned long long'. The default depends on what
-     *               printf() format is available to print this datatype.
+     *   fmt_ullong:           The printf() format to use when rendering data which is
+     *                         typed `unsigned long long'. The default depends on what
+     *                         printf() format is available to print this datatype.
      *
-     *   fmt_double: The printf() format to use when rendering data which is
-     *               typed `double'. The default is `%g'.
+     *   fmt_float:            The printf() format to use when rendering data which is
+     *                         typed `float'. The default is `%g'.
      *
-     *   fmt_float:  The printf() format to use when rendering data which is
-     *               typed `float'. The default is `%g'.
+     *   fmt_double:           The printf() format to use when rendering data which is
+     *                         typed `double'. The default is `%g'.
      *
-     *   ascii:      If set then print 1-byte integer values as an ASCII
-     *               character (no quotes).  If the character is one of the
-     *               standard C escapes then print the escaped version.  If
-     *               the character is unprintable then print a 3-digit octal
-     *               escape.  If `ascii' is zero then then 1-byte integers are
-     *               printed as numeric values.  The default is zero.
+     *   fmt_ldouble:          The printf() format to use when rendering data which is
+     *                         typed `long double'. The default is `%Lg'.
      *
-     *   str_locale: Determines how strings are printed. If zero then strings
-     *               are printed like in C except. If set to ESCAPE_HTML then
-     *               strings are printed using HTML encoding where each
-     *               character not in the class [a-zA-Z0-9] is substituted
-     *               with `%XX' where `X' is a hexadecimal digit.
+     *   fmt_float_complex:    The printf() format to use when rendering data which is
+     *                         typed `float _Complex' / `_Fcomplex'. The default is
+     *                         `%g%+gi'.
      *
-     *   str_repeat: If set to non-zero then any character value repeated N
-     *               or more times is printed as 'C'*N
+     *   fmt_double_complex:   The printf() format to use when rendering data which is
+     *                         typed `double _Complex' / `_Dcomplex'. The default is
+     *                         `%g%+gi'.
+     *
+     *   fmt_ldouble_complex:  The printf() format to use when rendering data which is
+     *                         typed `long double _Complex' / `_Lcomplex'. The default
+     *                         is `%Lg%+Lgi'.
+     *
+     *   ascii:                If set then print 1-byte integer values as an ASCII
+     *                         character (no quotes).  If the character is one of the
+     *                         standard C escapes then print the escaped version.  If
+     *                         the character is unprintable then print a 3-digit octal
+     *                         escape.  If `ascii' is zero then then 1-byte integers are
+     *                         printed as numeric values.  The default is zero.
+     *
+     *   str_locale:           Determines how strings are printed. If zero then strings
+     *                         are printed like in C except. If set to ESCAPE_HTML then
+     *                         strings are printed using HTML encoding where each
+     *                         character not in the class [a-zA-Z0-9] is substituted
+     *                         with `%XX' where `X' is a hexadecimal digit.
+     *
+     *   str_repeat:           If set to non-zero then any character value repeated N
+     *                         or more times is printed as 'C'*N
      *
      * Numeric data is also subject to the formats for individual elements.
      */
-    hbool_t     raw;
+    bool        raw;
     const char *fmt_raw;
-    const char *fmt_int;
-    const char *fmt_uint;
     const char *fmt_schar;
     const char *fmt_uchar;
     const char *fmt_short;
     const char *fmt_ushort;
+    const char *fmt_int;
+    const char *fmt_uint;
     const char *fmt_long;
     const char *fmt_ulong;
     const char *fmt_llong;
     const char *fmt_ullong;
-    const char *fmt_double;
     const char *fmt_float;
+    const char *fmt_double;
+    const char *fmt_ldouble;
+    const char *fmt_float_complex;
+    const char *fmt_double_complex;
+    const char *fmt_ldouble_complex;
     int         ascii;
     int         str_locale;
     unsigned    str_repeat;
@@ -381,7 +408,7 @@ typedef struct h5tool_format_t {
     /*
      * Fields associated with the individual elements.
      *
-     *   fmt:       A printf(3c) format to use to print the value string
+     *   fmt:       A printf(3) format to use to print the value string
      *              after it has been rendered.  The default is "%s".
      *
      *   suf1:      This string is appended to elements which are followed by
@@ -400,7 +427,7 @@ typedef struct h5tool_format_t {
      * Fields associated with the index values printed at the left edge of
      * each line of output.
      *
-     *   n_fmt:     Each index value is printed according to this printf(3c)
+     *   n_fmt:     Each index value is printed according to this printf(3)
      *              format string which should include a format for a long
      *              integer.  The default is "%lu".
      *
@@ -410,7 +437,7 @@ typedef struct h5tool_format_t {
      *   fmt:       After the index values are formatted individually and
      *              separated from one another by some string, the entire
      *              resulting string will be formatted according to this
-     *              printf(3c) format which should include a format for a
+     *              printf(3) format which should include a format for a
      *              character string.  The default is "%s".
      */
     const char *idx_n_fmt; /*index number format           */
@@ -597,6 +624,8 @@ typedef enum {
     SPLIT_VFD_IDX,
     MULTI_VFD_IDX,
     MPIO_VFD_IDX,
+    MIRROR_VFD_IDX,
+    SPLITTER_VFD_IDX,
     ROS3_VFD_IDX,
     HDFS_VFD_IDX,
     SUBFILING_VFD_IDX,
@@ -652,6 +681,7 @@ H5TOOLS_DLLVAR int enable_error_stack; /* re-enable error stack; disable=0 enabl
 #define H5_TOOLS_DATASET   "DATASET"
 #define H5_TOOLS_DATATYPE  "DATATYPE"
 #define H5_TOOLS_ATTRIBUTE "ATTRIBUTE"
+#define H5_TOOLS_MAP       "MAP"
 #define H5_TOOLS_UNKNOWN   "UNKNOWN"
 
 /* Definitions of useful routines */
@@ -665,20 +695,21 @@ H5TOOLS_DLL int  h5tools_set_input_file(const char *fname, int is_bin);
 H5TOOLS_DLL int  h5tools_set_output_file(const char *fname, int is_bin);
 H5TOOLS_DLL int  h5tools_set_error_file(const char *fname, int is_bin);
 
-H5TOOLS_DLL hid_t   h5tools_get_fapl(hid_t prev_fapl_id, h5tools_vol_info_t *vol_info,
-                                     h5tools_vfd_info_t *vfd_info);
+H5TOOLS_DLL hid_t   h5tools_get_new_fapl(hid_t prev_fapl_id);
 H5TOOLS_DLL herr_t  h5tools_get_vfd_name(hid_t fid, hid_t fapl_id, char *drivername, size_t drivername_size);
-H5TOOLS_DLL hid_t   h5tools_fopen(const char *fname, unsigned flags, hid_t fapl, hbool_t use_specific_driver,
+H5TOOLS_DLL herr_t  h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info);
+H5TOOLS_DLL herr_t  h5tools_set_fapl_vol(hid_t fapl_id, h5tools_vol_info_t *vol_info);
+H5TOOLS_DLL hid_t   h5tools_fopen(const char *fname, unsigned flags, hid_t fapl, bool use_specific_driver,
                                   char *drivername, size_t drivername_size);
 H5TOOLS_DLL hid_t   h5tools_get_little_endian_type(hid_t type);
 H5TOOLS_DLL hid_t   h5tools_get_big_endian_type(hid_t type);
 H5TOOLS_DLL htri_t  h5tools_detect_vlen(hid_t tid);
 H5TOOLS_DLL htri_t  h5tools_detect_vlen_str(hid_t tid);
-H5TOOLS_DLL hbool_t h5tools_is_obj_same(hid_t loc_id1, const char *name1, hid_t loc_id2, const char *name2);
+H5TOOLS_DLL bool    h5tools_is_obj_same(hid_t loc_id1, const char *name1, hid_t loc_id2, const char *name2);
 H5TOOLS_DLL void    init_acc_pos(unsigned ndims, const hsize_t *dims, hsize_t *acc, hsize_t *pos,
                                  hsize_t *p_min_idx);
 H5TOOLS_DLL hsize_t calc_acc_pos(unsigned ndims, hsize_t elemtno, const hsize_t *acc, hsize_t *pos);
-H5TOOLS_DLL hbool_t h5tools_is_zero(const void *_mem, size_t size);
+H5TOOLS_DLL bool    h5tools_is_zero(const void *_mem, size_t size);
 H5TOOLS_DLL int     h5tools_canreadf(const char *name, hid_t dcpl_id);
 H5TOOLS_DLL int     h5tools_can_encode(H5Z_filter_t filtn);
 
@@ -688,25 +719,28 @@ H5TOOLS_DLL void h5tools_region_simple_prefix(FILE *stream, const h5tool_format_
                                               h5tools_context_t *ctx, hsize_t elmtno, hsize_t *ptdata,
                                               int secnum);
 
-H5TOOLS_DLL int     render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t nelmts);
-H5TOOLS_DLL int     render_bin_output_region_data_blocks(hid_t region_id, FILE *stream, hid_t container,
-                                                         unsigned ndims, hid_t type_id, hsize_t nblocks,
-                                                         const hsize_t *ptdata);
-H5TOOLS_DLL hbool_t render_bin_output_region_blocks(hid_t region_space, hid_t region_id, FILE *stream,
-                                                    hid_t container);
-H5TOOLS_DLL int     render_bin_output_region_data_points(hid_t region_space, hid_t region_id, FILE *stream,
-                                                         hid_t container, unsigned ndims, hid_t type_id,
-                                                         hsize_t npoints);
-H5TOOLS_DLL hbool_t render_bin_output_region_points(hid_t region_space, hid_t region_id, FILE *stream,
-                                                    hid_t container);
+H5TOOLS_DLL int  render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t nelmts);
+H5TOOLS_DLL int  render_bin_output_region_data_blocks(hid_t region_id, FILE *stream, hid_t container,
+                                                      unsigned ndims, hid_t type_id, hsize_t nblocks,
+                                                      const hsize_t *ptdata);
+H5TOOLS_DLL bool render_bin_output_region_blocks(hid_t region_space, hid_t region_id, FILE *stream,
+                                                 hid_t container);
+H5TOOLS_DLL int  render_bin_output_region_data_points(hid_t region_space, hid_t region_id, FILE *stream,
+                                                      hid_t container, unsigned ndims, hid_t type_id,
+                                                      hsize_t npoints);
+H5TOOLS_DLL bool render_bin_output_region_points(hid_t region_space, hid_t region_id, FILE *stream,
+                                                 hid_t container);
 
-H5TOOLS_DLL hbool_t h5tools_render_element(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx,
-                                           h5tools_str_t *buffer, hsize_t *curr_pos, size_t ncols,
-                                           hsize_t local_elmt_counter, hsize_t elmt_counter);
-H5TOOLS_DLL hbool_t h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
-                                                  h5tools_context_t *ctx, h5tools_str_t *buffer,
-                                                  hsize_t *curr_pos, size_t ncols, hsize_t *ptdata,
-                                                  hsize_t local_elmt_counter, hsize_t elmt_counter);
+H5TOOLS_DLL bool h5tools_render_element(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx,
+                                        h5tools_str_t *buffer, hsize_t *curr_pos, size_t ncols,
+                                        hsize_t local_elmt_counter, hsize_t elmt_counter);
+H5TOOLS_DLL bool h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
+                                               h5tools_context_t *ctx, h5tools_str_t *buffer,
+                                               hsize_t *curr_pos, size_t ncols, hsize_t *ptdata,
+                                               hsize_t local_elmt_counter, hsize_t elmt_counter);
+
+/* S3 schema prefix */
+#define S3_URI_PREFIX "s3://"
 
 #ifdef __cplusplus
 }

@@ -1,0 +1,322 @@
+name: hdf5 dev cmake CI
+
+# Triggers the workflow on push or pull request or on demand
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'docs/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'LICENSE**'
+      - '**.md'
+  pull_request:
+    branches: [ develop ]
+    paths-ignore:
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'docs/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'LICENSE**'
+      - '**.md'
+
+# Using concurrency to cancel any in-progress job or run
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+  pull-requests: write
+
+jobs:
+    call-workflow-special-cmake:
+      name: "Special Workflows"
+      uses: ./.github/workflows/main-spc.yml
+
+    # Build aws-c-s3 library for ROS3 workflows
+    build-aws-c-s3-release:
+      name: "Build aws-c-s3 (Release)"
+      uses: ./.github/workflows/build-aws-c-s3.yml
+      with:
+        build_mode: "Release"
+        aws_c_s3_tag: "v0.8.0"
+
+    call-workflow-ros3-cmake:
+      name: "ROS3 VFD Workflows"
+      needs: build-aws-c-s3-release
+      uses: ./.github/workflows/vfd-ros3.yml
+      with:
+        build_mode: "Release"
+        aws_c_s3_build_type: "package"
+
+    call-workflow-ros3-ffm-cmake:
+      name: "ROS3 VFD FFM Workflows"
+      needs: build-aws-c-s3-release
+      uses: ./.github/workflows/vfd-ros3.yml
+      with:
+        build_mode: "Release"
+        aws_c_s3_build_type: "package"
+        save_binary: "ffm"
+        java_version: "latest"
+        force_java_implementation: "ffm"
+
+    call-debug-concurrent-cmake:
+        name: "Debug Concurrency Workflows"
+        uses: ./.github/workflows/main.yml
+        with:
+            cmake_version: "latest"
+            concurrent: "CC"
+            thread_safety: ""
+            build_mode: "Debug"
+
+    call-static-debug-concurrent-cmake:
+        name: "Debug Static Concurrency Workflows"
+        uses: ./.github/workflows/main-static.yml
+        with:
+            cmake_version: "latest"
+            concurrent: "CC"
+            thread_safety: ""
+            build_mode: "Debug"
+
+    call-release-concurrent-cmake:
+        name: "Release Concurrency Workflows"
+        uses: ./.github/workflows/main.yml
+        with:
+            cmake_version: "latest"
+            concurrent: "CC"
+            thread_safety: ""
+            build_mode: "Release"
+
+    call-debug-thread-cmake:
+        name: "Debug Thread-Safety Workflows"
+        uses: ./.github/workflows/main.yml
+        with:
+            cmake_version: "latest"
+            concurrent: ""
+            thread_safety: "TS"
+            build_mode: "Debug"
+
+    call-static-debug-thread-cmake:
+        name: "Debug Static Thread-Safety Workflows"
+        uses: ./.github/workflows/main-static.yml
+        with:
+            cmake_version: "latest"
+            concurrent: ""
+            thread_safety: "TS"
+            build_mode: "Debug"
+
+    call-release-thread-cmake:
+        name: "Release Thread-Safety Workflows"
+        uses: ./.github/workflows/main.yml
+        with:
+            cmake_version: "latest"
+            concurrent: ""
+            thread_safety: "TS"
+            build_mode: "Release"
+
+    call-debug-cmake:
+        name: "Debug Workflows"
+        uses: ./.github/workflows/main.yml
+        with:
+            cmake_version: "latest"
+            concurrent: ""
+            thread_safety: ""
+            build_mode: "Debug"
+            force_java_implementation: "jni"
+
+    call-debug-static-cmake:
+        name: "Debug Static Workflows"
+        uses: ./.github/workflows/main-static.yml
+        with:
+            cmake_version: "latest"
+            concurrent: ""
+            thread_safety: ""
+            build_mode: "Debug"
+
+    call-release-cross:
+        name: "Release Cross Compile Workflows"
+        uses: ./.github/workflows/cross-compile.yml
+        with:
+            build_mode: "Release"
+
+    call-release-cmake:
+        name: "Release Workflows"
+        uses: ./.github/workflows/main.yml
+        with:
+            cmake_version: "latest"
+            concurrent: ""
+            thread_safety: ""
+            build_mode: "Release"
+            save_binary: "std"
+            force_java_implementation: "jni"
+
+    call-release-static:
+        name: "Release Static Workflows"
+        uses: ./.github/workflows/main-static.yml
+        with:
+            cmake_version: "latest"
+            concurrent: ""
+            thread_safety: ""
+            build_mode: "Release"
+
+    call-release-cmakeMin:
+        name: "Minimum Release Workflows"
+        uses: ./.github/workflows/main.yml
+        with:
+            cmake_version: "3.26.0"
+            concurrent: ""
+            thread_safety: ""
+            build_mode: "Release"
+            force_java_implementation: "jni"
+            java_version: 11
+            win_runner: "windows-2022"
+            win_vs_generator: "Visual Studio 17 2022"
+
+    call-jni-latest-java:
+        name: "JNI Latest Java Testing"
+        uses: ./.github/workflows/main.yml
+        with:
+            cmake_version: "latest"
+            concurrent: ""
+            thread_safety: ""
+            build_mode: "Release"
+            java_version: "latest"
+            force_java_implementation: "jni"
+
+    call-ffm-latest-java:
+        name: "FFM Latest Java Testing"
+        uses: ./.github/workflows/main.yml
+        with:
+            cmake_version: "latest"
+            concurrent: ""
+            thread_safety: ""
+            build_mode: "Release"
+            save_binary: "ffm"
+            java_version: "latest"
+            force_java_implementation: "ffm"
+
+    call-arm64-cmake:
+        name: "arm64 Workflows"
+        uses: ./.github/workflows/arm-main.yml
+        with:
+            cmake_version: "latest"
+            concurrent: ""
+            thread_safety: ""
+            build_mode: "Release"
+            save_binary: "arm64"
+
+    call-debug-arm64-cmake:
+        name: "arm64 Workflows"
+        uses: ./.github/workflows/arm-main.yml
+        with:
+            cmake_version: "latest"
+            concurrent: ""
+            thread_safety: ""
+            build_mode: "Debug"
+
+    call-maven-staging:
+        name: "Maven Staging Tests"
+        needs: call-release-cmake
+        uses: ./.github/workflows/maven-staging.yml
+        with:
+            test_maven_deployment: true
+            use_snapshot_version: true
+            java_implementation: "jni"
+            platforms: "all-platforms"
+
+    call-maven-ffm-staging:
+        name: "Maven Staging Tests"
+        needs: call-ffm-latest-java
+        uses: ./.github/workflows/maven-staging.yml
+        with:
+            test_maven_deployment: true
+            use_snapshot_version: true
+            java_implementation: "ffm"
+            platforms: "all-platforms"
+
+    call-release-bintest:
+        name: "Test Release Binaries"
+        needs: [call-release-cmake, call-maven-staging]
+        uses: ./.github/workflows/bintest.yml
+        with:
+            build_mode: "Release"
+            save_binary: "std"
+            java_version: "21"
+
+    call-release-ffm-bintest:
+        name: "Test FFM Release Binaries"
+        needs: [call-ffm-latest-java, call-maven-ffm-staging]
+        uses: ./.github/workflows/bintest.yml
+        with:
+            build_mode: "Release"
+            save_binary: "ffm"
+            java_version: "latest"
+
+    call-release-par:
+        name: "Parallel Release Workflows"
+        uses: ./.github/workflows/main-par.yml
+        with:
+            build_mode: "Release"
+
+    call-debug-par:
+        name: "Parallel Debug Workflows"
+        uses: ./.github/workflows/main-par.yml
+        with:
+            build_mode: "Debug"
+
+    call-release-special-par:
+        name: "Parallel Release Special Workflows"
+        uses: ./.github/workflows/main-par-spc.yml
+        with:
+            build_mode: "Release"
+
+    call-debug-special-par:
+        name: "Parallel Debug Special Workflows"
+        uses: ./.github/workflows/main-par-spc.yml
+        with:
+            build_mode: "Debug"
+
+    call-release-cmake-intel:
+        name: "Intel Workflows"
+        uses: ./.github/workflows/intel.yml
+        with:
+            build_mode: "Release"
+
+    call-release-cmake-nvhpc:
+        name: "nvhpc Workflows"
+        uses: ./.github/workflows/nvhpc.yml
+        with:
+            build_mode: "Release"
+
+    call-release-cmake-aocc:
+        name: "aocc Workflows"
+        uses: ./.github/workflows/aocc.yml
+        with:
+            build_mode: "Release"
+
+    call-release-cmake-xpr:
+        name: "TestExpress Workflows"
+        uses: ./.github/workflows/testxpr.yml
+
+#    call-release-cmake-julia:
+#        name: "Julia Workflows"
+#        uses: ./.github/workflows/julia.yml
+#        with:
+#         build_mode: "Release"
+
+    call-release-cmake-msys2:
+        name: "Msys2 Workflows"
+        uses: ./.github/workflows/msys2.yml
+        with:
+          build_mode: "Release"
+
+    call-release-cmake-i386:
+        name: "i386 Workflows"
+        uses: ./.github/workflows/i386.yml
+        with:
+            build_mode: "Release"

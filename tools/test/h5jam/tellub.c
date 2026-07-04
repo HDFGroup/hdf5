@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -37,11 +37,11 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'}, {"hel", no_arg,
 static void
 usage(const char *prog)
 {
-    HDfflush(stdout);
-    HDfprintf(stdout, "usage: %s h5_file\n", prog);
-    HDfprintf(stdout, "           Check that h5_fil is HDF5 file and print size of user block \n");
-    HDfprintf(stdout, "       %s -h\n", prog);
-    HDfprintf(stdout, "           Print a usage message and exit\n");
+    fflush(stdout);
+    fprintf(stdout, "usage: %s h5_file\n", prog);
+    fprintf(stdout, "           Check that h5_fil is HDF5 file and print size of user block \n");
+    fprintf(stdout, "       %s -h\n", prog);
+    fprintf(stdout, "           Print a usage message and exit\n");
 } /* end usage() */
 
 /*-------------------------------------------------------------------------
@@ -85,7 +85,7 @@ static void
 leave(int ret)
 {
     h5tools_close();
-    HDexit(ret);
+    exit(ret);
 }
 
 /*-------------------------------------------------------------------------
@@ -124,7 +124,7 @@ main(int argc, char *argv[])
         goto done;
     }
 
-    ifname = HDstrdup(argv[H5_optind]);
+    ifname = strdup(argv[H5_optind]);
 
     testval = H5Fis_accessible(ifname, H5P_DEFAULT);
 
@@ -156,12 +156,13 @@ main(int argc, char *argv[])
         goto done;
     }
 
-    HDprintf("%ld\n", (long)usize);
+    printf("%ld\n", (long)usize);
 
 done:
     H5Pclose(plist);
     if (ifile >= 0)
         H5Fclose(ifile);
+    free(ifname);
 
     leave(h5tools_getstatus());
 } /* end main() */

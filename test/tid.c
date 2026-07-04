@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -18,10 +18,14 @@
 #define H5I_FRIEND /*suppress error about including H5Ipkg      */
 #include "H5Ipkg.h"
 
+/* Defines used in test_appropriate_ids */
+#define FILE_NAME "tid.h5"
+#define DSET_NAME "Dataset 1"
+
 static herr_t
 free_wrapper(void *p, void H5_ATTR_UNUSED **_ctx)
 {
-    HDfree(p);
+    free(p);
     return SUCCEED;
 }
 
@@ -75,9 +79,9 @@ basic_id_test(void)
         goto out;
 
     /* Register a type */
-    myType = H5Iregister_type((size_t)64, 0, free_wrapper);
+    myType = H5Iregister_type2(0, free_wrapper);
 
-    CHECK(myType, H5I_BADID, "H5Iregister_type");
+    CHECK(myType, H5I_BADID, "H5Iregister_type2");
     if (myType == H5I_BADID)
         goto out;
 
@@ -85,12 +89,12 @@ basic_id_test(void)
      * Once the ID has been registered, testObj will be freed when
      * its ID type is destroyed.
      */
-    testObj = HDmalloc(7 * sizeof(int));
+    testObj = malloc(7 * sizeof(int));
     arrayID = H5Iregister(myType, testObj);
 
     CHECK(arrayID, H5I_INVALID_HID, "H5Iregister");
     if (arrayID == H5I_INVALID_HID) {
-        HDfree(testObj);
+        free(testObj);
         goto out;
     }
 
@@ -169,9 +173,9 @@ basic_id_test(void)
     H5E_END_TRY
 
     /* Register another type and another object in that type */
-    myType = H5Iregister_type((size_t)64, 0, free_wrapper);
+    myType = H5Iregister_type2(0, free_wrapper);
 
-    CHECK(myType, H5I_BADID, "H5Iregister_type");
+    CHECK(myType, H5I_BADID, "H5Iregister_type2");
     if (myType == H5I_BADID)
         goto out;
 
@@ -179,12 +183,12 @@ basic_id_test(void)
      * freed when the previous type was destroyed.  Allocate new
      * memory for it.
      */
-    testObj = HDmalloc(7 * sizeof(int));
+    testObj = malloc(7 * sizeof(int));
     arrayID = H5Iregister(myType, testObj);
 
     CHECK(arrayID, H5I_INVALID_HID, "H5Iregister");
     if (arrayID == H5I_INVALID_HID) {
-        HDfree(testObj);
+        free(testObj);
         goto out;
     }
 
@@ -242,6 +246,225 @@ out:
     return -1;
 }
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+/* Test that H5Iregister_type1() works correctly (just a copy of the basic test) */
+static int
+H5Iregister_type1_test(void)
+{
+    H5I_type_t myType  = H5I_BADID;
+    hid_t      arrayID = H5I_INVALID_HID;
+    void      *testObj = NULL;
+    void      *testPtr = NULL;
+    char       nameString[10];
+    hid_t      testID;
+    ssize_t    testSize = -1;
+    herr_t     err;
+    int        num_ref;
+    hsize_t    num_members;
+
+    /* Try to register an ID with fictitious types */
+    H5E_BEGIN_TRY
+    arrayID = H5Iregister((H5I_type_t)420, testObj);
+    H5E_END_TRY
+
+    VERIFY(arrayID, H5I_INVALID_HID, "H5Iregister");
+    if (arrayID != H5I_INVALID_HID)
+        goto out;
+
+    H5E_BEGIN_TRY
+    arrayID = H5Iregister((H5I_type_t)-1, testObj);
+    H5E_END_TRY
+
+    VERIFY(arrayID, H5I_INVALID_HID, "H5Iregister");
+    if (arrayID != H5I_INVALID_HID)
+        goto out;
+
+    /* Try to access IDs with fictitious types */
+    H5E_BEGIN_TRY
+    testPtr = H5Iobject_verify((hid_t)100, (H5I_type_t)0);
+    H5E_END_TRY
+
+    CHECK_PTR_NULL(testPtr, "H5Iobject_verify");
+    if (testPtr != NULL)
+        goto out;
+
+    H5E_BEGIN_TRY
+    testPtr = H5Iobject_verify((hid_t)700, (H5I_type_t)700);
+    H5E_END_TRY
+
+    CHECK_PTR_NULL(testPtr, "H5Iobject_verify");
+    if (testPtr != NULL)
+        goto out;
+
+    /* Register a type */
+    myType = H5Iregister_type1(64, 0, free_wrapper);
+
+    CHECK(myType, H5I_BADID, "H5Iregister_type1");
+    if (myType == H5I_BADID)
+        goto out;
+
+    /* Register an ID and retrieve the object it points to.
+     * Once the ID has been registered, testObj will be freed when
+     * its ID type is destroyed.
+     */
+    testObj = malloc(7 * sizeof(int));
+    arrayID = H5Iregister(myType, testObj);
+
+    CHECK(arrayID, H5I_INVALID_HID, "H5Iregister");
+    if (arrayID == H5I_INVALID_HID) {
+        free(testObj);
+        goto out;
+    }
+
+    testPtr = (int *)H5Iobject_verify(arrayID, myType);
+
+    CHECK_PTR_EQ(testPtr, testObj, "H5Iobject_verify");
+    if (testPtr != testObj)
+        goto out;
+
+    /* Ensure that H5Iget_file_id and H5Iget_name() fail, since this
+     * is an hid_t for the wrong kind of object
+     */
+    H5E_BEGIN_TRY
+    testID = H5Iget_file_id(arrayID);
+    H5E_END_TRY
+
+    VERIFY(testID, H5I_INVALID_HID, "H5Iget_file_id");
+    if (testID != H5I_INVALID_HID)
+        goto out;
+
+    H5E_BEGIN_TRY
+    testSize = H5Iget_name(arrayID, nameString, (size_t)9);
+    H5E_END_TRY
+
+    VERIFY(testSize, -1, "H5Iget_name");
+    if (testSize != -1)
+        goto out;
+
+    /* Make sure H5Iremove_verify catches objects of the wrong type */
+    H5E_BEGIN_TRY
+    testPtr = (int *)H5Iremove_verify(arrayID, (H5I_type_t)0);
+    H5E_END_TRY
+
+    CHECK_PTR_NULL(testPtr, "H5Iremove_verify");
+    if (testPtr != NULL)
+        goto out;
+
+    H5E_BEGIN_TRY
+    testPtr = (int *)H5Iremove_verify(arrayID, (H5I_type_t)((int)myType - 1));
+    H5E_END_TRY
+
+    CHECK_PTR_NULL(testPtr, "H5Iremove_verify");
+    if (testPtr != NULL)
+        goto out;
+
+    /* Remove an ID and make sure we can't access it */
+    testPtr = (int *)H5Iremove_verify(arrayID, myType);
+
+    CHECK_PTR(testPtr, "H5Iremove_verify");
+    if (testPtr == NULL)
+        goto out;
+
+    H5E_BEGIN_TRY
+    testPtr = (int *)H5Iobject_verify(arrayID, myType);
+    H5E_END_TRY
+
+    CHECK_PTR_NULL(testPtr, "H5Iobject_verify");
+    if (testPtr != NULL)
+        goto out;
+
+    /* Delete the type and make sure we can't access objects within it */
+    arrayID = H5Iregister(myType, testObj);
+
+    err = H5Idestroy_type(myType);
+    VERIFY(err, 0, "H5Idestroy_type");
+    if (err != 0)
+        goto out;
+    VERIFY(H5Itype_exists(myType), 0, "H5Itype_exists");
+    if (H5Itype_exists(myType) != 0)
+        goto out;
+
+    H5E_BEGIN_TRY
+    VERIFY(H5Inmembers(myType, NULL), -1, "H5Inmembers");
+    if (H5Inmembers(myType, NULL) != -1)
+        goto out;
+    H5E_END_TRY
+
+    /* Register another type and another object in that type */
+    myType = H5Iregister_type1(64, 0, free_wrapper);
+
+    CHECK(myType, H5I_BADID, "H5Iregister_type1");
+    if (myType == H5I_BADID)
+        goto out;
+
+    /* The memory that testObj pointed to should already have been
+     * freed when the previous type was destroyed.  Allocate new
+     * memory for it.
+     */
+    testObj = malloc(7 * sizeof(int));
+    arrayID = H5Iregister(myType, testObj);
+
+    CHECK(arrayID, H5I_INVALID_HID, "H5Iregister");
+    if (arrayID == H5I_INVALID_HID) {
+        free(testObj);
+        goto out;
+    }
+
+    err = H5Inmembers(myType, &num_members);
+    CHECK(err, -1, "H5Inmembers");
+    if (err < 0)
+        goto out;
+    VERIFY(num_members, 1, "H5Inmembers");
+    if (num_members != 1)
+        goto out;
+
+    /* Increment references to type and ensure that dec_type_ref
+     * doesn't destroy the type
+     */
+    num_ref = H5Iinc_type_ref(myType);
+    VERIFY(num_ref, 2, "H5Iinc_type_ref");
+    if (num_ref != 2)
+        goto out;
+    num_ref = H5Idec_type_ref(myType);
+    VERIFY(num_ref, 1, "H5Idec_type_ref");
+    if (num_ref != 1)
+        goto out;
+    err = H5Inmembers(myType, &num_members);
+    CHECK(err, -1, "H5Inmembers");
+    if (err < 0)
+        goto out;
+    VERIFY(num_members, 1, "H5Inmembers");
+    if (num_members != 1)
+        goto out;
+
+    /* This call to dec_type_ref should destroy the type */
+    num_ref = H5Idec_type_ref(myType);
+    VERIFY(num_ref, 0, "H5Idec_type_ref");
+    if (num_ref != 0)
+        goto out;
+    VERIFY(H5Itype_exists(myType), 0, "H5Itype_exists");
+    if (H5Itype_exists(myType) != 0)
+        goto out;
+
+    H5E_BEGIN_TRY
+    err = H5Inmembers(myType, &num_members);
+    if (err >= 0)
+        goto out;
+    H5E_END_TRY
+
+    return 0;
+
+out:
+    /* Clean up type if it has been allocated and free memory used
+     * by testObj
+     */
+    if (myType >= 0)
+        H5Idestroy_type(myType);
+
+    return -1;
+}
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+
 /* A dummy search function for the next test */
 static int
 test_search_func(void H5_ATTR_UNUSED *ptr1, hid_t H5_ATTR_UNUSED id, void H5_ATTR_UNUSED *ptr2)
@@ -259,7 +482,7 @@ id_predefined_test(void)
     void  *testPtr;
     herr_t testErr;
 
-    testObj = HDmalloc(sizeof(int));
+    testObj = malloc(sizeof(int));
 
     /*
      * Attempt to perform public functions on various library types
@@ -350,14 +573,14 @@ id_predefined_test(void)
 
     /* testObj was never registered as an atom, so it will not be
      * automatically freed. */
-    HDfree(testObj);
+    free(testObj);
     return 0;
 
 out:
     if (typeID != H5I_INVALID_HID)
         H5Tclose(typeID);
     if (testObj != NULL)
-        HDfree(testObj);
+        free(testObj);
 
     return -1;
 }
@@ -380,15 +603,15 @@ test_is_valid(void)
 
     /* Check that the ID is valid */
     tri_ret = H5Iis_valid(dtype);
-    VERIFY(tri_ret, TRUE, "H5Iis_valid");
-    if (tri_ret != TRUE)
+    VERIFY(tri_ret, true, "H5Iis_valid");
+    if (tri_ret != true)
         goto out;
 
     /* Artificially manipulate the reference counts so app_count is 0, and dtype
      * appears to be an internal id.  This takes advantage of the fact that
      * H5Ipkg is included.
      */
-    ret = H5I_inc_ref(dtype, FALSE);
+    ret = H5I_inc_ref(dtype, false);
     CHECK(ret, FAIL, "H5I_inc_ref");
     if (ret < 0)
         goto out;
@@ -399,8 +622,8 @@ test_is_valid(void)
 
     /* Check that dtype is invalid */
     tri_ret = H5Iis_valid(dtype);
-    VERIFY(tri_ret, FALSE, "H5Iis_valid");
-    if (tri_ret != FALSE)
+    VERIFY(tri_ret, false, "H5Iis_valid");
+    if (tri_ret != false)
         goto out;
 
     /* Close dtype and verify that it has been closed */
@@ -419,14 +642,14 @@ test_is_valid(void)
 
     /* Check that dtype is invalid */
     tri_ret = H5Iis_valid(dtype);
-    VERIFY(tri_ret, FALSE, "H5Iis_valid");
-    if (tri_ret != FALSE)
+    VERIFY(tri_ret, false, "H5Iis_valid");
+    if (tri_ret != false)
         goto out;
 
     /* Check that an id of -1 is invalid */
-    tri_ret = H5Iis_valid((hid_t)-1);
-    VERIFY(tri_ret, FALSE, "H4Iis_valid");
-    if (tri_ret != FALSE)
+    tri_ret = H5Iis_valid((hid_t)H5I_INVALID_HID);
+    VERIFY(tri_ret, false, "H4Iis_valid");
+    if (tri_ret != false)
         goto out;
 
     return 0;
@@ -465,7 +688,7 @@ test_get_type(void)
         goto out;
 
     /* Check that the ID is correct */
-    type_ret = H5Iget_type((hid_t)-1);
+    type_ret = H5Iget_type((hid_t)H5I_INVALID_HID);
     VERIFY(type_ret, H5I_BADID, "H5Iget_type");
     if (type_ret != H5I_BADID)
         goto out;
@@ -504,47 +727,47 @@ test_id_type_list(void)
     H5I_type_t testType;
     int        i; /* Just a counter variable */
 
-    startType = H5Iregister_type((size_t)8, 0, free_wrapper);
-    CHECK(startType, H5I_BADID, "H5Iregister_type");
+    startType = H5Iregister_type2(0, free_wrapper);
+    CHECK(startType, H5I_BADID, "H5Iregister_type2");
     if (startType == H5I_BADID)
         goto out;
 
     /* Sanity check */
     if ((int)startType >= H5I_MAX_NUM_TYPES || startType < H5I_NTYPES) {
         /* Error condition, throw an error */
-        ERROR("H5Iregister_type");
+        ERROR("H5Iregister_type2");
         goto out;
     }
     /* Create types up to H5I_MAX_NUM_TYPES */
     for (i = startType + 1; i < H5I_MAX_NUM_TYPES; i++) {
-        currentType = H5Iregister_type((size_t)8, 0, free_wrapper);
-        CHECK(currentType, H5I_BADID, "H5Iregister_type");
+        currentType = H5Iregister_type2(0, free_wrapper);
+        CHECK(currentType, H5I_BADID, "H5Iregister_type2");
         if (currentType == H5I_BADID)
             goto out;
     }
 
     /* Wrap around to low type ID numbers */
     for (i = H5I_NTYPES; i < startType; i++) {
-        currentType = H5Iregister_type((size_t)8, 0, free_wrapper);
-        CHECK(currentType, H5I_BADID, "H5Iregister_type");
+        currentType = H5Iregister_type2(0, free_wrapper);
+        CHECK(currentType, H5I_BADID, "H5Iregister_type2");
         if (currentType == H5I_BADID)
             goto out;
     }
 
     /* There should be no room at the inn for a new ID type*/
     H5E_BEGIN_TRY
-    testType = H5Iregister_type((size_t)8, 0, free_wrapper);
+    testType = H5Iregister_type2(0, free_wrapper);
     H5E_END_TRY
 
-    VERIFY(testType, H5I_BADID, "H5Iregister_type");
+    VERIFY(testType, H5I_BADID, "H5Iregister_type2");
     if (testType != H5I_BADID)
         goto out;
 
     /* Now delete a type and try to insert again */
     H5Idestroy_type(H5I_NTYPES);
-    testType = H5Iregister_type((size_t)8, 0, free_wrapper);
+    testType = H5Iregister_type2(0, free_wrapper);
 
-    VERIFY(testType, H5I_NTYPES, "H5Iregister_type");
+    VERIFY(testType, H5I_NTYPES, "H5Iregister_type2");
     if (testType != H5I_NTYPES)
         goto out;
 
@@ -602,7 +825,7 @@ typedef struct rct_obj_t {
     /* Whether we are currently freeing this object directly
      * through H5Idec_ref().
      */
-    hbool_t freeing;
+    bool freeing;
 
     /* Pointer to the master list of all objects */
     rct_obj_list_t *list;
@@ -638,7 +861,7 @@ rct_free_cb(void *_obj, void H5_ATTR_UNUSED **_ctx)
          * and then scanning through the list to find that nth unfreed
          * object.
          */
-        remove_nth = HDrandom() % obj->list->remaining;
+        remove_nth = rand() % obj->list->remaining;
         for (i = 0; i < obj->list->count; i++)
             if (obj->list->objects[i].nfrees == 0) {
                 if (remove_nth == 0)
@@ -660,7 +883,7 @@ rct_free_cb(void *_obj, void H5_ATTR_UNUSED **_ctx)
          * not free another object. We don't want to recursively free the
          * entire list when we free the first ID.
          */
-        obj->list->objects[i].freeing = TRUE;
+        obj->list->objects[i].freeing = true;
 
         /* Decrement the reference count on the object */
         ret = H5Idec_ref(obj->list->objects[i].id);
@@ -669,7 +892,7 @@ rct_free_cb(void *_obj, void H5_ATTR_UNUSED **_ctx)
             goto error;
 
         /* Unset the "freeing" flag */
-        obj->list->objects[i].freeing = FALSE;
+        obj->list->objects[i].freeing = false;
     }
 
     /* Verify the number of objects remaining in the master list is non-negative */
@@ -696,15 +919,15 @@ test_remove_clear_type(void)
     herr_t         ret; /* return value */
 
     /* Register a user-defined type with our custom ID-deleting callback */
-    obj_type = H5Iregister_type((size_t)8, 0, rct_free_cb);
-    CHECK(obj_type, H5I_BADID, "H5Iregister_type");
+    obj_type = H5Iregister_type2(0, rct_free_cb);
+    CHECK(obj_type, H5I_BADID, "H5Iregister_type2");
     if (obj_type == H5I_BADID)
         goto error;
 
     /* Create an array to hold the objects in the master list */
     list_size        = RCT_MAX_NOBJS * sizeof(rct_obj_t);
-    obj_list.objects = HDmalloc(list_size);
-    CHECK_PTR(obj_list.objects, "HDcalloc");
+    obj_list.objects = malloc(list_size);
+    CHECK_PTR(obj_list.objects, "calloc");
     if (NULL == obj_list.objects)
         goto error;
 
@@ -723,18 +946,18 @@ test_remove_clear_type(void)
          * Build object list *
          *********************/
 
-        HDmemset(obj_list.objects, 0, list_size);
+        memset(obj_list.objects, 0, list_size);
 
         /* The number of objects used is a random number between the min and max */
         obj_list.count = obj_list.remaining =
-            RCT_MIN_NOBJS + (HDrandom() % (long)(RCT_MAX_NOBJS - RCT_MIN_NOBJS + 1));
+            RCT_MIN_NOBJS + (rand() % (long)(RCT_MAX_NOBJS - RCT_MIN_NOBJS + 1));
 
         /* Create the actual objects */
         for (j = 0; j < obj_list.count; j++) {
 
             /* Object setup */
             objects[j].nfrees  = 0;
-            objects[j].freeing = FALSE;
+            objects[j].freeing = false;
             objects[j].list    = &obj_list;
 
             /* Register an ID for it */
@@ -744,7 +967,7 @@ test_remove_clear_type(void)
                 goto error;
 
             /* Bump the reference count by 1 (to 2) 50% of the time */
-            if (HDrandom() % 2) {
+            if (rand() % 2) {
                 ret = H5Iinc_ref(objects[j].id);
                 CHECK(ret, FAIL, "H5Iinc_ref");
                 if (ret == FAIL)
@@ -753,13 +976,13 @@ test_remove_clear_type(void)
         }
 
         /******************************************
-         * Clear the type with force set to FALSE *
+         * Clear the type with force set to false *
          ******************************************/
 
-        /* Clear the type. Since force is FALSE, only
+        /* Clear the type. Since force is false, only
          * IDs with a reference count of 1 will be cleared.
          */
-        ret = H5Iclear_type(obj_type, FALSE);
+        ret = H5Iclear_type(obj_type, false);
         CHECK(ret, FAIL, "H5Iclear_type");
         if (ret == FAIL)
             goto error;
@@ -782,8 +1005,8 @@ test_remove_clear_type(void)
             }
 
             /* No object should still be marked as "freeing" */
-            VERIFY(objects[j].freeing, FALSE, "object marked as freeing");
-            if (objects[j].freeing != FALSE)
+            VERIFY(objects[j].freeing, false, "object marked as freeing");
+            if (objects[j].freeing != false)
                 goto error;
         }
 
@@ -804,11 +1027,11 @@ test_remove_clear_type(void)
             goto error;
 
         /*****************************************
-         * Clear the type with force set to TRUE *
+         * Clear the type with force set to true *
          *****************************************/
 
-        /* Clear the type. Since force is TRUE, all IDs will be cleared. */
-        ret = H5Iclear_type(obj_type, TRUE);
+        /* Clear the type. Since force is true, all IDs will be cleared. */
+        ret = H5Iclear_type(obj_type, true);
         CHECK(ret, FAIL, "H5Iclear_type");
         if (ret == FAIL)
             goto error;
@@ -822,8 +1045,8 @@ test_remove_clear_type(void)
                 goto error;
 
             /* No object should still be marked as "freeing" */
-            VERIFY(objects[j].freeing, FALSE, "object marked as freeing");
-            if (objects[j].freeing != FALSE)
+            VERIFY(objects[j].freeing, false, "object marked as freeing");
+            if (objects[j].freeing != false)
                 goto error;
         }
 
@@ -849,7 +1072,7 @@ test_remove_clear_type(void)
         goto error;
 
     /* Free the object array */
-    HDfree(obj_list.objects);
+    free(obj_list.objects);
 
     return 0;
 
@@ -861,7 +1084,7 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(obj_list.objects);
+    free(obj_list.objects);
 
     return -1;
 } /* end test_remove_clear_type() */
@@ -872,7 +1095,7 @@ typedef struct {
 } future_obj_t;
 
 /* Global (static) future ID object type */
-H5I_type_t future_obj_type_g = H5I_BADID;
+static H5I_type_t future_obj_type_g = H5I_BADID;
 
 /* Callback to free the actual object for future object test */
 static herr_t
@@ -883,7 +1106,7 @@ free_actual_object(void *_p, void H5_ATTR_UNUSED **_ctx)
     if (7 != *p)
         return FAIL;
 
-    HDfree(p);
+    free(p);
 
     return SUCCEED;
 }
@@ -916,7 +1139,7 @@ realize_future_cb(void *_future_obj, hid_t *actual_id)
     }
     else {
         /* Create a new object (the 'actual object') of the correct type */
-        if (NULL == (actual_obj = HDmalloc(sizeof(int))))
+        if (NULL == (actual_obj = malloc(sizeof(int))))
             return FAIL;
         *actual_obj = 7;
 
@@ -937,7 +1160,7 @@ discard_future_cb(void *future_obj)
     if (NULL == future_obj)
         return FAIL;
 
-    HDfree(future_obj);
+    free(future_obj);
 
     return SUCCEED;
 }
@@ -952,7 +1175,7 @@ realize_future_generate_cb(void *_future_obj, hid_t *actual_id)
     if (NULL != future_obj)
         return FAIL;
     /* Create a new object (the 'actual object') of the correct type */
-    if (NULL == (actual_obj = HDmalloc(sizeof(int))))
+    if (NULL == (actual_obj = malloc(sizeof(int))))
         return FAIL;
     *actual_obj = 7;
 
@@ -990,8 +1213,8 @@ test_future_ids(void)
     herr_t        ret;             /* Return value */
 
     /* Register a user-defined type with our custom ID-deleting callback */
-    obj_type = H5Iregister_type((size_t)15, 0, free_actual_object);
-    CHECK(obj_type, H5I_BADID, "H5Iregister_type");
+    obj_type = H5Iregister_type2(0, free_actual_object);
+    CHECK(obj_type, H5I_BADID, "H5Iregister_type2");
     if (H5I_BADID == obj_type)
         goto error;
 
@@ -1036,7 +1259,7 @@ test_future_ids(void)
     /* Test base use-case: create a future object and destroy type without
      *  realizing the future object.
      */
-    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj           = malloc(sizeof(future_obj_t));
     future_obj->obj_type = obj_type;
     future_id            = H5Iregister_future(obj_type, future_obj, realize_future_cb, discard_future_cb);
     CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
@@ -1050,13 +1273,13 @@ test_future_ids(void)
         goto error;
 
     /* Re-register a user-defined type with our custom ID-deleting callback */
-    obj_type = H5Iregister_type((size_t)15, 0, free_actual_object);
-    CHECK(obj_type, H5I_BADID, "H5Iregister_type");
+    obj_type = H5Iregister_type2(0, free_actual_object);
+    CHECK(obj_type, H5I_BADID, "H5Iregister_type2");
     if (H5I_BADID == obj_type)
         goto error;
 
     /* Test base use-case: create a future object and realize the actual object.  */
-    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj           = malloc(sizeof(future_obj_t));
     future_obj->obj_type = obj_type;
     future_id            = H5Iregister_future(obj_type, future_obj, realize_future_cb, discard_future_cb);
     CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
@@ -1090,8 +1313,8 @@ test_future_ids(void)
         goto error;
 
     /* Re-register a user-defined type with our custom ID-deleting callback */
-    obj_type = H5Iregister_type((size_t)15, 0, free_actual_object);
-    CHECK(obj_type, H5I_BADID, "H5Iregister_type");
+    obj_type = H5Iregister_type2(0, free_actual_object);
+    CHECK(obj_type, H5I_BADID, "H5Iregister_type2");
     if (H5I_BADID == obj_type)
         goto error;
 
@@ -1142,7 +1365,7 @@ test_future_ids(void)
 
     /* Test base use-case: create a future object for a pre-defined type */
     /* (DATASPACE) */
-    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj           = malloc(sizeof(future_obj_t));
     future_obj->obj_type = H5I_DATASPACE;
     future_id = H5Iregister_future(H5I_DATASPACE, future_obj, realize_future_cb, discard_future_cb);
     CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
@@ -1160,7 +1383,7 @@ test_future_ids(void)
         goto error;
 
     /* Test base use-case: create a future object for a pre-defined type */
-    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj           = malloc(sizeof(future_obj_t));
     future_obj->obj_type = H5I_DATASPACE;
     future_id = H5Iregister_future(H5I_DATASPACE, future_obj, realize_future_cb, discard_future_cb);
     CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
@@ -1183,7 +1406,7 @@ test_future_ids(void)
         goto error;
 
     /* Test base use-case: create a future object for a pre-defined type */
-    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj           = malloc(sizeof(future_obj_t));
     future_obj->obj_type = H5I_DATASPACE;
     future_id = H5Iregister_future(H5I_DATASPACE, future_obj, realize_future_cb, discard_future_cb);
     CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
@@ -1214,7 +1437,7 @@ test_future_ids(void)
 
     /* Test base use-case: create a future object for a pre-defined type */
     /* (DATATYPE) */
-    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj           = malloc(sizeof(future_obj_t));
     future_obj->obj_type = H5I_DATATYPE;
     future_id            = H5Iregister_future(H5I_DATATYPE, future_obj, realize_future_cb, discard_future_cb);
     CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
@@ -1232,7 +1455,7 @@ test_future_ids(void)
         goto error;
 
     /* Test base use-case: create a future object for a pre-defined type */
-    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj           = malloc(sizeof(future_obj_t));
     future_obj->obj_type = H5I_DATATYPE;
     future_id            = H5Iregister_future(H5I_DATATYPE, future_obj, realize_future_cb, discard_future_cb);
     CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
@@ -1255,7 +1478,7 @@ test_future_ids(void)
         goto error;
 
     /* Test base use-case: create a future object for a pre-defined type */
-    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj           = malloc(sizeof(future_obj_t));
     future_obj->obj_type = H5I_DATATYPE;
     future_id            = H5Iregister_future(H5I_DATATYPE, future_obj, realize_future_cb, discard_future_cb);
     CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
@@ -1286,7 +1509,7 @@ test_future_ids(void)
 
     /* Test base use-case: create a future object for a pre-defined type */
     /* (PROPERTY LIST) */
-    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj           = malloc(sizeof(future_obj_t));
     future_obj->obj_type = H5I_GENPROP_LST;
     future_id = H5Iregister_future(H5I_GENPROP_LST, future_obj, realize_future_cb, discard_future_cb);
     CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
@@ -1304,7 +1527,7 @@ test_future_ids(void)
         goto error;
 
     /* Test base use-case: create a future object for a pre-defined type */
-    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj           = malloc(sizeof(future_obj_t));
     future_obj->obj_type = H5I_GENPROP_LST;
     future_id = H5Iregister_future(H5I_GENPROP_LST, future_obj, realize_future_cb, discard_future_cb);
     CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
@@ -1327,7 +1550,7 @@ test_future_ids(void)
         goto error;
 
     /* Test base use-case: create a future object for a pre-defined type */
-    future_obj           = HDmalloc(sizeof(future_obj_t));
+    future_obj           = malloc(sizeof(future_obj_t));
     future_obj->obj_type = H5I_GENPROP_LST;
     future_id = H5Iregister_future(H5I_GENPROP_LST, future_obj, realize_future_cb, discard_future_cb);
     CHECK(future_id, H5I_INVALID_HID, "H5Iregister_future");
@@ -1339,7 +1562,7 @@ test_future_ids(void)
     CHECK(ret, FAIL, "H5Pisa_class");
     if (FAIL == ret)
         goto error;
-    if (TRUE != ret)
+    if (true != ret)
         goto error;
 
     /* Verify that the application believes the ID is still a property list */
@@ -1369,14 +1592,139 @@ error:
     return -1;
 } /* end test_future_ids() */
 
+/*-------------------------------------------------------------------------
+ * Function:    test_appropriate_ids
+ *
+ * Purpose:     Tests several API functions on detecting inappropriate ID.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_appropriate_ids(void)
+{
+    hid_t    file_id  = H5I_INVALID_HID;
+    hid_t    fapl_id  = H5I_INVALID_HID;
+    hid_t    fcpl_id  = H5I_INVALID_HID;
+    hid_t    plist    = H5I_INVALID_HID;
+    hid_t    dset_id  = H5I_INVALID_HID;
+    hid_t    space_id = H5I_INVALID_HID;
+    hsize_t  dims     = 2;
+    hssize_t free_space;
+    herr_t   ret = SUCCEED; /* Generic return value */
+
+    /* Create file create property list */
+    fcpl_id = H5Pcreate(H5P_FILE_CREATE);
+    CHECK(fcpl_id, H5I_INVALID_HID, "H5Pcreate");
+
+    file_id = H5Fcreate(FILE_NAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
+    CHECK(file_id, H5I_INVALID_HID, "H5Fcreate");
+
+    /* Create a dataset in the file */
+    space_id = H5Screate_simple(1, &dims, NULL);
+    CHECK(space_id, H5I_INVALID_HID, "H5Screate_simple");
+    dset_id = H5Dcreate2(file_id, DSET_NAME, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dset_id, H5I_INVALID_HID, "H5Dcreate2");
+
+    /* Close IDs */
+    ret = H5Pclose(fcpl_id);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Sclose(space_id);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Dclose(dset_id);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Fclose(file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    file_id = H5Fopen(FILE_NAME, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(file_id, H5I_INVALID_HID, "H5Fopen");
+
+    /* Get the file create property */
+    fcpl_id = H5Fget_create_plist(file_id);
+    CHECK(fcpl_id, H5I_INVALID_HID, "H5Fget_create_plist");
+
+    /* Get the file access property */
+    fapl_id = H5Fget_access_plist(file_id);
+    CHECK(fapl_id, H5I_INVALID_HID, "H5Fget_access_plist");
+
+    dset_id = H5Dopen2(file_id, DSET_NAME, H5P_DEFAULT);
+    CHECK(dset_id, H5I_INVALID_HID, "H5Dopen2");
+
+    /*-------------------------------------------------------------
+     * Try to call functions passing in a wrong ID
+     *-----------------------------------------------------------*/
+    H5E_BEGIN_TRY
+    {
+        plist = H5Fget_create_plist(dset_id); /* dset_id is not file ID */
+    }
+    H5E_END_TRY
+    VERIFY(plist, H5I_INVALID_HID, "H5Fget_create_plist");
+
+    H5E_BEGIN_TRY
+    {
+        plist = H5Fget_access_plist(fapl_id); /* fapl_id is not file ID */
+    }
+    H5E_END_TRY
+    VERIFY(plist, H5I_INVALID_HID, "H5Fget_access_plist");
+
+    H5E_BEGIN_TRY
+    {
+        unsigned intent;                       /* File access flags */
+        ret = H5Fget_intent(dset_id, &intent); /* dset_id is not file ID */
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Fget_intent");
+
+    H5E_BEGIN_TRY
+    {
+        unsigned long fileno = 0;
+        ret                  = H5Fget_fileno(dset_id, &fileno); /* dset_id is not file ID */
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Fget_fileno");
+
+    H5E_BEGIN_TRY
+    {
+        free_space = H5Fget_freespace(dset_id); /* dset_id is not file ID */
+    }
+    H5E_END_TRY
+    VERIFY(free_space, FAIL, "H5Fget_freespace");
+
+    H5E_BEGIN_TRY
+    {
+        void *os_file_handle = NULL;                                    /* OS file handle */
+        ret = H5Fget_vfd_handle(fapl_id, H5P_DEFAULT, &os_file_handle); /* fapl_id is not file ID */
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Fget_vfd_handle");
+
+    /* Close IDs */
+    ret = H5Pclose(fapl_id);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Pclose(fcpl_id);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Dclose(dset_id);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Fclose(file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    return 0;
+}
+
 void
-test_ids(void)
+test_ids(void H5_ATTR_UNUSED *params)
 {
     /* Set the random # seed */
-    HDsrandom((unsigned)HDtime(NULL));
+    srand((unsigned)time(NULL));
 
     if (basic_id_test() < 0)
         TestErrPrintf("Basic ID test failed\n");
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    if (H5Iregister_type1_test() < 0)
+        TestErrPrintf("H5Iregister_type1() test failed\n");
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
     if (id_predefined_test() < 0)
         TestErrPrintf("Predefined ID type test failed\n");
     if (test_is_valid() < 0)
@@ -1389,4 +1737,6 @@ test_ids(void)
         TestErrPrintf("ID remove during H5Iclear_type test failed\n");
     if (test_future_ids() < 0)
         TestErrPrintf("Future ID test failed\n");
+    if (test_appropriate_ids() < 0)
+        TestErrPrintf("Detection of inappropriate ID test failed\n");
 }

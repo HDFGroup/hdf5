@@ -5,7 +5,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -21,7 +21,7 @@ namespace H5 {
     enum datatypes.
 */
 //  Inheritance: DataType -> H5Object -> H5Location -> IdComponent
-class H5_DLLCPP EnumType : public DataType {
+class H5CPP_DLL EnumType : public DataType {
 
   public:
     // Creates an empty enumeration datatype based on a native signed
@@ -81,7 +81,7 @@ class H5_DLLCPP EnumType : public DataType {
     // Copy constructor: same as the original EnumType.
     EnumType(const EnumType &original);
 
-    virtual ~EnumType() override;
+    virtual ~EnumType() override = default;
 
 }; // end of EnumType
 } // namespace H5

@@ -4,28 +4,36 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Monday, August  2, 1999
- *
- * Purpose:	The public header file for the core driver.
+ * Purpose:	The public header file for the core virtual file driver (VFD)
  */
 #ifndef H5FDcore_H
 #define H5FDcore_H
 
-#define H5FD_CORE       (H5FDperform_init(H5FD_core_init))
+/* Public header files */
+#include "H5FDpublic.h" /* File drivers             */
+
+/** ID for the core VFD */
+#define H5FD_CORE (H5OPEN H5FD_CORE_id_g)
+
+/** Identifier for the core VFD \since 1.14.0 */
 #define H5FD_CORE_VALUE H5_VFD_CORE
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-H5_DLL hid_t H5FD_core_init(void);
+
+/** @private
+ *
+ * \brief ID for the core VFD
+ */
+H5_DLLVAR hid_t H5FD_CORE_id_g;
 
 /**
  * \ingroup FAPL
@@ -51,15 +59,15 @@ H5_DLL hid_t H5FD_core_init(void);
  *          be increased each time more memory is required.
  *
  *          While using H5Fcreate() to create a core file, if the \p
- *          backing_store is set to 1 (TRUE), the file contents are flushed to a
+ *          backing_store is set to 1 (true), the file contents are flushed to a
  *          file with the same name as this core file when the file is closed or
  *          access to the file is terminated in memory.
  *
  *          The application is allowed to open an existing file with #H5FD_CORE
  *          driver. While using H5Fopen() to open an existing file, if the \p
- *          backing_store is set to 1 (TRUE) and the \c flags for H5Fopen() is set to
+ *          backing_store is set to 1 (true) and the \c flags for H5Fopen() is set to
  *          #H5F_ACC_RDWR, any change to the file contents are saved to the file
- *          when the file is closed. If \p backing_store is set to 0 (FALSE) and the \c
+ *          when the file is closed. If \p backing_store is set to 0 (false) and the \c
  *          flags for H5Fopen() is set to #H5F_ACC_RDWR, any change to the file
  *          contents will be lost when the file is closed. If the flags for
  *          H5Fopen() is set to #H5F_ACC_RDONLY, no change to the file is
@@ -70,7 +78,7 @@ H5_DLL hid_t H5FD_core_init(void);
  * \since 1.4.0
  *
  */
-H5_DLL herr_t H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store);
+H5_DLL herr_t H5Pset_fapl_core(hid_t fapl_id, size_t increment, bool backing_store);
 
 /**
  * \ingroup FAPL
@@ -89,7 +97,7 @@ H5_DLL herr_t H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_
  * \since 1.4.0
  *
  */
-H5_DLL herr_t H5Pget_fapl_core(hid_t fapl_id, size_t *increment /*out*/, hbool_t *backing_store /*out*/);
+H5_DLL herr_t H5Pget_fapl_core(hid_t fapl_id, size_t *increment /*out*/, bool *backing_store /*out*/);
 #ifdef __cplusplus
 }
 #endif

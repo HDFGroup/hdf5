@@ -1,0 +1,205 @@
+name: Release Progress
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'  # Run every 4 hours
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  check-progress:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    if: github.repository_owner == 'HDFGROUP'
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        
+    - name: Set up Python
+      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+      with:
+        python-version: '3.11'  # Use specific version for consistency
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+        
+    - name: Install dependencies
+      run: |
+        pip install requests
+        
+    - name: Validate required secrets
+      run: |
+        if [ -z "${{ secrets.GIST_TOKEN }}" ]; then
+          echo "::error::GIST_TOKEN secret is required"
+          exit 1
+        fi
+        if [ -z "${{ secrets.GIST_ID }}" ]; then
+          echo "::error::GIST_ID secret is required"
+          exit 1
+        fi
+        echo "::notice::All required secrets are present"
+        
+    - name: Debug information
+      if: runner.debug == '1'
+      run: |
+        echo "Repository: $GITHUB_REPOSITORY"
+        echo "Workflow: $GITHUB_WORKFLOW"
+        echo "Run ID: $GITHUB_RUN_ID"
+        echo "Python version: $(python --version)"
+        echo "Environment variables:"
+        env | grep -E '^GITHUB_' | sort
+        
+    - name: Calculate progress
+      id: progress
+      run: |
+        cd .github/workflows
+        # Check if Python script exists
+        if [ ! -f "update-progress.py" ]; then
+          echo "::error::update-progress.py not found in .github/workflows directory"
+          exit 1
+        fi
+        
+        echo "::notice::Running progress calculation script..."
+        
+        # Run the Python script with error handling
+        if ! python update-progress.py > progress_output.txt 2>&1; then
+          echo "::error::Python script execution failed"
+          echo "Script output:"
+          cat progress_output.txt
+          exit 1
+        fi
+        
+        # Display the captured output for debugging
+        echo "=== Python Script Output ==="
+        cat progress_output.txt
+        echo "=========================="
+        
+        # Extract and validate percentage
+        PERCENTAGE=$(grep "^percentage=" progress_output.txt | cut -d'=' -f2 | head -1)
+        if [ -z "$PERCENTAGE" ] || ! [[ "$PERCENTAGE" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+          echo "::error::Invalid or missing percentage value: '$PERCENTAGE'"
+          echo "Expected format: percentage=XX.X"
+          exit 1
+        fi
+        
+        # Extract and validate done/total counts
+        DONE_TOTAL=$(grep "^Done / Total:" progress_output.txt | cut -d':' -f2 | xargs | head -1)
+        if [ -z "$DONE_TOTAL" ]; then
+          echo "::error::Missing 'Done / Total:' line in script output"
+          exit 1
+        fi
+        
+        DONE=$(echo "$DONE_TOTAL" | cut -d' ' -f1)
+        TOTAL=$(echo "$DONE_TOTAL" | cut -d' ' -f3)  # Account for "XX / YY" format
+        
+        # Validate numeric values
+        if ! [[ "$DONE" =~ ^[0-9]+$ ]] || ! [[ "$TOTAL" =~ ^[0-9]+$ ]]; then
+          echo "::error::Invalid done/total values: done='$DONE', total='$TOTAL'"
+          echo "Expected format: 'Done / Total: XX / YY'"
+          exit 1
+        fi
+        
+        # Validate logical consistency
+        if [ "$TOTAL" -eq 0 ]; then
+          echo "::error::Total count cannot be zero"
+          exit 1
+        fi
+        
+        if [ "$DONE" -gt "$TOTAL" ]; then
+          echo "::error::Done count ($DONE) cannot exceed total count ($TOTAL)"
+          exit 1
+        fi
+        
+        # Extract critical and high priority counts
+        BLOCKER_DONE=$(grep "^blocker_done=" progress_output.txt | cut -d'=' -f2 | head -1)
+        BLOCKER_TOTAL=$(grep "^blocker_total=" progress_output.txt | cut -d'=' -f2 | head -1)
+        MUSTDO_DONE=$(grep "^mustdo_done=" progress_output.txt | cut -d'=' -f2 | head -1)
+        MUSTDO_TOTAL=$(grep "^mustdo_total=" progress_output.txt | cut -d'=' -f2 | head -1)
+        VERSION=$(grep "^version=" progress_output.txt | cut -d'=' -f2 | head -1)
+
+        # Set outputs for use in subsequent steps
+        echo "percentage=$PERCENTAGE" >> $GITHUB_OUTPUT
+        echo "done=$DONE" >> $GITHUB_OUTPUT
+        echo "total=$TOTAL" >> $GITHUB_OUTPUT
+        echo "blocker_done=$BLOCKER_DONE" >> $GITHUB_OUTPUT
+        echo "blocker_total=$BLOCKER_TOTAL" >> $GITHUB_OUTPUT
+        echo "mustdo_done=$MUSTDO_DONE" >> $GITHUB_OUTPUT
+        echo "mustdo_total=$MUSTDO_TOTAL" >> $GITHUB_OUTPUT
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+        echo "::notice::Progress calculation successful: ${PERCENTAGE}% (${DONE}/${TOTAL})"
+        echo "::notice::  Version: ${VERSION}, Critical Priority: ${BLOCKER_DONE}/${BLOCKER_TOTAL}, High Priority: ${MUSTDO_DONE}/${MUSTDO_TOTAL}"
+        
+        # Clean up
+        rm -f progress_output.txt
+        
+      env:
+        GITHUB_TOKEN: ${{ secrets.GIST_TOKEN }}
+        GITHUB_OWNER: "HDFGroup"
+        GITHUB_PROJECT_NUMBER: "39"
+
+    - name: Update progress badge Gist
+      env:
+        GITHUB_TOKEN: ${{ secrets.GIST_TOKEN }}
+        GIST_ID: ${{ secrets.GIST_ID }}
+        PERCENTAGE: ${{ steps.progress.outputs.percentage }}
+        DONE: ${{ steps.progress.outputs.done }}
+        TOTAL: ${{ steps.progress.outputs.total }}
+        BLOCKER_DONE: ${{ steps.progress.outputs.blocker_done }}
+        BLOCKER_TOTAL: ${{ steps.progress.outputs.blocker_total }}
+        MUSTDO_DONE: ${{ steps.progress.outputs.mustdo_done }}
+        MUSTDO_TOTAL: ${{ steps.progress.outputs.mustdo_total }}
+        VERSION: ${{ steps.progress.outputs.version }}
+      run: |
+        # Execute dedicated badge generation script
+        # This separates concerns: YAML orchestrates, scripts implement logic
+        bash .github/workflows/update-badge.sh
+
+    - name: Update failure badge on error
+      if: failure()
+      env:
+        GITHUB_TOKEN: ${{ secrets.GIST_TOKEN }}
+        GIST_ID: ${{ secrets.GIST_ID }}
+      run: |
+        rm -f progress_output.txt
+        echo "::warning::Workflow failed - updating badges to FAILURE state"
+
+        REPO_NAME="${GITHUB_REPOSITORY##*/}"
+        BLOCKER_GIST_NAME="release-blocker-${REPO_NAME}.json"
+        MUSTDO_GIST_NAME="release-mustdo-${REPO_NAME}.json"
+
+        FAILURE_BADGE=$(jq -n '{
+          "schemaVersion": 1,
+          "label": "Release Progress",
+          "message": "FAILURE",
+          "color": "BF00FF",
+          "style": "flat-square"
+        }')
+
+        REQUEST_PAYLOAD=$(jq -n \
+          --arg blocker_filename "$BLOCKER_GIST_NAME" \
+          --arg mustdo_filename "$MUSTDO_GIST_NAME" \
+          --argjson content "$FAILURE_BADGE" \
+          '{
+            "files": {
+              ($blocker_filename): { "content": ($content | tostring) },
+              ($mustdo_filename): { "content": ($content | tostring) }
+            }
+          }')
+
+        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -L -X PATCH \
+          -H "Authorization: token ${GITHUB_TOKEN}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          "https://api.github.com/gists/${GIST_ID}" \
+          -d "$REQUEST_PAYLOAD")
+
+        if [ "$HTTP_CODE" != "200" ]; then
+          echo "::warning::Failed to update failure badges (HTTP $HTTP_CODE)"
+        else
+          echo "::notice::Failure badges updated successfully"
+        fi

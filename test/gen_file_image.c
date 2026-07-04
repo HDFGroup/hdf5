@@ -4,16 +4,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Friday, March 30, 2012
- *
  * Purpose:     Create a simple file for use with the file image tests.
  *
  */
@@ -31,21 +28,18 @@
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
- * Programmer:	Quincey Koziol
- *              Friday, March 30, 2012
- *
  *-------------------------------------------------------------------------
  */
 int
 main(void)
 {
-    hid_t   fid = -1, sid = -1, did = -1;
+    hid_t   fid = H5I_INVALID_HID, sid = H5I_INVALID_HID, did = H5I_INVALID_HID;
     hsize_t dims[SPACE_RANK] = {SPACE_DIM1, SPACE_DIM2};
     size_t  i, j;        /* Local index variables */
     int    *data = NULL; /* Dataset data */
 
     /* Initialize the data */
-    if (NULL == (data = (int *)HDmalloc(SPACE_DIM1 * SPACE_DIM2 * sizeof(int))))
+    if (NULL == (data = (int *)malloc(SPACE_DIM1 * SPACE_DIM2 * sizeof(int))))
         TEST_ERROR;
 
     for (i = 0; i < SPACE_DIM1; i++)
@@ -80,14 +74,14 @@ main(void)
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     H5E_BEGIN_TRY
     {
         H5Dclose(did);
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return EXIT_FAILURE;
 } /* end main() */

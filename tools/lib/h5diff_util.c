@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -120,7 +120,11 @@ print_type(hid_t type)
             break;
 
         case H5T_FLOAT:
-            if (H5Tequal(type, H5T_IEEE_F32BE))
+            if (H5Tequal(type, H5T_IEEE_F16BE))
+                parallel_print("H5T_IEEE_F16BE");
+            else if (H5Tequal(type, H5T_IEEE_F16LE))
+                parallel_print("H5T_IEEE_F16LE");
+            else if (H5Tequal(type, H5T_IEEE_F32BE))
                 parallel_print("H5T_IEEE_F32BE");
             else if (H5Tequal(type, H5T_IEEE_F32LE))
                 parallel_print("H5T_IEEE_F32LE");
@@ -128,6 +132,24 @@ print_type(hid_t type)
                 parallel_print("H5T_IEEE_F64BE");
             else if (H5Tequal(type, H5T_IEEE_F64LE))
                 parallel_print("H5T_IEEE_F64LE");
+            else if (H5Tequal(type, H5T_FLOAT_BFLOAT16BE))
+                parallel_print("H5T_FLOAT_BFLOAT16BE");
+            else if (H5Tequal(type, H5T_FLOAT_BFLOAT16LE))
+                parallel_print("H5T_FLOAT_BFLOAT16LE");
+            else if (H5Tequal(type, H5T_FLOAT_F8E4M3))
+                parallel_print("H5T_FLOAT_F8E4M3");
+            else if (H5Tequal(type, H5T_FLOAT_F8E5M2))
+                parallel_print("H5T_FLOAT_F8E5M2");
+            else if (H5Tequal(type, H5T_FLOAT_F6E2M3))
+                parallel_print("H5T_FLOAT_F6E2M3");
+            else if (H5Tequal(type, H5T_FLOAT_F6E3M2))
+                parallel_print("H5T_FLOAT_F6E3M2");
+            else if (H5Tequal(type, H5T_FLOAT_F4E2M1))
+                parallel_print("H5T_FLOAT_F4E2M1");
+#ifdef H5_HAVE__FLOAT16
+            else if (H5Tequal(type, H5T_NATIVE_FLOAT16))
+                parallel_print("H5T_NATIVE_FLOAT16");
+#endif
             else if (H5Tequal(type, H5T_NATIVE_FLOAT))
                 parallel_print("H5T_NATIVE_FLOAT");
             else if (H5Tequal(type, H5T_NATIVE_DOUBLE))
@@ -167,6 +189,7 @@ print_type(hid_t type)
         case H5T_ENUM:
         case H5T_VLEN:
         case H5T_ARRAY:
+        case H5T_COMPLEX:
         case H5T_NO_CLASS:
         case H5T_NCLASSES:
         default:
@@ -190,7 +213,7 @@ diff_basename(const char *name)
         return NULL;
 
     /* Find the end of the base name */
-    i = HDstrlen(name);
+    i = strlen(name);
     while (i > 0 && '/' == name[i - 1])
         --i;
 
@@ -302,6 +325,9 @@ get_class(H5T_class_t tclass)
         case H5T_ARRAY:
             return ("H5T_ARRAY");
 
+        case H5T_COMPLEX:
+            return ("H5T_COMPLEX");
+
         case H5T_NO_CLASS:
         case H5T_NCLASSES:
         default:
@@ -321,7 +347,7 @@ print_found(hsize_t nfound)
     if (g_Parallel)
         parallel_print("%" PRIuHSIZE " differences found\n", nfound);
     else
-        HDfprintf(stdout, "%" PRIuHSIZE " differences found\n", nfound);
+        fprintf(rawoutstream, "%" PRIuHSIZE " differences found\n", nfound);
 }
 
 /*-----------------------------------------------------------------

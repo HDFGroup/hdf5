@@ -1,0 +1,359 @@
+name: Maven Build and Test (All Platforms)
+
+# Standalone workflow for building and testing Maven packages across all platforms
+# This workflow is useful for:
+# - Testing Maven package creation in forks before submitting PRs
+# - Validating Maven artifacts and deployment process
+# - Testing both FFM and JNI implementations independently
+
+on:
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: 'Platforms to build'
+        type: choice
+        required: false
+        default: 'all-platforms'
+        options:
+          - 'linux-only'
+          - 'linux-windows'
+          - 'linux-macos'
+          - 'all-platforms'
+      java_implementation:
+        description: 'Java implementation to test'
+        type: choice
+        required: false
+        default: 'both'
+        options:
+          - 'both'
+          - 'ffm'
+          - 'jni'
+          - 'auto'
+      test_deployment:
+        description: 'Deploy to GitHub Packages for testing'
+        type: boolean
+        required: false
+        default: false
+      test_examples:
+        description: 'Run Java examples tests'
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-maven-packages:
+    name: Build Maven Packages
+    uses: ./.github/workflows/maven-staging.yml
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: write
+    with:
+      test_maven_deployment: true
+      use_snapshot_version: true
+      platforms: ${{ inputs.platforms }}
+      java_implementation: ${{ inputs.java_implementation }}
+
+  deploy-to-packages:
+    name: Deploy to GitHub Packages (Test)
+    runs-on: ubuntu-latest
+    needs: build-maven-packages
+    if: ${{ inputs.test_deployment && needs.build-maven-packages.result == 'success' }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Download all Maven staging artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+          pattern: maven-staging-artifacts-*
+          path: ./artifacts
+
+      - name: List downloaded artifacts
+        run: |
+          echo "=== Downloaded artifacts ==="
+          ls -R ./artifacts/
+
+      - name: Set up Java
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Deploy to GitHub Packages
+        run: |
+          # Find all JAR files
+          for artifact_dir in ./artifacts/maven-staging-artifacts-*/; do
+            if [ -d "$artifact_dir" ]; then
+              echo "Processing: $artifact_dir"
+
+              # Find POM file
+              POM_FILE=$(find "$artifact_dir" -name "pom.xml" | head -1)
+
+              # Find JAR files (main artifacts, not sources/javadoc)
+              for jar_file in $(find "$artifact_dir" -name "jarhdf5-*.jar" ! -name "*sources*" ! -name "*javadoc*"); do
+                echo "Deploying: $(basename "$jar_file")"
+
+                # Extract classifier from filename if present
+                jar_basename=$(basename "$jar_file")
+                if [[ "$jar_basename" =~ jarhdf5-[0-9.]+-SNAPSHOT-(.+)\.jar ]]; then
+                  CLASSIFIER="${BASH_REMATCH[1]}"
+                  echo "  Classifier: $CLASSIFIER"
+
+                  # Determine artifact ID based on classifier
+                  if [[ "$CLASSIFIER" == *"ffm"* ]] || [[ "$jar_file" == *"ffm"* ]]; then
+                    ARTIFACT_ID="hdf5-java-ffm"
+                  else
+                    ARTIFACT_ID="hdf5-java-jni"
+                  fi
+
+                  mvn deploy:deploy-file \
+                    -DgroupId=org.hdfgroup \
+                    -DartifactId="$ARTIFACT_ID" \
+                    -Dversion="${{ needs.build-maven-packages.outputs.version }}" \
+                    -Dpackaging=jar \
+                    -Dfile="$jar_file" \
+                    -Dclassifier="$CLASSIFIER" \
+                    -DpomFile="$POM_FILE" \
+                    -DrepositoryId=github \
+                    -Durl=${{ format('https://maven.pkg.github.com/{0}', github.repository) }} \
+                    -Dusername=${{ github.actor }} \
+                    -Dpassword=${{ secrets.GITHUB_TOKEN }}
+                fi
+              done
+            fi
+          done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  test-jni-package:
+    name: Test JNI Maven Package
+    needs: [build-maven-packages, deploy-to-packages]
+    runs-on: ubuntu-latest
+    if: |
+      inputs.test_deployment &&
+      needs.deploy-to-packages.result == 'success' &&
+      (inputs.java_implementation == 'both' || inputs.java_implementation == 'jni')
+    steps:
+      - name: Checkout HDF5 repository (contains HDF5Examples)
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Set up Java 21 for JNI
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Download HDF5 installation from workflow
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+          name: hdf5-install-linux-x86_64-jni
+          path: ${{ runner.workspace }}/hdf5-install
+
+      - name: Verify HDF5 installation
+        run: |
+          echo "HDF5 installation contents:"
+          ls -la "${{ runner.workspace }}/hdf5-install"
+          if [ -d "${{ runner.workspace }}/hdf5-install/lib" ]; then
+            echo "Libraries:"
+            ls -la "${{ runner.workspace }}/hdf5-install/lib" | grep -E '\.so' || echo "No shared libraries found"
+          fi
+
+      - name: Test JNI examples
+        run: |
+          cd HDF5Examples/JAVA
+          ./test-maven-jni.sh "${{ needs.build-maven-packages.outputs.version }}" "${{ format('https://maven.pkg.github.com/{0}', github.repository) }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          HDF5_HOME: ${{ runner.workspace }}/hdf5-install
+
+      - name: Upload test artifacts (JNI)
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+          name: jni-test-results-${{ needs.build-maven-packages.outputs.version }}
+          path: |
+            HDF5Examples/JAVA/build/maven-test-jni/
+
+  test-ffm-package:
+    name: Test FFM Maven Package
+    needs: [build-maven-packages, deploy-to-packages]
+    runs-on: ubuntu-latest
+    if: |
+      inputs.test_deployment &&
+      needs.deploy-to-packages.result == 'success' &&
+      (inputs.java_implementation == 'both' || inputs.java_implementation == 'ffm')
+    steps:
+      - name: Checkout HDF5 repository (contains HDF5Examples)
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Set up Java 25 for FFM
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        with:
+          java-version: '25'
+          distribution: 'oracle'
+
+      - name: Download HDF5 installation from workflow
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+          name: hdf5-install-linux-x86_64-ffm
+          path: ${{ runner.workspace }}/hdf5-install
+
+      - name: Verify HDF5 installation
+        run: |
+          echo "HDF5 installation contents:"
+          ls -la "${{ runner.workspace }}/hdf5-install"
+          if [ -d "${{ runner.workspace }}/hdf5-install/lib" ]; then
+            echo "Libraries:"
+            ls -la "${{ runner.workspace }}/hdf5-install/lib" | grep -E '\.so' || echo "No shared libraries found"
+          fi
+
+      - name: Test FFM examples
+        run: |
+          cd HDF5Examples/JAVA
+          ./test-maven-ffm.sh "${{ needs.build-maven-packages.outputs.version }}" "${{ format('https://maven.pkg.github.com/{0}', github.repository) }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          HDF5_HOME: ${{ runner.workspace }}/hdf5-install
+
+      - name: Upload test artifacts (FFM)
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+          name: ffm-test-results-${{ needs.build-maven-packages.outputs.version }}
+          path: |
+            HDF5Examples/JAVA/build/maven-test-ffm/
+
+  summarize-results:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [build-maven-packages, deploy-to-packages, test-jni-package, test-ffm-package]
+    if: always()
+    steps:
+      - name: Generate test summary
+        env:
+          INPUT_PLATFORMS: ${{ inputs.platforms }}
+          INPUT_JAVA_IMPL: ${{ inputs.java_implementation }}
+          INPUT_TEST_DEPLOYMENT: ${{ inputs.test_deployment }}
+          INPUT_TEST_EXAMPLES: ${{ inputs.test_examples }}
+        run: |
+          echo "# Maven Build and Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Configuration:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Platforms: $INPUT_PLATFORMS" >> $GITHUB_STEP_SUMMARY
+          echo "- Java Implementation: $INPUT_JAVA_IMPL" >> $GITHUB_STEP_SUMMARY
+          echo "- Deployment Test: $INPUT_TEST_DEPLOYMENT" >> $GITHUB_STEP_SUMMARY
+          echo "- Examples Test: $INPUT_TEST_EXAMPLES" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "## Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Build results
+          if [ "${{ needs.build-maven-packages.result }}" == "success" ]; then
+            echo "✅ **Maven Package Build:** PASSED" >> $GITHUB_STEP_SUMMARY
+            echo "   - Version: ${{ needs.build-maven-packages.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Maven Package Build:** FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Deployment results
+          if [ "$INPUT_TEST_DEPLOYMENT" == "true" ]; then
+            if [ "${{ needs.deploy-to-packages.result }}" == "success" ]; then
+              echo "✅ **Package Deployment:** PASSED" >> $GITHUB_STEP_SUMMARY
+              echo "   - Repository: https://github.com/${{ github.repository }}/packages" >> $GITHUB_STEP_SUMMARY
+            elif [ "${{ needs.deploy-to-packages.result }}" == "skipped" ]; then
+              echo "⏭️  **Package Deployment:** SKIPPED (build failed)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ **Package Deployment:** FAILED" >> $GITHUB_STEP_SUMMARY
+            fi
+
+            # Test results
+            JNI_RESULT="${{ needs.test-jni-package.result }}"
+            FFM_RESULT="${{ needs.test-ffm-package.result }}"
+
+            if [ "$JNI_RESULT" == "success" ] || [ "$JNI_RESULT" == "skipped" ]; then
+              if [ "$FFM_RESULT" == "success" ] || [ "$FFM_RESULT" == "skipped" ]; then
+                echo "✅ **Package Testing:** PASSED" >> $GITHUB_STEP_SUMMARY
+              else
+                echo "⚠️ **Package Testing:** PARTIAL (FFM failed)" >> $GITHUB_STEP_SUMMARY
+              fi
+            elif [ "$FFM_RESULT" == "success" ] || [ "$FFM_RESULT" == "skipped" ]; then
+              echo "⚠️ **Package Testing:** PARTIAL (JNI failed)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ **Package Testing:** FAILED" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Final status
+          JNI_OK=$([[ "${{ needs.test-jni-package.result }}" =~ ^(success|skipped)$ ]] && echo "true" || echo "false")
+          FFM_OK=$([[ "${{ needs.test-ffm-package.result }}" =~ ^(success|skipped)$ ]] && echo "true" || echo "false")
+
+          if [ "${{ needs.build-maven-packages.result }}" == "success" ] && \
+             ([ "$INPUT_TEST_DEPLOYMENT" == "false" ] || \
+              ([ "${{ needs.deploy-to-packages.result }}" == "success" ] && \
+               [ "$JNI_OK" == "true" ] && [ "$FFM_OK" == "true" ])); then
+            echo "## 🎉 All Tests Passed!" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Maven packages are ready for release." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ⚠️ Some Tests Failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Please review the logs above for details." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "**Next Steps:**" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.repository }}" != "HDFGroup/hdf5" ]; then
+            echo "- Review artifacts in [GitHub Packages](https://github.com/${{ github.repository }}/packages)" >> $GITHUB_STEP_SUMMARY
+            echo "- Test manually by adding your repository to Maven settings" >> $GITHUB_STEP_SUMMARY
+            echo "- Submit PR to HDFGroup/hdf5 when ready" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Artifacts are ready for official release" >> $GITHUB_STEP_SUMMARY
+            echo "- Run the full release workflow to deploy to Maven Central" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Check overall status
+        env:
+          INPUT_TEST_DEPLOYMENT: ${{ inputs.test_deployment }}
+        run: |
+          BUILD_RESULT="${{ needs.build-maven-packages.result }}"
+          DEPLOY_RESULT="${{ needs.deploy-to-packages.result }}"
+          JNI_RESULT="${{ needs.test-jni-package.result }}"
+          FFM_RESULT="${{ needs.test-ffm-package.result }}"
+
+          if [ "$BUILD_RESULT" != "success" ]; then
+            echo "❌ Build failed"
+            exit 1
+          fi
+
+          if [ "$INPUT_TEST_DEPLOYMENT" == "true" ]; then
+            if [ "$DEPLOY_RESULT" != "success" ] && [ "$DEPLOY_RESULT" != "skipped" ]; then
+              echo "❌ Deployment failed"
+              exit 1
+            fi
+
+            if [ "$JNI_RESULT" != "success" ] && [ "$JNI_RESULT" != "skipped" ]; then
+              echo "❌ JNI testing failed"
+              exit 1
+            fi
+
+            if [ "$FFM_RESULT" != "success" ] && [ "$FFM_RESULT" != "skipped" ]; then
+              echo "❌ FFM testing failed"
+              exit 1
+            fi
+          fi
+
+          echo "✅ All tests passed successfully"

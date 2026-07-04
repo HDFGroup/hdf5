@@ -5,7 +5,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -22,7 +22,7 @@ namespace H5 {
     It is not necessary to construct an instance of H5Library to use the
     methods.
 */
-class H5_DLLCPP H5Library {
+class H5CPP_DLL H5Library {
   public:
     // Initializes the HDF5 library.
     static void open();
@@ -62,7 +62,7 @@ class H5_DLLCPP H5Library {
     H5Library();
 
     // Destructor
-    ~H5Library();
+    ~H5Library() = default;
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 }; // end of H5Library

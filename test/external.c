@@ -4,16 +4,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Tuesday, March  3, 1998
- *
  * Purpose:    Tests datasets stored in external raw files.
  */
 #include "external_common.h"
@@ -30,12 +27,9 @@
  * Return:      Success:    nonzero if same, zero if different.
  *              Failure:    zero
  *
- * Programmer:  Robb Matzke
- *              Wednesday, March  4, 1998
- *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 files_have_same_contents(const char *name1, const char *name2)
 {
     int     fd1 = 0;
@@ -44,7 +38,7 @@ files_have_same_contents(const char *name1, const char *name2)
     ssize_t n2  = 0;
     char    buf1[1024];
     char    buf2[1024];
-    hbool_t ret = FALSE; /* not equal until proven otherwise */
+    bool    ret = false; /* not equal until proven otherwise */
 
     if ((fd1 = HDopen(name1, O_RDONLY)) < 0)
         goto out;
@@ -53,8 +47,8 @@ files_have_same_contents(const char *name1, const char *name2)
 
     /* Loop until files are empty or we encounter a problem */
     while (1) {
-        HDmemset(buf1, 0, sizeof(buf1));
-        HDmemset(buf2, 0, sizeof(buf2));
+        memset(buf1, 0, sizeof(buf1));
+        memset(buf2, 0, sizeof(buf2));
 
         n1 = HDread(fd1, buf1, sizeof(buf1));
         if (n1 < 0 || (size_t)n1 > sizeof(buf1))
@@ -67,11 +61,11 @@ files_have_same_contents(const char *name1, const char *name2)
             break;
 
         if (n1 == 0 && n2 == 0) {
-            ret = TRUE;
+            ret = true;
             break;
         }
 
-        if (HDmemcmp(buf1, buf2, (size_t)n1) != 0)
+        if (memcmp(buf1, buf2, (size_t)n1) != 0)
             break;
 
     } /* end while */
@@ -92,30 +86,27 @@ out:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_non_extendible(hid_t file)
 {
-    hid_t   dcpl        = -1;          /* dataset creation properties          */
-    hid_t   space       = -1;          /* data space                           */
-    hid_t   dset        = -1;          /* dataset                              */
-    hsize_t cur_size[1] = {100};       /* data space current size              */
-    hsize_t max_size[1] = {100};       /* data space maximum size              */
-    int     n           = 0;           /* number of external files             */
-    off_t   file_offset = 0;           /* external file offset                 */
-    hsize_t file_size   = 0;           /* sizeof external file segment         */
-    haddr_t dset_addr   = HADDR_UNDEF; /* address of dataset                   */
+    hid_t   dcpl        = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t   space       = H5I_INVALID_HID; /* data space                           */
+    hid_t   dset        = H5I_INVALID_HID; /* dataset                              */
+    hsize_t cur_size[1] = {100};           /* data space current size              */
+    hsize_t max_size[1] = {100};           /* data space maximum size              */
+    int     n           = 0;               /* number of external files             */
+    HDoff_t file_offset = 0;               /* external file offset                 */
+    hsize_t file_size   = 0;               /* sizeof external file segment         */
+    haddr_t dset_addr   = HADDR_UNDEF;     /* address of dataset                   */
 
     TESTING("fixed-size data space, exact storage");
 
     /* Create the dataset and close */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_external(dcpl, "ext1.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int))) < 0)
+    if (H5Pset_external(dcpl, "ext1.data", 0, (hsize_t)(max_size[0] * sizeof(int))) < 0)
         FAIL_STACK_ERROR;
     if ((space = H5Screate_simple(1, cur_size, max_size)) < 0)
         FAIL_STACK_ERROR;
@@ -137,7 +128,7 @@ test_non_extendible(hid_t file)
     {
         dset_addr = H5Dget_offset(dset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset_addr != HADDR_UNDEF)
         FAIL_STACK_ERROR;
 
@@ -148,8 +139,8 @@ test_non_extendible(hid_t file)
         FAIL_STACK_ERROR;
     if (1 != n) {
         H5_FAILED();
-        HDputs("    Returned external count is wrong.");
-        HDprintf("   got: %d\n    ans: 1\n", n);
+        puts("    Returned external count is wrong.");
+        printf("   got: %d\n    ans: 1\n", n);
         goto error;
     }
 
@@ -158,14 +149,14 @@ test_non_extendible(hid_t file)
         FAIL_STACK_ERROR;
     if (file_offset != 0) {
         H5_FAILED();
-        HDputs("    Wrong file offset.");
-        HDprintf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
+        puts("    Wrong file offset.");
+        printf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
         goto error;
     }
     if (file_size != (max_size[0] * sizeof(int))) {
         H5_FAILED();
-        HDputs("    Wrong file size.");
-        HDprintf("    got: %" PRIuHSIZE "\n    ans: %" PRIuHSIZE "\n", file_size, max_size[0] * sizeof(int));
+        puts("    Wrong file size.");
+        printf("    got: %" PRIuHSIZE "\n    ans: %" PRIuHSIZE "\n", file_size, max_size[0] * sizeof(int));
         goto error;
     }
 
@@ -184,7 +175,7 @@ error:
         H5Sclose(space);
         H5Dclose(dset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_non_extendible() */
 
@@ -197,26 +188,22 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_too_small(hid_t file)
 {
-    hid_t   dcpl        = -1;    /* dataset creation properties          */
-    hid_t   space       = -1;    /* data space                           */
-    hid_t   dset        = -1;    /* dataset                              */
-    hsize_t cur_size[1] = {100}; /* current data space size              */
-    hsize_t max_size[1] = {100}; /* maximum data space size              */
+    hid_t   dcpl        = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t   space       = H5I_INVALID_HID; /* data space                           */
+    hid_t   dset        = H5I_INVALID_HID; /* dataset                              */
+    hsize_t cur_size[1] = {100};           /* current data space size              */
+    hsize_t max_size[1] = {100};           /* maximum data space size              */
 
     TESTING("external storage is too small");
 
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_external(dcpl, "ext1.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int) - 1)) <
-        0) /* note -1 */
+    if (H5Pset_external(dcpl, "ext1.data", 0, (hsize_t)(max_size[0] * sizeof(int) - 1)) < 0) /* note -1 */
         FAIL_STACK_ERROR;
     if ((space = H5Screate_simple(1, cur_size, max_size)) < 0)
         FAIL_STACK_ERROR;
@@ -225,7 +212,7 @@ test_too_small(hid_t file)
     {
         dset = H5Dcreate2(file, "dset2", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset >= 0)
         FAIL_PUTS_ERROR("    Small external file succeeded instead of failing.");
     if (H5Sclose(space) < 0)
@@ -243,7 +230,7 @@ error:
         H5Pclose(dcpl);
         H5Dclose(dset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_too_small() */
 
@@ -257,25 +244,22 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_large_enough_current_eventual(hid_t file)
 {
-    hid_t   dcpl        = -1;    /* dataset creation properties          */
-    hid_t   space       = -1;    /* data space                           */
-    hid_t   dset        = -1;    /* dataset                              */
-    hsize_t cur_size[1] = {100}; /* current data space size              */
-    hsize_t max_size[1] = {200}; /* maximum data space size              */
+    hid_t   dcpl        = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t   space       = H5I_INVALID_HID; /* data space                           */
+    hid_t   dset        = H5I_INVALID_HID; /* dataset                              */
+    hsize_t cur_size[1] = {100};           /* current data space size              */
+    hsize_t max_size[1] = {200};           /* maximum data space size              */
 
     TESTING("extendible dataspace, exact external size");
 
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_external(dcpl, "ext1.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int))) < 0)
+    if (H5Pset_external(dcpl, "ext1.data", 0, (hsize_t)(max_size[0] * sizeof(int))) < 0)
         FAIL_STACK_ERROR;
     if ((space = H5Screate_simple(1, cur_size, max_size)) < 0)
         FAIL_STACK_ERROR;
@@ -299,7 +283,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_large_enough_current_eventual() */
 
@@ -312,26 +296,22 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_large_enough_current_not_eventual(hid_t file)
 {
-    hid_t   dcpl        = -1;    /* dataset creation properties          */
-    hid_t   space       = -1;    /* data space                           */
-    hid_t   dset        = -1;    /* dataset                              */
-    hsize_t cur_size[1] = {100}; /* current data space size              */
-    hsize_t max_size[1] = {200}; /* maximum data space size              */
+    hid_t   dcpl        = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t   space       = H5I_INVALID_HID; /* data space                           */
+    hid_t   dset        = H5I_INVALID_HID; /* dataset                              */
+    hsize_t cur_size[1] = {100};           /* current data space size              */
+    hsize_t max_size[1] = {200};           /* maximum data space size              */
 
     TESTING("extendible dataspace, external storage is too small");
 
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_external(dcpl, "ext1.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int) - 1)) <
-        0) /* note -1 */
+    if (H5Pset_external(dcpl, "ext1.data", 0, (hsize_t)(max_size[0] * sizeof(int) - 1)) < 0) /* note -1 */
         FAIL_STACK_ERROR;
     if ((space = H5Screate_simple(1, cur_size, max_size)) < 0)
         FAIL_STACK_ERROR;
@@ -340,7 +320,7 @@ test_large_enough_current_not_eventual(hid_t file)
     {
         dset = H5Dcreate2(file, "dset4", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset >= 0)
         FAIL_PUTS_ERROR("    Small external file succeeded instead of failing.");
 
@@ -359,7 +339,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_large_enough_current_not_eventual() */
 
@@ -372,21 +352,18 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_unlimited(hid_t file)
 {
-    hid_t   dcpl        = -1;              /* dataset creation properties   */
-    hid_t   space       = -1;              /* data space                    */
-    hid_t   dset        = -1;              /* dataset                       */
+    hid_t   dcpl        = H5I_INVALID_HID; /* dataset creation properties   */
+    hid_t   space       = H5I_INVALID_HID; /* data space                    */
+    hid_t   dset        = H5I_INVALID_HID; /* dataset                       */
     hsize_t cur_size[1] = {100};           /* data space current size       */
     hsize_t max_size[1] = {H5S_UNLIMITED}; /* data space maximum size       */
     int     n;                             /* number of external files      */
-    off_t   file_offset;                   /* external file offset          */
+    HDoff_t file_offset;                   /* external file offset          */
     hsize_t file_size;                     /* sizeof external file segment  */
 
     TESTING("unlimited dataspace, unlimited external storage");
@@ -394,7 +371,7 @@ test_unlimited(hid_t file)
     /* Create dataset */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_external(dcpl, "ext1.data", (off_t)0, H5F_UNLIMITED) < 0)
+    if (H5Pset_external(dcpl, "ext1.data", 0, H5F_UNLIMITED) < 0)
         FAIL_STACK_ERROR;
     if ((space = H5Screate_simple(1, cur_size, max_size)) < 0)
         FAIL_STACK_ERROR;
@@ -417,8 +394,8 @@ test_unlimited(hid_t file)
         FAIL_STACK_ERROR;
     if (1 != n) {
         H5_FAILED();
-        HDputs("    Returned external count is wrong.");
-        HDprintf("    got: %d\n    ans: 1\n", n);
+        puts("    Returned external count is wrong.");
+        printf("    got: %d\n    ans: 1\n", n);
         goto error;
     } /* end if */
 
@@ -426,14 +403,14 @@ test_unlimited(hid_t file)
         FAIL_STACK_ERROR;
     if (file_offset != 0) {
         H5_FAILED();
-        HDputs("    Wrong file offset.");
-        HDprintf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
+        puts("    Wrong file offset.");
+        printf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
         goto error;
     }
     if (H5F_UNLIMITED != file_size) {
         H5_FAILED();
-        HDputs("    Wrong file size.");
-        HDprintf("    got: %lu\n    ans: INF\n", (unsigned long)file_size);
+        puts("    Wrong file size.");
+        printf("    got: %lu\n    ans: INF\n", (unsigned long)file_size);
         goto error;
     }
 
@@ -452,7 +429,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_unlimited() */
 
@@ -466,13 +443,10 @@ error:
  * Return:      Success:    0
  *              Failure:    -1
  *
- * Programmer:  Jacob Smith
- *              29 Sep 2019
- *
  *-------------------------------------------------------------------------
  */
 static int
-add_external_files(hid_t dcpl_id, unsigned int n_external_files, off_t offset, hsize_t max_ext_size)
+add_external_files(hid_t dcpl_id, unsigned int n_external_files, HDoff_t offset, hsize_t max_ext_size)
 {
     char         exname[AEF_EXNAME_MAX_LEN + 1];
     unsigned int i = 0;
@@ -481,14 +455,14 @@ add_external_files(hid_t dcpl_id, unsigned int n_external_files, off_t offset, h
         return -1;
     }
     for (i = 0; i < n_external_files; i++) {
-        if (HDsnprintf(exname, AEF_EXNAME_MAX_LEN, "ext%d.data", i + 1) > AEF_EXNAME_MAX_LEN) {
-            HDfprintf(stderr, "External file %d overflows name buffer\n", i + 1);
-            HDfflush(stderr);
+        if (snprintf(exname, AEF_EXNAME_MAX_LEN, "ext%d.data", i + 1) > AEF_EXNAME_MAX_LEN) {
+            fprintf(stderr, "External file %d overflows name buffer\n", i + 1);
+            fflush(stderr);
             return -1;
         }
         if (H5Pset_external(dcpl_id, exname, offset, max_ext_size) < 0) {
-            HDfprintf(stderr, "Problem adding external file %s\n", exname);
-            HDfflush(stderr);
+            fprintf(stderr, "Problem adding external file %s\n", exname);
+            fflush(stderr);
             return -1;
         }
     }
@@ -503,20 +477,17 @@ add_external_files(hid_t dcpl_id, unsigned int n_external_files, off_t offset, h
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_multiple_files(hid_t file)
 {
-    hid_t        dcpl        = -1;    /* dataset creation properties         */
-    hid_t        space       = -1;    /* dataspace                           */
-    hid_t        dset        = -1;    /* dataset                             */
-    hsize_t      cur_size[1] = {100}; /* data space current size             */
-    hsize_t      max_size[1] = {100}; /* data space maximum size             */
-    hsize_t      max_ext_size;        /* maximum size of external files      */
+    hid_t        dcpl        = H5I_INVALID_HID; /* dataset creation properties         */
+    hid_t        space       = H5I_INVALID_HID; /* dataspace                           */
+    hid_t        dset        = H5I_INVALID_HID; /* dataset                             */
+    hsize_t      cur_size[1] = {100};           /* data space current size             */
+    hsize_t      max_size[1] = {100};           /* data space maximum size             */
+    hsize_t      max_ext_size;                  /* maximum size of external files      */
     unsigned int n_external_files = 4;
 
     TESTING("multiple external files");
@@ -540,7 +511,7 @@ test_multiple_files(hid_t file)
         FAIL_STACK_ERROR;
     if (H5Pclose(dcpl) < 0)
         FAIL_STACK_ERROR;
-    /* Re-use space below */
+    /* Reuse space below */
 
     /* ----------------------------------------------
      * Verify that too-small external files will fail
@@ -558,7 +529,7 @@ test_multiple_files(hid_t file)
     {
         dset = H5Dcreate2(file, "dset7", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset >= 0)
         FAIL_PUTS_ERROR("    Small external files succeeded instead of failing.");
 
@@ -577,7 +548,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_multiple_files() */
 
@@ -590,30 +561,27 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_add_to_unlimited(void)
 {
-    hid_t  dcpl   = -1;   /* dataset creation properties          */
-    herr_t status = FAIL; /* function return status               */
-    int    n      = 0;    /* number of external files             */
+    hid_t  dcpl   = H5I_INVALID_HID; /* dataset creation properties          */
+    herr_t status = FAIL;            /* function return status               */
+    int    n      = 0;               /* number of external files             */
 
     TESTING("external file following unlimited file");
 
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_external(dcpl, "ext1.data", (off_t)0, H5F_UNLIMITED) < 0)
+    if (H5Pset_external(dcpl, "ext1.data", 0, H5F_UNLIMITED) < 0)
         FAIL_STACK_ERROR;
 
     H5E_BEGIN_TRY
     {
-        status = H5Pset_external(dcpl, "ext2.data", (off_t)0, (hsize_t)100);
+        status = H5Pset_external(dcpl, "ext2.data", 0, 100);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0)
         FAIL_PUTS_ERROR("    H5Pset_external() succeeded when it should have failed.");
 
@@ -632,7 +600,7 @@ error:
     {
         H5Pclose(dcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_add_to_unlimited() */
 
@@ -645,29 +613,26 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_overflow(void)
 {
-    hid_t  dcpl   = -1;   /* dataset creation properties          */
-    herr_t status = FAIL; /* return status                        */
+    hid_t  dcpl   = H5I_INVALID_HID; /* dataset creation properties          */
+    herr_t status = FAIL;            /* return status                        */
 
     TESTING("address overflow in external files");
 
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_external(dcpl, "ext1.data", (off_t)0, H5F_UNLIMITED - 1) < 0)
+    if (H5Pset_external(dcpl, "ext1.data", 0, H5F_UNLIMITED - 1) < 0)
         FAIL_STACK_ERROR;
 
     H5E_BEGIN_TRY
     {
-        status = H5Pset_external(dcpl, "ext2.data", (off_t)0, (hsize_t)100);
+        status = H5Pset_external(dcpl, "ext2.data", 0, 100);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0)
         FAIL_PUTS_ERROR("    H5Pset_external() succeeded when it should have failed.");
 
@@ -682,7 +647,7 @@ error:
     {
         H5Pclose(dcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_overflow() */
 
@@ -694,27 +659,24 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Robb Matzke
- *              Wednesday, March  4, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_read_file_set(hid_t fapl)
 {
-    hid_t   file  = -1;        /* file to write to                     */
-    hid_t   dcpl  = -1;        /* dataset creation properties          */
-    hid_t   space = -1;        /* data space                           */
-    hid_t   dset  = -1;        /* dataset                              */
-    hid_t   grp   = -1;        /* group to emit diagnostics            */
-    size_t  i     = 0;         /* miscellaneous counter                */
-    char    filename[1024];    /* file names                           */
-    int     part[PART_SIZE];   /* raw data buffer (partial)            */
-    int     whole[TOTAL_SIZE]; /* raw data buffer (total)              */
-    hsize_t cur_size;          /* current data space size              */
-    hid_t   hs_space = -1;     /* hyperslab data space                 */
-    hsize_t hs_start = 30;     /* hyperslab starting offset            */
-    hsize_t hs_count = 25;     /* hyperslab size                       */
+    hid_t   file  = H5I_INVALID_HID;    /* file to write to                     */
+    hid_t   dcpl  = H5I_INVALID_HID;    /* dataset creation properties          */
+    hid_t   space = H5I_INVALID_HID;    /* data space                           */
+    hid_t   dset  = H5I_INVALID_HID;    /* dataset                              */
+    hid_t   grp   = H5I_INVALID_HID;    /* group to emit diagnostics            */
+    size_t  i     = 0;                  /* miscellaneous counter                */
+    char    filename[1024];             /* file names                           */
+    int     part[PART_SIZE];            /* raw data buffer (partial)            */
+    int     whole[TOTAL_SIZE];          /* raw data buffer (total)              */
+    hsize_t cur_size;                   /* current data space size              */
+    hid_t   hs_space = H5I_INVALID_HID; /* hyperslab data space                 */
+    hsize_t hs_start = 30;              /* hyperslab starting offset            */
+    hsize_t hs_count = 25;              /* hyperslab size                       */
 
     TESTING("read external dataset");
 
@@ -722,7 +684,7 @@ test_read_file_set(hid_t fapl)
         TEST_ERROR;
 
     /* Reset the raw data files */
-    if (reset_raw_data_files(FALSE) < 0)
+    if (reset_raw_data_files(false) < 0)
         TEST_ERROR;
 
     /* Create the file and an initial group.  This causes messages about
@@ -741,8 +703,8 @@ test_read_file_set(hid_t fapl)
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < N_EXT_FILES; i++) {
-        HDsnprintf(filename, sizeof(filename), "extern_%dr.raw", (int)i + 1);
-        if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
+        snprintf(filename, sizeof(filename), "extern_%dr.raw", (int)i + 1);
+        if (H5Pset_external(dcpl, filename, (HDoff_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
             FAIL_STACK_ERROR;
     }
 
@@ -756,7 +718,7 @@ test_read_file_set(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read the entire dataset */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
 
@@ -774,7 +736,7 @@ test_read_file_set(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, hs_space, hs_space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
 
@@ -807,7 +769,7 @@ error:
         H5Sclose(hs_space);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_read_file_set() */
 
@@ -819,27 +781,24 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Robb Matzke
- *              Wednesday, March  4, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_write_file_set(hid_t fapl)
 {
-    hid_t    file       = -1;   /* file to which to write               */
-    hid_t    dcpl       = -1;   /* dataset creation properties          */
-    hid_t    mem_space  = -1;   /* memory data space                    */
-    hid_t    file_space = -1;   /* file data space                      */
-    hid_t    dset       = -1;   /* dataset                              */
-    unsigned i          = 0;    /* miscellaneous counter                */
-    int      part[PART_SIZE];   /* raw data buffer (partial)            */
-    int      whole[TOTAL_SIZE]; /* raw data buffer (total)              */
-    hsize_t  cur_size = 100;    /* current data space size              */
-    hsize_t  max_size = 200;    /* maximum data space size              */
-    hsize_t  hs_start = 100;    /* hyperslab starting offset            */
-    hsize_t  hs_count = 100;    /* hyperslab size                       */
-    char     filename[1024];    /* file name                            */
+    hid_t    file       = H5I_INVALID_HID; /* file to which to write               */
+    hid_t    dcpl       = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t    mem_space  = H5I_INVALID_HID; /* memory data space                    */
+    hid_t    file_space = H5I_INVALID_HID; /* file data space                      */
+    hid_t    dset       = H5I_INVALID_HID; /* dataset                              */
+    unsigned i          = 0;               /* miscellaneous counter                */
+    int      part[PART_SIZE];              /* raw data buffer (partial)            */
+    int      whole[TOTAL_SIZE];            /* raw data buffer (total)              */
+    hsize_t  cur_size = 100;               /* current data space size              */
+    hsize_t  max_size = 200;               /* maximum data space size              */
+    hsize_t  hs_start = 100;               /* hyperslab starting offset            */
+    hsize_t  hs_count = 100;               /* hyperslab size                       */
+    char     filename[1024];               /* file name                            */
 
     TESTING("write external dataset");
 
@@ -857,20 +816,24 @@ test_write_file_set(hid_t fapl)
     for (i = 0; i < N_EXT_FILES; i++) {
         hsize_t size;
 
-        HDsnprintf(filename, sizeof(filename), "extern_%dw.raw", (int)i + 1);
+        snprintf(filename, sizeof(filename), "extern_%dw.raw", (int)i + 1);
 
         if (i != N_EXT_FILES - 1)
             size = (hsize_t)sizeof(part);
         else
             size = H5F_UNLIMITED;
 
-        if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), size) < 0)
+        if (H5Pset_external(dcpl, filename, (HDoff_t)(i * GARBAGE_PER_FILE), size) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
 
     /* Reset the raw data files */
-    if (reset_raw_data_files(FALSE) < 0)
+    if (reset_raw_data_files(false) < 0)
         TEST_ERROR;
+
+    /* Generate the data */
+    for (i = 0; i < cur_size; i++)
+        whole[i] = (int)i;
 
     /* Create the dataset */
     if ((mem_space = H5Screate_simple(1, &cur_size, &max_size)) < 0)
@@ -881,15 +844,13 @@ test_write_file_set(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Write the entire dataset and compare with the original */
-    for (i = 0; i < cur_size; i++)
-        whole[i] = (int)i;
     if (H5Dwrite(dset, H5T_NATIVE_INT, mem_space, file_space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < N_EXT_FILES; i++) {
         char name1[64], name2[64];
 
-        HDsnprintf(name1, sizeof(name1), "extern_%dr.raw", i + 1);
-        HDsnprintf(name2, sizeof(name2), "extern_%dw.raw", i + 1);
+        snprintf(name1, sizeof(name1), "extern_%dr.raw", i + 1);
+        snprintf(name2, sizeof(name2), "extern_%dw.raw", i + 1);
         if (!files_have_same_contents(name1, name2))
             FAIL_PUTS_ERROR("   Output differs from expected value.");
     } /* end for */
@@ -933,7 +894,7 @@ error:
         H5Sclose(file_space);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_write_file_set() */
 
@@ -949,24 +910,21 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Steffen Kiess
- *              March 10, 2015
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_path_absolute(hid_t fapl)
 {
-    hid_t   file  = -1;        /* file to write to                     */
-    hid_t   dcpl  = -1;        /* dataset creation properties          */
-    hid_t   space = -1;        /* data space                           */
-    hid_t   dset  = -1;        /* dataset                              */
-    size_t  i     = 0;         /* miscellaneous counter                */
-    char    cwdpath[1024];     /* working directory                    */
-    char    filename[1088];    /* file name                            */
-    int     part[PART_SIZE];   /* raw data buffer (partial)            */
-    int     whole[TOTAL_SIZE]; /* raw data buffer (total)              */
-    hsize_t cur_size;          /* current data space size              */
+    hid_t   file  = H5I_INVALID_HID; /* file to write to                     */
+    hid_t   dcpl  = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t   space = H5I_INVALID_HID; /* data space                           */
+    hid_t   dset  = H5I_INVALID_HID; /* dataset                              */
+    size_t  i     = 0;               /* miscellaneous counter                */
+    char    cwdpath[1024];           /* working directory                    */
+    char    filename[1088];          /* file name                            */
+    int     part[PART_SIZE];         /* raw data buffer (partial)            */
+    int     whole[TOTAL_SIZE];       /* raw data buffer (total)              */
+    hsize_t cur_size;                /* current data space size              */
 
     TESTING("absolute filenames for external file");
 
@@ -975,7 +933,7 @@ test_path_absolute(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Reset the raw data files */
-    if (reset_raw_data_files(FALSE) < 0)
+    if (reset_raw_data_files(false) < 0)
         TEST_ERROR;
 
     /* Create the dcpl */
@@ -984,15 +942,15 @@ test_path_absolute(hid_t fapl)
     if (NULL == HDgetcwd(cwdpath, sizeof(cwdpath)))
         TEST_ERROR;
     for (i = 0; i < N_EXT_FILES; i++) {
-        HDsnprintf(filename, sizeof(filename), "%s%sextern_%zur.raw", cwdpath, H5_DIR_SEPS, i + 1);
+        snprintf(filename, sizeof(filename), "%s%sextern_%zur.raw", cwdpath, H5_DIR_SEPS, i + 1);
 #if defined(H5_HAVE_WINDOW_PATH)
         /* For windows, test path-absolute case (\dir\file.raw) for the second file */
         if (i == 1)
-            HDsnprintf(filename, sizeof(filename), "%s%sextern_%zur.raw", cwdpath + 2, H5_DIR_SEPS, i + 1);
+            snprintf(filename, sizeof(filename), "%s%sextern_%zur.raw", cwdpath + 2, H5_DIR_SEPS, i + 1);
 #endif
-        if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
+        if (H5Pset_external(dcpl, filename, (HDoff_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
             FAIL_STACK_ERROR;
-    } /* end for */
+    }
 
     /* create the dataspace */
     cur_size = TOTAL_SIZE;
@@ -1004,7 +962,7 @@ test_path_absolute(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -1030,7 +988,7 @@ error:
         H5Pclose(dcpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_path_absolute() */
 
@@ -1044,23 +1002,20 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Steffen Kiess
- *              March 10, 2015
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_path_relative(hid_t fapl)
 {
-    hid_t   file  = -1;        /* file to write to                     */
-    hid_t   dcpl  = -1;        /* dataset creation properties          */
-    hid_t   space = -1;        /* data space                           */
-    hid_t   dset  = -1;        /* dataset                              */
-    size_t  i     = 0;         /* miscellaneous counters               */
-    char    filename[1024];    /* file name                            */
-    int     part[PART_SIZE];   /* raw data buffer (partial)            */
-    int     whole[TOTAL_SIZE]; /* raw data buffer (total)              */
-    hsize_t cur_size;          /* current data space size              */
+    hid_t   file  = H5I_INVALID_HID; /* file to write to                     */
+    hid_t   dcpl  = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t   space = H5I_INVALID_HID; /* data space                           */
+    hid_t   dset  = H5I_INVALID_HID; /* dataset                              */
+    size_t  i     = 0;               /* miscellaneous counters               */
+    char    filename[1024];          /* file name                            */
+    int     part[PART_SIZE];         /* raw data buffer (partial)            */
+    int     whole[TOTAL_SIZE];       /* raw data buffer (total)              */
+    hsize_t cur_size;                /* current data space size              */
 
     TESTING("filenames relative to current directory for external file");
 
@@ -1075,17 +1030,17 @@ test_path_relative(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Reset the raw data files */
-    if (reset_raw_data_files(FALSE) < 0)
+    if (reset_raw_data_files(false) < 0)
         TEST_ERROR;
 
     /* Create the dataset */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < N_EXT_FILES; i++) {
-        HDsnprintf(filename, sizeof(filename), "extern_%dr.raw", (int)i + 1);
-        if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
+        snprintf(filename, sizeof(filename), "extern_%dr.raw", (int)i + 1);
+        if (H5Pset_external(dcpl, filename, (HDoff_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
             FAIL_STACK_ERROR;
-    } /* end for */
+    }
 
     cur_size = TOTAL_SIZE;
     if ((space = H5Screate_simple(1, &cur_size, NULL)) < 0)
@@ -1094,7 +1049,7 @@ test_path_relative(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -1120,7 +1075,7 @@ error:
         H5Sclose(space);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_path_relative() */
 
@@ -1136,28 +1091,25 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Steffen Kiess
- *              March 10, 2015
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_path_relative_cwd(hid_t fapl)
 {
-    hid_t   file  = -1;        /* file to write to                     */
-    hid_t   dcpl  = -1;        /* dataset creation properties          */
-    hid_t   space = -1;        /* data space                           */
-    hid_t   dapl  = -1;        /* dataset access property list         */
-    hid_t   dapl2 = -1;        /* copy of dapl                         */
-    hid_t   dset  = -1;        /* dataset                              */
-    hid_t   dset2 = -1;        /* dataset, opened a second time        */
-    hid_t   dset3 = -1;        /* dataset, opened with different prefix    */
-    size_t  i     = 0;         /* miscellaneous counters               */
-    char    filename[1024];    /* file name                            */
-    int     part[PART_SIZE];   /* raw data buffer (partial)            */
-    int     whole[TOTAL_SIZE]; /* raw data buffer (total)              */
-    hsize_t cur_size;          /* current data space size              */
-    char    buffer[1024];      /* buffer to read efile_prefix          */
+    hid_t   file  = H5I_INVALID_HID; /* file to write to                     */
+    hid_t   dcpl  = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t   space = H5I_INVALID_HID; /* data space                           */
+    hid_t   dapl  = H5I_INVALID_HID; /* dataset access property list         */
+    hid_t   dapl2 = H5I_INVALID_HID; /* copy of dapl                         */
+    hid_t   dset  = H5I_INVALID_HID; /* dataset                              */
+    hid_t   dset2 = H5I_INVALID_HID; /* dataset, opened a second time        */
+    hid_t   dset3 = H5I_INVALID_HID; /* dataset, opened with different prefix    */
+    size_t  i     = 0;               /* miscellaneous counters               */
+    char    filename[1024];          /* file name                            */
+    int     part[PART_SIZE];         /* raw data buffer (partial)            */
+    int     whole[TOTAL_SIZE];       /* raw data buffer (total)              */
+    hsize_t cur_size;                /* current data space size              */
+    char    buffer[1024];            /* buffer to read efile_prefix          */
 
     TESTING("filenames relative to HDF5 file for external file");
 
@@ -1172,17 +1124,17 @@ test_path_relative_cwd(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Reset the raw data files */
-    if (reset_raw_data_files(FALSE) < 0)
+    if (reset_raw_data_files(false) < 0)
         TEST_ERROR;
 
     /* Create the dataset */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < N_EXT_FILES; i++) {
-        HDsnprintf(filename, sizeof(filename), "..%sextern_%dr.raw", H5_DIR_SEPS, (int)i + 1);
-        if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
+        snprintf(filename, sizeof(filename), "..%sextern_%dr.raw", H5_DIR_SEPS, (int)i + 1);
+        if (H5Pset_external(dcpl, filename, (HDoff_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
             FAIL_STACK_ERROR;
-    } /* end for */
+    }
 
     cur_size = TOTAL_SIZE;
     if ((space = H5Screate_simple(1, &cur_size, NULL)) < 0)
@@ -1193,7 +1145,7 @@ test_path_relative_cwd(hid_t fapl)
         FAIL_STACK_ERROR;
     if (H5Pget_efile_prefix(dapl, buffer, sizeof(buffer)) < 0)
         FAIL_STACK_ERROR;
-    if (HDstrcmp(buffer, "${ORIGIN}") != 0)
+    if (strcmp(buffer, "${ORIGIN}") != 0)
         FAIL_PUTS_ERROR("efile prefix not set correctly");
     if ((dapl2 = H5Pcopy(dapl)) < 0)
         FAIL_STACK_ERROR;
@@ -1213,12 +1165,12 @@ test_path_relative_cwd(hid_t fapl)
     {
         dset3 = H5Dopen2(file, "dset1", dapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset3 >= 0)
         FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeeded");
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -1250,12 +1202,12 @@ test_path_relative_cwd(hid_t fapl)
     {
         dset3 = H5Dopen2(file, "dset1", dapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset3 >= 0)
         FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeeded");
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -1291,7 +1243,7 @@ error:
         H5Sclose(space);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_path_relative_cwd() */
 
@@ -1303,22 +1255,19 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Dana Robinson
- *              March 2016
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_h5d_get_access_plist(hid_t fapl_id)
 {
-    hid_t   fid     = -1;   /* file to write to                     */
-    hid_t   dcpl_id = -1;   /* dataset creation properties          */
-    hid_t   dapl_id = -1;   /* dataset access properties            */
-    hid_t   sid     = -1;   /* data space                           */
-    hid_t   did     = -1;   /* dataset                              */
-    hsize_t dims    = 0;    /* dataset size                         */
-    char   *buffer  = NULL; /* saved prefix name from dapl          */
-    char    filename[1024]; /* file names                           */
+    hid_t   fid     = H5I_INVALID_HID; /* file to write to                     */
+    hid_t   dcpl_id = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t   dapl_id = H5I_INVALID_HID; /* dataset access properties            */
+    hid_t   sid     = H5I_INVALID_HID; /* data space                           */
+    hid_t   did     = H5I_INVALID_HID; /* dataset                              */
+    hsize_t dims    = 0;               /* dataset size                         */
+    char   *buffer  = NULL;            /* saved prefix name from dapl          */
+    char    filename[1024];            /* file names                           */
 
     TESTING("H5Dget_access_plist() returns correct prefix");
 
@@ -1326,7 +1275,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
         TEST_ERROR;
 
     /* Reset the raw data files */
-    if (reset_raw_data_files(FALSE) < 0)
+    if (reset_raw_data_files(false) < 0)
         TEST_ERROR;
 
     /* Create the file */
@@ -1337,7 +1286,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
     /* Create the dcpl and set external storage */
     if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_external(dcpl_id, "extern_1r.raw", (off_t)0, (hsize_t)0) < 0)
+    if (H5Pset_external(dcpl_id, "extern_1r.raw", 0, 0) < 0)
         FAIL_STACK_ERROR;
 
     /* Create the dapl and set the prefix */
@@ -1362,15 +1311,15 @@ test_h5d_get_access_plist(hid_t fapl_id)
         FAIL_STACK_ERROR;
 
     /* Check the value for the external prefix */
-    if ((buffer = (char *)HDcalloc((size_t)64, sizeof(char))) == NULL)
+    if ((buffer = (char *)calloc((size_t)64, sizeof(char))) == NULL)
         TEST_ERROR;
     if (H5Pget_efile_prefix(dapl_id, buffer, (size_t)64) < 0)
         FAIL_STACK_ERROR;
-    if (HDstrcmp(buffer, "someprefix") != 0)
+    if (strcmp(buffer, "someprefix") != 0)
         FAIL_PUTS_ERROR("external file prefix from dapl incorrect");
 
     /* Close everything */
-    HDfree(buffer);
+    free(buffer);
     if (H5Sclose(sid) < 0)
         FAIL_STACK_ERROR;
     if (H5Dclose(did) < 0)
@@ -1387,7 +1336,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
 
 error:
     if (buffer)
-        HDfree(buffer);
+        free(buffer);
     H5E_BEGIN_TRY
     {
         H5Dclose(did);
@@ -1396,7 +1345,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_h5d_get_access_plist() */
 
@@ -1407,23 +1356,20 @@ error:
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
- * Programmer:  Robb Matzke
- *              Tuesday, March  3, 1998
- *
  *-------------------------------------------------------------------------
  */
 int
 main(void)
 {
-    hid_t    fapl_id_old = -1; /* file access properties (old format)  */
-    hid_t    fapl_id_new = -1; /* file access properties (new format)  */
-    hid_t    fid         = -1; /* file for test_1* functions           */
-    hid_t    gid         = -1; /* group to emit diagnostics            */
-    char     filename[1024];   /* file name for test_1* funcs          */
-    unsigned latest_format;    /* default or latest file format        */
-    int      nerrors = 0;      /* number of errors                     */
+    hid_t    fapl_id_old = H5I_INVALID_HID; /* file access properties (old format)  */
+    hid_t    fapl_id_new = H5I_INVALID_HID; /* file access properties (new format)  */
+    hid_t    fid         = H5I_INVALID_HID; /* file for test_1* functions           */
+    hid_t    gid         = H5I_INVALID_HID; /* group to emit diagnostics            */
+    char     filename[1024];                /* file name for test_1* funcs          */
+    unsigned latest_format;                 /* default or latest file format        */
+    int      nerrors = 0;                   /* number of errors                     */
 
-    h5_reset();
+    h5_test_init();
 
     /* Get a fapl for the old (default) file format */
     fapl_id_old = h5_fileaccess();
@@ -1437,19 +1383,19 @@ main(void)
 
     /* The file format doesn't matter for this test */
     nerrors += test_h5d_get_access_plist(fapl_id_new);
-    HDputs("");
+    puts("");
 
     /* Test with old & new format groups */
-    for (latest_format = FALSE; latest_format <= TRUE; latest_format++) {
-        hid_t current_fapl_id = -1;
+    for (latest_format = false; latest_format <= true; latest_format++) {
+        hid_t current_fapl_id = H5I_INVALID_HID;
 
         /* Set the fapl for different file formats */
         if (latest_format) {
-            HDputs("\nTesting with the latest file format:");
+            puts("\nTesting with the latest file format:");
             current_fapl_id = fapl_id_new;
         }
         else {
-            HDputs("Testing with the default file format:");
+            puts("Testing with the default file format:");
             current_fapl_id = fapl_id_old;
         }
 
@@ -1498,7 +1444,7 @@ main(void)
     if (H5Pclose(fapl_id_new) < 0)
         FAIL_STACK_ERROR;
 
-    HDputs("All external storage tests passed.");
+    puts("All external storage tests passed.");
 
     /* Clean up files used by file set tests */
     if (h5_cleanup(EXT_FNAME, fapl_id_old)) {
@@ -1525,8 +1471,8 @@ error:
         H5Pclose(fapl_id_new);
         H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     nerrors = MAX(1, nerrors);
-    HDprintf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
+    printf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
     return EXIT_FAILURE;
 } /* end main() */

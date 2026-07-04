@@ -1,0 +1,26 @@
+name: hdf5 VFD CI
+
+# Run VFD CI daily at 07:00 CDT (12:00 UTC) or on demand
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 12 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  build_and_test:
+    strategy:
+      matrix:
+        build_mode: ["Release", "Debug"]
+
+    # Sets the job's name from the properties
+    name: "${{ matrix.build_mode }} Workflows"
+
+    # Don't run the action if the commit message says to skip CI
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+
+    uses: ./.github/workflows/vfd-main.yml
+    with:
+      build_mode: ${{ matrix.build_mode }}

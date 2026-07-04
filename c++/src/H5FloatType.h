@@ -5,7 +5,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -21,7 +21,7 @@ namespace H5 {
     floating point datatype.
 */
 //  Inheritance: AtomType -> DataType -> H5Object -> H5Location -> IdComponent
-class H5_DLLCPP FloatType : public AtomType {
+class H5CPP_DLL FloatType : public AtomType {
   public:
     // Creates a floating-point type using a predefined type.
     FloatType(const PredType &pred_type);
@@ -78,7 +78,7 @@ class H5_DLLCPP FloatType : public AtomType {
     FloatType(const FloatType &original);
 
     // Noop destructor.
-    virtual ~FloatType() override;
+    virtual ~FloatType() override = default;
 
 }; // end of FloatType
 } // namespace H5

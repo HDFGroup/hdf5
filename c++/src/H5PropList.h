@@ -5,7 +5,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -21,7 +21,7 @@ namespace H5 {
     the HDF5 generic property list.
 */
 //  Inheritance: IdComponent
-class H5_DLLCPP PropList : public IdComponent {
+class H5CPP_DLL PropList : public IdComponent {
   public:
     ///\brief Default property list
     static const PropList &DEFAULT;

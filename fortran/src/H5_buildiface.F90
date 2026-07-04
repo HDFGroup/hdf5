@@ -32,21 +32,17 @@
 !                                                                              *
 !  This file is part of HDF5.  The full HDF5 copyright notice, including       *
 !  terms governing use, modification, and redistribution, is contained in      *
-!  the COPYING file, which can be found at the root of the source code         *
+!  the LICENSE file, which can be found at the root of the source code         *
 !  distribution tree, or in https://www.hdfgroup.org/licenses.                 *
 !  If you do not have access to either file, you may request a copy from       *
 !  help@hdfgroup.org.                                                          *
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-!
-! AUTHOR
-!  M. Scot Breitenfeld
 !
 !*****
 
 #include <H5config_f.inc>
 
 PROGRAM H5_buildiface
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR, C_LOC
   IMPLICIT NONE
 
 ! These values are valid REAL KINDs (with corresponding C float) found during configure
@@ -121,7 +117,7 @@ PROGRAM H5_buildiface
 '!                                                                             *',&
 '!   This file is part of HDF5.  The full HDF5 copyright notice, including     *',&
 '!   terms governing use, modification, and redistribution, is contained in    *',&
-'!   the COPYING file, which can be found at the root of the source code       *',&
+'!   the LICENSE file, which can be found at the root of the source code       *',&
 '!   distribution tree, or in https://www.hdfgroup.org/licenses.               *',&
 '!   If you do not have access to either file, you may request a copy from     *',&
 '!   help@hdfgroup.org.                                                        *',&
@@ -424,23 +420,6 @@ PROGRAM H5_buildiface
 ! Outputs:
 !  hdferr      - \fortran_error
 !
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces are added for
-!  called C functions (it is needed for Windows
-!  port).  February 27, 2001
-!
-!  dims parameter was added to make code portable;
-!  Aprile 4, 2001
-!
-!  Changed buf intent to INOUT to be consistent
-!  with how the C functions handles it. The pg
-!  compiler will return 0 if a buf value is not set.
-!  February, 2008
-!
 ! NOTES
 !  This function is overloaded to write INTEGER,
 !  REAL, REAL(KIND=C_DOUBLE) and CHARACTER buffers
@@ -550,23 +529,6 @@ PROGRAM H5_buildiface
 ! Outputs:
 !  buf 	       - Data buffer; may be a scalar or an array
 !  hdferr      - \fortran_error
-!
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces are added for
-!  called C functions (it is needed for Windows
-!  port).  February 27, 2001
-!
-!  dims parameter was added to make code portable;
-!  Aprile 4, 2001
-!
-!  Changed buf intent to INOUT to be consistent
-!  with how the C functions handles it. The pg
-!  compiler will return 0 if a buf value is not set.
-!  February, 2008
 !
 ! NOTES
 !  This function is overloaded to write INTEGER,
@@ -678,20 +640,6 @@ PROGRAM H5_buildiface
 !		file_space_id 	- file dataspace identifier
 !		xfer_prp	- transfer property list identifier
 !
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces were added for
-!  called C functions (it is needed for Windows
-!  port).  February 28, 2001
-!
-!  dims parameter was added to make code portable;
-!  n parameter was replaced with dims parameter in
-!  the h5dwrite_reference_obj and h5dwrite_reference_dsetreg
-!  functions.  April 2, 2001
-!
 ! NOTES
 !  This function is overloaded to read INTEGER,
 !  REAL, DOUBLE PRECISION and CHARACTER buffers
@@ -717,9 +665,9 @@ PROGRAM H5_buildiface
         WRITE(11,'(A)') '    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims'
         WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(INOUT)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
         WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr'
-        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id'
-        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id'
-        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp'
+        WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp'
         WRITE(11,'(A)') '    INTEGER(HID_T) :: xfer_prp_default'
         WRITE(11,'(A)') '    INTEGER(HID_T) :: mem_space_id_default'
         WRITE(11,'(A)') '    INTEGER(HID_T) :: file_space_id_default'
@@ -756,9 +704,9 @@ PROGRAM H5_buildiface
         WRITE(11,'(A)') '    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims'
         WRITE(11,'(A)') '    INTEGER(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(INOUT)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
         WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr'
-        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id'
-        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id'
-        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp'
+        WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp'
         WRITE(11,'(A)') '    INTEGER(HID_T) :: xfer_prp_default'
         WRITE(11,'(A)') '    INTEGER(HID_T) :: mem_space_id_default'
         WRITE(11,'(A)') '    INTEGER(HID_T) :: file_space_id_default'
@@ -790,9 +738,9 @@ PROGRAM H5_buildiface
      WRITE(11,'(A)') '    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims'
      WRITE(11,'(A)') '    CHARACTER(LEN=*), INTENT(INOUT)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
      WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr'
-     WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id'
-     WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id'
-     WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp'
+     WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id'
+     WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id'
+     WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp'
      WRITE(11,'(A)') '    INTEGER(HID_T) :: xfer_prp_default'
      WRITE(11,'(A)') '    INTEGER(HID_T) :: mem_space_id_default'
      WRITE(11,'(A)') '    INTEGER(HID_T) :: file_space_id_default'
@@ -829,9 +777,9 @@ PROGRAM H5_buildiface
         WRITE(11,'(A)') '    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims'
         WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(IN)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
         WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr'
-        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id'
-        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id'
-        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp'
+        WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp'
         WRITE(11,'(A)') '    INTEGER(HID_T) :: xfer_prp_default'
         WRITE(11,'(A)') '    INTEGER(HID_T) :: mem_space_id_default'
         WRITE(11,'(A)') '    INTEGER(HID_T) :: file_space_id_default'
@@ -867,9 +815,9 @@ PROGRAM H5_buildiface
         WRITE(11,'(A)') '    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims'
         WRITE(11,'(A)') '    INTEGER(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(IN)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
         WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr'
-        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id'
-        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id'
-        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp'
+        WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp'
         WRITE(11,'(A)') '    INTEGER(HID_T) :: xfer_prp_default'
         WRITE(11,'(A)') '    INTEGER(HID_T) :: mem_space_id_default'
         WRITE(11,'(A)') '    INTEGER(HID_T) :: file_space_id_default'
@@ -900,9 +848,9 @@ PROGRAM H5_buildiface
      WRITE(11,'(A)') '    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims'
      WRITE(11,'(A)') '    CHARACTER(LEN=*),INTENT(IN)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
      WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr'
-     WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id'
-     WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id'
-     WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp'
+     WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id'
+     WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id'
+     WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp'
      WRITE(11,'(A)') '    INTEGER(HID_T) :: xfer_prp_default'
      WRITE(11,'(A)') '    INTEGER(HID_T) :: mem_space_id_default'
      WRITE(11,'(A)') '    INTEGER(HID_T) :: file_space_id_default'
@@ -941,7 +889,7 @@ PROGRAM H5_buildiface
      WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr '
      WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr '
      WRITE(11,'(A)') '    f_ptr = C_LOC(fillvalue)'
-     WRITE(11,'(A)') '    hdferr = h5pset_fill_value_c(prp_id, type_id, f_ptr)'
+     WRITE(11,'(A)') '    hdferr = INT(h5pset_fill_value(prp_id, type_id, f_ptr))'
      WRITE(11,'(A)') '  END SUBROUTINE h5pset_fill_value_kind_'//TRIM(ADJUSTL(chr2))
   ENDDO
 
@@ -963,7 +911,7 @@ PROGRAM H5_buildiface
      WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr'
      WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
      WRITE(11,'(A)') '    f_ptr = C_LOC(fillvalue)'
-     WRITE(11,'(A)') '    hdferr = h5pget_fill_value_c(prp_id, type_id, f_ptr)'
+     WRITE(11,'(A)') '    hdferr = INT(h5pget_fill_value(prp_id, type_id, f_ptr))'
      WRITE(11,'(A)') '  END SUBROUTINE h5pget_fill_value_kind_'//TRIM(ADJUSTL(chr2))
   ENDDO
 

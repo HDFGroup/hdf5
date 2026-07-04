@@ -4,16 +4,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Leon Arber  <larber@uiuc.edu>
- *              Sept. 28, 2006.
- *
  * Purpose:     This is the second half of a two-part test that makes sure
  *              that a file can be read after a parallel application crashes as long
  *              as the file was flushed first.  We simulate a crash by
@@ -23,7 +20,8 @@
 
 #include "h5test.h"
 
-const char *FILENAME[] = {"flush", "noflush", NULL};
+static const char *FLUSH_FILENAME[]   = {"flush", NULL};
+static const char *NOFLUSH_FILENAME[] = {"noflush", NULL};
 
 static int *data_g = NULL;
 
@@ -35,10 +33,6 @@ static int *data_g = NULL;
  * Purpose:     Part 2 of a two-part H5Fflush() test.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Leon Arber
- *              Sept. 26, 2006.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -68,7 +62,7 @@ check_test_file(char *name, size_t name_length, hid_t fapl_id)
         goto error;
     if (H5Sget_simple_extent_dims(sid, dims, NULL) < 0)
         goto error;
-    HDassert(100 == dims[0] && 100 == dims[1]);
+    assert(100 == dims[0] && 100 == dims[1]);
 
     /* Read some data */
     if (H5Dread(did, H5T_NATIVE_INT, sid, sid, dxpl_id, data_g) < 0)
@@ -78,9 +72,9 @@ check_test_file(char *name, size_t name_length, hid_t fapl_id)
             val = (int)(i + (i * j) + j);
             if (data_g[(i * 100) + j] != val) {
                 H5_FAILED();
-                HDprintf("    data_g[%lu][%lu] = %d\n", (unsigned long)i, (unsigned long)j,
-                         data_g[(i * 100) + j]);
-                HDprintf("    should be %d\n", val);
+                printf("    data_g[%lu][%lu] = %d\n", (unsigned long)i, (unsigned long)j,
+                       data_g[(i * 100) + j]);
+                printf("    should be %d\n", val);
             }
         }
     }
@@ -89,7 +83,7 @@ check_test_file(char *name, size_t name_length, hid_t fapl_id)
     if ((top_level_gid = H5Gopen2(fid, "some_groups", H5P_DEFAULT)) < 0)
         goto error;
     for (i = 0; i < N_GROUPS; i++) {
-        HDsnprintf(name, name_length, "grp%02u", (unsigned)i);
+        snprintf(name, name_length, "grp%02u", (unsigned)i);
         if ((gid = H5Gopen2(top_level_gid, name, H5P_DEFAULT)) < 0)
             goto error;
         if (H5Gclose(gid) < 0)
@@ -119,7 +113,7 @@ error:
         H5Sclose(sid);
         H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end check_test_file() */
 
@@ -129,10 +123,6 @@ error:
  * Purpose:     Part 2 of a two-part H5Fflush() test.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAIL
- *
- * Programmer:  Robb Matzke
- *              Friday, October 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -142,12 +132,11 @@ main(int argc, char *argv[])
     hid_t       fapl_id2 = H5I_INVALID_HID;
     H5E_auto2_t func;
     char        name[1024];
-    const char *envval = NULL;
-
-    int      mpi_size;
-    int      mpi_rank;
-    MPI_Comm comm = MPI_COMM_WORLD;
-    MPI_Info info = MPI_INFO_NULL;
+    const char *driver_name;
+    int         mpi_size;
+    int         mpi_rank;
+    MPI_Comm    comm = MPI_COMM_WORLD;
+    MPI_Info    info = MPI_INFO_NULL;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(comm, &mpi_size);
@@ -157,20 +146,18 @@ main(int argc, char *argv[])
         TESTING("H5Fflush (part2 with flush)");
 
     /* Don't run using the split VFD */
-    envval = HDgetenv(HDF5_DRIVER);
-    if (envval == NULL)
-        envval = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
-    if (!HDstrcmp(envval, "split")) {
+    if (!strcmp(driver_name, "split")) {
         if (mpi_rank == 0) {
             SKIPPED();
-            HDputs("    Test not compatible with current Virtual File Driver");
+            puts("    Test not compatible with current Virtual File Driver");
         }
         MPI_Finalize();
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
-    if (NULL == (data_g = HDmalloc(100 * 100 * sizeof(*data_g))))
+    if (NULL == (data_g = malloc(100 * 100 * sizeof(*data_g))))
         goto error;
 
     if ((fapl_id1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -184,7 +171,7 @@ main(int argc, char *argv[])
         goto error;
 
     /* Check the case where the file was flushed */
-    h5_fixname(FILENAME[0], fapl_id1, name, sizeof(name));
+    h5_fixname(FLUSH_FILENAME[0], fapl_id1, name, sizeof(name));
     if (check_test_file(name, sizeof(name), fapl_id1)) {
         H5_FAILED();
         goto error;
@@ -201,7 +188,7 @@ main(int argc, char *argv[])
     H5Eget_auto2(H5E_DEFAULT, &func, NULL);
     H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
-    h5_fixname(FILENAME[1], fapl_id2, name, sizeof(name));
+    h5_fixname(NOFLUSH_FILENAME[0], fapl_id2, name, sizeof(name));
     if (check_test_file(name, sizeof(name), fapl_id2)) {
         if (mpi_rank == 0)
             PASSED();
@@ -213,21 +200,23 @@ main(int argc, char *argv[])
 
     H5Eset_auto2(H5E_DEFAULT, func, NULL);
 
-    h5_clean_files(&FILENAME[0], fapl_id1);
-    h5_clean_files(&FILENAME[1], fapl_id2);
+    h5_delete_all_test_files(FLUSH_FILENAME, fapl_id1);
+    H5Pclose(fapl_id1);
+    h5_delete_all_test_files(NOFLUSH_FILENAME, fapl_id2);
+    H5Pclose(fapl_id2);
 
     if (data_g) {
-        HDfree(data_g);
+        free(data_g);
         data_g = NULL;
     }
 
     MPI_Finalize();
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     if (data_g)
-        HDfree(data_g);
+        free(data_g);
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

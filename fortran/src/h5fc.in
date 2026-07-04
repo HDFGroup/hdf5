@@ -5,7 +5,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -60,15 +60,14 @@ host_os="@host_os@"
 
 prog_name="`basename $0`"
 
-allargs=""
+qargs=""
 compile_args=""
 link_args=""
 link_objs=""
 
 do_link="yes"
 do_compile="no"
-dash_o="no"
-dash_c="no"
+dash_c=""
 get_output_file="no"
 
 SHOW="eval"
@@ -110,15 +109,15 @@ usage() {
   # A wonderfully informative "usage" message.
   echo "usage: $prog_name [OPTIONS] <compile line>"
   echo "  OPTIONS:"
-  echo "    -help        This help message."
-  echo "    -echo        Show all the shell commands executed"
-  echo "    -prefix=DIR  Prefix directory to find HDF5 lib/ and include/"
-  echo "                   subdirectories [default: $prefix]"
-  echo "    -show        Show the commands without executing them"
-  echo "    -showconfig  Show the HDF5 library configuration summary"
-  echo "    -shlib       Compile with shared HDF5 libraries [default for hdf5 built"
+  echo "    -help | --help | -h   This help message."
+  echo "    -echo                 Show all the shell commands executed"
+  echo "    -prefix=DIR           Prefix directory to find HDF5 lib/ and include/"
+  echo "                                                     subdirectories [default: $prefix]"
+  echo "    -show                 Show the commands without executing them"
+  echo "    -showconfig           Show the HDF5 library configuration summary"
+  echo "    -shlib                Compile with shared HDF5 libraries [default for hdf5 built"
   echo "                                                     without static libraries]"
-  echo "    -noshlib     Compile with static HDF5 libraries [default for hdf5 built"
+  echo "    -noshlib              Compile with static HDF5 libraries [default for hdf5 built"
   echo "                                                     with static libraries]"
   echo " "
   echo "  <compile line>  - the normal compile line options for your compiler."
@@ -166,7 +165,7 @@ if test "$#" = "0"; then
   usage
 fi
 
-for arg in $@ ; do
+for arg in "$@" ; do
   if test "x$get_output_file" = "xyes"; then
     link_args="$link_args $arg"
     output_file="$arg"
@@ -176,7 +175,6 @@ for arg in $@ ; do
 
   case "$arg" in
     -c)
-      allargs="$allargs $arg"
       compile_args="$compile_args $arg"
 
       if test "x$do_link" = "xyes" -a -n "$output_file"; then
@@ -184,13 +182,10 @@ for arg in $@ ; do
       fi
 
       do_link="no"
-      dash_c="yes"
+      dash_c="-c"
       ;;
     -o)
-      allargs="$allargs $arg"
-      dash_o="yes"
-
-      if test "x$dash_c" = "xyes"; then
+      if test "x$dash_c" = "x-c"; then
         compile_args="$compile_args $arg"
       else
         link_args="$link_args $arg"
@@ -199,14 +194,12 @@ for arg in $@ ; do
       fi
       ;;
     -E|-M|-MT)
-      allargs="$allargs $arg"
       compile_args="$compile_args $arg"
-      dash_c="yes"
+      dash_c="-c"
       do_link="no"
       ;;
     -l*)
       link_args="$link_args $arg"
-      allargs="$allargs $arg"
       ;;
     -prefix=*)
       prefix="`expr "$arg" : '-prefix=\(.*\)'`"
@@ -230,51 +223,60 @@ for arg in $@ ; do
     -help)
       usage
       ;;
+    --help)
+      usage
+      ;;
+    -h)
+      usage
+      ;;
     *\"*)
       qarg="'"$arg"'"
-      allargs="$allargs $qarg"
+      qargs="$qargs $qarg"
       ;;
     *\'*)
-      qarg='\"'"$arg"'\"'
-      allargs="$allargs $qarg"
+      qarg='"'"$arg"'"'
+      qargs="$qargs $qarg"
       ;;
-
-        *) allargs="$allargs $arg"
-	if [ -s "$arg" ] ; then
-	    ext=`expr "$arg" : '.*\(\..*\)'`
-	    if [ "$ext" = ".f" -o "$ext" = ".F" -o \
-                 "$ext" = ".for" -o "$ext" = ".FOR" -o \
-                 "$ext" = ".ftn" -o "$ext" = ".FTN" -o \
-                 "$ext" = ".f90" -o "$ext" = ".F90" -o \
-                 "$ext" = ".f95" -o "$ext" = ".F95" -o \
-                 "$ext" = ".f03" -o "$ext" = ".F03" -o \
-                 "$ext" = ".f08" -o "$ext" = ".F08" ] ; then
-	        do_compile="yes"
-	        compile_args="$compile_args $arg"
-	        fname=`basename $arg $ext`
-	        link_objs="$link_objs $fname.o"
-	    elif [ "$ext" = ".o" ] ; then
-		if test "x$dash_c" = "xyes"  ; then
-	            compile_args="$compile_args $arg"
-                else
-	            do_link="yes"
-	            link_objs="$link_objs $arg"
-                fi
-            elif test "x$ext" = "x.a"; then
-              # This is an archive that we're linking in
-              libraries=" $libraries $arg "
-            else
-              compile_args="$compile_args $arg"
-              link_args="$link_args $arg"
-            fi
-	    else
-	        compile_args="$compile_args $arg"
-	        link_args="$link_args $arg"
-	    fi
-	;;
+    *\ *)
+      qarg=$arg
+      qargs="$qargs $qarg"
+      ;;
+    *)
+      if [ -s "$arg" ] ; then
+        ext=`expr "$arg" : '.*\(\..*\)'`
+        if [ "$ext" = ".f" -o "$ext" = ".F" -o \
+             "$ext" = ".for" -o "$ext" = ".FOR" -o \
+             "$ext" = ".ftn" -o "$ext" = ".FTN" -o \
+             "$ext" = ".f90" -o "$ext" = ".F90" -o \
+             "$ext" = ".f95" -o "$ext" = ".F95" -o \
+             "$ext" = ".f03" -o "$ext" = ".F03" -o \
+             "$ext" = ".f08" -o "$ext" = ".F08" ] ; then
+	  do_compile="yes"
+	  compile_args="$compile_args $arg"
+	  fname=`basename $arg $ext`
+	  link_objs="$link_objs $fname.o"
+	elif [ "$ext" = ".o" ] ; then
+          if test "x$dash_c" = "x-c"  ; then
+	    compile_args="$compile_args $arg"
+          else
+	    do_link="yes"
+	    link_objs="$link_objs $arg"
+          fi
+        elif test "x$ext" = "x.a"; then
+          # This is an archive that we're linking in
+          libraries=" $libraries $arg "
+        else
+          compile_args="$compile_args $arg"
+          link_args="$link_args $arg"
+        fi
+      else
+        compile_args="$compile_args $arg"
+	link_args="$link_args $arg"
+      fi
+      ;;
   esac
 done
-
+link_args="$link_args $qargs"
 # It's possible that there isn't a modules flag...
   fmodules=""
   if test -n "$F9XMODFLAG"; then
@@ -282,12 +284,10 @@ done
   fi
 
 if test "x$do_compile" = "xyes"; then
-  if test "x$dash_c" != "xyes"; then
-    compile_args="-c $compile_args"
+  if test "x$dash_c" = "x"; then
+    dash_c="-c"
   fi
-
-
-  $SHOW $FC $H5BLD_FCFLAGS $FCFLAGS ${F9XSUFFIXFLAG} ${fmodules} $compile_args
+  $SHOW $FC $H5BLD_FCFLAGS $FCFLAGS ${F9XSUFFIXFLAG} ${fmodules} $dash_c $qargs $compile_args
   status=$?
 
   if test "$status" != "0"; then
@@ -300,26 +300,26 @@ if test "x$do_link" = "xyes"; then
   shared_link=""
 # conditionally link with the hl library
   if test "X$HL" = "Xhl"; then
-   libraries=" $libraries -lhdf5hl_fortran -lhdf5_hl -lhdf5_fortran -lhdf5 "
+   libraries=" $libraries -lhdf5_hl_fortran -lhdf5_hl -lhdf5_fortran -lhdf5 "
   else
    libraries=" $libraries -lhdf5_fortran -lhdf5 "
   fi
   link_args="$link_args -L${libdir}"
 
-  case "$host_os" in
-    linux*)               flag="@fortran_linux_linker_option@-rpath -Wl," ;;
-    hpux*)                flag="-Wl,+b -Wl," ;;
-    freebsd*|solaris*)    flag="-R" ;;
-    rs6000*|aix*)         flag="-L" ;;
-    sgi)                  flag="-rpath " ;;
-    *)                    flag="" ;;
-  esac
+  if test "x$USE_SHARED_LIB" = "xyes"; then
+    case "$host_os" in
+      linux*)               flag="@fortran_linux_linker_option@-rpath -Wl," ;;
+      hpux*)                flag="-Wl,+b -Wl," ;;
+      freebsd*|solaris*)    flag="-R" ;;
+      rs6000*|aix*)         flag="-L" ;;
+      sgi)                  flag="-rpath " ;;
+      *)                    flag="" ;;
+    esac
 
-  if test -n "$flag"; then
-    shared_link="${flag}${libdir}"
-  fi
-
-  if test "x$USE_SHARED_LIB" != "xyes"; then
+    if test -n "$flag"; then
+      shared_link="${flag}${libdir}"
+    fi
+  else
     # The hdf5 library "-l" flags are in here already.  This is a static
     # compile though, so change it to the static versions (.a) of the libraries.
     new_libraries=""
@@ -334,8 +334,8 @@ if test "x$do_link" = "xyes"; then
         -lhdf5_fortran)
           new_libraries="$new_libraries ${libdir}/libhdf5_fortran.a"
           ;;
-        -lhdf5hl_fortran)
-          new_libraries="$new_libraries ${libdir}/libhdf5hl_fortran.a"
+        -lhdf5_hl_fortran)
+          new_libraries="$new_libraries ${libdir}/libhdf5_hl_fortran.a"
           ;;
         *)
           new_libraries="$new_libraries $lib"

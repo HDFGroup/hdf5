@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -153,6 +153,7 @@ H5_DLLVAR const struct H5P_libclass_t H5P_CLS_OCPY[1]; /* Object copy */
 /* Forward declaration of structs used below */
 struct H5O_fill_t;
 struct H5T_t;
+struct H5VL_connector_t;
 struct H5VL_connector_prop_t;
 
 /* Package initialization routines */
@@ -161,8 +162,8 @@ H5_DLL herr_t H5P_init_phase2(void);
 
 /* Internal versions of API routines */
 H5_DLL herr_t H5P_close(H5P_genplist_t *plist);
-H5_DLL hid_t  H5P_create_id(H5P_genclass_t *pclass, hbool_t app_ref);
-H5_DLL hid_t  H5P_copy_plist(const H5P_genplist_t *old_plist, hbool_t app_ref);
+H5_DLL hid_t  H5P_create_id(H5P_genclass_t *pclass, bool app_ref);
+H5_DLL hid_t  H5P_copy_plist(const H5P_genplist_t *old_plist, bool app_ref);
 H5_DLL herr_t H5P_get(H5P_genplist_t *plist, const char *name, void *value);
 H5_DLL herr_t H5P_set(H5P_genplist_t *plist, const char *name, const void *value);
 H5_DLL herr_t H5P_peek(H5P_genplist_t *plist, const char *name, void *value);
@@ -175,20 +176,20 @@ H5_DLL herr_t H5P_insert(H5P_genplist_t *plist, const char *name, size_t size, v
 H5_DLL herr_t H5P_remove(H5P_genplist_t *plist, const char *name);
 H5_DLL htri_t H5P_exist_plist(const H5P_genplist_t *plist, const char *name);
 H5_DLL htri_t H5P_class_isa(const H5P_genclass_t *pclass1, const H5P_genclass_t *pclass2);
-H5_DLL char  *H5P_get_class_name(H5P_genclass_t *pclass);
+H5_DLL char  *H5P_get_class_name(H5P_genclass_t *pclass) H5_ATTR_MALLOC;
 
 /* Internal helper routines */
-H5_DLL herr_t      H5P_get_nprops_pclass(const H5P_genclass_t *pclass, size_t *nprops, hbool_t recurse);
+H5_DLL herr_t      H5P_get_nprops_pclass(const H5P_genclass_t *pclass, size_t *nprops, bool recurse);
 H5_DLL hid_t       H5P_peek_driver(H5P_genplist_t *plist);
 H5_DLL const void *H5P_peek_driver_info(H5P_genplist_t *plist);
 H5_DLL const char *H5P_peek_driver_config_str(H5P_genplist_t *plist);
 H5_DLL herr_t      H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_driver_info,
                                   const char *new_driver_config_str);
 H5_DLL herr_t      H5P_set_driver_by_name(H5P_genplist_t *plist, const char *driver_name,
-                                          const char *driver_config, hbool_t app_ref);
+                                          const char *driver_config, bool app_ref);
 H5_DLL herr_t      H5P_set_driver_by_value(H5P_genplist_t *plist, H5FD_class_value_t driver_value,
-                                           const char *driver_config, hbool_t app_ref);
-H5_DLL herr_t      H5P_set_vol(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info);
+                                           const char *driver_config, bool app_ref);
+H5_DLL herr_t H5P_set_vol(H5P_genplist_t *plist, struct H5VL_connector_t *connector, const void *vol_info);
 H5_DLL herr_t H5P_reset_vol_class(const H5P_genclass_t *pclass, const struct H5VL_connector_prop_t *vol_prop);
 H5_DLL herr_t H5P_set_vlen_mem_manager(H5P_genplist_t *plist, H5MM_allocate_t alloc_func, void *alloc_info,
                                        H5MM_free_t free_func, void *free_info);
@@ -200,6 +201,7 @@ H5_DLL herr_t H5P_get_filter_by_id(H5P_genplist_t *plist, H5Z_filter_t id, unsig
                                    size_t *cd_nelmts, unsigned cd_values[], size_t namelen, char name[],
                                    unsigned *filter_config);
 H5_DLL htri_t H5P_filter_in_pline(H5P_genplist_t *plist, H5Z_filter_t id);
+H5_DLL bool   H5P_is_default_plist(hid_t plist_id);
 
 /* Query internal fields of the property list struct */
 H5_DLL hid_t           H5P_get_plist_id(const H5P_genplist_t *plist);
@@ -207,7 +209,7 @@ H5_DLL H5P_genclass_t *H5P_get_class(const H5P_genplist_t *plist);
 
 /* *SPECIAL* Don't make more of these! -QAK */
 H5_DLL htri_t          H5P_isa_class(hid_t plist_id, hid_t pclass_id);
-H5_DLL H5P_genplist_t *H5P_object_verify(hid_t plist_id, hid_t pclass_id);
+H5_DLL H5P_genplist_t *H5P_object_verify(hid_t plist_id, hid_t pclass_id, bool allow_default);
 
 /* Private DCPL routines */
 H5_DLL herr_t H5P_fill_value_defined(H5P_genplist_t *plist, H5D_fill_value_t *status);

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -25,13 +25,18 @@
  * with the macro size.
  */
 #define vrfy_cint_type(ctype, uctype, ctype_macro)                                                           \
-    /* check signed type size */                                                                             \
-    vrfy_macrosize(ctype, ctype_macro, #ctype_macro);                                                        \
-    /* check unsigned type size */                                                                           \
-    vrfy_macrosize(uctype, ctype_macro, #ctype_macro);
+    do {                                                                                                     \
+        /* check signed type size */                                                                         \
+        vrfy_macrosize(ctype, ctype_macro, #ctype_macro);                                                    \
+        /* check unsigned type size */                                                                       \
+        vrfy_macrosize(uctype, ctype_macro, #ctype_macro);                                                   \
+    } while (0)
 
 /* verify C type sizes: verify the sizeof type with the macro size. */
-#define vrfy_ctype(type, macro) vrfy_macrosize(type, macro, #macro);
+#define vrfy_ctype(type, macro)                                                                              \
+    do {                                                                                                     \
+        vrfy_macrosize(type, macro, #macro);                                                                 \
+    } while (0)
 
 /* verify if the sizeof(type) matches size defined in macro. */
 /* Needs this extra step so that we can print the macro name. */
@@ -51,13 +56,10 @@ void test_exit_definitions(void);
  *
  * Return:    none (error is fed back via global variable num_errs)
  *
- * Programmer:    Albert Cheng
- *              September 25, 2001
- *
  *-------------------------------------------------------------------------
  */
 void
-test_configure(void)
+test_configure(void H5_ATTR_UNUSED *params)
 {
     /* Output message about test being performed */
     MESSAGE(5, ("Testing configure definitions\n"));
@@ -72,15 +74,10 @@ test_configure(void)
  *
  * Return:    none
  *
- * Programmer:    Albert Cheng
- *              September 25, 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
-cleanup_configure(void)
+cleanup_configure(void H5_ATTR_UNUSED *params)
 {
     /* no file to clean */
 }
@@ -91,13 +88,6 @@ cleanup_configure(void)
  * Purpose:    test C language data type sizes
  *
  * Return:    none (error is fed back via global variable num_errs)
- *
- * Programmer:    Albert Cheng
- *              September 25, 2001
- *
- * Modifications:
- *    Albert Cheng, 2004/10/14
- *    Verified both signed and unsigned int types.
  *
  *-------------------------------------------------------------------------
  */
@@ -179,11 +169,6 @@ test_config_ctypes(void)
  * Purpose:    test the exit macros values
  *
  * Return:    none (error is fed back via global variable num_errs)
- *
- * Programmer:    Albert Cheng
- *              October 12, 2009
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -103,7 +103,7 @@ generate_dset(hid_t fid, const char *dname, int ndims, hsize_t *dims, hsize_t *m
         goto done;
 
     /* Set up dataset's creation properties */
-    if (!HDstrcmp(dname, DSET_NONE))
+    if (!strcmp(dname, DSET_NONE))
         dcpl = H5P_DEFAULT;
     else {
         hsize_t chunk_dims[H5S_MAX_RANK]; /* Dimension sizes for chunks */
@@ -116,11 +116,11 @@ generate_dset(hid_t fid, const char *dname, int ndims, hsize_t *dims, hsize_t *m
             goto done;
     } /* end else */
 
-    if (!HDstrcmp(dname, DSET_ALLOC_LATE)) {
+    if (!strcmp(dname, DSET_ALLOC_LATE)) {
         if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE) < 0)
             goto done;
     } /* end if */
-    else if (!HDstrcmp(dname, DSET_ALLOC_EARLY)) {
+    else if (!strcmp(dname, DSET_ALLOC_EARLY)) {
         if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
             goto done;
     } /* end if */

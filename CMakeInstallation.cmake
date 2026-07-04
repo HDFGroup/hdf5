@@ -4,11 +4,34 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
+
+# -----------------------------------------------------------------------------
+# HDF5 CMake Installation and Packaging Configuration
+# -----------------------------------------------------------------------------
+# This CMake module handles installation and packaging for the HDF5 library and
+# its components. It configures install targets, generates CMake config files,
+# sets up packaging with CPack, and manages platform-specific installer options.
+#
+# Key Features:
+# - Installs HDF5 libraries, headers, utilities, documentation, and CMake config files.
+# - Generates hdf5-config.cmake and version files for build and install trees.
+# - Supports Windows (NSIS, WiX), macOS (DMG, Framework), and Linux (DEB, RPM, TGZ) packaging.
+# - Handles installation of example files and release documentation.
+# - Configures CPack variables and component groups for flexible packaging.
+#
+# Usage:
+#   HDF5 includes this file from the main CMakeLists.txt to enable installation and
+#   packaging for HDF5. Adjust options and variables as needed for your platform
+#   and distribution requirements.
+#
+# See comments throughout for details on each section and option.
+# -----------------------------------------------------------------------------
+
 include (CMakePackageConfigHelpers)
 
 #-----------------------------------------------------------------------------
@@ -17,34 +40,56 @@ include (CMakePackageConfigHelpers)
 if (WIN32)
   set (PF_ENV_EXT "(x86)")
   find_program (NSIS_EXECUTABLE NSIS.exe PATHS "$ENV{ProgramFiles}\\NSIS" "$ENV{ProgramFiles${PF_ENV_EXT}}\\NSIS")
+  mark_as_advanced (NSIS_EXECUTABLE)
   if(NOT CPACK_WIX_ROOT)
     file(TO_CMAKE_PATH "$ENV{WIX}" CPACK_WIX_ROOT)
   endif ()
   find_program (WIX_EXECUTABLE candle  PATHS "${CPACK_WIX_ROOT}/bin")
+  mark_as_advanced (WIX_EXECUTABLE)
 endif ()
 
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
-if (NOT HDF5_EXTERNALLY_CONFIGURED)
-  if (HDF5_EXPORTED_TARGETS)
+if (HDF5_EXPORTED_TARGETS AND NOT HDF5_EXTERNALLY_CONFIGURED)
+  if (HDF5_ENABLE_JNI)
     install (
-        EXPORT ${HDF5_EXPORTED_TARGETS}
+        EXPORT ${HDF5_EXPORTED_TARGETS}_java
         DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
-        FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
+        FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}_java-targets.cmake
         NAMESPACE ${HDF_PACKAGE_NAMESPACE}
         COMPONENT configinstall
     )
   endif ()
+  if (BUILD_STATIC_LIBS AND BUILD_SHARED_LIBS)
+    install (
+        EXPORT ${HDF5_EXPORTED_TARGETS}_static
+        DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
+        FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}_static-targets.cmake
+        NAMESPACE ${HDF_PACKAGE_NAMESPACE}
+        COMPONENT configinstall
+    )
+  endif ()
+  install (
+      EXPORT ${HDF5_EXPORTED_TARGETS}
+      DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
+      FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
+      NAMESPACE ${HDF_PACKAGE_NAMESPACE}
+      COMPONENT configinstall
+  )
+endif ()
 
-  #-----------------------------------------------------------------------------
-  # Export all exported targets to the build tree for use by parent project
-  #-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+# If built as a sub-project or if cross-compiling, export all exported targets
+# to the build tree
+#-----------------------------------------------------------------------------
+if (HDF5_EXTERNALLY_CONFIGURED OR CMAKE_CROSSCOMPILING)
   export (
       TARGETS ${HDF5_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES} ${HDF5_UTILS_TO_EXPORT}
       FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
       NAMESPACE ${HDF_PACKAGE_NAMESPACE}
+      APPEND
   )
 endif ()
 
@@ -57,11 +102,20 @@ set (HDF5_INCLUDES_BUILD_TIME
 )
 
 #-----------------------------------------------------------------------------
-# Set variables needed for installation
+# Set Java JAR names for config file (with Maven SNAPSHOT suffix if enabled)
 #-----------------------------------------------------------------------------
-set (HDF5_VERSION_STRING ${HDF5_PACKAGE_VERSION})
-set (HDF5_VERSION_MAJOR  ${HDF5_PACKAGE_VERSION_MAJOR})
-set (HDF5_VERSION_MINOR  ${HDF5_PACKAGE_VERSION_MINOR})
+if (HDF5_BUILD_JAVA)
+  if (HDF5_ENABLE_MAVEN_DEPLOY AND HDF5_MAVEN_SNAPSHOT)
+    set (HDF5_JARHDF5_JAR_NAME "jarhdf5-${HDF5_PACKAGE_VERSION}-SNAPSHOT.jar")
+    set (HDF5_JAVAHDF5_JAR_NAME "javahdf5-${HDF5_PACKAGE_VERSION}-SNAPSHOT.jar")
+  else ()
+    set (HDF5_JARHDF5_JAR_NAME "jarhdf5-${HDF5_PACKAGE_VERSION}.jar")
+    set (HDF5_JAVAHDF5_JAR_NAME "javahdf5-${HDF5_PACKAGE_VERSION}.jar")
+  endif ()
+  # slf4j JAR names derived from configured paths so overrides are reflected in the exported config
+  get_filename_component (HDF5_SLF4J_API_JAR_NAME ${HDF5_JAVA_LOGGING_JAR} NAME)
+  get_filename_component (HDF5_SLF4J_NOP_JAR_NAME ${HDF5_JAVA_LOGGING_NOP_JAR} NAME)
+endif ()
 
 #-----------------------------------------------------------------------------
 # Configure the hdf5-config.cmake file for the build directory
@@ -70,7 +124,7 @@ set (INCLUDE_INSTALL_DIR ${HDF5_INSTALL_INCLUDE_DIR})
 set (SHARE_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_INSTALL_CMAKE_DIR}" )
 set (CURRENT_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}" )
 configure_package_config_file (
-    ${HDF_RESOURCES_DIR}/hdf5-config.cmake.in
+    ${HDF_CONFIG_DIR}/install/hdf5-config.cmake.in
     "${HDF5_BINARY_DIR}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake"
     INSTALL_DESTINATION "${HDF5_INSTALL_CMAKE_DIR}"
     PATH_VARS INCLUDE_INSTALL_DIR SHARE_INSTALL_DIR CURRENT_BUILD_DIR
@@ -84,7 +138,7 @@ set (INCLUDE_INSTALL_DIR ${HDF5_INSTALL_INCLUDE_DIR})
 set (SHARE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${HDF5_INSTALL_CMAKE_DIR}" )
 set (CURRENT_BUILD_DIR "${CMAKE_INSTALL_PREFIX}" )
 configure_package_config_file (
-    ${HDF_RESOURCES_DIR}/hdf5-config.cmake.in
+    ${HDF_CONFIG_DIR}/install/hdf5-config.cmake.in
     "${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake"
     INSTALL_DESTINATION "${HDF5_INSTALL_CMAKE_DIR}"
     PATH_VARS INCLUDE_INSTALL_DIR SHARE_INSTALL_DIR CURRENT_BUILD_DIR
@@ -108,7 +162,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
     COMPATIBILITY SameMinorVersion
   )
   #configure_file (
-  #    ${HDF_RESOURCES_DIR}/hdf5-config-version.cmake.in
+  #    ${HDF_CONFIG_DIR}/install/hdf5-config-version.cmake.in
   #    ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config-version.cmake @ONLY
   #)
   install (
@@ -119,7 +173,21 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Configure the libhdf5.settings file for the lib info
+# Add CMake Find modules to installation
+#-----------------------------------------------------------------------------
+install (
+    FILES ${HDF_RESOURCES_DIR}/Findlibaec.cmake
+    DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/Modules
+    COMPONENT configinstall
+)
+install (
+    FILES ${HDF_RESOURCES_DIR}/FindZLIBNG.cmake
+    DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/Modules
+    COMPONENT configinstall
+)
+
+#-----------------------------------------------------------------------------
+# Configure the libhdf5.settings file with library info
 #-----------------------------------------------------------------------------
 if (H5_WORDS_BIGENDIAN)
   set (BYTESEX big-endian)
@@ -127,7 +195,7 @@ else ()
   set (BYTESEX little-endian)
 endif ()
 configure_file (
-    ${HDF_RESOURCES_DIR}/libhdf5.settings.cmake.in
+    ${HDF5_SOURCE_DIR}/src/libhdf5.settings.in
     ${HDF5_SRC_BINARY_DIR}/libhdf5.settings ESCAPE_QUOTES @ONLY
 )
 install (
@@ -140,9 +208,14 @@ install (
 # Configure the HDF5_Examples.cmake file and the examples
 #-----------------------------------------------------------------------------
 option (HDF5_PACK_EXAMPLES  "Package the HDF5 Library Examples Compressed File" OFF)
+mark_as_advanced (HDF5_PACK_EXAMPLES)
 if (HDF5_PACK_EXAMPLES)
+  if (DEFINED CMAKE_TOOLCHAIN_FILE)
+    get_filename_component(TOOLCHAIN ${CMAKE_TOOLCHAIN_FILE} NAME)
+    set(CTEST_TOOLCHAIN_FILE "\${CTEST_SOURCE_DIRECTORY}/config/toolchain/${TOOLCHAIN}")
+  endif ()
   configure_file (
-      ${HDF_RESOURCES_DIR}/HDF5_Examples.cmake.in
+      ${HDF_CONFIG_DIR}/examples/HDF5_Examples.cmake.in
       ${HDF5_BINARY_DIR}/HDF5_Examples.cmake @ONLY
   )
   install (
@@ -150,32 +223,28 @@ if (HDF5_PACK_EXAMPLES)
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       COMPONENT hdfdocuments
   )
-  if (EXISTS "${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}")
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} -E tar xzf ${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}
-    )
-    install (
-      DIRECTORY ${HDF5_BINARY_DIR}/HDF5Examples
-      DESTINATION ${HDF5_INSTALL_DATA_DIR}
-      USE_SOURCE_PERMISSIONS
-      COMPONENT hdfdocuments
-    )
-  endif ()
+
+  install (
+    DIRECTORY ${HDF5_SOURCE_DIR}/HDF5Examples
+    DESTINATION ${HDF5_INSTALL_DATA_DIR}
+    USE_SOURCE_PERMISSIONS
+    COMPONENT hdfdocuments
+  )
   install (
       FILES
-          ${HDF5_SOURCE_DIR}/release_docs/USING_CMake_Examples.txt
+          ${HDF5_DOCS_DIR}/USING_CMake_Examples.md
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       COMPONENT hdfdocuments
   )
   install (
       FILES
-          ${HDF_RESOURCES_DIR}/CTestScript.cmake
+          ${HDF_CONFIG_DIR}/examples/CTestScript.cmake
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       COMPONENT hdfdocuments
   )
   install (
       FILES
-          ${HDF_RESOURCES_DIR}/HDF5_Examples_options.cmake
+          ${HDF_CONFIG_DIR}/examples/HDF5_Examples_options.cmake
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       COMPONENT hdfdocuments
   )
@@ -187,10 +256,10 @@ endif ()
 HDF_README_PROPERTIES(HDF5_BUILD_FORTRAN)
 
 #-----------------------------------------------------------------------------
-# Configure the COPYING.txt file for the windows binary package
+# Configure the LICENSE.txt file for the windows binary package
 #-----------------------------------------------------------------------------
 if (WIN32)
-  configure_file (${HDF5_SOURCE_DIR}/COPYING ${HDF5_BINARY_DIR}/COPYING.txt @ONLY)
+  configure_file (${HDF5_SOURCE_DIR}/LICENSE ${HDF5_BINARY_DIR}/LICENSE.txt @ONLY)
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -198,45 +267,44 @@ endif ()
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
   install (
-      FILES ${HDF5_SOURCE_DIR}/COPYING
+      FILES ${HDF5_SOURCE_DIR}/LICENSE
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       COMPONENT hdfdocuments
   )
-  if (EXISTS "${HDF5_SOURCE_DIR}/release_docs" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/release_docs")
+  if (EXISTS "${HDF5_DOCS_DIR}" AND IS_DIRECTORY "${HDF5_DOCS_DIR}")
     set (release_files
-        ${HDF5_SOURCE_DIR}/release_docs/USING_HDF5_CMake.txt
-        ${HDF5_SOURCE_DIR}/release_docs/RELEASE.txt
+        ${HDF5_DOCS_DIR}/USING_HDF5_CMake.md
+        ${HDF5_SOURCE_DIR}/release_docs/CHANGELOG.md
     )
     if (WIN32)
       set (release_files
           ${release_files}
-          ${HDF5_SOURCE_DIR}/release_docs/USING_HDF5_VS.txt
+          ${HDF5_DOCS_DIR}/USING_HDF5_VS.md
       )
     endif ()
     if (HDF5_PACK_INSTALL_DOCS)
       set (release_files
           ${release_files}
-          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Warnings.txt
-          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_CMake.txt
+          ${HDF5_DOCS_DIR}/INSTALL_CMake.md
           ${HDF5_SOURCE_DIR}/release_docs/HISTORY-1_8.txt
-          ${HDF5_SOURCE_DIR}/release_docs/INSTALL
+          ${HDF5_DOCS_DIR}/INSTALL.md
       )
       if (WIN32)
         set (release_files
             ${release_files}
-            ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Windows.txt
+            ${HDF5_DOCS_DIR}/INSTALL_Windows.md
         )
       endif ()
       if (CYGWIN)
         set (release_files
             ${release_files}
-            ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Cygwin.txt
+            ${HDF5_DOCS_DIR}/INSTALL_Cygwin.md
         )
       endif ()
       if (HDF5_ENABLE_PARALLEL)
         set (release_files
             ${release_files}
-            ${HDF5_SOURCE_DIR}/release_docs/INSTALL_parallel
+            ${HDF5_DOCS_DIR}/README_HPC.md
         )
       endif ()
     endif ()
@@ -254,18 +322,21 @@ endif ()
 if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
   set (CPACK_PACKAGE_VENDOR "HDF_Group")
   set (CPACK_PACKAGE_NAME "${HDF5_PACKAGE_NAME}")
-  if (CDASH_LOCAL)
-    set (CPACK_PACKAGE_VERSION "${HDF5_PACKAGE_VERSION}")
-  else ()
+  if (NOT WIN32 OR HDF5_VERS_SUBRELEASE MATCHES "^[0-9]+$")
     set (CPACK_PACKAGE_VERSION "${HDF5_PACKAGE_VERSION_STRING}")
+  else ()
+    set (CPACK_PACKAGE_VERSION "${HDF5_PACKAGE_VERSION}")
+  endif ()
+  if (CMAKE_C_COMPILER_ARCHITECTURE_ID MATCHES "ARM64")
+    set (CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-winarm64")
   endif ()
   set (CPACK_PACKAGE_VERSION_MAJOR "${HDF5_PACKAGE_VERSION_MAJOR}")
   set (CPACK_PACKAGE_VERSION_MINOR "${HDF5_PACKAGE_VERSION_MINOR}")
   set (CPACK_PACKAGE_VERSION_PATCH "")
-  set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
+  set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
   if (EXISTS "${HDF5_SOURCE_DIR}/release_docs")
-    set (CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/release_docs/RELEASE.txt")
-    set (CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/release_docs/RELEASE.txt")
+    set (CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/release_docs/CHANGELOG.md")
+    set (CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/release_docs/CHANGELOG.md")
   endif ()
   set (CPACK_PACKAGE_RELOCATABLE TRUE)
   if (OVERRIDE_INSTALL_VERSION)
@@ -273,15 +344,18 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
   else ()
     set (CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_VENDOR}/${CPACK_PACKAGE_NAME}/${CPACK_PACKAGE_VERSION}")
   endif ()
-  set (CPACK_PACKAGE_ICON "${HDF_RESOURCES_DIR}/hdf.bmp")
+  set (CPACK_PACKAGE_ICON "${HDF_CONFIG_DIR}/install/hdf.bmp")
 
+  set (CPACK_ORIG_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+  if ("$ENV{BINSIGN}" STREQUAL "exists")
+    set (CPACK_PRE_BUILD_SCRIPTS ${CMAKE_SOURCE_DIR}/config/install/SignPackageFiles.cmake)
+  endif ()
+
+  # Add the package types to the list of generators, TGZ is the default on all platforms
   set (CPACK_GENERATOR "TGZ")
   if (WIN32)
     set (CPACK_GENERATOR "ZIP")
 
-    if (NSIS_EXECUTABLE)
-      list (APPEND CPACK_GENERATOR "NSIS")
-    endif ()
     # Installers for 32- vs. 64-bit CMake:
     #  - Root install directory (displayed to end user at installer-run time)
     #  - "NSIS package/display name" (text used in the installer GUI)
@@ -294,12 +368,12 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
       set (CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES")
       set (CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
     endif ()
-    # set the install/unistall icon used for the installer itself
+    # set the install/uninstall icon used for the installer itself
     # There is a bug in NSI that does not handle full unix paths properly.
-    set (CPACK_NSIS_MUI_ICON "${HDF_RESOURCES_DIR}\\\\hdf.ico")
-    set (CPACK_NSIS_MUI_UNIICON "${HDF_RESOURCES_DIR}\\\\hdf.ico")
+    set (CPACK_NSIS_MUI_ICON "${HDF_CONFIG_DIR}\\\\install\\\\hdf.ico")
+    set (CPACK_NSIS_MUI_UNIICON "${HDF_CONFIG_DIR}\\\\install\\\\hdf.ico")
     # set the package header icon for MUI
-    set (CPACK_PACKAGE_ICON "${HDF_RESOURCES_DIR}\\\\hdf.bmp")
+    set (CPACK_PACKAGE_ICON "${HDF_CONFIG_DIR}\\\\install\\\\hdf.bmp")
     set (CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_PACKAGE_NAME}")
     if (OVERRIDE_INSTALL_VERSION)
       set (CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_VENDOR}\\\\${CPACK_PACKAGE_NAME}\\\\${OVERRIDE_INSTALL_VERSION}")
@@ -326,10 +400,10 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
 #  With CPACK_WIX_LICENSE_RTF you can override the license file used by the
 #  WiX Generator in case CPACK_RESOURCE_FILE_LICENSE is in an unsupported
 #  format or the .txt -> .rtf conversion does not work as expected.
-    set (CPACK_RESOURCE_FILE_LICENSE "${HDF5_BINARY_DIR}/COPYING.txt")
+    set (CPACK_RESOURCE_FILE_LICENSE "${HDF5_BINARY_DIR}/LICENSE.txt")
 # .. variable:: CPACK_WIX_PRODUCT_ICON
 #  The Icon shown next to the program name in Add/Remove programs.
-    set(CPACK_WIX_PRODUCT_ICON "${HDF_RESOURCES_DIR}\\\\hdf.ico")
+    set(CPACK_WIX_PRODUCT_ICON "${HDF_CONFIG_DIR}\\\\install\\\\hdf.ico")
 #
 # .. variable:: CPACK_WIX_UI_BANNER
 #
@@ -353,36 +427,45 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
     set(CPACK_WIX_PROPERTY_ARPURLINFOABOUT "${HDF5_PACKAGE_URL}")
     set(CPACK_WIX_PROPERTY_ARPHELPLINK "${HDF5_PACKAGE_BUGREPORT}")
     if (BUILD_SHARED_LIBS)
-      set(CPACK_WIX_PATCH_FILE "${HDF_RESOURCES_DIR}/patch.xml")
+      if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
+        set (WIX_CMP_NAME "${HDF5_LIB_NAME}${CMAKE_DEBUG_POSTFIX}")
+      else ()
+        set (WIX_CMP_NAME "${HDF5_LIB_NAME}")
+      endif ()
+      configure_file (${HDF_CONFIG_DIR}/install/patch.xml.in ${HDF5_BINARY_DIR}/patch.xml @ONLY)
+      set(CPACK_WIX_PATCH_FILE "${HDF5_BINARY_DIR}/patch.xml")
     endif ()
   elseif (APPLE)
     list (APPEND CPACK_GENERATOR "STGZ")
-    list (APPEND CPACK_GENERATOR "DragNDrop")
+    option (HDF5_PACK_MACOSX_DMG  "Package the HDF5 Library using DragNDrop" ON)
+    if (HDF5_PACK_MACOSX_DMG)
+      list (APPEND CPACK_GENERATOR "DragNDrop")
+    endif ()
     set (CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE ON)
     set (CPACK_PACKAGING_INSTALL_PREFIX "/${CPACK_PACKAGE_INSTALL_DIRECTORY}")
-    set (CPACK_PACKAGE_ICON "${HDF_RESOURCES_DIR}/hdf.icns")
+    set (CPACK_PACKAGE_ICON "${HDF_CONFIG_DIR}/install/hdf.icns")
 
     option (HDF5_PACK_MACOSX_FRAMEWORK  "Package the HDF5 Library in a Frameworks" OFF)
     if (HDF5_PACK_MACOSX_FRAMEWORK AND HDF5_BUILD_FRAMEWORKS)
       set (CPACK_BUNDLE_NAME "${HDF5_PACKAGE_STRING}")
       set (CPACK_BUNDLE_LOCATION "/")    # make sure CMAKE_INSTALL_PREFIX ends in /
       set (CMAKE_INSTALL_PREFIX "/${CPACK_BUNDLE_NAME}.framework/Versions/${CPACK_PACKAGE_VERSION}/${CPACK_PACKAGE_NAME}/")
-      set (CPACK_BUNDLE_ICON "${HDF_RESOURCES_DIR}/hdf.icns")
+      set (CPACK_BUNDLE_ICON "${HDF_CONFIG_DIR/install}/hdf.icns")
       set (CPACK_BUNDLE_PLIST "${HDF5_BINARY_DIR}/CMakeFiles/Info.plist")
       set (CPACK_SHORT_VERSION_STRING "${CPACK_PACKAGE_VERSION}")
       #-----------------------------------------------------------------------------
       # Configure the Info.plist file for the install bundle
       #-----------------------------------------------------------------------------
       configure_file (
-          ${HDF_RESOURCES_DIR}/CPack.Info.plist.in
+          ${HDF_CONFIG_DIR}/install/CPack.Info.plist.in
           ${HDF5_BINARY_DIR}/CMakeFiles/Info.plist @ONLY
       )
       configure_file (
-          ${HDF_RESOURCES_DIR}/PkgInfo.in
+          ${HDF_CONFIG_DIR}/install/PkgInfo.in
           ${HDF5_BINARY_DIR}/CMakeFiles/PkgInfo @ONLY
       )
       configure_file (
-          ${HDF_RESOURCES_DIR}/version.plist.in
+          ${HDF_CONFIG_DIR}/install/version.plist.in
           ${HDF5_BINARY_DIR}/CMakeFiles/version.plist @ONLY
       )
       install (
@@ -396,6 +479,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
     set (CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE ON)
 
     find_program (DPKGSHLIB_EXE dpkg-shlibdeps)
+    mark_as_advanced (DPKGSHLIB_EXE)
     if (DPKGSHLIB_EXE)
       list (APPEND CPACK_GENERATOR "DEB")
       set (CPACK_DEBIAN_PACKAGE_SECTION "Libraries")
@@ -403,7 +487,8 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
     endif ()
 
     find_program (RPMBUILD_EXE rpmbuild)
-    if (RPMBUILD_EXE)
+    mark_as_advanced (RPMBUILD_EXE)
+    if (RPMBUILD_EXE AND NOT HDF5_ENABLE_PARALLEL)
       list (APPEND CPACK_GENERATOR "RPM")
       set (CPACK_RPM_PACKAGE_RELEASE "1")
       set (CPACK_RPM_PACKAGE_RELEASE_DIST ON)
@@ -437,7 +522,7 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
       #-----------------------------------------------------------------------------
       # Configure the spec file for the install RPM
       #-----------------------------------------------------------------------------
-#      configure_file ("${HDF5_RESOURCES_DIR}/hdf5.spec.in" "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_PACKAGE_NAME}.spec" @ONLY IMMEDIATE)
+#      configure_file ("${HDF_CONFIG_DIR}/install/hdf5.spec.in" "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_PACKAGE_NAME}.spec" @ONLY IMMEDIATE)
 #      set (CPACK_RPM_USER_BINARY_SPECFILE "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_PACKAGE_NAME}.spec")
     endif ()
   endif ()
@@ -450,38 +535,36 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
 
   set (CPACK_INSTALL_CMAKE_PROJECTS "${HDF5_BINARY_DIR};HDF5;ALL;/")
 
-  if (HDF5_PACKAGE_EXTLIBS)
-    if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
-      if (ZLIB_FOUND AND ZLIB_USE_EXTERNAL)
-        if (WIN32)
-          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${ZLIB_INCLUDE_DIR_GEN};HDF5_ZLIB;ALL;/")
-        else ()
-          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${ZLIB_INCLUDE_DIR_GEN};HDF5_ZLIB;libraries;/")
-          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${ZLIB_INCLUDE_DIR_GEN};HDF5_ZLIB;headers;/")
-          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${ZLIB_INCLUDE_DIR_GEN};HDF5_ZLIB;configinstall;/")
-        endif ()
+  if (HDF5_PACKAGE_EXTLIBS AND (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT|TGZ"))
+    if (H5_ZLIB_FOUND AND ZLIB_USE_EXTERNAL)
+      if (WIN32)
+        set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${H5_ZLIB_INCLUDE_DIR_GEN};HDF5_ZLIB;ALL;/")
+      else ()
+        set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${H5_ZLIB_INCLUDE_DIR_GEN};HDF5_ZLIB;libraries;/")
+        set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${H5_ZLIB_INCLUDE_DIR_GEN};HDF5_ZLIB;configinstall;/")
       endif ()
-      if (SZIP_FOUND AND SZIP_USE_EXTERNAL)
-        if (WIN32)
-          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${SZIP_INCLUDE_DIR_GEN};SZIP;ALL;/")
-        else ()
-          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${SZIP_INCLUDE_DIR_GEN};SZIP;libraries;/")
-          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${SZIP_INCLUDE_DIR_GEN};SZIP;headers;/")
-          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${SZIP_INCLUDE_DIR_GEN};SZIP;configinstall;/")
-        endif ()
+    endif ()
+    if (H5_SZIP_FOUND AND SZIP_USE_EXTERNAL)
+      set (SZIP_PROJNAME "${LIBAEC_PACKAGE_NAME}")
+      if (WIN32)
+        set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${H5_SZIP_INCLUDE_DIR_GEN};${SZIP_PROJNAME};ALL;/")
+      else ()
+        set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${H5_SZIP_INCLUDE_DIR_GEN};${SZIP_PROJNAME};libraries;/")
+        set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${H5_SZIP_INCLUDE_DIR_GEN};${SZIP_PROJNAME};configinstall;/")
       endif ()
-      if (PLUGIN_FOUND AND PLUGIN_USE_EXTERNAL)
-        if (WIN32)
-          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${PLUGIN_BINARY_DIR};PLUGIN;ALL;/")
-        else ()
-          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${PLUGIN_BINARY_DIR};PLUGIN;libraries;/")
-        endif ()
+    endif ()
+    if (HDF5_PLUGINS_FOUND AND PLUGIN_USE_EXTERNAL)
+      if (WIN32)
+        set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${PLUGIN_BINARY_DIR};PLUGIN;ALL;/")
+      else ()
+        set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${PLUGIN_BINARY_DIR};PLUGIN;libraries;/")
       endif ()
     endif ()
   endif ()
 
   include (CPack)
 
+  # The following sets packaging specific categories and descriptions
   cpack_add_install_type(Full DISPLAY_NAME "Everything")
   cpack_add_install_type(Developer)
 

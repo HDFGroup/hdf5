@@ -4,16 +4,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Bill Wendling
- *              Tuesday, 6. March 2001
- *
  * Purpose:     Support functions for the various tools.
  */
 #ifndef H5TOOLS_UTILS_H
@@ -28,6 +25,10 @@ extern "C" {
 /* ``parallel_print'' information */
 #define PRINT_DATA_MAX_SIZE 512
 #define OUTBUFF_SIZE        (PRINT_DATA_MAX_SIZE * 4)
+
+#ifdef H5_HAVE_ROS3_VFD
+#define H5FD_ROS3_MAX_ENDPOINT_URL_LEN 256
+#endif /* H5_HAVE_ROS3_VFD */
 
 H5TOOLS_DLLVAR int           g_nTasks;
 H5TOOLS_DLLVAR unsigned char g_Parallel;
@@ -44,8 +45,8 @@ H5TOOLS_DLLVAR hsize_t H5TOOLS_BUFSIZE;
 typedef struct obj_t {
     H5O_token_t obj_token;
     char       *objname;
-    hbool_t     displayed; /* Flag to indicate that the object has been displayed */
-    hbool_t     recorded;  /* Flag for named datatypes to indicate they were found in the group hierarchy */
+    bool        displayed; /* Flag to indicate that the object has been displayed */
+    bool        recorded;  /* Flag for named datatypes to indicate they were found in the group hierarchy */
 } obj_t;
 
 /*struct for the tables that the find_objs function uses*/
@@ -64,12 +65,24 @@ typedef struct find_objs_t {
     table_t *dset_table;
 } find_objs_t;
 
+#ifdef H5_HAVE_ROS3_VFD
+/*extended configuration struct for holding the configuration data to the #H5FD_ROS3 driver */
+typedef struct H5FD_ros3_fapl_ext_t {
+    H5FD_ros3_fapl_t fa;                                         /* ROS3 configuration struct */
+    char             token[H5FD_ROS3_MAX_SECRET_TOK_LEN + 1];    /* Session/security token */
+    char             ep_url[H5FD_ROS3_MAX_ENDPOINT_URL_LEN + 1]; /* Optional endpoint url */
+} H5FD_ros3_fapl_ext_t;
+#endif /* H5_HAVE_ROS3_VFD */
+
 H5TOOLS_DLLVAR unsigned h5tools_nCols; /*max number of columns for outputting  */
 
 /* Definitions of useful routines */
+H5TOOLS_DLL struct subset_t *parse_subset_params(const char *dset);
+
 H5TOOLS_DLL void   indentation(unsigned);
 H5TOOLS_DLL void   print_version(const char *progname);
 H5TOOLS_DLL void   parallel_print(const char *format, ...) H5_ATTR_FORMAT(printf, 1, 2);
+H5TOOLS_DLL void   parse_hsize_list(const char *h_list, subset_d *d);
 H5TOOLS_DLL herr_t parse_tuple(const char *start, int sep, char **cpy_out, unsigned *nelems,
                                char ***ptrs_out);
 H5TOOLS_DLL void   error_msg(const char *fmt, ...) H5_ATTR_FORMAT(printf, 1, 2);
@@ -118,7 +131,7 @@ typedef struct {
 
 /* Definitions of routines */
 H5TOOLS_DLL int H5tools_get_symlink_info(hid_t file_id, const char *linkpath, h5tool_link_info_t *link_info,
-                                         hbool_t get_obj_type);
+                                         bool get_obj_type);
 H5TOOLS_DLL const char *h5tools_getprogname(void);
 H5TOOLS_DLL void        h5tools_setprogname(const char *progname);
 H5TOOLS_DLL int         h5tools_getstatus(void);
@@ -126,8 +139,9 @@ H5TOOLS_DLL void        h5tools_setstatus(int d_status);
 H5TOOLS_DLL int         h5tools_getenv_update_hyperslab_bufsize(void);
 #ifdef H5_HAVE_ROS3_VFD
 H5TOOLS_DLL herr_t h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim,
-                                                 H5FD_ros3_fapl_t *fapl_config_out);
-H5TOOLS_DLL int    h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values);
+                                                 H5FD_ros3_fapl_ext_t *fapl_config_out);
+H5TOOLS_DLL herr_t h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values,
+                                              size_t num_values);
 #endif /* H5_HAVE_ROS3_VFD */
 #ifdef H5_HAVE_LIBHDFS
 H5TOOLS_DLL herr_t h5tools_parse_hdfs_fapl_tuple(const char *tuple_str, int delim,

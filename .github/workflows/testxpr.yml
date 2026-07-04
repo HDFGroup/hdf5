@@ -1,0 +1,73 @@
+name: hdf5 TestExpress CI
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+jobs:
+  build_and_test:
+    strategy:
+      matrix:
+        build_mode: ["Release", "Debug"]
+        include:
+          - build_mode: "Release"
+          - build_mode: "Debug"
+
+    name: "${{ matrix.build_mode }} Express Test Workflows"
+
+    # Don't run the action if the commit message says to skip CI
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Sources
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt-get update
+           sudo apt-get install ninja-build graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install libaec0 libaec-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
+
+      - name: Configure
+        shell: bash
+        run: |
+           mkdir "${{ runner.workspace }}/build"
+           cd "${{ runner.workspace }}/build"
+           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+                -G Ninja \
+                -DCMAKE_BUILD_TYPE=${{ matrix.build_mode }} \
+                -DBUILD_SHARED_LIBS=ON \
+                -DHDF5_ENABLE_ALL_WARNINGS=ON \
+                -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+                -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+                -DHDF5_BUILD_FORTRAN=OFF \
+                -DHDF5_BUILD_JAVA=OFF \
+                -DHDF5_BUILD_DOC=OFF \
+                -DLIBAEC_USE_LOCALCONTENT=OFF \
+                -DZLIB_USE_LOCALCONTENT=OFF \
+                -DHDF_TEST_EXPRESS=0 \
+                $GITHUB_WORKSPACE
+
+      - name: Build
+        run: cmake --build . --parallel 3 --config ${{ matrix.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Run Tests
+        env:
+          HDF5TestExpress: 0
+        run: ctest . --parallel 2 -C ${{ matrix.build_mode }} -R H5TESTXPR
+        working-directory: ${{ runner.workspace }}/build

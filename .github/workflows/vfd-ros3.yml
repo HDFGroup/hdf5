@@ -1,0 +1,392 @@
+name: Build and test HDF5 ROS3 VFD
+
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "Build type (CMAKE_BUILD_TYPE)"
+        required: true
+        type: string
+      aws_c_s3_build_type:
+        description: "Install aws-c-s3 from a package manager ('package') or build from source ('source')"
+        required: true
+        type: string
+      save_binary:
+        description: "binary-ext-name or missing"
+        required: false
+        default: "skip"
+        type: string
+      java_version:
+        description: "Java version for testing (11, 17, 21, 24, latest, auto)"
+        required: false
+        default: "auto"
+        type: string
+      force_java_implementation:
+        description: "Force specific Java implementation (auto, ffm, jni)"
+        required: false
+        default: "jni"
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+jobs:
+  # NOTE: The aws-c-s3 library build is now handled by the parent workflow
+  # that calls this workflow. The parent must call build-aws-c-s3.yml before
+  # calling vfd-ros3.yml to ensure the libaws-c-s3 artifact is available.
+
+  build_from_package_managers:
+    if: ${{ inputs.aws_c_s3_build_type == 'package' }}
+
+    # Ubuntu doesn't have a package for aws-c-s3 yet, so use a
+    # built from source version until then
+
+    strategy:
+      # Let jobs run to completion even if one fails
+      fail-fast: false
+      matrix:
+        os_name: ["Windows MSVC", "Ubuntu GCC", "MacOS Clang"]
+        include:
+          - os_name: "Windows MSVC"
+            os: windows-latest
+            test_ros3: OFF
+          - os_name: "Ubuntu GCC"
+            os: ubuntu-latest
+            test_ros3: ON
+          - os_name: "MacOS Clang"
+            os: macos-latest
+            test_ros3: OFF
+
+    name: "ROS3 VFD (${{ matrix.os_name }} ${{ inputs.build_mode }}-${{ inputs.force_java_implementation }})"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install aws-c-s3 (Windows)
+        if: ${{ matrix.os_name == 'Windows MSVC' }}
+        run: vcpkg install aws-c-s3
+
+      # Ubuntu doesn't have a package for aws-c-s3 yet, so use a
+      # built from source version until then
+      # - name: Install aws-c-s3 (Ubuntu)
+      #   if: ${{ matrix.os_name == 'Ubuntu GCC' }}
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install aws-c-s3
+
+      - name: Install libaws-c-s3 (Ubuntu) (Cached installation)
+        if: ${{ matrix.os_name == 'Ubuntu GCC' }}
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: libaws-c-s3-${{ inputs.build_mode }}
+
+      - name: Untar libaws-c-s3 installation (Ubuntu)
+        if: ${{ matrix.os_name == 'Ubuntu GCC' }}
+        run: |
+          tar xvf libaws-c-s3.tar -C ${{ runner.workspace }}
+
+      - name: List contents of libaws-c-s3 installation (Ubuntu)
+        if: ${{ matrix.os_name == 'Ubuntu GCC' }}
+        run: |
+          ls -lR ${{ runner.workspace }}/aws-c-s3-build
+
+      - name: Setup environment (Ubuntu)
+        if: ${{ matrix.os_name == 'Ubuntu GCC' }}
+        shell: bash
+        run: |
+          echo "LD_LIBRARY_PATH=${{ runner.workspace }}/aws-c-s3-build/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build" >> $GITHUB_ENV
+
+      - name: Install aws-c-s3 (MacOS)
+        if: ${{ matrix.os_name == 'MacOS Clang' }}
+        run: brew install aws-c-s3
+
+      - name: Set up Java (if specified or FFM required)
+        if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        with:
+          distribution: ${{ inputs.force_java_implementation == 'ffm' && 'oracle' || 'temurin' }}
+          java-version: |
+            ${{
+              inputs.force_java_implementation == 'ffm' && '25' ||
+              inputs.java_version == 'latest' && '24' ||
+              inputs.java_version
+            }}
+
+      - name: Verify Java Setup
+        if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
+        run: |
+          java -version
+          echo "JAVA_HOME=$JAVA_HOME"
+          echo "Selected Java implementation: ${{ inputs.force_java_implementation }}"
+
+      - name: Set environment for MSVC (Windows)
+        if: ${{ matrix.os_name == 'Windows MSVC' }}
+        run: |
+          # Set these environment variables so CMake picks the correct compiler
+          echo "CXX=cl.exe" >> $GITHUB_ENV
+          echo "CC=cl.exe" >> $GITHUB_ENV
+
+      - name: Get HDF5 sources
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup jextract (FFM builds only)
+        if: ${{ inputs.force_java_implementation == 'ffm' }}
+        uses: ./.github/actions/setup-jextract
+        with:
+          java-version: '25'
+
+      # For Windows, use vcpkg toolchain file to allow find_package() calls to resolve
+      - name: "Configure (vcpkg; ROS3 testing: ${{ matrix.test_ros3 }})"
+        if: ${{ matrix.os_name == 'Windows MSVC' }}
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            --log-level=VERBOSE \
+            -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DBUILD_SHARED_LIBS=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_ENABLE_WARNINGS_AS_ERRORS=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_CPP_LIB:BOOL=ON \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON \
+            -DLIBAEC_USE_LOCALCONTENT=OFF \
+            -DZLIB_USE_LOCALCONTENT=OFF \
+            -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
+            -DHDF5_ENABLE_ROS3_VFD_DOCKER_PROXY=${{ matrix.test_ros3 }} \
+            -DHDF5_PACK_EXAMPLES:BOOL=ON \
+            -DHDF5_ENABLE_JNI:BOOL=${{ inputs.force_java_implementation == 'jni' }} \
+            $GITHUB_WORKSPACE
+        shell: bash
+
+      - name: "Configure (ROS3 testing: ${{ matrix.test_ros3 }})"
+        if: ${{ matrix.os_name != 'Windows MSVC' }}
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            --log-level=VERBOSE \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DBUILD_SHARED_LIBS=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_ENABLE_WARNINGS_AS_ERRORS=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_CPP_LIB:BOOL=ON \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON \
+            -DLIBAEC_USE_LOCALCONTENT=OFF \
+            -DZLIB_USE_LOCALCONTENT=OFF \
+            -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
+            -DHDF5_ENABLE_ROS3_VFD_DOCKER_PROXY=${{ matrix.test_ros3 }} \
+            -DHDF5_PACK_EXAMPLES:BOOL=ON \
+            -DHDF5_ENABLE_JNI:BOOL=${{ inputs.force_java_implementation == 'jni' }} \
+            $GITHUB_WORKSPACE
+        shell: bash
+
+      - name: Build
+        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Run Tests
+        if: matrix.test_ros3 == 'ON'
+        run: |
+          # For now, just run S3 tests
+          ctest . -C ${{ inputs.build_mode }} -R "S3TEST"
+        working-directory: ${{ runner.workspace }}/build
+
+  # Build and test the ROS3 VFD using aws-c-s3 from source (Linux) or package managers (Windows/macOS)
+  build_and_test_vfd:
+    if: ${{ inputs.aws_c_s3_build_type == 'source' }}
+
+    strategy:
+      # Let jobs run to completion even if one fails
+      fail-fast: false
+      matrix:
+        os_name: ["Windows MSVC", "Ubuntu GCC", "MacOS Clang"]
+        include:
+          - os_name: "Windows MSVC"
+            os: windows-latest
+            ostype: windows
+            test_ros3: OFF
+          - os_name: "Ubuntu GCC"
+            os: ubuntu-latest
+            ostype: ubuntu
+            test_ros3: ON
+          - os_name: "MacOS Clang"
+            os: macos-latest
+            ostype: macos
+            test_ros3: OFF
+
+    name: "ROS3 VFD Source (${{ matrix.os_name }} ${{ inputs.build_mode }})"
+    runs-on: ${{ matrix.os }}
+    steps:
+      # Linux: Download aws-c-s3 artifact from build-aws-c-s3 workflow
+      - name: Install libaws-c-s3 (Ubuntu) (Cached installation)
+        if: ${{ matrix.os_name == 'Ubuntu GCC' }}
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: libaws-c-s3-${{ inputs.build_mode }}
+
+      - name: Untar libaws-c-s3 installation (Ubuntu)
+        if: ${{ matrix.os_name == 'Ubuntu GCC' }}
+        run: |
+          tar xvf libaws-c-s3.tar -C ${{ runner.workspace }}
+
+      - name: List contents of libaws-c-s3 installation (Ubuntu)
+        if: ${{ matrix.os_name == 'Ubuntu GCC' }}
+        run: |
+          ls -lR ${{ runner.workspace }}/aws-c-s3-build
+
+      - name: Setup environment (Ubuntu)
+        if: ${{ matrix.os_name == 'Ubuntu GCC' }}
+        shell: bash
+        run: |
+          echo "LD_LIBRARY_PATH=${{ runner.workspace }}/aws-c-s3-build/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build" >> $GITHUB_ENV
+
+      # Windows: Install aws-c-s3 via vcpkg
+      - name: Install aws-c-s3 (Windows)
+        if: ${{ matrix.os_name == 'Windows MSVC' }}
+        run: vcpkg install aws-c-s3
+
+      # macOS: Install aws-c-s3 via Homebrew
+      - name: Install aws-c-s3 (MacOS)
+        if: ${{ matrix.os_name == 'MacOS Clang' }}
+        run: brew install aws-c-s3
+
+      - name: Set up Java (if specified or FFM required)
+        if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        with:
+          distribution: ${{ inputs.force_java_implementation == 'ffm' && 'oracle' || 'temurin' }}
+          java-version: |
+            ${{
+              inputs.force_java_implementation == 'ffm' && '25' ||
+              inputs.java_version == 'latest' && '24' ||
+              inputs.java_version
+            }}
+
+      - name: Verify Java Setup
+        if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
+        run: |
+          java -version
+          echo "JAVA_HOME=$JAVA_HOME"
+          echo "Selected Java implementation: ${{ inputs.force_java_implementation }}"
+
+      - name: Set environment for MSVC (Windows)
+        if: ${{ matrix.os_name == 'Windows MSVC' }}
+        run: |
+          # Set these environment variables so CMake picks the correct compiler
+          echo "CXX=cl.exe" >> $GITHUB_ENV
+          echo "CC=cl.exe" >> $GITHUB_ENV
+
+      - name: Get HDF5 sources
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup jextract (FFM builds only)
+        if: ${{ inputs.force_java_implementation == 'ffm' }}
+        uses: ./.github/actions/setup-jextract
+        with:
+          java-version: '25'
+
+      # For Windows, use vcpkg toolchain file to allow find_package() calls to resolve
+      - name: "Configure (vcpkg; ROS3 testing: ${{ matrix.test_ros3 }})"
+        if: ${{ matrix.os_name == 'Windows MSVC' }}
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            --log-level=VERBOSE \
+            -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DBUILD_SHARED_LIBS=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_ENABLE_WARNINGS_AS_ERRORS=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_CPP_LIB:BOOL=ON \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON \
+            -DLIBAEC_USE_LOCALCONTENT=OFF \
+            -DZLIB_USE_LOCALCONTENT=OFF \
+            -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
+            -DHDF5_ENABLE_ROS3_VFD_DOCKER_PROXY=${{ matrix.test_ros3 }} \
+            -DHDF5_PACK_EXAMPLES:BOOL=ON \
+            -DHDF5_ENABLE_JNI:BOOL=${{ inputs.force_java_implementation == 'jni' }} \
+            $GITHUB_WORKSPACE
+        shell: bash
+
+      - name: "Configure (ROS3 testing: ${{ matrix.test_ros3 }})"
+        if: ${{ matrix.os_name != 'Windows MSVC' }}
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            --log-level=VERBOSE \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DBUILD_SHARED_LIBS=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_ENABLE_WARNINGS_AS_ERRORS=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_CPP_LIB:BOOL=ON \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON \
+            -DLIBAEC_USE_LOCALCONTENT=OFF \
+            -DZLIB_USE_LOCALCONTENT=OFF \
+            -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
+            -DHDF5_ENABLE_ROS3_VFD_DOCKER_PROXY=${{ matrix.test_ros3 }} \
+            -DHDF5_PACK_EXAMPLES:BOOL=ON \
+            -DHDF5_ENABLE_JNI:BOOL=${{ inputs.force_java_implementation == 'jni' }} \
+            $GITHUB_WORKSPACE
+        shell: bash
+
+      - name: Build
+        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Run Tests
+        if: matrix.test_ros3 == 'ON'
+        run: |
+          # For now, just run S3 tests
+          ctest . -C ${{ inputs.build_mode }} -R "S3TEST"
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Run Package
+        run: cpack -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: List files in the space
+        run: |
+              ls -l ${{ runner.workspace }}/build
+
+      # Save files created by CTest script
+      - name: Save published binary (Windows)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: zip-vs2022_cl-S3-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if:  ${{ (matrix.ostype == 'windows') && ( inputs.save_binary != 'skip') }}
+
+      - name: Save published binary (linux)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: tgz-ubuntu-2404_gcc-S3-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if:  ${{ (matrix.ostype == 'ubuntu') && ( inputs.save_binary != 'skip') }}
+
+      - name: Save published binary (Mac_latest)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: tgz-macos14_clang-S3-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if: ${{ (matrix.ostype == 'macos') && ( inputs.save_binary != 'skip') }}

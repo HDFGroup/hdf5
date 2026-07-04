@@ -4,7 +4,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -17,17 +17,17 @@
 ##############################################################################
 # Remove any output file left over from previous test run
 add_test (
-    NAME MPI_TEST-clear-testphdf5-objects
+    NAME MPI_TEST-testphdf5-clear-objects
     COMMAND ${CMAKE_COMMAND} -E remove ParaTest.h5
     WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
 )
-set_tests_properties (MPI_TEST-clear-testphdf5-objects PROPERTIES FIXTURES_SETUP par_clear_testphdf5)
+set_tests_properties (MPI_TEST-testphdf5-clear-objects PROPERTIES FIXTURES_SETUP par_clear_testphdf5)
 add_test (
-    NAME MPI_TEST-clean-testphdf5-objects
+    NAME MPI_TEST-testphdf5-clean-objects
     COMMAND ${CMAKE_COMMAND} -E remove ParaTest.h5
     WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
 )
-set_tests_properties (MPI_TEST-clean-testphdf5-objects PROPERTIES FIXTURES_CLEANUP par_clear_testphdf5)
+set_tests_properties (MPI_TEST-testphdf5-clean-objects PROPERTIES FIXTURES_CLEANUP par_clear_testphdf5)
 
 set (SKIP_tests
     cchunk1
@@ -55,6 +55,9 @@ set_tests_properties (MPI_TEST_testphdf5 PROPERTIES
     ENVIRONMENT "HDF5_ALARM_SECONDS=3600;srcdir=${HDF5_TEST_PAR_BINARY_DIR}"
     WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
 )
+if ("MPI_TEST_testphdf5" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+  set_tests_properties (MPI_TEST_testphdf5 PROPERTIES DISABLED true)
+endif ()
 if (last_test)
   set_tests_properties (MPI_TEST_testphdf5 PROPERTIES DEPENDS ${last_test})
 endif ()
@@ -68,6 +71,9 @@ foreach (skiptest ${SKIP_tests})
       ENVIRONMENT "HDF5_ALARM_SECONDS=3600;srcdir=${HDF5_TEST_PAR_BINARY_DIR}"
       WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
   )
+  if ("MPI_TEST_testphdf5_${skiptest}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (MPI_TEST_testphdf5_${skiptest} PROPERTIES DISABLED true)
+  endif ()
   if (last_test)
     set_tests_properties (MPI_TEST_testphdf5_${skiptest} PROPERTIES DEPENDS ${last_test})
   endif ()
@@ -77,9 +83,6 @@ endforeach ()
 #if (HDF5_OPENMPI_VERSION_SKIP)
 #  list (REMOVE_ITEM H5P_TESTS t_shapesame)
 #endif ()
-
-# do not test until new version is added
-list (REMOVE_ITEM H5P_TESTS t_cache_image)
 
 set (test_par_CLEANFILES
     t_cache_image_00.h5
@@ -99,8 +102,10 @@ set (test_par_CLEANFILES
     MPItest.h5
     ShapeSameTest.h5
     test_subfiling_basic_create.h5
+    test_subfiling_only_ioc_fail.h5
     test_subfiling_config_file.h5
     test_subfiling_stripe_sizes.h5
+    test_subfiling_selection_strategies.h5
     test_subfiling_read_different_stripe_sizes.h5
     test_subfiling_precreate_rank_0.h5
     test_subfiling_write_many_read_one.h5
@@ -129,6 +134,9 @@ foreach (h5_testp ${H5P_TESTS})
       ENVIRONMENT "HDF5_ALARM_SECONDS=3600;srcdir=${HDF5_TEST_PAR_BINARY_DIR}"
       WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
   )
+  if ("MPI_TEST_${h5_testp}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (MPI_TEST_${h5_testp} PROPERTIES DISABLED true)
+  endif ()
   if (last_test)
     set_tests_properties (MPI_TEST_${h5_testp} PROPERTIES DEPENDS ${last_test})
   endif ()

@@ -1,31 +1,86 @@
-# CMake cache file for external HDF5 filter plugins
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the LICENSE file, which can be found at the root of the source code
+# distribution tree, or in https://www.hdfgroup.org/licenses.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+# CMake cache file for external HDF5 filter plugins when building the plugins during a HDF5 build
 
 #########################
 # EXTERNAL cache entries
 #########################
 
-# examples are the tests for plugins
+# Enable testing for plugins (examples are the tests for plugins)
 set (H5PL_BUILD_TESTING ON CACHE BOOL "Enable H5PL testing" FORCE)
-set (BUILD_EXAMPLES ON CACHE BOOL "Build H5PL Examples" FORCE)
+# Enable building of plugin examples if main HDF5 build enables examples
+set (H5PL_BUILD_EXAMPLES ${HDF5_BUILD_EXAMPLES} CACHE BOOL "Build H5PL Examples" FORCE)
 
-set (HDF5_HDF5_HEADER "H5pubconf.h" CACHE STRING "Name of HDF5 header" FORCE)
-set (HDF5_LINK_LIBS ${HDF5_LIBSH_TARGET} CACHE STRING "HDF5 target" FORCE)
-#set (HDF5_INCLUDE_DIR $<TARGET_PROPERTY:${HDF5_LIBSH_TARGET},INCLUDE_DIRECTORIES> CACHE PATH "HDF5 include dirs" FORCE)
-set (HDF5_INCLUDE_DIR "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR}" CACHE PATH "HDF5 include dirs" FORCE)
-set (HDF5_INCLUDE_DIRS "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR}" CACHE PATH "HDF5 include dirs" FORCE)
-set (HDF5_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE STRING "HDF5 build folder" FORCE)
+# Preset HDF5 cache variables to use this project's libraries instead of searching
+set (H5PL_HDF5_HEADER "H5pubconf.h" CACHE STRING "Name of HDF5 header" FORCE)
+set (H5PL_HDF5_LINK_LIBS ${HDF5_LIBSH_TARGET} CACHE STRING "HDF5 target" FORCE)
+# Optionally, could use target property for include dirs (commented out)
+#set (H5PL_HDF5_INCLUDE_DIRS $<TARGET_PROPERTY:${HDF5_LIBSH_TARGET},INCLUDE_DIRECTORIES> CACHE PATH "HDF5 include dirs" FORCE)
+set (H5PL_HDF5_INCLUDE_DIRS "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR}" CACHE PATH "HDF5 include dirs" FORCE)
+set (H5PL_HDF5_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE STRING "HDF5 build folder" FORCE)
 
-set (HDF5_DUMP_EXECUTABLE $<TARGET_FILE:h5dump-shared> CACHE STRING "HDF5 h5dump target" FORCE)
-set (HDF5_REPACK_EXECUTABLE $<TARGET_FILE:h5repack-shared> CACHE STRING "HDF5 h5repack target" FORCE)
+# Set up tool executables for plugin tests
+set (H5PL_HDF5_DUMP_EXECUTABLE $<TARGET_FILE:h5dump> CACHE STRING "HDF5 h5dump target" FORCE)
+set (H5PL_HDF5_REPACK_EXECUTABLE $<TARGET_FILE:h5repack> CACHE STRING "HDF5 h5repack target" FORCE)
 
-set (H5PL_ALLOW_EXTERNAL_SUPPORT "${HDF5_ALLOW_EXTERNAL_SUPPORT}" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
+# Allow external support for plugins (e.g., GIT or TGZ), defaulting to HDF5 setting if not defined
+if (NOT DEFINED H5PL_ALLOW_EXTERNAL_SUPPORT)
+  set (H5PL_ALLOW_EXTERNAL_SUPPORT "${HDF5_ALLOW_EXTERNAL_SUPPORT}" CACHE STRING "If not set to NO, specifies where to obtain sources when building or using external libraries (NO GIT TGZ)" FORCE)
+endif ()
 
-set (H5PL_GIT_URL "https://github.com/HDFGroup/hdf5_plugins.git" CACHE STRING "Use plugins from HDF Group repository" FORCE)
-set (H5PL_GIT_BRANCH "master" CACHE STRING "" FORCE)
+# On Windows with Intel compilers, disable ZFP plugin (not supported)
+if (WIN32 AND (CMAKE_C_COMPILER_ID MATCHES "Intel[Ll][Ll][Vv][Mm]" OR CMAKE_C_COMPILER_ID MATCHES "Intel"))
+  set (ENABLE_ZFP OFF CACHE BOOL "" FORCE)
+endif ()
 
-set (H5PL_TGZ_NAME "${PLUGIN_TGZ_NAME}" CACHE STRING "Use plugins from compressed file" FORCE)
+# Set path for plugin TGZ file if not already defined
+if (NOT DEFINED H5PL_TGZPATH)
+  set (H5PL_TGZPATH "${TGZPATH}" CACHE PATH "PATH for finding plugin tgz file" FORCE)
+  mark_as_advanced (H5PL_TGZPATH)
+endif ()
 
-set (PL_PACKAGE_NAME "${PLUGIN_PACKAGE_NAME}" CACHE STRING "Name of plugins package" FORCE)
+# Set GIT and TGZ plugin source variables from parent project
+if (DEFINED PLUGIN_GIT_URL)
+  # PLUGIN_GIT_URL is deprecated, but still available
+  set (H5PL_GIT_URL "${PLUGIN_GIT_URL}" CACHE STRING "Use plugins from HDF Group repository" FORCE)  
+else ()
+  set (H5PL_GIT_URL "${HDF5_FILTER_PLUGINS_GIT_URL}" CACHE STRING "Use plugins from HDF Group repository" FORCE)  
+endif ()
+if (DEFINED )
+  # PLUGIN_GIT_BRANCH is deprecated, but still available
+  set (H5PL_GIT_BRANCH "${PLUGIN_GIT_BRANCH}" CACHE STRING "" FORCE)
+else ()
+  set (H5PL_GIT_BRANCH "${HDF5_FILTER_PLUGINS_GIT_TAG}" CACHE STRING "" FORCE)
+endif ()
+mark_as_advanced (H5PL_GIT_URL)
+mark_as_advanced (H5PL_GIT_BRANCH)
+if (DEFINED PLUGIN_TGZ_NAME)
+  # PLUGIN_TGZ_NAME is deprecated, but still available
+  set (H5PL_TGZ_NAME "${PLUGIN_TGZ_NAME}" CACHE STRING "Use plugins from compressed file" FORCE)
+else ()
+  set (H5PL_TGZ_NAME "${HDF5_FILTER_PLUGINS_TGZ_NAME}" CACHE STRING "Use plugins from compressed file" FORCE)
+endif ()
+mark_as_advanced (H5PL_TGZ_NAME)
+
+# Set plugin package name and CPack option
+if (DEFINED PLUGIN_PACKAGE_NAME)
+  # PLUGIN_PACKAGE_NAME is deprecated, but still available
+  set (PL_PACKAGE_NAME "${PLUGIN_PACKAGE_NAME}" CACHE STRING "Name of plugins package" FORCE)
+else ()
+  set (PL_PACKAGE_NAME "${HDF5_FILTER_PLUGINS_PACKAGE_NAME}" CACHE STRING "Name of plugins package" FORCE)
+endif ()
+mark_as_advanced (PL_PACKAGE_NAME)
 set (H5PL_CPACK_ENABLE OFF CACHE BOOL "Enable CPack include and components" FORCE)
 
-set (H5PL_USE_GNU_DIRS ${HDF5_USE_GNU_DIRS} CACHE BOOL "TRUE to use GNU Coding Standard install directory variables" FORCE)
+# Use GNU install directory variables if enabled in HDF5 build
+set (H5PL_USE_GNU_DIRS ${HDF5_USE_GNU_DIRS} CACHE BOOL "ON to use GNU Coding Standard install directory variables, OFF to use historical settings" FORCE)
+mark_as_advanced (H5PL_USE_GNU_DIRS)

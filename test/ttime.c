@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -150,7 +150,7 @@ test_time_io(void)
     CHECK(dsid, FAIL, "H5Dcreate2");
 
     /* Initialize time data value */
-    timenow = HDtime(NULL);
+    timenow = time(NULL);
 
     /* Write time to dataset */
     status = H5Dwrite(dsid, H5T_UNIX_D32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &timenow);
@@ -176,13 +176,13 @@ test_time_io(void)
     tid = H5Dget_type(dsid);
     CHECK(tid, FAIL, "H5Dget_type");
     if (H5Tget_class(tid) == H5T_TIME)
-        HDfprintf(stderr, "datatype class is H5T_TIME\n");
+        fprintf(stderr, "datatype class is H5T_TIME\n");
     status = H5Tclose(tid);
     CHECK(status, FAIL, "H5Tclose");
 
     status = H5Dread(dsid, H5T_UNIX_D32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &timethen);
     CHECK(status, FAIL, "H5Dread");
-    HDfprintf(stderr, "time written was: %s\n", HDctime(&timethen));
+    fprintf(stderr, "time written was: %s\n", ctime(&timethen));
 
     status = H5Dclose(dsid);
     CHECK(status, FAIL, "H5Dclose");
@@ -198,7 +198,7 @@ test_time_io(void)
 **
 ****************************************************************/
 void
-test_time(void)
+test_time(void H5_ATTR_UNUSED *params)
 {
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Time Datatypes\n"));
@@ -217,15 +217,16 @@ test_time(void)
  *
  * Return:    none
  *
- * Programmer:    Quincey Koziol
- *              October 19, 2000
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
-cleanup_time(void)
+cleanup_time(void H5_ATTR_UNUSED *params)
 {
-    HDremove(DATAFILE);
+    if (GetTestCleanup()) {
+        H5E_BEGIN_TRY
+        {
+            H5Fdelete(DATAFILE, H5P_DEFAULT);
+        }
+        H5E_END_TRY
+    }
 }

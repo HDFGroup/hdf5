@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -13,7 +13,7 @@
 #include "h5test.h"
 
 #ifdef BROKEN
-const char *FILENAME[] = {"rsrv_heap", "rsrv_ohdr", "rsrv_vlen", NULL};
+static const char *FILENAME[] = {"rsrv_heap", "rsrv_ohdr", "rsrv_vlen", NULL};
 
 /*-------------------------------------------------------------------------
  * Function:    rsrv_heap
@@ -26,19 +26,13 @@ const char *FILENAME[] = {"rsrv_heap", "rsrv_ohdr", "rsrv_vlen", NULL};
  * Return:    Success:    0
  *        Failure:    1
  *
- * Programmer:    James Laird
- *              Nat Furrer
- *              Friday, May 28, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 rsrv_heap(void)
 {
-    hid_t   file_id = (-1), dataset_id = (-1), dataspace_id = (-1);
-    hid_t   fapl = (-1), fcpl = (-1);
+    hid_t   file_id = (H5I_INVALID_HID), dataset_id = (H5I_INVALID_HID), dataspace_id = (H5I_INVALID_HID);
+    hid_t   fapl = (H5I_INVALID_HID), fcpl = (H5I_INVALID_HID);
     hsize_t dims[1] = {1};
     char    filename[1024], dset_name[10];
     int     i;
@@ -70,7 +64,7 @@ rsrv_heap(void)
         }
         H5E_END_TRY
 
-        HDsnprintf(dset_name, sizeof(dset_name), "Dset %d", i);
+        snprintf(dset_name, sizeof(dset_name), "Dset %d", i);
 
         H5E_BEGIN_TRY
         {
@@ -114,7 +108,7 @@ rsrv_heap(void)
     if (H5open() < 0)
         TEST_ERROR;
 
-    HDsnprintf(dset_name, sizeof(dset_name), "Dset %d", i - 2);
+    snprintf(dset_name, sizeof(dset_name), "Dset %d", i - 2);
 
     file_id = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
     if (file_id < 0)
@@ -161,19 +155,13 @@ error:
  * Return:    Success:    0
  *        Failure:    1
  *
- * Programmer:    James Laird
- *              Nat Furrer
- *              Friday, May 28, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 rsrv_ohdr(void)
 {
-    hid_t   file_id = (-1), dataset_id = (-1), dataspace_id = (-1);
-    hid_t   fapl = (-1), fcpl = (-1), aid, attr_id;
+    hid_t   file_id = (H5I_INVALID_HID), dataset_id = (H5I_INVALID_HID), dataspace_id = (H5I_INVALID_HID);
+    hid_t   fapl = (H5I_INVALID_HID), fcpl = (H5I_INVALID_HID), aid, attr_id;
     hsize_t dims[2];
     herr_t  status;
     int     attrval[4][6];
@@ -217,7 +205,7 @@ rsrv_ohdr(void)
     } /* end for */
 
     for (i = 0; i < 2000; i++) {
-        HDsnprintf(attrname, sizeof(attrname), "attr %d", i);
+        snprintf(attrname, sizeof(attrname), "attr %d", i);
         H5E_BEGIN_TRY
         {
             aid     = H5Screate_simple(2, dims, NULL);
@@ -305,19 +293,14 @@ error:
  * Return:    Success:    0
  *        Failure:    1
  *
- * Programmer:    James Laird
- *        Nat Furrer
- *              Thursday, July 1, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 rsrv_vlen(void)
 {
-    hid_t    file_id = (-1), dataset_id = (-1), dataspace_id = (-1), type_id = (-1);
-    hid_t    fapl = (-1), fcpl = (-1), mem_space_id = (-1);
+    hid_t file_id = (H5I_INVALID_HID), dataset_id = (H5I_INVALID_HID), dataspace_id = (H5I_INVALID_HID),
+          type_id = (H5I_INVALID_HID);
+    hid_t    fapl = (H5I_INVALID_HID), fcpl = (H5I_INVALID_HID), mem_space_id = (H5I_INVALID_HID);
     hssize_t offset[1];
     hsize_t  start[1];
     hsize_t  dims[1], count[1];
@@ -468,11 +451,6 @@ error:
  *
  *        Failure:
  *
- * Programmer:    Nat Furrer and James Laird
- *              Thursday, July 1, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -484,31 +462,30 @@ main(void)
      * (Also, we should try to make this test work with all the VFDs)
      */
 #ifdef BROKEN
+    const char *driver_name;
     int         num_errs = 0;
     hid_t       fapl;
-    const char *envval = NULL;
 
-    envval = HDgetenv(HDF5_DRIVER);
-    if (envval == NULL)
-        envval = "nomatch";
+    driver_name = h5_get_test_driver_name();
+
     /* QAK: should be able to use the core driver? */
-    if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") &&
-        HDstrcmp(envval, "family")) {
+    if (strcmp(driver_name, "core") && strcmp(driver_name, "split") && strcmp(driver_name, "multi") &&
+        strcmp(driver_name, "family")) {
         num_errs += rsrv_ohdr();
         num_errs += rsrv_heap();
         num_errs += rsrv_vlen();
 
         if (num_errs > 0)
-            HDprintf("**** %d FAILURE%s! ****\n", num_errs, num_errs == 1 ? "" : "S");
+            printf("**** %d FAILURE%s! ****\n", num_errs, num_errs == 1 ? "" : "S");
         else
-            HDputs("All address space reservation tests passed.");
+            puts("All address space reservation tests passed.");
 
         fapl = h5_fileaccess();
         h5_cleanup(FILENAME, fapl);
         return num_errs;
     }
     else {
-        HDputs("All address space reservation tests skipped - Incompatible with current Virtual File Driver");
+        puts("All address space reservation tests skipped - Incompatible with current Virtual File Driver");
     }
 #endif /* BROKEN */
 

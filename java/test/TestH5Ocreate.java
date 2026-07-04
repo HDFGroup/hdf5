@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -17,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.lang.foreign.MemorySegment;
 import java.util.ArrayList;
 
 import hdf.hdf5lib.H5;
@@ -27,6 +28,7 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5O_info_t;
 
+import org.hdfgroup.javahdf5.H5L_info2_t;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -412,14 +414,15 @@ public class TestH5Ocreate {
             }
         }
         class H5O_iter_data implements H5O_iterate_opdata_t {
-            public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static void add_iter_data(idata id) { iterdata.add(id); }
         }
         H5O_iterate_opdata_t iter_data = new H5O_iter_data();
         class H5O_iter_callback implements H5O_iterate_t {
-            public int callback(long group, String name, H5O_info_t info, H5O_iterate_opdata_t op_data)
+            public int apply(long group, MemorySegment name, MemorySegment info, MemorySegment op_data)
             {
-                idata id = new idata(name, info.type);
-                ((H5O_iter_data)op_data).iterdata.add(id);
+                idata id = new idata(name.getString(0), H5L_info2_t.type(info));
+                ((H5O_iter_data)iter_data).add_iter_data(id);
                 return 0;
             }
         }

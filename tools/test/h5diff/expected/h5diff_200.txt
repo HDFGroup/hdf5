@@ -1,0 +1,4 @@
+--------------------------------
+Some objects are not comparable
+--------------------------------
+Use -c for a list of objects.

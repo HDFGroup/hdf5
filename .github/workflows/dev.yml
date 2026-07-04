@@ -1,0 +1,363 @@
+name: hdf5 Developer Mode CI
+
+on:
+  workflow_call:
+    inputs:
+      file_base:
+        description: "The common base name of the source tarballs"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+jobs:
+  linux_build_and_test:
+    name: "Linux Developer Mode Express Test Workflows"
+
+    # Don't run the action if the commit message says to skip CI
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set file base name (Windows)
+        id: set-file-base
+        run: |
+           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      - name: Get Actions
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          sparse-checkout: .github/actions
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt-get update
+           sudo apt-get install ninja-build graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install libaec0 libaec-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
+
+      # Get files created by release script
+      - name: Get tgz-tarball (Linux)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+              name: tgz-tarball
+              path: ${{ github.workspace }}
+
+      - name: List files for the space (Linux)
+        run: |
+              ls -l ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      - name: Uncompress source (Linux)
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+      - name: List files for the space (Linux)
+        run: |
+              ls -l ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      - name: Configure
+        shell: bash
+        run: |
+            mkdir "${{ runner.workspace }}/build"
+            cd "${{ runner.workspace }}/build"
+            cmake -C ${{ github.workspace }}/hdfsrc/config/cmake/cacheinit.cmake \
+                 -G Ninja \
+                 -DCMAKE_BUILD_TYPE=Developer \
+                 -DBUILD_SHARED_LIBS=ON \
+                 -DHDF5_ENABLE_ALL_WARNINGS=ON \
+                 -DHDF5_ENABLE_DEBUG_H5B2=ON \
+                 -DHDF5_ENABLE_DEBUG_H5FS_ASSERT=ON \
+                 -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+                 -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+                 -DHDF5_BUILD_FORTRAN=OFF \
+                 -DHDF5_BUILD_JAVA=OFF \
+                 -DHDF5_BUILD_DOC=OFF \
+                 -DLIBAEC_USE_LOCALCONTENT=OFF \
+                 -DZLIB_USE_LOCALCONTENT=OFF \
+                 -DHDF_TEST_EXPRESS=0 \
+                 ${{ github.workspace }}/hdfsrc
+
+      - name: Build
+        run: cmake --build . --parallel 3 --config Developer
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Run Tests
+        env:
+          HDF5TestExpress: 0
+        run: ctest . --parallel 2 -C Developer -R H5TESTXPR -E fheap
+        working-directory: ${{ runner.workspace }}/build
+
+  win_build_and_test:
+    name: "Windows Developer Mode Express Test Workflows"
+
+    # Don't run the action if the commit message says to skip CI
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+
+    runs-on: windows-latest
+    steps:
+      - name: Get Actions
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          sparse-checkout: .github/actions
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
+      - name: Install Dependencies (Windows)
+        run: choco install ninja
+
+      - name: Enable Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+
+      - name: Check CMake Version
+        shell: bash
+        run: |
+          which cmake
+          cmake --version
+
+      - name: Set file base name (Windows)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
+
+      # Get files created by release script
+      - name: Get zip-tarball (Windows)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+              name: zip-tarball
+              path: ${{ github.workspace }}
+
+      - name: using powershell
+        shell: pwsh
+        run: Get-Location
+
+      - name: List files for the space (Windows)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      - name: Uncompress source (Windows)
+        working-directory: ${{ github.workspace }}
+        run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
+        shell: bash
+
+      - name: Configure (Windows)
+        shell: pwsh
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          Set-Location -Path "${{ runner.workspace }}\\build"
+          cmake -C ${{ github.workspace }}/hdfsrc/config/cmake/cacheinit.cmake -G Ninja -DCMAKE_BUILD_TYPE=Developer -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_DEBUG_H5B2=ON -DHDF5_ENABLE_DEBUG_H5FS_ASSERT=ON -DHDF5_ENABLE_PARALLEL:BOOL=OFF -DHDF5_BUILD_CPP_LIB=OFF -DHDF5_BUILD_FORTRAN=OFF -DHDF5_BUILD_JAVA=OFF -DHDF5_BUILD_DOC=OFF -DLIBAEC_USE_LOCALCONTENT=OFF -DZLIB_USE_LOCALCONTENT=OFF -DHDF_TEST_EXPRESS=0 ${{ github.workspace }}/hdfsrc
+
+      - name: Build
+        run: cmake --build . --parallel 3 --config Developer
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Run Tests
+        env:
+          HDF5TestExpress: 0
+        run: ctest . --parallel 2 -C Developer -R H5TESTXPR -E fheap
+        working-directory: ${{ runner.workspace }}/build
+
+  build_and_test_mac_latest:
+  # MacOS w/ Clang
+  #
+    name: "MacOS Clang"
+    runs-on: macos-latest
+    steps:
+      - name: Get Actions
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          sparse-checkout: .github/actions
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
+      - name: Check Clang Version
+        shell: bash
+        run: |
+          which clang
+          clang -v
+
+      - name: Check CMake Version
+        shell: bash
+        run: |
+          which cmake
+          cmake --version
+
+      - name: Set file base name (MacOS_latest)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      # Get files created by release script
+      - name: Get tgz-tarball (MacOS_latest)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+              name: tgz-tarball
+              path: ${{ github.workspace }}
+
+      - name: List files for the space (MacOS_latest)
+        run: |
+              ls ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      - name: Uncompress source (MacOS_latest)
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+      - name: Configure
+        shell: bash
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C ${{ github.workspace }}/hdfsrc/config/cmake/cacheinit.cmake \
+               -G Ninja \
+               -DCMAKE_BUILD_TYPE=Developer \
+               -DBUILD_SHARED_LIBS=ON \
+               -DHDF5_ENABLE_ALL_WARNINGS=ON \
+               -DHDF5_ENABLE_DEBUG_H5B2=ON \
+               -DHDF5_ENABLE_DEBUG_H5FS_ASSERT=ON \
+               -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+               -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+               -DHDF5_BUILD_FORTRAN=OFF \
+               -DHDF5_BUILD_JAVA=OFF \
+               -DHDF5_BUILD_DOC=OFF \
+               -DLIBAEC_USE_LOCALCONTENT=OFF \
+               -DZLIB_USE_LOCALCONTENT=OFF \
+               -DHDF_TEST_EXPRESS=0 \
+               ${{ github.workspace }}/hdfsrc
+
+      - name: Build
+        run: cmake --build . --parallel 3 --config Developer
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Run Tests
+        env:
+          HDF5TestExpress: 0
+        run: ctest . --parallel 2 -C Developer -R H5TESTXPR -E fheap
+        working-directory: ${{ runner.workspace }}/build
+
+  ####### clang builds
+  build_and_test_linux_clang:
+    # Linux (Ubuntu) w/ clang
+    #
+    name: "Ubuntu Clang"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Actions
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          sparse-checkout: .github/actions
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
+      - name: Install Dependencies (Linux_clang)
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build graphviz curl
+
+      - name: Check Clang Version
+        shell: bash
+        run: |
+          which clang
+          clang -v
+
+      - name: Check CMake Version
+        shell: bash
+        run: |
+          which cmake
+          cmake --version
+
+      - name: Set file base name (Linux_clang)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      # Get files created by release script
+      - name: Get tgz-tarball (Linux_clang)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: tgz-tarball
+          path: ${{ github.workspace }}
+
+      - name: List files for the space (Linux_clang)
+        run: |
+          ls -l ${{ github.workspace }}
+          ls ${{ runner.workspace }}
+
+      - name: Uncompress source (Linux_clang)
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+      - name: Configure
+        shell: bash
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C ${{ github.workspace }}/hdfsrc/config/cmake/cacheinit.cmake \
+               -G Ninja \
+               -DCMAKE_BUILD_TYPE=Developer \
+               -DBUILD_SHARED_LIBS=ON \
+               -DHDF5_ENABLE_ALL_WARNINGS=ON \
+               -DHDF5_ENABLE_DEBUG_H5B2=ON \
+               -DHDF5_ENABLE_DEBUG_H5FS_ASSERT=ON \
+               -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+               -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+               -DHDF5_BUILD_FORTRAN=OFF \
+               -DHDF5_BUILD_JAVA=OFF \
+               -DHDF5_BUILD_DOC=OFF \
+               -DLIBAEC_USE_LOCALCONTENT=OFF \
+               -DZLIB_USE_LOCALCONTENT=OFF \
+               -DCMAKE_C_COMPILER:STRING=clang \
+               -DCMAKE_CXX_COMPILER:STRING=clang++ \
+               -DHDF_TEST_EXPRESS=0 \
+               ${{ github.workspace }}/hdfsrc
+
+      - name: Build
+        run: cmake --build . --parallel 3 --config Developer
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Run Tests
+        env:
+          HDF5TestExpress: 0
+        run: ctest . --parallel 2 -C Developer -R H5TESTXPR -E fheap
+        working-directory: ${{ runner.workspace }}/build
+

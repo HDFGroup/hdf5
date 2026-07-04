@@ -1,0 +1,257 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop" ]
+  schedule:
+    - cron: "16 7 * * 0"
+  workflow_dispatch:  # Allow manual triggering
+
+permissions:
+  contents: read
+
+jobs:
+  check-changes:
+    name: Check for code changes
+    runs-on: ubuntu-latest
+    outputs:
+      has_code_changes: ${{ steps.filter.outputs.code }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Check for code changes
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+        id: filter
+        with:
+          filters: |
+            code:
+              - '**/*.c'
+              - '**/*.h'
+              - '**/*.cpp'
+              - '**/*.hpp'
+              - '**/CMakeLists.txt'
+              - '**/*.cmake'
+
+  analyze:
+    name: Analyze
+    needs: check-changes
+    if: >-
+      needs.check-changes.outputs.has_code_changes == 'true' ||
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Install Dependencies (Linux)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            openmpi-bin openmpi-common mpi-default-dev \
+            zlib1g-dev libaec-dev
+
+          # Set env vars
+          echo "CC=mpicc" >> $GITHUB_ENV
+          echo "FC=mpif90" >> $GITHUB_ENV
+          echo "F77=mpif90" >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Configure HDF5
+        run: |
+          mkdir build; cd build
+          cmake -G "Unix Makefiles" \
+            -DCMAKE_INSTALL_PREFIX=$PWD/hdf5 \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+            -DHDF5_ENABLE_SUBFILING_VFD:BOOL=ON \
+            -DHDF5_BUILD_TOOLS:BOOL=ON \
+            -DBUILD_SHARED_LIBS:BOOL=ON \
+            -DBUILD_STATIC_LIBS:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_JAVA:BOOL=OFF \
+            -DBUILD_TESTING:BOOL=OFF \
+            -DHDF5_BUILD_EXAMPLES:BOOL=OFF \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
+            -DZLIB_INCLUDE_DIR=/usr/include \
+            -DZLIB_LIBRARY=/usr/lib/x86_64-linux-gnu/libz.so \
+            ..
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+        with:
+          languages: c-cpp
+          build-mode: manual
+          queries: +security-and-quality
+          
+          # Excluded rules justification:
+          #
+          # ── Global exclusions (legitimate across the entire codebase) ──
+          #
+          # Security false positives:
+          # - cpp/toctou-race-condition: HDF5 file operations inherently involve
+          #   check-then-act patterns that cannot be avoided in a file I/O library.
+          # - cpp/type-confusion: HDF5 object header messages use a void* dispatch
+          #   pattern where H5O_shared_t is embedded as the first member of message
+          #   structs (C "base class" idiom). Runtime type guards prevent invalid casts.
+          #   H5TSpool thread arg is always passed as the correct type.
+          # - cpp/non-constant-format, cpp/uncontrolled-format-string,
+          #   cpp/tainted-format-string: All flagged sites are intentional
+          #   format-string-as-template patterns:
+          #   h5tools_str.c uses configurable output formats (e.g., OPT(info->fmt_float, "%g")),
+          #   h5repart.c and sio_engine.c use family file naming templates with %d,
+          #   H5FDmulti.c uses API-configured member name templates with %s.
+          #   These are bounded by snprintf, guarded by H5_WARN_FORMAT_NONLITERAL_OFF,
+          #   and the format strings originate from application code, not untrusted input.
+          #
+          # Code style rules (non-security, no severity rating):
+          # These are structural patterns inherent to HDF5's C codebase and
+          # do not represent security vulnerabilities.
+          # - cpp/short-global-name: HDF5 uses short prefixed names (H5F_, H5D_, etc.)
+          #   as an intentional namespace convention throughout the public API.
+          # - cpp/long-switch: Large switch statements are the standard C pattern for
+          #   dispatching on HDF5 type enums, VOL callbacks, and tool options.
+          # - cpp/guarded-free: HDF5 consistently uses NULL-guarded free patterns
+          #   as a defensive coding convention.
+          # - cpp/commented-out-code: Legacy code preserved intentionally for
+          #   reference during ongoing development.
+          # - cpp/use-of-goto: HDF5 uses goto for centralized cleanup (HGOTO_ERROR /
+          #   HGOTO_DONE macros), a well-established C resource management pattern.
+          #
+          # ── Tools-only exclusions (enforced for core library via filter-sarif) ──
+          #
+          # The following rules are excluded only for CLI tools and benchmarks
+          # via path-scoped filter-sarif patterns (see filter-sarif step below),
+          # but remain ENFORCED for the core library (src/, hl/src/):
+          #
+          # - cpp/path-injection: CLI tools (h5dump, h5repack, h5import, h5jam,
+          #   h5ls, h5perf) accept file paths from command-line arguments by design.
+          #   Kept enforced for src/ to surface env-var path usage in VFDs
+          #   (e.g., H5FDsubfiling, H5FDioc) for review.
+          # - cpp/uncontrolled-allocation-size: CLI tools and benchmarks intentionally
+          #   accept allocation sizes from command-line arguments (block size, dataset
+          #   dimensions). Kept enforced for src/ to catch library allocation issues.
+          # - cpp/world-writable-file-creation: CLI tools create files using fopen()
+          #   which defaults to 0666 & ~umask. Kept enforced for src/ to review
+          #   library file creation (VFD logging, cache logging).
+          #
+          config: |
+             query-filters:
+               - exclude:
+                   id: cpp/toctou-race-condition
+               - exclude:
+                   id: cpp/type-confusion
+               - exclude:
+                   id: cpp/non-constant-format
+               - exclude:
+                   id: cpp/uncontrolled-format-string
+               - exclude:
+                   id: cpp/tainted-format-string
+               - exclude:
+                   id: cpp/short-global-name
+               - exclude:
+                   id: cpp/long-switch
+               - exclude:
+                   id: cpp/guarded-free
+               - exclude:
+                   id: cpp/commented-out-code
+               - exclude:
+                   id: cpp/use-of-goto
+
+      - name: Build
+        run: |
+          cd build
+          cmake --build . --config Debug
+        shell: bash
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+        with:
+          category: "/language:c-cpp"
+          output: sarif-results
+          upload: failure-only
+
+      - name: filter-sarif
+        uses: advanced-security/filter-sarif@2da736ff05ef065cb2894ac6892e47b5eac2c3c0 # v1.1
+        with:
+          # Path-scoped exclusions:
+          #   - Test directories are excluded entirely (no security value in test harnesses).
+          #   - Tools-only rules: cpp/path-injection, cpp/uncontrolled-allocation-size,
+          #     and cpp/world-writable-file-creation are excluded for CLI tools and
+          #     benchmarks but remain enforced for the core library (src/, hl/src/).
+          patterns: |
+            -**/test/**
+            -**/testpar/**
+            -**/tools/test/**
+            -tools/**:cpp/path-injection
+            -tools/**:cpp/uncontrolled-allocation-size
+            -tools/**:cpp/world-writable-file-creation
+            -hl/tools/**:cpp/path-injection
+            -hl/tools/**:cpp/uncontrolled-allocation-size
+            -hl/tools/**:cpp/world-writable-file-creation
+          input: sarif-results/cpp.sarif
+          output: sarif-results/cpp.sarif
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+        with:
+          sarif_file: sarif-results/cpp.sarif
+
+  # Gate job: always runs even when 'analyze' is skipped (e.g., text-only PRs).
+  # Use "CodeQL / codeql-complete" as the required status check instead of "CodeQL / Analyze".
+  # When analysis is skipped, uploads an empty SARIF so the "Require code scanning
+  # results" branch protection rule is satisfied.
+  codeql-complete:
+    name: codeql-complete
+    if: always()
+    needs: [check-changes, analyze]
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - name: Check analyze result
+        run: |
+          check_result="${{ needs.check-changes.result }}"
+          analyze_result="${{ needs.analyze.result }}"
+
+          if [ "$check_result" != "success" ]; then
+            echo "check-changes job failed with result: $check_result"
+            exit 1
+          fi
+
+          if [ "$analyze_result" = "success" ] || [ "$analyze_result" = "skipped" ]; then
+            echo "CodeQL analysis passed or was skipped (text-only change)."
+          else
+            echo "CodeQL analysis failed with result: $analyze_result"
+            exit 1
+          fi
+
+      - name: Create empty SARIF file
+        if: needs.analyze.result == 'skipped' && github.event_name == 'pull_request'
+        run: |
+          cat <<'EOF' > "${{ github.workspace }}/empty.sarif"
+          {
+            "version": "2.1.0",
+            "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+            "runs": [{
+              "tool": { "driver": { "name": "CodeQL", "rules": [] } },
+              "results": []
+            }]
+          }
+          EOF
+
+      - name: Upload empty SARIF for skipped analysis
+        if: needs.analyze.result == 'skipped' && github.event_name == 'pull_request'
+        uses: github/codeql-action/upload-sarif@c1e7c7a0de342c642bc11d2219ba7a3cb2281f19 
+        with:
+          sarif_file: ${{ github.workspace }}/empty.sarif
+          category: "/language:c-cpp"

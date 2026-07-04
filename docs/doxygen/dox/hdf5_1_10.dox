@@ -1,0 +1,391 @@
+/** \page rel_spec_110 Release Specific Information for HDF5 1.10
+ *
+ * Navigate back: \ref index "Main" / \ref release_specific_info
+ * <hr>
+
+\section sec_rel_spec_110_migrate Migrating from HDF5 1.8 to HDF5 1.10
+The HDF Group will drop support for HDF5 1.8.\* releases in the summer of 2020. We strongly recommend
+that our users start migrating their applications as soon as possible and we ask that any problems that
+are encountered be reported to The HDF Group. Problems can be reported by sending email to help@hdfgroup.org,
+submitting a request to the The HDF Group&rsquo;s Help Desk at <a href="mailto:help@hdfgroup.org">HDF Help Desk</a>,
+or posting to the <a href="https://forum.hdfgroup.org/">HDF Forum</a>.
+
+Please follow these steps for moving your HDF5 application to HDF5 1.10:
+<ol>
+<li>Make sure the latest (1.1.0.5+) version of HDF5 1.10 is installed on your system. You can
+    download the HDF5 1.10 release source code or pre-built binaries from The HDF Group,
+    <a href="https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/index.html">Archive Releases</a>
+    and follow the included installation instructions.</li>
+<li>If on Unix, you can recompile and relink your application with HDF5 1.10, by using the h5cc
+    script with any compiler flags needed for your application. The h5cc script can be found under
+    the bin sub-directory of the HDF5 1.10 installation point. In cases where your software package
+    has a more complex build system and dependencies, just make sure you point to the new
+    HDF5 1.10.* library when rebuilding your software.</li>
+<li>If your application or software package has any regression test suite, run it and make
+    sure that all tests pass.</li>
+<li>Please contact us if you find any problems.</li>
+</ol>
+
+If you have concerns about the files created by the rebuilt application (or software package), you may wish to consider several verification steps to assure that the files can be read by applications built with HDF5 1.8 releases.
+<ol>
+<li>Use the tools you regularly work with to open, browse, and modify the files created by the
+    rebuilt application (for example, HDFView, MATLAB, IDL, etc.).</li>
+<li>If you have an HDF5 1.8.* installation on your system, use \ref sec_cltools_h5dump from that installation to
+    read files created by the rebuilt application. If you encounter any errors, please rerun
+    \ref sec_cltools_h5dump with the <code>--enable-error-stack</code> flag and report the issue.</li>
+<li>If you have files created by your application that were built with HDF5 1.8, use \ref sec_cltools_h5diff
+    from the HDF5 1.8 installation to compare with the files created by the rebuilt application.</li>
+</ol>
+
+If you want to learn more, please see the frequently asked questions (FAQ) below.
+
+\subsection subsec_rel_spec_110_migrate_faq FAQ
+
+\subsubsection subsubsec_rel_spec_110_migrate_faq_1 What is the difference between the HDF5 1.8 and HDF5 1.10 releases ?
+Many new features (e.g., SWMR, VDS, paged allocation, etc.) that required extensions to the HDF5 file format were added to HDF5 1.10.0.
+For more information please see the Release Specific Information pages.
+
+\subsubsection subsubsec_rel_spec_110_migrate_faq_2 Why one should (or should not) move an application to HDF5 1.10 ?
+HDF5 1.8 will not be supported after the May 2020 release, i.e., there will be no more public releases
+of HDF5 1.8 with security patches, bug fixes, performance improvements and support for OSs and compilers.
+
+In addition, applications originally written for use with HDF5 Release 1.8.x can be linked against the HDF5
+Release 1.10.x library, thus taking advantage of performance improvements in 1.10. Users are encouraged to
+move to the latest releases of HDF5 1.10 or to HDF5 1.12.0 (coming out in the summer of 2019) if they want
+to stay with the current HDF5 upgrades.
+
+If you are not planning to upgrade your system environment, and a version of HDF5 1.8.* works for you,
+then there is no reason to upgrade to the latest HDF5. However, if you regularly update your software
+to use the latest HDF5 1.8 maintenance release, then you need to plan a transition to HDF5 1.10 after
+the HDF5 1.8 May 2020 release.
+
+\subsubsection subsubsec_rel_spec_110_migrate_faq_3 Why do I need to rebuild my application with HDF5 1.10?
+The HDF5 1.10.* binaries are not ABI compatible with the HDF5 1.8.* binaries due to changes in the
+public header files and APIs. One has to rebuild an application with the HDF5 1.10.* library. The
+HDF Group tries hard to maintain ABI compatibility for minor maintenance releases, for example when
+moving from 1.8.21 to 1.8.22, or 1.10.5 to 1.10.6, but this is not the case when migrating from
+one major release to another, for example, from 1.8.21 to 1.10.5. If you want to learn more about
+HDF5 versioning please see HDF5 Library Release Version Numbers.
+
+\subsubsection subsubsec_rel_spec_110_migrate_faq_4 Can I migrate my application if I still use the HDF5 1.6 APIs?
+Yes, use the -DH5_USE_16_API compiler flag. For more information see the \ref api-compat-macros.
+
+\subsubsection subsubsec_rel_spec_110_migrate_faq_5 Will my old software read files created by an application rebuilt with HDF5 1.10?
+If the application built on HDF5 Release 1.10 avoids use of the new features and does not request
+use of the latest format, applications built on HDF5 Release 1.8.x will be able to read files the first application created.
+
+\subsubsection subsubsec_rel_spec_110_migrate_faq_6 Can I use the HDF5 tools I use now to read files created with the new HDF5 1.10 features?
+Unfortunately, no. However, we provide a few tools that will help you to “downgrade” the file, so
+it can be opened and used with tools and applications built with the 1.8 versions of HDF5.
+
+If your application uses SWMR, then the \ref sec_cltools_h5format_convert tool can be used to “downgrade” the file to
+the HDF5 1.8 compatible file format without rewriting raw data.
+
+The \ref sec_cltools_h5repack tool with –l flag can be used to repack VDS source datasets into the HDF5 file using
+contiguous, chunked or compact storage.  The tool can also be used to rewrite the file using the
+HDF5 1.8 format by specifying the <code>--high=H5F_LIBVER_V18</code> flag.
+
+\section sec_rel_spec_110_feat New Features in HDF5 Release 1.10
+HDF5 1.10 introduces several new features in the HDF5 library. These new features were added in
+the first three releases of HDF5-1.10. For a brief description of each new feature see:
+\li \ref subsec_rel_spec_110_feat_new_8
+\li \ref subsec_rel_spec_110_feat_new_7
+\li \ref subsec_rel_spec_110_feat_new_6
+\li \ref subsec_rel_spec_110_feat_new_5
+\li \ref subsec_rel_spec_110_feat_new_4
+\li \ref subsec_rel_spec_110_feat_new_3
+\li \ref subsec_rel_spec_110_feat_new_2
+\li \ref subsec_rel_spec_110_feat_new_1
+\li \ref subsec_rel_spec_110_feat_new_0
+
+This release includes changes in the HDF5 storage format. For detailed information on the changes,
+see: Changes to the File Format Specification
+
+/note
+PLEASE NOTE that HDF5-1.8 cannot read files created with the new features described below that are marked with \*.
+
+These changes come into play when one or more of the new features is used or when an application calls for use
+of the latest storage format (#H5Pset_libver_bounds). See the \ref_rfc20160105 for more details.
+
+Due to the requirements of some of the new features, the format of a 1.10.x HDF5 file is likely to be different
+from that of a 1.8.x HDF5 file. This means that tools and applications built to read 1.10.x files will be able
+to read a 1.8.x file, but tools built to read 1.8.x files may not be able to read a 1.10.x file.
+
+If an application built on HDF5 Release 1.10 avoids use of the new features and does not request use of the latest
+format, applications built on HDF5 Release 1.8.x will be able to read files the first application created. In
+addition, applications originally written for use with HDF5 Release 1.8.x can be linked against a suitably
+configured HDF5 Release 1.10.x library, thus taking advantage of performance improvements in 1.10.
+
+\subsection subsec_rel_spec_110_feat_new_8 New Features Introduced in HDF5 1.10.8
+The following important new features and changes were introduced in HDF5-1.10.8. For complete details
+see the Release Notes and the \ref sec_rel_spec_110_change page.
+
+\subsection subsec_rel_spec_110_feat_new_7 New Features Introduced in HDF5 1.10.7
+The following important new features and changes were introduced in HDF5-1.10.7. For complete details
+see the Release Notes and the \ref sec_rel_spec_110_change page.
+
+<strong>Addition of AEC (open source SZip) Compression Library</strong>
+HDF5 now supports building with the AEC library as a replacement library for SZip.
+
+<strong>Addition of the Splitter and Mirror VFDs</strong>
+Two VFDs were added in this release:
+\li The Splitter VFD maintains separate R/W and W/O channels for "concurrent" file writes to two files
+    using a single HDF5 file handle.
+\li The Mirror VFD uses TCP/IP sockets to perform write-only (W/O) file I/O on a remote machine.
+
+<strong>Improvements to Performance</strong>
+Performance has continued to improve in this release. Please see the images under
+Compatibility and Performance Issues on the \ref sec_rel_spec_110_change page.
+
+<strong>Addition of Hyperslab Selection Functions</strong>
+Several hyperslab selection routines introduced in HDF5-1.12 were ported to 1.10. See the
+\ref sec_rel_spec_110_change page for details.
+
+\subsection subsec_rel_spec_110_feat_new_6 New Features Introduced in HDF5 1.10.6
+The following important new features and changes were introduced in HDF5-1.10.6. For complete details
+see the Release Notes and the \ref sec_rel_spec_110_change page:
+
+\subsubsection subsubsec_rel_spec_110_feat_new_6_cmake Improvements to the CMake Support
+Several improvements were added to the CMake support, including:
+\li Support was added for VS 2019 on Windows (with CMake 3.15).
+\li Support was added for MinGW using a toolchain file on Linux (C only).
+
+\subsubsection subsubsec_rel_spec_110_feat_new_6_virt Virtual File Drivers - S3 and HDFS
+Two Virtual File Drivers (VFDs) have been introduced in 1.10.6:
+\li The S3 VFD enables access to an HDF5 file via the Amazon Simple Storage Service (Amazon S3).
+\li The HDFS VFD enables access to an HDF5 file with the Hadoop Distributed File System (HDFS).
+
+See the Virtual File Drivers - S3 and HDFS page for more information.
+
+\subsubsection subsubsec_rel_spec_110_feat_new_6_perf Improvement to Performance
+Performance was improved when creating a large number of small datasets.
+
+\subsection subsec_rel_spec_110_feat_new_5 New Features Introduced in HDF5 1.10.5
+The following important new features were added in HDF5-1.10.5. Please see the release announcement
+and \ref sec_rel_spec_110_change page for more details regarding these features:
+
+\subsubsection subsubsec_rel_spec_110_feat_new_5_ohdr Minimized Dataset Object Headers
+The ability to minimize dataset object headers was added to reduce the file bloat caused by extra
+space in the dataset object header. The file bloat can occur when creating many, very small
+datasets. See the Release Notes and \ref_rfc20181231 for more details regarding this issue.
+
+The following APIs were introduced to support this feature:
+\li #H5Fget_dset_no_attrs_hint - Retrieves the setting for determining whether the specified
+    file does or does not create minimized dataset object headers
+\li #H5Fset_dset_no_attrs_hint - Sets the flag to create minimized dataset object headers
+\li #H5Pget_dset_no_attrs_hint - Retrieves the setting for determining whether the specified
+    DCPL does or does not create minimized dataset object headers
+\li #H5Pset_dset_no_attrs_hint - Sets the flag to create minimized dataset object headers
+
+\subsubsection subsubsec_rel_spec_110_feat_new_5_parchg Parallel Library Change
+
+A change was added to the default behavior in parallel when reading the same dataset in its
+entirety (i.e. H5S_ALL dataset selection) which is being read by all the processes collectively.
+The dataset must be contiguous, less than 2GB, and of an atomic datatype. The new behavior in the
+HDF5 library uses an MPI_Bcast to pass the data read from the disk by the root process to the
+remaining processes in the MPI communicator associated with the HDF5 file.
+
+A CFD application was used to benchmark CGNS with:
+\li compact storage
+\li read-proc0-and-bcast
+
+These results were reported by Greg Sjaardema from Sandia National Laboratories.
+
+(image missing)
+
+Series 1 is the read-proc0-and-bcast solution
+Series 2 is a single MPI_Bcast
+Series 3 uses multiple MPI_Bcast totaling 2 MiB total data 64 bytes at a time (IIRC)
+Series 4 is unmodified CGNS develop
+Compact is using compact storage
+Compact 192 is also using compact storage
+Compact 384 is also using compact storage
+The last 3 "compact" curves are just three different batch jobs on 192, 384, and 552 nodes
+(with 36 core/node). The Series 2 and 3 curves are not related to the CGNS benchmark, but give
+a qualitative indication on the scaling behavior of MPI_Bcast. Both read-proc0-and-bcast and
+compact storage follow MPI_Bcast's trend, which makes sense since both methods rely on
+MPI_Bcast. See \ref_rfc20181220 for better resolution.
+
+\subsubsection subsubsec_rel_spec_110_feat_new_5_mpi OpenMPI Support
+Support for OpenMPI was added. For known problems and issues please see OpenMPI Build Issues.
+To better support OpenMPI, all MPI-1 API calls were replaced by MPI-2 equivalents.
+
+\subsubsection subsubsec_rel_spec_110_feat_new_5_chunk Chunk Query Functions
+New functions were added to find locations, sizes and filters applied to chunks of a dataset.
+This functionality is useful for applications that need to read chunks directly from the file,
+bypassing the HDF5 library.
+\li #H5Dget_chunk_info - Retrieves information about a chunk specified by the chunk index
+\li #H5Dget_chunk_info_by_coord - Retrieves information about a chunk specified by its coordinates
+\li #H5Dget_num_chunks - Retrieves number of chunks that have nonempty intersection with a specified selection
+
+See \ref_rfc20180620 for more details.
+
+\subsection subsec_rel_spec_110_feat_new_4 New Features Introduced in HDF5 1.10.4
+This release was incorrectly developed and should not be used.
+
+\subsection subsec_rel_spec_110_feat_new_3 New Features Introduced in HDF5 1.10.3
+This release was incorrectly developed and should not be used.
+
+\subsection subsec_rel_spec_110_feat_new_2 New Features Introduced in HDF5 1.10.2
+Several important features and changes were added to HDF5 1.10.2. See the release announcement
+and blog for complete details. Following are the major new features:
+
+\subsection subsec_rel_spec_110_feat_new_2_compat Forward Compatibility for HDF5 1.8-based Applications Accessing Files Created by HDF5 1.10.2 ( RFC )
+In HDF5 1.8.0, the #H5Pset_libver_bounds function was introduced for specifying the
+earliest ("low") and latest ("high") versions of the library to use when writing objects.
+With HDF5 1.10.2, new values for "low" and "high" were introduced: #H5F_LIBVER_V18 and #H5F_LIBVER_LATEST is
+now mapped to #H5F_LIBVER_V110. See the #H5Pset_libver_bounds function for details.
+
+\subsubsection subsubsec_rel_spec_110_feat_new_2_perf Performance Optimizations for HDF5 Parallel Applications
+Optimizations were introduced to parallel HDF5 for improving the performance of open,
+close and flush operations at scale.
+
+\subsubsection subsubsec_rel_spec_110_feat_new_2_comp Using Compression with HDF5 Parallel Applications
+HDF5 parallel applications can now write data using compression (and other filters
+such as the Fletcher32 checksum filter).
+
+\subsection subsec_rel_spec_110_feat_new_1 New Features Introduced in HDF5 1.10.1
+
+\subsubsection subsubsec_rel_spec_110_feat_new_1_cache Metadata Cache Image -> Fine-tuning the Metadata Cache *
+HDF5 metadata is typically small, and scattered throughout the HDF5 file. This can affect
+performance, particularly on large HPC systems. The Metadata Cache Image feature can improve
+performance by writing the metadata cache in a single block on file close, and then populating
+the cache with the contents of this block on file open, thus avoiding the many small I/O
+operations that would otherwise be required on file open and close.
+
+See \ref_rfc20150615 for more details.
+
+\subsubsection subsubsec_rel_spec_110_feat_new_1_evict Metadata Cache Evict on Close -> Fine-tuning the Metadata Cache
+The HDF5 library's metadata cache is fairly conservative about holding on to HDF5 object
+metadata (object headers, chunk index structures, etc.), which can cause the cache size
+to grow, resulting in memory pressure on an application or system. The "evict on close"
+property will cause all metadata for an object to be evicted from the cache as long as
+metadata is not referenced from any other open object.
+
+\subsubsection subsubsec_rel_spec_110_feat_new_1_pagg Paged Aggregation -> File Space Management *
+The current HDF5 file space allocation accumulates small pieces of metadata and raw
+data in aggregator blocks which are not page aligned and vary widely in sizes. The
+paged aggregation feature was implemented to provide efficient paged access of these
+small pieces of metadata and raw data.
+
+See \ref_rfc20120523 and \ref_rfc20121024 for more details.
+
+\subsubsection subsubsec_rel_spec_110_feat_new_1_pbuf Page Buffering
+Small and random I/O accesses on parallel file systems result in poor performance
+for applications. Page buffering in conjunction with paged aggregation can improve
+performance by giving an application control of minimizing HDF5 I/O requests to a
+specific granularity and alignment.
+
+See \ref_rfc20150709 for more details.
+
+\subsection subsec_rel_spec_110_feat_new_0 New Features Introduced in HDF5 1.10.0
+
+\subsubsection subsubsec_rel_spec_110_feat_new_0_smr SWMR *
+Data acquisition and computer modeling systems often need to analyze and visualize data
+while it is being written. It is not unusual, for example, for an application to produce
+results in the middle of a run that suggest some basic parameters be changed, sensors be
+adjusted, or the run be scrapped entirely.
+
+To enable users to check on such systems, we have been developing a concurrent read/write
+file access pattern we call SWMR (pronounced swimmer). SWMR is short for
+single-writer/multiple-reader. SWMR functionality allows a writer process to add data
+to a file while multiple reader processes read from the file.
+
+\subsubsection subsubsec_rel_spec_110_feat_new_0_tune Fine-tuning the Metadata Cache
+The orderly operation of the metadata cache is crucial to SWMR functioning. A number
+of APIs have been developed to handle the requests from writer and reader processes
+and to give applications the control of the metadata cache they might need. However,
+the metadata cache APIs can be used when SWMR is not being used; so, these functions
+are described separately.
+
+\subsubsection subsubsec_rel_spec_110_feat_new_0_coll Collective Metadata I/O
+Calls for HDF5 metadata can result in many small reads and writes. On metadata reads,
+collective metadata I/O can improve performance by allowing the library to perform
+optimizations when reading the metadata, by having one rank read the data and broadcasting
+it to all other ranks.
+
+Collective metadata I/O improves metadata write performance through the construction
+of an MPI derived datatype that is then written collectively in a single call.
+
+\subsubsection subsubsec_rel_spec_110_feat_new_0_fspace File Space Management *
+Usage patterns when working with an HDF5 file sometimes result in wasted space within the file
+ This can also impair access times when working with the resulting files. The new file space
+ management feature provides strategies for managing space in a file to improve performance
+ in both of these arenas.
+
+\subsubsection subsubsec_rel_spec_110_feat_new_0_vds Virtual Datasets (VDS) *
+With a growing amount of data in HDF5, the need has emerged to access data stored across
+multiple HDF5 files using standard HDF5 objects, such as groups and datasets, without rewriting
+or rearranging the data. The new virtual dataset (VDS) feature enables an application to draw
+on multiple datasets and files to create virtual datasets without moving or rewriting any data.
+
+\subsubsection subsubsec_rel_spec_110_feat_new_0_edge Partial Edge Chunk Options *
+New options for the storage and filtering of partial edge chunks in a dataset provide a tool
+for tuning I/O speed and file size in cases where the dataset size may not be a multiple of the chunk size.
+
+\subsubsection subsubsec_rel_spec_110_feat_new_0_add Additional New APIs
+In addition to the features described above, several additional new functions, a new struct,
+and new macros have been introduced or newly versioned in this release.
+
+\subsubsection subsubsec_rel_spec_110_feat_new_0_form Changes to the File Format Specification
+The file format of the HDF5 library has been changed to support the new features in HDF5-1.10.
+
+See the \ref FMT11 for complete details on the changes. This specification describes how the bytes in
+an HDF5 file are organized on the storage media where the file is kept. In other words, when a file is
+written to disk, the file will be written according to the information described in this file. The
+following sections have been added or changed:
+\li Another version of the superblock was added.
+\li Additional B-tree types were added to the version 2 B-trees.
+\li The global heap block for virtual datasets was added.
+\li The Data Layout Message was changed: the name was changed, and version 4 of the data layout message
+    was added for the virtual type.
+\li Additional types of indexes were added for dataset chunks.
+
+HDF5-1.8 cannot read files created with the new features described on this page that are marked with *.
+
+\subsection subsec_rel_spec_110_feat_add Additional New APIs
+This page describes various new functions, a new struct, and new macros that are either unrelated to
+new features described elsewhere or have aspects that are unrelated to the feature where they are
+otherwise described. The page includes the following sections:
+\li Versioned Functions and Struct with Associated Macros<br />
+    Two functions in the HDF5 C interface, and a struct associated with one of those functions,
+    have been versioned in this release. At the same time, interface compatibility macros were
+    created for programmatic management of these functions. See \ref api-compat-macros in HDF5
+    for a detailed discussion of versioned functions and structs and the related macros.<br />
+    <ul>
+    <li>#H5Fget_info - Macro for programmatic control of versioned functions</li>
+    <li>#H5Fget_info1 Original function</li>
+    <li>#H5Fget_info2 New version introduced at Release 1.10.0</li>
+    <li>#H5Rdereference Macro for programmatic control of versioned functions</li>
+    <li>#H5Rdereference1 Original function</li>
+    <li>#H5Rdereference2 New version introduced at Release 1.10.0</li>
+    </ul>
+\li Property List Encoding and Decoding Functions<br />
+    Property List Encoding and Decoding Functions Functions have been added in the HDF5 C interface
+    to encode and decode property lists.<br />
+    <ul>
+    <li>#H5Pencode</li>
+    <li>#H5Pdecode</li>
+    </ul>
+\li External File Prefix Functions<br />
+    External File Prefix Functions Datasets that store raw data in external files can be created
+    in HDF5. Functions have been added in the HDF5 C interface to enable such external files to be
+    located via a relative path from the directory where the HDF5 file containing such a dataset is located:<br />
+    <ul>
+    <li>#H5Pset_efile_prefix</li>
+    <li>#H5Pget_efile_prefix</li>
+    </ul>
+
+RFCs for the new features in HDF5-1.10:
+\li \ref_rfc20180620
+\li \ref_rfc20181231
+\li \ref subsubsec_rel_spec_110_feat_new_5_parchg
+\li \ref_rfc20181220
+\li \ref_rfc20160105
+
+\ref rel_spec_110_change
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref release_specific_info
+ *
+*/

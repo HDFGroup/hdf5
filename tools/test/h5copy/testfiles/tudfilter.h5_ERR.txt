@@ -1,2 +1,0 @@
-Copying file <./testfiles/tudfilter.h5> and object </dynlibud> to file <./testfiles/h5copy_plugin_fail_ERR.out.h5> and object </dynlibud>
-EXIT CODE: 0

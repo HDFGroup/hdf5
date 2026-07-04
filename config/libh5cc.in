@@ -1,0 +1,279 @@
+#! /bin/sh
+##
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the LICENSE file, which can be found at the root of the source code
+# distribution tree, or in https://www.hdfgroup.org/licenses.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+##
+
+# Constants definitions
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
+# Variables to control final behavior of script
+do_show="no"
+do_compile="yes"
+do_link="yes"
+
+# Add the HDF5 library directory to the rpath of the
+# built executable/library by default
+add_rpath="yes"
+
+# Variables for arguments passed to pkg-config and compiler
+pc_args="${HDF5_PKG_CONFIG_ARGS}"
+compile_args=""
+prefix=""
+libdir=""
+
+# Variables for flags passed to pkg-config and compiler
+pc_flags=""
+
+status=$EXIT_SUCCESS
+
+# Determine name and location of script
+prg=$0
+if [ ! -e "$prg" ]; then
+  case $prg in
+    (*/*) exit 1;;
+    (*) prg=$(command -v -- "$prg") || exit;;
+  esac
+fi
+dir=$(
+  cd -P -- "$(dirname -- "$prg")/.." && pwd -P
+) || exit
+
+prog_name=$(basename -- "$prg") || exit
+prg=$dir/bin/$prog_name
+
+prefix=$dir
+
+libdir=$dir/@HDF5_INSTALL_LIB_DIR@
+
+export PKG_CONFIG_PATH=$libdir/pkgconfig
+
+# Show the configuration summary of the library recorded in the
+# libhdf5.settings file residing in the lib directory.
+showconfigure()
+{
+  cat $dir/@HDF5_INSTALL_LIB_DIR@/libhdf5.settings
+  status=$?
+}
+
+usage() {
+  # "How-to use" message.
+  echo "usage: $prog_name [OPTIONS] <compile line>"
+  echo "  OPTIONS:"
+  echo "    -help | --help | -h   This help message."
+  echo "    -echo                 Show all the shell commands executed"
+  echo "    -show                 Show the commands without executing them"
+  echo "    -showconfig           Show the HDF5 library configuration summary"
+  echo "    -shlib                Compile with shared HDF5 libraries [default for"
+  echo "                          hdf5 built with shared libraries]"
+  echo "    -noshlib              Compile with static HDF5 libraries [default for"
+  echo "                          hdf5 built without shared libraries]"
+  echo "    -nohl                 By default, $prog_name builds and links against the"
+  echo "                          high-level HDF5 library, if it is available."
+  echo "                          Specifying the -nohl option disables this behavior."
+  echo "    -norpath              By default, $prog_name adds the library directory"
+  echo "                          of the HDF5 installation to the rpath of the resulting"
+  echo "                          executable/library when linking against shared HDF5"
+  echo "                          libraries. If this behavior is not desired or is"
+  echo "                          problematic for a particular compiler/linker, specifying"
+  echo "                          the -norpath option disables this behavior."
+  echo "    -c                    Compile and assemble without linking. When combined"
+  echo "                          with -show, displays only the compile flags without"
+  echo "                          displaying the linking flags. Otherwise, passes the"
+  echo "                          '-c' flag to the compiler, where it's assumed that"
+  echo "                          the flag will have the behavior of 'compile and"
+  echo "                          assemble without linking'. Note that this may not"
+  echo "                          be the case for some compilers."
+  echo " "
+  echo "  <compile line>  - the normal compile line options for your compiler."
+  echo "                    $prog_name uses the same compiler you used to compile"
+  echo "                    HDF5, unless an alternate compiler is specified at"
+  echo "                    configuration time. Check with your compiler's man"
+  echo "                    pages for more information on which options are needed."
+  echo " "
+  echo "                    All options specific to $prog_name should appear BEFORE"
+  echo "                    any options specified for <compile line>."
+  echo " "
+  echo " You can override whether or not to use shared or static HDF5 libraries"
+  echo " by setting the following environment variable:"
+  echo " "
+  echo "   HDF5_USE_SHLIB=[yes|no]  -  use shared or static version of the HDF5 library."
+  echo "                               precedence is given to the -shlib/-noshlib options."
+  echo "                                 [default: yes except when built with only"
+  echo "                                           static libraries]"
+  echo " "
+  echo " $prog_name uses pkg-config to determine additional flags to pass to the"
+  echo " compiler. You can specify any options to pass to pkg-config by setting the"
+  echo " following environment variable:"
+  echo " "
+  echo "   HDF5_PKG_CONFIG_ARGS"
+  echo " "
+}
+
+if test $# -eq 0; then
+  # No parameters specified, issue usage statement and exit.
+  usage
+  exit $EXIT_FAILURE
+fi
+
+# If a shared library is available, the default will be to use it. If the only
+# available library is static, it will be used by default.  The user can
+# override either default, although choosing an unavailable library will result
+# in errors from h5cc.
+SHARED_AVAILABLE="@BUILD_SHARED_LIBS@"
+STATIC_AVAILABLE="@BUILD_STATIC_LIBS@"
+if test "${SHARED_AVAILABLE}" = "ON"; then
+  USE_SHARED_LIB="${HDF5_USE_SHLIB:-yes}"
+else
+  USE_SHARED_LIB="${HDF5_USE_SHLIB:-no}"
+fi
+
+# If the high-level library is available, the default will be to build and
+# link against it.
+USE_HL_LIB="yes"
+HL_AVAILABLE="@HDF5_BUILD_HL_LIB@"
+if test "${HL_AVAILABLE}" = "ON"; then
+  HL_LIB_NAME="@_PKG_CONFIG_HL_LIBNAME@"
+else
+  USE_HL_LIB="no"
+fi
+
+for arg in $@ ; do
+  case "$arg" in
+    -help|--help|-h)
+      usage
+      exit $EXIT_SUCCESS
+      ;;
+    -echo)
+      shift
+      set -x
+      ;;
+    -show)
+      shift
+      # Delay showing command-line until arguments have been processed
+      do_show="yes"
+      ;;
+    -showconfig)
+      showconfigure
+      exit $status
+      ;;
+    -shlib)
+      shift
+      USE_SHARED_LIB="yes"
+      ;;
+    -noshlib)
+      shift
+      USE_SHARED_LIB="no"
+      ;;
+    -nohl)
+      shift
+      USE_HL_LIB="no"
+      ;;
+    -norpath)
+      shift
+      add_rpath="no"
+      ;;
+    -c)
+      compile_args="${compile_args:+${compile_args} }$arg"
+      shift
+
+      do_link="no"
+      ;;
+    *)
+      # For now, any unrecognized arguments are passed directly on to the
+      # compiler to simplify handling of them. It's assumed that any
+      # h5cc-specific options come before these arguments. If this proves
+      # to be insufficient, arguments should be stored somewhere and
+      # shifted off the command-line.
+      ;;
+  esac
+done
+
+# Check availability of default or requested HDF5 library type
+if test "${USE_SHARED_LIB}" = "yes" -a "${SHARED_AVAILABLE}" != "ON"; then
+  echo "error: linking against shared HDF5 libraries was requested, but shared HDF5 libraries aren't available" >&2
+  exit $EXIT_FAILURE
+elif test "${USE_SHARED_LIB}" = "no" -a "${STATIC_AVAILABLE}" != "ON"; then
+  echo "error: linking against static HDF5 libraries was requested, but static HDF5 libraries aren't available" >&2
+  exit $EXIT_FAILURE
+fi
+
+# Add in relevant flags to pkg-config command
+pc_args="${pc_args:+${pc_args} }--define-variable=prefix=$prefix"
+
+if test "$do_compile" = "yes"; then
+  pc_args="${pc_args:+${pc_args} }--cflags"
+fi
+
+if test "$do_link" = "yes"; then
+  pc_args="${pc_args:+${pc_args} }--libs"
+fi
+
+if test "$USE_SHARED_LIB" = "no"; then
+  pc_args="${pc_args:+${pc_args} }--static"
+fi
+
+pc_args="${pc_args:+${pc_args} }@_PKG_CONFIG_LIBNAME@"
+
+# Build and link against high-level library,
+# unless requested not to.
+if test "${USE_HL_LIB}" = "yes"; then
+  pc_args="${pc_args:+${pc_args} }${HL_LIB_NAME}"
+fi
+
+# Evaluate pkg-config command for later use
+pc_flags="`pkg-config $pc_args`"
+if test $? -ne 0; then
+  echo "pkg-config failed with arguments: $pc_args" >&2
+  exit $EXIT_FAILURE
+fi
+
+# If linking against static HDF5 libraries, fixup the
+# flags generated by pkg-config to point to the static
+# libraries
+if test "$do_link" = "yes" -a "$USE_SHARED_LIB" = "no"; then
+  # Escape '/' in libdir path to not conflict with sed delimiter
+  escaped_libdir=$(echo "$libdir" | sed 's/\//\\\//g')
+
+  # Replace flags of form '-lhdf5*' with path to matching static library
+  edited_pc_flags=$(echo "$pc_flags" | sed -E 's/-l(hdf5[a-z0-9_]*)/'"${escaped_libdir}\/"'lib\1.a/g')
+  if test $? -ne 0; then
+    echo "couldn't edit flags to compile against static HDF5 libraries" >&2
+    exit $EXIT_FAILURE
+  fi
+
+  pc_flags=$edited_pc_flags
+fi
+
+# If linking against shared HDF5 libraries, add the
+# HDF5 library directory to the rpath of the executable
+# if not requested not to.
+if test "$do_link" = "yes" -a "$USE_SHARED_LIB" = "yes" -a "$add_rpath" = "yes"; then
+  # Simply assume that the -Wl,-rpath,<dir> form is acceptable
+  # for the compiler and -rpath is a linker option. Add
+  # compiler/linker-specific logic as needed.
+  compile_args="${compile_args:+${compile_args} }-Wl,-rpath,$libdir"
+fi
+
+# If -show was passed, only output the command-line, don't execute it
+if test "$do_show" = "yes"; then
+  echo @_PKG_CONFIG_COMPILER@ ${compile_args:+"${compile_args} "}"$@" "$pc_flags"
+  exit $EXIT_SUCCESS
+fi
+
+@_PKG_CONFIG_COMPILER@ $compile_args "$@" $pc_flags
+status=$?
+
+if test $status -ne 0; then
+  echo "compile failed with command: @_PKG_CONFIG_COMPILER@ $compile_args $@ $pc_flags" >&2
+fi
+
+exit $status

@@ -1,0 +1,36 @@
+/** \page Cookbook Cookbook
+
+Navigate back: \ref index "Main"
+<hr>
+
+Healthy, everyday recipes for every taste and budget...
+
+\ref Files
+\li \ref CB_FreeSpace
+\li \ref CB_RemoveUnusedSpace
+\li \ref CB_UserBlock
+
+\ref Attributes
+\li \ref CB_LargeAttributes
+
+\ref Accessibility
+\li \ref CB_MaintainCompat
+
+\ref Performance
+\li \ref CB_MDCPerf
+
+\ref cmake-presets
+\li \ref sec_cmake_presets_build
+\li \ref sec_cmake_presets_files
+
+\ref CB_MavenArtifacts
+\li \ref sec_maven_intro
+\li \ref subsec_maven_artifacts
+\li \ref subsec_maven_jni
+\li \ref subsec_maven_ffm
+\li \ref subsec_maven_examples
+
+<hr>
+Navigate back: \ref index "Main"
+
+ */

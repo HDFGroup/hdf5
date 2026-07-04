@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -25,14 +25,10 @@
  *
  * Return:      Success:    None
  *              Failure:    Abort
- *
- * Programmer:  Albert Cheng
- *              January 9, 2003
- *
  *-------------------------------------------------------------------------
  */
 void
-test_fapl_mpio_dup(void)
+test_fapl_mpio_dup(void H5_ATTR_UNUSED *params)
 {
     int      mpi_size, mpi_rank;
     MPI_Comm comm, comm_tmp;
@@ -46,13 +42,13 @@ test_fapl_mpio_dup(void)
     int      nkeys, nkeys_tmp;
 
     if (VERBOSE_MED)
-        HDprintf("Verify fapl_mpio duplicates communicator and INFO objects\n");
+        printf("Verify fapl_mpio duplicates communicator and INFO objects\n");
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     if (VERBOSE_MED)
-        HDprintf("rank/size of MPI_COMM_WORLD are %d/%d\n", mpi_rank, mpi_size);
+        printf("rank/size of MPI_COMM_WORLD are %d/%d\n", mpi_rank, mpi_size);
 
     /* Create a new communicator that has the same processes as MPI_COMM_WORLD.
      * Use MPI_Comm_split because it is simpler than MPI_Comm_create
@@ -62,7 +58,7 @@ test_fapl_mpio_dup(void)
     MPI_Comm_size(comm, &mpi_size_old);
     MPI_Comm_rank(comm, &mpi_rank_old);
     if (VERBOSE_MED)
-        HDprintf("rank/size of comm are %d/%d\n", mpi_rank_old, mpi_size_old);
+        printf("rank/size of comm are %d/%d\n", mpi_rank_old, mpi_size_old);
 
     /* create a new INFO object with some trivial information. */
     mrc = MPI_Info_create(&info);
@@ -99,7 +95,7 @@ test_fapl_mpio_dup(void)
     MPI_Comm_size(comm_tmp, &mpi_size_tmp);
     MPI_Comm_rank(comm_tmp, &mpi_rank_tmp);
     if (VERBOSE_MED)
-        HDprintf("After H5Pget_fapl_mpio: rank/size of comm are %d/%d\n", mpi_rank_tmp, mpi_size_tmp);
+        printf("After H5Pget_fapl_mpio: rank/size of comm are %d/%d\n", mpi_rank_tmp, mpi_size_tmp);
     VRFY((mpi_size_tmp == mpi_size), "MPI_Comm_size");
     VRFY((mpi_rank_tmp == mpi_rank), "MPI_Comm_rank");
     if (MPI_INFO_NULL != info_tmp) {
@@ -146,7 +142,7 @@ test_fapl_mpio_dup(void)
     MPI_Comm_size(comm_tmp, &mpi_size_tmp);
     MPI_Comm_rank(comm_tmp, &mpi_rank_tmp);
     if (VERBOSE_MED)
-        HDprintf("After second H5Pget_fapl_mpio: rank/size of comm are %d/%d\n", mpi_rank_tmp, mpi_size_tmp);
+        printf("After second H5Pget_fapl_mpio: rank/size of comm are %d/%d\n", mpi_rank_tmp, mpi_size_tmp);
     VRFY((mpi_size_tmp == mpi_size), "MPI_Comm_size");
     VRFY((mpi_rank_tmp == mpi_rank), "MPI_Comm_rank");
     if (MPI_INFO_NULL != info_tmp) {
@@ -165,7 +161,7 @@ test_fapl_mpio_dup(void)
     MPI_Comm_size(comm_tmp, &mpi_size_tmp);
     MPI_Comm_rank(comm_tmp, &mpi_rank_tmp);
     if (VERBOSE_MED)
-        HDprintf("After Property list closed: rank/size of comm are %d/%d\n", mpi_rank_tmp, mpi_size_tmp);
+        printf("After Property list closed: rank/size of comm are %d/%d\n", mpi_rank_tmp, mpi_size_tmp);
     if (MPI_INFO_NULL != info_tmp) {
         mrc = MPI_Info_get_nkeys(info_tmp, &nkeys_tmp);
         VRFY((mrc == MPI_SUCCESS), "MPI_Info_get_nkeys");
@@ -181,3 +177,139 @@ test_fapl_mpio_dup(void)
         VRFY((mrc == MPI_SUCCESS), "MPI_Info_free");
     }
 } /* end test_fapl_mpio_dup() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_get_dxpl_mpio
+ *
+ * Purpose:     Test that H5Pget_dxpl_mpio will properly return the data
+ *              transfer mode of collective and independent I/O access
+ *              after setting it and writing some data.
+ *
+ * Return:      Success:    None
+ *              Failure:    Abort
+ *-------------------------------------------------------------------------
+ */
+void
+test_get_dxpl_mpio(void *params)
+{
+    hid_t            fid  = H5I_INVALID_HID;
+    hid_t            sid  = H5I_INVALID_HID;
+    hid_t            did  = H5I_INVALID_HID;
+    hid_t            fapl = H5I_INVALID_HID;
+    hid_t            dxpl = H5I_INVALID_HID;
+    H5FD_mpio_xfer_t xfer_mode;
+    hsize_t          dims[2] = {100, 100};
+    hsize_t          i, j;
+    int             *data = NULL;
+    int              mpi_rank, mpi_size;
+    const char      *filename;
+    herr_t           ret;
+
+    if (VERBOSE_MED)
+        printf("Verify get_dxpl_mpio correctly gets the data transfer mode"
+               "set in the data transfer property list after a write\n");
+
+    /* Set up MPI for VRFY macro */
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    /* Initialize data array */
+    data = malloc(100 * 100 * sizeof(*data));
+    VRFY((data != NULL), "Data buffer initialized properly");
+
+    /* Create parallel fapl */
+    fapl = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, FACC_MPIO);
+    VRFY((fapl >= 0), "Fapl creation succeeded");
+
+    /* Create a file */
+    filename = ((const H5Ptest_param_t *)params)->name;
+    fid      = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    VRFY((fid >= 0), "H5Fcreate succeeded");
+
+    /* Create a dataset */
+    sid = H5Screate_simple(2, dims, NULL);
+    VRFY((sid >= 0), "H5Screate succeeded");
+    did = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((did >= 0), "H5Dcreate2 succeeded");
+
+    /* Use collective I/O access */
+    dxpl = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl >= 0), "H5Pcreate succeeded");
+    ret = H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE);
+    VRFY((ret >= 0), "H5Pset_dxpl_mpio set to collective succeeded");
+
+    /* Write some data */
+    for (i = 0; i < dims[0]; i++)
+        for (j = 0; j < dims[1]; j++)
+            data[(i * 100) + j] = (int)(i + (i * j) + j);
+
+    ret = H5Dwrite(did, H5T_NATIVE_INT, sid, sid, dxpl, data);
+    VRFY((ret >= 0), "H5Dwrite succeeded");
+
+    /* Check to make sure the property is still correct */
+    ret = H5Pget_dxpl_mpio(dxpl, &xfer_mode);
+    VRFY((ret >= 0), "H5Pget_dxpl_mpio succeeded");
+    VRFY((xfer_mode == H5FD_MPIO_COLLECTIVE), "Xfer_mode retrieved"
+                                              " successfully");
+
+    /* Read the data */
+    ret = H5Dread(did, H5T_NATIVE_INT, sid, sid, dxpl, data);
+    VRFY((ret >= 0), "H5Dread succeeded");
+
+    /* Check to make sure the property is still correct */
+    ret = H5Pget_dxpl_mpio(dxpl, &xfer_mode);
+    VRFY((ret >= 0), "H5Pget_dxpl_mpio succeeded");
+    VRFY((xfer_mode == H5FD_MPIO_COLLECTIVE), "Xfer_mode retrieved"
+                                              " successfully");
+
+    /* Check it does nothing on receiving NULL */
+    ret = H5Pget_dxpl_mpio(dxpl, NULL);
+    VRFY((ret >= 0), "H5Pget_dxpl_mpio succeeded on NULL input");
+
+    /* Use independent I/O access */
+    ret = H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_INDEPENDENT);
+    VRFY((ret >= 0), "H5Pset_dxpl_mpio set to independent succeeded");
+
+    /* Write some data */
+    for (i = 0; i < dims[0]; i++)
+        for (j = 0; j < dims[1]; j++)
+            data[(i * 100) + j] = (int)(i + (j * j) + i);
+
+    ret = H5Dwrite(did, H5T_NATIVE_INT, sid, sid, dxpl, data);
+    VRFY((ret >= 0), "H5Dwrite succeeded");
+
+    /* Check to make sure the property is still correct */
+    ret = H5Pget_dxpl_mpio(dxpl, &xfer_mode);
+    VRFY((ret >= 0), "H5Pget_dxpl_mpio succeeded");
+    VRFY((xfer_mode == H5FD_MPIO_INDEPENDENT), "Xfer_mode retrieved"
+                                               " successfully");
+
+    /* Read the data */
+    ret = H5Dread(did, H5T_NATIVE_INT, sid, sid, dxpl, data);
+    VRFY((ret >= 0), "H5Dread succeeded");
+
+    /* Check to make sure the property is still correct */
+    ret = H5Pget_dxpl_mpio(dxpl, &xfer_mode);
+    VRFY((ret >= 0), "H5Pget_dxpl_mpio succeeded");
+    VRFY((xfer_mode == H5FD_MPIO_INDEPENDENT), "Xfer_mode retrieved"
+                                               " successfully");
+
+    /* Close everything */
+    free(data);
+
+    ret = H5Pclose(fapl);
+    VRFY((ret >= 0), "H5Pclose succeeded");
+
+    ret = H5Pclose(dxpl);
+    VRFY((ret >= 0), "H5Pclose succeeded");
+
+    ret = H5Dclose(did);
+    VRFY((ret >= 0), "H5Dclose succeeded");
+
+    ret = H5Sclose(sid);
+    VRFY((ret >= 0), "H5Sclose succeeded");
+
+    ret = H5Fclose(fid);
+    VRFY((ret >= 0), "H5Fclose succeeded");
+
+} /* end test_get_dxpl_mpio() */

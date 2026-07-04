@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -38,7 +38,6 @@ namespace H5 {
 // Description
 //              This constructor creates a PredType object by copying
 //              the provided HDF5 predefined datatype.
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PredType::PredType(const hid_t predtype_id) : AtomType(predtype_id)
 {
@@ -48,7 +47,6 @@ PredType::PredType(const hid_t predtype_id) : AtomType(predtype_id)
 //--------------------------------------------------------------------------
 // Function:    PredType default constructor
 ///\brief       Default constructor: Creates a stub predefined datatype
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PredType::PredType() : AtomType()
 {
@@ -59,7 +57,6 @@ PredType::PredType() : AtomType()
 // Function:    PredType copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: PredType instance to copy
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PredType::PredType(const PredType &original) : AtomType(original)
 {
@@ -74,7 +71,6 @@ PredType::PredType(const PredType &original) : AtomType(original)
 // Description
 //              Makes a copy of the type on the right hand side and stores
 //              the new id in the left hand side object.
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PredType &
 PredType::operator=(const PredType &rhs)
@@ -111,16 +107,6 @@ PredType::committed()
                              "Error: Attempting to check for commit status on a predefined datatype.");
 }
 #endif // DOXYGEN_SHOULD_SKIP_THIS
-
-// Default destructor
-//--------------------------------------------------------------------------
-// Function:    PredType destructor
-///\brief       Noop destructor.
-// Programmer   Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-PredType::~PredType()
-{
-}
 
 /*****************************************************************************
         The following section is regarding the global constants PredType,
@@ -165,6 +151,14 @@ PredType *PredType::IEEE_F32BE_;
 PredType *PredType::IEEE_F32LE_;
 PredType *PredType::IEEE_F64BE_;
 PredType *PredType::IEEE_F64LE_;
+
+PredType *PredType::FLOAT_BFLOAT16BE_;
+PredType *PredType::FLOAT_BFLOAT16LE_;
+PredType *PredType::FLOAT_F8E4M3_;
+PredType *PredType::FLOAT_F8E5M2_;
+PredType *PredType::FLOAT_F6E2M3_;
+PredType *PredType::FLOAT_F6E3M2_;
+PredType *PredType::FLOAT_F4E2M1_;
 
 PredType *PredType::UNIX_D32BE_;
 PredType *PredType::UNIX_D32LE_;
@@ -287,7 +281,6 @@ PredType *PredType::NATIVE_UINT_FAST64_;
 //              Note that, there is a similar function to getPredTypes() in
 //              other classes, that have global constants, is called getConstant().
 //
-// Programmer   Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
 PredType *
 PredType::getPredTypes()
@@ -313,7 +306,6 @@ PredType::getPredTypes()
 //--------------------------------------------------------------------------
 // Function:    PredType::makePredTypes
 // Purpose      Allocate all PredType constants.
-// Programmer   Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
 void
 PredType::makePredTypes()
@@ -354,6 +346,14 @@ PredType::makePredTypes()
     IEEE_F32LE_ = new PredType(H5T_IEEE_F32LE);
     IEEE_F64BE_ = new PredType(H5T_IEEE_F64BE);
     IEEE_F64LE_ = new PredType(H5T_IEEE_F64LE);
+
+    FLOAT_BFLOAT16BE_ = new PredType(H5T_FLOAT_BFLOAT16BE);
+    FLOAT_BFLOAT16LE_ = new PredType(H5T_FLOAT_BFLOAT16LE);
+    FLOAT_F8E4M3_     = new PredType(H5T_FLOAT_F8E4M3);
+    FLOAT_F8E5M2_     = new PredType(H5T_FLOAT_F8E5M2);
+    FLOAT_F6E2M3_     = new PredType(H5T_FLOAT_F6E2M3);
+    FLOAT_F6E3M2_     = new PredType(H5T_FLOAT_F6E3M2);
+    FLOAT_F4E2M1_     = new PredType(H5T_FLOAT_F4E2M1);
 
     UNIX_D32BE_ = new PredType(H5T_UNIX_D32BE);
     UNIX_D32LE_ = new PredType(H5T_UNIX_D32LE);
@@ -469,7 +469,6 @@ PredType::makePredTypes()
 //--------------------------------------------------------------------------
 // Function:    PredType::deleteConstants
 // Purpose      Deletes all PredType constant pointers.
-// Programmer   Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
 void
 PredType::deleteConstants()
@@ -508,6 +507,14 @@ PredType::deleteConstants()
     delete IEEE_F32LE_;
     delete IEEE_F64BE_;
     delete IEEE_F64LE_;
+
+    delete FLOAT_BFLOAT16BE_;
+    delete FLOAT_BFLOAT16LE_;
+    delete FLOAT_F8E4M3_;
+    delete FLOAT_F8E5M2_;
+    delete FLOAT_F6E2M3_;
+    delete FLOAT_F6E3M2_;
+    delete FLOAT_F4E2M1_;
 
     delete UNIX_D32BE_;
     delete UNIX_D32LE_;
@@ -665,6 +672,14 @@ const PredType &PredType::IEEE_F32BE = *IEEE_F32BE_;
 const PredType &PredType::IEEE_F32LE = *IEEE_F32LE_;
 const PredType &PredType::IEEE_F64BE = *IEEE_F64BE_;
 const PredType &PredType::IEEE_F64LE = *IEEE_F64LE_;
+
+const PredType &PredType::FLOAT_BFLOAT16BE = *FLOAT_BFLOAT16BE_;
+const PredType &PredType::FLOAT_BFLOAT16LE = *FLOAT_BFLOAT16LE_;
+const PredType &PredType::FLOAT_F8E4M3     = *FLOAT_F8E4M3_;
+const PredType &PredType::FLOAT_F8E5M2     = *FLOAT_F8E5M2_;
+const PredType &PredType::FLOAT_F6E2M3     = *FLOAT_F6E2M3_;
+const PredType &PredType::FLOAT_F6E3M2     = *FLOAT_F6E3M2_;
+const PredType &PredType::FLOAT_F4E2M1     = *FLOAT_F4E2M1_;
 
 const PredType &PredType::UNIX_D32BE = *UNIX_D32BE_;
 const PredType &PredType::UNIX_D32LE = *UNIX_D32LE_;

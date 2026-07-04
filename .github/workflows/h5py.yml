@@ -1,0 +1,35 @@
+name: h5py
+
+# Triggers the workflow on a schedule or on demand
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "6 0 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Spack
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      with:
+        repository: spack/spack
+        path: ./spack
+
+    - name: Run a multi-line script
+      run: |
+        . ./spack/share/spack/setup-env.sh
+        ./spack/bin/spack spec py-h5py@master+mpi
+         sed -i 's/hdf5@1.10.7:1.14/hdf5@1.10.7:/g' \
+        /home/runner/.spack/package_repos/*/repos/spack_repo/builtin/packages/py_h5py/package.py
+        ./spack/bin/spack spec py-h5py@master+mpi ^hdf5@develop-2.0
+        ./spack/bin/spack install py-h5py@master+mpi ^hdf5@develop-2.0
+        ./spack/bin/spack install py-pytest
+        ./spack/bin/spack install py-pytest-mpi
+        spack load py-h5py
+        spack load py-pytest
+        spack load py-pytest-mpi
+        python -c "import h5py; h5py.run_tests(); print(h5py.version.info);"

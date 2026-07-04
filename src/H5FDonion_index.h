@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -125,9 +125,9 @@ extern "C" {
 H5_DLL herr_t H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *raw_file,
                                                  const H5FD_onion_history_t *history, uint64_t revision_num);
 
-H5_DLL hbool_t H5FD__onion_archival_index_is_valid(const H5FD_onion_archival_index_t *);
-H5_DLL int     H5FD__onion_archival_index_find(const H5FD_onion_archival_index_t *, uint64_t,
-                                               const H5FD_onion_index_entry_t **);
+H5_DLL bool H5FD__onion_archival_index_is_valid(const H5FD_onion_archival_index_t *);
+H5_DLL int  H5FD__onion_archival_index_find(const H5FD_onion_archival_index_t *, uint64_t,
+                                            const H5FD_onion_index_entry_t **);
 
 H5_DLL H5FD_onion_revision_index_t *H5FD__onion_revision_index_init(uint32_t page_size);
 H5_DLL herr_t                       H5FD__onion_revision_index_destroy(H5FD_onion_revision_index_t *);

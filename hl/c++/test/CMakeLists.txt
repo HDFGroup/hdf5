@@ -1,9 +1,14 @@
-cmake_minimum_required (VERSION 3.18)
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 High-Level (HL) C++ test suite
+# This file sets up the build, formatting, and test execution rules for the HDF5 HL C++ test suite.
+# It handles HL C++ test source grouping, test executable creation, compiler options, linking, and integration with the HDF5 HL, HL C++, and core libraries.
+#-----------------------------------------------------------------------------
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_HL_CPP_TEST CXX)
 
 add_executable (hl_ptableTest ${HDF5_HL_CPP_TEST_SOURCE_DIR}/ptableTest.cpp)
 target_compile_options(hl_ptableTest PRIVATE "${HDF5_CMAKE_CXX_FLAGS}")
-target_include_directories (hl_ptableTest PRIVATE "${HDF5_HL_SRC_DIR}/test;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories (hl_ptableTest PRIVATE "${HDF5_HL_TST_DIR};${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (hl_ptableTest STATIC)
   target_link_libraries (hl_ptableTest PRIVATE

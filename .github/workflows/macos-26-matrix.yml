@@ -1,0 +1,284 @@
+name: macOS-26 Matrix Testing
+
+on:
+   workflow_dispatch:
+   schedule:
+     - cron: "0 9 * * *"
+
+# Using concurrency to cancel any in-progress job or run
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+jobs:
+  build-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        # Test combinations of key options
+        include:
+          # Shared libraries with OpenMPI
+          - name: "macOS-26 Shared OpenMPI Fortran Java"
+            os: macos-26
+            mpi: openmpi
+            shared_libs: ON
+            static_libs: OFF
+            cpp: OFF
+            fortran: OFF
+            java: ON
+            hl: ON
+            threadsafe: OFF
+            parallel: ON
+            tools: ON
+            tests: ON
+            examples: ON
+            zlib: ON
+            szip: ON
+
+          # Shared libraries with MPICH
+          - name: "macOS-26 Shared MPICH Fortran"
+            os: macos-26
+            mpi: mpich
+            shared_libs: ON
+            static_libs: OFF
+            cpp: OFF
+            fortran: ON
+            java: OFF
+            hl: ON
+            threadsafe: OFF
+            parallel: ON
+            tools: ON
+            tests: ON
+            examples: ON
+            zlib: ON
+            szip: ON
+
+          # Static libraries with OpenMPI
+          - name: "macOS-26 Static OpenMPI"
+            os: macos-26
+            mpi: openmpi
+            shared_libs: OFF
+            static_libs: ON
+            cpp: OFF
+            fortran: OFF
+            java: OFF
+            hl: ON
+            threadsafe: OFF
+            parallel: ON
+            tools: ON
+            tests: ON
+            examples: ON
+            zlib: ON
+            szip: OFF
+
+          # Both static and shared with MPICH
+          - name: "macOS-26 Both MPICH All Features"
+            os: macos-26
+            mpi: mpich
+            shared_libs: ON
+            static_libs: ON
+            cpp: ON
+            fortran: ON
+            java: OFF
+            hl: ON
+            threadsafe: OFF
+            parallel: ON
+            tools: ON
+            tests: ON
+            examples: ON
+            zlib: ON
+            szip: ON
+
+          # Serial build with thread-safety
+          - name: "macOS-26 Serial Threadsafe"
+            os: macos-26
+            mpi: none
+            shared_libs: ON
+            static_libs: ON
+            cpp: ON
+            fortran: OFF
+            java: OFF
+            hl: OFF
+            threadsafe: ON
+            parallel: OFF
+            tools: ON
+            tests: ON
+            examples: ON
+            zlib: ON
+            szip: ON
+
+          # Minimal configuration
+          - name: "macOS-26 Minimal Config"
+            os: macos-26
+            mpi: none
+            shared_libs: ON
+            static_libs: OFF
+            cpp: OFF
+            fortran: OFF
+            java: OFF
+            hl: OFF
+            threadsafe: OFF
+            parallel: OFF
+            tools: OFF
+            tests: ON
+            examples: OFF
+            zlib: OFF
+            szip: OFF
+
+          # Plugin support with OpenMPI
+          - name: "macOS-26 Plugins OpenMPI"
+            os: macos-26
+            mpi: openmpi
+            shared_libs: ON
+            static_libs: OFF
+            cpp: OFF
+            fortran: OFF
+            java: OFF
+            hl: ON
+            threadsafe: OFF
+            parallel: ON
+            tools: ON
+            tests: ON
+            examples: ON
+            zlib: ON
+            szip: ON
+            plugins: ON
+
+          # No High Level API with MPICH
+          - name: "macOS-26 No HL MPICH"
+            os: macos-26
+            mpi: mpich
+            shared_libs: ON
+            static_libs: ON
+            cpp: ON
+            fortran: OFF
+            java: OFF
+            hl: OFF
+            threadsafe: OFF
+            parallel: ON
+            tools: ON
+            tests: ON
+            examples: ON
+            zlib: ON
+            szip: ON
+
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+
+    steps:
+    - name: Install Dependencies
+      run: |
+        # Install base dependencies
+        brew install autoconf automake libtool
+
+        # Install compression libraries
+        brew install zlib
+        if [[ "${{ matrix.szip }}" == "ON" ]]; then
+          brew install libaec
+        fi
+
+        # Install MPI libraries
+        if [[ "${{ matrix.mpi }}" == "openmpi" ]]; then
+          brew install openmpi
+        elif [[ "${{ matrix.mpi }}" == "mpich" ]]; then
+          brew install mpich
+        fi
+
+    - name: Get Sources
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+    - name: Configure
+      run: |
+        mkdir "${{ runner.workspace }}/build"
+        cd "${{ runner.workspace }}/build"
+
+        # Base CMake options
+        CMAKE_OPTS="-G Ninja"
+        CMAKE_OPTS="$CMAKE_OPTS -DCMAKE_BUILD_TYPE=Release"
+        CMAKE_OPTS="$CMAKE_OPTS -DBUILD_SHARED_LIBS=${{ matrix.shared_libs }}"
+        CMAKE_OPTS="$CMAKE_OPTS -DBUILD_STATIC_LIBS=${{ matrix.static_libs }}"
+        CMAKE_OPTS="$CMAKE_OPTS -DHDF5_BUILD_CPP_LIB=${{ matrix.cpp }}"
+        CMAKE_OPTS="$CMAKE_OPTS -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }}"
+        CMAKE_OPTS="$CMAKE_OPTS -DHDF5_BUILD_JAVA=${{ matrix.java }}"
+        CMAKE_OPTS="$CMAKE_OPTS -DHDF5_BUILD_HL_LIB=${{ matrix.hl }}"
+        CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ENABLE_THREADSAFE=${{ matrix.threadsafe }}"
+        CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ENABLE_PARALLEL=${{ matrix.parallel }}"
+        CMAKE_OPTS="$CMAKE_OPTS -DHDF5_BUILD_TOOLS=${{ matrix.tools }}"
+        CMAKE_OPTS="$CMAKE_OPTS -DBUILD_TESTING=${{ matrix.tests }}"
+        CMAKE_OPTS="$CMAKE_OPTS -DHDF5_BUILD_EXAMPLES=${{ matrix.examples }}"
+        CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ENABLE_ZLIB_SUPPORT=${{ matrix.zlib }}"
+        CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ENABLE_SZIP_SUPPORT=${{ matrix.szip }}"
+        CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ALLOW_UNSUPPORTED=ON"
+
+        # Plugin support if specified
+        if [[ "${{ matrix.plugins }}" == "ON" ]]; then
+          CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ENABLE_PLUGIN_SUPPORT=ON"
+          CMAKE_OPTS="$CMAKE_OPTS -DHDF5_ALLOW_EXTERNAL_SUPPORT=TGZ"
+          CMAKE_OPTS="$CMAKE_OPTS -DPLUGIN_USE_EXTERNAL=ON"
+          CMAKE_OPTS="$CMAKE_OPTS -DPLUGIN_USE_LOCALCONTENT=OFF"
+        fi
+
+        # Set Fortran compiler if needed
+        if [[ "${{ matrix.fortran }}" == "ON" ]]; then
+          CMAKE_OPTS="$CMAKE_OPTS -DCMAKE_Fortran_COMPILER=gfortran-15"
+        fi
+
+        # MPI configuration
+        if [[ "${{ matrix.parallel }}" == "ON" ]]; then
+          CMAKE_OPTS="$CMAKE_OPTS -DMPIEXEC_MAX_NUMPROCS=2"
+          if [[ "${{ matrix.mpi }}" == "openmpi" ]]; then
+            CMAKE_OPTS="$CMAKE_OPTS -DMPI_C_COMPILER=mpicc"
+            CMAKE_OPTS="$CMAKE_OPTS -DMPIEXEC_PREFLAGS=--oversubscribe"
+          elif [[ "${{ matrix.mpi }}" == "mpich" ]]; then
+            CMAKE_OPTS="$CMAKE_OPTS -DMPI_C_COMPILER=mpicc"
+            CMAKE_OPTS="$CMAKE_OPTS -DCMAKE_Fortran_COMPILER=mpifort"
+            sudo ln -s /opt/homebrew/bin/gfortran-15 /opt/homebrew/bin/gfortran
+            mpifort --version
+          fi
+        fi
+
+        echo "Configuration options: $CMAKE_OPTS"
+        cmake $CMAKE_OPTS "$GITHUB_WORKSPACE"
+      shell: bash
+
+    - name: Build
+      run: cmake --build . --config Release --parallel 2
+      working-directory: ${{ runner.workspace }}/build
+
+    - name: Test
+      run: |
+        # Run tests with appropriate settings for each configuration
+        if [[ "${{ matrix.parallel }}" == "ON" ]]; then
+          # For parallel builds, limit concurrent tests
+          ctest . -C Release --parallel 1
+        else
+          # For serial builds, can run more tests concurrently
+          ctest . -C Release --parallel 2
+        fi
+      working-directory: ${{ runner.workspace }}/build
+      env:
+        # Set test timeout
+        CTEST_TIMEOUT: 3600
+
+    - name: Upload Test Results
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+      if: always()
+      with:
+        name: test-results-${{ matrix.name }}
+        path: |
+          ${{ runner.workspace }}/build/Testing/Temporary/CTestCostData.txt
+          ${{ runner.workspace }}/build/Testing/Temporary/LastTest.log
+        retention-days: 7
+
+    - name: Show Test Summary
+      if: always()
+      run: |
+        echo "=== Test Summary for ${{ matrix.name }} ==="
+        if [[ -f Testing/Temporary/LastTest.log ]]; then
+          tail -50 Testing/Temporary/LastTest.log
+        fi
+      working-directory: ${{ runner.workspace }}/build

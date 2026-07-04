@@ -4,21 +4,18 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Neil Fortner
- *              Monday, February 16, 2015
- *
  * Purpose:     Tests datasets with virtual layout.
  */
 #include "h5test.h"
 
-const char *FILENAME[] = {"vds_env_virt_0", "vds_env_virt_3", "vds_env_src_2", "vds_env%%_src2", NULL};
+static const char *FILENAME[] = {"vds_env_virt_0", "vds_env_virt_3", "vds_env_src_2", "vds_env%%_src2", NULL};
 
 /* I/O test config flags */
 #define TEST_IO_CLOSE_SRC      0x01u
@@ -51,35 +48,39 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
     char       *vfilename2              = NULL;
     char       *srcfilenamepct          = NULL;
     char       *srcfilenamepct_map      = NULL;
-    hid_t       srcfile[4]              = {-1, -1, -1, -1}; /* Files with source dsets */
-    hid_t       vfile                   = -1;               /* File with virtual dset */
-    hid_t       dcpl                    = -1;               /* Dataset creation property list */
-    hid_t       dapl                    = -1;               /* Dataset access property list */
-    hid_t       srcspace[4]             = {-1, -1, -1, -1}; /* Source dataspaces */
-    hid_t       vspace[4]               = {-1, -1, -1, -1}; /* Virtual dset dataspaces */
-    hid_t       memspace                = -1;               /* Memory dataspace */
-    hid_t       srcdset[4]              = {-1, -1, -1, -1}; /* Source datasets */
-    hid_t       vdset                   = -1;               /* Virtual dataset */
-    hsize_t     dims[4]                 = {10, 26, 0, 0};   /* Data space current size */
-    int         buf[10][26];                                /* Write and expected read buffer */
-    int         rbuf[10][26];                               /* Read buffer */
-    int         fill = -1;                                  /* Fill value */
+    hid_t       srcfile[4]              = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                                           H5I_INVALID_HID}; /* Files with source dsets */
+    hid_t       vfile                   = H5I_INVALID_HID;   /* File with virtual dset */
+    hid_t       dcpl                    = H5I_INVALID_HID;   /* Dataset creation property list */
+    hid_t       dapl                    = H5I_INVALID_HID;   /* Dataset access property list */
+    hid_t       srcspace[4]             = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                                           H5I_INVALID_HID}; /* Source dataspaces */
+    hid_t       vspace[4]               = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                                           H5I_INVALID_HID}; /* Virtual dset dataspaces */
+    hid_t       memspace                = H5I_INVALID_HID;   /* Memory dataspace */
+    hid_t       srcdset[4]              = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                                           H5I_INVALID_HID}; /* Source datasets */
+    hid_t       vdset                   = H5I_INVALID_HID;   /* Virtual dataset */
+    hsize_t     dims[4]                 = {10, 26, 0, 0};    /* Data space current size */
+    int         buf[10][26];                                 /* Write and expected read buffer */
+    int         rbuf[10][26];                                /* Read buffer */
+    int         fill = -1;                                   /* Fill value */
     int         i, j;
     char        buffer[1024]; /* buffer to read vds_prefix       */
 
     TESTING("basic virtual dataset I/O via H5Pset_vds_prefix(): all selection with ENV prefix");
 
-    if (NULL == (srcfilename = HDmalloc(FILENAME_BUF_SIZE)))
+    if (NULL == (srcfilename = malloc(FILENAME_BUF_SIZE)))
         TEST_ERROR;
-    if (NULL == (srcfilename_map = HDmalloc(FILENAME_BUF_SIZE)))
+    if (NULL == (srcfilename_map = malloc(FILENAME_BUF_SIZE)))
         TEST_ERROR;
-    if (NULL == (vfilename = HDmalloc(FILENAME_BUF_SIZE)))
+    if (NULL == (vfilename = malloc(FILENAME_BUF_SIZE)))
         TEST_ERROR;
-    if (NULL == (vfilename2 = HDmalloc(FILENAME_BUF_SIZE)))
+    if (NULL == (vfilename2 = malloc(FILENAME_BUF_SIZE)))
         TEST_ERROR;
-    if (NULL == (srcfilenamepct = HDmalloc(FILENAME_BUF_SIZE)))
+    if (NULL == (srcfilenamepct = malloc(FILENAME_BUF_SIZE)))
         TEST_ERROR;
-    if (NULL == (srcfilenamepct_map = HDmalloc(FILENAME_BUF_SIZE)))
+    if (NULL == (srcfilenamepct_map = malloc(FILENAME_BUF_SIZE)))
         TEST_ERROR;
 
     h5_fixname(FILENAME[0], fapl, vfilename, FILENAME_BUF_SIZE);
@@ -110,7 +111,7 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
     if (H5Pget_virtual_prefix(dapl, buffer, sizeof(buffer)) < 0)
         TEST_ERROR;
 
-    if (HDstrcmp(buffer, "someprefix") != 0)
+    if (strcmp(buffer, "someprefix") != 0)
         FAIL_PUTS_ERROR("vds prefix not set correctly");
 
     /* Create source dataspace */
@@ -199,7 +200,7 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
     }
 
     /* Read data through virtual dataset */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR;
 
@@ -237,7 +238,7 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
     }
 
     /* Read data directly from source dataset */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(srcdset[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR;
 
@@ -273,23 +274,23 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
         TEST_ERROR;
     dcpl = -1;
 
-    HDfree(srcfilenamepct_map);
-    HDfree(srcfilenamepct);
-    HDfree(vfilename2);
-    HDfree(vfilename);
-    HDfree(srcfilename_map);
-    HDfree(srcfilename);
+    free(srcfilenamepct_map);
+    free(srcfilenamepct);
+    free(vfilename2);
+    free(vfilename);
+    free(srcfilename_map);
+    free(srcfilename);
 
     PASSED();
     return 0;
 
 error:
-    HDfree(srcfilenamepct_map);
-    HDfree(srcfilenamepct);
-    HDfree(vfilename2);
-    HDfree(vfilename);
-    HDfree(srcfilename_map);
-    HDfree(srcfilename);
+    free(srcfilenamepct_map);
+    free(srcfilenamepct);
+    free(vfilename2);
+    free(vfilename);
+    free(srcfilename_map);
+    free(srcfilename);
 
     H5E_BEGIN_TRY
     {
@@ -307,7 +308,7 @@ error:
         H5Pclose(dapl);
         H5Pclose(dcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_vds_prefix2 */
@@ -326,16 +327,14 @@ main(void)
     hid_t        fapl, my_fapl;
     unsigned     bit_config;
     H5F_libver_t low, high;   /* Low and high bounds */
-    const char  *env_h5_drvr; /* File Driver value from environment */
-    hbool_t      driver_is_parallel;
+    const char  *driver_name; /* File Driver value from environment */
+    bool         driver_is_parallel;
     int          nerrors = 0;
 
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Testing setup */
-    h5_reset();
+    h5_test_init();
     fapl = h5_fileaccess();
 
     if (h5_using_parallel_driver(fapl, &driver_is_parallel) < 0)
@@ -346,9 +345,9 @@ main(void)
      * doesn't support parallel reads and the splitter VFD has external
      * link-related bugs.
      */
-    if (driver_is_parallel || !HDstrcmp(env_h5_drvr, "splitter")) {
-        HDputs(" -- SKIPPED for incompatible VFD --");
-        HDexit(EXIT_SUCCESS);
+    if (driver_is_parallel || !strcmp(driver_name, "splitter")) {
+        puts(" -- SKIPPED for incompatible VFD --");
+        exit(EXIT_SUCCESS);
     }
 
     /* Set to use the latest file format */
@@ -377,15 +376,14 @@ main(void)
             /* Display testing info */
             low_string  = h5_get_version_string(low);
             high_string = h5_get_version_string(high);
-            HDsnprintf(msg, sizeof(msg),
-                       "Testing virtual dataset with file version bounds: (%s, %s):", low_string,
-                       high_string);
-            HDputs(msg);
+            snprintf(msg, sizeof(msg),
+                     "Testing virtual dataset with file version bounds: (%s, %s):", low_string, high_string);
+            puts(msg);
 
             for (bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
-                HDprintf("Config: %s%s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "",
-                         bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file",
-                         bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "");
+                printf("Config: %s%s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "",
+                       bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file",
+                       bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "");
                 nerrors += test_vds_prefix_second(bit_config, fapl);
             }
 
@@ -400,13 +398,13 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDprintf("All virtual dataset tests passed.\n");
+    printf("All virtual dataset tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
     return EXIT_SUCCESS;
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d VIRTUAL DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d VIRTUAL DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     return EXIT_FAILURE;
 } /* end main() */

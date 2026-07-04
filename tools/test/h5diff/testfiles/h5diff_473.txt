@@ -1,3 +1,0 @@
-link   : </soft_link4> and </soft_link4>
-1 differences found
-EXIT CODE: 1

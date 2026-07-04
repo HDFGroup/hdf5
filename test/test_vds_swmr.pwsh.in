@@ -3,7 +3,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -80,14 +80,14 @@ function Wait-Message {
 ## Main
 ###############################################################################
 
-# Check to see if the VFD specified by the HDF5_DRIVER environment variable
-# supports SWMR.
+# Check to see if the VFD specified by the HDF5_DRIVER or HDF5_TEST_DRIVER
+# environment variable supports SWMR.
 $testprog = Join-Path -Path $utils_testdir -ChildPath swmr_check_compat_vfd.exe
 $rp = Start-Process -FilePath $testprog -PassThru -Wait -NoNewWindow
 if ($rp.ExitCode -ne 0) {
     Write-Output ""
-    Write-Output "The VFD specified by the HDF5_DRIVER environment variable"
-    Write-Output "does not support SWMR."
+    Write-Output "The VFD specified by the HDF5_DRIVER or HDF5_TEST_DRIVER"
+    Write-Output "environment variable does not support SWMR."
     Write-Output ""
     Write-Output "SWMR acceptance tests skipped"
     Write-Output ""

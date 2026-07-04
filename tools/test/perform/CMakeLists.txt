@@ -1,4 +1,9 @@
-cmake_minimum_required (VERSION 3.18)
+# CMake configuration for building and testing HDF5 performance test tools
+# Configures build, linking, formatting, and test rules for various performance executables
+# Supports static/shared builds and conditional test/formatting targets
+# Tools covered: chunk, iopipe, chunk_cache, overhead, perf_meta, zip_perf
+# Includes logic for ZLIB/NG support and test inclusion
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_TOOLS_TEST_PERFORM C)
 
 #-----------------------------------------------------------------------------
@@ -112,6 +117,12 @@ endif ()
 set (zip_perf_SOURCES
     ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/zip_perf.c
 )
+if (H5_ZLIB_HEADER)
+  message (VERBOSE "H5_ZLIB_HEADER for zip_perf=${H5_ZLIB_HEADER}")
+  if (HDF5_USE_ZLIB_NG AND NOT ZLIB_COMPAT AND NOT ZLIBNG_ZLIB_COMPAT)
+    add_compile_definitions(H5_HAVE_ZLIBNG_H=1 H5_ZLIB_HEADER="${H5_ZLIB_HEADER}")
+  endif ()
+endif ()
 add_executable (zip_perf ${zip_perf_SOURCES})
 target_include_directories (zip_perf PRIVATE "${HDF5_TEST_SRC_DIR};${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT BUILD_SHARED_LIBS)

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -24,7 +24,7 @@ hsize_t write_pad(int, hsize_t);
 hsize_t compute_pad(hsize_t);
 herr_t  copy_to_file(FILE *, FILE *, ssize_t, ssize_t);
 
-int   do_delete   = FALSE;
+int   do_delete   = false;
 char *output_file = NULL;
 char *input_file  = NULL;
 char *ub_file     = NULL;
@@ -50,35 +50,35 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},   {"i", require
 static void
 usage(const char *prog)
 {
-    HDfflush(stdout);
-    HDfprintf(stdout, "usage: %s -i <in_file.h5>  [-o <out_file.h5> ] [-u <out_user_file> | --delete]\n",
-              prog);
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "Splits user file and HDF5 file into two files: user block data and HDF5 data.\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "OPTIONS\n");
-    HDfprintf(stdout, "  -i in_file.h5   Specifies the HDF5 as input.  If the input HDF5 file\n");
-    HDfprintf(stdout, "                  contains no user block, exit with an error message.\n");
-    HDfprintf(stdout, "  -o out_file.h5  Specifies output HDF5 file without a user block.\n");
-    HDfprintf(stdout, "                  If not specified, the user block will be removed from the\n");
-    HDfprintf(stdout, "                  input HDF5 file.\n");
-    HDfprintf(stdout, "  -u out_user_file\n");
-    HDfprintf(stdout, "                  Specifies the output file containing the data from the\n");
-    HDfprintf(stdout, "                  user block.\n");
-    HDfprintf(stdout, "                  Cannot be used with --delete option.\n");
-    HDfprintf(stdout, "  --delete        Remove the user block from the input HDF5 file. The content\n");
-    HDfprintf(stdout, "                  of the user block is discarded.\n");
-    HDfprintf(stdout, "                  Cannot be used with the -u option.\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "  -h              Prints a usage message and exits.\n");
-    HDfprintf(stdout, "  -V              Prints the HDF5 library version and exits.\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "  If neither --delete nor -u is specified, the user block from the input file\n");
-    HDfprintf(stdout, "  will be displayed to stdout.\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "Exit Status:\n");
-    HDfprintf(stdout, "  0      Succeeded.\n");
-    HDfprintf(stdout, "  >0    An error occurred.\n");
+    fflush(rawoutstream);
+    fprintf(rawoutstream, "usage: %s -i <in_file.h5>  [-o <out_file.h5> ] [-u <out_user_file> | --delete]\n",
+            prog);
+    fprintf(rawoutstream, "\n");
+    fprintf(rawoutstream, "Splits user file and HDF5 file into two files: user block data and HDF5 data.\n");
+    fprintf(rawoutstream, "\n");
+    fprintf(rawoutstream, "OPTIONS\n");
+    fprintf(rawoutstream, "  -i in_file.h5   Specifies the HDF5 as input.  If the input HDF5 file\n");
+    fprintf(rawoutstream, "                  contains no user block, exit with an error message.\n");
+    fprintf(rawoutstream, "  -o out_file.h5  Specifies output HDF5 file without a user block.\n");
+    fprintf(rawoutstream, "                  If not specified, the user block will be removed from the\n");
+    fprintf(rawoutstream, "                  input HDF5 file.\n");
+    fprintf(rawoutstream, "  -u out_user_file\n");
+    fprintf(rawoutstream, "                  Specifies the output file containing the data from the\n");
+    fprintf(rawoutstream, "                  user block.\n");
+    fprintf(rawoutstream, "                  Cannot be used with --delete option.\n");
+    fprintf(rawoutstream, "  --delete        Remove the user block from the input HDF5 file. The content\n");
+    fprintf(rawoutstream, "                  of the user block is discarded.\n");
+    fprintf(rawoutstream, "                  Cannot be used with the -u option.\n");
+    fprintf(rawoutstream, "\n");
+    fprintf(rawoutstream, "  -h              Prints a usage message and exits.\n");
+    fprintf(rawoutstream, "  -V              Prints the HDF5 library version and exits.\n");
+    fprintf(rawoutstream, "\n");
+    fprintf(rawoutstream, "  If neither --delete nor -u is specified, the user block from the input file\n");
+    fprintf(rawoutstream, "  will be displayed to stdout.\n");
+    fprintf(rawoutstream, "\n");
+    fprintf(rawoutstream, "Exit Status:\n");
+    fprintf(rawoutstream, "  0      Succeeded.\n");
+    fprintf(rawoutstream, "  >0    An error occurred.\n");
 }
 
 /*-------------------------------------------------------------------------
@@ -93,26 +93,25 @@ usage(const char *prog)
 static int
 parse_command_line(int argc, const char *const *argv)
 {
-    int opt = FALSE;
+    int opt = false;
 
     /* parse command line options */
     while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'o':
-                output_file = HDstrdup(H5_optarg);
+                output_file = strdup(H5_optarg);
                 if (output_file)
                     h5tools_set_data_output_file(output_file, 1);
                 break;
 
             case 'i':
-                input_file = HDstrdup(H5_optarg);
+                input_file = strdup(H5_optarg);
                 if (input_file)
                     h5tools_set_input_file(input_file, 1);
                 break;
-                ;
 
             case 'u':
-                ub_file = HDstrdup(H5_optarg);
+                ub_file = strdup(H5_optarg);
                 if (ub_file)
                     h5tools_set_output_file(ub_file, 1);
                 else
@@ -120,7 +119,7 @@ parse_command_line(int argc, const char *const *argv)
                 break;
 
             case 'd':
-                do_delete = TRUE;
+                do_delete = true;
                 break;
 
             case 'h':
@@ -145,11 +144,11 @@ parse_command_line(int argc, const char *const *argv)
 
 done:
     if (input_file)
-        HDfree(input_file);
+        free(input_file);
     if (output_file)
-        HDfree(output_file);
+        free(output_file);
     if (ub_file)
-        HDfree(ub_file);
+        free(ub_file);
 
     return EXIT_FAILURE;
 }
@@ -158,7 +157,7 @@ static void
 leave(int ret)
 {
     h5tools_close();
-    HDexit(ret);
+    exit(ret);
 }
 
 /*-------------------------------------------------------------------------
@@ -175,7 +174,7 @@ main(int argc, char *argv[])
 {
     hid_t     ifile = H5I_INVALID_HID;
     hid_t     plist = H5I_INVALID_HID;
-    off_t     fsize;
+    HDoff_t   fsize;
     hsize_t   usize;
     htri_t    testval;
     herr_t    status;
@@ -197,7 +196,7 @@ main(int argc, char *argv[])
     if (input_file == NULL) {
         /* no user block  */
         error_msg("missing argument for HDF5 file input.\n");
-        help_ref_msg(stderr);
+        help_ref_msg(rawerrorstream);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
@@ -206,7 +205,7 @@ main(int argc, char *argv[])
 
     if (testval <= 0) {
         error_msg("Input HDF5 file \"%s\" is not HDF\n", input_file);
-        help_ref_msg(stderr);
+        help_ref_msg(rawerrorstream);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
@@ -243,6 +242,7 @@ main(int argc, char *argv[])
         goto done;
     }
 
+    memset(&sbuf, 0, sizeof(h5_stat_t));
     res = HDfstat(HDfileno(rawinstream), &sbuf);
     if (res < 0) {
         error_msg("Can't stat file \"%s\"\n", input_file);
@@ -283,13 +283,13 @@ main(int argc, char *argv[])
 
 done:
     if (input_file)
-        HDfree(input_file);
+        free(input_file);
 
     if (output_file)
-        HDfree(output_file);
+        free(output_file);
 
     if (ub_file) {
-        HDfree(ub_file);
+        free(ub_file);
     }
 
     leave(h5tools_getstatus());
@@ -307,9 +307,9 @@ copy_to_file(FILE *infid, FILE *ofid, ssize_t _where, ssize_t show_much)
 {
     static char buf[COPY_BUF_SIZE];
     size_t      how_much;
-    off_t       where = (off_t)_where;
-    off_t       to;
-    off_t       from;
+    HDoff_t     where = (HDoff_t)_where;
+    HDoff_t     to;
+    HDoff_t     from;
     herr_t      ret_value = 0;
 
     /* nothing to copy */
@@ -336,12 +336,12 @@ copy_to_file(FILE *infid, FILE *ofid, ssize_t _where, ssize_t show_much)
         HDfseek(infid, from, SEEK_SET);
 
         /* Read data to buffer */
-        bytes_read = HDfread(buf, (size_t)1, bytes_in, infid);
-        if (0 == bytes_read && HDferror(infid)) {
+        bytes_read = fread(buf, (size_t)1, bytes_in, infid);
+        if (0 == bytes_read && ferror(infid)) {
             ret_value = -1;
             goto done;
         } /* end if */
-        if (0 == bytes_read && HDfeof(infid)) {
+        if (0 == bytes_read && feof(infid)) {
             goto done;
         } /* end if */
 
@@ -350,12 +350,12 @@ copy_to_file(FILE *infid, FILE *ofid, ssize_t _where, ssize_t show_much)
 
         /* Update positions/size */
         how_much -= bytes_read;
-        from += (off_t)bytes_read;
-        to += (off_t)bytes_read;
+        from += (HDoff_t)bytes_read;
+        to += (HDoff_t)bytes_read;
 
         /* Write nchars bytes to output file */
-        bytes_wrote = HDfwrite(buf, (size_t)1, bytes_read, ofid);
-        if (bytes_wrote != bytes_read || (0 == bytes_wrote && HDferror(ofid))) { /* error */
+        bytes_wrote = fwrite(buf, (size_t)1, bytes_read, ofid);
+        if (bytes_wrote != bytes_read || (0 == bytes_wrote && ferror(ofid))) { /* error */
             ret_value = -1;
             goto done;
         } /* end if */

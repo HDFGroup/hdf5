@@ -4,16 +4,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Jordan Henderson
- *             01/31/2017
- *
  * This file contains #defines for tests of the use
  * of filters in parallel HDF5, implemented in
  * H5Dmpio.c
@@ -26,6 +23,9 @@
 
 #include "stdlib.h"
 #include "testpar.h"
+
+/* Include testing framework functionality */
+#include "testframe.h"
 
 #define ARRAY_SIZE(a) sizeof(a) / sizeof(a[0])
 
@@ -60,6 +60,11 @@ size_t             cd_nelmts                      = FILTER_NUM_CDVALUES;
 
 #define DIM0_SCALE_FACTOR 4
 #define DIM1_SCALE_FACTOR 2
+
+/* The maximum number of datasets to work on simultaneously
+ * when using H5Dwrite_multi/H5Dread_multi
+ */
+#define MAX_NUM_DSETS_MULTI 5
 
 /* Struct type for the compound datatype filtered dataset tests */
 typedef struct {
@@ -442,7 +447,7 @@ typedef struct {
 #define SHRINKING_GROWING_CHUNKS_NCOLS        (mpi_size * DIM1_SCALE_FACTOR)
 #define SHRINKING_GROWING_CHUNKS_CH_NROWS     (SHRINKING_GROWING_CHUNKS_NROWS / mpi_size)
 #define SHRINKING_GROWING_CHUNKS_CH_NCOLS     (SHRINKING_GROWING_CHUNKS_NCOLS / mpi_size)
-#define SHRINKING_GROWING_CHUNKS_NLOOPS       20
+#define SHRINKING_GROWING_CHUNKS_NLOOPS       8
 
 /* Defines for the unshared filtered edge chunks write test */
 #define WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME  "unshared_filtered_edge_chunks_write"

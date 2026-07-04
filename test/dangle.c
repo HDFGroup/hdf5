@@ -4,21 +4,18 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Tuesday, May 13, 2003
- *
  * Purpose:    Test dangling IDs
  */
 #include "h5test.h"
 
-const char *FILENAME[] = {"dangle", NULL};
+static const char *FILENAME[] = {"dangle", NULL};
 
 #define MAX_DANGLE 1000
 
@@ -35,11 +32,6 @@ const char *FILENAME[] = {"dangle", NULL};
  *
  * Return:    Success:    zero
  *        Failure:    non-zero
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, May 13, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -86,7 +78,7 @@ test_dangle_dataset(H5F_close_degree_t degree)
             0)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (H5Sclose(sid) < 0)
         TEST_ERROR;
@@ -102,7 +94,7 @@ test_dangle_dataset(H5F_close_degree_t degree)
             if (H5Fclose(fid) >= 0)
                 TEST_ERROR;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     } /* end if */
     else if (H5Fclose(fid) < 0)
         TEST_ERROR;
@@ -134,11 +126,6 @@ error:
  *
  * Return:    Success:    zero
  *        Failure:    non-zero
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, May 13, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -179,7 +166,7 @@ test_dangle_group(H5F_close_degree_t degree)
     {
         gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (gid >= 0)
         TEST_ERROR;
 
@@ -197,7 +184,7 @@ test_dangle_group(H5F_close_degree_t degree)
             if (H5Fclose(fid) >= 0)
                 TEST_ERROR;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     } /* end if */
     else if (H5Fclose(fid) < 0)
         TEST_ERROR;
@@ -229,11 +216,6 @@ error:
  *
  * Return:    Success:    zero
  *        Failure:    non-zero
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, May 13, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -280,7 +262,7 @@ test_dangle_datatype1(H5F_close_degree_t degree)
         if (H5Tcommit2(fid, TYPENAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) >= 0)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -295,7 +277,7 @@ test_dangle_datatype1(H5F_close_degree_t degree)
             if (H5Fclose(fid) >= 0)
                 TEST_ERROR;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     } /* end if */
     else if (H5Fclose(fid) < 0)
         TEST_ERROR;
@@ -327,11 +309,6 @@ error:
  *
  * Return:    Success:    zero
  *        Failure:    non-zero
- *
- * Programmer:    Quincey Koziol
- *              Thursday, August 25, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -382,7 +359,7 @@ test_dangle_datatype2(H5F_close_degree_t degree)
             if (H5Fclose(fid) >= 0)
                 TEST_ERROR;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     } /* end if */
     else if (H5Fclose(fid) < 0)
         TEST_ERROR;
@@ -414,11 +391,6 @@ error:
  *
  * Return:    Success:    zero
  *        Failure:    non-zero
- *
- * Programmer:    Quincey Koziol
- *              Wednesday, June 18, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -472,7 +444,7 @@ test_dangle_attribute(H5F_close_degree_t degree)
         if ((aid = H5Acreate2(dsid, ATTRNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) >= 0)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (H5Sclose(sid) < 0)
         TEST_ERROR;
@@ -491,7 +463,7 @@ test_dangle_attribute(H5F_close_degree_t degree)
             if (H5Fclose(fid) >= 0)
                 TEST_ERROR;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     } /* end if */
     else if (H5Fclose(fid) < 0)
         TEST_ERROR;
@@ -523,9 +495,6 @@ error:
  *
  * Return:    Success:    zero
  *        Failure:    non-zero
- *
- * Programmer:    Quincey Koziol
- *              Friday, October 29, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -608,7 +577,7 @@ test_dangle_force(void)
         TEST_ERROR;
 
     /* Allocate the array of object IDs */
-    if (NULL == (objs = (hid_t *)HDcalloc((size_t)count, sizeof(hid_t))))
+    if (NULL == (objs = (hid_t *)calloc((size_t)count, sizeof(hid_t))))
         TEST_ERROR;
 
     /* Get the list of open IDs */
@@ -630,14 +599,14 @@ test_dangle_force(void)
     HDremove(filename);
 
     /* Release object ID array */
-    HDfree(objs);
+    free(objs);
 
     PASSED();
     return 0;
 
 error:
     if (objs)
-        HDfree(objs);
+        free(objs);
     return 1;
 }
 
@@ -649,34 +618,27 @@ error:
  * Return:    Success:    zero
  *        Failure:    non-zero
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, May 13, 2003
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
 main(void)
 {
-    const char *env_h5_drvr; /* File Driver value from environment */
+    const char *driver_name; /* File Driver value from environment */
     int         nerrors = 0;
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
-    if (env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
+    driver_name = h5_get_test_driver_name();
 
     /* Don't run this test with the multi/split VFD. A bug in library shutdown
      * ordering causes problems with the multi VFD when IDs are left dangling.
      */
-    if (!HDstrcmp(env_h5_drvr, "multi") || !HDstrcmp(env_h5_drvr, "split")) {
-        HDputs(" -- SKIPPED for incompatible VFD --");
+    if (!strcmp(driver_name, "multi") || !strcmp(driver_name, "split")) {
+        puts(" -- SKIPPED for incompatible VFD --");
         return 0;
     }
 
     /* Run tests w/weak file close */
-    HDputs("Testing dangling objects with weak file close:");
+    puts("Testing dangling objects with weak file close:");
     nerrors += test_dangle_dataset(H5F_CLOSE_WEAK);
     nerrors += test_dangle_group(H5F_CLOSE_WEAK);
     nerrors += test_dangle_datatype1(H5F_CLOSE_WEAK);
@@ -684,7 +646,7 @@ main(void)
     nerrors += test_dangle_attribute(H5F_CLOSE_WEAK);
 
     /* Run tests w/semi file close */
-    HDputs("Testing dangling objects with semi file close:");
+    puts("Testing dangling objects with semi file close:");
     nerrors += test_dangle_dataset(H5F_CLOSE_SEMI);
     nerrors += test_dangle_group(H5F_CLOSE_SEMI);
     nerrors += test_dangle_datatype1(H5F_CLOSE_SEMI);
@@ -692,7 +654,7 @@ main(void)
     nerrors += test_dangle_attribute(H5F_CLOSE_SEMI);
 
     /* Run tests w/strong file close */
-    HDputs("Testing dangling objects with strong file close:");
+    puts("Testing dangling objects with strong file close:");
     nerrors += test_dangle_dataset(H5F_CLOSE_STRONG);
     nerrors += test_dangle_group(H5F_CLOSE_STRONG);
     nerrors += test_dangle_datatype1(H5F_CLOSE_STRONG);
@@ -705,11 +667,11 @@ main(void)
     /* Check for errors */
     if (nerrors)
         goto error;
-    HDputs("All dangling ID tests passed.");
+    puts("All dangling ID tests passed.");
 
     return 0;
 
 error:
-    HDputs("***** DANGLING ID TESTS FAILED *****");
+    puts("***** DANGLING ID TESTS FAILED *****");
     return 1;
 }

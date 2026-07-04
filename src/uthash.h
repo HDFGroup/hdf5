@@ -700,28 +700,38 @@ typedef unsigned char uint8_t;
         switch (_hj_k) {                                                                                     \
             case 11:                                                                                         \
                 hashv += ((unsigned)_hj_key[10] << 24);                                                      \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 10:                                                                                     \
+                hashv += ((unsigned)_hj_key[9] << 16);                                                       \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 9:                                                                                      \
+                hashv += ((unsigned)_hj_key[8] << 8);                                                        \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 8:                                                                                      \
+                _hj_j += ((unsigned)_hj_key[7] << 24);                                                       \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 7:                                                                                      \
+                _hj_j += ((unsigned)_hj_key[6] << 16);                                                       \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 6:                                                                                      \
+                _hj_j += ((unsigned)_hj_key[5] << 8);                                                        \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 5:                                                                                      \
+                _hj_j += _hj_key[4];                                                                         \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 4:                                                                                      \
+                _hj_i += ((unsigned)_hj_key[3] << 24);                                                       \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 3:                                                                                      \
+                _hj_i += ((unsigned)_hj_key[2] << 16);                                                       \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 2:                                                                                      \
+                _hj_i += ((unsigned)_hj_key[1] << 8);                                                        \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 1:                                                                                      \
+                _hj_i += _hj_key[0];                                                                         \
                 H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 10 : hashv += ((unsigned)_hj_key[9] << 16);                                         \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 9 : hashv += ((unsigned)_hj_key[8] << 8);                                           \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 8 : _hj_j += ((unsigned)_hj_key[7] << 24);                                          \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 7 : _hj_j += ((unsigned)_hj_key[6] << 16);                                          \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 6 : _hj_j += ((unsigned)_hj_key[5] << 8);                                           \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 5 : _hj_j += _hj_key[4];                                                            \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 4 : _hj_i += ((unsigned)_hj_key[3] << 24);                                          \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 3 : _hj_i += ((unsigned)_hj_key[2] << 16);                                          \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 2 : _hj_i += ((unsigned)_hj_key[1] << 8);                                           \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 1 : _hj_i += _hj_key[0];                                                            \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    default:;                                                                                \
+                    default :;                                                                               \
         }                                                                                                    \
         HASH_JEN_MIX(_hj_i, _hj_j, hashv);                                                                   \
     } while (0)
@@ -1101,6 +1111,37 @@ typedef unsigned char uint8_t;
 /* obtain a count of items in the hash */
 #define HASH_COUNT(head)   HASH_CNT(hh, head)
 #define HASH_CNT(hh, head) ((head != NULL) ? ((head)->hh.tbl->num_items) : 0U)
+
+/* Adjust all element and hash handle pointers by ptr_adj bytes. Does not adjust key pointers. Intended for
+ * the case where all elements are stored in a flat array and that array is realloced. */
+#define HASH_ADJUST_PTRS(hh, head, ptr_adj)                                                                  \
+    do {                                                                                                     \
+        ptrdiff_t _ptr_adj = (ptrdiff_t)(ptr_adj);                                                           \
+        if (head && (_ptr_adj != 0)) {                                                                       \
+            unsigned _tmp_bkt;                                                                               \
+            (head)               = (void *)((char *)head + _ptr_adj);                                        \
+            (head)->hh.tbl->tail = (UT_hash_handle *)(void *)((char *)(head)->hh.tbl->tail + _ptr_adj);      \
+            for (_tmp_bkt = 0; _tmp_bkt < (head)->hh.tbl->num_buckets; _tmp_bkt++)                           \
+                if ((head)->hh.tbl->buckets[_tmp_bkt].hh_head) {                                             \
+                    (head)->hh.tbl->buckets[_tmp_bkt].hh_head =                                              \
+                        (UT_hash_handle *)(void *)((char *)(head)->hh.tbl->buckets[_tmp_bkt].hh_head +       \
+                                                   _ptr_adj);                                                \
+                    for (UT_hash_handle *_tmp_hh  = (head)->hh.tbl->buckets[_tmp_bkt].hh_head;               \
+                         _tmp_hh != NULL; _tmp_hh = _tmp_hh->hh_next) {                                      \
+                        if (_tmp_hh->prev)                                                                   \
+                            _tmp_hh->prev = (UT_hash_handle *)(void *)((char *)_tmp_hh->prev + _ptr_adj);    \
+                        if (_tmp_hh->next)                                                                   \
+                            _tmp_hh->next = (UT_hash_handle *)(void *)((char *)_tmp_hh->next + _ptr_adj);    \
+                        if (_tmp_hh->hh_prev)                                                                \
+                            _tmp_hh->hh_prev =                                                               \
+                                (UT_hash_handle *)(void *)((char *)_tmp_hh->hh_prev + _ptr_adj);             \
+                        if (_tmp_hh->hh_next)                                                                \
+                            _tmp_hh->hh_next =                                                               \
+                                (UT_hash_handle *)(void *)((char *)_tmp_hh->hh_next + _ptr_adj);             \
+                    }                                                                                        \
+                }                                                                                            \
+        }                                                                                                    \
+    } while (0)
 
 typedef struct UT_hash_bucket {
     struct UT_hash_handle *hh_head;

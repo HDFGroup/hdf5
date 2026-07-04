@@ -4,36 +4,39 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 /*
- * Purpose:    Tests the plugin module (H5PL)
+ * Purpose:	Test group filter plugin for the filter_pluging.c test.
  */
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
 #include "H5PLextern.h"
 
-#define H5Z_FILTER_DYNLIB4 260
+#define FILTER4_ID   260
+#define SUFFIX_LEN   8
+#define GROUP_SUFFIX ".h5group"
 
-#define PUSH_ERR(func, minor, str)                                                                           \
-    H5Epush2(H5E_DEFAULT, __FILE__, func, __LINE__, H5E_ERR_CLS, H5E_PLUGIN, minor, str)
+static size_t append_to_group_name(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                                   size_t nbytes, size_t *buf_size, void **buf);
 
-static size_t H5Z_filter_dynlib4(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
-                                 size_t nbytes, size_t *buf_size, void **buf);
-
-/* This message derives from H5Z */
-const H5Z_class2_t H5Z_DYNLIB4[1] = {{
-    H5Z_CLASS_T_VERS,   /* H5Z_class_t version             */
-    H5Z_FILTER_DYNLIB4, /* Filter id number        */
-    1, 1,               /* Encoding and decoding enabled   */
-    "dynlib4",          /* Filter name for debugging    */
-    NULL,               /* The "can apply" callback        */
-    NULL,               /* The "set local" callback        */
-    H5Z_filter_dynlib4, /* The actual filter function    */
+/* Filter class struct */
+const H5Z_class2_t FILTER_INFO[1] = {{
+    H5Z_CLASS_T_VERS,       /* H5Z_class_t version              */
+    FILTER4_ID,             /* Filter ID number                 */
+    1,                      /* Encoding enabled                 */
+    1,                      /* Decoding enabled                 */
+    "test filter plugin 4", /* Filter name for debugging        */
+    NULL,                   /* The "can apply" callback         */
+    NULL,                   /* The "set local" callback         */
+    append_to_group_name,   /* The actual filter function       */
 }};
 
 H5PL_type_t
@@ -44,66 +47,66 @@ H5PLget_plugin_type(void)
 const void *
 H5PLget_plugin_info(void)
 {
-    return H5Z_DYNLIB4;
+    return FILTER_INFO;
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Z_filter_dynlib4
+ * Function:	append_to_group_name
  *
- * Purpose:    A dynlib4 filter method that adds on and subtract from
- *              the original value with another value.  It will be built
- *              as a shared library.  plugin.c test will load and use
- *              this filter library. Designed to call a HDF function.
+ * Purpose:     On write:
+ *                  Appends the suffix ".h5group" to the group name
+ *              On read:
+ *                  Removes the ".h5group" suffix from the group name
  *
- * Return:    Success:    Data chunk size
- *
- *        Failure:    0
+ * Return:      Success:    Data size in bytes
+ *              Failure:    0
  *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z_filter_dynlib4(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
-                   size_t *buf_size, void **buf)
+append_to_group_name(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
+                     size_t *buf_size, void **buf)
 {
-    int     *int_ptr  = (int *)*buf; /* Pointer to the data values */
-    size_t   buf_left = *buf_size;   /* Amount of data buffer left to process */
-    int      add_on   = 0;
-    unsigned ver_info[3];
+    size_t new_name_size = 0; /* Return value */
 
-    /* Check for the library version */
-    if (H5get_libversion(&ver_info[0], &ver_info[1], &ver_info[2]) < 0) {
-        PUSH_ERR("dynlib4", H5E_CALLBACK, "H5get_libversion");
-        return (0);
-    }
     /* Check for the correct number of parameters */
-    if (cd_nelmts == 0)
-        return (0);
+    if (cd_nelmts > 0)
+        return 0;
 
-    /* Check that permanent parameters are set correctly */
-    if (cd_values[0] > 9)
-        return (0);
+    /* Assignment to eliminate unused parameter warning. */
+    (void)cd_values;
 
-    if (ver_info[0] != cd_values[1] || ver_info[1] != cd_values[2]) {
-        PUSH_ERR("dynlib4", H5E_CALLBACK, "H5get_libversion does not match");
-        return (0);
+    if (flags & H5Z_FLAG_REVERSE) {
+        /* READ - Remove the suffix from the group name */
+        new_name_size = *buf_size = nbytes - SUFFIX_LEN;
+    }
+    else {
+        /* WRITE - Append the suffix to the group name */
+        void          *outbuf = NULL; /* Pointer to new buffer                    */
+        unsigned char *dst    = NULL; /* Temporary pointer to destination buffer  */
+
+        /* Get memory for the new, larger string buffer using the
+         * library's memory allocator.
+         */
+        if (NULL == (dst = (unsigned char *)(outbuf = H5allocate_memory(nbytes + SUFFIX_LEN, 0))))
+            return 0;
+
+        /* Copy raw data */
+        memcpy((void *)dst, (const void *)(*buf), nbytes);
+
+        /* Append suffix to raw data for storage */
+        dst += nbytes;
+        memcpy((void *)dst, (const void *)GROUP_SUFFIX, SUFFIX_LEN);
+
+        /* Free the passed-in buffer using the library's allocator */
+        H5free_memory(*buf);
+
+        /* Set return values */
+        *buf_size     = nbytes + SUFFIX_LEN;
+        *buf          = outbuf;
+        outbuf        = NULL;
+        new_name_size = *buf_size;
     }
 
-    add_on = (int)cd_values[0];
-
-    if (flags & H5Z_FLAG_REVERSE) { /*read*/
-        /* Subtract the "add on" value to all the data values */
-        while (buf_left > 0) {
-            *int_ptr++ -= add_on;
-            buf_left -= sizeof(int);
-        }  /* end while */
-    }      /* end if */
-    else { /*write*/
-        /* Add the "add on" value to all the data values */
-        while (buf_left > 0) {
-            *int_ptr++ += add_on;
-            buf_left -= sizeof(int);
-        } /* end while */
-    }     /* end else */
-
-    return nbytes;
-} /* end H5Z_filter_dynlib4() */
+    return new_name_size;
+} /* append_to_group_name() */

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if !defined(WIN32) && !defined(__MINGW32__)
+#if !defined(WIN32) && !defined(__MINGW32__) && !defined(_WIN32)
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -114,7 +114,7 @@ verify(int fd, unsigned int k)
     } /* end if */
 
     /* Position the file at the beginning */
-    if (lseek(fd, (off_t)0, SEEK_SET) < 0) {
+    if (lseek(fd, 0, SEEK_SET) < 0) {
         printf("READER: error from lseek\n");
         goto error;
     } /* end if */

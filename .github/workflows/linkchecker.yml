@@ -1,0 +1,115 @@
+name: Link Checker
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check-links:
+    name: Check Documentation Links
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libunwind-dev \
+            graphviz \
+            doxygen \
+            cmake
+
+      - name: Build Documentation
+        id: build_docs
+        run: |
+          mkdir build
+          cd build
+          cmake -DHDF5_BUILD_DOC:BOOL=ON ..
+          make doxygen
+          echo "html_path=$(pwd)/hdf5lib_docs/html" >> $GITHUB_OUTPUT
+
+      - name: Run Comprehensive Link Check
+        id: lychee
+        uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2.8.0
+        with:
+          args: >
+            --base ${{ steps.build_docs.outputs.html_path }}
+            --max-retries 4
+            --max-concurrency 4
+            --retry-wait-time 10
+            --timeout 30
+            --accept 200..=299,429
+            --user-agent "Mozilla/5.0 (compatible; Lychee/v0.1)"
+            --skip-missing
+            --exclude ".*%23.*"
+            --exclude "eigen.tuxfamily.org"
+            --exclude "gnu.org"
+            --exclude "en.wikipedia.org"
+            --exclude "help.hdfgroup.org"
+            --exclude "libpng.org"
+            --exclude "my.cdash.org"
+            --exclude "www.oreilly.com"
+            --exclude "preshing.com"
+            --exclude "semver.org"
+            --exclude "sourceforge.net"
+            --exclude "www.youtube.com"
+            --exclude "youtu.be"
+            --exclude "hdfeos.org"
+            --exclude "github.com"
+            --exclude "stackoverflow.com"
+            --exclude "reddit.com"
+            --exclude "twitter.com"
+            --exclude "linkedin.com"
+            --exclude "web.cels.anl.gov"
+            --exclude "www.doxygen.org"
+            --exclude "www.doxygen.nl"
+            "${{ steps.build_docs.outputs.html_path }}/**/*.html"
+          output: lychee-report.md
+          format: markdown
+          jobSummary: false
+          # Let the action fail naturally - we'll handle it in the summary step
+          fail: true
+
+      - name: Publish Report to Job Summary
+        if: always()
+        run: |
+          echo "## 🔗 Link Checker Report" >> "$GITHUB_STEP_SUMMARY"
+
+          # Check if lychee step succeeded or failed
+          if [ "${{ steps.lychee.outcome }}" = "success" ]; then
+            echo "✅ **No broken links found!**" >> "$GITHUB_STEP_SUMMARY"
+          elif [ "${{ steps.lychee.outcome }}" = "failure" ]; then
+            # Count actual broken links marked with the ❌ emoji.
+            # Default to 0 if grep finds nothing or fails.
+            FAILED_COUNT=$(grep -c "❌" lychee-report.md 2>/dev/null || echo 0)
+
+            if [ "$FAILED_COUNT" -gt 0 ]; then
+              echo "❌ **Found $FAILED_COUNT broken link(s)!**" >> "$GITHUB_STEP_SUMMARY"
+            else
+              # If the step failed but no broken links found, it's likely a different error
+              echo "⚠️ **Link checker encountered an error.**" >> "$GITHUB_STEP_SUMMARY"
+              echo "This may indicate a configuration, network, or file access issue." >> "$GITHUB_STEP_SUMMARY"
+            fi
+          else
+            echo "⚠️ **Link checker step was skipped or cancelled.**" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Full Report:" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f "lychee-report.md" ]; then
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            cat lychee-report.md >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No detailed report available." >> "$GITHUB_STEP_SUMMARY"
+          fi

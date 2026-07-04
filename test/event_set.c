@@ -4,16 +4,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Wednesday, April 8, 2020
- *
  * Purpose:    Tests event sets.
  */
 #include "h5test.h"
@@ -21,12 +18,12 @@
 
 #define EVENT_SET_NUM_CONNECTOR_IDS 2
 
-const char *FILENAME[] = {"event_set_1", NULL};
+static const char *FILENAME[] = {"event_set_1", NULL};
 
-hid_t connector_ids_g[EVENT_SET_NUM_CONNECTOR_IDS];
+static hid_t connector_ids_g[EVENT_SET_NUM_CONNECTOR_IDS];
 
-herr_t fake_wait_request_wait(void *req, uint64_t timeout, H5VL_request_status_t *status);
-herr_t fake_wait_request_free(void *req);
+herr_t               fake_wait_request_wait(void *req, uint64_t timeout, H5VL_request_status_t *status);
+H5_ATTR_CONST herr_t fake_wait_request_free(void *req);
 
 /* A VOL class struct that describes a VOL class with no
  * functionality, other than a wait that returns success.
@@ -162,7 +159,7 @@ fake_wait_request_wait(void H5_ATTR_UNUSED *req, uint64_t H5_ATTR_UNUSED timeout
         *status = H5VL_REQUEST_STATUS_SUCCEED;
 
     return 0;
-} /* end H5_daos_req_wait() */
+} /* end fake_wait_request_wait() */
 
 herr_t
 fake_wait_request_free(void H5_ATTR_UNUSED *req)
@@ -178,9 +175,6 @@ fake_wait_request_free(void H5_ATTR_UNUSED *req)
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Quincey Koziol
- *              Thursday, April 9, 2020
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -190,7 +184,7 @@ test_es_create(void)
     size_t   count;        /* # of events in set */
     size_t   num_errs;     /* # of failed events in set */
     uint64_t num_ops;      /* # of events inserted into set */
-    hbool_t  err_occurred; /* Whether an error has occurred */
+    bool     err_occurred; /* Whether an error has occurred */
 
     TESTING("event set creation");
 
@@ -206,7 +200,7 @@ test_es_create(void)
         FAIL_PUTS_ERROR("should be empty event set");
 
     /* Check for errors */
-    err_occurred = FALSE;
+    err_occurred = false;
     if (H5ESget_err_status(es_id, &err_occurred) < 0)
         TEST_ERROR;
     if (err_occurred)
@@ -238,7 +232,7 @@ error:
     {
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -249,9 +243,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    number of errors
- *
- * Programmer:  Quincey Koziol
- *              Friday, February 26, 2021
  *
  *-------------------------------------------------------------------------
  */
@@ -315,20 +306,18 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Neil Fortner
- *              Wednesday, November 24, 2021
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_es_get_requests(void)
 {
-    hid_t   es_id;            /* Event set ID */
-    hid_t   connector_ids[2]; /* Connector IDs */
-    void   *requests[2];      /* Requests */
-    int     req_targets[2];   /* Dummy targets for void * requests */
-    size_t  count;            /* # of events in set */
-    hbool_t op_failed;        /* Whether an operation failed (unused) */
+    hid_t  es_id;            /* Event set ID */
+    hid_t  connector_ids[2]; /* Connector IDs */
+    void  *requests[2];      /* Requests */
+    int    req_targets[2];   /* Dummy targets for void * requests */
+    size_t count;            /* # of events in set */
+    int    cmp_value;        /* Comparison value */
+    bool   op_failed;        /* Whether an operation failed (unused) */
 
     TESTING("event set get requests");
 
@@ -407,7 +396,12 @@ test_es_get_requests(void)
         TEST_ERROR;
     if (count != 1)
         TEST_ERROR;
-    if (connector_ids[0] != connector_ids_g[0])
+    cmp_value = 0;
+    if (H5VLcmp_connector_cls(&cmp_value, connector_ids[0], connector_ids_g[0]) < 0)
+        TEST_ERROR;
+    if (cmp_value)
+        TEST_ERROR;
+    if (H5Idec_ref(connector_ids[0]) < 0)
         TEST_ERROR;
     if (connector_ids[1] != H5I_INVALID_HID)
         TEST_ERROR;
@@ -435,7 +429,12 @@ test_es_get_requests(void)
         TEST_ERROR;
     if (count != 1)
         TEST_ERROR;
-    if (connector_ids[0] != connector_ids_g[0])
+    cmp_value = 0;
+    if (H5VLcmp_connector_cls(&cmp_value, connector_ids[0], connector_ids_g[0]) < 0)
+        TEST_ERROR;
+    if (cmp_value)
+        TEST_ERROR;
+    if (H5Idec_ref(connector_ids[0]) < 0)
         TEST_ERROR;
     if (connector_ids[1] != H5I_INVALID_HID)
         TEST_ERROR;
@@ -463,9 +462,19 @@ test_es_get_requests(void)
         TEST_ERROR;
     if (count != 2)
         TEST_ERROR;
-    if (connector_ids[0] != connector_ids_g[0])
+    cmp_value = 0;
+    if (H5VLcmp_connector_cls(&cmp_value, connector_ids[0], connector_ids_g[0]) < 0)
         TEST_ERROR;
-    if (connector_ids[1] != connector_ids_g[1])
+    if (cmp_value)
+        TEST_ERROR;
+    if (H5Idec_ref(connector_ids[0]) < 0)
+        TEST_ERROR;
+    cmp_value = 0;
+    if (H5VLcmp_connector_cls(&cmp_value, connector_ids[1], connector_ids_g[1]) < 0)
+        TEST_ERROR;
+    if (cmp_value)
+        TEST_ERROR;
+    if (H5Idec_ref(connector_ids[1]) < 0)
         TEST_ERROR;
 
     /* Try with H5_ITER_DEC */
@@ -476,9 +485,19 @@ test_es_get_requests(void)
         TEST_ERROR;
     if (count != 2)
         TEST_ERROR;
-    if (connector_ids[0] != connector_ids_g[1])
+    cmp_value = 0;
+    if (H5VLcmp_connector_cls(&cmp_value, connector_ids[0], connector_ids_g[1]) < 0)
         TEST_ERROR;
-    if (connector_ids[1] != connector_ids_g[0])
+    if (cmp_value)
+        TEST_ERROR;
+    if (H5Idec_ref(connector_ids[0]) < 0)
+        TEST_ERROR;
+    cmp_value = 0;
+    if (H5VLcmp_connector_cls(&cmp_value, connector_ids[1], connector_ids_g[0]) < 0)
+        TEST_ERROR;
+    if (cmp_value)
+        TEST_ERROR;
+    if (H5Idec_ref(connector_ids[1]) < 0)
         TEST_ERROR;
 
     /* Get only requests */
@@ -517,9 +536,19 @@ test_es_get_requests(void)
         TEST_ERROR;
     if (count != 2)
         TEST_ERROR;
-    if (connector_ids[0] != connector_ids_g[0])
+    cmp_value = 0;
+    if (H5VLcmp_connector_cls(&cmp_value, connector_ids[0], connector_ids_g[0]) < 0)
         TEST_ERROR;
-    if (connector_ids[1] != connector_ids_g[1])
+    if (cmp_value)
+        TEST_ERROR;
+    if (H5Idec_ref(connector_ids[0]) < 0)
+        TEST_ERROR;
+    cmp_value = 0;
+    if (H5VLcmp_connector_cls(&cmp_value, connector_ids[1], connector_ids_g[1]) < 0)
+        TEST_ERROR;
+    if (cmp_value)
+        TEST_ERROR;
+    if (H5Idec_ref(connector_ids[1]) < 0)
         TEST_ERROR;
     if (requests[0] != &req_targets[0])
         TEST_ERROR;
@@ -536,9 +565,19 @@ test_es_get_requests(void)
         TEST_ERROR;
     if (count != 2)
         TEST_ERROR;
-    if (connector_ids[0] != connector_ids_g[1])
+    cmp_value = 0;
+    if (H5VLcmp_connector_cls(&cmp_value, connector_ids[0], connector_ids_g[1]) < 0)
         TEST_ERROR;
-    if (connector_ids[1] != connector_ids_g[0])
+    if (cmp_value)
+        TEST_ERROR;
+    if (H5Idec_ref(connector_ids[0]) < 0)
+        TEST_ERROR;
+    cmp_value = 0;
+    if (H5VLcmp_connector_cls(&cmp_value, connector_ids[1], connector_ids_g[0]) < 0)
+        TEST_ERROR;
+    if (cmp_value)
+        TEST_ERROR;
+    if (H5Idec_ref(connector_ids[1]) < 0)
         TEST_ERROR;
     if (requests[0] != &req_targets[1])
         TEST_ERROR;
@@ -553,7 +592,12 @@ test_es_get_requests(void)
         TEST_ERROR;
     if (count != 2)
         TEST_ERROR;
-    if (connector_ids[0] != connector_ids_g[0])
+    cmp_value = 0;
+    if (H5VLcmp_connector_cls(&cmp_value, connector_ids[0], connector_ids_g[0]) < 0)
+        TEST_ERROR;
+    if (cmp_value)
+        TEST_ERROR;
+    if (H5Idec_ref(connector_ids[0]) < 0)
         TEST_ERROR;
     if (connector_ids[1] != H5I_INVALID_HID)
         TEST_ERROR;
@@ -566,7 +610,12 @@ test_es_get_requests(void)
         TEST_ERROR;
     if (count != 2)
         TEST_ERROR;
-    if (connector_ids[0] != connector_ids_g[1])
+    cmp_value = 0;
+    if (H5VLcmp_connector_cls(&cmp_value, connector_ids[0], connector_ids_g[1]) < 0)
+        TEST_ERROR;
+    if (cmp_value)
+        TEST_ERROR;
+    if (H5Idec_ref(connector_ids[0]) < 0)
         TEST_ERROR;
     if (connector_ids[1] != H5I_INVALID_HID)
         TEST_ERROR;
@@ -605,7 +654,12 @@ test_es_get_requests(void)
     requests[1]      = NULL;
     if (H5ESget_requests(es_id, H5_ITER_INC, connector_ids, requests, 1, &count) < 0)
         TEST_ERROR;
-    if (connector_ids[0] != connector_ids_g[0])
+    cmp_value = 0;
+    if (H5VLcmp_connector_cls(&cmp_value, connector_ids[0], connector_ids_g[0]) < 0)
+        TEST_ERROR;
+    if (cmp_value)
+        TEST_ERROR;
+    if (H5Idec_ref(connector_ids[0]) < 0)
         TEST_ERROR;
     if (connector_ids[1] != H5I_INVALID_HID)
         TEST_ERROR;
@@ -622,7 +676,12 @@ test_es_get_requests(void)
     requests[1]      = NULL;
     if (H5ESget_requests(es_id, H5_ITER_DEC, connector_ids, requests, 1, &count) < 0)
         TEST_ERROR;
-    if (connector_ids[0] != connector_ids_g[1])
+    cmp_value = 0;
+    if (H5VLcmp_connector_cls(&cmp_value, connector_ids[0], connector_ids_g[1]) < 0)
+        TEST_ERROR;
+    if (cmp_value)
+        TEST_ERROR;
+    if (H5Idec_ref(connector_ids[0]) < 0)
         TEST_ERROR;
     if (connector_ids[1] != H5I_INVALID_HID)
         TEST_ERROR;
@@ -645,7 +704,7 @@ error:
     {
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -657,9 +716,6 @@ error:
  * Return:      Success: EXIT_SUCCESS
  *              Failure: EXIT_FAILURE
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, April 8, 2020
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -670,7 +726,7 @@ main(void)
     int   nerrors = 0;               /* Error count */
 
     /* Setup */
-    h5_reset();
+    h5_test_init();
     fapl_id = h5_fileaccess();
 
     /* Register dummy connector IDs */
@@ -696,11 +752,11 @@ main(void)
         goto error;
 
     /* Report status */
-    HDputs("All event set tests passed.");
+    puts("All event set tests passed.");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
-    HDputs("***** EVENT SET TESTS FAILED *****");
-    HDexit(EXIT_FAILURE);
+    puts("***** EVENT SET TESTS FAILED *****");
+    exit(EXIT_FAILURE);
 } /* end main() */

@@ -5,15 +5,12 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
 # Tests for the swmr feature using virtual datasets.
-#
-# Created:
-#   Dana Robinson, November 2015
 
 srcdir=@srcdir@
 utils_testdir=@abs_top_builddir@/@H5_UTILS_TEST_BUILDDIR@
@@ -80,14 +77,14 @@ WAIT_MESSAGE() {
 ## Main
 ###############################################################################
 
-# Check to see if the VFD specified by the HDF5_DRIVER environment variable
-# supports SWMR.
+# Check to see if the VFD specified by the HDF5_DRIVER or HDF5_TEST_DRIVER
+# environment variable supports SWMR.
 $utils_testdir/swmr_check_compat_vfd
 rc=$?
 if [ $rc -ne 0 ] ; then
     echo
-    echo "The VFD specified by the HDF5_DRIVER environment variable"
-    echo "does not support SWMR."
+    echo "The VFD specified by the HDF5_DRIVER or HDF5_TEST_DRIVER"
+    echo "environment variable does not support SWMR."
     echo
     echo "SWMR acceptance tests skipped"
     echo

@@ -16,7 +16,7 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the COPYING file, which can be found at the root of the source code       *
+!   the LICENSE file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
@@ -38,7 +38,6 @@
 
 MODULE H5T
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR,  C_CHAR, C_NULL_PTR
   USE H5GLOBAL
   IMPLICIT NONE
 
@@ -80,7 +79,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER(HID_T), INTENT(OUT) :: type_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: tapl_id
     INTEGER :: namelen                  ! Name length
     INTEGER(HID_T) :: tapl_id_default
 
@@ -126,9 +125,9 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER(HID_T), INTENT(IN) :: type_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: tcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: tapl_id
 
     INTEGER :: namelen          ! Name length
 
@@ -268,6 +267,7 @@ CONTAINS
 !!                \li H5T_ENUM_F
 !!                \li H5T_VLEN_F
 !!                \li H5T_ARRAY_F
+!!                \li H5T_COMPLEX_F
 !! \param hdferr  \fortran_error
 !!
 !! See C API: @ref H5Tget_class()
@@ -1409,14 +1409,6 @@ CONTAINS
 !                               Success:  0
 !                               Failure: -1
 !
-! AUTHOR
-!      Elena Pourmal
-!            August 12, 1999
-!
-! HISTORY
-!       Explicit Fortran interfaces were added for
-!                  called C functions (it is needed for Windows
-!                  port).  March 7, 2001
 ! SOURCE
 !  SUBROUTINE h5tinsert_array_f(parent_id,name,offset, ndims, dims, member_id, hdferr, perm)
 !  IMPLICIT NONE
@@ -1735,9 +1727,9 @@ CONTAINS
 !!
 !! \brief Returns datatype class of compound datatype member.
 !!
-!! \param type_id   Datartpe identifier.
+!! \param type_id   Datatype identifier.
 !! \param member_no Index of compound datatype member.
-!! \param class     Class type for compound dadtype member. Valid classes:
+!! \param class     Class type for compound datatype member. Valid classes:
 !!                  \li H5T_NO_CLASS_F (error)
 !!                  \li H5T_INTEGER_F
 !!                  \li H5T_FLOAT_F
@@ -1750,6 +1742,7 @@ CONTAINS
 !!                  \li H5T_ENUM_F
 !!                  \li H5T_VLEN_F
 !!                  \li H5T_ARRAY_F
+!!                  \li H5T_COMPLEX_F
 !! \param hdferr    \fortran_error
 !!
 !! See C API: @ref H5Tget_member_class()
@@ -1793,8 +1786,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: loc_id
     INTEGER(HID_T), INTENT(IN) :: dtype_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: tcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: tapl_id
     INTEGER(HID_T) :: tcpl_id_default
     INTEGER(HID_T) :: tapl_id_default
 
@@ -1862,32 +1855,47 @@ CONTAINS
 !>
 !! \ingroup FH5T
 !!
-!! \brief Decode A binary object description of data type and return a new object handle.
+!! \brief Decode a binary object description of data type and return a new object handle.
 !!
-!! \param buf    Buffer for the data space object to be decoded.
-!! \param obj_id Object ID.
-!! \param hdferr \fortran_error
+!! \param buf      Buffer for the data space object to be decoded.
+!! \param obj_id   Object ID.
+!! \param hdferr   \fortran_error
+!! \param buf_size Size of the buffer.
 !!
-!! See C API: @ref H5Tdecode()
+!! See C API: @ref H5Tdecode2()
 !!
-  SUBROUTINE h5tdecode_f(buf, obj_id, hdferr)
+SUBROUTINE h5tdecode_f(buf, obj_id, hdferr, buf_size)
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: buf
     INTEGER(HID_T), INTENT(OUT) :: obj_id
     INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(SIZE_T), OPTIONAL, INTENT(IN) :: buf_size
+
+    INTEGER(SIZE_T) :: buf_size_default
+
     INTERFACE
-       INTEGER FUNCTION h5tdecode_c(buf, obj_id) BIND(C,NAME='h5tdecode_c')
+       INTEGER(HID_T) FUNCTION H5Tdecode2(buf, buf_size) BIND(C,NAME='H5Tdecode2')
          IMPORT :: C_CHAR
-         IMPORT :: HID_T
+         IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: buf
-         INTEGER(HID_T), INTENT(OUT) :: obj_id
-       END FUNCTION h5tdecode_c
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: buf
+         INTEGER(SIZE_T), VALUE :: buf_size
+       END FUNCTION H5Tdecode2
     END INTERFACE
 
-    hdferr = h5tdecode_c(buf, obj_id)
+    IF(PRESENT(buf_size))THEN
+        buf_size_default = buf_size
+    ELSE
+        buf_size_default = LEN(buf)
+    ENDIF
 
-  END SUBROUTINE h5tdecode_f
+    obj_id = H5Tdecode2(buf, buf_size_default)
+
+    IF(obj_id.LT.0)THEN
+      hdferr = -1
+    ENDIF
+
+END SUBROUTINE h5tdecode_f
 
 !>
 !! \ingroup FH5T
@@ -1954,7 +1962,7 @@ CONTAINS
 !>
 !! \ingroup FH5T
 !!
-!! \brief Check whether the library’s default conversion is hard conversion.
+!! \brief Check whether the library&apos;s default conversion is hard conversion.
 !!
 !! \param src_id Identifier for the source datatype.
 !! \param dst_id Identifier for the destination datatype.
@@ -2040,13 +2048,13 @@ CONTAINS
 !!
   SUBROUTINE h5tconvert_f(src_id, dst_id, nelmts, buf, hdferr, background, plist_id)
     IMPLICIT NONE
-    INTEGER(HID_T) , INTENT(IN)               :: src_id
-    INTEGER(HID_T) , INTENT(IN)               :: dst_id
-    INTEGER(SIZE_T), INTENT(IN)               :: nelmts
-    TYPE(C_PTR)    , INTENT(INOUT)            :: buf
-    INTEGER        , INTENT(OUT)              :: hdferr
-    TYPE(C_PTR)    , INTENT(INOUT), OPTIONAL  :: background
-    INTEGER(HID_T) , INTENT(IN)   , OPTIONAL  :: plist_id
+    INTEGER(HID_T) , INTENT(IN)            :: src_id
+    INTEGER(HID_T) , INTENT(IN)            :: dst_id
+    INTEGER(SIZE_T), INTENT(IN)            :: nelmts
+    TYPE(C_PTR)    , INTENT(IN)            :: buf
+    INTEGER        , INTENT(OUT)           :: hdferr
+    TYPE(C_PTR)    , INTENT(IN), OPTIONAL  :: background
+    INTEGER(HID_T) , INTENT(IN), OPTIONAL  :: plist_id
     INTEGER(HID_T) :: plist_id_default
     TYPE(C_PTR) :: background_default
 

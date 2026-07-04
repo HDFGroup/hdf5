@@ -1,0 +1,83 @@
+name: hdf5 dev julia
+
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  julia_build_and_test:
+    name: "julia ${{ inputs.build_mode }}"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get HDF5 source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Install Dependencies
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build graphviz
+          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+          sudo apt install -y libaec-dev zlib1g-dev wget curl bzip2 flex bison cmake libzip-dev openssl build-essential
+
+      - name: Configure
+        shell: bash
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+          -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
+          -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
+          -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+          -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+          -DLIBAEC_USE_LOCALCONTENT=OFF \
+          -DZLIB_USE_LOCALCONTENT=OFF \
+          -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+          -DHDF5_BUILD_JAVA:BOOL=OFF \
+          -DCMAKE_INSTALL_PREFIX=/tmp \
+          $GITHUB_WORKSPACE
+
+      - name: Build
+        shell: bash
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Install HDF5
+        shell: bash
+        run: |
+          cmake --install .
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Install julia
+        uses: julia-actions/setup-julia@fa02766e078afaaf09b14210362cee14137e6a32 # latest
+        with:
+          version: '1.6'
+          arch: 'x64'
+
+      - name: Get julia hdf5 source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: JuliaIO/HDF5.jl
+          path: .
+
+      - name: Generate LocalPreferences
+        run: |
+          echo '[HDF5]' >> LocalPreferences.toml
+          echo 'libhdf5 = "/tmp/lib/libhdf5.so"' >> LocalPreferences.toml
+          echo 'libhdf5_hl = "/tmp/lib/libhdf5_hl.so"' >> LocalPreferences.toml
+
+      - uses: julia-actions/julia-buildpkg@e3eb439fad4f9aba7da2667e7510e4a46ebc46e1 # latest
+
+      - name: Julia Run Tests
+        uses: julia-actions/julia-runtest@fc07e51ec99db23b29943e95406b5762501e2897 # latest
+        env:
+          JULIA_DEBUG: Main

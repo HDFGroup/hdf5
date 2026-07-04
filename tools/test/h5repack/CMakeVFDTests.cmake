@@ -4,7 +4,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -15,7 +15,7 @@
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-H5_CREATE_VFD_DIR()
+H5_CREATE_VFD_DIR ()
 
 set (H5REPACK_VFD_subfiling_SKIP_TESTS
   h5repacktest
@@ -70,7 +70,6 @@ macro (ADD_VFD_TEST vfdname resultcode)
       add_test (
           NAME H5REPACK_VFD-${vfdname}-h5repacktest
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5repacktest>"
               -D "TEST_ARGS:STRING="
               -D "TEST_VFD:STRING=${vfdname}"
@@ -83,6 +82,9 @@ macro (ADD_VFD_TEST vfdname resultcode)
           DEPENDS H5REPACK_VFD-${vfdname}-h5repacktest-clear-objects
           TIMEOUT ${CTEST_SHORT_TIMEOUT}
       )
+      if ("H5REPACK_VFD-${vfdname}-h5repacktest" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5REPACK_VFD-${vfdname}-h5repacktest PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5REPACK_VFD-${vfdname}-h5repacktest-clean-objects
           COMMAND ${CMAKE_COMMAND} -E remove

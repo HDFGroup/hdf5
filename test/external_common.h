@@ -4,16 +4,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu
- *              April, 2019
- *
  * Purpose:     Private function for external.c and external_env.c
  */
 #ifndef EXTERNAL_COMMON_H
@@ -34,7 +31,7 @@
 extern "C" {
 #endif
 
-H5TEST_DLL herr_t reset_raw_data_files(hbool_t is_env);
+H5TEST_DLL herr_t reset_raw_data_files(bool is_env);
 
 #ifdef __cplusplus
 }

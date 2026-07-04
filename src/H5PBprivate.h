@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5PBprivate.h
- *			June 2014
- *			Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -31,6 +29,10 @@
 /**************************/
 /* Library Private Macros */
 /**************************/
+
+/* "Actual" default page buffer size (this is the size of the page buffer used when the value in the property
+ * list is H5F_PAGE_BUFFER_SIZE_DEFAULT) */
+#define H5PB_SIZE_DEFAULT_VALUE 0
 
 /****************************/
 /* Library Private Typedefs */
@@ -85,7 +87,7 @@ H5_DLL herr_t H5PB_update_entry(H5PB_t *page_buf, haddr_t addr, size_t size, con
 H5_DLL herr_t H5PB_remove_entry(const H5F_shared_t *f_sh, haddr_t addr);
 H5_DLL herr_t H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /*out*/);
 H5_DLL herr_t H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf);
-H5_DLL herr_t H5PB_enabled(H5F_shared_t *f_sh, H5FD_mem_t type, hbool_t *enabled);
+H5_DLL herr_t H5PB_enabled(H5F_shared_t *f_sh, H5FD_mem_t type, bool *enabled);
 
 /* Statistics routines */
 H5_DLL herr_t H5PB_reset_stats(H5PB_t *page_buf);

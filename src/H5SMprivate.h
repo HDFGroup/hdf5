@@ -4,18 +4,15 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	James Laird
- *		Thursday, March 2, 2006
- *
- * Purpose:	This file contains private declarations for the H5SM
- *              shared object header messages module.
+ * Purpose: This file contains private declarations for the H5SM
+ *          shared object header messages module.
  */
 #ifndef H5SMprivate_H
 #define H5SMprivate_H

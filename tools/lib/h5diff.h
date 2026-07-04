@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -27,7 +27,7 @@
  *------------------------------------------------------------------------*/
 typedef struct {
     h5trav_type_t type[2];
-    hbool_t       is_same_trgobj;
+    bool          is_same_trgobj;
 } diff_args_t;
 /*-------------------------------------------------------------------------
  * command line options
@@ -51,28 +51,29 @@ typedef struct {
     int                       mode_quiet;   /* quiet mode: no output at all */
     int                       mode_report;  /* report mode: print the data */
     int                       mode_verbose; /* verbose mode: print the data, list of objcets, warnings */
-    int                       mode_verbose_level; /* control verbose details */
-    int                       mode_list_not_cmp;  /* list not comparable messages */
-    int                       print_header;       /* print header */
-    int                       print_percentage;   /* print percentage */
-    int                       print_dims;         /* print dimension index */
-    int                       delta_bool;         /* delta, absolute value to compare */
-    double                    delta;              /* delta value */
-    int                       use_system_epsilon; /* flag to use system epsilon (1 or 0) */
-    int                       percent_bool;       /* relative error to compare*/
-    double                    percent;            /* relative error value */
-    hbool_t                   follow_links;       /* follow symbolic links */
-    int                       no_dangle_links;    /* return error when find dangling link */
-    int                       cmn_objs;           /* do we have common objects */
-    int                       not_cmp;            /* are the objects comparable */
-    int                       contents;           /* equal contents */
-    int                       do_nans;            /* consider Nans while diffing floats */
-    int                       exclude_path;       /* exclude path to an object */
-    int                       exclude_attr_path;  /* exclude path to an object */
-    struct exclude_path_list *exclude;            /* keep exclude path list */
-    struct exclude_path_list *exclude_attr;       /* keep exclude attribute list */
-    int                       count_bool;         /* count, compare up to count */
-    hsize_t                   count;              /* count value */
+    int                       mode_verbose_level;     /* control verbose details */
+    int                       mode_list_not_cmp;      /* list not comparable messages */
+    int                       print_header;           /* print header */
+    int                       print_percentage;       /* print percentage */
+    int                       print_dims;             /* print dimension index */
+    int                       delta_bool;             /* delta, absolute value to compare */
+    double                    delta;                  /* delta value */
+    int                       use_system_epsilon;     /* flag to use system epsilon (1 or 0) */
+    int                       percent_bool;           /* relative error to compare*/
+    double                    percent;                /* relative error value */
+    bool                      follow_links;           /* follow symbolic links */
+    int                       no_dangle_links;        /* return error when find dangling link */
+    int                       cmn_objs;               /* do we have common objects */
+    int                       not_cmp;                /* are the objects comparable */
+    int                       contents;               /* equal contents */
+    int                       do_nans;                /* consider Nans while diffing floats */
+    int                       disable_compact_subset; /* disable compact form of subset notation */
+    int                       exclude_path;           /* exclude path to an object */
+    int                       exclude_attr_path;      /* exclude path to an object */
+    struct exclude_path_list *exclude;                /* keep exclude path list */
+    struct exclude_path_list *exclude_attr;           /* keep exclude attribute list */
+    int                       count_bool;             /* count, compare up to count */
+    hsize_t                   count;                  /* count value */
     diff_err_t                err_stat;  /* an error occurred (2, error, 1, differences, 0, no error) */
     hsize_t                   nelmts;    /* total number of elements */
     hsize_t                   hs_nelmts; /* number of elements to read at a time*/
@@ -89,8 +90,9 @@ typedef struct {
     struct subset_t          *sset[2];                 /* subsetting parameters */
     h5tools_vol_info_t        vol_info[2];             /* VOL information for input file, output file */
     h5tools_vfd_info_t        vfd_info[2];             /* VFD information for input file, output file */
-    hbool_t                   custom_vol[2];           /* Using a custom input, output VOL? */
-    hbool_t                   custom_vfd[2];           /* Using a custom input, output VFD? */
+    bool                      custom_vol[2];           /* Using a custom input, output VOL? */
+    bool                      custom_vfd[2];           /* Using a custom input, output VFD? */
+    size_t                    page_cache;              /* Size to request for page buffer cache */
 } diff_opt_t;
 
 /*-------------------------------------------------------------------------

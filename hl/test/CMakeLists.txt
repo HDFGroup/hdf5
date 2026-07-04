@@ -1,4 +1,9 @@
-cmake_minimum_required (VERSION 3.18)
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 High-Level (HL) test suite
+# This file sets up the build, formatting, and test execution rules for the HDF5 HL test suite.
+# It handles HL C test source grouping, test executable creation, compiler options, linking, and integration with the HDF5 HL and core libraries.
+#-----------------------------------------------------------------------------
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_HL_TEST C)
 # --------------------------------------------------------------------
 # Notes: When creating unit test executables they should be prefixed
@@ -87,42 +92,58 @@ endif ()
 # This executable is used to generate test files for the test_ds test.
 # It should only be run during development when new test files are needed
 # --------------------------------------------------------------------
-if (HDF5_BUILD_GENERATORS AND BUILD_STATIC_LIBS)
-  add_executable (hl_gen_test_ds gen_test_ds.c)
-  target_compile_options(hl_gen_test_ds PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-  target_include_directories (hl_gen_test_ds PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+add_executable (hl_gen_test_ds gen_test_ds.c)
+target_compile_options(hl_gen_test_ds PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+target_include_directories (hl_gen_test_ds PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (hl_gen_test_ds STATIC)
   target_link_libraries (hl_gen_test_ds PRIVATE
       ${HDF5_HL_LIB_TARGET}
       ${HDF5_TEST_LIB_TARGET}
       ${HDF5_LIB_TARGET}
   )
-  set_target_properties (hl_gen_test_ds PROPERTIES FOLDER test/hl/gen)
+else ()
+  TARGET_C_PROPERTIES (hl_gen_test_ds SHARED)
+  target_link_libraries (hl_gen_test_ds PRIVATE
+      ${HDF5_HL_LIBSH_TARGET}
+      ${HDF5_TEST_LIBSH_TARGET}
+      ${HDF5_LIBSH_TARGET}
+  )
+endif ()
+set_target_properties (hl_gen_test_ds PROPERTIES FOLDER test/hl/gen)
 
-  #-----------------------------------------------------------------------------
-  # Add Target to clang-format
-  #-----------------------------------------------------------------------------
-  if (HDF5_ENABLE_FORMATTERS)
-    clang_format (HDF5_HL_TEST_hl_gen_test_ds_FORMAT hl_gen_test_ds)
-  endif ()
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_HL_TEST_hl_gen_test_ds_FORMAT hl_gen_test_ds)
+endif ()
 
-  add_executable (hl_gen_test_ld gen_test_ld.c)
-  target_compile_options(hl_gen_test_ld PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-  target_include_directories (hl_gen_test_ld PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+add_executable (hl_gen_test_ld gen_test_ld.c)
+target_compile_options(hl_gen_test_ld PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+target_include_directories (hl_gen_test_ld PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (hl_gen_test_ld STATIC)
   target_link_libraries (hl_gen_test_ld PRIVATE
       ${HDF5_HL_LIB_TARGET}
       ${HDF5_TEST_LIB_TARGET}
       ${HDF5_LIB_TARGET}
   )
-  set_target_properties (hl_gen_test_ld PROPERTIES FOLDER test/hl/gen)
+else ()
+  TARGET_C_PROPERTIES (hl_gen_test_ld SHARED)
+  target_link_libraries (hl_gen_test_ld PRIVATE
+      ${HDF5_HL_LIBSH_TARGET}
+      ${HDF5_TEST_LIBSH_TARGET}
+      ${HDF5_LIBSH_TARGET}
+  )
+endif ()
+set_target_properties (hl_gen_test_ld PROPERTIES FOLDER test/hl/gen)
 
-  #-----------------------------------------------------------------------------
-  # Add Target to clang-format
-  #-----------------------------------------------------------------------------
-  if (HDF5_ENABLE_FORMATTERS)
-    clang_format (HDF5_HL_TEST_hl_gen_test_ld_FORMAT hl_gen_test_ld)
-  endif ()
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_HL_TEST_hl_gen_test_ld_FORMAT hl_gen_test_ld)
 endif ()
 
 if (HDF5_TEST_SERIAL)

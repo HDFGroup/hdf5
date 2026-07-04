@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+title: 'Hierarchical Data Format, version 5'
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - name: The HDF Group
+    website: 'https://www.hdfgroup.org'
+repository-code: 'https://github.com/HDFGroup/hdf5'
+url: 'https://www.hdfgroup.org/HDF5/'
+repository-artifact: 'https://support.hdfgroup.org/downloads/index.html'
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.17808614
+    description: 'Zenodo DOI for all versions'

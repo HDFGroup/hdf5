@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -13,19 +13,26 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5Cepoch.c
- *              June 5 2004
- *              Quincey Koziol
  *
- * Purpose:     Metadata cache epoch callbacks.
+ * Purpose:     Metadata cache epoch callbacks
  *
  *-------------------------------------------------------------------------
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
+#include "H5Cmodule.h" /* This source code file is part of the H5C module */
+
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5ACprivate.h" /* Metadata cache                       */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Metadata Cache                           */
+#include "H5Cpkg.h"      /* Cache                                    */
+#include "H5Eprivate.h"  /* Error Handling                           */
+#include "H5Fprivate.h"  /* Files                                    */
 
 /****************/
 /* Local Macros */
@@ -45,7 +52,7 @@
  *
  * As a strategy for automatic cache size reduction, the cache may insert
  * marker entries in the LRU list at the end of each epoch.  These markers
- * are then used to identify entries that have not been accessed for n
+ * are then used to identify entries that have not been accessed for 'n'
  * epochs so that they can be evicted from the cache.
  *
  ****************************************************************************/
@@ -53,8 +60,7 @@ static herr_t H5C__epoch_marker_get_initial_load_size(void *udata_ptr, size_t *i
 static herr_t H5C__epoch_marker_get_final_load_size(const void *image_ptr, size_t image_len_ptr,
                                                     void *udata_ptr, size_t *actual_len);
 static htri_t H5C__epoch_marker_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
-static void  *H5C__epoch_marker_deserialize(const void *image_ptr, size_t len, void *udata,
-                                            hbool_t *dirty_ptr);
+static void  *H5C__epoch_marker_deserialize(const void *image_ptr, size_t len, void *udata, bool *dirty_ptr);
 static herr_t H5C__epoch_marker_image_len(const void *thing, size_t *image_len_ptr);
 static herr_t H5C__epoch_marker_pre_serialize(H5F_t *f, void *thing, haddr_t addr, size_t len,
                                               haddr_t *new_addr_ptr, size_t *new_len_ptr,
@@ -98,7 +104,6 @@ const H5AC_class_t H5AC_EPOCH_MARKER[1] = {
  *
  * None of these functions should ever be called, so there is no point in
  * documenting them separately.
- *                                                     JRM - 11/16/04
  *
  ***************************************************************************/
 
@@ -131,12 +136,12 @@ H5C__epoch_marker_verify_chksum(const void H5_ATTR_UNUSED *image_ptr, size_t H5_
 
         HERROR(H5E_CACHE, H5E_SYSTEM, "called unreachable fcn.");
 
-    FUNC_LEAVE_NOAPI(FALSE)
+    FUNC_LEAVE_NOAPI(false)
 } /* end H5C__epoch_marker_verify_chksum() */
 
 static void *
 H5C__epoch_marker_deserialize(const void H5_ATTR_UNUSED *image_ptr, size_t H5_ATTR_UNUSED len,
-                              void H5_ATTR_UNUSED *udata, hbool_t H5_ATTR_UNUSED *dirty_ptr)
+                              void H5_ATTR_UNUSED *udata, bool H5_ATTR_UNUSED *dirty_ptr)
 {
     FUNC_ENTER_PACKAGE_NOERR /* Yes, even though this pushes an error on the stack */
 

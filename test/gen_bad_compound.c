@@ -4,16 +4,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              April 14, 2011
- *
  * Purpose:     This program is run to generate an HDF5 data file with objects
  *              that use compound datatypes with no fields (now forbidden to
  *              be created by the library, as of v1.4.x).  It must be built/run
@@ -26,7 +23,7 @@
 #define FILENAME "bad_compound.h5"
 
 int
-main()
+main(void)
 {
     hid_t   file;
     hid_t   cmpd_dt;

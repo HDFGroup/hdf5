@@ -4,24 +4,23 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5private.h"   /* Generic Functions        */
-#include "H5Eprivate.h"  /* Error handling           */
-#include "H5Fprivate.h"  /* File access              */
-#include "H5FDprivate.h" /* File drivers             */
-#include "H5FDwindows.h" /* Windows file driver      */
-#include "H5FDsec2.h"    /* Windows file driver      */
-#include "H5FLprivate.h" /* Free Lists               */
-#include "H5Iprivate.h"  /* IDs                      */
-#include "H5MMprivate.h" /* Memory management        */
-#include "H5Pprivate.h"  /* Property lists           */
+#include "H5FDmodule.h" /* This source code file is part of the H5FD module */
+
+#include "H5private.h" /* Generic Functions        */
 
 #ifdef H5_HAVE_WINDOWS
+
+#include "H5Eprivate.h"  /* Error handling           */
+#include "H5FDsec2.h"    /* Windows file driver      */
+#include "H5FDpkg.h"     /* File drivers             */
+#include "H5FDwindows.h" /* Windows file driver      */
+#include "H5Pprivate.h"  /* Property lists           */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_fapl_windows
@@ -38,9 +37,6 @@
  *
  * Return:  Non-negative on success/Negative on failure
  *
- * Programmer:  Dana Robinson
- *              October 10, 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -50,10 +46,9 @@ H5Pset_fapl_windows(hid_t fapl_id)
     herr_t          ret_value;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", fapl_id);
 
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, false)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     ret_value = H5P_set_driver(plist, H5FD_WINDOWS, NULL, NULL);
 

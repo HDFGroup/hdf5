@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -17,6 +17,8 @@ import static org.junit.Assert.fail;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
+import hdf.hdf5lib.exceptions.HDF5DataspaceInterfaceException;
+import hdf.hdf5lib.exceptions.HDF5FunctionArgumentException;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 
 import org.junit.After;
@@ -41,11 +43,10 @@ public class TestH5Sbasic {
         System.out.println();
     }
 
-    @Test //(expected = HDF5LibraryException.class)
+    @Test(expected = HDF5LibraryException.class)
     public void testH5Sclose_invalid() throws Throwable
     {
         long sid = H5.H5Sclose(-1);
-        assertTrue(sid == 0);
     }
 
     @Test(expected = HDF5LibraryException.class)
@@ -54,7 +55,7 @@ public class TestH5Sbasic {
         H5.H5Screate(-1);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Sget_simple_extent_type_invalid() throws Throwable
     {
         H5.H5Sget_simple_extent_type(-1);
@@ -114,14 +115,14 @@ public class TestH5Sbasic {
         H5.H5Screate_simple(2, (long[])null, null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Screate_simple_rank_invalid() throws Throwable
     {
         long dims[] = {5, 5};
         H5.H5Screate_simple(-1, dims, null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Screate_simple_dims_invalid() throws Throwable
     {
         long dims[] = {2, 2};
@@ -277,7 +278,7 @@ public class TestH5Sbasic {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Sencode_invalid() throws Throwable
     {
         H5.H5Sencode(-1);
@@ -289,7 +290,7 @@ public class TestH5Sbasic {
         H5.H5Sdecode(null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Sget_regular_hyperslab_invalid() throws Throwable
     {
         long q_start[]  = new long[2];
@@ -312,14 +313,14 @@ public class TestH5Sbasic {
         H5.H5Sselect_shape_same(-1, -1);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Sselect_adjust_invalid() throws Throwable
     {
         long offset[][] = {{0, 1}, {2, 4}, {5, 6}};
         H5.H5Sselect_adjust(-1, offset);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Sselect_adjust_rank_offset() throws Throwable
     {
         long sid        = HDF5Constants.H5I_INVALID_HID;
@@ -339,7 +340,7 @@ public class TestH5Sbasic {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5DataspaceInterfaceException.class)
     public void testH5Sselect_intersect_block_invalid() throws Throwable
     {
         long start[] = new long[2];
@@ -347,12 +348,12 @@ public class TestH5Sbasic {
         H5.H5Sselect_intersect_block(-1, start, end);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Sselect_intersect_block_rank_start() throws Throwable
     {
         long sid     = HDF5Constants.H5I_INVALID_HID;
         long start[] = new long[2];
-        long end[]   = null;
+        long end[]   = new long[3];
 
         try {
             sid = H5.H5Screate(HDF5Constants.H5S_SIMPLE);
@@ -368,11 +369,11 @@ public class TestH5Sbasic {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Sselect_intersect_block_rank_end() throws Throwable
     {
         long sid     = HDF5Constants.H5I_INVALID_HID;
-        long start[] = null;
+        long start[] = new long[3];
         long end[]   = new long[2];
 
         try {

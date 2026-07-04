@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -55,7 +55,26 @@ h5tools_get_little_endian_type(hid_t tid)
             break;
 
         case H5T_FLOAT:
-            if (size == 4)
+            if (size == 1) {
+                if (true == H5Tequal(tid, H5T_FLOAT_F8E4M3))
+                    p_type = H5Tcopy(H5T_FLOAT_F8E4M3);
+                else if (true == H5Tequal(tid, H5T_FLOAT_F8E5M2))
+                    p_type = H5Tcopy(H5T_FLOAT_F8E5M2);
+                else if (true == H5Tequal(tid, H5T_FLOAT_F6E2M3))
+                    p_type = H5Tcopy(H5T_FLOAT_F6E2M3);
+                else if (true == H5Tequal(tid, H5T_FLOAT_F6E3M2))
+                    p_type = H5Tcopy(H5T_FLOAT_F6E3M2);
+                else if (true == H5Tequal(tid, H5T_FLOAT_F4E2M1))
+                    p_type = H5Tcopy(H5T_FLOAT_F4E2M1);
+            }
+            else if (size == 2) {
+                if (true == H5Tequal(tid, H5T_IEEE_F16LE) || true == H5Tequal(tid, H5T_IEEE_F16BE))
+                    p_type = H5Tcopy(H5T_IEEE_F16LE);
+                else if (true == H5Tequal(tid, H5T_FLOAT_BFLOAT16LE) ||
+                         true == H5Tequal(tid, H5T_FLOAT_BFLOAT16BE))
+                    p_type = H5Tcopy(H5T_FLOAT_BFLOAT16LE);
+            }
+            else if (size == 4)
                 p_type = H5Tcopy(H5T_IEEE_F32LE);
             else if (size == 8)
                 p_type = H5Tcopy(H5T_IEEE_F64LE);
@@ -70,6 +89,15 @@ h5tools_get_little_endian_type(hid_t tid)
                 p_type = H5Tcopy(H5T_STD_B32LE);
             else if (size == 8)
                 p_type = H5Tcopy(H5T_STD_B64LE);
+            break;
+
+        case H5T_COMPLEX:
+            if (size == 4)
+                p_type = H5Tcopy(H5T_COMPLEX_IEEE_F16LE);
+            else if (size == 8)
+                p_type = H5Tcopy(H5T_COMPLEX_IEEE_F32LE);
+            else if (size == 16)
+                p_type = H5Tcopy(H5T_COMPLEX_IEEE_F64LE);
             break;
 
         case H5T_TIME:
@@ -134,7 +162,46 @@ h5tools_get_big_endian_type(hid_t tid)
             break;
 
         case H5T_FLOAT:
-            if (size == 4)
+            if (size == 1) {
+                if (true == H5Tequal(tid, H5T_FLOAT_F8E4M3)) {
+                    p_type = H5Tcopy(H5T_FLOAT_F8E4M3);
+
+                    /* Though not very useful, set order to BE as expected */
+                    H5Tset_order(p_type, H5T_ORDER_BE);
+                }
+                else if (true == H5Tequal(tid, H5T_FLOAT_F8E5M2)) {
+                    p_type = H5Tcopy(H5T_FLOAT_F8E5M2);
+
+                    /* Though not very useful, set order to BE as expected */
+                    H5Tset_order(p_type, H5T_ORDER_BE);
+                }
+                else if (true == H5Tequal(tid, H5T_FLOAT_F6E2M3)) {
+                    p_type = H5Tcopy(H5T_FLOAT_F6E2M3);
+
+                    /* Though not very useful, set order to BE as expected */
+                    H5Tset_order(p_type, H5T_ORDER_BE);
+                }
+                else if (true == H5Tequal(tid, H5T_FLOAT_F6E3M2)) {
+                    p_type = H5Tcopy(H5T_FLOAT_F6E3M2);
+
+                    /* Though not very useful, set order to BE as expected */
+                    H5Tset_order(p_type, H5T_ORDER_BE);
+                }
+                else if (true == H5Tequal(tid, H5T_FLOAT_F4E2M1)) {
+                    p_type = H5Tcopy(H5T_FLOAT_F4E2M1);
+
+                    /* Though not very useful, set order to BE as expected */
+                    H5Tset_order(p_type, H5T_ORDER_BE);
+                }
+            }
+            else if (size == 2) {
+                if (true == H5Tequal(tid, H5T_IEEE_F16LE) || true == H5Tequal(tid, H5T_IEEE_F16BE))
+                    p_type = H5Tcopy(H5T_IEEE_F16BE);
+                else if (true == H5Tequal(tid, H5T_FLOAT_BFLOAT16LE) ||
+                         true == H5Tequal(tid, H5T_FLOAT_BFLOAT16BE))
+                    p_type = H5Tcopy(H5T_FLOAT_BFLOAT16BE);
+            }
+            else if (size == 4)
                 p_type = H5Tcopy(H5T_IEEE_F32BE);
             else if (size == 8)
                 p_type = H5Tcopy(H5T_IEEE_F64BE);
@@ -149,6 +216,15 @@ h5tools_get_big_endian_type(hid_t tid)
                 p_type = H5Tcopy(H5T_STD_B32BE);
             else if (size == 8)
                 p_type = H5Tcopy(H5T_STD_B64BE);
+            break;
+
+        case H5T_COMPLEX:
+            if (size == 4)
+                p_type = H5Tcopy(H5T_COMPLEX_IEEE_F16BE);
+            else if (size == 8)
+                p_type = H5Tcopy(H5T_COMPLEX_IEEE_F32BE);
+            else if (size == 16)
+                p_type = H5Tcopy(H5T_COMPLEX_IEEE_F64BE);
             break;
 
         case H5T_TIME:

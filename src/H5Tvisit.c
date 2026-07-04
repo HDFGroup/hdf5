@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -20,8 +20,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Tvisit.c
- *			Jul 19 2007
- *			Quincey Koziol
  *
  * Purpose:		Visit all the components of a datatype
  *
@@ -77,30 +75,27 @@
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Thursday, July 19, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5T__visit(H5T_t *dt, unsigned visit_flags, H5T_operator_t op, void *op_value)
 {
-    hbool_t is_complex;          /* Flag indicating current datatype is "complex" */
-    herr_t  ret_value = SUCCEED; /* Return value */
+    bool   is_composite;        /* Flag indicating current datatype is composite */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(dt);
-    HDassert(op);
+    assert(dt);
+    assert(op);
 
-    /* Check for complex datatype */
-    is_complex = H5T_IS_COMPLEX(dt->shared->type);
+    /* Check for composite datatype */
+    is_composite = H5T_IS_COMPOSITE(dt->shared->type);
 
     /* If the callback is to be made on the datatype first, do that */
-    if (is_complex && (visit_flags & H5T_VISIT_COMPLEX_FIRST))
+    if (is_composite && (visit_flags & H5T_VISIT_COMPOSITE_FIRST))
         if (op(dt, op_value) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_BADITER, FAIL, "operator callback failed")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADITER, FAIL, "operator callback failed");
 
     /* Make callback for each member/child, if requested */
     switch (dt->shared->type) {
@@ -110,22 +105,23 @@ H5T__visit(H5T_t *dt, unsigned visit_flags, H5T_operator_t op, void *op_value)
             /* Visit each member of the compound datatype */
             for (u = 0; u < dt->shared->u.compnd.nmembs; u++)
                 if (H5T__visit(dt->shared->u.compnd.memb[u].type, visit_flags, op, op_value) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADITER, FAIL, "can't visit member datatype")
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADITER, FAIL, "can't visit member datatype");
         } /* end case */
         break;
 
         case H5T_ARRAY:
         case H5T_VLEN:
         case H5T_ENUM:
+        case H5T_COMPLEX:
             /* Visit parent type */
             if (H5T__visit(dt->shared->parent, visit_flags, op, op_value) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_BADITER, FAIL, "can't visit parent datatype")
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADITER, FAIL, "can't visit parent datatype");
             break;
 
         case H5T_NO_CLASS:
         case H5T_NCLASSES:
             /* Not real values */
-            HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "operation not defined for datatype class")
+            HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "operation not defined for datatype class");
             break;
 
         case H5T_INTEGER:
@@ -139,14 +135,14 @@ H5T__visit(H5T_t *dt, unsigned visit_flags, H5T_operator_t op, void *op_value)
             /* Visit "simple" datatypes here */
             if (visit_flags & H5T_VISIT_SIMPLE)
                 if (op(dt, op_value) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADITER, FAIL, "operator callback failed")
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADITER, FAIL, "operator callback failed");
             break;
     } /* end switch */
 
     /* If the callback is to be made on the datatype last, do that */
-    if (is_complex && (visit_flags & H5T_VISIT_COMPLEX_LAST))
+    if (is_composite && (visit_flags & H5T_VISIT_COMPOSITE_LAST))
         if (op(dt, op_value) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_BADITER, FAIL, "operator callback failed")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADITER, FAIL, "operator callback failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

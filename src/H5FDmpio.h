@@ -4,46 +4,53 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Monday, August  2, 1999
- *
- * Purpose:	The public header file for the mpio driver.
+ * Purpose:	The public header file for the MPI-I/O (mpio) virtual file driver (VFD)
  */
 #ifndef H5FDmpio_H
 #define H5FDmpio_H
 
-/* Macros */
+/* Public header files */
+#include "H5FDpublic.h" /* File drivers             */
 
 #ifdef H5_HAVE_PARALLEL
-#define H5FD_MPIO (H5FDperform_init(H5FD_mpio_init))
+
+/** ID for the mpio VFD */
+#define H5FD_MPIO (H5OPEN H5FD_MPIO_id_g)
+
 #else
+
+/** Initializer for the mpio VFD (disabled) */
 #define H5FD_MPIO (H5I_INVALID_HID)
-#endif /* H5_HAVE_PARALLEL */
+
+#endif
 
 #ifdef H5_HAVE_PARALLEL
-/*Turn on H5FDmpio_debug if H5F_DEBUG is on */
-#ifdef H5F_DEBUG
-#ifndef H5FDmpio_DEBUG
+
+#if defined(H5F_DEBUG) && !defined(H5FDmpio_DEBUG)
+/** Turn mpio VFD debugging on (requires H5F_DEBUG) */
 #define H5FDmpio_DEBUG
 #endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /* Global var whose value comes from environment variable */
 /* (Defined in H5FDmpio.c) */
-H5_DLLVAR hbool_t H5FD_mpi_opt_types_g;
+H5_DLLVAR bool H5FD_mpi_opt_types_g;
 
-/* Function prototypes */
-#ifdef __cplusplus
-extern "C" {
-#endif
-H5_DLL hid_t H5FD_mpio_init(void);
+/** @private
+ *
+ * \brief ID for the mpio VFD
+ */
+H5_DLLVAR hid_t H5FD_MPIO_id_g;
 
 /**
  * \ingroup FAPL
@@ -51,8 +58,8 @@ H5_DLL hid_t H5FD_mpio_init(void);
  * \brief Stores MPI IO communicator information to the file access property list
  *
  * \fapl_id
- * \param[in] comm MPI-2 communicator
- * \param[in] info MPI-2 info object
+ * \param[in] comm MPI communicator
+ * \param[in] info MPI info object
  * \returns \herr_t
  *
  * \details H5Pset_fapl_mpio() stores the user-supplied MPI IO parameters \p
@@ -64,12 +71,12 @@ H5_DLL hid_t H5FD_mpio_init(void);
  *          and is not a collective function.
  *
  *          \p comm is the MPI communicator to be used for file open, as defined
- *          in \c MPI_File_open of MPI-2. This function makes a duplicate of the
+ *          in \c MPI_File_open of MPI. This function makes a duplicate of the
  *          communicator, so modifications to \p comm after this function call
  *          returns have no effect on the file access property list.
  *
  *          \p info is the MPI Info object to be used for file open, as defined
- *          in MPI_File_open() of MPI-2. This function makes a duplicate copy of
+ *          in MPI_File_open() of MPI. This function makes a duplicate copy of
  *          the Info object, so modifications to the Info object after this
  *          function call returns will have no effect on the file access
  *          property list.
@@ -99,8 +106,8 @@ H5_DLL herr_t H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
  * \brief Returns MPI IO communicator information
  *
  * \fapl_id
- * \param[out] comm MPI-2 communicator
- * \param[out] info MPI-2 info object
+ * \param[out] comm MPI communicator
+ * \param[out] info MPI info object
  * \returns \herr_t
  *
  * \details If the file access property list is set to the #H5FD_MPIO driver,
@@ -167,18 +174,24 @@ H5_DLL herr_t H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode /*out*
 /**
  * \ingroup DXPL
  *
- * \brief Sets data transfer mode
+ * \brief Sets low-level data transfer mode
  *
  * \dxpl_id
  * \param[in] opt_mode Transfer mode
  * \returns \herr_t
  *
- * \details H5Pset_dxpl_mpio() sets the data transfer property list \p dxpl_id
- *          to use transfer mode xfer_mode. The property list can then be used
- *          to control the I/O transfer mode during data I/O operations.
+ * \details H5Pset_dxpl_mpio_collective_opt() sets the data transfer property
+ *          list \p dxpl_id to use transfer mode \p opt_mode when performing
+ *          I/O. This allows the application to specify collective I/O at the
+ *          HDF5 interface level (with the H5Pset_dxpl_mpio() API routine),
+ *          while controlling whether the actual I/O is performed collectively
+ *          (e.g., via MPI_File_write_at_all) or independently (e.g., via
+ *          MPI_File_write_at). If the collectivity setting at the HDF5
+ *          interface level (set via H5Pset_dxpl_mpio()) is not set to
+ *          H5FD_MPIO_COLLECTIVE, this setting will be ignored.
  *
- *          Valid transfer modes are #H5FD_MPIO_INDEPENDENT (default) and
- *          #H5FD_MPIO_COLLECTIVE.
+ *          Valid transfer modes are #H5FD_MPIO_COLLECTIVE_IO (default) and
+ *          #H5FD_MPIO_INDIVIDUAL_IO.
  *
  * \since 1.4.0
  *

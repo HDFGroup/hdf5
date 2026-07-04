@@ -1,0 +1,7 @@
+
+group1   group2
+---------------------------------------
+    x      x                   
+
+group  : </g1> and </g2>
+0 differences found

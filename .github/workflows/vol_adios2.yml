@@ -1,0 +1,120 @@
+name: Test HDF5 ADIOS2 VOL
+
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "Build type"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+  ADIOS2_COMMIT: 3adf20a929b69c23312a6b5f3cccc49376df77e8
+  ADIOS2_COMMIT_SHORT: 3adf20a
+
+jobs:
+  build_and_test:
+    name: Test HDF5 ADIOS2 VOL connector
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install libopenmpi-dev
+
+      - name: Checkout HDF5
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          path: hdf5
+
+      - name: Configure HDF5
+        shell: bash
+        run: |
+          mkdir ${{ github.workspace }}/hdf5/build
+          cd ${{ github.workspace }}/hdf5/build
+          cmake -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/hdf5_build \
+            -DBUILD_STATIC_LIBS=OFF \
+            -DHDF5_TEST_API:BOOL=ON \
+            -DHDF5_TEST_API_ENABLE_ASYNC:BOOL=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+            -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
+            -DHDF5_ALLOW_UNSUPPORTED:BOOL=ON \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
+            ${{ github.workspace }}/hdf5
+          cat src/libhdf5.settings
+
+      - name: Build and install HDF5
+        shell: bash
+        working-directory: ${{ github.workspace }}/hdf5/build
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+          cmake --install .
+          echo "LD_LIBRARY_PATH=${{ github.workspace }}/hdf5/build/bin" >> $GITHUB_ENV
+          echo "PATH=${{ runner.workspace }}/hdf5_build/bin:${PATH}" >> $GITHUB_ENV
+
+      # Since the HDF5 ADIOS2 VOL connector is part of the ADIOS2 repository,
+      # it is difficult to use CMake's FetchContent functionality to fetch
+      # and build the ADIOS2 connector. Also, since building of ADIOS2 takes
+      # a while, it isn't ideal to have to rebuild it every time we want to
+      # test against changes in HDF5 or the VOL connector. Therefore, just
+      # use a fixed commit for the build of ADIOS2 so we can cache that and
+      # still test the connector against changes in HDF5.
+      - name: Restore ADIOS2 (${{ env.ADIOS2_COMMIT_SHORT }}) installation cache
+        id: cache-adios2
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v4
+        with:
+          path: ${{ runner.workspace }}/adios2-${{ env.ADIOS2_COMMIT_SHORT }}-install
+          key: ${{ runner.os }}-${{ runner.arch }}-adios2-${{ env.ADIOS2_COMMIT }}-${{ inputs.build_mode }}-cache
+
+      - if: ${{ steps.cache-adios2.outputs.cache-hit != 'true' }}
+        name: Checkout ADIOS2 (${{ env.ADIOS2_COMMIT_SHORT }})
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: ornladios/ADIOS2
+          ref: ${{ env.ADIOS2_COMMIT }}
+          path: adios2
+
+      - if: ${{ steps.cache-adios2.outputs.cache-hit != 'true' }}
+        name: Install ADIOS2 (${{ env.ADIOS2_COMMIT_SHORT }})
+        env:
+          CXX: mpic++
+          CC: mpicc
+        run: |
+          mkdir adios2/build
+          cd adios2/build
+          cmake -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/adios2-${{ env.ADIOS2_COMMIT_SHORT }}-install \
+            -DADIOS2_USE_HDF5:BOOL=ON \
+            -DHDF5_ROOT=${{ runner.workspace }}/hdf5_build/ \
+            ..
+          make -j2
+          make -j2 install
+
+      - name: Cache ADIOS2 (${{ env.ADIOS2_COMMIT_SHORT }}) installation
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v4
+        if: ${{ steps.cache-adios2.outputs.cache-hit != 'true' }}
+        with:
+          path: ${{ runner.workspace }}/adios2-${{ env.ADIOS2_COMMIT_SHORT }}-install
+          key: ${{ runner.os }}-${{ runner.arch }}-adios2-${{ env.ADIOS2_COMMIT }}-${{ inputs.build_mode }}-cache
+
+      - name: Set environment variables for tests
+        run: |
+          echo "HDF5_PLUGIN_PATH=${{ runner.workspace }}/adios2-${{ env.ADIOS2_COMMIT_SHORT }}-install/lib" >> $GITHUB_ENV
+          echo "HDF5_VOL_CONNECTOR=ADIOS2_VOL" >> $GITHUB_ENV
+
+      # Skip parallel testing for now as it appears to hang
+      - name: Test HDF5 ADIOS2 VOL connector with HDF5 API tests
+        working-directory: ${{ github.workspace }}/hdf5/build
+        # Don't test the ADIOS2 VOL connector with the HDF5 API tests yet,
+        # as it doesn't currently pass all the tests. Leave the step in,
+        # but skip it to leave an indication that this should be re-enabled
+        # in the future.
+        if: false
+        run: |
+          ctest --build-config ${{ inputs.build_mode }} -R "h5_api" -E "parallel" .

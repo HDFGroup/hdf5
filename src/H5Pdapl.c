@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:        H5Pdapl.c
- *              October 27, 2008
- *              Neil Fortner
  *
  * Purpose:        Dataset access property list class routines
  *
@@ -30,13 +28,14 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions */
-#include "H5Dprivate.h"  /* Datasets */
-#include "H5Eprivate.h"  /* Error handling */
-#include "H5Fprivate.h"  /* Files */
-#include "H5Iprivate.h"  /* IDs */
-#include "H5MMprivate.h" /* Memory management */
-#include "H5Ppkg.h"      /* Property lists */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5Dprivate.h"  /* Datasets                                 */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5Fprivate.h"  /* Files                                    */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
+#include "H5Ppkg.h"      /* Property lists                           */
+#include "H5VMprivate.h" /* Vector Functions                         */
 
 /****************/
 /* Local Macros */
@@ -97,6 +96,12 @@
 #define H5D_ACS_EFILE_PREFIX_COPY  H5P__dapl_efile_pref_copy
 #define H5D_ACS_EFILE_PREFIX_CMP   H5P__dapl_efile_pref_cmp
 #define H5D_ACS_EFILE_PREFIX_CLOSE H5P__dapl_efile_pref_close
+
+/* Definitions for use of VDS mapping spatial tree */
+#define H5D_ACS_USE_TREE_SIZE sizeof(bool)
+#define H5D_ACS_USE_TREE_DEF  true
+#define H5D_ACS_USE_TREE_ENC  H5P__encode_bool
+#define H5D_ACS_USE_TREE_DEC  H5P__decode_bool
 
 /******************/
 /* Local Typedefs */
@@ -176,6 +181,7 @@ static const H5D_append_flush_t H5D_def_append_flush_g =
 static const char *H5D_def_efile_prefix_g =
     H5D_ACS_EFILE_PREFIX_DEF;                                     /* Default external file prefix string */
 static const char *H5D_def_vds_prefix_g = H5D_ACS_VDS_PREFIX_DEF; /* Default vds prefix string */
+static const bool  H5D_def_tree_g = H5D_ACS_USE_TREE_DEF; /* Default use of spatial tree for VDS mappings */
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__dacc_reg_prop
@@ -202,43 +208,43 @@ H5P__dacc_reg_prop(H5P_genclass_t *pclass)
     if (H5P__register_real(pclass, H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME, H5D_ACS_DATA_CACHE_NUM_SLOTS_SIZE,
                            &rdcc_nslots, NULL, NULL, NULL, H5D_ACS_DATA_CACHE_NUM_SLOTS_ENC,
                            H5D_ACS_DATA_CACHE_NUM_SLOTS_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the size of raw data chunk cache(bytes) */
     if (H5P__register_real(pclass, H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME, H5D_ACS_DATA_CACHE_BYTE_SIZE_SIZE,
                            &rdcc_nbytes, NULL, NULL, NULL, H5D_ACS_DATA_CACHE_BYTE_SIZE_ENC,
                            H5D_ACS_DATA_CACHE_BYTE_SIZE_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the preemption for reading chunks */
     if (H5P__register_real(pclass, H5D_ACS_PREEMPT_READ_CHUNKS_NAME, H5D_ACS_PREEMPT_READ_CHUNKS_SIZE,
                            &rdcc_w0, NULL, NULL, NULL, H5D_ACS_PREEMPT_READ_CHUNKS_ENC,
                            H5D_ACS_PREEMPT_READ_CHUNKS_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the VDS view option */
     if (H5P__register_real(pclass, H5D_ACS_VDS_VIEW_NAME, H5D_ACS_VDS_VIEW_SIZE, &virtual_view, NULL, NULL,
                            NULL, H5D_ACS_VDS_VIEW_ENC, H5D_ACS_VDS_VIEW_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the VDS printf gap */
     if (H5P__register_real(pclass, H5D_ACS_VDS_PRINTF_GAP_NAME, H5D_ACS_VDS_PRINTF_GAP_SIZE, &printf_gap,
                            NULL, NULL, NULL, H5D_ACS_VDS_PRINTF_GAP_ENC, H5D_ACS_VDS_PRINTF_GAP_DEC, NULL,
                            NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register property for vds prefix */
     if (H5P__register_real(pclass, H5D_ACS_VDS_PREFIX_NAME, H5D_ACS_VDS_PREFIX_SIZE, &H5D_def_vds_prefix_g,
                            NULL, H5D_ACS_VDS_PREFIX_SET, H5D_ACS_VDS_PREFIX_GET, H5D_ACS_VDS_PREFIX_ENC,
                            H5D_ACS_VDS_PREFIX_DEC, H5D_ACS_VDS_PREFIX_DEL, H5D_ACS_VDS_PREFIX_COPY,
                            H5D_ACS_VDS_PREFIX_CMP, H5D_ACS_VDS_PREFIX_CLOSE) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register info for append flush */
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if (H5P__register_real(pclass, H5D_ACS_APPEND_FLUSH_NAME, H5D_ACS_APPEND_FLUSH_SIZE,
                            &H5D_def_append_flush_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register property for external file prefix */
     if (H5P__register_real(pclass, H5D_ACS_EFILE_PREFIX_NAME, H5D_ACS_EFILE_PREFIX_SIZE,
@@ -246,7 +252,12 @@ H5P__dacc_reg_prop(H5P_genclass_t *pclass)
                            H5D_ACS_EFILE_PREFIX_ENC, H5D_ACS_EFILE_PREFIX_DEC, H5D_ACS_EFILE_PREFIX_DEL,
                            H5D_ACS_EFILE_PREFIX_COPY, H5D_ACS_EFILE_PREFIX_CMP,
                            H5D_ACS_EFILE_PREFIX_CLOSE) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
+
+    /* Register the spatial tree use property */
+    if (H5P__register_real(pclass, H5D_ACS_USE_TREE_NAME, H5D_ACS_USE_TREE_SIZE, &H5D_def_tree_g, NULL, NULL,
+                           NULL, H5D_ACS_USE_TREE_ENC, H5D_ACS_USE_TREE_DEC, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -268,7 +279,7 @@ H5P__dapl_vds_file_pref_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNU
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Copy the prefix */
     *(char **)value = H5MM_xstrdup(*(const char **)value);
@@ -292,7 +303,7 @@ H5P__dapl_vds_file_pref_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNU
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Copy the prefix */
     *(char **)value = H5MM_xstrdup(*(const char **)value);
@@ -303,7 +314,7 @@ H5P__dapl_vds_file_pref_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNU
 /*-------------------------------------------------------------------------
  * Function:    H5P__dapl_vds_file_pref_enc
  *
- * Purpose:     Callback routine which is called whenever the vds file flags
+ * Purpose:     Callback routine which is called whenever the vds file prefix
  *              property in the dataset access property list is
  *              encoded.
  *
@@ -325,11 +336,11 @@ H5P__dapl_vds_file_pref_enc(const void *value, void **_pp, size_t *size)
 
     /* calculate prefix length */
     if (NULL != vds_file_pref)
-        len = HDstrlen(vds_file_pref);
+        len = strlen(vds_file_pref);
 
     enc_value = (uint64_t)len;
     enc_size  = H5VM_limit_enc_size(enc_value);
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     if (NULL != *pp) {
         /* encode the length of the prefix */
@@ -372,14 +383,14 @@ H5P__dapl_vds_file_pref_dec(const void **_pp, void *_value)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(vds_file_pref);
+    assert(pp);
+    assert(*pp);
+    assert(vds_file_pref);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     /* Decode the size */
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     /* Decode the value */
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
@@ -388,8 +399,8 @@ H5P__dapl_vds_file_pref_dec(const void **_pp, void *_value)
     if (0 != len) {
         /* Make a copy of the user's prefix string */
         if (NULL == (*vds_file_pref = (char *)H5MM_malloc(len + 1)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for prefix")
-        HDstrncpy(*vds_file_pref, *(const char **)pp, len);
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for prefix");
+        strncpy(*vds_file_pref, *(const char **)pp, len);
         (*vds_file_pref)[len] = '\0';
 
         *pp += len;
@@ -415,7 +426,7 @@ H5P__dapl_vds_file_pref_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNU
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     H5MM_xfree(*(void **)value);
 
@@ -435,7 +446,7 @@ H5P__dapl_vds_file_pref_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNU
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     *(char **)value = H5MM_xstrdup(*(const char **)value);
 
@@ -466,7 +477,7 @@ H5P__dapl_vds_file_pref_cmp(const void *value1, const void *value2, size_t H5_AT
     if (NULL != pref1 && NULL == pref2)
         HGOTO_DONE(-1);
     if (NULL != pref1 && NULL != pref2)
-        ret_value = HDstrcmp(pref1, pref2);
+        ret_value = strcmp(pref1, pref2);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -485,7 +496,7 @@ H5P__dapl_vds_file_pref_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UN
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     H5MM_xfree(*(void **)value);
 
@@ -508,7 +519,7 @@ H5P__dapl_efile_pref_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Copy the prefix */
     *(char **)value = H5MM_xstrdup(*(const char **)value);
@@ -532,7 +543,7 @@ H5P__dapl_efile_pref_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Copy the prefix */
     *(char **)value = H5MM_xstrdup(*(const char **)value);
@@ -565,11 +576,11 @@ H5P__dapl_efile_pref_enc(const void *value, void **_pp, size_t *size)
 
     /* calculate prefix length */
     if (NULL != efile_pref)
-        len = HDstrlen(efile_pref);
+        len = strlen(efile_pref);
 
     enc_value = (uint64_t)len;
     enc_size  = H5VM_limit_enc_size(enc_value);
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     if (NULL != *pp) {
         /* encode the length of the prefix */
@@ -612,14 +623,14 @@ H5P__dapl_efile_pref_dec(const void **_pp, void *_value)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(efile_pref);
+    assert(pp);
+    assert(*pp);
+    assert(efile_pref);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     /* Decode the size */
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     /* Decode the value */
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
@@ -628,8 +639,8 @@ H5P__dapl_efile_pref_dec(const void **_pp, void *_value)
     if (0 != len) {
         /* Make a copy of the user's prefix string */
         if (NULL == (*efile_pref = (char *)H5MM_malloc(len + 1)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for prefix")
-        HDstrncpy(*efile_pref, *(const char **)pp, len);
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for prefix");
+        strncpy(*efile_pref, *(const char **)pp, len);
         (*efile_pref)[len] = '\0';
 
         *pp += len;
@@ -655,7 +666,7 @@ H5P__dapl_efile_pref_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     H5MM_xfree(*(void **)value);
 
@@ -675,7 +686,7 @@ H5P__dapl_efile_pref_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     *(char **)value = H5MM_xstrdup(*(const char **)value);
 
@@ -706,7 +717,7 @@ H5P__dapl_efile_pref_cmp(const void *value1, const void *value2, size_t H5_ATTR_
     if (NULL != pref1 && NULL == pref2)
         HGOTO_DONE(-1);
     if (NULL != pref1 && NULL != pref2)
-        ret_value = HDstrcmp(pref1, pref2);
+        ret_value = strcmp(pref1, pref2);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -725,7 +736,7 @@ H5P__dapl_efile_pref_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSE
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     H5MM_xfree(*(void **)value);
 
@@ -763,7 +774,6 @@ H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots, size_t rdcc_nbytes, double
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "izzd", dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0);
 
     /* Check arguments.  Note that we allow negative values - they are
      * considered to "unset" the property. */
@@ -773,7 +783,7 @@ H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots, size_t rdcc_nbytes, double
             "raw data cache w0 value must be between 0.0 and 1.0 inclusive, or H5D_CHUNK_CACHE_W0_DEFAULT");
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(dapl_id, H5P_DATASET_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(dapl_id, H5P_DATASET_ACCESS, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set sizes */
@@ -811,10 +821,9 @@ H5Pget_chunk_cache(hid_t dapl_id, size_t *rdcc_nslots /*out*/, size_t *rdcc_nbyt
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "ixxx", dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0);
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(dapl_id, H5P_DATASET_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(dapl_id, H5P_DATASET_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get default file access plist */
@@ -873,7 +882,7 @@ H5P__encode_chunk_cache_nslots(const void *value, void **_pp, size_t *size)
 
     /* Sanity checks */
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
-    HDassert(size);
+    assert(size);
 
     /* Determine if this is the default value, in which case only encode
      * enc_size (as 255).  Also set size needed for encoding. */
@@ -884,11 +893,11 @@ H5P__encode_chunk_cache_nslots(const void *value, void **_pp, size_t *size)
     else {
         enc_value = (uint64_t) * (const size_t *)value;
         enc_size  = H5VM_limit_enc_size(enc_value);
-        HDassert(enc_size > 0);
+        assert(enc_size > 0);
         *size += (1 + enc_size);
     } /* end else */
 
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     if (NULL != *pp) {
         /* Encode the size */
@@ -928,13 +937,13 @@ H5P__decode_chunk_cache_nslots(const void **_pp, void *_value)
 
     /* Sanity check */
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(value);
+    assert(pp);
+    assert(*pp);
+    assert(value);
 
     /* Decode the size */
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     /* Determine if enc_size indicates that this is the default value, in which
      * case set value to H5D_ACS_DATA_CACHE_NUM_SLOTS_DEF and return */
@@ -954,7 +963,7 @@ H5P__decode_chunk_cache_nslots(const void **_pp, void *_value)
  *
  * Purpose:        Encode the rdcc_nbytes parameter to a serialized
  *                 property list.  Similar to H5P__encode_size_t except
- *                 the value of 255 for the enc_size field is reserved to
+ *                 the value of 0 for the enc_size field is reserved to
  *                 indicate H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF, in which
  *                 nothing further is encoded.
  *
@@ -973,10 +982,10 @@ H5P__encode_chunk_cache_nbytes(const void *value, void **_pp, size_t *size)
 
     /* Sanity checks */
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
-    HDassert(size);
+    assert(size);
 
     /* Determine if this is the default value, in which case only encode
-     * enc_size (as 255).  Also set size needed for encoding. */
+     * enc_size (as 0).  Also set size needed for encoding. */
     if (*(const size_t *)value == H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF) {
         enc_size = 0;
         *size += 1;
@@ -984,11 +993,11 @@ H5P__encode_chunk_cache_nbytes(const void *value, void **_pp, size_t *size)
     else {
         enc_value = (uint64_t) * (const size_t *)value;
         enc_size  = H5VM_limit_enc_size(enc_value);
-        HDassert(enc_size > 0);
+        assert(enc_size > 0);
         *size += (1 + enc_size);
     } /* end else */
 
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     if (NULL != *pp) {
         /* Encode the size */
@@ -1008,7 +1017,7 @@ H5P__encode_chunk_cache_nbytes(const void *value, void **_pp, size_t *size)
  *
  * Purpose:        Decode the rdcc_nbytes parameter from a serialized
  *                 property list.  Similar to H5P__decode_size_t except
- *                 the value of 255 for the enc_size field is reserved to
+ *                 the value of 0 for the enc_size field is reserved to
  *                 indicate H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF, in which
  *                 nothing further needs to be decoded.
  *
@@ -1028,13 +1037,13 @@ H5P__decode_chunk_cache_nbytes(const void **_pp, void *_value)
 
     /* Sanity check */
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(value);
+    assert(pp);
+    assert(*pp);
+    assert(value);
 
     /* Decode the size */
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     /* Determine if enc_size indicates that this is the default value, in which
      * case set value to H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF and return */
@@ -1073,19 +1082,18 @@ H5Pset_virtual_view(hid_t plist_id, H5D_vds_view_t view)
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iDv", plist_id, view);
 
     /* Check argument */
     if ((view != H5D_VDS_FIRST_MISSING) && (view != H5D_VDS_LAST_AVAILABLE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid bounds option")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid bounds option");
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS, false)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Update property list */
     if (H5P_set(plist, H5D_ACS_VDS_VIEW_NAME, &view) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1109,16 +1117,15 @@ H5Pget_virtual_view(hid_t plist_id, H5D_vds_view_t *view /*out*/)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, view);
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS, true)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get value from property list */
     if (view)
         if (H5P_get(plist, H5D_ACS_VDS_VIEW_NAME, view) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1143,8 +1150,8 @@ H5P__dacc_vds_view_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(view);
-    HDassert(size);
+    assert(view);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode EDC property */
@@ -1175,9 +1182,9 @@ H5P__dacc_vds_view_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(view);
+    assert(pp);
+    assert(*pp);
+    assert(view);
 
     /* Decode EDC property */
     *view = (H5D_vds_view_t) * (*pp)++;
@@ -1215,19 +1222,18 @@ H5Pset_virtual_printf_gap(hid_t plist_id, hsize_t gap_size)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ih", plist_id, gap_size);
 
     /* Check argument */
     if (gap_size == HSIZE_UNDEF)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid printf gap size")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid printf gap size");
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS, false)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Update property list */
     if (H5P_set(plist, H5D_ACS_VDS_PRINTF_GAP_NAME, &gap_size) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1252,16 +1258,15 @@ H5Pget_virtual_printf_gap(hid_t plist_id, hsize_t *gap_size /*out*/)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, gap_size);
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS, true)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get value from property list */
     if (gap_size)
         if (H5P_get(plist, H5D_ACS_VDS_PRINTF_GAP_NAME, gap_size) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1292,41 +1297,40 @@ H5Pset_append_flush(hid_t plist_id, unsigned ndims, const hsize_t *boundary, H5D
     herr_t             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "iIu*hDA*x", plist_id, ndims, boundary, func, udata);
 
     /* Check arguments */
     if (0 == ndims)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimensionality cannot be zero")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimensionality cannot be zero");
     if (ndims > H5S_MAX_RANK)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimensionality is too large")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimensionality is too large");
     if (!boundary)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no boundary dimensions specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no boundary dimensions specified");
 
     /* Check if the callback function is NULL and the user data is non-NULL.
      * This is almost certainly an error as the user data will not be used. */
     if (!func && udata)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "callback is NULL while user data is not")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "callback is NULL while user data is not");
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS, false)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set up values */
     info.ndims = ndims;
     info.func  = func;
     info.udata = udata;
 
-    HDmemset(info.boundary, 0, sizeof(info.boundary));
+    memset(info.boundary, 0, sizeof(info.boundary));
     /* boundary can be 0 to indicate no boundary is set */
     for (u = 0; u < ndims; u++) {
         if (boundary[u] != (boundary[u] & 0xffffffff)) /* negative value (including H5S_UNLIMITED) */
-            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "all boundary dimensions must be less than 2^32")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "all boundary dimensions must be less than 2^32");
         info.boundary[u] = boundary[u]; /* Store user's boundary dimensions */
     }                                   /* end for */
 
     /* Set values */
     if (H5P_set(plist, H5D_ACS_APPEND_FLUSH_NAME, &info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set append flush")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set append flush");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1354,19 +1358,18 @@ H5Pget_append_flush(hid_t plist_id, unsigned ndims, hsize_t boundary[], H5D_appe
     herr_t             ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "iIu*hxx", plist_id, ndims, boundary, func, udata);
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS, true)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Retrieve info for append flush */
     if (H5P_get(plist, H5D_ACS_APPEND_FLUSH_NAME, &info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object flush callback")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object flush callback");
 
     /* Assign return values */
     if (boundary) {
-        HDmemset(boundary, 0, ndims * sizeof(hsize_t));
+        memset(boundary, 0, ndims * sizeof(hsize_t));
         if (info.ndims > 0)
             for (u = 0; u < info.ndims && u < ndims; u++)
                 boundary[u] = info.boundary[u];
@@ -1404,15 +1407,14 @@ H5Pset_efile_prefix(hid_t plist_id, const char *prefix)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*s", plist_id, prefix);
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS, false)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set prefix */
     if (H5P_set(plist, H5D_ACS_EFILE_PREFIX_NAME, &prefix) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set prefix info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set prefix info");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1437,22 +1439,21 @@ H5Pget_efile_prefix(hid_t plist_id, char *prefix /*out*/, size_t size)
     ssize_t         ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("Zs", "ixz", plist_id, prefix, size);
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS, true)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get the current prefix */
     if (H5P_peek(plist, H5D_ACS_EFILE_PREFIX_NAME, &my_prefix) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file prefix")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file prefix");
 
     /* Check for prefix being set */
     if (my_prefix) {
         /* Copy to user's buffer, if given */
-        len = HDstrlen(my_prefix);
+        len = strlen(my_prefix);
         if (prefix) {
-            HDstrncpy(prefix, my_prefix, size);
+            strncpy(prefix, my_prefix, size);
             if (len >= size)
                 prefix[size - 1] = '\0';
         } /* end if */
@@ -1492,15 +1493,14 @@ H5Pset_virtual_prefix(hid_t plist_id, const char *prefix)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*s", plist_id, prefix);
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS, false)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set prefix */
     if (H5P_set(plist, H5D_ACS_VDS_PREFIX_NAME, &prefix) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set prefix info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set prefix info");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1527,22 +1527,21 @@ H5Pget_virtual_prefix(hid_t plist_id, char *prefix /*out*/, size_t size)
     ssize_t         ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("Zs", "ixz", plist_id, prefix, size);
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS, true)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get the current prefix */
     if (H5P_peek(plist, H5D_ACS_VDS_PREFIX_NAME, &my_prefix) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vds file prefix")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vds file prefix");
 
     /* Check for prefix being set */
     if (my_prefix) {
         /* Copy to user's buffer, if given */
-        len = HDstrlen(my_prefix);
+        len = strlen(my_prefix);
         if (prefix) {
-            HDstrncpy(prefix, my_prefix, size);
+            strncpy(prefix, my_prefix, size);
             if (len >= size)
                 prefix[size - 1] = '\0';
         } /* end if */
@@ -1556,3 +1555,99 @@ H5Pget_virtual_prefix(hid_t plist_id, char *prefix /*out*/, size_t size)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_virtual_prefix() */
+
+/*-----------------------------------------------------------------------------
+ * Function: H5Pget_virtual_spatial_tree
+ *
+ * Purpose:
+ *
+ *     Access the flag for whether or not datasets created by the given dcpl
+ *     construct a spatial tree and use it when searching over VDS mappings
+ *
+ *     Use of a spatial tree will accelerate the process of searching through mappings
+ *     to determine which contain intersections with the user's selection region.
+ *     With the tree disabled, all mappings will simply be iterated through and
+ *     checked directly.
+ *
+ *     Certain workflows may find that tree creation overhead outweighs the time saved
+ *     on reads. In this case, disabling this property will lead to a performance improvement,
+ *     though it is expected that almost all cases will benefit from the tree on net.
+ *
+ * Return:
+ *
+ *     Failure: Negative value (FAIL)
+ *     Success: Non-negative value (SUCCEED)
+ *
+ *-----------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_virtual_spatial_tree(hid_t dcpl_id, bool *use_tree)
+{
+    bool            setting   = false;
+    H5P_genplist_t *plist     = NULL;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    if (NULL == use_tree)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "receiving pointer cannot be NULL");
+
+    plist = H5P_object_verify(dcpl_id, H5P_DATASET_ACCESS, true);
+    if (NULL == plist)
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
+
+    if (H5P_peek(plist, H5D_ACS_USE_TREE_NAME, &setting) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get dset use spatial tree flag value");
+
+    *use_tree = setting;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pget_virtual_spatial_tree() */
+
+/*-----------------------------------------------------------------------------
+ * Function: H5Pset_virtual_spatial_tree
+ *
+ * Purpose:
+ *
+ *     Set the DAPL to construct a spatial tree and use it when searching over
+ *     VDS mappings
+ *
+ *     Use of a spatial tree will accelerate the process of searching through mappings
+ *     to determine which contain intersections with the user's selection region.
+ *     With the tree disabled, all mappings will simply be iterated through and
+ *     checked directly.
+ *
+ *     Certain workflows may find that tree creation overhead outweighs the time saved
+ *     on reads. In this case, disabling this property will lead to a performance improvement,
+ *     though it is expected that almost all cases will benefit from the tree on net.
+ *
+ * Return:
+ *
+ *     Failure: Negative value (FAIL)
+ *     Success: Non-negative value (SUCCEED)
+ *
+ *-----------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_virtual_spatial_tree(hid_t dapl_id, bool use_tree)
+{
+    H5P_genplist_t *plist     = NULL;
+    bool            prev_set  = false;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    plist = H5P_object_verify(dapl_id, H5P_DATASET_ACCESS, false);
+    if (NULL == plist)
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
+
+    if (H5P_peek(plist, H5D_ACS_USE_TREE_NAME, &prev_set) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get extant dset use spatial tree flag value");
+
+    if (H5P_poke(plist, H5D_ACS_USE_TREE_NAME, &use_tree) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set dset use spatial tree flag value");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pset_virtual_spatial_tree() */

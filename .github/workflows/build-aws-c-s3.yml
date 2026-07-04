@@ -1,0 +1,254 @@
+name: Build aws-c-s3 library
+
+# Reusable workflow to build aws-c-s3 library from source for Ubuntu
+# This workflow is called by vfd-ros3.yml and other workflows that need aws-c-s3
+
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "Build type (CMAKE_BUILD_TYPE)"
+        required: true
+        type: string
+      aws_c_s3_tag:
+        description: "Tag of aws-c-s3 to use when building from source"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  check_artifact:
+    name: "Check for existing aws-c-s3 artifact"
+    runs-on: ubuntu-latest
+    outputs:
+      has_artifact: ${{ steps.check_artifact.outputs.exists }}
+    steps:
+      - name: Check if 'libaws-c-s3-${{ inputs.build_mode }}' exists
+        id: check_artifact
+        uses: softwareforgood/check-artifact-v4-existence@f988c59be23773bdf226dffa5720d85a13501fba # v0
+        with:
+          name: libaws-c-s3-${{ inputs.build_mode }}
+
+      - name: Status of artifact check
+        if: steps.check_artifact.outputs.exists == 'true'
+        run: echo "Artifact 'libaws-c-s3-${{ inputs.build_mode }}' exists.."
+
+  # Build the aws-c-s3 library from source using the specified tag
+  # and cache the results, currently only on Ubuntu. The result is
+  # compressed into a 'libaws-c-s3.tar' archive to preserve permissions
+  # and then is uploaded as the artifact 'libaws-c-s3' which can later
+  # be downloaded with 'actions/download-artifact' and then uncompressed
+  # with 'tar xvf libaws-c-s3.tar -C <directory>'. The uncompressed build
+  # directory will be called 'aws-c-s3-build'.
+  build_aws_c_s3:
+    # Ubuntu doesn't have a package for aws-c-s3 yet
+    name: "Build aws-c-s3 library from source"
+    runs-on: ubuntu-latest
+    needs: check_artifact
+    if: ${{ needs.check_artifact.outputs.has_artifact == 'false' }}
+    steps:
+      - name: Get aws-c-s3 sources (main)
+        if: inputs.aws_c_s3_tag == ''
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: awslabs/aws-c-s3
+          path: aws-c-s3
+
+      - name: Get aws-c-s3 sources (tag)
+        if: inputs.aws_c_s3_tag != ''
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: awslabs/aws-c-s3
+          path: aws-c-s3
+          ref: ${{ inputs.aws_c_s3_tag }}
+
+      - name: Get aws-c-s3 commit hash
+        shell: bash
+        id: get-sha
+        run: |
+          cd $GITHUB_WORKSPACE/aws-c-s3
+          export AWSCS3_SHA=$(git rev-parse HEAD)
+          echo "AWSCS3_SHA=$AWSCS3_SHA" >> $GITHUB_ENV
+          echo "sha=$AWSCS3_SHA" >> $GITHUB_OUTPUT
+          # Output SHA for debugging
+          echo "AWSCS3_SHA=$AWSCS3_SHA"
+
+      - name: Cache/Restore aws-c-s3 (GCC) installation
+        id: cache-aws-c-s3-ubuntu-gcc
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v4
+        with:
+          path: ${{ runner.workspace }}/aws-c-s3-build
+          key: ${{ runner.os }}-${{ runner.arch }}-gcc-aws-c-s3-${{ steps.get-sha.outputs.sha }}-${{ inputs.build_mode }}
+
+      - name: Get aws-lc sources
+        if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: aws/aws-lc
+          path: aws-lc
+
+      - name: Get s2n-tls sources
+        if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: aws/s2n-tls
+          path: s2n-tls
+
+      - name: Get aws-c-common sources
+        if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: awslabs/aws-c-common
+          path: aws-c-common
+
+      - name: Get aws-checksums sources
+        if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: awslabs/aws-checksums
+          path: aws-checksums
+
+      - name: Get aws-c-cal sources
+        if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: awslabs/aws-c-cal
+          path: aws-c-cal
+
+      - name: Get aws-c-io sources
+        if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: awslabs/aws-c-io
+          path: aws-c-io
+
+      - name: Get aws-c-compression sources
+        if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: awslabs/aws-c-compression
+          path: aws-c-compression
+
+      - name: Get aws-c-http sources
+        if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: awslabs/aws-c-http
+          path: aws-c-http
+
+      - name: Get aws-c-sdkutils sources
+        if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: awslabs/aws-c-sdkutils
+          path: aws-c-sdkutils
+
+      - name: Get aws-c-auth sources
+        if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: awslabs/aws-c-auth
+          path: aws-c-auth
+
+      - name: Build aws-c-s3 from source
+        if: ${{ (steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true') }}
+        run: |
+          # Build aws-lc
+          echo "Building aws-lc"
+          cmake -S aws-lc -B aws-lc/build \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
+            -DBUILD_SHARED_LIBS=1
+          cmake --build aws-lc/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          # Build s2n-tls
+          echo "Building s2n-tls"
+          cmake -S s2n-tls -B s2n-tls/build \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build \
+            -DBUILD_SHARED_LIBS=1
+          cmake --build s2n-tls/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          # Build aws-c-common
+          echo "Building aws-c-common"
+          cmake -S aws-c-common -B aws-c-common/build \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
+            -DBUILD_SHARED_LIBS=1
+          cmake --build aws-c-common/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          # Build aws-checksums
+          echo "Building aws-checksums"
+          cmake -S aws-checksums -B aws-checksums/build \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build \
+            -DBUILD_SHARED_LIBS=1
+          cmake --build aws-checksums/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          # Build aws-c-cal
+          echo "Building aws-c-cal"
+          cmake -S aws-c-cal -B aws-c-cal/build \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build \
+            -DBUILD_SHARED_LIBS=1
+          cmake --build aws-c-cal/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          # Build aws-c-io
+          echo "Building aws-c-io"
+          cmake -S aws-c-io -B aws-c-io/build \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build \
+            -DBUILD_SHARED_LIBS=1
+          cmake --build aws-c-io/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          # Build aws-c-compression
+          echo "Building aws-c-compression"
+          cmake -S aws-c-compression -B aws-c-compression/build \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build \
+            -DBUILD_SHARED_LIBS=1
+          cmake --build aws-c-compression/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          # Build aws-c-http
+          echo "Building aws-c-http"
+          cmake -S aws-c-http -B aws-c-http/build \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build \
+            -DBUILD_SHARED_LIBS=1
+          cmake --build aws-c-http/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          # Build aws-c-sdkutils
+          echo "Building aws-c-sdkutils"
+          cmake -S aws-c-sdkutils -B aws-c-sdkutils/build \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build \
+            -DBUILD_SHARED_LIBS=1
+          cmake --build aws-c-sdkutils/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          # Build aws-c-auth
+          echo "Building aws-c-auth"
+          cmake -S aws-c-auth -B aws-c-auth/build \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build \
+            -DBUILD_SHARED_LIBS=1
+          cmake --build aws-c-auth/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+          # Build aws-c-s3
+          echo "Building aws-c-s3"
+          cmake -S aws-c-s3 -B aws-c-s3/build \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/aws-c-s3-build \
+            -DCMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build \
+            -DBUILD_SHARED_LIBS=1
+          cmake --build aws-c-s3/build --parallel 3 --config ${{ inputs.build_mode }} --target install
+
+      - name: Tar aws-c-s3 installation to preserve permissions for artifact
+        run: tar -cvf libaws-c-s3.tar -C ${{ runner.workspace }} aws-c-s3-build
+
+      - name: Save aws-c-s3 installation artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+          name: libaws-c-s3-${{ inputs.build_mode }}
+          path: libaws-c-s3.tar
+          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

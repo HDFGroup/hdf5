@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -25,7 +25,7 @@
 #define RANK        2
 
 void
-test_oflush(void)
+test_oflush(void *params)
 {
     int         mpi_size, mpi_rank;
     hid_t       file, dataset;
@@ -50,7 +50,7 @@ test_oflush(void)
         for (i = 0; i < NY; i++)
             data[j][i] = i + j;
 
-    filename = GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
 
     file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     VRFY((file >= 0), "file creation succeeded");

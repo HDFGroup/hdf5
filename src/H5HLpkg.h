@@ -4,16 +4,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Quincey Koziol
- *             Wednesday, July 9, 2003
- *
  * Purpose:     This file contains declarations which are visible
  *              only within the H5HL package. Source files outside the
  *              H5HL package should include H5HLprivate.h instead.
@@ -44,15 +41,6 @@ H5FL_BLK_EXTERN(lheap_chunk);
 /**************************/
 /* Package Private Macros */
 /**************************/
-
-/* If this package header is being included in one of the H5HL source files,
- *      define the proper control macros for the generic FUNC_ENTER/LEAVE and
- *      error reporting macros.
- */
-#ifdef H5HL_PACKAGE
-#define H5_MY_PKG     H5HL
-#define H5_MY_PKG_ERR H5E_HEAP
-#endif
 
 #define H5HL_SIZEOF_HDR(F)                                                                                   \
     H5HL_ALIGN(H5_SIZEOF_MAGIC +    /* heap signature   */                                                   \
@@ -86,7 +74,7 @@ struct H5HL_t {
     size_t       prots;            /* # of times the heap has been protected                       */
     size_t       sizeof_size;      /* Size of file sizes                                           */
     size_t       sizeof_addr;      /* Size of file addresses                                       */
-    hbool_t      single_cache_obj; /* Indicate if the heap is a single object in the cache         */
+    bool         single_cache_obj; /* Indicate if the heap is a single object in the cache         */
     H5HL_free_t *freelist;         /* the free list                                                */
 
     /* Prefix-specific fields */

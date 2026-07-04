@@ -3,19 +3,48 @@ require 5.003;
 use warnings;
 
 # Global settings
-# (The max_idx parameter is the only thing that needs to be changed when adding
-#       support for a new major release.  If support for a prior major release
-#       is added (like support for 1.4, etc), the min_sup_idx parameter will
-#       need to be decremented.)
 
-# Max. library "index" (0 = v1.0, 1 = 1.2, 2 = 1.4, 3 = 1.6, 4 = 1.8, 5 = 1.10, 6 = 1.12, 7 = 1.14, 8 = 1.16, etc)
-$max_idx = 8;
-
-# Min. supported previous library version "index" (0 = v1.0, 1 = 1.2, etc)
-$min_sup_idx = 3;
+# Supported version strings. "16" = HDF5 1.6.0, "200" = HDF5 2.0.0, etc.
+#
+# Note that the scheme changed with 2.0.0, when we went to semantic versioning.
+# We use 200 instead of 20 so that HDF5 11.0.0 will get 1100 instead of 110,
+# which would conflict with HDF5 1.10.
+#
+# Also, note that this scheme started at the 1.6/1.8 transition, so earlier
+# versions of the API aren't versioned.
+@versions = ("16", "18", "110", "112", "114", "200");
 
 # Number of spaces to indent preprocessor commands inside ifdefs
 $indent = 2;
+
+# Global hash of functions ==> # symbol versions parsed from H5vers.txt
+$functions = {};
+
+# Global hash of functions ==> versioned function params parsed from H5vers.txt
+$func_params = {};
+
+# Global hash of typedefs ==> # symbol versions parsed from H5vers.txt
+$typedefs = {};
+
+# Hash of API versions to a hash of (API call name --> symbol version)
+#
+# There is one hash for each version in @versions and the (API call name
+# --> symbol version) hash maps an API name like H5Dopen to the symbol version
+# (e.g. H5Dopen --> 1 or 2).
+#
+# So...
+#
+# 200 --> {H5Dopen --> 2, H5Iregister_type --> 2, etc.}
+my %api_vers_to_function_vers;
+foreach my $key (@versions) {
+    $api_vers_to_function_vers{$key} = {};
+}
+
+# Hash of API versions to a hash of (typedef name --> symbol version)
+my %api_vers_to_type_vers;
+foreach my $key (@versions) {
+    $api_vers_to_type_vers{$key} = {};
+}
 
 #
 # Copyright by The HDF Group.
@@ -23,7 +52,7 @@ $indent = 2;
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -34,8 +63,6 @@ $indent = 2;
 # Read in the public symbol version description text file and create the
 # appropriate headers needed by the library.
 #
-# Programmer: Quincey Koziol
-# Creation Date: 2007/07/10
 
 ##############################################################################
 # Print the copyright into an open file
@@ -49,7 +76,7 @@ sub print_copyright ($) {
     print $fh " *                                                                           *\n";
     print $fh " * This file is part of HDF5.  The full HDF5 copyright notice, including     *\n";
     print $fh " * terms governing use, modification, and redistribution, is contained in    *\n";
-    print $fh " * the COPYING file, which can be found at the root of the source code       *\n";
+    print $fh " * the LICENSE file, which can be found at the root of the source code       *\n";
     print $fh " * distribution tree, or in https://www.hdfgroup.org/licenses.               *\n";
     print $fh " * If you do not have access to either file, you may request a copy from     *\n";
     print $fh " * help\@hdfgroup.org.                                                        *\n";
@@ -85,7 +112,6 @@ sub print_startprotect ($$) {
 #
 sub print_checkoptions ($) {
     my $fh = shift;             # File handle for output file
-    my $curr_idx;               # Current API version index
 
     # Print the option checking
     print $fh "\n\n/* Issue error if contradicting macros have been defined. */\n";
@@ -93,9 +119,12 @@ sub print_checkoptions ($) {
 
     # Print the #ifdef
     print $fh "#if (";
-    for $curr_idx ($min_sup_idx .. ($max_idx - 1)) {
-        print $fh "defined(H5_USE_1", ($curr_idx * 2), "_API)";
-        if($curr_idx < ($max_idx - 1)) {
+    for my $i (0 .. $#versions - 1) {
+        print $fh "defined(H5_USE_", $versions[$i], "_API)";
+
+        # -2 because we're ignoring the last version in the array, and the
+        # last version we DO write out can't have an || after it
+        if ($i < @versions - 2) {
             print $fh " || ";
         }
     }
@@ -106,9 +135,10 @@ sub print_checkoptions ($) {
 
     # Print the #endif
     print $fh "#endif /* (";
-    for $curr_idx ($min_sup_idx .. ($max_idx - 1)) {
-        print $fh "defined(H5_USE_1", ($curr_idx * 2), "_API)";
-        if($curr_idx < ($max_idx - 1)) {
+    for my $i (0 .. $#versions - 1) {
+        print $fh "defined(H5_USE_", $versions[$i], "_API)";
+
+        if ($i < @versions - 2) {
             print $fh " || ";
         }
     }
@@ -120,7 +150,6 @@ sub print_checkoptions ($) {
 #
 sub print_globalapidefvers ($) {
     my $fh = shift;             # File handle for output file
-    my $curr_idx;               # Current API version index
 
     # Print the descriptive comment
     print $fh "\n\n/* If a particular default \"global\" version of the library's interfaces is\n";
@@ -128,13 +157,13 @@ sub print_globalapidefvers ($) {
     print $fh " *\n";
     print $fh " */\n";
 
-    for $curr_idx ($min_sup_idx .. ($max_idx - 1)) {
+    for my $api_vers (@versions) {
         # Print API version ifdef
-        print $fh "\n#if defined(H5_USE_1", ($curr_idx * 2), "_API_DEFAULT) && !defined(H5_USE_1", ($curr_idx * 2), "_API)\n";
+        print $fh "\n#if defined(H5_USE_", $api_vers, "_API_DEFAULT) && !defined(H5_USE_", $api_vers, "_API)\n";
         # Print API version definition
-        print $fh " " x $indent, "#define H5_USE_1", ($curr_idx * 2), "_API 1\n";
+        print $fh " " x $indent, "#define H5_USE_", $api_vers, "_API 1\n";
         # Print API version endif
-        print $fh "#endif /* H5_USE_1", ($curr_idx * 2), "_API_DEFAULT && !H5_USE_1", ($curr_idx * 2), "_API */\n";
+        print $fh "#endif /* H5_USE_", $api_vers, "_API_DEFAULT && !H5_USE_", $api_vers, "_API */\n";
     }
 }
 
@@ -143,7 +172,6 @@ sub print_globalapidefvers ($) {
 #
 sub print_globalapisymbolvers ($) {
     my $fh = shift;             # File handle for output file
-    my $curr_idx;               # Current API version index
 
     # Print the descriptive comment
     print $fh "\n\n/* If a particular \"global\" version of the library's interfaces is chosen,\n";
@@ -154,18 +182,18 @@ sub print_globalapisymbolvers ($) {
     print $fh " */\n";
 
     # Loop over supported older library APIs and define the appropriate macros
-    for $curr_idx ($min_sup_idx .. ($max_idx - 1)) {
+    foreach my $api_vers (@versions) {
         # Print API version ifdef
-        print $fh "\n#ifdef H5_USE_1", ($curr_idx * 2), "_API\n";
+        print $fh "\n#ifdef H5_USE_", $api_vers, "_API\n";
 
         # Print the version macro info for each function that is defined for
         # this API version
         print $fh "\n/*************/\n";
         print $fh "/* Functions */\n";
         print $fh "/*************/\n";
-        for $name (sort keys %{$func_vers[$curr_idx]}) {
+        for $name (sort keys %{$api_vers_to_function_vers{$api_vers}}) {
             print $fh "\n#if !defined(", $name, "_vers)\n";
-            print $fh  " " x $indent, "#define ", $name, "_vers $func_vers[$curr_idx]{$name}\n";
+            print $fh  " " x $indent, "#define ", $name, "_vers $api_vers_to_function_vers{$api_vers}{$name}\n";
             print $fh  "#endif /* !defined(", $name, "_vers) */\n";
         }
 
@@ -174,14 +202,14 @@ sub print_globalapisymbolvers ($) {
         print $fh "\n/************/\n";
         print $fh "/* Typedefs */\n";
         print $fh "/************/\n";
-        for $name (sort keys %{$type_vers[$curr_idx]}) {
+        for $name (sort keys %{$api_vers_to_type_vers{$api_vers}}) {
             print $fh "\n#if !defined(", $name, "_t_vers)\n";
-            print $fh  " " x $indent, "#define ", $name, "_t_vers $type_vers[$curr_idx]{$name}\n";
+            print $fh  " " x $indent, "#define ", $name, "_t_vers $api_vers_to_type_vers{$api_vers}{$name}\n";
             print $fh  "#endif /* !defined(", $name, "_t_vers) */\n";
         }
 
         # Print API version endif
-        print $fh "\n#endif /* H5_USE_1", ($curr_idx * 2), "_API */\n";
+        print $fh "\n#endif /* H5_USE_", $api_vers, "_API */\n";
     }
 }
 
@@ -224,7 +252,7 @@ sub print_defaultapivers ($) {
         print $fh " " x $indent, "#define $curr_name $curr_name$curr_vers\n";
 
         # Print function's dependent parameter types
-        foreach(sort(@param_list)) {
+        foreach (sort (@param_list)) {
             print $fh " " x $indent, "#define ${_}_t $_${curr_vers}_t\n";
         }
 
@@ -235,7 +263,7 @@ sub print_defaultapivers ($) {
             print $fh " " x $indent, "#define $curr_name $curr_name$curr_vers\n";
 
             # Print function's dependent parameter types
-            foreach(sort(@param_list)) {
+            foreach (sort (@param_list)) {
                 print $fh " " x $indent, "#define ${_}_t $_${curr_vers}_t\n";
             }
 
@@ -269,7 +297,7 @@ sub print_defaultapivers ($) {
 
         # Loop to print earlier version name mappings
         $curr_vers--;
-        while($curr_vers > 0) {
+        while ($curr_vers > 0) {
             print $fh "#elif $curr_vers_name == $curr_vers\n";
             print $fh " " x $indent, "#define ${curr_name}_t $curr_name${curr_vers}_t\n";
             $curr_vers--;
@@ -296,6 +324,57 @@ sub print_endprotect ($$) {
 }
 
 ##############################################################################
+# Validate a line from H5vers.txt
+#
+sub validate_line {
+    my $name      = $_[0];
+    my $params    = $_[1];
+    my $vers      = $_[2];
+
+    my @vers_list;      # Version strings ("v18", etc.)
+    my %sym_versions;   # Versions already seen (for duplicate checks)
+
+    # Check if the name already exists in the list of symbols
+    if (exists ($functions{$name}) || exists($typedefs{$name})) {
+        die "duplicated symbol: $name";
+    }
+
+    # Check for no version info given
+    if ($vers eq "") {
+        die "no version information: $name";
+    }
+
+    # Separate the versions on commas (produces string elements like "v18")
+    @vers_list = split (/\s*,\s*/, $vers);
+
+    # Check for invalid version data
+    foreach (@vers_list) {
+        # Note:  v111 is allowed because H5O functions were prematurely versioned
+        #        in HDF5 1.10.  Because users were affected by this, the versioning
+        #        was rescinded but the H5O version 2 functions were kept to be
+        #        called directly.  Now that the version macros are added in 1.12,
+        #        along with a 3rd version of the H5O functions, the H5O function
+        #        version for default api=v110 should be version 1 to work correctly
+        #        with 1.10 applications that were using unversioned H5O functions,
+        #        and the H5O function version should be version 3 for default api=v112
+        #        (the default api version for 1.12).  Allowing a v111 entry allows
+        #        a version 2 that is never accessed via the H5O function macros.
+        if (!( $_ =~ /v1[02468]/ || $_ =~ /v11[02468]/ ||  $_ =~ /v111/ || $_ =~ /v200/ )) {
+            die "bad version information: $name";
+        }
+
+        # Make sure we didn't specify duplicate versions on this line
+        if (exists($sym_versions{$_})) {
+            die "duplicate version information: $name";
+        }
+
+        # Store the versions for the function in a local hash table, indexed by the version
+        # (this is only used to check for duplicates)
+        $sym_versions{$_}=$_;
+    }
+}
+
+##############################################################################
 # Parse a meaningful line (not a comment or blank line) into the appropriate
 # data structure
 #
@@ -303,149 +382,80 @@ sub parse_line ($) {
     my $line = shift;   # Get the line to parse
 
     # Parse API function lines
-#print "line=$line\n";
-    if($line =~ /^\s*FUNCTION:/ || $line =~ /^\s*TYPEDEF:/) {
+#print "line=$line";
+    if ($line =~ /^\s*FUNCTION:/ || $line =~ /^\s*TYPEDEF:/) {
         my $name;           # The name of the function
         my $params;         # Typedefs for function parameters
-        my $vers;           # The version info for the function
-        my @vers_list;      # Version info, as a list
-        my @vers_nums;      # Version info, as a numeric list
-        my $num_versions;   # Number of versions for function
-        my %sym_versions;   # Versions for a symbol
-        my $last_idx;       # The previous version index seen for a function
-        my $last_vers;      # The previous version # seen for a function
+        my $vers_string;    # The version info for the function
+        my @vers_list;      # Version info, as a list (e.g., "112", "200", etc.
         my $line_type;      # Type of line we are parsing
 
         # Determine the type of the line to parse
-        if($line =~ /^\s*FUNCTION:/) {
+        if ($line =~ /^\s*FUNCTION:/) {
             $line_type = 1;
             # Get the function's name & version info
-            ($name, $params, $vers) = ($line =~ /^\s*FUNCTION:\s*(\w*);\s*(.*?)\s*;\s*(.*?)\s*$/);
-#print "parse_line: name='$name', params='$params', vers='$vers'\n";
+            ($name, $params, $vers_string) = ($line =~ /^\s*FUNCTION:\s*(\w*);\s*(.*?)\s*;\s*(.*?)\s*$/);
+#print "parse_line: name='$name', params='$params', vers_string='$vers_string'\n";
         }
-        elsif($line =~ /^\s*TYPEDEF:/) {
+        elsif ($line =~ /^\s*TYPEDEF:/) {
             $line_type = 2;
 
             # Get the typedefs's name & version info
-            ($name, $vers) = ($line =~ /^\s*TYPEDEF:\s*(\w*);\s*(.*?)\s*$/);
-#print "parse_line: name='$name', vers='$vers'\n";
+            ($name, $vers_string) = ($line =~ /^\s*TYPEDEF:\s*(\w*);\s*(.*?)\s*$/);
+#print "parse_line: name='$name', vers_string='$vers_string'\n";
+        } else {
+            die "unknown line type: $line";
         }
 #print "parse_line: line_type='$line_type'\n";
 
+        validate_line($name, $params, $vers_string);
 
-        # Check if the name already exists in the list of symbols
-        if(exists($functions{$name}) || exists($typedefs{$name})) {
-            die "duplicated symbol: $name";
-        }
-
-        # Check for no version info given
-        if($vers eq "") {
-            die "no version information: $name";
-        }
-
-        # Split up version info
-        @vers_list = split(/\s*,\s*/, $vers);
+        # Split the version info and strip off the leading "v"
+        @vers_list = split(/\s*,\s*/, $vers_string);
+        @vers_list = map { substr($_, 1) } @vers_list;
 #print "parse_line: vers_list=(@vers_list)\n";
 
-        # Parse the version list into numbers, checking for invalid input
-        foreach(@vers_list) {
-            my $vers_idx;       # Index of version in array
-
-            # Do some validation on the input
-            # Note:  v111 is allowed because H5O functions were prematurely versioned
-            #        in HDF5 1.10.  Because users were affected by this, the versioning
-            #        was rescinded but the H5O version 2 functions were kept to be 
-            #        called directly.  Now that the version macros are added in 1.12,
-            #        along with a 3rd version of the H5O functions, the H5O function
-            #        version for default api=v110 should be version 1 to work correctly
-            #        with 1.10 applications that were using unversioned H5O functions,
-            #        and the H5O function version should be version 3 for default api=v112 
-            #        (the default api version for 1.12).  Allowing a v111 entry and 
-            #        incrementing its index 13 lines below allows a version 2 that is
-            #        never accessed via the H5O function macros.
-            if(!( $_ =~ /v1[02468]/ || $_ =~ /v11[02468]/ ||  $_ =~ /v111/ )) {
-                die "bad version information: $name";
-            }
-            if(exists($sym_versions{$_})) {
-                die "duplicate version information: $name";
-            }
-
-            # Store the versions for the function in a local hash table, indexed by the version
-            $sym_versions{$_}=$_;
-
-#print "parse_line: _=$_\n";
-            # Get the index of the version
-            ($vers_idx) = ($_ =~ /v1(\d+)/);
-            if($vers_idx == 11) {
-                $vers_idx++;
-            }
-            $vers_idx /= 2;
-#print "parse_line: vers_idx='$vers_idx'\n";
-            push(@vers_nums, $vers_idx);
-        }
-#print "parse_line: vers_nums=(@vers_nums)\n";
-
-        # Check for invalid version info given
-        $last_idx = -1;
-        $last_vers = 1;
-        foreach(sort(@vers_nums)) {
-#print "parse_line: _=$_ last_idx='$last_idx'\n";
-            # Update intermediate versions of the library that included the API routine
-            if($last_idx >= 0) {
-#print "parse_line: name='$name'\n";
-#print "parse_line: last_vers='$last_vers'\n";
-#print "parse_line: last_idx='$last_idx'\n";
-
-                # Add the function to the list of API routines available in
-                # different versions of the library
-                while($last_idx <= $_) {
-                    if($line_type == 1) {
-                        $func_vers[$last_idx]{$name} = $last_vers;
-                    } elsif($line_type == 2) {
-                        $type_vers[$last_idx]{$name} = $last_vers;
-                    } else {
-                        die "unknown line type: $line";
-                    }
-                    $last_idx++;
-                }
-
-                # Increment the version # of the function
-                $last_vers++;
-            }
-
-            # Keep track of last version index seen
-            $last_idx = $_;
-        }
-
-        # Finish updating versions of the library that included the API routine
-        if($last_idx >= 0) {
-#print "parse_line: max_idx='$max_idx'\n";
-
-            # Add the function to the list of API routines available in
-            # different versions of the library
-            while($last_idx <= $max_idx) {
-                if($line_type == 1) {
-                    $func_vers[$last_idx]{$name} = $last_vers;
-                } elsif($line_type == 2) {
-                    $type_vers[$last_idx]{$name} = $last_vers;
+        # Parse the version list into the hashes of version and type info
+        my $curr_sym_number = 1;
+        foreach my $vers (@vers_list) {
+            foreach my $hash_vers (@versions) {
+                if ($vers > $hash_vers) {
+                    next;
                 } else {
-                    die "unknown line type: $line";
+                    if ($line_type == 1) {
+                        $api_vers_to_function_vers{$hash_vers}{$name} = $curr_sym_number;
+                    } else {
+                        $api_vers_to_type_vers{$hash_vers}{$name} = $curr_sym_number;
+                    }
                 }
-                $last_idx++;
+            }
+
+            $curr_sym_number++;
+        }
+
+        # For API versions earlier than the function's introduction,
+        # default to the earliest version (version 1) for maximum compatibility
+        my $intro_vers = $vers_list[0];
+        foreach my $hash_vers (@versions) {
+            if ($hash_vers < $intro_vers) {
+                if ($line_type == 1) {
+                    $api_vers_to_function_vers{$hash_vers}{$name} = 1;
+                } else {
+                    $api_vers_to_type_vers{$hash_vers}{$name} = 1;
+                }
             }
         }
 
         # Store the number of symbol versions in a hash table, indexed by the name
-        if($line_type == 1) {
+        if ($line_type == 1) {
             $functions{$name} = $#vers_list + 1;
 
             # Store the function's parameter types for later
             $func_params{$name} = $params;
-        } elsif($line_type == 2) {
+        } elsif ($line_type == 2) {
             $typedefs{$name} = $#vers_list + 1;
-        } else {
-            die "unknown line type: $line";
         }
+#print "\n";
     }
     # Unknown keyword
     else {
@@ -482,6 +492,201 @@ sub create_public ($) {
 }
 
 ##############################################################################
+# Create the generated CMake file for Doxygen PREDEFINED macros
+#
+sub create_doxygen_cmake ($) {
+    my $prefix = shift;         # Get the prefix for the source file (e.g., "src/")
+    my $file = "H5version_doxygen.cmake";   # Name of file to generate
+
+    # Output to doxygen directory (relative to src/)
+    my $doxygen_dir = $prefix;
+    $doxygen_dir =~ s/src\/?$/docs\/doxygen\//;   # Replace "src/" with "docs/doxygen/"
+
+    # Create doxygen directory if it doesn't exist
+    if ($doxygen_dir ne "" && ! -d $doxygen_dir) {
+        mkdir $doxygen_dir or die "unable to create directory: $doxygen_dir";
+    }
+
+    # Open new cmake file in doxygen directory
+    open CMAKE, ">${doxygen_dir}${file}" or die "unable to create doxygen cmake file: ${doxygen_dir}${file}";
+
+    # Create file contents
+    print CMAKE "# Generated automatically by bin/make_vers -- do not edit\n";
+    print CMAKE "# Add new versioned symbols to H5vers.txt file\n";
+    print CMAKE "#\n";
+    print CMAKE "# Doxygen PREDEFINED entries for versioned APIs\n";
+    print CMAKE "# These macros tell Doxygen which version each API name maps to,\n";
+    print CMAKE "# preventing \"multiple \@param documentation sections\" warnings\n";
+    print CMAKE "\n";
+    print CMAKE "list (APPEND _doxygen_predefined_entries\n";
+
+    # Add function version macros (sorted for consistency)
+    for my $name (sort keys %functions) {
+        my $vers = $functions{$name};
+        print CMAKE "  \"$name=$name$vers\"\n";
+    }
+
+    print CMAKE ")\n";
+
+    # Close cmake file
+    close CMAKE;
+}
+
+##############################################################################
+# Create the generated test file for verifying API version defaulting
+#
+sub create_test ($) {
+    my $prefix = shift;         # Get the prefix for the source file (e.g., "src/")
+    my $file = "tapi_version_default.c";
+
+    # Output to test directory (relative to src/)
+    my $test_dir = $prefix;
+    $test_dir =~ s/src\/?$/test\//;
+
+    # Validate the substitution succeeded
+    if ($test_dir eq $prefix && $prefix ne "") {
+        die "create_test: prefix '$prefix' does not end in 'src/' -- cannot derive test directory";
+    }
+
+    # Create test directory if it doesn't exist
+    if ($test_dir ne "" && ! -d $test_dir) {
+        mkdir $test_dir or die "unable to create directory: $test_dir";
+    }
+
+    # Open new test file
+    open TEST, ">${test_dir}${file}" or die "unable to create test file: ${test_dir}${file}";
+
+    # Print copyright and warning
+    print_copyright(*TEST);
+    print_warning(*TEST);
+
+    # Print test description
+    print TEST "/*\n";
+    print TEST " * Purpose: Tests that versioned API function macros default to the earliest\n";
+    print TEST " *          version for functions introduced after the configured global API\n";
+    print TEST " *          version. For example, with H5_USE_16_API, H5Sencode (introduced\n";
+    print TEST " *          in v1.8) should map to H5Sencode1, not H5Sencode2.\n";
+    print TEST " *\n";
+    print TEST " *          This test is compiled multiple times with different\n";
+    print TEST " *          -DH5_USE_*_API and -DTEST_API_VERSION=* flags to verify each\n";
+    print TEST " *          API version level.\n";
+    print TEST " */\n";
+
+    # Emit preamble that clears all global API version defaults.
+    # When the project is configured with a default API version (e.g.,
+    # HDF5_DEFAULT_API_VERSION=v16), H5pubconf.h defines H5_USE_16_API_DEFAULT,
+    # which causes H5version.h to activate H5_USE_16_API. If the test also
+    # defines -DH5_USE_200_API, both blocks would be active and the earliest
+    # one wins (setting everything to version 1). To isolate each test to
+    # exactly one API version, we include H5pubconf.h first (setting its
+    # include guard), then #undef all API version macros, and re-establish
+    # only the version under test before including the rest of the headers.
+    print TEST "/* Include config header first to set its include guard */\n";
+    print TEST "#include \"H5pubconf.h\"\n\n";
+    print TEST "/* Clear all API version macros that may have been set by the\n";
+    print TEST " * global default configuration, so only the version under test\n";
+    print TEST " * is active when H5version.h is processed.\n";
+    print TEST " */\n";
+    foreach my $api_vers (@versions) {
+        print TEST "#undef H5_USE_${api_vers}_API_DEFAULT\n";
+        print TEST "#undef H5_USE_${api_vers}_API\n";
+    }
+    print TEST "\n";
+    print TEST "/* Re-establish only the API version under test */\n";
+    my $first_preamble = 1;
+    foreach my $api_vers (@versions) {
+        if ($first_preamble) {
+            print TEST "#if TEST_API_VERSION == $api_vers\n";
+            $first_preamble = 0;
+        }
+        else {
+            print TEST "#elif TEST_API_VERSION == $api_vers\n";
+        }
+        print TEST "  #define H5_USE_${api_vers}_API 1\n";
+    }
+    print TEST "#else\n";
+    print TEST "  #error \"TEST_API_VERSION not set to a valid value\"\n";
+    print TEST "#endif\n\n";
+
+    print TEST "#include \"h5test.h\"\n\n";
+
+    # Print CHECK_VERS macro for functions
+    print TEST "/*\n";
+    print TEST " * Helper macro: check that a _vers macro equals an expected value.\n";
+    print TEST " */\n";
+    print TEST "#define CHECK_VERS(func_name, expected)                                  \\\n";
+    print TEST "    do {                                                                 \\\n";
+    print TEST "        if (func_name##_vers != (expected)) {                            \\\n";
+    print TEST "            fprintf(stderr, \"FAIL: %s_vers = %d, expected %d\\n\",      \\\n";
+    print TEST "                    #func_name, func_name##_vers, (expected));            \\\n";
+    print TEST "            nerrors++;                                                    \\\n";
+    print TEST "        }                                                                \\\n";
+    print TEST "    } while (0)\n\n";
+
+    # Print CHECK_VERS_T macro for typedefs
+    print TEST "#define CHECK_VERS_T(type_name, expected)                                \\\n";
+    print TEST "    do {                                                                 \\\n";
+    print TEST "        if (type_name##_t_vers != (expected)) {                          \\\n";
+    print TEST "            fprintf(stderr, \"FAIL: %s_t_vers = %d, expected %d\\n\",    \\\n";
+    print TEST "                    #type_name, type_name##_t_vers, (expected));          \\\n";
+    print TEST "            nerrors++;                                                    \\\n";
+    print TEST "        }                                                                \\\n";
+    print TEST "    } while (0)\n\n";
+
+    # Print main function
+    print TEST "int\n";
+    print TEST "main(void)\n";
+    print TEST "{\n";
+    print TEST "    int nerrors = 0;\n\n";
+    print TEST "    TESTING(\"API version defaulting for versioned functions\");\n\n";
+
+    # Generate test sections for each API version
+    my $first = 1;
+    foreach my $api_vers (@versions) {
+        if ($first) {
+            print TEST "#if TEST_API_VERSION == $api_vers\n";
+            $first = 0;
+        }
+        else {
+            print TEST "#elif TEST_API_VERSION == $api_vers\n";
+        }
+        print TEST "    printf(\"Configured with H5_USE_${api_vers}_API\\n\");\n\n";
+
+        # Print checks for all functions at this API version
+        for my $name (sort keys %{$api_vers_to_function_vers{$api_vers}}) {
+            my $expected = $api_vers_to_function_vers{$api_vers}{$name};
+            print TEST "    CHECK_VERS($name, $expected);\n";
+        }
+        print TEST "\n";
+
+        # Print checks for all typedefs at this API version
+        for my $name (sort keys %{$api_vers_to_type_vers{$api_vers}}) {
+            my $expected = $api_vers_to_type_vers{$api_vers}{$name};
+            print TEST "    CHECK_VERS_T($name, $expected);\n";
+        }
+        print TEST "\n";
+    }
+
+    # Close the #if/#elif chain
+    print TEST "#else\n";
+    print TEST "#error \"TEST_API_VERSION not set to a valid value\"\n";
+    print TEST "#endif\n\n";
+
+    # Print result checking and return
+    print TEST "    if (nerrors) {\n";
+    print TEST "        H5_FAILED();\n";
+    print TEST "        fprintf(stderr, \"    %d version check%s failed\\n\", nerrors, nerrors > 1 ? \"s\" : \"\");\n";
+    print TEST "        return 1;\n";
+    print TEST "    }\n\n";
+    print TEST "    PASSED();\n";
+    print TEST "    return 0;\n";
+    print TEST "}\n";
+
+    # Close test file
+    close TEST;
+}
+
+##############################################################################
 # Read symbol version file (given as command-line argument) in and process it
 # into internal data structures, then create header files.
 #
@@ -490,7 +695,7 @@ for $file (@ARGV) {
 
 #print "file = '$file'\n";
     # Check for directory prefix on input file
-    if($file =~ /\//) {
+    if ($file =~ /\//) {
         ($prefix) = ($file =~ /(^.*\/)/);
     }
     else {
@@ -499,9 +704,9 @@ for $file (@ARGV) {
 #print "prefix = '$prefix'\n";
     # Read in the entire file
     open SOURCE, $file or die "$file: $!\n";
-    while ( defined ($line=<SOURCE>) ) {
+    while ( defined ($line = <SOURCE>) ) {
         # Skip blank lines and those lines whose first character is a '#'
-        if(!($line =~ /(^\s*#.*$)|(^\s*$)/)) {
+        if (!($line =~ /(^\s*#.*$)|(^\s*$)/)) {
             # Construct data structures for later printing
             parse_line($line);
         }
@@ -509,22 +714,11 @@ for $file (@ARGV) {
     close SOURCE;
 
     # Create header files
-    print "Generating '", $prefix, "H5version.h'\n";
+    print "Generating 'H5version.h'\n";
     create_public($prefix);
-
-#for $name (sort keys %functions) {
-#    print "functions{$name} = $functions{$name}\n";
-#}
-
-#for $i (0 .. $#func_vers) {
-#    my $vers_name;      # Name of indexed version
-#    $vers_name = "v1." . ($i * 2);
-#    print "$vers_name functions: ";
-#    for $name (sort keys %{$func_vers[$i]}) {
-#        print "$name$func_vers[$i]{$name} ";
-#    }
-#    print "\n";
-#}
-
+    print "Generating 'docs/doxygen/H5version_doxygen.cmake'\n";
+    create_doxygen_cmake($prefix);
+    print "Generating 'test/tapi_version_default.c'\n";
+    create_test($prefix);
 }
 

@@ -5,7 +5,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -25,7 +25,7 @@ namespace H5 {
     a location.
 */
 //  Inheritance: multiple H5Location/AbstractDs -> IdComponent
-class H5_DLLCPP Attribute : public AbstractDs, public H5Location {
+class H5CPP_DLL Attribute : public AbstractDs, public H5Location {
   public:
     // Copy constructor: same as the original Attribute.
     Attribute(const Attribute &original);
@@ -77,6 +77,9 @@ class H5_DLLCPP Attribute : public AbstractDs, public H5Location {
 
     // Destructor: properly terminates access to this attribute.
     virtual ~Attribute() override;
+
+    // Copy assignment operator.
+    Attribute &operator=(const Attribute &original);
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   protected:

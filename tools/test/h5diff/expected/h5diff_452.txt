@@ -1,0 +1,1 @@
+Error: --no-dangling-links must be used along with --follow-symlinks option.

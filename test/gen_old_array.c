@@ -4,16 +4,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Thursday, November 09, 2000
- *
  * Purpose:	Create a two datasets with compound datatypes, one with no array
  *      fields and one with array fields.
  *		This program is used to create the test file `tarrold.h5' which has a
@@ -45,11 +42,6 @@
  * Return:	Success:
  *
  *		Failure:
- *
- * Programmer:	Robb Matzke
- *              Monday, October 26, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

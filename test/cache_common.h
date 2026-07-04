@@ -4,15 +4,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  John Mainzer
- *              10/27/05
- *
+/*
  *        This file contains common #defines, type definitions, and
  *        externs for tests of the cache implemented in H5C.c
  */
@@ -23,6 +21,7 @@
 #define H5F_FRIEND /*suppress error about including H5Fpkg      */
 
 /* Include library header files */
+#include "H5private.h"
 #include "H5ACprivate.h"
 #include "H5MFprivate.h"
 #include "H5Cpkg.h"
@@ -37,7 +36,7 @@
 #define CACHE_ERROR(s)                                                                                       \
     {                                                                                                        \
         failure_mssg = "Line #" H5_TOSTRING(__LINE__) ": " s;                                                \
-        pass         = FALSE;                                                                                \
+        pass         = false;                                                                                \
         goto done;                                                                                           \
     }
 
@@ -128,31 +127,18 @@
  *              for it to setup the slist on entry, and take it down
  *              on exit.
  *
- *              Note that the slist need not be empty if the flags
- *              indicate a partial flush (i.e.
- *              H5C__FLUSH_MARKED_ENTRIES_FLAG).  Compute clear_slist
- *              and pass it into H5C_set_slist_enabled as appropriate.
- *
- *              On error, set pass to FALSE, and set failure_mssg
+ *              On error, set pass to false, and set failure_mssg
  *              to the supplied error message.
  *
  * Return:      N/A
- *
- * Programmer:  John Mainzer
- *              5/14/20
- *
- * Changes:     None.
  *
  ***********************************************************************/
 
 #define H5C_FLUSH_CACHE(file, flags, fail_mssg)                                                              \
     {                                                                                                        \
-        hbool_t clear_slist;                                                                                 \
-        herr_t  rslt;                                                                                        \
+        herr_t rslt;                                                                                         \
                                                                                                              \
-        clear_slist = ((flags & H5C__FLUSH_MARKED_ENTRIES_FLAG) != 0);                                       \
-                                                                                                             \
-        rslt = H5C_set_slist_enabled((file)->shared->cache, TRUE, FALSE);                                    \
+        rslt = H5C_set_slist_enabled((file)->shared->cache, true, true);                                     \
                                                                                                              \
         if (rslt >= 0) {                                                                                     \
                                                                                                              \
@@ -161,12 +147,12 @@
                                                                                                              \
         if (rslt >= 0) {                                                                                     \
                                                                                                              \
-            rslt = H5C_set_slist_enabled((file)->shared->cache, FALSE, clear_slist);                         \
+            rslt = H5C_set_slist_enabled((file)->shared->cache, false, false);                               \
         }                                                                                                    \
                                                                                                              \
         if (rslt < 0) {                                                                                      \
                                                                                                              \
-            pass         = FALSE;                                                                            \
+            pass         = false;                                                                            \
             failure_mssg = (fail_mssg);                                                                      \
         }                                                                                                    \
     } /* H5C_FLUSH_CACHE */
@@ -218,25 +204,25 @@ typedef struct flush_op {
                           * function implementing the flush
                           * operation.
                           */
-    hbool_t flag;        /* boolean flag passed into the
+    bool flag;           /* boolean flag passed into the
                           * function implementing the flush
                           * operation.  The meaning of the
                           * flag is dependent upon the flush
                           * operation:
                           *
-                          * FLUSH_OP__DIRTY: TRUE iff the
+                          * FLUSH_OP__DIRTY: true iff the
                           *   target is pinned, and is to
                           *   be dirtied via the
                           *   H5C_mark_entry_dirty()
                           *   call.
                           *
-                          * FLUSH_OP__RESIZE: TRUE iff the
+                          * FLUSH_OP__RESIZE: true iff the
                           *   target is pinned, and is to
                           *   be resized via the
                           *   H5C_resize_entry()
                           *   call.
                           *
-                          * FLUSH_OP__MOVE: TRUE iff the
+                          * FLUSH_OP__MOVE: true iff the
                           *    target is to be moved to
                           *    its main address.
                           */
@@ -271,7 +257,7 @@ typedef struct test_entry_t {
                                    * the entry resides, or NULL if the
                                    * entry is not in cache.
                                    */
-    hbool_t written_to_main_addr;
+    bool written_to_main_addr;
     /* Flag indicating whether an image
      * of the entry has been written to
      * its main address.  Since we no
@@ -280,7 +266,7 @@ typedef struct test_entry_t {
      * entry is serialized while at its
      * main address.
      */
-    hbool_t written_to_alt_addr;
+    bool written_to_alt_addr;
     /* Flag indicating whether an image
      * of the entry has been written to
      * its alternate address.  Since we no
@@ -292,7 +278,7 @@ typedef struct test_entry_t {
     haddr_t addr;                                    /* where the cache thinks this entry
                                                       * is located
                                                       */
-    hbool_t at_main_addr;                            /* boolean flag indicating whether
+    bool at_main_addr;                               /* boolean flag indicating whether
                                                       * the entry is supposed to be at
                                                       * either its main or alternate
                                                       * address.
@@ -316,23 +302,23 @@ typedef struct test_entry_t {
     int32_t deserializes;                            /* number of times this entry has
                                                       * been deserialized
                                                       */
-    hbool_t is_dirty;                                /* entry has been modified since
+    bool is_dirty;                                   /* entry has been modified since
                                                       * last write
                                                       */
-    hbool_t is_protected;                            /* entry should currently be on
+    bool is_protected;                               /* entry should currently be on
                                                       * the cache's protected list.
                                                       */
-    hbool_t is_read_only;                            /* TRUE iff the entry should be
+    bool is_read_only;                               /* true iff the entry should be
                                                       * protected read only.
                                                       */
     int ro_ref_count;                                /* Number of outstanding read only
                                                       * protects on the entry.
                                                       */
-    hbool_t is_pinned;                               /* entry is currently pinned in
+    bool is_pinned;                                  /* entry is currently pinned in
                                                       * the cache.
                                                       */
     haddr_t tag;                                     /* the base_addr as tag for corking entries */
-    hbool_t is_corked;                               /* entry is currently corked or not */
+    bool    is_corked;                               /* entry is currently corked or not */
     int     pinning_ref_count;                       /* Number of entries that
                                                       * pin this entry in the cache.
                                                       * When this count drops to zero,
@@ -365,8 +351,8 @@ typedef struct test_entry_t {
                                                       * num_flush_ops contains the number
                                                       * of valid entries in this array.
                                                       */
-    hbool_t flush_op_self_resize_in_progress;        /* Boolean flag
-                                                      * that is set to TRUE iff this
+    bool flush_op_self_resize_in_progress;           /* Boolean flag
+                                                      * that is set to true iff this
                                                       * entry is being flushed, it has
                                                       * been resized by a resize flush
                                                       * op, and the flush function has
@@ -375,16 +361,16 @@ typedef struct test_entry_t {
                                                       * checking code that would otherwise
                                                       * cause a false test failure.
                                                       */
-    hbool_t deserialized;                            /* entry has been deserialized since
+    bool deserialized;                               /* entry has been deserialized since
                                                       * the last time it was reset.
                                                       */
-    hbool_t serialized;                              /* entry has been serialized since the
+    bool serialized;                                 /* entry has been serialized since the
                                                       * last time it was reset.
                                                       */
-    hbool_t destroyed;                               /* entry has been destroyed since the
+    bool destroyed;                                  /* entry has been destroyed since the
                                                       * last time it was reset.
                                                       */
-    hbool_t expunged;                                /* entry has been expunged since the
+    bool expunged;                                   /* entry has been expunged since the
                                                       * last time it was reset.
                                                       */
     int      flush_dep_par_type[MAX_FLUSH_DEP_PARS]; /* Entry types of flush dependency parents */
@@ -392,10 +378,10 @@ typedef struct test_entry_t {
     unsigned flush_dep_npar;                         /* Number of flush dependency parents */
     unsigned flush_dep_nchd;                         /* Number of flush dependency children */
     unsigned
-        flush_dep_ndirty_chd; /* Number of dirty flush dependency children (including grandchildren, etc.) */
-    hbool_t  pinned_from_client; /* entry was pinned by client call */
-    hbool_t  pinned_from_cache;  /* entry was pinned by cache internally */
-    unsigned flush_order;        /* Order that entry was flushed in */
+         flush_dep_ndirty_chd; /* Number of dirty flush dependency children (including grandchildren, etc.) */
+    bool pinned_from_client;   /* entry was pinned by client call */
+    bool pinned_from_cache;    /* entry was pinned by cache internally */
+    unsigned flush_order;      /* Order that entry was flushed in */
 
     unsigned notify_after_insert_count; /* Count of times that entry was inserted in cache */
     unsigned notify_before_evict_count; /* Count of times that entry was removed in cache */
@@ -404,59 +390,40 @@ typedef struct test_entry_t {
     unsigned verify_ct;                 /* Count the # of checksum verification for an entry */
 } test_entry_t;
 
-/* The following are cut down test versions of the hash table manipulation
- * macros from H5Cpkg.h, which have been further modified to avoid references
- * to the error reporting macros.  Needless to say, these macros must be
- * updated as necessary.
- */
-
-#define H5C__HASH_MASK ((size_t)(H5C__HASH_TABLE_LEN - 1) << 3)
-
 #define H5C_TEST__PRE_HT_SEARCH_SC(cache_ptr, Addr)                                                          \
-    if (((cache_ptr) == NULL) || ((cache_ptr)->magic != H5C__H5C_T_MAGIC) ||                                 \
-        ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size)) ||      \
-        (!H5F_addr_defined(Addr)) || (H5C__HASH_FCN(Addr) < 0) ||                                            \
-        (H5C__HASH_FCN(Addr) >= H5C__HASH_TABLE_LEN)) {                                                      \
-        HDfprintf(stdout, "Pre HT search SC failed.\n");                                                     \
+    if (H5C__PRE_HT_SEARCH_SC_CMP(cache_ptr, Addr)) {                                                        \
+        fprintf(stdout, "Pre HT search SC failed.\n");                                                       \
     }
 
 #define H5C_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, k)                                             \
-    if (((cache_ptr) == NULL) || ((cache_ptr)->magic != H5C__H5C_T_MAGIC) || ((cache_ptr)->index_len < 1) || \
-        ((entry_ptr) == NULL) || ((cache_ptr)->index_size < (entry_ptr)->size) ||                            \
-        ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size)) ||      \
-        ((entry_ptr)->size <= 0) || (((cache_ptr)->index)[k] == NULL) ||                                     \
-        ((((cache_ptr)->index)[k] != (entry_ptr)) && ((entry_ptr)->ht_prev == NULL)) ||                      \
-        ((((cache_ptr)->index)[k] == (entry_ptr)) && ((entry_ptr)->ht_prev != NULL)) ||                      \
-        (((entry_ptr)->ht_prev != NULL) && ((entry_ptr)->ht_prev->ht_next != (entry_ptr))) ||                \
-        (((entry_ptr)->ht_next != NULL) && ((entry_ptr)->ht_next->ht_prev != (entry_ptr)))) {                \
-        HDfprintf(stdout, "Post successful HT search SC failed.\n");                                         \
+    if (H5C__POST_SUC_HT_SEARCH_SC_CMP(cache_ptr, entry_ptr, k)) {                                           \
+        fprintf(stdout, "Post successful HT search SC failed.\n");                                           \
     }
 
-#define H5C_TEST__POST_HT_SHIFT_TO_FRONT(cache_ptr, entry_ptr, k)                                            \
-    if (((cache_ptr) == NULL) || (((cache_ptr)->index)[k] != (entry_ptr)) ||                                 \
-        ((entry_ptr)->ht_prev != NULL)) {                                                                    \
-        HDfprintf(stdout, "Post HT shift to front failed.\n");                                               \
+#define H5C_TEST__POST_HT_SHIFT_TO_FRONT_SC(cache_ptr, entry_ptr, k)                                         \
+    if (H5C__POST_HT_SHIFT_TO_FRONT_SC_CMP(cache_ptr, entry_ptr, k)) {                                       \
+        fprintf(stdout, "Post HT shift to front failed.\n");                                                 \
     }
 
 #define H5C_TEST__SEARCH_INDEX(cache_ptr, Addr, entry_ptr)                                                   \
     {                                                                                                        \
         int k;                                                                                               \
         H5C_TEST__PRE_HT_SEARCH_SC(cache_ptr, Addr)                                                          \
-        k         = H5C__HASH_FCN(Addr);                                                                     \
-        entry_ptr = ((cache_ptr)->index)[k];                                                                 \
+        k           = H5C__HASH_FCN(Addr);                                                                   \
+        (entry_ptr) = (cache_ptr)->index[k];                                                                 \
         while (entry_ptr) {                                                                                  \
-            if (H5F_addr_eq(Addr, (entry_ptr)->addr)) {                                                      \
+            if (H5_addr_eq(Addr, (entry_ptr)->addr)) {                                                       \
                 H5C_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, k)                                     \
-                if (entry_ptr != ((cache_ptr)->index)[k]) {                                                  \
+                if ((entry_ptr) != (cache_ptr)->index[k]) {                                                  \
                     if ((entry_ptr)->ht_next)                                                                \
                         (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;                                \
-                    HDassert((entry_ptr)->ht_prev != NULL);                                                  \
-                    (entry_ptr)->ht_prev->ht_next    = (entry_ptr)->ht_next;                                 \
-                    ((cache_ptr)->index)[k]->ht_prev = (entry_ptr);                                          \
-                    (entry_ptr)->ht_next             = ((cache_ptr)->index)[k];                              \
-                    (entry_ptr)->ht_prev             = NULL;                                                 \
-                    ((cache_ptr)->index)[k]          = (entry_ptr);                                          \
-                    H5C_TEST__POST_HT_SHIFT_TO_FRONT(cache_ptr, entry_ptr, k)                                \
+                    assert((entry_ptr)->ht_prev != NULL);                                                    \
+                    (entry_ptr)->ht_prev->ht_next  = (entry_ptr)->ht_next;                                   \
+                    (cache_ptr)->index[k]->ht_prev = (entry_ptr);                                            \
+                    (entry_ptr)->ht_next           = (cache_ptr)->index[k];                                  \
+                    (entry_ptr)->ht_prev           = NULL;                                                   \
+                    (cache_ptr)->index[k]          = (entry_ptr);                                            \
+                    H5C_TEST__POST_HT_SHIFT_TO_FRONT_SC(cache_ptr, entry_ptr, k)                             \
                 }                                                                                            \
                 break;                                                                                       \
             }                                                                                                \
@@ -469,7 +436,7 @@ typedef struct test_entry_t {
 #define CACHE_CONFIGS_EQUAL(a, b, cmp_set_init, cmp_init_size)                                               \
     (((a).version == (b).version) && ((a).rpt_fcn_enabled == (b).rpt_fcn_enabled) &&                         \
      ((a).open_trace_file == (b).open_trace_file) && ((a).close_trace_file == (b).close_trace_file) &&       \
-     (((a).open_trace_file == FALSE) || (strcmp((a).trace_file_name, (b).trace_file_name) == 0)) &&          \
+     (((a).open_trace_file == false) || (strcmp((a).trace_file_name, (b).trace_file_name) == 0)) &&          \
      ((a).evictions_enabled == (b).evictions_enabled) &&                                                     \
      ((!cmp_set_init) || ((a).set_initial_size == (b).set_initial_size)) &&                                  \
      ((!cmp_init_size) || ((a).initial_size == (b).initial_size)) &&                                         \
@@ -528,14 +495,14 @@ struct expected_entry_status {
     int           entry_type;
     int           entry_index;
     size_t        size;
-    hbool_t       in_cache;
-    hbool_t       at_main_addr;
-    hbool_t       is_dirty;
-    hbool_t       is_protected;
-    hbool_t       is_pinned;
-    hbool_t       deserialized;
-    hbool_t       serialized;
-    hbool_t       destroyed;
+    bool          in_cache;
+    bool          at_main_addr;
+    bool          is_dirty;
+    bool          is_protected;
+    bool          is_pinned;
+    bool          deserialized;
+    bool          serialized;
+    bool          destroyed;
     int           flush_dep_par_type[MAX_FLUSH_DEP_PARS]; /* Entry types of flush dependency parents */
     int           flush_dep_par_idx[MAX_FLUSH_DEP_PARS];  /* Indices of flush dependency parents */
     unsigned      flush_dep_npar;                         /* Number of flush dependency parents */
@@ -546,7 +513,7 @@ struct expected_entry_status {
 };
 
 /* global variable externs: */
-H5TEST_DLLVAR hbool_t     pass; /* set to false on error */
+H5TEST_DLLVAR bool        pass; /* set to false on error */
 H5TEST_DLLVAR const char *failure_mssg;
 
 H5TEST_DLLVAR test_entry_t *entries[NUMBER_OF_ENTRY_TYPES];
@@ -565,17 +532,12 @@ extern "C" {
 
 /* function declarations: */
 
-H5TEST_DLL void add_flush_op(int target_type, int target_idx, int op_code, int type, int idx, hbool_t flag,
+H5TEST_DLL void add_flush_op(int target_type, int target_idx, int op_code, int type, int idx, bool flag,
                              size_t size, unsigned *order);
 
 H5TEST_DLL void addr_to_type_and_index(haddr_t addr, int32_t *type_ptr, int32_t *index_ptr);
 
-#if 0 /* keep this for a while -- it may be useful */
-H5TEST_DLL haddr_t type_and_index_to_addr(int32_t type,
-                               int32_t idx);
-#endif
-
-H5TEST_DLL void dirty_entry(H5F_t *file_ptr, int32_t type, int32_t idx, hbool_t dirty_pin);
+H5TEST_DLL void dirty_entry(H5F_t *file_ptr, int32_t type, int32_t idx, bool dirty_pin);
 
 H5TEST_DLL void expunge_entry(H5F_t *file_ptr, int32_t type, int32_t idx);
 
@@ -583,7 +545,7 @@ H5TEST_DLL void insert_entry(H5F_t *file_ptr, int32_t type, int32_t idx, unsigne
 
 H5TEST_DLL void mark_entry_dirty(int32_t type, int32_t idx);
 
-H5TEST_DLL void move_entry(H5C_t *cache_ptr, int32_t type, int32_t idx, hbool_t main_addr);
+H5TEST_DLL void move_entry(H5C_t *cache_ptr, int32_t type, int32_t idx, bool main_addr);
 
 H5TEST_DLL void protect_entry(H5F_t *file_ptr, int32_t type, int32_t idx);
 
@@ -591,7 +553,7 @@ H5TEST_DLL void protect_entry_ro(H5F_t *file_ptr, int32_t type, int32_t idx);
 
 H5TEST_DLL void pin_entry(int32_t type, int32_t idx);
 
-H5TEST_DLL hbool_t entry_in_cache(H5C_t *cache_ptr, int32_t type, int32_t idx);
+H5TEST_DLL bool entry_in_cache(H5C_t *cache_ptr, int32_t type, int32_t idx);
 
 H5TEST_DLL void create_pinned_entry_dependency(H5F_t *file_ptr, int pinning_type, int pinning_idx,
                                                int pinned_type, int pinned_idx);
@@ -606,51 +568,43 @@ H5TEST_DLL void cork_entry_type(H5F_t *file_ptr, int32_t type);
 
 H5TEST_DLL void uncork_entry_type(H5F_t *file_ptr, int32_t type);
 
-H5TEST_DLL void resize_entry(H5F_t *file_ptr, int32_t type, int32_t idx, size_t new_size, hbool_t in_cache);
+H5TEST_DLL void resize_entry(H5F_t *file_ptr, int32_t type, int32_t idx, size_t new_size, bool in_cache);
 
-H5TEST_DLL void row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t verbose,
-                                       hbool_t reset_stats, hbool_t display_stats,
-                                       hbool_t display_detailed_stats, hbool_t do_inserts, hbool_t do_moves,
-                                       hbool_t move_to_main_addr, hbool_t do_destroys,
-                                       hbool_t do_mult_ro_protects, int dirty_destroys, int dirty_unprotects);
-
-H5TEST_DLL void hl_row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose,
-                                          hbool_t reset_stats, hbool_t display_stats,
-                                          hbool_t display_detailed_stats, hbool_t do_inserts);
-
-H5TEST_DLL void row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t verbose,
-                                        hbool_t reset_stats, hbool_t display_stats,
-                                        hbool_t display_detailed_stats, hbool_t do_inserts, hbool_t do_moves,
-                                        hbool_t move_to_main_addr, hbool_t do_destroys,
-                                        hbool_t do_mult_ro_protects, int dirty_destroys,
-                                        int dirty_unprotects);
-
-H5TEST_DLL void hl_row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose,
-                                           hbool_t reset_stats, hbool_t display_stats,
-                                           hbool_t display_detailed_stats, hbool_t do_inserts);
-
-H5TEST_DLL void col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t verbose,
-                                       hbool_t reset_stats, hbool_t display_stats,
-                                       hbool_t display_detailed_stats, hbool_t do_inserts,
+H5TEST_DLL void row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, bool verbose,
+                                       bool reset_stats, bool display_stats, bool display_detailed_stats,
+                                       bool do_inserts, bool do_moves, bool move_to_main_addr,
+                                       bool do_destroys, bool do_mult_ro_protects, int dirty_destroys,
                                        int dirty_unprotects);
 
-H5TEST_DLL void hl_col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose,
-                                          hbool_t reset_stats, hbool_t display_stats,
-                                          hbool_t display_detailed_stats, hbool_t do_inserts,
-                                          int dirty_unprotects);
+H5TEST_DLL void hl_row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, bool verbose, bool reset_stats,
+                                          bool display_stats, bool display_detailed_stats, bool do_inserts);
 
-H5TEST_DLL void col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t verbose,
-                                        hbool_t reset_stats, hbool_t display_stats,
-                                        hbool_t display_detailed_stats, hbool_t do_inserts,
+H5TEST_DLL void row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, bool verbose,
+                                        bool reset_stats, bool display_stats, bool display_detailed_stats,
+                                        bool do_inserts, bool do_moves, bool move_to_main_addr,
+                                        bool do_destroys, bool do_mult_ro_protects, int dirty_destroys,
                                         int dirty_unprotects);
 
-H5TEST_DLL void hl_col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose,
-                                           hbool_t reset_stats, hbool_t display_stats,
-                                           hbool_t display_detailed_stats, hbool_t do_inserts,
+H5TEST_DLL void hl_row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, bool verbose, bool reset_stats,
+                                           bool display_stats, bool display_detailed_stats, bool do_inserts);
+
+H5TEST_DLL void col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, bool verbose,
+                                       bool reset_stats, bool display_stats, bool display_detailed_stats,
+                                       bool do_inserts, int dirty_unprotects);
+
+H5TEST_DLL void hl_col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, bool verbose, bool reset_stats,
+                                          bool display_stats, bool display_detailed_stats, bool do_inserts,
+                                          int dirty_unprotects);
+
+H5TEST_DLL void col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, bool verbose,
+                                        bool reset_stats, bool display_stats, bool display_detailed_stats,
+                                        bool do_inserts, int dirty_unprotects);
+
+H5TEST_DLL void hl_col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, bool verbose, bool reset_stats,
+                                           bool display_stats, bool display_detailed_stats, bool do_inserts,
                                            int dirty_unprotects);
 
-H5TEST_DLL void flush_cache(H5F_t *file_ptr, hbool_t destroy_entries, hbool_t dump_stats,
-                            hbool_t dump_detailed_stats);
+H5TEST_DLL void flush_cache(H5F_t *file_ptr, bool destroy_entries, bool dump_stats, bool dump_detailed_stats);
 
 H5TEST_DLL void unpin_entry(int32_t type, int32_t idx);
 
@@ -671,17 +625,17 @@ H5TEST_DLL void destroy_flush_dependency(int32_t parent_type, int32_t parent_idx
 
 /*** H5AC level utility functions ***/
 
-H5TEST_DLL hbool_t resize_configs_are_equal(const H5C_auto_size_ctl_t *a, const H5C_auto_size_ctl_t *b,
-                                            hbool_t compare_init);
+H5TEST_DLL bool resize_configs_are_equal(const H5C_auto_size_ctl_t *a, const H5C_auto_size_ctl_t *b,
+                                         bool compare_init);
 
-H5TEST_DLL void check_and_validate_cache_hit_rate(hid_t file_id, double *hit_rate_ptr, hbool_t dump_data,
+H5TEST_DLL void check_and_validate_cache_hit_rate(hid_t file_id, double *hit_rate_ptr, bool dump_data,
                                                   int64_t min_accesses, double min_hit_rate);
 
 H5TEST_DLL void check_and_validate_cache_size(hid_t file_id, size_t *max_size_ptr, size_t *min_clean_size_ptr,
                                               size_t *cur_size_ptr, int32_t *cur_num_entries_ptr,
-                                              hbool_t dump_data);
+                                              bool dump_data);
 
-H5TEST_DLL void validate_mdc_config(hid_t file_id, H5AC_cache_config_t *ext_config_ptr, hbool_t compare_init,
+H5TEST_DLL void validate_mdc_config(hid_t file_id, H5AC_cache_config_t *ext_config_ptr, bool compare_init,
                                     int test_num);
 
 /** Debugging functions -- normally commented out ***/

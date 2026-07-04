@@ -1,0 +1,277 @@
+/** \page CB_MavenArtifacts Using HDF5 Maven Artifacts
+
+Navigate back: \ref index "Main" / \ref Cookbook
+<hr>
+
+\section sec_maven_intro Using HDF5 Java Bindings with Maven
+
+\par Problem
+I want to use HDF5 Java bindings in my Maven project without building from source.
+
+\par Solution
+HDF5 Java bindings are available as Maven artifacts with platform-specific JARs for
+both JNI and FFM implementations. Use the appropriate artifact and classifier for your
+platform and Java version.
+
+\subsection subsec_maven_artifacts Maven Artifact Selection
+
+HDF5 provides three main Maven artifacts:
+
+<table>
+<tr><th>Artifact ID</th><th>Java Version</th><th>Description</th><th>Status</th></tr>
+<tr>
+  <td><strong>hdf5-java-jni</strong></td>
+  <td>Java 8+</td>
+  <td>JNI implementation (default)</td>
+  <td>Production-ready</td>
+</tr>
+<tr>
+  <td><strong>hdf5-java-ffm</strong></td>
+  <td>Java 25+</td>
+  <td>FFM implementation (future default)</td>
+  <td>Production-ready</td>
+</tr>
+<tr>
+  <td><strong>hdf5-java-examples</strong></td>
+  <td>Java 8+</td>
+  <td>example programs</td>
+  <td>Platform-independent</td>
+</tr>
+</table>
+
+<em>Note: FFM will become the default implementation in the next major HDF5 release.</em>
+
+\subsection subsec_maven_jni Using JNI Implementation (Java 8+)
+
+\par Basic Usage
+Add the following dependency to your <code>pom.xml</code>:
+
+\code{.xml}
+<dependency>
+    <groupId>org.hdfgroup</groupId>
+    <artifactId>hdf5-java-jni</artifactId>
+    <version>2.0.0</version>
+    <classifier>linux-x86_64</classifier>
+</dependency>
+\endcode
+
+Replace the classifier with your platform:
+\li <code>linux-x86_64</code> - Linux 64-bit
+\li <code>windows-x86_64</code> - Windows 64-bit
+\li <code>macos-x86_64</code> - macOS Intel
+\li <code>macos-aarch64</code> - macOS Apple Silicon
+
+\par Java Code
+\code{.java}
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
+public class MyHDF5App {
+    public static void main(String[] args) throws Exception {
+        // Initialize HDF5 library
+        H5.H5open();
+
+        // Your HDF5 operations here
+        long file_id = H5.H5Fcreate("myfile.h5",
+                                    HDF5Constants.H5F_ACC_TRUNC,
+                                    HDF5Constants.H5P_DEFAULT,
+                                    HDF5Constants.H5P_DEFAULT);
+
+        // Clean up
+        H5.H5Fclose(file_id);
+        H5.H5close();
+    }
+}
+\endcode
+
+\subsection subsec_maven_ffm Using FFM Implementation (Java 25+)
+
+\par Basic Usage
+Add the following dependency to your <code>pom.xml</code>:
+
+\code{.xml}
+<dependency>
+    <groupId>org.hdfgroup</groupId>
+    <artifactId>hdf5-java-ffm</artifactId>
+    <version>2.0.0</version>
+    <classifier>linux-x86_64</classifier>
+</dependency>
+\endcode
+
+\par Java Runtime Configuration
+FFM requires enabling native access:
+\code
+java --enable-native-access=ALL-UNNAMED -cp yourapp.jar com.example.Main
+\endcode
+
+Or configure in <code>pom.xml</code>:
+\code{.xml}
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <configuration>
+        <argLine>--enable-native-access=ALL-UNNAMED</argLine>
+    </configuration>
+</plugin>
+\endcode
+
+\par Java Code
+The API is identical to JNI - same code works with both implementations:
+\code{.java}
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
+// Same code as JNI example above
+\endcode
+
+\subsection subsec_maven_examples Using Java Examples
+
+\par Adding Examples Artifact
+\code{.xml}
+<dependency>
+    <groupId>org.hdfgroup</groupId>
+    <artifactId>hdf5-java-examples</artifactId>
+    <version>2.0.0</version>
+</dependency>
+\endcode
+
+The examples artifact contains 62 educational examples covering:
+\li File operations and dataset creation
+\li Compound datatypes and variable-length data
+\li Groups, attributes, and links
+\li Chunking, compression, and filters
+\li Parallel I/O examples
+
+\par Running Examples
+\code
+# List available examples
+java -cp hdf5-java-examples-2.0.0.jar examples.intro.H5_CreateFile
+
+# Run a specific example
+java -cp "hdf5-java-jni-2.0.0-linux-x86_64.jar:hdf5-java-examples-2.0.0.jar" \
+     examples.intro.H5_CreateFile
+\endcode
+
+See <code>HDF5Examples/JAVA/README-MAVEN.md</code> for complete details.
+
+\subsection subsec_maven_repositories Maven Repositories
+
+\par GitHub Packages (Current)
+HDF5 artifacts are published to GitHub Packages. Add this repository to your <code>pom.xml</code>:
+
+\code{.xml}
+<repositories>
+    <repository>
+        <id>github-hdfgroup</id>
+        <name>HDF Group GitHub Packages</name>
+        <url>https://maven.pkg.github.com/HDFGroup/hdf5</url>
+    </repository>
+</repositories>
+\endcode
+
+<strong>Note:</strong> GitHub Packages requires authentication even for public packages.
+Add credentials to your <code>~/.m2/settings.xml</code>:
+
+\code{.xml}
+<servers>
+    <server>
+        <id>github-hdfgroup</id>
+        <username>YOUR_GITHUB_USERNAME</username>
+        <password>YOUR_GITHUB_TOKEN</password>
+    </server>
+</servers>
+\endcode
+
+Generate a GitHub personal access token with <code>read:packages</code> permission.
+
+\par Maven Central (Coming Soon)
+Future releases will be available on Maven Central, which does not require authentication:
+
+\code{.xml}
+<!-- Maven Central (future releases) -->
+<dependency>
+    <groupId>org.hdfgroup</groupId>
+    <artifactId>hdf5-java-jni</artifactId>
+    <version>2.1.0</version>
+    <classifier>linux-x86_64</classifier>
+</dependency>
+\endcode
+
+\subsection subsec_maven_troubleshooting Troubleshooting
+
+\par UnsatisfiedLinkError
+If you see <code>java.lang.UnsatisfiedLinkError</code>:
+\li Verify you're using the correct platform classifier
+\li Ensure only ONE HDF5 artifact (JNI or FFM) is on classpath
+\li Check Java version matches implementation (Java 25+ for FFM)
+\li Install HDF5 native libraries: <code>sudo apt-get install libhdf5-dev</code> (Linux) or <code>brew install hdf5</code> (macOS)
+
+\par Native Access Error (FFM only)
+If you see <code>IllegalCallerException</code> with FFM:
+\li Add <code>--enable-native-access=ALL-UNNAMED</code> to Java command
+\li Or configure in build tool (Maven, Gradle)
+
+\par Version Conflicts
+If you see dependency conflicts:
+\li Use <code>&lt;dependencyManagement&gt;</code> to control versions
+\li Exclude transitive HDF5 dependencies if needed
+\li Ensure all HDF5 artifacts use the same version
+
+\subsection subsec_maven_migration Migrating Between JNI and FFM
+
+\par API Compatibility
+Both implementations use identical APIs:
+\li Same package names: <code>hdf.hdf5lib.*</code>
+\li Same class names: <code>H5, HDF5Constants</code>
+\li Same method signatures
+\li Same exception handling
+
+\par Migration Steps
+1. Update artifact ID in <code>pom.xml</code>:
+   \li Change <code>hdf5-java-jni</code> to <code>hdf5-java-ffm</code>
+   \li Or vice versa
+
+2. For FFM: Add native access flag
+   \li <code>--enable-native-access=ALL-UNNAMED</code>
+
+3. Rebuild and test
+   \li No code changes required!
+
+\subsection subsec_maven_testing Testing Maven Artifacts
+
+\par Local Testing Scripts
+HDF5 provides test scripts to verify Maven artifacts work correctly:
+
+\code
+cd HDF5Examples/JAVA
+
+# Test JNI implementation
+./test-maven-jni.sh 2.0.0
+
+# Test FFM implementation
+./test-maven-ffm.sh 2.0.0
+
+# Test against custom repository
+./test-maven-ffm.sh 2.0.0 https://maven.pkg.github.com/YOUR_FORK/hdf5
+\endcode
+
+These scripts automatically:
+\li Configure GitHub authentication
+\li Download and verify JARs
+\li Compile and run example programs
+\li Report detailed test results
+
+See <code>HDF5Examples/JAVA/README-MAVEN.md</code> for complete testing documentation.
+
+\par See Also
+\li \ref subsec_cmake_presets_build_java for building from source
+\li release_docs/README.md for complete Maven documentation
+\li HDF5Examples/JAVA/README-MAVEN.md for testing and examples with Maven
+\li HDF5Examples/JAVA/test-maven-jni.sh for JNI artifact testing
+\li HDF5Examples/JAVA/test-maven-ffm.sh for FFM artifact testing
+\li https://github.com/HDFGroup/hdf5-examples for more examples
+
+<hr>
+Navigate back: \ref index "Main" / \ref Cookbook
+
+*/

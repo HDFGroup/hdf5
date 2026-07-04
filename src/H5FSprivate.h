@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5FSprivate.h
- *              May  2 2006
- *              Quincey Koziol
  *
  * Purpose:     Private header for library accessible file free space routines.
  *
@@ -185,6 +183,9 @@ H5FL_SEQ_EXTERN(H5FS_section_class_t);
 /* Library-private Function Prototypes */
 /***************************************/
 
+/* Package initialization routine */
+H5_DLL herr_t H5FS_init(void);
+
 /* Free space manager routines */
 H5_DLL H5FS_t *H5FS_create(H5F_t *f, haddr_t *fs_addr, const H5FS_create_t *fs_create, uint16_t nclasses,
                            const H5FS_section_class_t *classes[], void *cls_init_udata, hsize_t alignment,
@@ -196,11 +197,11 @@ H5_DLL herr_t  H5FS_delete(H5F_t *f, haddr_t fs_addr);
 H5_DLL herr_t  H5FS_close(H5F_t *f, H5FS_t *fspace);
 H5_DLL herr_t  H5FS_alloc_hdr(H5F_t *f, H5FS_t *fspace, haddr_t *fs_addr);
 H5_DLL herr_t  H5FS_alloc_sect(H5F_t *f, H5FS_t *fspace);
-H5_DLL herr_t  H5FS_free(H5F_t *f, H5FS_t *fspace, hbool_t free_file_space);
+H5_DLL herr_t  H5FS_free(H5F_t *f, H5FS_t *fspace, bool free_file_space);
 
 /* Free space section routines */
 H5_DLL herr_t H5FS_sect_add(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *node, unsigned flags,
-                            void *op_data);
+                            void *op_data, bool *merged_or_shrunk);
 H5_DLL htri_t H5FS_sect_try_merge(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect, unsigned flags,
                                   void *op_data);
 H5_DLL htri_t H5FS_sect_try_extend(H5F_t *f, H5FS_t *fspace, haddr_t addr, hsize_t size,

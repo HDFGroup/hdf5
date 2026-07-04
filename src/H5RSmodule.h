@@ -4,19 +4,16 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Saturday, October 10, 2020
- *
  * Purpose:	This file contains declarations which define macros for the
- *		H5RS package.  Including this header means that the source file
- *		is part of the H5RS package.
+ *          H5RS package.  Including this header means that the source file
+ *          is part of the H5RS package.
  */
 #ifndef H5RSmodule_H
 #define H5RSmodule_H
@@ -25,7 +22,7 @@
  *      reporting macros.
  */
 #define H5RS_MODULE
-#define H5_MY_PKG     H5RS
-#define H5_MY_PKG_ERR H5E_RS
+#define H5_MY_PKG      H5RS
+#define H5_MY_PKG_INIT NO
 
 #endif /* H5RSmodule_H */

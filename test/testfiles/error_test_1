@@ -1,10 +1,10 @@
    This program tests the Error API.  There're supposed to be some error messages
 ********* Print error stack in HDF5 default way *********
-Second Test-DIAG: Error detected in Second Program (1.0) thread (IDs):
+Second Test-DIAG: Error detected in Second Program (1.0):
   #000: (file name) line (number) in main(): Error stack test failed
     major: Error in test
     minor: Error in error stack
-Error Test-DIAG: Error detected in Error Program (1.0) thread (IDs):
+Error Test-DIAG: Error detected in Error Program (1.0):
   #001: (file name) line (number) in error_stack(): Get number test failed, returned 0
     major: Error in API
     minor: Error in H5Eget_num
@@ -20,21 +20,21 @@ Error Test-DIAG: Error detected in Error Program (1.0) thread (IDs):
         minor: Error in error stack
 
 Testing error API based on data I/O
-HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+HDF5-DIAG: Error detected in HDF5 (version (number)):
   #000: (file name) line (number) in H5Dwrite(): can't synchronously write data
     major: Dataset
     minor: Write failed
   #001: (file name) line (number) in H5D__write_api_common(): dset_id is not a dataset ID
     major: Invalid arguments to routine
     minor: Inappropriate type
-Error Test-DIAG: Error detected in Error Program (1.0) thread (IDs):
+Error Test-DIAG: Error detected in Error Program (1.0):
   #000: (file name) line (number) in main(): Error test failed, it's wrong
     major: Error in test
     minor: Error in subroutine
   #001: (file name) line (number) in test_error(): H5Dwrite failed as supposed to
     major: Error in IO
     minor: Error in H5Dwrite
-HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+HDF5-DIAG: Error detected in HDF5 (version (number)):
   #002: (file name) line (number) in H5Dwrite(): can't synchronously write data
     major: Dataset
     minor: Write failed
@@ -43,14 +43,14 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
     minor: Inappropriate type
 
 Testing error message during data reading when filter isn't registered
-HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+HDF5-DIAG: Error detected in HDF5 (version (number)):
   #000: (file name) line (number) in H5Dread(): can't synchronously read data
     major: Dataset
     minor: Read failed
   #001: (file name) line (number) in H5D__read_api_common(): can't read data
     major: Dataset
     minor: Read failed
-  #002: (file name) line (number) in H5VL_dataset_read_direct(): dataset read failed
+  #002: (file name) line (number) in H5VL_dataset_read(): dataset read failed
     major: Virtual Object Layer
     minor: Read failed
   #003: (file name) line (number) in H5VL__dataset_read(): dataset read failed

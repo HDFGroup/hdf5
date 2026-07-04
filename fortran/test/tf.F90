@@ -13,15 +13,15 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the COPYING file, which can be found at the root of the source code       *
+!   the LICENSE file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! CONTAINS SUBROUTINES
-!  write_test_status, check, verify, verifyLogical, verifyString, h5_fixname_f,
-!  h5_cleanup_f, h5_exit_f, h5_env_nocleanup_f,dreal_eqv
+!  write_test_status, check, h5_fixname_f,
+!  h5_cleanup_f, h5_exit_f, h5_env_nocleanup_f
 !
 !*****
 
@@ -35,6 +35,8 @@ MODULE TH5_MISC
 
   INTEGER, PARAMETER :: sp = SELECTED_REAL_KIND(5)  ! This should map to REAL*4 on most modern processors
   INTEGER, PARAMETER :: dp = SELECTED_REAL_KIND(10) ! This should map to REAL*8 on most modern processors
+
+  INTEGER, PARAMETER :: TAB_SPACE = 88 ! Tab spacing for printing results
 
   ! generic compound datatype
   TYPE :: comp_datatype
@@ -54,6 +56,86 @@ MODULE TH5_MISC
   END INTERFACE
 
 CONTAINS
+
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_TEST_DLL)
+!DEC$attributes dllexport :: write_test_header
+!DEC$endif
+  SUBROUTINE write_test_header(title_header)
+
+    ! Writes the test header
+
+    IMPLICIT NONE
+
+    CHARACTER(LEN=*), INTENT(IN) :: title_header ! test name
+    INTEGER, PARAMETER :: width = TAB_SPACE+10
+    CHARACTER(LEN=2*width) ::title_centered
+    INTEGER :: len, i
+
+    title_centered(:) = " "
+
+    len=LEN_TRIM(title_header)
+    title_centered(1:3) ="| |"
+    title_centered((width-len)/2:(width-len)/2+len) = TRIM(title_header)
+    title_centered(width-1:width+2) ="| |"
+
+    WRITE(*,'(1X)', ADVANCE="NO")
+    DO i = 1, width-1
+       WRITE(*,'("_")', ADVANCE="NO")
+    ENDDO
+    WRITE(*,'()')
+    WRITE(*,'("|  ")', ADVANCE="NO")
+    DO i = 1, width-5
+       WRITE(*,'("_")', ADVANCE="NO")
+    ENDDO
+    WRITE(*,'("  |")')
+
+    WRITE(*,'("| |")', ADVANCE="NO")
+    DO i = 1, width-5
+       WRITE(*,'(1X)', ADVANCE="NO")
+    ENDDO
+    WRITE(*,'("| |")')
+
+    WRITE(*,'(A)') TRIM(title_centered)
+  
+    WRITE(*,'("| |")', ADVANCE="NO")
+    DO i = 1, width-5
+       WRITE(*,'(1X)', ADVANCE="NO")
+    ENDDO
+    WRITE(*,'("| |")')
+
+    WRITE(*,'("| |")', ADVANCE="NO")
+    DO i = 1, width-5
+       WRITE(*,'("_")', ADVANCE="NO")
+    ENDDO
+    WRITE(*,'("| |")')
+
+    WRITE(*,'("|")', ADVANCE="NO")
+    DO i = 1, width-1
+       WRITE(*,'("_")', ADVANCE="NO")
+    ENDDO
+    WRITE(*,'("|",/)')
+
+   END SUBROUTINE write_test_header
+
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_TEST_DLL)
+!DEC$attributes dllexport :: write_test_footer
+!DEC$endif
+   SUBROUTINE write_test_footer()
+
+     ! Writes the test footer
+
+     IMPLICIT NONE
+     INTEGER, PARAMETER :: width = TAB_SPACE+10
+     INTEGER :: i
+
+     DO i = 1, width
+        WRITE(*,'("_")', ADVANCE="NO")
+     ENDDO
+     WRITE(*,'(/)')
+
+   END SUBROUTINE write_test_footer
 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_TEST_DLL)
@@ -78,7 +160,7 @@ CONTAINS
     CHARACTER(LEN=8), PARAMETER :: success = ' PASSED '
     CHARACTER(LEN=8), PARAMETER :: failure = '*FAILED*'
     CHARACTER(LEN=8), PARAMETER :: skip    = '--SKIP--'
-
+    CHARACTER(LEN=10) :: FMT
 
     error_string = failure
     IF (test_result ==  0) THEN
@@ -86,8 +168,8 @@ CONTAINS
     ELSE IF (test_result == -1) THEN
        error_string = skip
     ENDIF
-
-    WRITE(*, fmt = '(A, T88, A)') test_title, error_string
+    WRITE(FMT,'("(A,T",I0,",A)")') TAB_SPACE
+    WRITE(*, fmt = FMT) test_title, error_string
 
     IF(test_result.GT.0) total_error = total_error + test_result
 
@@ -122,11 +204,6 @@ CONTAINS
 !		hdferr:		- error code
 !				 	Success:  0
 !				 	Failure: -1
-!
-! Programmer:	Elena Pourmal
-!		September 13, 2002
-!
-!
 !----------------------------------------------------------------------
   SUBROUTINE h5_fixname_f(base_name, full_name, fapl, hdferr)
 !
@@ -182,11 +259,6 @@ CONTAINS
 !		hdferr:		- error code
 !				 	Success:  0
 !				 	Failure: -1
-!
-! Programmer:	Elena Pourmal
-!		September 19, 2002
-!
-!
 !----------------------------------------------------------------------
   SUBROUTINE h5_cleanup_f(base_name, fapl, hdferr)
 !
@@ -234,11 +306,6 @@ CONTAINS
 !
 ! Outputs:
 !		none
-!
-! Programmer:	Quincey Koziol
-!		December 14, 2004
-!
-!
 !----------------------------------------------------------------------
   SUBROUTINE h5_exit_f(status)
 !
@@ -272,10 +339,6 @@ CONTAINS
 !
 ! Outputs:      HDF5_NOCLEANUP:  .true. - don't remove test files
 !		                .false. - remove test files
-!
-! Programmer:	M.S. Breitenfeld
-!               September 30, 2008
-!
 !----------------------------------------------------------------------
   SUBROUTINE h5_env_nocleanup_f(HDF5_NOCLEANUP)
 !

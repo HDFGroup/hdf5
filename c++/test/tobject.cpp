@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -57,9 +57,6 @@ const H5std_string DSET_IN_GRP1_2_PATH("/Top Group/Sub-Group 1.2/Dataset_in_Grou
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              Friday, March 4, 2014
  *-------------------------------------------------------------------------
  */
 static void
@@ -159,9 +156,6 @@ test_get_objname()
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              Friday, March 4, 2014
  *-------------------------------------------------------------------------
  */
 static void
@@ -175,54 +169,54 @@ test_existance()
 
         // Check if GROUP1 exists in the file
         bool exists = file.nameExists(GROUP1);
-        verify_val(exists, TRUE, "Group::nameExists GROUP1_1", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::nameExists GROUP1_1", __LINE__, __FILE__);
         // Deprecated
         exists = file.exists(GROUP1);
-        verify_val(exists, TRUE, "Group::exists GROUP1_1", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::exists GROUP1_1", __LINE__, __FILE__);
 
         // Open GROUP1
         Group grp1 = file.openGroup(GROUP1);
 
         // Check if GROUP1_1 and GROUP1_2 exist in GROUP1
         exists = grp1.nameExists(GROUP1_1);
-        verify_val(exists, TRUE, "Group::nameExists GROUP1_1", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::nameExists GROUP1_1", __LINE__, __FILE__);
         exists = grp1.nameExists(GROUP1_2);
-        verify_val(exists, TRUE, "Group::nameExists GROUP1_2", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::nameExists GROUP1_2", __LINE__, __FILE__);
         // Deprecated
         exists = grp1.exists(GROUP1_1);
-        verify_val(exists, TRUE, "Group::exists GROUP1_1", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::exists GROUP1_1", __LINE__, __FILE__);
         exists = grp1.exists(GROUP1_2);
-        verify_val(exists, TRUE, "Group::exists GROUP1_2", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::exists GROUP1_2", __LINE__, __FILE__);
 
         // Check if DSET_IN_GRP1 exists in GROUP1
         exists = grp1.nameExists(DSET_IN_GRP1);
-        verify_val(exists, TRUE, "Group::nameExists DSET_IN_GRP1", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::nameExists DSET_IN_GRP1", __LINE__, __FILE__);
         // Deprecated
         exists = grp1.exists(DSET_IN_GRP1);
-        verify_val(exists, TRUE, "Group::exists DSET_IN_GRP1", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::exists DSET_IN_GRP1", __LINE__, __FILE__);
 
         // Open GROUP1_2
         Group grp1_2 = grp1.openGroup(GROUP1_2);
 
         // Check if DSET_IN_GRP1_2 exists in GROUP1_2
         exists = grp1_2.nameExists(DSET_IN_GRP1_2);
-        verify_val(exists, TRUE, "Group::nameExists DSET_IN_GRP1_2", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::nameExists DSET_IN_GRP1_2", __LINE__, __FILE__);
         // Deprecated
         exists = grp1_2.exists(DSET_IN_GRP1_2);
-        verify_val(exists, TRUE, "Group::exists DSET_IN_GRP1_2", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::exists DSET_IN_GRP1_2", __LINE__, __FILE__);
 
         // Check if a dataset exists given dataset as location with full path name
         DataSet dset1 = file.openDataSet(DSET_IN_FILE);
         exists        = dset1.nameExists("/Top Group/Dataset_in_Group_1");
-        verify_val(exists, TRUE, "Group::nameExists given dataset with full path name", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::nameExists given dataset with full path name", __LINE__, __FILE__);
 
         exists = grp1_2.nameExists(DSET_IN_GRP1);
-        verify_val(exists, FALSE, "Group::nameExists DSET_IN_GRP1", __LINE__, __FILE__);
+        verify_val(exists, false, "Group::nameExists DSET_IN_GRP1", __LINE__, __FILE__);
         // Deprecated
         exists = dset1.exists("/Top Group/Dataset_in_Group_1");
-        verify_val(exists, TRUE, "Group::exists given dataset with full path name", __LINE__, __FILE__);
+        verify_val(exists, true, "Group::exists given dataset with full path name", __LINE__, __FILE__);
         exists = grp1_2.exists(DSET_IN_GRP1);
-        verify_val(exists, FALSE, "Group::exists DSET_IN_GRP1", __LINE__, __FILE__);
+        verify_val(exists, false, "Group::exists DSET_IN_GRP1", __LINE__, __FILE__);
 
         // Everything will be closed as they go out of scope
 
@@ -242,9 +236,6 @@ test_existance()
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              March 4, 2014
  *-------------------------------------------------------------------------
  */
 static void
@@ -316,7 +307,7 @@ test_get_objname_ontypes()
         // Name this datatype
         new_int_type.commit(grp, "IntType NATIVE_INT");
         ssize_t name_len = new_int_type.getObjName(type_name); // default len
-        verify_val(name_len, static_cast<ssize_t>(HDstrlen("/typetests/IntType NATIVE_INT")),
+        verify_val(name_len, static_cast<ssize_t>(strlen("/typetests/IntType NATIVE_INT")),
                    "DataType::getObjName", __LINE__, __FILE__);
         verify_val(type_name, "/typetests/IntType NATIVE_INT", "DataType::getObjName", __LINE__, __FILE__);
 
@@ -341,9 +332,6 @@ test_get_objname_ontypes()
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              Friday, March 4, 2014
  *-------------------------------------------------------------------------
  */
 static void
@@ -406,9 +394,6 @@ test_get_objtype()
  * Purpose      Test Group::getObjId function.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version)
- *              March, 2017
  *-------------------------------------------------------------------------
  */
 const H5std_string GROUPNAME("group");
@@ -527,8 +512,6 @@ test_open_object_header()
  *              file will return the same file "number".
  *
  * Return       None
- *
- * July, 2018
  *-------------------------------------------------------------------------
  */
 const H5std_string FILE_OBJINFO("tobject_getinfo.h5");
@@ -551,8 +534,8 @@ test_getobjectinfo_same_file()
         Group grp2(file1.createGroup(GROUP2NAME));
 
         // Reset object info
-        HDmemset(&oinfo1, 0, sizeof(oinfo1));
-        HDmemset(&oinfo2, 0, sizeof(oinfo2));
+        memset(&oinfo1, 0, sizeof(oinfo1));
+        memset(&oinfo2, 0, sizeof(oinfo2));
 
         // Query the info of two groups and verify that they have the same
         // file number
@@ -574,8 +557,8 @@ test_getobjectinfo_same_file()
         grp2 = file2.openGroup(GROUP2NAME);
 
         // Reset object info
-        HDmemset(&oinfo1, 0, sizeof(oinfo1));
-        HDmemset(&oinfo2, 0, sizeof(oinfo2));
+        memset(&oinfo1, 0, sizeof(oinfo1));
+        memset(&oinfo2, 0, sizeof(oinfo2));
 
         // Query the info of two groups and verify that they have the same
         // file number
@@ -584,8 +567,8 @@ test_getobjectinfo_same_file()
         verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjinfo", __LINE__, __FILE__);
 
         // Reset object info
-        HDmemset(&oinfo1, 0, sizeof(oinfo1));
-        HDmemset(&oinfo2, 0, sizeof(oinfo2));
+        memset(&oinfo1, 0, sizeof(oinfo1));
+        memset(&oinfo2, 0, sizeof(oinfo2));
 
         file1.getObjinfo(GROUP1NAME, oinfo1);
         file1.getObjinfo(GROUP2NAME, oinfo2);
@@ -614,8 +597,6 @@ test_getobjectinfo_same_file()
  *              the property setting.
  *
  * Return       None
- *
- * April, 2019
  *-------------------------------------------------------------------------
  */
 const H5std_string FILE_INTERGRPS("tobject_intergrps.h5");
@@ -662,7 +643,7 @@ test_intermediate_groups()
         } // Failure is ignored
 
         // Create GROUP14NAME with the flag to create missing groups set
-        // to FALSE, should fail because group GROUP13NAME is missing
+        // to false, should fail because group GROUP13NAME is missing
 
         // Reset flag to not create missing groups
         lcpl.setCreateIntermediateGroup(false);
@@ -677,7 +658,7 @@ test_intermediate_groups()
         catch (FileIException &expected2) {
         } // Failure is ignored
 
-        // Set the flag to create missing groups set to TRUE
+        // Set the flag to create missing groups set to true
         lcpl.setCreateIntermediateGroup(true);
         crt_int_grps = lcpl.getCreateIntermediateGroup();
         verify_val(crt_int_grps, true, "LinkCreatPropList::getCreateIntermediateGroup", __LINE__, __FILE__);
@@ -728,13 +709,13 @@ test_intermediate_groups()
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * March 4, 2014
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_object()
+test_object(void *params)
 {
+    (void)params;
+
     // Output message about test being performed
     MESSAGE(5, ("Testing Object Functions\n"));
 
@@ -757,10 +738,14 @@ test_object()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-cleanup_object()
+cleanup_object(void *params)
 {
-    HDremove(FILE_OBJECTS.c_str());
-    HDremove(FILE_OBJHDR.c_str());
-    HDremove(FILE_OBJINFO.c_str());
-    HDremove(FILE_INTERGRPS.c_str());
+    (void)params;
+
+    if (GetTestCleanup()) {
+        HDremove(FILE_OBJECTS.c_str());
+        HDremove(FILE_OBJHDR.c_str());
+        HDremove(FILE_OBJINFO.c_str());
+        HDremove(FILE_INTERGRPS.c_str());
+    }
 } // cleanup_objects

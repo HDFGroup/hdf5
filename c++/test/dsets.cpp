@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -17,7 +17,6 @@
 
    EXTERNAL ROUTINES/VARIABLES:
      These routines are in the test directory of the C library:
-        h5_reset() -- in h5test.c, resets the library by closing it
         h5_fileaccess() -- in h5test.c, returns a file access template
 
  ***************************************************************************/
@@ -404,9 +403,6 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  * Return       Success: Data chunk size
  *
  *              Failure: 0
- *
- * Programmer   Robb Matzke
- *              Tuesday, April 21, 1998
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -729,8 +725,8 @@ test_nbit_compression(H5File &file)
 
     SUBTEST("N-bit compression (setup)");
 
-    HDmemset(orig_data, 0, DIM1 * DIM2 * sizeof(s1_t));
-    HDmemset(new_data, 0, DIM1 * DIM2 * sizeof(s1_t));
+    memset(orig_data, 0, DIM1 * DIM2 * sizeof(s1_t));
+    memset(new_data, 0, DIM1 * DIM2 * sizeof(s1_t));
 
     try {
         // Define datatypes of members of compound datatype
@@ -1096,7 +1092,7 @@ test_getnativeinfo(H5File &file)
 
         // Get dataset header info
         H5O_native_info_t ninfo;
-        HDmemset(&ninfo, 0, sizeof(ninfo));
+        memset(&ninfo, 0, sizeof(ninfo));
         dataset.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_HDR);
         verify_val(static_cast<long>(ninfo.hdr.nchunks), 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
         dataset.close();
@@ -1104,7 +1100,7 @@ test_getnativeinfo(H5File &file)
         // Open the dataset we created above and then close it.  This is one
         // way to open an existing dataset for accessing.
         dataset = file.openDataSet(DSET_DEFAULT_NAME);
-        HDmemset(&ninfo, 0, sizeof(ninfo));
+        memset(&ninfo, 0, sizeof(ninfo));
         dataset.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_ALL);
         verify_val(static_cast<long>(ninfo.hdr.nchunks), 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
         dataset.close();
@@ -1367,6 +1363,83 @@ test_operator(H5File &file)
 } // test_operator
 
 /*-------------------------------------------------------------------------
+ * Function:    test_read_string
+ *
+ * Purpose      Tests DataSet::read(H5std_string ...)
+ *
+ * Return       Success: 0
+ *
+ *              Failure: -1
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_read_string(H5File &file)
+{
+    SUBTEST("DataSet::read(H5std_string)");
+    try {
+        const H5std_string  DATASET_NAME("test_read_string");
+        const unsigned long NX           = 8;
+        const char          DATA[NX]     = {'a', 0, 0, 0, 0, 0, 0, 'Z'};
+        const H5std_string  EXPECTED_STR = H5std_string(DATA, NX);
+        H5std_string        str;
+
+        /*
+         * Write characters with internal null bytes
+         */
+
+        PredType  datatype(PredType::NATIVE_INT8);
+        hsize_t   dimsf[RANK1] = {NX};
+        DataSpace dataspace(RANK1, dimsf);
+        DataSet   dataset = file.createDataSet(DATASET_NAME, datatype, dataspace);
+        dataset.write(DATA, datatype);
+        dataset.close();
+
+        /*
+         * Read characters with internal null bytes as a string.
+         * The read std::string should NOT be truncated at the first null byte.
+         */
+
+        dataset = file.openDataSet(DATASET_NAME);
+        dataset.read(str, datatype);
+        dataset.close();
+        verify_val(str.length(), NX, "test_read_string", __LINE__, __FILE__);
+        verify_val(str, EXPECTED_STR, "test_read_string", __LINE__, __FILE__);
+
+        /*
+         * Write the H5std_string back to the dataset.
+         */
+        dataset = file.openDataSet(DATASET_NAME);
+        dataset.write(str, datatype);
+        dataset.close();
+
+        /*
+         * Read characters with internal null bytes as a string, after rewrite.
+         * The read std::string should NOT be truncated at the first null byte.
+         */
+
+        dataset = file.openDataSet(DATASET_NAME);
+        dataset.read(str, datatype);
+        dataset.close();
+        verify_val(str.length(), NX, "test_read_string", __LINE__, __FILE__);
+        verify_val(str, EXPECTED_STR, "test_read_string", __LINE__, __FILE__);
+
+        /*
+         * Success
+         */
+        PASSED();
+        return 0;
+    }
+    catch (Exception &E) {
+        // H5_FAILED should probably be invoked before verify_val
+        H5_FAILED();
+        issue_fail_msg("test_read_string", __LINE__, __FILE__);
+
+        // clean up and return with failure
+        return -1;
+    }
+} // test_read_string
+
+/*-------------------------------------------------------------------------
  * Function:    test_dset
  *
  * Purpose      Tests the dataset interface (H5D)
@@ -1375,22 +1448,16 @@ test_operator(H5File &file)
  *
  *              Failure: -1
  *
- * Modifications:
- *        Nov 12, 01:
- *              - moved h5_cleanup to outside of try block because
- *                dataset.h5 cannot be removed until "file" is out of
- *                scope and dataset.h5 is closed.
- *        Feb 20, 05:
- *              - cleanup_dsets took care of the cleanup now.
- *
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_dset()
+test_dset(void *params)
 {
     hid_t fapl_id;
     fapl_id     = h5_fileaccess(); // in h5test.c, returns a file access template
     int nerrors = 0;               // keep track of number of failures occur
+
+    (void)params;
 
     try {
         // Use the file access template id to create a file access prop.
@@ -1414,6 +1481,7 @@ test_dset()
         nerrors += test_virtual() < 0 ? 1 : 0;
         nerrors += test_operator(file) < 0 ? 1 : 0;
         nerrors += test_chunk_cache(fapl) < 0 ? 1 : 0;
+        nerrors += test_read_string(file) < 0 ? 1 : 0;
 
         // Close group "emit diagnostics".
         grp.close();
@@ -1426,9 +1494,6 @@ test_dset()
     catch (Exception &E) {
         test_report(nerrors, H5std_string(" Dataset"));
     }
-
-    // Clean up data file
-    cleanup_dsets();
 } // test_dset
 
 /*-------------------------------------------------------------------------
@@ -1437,13 +1502,15 @@ test_dset()
  * Purpose      Cleanup temporary test files
  *
  * Return       None
- *
- * Programmer   (use C version)
  *-------------------------------------------------------------------------
  */
 extern "C" void
-cleanup_dsets()
+cleanup_dsets(void *params)
 {
-    HDremove(FILE1.c_str());
-    HDremove(FILE_ACCPLIST.c_str());
+    (void)params;
+
+    if (GetTestCleanup()) {
+        HDremove(FILE1.c_str());
+        HDremove(FILE_ACCPLIST.c_str());
+    }
 } // cleanup_dsets

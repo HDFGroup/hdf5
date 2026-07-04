@@ -14,7 +14,7 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the COPYING file, which can be found at the root of the source code       *
+!   the LICENSE file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
@@ -41,11 +41,6 @@ MODULE visit_cb
   !
   ! Return:      Success:        0
   !              Failure:        -1
-  !
-  ! Programmer:  M.S. Breitenfeld
-  !              July 12, 2012
-  !              Adopted from C test.
-  !
   !-------------------------------------------------------------------------
   !
   ! Object visit structs
@@ -78,6 +73,8 @@ CONTAINS
     INTEGER :: cmp_value
     INTEGER :: i
     INTEGER :: ierr
+    INTEGER(HADDR_T) :: addr
+    TYPE(H5O_TOKEN_T_F) :: token
 
     status = 0
 
@@ -87,7 +84,7 @@ CONTAINS
           RETURN
        ENDIF
        token_c%token = oinfo_c%token%token
-       CALL H5Otoken_cmp_f(loc_id, oinfo_f%token, token_c, cmp_value, ierr);
+       CALL H5Otoken_cmp_f(loc_id, oinfo_f%token, token_c, cmp_value, ierr)
        IF( (ierr .EQ. -1) .OR. (cmp_value .NE. 0) ) THEN
           status = -1
           RETURN
@@ -101,14 +98,30 @@ CONTAINS
           RETURN
        ENDIF
 
+       CALL h5vlnative_token_to_addr_f(loc_id, oinfo_f%token, addr, ierr)
+       IF( ierr .EQ. -1) THEN
+          status = -1
+          RETURN
+       ENDIF
+       CALL h5vlnative_addr_to_token_f(loc_id, addr, token, ierr)
+       IF( ierr .EQ. -1) THEN
+          status = -1
+          RETURN
+       ENDIF
+       CALL H5Otoken_cmp_f(loc_id, oinfo_f%token, token, cmp_value, ierr)
+       IF( (ierr .EQ. -1) .OR. (cmp_value .NE. 0) ) THEN
+          status = -1
+          RETURN
+       ENDIF
+
     ENDIF
 
     IF((field .EQ. H5O_INFO_TIME_F).OR.(field .EQ. H5O_INFO_ALL_F))THEN
 
-       atime(1:8) = h5gmtime(oinfo_c%atime)
-       btime(1:8) = h5gmtime(oinfo_c%btime)
-       ctime(1:8) = h5gmtime(oinfo_c%ctime)
-       mtime(1:8) = h5gmtime(oinfo_c%mtime)
+       atime(1:8) = INT(h5gmtime(oinfo_c%atime),C_INT)
+       btime(1:8) = INT(h5gmtime(oinfo_c%btime),C_INT)
+       ctime(1:8) = INT(h5gmtime(oinfo_c%ctime),C_INT)
+       mtime(1:8) = INT(h5gmtime(oinfo_c%mtime),C_INT)
 
        DO i = 1, 8
           IF( (atime(i) .NE. oinfo_f%atime(i)) )THEN
@@ -137,7 +150,7 @@ CONTAINS
        status = 0
        IF( oinfo_c%fileno .NE. oinfo_f%fileno) status = status + 1
        token_c%token = oinfo_c%token%token
-       CALL H5Otoken_cmp_f(loc_id, oinfo_f%token, token_c, cmp_value, ierr);
+       CALL H5Otoken_cmp_f(loc_id, oinfo_f%token, token_c, cmp_value, ierr)
        IF( (ierr .EQ. -1) .OR. (cmp_value .NE. 0) ) THEN
           status = -1
           RETURN
@@ -161,7 +174,7 @@ CONTAINS
        status = 0
        IF( oinfo_c%fileno .NE. oinfo_f%fileno) status = status + 1
        token_c%token = oinfo_c%token%token
-       CALL H5Otoken_cmp_f(loc_id, oinfo_f%token, token_c, cmp_value, ierr);
+       CALL H5Otoken_cmp_f(loc_id, oinfo_f%token, token_c, cmp_value, ierr)
        IF( (ierr .EQ. -1) .OR. (cmp_value .NE. 0) ) THEN
           status = -1
           RETURN
@@ -239,25 +252,24 @@ CONTAINS
     ENDIF
 
     ! Check H5Oget_info_by_name_f; if partial field values were filled correctly
-    CALL H5Oget_info_by_name_f(group_id, name2, oinfo_f, ierr);
+    CALL H5Oget_info_by_name_f(group_id, name2, oinfo_f, ierr)
     visit_obj_cb =  compare_h5o_info_t( group_id, oinfo_f, oinfo_c, op_data%field, .TRUE. )
     IF(visit_obj_cb.EQ.-1) RETURN
 
     ! Check H5Oget_info_by_name_f, only check field values
-    CALL H5Oget_info_by_name_f(group_id, name2, oinfo_f, ierr, fields = op_data%field);
+    CALL H5Oget_info_by_name_f(group_id, name2, oinfo_f, ierr, fields = op_data%field)
     visit_obj_cb =  compare_h5o_info_t(group_id, oinfo_f, oinfo_c, op_data%field, .FALSE. )
     IF(visit_obj_cb.EQ.-1) RETURN
-
 
     IF(op_data%idx.EQ.1)THEN
 
        ! Check H5Oget_info_f, only check field values
-       CALL H5Oget_info_f(group_id, oinfo_f, ierr, fields = op_data%field);
+       CALL H5Oget_info_f(group_id, oinfo_f, ierr, fields = op_data%field)
        visit_obj_cb =  compare_h5o_info_t(group_id, oinfo_f, oinfo_c, op_data%field, .FALSE.  )
        IF(visit_obj_cb.EQ.-1) RETURN
 
        ! Check H5Oget_info_f; if partial field values where filled correctly
-       CALL H5Oget_info_f(group_id, oinfo_f, ierr);
+       CALL H5Oget_info_f(group_id, oinfo_f, ierr)
        visit_obj_cb =  compare_h5o_info_t(group_id, oinfo_f, oinfo_c, op_data%field, .TRUE.  )
        IF(visit_obj_cb.EQ.-1) RETURN
 
@@ -272,6 +284,10 @@ END MODULE visit_cb
 
 MODULE TH5O_F03
 
+  USE HDF5
+  USE TH5_MISC
+  USE ISO_C_BINDING
+
 CONTAINS
 !***************************************************************
 !**
@@ -281,9 +297,6 @@ CONTAINS
 
 SUBROUTINE test_h5o_refcount(total_error)
 
-  USE HDF5
-  USE TH5_MISC
-  USE ISO_C_BINDING
   IMPLICIT NONE
 
   INTEGER, INTENT(INOUT) :: total_error
@@ -420,11 +433,8 @@ END SUBROUTINE test_h5o_refcount
 
 SUBROUTINE test_obj_visit(total_error)
 
-  USE HDF5
-  USE TH5_MISC
-
   USE visit_cb
-  USE ISO_C_BINDING
+
   IMPLICIT NONE
 
   INTEGER, INTENT(INOUT) :: total_error
@@ -558,9 +568,6 @@ END SUBROUTINE test_obj_visit
 
 SUBROUTINE test_obj_info(total_error)
 
-  USE HDF5
-  USE TH5_MISC
-  USE ISO_C_BINDING
   IMPLICIT NONE
 
   INTEGER, INTENT(INOUT) :: total_error
@@ -687,7 +694,6 @@ SUBROUTINE test_obj_info(total_error)
      CALL check("h5oget_info_by_idx_f", -1, total_error)
   ENDIF
 
-
   ! Close objects
   CALL h5dclose_f(did, error)
   CALL check("h5dclose_f", error, total_error)
@@ -702,18 +708,11 @@ END SUBROUTINE test_obj_info
 ! Function:    build_visit_file
 !
 ! Purpose:     Build an "interesting" file to use for visiting links & objects
-!
-! Programmer:  M. Scot Breitenfeld
-!              July 12, 2012
-!              NOTE: Adapted from C test.
-!
 !-------------------------------------------------------------------------
 !
 
 SUBROUTINE build_visit_file(fid)
 
-  USE HDF5
-  USE TH5_MISC
   IMPLICIT NONE
 
   INTEGER(hid_t) :: fid                   ! File ID

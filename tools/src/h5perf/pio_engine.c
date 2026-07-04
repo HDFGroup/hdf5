@@ -4,15 +4,11 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-/*
- * Author: Albert Cheng of NCSA, Oct 24, 2001.
- */
 
 #include "hdf5.h"
 
@@ -56,15 +52,15 @@
 #define ELMT_H5_TYPE H5T_NATIVE_UCHAR
 
 #define GOTOERROR(errcode)                                                                                   \
-    {                                                                                                        \
+    do {                                                                                                     \
         ret_code = errcode;                                                                                  \
         goto done;                                                                                           \
-    }
+    } while (0)
 #define ERRMSG(mesg)                                                                                         \
-    {                                                                                                        \
-        HDfprintf(stderr, "Proc %d: ", pio_mpi_rank_g);                                                      \
-        HDfprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n", mesg, (int)__LINE__, __FILE__);   \
-    }
+    do {                                                                                                     \
+        fprintf(stderr, "Proc %d: ", pio_mpi_rank_g);                                                        \
+        fprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n", mesg, (int)__LINE__, __FILE__);     \
+    } while (0)
 
 /* verify: if val is false (0), print mesg. */
 #define VRFY(val, mesg)                                                                                      \
@@ -76,12 +72,6 @@
     } while (0)
 
 /* POSIX I/O macros */
-#ifdef H5_HAVE_WIN32_API
-/* Can't link against the library, so this test will use the older, non-Unicode
- * _open() call on Windows.
- */
-#define HDopen(S, F, ...) _open(S, F | _O_BINARY, __VA_ARGS__)
-#endif /* H5_HAVE_WIN32_API */
 #define POSIXCREATE(fn)     HDopen(fn, O_CREAT | O_TRUNC | O_RDWR, 0600)
 #define POSIXOPEN(fn, F)    HDopen(fn, F, 0600)
 #define POSIXCLOSE(F)       HDclose(F)
@@ -132,9 +122,6 @@ static off_t  sqrto(off_t);
  * Function:        do_pio
  * Purpose:         PIO Engine where Parallel IO are executed.
  * Return:          results
- * Programmer:      Albert Cheng, Bill Wendling 2001/12/12
- * Modifications:
- *  Added 2D testing (Christian Chilan, 10. August 2005)
  */
 results
 do_pio(parameters param)
@@ -168,7 +155,7 @@ do_pio(parameters param)
     /* IO type */
     iot = param.io_type;
 
-    if (NULL == (fname = HDcalloc(FILENAME_MAX, sizeof(char))))
+    if (NULL == (fname = calloc(FILENAME_MAX, sizeof(char))))
         GOTOERROR(FAIL);
 
     switch (iot) {
@@ -186,7 +173,7 @@ do_pio(parameters param)
             break;
         default:
             /* unknown request */
-            HDfprintf(stderr, "Unknown IO type request (%d)\n", iot);
+            fprintf(stderr, "Unknown IO type request (%d)\n", iot);
             GOTOERROR(FAIL);
     }
 
@@ -205,66 +192,66 @@ do_pio(parameters param)
     }
 
     if (param.num_files < 0) {
-        HDfprintf(stderr, "number of files must be >= 0 (%ld)\n", param.num_files);
+        fprintf(stderr, "number of files must be >= 0 (%ld)\n", param.num_files);
         GOTOERROR(FAIL);
     }
 
     if (ndsets < 0) {
-        HDfprintf(stderr, "number of datasets per file must be >= 0 (%ld)\n", ndsets);
+        fprintf(stderr, "number of datasets per file must be >= 0 (%ld)\n", ndsets);
         GOTOERROR(FAIL);
     }
 
     if (param.num_procs <= 0) {
-        HDfprintf(stderr, "maximum number of process to use must be > 0 (%d)\n", param.num_procs);
+        fprintf(stderr, "maximum number of process to use must be > 0 (%d)\n", param.num_procs);
         GOTOERROR(FAIL);
     }
 
     /* Validate transfer buffer size & block size*/
     if (blk_size <= 0) {
-        HDfprintf(stderr, "Transfer block size (%zu) must be > 0\n", blk_size);
+        fprintf(stderr, "Transfer block size (%zu) must be > 0\n", blk_size);
         GOTOERROR(FAIL);
     }
     if (buf_size <= 0) {
-        HDfprintf(stderr, "Transfer buffer size (%zu) must be > 0\n", buf_size);
+        fprintf(stderr, "Transfer buffer size (%zu) must be > 0\n", buf_size);
         GOTOERROR(FAIL);
     }
     if ((buf_size % blk_size) != 0) {
-        HDfprintf(stderr,
-                  "Transfer buffer size (%zu) must be a multiple of the "
-                  "interleaved I/O block size (%zu)\n",
-                  buf_size, blk_size);
+        fprintf(stderr,
+                "Transfer buffer size (%zu) must be a multiple of the "
+                "interleaved I/O block size (%zu)\n",
+                buf_size, blk_size);
         GOTOERROR(FAIL);
     }
     if ((snbytes % pio_mpi_nprocs_g) != 0) {
-        HDfprintf(stderr,
-                  "Dataset size (%lld) must be a multiple of the "
-                  "number of processes (%d)\n",
-                  (long long)snbytes, pio_mpi_nprocs_g);
+        fprintf(stderr,
+                "Dataset size (%lld) must be a multiple of the "
+                "number of processes (%d)\n",
+                (long long)snbytes, pio_mpi_nprocs_g);
         GOTOERROR(FAIL);
     }
 
     if (!param.dim2d) {
         if (((size_t)(snbytes / pio_mpi_nprocs_g) % buf_size) != 0) {
-            HDfprintf(stderr,
-                      "Dataset size/process (%lld) must be a multiple of the "
-                      "transfer buffer size (%zu)\n",
-                      (long long)(snbytes / pio_mpi_nprocs_g), buf_size);
+            fprintf(stderr,
+                    "Dataset size/process (%lld) must be a multiple of the "
+                    "transfer buffer size (%zu)\n",
+                    (long long)(snbytes / pio_mpi_nprocs_g), buf_size);
             GOTOERROR(FAIL);
         }
     }
     else {
         if (((size_t)snbytes % buf_size) != 0) {
-            HDfprintf(stderr,
-                      "Dataset side size (%lld) must be a multiple of the "
-                      "transfer buffer size (%zu)\n",
-                      (long long)snbytes, buf_size);
+            fprintf(stderr,
+                    "Dataset side size (%lld) must be a multiple of the "
+                    "transfer buffer size (%zu)\n",
+                    (long long)snbytes, buf_size);
             GOTOERROR(FAIL);
         }
     }
 
     /* Allocate transfer buffer */
     if ((buffer = malloc(bsize)) == NULL) {
-        HDfprintf(stderr, "malloc for transfer buffer size (%zu) failed\n", bsize);
+        fprintf(stderr, "malloc for transfer buffer size (%zu) failed\n", bsize);
         GOTOERROR(FAIL);
     }
 
@@ -275,7 +262,7 @@ do_pio(parameters param)
 
         /* output all of the times for all iterations */
         if (myrank == 0)
-            HDfprintf(output, "Timer details:\n");
+            fprintf(output, "Timer details:\n");
     }
 
     for (nf = 1; nf <= param.num_files; nf++) {
@@ -285,10 +272,10 @@ do_pio(parameters param)
         /* Open file for write */
         char base_name[256];
 
-        HDsnprintf(base_name, sizeof(base_name), "#pio_tmp_%lu", nf);
+        snprintf(base_name, sizeof(base_name), "#pio_tmp_%lu", nf);
         pio_create_filename(iot, base_name, fname, FILENAME_MAX);
         if (pio_debug_level > 0)
-            HDfprintf(output, "rank %d: data filename=%s\n", pio_mpi_rank_g, fname);
+            fprintf(output, "rank %d: data filename=%s\n", pio_mpi_rank_g, fname);
 
         /* Need barrier to make sure everyone starts at the same time */
         MPI_Barrier(pio_comm_g);
@@ -368,8 +355,8 @@ done:
     }
 
     /* release generic resources */
-    HDfree(buffer);
-    HDfree(fname);
+    free(buffer);
+    free(fname);
     res.ret_code = ret_code;
     return res;
 }
@@ -381,8 +368,6 @@ done:
  *              doing. Also, place in the /tmp/{$USER,$LOGIN} directory if
  *              USER or LOGIN are specified in the environment.
  * Return:      Pointer to filename or NULL
- * Programmer:  Bill Wendling, 21. November 2001
- * Modifications:
  */
 static char *
 pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t size)
@@ -394,7 +379,7 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
     if (!base_name || !fullname || size < 1)
         return NULL;
 
-    HDmemset(fullname, 0, size);
+    memset(fullname, 0, size);
 
     switch (iot) {
         case POSIXIO:
@@ -411,7 +396,7 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
     }
 
     /* First use the environment variable and then try the constant */
-    prefix = HDgetenv("HDF5_PARAPREFIX");
+    prefix = getenv("HDF5_PARAPREFIX");
 
 #ifdef HDF5_PARAPREFIX
     if (!prefix)
@@ -425,8 +410,8 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
          * directory instead. */
         char *user, *login, *subdir;
 
-        user   = HDgetenv("USER");
-        login  = HDgetenv("LOGIN");
+        user   = getenv("USER");
+        login  = getenv("LOGIN");
         subdir = (user ? user : login);
 
         if (subdir) {
@@ -440,45 +425,48 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
         }
         else {
             /* We didn't append the prefix yet */
-            HDstrncpy(fullname, prefix, size);
+            strncpy(fullname, prefix, size);
             fullname[size - 1] = '\0';
         }
 
-        if ((HDstrlen(fullname) + HDstrlen(base_name) + 1) < size) {
+        {
             /* Append the base_name with a slash first. Multiple slashes are
              * handled below. */
             h5_stat_t buf;
+            size_t    cur_len;
+            int       nchars;
 
+            memset(&buf, 0, sizeof(h5_stat_t));
             if (HDstat(fullname, &buf) < 0)
                 /* The directory doesn't exist just yet */
                 if (HDmkdir(fullname, (mode_t)0755) < 0 && errno != EEXIST) {
                     /* We couldn't make the "/tmp/${USER,LOGIN}" subdirectory.
                      * Default to PREFIX's original prefix value. */
-                    HDstrcpy(fullname, prefix);
+                    snprintf(fullname, size, "%s", prefix);
                 }
 
-            HDstrcat(fullname, "/");
-            HDstrcat(fullname, base_name);
-        }
-        else {
-            /* Buffer is too small */
-            return NULL;
+            cur_len = strlen(fullname);
+            nchars  = snprintf(fullname + cur_len, size - cur_len, "/%s", base_name);
+            if (nchars < 0 || (size_t)nchars >= size - cur_len)
+                return NULL;
         }
     }
-    else if (HDstrlen(base_name) >= size) {
+    else if (strlen(base_name) >= size) {
         /* Buffer is too small */
         return NULL;
     }
     else {
-        HDstrcpy(fullname, base_name);
+        snprintf(fullname, size, "%s", base_name);
     }
 
     /* Append a suffix */
     if (suffix) {
-        if (HDstrlen(fullname) + HDstrlen(suffix) >= size)
+        size_t cur_len = strlen(fullname);
+
+        if (cur_len + strlen(suffix) >= size)
             return NULL;
 
-        HDstrcat(fullname, suffix);
+        snprintf(fullname + cur_len, size - cur_len, "%s", suffix);
     }
 
     /* Remove any double slashes in the filename */
@@ -496,9 +484,6 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
  * Function:        do_write
  * Purpose:         Write the required amount of data to the file.
  * Return:          SUCCESS or FAIL
- * Programmer:      Albert Cheng, Bill Wendling, 2001/12/13
- * Modifications:
- *  Added 2D testing (Christian Chilan, 10. August 2005)
  */
 static herr_t
 do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbytes, size_t buf_size,
@@ -606,7 +591,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
 
         /* Prepare buffer for verifying data */
         if (parms->verify)
-            HDmemset(buffer, pio_mpi_rank_g + 1, buf_size * blk_size);
+            memset(buffer, pio_mpi_rank_g + 1, buf_size * blk_size);
     } /* end else */
 
     /* Calculate the total number of bytes (bytes_count) to be
@@ -626,17 +611,17 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
     if (pio_debug_level >= 4) {
         HDprint_rank(output);
         if (!parms->dim2d) {
-            HDfprintf(output,
-                      "Debug(do_write): "
-                      "buf_size=%zu, bytes_begin=%lld, bytes_count=%lld\n",
-                      buf_size, (long long)bytes_begin[0], (long long)bytes_count);
+            fprintf(output,
+                    "Debug(do_write): "
+                    "buf_size=%zu, bytes_begin=%lld, bytes_count=%lld\n",
+                    buf_size, (long long)bytes_begin[0], (long long)bytes_count);
         }
         else {
-            HDfprintf(output,
-                      "Debug(do_write): "
-                      "linear buf_size=%zu, bytes_begin=(%lld,%lld), bytes_count=%lld\n",
-                      buf_size * blk_size, (long long)bytes_begin[0], (long long)bytes_begin[1],
-                      (long long)bytes_count);
+            fprintf(output,
+                    "Debug(do_write): "
+                    "linear buf_size=%zu, bytes_begin=(%lld,%lld), bytes_count=%lld\n",
+                    buf_size * blk_size, (long long)bytes_begin[0], (long long)bytes_begin[1],
+                    (long long)bytes_count);
         }
     }
 
@@ -836,7 +821,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
             /* Create the dataset transfer property list */
             h5dxpl = H5Pcreate(H5P_DATASET_XFER);
             if (h5dxpl < 0) {
-                HDfprintf(stderr, "HDF5 Property List Create failed\n");
+                fprintf(stderr, "HDF5 Property List Create failed\n");
                 GOTOERROR(FAIL);
             }
 
@@ -844,7 +829,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
             if (parms->collective) {
                 hrc = H5Pset_dxpl_mpio(h5dxpl, H5FD_MPIO_COLLECTIVE);
                 if (hrc < 0) {
-                    HDfprintf(stderr, "HDF5 Property List Set failed\n");
+                    fprintf(stderr, "HDF5 Property List Set failed\n");
                     GOTOERROR(FAIL);
                 } /* end if */
             }     /* end if */
@@ -869,7 +854,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
             case PHDF5:
                 h5dcpl = H5Pcreate(H5P_DATASET_CREATE);
                 if (h5dcpl < 0) {
-                    HDfprintf(stderr, "HDF5 Property List Create failed\n");
+                    fprintf(stderr, "HDF5 Property List Create failed\n");
                     GOTOERROR(FAIL);
                 }
                 /* 1D dataspace */
@@ -880,7 +865,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
                         h5dims[0] = blk_size;
                         hrc       = H5Pset_chunk(h5dcpl, 1, h5dims);
                         if (hrc < 0) {
-                            HDfprintf(stderr, "HDF5 Property List Set failed\n");
+                            fprintf(stderr, "HDF5 Property List Set failed\n");
                             GOTOERROR(FAIL);
                         } /* end if */
                     }     /* end if */
@@ -893,24 +878,24 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
                         h5dims[1] = blk_size;
                         hrc       = H5Pset_chunk(h5dcpl, 2, h5dims);
                         if (hrc < 0) {
-                            HDfprintf(stderr, "HDF5 Property List Set failed\n");
+                            fprintf(stderr, "HDF5 Property List Set failed\n");
                             GOTOERROR(FAIL);
                         } /* end if */
                     }     /* end if */
                 }         /* end else */
 
-                HDsnprintf(dname, sizeof(dname), "Dataset_%ld", ndset);
+                snprintf(dname, sizeof(dname), "Dataset_%ld", ndset);
                 h5ds_id = H5DCREATE(fd->h5fd, dname, ELMT_H5_TYPE, h5dset_space_id, h5dcpl);
 
                 if (h5ds_id < 0) {
-                    HDfprintf(stderr, "HDF5 Dataset Create failed\n");
+                    fprintf(stderr, "HDF5 Dataset Create failed\n");
                     GOTOERROR(FAIL);
                 }
 
                 hrc = H5Pclose(h5dcpl);
                 /* verifying the close of the dcpl */
                 if (hrc < 0) {
-                    HDfprintf(stderr, "HDF5 Property List Close failed\n");
+                    fprintf(stderr, "HDF5 Property List Close failed\n");
                     GOTOERROR(FAIL);
                 }
                 break;
@@ -1412,7 +1397,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
             hrc = H5Dclose(h5ds_id);
 
             if (hrc < 0) {
-                HDfprintf(stderr, "HDF5 Dataset Close failed\n");
+                fprintf(stderr, "HDF5 Dataset Close failed\n");
                 GOTOERROR(FAIL);
             }
 
@@ -1469,7 +1454,7 @@ done:
     if (h5dset_space_id != -1) {
         hrc = H5Sclose(h5dset_space_id);
         if (hrc < 0) {
-            HDfprintf(stderr, "HDF5 Dataset Space Close failed\n");
+            fprintf(stderr, "HDF5 Dataset Space Close failed\n");
             ret_code = FAIL;
         }
         else {
@@ -1480,7 +1465,7 @@ done:
     if (h5mem_space_id != -1) {
         hrc = H5Sclose(h5mem_space_id);
         if (hrc < 0) {
-            HDfprintf(stderr, "HDF5 Memory Space Close failed\n");
+            fprintf(stderr, "HDF5 Memory Space Close failed\n");
             ret_code = FAIL;
         }
         else {
@@ -1491,7 +1476,7 @@ done:
     if (h5dxpl != -1) {
         hrc = H5Pclose(h5dxpl);
         if (hrc < 0) {
-            HDfprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
+            fprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
             ret_code = FAIL;
         }
         else {
@@ -1513,9 +1498,6 @@ sqrto(off_t x)
  * Function:        do_read
  * Purpose:         read the required amount of data from the file.
  * Return:          SUCCESS or FAIL
- * Programmer:      Albert Cheng 2001/12/13
- * Modifications:
- *  Added 2D testing (Christian Chilan, 10. August 2005)
  */
 static herr_t
 do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbytes, size_t buf_size,
@@ -1638,17 +1620,17 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
     if (pio_debug_level >= 4) {
         HDprint_rank(output);
         if (!parms->dim2d) {
-            HDfprintf(output,
-                      "Debug(do_write): "
-                      "buf_size=%zu, bytes_begin=%lld, bytes_count=%lld\n",
-                      buf_size, (long long)bytes_begin[0], (long long)bytes_count);
+            fprintf(output,
+                    "Debug(do_write): "
+                    "buf_size=%zu, bytes_begin=%lld, bytes_count=%lld\n",
+                    buf_size, (long long)bytes_begin[0], (long long)bytes_count);
         }
         else {
-            HDfprintf(output,
-                      "Debug(do_write): "
-                      "linear buf_size=%zu, bytes_begin=(%lld,%lld), bytes_count=%lld\n",
-                      buf_size * blk_size, (long long)bytes_begin[0], (long long)bytes_begin[1],
-                      (long long)bytes_count);
+            fprintf(output,
+                    "Debug(do_write): "
+                    "linear buf_size=%zu, bytes_begin=(%lld,%lld), bytes_count=%lld\n",
+                    buf_size * blk_size, (long long)bytes_begin[0], (long long)bytes_begin[1],
+                    (long long)bytes_count);
         }
     }
 
@@ -1846,7 +1828,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
             /* Create the dataset transfer property list */
             h5dxpl = H5Pcreate(H5P_DATASET_XFER);
             if (h5dxpl < 0) {
-                HDfprintf(stderr, "HDF5 Property List Create failed\n");
+                fprintf(stderr, "HDF5 Property List Create failed\n");
                 GOTOERROR(FAIL);
             }
 
@@ -1854,7 +1836,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
             if (parms->collective) {
                 hrc = H5Pset_dxpl_mpio(h5dxpl, H5FD_MPIO_COLLECTIVE);
                 if (hrc < 0) {
-                    HDfprintf(stderr, "HDF5 Property List Set failed\n");
+                    fprintf(stderr, "HDF5 Property List Set failed\n");
                     GOTOERROR(FAIL);
                 } /* end if */
             }     /* end if */
@@ -1877,10 +1859,10 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
                 break;
 
             case PHDF5:
-                HDsnprintf(dname, sizeof(dname), "Dataset_%ld", ndset);
+                snprintf(dname, sizeof(dname), "Dataset_%ld", ndset);
                 h5ds_id = H5DOPEN(fd->h5fd, dname);
                 if (h5ds_id < 0) {
-                    HDfprintf(stderr, "HDF5 Dataset open failed\n");
+                    fprintf(stderr, "HDF5 Dataset open failed\n");
                     GOTOERROR(FAIL);
                 }
                 break;
@@ -2376,17 +2358,17 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
                         if (++nerror < 20) {
                             /* report at most 20 errors */
                             HDprint_rank(output);
-                            HDfprintf(output,
-                                      "read data error, expected (%d), "
-                                      "got (%d)\n",
-                                      pio_mpi_rank_g + 1, (int)*(ucharptr - 1));
+                            fprintf(output,
+                                    "read data error, expected (%d), "
+                                    "got (%d)\n",
+                                    pio_mpi_rank_g + 1, (int)*(ucharptr - 1));
                         } /* end if */
                     }     /* end if */
                 }         /* end for */
                 if (nerror >= 20) {
                     HDprint_rank(output);
-                    HDfprintf(output, "...");
-                    HDfprintf(output, "total read data errors=%d\n", nerror);
+                    fprintf(output, "...");
+                    fprintf(output, "total read data errors=%d\n", nerror);
                 } /* end if */
             }     /* if (parms->verify) */
 
@@ -2402,7 +2384,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
             hrc = H5Dclose(h5ds_id);
 
             if (hrc < 0) {
-                HDfprintf(stderr, "HDF5 Dataset Close failed\n");
+                fprintf(stderr, "HDF5 Dataset Close failed\n");
                 GOTOERROR(FAIL);
             }
 
@@ -2459,7 +2441,7 @@ done:
     if (h5dset_space_id != -1) {
         hrc = H5Sclose(h5dset_space_id);
         if (hrc < 0) {
-            HDfprintf(stderr, "HDF5 Dataset Space Close failed\n");
+            fprintf(stderr, "HDF5 Dataset Space Close failed\n");
             ret_code = FAIL;
         }
         else {
@@ -2470,7 +2452,7 @@ done:
     if (h5mem_space_id != -1) {
         hrc = H5Sclose(h5mem_space_id);
         if (hrc < 0) {
-            HDfprintf(stderr, "HDF5 Memory Space Close failed\n");
+            fprintf(stderr, "HDF5 Memory Space Close failed\n");
             ret_code = FAIL;
         }
         else {
@@ -2481,7 +2463,7 @@ done:
     if (h5dxpl != -1) {
         hrc = H5Pclose(h5dxpl);
         if (hrc < 0) {
-            HDfprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
+            fprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
             ret_code = FAIL;
         }
         else {
@@ -2496,8 +2478,6 @@ done:
  * Function:    do_fopen
  * Purpose:     Open the specified file.
  * Return:      SUCCESS or FAIL
- * Programmer:  Albert Cheng, Bill Wendling, 2001/12/13
- * Modifications:
  */
 static herr_t
 do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
@@ -2513,7 +2493,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
                 fd->posixfd = POSIXOPEN(fname, O_RDONLY);
 
             if (fd->posixfd < 0) {
-                HDfprintf(stderr, "POSIX File Open failed(%s)\n", fname);
+                fprintf(stderr, "POSIX File Open failed(%s)\n", fname);
                 GOTOERROR(FAIL);
             }
 
@@ -2536,7 +2516,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
                                     &fd->mpifd);
 
                 if (mrc != MPI_SUCCESS) {
-                    HDfprintf(stderr, "MPI File Open failed(%s)\n", fname);
+                    fprintf(stderr, "MPI File Open failed(%s)\n", fname);
                     GOTOERROR(FAIL);
                 }
 
@@ -2544,14 +2524,14 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
                 /*filesize , set size to 0 explicitedly.    */
                 mrc = MPI_File_set_size(fd->mpifd, (MPI_Offset)0);
                 if (mrc != MPI_SUCCESS) {
-                    HDfprintf(stderr, "MPI_File_set_size failed\n");
+                    fprintf(stderr, "MPI_File_set_size failed\n");
                     GOTOERROR(FAIL);
                 }
             }
             else {
                 mrc = MPI_File_open(pio_comm_g, fname, MPI_MODE_RDONLY, h5_io_info_g, &fd->mpifd);
                 if (mrc != MPI_SUCCESS) {
-                    HDfprintf(stderr, "MPI File Open failed(%s)\n", fname);
+                    fprintf(stderr, "MPI File Open failed(%s)\n", fname);
                     GOTOERROR(FAIL);
                 }
             }
@@ -2560,19 +2540,19 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
 
         case PHDF5:
             if ((acc_tpl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
-                HDfprintf(stderr, "HDF5 Property List Create failed\n");
+                fprintf(stderr, "HDF5 Property List Create failed\n");
                 GOTOERROR(FAIL);
             }
 
             /* Set the file driver to the MPI-IO driver */
             if (H5Pset_fapl_mpio(acc_tpl, pio_comm_g, h5_io_info_g) < 0) {
-                HDfprintf(stderr, "HDF5 Property List Set failed\n");
+                fprintf(stderr, "HDF5 Property List Set failed\n");
                 GOTOERROR(FAIL);
             }
 
             /* Set the alignment of objects in HDF5 file */
             if (H5Pset_alignment(acc_tpl, param->h5_thresh, param->h5_align) < 0) {
-                HDfprintf(stderr, "HDF5 Property List Set failed\n");
+                fprintf(stderr, "HDF5 Property List Set failed\n");
                 GOTOERROR(FAIL);
             }
 
@@ -2582,13 +2562,13 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
             else
                 fd->h5fd = H5Fopen(fname, H5F_ACC_RDONLY, acc_tpl);
             if (fd->h5fd < 0) {
-                HDfprintf(stderr, "HDF5 File Create failed(%s)\n", fname);
+                fprintf(stderr, "HDF5 File Create failed(%s)\n", fname);
                 GOTOERROR(FAIL);
             }
 
             /* verifying the close of the acc_tpl */
             if (H5Pclose(acc_tpl) < 0) {
-                HDfprintf(stderr, "HDF5 Property List Close failed\n");
+                fprintf(stderr, "HDF5 Property List Close failed\n");
                 GOTOERROR(FAIL);
             }
 
@@ -2606,8 +2586,6 @@ done:
  * Function:    do_fclose
  * Purpose:     Close the specified file descriptor.
  * Return:      SUCCESS or FAIL
- * Programmer:  Albert Cheng, Bill Wendling, 2001/12/13
- * Modifications:
  */
 static herr_t
 do_fclose(iotype iot, file_descr *fd /*out*/)
@@ -2620,7 +2598,7 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
             rc = POSIXCLOSE(fd->posixfd);
 
             if (rc != 0) {
-                HDfprintf(stderr, "POSIX File Close failed\n");
+                fprintf(stderr, "POSIX File Close failed\n");
                 GOTOERROR(FAIL);
             }
 
@@ -2631,7 +2609,7 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
             mrc = MPI_File_close(&fd->mpifd);
 
             if (mrc != MPI_SUCCESS) {
-                HDfprintf(stderr, "MPI File close failed\n");
+                fprintf(stderr, "MPI File close failed\n");
                 GOTOERROR(FAIL);
             }
 
@@ -2642,7 +2620,7 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
             hrc = H5Fclose(fd->h5fd);
 
             if (hrc < 0) {
-                HDfprintf(stderr, "HDF5 File Close failed\n");
+                fprintf(stderr, "HDF5 File Close failed\n");
                 GOTOERROR(FAIL);
             }
 
@@ -2663,8 +2641,6 @@ done:
  *      Only Proc 0 of the PIO communicator will do the cleanup.
  *      Other processes just return.
  * Return:      void
- * Programmer:  Albert Cheng 2001/12/12
- * Modifications:
  */
 static void
 do_cleanupfile(iotype iot, char *fname)

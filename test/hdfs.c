@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -19,8 +19,6 @@
  *
  *     Demonstrates basic use cases and fapl interaction.
  *
- * Programmer: Jacob Smith
- *             2018-04-23
  */
 
 #include "h5test.h"   /* testing utilities */
@@ -68,9 +66,6 @@
  *         JSVERIFY_NOT()   - long-int inequality check; prints
  *         JSVERIFY_STR()   - string equality check; prints
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *****************************************************************************/
 
 /*----------------------------------------------------------------------------
@@ -95,14 +90,11 @@
  *
  *     *FAILED* at somefile.c:12 in function_name()...
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSFAILED_AT()                                                                                        \
     {                                                                                                        \
-        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                            \
+        printf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                              \
     }
 
 /*----------------------------------------------------------------------------
@@ -122,9 +114,6 @@
  *
  *     Prints a generic "FAILED AT" line to stdout and jumps to `error`,
  *     similar to `TEST_ERROR` in h5test.h
- *
- * Programmer: Jacob Smith
- *             2017-10-23
  *
  *----------------------------------------------------------------------------
  */
@@ -150,9 +139,6 @@
  *     `FAIL_UNLESS( 5 == my_op() )`
  *     However, `JSVERIFY(5, my_op(), "bad return")` may be even clearer.
  *         (see JSVERIFY)
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -184,19 +170,16 @@
  *       ! Expected 425
  *       ! Actual   3
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSERR_LONG(expected, actual, reason)                                                                 \
     {                                                                                                        \
         JSFAILED_AT()                                                                                        \
         if (reason != NULL) {                                                                                \
-            HDprintf("%s\n", (reason));                                                                      \
+            printf("%s\n", (reason));                                                                        \
         }                                                                                                    \
         else {                                                                                               \
-            HDprintf("  ! Expected %ld\n  ! Actual   %ld\n", (long)(expected), (long)(actual));              \
+            printf("  ! Expected %ld\n  ! Actual   %ld\n", (long)(expected), (long)(actual));                \
         }                                                                                                    \
     }
 
@@ -223,9 +206,6 @@
  *     !!! Actual:
  *     not what I expected at all
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSERR_STR(expected, actual, reason)                                                                  \
@@ -233,10 +213,10 @@
         const char *_reason = reason;                                                                        \
         JSFAILED_AT()                                                                                        \
         if (_reason != NULL) {                                                                               \
-            HDprintf("%s\n", _reason);                                                                       \
+            printf("%s\n", _reason);                                                                         \
         }                                                                                                    \
         else {                                                                                               \
-            HDprintf("!!! Expected:\n%s\n!!!Actual:\n%s\n", (expected), (actual));                           \
+            printf("!!! Expected:\n%s\n!!!Actual:\n%s\n", (expected), (actual));                             \
         }                                                                                                    \
     }
 
@@ -252,9 +232,6 @@
  *     If unequal, print failure message
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -275,9 +252,6 @@
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_NOT(expected, actual, reason)                                                               \
@@ -297,13 +271,10 @@
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
-    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                                 \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -317,8 +288,6 @@
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY()
  * See: JSVERIFY documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY(actual, expected, reason)                                                                   \
@@ -330,8 +299,6 @@
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_NOT()
  * See: JSVERIFY_NOT documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_NOT(actual, expected, reason)                                                               \
@@ -343,12 +310,10 @@
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_STR()
  * See: JSVERIFY_STR documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
-    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                                 \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -401,11 +366,6 @@ static H5FD_hdfs_fapl_t default_fa = {
  *     PASSED : 0
  *     FAILED : 1
  *
- * Programmer:  Jacob Smith
- *              2018-04-25
- *
- * Changes:     None.
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -414,8 +374,8 @@ test_fapl_config_validation(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS fapl configuration validation");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    puts("    HDFS VFD is not enabled");
+    fflush(stdout);
     return 0;
 
 #else
@@ -437,7 +397,7 @@ test_fapl_config_validation(void)
      * test-local variables *
      ************************/
 
-    hid_t            fapl_id = -1; /* file access property list ID */
+    hid_t            fapl_id = H5I_INVALID_HID; /* file access property list ID */
     H5FD_hdfs_fapl_t config;
     H5FD_hdfs_fapl_t fa_fetch;
     herr_t           success  = SUCCEED;
@@ -550,7 +510,7 @@ test_fapl_config_validation(void)
              */
             success = H5Pset_fapl_hdfs(fapl_id, &case_ptr->config);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         JSVERIFY(case_ptr->expected, success, case_ptr->msg)
 
@@ -592,7 +552,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     return 1;
 #endif /* H5_HAVE_LIBHDFS */
@@ -611,11 +571,6 @@ error:
  * Return:      Success:        0
  *              Failure:        1
  *
- * Programmer:  Jacob Smith
- *              2018-04-25
- *
- * Changes:     None.
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -624,8 +579,8 @@ test_hdfs_fapl(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS fapl ");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    puts("    HDFS VFD is not enabled");
+    fflush(stdout);
     return 0;
 
 #else
@@ -633,10 +588,10 @@ test_hdfs_fapl(void)
      * test-local variables *
      ************************/
 
-    hid_t fapl_id = -1;             /* file access property list ID */
-    hid_t driver_id = -1;           /* ID for this VFD              */
-    unsigned long driver_flags = 0; /* VFD feature flags            */
-    H5FD_hdfs_fapl_t hdfs_fa_0 = {
+    hid_t            fapl_id      = H5I_INVALID_HID; /* file access property list ID */
+    hid_t            driver_id    = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long    driver_flags = 0;               /* VFD feature flags            */
+    H5FD_hdfs_fapl_t hdfs_fa_0    = {
         1,    /* version*/
         "",   /* node name */
         9000, /* node port */
@@ -678,7 +633,7 @@ error:
     {
         (void)H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 #endif /* H5_HAVE_LIBHDFS */
@@ -698,9 +653,6 @@ error:
  *     PASSED : 0
  *     FAILED : 1
  *
- * Programmer: Jacob Smith
- *             2018-06-07
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -710,8 +662,8 @@ test_vfd_open(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD-level open");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    puts("    HDFS VFD is not enabled");
+    fflush(stdout);
     return 0;
 
 #else
@@ -720,7 +672,7 @@ test_vfd_open(void)
      * test-local macros *
      *********************/
 
-/* selectors for which fapl to use in testcase */
+    /* selectors for which fapl to use in testcase */
 #define FAPL_H5P_DEFAULT  -2
 #define FAPL_UNCONFIGURED -3 /* H5P_FILE_ACCESS */
 #define FAPL_HDFS         -4
@@ -732,10 +684,10 @@ test_vfd_open(void)
     struct test_condition {
         const char *message;
         const char *url;
-        unsigned flags;
-        int which_fapl;
-        haddr_t maxaddr;
-        hbool_t might_use_other_driver;
+        unsigned    flags;
+        int         which_fapl;
+        haddr_t     maxaddr;
+        bool        might_use_other_driver;
     };
 
     /************************
@@ -749,7 +701,7 @@ test_vfd_open(void)
             H5F_ACC_RDONLY,
             FAPL_H5P_DEFAULT,
             MAXADDR,
-            TRUE,
+            true,
         },
         {
             "generic file access property list is invalid",
@@ -757,7 +709,7 @@ test_vfd_open(void)
             H5F_ACC_RDONLY,
             FAPL_UNCONFIGURED,
             MAXADDR,
-            TRUE,
+            true,
         },
         {
             "filename cannot be null",
@@ -765,7 +717,7 @@ test_vfd_open(void)
             H5F_ACC_RDONLY,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "filename cannot be empty",
@@ -773,7 +725,7 @@ test_vfd_open(void)
             H5F_ACC_RDONLY,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "file at filename must exist",
@@ -781,7 +733,7 @@ test_vfd_open(void)
             H5F_ACC_RDONLY,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "read-write flag not supported",
@@ -789,7 +741,7 @@ test_vfd_open(void)
             H5F_ACC_RDWR,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "truncate flag not supported",
@@ -797,7 +749,7 @@ test_vfd_open(void)
             H5F_ACC_TRUNC,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "create flag not supported",
@@ -805,7 +757,7 @@ test_vfd_open(void)
             H5F_ACC_CREAT,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "EXCL flag not supported",
@@ -813,7 +765,7 @@ test_vfd_open(void)
             H5F_ACC_EXCL,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "maxaddr cannot be 0 (caught in `H5FD_open()`)",
@@ -821,14 +773,14 @@ test_vfd_open(void)
             H5F_ACC_RDONLY,
             FAPL_HDFS,
             0,
-            FALSE,
+            false,
         },
     };
-    unsigned i = 0;
+    unsigned i                        = 0;
     unsigned failing_conditions_count = 10;
-    H5FD_t *fd = NULL;
-    hid_t fapl_hdfs = -1;
-    hid_t fapl_unconfigured = -1;
+    H5FD_t  *fd                       = NULL;
+    hid_t    fapl_hdfs                = H5I_INVALID_HID;
+    hid_t    fapl_unconfigured        = H5I_INVALID_HID;
 
     TESTING("HDFS VFD-level open");
 
@@ -846,8 +798,8 @@ test_vfd_open(void)
     /* all the test cases that will _not_ open
      */
     for (i = 0; i < failing_conditions_count; i++) {
-        struct test_condition T = failing_conditions[i];
-        hid_t fapl_id = H5P_DEFAULT;
+        struct test_condition T       = failing_conditions[i];
+        hid_t                 fapl_id = H5P_DEFAULT;
 
         fd = NULL;
 
@@ -859,19 +811,19 @@ test_vfd_open(void)
         }
 
 #if HDFS_TEST_DEBUG
-        HDfprintf(stderr, "testing: %s\n", T.message);
+        fprintf(stderr, "testing: %s\n", T.message);
 #endif /* HDFS_TEST_DEBUG */
 
         H5E_BEGIN_TRY
         {
             fd = H5FDopen(T.url, T.flags, fapl_id, T.maxaddr);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (NULL != fd) {
-            if (TRUE == T.might_use_other_driver && H5FD_HDFS != fd->driver_id) {
-                HDfprintf(stderr, "\n!!!!! WARNING !!!!!\n"
-                                  "    Successful open of file on local system "
-                                  "with non-HDFS VFD.\n");
+            if (true == T.might_use_other_driver && H5FD_HDFS != fd->driver_id) {
+                fprintf(stderr, "\n!!!!! WARNING !!!!!\n"
+                                "    Successful open of file on local system "
+                                "with non-HDFS VFD.\n");
                 JSVERIFY(SUCCEED, H5FDclose(fd), "unable to close errant open");
                 fd = NULL;
             }
@@ -884,7 +836,7 @@ test_vfd_open(void)
     FAIL_IF(NULL != fd) /* sanity check */
 
 #if HDFS_TEST_DEBUG
-    HDfprintf(stderr, "nominal open\n");
+    fprintf(stderr, "nominal open\n");
 #endif /* HDFS_TEST_DEBUG */
 
     /* finally, show that a file can be opened
@@ -897,7 +849,7 @@ test_vfd_open(void)
      ************/
 
 #if HDFS_TEST_DEBUG
-    HDfprintf(stderr, "teardown...\n");
+    fprintf(stderr, "teardown...\n");
 #endif /* HDFS_TEST_DEBUG */
 
     FAIL_IF(FAIL == H5FDclose(fd))
@@ -930,7 +882,7 @@ error:
             (void)H5Pclose(fapl_unconfigured);
         }
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 
@@ -955,9 +907,6 @@ error:
  *     PASSED : 0
  *     FAILED : 1
  *
- * Programmer: Jacob Smith
- *             2018-06-07
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -966,8 +915,8 @@ test_eof_eoa(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS eof/eoa gets and sets");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    puts("    HDFS VFD is not enabled");
+    fflush(stdout);
     return 0;
 
 #else
@@ -985,7 +934,7 @@ test_eof_eoa(void)
      ************************/
 
     H5FD_t *fd_shakespeare = NULL;
-    hid_t fapl_id = -1;
+    hid_t   fapl_id        = H5I_INVALID_HID;
 
     TESTING("HDFS eof/eoa gets and sets");
 
@@ -1050,7 +999,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     return 1;
@@ -1068,9 +1017,6 @@ error:
  *     Demonstrate a not-obvious constraint by the library, preventing
  *     file read before EoA is set
  *
- * Programmer: Jacob Smith
- *             2018-06-08
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -1079,16 +1025,16 @@ test_H5FDread_without_eoa_set_fails(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD read-eoa temporal coupling library limitation");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    puts("    HDFS VFD is not enabled");
+    fflush(stdout);
     return 0;
 
 #else
 
-    char buffer[HDFS_TEST_MAX_BUF_SIZE];
-    unsigned int i = 0;
-    H5FD_t *file_shakespeare = NULL;
-    hid_t fapl_id = -1;
+    char         buffer[HDFS_TEST_MAX_BUF_SIZE];
+    unsigned int i                = 0;
+    H5FD_t      *file_shakespeare = NULL;
+    hid_t        fapl_id          = H5I_INVALID_HID;
 
     TESTING("HDFS VFD read-eoa temporal coupling library limitation");
 
@@ -1116,9 +1062,10 @@ test_H5FDread_without_eoa_set_fails(void)
      * TEST *
      ********/
 
-    H5E_BEGIN_TRY{/* mute stack trace on expected failure */
-                  JSVERIFY(FAIL, H5FDread(file_shakespeare, H5FD_MEM_DRAW, H5P_DEFAULT, 1200699, 102, buffer),
-                           "cannot read before eoa is set")} H5E_END_TRY;
+    H5E_BEGIN_TRY
+    {/* mute stack trace on expected failure */
+     JSVERIFY(FAIL, H5FDread(file_shakespeare, H5FD_MEM_DRAW, H5P_DEFAULT, 1200699, 102, buffer),
+              "cannot read before eoa is set")} H5E_END_TRY
     for (i = 0; i < HDFS_TEST_MAX_BUF_SIZE; i++) {
         JSVERIFY(0, (unsigned)buffer[i], "buffer was modified by write!")
     }
@@ -1150,7 +1097,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     return 1;
@@ -1170,9 +1117,6 @@ error:
  *     PASSED : 0
  *     FAILED : 1
  *
- * Programmer: Jacob Smith
- *             2018-06-08
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -1181,8 +1125,8 @@ test_read(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD read/range-gets");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    puts("    HDFS VFD is not enabled");
+    fflush(stdout);
     return 0;
 
 #else
@@ -1196,10 +1140,10 @@ test_read(void)
      *************************/
     struct testcase {
         const char *message;  /* purpose of test case */
-        haddr_t eoa_set;      /* set file EOA to this prior to read */
-        size_t addr;          /* offset of read in file */
-        size_t len;           /* length of read in file */
-        herr_t success;       /* expected return value of read function */
+        haddr_t     eoa_set;  /* set file EOA to this prior to read */
+        size_t      addr;     /* offset of read in file */
+        size_t      len;      /* length of read in file */
+        herr_t      success;  /* expected return value of read function */
         const char *expected; /* expected contents of buffer; failure ignores */
     };
 
@@ -1256,14 +1200,14 @@ test_read(void)
             NULL,
         },
     };
-    unsigned testcase_count = 6;
-    unsigned test_i = 0;
+    unsigned        testcase_count = 6;
+    unsigned        test_i         = 0;
     struct testcase test;
-    herr_t open_return = FAIL;
-    char buffer[HDFS_TEST_MAX_BUF_SIZE];
-    unsigned int i = 0;
-    H5FD_t *file_raven = NULL;
-    hid_t fapl_id = -1;
+    herr_t          open_return = FAIL;
+    char            buffer[HDFS_TEST_MAX_BUF_SIZE];
+    unsigned int    i          = 0;
+    H5FD_t         *file_raven = NULL;
+    hid_t           fapl_id    = H5I_INVALID_HID;
 
     TESTING("HDFS VFD read/range-gets");
 
@@ -1300,7 +1244,7 @@ test_read(void)
          * per-test setup *
          * -------------- */
 
-        test = cases[test_i];
+        test        = cases[test_i];
         open_return = FAIL;
 
         FAIL_IF(HDFS_TEST_MAX_BUF_SIZE < test.len) /* buffer too small! */
@@ -1320,7 +1264,7 @@ test_read(void)
         {
             open_return = H5FDread(file_raven, H5FD_MEM_DRAW, H5P_DEFAULT, test.addr, test.len, buffer);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         JSVERIFY(test.success, open_return, test.message)
 
@@ -1357,7 +1301,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     return 1;
@@ -1380,13 +1324,6 @@ error:
  *     PASSED : 0
  *     FAILED : 1
  *
- * Programmer: Jacob Smith
- *             2017-11-06
- *
- * Changes:
- *     + modify from S3VFD codebase to HDFS; Minor changes, mostly.
- *         + Jacob Smith 2018-06-08
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -1395,8 +1332,8 @@ test_noops_and_autofails(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD always-fail and no-op routines");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    puts("    HDFS VFD is not enabled");
+    fflush(stdout);
     return 0;
 
 #else
@@ -1413,8 +1350,8 @@ test_noops_and_autofails(void)
      * test-local variables *
      ************************/
 
-    hid_t fapl_id = -1;
-    H5FD_t *file = NULL;
+    hid_t      fapl_id  = H5I_INVALID_HID;
+    H5FD_t    *file     = NULL;
     const char data[36] = "The Force shall be with you, always";
 
     TESTING("HDFS VFD always-fail and no-op routines");
@@ -1440,13 +1377,15 @@ test_noops_and_autofails(void)
 
     /* auto-fail calls to write and truncate
      */
-    H5E_BEGIN_TRY{JSVERIFY(FAIL, H5FDwrite(file, H5FD_MEM_DRAW, H5P_DEFAULT, 1000, 35, data),
-                           "write must fail")} H5E_END_TRY;
+    H5E_BEGIN_TRY
+    {JSVERIFY(FAIL, H5FDwrite(file, H5FD_MEM_DRAW, H5P_DEFAULT, 1000, 35, data),
+              "write must fail")} H5E_END_TRY
 
-    H5E_BEGIN_TRY{JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, FALSE), "truncate must fail")} H5E_END_TRY;
+    H5E_BEGIN_TRY
+    {JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, false), "truncate must fail")} H5E_END_TRY
 
-    H5E_BEGIN_TRY{
-        JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, TRUE), "truncate must fail (closing)")} H5E_END_TRY;
+    H5E_BEGIN_TRY
+    {JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, true), "truncate must fail (closing)")} H5E_END_TRY
 
     /************
      * TEARDOWN *
@@ -1472,7 +1411,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     if (file != NULL) {
         (void)H5FDclose(file);
@@ -1497,9 +1436,6 @@ error:
  *     PASSED : 0
  *     FAILED : 1
  *
- * Programmer: Jacob Smith
- *             2017-11-06
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -1507,7 +1443,7 @@ test_cmp(void)
 {
     TESTING("HDFS cmp (comparison)");
     SKIPPED();
-    HDfprintf(stderr, "    TODO: Distinct valid fapls to open the same file.\n");
+    fprintf(stderr, "    TODO: Distinct valid fapls to open the same file.\n");
 
     return 0;
 
@@ -1526,13 +1462,6 @@ test_cmp(void)
  *     PASSED : 0
  *     FAILED : 1
  *
- * Programmer: Jacob Smith
- *             2017-11-07
- *
- * Changes:
- *     + modify from S3VFD codebase to HDFS; Minor changes, mostly.
- *         + Jacob Smith 2018-06-08
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -1541,8 +1470,8 @@ test_H5F_integration(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS file access through HD5F library (H5F API)");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    puts("    HDFS VFD is not enabled");
+    fflush(stdout);
     return 0;
 
 #else
@@ -1559,8 +1488,8 @@ test_H5F_integration(void)
      * test-local variables *
      ************************/
 
-    hid_t file = -1;
-    hid_t fapl_id = -1;
+    hid_t file    = H5I_INVALID_HID;
+    hid_t fapl_id = H5I_INVALID_HID;
 
     TESTING("HDFS file access through HD5F library (H5F API)");
 
@@ -1578,12 +1507,13 @@ test_H5F_integration(void)
 
     /* Read-Write Open access is not allowed with this file driver.
      */
-    H5E_BEGIN_TRY{FAIL_IF(0 <= H5Fopen(filename_example_h5, H5F_ACC_RDWR, fapl_id))} H5E_END_TRY;
+    H5E_BEGIN_TRY
+    {FAIL_IF(0 <= H5Fopen(filename_example_h5, H5F_ACC_RDWR, fapl_id))} H5E_END_TRY
 
     /* H5Fcreate() is not allowed with this file driver.
      */
-    H5E_BEGIN_TRY{
-        FAIL_IF(0 <= H5Fcreate(filename_missing, H5F_ACC_RDONLY, H5P_DEFAULT, fapl_id))} H5E_END_TRY;
+    H5E_BEGIN_TRY
+    {FAIL_IF(0 <= H5Fcreate(filename_missing, H5F_ACC_RDONLY, H5P_DEFAULT, fapl_id))} H5E_END_TRY
 
     /* Successful open.
      */
@@ -1609,8 +1539,8 @@ error:
      ***********/
 
 #if HDFS_TEST_DEBUG
-    HDprintf("\nerror!");
-    HDfflush(stdout);
+    printf("\nerror!");
+    fflush(stdout);
 #endif /* HDFS_TEST_DEBUG */
 
     if (fapl_id >= 0) {
@@ -1618,7 +1548,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     if (file > 0) {
         (void)H5Fclose(file);
@@ -1639,9 +1569,6 @@ error:
  * Return:      Success: 0
  *              Failure: 1
  *
- * Programmer:  Jacob Smith
- *              2017-10-23
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1657,19 +1584,19 @@ main(void)
     static char hdfs_namenode_name[HDFS_NAMENODE_NAME_MAX_SIZE] = "";
     const char *hdfs_namenode_name_env                          = NULL;
 
-    hdfs_namenode_name_env = HDgetenv("HDFS_TEST_NAMENODE_NAME");
+    hdfs_namenode_name_env = getenv("HDFS_TEST_NAMENODE_NAME");
     if (hdfs_namenode_name_env == NULL || hdfs_namenode_name_env[0] == '\0') {
-        HDstrncpy(hdfs_namenode_name, "localhost", HDFS_NAMENODE_NAME_MAX_SIZE);
+        strncpy(hdfs_namenode_name, "localhost", HDFS_NAMENODE_NAME_MAX_SIZE);
     }
     else {
-        HDstrncpy(/* TODO: error-check? */
-                  default_fa.namenode_name, hdfs_namenode_name_env, HDFS_NAMENODE_NAME_MAX_SIZE);
+        strncpy(/* TODO: error-check? */
+                default_fa.namenode_name, hdfs_namenode_name_env, HDFS_NAMENODE_NAME_MAX_SIZE);
     }
 #endif /* H5_HAVE_LIBHDFS */
 
-    h5_reset();
+    h5_test_init();
 
-    HDprintf("Testing hdfs VFD functionality.\n");
+    printf("Testing hdfs VFD functionality.\n");
 
     nerrors += test_fapl_config_validation();
     nerrors += test_hdfs_fapl();
@@ -1682,11 +1609,11 @@ main(void)
     nerrors += test_H5F_integration();
 
     if (nerrors > 0) {
-        HDprintf("***** %d hdfs TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        printf("***** %d hdfs TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
         nerrors = 1;
     }
     else {
-        HDprintf("All hdfs tests passed.\n");
+        printf("All hdfs tests passed.\n");
     }
     return nerrors; /* 0 if no errors, 1 if any errors */
 

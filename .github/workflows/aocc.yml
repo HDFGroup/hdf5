@@ -1,0 +1,110 @@
+name: hdf5 dev PAR aocc ompi
+
+# Triggers the workflow on a call from another workflow
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+jobs:
+  aocc_build_and_test:
+    name: "aocc ${{ inputs.build_mode }}"
+    runs-on: ubuntu-latest
+    env:
+      AOCCVERDOT: "5.1.0"
+      AOCCVERDASH: "5-1"
+      MPIVERDOT: "5.0.9"
+      #MPIVERUND: Change is needed in the lines below.
+
+    steps:
+      - name: Get Sources
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Install Dependencies
+        shell: bash
+        run: |
+          sudo apt update
+          sudo apt install -y libaec-dev ninja-build
+          sudo apt install -y doxygen libncurses-dev libquadmath0 libstdc++6 libxml2
+          sudo apt install -y zlib1g-dev libcurl4-openssl-dev libjpeg-dev wget curl bzip2
+          sudo apt install -y m4 flex bison cmake libzip-dev openssl build-essential
+
+      - name: Install ${{ env.AOCCVERDOT }} AOCC
+        shell: bash
+        run: |
+          wget https://download.amd.com/developer/eula/aocc/aocc-${{ env.AOCCVERDASH }}/aocc-compiler-${{ env.AOCCVERDOT }}.tar
+          tar -xvf aocc-compiler-${{ env.AOCCVERDOT }}.tar
+          cd aocc-compiler-${{ env.AOCCVERDOT }}
+          bash install.sh
+          source $GITHUB_WORKSPACE/setenv_AOCC.sh
+          which clang
+          which flang
+          clang -v
+
+      - name: Cache OpenMPI ${{ env.MPIVERDOT }} installation
+        id: cache-openmpi-5_0_7
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v4
+        with:
+          path: ${{ github.workspace }}/openmpi-${{ env.MPIVERDOT }}-install
+          key: ${{ runner.os }}-${{ runner.arch }}-openmpi-5_0_7-cache
+
+      - name: Install OpenMPI ${{ env.MPIVERDOT }}
+        if: ${{ steps.cache-openmpi-5_0_7.outputs.cache-hit != 'true' }}
+        run: |
+          export LD_LIBRARY_PATH=$GITHUB_WORKSPACE/aocc-compiler-${{ env.AOCCVERDOT }}/lib:/usr/local/lib
+          wget https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-${{ env.MPIVERDOT }}.tar.gz
+          tar zxvf openmpi-${{ env.MPIVERDOT }}.tar.gz
+          cd openmpi-${{ env.MPIVERDOT }}
+          ./configure CC=$GITHUB_WORKSPACE/aocc-compiler-${{ env.AOCCVERDOT }}/bin/clang FC=$GITHUB_WORKSPACE/aocc-compiler-${{ env.AOCCVERDOT }}/bin/flang --prefix=$GITHUB_WORKSPACE/openmpi-${{ env.MPIVERDOT }}-install
+          make
+          make install
+
+      - name: Configure
+        shell: bash
+        run: |
+          export LD_LIBRARY_PATH=$GITHUB_WORKSPACE/aocc-compiler-${{ env.AOCCVERDOT }}/lib:$GITHUB_WORKSPACE/openmpi-${{ env.MPIVERDOT }}-install/lib:/usr/local/lib
+          export LD_RUN_PATH=$GITHUB_WORKSPACE/aocc-compiler-${{ env.AOCCVERDOT }}/lib:$GITHUB_WORKSPACE/openmpi-${{ env.MPIVERDOT }}-install/lib:/usr/local/lib
+          export PATH=$GITHUB_WORKSPACE/openmpi-${{ env.MPIVERDOT }}-install/bin:/usr/local/bin:$PATH
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          CC=mpicc cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+          -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
+          -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
+          -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+          -DHDF5_ENABLE_SUBFILING_VFD:BOOL=ON \
+          -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+          -DLIBAEC_USE_LOCALCONTENT=OFF \
+          -DZLIB_USE_LOCALCONTENT=OFF \
+          -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+          -DHDF5_BUILD_JAVA:BOOL=OFF \
+          -DMPIEXEC_MAX_NUMPROCS:STRING="2" \
+          $GITHUB_WORKSPACE
+          #cat src/libhdf5.settings
+
+      - name: Build
+        shell: bash
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Run Tests
+        shell: bash
+        run: |
+          ctest . -E MPI_TEST --parallel 2 -C ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Run Parallel Tests
+        shell: bash
+        run: |
+          ctest . -R MPI_TEST -E "_by_chunk|_by_pattern" -C ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build

@@ -5,7 +5,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -21,7 +21,7 @@ namespace H5 {
     wrappers for the HDF5 object create property list.
 */
 //  Inheritance: PropList -> IdComponent
-class H5_DLLCPP ObjCreatPropList : public PropList {
+class H5CPP_DLL ObjCreatPropList : public PropList {
   public:
     ///\brief Default object creation property list.
     static const ObjCreatPropList &DEFAULT;
@@ -56,7 +56,7 @@ class H5_DLLCPP ObjCreatPropList : public PropList {
     ObjCreatPropList(const hid_t plist_id);
 
     // Noop destructor
-    virtual ~ObjCreatPropList() override;
+    virtual ~ObjCreatPropList() override = default;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 

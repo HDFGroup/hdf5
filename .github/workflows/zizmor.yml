@@ -1,0 +1,55 @@
+name: zizmor
+
+# Static security analysis for GitHub Actions workflows.
+# Findings appear as inline annotations on PRs and in the Security tab.
+# Runs zizmor directly via pip to avoid a third-party action dependency.
+
+on:
+  push:
+    branches: [develop]
+    paths: ['.github/**']
+  pull_request:
+    branches: [develop]
+    paths: ['.github/**']
+
+permissions: {}
+
+jobs:
+  zizmor:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - run: |
+          echo 'zizmor==1.25.2 --hash=sha256:c4246f1344d8dbeffc044d7bb11b131773a7db7eb57d9073c45942dfd3543a1f' > /tmp/zizmor-req.txt
+          pip install --require-hashes -r /tmp/zizmor-req.txt
+      - name: Run zizmor
+        run: |
+          # Only scan workflows that have user-facing triggers (workflow_dispatch,
+          # pull_request, push, schedule, release). Pure reusable workflows that
+          # only declare workflow_call are never triggered directly by users, so
+          # template-injection findings against inputs.* in those files are false
+          # positives — inputs come from the trusted calling workflow, not from
+          # external actors.
+          files=()
+          for f in .github/workflows/*.yml .github/workflows/*.yaml; do
+            [ -f "$f" ] || continue
+            if grep -qE '^\s+(workflow_dispatch|pull_request|push|schedule|release)\s*:' "$f"; then
+              files+=("$f")
+            fi
+          done
+          printf 'Scanning %d user-facing workflow files\n' "${#files[@]}"
+          zizmor --format sarif "${files[@]}" > zizmor-results.sarif
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+        if: always()
+        continue-on-error: true
+        with:
+          sarif_file: zizmor-results.sarif
+          category: zizmor

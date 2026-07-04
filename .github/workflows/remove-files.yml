@@ -1,0 +1,63 @@
+name: hdf5 dev remove-files
+
+# Triggers the workflow on a call from another workflow
+on:
+  workflow_call:
+    inputs:
+      use_tag:
+        description: 'Release version tag'
+        type: string
+        required: false
+        default: snapshot
+      use_environ:
+        description: 'Environment to locate files'
+        type: string
+        required: true
+        default: snapshots
+      file_base:
+        description: "The common base name of the source tarballs"
+        required: true
+        type: string
+
+# Minimal permissions to be inherited by any job that doesn't declare its own permissions
+permissions:
+  contents: read
+
+# Previous workflows must pass to get here so tag the commit that created the files
+jobs:
+  PreRelease-delfiles:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.use_environ }}
+    permissions:
+        contents: write
+    steps:
+      - name: Get file base name
+        id: get-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      - name: PreRelease delete from tag
+        id: delete_prerelease
+        if: ${{ (inputs.use_environ == 'snapshots') }}
+        uses: mknejp/delete-release-assets@6a8fd1fd4ce4296fde58ab811acf5fc13fef3cc9 # v1
+        with:
+          token: ${{ github.token }}
+          tag: "${{ inputs.use_tag }}"
+          assets: |
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-macos14_clang.dmg
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc_s3.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_intel.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.msi

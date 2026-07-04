@@ -1,0 +1,210 @@
+name: Test Maven Deployment
+
+# Manual workflow for testing Maven deployment to HDFGroup packages
+on:
+  workflow_dispatch:
+    inputs:
+      test_mode:
+        description: 'Test mode'
+        type: choice
+        options:
+          - dry-run
+          - live-deployment
+        required: true
+        default: dry-run
+      target_repository:
+        description: 'Maven repository target'
+        type: choice
+        options:
+          - github-packages
+          - maven-central-staging
+        required: false
+        default: github-packages
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  generate-test-artifacts:
+    name: Generate Test Artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Display test configuration
+        run: |
+          echo "=== Maven Deployment Test Configuration ==="
+          echo "Test Mode: ${{ inputs.test_mode }}"
+          echo "Target Repository: ${{ inputs.target_repository }}"
+          echo "GitHub Actor: ${{ github.actor }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Expected packages URL: https://github.com/${{ github.repository }}/packages"
+          echo ""
+
+      - name: Check repository permissions
+        run: |
+          echo "=== Repository Permission Check ==="
+
+          # Check repository context
+          if [[ "${{ github.repository }}" == "HDFGroup/hdf5" ]]; then
+            echo "✓ Running on canonical repository (${{ github.repository }})"
+            echo "   Packages will be published to HDFGroup/hdf5"
+          else
+            echo "✓ Running on fork/test repository (${{ github.repository }})"
+            echo "   Packages will be published to ${{ github.repository }} for validation"
+            echo "   This allows full testing before merging to canonical repository"
+          fi
+
+          # Check if we have packages permission
+          echo "Checking packages permission..."
+          if [[ "${{ github.token }}" != "" ]]; then
+            echo "✓ GITHUB_TOKEN is available"
+          else
+            echo "❌ GITHUB_TOKEN not available"
+          fi
+
+      - name: Test GitHub Packages API access
+        run: |
+          echo "=== Testing GitHub Packages API Access ==="
+
+          # Test basic API access
+          echo "Testing GitHub API access..."
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               "https://api.github.com/user" | jq '.login // "API_ERROR"'
+
+          # Test packages API access
+          echo "Testing GitHub Packages API access..."
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               "https://api.github.com/repos/${{ github.repository }}/packages?package_type=maven" \
+               | jq 'length // "API_ERROR"' || echo "No packages found yet"
+
+      - name: Generate test Maven artifacts
+        run: |
+          echo "=== Generating Test Maven Artifacts ==="
+
+          # Create test directory structure
+          mkdir -p test-artifacts/maven-staging-artifacts-linux-x86_64
+
+          # Create a minimal test JAR file
+          mkdir -p temp-jar/org/hdfgroup/test
+          echo 'package org.hdfgroup.test; public class TestClass { }' > temp-jar/org/hdfgroup/test/TestClass.java
+
+          # Compile and create JAR
+          cd temp-jar
+          javac org/hdfgroup/test/TestClass.java
+          jar cf ../test-artifacts/maven-staging-artifacts-linux-x86_64/jarhdf5-2.1.0-test.jar org/hdfgroup/test/TestClass.class
+          cd ..
+
+          # Create a test POM file
+          cat > test-artifacts/maven-staging-artifacts-linux-x86_64/pom.xml << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <project xmlns="http://maven.apache.org/POM/4.0.0"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+              <modelVersion>4.0.0</modelVersion>
+              <groupId>org.hdfgroup</groupId>
+              <artifactId>hdf5-java</artifactId>
+              <version>2.1.0-test</version>
+              <name>HDF5 Java Test</name>
+              <description>Test artifact for HDF5 Java Maven deployment</description>
+          </project>
+          EOF
+
+          # Upload as artifact for the deployment workflow
+          echo "Test artifacts created:"
+          find test-artifacts -type f -exec ls -la {} \;
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+          name: maven-staging-artifacts-linux-x86_64
+          path: test-artifacts/maven-staging-artifacts-linux-x86_64/
+
+  test-maven-deployment:
+    name: Test Maven Deployment to HDFGroup Packages
+    needs: generate-test-artifacts
+    uses: ./.github/workflows/maven-deploy.yml
+    with:
+      file_base: "hdf5-test"
+      preset_name: "test"
+      repository_url: ${{ inputs.target_repository == 'github-packages' && format('https://maven.pkg.github.com/{0}', github.repository) || 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/' }}
+      repository_id: ${{ inputs.target_repository == 'github-packages' && 'github' || 'ossrh' }}
+      deploy_snapshots: false
+      dry_run: ${{ inputs.test_mode == 'dry-run' }}
+    secrets:
+      MAVEN_USERNAME: ${{ inputs.target_repository == 'github-packages' && github.actor || secrets.MAVEN_CENTRAL_USERNAME }}
+      MAVEN_PASSWORD: ${{ inputs.target_repository == 'github-packages' && secrets.GITHUB_TOKEN || secrets.MAVEN_CENTRAL_PASSWORD }}
+      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+  validate-results:
+    name: Validate Deployment Results
+    needs: test-maven-deployment
+    if: ${{ always() && inputs.test_mode == 'live-deployment' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate deployment results
+        run: |
+          echo "=== Validating Deployment Results ==="
+
+          # Wait for packages to be processed
+          echo "Waiting 30 seconds for packages to be processed..."
+          sleep 30
+
+          # Check GitHub Packages for the deployed artifact
+          if [[ "${{ inputs.target_repository }}" == "github-packages" ]]; then
+            echo "Checking GitHub Packages..."
+
+            packages=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                            -H "Accept: application/vnd.github.v3+json" \
+                            "https://api.github.com/repos/${{ github.repository }}/packages?package_type=maven")
+
+            echo "Available packages:"
+            echo "$packages" | jq '.[] | {name: .name, html_url: .html_url}' || echo "No packages or jq not available"
+
+            # Check for our test package
+            if echo "$packages" | jq -r '.[].name' | grep -q "hdf5-java"; then
+              echo "✓ hdf5-java package found in GitHub Packages"
+            else
+              echo "⚠️ hdf5-java package not found in GitHub Packages"
+            fi
+          fi
+
+  display-results:
+    name: Display Test Results
+    needs: [generate-test-artifacts, test-maven-deployment]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Display next steps
+        run: |
+          echo "=== Test Results and Next Steps ==="
+          echo "Generation Status: ${{ needs.generate-test-artifacts.result }}"
+          echo "Deployment Status: ${{ needs.test-maven-deployment.result }}"
+
+          if [[ "${{ inputs.test_mode }}" == "dry-run" ]]; then
+            echo "🧪 DRY RUN COMPLETED"
+            echo ""
+            echo "✓ Permission configuration tested"
+            echo "✓ Workflow logic validated"
+            echo "✓ No actual artifacts deployed"
+            echo ""
+            echo "Next steps:"
+            echo "1. If no errors above, run with 'live-deployment' mode"
+            echo "2. Check https://github.com/${{ github.repository }}/packages for deployed artifacts"
+            echo "3. Test consuming the artifacts in a sample Maven project"
+          else
+            echo "🚀 LIVE DEPLOYMENT COMPLETED"
+            echo ""
+            echo "Check deployment results at:"
+            echo "- GitHub Packages: https://github.com/${{ github.repository }}/packages"
+            echo "- Workflow logs above for any deployment errors"
+            echo ""
+            echo "Next steps:"
+            echo "1. Run full release workflow with deploy_maven=true"
+            echo "2. Test end-to-end user experience with deployed artifacts"
+          fi

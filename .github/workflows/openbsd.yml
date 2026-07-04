@@ -1,0 +1,99 @@
+name: OpenBSD CI
+
+# Triggers the workflow on push or pull request or on demand
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'docs/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'LICENSE**'
+      - '**.md'
+  pull_request:
+    branches: [ develop ]
+    paths-ignore:
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'docs/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'LICENSE**'
+      - '**.md'
+
+# Using concurrency to cancel any in-progress job or run
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+jobs:
+  openbsd-build-and-test:
+    runs-on: ubuntu-latest
+    name: OpenBSD ${{ matrix.openbsd-version }} Build and Test
+
+    # Don't run the action if the commit message says to skip CI
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        openbsd-version: ['7.9']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Build and test on OpenBSD
+        uses: vmactions/openbsd-vm@18edb32f4e48dae5865d7b8b3a9587bc01218a20
+        with:
+          release: ${{ matrix.openbsd-version }}
+          usesh: true
+          prepare: |
+            echo "https://ftp.openbsd.org/pub/OpenBSD" > /etc/installurl
+            pkg_add cmake pkgconf curl
+          run: |
+            set -e
+
+            # Get number of processors (OpenBSD uses sysctl in /sbin)
+            NPROC=$(/sbin/sysctl -n hw.ncpu)
+            echo "Number of processors: $NPROC"
+
+            # Configure the build
+            mkdir build
+            cd build
+            cmake -C ../config/cmake/cacheinit.cmake \
+              --log-level=VERBOSE \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DBUILD_SHARED_LIBS:BOOL=ON \
+              -DHDF5_ENABLE_ALL_WARNINGS:BOOL=ON \
+              -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+              -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+              -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+              -DHDF5_BUILD_JAVA:BOOL=OFF \
+              -DHDF5_BUILD_DOC:BOOL=OFF \
+              -DHDF5_BUILD_HL_LIB:BOOL=OFF \
+              -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
+              -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON \
+              -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF \
+              -DZLIB_USE_LOCALCONTENT:BOOL=OFF \
+              -DHDF5_TEST_API:BOOL=ON \
+              -DHDF5_TEST_SHELL_SCRIPTS:BOOL=OFF \
+              -DENABLE_EXTENDED_TESTS:BOOL=OFF \
+              ..
+            echo ""
+
+            # Build
+            cmake --build . --parallel $NPROC
+            echo ""
+
+            # Run tests
+            ctest . --parallel $NPROC
+            echo ""

@@ -4,25 +4,29 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Mohamad Chaarawi
- *              February 2015
- *
  * Purpose: This test opens a file created by the t_pshutdown program
  * and makes sure the objects created are there.
  */
 
-#include "testphdf5.h"
+#include "testpar.h"
+
+#define RANK       2
+#define ROW_FACTOR 8  /* Nominal row factor for dataset size */
+#define COL_FACTOR 16 /* Nominal column factor for dataset size */
+
+/* Dataset data type.  Int's can be easily octo dumped. */
+typedef int DATATYPE;
 
 int nerrors = 0; /* errors count */
 
-const char *FILENAME[] = {"shutdown", NULL};
+static const char *FILENAME[] = {"shutdown", NULL};
 
 int
 main(int argc, char **argv)
@@ -74,8 +78,8 @@ main(int argc, char **argv)
     VRFY(dims[1] == (hsize_t)(COL_FACTOR * mpi_size), "Wrong dataset dimensions");
 
     /* allocate memory for data buffer */
-    data_array = (DATATYPE *)HDmalloc(dims[0] * dims[1] * sizeof(DATATYPE));
-    VRFY((data_array != NULL), "data_array HDmalloc succeeded");
+    data_array = (DATATYPE *)malloc(dims[0] * dims[1] * sizeof(DATATYPE));
+    VRFY((data_array != NULL), "data_array malloc succeeded");
 
     /* Each process takes a slabs of rows. */
     block[0]  = dims[0] / (hsize_t)mpi_size;
@@ -103,9 +107,9 @@ main(int argc, char **argv)
     for (i = 0; i < block[0]; i++) {
         for (j = 0; j < block[1]; j++) {
             if (*dataptr != mpi_rank + 1) {
-                HDprintf("Dataset Verify failed at [%lu][%lu](row %lu, col %lu): expect %d, got %d\n",
-                         (unsigned long)i, (unsigned long)j, (unsigned long)((hsize_t)i + start[0]),
-                         (unsigned long)((hsize_t)j + start[1]), mpi_rank + 1, *(dataptr));
+                printf("Dataset Verify failed at [%lu][%lu](row %lu, col %lu): expect %d, got %d\n",
+                       (unsigned long)i, (unsigned long)j, (unsigned long)((hsize_t)i + start[0]),
+                       (unsigned long)((hsize_t)j + start[1]), mpi_rank + 1, *(dataptr));
                 nerrors++;
             }
             dataptr++;
@@ -116,9 +120,7 @@ main(int argc, char **argv)
 
     /* release data buffers */
     if (data_array)
-        HDfree(data_array);
-
-    nerrors += GetTestNumErrs();
+        free(data_array);
 
     if (MAINPROCESS) {
         if (0 == nerrors)

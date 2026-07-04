@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -43,11 +43,6 @@ static void coll_chunktest(const char *filename, int chunk_factor, int select_fa
  *
  *		Failure:	-1
  *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -69,9 +64,25 @@ static void coll_chunktest(const char *filename, int chunk_factor, int select_fa
  */
 
 void
-coll_chunk1(void)
+coll_chunk1(void *params)
 {
-    const char *filename = GetTestParameters();
+    const char *filename = ((const H5Ptest_param_t *)params)->name;
+    int         mpi_rank;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file, dataset or dataset more aren't supported with this "
+                   "connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
 
     coll_chunktest(filename, 1, BYROW_CONT, API_NONE, HYPER, HYPER, OUT_OF_ORDER);
     coll_chunktest(filename, 1, BYROW_CONT, API_NONE, HYPER, POINT, OUT_OF_ORDER);
@@ -94,11 +105,6 @@ coll_chunk1(void)
  *
  *		Failure:	-1
  *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -120,9 +126,25 @@ coll_chunk1(void)
  * ------------------------------------------------------------------------
  */
 void
-coll_chunk2(void)
+coll_chunk2(void *params)
 {
-    const char *filename = GetTestParameters();
+    const char *filename = ((const H5Ptest_param_t *)params)->name;
+    int         mpi_rank;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file, dataset or dataset more aren't supported with this "
+                   "connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
 
     coll_chunktest(filename, 1, BYROW_DISCONT, API_NONE, HYPER, HYPER, OUT_OF_ORDER);
     coll_chunktest(filename, 1, BYROW_DISCONT, API_NONE, HYPER, POINT, OUT_OF_ORDER);
@@ -144,11 +166,6 @@ coll_chunk2(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -172,12 +189,28 @@ coll_chunk2(void)
  */
 
 void
-coll_chunk3(void)
+coll_chunk3(void *params)
 {
-    const char *filename = GetTestParameters();
+    const char *filename = ((const H5Ptest_param_t *)params)->name;
     int         mpi_size;
+    int         mpi_rank;
 
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file, dataset or dataset more aren't supported with this "
+                   "connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
+
     coll_chunktest(filename, mpi_size, BYROW_CONT, API_NONE, HYPER, HYPER, OUT_OF_ORDER);
     coll_chunktest(filename, mpi_size, BYROW_CONT, API_NONE, HYPER, POINT, OUT_OF_ORDER);
     coll_chunktest(filename, mpi_size, BYROW_CONT, API_NONE, POINT, ALL, OUT_OF_ORDER);
@@ -198,11 +231,6 @@ coll_chunk3(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -226,9 +254,25 @@ coll_chunk3(void)
  */
 
 void
-coll_chunk4(void)
+coll_chunk4(void *params)
 {
-    const char *filename = GetTestParameters();
+    const char *filename = ((const H5Ptest_param_t *)params)->name;
+    int         mpi_rank;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file, dataset or dataset more aren't supported with this "
+                   "connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
 
     coll_chunktest(filename, 1, BYROW_SELECTNONE, API_NONE, HYPER, HYPER, OUT_OF_ORDER);
     coll_chunktest(filename, 1, BYROW_SELECTNONE, API_NONE, HYPER, POINT, OUT_OF_ORDER);
@@ -251,11 +295,6 @@ coll_chunk4(void)
  *
  *		Failure:	-1
  *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -278,9 +317,25 @@ coll_chunk4(void)
  */
 
 void
-coll_chunk5(void)
+coll_chunk5(void *params)
 {
-    const char *filename = GetTestParameters();
+    const char *filename = ((const H5Ptest_param_t *)params)->name;
+    int         mpi_rank;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file, dataset or dataset more aren't supported with this "
+                   "connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
 
     coll_chunktest(filename, 4, BYROW_SELECTUNBALANCE, API_LINK_HARD, HYPER, HYPER, OUT_OF_ORDER);
     coll_chunktest(filename, 4, BYROW_SELECTUNBALANCE, API_LINK_HARD, HYPER, POINT, OUT_OF_ORDER);
@@ -305,11 +360,6 @@ coll_chunk5(void)
  *
  *		Failure:	-1
  *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -332,9 +382,25 @@ coll_chunk5(void)
  */
 
 void
-coll_chunk6(void)
+coll_chunk6(void *params)
 {
-    const char *filename = GetTestParameters();
+    const char *filename = ((const H5Ptest_param_t *)params)->name;
+    int         mpi_rank;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file, dataset or dataset more aren't supported with this "
+                   "connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
 
     coll_chunktest(filename, 4, BYROW_SELECTUNBALANCE, API_MULTI_HARD, HYPER, HYPER, OUT_OF_ORDER);
     coll_chunktest(filename, 4, BYROW_SELECTUNBALANCE, API_MULTI_HARD, HYPER, POINT, OUT_OF_ORDER);
@@ -357,11 +423,6 @@ coll_chunk6(void)
  *
  *		Failure:	-1
  *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -384,9 +445,25 @@ coll_chunk6(void)
  */
 
 void
-coll_chunk7(void)
+coll_chunk7(void *params)
 {
-    const char *filename = GetTestParameters();
+    const char *filename = ((const H5Ptest_param_t *)params)->name;
+    int         mpi_rank;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file, dataset or dataset more aren't supported with this "
+                   "connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
 
     coll_chunktest(filename, 4, BYROW_SELECTUNBALANCE, API_LINK_TRUE, HYPER, HYPER, OUT_OF_ORDER);
     coll_chunktest(filename, 4, BYROW_SELECTUNBALANCE, API_LINK_TRUE, HYPER, POINT, OUT_OF_ORDER);
@@ -409,11 +486,6 @@ coll_chunk7(void)
  *
  *		Failure:	-1
  *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -436,9 +508,25 @@ coll_chunk7(void)
  */
 
 void
-coll_chunk8(void)
+coll_chunk8(void *params)
 {
-    const char *filename = GetTestParameters();
+    const char *filename = ((const H5Ptest_param_t *)params)->name;
+    int         mpi_rank;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file, dataset or dataset more aren't supported with this "
+                   "connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
 
     coll_chunktest(filename, 4, BYROW_SELECTUNBALANCE, API_LINK_FALSE, HYPER, HYPER, OUT_OF_ORDER);
     coll_chunktest(filename, 4, BYROW_SELECTUNBALANCE, API_LINK_FALSE, HYPER, POINT, OUT_OF_ORDER);
@@ -461,11 +549,6 @@ coll_chunk8(void)
  *
  *		Failure:	-1
  *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -488,9 +571,25 @@ coll_chunk8(void)
  */
 
 void
-coll_chunk9(void)
+coll_chunk9(void *params)
 {
-    const char *filename = GetTestParameters();
+    const char *filename = ((const H5Ptest_param_t *)params)->name;
+    int         mpi_rank;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file, dataset or dataset more aren't supported with this "
+                   "connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
 
     coll_chunktest(filename, 4, BYROW_SELECTUNBALANCE, API_MULTI_COLL, HYPER, HYPER, OUT_OF_ORDER);
     coll_chunktest(filename, 4, BYROW_SELECTUNBALANCE, API_MULTI_COLL, HYPER, POINT, OUT_OF_ORDER);
@@ -513,11 +612,6 @@ coll_chunk9(void)
  *
  *		Failure:	-1
  *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -540,9 +634,25 @@ coll_chunk9(void)
  */
 
 void
-coll_chunk10(void)
+coll_chunk10(void *params)
 {
-    const char *filename = GetTestParameters();
+    const char *filename = ((const H5Ptest_param_t *)params)->name;
+    int         mpi_rank;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file, dataset or dataset more aren't supported with this "
+                   "connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
 
     coll_chunktest(filename, 4, BYROW_SELECTINCHUNK, API_MULTI_IND, HYPER, HYPER, OUT_OF_ORDER);
     coll_chunktest(filename, 4, BYROW_SELECTINCHUNK, API_MULTI_IND, HYPER, POINT, OUT_OF_ORDER);
@@ -556,28 +666,15 @@ coll_chunk10(void)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	coll_chunktest
+ * Function:    coll_chunktest
  *
  * Purpose:     The real testing routine for regular selection of collective
-                chunking storage
-                testing both write and read,
-                If anything fails, it may be read or write. There is no
-                separation test between read and write.
+ *              chunking storage testing both write and read,
+ *              If anything fails, it may be read or write. There is no
+ *              separation test between read and write.
  *
- * Return:	Success:	0
- *
- *		Failure:	-1
- *
- * Modifications:
- *   Remove invalid temporary property checkings for API_LINK_HARD and
- *   API_LINK_TRUE cases.
- * Programmer: Jonathan Kim
- * Date: 2012-10-10
- *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
- * Modifications:
+ * Return:      Success:     0
+ *              Failure:    -1
  *
  *-------------------------------------------------------------------------
  */
@@ -596,7 +693,8 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     hsize_t start[RANK], count[RANK], stride[RANK], block[RANK];
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-    unsigned prop_value;
+    unsigned                prop_value;
+    H5D_selection_io_mode_t selection_io_mode;
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
     int mpi_size, mpi_rank;
@@ -629,7 +727,7 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     dims[1] = SPACE_DIM2;
 
     /* allocate memory for data buffer */
-    data_array1 = (int *)HDmalloc(dims[0] * dims[1] * sizeof(int));
+    data_array1 = (int *)malloc(dims[0] * dims[1] * sizeof(int));
     VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
     /* set up dimensions of the slab this process accesses */
@@ -637,9 +735,25 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
 
     /* set up the coords array selection */
     num_points = block[0] * block[1] * count[0] * count[1];
-    coords     = (hsize_t *)HDmalloc(num_points * RANK * sizeof(hsize_t));
+    coords     = (hsize_t *)malloc(num_points * RANK * sizeof(hsize_t));
     VRFY((coords != NULL), "coords malloc succeeded");
     point_set(start, count, stride, block, num_points, coords, mode);
+
+    if (VERBOSE_MED) {
+        hsize_t k = 0;
+
+        printf("start[]=(%lu, %lu), count[]=(%lu, %lu), stride[]=(%lu, %lu), block[]=(%lu, %lu), total "
+               "datapoints=%lu\n",
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1],
+               (unsigned long)(block[0] * block[1] * count[0] * count[1]));
+
+        for (size_t i = 0; i < num_points; i++) {
+            printf("(%d, %d)\n", (int)coords[k], (int)coords[k + 1]);
+            k += RANK;
+        }
+    }
 
     file_dataspace = H5Screate_simple(2, dims, NULL);
     VRFY((file_dataspace >= 0), "file dataspace created succeeded");
@@ -698,6 +812,9 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
             status = H5Sselect_all(file_dataspace);
             VRFY((status >= 0), "H5Sselect_all succeeded");
             break;
+
+        default:
+            break;
     }
 
     switch (mem_selection) {
@@ -720,6 +837,9 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
         case ALL:
             status = H5Sselect_all(mem_dataspace);
             VRFY((status >= 0), "H5Sselect_all succeeded");
+            break;
+
+        default:
             break;
     }
 
@@ -834,7 +954,11 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     /* Only check chunk optimization mode if selection I/O is not being used -
      * selection I/O bypasses this IO mode decision - it's effectively always
      * multi chunk currently */
-    if (facc_type == FACC_MPIO && !H5_use_selection_io_g) {
+
+    status = H5Pget_selection_io(xfer_plist, &selection_io_mode);
+    VRFY((status >= 0), "testing property list get succeeded");
+
+    if (facc_type == FACC_MPIO && (selection_io_mode == H5D_SELECTION_IO_MODE_OFF)) {
         switch (api_option) {
             case API_LINK_HARD:
                 status = H5Pget(xfer_plist, H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, &prop_value);
@@ -894,23 +1018,23 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     VRFY((status >= 0), "");
 
     if (data_array1)
-        HDfree(data_array1);
+        free(data_array1);
 
     /* Use collective read to verify the correctness of collective write. */
 
     /* allocate memory for data buffer */
-    data_array1 = (int *)HDmalloc(dims[0] * dims[1] * sizeof(int));
+    data_array1 = (int *)malloc(dims[0] * dims[1] * sizeof(int));
     VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
     /* allocate memory for data buffer */
-    data_origin1 = (int *)HDmalloc(dims[0] * dims[1] * sizeof(int));
+    data_origin1 = (int *)malloc(dims[0] * dims[1] * sizeof(int));
     VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
 
     acc_plist = create_faccess_plist(comm, info, facc_type);
     VRFY((acc_plist >= 0), "MPIO creation property list succeeded");
 
     file = H5Fopen(filename, H5F_ACC_RDONLY, acc_plist);
-    VRFY((file >= 0), "H5Fcreate succeeded");
+    VRFY((file >= 0), "H5Fopen succeeded");
 
     status = H5Pclose(acc_plist);
     VRFY((status >= 0), "");
@@ -957,6 +1081,9 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
             status = H5Sselect_all(file_dataspace);
             VRFY((status >= 0), "H5Sselect_all succeeded");
             break;
+
+        default:
+            break;
     }
 
     switch (mem_selection) {
@@ -979,6 +1106,9 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
         case ALL:
             status = H5Sselect_all(mem_dataspace);
             VRFY((status >= 0), "H5Sselect_all succeeded");
+            break;
+
+        default:
             break;
     }
 
@@ -1022,11 +1152,11 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
 
     /* release data buffers */
     if (coords)
-        HDfree(coords);
+        free(coords);
     if (data_array1)
-        HDfree(data_array1);
+        free(data_array1);
     if (data_origin1)
-        HDfree(data_origin1);
+        free(data_origin1);
 }
 
 /* Set up the selection */
@@ -1123,12 +1253,12 @@ ccslab_set(int mpi_rank, int mpi_size, hsize_t start[], hsize_t count[], hsize_t
             break;
     }
     if (VERBOSE_MED) {
-        HDprintf("start[]=(%lu,%lu), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total "
-                 "datapoints=%lu\n",
-                 (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
-                 (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
-                 (unsigned long)block[0], (unsigned long)block[1],
-                 (unsigned long)(block[0] * block[1] * count[0] * count[1]));
+        printf("start[]=(%lu,%lu), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total "
+               "datapoints=%lu\n",
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1],
+               (unsigned long)(block[0] * block[1] * count[0] * count[1]));
     }
 }
 
@@ -1181,20 +1311,20 @@ ccdataset_print(hsize_t start[], hsize_t block[], DATATYPE *dataset)
     hsize_t   i, j;
 
     /* print the column heading */
-    HDprintf("Print only the first block of the dataset\n");
-    HDprintf("%-8s", "Cols:");
+    printf("Print only the first block of the dataset\n");
+    printf("%-8s", "Cols:");
     for (j = 0; j < block[1]; j++) {
-        HDprintf("%3lu ", (unsigned long)(start[1] + j));
+        printf("%3lu ", (unsigned long)(start[1] + j));
     }
-    HDprintf("\n");
+    printf("\n");
 
     /* print the slab data */
     for (i = 0; i < block[0]; i++) {
-        HDprintf("Row %2lu: ", (unsigned long)(i + start[0]));
+        printf("Row %2lu: ", (unsigned long)(i + start[0]));
         for (j = 0; j < block[1]; j++) {
-            HDprintf("%03d ", *dataptr++);
+            printf("%03d ", *dataptr++);
         }
-        HDprintf("\n");
+        printf("\n");
     }
 }
 
@@ -1211,14 +1341,14 @@ ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block
 
     /* print it if VERBOSE_MED */
     if (VERBOSE_MED) {
-        HDprintf("dataset_vrfy dumping:::\n");
-        HDprintf("start(%lu, %lu), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
-                 (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
-                 (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
-                 (unsigned long)block[0], (unsigned long)block[1]);
-        HDprintf("original values:\n");
+        printf("dataset_vrfy dumping:::\n");
+        printf("start(%lu, %lu), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1]);
+        printf("original values:\n");
         ccdataset_print(start, block, original);
-        HDprintf("compared values:\n");
+        printf("compared values:\n");
         ccdataset_print(start, block, dataset);
     }
 
@@ -1241,8 +1371,8 @@ ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block
                     }
                     if (*dataptr != *oriptr) {
                         if (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED) {
-                            HDprintf("Dataset Verify failed at [%lu][%lu]: expect %d, got %d\n",
-                                     (unsigned long)i, (unsigned long)j, *(oriptr), *(dataptr));
+                            printf("Dataset Verify failed at [%lu][%lu]: expect %d, got %d\n",
+                                   (unsigned long)i, (unsigned long)j, *(oriptr), *(dataptr));
                         }
                     }
                 }
@@ -1250,8 +1380,8 @@ ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block
         }
     }
     if (vrfyerrs > MAX_ERR_REPORT && !VERBOSE_MED)
-        HDprintf("[more errors ...]\n");
+        printf("[more errors ...]\n");
     if (vrfyerrs)
-        HDprintf("%d errors found in ccdataset_vrfy\n", vrfyerrs);
+        printf("%d errors found in ccdataset_vrfy\n", vrfyerrs);
     return (vrfyerrs);
 }

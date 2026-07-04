@@ -1,0 +1,59 @@
+name: cve dev
+
+# Triggers the workflow on push or pull request or on demand
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'docs/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'LICENSE**'
+      - '**.md'
+  pull_request:
+    branches: [ develop ]
+    paths-ignore:
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'docs/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'LICENSE**'
+      - '**.md'
+
+# Using concurrency to cancel any in-progress job or run
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: CVE regression
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false # Prevents tokens from being written to Git config files
+
+      - name: Install HDF5
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DBUILD_TESTING:BOOL=OFF $GITHUB_WORKSPACE
+          make
+          sudo make install
+      - name: Checkout CVE test repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: HDFGroup/cve_hdf5
+          path: cve_hdf5
+      - name: Run regression tests
+        run: |
+          cd cve_hdf5
+          export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
+          ./test_hdf5_cve.sh /usr/local/bin ./cve_out

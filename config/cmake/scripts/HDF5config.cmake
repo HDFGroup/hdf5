@@ -4,50 +4,85 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
 #############################################################################################
 ### ${CTEST_SCRIPT_ARG} is of the form OPTION=VALUE                                       ###
-### BUILD_GENERATOR required [Unix, VS2019, VS201964, VS2017, VS201764, VS2015, VS201564] ###
-### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201764 -C Release -VV -O hdf5.log         ###
+### BUILD_GENERATOR required [Unix, VS2022, VS202264, VS2019, VS201964]                   ###
+### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS202264 -C Release -VV -O hdf5.log         ###
 #############################################################################################
 
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 ############################################################################
 # Usage:
 #     ctest -S HDF5config.cmake,OPTION=VALUE -C Release -VV -O test.log
 # where valid options for OPTION are:
+#     NINJA           - Use Ninja build system
 #     BUILD_GENERATOR - The cmake build generator:
 #            MinGW     * MinGW Makefiles
 #            Unix      * Unix Makefiles
+#            VS2022    * Visual Studio 17 2022
+#            VS202264  * Visual Studio 17 2022
 #            VS2019    * Visual Studio 16 2019
 #            VS201964  * Visual Studio 16 2019
 #            VS2017    * Visual Studio 15 2017
 #            VS201764  * Visual Studio 15 2017 Win64
 #            VS2015    * Visual Studio 14 2015
 #            VS201564  * Visual Studio 14 2015 Win64
-#            VS2013    * Visual Studio 12 2013
-#            VS201364  * Visual Studio 12 2013 Win64
 #
 #     INSTALLDIR  -  root folder where hdf5 is installed
 #     CTEST_CONFIGURATION_TYPE  - Release, Debug, etc
 #     CTEST_SOURCE_NAME  -  source folder
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION "1.15.0")
-set (CTEST_SOURCE_VERSEXT "")
+#-----------------------------------------------------------------------------
+# Version is extracted from H5public.h at configure time
+# If not set in parent scope, read it from H5public.h now
+#-----------------------------------------------------------------------------
+if (NOT DEFINED H5_VERS_MAJOR)
+  # Resolve the real path of this script to handle symlinks correctly
+  get_filename_component(_hdf5config_real_dir "${CMAKE_CURRENT_LIST_FILE}" REALPATH)
+  get_filename_component(_hdf5config_real_dir "${_hdf5config_real_dir}" DIRECTORY)
+
+  # Validate the computed path
+  if(NOT EXISTS "${_hdf5config_real_dir}")
+    message(FATAL_ERROR "Failed to resolve directory from ${CMAKE_CURRENT_LIST_FILE}")
+  endif()
+
+  # Compute source root from this script location to avoid fragile relative paths
+  # This script is in config/cmake/scripts/, so go up to project root
+  get_filename_component(_hdf5_source_root "${_hdf5config_real_dir}/../../.." REALPATH)
+
+  # Use shared version parsing module
+  include(${_hdf5config_real_dir}/../HDF5VersionParsing.cmake)
+  parse_hdf5_version("${_hdf5_source_root}/src/H5public.h"
+                     MAJOR_VAR H5_VERS_MAJOR
+                     MINOR_VAR H5_VERS_MINOR
+                     RELEASE_VAR H5_VERS_RELEASE
+                     SUBRELEASE_VAR H5_VERS_SUBRELEASE)
+
+  unset(_hdf5config_real_dir)
+  unset(_hdf5_source_root)
+endif ()
+
+set (CTEST_SOURCE_VERSION "${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}")
+if (H5_VERS_SUBRELEASE)
+  set (CTEST_SOURCE_VERSEXT "-${H5_VERS_SUBRELEASE}")
+else ()
+  set (CTEST_SOURCE_VERSEXT "")
+endif ()
 
 ##############################################################################
 # handle input parameters to script.
 #BUILD_GENERATOR - which CMake generator to use, required
-#INSTALLDIR - HDF5-1.13.x root folder
+#INSTALLDIR - HDF5-2.0.x root folder
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
-#CTEST_SOURCE_NAME - name of source folder; HDF5-1.13.x
+#CTEST_SOURCE_NAME - name of source folder; HDF5-2.0.x
 #MODEL - CDash group name
-#HPC - run alternate configurations for HPC machines; sbatch, bsub, raybsub, qsub
+#HPC - run alternate configurations for HPC machines; sbatch, bsub, qsub
 #MPI - enable MPI
 if (DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form
@@ -68,7 +103,7 @@ endif ()
 
 # build generator must be defined
 if (NOT DEFINED BUILD_GENERATOR)
-  message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2019, VS201964, VS2017, VS201764, VS2015, VS201564")
+  message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2022, VS202264, VS2019, VS201964")
 endif ()
 
 ###################################################################
@@ -105,79 +140,95 @@ endif ()
 #########       Following describes compiler           ############
 if (NOT DEFINED HPC)
   if (NOT DEFINED BUILD_GENERATOR)
-    message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2019, VS201964, VS2017, VS201764, VS2015, VS201564")
+    message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2022, VS202264, VS2019, VS201964")
   endif ()
   if (WIN32 AND NOT MINGW)
     set (SITE_OS_NAME "Windows")
     set (SITE_OS_VERSION "WIN10")
-    if (BUILD_GENERATOR STREQUAL "VS201964")
-      set (CTEST_CMAKE_GENERATOR "Visual Studio 16 2019")
-      set (CMAKE_GENERATOR_ARCHITECTURE "x64")
+    if (BUILD_GENERATOR STREQUAL "VS202264")
+      if (DEFINED NINJA)
+        set (CTEST_CMAKE_GENERATOR "Ninja")
+      else ()
+         set (CTEST_CMAKE_GENERATOR "Visual Studio 17 2022")
+         set (CMAKE_GENERATOR_ARCHITECTURE "x64")
+      endif ()
+      set (SITE_OS_BITS "64")
+      set (SITE_COMPILER_NAME "vs2022")
+      set (SITE_COMPILER_VERSION "17")
+    elseif (BUILD_GENERATOR STREQUAL "VS2022")
+      if (DEFINED NINJA)
+        set (CTEST_CMAKE_GENERATOR "Ninja")
+      else ()
+        set (CTEST_CMAKE_GENERATOR "Visual Studio 17 2022")
+        set (CMAKE_GENERATOR_ARCHITECTURE "Win32")
+      endif ()
+      set (SITE_OS_BITS "32")
+      set (SITE_COMPILER_NAME "vs2022")
+      set (SITE_COMPILER_VERSION "17")
+    elseif (BUILD_GENERATOR STREQUAL "VS201964")
+      if (DEFINED NINJA)
+        set (CTEST_CMAKE_GENERATOR "Ninja")
+      else ()
+        set (CTEST_CMAKE_GENERATOR "Visual Studio 16 2019")
+        set (CMAKE_GENERATOR_ARCHITECTURE "x64")
+      endif ()
       set (SITE_OS_BITS "64")
       set (SITE_COMPILER_NAME "vs2019")
       set (SITE_COMPILER_VERSION "16")
     elseif (BUILD_GENERATOR STREQUAL "VS2019")
-      set (CTEST_CMAKE_GENERATOR "Visual Studio 16 2019")
-      set (CMAKE_GENERATOR_ARCHITECTURE "Win32")
+      if (DEFINED NINJA)
+        set (CTEST_CMAKE_GENERATOR "Ninja")
+      else ()
+        set (CTEST_CMAKE_GENERATOR "Visual Studio 16 2019")
+        set (CMAKE_GENERATOR_ARCHITECTURE "Win32")
+      endif ()
       set (SITE_OS_BITS "32")
       set (SITE_COMPILER_NAME "vs2019")
       set (SITE_COMPILER_VERSION "16")
     elseif (BUILD_GENERATOR STREQUAL "VS201764")
-      set (CTEST_CMAKE_GENERATOR "Visual Studio 15 2017 Win64")
+      if (DEFINED NINJA)
+        set (CTEST_CMAKE_GENERATOR "Ninja")
+      else ()
+        set (CTEST_CMAKE_GENERATOR "Visual Studio 15 2017 Win64")
+      endif ()
       set (SITE_OS_BITS "64")
       set (SITE_COMPILER_NAME "vs2017")
       set (SITE_COMPILER_VERSION "15")
     elseif (BUILD_GENERATOR STREQUAL "VS2017")
-      set (CTEST_CMAKE_GENERATOR "Visual Studio 15 2017")
+      if (DEFINED NINJA)
+        set (CTEST_CMAKE_GENERATOR "Ninja")
+      else ()
+        set (CTEST_CMAKE_GENERATOR "Visual Studio 15 2017")
+      endif ()
       set (SITE_OS_BITS "32")
       set (SITE_COMPILER_NAME "vs2017")
       set (SITE_COMPILER_VERSION "15")
-    elseif (BUILD_GENERATOR STREQUAL "VS201564")
-      set (CTEST_CMAKE_GENERATOR "Visual Studio 14 2015 Win64")
-      set (SITE_OS_BITS "64")
-      set (SITE_COMPILER_NAME "vs2015")
-      set (SITE_COMPILER_VERSION "14")
-    elseif (BUILD_GENERATOR STREQUAL "VS2015")
-      set (CTEST_CMAKE_GENERATOR "Visual Studio 14 2015")
-      set (SITE_OS_BITS "32")
-      set (SITE_COMPILER_NAME "vs2015")
-      set (SITE_COMPILER_VERSION "14")
-    elseif (BUILD_GENERATOR STREQUAL "VS201364")
-      set (CTEST_CMAKE_GENERATOR "Visual Studio 12 2013 Win64")
-      set (SITE_OS_BITS "64")
-      set (SITE_COMPILER_NAME "vs2013")
-      set (SITE_COMPILER_VERSION "12")
-    elseif (BUILD_GENERATOR STREQUAL "VS2013")
-      set (CTEST_CMAKE_GENERATOR "Visual Studio 12 2013")
-      set (SITE_OS_BITS "32")
-      set (SITE_COMPILER_NAME "vs2013")
-      set (SITE_COMPILER_VERSION "12")
-    elseif (BUILD_GENERATOR STREQUAL "VS201264")
-      set (CTEST_CMAKE_GENERATOR "Visual Studio 11 2012 Win64")
-      set (SITE_OS_BITS "64")
-      set (SITE_COMPILER_NAME "vs2012")
-      set (SITE_COMPILER_VERSION "11")
-    elseif (BUILD_GENERATOR STREQUAL "VS2012")
-      set (CTEST_CMAKE_GENERATOR "Visual Studio 11 2012")
-      set (SITE_OS_BITS "32")
-      set (SITE_COMPILER_NAME "vs2012")
-      set (SITE_COMPILER_VERSION "11")
     else ()
-      message (FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2019, VS201964, VS2017, VS201764, VS2015, VS201564")
+      message (FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2022, VS202264, VS2019, VS201964")
     endif ()
   ##  Set the following to unique id your computer  ##
-    set (CTEST_SITE "WIN7${BUILD_GENERATOR}.XXXX")
+    if(NOT DEFINED CTEST_SITE)
+      set (CTEST_SITE "WIN10${BUILD_GENERATOR}-${CTEST_SITE_EXT}")
+    endif()
   else ()
-    if (MINGW)
-      set (CTEST_CMAKE_GENERATOR "MinGW Makefiles")
+    if (DEFINED NINJA)
+      set (CTEST_CMAKE_GENERATOR "Ninja")
     else ()
-      set (CTEST_CMAKE_GENERATOR "Unix Makefiles")
+      if (BUILD_GENERATOR STREQUAL "MINGW")
+        set (CTEST_CMAKE_GENERATOR "MinGW Makefiles")
+      else ()
+        set (CTEST_CMAKE_GENERATOR "Unix Makefiles")
+      endif ()
     endif ()
   ##  Set the following to unique id your computer  ##
     if (APPLE)
-     set (CTEST_SITE "MAC.XXXX")
+      if(NOT DEFINED CTEST_SITE)
+        set (CTEST_SITE "MAC-${CTEST_SITE_EXT}")
+      endif()
     else ()
-      set (CTEST_SITE "LINUX.XXXX")
+      if(NOT DEFINED CTEST_SITE)
+        set (CTEST_SITE "LINUX-${CTEST_SITE_EXT}")
+      endif()
     endif ()
     if (APPLE)
       execute_process (COMMAND xcrun --find cc OUTPUT_VARIABLE XCODE_CC OUTPUT_STRIP_TRAILING_WHITESPACE)

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -29,7 +29,6 @@
 #include "H5private.h"  /* Generic Functions                        */
 #include "H5Mprivate.h" /* Maps                                     */
 #include "H5Eprivate.h" /* Error handling                           */
-#include "H5Iprivate.h" /* IDs                                      */
 #include "H5Ppkg.h"     /* Property lists                           */
 
 /****************/
@@ -117,13 +116,13 @@ H5P__macc_reg_prop(H5P_genclass_t *pclass)
     if (H5P__register_real(pclass, H5M_ACS_KEY_PREFETCH_SIZE_NAME, H5M_ACS_KEY_PREFETCH_SIZE_SIZE,
                            &key_prefetch_size, NULL, NULL, NULL, H5M_ACS_KEY_PREFETCH_SIZE_ENC,
                            H5M_ACS_KEY_PREFETCH_SIZE_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the key prefetch allocation size for iteration */
     if (H5P__register_real(pclass, H5M_ACS_KEY_ALLOC_SIZE_NAME, H5M_ACS_KEY_ALLOC_SIZE_SIZE, &key_alloc_size,
                            NULL, NULL, NULL, H5M_ACS_KEY_ALLOC_SIZE_ENC, H5M_ACS_KEY_ALLOC_SIZE_DEC, NULL,
                            NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -155,10 +154,9 @@ H5Pset_map_iterate_hints(hid_t mapl_id, size_t key_prefetch_size, size_t key_all
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "izz", mapl_id, key_prefetch_size, key_alloc_size);
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(mapl_id, H5P_MAP_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(mapl_id, H5P_MAP_ACCESS, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set sizes */
@@ -187,10 +185,9 @@ H5Pget_map_iterate_hints(hid_t mapl_id, size_t *key_prefetch_size /*out*/, size_
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", mapl_id, key_prefetch_size, key_alloc_size);
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(mapl_id, H5P_MAP_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(mapl_id, H5P_MAP_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get the properties */

@@ -1,0 +1,1137 @@
+name: hdf5 dev CTest runs
+
+# Triggers the workflow on a call from another workflow
+on:
+  workflow_call:
+    inputs:
+      snap_name:
+        description: 'The name in the source tarballs'
+        type: string
+        required: false
+        default: hdfsrc
+      file_base:
+        description: "The common base name of the source tarballs"
+        required: true
+        type: string
+      preset_name:
+        description: "The common base name of the preset configuration name to control the build"
+        required: true
+        type: string
+      use_environ:
+        description: 'Environment to locate files'
+        type: string
+        required: true
+        default: snapshots
+      cmake_version:
+        description: "3.26.0 or later, latest"
+        required: true
+        type: string
+      maven_enabled:
+        description: 'Enable Maven artifact generation and upload'
+        type: boolean
+        required: false
+        default: false
+    secrets:
+        APPLE_CERTS_BASE64:
+            required: true
+        APPLE_CERTS_BASE64_PASSWD:
+            required: true
+        KEYCHAIN_PASSWD:
+            required: true
+        AZURE_TENANT_ID:
+            required: true
+        AZURE_CLIENT_ID:
+            required: true
+        AZURE_CLIENT_SECRET:
+            required: true
+        AZURE_ENDPOINT:
+            required: true
+        AZURE_CODE_SIGNING_NAME:
+            required: true
+        AZURE_CERT_PROFILE_NAME:
+            required: true
+
+permissions:
+  contents: read
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+jobs:
+  check-secret:
+    name: Check Secrets exists
+    runs-on: ubuntu-latest
+    outputs:
+      sign-state: ${{ steps.set-signing-state.outputs.BINSIGN }}
+    steps:
+      - name: Identify Signing Status
+        id: set-signing-state
+        env: 
+            signing_secret: ${{ secrets.AZURE_ENDPOINT }}
+        run: |
+          if [[ '${{ env.signing_secret }}' == '' ]]
+          then
+            SIGN_VAL=$(echo 'notexists')
+          else
+            SIGN_VAL=$(echo 'exists')
+          fi
+          echo "BINSIGN=$SIGN_VAL" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - run: echo "signing is ${{ steps.set-signing-state.outputs.BINSIGN }}."
+
+  build_and_test_win:
+  # Windows w/ MSVC
+  #
+    name: "Windows MSVC CTest"
+    runs-on: windows-latest
+    needs: [check-secret]
+    steps:
+      - name: Install Dependencies (Windows)
+        run: choco install ninja
+
+      - name: Enable Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+
+      - name: Install CMake
+        uses: lukka/get-cmake@f5b8fbb4d77cec1acc5a5f9f0df4beffaf5d98d9 # latest
+        with:
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
+
+      - name: Check CMake Version
+        shell: bash
+        run: |
+          which cmake
+          cmake --version
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set file base name (Windows)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
+
+      # Get files created by release script
+      - name: Get zip-tarball (Windows)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+              name: zip-tarball
+              path: ${{ github.workspace }}
+
+      - name: using powershell
+        shell: pwsh
+        run: Get-Location
+
+      - name: List files for the space (Windows)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      - name: Uncompress source (Windows)
+        working-directory: ${{ github.workspace }}
+        run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
+        shell: bash
+
+      - name: Install TrustedSigning (Windows)
+        run: |
+            Invoke-WebRequest -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile .\nuget.exe
+            .\nuget.exe install Microsoft.Windows.SDK.BuildTools -Version 10.0.22621.3233 -x
+            .\nuget.exe install Microsoft.Trusted.Signing.Client -Version 1.0.86 -x
+        shell: pwsh
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: create-json
+        id: create-json
+        uses: jsdaniell/create-json@b8e77fa01397ca39cc4a6198cc29a3be5481afef # v1.2.3
+        with:
+            name: "credentials.json"
+            dir: '${{ steps.set-file-base.outputs.SOURCE_BASE }}'
+            json: '{"Endpoint": "${{ secrets.AZURE_ENDPOINT }}","CodeSigningAccountName": "${{ secrets.AZURE_CODE_SIGNING_NAME }}","CertificateProfileName": "${{ secrets.AZURE_CERT_PROFILE_NAME }}"}'
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: Run CTest (Windows)
+        env:
+          BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
+          SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
+        run: |
+          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
+          cmake --workflow --preset=${{ inputs.preset_name }}-MSVC --fresh
+        shell: bash
+
+      - name: Sign files with Trusted Signing
+        uses: azure/trusted-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_ENDPOINT }}
+          trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+          certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+          files-folder: ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC
+          files-folder-filter: msi
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: Publish binary (Windows)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5"
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/LICENSE -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/README.md -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
+          cd "${{ runner.workspace }}/build"
+          7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip hdf5
+        shell: pwsh
+
+      - name: Publish msi binary (Windows)
+        id: publish-ctest-msi-binary
+        run: |
+          mkdir "${{ runner.workspace }}/buildmsi"
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/* -Destination ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi -Include *.msi
+        shell: pwsh
+
+      - name: List files in the space (Windows)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      # Save files created by CTest script
+      - name: Save published binary (Windows)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: zip-vs2022_cl-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Save published msi binary (Windows)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: msi-vs2022_cl-binary
+              path: ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  build_and_test_win_arm64:
+  # Windows ARM64 w/ MSVC (Native)
+  #
+    name: "Windows MSVC ARM64 CTest"
+    runs-on: windows-11-arm
+    needs: [check-secret]
+    steps:
+      - name: Install Dependencies (Windows ARM64)
+        run: choco install ninja
+
+      - name: Get Sources
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
+      - name: Enable Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+        with:
+          arch: arm64
+
+      - name: Install CMake
+        uses: lukka/get-cmake@f5b8fbb4d77cec1acc5a5f9f0df4beffaf5d98d9 # latest
+        with:
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
+
+      - name: Check CMake Version
+        shell: bash
+        run: |
+          which cmake
+          cmake --version
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          architecture: 'aarch64'
+
+      - name: Set environment for MSVC ARM64 (Windows)
+        run: |
+          echo "CXX=cl.exe" >> $GITHUB_ENV
+          echo "CC=cl.exe" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Set file base name (Windows ARM64)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
+
+      # Get files created by release script
+      - name: Get zip-tarball (Windows ARM64)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+              name: zip-tarball
+              path: ${{ github.workspace }}
+
+      - name: using powershell
+        shell: pwsh
+        run: Get-Location
+
+      - name: List files for the space (Windows ARM64)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      - name: Uncompress source (Windows ARM64)
+        working-directory: ${{ github.workspace }}
+        run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
+        shell: bash
+
+      - name: Install TrustedSigning (Windows ARM64)
+        run: |
+            Invoke-WebRequest -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile .\nuget.exe
+            .\nuget.exe install Microsoft.Windows.SDK.BuildTools -Version 10.0.22621.3233 -x
+            .\nuget.exe install Microsoft.Trusted.Signing.Client -Version 1.0.86 -x
+        shell: pwsh
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: create-json
+        id: create-json
+        uses: jsdaniell/create-json@b8e77fa01397ca39cc4a6198cc29a3be5481afef # v1.2.3
+        with:
+            name: "credentials.json"
+            dir: '${{ steps.set-file-base.outputs.SOURCE_BASE }}'
+            json: '{"Endpoint": "${{ secrets.AZURE_ENDPOINT }}","CodeSigningAccountName": "${{ secrets.AZURE_CODE_SIGNING_NAME }}","CertificateProfileName": "${{ secrets.AZURE_CERT_PROFILE_NAME }}"}'
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: Install WiX v3.14
+        run: |
+          Invoke-WebRequest -Uri https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip -OutFile wix314-binaries.zip
+          Expand-Archive -Path wix314-binaries.zip -DestinationPath C:\wix314
+          echo "C:\wix314" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          echo "WIX=C:\wix314" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        shell: pwsh
+
+      - name: Run CTest (Windows ARM64)
+        env:
+          BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
+          SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/arm64
+        run: |
+          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
+          cmake --workflow --preset=${{ inputs.preset_name }}-MSVC-ARM64 --fresh
+        shell: bash
+
+      - name: Sign files with Trusted Signing
+        uses: azure/trusted-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_ENDPOINT }}
+          trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+          certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+          files-folder: ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC-ARM64
+          files-folder-filter: msi
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: Publish binary (Windows ARM64)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5"
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/LICENSE -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC-ARM64/README.md -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC-ARM64/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
+          cd "${{ runner.workspace }}/build"
+          7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl_arm64.zip hdf5
+        shell: pwsh
+
+      - name: Publish msi binary (Windows ARM64)
+        id: publish-ctest-msi-binary
+        run: |
+          mkdir "${{ runner.workspace }}/buildmsi"
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC-ARM64/* -Destination ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl_arm64.msi -Include *.msi
+        shell: pwsh
+
+      - name: List files in the space (Windows ARM64)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      # Save files created by CTest script
+      - name: Save published binary (Windows ARM64)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: zip-vs2022_cl_arm64-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl_arm64.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Save published msi binary (Windows ARM64)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: msi-vs2022_cl_arm64-binary
+              path: ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl_arm64.msi
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  build_and_test_linux:
+  # Linux (Ubuntu) w/ gcc
+  #
+    name: "Ubuntu gcc"
+    runs-on: ubuntu-latest
+    needs: [check-secret]
+    steps:
+      - name: Install Dependencies (Linux)
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build graphviz
+
+      - name: Get Actions
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          sparse-checkout: .github/actions
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
+      - name: Install CMake
+        uses: lukka/get-cmake@f5b8fbb4d77cec1acc5a5f9f0df4beffaf5d98d9 # latest
+        with:
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
+
+      - name: Check CMake Version
+        shell: bash
+        run: |
+          which cmake
+          cmake --version
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set file base name (Linux)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      # Get files created by release script
+      - name: Get tgz-tarball (Linux)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+              name: tgz-tarball
+              path: ${{ github.workspace }}
+
+      - name: List files for the space (Linux)
+        run: |
+              ls -l ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      - name: Uncompress source (Linux)
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+      - name: Run CTest (Linux)
+        id: run-ctest
+        run: |
+          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
+          if [ "${{ inputs.maven_enabled }}" == "true" ]; then
+            if [ "${{ inputs.use_environ }}" == "release" ]; then
+              echo "Building with Maven release preset"
+              ACTIVE_PRESET_BASE=$(echo "${{ inputs.preset_name }}-GNUC-Maven")
+            else
+              echo "Building with Maven snapshot preset"
+              ACTIVE_PRESET_BASE=$(echo "${{ inputs.preset_name }}-GNUC-Maven-Snapshot")
+            fi
+          else
+            echo "Building with standard preset"
+            ACTIVE_PRESET_BASE=$(echo "${{ inputs.preset_name }}-GNUC")
+          fi
+          echo "ACTIVE_PRESET=$ACTIVE_PRESET_BASE" >> $GITHUB_OUTPUT
+          cmake --workflow --preset=$ACTIVE_PRESET_BASE --fresh
+        shell: bash
+
+      - name: Publish binary (Linux)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5"
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/LICENSE ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/*.tar.gz ${{ runner.workspace }}/build/hdf5
+          cd "${{ runner.workspace }}/build"
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.tar.gz hdf5
+        shell: bash
+
+      - name: Publish deb binary (Linux)
+        id: publish-ctest-deb-binary
+        run: |
+          mkdir "${{ runner.workspace }}/builddeb"
+          cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/*.deb ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb
+        shell: bash
+
+      - name: Publish rpm binary (Linux)
+        id: publish-ctest-rpm-binary
+        run: |
+          mkdir "${{ runner.workspace }}/buildrpm"
+          cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/*.rpm ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
+        shell: bash
+
+      - name: List files in the space (Linux)
+        run: |
+              ls ${{ github.workspace }}
+              ls -l ${{ runner.workspace }}
+
+      # Save files created by CTest script
+      - name: Save published binary (Linux)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: tgz-ubuntu-2404_gcc-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Save published binary deb (Linux)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: deb-ubuntu-2404_gcc-binary
+              path: ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Save published binary rpm (Linux)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: rpm-ubuntu-2404_gcc-binary
+              path: ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      # Save doxygen files created by CTest script
+      - name: Save published doxygen (Linux)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: docs-doxygen
+              path: ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/hdf5lib_docs/html
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      # Upload Maven artifacts when Maven deployment is enabled
+      - name: Collect Maven artifacts (Linux)
+        if: ${{ inputs.maven_enabled == true }}
+        run: |
+          echo "Collecting Maven artifacts for deployment..."
+          mkdir -p ${{ runner.workspace }}/maven-artifacts
+
+          # Determine the build directory based on Maven preset used
+          BUILD_DIR="${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}"
+
+          echo "Looking for artifacts in: ${BUILD_DIR}"
+
+          # Copy JAR files
+          find "${BUILD_DIR}" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+
+          # Copy POM files
+          find "${BUILD_DIR}" -name "pom.xml" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+
+          # List collected artifacts
+          echo "Collected Maven artifacts:"
+          ls -la ${{ runner.workspace }}/maven-artifacts/
+        shell: bash
+
+      - name: Upload Maven artifacts (Linux)
+        if: ${{ inputs.maven_enabled == true }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: Linux-${{ inputs.preset_name }}-artifacts
+              path: ${{ runner.workspace }}/maven-artifacts
+              if-no-files-found: warn
+
+  build_and_test_mac_latest:
+  # MacOS w/ Clang
+  #
+    name: "MacOS Clang"
+    runs-on: macos-latest
+    needs: [check-secret]
+    steps:
+      - name: check clang version
+        shell: bash
+        run: |
+          which clang
+          clang -v
+
+      - name: Install CMake
+        uses: lukka/get-cmake@f5b8fbb4d77cec1acc5a5f9f0df4beffaf5d98d9 # latest
+        with:
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
+
+      - name: Check CMake Version
+        shell: bash
+        run: |
+          which cmake
+          cmake --version
+
+      - name: Install the Apple certificate and provisioning profile
+        shell: bash
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
+          P12_PASSWORD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
+          KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+        run: |
+            # create variables
+            CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+            KEYCHAIN_FILE=${{ vars.KEYCHAIN_NAME }}.keychain
+            # import certificate from secrets
+            echo $BUILD_CERTIFICATE_BASE64 | base64 --decode > $CERTIFICATE_PATH
+            security -v create-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
+            security -v list-keychain -d user -s $KEYCHAIN_FILE
+            security -v list-keychains
+            security -v set-keychain-settings -lut 21600 $KEYCHAIN_FILE
+            security -v unlock-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
+            # import certificate to keychain
+            security -v import $CERTIFICATE_PATH -P $P12_PASSWORD -A -t cert -f pkcs12 -k $KEYCHAIN_FILE
+            security -v set-key-partition-list -S apple-tool:,codesign:,apple: -k $KEYCHAIN_PASSWD $KEYCHAIN_FILE
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: Set up JDK 19
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set file base name (MacOS_latest)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      # Get files created by release script
+      - name: Get tgz-tarball (MacOS_latest)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+              name: tgz-tarball
+              path: ${{ github.workspace }}
+
+      - name: List files for the space (MacOS_latest)
+        run: |
+              ls ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      - name: Uncompress source (MacOS_latest)
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+      # symlinks the compiler executables to a common location 
+      - name: Setup GNU Fortran
+        uses: fortran-lang/setup-fortran@195bac823dc6e05bb7c706311ad4540ffc34d5b9 # v1
+        id: setup-fortran
+        with:
+          compiler: gcc
+          version: 14
+
+      - name: Run CTest (MacOS_latest)
+        id: run-ctest
+        env:
+          BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
+          SIGNER: ${{ vars.SIGNER }}
+        run: |
+          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
+          cmake --workflow --preset=${{ inputs.preset_name }}-macos-Clang --fresh
+        shell: bash
+
+      - name: Sign dmg (MacOS_latest)
+        id: sign-dmg
+        env:
+          KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
+          SIGNER: ${{ vars.SIGNER }}
+          NOTARY_USER: ${{ vars.NOTARY_USER }}
+          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+        run: |
+          /usr/bin/codesign --force --timestamp --options runtime --entitlements ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/install/distribution.entitlements --verbose=4 --strict --sign ${{ env.SIGNER }} --deep ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: Check dmg timestamp (MacOS_latest)
+        run: |
+          /usr/bin/codesign -dvv ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: Verify dmg (MacOS_latest)
+        run: |
+          /usr/bin/hdiutil verify ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: Notarize dmg (MacOS_latest)
+        id: notarize-dmg
+        env:
+          KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
+          SIGNER: ${{ vars.SIGNER }}
+          NOTARY_USER: ${{ vars.NOTARY_USER }}
+          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+        run: |
+          jsonout=$(/usr/bin/xcrun notarytool submit --wait --output-format json --apple-id ${{ env.NOTARY_USER }} --password ${{ env.NOTARY_KEY }} --team-id ${{ env.SIGNER }} ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg)
+          echo "JSONOUT=$jsonout" >> $GITHUB_OUTPUT
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: Get ID token (MacOS_latest)
+        id: get-id-token
+        run: |
+          echo "notary result is ${{ fromJson(steps.notarize-dmg.outputs.JSONOUT) }}"
+          token=${{ fromJson(steps.notarize-dmg.outputs.JSONOUT).id }}
+          echo "ID_TOKEN=$token" >> "$GITHUB_OUTPUT"
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: post notary check (MacOS_latest)
+        id: post-notary
+        env:
+          KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
+          SIGNER: ${{ vars.SIGNER }}
+          NOTARY_USER: ${{ vars.NOTARY_USER }}
+          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+        run: |
+          {
+            echo 'NOTARYOUT<<EOF'
+            /usr/bin/xcrun notarytool info --apple-id ${{ env.NOTARY_USER }} --password ${{ env.NOTARY_KEY }} --team-id ${{ env.SIGNER }} ${{ steps.get-id-token.outputs.ID_TOKEN }}
+            echo EOF
+          } >> $GITHUB_OUTPUT
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: Get notary info (MacOS_latest)
+        id: get-notary-info
+        run: |
+          echo "notary info is ${{ steps.post-notary.outputs.NOTARYOUT }}."
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: Staple dmg (MacOS_latest)
+        id: staple-dmg
+        env:
+          KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
+          SIGNER: ${{ vars.SIGNER }}
+          NOTARY_USER: ${{ vars.NOTARY_USER }}
+          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+        run: |
+          /usr/bin/xcrun stapler staple ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+        continue-on-error: true
+
+      - name: Publish binary (MacOS_latest)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5"
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/LICENSE ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
+          cd "${{ runner.workspace }}/build"
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz hdf5
+        shell: bash
+
+      - name: Publish dmg binary (MacOS_latest)
+        id: publish-ctest-dmg-binary
+        run: |
+          mkdir "${{ runner.workspace }}/builddmg"
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.dmg
+        shell: bash
+
+      - name: List files in the space (MacOS_latest)
+        run: |
+              ls ${{ github.workspace }}
+              ls -l ${{ runner.workspace }}
+
+      # Save files created by CTest script
+      - name: Save published binary (MacOS_latest)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: tgz-macos14_clang-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Save published dmg binary (MacOS_latest)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: tgz-macos14_clang-dmg-binary
+              path: ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.dmg
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  build_and_test_S3_linux:
+  # Linux S3 (Ubuntu) w/ gcc
+  #
+    name: "Ubuntu gcc S3"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Dependencies (Linux S3)
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build
+
+      - name: Install CMake
+        uses: lukka/get-cmake@f5b8fbb4d77cec1acc5a5f9f0df4beffaf5d98d9 # latest
+        with:
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
+
+      - name: Install aws-c-s3 (Cached installation)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+          name: libaws-c-s3-Release
+
+      - name: Untar libaws-c-s3 installation
+        run: |
+          tar xvf libaws-c-s3.tar -C ${{ runner.workspace }}
+
+      - name: List contents of libaws-c-s3 installation
+        run: |
+          ls -lR ${{ runner.workspace }}/aws-c-s3-build
+
+      - name: Setup environment
+        shell: bash
+        run: |
+          echo "LD_LIBRARY_PATH=${{ runner.workspace }}/aws-c-s3-build/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build" >> $GITHUB_ENV
+
+      - name: Set file base name (Linux S3)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      # Get files created by release script
+      - name: Get tgz-tarball (Linux S3)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+              name: tgz-tarball
+              path: ${{ github.workspace }}
+
+      - name: List files for the space (Linux S3)
+        run: |
+              ls -l ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      - name: Uncompress source (Linux S3)
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+      - name: Run CTest (Linux S3)
+        run: |
+          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
+          cmake --workflow --preset=${{ inputs.preset_name }}-GNUC-S3 --fresh
+        shell: bash
+
+      - name: Publish binary (Linux S3)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5"
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/LICENSE ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC-S3/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC-S3/*.tar.gz ${{ runner.workspace }}/build/hdf5
+          cd "${{ runner.workspace }}/build"
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc_s3.tar.gz hdf5
+        shell: bash
+
+      - name: List files in the space (Linux S3)
+        run: |
+              ls ${{ github.workspace }}
+              ls -l ${{ runner.workspace }}
+
+      # Save files created by CTest script
+      - name: Save published binary (Linux S3)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: tgz-ubuntu-2404_gcc_s3-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc_s3.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+####### intel builds
+  build_and_test_win_intel:
+  # Windows w/ OneAPI
+  #
+    name: "Windows Intel CTest"
+    runs-on: windows-2022
+    needs: [check-secret]
+    steps:
+      - name: Install Dependencies (Windows_intel)
+        run: choco install ninja
+
+      - name: add oneAPI to env
+        uses: fortran-lang/setup-fortran@195bac823dc6e05bb7c706311ad4540ffc34d5b9 # v1
+        id: setup-fortran
+        with:
+          compiler: intel
+          version: '2025.0'
+
+      - name: Setup Java
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5.4.0
+        with:
+          java-version: 21
+          distribution: 'temurin'
+
+      - name: Install CMake
+        uses: lukka/get-cmake@f5b8fbb4d77cec1acc5a5f9f0df4beffaf5d98d9 # latest
+        with:
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
+
+      - name: Set file base name (Windows_intel)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
+
+      # Get files created by release script
+      - name: Get zip-tarball (Windows_intel)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+              name: zip-tarball
+              path: ${{ github.workspace }}
+
+      - name: using powershell
+        shell: pwsh
+        run: Get-Location
+
+      - name: List files for the space (Windows_intel)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      - name: Uncompress source (Windows_intel)
+        working-directory: ${{ github.workspace }}
+        run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
+        shell: bash
+
+      - name: Install TrustedSigning (Windows)
+        run: |
+            Invoke-WebRequest -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile .\nuget.exe
+            .\nuget.exe install Microsoft.Windows.SDK.BuildTools -Version 10.0.22621.3233 -x
+            .\nuget.exe install Microsoft.Trusted.Signing.Client -Version 1.0.86 -x
+        shell: pwsh
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: create-json
+        id: create-json
+        uses: jsdaniell/create-json@b8e77fa01397ca39cc4a6198cc29a3be5481afef # v1.2.3
+        with:
+            name: "credentials.json"
+            dir: '${{ steps.set-file-base.outputs.SOURCE_BASE }}'
+            json: '{"Endpoint": "${{ secrets.AZURE_ENDPOINT }}","CodeSigningAccountName": "${{ secrets.AZURE_CODE_SIGNING_NAME }}","CertificateProfileName": "${{ secrets.AZURE_CERT_PROFILE_NAME }}"}'
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: Run CTest (Windows_intel) with oneapi
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          
+          BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
+          SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
+        run: |
+          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
+          cmake --workflow --preset=${{ inputs.preset_name }}-win-Intel --fresh
+        shell: pwsh
+
+      - name: Sign files with Trusted Signing (Windows_intel)
+        uses: azure/trusted-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_ENDPOINT }}
+          trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+          certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+          files-folder: ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel
+          files-folder-filter: msi
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: Publish binary (Windows_intel)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5"
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/LICENSE -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/README.md -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
+          cd "${{ runner.workspace }}/build"
+          7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip hdf5
+        shell: pwsh
+
+      - name: Publish msi binary (Windows_intel)
+        id: publish-ctest-msi-binary
+        run: |
+          mkdir "${{ runner.workspace }}/buildmsi"
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/* -Destination ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.msi -Include *.msi
+        shell: pwsh
+
+      - name: List files in the space (Windows_intel)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      # Save files created by CTest script
+      - name: Save published binary (Windows_intel)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: zip-vs2022_intel-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Save published msi binary (Windows_intel)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: msi-vs2022_intel-binary
+              path: ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.msi
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  build_and_test_linux_intel:
+  # Linux (Ubuntu) w/ OneAPI
+  #
+    name: "Ubuntu Intel"
+    runs-on: ubuntu-latest
+    needs: [check-secret]
+    steps:
+      - name: Install Dependencies (Linux_intel)
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build graphviz
+
+      - name: add oneAPI to env
+        uses: fortran-lang/setup-fortran@195bac823dc6e05bb7c706311ad4540ffc34d5b9 # v1
+        id: setup-fortran
+        with:
+          compiler: intel
+          version: '2025.0'
+
+      - name: Install CMake
+        uses: lukka/get-cmake@f5b8fbb4d77cec1acc5a5f9f0df4beffaf5d98d9 # latest
+        with:
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
+
+      - name: Set file base name (Linux_intel)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      # Get files created by release script
+      - name: Get tgz-tarball (Linux_intel)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+              name: tgz-tarball
+              path: ${{ github.workspace }}
+
+      - name: List files for the space (Linux_intel)
+        run: |
+              ls -l ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      - name: Uncompress source (Linux_intel)
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+      - name: Run CTest (Linux_intel)
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+        run: |
+          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
+          cmake --workflow --preset=${{ inputs.preset_name }}-Intel --fresh
+        shell: bash
+
+      - name: Publish binary (Linux_intel)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5"
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/LICENSE ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/*.tar.gz ${{ runner.workspace }}/build/hdf5
+          cd "${{ runner.workspace }}/build"
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_intel.tar.gz hdf5
+        shell: bash
+
+      - name: List files in the space (Linux_intel)
+        run: |
+              ls ${{ github.workspace }}
+              ls -l ${{ runner.workspace }}
+
+      # Save files created by CTest script
+      - name: Save published binary (Linux_intel)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: tgz-ubuntu-2404_intel-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_intel.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

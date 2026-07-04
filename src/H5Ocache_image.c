@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -13,14 +13,12 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5Ocache_image.c
- *              June 21, 2015
- *              John Mainzer
  *
  * Purpose:     A message indicating that a metadata cache image block
- *		of the indicated length exists at the specified offset
- *		in the HDF5 file.
+ *              of the indicated length exists at the specified offset
+ *              in the HDF5 file.
  *
- * 		The mdci_msg only appears in the superblock extension.
+ *              The mdci_msg only appears in the superblock extension
  *
  *-------------------------------------------------------------------------
  */
@@ -38,9 +36,10 @@
 /* Callbacks for message class */
 static void *H5O__mdci_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags, size_t p_size,
                               const uint8_t *p);
-static herr_t H5O__mdci_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__mdci_encode(H5F_t *f, bool disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                               const void *_mesg);
 static void  *H5O__mdci_copy(const void *_mesg, void *_dest);
-static size_t H5O__mdci_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static size_t H5O__mdci_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__mdci_free(void *mesg);
 static herr_t H5O__mdci_delete(H5F_t *f, H5O_t *open_oh, void *_mesg);
 static herr_t H5O__mdci_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
@@ -73,52 +72,64 @@ const H5O_msg_class_t H5O_MSG_MDCI[1] = {{
 #define H5O_MDCI_VERSION_0 0
 
 /* Declare the free list for H5O_mdci_t's */
-H5FL_DEFINE(H5O_mdci_t);
+H5FL_DEFINE_STATIC(H5O_mdci_t);
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__mdci_decode
  *
  * Purpose:     Decode a metadata cache image  message and return a
- * 		pointer to a newly allocated H5O_mdci_t struct.
+ *              pointer to a newly allocated H5O_mdci_t struct.
  *
- * Return:      Success:        Ptr to new message in native struct.
- *              Failure:        NULL
- *
- * Programmer:  John Mainzer
- *              6/22/15
- *
+ * Return:      Success:    Pointer to new message in native struct
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
 H5O__mdci_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                 unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+                 unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_mdci_t *mesg;             /* Native message        */
-    void       *ret_value = NULL; /* Return value          */
+    H5O_mdci_t    *mesg      = NULL;           /* New cache image message */
+    const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
+    void          *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
-    /* Sanity check */
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* Version of message */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     if (*p++ != H5O_MDCI_VERSION_0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message");
 
     /* Allocate space for message */
     if (NULL == (mesg = (H5O_mdci_t *)H5FL_MALLOC(H5O_mdci_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "memory allocation failed for metadata cache image message")
+                    "memory allocation failed for metadata cache image message");
 
-    /* Decode */
+    if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     H5F_addr_decode(f, &p, &(mesg->addr));
+
+    if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     H5F_DECODE_LENGTH(f, p, mesg->size);
+
+    if (H5_addr_defined(mesg->addr) && mesg->size) {
+        if (mesg->addr >= (HADDR_UNDEF - mesg->size))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "address plus size overflows");
+        if ((mesg->addr + mesg->size) > H5F_get_eoa(f, H5FD_MEM_SUPER))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "address plus size exceeds file eoa");
+    }
 
     /* Set return value */
     ret_value = (void *)mesg;
 
 done:
+    if (!ret_value && mesg)
+        H5FL_FREE(H5O_mdci_t, mesg);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__mdci_decode() */
 
@@ -129,22 +140,20 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              6/22/15
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__mdci_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__mdci_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                 const void *_mesg)
 {
     const H5O_mdci_t *mesg = (const H5O_mdci_t *)_mesg;
 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(p);
-    HDassert(mesg);
+    assert(f);
+    assert(p);
+    assert(mesg);
 
     /* encode */
     *p++ = H5O_MDCI_VERSION_0;
@@ -163,9 +172,6 @@ H5O__mdci_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
  * Return:      Success:        Ptr to _DEST
  *              Failure:        NULL
  *
- * Programmer:  John Mainzer
- *              6/22/15
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -178,9 +184,9 @@ H5O__mdci_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(mesg);
+    assert(mesg);
     if (!dest && NULL == (dest = H5FL_MALLOC(H5O_mdci_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* copy */
     *dest = *mesg;
@@ -203,13 +209,10 @@ done:
  *
  *              Failure:        zero
  *
- * Programmer:  John Mainzer
- *              6/22/15
- *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O__mdci_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void H5_ATTR_UNUSED *_mesg)
+H5O__mdci_size(const H5F_t *f, bool H5_ATTR_UNUSED disable_shared, const void H5_ATTR_UNUSED *_mesg)
 {
     size_t ret_value = 0; /* Return value */
 
@@ -232,9 +235,6 @@ H5O__mdci_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              6/22/15
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -242,7 +242,7 @@ H5O__mdci_free(void *mesg)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(mesg);
+    assert(mesg);
 
     mesg = H5FL_FREE(H5O_mdci_t, mesg);
 
@@ -256,9 +256,6 @@ H5O__mdci_free(void *mesg)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, March 19, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -271,11 +268,11 @@ H5O__mdci_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
+    assert(f);
+    assert(mesg);
 
     /* Free file space for cache image */
-    if (H5F_addr_defined(mesg->addr)) {
+    if (H5_addr_defined(mesg->addr)) {
         /* The space for the cache image block was allocated directly
          * from the VFD layer at the end of file.  As this was the
          * last file space allocation before shutdown, the cache image
@@ -284,15 +281,15 @@ H5O__mdci_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
         if (f->shared->closing) {
             /* Get the eoa, and verify that it has the expected value */
             if (HADDR_UNDEF == (final_eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "unable to get file size")
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "unable to get file size");
 
-            HDassert(H5F_addr_eq(final_eoa, mesg->addr + mesg->size));
+            assert(H5_addr_eq(final_eoa, mesg->addr + mesg->size));
 
             if (H5FD_free(f->shared->lf, H5FD_MEM_SUPER, f, mesg->addr, mesg->size) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't free MDC image")
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't free MDC image");
         }
         else if (H5MF_xfree(f, H5FD_MEM_SUPER, mesg->addr, mesg->size) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free file space for cache image block")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free file space for cache image block");
     } /* end if */
 
 done:
@@ -306,9 +303,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              6/22/15
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -319,17 +313,17 @@ H5O__mdci_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(mdci);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(mdci);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-              "Metadata Cache Image Block address:", mdci->addr);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+            "Metadata Cache Image Block address:", mdci->addr);
 
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Metadata Cache Image Block size in bytes:", mdci->size);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+            "Metadata Cache Image Block size in bytes:", mdci->size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__mdci_debug() */

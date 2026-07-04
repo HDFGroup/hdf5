@@ -4,7 +4,7 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the COPYING file, which can be found at the root of the source code       *
+!   the LICENSE file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
@@ -25,36 +25,42 @@ PROGRAM subfiling_test
   IMPLICIT NONE
 
   INTEGER :: total_error = 0        ! sum of the number of errors
-  INTEGER :: mpierror               ! MPI hdferror flag
-  INTEGER :: mpi_rank               ! rank of the calling process in the communicator
+  INTEGER(KIND=MPI_INTEGER_KIND) :: mpierror               ! MPI hdferror flag
+  INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_rank               ! rank of the calling process in the communicator
 
 #ifdef H5_HAVE_SUBFILING_VFD
 
   CHARACTER(LEN=7), PARAMETER :: filename = "subf.h5"
 
-  INTEGER :: hdferror               ! HDF hdferror flag
-  INTEGER :: mpi_size, mpi_size_ret ! number of processes in the group of communicator
-  INTEGER :: required, provided
+  INTEGER :: hdferror                                      ! HDF hdferror flag
+  INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_size, mpi_size_ret ! number of processes in the group of communicator
+  INTEGER(KIND=MPI_INTEGER_KIND) :: required, provided
   LOGICAL :: file_exists
 
   INTEGER(HID_T) :: fapl_id
   INTEGER(HID_T) :: file_id
-  INTEGER :: comm, comm_ret
-  INTEGER :: info, info_ret
+  INTEGER(KIND=MPI_INTEGER_KIND) :: comm, comm_ret
+  INTEGER(KIND=MPI_INTEGER_KIND) :: info, info_ret
   CHARACTER(LEN=3) :: info_val
   CHARACTER(LEN=180) :: subfname
   INTEGER :: i, sum
   INTEGER(C_INT64_T) inode
   TYPE(H5FD_subfiling_config_t) :: vfd_config
   TYPE(H5FD_ioc_config_t)       :: vfd_config_ioc
-  LOGICAL :: flag
+#ifdef H5_MPI_LOGICAL_KIND
+  LOGICAL(KIND=H5_MPI_LOGICAL_KIND) :: flag
+#else
+  LOGICAL(KIND=MPI_INTEGER_KIND) :: flag
+#endif
 
   INTEGER :: nerrors = 0
 
   INTEGER(HID_T) :: driver_id
 
   CHARACTER(len=8) :: hex1, hex2
+  CHARACTER(len=1) :: arg
 
+  INTEGER(KIND=MPI_INTEGER_KIND) :: mpi_int_type
   !
   ! initialize MPI
   !
@@ -83,13 +89,15 @@ PROGRAM subfiling_test
      IF(mpi_rank==0) CALL write_test_status(sum, &
           'Testing Initializing mpi_init_thread', total_error)
      CALL MPI_Barrier(MPI_COMM_WORLD, mpierror)
-     CALL mpi_abort(MPI_COMM_WORLD, 1, mpierror)
+     CALL mpi_abort(MPI_COMM_WORLD, 1_MPI_INTEGER_KIND, mpierror)
   ENDIF
 
   !
   ! initialize the HDF5 fortran interface
   !
   CALL h5open_f(hdferror)
+
+  IF(mpi_rank==0) CALL write_test_header("SUBFILING FORTRAN TESTING")
 
   ! ***********************************
   ! Test H5Pset/get_mpi_params_f APIs
@@ -98,9 +106,9 @@ PROGRAM subfiling_test
   IF(mpi_size.GT.2)THEN
 
      IF (mpi_rank.LE.1)THEN
-        CALL MPI_Comm_split(MPI_COMM_WORLD, 1, mpi_rank, comm, mpierror)
+        CALL MPI_Comm_split(MPI_COMM_WORLD, 1_MPI_INTEGER_KIND, mpi_rank, comm, mpierror)
      ELSE
-        CALL MPI_Comm_split(MPI_COMM_WORLD, 0, mpi_rank, comm, mpierror)
+        CALL MPI_Comm_split(MPI_COMM_WORLD, 0_MPI_INTEGER_KIND, mpi_rank, comm, mpierror)
      ENDIF
 
      CALL MPI_Info_create(info, mpierror)
@@ -125,8 +133,8 @@ PROGRAM subfiling_test
            nerrors = nerrors + 1
         ENDIF
 
-        CALL mpi_info_get(info_ret,"foo", 3, info_val, flag, mpierror)
-        IF(flag .EQV. .TRUE.)THEN
+        CALL mpi_info_get(info_ret,"foo", 3_MPI_INTEGER_KIND, info_val, flag, mpierror)
+        IF(LOGICAL(flag) .EQV. LOGICAL(.TRUE.))THEN
            IF(info_val.NE."bar")THEN
               IF(mpi_rank.EQ.0) &
                    WRITE(*,*) "Failed H5Pset_mpi_params_f and H5Pget_mpi_params_f sequence"
@@ -145,7 +153,13 @@ PROGRAM subfiling_test
 
   ENDIF
 
-  CALL MPI_REDUCE(nerrors, sum, 1, MPI_INTEGER, MPI_SUM, 0, MPI_COMM_WORLD, mpierror)
+  IF(h5_sizeof(total_error).EQ.8_size_t)THEN
+     mpi_int_type=MPI_INTEGER8
+  ELSE
+     mpi_int_type=MPI_INTEGER4
+  ENDIF
+
+  CALL MPI_REDUCE(nerrors, sum, 1_MPI_INTEGER_KIND, mpi_int_type, MPI_SUM, 0_MPI_INTEGER_KIND, MPI_COMM_WORLD, mpierror)
   IF(mpi_rank==0) CALL write_test_status(sum, &
        'Testing H5Pset/get_mpi_params_f', total_error)
 
@@ -264,10 +278,10 @@ PROGRAM subfiling_test
 
   ! Testing modifying defaults for subfiling FD
 
-  vfd_config%magic = H5FD_SUBFILING_FAPL_MAGIC_F
-  vfd_config%version = H5FD_SUBFILING_CURR_FAPL_VERSION_F
+  vfd_config%magic = INT(H5FD_SUBFILING_FAPL_MAGIC_F,C_INT32_T)
+  vfd_config%version = INT(H5FD_SUBFILING_CURR_FAPL_VERSION_F,C_INT32_T)
   vfd_config%require_ioc = .TRUE.
-  vfd_config%shared_cfg%ioc_selection = SELECT_IOC_ONE_PER_NODE_F
+  vfd_config%shared_cfg%ioc_selection = INT(SELECT_IOC_ONE_PER_NODE_F,C_INT)
   vfd_config%shared_cfg%stripe_size = 16*1024*1024
   vfd_config%shared_cfg%stripe_count = 3
 
@@ -296,8 +310,8 @@ PROGRAM subfiling_test
   IF(mpi_rank==0) CALL write_test_status(nerrors, &
        'Testing H5Pset/get_fapl_subfiling_f with custom settings', total_error)
 
-  vfd_config_ioc%magic   = H5FD_IOC_FAPL_MAGIC_F
-  vfd_config_ioc%version = H5FD_IOC_CURR_FAPL_VERSION_F
+  vfd_config_ioc%magic   = INT(H5FD_IOC_FAPL_MAGIC_F,C_INT32_T)
+  vfd_config_ioc%version = INT(H5FD_IOC_CURR_FAPL_VERSION_F,C_INT32_T)
   vfd_config_ioc%thread_pool_size = 2
 
   nerrors = 0
@@ -334,10 +348,14 @@ PROGRAM subfiling_test
         WRITE(*,"(A,A)") "Failed to find the stub subfile ",TRIM(filename)
         nerrors = nerrors + 1
      ENDIF
-
-     CALL EXECUTE_COMMAND_LINE("stat --format='%i' "//filename//" >> tmp_inode", EXITSTAT=i)
+#ifdef H5_HAVE_DARWIN
+     arg(1:1)="f"
+#else
+     arg(1:1)="c"
+#endif
+     CALL EXECUTE_COMMAND_LINE("stat -"//arg(1:1)//" %i "//filename//" >> tmp_inode", EXITSTAT=i)
      IF(i.ne.0)THEN
-        WRITE(*,"(A,A)") "Failed to stat the stub  subfile ",TRIM(filename)
+        WRITE(*,"(A,A)") "Failed to stat the stub subfile ",TRIM(filename)
         nerrors = nerrors + 1
      ENDIF
 
@@ -362,12 +380,29 @@ PROGRAM subfiling_test
   IF(mpi_rank==0) CALL write_test_status(nerrors, &
        'Testing H5Fcreate with subfiling with custom settings', total_error)
 
+  ! *********************************************************
+  ! Testing H5FDsubfiling_get_file_mapping_f Fortran wrapper
+  ! *********************************************************
+
+  nerrors = 0
+  CALL test_subfiling_get_file_mapping_f(filename, nerrors, mpi_rank)
+  CALL MPI_Barrier(MPI_COMM_WORLD, mpierror)
+
+  IF(mpi_rank==0) CALL write_test_status(nerrors, &
+       'Testing H5FDsubfiling_get_file_mapping_f wrapper', total_error)
+
   !
   ! close HDF5 interface
   !
   CALL h5close_f(hdferror)
 
-  CALL MPI_ALLREDUCE(total_error, sum, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, mpierror)
+  IF(h5_sizeof(total_error).EQ.8_size_t)THEN
+     mpi_int_type=MPI_INTEGER8
+  ELSE
+     mpi_int_type=MPI_INTEGER4
+  ENDIF
+
+  CALL MPI_ALLREDUCE(total_error, sum, 1_MPI_INTEGER_KIND, mpi_int_type, MPI_SUM, MPI_COMM_WORLD, mpierror)
 
   !
   ! close MPI
@@ -379,11 +414,90 @@ PROGRAM subfiling_test
      ENDIF
   ELSE
      WRITE(*,*) 'Errors detected in process ', mpi_rank
-     CALL mpi_abort(MPI_COMM_WORLD, 1, mpierror)
+     CALL mpi_abort(MPI_COMM_WORLD, 1_MPI_INTEGER_KIND, mpierror)
      IF (mpierror .NE. MPI_SUCCESS) THEN
         WRITE(*,*) "MPI_ABORT  *FAILED* Process = ", mpi_rank
      ENDIF
   ENDIF
+
+  IF(mpi_rank==0) CALL write_test_footer()
+
+CONTAINS
+
+! **********************************************************************
+! Function:  test_subfiling_get_file_mapping_f
+!
+! Purpose:   Test the Fortran wrapper for H5FDsubfiling_get_file_mapping
+!            This is a focused test for the Fortran wrapper functionality
+!
+! Return:    none (errors incremented in nerrors)
+! **********************************************************************
+SUBROUTINE test_subfiling_get_file_mapping_f(filename, nerrors, mpi_rank)
+  IMPLICIT NONE
+
+  CHARACTER(LEN=*), INTENT(IN) :: filename
+  INTEGER, INTENT(INOUT) :: nerrors
+  INTEGER(KIND=MPI_INTEGER_KIND), INTENT(IN) :: mpi_rank
+
+  INTEGER(HID_T) :: file_id, fapl_id
+  INTEGER :: hdferror
+  INTEGER(SIZE_T) :: num_files
+
+  ! Variable declarations matching the exact interface signature
+#ifdef H5_FORTRAN_HAVE_CHAR_ALLOC
+  CHARACTER(LEN=:), ALLOCATABLE, DIMENSION(:) :: filenames
+#else
+  CHARACTER(LEN=4096), ALLOCATABLE, DIMENSION(:) :: filenames
+#endif
+
+  ! All ranks will test the API to ensure parallel consistency
+
+  ! Set up file access property list with subfiling
+  CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl_id, hdferror)
+  CALL check("h5pcreate_f", hdferror, nerrors)
+
+  CALL H5Pset_mpi_params_f(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL, hdferror)
+  CALL check("H5Pset_mpi_params_f", hdferror, nerrors)
+
+  CALL h5pset_fapl_subfiling_f(fapl_id, hdferror)
+  CALL check("h5pset_fapl_subfiling_f", hdferror, nerrors)
+
+  ! Open existing subfiling file (created earlier in the test)
+  CALL h5fopen_f(filename, H5F_ACC_RDONLY_F, file_id, hdferror, access_prp = fapl_id)
+  CALL check("h5fopen_f", hdferror, nerrors)
+
+  ! Test the Fortran wrapper for getting file mapping
+  CALL h5fdsubfiling_get_file_mapping_f(file_id, filenames, num_files, hdferror)
+  CALL check("h5fdsubfiling_get_file_mapping_f", hdferror, nerrors)
+  ! Basic validation of the Fortran wrapper functionality
+  IF (hdferror .EQ. 0) THEN
+    IF (num_files .GT. 0) THEN
+      ! Just verify we got some results and they have the expected pattern
+      IF (INDEX(filenames(1), ".subfile_") .LE. 0) THEN
+        IF (mpi_rank .EQ. 0) WRITE(*,*) "ERROR: Subfile names don't contain expected pattern"
+        nerrors = nerrors + 1
+      END IF
+    ELSE
+      IF (mpi_rank .EQ. 0) WRITE(*,*) "ERROR: No subfiles returned from Fortran wrapper"
+      nerrors = nerrors + 1
+    END IF
+
+    ! Clean up memory allocated by the Fortran wrapper
+    IF (ALLOCATED(filenames)) DEALLOCATE(filenames)
+  ELSE
+    IF (mpi_rank .EQ. 0) WRITE(*,*) "ERROR: h5fdsubfiling_get_file_mapping_f failed with hdferr =", hdferror
+    nerrors = nerrors + 1
+  END IF
+
+  ! Clean up
+  CALL h5fclose_f(file_id, hdferror)
+  CALL check("h5fclose_f", hdferror, nerrors)
+
+  CALL h5pclose_f(fapl_id, hdferror)
+  CALL check("h5pclose_f", hdferror, nerrors)
+
+END SUBROUTINE test_subfiling_get_file_mapping_f
+
   !
   ! end main program
   !
@@ -392,8 +506,13 @@ PROGRAM subfiling_test
 
   CALL mpi_init(mpierror)
   CALL mpi_comm_rank(MPI_COMM_WORLD, mpi_rank, mpierror)
-  IF(mpi_rank==0) CALL write_test_status( -1, &
-       'Subfiling not enabled', total_error)
+
+  IF(mpi_rank==0) THEN
+     CALL write_test_header("SUBFILING FORTRAN TESTING")
+     CALL write_test_status( -1, 'Subfiling not enabled', total_error)
+     CALL write_test_footer()
+  ENDIF
+
   CALL mpi_finalize(mpierror)
 
 #endif

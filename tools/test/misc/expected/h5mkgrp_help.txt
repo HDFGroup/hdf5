@@ -1,0 +1,23 @@
+usage: h5mkgrp [OPTIONS] FILE GROUP...
+   OPTIONS
+      -h, --help         Print a usage message and exit
+      -l, --latest       Use latest version of file format to create groups
+      -p, --parents      No error if existing, make parent groups as needed
+      -v, --verbose      Print information about OBJECTS and OPTIONS
+      -V, --version      Print version number and exit
+      --vol-value        Value (ID) of the VOL connector to use for opening the
+                         HDF5 file specified
+      --vol-name         Name of the VOL connector to use for opening the
+                         HDF5 file specified
+      --vol-info         VOL-specific info to pass to the VOL connector used for
+                         opening the HDF5 file specified
+                         If none of the above options are used to specify a VOL, then
+                         the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,
+                         if that environment variable is unset) will be used
+      --vfd-value        Value (ID) of the VFL driver to use for opening the
+                         HDF5 file specified
+      --vfd-name         Name of the VFL driver to use for opening the
+                         HDF5 file specified
+      --vfd-info         VFD-specific info to pass to the VFL driver used for
+                         opening the HDF5 file specified
+

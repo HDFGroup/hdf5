@@ -4,57 +4,66 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the COPYING file, which can be found at the root of the source code       *
+!   the LICENSE file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-! fortran/src/H5config_f.inc. Generated from fortran/src/H5config_f.inc.in by configure
+! fortran/H5config_f.inc. Generated from fortran/src/H5config_f.inc.cmake by CMake
 
 ! Define if there is parallel support
-#cmakedefine01 H5_HAVE_PARALLEL
-#if H5_HAVE_PARALLEL == 0
-#undef H5_HAVE_PARALLEL
-#endif
+#cmakedefine H5_HAVE_PARALLEL
+
+! Define if MPI supports mpi_f08 module
+#cmakedefine H5_HAVE_MPI_F08
 
 ! Define if there is subfiling support
-#cmakedefine01 H5_HAVE_SUBFILING_VFD
-#if H5_HAVE_SUBFILING_VFD == 0
-#undef H5_HAVE_SUBFILING_VFD
-#endif
+#cmakedefine H5_HAVE_SUBFILING_VFD
+
+! Define if on APPLE
+#cmakedefine H5_HAVE_DARWIN
 
 ! Define if the intrinsic function STORAGE_SIZE exists
-#define H5_FORTRAN_HAVE_STORAGE_SIZE @H5_FORTRAN_HAVE_STORAGE_SIZE@
+#cmakedefine H5_FORTRAN_HAVE_STORAGE_SIZE
 
 ! Define if the intrinsic function SIZEOF exists
-#define H5_FORTRAN_HAVE_SIZEOF @H5_FORTRAN_HAVE_SIZEOF@
+#cmakedefine H5_FORTRAN_HAVE_SIZEOF
 
 ! Define if the intrinsic function C_SIZEOF exists
-#define H5_FORTRAN_HAVE_C_SIZEOF @H5_FORTRAN_HAVE_C_SIZEOF@
+#cmakedefine H5_FORTRAN_HAVE_C_SIZEOF
 
-! Define if the intrinsic C_LONG_DOUBLE exists
-#define H5_FORTRAN_HAVE_C_LONG_DOUBLE @H5_FORTRAN_HAVE_C_LONG_DOUBLE@
+! Define if allocatable character is supported
+#cmakedefine H5_FORTRAN_HAVE_CHAR_ALLOC
+
+! Define if the intrinsic function C_LONG_DOUBLE exists
+#cmakedefine H5_FORTRAN_HAVE_C_LONG_DOUBLE
 
 ! Define if Fortran C_LONG_DOUBLE is different from C_DOUBLE
-#define H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE @H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE@
+#cmakedefine H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
 
-! Define if the intrinsic module ISO_FORTRAN_ENV exists
-#define H5_HAVE_ISO_FORTRAN_ENV @H5_HAVE_ISO_FORTRAN_ENV@
+! Define if Fortran C_BOOL is different from default LOGICAL
+#cmakedefine H5_FORTRAN_C_BOOL_IS_UNIQUE
 
-! should this be ${HDF_PREFIX} instead of H5 MSB
+! Define  MPI Fortran KIND of LOGICAL
+#cmakedefine H5_MPI_LOGICAL_KIND @H5_MPI_LOGICAL_KIND@
+
+! Define if Fortran supports ISO_FORTRAN_ENV (F08)
+#cmakedefine H5_HAVE_ISO_FORTRAN_ENV
+
+! Define the size of C's double
 #define H5_SIZEOF_DOUBLE @H5_SIZEOF_DOUBLE@
 
-! should this be ${HDF_PREFIX} instead of H5 MSB
+! Define the size of C's long double
 #define H5_SIZEOF_LONG_DOUBLE @H5_SIZEOF_LONG_DOUBLE@
 
 ! Define the maximum decimal precision for reals
 #define H5_PAC_FC_MAX_REAL_PRECISION @H5_PAC_FC_MAX_REAL_PRECISION@
 
 ! If C has quad precision
-#define H5_HAVE_FLOAT128 @H5_HAVE_FLOAT128@
+#cmakedefine H5_HAVE_FLOAT128
 
 ! Define if INTEGER*16 is available
-#define H5_HAVE_Fortran_INTEGER_SIZEOF_16 @H5_HAVE_Fortran_INTEGER_SIZEOF_16@
+#cmakedefine H5_HAVE_Fortran_INTEGER_SIZEOF_16
 
 ! Maximum decimal precision for C
 #define H5_PAC_C_MAX_REAL_PRECISION @H5_PAC_C_MAX_REAL_PRECISION@
@@ -76,3 +85,25 @@
 
 ! Fortran compiler id
 #define H5_Fortran_COMPILER_ID @CMAKE_Fortran_COMPILER_ID@
+
+! Define if deprecated public API symbols are disabled
+#cmakedefine H5_NO_DEPRECATED_SYMBOLS
+
+! For major interface/format changes
+#define H5_VERS_MAJOR @H5_VERS_MAJOR@
+
+! For minor interface/format changes
+#define H5_VERS_MINOR @H5_VERS_MINOR@
+
+! For tweaks, bug-fixes, or development
+#define H5_VERS_RELEASE @H5_VERS_RELEASE@
+
+! macros for comparing versions
+#define H5_VERSION_GE(Maj, Min, Rel)                                                   \
+    (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) && (H5_VERS_RELEASE >= Rel)) || \
+     ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR > Min)) || (H5_VERS_MAJOR > Maj))
+
+#define H5_VERSION_LE(Maj, Min, Rel)                                                   \
+    (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) && (H5_VERS_RELEASE <= Rel)) || \
+     ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR < Min)) || (H5_VERS_MAJOR < Maj))
+

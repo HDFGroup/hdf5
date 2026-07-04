@@ -4,16 +4,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Mohamad Chaarawi
- *              February 2015
- *
  * Purpose: This test creates a file and a bunch of objects in the
  * file and then calls MPI_Finalize without closing anything. The
  * library should exercise the attribute callback destroy attached to
@@ -22,11 +19,18 @@
  * all created objects are there.
  */
 
-#include "testphdf5.h"
+#include "testpar.h"
+
+#define RANK       2
+#define ROW_FACTOR 8  /* Nominal row factor for dataset size */
+#define COL_FACTOR 16 /* Nominal column factor for dataset size */
+
+/* Dataset data type.  Int's can be easily octo dumped. */
+typedef int DATATYPE;
 
 int nerrors = 0; /* errors count */
 
-const char *FILENAME[] = {"shutdown", NULL};
+static const char *FILENAME[] = {"shutdown", NULL};
 
 int
 main(int argc, char **argv)
@@ -44,10 +48,43 @@ main(int argc, char **argv)
     hsize_t   stride[RANK];
     hsize_t   block[RANK];
     DATATYPE *data_array = NULL; /* data buffer */
+    int       mpi_code;
+#ifdef H5_HAVE_TEST_API
+    int required = MPI_THREAD_MULTIPLE;
+    int provided;
+#endif
 
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(comm, &mpi_size);
-    MPI_Comm_rank(comm, &mpi_rank);
+#ifdef H5_HAVE_TEST_API
+    /* Attempt to initialize with MPI_THREAD_MULTIPLE if possible */
+    if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(&argc, &argv, required, &provided))) {
+        printf("MPI_Init_thread failed with error code %d\n", mpi_code);
+        return -1;
+    }
+#else
+    if (MPI_SUCCESS != (mpi_code = MPI_Init(&argc, &argv))) {
+        printf("MPI_Init failed with error code %d\n", mpi_code);
+        return -1;
+    }
+#endif
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &mpi_rank))) {
+        printf("MPI_Comm_rank failed with error code %d\n", mpi_code);
+        MPI_Finalize();
+        return -1;
+    }
+
+#ifdef H5_HAVE_TEST_API
+    /* Warn about missing MPI_THREAD_MULTIPLE support */
+    if ((provided < required) && MAINPROCESS)
+        printf("** MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE **\n");
+#endif
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(comm, &mpi_size))) {
+        if (MAINPROCESS)
+            printf("MPI_Comm_size failed with error code %d\n", mpi_code);
+        MPI_Finalize();
+        return -1;
+    }
 
     if (MAINPROCESS)
         TESTING("proper shutdown of HDF5 library");
@@ -55,6 +92,25 @@ main(int argc, char **argv)
     /* Set up file access property list with parallel I/O access */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     VRFY((fapl >= 0), "H5Pcreate succeeded");
+
+    /* Get the capability flag of the VOL connector being used */
+    ret = H5Pget_vol_cap_flags(fapl, &vol_cap_flags_g);
+    VRFY((ret >= 0), "H5Pget_vol_cap_flags succeeded");
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf(
+                "    API functions for basic file, group, or dataset aren't supported with this connector\n");
+            fflush(stdout);
+        }
+
+        MPI_Finalize();
+        return 0;
+    }
+
     ret = H5Pset_fapl_mpio(fapl, comm, info);
     VRFY((ret >= 0), "");
 
@@ -73,8 +129,8 @@ main(int argc, char **argv)
     VRFY((dset_id >= 0), "H5Dcreate succeeded");
 
     /* allocate memory for data buffer */
-    data_array = (DATATYPE *)HDmalloc(dims[0] * dims[1] * sizeof(DATATYPE));
-    VRFY((data_array != NULL), "data_array HDmalloc succeeded");
+    data_array = (DATATYPE *)malloc(dims[0] * dims[1] * sizeof(DATATYPE));
+    VRFY((data_array != NULL), "data_array malloc succeeded");
 
     /* Each process takes a slabs of rows. */
     block[0]  = dims[0] / (hsize_t)mpi_size;
@@ -103,11 +159,9 @@ main(int argc, char **argv)
 
     /* release data buffers */
     if (data_array)
-        HDfree(data_array);
+        free(data_array);
 
     MPI_Finalize();
-
-    nerrors += GetTestNumErrs();
 
     if (MAINPROCESS) {
         if (0 == nerrors)

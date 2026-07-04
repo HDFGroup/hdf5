@@ -1,4 +1,9 @@
-cmake_minimum_required (VERSION 3.18)
+# CMake configuration for building and testing the h5dump tool
+# Configures dynamic plugin library for h5dump if shared builds are enabled
+# Sets up include directories, linking, and formatting for plugin targets
+# Includes test scripts for h5dump, PBITS, VDS, and XML if test tools and serial tests are enabled
+
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_TOOLS_TEST_H5DUMP C)
 
 #-----------------------------------------------------------------------------
@@ -35,26 +40,11 @@ if (BUILD_SHARED_LIBS)
             "$<TARGET_FILE:${H5DUMP_TOOL_PLUGIN_LIB_TARGET}>"
             "${CMAKE_BINARY_DIR}/plugins/$<TARGET_FILE_NAME:${H5DUMP_TOOL_PLUGIN_LIB_TARGET}>"
   )
-endif ()
-
-# --------------------------------------------------------------------
-# Add the h5dump test executable
-# --------------------------------------------------------------------
-if (HDF5_BUILD_GENERATORS AND BUILD_STATIC_LIBS)
-  add_executable (h5dumpgentest ${HDF5_TOOLS_TEST_H5DUMP_SOURCE_DIR}/h5dumpgentest.c)
-  target_include_directories (h5dumpgentest PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_TEST_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-  TARGET_C_PROPERTIES (h5dumpgentest STATIC)
-  target_link_libraries (h5dumpgentest PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
-  set_target_properties (h5dumpgentest PROPERTIES FOLDER generator/tools)
 
   #-----------------------------------------------------------------------------
-  # Add Target to clang-format
+  # Sign the plugin if signature verification is enabled
   #-----------------------------------------------------------------------------
-  if (HDF5_ENABLE_FORMATTERS)
-    clang_format (HDF5_TOOLS_TEST_H5DUMP_FORMAT h5dumpgentest)
-  endif ()
-
-  #add_test (NAME h5dumpgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dumpgentest>)
+  sign_plugin_target(${H5DUMP_TOOL_PLUGIN_LIB_TARGET} "${CMAKE_BINARY_DIR}/plugins")
 endif ()
 
 if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)

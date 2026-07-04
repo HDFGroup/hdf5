@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -297,7 +297,7 @@ test_attr_getname(FileAccPropList &fapl)
         // 1. With arbitrary buf_size that is larger than the name size
         size_t buf_size    = FATTR1_NAME.length() + 10;
         char  *fattr1_name = new char[buf_size + 1];
-        HDmemset(fattr1_name, 0, buf_size + 1);
+        memset(fattr1_name, 0, buf_size + 1);
         ssize_t name_size = 0; // actual length of attribute name
         name_size         = fattr1.getName(fattr1_name, buf_size + 1);
         CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
@@ -312,7 +312,7 @@ test_attr_getname(FileAccPropList &fapl)
         buf_size           = 4;
         char short_name[5] = "File"; // to verify the read name
         fattr1_name        = new char[buf_size + 1];
-        HDmemset(fattr1_name, 0, buf_size + 1);
+        memset(fattr1_name, 0, buf_size + 1);
         name_size = fattr1.getName(fattr1_name, buf_size + 1);
         CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
         verify_val(static_cast<size_t>(name_size), FATTR1_NAME.size(), "Attribute::getName", __LINE__,
@@ -324,7 +324,7 @@ test_attr_getname(FileAccPropList &fapl)
         // 3. With a buf_size that equals the name's length.
         buf_size    = FATTR1_NAME.length();
         fattr1_name = new char[buf_size + 1];
-        HDmemset(fattr1_name, 0, buf_size + 1);
+        memset(fattr1_name, 0, buf_size + 1);
         name_size = fattr1.getName(fattr1_name, buf_size + 1);
         CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
         verify_val(fattr1_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
@@ -531,7 +531,7 @@ test_attr_basic_read(FileAccPropList &fapl)
 
         // Verify the correct number of attributes another way
         H5O_info2_t oinfo;
-        HDmemset(&oinfo, 0, sizeof(oinfo));
+        memset(&oinfo, 0, sizeof(oinfo));
         dataset.getObjinfo(oinfo, H5O_INFO_NUM_ATTRS);
         verify_val(static_cast<long>(oinfo.num_attrs), 3, "DataSet::getObjinfo", __LINE__, __FILE__);
 
@@ -560,7 +560,7 @@ test_attr_basic_read(FileAccPropList &fapl)
         verify_val(num_attrs, 1, "Group::getNumAttrs", __LINE__, __FILE__);
 
         // Verify the correct number of attributes another way
-        HDmemset(&oinfo, 0, sizeof(oinfo));
+        memset(&oinfo, 0, sizeof(oinfo));
         group.getObjinfo(oinfo, H5O_INFO_NUM_ATTRS);
         verify_val(static_cast<long>(oinfo.num_attrs), 1, "Group::getObjinfo", __LINE__, __FILE__);
 
@@ -632,7 +632,7 @@ test_attr_compound_write(FileAccPropList &fapl)
         hsize_t   dims2[] = {ATTR4_DIM1, ATTR4_DIM2};
         DataSpace sid2(ATTR4_RANK, dims2);
 
-        // Create complex attribute for the dataset
+        // Create compound attribute for the dataset
         Attribute attr = dataset.createAttribute(ATTR4_NAME, comp_type, sid2);
 
         // Try to create the same attribute again (should fail)
@@ -643,7 +643,7 @@ test_attr_compound_write(FileAccPropList &fapl)
         {
         } // do nothing, exception expected
 
-        // Write complex attribute data
+        // Write compound attribute data
         attr.write(comp_type, attr_data4);
 
         PASSED();
@@ -686,7 +686,7 @@ test_attr_compound_read(FileAccPropList &fapl)
 
         // Verify the correct number of attributes another way
         H5O_info2_t oinfo;
-        HDmemset(&oinfo, 0, sizeof(oinfo));
+        memset(&oinfo, 0, sizeof(oinfo));
         dataset.getObjinfo(oinfo, H5O_INFO_NUM_ATTRS);
         verify_val(static_cast<long>(oinfo.num_attrs), 1, "DataSet::getObjinfo", __LINE__, __FILE__);
 
@@ -789,7 +789,7 @@ test_attr_compound_read(FileAccPropList &fapl)
         hsize_t ii, jj;
         for (ii = 0; ii < ATTR4_DIM1; ii++)
             for (jj = 0; jj < ATTR4_DIM2; jj++)
-                if (HDmemcmp(&attr_data4[ii][jj], &read_data4[ii][jj], sizeof(struct attr4_struct)) != 0) {
+                if (memcmp(&attr_data4[ii][jj], &read_data4[ii][jj], sizeof(struct attr4_struct)) != 0) {
                     TestErrPrintf("%d:attribute data different: attr_data4[%" PRIuHSIZE "][%" PRIuHSIZE
                                   "].i=%d, "
                                   "read_data4[%" PRIuHSIZE "][%" PRIuHSIZE "].i=%d\n",
@@ -1406,17 +1406,23 @@ test_attr_dtype_shared(FileAccPropList &fapl)
     SUBTEST("Shared Datatypes with Attributes");
 
     try {
+        h5_stat_size_t empty_filesize        = 0; // Size of empty file
+        bool           is_default_vfd_compat = false;
+
         // Create a file
         H5File fid1(FILE_DTYPE, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
 
         // Close file
         fid1.close();
 
-        // Get size of file
-        h5_stat_size_t empty_filesize; // Size of empty file
-        empty_filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
-        if (empty_filesize < 0)
-            TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
+        h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &is_default_vfd_compat);
+
+        if (is_default_vfd_compat) {
+            // Get size of file
+            empty_filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
+            if (empty_filesize < 0)
+                TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
+        }
 
         // Open the file again
         fid1.openFile(FILE_DTYPE, H5F_ACC_RDWR);
@@ -1533,10 +1539,12 @@ test_attr_dtype_shared(FileAccPropList &fapl)
         // Close file
         fid1.close();
 
-        // Check size of file
-        filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
-        verify_val(static_cast<long>(filesize), static_cast<long>(empty_filesize), "Checking file size",
-                   __LINE__, __FILE__);
+        if (is_default_vfd_compat) {
+            // Check size of file
+            filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
+            verify_val(static_cast<long>(filesize), static_cast<long>(empty_filesize), "Checking file size",
+                       __LINE__, __FILE__);
+        }
 
         PASSED();
     } // end try block
@@ -1604,7 +1612,7 @@ test_string_attr(FileAccPropList &fapl)
         // Read and verify the attribute string as a string of chars.
         char flstring_att_check[ATTR_LEN];
         gr_flattr1.read(fls_type, flstring_att_check);
-        if (HDstrcmp(flstring_att_check, ATTRSTR_DATA.c_str()) != 0)
+        if (strcmp(flstring_att_check, ATTRSTR_DATA.c_str()) != 0)
             TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,flstring_att_check=%s\n",
                           __LINE__, ATTRSTR_DATA.c_str(), flstring_att_check);
 
@@ -1614,7 +1622,7 @@ test_string_attr(FileAccPropList &fapl)
         char  *fl_dyn_string_att_check;
         fl_dyn_string_att_check = new char[attr_size + 1];
         gr_flattr1.read(fls_type, fl_dyn_string_att_check);
-        if (HDstrcmp(fl_dyn_string_att_check, ATTRSTR_DATA.c_str()) != 0)
+        if (strcmp(fl_dyn_string_att_check, ATTRSTR_DATA.c_str()) != 0)
             TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,flstring_att_check=%s\n",
                           __LINE__, ATTRSTR_DATA.c_str(), fl_dyn_string_att_check);
         delete[] fl_dyn_string_att_check;
@@ -1629,9 +1637,9 @@ test_string_attr(FileAccPropList &fapl)
                           ATTRSTR_DATA.c_str(), read_flstr1.c_str());
 
         // Read and verify the attribute string as a string of chars.
-        HDstrcpy(flstring_att_check, "");
+        strcpy(flstring_att_check, "");
         gr_flattr2.read(fls_type, flstring_att_check);
-        if (HDstrcmp(flstring_att_check, ATTRSTR_DATA.c_str()) != 0)
+        if (strcmp(flstring_att_check, ATTRSTR_DATA.c_str()) != 0)
             TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,flstring_att_check=%s\n",
                           __LINE__, ATTRSTR_DATA.c_str(), flstring_att_check);
 
@@ -1660,10 +1668,10 @@ test_string_attr(FileAccPropList &fapl)
         // Read and verify the attribute string as a string of chars.
         char *string_att_check;
         gr_vlattr.read(vls_type, &string_att_check);
-        if (HDstrcmp(string_att_check, ATTRSTR_DATA.c_str()) != 0)
+        if (strcmp(string_att_check, ATTRSTR_DATA.c_str()) != 0)
             TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,string_att_check=%s\n",
                           __LINE__, ATTRSTR_DATA.c_str(), string_att_check);
-        HDfree(string_att_check);
+        free(string_att_check);
 
         /* Test Attribute::read(...,H5std_string& strg) with VL string */
         // Read and verify the attribute string as an std::string.
@@ -1948,8 +1956,10 @@ test_attr_corder_create_basic(FileCreatPropList &fcpl, FileAccPropList &fapl)
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_attr()
+test_attr(void *params)
 {
+    (void)params;
+
     // Output message about test being performed
     MESSAGE(5, ("Testing Attributes\n"));
 
@@ -1975,7 +1985,7 @@ test_attr()
 
         // Loop over using new group format
         unsigned new_format;
-        for (new_format = FALSE; new_format <= TRUE; new_format++) {
+        for (new_format = false; new_format <= true; new_format++) {
             FileAccPropList curr_fapl;
 
             // Set the file access proplist for the type of format
@@ -1993,8 +2003,8 @@ test_attr()
             test_attr_rename(curr_fapl);      // Test renaming attribute
             test_attr_basic_read(curr_fapl);  // Test basic H5A reading code
 
-            test_attr_compound_write(curr_fapl); // Test complex datatype H5A writing code
-            test_attr_compound_read(curr_fapl);  // Test complex datatype H5A reading code
+            test_attr_compound_write(curr_fapl); // Test compound datatype H5A writing code
+            test_attr_compound_read(curr_fapl);  // Test compound datatype H5A reading code
 
             test_attr_scalar_write(curr_fapl); // Test scalar dataspace H5A writing code
             test_attr_scalar_read(curr_fapl);  // Test scalar dataspace H5A reading code
@@ -2033,12 +2043,16 @@ test_attr()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-cleanup_attr()
+cleanup_attr(void *params)
 {
-    HDremove(FILE_BASIC.c_str());
-    HDremove(FILE_COMPOUND.c_str());
-    HDremove(FILE_SCALAR.c_str());
-    HDremove(FILE_MULTI.c_str());
-    HDremove(FILE_DTYPE.c_str());
-    HDremove(FILE_CRTPROPS.c_str());
+    (void)params;
+
+    if (GetTestCleanup()) {
+        HDremove(FILE_BASIC.c_str());
+        HDremove(FILE_COMPOUND.c_str());
+        HDremove(FILE_SCALAR.c_str());
+        HDremove(FILE_MULTI.c_str());
+        HDremove(FILE_DTYPE.c_str());
+        HDremove(FILE_CRTPROPS.c_str());
+    }
 }

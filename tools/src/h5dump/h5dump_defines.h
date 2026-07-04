@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -28,18 +28,18 @@
         else {                                                                                               \
             PRINTSTREAM(rawoutstream, "%s %s", (obj), (begin));                                              \
         }                                                                                                    \
-    } while (0);
+    } while (0)
 
 #define end_obj(obj, end)                                                                                    \
     do {                                                                                                     \
-        if (HDstrlen(end)) {                                                                                 \
+        if (strlen(end)) {                                                                                   \
             PRINTSTREAM(rawoutstream, "%s", end);                                                            \
-            if (HDstrlen(obj))                                                                               \
+            if (strlen(obj))                                                                                 \
                 PRINTVALSTREAM(rawoutstream, " ");                                                           \
         }                                                                                                    \
-        if (HDstrlen(obj))                                                                                   \
+        if (strlen(obj))                                                                                     \
             PRINTSTREAM(rawoutstream, "%s", obj);                                                            \
-    } while (0);
+    } while (0)
 
 /* 3 private values: can't be set, but can be read.
    Note: these are defined in H5Zprivate, they are

@@ -4,7 +4,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -29,10 +29,9 @@ set_tests_properties (HL_CPP_ptableTest-clear-objects PROPERTIES
 )
 
 if (HDF5_ENABLE_USING_MEMCHECKER)
-  add_test (NAME HL_CPP_ptableTest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:hl_ptableTest>)
+  add_test (NAME HL_CPP_ptableTest COMMAND $<TARGET_FILE:hl_ptableTest>)
 else ()
   add_test (NAME HL_CPP_ptableTest COMMAND "${CMAKE_COMMAND}"
-      -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -D "TEST_PROGRAM=$<TARGET_FILE:hl_ptableTest>"
       -D "TEST_ARGS:STRING="
       -D "TEST_EXPECT=0"
@@ -43,7 +42,12 @@ else ()
       -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
 endif ()
-set_tests_properties (HL_CPP_ptableTest PROPERTIES DEPENDS HL_CPP_ptableTest-clear-objects)
+set_tests_properties (HL_CPP_ptableTest PROPERTIES
+    DEPENDS HL_CPP_ptableTest-clear-objects
+)
+if ("HL_CPP_ptableTest" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+  set_tests_properties (HL_CPP_ptableTest PROPERTIES DISABLED true)
+endif ()
 add_test (
     NAME HL_CPP_ptableTest-clean-objects
     COMMAND    ${CMAKE_COMMAND}
@@ -53,3 +57,4 @@ set_tests_properties (HL_CPP_ptableTest-clean-objects PROPERTIES
     DEPENDS HL_CPP_ptableTest
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
 )
+

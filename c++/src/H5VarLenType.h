@@ -5,7 +5,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -21,7 +21,7 @@ namespace H5 {
     Variable-length Datatypes.
 */
 //  Inheritance: DataType -> H5Object -> H5Location -> IdComponent
-class H5_DLLCPP VarLenType : public DataType {
+class H5CPP_DLL VarLenType : public DataType {
   public:
     // Constructor that creates a variable-length datatype based
     // on the specified base type.
@@ -52,7 +52,7 @@ class H5_DLLCPP VarLenType : public DataType {
     VarLenType(const H5Location &loc, const H5std_string &name);
 
     // Noop destructor
-    virtual ~VarLenType() override;
+    virtual ~VarLenType() override = default;
 
     // Default constructor
     VarLenType();

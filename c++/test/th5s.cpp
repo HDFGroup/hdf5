@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -83,20 +83,6 @@ int space5_data = 7;
  * Purpose      Test basic H5S (dataspace) code
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Mar 2001
- *
- * Modifications:
- *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *              cases.  Since there are no operator<< for 'long long'
- *              or int64 in VS C++ ostream, I casted the hssize_t values
- *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specifically handled
- *              with a special routine.
- *     April 12, 2011: Raymond Lu
- *              Starting from the 1.8.7 release, we allow dimension
- *              size to be zero.  So I took out the test against it.
  *-------------------------------------------------------------------------
  */
 static void
@@ -130,8 +116,8 @@ test_h5s_basic()
         hsize_t tdims[4]; // Dimension array to test with
         ndims = sid1.getSimpleExtentDims(tdims);
         verify_val(ndims, SPACE1_RANK, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
-        verify_val(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(unsigned)), 0,
-                   "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
+        verify_val(memcmp(tdims, dims1, SPACE1_RANK * sizeof(unsigned)), 0, "DataSpace::getSimpleExtentDims",
+                   __LINE__, __FILE__);
 
         // Create simple dataspace sid2
         hsize_t   max2[] = {SPACE2_MAX1, SPACE2_MAX2, SPACE2_MAX3, SPACE2_MAX4};
@@ -149,9 +135,9 @@ test_h5s_basic()
         // Retrieves dimension size and max size of dataspace sid2 and
         // verify them
         ndims = sid2.getSimpleExtentDims(tdims, tmax);
-        verify_val(HDmemcmp(tdims, dims2, SPACE2_RANK * sizeof(unsigned)), 0,
-                   "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
-        verify_val(HDmemcmp(tmax, max2, SPACE2_RANK * sizeof(unsigned)), 0, "DataSpace::getSimpleExtentDims",
+        verify_val(memcmp(tdims, dims2, SPACE2_RANK * sizeof(unsigned)), 0, "DataSpace::getSimpleExtentDims",
+                   __LINE__, __FILE__);
+        verify_val(memcmp(tmax, max2, SPACE2_RANK * sizeof(unsigned)), 0, "DataSpace::getSimpleExtentDims",
                    __LINE__, __FILE__);
 
         // Check to be sure we can't create a simple data space that has too
@@ -219,17 +205,6 @@ test_h5s_basic()
  * Purpose      Test scalar H5S (dataspace) writing code
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Mar 2001
- *
- * Modifications:
- *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *              cases.  Since there are no operator<< for 'long long'
- *              or int64 in VS C++ ostream, I casted the hssize_t values
- *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specifically handled
- *              with a special routine.
  *-------------------------------------------------------------------------
  */
 static void
@@ -283,17 +258,6 @@ test_h5s_scalar_write()
  * Purpose      Test scalar H5S (dataspace) reading code
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Mar 2001
- *
- * Modifications:
- *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *              cases.  Since there are no operator<< for 'long long'
- *              or int64 in VS C++ ostream, I casted the hssize_t values
- *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specifically handled
- *              with a special routine.
  *-------------------------------------------------------------------------
  */
 static void
@@ -344,17 +308,6 @@ test_h5s_scalar_read()
  * Purpose      Test null H5S (dataspace) code
  *
  * Return       None
- *
- * Programmer   Raymond Lu (using C version)
- *              May 18, 2004
- *
- * Modifications:
- *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *              cases.  Since there are no operator<< for 'long long'
- *              or int64 in VS C++ ostream, I casted the hssize_t values
- *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specifically handled
- *              with a special routine.
  *-------------------------------------------------------------------------
  */
 static void
@@ -398,17 +351,6 @@ test_h5s_null()
  *              datatypes
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Mar 2001
- *
- * Modifications:
- *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *              cases.  Since there are no operator<< for 'long long'
- *              or int64 in VS C++ ostream, I casted the hssize_t values
- *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specifically handled
- *              with a special routine.
  *-------------------------------------------------------------------------
  */
 static void
@@ -466,17 +408,6 @@ test_h5s_compound_scalar_write()
  *              datatypes
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Mar 2001
- *
- * Modifications:
- *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *              cases.  Since there are no operator<< for 'long long'
- *              or int64 in VS C++ ostream, I casted the hssize_t values
- *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specifically handled
- *              with a special routine.
  *-------------------------------------------------------------------------
  */
 static void
@@ -513,7 +444,7 @@ test_h5s_compound_scalar_read()
         dataset.read(&rdata, type);
 
         // Verify read data
-        if (HDmemcmp(&space4_data, &rdata, sizeof(struct space4_struct)) != 0) {
+        if (memcmp(&space4_data, &rdata, sizeof(struct space4_struct)) != 0) {
             cerr << "scalar data different: space4_data.c1=" << space4_data.c1
                  << ", read_data4.c1=" << rdata.c1 << endl;
             cerr << "scalar data different: space4_data.u=" << space4_data.u << ", read_data4.u=" << rdata.u
@@ -537,14 +468,13 @@ test_h5s_compound_scalar_read()
  * Purpose      Main dataspace testing routine
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Mar 2001
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_h5s()
+test_h5s(void *params)
 {
+    (void)params;
+
     // Output message about test being performed
     MESSAGE(5, ("Testing Dataspaces\n"));
 
@@ -565,7 +495,11 @@ test_h5s()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-cleanup_h5s()
+cleanup_h5s(void *params)
 {
-    HDremove(DATAFILE.c_str());
+    (void)params;
+
+    if (GetTestCleanup()) {
+        HDremove(DATAFILE.c_str());
+    }
 } // cleanup_h5s

@@ -4,16 +4,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Neil Fortner
- *              March 10, 2014
- *
  * Purpose:     Test H5Dwrite_multi() and H5Dread_multi using randomized
  *              parameters in parallel.  Also tests H5Dwrite() and H5Dread()
  *              using a similar method.
@@ -71,8 +68,8 @@ unsigned seed;
 int nerrors = 0;
 
 /* Whether these filters are available */
-htri_t deflate_avail    = FALSE;
-htri_t fletcher32_avail = FALSE;
+htri_t deflate_avail    = false;
+htri_t fletcher32_avail = false;
 
 /*-------------------------------------------------------------------------
  * Function:    test_pmdset
@@ -91,10 +88,6 @@ htri_t fletcher32_avail = FALSE;
  *              way that the shapesame code is not designed to handle.
  *
  * Return:      Number of errors
- *
- * Programmer:  Neil Fortner
- *              Monday, March 10, 2014
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -109,10 +102,10 @@ test_pmdset(size_t niter, unsigned flags)
     size_t         max_dsets;
     size_t         buf_size;
     size_t         ndsets;
-    hid_t          file_id = -1;
-    hid_t          fapl_id = -1;
+    hid_t          file_id = H5I_INVALID_HID;
+    hid_t          fapl_id = H5I_INVALID_HID;
     hid_t          dcpl_id[MAX_DSETS];
-    hid_t          dxpl_id = -1;
+    hid_t          dxpl_id = H5I_INVALID_HID;
     hsize_t        dset_dims[MAX_DSETS][3];
     hsize_t        chunk_dims[2];
     hsize_t        max_dims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
@@ -126,9 +119,9 @@ test_pmdset(size_t niter, unsigned flags)
     unsigned      *efbufi[MAX_DSETS][MAX_DSET_X];
     unsigned char *dset_usage;
     unsigned char *dset_usagei[MAX_DSETS][MAX_DSET_X];
-    hbool_t        do_read;
-    hbool_t        last_read;
-    hbool_t        overlap;
+    bool           do_read;
+    bool           last_read;
+    bool           overlap;
     hsize_t        start[MAX_HS][3];
     hsize_t        count[MAX_HS][3];
     hsize_t        points[3 * MAX_POINTS];
@@ -160,15 +153,15 @@ test_pmdset(size_t niter, unsigned flags)
         dcpl_id[i] = -1;
 
     /* Allocate buffers */
-    if (NULL == (rbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (rbuf = (unsigned *)malloc(buf_size)))
         T_PMD_ERROR;
-    if (NULL == (erbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (erbuf = (unsigned *)malloc(buf_size)))
         T_PMD_ERROR;
-    if (NULL == (wbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (wbuf = (unsigned *)malloc(buf_size)))
         T_PMD_ERROR;
-    if (NULL == (efbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (efbuf = (unsigned *)malloc(buf_size)))
         T_PMD_ERROR;
-    if (NULL == (dset_usage = (unsigned char *)HDmalloc(max_dsets * MAX_DSET_X * MAX_DSET_Y)))
+    if (NULL == (dset_usage = (unsigned char *)malloc(max_dsets * MAX_DSET_X * MAX_DSET_Y)))
         T_PMD_ERROR;
 
     /* Initialize buffer indices */
@@ -274,7 +267,7 @@ test_pmdset(size_t niter, unsigned flags)
     for (i = 0; i < niter; i++) {
         /* Determine number of datasets */
         ndsets = (flags & MDSET_FLAG_MLAYOUT) ? 3
-                 : (flags & MDSET_FLAG_MDSET) ? (size_t)((size_t)HDrandom() % max_dsets) + 1
+                 : (flags & MDSET_FLAG_MDSET) ? (size_t)((size_t)h5_local_rand() % max_dsets) + 1
                                               : 1;
 
         /* Create file */
@@ -283,20 +276,20 @@ test_pmdset(size_t niter, unsigned flags)
 
         /* Create datasets */
         for (j = 0; j < ndsets; j++) {
-            hbool_t use_chunk =
+            bool use_chunk =
                 (flags & MDSET_FLAG_CHUNK) || ((flags & MDSET_FLAG_MLAYOUT) && (j == 1 || j == 2));
 
             /* Generate file dataspace */
-            dset_dims[j][0] = (hsize_t)((HDrandom() % MAX_DSET_X) + 1);
-            dset_dims[j][1] = (hsize_t)((HDrandom() % MAX_DSET_Y) + 1);
+            dset_dims[j][0] = (hsize_t)((h5_local_rand() % MAX_DSET_X) + 1);
+            dset_dims[j][1] = (hsize_t)((h5_local_rand() % MAX_DSET_Y) + 1);
             if ((file_space_ids[j] = H5Screate_simple(2, dset_dims[j], use_chunk ? max_dims : NULL)) < 0)
                 T_PMD_ERROR;
 
             /* Generate chunk if called for by configuration (multi layout uses chunked for datasets
              * 1 and 2) */
             if (use_chunk) {
-                chunk_dims[0] = (hsize_t)((HDrandom() % MAX_CHUNK_X) + 1);
-                chunk_dims[1] = (hsize_t)((HDrandom() % MAX_CHUNK_Y) + 1);
+                chunk_dims[0] = (hsize_t)((h5_local_rand() % MAX_CHUNK_X) + 1);
+                chunk_dims[1] = (hsize_t)((h5_local_rand() % MAX_CHUNK_Y) + 1);
                 if (H5Pset_chunk(dcpl_id[j], 2, chunk_dims) < 0)
                     T_PMD_ERROR;
             } /* end if */
@@ -305,15 +298,15 @@ test_pmdset(size_t niter, unsigned flags)
             /* If MDSET_FLAG_TCONV is set, use a different datatype with 50% probability, so
              * some datasets require type conversion and others do not */
             if ((dset_ids[j] = H5Dcreate2(file_id, dset_name[j],
-                                          (flags & MDSET_FLAG_TCONV && HDrandom() % 2) ? H5T_NATIVE_LONG
-                                                                                       : H5T_NATIVE_UINT,
+                                          (flags & MDSET_FLAG_TCONV && h5_local_rand() % 2) ? H5T_NATIVE_LONG
+                                                                                            : H5T_NATIVE_UINT,
                                           file_space_ids[j], H5P_DEFAULT, dcpl_id[j], H5P_DEFAULT)) < 0)
                 T_PMD_ERROR;
         } /* end for */
 
         /* Initialize read buffer and expected read buffer */
-        (void)HDmemset(rbuf, 0, buf_size);
-        (void)HDmemset(erbuf, 0, buf_size);
+        (void)memset(rbuf, 0, buf_size);
+        (void)memset(erbuf, 0, buf_size);
 
         /* Initialize write buffer */
         for (j = 0; j < max_dsets; j++)
@@ -323,16 +316,16 @@ test_pmdset(size_t niter, unsigned flags)
                                                 (j * MAX_DSET_X * MAX_DSET_Y) + (k * MAX_DSET_Y) + l);
 
         /* Initialize expected file buffer */
-        (void)HDmemset(efbuf, 0, buf_size);
+        (void)memset(efbuf, 0, buf_size);
 
-        /* Set last_read to TRUE so we don't reopen the file on the first
+        /* Set last_read to true so we don't reopen the file on the first
          * iteration */
-        last_read = TRUE;
+        last_read = true;
 
         /* Perform read/write operations */
         for (j = 0; j < OPS_PER_FILE; j++) {
             /* Decide whether to read or write */
-            do_read = (hbool_t)(HDrandom() % 2);
+            do_read = (bool)(h5_local_rand() % 2);
 
             /* Barrier to ensure processes have finished the previous operation
              */
@@ -384,7 +377,7 @@ test_pmdset(size_t niter, unsigned flags)
 
                 /* Reset dataset usage array, if writing */
                 if (!do_read)
-                    HDmemset(dset_usage, 0, max_dsets * MAX_DSET_X * MAX_DSET_Y);
+                    memset(dset_usage, 0, max_dsets * MAX_DSET_X * MAX_DSET_Y);
 
                 /* Iterate over processes */
                 for (l = 0; l < (size_t)mpi_size; l++) {
@@ -394,9 +387,9 @@ test_pmdset(size_t niter, unsigned flags)
                         (int)((unsigned)max_dsets * MAX_DSET_X * MAX_DSET_Y) * ((int)l - (int)mpi_rank);
 
                     /* Decide whether to do a hyperslab or point selection */
-                    if (HDrandom() % 2) {
+                    if (h5_local_rand() % 2) {
                         /* Hyperslab */
-                        size_t nhs      = (size_t)((HDrandom() % MAX_HS) + 1); /* Number of hyperslabs */
+                        size_t nhs      = (size_t)((h5_local_rand() % MAX_HS) + 1); /* Number of hyperslabs */
                         size_t max_hs_x = (MAX_HS_X <= dset_dims[k][0])
                                               ? MAX_HS_X
                                               : dset_dims[k][0]; /* Determine maximum hyperslab size in X */
@@ -405,26 +398,28 @@ test_pmdset(size_t niter, unsigned flags)
                                               : dset_dims[k][1]; /* Determine maximum hyperslab size in Y */
 
                         for (m = 0; m < nhs; m++) {
-                            overlap = TRUE;
+                            overlap = true;
                             for (n = 0; overlap && (n < MAX_SEL_RETRIES); n++) {
                                 /* Generate hyperslab */
-                                count[m][0] = (hsize_t)(((hsize_t)HDrandom() % max_hs_x) + 1);
-                                count[m][1] = (hsize_t)(((hsize_t)HDrandom() % max_hs_y) + 1);
-                                start[m][0] = (count[m][0] == dset_dims[k][0])
-                                                  ? 0
-                                                  : (hsize_t)HDrandom() % (dset_dims[k][0] - count[m][0] + 1);
-                                start[m][1] = (count[m][1] == dset_dims[k][1])
-                                                  ? 0
-                                                  : (hsize_t)HDrandom() % (dset_dims[k][1] - count[m][1] + 1);
+                                count[m][0] = (hsize_t)(((hsize_t)h5_local_rand() % max_hs_x) + 1);
+                                count[m][1] = (hsize_t)(((hsize_t)h5_local_rand() % max_hs_y) + 1);
+                                start[m][0] =
+                                    (count[m][0] == dset_dims[k][0])
+                                        ? 0
+                                        : (hsize_t)h5_local_rand() % (dset_dims[k][0] - count[m][0] + 1);
+                                start[m][1] =
+                                    (count[m][1] == dset_dims[k][1])
+                                        ? 0
+                                        : (hsize_t)h5_local_rand() % (dset_dims[k][1] - count[m][1] + 1);
 
                                 /* If writing, check for overlap with other processes */
-                                overlap = FALSE;
+                                overlap = false;
                                 if (!do_read)
                                     for (o = start[m][0]; (o < (start[m][0] + count[m][0])) && !overlap; o++)
                                         for (p = start[m][1]; (p < (start[m][1] + count[m][1])) && !overlap;
                                              p++)
                                             if (dset_usagei[k][o][p])
-                                                overlap = TRUE;
+                                                overlap = true;
                             } /* end for */
 
                             /* If we did not find a non-overlapping hyperslab
@@ -468,26 +463,26 @@ test_pmdset(size_t niter, unsigned flags)
                     else {
                         /* Point selection */
                         size_t npoints =
-                            (size_t)(((size_t)HDrandom() % MAX_POINTS) + 1); /* Number of points */
+                            (size_t)(((size_t)h5_local_rand() % MAX_POINTS) + 1); /* Number of points */
 
                         /* Reset dataset usage array if reading, since in this case we don't care
                          * about overlapping selections between processes */
                         if (do_read)
-                            HDmemset(dset_usage, 0, max_dsets * MAX_DSET_X * MAX_DSET_Y);
+                            memset(dset_usage, 0, max_dsets * MAX_DSET_X * MAX_DSET_Y);
 
                         /* Generate points */
                         for (m = 0; m < npoints; m++) {
-                            overlap = TRUE;
+                            overlap = true;
                             for (n = 0; overlap && (n < MAX_SEL_RETRIES); n++) {
                                 /* Generate point */
-                                points[2 * m]       = (unsigned)((hsize_t)HDrandom() % dset_dims[k][0]);
-                                points[(2 * m) + 1] = (unsigned)((hsize_t)HDrandom() % dset_dims[k][1]);
+                                points[2 * m]       = (unsigned)((hsize_t)h5_local_rand() % dset_dims[k][0]);
+                                points[(2 * m) + 1] = (unsigned)((hsize_t)h5_local_rand() % dset_dims[k][1]);
 
                                 /* Check for overlap with other processes (write) or this process
                                  * (always) */
-                                overlap = FALSE;
+                                overlap = false;
                                 if (dset_usagei[k][points[2 * m]][points[(2 * m) + 1]])
-                                    overlap = TRUE;
+                                    overlap = true;
                             } /* end for */
 
                             /* If we did not find a non-overlapping point quit
@@ -647,10 +642,6 @@ test_pmdset(size_t niter, unsigned flags)
  *
  * Return:      Success:        0
  *              Failure:        1
- *
- * Programmer:  Neil Fortner
- *              Monday, March 10, 2014
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -659,16 +650,16 @@ main(int argc, char *argv[])
     unsigned i;
     int      ret;
 
-    h5_reset();
-
     /* Initialize MPI */
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
+    h5_test_init();
+
     /* Generate random number seed, if rank 0 */
     if (MAINPROCESS)
-        seed = (unsigned)HDtime(NULL);
+        seed = (unsigned)time(NULL);
 
     /* Broadcast seed from rank 0 (other ranks will receive rank 0's seed) */
     if (MPI_SUCCESS != MPI_Bcast(&seed, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD))
@@ -676,7 +667,7 @@ main(int argc, char *argv[])
 
     /* Seed random number generator with shared seed (so all ranks generate the
      * same sequence) */
-    HDsrandom(seed);
+    h5_local_srand(seed);
 
     /* Fill dset_name array */
     for (i = 0; i < MAX_DSETS; i++) {

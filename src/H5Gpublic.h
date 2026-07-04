@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Gpublic.h
- *                      Jul 11 1997
- *                      Robb Matzke
  *
  * Purpose:             Public declarations for the H5G package
  *
@@ -23,14 +21,10 @@
 #ifndef H5Gpublic_H
 #define H5Gpublic_H
 
-/* System headers needed by this file */
-#include <sys/types.h>
-
-/* Public headers needed by this file */
-#include "H5public.h"  /* Generic Functions			*/
-#include "H5Lpublic.h" /* Links                                */
-#include "H5Opublic.h" /* Object headers			*/
-#include "H5Tpublic.h" /* Datatypes				*/
+#include "H5public.h"  /* Generic Functions                        */
+#include "H5Ipublic.h" /* Identifiers                              */
+#include "H5Lpublic.h" /* Links                                    */
+#include "H5Opublic.h" /* Object Headers                           */
 
 /*****************/
 /* Public Macros */
@@ -62,7 +56,7 @@ typedef struct H5G_info_t {
     H5G_storage_type_t storage_type; /**< Type of storage for links in group */
     hsize_t            nlinks;       /**< Number of links in group */
     int64_t            max_corder;   /**< Current max. creation order value for group */
-    hbool_t            mounted;      /**< Whether group has a file mounted on it */
+    bool               mounted;      /**< Whether group has a file mounted on it */
 } H5G_info_t;
 //! <!-- [H5G_info_t_snip] -->
 
@@ -133,8 +127,8 @@ H5_DLL hid_t H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcp
 H5_DLL hid_t H5Gcreate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                              const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Gcreate_async(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id,
-                              hid_t es_id);
+H5_DLL hid_t H5Gcreate_async(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id,
+                             hid_t es_id);
 #endif
 
 /**
@@ -154,7 +148,7 @@ H5_DLL hid_t  H5Gcreate_async(hid_t loc_id, const char *name, hid_t lcpl_id, hid
  *          provides similar functionality to that provided by
  *          H5Gcreate1(), with the differences described in the list below.
  *
- *          The new group’s creation and access properties are specified
+ *          The new group's creation and access properties are specified
  *          in \p gcpl_id and \p gapl_id, respectively.
  *
  *          H5Gcreate_anon() returns a new group identifier. This identifier
@@ -166,12 +160,12 @@ H5_DLL hid_t  H5Gcreate_async(hid_t loc_id, const char *name, hid_t lcpl_id, hid
  *
  *          \li H5Gcreate1() does not provide for the use of custom property
  *              lists; H5Gcreate1() always uses default properties.
- *          \li H5Gcreate_anon() neither provides the new group’s name
+ *          \li H5Gcreate_anon() neither provides the new group's name
  *              nor links it into the HDF5 file structure; those actions
  *              must be performed separately through a call to H5Olink(),
  *              which offers greater control over linking.
  *          \li H5Gcreate_anon() does not directly provide a hint mechanism
- *              for the group’s heap size. Comparable information can be
+ *              for the group's heap size. Comparable information can be
  *              included in the group creation property list \p gcpl_id through
  *              a H5Pset_local_heap_size_hint() call.
  *
@@ -220,12 +214,15 @@ H5_DLL hid_t H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id);
  * --------------------------------------------------------------------------
  * \ingroup ASYNC
  * \async_variant_of{H5Gopen}
+ *
+ * \since 1.12.0
+ *
  */
 #ifndef H5_DOXYGEN
 H5_DLL hid_t H5Gopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                            const char *name, hid_t gapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Gopen_async(hid_t loc_id, const char *name, hid_t gapl_id, hid_t es_id);
+H5_DLL hid_t H5Gopen_async(hid_t loc_id, const char *name, hid_t gapl_id, hid_t es_id);
 #endif
 
 /**
@@ -279,6 +276,9 @@ H5_DLL herr_t H5Gget_info(hid_t loc_id, H5G_info_t *ginfo);
  * --------------------------------------------------------------------------
  * \ingroup ASYNC
  * \async_variant_of{H5Gget_info}
+ *
+ * \since 1.12.0
+ *
  */
 #ifndef H5_DOXYGEN
 H5_DLL herr_t H5Gget_info_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
@@ -323,6 +323,9 @@ H5_DLL herr_t H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *gi
  * --------------------------------------------------------------------------
  * \ingroup ASYNC
  * \async_variant_of{H5Gget_info_by_name}
+ *
+ * \since 1.12.0
+ *
  */
 #ifndef H5_DOXYGEN
 H5_DLL herr_t H5Gget_info_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
@@ -337,7 +340,7 @@ H5_DLL herr_t H5Gget_info_by_name_async(hid_t loc_id, const char *name, H5G_info
  *-------------------------------------------------------------------------
  * \ingroup H5G
  *
- * \brief Retrieves information about a group, according to the group’s
+ * \brief Retrieves information about a group, according to the group's
  *        position within an index
  *
  * \fgdta_loc_id
@@ -383,6 +386,9 @@ H5_DLL herr_t H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_
  * --------------------------------------------------------------------------
  * \ingroup ASYNC
  * \async_variant_of{H5Gget_info_by_idx}
+ *
+ * \since 1.12.0
+ *
  */
 #ifndef H5_DOXYGEN
 H5_DLL herr_t H5Gget_info_by_idx_async(const char *app_file, const char *app_func, unsigned app_line,
@@ -474,6 +480,9 @@ H5_DLL herr_t H5Gclose(hid_t group_id);
  * --------------------------------------------------------------------------
  * \ingroup ASYNC
  * \async_variant_of{H5Gclose}
+ *
+ * \since 1.12.0
+ *
  */
 #ifndef H5_DOXYGEN
 H5_DLL herr_t H5Gclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t group_id,
@@ -515,17 +524,18 @@ H5_DLL herr_t H5Gclose_async(hid_t group_id, hid_t es_id);
 /* Macros */
 
 /* Link definitions */
-#define H5G_SAME_LOC   H5L_SAME_LOC
-#define H5G_LINK_ERROR H5L_TYPE_ERROR
-#define H5G_LINK_HARD  H5L_TYPE_HARD
-#define H5G_LINK_SOFT  H5L_TYPE_SOFT
-#define H5G_link_t     H5L_type_t
+#define H5G_SAME_LOC   H5L_SAME_LOC   /**< Indicates operation occurs on same location \since 1.6.0 */
+#define H5G_LINK_ERROR H5L_TYPE_ERROR /**< Invalid link type id \since 1.8.0 */
+#define H5G_LINK_HARD  H5L_TYPE_HARD  /**< Hard link id \since 1.8.0 */
+#define H5G_LINK_SOFT  H5L_TYPE_SOFT  /**< Soft link id \since 1.8.0 */
+#define H5G_link_t     H5L_type_t     /**< Link types \since 1.0.0 */
 
 /* Macros for types of objects in a group (see H5G_obj_t definition) */
-#define H5G_NTYPES      256 /* Max possible number of types	*/
-#define H5G_NLIBTYPES   8   /* Number of internal types	*/
-#define H5G_NUSERTYPES  (H5G_NTYPES - H5G_NLIBTYPES)
-#define H5G_USERTYPE(X) (8 + (X)) /* User defined types		*/
+#define H5G_NTYPES     256 /**< Max possible number of types \since 1.0.0 */
+#define H5G_NLIBTYPES  8   /**< Number of internal types \since 1.2.0 */
+#define H5G_NUSERTYPES (H5G_NTYPES - H5G_NLIBTYPES)
+/**< Number of user-defined types \since 1.2.0 */
+#define H5G_USERTYPE(X) (8 + (X)) /**< User defined types \since 1.2.0 */
 
 /* Typedefs */
 
@@ -534,7 +544,7 @@ H5_DLL herr_t H5Gclose_async(hid_t group_id, hid_t es_id);
  * An object has a certain type. The first few numbers are reserved for use
  * internally by HDF5. Users may add their own types with higher values.  The
  * values are never stored in the file -- they only exist while an application
- * is running.  An object may satisfy the `isa' function for more than one type.
+ * is running.  An object may satisfy the `isa` function for more than one type.
  *
  * \deprecated
  */
@@ -683,11 +693,13 @@ H5_DLL hid_t H5Gopen1(hid_t loc_id, const char *name);
  *          If \p link_type is #H5G_LINK_SOFT, then \p cur_name can be anything
  *          and is interpreted at lookup time relative to the group which
  *          contains the final component of \p new_name. For instance, if \p
- *          cur_name is \Code{./foo}, \p new_name is \Code{./x/y/bar}, and a
- *          request is made for \Code{./x/y/bar}, then the actual object looked
- *          up is \Code{./x/y/./foo}.
-
+ *          cur_name is \TText{./foo}, \p new_name is \TText{./x/y/bar}, and a
+ *          request is made for \TText{./x/y/bar}, then the actual object looked
+ *          up is \TText{./x/y/./foo}.
+ *
  * \version 1.8.0 Function deprecated in this release.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new_name);
@@ -719,11 +731,13 @@ H5_DLL herr_t H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, c
  *          If \p link_type is #H5G_LINK_SOFT, then \p cur_name can be anything
  *          and is interpreted at lookup time relative to the group which
  *          contains the final component of \p new_name. For instance, if \p
- *          current_name is \Code{./foo}, \p new_name is \Code{./x/y/bar}, and a
- *          request is made for \Code{./x/y/bar}, then the actual object looked
- *          up is \Code{./x/y/./foo}.
-
+ *          current_name is \TText{./foo}, \p new_name is \TText{./x/y/bar}, and a
+ *          request is made for \TText{./x/y/bar}, then the actual object looked
+ *          up is \TText{./x/y/./foo}.
+ *
  * \version 1.8.0 Function deprecated in this release.
+ *
+ * \since 1.6.0
  *
  */
 H5_DLL herr_t H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type, hid_t new_loc_id,
@@ -753,6 +767,8 @@ H5_DLL herr_t H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type, 
  *            \ref UG.
  *
  * \version 1.8.0 Function deprecated in this release.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Gmove(hid_t src_loc_id, const char *src_name, const char *dst_name);
@@ -785,6 +801,8 @@ H5_DLL herr_t H5Gmove(hid_t src_loc_id, const char *src_name, const char *dst_na
  *
  * \version 1.8.0 Function deprecated in this release.
  *
+ * \since 1.6.0
+ *
  */
 H5_DLL herr_t H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *dst_name);
 /**
@@ -815,16 +833,18 @@ H5_DLL herr_t H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
  *          any object identifier is open for the object, the space will not be
  *          released until after the object identifier is closed.
  *
- *          Note that space identified as freespace is available for re-use only
+ *          Note that space identified as freespace is available for reuse only
  *          as long as the file remains open; once a file has been closed, the
  *          HDF5 library loses track of freespace. See “Freespace Management” in
  *          the \ref UG for further details.
  *
  * \attention Exercise care in moving groups as it is possible to render data in
- *            a file inaccessible with H5Gunlink(). See The Group Interface in the
+ *            a file inaccessible with H5Gunlink(). See \ref sec_group in the
  *            \ref UG.
  *
  * \version 1.8.0 Function deprecated in this release.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Gunlink(hid_t loc_id, const char *name);
@@ -864,6 +884,8 @@ H5_DLL herr_t H5Gunlink(hid_t loc_id, const char *name);
  *
  * \version 1.8.0 Function deprecated in this release.
  *
+ * \since 1.0.0
+ *
  */
 H5_DLL herr_t H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf /*out*/);
 /**
@@ -874,7 +896,7 @@ H5_DLL herr_t H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *
  *
  * \fgdt_loc_id
  * \param[in] name Name of the object whose comment is to be set or reset
- *                 name must be \Code{'.'} (dot) if \p loc_id fully specifies
+ *                 name must be \TText{'.'} (dot) if \p loc_id fully specifies
  *                 the object for which the comment is to be set.
  * \param[in] comment The new comment
  *
@@ -890,7 +912,7 @@ H5_DLL herr_t H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *
  *          \p loc_id can specify any object in the file. name can be one of the
  *          following:
  *          \li The name of the object relative to \p loc_id
- *          \li An absolute name of the object, starting from \c /, the file’s
+ *          \li An absolute name of the object, starting from \c /, the file's
  *              root group
  *          \li A dot (\c .), if \p loc_id fully specifies the object
  *
@@ -904,6 +926,8 @@ H5_DLL herr_t H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *
  *
  * \version 1.8.0 Function deprecated in this release.
  *
+ * \since 1.0.0
+ *
  */
 H5_DLL herr_t H5Gset_comment(hid_t loc_id, const char *name, const char *comment);
 /**
@@ -914,10 +938,10 @@ H5_DLL herr_t H5Gset_comment(hid_t loc_id, const char *name, const char *comment
  *
  * \fgdt_loc_id
  * \param[in] name Name of the object whose comment is to be set or reset
- *                 name must be \Code{'.'} (dot) if \p loc_id fully specifies
+ *                 name must be \TText{'.'} (dot) if \p loc_id fully specifies
  *                 the object for which the comment is to be set.
  * \param[in] bufsize Maximum number of comment characters to be returned in \p buf.
- * \param[in] buf The comment
+ * \param[out] buf The comment
  *
  * \return Returns the number of characters in the comment, counting the \c NULL
  *         terminator, if successful; the value returned may be larger than
@@ -933,21 +957,18 @@ H5_DLL herr_t H5Gset_comment(hid_t loc_id, const char *name, const char *comment
  *          \p loc_id can specify any object in the file. name can be one of the
  *          following:
  *          \li The name of the object relative to \p loc_id
- *          \li An absolute name of the object, starting from \c /, the file’s
+ *          \li An absolute name of the object, starting from \c /, the file's
  *              root group
  *          \li A dot (\c .), if \p loc_id fully specifies the object
  *
- *          At most bufsize characters, including a null-terminator, are
- *          returned in \p buf. The returned value is not null-terminated if the
- *          comment is longer than the supplied buffer. If the size of the
- *          comment is unknown, a preliminary \p H5Gget_comment() call will
- *          return the size of the comment, including space for the
- *          null-terminator.
+ *          \details_namelen{comment,H5Gget_comment}
  *
  *          If an object does not have a comment, the empty string is returned
  *          in comment.
  *
  * \version 1.8.0 Function deprecated in this release.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf);
@@ -1008,8 +1029,15 @@ H5_DLL int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *
  *          examine the members of \c subgroup_a. When recursive iteration is
  *          required, the application must handle the recursion, explicitly
  *          calling H5Giterate() on discovered subgroups.
-
+ *
+ * \warning  Adding or removing members to the group during iteration
+ *           will lead to undefined behavior.
+ *
+ * \callback_note
+ *
  * \version 1.8.0 Function deprecated in this release.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Giterate(hid_t loc_id, const char *name, int *idx, H5G_iterate_t op, void *op_data);
@@ -1031,6 +1059,8 @@ H5_DLL herr_t H5Giterate(hid_t loc_id, const char *name, int *idx, H5G_iterate_t
  *          passed in, then the number of objects in the root group is returned.
  *
  * \version 1.8.0 Function deprecated in this release.
+ *
+ * \since 1.6.0
  *
  */
 H5_DLL herr_t H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs);
@@ -1089,9 +1119,10 @@ H5_DLL herr_t H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs);
  * \version 1.6.1 Two new fields were added to the \ref H5G_stat_t struct in
  *                this release.
  *
+ * \since 1.0.0
+ *
  */
-H5_DLL herr_t H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link,
-                             H5G_stat_t *statbuf /*out*/);
+H5_DLL herr_t H5Gget_objinfo(hid_t loc_id, const char *name, bool follow_link, H5G_stat_t *statbuf /*out*/);
 /**
  *-------------------------------------------------------------------------
  * \ingroup H5G
@@ -1100,7 +1131,7 @@ H5_DLL herr_t H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link
  *
  * \fg_loc_id
  * \param[in] idx Transient index identifying object
- * \param[in,out] name Pointer to user-provided buffer the object name
+ * \param[out] name Pointer to user-provided buffer the object name
  * \param[in] size Name length
  *
  * \return Returns the size of the object name if successful, or 0 if no name is
@@ -1126,7 +1157,7 @@ H5_DLL herr_t H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link
  *
  *          If the size of the provided buffer \p name is less or equal the
  *          actual object name length, the object name is truncated to
- *          \Code{max_size - 1} characters.
+ *          \TText{max_size - 1} characters.
  *
  *          Note that if the size of the object's name is unknown, a preliminary
  *          call to H5Gget_objname_by_idx() with \p name set to \c NULL will
@@ -1163,6 +1194,12 @@ H5_DLL ssize_t H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name, size
  *          \p idx is the transient index used to iterate through the objects in
  *          the group. This parameter is described in more detail in the
  *          discussion of H5Gget_objname_by_idx().
+ *
+ * \note    As of 1.12.0, H5Gget_objtype_by_idx() returns the type of the object
+ *          that the link points to, but it has been deprecated for H5Oget_info().
+ *          Previous behavior for this function returned H5G_LINK for any link type.
+ *          To get the link type, an application may use H5Lget_info_by_idx()
+ *          instead.
  *
  * \version 1.8.0 Function deprecated in this release.
  * \version 1.6.0 The function return type changed from \c int to the enumerated

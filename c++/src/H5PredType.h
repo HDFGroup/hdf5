@@ -5,7 +5,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -24,7 +24,7 @@ namespace H5 {
     closed by H5Tclose.  They are treated as constants.
 */
 //  Inheritance: AtomType -> DataType -> H5Object -> H5Location -> IdComponent
-class H5_DLLCPP PredType : public AtomType {
+class H5CPP_DLL PredType : public AtomType {
   public:
     ///\brief Returns this class name.
     virtual H5std_string
@@ -41,7 +41,7 @@ class H5_DLLCPP PredType : public AtomType {
     PredType(const PredType &original);
 
     // Noop destructor
-    virtual ~PredType() override;
+    virtual ~PredType() override = default;
 
     /*! \brief This dummy function do not inherit from DataType - it will
         throw a DataTypeIException if invoked.
@@ -91,6 +91,14 @@ class H5_DLLCPP PredType : public AtomType {
     static const PredType &IEEE_F32LE;
     static const PredType &IEEE_F64BE;
     static const PredType &IEEE_F64LE;
+
+    static const PredType &FLOAT_BFLOAT16BE;
+    static const PredType &FLOAT_BFLOAT16LE;
+    static const PredType &FLOAT_F8E4M3;
+    static const PredType &FLOAT_F8E5M2;
+    static const PredType &FLOAT_F6E2M3;
+    static const PredType &FLOAT_F6E3M2;
+    static const PredType &FLOAT_F4E2M1;
 
     static const PredType &UNIX_D32BE;
     static const PredType &UNIX_D32LE;
@@ -261,6 +269,14 @@ class H5_DLLCPP PredType : public AtomType {
     static PredType *IEEE_F32LE_;
     static PredType *IEEE_F64BE_;
     static PredType *IEEE_F64LE_;
+
+    static PredType *FLOAT_BFLOAT16BE_;
+    static PredType *FLOAT_BFLOAT16LE_;
+    static PredType *FLOAT_F8E4M3_;
+    static PredType *FLOAT_F8E5M2_;
+    static PredType *FLOAT_F6E2M3_;
+    static PredType *FLOAT_F6E3M2_;
+    static PredType *FLOAT_F4E2M1_;
 
     static PredType *UNIX_D32BE_;
     static PredType *UNIX_D32LE_;

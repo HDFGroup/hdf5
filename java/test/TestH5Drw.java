@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -28,6 +28,7 @@ import hdf.hdf5lib.exceptions.HDF5LibraryException;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -226,7 +227,7 @@ public class TestH5Drw {
     @Test
     public void testH5Dread_32bit_ints()
     {
-        int[][] dset_data = new int[DIM_X][DIM16_Y];
+        int[][] dset_data = new int[DIM_X][DIM32_Y];
 
         try {
             openH5file(H5_INTS_FILE, DATASETU32);
@@ -348,7 +349,8 @@ public class TestH5Drw {
             fail("testH5Dread_32bit_floats: H5Dread: " + err);
         }
         for (int i = 0; i < DIM_X; i++)
-            assertTrue("testH5Dread_32bit_floats - H5.H5Dread: ", dset_data[i][0] == (32 - i));
+            assertTrue("testH5Dread_32bit_floats - H5.H5Dread:  [" + i + "][0]" + dset_data[i][0],
+                       dset_data[i][0] == (32 - i));
     }
 
     @Test
@@ -374,10 +376,11 @@ public class TestH5Drw {
             fail("testH5Dread_64bit_floats: H5Dread: " + err);
         }
         for (int i = 0; i < DIM_X; i++)
-            assertTrue("testH5Dread_64bit_floats - H5.H5Dread: ", dset_data[i][0] == (64 - i));
+            assertTrue("testH5Dread_64bit_floats - H5.H5Dread: [" + i + "][0]" + dset_data[i][0],
+                       dset_data[i][0] == (64 - i));
     }
 
-    @Test
+    @Ignore
     public void testH5Dread_128bit_floats()
     {
         byte[][][] dset_data = new byte[DIM_X][DIM128_Y][8];

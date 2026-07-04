@@ -4,16 +4,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu
- *              April, 2019
- *
  * Purpose:     Private function for external.c and external_env.c
  */
 
@@ -27,26 +24,27 @@
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              February 2016
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-reset_raw_data_files(hbool_t is_env)
+reset_raw_data_files(bool is_env)
 {
     int      fd = 0;          /* external file descriptor             */
     size_t   i, j;            /* iterators                            */
-    hssize_t n;               /* bytes of I/O                         */
     char     filename[1024];  /* file name                            */
     int      data[PART_SIZE]; /* raw data buffer                      */
     uint8_t *garbage = NULL;  /* buffer of garbage data               */
     size_t   garbage_count;   /* size of garbage buffer               */
     size_t   garbage_bytes;   /* # of garbage bytes written to file   */
 
+    h5_posix_io_ret_t n; /* bytes of I/O - use our platform-independent POSIX
+                          * I/O return type to avoid warnings on platforms
+                          * where the return type isn't ssize_t (e.g., Windows)
+                          */
+
     /* Set up garbage buffer */
     garbage_count = N_EXT_FILES * GARBAGE_PER_FILE;
-    if (NULL == (garbage = (uint8_t *)HDcalloc(garbage_count, sizeof(uint8_t))))
+    if (NULL == (garbage = (uint8_t *)calloc(garbage_count, sizeof(uint8_t))))
         goto error;
     for (i = 0; i < garbage_count; i++)
         garbage[i] = 0xFF;
@@ -58,9 +56,9 @@ reset_raw_data_files(hbool_t is_env)
 
         /* Open file */
         if (is_env)
-            HDsnprintf(filename, sizeof(filename), "extern_env_%lur.raw", (unsigned long)i + 1);
+            snprintf(filename, sizeof(filename), "extern_env_%lur.raw", (unsigned long)i + 1);
         else
-            HDsnprintf(filename, sizeof(filename), "extern_%lur.raw", (unsigned long)i + 1);
+            snprintf(filename, sizeof(filename), "extern_%lur.raw", (unsigned long)i + 1);
         if ((fd = HDopen(filename, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0)
             goto error;
 
@@ -75,7 +73,7 @@ reset_raw_data_files(hbool_t is_env)
         /* Fill array with data */
         for (j = 0; j < PART_SIZE; j++) {
             data[j] = (int)(i * 25 + j);
-        } /* end for */
+        }
 
         /* Write raw data to the file. */
         n = HDwrite(fd, data, sizeof(data));
@@ -84,8 +82,7 @@ reset_raw_data_files(hbool_t is_env)
 
         /* Close this file */
         HDclose(fd);
-
-    } /* end for */
+    }
 
     /* The *w files are only pre-filled with the garbage data and are
      * used to verify that write operations work correctly. The individual
@@ -95,9 +92,9 @@ reset_raw_data_files(hbool_t is_env)
 
         /* Open file */
         if (is_env)
-            HDsnprintf(filename, sizeof(filename), "extern_env_%luw.raw", (unsigned long)i + 1);
+            snprintf(filename, sizeof(filename), "extern_env_%luw.raw", (unsigned long)i + 1);
         else
-            HDsnprintf(filename, sizeof(filename), "extern_%luw.raw", (unsigned long)i + 1);
+            snprintf(filename, sizeof(filename), "extern_%luw.raw", (unsigned long)i + 1);
         if ((fd = HDopen(filename, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0)
             goto error;
 
@@ -111,15 +108,15 @@ reset_raw_data_files(hbool_t is_env)
 
         /* Close this file */
         HDclose(fd);
+    }
 
-    } /* end for */
-    HDfree(garbage);
+    free(garbage);
     return SUCCEED;
 
 error:
     if (fd)
         HDclose(fd);
     if (garbage)
-        HDfree(garbage);
+        free(garbage);
     return FAIL;
 }

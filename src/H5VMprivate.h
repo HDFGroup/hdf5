@@ -4,16 +4,12 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer: Robb Matzke
- *             Friday, October 10, 1997
- */
 #ifndef H5VMprivate_H
 #define H5VMprivate_H
 
@@ -39,50 +35,50 @@ typedef herr_t (*H5VM_opvv_func_t)(hsize_t dst_off, hsize_t src_off, size_t len,
 
 /* Other functions */
 #define H5VM_vector_cpy(N, DST, SRC)                                                                         \
-    {                                                                                                        \
-        HDassert(sizeof(*(DST)) == sizeof(*(SRC)));                                                          \
+    do {                                                                                                     \
+        assert(sizeof(*(DST)) == sizeof(*(SRC)));                                                            \
         if (SRC)                                                                                             \
             H5MM_memcpy(DST, SRC, (N) * sizeof(*(DST)));                                                     \
         else                                                                                                 \
-            HDmemset(DST, 0, (N) * sizeof(*(DST)));                                                          \
-    }
+            memset(DST, 0, (N) * sizeof(*(DST)));                                                            \
+    } while (0)
 
-#define H5VM_vector_zero(N, DST) HDmemset(DST, 0, (N) * sizeof(*(DST)))
+#define H5VM_vector_zero(N, DST) memset(DST, 0, (N) * sizeof(*(DST)))
 
 /* Given a coordinate offset array (COORDS) of type TYPE, move the unlimited
  * dimension (UNLIM_DIM) value to offset 0, sliding any intermediate values down
  * one position. */
 #define H5VM_swizzle_coords(TYPE, COORDS, UNLIM_DIM)                                                         \
-    {                                                                                                        \
+    do {                                                                                                     \
         /* COORDS must be an array of type TYPE */                                                           \
-        HDassert(sizeof(COORDS[0]) == sizeof(TYPE));                                                         \
+        assert(sizeof(COORDS[0]) == sizeof(TYPE));                                                           \
                                                                                                              \
         /* Nothing to do when unlimited dimension is at position 0 */                                        \
         if (0 != (UNLIM_DIM)) {                                                                              \
             TYPE _tmp = (COORDS)[UNLIM_DIM];                                                                 \
                                                                                                              \
-            HDmemmove(&(COORDS)[1], &(COORDS)[0], sizeof(TYPE) * (UNLIM_DIM));                               \
+            memmove(&(COORDS)[1], &(COORDS)[0], sizeof(TYPE) * (UNLIM_DIM));                                 \
             (COORDS)[0] = _tmp;                                                                              \
         } /* end if */                                                                                       \
-    }
+    } while (0)
 
 /* Given a coordinate offset array (COORDS) of type TYPE, move the value at
  * offset 0 to offset of the unlimied dimension (UNLIM_DIM), sliding any
  * intermediate values up one position.  Undoes the "swizzle_coords" operation.
  */
 #define H5VM_unswizzle_coords(TYPE, COORDS, UNLIM_DIM)                                                       \
-    {                                                                                                        \
+    do {                                                                                                     \
         /* COORDS must be an array of type TYPE */                                                           \
-        HDassert(sizeof(COORDS[0]) == sizeof(TYPE));                                                         \
+        assert(sizeof(COORDS[0]) == sizeof(TYPE));                                                           \
                                                                                                              \
         /* Nothing to do when unlimited dimension is at position 0 */                                        \
         if (0 != (UNLIM_DIM)) {                                                                              \
             TYPE _tmp = (COORDS)[0];                                                                         \
                                                                                                              \
-            HDmemmove(&(COORDS)[0], &(COORDS)[1], sizeof(TYPE) * (UNLIM_DIM));                               \
+            memmove(&(COORDS)[0], &(COORDS)[1], sizeof(TYPE) * (UNLIM_DIM));                                 \
             (COORDS)[UNLIM_DIM] = _tmp;                                                                      \
         } /* end if */                                                                                       \
-    }
+    } while (0)
 
 /* A null pointer is equivalent to a zero vector */
 #define H5VM_ZERO NULL
@@ -109,10 +105,10 @@ H5_DLL hsize_t H5VM_array_offset_pre(unsigned n, const hsize_t *acc, const hsize
 H5_DLL hsize_t H5VM_array_offset(unsigned n, const hsize_t *total_size, const hsize_t *offset);
 H5_DLL herr_t  H5VM_array_calc_pre(hsize_t offset, unsigned n, const hsize_t *down, hsize_t *coords);
 H5_DLL herr_t  H5VM_array_calc(hsize_t offset, unsigned n, const hsize_t *total_size, hsize_t *coords);
-H5_DLL hsize_t H5VM_chunk_index(unsigned ndims, const hsize_t *coord, const uint32_t *chunk,
+H5_DLL hsize_t H5VM_chunk_index(unsigned ndims, const hsize_t *coord, const hsize_t *chunk,
                                 const hsize_t *down_nchunks);
-H5_DLL void H5VM_chunk_scaled(unsigned ndims, const hsize_t *coord, const uint32_t *chunk, hsize_t *scaled);
-H5_DLL hsize_t H5VM_chunk_index_scaled(unsigned ndims, const hsize_t *coord, const uint32_t *chunk,
+H5_DLL void    H5VM_chunk_scaled(unsigned ndims, const hsize_t *coord, const hsize_t *chunk, hsize_t *scaled);
+H5_DLL hsize_t H5VM_chunk_index_scaled(unsigned ndims, const hsize_t *coord, const hsize_t *chunk,
                                        const hsize_t *down_nchunks, hsize_t *scaled);
 H5_DLL ssize_t H5VM_opvv(size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_len_arr[],
                          hsize_t dst_off_arr[], size_t src_max_nseq, size_t *src_curr_seq,
@@ -133,13 +129,8 @@ H5_DLL ssize_t H5VM_memcpyvv(void *_dst, size_t dst_max_nseq, size_t *dst_curr_s
  *              only as an optimization and the naming (with a single underscore)
  *              reflects its inclusion in a "private" header file.
  *
- * Return:      Success:        Product of elements
- *
- *              Failure:        1 if N is zero
- *
- * Programmer:  Robb Matzke
- *              Friday, October 10, 1997
- *
+ * Return:      Success:    Product of elements
+ *              Failure:    1 if N is zero
  *-------------------------------------------------------------------------
  */
 static inline hsize_t H5_ATTR_UNUSED
@@ -151,7 +142,7 @@ H5VM_vector_reduce_product(unsigned n, const hsize_t *v)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (n && !v)
-        HGOTO_DONE(0)
+        HGOTO_DONE(0);
     while (n--)
         ret_value *= *v++;
 
@@ -168,29 +159,23 @@ done:
  *              only as an optimization and the naming (with a single underscore)
  *              reflects its inclusion in a "private" header file.
  *
- * Return:      Success:        TRUE if all elements are zero,
- *                              FALSE otherwise
- *
- *              Failure:        TRUE if N is zero
- *
- * Programmer:  Robb Matzke
- *              Friday, October 10, 1997
- *
+ * Return:      Success:    true if all elements are zero,
+ *              Failure:    true if N is zero
  *-------------------------------------------------------------------------
  */
 static inline htri_t H5_ATTR_UNUSED
 H5VM_vector_zerop_u(int n, const hsize_t *v)
 {
-    htri_t ret_value = TRUE; /* Return value */
+    htri_t ret_value = true; /* Return value */
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (!v)
-        HGOTO_DONE(TRUE)
+        HGOTO_DONE(true);
     while (n--)
         if (*v++)
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(false);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -205,29 +190,24 @@ done:
  *              only as an optimization and the naming (with a single underscore)
  *              reflects its inclusion in a "private" header file.
  *
- * Return:      Success:        TRUE if all elements are zero,
- *                              FALSE otherwise
- *
- *              Failure:        TRUE if N is zero
- *
- * Programmer:  Robb Matzke
- *              Friday, October 10, 1997
- *
+ * Return:      Success:    true if all elements are zero,
+ *                          false otherwise
+ *              Failure:    true if N is zero
  *-------------------------------------------------------------------------
  */
 static inline htri_t H5_ATTR_UNUSED
 H5VM_vector_zerop_s(int n, const hssize_t *v)
 {
-    htri_t ret_value = TRUE; /* Return value */
+    htri_t ret_value = true; /* Return value */
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (!v)
-        HGOTO_DONE(TRUE)
+        HGOTO_DONE(true);
     while (n--)
         if (*v++)
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(false);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -243,15 +223,11 @@ done:
  *              only as an optimization and the naming (with a single underscore)
  *              reflects its inclusion in a "private" header file.
  *
- * Return:      Success:        -1 if V1 is less than V2
- *                              0 if they are equal
- *                              1 if V1 is greater than V2
+ * Return:      Success:    -1 if V1 is less than V2
+ *                          0 if they are equal
+ *                          1 if V1 is greater than V2
  *
- *              Failure:        0 if N is zero
- *
- * Programmer:  Robb Matzke
- *              Friday, October 10, 1997
- *
+ *              Failure:    0 if N is zero
  *-------------------------------------------------------------------------
  */
 static inline int H5_ATTR_UNUSED
@@ -263,16 +239,16 @@ H5VM_vector_cmp_u(unsigned n, const hsize_t *v1, const hsize_t *v2)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (v1 == v2)
-        HGOTO_DONE(0)
+        HGOTO_DONE(0);
     if (v1 == NULL)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     if (v2 == NULL)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     while (n--) {
         if (*v1 < *v2)
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
         if (*v1 > *v2)
-            HGOTO_DONE(1)
+            HGOTO_DONE(1);
         v1++;
         v2++;
     }
@@ -291,15 +267,11 @@ done:
  *              only as an optimization and the naming (with a single underscore)
  *              reflects its inclusion in a "private" header file.
  *
- * Return:      Success:        -1 if V1 is less than V2
- *                              0 if they are equal
- *                              1 if V1 is greater than V2
+ * Return:      Success:    -1 if V1 is less than V2
+ *                          0 if they are equal
+ *                          1 if V1 is greater than V2
  *
- *              Failure:        0 if N is zero
- *
- * Programmer:  Robb Matzke
- *              Wednesday, April  8, 1998
- *
+ *              Failure:    0 if N is zero
  *-------------------------------------------------------------------------
  */
 static inline int H5_ATTR_UNUSED
@@ -311,16 +283,16 @@ H5VM_vector_cmp_s(unsigned n, const hssize_t *v1, const hssize_t *v2)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (v1 == v2)
-        HGOTO_DONE(0)
+        HGOTO_DONE(0);
     if (v1 == NULL)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     if (v2 == NULL)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     while (n--) {
         if (*v1 < *v2)
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
         if (*v1 > *v2)
-            HGOTO_DONE(1)
+            HGOTO_DONE(1);
         v1++;
         v2++;
     }
@@ -339,10 +311,6 @@ done:
  *              reflects its inclusion in a "private" header file.
  *
  * Return:      void
- *
- * Programmer:  Robb Matzke
- *              Monday, October 13, 1997
- *
  *-------------------------------------------------------------------------
  */
 static inline void H5_ATTR_UNUSED
@@ -354,17 +322,14 @@ H5VM_vector_inc(int n, hsize_t *v1, const hsize_t *v2)
 
 /* Lookup table for general log2(n) routine */
 static const unsigned char LogTable256[] = {
-    /* clang-clang-format off */
-    0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5,
-    5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6,
-    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7,
-    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
-    /* clang-clang-format on */
-};
+    0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+    5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7};
 
 /*-------------------------------------------------------------------------
  * Function:    H5VM_log2_gen
@@ -383,10 +348,6 @@ static const unsigned char LogTable256[] = {
  *              reflects its inclusion in a "private" header file.
  *
  * Return:      log2(n) (always - no failure condition)
- *
- * Programmer:  Quincey Koziol
- *              Monday, March  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static inline unsigned H5_ATTR_UNUSED
@@ -432,17 +393,13 @@ static const unsigned MultiplyDeBruijnBitPosition[32] = {0,  1,  28, 2,  29, 14,
  *              reflects its inclusion in a "private" header file.
  *
  * Return:      log2(n) (always - no failure condition)
- *
- * Programmer:  Quincey Koziol
- *              Monday, February 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static inline H5_ATTR_PURE unsigned
 H5VM_log2_of2(uint32_t n)
 {
 #ifndef NDEBUG
-    HDassert(POWER_OF_TWO(n));
+    assert(POWER_OF_TWO(n));
 #endif /* NDEBUG */
     return (MultiplyDeBruijnBitPosition[(n * (uint32_t)0x077CB531UL) >> 27]);
 } /* H5VM_log2_of2() */
@@ -450,16 +407,13 @@ H5VM_log2_of2(uint32_t n)
 /*-------------------------------------------------------------------------
  * Function:    H5VM_power2up
  *
- * Purpose:    Round up a number to the next power of 2
+ * Purpose:     Round up a number to the next power of 2
  *
  * Note:        Although this routine is 'static' in this file, that's intended
  *              only as an optimization and the naming (with a single underscore)
  *              reflects its inclusion in a "private" header file.
  *
- * Return:    Return the number which is a power of 2
- *
- * Programmer:    Vailin Choi; Nov 2014
- *
+ * Return:      Return the number which is a power of 2
  *-------------------------------------------------------------------------
  */
 static inline H5_ATTR_CONST hsize_t
@@ -488,10 +442,6 @@ H5VM_power2up(hsize_t n)
  *              reflects its inclusion in a "private" header file.
  *
  * Return:      Number of bytes needed
- *
- * Programmer:  Quincey Koziol
- *              Thursday, March 13, 2008
- *
  *-------------------------------------------------------------------------
  */
 static inline unsigned H5_ATTR_UNUSED
@@ -519,18 +469,14 @@ static const unsigned char H5VM_bit_clear_g[8] = {0x7F, 0xBF, 0xDF, 0xEF, 0xF7, 
  *              only as an optimization and the naming (with a single underscore)
  *              reflects its inclusion in a "private" header file.
  *
- * Return:      TRUE/FALSE
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, November 25, 2008
- *
+ * Return:      true/false
  *-------------------------------------------------------------------------
  */
-static inline hbool_t H5_ATTR_UNUSED
+static inline bool H5_ATTR_UNUSED
 H5VM_bit_get(const unsigned char *buf, size_t offset)
 {
     /* Test the appropriate bit in the buffer */
-    return (hbool_t)((buf[offset / 8] & (H5VM_bit_set_g[offset % 8])) ? TRUE : FALSE);
+    return (bool)((buf[offset / 8] & (H5VM_bit_set_g[offset % 8])) ? true : false);
 } /* end H5VM_bit_get() */
 
 /*-------------------------------------------------------------------------
@@ -549,15 +495,11 @@ H5VM_bit_get(const unsigned char *buf, size_t offset)
  *              only as an optimization and the naming (with a single underscore)
  *              reflects its inclusion in a "private" header file.
  *
- * Return:      None
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, November 25, 2008
- *
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static inline void H5_ATTR_UNUSED
-H5VM_bit_set(unsigned char *buf, size_t offset, hbool_t val)
+H5VM_bit_set(unsigned char *buf, size_t offset, bool val)
 {
     /* Set/reset the appropriate bit in the buffer */
     if (val)

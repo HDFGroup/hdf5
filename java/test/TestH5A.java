@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -19,12 +19,22 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.lang.Integer;
+import java.lang.foreign.MemoryLayout;
+import java.lang.foreign.MemoryLayout.PathElement;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SequenceLayout;
+import java.lang.foreign.ValueLayout;
+import java.lang.invoke.VarHandle;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
+import hdf.hdf5lib.HDFArray;
 import hdf.hdf5lib.callbacks.H5A_iterate_cb;
 import hdf.hdf5lib.callbacks.H5A_iterate_t;
 import hdf.hdf5lib.exceptions.HDF5Exception;
@@ -53,6 +63,76 @@ public class TestH5A {
     long space_id                       = HDF5Constants.H5I_INVALID_HID;
     long lapl_id                        = HDF5Constants.H5I_INVALID_HID;
     long aapl_id                        = HDF5Constants.H5I_INVALID_HID;
+
+    // Helper class for compound datatype testing
+    static class TestSensor {
+        static final int MAXSTRINGSIZE = 32;
+        static final int INTEGERSIZE   = 4;
+        static final int DOUBLESIZE    = 8;
+
+        public int serial_no;
+        public String location;
+        public double temperature;
+        public double pressure;
+
+        TestSensor(int serial_no, String location, double temperature, double pressure)
+        {
+            this.serial_no   = serial_no;
+            this.location    = location;
+            this.temperature = temperature;
+            this.pressure    = pressure;
+        }
+
+        TestSensor(ArrayList data)
+        {
+            this.serial_no   = (Integer)data.get(0);
+            this.location    = (String)data.get(1);
+            this.temperature = (Double)data.get(2);
+            this.pressure    = (Double)data.get(3);
+        }
+
+        ArrayList toArrayList()
+        {
+            ArrayList data = new ArrayList();
+            data.add(serial_no);
+            data.add(location);
+            data.add(temperature);
+            data.add(pressure);
+            return data;
+        }
+
+        static long createMemType() throws HDF5Exception
+        {
+            long strtype_id = HDF5Constants.H5I_INVALID_HID;
+            long memtype_id = HDF5Constants.H5I_INVALID_HID;
+
+            try {
+                strtype_id = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+                H5.H5Tset_size(strtype_id, MAXSTRINGSIZE);
+
+                memtype_id = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND,
+                                          INTEGERSIZE + MAXSTRINGSIZE + DOUBLESIZE + DOUBLESIZE);
+
+                H5.H5Tinsert(memtype_id, "Serial number", 0, HDF5Constants.H5T_NATIVE_INT);
+                H5.H5Tinsert(memtype_id, "Location", INTEGERSIZE, strtype_id);
+                H5.H5Tinsert(memtype_id, "Temperature", INTEGERSIZE + MAXSTRINGSIZE,
+                             HDF5Constants.H5T_NATIVE_DOUBLE);
+                H5.H5Tinsert(memtype_id, "Pressure", INTEGERSIZE + MAXSTRINGSIZE + DOUBLESIZE,
+                             HDF5Constants.H5T_NATIVE_DOUBLE);
+
+                H5.H5Tclose(strtype_id);
+            }
+            catch (Exception e) {
+                if (strtype_id >= 0)
+                    H5.H5Tclose(strtype_id);
+                if (memtype_id >= 0)
+                    H5.H5Tclose(memtype_id);
+                throw e;
+            }
+
+            return memtype_id;
+        }
+    }
 
     private final void _deleteFile(String filename)
     {
@@ -1079,27 +1159,34 @@ public class TestH5A {
                                    HDF5Constants.H5P_DEFAULT);
             assertTrue("testH5Awrite_readVL: ", attr_id >= 0);
 
-            H5.H5AwriteVL(attr_id, atype_id, str_data);
+            // Convert String[] to ArrayList[] for VL data
+            ArrayList<String>[] vl_data = new ArrayList[str_data.length];
+            for (int i = 0; i < str_data.length; i++) {
+                vl_data[i] = new ArrayList<>();
+                vl_data[i].add(str_data[i]);
+            }
+            H5.H5AwriteVL(attr_id, atype_id, vl_data);
 
             H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
 
             for (int j = 0; j < dims.length; j++) {
                 lsize *= dims[j];
             }
-            String[] strs = new String[(int)lsize];
-            for (int j = 0; j < lsize; j++) {
-                strs[j] = "";
-            }
+            ArrayList<String>[] read_vl_data = new ArrayList[(int)lsize];
             try {
-                H5.H5AreadVL(attr_id, atype_id, strs);
+                H5.H5AreadVL(attr_id, atype_id, read_vl_data);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
             }
-            assertTrue("testH5Awrite_readVL:", str_data[0].equals(strs[0]));
-            assertTrue("testH5Awrite_readVL:", str_data[1].equals(strs[1]));
-            assertTrue("testH5Awrite_readVL:", str_data[2].equals(strs[2]));
-            assertTrue("testH5Awrite_readVL:", str_data[3].equals(strs[3]));
+            assertTrue("testH5Awrite_readVL: " + str_data[0] + " == " + read_vl_data[0].get(0),
+                       str_data[0].equals(read_vl_data[0].get(0)));
+            assertTrue("testH5Awrite_readVL: " + str_data[1] + " == " + read_vl_data[1].get(0),
+                       str_data[1].equals(read_vl_data[1].get(0)));
+            assertTrue("testH5Awrite_readVL: " + str_data[2] + " == " + read_vl_data[2].get(0),
+                       str_data[2].equals(read_vl_data[2].get(0)));
+            assertTrue("testH5Awrite_readVL: " + str_data[3] + " == " + read_vl_data[3].get(0),
+                       str_data[3].equals(read_vl_data[3].get(0)));
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -1121,6 +1208,108 @@ public class TestH5A {
             if (atype_id > 0)
                 try {
                     H5.H5Tclose(atype_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    @Test
+    public void testH5Awrite_readCompound()
+    {
+        String attr_name      = "CompoundData";
+        long attr_id          = HDF5Constants.H5I_INVALID_HID;
+        long compound_type_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id     = HDF5Constants.H5I_INVALID_HID;
+        final int ARRAY_SIZE  = 4;
+
+        // Create test data - 4 sensor readings
+        ArrayList[] write_data = new ArrayList[ARRAY_SIZE];
+        write_data[0]          = new TestSensor(1153, "Exterior (static)", 53.23, 24.57).toArrayList();
+        write_data[1]          = new TestSensor(1184, "Intake", 55.12, 22.95).toArrayList();
+        write_data[2]          = new TestSensor(1027, "Intake manifold", 103.55, 31.23).toArrayList();
+        write_data[3]          = new TestSensor(1313, "Exhaust manifold", 1252.89, 84.11).toArrayList();
+
+        try {
+            // Create compound datatype
+            compound_type_id = TestSensor.createMemType();
+            assertTrue("testH5Awrite_readCompound: compound type created", compound_type_id >= 0);
+
+            // Create dataspace (1D, 4 elements)
+            long[] dims  = {ARRAY_SIZE};
+            dataspace_id = H5.H5Screate_simple(1, dims, null);
+            assertTrue("testH5Awrite_readCompound: dataspace created", dataspace_id >= 0);
+
+            // Create attribute
+            attr_id = H5.H5Acreate(H5did, attr_name, compound_type_id, dataspace_id,
+                                   HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            assertTrue("testH5Awrite_readCompound: attribute created", attr_id >= 0);
+
+            // Write compound data
+            H5.H5AwriteVL(attr_id, compound_type_id, write_data);
+
+            H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
+
+            // Read compound data back
+            ArrayList[] read_data = new ArrayList[ARRAY_SIZE];
+            H5.H5AreadVL(attr_id, compound_type_id, read_data);
+
+            // Validate sensor 0
+            assertNotNull("testH5Awrite_readCompound: read_data[0] not null", read_data[0]);
+            TestSensor sensor0 = new TestSensor(read_data[0]);
+            assertEquals("testH5Awrite_readCompound: sensor0 serial_no", 1153, sensor0.serial_no);
+            assertEquals("testH5Awrite_readCompound: sensor0 location", "Exterior (static)",
+                         sensor0.location.trim());
+            assertEquals("testH5Awrite_readCompound: sensor0 temperature", 53.23, sensor0.temperature, 0.01);
+            assertEquals("testH5Awrite_readCompound: sensor0 pressure", 24.57, sensor0.pressure, 0.01);
+
+            // Validate sensor 1
+            assertNotNull("testH5Awrite_readCompound: read_data[1] not null", read_data[1]);
+            TestSensor sensor1 = new TestSensor(read_data[1]);
+            assertEquals("testH5Awrite_readCompound: sensor1 serial_no", 1184, sensor1.serial_no);
+            assertEquals("testH5Awrite_readCompound: sensor1 location", "Intake", sensor1.location.trim());
+            assertEquals("testH5Awrite_readCompound: sensor1 temperature", 55.12, sensor1.temperature, 0.01);
+            assertEquals("testH5Awrite_readCompound: sensor1 pressure", 22.95, sensor1.pressure, 0.01);
+
+            // Validate sensor 2
+            assertNotNull("testH5Awrite_readCompound: read_data[2] not null", read_data[2]);
+            TestSensor sensor2 = new TestSensor(read_data[2]);
+            assertEquals("testH5Awrite_readCompound: sensor2 serial_no", 1027, sensor2.serial_no);
+            assertEquals("testH5Awrite_readCompound: sensor2 location", "Intake manifold",
+                         sensor2.location.trim());
+            assertEquals("testH5Awrite_readCompound: sensor2 temperature", 103.55, sensor2.temperature, 0.01);
+            assertEquals("testH5Awrite_readCompound: sensor2 pressure", 31.23, sensor2.pressure, 0.01);
+
+            // Validate sensor 3
+            assertNotNull("testH5Awrite_readCompound: read_data[3] not null", read_data[3]);
+            TestSensor sensor3 = new TestSensor(read_data[3]);
+            assertEquals("testH5Awrite_readCompound: sensor3 serial_no", 1313, sensor3.serial_no);
+            assertEquals("testH5Awrite_readCompound: sensor3 location", "Exhaust manifold",
+                         sensor3.location.trim());
+            assertEquals("testH5Awrite_readCompound: sensor3 temperature", 1252.89, sensor3.temperature,
+                         0.01);
+            assertEquals("testH5Awrite_readCompound: sensor3 pressure", 84.11, sensor3.pressure, 0.01);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5.testH5Awrite_readCompound: " + err);
+        }
+        finally {
+            if (attr_id > 0)
+                try {
+                    H5.H5Aclose(attr_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dataspace_id > 0)
+                try {
+                    H5.H5Sclose(dataspace_id);
+                }
+                catch (Exception ex) {
+                }
+            if (compound_type_id > 0)
+                try {
+                    H5.H5Tclose(compound_type_id);
                 }
                 catch (Exception ex) {
                 }
@@ -1215,14 +1404,17 @@ public class TestH5A {
             idata(String name) { this.attr_name = name; }
         }
         class H5A_iter_data implements H5A_iterate_t {
-            public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static void add_iter_data(idata id) { iterdata.add(id); }
         }
         H5A_iterate_t iter_data = new H5A_iter_data();
         class H5A_iter_callback implements H5A_iterate_cb {
-            public int callback(long group, String name, H5A_info_t info, H5A_iterate_t op_data)
+            public int apply(long location_id, MemorySegment attr_name, MemorySegment ainfo,
+                             MemorySegment op_data)
             {
-                idata id = new idata(name);
-                ((H5A_iter_data)op_data).iterdata.add(id);
+                String name = attr_name.getString(0, StandardCharsets.UTF_8);
+                idata id    = new idata(name);
+                ((H5A_iter_data)iter_data).add_iter_data(id);
                 return 0;
             }
         }
@@ -1308,14 +1500,17 @@ public class TestH5A {
             idata(String name) { this.attr_name = name; }
         }
         class H5A_iter_data implements H5A_iterate_t {
-            public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static public ArrayList<idata> iterdata = new ArrayList<idata>();
+            static void add_iter_data(idata id) { iterdata.add(id); }
         }
         H5A_iterate_t iter_data = new H5A_iter_data();
         class H5A_iter_callback implements H5A_iterate_cb {
-            public int callback(long group, String name, H5A_info_t info, H5A_iterate_t op_data)
+            public int apply(long location_id, MemorySegment attr_name, MemorySegment ainfo,
+                             MemorySegment op_data)
             {
-                idata id = new idata(name);
-                ((H5A_iter_data)op_data).iterdata.add(id);
+                String name = attr_name.getString(0, StandardCharsets.UTF_8);
+                idata id    = new idata(name);
+                ((H5A_iter_data)iter_data).add_iter_data(id);
                 return 0;
             }
         }
@@ -1999,5 +2194,410 @@ public class TestH5A {
                    arr_str_data[2].get(0).equals(arr_readbuf[2].get(0)));
         assertTrue("testH5AArray_string_buffer:" + arr_readbuf[3].get(0),
                    arr_str_data[3].get(0).equals(arr_readbuf[3].get(0)));
+    }
+
+    /**
+     * Test H5Awrite_VLStrings - write only (read tests will come with H5Aread_VLStrings)
+     */
+    @Ignore
+    public void testH5A_VLStrings_write_basic()
+    {
+        String attrName = "VLStringAttr_write";
+        long strType    = HDF5Constants.H5I_INVALID_HID;
+        long attrId     = HDF5Constants.H5I_INVALID_HID;
+        long attrSpace  = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            // Create variable-length string type
+            strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            assertTrue("H5Tcopy failed", strType >= 0);
+
+            int status = H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+            assertTrue("H5Tset_size failed", status >= 0);
+
+            // Verify it's variable length
+            boolean isVar = H5.H5Tis_variable_str(strType);
+            assertTrue("Should be variable-length string", isVar);
+
+            // Create dataspace for 3 strings
+            long[] dims = {3};
+            attrSpace   = H5.H5Screate_simple(1, dims, null);
+            assertTrue("H5Screate_simple failed", attrSpace >= 0);
+
+            // Create attribute
+            attrId = H5.H5Acreate(H5did, attrName, strType, attrSpace, HDF5Constants.H5P_DEFAULT,
+                                  HDF5Constants.H5P_DEFAULT);
+            assertTrue("H5Acreate failed", attrId >= 0);
+
+            // Write VL strings
+            String[] writeData = {"First string", "Second string", "Third string"};
+            status             = H5.H5Awrite_VLStrings(attrId, strType, writeData);
+            assertTrue("H5Awrite_VLStrings failed", status >= 0);
+
+            System.out.println("testH5A_VLStrings_write_basic: PASSED");
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail("Exception: " + ex.getMessage());
+        }
+        finally {
+            try {
+                if (attrId >= 0)
+                    H5.H5Aclose(attrId);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (attrSpace >= 0)
+                    H5.H5Sclose(attrSpace);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (strType >= 0)
+                    H5.H5Tclose(strType);
+            }
+            catch (Exception ex) {
+            }
+        }
+    }
+
+    /**
+     * Test edge case: empty strings
+     */
+    @Ignore
+    public void testH5A_VLStrings_write_empty()
+    {
+        String attrName = "EmptyVLStrings";
+        long strType    = HDF5Constants.H5I_INVALID_HID;
+        long attrId     = HDF5Constants.H5I_INVALID_HID;
+        long attrSpace  = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+
+            long[] dims = {3};
+            attrSpace   = H5.H5Screate_simple(1, dims, null);
+            attrId      = H5.H5Acreate(H5did, attrName, strType, attrSpace, HDF5Constants.H5P_DEFAULT,
+                                       HDF5Constants.H5P_DEFAULT);
+
+            // Write mix of empty and non-empty strings
+            String[] writeData = {"", "Not empty", ""};
+            int status         = H5.H5Awrite_VLStrings(attrId, strType, writeData);
+            assertTrue("H5Awrite_VLStrings with empty strings failed", status >= 0);
+
+            System.out.println("testH5A_VLStrings_write_empty: PASSED");
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail("Exception: " + ex.getMessage());
+        }
+        finally {
+            try {
+                if (attrId >= 0)
+                    H5.H5Aclose(attrId);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (attrSpace >= 0)
+                    H5.H5Sclose(attrSpace);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (strType >= 0)
+                    H5.H5Tclose(strType);
+            }
+            catch (Exception ex) {
+            }
+        }
+    }
+
+    /**
+     * Test error: non-VL string type should fail
+     */
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5A_VLStrings_write_invalid_type() throws Exception
+    {
+        String attrName = "InvalidTypeAttr";
+        long strType    = HDF5Constants.H5I_INVALID_HID;
+        long attrId     = HDF5Constants.H5I_INVALID_HID;
+        long attrSpace  = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            // Create FIXED-length string type (not variable)
+            strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            H5.H5Tset_size(strType, 10); // Fixed 10 chars, not variable
+
+            long[] dims = {1};
+            attrSpace   = H5.H5Screate_simple(1, dims, null);
+            attrId      = H5.H5Acreate(H5did, attrName, strType, attrSpace, HDF5Constants.H5P_DEFAULT,
+                                       HDF5Constants.H5P_DEFAULT);
+
+            String[] data = {"test"};
+            // This should throw HDF5LibraryException due to type validation
+            H5.H5Awrite_VLStrings(attrId, strType, data);
+        }
+        finally {
+            try {
+                if (attrId >= 0)
+                    H5.H5Aclose(attrId);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (attrSpace >= 0)
+                    H5.H5Sclose(attrSpace);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (strType >= 0)
+                    H5.H5Tclose(strType);
+            }
+            catch (Exception ex) {
+            }
+        }
+    }
+
+    /**
+     * Test error: null buffer should throw NullPointerException
+     */
+    @Test(expected = NullPointerException.class)
+    public void testH5A_VLStrings_write_null_buffer() throws Exception
+    {
+        long strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+        H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+
+        try {
+            // This should throw NullPointerException
+            H5.H5Awrite_VLStrings(H5did, strType, null);
+        }
+        finally {
+            H5.H5Tclose(strType);
+        }
+    }
+
+    /**
+     * Test error: empty buffer should throw IllegalArgumentException
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testH5A_VLStrings_write_empty_buffer() throws Exception
+    {
+        long strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+        H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+
+        try {
+            // This should throw IllegalArgumentException
+            String[] emptyArray = new String[0];
+            H5.H5Awrite_VLStrings(H5did, strType, emptyArray);
+        }
+        finally {
+            H5.H5Tclose(strType);
+        }
+    }
+
+    /**
+     * Test H5Awrite_VLStrings and H5Aread_VLStrings round-trip
+     */
+    @Ignore
+    public void testH5A_VLStrings_write_read_roundtrip()
+    {
+        String attrName = "VLStringAttr_roundtrip";
+        long strType    = HDF5Constants.H5I_INVALID_HID;
+        long attrId     = HDF5Constants.H5I_INVALID_HID;
+        long attrSpace  = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            // Create variable-length string type
+            strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            assertTrue("H5Tcopy failed", strType >= 0);
+
+            int status = H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+            assertTrue("H5Tset_size failed", status >= 0);
+
+            // Verify it's variable length
+            boolean isVar = H5.H5Tis_variable_str(strType);
+            assertTrue("Should be variable-length string", isVar);
+
+            // Create dataspace for 3 strings
+            long[] dims = {3};
+            attrSpace   = H5.H5Screate_simple(1, dims, null);
+            assertTrue("H5Screate_simple failed", attrSpace >= 0);
+
+            // Create attribute
+            attrId = H5.H5Acreate(H5did, attrName, strType, attrSpace, HDF5Constants.H5P_DEFAULT,
+                                  HDF5Constants.H5P_DEFAULT);
+            assertTrue("H5Acreate failed", attrId >= 0);
+
+            // Write VL strings
+            String[] writeData = {"First string", "Second string", "Third string"};
+            status             = H5.H5Awrite_VLStrings(attrId, strType, writeData);
+            assertTrue("H5Awrite_VLStrings failed", status >= 0);
+
+            // Read back
+            String[] readData = new String[3];
+            status            = H5.H5Aread_VLStrings(attrId, strType, readData);
+            assertTrue("H5Aread_VLStrings failed", status >= 0);
+
+            // Verify
+            assertNotNull("Read data should not be null", readData);
+            assertEquals("Should have 3 strings", 3, readData.length);
+            assertEquals("First string mismatch", writeData[0], readData[0]);
+            assertEquals("Second string mismatch", writeData[1], readData[1]);
+            assertEquals("Third string mismatch", writeData[2], readData[2]);
+
+            System.out.println("testH5A_VLStrings_write_read_roundtrip: PASSED");
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail("Exception: " + ex.getMessage());
+        }
+        finally {
+            try {
+                if (attrId >= 0)
+                    H5.H5Aclose(attrId);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (attrSpace >= 0)
+                    H5.H5Sclose(attrSpace);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (strType >= 0)
+                    H5.H5Tclose(strType);
+            }
+            catch (Exception ex) {
+            }
+        }
+    }
+
+    /**
+     * Test round-trip with empty strings
+     */
+    @Ignore
+    public void testH5A_VLStrings_roundtrip_empty()
+    {
+        String attrName = "EmptyVLStrings_roundtrip";
+        long strType    = HDF5Constants.H5I_INVALID_HID;
+        long attrId     = HDF5Constants.H5I_INVALID_HID;
+        long attrSpace  = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+
+            long[] dims = {3};
+            attrSpace   = H5.H5Screate_simple(1, dims, null);
+            attrId      = H5.H5Acreate(H5did, attrName, strType, attrSpace, HDF5Constants.H5P_DEFAULT,
+                                       HDF5Constants.H5P_DEFAULT);
+
+            // Write mix of empty and non-empty strings
+            String[] writeData = {"", "Not empty", ""};
+            int status         = H5.H5Awrite_VLStrings(attrId, strType, writeData);
+            assertTrue("H5Awrite_VLStrings with empty strings failed", status >= 0);
+
+            // Read back
+            String[] readData = new String[3];
+            status            = H5.H5Aread_VLStrings(attrId, strType, readData);
+            assertTrue("H5Aread_VLStrings failed", status >= 0);
+
+            // Verify empty strings preserved
+            assertEquals("First should be empty", "", readData[0]);
+            assertEquals("Second should match", "Not empty", readData[1]);
+            assertEquals("Third should be empty", "", readData[2]);
+
+            System.out.println("testH5A_VLStrings_roundtrip_empty: PASSED");
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail("Exception: " + ex.getMessage());
+        }
+        finally {
+            try {
+                if (attrId >= 0)
+                    H5.H5Aclose(attrId);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (attrSpace >= 0)
+                    H5.H5Sclose(attrSpace);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (strType >= 0)
+                    H5.H5Tclose(strType);
+            }
+            catch (Exception ex) {
+            }
+        }
+    }
+
+    /**
+     * Test round-trip with Unicode strings
+     */
+    @Ignore
+    public void testH5A_VLStrings_roundtrip_unicode()
+    {
+        String attrName = "UnicodeVLStrings_roundtrip";
+        long strType    = HDF5Constants.H5I_INVALID_HID;
+        long attrId     = HDF5Constants.H5I_INVALID_HID;
+        long attrSpace  = HDF5Constants.H5I_INVALID_HID;
+
+        try {
+            strType = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            H5.H5Tset_size(strType, HDF5Constants.H5T_VARIABLE);
+            H5.H5Tset_cset(strType, HDF5Constants.H5T_CSET_UTF8);
+
+            long[] dims = {2};
+            attrSpace   = H5.H5Screate_simple(1, dims, null);
+            attrId      = H5.H5Acreate(H5did, attrName, strType, attrSpace, HDF5Constants.H5P_DEFAULT,
+                                       HDF5Constants.H5P_DEFAULT);
+
+            // Unicode test strings
+            String[] writeData = {"Hello \u4E16\u754C", "\u00D1o\u00F1o \uD83D\uDE80"};
+            int status         = H5.H5Awrite_VLStrings(attrId, strType, writeData);
+            assertTrue("H5Awrite_VLStrings with Unicode failed", status >= 0);
+
+            String[] readData = new String[2];
+            status            = H5.H5Aread_VLStrings(attrId, strType, readData);
+            assertTrue("H5Aread_VLStrings failed", status >= 0);
+
+            assertEquals("Unicode string 1 mismatch", writeData[0], readData[0]);
+            assertEquals("Unicode string 2 mismatch", writeData[1], readData[1]);
+
+            System.out.println("testH5A_VLStrings_roundtrip_unicode: PASSED");
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail("Exception: " + ex.getMessage());
+        }
+        finally {
+            try {
+                if (attrId >= 0)
+                    H5.H5Aclose(attrId);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (attrSpace >= 0)
+                    H5.H5Sclose(attrSpace);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                if (strType >= 0)
+                    H5.H5Tclose(strType);
+            }
+            catch (Exception ex) {
+            }
+        }
     }
 }

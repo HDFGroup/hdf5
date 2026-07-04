@@ -4,19 +4,16 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Saturday, September 12, 2015
- *
- * Purpose:	This file contains declarations which define macros for the
- *		H5P package.  Including this header means that the source file
- *		is part of the H5P package.
+ * Purpose: This file contains declarations which define macros for the
+ *          H5P package.  Including this header means that the source file
+ *          is part of the H5P package.
  */
 #ifndef H5Pmodule_H
 #define H5Pmodule_H
@@ -25,10 +22,13 @@
  *      reporting macros.
  */
 #define H5P_MODULE
-#define H5_MY_PKG     H5P
-#define H5_MY_PKG_ERR H5E_PLIST
+#define H5_MY_PKG      H5P
+#define H5_MY_PKG_INIT YES
 
 /** \page H5P_UG  Properties and Property Lists in HDF5
+ *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
  *
  * \section sec_plist Properties and Property Lists in HDF5
  *
@@ -293,16 +293,39 @@
  * See \ref subsec_attribute_work.
  *   </td>
  * </tr>
+ * <tr valign="top">
+ *   <td>
+ * Map creation (MCPL)
+ *   </td>
+ *   <td>
+ * \ref H5P_MAP_CREATE
+ *   </td>
+ *   <td>
+ * See \ref subsec_map_plist. Only available with VOL connectors that support maps.
+ *   </td>
+ * </tr>
+ * <tr valign="top">
+ *   <td>
+ * Map access (MAPL)
+ *   </td>
+ *   <td>
+ * \ref H5P_MAP_ACCESS
+ *   </td>
+ *   <td>
+ * See \ref subsec_map_plist. Only available with VOL connectors that support maps.
+ *   </td>
+ * </tr>
  * </table>
  *
  * Note: In the table above, the abbreviations to the right of each property list class name in this
  * table are widely used in both HDF5 programmer documentation and HDF5 source code. For
  * example, \ref FCPL (FCPL) is the file creation property list, \ref OCPL (OCPL) is the object creation
- * property list, \ref OCPYPL (OCPYPL) is object copy property list, and \ref STRCPL (STRCPL) is the string
- * creation property list. These abbreviations may appear in either uppercase or lowercase.
+ * property list, \ref OCPYPL (OCPYPL) is object copy property list, \ref STRCPL (STRCPL) is the string
+ * creation property list, and \ref MCPL (MCPL) and \ref MAPL (MAPL) are the map creation and access
+ * property lists. These abbreviations may appear in either uppercase or lowercase.
  *
  * The “HDF5 property list class inheritance hierarchy” figure, immediately following, illustrates
- * the inheritance hierarchy of HDF5’s property list classes. Properties are defined at the root of the
+ * the inheritance hierarchy of HDF5's property list classes. Properties are defined at the root of the
  * HDF5 property environment (\ref PLCR in the figure below). Property list
  * classes then inherit properties from that root, either directly or indirectly through a parent class.
  * In every case, a property list class inherits only the properties relevant to its role. For example,
@@ -328,14 +351,14 @@
  *
  * A property list is a collection of related properties that are used together in specific
  * circumstances. A new property list created from a property list class inherits the properties of the
- * property list class and each property’s default value. A fresh dataset creation property list, for
+ * property list class and each property's default value. A fresh dataset creation property list, for
  * example, includes all of the HDF5 properties relevant to the creation of a new dataset.
  *
  * Property lists are implemented as containers holding a collection of name/value pairs. Each pair
  * specifies a property name and a value for the property. A property list usually contains
  * information for one to many properties.
  *
- * HDF5’s default property values are designed to be reasonable for general use cases. Therefore,
+ * HDF5's default property values are designed to be reasonable for general use cases. Therefore,
  * an application can often use a property list without modification. On the other hand, adjusting
  * property list settings is a routine action and there are many reasons for an application to do so.
  *
@@ -349,7 +372,7 @@
  * Property lists can be freely reused to create consistency. For example, a single set of file, group,
  * and dataset creation property lists might be created at the beginning of a project and used to
  * create hundreds, thousands, even millions, of consistent files, file structures, and datasets over
- * the project’s life. When such consistency is important to a project, this is an economical means
+ * the project's life. When such consistency is important to a project, this is an economical means
  * of providing it.
  *
  * \subsubsection subsubsec_plist_props Properties
@@ -430,7 +453,7 @@
  * will fit easily in system memory. <br />
  * <br />
  * A chunked layout is important if a dataset is to be compressed, to enable extending
- * the dataset’s size, or to enable caching during I/O. <br />
+ * the dataset's size, or to enable caching during I/O. <br />
  * <br />
  * A compact layout is suitable only for very small datasets because the raw data is
  * stored in the object header.
@@ -533,7 +556,7 @@
  * \ref H5Pset_dxpl_mpio_chunk_opt_ratio, and \ref H5Pget_mpio_actual_chunk_opt_mode).<br />
  * <br />
  * Optimal settings differ due to the characteristics of a computing environment and due
- * to an application’s data access patterns; even when working with the same file, these
+ * to an application's data access patterns; even when working with the same file, these
  * settings might change for every application and every platform.
  * </p>
  *       </td>
@@ -561,7 +584,7 @@
  * Default property lists can simplify many routine HDF5 tasks because you do not always have to
  * create every property list you use.
  *
- * An application that would be well-served by HDF5’s default property settings can use the default
+ * An application that would be well-served by HDF5's default property settings can use the default
  * property lists simply by substituting the value \ref H5P_DEFAULT for a property list identifier.
  * HDF5 will then apply the default property list for the appropriate property list class.
  *
@@ -597,7 +620,7 @@
  * The new dataset creation property list is created as an instance of the property list class
  * \ref H5P_DATASET_CREATE.
  *
- * The new dataset creation property list’s identifier is returned in dcplA_id and the property list is
+ * The new dataset creation property list's identifier is returned in dcplA_id and the property list is
  * initialized with default dataset creation property values.
  *
  * A list of valid classes appears in the table \ref table_plist "Property list classes in HDF5".
@@ -613,7 +636,7 @@
  * values that were changed in dcplA_id before dcplB_id was created. They may, however, diverge
  * as additional property values are reset in each.
  *
- * While we are creating property lists, let’s create a link creation property list; we will need this
+ * While we are creating property lists, let's create a link creation property list; we will need this
  * property list when the new dataset is linked into the file below:
  * \code
  *     lcplAB_id = H5Pcreate (H5P_LINK_CREATE);
@@ -698,7 +721,7 @@
  *     PList_Class = H5Pget_class (dcplA_id);
  * \endcode
  *
- * Upon this function’s return, PList_Class will contain the value \ref H5P_DATASET_CREATE indicating that
+ * Upon this function's return, PList_Class will contain the value \ref H5P_DATASET_CREATE indicating that
  * dcplA_id is a dataset creation property list.
 
  * <h4>Determine Current Creation Property List Settings in an Existing Object</h4>
@@ -709,7 +732,7 @@
  *
  * But sometimes an application must do something that requires knowing the creation property
  * settings. HDF5 makes the acquisition of this information fairly straight-forward; for each
- * property setting call, H5Pset_*, there is a corresponding H5Pget_*call to retrieve the property’s
+ * property setting call, H5Pset_*, there is a corresponding H5Pget_*call to retrieve the property's
  * current setting.
  *
  * Consider the following examples which illustrate the determination of dataset layout and chunking settings:
@@ -720,9 +743,9 @@
  * \ref H5Dget_create_plist will return a property list identifier for the creation property list that was
  * used to create the dataset. Call it DCPL1_id.
  *
- * \ref H5Pset_layout sets a dataset’s layout to be compact, contiguous, or chunked.
+ * \ref H5Pset_layout sets a dataset's layout to be compact, contiguous, or chunked.
  *
- * \ref H5Pget_layout called with DCPL1_id will return the dataset’s layout,
+ * \ref H5Pget_layout called with DCPL1_id will return the dataset's layout,
  * either \ref H5D_COMPACT, \ref H5D_CONTIGUOUS, or \ref H5D_CHUNKED.
  *
  * \ref H5Pset_chunk sets the rank of a dataset, that is the number of dimensions it will have, and the
@@ -732,7 +755,7 @@
  * size of each dimension.
  *
  * If a creation property value has not been explicitly set, these H5Pget_calls will return the
- * property’s default value.
+ * property's default value.
  *
  * <h4>Determine Access Property Settings</h4>
  *
@@ -756,14 +779,14 @@
  *
  * \subsection subsec_plist_generic Generic Properties Interface and User-defined Properties
  *
- * HDF5’s generic property interface provides tools for managing the entire property hierarchy and
+ * HDF5's generic property interface provides tools for managing the entire property hierarchy and
  * for the creation and management of user-defined property lists and properties. This interface also
  * makes it possible for an application or a driver to create, modify, and manage custom properties,
  * property lists, and property list classes. A comprehensive list of functions for this interface
  * appears under "Generic Property Operations (Advanced)" in the "H5P: Property List Interface"
  * section of the \ref RM.
  *
- * Further discussion of HDF5’s generic property interface and user-defined properties and
+ * Further discussion of HDF5's generic property interface and user-defined properties and
  * property lists is beyond the scope of this document.
  *
  * \subsection subsec_plist_H5P Property List Function Summaries
@@ -818,7 +841,7 @@
  *
  * The in-memory file image feature of HDF5 uses property lists in a manner that differs
  * substantially from their use elsewhere in HDF5. Those who plan to use in-memory file images
- * must study "File Image Operations" (PDF) in the Advanced Topics in HDF5collection.
+ * must study \ref H5FIM_UG.
  *
  * \subsection subsec_plist_notes Notes
  *
@@ -881,6 +904,11 @@
  *
  * Previous Chapter \ref sec_error - Next Chapter \ref sec_vol
  *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
+ */
+
+/**
  * \defgroup H5P Property Lists (H5P)
  *
  * Use the functions in this module to manage HDF5 property lists and property
@@ -894,48 +922,75 @@
  * properties. Property lists are deleted by closing the associated handles.
  *
  * \ref PLCR
+ * <div>
  * \snippet{doc} tables/propertyLists.dox plcr_table
+ * </div>
  *
  * \ref PLCR
+ * <div>
  * \snippet{doc} tables/propertyLists.dox plcra_table
+ * </div>
  *
  * \ref PLCR / \ref OCPL / \ref GCPL
+ * <div>
  * \snippet{doc} tables/propertyLists.dox fcpl_table
+ * </div>
  *
  * \ref PLCR
+ * <div>
  * \snippet{doc} tables/propertyLists.dox fapl_table
  * \snippet{doc} tables/propertyLists.dox fd_pl_table
+ * </div>
  *
  * \ref PLCR
+ * <div>
  * \snippet{doc} tables/propertyLists.dox lapl_table
+ * </div>
  *
  * \ref PLCR / \ref OCPL
+ * <div>
  * \snippet{doc} tables/propertyLists.dox dcpl_table
+ * </div>
  *
  * \ref PLCR / \ref LAPL
+ * <div>
  * \snippet{doc} tables/propertyLists.dox dapl_table
+ * </div>
  *
  * \ref PLCR / \ref OCPL
+ * <div>
  * \snippet{doc} tables/propertyLists.dox gcpl_table
+ * </div>
  *
  * \ref PLCR / \ref LAPL
+ * <div>
  * \snippet{doc} tables/propertyLists.dox gapl_table
+ * </div>
  *
  * \ref PLCR
+ * <div>
  * \snippet{doc} tables/propertyLists.dox ocpl_table
+ * </div>
  *
  * \ref PLCR
+ * <div>
  * \snippet{doc} tables/propertyLists.dox ocpypl_table
+ * </div>
  *
  * \ref PLCR
+ * <div>
  * \snippet{doc} tables/propertyLists.dox strcpl_table
+ * </div>
  *
  * \ref PLCR / \ref STRCPL
+ * <div>
  * \snippet{doc} tables/propertyLists.dox lcpl_table
+ * </div>
  *
  * \ref PLCR / \ref STRCPL
+ * <div>
  * \snippet{doc} tables/propertyLists.dox acpl_table
- *
+ * </div>
  *
  * \defgroup STRCPL String Creation Properties
  * \ingroup H5P
@@ -944,30 +999,33 @@
  * choice of a character encoding, applies to both attributes and links.
  * The second creation property applies to links only, and advises the library
  * to automatically create missing intermediate groups when creating new objects.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox strcpl_table
+ * </div>
  *
  * \defgroup LCPL Link Creation Properties
  * \ingroup STRCPL
  * This creation property applies to links only, and advises the library
  * to automatically create missing intermediate groups when creating new objects.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox lcpl_table
- *
- * @see STRCPL
+ * </div>
+ * @see @ref STRCPL
  *
  * \defgroup ACPL Attribute Creation Properties
  * \ingroup STRCPL
  * The creation property, the choice of a character encoding, applies to attributes.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox acpl_table
+ * </div>
  *
- * @see STRCPL
+ * @see @ref STRCPL
  *
  * \defgroup LAPL Link Access Properties
  * \ingroup H5P
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox lapl_table
+ * </div>
  *
  * \defgroup DAPL Dataset Access Properties
  * \ingroup LAPL
@@ -977,8 +1035,9 @@
  * dataset file paths, and controlling flush behavior, etc. These properties
  * are \Emph{not} persisted with datasets, and can be adjusted at runtime before
  * a dataset is created or opened.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox dapl_table
+ * </div>
  *
  * \defgroup DCPL Dataset Creation Properties
  * \ingroup OCPL
@@ -987,8 +1046,9 @@
  * Unlike dataset access and transfer properties, creation properties \Emph{are}
  * stored with the dataset, and cannot be changed once a dataset has been
  * created.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox dcpl_table
+ * </div>
  *
  * \defgroup DXPL Dataset Transfer Properties
  * \ingroup H5P
@@ -996,8 +1056,9 @@
  * and writing datasets such as transformations, MPI-IO I/O mode, error
  * detection, etc. These properties are \Emph{not} persisted with datasets,
  * and can be adjusted at runtime before a dataset is read or written.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox dxpl_table
+ * </div>
  *
  * \defgroup FAPL File Access Properties
  * \ingroup H5P
@@ -1006,9 +1067,10 @@
  * file driver (VFD), configuring the metadata cache (MDC), control
  * file locking, etc. These properties are \Emph{not} persisted with files, and
  * can be adjusted at runtime before a file is created or opened.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox fapl_table
  * \snippet{doc} tables/propertyLists.dox fd_pl_table
+ * </div>
  *
  * \defgroup FCPL File Creation Properties
  * \ingroup GCPL
@@ -1017,14 +1079,16 @@
  * Unlike file access properties, creation properties \Emph{are}
  * stored with the file, and cannot be changed once a file has been
  * created.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox fcpl_table
+ * </div>
  *
  * \defgroup GAPL Group Access Properties
  * \ingroup LAPL
  * The functions in this section can be applied to group property lists.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox gapl_table
+ * </div>
  *
  * \defgroup GCPL Group Creation Properties
  * \ingroup OCPL
@@ -1033,32 +1097,37 @@
  * Unlike file access properties, creation properties \Emph{are}
  * stored with the group, and cannot be changed once a group has been
  * created.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox gcpl_table
+ * </div>
  *
  * \defgroup PLCR Property List Class Root
  * \ingroup H5P
  * Use the functions in this module to manage HDF5 property lists.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox plcr_table
+ * </div>
  *
  * \defgroup PLCRA Property List Class Root (Advanced)
  * \ingroup H5P
  * You can create and customize user-defined property list classes using the
  * functions described below. Arbitrary user-defined properties can also
  * be inserted into existing property lists as so-called temporary properties.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox plcra_table
+ * </div>
  *
  * \defgroup OCPL Object Creation Properties
  * \ingroup H5P
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox ocpl_table
+ * </div>
  *
  * \defgroup OCPYPL Object Copy Properties
  * \ingroup H5P
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox ocpypl_table
+ * </div>
  *
  * \defgroup FMPL File Mount Properties
  * \ingroup H5P
@@ -1074,6 +1143,15 @@
  * \ingroup LAPL
  * TAPL isn't supported yet.
  *
+ *
+ * \defgroup MCPL Map Creation Properties
+ * \ingroup H5P
+ * Properties for map object creation.
+ *
+ *
+ * \defgroup MAPL VOL Data Mapping Properties
+ * \ingroup H5P
+ * Empty property class.
  *
  *
  */

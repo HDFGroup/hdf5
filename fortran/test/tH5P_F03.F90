@@ -14,7 +14,7 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the COPYING file, which can be found at the root of the source code       *
+!   the LICENSE file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
@@ -47,7 +47,7 @@ MODULE test_genprop_cls_cb1_mod
 
 CONTAINS
 
-  INTEGER FUNCTION test_genprop_cls_cb1_f(list_id, create_data ) bind(C)
+  INTEGER(KIND=C_INT) FUNCTION test_genprop_cls_cb1_f(list_id, create_data ) bind(C)
 
     IMPLICIT NONE
 
@@ -81,12 +81,6 @@ CONTAINS
 ! * Return:	Success:	0
 ! *
 ! *		Failure:	number of errors
-! *
-! * Programmer:	M. Scot Breitenfeld
-! *             June 24, 2008
-! *
-! * Modifications:
-! *
 ! *-------------------------------------------------------------------------
 !
 
@@ -152,7 +146,6 @@ SUBROUTINE test_create(total_error)
   !  Compound datatype test
 
   f_ptr = C_LOC(fill_ctype)
-
   CALL H5Pget_fill_value_f(dcpl, comp_type_id, f_ptr, error)
   CALL check("H5Pget_fill_value_f",error, total_error)
 
@@ -160,8 +153,6 @@ SUBROUTINE test_create(total_error)
   fill_ctype%z = 'S'
   fill_ctype%a = 5555.
   fill_ctype%x = 55
-
-  f_ptr = C_LOC(fill_ctype)
 
   ! Test various fill values
   CALL H5Pset_fill_value_f(dcpl, H5T_NATIVE_CHARACTER, 'X', error)
@@ -192,6 +183,7 @@ SUBROUTINE test_create(total_error)
   CALL VERIFY("***ERROR: Returned wrong fill value (real)", rfill, 2.0, total_error)
 
   ! For the actual compound type
+  f_ptr = C_LOC(fill_ctype)
   CALL H5Pset_fill_value_f(dcpl, comp_type_id, f_ptr, error)
   CALL check("H5Pget_fill_value_f",error, total_error)
 
@@ -236,6 +228,13 @@ SUBROUTINE test_create(total_error)
   CALL VERIFY("***ERROR: Returned wrong low libver_bounds", low, H5F_LIBVER_V114_F, total_error)
   CALL VERIFY("***ERROR: Returned wrong high libver_bounds", high, H5F_LIBVER_V114_F, total_error)
 
+  CALL h5pset_libver_bounds_f(fapl, H5F_LIBVER_V200_F, H5F_LIBVER_V200_F, error)
+  CALL check("h5pset_libver_bounds_f",error, total_error)
+  CALL h5pget_libver_bounds_f(fapl, low, high, error)
+  CALL check("h5pget_libver_bounds_f",error, total_error)
+  CALL VERIFY("***ERROR: Returned wrong low libver_bounds", low, H5F_LIBVER_V200_F, total_error)
+  CALL VERIFY("***ERROR: Returned wrong high libver_bounds", high, H5F_LIBVER_V200_F, total_error)
+
   CALL H5Pset_libver_bounds_f(fapl, H5F_LIBVER_LATEST_F, H5F_LIBVER_LATEST_F, error)
   CALL check("H5Pset_libver_bounds_f",error, total_error)
   CALL h5pget_libver_bounds_f(fapl, low, high, error)
@@ -262,7 +261,6 @@ SUBROUTINE test_create(total_error)
   CALL check("H5Dget_create_plist_f", error, total_error)
 
   f_ptr = C_LOC(rd_c)
-
   CALL H5Pget_fill_value_f(dcpl, comp_type_id, f_ptr, error)
   CALL check("H5Pget_fill_value_f", error, total_error)
   CALL verify("***ERROR: Returned wrong fill value", rd_c%a, fill_ctype%a, total_error)
@@ -444,14 +442,10 @@ END SUBROUTINE test_genprop_class_callback
 !
 ! Return:      Success: 0
 !              Failure: -1
-!
-! FORTRAN Programmer: M. Scot Breitenfeld
-!                     April 1, 2014
 !-------------------------------------------------------------------------
 
 SUBROUTINE test_h5p_file_image(total_error)
 
-  USE, INTRINSIC :: iso_c_binding
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
   INTEGER(hid_t) ::   fapl_1 = -1
@@ -516,9 +510,6 @@ END SUBROUTINE test_h5p_file_image
 !
 ! Return:      Success: 0
 !              Failure: -1
-!
-! FORTRAN Programmer: M. Scot Breitenfeld
-!                     January 10, 2012
 !-------------------------------------------------------------------------
 !
 SUBROUTINE external_test_offset(cleanup,total_error)
@@ -534,6 +525,7 @@ SUBROUTINE external_test_offset(cleanup,total_error)
   INTEGER(hid_t) :: dset=-1   ! dataset
   INTEGER(hid_t) :: grp=-1    ! group to emit diagnostics
   INTEGER(size_t) :: i, j     ! miscellaneous counters
+  INTEGER :: k
   CHARACTER(LEN=180) :: filename   ! file names
   INTEGER, DIMENSION(1:25) :: part
   INTEGER, DIMENSION(1:100), TARGET :: whole ! raw data buffers
@@ -600,8 +592,9 @@ SUBROUTINE external_test_offset(cleanup,total_error)
   CALL h5dread_f(dset, H5T_NATIVE_INTEGER, f_ptr, error, mem_space_id=space, file_space_id=space)
   CALL check("h5dread_f", error, total_error)
 
-  DO i = 1, 100
-     IF(whole(i) .NE. i-1)THEN
+  DO k = 1, 100
+     CALL verify("h5dread_f", whole(k), k-1, error)
+     IF(error .NE. 0)THEN
         WRITE(*,*) "Incorrect value(s) read."
         total_error =  total_error + 1
         EXIT
@@ -621,8 +614,10 @@ SUBROUTINE external_test_offset(cleanup,total_error)
 
   CALL h5sclose_f(hs_space, error)
   CALL check("h5sclose_f", error, total_error)
-  DO i = INT(hs_start(1))+1, INT(hs_start(1)+hs_count(1))
-     IF(whole(i) .NE. i-1)THEN
+
+  DO k = INT(hs_start(1))+1, INT(hs_start(1)+hs_count(1))
+     CALL verify("h5dread_f", whole(k), k-1, error)
+     IF(error .NE. 0)THEN
         WRITE(*,*) "Incorrect value(s) read."
         total_error =  total_error + 1
         EXIT
@@ -660,15 +655,10 @@ END SUBROUTINE external_test_offset
 ! RETURNS:
 !   Success:	0
 !   Failure:	number of errors
-!
-! FORTRAN Programmer:  M. Scot Breitenfeld
-!                      February 1, 2016
-!
 !-------------------------------------------------------------------------
 !
 SUBROUTINE test_vds(total_error)
 
-  USE ISO_C_BINDING
   IMPLICIT NONE
 
   INTEGER, INTENT(INOUT) :: total_error

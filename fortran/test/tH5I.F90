@@ -13,7 +13,7 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the COPYING file, which can be found at the root of the source code       *
+!   the LICENSE file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
@@ -245,7 +245,7 @@ CONTAINS
      CALL h5sclose_f(dspace_id, error)
      CALL check("h5sclose_f",error,total_error)
      !
-     ! Close the dataype.
+     ! Close the datatype.
      !
      CALL h5tclose_f(atype_id, error)
      CALL check("h5tclose_f",error,total_error)
@@ -308,9 +308,12 @@ CONTAINS
      ! Clear the error stack from the file close failure
      CALL h5eset_auto_f(1, error)
      CALL h5eclear_f(error)
+     CALL check("h5eclear_f",error,total_error)
+     CALL h5eclear_f(error, H5P_DEFAULT_F)
+     CALL check("h5eclear_f",error,total_error)
 
-      if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
-          CALL check("h5_cleanup_f", error, total_error)
+     IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+     CALL check("h5_cleanup_f", error, total_error)
 
      RETURN
      END SUBROUTINE identifier_test

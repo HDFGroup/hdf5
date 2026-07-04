@@ -1,0 +1,66 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by The HDF Group.                                               *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the LICENSE file, which can be found at the root of the source code       *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#ifndef H5_API_TEST_CONFIG_H
+#define H5_API_TEST_CONFIG_H
+
+#include "hdf5.h"
+
+#cmakedefine H5_API_TEST_HAVE_ASYNC
+
+#ifdef H5_HAVE_PARALLEL
+#cmakedefine MPIEXEC_EXECUTABLE "@MPIEXEC_EXECUTABLE@"
+#cmakedefine MPIEXEC "@MPIEXEC@" /* For compatibility */
+#ifndef MPIEXEC_EXECUTABLE
+# define MPIEXEC_EXECUTABLE MPIEXEC
+#endif
+#cmakedefine MPIEXEC_NUMPROC_FLAG "@MPIEXEC_NUMPROC_FLAG@"
+#cmakedefine MPIEXEC_PREFLAGS  "@MPIEXEC_PREFLAGS@"
+#cmakedefine MPIEXEC_POSTFLAGS "@MPIEXEC_POSTFLAGS@"
+/* Server-specific flags if different */
+#cmakedefine MPIEXEC_SERVER_PREFLAGS  "@MPIEXEC_SERVER_PREFLAGS@"
+#cmakedefine MPIEXEC_SERVER_POSTFLAGS "@MPIEXEC_SERVER_POSTFLAGS@"
+#cmakedefine MPIEXEC_MAX_NUMPROCS @MPIEXEC_MAX_NUMPROCS@
+#endif /* H5_HAVE_PARALLEL */
+
+#cmakedefine DART_TESTING_TIMEOUT @DART_TESTING_TIMEOUT@
+#ifndef DART_TESTING_TIMEOUT
+# define DART_TESTING_TIMEOUT 1500
+#endif
+
+#cmakedefine H5_API_TEST_ENV_VARS "@H5_API_TEST_ENV_VARS@"
+
+#cmakedefine H5_API_TEST_INIT_COMMAND "@H5_API_TEST_INIT_COMMAND@"
+
+#cmakedefine H5_API_TEST_SERVER_START_MSG "@H5_API_TEST_SERVER_START_MSG@"
+#ifndef H5_API_TEST_SERVER_START_MSG
+# define H5_API_TEST_SERVER_START_MSG "Waiting"
+#endif
+#cmakedefine H5_API_TEST_SERVER_EXIT_COMMAND "@H5_API_TEST_SERVER_EXIT_COMMAND@"
+
+#cmakedefine H5_API_TEST_CLIENT_HELPER_START_MSG "@H5_API_TEST_CLIENT_HELPER_START_MSG@"
+#ifndef H5_API_TEST_CLIENT_HELPER_START_MSG
+# define H5_API_TEST_CLIENT_HELPER_START_MSG "Waiting"
+#endif
+#cmakedefine H5_API_TEST_CLIENT_HELPER_EXIT_COMMAND "@H5_API_TEST_CLIENT_HELPER_EXIT_COMMAND@"
+
+#cmakedefine H5_API_TEST_CLIENT_INIT_TOKEN_REGEX "@H5_API_TEST_CLIENT_INIT_TOKEN_REGEX@"
+#ifndef H5_API_TEST_CLIENT_INIT_TOKEN_REGEX
+# define H5_API_TEST_CLIENT_INIT_TOKEN_REGEX "^token"
+#endif
+#cmakedefine H5_API_TEST_CLIENT_INIT_TOKEN_VAR "@H5_API_TEST_CLIENT_INIT_TOKEN_VAR@"
+#ifndef H5_API_TEST_CLIENT_INIT_TOKEN_VAR
+# define H5_API_TEST_CLIENT_INIT_TOKEN_VAR "TOKEN"
+#endif
+
+
+#endif /* H5_API_TEST_CONFIG_H */

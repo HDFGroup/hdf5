@@ -5,7 +5,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -20,7 +20,7 @@ namespace H5 {
     \brief Class Group represents an HDF5 group.
 */
 //  Inheritance: CommonFG/H5Object -> H5Location -> IdComponent
-class H5_DLLCPP Group : public H5Object, public CommonFG {
+class H5CPP_DLL Group : public H5Object, public CommonFG {
   public:
     // Close this group.
     virtual void close() override;
@@ -66,6 +66,9 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 
     // Destructor
     virtual ~Group() override;
+
+    // Copy assignment operator.
+    Group &operator=(const Group &original);
 
     // Creates a copy of an existing group using its id.
     Group(const hid_t group_id);

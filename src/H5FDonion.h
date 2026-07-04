@@ -4,41 +4,43 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Onion Virtual File Driver (VFD)
- *
- * Purpose:    The public header file for the Onion VFD.
+ * Purpose:	The public header file for the onion virtual file driver (VFD)
  */
 #ifndef H5FDonion_H
 #define H5FDonion_H
 
-#define H5FD_ONION       (H5FDperform_init(H5FD_onion_init))
+/* Public header files */
+#include "H5FDpublic.h" /* File drivers             */
+
+/** ID for the onion VFD */
+#define H5FD_ONION (H5OPEN H5FD_ONION_id_g)
+
+/** Identifier for the onion VFD \since 1.14.0 */
 #define H5FD_ONION_VALUE H5_VFD_ONION
 
-/**
- *  Current version of the onion VFD fapl info struct.
- */
+/** Current version of the onion VFD fapl info struct */
 #define H5FD_ONION_FAPL_INFO_VERSION_CURR 1
 
-#define H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT                                               \
-    (0x0001u) /**<                                                                                           \
-               * Onion history metadata will align to page_size.                                             \
-               * Partial pages of unused space will occur in the file,                                       \
-               * but may improve read performance from the backing store                                     \
-               * on some systems.                                                                            \
-               * If disabled (0), padding will not be inserted to align                                      \
-               * to page boundaries.                                                                         \
-               */
+/**
+ * Onion history metadata will align to page_size.
+ * Partial pages of unused space will occur in the file, but may improve read
+ * performance from the backing store on some systems.
+ * If disabled (0), padding will not be inserted to align to page boundaries.
+ * \since 1.14.0
+ */
+#define H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT (0x0001u)
 
 /**
  * Max length of a comment.
  * The buffer is defined to be this size + 1 to handle the NUL.
+ * \since 1.14.0
  */
 #define H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN 255
 
@@ -114,7 +116,11 @@ typedef struct H5FD_onion_fapl_info_t {
 extern "C" {
 #endif
 
-H5_DLL hid_t H5FD_onion_init(void);
+/** @private
+ *
+ * \brief ID for the onion VFD
+ */
+H5_DLLVAR hid_t H5FD_ONION_id_g;
 
 /**
  * --------------------------------------------------------------------------
@@ -156,7 +162,7 @@ H5_DLL herr_t H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa)
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5FD
+ * \ingroup H5VFD
  *
  * \brief get the number of revisions
  *

@@ -13,7 +13,7 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the COPYING file, which can be found at the root of the source code       *
+!   the LICENSE file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
@@ -26,6 +26,9 @@
 
 MODULE TH5G
 
+    USE HDF5 ! This module contains all necessary modules
+    USE TH5_MISC
+
 CONTAINS
 
     SUBROUTINE group_test(cleanup, total_error)
@@ -34,9 +37,6 @@ CONTAINS
 !   h5gcreate_f, h5gopen_f, h5gclose_f, (?)h5gget_obj_info_idx_f,  h5gn_members_f
 !   h5glink(2)_f, h5gunlink_f, h5gmove(2)_f,  h5gget_linkval_f, h5gset_comment_f,
 !   h5gget_comment_f
-
-     USE HDF5 ! This module contains all necessary modules
-     USE TH5_MISC
 
      IMPLICIT NONE
      LOGICAL, INTENT(IN)  :: cleanup

@@ -1,0 +1,1001 @@
+/** \page ExAPI Examples by API
+
+Navigate back: \ref index "Main" / \ref GettingStarted
+<hr>
+
+\section sec_exapi_desc Examples Description
+The C, FORTRAN and Java examples below point to the examples in the hdf5-examples github repository. Examples for older versions of HDF5
+are handled by setting the appropriate USE_API_xxx definition. HDF5-1.6 examples are in a "16"-named subdirectory.
+
+The Java examples are in the develop source code, and the Java Object package examples are in the HDFView source.
+<em>Please note that you must comment out the "package" statement at the top when downloading a Java Object example individually.</em>
+
+The MATLAB and Python examples were generously provided by a user and are not tested.
+
+Languages are C, Fortran, Java (JHI5), Java Object Package, Python (High Level), and Python (Low Level APIs).
+
+\subsection sec_exapi_dsets Datasets
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Languages</th>
+<th>HDF5 File</th>
+<th>Output</th>
+<th>DDL</th>
+</tr>
+<tr>
+<td>Set Space Allocation Time for Dataset</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_alloc.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5D/h5ex_d_alloc.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5D/H5Ex_D_Alloc.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_Alloc.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_d_alloc.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_alloc.tst">h5ex_d_alloc.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_alloc.ddl">h5ex_d_alloc.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Dataset using Fletcher32 Checksum Filter</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_checksum.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5D/h5ex_d_checksum.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5D/H5Ex_D_Checksum.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_Checksum.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_d_checksum.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_checksum.tst">h5ex_d_checksum.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_checksum.ddl">h5ex_d_checksum.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Chunked Dataset</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_chunk.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5D/h5ex_d_chunk.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5D/H5Ex_D_Chunk.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_Chunk.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_d_chunk.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_chunk.tst">h5ex_d_chunk.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_chunk.ddl">h5ex_d_chunk.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Compact Dataset</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_compact.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5D/h5ex_d_compact.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5D/H5Ex_D_Compact.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_Compact.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_d_compact.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_compact.tst">h5ex_d_compact.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_compact.ddl">h5ex_d_compact.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write to External Dataset</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_extern.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5D/h5ex_d_extern.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5D/H5Ex_D_External.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_External.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_d_extern.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_extern.tst">h5ex_d_extern.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_extern.ddl">h5ex_d_extern.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Dataset w/ Fill Value</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_fillval.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5D/h5ex_d_fillval.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5D/H5Ex_D_FillValue.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_FillValue.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_d_fillval.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_fillval.tst">h5ex_d_fillval.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_fillval.ddl">h5ex_d_fillval.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write GZIP Compressed Dataset</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_gzip.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5D/h5ex_d_gzip.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5D/H5Ex_D_Gzip.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_Gzip.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_d_gzip.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_gzip.tst">h5ex_d_gzip.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_gzip.ddl">h5ex_d_gzip.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Data by Hyperslabs</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_hyper.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5D/h5ex_d_hyper.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5D/H5Ex_D_Hyperslab.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_Hyperslab.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_d_hyper.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_hyper.tst">h5ex_d_hyper.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_hyper.ddl">h5ex_d_hyper.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Dataset with n-bit Filter</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_nbit.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5D/h5ex_d_nbit.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5D/H5Ex_D_Nbit.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_Nbit.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_d_nbit.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/18/h5ex_d_nbit.tst">h5ex_d_nbit.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/18/h5ex_d_nbit.ddl">h5ex_d_nbit.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Integer Dataset</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_rdwr.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5D/h5ex_d_rdwr.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5D/H5Ex_D_ReadWrite.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_ReadWrite.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_d_rdwr.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_rdwr.tst">h5ex_d_rdwr.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_rdwr.ddl">h5ex_d_rdwr.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Dataset w/ Shuffle Filter and GZIP Compression</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_shuffle.c">C</a>
+FORTRAN
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5D/H5Ex_D_Shuffle.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_Shuffle.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_d_shuffle.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_shuffle.tst">h5ex_d_shuffle.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_shuffle.ddl">h5ex_d_shuffle.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Dataset using Scale-Offset Filter (float)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_sofloat.c">C</a>
+FORTRAN
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5D/H5Ex_D_Sofloat.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_Sofloat.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_d_sofloat.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/18/h5ex_d_sofloat.tst">h5ex_d_sofloat.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/18/h5ex_d_sofloat.ddl">h5ex_d_sofloat.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Dataset using Scale-Offset Filter (integer)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_soint.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5D/h5ex_d_soint.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5D/H5Ex_D_Soint.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_Soint.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_d_soint.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/18/h5ex_d_soint.tst">h5ex_d_soint.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/18/h5ex_d_soint.ddl">h5ex_d_soint.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Dataset using SZIP Compression</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_szip.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5D/h5ex_d_szip.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5D/H5Ex_D_Szip.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_Szip.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_d_szip.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_szip.tst">h5ex_d_szip.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_szip.ddl">h5ex_d_szip.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Dataset using Data Transform Expression</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_transform.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5D/h5ex_d_transform.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5D/H5Ex_D_Transform.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_Transform.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_d_transform.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/18/h5ex_d_transform.tst">h5ex_d_transform.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/18/h5ex_d_transform.ddl">h5ex_d_transform.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Unlimited Dimension Dataset</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_unlimadd.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5D/h5ex_d_transform.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5D/H5Ex_D_UnlimitedAdd.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_UnlimitedAdd.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_d_unlimadd.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_unlimadd.tst">h5ex_d_unlimadd.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_unlimadd.ddl">h5ex_d_unlimadd.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write GZIP Compressed Unlimited Dimension Dataset</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_unlimgzip.c">C</a>
+FORTRAN
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5D/H5Ex_D_UnlimitedGzip.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_UnlimitedGzip.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_d_unlimgzip.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_unlimgzip.tst">h5ex_d_unlimgzip.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_unlimgzip.ddl">h5ex_d_unlimgzip.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write / Edit Unlimited Dimension Dataset</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_unlimmod.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5D/h5ex_d_unlimmod.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5D/H5Ex_D_UnlimitedMod.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_UnlimitedMod.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_d_unlimmod.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_unlimmod.tst">h5ex_d_unlimmod.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_unlimmod.ddl">h5ex_d_unlimmod.ddl</a></td>
+</tr>
+</table>
+
+\subsection sec_exapi_grps Groups
+<table>
+<tr>
+<th>Feature</th>
+<th>Languages</th>
+<th>HDF5 File</th>
+<th>Output</th>
+<th>DDL</th>
+</tr>
+<tr>
+<td>Create "compact-or-indexed" Format Groups</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5G/h5ex_g_compact.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5G/h5ex_g_compact.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5G/H5Ex_G_Compact.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/groups/H5ObjectEx_G_Compact.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_g_compact.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5G/tfiles/18/h5ex_g_compact.tst">h5ex_g_.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5G/tfiles/18/h5ex_g_compact1.ddl">h5ex_g_compact1.ddl</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5G/tfiles/18/h5ex_g_compact2.ddl">h5ex_g_compact2.ddl</a></td>
+</tr>
+<tr>
+<td>Track links in a Group by Creation Order</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5G/h5ex_g_corder.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5G/h5ex_g_corder.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5G/H5Ex_G_Corder.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/groups/H5ObjectEx_G_Corder.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_g_corder.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5G/tfiles/18/h5ex_g_corder.tst">h5ex_g_corder.tst</a></td>
+<td>h5ex_g_corder.ddl</td>
+</tr>
+<tr>
+<td>Create / Open / Close a Group</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5G/h5ex_g_create.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5G/h5ex_g_create.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5G/H5Ex_G_Create.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/groups/H5ObjectEx_G_Create.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_g_create.h5</td>
+<td>h5ex_g_create.tst</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5G/tfiles/16/h5ex_g_create.ddl">h5ex_g_create.ddl</a></td>
+</tr>
+<tr>
+<td>Create Intermediate Groups</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5G/h5ex_g_intermediate.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5G/h5ex_g_intermediate.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5G/H5Ex_G_Intermediate.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/groups/H5ObjectEx_G_Intermediate.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_g_intermediate.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5G/tfiles/18/h5ex_g_intermediate.tst">h5ex_g_intermediate.tst</a></td>
+<td>h5ex_g_intermediate.ddl</td>
+</tr>
+<tr>
+<td>Iterate over Groups w/ H5Literate</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5G/h5ex_g_iterate.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5G/h5ex_g_iterate.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5G/H5Ex_G_Iterate.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/groups/H5ObjectEx_G_Iterate.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_g_iterate.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5G/tfiles/16/h5ex_g_iterate.tst">h5ex_g_iterate.tst</a></td>
+<td>h5ex_g_iterate.ddl</td>
+</tr>
+<tr>
+<td>Set Conditions to Convert between Compact and Dense Groups</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5G/h5ex_g_phase.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5G/h5ex_g_phase.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5G/H5Ex_G_Phase.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/groups/H5ObjectEx_G_Phase.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_g_phase.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5G/tfiles/18/h5ex_g_phase.tst">h5ex_g_phase.tst</a></td>
+<td>h5ex_g_phase.ddl</td>
+</tr>
+<tr>
+<td>Recursively Traverse a File with H5Literate</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5G/h5ex_g_traverse.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5G/h5ex_g_traverse.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5G/H5Ex_G_Traverse.java">Java</a>
+  JavaObj  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_g_traverse.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5G/tfiles/16/h5ex_g_traverse.tst">h5ex_g_traverse.tst</a></td>
+<td>h5ex_g_traverse.ddl</td>
+</tr>
+<tr>
+<td>Recursively Traverse a File with H5Ovisit / H5Lvisit</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5G/h5ex_g_visit.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5G/h5ex_g_visit.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5G/H5Ex_G_Visit.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/groups/H5ObjectEx_G_Visit.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_g_visit.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5G/tfiles/18/h5ex_g_visit.tst">h5ex_g_visit.tst</a></td>
+<td>h5ex_g_visit.ddl</td>
+</tr>
+</table>
+
+\subsection sec_exapi_dtypes Datatypes
+<table>
+<tr>
+<th>Feature</th>
+<th>Languages</th>
+<th>HDF5 File</th>
+<th>Output</th>
+<th>DDL</th>
+</tr>
+<tr>
+<td>Read / Write Array   (Attribute)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_arrayatt.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_arrayatt_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_ArrayAttribute.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_ArrayAttribute.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_arrayatt.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_arrayatt.tst">h5ex_t_arrayatt.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_arrayatt.ddl">h5ex_t_arrayatt.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Array   (Dataset)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_array.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_array_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_Array.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_Array.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_array.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_array.tst">h5ex_t_array.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_array.ddl">h5ex_t_array.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Bitfield  (Attribute)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_bitatt.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_bitatt_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_BitAttribute.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_BitAttribute.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_bitatt.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_bitatt.tst">h5ex_t_bitatt.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_bitatt.ddl">h5ex_t_bitatt.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Bitfield  (Dataset)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_bit.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_bit_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_Bit.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_Bit.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_bit.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_bit.tst">h5ex_t_bit.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_bit.ddl">h5ex_t_bit.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Compound  (Attribute)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_cmpdatt.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_cmpdatt_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_CompoundAttribute.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_CompoundAttribute.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_cmpdatt.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_cmpdatt.tst">h5ex_t_cmpdatt.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_cmpdatt.ddl">h5ex_t_cmpdatt.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Compound  (Dataset)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_cmpd.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_cmpd_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_Compound.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_Compound.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_cmpd.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_cmpd.tst">h5ex_t_cmpd.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_cmpd.ddl">h5ex_t_cmpd.ddl</a></td>
+</tr>
+<tr>
+<td>Commit Named Datatype and Read Back</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_commit.c">C</a>
+  FORTRAN
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_Commit.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_Commit.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_commit.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_commit.tst">h5ex_t_commit.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_commit.ddl">h5ex_t_commit.ddl</a></td>
+</tr>
+<tr>
+<td>Convert Between Datatypes in Memory</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_convert.c">C</a>
+  FORTRAN  Java  JavaObj  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_convert.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_convert.tst">h5ex_t_convert.tst</a></td>
+<td>h5ex_t_convert.ddl not applicable</td>
+</tr>
+<tr>
+<td>Read / Write Complex Compound  (Attribute)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_cpxcmpdatt.c">C</a>
+  FORTRAN  Java  JavaObj  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_cpxcmpdatt.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_cpxcmpdatt.tst">h5ex_t_cpxcmpdatt.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_cpxcmpdatt.ddl">h5ex_t_cpxcmpdatt.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Complex Compound  (Dataset)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_cpxcmpd.c">C</a>
+  FORTRAN  Java  JavaObj  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_cpxcmpd.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_cpxcmpd.tst">h5ex_t_cpxcmpd.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_cpxcmpd.ddl">h5ex_t_cpxcmpd.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Enumerated  (Attribute)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_enumatt.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_enumatt_F03.F90">FORTRAN</a>
+  Java  JavaObj  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_enumatt.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_enumatt.tst">h5ex_t_enumatt.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_enumatt.ddl">h5ex_t_enumatt.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Enumerated  (Dataset)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_enum.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_enum_F03.F90">FORTRAN</a>
+  Java  JavaObj  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_enum.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_enum.tst">h5ex_t_enum.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_enum.ddl">h5ex_t_enum.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Floating Point  (Attribute)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_floatatt.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_floatatt_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_FloatAttribute.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_FloatAttribute.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_floatatt.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_floatatt.tst">h5ex_t_floatatt.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_floatatt.ddl">h5ex_t_floatatt.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Floating Point  (Dataset)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_float.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_float_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_Float.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_Float.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_float.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_float.tst">h5ex_t_float.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_float.ddl">h5ex_t_float.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Integer Datatype (Attribute)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_intatt.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_intatt_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_IntegerAttribute.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_IntegerAttribute.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_intatt.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_intatt.tst">h5ex_t_intatt.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_intatt.ddl">h5ex_t_intatt.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Integer Datatype (Dataset)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_int.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_int_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_Integer.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_Integer.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_int.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_int.tst">h5ex_t_int.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_int.ddl">h5ex_t_int.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Object References (Attribute)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_objrefatt.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_objrefatt_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_ObjectReferenceAttribute.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_ObjectReferenceAttribute.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_objrefatt.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_objrefatt.tst">h5ex_t_objrefatt.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/112/h5ex_t_objrefatt.ddl">h5ex_t_objrefatt.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Object References (Dataset)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_objref.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_objref_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_ObjectReference.java">Java</a>
+  <a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_ObjectReference.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_objref.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_objref.tst">h5ex_t_objref.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/112/h5ex_t_objref.ddl">h5ex_t_objref.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Opaque  (Attribute)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_opaqueatt.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_opaqueatt_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_OpaqueAttribute.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_OpaqueAttribute.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_opaqueatt.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_opaqueatt.tst">h5ex_t_opaqueatt.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_opaqueatt.ddl">h5ex_t_opaqueatt.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Opaque  (Dataset)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_opaque.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_opaque_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_Opaque.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_Opaque.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_opaque.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_opaque.tst">h5ex_t_opaque.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_opaque.ddl">h5ex_t_opaque.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Region References (Attribute)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_regrefatt.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_regrefatt_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_RegionReferenceAttribute.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_RegionReferenceAttribute.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_regrefatt.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_regrefatt.tst">h5ex_t_regrefatt.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/112/h5ex_t_regrefatt.ddl">h5ex_t_regrefatt.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Region References (Dataset)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_regref.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_regref_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_RegionReference.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_RegionReference.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_regref.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_regref.tst">h5ex_t_regref.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/112/h5ex_t_regref.ddl">h5ex_t_regref.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write String  (Attribute)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_stringatt.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_stringCatt_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_StringAttribute.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_StringAttribute.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_stringatt.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_stringatt.tst">h5ex_t_stringatt.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_stringatt.ddl">h5ex_t_stringatt.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write String  (Dataset)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_string.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_string_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_String.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_String.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_string.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_string.tst">h5ex_t_string.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_string.ddl">h5ex_t_string.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Variable Length  (Attribute)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_vlenatt.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_vlenatt_F03.F90">FORTRAN</a>
+  Java  JavaObj  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_vlenatt.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_vlenatt.tst">h5ex_t_vlenatt.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/114/h5ex_t_vlenatt.ddl">h5ex_t_vlenatt.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Variable Length  (Dataset)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_vlen.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_vlen_F03.F90">FORTRAN</a>
+  Java  JavaObj  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_vlen.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_vlen.tst">h5ex_t_vlen.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/114/h5ex_t_vlen.ddl">h5ex_t_vlen.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Variable Length String (Attribute)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_vlstringatt.c">C</a>
+  FORTRAN  Java  JavaObj  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_vlstringatt.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_vlstringatt.tst">h5ex_t_vlstringatt.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_vlstringatt.ddl">h5ex_t_vlstringatt.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Variable Length String (Dataset)</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5T/h5ex_t_vlstring.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5T/h5ex_t_vlstring_F03.F90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/JAVA/H5T/H5Ex_T_VLString.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/datatypes/H5ObjectEx_T_VLString.java">JavaObj</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>h5ex_t_vlstring.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_vlstring.tst">h5ex_t_vlstring.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_vlstring.ddl">h5ex_t_vlstring.ddl</a></td>
+</tr>
+</table>
+
+\subsection sec_exapi_filts Filters
+<table>
+<tr>
+<th>Feature</th>
+<th>Languages</th>
+<th>HDF5 File</th>
+<th>Output</th>
+<th>DDL</th>
+</tr>
+<tr>
+<td>Read / Write Dataset using Blosc Compression</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5FLT/h5ex_d_blosc.c">C</a>
+  FORTRAN  Java  JavaObj  MATLAB  PyHigh  PyLow
+</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_blosc.h5">h5ex_d_blosc.h5</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_blosc.tst">h5ex_d_blosc.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_blosc.ddl">h5ex_d_blosc.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Dataset using Bit Shuffle Compression</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5FLT/h5ex_d_bshuf.c">C</a>
+  FORTRAN  Java  JavaObj  MATLAB  PyHigh  PyLow
+</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_bshuf.h5">h5ex_d_bshuf.h5</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_bshuf.tst">h5ex_d_bshuf.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_bshuf.ddl">h5ex_d_bshuf.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Dataset using BZip2 Compression</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5FLT/h5ex_d_bzip2.c">C</a>
+  FORTRAN  Java  JavaObj  MATLAB  PyHigh  PyLow
+</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_bzip2.h5">h5ex_d_bzip2.h5</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_bzip2.tst">h5ex_d_bzip2.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_bzip2.ddl">h5ex_d_bzip2.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Dataset using JPEG Compression</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5FLT/h5ex_d_jpeg.c">C</a>
+  FORTRAN  Java  JavaObj  MATLAB  PyHigh  PyLow
+</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_jpeg.h5">h5ex_d_jpeg.h5</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_jpeg.tst">h5ex_d_jpeg.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_jpeg.ddl">h5ex_d_jpeg.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Dataset using LZ4 Compression</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5FLT/h5ex_d_lz4.c">C</a>
+  FORTRAN  Java  JavaObj  MATLAB  PyHigh  PyLow
+</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_lz4.h5">h5ex_d_lz4.h5</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_lz4.tst">h5ex_d_lz4.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_lz4.ddl">h5ex_d_lz4.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Dataset using LZF Compression</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5FLT/h5ex_d_lzf.c">C</a>
+  FORTRAN  Java  JavaObj  MATLAB  PyHigh  PyLow
+</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_lzf.h5">h5ex_d_lzf.h5</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_lzf.tst">h5ex_d_lzf.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_lzf.ddl">h5ex_d_lzf.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Dataset using ZFP Compression</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5FLT/h5ex_d_zfp.c">C</a>
+  FORTRAN  Java  JavaObj  MATLAB  PyHigh  PyLow
+</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_zfp.h5">h5ex_d_zfp.h5</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_zfp.tst">h5ex_d_zfp.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_zfp.ddl">h5ex_d_zfp.ddl</a></td>
+</tr>
+<tr>
+<td>Read / Write Dataset using ZStd Compression</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5FLT/h5ex_d_zstd.c">C</a>
+  FORTRAN  Java  JavaObj  MATLAB  PyHigh  PyLow
+</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_zstd.h5">h5ex_d_zstd.h5</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_zstd.tst">h5ex_d_zstd.tst</a></td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_zstd.ddl">h5ex_d_zstd.ddl</a></td>
+</tr>
+</table>
+
+\subsection sec_exapi_java Java General
+<table>
+<tr>
+<th>Feature</th>
+<th>Languages</th>
+<th>Output</th>
+</tr>
+<tr>
+<td>Create/Read/Write an Attribute</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5AttributeCreate.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/intro/H5Object_CreateAttribute.java">JavaObj</a>
+</td>
+<td><a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/tfiles/110/HDF5AttributeCreate.txt">HDF5AttributeCreate.txt</a></td>
+</tr>
+<tr>
+<td>Create Datasets</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5DatasetCreate.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/intro/H5Object_CreateDataset.java">JavaObj</a>
+</td>
+<td><a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/tfiles/110/HDF5DatasetCreate.txt">HDF5DatasetCreate.txt</a></td>
+</tr>
+<tr>
+<td>Read/Write Datasets</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5DatasetRead.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/intro/H5Object_ReadWrite.java">JavaObj</a>
+</td>
+<td><a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/tfiles/110/HDF5DatasetRead.txt">HDF5DatasetRead.txt</a></td>
+</tr>
+<tr>
+<td>Create an Empty File</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5FileCreate.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/intro/H5Object_CreateFile.java">JavaObj</a>
+</td>
+<td><a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/tfiles/110/HDF5FileCreate.txt">HDF5FileCreate.txt</a></td>
+</tr>
+<tr>
+<td>Retrieve the File Structure</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5FileStructure.java">Java</a>
+  JavaObj
+</td>
+<td><a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/tfiles/110/HDF5FileStructure.txt">HDF5FileStructure.txt</a></td>
+</tr>
+<tr>
+<td>Create Groups</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5GroupCreate.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/intro/H5Object_CreateGroup.java">JavaObj</a>
+</td>
+<td><a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/tfiles/110/HDF5GroupCreate.txt">HDF5GroupCreate.txt</a></td>
+</tr>
+<tr>
+<td>Select a Subset of a Dataset</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5SubsetSelect.java">Java</a>
+  JavaObj
+</td>
+<td><a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/tfiles/110/HDF5SubsetSelect.txt">HDF5SubsetSelect.txt</a></td>
+</tr>
+<tr>
+<td>Create Two Datasets Within Groups</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5GroupDatasetCreate.java">Java</a>
+<a href="https://\HVURL/test/org.hdfgroup.object.example.test/intro/H5Object_CreateGroupDataset.java">JavaObj</a>
+</td>
+<td><a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/tfiles/110/HDF5GroupDatasetCreate.txt">HDF5GroupDatasetCreate.txt</a></td>
+</tr>
+</table>
+
+
+\subsection sec_exapi_par Parallel
+<table>
+<tr>
+<th>Feature</th>
+<th>Languages</th>
+<th>HDF5 File</th>
+<th>Output</th>
+</tr>
+<tr>
+<td>Creating and Accessing a File</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_file_create.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_file_create.F90">FORTRAN</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>ph5_.h5</td>
+<td>ph5_.tst</td>
+</tr>
+<tr>
+<td>Creating and Accessing a Dataset</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_dataset.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_dataset.F90">FORTRAN</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>ph5_.h5</td>
+<td>ph5_.tst</td>
+</tr>
+<tr>
+<td>Writing and Reading Contiguous Hyperslabs</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_hyperslab_by_row.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_hyperslab_by_row.F90">FORTRAN</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>ph5_.h5</td>
+<td>ph5_.tst</td>
+</tr>
+<tr>
+<td>Writing and Reading Regularly Spaced Data Hyperslabs</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_hyperslab_by_col.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_hyperslab_by_col.F90">FORTRAN</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>ph5_.h5</td>
+<td>ph5_.tst</td>
+</tr>
+<tr>
+<td>Writing and Reading Pattern Hyperslabs</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_hyperslab_by_pattern.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_hyperslab_by_pattern.F90">FORTRAN</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>ph5_.h5</td>
+<td>ph5_.tst</td>
+</tr>
+<tr>
+<td>Writing and Reading Chunk Hyperslabs</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_hyperslab_by_chunk.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_hyperslab_by_chunk.F90">FORTRAN</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>ph5_.h5</td>
+<td>ph5_.tst</td>
+</tr>
+<tr>
+<td>Using the Subfiling VFD to Write a File Striped Across Multiple Subfiles</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_subfiling.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_subfiling.F90">FORTRAN</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>ph5_.h5</td>
+<td>ph5_.tst</td>
+</tr>
+<tr>
+<td>Write to Datasets with Filters Applied</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_filtered_writes.c">C</a>
+  FORTRAN  MATLAB  PyHigh  PyLow
+</td>
+<td>ph5_.h5</td>
+<td>ph5_.tst</td>
+</tr>
+<tr>
+<td>Collectively Write Datasets with Filters and Not All Ranks have Data</td>
+<td>
+<a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_filtered_writes_no_sel.c">C</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_filtered_writes_no_sel.F90">FORTRAN</a>
+  MATLAB  PyHigh  PyLow
+</td>
+<td>ph5_.h5</td>
+<td>ph5_.tst</td>
+</tr>
+</table>
+
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted
+
+*/

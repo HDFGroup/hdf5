@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -13,10 +13,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Ofsinfo.c
- *                      Feb 2009
- *                      Vailin Choi
  *
- * Purpose:             File space info message.
+ * Purpose:             File space info message
  *
  *-------------------------------------------------------------------------
  */
@@ -32,9 +30,10 @@
 /* PRIVATE PROTOTYPES */
 static void  *H5O__fsinfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                  size_t p_size, const uint8_t *p);
-static herr_t H5O__fsinfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__fsinfo_encode(H5F_t *f, bool disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                                 const void *_mesg);
 static void  *H5O__fsinfo_copy(const void *_mesg, void *_dest);
-static size_t H5O__fsinfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static size_t H5O__fsinfo_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__fsinfo_free(void *mesg);
 static herr_t H5O__fsinfo_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
@@ -70,6 +69,7 @@ static const unsigned H5O_fsinfo_ver_bounds[] = {
     H5O_FSINFO_VERSION_1,     /* H5F_LIBVER_V110 */
     H5O_FSINFO_VERSION_1,     /* H5F_LIBVER_V112 */
     H5O_FSINFO_VERSION_1,     /* H5F_LIBVER_V114 */
+    H5O_FSINFO_VERSION_1,     /* H5F_LIBVER_V200 */
     H5O_FSINFO_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 #define N_FSINFO_VERSION_BOUNDS H5F_LIBVER_NBOUNDS
@@ -82,46 +82,41 @@ H5FL_DEFINE_STATIC(H5O_fsinfo_t);
  *
  * Purpose:     Decode a message and return a pointer to a newly allocated one.
  *
- * Return:      Success:        Ptr to new message in native form.
- *              Failure:        NULL
- *
- * Programmer:  Vailin Choi; Feb 2009
- *
+ * Return:      Success:    Pointer to new message in native form
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
-
 static void *
 H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
                    unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_fsinfo_t  *fsinfo = NULL; /* File space info message */
-    H5F_mem_page_t ptype;         /* Memory type for iteration */
-    unsigned       vers;          /* message version */
-    const uint8_t *p_end     = p + p_size;
-    void          *ret_value = NULL; /* Return value */
+    H5O_fsinfo_t  *fsinfo = NULL;              /* File space info message */
+    H5F_mem_page_t ptype;                      /* Memory type for iteration */
+    unsigned       vers;                       /* Message version */
+    const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
+    void          *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* Allocate space for message */
     if (NULL == (fsinfo = H5FL_CALLOC(H5O_fsinfo_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     for (ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
         fsinfo->fs_addr[ptype - 1] = HADDR_UNDEF;
 
     /* Version of message */
-    if (p + 1 - 1 > p_end) /* one byte for version */
-        HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "ran off end of input buffer while decoding")
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     vers = *p++;
 
     if (vers == H5O_FSINFO_VERSION_0) {
-        H5F_file_space_type_t strategy;  /* Strategy */
-        hsize_t               threshold; /* Threshold */
-        H5FD_mem_t            type;      /* Memory type for iteration */
+        H5F_file_space_type_t strategy;      /* Strategy */
+        hsize_t               threshold = 0; /* Threshold */
+        H5FD_mem_t            type;          /* Memory type for iteration */
 
         fsinfo->persist             = H5F_FREE_SPACE_PERSIST_DEF;
         fsinfo->threshold           = H5F_FREE_SPACE_THRESHOLD_DEF;
@@ -129,8 +124,8 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
         fsinfo->pgend_meta_thres    = H5F_FILE_SPACE_PGEND_META_THRES;
         fsinfo->eoa_pre_fsm_fsalloc = HADDR_UNDEF;
 
-        if (p + 1 + H5F_SIZEOF_SIZE(f) - 1 > p_end) /* one byte for strategy + sizeof(f)  */
-            HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "ran off end of input buffer while decoding")
+        if (H5_IS_BUFFER_OVERFLOW(p, 1 + H5F_sizeof_size(f), p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         strategy = (H5F_file_space_type_t)*p++; /* File space strategy */
         H5F_DECODE_LENGTH(f, p, threshold);     /* Free-space section threshold */
 
@@ -138,14 +133,14 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
         switch (strategy) {
             case H5F_FILE_SPACE_ALL_PERSIST:
                 fsinfo->strategy  = H5F_FSPACE_STRATEGY_FSM_AGGR;
-                fsinfo->persist   = TRUE;
+                fsinfo->persist   = true;
                 fsinfo->threshold = threshold;
                 if (HADDR_UNDEF == (fsinfo->eoa_pre_fsm_fsalloc = H5F_get_eoa(f, H5FD_MEM_DEFAULT)))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get file size")
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get file size");
                 for (type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; type++) {
-                    if (p + H5_SIZEOF_HADDR_T > p_end)
-                        HGOTO_ERROR(H5E_FILE, H5E_CANTDECODE, NULL,
-                                    "ran off end of input buffer while decoding")
+                    if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                    "ran off end of input buffer while decoding");
                     H5F_addr_decode(f, &p, &(fsinfo->fs_addr[type - 1]));
                 }
                 break;
@@ -166,44 +161,58 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
             case H5F_FILE_SPACE_NTYPES:
             case H5F_FILE_SPACE_DEFAULT:
             default:
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file space strategy")
-        } /* end switch */
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file space strategy");
+        }
 
         fsinfo->version = H5O_FSINFO_VERSION_1;
-        fsinfo->mapped  = TRUE;
+        fsinfo->mapped  = true;
     }
     else {
-        HDassert(vers >= H5O_FSINFO_VERSION_1);
+        if (vers < H5O_FSINFO_VERSION_1)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "bad version number");
 
         fsinfo->version = vers;
-        /* strategy (1) + persist (1) + sizeof(f) + sizeof(f) + pgend_meta_thres (2)  + sizeofaddr(f) */
-        if (p + 1 + 1 + 2 * H5F_SIZEOF_SIZE(f) + 2 + H5F_SIZEOF_ADDR(f) - 1 > p_end)
-            HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "ran off end of input buffer while decoding")
+        if (H5_IS_BUFFER_OVERFLOW(p, 1 + 1, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         fsinfo->strategy = (H5F_fspace_strategy_t)*p++; /* File space strategy */
         fsinfo->persist  = *p++;                        /* Free-space persist or not */
-        H5F_DECODE_LENGTH(f, p, fsinfo->threshold);     /* Free-space section threshold */
 
+        if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+        H5F_DECODE_LENGTH(f, p, fsinfo->threshold); /* Free-space section threshold */
+
+        if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         H5F_DECODE_LENGTH(f, p, fsinfo->page_size); /* File space page size */
-        UINT16DECODE(p, fsinfo->pgend_meta_thres);  /* Page end metadata threshold */
+        /* Basic sanity check */
+        if (fsinfo->page_size == 0 || fsinfo->page_size > H5F_FILE_SPACE_PAGE_SIZE_MAX)
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid page size in file space info");
+
+        if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+        UINT16DECODE(p, fsinfo->pgend_meta_thres); /* Page end metadata threshold */
+
+        if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         H5F_addr_decode(f, &p,
                         &(fsinfo->eoa_pre_fsm_fsalloc)); /* EOA before free-space header and section info */
 
         /* Decode addresses of free space managers, if persisting */
         if (fsinfo->persist)
             for (ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++) {
-                if (p + H5F_SIZEOF_SIZE(f) - 1 > p_end) /* one byte for sizeof(f)  */
-                    HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "ran off end of input buffer while decoding")
+                if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
                 H5F_addr_decode(f, &p, &(fsinfo->fs_addr[ptype - 1]));
             }
-        fsinfo->mapped = FALSE;
+        fsinfo->mapped = false;
     }
 
     /* Set return value */
     ret_value = fsinfo;
 
 done:
-    if (ret_value == NULL && fsinfo != NULL)
-        fsinfo = H5FL_FREE(H5O_fsinfo_t, fsinfo);
+    if (!ret_value && fsinfo)
+        H5FL_FREE(H5O_fsinfo_t, fsinfo);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__fsinfo_decode() */
@@ -215,12 +224,11 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi; Feb 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__fsinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__fsinfo_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                   const void *_mesg)
 {
     const H5O_fsinfo_t *fsinfo = (const H5O_fsinfo_t *)_mesg;
     H5F_mem_page_t      ptype; /* Memory type for iteration */
@@ -228,9 +236,9 @@ H5O__fsinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
-    HDassert(fsinfo);
+    assert(f);
+    assert(p);
+    assert(fsinfo);
 
     *p++ = (uint8_t)fsinfo->version;            /* message version */
     *p++ = (uint8_t)fsinfo->strategy;           /* File space strategy */
@@ -259,8 +267,6 @@ H5O__fsinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
  * Return:      Success:        Ptr to _DEST
  *              Failure:        NULL
  *
- * Programmer:  Vailin Choi; Feb 2009
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -273,9 +279,9 @@ H5O__fsinfo_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(fsinfo);
+    assert(fsinfo);
     if (!dest && NULL == (dest = H5FL_CALLOC(H5O_fsinfo_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* copy */
     *dest = *fsinfo;
@@ -297,12 +303,10 @@ done:
  * Return:      Success:        Message data size in bytes without alignment.
  *              Failure:        zero
  *
- * Programmer:  Vailin Choi; Feb 2009
- *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O__fsinfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
+H5O__fsinfo_size(const H5F_t *f, bool H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_fsinfo_t *fsinfo    = (const H5O_fsinfo_t *)_mesg;
     size_t              ret_value = 0; /* Return value */
@@ -329,8 +333,6 @@ H5O__fsinfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const vo
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi; Feb 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -338,7 +340,7 @@ H5O__fsinfo_free(void *mesg)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(mesg);
+    assert(mesg);
 
     mesg = H5FL_FREE(H5O_fsinfo_t, mesg);
 
@@ -352,8 +354,6 @@ H5O__fsinfo_free(void *mesg)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi; Feb 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -365,54 +365,54 @@ H5O__fsinfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(fsinfo);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(fsinfo);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "File space strategy:");
+    fprintf(stream, "%*s%-*s ", indent, "", fwidth, "File space strategy:");
     switch (fsinfo->strategy) {
         case H5F_FSPACE_STRATEGY_FSM_AGGR:
-            HDfprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_FSM_AGGR");
+            fprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_FSM_AGGR");
             break;
 
         case H5F_FSPACE_STRATEGY_PAGE:
-            HDfprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_PAGE");
+            fprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_PAGE");
             break;
 
         case H5F_FSPACE_STRATEGY_AGGR:
-            HDfprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_AGGR");
+            fprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_AGGR");
             break;
 
         case H5F_FSPACE_STRATEGY_NONE:
-            HDfprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_NONE");
+            fprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_NONE");
             break;
 
         case H5F_FSPACE_STRATEGY_NTYPES:
         default:
-            HDfprintf(stream, "%s\n", "unknown");
+            fprintf(stream, "%s\n", "unknown");
     } /* end switch */
 
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-              "Free-space persist:", fsinfo->persist ? "TRUE" : "FALSE");
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+            "Free-space persist:", fsinfo->persist ? "TRUE" : "FALSE");
 
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Free-space section threshold:", fsinfo->threshold);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+            "Free-space section threshold:", fsinfo->threshold);
 
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "File space page size:", fsinfo->page_size);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+            "File space page size:", fsinfo->page_size);
 
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-              "Page end metadata threshold:", fsinfo->pgend_meta_thres);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
+            "Page end metadata threshold:", fsinfo->pgend_meta_thres);
 
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-              "eoa_pre_fsm_fsalloc:", fsinfo->eoa_pre_fsm_fsalloc);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+            "eoa_pre_fsm_fsalloc:", fsinfo->eoa_pre_fsm_fsalloc);
 
     if (fsinfo->persist) {
         for (ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
-            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-                      "Free space manager address:", fsinfo->fs_addr[ptype - 1]);
+            fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+                    "Free space manager address:", fsinfo->fs_addr[ptype - 1]);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -424,8 +424,6 @@ H5O__fsinfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
  * Purpose:     Set the version to encode the fsinfo message with.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi; June 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -439,7 +437,7 @@ H5O_fsinfo_set_version(H5F_libver_t low, H5F_libver_t high, H5O_fsinfo_t *fsinfo
 
     /* Sanity check */
     HDcompile_assert(N_FSINFO_VERSION_BOUNDS == H5F_LIBVER_NBOUNDS);
-    HDassert(fsinfo);
+    assert(fsinfo);
 
     version = H5O_FSINFO_VERSION_1;
 
@@ -449,7 +447,7 @@ H5O_fsinfo_set_version(H5F_libver_t low, H5F_libver_t high, H5O_fsinfo_t *fsinfo
 
     /* Version bounds check */
     if (H5O_fsinfo_ver_bounds[high] == H5O_INVALID_VERSION || version > H5O_fsinfo_ver_bounds[high])
-        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "File space info message's version out of bounds")
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "File space info message's version out of bounds");
 
     /* Set the message version */
     fsinfo->version = version;
@@ -465,9 +463,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Summer 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -479,11 +474,11 @@ H5O_fsinfo_check_version(H5F_libver_t high, H5O_fsinfo_t *fsinfo)
 
     /* Sanity check */
     HDcompile_assert(N_FSINFO_VERSION_BOUNDS == H5F_LIBVER_NBOUNDS);
-    HDassert(fsinfo);
+    assert(fsinfo);
 
     /* Check the version */
     if (H5O_fsinfo_ver_bounds[high] == H5O_INVALID_VERSION || fsinfo->version > H5O_fsinfo_ver_bounds[high])
-        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "File space info message's version out of bounds")
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "File space info message's version out of bounds");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

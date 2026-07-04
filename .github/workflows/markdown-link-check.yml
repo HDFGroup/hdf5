@@ -1,0 +1,24 @@
+name: Check Markdown links
+
+# Triggers the workflow on push or pull request or on demand
+on:
+  workflow_dispatch:
+  schedule:
+      - cron: "0 10 * * 6"
+
+permissions:
+  contents: read
+
+# The config file handles things like http 500 errors from sites like GitLab
+# and http 200 responses
+jobs:
+  markdown-link-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # master
+      with:
+        persist-credentials: false # Prevents tokens from being written to Git config files
+
+    - uses: gaurav-nelson/github-action-markdown-link-check@5c5dfc0ac2e225883c0e5f03a85311ec2830d368 # v1
+      with:
+        config-file: '.github/workflows/markdown_config.json'

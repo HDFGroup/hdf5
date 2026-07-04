@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Plapl.c
- *			July 14 2006
- *			James Laird
  *
  * Purpose:		Link access property list class routines
  *
@@ -30,12 +28,13 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5Lprivate.h"  /* Links		  		*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5Ppkg.h"      /* Property lists		  	*/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5Lprivate.h"  /* Links                                    */
+#include "H5MMprivate.h" /* Memory management                        */
+#include "H5Ppkg.h"      /* Property lists                           */
+#include "H5VMprivate.h" /* Vector Functions                         */
 
 /****************/
 /* Local Macros */
@@ -178,9 +177,6 @@ static const H5P_coll_md_read_flag_t H5L_def_coll_md_read_g =
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              October 31, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -193,7 +189,7 @@ H5P__lacc_reg_prop(H5P_genclass_t *pclass)
     /* Register property for number of links traversed */
     if (H5P__register_real(pclass, H5L_ACS_NLINKS_NAME, H5L_ACS_NLINKS_SIZE, &H5L_def_nlinks_g, NULL, NULL,
                            NULL, H5L_ACS_NLINKS_ENC, H5L_ACS_NLINKS_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register property for external link prefix */
     if (H5P__register_real(pclass, H5L_ACS_ELINK_PREFIX_NAME, H5L_ACS_ELINK_PREFIX_SIZE,
@@ -201,33 +197,33 @@ H5P__lacc_reg_prop(H5P_genclass_t *pclass)
                            H5L_ACS_ELINK_PREFIX_ENC, H5L_ACS_ELINK_PREFIX_DEC, H5L_ACS_ELINK_PREFIX_DEL,
                            H5L_ACS_ELINK_PREFIX_COPY, H5L_ACS_ELINK_PREFIX_CMP,
                            H5L_ACS_ELINK_PREFIX_CLOSE) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register fapl for link access */
     if (H5P__register_real(pclass, H5L_ACS_ELINK_FAPL_NAME, H5L_ACS_ELINK_FAPL_SIZE, &H5L_def_fapl_id_g, NULL,
                            H5L_ACS_ELINK_FAPL_SET, H5L_ACS_ELINK_FAPL_GET, H5L_ACS_ELINK_FAPL_ENC,
                            H5L_ACS_ELINK_FAPL_DEC, H5L_ACS_ELINK_FAPL_DEL, H5L_ACS_ELINK_FAPL_COPY,
                            H5L_ACS_ELINK_FAPL_CMP, H5L_ACS_ELINK_FAPL_CLOSE) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register property for external link file access flags */
     if (H5P__register_real(pclass, H5L_ACS_ELINK_FLAGS_NAME, H5L_ACS_ELINK_FLAGS_SIZE, &H5L_def_elink_flags_g,
                            NULL, NULL, NULL, H5L_ACS_ELINK_FLAGS_ENC, H5L_ACS_ELINK_FLAGS_DEC, NULL, NULL,
                            NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register property for external link file traversal callback */
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if (H5P__register_real(pclass, H5L_ACS_ELINK_CB_NAME, H5L_ACS_ELINK_CB_SIZE, &H5L_def_elink_cb_g, NULL,
                            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
 #ifdef H5_HAVE_PARALLEL
     /* Register the metadata collective read flag */
     if (H5P__register_real(pclass, H5_COLL_MD_READ_FLAG_NAME, H5L_ACS_COLL_MD_READ_SIZE,
                            &H5L_def_coll_md_read_g, NULL, NULL, NULL, H5L_ACS_COLL_MD_READ_ENC,
                            H5L_ACS_COLL_MD_READ_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 #endif /* H5_HAVE_PARALLEL */
 
 done:
@@ -242,9 +238,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, Sept 2, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -257,7 +250,7 @@ H5P__lacc_elink_fapl_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Get the FAPL ID */
     l_fapl_id = *(const hid_t *)value;
@@ -266,10 +259,10 @@ H5P__lacc_elink_fapl_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
     if (l_fapl_id != H5P_DEFAULT) {
         H5P_genplist_t *l_fapl_plist;
 
-        if (NULL == (l_fapl_plist = (H5P_genplist_t *)H5P_object_verify(l_fapl_id, H5P_FILE_ACCESS)))
-            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get property list")
-        if (((*(hid_t *)value) = H5P_copy_plist(l_fapl_plist, FALSE)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy file access property list")
+        if (NULL == (l_fapl_plist = (H5P_genplist_t *)H5P_object_verify(l_fapl_id, H5P_FILE_ACCESS, true)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get property list");
+        if (((*(hid_t *)value) = H5P_copy_plist(l_fapl_plist, false)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy file access property list");
     } /* end if */
 
 done:
@@ -284,9 +277,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, Sept 2, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -299,7 +289,7 @@ H5P__lacc_elink_fapl_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Get the FAPL ID */
     l_fapl_id = *(const hid_t *)value;
@@ -308,10 +298,10 @@ H5P__lacc_elink_fapl_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
     if (l_fapl_id != H5P_DEFAULT) {
         H5P_genplist_t *l_fapl_plist;
 
-        if (NULL == (l_fapl_plist = (H5P_genplist_t *)H5P_object_verify(l_fapl_id, H5P_FILE_ACCESS)))
-            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get property list")
-        if (((*(hid_t *)value) = H5P_copy_plist(l_fapl_plist, FALSE)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy file access property list")
+        if (NULL == (l_fapl_plist = (H5P_genplist_t *)H5P_object_verify(l_fapl_id, H5P_FILE_ACCESS, true)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get property list");
+        if (((*(hid_t *)value) = H5P_copy_plist(l_fapl_plist, false)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy file access property list");
     } /* end if */
 
 done:
@@ -328,9 +318,6 @@ done:
  * Return:         Success:        Non-negative
  *	               Failure:        Negative
  *
- * Programmer:     Quincey Koziol
- *                 Wednesday, August 15, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -339,7 +326,7 @@ H5P__lacc_elink_fapl_enc(const void *value, void **_pp, size_t *size)
     const hid_t    *elink_fapl = (const hid_t *)value; /* Property to encode */
     uint8_t       **pp         = (uint8_t **)_pp;
     H5P_genplist_t *fapl_plist;                 /* Pointer to property list */
-    hbool_t         non_default_fapl = FALSE;   /* Whether the FAPL is non-default */
+    bool            non_default_fapl = false;   /* Whether the FAPL is non-default */
     size_t          fapl_size        = 0;       /* FAPL's encoded size */
     herr_t          ret_value        = SUCCEED; /* Return value */
 
@@ -347,9 +334,9 @@ H5P__lacc_elink_fapl_enc(const void *value, void **_pp, size_t *size)
 
     /* Check for non-default FAPL */
     if (*elink_fapl != H5P_DEFAULT) {
-        if (NULL == (fapl_plist = (H5P_genplist_t *)H5P_object_verify(*elink_fapl, H5P_FILE_ACCESS)))
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property list")
-        non_default_fapl = TRUE;
+        if (NULL == (fapl_plist = (H5P_genplist_t *)H5P_object_verify(*elink_fapl, H5P_FILE_ACCESS, true)))
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property list");
+        non_default_fapl = true;
     } /* end if */
 
     if (NULL != *pp) {
@@ -360,8 +347,8 @@ H5P__lacc_elink_fapl_enc(const void *value, void **_pp, size_t *size)
     /* Encode the property list, if non-default */
     /* (if *pp == NULL, will only compute the size) */
     if (non_default_fapl) {
-        if (H5P__encode(fapl_plist, TRUE, NULL, &fapl_size) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "can't encode property list")
+        if (H5P__encode(fapl_plist, true, NULL, &fapl_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "can't encode property list");
 
         if (*pp) {
             uint64_t enc_value;
@@ -370,13 +357,13 @@ H5P__lacc_elink_fapl_enc(const void *value, void **_pp, size_t *size)
             /* encode the length of the plist */
             enc_value = (uint64_t)fapl_size;
             enc_size  = H5VM_limit_enc_size(enc_value);
-            HDassert(enc_size < 256);
+            assert(enc_size < 256);
             *(*pp)++ = (uint8_t)enc_size;
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
             /* encode the plist */
-            if (H5P__encode(fapl_plist, TRUE, *pp, &fapl_size) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "can't encode property list")
+            if (H5P__encode(fapl_plist, true, *pp, &fapl_size) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "can't encode property list");
 
             *pp += fapl_size;
         }
@@ -399,9 +386,6 @@ done:
  * Return:         Success:        Non-negative
  *	               Failure:        Negative
  *
- * Programmer:     Quincey Koziol
- *                 Wednesday, August 15, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -409,19 +393,19 @@ H5P__lacc_elink_fapl_dec(const void **_pp, void *_value)
 {
     hid_t          *elink_fapl = (hid_t *)_value; /* The elink FAPL value */
     const uint8_t **pp         = (const uint8_t **)_pp;
-    hbool_t         non_default_fapl;    /* Whether the FAPL is non-default */
+    bool            non_default_fapl;    /* Whether the FAPL is non-default */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(elink_fapl);
+    assert(pp);
+    assert(*pp);
+    assert(elink_fapl);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     /* Determine if the FAPL is non-default */
-    non_default_fapl = (hbool_t) * (*pp)++;
+    non_default_fapl = (bool)*(*pp)++;
 
     if (non_default_fapl) {
         size_t   fapl_size = 0; /* Encoded size of property list */
@@ -430,13 +414,13 @@ H5P__lacc_elink_fapl_dec(const void **_pp, void *_value)
 
         /* Decode the plist length */
         enc_size = *(*pp)++;
-        HDassert(enc_size < 256);
+        assert(enc_size < 256);
         UINT64DECODE_VAR(*pp, enc_value, enc_size);
         fapl_size = (size_t)enc_value;
 
         /* Decode the property list */
         if ((*elink_fapl = H5P__decode(*pp)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "can't decode property")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "can't decode property");
 
         *pp += fapl_size;
     } /* end if */
@@ -455,9 +439,6 @@ done:
  * Return:      Success:        Non-negative
  * 	            Failure:        Negative
  *
- * Programmer:  Vailin Choi
- *	            Tuesday, Sept 23, 2008
- *
  *--------------------------------------------------------------------------
  */
 static herr_t
@@ -470,14 +451,14 @@ H5P__lacc_elink_fapl_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Get the FAPL ID */
     l_fapl_id = (*(const hid_t *)value);
 
     /* Close the FAPL */
     if (l_fapl_id != H5P_DEFAULT && H5I_dec_ref(l_fapl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to close ID for file access property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to close ID for file access property list");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -491,9 +472,6 @@ done:
  * Return:      Success:        Non-negative
  * 	            Failure:        Negative
  *
- * Programmer:  Vailin Choi
- *	            Tuesday, Sept 23, 2008
- *
  *--------------------------------------------------------------------------
  */
 static herr_t
@@ -505,7 +483,7 @@ H5P__lacc_elink_fapl_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Get the FAPL ID */
     l_fapl_id = (*(const hid_t *)value);
@@ -514,10 +492,10 @@ H5P__lacc_elink_fapl_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED
     if (l_fapl_id != H5P_DEFAULT) {
         H5P_genplist_t *l_fapl_plist;
 
-        if (NULL == (l_fapl_plist = (H5P_genplist_t *)H5P_object_verify(l_fapl_id, H5P_FILE_ACCESS)))
-            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get property list")
-        if (((*(hid_t *)value) = H5P_copy_plist(l_fapl_plist, FALSE)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy file access property list")
+        if (NULL == (l_fapl_plist = (H5P_genplist_t *)H5P_object_verify(l_fapl_id, H5P_FILE_ACCESS, true)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get property list");
+        if (((*(hid_t *)value) = H5P_copy_plist(l_fapl_plist, false)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy file access property list");
     } /* end if */
 
 done:
@@ -532,9 +510,6 @@ done:
  *                 compared.
  *
  * Return:         zero if VALUE1 and VALUE2 are equal, non zero otherwise.
- *
- * Programmer:     Quincey Koziol
- *                 Wednesday, August 15, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -567,7 +542,7 @@ H5P__lacc_elink_fapl_cmp(const void *value1, const void *value2, size_t H5_ATTR_
         herr_t H5_ATTR_NDEBUG_UNUSED status;
 
         status = H5P__cmp_plist(obj1, obj2, &ret_value);
-        HDassert(status >= 0);
+        assert(status >= 0);
     } /* end if */
 
 done:
@@ -582,9 +557,6 @@ done:
  * Return:      Success:        Non-negative
  * 	            Failure:        Negative
  *
- * Programmer:  Vailin Choi
- *	            Tuesday, Sept 23, 2008
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -596,14 +568,14 @@ H5P__lacc_elink_fapl_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSE
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Get the FAPL ID */
     l_fapl_id = (*(const hid_t *)value);
 
     /* Close the FAPL */
     if ((l_fapl_id > H5P_DEFAULT) && (H5I_dec_ref(l_fapl_id) < 0))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to close ID for file access property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to close ID for file access property list");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -617,9 +589,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, Sept 2, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -629,7 +598,7 @@ H5P__lacc_elink_pref_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Copy the prefix */
     *(char **)value = H5MM_xstrdup(*(const char **)value);
@@ -645,9 +614,6 @@ H5P__lacc_elink_pref_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, Sept 2, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -657,7 +623,7 @@ H5P__lacc_elink_pref_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Copy the prefix */
     *(char **)value = H5MM_xstrdup(*(const char **)value);
@@ -668,15 +634,12 @@ H5P__lacc_elink_pref_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
 /*-------------------------------------------------------------------------
  * Function:       H5P__lacc_elink_pref_enc
  *
- * Purpose:        Callback routine which is called whenever the elink flags
+ * Purpose:        Callback routine which is called whenever the elink prefix
  *                 property in the dataset access property list is
  *                 encoded.
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -695,11 +658,11 @@ H5P__lacc_elink_pref_enc(const void *value, void **_pp, size_t *size)
 
     /* calculate prefix length */
     if (NULL != elink_pref)
-        len = HDstrlen(elink_pref);
+        len = strlen(elink_pref);
 
     enc_value = (uint64_t)len;
     enc_size  = H5VM_limit_enc_size(enc_value);
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     if (NULL != *pp) {
         /* encode the length of the prefix */
@@ -730,9 +693,6 @@ H5P__lacc_elink_pref_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -747,14 +707,14 @@ H5P__lacc_elink_pref_dec(const void **_pp, void *_value)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(elink_pref);
+    assert(pp);
+    assert(*pp);
+    assert(elink_pref);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     /* Decode the size */
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     /* Decode the value */
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
@@ -763,8 +723,8 @@ H5P__lacc_elink_pref_dec(const void **_pp, void *_value)
     if (0 != len) {
         /* Make a copy of the user's prefix string */
         if (NULL == (*elink_pref = (char *)H5MM_malloc(len + 1)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for prefix")
-        HDstrncpy(*elink_pref, *(const char **)pp, len);
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for prefix");
+        strncpy(*elink_pref, *(const char **)pp, len);
         (*elink_pref)[len] = '\0';
 
         *pp += len;
@@ -783,9 +743,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              November 2, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -794,7 +751,7 @@ H5P__lacc_elink_pref_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     H5MM_xfree(*(void **)value);
 
@@ -808,9 +765,6 @@ H5P__lacc_elink_pref_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              November 2, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -818,7 +772,7 @@ H5P__lacc_elink_pref_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     *(char **)value = H5MM_xstrdup(*(const char **)value);
 
@@ -833,9 +787,6 @@ H5P__lacc_elink_pref_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED
  *                 compared.
  *
  * Return:         zero if VALUE1 and VALUE2 are equal, non zero otherwise.
- *
- * Programmer:     Mohamad Chaarawi
- *                 Thursday, November 3, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -853,7 +804,7 @@ H5P__lacc_elink_pref_cmp(const void *value1, const void *value2, size_t H5_ATTR_
     if (NULL != pref1 && NULL == pref2)
         HGOTO_DONE(-1);
     if (NULL != pref1 && NULL != pref2)
-        ret_value = HDstrcmp(pref1, pref2);
+        ret_value = strcmp(pref1, pref2);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -866,9 +817,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              November 2, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -876,7 +824,7 @@ H5P__lacc_elink_pref_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSE
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     H5MM_xfree(*(void **)value);
 
@@ -899,9 +847,6 @@ H5P__lacc_elink_pref_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSE
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *              Friday, July 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -911,18 +856,17 @@ H5Pset_nlinks(hid_t plist_id, size_t nlinks)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iz", plist_id, nlinks);
 
     if (nlinks <= 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "number of links must be positive");
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS, false)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set number of links */
     if (H5P_set(plist, H5L_ACS_NLINKS_NAME, &nlinks) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set nlink info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set nlink info");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -939,9 +883,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *              Friday, July 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -951,18 +892,17 @@ H5Pget_nlinks(hid_t plist_id, size_t *nlinks /*out*/)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, nlinks);
 
     if (!nlinks)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer passed in");
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS, true)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get the current number of links */
     if (H5P_get(plist, H5L_ACS_NLINKS_NAME, nlinks) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of links")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of links");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -977,9 +917,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *              Thursday, August 3, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -989,15 +926,14 @@ H5Pset_elink_prefix(hid_t plist_id, const char *prefix)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*s", plist_id, prefix);
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS, false)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set prefix */
     if (H5P_set(plist, H5L_ACS_ELINK_PREFIX_NAME, &prefix) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set prefix info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set prefix info");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1014,9 +950,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *              Thursday, August 3, 2006
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -1028,22 +961,21 @@ H5Pget_elink_prefix(hid_t plist_id, char *prefix /*out*/, size_t size)
     ssize_t         ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("Zs", "ixz", plist_id, prefix, size);
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS, true)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get the current prefix */
     if (H5P_peek(plist, H5L_ACS_ELINK_PREFIX_NAME, &my_prefix) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external link prefix")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external link prefix");
 
     /* Check for prefix being set */
     if (my_prefix) {
         /* Copy to user's buffer, if given */
-        len = HDstrlen(my_prefix);
+        len = strlen(my_prefix);
         if (prefix) {
-            HDstrncpy(prefix, my_prefix, size);
+            strncpy(prefix, my_prefix, size);
             if (len >= size)
                 prefix[size - 1] = '\0';
         } /* end if */
@@ -1065,9 +997,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:
- *              Vailin Choi; Tuesday, September 12th, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1077,15 +1006,14 @@ H5Pset_elink_fapl(hid_t lapl_id, hid_t fapl_id)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ii", lapl_id, fapl_id);
 
     /* Check arguments */
-    if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS, false)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link access property list");
 
     /* Set the file access property list for the link access */
     if (H5P_set(plist, H5L_ACS_ELINK_FAPL_NAME, &fapl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set fapl for link")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set fapl for link");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1099,9 +1027,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:
- *              Vailin Choi; Tuesday, September 12th, 2008
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1110,18 +1035,17 @@ H5Pget_elink_fapl(hid_t lapl_id)
     H5P_genplist_t *plist;     /* Property list pointer */
     hid_t           ret_value; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
-    H5TRACE1("i", "i", lapl_id);
+    FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS, true)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, H5I_INVALID_HID, "can't find object for ID");
 
     if (H5P_get(plist, H5L_ACS_ELINK_FAPL_NAME, &ret_value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fapl for links")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get fapl for links");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_elink_fapl() */
 
 /*-------------------------------------------------------------------------
@@ -1133,9 +1057,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Tuesday, December 9, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1145,21 +1066,20 @@ H5Pset_elink_acc_flags(hid_t lapl_id, unsigned flags)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iIu", lapl_id, flags);
 
     /* Check that flags are valid */
     if ((flags != H5F_ACC_RDWR) && (flags != (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE)) &&
         (flags != H5F_ACC_RDONLY) && (flags != (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ)) &&
         (flags != H5F_ACC_DEFAULT))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags");
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS, false)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set flags */
     if (H5P_set(plist, H5L_ACS_ELINK_FLAGS_NAME, &flags) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access flags")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access flags");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1173,9 +1093,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Tuesday, December 9, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1185,16 +1102,15 @@ H5Pget_elink_acc_flags(hid_t lapl_id, unsigned *flags /*out*/)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", lapl_id, flags);
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS, true)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get flags */
     if (flags)
         if (H5P_get(plist, H5L_ACS_ELINK_FLAGS_NAME, flags) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, 0, "can't get access flags")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, 0, "can't get access flags");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1209,9 +1125,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Tuesday, December 15, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1222,16 +1135,15 @@ H5Pset_elink_cb(hid_t lapl_id, H5L_elink_traverse_t func, void *op_data)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iLt*x", lapl_id, func, op_data);
 
     /* Check if the callback function is NULL and the user data is non-NULL.
      * This is almost certainly an error as the user data will not be used. */
     if (!func && op_data)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "callback is NULL while user data is not")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "callback is NULL while user data is not");
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS, false)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Populate the callback info struct */
     cb_info.func      = func;
@@ -1239,7 +1151,7 @@ H5Pset_elink_cb(hid_t lapl_id, H5L_elink_traverse_t func, void *op_data)
 
     /* Set callback info */
     if (H5P_set(plist, H5L_ACS_ELINK_CB_NAME, &cb_info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set callback info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set callback info");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1253,9 +1165,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Tuesday, December 15, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1266,15 +1175,14 @@ H5Pget_elink_cb(hid_t lapl_id, H5L_elink_traverse_t *func /*out*/, void **op_dat
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", lapl_id, func, op_data);
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS, true)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get callback_info */
     if (H5P_get(plist, H5L_ACS_ELINK_CB_NAME, &cb_info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get callback info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get callback info");
 
     if (func)
         *func = cb_info.func;

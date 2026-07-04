@@ -1,14 +1,18 @@
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_UTILS C)
 
-if (BUILD_TESTING)
+if (NOT HDF5_EXTERNALLY_CONFIGURED AND BUILD_TESTING)
   add_subdirectory (test)
 endif ()
 
 option (HDF5_BUILD_UTILS  "Build HDF5 Utils" ON)
 if (HDF5_BUILD_UTILS)
-  add_subdirectory (mirror_vfd)
-  add_subdirectory (subfiling_vfd)
+  if (HDF5_ENABLE_MIRROR_VFD)  
+    add_subdirectory (mirror_vfd)
+  endif ()
+  if (HDF5_ENABLE_SUBFILING_VFD)  
+    add_subdirectory (subfiling_vfd)
+  endif ()
 endif ()
 
 #-- Add the h5dwalk and test executables

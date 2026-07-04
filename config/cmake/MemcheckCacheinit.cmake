@@ -1,0 +1,61 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the LICENSE file, which can be found at the root of the source code
+# distribution tree, or in https://www.hdfgroup.org/licenses.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+# This file is used to initialize the CMake cache for memory checking
+# builds of HDF5.
+
+#########################
+# EXTERNAL cache entries
+#########################
+
+set (CMAKE_INSTALL_FRAMEWORK_PREFIX "Library/Frameworks" CACHE STRING "Frameworks installation directory" FORCE)
+
+set (HDF_PACKAGE_EXT "" CACHE STRING "Name of HDF package extension" FORCE)
+
+set (HDF_PACKAGE_NAMESPACE "hdf5::" CACHE STRING "Name for HDF package namespace (can be empty)" FORCE)
+
+set (HDF5_BUILD_CPP_LIB ON CACHE BOOL "Build C++ support" FORCE)
+
+set (HDF5_BUILD_FORTRAN ON CACHE BOOL "Build FORTRAN support" FORCE)
+
+set (HDF5_BUILD_HL_LIB ON CACHE BOOL "Build HIGH Level HDF5 Library" FORCE)
+
+set (HDF5_BUILD_TOOLS ON CACHE BOOL "Build HDF5 Tools" FORCE)
+
+set (HDF5_BUILD_EXAMPLES ON CACHE BOOL "Build HDF5 Library Examples" FORCE)
+
+set (HDF5_ENABLE_ZLIB_SUPPORT ON CACHE BOOL "Enable Zlib Filters" FORCE)
+
+set (HDF5_ENABLE_SZIP_SUPPORT OFF CACHE BOOL "Use SZip Filter" FORCE)
+
+set (HDF5_ENABLE_SZIP_ENCODING OFF CACHE BOOL "Use SZip Encoding" FORCE)
+
+set (MPIEXEC_MAX_NUMPROCS "4" CACHE STRING "Minimum number of processes for HDF parallel tests" FORCE)
+
+set (HDF5_USING_ANALYSIS_TOOL ON CACHE BOOL "Indicate that an analysis checker is used" FORCE)
+
+set (HDF5_NO_PACKAGES ON CACHE BOOL "CPACK - Disable packaging" FORCE)
+
+set (HDF_TEST_EXPRESS "2" CACHE STRING "Control testing framework (0-3)" FORCE)
+
+set (HDF5_MINGW_STATIC_GCC_LIBS ON CACHE BOOL "Statically link libgcc/libstdc++" FORCE)
+
+set (HDF5_ALLOW_EXTERNAL_SUPPORT "TGZ" CACHE STRING "If not set to NO, specifies where to obtain sources when building or using external libraries (NO GIT TGZ)" FORCE)
+
+########################
+# compression options
+########################
+set (ZLIB_USE_LOCALCONTENT ON CACHE BOOL "Use local file for ZLIB FetchContent" FORCE)
+set (LIBAEC_USE_LOCALCONTENT ON CACHE BOOL "Use local file for LIBAEC FetchContent" FORCE)
+
+set (CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build Debug" FORCE)
+
+set (CTEST_CONFIGURATION_TYPE "Debug" CACHE STRING "Build Debug" FORCE)

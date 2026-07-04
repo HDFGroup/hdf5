@@ -4,19 +4,16 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Saturday, September 12, 2015
- *
- * Purpose:	This file contains declarations which define macros for the
- *		H5D package.  Including this header means that the source file
- *		is part of the H5D package.
+ * Purpose: This file contains declarations which define macros for the
+ *          H5D package.  Including this header means that the source file
+ *          is part of the H5D package.
  */
 #ifndef H5Dmodule_H
 #define H5Dmodule_H
@@ -25,10 +22,13 @@
  *      reporting macros.
  */
 #define H5D_MODULE
-#define H5_MY_PKG     H5D
-#define H5_MY_PKG_ERR H5E_DATASET
+#define H5_MY_PKG      H5D
+#define H5_MY_PKG_INIT YES
 
 /** \page H5D_UG HDF5 Datasets
+ *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
  *
  * \section sec_dataset HDF5 Datasets
  *
@@ -55,7 +55,7 @@
  * pointers to metadata) that describes or annotates the dataset. Header information includes the
  * name of the object, its dimensionality, its number-type, information about how the data itself is
  * stored on disk (the storage layout), and other information used by the library to speed up access
- * to the dataset or maintain the file’s integrity.
+ * to the dataset or maintain the file's integrity.
  *
  * The HDF5 dataset interface, comprising the @ref H5D functions, provides a mechanism for managing
  * HDF5 datasets including the transfer of data between memory and disk and the description of
@@ -70,16 +70,20 @@
  * The dataset does not have to open to be linked or unlinked.
  *
  * \subsubsection subsubsec_dataset_intro_obj Object Reference
- * A dataset may be the target of an object reference. The object reference is created by
- * #H5Rcreate with the name of an object which may be a dataset and the reference type
+ * A file, group, dataset, named datatype, or attribute may be the target of an object reference.
+ * The object reference is created by
+ * #H5Rcreate_object with the name of an object which may be a dataset and the reference type
  * #H5R_OBJECT. The dataset does not have to be open to create a reference to it.
  *
  * An object reference may also refer to a region (selection) of a dataset. The reference is created
- * with #H5Rcreate and a reference type of #H5R_DATASET_REGION.
+ * with #H5Rcreate_region.
  *
- * An object reference can be accessed by a call to #H5Rdereference. When the reference is to a
- * dataset or dataset region, the #H5Rdereference call returns an identifier to the dataset just as if
+ * An object reference can be accessed by a call to #H5Ropen_object. When the reference is to a
+ * dataset or dataset region, the #H5Ropen_object call returns an identifier to the dataset just as if
  * #H5Dopen has been called.
+ *
+ * The reference buffer from the #H5Rcreate_object call must be released by
+ * using #H5Rdestroy to avoid resource leaks and possible HDF5 library shutdown issues.
  *
  * \subsubsection subsubsec_dataset_intro_attr Adding Attributes
  * A dataset may have user-defined attributes which are created with #H5Acreate and accessed
@@ -177,15 +181,20 @@
  * </tr>
  * <tr>
  * <td>#H5Dset_extent</td>
- * <td>Changes the sizes of a dataset’s dimensions.</td>
+ * <td>Changes the sizes of a dataset's dimensions.</td>
  * </tr>
  * </table>
  *
  * \anchor dcpl_table_tag Dataset creation property list functions (H5P)
+ * <div>
  * \snippet{doc} tables/propertyLists.dox dcpl_table
+ * </div>
  *
  * \anchor dapl_table_tag Dataset access property list functions (H5P)
+ *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox dapl_table
+ * </div>
  *
  * \subsection subsec_dataset_program Programming Model for Datasets
  * This section explains the programming model for datasets.
@@ -271,7 +280,7 @@
  * of each dimension. The maximum dimension size can be a fixed value or the constant
  * #H5S_UNLIMITED, in which case the actual dimension size can be changed with calls to
  * #H5Dset_extent, up to the maximum set with the maxdims parameter in the #H5Screate_simple
- * call that established the dataset’s original dimensions. The maximum dimension size is set when
+ * call that established the dataset's original dimensions. The maximum dimension size is set when
  * the dataset is created and cannot be changed.
  *
  * <h4>Datatype</h4>
@@ -741,11 +750,11 @@
  * </tr>
  * <tr>
  * <td>I/O initiation</td>
- * <td>Initiation of HDF5 I/O activities (#H5Dwrite and #H5Dread) in a user’s application program.</td>
+ * <td>Initiation of HDF5 I/O activities (#H5Dwrite and #H5Dread) in a user's application program.</td>
  * </tr>
  * <tr>
  * <td>Memory hyperslab operation</td>
- * <td>Data is scattered to (for read), or gathered from (for write) the application’s memory buffer
+ * <td>Data is scattered to (for read), or gathered from (for write) the application's memory buffer
  * (bypassed if no datatype conversion is needed).</td>
  * </tr>
  * <tr>
@@ -807,23 +816,14 @@
  *
  * The HDF5 library distribution includes or employs several optional filters. These are listed in the
  * table below. The filters are applied in the pipeline between the virtual file layer and the file
- * hyperslab operation. See the figure above. The application can use any number of filters in any
+ * hyperslab operation. See the figure above. The application can use any number of filters up to 32, in any
  * order.
  *
  * <table>
  * <caption>Data pipeline filters</caption>
  * <tr>
- * <th>Filter</th>
+ * <th>Built-in Filter</th>
  * <th>Description</th>
- * </tr>
- * <tr>
- * <td>gzip compression</td>
- * <td>Data compression using zlib.</td>
- * </tr>
- * <tr>
- * <td>Szip compression</td>
- * <td>Data compression using the Szip library. See The HDF Group website for more information
- * regarding the Szip filter.</td>
  * </tr>
  * <tr>
  * <td>N-bit compression</td>
@@ -843,6 +843,19 @@
  * <td>Fletcher32</td>
  * <td>Fletcher32 checksum for error-detection.</td>
  * </tr>
+ * <tr>
+ * <th>Optional Built-in Filter</th>
+ * <th>Description</th>
+ * </tr>
+ * <tr>
+ * <td>gzip compression</td>
+ * <td>Data compression using zlib.</td>
+ * </tr>
+ * <tr>
+ * <td>szip compression</td>
+ * <td>Data compression using the szip library. The HDF Group now uses the libaec library for the szip
+ *     filter.</td>
+ * </tr>
  * </table>
  *
  * Filters may be used only for chunked data and are applied to chunks of data between the file
@@ -852,12 +865,51 @@
  * Filters are selected by dataset creation properties, and some behavior may be controlled by data
  * transfer properties. The library determines what filters must be applied and applies them in the
  * order in which they were set by the application. That is, if an application calls
- * #H5Pset_shuffle and then #H5Pset_deflate when creating a dataset’s creation property list, the
+ * #H5Pset_shuffle and then #H5Pset_deflate when creating a dataset's creation property list, the
  * library will apply the shuffle filter first and then the deflate filter.
  *
  * For more information,
  * \li @see @ref subsubsec_dataset_filters_nbit
  * \li @see @ref subsubsec_dataset_filters_scale
+ *
+ * \subsubsection subsubsec_dataset_transfer_dyn_filter Data Pipeline Dynamically Loaded Filters
+ * While the HDF5 “internal” compression methods work reasonably well on users’
+ * datasets, there are certain drawbacks to this implementation. First, the “internal” compression
+ * methods may not provide the optimal compression ratio, as do some newly developed or specialized
+ * compression methods. Secondly, if a data provider wants to use a “non-internal” compression for
+ * storing the data in HDF5, they have to write a filter function that uses the new compression method
+ * and then register it with the library. Data consumers of such HDF5 files will need to have the new filter
+ * function and use it with their applications to read the data, or they will need a modified version of the
+ * HDF5 Library that has the new filter as a part of the library.
+ *
+ * If a user of such data does not have a modified HDF5 Library installed on his system, command-line tools
+ * such as \ref sec_cltools_h5dump or \ref sec_cltools_h5ls will not be able to display the compressed data.
+ * Furthermore, it would be
+ * practically impossible to determine the compression method used, making the data stored in HDF5
+ * useless.
+ *
+ * It is clear that the internal HDF5 filter mechanism, while extensible, does not work well with third-party
+ * filters. It would be a maintenance nightmare to keep adding and supporting new compression methods
+ * in HDF5. For any set of HDF5 “internal” filters, there always will be data with which the “internal”
+ * filters
+ * will not achieve the optimal performance needed to address data I/O and storage problems. Thus the
+ * internal HDF5 filter mechanism is enhanced to address the issues discussed above.
+ *
+ * We have a feature of HDF5 called “dynamically loaded filters in HDF5.” This feature
+ * makes the HDF5 third-party filters available to an application at runtime. The third-party HDF5 filter
+ * function has to be a part of the HDF5 filter plugin installed on the system as a shared library or DLL.
+ *
+ * To use a third-party filter an HDF5 application should call the #H5Pset_filter function when setting the
+ * filter pipeline for a dataset creation property. The HDF5 Library will register the filter with the library
+ * and the filter will be applied when data is written to the file.
+ *
+ * When an application reads data compressed with a third-party HDF5 filter, the HDF5 Library will search
+ * for the required filter plugin, register the filter with the library (if the filter function is not
+ * registered) and
+ * apply it to the data on the read operation.
+ *
+ * For more information,
+ * \li @see @ref sec_filter_plugins
  *
  * \subsubsection subsubsec_dataset_transfer_drive File Drivers
  * I/O is performed by the HDF5 virtual file layer. The file driver interface writes and reads blocks
@@ -866,7 +918,9 @@
  * the pipeline processing: the pipeline and filter operations are identical no matter what data access
  * mechanism is used.
  *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox lcpl_table
+ * </div>
  *
  * Each file driver writes/reads contiguous blocks of bytes from a logically contiguous address
  * space. The file driver is responsible for managing the details of the different physical storage
@@ -883,7 +937,9 @@
  * Data transfer properties set optional parameters that control parts of the data pipeline. The
  * function listing below shows transfer properties that control the behavior of the library.
  *
+ * <div>
  * \snippet{doc} tables/fileDriverLists.dox file_driver_table
+ * </div>
  *
  * Some filters and file drivers require or use additional parameters from the application program.
  * These can be passed in the data transfer property list. The table below shows file driver property
@@ -1035,9 +1091,9 @@
  *
  * \subsection subsec_dataset_allocation Allocation of Space in the File
  * When a dataset is created, space is allocated in the file for its header and initial data. The amount
-of space allocated when the dataset is created depends on the storage properties. When the
-dataset is modified (data is written, attributes added, or other changes), additional storage may be
-allocated if necessary.
+ * of space allocated when the dataset is created depends on the storage properties. When the
+ * dataset is modified (data is written, attributes added, or other changes), additional storage may be
+ * allocated if necessary.
  *
  * <table>
  * <caption>Initial dataset size</caption>
@@ -1150,8 +1206,8 @@ allocated if necessary.
  * are defined. See the example code below.
  *
  * The dimensions of the dataset can also be reduced. If the sizes specified are smaller than the
- * dataset’s current dimension sizes, #H5Dset_extent will reduce the dataset’s dimension sizes to the
- * specified values. It is the user’s responsibility to ensure that valuable data is not lost;
+ * dataset's current dimension sizes, #H5Dset_extent will reduce the dataset's dimension sizes to the
+ * specified values. It is the user's responsibility to ensure that valuable data is not lost;
  * #H5Dset_extent does not check.
  *
  * <em>Using #H5Dset_extent to increase the size of a dataset</em>
@@ -1301,7 +1357,7 @@ allocated if necessary.
  * </tr>
  * </table>
  *
- * Together these three properties control the library’s behavior. The table below summarizes the
+ * Together these three properties control the library's behavior. The table below summarizes the
  * possibilities during the dataset create-write-close cycle.
  *
  * <table>
@@ -1421,12 +1477,13 @@ allocated if necessary.
  * reclaim the storage space occupied by a deleted object.
  *
  * Removing a dataset and reclaiming the space it used can be done with the #H5Ldelete function
- * and the h5repack utility program. With the H5Ldelete function, links to a dataset can be removed
+ * and the \ref sec_cltools_h5repack utility program. With the H5Ldelete function, links to a dataset can be
+ * removed
  * from the file structure. After all the links have been removed, the dataset becomes inaccessible to
  * any application and is effectively removed from the file. The way to recover the space occupied
  * by an unlinked dataset is to write all of the objects of the file into a new file. Any unlinked object
  * is inaccessible to the application and will not be included in the new file. Writing objects to a
- * new file can be done with a custom program or with the h5repack utility program.
+ * new file can be done with a custom program or with the \ref sec_cltools_h5repack utility program.
  *
  * For more information, @see @ref sec_group
  *
@@ -1444,7 +1501,7 @@ allocated if necessary.
  * the size of the memory datatype and the number of elements in the memory selection.
  *
  * Variable-length data are organized in two or more areas of memory. For more information,
- * \see \ref h4_vlen_datatype "Variable-length Datatypes".
+ * see \ref h4_vlen_datatype "Variable-length Datatypes".
  *
  * When writing data, the application creates an array of
  * vl_info_t which contains pointers to the elements. The elements might be, for example, strings.
@@ -1560,7 +1617,8 @@ allocated if necessary.
  * care must be taken to assure that all the external files are accessible in the new location.
  *
  * \subsection subsec_dataset_filters Using HDF5 Filters
- * This section describes in detail how to use the n-bit, scale-offset filters and szip filters.
+ * This section describes in detail how to use the n-bit, scale-offset filters and szip filters. For
+ * details on the how filters are used in the read / write of data, see /def subsubsec_dataset_transfer_pipe.
  *
  * \subsubsection subsubsec_dataset_filters_nbit Using the N‐bit Filter
  * N-bit data has n significant bits, where n may not correspond to a precise number of bytes. On
@@ -1815,7 +1873,7 @@ allocated if necessary.
  * The first and second parameters can be obtained using the HDF5 dataspace and datatype
  * interface calls.
  *
- * A compound datatype can have members of array or compound datatype. An array datatype’s
+ * A compound datatype can have members of array or compound datatype. An array datatype's
  * base datatype can be a complex compound datatype. Recursive calls are required to set
  * parameters for these complex situations.
  *
@@ -1824,16 +1882,16 @@ allocated if necessary.
  * recursive calls.
  *
  * For an atomic datatype (integer or floating-point), parameters that will be stored include the
- * datatype’s size, endianness, precision, and offset.
+ * datatype's size, endianness, precision, and offset.
  *
  * For a no-op datatype, only the size is required.
  *
- * For a compound datatype, parameters that will be stored include the datatype’s total size and
+ * For a compound datatype, parameters that will be stored include the datatype's total size and
  * number of members. For each member, its member offset needs to be stored. Other parameters
  * for members will depend on the respective datatype class.
  *
- * For an array datatype, the total size parameter should be stored. Other parameters for the array’s
- * base type depend on the base type’s datatype class.
+ * For an array datatype, the total size parameter should be stored. Other parameters for the array's
+ * base type depend on the base type's datatype class.
  *
  * Further, to correctly retrieve the parameter for use of n-bit compression or decompression later,
  * parameters for distinguishing between datatype classes should be stored.
@@ -1900,7 +1958,7 @@ allocated if necessary.
  * In the function H5Z__set_parms_array:
  * <ul><li>1. Store the assigned numeric code for the array datatype in cd_value[i]; increment i</li>
  * <li>2. Get the size of the array datatype and store in cd_value[i]; increment i</li>
- * <li>3. Get the class of the array’s base datatype.
+ * <li>3. Get the class of the array's base datatype.
  *   <ul><li>For an integer or floating-point datatype, call H5Z__set_parms_atomic</li>
  *   <li>For an array datatype, call H5Z__set_parms_array</li>
  *   <li>For a compound datatype, call H5Z__set_parms_compound</li>
@@ -2679,10 +2737,141 @@ allocated if necessary.
  * and minimum values, and they will get a much larger minimum-bits (poor compression)
  * </li></ol>
  *
- * \subsubsection subsubsec_dataset_filters_szip Using the Szip Filter
- * See The HDF Group website for further information regarding the Szip filter.
+ * \subsubsection subsubsec_dataset_filters_szip Using the SZip Filter
+ * Szip compression software, providing lossless compression of scientific data, has been provided with HDF
+ * software products as of HDF5 Release 1.6.0.  Szip is an implementation of the extended-Rice lossless
+ * compression algorithm. The Consultative Committee on Space Data Systems (CCSDS) has adopted the
+ * extended-Rice algorithm for international standards for space applications. Szip is reported
+ * to provide fast and effective compression, specifically for the EOS data generated by the NASA Earth
+ * Observatory System (EOS).
+ * It was originally developed at University of New Mexico (UNM) and integrated with HDF by UNM researchers
+ * and developers.
+ *
+ * The primary gain with Szip compression is in speed of processing. Szip also provides some advantage in
+ * compression ratio over other compression methods.
+ *
+ * <h4>Szip and HDF5</h4>
+ * Using Szip compression in HDF5: Szip is a stand-alone library that is configured as an optional filter in
+ * HDF5.
+ * Depending on which Szip library is used (encoder enabled or decode-only), an HDF5 application can
+ * create, write, and read datasets compressed with Szip compression, or can only read datasets
+ * compressed with Szip.
+ * Applications use Szip by setting Szip as an optional filter when a dataset is created. If the Szip
+ * encoder is enabled with the HDF5 library, data is automatically compressed and decompressed with
+ * Szip during I/O.
+ * If only the decoder is present, the HDF5 library cannot create and write Szip-compressed datasets,
+ * but it automatically decompresses Szip-compressed data when data is read.
+ *
+ * This sample HDF5 program illustrates the use of Szip compression with HDF5.
+ * \code
+ * Example of Szip Usage in HDF5
+ * The following sample program illustrates the use of Szip compression in HDF5. This sample program is
+ * also available in the subdirectory HDF5Examples.
+ * #include "hdf5.h"
+ * #define NX 500
+ * #define NY 600
+ * #define CH_NX 100
+ * #define CH_NY 25
+ *
+ * int main(void)
+ * {
+ *     hid_t file, data_space, dataset32, properties;
+ *     float buf[NX][NY];
+ *     float buf_r[NX][NY];
+ *     hsize_t dims[2], chunk_size[2];
+ *     int i, j;
+ *     unsigned szip_options_mask;
+ *     unsigned szip_pixels_per_block;
+ *
+ *     // Initialize data buffer with some bogus data.
+ *     for (i=0; i < NX; i++) {
+ *         for (j=0; j < NY; j++)
+ *             buf[i][j] = i + j;
+ *     }
+ *
+ *     // Describe the size of the array.
+ *     dims[0] = NX;
+ *     dims[1] = NY;
+ *     data_space = H5Screate_simple (2, dims, NULL);
+ *
+ *     // Create a new file using read/write access, default file
+ *     // creation properties, and default file access properties.
+ *     file = H5Fcreate ("test.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ *
+ *     // Set the dataset creation property list to specify that
+ *     // the raw data is to be partitioned into 100x100 element
+ *     // chunks and that each chunk is to be compressed.
+ *     chunk_size[0] = CH_NX;
+ *     chunk_size[1] = CH_NY;
+ *     properties = H5Pcreate (H5P_DATASET_CREATE);
+ *     H5Pset_chunk (properties, 2, chunk_size);
+ *
+ *     // Set parameters for SZIP compression; check the description of
+ *     // the H5Pset_szip function in the HDF5 Reference Manual for more
+ *     // information.
+ *     szip_options_mask=H5_SZIP_NN_OPTION_MASK;
+ *     szip_pixels_per_block=32;
+ *
+ *     H5Pset_szip (properties, szip_options_mask, szip_pixels_per_block);
+ *
+ *     // Create a new dataset within the file.  The datatype
+ *     // and data space describe the data on disk, which may
+ *     // be different from the format used in the application's
+ *     // memory.
+ *
+ *     dataset32 = H5Dcreate (file, "datasetF32", H5T_NATIVE_FLOAT, data_space, properties);
+ *
+ *     // Write the array to the file.  The datatype and dataspace
+ *     // describe the format of the data in the `buf' buffer.
+ *     // The raw data is translated to the format required on disk,
+ *     // as defined above.  We use default raw data transfer properties.
+ *
+ *     H5Dwrite (dataset32, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+ *
+ *     // Read the array.  This is similar to writing data,
+ *     // except the data flows in the opposite direction.
+ *     // Note: Decompression is automatic.
+ *
+ *     H5Dread (dataset32, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_r);
+ *
+ *     H5Dclose (dataset32);
+ *     H5Sclose (data_space);
+ *     H5Pclose (properties);
+ *     H5Fclose (file);
+ *   }
+ * \endcode
+ *
+ * Details of the required and optional parameters are provided in the H5Pset_szip entry
+ * in the \ref RM.
+ *
+ * Software distribution: Starting with Release 1.6.0, HDF5 has been distributed with Szip enabled,
+ * making it easier to use Szip compression. The software is distributed as follows:
+ * - Pre-compiled HDF5 binaries are provided with the Szip encoder enabled.
+ * - Szip source code can be obtained at:
+ *  <a href="https://github.com/MathisRosenhauer/libaec.git">LIBAEC(SZIP) repository</a>
+ *
+ * \subsubsection subsubsec_dataset_filters_dyn Using Dynamically-Loadable Filters
+ * see \ref sec_filter_plugins for further information regarding the dynamically-loadable filters.
+ *
+ * HDF has a filter plugin repository of useful third-party plugins that can used
+ * <table>
+ * <tr><th>Filter</th><th>SetFilter Params</th></tr>
+ * <tr><td>BLOSC</td><td>UD=32001,0,0</td></tr>
+ * <tr><td>BLOSC2</td><td>UD=32026,0,0</td></tr>
+ * <tr><td>BSHUF</td><td>UD=32004,0,0</td></tr>
+ * <tr><td>BZIP2</td><td>UD=307,0,1,9</td></tr>
+ * <tr><td>JPEG</td><td>UD=32019,0,4,q,c,r,t</td></tr>
+ * <tr><td>LZ4 </td><td>UD=32004,0,1,3</td></tr>
+ * <tr><td>LZF</td><td>UD=32000,1,3,0,0,0</td></tr>
+ * <tr><td>SZ</td><td>UD=32017,1,5,2,7,20,40,0</td></tr>
+ * <tr><td>ZFP</td><td>UD=32013,1,0,0</td></tr>
+ * <tr><td>ZSTD</td><td>UD=32015,0,0</td></tr>
+ * </table>
  *
  * Previous Chapter \ref sec_group - Next Chapter \ref sec_datatype
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  *
  */
 
@@ -2694,29 +2883,6 @@ allocated if necessary.
  * properties. Datasets are used by other HDF5 APIs and referenced either by
  * name or by a handle. Such handles can be obtained by either creating or
  * opening the dataset.
- *
- * Typical stages in the HDF5 dataset life cycle are shown below in introductory
- * examples.
- *
- * <table>
- * <tr><th>Create</th><th>Read</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5D_examples.c create
- *   </td>
- *   <td>
- *   \snippet{lineno} H5D_examples.c read
- *   </td>
- * <tr><th>Update</th><th>Delete</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5D_examples.c update
- *   </td>
- *   <td>
- *   \snippet{lineno} H5D_examples.c delete
- *   </td>
- * </tr>
- * </table>
  *
  */
 

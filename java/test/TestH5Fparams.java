@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -22,6 +22,7 @@ import java.io.File;
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5FunctionArgumentException;
+import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5F_info2_t;
 
 import org.junit.After;
@@ -104,12 +105,11 @@ public class TestH5Fparams {
         }
     }
 
-    @Test //(expected = HDF5LibraryException.class)
+    @Test(expected = HDF5LibraryException.class)
     public void testH5Fclose_negative() throws Throwable
     {
         // cannot close a file with negative id.
         int fid = H5.H5Fclose(-1);
-        assertTrue(fid == 0);
     }
 
     @Test
@@ -210,7 +210,7 @@ public class TestH5Fparams {
 
             try {
                 H5F_info2_t finfo = H5.H5Fget_info(fid);
-                assertEquals(finfo.super_version, 0);
+                assertEquals(finfo.super_version, 2);
                 assertEquals(finfo.free_version, 0);
                 assertEquals(finfo.sohm_version, 0);
             }

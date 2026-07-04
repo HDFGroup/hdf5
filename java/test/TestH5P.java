@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -545,7 +545,7 @@ public class TestH5P {
         H5.H5Pget_data_transform(plist_id, express, 20);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Pget_data_transform_IllegalSize() throws Throwable
     {
         String[] express = {""};
@@ -614,13 +614,13 @@ public class TestH5P {
         assertTrue("H5Pset_link_phase_change", ret_val >= 0);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Pset_link_phase_change_Highmax_Compact() throws Throwable
     {
         H5.H5Pset_link_phase_change(fcpl_id, 70000000, 3);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Pset_link_phase_change_max_compactLESSTHANmin_dense() throws Throwable
     {
         H5.H5Pset_link_phase_change(fcpl_id, 5, 6);
@@ -751,19 +751,19 @@ public class TestH5P {
         assertTrue("H5Pset_shared_mesg_phase_change", ret_val >= 0);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5PH5Pset_shared_mesg_phase_change_HighMaxlistValue() throws Throwable
     {
         H5.H5Pset_shared_mesg_phase_change(fcpl_id, 5001, 4000);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5PH5Pset_shared_mesg_phase_change_HighMinbtreeValue() throws Throwable
     {
         H5.H5Pset_shared_mesg_phase_change(fcpl_id, 5000, 5001);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5PH5Pset_shared_mesg_phase_change_MinbtreeGreaterThanMaxlist() throws Throwable
     {
         H5.H5Pset_link_phase_change(fcpl_id, 3, 7);
@@ -802,7 +802,7 @@ public class TestH5P {
         assertEquals("Value of nindexes is equal to value set", 7, nindexes);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Pset_shared_mesg_nindexes_InvalidHIGHnindexes() throws Throwable
     {
         H5.H5Pset_shared_mesg_nindexes(fcpl_id, 9);
@@ -824,13 +824,13 @@ public class TestH5P {
         assertTrue("H5Pset_shared_mesg_index", ret_val >= 0);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Pset_shared_mesg_index_Invalid_indexnum() throws Throwable
     {
         H5.H5Pset_shared_mesg_index(fcpl_id, 2, HDF5Constants.H5O_SHMESG_ATTR_FLAG, 10);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Pset_shared_mesg_index_InvalidFlag() throws Throwable
     {
         H5.H5Pset_shared_mesg_nindexes(fcpl_id, 7);
@@ -857,7 +857,7 @@ public class TestH5P {
         assertEquals("minimum message size", 10, mesg_info[1]);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Pget_shared_mesg_index_Invalid_indexnum() throws Throwable
     {
         int[] mesg_info = new int[2];
@@ -922,13 +922,13 @@ public class TestH5P {
         assertTrue("H5Pset_scaleoffset", ret_val >= 0);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Pset_scaleoffset_Invalidscale_type() throws Throwable
     {
         H5.H5Pset_scaleoffset(ocpl_id, 3, 1);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Pset_scaleoffset_Invalidscale_factor() throws Throwable
     {
         H5.H5Pset_scaleoffset(ocpl_id, HDF5Constants.H5Z_SO_INT, -1);
@@ -948,7 +948,7 @@ public class TestH5P {
         assertTrue("H5Pset_est_link_info", ret_val >= 0);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Pset_est_link_info_InvalidValues() throws Throwable
     {
         H5.H5Pset_est_link_info(gcpl_id, 100000, 10);
@@ -1038,7 +1038,7 @@ public class TestH5P {
 
             /* Get the file's version information */
             H5F_info2_t finfo = H5.H5Fget_info(H5fid);
-            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 0);
+            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 2);
             assertTrue("free-space manager version: " + finfo.free_version, finfo.free_version == 0);
             assertTrue("shared object header version: " + finfo.sohm_version, finfo.sohm_version == 0);
             H5.H5Pget_userblock(fcpl_id, size);
@@ -1074,7 +1074,7 @@ public class TestH5P {
 
             /* Get the file's version information */
             H5F_info2_t finfo = H5.H5Fget_info(H5fid);
-            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 0);
+            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 2);
             assertTrue("free-space manager version: " + finfo.free_version, finfo.free_version == 0);
             assertTrue("shared object header version: " + finfo.sohm_version, finfo.sohm_version == 0);
             H5.H5Pget_sizes(fcpl_id, size);
@@ -1111,7 +1111,7 @@ public class TestH5P {
 
             /* Get the file's version information */
             H5F_info2_t finfo = H5.H5Fget_info(H5fid);
-            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 0);
+            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 2);
             assertTrue("free-space manager version: " + finfo.free_version, finfo.free_version == 0);
             assertTrue("shared object header version: " + finfo.sohm_version, finfo.sohm_version == 0);
             H5.H5Pget_sym_k(fcpl_id, size);
@@ -1148,7 +1148,7 @@ public class TestH5P {
 
             /* Get the file's version information */
             H5F_info2_t finfo = H5.H5Fget_info(H5fid);
-            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 1);
+            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 2);
             assertTrue("free-space manager version: " + finfo.free_version, finfo.free_version == 0);
             assertTrue("shared object header version: " + finfo.sohm_version, finfo.sohm_version == 0);
             H5.H5Pget_istore_k(fcpl_id, size);
@@ -1256,7 +1256,7 @@ public class TestH5P {
             assertTrue("fill_value_status: " + fill_value_status[0],
                        fill_value_status[0] == HDF5Constants.H5D_FILL_VALUE_DEFAULT);
             H5.H5Pget_fill_value(ocpl_id, HDF5Constants.H5T_NATIVE_INT, fill_value);
-            assertTrue("fill_value: " + fill_value[0], fill_value[0] == 0);
+            assertTrue("fill_value: " + fill_value[0], fill_value[0] == -1);
             fill_value[0] = 255;
             H5.H5Pset_fill_value(ocpl_id, HDF5Constants.H5T_NATIVE_INT, fill_value);
             H5.H5Pget_fill_value(ocpl_id, HDF5Constants.H5T_NATIVE_INT, fill_value);

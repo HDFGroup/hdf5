@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_TOOLS C)
 
 add_subdirectory (lib)
@@ -7,7 +7,7 @@ add_subdirectory (lib)
 add_subdirectory (src)
 
 #-- Add the tests
-if (BUILD_TESTING)
+if (NOT HDF5_EXTERNALLY_CONFIGURED AND BUILD_TESTING)
   add_subdirectory (test)
 
 # --------------------------------------------------------------------

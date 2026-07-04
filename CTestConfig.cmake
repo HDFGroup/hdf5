@@ -4,7 +4,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -22,20 +22,12 @@ set (CTEST_DROP_METHOD "https")
 if (CTEST_DROP_SITE_INIT)
   set (CTEST_DROP_SITE "${CTEST_DROP_SITE_INIT}")
 else ()
-  if (CDASH_LOCAL)
-    set (CTEST_DROP_SITE "cdash-internal.hdfgroup.org")
-  else ()
-    set (CTEST_DROP_SITE "cdash.hdfgroup.org")
-  endif ()
+  set (CTEST_DROP_SITE "cdash.hdfgroup.org")
 endif ()
 if (CTEST_DROP_LOCATION_INIT)
   set (CTEST_DROP_LOCATION "${CTEST_DROP_LOCATION_INIT}")
 else ()
-  if (CDASH_LOCAL)
-    set (CTEST_DROP_LOCATION "/submit.php?project=HDF5Trunk")
-  else ()
-    set (CTEST_DROP_LOCATION "/submit.php?project=HDF5")
-  endif ()
+  set (CTEST_DROP_LOCATION "/submit.php?project=HDF5")
 endif ()
 set (CTEST_DROP_SITE_CDASH TRUE)
 
@@ -47,6 +39,8 @@ set (CTEST_TEST_TIMEOUT 1200 CACHE STRING
     "Maximum time allowed before CTest will kill the test.")
 set (DART_TESTING_TIMEOUT 1200 CACHE STRING
     "Maximum time allowed before CTest will kill the test." FORCE)
+mark_as_advanced (CTEST_TEST_TIMEOUT)
+mark_as_advanced (DART_TESTING_TIMEOUT)
 
 set (CTEST_SUBMIT_RETRY_DELAY 20 CACHE STRING
     "How long to wait between timed-out CTest submissions.")

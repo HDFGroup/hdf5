@@ -1,0 +1,155 @@
+name: Test Signed Plugins
+
+on:
+  push:
+    branches: [ develop ]
+    paths-ignore:
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'docs/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'LICENSE**'
+      - '**.md'
+  pull_request:
+    branches: [ develop ]
+    paths-ignore:
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'docs/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'LICENSE**'
+      - '**.md'
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+jobs:
+  # Test signature verification across platforms and configurations
+  test-signed-plugins:
+    name: "${{ matrix.config.name }}"
+    runs-on: ${{ matrix.config.os }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          # Linux configurations
+          - name: "Linux Serial (Debug + Shared)"
+            os: ubuntu-latest
+            build_type: Debug
+            shared: ON
+            parallel: OFF
+            generator: ""
+
+          - name: "Linux Serial (Release + Static)"
+            os: ubuntu-latest
+            build_type: Release
+            shared: OFF
+            parallel: OFF
+            generator: ""
+
+          - name: "Linux Parallel (Debug + Shared)"
+            os: ubuntu-latest
+            build_type: Debug
+            shared: ON
+            parallel: ON
+            generator: ""
+
+          # macOS configuration
+          - name: "macOS Serial (Release + Shared)"
+            os: macos-latest
+            build_type: Release
+            shared: ON
+            parallel: OFF
+            generator: ""
+
+          # Windows configuration
+          - name: "Windows Serial (Release + Shared)"
+            os: windows-latest
+            build_type: Release
+            shared: ON
+            parallel: OFF
+            generator: "-A x64"
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+    - name: Install dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libssl-dev \
+          zlib1g-dev \
+          libaec-dev
+
+    - name: Install MPI dependencies (Linux)
+      if: runner.os == 'Linux' && matrix.config.parallel == 'ON'
+      run: |
+        sudo apt-get install -y \
+          libopenmpi-dev \
+          openmpi-bin
+
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install openssl@3
+
+    - name: Generate test RSA key pair (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        openssl genrsa -out ci-test-private.pem 2048
+        openssl rsa -in ci-test-private.pem -pubout -out ci-test-public.pem
+        mkdir -p ci-keystore
+        cp ci-test-public.pem ci-keystore/
+
+    - name: Generate test RSA key pair (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        & openssl genrsa -out ci-test-private.pem 2048
+        & openssl rsa -in ci-test-private.pem -pubout -out ci-test-public.pem
+        New-Item -ItemType Directory -Force -Path ci-keystore
+        Copy-Item ci-test-public.pem ci-keystore/
+
+    - name: Configure CMake
+      shell: bash
+      run: |
+        EXTRA_FLAGS=""
+        if [ "${{ matrix.config.parallel }}" == "ON" ]; then
+          EXTRA_FLAGS="-DMPIEXEC_PREFLAGS=--oversubscribe"
+        fi
+        cmake -B build \
+          ${{ matrix.config.generator }} \
+          -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
+          -DHDF5_REQUIRE_SIGNED_PLUGINS:BOOL=ON \
+          -DHDF5_PLUGIN_KEYSTORE_DIR="${PWD}/ci-keystore" \
+          -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.config.parallel }} \
+          -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} \
+          -DBUILD_STATIC_LIBS:BOOL=ON \
+          -DBUILD_TESTING:BOOL=ON \
+          -DHDF5_BUILD_TOOLS:BOOL=ON \
+          -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=${{ runner.os == 'Linux' }} \
+          -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=${{ runner.os == 'Linux' }} \
+          $EXTRA_FLAGS
+
+    - name: Build
+      run: cmake --build build --parallel 4 --config ${{ matrix.config.build_type }}
+
+    - name: Copy OpenSSL DLLs (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        Copy-Item "C:\Program Files\OpenSSL\bin\libcrypto-3-x64.dll" build\bin\${{ matrix.config.build_type }}\
+        Copy-Item "C:\Program Files\OpenSSL\bin\libssl-3-x64.dll" build\bin\${{ matrix.config.build_type }}\
+
+    - name: Run Tests
+      shell: bash
+      run: |
+        cd build
+        ctest --build-config ${{ matrix.config.build_type }} --parallel 4 --output-on-failure \
+          -R "H5SIGN|H5PLUGIN-signature"

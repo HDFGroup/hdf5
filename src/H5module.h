@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -22,12 +22,16 @@
  *      reporting macros.
  */
 #define H5_MODULE
-#define H5_MY_PKG     H5
-#define H5_MY_PKG_ERR H5E_LIB
+#define H5_MY_PKG      H5
+#define H5_MY_PKG_INIT YES
 
-/** \page H5DM_UG The HDF5 Data Model and File Structure
+/** \page H5DM_UG HDF5 Data Model and File Structure
+ *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
  *
  * \section sec_data_model The HDF5 Data Model and File Structure
+ *
  * \subsection subsec_data_model_intro Introduction
  * The Hierarchical Data Format (HDF) implements a model for managing and storing data. The
  * model includes an abstract data model and an abstract storage model (the data format), and
@@ -49,8 +53,7 @@
  * The <em>Abstract Data Model</em> is a conceptual model of data, data types, and data organization. The
  * abstract data model is independent of storage medium or programming environment. The
  * <em>Storage Model</em> is a standard representation for the objects of the abstract data model. The
- * <a href="https://docs.hdfgroup.org/hdf5/develop/_s_p_e_c.html">HDF5 File Format Specification</a>
- * defines the storage model.
+ * \ref_spec_fileformat defines the storage model.
  *
  * The <em>Programming Model</em> is a model of the computing environment and includes platforms from
  * small single systems to large multiprocessors and clusters. The programming model manipulates
@@ -100,8 +103,11 @@
  * model, and stored in a storage medium. The stored objects include header blocks, free lists, data
  * blocks, B-trees, and other objects. Each group or dataset is stored as one or more header and data
  * blocks.
- * @see <a href="https://docs.hdfgroup.org/hdf5/develop/_s_p_e_c.html">HDF5 File Format Specification</a>
- * for more information on how these objects are organized. The HDF5 library can also use other
+ *
+ * For more information on how these objects are organized;
+ * see \ref_spec_fileformat
+ *
+ * The HDF5 library can also use other
  * libraries and modules such as compression.
  *
  * <table>
@@ -124,8 +130,7 @@
  * Specification. The organization of the data of application program, and how it is mapped to the
  * HDF5 abstract data model is up to the application developer. The application program only
  * needs to deal with the library and the abstract data model. Most applications need not consider
- * any details of the
- * <a href="https://docs.hdfgroup.org/hdf5/develop/_s_p_e_c.html">HDF5 File Format Specification</a>
+ * any details of the \ref_spec_fileformat
  * or the details of how objects of abstract data model are translated to and from storage.
  *
  * \subsection subsec_data_model_abstract The Abstract Data Model
@@ -352,7 +357,7 @@
  * pass parameters from the calling program to a VFL driver or a module of the pipeline.
  *
  * Property lists are conceptually similar to attributes. Property lists are information relevant to the
- * behavior of the library while attributes are relevant to the user’s data and application.
+ * behavior of the library while attributes are relevant to the user's data and application.
  *
  * <table>
  * <tr>
@@ -404,19 +409,44 @@
  * @see @ref sec_plist.
  *
  * \subsubsection subsubsec_data_model_abstract_link Link
- * This section is under construction.
+ *
+ * Links are the fundamental mechanism for organizing objects in the HDF5 file hierarchy. A link is a
+ * path from one object (typically a group) to another object, creating relationships that enable
+ * navigation and provide meaningful structure to the data.
+ *
+ * HDF5 supports three types of links:
+ *
+ * \li \Bold{Hard Links}: Direct references to objects within the file. An object exists as long as at
+ *     least one hard link points to it. Hard links implement reference counting - when the last hard
+ *     link to an object is deleted, the object's storage is freed. Hard links cannot cross file boundaries.
+ *
+ * \li \Bold{Soft Links (Symbolic Links)}: Path-based references stored as strings. Soft links provide
+ *     flexible indirection but can "dangle" if the target object is deleted or renamed. Soft links can
+ *     reference objects that do not yet exist, enabling forward references.
+ *
+ * \li \Bold{External Links}: References to objects in other HDF5 files. External links store both the
+ *     target filename and the path to the object within that file, enabling multi-file data organizations.
+ *
+ * Links have names and are stored within groups. The combination of links and groups creates a hierarchical
+ * namespace similar to a filesystem directory structure. Multiple hard links can point to the same object,
+ * allowing objects to appear in multiple locations within the hierarchy.
+ *
+ * The HDF5 Link interface (H5L) provides functions for creating, querying, and manipulating links.
+ * Additionally, HDF5 supports user-defined link types, allowing applications to implement custom link
+ * behaviors and traversal semantics.
+ *
+ * @see @ref sec_link for detailed information on links and the H5L interface.
  *
  * \subsection subsec_data_model_storage The HDF5 Storage Model
  * \subsubsection subsubsec_data_model_storage_spec The Abstract Storage Model: the HDF5 Format Specification
- * The <a href="https://docs.hdfgroup.org/hdf5/develop/_s_p_e_c.html">HDF5 File Format Specification</a>
- * defines how HDF5 objects and data are mapped to a linear
+ * The \ref_spec_fileformat defines how HDF5 objects and data are mapped to a linear
  * address space. The address space is assumed to be a contiguous array of bytes stored on some
  * random access medium. The format defines the standard for how the objects of the abstract data
  * model are mapped to linear addresses. The stored representation is self-describing in the sense
  * that the format defines all the information necessary to read and reconstruct the original objects
  * of the abstract data model.
  *
- * The HDF5 File Format Specification is organized in three parts:
+ * The \ref_spec_fileformat is organized in three parts:
  * <ul><li>Level 0: File signature and super block</li>
  * <li>Level 1: File infrastructure</li>
  * <ul><li>Level 1A: B-link trees and B-tree nodes</li>
@@ -440,7 +470,7 @@
  * It is important to realize that the structures defined in the HDF5 file format are not the same as
  * the abstract data model: the object headers, heaps, and B-trees of the file specification are not
  * represented in the abstract data model. The format defines a number of objects for managing the
- * storage including header blocks, B-trees, and heaps. The HDF5 File Format Specification defines
+ * storage including header blocks, B-trees, and heaps. The \ref_spec_fileformat defines
  * how the abstract objects (for example, groups and datasets) are represented as headers, B-tree
  * blocks, and other elements.
  *
@@ -588,7 +618,7 @@
  * <table>
  * <tr>
  * <td>
- * \image html Dmodel_fig14_c.gif " Another HDF5 file structure with groups and datasets"
+ * \image html Dmodel_fig14_d.gif " Another HDF5 file structure with groups and datasets"
  * </td>
  * </tr>
  * </table>
@@ -604,9 +634,15 @@
  *
  * Next Chapter \ref sec_program
  *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
+ *
  */
 
-/** \page H5_UG The HDF5 Library and Programming Model
+/** \page H5_UG HDF5 Library and Programming Model
+ *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
  *
  * \section sec_program The HDF5 Library and Programming Model
  * \subsection subsec_program_intro Introduction
@@ -701,7 +737,7 @@
  * \subsection subsec_program_model The HDF5 Programming Model
  * In this section we introduce the HDF5 programming model by means of a series of short code
  * samples. These samples illustrate a broad selection of common HDF5 tasks. More details are
- * provided in the following chapters and in the HDF5 Reference Manual.
+ * provided in the following chapters and in the \ref RM.
  *
  * \subsubsection subsubsec_program_model_create Creating an HDF5 File
  * Before an HDF5 file can be used or referred to in any manner, it must be explicitly created or
@@ -761,7 +797,7 @@
  * \subsubsection subsubsec_program_model_close Closing an Object
  * An application should close an object such as a datatype, dataspace, or dataset once the object is
  * no longer needed. Since each is an independent object, each must be released (or closed)
- * separately. This action is frequently referred to as releasing the object’s identifier. The code in
+ * separately. This action is frequently referred to as releasing the object's identifier. The code in
  * the example below closes the datatype, dataspace, and dataset that were created in the preceding
  * section.
  *
@@ -778,8 +814,8 @@
  * item must be closed separately.
  *
  * For more information,
- * @see <a href="http://www.hdfgroup.org/HDF5/doc/Advanced/UsingIdentifiers/index.html">Using Identifiers</a>
- * in the HDF5 Application Developer’s Guide under General Topics in HDF5.
+ * @see \ref UsingIdentifiers
+ * in the HDF5 Application Developer's Guide under General Topics in HDF5.
  *
  * <h4>How Closing a File Effects Other Open Structural Elements</h4>
  * Every structural element in an HDF5 file can be opened, and these elements can be opened more
@@ -828,7 +864,7 @@
  * portions of a dataset. These parts of datasets are known as selections.
  *
  * The simplest type of selection is a simple hyperslab. This is an n-dimensional rectangular sub-set
- * of a dataset where n is equal to the dataset’s rank. Other available selections include a more
+ * of a dataset where n is equal to the dataset's rank. Other available selections include a more
  * complex hyperslab with user-defined stride and block size, a list of independent points, or the
  * union of any of these.
  *
@@ -863,7 +899,7 @@
  * user-defined stride and block, a selection of points, or a union of any of these forms.
  *
  * Selections and hyperslabs are portions of a dataset. As described above, a simple hyperslab is a
- * rectangular array of data elements with the same rank as the dataset’s dataspace. Thus, a simple
+ * rectangular array of data elements with the same rank as the dataset's dataspace. Thus, a simple
  * hyperslab is a logically contiguous collection of points within the dataset.
  *
  * The more general case of a hyperslab can also be a regular pattern of points or blocks within the
@@ -880,7 +916,7 @@
  * </tr>
  * <tr>
  * <td>start</td>
- * <td>The coordinates of the starting location of the hyperslab in the dataset’s dataspace.</td>
+ * <td>The coordinates of the starting location of the hyperslab in the dataset's dataspace.</td>
  * </tr>
  * <tr>
  * <td>block</td>
@@ -964,7 +1000,7 @@
  * count=(3,4,1), stride and block size are NULL.
  *
  * <h4>Writing Data into a Differently Shaped Disk Storage Block</h4>
- * Now let’s consider the opposite process of writing a selection from memory to a selection in a
+ * Now let's consider the opposite process of writing a selection from memory to a selection in a
  * dataset in a file. Suppose that the source dataspace in memory is a 50-element, one-dimensional
  * array called vector and that the source selection is a 48-element simple hyperslab that starts at the
  * second element of vector. See the figure below.
@@ -1136,7 +1172,7 @@
  * </tr>
  * </table>
  *
- * HDF5 requires the use of chunking when defining extendable datasets. Chunking makes it
+ * HDF5 requires the use of chunking when defining extendable datasets. \ref hdf5_chunking makes it
  * possible to extend datasets efficiently without having to reorganize contiguous storage
  * excessively.
  *
@@ -1372,7 +1408,7 @@
  * and a data I/O pipeline. The data I/O pipeline applies compression to data blocks, transforms
  * data elements, and implements selections.
  *
- * A substantial portion of the HDF5 library’s work is in transferring data from one environment or
+ * A substantial portion of the HDF5 library's work is in transferring data from one environment or
  * media to another. This most often involves a transfer between system memory and a storage
  * medium. Data transfers are affected by compression, encryption, machine-dependent differences
  * in numerical representation, and other features. So, the bit-by-bit arrangement of a given dataset
@@ -1399,7 +1435,7 @@
  * For a given I/O request, different combinations of actions may be performed by the pipeline. The
  * library automatically sets up the pipeline and passes data through the processing steps. For
  * example, for a read request (from disk to memory), the library must determine which logical
- * blocks contain the requested data elements and fetch each block into the library’s cache. If the
+ * blocks contain the requested data elements and fetch each block into the library's cache. If the
  * data needs to be decompressed, then the compression algorithm is applied to the block after it is
  * read from disk. If the data is a selection, the selected elements are extracted from the data block
  * after it is decompressed. If the data needs to be transformed (for example, byte swapped), then
@@ -1420,9 +1456,12 @@
  * Library by linking an appropriate module into the pipeline through the VFL. This requires
  * creating an appropriate wrapper for the compression module and registering it with the library
  * with #H5Zregister. The algorithm can then be applied to a dataset with an #H5Pset_filter call which
- * will add the algorithm to the selected dataset’s transfer property list.
+ * will add the algorithm to the selected dataset's transfer property list.
  *
  * Previous Chapter \ref sec_data_model - Next Chapter \ref sec_file
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  *
  */
 
@@ -1431,27 +1470,6 @@
  *
  * Use the functions in this module to manage the life cycle of HDF5 library
  * instances.
- *
- * <table>
- * <tr><th>Create</th><th>Read</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5_examples.c create
- *   </td>
- *   <td>
- *   \snippet{lineno} H5_examples.c read
- *   </td>
- * <tr><th>Update</th><th>Delete</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5_examples.c update
- *   </td>
- *   <td>
- *   \snippet{lineno} H5_examples.c closing_shop
- *   \snippet{lineno} H5_examples.c delete
- *   </td>
- * </tr>
- * </table>
  *
  */
 

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -126,7 +126,7 @@ public class TestH5Pfapls3 {
         assertEquals("driver types don't match", HDF5Constants.H5FD_ROS3, H5.H5Pget_driver(fapl_id));
 
         /* get_fapl_ros3 can throw exception in error cases */
-        H5FD_ros3_fapl_t copy = H5.H5Pget_fapl_ros3(fapl_id);
+        H5FD_ros3_fapl_t copy = (H5FD_ros3_fapl_t)H5.H5Pget_fapl_ros3(fapl_id);
         assertEquals("contents of fapl set and get don't match", new H5FD_ros3_fapl_t("", "", ""), copy);
     }
 
@@ -135,7 +135,7 @@ public class TestH5Pfapls3 {
     {
         if (HDF5Constants.H5FD_ROS3 < 0)
             throw new HDF5LibraryException("skip");
-        H5FD_ros3_fapl_t fails = H5.H5Pget_fapl_ros3(-1);
+        H5FD_ros3_fapl_t fails = (H5FD_ros3_fapl_t)H5.H5Pget_fapl_ros3(-1);
     }
 
     @Test(expected = HDF5LibraryException.class)
@@ -149,7 +149,7 @@ public class TestH5Pfapls3 {
 
         H5.H5Pset_fapl_sec2(fapl_id);
         assertEquals("fapl_id was not set properly", HDF5Constants.H5FD_SEC2, H5.H5Pget_driver(fapl_id));
-        H5FD_ros3_fapl_t fails = H5.H5Pget_fapl_ros3(fapl_id);
+        H5FD_ros3_fapl_t fails = (H5FD_ros3_fapl_t)H5.H5Pget_fapl_ros3(fapl_id);
     }
 
     @Test
@@ -166,7 +166,7 @@ public class TestH5Pfapls3 {
         H5.H5Pset_fapl_ros3(fapl_id, config);
         assertEquals("driver types don't match", HDF5Constants.H5FD_ROS3, H5.H5Pget_driver(fapl_id));
 
-        H5FD_ros3_fapl_t copy = H5.H5Pget_fapl_ros3(fapl_id);
+        H5FD_ros3_fapl_t copy = (H5FD_ros3_fapl_t)H5.H5Pget_fapl_ros3(fapl_id);
         assertEquals("contents of fapl set and get don't match",
                      new H5FD_ros3_fapl_t(region, acc_id, acc_key), copy);
     }

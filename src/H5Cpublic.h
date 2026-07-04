@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -12,19 +12,16 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:	H5Cpublic.h
- *              June 4, 2005
- *              John Mainzer
+ * Created:     H5Cpublic.h
  *
- * Purpose:     Public include file for cache functions.
+ * Purpose:     Public header file for cache functions
  *
  *-------------------------------------------------------------------------
  */
 #ifndef H5Cpublic_H
 #define H5Cpublic_H
 
-/* Public headers needed by this file */
-#include "H5public.h"
+#include "H5public.h" /* Generic Functions                        */
 
 enum H5C_cache_incr_mode {
     H5C_incr__off,

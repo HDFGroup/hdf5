@@ -5,7 +5,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -21,7 +21,7 @@ namespace H5 {
     wrappers for the HDF5 file access property list.
 */
 //  Inheritance: PropList -> IdComponent
-class H5_DLLCPP FileAccPropList : public PropList {
+class H5CPP_DLL FileAccPropList : public PropList {
   public:
     ///\brief Default file access property list.
     static const FileAccPropList &DEFAULT;
@@ -49,10 +49,10 @@ class H5_DLLCPP FileAccPropList : public PropList {
 
     // Modifies this file access property list to use the H5FD_CORE
     // driver.
-    void setCore(size_t increment, hbool_t backing_store) const;
+    void setCore(size_t increment, bool backing_store) const;
 
     // Queries H5FD_CORE driver properties.
-    void getCore(size_t &increment, hbool_t &backing_store) const;
+    void getCore(size_t &increment, bool &backing_store) const;
 
     // Sets this file access properties list to the family driver.
     void setFamily(hsize_t memb_size, const FileAccPropList &memb_plist) const;
@@ -122,10 +122,10 @@ class H5_DLLCPP FileAccPropList : public PropList {
     unsigned getGcReferences() const;
 
     // Sets file locking parameters.
-    void setFileLocking(hbool_t use_file_locking, hbool_t ignore_when_disabled) const;
+    void setFileLocking(bool use_file_locking, bool ignore_when_disabled) const;
 
     // Gets file locking parameters.
-    void getFileLocking(hbool_t &use_file_locking, hbool_t &ignore_when_disabled) const;
+    void getFileLocking(bool &use_file_locking, bool &ignore_when_disabled) const;
 
     // Sets bounds on versions of library format to be used when creating
     // or writing objects.
@@ -149,7 +149,7 @@ class H5_DLLCPP FileAccPropList : public PropList {
     FileAccPropList(const hid_t plist_id);
 
     // Noop destructor
-    virtual ~FileAccPropList() override;
+    virtual ~FileAccPropList() override = default;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 

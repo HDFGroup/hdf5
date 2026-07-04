@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -18,7 +18,7 @@ void parse_command_line(int argc, const char *const *argv);
 
 /* Name of tool */
 #define PROGRAM_NAME "getub"
-char *nbytes = NULL;
+static char *nbytes = NULL;
 
 static const char            *s_opts   = "c:";                     /* add more later ? */
 static struct h5_long_options l_opts[] = {{"c", require_arg, 'c'}, /* input file */
@@ -35,9 +35,9 @@ static struct h5_long_options l_opts[] = {{"c", require_arg, 'c'}, /* input file
 static void
 usage(const char *prog)
 {
-    HDfflush(stdout);
-    HDfprintf(stdout, "usage: %s -c nb file] \n", prog);
-    HDfprintf(stdout, "           print first 'nb' byts of file to stdoug.\n");
+    fflush(stdout);
+    fprintf(stdout, "usage: %s -c nb file] \n", prog);
+    fprintf(stdout, "           print first 'nb' byts of file to stdoug.\n");
 }
 
 /*-------------------------------------------------------------------------
@@ -59,19 +59,19 @@ parse_command_line(int argc, const char *const *argv)
     while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'c':
-                nbytes = HDstrdup(H5_optarg);
+                nbytes = strdup(H5_optarg);
                 break;
             case '?':
             default:
                 usage(h5tools_getprogname());
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         } /* end switch */
     }     /* end while */
 
     if (argc <= H5_optind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 } /* end parse_command_line() */
 
@@ -105,10 +105,10 @@ main(int argc, char *argv[])
         goto error;
     } /* end if */
 
-    filename = HDstrdup(argv[H5_optind]);
+    filename = strdup(argv[H5_optind]);
 
     size = 0;
-    if (EOF == (res = HDsscanf(nbytes, "%u", &size))) {
+    if (EOF == (res = sscanf(nbytes, "%u", &size))) {
         /* fail */
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
@@ -120,7 +120,7 @@ main(int argc, char *argv[])
         goto error;
     } /* end if */
 
-    if (NULL == (buf = (char *)HDmalloc((unsigned)(size + 1)))) {
+    if (NULL == (buf = (char *)malloc((unsigned)(size + 1)))) {
         error_msg("can't allocate buffer \n");
         goto error;
     } /* end if */
@@ -137,15 +137,15 @@ main(int argc, char *argv[])
     } /* end if */
 
     /* close things and exit */
-    HDfree(filename);
-    HDfree(buf);
+    free(filename);
+    free(buf);
     HDclose(fd);
 
     return EXIT_SUCCESS;
 
 error:
-    HDfree(filename);
-    HDfree(buf);
+    free(filename);
+    free(buf);
     if (fd >= 0)
         HDclose(fd);
     return EXIT_FAILURE;

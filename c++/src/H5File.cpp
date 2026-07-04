@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -618,7 +618,6 @@ H5File::getVFDHandle(void **file_handle) const
 ///\par Description
 ///             This function is called after an existing file is opened in
 ///             order to learn the true size of the underlying file.
-// Programmer   Raymond Lu - June 24, 2004
 //--------------------------------------------------------------------------
 hsize_t
 H5File::getFileSize() const
@@ -639,7 +638,6 @@ H5File::getFileSize() const
 ///\par Description
 ///             This function is called after an existing file is opened in
 ///             order to retrieve the unique 'file number' for the file.
-// Programmer   Quincey Koziol - April 13, 2019
 //--------------------------------------------------------------------------
 unsigned long
 H5File::getFileNum() const

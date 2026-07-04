@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -28,6 +28,9 @@
 #define DSET5_NAME "dataset float"
 #define DSET6_NAME "dataset double"
 #define DSET7_NAME "dataset string"
+
+/* Name of a non-existing dataset, do not create a dataset with this name */
+#define NODS_NAME "dataset"
 
 #define DIM 6
 
@@ -60,6 +63,7 @@ test_dsets(void)
     hsize_t     dims[2] = {2, 3};
     hid_t       file_id;
     hid_t       dataset_id;
+    herr_t      ds_existed        = 0; /* whether searched ds exists */
     char        data_char_in[DIM] = {1, 2, 3, 4, 5, 6};
     char        data_char_out[DIM];
     short       data_short_in[DIM] = {1, 2, 3, 4, 5, 6};
@@ -345,8 +349,25 @@ test_dsets(void)
     if (H5LTread_dataset_string(file_id, DSET7_NAME, data_string_out) < 0)
         goto out;
 
-    if (HDstrcmp(data_string_in, data_string_out) != 0)
+    if (strcmp(data_string_in, data_string_out) != 0)
         goto out;
+
+    PASSED();
+
+    /*-------------------------------------------------------------------------
+     * H5LTfind_dataset test
+     *-------------------------------------------------------------------------
+     */
+
+    HL_TESTING2("H5LTfind_dataset");
+
+    /* Try to find a non-existing ds whose name matches existing datasets partially */
+    if ((ds_existed = H5LTfind_dataset(file_id, NODS_NAME)) < 0)
+        goto out;
+    if (ds_existed > 0) {
+        printf("Dataset \"%s\" does not exist.\n", NODS_NAME);
+        goto out;
+    }
 
     /*-------------------------------------------------------------------------
      * end tests
@@ -521,7 +542,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     if (H5LTget_attribute_string(loc_id, obj_name, ATTR1_NAME, attr_str_out) < 0)
         return -1;
 
-    if (HDstrcmp(attr_str_in, attr_str_out) != 0) {
+    if (strcmp(attr_str_in, attr_str_out) != 0) {
         return -1;
     }
 
@@ -1038,26 +1059,26 @@ make_attributes(hid_t loc_id, const char *obj_name)
 
     HL_TESTING2("H5LTget_attribute_info");
 
-    if (NULL == (dims_out = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)rank_out)))
+    if (NULL == (dims_out = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)rank_out)))
         return -1;
 
     if (H5LTget_attribute_info(loc_id, obj_name, ATTR2_NAME, dims_out, &type_class, &type_size) < 0) {
-        HDfree(dims_out);
+        free(dims_out);
         return -1;
     }
 
     for (i = 0; i < rank_out; i++) {
         if (dims_out[i] != 5) {
-            HDfree(dims_out);
+            free(dims_out);
             return -1;
         }
     }
 
     if (type_class != H5T_INTEGER) {
-        HDfree(dims_out);
+        free(dims_out);
         return -1;
     }
-    HDfree(dims_out);
+    free(dims_out);
 
     PASSED();
 
@@ -1075,7 +1096,7 @@ test_integers(void)
     char  *dt_str;
     size_t str_len;
 
-    HL_TESTING3("\n        text for integer types");
+    HL_TESTING3("        text for integer types");
 
     if ((dtype = H5LTtext_to_dtype("H5T_NATIVE_INT\n", H5LT_DDL)) < 0)
         goto out;
@@ -1092,17 +1113,17 @@ test_integers(void)
     if (H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len) < 0)
         goto out;
 
-    if (NULL == (dt_str = (char *)HDcalloc(str_len, sizeof(char))))
+    if (NULL == (dt_str = (char *)calloc(str_len, sizeof(char))))
         goto out;
     if (H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len) < 0) {
-        HDfree(dt_str);
+        free(dt_str);
         goto out;
     }
-    if (HDstrcmp(dt_str, "H5T_STD_I8BE") != 0) {
-        HDfree(dt_str);
+    if (strcmp(dt_str, "H5T_STD_I8BE") != 0) {
+        free(dt_str);
         goto out;
     }
-    HDfree(dt_str);
+    free(dt_str);
 
     if (H5Tclose(dtype) < 0)
         goto out;
@@ -1150,17 +1171,17 @@ test_fps(void)
     if (H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len) < 0)
         goto out;
 
-    if (NULL == (dt_str = (char *)HDcalloc(str_len, sizeof(char))))
+    if (NULL == (dt_str = (char *)calloc(str_len, sizeof(char))))
         goto out;
     if (H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len) < 0) {
-        HDfree(dt_str);
+        free(dt_str);
         goto out;
     }
-    if (HDstrcmp(dt_str, "H5T_IEEE_F32BE") != 0) {
-        HDfree(dt_str);
+    if (strcmp(dt_str, "H5T_IEEE_F32BE") != 0) {
+        free(dt_str);
         goto out;
     }
-    HDfree(dt_str);
+    free(dt_str);
 
     if (H5Tclose(dtype) < 0)
         goto out;
@@ -1168,6 +1189,55 @@ test_fps(void)
     if ((dtype = H5LTtext_to_dtype("H5T_IEEE_F64LE\n", H5LT_DDL)) < 0)
         goto out;
     if (!H5Tequal(dtype, H5T_IEEE_F64LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_FLOAT_BFLOAT16BE\n", H5LT_DDL)) < 0)
+        goto out;
+    if (!H5Tequal(dtype, H5T_FLOAT_BFLOAT16BE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_FLOAT_BFLOAT16LE\n", H5LT_DDL)) < 0)
+        goto out;
+    if (!H5Tequal(dtype, H5T_FLOAT_BFLOAT16LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_FLOAT_F8E4M3\n", H5LT_DDL)) < 0)
+        goto out;
+    if (!H5Tequal(dtype, H5T_FLOAT_F8E4M3))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_FLOAT_F8E5M2\n", H5LT_DDL)) < 0)
+        goto out;
+    if (!H5Tequal(dtype, H5T_FLOAT_F8E5M2))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_FLOAT_F6E2M3\n", H5LT_DDL)) < 0)
+        goto out;
+    if (!H5Tequal(dtype, H5T_FLOAT_F6E2M3))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_FLOAT_F6E3M2\n", H5LT_DDL)) < 0)
+        goto out;
+    if (!H5Tequal(dtype, H5T_FLOAT_F6E3M2))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_FLOAT_F4E2M1\n", H5LT_DDL)) < 0)
+        goto out;
+    if (!H5Tequal(dtype, H5T_FLOAT_F4E2M1))
         goto out;
     if (H5Tclose(dtype) < 0)
         goto out;
@@ -1221,19 +1291,19 @@ test_strings(void)
 
     if (H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len) < 0)
         goto out;
-    if (NULL == (dt_str = (char *)HDcalloc(str_len, sizeof(char))))
+    if (NULL == (dt_str = (char *)calloc(str_len, sizeof(char))))
         goto out;
     if (H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len) < 0) {
-        HDfree(dt_str);
+        free(dt_str);
         goto out;
     }
-    if (HDstrcmp(dt_str, "H5T_STRING {\n      STRSIZE 13;\n      STRPAD H5T_STR_NULLTERM;\n      CSET "
-                         "H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }") != 0) {
-        HDprintf("dt=\n%s\n", dt_str);
-        HDfree(dt_str);
+    if (strcmp(dt_str, "H5T_STRING {\n      STRSIZE 13;\n      STRPAD H5T_STR_NULLTERM;\n      CSET "
+                       "H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }") != 0) {
+        printf("dt=\n%s\n", dt_str);
+        free(dt_str);
         goto out;
     }
-    HDfree(dt_str);
+    free(dt_str);
 
     if (H5Tclose(dtype) < 0)
         goto out;
@@ -1256,62 +1326,62 @@ test_strings(void)
 
     if (H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len) < 0)
         goto out;
-    if (NULL == (dt_str = (char *)HDcalloc(str_len, sizeof(char))))
+    if (NULL == (dt_str = (char *)calloc(str_len, sizeof(char))))
         goto out;
     if (H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len) < 0) {
-        HDfree(dt_str);
+        free(dt_str);
         goto out;
     }
-    if (HDstrcmp(dt_str, "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      "
-                         "CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }") != 0) {
-        HDprintf("dt=\n%s\n", dt_str);
-        HDfree(dt_str);
+    if (strcmp(dt_str, "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      "
+                       "CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }") != 0) {
+        printf("dt=\n%s\n", dt_str);
+        free(dt_str);
         goto out;
     }
-    HDfree(dt_str);
+    free(dt_str);
 
     /* Length of the character buffer is larger then needed */
     str_len = str_len + 10;
-    if (NULL == (dt_str = (char *)HDcalloc(str_len, sizeof(char))))
+    if (NULL == (dt_str = (char *)calloc(str_len, sizeof(char))))
         goto out;
 
     if (H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len) < 0) {
-        HDfree(dt_str);
+        free(dt_str);
         goto out;
     }
-    if (HDstrncmp(dt_str,
-                  "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      CSET "
-                  "H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }",
-                  str_len - 1) != 0) {
-        HDprintf("dt=\n%s\n", dt_str);
-        HDfree(dt_str);
+    if (strncmp(dt_str,
+                "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      CSET "
+                "H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }",
+                str_len - 1) != 0) {
+        printf("dt=\n%s\n", dt_str);
+        free(dt_str);
         goto out;
     }
-    HDfree(dt_str);
+    free(dt_str);
 
     /* Length of the character buffer is smaller then needed */
     str_len = 21;
-    if (NULL == (dt_str = (char *)HDcalloc(str_len, sizeof(char))))
+    if (NULL == (dt_str = (char *)calloc(str_len, sizeof(char))))
         goto out;
 
     if (H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len) < 0) {
-        HDfree(dt_str);
+        free(dt_str);
         goto out;
     }
     /* check the truncated string */
-    if (HDstrlen(dt_str) != str_len - 1)
+    if (strlen(dt_str) != str_len - 1)
         goto out;
-    str_len = HDstrlen(dt_str);
-    if (HDstrncmp(dt_str,
-                  "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      CSET "
-                  "H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }",
-                  str_len) != 0) {
-        HDprintf("dt=\n%s\n", dt_str);
-        HDfree(dt_str);
+    str_len = strlen(dt_str);
+    if (strncmp(dt_str,
+                "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      CSET "
+                "H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }",
+                str_len) != 0) {
+        printf("dt=\n%s\n", dt_str);
+        free(dt_str);
         goto out;
     }
 
-    HDfree(dt_str);
+    free(dt_str);
 
     if (H5Tclose(dtype) < 0)
         goto out;
@@ -1321,7 +1391,7 @@ test_strings(void)
 
 out:
     if (dt_str)
-        HDfree(dt_str);
+        free(dt_str);
 
     H5_FAILED();
     return -1;
@@ -1358,21 +1428,20 @@ test_opaques(void)
 
     if (H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len) < 0)
         goto out;
-    if (NULL == (dt_str = (char *)HDcalloc(str_len, sizeof(char))))
+    if (NULL == (dt_str = (char *)calloc(str_len, sizeof(char))))
         goto out;
     if (H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len) < 0) {
-        HDfree(dt_str);
+        free(dt_str);
         goto out;
     }
-    if (HDstrcmp(
-            dt_str,
-            "H5T_OPAQUE {\n      OPQ_SIZE 19;\n      OPQ_TAG \"This is a tag for opaque type\";\n   }") !=
+    if (strcmp(dt_str,
+               "H5T_OPAQUE {\n      OPQ_SIZE 19;\n      OPQ_TAG \"This is a tag for opaque type\";\n   }") !=
         0) {
-        HDprintf("dt=\n%s\n", dt_str);
-        HDfree(dt_str);
+        printf("dt=\n%s\n", dt_str);
+        free(dt_str);
         goto out;
     }
-    HDfree(dt_str);
+    free(dt_str);
 
     if (H5Tclose(dtype) < 0)
         goto out;
@@ -1421,7 +1490,7 @@ test_enums(void)
 
     if (H5Tenum_nameof(dtype, &value1, name1, size) < 0)
         goto out;
-    if (HDstrcmp(name1, "BLUE") != 0)
+    if (strcmp(name1, "BLUE") != 0)
         goto out;
 
     if (H5Tenum_valueof(dtype, name2, &value2) < 0)
@@ -1438,22 +1507,22 @@ test_enums(void)
 
     if (H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len) < 0)
         goto out;
-    if (NULL == (dt_str = (char *)HDcalloc(str_len, sizeof(char))))
+    if (NULL == (dt_str = (char *)calloc(str_len, sizeof(char))))
         goto out;
     if (H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len) < 0) {
-        HDfree(dt_str);
+        free(dt_str);
         goto out;
     }
-    if (HDstrcmp(dt_str,
-                 "H5T_ENUM {\n      H5T_STD_I32LE;\n      \"RED\"              5;\n      \"GREEN\"   "
-                 "         6;\n      \"BLUE\"             7;\n      \"WHITE\"            8;\n   }") != 0) {
+    if (strcmp(dt_str,
+               "H5T_ENUM {\n      H5T_STD_I32LE;\n      \"RED\"              5;\n      \"GREEN\"   "
+               "         6;\n      \"BLUE\"             7;\n      \"WHITE\"            8;\n   }") != 0) {
 
-        HDprintf("dt=\n%s\n", dt_str);
-        HDfree(dt_str);
+        printf("dt=\n%s\n", dt_str);
+        free(dt_str);
         goto out;
     }
 
-    HDfree(dt_str);
+    free(dt_str);
 
     if (H5Tclose(dtype) < 0)
         goto out;
@@ -1502,18 +1571,18 @@ test_variables(void)
 
     if (H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len) < 0)
         goto out;
-    if (NULL == (dt_str = (char *)HDcalloc(str_len, sizeof(char))))
+    if (NULL == (dt_str = (char *)calloc(str_len, sizeof(char))))
         goto out;
     if (H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len) < 0) {
-        HDfree(dt_str);
+        free(dt_str);
         goto out;
     }
-    if (HDstrcmp(dt_str, "H5T_VLEN {\n      H5T_VLEN {\n         H5T_STD_I32BE\n      }\n   }") != 0) {
-        HDprintf("dt=\n%s\n", dt_str);
-        HDfree(dt_str);
+    if (strcmp(dt_str, "H5T_VLEN {\n      H5T_VLEN {\n         H5T_STD_I32BE\n      }\n   }") != 0) {
+        printf("dt=\n%s\n", dt_str);
+        free(dt_str);
         goto out;
     }
-    HDfree(dt_str);
+    free(dt_str);
 
     if (H5Tclose(dtype) < 0)
         goto out;
@@ -1564,21 +1633,21 @@ test_arrays(void)
 
     if (H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len) < 0)
         goto out;
-    if (NULL == (dt_str = (char *)HDcalloc(str_len, sizeof(char))))
+    if (NULL == (dt_str = (char *)calloc(str_len, sizeof(char))))
         goto out;
     if (H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len) < 0) {
-        HDfree(dt_str);
+        free(dt_str);
         goto out;
     }
-    if (HDstrcmp(dt_str, "H5T_ARRAY {\n      [5][7][13] H5T_ARRAY {\n         [17][19] H5T_COMPOUND {\n      "
-                         "      H5T_STD_I8BE \"arr_compound_1\" : 0;\n            H5T_STD_I32BE "
-                         "\"arr_compound_2\" : 1;\n         }\n      }\n   }") != 0) {
-        HDprintf("dt=\n%s\n", dt_str);
-        HDfree(dt_str);
+    if (strcmp(dt_str, "H5T_ARRAY {\n      [5][7][13] H5T_ARRAY {\n         [17][19] H5T_COMPOUND {\n      "
+                       "      H5T_STD_I8BE \"arr_compound_1\" : 0;\n            H5T_STD_I32BE "
+                       "\"arr_compound_2\" : 1;\n         }\n      }\n   }") != 0) {
+        printf("dt=\n%s\n", dt_str);
+        free(dt_str);
         goto out;
     }
 
-    HDfree(dt_str);
+    free(dt_str);
 
     if (H5Tclose(dtype) < 0)
         goto out;
@@ -1625,19 +1694,19 @@ test_compounds(void)
 
     if (H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len) < 0)
         goto out;
-    if (NULL == (dt_str = (char *)HDcalloc(str_len, sizeof(char))))
+    if (NULL == (dt_str = (char *)calloc(str_len, sizeof(char))))
         goto out;
     if (H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len) < 0) {
-        HDfree(dt_str);
+        free(dt_str);
         goto out;
     }
-    if (HDstrcmp(dt_str, "H5T_COMPOUND {\n      H5T_STD_I16BE \"one_field\" : 2;\n      H5T_STD_U8LE "
-                         "\"two_field\" : 6;\n   }") != 0) {
-        HDprintf("dt=\n%s\n", dt_str);
-        HDfree(dt_str);
+    if (strcmp(dt_str, "H5T_COMPOUND {\n      H5T_STD_I16BE \"one_field\" : 2;\n      H5T_STD_U8LE "
+                       "\"two_field\" : 6;\n   }") != 0) {
+        printf("dt=\n%s\n", dt_str);
+        free(dt_str);
         goto out;
     }
-    HDfree(dt_str);
+    free(dt_str);
 
     if (H5Tclose(dtype) < 0)
         goto out;
@@ -1651,7 +1720,7 @@ test_compounds(void)
 
     if ((memb_name = H5Tget_member_name(dtype, 1)) == NULL)
         goto out;
-    if (HDstrcmp(memb_name, "i16_field") != 0) {
+    if (strcmp(memb_name, "i16_field") != 0) {
         H5free_memory(memb_name);
         goto out;
     }
@@ -1729,7 +1798,7 @@ test_compound_bug(void)
 
     if ((memb_name = H5Tget_member_name(dtype, 2)) == NULL)
         goto out;
-    if (HDstrcmp(memb_name, "sub") != 0) {
+    if (strcmp(memb_name, "sub") != 0) {
         H5free_memory(memb_name);
         goto out;
     }
@@ -1738,13 +1807,13 @@ test_compound_bug(void)
     if (H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len) < 0)
         goto out;
 
-    if (NULL == (dt_str = (char *)HDcalloc(str_len, sizeof(char))))
+    if (NULL == (dt_str = (char *)calloc(str_len, sizeof(char))))
         goto out;
     if (H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len) < 0) {
-        HDfree(dt_str);
+        free(dt_str);
         goto out;
     }
-    HDfree(dt_str);
+    free(dt_str);
 
     if (H5Tclose(dtype) < 0)
         goto out;
@@ -1765,8 +1834,8 @@ test_compound_bug(void)
 
     if ((memb_name = H5Tget_member_name(dtype, 1)) == NULL)
         goto out;
-    if (HDstrcmp(memb_name, "desc____________________________________________________________________________"
-                            "_____________") != 0) {
+    if (strcmp(memb_name, "desc____________________________________________________________________________"
+                          "_____________") != 0) {
         H5free_memory(memb_name);
         goto out;
     }
@@ -1775,14 +1844,14 @@ test_compound_bug(void)
     if (H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len) < 0)
         goto out;
 
-    if (NULL == (dt_str = (char *)HDcalloc(str_len, sizeof(char))))
+    if (NULL == (dt_str = (char *)calloc(str_len, sizeof(char))))
         goto out;
     if (H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len) < 0) {
-        HDfree(dt_str);
+        free(dt_str);
         goto out;
     }
 
-    HDfree(dt_str);
+    free(dt_str);
 
     if (H5Tclose(dtype) < 0)
         goto out;
@@ -1813,9 +1882,9 @@ test_complicated_compound(void)
     HL_TESTING3("        text for complicated compound types");
 
     /* Open input file */
-    fp = HDfopen(filename, "r");
+    fp = fopen(filename, "r");
     if (fp == NULL) {
-        HDprintf("Could not find file %s. Try set $srcdir \n", filename);
+        printf("Could not find file %s. Try set $srcdir \n", filename);
         goto out;
     }
 
@@ -1823,23 +1892,23 @@ test_complicated_compound(void)
      * Library has convenient function getline() but isn't available on
      * all machines.
      */
-    if ((line = (char *)HDcalloc(size, sizeof(char))) == NULL)
+    if ((line = (char *)calloc(size, sizeof(char))) == NULL)
         goto out;
-    if (HDfgets(line, (int)size, fp) == NULL)
+    if (fgets(line, (int)size, fp) == NULL)
         goto out;
-    while (HDstrlen(line) == size - 1) {
+    while (strlen(line) == size - 1) {
         size *= 2;
         if (line)
-            HDfree(line);
-        if ((line = (char *)HDcalloc(size, sizeof(char))) == NULL)
+            free(line);
+        if ((line = (char *)calloc(size, sizeof(char))) == NULL)
             goto out;
         if (HDfseek(fp, 0L, SEEK_SET) != 0)
             goto out;
-        if (HDfgets(line, (int)size, fp) == NULL)
+        if (fgets(line, (int)size, fp) == NULL)
             goto out;
     }
 
-    HDfclose(fp);
+    fclose(fp);
     fp = NULL;
 
     if ((dtype = H5LTtext_to_dtype(line, H5LT_DDL)) < 0)
@@ -1857,7 +1926,7 @@ test_complicated_compound(void)
         goto out;
 
     if (line)
-        HDfree(line);
+        free(line);
 
     PASSED();
     return 0;
@@ -1865,10 +1934,230 @@ test_complicated_compound(void)
 out:
 
     if (line)
-        HDfree(line);
+        free(line);
     if (fp)
-        HDfclose(fp);
+        fclose(fp);
 
+    H5_FAILED();
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * subroutine for test_text_dtype(): test complex number datatypes
+ *-------------------------------------------------------------------------
+ */
+static int
+test_complex(void)
+{
+    hid_t       dtype;
+    H5T_class_t type_class;
+
+    HL_TESTING3("        text for complex number types");
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    if ((dtype = H5LTtext_to_dtype("H5T_NATIVE_FLOAT_COMPLEX\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_NATIVE_FLOAT_COMPLEX))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_NATIVE_DOUBLE_COMPLEX\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_NATIVE_DOUBLE_COMPLEX))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_NATIVE_LDOUBLE_COMPLEX\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_NATIVE_LDOUBLE_COMPLEX))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_NATIVE_FLOAT }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_NATIVE_FLOAT_COMPLEX))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_NATIVE_DOUBLE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_NATIVE_DOUBLE_COMPLEX))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_NATIVE_LDOUBLE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_NATIVE_LDOUBLE_COMPLEX))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+#endif
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX_IEEE_F16LE\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F16LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX_IEEE_F16BE\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F16BE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX_IEEE_F32LE\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F32LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX_IEEE_F32BE\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F32BE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX_IEEE_F64LE\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F64LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX_IEEE_F64BE\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F64BE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_IEEE_F16LE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F16LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_IEEE_F16BE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F16BE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_IEEE_F32LE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F32LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_IEEE_F32BE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F32BE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_IEEE_F64LE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F64LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_IEEE_F64BE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F64BE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    PASSED();
+    return 0;
+
+out:
     H5_FAILED();
     return -1;
 }
@@ -1882,6 +2171,7 @@ test_text_dtype(void)
 {
     HL_TESTING2("H5LTtext_to_dtype");
 
+    printf("\n");
     if (test_integers() < 0)
         goto out;
 
@@ -1910,6 +2200,9 @@ test_text_dtype(void)
         goto out;
 
     if (test_complicated_compound() < 0)
+        goto out;
+
+    if (test_complex() < 0)
         goto out;
 
     return 0;
@@ -2113,54 +2406,54 @@ test_valid_path(void)
      * CHECK ABSOLUTE PATHS
      **************************************/
 
-    if ((path_valid = H5LTpath_valid(file_id, "/", TRUE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(file_id, "/", true)) != true) {
         goto out;
     }
 
-    if ((path_valid = H5LTpath_valid(file_id, "/", FALSE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(file_id, "/", false)) != true) {
         goto out;
     }
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1", TRUE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(file_id, "/G1", true)) != true) {
         goto out;
     }
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/DS1", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/DS1", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/DS3", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/DS3", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G5", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G5", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/DS1", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/DS1", false)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/DS1", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/DS1", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G2", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G2", true)) != true)
         goto out;
 
     /* check soft link points to a valid object*/
-    if ((path_valid = H5LTpath_valid(file_id, "/G2/DS4", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G2/DS4", true)) != true)
         goto out;
 
     /* check if path exist, but not the object */
-    if ((path_valid = H5LTpath_valid(file_id, "/G2/G7", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G2/G7", false)) != true)
         goto out;
     /* check if path exist and if the object exists. It should fail
      * since it is a dangling soft link
      */
-    if ((path_valid = H5LTpath_valid(file_id, "/G2/G7", TRUE)) == TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G2/G7", true)) == true)
         goto out;
 
     /* check soft links */
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G5/DS4", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G5/DS4", true)) != true)
         goto out;
 
     /**************************************
@@ -2170,11 +2463,11 @@ test_valid_path(void)
     if ((group = H5Gopen2(file_id, "/", H5P_DEFAULT)) < 0)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(group, "/", TRUE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(group, "/", true)) != true) {
         goto out;
     }
 
-    if ((path_valid = H5LTpath_valid(group, "/", FALSE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(group, "/", false)) != true) {
         goto out;
     }
 
@@ -2186,39 +2479,39 @@ test_valid_path(void)
 
     /* The identifier (file id) is the object itself, i.e. "." */
 
-    if ((path_valid = H5LTpath_valid(file_id, ".", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, ".", false)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, ".", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, ".", true)) != true)
         goto out;
 
     /* The identifier (group id) is the object itself, i.e. "." */
 
-    if ((path_valid = H5LTpath_valid(group, ".", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(group, ".", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(group, "DS3", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(group, "DS3", false)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(group, "DS3", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(group, "DS3", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(group, "G2/G5", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(group, "G2/G5", true)) != true)
         goto out;
 
     /* Check the "./" case */
-    if ((path_valid = H5LTpath_valid(group, "./DS3", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(group, "./DS3", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(group, "./G2/G5", TRUE)) != TRUE)
-        goto out;
-
-    /* Should fail, does not exist */
-    if ((path_valid = H5LTpath_valid(group, "./G2/G20", FALSE)) == TRUE)
+    if ((path_valid = H5LTpath_valid(group, "./G2/G5", true)) != true)
         goto out;
 
     /* Should fail, does not exist */
-    if ((path_valid = H5LTpath_valid(group, "./G2/G20", TRUE)) == TRUE)
+    if ((path_valid = H5LTpath_valid(group, "./G2/G20", false)) == true)
+        goto out;
+
+    /* Should fail, does not exist */
+    if ((path_valid = H5LTpath_valid(group, "./G2/G20", true)) == true)
         goto out;
 
     if (H5Gclose(group) < 0)
@@ -2229,36 +2522,36 @@ test_valid_path(void)
      *****************************/
 
     /* The dangled external link path is valid */
-    if ((path_valid = H5LTpath_valid(file_id, "/DangledExternalLink", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/DangledExternalLink", false)) != true)
         goto out;
 
     /* The file however does not exists, so the link dangles -> should return false */
-    if ((path_valid = H5LTpath_valid(file_id, "/DangledExternalLink", TRUE)) == TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/DangledExternalLink", true)) == true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", false)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/DS1", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/DS1", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/G20", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/G20", false)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/DS1", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/DS1", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/G20", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/G20", false)) != true)
         goto out;
 
     /* Should fail, does not exist */
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/G20", TRUE)) == TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/G20", true)) == true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/G20", TRUE)) == TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/G20", true)) == true)
         goto out;
 
     if (H5Fclose(file_id) < 0)

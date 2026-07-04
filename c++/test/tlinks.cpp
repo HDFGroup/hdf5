@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -57,7 +57,7 @@ static const char *FILENAME[] = {"link0", "link1.h5", "link2.h5", "visit", NULL}
  *-------------------------------------------------------------------------
  */
 static void
-test_basic_links(hid_t fapl_id, hbool_t new_format)
+test_basic_links(hid_t fapl_id, bool new_format)
 {
     hsize_t size[1] = {1};
     char    filename[NAME_BUF_SIZE];
@@ -67,9 +67,9 @@ test_basic_links(hid_t fapl_id, hbool_t new_format)
 
     try {
         if (new_format)
-            SUBTEST("Link creation (w/new group format)")
+            SUBTEST("Link creation (w/new group format)");
         else
-            SUBTEST("Link creation")
+            SUBTEST("Link creation");
 
         h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
         H5File file(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
@@ -129,14 +129,14 @@ test_basic_links(hid_t fapl_id, hbool_t new_format)
         H5File file(filename, H5F_ACC_RDWR, FileCreatPropList::DEFAULT, fapl);
 
         // Verify link existence
-        if (file.nameExists("dset1", LinkAccPropList::DEFAULT) != TRUE)
+        if (file.nameExists("dset1", LinkAccPropList::DEFAULT) != true)
             throw InvalidActionException("H5File::nameExists", "dset1 doesn't exist");
-        if (file.nameExists("grp1/soft", LinkAccPropList::DEFAULT) != TRUE)
+        if (file.nameExists("grp1/soft", LinkAccPropList::DEFAULT) != true)
             throw InvalidActionException("H5File::nameExists", "grp1/soft doesn't exist");
         // Deprecated
-        if (file.exists("dset1", LinkAccPropList::DEFAULT) != TRUE)
+        if (file.exists("dset1", LinkAccPropList::DEFAULT) != true)
             throw InvalidActionException("H5File::exists", "dset1 doesn't exist");
-        if (file.exists("grp1/soft", LinkAccPropList::DEFAULT) != TRUE)
+        if (file.exists("grp1/soft", LinkAccPropList::DEFAULT) != true)
             throw InvalidActionException("H5File::exists", "grp1/soft doesn't exist");
 
         // Verify link values
@@ -167,16 +167,16 @@ test_basic_links(hid_t fapl_id, hbool_t new_format)
 const H5std_string GROUP1NAME("First_group");
 const H5std_string GROUP2NAME("Second_group");
 static void
-test_lcpl(hid_t fapl_id, hbool_t new_format)
+test_lcpl(hid_t fapl_id, bool new_format)
 {
     H5L_info2_t linfo;
     char        filename[1024];
     hsize_t     dims[2];
 
     if (new_format)
-        SUBTEST("Link creation property lists (w/new group format)")
+        SUBTEST("Link creation property lists (w/new group format)");
     else
-        SUBTEST("Link creation property lists")
+        SUBTEST("Link creation property lists");
 
     try {
         FileAccPropList fapl(fapl_id);
@@ -249,14 +249,14 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
  *-------------------------------------------------------------------------
  */
 static void
-test_move(hid_t fapl_id, hbool_t new_format)
+test_move(hid_t fapl_id, bool new_format)
 {
     char filename[1024];
 
     if (new_format)
-        SUBTEST("Group::moveLink (w/new group format)")
+        SUBTEST("Group::moveLink (w/new group format)");
     else
-        SUBTEST("Group::moveLink")
+        SUBTEST("Group::moveLink");
 
     try {
         FileAccPropList fapl(fapl_id);
@@ -290,7 +290,7 @@ test_move(hid_t fapl_id, hbool_t new_format)
 
         // Move a soft link across files, should succeed
         grp_2.moveLink("soft", file_b, "soft_new_name");
-        if (file_b.exists("soft_new_name") != TRUE)
+        if (file_b.exists("soft_new_name") != true)
             throw InvalidActionException("H5File::exists", "grp1/soft doesn't exist");
 
         // Move a group across groups in the same file while renaming it
@@ -394,14 +394,14 @@ test_move(hid_t fapl_id, hbool_t new_format)
  *-------------------------------------------------------------------------
  */
 static void
-test_copy(hid_t fapl_id, hbool_t new_format)
+test_copy(hid_t fapl_id, bool new_format)
 {
     char filename[1024];
 
     if (new_format)
-        SUBTEST("Group::copyLink (w/new group format)")
+        SUBTEST("Group::copyLink (w/new group format)");
     else
-        SUBTEST("Group::copyLink")
+        SUBTEST("Group::copyLink");
 
     try {
         // Create two new files
@@ -429,7 +429,7 @@ test_copy(hid_t fapl_id, hbool_t new_format)
 
         // Copy a soft link across files, should succeed
         grp_2.copyLink("soft", file_b, "soft_new_name");
-        if (file_b.exists("soft_new_name") != TRUE)
+        if (file_b.exists("soft_new_name") != true)
             throw InvalidActionException("H5File::exists", "soft_new_name doesn't exist");
 
         // Move a group across groups in the same file while renaming it
@@ -532,14 +532,14 @@ test_copy(hid_t fapl_id, hbool_t new_format)
  *-------------------------------------------------------------------------
  */
 static void
-test_num_links(hid_t fapl_id, hbool_t new_format)
+test_num_links(hid_t fapl_id, bool new_format)
 {
     char filename[NAME_BUF_SIZE];
 
     if (new_format)
-        SUBTEST("Setting number of links (w/new group format)")
+        SUBTEST("Setting number of links (w/new group format)");
     else
-        SUBTEST("Setting number of links")
+        SUBTEST("Setting number of links");
 
     try {
         // Use the file access template id to create a file access prop. list.
@@ -615,16 +615,16 @@ visit_obj_cb(H5Object &obj, const H5std_string name, const H5O_info2_t *oinfo, v
  *-------------------------------------------------------------------------
  */
 static void
-test_visit(hid_t fapl_id, hbool_t new_format)
+test_visit(hid_t fapl_id, bool new_format)
 {
     hsize_t dims[2];
     hsize_t cdims[2];
     char    filename[NAME_BUF_SIZE];
 
     if (new_format)
-        SUBTEST("H5Object::visit (w/new group format)")
+        SUBTEST("H5Object::visit (w/new group format)");
     else
-        SUBTEST("H5Object::visit")
+        SUBTEST("H5Object::visit");
 
     try {
         // Use the file access template id to create a file access prop. list
@@ -666,7 +666,7 @@ test_visit(hid_t fapl_id, hbool_t new_format)
         delete file;
 
         // Reopen the file and group in the file.
-        file  = new H5File(filename, H5F_ACC_RDWR);
+        file  = new H5File(filename, H5F_ACC_RDWR, FileCreatPropList::DEFAULT, fapl);
         group = new Group(file->openGroup("Data"));
 
         // Open the group
@@ -709,10 +709,12 @@ test_visit(hid_t fapl_id, hbool_t new_format)
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_links()
+test_links(void *params)
 {
     hid_t    fapl_id, fapl2_id; /* File access property lists */
     unsigned new_format;        /* Whether to use the new format or not */
+
+    (void)params;
 
     if ((fapl_id = h5_fileaccess()) < 0)
         throw Exception("test_links", "Unable to get file access property list");
@@ -730,7 +732,7 @@ test_links()
             throw Exception("test_links", "H5Pset_libver_bounds failed");
 
         /* Loop over using new group format */
-        for (new_format = FALSE; new_format <= TRUE; new_format++) {
+        for (new_format = false; new_format <= true; new_format++) {
             hid_t my_fapl_id;
 
             /* Check for FAPL to use */
@@ -752,7 +754,8 @@ test_links()
         /* Close 2nd FAPL */
         H5Pclose(fapl2_id);
 
-        h5_clean_files(FILENAME, fapl_id);
+        h5_delete_all_test_files(FILENAME, fapl_id);
+        H5Pclose(fapl_id);
     }
     catch (Exception &E) {
         issue_fail_msg("test_links()", __LINE__, __FILE__, E.getCDetailMsg());
@@ -768,8 +771,12 @@ test_links()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-cleanup_links()
+cleanup_links(void *params)
 {
-    HDremove(FILENAME[0]);
-    HDremove(FILENAME[1]);
+    (void)params;
+
+    if (GetTestCleanup()) {
+        HDremove(FILENAME[0]);
+        HDremove(FILENAME[1]);
+    }
 }

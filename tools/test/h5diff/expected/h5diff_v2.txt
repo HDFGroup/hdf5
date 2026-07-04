@@ -1,0 +1,6 @@
+dataset: </vds_dset> and </vds_dset>
+0 differences found
+--------------------------------
+Some objects are not comparable
+--------------------------------
+Use -c for a list of objects.

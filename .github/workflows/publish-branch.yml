@@ -1,0 +1,50 @@
+name: hdf5 publish files in HDF5 folder from branch to S3
+
+# Triggers the workflow on demand
+on:
+  workflow_dispatch:
+    inputs:
+      local_dir:
+        description: 'HDF5 local directory'
+        type: string
+        required: true
+      target_dir:
+        description: 'hdf5 target bucket directory'
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  publish-tag:
+    runs-on: ubuntu-latest
+    steps:
+        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+        - name: Get Sources
+          uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+          with:
+            fetch-depth: 0
+            ref: '${{ github.head_ref || github.ref_name }}'
+
+        - name: List files for the space
+          run: |
+              ls -l ${{ github.workspace }}
+              ls ${{ github.workspace }}/HDF5
+
+        - name: Setup AWS CLI
+          uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
+          with:
+                 aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                 aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                 aws-region: ${{ secrets.AWS_REGION }}
+
+        - name: Sync dir to S3 bucket
+          env:
+            LOCAL_DIR: ${{ inputs.local_dir }}
+            TARGET_DIR: ${{ inputs.target_dir }}
+            S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+            S3_TARGET_PATH: ${{ vars.TARGET_PATH }}
+          run: |
+                aws s3 sync "./HDF5/$LOCAL_DIR" "s3://$S3_BUCKET/$S3_TARGET_PATH/$TARGET_DIR"
+

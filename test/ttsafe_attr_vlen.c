@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -42,16 +42,16 @@
 
 #include "ttsafe.h"
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
 
 #define FILENAME    "ttsafe_attr_vlen.h5"
 #define ATTR_NAME   "root_attr"
 #define NUM_THREADS 32
 
-void *tts_attr_vlen_thread(void *);
+H5TS_THREAD_RETURN_TYPE tts_attr_vlen_thread(void *);
 
 void
-tts_attr_vlen(void)
+tts_attr_vlen(void H5_ATTR_UNUSED *params)
 {
     H5TS_thread_t threads[NUM_THREADS] = {0};             /* Thread declaration */
     hid_t         fid                  = H5I_INVALID_HID; /* File ID */
@@ -105,23 +105,25 @@ tts_attr_vlen(void)
     CHECK(ret, H5I_INVALID_HID, "H5Tclose");
 
     /* Start multiple threads and execute tts_attr_vlen_thread() for each thread */
-    for (i = 0; i < NUM_THREADS; i++) {
-        threads[i] = H5TS_create_thread(tts_attr_vlen_thread, NULL, NULL);
-    }
+    for (i = 0; i < NUM_THREADS; i++)
+        if (H5TS_thread_create(&threads[i], tts_attr_vlen_thread, NULL) < 0)
+            TestErrPrintf("thread # %d did not start", i);
 
     /* Wait for the threads to end */
     for (i = 0; i < NUM_THREADS; i++)
-        H5TS_wait_for_thread(threads[i]);
+        if (H5TS_thread_join(threads[i], NULL) < 0)
+            TestErrPrintf("thread %d failed to join", i);
 
 } /* end tts_attr_vlen() */
 
 /* Start execution for each thread */
-void *
+H5TS_THREAD_RETURN_TYPE
 tts_attr_vlen_thread(void H5_ATTR_UNUSED *client_data)
 {
     hid_t       fid  = H5I_INVALID_HID; /* File ID */
     hid_t       gid  = H5I_INVALID_HID; /* Group ID */
     hid_t       aid  = H5I_INVALID_HID; /* Attribute ID */
+    hid_t       asid = H5I_INVALID_HID; /* Dataspace ID for the attribute */
     hid_t       atid = H5I_INVALID_HID; /* Datatype ID for the attribute */
     char       *string_attr_check;      /* The attribute data being read */
     const char *string_attr = "2.0";    /* The expected attribute data */
@@ -143,6 +145,10 @@ tts_attr_vlen_thread(void H5_ATTR_UNUSED *client_data)
     atid = H5Aget_type(aid);
     CHECK(atid, H5I_INVALID_HID, "H5Aget_type");
 
+    /* Get the dataspace for the attribute */
+    asid = H5Aget_space(aid);
+    CHECK(asid, H5I_INVALID_HID, "H5Aget_space");
+
     /* Read the attribute */
     ret = H5Aread(aid, atid, &string_attr_check);
     CHECK(ret, FAIL, "H5Aclose");
@@ -150,8 +156,15 @@ tts_attr_vlen_thread(void H5_ATTR_UNUSED *client_data)
     /* Verify the attribute data is as expected */
     VERIFY_STR(string_attr_check, string_attr, "H5Aread");
 
+    /* Free the attribute data */
+    ret = H5Treclaim(atid, asid, H5P_DEFAULT, &string_attr_check);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
     /* Close IDs */
     ret = H5Aclose(aid);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Sclose(asid);
     CHECK(ret, FAIL, "H5Aclose");
 
     ret = H5Gclose(gid);
@@ -163,13 +176,15 @@ tts_attr_vlen_thread(void H5_ATTR_UNUSED *client_data)
     ret = H5Tclose(atid);
     CHECK(ret, FAIL, "H5Aclose");
 
-    return NULL;
+    return (H5TS_thread_ret_t)0;
 } /* end tts_attr_vlen_thread() */
 
 void
-cleanup_attr_vlen(void)
+cleanup_attr_vlen(void H5_ATTR_UNUSED *params)
 {
-    HDunlink(FILENAME);
+    if (GetTestCleanup()) {
+        HDunlink(FILENAME);
+    }
 }
 
-#endif /*H5_HAVE_THREADSAFE*/
+#endif /* H5_HAVE_THREADSAFE_API */

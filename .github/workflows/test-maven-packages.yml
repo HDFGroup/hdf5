@@ -1,0 +1,635 @@
+name: Test Maven Packages
+
+# This workflow tests published Maven artifacts by:
+# 1. Downloading packages from GitHub Packages
+# 2. Verifying JAR contents are complete (not just dependencies)
+# 3. Building and running HDF5Examples against the packages
+# 4. Testing both JNI and FFM implementations
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Maven artifact version to test'
+        type: string
+        required: true
+      java_implementation:
+        description: 'Java implementation(s) to test: jni, ffm, or both'
+        type: string
+        required: false
+        default: 'both'
+      repository_url:
+        description: 'Maven repository URL'
+        type: string
+        required: false
+        default: 'https://maven.pkg.github.com/HDFGroup/hdf5'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Maven artifact version to test'
+        type: string
+        required: true
+        default: '2.1.0-SNAPSHOT'
+      java_implementation:
+        description: 'Java implementation(s) to test'
+        type: choice
+        required: false
+        default: 'both'
+        options:
+          - 'both'
+          - 'jni'
+          - 'ffm'
+      repository_url:
+        description: 'Maven repository URL'
+        type: string
+        required: false
+        default: 'https://maven.pkg.github.com/HDFGroup/hdf5'
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  test-jni-package:
+    name: Test JNI Maven Package
+    runs-on: ubuntu-latest
+    if: |
+      inputs.java_implementation == 'both' ||
+      inputs.java_implementation == 'jni'
+    steps:
+      - name: Checkout HDF5 repository (contains HDF5Examples)
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Set up Java 21 for JNI
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Configure Maven settings for GitHub Packages
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                    http://maven.apache.org/xsd/settings-1.0.0.xsd">
+              <servers>
+                  <server>
+                      <id>github-hdfgroup-hdf5</id>
+                      <username>\${env.GITHUB_ACTOR}</username>
+                      <password>\${env.GITHUB_TOKEN}</password>
+                  </server>
+              </servers>
+              <profiles>
+                  <profile>
+                      <id>github-packages</id>
+                      <repositories>
+                          <repository>
+                              <id>github-hdfgroup-hdf5</id>
+                              <url>$REPOSITORY_URL</url>
+                              <snapshots><enabled>true</enabled></snapshots>
+                              <releases><enabled>true</enabled></releases>
+                          </repository>
+                      </repositories>
+                  </profile>
+              </profiles>
+              <activeProfiles>
+                  <activeProfile>github-packages</activeProfile>
+              </activeProfiles>
+          </settings>
+          EOF
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+
+      - name: Verify JNI artifact exists and download
+        env:
+          ARTIFACT_VERSION: ${{ inputs.version }}
+          REPOSITORY_URL: ${{ inputs.repository_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: |
+          echo "::group::Download JNI artifact"
+          # Clear cached SNAPSHOT to force fresh download
+          rm -rf ~/.m2/repository/org/hdfgroup/hdf5-java-jni/"$ARTIFACT_VERSION"
+
+          # Determine platform classifier
+          PLATFORM_CLASSIFIER="linux-x86_64"
+          ARTIFACT_ID="hdf5-java-jni"
+          VERSION="$ARTIFACT_VERSION"
+          REPO_URL="$REPOSITORY_URL"
+
+          echo "Downloading: org.hdfgroup:${ARTIFACT_ID}:${VERSION} with classifier ${PLATFORM_CLASSIFIER}"
+
+          # For SNAPSHOT versions, get the latest timestamp from maven-metadata.xml
+          if [[ "$VERSION" == *"SNAPSHOT"* ]]; then
+            echo "Fetching SNAPSHOT metadata..."
+            METADATA_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/maven-metadata.xml"
+
+            # Download metadata with retry (GitHub Packages may need time to propagate)
+            echo "Downloading metadata (with retry for GitHub Packages propagation)..."
+            RETRY_COUNT=0
+            MAX_RETRIES=12
+            RETRY_DELAY=10
+
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$METADATA_URL" -o /tmp/maven-metadata.xml; then
+                echo "✅ Metadata downloaded successfully"
+                break
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                  echo "⏳ Attempt $RETRY_COUNT/$MAX_RETRIES failed. Waiting ${RETRY_DELAY}s for GitHub Packages to propagate..."
+                  sleep $RETRY_DELAY
+                else
+                  echo "::error::Failed to download metadata after $MAX_RETRIES attempts"
+                  echo "::error::URL: $METADATA_URL"
+                  exit 1
+                fi
+              fi
+            done
+
+            # Extract timestamped version from metadata
+            # Note: Maven may truncate long classifiers, so we search for partial matches
+            # e.g., "linux-x86_64" may be stored as classifier="linux-x" extension="6_64.jar"
+            # Maven removes suffixes: 86_64, _64, or 64
+            TRUNCATED_CLASSIFIER=$(echo "$PLATFORM_CLASSIFIER" | sed -E 's/(86_64|_64|64)$//')
+
+            # Parse XML using awk (xmllint not available in GitHub Actions by default)
+            # Format XML (GitHub Packages returns minified XML on one line)
+            # Look for snapshotVersion blocks with matching classifier and jar extension
+            echo "Searching for classifier: ${TRUNCATED_CLASSIFIER}"
+            TIMESTAMPED_VERSION=$(sed 's/></>\n</g' /tmp/maven-metadata.xml | awk -v search_classifier="${TRUNCATED_CLASSIFIER}" '
+              /<snapshotVersion>/ { in_block=1; classifier=""; extension=""; value="" }
+              /<\/snapshotVersion>/ {
+                if (in_block && classifier == search_classifier && extension ~ /jar/) {
+                  print value
+                  exit
+                }
+                in_block=0
+              }
+              in_block && /<classifier>/ { gsub(/.*<classifier>|<\/classifier>.*/, ""); classifier=$0 }
+              in_block && /<extension>/ { gsub(/.*<extension>|<\/extension>.*/, ""); extension=$0 }
+              in_block && /<value>/ { gsub(/.*<value>|<\/value>.*/, ""); value=$0 }
+            ')
+
+            if [ -z "$TIMESTAMPED_VERSION" ]; then
+              echo "::error::Could not extract SNAPSHOT version from metadata"
+              echo "::error::Searched for classifier starting with: ${TRUNCATED_CLASSIFIER}"
+              echo "::error::Metadata contents:"
+              cat /tmp/maven-metadata.xml
+              exit 1
+            fi
+
+            echo "Latest SNAPSHOT version: ${TIMESTAMPED_VERSION}"
+            JAR_FILENAME="${ARTIFACT_ID}-${TIMESTAMPED_VERSION}-${PLATFORM_CLASSIFIER}.jar"
+            POM_FILENAME="${ARTIFACT_ID}-${TIMESTAMPED_VERSION}.pom"
+          else
+            # Release version - use version as-is
+            JAR_FILENAME="${ARTIFACT_ID}-${VERSION}-${PLATFORM_CLASSIFIER}.jar"
+            POM_FILENAME="${ARTIFACT_ID}-${VERSION}.pom"
+          fi
+
+          # Download JAR and POM with retry
+          JAR_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/${JAR_FILENAME}"
+          POM_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/${POM_FILENAME}"
+          mkdir -p /tmp/maven-download
+
+          # Download JAR with retry
+          echo "Downloading JAR: ${JAR_URL}"
+          RETRY_COUNT=0
+          MAX_RETRIES=12
+          RETRY_DELAY=10
+
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$JAR_URL" -o "/tmp/maven-download/${JAR_FILENAME}"; then
+              echo "✅ JAR downloaded successfully"
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "⏳ JAR download attempt $RETRY_COUNT/$MAX_RETRIES failed. Waiting ${RETRY_DELAY}s..."
+                sleep $RETRY_DELAY
+              else
+                echo "::error::Failed to download JAR after $MAX_RETRIES attempts"
+                echo "::error::URL: $JAR_URL"
+                exit 1
+              fi
+            fi
+          done
+
+          # Download POM with retry
+          echo "Downloading POM: ${POM_URL}"
+          RETRY_COUNT=0
+
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$POM_URL" -o "/tmp/maven-download/${POM_FILENAME}"; then
+              echo "✅ POM downloaded successfully"
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "⏳ POM download attempt $RETRY_COUNT/$MAX_RETRIES failed. Waiting ${RETRY_DELAY}s..."
+                sleep $RETRY_DELAY
+              else
+                echo "::error::Failed to download POM after $MAX_RETRIES attempts"
+                echo "::error::URL: $POM_URL"
+                exit 1
+              fi
+            fi
+          done
+
+          # Install to local Maven repository
+          echo "Installing artifact to local repository..."
+          mvn install:install-file \
+            -Dfile="/tmp/maven-download/${JAR_FILENAME}" \
+            -DpomFile="/tmp/maven-download/${POM_FILENAME}" \
+            -DgroupId=org.hdfgroup \
+            -DartifactId=${ARTIFACT_ID} \
+            -Dversion=${VERSION} \
+            -Dpackaging=jar \
+            -Dclassifier=${PLATFORM_CLASSIFIER}
+
+          echo "✅ Artifact installed successfully"
+          echo "::endgroup::"
+
+      - name: Verify JAR contents (JNI)
+        env:
+          ARTIFACT_VERSION: ${{ inputs.version }}
+        run: |
+          echo "::group::Verify JAR contents"
+          JAR_PATH=$(find ~/.m2/repository/org/hdfgroup/hdf5-java-jni/"$ARTIFACT_VERSION" -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+
+          if [ -z "$JAR_PATH" ]; then
+            echo "::error::Could not find downloaded JAR file"
+            exit 1
+          fi
+
+          echo "JAR location: $JAR_PATH"
+          echo "JAR size: $(du -h "$JAR_PATH" | cut -f1)"
+
+          # Verify HDF5 classes are present
+          if jar tf "$JAR_PATH" | grep -q "hdf/hdf5lib/H5.class"; then
+            echo "✅ JAR contains HDF5 JNI classes"
+            CLASS_COUNT=$(jar tf "$JAR_PATH" | grep "hdf/hdf5lib.*\.class" | wc -l)
+            echo "Found $CLASS_COUNT HDF5 classes"
+          else
+            echo "::error::JAR does not contain HDF5 classes!"
+            echo "JAR contents (first 50 files):"
+            jar tf "$JAR_PATH" | head -50
+            exit 1
+          fi
+          echo "::endgroup::"
+
+      - name: Download HDF5 installation from workflow
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+          name: hdf5-install-linux-x86_64-jni
+          path: ${{ runner.workspace }}/hdf5-install
+
+      - name: Verify HDF5 installation
+        run: |
+          echo "HDF5 installation contents:"
+          ls -la "${{ runner.workspace }}/hdf5-install"
+          if [ -d "${{ runner.workspace }}/hdf5-install/lib" ]; then
+            echo "Libraries:"
+            ls -la "${{ runner.workspace }}/hdf5-install/lib" | grep -E '\.so' || echo "No shared libraries found"
+          fi
+
+      - name: Test JNI examples
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          HDF5_HOME: ${{ runner.workspace }}/hdf5-install
+          ARTIFACT_VERSION: ${{ inputs.version }}
+          REPOSITORY_URL: ${{ inputs.repository_url }}
+        run: |
+          cd HDF5Examples/JAVA
+          ./test-maven-jni.sh "$ARTIFACT_VERSION" "$REPOSITORY_URL"
+
+      - name: Upload test artifacts (JNI)
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+          name: jni-test-results-${{ inputs.version }}
+          path: |
+            HDF5Examples/JAVA/build/maven-test-jni/
+
+  test-ffm-package:
+    name: Test FFM Maven Package
+    runs-on: ubuntu-latest
+    if: |
+      inputs.java_implementation == 'both' ||
+      inputs.java_implementation == 'ffm'
+    steps:
+      - name: Checkout HDF5 repository (contains HDF5Examples)
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Set up Java 25 for FFM
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        with:
+          java-version: '25'
+          distribution: 'oracle'
+
+      - name: Configure Maven settings for GitHub Packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          REPOSITORY_URL: ${{ inputs.repository_url }}
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                    http://maven.apache.org/xsd/settings-1.0.0.xsd">
+              <servers>
+                  <server>
+                      <id>github-hdfgroup-hdf5</id>
+                      <username>\${env.GITHUB_ACTOR}</username>
+                      <password>\${env.GITHUB_TOKEN}</password>
+                  </server>
+              </servers>
+              <profiles>
+                  <profile>
+                      <id>github-packages</id>
+                      <repositories>
+                          <repository>
+                              <id>github-hdfgroup-hdf5</id>
+                              <url>$REPOSITORY_URL</url>
+                              <snapshots><enabled>true</enabled></snapshots>
+                              <releases><enabled>true</enabled></releases>
+                          </repository>
+                      </repositories>
+                  </profile>
+              </profiles>
+              <activeProfiles>
+                  <activeProfile>github-packages</activeProfile>
+              </activeProfiles>
+          </settings>
+          EOF
+
+      - name: Verify FFM artifact exists and download
+        env:
+          ARTIFACT_VERSION: ${{ inputs.version }}
+          REPOSITORY_URL: ${{ inputs.repository_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: |
+          echo "::group::Download FFM artifact"
+          # Clear cached SNAPSHOT to force fresh download
+          rm -rf ~/.m2/repository/org/hdfgroup/hdf5-java-ffm/"$ARTIFACT_VERSION"
+
+          # Determine platform classifier
+          PLATFORM_CLASSIFIER="linux-x86_64"
+          ARTIFACT_ID="hdf5-java-ffm"
+          VERSION="$ARTIFACT_VERSION"
+          REPO_URL="$REPOSITORY_URL"
+
+          echo "Downloading: org.hdfgroup:${ARTIFACT_ID}:${VERSION} with classifier ${PLATFORM_CLASSIFIER}"
+
+          # For SNAPSHOT versions, get the latest timestamp from maven-metadata.xml
+          if [[ "$VERSION" == *"SNAPSHOT"* ]]; then
+            echo "Fetching SNAPSHOT metadata..."
+            METADATA_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/maven-metadata.xml"
+
+            # Download metadata with retry (GitHub Packages may need time to propagate)
+            echo "Downloading metadata (with retry for GitHub Packages propagation)..."
+            RETRY_COUNT=0
+            MAX_RETRIES=12
+            RETRY_DELAY=10
+
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$METADATA_URL" -o /tmp/maven-metadata.xml; then
+                echo "✅ Metadata downloaded successfully"
+                break
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                  echo "⏳ Attempt $RETRY_COUNT/$MAX_RETRIES failed. Waiting ${RETRY_DELAY}s for GitHub Packages to propagate..."
+                  sleep $RETRY_DELAY
+                else
+                  echo "::error::Failed to download metadata after $MAX_RETRIES attempts"
+                  echo "::error::URL: $METADATA_URL"
+                  exit 1
+                fi
+              fi
+            done
+
+            # Extract timestamped version from metadata
+            # Note: Maven may truncate long classifiers, so we search for partial matches
+            # e.g., "linux-x86_64" may be stored as classifier="linux-x" extension="6_64.jar"
+            # Maven removes suffixes: 86_64, _64, or 64
+            TRUNCATED_CLASSIFIER=$(echo "$PLATFORM_CLASSIFIER" | sed -E 's/(86_64|_64|64)$//')
+
+            # Parse XML using awk (xmllint not available in GitHub Actions by default)
+            # Format XML (GitHub Packages returns minified XML on one line)
+            # Look for snapshotVersion blocks with matching classifier and jar extension
+            echo "Searching for classifier: ${TRUNCATED_CLASSIFIER}"
+            TIMESTAMPED_VERSION=$(sed 's/></>\n</g' /tmp/maven-metadata.xml | awk -v search_classifier="${TRUNCATED_CLASSIFIER}" '
+              /<snapshotVersion>/ { in_block=1; classifier=""; extension=""; value="" }
+              /<\/snapshotVersion>/ {
+                if (in_block && classifier == search_classifier && extension ~ /jar/) {
+                  print value
+                  exit
+                }
+                in_block=0
+              }
+              in_block && /<classifier>/ { gsub(/.*<classifier>|<\/classifier>.*/, ""); classifier=$0 }
+              in_block && /<extension>/ { gsub(/.*<extension>|<\/extension>.*/, ""); extension=$0 }
+              in_block && /<value>/ { gsub(/.*<value>|<\/value>.*/, ""); value=$0 }
+            ')
+
+            if [ -z "$TIMESTAMPED_VERSION" ]; then
+              echo "::error::Could not extract SNAPSHOT version from metadata"
+              echo "::error::Searched for classifier starting with: ${TRUNCATED_CLASSIFIER}"
+              echo "::error::Metadata contents:"
+              cat /tmp/maven-metadata.xml
+              exit 1
+            fi
+
+            echo "Latest SNAPSHOT version: ${TIMESTAMPED_VERSION}"
+            JAR_FILENAME="${ARTIFACT_ID}-${TIMESTAMPED_VERSION}-${PLATFORM_CLASSIFIER}.jar"
+            POM_FILENAME="${ARTIFACT_ID}-${TIMESTAMPED_VERSION}.pom"
+          else
+            # Release version - use version as-is
+            JAR_FILENAME="${ARTIFACT_ID}-${VERSION}-${PLATFORM_CLASSIFIER}.jar"
+            POM_FILENAME="${ARTIFACT_ID}-${VERSION}.pom"
+          fi
+
+          # Download JAR and POM with retry
+          JAR_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/${JAR_FILENAME}"
+          POM_URL="${REPO_URL}/org/hdfgroup/${ARTIFACT_ID}/${VERSION}/${POM_FILENAME}"
+          mkdir -p /tmp/maven-download
+
+          # Download JAR with retry
+          echo "Downloading JAR: ${JAR_URL}"
+          RETRY_COUNT=0
+          MAX_RETRIES=12
+          RETRY_DELAY=10
+
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$JAR_URL" -o "/tmp/maven-download/${JAR_FILENAME}"; then
+              echo "✅ JAR downloaded successfully"
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "⏳ JAR download attempt $RETRY_COUNT/$MAX_RETRIES failed. Waiting ${RETRY_DELAY}s..."
+                sleep $RETRY_DELAY
+              else
+                echo "::error::Failed to download JAR after $MAX_RETRIES attempts"
+                echo "::error::URL: $JAR_URL"
+                exit 1
+              fi
+            fi
+          done
+
+          # Download POM with retry
+          echo "Downloading POM: ${POM_URL}"
+          RETRY_COUNT=0
+
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" -fsSL "$POM_URL" -o "/tmp/maven-download/${POM_FILENAME}"; then
+              echo "✅ POM downloaded successfully"
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "⏳ POM download attempt $RETRY_COUNT/$MAX_RETRIES failed. Waiting ${RETRY_DELAY}s..."
+                sleep $RETRY_DELAY
+              else
+                echo "::error::Failed to download POM after $MAX_RETRIES attempts"
+                echo "::error::URL: $POM_URL"
+                exit 1
+              fi
+            fi
+          done
+
+          # Install to local Maven repository
+          echo "Installing artifact to local repository..."
+          mvn install:install-file \
+            -Dfile="/tmp/maven-download/${JAR_FILENAME}" \
+            -DpomFile="/tmp/maven-download/${POM_FILENAME}" \
+            -DgroupId=org.hdfgroup \
+            -DartifactId=${ARTIFACT_ID} \
+            -Dversion=${VERSION} \
+            -Dpackaging=jar \
+            -Dclassifier=${PLATFORM_CLASSIFIER}
+
+          echo "✅ Artifact installed successfully"
+          echo "::endgroup::"
+
+      - name: Verify JAR contents (FFM)
+        env:
+          ARTIFACT_VERSION: ${{ inputs.version }}
+        run: |
+          echo "::group::Verify JAR contents"
+          JAR_PATH=$(find ~/.m2/repository/org/hdfgroup/hdf5-java-ffm/"$ARTIFACT_VERSION" -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+
+          if [ -z "$JAR_PATH" ]; then
+            echo "::error::Could not find downloaded JAR file"
+            exit 1
+          fi
+
+          echo "JAR location: $JAR_PATH"
+          echo "JAR size: $(du -h "$JAR_PATH" | cut -f1)"
+
+          # Verify HDF5 FFM classes are present
+          if jar tf "$JAR_PATH" | grep -q "org/hdfgroup/javahdf5/hdf5_h.class"; then
+            echo "✅ JAR contains HDF5 FFM classes"
+            CLASS_COUNT=$(jar tf "$JAR_PATH" | grep "org/hdfgroup/javahdf5.*\.class" | wc -l)
+            echo "Found $CLASS_COUNT HDF5 FFM classes"
+          else
+            echo "::error::JAR does not contain HDF5 FFM classes!"
+            echo "JAR contents (first 50 files):"
+            jar tf "$JAR_PATH" | head -50
+            exit 1
+          fi
+          echo "::endgroup::"
+
+      - name: Download HDF5 installation from workflow
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+          name: hdf5-install-linux-x86_64-ffm
+          path: ${{ runner.workspace }}/hdf5-install
+
+      - name: Verify HDF5 installation
+        run: |
+          echo "HDF5 installation contents:"
+          ls -la "${{ runner.workspace }}/hdf5-install"
+          if [ -d "${{ runner.workspace }}/hdf5-install/lib" ]; then
+            echo "Libraries:"
+            ls -la "${{ runner.workspace }}/hdf5-install/lib" | grep -E '\.so' || echo "No shared libraries found"
+          fi
+
+      - name: Test FFM examples
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          HDF5_HOME: ${{ runner.workspace }}/hdf5-install
+          ARTIFACT_VERSION: ${{ inputs.version }}
+          REPOSITORY_URL: ${{ inputs.repository_url }}
+        run: |
+          cd HDF5Examples/JAVA
+          ./test-maven-ffm.sh "$ARTIFACT_VERSION" "$REPOSITORY_URL"
+
+      - name: Upload test artifacts (FFM)
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+          name: ffm-test-results-${{ inputs.version }}
+          path: |
+            HDF5Examples/JAVA/build/maven-test-ffm/
+
+  summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [test-jni-package, test-ffm-package]
+    if: always()
+    steps:
+      - name: Check test results
+        env:
+          ARTIFACT_VERSION: ${{ inputs.version }}
+          REPOSITORY_URL: ${{ inputs.repository_url }}
+        run: |
+          echo "## Maven Package Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** $ARTIFACT_VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository:** $REPOSITORY_URL" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          JNI_RESULT="${{ needs.test-jni-package.result }}"
+          FFM_RESULT="${{ needs.test-ffm-package.result }}"
+
+          echo "### Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$JNI_RESULT" != "skipped" ]; then
+            if [ "$JNI_RESULT" == "success" ]; then
+              echo "✅ **JNI Package:** PASSED" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ **JNI Package:** FAILED" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+          if [ "$FFM_RESULT" != "skipped" ]; then
+            if [ "$FFM_RESULT" == "success" ]; then
+              echo "✅ **FFM Package:** PASSED" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ **FFM Package:** FAILED" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+          # Fail if any tests failed
+          if [ "$JNI_RESULT" == "failure" ] || [ "$FFM_RESULT" == "failure" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ **One or more tests failed. Check the logs above for details.**" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🎉 **All tests passed!**" >> $GITHUB_STEP_SUMMARY

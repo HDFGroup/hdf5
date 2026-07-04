@@ -5,7 +5,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -15,18 +15,114 @@
 
 # Function definitions
 #
+# Function to get version from H5public.h
+get_version()
+{
+    local major=$(grep '^#define H5_VERS_MAJOR' src/H5public.h | awk '{print $3}')
+    local minor=$(grep '^#define H5_VERS_MINOR' src/H5public.h | awk '{print $3}')
+    local release=$(grep '^#define H5_VERS_RELEASE' src/H5public.h | awk '{print $3}')
+    local subrelease=$(grep '^#define H5_VERS_SUBRELEASE' src/H5public.h | cut -d'"' -f2)
+
+    echo "${major}.${minor}.${release}${subrelease}"
+}
+
+# Function to set version in H5public.h
+# Usage: set_version "2.0.1-of20250116"
+set_version()
+{
+    if [ $# -ne 1 ]; then
+        echo "usage: set_version <version_string>"
+        return 1
+    fi
+
+    new_vers=$1
+
+    # Validate version string format
+    if ! echo "$new_vers" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9._-]+)?$'; then
+        echo "Error: Invalid version format '$new_vers'. Expected format: major.minor.release[-subrelease]"
+        return 1
+    fi
+
+    # Parse version string (format: major.minor.release or major.minor.release-subrelease)
+    major=$(echo $new_vers | sed 's/^\([0-9]*\)\..*/\1/')
+    minor=$(echo $new_vers | sed 's/^[0-9]*\.\([0-9]*\)\..*/\1/')
+    release=$(echo $new_vers | sed 's/^[0-9]*\.[0-9]*\.\([0-9]*\).*/\1/')
+    # Note: subrelease includes the leading dash (e.g., "-snap0") to match H5_VERS_STR concatenation
+    subrelease=$(echo $new_vers | sed 's/^[0-9]*\.[0-9]*\.[0-9]*\(.*\)/\1/')
+
+    # If subrelease is same as new_vers, there was no subrelease part
+    if [ "$subrelease" = "$new_vers" ]; then
+        subrelease=""
+    fi
+
+    # Validate that all components were extracted
+    if [ -z "$major" ] || [ -z "$minor" ] || [ -z "$release" ]; then
+        echo "Error: Failed to parse version components from '$new_vers'"
+        echo "  major=$major, minor=$minor, release=$release, subrelease=$subrelease"
+        return 1
+    fi
+
+    # Verify H5public.h exists and has the expected defines
+    if [ ! -f src/H5public.h ]; then
+        echo "Error: src/H5public.h not found"
+        return 1
+    fi
+
+    for def in H5_VERS_MAJOR H5_VERS_MINOR H5_VERS_RELEASE H5_VERS_SUBRELEASE; do
+        if ! grep -q "^#define $def" src/H5public.h; then
+            echo "Error: #define $def not found in src/H5public.h"
+            return 1
+        fi
+    done
+
+    # Update H5public.h
+    # Note: H5_VERS_STR and H5_VERS_INFO are automatically derived from the base version macros
+    sed -i.bak \
+        -e "s/^\(#define H5_VERS_MAJOR[[:space:]]*\)[0-9]*/\1$major/" \
+        -e "s/^\(#define H5_VERS_MINOR[[:space:]]*\)[0-9]*/\1$minor/" \
+        -e "s/^\(#define H5_VERS_RELEASE[[:space:]]*\)[0-9]*/\1$release/" \
+        -e "s/^\(#define H5_VERS_SUBRELEASE[[:space:]]*\)\".*\"/\1\"$subrelease\"/" \
+        src/H5public.h
+
+    if [ $? -ne 0 ]; then
+        echo "Error: sed command failed"
+        mv src/H5public.h.bak src/H5public.h 2>/dev/null
+        return 1
+    fi
+
+    # Verify the changes were applied correctly
+    new_major=$(grep '^#define H5_VERS_MAJOR' src/H5public.h | sed 's/^#define H5_VERS_MAJOR[[:space:]]*\([0-9]*\).*/\1/')
+    new_minor=$(grep '^#define H5_VERS_MINOR' src/H5public.h | sed 's/^#define H5_VERS_MINOR[[:space:]]*\([0-9]*\).*/\1/')
+    new_release=$(grep '^#define H5_VERS_RELEASE' src/H5public.h | sed 's/^#define H5_VERS_RELEASE[[:space:]]*\([0-9]*\).*/\1/')
+    new_subrelease=$(grep '^#define H5_VERS_SUBRELEASE' src/H5public.h | sed 's/^#define H5_VERS_SUBRELEASE[[:space:]]*"\(.*\)".*/\1/')
+
+    if [ "$new_major" != "$major" ] || [ "$new_minor" != "$minor" ] || \
+       [ "$new_release" != "$release" ] || [ "$new_subrelease" != "$subrelease" ]; then
+        echo "Error: Version update verification failed"
+        echo "  Expected: major=$major, minor=$minor, release=$release, subrelease=$subrelease"
+        echo "  Got:      major=$new_major, minor=$new_minor, release=$new_release, subrelease=$new_subrelease"
+        mv src/H5public.h.bak src/H5public.h
+        return 1
+    fi
+
+    # Success - remove backup
+    rm -f src/H5public.h.bak
+    echo "Successfully updated version to $new_vers"
+    return 0
+}
+
 # Print Usage page
 USAGE()
 {
 cat << EOF
-Usage: $0 -d <dir> [--docver BRANCHNAME] [-h] [--private] <methods> ...
+Usage: $0 -d <dir> [-h] [--private] [--revision [--branch BRANCHNAME]] <methods> ...
    -d DIR       The name of the directory where the release(s) should be
                 placed.
-   --docver BRANCHNAME  This is added for 1.8 and beyond to get the correct
-                        version of documentation files from the hdf5docs
+   --branch BRANCHNAME  This is to get the correct version of the branch name from the
                         repository.  BRANCHNAME for v1.8 should be hdf5_1_8.
    -h           print the help page.
    --private    Make a private release with today's date in version information.
+   --revision   Make a private release with the code revision number in version information.
 
 This must be run at the top level of the source directory.
 The other command-line options are the names of the programs to use
@@ -37,41 +133,38 @@ for compressing the resulting tar archive (if none are given then
     gzip        -- use gzip with "-9" and append ".gz" to the output name.
     bzip2       -- use bzip2 with "-9" and append ".bz2" to the output name.
     zip         -- convert all text files to DOS style and form a zip file for Windows use.
-    cmake-tgz   -- create a tar file using the gzip default level with a build-unix.sh
-                   command file and all other CMake files needed to build HDF5 source
-                   using CMake on unix machines.
-    cmake-zip   -- convert all text files to DOS style and create a zip file including cmake
-                   scripts and .bat files to build HDF5 source using CMake on Windows.
-    hpc-cmake-tgz
-                -- create a tar file using the gzip default level with a build-unix.sh
-                   command file and all other CMake files needed to build HDF5 source
-                   using CMake on unix machines, with HDF5options.cmake files for serial
-                   and parallel builds on machines requiring batch jobs to run tests.
-                   The default is for parallel build, with serial only build by changing
-                   the HDF5options.cmake symlink to ser-HDF5options.cmake.  More
-                   information is available in the README_HPC file.
     doc         -- produce the latest doc tree in addition to the archive.
 
-A sha256 checksum is produced for each archive created and stored in the sha256 file.
+A sha256 checksum is produced for each archive created and stored in a corresponding sha256 file.
 
 Examples:
 
     $ bin/release -d /tmp
     /tmp/hdf5-1.8.13-RELEASE.txt
-    /tmp/hdf5-1.8.13.sha256
     /tmp/hdf5-1.8.13.tar
+    /tmp/hdf5-1.8.13.tar.sha256
 
     $ bin/release -d /tmp gzip
     /tmp/hdf5-1.8.13-RELEASE.txt
-    /tmp/hdf5-1.8.13.sha256
+    /tmp/hdf5-1.8.13.tar
+    /tmp/hdf5-1.8.13.tar.sha256
     /tmp/hdf5-1.8.13.tar.gz
+    /tmp/hdf5-1.8.13.tar.gz.sha256
 
     $ bin/release -d /tmp tar gzip zip
     /tmp/hdf5-1.8.13-RELEASE.txt
-    /tmp/hdf5-1.8.13.sha256
     /tmp/hdf5-1.8.13.tar
+    /tmp/hdf5-1.8.13.tar.sha256
     /tmp/hdf5-1.8.13.tar.gz
-    /tmp/hdf5-1.8.13.tar.zip
+    /tmp/hdf5-1.8.13.tar.gz.sha256
+    /tmp/hdf5-1.8.13.zip
+    /tmp/hdf5-1.8.13.zip.sha256
+
+    Note:  as of HDF5 2.0.0, RELEASE.txt is replaced by CHANGELOG.md
+
+The integrity of a downloaded file can be verified on Linux platforms by running 
+"sha256sum --check <filename>.sha256, which will display 'OK' if the calculated
+checksum of <filename> matches the checksum in <filename>.sha256.
 
 EOF
 
@@ -139,286 +232,18 @@ tar2zip()
     rm -rf $ztmpdir
 }
 
-# Function name: tar2cmakezip
-# Convert the release tarball to a Windows zipball with files to run CMake build.
-#
-# Steps:
-# 1. untar the tarball in a temporary directory;
-#    Note: do this in a temporary directory to avoid changing
-#    the original source directory which may be around.
-# 2. add build-unix.sh script.
-# 3. add LIBAEC.tar.gz, ZLib.tar.gz and cmake files to top level directory.
-# 4. create gzipped tar file with these contents:
-#        build-unix.sh          script
-#        hdf5-<version>         source code directory extracted from tar file
-#        CTestScript.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        HDF5config.cmake       cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        HDF5options.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        LIBAEC.tar.gz          copied from /mnt/scr1/pre-release/hdf5/CMake
-#        ZLib.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake
-
-
-# Parameters:
-# $1 version
-# $2 release tarball
-# $3 output zipball file name
-#
-# Returns 0 if successful; 1 otherwise
-#
- # need function to create another temporary directory, extract the
-            # $tmpdir/$HDF5_VERS.tar into it, create build-VS*.bat files,
-            # add CTestScript.cmake, HDF5config.cmake, LIBAEC.tar.gz
-            # ZLib.tar.gz, HDF5 examples, and then zip it.
-tar2cmakezip()
-{
-    if [ $# -ne 3 ]; then
-        echo "usage: tar2cmakezip <tarfilename> <zipfilename>"
-        return 1
-    fi
-    cmziptmpdir=/tmp/cmziptmpdir$$
-    cmziptmpsubdir=$cmziptmpdir/CMake-$HDF5_VERS
-    mkdir -p $cmziptmpsubdir
-    version=$1
-    tarfile=$2
-    zipfile=$3
-
-    # step 1: untar tarball in cmgztmpdir
-    (cd $cmziptmpsubdir; tar xf -) < $tarfile
-    # sanity check
-    if [ ! -d $cmziptmpsubdir/$version ]; then
-        echo "untar did not create $cmziptmpsubdir/$version source dir"
-        # cleanup
-        rm -rf $cmziptmpdir
-        return 1
-    fi
-
-    # step 2: add batch file for building CMake on window
-    (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2013 -C Release -V -O hdf5.log" > build-VS2013-32.bat; chmod 755 build-VS2013-32.bat)
-    (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201364 -C Release -V -O hdf5.log" > build-VS2013-64.bat; chmod 755 build-VS2013-64.bat)
-    (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2015 -C Release -V -O hdf5.log" > build-VS2015-32.bat; chmod 755 build-VS2015-32.bat)
-    (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201564 -C Release -V -O hdf5.log" > build-VS2015-64.bat; chmod 755 build-VS2015-64.bat)
-    (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2017 -C Release -V -O hdf5.log" > build-VS2017-32.bat; chmod 755 build-VS2017-32.bat)
-    (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201764 -C Release -V -O hdf5.log" > build-VS2017-64.bat; chmod 755 build-VS2017-64.bat)
-    (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2019 -C Release -V -O hdf5.log" > build-VS2019-32.bat; chmod 755 build-VS2019-32.bat)
-    (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201964 -C Release -V -O hdf5.log" > build-VS2019-64.bat; chmod 755 build-VS2019-64.bat)
-
-    # step 3: add LIBAEC.tar.gz, ZLib.tar.gz and cmake files
-    cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmziptmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmziptmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-2.0.2-Source.zip $cmziptmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-master.zip $cmziptmpsubdir
-    cp $cmziptmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmziptmpsubdir
-    cp $cmziptmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmziptmpsubdir
-    cp $cmziptmpsubdir/$version/config/cmake/scripts/HDF5options.cmake $cmziptmpsubdir
-
-    # step 4: convert text files
-    # There maybe a simpler way to do this.
-    # options used in unix2dos:
-    # -k   Keep the date stamp
-    # -q   quiet mode
-    # grep redirect output to /dev/null because -q or -s are not portable.
-    find $cmziptmpsubdir/$version | \
-        while read inf; do \
-            if file $inf | grep "$inf\: .*text" > /dev/null 2>&1 ; then \
-                unix2dos -q -k $inf; \
-            fi\
-        done
-
-    # step 3: make zipball
-    # -9 maximum compression
-    # -y Store symbolic links as such in the zip archive
-    # -r recursive
-    # -q quiet
-    (cd $cmziptmpdir; zip -9 -y -r -q CMake-$version.zip *)
-    mv $cmziptmpdir/CMake-$version.zip $zipfile
-
-    # cleanup
-    rm -rf $cmziptmpdir
-}
-
-# Function name: tar2cmaketgz
-# Convert the release tarball to a gzipped tar file with files to run CMake build.
-#
-#
-# Steps:
-# 1. untar the tarball in a temporary directory;
-#    Note: do this in a temporary directory to avoid changing
-#    the original source directory which may be around.
-# 2. add build-unix.sh script.
-# 3. add LIBAEC.tar.gz, ZLib.tar.gz and cmake files to top level directory.
-# 4. create gzipped tar file with these contents:
-#        build-unix.sh          script
-#        hdf5-<version>         source code directory extracted from tar file
-#        CTestScript.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        HDF5config.cmake       cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        HDF5options.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        LIBAEC.tar.gz          copied from /mnt/scr1/pre-release/hdf5/CMake
-#        ZLib.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake
-
-
-# Parameters:
-# $1 version
-# $2 release tarball
-# $3 output zipball file name
-#
-# Returns 0 if successful; 1 otherwise
-#
- # need function to create another temporary directory, extract the
-            # $tmpdir/$HDF5_VERS.tar into it, create build-unix.sh,
-            # add CTestScript.cmake, HDF5config.cmake, LIBAEC.tar.gz
-            # ZLib.tar.gz, HDF5 examples, and then tar.gz it.
-tar2cmaketgz()
-{
-    if [ $# -ne 3 ]; then
-        echo "usage: tar2cmaketgz <tarfilename> <tgzfilename>"
-        return 1
-    fi
-    cmgztmpdir=/tmp/cmgztmpdir$$
-    cmgztmpsubdir=$cmgztmpdir/CMake-$HDF5_VERS
-    mkdir -p $cmgztmpsubdir
-    version=$1
-    tarfile=$2
-    tgzfile=$3
-
-    # step 1: untar tarball in cmgztmpdir
-    (cd $cmgztmpsubdir; tar xf -) < $tarfile
-    # sanity check
-    if [ ! -d $cmgztmpsubdir/$version ]; then
-        echo "untar did not create $cmgztmpsubdir/$version source dir"
-        # cleanup
-        rm -rf $cmgztmpdir
-        return 1
-    fi
-
-
-    # step 2: add build-unix.sh script
-    (cd $cmgztmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -V -O hdf5.log" > build-unix.sh; chmod 755 build-unix.sh)
-
-    # step 3: add LIBAEC.tar.gz, ZLib.tar.gz and cmake files
-    cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-2.0.2-Source.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-master.tar.gz $cmgztmpsubdir
-    cp $cmgztmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpsubdir
-    cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpsubdir
-    cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5options.cmake $cmgztmpsubdir
-    tar czf $DEST/CMake-$HDF5_VERS.tar.gz -C $cmgztmpdir . || exit 1
-
-    # cleanup
-    rm -rf $cmgztmpdir
-}
-
-# Function name: tar2hpccmaketgz
-# Convert the release tarball to a gzipped tarfile with files to run CMake build
-# and HDF5options.cmake files for parallel or serial only builds where build
-# tests are run on compute nodes using batch scripts.
-#
-# Steps:
-# 1. untar the tarball in a temporary directory;
-#    Note: do this in a temporary directory to avoid changing
-#    the original source directory which may be around.
-# 2. add build-unix.sh script.
-# 3. add LIBAEC.tar.gz, ZLib.tar.gz and cmake files to top level directory.
-# 4. create gzipped tar file with these contents:
-#        build-unix.sh          script
-#        hdf5-<version>         source code directory extracted from tar file
-#        CTestScript.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        HDF5config.cmake       cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        HDF5options.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        LIBAEC.tar.gz          copied from /mnt/scr1/pre-release/hdf5/CMake
-#        ZLib.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake
-#
-# 5. For HPC-CMake tgz file the following are also needed in the top-level directory:
-#        README_HPC                 copied from release_docs
-#        ser-HDF5options.cmake      copied from <hdf5 source code>/config/cmake/scripts/HPC
-#        par-HDF5options.cmake      copied from <hdf5 source code>/config/cmake/scripts/HPC
-#        HDF5options.cmake          symlink to par-HDF5options.cmake
-#
-
-# Parameters:
-# $1 version
-# $2 release tarball
-# $3 output zipball file name
-#
-# Returns 0 if successful; 1 otherwise
-#
- # need function to create another temporary directory, extract the
-            # $tmpdir/$HDF5_VERS.tar into it, create build-unix.sh,
-            # add CTestScript.cmake, HDF5config.cmake, LIBAEC.tar.gz
-            # ZLib.tar.gz, HDF5 examples, and then tar.gz it.
-tar2hpccmaketgz()
-{
-    if [ $# -ne 3 ]; then
-        echo "usage: tar2hpccmaketgz <tarfilename> <tgzfilename>"
-        return 1
-    fi
-    cmgztmpdir=/tmp/cmgztmpdir$$
-    cmgztmpsubdir=$cmgztmpdir/HPC-CMake-$HDF5_VERS
-    mkdir -p $cmgztmpsubdir
-    version=$1
-    tarfile=$2
-    tgzfile=$3
-
-    # step 1: untar tarball in cmgztmpdir
-    (cd $cmgztmpsubdir; tar xf -) < $tarfile
-    # sanity check
-    if [ ! -d $cmgztmpsubdir/$version ]; then
-        echo "untar did not create $cmgztmpsubdir/$version source dir"
-        # cleanup
-        rm -rf $cmgztmpdir
-        return 1
-    fi
-
-
-    # step 2: add build-unix.sh script
-    (cd $cmgztmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -V -O hdf5.log" > build-unix.sh; chmod 755 build-unix.sh)
-
-    # step 3: add LIBAEC.tar.gz, ZLib.tar.gz and cmake files
-    cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-2.0.2-Source.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-master.tar.gz $cmgztmpsubdir
-    cp $cmgztmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpsubdir
-    cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpsubdir
-
-    cp $cmgztmpsubdir/$version/release_docs/README_HPC $cmgztmpsubdir
-    cp $cmgztmpsubdir/$version/config/cmake/scripts/HPC/ser-HDF5options.cmake $cmgztmpsubdir
-    cp $cmgztmpsubdir/$version/config/cmake/scripts/HPC/par-HDF5options.cmake $cmgztmpsubdir
-    (cd $cmgztmpsubdir; ln -s par-HDF5options.cmake HDF5options.cmake)
-    tar czf $DEST/HPC-CMake-$HDF5_VERS.tar.gz -C $cmgztmpdir . || exit 1
-
-    # cleanup
-    rm -rf $cmgztmpdir
-}
-
-# This command must be run at the top level of the hdf5 source directory.
-# Verify this requirement.
-if [ ! \( -f configure.ac -a -f bin/release \) ]; then
-    echo "$0 must be run at the top level of the hdf5 source directory"
-    exit 1
-fi
 
 # Defaults
 DEST=releases
-VERS=`perl bin/h5vers`
+VERS=$(get_version)
 VERS_OLD=
 test "$VERS" || exit 1
 verbose=yes
 release_date=`date +%F`
 today=`date +%Y%m%d`
 pmode='no'
+revmode='no'
 tmpdir="../#release_tmp.$$"     # tmp work directory
-DOC_URL=https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5doc.git
-CPPLUS_RM_NAME=cpplus_RM
-MAINT_MODE_ENABLED=""
-
-# If maintainer mode is enabled in configure, it should be disabled for release,
-# and enabled again after release files have been created.  If already disabled
-# there's no need to do either.
-MAINT_MODE_ENABLED=`grep ^AM_MAINTAINER_MODE ./configure.ac | grep enable`
-if [ "${MAINT_MODE_ENABLED}" != "" ]; then
-    bin/switch_maint_mode -disable ./configure.ac
-fi
 
 # Restore previous Version information
 RESTORE_VERSION()
@@ -427,7 +252,7 @@ RESTORE_VERSION()
         echo restoring version information back to $VERS_OLD
         rm -f config/lt_vers.am
         cp $tmpdir/lt_vers.am config/lt_vers.am
-        bin/h5vers -s $VERS_OLD
+        set_version $VERS_OLD
         VERS_OLD=
     fi
 }
@@ -449,8 +274,11 @@ while [ -n "$1" ]; do
         --private)
             pmode=yes
             ;;
-        --docver)
-            DOCVERSION=$1
+        --revision)
+            revmode=yes
+            ;;
+        --branch)
+            BRANCHNAME=$1
             shift
             ;;
         -*)
@@ -487,15 +315,35 @@ if [ X$pmode = Xyes ]; then
     # "undo" changes to it.
     cp config/lt_vers.am $tmpdir
     # Set version information to m.n.r-of$today.
-    # (h5vers does not correctly handle just m.n.r-$today.)
     VERS=`echo $VERS | sed -e s/-.*//`-of$today
     echo Private release of $VERS
-else
-    bin/h5vers -s $VERS
+    set_version $VERS
 fi
 
-# Store hdf5-$VERS ("hdf5-1.7.51", e.g.) to a variable to avoid typos
-HDF5_VERS=hdf5-$VERS
+if [ X$revmode = Xyes ]; then
+    VERS_OLD=$VERS
+    echo "Save old version $VERS_OLD for restoration later."
+    # Copy old version of config/lt_vers.am, since it's hard to
+    # "undo" changes to it.
+    cp config/lt_vers.am $tmpdir
+    if [ "${BRANCHNAME}" = "" ]; then
+        BRANCHNAME=`git symbolic-ref -q --short HEAD`
+    fi
+    revision=`git rev-parse --short HEAD`
+    # Set version information to m.n.r-r$revision.
+    VERS=`echo $VERS | sed -e s/-.*//`-$revision
+    echo Private release of $VERS
+    HDF5_VERS=hdf5-$BRANCHNAME-$revision
+    echo file base of $HDF5_VERS
+    set_version $VERS
+    # use a generic directory name for revision releases
+    HDF5_IN_VERS=hdfsrc
+else
+    # Store hdf5-$VERS ("hdf5-1.7.51", e.g.) to a variable to avoid typos
+    HDF5_VERS=hdf5-$VERS
+    # directory name matches tar file name for non-revision releases
+    HDF5_IN_VERS=$HDF5_VERS
+fi
 
 test "$verbose" && echo "Releasing $HDF5_VERS to $DEST" 1>&2
 if [ ! -d $DEST ]; then
@@ -505,15 +353,11 @@ fi
 
 # Create a symlink to the source so files in the tarball have the prefix
 # we want (gnu's --transform isn't portable)
-ln -s `pwd` $tmpdir/$HDF5_VERS || exit 1
+ln -s `pwd` $tmpdir/$HDF5_IN_VERS || exit 1
 
-# Save a backup copy of Makefile if exists.
-test -f Makefile && mv Makefile $tmpdir/Makefile.x
-cp -p Makefile.dist Makefile
-
-# Update README.md and release_docs/RELEASE.txt with release information in
+# Update README.md and release_docs/CHANGELOG.md with release information in
 # line 1.
-for f in README.md release_docs/RELEASE.txt; do
+for f in README.md release_docs/CHANGELOG.md; do
     echo "HDF5 version $VERS released on $release_date" >$f.x
     sed -e 1d $f >>$f.x
     mv $f.x $f
@@ -521,70 +365,33 @@ for f in README.md release_docs/RELEASE.txt; do
     chmod 644 $f
 done
 
-# develop is different than branches.
-if [ "${DOCVERSION}" ]; then
-    DOC_URL="$DOC_URL -b ${DOCVERSION}"
-fi
-
 # Create the tar file
 test "$verbose" && echo "   Running tar..." 1>&2
-(cd "$tmpdir" && exec tar -ch --exclude-vcs -f "$HDF5_VERS.tar" "./$HDF5_VERS" || exit 1 )
+(cd "$tmpdir" && exec tar -ch --exclude-vcs --exclude=.clang-format --exclude=.codespellrc --exclude=.devcontainer --exclude=.git* --exclude=.h5chkright.ini -f "$HDF5_VERS.tar" "./$HDF5_IN_VERS" || exit 1 )
 
 # Compress
-SHA256=$HDF5_VERS.sha256
+#SHA256=$HDF5_VERS.sha256
 cp /dev/null $DEST/$SHA256
 for comp in $methods; do
     case $comp in
         tar)
             cp -p $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.tar
-            (cd $DEST; sha256sum $HDF5_VERS.tar >> $SHA256)
+            (cd $DEST; sha256sum $HDF5_VERS.tar > $HDF5_VERS.tar.sha256)
             ;;
         gzip)
             test "$verbose" && echo "   Running gzip..." 1>&2
             gzip -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.gz
-            (cd $DEST; sha256sum $HDF5_VERS.tar.gz >> $SHA256)
-            ;;
-        cmake-tgz)
-            test "$verbose" && echo "   Creating CMake tar.gz file..." 1>&2
-            tar2cmaketgz $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/CMake-$HDF5_VERS.tar.gz 1>&2
-            (cd $DEST; sha256sum CMake-$HDF5_VERS.tar.gz >> $SHA256)
-            ;;
-        hpc-cmake-tgz)
-            test "$verbose" && echo "   Creating HPC-CMake tar.gz file..." 1>&2
-            tar2hpccmaketgz $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/HPC-CMake-$HDF5_VERS.tar.gz 1>&2
-            (cd $DEST; sha256sum HPC-CMake-$HDF5_VERS.tar.gz >> $SHA256)
+            (cd $DEST; sha256sum $HDF5_VERS.tar.gz > $HDF5_VERS.tar.gz.sha256)
             ;;
         bzip2)
             test "$verbose" && echo "   Running bzip2..." 1>&2
             bzip2 -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.bz2
-            (cd $DEST; sha256sum $HDF5_VERS.tar.bz2 >> $SHA256)
+            (cd $DEST; sha256sum $HDF5_VERS.tar.bz2 > $HDF5_VERS.tar.bz2.sha256)
             ;;
         zip)
             test "$verbose" && echo "   Creating zip ball..." 1>&2
-            tar2zip $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
-            (cd $DEST; sha256sum $HDF5_VERS.zip >> $SHA256)
-            ;;
-        cmake-zip)
-            test "$verbose" && echo "   Creating CMake-zip ball..." 1>&2
-            tar2cmakezip $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/CMake-$HDF5_VERS.zip 1>&2
-            (cd $DEST; sha256sum CMake-$HDF5_VERS.zip >> $SHA256)
-            ;;
-        doc)
-            if [ "${DOCVERSION}" = "" ]; then
-                DOCVERSION=master
-            fi
-            test "$verbose" && echo "   Creating docs..." 1>&2
-            # Check out docs from git repo
-            (cd $tmpdir; git clone -q $DOC_URL ${DOCVERSION} > /dev/null) || exit 1
-            # Create doxygen C++ RM
-            (cd c++/src && doxygen cpp_doc_config > /dev/null ) || exit 1
-            # Replace version of C++ RM with just-created version
-            rm -rf $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME || exit 1
-            mv c++/src/$CPPLUS_RM_NAME $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME || exit 1
-            # Compress the docs and move them to the release area
-            mv $tmpdir/${DOCVERSION} $tmpdir/${HDF5_VERS}_docs || exit 1
-            (cd $tmpdir && tar cf ${HDF5_VERS}_docs.tar ${HDF5_VERS}_docs) || exit 1
-            mv $tmpdir/${HDF5_VERS}_docs.tar $DEST || exit 1
+            tar2zip $HDF5_IN_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
+            (cd $DEST; sha256sum $HDF5_VERS.zip > $HDF5_VERS.zip.sha256)
             ;;
         *)
             echo "***Error*** Unknown method $comp"
@@ -593,21 +400,12 @@ for comp in $methods; do
     esac
 done
 
-# If AM_MAINTAINER_MODE was enabled before running this script
-# restore it to "enabled".
-if [ "${MAINT_MODE_ENABLED}" != "" ]; then
-    bin/switch_maint_mode -enable ./configure.ac
-fi
-
-# Copy the RELEASE.txt to the release area.
-cp release_docs/RELEASE.txt $DEST/$HDF5_VERS-RELEASE.txt
-
-# Remove distributed Makefile and restore previous Makefile if existed.
-rm -f Makefile
-test -f $tmpdir/Makefile.x && mv $tmpdir/Makefile.x Makefile
+# Copy CHANGELOG.mc to the release area
+cp release_docs/CHANGELOG.md $DEST/$HDF5_VERS-CHANGELOG.md
 
 # Restore OLD version information, then no need for trap.
-if [ X$pmode = Xyes ]; then
+if [ X$pmode = Xyes ] || [ X$revmode = Xyes ]; then
+    echo "Restore the original version $VERS_OLD"
     RESTORE_VERSION
     trap 0
 fi

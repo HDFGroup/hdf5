@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -55,9 +55,6 @@ typedef enum int_t {
  * Purpose      Tests 1-D array of compound datatypes (with array fields)
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              January, 2016
  *-------------------------------------------------------------------------
  */
 static void
@@ -223,7 +220,7 @@ test_array_compound_array()
 
         // Check the 2nd field's name
         H5std_string field2_name = ctype_check.getMemberName(1);
-        if (HDstrcmp(field2_name.c_str(), "f") != 0)
+        if (strcmp(field2_name.c_str(), "f") != 0)
             TestErrPrintf("Compound field name doesn't match!, field2_name=%s\n", field2_name.c_str());
 
         // Get the 2nd field's datatype
@@ -242,7 +239,7 @@ test_array_compound_array()
         verify_val(ndims, ARRAY1_RANK, "f2_atype_check.getArrayNDims", __LINE__, __FILE__);
 
         // Get the array dimensions
-        HDmemset(rdims1, 0, sizeof(rdims1));
+        memset(rdims1, 0, sizeof(rdims1));
         f2_atype_check.getArrayDims(rdims1);
 
         // Check the array dimensions
@@ -307,9 +304,6 @@ getArr()
  *
  * Return       None
  *
- * Programmer   Binh-Minh Ribler (using C version)
- *              March, 2016
- *
  * Description:
  *              Used user's sample code in HDFFV-9562
  *-------------------------------------------------------------------------
@@ -364,9 +358,6 @@ test_array_assignment()
  * Purpose      Tests getting array information using the const methods.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler
- *              April, 2016
  *-------------------------------------------------------------------------
  */
 static void
@@ -486,8 +477,10 @@ test_array_info()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_array()
+test_array(void *params)
 {
+    (void)params;
+
     // Output message about test being performed
     MESSAGE(5, ("Testing Array Datatypes\n"));
 
@@ -508,13 +501,14 @@ test_array()
  * Purpose      Cleanup temporary test files
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              January, 2016
  *-------------------------------------------------------------------------
  */
 extern "C" void
-cleanup_array()
+cleanup_array(void *params)
 {
-    HDremove(FILENAME.c_str());
+    (void)params;
+
+    if (GetTestCleanup()) {
+        HDremove(FILENAME.c_str());
+    }
 } // cleanup_array

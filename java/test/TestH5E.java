@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -12,12 +12,18 @@
 
 package test;
 
+import static org.hdfgroup.javahdf5.hdf5_h.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.lang.foreign.MemoryLayout;
+import java.lang.foreign.MemoryLayout.PathElement;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.lang.invoke.VarHandle;
 import java.util.ArrayList;
 
 import hdf.hdf5lib.H5;
@@ -25,8 +31,9 @@ import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.callbacks.H5E_walk_cb;
 import hdf.hdf5lib.callbacks.H5E_walk_t;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
-import hdf.hdf5lib.structs.H5E_error2_t;
 
+import org.hdfgroup.javahdf5.*;
+import org.hdfgroup.javahdf5.H5E_error2_t;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -93,7 +100,8 @@ public class TestH5E {
                 fail("H5.H5Eget_msg(Throwable): " + err);
             }
             assertNotNull("H5.H5Eget_msg: " + msg, msg);
-            assertEquals("H5.H5Eget_msg: ", HDF5Constants.H5E_MAJOR, error_msg_type[0]);
+            assertEquals("H5.H5Eget_msg: (" + HDF5Constants.H5E_MAJOR + "=" + error_msg_type[0] + ")",
+                         HDF5Constants.H5E_MAJOR, error_msg_type[0]);
 
             /*
              * If HDF5_VOL_CONNECTOR is set, this might not be the
@@ -307,9 +315,9 @@ public class TestH5E {
     public void testH5Ewalk()
     {
         class wdata {
+            public int line         = -1;
             public String err_desc  = null;
             public String func_name = null;
-            public int line         = -1;
             wdata(String desc, String func, int lineno)
             {
                 this.err_desc  = new String(desc);
@@ -318,19 +326,22 @@ public class TestH5E {
             }
         }
         class H5E_walk_data implements H5E_walk_t {
-            public ArrayList<wdata> walkdata = new ArrayList<wdata>();
+            static public ArrayList<wdata> walkdata = new ArrayList<wdata>();
+            static void add_iter_data(wdata id) { walkdata.add(id); }
         }
         H5E_walk_t walk_data = new H5E_walk_data();
         class H5E_walk_callback implements H5E_walk_cb {
-            public int callback(int nidx, H5E_error2_t info, H5E_walk_t op_data)
+            public int apply(int nidx, MemorySegment info, MemorySegment op_data)
             {
-                wdata wd = new wdata(info.desc, info.func_name, info.line);
-                ((H5E_walk_data)op_data).walkdata.add(wd);
+                wdata wd = new wdata((String)H5E_error2_t.desc(info).getString(0),
+                                     (String)H5E_error2_t.func_name(info).getString(0),
+                                     (int)H5E_error2_t.line(info));
+                ((H5E_walk_data)walk_data).add_iter_data(wd);
                 return 0;
             }
         }
-        H5E_walk_cb walk_cb = new H5E_walk_callback();
-        long num_msg        = -1;
+        H5E_walk_callback walk_cb = new H5E_walk_callback();
+        long num_msg              = -1;
 
         try {
             H5.H5Eset_current_stack(current_stackid);

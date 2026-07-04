@@ -1,0 +1,1 @@
+Warning: </softlink_noexist> is a dangling link.

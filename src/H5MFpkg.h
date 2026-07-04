@@ -4,16 +4,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Tuesday, January 8, 2008
- *
  * Purpose:     This file contains declarations which are visible only within
  *              the H5MF package.  Source files outside the H5MF package should
  *              include H5MFprivate.h instead.
@@ -70,14 +67,14 @@
 
 /* Calculate the mis-aligned fragment */
 #define H5MF_EOA_MISALIGN(F, E, A, FR)                                                                       \
-    {                                                                                                        \
+    do {                                                                                                     \
         hsize_t m;                                                                                           \
                                                                                                              \
-        if (H5F_addr_gt((E), 0) && ((m) = ((E) + H5F_BASE_ADDR(F)) % (A)))                                   \
+        if (H5_addr_gt((E), 0) && ((m) = ((E) + H5F_BASE_ADDR(F)) % (A)))                                    \
             (FR) = (A)-m;                                                                                    \
         else                                                                                                 \
             (FR) = 0;                                                                                        \
-    }
+    } while (0)
 
 /****************************/
 /* Package Private Typedefs */
@@ -99,7 +96,7 @@ typedef struct H5MF_free_section_t {
             unsigned                    num_entries; /* Number of entries covered */
 
             /* Fields that aren't stored */
-            hbool_t checked_out; /* Flag to indicate that a row section is temporarily out of the free space
+            bool checked_out; /* Flag to indicate that a row section is temporarily out of the free space
                                     manager */
         } row;
         struct {
@@ -145,8 +142,8 @@ typedef struct H5MF_sect_ud_t {
     /* Down */
     H5F_t     *f;                     /* Pointer to file to operate on */
     H5FD_mem_t alloc_type;            /* Type of memory being allocated */
-    hbool_t    allow_sect_absorb;     /* Whether sections are allowed to absorb a block aggregator */
-    hbool_t    allow_eoa_shrink_only; /* Whether shrinking eoa is allowed only for the section */
+    bool       allow_sect_absorb;     /* Whether sections are allowed to absorb a block aggregator */
+    bool       allow_eoa_shrink_only; /* Whether shrinking eoa is allowed only for the section */
 
     /* Up */
     H5MF_shrink_type_t shrink; /* Type of shrink operation to perform */
@@ -179,7 +176,8 @@ H5_DLLVAR const H5FS_section_class_t H5MF_FSPACE_SECT_CLS_LARGE[1];
 H5_DLL herr_t H5MF__open_fstype(H5F_t *f, H5F_mem_page_t type);
 H5_DLL herr_t H5MF__start_fstype(H5F_t *f, H5F_mem_page_t type);
 H5_DLL htri_t H5MF__find_sect(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size, H5FS_t *fspace, haddr_t *addr);
-H5_DLL herr_t H5MF__add_sect(H5F_t *f, H5FD_mem_t alloc_type, H5FS_t *fspace, H5MF_free_section_t *node);
+H5_DLL herr_t H5MF__add_sect(H5F_t *f, H5FD_mem_t alloc_type, H5FS_t *fspace, H5MF_free_section_t *node,
+                             bool *merged_or_shrunk);
 H5_DLL void   H5MF__alloc_to_fs_type(H5F_shared_t *f_sh, H5FD_mem_t alloc_type, hsize_t size,
                                      H5F_mem_page_t *fs_type);
 
@@ -194,7 +192,7 @@ H5_DLL htri_t H5MF__aggrs_try_shrink_eoa(H5F_t *f);
 H5_DLL htri_t H5MF__aggr_can_absorb(const H5F_t *f, const H5F_blk_aggr_t *aggr,
                                     const H5MF_free_section_t *sect, H5MF_shrink_type_t *shrink);
 H5_DLL herr_t H5MF__aggr_absorb(const H5F_t *f, H5F_blk_aggr_t *aggr, H5MF_free_section_t *sect,
-                                hbool_t allow_sect_absorb);
+                                bool allow_sect_absorb);
 H5_DLL herr_t H5MF__aggr_query(const H5F_t *f, const H5F_blk_aggr_t *aggr, haddr_t *addr, hsize_t *size);
 
 /* Debugging routines */

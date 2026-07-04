@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -26,14 +26,6 @@
  *
  * Return:
  *
- * Programmer:
- *
- * Date:
- *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -48,10 +40,10 @@ main(void)
 
 #ifdef H5_HAVE_FILTER_SZIP
     if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
-        HDprintf("yes\n");
+        printf("yes\n");
         return (1);
     }
 #endif /* H5_HAVE_FILTER_SZIP */
-    HDprintf("no\n");
+    printf("no\n");
     return (0);
 }

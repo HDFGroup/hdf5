@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -39,11 +39,9 @@
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
 
-/* The VOL connector identification number */
-static hid_t H5VL_NATIVE_ID_g = H5I_INVALID_HID;
-
-/* Prototypes */
-static herr_t H5VL__native_term(void);
+/* The native VOL connector */
+hid_t             H5VL_NATIVE_g      = H5I_INVALID_HID;
+H5VL_connector_t *H5VL_NATIVE_conn_g = NULL;
 
 #define H5VL_NATIVE_CAP_FLAGS                                                                                \
     (H5VL_CAP_FLAG_NATIVE_FILES | H5VL_CAP_FLAG_ATTR_BASIC | H5VL_CAP_FLAG_ATTR_MORE |                       \
@@ -66,7 +64,7 @@ static const H5VL_class_t H5VL_native_cls_g = {
     H5VL_NATIVE_VERSION,   /* connector version */
     H5VL_NATIVE_CAP_FLAGS, /* capability flags */
     NULL,                  /* initialize   */
-    H5VL__native_term,     /* terminate    */
+    NULL,                  /* terminate    */
     {
         /* info_cls */
         (size_t)0, /* info size    */
@@ -182,37 +180,42 @@ static const H5VL_class_t H5VL_native_cls_g = {
 };
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_native_register
+ * Function:    H5VL__native_register
  *
- * Purpose:     Register the native VOL connector and retrieve an ID for it.
+ * Purpose:     Register the native VOL connector and set up an ID for it.
  *
- * Return:      Success:    The ID for the native connector
- *              Failure:    H5I_INVALID_HID
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-H5VL_native_register(void)
+herr_t
+H5VL__native_register(void)
 {
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_PACKAGE
 
     /* Register the native VOL connector, if it isn't already */
-    if (H5I_INVALID_HID == H5VL_NATIVE_ID_g)
-        if ((H5VL_NATIVE_ID_g =
-                 H5VL__register_connector(&H5VL_native_cls_g, TRUE, H5P_VOL_INITIALIZE_DEFAULT)) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, H5I_INVALID_HID, "can't create ID for native VOL connector")
+    if (NULL == H5VL_NATIVE_conn_g)
+        if (NULL ==
+            (H5VL_NATIVE_conn_g = H5VL__register_connector(&H5VL_native_cls_g, H5P_VOL_INITIALIZE_DEFAULT)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "can't register native VOL connector");
 
-    /* Set return value */
-    ret_value = H5VL_NATIVE_ID_g;
+    /* Get ID for connector */
+    if (H5I_VOL != H5I_get_type(H5VL_NATIVE_g)) {
+        if ((H5VL_NATIVE_g = H5I_register(H5I_VOL, H5VL_NATIVE_conn_g, false)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "can't create ID for native VOL connector");
+
+        /* ID is holding a reference to the connector */
+        H5VL_conn_inc_rc(H5VL_NATIVE_conn_g);
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_native_register() */
+} /* end H5VL__native_register() */
 
 /*---------------------------------------------------------------------------
- * Function:    H5VL__native_term
+ * Function:    H5VL__native_unregister
  *
  * Purpose:     Shut down the native VOL
  *
@@ -220,16 +223,17 @@ done:
  *
  *---------------------------------------------------------------------------
  */
-static herr_t
-H5VL__native_term(void)
+herr_t
+H5VL__native_unregister(void)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Reset VOL ID */
-    H5VL_NATIVE_ID_g = H5I_INVALID_HID;
+    /* Reset VOL connector info */
+    H5VL_NATIVE_g      = H5I_INVALID_HID;
+    H5VL_NATIVE_conn_g = NULL;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5VL__native_term() */
+} /* end H5VL__native_unregister() */
 
 /*---------------------------------------------------------------------------
  * Function:    H5VL__native_introspect_get_conn_cls
@@ -250,7 +254,7 @@ H5VL__native_introspect_get_conn_cls(void H5_ATTR_UNUSED *obj, H5VL_get_conn_lvl
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(conn_cls);
+    assert(conn_cls);
 
     /* Retrieve the native VOL connector class */
     *conn_cls = &H5VL_native_cls_g;
@@ -276,7 +280,7 @@ H5VL__native_introspect_get_cap_flags(const void H5_ATTR_UNUSED *info, uint64_t 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(cap_flags);
+    assert(cap_flags);
 
     /* Set the flags from the connector's field */
     *cap_flags = H5VL_native_cls_g.cap_flags;
@@ -305,19 +309,19 @@ H5VL_native_get_file_addr_len(hid_t loc_id, size_t *addr_len)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
-    HDassert(addr_len);
+    assert(addr_len);
 
     /* Get object type */
     if ((vol_obj_type = H5I_get_type(loc_id)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "invalid location identifier")
+        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Retrieve underlying VOL object */
     if (NULL == (vol_obj = H5VL_object(loc_id)))
-        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "invalid location identifier")
+        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Retrieve file address length */
     if (H5VL__native_get_file_addr_len(vol_obj, vol_obj_type, addr_len) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get file address length")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get file address length");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -340,15 +344,15 @@ H5VL__native_get_file_addr_len(void *obj, H5I_type_t obj_type, size_t *addr_len)
     H5F_t *file      = NULL; /* File struct pointer */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(obj);
-    HDassert(addr_len);
+    assert(obj);
+    assert(addr_len);
 
     /* Retrieve file from the VOL object */
     if (H5VL_native_get_file_struct(obj, obj_type, &file) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "couldn't get file from VOL object")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "couldn't get file from VOL object");
 
     /* Get the length of an address in this file */
     *addr_len = H5F_SIZEOF_ADDR(file);
@@ -374,41 +378,40 @@ H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *token)
     herr_t     ret_value    = SUCCEED;   /* Return value         */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ia*k", loc_id, addr, token);
 
     /* Check args */
     if (NULL == token)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "token pointer can't be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "token pointer can't be NULL");
 
     /* Get object type */
     if ((vol_obj_type = H5I_get_type(loc_id)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "invalid location identifier")
+        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Retrieve underlying VOL object */
     if (NULL == (vol_obj = H5VL_object(loc_id)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get underlying VOL object")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get underlying VOL object");
 
 #ifndef NDEBUG
     {
         H5VL_object_t *vol_obj_container;
-        hbool_t        is_native_vol_obj;
+        bool           is_native_vol_obj;
 
         /* Get the location object */
-        if (NULL == (vol_obj_container = (H5VL_object_t *)H5I_object(loc_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+        if (NULL == (vol_obj_container = H5VL_vol_object(loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
         /* Make sure that the VOL object is a native connector object */
         if (H5VL_object_is_native(vol_obj_container, &is_native_vol_obj) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL,
-                        "can't determine if VOL object is native connector object")
+                        "can't determine if VOL object is native connector object");
 
-        HDassert(is_native_vol_obj && "not a native VOL connector object");
+        assert(is_native_vol_obj && "not a native VOL connector object");
     }
 #endif
 
     /* Convert the haddr_t to an object token */
     if (H5VL_native_addr_to_token(vol_obj, vol_obj_type, addr, token) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSERIALIZE, FAIL, "couldn't serialize haddr_t into object token")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSERIALIZE, FAIL, "couldn't serialize haddr_t into object token");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -433,15 +436,15 @@ H5VL_native_addr_to_token(void *obj, H5I_type_t obj_type, haddr_t addr, H5O_toke
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(obj);
-    HDassert(token);
+    assert(obj);
+    assert(token);
 
     /* Get the length of an haddr_t in the file */
     if (H5VL__native_get_file_addr_len(obj, obj_type, &addr_len) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "couldn't get length of haddr_t from VOL object")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "couldn't get length of haddr_t from VOL object");
 
     /* Ensure that token is initialized */
-    HDmemset(token, 0, sizeof(H5O_token_t));
+    memset(token, 0, sizeof(H5O_token_t));
 
     /* Encode token */
     p = (uint8_t *)token;
@@ -468,41 +471,40 @@ H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr)
     herr_t     ret_value    = SUCCEED;   /* Return value         */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ik*a", loc_id, token, addr);
 
     /* Check args */
     if (NULL == addr)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr pointer can't be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr pointer can't be NULL");
 
     /* Get object type */
     if ((vol_obj_type = H5I_get_type(loc_id)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "invalid location identifier")
+        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Retrieve underlying VOL object */
     if (NULL == (vol_obj = H5VL_object(loc_id)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get underlying VOL object")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get underlying VOL object");
 
 #ifndef NDEBUG
     {
         H5VL_object_t *vol_obj_container;
-        hbool_t        is_native_vol_obj;
+        bool           is_native_vol_obj;
 
         /* Get the location object */
-        if (NULL == (vol_obj_container = (H5VL_object_t *)H5I_object(loc_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+        if (NULL == (vol_obj_container = H5VL_vol_object(loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
         /* Make sure that the VOL object is a native connector object */
         if (H5VL_object_is_native(vol_obj_container, &is_native_vol_obj) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL,
-                        "can't determine if VOL object is native connector object")
+                        "can't determine if VOL object is native connector object");
 
-        HDassert(is_native_vol_obj && "not a native VOL connector object");
+        assert(is_native_vol_obj && "not a native VOL connector object");
     }
 #endif
 
     /* Convert the object token to an haddr_t */
     if (H5VL_native_token_to_addr(vol_obj, vol_obj_type, token, addr) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTUNSERIALIZE, FAIL, "couldn't deserialize object token into haddr_t")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTUNSERIALIZE, FAIL, "couldn't deserialize object token into haddr_t");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -527,12 +529,12 @@ H5VL_native_token_to_addr(void *obj, H5I_type_t obj_type, H5O_token_t token, had
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(obj);
-    HDassert(addr);
+    assert(obj);
+    assert(addr);
 
     /* Get the length of an haddr_t in the file */
     if (H5VL__native_get_file_addr_len(obj, obj_type, &addr_len) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "couldn't get length of haddr_t from VOL object")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "couldn't get length of haddr_t from VOL object");
 
     /* Decode token */
     p = (const uint8_t *)&token;
@@ -557,7 +559,11 @@ H5VL_native_get_file_struct(void *obj, H5I_type_t type, H5F_t **file)
     H5O_loc_t *oloc      = NULL;    /* Object location for ID   */
     herr_t     ret_value = SUCCEED; /* Return value             */
 
-    FUNC_ENTER_NOAPI(FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check arguments */
+    assert(obj);
+    assert(file);
 
     *file = NULL;
 
@@ -583,7 +589,7 @@ H5VL_native_get_file_struct(void *obj, H5I_type_t type, H5F_t **file)
             break;
 
         case H5I_MAP:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "maps not supported in native VOL connector")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "maps not supported in native VOL connector");
 
         case H5I_UNINIT:
         case H5I_BADID:
@@ -599,7 +605,7 @@ H5VL_native_get_file_struct(void *obj, H5I_type_t type, H5F_t **file)
         case H5I_EVENTSET:
         case H5I_NTYPES:
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
     } /* end switch */
 
     /* Set return value for objects (not files) */
@@ -608,7 +614,7 @@ H5VL_native_get_file_struct(void *obj, H5I_type_t type, H5F_t **file)
 
     /* Couldn't find a file struct */
     if (!*file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "object is not associated with a file")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "object is not associated with a file");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

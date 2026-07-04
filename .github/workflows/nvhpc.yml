@@ -1,0 +1,111 @@
+name: hdf5 dev nvhpc
+
+# Triggers the workflow on a call from another workflow
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+jobs:
+  nvhpc_build_and_test:
+    name: "nvhpc ${{ inputs.build_mode }}"
+    runs-on: ubuntu-latest
+    env:
+      CUDAVERDOT: "13.1"
+      NVERDOT: "26.3"
+      NVERDASH: "26-3"
+
+    steps:
+      - name: Get Sources
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+        with:
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          tool-cache: false
+          swap-storage: true
+
+      - name: Install Dependencies
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build graphviz
+          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+          sudo apt install -y libaec-dev zlib1g-dev wget curl bzip2 flex bison cmake libzip-dev openssl build-essential
+
+      - name: Install NVHPC
+        shell: bash
+        run: |
+          curl https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA-HPC-SDK | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg
+          echo 'deb [signed-by=/usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /' | sudo tee /etc/apt/sources.list.d/nvhpc.list
+          sudo apt-get update -y
+          sudo apt-get install -y nvhpc-${{ env.NVERDASH }}
+          echo "NVHPCSDK=/opt/nvidia/hpc_sdk" >> $GITHUB_ENV
+          echo "OMPI_CXX=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/bin/nvc++" >> $GITHUB_ENV
+          echo "OMPI_CC=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/bin/nvc" >> $GITHUB_ENV
+          echo "OMPI_FC=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/bin/nvfortran" >> $GITHUB_ENV
+          echo "CC=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/comm_libs/hpcx/bin/mpicc" >> $GITHUB_ENV
+          echo "FC=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/comm_libs/hpcx/bin/mpifort" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/cuda/${{ env.CUDAVERDOT }}/lib64:/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/lib" >> $GITHUB_ENV
+          echo "DESTDIR=/tmp" >> $GITHUB_ENV
+
+      - name: Configure
+        shell: bash
+        run: |
+          export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/comm_libs/hpcx/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/bin:$PATH
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+          -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+          -DMPIEXEC_NUMPROC_FLAG:STRING=-np \
+          -DMPIEXEC_MAX_NUMPROCS:STRING=2 \
+          -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+          -DHDF5_BUILD_FORTRAN:BOOL=ON \
+          -DHDF5_BUILD_JAVA:BOOL=OFF \
+          -DCMAKE_C_FLAGS="-tp=x86-64-v3" \
+          -DCMAKE_Fortran_FLAGS="-tp=x86-64-v3" \
+          -DCMAKE_CXX_FLAGS="-tp=x86-64-v3" \
+          -DMPIEXEC_MAX_NUMPROCS:STRING="2" \
+          -DMPIEXEC_PREFLAGS:STRING="--mca;opal_warn_on_missing_libcuda;0" \
+          $GITHUB_WORKSPACE
+
+      - name: Build
+        shell: bash
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      # Skipping dt_arith and dtransform while we investigate long double failures
+      - name: Run Tests
+        shell: bash
+        run: |
+          ctest . -E "MPI_TEST|H5TEST-dt_arith" --parallel 2 -C ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Run Expected To Fail Tests
+        shell: bash
+        run: |
+          ctest . -R "H5TEST-dt_arith" --parallel 2 -C ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+        continue-on-error: true
+
+      - name: Run Parallel Tests
+        shell: bash
+        run: |
+          export UCX_WARN_UNUSED_ENV_VARS=n
+          ctest . -R MPI_TEST -E "_by_chunk|_by_pattern" -C ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build

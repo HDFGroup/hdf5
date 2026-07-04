@@ -4,7 +4,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -35,15 +35,16 @@ set (HL_REFERENCE_TEST_FILES
     test_ds_le.h5
     test_ds_le_new_ref.h5
     test_ld.h5
+    test_table.h5.ddl
 )
 
 # --------------------------------------------------------------------
 #-- Copy the necessary files.
 # --------------------------------------------------------------------
 foreach (h5_file ${HL_REFERENCE_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_HL_TEST_SOURCE_DIR}/${h5_file}" "${HDF5_HL_TEST_BINARY_DIR}/${h5_file}" "hl_test_files")
+  HDFTEST_COPY_FILE ("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${HDF5_HL_TEST_BINARY_DIR}/testfiles/${h5_file}" "hl_test_files")
 endforeach ()
-add_custom_target(hl_test_files ALL COMMENT "Copying files needed by hl_test tests" DEPENDS ${hl_test_files_list})
+add_custom_target (hl_test_files ALL COMMENT "Copying files needed by hl_test tests" DEPENDS ${hl_test_files_list})
 
 # Remove any output file left over from previous test run
 set (test_hl_CLEANFILES
@@ -64,14 +65,18 @@ set (test_hl_CLEANFILES
     test_ds8.h5
     test_ds9.h5
     test_ds10.h5
+    test_ds_class_prefix.h5
+    test_ds_reserved_prefix.h5
     test_image1.h5
     test_image2.h5
     test_image3.h5
+    test_image_class_prefix.h5
     test_lite1.h5
     test_lite2.h5
     test_lite3.h5
     test_lite4.h5
     test_packet_compress.h5
+    test_boundary.h5
     test_packet_table.h5
     test_packet_table_vlen.h5
     testfl_packet_table_vlen.h5
@@ -98,11 +103,11 @@ set_tests_properties (HL_test-clean-objects PROPERTIES
 #  Macro used to add a unit test
 # --------------------------------------------------------------------
 macro (HL_ADD_TEST hl_name)
+  set (current_test_name "HL_${hl_name}")
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME HL_${hl_name} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:hl_${hl_name}>)
+    add_test (NAME HL_${hl_name} COMMAND $<TARGET_FILE:hl_${hl_name}>)
   else ()
     add_test (NAME HL_${hl_name} COMMAND "${CMAKE_COMMAND}"
-        -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
         -D "TEST_PROGRAM=$<TARGET_FILE:hl_${hl_name}>"
         -D "TEST_ARGS:STRING="
         -D "TEST_EXPECT=0"
@@ -112,12 +117,32 @@ macro (HL_ADD_TEST hl_name)
         -D "TEST_FOLDER=${HDF5_HL_TEST_BINARY_DIR}"
         -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
+    if ("hl_name" STREQUAL "test_table")
+      add_test (
+          NAME H5DUMP-HL_${hl_name}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_ARGS:STRING=--enable-error-stack;${hl_name}.h5"
+              -D "TEST_FOLDER=${HDF5_HL_TEST_BINARY_DIR}"
+              -D "TEST_OUTPUT=h5dump-${hl_name}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=testfiles/${hl_name}.h5.ddl"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5DUMP-HL_${hl_name} PROPERTIES
+          DEPENDS HL_${hl_name}
+      )
+      set (current_test_name "H5DUMP-HL_${hl_name}")
+    endif ()
   endif ()
-  set_tests_properties (HL_${hl_name} PROPERTIES
+  set_tests_properties (${current_test_name} PROPERTIES
       FIXTURES_REQUIRED clear_test_hl
       ENVIRONMENT "srcdir=${HDF5_HL_TEST_BINARY_DIR}"
       WORKING_DIRECTORY ${HDF5_HL_TEST_BINARY_DIR}
   )
+  if ("HL_${hl_name}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (HL_${hl_name} PROPERTIES DISABLED true)
+  endif ()
 endmacro ()
 
 HL_add_test (test_lite )

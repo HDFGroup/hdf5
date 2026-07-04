@@ -1,13 +1,26 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by The HDF Group.                                               *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the LICENSE file, which can be found at the root of the source code       *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "hdf5.h"
-#include "testphdf5.h"
+#include "testpar.h"
 #include "H5Dprivate.h" /* For Chunk tests */
+
+/* Include testing framework functionality */
+#include "testframe.h"
 
 /* FILENAME and filenames must have the same number of names */
 const char *FILENAME[3] = {"bigio_test.h5", "single_rank_independent_io.h5", NULL};
 
 /* Constants definitions */
-#define MAX_ERR_REPORT 10 /* Maximum number of errors reported */
 
 /* Define some handy debugging shorthands, routines, ... */
 /* debugging tools */
@@ -17,22 +30,27 @@ const char *FILENAME[3] = {"bigio_test.h5", "single_rank_independent_io.h5", NUL
 /* Constants definitions */
 #define RANK 2
 
-#define IN_ORDER     1
-#define OUT_OF_ORDER 2
+#define DATASET1       "DSET1"
+#define DATASET2       "DSET2"
+#define DATASET3       "DSET3"
+#define DATASET4       "DSET4"
+#define DXFER_BIGCOUNT (1 << 29)
 
-#define DATASET1             "DSET1"
-#define DATASET2             "DSET2"
-#define DATASET3             "DSET3"
-#define DATASET4             "DSET4"
-#define DXFER_COLLECTIVE_IO  0x1 /* Collective IO*/
-#define DXFER_INDEPENDENT_IO 0x2 /* Independent IO collectively */
-#define DXFER_BIGCOUNT       (1 < 29)
+#define SPACE_DIM1            24
+#define SPACE_DIM2            4
+#define BYROW_CONT            1
+#define BYROW_DISCONT         2
+#define BYROW_SELECTNONE      3
+#define BYROW_SELECTUNBALANCE 4
+#define BYROW_SELECTINCHUNK   5
+
+#define DSET_COLLECTIVE_CHUNK_NAME "coll_chunk_name"
 
 #define HYPER 1
 #define POINT 2
 #define ALL   3
 
-/* Dataset data type.  Int's can be easily octo dumped. */
+typedef int     DATATYPE;
 typedef hsize_t B_DATATYPE;
 
 int        facc_type       = FACC_MPIO; /*Test file access type */
@@ -98,54 +116,6 @@ fill_datasets(hsize_t start[], hsize_t block[], B_DATATYPE *dataset)
 }
 
 /*
- * Setup the coordinates for point selection.
- */
-void
-point_set(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], size_t num_points,
-          hsize_t coords[], int order)
-{
-    hsize_t i, j, k = 0, m, n, s1, s2;
-
-    HDcompile_assert(RANK == 2);
-
-    if (OUT_OF_ORDER == order)
-        k = (num_points * RANK) - 1;
-    else if (IN_ORDER == order)
-        k = 0;
-
-    s1 = start[0];
-    s2 = start[1];
-
-    for (i = 0; i < count[0]; i++)
-        for (j = 0; j < count[1]; j++)
-            for (m = 0; m < block[0]; m++)
-                for (n = 0; n < block[1]; n++)
-                    if (OUT_OF_ORDER == order) {
-                        coords[k--] = s2 + (stride[1] * j) + n;
-                        coords[k--] = s1 + (stride[0] * i) + m;
-                    }
-                    else if (IN_ORDER == order) {
-                        coords[k++] = s1 + stride[0] * i + m;
-                        coords[k++] = s2 + stride[1] * j + n;
-                    }
-
-    if (VERBOSE_MED) {
-        HDprintf("start[]=(%" PRIuHSIZE ", %" PRIuHSIZE "), "
-                 "count[]=(%" PRIuHSIZE ", %" PRIuHSIZE "), "
-                 "stride[]=(%" PRIuHSIZE ", %" PRIuHSIZE "), "
-                 "block[]=(%" PRIuHSIZE ", %" PRIuHSIZE "), "
-                 "total datapoints=%" PRIuHSIZE "\n",
-                 start[0], start[1], count[0], count[1], stride[0], stride[1], block[0], block[1],
-                 block[0] * block[1] * count[0] * count[1]);
-        k = 0;
-        for (i = 0; i < num_points; i++) {
-            HDprintf("(%d, %d)\n", (int)coords[k], (int)coords[k + 1]);
-            k += 2;
-        }
-    }
-}
-
-/*
  * Print the content of the dataset.
  */
 static void
@@ -155,19 +125,19 @@ dataset_print(hsize_t start[], hsize_t block[], B_DATATYPE *dataset)
     hsize_t     i, j;
 
     /* print the column heading */
-    HDprintf("%-8s", "Cols:");
+    printf("%-8s", "Cols:");
     for (j = 0; j < block[1]; j++) {
-        HDprintf("%3" PRIuHSIZE " ", start[1] + j);
+        printf("%3" PRIuHSIZE " ", start[1] + j);
     }
-    HDprintf("\n");
+    printf("\n");
 
     /* print the slab data */
     for (i = 0; i < block[0]; i++) {
-        HDprintf("Row %2" PRIuHSIZE ": ", i + start[0]);
+        printf("Row %2" PRIuHSIZE ": ", i + start[0]);
         for (j = 0; j < block[1]; j++) {
-            HDprintf("%" PRIuHSIZE " ", *dataptr++);
+            printf("%" PRIuHSIZE " ", *dataptr++);
         }
-        HDprintf("\n");
+        printf("\n");
     }
 }
 
@@ -183,15 +153,15 @@ verify_data(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[],
 
     /* print it if VERBOSE_MED */
     if (VERBOSE_MED) {
-        HDprintf("verify_data dumping:::\n");
-        HDprintf("start(%" PRIuHSIZE ", %" PRIuHSIZE "), "
-                 "count(%" PRIuHSIZE ", %" PRIuHSIZE "), "
-                 "stride(%" PRIuHSIZE ", %" PRIuHSIZE "), "
-                 "block(%" PRIuHSIZE ", %" PRIuHSIZE ")\n",
-                 start[0], start[1], count[0], count[1], stride[0], stride[1], block[0], block[1]);
-        HDprintf("original values:\n");
+        printf("verify_data dumping:::\n");
+        printf("start(%" PRIuHSIZE ", %" PRIuHSIZE "), "
+               "count(%" PRIuHSIZE ", %" PRIuHSIZE "), "
+               "stride(%" PRIuHSIZE ", %" PRIuHSIZE "), "
+               "block(%" PRIuHSIZE ", %" PRIuHSIZE ")\n",
+               start[0], start[1], count[0], count[1], stride[0], stride[1], block[0], block[1]);
+        printf("original values:\n");
         dataset_print(start, block, original);
-        HDprintf("compared values:\n");
+        printf("compared values:\n");
         dataset_print(start, block, dataset);
     }
 
@@ -200,10 +170,10 @@ verify_data(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[],
         for (j = 0; j < block[1]; j++) {
             if (*dataset != *original) {
                 if (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED) {
-                    HDprintf("Dataset Verify failed at [%" PRIuHSIZE "][%" PRIuHSIZE "]"
-                             "(row %" PRIuHSIZE ", col %" PRIuHSIZE "): "
-                             "expect %" PRIuHSIZE ", got %" PRIuHSIZE "\n",
-                             i, j, i + start[0], j + start[1], *(original), *(dataset));
+                    printf("Dataset Verify failed at [%" PRIuHSIZE "][%" PRIuHSIZE "]"
+                           "(row %" PRIuHSIZE ", col %" PRIuHSIZE "): "
+                           "expect %" PRIuHSIZE ", got %" PRIuHSIZE "\n",
+                           i, j, i + start[0], j + start[1], *(original), *(dataset));
                 }
                 dataset++;
                 original++;
@@ -211,9 +181,9 @@ verify_data(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[],
         }
     }
     if (vrfyerrs > MAX_ERR_REPORT && !VERBOSE_MED)
-        HDprintf("[more errors ...]\n");
+        printf("[more errors ...]\n");
     if (vrfyerrs)
-        HDprintf("%d errors found in verify_data\n", vrfyerrs);
+        printf("%d errors found in verify_data\n", vrfyerrs);
     return (vrfyerrs);
 }
 
@@ -311,12 +281,12 @@ ccslab_set(int mpi_rank, int mpi_size, hsize_t start[], hsize_t count[], hsize_t
             break;
     }
     if (VERBOSE_MED) {
-        HDprintf("start[]=(%lu,%lu), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total "
-                 "datapoints=%lu\n",
-                 (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
-                 (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
-                 (unsigned long)block[0], (unsigned long)block[1],
-                 (unsigned long)(block[0] * block[1] * count[0] * count[1]));
+        printf("start[]=(%lu,%lu), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total "
+               "datapoints=%lu\n",
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1],
+               (unsigned long)(block[0] * block[1] * count[0] * count[1]));
     }
 }
 
@@ -369,20 +339,20 @@ ccdataset_print(hsize_t start[], hsize_t block[], DATATYPE *dataset)
     hsize_t   i, j;
 
     /* print the column heading */
-    HDprintf("Print only the first block of the dataset\n");
-    HDprintf("%-8s", "Cols:");
+    printf("Print only the first block of the dataset\n");
+    printf("%-8s", "Cols:");
     for (j = 0; j < block[1]; j++) {
-        HDprintf("%3lu ", (unsigned long)(start[1] + j));
+        printf("%3lu ", (unsigned long)(start[1] + j));
     }
-    HDprintf("\n");
+    printf("\n");
 
     /* print the slab data */
     for (i = 0; i < block[0]; i++) {
-        HDprintf("Row %2lu: ", (unsigned long)(i + start[0]));
+        printf("Row %2lu: ", (unsigned long)(i + start[0]));
         for (j = 0; j < block[1]; j++) {
-            HDprintf("%03d ", *dataptr++);
+            printf("%03d ", *dataptr++);
         }
-        HDprintf("\n");
+        printf("\n");
     }
 }
 
@@ -399,14 +369,14 @@ ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block
 
     /* print it if VERBOSE_MED */
     if (VERBOSE_MED) {
-        HDprintf("dataset_vrfy dumping:::\n");
-        HDprintf("start(%lu, %lu), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
-                 (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
-                 (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
-                 (unsigned long)block[0], (unsigned long)block[1]);
-        HDprintf("original values:\n");
+        printf("dataset_vrfy dumping:::\n");
+        printf("start(%lu, %lu), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1]);
+        printf("original values:\n");
         ccdataset_print(start, block, original);
-        HDprintf("compared values:\n");
+        printf("compared values:\n");
         ccdataset_print(start, block, dataset);
     }
 
@@ -429,8 +399,8 @@ ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block
                     }
                     if (*dataptr != *oriptr) {
                         if (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED) {
-                            HDprintf("Dataset Verify failed at [%lu][%lu]: expect %d, got %d\n",
-                                     (unsigned long)i, (unsigned long)j, *(oriptr), *(dataptr));
+                            printf("Dataset Verify failed at [%lu][%lu]: expect %d, got %d\n",
+                                   (unsigned long)i, (unsigned long)j, *(oriptr), *(dataptr));
                         }
                     }
                 }
@@ -438,9 +408,9 @@ ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block
         }
     }
     if (vrfyerrs > MAX_ERR_REPORT && !VERBOSE_MED)
-        HDprintf("[more errors ...]\n");
+        printf("[more errors ...]\n");
     if (vrfyerrs)
-        HDprintf("%d errors found in ccdataset_vrfy\n", vrfyerrs);
+        printf("%d errors found in ccdataset_vrfy\n", vrfyerrs);
     return (vrfyerrs);
 }
 
@@ -474,7 +444,7 @@ dataset_big_write(void)
     B_DATATYPE *wdata;
 
     /* allocate memory for data buffer */
-    wdata = (B_DATATYPE *)HDmalloc(bigcount * sizeof(B_DATATYPE));
+    wdata = (B_DATATYPE *)malloc(bigcount * sizeof(B_DATATYPE));
     VRFY_G((wdata != NULL), "wdata malloc succeeded");
 
     /* setup file access template */
@@ -492,7 +462,7 @@ dataset_big_write(void)
 
     /* Each process takes a slabs of rows. */
     if (mpi_rank_g == 0)
-        HDprintf("\nTesting Dataset1 write by ROW\n");
+        printf("\nTesting Dataset1 write by ROW\n");
     /* Create a large dataset */
     dims[0] = bigcount;
     dims[1] = (hsize_t)mpi_size_g;
@@ -553,7 +523,7 @@ dataset_big_write(void)
 
     /* Each process takes a slabs of cols. */
     if (mpi_rank_g == 0)
-        HDprintf("\nTesting Dataset2 write by COL\n");
+        printf("\nTesting Dataset2 write by COL\n");
     /* Create a large dataset */
     dims[0] = bigcount;
     dims[1] = (hsize_t)mpi_size_g;
@@ -614,7 +584,7 @@ dataset_big_write(void)
 
     /* ALL selection */
     if (mpi_rank_g == 0)
-        HDprintf("\nTesting Dataset3 write select ALL proc 0, NONE others\n");
+        printf("\nTesting Dataset3 write select ALL proc 0, NONE others\n");
     /* Create a large dataset */
     dims[0] = bigcount;
     dims[1] = 1;
@@ -675,7 +645,7 @@ dataset_big_write(void)
 
     /* Point selection */
     if (mpi_rank_g == 0)
-        HDprintf("\nTesting Dataset4 write point selection\n");
+        printf("\nTesting Dataset4 write point selection\n");
     /* Create a large dataset */
     dims[0] = bigcount;
     dims[1] = (hsize_t)(mpi_size_g * 4);
@@ -697,7 +667,7 @@ dataset_big_write(void)
 
     num_points = bigcount;
 
-    coords = (hsize_t *)HDmalloc(num_points * RANK * sizeof(hsize_t));
+    coords = (hsize_t *)malloc(num_points * RANK * sizeof(hsize_t));
     VRFY_G((coords != NULL), "coords malloc succeeded");
 
     set_coords(start, count, stride, block, num_points, coords, IN_ORDER);
@@ -746,7 +716,7 @@ dataset_big_write(void)
     ret = H5Dclose(dataset);
     VRFY_G((ret >= 0), "H5Dclose1 succeeded");
 
-    HDfree(wdata);
+    free(wdata);
     H5Fclose(fid);
 }
 
@@ -779,12 +749,12 @@ dataset_big_read(void)
     herr_t      ret; /* Generic return value */
 
     /* allocate memory for data buffer */
-    rdata = (B_DATATYPE *)HDmalloc(bigcount * sizeof(B_DATATYPE));
+    rdata = (B_DATATYPE *)malloc(bigcount * sizeof(B_DATATYPE));
     VRFY_G((rdata != NULL), "rdata malloc succeeded");
-    wdata = (B_DATATYPE *)HDmalloc(bigcount * sizeof(B_DATATYPE));
+    wdata = (B_DATATYPE *)malloc(bigcount * sizeof(B_DATATYPE));
     VRFY_G((wdata != NULL), "wdata malloc succeeded");
 
-    HDmemset(rdata, 0, bigcount * sizeof(B_DATATYPE));
+    memset(rdata, 0, bigcount * sizeof(B_DATATYPE));
 
     /* setup file access template */
     acc_tpl = H5Pcreate(H5P_FILE_ACCESS);
@@ -800,7 +770,7 @@ dataset_big_read(void)
     VRFY_G((ret >= 0), "");
 
     if (mpi_rank_g == 0)
-        HDprintf("\nRead Testing Dataset1 by COL\n");
+        printf("\nRead Testing Dataset1 by COL\n");
 
     dataset = H5Dopen2(fid, DATASET1, H5P_DEFAULT);
     VRFY_G((dataset >= 0), "H5Dopen2 succeeded");
@@ -851,7 +821,7 @@ dataset_big_read(void)
     /* verify the read data with original expected data */
     ret = verify_data(start, count, stride, block, rdata, wdata);
     if (ret) {
-        HDfprintf(stderr, "verify failed\n");
+        fprintf(stderr, "verify failed\n");
         exit(1);
     }
 
@@ -863,8 +833,8 @@ dataset_big_read(void)
     VRFY_G((ret >= 0), "H5Dclose1 succeeded");
 
     if (mpi_rank_g == 0)
-        HDprintf("\nRead Testing Dataset2 by ROW\n");
-    HDmemset(rdata, 0, bigcount * sizeof(B_DATATYPE));
+        printf("\nRead Testing Dataset2 by ROW\n");
+    memset(rdata, 0, bigcount * sizeof(B_DATATYPE));
     dataset = H5Dopen2(fid, DATASET2, H5P_DEFAULT);
     VRFY_G((dataset >= 0), "H5Dopen2 succeeded");
 
@@ -914,7 +884,7 @@ dataset_big_read(void)
     /* verify the read data with original expected data */
     ret = verify_data(start, count, stride, block, rdata, wdata);
     if (ret) {
-        HDfprintf(stderr, "verify failed\n");
+        fprintf(stderr, "verify failed\n");
         exit(1);
     }
 
@@ -926,8 +896,8 @@ dataset_big_read(void)
     VRFY_G((ret >= 0), "H5Dclose1 succeeded");
 
     if (mpi_rank_g == 0)
-        HDprintf("\nRead Testing Dataset3 read select ALL proc 0, NONE others\n");
-    HDmemset(rdata, 0, bigcount * sizeof(B_DATATYPE));
+        printf("\nRead Testing Dataset3 read select ALL proc 0, NONE others\n");
+    memset(rdata, 0, bigcount * sizeof(B_DATATYPE));
     dataset = H5Dopen2(fid, DATASET3, H5P_DEFAULT);
     VRFY_G((dataset >= 0), "H5Dopen2 succeeded");
 
@@ -979,7 +949,7 @@ dataset_big_read(void)
         /* verify the read data with original expected data */
         ret = verify_data(start, count, stride, block, rdata, wdata);
         if (ret) {
-            HDfprintf(stderr, "verify failed\n");
+            fprintf(stderr, "verify failed\n");
             exit(1);
         }
     }
@@ -992,7 +962,7 @@ dataset_big_read(void)
     VRFY_G((ret >= 0), "H5Dclose1 succeeded");
 
     if (mpi_rank_g == 0)
-        HDprintf("\nRead Testing Dataset4 with Point selection\n");
+        printf("\nRead Testing Dataset4 with Point selection\n");
     dataset = H5Dopen2(fid, DATASET4, H5P_DEFAULT);
     VRFY_G((dataset >= 0), "H5Dopen2 succeeded");
 
@@ -1017,7 +987,7 @@ dataset_big_read(void)
 
     num_points = bigcount;
 
-    coords = (hsize_t *)HDmalloc(num_points * RANK * sizeof(hsize_t));
+    coords = (hsize_t *)malloc(num_points * RANK * sizeof(hsize_t));
     VRFY_G((coords != NULL), "coords malloc succeeded");
 
     set_coords(start, count, stride, block, num_points, coords, IN_ORDER);
@@ -1028,7 +998,7 @@ dataset_big_read(void)
     VRFY_G((ret >= 0), "H5Sselect_elements succeeded");
 
     if (coords)
-        HDfree(coords);
+        free(coords);
 
     /* create a memory dataspace */
     /* Warning: H5Screate_simple requires an array of hsize_t elements
@@ -1054,7 +1024,7 @@ dataset_big_read(void)
 
     ret = verify_data(start, count, stride, block, rdata, wdata);
     if (ret) {
-        HDfprintf(stderr, "verify failed\n");
+        fprintf(stderr, "verify failed\n");
         exit(1);
     }
 
@@ -1065,8 +1035,8 @@ dataset_big_read(void)
     ret = H5Dclose(dataset);
     VRFY_G((ret >= 0), "H5Dclose1 succeeded");
 
-    HDfree(wdata);
-    HDfree(rdata);
+    free(wdata);
+    free(rdata);
 
     wdata = NULL;
     rdata = NULL;
@@ -1093,9 +1063,9 @@ dataset_big_read(void)
 
     /* release data buffers */
     if (rdata)
-        HDfree(rdata);
+        free(rdata);
     if (wdata)
-        HDfree(wdata);
+        free(wdata);
 
 } /* dataset_large_readAll */
 
@@ -1103,14 +1073,14 @@ static void
 single_rank_independent_io(void)
 {
     if (mpi_rank_g == 0)
-        HDprintf("\nSingle Rank Independent I/O\n");
+        printf("\nSingle Rank Independent I/O\n");
 
     if (MAIN_PROCESS) {
         hsize_t  dims[1];
-        hid_t    file_id   = -1;
-        hid_t    fapl_id   = -1;
-        hid_t    dset_id   = -1;
-        hid_t    fspace_id = -1;
+        hid_t    file_id   = H5I_INVALID_HID;
+        hid_t    fapl_id   = H5I_INVALID_HID;
+        hid_t    dset_id   = H5I_INVALID_HID;
+        hid_t    fspace_id = H5I_INVALID_HID;
         herr_t   ret;
         int     *data = NULL;
         uint64_t i;
@@ -1122,11 +1092,24 @@ single_rank_independent_io(void)
         file_id = H5Fcreate(FILENAME[1], H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
         VRFY_G((file_id >= 0), "H5Dcreate2 succeeded");
 
-        /*
-         * Calculate the number of elements needed to exceed
-         * MPI's INT_MAX limitation
-         */
-        dims[0] = (INT_MAX / sizeof(int)) + 10;
+        if (sizeof(size_t) > 4) {
+            /*
+             * Calculate the number of elements needed to exceed
+             * MPI's INT_MAX limitation
+             */
+            dims[0] = (INT_MAX / sizeof(int)) + 10;
+        }
+        else {
+            /* 32-bit systems can't allocate a buffer > MPI's INT_MAX
+             * limitation, so that aspect of this test can't really
+             * be tested. Instead, just get enough elements to fill
+             * a 2 GiB buffer, which should be safe on most platforms
+             * (even though 4 GiB technically fits in the data type,
+             * the operating system's allocator probably can't fulfil
+             * a request that large).
+             */
+            dims[0] = ((INT_MAX / 2) / sizeof(int));
+        }
 
         fspace_id = H5Screate_simple(1, dims, NULL);
         VRFY_G((fspace_id >= 0), "H5Screate_simple fspace_id succeeded");
@@ -1139,7 +1122,8 @@ single_rank_independent_io(void)
 
         VRFY_G((dset_id >= 0), "H5Dcreate2 succeeded");
 
-        data = malloc(dims[0] * sizeof(int));
+        data = malloc((size_t)dims[0] * sizeof(int));
+        VRFY_G((data != NULL), "data malloc succeeded");
 
         /* Initialize data */
         for (i = 0; i < dims[0]; i++)
@@ -1150,7 +1134,7 @@ single_rank_independent_io(void)
         VRFY_G((ret >= 0), "H5Dwrite succeeded");
 
         /* Wipe buffer */
-        HDmemset(data, 0, dims[0] * sizeof(int));
+        memset(data, 0, dims[0] * sizeof(int));
 
         /* Read data back */
         ret = H5Dread(dset_id, H5T_NATIVE_INT, H5S_BLOCK, fspace_id, H5P_DEFAULT, data);
@@ -1159,70 +1143,20 @@ single_rank_independent_io(void)
         /* Verify data */
         for (i = 0; i < dims[0]; i++)
             if (data[i] != (int)(i % (uint64_t)DXFER_BIGCOUNT)) {
-                HDfprintf(stderr, "verify failed\n");
+                fprintf(stderr, "verify failed\n");
                 exit(1);
             }
 
         free(data);
         H5Sclose(fspace_id);
-        H5Pclose(fapl_id);
         H5Dclose(dset_id);
         H5Fclose(file_id);
+
+        H5Fdelete(FILENAME[1], fapl_id);
+
+        H5Pclose(fapl_id);
     }
     MPI_Barrier(MPI_COMM_WORLD);
-}
-
-/*
- * Create the appropriate File access property list
- */
-hid_t
-create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
-{
-    hid_t  ret_pl = -1;
-    herr_t ret;      /* generic return value */
-    int    mpi_rank; /* mpi variables */
-
-    /* need the rank for error checking macros */
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-
-    ret_pl = H5Pcreate(H5P_FILE_ACCESS);
-    VRFY_G((ret_pl >= 0), "H5P_FILE_ACCESS");
-
-    if (l_facc_type == FACC_DEFAULT)
-        return (ret_pl);
-
-    if (l_facc_type == FACC_MPIO) {
-        /* set Parallel access with communicator */
-        ret = H5Pset_fapl_mpio(ret_pl, comm, info);
-        VRFY_G((ret >= 0), "");
-        ret = H5Pset_all_coll_metadata_ops(ret_pl, TRUE);
-        VRFY_G((ret >= 0), "");
-        ret = H5Pset_coll_metadata_write(ret_pl, TRUE);
-        VRFY_G((ret >= 0), "");
-        return (ret_pl);
-    }
-
-    if (l_facc_type == (FACC_MPIO | FACC_SPLIT)) {
-        hid_t mpio_pl;
-
-        mpio_pl = H5Pcreate(H5P_FILE_ACCESS);
-        VRFY_G((mpio_pl >= 0), "");
-        /* set Parallel access with communicator */
-        ret = H5Pset_fapl_mpio(mpio_pl, comm, info);
-        VRFY_G((ret >= 0), "");
-
-        /* setup file access template */
-        ret_pl = H5Pcreate(H5P_FILE_ACCESS);
-        VRFY_G((ret_pl >= 0), "");
-        /* set Parallel access with communicator */
-        ret = H5Pset_fapl_split(ret_pl, ".meta", mpio_pl, ".raw", mpio_pl);
-        VRFY_G((ret >= 0), "H5Pset_fapl_split succeeded");
-        H5Pclose(mpio_pl);
-        return (ret_pl);
-    }
-
-    /* unknown file access types */
-    return (ret_pl);
 }
 
 /*-------------------------------------------------------------------------
@@ -1234,9 +1168,6 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Unknown
- *        July 12th, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1258,12 +1189,12 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
  * ------------------------------------------------------------------------
  */
 
-void
+static void
 coll_chunk1(void)
 {
     const char *filename = FILENAME[0];
     if (mpi_rank_g == 0)
-        HDprintf("\nCollective chunk I/O Test #1\n");
+        printf("\nCollective chunk I/O Test #1\n");
 
     coll_chunktest(filename, 1, BYROW_CONT, API_NONE, HYPER, HYPER, OUT_OF_ORDER);
     coll_chunktest(filename, 1, BYROW_CONT, API_NONE, HYPER, POINT, OUT_OF_ORDER);
@@ -1286,11 +1217,6 @@ coll_chunk1(void)
  *
  *        Failure:    -1
  *
- * Programmer:    Unknown
- *        July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1311,12 +1237,12 @@ coll_chunk1(void)
  *
  * ------------------------------------------------------------------------
  */
-void
+static void
 coll_chunk2(void)
 {
     const char *filename = FILENAME[0];
     if (mpi_rank_g == 0)
-        HDprintf("\nCollective chunk I/O Test #2\n");
+        printf("\nCollective chunk I/O Test #2\n");
 
     coll_chunktest(filename, 1, BYROW_DISCONT, API_NONE, HYPER, HYPER, OUT_OF_ORDER);
     coll_chunktest(filename, 1, BYROW_DISCONT, API_NONE, HYPER, POINT, OUT_OF_ORDER);
@@ -1339,9 +1265,6 @@ coll_chunk2(void)
  *
  *        Failure:    -1
  *
- * Programmer:    Unknown
- *        July 12th, 2004
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1363,12 +1286,12 @@ coll_chunk2(void)
  * ------------------------------------------------------------------------
  */
 
-void
+static void
 coll_chunk3(void)
 {
     const char *filename = FILENAME[0];
     if (mpi_rank_g == 0)
-        HDprintf("\nCollective chunk I/O Test #3\n");
+        printf("\nCollective chunk I/O Test #3\n");
 
     coll_chunktest(filename, mpi_size_g, BYROW_CONT, API_NONE, HYPER, HYPER, OUT_OF_ORDER);
     coll_chunktest(filename, mpi_size_g, BYROW_CONT, API_NONE, HYPER, POINT, OUT_OF_ORDER);
@@ -1395,9 +1318,6 @@ coll_chunk3(void)
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Unknown
- *        July 12th, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1442,7 +1362,7 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     dims[1] = space_dim2;
 
     /* allocate memory for data buffer */
-    data_array1 = (int *)HDmalloc(dims[0] * dims[1] * sizeof(int));
+    data_array1 = (int *)malloc(dims[0] * dims[1] * sizeof(int));
     VRFY_G((data_array1 != NULL), "data_array1 malloc succeeded");
 
     /* set up dimensions of the slab this process accesses */
@@ -1450,7 +1370,7 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
 
     /* set up the coords array selection */
     num_points = block[0] * block[1] * count[0] * count[1];
-    coords     = (hsize_t *)HDmalloc(num_points * RANK * sizeof(hsize_t));
+    coords     = (hsize_t *)malloc(num_points * RANK * sizeof(hsize_t));
     VRFY_G((coords != NULL), "coords malloc succeeded");
     point_set(start, count, stride, block, num_points, coords, mode);
 
@@ -1516,6 +1436,9 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
             status = H5Sselect_all(file_dataspace);
             VRFY_G((status >= 0), "H5Sselect_all succeeded");
             break;
+
+        default:
+            break;
     }
 
     switch (mem_selection) {
@@ -1538,6 +1461,9 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
         case ALL:
             status = H5Sselect_all(mem_dataspace);
             VRFY_G((status >= 0), "H5Sselect_all succeeded");
+            break;
+
+        default:
             break;
     }
 
@@ -1709,16 +1635,16 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     VRFY_G((status >= 0), "");
 
     if (data_array1)
-        HDfree(data_array1);
+        free(data_array1);
 
     /* Use collective read to verify the correctness of collective write. */
 
     /* allocate memory for data buffer */
-    data_array1 = (int *)HDmalloc(dims[0] * dims[1] * sizeof(int));
+    data_array1 = (int *)malloc(dims[0] * dims[1] * sizeof(int));
     VRFY_G((data_array1 != NULL), "data_array1 malloc succeeded");
 
     /* allocate memory for data buffer */
-    data_origin1 = (int *)HDmalloc(dims[0] * dims[1] * sizeof(int));
+    data_origin1 = (int *)malloc(dims[0] * dims[1] * sizeof(int));
     VRFY_G((data_origin1 != NULL), "data_origin1 malloc succeeded");
 
     acc_plist = create_faccess_plist(comm, info, facc_type);
@@ -1776,6 +1702,9 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
             status = H5Sselect_all(file_dataspace);
             VRFY_G((status >= 0), "H5Sselect_all succeeded");
             break;
+
+        default:
+            break;
     }
 
     switch (mem_selection) {
@@ -1798,6 +1727,9 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
         case ALL:
             status = H5Sselect_all(mem_dataspace);
             VRFY_G((status >= 0), "H5Sselect_all succeeded");
+            break;
+
+        default:
             break;
     }
 
@@ -1841,11 +1773,11 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
 
     /* release data buffers */
     if (coords)
-        HDfree(coords);
+        free(coords);
     if (data_array1)
-        HDfree(data_array1);
+        free(data_array1);
     if (data_origin1)
-        HDfree(data_origin1);
+        free(data_origin1);
 }
 
 int
@@ -1853,7 +1785,13 @@ main(int argc, char **argv)
 {
     hsize_t newsize = 1048576;
     /* Set the bigio processing limit to be 'newsize' bytes */
-    hsize_t oldsize = H5_mpi_set_bigio_count(newsize);
+    hsize_t oldsize   = H5_mpi_set_bigio_count(newsize);
+    hid_t   acc_plist = H5I_INVALID_HID;
+#ifdef H5_HAVE_TEST_API
+    int required = MPI_THREAD_MULTIPLE;
+    int provided;
+#endif
+    int mpi_code;
 
     /* Having set the bigio handling to a size that is manageable,
      * we'll set our 'bigcount' variable to be 2X that limit so
@@ -1863,20 +1801,77 @@ main(int argc, char **argv)
     if (newsize != oldsize)
         bigcount = newsize * 2;
 
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size_g);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank_g);
+#ifdef H5_HAVE_TEST_API
+    /* Attempt to initialize with MPI_THREAD_MULTIPLE if possible */
+    if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(&argc, &argv, required, &provided))) {
+        printf("MPI_Init_thread failed with error code %d\n", mpi_code);
+        return -1;
+    }
+#else
+    if (MPI_SUCCESS != (mpi_code = MPI_Init(&argc, &argv))) {
+        printf("MPI_Init failed with error code %d\n", mpi_code);
+        return -1;
+    }
+#endif
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank_g))) {
+        printf("MPI_Comm_rank failed with error code %d\n", mpi_code);
+        MPI_Finalize();
+        return -1;
+    }
+
+#ifdef H5_HAVE_TEST_API
+    /* Warn about missing MPI_THREAD_MULTIPLE support */
+    if ((provided < required) && MAIN_PROCESS)
+        printf("** MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE **\n");
+#endif
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(MPI_COMM_WORLD, &mpi_size_g))) {
+        if (MAIN_PROCESS)
+            printf("MPI_Comm_size failed with error code %d\n", mpi_code);
+        MPI_Finalize();
+        return -1;
+    }
 
     /* Attempt to turn off atexit post processing so that in case errors
      * happen during the test and the process is aborted, it will not get
-     * hang in the atexit post processing in which it may try to make MPI
+     * hung in the atexit post processing in which it may try to make MPI
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0)
-        HDprintf("Failed to turn off atexit processing. Continue.\n");
+        printf("Failed to turn off atexit processing. Continue.\n");
 
     /* set alarm. */
-    TestAlarmOn();
+    if (TestAlarmOn() < 0) {
+        if (MAIN_PROCESS)
+            fprintf(stderr, "couldn't enable test timer\n");
+        MPI_Finalize();
+        return -1;
+    }
+
+    acc_plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+
+    /* Get the capability flag of the VOL connector being used */
+    if (H5Pget_vol_cap_flags(acc_plist, &vol_cap_flags_g) < 0) {
+        if (MAIN_PROCESS)
+            printf("Failed to get the capability flag of the VOL connector being used\n");
+
+        MPI_Finalize();
+        return -1;
+    }
+
+    /* Make sure the connector supports the API functions being tested.  This test only
+     * uses a few API functions, such as H5Fcreate/open/close/delete, H5Dcreate/write/read/close,
+     * and H5Dget_space. */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+        if (MAIN_PROCESS)
+            printf(
+                "API functions for basic file, dataset basic or more aren't supported with this connector\n");
+
+        MPI_Finalize();
+        return 0;
+    }
 
     dataset_big_write();
     MPI_Barrier(MPI_COMM_WORLD);
@@ -1899,28 +1894,40 @@ main(int argc, char **argv)
     H5_mpi_set_bigio_count(oldsize);
     single_rank_independent_io();
 
-    /* turn off alarm */
-    TestAlarmOff();
-
     if (mpi_rank_g == 0) {
         hid_t fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
         H5Pset_fapl_mpio(fapl_id, MPI_COMM_SELF, MPI_INFO_NULL);
 
-        H5E_BEGIN_TRY
-        {
-            H5Fdelete(FILENAME[0], fapl_id);
-            H5Fdelete(FILENAME[1], fapl_id);
-        }
-        H5E_END_TRY;
+        if (H5Fdelete(FILENAME[0], fapl_id) < 0)
+            nerrors++;
 
         H5Pclose(fapl_id);
     }
 
+    /* Gather errors from all ranks */
+    MPI_Allreduce(MPI_IN_PLACE, &nerrors, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+
+    if (mpi_rank_g == 0) {
+        printf("\n==================================================\n");
+        if (nerrors)
+            printf("***Parallel big IO tests detected %d errors***\n", nerrors);
+        else
+            printf("Parallel big IO tests finished with no errors\n");
+        printf("==================================================\n");
+    }
+
+    H5Pclose(acc_plist);
+
+    /* turn off alarm */
+    TestAlarmOff();
+
     /* close HDF5 library */
     H5close();
 
+    /* MPI_Finalize must be called AFTER H5close which may use MPI calls */
     MPI_Finalize();
 
-    return 0;
+    /* cannot just return (nerrors) because exit code is limited to 1 byte */
+    return (nerrors != 0);
 }

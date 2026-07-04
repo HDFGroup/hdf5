@@ -4,16 +4,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Neil Fortner
- *              Thursday, July  15, 2010
- *
  * Purpose:     Creates a file with non-default sizes of lengths and addresses.
  *              This is used to make sure that the local heap code is able to
  *              handle this case correctly, even when the heap prefix and data
@@ -32,11 +29,6 @@
  * Return:      Success:
  *
  *              Failure:
- *
- * Programmer:  Neil Fortner
- *              Thursday, July  15, 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

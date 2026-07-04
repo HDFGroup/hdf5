@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -18,6 +18,7 @@ import static org.junit.Assert.fail;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
+import hdf.hdf5lib.exceptions.HDF5FunctionArgumentException;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 
 import org.junit.After;
@@ -54,7 +55,7 @@ public class TestH5Edefault {
         System.out.println();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Eprint2_invalid_classid() throws Throwable
     {
         H5.H5Eprint2(-1, null);
@@ -251,13 +252,13 @@ public class TestH5Edefault {
         assertTrue("H5.H5Eget_current_stack: get_num #:" + num_msg, num_msg == saved_num_msg);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Eclose_stack_invalid_stackid() throws Throwable
     {
         H5.H5Eclose_stack(-1);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Eget_class_name_invalid_classid() throws Throwable
     {
         H5.H5Eget_class_name(-1);
@@ -269,22 +270,23 @@ public class TestH5Edefault {
         H5.H5Eget_class_name(HDF5Constants.H5E_DEFAULT);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Eclose_msg_invalid_errid() throws Throwable
     {
         H5.H5Eclose_msg(-1);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Ecreate_msg_invalid_errid() throws Throwable
     {
         H5.H5Ecreate_msg(-1, HDF5Constants.H5E_MAJOR, "null");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Eget_msg_invalid_msgid() throws Throwable
     {
-        H5.H5Eget_msg(-1, null);
+        int[] error_msg_type = {HDF5Constants.H5E_MAJOR};
+        H5.H5Eget_msg(-1, error_msg_type);
     }
 
     @Test
@@ -301,7 +303,7 @@ public class TestH5Edefault {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Eset_current_stack_invalid_stkid() throws Throwable
     {
         H5.H5Eset_current_stack(-1);
@@ -406,7 +408,7 @@ public class TestH5Edefault {
         assertTrue("H5.H5Eset_current_stack: get_num - " + num_msg, num_msg == saved_num_msg);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Epop_invalid_stkid() throws Throwable
     {
         H5.H5Epop(-1, 0);
@@ -442,7 +444,7 @@ public class TestH5Edefault {
         assertTrue("H5.H5Epop after #:" + num_msg, num_msg == saved_num_msg - 1);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Epush_invalid_stkid() throws Throwable
     {
         H5.H5Epush(-1, "Invalid", "Invalid", 0, -1, -1, -1, "Invalid message");
@@ -455,7 +457,7 @@ public class TestH5Edefault {
                    HDF5Constants.H5E_DEFAULT, HDF5Constants.H5E_DEFAULT, "Invalid message");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5EprintInt_invalid_classid() throws Throwable
     {
         H5.H5Eprint2(-1, null);
@@ -499,7 +501,7 @@ public class TestH5Edefault {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Eclear2_invalid_stkid() throws Throwable
     {
         H5.H5Eclear2(-1);
@@ -545,7 +547,7 @@ public class TestH5Edefault {
         assertTrue("H5.H5Eclear2_with_msg after #:" + num_msg, num_msg == 0);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Eauto_is_v2_invalid_stkid() throws Throwable
     {
         H5.H5Eauto_is_v2(-1);
@@ -565,7 +567,7 @@ public class TestH5Edefault {
         assertTrue("H5.H5Eauto_is_v2: ", is_v2);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Eget_num_invalid_stkid() throws Throwable
     {
         H5.H5Eget_num(-1);

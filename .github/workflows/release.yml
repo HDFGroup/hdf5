@@ -1,0 +1,149 @@
+name: hdf5 dev release build
+
+# Triggers the workflow on demand
+on:
+  workflow_dispatch:
+    inputs:
+      use_tag:
+        description: 'Release version tag'
+        type: string
+        required: false
+        default: snapshot
+      deploy_maven:
+        description: 'Deploy artifacts to Maven repository'
+        type: boolean
+        required: false
+        default: false
+      maven_repository:
+        description: 'Maven repository type'
+        type: choice
+        options:
+          - github-packages
+          - maven-central-staging
+        required: false
+        default: github-packages
+
+permissions:
+  contents: read
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+jobs:
+  log-the-inputs:
+    runs-on: ubuntu-latest
+    outputs:
+      rel_tag: ${{ steps.get-tag-name.outputs.RELEASE_TAG }}
+    steps:
+    - name: Get tag name
+      id: get-tag-name
+      env:
+        TAG: ${{ inputs.use_tag }}
+      run: echo "RELEASE_TAG=$TAG" >> $GITHUB_OUTPUT
+
+  call-workflow-tarball:
+    needs: log-the-inputs
+    uses: ./.github/workflows/tarball.yml
+    with:
+      use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
+      use_environ: release
+
+  call-aws-c-s3-build:
+    needs: call-workflow-tarball
+    name: "Build aws-c-s3 library"
+    uses: ./.github/workflows/build-aws-c-s3.yml
+    with:
+      build_mode: "Release"
+      # Use latest release for building from source on Ubuntu
+      # until a package is available to install
+      aws_c_s3_tag: "v0.8.0"
+
+  call-workflow-ctest:
+    needs: [call-workflow-tarball, call-aws-c-s3-build]
+    uses: ./.github/workflows/ctest.yml
+    with:
+      cmake_version: "latest"
+      preset_name: ci-StdShar
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      snap_name: hdf5-${{ needs.call-workflow-tarball.outputs.source_base }}
+      use_environ: release
+    secrets:
+        APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
+        APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
+        KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
+        AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+        AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+
+  call-workflow-abi:
+    needs: [log-the-inputs, call-workflow-tarball, call-workflow-ctest]
+    uses: ./.github/workflows/abi-report.yml
+    with:
+      # previous release version
+      file_ref: '2.0.0'
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
+      use_environ: release
+
+  call-workflow-release:
+    needs: [log-the-inputs, call-workflow-tarball, call-workflow-ctest, call-workflow-abi]
+    permissions:
+      contents: write # In order to allow tag creation
+    uses: ./.github/workflows/release-files.yml
+    with:
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
+      file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
+      use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
+      use_environ: release
+
+  call-workflow-maven-staging:
+    needs: [log-the-inputs, call-workflow-tarball]
+    if: ${{ inputs.deploy_maven == true }}
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: write
+    uses: ./.github/workflows/maven-staging.yml
+    with:
+      test_maven_deployment: true
+      use_snapshot_version: ${{ needs.log-the-inputs.outputs.rel_tag == 'snapshot' }}
+      platforms: 'all-platforms'
+      java_implementation: 'both'  # Build both FFM and JNI implementations
+
+  deploy-maven-artifacts:
+    name: Deploy Maven Artifacts
+    needs: [log-the-inputs, call-workflow-tarball, call-workflow-ctest, call-workflow-abi, call-workflow-maven-staging]
+    if: ${{ inputs.deploy_maven == true }}
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/maven-deploy.yml
+    with:
+      # Note: file_base and preset_name are legacy parameters and not used by maven-deploy.yml
+      repository_url: ${{ inputs.maven_repository == 'github-packages' && format('https://maven.pkg.github.com/{0}', github.repository) || 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/' }}
+      repository_id: ${{ inputs.maven_repository == 'github-packages' && 'github' || 'ossrh' }}
+      deploy_snapshots: ${{ inputs.use_tag == 'snapshot' }}
+      dry_run: false
+    secrets:
+      MAVEN_USERNAME: ${{ inputs.maven_repository == 'github-packages' && github.actor || secrets.MAVEN_CENTRAL_USERNAME }}
+      MAVEN_PASSWORD: ${{ inputs.maven_repository == 'github-packages' && secrets.GITHUB_TOKEN || secrets.MAVEN_CENTRAL_PASSWORD }}
+      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+  test-deployed-maven-packages:
+    name: Test Deployed Maven Packages
+    needs: [log-the-inputs, call-workflow-maven-staging, deploy-maven-artifacts]
+    if: ${{ inputs.deploy_maven == true && needs.deploy-maven-artifacts.result == 'success' }}
+    permissions:
+      contents: read
+      packages: read
+    uses: ./.github/workflows/test-maven-packages.yml
+    with:
+      version: ${{ needs.call-workflow-maven-staging.outputs.version }}
+      java_implementation: 'both'
+      repository_url: ${{ inputs.maven_repository == 'github-packages' && format('https://maven.pkg.github.com/{0}', github.repository) || 'https://repo.maven.apache.org/maven2' }}
+    secrets: inherit

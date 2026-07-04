@@ -5,7 +5,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -25,7 +25,7 @@ class DataSpace;
     wrappers for the HDF5 dataset creation property functions.
 */
 //  Inheritance: ObjCreatPropList -> PropList -> IdComponent
-class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
+class H5CPP_DLL DSetCreatPropList : public ObjCreatPropList {
   public:
     ///\brief Default dataset creation property list.
     static const DSetCreatPropList &DEFAULT;
@@ -50,7 +50,7 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
     void setChunk(int ndims, const hsize_t *dim) const;
 
     // Returns information about an external file.
-    void getExternal(unsigned idx, size_t name_size, char *name, off_t &offset, hsize_t &size) const;
+    void getExternal(unsigned idx, size_t name_size, char *name, HDoff_t &offset, hsize_t &size) const;
 
     // Returns the number of external files for a dataset.
     int getExternalCount() const;
@@ -101,7 +101,7 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
     void setDeflate(int level) const;
 
     // Adds an external file to the list of external files.
-    void setExternal(const char *name, off_t offset, hsize_t size) const;
+    void setExternal(const char *name, HDoff_t offset, hsize_t size) const;
 
     // Adds a filter to the filter pipeline.
     void setFilter(H5Z_filter_t filter, unsigned int flags = 0, size_t cd_nelmts = 0,
@@ -140,7 +140,7 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
     DSetCreatPropList(const hid_t plist_id);
 
     // Noop destructor.
-    virtual ~DSetCreatPropList() override;
+    virtual ~DSetCreatPropList() override = default;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -31,9 +31,10 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 
-#if !defined(WIN32) && !defined(__MINGW32__)
+#if !defined(WIN32) && !defined(__MINGW32__) && !defined(_WIN32)
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -184,13 +185,28 @@ main(int argc, char *argv[])
 
         /* Write the series of integers to the file */
         for (n = 0; n < num; n++) {
+            size_t seek_pos;
 
             /* Set up data to be written */
             for (u = 0; u < num; u++)
                 buf[u] = n;
 
+            seek_pos = n * sizeof(unsigned int);
+            if (sizeof(off_t) < 8) {
+                if (seek_pos > INT32_MAX) {
+                    printf("WRITER: seek past range for lseek\n");
+                    goto error;
+                }
+            }
+            else {
+                if (seek_pos > INT64_MAX) {
+                    printf("WRITER: seek past range for lseek\n");
+                    goto error;
+                }
+            }
+
             /* Position the file to the proper location */
-            if (lseek(fd, (off_t)(n * sizeof(unsigned int)), SEEK_SET) < 0) {
+            if (lseek(fd, (off_t)seek_pos, SEEK_SET) < 0) {
                 printf("WRITER: error from lseek\n");
                 goto error;
             } /* end if */

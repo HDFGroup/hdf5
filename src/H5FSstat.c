@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -63,9 +63,6 @@
  *
  * Return:      SUCCEED (Can't fail)
  *
- * Programmer:  Vailin Choi
- *              August 25th, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -74,8 +71,8 @@ H5FS_stat_info(const H5F_t *f, const H5FS_t *frsp, H5FS_stat_t *stats)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
-    HDassert(frsp);
-    HDassert(stats);
+    assert(frsp);
+    assert(stats);
 
     /* Report statistics for free space */
     stats->tot_space         = frsp->tot_space;

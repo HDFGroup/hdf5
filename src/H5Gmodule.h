@@ -4,19 +4,16 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Saturday, September 12, 2015
- *
- * Purpose:	This file contains declarations which define macros for the
- *		H5G package.  Including this header means that the source file
- *		is part of the H5G package.
+ * Purpose: This file contains declarations which define macros for the
+ *          H5G package.  Including this header means that the source file
+ *          is part of the H5G package.
  */
 #ifndef H5Gmodule_H
 #define H5Gmodule_H
@@ -25,10 +22,13 @@
  *      reporting macros.
  */
 #define H5G_MODULE
-#define H5_MY_PKG     H5G
-#define H5_MY_PKG_ERR H5E_SYM
+#define H5_MY_PKG      H5G
+#define H5_MY_PKG_INIT YES
 
 /**  \page H5G_UG HDF5 Groups
+ *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
  *
  * \section sec_group HDF5 Groups
  * \subsection subsec_group_intro Introduction
@@ -49,7 +49,7 @@
  * In the first figure below, the group structure is strictly hierarchical, identical to the file system
  * analogs.
  *
- * In the next two figures below, the structure takes advantage of the directed graph’s allowance of
+ * In the next two figures below, the structure takes advantage of the directed graph's allowance of
  * circular references. In the second figure, GroupA is not only a member of the root group, /, but a
  * member of GroupC. Since Group C is a member of Group B and Group B is a member of Group
  * A, Dataset1 can be accessed by means of the circular reference /Group A/Group B/Group
@@ -192,7 +192,7 @@
  * like a regular or hard link. The differences are that the hard link cannot be created if the target
  * object does not exist and it always points to the same object. A soft link can be created with any
  * path name, whether or not the object exists; it may or may not, therefore, be possible to follow a
- * soft link. Furthermore, a soft link’s target object may be changed.
+ * soft link. Furthermore, a soft link's target object may be changed.
  *
  * \subsubsection subsubsec_group_descr_path HDF5 Path Names
  * The structure of the HDF5 file constitutes the name space for the objects in the file. A path name
@@ -202,11 +202,11 @@
  * slash is a always a member of the component indicated by the link name preceding that slash.
  *
  * The first component in the path name may be any of the following:
- * \li The special character dot (., a period), indicating the current group
+ * \li The special character dot (., a single period), indicating the current group
  * \li The special character slash (/), indicating the root group
  * \li Any member of the current group
  *
- * Component link names may be any string of ASCII characters not containing a slash or a dot
+ * Component link names may be any string of ASCII characters not containing a slash or a single dot
  * (/ and ., which are reserved as noted above). However, users are advised to avoid the use of
  * punctuation and non-printing characters, as they may create problems for other software. The
  * figure below provides a BNF grammar for HDF5 path names.
@@ -260,14 +260,14 @@
  * for very small groups, improved link indexing for large groups, and other advanced features.
  * <ul>
  * <li>The original indexed format remains the default. Links are stored in a B-tree in the
- * group’s local heap.</li>
+ * group's local heap.</li>
  * <li>Groups created in the new compact-or-indexed format, the implementation introduced
  * with Release 1.8.0, can be tuned for performance, switching between the compact and
  * indexed formats at thresholds set in the user application.
  * <ul>
  * <li>The compact format will conserve file space and processing overhead when
  * working with small groups and is particularly valuable when a group contains
- * no links. Links are stored as a list of messages in the group’s header.</li>
+ * no links. Links are stored as a list of messages in the group's header.</li>
  * <li>The indexed format will yield improved performance when working with large
  * groups. A large group may contain thousands to millions of members. Links
  * are stored in a fractal heap and indexed with an improved B-tree.</li>
@@ -319,15 +319,12 @@
  * stored in either the original indexed format or the compact-or-indexed format.
  *
  * \subsection subsec_group_h5dump Using h5dump
- * You can use h5dump, the command-line utility distributed with HDF5, to examine a file for
+ * You can use \ref sec_cltools_h5dump, the command-line utility distributed with HDF5, to examine a file for
  * purposes either of determining where to create an object within an HDF5 file or to verify that
  * you have created an object in the intended place.
  *
- * In the case of the new group created later in this chapter, the following h5dump command will
- * display the contents of FileA.h5:
- * \code
- * h5dump FileA.h5
- * \endcode
+ * In the case of the new group created later in this chapter, the following \ref sec_cltools_h5dump command
+ * will display the contents of FileA.h5: \code h5dump FileA.h5 \endcode
  *
  * For more information, @see @ref subsubsec_group_program_create.
  *
@@ -344,9 +341,9 @@
  * }
  * \endcode
  *
- * h5dump is described on the “HDF5 Tools” page of the \ref RM.
+ * \ref sec_cltools_h5dump is described on the \ref sec_cltools page of the \ref UG.
  *
- * The HDF5 DDL grammar is described in the @ref DDLBNF110.
+ * The HDF5 DDL grammar is described in the @ref DDLBNF200.
  *
  * \subsection subsec_group_function Group Function Summaries
  * Functions that can be used with groups (\ref H5G functions) and property list functions that can used
@@ -388,7 +385,7 @@
  * </tr>
  * <tr>
  * <td>#H5Gget_info_by_idx</td>
- * <td>Retrieves information about a group according to the group’s position within an index.</td>
+ * <td>Retrieves information about a group according to the group's position within an index.</td>
  * </tr>
  * <tr>
  * <td>#H5Gget_info_by_name</td>
@@ -417,7 +414,6 @@
  * <tr>
  * <td>#H5Lcreate_ud</td>
  * <td>Creates a link of a user-defined type.</td>
- * </tr>
  * </tr>
  * <tr>
  * <td>#H5Lget_val</td>
@@ -480,7 +476,9 @@
  * </tr>
  * </table>
  *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox gcpl_table
+ * </div>
  *
  * <table>
  * <caption>Other external link functions</caption>
@@ -526,7 +524,7 @@
  * A path that begins with a slash (/) is
  * an absolute path indicating that it locates the new group from the root group of the HDF5 file. A
  * path that begins with any other character is a relative path. When the location is a file, a relative
- * path is a path from that file’s root group; when the location is a group, a relative path is a path
+ * path is a path from that file's root group; when the location is a group, a relative path is a path
  * from that group.
  *
  * The sample code in the example below creates three groups. The group Data is created in the
@@ -695,7 +693,7 @@
  * entry in the \ref RM for the #H5Pset_elink_file_cache_size function call.
  *
  * <h4>Note Regarding Hard Links and Soft Links</h4>
- * Note that an object’s existence in a file is governed by the presence of at least one hard link to
+ * Note that an object's existence in a file is governed by the presence of at least one hard link to
  * that object. If the last hard link to an object is removed, the object is removed from the file and
  * any remaining soft link becomes a dangling link, a link whose target object does not exist.
  *
@@ -713,7 +711,7 @@
  *
  * <h5>Scenario 2: Moving a Link that Isolates an Object</h5>
  * Consider the following example: assume that the group group2 can only be accessed via the
- * following path, where top_group is a member of the file’s root group:
+ * following path, where top_group is a member of the file's root group:
  * <em>/top_group/group1/group2/</em>
  *
  * Using #H5Lmove, top_group is renamed to be a member ofgroup2. At this point, since
@@ -723,7 +721,7 @@
  *
  * <h4>Mounting a File</h4>
  * An external link is a permanent connection between two files. A temporary connection can be set
- * up with the #H5Fmount function. For more information, @see sec_file.
+ * up with the #H5Fmount function. For more information, @see \ref sec_file.
  * For more information, see the #H5Fmount function in the \ref RM.
  *
  * \subsubsection subsubsec_group_program_info Discovering Information about Objects
@@ -776,14 +774,14 @@
  * \image html Groups_fig9_aa.gif "c) A link named dset2 to the same dataset is created in /group2."
  * </td>
  * <td>
- * \image html Groups_fig9_bb.gif "d) The link from /group1 to dset1 is removed. The dataset is
- * still in the file, but can be accessed only as /group2/dset2."
+ * \image html Groups_fig9_bb.gif "d) The link from /group1 to dset1 is removed."
+ * The dataset is still in the file, but can be accessed only as /group2/dset2.
  * </td>
  * </tr>
  * </table>
  *
  * Figure 10 illustrates loops in an HDF5 file structure. The file in part a contains three groups
- * and a dataset; group2 is a member of the root group and of the root group’s other member group,
+ * and a dataset; group2 is a member of the root group and of the root group's other member group,
  * group1. group2 thus can be accessed by either of two paths: /group2 or /group1/GXX. Similarly,
  * the dataset can be accessed either as /group2/dset1 or as /group1/GXX/dset1.
  *
@@ -812,8 +810,7 @@
  * </tr>
  * <tr>
  * <td>
- * \image html Groups_fig10_c.gif "c) dset1 has three names: /group1/dset1, /group2/dset2, and
- * /group1/GXX/dset2."
+ * \image html Groups_fig10_c.gif "c) dset1 has 3 names: /group1/dset1, /group2/dset2, and /group1/GXX/dset2."
  * </td>
  * <td>
  * \image html Groups_fig10_d.gif "d) dset1 has an infinite number of available path names."
@@ -854,32 +851,15 @@
  *
  * Previous Chapter \ref sec_file - Next Chapter \ref sec_dataset
  *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
+ *
  */
 
 /**
  * \defgroup H5G Groups (H5G)
  *
  * Use the functions in this module to manage HDF5 groups.
- *
- * <table>
- * <tr><th>Create</th><th>Read</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5G_examples.c create
- *   </td>
- *   <td>
- *   \snippet{lineno} H5G_examples.c read
- *   </td>
- * <tr><th>Update</th><th>Delete</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5G_examples.c update
- *   </td>
- *   <td>
- *   \snippet{lineno} H5G_examples.c delete
- *   </td>
- * </tr>
- * </table>
  *
  * \details \Bold{Groups in HDF5:} A group associates names with objects and
  *          provides a mechanism for mapping a name to an object. Since all
@@ -909,7 +889,7 @@
  *          indexing for large groups, and other advanced features.
  *
  *          \li The \Emph{original indexed} format remains the default. Links
- *              are stored in a B-tree in the group’s local heap.
+ *              are stored in a B-tree in the group's local heap.
  *          \li Groups created in the new \Emph{compact-or-indexed} format, the
  *              implementation introduced with Release 1.8.0, can be tuned for
  *              performance, switching between the compact and indexed formats
@@ -917,7 +897,7 @@
  *              - The \Emph{compact} format will conserve file space and processing
  *                overhead when working with small groups and is particularly
  *                valuable when a group contains no links. Links are stored
- *                as a list of messages in the group’s header.
+ *                as a list of messages in the group's header.
  *              - The \Emph{indexed} format will yield improved
  *                performance when working with large groups, e.g., groups
  *                containing thousands to millions of members. Links are stored in

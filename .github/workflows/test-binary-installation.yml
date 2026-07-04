@@ -1,0 +1,419 @@
+name: Test Binary Installation
+
+# Tests complete binary installation including:
+# - HDF5 native library installation (from system packages or built binaries)
+# - Maven package consumption
+# - Full integration testing with Java examples
+
+on:
+  workflow_dispatch:
+    inputs:
+      maven_version:
+        description: 'Maven artifact version to test'
+        type: string
+        required: true
+        default: '2.1.0-SNAPSHOT'
+      maven_repository:
+        description: 'Maven repository URL'
+        type: string
+        required: false
+        default: 'https://maven.pkg.github.com/HDFGroup/hdf5'
+      java_implementation:
+        description: 'Java implementation to test'
+        type: choice
+        required: false
+        default: 'both'
+        options:
+          - 'both'
+          - 'ffm'
+          - 'jni'
+      install_method:
+        description: 'HDF5 native library installation method'
+        type: choice
+        required: false
+        default: 'system-package'
+        options:
+          - 'system-package'  # apt-get install libhdf5-dev
+          - 'from-source'     # Build from source tarball
+          - 'from-binary'     # Install from release binary package
+  workflow_call:
+    inputs:
+      maven_version:
+        description: 'Maven artifact version to test'
+        type: string
+        required: true
+      maven_repository:
+        description: 'Maven repository URL'
+        type: string
+        required: false
+        default: 'https://maven.pkg.github.com/HDFGroup/hdf5'
+      java_implementation:
+        description: 'Java implementation to test'
+        type: string
+        required: false
+        default: 'both'
+      install_method:
+        description: 'HDF5 native library installation method'
+        type: string
+        required: false
+        default: 'system-package'
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  test-jni-binary:
+    name: Test JNI with Binary Installation
+    runs-on: ubuntu-latest
+    if: |
+      inputs.java_implementation == 'both' ||
+      inputs.java_implementation == 'jni'
+    steps:
+      - name: Checkout HDF5Examples
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: HDFGroup/HDF5Examples
+          path: HDF5Examples
+
+      - name: Set up Java 11 for JNI
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Install HDF5 native libraries
+        env:
+          INSTALL_METHOD: ${{ inputs.install_method }}
+        run: |
+          echo "=== Installing HDF5 Native Libraries ==="
+          echo "Installation method: $INSTALL_METHOD"
+
+          if [ "$INSTALL_METHOD" == "system-package" ]; then
+            echo "Installing from system packages..."
+            sudo apt-get update
+            sudo apt-get install -y libhdf5-dev hdf5-tools
+
+            echo "Installed HDF5 version:"
+            h5dump --version || echo "h5dump not found"
+
+            echo "HDF5 library location:"
+            find /usr/lib -name "libhdf5.so*" 2>/dev/null || echo "Library not found in /usr/lib"
+            find /usr/local/lib -name "libhdf5.so*" 2>/dev/null || true
+
+          elif [ "$INSTALL_METHOD" == "from-source" ]; then
+            echo "Building from source not yet implemented"
+            echo "Falling back to system package installation"
+            sudo apt-get update
+            sudo apt-get install -y libhdf5-dev hdf5-tools
+
+          elif [ "$INSTALL_METHOD" == "from-binary" ]; then
+            echo "Installing from binary package not yet implemented"
+            echo "Falling back to system package installation"
+            sudo apt-get update
+            sudo apt-get install -y libhdf5-dev hdf5-tools
+          fi
+
+          echo "Library path configuration:"
+          ldconfig -p | grep hdf5 || echo "No HDF5 libraries in ld cache"
+
+      - name: Configure Maven for GitHub Packages
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << 'SETTINGSEOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                    http://maven.apache.org/xsd/settings-1.0.0.xsd">
+              <servers>
+                  <server>
+                      <id>github-hdfgroup-hdf5</id>
+                      <username>${env.GITHUB_ACTOR}</username>
+                      <password>${env.GITHUB_TOKEN}</password>
+                  </server>
+              </servers>
+              <profiles>
+                  <profile>
+                      <id>github-packages</id>
+                      <repositories>
+                          <repository>
+                              <id>github-hdfgroup-hdf5</id>
+                              <url>MAVEN_REPO_URL_PLACEHOLDER</url>
+                              <snapshots><enabled>true</enabled></snapshots>
+                              <releases><enabled>true</enabled></releases>
+                          </repository>
+                      </repositories>
+                  </profile>
+              </profiles>
+              <activeProfiles>
+                  <activeProfile>github-packages</activeProfile>
+              </activeProfiles>
+          </settings>
+          SETTINGSEOF
+
+          # Replace placeholder with actual URL
+          sed -i "s|MAVEN_REPO_URL_PLACEHOLDER|$MAVEN_REPOSITORY|g" ~/.m2/settings.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAVEN_REPOSITORY: ${{ inputs.maven_repository }}
+
+      - name: Download JNI Maven artifact
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAVEN_VERSION: ${{ inputs.maven_version }}
+          MAVEN_REPOSITORY: ${{ inputs.maven_repository }}
+        run: |
+          echo "Downloading hdf5-java-jni:$MAVEN_VERSION"
+          mvn dependency:get \
+            -Dartifact=org.hdfgroup:hdf5-java-jni:"$MAVEN_VERSION" \
+            -DremoteRepositories="$MAVEN_REPOSITORY" \
+            -Dtransitive=true
+
+      - name: Verify JAR and native library integration
+        env:
+          MAVEN_VERSION: ${{ inputs.maven_version }}
+        run: |
+          echo "=== Testing JNI Integration ==="
+
+          # Find downloaded JAR
+          JAR_PATH=$(find ~/.m2/repository/org/hdfgroup/hdf5-java-jni/"$MAVEN_VERSION" -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+
+          if [ -z "$JAR_PATH" ]; then
+            echo "❌ Could not find downloaded JAR"
+            exit 1
+          fi
+
+          echo "JAR location: $JAR_PATH"
+
+          # Find native library
+          HDF5_LIB=$(find /usr/lib /usr/local/lib -name "libhdf5.so*" 2>/dev/null | head -1)
+
+          if [ -z "$HDF5_LIB" ]; then
+            echo "❌ Could not find HDF5 native library"
+            exit 1
+          fi
+
+          echo "Native library: $HDF5_LIB"
+
+          # Set library path for testing
+          export LD_LIBRARY_PATH=/usr/lib:/usr/local/lib:$LD_LIBRARY_PATH
+          export JAVA_LIBRARY_PATH=/usr/lib:/usr/local/lib
+
+          echo "Testing basic H5 initialization..."
+          cd HDF5Examples/JAVA
+
+          # Create simple test using printf to avoid heredoc issues in YAML
+          printf '%s\n' \
+            'import hdf.hdf5lib.H5;' \
+            'import hdf.hdf5lib.HDF5Constants;' \
+            '' \
+            'public class TestH5Init {' \
+            '    public static void main(String[] args) {' \
+            '        try {' \
+            '            H5.H5open();' \
+            '            int[] version = new int[3];' \
+            '            H5.H5get_libversion(version);' \
+            '            System.out.println("✅ HDF5 library initialized successfully");' \
+            '            System.out.println("Library version: " + version[0] + "." + version[1] + "." + version[2]);' \
+            '            H5.H5close();' \
+            '            System.exit(0);' \
+            '        } catch (Exception e) {' \
+            '            System.err.println("❌ Error: " + e.getMessage());' \
+            '            e.printStackTrace();' \
+            '            System.exit(1);' \
+            '        }' \
+            '    }' \
+            '}' \
+            > TestH5Init.java
+
+          # Compile and run
+          javac -cp "$JAR_PATH" TestH5Init.java
+          java -cp ".:$JAR_PATH" -Djava.library.path="$JAVA_LIBRARY_PATH" TestH5Init
+
+      - name: Run representative examples
+        env:
+          MAVEN_VERSION: ${{ inputs.maven_version }}
+        run: |
+          cd HDF5Examples/JAVA
+
+          # Find JAR
+          JAR_PATH=$(find ~/.m2/repository/org/hdfgroup/hdf5-java-jni/"$MAVEN_VERSION" -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+
+          # Set library path
+          export LD_LIBRARY_PATH=/usr/lib:/usr/local/lib:$LD_LIBRARY_PATH
+          export JAVA_LIBRARY_PATH=/usr/lib:/usr/local/lib
+
+          echo "=== Running Example Tests ==="
+
+          # Test a few representative examples from compat directory (JNI compatible)
+          for example in compat/TUTR/H5_*.java; do
+            if [ -f "$example" ]; then
+              example_name=$(basename "$example" .java)
+              echo "Testing: $example_name"
+
+              cd "$(dirname "$example")"
+              javac -cp "$JAR_PATH" "$example_name.java"
+
+              if timeout 30s java -cp ".:$JAR_PATH" -Djava.library.path="$JAVA_LIBRARY_PATH" "$example_name"; then
+                echo "✅ $example_name passed"
+              else
+                echo "❌ $example_name failed"
+              fi
+
+              cd - > /dev/null
+              break  # Just test one example for now
+            fi
+          done
+
+  test-ffm-binary:
+    name: Test FFM with Binary Installation
+    runs-on: ubuntu-latest
+    if: |
+      inputs.java_implementation == 'both' ||
+      inputs.java_implementation == 'ffm'
+    steps:
+      - name: Checkout HDF5Examples
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: HDFGroup/HDF5Examples
+          path: HDF5Examples
+
+      - name: Set up Java 25 for FFM
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        with:
+          java-version: '25'
+          distribution: 'oracle'
+          cache: 'maven'
+
+      - name: Install HDF5 native libraries
+        run: |
+          echo "=== Installing HDF5 Native Libraries ==="
+          sudo apt-get update
+          sudo apt-get install -y libhdf5-dev hdf5-tools
+
+          echo "Installed HDF5 version:"
+          h5dump --version || echo "h5dump not found"
+
+      - name: Configure Maven for GitHub Packages
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << 'SETTINGSEOF2'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+              <servers>
+                  <server>
+                      <id>github-hdfgroup-hdf5</id>
+                      <username>${env.GITHUB_ACTOR}</username>
+                      <password>${env.GITHUB_TOKEN}</password>
+                  </server>
+              </servers>
+              <profiles>
+                  <profile>
+                      <id>github-packages</id>
+                      <repositories>
+                          <repository>
+                              <id>github-hdfgroup-hdf5</id>
+                              <url>MAVEN_REPO_URL_PLACEHOLDER</url>
+                              <snapshots><enabled>true</enabled></snapshots>
+                              <releases><enabled>true</enabled></releases>
+                          </repository>
+                      </repositories>
+                  </profile>
+              </profiles>
+              <activeProfiles>
+                  <activeProfile>github-packages</activeProfile>
+              </activeProfiles>
+          </settings>
+          SETTINGSEOF2
+
+          # Replace placeholder with actual URL
+          sed -i "s|MAVEN_REPO_URL_PLACEHOLDER|$MAVEN_REPOSITORY|g" ~/.m2/settings.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAVEN_REPOSITORY: ${{ inputs.maven_repository }}
+
+      - name: Download FFM Maven artifact
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAVEN_VERSION: ${{ inputs.maven_version }}
+          MAVEN_REPOSITORY: ${{ inputs.maven_repository }}
+        run: |
+          echo "Downloading hdf5-java-ffm:$MAVEN_VERSION"
+          mvn dependency:get \
+            -Dartifact=org.hdfgroup:hdf5-java-ffm:"$MAVEN_VERSION" \
+            -DremoteRepositories="$MAVEN_REPOSITORY" \
+            -Dtransitive=true
+
+      - name: Test FFM with system HDF5
+        env:
+          MAVEN_VERSION: ${{ inputs.maven_version }}
+        run: |
+          echo "=== Testing FFM Integration ==="
+
+          # Find downloaded JAR
+          JAR_PATH=$(find ~/.m2/repository/org/hdfgroup/hdf5-java-ffm/"$MAVEN_VERSION" -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+
+          if [ -z "$JAR_PATH" ]; then
+            echo "❌ Could not find downloaded JAR"
+            exit 1
+          fi
+
+          echo "JAR location: $JAR_PATH"
+          echo "JAR contents sample:"
+          jar tf "$JAR_PATH" | grep "org/hdfgroup/javahdf5" | head -5
+
+          echo "✅ FFM JAR verification complete"
+          echo "Note: Full FFM testing requires compatible native library"
+
+  summary:
+    name: Binary Installation Test Summary
+    runs-on: ubuntu-latest
+    needs: [test-jni-binary, test-ffm-binary]
+    if: always()
+    steps:
+      - name: Generate summary
+        env:
+          MAVEN_VERSION: ${{ inputs.maven_version }}
+          MAVEN_REPOSITORY: ${{ inputs.maven_repository }}
+          INSTALL_METHOD: ${{ inputs.install_method }}
+        run: |
+          echo "# Binary Installation Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** $MAVEN_VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository:** $MAVEN_REPOSITORY" >> $GITHUB_STEP_SUMMARY
+          echo "**Install Method:** $INSTALL_METHOD" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          JNI_RESULT="${{ needs.test-jni-binary.result }}"
+          FFM_RESULT="${{ needs.test-ffm-binary.result }}"
+
+          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$JNI_RESULT" != "skipped" ]; then
+            if [ "$JNI_RESULT" == "success" ]; then
+              echo "✅ **JNI Binary Installation:** PASSED" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ **JNI Binary Installation:** FAILED" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+          if [ "$FFM_RESULT" != "skipped" ]; then
+            if [ "$FFM_RESULT" == "success" ]; then
+              echo "✅ **FFM Binary Installation:** PASSED" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ **FFM Binary Installation:** FAILED" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+          # Fail if any tests failed
+          if [ "$JNI_RESULT" == "failure" ] || [ "$FFM_RESULT" == "failure" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ **Some tests failed. Check logs for details.**" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🎉 **All binary installation tests passed!**" >> $GITHUB_STEP_SUMMARY

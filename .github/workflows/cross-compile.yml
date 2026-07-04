@@ -1,0 +1,106 @@
+name: hdf5 dev CMake CI
+
+# Triggers the workflow on a call from another workflow
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+jobs:
+  build_and_test_linux:
+    name: "Ubuntu mingw64-${{ inputs.build_mode }}"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install CMake Dependencies (Linux)
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build graphviz
+          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+
+      - name: Install Wine64 and dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y wine64 winbind
+
+#      - name: Verify Wine64 installation
+#        run: wine64 --version
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
+      - name: Install MinGW64 Cross-Compiler
+        run: |
+          sudo apt update
+          sudo apt-get install -y mingw-w64
+          sudo apt-get install gfortran-mingw-w64-x86-64-win32
+
+      # CMAKE CONFIGURE
+      - name: CMake Configure
+        run: |
+           mkdir "${{ runner.workspace }}/build"
+           cd "${{ runner.workspace }}/build"
+           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+             -G Ninja \
+             --log-level=VERBOSE \
+             -DCMAKE_TOOLCHAIN_FILE:STRING=config/toolchain/mingw64.cmake \
+             -DCMAKE_CROSSCOMPILING_EMULATOR:PATH=$GITHUB_WORKSPACE/config/toolchain/mingw-w64-x86-64-wine.sh \
+             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+             -DHDF5_ENABLE_DOXY_WARNINGS:BOOL=ON \
+             -DHDF5_BUILD_DOC:BOOL=ON \
+             -DHDF5_BUILD_JAVA:BOOL=OFF \
+             -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=OFF \
+             -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
+             -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON \
+             -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF \
+             -DZLIB_USE_LOCALCONTENT:BOOL=OFF \
+             -DHDF5_PACK_EXAMPLES:BOOL=ON \
+             -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
+             -DHDF5_TEST_API:BOOL=OFF \
+             -DHDF5_USE_PREGEN:BOOL=ON \
+             $GITHUB_WORKSPACE
+        shell: bash
+
+      # BUILD
+      - name: CMake Build
+        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      # RUN TESTS
+#      - name: CMake Run Tests
+#        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -E "err_compat|filenotclosed|swmr|cache_api"
+#        working-directory: ${{ runner.workspace }}/build
+
+      # RUN Failing TESTS
+#      - name: CMake Run Tests
+#        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -R "err_compat|filenotclosed|swmr|cache_api"
+#        working-directory: ${{ runner.workspace }}/build
+#        continue-on-error: true
+
+      - name: CMake Run Package
+        run: cpack -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: List files in the space
+        run: |
+               ls -l ${{ runner.workspace }}/build
+
+      - name: Save published binary (linux)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+          name: tgz-ubuntu-2404_mingw64-${{ inputs.build_mode }}-binary
+          path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
+          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if:  ${{ inputs.build_mode != 'Debug' }}
