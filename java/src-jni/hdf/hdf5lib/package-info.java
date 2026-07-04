@@ -58,7 +58,7 @@
  * <td>java.lang.String</td>
  * </tr>
  * <tr>
- * <td>void * <br />
+ * <td>void * <br>
  * (i.e., pointer to `Any')</td>
  * <td>Special -- see HDFArray</td>
  * </tr>
