@@ -8037,7 +8037,7 @@ error:
  * Purpose: Test that a malformed file whose stored chunk layout
  *          dimensionality does not match the dataset's dataspace rank
  *          is properly rejected at open-time.
- * 
+ *
  * Return: Success: 0
  *         Failure: -1
  *
@@ -8053,8 +8053,8 @@ test_chunk_dims_mismatch(void)
     TESTING("rejection of chunk dimensionality that mismatches the dataspace");
 
     if ((fid = H5Fopen(data_file, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) {
-        printf("    Could not open file %s. Try set $srcdir to point at the "
-               "source directory of test\n",
+        printf("    Could not open file %s. Try setting $srcdir to point at the "
+               "source directory of the test suite\n",
                data_file);
         goto error;
     }
