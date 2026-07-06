@@ -93,15 +93,18 @@ main(void)
     hid_t          fapl = H5I_INVALID_HID, file = H5I_INVALID_HID, sid = H5I_INVALID_HID;
     hid_t          dcpl = H5I_INVALID_HID, dset = H5I_INVALID_HID;
     hsize_t        dims[3]  = {3, 4, 5};
-    hsize_t        chunk[3] = {2, 2, 4}; /* last chunk size equals sizeof(int) */
+    hsize_t        chunk[3] = {2, 2, 4}; /* edge lengths in elements; see the patch note below re: the 4 */
     int            data[3 * 4 * 5];
     unsigned char *buf = NULL;
     size_t         len, off;
     int            i;
 
-    /* Version-3 chunk layout message header immediately followed after the 8-byte b-tree address
-     * by the four chunk sizes {2, 2, 4, sizeof(int)=4} as little-endian
-     * uint32 values. This anchor uniquely locates the layout message. */
+    /* The version-3 chunk layout stores, after the 3-byte header (version,
+     * class, dimensionality) and the 8-byte b-tree address, one little-endian
+     * uint32 per stored dimension: the three chunk edge lengths (in elements)
+     * followed by the element size in bytes.  For this dataset those on-disk
+     * values are literally {2, 2, 4, 4} (the trailing 4 is sizeof(int)); this
+     * byte pattern uniquely locates the layout message. */
     static const unsigned char layout_dims[] = {2, 0, 0, 0, 2, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0};
 
     for (i = 0; i < 3 * 4 * 5; i++)
@@ -136,7 +139,16 @@ main(void)
     if ((off = find_once(buf, len, layout_dims, sizeof(layout_dims))) == (size_t)-1)
         TEST_ERROR;
     /* Layout header is 3 bytes (version, class, ndims) + 8-byte address before
-     * the chunk sizes, so the ndims byte is 11 bytes before the sizes. */
+     * the chunk sizes, so the ndims byte is 11 bytes before the sizes.
+     *
+     * Patching ndims from 4 to 3 makes the layout describe a 2-D chunk over the
+     * 3-D dataspace.  The decoder then reads only the first three stored sizes,
+     * {2, 2, 4}, and treats the last of those (4) as the element-size
+     * dimension.  Because the dataset's third chunk edge was chosen to be 4,
+     * that reinterpreted element size still equals sizeof(int), so the layout
+     * decodes consistently and the dataset opens instead of being rejected by
+     * the element-size check -- which is what let the original bug reach the
+     * I/O path and crash. */
     if (off < 11 || buf[off - 11] != 3 /* version */ || buf[off - 10] != 2 /* chunked */ ||
         buf[off - 9] != 4 /* ndims */)
         TEST_ERROR;
