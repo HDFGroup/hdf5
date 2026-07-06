@@ -248,6 +248,7 @@ set (HDF5_N_REFERENCE_FILES
 )
 set (HDF5_REFERENCE_EXP_FILES
     tall-6.exp
+    tbinvlstr.exp
     tnoddlfile.exp
     trawdatafile.exp
     trawssetfile.exp
@@ -355,6 +356,7 @@ set (HDF5_REFERENCE_TEST_FILES
     tscalarintattrsize.h5
     tscalarintsize.h5
     tscalarstring.h5
+    tbinvlstr.h5
     tslink.h5
     tsplit_file-m.h5
     tsplit_file-r.h5
@@ -1375,6 +1377,8 @@ ADD_H5_TEST (tbin1LE BINFILE RESULT_CODE 0 TARGET_FILE tbinary.h5 --enable-error
 # test for string binary output
 ADD_H5_TEST (tstr2bin2 OUTPUT_FILE tstr2bin2 TARGET_FILE tstr2.h5 RESULT_CODE 0 --enable-error-stack -d /g2/dset2 BINARY_OUTPUT)
 ADD_H5_TEST (tstr2bin6 OUTPUT_FILE tstr2bin6 TARGET_FILE tstr2.h5 RESULT_CODE 0 --enable-error-stack -d /g6/dset6 BINARY_OUTPUT)
+# test for binary output of a variable-length string dataset
+ADD_H5_TEST (tbinvlstr OUTPUT_FILE tbinvlstr TARGET_FILE tbinvlstr.h5 RESULT_CODE 0 --enable-error-stack -d vlenstr BINARY_OUTPUT)
 
 # NATIVE default. the NATIVE test can be validated with h5import/h5diff
 #  ADD_H5_TEST_IMPORT (tbin1 out1D TARGET_FILE tbinary.h5 0 --enable-error-stack -d integer -b)

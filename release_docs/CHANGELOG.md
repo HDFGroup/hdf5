@@ -144,6 +144,10 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ## Library
 
+### Fixed a crash when reading a dataset with a malformed fill value
+
+   An old-style (version 1/2) fill value message that is marked "defined" but encodes a negative size leaves the fill value with a negative size and no datatype; `H5Pget_fill_value()` then passed that NULL datatype to `H5T_path_find()` and dereferenced it. `H5P_get_fill_value()` now rejects a fill value that has no datatype and returns an error, so the dataset itself remains readable while the corrupt fill value is reported cleanly.
+
 ### HTTP 403 errors in the ROS3 VFD for object keys with special characters
 
    The ROS3 VFD did not URI-encode the S3 object key when building the HTTP request path, so keys containing characters that AWS Signature Version 4 requires to be percent-encoded — such as the '=' in Hive-style `key=value` partition prefixes, '+', or spaces — produced a signed request whose signature did not match S3's server-side recomputation. S3 rejects such requests with `SignatureDoesNotMatch`, which surfaces as an HTTP 403 error (indistinguishable from a permissions error on a HEAD request), even though tools like the AWS CLI could access the same object. The object key is now percent-encoded exactly once when the request path is built, matching the behavior of other S3 clients. Note that URLs must now be passed to the ROS3 VFD with their object keys unencoded; a key that was pre-encoded as a workaround for this issue will now be double-encoded and fail to resolve.
@@ -189,6 +193,15 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 ## Configuration
 
 ## Tools
+
+### Fixed a crash in h5dump binary output of variable-length string datasets
+
+   Dumping a variable-length string dataset with more than one element to native binary
+   (`h5dump -b`) could crash. `render_bin_output()` reused a single variable as both the
+   per-element stride and the length of the current string, so after the first element the
+   stride was corrupted and subsequent elements were read from misaligned addresses,
+   dereferencing a garbage pointer. The two uses are now kept separate and variable-length
+   string datasets can be binary dumped safely.
 
 ### Fixed h5repack silently dropping a declared cd_nelmts for user-defined filters
 
