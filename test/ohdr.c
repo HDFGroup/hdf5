@@ -177,10 +177,10 @@ error:
 static herr_t
 test_bad_cont_chunk_size(char *filename, hid_t fapl)
 {
-    hid_t    file        = H5I_INVALID_HID;
-    hid_t    reopened    = H5I_INVALID_HID;
-    H5F_t   *f           = NULL;
-    H5O_t   *oh          = NULL;
+    hid_t     file     = H5I_INVALID_HID;
+    hid_t     reopened = H5I_INVALID_HID;
+    H5F_t    *f        = NULL;
+    H5O_t    *oh       = NULL;
     H5O_loc_t oh_loc;
     H5O_loc_t block_loc;
     time_t    time_new;
@@ -189,7 +189,7 @@ test_bad_cont_chunk_size(char *filename, hid_t fapl)
     uint8_t  *p           = size_buf;
     uint64_t  bad_size;
     size_t    sizeof_size;
-    int       fd = -1;
+    int       fd             = -1;
     bool      found_cont_msg = false;
     herr_t    ret;
 
@@ -244,7 +244,7 @@ test_bad_cont_chunk_size(char *filename, hid_t fapl)
             if (H5_addr_overflow(oh->chunk[chunkno].addr, raw_offset + H5F_SIZEOF_ADDR(f)))
                 TEST_ERROR;
 
-            size_addr = oh->chunk[chunkno].addr + (haddr_t)raw_offset + (haddr_t)H5F_SIZEOF_ADDR(f);
+            size_addr      = oh->chunk[chunkno].addr + (haddr_t)raw_offset + (haddr_t)H5F_SIZEOF_ADDR(f);
             found_cont_msg = true;
             break;
         }

@@ -954,6 +954,14 @@ H5C__verify_len_eoa(H5F_t *f, const H5C_class_t *type, haddr_t addr, size_t *len
 
     FUNC_ENTER_PACKAGE
 
+    /*
+     * SWMR readers can observe metadata flushed by a writer before their local
+     * EOA cache is refreshed.  Lower VFD read paths already bypass EOA
+     * validation for SWMR reads and rely on read retries / EOF handling.
+     */
+    if (H5F_INTENT(f) & H5F_ACC_SWMR_READ)
+        HGOTO_DONE(SUCCEED);
+
     /* if type == H5FD_MEM_GHEAP, H5F_block_read() forces
      * type to H5FD_MEM_DRAW via its call to H5F__accum_read().
      * Thus we do the same for purposes of computing the EOA

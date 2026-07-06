@@ -111,8 +111,6 @@ H5O__cont_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid continuation chunk address");
     if (H5_addr_overflow(cont->addr, cont->size))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "continuation chunk address plus size overflows");
-    if (H5_addr_gt(cont->addr + cont->size, H5F_get_eoa(f, H5FD_MEM_OHDR)))
-        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "continuation chunk address plus size exceeds file eoa");
 
     /* Set return value */
     ret_value = cont;
