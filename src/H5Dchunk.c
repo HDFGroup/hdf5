@@ -1120,6 +1120,13 @@ H5D__chunk_init(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool open_op)
     assert(dset);
     H5D_CHUNK_STORAGE_INDEX_CHK(sc);
 
+    /* When opening an existing dataset, validate that the stored chunk
+     * dimensionality is consistent with the dataspace rank.  H5D__chunk_construct()
+     * performs this check at creation time, but it must also be performed
+     * here to catch malformed files. */
+    if (open_op && dset->shared->layout.u.chunk.ndims != dset->shared->ndims + 1)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "dimensionality of chunks doesn't match the dataspace");
+
     if (NULL == (dapl = (H5P_genplist_t *)H5I_object(dapl_id)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for fapl ID");
 
