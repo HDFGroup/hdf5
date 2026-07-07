@@ -107,7 +107,7 @@ We would like to thank the many HDF5 community members who contributed to this r
    - `H5Pappend_filter(plist, filter_id, flags, params)` - appends a filter to
      a dataset creation property list; `params` is an `H5Z_params_t` that
      carries either a `key=value` string or a raw `cd_values` array.
-   - `H5Pget_filter_params_by_idx(plist, idx, buf, buf_size, content_len)` —
+   - `H5Pget_filter_params_by_idx(plist, idx, buf, buf_size, content_len)` -
      retrieves the parameter string for the filter at pipeline index `idx`.
    - `H5Zconfig_get_int`, `H5Zconfig_get_double`, `H5Zconfig_get_bool`,
      `H5Zconfig_get_str` - typed accessors that extract individual parameters
