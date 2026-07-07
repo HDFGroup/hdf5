@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-05</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-07</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -2174,7 +2174,7 @@ Functions</h2></td></tr>
     <tr><td class="paramname">mem_space_id</td><td>Identifier of the memory dataspace. </td></tr>
     <tr><td class="paramname">file_space_id</td><td>Identifier of the dataset's dataspace in the file. </td></tr>
     <tr><td class="paramname">xfer_plist_id</td><td>Identifier of a transfer property list for this I/O operation. </td></tr>
-    <tr><td class="paramname">buf</td><td>Buffer of variable-lenght to store data read from the file.</td></tr>
+    <tr><td class="paramname">buf</td><td>Object[] (one slot per selected point) to store the data read; each slot is filled with a nested ArrayList structure matching mem_type_id (see "Buffer data model" in the class description). Slots need not be pre-allocated.</td></tr>
   </table>
   </dd>
 </dl>
@@ -3582,7 +3582,7 @@ Functions</h2></td></tr>
     <tr><td class="paramname">mem_space_id</td><td>Identifier of the memory dataspace. </td></tr>
     <tr><td class="paramname">file_space_id</td><td>Identifier of the dataset's dataspace in the file. </td></tr>
     <tr><td class="paramname">xfer_plist_id</td><td>Identifier of a transfer property list for this I/O operation. </td></tr>
-    <tr><td class="paramname">buf</td><td>Buffer of variable-length with data to be written to the file.</td></tr>
+    <tr><td class="paramname">buf</td><td>Object[] (one slot per selected point) holding the data to write; each slot must be a nested ArrayList structure matching mem_type_id (see "Buffer data model" in the class description). A structural mismatch raises IllegalArgumentException.</td></tr>
   </table>
   </dd>
 </dl>

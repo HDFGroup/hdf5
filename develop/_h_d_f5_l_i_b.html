@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-05</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-07</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -194,6 +194,15 @@ For Java, this </span>ANY'' is a problem, as the type of data must always be dec
 <div class="line">                                       <span class="keywordtype">boolean</span> isCriticalPinning)</div>
 <div class="line">  <span class="keywordflow">throws</span> HDF5Exception, HDF5LibraryException, NullPointerException;</div>
 </div><!-- fragment --><p>and the parameter <em>data</em> can be any multi-dimensional array of numbers, such as float[][], or int[][][], or Double[][]. </p>
+<p><b>Buffer data model</b> </p>
+<p>Read/write buffers must match the memory datatype. The JNI verifies this at the API boundary and throws IllegalArgumentException on a mismatch instead of crashing. The expected Java buffer per datatype class is: </p><ul>
+<li>
+integer/enum/bitfield, float: a primitive array (byte/short/int/long/float/double[]) or byte[]; it must be large enough to hold one element of the memory type per selected point. </li>
+<li>
+fixed- or variable-length string, reference: a String[] (byte[] for references) with one slot per selected point. </li>
+<li>
+compound, variable-length sequence, array, complex: an Object[] of nested java.util.ArrayLists. Each element is an ArrayList; a compound is an ArrayList of its members in order, a VLEN/array/complex is an ArrayList of its elements, and scalar leaves are the boxed type (Integer, Double, String, ...) except reference and opaque leaves, which are a byte[] holding the element's raw bytes. Slots are not pre-allocated by the caller on read. </li>
+</ul>
 <p><b><a class="el" href="_h_d_f5_c_o_n_s_t.html" title="Constants and Enumerated Types">Constants and Enumerated Types</a></b> </p>
 <p>The HDF5 API defines a set of constants and enumerated values. Most of these values are available to Java programs via the class <a class="el" href="_h_d_f5_c_o_n_s_t.html" title="Constants and Enumerated Types">Constants and Enumerated Types</a> <b><a class="el" href="classhdf_1_1hdf5lib_1_1_h_d_f5_constants.html">HDF5Constants</a></b>. For example, the parameters for the h5open() call include two numeric values, <b><em>HDFConstants.H5F_ACC_RDWR</em></b> and <b><em><a class="el" href="classhdf_1_1hdf5lib_1_1_h_d_f5_constants.html#a90bd58cb8e9d2bbd2d491707a5971410">HDF5Constants.H5P_DEFAULT</a></em></b>. As would be expected, these numbers correspond to the C constants <b><em><a class="el" href="_h5_fpublic_8h.html#a402673dec5c537b27a49a9a8bd6140b4">H5F_ACC_RDWR</a></em></b> and <b><em><a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a></em></b>. </p>
 <p>The HDF5 API defines a set of values that describe number types and sizes, such as "H5T_NATIVE_INT" and "hsize_t". These values are determined at run time by the HDF5 C library. To support these parameters, the Java HDFConstants class looks up the values when initiated. The values can be accessed as public variables of the Java class, such as:</p>
