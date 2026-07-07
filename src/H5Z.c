@@ -249,7 +249,7 @@ H5Zregister(const void *cls)
      * at least 256, there should be no overlap and the version of the struct
      * can be determined by the value of the first field.
      */
-    if (cls_real->version == H5Z_CLASS3_T_VERS) {
+    if (cls_real->version == H5Z_CLASS3_T_VERS_INTERNAL) {
         /* New H5Z_class3_t path */
         const H5Z_class3_t *cls3 = (const H5Z_class3_t *)cls;
 
@@ -396,7 +396,7 @@ H5Z_register(const H5Z_class2_t *cls)
      * (at the same offset as can_apply in H5Z_class2_t) is never misread.
      * Do NOT "simplify" away this check — the v3 dispatch must happen inside
      * H5Z_register, not only at the H5Zregister API boundary. */
-    if (cls->version == H5Z_CLASS3_T_VERS) {
+    if (cls->version == H5Z_CLASS3_T_VERS_INTERNAL) {
         if (H5Z_register3((const H5Z_class3_t *)cls) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter");
         HGOTO_DONE(SUCCEED);
@@ -425,7 +425,7 @@ done:
  * Function: H5Z_register3
  *
  * Purpose:  Register a filter using an H5Z_class3_t struct. Used for built-in
- *           filters and by H5Zregister() when version == H5Z_CLASS3_T_VERS.
+ *           filters and by H5Zregister() when version == H5Z_CLASS3_T_VERS_INTERNAL.
  *           Validates the canonical name and populates the internal entry with
  *           v3 callbacks.
  *
@@ -453,7 +453,7 @@ H5Z_register3(const H5Z_class3_t *cls)
 
     /* Build entry */
     memset(&entry, 0, sizeof(entry));
-    entry.base.version         = cls->version; /* H5Z_CLASS3_T_VERS for v3-aware downstream checks */
+    entry.base.version         = cls->version; /* H5Z_CLASS3_T_VERS_INTERNAL for v3-aware downstream checks */
     entry.base.id              = cls->id;
     entry.base.encoder_present = cls->encoder_present;
     entry.base.decoder_present = cls->decoder_present;

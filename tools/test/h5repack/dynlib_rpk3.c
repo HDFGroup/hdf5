@@ -34,7 +34,7 @@ static herr_t H5Z_dynlib3_get_config(unsigned flags, size_t cd_nelmts, const uns
 
 /* This message derives from H5Z */
 static const H5Z_class3_t H5Z_DYNLIB3[1] = {{
-    H5Z_CLASS3_T_VERS,                                         /* H5Z_class_t version           */
+    2,                                                          /* H5Z_class3_t version (literal 2) */
     H5Z_FILTER_DYNLIB3,                                        /* Filter id number               */
     1, 1,                                                      /* Encoding and decoding enabled  */
     "dynlib3",                                                 /* Filter name for debugging      */

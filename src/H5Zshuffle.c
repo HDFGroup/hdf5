@@ -28,7 +28,7 @@ static size_t H5Z__filter_shuffle(unsigned flags, size_t cd_nelmts, const unsign
 
 /* This message derives from H5Z */
 H5_ATTR_VISIBILITY_HIDDEN const H5Z_class3_t H5Z_SHUFFLE[1] = {{
-    H5Z_CLASS3_T_VERS,                                              /* H5Z_class_t version */
+    2,                                                              /* H5Z_class3_t version (literal 2) */
     H5Z_FILTER_SHUFFLE,                                             /* Filter id number */
     1,                                                              /* encoder_present flag (set to true) */
     1,                                                              /* decoder_present flag (set to true) */

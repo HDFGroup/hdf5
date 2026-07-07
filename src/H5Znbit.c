@@ -87,7 +87,7 @@ static herr_t H5Z__nbit_set_config(const char *params, unsigned *flags, size_t *
 
 /* This message derives from H5Z */
 H5_ATTR_VISIBILITY_HIDDEN H5Z_class3_t H5Z_NBIT[1] = {{
-    H5Z_CLASS3_T_VERS, /* H5Z_class_t version */
+    2,                 /* H5Z_class3_t version (literal 2) */
     H5Z_FILTER_NBIT,   /* Filter id number */
     1,                 /* Assume encoder present: check before registering */
     1,                 /* decoder_present flag (set to true) */

@@ -20,6 +20,14 @@
 /* Include private header file */
 #include "H5Zprivate.h" /* Filter functions                */
 
+/* Package-private version-field value identifying H5Z_class3_t, used only
+ * for internal dispatch in H5Zregister()/H5Z_register(). Deliberately not
+ * exposed in H5Zdevelop.h: plugin authors set the version field to the
+ * literal value 2 (see H5Z_class3_t's documentation), and this constant is
+ * pinned to 2 forever regardless of any future H5Z_CLASS_T_VERS_MAX growth,
+ * so it must not be confused with (or replaced by) that public constant. */
+#define H5Z_CLASS3_T_VERS_INTERNAL (2)
+
 /*
  * Internal filter table entry.  H5Z_class2_t is embedded as the first member
  * so that a pointer to H5Z_entry_t can be safely cast to H5Z_class2_t * per

@@ -26,20 +26,16 @@
 /*****************/
 
 /**
- * Current version of the H5Z_class_t struct (used by H5Z_class2_t)
+ * Default version of the filter class struct's \c version field, used by
+ * \c H5Z_class2_t. \c H5Z_class3_t plugins set \c version to the literal
+ * value \c 2 instead (see \c H5Z_class3_t's documentation) -- there is no
+ * separate named constant for it, since it's the same \c version field,
+ * not an independent counter.
  */
 #define H5Z_CLASS_T_VERS (1)
 
 /**
- * Version constant for the new H5Z_class3_t struct \since 2.2.0
- */
-#define H5Z_CLASS3_T_VERS (2)
-
-/**
- * Highest accepted version field value in H5Zregister().  Plugin authors
- * should set the version field to the literal value documented for their
- * chosen struct (1 for H5Z_class2_t, 2 for H5Z_class3_t) rather than
- * referencing this constant directly. \since 2.2.0
+ * Highest accepted version field value in H5Zregister(). \since 2.2.0
  */
 #define H5Z_CLASS_T_VERS_MAX (2)
 
@@ -277,7 +273,7 @@ typedef size_t (*H5Z_func2_t)(unsigned int flags, size_t cd_nelmts, const unsign
  */
 //! <!-- [H5Z_class3_t_snip] -->
 typedef struct H5Z_class3_t {
-    int          version;            /**< H5Z_CLASS3_T_VERS                         */
+    int          version;            /**< Set to the literal value 2                */
     H5Z_filter_t id;                 /**< Filter ID number                           */
     unsigned     encoder_present;    /**< Does this filter have an encoder?          */
     unsigned     decoder_present;    /**< Does this filter have a decoder?           */
