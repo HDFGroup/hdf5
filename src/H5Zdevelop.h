@@ -408,62 +408,6 @@ H5_DLL htri_t H5Zconfig_get_str(const char *params, const char *key, char *buf, 
 
 /**
  * \ingroup H5Z
- * \brief Pack a double value into two consecutive unsigned int cd_values slots.
- * \since 2.2.0
- */
-H5_DLL herr_t H5Zcd_pack_double(double val, unsigned *slots, size_t cap, size_t *n_used);
-
-/**
- * \ingroup H5Z
- * \brief Unpack a double value from two consecutive unsigned int cd_values slots.
- * \since 2.2.0
- */
-H5_DLL herr_t H5Zcd_unpack_double(const unsigned *slots, size_t n_slots, double *val);
-
-/**
- * \ingroup H5Z
- * \brief Pack a float value into one unsigned int cd_values slot.
- * \since 2.2.0
- */
-H5_DLL herr_t H5Zcd_pack_float(float val, unsigned *slots, size_t cap, size_t *n_used);
-
-/**
- * \ingroup H5Z
- * \brief Unpack a float value from one unsigned int cd_values slot.
- * \since 2.2.0
- */
-H5_DLL herr_t H5Zcd_unpack_float(const unsigned *slots, size_t n_slots, float *val);
-
-/**
- * \ingroup H5Z
- * \brief Pack a NUL-terminated string into cd_values slots.
- * \since 2.2.0
- */
-H5_DLL herr_t H5Zcd_pack_string(const char *str, unsigned *slots, size_t cap, size_t *n_used);
-
-/**
- * \ingroup H5Z
- * \brief Unpack a NUL-terminated string from cd_values slots.
- * \since 2.2.0
- */
-H5_DLL herr_t H5Zcd_unpack_string(const unsigned *slots, size_t n_slots, char *buf, size_t bufsz);
-
-/**
- * \ingroup H5Z
- * \brief Pack an int64_t value into two consecutive unsigned int cd_values slots (little-endian).
- * \since 2.2.0
- */
-H5_DLL herr_t H5Zcd_pack_int64(int64_t val, unsigned *slots, size_t cap, size_t *n_used);
-
-/**
- * \ingroup H5Z
- * \brief Unpack an int64_t value from two consecutive unsigned int cd_values slots.
- * \since 2.2.0
- */
-H5_DLL herr_t H5Zcd_unpack_int64(const unsigned *slots, size_t n_slots, int64_t *val);
-
-/**
- * \ingroup H5Z
  *
  * \brief Registers a new filter with the HDF5 library
  *

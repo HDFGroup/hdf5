@@ -1071,105 +1071,6 @@ error:
 }
 
 /* -----------------------------------------------------------------------
- * cd_packing helper tests
- * ---------------------------------------------------------------------- */
-static int
-test_cd_packing(void)
-{
-    unsigned slots[8];
-    size_t   n_used;
-    double   dval_out;
-    float    fval_out;
-    char     sbuf[64];
-
-    TESTING("H5Zcd_pack/unpack double round-trip");
-    {
-        double dval = 3.14159265358979;
-        if (H5Zcd_pack_double(dval, slots, 8, &n_used) < 0)
-            TEST_ERROR;
-        if (n_used != 2)
-            TEST_ERROR;
-        if (H5Zcd_unpack_double(slots, n_used, &dval_out) < 0)
-            TEST_ERROR;
-        if (dval_out != dval)
-            TEST_ERROR;
-    }
-    PASSED();
-
-    TESTING("H5Zcd_pack/unpack float round-trip");
-    {
-        float fval = 2.718f;
-        if (H5Zcd_pack_float(fval, slots, 8, &n_used) < 0)
-            TEST_ERROR;
-        if (n_used != 1)
-            TEST_ERROR;
-        if (H5Zcd_unpack_float(slots, n_used, &fval_out) < 0)
-            TEST_ERROR;
-        if (fval_out != fval)
-            TEST_ERROR;
-    }
-    PASSED();
-
-    TESTING("H5Zcd_pack/unpack string round-trip");
-    {
-        const char *src = "hello";
-        if (H5Zcd_pack_string(src, slots, 8, &n_used) < 0)
-            TEST_ERROR;
-        if (H5Zcd_unpack_string(slots, n_used, sbuf, sizeof(sbuf)) < 0)
-            TEST_ERROR;
-        if (strcmp(sbuf, src) != 0)
-            TEST_ERROR;
-    }
-    PASSED();
-
-    TESTING("H5Zcd_pack/unpack int64 round-trip");
-    {
-        int64_t src = INT64_C(-123456789012345), dst;
-        if (H5Zcd_pack_int64(src, slots, 8, &n_used) < 0)
-            TEST_ERROR;
-        if (n_used != 2)
-            TEST_ERROR;
-        if (H5Zcd_unpack_int64(slots, n_used, &dst) < 0)
-            TEST_ERROR;
-        if (dst != src)
-            TEST_ERROR;
-    }
-    PASSED();
-
-    TESTING("H5Zcd_pack_double: cap=1 (insufficient) returns error");
-    H5E_BEGIN_TRY
-    {
-        if (H5Zcd_pack_double(1.0, slots, 1, &n_used) >= 0)
-            TEST_ERROR;
-    }
-    H5E_END_TRY
-    PASSED();
-
-    TESTING("H5Zcd_pack_string: cap=0 (insufficient) returns error");
-    H5E_BEGIN_TRY
-    {
-        if (H5Zcd_pack_string("hi", slots, 0, &n_used) >= 0)
-            TEST_ERROR;
-    }
-    H5E_END_TRY
-    PASSED();
-
-    TESTING("H5Zcd_unpack_double: n_slots=1 (insufficient) returns error");
-    H5E_BEGIN_TRY
-    {
-        if (H5Zcd_unpack_double(slots, 1, &dval_out) >= 0)
-            TEST_ERROR;
-    }
-    H5E_END_TRY
-    PASSED();
-
-    return 0;
-
-error:
-    return -1;
-}
-
-/* -----------------------------------------------------------------------
  * Additional coverage tests
  * ---------------------------------------------------------------------- */
 
@@ -2268,9 +2169,6 @@ main(void)
 
     /* H5Z_class3_t name field tests */
     nerrors += test_class3_name() < 0 ? 1 : 0;
-
-    /* cd_packing helper tests */
-    nerrors += test_cd_packing() < 0 ? 1 : 0;
 
     /* H5Pappend_filter callback contract tests */
     nerrors += test_callback_contracts() < 0 ? 1 : 0;

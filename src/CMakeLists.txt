@@ -984,7 +984,6 @@ set (H5WB_PRIVATE_HDRS
 
 set (H5Z_SOURCES
     ${HDF5_SRC_DIR}/H5Z.c
-    ${HDF5_SRC_DIR}/H5Zcd.c
     ${HDF5_SRC_DIR}/H5Zconfig.c
     ${HDF5_SRC_DIR}/H5Zdeflate.c
     ${HDF5_SRC_DIR}/H5Zfletcher32.c
