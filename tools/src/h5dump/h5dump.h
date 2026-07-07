@@ -283,10 +283,9 @@ typedef struct {
     int include_attrs;          /* Display attributes */
     int display_vds_first;      /* vds display to all by default */
     int vds_gap_size;           /* vds skip missing files default is none */
-    int display_filter_params;  /* emit PARAMS_STRING in FILTERS block */
 } dump_opt_t;
 dump_opt_t dump_opts = {true, false, true,  true,  false, false, false, false, false,
-                        true, false, false, false, false, true,  false, 0,     false};
+                        true, false, false, false, false, true,  false, 0};
 
 #define PACKED_BITS_MAX      8                       /* Maximum number of packed-bits to display */
 #define PACKED_BITS_SIZE_MAX (8 * sizeof(long long)) /* Maximum bits size of integer types of packed-bits */

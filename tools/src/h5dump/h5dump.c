@@ -785,10 +785,6 @@ parse_start:
                 break;
             case 'p':
                 dump_opts.display_dcpl = true;
-                /* RFC-HDFG-2026-001 §9: -p also prints PARAMS_STRING in the
-                 * FILTERS block, matching the existing per-filter PARAMS{}
-                 * output for user-defined filters. */
-                dump_opts.display_filter_params = true;
                 break;
             case 'y':
                 dump_opts.display_ai = false;

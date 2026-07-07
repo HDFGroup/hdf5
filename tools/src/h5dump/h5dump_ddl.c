@@ -958,7 +958,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     memset(&ctx, 0, sizeof(ctx));
     ctx.indent_level       = dump_indent / COL;
     ctx.cur_column         = dump_indent;
-    ctx.show_filter_params = dump_opts.display_filter_params;
+    ctx.show_filter_params = dump_opts.display_dcpl;
 
     string_dataformat = *outputformat;
 
