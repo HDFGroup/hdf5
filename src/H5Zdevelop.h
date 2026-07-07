@@ -26,11 +26,9 @@
 /*****************/
 
 /**
- * Default version of the filter class struct's \c version field, used by
+ * Version of the filter class struct's \c version field used by
  * \c H5Z_class2_t. \c H5Z_class3_t plugins set \c version to the literal
- * value \c 2 instead (see \c H5Z_class3_t's documentation) -- there is no
- * separate named constant for it, since it's the same \c version field,
- * not an independent counter.
+ * value \c 2 instead (see \c H5Z_class3_t's documentation).
  */
 #define H5Z_CLASS_T_VERS (1)
 

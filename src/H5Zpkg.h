@@ -20,12 +20,9 @@
 /* Include private header file */
 #include "H5Zprivate.h" /* Filter functions                */
 
-/* Package-private version-field value identifying H5Z_class3_t, used only
- * for internal dispatch in H5Zregister()/H5Z_register(). Deliberately not
- * exposed in H5Zdevelop.h: plugin authors set the version field to the
- * literal value 2 (see H5Z_class3_t's documentation), and this constant is
- * pinned to 2 forever regardless of any future H5Z_CLASS_T_VERS_MAX growth,
- * so it must not be confused with (or replaced by) that public constant. */
+/* Version-field value identifying H5Z_class3_t, for internal dispatch in
+ * H5Zregister()/H5Z_register(). Pinned to 2, independent of
+ * H5Z_CLASS_T_VERS_MAX. */
 #define H5Z_CLASS3_T_VERS_INTERNAL (2)
 
 /*

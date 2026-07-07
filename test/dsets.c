@@ -2741,8 +2741,6 @@ test_get_filter_info(void)
     if (H5Zget_filter_info(H5Z_FILTER_SZIP, &flags) < 0)
         TEST_ERROR;
 
-    /* Check the reported flags against the actual encoder_present state,
-     * rather than checking flags against themselves. */
     if (H5Z_SZIP->encoder_present) {
         if (((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) ||
             ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
