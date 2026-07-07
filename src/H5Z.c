@@ -1550,9 +1550,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*in,out*/, H5Z_EDC_t edc_read,
-             H5Z_cb_t cb_struct, size_t *nbytes /*in,out*/, size_t *buf_size /*in,out*/,
-             void **buf /*in,out*/, hid_t dxpl_id, const hsize_t *scaled, size_t ndims)
+H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, hid_t dxpl_id, const hsize_t *scaled, size_t ndims,
+             unsigned *filter_mask /*in,out*/, H5Z_EDC_t edc_read, H5Z_cb_t cb_struct,
+             size_t *nbytes /*in,out*/, size_t *buf_size /*in,out*/, void **buf /*in,out*/)
 {
     size_t       idx;
     size_t       new_nbytes;

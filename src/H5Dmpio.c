@@ -4614,10 +4614,11 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
         if (chunk_entry->need_read && !chunk_entry->skip_filter_pline) {
             /* ndims == dataset rank == chunk.ndims - 1 (chunk layout includes trailing element-size dim) */
             if (H5Z_pipeline(&chunk_info->dset_info->dset->shared->dcpl_cache.pline, H5Z_FLAG_REVERSE,
+                             H5CX_get_dxpl(), chunk_info->scaled,
+                             chunk_info->dset_info->dset->shared->ndims,
                              &(chunk_entry->index_info.filter_mask), err_detect, filter_cb,
                              (size_t *)&chunk_entry->chunk_new.length, &chunk_entry->chunk_buf_size,
-                             &chunk_entry->buf, H5CX_get_dxpl(), chunk_info->scaled,
-                             chunk_info->dset_info->dset->shared->ndims) < 0)
+                             &chunk_entry->buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "couldn't unfilter chunk for modifying");
         }
 
@@ -4838,10 +4839,11 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
          */
         if (chunk_entry->need_read && !chunk_entry->skip_filter_pline) {
             if (H5Z_pipeline(&chunk_info->dset_info->dset->shared->dcpl_cache.pline, H5Z_FLAG_REVERSE,
+                             H5CX_get_dxpl(), chunk_info->scaled,
+                             chunk_info->dset_info->dset->shared->ndims,
                              &(chunk_entry->index_info.filter_mask), err_detect, filter_cb,
                              (size_t *)&chunk_entry->chunk_new.length, &chunk_entry->chunk_buf_size,
-                             &chunk_entry->buf, H5CX_get_dxpl(), chunk_info->scaled,
-                             chunk_info->dset_info->dset->shared->ndims) < 0)
+                             &chunk_entry->buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "couldn't unfilter chunk for modifying");
         }
 
@@ -4930,11 +4932,12 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
         if (!chunk_list->chunk_infos[info_idx].skip_filter_pline) {
             if (H5Z_pipeline(
                     &chunk_list->chunk_infos[info_idx].chunk_info->dset_info->dset->shared->dcpl_cache.pline,
-                    0, &(chunk_list->chunk_infos[info_idx].index_info.filter_mask), err_detect, filter_cb,
+                    0, H5CX_get_dxpl(), chunk_list->chunk_infos[info_idx].chunk_info->scaled,
+                    chunk_list->chunk_infos[info_idx].chunk_info->dset_info->dset->shared->ndims,
+                    &(chunk_list->chunk_infos[info_idx].index_info.filter_mask), err_detect, filter_cb,
                     (size_t *)&chunk_list->chunk_infos[info_idx].chunk_new.length,
-                    &chunk_list->chunk_infos[info_idx].chunk_buf_size, &chunk_list->chunk_infos[info_idx].buf,
-                    H5CX_get_dxpl(), chunk_list->chunk_infos[info_idx].chunk_info->scaled,
-                    chunk_list->chunk_infos[info_idx].chunk_info->dset_info->dset->shared->ndims) < 0)
+                    &chunk_list->chunk_infos[info_idx].chunk_buf_size,
+                    &chunk_list->chunk_infos[info_idx].buf) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "output pipeline failed");
         }
 

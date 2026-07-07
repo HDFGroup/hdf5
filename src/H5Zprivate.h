@@ -80,10 +80,10 @@ H5_DLL herr_t H5Z_append(struct H5O_pline_t *pline, H5Z_filter_t filter, unsigne
                          const unsigned int cd_values[]);
 H5_DLL herr_t H5Z_modify(const struct H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
                          size_t cd_nelmts, const unsigned int cd_values[]);
-H5_DLL herr_t H5Z_pipeline(const struct H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*in,out*/,
+H5_DLL herr_t H5Z_pipeline(const struct H5O_pline_t *pline, unsigned flags, hid_t dxpl_id,
+                           const hsize_t *scaled, size_t ndims, unsigned *filter_mask /*in,out*/,
                            H5Z_EDC_t edc_read, H5Z_cb_t cb_struct, size_t *nbytes /*in,out*/,
-                           size_t *buf_size /*in,out*/, void **buf /*in,out*/, hid_t dxpl_id,
-                           const hsize_t *scaled, size_t ndims);
+                           size_t *buf_size /*in,out*/, void **buf /*in,out*/);
 H5_DLL herr_t H5Z_find(bool attempt, H5Z_filter_t id, H5Z_class2_t **cls);
 /* Find filter entry; returns pointer into internal table (cast-compatible with H5Z_class2_t *) */
 struct H5Z_entry_t; /* forward decl; full def in H5Zpkg.h */
