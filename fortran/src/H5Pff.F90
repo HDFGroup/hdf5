@@ -1652,15 +1652,15 @@ CONTAINS
 !!
 !!          The three supported calling modes are:
 !!
-!!          - <b>Size query</b> — omit \p params_buf, provide \p params_len.
+!!          - <b>Size query</b> - omit \p params_buf, provide \p params_len.
 !!            Passes a NULL buffer to the C layer and returns the required
 !!            character count (excluding NUL) in \p params_len.
 !!
-!!          - <b>Fill only</b> — provide \p params_buf, omit \p params_len.
+!!          - <b>Fill only</b> - provide \p params_buf, omit \p params_len.
 !!            The buffer must be pre-allocated large enough; no length is
 !!            returned.
 !!
-!!          - <b>Fill and verify</b> — provide both.  The buffer is filled and
+!!          - <b>Fill and verify</b> - provide both.  The buffer is filled and
 !!            \p params_len is set to the actual character count, allowing the
 !!            caller to detect truncation (\p params_len > LEN(\p params_buf)).
 !!
