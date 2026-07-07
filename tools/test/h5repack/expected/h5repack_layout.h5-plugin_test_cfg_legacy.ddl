@@ -12,7 +12,7 @@ GROUP "/" {
             FILTER_ID 261
             COMMENT dynlib3
             PARAMS { 9 }
-            PARAMS_STRING "mode=rate,rate=0.9"
+            PARAMS_STRING 'mode=rate,rate=0.9'
             DESCRIPTION "Test filter with string-based configuration (mode=rate)"
          }
       }
@@ -36,7 +36,7 @@ GROUP "/" {
             FILTER_ID 261
             COMMENT dynlib3
             PARAMS { 9 }
-            PARAMS_STRING "mode=rate,rate=0.9"
+            PARAMS_STRING 'mode=rate,rate=0.9'
             DESCRIPTION "Test filter with string-based configuration (mode=rate)"
          }
       }
@@ -60,7 +60,7 @@ GROUP "/" {
             FILTER_ID 261
             COMMENT dynlib3
             PARAMS { 9 }
-            PARAMS_STRING "mode=rate,rate=0.9"
+            PARAMS_STRING 'mode=rate,rate=0.9'
             DESCRIPTION "Test filter with string-based configuration (mode=rate)"
          }
       }
@@ -84,7 +84,7 @@ GROUP "/" {
             FILTER_ID 261
             COMMENT dynlib3
             PARAMS { 9 }
-            PARAMS_STRING "mode=rate,rate=0.9"
+            PARAMS_STRING 'mode=rate,rate=0.9'
             DESCRIPTION "Test filter with string-based configuration (mode=rate)"
          }
       }
@@ -108,7 +108,7 @@ GROUP "/" {
             FILTER_ID 261
             COMMENT dynlib3
             PARAMS { 9 }
-            PARAMS_STRING "mode=rate,rate=0.9"
+            PARAMS_STRING 'mode=rate,rate=0.9'
             DESCRIPTION "Test filter with string-based configuration (mode=rate)"
          }
       }
@@ -132,7 +132,7 @@ GROUP "/" {
             FILTER_ID 261
             COMMENT dynlib3
             PARAMS { 9 }
-            PARAMS_STRING "mode=rate,rate=0.9"
+            PARAMS_STRING 'mode=rate,rate=0.9'
             DESCRIPTION "Test filter with string-based configuration (mode=rate)"
          }
       }
@@ -156,7 +156,7 @@ GROUP "/" {
             FILTER_ID 261
             COMMENT dynlib3
             PARAMS { 9 }
-            PARAMS_STRING "mode=rate,rate=0.9"
+            PARAMS_STRING 'mode=rate,rate=0.9'
             DESCRIPTION "Test filter with string-based configuration (mode=rate)"
          }
       }

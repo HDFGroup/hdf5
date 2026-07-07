@@ -8,7 +8,7 @@ DATASET "shuffle" {
    }
    FILTERS {
       PREPROCESSING SHUFFLE {
-         PARAMS_STRING "cd_values=4"
+         PARAMS_STRING 'cd_values=4'
          DESCRIPTION "Byte shuffle preprocessing to improve downstream compression"
       }
    }

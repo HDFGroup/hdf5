@@ -9,7 +9,7 @@ DATASET "scaleoffset" {
    FILTERS {
       COMPRESSION SCALEOFFSET {
          MIN BITS 2
-         PARAMS_STRING "scale_type = \"int\", scale_factor = 4"
+         PARAMS_STRING 'scale_type = "int", scale_factor = 4'
          DESCRIPTION "Scale+offset lossy compression for integer/float data"
       }
    }

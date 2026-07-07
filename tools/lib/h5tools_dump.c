@@ -3180,9 +3180,8 @@ h5tools_print_fill_value(h5tools_str_t *buffer /*in,out*/, const h5tool_format_t
 /*-------------------------------------------------------------------------
  * Function:    h5tools_dump_filter_extra
  *
- * Purpose:     RFC-HDFG-2026-001 §9: emits PARAMS_STRING and DESCRIPTION
- *              lines for a single filter, nested inside that filter's own
- *              FILTERS{} entry rather than as siblings of it.
+ * Purpose:     Emits PARAMS_STRING and DESCRIPTION lines for a single
+ *              filter, nested inside that filter's own FILTERS{} entry.
  *
  * Return:      void
  *-------------------------------------------------------------------------
@@ -3195,7 +3194,7 @@ h5tools_dump_filter_extra(FILE *stream, const h5tool_format_t *info, h5tools_con
     if (params_str) {
         ctx->need_prefix = true;
         h5tools_str_reset(buffer);
-        h5tools_str_append(buffer, "%s \"%s\"", PARAMS_STRING, params_str);
+        h5tools_str_append(buffer, "%s '%s'", PARAMS_STRING, params_str);
         h5tools_render_element(stream, info, ctx, buffer, curr_pos, ncols, (hsize_t)0, (hsize_t)0);
     }
 
@@ -3603,21 +3602,24 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                 if (filtn < 0)
                     continue; /* nothing to print for invalid filter */
 
-                /* RFC-HDFG-2026-001 §9: -p prints PARAMS_STRING and DESCRIPTION
-                 * nested inside this filter's own FILTERS{} entry. */
+                /* -p prints PARAMS_STRING and DESCRIPTION nested inside this
+                 * filter's own FILTERS{} entry. */
                 if (dcpl_id >= 0 && ctx->show_filter_params) {
                     size_t plen = 0;
                     if (H5Pget_filter_params_by_idx(dcpl_id, (unsigned)i, params_str_buf,
                                                     sizeof(params_str_buf), &plen) >= 0 &&
                         plen > 0) {
-                        /* escape embedded double-quote characters as \" so the
-                         * outer quoted form is unambiguous. */
+                        /* PARAMS_STRING is wrapped in single quotes: its content is
+                         * TOML, whose only quoted forms are "..." and '...', neither
+                         * of which can contain a literal unescaped single quote --
+                         * except a TOML double-quoted string value may itself contain
+                         * one (e.g. "it's"), so still escape it here for that case. */
                         size_t ebuf_size = 2 * plen + 1;
                         char  *ebuf      = (char *)malloc(ebuf_size);
                         if (ebuf) {
                             size_t in_i, out_i = 0;
                             for (in_i = 0; in_i < plen; in_i++) {
-                                if (params_str_buf[in_i] == '\\' || params_str_buf[in_i] == '"')
+                                if (params_str_buf[in_i] == '\\' || params_str_buf[in_i] == '\'')
                                     ebuf[out_i++] = '\\';
                                 ebuf[out_i++] = params_str_buf[in_i];
                             }

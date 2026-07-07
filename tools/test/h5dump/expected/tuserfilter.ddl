@@ -11,7 +11,7 @@ DATASET "myfilter" {
          FILTER_ID 405
          COMMENT myfilter
          PARAMS { 5 6 }
-         PARAMS_STRING "cd_values=5:6"
+         PARAMS_STRING 'cd_values=5:6'
       }
    }
    FILLVALUE {

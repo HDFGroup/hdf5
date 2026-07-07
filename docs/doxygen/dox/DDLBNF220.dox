@@ -492,10 +492,15 @@ This section contains a brief explanation of the symbols used in the DDL.
 // it is nested inside the FILTERS{} entry of the filter it describes,
 // not as a sibling of that entry.
 
-<filter_params_string> ::= PARAMS_STRING <string_data>
+<filter_params_string> ::= PARAMS_STRING <quoted_toml_data>
 // the human-readable form of this filter's cd_values, as returned by the
 // filter's get_config callback, or the raw "cd_values=..." form if the
 // filter has no get_config callback
+
+<quoted_toml_data> ::= a TOML key=value string, enclosed in single quotes
+// unlike <string_data>, single quotes are used here rather than double
+// quotes, since the value is itself TOML text that commonly contains
+// double-quoted TOML string values (e.g. 'mode = "rate", rate = 3.5')
 
 <filter_description> ::= DESCRIPTION <string_data>
 // the registered filter's free-form description string, omitted if the

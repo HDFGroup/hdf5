@@ -8,7 +8,7 @@ DATASET "nbit" {
    }
    FILTERS {
       COMPRESSION NBIT {
-         PARAMS_STRING "cd_values=8:0:50:1:4:0:17:0"
+         PARAMS_STRING 'cd_values=8:0:50:1:4:0:17:0'
          DESCRIPTION "N-bit packing for non-byte-aligned integer/float storage"
       }
    }

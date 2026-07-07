@@ -9,7 +9,7 @@ DATASET "deflate" {
    FILTERS {
       COMPRESSION DEFLATE {
          LEVEL 9
-         PARAMS_STRING "level = 9"
+         PARAMS_STRING 'level = 9'
          DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
       }
    }

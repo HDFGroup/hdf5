@@ -10,7 +10,7 @@ GROUP "/" {
       FILTERS {
          COMPRESSION DEFLATE {
             LEVEL 2
-            PARAMS_STRING "level = 2"
+            PARAMS_STRING 'level = 2'
             DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
          }
       }
@@ -32,7 +32,7 @@ GROUP "/" {
       FILTERS {
          COMPRESSION DEFLATE {
             LEVEL 2
-            PARAMS_STRING "level = 2"
+            PARAMS_STRING 'level = 2'
             DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
          }
       }
@@ -54,7 +54,7 @@ GROUP "/" {
       FILTERS {
          COMPRESSION DEFLATE {
             LEVEL 2
-            PARAMS_STRING "level = 2"
+            PARAMS_STRING 'level = 2'
             DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
          }
       }
@@ -76,7 +76,7 @@ GROUP "/" {
       FILTERS {
          COMPRESSION DEFLATE {
             LEVEL 2
-            PARAMS_STRING "level = 2"
+            PARAMS_STRING 'level = 2'
             DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
          }
       }
@@ -98,7 +98,7 @@ GROUP "/" {
       FILTERS {
          COMPRESSION DEFLATE {
             LEVEL 2
-            PARAMS_STRING "level = 2"
+            PARAMS_STRING 'level = 2'
             DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
          }
       }
@@ -120,7 +120,7 @@ GROUP "/" {
       FILTERS {
          COMPRESSION DEFLATE {
             LEVEL 2
-            PARAMS_STRING "level = 2"
+            PARAMS_STRING 'level = 2'
             DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
          }
       }
@@ -142,7 +142,7 @@ GROUP "/" {
       FILTERS {
          COMPRESSION DEFLATE {
             LEVEL 2
-            PARAMS_STRING "level = 2"
+            PARAMS_STRING 'level = 2'
             DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
          }
       }
