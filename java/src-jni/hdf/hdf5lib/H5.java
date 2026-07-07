@@ -15748,7 +15748,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5Z
      *
-     * H5Zget_filter_info2 retrieves registry-level information about a filter,
+     * H5Zget_filter_class_info retrieves registry-level information about a filter,
      * including its canonical name, description, and whether it implements the
      * set_config / get_config callbacks (H5Z_class3_t plugin class).
      *
@@ -15760,7 +15760,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *            Error from the HDF5 Library.
      **/
-    public synchronized static native hdf.hdf5lib.structs.H5Z_class_info_t H5Zget_filter_info2(int filter)
+    public synchronized static native hdf.hdf5lib.structs.H5Z_class_info_t H5Zget_filter_class_info(int filter)
         throws HDF5LibraryException;
 
     /**

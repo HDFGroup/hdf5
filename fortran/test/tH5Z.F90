@@ -570,7 +570,7 @@ CONTAINS
     SUBROUTINE get_filter_info2_test(total_error)
 !   Tests the h5zget_filter_info_f generic interface:
 !     - variant 1 (INTEGER second arg) dispatches to H5Zget_filter_info
-!     - variant 2 (TYPE(h5z_class_info_f_t) second arg) dispatches to H5Zget_filter_info2
+!     - variant 2 (TYPE(h5z_class_info_f_t) second arg) dispatches to H5Zget_filter_class_info
 
       IMPLICIT NONE
       INTEGER, INTENT(OUT) :: total_error
@@ -599,7 +599,7 @@ CONTAINS
       END IF
 
       !
-      ! Variant 2: TYPE(h5z_class_info_f_t) second argument (H5Zget_filter_info2)
+      ! Variant 2: TYPE(h5z_class_info_f_t) second argument (H5Zget_filter_class_info)
       !
       ! --- DEFLATE ---
       CALL h5zfilter_avail_f(H5Z_FILTER_DEFLATE_F, avail, error)

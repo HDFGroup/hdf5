@@ -1965,7 +1965,7 @@ error:
 }
 
 /* -----------------------------------------------------------------------
- * H5Zget_filter_info2: registry-level info incl. name + description
+ * H5Zget_filter_class_info: registry-level info incl. name + description
  * ---------------------------------------------------------------------- */
 static int
 test_get_filter_info2_builtin(void)
@@ -1973,10 +1973,10 @@ test_get_filter_info2_builtin(void)
     H5Z_class_info_t info;
     herr_t           ret;
 
-    TESTING("H5Zget_filter_info2: deflate built-in (canonical name + description)");
+    TESTING("H5Zget_filter_class_info: deflate built-in (canonical name + description)");
 #ifdef H5_HAVE_FILTER_DEFLATE
     memset(&info, 0xAA, sizeof(info));
-    if (H5Zget_filter_info2(H5Z_FILTER_DEFLATE, &info) < 0)
+    if (H5Zget_filter_class_info(H5Z_FILTER_DEFLATE, &info) < 0)
         TEST_ERROR;
     if (info.id != H5Z_FILTER_DEFLATE)
         TEST_ERROR;
@@ -2000,9 +2000,9 @@ test_get_filter_info2_builtin(void)
     (void)ret;
 #endif
 
-    TESTING("H5Zget_filter_info2: scaleoffset (no description in built-in registration)");
+    TESTING("H5Zget_filter_class_info: scaleoffset (no description in built-in registration)");
     memset(&info, 0xAA, sizeof(info));
-    if (H5Zget_filter_info2(H5Z_FILTER_SCALEOFFSET, &info) < 0)
+    if (H5Zget_filter_class_info(H5Z_FILTER_SCALEOFFSET, &info) < 0)
         TEST_ERROR;
     if (info.id != H5Z_FILTER_SCALEOFFSET)
         TEST_ERROR;
@@ -2017,9 +2017,9 @@ test_get_filter_info2_builtin(void)
         TEST_ERROR;
     PASSED();
 
-    TESTING("H5Zget_filter_info2: shuffle (set_config but no get_config)");
+    TESTING("H5Zget_filter_class_info: shuffle (set_config but no get_config)");
     memset(&info, 0xAA, sizeof(info));
-    if (H5Zget_filter_info2(H5Z_FILTER_SHUFFLE, &info) < 0)
+    if (H5Zget_filter_class_info(H5Z_FILTER_SHUFFLE, &info) < 0)
         TEST_ERROR;
     if (info.id != H5Z_FILTER_SHUFFLE)
         TEST_ERROR;
@@ -2031,20 +2031,20 @@ test_get_filter_info2_builtin(void)
         TEST_ERROR;
     PASSED();
 
-    TESTING("H5Zget_filter_info2: NULL info pointer rejected");
+    TESTING("H5Zget_filter_class_info: NULL info pointer rejected");
     H5E_BEGIN_TRY
     {
-        ret = H5Zget_filter_info2(H5Z_FILTER_SHUFFLE, NULL);
+        ret = H5Zget_filter_class_info(H5Z_FILTER_SHUFFLE, NULL);
     }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
     PASSED();
 
-    TESTING("H5Zget_filter_info2: unknown filter ID fails with H5E_NOFILTER");
+    TESTING("H5Zget_filter_class_info: unknown filter ID fails with H5E_NOFILTER");
     H5E_BEGIN_TRY
     {
-        ret = H5Zget_filter_info2((H5Z_filter_t)0x6FFE /*unregistered*/, &info);
+        ret = H5Zget_filter_class_info((H5Z_filter_t)0x6FFE /*unregistered*/, &info);
     }
     H5E_END_TRY
     if (ret >= 0)

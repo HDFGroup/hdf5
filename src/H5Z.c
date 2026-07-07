@@ -2003,7 +2003,7 @@ done:
 } /* end H5Zget_filter_info() */
 
 /*-------------------------------------------------------------------------
- * Function: H5Zget_filter_info2
+ * Function: H5Zget_filter_class_info
  *
  * Purpose:  Retrieves registry-level information about a registered filter:
  *           the encode/decode config flags (same bits returned by the v1
@@ -2023,7 +2023,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Zget_filter_info2(H5Z_filter_t filter, H5Z_class_info_t *info /*out*/)
+H5Zget_filter_class_info(H5Z_filter_t filter, H5Z_class_info_t *info /*out*/)
 {
     H5Z_entry_t *entry = NULL;
     htri_t       avail;
@@ -2061,7 +2061,7 @@ H5Zget_filter_info2(H5Z_filter_t filter, H5Z_class_info_t *info /*out*/)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Zget_filter_info2() */
+} /* end H5Zget_filter_class_info() */
 
 /*-------------------------------------------------------------------------
  * Function: H5Z_get_filter_info

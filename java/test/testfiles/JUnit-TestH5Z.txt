@@ -5,8 +5,8 @@ JUnit version 4.13.2
 .testH5Zconfig_get_param_missing_key
 .testH5Zconfig_get_param_int
 .testH5Zconfig_get_param_str
-.testH5Zget_filter_info2
-.testH5Zget_filter_info2_invalid
+.testH5Zget_filter_class_info
+.testH5Zget_filter_class_info_invalid
 .testH5Zconfig_get_param_bool
 .testH5Zunregister_predefined
 .testH5Pappend_filter_string

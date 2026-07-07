@@ -380,10 +380,10 @@ public class TestH5Zffm {
     }
 
     /**
-     * Test H5Zget_filter_info2 for DEFLATE via raw FFM binding
+     * Test H5Zget_filter_class_info for DEFLATE via raw FFM binding
      */
     @Test
-    public void testH5Zget_filter_info2_deflate()
+    public void testH5Zget_filter_class_info_deflate()
     {
         System.out.print(testname.getMethodName());
 
@@ -395,14 +395,14 @@ public class TestH5Zffm {
 
             try (Arena arena = Arena.ofConfined()) {
                 MemorySegment infoSeg = arena.allocate(layout);
-                int result            = hdf5_h.H5Zget_filter_info2(hdf5_h.H5Z_FILTER_DEFLATE(), infoSeg);
-                assertEquals("H5Zget_filter_info2(DEFLATE) should succeed", 0, result);
+                int result            = hdf5_h.H5Zget_filter_class_info(hdf5_h.H5Z_FILTER_DEFLATE(), infoSeg);
+                assertEquals("H5Zget_filter_class_info(DEFLATE) should succeed", 0, result);
 
                 int id    = (int)idH.get(infoSeg, 0L);
                 int flags = (int)flagsH.get(infoSeg, 0L);
 
-                assertEquals("H5Zget_filter_info2: DEFLATE id", hdf5_h.H5Z_FILTER_DEFLATE(), id);
-                assertTrue("H5Zget_filter_info2: DEFLATE decode enabled",
+                assertEquals("H5Zget_filter_class_info: DEFLATE id", hdf5_h.H5Z_FILTER_DEFLATE(), id);
+                assertTrue("H5Zget_filter_class_info: DEFLATE decode enabled",
                            (flags & hdf5_h.H5Z_FILTER_CONFIG_DECODE_ENABLED()) != 0);
             }
         }
@@ -411,10 +411,10 @@ public class TestH5Zffm {
     }
 
     /**
-     * Test H5Zget_filter_info2 for SHUFFLE via raw FFM binding
+     * Test H5Zget_filter_class_info for SHUFFLE via raw FFM binding
      */
     @Test
-    public void testH5Zget_filter_info2_shuffle()
+    public void testH5Zget_filter_class_info_shuffle()
     {
         System.out.print(testname.getMethodName());
 
@@ -424,14 +424,14 @@ public class TestH5Zffm {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment infoSeg = arena.allocate(layout);
-            int result            = hdf5_h.H5Zget_filter_info2(hdf5_h.H5Z_FILTER_SHUFFLE(), infoSeg);
-            assertEquals("H5Zget_filter_info2(SHUFFLE) should succeed", 0, result);
+            int result            = hdf5_h.H5Zget_filter_class_info(hdf5_h.H5Z_FILTER_SHUFFLE(), infoSeg);
+            assertEquals("H5Zget_filter_class_info(SHUFFLE) should succeed", 0, result);
 
             int id    = (int)idH.get(infoSeg, 0L);
             int flags = (int)flagsH.get(infoSeg, 0L);
 
-            assertEquals("H5Zget_filter_info2: SHUFFLE id", hdf5_h.H5Z_FILTER_SHUFFLE(), id);
-            assertTrue("H5Zget_filter_info2: SHUFFLE decode enabled",
+            assertEquals("H5Zget_filter_class_info: SHUFFLE id", hdf5_h.H5Z_FILTER_SHUFFLE(), id);
+            assertTrue("H5Zget_filter_class_info: SHUFFLE decode enabled",
                        (flags & hdf5_h.H5Z_FILTER_CONFIG_DECODE_ENABLED()) != 0);
         }
 
@@ -439,10 +439,10 @@ public class TestH5Zffm {
     }
 
     /**
-     * Test H5Zget_filter_info2 for FLETCHER32 via raw FFM binding
+     * Test H5Zget_filter_class_info for FLETCHER32 via raw FFM binding
      */
     @Test
-    public void testH5Zget_filter_info2_fletcher32()
+    public void testH5Zget_filter_class_info_fletcher32()
     {
         System.out.print(testname.getMethodName());
 
@@ -451,21 +451,21 @@ public class TestH5Zffm {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment infoSeg = arena.allocate(layout);
-            int result            = hdf5_h.H5Zget_filter_info2(hdf5_h.H5Z_FILTER_FLETCHER32(), infoSeg);
-            assertEquals("H5Zget_filter_info2(FLETCHER32) should succeed", 0, result);
+            int result            = hdf5_h.H5Zget_filter_class_info(hdf5_h.H5Z_FILTER_FLETCHER32(), infoSeg);
+            assertEquals("H5Zget_filter_class_info(FLETCHER32) should succeed", 0, result);
 
             int id = (int)idH.get(infoSeg, 0L);
-            assertEquals("H5Zget_filter_info2: FLETCHER32 id", hdf5_h.H5Z_FILTER_FLETCHER32(), id);
+            assertEquals("H5Zget_filter_class_info: FLETCHER32 id", hdf5_h.H5Z_FILTER_FLETCHER32(), id);
         }
 
         System.out.println();
     }
 
     /**
-     * Test H5Zget_filter_info2 with invalid filter ID returns error
+     * Test H5Zget_filter_class_info with invalid filter ID returns error
      */
     @Test
-    public void testH5Zget_filter_info2_invalid()
+    public void testH5Zget_filter_class_info_invalid()
     {
         System.out.print(testname.getMethodName());
 
@@ -473,8 +473,8 @@ public class TestH5Zffm {
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment infoSeg = arena.allocate(layout);
-            int result            = hdf5_h.H5Zget_filter_info2(32999, infoSeg);
-            assertTrue("H5Zget_filter_info2 with invalid filter should fail", result < 0);
+            int result            = hdf5_h.H5Zget_filter_class_info(32999, infoSeg);
+            assertTrue("H5Zget_filter_class_info with invalid filter should fail", result < 0);
         }
 
         System.out.println();

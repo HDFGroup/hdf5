@@ -23799,7 +23799,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5Z
      *
-     * H5Zget_filter_info2 retrieves registry-level information about a filter,
+     * H5Zget_filter_class_info retrieves registry-level information about a filter,
      * including its canonical name, description, and whether it implements the
      * set_config / get_config callbacks (H5Z_class3_t plugin class).
      *
@@ -23811,7 +23811,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *            Error from the HDF5 Library.
      **/
-    public static H5Z_class_info_t H5Zget_filter_info2(int filter) throws HDF5LibraryException
+    public static H5Z_class_info_t H5Zget_filter_class_info(int filter) throws HDF5LibraryException
     {
         // Layout of H5Z_class_info_t (64-bit):
         //   int            id                  @ 0
@@ -23840,7 +23840,7 @@ public class H5 implements java.io.Serializable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment infoSeg = arena.allocate(layout);
 
-            int status = org.hdfgroup.javahdf5.hdf5_h.H5Zget_filter_info2(filter, infoSeg);
+            int status = org.hdfgroup.javahdf5.hdf5_h.H5Zget_filter_class_info(filter, infoSeg);
             if (status < 0)
                 h5libraryError();
 
@@ -23868,7 +23868,7 @@ public class H5 implements java.io.Serializable {
             throw e;
         }
         catch (Throwable t) {
-            throw new HDF5LibraryException("H5Zget_filter_info2 failed: " + t.getMessage());
+            throw new HDF5LibraryException("H5Zget_filter_class_info failed: " + t.getMessage());
         }
     }
 

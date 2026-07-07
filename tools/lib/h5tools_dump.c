@@ -3200,7 +3200,7 @@ h5tools_dump_filter_extra(FILE *stream, const h5tool_format_t *info, h5tools_con
     }
 
     /* DESCRIPTION is a best-effort, registry-sourced label: it comes from the
-     * filter class's in-memory registration (H5Zget_filter_info2), not from
+     * filter class's in-memory registration (H5Zget_filter_class_info), not from
      * anything persisted in the file. Unlike COMMENT (the filter's
      * canonical_name, which is stored in the pipeline message and always
      * displays), DESCRIPTION is omitted whenever the filter isn't currently
@@ -3628,7 +3628,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
 
                     {
                         H5Z_class_info_t finfo;
-                        if (H5Zget_filter_info2(filtn, &finfo) >= 0 && finfo.description != NULL)
+                        if (H5Zget_filter_class_info(filtn, &finfo) >= 0 && finfo.description != NULL)
                             filter_descr = finfo.description;
                     }
                 }

@@ -44,10 +44,10 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Zget_1filter_1info(JNIEnv *, jclass
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Zget_filter_info2
+ * Method:    H5Zget_filter_class_info
  * Signature: (I)Lhdf/hdf5lib/structs/H5Z_class_info_t;
  */
-JNIEXPORT jobject JNICALL Java_hdf_hdf5lib_H5_H5Zget_1filter_1info2(JNIEnv *, jclass, jint);
+JNIEXPORT jobject JNICALL Java_hdf_hdf5lib_H5_H5Zget_1filter_1class_1info(JNIEnv *, jclass, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5

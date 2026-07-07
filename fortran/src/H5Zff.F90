@@ -79,11 +79,11 @@ MODULE H5Z
 !! \brief Queries filter configuration or retrieves registry-level filter information.
 !!
 !! This generic interface dispatches based on the type of the second argument:
-!! \li \c INTEGER — calls the original H5Zget_filter_info(), returning encode/decode flags only.
-!! \li \c TYPE(h5z_class_info_f_t) — calls H5Zget_filter_info2(), returning the full
+!! \li \c INTEGER - calls the original H5Zget_filter_info(), returning encode/decode flags only.
+!! \li \c TYPE(h5z_class_info_f_t) - calls H5Zget_filter_class_info(), returning the full
 !!     registry record including the canonical name, description, and callback flags.
 !!
-!! See C APIs: @ref H5Zget_filter_info(), @ref H5Zget_filter_info2()
+!! See C APIs: @ref H5Zget_filter_info(), @ref H5Zget_filter_class_info()
 !!
   INTERFACE h5zget_filter_info_f
     MODULE PROCEDURE h5zget_filter_info_flags_f
@@ -97,10 +97,10 @@ MODULE H5Z
 !!
 !! This generic interface dispatches to a type-specific implementation based
 !! on the declared type of \p value:
-!! \li \c INTEGER(C_INT64_T) — calls H5Zconfig_get_int()
-!! \li \c REAL(C_DOUBLE)     — calls H5Zconfig_get_double()
-!! \li \c LOGICAL            — calls H5Zconfig_get_bool()
-!! \li \c CHARACTER(LEN=*)   — calls H5Zconfig_get_str() (uses \p buf_size instead of \p found)
+!! \li \c INTEGER(C_INT64_T) - calls H5Zconfig_get_int()
+!! \li \c REAL(C_DOUBLE)     - calls H5Zconfig_get_double()
+!! \li \c LOGICAL            - calls H5Zconfig_get_bool()
+!! \li \c CHARACTER(LEN=*)   - calls H5Zconfig_get_str() (uses \p buf_size instead of \p found)
 !!
 !! \param params   Full parameter string (e.g. \c "level = 6, mode = \"fast\"").
 !! \param key      Name of the parameter to retrieve.
@@ -252,7 +252,7 @@ CONTAINS
 !!                characters respectively.
 !! \param hdferr  \fortran_error
 !!
-!! See C API: @ref H5Zget_filter_info2()
+!! See C API: @ref H5Zget_filter_class_info()
 !!
   SUBROUTINE h5zget_filter_info_class_f(filter, info, hdferr)
     USE ISO_C_BINDING, ONLY : C_INT, C_CHAR, C_PTR, C_F_POINTER, c_associated
@@ -265,16 +265,16 @@ CONTAINS
     CHARACTER(KIND=C_CHAR), POINTER, DIMENSION(:) :: cp
 
     INTERFACE
-       INTEGER(C_INT) FUNCTION H5Zget_filter_info2(filter, info) &
-            BIND(C, NAME='H5Zget_filter_info2')
+       INTEGER(C_INT) FUNCTION H5Zget_filter_class_info(filter, info) &
+            BIND(C, NAME='H5Zget_filter_class_info')
          USE ISO_C_BINDING, ONLY : C_INT
          IMPORT :: h5z_class_info_c_t
          INTEGER(C_INT),           VALUE, INTENT(IN)  :: filter
          TYPE(h5z_class_info_c_t),        INTENT(OUT) :: info
-       END FUNCTION H5Zget_filter_info2
+       END FUNCTION H5Zget_filter_class_info
     END INTERFACE
 
-    hdferr = INT(H5Zget_filter_info2(INT(filter, C_INT), c_info))
+    hdferr = INT(H5Zget_filter_class_info(INT(filter, C_INT), c_info))
 
     IF (hdferr >= 0) THEN
        info%id           = INT(c_info%id)

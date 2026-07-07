@@ -419,7 +419,7 @@ H5_DLL herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_confi
 
 /**
  * \brief Registry-level information about a filter (output of
- *        #H5Zget_filter_info2).
+ *        #H5Zget_filter_class_info).
  *
  * String fields point into library-owned storage; their lifetime extends
  * until the filter is unregistered (e.g. via #H5Zunregister or library
@@ -459,11 +459,11 @@ typedef struct H5Z_class_info_t {
  *
  * \return \herr_t
  *
- * \details H5Zget_filter_info2() is the v3 successor to #H5Zget_filter_info.
- *          Where the v1 call returns only the encode/decode config-flag bits,
- *          this call also exposes the filter's canonical \c name, its
- *          human-readable \c description, and whether the
- *          plugin implements the v3 \c set_config / \c get_config callbacks.
+ * \details H5Zget_filter_class_info() complements #H5Zget_filter_info, which
+ *          returns only the encode/decode config-flag bits. This call also
+ *          exposes the filter's canonical \c name, its human-readable
+ *          \c description, and whether the plugin implements the v3
+ *          \c set_config / \c get_config callbacks.
  *
  *          The function attempts to load the filter plugin if it is not yet
  *          registered (same dynamic-load policy as #H5Zfilter_avail).  If the
@@ -476,7 +476,7 @@ typedef struct H5Z_class_info_t {
  *
  * \since 2.2.0
  */
-H5_DLL herr_t H5Zget_filter_info2(H5Z_filter_t filter, H5Z_class_info_t *info /*out*/);
+H5_DLL herr_t H5Zget_filter_class_info(H5Z_filter_t filter, H5Z_class_info_t *info /*out*/);
 
 #ifdef __cplusplus
 }

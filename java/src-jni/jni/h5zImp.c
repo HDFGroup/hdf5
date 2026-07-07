@@ -80,11 +80,11 @@ done:
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Zget_filter_info2
+ * Method:    H5Zget_filter_class_info
  * Signature: (I)Lhdf/hdf5lib/structs/H5Z_class_info_t;
  */
 JNIEXPORT jobject JNICALL
-Java_hdf_hdf5lib_H5_H5Zget_1filter_1info2(JNIEnv *env, jclass clss, jint filter)
+Java_hdf_hdf5lib_H5_H5Zget_1filter_1class_1info(JNIEnv *env, jclass clss, jint filter)
 {
     H5Z_class_info_t info;
     jobject          ret_obj = NULL;
@@ -96,19 +96,19 @@ Java_hdf_hdf5lib_H5_H5Zget_1filter_1info2(JNIEnv *env, jclass clss, jint filter)
 
     memset(&info, 0, sizeof(info));
 
-    if (H5Zget_filter_info2((H5Z_filter_t)filter, &info) < 0)
+    if (H5Zget_filter_class_info((H5Z_filter_t)filter, &info) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     name_str = info.name ? ENVPTR->NewStringUTF(ENVONLY, info.name) : NULL;
     if (info.name && NULL == name_str) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Zget_filter_info2: could not create name string");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Zget_filter_class_info: could not create name string");
     }
 
     desc_str = info.description ? ENVPTR->NewStringUTF(ENVONLY, info.description) : NULL;
     if (info.description && NULL == desc_str) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Zget_filter_info2: could not create description string");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Zget_filter_class_info: could not create description string");
     }
 
     args[0].i = (jint)info.id;
@@ -124,7 +124,7 @@ Java_hdf_hdf5lib_H5_H5Zget_1filter_1info2(JNIEnv *env, jclass clss, jint filter)
 
 done:
     return ret_obj;
-} /* end Java_hdf_hdf5lib_H5_H5Zget_1filter_1info2 */
+} /* end Java_hdf_hdf5lib_H5_H5Zget_1filter_1class_1info */
 
 /*
  * Class:     hdf_hdf5lib_H5

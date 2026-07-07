@@ -15,7 +15,7 @@ package hdf.hdf5lib.structs;
 import java.io.Serializable;
 
 /**
- * Registry-level information about a filter (returned by H5Zget_filter_info2).
+ * Registry-level information about a filter (returned by H5Zget_filter_class_info).
  */
 public class H5Z_class_info_t implements Serializable {
     private static final long serialVersionUID = 1L;
