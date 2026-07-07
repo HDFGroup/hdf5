@@ -582,13 +582,20 @@ H5S__none_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, boo
     H5S_t *tmp_space = NULL;                    /* Pointer to actual dataspace to use,
                                                    either *space or a newly allocated one */
     uint32_t       version;                     /* Version number */
-    herr_t         ret_value = SUCCEED;         /* return value */
-    const uint8_t *p_end     = *p + p_size - 1; /* Pointer to last valid byte in buffer */
+    herr_t         ret_value = SUCCEED; /* return value */
+    const uint8_t *p_end;               /* Pointer to last valid byte in buffer */
 
     FUNC_ENTER_PACKAGE
 
     assert(p);
     assert(*p);
+
+    if (skip)
+        p_end = *p;
+    else if (p_size == 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "empty none selection buffer");
+    else
+        p_end = *p + p_size - 1;
 
     /* As part of the efforts to push all selection-type specific coding
        to the callbacks, the coding for the allocation of a null dataspace

@@ -526,6 +526,7 @@ H5S_select_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size)
     uint32_t       sel_type;         /* Pointer to the selection type */
     herr_t         ret_value = FAIL; /* Return value */
     const uint8_t *p_end     = NULL; /* Pointer to last valid byte in buffer */
+    size_t         sel_info_size;    /* Size of selection-type-specific information */
     bool           skip      = false;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -536,6 +537,8 @@ H5S_select_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size)
     skip = (p_size == SIZE_MAX ? true : false);
     if (skip)
         p_end = *p;
+    else if (p_size < sizeof(uint32_t))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "selection buffer too small");
     else
         p_end = *p + p_size - 1;
 
@@ -545,23 +548,24 @@ H5S_select_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size)
     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, *p, sizeof(uint32_t), p_end))
         HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection type");
     UINT32DECODE(*p, sel_type);
+    sel_info_size = (skip ? SIZE_MAX : p_size - sizeof(uint32_t));
 
     /* Make routine for selection type */
     switch (sel_type) {
         case H5S_SEL_POINTS: /* Sequence of points selected */
-            ret_value = (*H5S_sel_point->deserialize)(space, p, p_size - sizeof(uint32_t), skip);
+            ret_value = (*H5S_sel_point->deserialize)(space, p, sel_info_size, skip);
             break;
 
         case H5S_SEL_HYPERSLABS: /* Hyperslab selection defined */
-            ret_value = (*H5S_sel_hyper->deserialize)(space, p, p_size - sizeof(uint32_t), skip);
+            ret_value = (*H5S_sel_hyper->deserialize)(space, p, sel_info_size, skip);
             break;
 
         case H5S_SEL_ALL: /* Entire extent selected */
-            ret_value = (*H5S_sel_all->deserialize)(space, p, p_size - sizeof(uint32_t), skip);
+            ret_value = (*H5S_sel_all->deserialize)(space, p, sel_info_size, skip);
             break;
 
         case H5S_SEL_NONE: /* Nothing selected */
-            ret_value = (*H5S_sel_none->deserialize)(space, p, p_size - sizeof(uint32_t), skip);
+            ret_value = (*H5S_sel_none->deserialize)(space, p, sel_info_size, skip);
             break;
 
         default:

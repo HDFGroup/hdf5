@@ -16056,6 +16056,65 @@ test_h5s_set_extent_none(void)
 
 /****************************************************************
 **
+**  test_select_deserialize_invalid:
+**  Test malformed serialized selections that should fail cleanly.
+**
+****************************************************************/
+static void
+test_select_deserialize_invalid(void)
+{
+    uint8_t        hyper_bad_rank[14];
+    uint8_t        short_selection_type[1] = {0};
+    uint8_t        none_selection[16];
+    uint8_t       *w;
+    const uint8_t *r;
+    H5S_t         *space = NULL;
+    herr_t         ret;
+
+    TESTING("deserialization of malformed serialized selections");
+
+    w = hyper_bad_rank;
+    UINT32ENCODE(w, (uint32_t)H5S_SEL_HYPERSLABS);
+    UINT32ENCODE(w, (uint32_t)H5S_HYPER_VERSION_3);
+    *w++ = 0;
+    *w++ = H5S_SELECT_INFO_ENC_SIZE_4;
+    UINT32ENCODE(w, (uint32_t)H5S_MAX_RANK + 1);
+
+    r = hyper_bad_rank;
+    H5E_BEGIN_TRY
+    {
+        ret = H5S_SELECT_DESERIALIZE(&space, &r, sizeof(hyper_bad_rank));
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5S_SELECT_DESERIALIZE");
+    VERIFY(space, NULL, "H5S_SELECT_DESERIALIZE");
+
+    r = short_selection_type;
+    H5E_BEGIN_TRY
+    {
+        ret = H5S_SELECT_DESERIALIZE(&space, &r, 0);
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5S_SELECT_DESERIALIZE");
+    VERIFY(space, NULL, "H5S_SELECT_DESERIALIZE");
+
+    w = none_selection;
+    UINT32ENCODE(w, (uint32_t)H5S_SEL_NONE);
+    UINT32ENCODE(w, (uint32_t)H5S_NONE_VERSION_1);
+    memset(w, 0, 8);
+
+    r   = none_selection;
+    ret = H5S_SELECT_DESERIALIZE(&space, &r, SIZE_MAX);
+    CHECK(ret, FAIL, "H5S_SELECT_DESERIALIZE");
+    CHECK_PTR(space, "H5S_SELECT_DESERIALIZE");
+    ret = H5S_close(space);
+    CHECK(ret, FAIL, "H5S_close");
+
+    PASSED();
+} /* test_select_deserialize_invalid() */
+
+/****************************************************************
+**
 **  test_select(): Main H5S selection testing routine.
 **
 ****************************************************************/
@@ -16259,6 +16318,9 @@ test_select(void H5_ATTR_UNUSED *params)
      * the class to H5S_NULL instead of H5S_NO_CLASS.
      */
     test_h5s_set_extent_none();
+
+    /* Test malformed serialized selections */
+    test_select_deserialize_invalid();
 
 } /* test_select() */
 
