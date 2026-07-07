@@ -63,6 +63,26 @@ struct H5Z_filter_info_t {
     unsigned    *cd_values;                        /*client data values                    */
 };
 
+/*
+ * Internal filter table entry.  H5Z_class2_t is embedded as the first member
+ * so that a pointer to H5Z_entry_t can be safely cast to H5Z_class2_t * per
+ * C11 6.7.2.1p15 without relying on struct-layout coincidence.  V3-specific
+ * fields are zero-initialised for filters registered via H5Z_class2_t or
+ * H5Z_class1_t.
+ */
+typedef struct H5Z_entry_t {
+    H5Z_class2_t base; /* must stay first; safe to cast to H5Z_class2_t * */
+    /* --- V3 extensions (NULL for v1/v2 plugins) --- */
+    H5Z_func2_t           filter2; /* Extended callback (class3); NULL for class1/class2 */
+    H5Z_set_config_func_t set_config;
+    H5Z_get_config_func_t get_config;
+    const char           *description; /* free-form description; may be NULL */
+    /* --- Reserved blob callbacks (NULL until activated by RFC-HDFG-2026-*) --- */
+    void *write_blob;
+    void *read_blob;
+    void *close_blob;
+} H5Z_entry_t;
+
 /*****************************/
 /* Library-private Variables */
 /*****************************/
@@ -86,8 +106,7 @@ H5_DLL herr_t H5Z_pipeline(const struct H5O_pline_t *pline, unsigned flags, hid_
                            size_t *buf_size /*in,out*/, void **buf /*in,out*/);
 H5_DLL herr_t H5Z_find(bool attempt, H5Z_filter_t id, H5Z_class2_t **cls);
 /* Find filter entry; returns pointer into internal table (cast-compatible with H5Z_class2_t *) */
-struct H5Z_entry_t; /* forward decl; full def in H5Zpkg.h */
-H5_DLL herr_t             H5Z_find_entry(bool attempt, H5Z_filter_t id, struct H5Z_entry_t **entry);
+H5_DLL herr_t             H5Z_find_entry(bool attempt, H5Z_filter_t id, H5Z_entry_t **entry);
 H5_DLL herr_t             H5Z_can_apply(hid_t dcpl_id, hid_t type_id);
 H5_DLL herr_t             H5Z_set_local(hid_t dcpl_id, hid_t type_id);
 H5_DLL herr_t             H5Z_can_apply_direct(const struct H5O_pline_t *pline);
