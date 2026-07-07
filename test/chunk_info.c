@@ -48,7 +48,9 @@
 #endif
 #endif
 
-/* Test file names, using H5F_libver_t as indices */
+/* Test file names, using H5F_libver_t as indices.
+ * NOTE: update this array (and its H5F_libver_t-indexed usages below) whenever
+ * a new library version bound is added to H5F_libver_t in H5Fpublic.h. */
 static const char *FILENAME[] = {
     "tchunk_info_earliest", "tchunk_info_v18",  "tchunk_info_v110", "tchunk_info_v112",
     "tchunk_info_v114",     "tchunk_info_v200", "tchunk_info_v300", NULL};
