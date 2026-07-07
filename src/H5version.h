@@ -1681,10 +1681,10 @@
     #define H5Z_class_t_vers 2
   #endif /* H5Z_class_t_vers */
   #define H5Z_class_t H5Z_class2_t
-#elif H5Z_class_t_vers == 1
-  #define H5Z_class_t H5Z_class1_t
 #elif H5Z_class_t_vers == 3
   #define H5Z_class_t H5Z_class3_t
+#elif H5Z_class_t_vers == 1
+  #define H5Z_class_t H5Z_class1_t
 #else /* H5Z_class_t_vers */
   #error "H5Z_class_t_vers set to invalid value"
 #endif /* H5Z_class_t_vers */
