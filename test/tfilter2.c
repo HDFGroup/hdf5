@@ -938,9 +938,6 @@ test_canonical_name_display(void)
         title_filter_func,   /* filter         */
         NULL,                /* set_config     */
         NULL,                /* get_config     */
-        NULL,                /* write_blob (reserved) */
-        NULL,                /* read_blob  (reserved) */
-        NULL,                /* close_blob (reserved) */
     };
     hid_t    dcpl = H5I_INVALID_HID;
     unsigned flags;
@@ -1021,9 +1018,6 @@ test_class3_name(void)
             name_filter_func,  /* filter         */
             NULL,              /* set_config     */
             NULL,              /* get_config     */
-            NULL,              /* write_blob (reserved) */
-            NULL,              /* read_blob  (reserved) */
-            NULL,              /* close_blob (reserved) */
         };
         H5E_BEGIN_TRY
         {
@@ -1049,9 +1043,6 @@ test_class3_name(void)
             name_filter_func,   /* filter         */
             NULL,               /* set_config     */
             NULL,               /* get_config     */
-            NULL,               /* write_blob (reserved) */
-            NULL,               /* read_blob  (reserved) */
-            NULL,               /* close_blob (reserved) */
         };
         if (H5Zregister(&valid_cls) < 0)
             TEST_ERROR;
@@ -1124,9 +1115,6 @@ test_empty_string_fast_path(void)
         fastpath_filter_func, /* filter          */
         fastpath_set_config,  /* set_config      */
         NULL,                 /* get_config      */
-        NULL,                 /* write_blob (reserved) */
-        NULL,                 /* read_blob  (reserved) */
-        NULL,                 /* close_blob (reserved) */
     };
     static const H5Z_class3_t nocfg_cls = {
         2,    /* version         */
@@ -1140,9 +1128,6 @@ test_empty_string_fast_path(void)
         fastpath_filter_func, /* filter          */
         NULL,                 /* set_config (intentionally absent) */
         NULL,                 /* get_config      */
-        NULL,                 /* write_blob (reserved) */
-        NULL,                 /* read_blob  (reserved) */
-        NULL,                 /* close_blob (reserved) */
     };
     hid_t  dcpl = H5I_INVALID_HID;
     herr_t ret;
@@ -1279,9 +1264,6 @@ test_cdvalues_path(void)
         cdvals_filter_func, /* filter          */
         NULL,               /* set_config      */
         NULL,               /* get_config      */
-        NULL,               /* write_blob (reserved) */
-        NULL,               /* read_blob  (reserved) */
-        NULL,               /* close_blob (reserved) */
     };
     hid_t        dcpl   = H5I_INVALID_HID;
     unsigned     vals[] = {42, 99};
@@ -1407,9 +1389,6 @@ test_cdvalues_no_name_pollution(void)
         cdvals_clean_filter_func, /* filter          */
         cdvals_clean_set_config,  /* set_config      */
         NULL,                     /* get_config      */
-        NULL,                     /* write_blob (reserved) */
-        NULL,                     /* read_blob  (reserved) */
-        NULL,                     /* close_blob (reserved) */
     };
     hid_t    dcpl = H5I_INVALID_HID;
     unsigned flags2;
@@ -1485,9 +1464,6 @@ test_canonical_name_persistence(void)
         persist_filter_func, /* filter         */
         NULL,                /* set_config      */
         NULL,                /* get_config      */
-        NULL,                /* write_blob (reserved) */
-        NULL,                /* read_blob  (reserved) */
-        NULL,                /* close_blob (reserved) */
     };
     hid_t    dcpl = H5I_INVALID_HID;
     unsigned flags2;
@@ -1607,9 +1583,6 @@ test_canonical_name_length_limit(void)
         longtitle_filter_func, /* filter          */
         NULL,                  /* set_config      */
         NULL,                  /* get_config      */
-        NULL,                  /* write_blob (reserved) */
-        NULL,                  /* read_blob  (reserved) */
-        NULL,                  /* close_blob (reserved) */
     };
     herr_t ret;
 
@@ -1816,9 +1789,6 @@ test_set_get_config_callbacks(void)
         callback_filter_func, /* filter          */
         callback_set_config,  /* set_config      */
         callback_get_config,  /* get_config      */
-        NULL,                 /* write_blob (reserved) */
-        NULL,                 /* read_blob  (reserved) */
-        NULL,                 /* close_blob (reserved) */
     };
     hid_t  dcpl = H5I_INVALID_HID;
     char   pbuf[256];
@@ -2012,9 +1982,6 @@ static const H5Z_class3_t ctxpass_cls = {
     NULL,
     NULL,
     ctxpass_filter_cb,
-    NULL,
-    NULL,
-    NULL,
     NULL,
     NULL,
 };

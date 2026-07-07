@@ -464,9 +464,6 @@ H5Z_register3(const H5Z_class3_t *cls)
     entry.filter2              = cls->filter; /* class3 extended callback; base.filter stays NULL */
     entry.set_config           = cls->set_config;
     entry.get_config           = cls->get_config;
-    entry.write_blob           = cls->write_blob;
-    entry.read_blob            = cls->read_blob;
-    entry.close_blob           = cls->close_blob;
 
     if (H5Z__insert_entry(&entry) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to insert filter into table");
@@ -2053,11 +2050,10 @@ H5Zget_filter_class_info(H5Z_filter_t filter, H5Z_class_info_t *info /*out*/)
     if (entry->base.decoder_present)
         info->config_flags |= H5Z_FILTER_CONFIG_DECODE_ENABLED;
 
-    info->name               = entry->base.name;   /* may be NULL for class2 entries */
-    info->description        = entry->description; /* may be NULL */
-    info->has_set_config     = (entry->set_config != NULL);
-    info->has_get_config     = (entry->get_config != NULL);
-    info->has_blob_callbacks = (entry->write_blob != NULL);
+    info->name           = entry->base.name;   /* may be NULL for class2 entries */
+    info->description    = entry->description; /* may be NULL */
+    info->has_set_config = (entry->set_config != NULL);
+    info->has_get_config = (entry->get_config != NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -23820,22 +23820,19 @@ public class H5 implements java.io.Serializable {
         //   const char    *description         @ 16
         //   bool           has_set_config      @ 24
         //   bool           has_get_config      @ 25
-        //   bool           has_blob_callbacks  @ 26
-        //   padding                            @ 27-31
+        //   padding                            @ 26-31
         StructLayout layout = MemoryLayout.structLayout(
             ValueLayout.JAVA_INT.withName("id"), ValueLayout.JAVA_INT.withName("config_flags"),
             ValueLayout.ADDRESS.withName("name"), ValueLayout.ADDRESS.withName("description"),
             ValueLayout.JAVA_BOOLEAN.withName("has_set_config"),
-            ValueLayout.JAVA_BOOLEAN.withName("has_get_config"),
-            ValueLayout.JAVA_BOOLEAN.withName("has_blob_callbacks"), MemoryLayout.paddingLayout(5));
+            ValueLayout.JAVA_BOOLEAN.withName("has_get_config"), MemoryLayout.paddingLayout(6));
 
-        VarHandle idHandle               = layout.varHandle(PathElement.groupElement("id"));
-        VarHandle flagsHandle            = layout.varHandle(PathElement.groupElement("config_flags"));
-        VarHandle nameHandle             = layout.varHandle(PathElement.groupElement("name"));
-        VarHandle descHandle             = layout.varHandle(PathElement.groupElement("description"));
-        VarHandle hasSetConfigHandle     = layout.varHandle(PathElement.groupElement("has_set_config"));
-        VarHandle hasGetConfigHandle     = layout.varHandle(PathElement.groupElement("has_get_config"));
-        VarHandle hasBlobCallbacksHandle = layout.varHandle(PathElement.groupElement("has_blob_callbacks"));
+        VarHandle idHandle           = layout.varHandle(PathElement.groupElement("id"));
+        VarHandle flagsHandle        = layout.varHandle(PathElement.groupElement("config_flags"));
+        VarHandle nameHandle         = layout.varHandle(PathElement.groupElement("name"));
+        VarHandle descHandle         = layout.varHandle(PathElement.groupElement("description"));
+        VarHandle hasSetConfigHandle = layout.varHandle(PathElement.groupElement("has_set_config"));
+        VarHandle hasGetConfigHandle = layout.varHandle(PathElement.groupElement("has_get_config"));
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment infoSeg = arena.allocate(layout);
@@ -23844,11 +23841,10 @@ public class H5 implements java.io.Serializable {
             if (status < 0)
                 h5libraryError();
 
-            int id                     = (int)idHandle.get(infoSeg, 0L);
-            int config_flags           = (int)flagsHandle.get(infoSeg, 0L);
-            boolean has_set_config     = (boolean)hasSetConfigHandle.get(infoSeg, 0L);
-            boolean has_get_config     = (boolean)hasGetConfigHandle.get(infoSeg, 0L);
-            boolean has_blob_callbacks = (boolean)hasBlobCallbacksHandle.get(infoSeg, 0L);
+            int id                 = (int)idHandle.get(infoSeg, 0L);
+            int config_flags       = (int)flagsHandle.get(infoSeg, 0L);
+            boolean has_set_config = (boolean)hasSetConfigHandle.get(infoSeg, 0L);
+            boolean has_get_config = (boolean)hasGetConfigHandle.get(infoSeg, 0L);
 
             MemorySegment namePtr = (MemorySegment)nameHandle.get(infoSeg, 0L);
             String name           = (namePtr == null || namePtr.equals(MemorySegment.NULL))
@@ -23861,8 +23857,7 @@ public class H5 implements java.io.Serializable {
                     ? null
                     : descPtr.reinterpret(Long.MAX_VALUE).getString(0, StandardCharsets.UTF_8);
 
-            return new H5Z_class_info_t(id, config_flags, name, description, has_set_config, has_get_config,
-                                        has_blob_callbacks);
+            return new H5Z_class_info_t(id, config_flags, name, description, has_set_config, has_get_config);
         }
         catch (HDF5LibraryException e) {
             throw e;

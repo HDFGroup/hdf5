@@ -106,9 +106,6 @@ H5_ATTR_VISIBILITY_HIDDEN H5Z_class3_t H5Z_SCALEOFFSET[1] = {{
     H5Z__filter_scaleoffset,                                 /* The actual filter function */
     H5Z__scaleoffset_set_config,                             /* String config setter */
     H5Z__scaleoffset_get_config,                             /* String config getter */
-    NULL,                                                    /* write_blob (reserved) */
-    NULL,                                                    /* read_blob  (reserved) */
-    NULL,                                                    /* close_blob (reserved) */
 }};
 
 /* Local macros */

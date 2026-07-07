@@ -304,9 +304,7 @@ typedef H5Z_cb_return_t (*H5Z_filter_func_t)(H5Z_filter_t filter, void *buf, siz
  */
 typedef enum {
     H5Z_PARAMS_CDVALUES = 0, /**< raw cd_values array (same as H5Pset_filter) */
-    H5Z_PARAMS_STRING   = 1, /**< human-readable key=value string              */
-    H5Z_PARAMS_BLOB     = 2  /**< reserved: in-file blob config data (future RFC);
-                                     H5Pappend_filter returns H5E_UNSUPPORTED    */
+    H5Z_PARAMS_STRING   = 1  /**< human-readable key=value string              */
 } H5Z_params_type_t;
 
 /**
@@ -443,9 +441,6 @@ typedef struct H5Z_class_info_t {
                                   \c set_config callback (v3 plugins) */
     bool has_get_config;     /**< true iff the filter exposes a
                                   \c get_config callback (v3 plugins) */
-    bool has_blob_callbacks; /**< true iff the filter exposes a
-                                  \c write_blob callback; reserved for
-                                  future use */
 } H5Z_class_info_t;
 
 /**

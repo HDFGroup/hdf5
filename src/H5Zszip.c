@@ -52,9 +52,6 @@ H5_ATTR_VISIBILITY_HIDDEN H5Z_class3_t H5Z_SZIP[1] = {{
     H5Z__filter_szip,                                /* The actual filter function */
     H5Z__szip_set_config,                            /* String config setter */
     H5Z__szip_get_config,                            /* String config getter */
-    NULL,                                            /* write_blob (reserved) */
-    NULL,                                            /* read_blob  (reserved) */
-    NULL,                                            /* close_blob (reserved) */
 }};
 
 /*-------------------------------------------------------------------------

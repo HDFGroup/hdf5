@@ -31,18 +31,15 @@ public class H5Z_class_info_t implements Serializable {
     public boolean has_set_config;
     /** True if the plugin implements the get_config callback */
     public boolean has_get_config;
-    /** True if the plugin implements the write_blob callback (reserved for future use) */
-    public boolean has_blob_callbacks;
 
     public H5Z_class_info_t(int id, int config_flags, String name, String description, boolean has_set_config,
-                            boolean has_get_config, boolean has_blob_callbacks)
+                            boolean has_get_config)
     {
-        this.id                 = id;
-        this.config_flags       = config_flags;
-        this.name               = name;
-        this.description        = description;
-        this.has_set_config     = has_set_config;
-        this.has_get_config     = has_get_config;
-        this.has_blob_callbacks = has_blob_callbacks;
+        this.id             = id;
+        this.config_flags   = config_flags;
+        this.name           = name;
+        this.description    = description;
+        this.has_set_config = has_set_config;
+        this.has_get_config = has_get_config;
     }
 }

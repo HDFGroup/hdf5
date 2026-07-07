@@ -1805,11 +1805,6 @@ H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const 
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cd_values is NULL but cd_nelmts > 0");
         }
     }
-    else if (params->type == H5Z_PARAMS_BLOB) {
-        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL,
-                    "H5Z_PARAMS_BLOB is reserved for future in-file blob config data support and is not "
-                    "yet active");
-    }
     else if (params->type == H5Z_PARAMS_STRING) {
         /* String path - invoke set_config to translate into cd_values.
          *

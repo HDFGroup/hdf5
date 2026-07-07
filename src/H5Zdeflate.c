@@ -48,9 +48,6 @@ H5_ATTR_VISIBILITY_HIDDEN const H5Z_class3_t H5Z_DEFLATE[1] = {{
     H5Z__filter_deflate,                                   /* The actual filter function */
     H5Z__deflate_set_config,                               /* String config setter */
     H5Z__deflate_get_config,                               /* String config getter */
-    NULL,                                                  /* write_blob (reserved) */
-    NULL,                                                  /* read_blob  (reserved) */
-    NULL,                                                  /* close_blob (reserved) */
 }};
 
 /*-------------------------------------------------------------------------

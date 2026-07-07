@@ -98,9 +98,6 @@ H5_ATTR_VISIBILITY_HIDDEN H5Z_class3_t H5Z_NBIT[1] = {{
     H5Z__filter_nbit,                                           /* The actual filter function */
     H5Z__nbit_set_config,                                       /* String config setter */
     NULL,                                                       /* No string config getter */
-    NULL,                                                       /* write_blob (reserved) */
-    NULL,                                                       /* read_blob  (reserved) */
-    NULL,                                                       /* close_blob (reserved) */
 }};
 
 /*-------------------------------------------------------------------------

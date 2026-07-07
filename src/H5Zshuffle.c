@@ -39,9 +39,6 @@ H5_ATTR_VISIBILITY_HIDDEN const H5Z_class3_t H5Z_SHUFFLE[1] = {{
     H5Z__filter_shuffle,                                            /* The actual filter function */
     H5Z__no_params_set_config,                                      /* String config setter */
     NULL, /* No string config getter (no user params) */
-    NULL, /* write_blob (reserved) */
-    NULL, /* read_blob  (reserved) */
-    NULL, /* close_blob (reserved) */
 }};
 
 /* Local macros */

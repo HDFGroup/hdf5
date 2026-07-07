@@ -77,10 +77,6 @@ typedef struct H5Z_entry_t {
     H5Z_set_config_func_t set_config;
     H5Z_get_config_func_t get_config;
     const char           *description; /* free-form description; may be NULL */
-    /* --- Reserved for future use; NULL for all current filters --- */
-    void *write_blob;
-    void *read_blob;
-    void *close_blob;
 } H5Z_entry_t;
 
 /*****************************/

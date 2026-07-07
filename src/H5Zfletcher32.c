@@ -35,9 +35,6 @@ H5_ATTR_VISIBILITY_HIDDEN const H5Z_class3_t H5Z_FLETCHER32[1] = {{
     H5Z__filter_fletcher32,                              /* The actual filter function */
     H5Z__no_params_set_config,                           /* String config setter */
     NULL,                                                /* No string config getter */
-    NULL,                                                /* write_blob (reserved) */
-    NULL,                                                /* read_blob  (reserved) */
-    NULL,                                                /* close_blob (reserved) */
 }};
 
 #define FLETCHER_LEN 4
