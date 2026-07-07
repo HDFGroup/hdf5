@@ -233,7 +233,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                  *-------------------------------------------------------------------------
                  */
                 else if (strcmp(scomp, "UD") == 0) {
-                    /* RFC-HDFG-2026-001 §9: UD= accepts two forms.
+                    /* UD= accepts two forms.
                      *   Legacy: UD=id,flags,nelmts,v1,v2,...,vN  (third field is a digit)
                      *   New:    UD=id,flags,key=value,...        (third field is TOML)
                      * Peek at the third field to decide which path to take. */
@@ -345,6 +345,16 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                         filt->params_str[plen] = '\0';
                         filt->cd_nelmts        = 0;
                         m                      = len - i - 1; /* advance outer loop to end */
+
+                        /* This form doesn't use stype/l/f/p at all -- everything needed
+                         * is already committed above. Mark l/f/p as "already found" (not
+                         * -1) so the done_filter_params epilogue below (which commits a
+                         * trailing token left in stype for the legacy comma-separated
+                         * forms) doesn't clobber filt->filtn/filt_flag from stale/unset
+                         * stype contents. */
+                        l = 0;
+                        f = 0;
+                        p = 0;
                     }
                     else {
                         l = -1; /* filter number index check */
