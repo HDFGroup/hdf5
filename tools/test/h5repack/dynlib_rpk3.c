@@ -29,24 +29,24 @@ static size_t H5Z_filter_dynlib3(unsigned int flags, size_t cd_nelmts, const uns
                                  size_t *buf_size, void **buf);
 static herr_t H5Z_dynlib3_set_config(const char *params, unsigned *flags, size_t *cd_nelmts,
                                      unsigned cd_values[], size_t cd_values_size);
-static herr_t H5Z_dynlib3_get_config(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
-                                     char *buf, size_t *buf_size);
+static herr_t H5Z_dynlib3_get_config(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], char *buf,
+                                     size_t *buf_size);
 
 /* This message derives from H5Z */
 static const H5Z_class3_t H5Z_DYNLIB3[1] = {{
-    H5Z_CLASS3_T_VERS,                                        /* H5Z_class_t version           */
-    H5Z_FILTER_DYNLIB3,                                       /* Filter id number               */
-    1, 1,                                                     /* Encoding and decoding enabled  */
-    "dynlib3",                                                /* Filter name for debugging      */
+    H5Z_CLASS3_T_VERS,                                         /* H5Z_class_t version           */
+    H5Z_FILTER_DYNLIB3,                                        /* Filter id number               */
+    1, 1,                                                      /* Encoding and decoding enabled  */
+    "dynlib3",                                                 /* Filter name for debugging      */
     "Test filter with string-based configuration (mode=rate)", /* Description                   */
-    NULL,                                                     /* The "can apply" callback       */
-    NULL,                                                     /* The "set local" callback       */
-    H5Z_filter_dynlib3,                                       /* The actual filter function     */
-    H5Z_dynlib3_set_config,                                   /* String configuration setter    */
-    H5Z_dynlib3_get_config,                                   /* String configuration getter    */
-    NULL,                                                     /* write_blob (reserved)          */
-    NULL,                                                     /* read_blob (reserved)            */
-    NULL,                                                     /* close_blob (reserved)           */
+    NULL,                                                      /* The "can apply" callback       */
+    NULL,                                                      /* The "set local" callback       */
+    H5Z_filter_dynlib3,                                        /* The actual filter function     */
+    H5Z_dynlib3_set_config,                                    /* String configuration setter    */
+    H5Z_dynlib3_get_config,                                    /* String configuration getter    */
+    NULL,                                                      /* write_blob (reserved)          */
+    NULL,                                                      /* read_blob (reserved)            */
+    NULL,                                                      /* close_blob (reserved)           */
 }};
 
 H5PL_type_t
