@@ -2005,6 +2005,13 @@ H5Pget_filter_params_by_idx(hid_t plist_id, unsigned idx, char *params_buf, size
 
     filter = &pline.filter[idx];
 
+    /* Trigger a plugin load if the filter isn't registered yet -- mirrors
+     * H5Zget_filter_info2()'s use of H5Z_filter_avail() to get get_config
+     * available on the first query, not just subsequent ones. Availability
+     * itself is ignored here; the fallback path below handles filters that
+     * remain unavailable after this attempt. */
+    (void)H5Z_filter_avail(filter->id);
+
     /* Attempt to find the entry (try plugin load if not yet registered) */
     (void)H5Z_find_entry(true, filter->id, &entry);
 
