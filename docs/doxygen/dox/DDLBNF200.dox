@@ -448,15 +448,21 @@ This section contains a brief explanation of the symbols used in the DDL.
                           FILTER_ID <int_value>
                           <filter_comment>opt
                           <filter_params>opt
+                          <filter_params_string>opt
+                          <filter_description>opt
                      }
 
 <filter_user> :: = USER_DEFINED_FILTER
 
-<filter_deflate> :: = COMPRESSION DEFLATE { LEVEL <int_value> }
+<filter_deflate> :: = COMPRESSION DEFLATE {
+                          LEVEL <int_value>
+                          <filter_params_string>opt
+                          <filter_description>opt
+                     }
 
-<filter_shuffle> :: = PREPROCESSING SHUFFLE
+<filter_shuffle> :: = PREPROCESSING SHUFFLE <filter_extras>opt
 
-<filter_flecther> :: = CHECKSUM FLETCHER32
+<filter_flecther> :: = CHECKSUM FLETCHER32 <filter_extras>opt
 
 <filter_szip> :: = COMPRESSION SZIP {
                        PIXELS_PER_BLOCK <int_value>
@@ -464,6 +470,8 @@ This section contains a brief explanation of the symbols used in the DDL.
                        <filter_szip_coding>opt
                        <filter_szip_order>opt
                        <filter_szip_header>opt
+                       <filter_params_string>opt
+                       <filter_description>opt
                   }
 
 <filter_szip_mode> :: = MODE HARDWARE | K13
@@ -474,13 +482,23 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 <filter_szip_header> :: = HEADER RAW
 
-<filter_nbit> :: = CHECKSUM NBIT
+<filter_nbit> :: = CHECKSUM NBIT <filter_extras>opt
 
-<filter_scaleoffset> :: = COMPRESSION SCALEOFFSET { MIN BITS <int_value> }
+<filter_scaleoffset> :: = COMPRESSION SCALEOFFSET {
+                              MIN BITS <int_value>
+                              <filter_params_string>opt
+                              <filter_description>opt
+                          }
 
 <filter_comment> :: = COMMENT  <identifier>
 
 <filter_params> :: = PARAMS { <int_value>* }
+
+<filter_extras> :: = { <filter_params_string>opt <filter_description>opt }
+
+<filter_params_string> :: = PARAMS_STRING <string_data>
+
+<filter_description> :: = DESCRIPTION <string_data>
 
 <fillvalue> ::= FILLVALUE {
                     FILL_TIME H5D_FILL_TIME_ALLOC | H5D_FILL_TIME_NEVER | H5D_FILL_TIME_IFSET

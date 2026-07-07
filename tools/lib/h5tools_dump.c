@@ -3199,6 +3199,14 @@ h5tools_dump_filter_extra(FILE *stream, const h5tool_format_t *info, h5tools_con
         h5tools_render_element(stream, info, ctx, buffer, curr_pos, ncols, (hsize_t)0, (hsize_t)0);
     }
 
+    /* DESCRIPTION is a best-effort, registry-sourced label: it comes from the
+     * filter class's in-memory registration (H5Zget_filter_info2), not from
+     * anything persisted in the file. Unlike COMMENT (the filter's
+     * canonical_name, which is stored in the pipeline message and always
+     * displays), DESCRIPTION is omitted whenever the filter isn't currently
+     * registered/loadable on the machine running h5dump -- e.g. `h5dump -p`
+     * on the same file will show DESCRIPTION on a machine with the plugin
+     * installed and omit it on one without. */
     if (description) {
         ctx->need_prefix = true;
         h5tools_str_reset(buffer);
