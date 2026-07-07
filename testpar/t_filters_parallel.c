@@ -10101,7 +10101,7 @@ test_par_append_filter_error_propagation(hid_t fapl_id)
     if (ret < 0)
         local_err = 1;
 
-    /* Collective reduce — if any rank deadlocked we would never get here */
+    /* Collective reduce - if any rank deadlocked we would never get here */
     mpi_code = MPI_Allreduce(&local_err, &global_err, 1, MPI_INT, MPI_SUM, comm);
     VRFY((mpi_code == MPI_SUCCESS), "MPI_Allreduce succeeded");
     VRFY((global_err == mpi_size), "All ranks received H5Pappend_filter error for unknown key");
@@ -10170,7 +10170,7 @@ test_par_append_filter_rank_inconsistent_dcpl(hid_t fapl_id)
         VRFY((local_level != rank0_level),
              "Non-0 rank cd_values differ from rank-0 (inconsistency confirmed)");
 
-    /* Attempt collective H5Dcreate — may succeed or fail; must not deadlock */
+    /* Attempt collective H5Dcreate - may succeed or fail; must not deadlock */
     fspace_id = H5Screate_simple(2, dims, NULL);
     VRFY((fspace_id >= 0), "H5Screate_simple succeeded");
 
@@ -10193,7 +10193,7 @@ test_par_append_filter_rank_inconsistent_dcpl(hid_t fapl_id)
 }
 
 /*
- * par-04: All ranks configure a shuffle→deflate pipeline entirely via the
+ * par-04: All ranks configure a shuffle->deflate pipeline entirely via the
  *         string API, then write and read back one chunk per rank to verify
  *         end-to-end correctness of the string-configured pipeline.
  */
@@ -10251,7 +10251,7 @@ test_par_append_filter_builtin_string_pipeline(hid_t fapl_id)
     VRFY((dxpl_id >= 0), "H5Pcreate DXPL succeeded");
     VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) >= 0), "H5Pset_dxpl_mpio succeeded");
 
-    /* Each rank writes one 4×4 chunk */
+    /* Each rank writes one 4x4 chunk */
     nbytes = 4 * 4 * sizeof(C_DATATYPE);
     wbuf   = (C_DATATYPE *)malloc(nbytes);
     VRFY((wbuf != NULL), "malloc wbuf succeeded");
@@ -10698,7 +10698,7 @@ main(int argc, char **argv)
     if (nerrors)
         goto exit;
 
-    /* RFC-HDFG-2026-001: parallel consistency tests (par-01 through par-04) */
+    /* Parallel consistency tests for the string-based filter config API */
     if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) > 0) {
         if (MAINPROCESS)
             puts("\n=== RFC-HDFG-2026-001 Parallel String-API Tests ===\n");

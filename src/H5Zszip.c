@@ -78,7 +78,7 @@ H5Z__szip_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size_t 
 
     if (cd_values) {
         unsigned mask = H5_SZIP_NN_OPTION_MASK; /* default: nearest neighbour */
-        unsigned ppb  = 16;                     /* default pixels_per_block (RFC §7 SZIP) */
+        unsigned ppb  = 16;                     /* default pixels_per_block */
         htri_t   found;
 
         if (cd_values_size < H5Z_SZIP_USER_NPARMS)

@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Tests for RFC-HDFG-2026-001: String-Based Filter Configuration API
+ * Tests for the string-based filter configuration API:
  *   - H5Pappend_filter / H5Pget_filter_params_by_idx
  *   - Typed TOML accessor functions (H5Zconfig_get_int, _get_str, etc.)
  *   - Built-in filter set_config / get_config round-trips
@@ -24,7 +24,7 @@
 static const char *FILENAME[] = {"tfilter2", NULL};
 
 /* -----------------------------------------------------------------------
- * Parser tests — typed TOML accessor functions
+ * Parser tests - typed TOML accessor functions
  * ---------------------------------------------------------------------- */
 static int
 test_parser(void)
@@ -141,9 +141,9 @@ test_parser(void)
         TEST_ERROR;
     PASSED();
 
-    /* RFC-HDFG-2026-001 §7: dotted-key form -- nested inline tables addressed
-     * through a single dotted accessor call.  Both surface forms below must
-     * resolve identically (the Blosc2 example in the RFC). */
+    /* Dotted-key form: nested inline tables addressed through a single
+     * dotted accessor call. Both surface forms below must resolve
+     * identically. */
     TESTING("H5Zconfig_get_str: dotted-key into nested table (dotted form)");
     vsz = sizeof(vbuf);
     ret = H5Zconfig_get_str("compressor.name = \"zlib\", shuffle = 1", "compressor.name", vbuf, &vsz);
@@ -550,9 +550,9 @@ error:
  *
  * There is no H5Pmodify_filter2 (string-based).  The documented pattern for
  * updating a filter's parameters on a copied DCPL is:
- *   1. H5Pget_filter_by_id2 → retrieve current cd_values
+ *   1. H5Pget_filter_by_id2 -> retrieve current cd_values
  *   2. Mutate cd_values in place
- *   3. H5Pmodify_filter → write back
+ *   3. H5Pmodify_filter -> write back
  *
  * This test verifies that a filter appended via the string API produces
  * cd_values that round-trip correctly through this pattern.
@@ -585,7 +585,7 @@ test_modify_filter_pattern(void)
             TEST_ERROR;
     }
 
-    /* Copy it — simulates a caller receiving a DCPL they did not create */
+    /* Copy it - simulates a caller receiving a DCPL they did not create */
     if ((dcpl = H5Pcopy(dcpl_orig)) < 0)
         TEST_ERROR;
 
@@ -1014,7 +1014,7 @@ test_class3_name(void)
             NAME_FILTER_ID,    /* id             */
             1,                 /* encoder_present */
             1,                 /* decoder_present */
-            NULL,              /* canonical_name — intentionally NULL to trigger error */
+            NULL,              /* canonical_name - intentionally NULL to trigger error */
             NULL,              /* description    */
             NULL,              /* can_apply      */
             NULL,              /* set_local      */
@@ -1075,9 +1075,8 @@ error:
  * ---------------------------------------------------------------------- */
 
 /* 1. Empty-input handling: when set_config is present it is invoked with
- *    params=NULL so the plugin can fail-fast (RFC §Empty-string handling).
- *    When set_config is absent, the filter is appended with cd_nelmts=0
- *    and no callback runs. */
+ *    params=NULL so the plugin can fail-fast. When set_config is absent,
+ *    the filter is appended with cd_nelmts=0 and no callback runs. */
 #define FASTPATH_FILTER_ID 514
 #define NOCFG_FILTER_ID    518
 
@@ -1687,7 +1686,7 @@ test_config_string_max_boundary(void)
     htri_t     deflate_avail;
 
     TESTING("H5Pappend_filter: param string == H5Z_CONFIG_STRING_MAX is accepted");
-    /* Deflate (zlib) required as the test filter — skip if not compiled in */
+    /* Deflate (zlib) required as the test filter - skip if not compiled in */
     if ((deflate_avail = H5Zfilter_avail(H5Z_FILTER_DEFLATE)) < 0)
         TEST_ERROR;
     if (!deflate_avail) {
@@ -1964,7 +1963,7 @@ error:
  * ---------------------------------------------------------------------- */
 
 #define CTXPASS_FILTER_ID 520
-#define CTXPASS_NCHUNKS   4 /* 2×2 chunk grid in an 8×8/4×4 dataset */
+#define CTXPASS_NCHUNKS   4 /* 2x2 chunk grid in an 8x8/4x4 dataset */
 
 typedef struct {
     hid_t  expected_dxpl;
@@ -2040,7 +2039,7 @@ check_ctxpass_state(void)
 static int
 test_filter2_context_passthrough(hid_t file)
 {
-    /* 8×8 dataset with 4×4 chunks → 2×2 chunk grid, 4 total chunks.
+    /* 8x8 dataset with 4x4 chunks -> 2x2 chunk grid, 4 total chunks.
      * Chunk cache is disabled (nslots=0) so the filter fires during
      * H5Dwrite / H5Dread rather than at a later flush, letting us verify
      * the dxpl_id, scaled[], and ndims values that arrive at filter2.

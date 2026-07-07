@@ -1765,11 +1765,11 @@ done:
  *              the pipeline on PLIST_ID.  PARAMS selects the configuration
  *              mode via its type field:
  *
- *              H5Z_PARAMS_CDVALUES – pass raw cd_values directly (same as
+ *              H5Z_PARAMS_CDVALUES - pass raw cd_values directly (same as
  *                                    H5Pset_filter).
- *              H5Z_PARAMS_STRING   – invoke the filter's set_config callback
+ *              H5Z_PARAMS_STRING   - invoke the filter's set_config callback
  *                                    with the key=value string.
- *              NULL                – equivalent to CDVALUES with cd_nelmts=0.
+ *              NULL                - equivalent to CDVALUES with cd_nelmts=0.
  *
  * Return:      Non-negative on success / Negative on failure
  *
@@ -1797,7 +1797,7 @@ H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags");
 
     if (params == NULL || params->type == H5Z_PARAMS_CDVALUES) {
-        /* Raw cd_values path – behaves identically to H5Pset_filter */
+        /* Raw cd_values path - behaves identically to H5Pset_filter */
         if (params) {
             cd_nelmts = params->u.raw.cd_nelmts;
             cd_values = params->u.raw.cd_values;
@@ -1811,10 +1811,10 @@ H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const 
                     "yet active");
     }
     else if (params->type == H5Z_PARAMS_STRING) {
-        /* String path – invoke set_config to translate into cd_values.
+        /* String path - invoke set_config to translate into cd_values.
          *
          * NULL or "" means
-         * "no parameters" — the filter plugin is still located so we can
+         * "no parameters" - the filter plugin is still located so we can
          * inspect its class record.
          *   - If the filter has no set_config callback, the filter is
          *     appended with cd_nelmts = 0 and no callback runs.

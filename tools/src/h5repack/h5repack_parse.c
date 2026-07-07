@@ -44,7 +44,7 @@
  *  FLET, to apply the HDF5 checksum filter
  *  NBIT, to apply the HDF5 NBIT filter (NBIT compression)
  *  SOFF, to apply the HDF5 scale+offset filter (compression)
- *  UD, to apply a User Defined filter k,m,n1[,…,nm]
+ *  UD, to apply a User Defined filter k,m,n1[,...,nm]
  *  NONE, to remove the filter
  *
  * Examples:
@@ -255,7 +255,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                      *
                      * Legacy form:  UD=id,flags,nelmts,v1,v2,...,vN
                      *   - The third field ("nelmts") and every subsequent
-                     *     field ("v1"…"vN") are pure decimal integers and
+                     *     field ("v1"..."vN") are pure decimal integers and
                      *     can never contain '='.  Scanning to len is safe.
                      *
                      * TOML/string form:  UD=id,flags,key=value[,...]

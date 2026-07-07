@@ -334,7 +334,7 @@ H5Z__insert_entry(const H5Z_entry_t *entry)
             break;
 
     if (i >= H5Z_table_used_g) {
-        /* Filter not already registered — grow table if needed */
+        /* Filter not already registered - grow table if needed */
         if (H5Z_table_used_g >= H5Z_table_alloc_g) {
             size_t       n         = MAX(H5Z_MAX_NFILTERS, 2 * H5Z_table_alloc_g);
             H5Z_entry_t *new_table = NULL;
@@ -394,7 +394,7 @@ H5Z_register(const H5Z_class2_t *cls)
      * (H5Zregister, H5PL_load) may pass a H5Z_class3_t * cast to that type.
      * Re-sniff the version here so that the description field
      * (at the same offset as can_apply in H5Z_class2_t) is never misread.
-     * Do NOT "simplify" away this check — the v3 dispatch must happen inside
+     * Do NOT "simplify" away this check - the v3 dispatch must happen inside
      * H5Z_register, not only at the H5Zregister API boundary. */
     if (cls->version == H5Z_CLASS3_T_VERS_INTERNAL) {
         if (H5Z_register3((const H5Z_class3_t *)cls) < 0)
@@ -444,7 +444,7 @@ H5Z_register3(const H5Z_class3_t *cls)
     assert(cls->id >= 0 && cls->id <= H5Z_FILTER_MAX);
     assert(cls->name); /* name is required for H5Z_class3_t */
 
-    /* Runtime checks that survive NDEBUG — enforce for the plugin-load path
+    /* Runtime checks that survive NDEBUG - enforce for the plugin-load path
      * which calls H5Z_register3 directly, bypassing the H5Zregister wrapper. */
     if (cls->name == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter name must not be NULL for H5Z_class3_t");
@@ -1490,7 +1490,7 @@ H5Z_find(bool attempt, H5Z_filter_t id, H5Z_class2_t **cls)
             HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "required filter %d is not registered", id);
     }
     else
-        /* base is the first member of H5Z_entry_t; cast is valid per C11 §6.7.2.1p15 */
+        /* base is the first member of H5Z_entry_t; cast is valid per C11 Sec. 6.7.2.1p15 */
         *cls = &H5Z_table_g[idx].base;
 
 done:

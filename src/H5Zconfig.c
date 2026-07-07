@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * H5Zconfig.c — TOML parameter string parser for the string-based filter
+ * H5Zconfig.c - TOML parameter string parser for the string-based filter
  *               configuration API.
  *
  * Uses the vendored tomlc17 library for all TOML parsing.
@@ -64,7 +64,7 @@ H5Z__copy_chars2(char *out, size_t cap, size_t *pos, const char **p)
 }
 
 /*
- * H5Z__rewrite_hexfloats — return a copy of `src` with every C99 hex-float
+ * H5Z__rewrite_hexfloats - return a copy of `src` with every C99 hex-float
  * literal (e.g. "0x1.8p+1", "-0x1p-1") replaced by an equivalent decimal
  * string.  Uses %.17g which guarantees IEEE 754 double round-trip fidelity.
  *
@@ -85,7 +85,7 @@ H5Z__rewrite_hexfloats(const char *src)
     char       *out;
     size_t      pos = 0;
 
-    /* Worst case: every 3-char token "0x1" expands to ~24 chars "%.17e" → 8x.
+    /* Worst case: every 3-char token "0x1" expands to ~24 chars "%.17e" -> 8x.
      * Guard against size_t overflow in the multiplication; callers normally
      * cap input at H5Z_CONFIG_STRING_MAX, but enforce the bound here too so
      * this static helper is safe for any future caller. */
@@ -99,7 +99,7 @@ H5Z__rewrite_hexfloats(const char *src)
 
     while (*p) {
         /* ----------------------------------------------------------------
-         * Skip TOML double-quoted strings verbatim — do not rewrite content
+         * Skip TOML double-quoted strings verbatim - do not rewrite content
          * inside "...".  Honours backslash escapes so that \" does not end
          * the string prematurely.
          * ---------------------------------------------------------------- */
@@ -117,7 +117,7 @@ H5Z__rewrite_hexfloats(const char *src)
         }
 
         /* ----------------------------------------------------------------
-         * Skip TOML single-quoted (literal) strings verbatim — no escapes.
+         * Skip TOML single-quoted (literal) strings verbatim - no escapes.
          * ---------------------------------------------------------------- */
         if (*p == '\'') {
             H5Z__copy_char(out, cap, &pos, &p);
@@ -218,19 +218,19 @@ H5Z__rewrite_hexfloats(const char *src)
 }
 
 /*
- * H5Z__toml_wrap — allocate a NUL-terminated TOML document that wraps the
+ * H5Z__toml_wrap - allocate a NUL-terminated TOML document that wraps the
  * inline-table content in params.  Returns a heap buffer that the caller
  * must free with H5MM_xfree().
  *
  * The wrapper key "__p__" is chosen specifically because TOML bare keys cannot
- * contain two consecutive underscores — "__p__" is therefore impossible to
+ * contain two consecutive underscores - "__p__" is therefore impossible to
  * produce in user-supplied content.  User keys become *values* inside the
  * inline table, so a user key named "__p__" would still not collide.
  *
  * Accepts both bare content and an already-braced inline table:
- *   "level = 6"        →  "__p__ = {level = 6}"
- *   "{level = 6}"      →  "__p__ = {level = 6}"
- *   "{ level = 6 }"   →  "__p__ = {level = 6}"  (whitespace trimmed inside braces)
+ *   "level = 6"        ->  "__p__ = {level = 6}"
+ *   "{level = 6}"      ->  "__p__ = {level = 6}"
+ *   "{ level = 6 }"   ->  "__p__ = {level = 6}"  (whitespace trimmed inside braces)
  */
 static char *
 H5Z__toml_wrap(const char *params)
@@ -267,7 +267,7 @@ H5Z__toml_wrap(const char *params)
 }
 
 /*
- * H5Z__toml_parse_params — wrap params as a TOML document and parse it.
+ * H5Z__toml_parse_params - wrap params as a TOML document and parse it.
  *
  * On success: *tr_out holds a valid result; *ptab_out is the inline-table
  *             datum.  The caller MUST call toml_free(*tr_out) when done.
@@ -308,7 +308,7 @@ H5Z__toml_parse_params(const char *params, toml_result_t *tr_out, toml_datum_t *
     if (!tr_out->ok) {
         /* Guard: errmsg must be a fixed-size char array so sizeof gives the
          * full capacity.  If a future tomlc17 update changes it to a pointer,
-         * sizeof would equal sizeof(char *) (≤8) and the memcpy below would
+         * sizeof would equal sizeof(char *) (<=8) and the memcpy below would
          * silently truncate.  The assert catches that at compile time. */
         _Static_assert(sizeof(tr_out->errmsg) > sizeof(void *),
                        "toml_result_t.errmsg must be a fixed-size char array, not a pointer");
@@ -335,7 +335,7 @@ done:
 }
 
 /*
- * H5Z__validate_table_keys — walk one TOML table level, checking each leaf
+ * H5Z__validate_table_keys - walk one TOML table level, checking each leaf
  * key against known_keys.  When a value is a nested table, recurse with the
  * dotted prefix accumulated so far.  Returns FAIL on first unknown leaf.
  */
@@ -389,10 +389,10 @@ done:
 }
 
 /*
- * H5Z__config_validate_keys — verify every leaf key in params is in known_keys.
+ * H5Z__config_validate_keys - verify every leaf key in params is in known_keys.
  * Nested inline tables are walked recursively so the dotted-key form
  * ("compressor.name") and the inline-table form ("compressor = {name = ...}")
- * are validated identically (RFC §7 wrapping filters).
+ * are validated identically.
  * Package-internal; called by built-in filter set_config callbacks.
  */
 herr_t
@@ -429,11 +429,11 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * H5Z__config_get_datum — shared lookup core for all public accessors.
+ * H5Z__config_get_datum - shared lookup core for all public accessors.
  *
  * Parses params, looks up key, and returns the raw toml_datum_t.
  *
- * Return:  > 0  key found;   *tr is valid — caller MUST toml_free(*tr)
+ * Return:  > 0  key found;   *tr is valid - caller MUST toml_free(*tr)
  *           0   key absent;  helper already called toml_free(*tr)
  *         < 0   error;       error pushed; helper already cleaned up *tr
  *-------------------------------------------------------------------------
@@ -460,9 +460,9 @@ H5Z__config_get_datum(const char *params, const char *key, toml_result_t *tr, to
 
     /* toml_seek traverses dotted paths (e.g. "compressor.name") through
      * nested inline tables; for flat keys it behaves identically to toml_get.
-     * Both surface forms — "compressor = {name = ...}" and the dotted form
-     * "compressor.name = ..." — parse to the same nested layout, so callers
-     * see one canonical lookup convention (RFC §7 wrapping filters). */
+     * Both surface forms - "compressor = {name = ...}" and the dotted form
+     * "compressor.name = ..." - parse to the same nested layout, so callers
+     * see one canonical lookup convention. */
     *d = toml_seek(ptab, key);
     if (d->type == TOML_UNKNOWN)
         HGOTO_DONE(false);
@@ -505,7 +505,7 @@ H5Zconfig_has_key(const char *params, const char *key)
 }
 
 /*-------------------------------------------------------------------------
- * H5Z__config_get_int — package-level integer lookup (no API lock).
+ * H5Z__config_get_int - package-level integer lookup (no API lock).
  * Called by set_config callbacks which already run inside an API context.
  *-------------------------------------------------------------------------
  */
@@ -540,7 +540,7 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * H5Z__no_params_set_config — shared set_config implementation for
+ * H5Z__no_params_set_config - shared set_config implementation for
  * filters that accept no user parameters (e.g. shuffle, fletcher32).
  * Sets *cd_nelmts = 0 and rejects any non-empty params.
  *-------------------------------------------------------------------------
@@ -673,7 +673,7 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * H5Z__config_get_str — package-level string lookup (no API lock).
+ * H5Z__config_get_str - package-level string lookup (no API lock).
  * Called by set_config callbacks which already run inside an API context.
  *-------------------------------------------------------------------------
  */

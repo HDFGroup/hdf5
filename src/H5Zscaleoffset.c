@@ -779,7 +779,7 @@ H5Z__scaleoffset_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, 
         if (cd_values_size < H5Z_SCALEOFFSET_USER_NPARMS)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cd_values buffer too small for scaleoffset");
 
-        /* scaleoffset has no usable defaults: both keys are required by RFC §7 */
+        /* scaleoffset has no usable defaults: both keys are required */
         if (!params || *params == '\0')
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                         "scaleoffset filter requires 'scale_type' and 'scale_factor' parameters");

@@ -284,9 +284,9 @@ typedef struct H5Z_class3_t {
     H5Z_func2_t           filter;    /**< Extended filter callback: dxpl_id + scaled */
     H5Z_set_config_func_t set_config; /**< String configuration callback; may be NULL */
     H5Z_get_config_func_t get_config; /**< Parameter string reconstruction; may be NULL */
-    void                 *write_blob; /**< Reserved: set to NULL; defined by RFC-HDFG-2026-* */
-    void                 *read_blob;  /**< Reserved: set to NULL; defined by RFC-HDFG-2026-* */
-    void                 *close_blob; /**< Reserved: set to NULL; defined by RFC-HDFG-2026-* */
+    void                 *write_blob; /**< Reserved for future use; must be set to NULL */
+    void                 *read_blob;  /**< Reserved for future use; must be set to NULL */
+    void                 *close_blob; /**< Reserved for future use; must be set to NULL */
 } H5Z_class3_t;
 //! <!-- [H5Z_class3_t_snip] -->
 
