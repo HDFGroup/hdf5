@@ -439,14 +439,13 @@ typedef struct H5Z_class_info_t {
     const char *description;    /**< Free-form description
                                      (\c H5Z_class3_t::description); may be
                                      \c NULL                              */
-    hbool_t has_set_config;     /**< true iff the filter exposes a
-                                     \c set_config callback (v3 plugins) */
-    hbool_t has_get_config;     /**< true iff the filter exposes a
-                                     \c get_config callback (v3 plugins) */
-    hbool_t has_blob_callbacks; /**< true iff the filter exposes a
-                                       \c write_blob callback (v3 plugins;
-                                       reserved for future in-file blob
-                                       config data support, RFC to follow) */
+    bool has_set_config;     /**< true iff the filter exposes a
+                                  \c set_config callback (v3 plugins) */
+    bool has_get_config;     /**< true iff the filter exposes a
+                                  \c get_config callback (v3 plugins) */
+    bool has_blob_callbacks; /**< true iff the filter exposes a
+                                  \c write_blob callback; reserved for
+                                  future use */
 } H5Z_class_info_t;
 
 /**
