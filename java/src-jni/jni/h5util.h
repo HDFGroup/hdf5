@@ -46,9 +46,42 @@ extern int    h5str_dump_simple_mem(JNIEnv *env, FILE *stream, hid_t attr, int b
 extern htri_t H5Tdetect_variable_str(hid_t tid);
 
 extern void translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t type_class,
-                           jsize count, void *raw_buf);
+                           jsize count, void *raw_buf, size_t buf_size);
 extern void translate_wbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t type_class,
-                           jsize count, void *raw_buf);
+                           jsize count, void *raw_buf, size_t buf_size);
+
+/*
+ * API-level buffer-contract verification helpers. These let the JNI entry
+ * points reject a Java buffer whose structure does not match the documented
+ * data-model for mem_type_id BEFORE any conversion or native I/O is attempted,
+ * turning crashes/corruption into clean HDF5LibraryExceptions.
+ */
+
+/* Number of elements selected for a dataset read/write (mem space, else file
+ * space, else the dataset extent for H5S_ALL), or -1 on error. */
+extern hssize_t h5d_io_npoints(JNIEnv *env, hid_t mem_space_id, hid_t file_space_id, hid_t dataset_id);
+/* Number of elements in an attribute's dataspace, or -1 on error. */
+extern hssize_t h5a_io_npoints(JNIEnv *env, hid_t attr_id);
+
+/* Recursively verify that a write buffer (top-level Java Object[] of `count`
+ * elements) matches the nested ArrayList/boxed structure expected for
+ * mem_type_id. Raises a descriptive H5_BAD_ARGUMENT_ERROR and returns a
+ * negative value on the first mismatch; returns 0 if the structure is valid. */
+extern herr_t h5validate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t type_class,
+                              jsize count);
+
+/* Capacity check for a packed (primitive-array or byte[]) dataset/attribute
+ * buffer: `buf_len` elements of `elem_size` bytes must cover the selection of
+ * mem_type_id. Raises IllegalArgumentException and returns negative on failure. */
+extern herr_t h5d_validate_raw_buf(JNIEnv *env, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
+                                   hid_t dataset_id, jsize buf_len, size_t elem_size, const char *where);
+extern herr_t h5a_validate_raw_buf(JNIEnv *env, hid_t mem_type_id, hid_t attr_id, jsize buf_len,
+                                   size_t elem_size, const char *where);
+/* Slot-count check for a String[]-style buffer (fixed/variable strings, refs):
+ * the array must have at least one slot per selected point. */
+extern herr_t h5d_validate_slot_buf(JNIEnv *env, hid_t mem_space_id, hid_t file_space_id, hid_t dataset_id,
+                                    jsize buf_len, const char *where);
+extern herr_t h5a_validate_slot_buf(JNIEnv *env, hid_t attr_id, jsize buf_len, const char *where);
 
 /*
  * Symbols used to format the output of h5str_sprintf and

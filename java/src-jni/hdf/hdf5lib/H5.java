@@ -194,6 +194,22 @@ import org.slf4j.LoggerFactory;
  * and the parameter <i>data</i> can be any multi-dimensional array of numbers, such as float[][], or
  * int[][][], or Double[][].
  * <p>
+ * <b>Buffer data model</b>
+ * <p>
+ * Read/write buffers must match the memory datatype. The JNI verifies this at the API boundary and throws
+ * IllegalArgumentException on a mismatch instead of crashing. The expected Java buffer per datatype class is:
+ * <ul>
+ * <li>integer/enum/bitfield, float: a primitive array (byte/short/int/long/float/double[]) or byte[]; it must
+ * be large enough to hold one element of the memory type per selected point.</li>
+ * <li>fixed- or variable-length string, reference: a String[] (byte[] for references) with one slot per
+ * selected point.</li>
+ * <li>compound, variable-length sequence, array, complex: an Object[] of nested java.util.ArrayLists. Each
+ * element is an ArrayList; a compound is an ArrayList of its members in order, a VLEN/array/complex is an
+ * ArrayList of its elements, and scalar leaves are the boxed type (Integer, Double, String, ...) except
+ * reference and opaque leaves, which are a byte[] holding the element's raw bytes. Slots are
+ * not pre-allocated by the caller on read.</li>
+ * </ul>
+ * <p>
  * <b>@ref HDF5CONST</b>
  * <p>
  * The HDF5 API defines a set of constants and enumerated values. Most of these values are available to Java
@@ -1681,7 +1697,8 @@ public class H5 implements java.io.Serializable {
      * @param mem_type_id
      *            IN: Identifier of the attribute datatype (in memory).
      * @param buf
-     *            Buffer of variable-lenght to store data read from the file.
+     *            Object[] (one slot per element) to store the data read; each slot is filled with a nested
+     *            ArrayList structure matching mem_type_id (see "Buffer data model" in the class description).
      *
      * @return a non-negative value if successful
      *
@@ -2263,7 +2280,8 @@ public class H5 implements java.io.Serializable {
      * @param mem_type_id
      *            IN: Identifier of the attribute datatype (in memory).
      * @param buf
-     *            IN: Buffer of variable-lenght with data to be written to the file.
+     *            IN: Object[] (one slot per element) holding the data to write; each slot must be a nested
+     *            ArrayList structure matching mem_type_id (see "Buffer data model" in the class description).
      *
      * @return a non-negative value if successful
      *
@@ -3425,7 +3443,9 @@ public class H5 implements java.io.Serializable {
      * @param xfer_plist_id
      *            Identifier of a transfer property list for this I/O operation.
      * @param buf
-     *            Buffer of variable-lenght to store data read from the file.
+     *            Object[] (one slot per selected point) to store the data read; each slot is filled with a
+     *            nested ArrayList structure matching mem_type_id (see "Buffer data model" in the class
+     *            description). Slots need not be pre-allocated.
      *
      * @return a non-negative value if successful
      *
@@ -4145,7 +4165,9 @@ public class H5 implements java.io.Serializable {
      * @param xfer_plist_id
      *            Identifier of a transfer property list for this I/O operation.
      * @param buf
-     *            Buffer of variable-length with data to be written to the file.
+     *            Object[] (one slot per selected point) holding the data to write; each slot must be a nested
+     *            ArrayList structure matching mem_type_id (see "Buffer data model" in the class description).
+     *            A structural mismatch raises IllegalArgumentException.
      *
      * @return a non-negative value if successful
      *

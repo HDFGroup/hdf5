@@ -58,7 +58,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
     size_t      i, m, u;
     char        c;
     size_t      len = strlen(str);
-    int         f, k, l, p, q, end_obj = -1, no_param = 0;
+    int         f = -1, k, l = -1, p = -1, q, end_obj = -1, no_param = 0;
     unsigned    j, n;
     char        sobj[MAX_NC_NAME];
     char        scomp[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -420,8 +420,19 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                 } /*if */
 
 done_filter_params:;
-                if ((strcmp(scomp, "UD") == 0) && (filt->cd_nelmts == 0))
-                    j = 0;
+                if (strcmp(scomp, "UD") == 0) {
+                    /* the trailing token (no comma after it) was never committed inside
+                     * the loop above; commit it to whichever UD field is still pending,
+                     * mirroring the comma-triggered branch exactly */
+                    if (l == -1)
+                        filt->filtn = atoi(stype);
+                    else if (f == -1)
+                        filt->filt_flag = (unsigned)strtoul(stype, NULL, 0);
+                    else if (p == -1)
+                        filt->cd_nelmts = strtoull(stype, NULL, 0);
+                    else if (filt->cd_nelmts > 0)
+                        filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
+                }
                 else
                     filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
             }
