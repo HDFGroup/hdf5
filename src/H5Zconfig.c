@@ -17,14 +17,14 @@
  * Uses the vendored tomlc17 library for all TOML parsing.
  *
  * Public typed accessor functions:
- *   H5Zconfig_has_key    — key presence check
- *   H5Zconfig_get_int    — TOML integer  → int64_t
- *   H5Zconfig_get_double — TOML float    → double
- *   H5Zconfig_get_bool   — TOML boolean  → hbool_t
- *   H5Zconfig_get_str    — TOML string   → char buffer
+ *   H5Zconfig_has_key    - key presence check
+ *   H5Zconfig_get_int    - TOML integer  -> int64_t
+ *   H5Zconfig_get_double - TOML float    -> double
+ *   H5Zconfig_get_bool   - TOML boolean  -> bool
+ *   H5Zconfig_get_str    - TOML string   -> char buffer
  *
  * Package-internal:
- *   H5Z__config_validate_keys — validate all keys in params against a
+ *   H5Z__config_validate_keys - validate all keys in params against a
  *                               known-key list; called by built-in filter
  *                               set_config callbacks.
  */
@@ -642,7 +642,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5Zconfig_get_bool(const char *params, const char *key, hbool_t *out)
+H5Zconfig_get_bool(const char *params, const char *key, bool *out)
 {
     toml_result_t tr;
     toml_datum_t  d;

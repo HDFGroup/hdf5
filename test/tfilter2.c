@@ -33,7 +33,7 @@ test_parser(void)
     size_t  vsz;
     int64_t ival;
     double  dval;
-    hbool_t bval;
+    bool    bval;
     htri_t  ret;
 
     TESTING("H5Zconfig_get_int: basic integer lookup");

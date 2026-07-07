@@ -384,7 +384,7 @@ H5_DLL htri_t H5Zconfig_get_double(const char *params, const char *key, double *
  *
  * \since 2.2.0
  */
-H5_DLL htri_t H5Zconfig_get_bool(const char *params, const char *key, hbool_t *out);
+H5_DLL htri_t H5Zconfig_get_bool(const char *params, const char *key, bool *out);
 
 /**
  * \ingroup H5Z
