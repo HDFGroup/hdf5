@@ -563,8 +563,10 @@ Versions 2 and 3 of the superblock is described below:
 </table>
 
 \subsection subsec_fmt4_boot_driver II.B. Disk Format: Level 0B - File Driver Info
-The <strong>driver information block</strong> is an optional region of the file which contains information
-needed by the file driver in order to reopen a file. The format is described below:
+The <strong>driver information block</strong> lives right after the superblock.
+It is an optional region of the file which contains information
+needed by the file driver in order to reopen a file and may only exist when superblock version is less than 2.
+The format is described below:
 <table>
 <caption align=top><strong>Layout: Driver Information Block</strong></caption>
 <tr align="center">
@@ -619,7 +621,7 @@ needed by the file driver in order to reopen a file. The format is described bel
 </table>
 
 The two drivers encoded in the <em>Driver Identification</em> field are as follows:
-\li Multi driver:<br />The identifier for this driver is &ldquo;NCSAmulti&rdquo;. This driver provides
+\li Multi driver:<br />The identifier for this driver is &ldquo;NCSAmult&rdquo;. This driver provides
     a mechanism for segregating raw data and different types of metadata into multiple files. These files
     are viewed by the library as a single virtual HDF5 file with a single file address. A maximum of 6
     files will be created for the following data: superblock, B-tree, raw data, global heap, local heap,
