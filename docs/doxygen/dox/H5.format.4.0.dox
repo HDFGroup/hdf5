@@ -90,6 +90,7 @@ Navigate back: \ref index "Main" / \ref SPEC
       <li> @ref sec_fmt4_appendixd
         <ol type="A">
           <li> @ref subsec_fmt4_appendixd_encode
+          <li> @ref subsec_fmt4_appendixd_encodet
           <li> @ref subsec_fmt4_appendixd_encoderv
           <li> @ref subsec_fmt4_appendixd_encodedp
         </ol>
@@ -11784,7 +11785,7 @@ Version 2 B-trees can be used to index various objects in the library. See
 @ref FMT4V2BtType10 "10" and @ref FMT4V2BtType11 "11" record layouts are for
 indexing dataset chunks.
 
-\section sec_fmt4_appendixd VIII. Appendix D: Encoding for Dataspace and Reference
+\section sec_fmt4_appendixd VIII. Appendix D: Encoding for Dataspace, Datatype, and Reference
 
 \section subsec_fmt4_appendixd_encode VIII.A. Dataspace Encoding
 <i>#H5Sencode</i> is a public routine that encodes a dataspace description into a buffer while
@@ -12619,7 +12620,50 @@ See the reference manual description for these two public routines.
 </tr>
 </table>
 
-\section subsec_fmt4_appendixd_encoderv VIII.B. Reference Encoding (Revised)
+\section subsec_fmt4_appendixd_encodet VIII.B. Datatype Encoding
+<i>#H5Tencode</i> is a public routine that encodes a datatype description into a buffer while
+<i>#H5Tdecode</i> is the corresponding routine that decodes the description encoded in the buffer.
+See the reference manual description for these two public routines.
+
+<table>
+<caption><strong>Layout: Datatype Description for #H5Tencode/#H5Tdecode</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Datatype ID</td>
+  <td>Encode Version</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br /><br />Datatype Message <em>(variable size)</em><br /><br /></td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Fields: Datatype Description for #H5Tencode/#H5Tdecode</strong></caption>
+<tr>
+  <th width="40%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Datatype ID</td>
+  <td>The datatype message ID which is 3.</td>
+</tr>
+<tr>
+  <td>Encode Version</td>
+  <td>H5T_ENCODE_VERSION which is 0.</td>
+</tr>
+<tr>
+  <td>Datatype Message</td>
+  <td>The datatype message information. See @ref subsubsec_fmt4_dataobject_hdr_msg_dtmessage</td>
+</tr>
+</table>
+
+\section subsec_fmt4_appendixd_encoderv VIII.C. Reference Encoding (Revised)
 
 Reference information is stored as the dataset's raw data.  The layout format is described below as 
 the Reference Header and the Reference Block.
@@ -12849,7 +12893,7 @@ the Reference Block is stored using one of two methods:
 
 </ul>
 
-\section subsec_fmt4_appendixd_encodedp VIII.C. Reference Encoding (Backward Compatibility)
+\section subsec_fmt4_appendixd_encodedp VIII.D. Reference Encoding (Backward Compatibility)
 The two references described below are maintained to preserve compatibility with previous versions
 of the library.<br />
 For the following reference type, the reference encoding is stored as the dataset's raw data in the file:
