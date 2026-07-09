@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-07</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-09</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -277,13 +277,15 @@ $(function(){initNavTree('_f_m_t4.html','',''); });
 </ol>
 </li>
 <li>
-<a class="el" href="#sec_fmt4_appendixd" title="VIII. Appendix D: Encoding for Dataspace and Reference">VIII. Appendix D: Encoding for Dataspace and Reference</a> <ol type="A">
+<a class="el" href="#sec_fmt4_appendixd" title="VIII. Appendix D: Encoding for Dataspace, Datatype, and Reference">VIII. Appendix D: Encoding for Dataspace, Datatype, and Reference</a> <ol type="A">
 <li>
 <a class="el" href="#subsec_fmt4_appendixd_encode" title="VIII.A. Dataspace Encoding">VIII.A. Dataspace Encoding</a> </li>
 <li>
-<a class="el" href="#subsec_fmt4_appendixd_encoderv" title="VIII.B. Reference Encoding (Revised)">VIII.B. Reference Encoding (Revised)</a> </li>
+<a class="el" href="#subsec_fmt4_appendixd_encodet" title="VIII.B. Datatype Encoding">VIII.B. Datatype Encoding</a> </li>
 <li>
-<a class="el" href="#subsec_fmt4_appendixd_encodedp" title="VIII.C. Reference Encoding (Backward Compatibility)">VIII.C. Reference Encoding (Backward Compatibility)</a> </li>
+<a class="el" href="#subsec_fmt4_appendixd_encoderv" title="VIII.C. Reference Encoding (Revised)">VIII.C. Reference Encoding (Revised)</a> </li>
+<li>
+<a class="el" href="#subsec_fmt4_appendixd_encodedp" title="VIII.D. Reference Encoding (Backward Compatibility)">VIII.D. Reference Encoding (Backward Compatibility)</a> </li>
 </ol>
 </li>
 </ol>
@@ -345,7 +347,7 @@ I.B. Changes for HDF5 2.0</h2>
 I.C. Changes for HDF5 1.12</h2>
 <p>The following sections have been changed or added for the 1.12 release: </p><ul>
 <li>Under <a class="el" href="#subsubsec_fmt4_dataobject_hdr_msg_dtmessage" title="IV.A.2.d. The Datatype Message">IV.A.2.d. The Datatype Message</a>, in the Description for &ldquo;Fields:Datatype Message&rdquo;, version 4 was added and Reference class (7) of the datatype was updated to describe version 4. </li>
-<li><a class="el" href="#sec_fmt4_appendixd" title="VIII. Appendix D: Encoding for Dataspace and Reference">VIII. Appendix D: Encoding for Dataspace and Reference</a> was added.</li>
+<li><a class="el" href="#sec_fmt4_appendixd" title="VIII. Appendix D: Encoding for Dataspace, Datatype, and Reference">VIII. Appendix D: Encoding for Dataspace, Datatype, and Reference</a> was added.</li>
 </ul>
 <h2 class="doxsection"><a class="anchor" id="subsec_fmt4_intro_110"></a>
 I.D. Changes for HDF5 1.10</h2>
@@ -6692,7 +6694,7 @@ IV.B. Disk Format: Level 2B - Data Object Data Storage</h2>
 <p>Data of a compound datatype is stored as a contiguous stream of the items in the structure, with each item formatted according to its datatype.<br  />
  Description of datatypes for variable-length, references and compound classes can be found in <a class="el" href="#subsubsec_fmt4_dataobject_hdr_msg_dtmessage" title="IV.A.2.d. The Datatype Message">IV.A.2.d. The Datatype Message</a>.<br  />
  Information about global heap and heap ID can be found in <a class="el" href="#subsec_fmt4_infra_globalheap" title="III.E. Disk Format: Level 1E - Global Heap">III.E. Disk Format: Level 1E - Global Heap</a>..<br  />
- For reference datatype, see also the encoding description for <a class="el" href="#subsec_fmt4_appendixd_encoderv" title="VIII.B. Reference Encoding (Revised)">VIII.B. Reference Encoding (Revised)</a> and <a class="el" href="#subsec_fmt4_appendixd_encodedp" title="VIII.C. Reference Encoding (Backward Compatibility)">VIII.C. Reference Encoding (Backward Compatibility)</a> in Appendix D.</p>
+ For reference datatype, see also the encoding description for <a class="el" href="#subsec_fmt4_appendixd_encoderv" title="VIII.C. Reference Encoding (Revised)">VIII.C. Reference Encoding (Revised)</a> and <a class="el" href="#subsec_fmt4_appendixd_encodedp" title="VIII.D. Reference Encoding (Backward Compatibility)">VIII.D. Reference Encoding (Backward Compatibility)</a> in Appendix D.</p>
 <h1 class="doxsection"><a class="anchor" id="sec_fmt4_appendixa"></a>
 V. Appendix A: Definitions</h1>
 <p>Definitions of various terms used in this document are included in this section. </p><table class="doxtable">
@@ -7502,7 +7504,7 @@ more than one dimension of unlimited extent </li>
 </ul>
 <p>Version 2 B-trees can be used to index various objects in the library. See <a class="el" href="#subsubsec_fmt4_infra_btrees_v2" title="III.A.2. Disk Format: Level 1A2 - Version 2 B-trees">III.A.2. Disk Format: Level 1A2 - Version 2 B-trees</a> for more information. The B-tree types <a class="el" href="#FMT4V2BtType10" title="FMT4V2BtType10">10</a> and <a class="el" href="#FMT4V2BtType11" title="FMT4V2BtType11">11</a> record layouts are for indexing dataset chunks.</p>
 <h1 class="doxsection"><a class="anchor" id="sec_fmt4_appendixd"></a>
-VIII. Appendix D: Encoding for Dataspace and Reference</h1>
+VIII. Appendix D: Encoding for Dataspace, Datatype, and Reference</h1>
 <h1 class="doxsection"><a class="anchor" id="subsec_fmt4_appendixd_encode"></a>
 VIII.A. Dataspace Encoding</h1>
 <p><em><a class="el" href="group___h5_s.html#ga35e289baf490229e233296929fbf5208">H5Sencode</a></em> is a public routine that encodes a dataspace description into a buffer while <em><a class="el" href="group___h5_s.html#ga0ac0ebd5f292460354f574476be49fad" title="Decodes a binary object description of data space and returns a new object handle.">H5Sdecode</a></em> is the corresponding routine that decodes the description encoded in the buffer. See the reference manual description for these two public routines.</p>
@@ -8070,8 +8072,35 @@ Reserved <em>(zero, 8 bytes)</em><br  />
 <tr>
 <td>Version</td><td>The version number for the <a class="el" href="_h5_spublic_8h.html#a1e9590539381e3922a1582067d496304a865473ae023d0ac257aeb9424f363e75">H5S_SEL_ALL</a> Selection Info; the value is 1.</td></tr>
 </table>
+<h1 class="doxsection"><a class="anchor" id="subsec_fmt4_appendixd_encodet"></a>
+VIII.B. Datatype Encoding</h1>
+<p><em><a class="el" href="group___h5_t.html#ga1ceda41ee462fab8dd70bdf67205ed1c" title="Encodes a datatype object description into a binary buffer.">H5Tencode</a></em> is a public routine that encodes a datatype description into a buffer while <em><a class="el" href="_h5version_8h.html#ac90f7722dacad861c0a22507d3adf0dd">H5Tdecode</a></em> is the corresponding routine that decodes the description encoded in the buffer. See the reference manual description for these two public routines.</p>
+<table class="doxtable">
+<caption><b>Layout: Datatype Description for <a class="el" href="group___h5_t.html#ga1ceda41ee462fab8dd70bdf67205ed1c" title="Encodes a datatype object description into a binary buffer.">H5Tencode</a>/<a class="el" href="_h5version_8h.html#ac90f7722dacad861c0a22507d3adf0dd">H5Tdecode</a></b></caption>
+<tr>
+<th width="25%">byte</th><th width="25%">byte</th><th width="25%">byte</th><th>byte</th></tr>
+<tr>
+<td>Datatype ID</td><td>Encode Version</td><td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td></tr>
+<tr>
+<td colspan="4"><br  />
+<br  />
+Datatype Message <em>(variable size)</em><br  />
+<br  />
+</td></tr>
+</table>
+<table class="doxtable">
+<caption><b>Fields: Datatype Description for <a class="el" href="group___h5_t.html#ga1ceda41ee462fab8dd70bdf67205ed1c" title="Encodes a datatype object description into a binary buffer.">H5Tencode</a>/<a class="el" href="_h5version_8h.html#ac90f7722dacad861c0a22507d3adf0dd">H5Tdecode</a></b></caption>
+<tr>
+<th width="40%">Field Name</th><th>Description</th></tr>
+<tr>
+<td>Datatype ID</td><td>The datatype message ID which is 3.</td></tr>
+<tr>
+<td>Encode Version</td><td>H5T_ENCODE_VERSION which is 0.</td></tr>
+<tr>
+<td>Datatype Message</td><td>The datatype message information. See <a class="el" href="#subsubsec_fmt4_dataobject_hdr_msg_dtmessage" title="IV.A.2.d. The Datatype Message">IV.A.2.d. The Datatype Message</a></td></tr>
+</table>
 <h1 class="doxsection"><a class="anchor" id="subsec_fmt4_appendixd_encoderv"></a>
-VIII.B. Reference Encoding (Revised)</h1>
+VIII.C. Reference Encoding (Revised)</h1>
 <p>Reference information is stored as the dataset's raw data. The layout format is described below as the Reference Header and the Reference Block.</p>
 <table class="doxtable">
 <caption><b>Layout: Reference Header</b></caption>
@@ -8225,7 +8254,7 @@ Collection Address<sup>O</sup><br  />
 </li>
 </ul>
 <h1 class="doxsection"><a class="anchor" id="subsec_fmt4_appendixd_encodedp"></a>
-VIII.C. Reference Encoding (Backward Compatibility)</h1>
+VIII.D. Reference Encoding (Backward Compatibility)</h1>
 <p>The two references described below are maintained to preserve compatibility with previous versions of the library.<br  />
  For the following reference type, the reference encoding is stored as the dataset's raw data in the file: </p><ul>
 <li>
