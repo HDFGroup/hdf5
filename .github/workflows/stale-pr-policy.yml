@@ -41,7 +41,8 @@ jobs:
   draft-pr-policy:
     if: >-
       github.repository_owner == 'HDFGroup' &&
-      (github.event_name != 'issue_comment' || github.event.issue.pull_request != null)
+      (github.event_name != 'issue_comment' ||
+       (github.event.issue.pull_request != null && github.event.comment.user.type != 'Bot'))
     runs-on: ubuntu-latest
     permissions:
       contents: read
