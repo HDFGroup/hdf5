@@ -73,11 +73,11 @@ free_ref_path_info(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *op
  *-------------------------------------------------------------------------
  */
 static herr_t
-init_ref_path_cb(const char *obj_name, const H5O_info2_t *oinfo, const char *already_seen,
-                 void H5_ATTR_UNUSED *_udata)
+init_ref_path_cb(const char *obj_name, const H5O_info2_t *oinfo, bool already_seen,
+                 const trav_seen_t H5_ATTR_UNUSED *visited_obj_info, void H5_ATTR_UNUSED *_udata)
 {
     /* Check if the object is already in the path table */
-    if (NULL == already_seen) {
+    if (!already_seen) {
         /* Insert the object into the path table */
         ref_path_table_put(obj_name, &oinfo->token);
     } /* end if */

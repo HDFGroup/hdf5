@@ -1,0 +1,72 @@
+# Flags inactive PRs instead of letting them sit indefinitely. Issues are
+# intentionally untouched by this workflow.
+# Staleness is measured by the last *meaningful* activity: non-bot comments,
+# review submissions, or commits — bot-only events (e.g. /remove-reviewer
+# acknowledgments) do not reset the countdown. Draft PRs get a longer window
+# handled separately. Nothing is ever auto-closed: once a PR has been stale
+# past its alert threshold, the assignee (falling back to requested reviewers,
+# then the author) is pinged to decide whether to close it or keep it open.
+name: Stale PR policy
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * *"
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  mark-stale:
+    if: github.repository_owner == 'HDFGroup' && github.event_name != 'issue_comment'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const { runMarkStale } = require('${{ github.workspace }}/.github/scripts/mark-stale.js');
+            await runMarkStale({ github, context, core });
+
+  draft-pr-policy:
+    if: github.repository_owner == 'HDFGroup'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const { runDraftPolicy } = require('${{ github.workspace }}/.github/scripts/draft-pr-policy.js');
+            await runDraftPolicy({ github, context, core });
+
+  alert-stale:
+    needs: [mark-stale, draft-pr-policy]
+    if: github.repository_owner == 'HDFGroup' && github.event_name != 'issue_comment'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const { runAlertStale } = require('${{ github.workspace }}/.github/scripts/alert-stale.js');
+            await runAlertStale({ github, context, core });

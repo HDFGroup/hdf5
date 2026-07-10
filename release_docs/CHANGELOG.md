@@ -32,6 +32,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## Performance Enhancements:
 
+- Improved the performance of several tools (h5dump, h5ls, h5diff, h5repack, h5stat and h5format_convert) for specific file structures where many objects are linked to with multiple hard links
 
 ## Significant Advancements:
 
@@ -144,6 +145,10 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ## Library
 
+### HTTP 403 errors in the ROS3 VFD for object keys with special characters
+
+   The ROS3 VFD did not URI-encode the S3 object key when building the HTTP request path, so keys containing characters that AWS Signature Version 4 requires to be percent-encoded — such as the '=' in Hive-style `key=value` partition prefixes, '+', or spaces — produced a signed request whose signature did not match S3's server-side recomputation. S3 rejects such requests with `SignatureDoesNotMatch`, which surfaces as an HTTP 403 error (indistinguishable from a permissions error on a HEAD request), even though tools like the AWS CLI could access the same object. The object key is now percent-encoded exactly once when the request path is built, matching the behavior of other S3 clients. Note that URLs must now be passed to the ROS3 VFD with their object keys unencoded; a key that was pre-encoded as a workaround for this issue will now be double-encoded and fail to resolve.
+
 ### Fixed file descriptor leaks in stdio VFD error paths
 
    Fixed multiple resource leaks in the H5FDstdio driver where file descriptors were not properly closed on error paths. The error handling code was incorrectly attempting to close a local variable instead of the file pointer stored in the file structure, leading to file descriptor leaks. This issue affected 5 error paths in `H5FD_stdio_open()` and could cause file descriptor exhaustion in long-running applications.
@@ -186,7 +191,18 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ## Tools
 
+### Fixed h5repack silently dropping a declared cd_nelmts for user-defined filters
+
+   `h5repack -f UD=<filtn>,<flag>,<cd_nelmts>` with no values following `cd_nelmts` silently
+   treated the declared count as 0 instead of validating it, because the trailing token (with
+   no comma after it) was never committed to `cd_nelmts` inside the parser. `parse_filter()` now
+   commits the trailing token to whichever UD field is still pending, so a declared, unfulfilled
+   `cd_nelmts` is correctly rejected with "incorrect number of compression parameters" instead of
+   being silently coerced to 0.
+
 ## Performance
+
+   Fixed performance issues in several tools (h5dump, h5ls, h5diff, h5repack, h5stat and h5format_convert) for specific file structures where many objects are linked to with multiple hard links. While traversing a file's structure, these tools internally track already visited objects to avoid redundant processing on objects linked to multiple times. Checking if an object was already visited previously used a linear scan over an array of all the already visited objects that were multiply linked, resulting in behavior that was potentially quadratic with the number of objects visited and causing most of the application runtime to be spent checking this array. Additionally, h5repack had a separate array for hard link name aliases for objects that further contributed to performance issues in that tool. Replacing these arrays with hash tables greatly improved the performance of these tools on files with structures matching the structure mentioned previously.
 
 ## Fortran API
 

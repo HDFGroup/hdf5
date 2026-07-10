@@ -1788,7 +1788,7 @@ H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
  *          name is not limited.
  *
  *          \p dcpl_id is an #H5P_DATASET_CREATE property list created with \p
- *          H5reate1() and initialized with various property list functions
+ *          H5Dcreate1() and initialized with various property list functions
  *          described in Property List Interface.
  *
  *          H5Dcreate() and H5Dcreate_anon() return an error if the dataset's

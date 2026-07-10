@@ -1,0 +1,26 @@
+name: Review Checklist (gather)
+
+# Minimal signal workflow: fires on pull_request_review so that the
+# privileged review-checklist.yml (triggered via workflow_run) can
+# update the checklist with the latest approval state.
+#
+# This workflow intentionally does nothing except complete — its only
+# purpose is to unblock the workflow_run trigger in review-checklist.yml.
+#
+# Requires the repo "Fork pull request workflows from outside collaborators"
+# setting to be "Require approval for first-time contributors" (not all
+# outside collaborators) so regular fork contributors' reviews fire this
+# immediately without a maintainer approval gate.
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+permissions: {}
+
+jobs:
+  signal:
+    runs-on: ubuntu-latest
+    if: github.repository == 'HDFGroup/hdf5' && github.event.pull_request.base.ref == 'develop'
+    steps:
+      - run: echo "Review submitted on PR ${{ github.event.pull_request.number }}"
