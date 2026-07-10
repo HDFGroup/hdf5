@@ -49,38 +49,38 @@
 #include "H5VMprivate.h"
 #include "H5Zpkg.h"
 
-static const char *FILENAME[] = {"dataset",             /* 0 */
-                                 "compact_dataset",     /* 1 */
-                                 "dset_offset",         /* 2 */
-                                 "max_compact_dataset", /* 3 */
-                                 "simple",              /* 4 */
-                                 "set_local",           /* 5 */
-                                 "random_chunks",       /* 6 */
-                                 "huge_chunks",         /* 7 */
-                                 "chunk_cache",         /* 8 */
-                                 "big_chunk",           /* 9 */
-                                 "chunk_fast",          /* 10 */
-                                 "chunk_expand",        /* 11 */
-                                 "chunk_fixed",         /* 12 */
-                                 "copy_dcpl_newfile",   /* 13 */
-                                 "partial_chunks",      /* 14 */
-                                 "layout_extend",       /* 15 */
-                                 "zero_chunk",          /* 16 */
-                                 "chunk_single",        /* 17 */
-                                 "swmr_non_latest",     /* 18 */
-                                 "earray_hdr_fd",       /* 19 */
-                                 "farray_hdr_fd",       /* 20 */
-                                 "bt2_hdr_fd",          /* 21 */
-                                 "storage_size",        /* 22 */
-                                 "dls_01_strings",      /* 23 */
-                                 "power2up",            /* 24 */
-                                 "version_bounds",      /* 25 */
-                                 "alloc_0sized",        /* 26 */
-                                 "h5s_block",           /* 27 */
-                                 "h5s_plist",           /* 28 */
-                                 "vds_strings",         /* 29 */
-                                 "chunk_expand2",       /* 30 */
-                                 "scalar_datasets",     /* 31 */
+static const char *FILENAME[] = {"dataset",              /* 0 */
+                                 "compact_dataset",      /* 1 */
+                                 "dset_offset",          /* 2 */
+                                 "max_compact_dataset",  /* 3 */
+                                 "simple",               /* 4 */
+                                 "set_local",            /* 5 */
+                                 "random_chunks",        /* 6 */
+                                 "huge_chunks",          /* 7 */
+                                 "chunk_cache",          /* 8 */
+                                 "big_chunk",            /* 9 */
+                                 "chunk_fast",           /* 10 */
+                                 "chunk_expand",         /* 11 */
+                                 "chunk_fixed",          /* 12 */
+                                 "copy_dcpl_newfile",    /* 13 */
+                                 "partial_chunks",       /* 14 */
+                                 "layout_extend",        /* 15 */
+                                 "zero_chunk",           /* 16 */
+                                 "chunk_single",         /* 17 */
+                                 "swmr_non_latest",      /* 18 */
+                                 "earray_hdr_fd",        /* 19 */
+                                 "farray_hdr_fd",        /* 20 */
+                                 "bt2_hdr_fd",           /* 21 */
+                                 "storage_size",         /* 22 */
+                                 "dls_01_strings",       /* 23 */
+                                 "power2up",             /* 24 */
+                                 "version_bounds",       /* 25 */
+                                 "alloc_0sized",         /* 26 */
+                                 "h5s_block",            /* 27 */
+                                 "h5s_plist",            /* 28 */
+                                 "vds_strings",          /* 29 */
+                                 "chunk_expand2",        /* 30 */
+                                 "scalar_datasets",      /* 31 */
                                  "read_only_vlen_fill",  /* 32 */
                                  "scaleoffset_fullprec", /* 33 */
                                  NULL};
@@ -5911,19 +5911,19 @@ static herr_t
 test_scaleoffset_int_fullprec(hid_t fapl)
 {
     char          filename[FILENAME_BUF_SIZE];
-    hid_t         file      = H5I_INVALID_HID;
-    hid_t         datatype  = H5I_INVALID_HID;
-    hid_t         space     = H5I_INVALID_HID;
-    hid_t         dc        = H5I_INVALID_HID;
-    hid_t         dataset   = H5I_INVALID_HID;
+    hid_t         file          = H5I_INVALID_HID;
+    hid_t         datatype      = H5I_INVALID_HID;
+    hid_t         space         = H5I_INVALID_HID;
+    hid_t         dc            = H5I_INVALID_HID;
+    hid_t         dataset       = H5I_INVALID_HID;
     const hsize_t size[1]       = {8};
     const hsize_t chunk_size[1] = {8};
     /* Include both the minimum and maximum values of the type so the data
      * spans its full range and must be stored at full precision.
      */
-    int           orig_data[8] = {INT_MIN, INT_MAX, 0, -1, 1, 12345, -54321, 100};
-    int           new_data[8];
-    size_t        i;
+    int    orig_data[8] = {INT_MIN, INT_MAX, 0, -1, 1, 12345, -54321, 100};
+    int    new_data[8];
+    size_t i;
 
     TESTING("    scaleoffset int full-precision round-trip");
 
