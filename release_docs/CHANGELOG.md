@@ -124,7 +124,7 @@ We would like to thank the many HDF5 community members who contributed to this r
    byte per filter and, when set, the blob's locator.  Blob bytes live in the
    global heap, not inline in the object header; deleting the dataset
    reclaims the heap object.  Writing a blob-bearing dataset requires a
-   library-version high bound of `H5F_LIBVER_V220` (see below) or later;
+   library-version high bound of `H5F_LIBVER_V230` (see below) or later;
    files without blobs are unaffected.
 
    `H5Pencode`/`H5Pdecode` serialize the blob bytes inline so an encoded DCPL
@@ -133,14 +133,14 @@ We would like to thank the many HDF5 community members who contributed to this r
    HDF5, rank 0 writes the blob and broadcasts the locator so all ranks
    encode an identical pipeline message.
 
-### Added the H5F_LIBVER_V220 library version bound
+### Added the H5F_LIBVER_V230 library version bound
 
-   The `H5F_libver_t` enumeration gains `H5F_LIBVER_V220`, and
+   The `H5F_libver_t` enumeration gains `H5F_LIBVER_V230`, and
    `H5F_LIBVER_LATEST` now maps to it.  A file access property list's high
-   bound must be at least `H5F_LIBVER_V220` to write the version-3 filter
+   bound must be at least `H5F_LIBVER_V230` to write the version-3 filter
    pipeline message introduced for blob storage; all other format versions
    are unchanged from `H5F_LIBVER_V200`.  The constant is mirrored in the
-   Fortran (`H5F_LIBVER_V220_F`) and Java (`HDF5Constants.H5F_LIBVER_V220`)
+   Fortran (`H5F_LIBVER_V230_F`) and Java (`HDF5Constants.H5F_LIBVER_V230`)
    bindings.
 
 ### Added string-based filter configuration API (RFC-HDFG-2026-001)

@@ -270,7 +270,7 @@ typedef size_t (*H5Z_func2_t)(unsigned int flags, size_t cd_nelmts, const unsign
  * whatever they need in the two fields, as long as \c read_blob can recover
  * the blob from them.
  *
- * \since 2.2.0
+ * \since 2.3.0
  */
 typedef struct H5Z_blob_loc_t {
     haddr_t addr; /**< Global heap collection address           */
@@ -292,7 +292,7 @@ typedef struct H5Z_blob_loc_t {
  *          \c set_local callback runs.  If the filter class leaves this field
  *          NULL, the library uses its default global-heap (H5HG) writer.
  *
- * \since 2.2.0
+ * \since 2.3.0
  */
 typedef herr_t (*H5Z_write_blob_func_t)(hid_t file_id, const void *buf, size_t size, H5Z_blob_loc_t *loc_out);
 
@@ -313,7 +313,7 @@ typedef herr_t (*H5Z_write_blob_func_t)(hid_t file_id, const void *buf, size_t s
  *          it here using \p file_id and cache the result for later
  *          \c H5Z_func2_t invocations.
  *
- * \since 2.2.0
+ * \since 2.3.0
  */
 typedef herr_t (*H5Z_read_blob_func_t)(hid_t file_id, H5Z_blob_loc_t loc, void **buf_out, size_t *size_out);
 
@@ -328,7 +328,7 @@ typedef herr_t (*H5Z_read_blob_func_t)(hid_t file_id, H5Z_blob_loc_t loc, void *
  * \details Called at dataset close.  If the filter class leaves this field
  *          NULL, the library releases the buffer itself.
  *
- * \since 2.2.0
+ * \since 2.3.0
  */
 typedef herr_t (*H5Z_close_blob_func_t)(void *buf, size_t size);
 

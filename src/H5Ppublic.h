@@ -2886,7 +2886,7 @@ H5_DLL herr_t H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int
  *          to another dataset).  The filter's \c set_config callback is not
  *          invoked for this entry point.
  *
- * \since 2.2.0
+ * \since 2.3.0
  */
 H5_DLL herr_t H5Pappend_filter_blob(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const void *buf,
                                     size_t size);
