@@ -9493,7 +9493,7 @@ test_chunk_size_of_sizes(hid_t fapl)
     bool     registered  = false;     /* Whether the bogus filter is registered */
     unsigned s;                        /* Local index variable */
 
-    TESTING("chunked datasets with size of sizes < 8");
+    TESTING("chunked datasets with size of sizes <= 8");
 
     /* Copy the FAPL and force the latest format so that version-5 chunk layout
      * messages (which encode filtered chunk sizes using the file's size of
