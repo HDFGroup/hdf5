@@ -9379,14 +9379,14 @@ static herr_t
 test_sos_roundtrip_dset(hid_t fid, const char *dset_name, int rank, const hsize_t *dims,
                         const hsize_t *maxdims, const hsize_t *chunk, H5D_chunk_index_t expected_idx)
 {
-    hid_t             sid     = H5I_INVALID_HID; /* Dataspace ID */
-    hid_t             did     = H5I_INVALID_HID; /* Dataset ID */
-    hid_t             dcpl    = H5I_INVALID_HID; /* Dataset creation property list ID */
-    int              *wbuf    = NULL;            /* Write buffer */
-    int              *rbuf    = NULL;            /* Read buffer */
-    H5D_chunk_index_t idx_type;                  /* Actual chunk index type */
-    hsize_t           nelmts = 1;                /* Number of elements in the dataset */
-    size_t            u;                         /* Local index variable */
+    hid_t             sid  = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t             did  = H5I_INVALID_HID; /* Dataset ID */
+    hid_t             dcpl = H5I_INVALID_HID; /* Dataset creation property list ID */
+    int              *wbuf = NULL;            /* Write buffer */
+    int              *rbuf = NULL;            /* Read buffer */
+    H5D_chunk_index_t idx_type;               /* Actual chunk index type */
+    hsize_t           nelmts = 1;             /* Number of elements in the dataset */
+    size_t            u;                      /* Local index variable */
 
     /* Compute the number of elements and fill the write buffer */
     for (u = 0; u < (size_t)rank; u++)
@@ -9489,9 +9489,9 @@ test_chunk_size_of_sizes(hid_t fapl)
     hid_t    fcpl    = H5I_INVALID_HID; /* File creation property list ID */
     hid_t    fid     = H5I_INVALID_HID; /* File ID */
     char     filename[FILENAME_BUF_SIZE];
-    size_t   sizes[]     = {2, 4, 8}; /* "size of sizes" values to test (all <= 8) */
-    bool     registered  = false;     /* Whether the bogus filter is registered */
-    unsigned s;                        /* Local index variable */
+    size_t   sizes[]    = {2, 4, 8}; /* "size of sizes" values to test (all <= 8) */
+    bool     registered = false;     /* Whether the bogus filter is registered */
+    unsigned s;                      /* Local index variable */
 
     TESTING("chunked datasets with size of sizes <= 8");
 
@@ -9513,18 +9513,18 @@ test_chunk_size_of_sizes(hid_t fapl)
 
     for (s = 0; s < sizeof(sizes) / sizeof(sizes[0]); s++) {
         /* Single chunk index: cur dims == max dims == chunk dims */
-        hsize_t single_dims[2]  = {10, 10};
-        hsize_t single_max[2]   = {10, 10};
+        hsize_t single_dims[2] = {10, 10};
+        hsize_t single_max[2]  = {10, 10};
         /* Fixed array index: fixed max dims, multiple chunks */
-        hsize_t farray_dims[2]  = {40, 40};
-        hsize_t farray_max[2]   = {40, 40};
+        hsize_t farray_dims[2] = {40, 40};
+        hsize_t farray_max[2]  = {40, 40};
         /* Extensible array index: exactly one unlimited dimension */
-        hsize_t earray_dims[2]  = {40, 40};
-        hsize_t earray_max[2]   = {H5S_UNLIMITED, 40};
+        hsize_t earray_dims[2] = {40, 40};
+        hsize_t earray_max[2]  = {H5S_UNLIMITED, 40};
         /* Version 2 B-tree index: more than one unlimited dimension */
-        hsize_t bt2_dims[2]     = {40, 40};
-        hsize_t bt2_max[2]      = {H5S_UNLIMITED, H5S_UNLIMITED};
-        hsize_t chunk[2]        = {10, 10}; /* 10 * 10 * 4 = 400 bytes on disk */
+        hsize_t bt2_dims[2] = {40, 40};
+        hsize_t bt2_max[2]  = {H5S_UNLIMITED, H5S_UNLIMITED};
+        hsize_t chunk[2]    = {10, 10}; /* 10 * 10 * 4 = 400 bytes on disk */
 
         /* Create a file whose size of sizes is the value under test.  The size
          * of addresses is left at its default. */
@@ -9536,14 +9536,14 @@ test_chunk_size_of_sizes(hid_t fapl)
             TEST_ERROR;
 
         /* Exercise each chunk index type that stores per-chunk sizes */
-        if (test_sos_roundtrip_dset(fid, "single", 2, single_dims, single_max, chunk,
-                                    H5D_CHUNK_IDX_SINGLE) < 0)
+        if (test_sos_roundtrip_dset(fid, "single", 2, single_dims, single_max, chunk, H5D_CHUNK_IDX_SINGLE) <
+            0)
             goto error;
-        if (test_sos_roundtrip_dset(fid, "farray", 2, farray_dims, farray_max, chunk,
-                                    H5D_CHUNK_IDX_FARRAY) < 0)
+        if (test_sos_roundtrip_dset(fid, "farray", 2, farray_dims, farray_max, chunk, H5D_CHUNK_IDX_FARRAY) <
+            0)
             goto error;
-        if (test_sos_roundtrip_dset(fid, "earray", 2, earray_dims, earray_max, chunk,
-                                    H5D_CHUNK_IDX_EARRAY) < 0)
+        if (test_sos_roundtrip_dset(fid, "earray", 2, earray_dims, earray_max, chunk, H5D_CHUNK_IDX_EARRAY) <
+            0)
             goto error;
         if (test_sos_roundtrip_dset(fid, "bt2", 2, bt2_dims, bt2_max, chunk, H5D_CHUNK_IDX_BT2) < 0)
             goto error;
@@ -9600,14 +9600,14 @@ static herr_t
 test_sos_overflow_dset(hid_t fid, const char *dset_name, int rank, const hsize_t *dims,
                        const hsize_t *maxdims, const hsize_t *chunk, H5D_chunk_index_t expected_idx)
 {
-    hid_t             sid    = H5I_INVALID_HID; /* Dataspace ID */
-    hid_t             did    = H5I_INVALID_HID; /* Dataset ID */
-    hid_t             dcpl   = H5I_INVALID_HID; /* Dataset creation property list ID */
-    int              *wbuf   = NULL;            /* Write buffer */
-    H5D_chunk_index_t idx_type;                 /* Actual chunk index type */
-    hsize_t           nelmts = 1;               /* Number of elements in the dataset */
-    herr_t            status = SUCCEED;         /* Return value of the write/flush */
-    size_t            u;                        /* Local index variable */
+    hid_t             sid  = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t             did  = H5I_INVALID_HID; /* Dataset ID */
+    hid_t             dcpl = H5I_INVALID_HID; /* Dataset creation property list ID */
+    int              *wbuf = NULL;            /* Write buffer */
+    H5D_chunk_index_t idx_type;               /* Actual chunk index type */
+    hsize_t           nelmts = 1;             /* Number of elements in the dataset */
+    herr_t            status = SUCCEED;       /* Return value of the write/flush */
+    size_t            u;                      /* Local index variable */
 
     for (u = 0; u < (size_t)rank; u++)
         nelmts *= dims[u];
@@ -9695,15 +9695,15 @@ error:
 static herr_t
 test_chunk_size_of_sizes_overflow(hid_t fapl)
 {
-    hid_t   my_fapl    = H5I_INVALID_HID; /* Copy of the file access property list */
-    hid_t   fcpl       = H5I_INVALID_HID; /* File creation property list ID */
-    hid_t   fid        = H5I_INVALID_HID; /* File ID */
-    char    filename[FILENAME_BUF_SIZE];
-    bool    registered = false; /* Whether the bogus filter is registered */
+    hid_t my_fapl = H5I_INVALID_HID; /* Copy of the file access property list */
+    hid_t fcpl    = H5I_INVALID_HID; /* File creation property list ID */
+    hid_t fid     = H5I_INVALID_HID; /* File ID */
+    char  filename[FILENAME_BUF_SIZE];
+    bool  registered = false; /* Whether the bogus filter is registered */
 
     /* Single chunk index: cur dims == max dims == chunk dims (one 160000-byte chunk) */
-    hsize_t single_dims[2] = {200, 200};
-    hsize_t single_max[2]  = {200, 200};
+    hsize_t single_dims[2]  = {200, 200};
+    hsize_t single_max[2]   = {200, 200};
     hsize_t single_chunk[2] = {200, 200};
     /* Fixed array index: fixed max dims, more than one chunk */
     hsize_t farray_dims[2] = {400, 200};

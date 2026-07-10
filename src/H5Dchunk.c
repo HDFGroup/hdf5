@@ -129,14 +129,14 @@
             }                                                                                                \
         }                                                                                                    \
                                                                                                              \
-        /* For version 5 (all chunk index types) and for the single chunk index (any version), the */       \
+        /* For version 5 (all chunk index types) and for the single chunk index (any version), the */        \
         /* filtered chunk size is encoded in a fixed-width field equal to the file's "size of sizes". */     \
         /* Make sure the chunk size fits in that many bytes to avoid silently truncating it. */              \
         if ((layout)->version > H5O_LAYOUT_VERSION_4 ||                                                      \
             (layout)->storage.u.chunk.idx_type == H5D_CHUNK_IDX_SINGLE) {                                    \
             unsigned size_of_sizes = (unsigned)H5F_SIZEOF_SIZE(f);                                           \
                                                                                                              \
-            if (size_of_sizes < 8 && (length) > (((uint64_t)1 << (8 * size_of_sizes)) - 1))                 \
+            if (size_of_sizes < 8 && (length) > (((uint64_t)1 << (8 * size_of_sizes)) - 1))                  \
                 HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, err,                                                  \
                             "filtered chunk size is too large to be encoded with the file's size of sizes "  \
                             "- see H5Pset_sizes()");                                                         \
