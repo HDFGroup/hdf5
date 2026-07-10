@@ -81,7 +81,8 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
                                  "vds_strings",         /* 29 */
                                  "chunk_expand2",       /* 30 */
                                  "scalar_datasets",     /* 31 */
-                                 "read_only_vlen_fill", /* 32 */
+                                 "read_only_vlen_fill",  /* 32 */
+                                 "scaleoffset_fullprec", /* 33 */
                                  NULL};
 
 #define OHMIN_FILENAME_A "ohdr_min_a"
@@ -153,6 +154,7 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
 #define DSET_SCALEOFFSET_FLOAT_NAME_2       "scaleoffset_float_2"
 #define DSET_SCALEOFFSET_DOUBLE_NAME        "scaleoffset_double"
 #define DSET_SCALEOFFSET_DOUBLE_NAME_2      "scaleoffset_double_2"
+#define DSET_SCALEOFFSET_INT_FULLPREC_NAME  "scaleoffset_int_fullprec"
 #define DSET_COMPARE_DCPL_NAME              "compare_dcpl"
 #define DSET_COMPARE_DCPL_NAME_2            "compare_dcpl_2"
 #define DSET_COPY_DCPL_NAME_1               "copy_dcpl_1"
@@ -5891,6 +5893,116 @@ test_scaleoffset_double_2(hid_t file)
 error:
     return FAIL;
 } /* end test_scaleoffset_double_2() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_scaleoffset_int_fullprec
+ *
+ * Purpose:     Tests that scale-offset data spanning the full range of the
+ *              datatype (so the filter must store it at full precision) can
+ *              be written, flushed to disk, and read back correctly.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_scaleoffset_int_fullprec(hid_t fapl)
+{
+    char          filename[FILENAME_BUF_SIZE];
+    hid_t         file      = H5I_INVALID_HID;
+    hid_t         datatype  = H5I_INVALID_HID;
+    hid_t         space     = H5I_INVALID_HID;
+    hid_t         dc        = H5I_INVALID_HID;
+    hid_t         dataset   = H5I_INVALID_HID;
+    const hsize_t size[1]       = {8};
+    const hsize_t chunk_size[1] = {8};
+    /* Include both the minimum and maximum values of the type so the data
+     * spans its full range and must be stored at full precision.
+     */
+    int           orig_data[8] = {INT_MIN, INT_MAX, 0, -1, 1, 12345, -54321, 100};
+    int           new_data[8];
+    size_t        i;
+
+    TESTING("    scaleoffset int full-precision round-trip");
+
+    h5_fixname(FILENAME[33], fapl, filename, sizeof filename);
+
+    if ((datatype = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        goto error;
+
+    if ((space = H5Screate_simple(1, size, NULL)) < 0)
+        goto error;
+
+    if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+    if (H5Pset_chunk(dc, 1, chunk_size) < 0)
+        goto error;
+    if (H5Pset_scaleoffset(dc, H5Z_SO_INT, H5Z_SO_INT_MINBITS_DEFAULT) < 0)
+        goto error;
+
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        goto error;
+    if ((dataset = H5Dcreate2(file, DSET_SCALEOFFSET_INT_FULLPREC_NAME, datatype, space, H5P_DEFAULT, dc,
+                              H5P_DEFAULT)) < 0)
+        goto error;
+    if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig_data) < 0)
+        goto error;
+
+    /* Flush the compressed chunk to disk */
+    if (H5Dclose(dataset) < 0)
+        goto error;
+    if (H5Fclose(file) < 0)
+        goto error;
+
+    /* Reopen the file and read the data back.  This forces the filter's
+     * decompression path to run against the on-disk chunk.
+     */
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        goto error;
+    if ((dataset = H5Dopen2(file, DSET_SCALEOFFSET_INT_FULLPREC_NAME, H5P_DEFAULT)) < 0)
+        goto error;
+    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, new_data) < 0)
+        goto error;
+
+    /* Verify the data round-tripped */
+    for (i = 0; i < (size_t)size[0]; i++) {
+        if (new_data[i] != orig_data[i]) {
+            H5_FAILED();
+            printf("    Read different values than written.\n");
+            printf("    At index %lu: read %d, expected %d\n", (unsigned long)i, new_data[i], orig_data[i]);
+            goto error;
+        }
+    }
+
+    if (H5Dclose(dataset) < 0)
+        goto error;
+    if (H5Fclose(file) < 0)
+        goto error;
+    if (H5Tclose(datatype) < 0)
+        goto error;
+    if (H5Pclose(dc) < 0)
+        goto error;
+    if (H5Sclose(space) < 0)
+        goto error;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dataset);
+        H5Tclose(datatype);
+        H5Pclose(dc);
+        H5Sclose(space);
+        H5Fclose(file);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_scaleoffset_int_fullprec() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_multiopen
@@ -19225,6 +19337,7 @@ main(void)
                 nerrors += (test_scaleoffset_float_2(file) < 0 ? 1 : 0);
                 nerrors += (test_scaleoffset_double(file) < 0 ? 1 : 0);
                 nerrors += (test_scaleoffset_double_2(file) < 0 ? 1 : 0);
+                nerrors += (test_scaleoffset_int_fullprec(fapl) < 0 ? 1 : 0);
                 nerrors += (test_multiopen(file) < 0 ? 1 : 0);
                 nerrors += (test_types(file) < 0 ? 1 : 0);
                 nerrors += (test_floattypes(file) < 0 ? 1 : 0);
