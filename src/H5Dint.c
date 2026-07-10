@@ -1323,6 +1323,11 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
     if (H5O_pline_set_version(file, &new_dset->shared->dcpl_cache.pline) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of I/O filter pipeline");
 
+    /* Persist any filter blobs so their locators are defined before the
+     * pipeline message is encoded into the object header below */
+    if (H5Z_blob_write(file, &new_dset->shared->dcpl_cache.pline) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to write filter blobs");
+
     /* Set the version for the fill message */
     if (H5O_fill_set_version(file, &new_dset->shared->dcpl_cache.fill) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of fill value");
@@ -2270,12 +2275,12 @@ done:
  */
 H5O_loc_t *
 H5D_oloc(H5D_t *dataset)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+{ /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(dataset ? &(dataset->oloc) : (H5O_loc_t *)NULL)
-} /* end H5D_oloc() */
+}
+/* end H5D_oloc() */
 
 /*-------------------------------------------------------------------------
  * Function: H5D_nameof

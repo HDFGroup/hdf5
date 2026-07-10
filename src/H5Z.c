@@ -16,6 +16,7 @@
 #include "H5Dprivate.h"  /* Dataset functions   */
 #include "H5Eprivate.h"  /* Error handling      */
 #include "H5Fprivate.h"  /* File                */
+#include "H5HGprivate.h" /* Global Heaps        */
 #include "H5Iprivate.h"  /* IDs                 */
 #include "H5MMprivate.h" /* Memory management   */
 #include "H5Oprivate.h"  /* Object headers      */
@@ -464,6 +465,9 @@ H5Z_register3(const H5Z_class3_t *cls)
     entry.filter2              = cls->filter; /* class3 extended callback; base.filter stays NULL */
     entry.set_config           = cls->set_config;
     entry.get_config           = cls->get_config;
+    entry.write_blob           = cls->write_blob;
+    entry.read_blob            = cls->read_blob;
+    entry.close_blob           = cls->close_blob;
 
     if (H5Z__insert_entry(&entry) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to insert filter into table");
@@ -1407,11 +1411,16 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_ne
     } /* end if */
 
     /* Add the new filter to the pipeline */
-    idx                          = pline->nused;
-    pline->filter[idx].id        = filter;
-    pline->filter[idx].flags     = flags;
-    pline->filter[idx].name      = NULL; /*we'll pick it up later*/
-    pline->filter[idx].cd_nelmts = cd_nelmts;
+    idx                                  = pline->nused;
+    pline->filter[idx].id                = filter;
+    pline->filter[idx].flags             = flags;
+    pline->filter[idx].name              = NULL; /*we'll pick it up later*/
+    pline->filter[idx].cd_nelmts         = cd_nelmts;
+    pline->filter[idx].aux_data          = NULL; /*set by H5Pappend_filter_blob or pline decode*/
+    pline->filter[idx].aux_size          = 0;
+    pline->filter[idx].aux_loc.addr      = HADDR_UNDEF;
+    pline->filter[idx].aux_loc.idx       = 0;
+    pline->filter[idx].aux_from_callback = false;
     if (cd_nelmts > 0) {
         size_t i; /* Local index variable */
 
@@ -1950,6 +1959,7 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
             assert(pline->filter[idx].cd_nelmts > H5Z_COMMON_CD_VALUES);
         if (pline->filter[idx].cd_values != pline->filter[idx]._cd_values)
             pline->filter[idx].cd_values = (unsigned *)H5MM_xfree(pline->filter[idx].cd_values);
+        H5Z_blob_release(&pline->filter[idx]);
 
         /* Remove filter from pipeline array */
         if ((idx + 1) < pline->nused) {
@@ -1973,6 +1983,197 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_delete() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5Z_blob_release
+ *
+ * Purpose:  Release a filter entry's in-memory blob.  A buffer recovered
+ *           by the filter's read_blob callback is released through its
+ *           close_blob callback (allocator symmetry); library-owned copies
+ *           use H5MM.  Safe to call on entries with no blob.
+ *
+ * Return:   void
+ *-------------------------------------------------------------------------
+ */
+void
+H5Z_blob_release(H5Z_filter_info_t *fi)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    assert(fi);
+
+    if (fi->aux_data) {
+        if (fi->aux_from_callback) {
+            H5Z_entry_t *entry = NULL;
+
+            (void)H5Z_find_entry(false, fi->id, &entry);
+            if (entry && entry->close_blob)
+                (void)(entry->close_blob)(fi->aux_data, fi->aux_size);
+            else
+                H5MM_xfree(fi->aux_data);
+        }
+        else
+            H5MM_xfree(fi->aux_data);
+        fi->aux_data = NULL;
+    }
+    fi->aux_size          = 0;
+    fi->aux_from_callback = false;
+    fi->aux_loc.addr      = HADDR_UNDEF;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5Z_blob_release() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5Z_blob_write
+ *
+ * Purpose:  Persist each blob-bearing filter's bytes at dataset-creation
+ *           time, populating the filter's on-disk locator before the
+ *           pipeline message is encoded.  Filters with a custom write_blob
+ *           callback control their own storage; otherwise the bytes are
+ *           inserted into the file's global heap.
+ *
+ *           For parallel access, only rank 0 writes; the resulting locator
+ *           is broadcast so all ranks encode an identical pipeline message.
+ *           H5HG_insert allocates file space outside collective-I/O
+ *           coordination, so independent per-rank writes would produce
+ *           divergent locators.
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z_blob_write(H5F_t *f, H5O_pline_t *pline)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    assert(f);
+    assert(pline);
+
+    for (size_t u = 0; u < pline->nused; u++) {
+        H5Z_filter_info_t *fi    = &pline->filter[u];
+        H5Z_entry_t       *entry = NULL;
+        H5Z_blob_loc_t     loc;
+        bool               do_write = true;
+
+        if (fi->aux_data == NULL)
+            continue;
+
+        loc.addr = HADDR_UNDEF;
+        loc.idx  = 0;
+
+        (void)H5Z_find_entry(true, fi->id, &entry);
+
+#ifdef H5_HAVE_PARALLEL
+        if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI))
+            do_write = (H5F_mpi_get_rank(f) == 0);
+#endif
+
+        if (do_write) {
+            if (entry && entry->write_blob) {
+                hid_t file_id;
+
+                if ((file_id = H5F_get_id(f)) < 0)
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get file ID for blob callback");
+                if ((entry->write_blob)(file_id, fi->aux_data, fi->aux_size, &loc) < 0) {
+                    (void)H5I_dec_ref(file_id);
+                    HGOTO_ERROR(H5E_PLINE, H5E_CALLBACK, FAIL, "filter write_blob callback failed");
+                }
+                if (H5I_dec_ref(file_id) < 0)
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTDEC, FAIL, "can't release file ID");
+            }
+            else {
+                H5HG_t hobj;
+
+                if (H5HG_insert(f, fi->aux_size, fi->aux_data, &hobj) < 0)
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTINSERT, FAIL,
+                                "unable to insert filter blob into global heap");
+                loc.addr = hobj.addr;
+                loc.idx  = hobj.idx;
+            }
+        }
+
+#ifdef H5_HAVE_PARALLEL
+        /* All ranks must agree on the locator before the pipeline message is
+         * encoded.  An undefined address after the broadcast means rank 0
+         * failed, so every rank fails consistently instead of deadlocking. */
+        if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
+            int mpi_code;
+
+            if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&loc, sizeof(loc), MPI_BYTE, 0, H5F_mpi_get_comm(f))))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+        }
+#endif
+
+        if (!H5_addr_defined(loc.addr))
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTINSERT, FAIL, "filter blob was not assigned a valid locator");
+
+        fi->aux_loc = loc;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_blob_write() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5Z_blob_read
+ *
+ * Purpose:  Recover each blob-bearing filter's bytes at dataset-open time,
+ *           populating aux_data/aux_size from the locator decoded out of
+ *           the version-3 pipeline message.  Filters with a custom
+ *           read_blob callback recover their own storage; otherwise the
+ *           bytes are read from the file's global heap.
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z_blob_read(H5F_t *f, H5O_pline_t *pline)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    assert(f);
+    assert(pline);
+
+    for (size_t u = 0; u < pline->nused; u++) {
+        H5Z_filter_info_t *fi    = &pline->filter[u];
+        H5Z_entry_t       *entry = NULL;
+
+        if (!H5_addr_defined(fi->aux_loc.addr) || fi->aux_data != NULL)
+            continue;
+
+        (void)H5Z_find_entry(true, fi->id, &entry);
+
+        if (entry && entry->read_blob) {
+            hid_t file_id;
+
+            if ((file_id = H5F_get_id(f)) < 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get file ID for blob callback");
+            if ((entry->read_blob)(file_id, fi->aux_loc, &fi->aux_data, &fi->aux_size) < 0) {
+                (void)H5I_dec_ref(file_id);
+                HGOTO_ERROR(H5E_PLINE, H5E_CALLBACK, FAIL, "filter read_blob callback failed");
+            }
+            if (H5I_dec_ref(file_id) < 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTDEC, FAIL, "can't release file ID");
+            fi->aux_from_callback = true;
+        }
+        else {
+            H5HG_t hobj;
+
+            hobj.addr = fi->aux_loc.addr;
+            hobj.idx  = fi->aux_loc.idx;
+            if (NULL == (fi->aux_data = H5HG_read(f, &hobj, NULL, &fi->aux_size)))
+                HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "unable to read filter blob from global heap");
+            fi->aux_from_callback = false; /* H5HG_read allocates with H5MM */
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_blob_read() */
 
 /*-------------------------------------------------------------------------
  * Function: H5Zget_filter_info
@@ -2050,10 +2251,11 @@ H5Zget_filter_class_info(H5Z_filter_t filter, H5Z_class_info_t *info /*out*/)
     if (entry->base.decoder_present)
         info->config_flags |= H5Z_FILTER_CONFIG_DECODE_ENABLED;
 
-    info->name           = entry->base.name;   /* may be NULL for class2 entries */
-    info->description    = entry->description; /* may be NULL */
-    info->has_set_config = (entry->set_config != NULL);
-    info->has_get_config = (entry->get_config != NULL);
+    info->name               = entry->base.name;   /* may be NULL for class2 entries */
+    info->description        = entry->description; /* may be NULL */
+    info->has_set_config     = (entry->set_config != NULL);
+    info->has_get_config     = (entry->get_config != NULL);
+    info->has_blob_callbacks = (entry->write_blob != NULL || entry->read_blob != NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)

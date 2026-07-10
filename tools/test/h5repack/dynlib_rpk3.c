@@ -44,6 +44,9 @@ static const H5Z_class3_t H5Z_DYNLIB3[1] = {{
     H5Z_filter_dynlib3,                                        /* The actual filter function     */
     H5Z_dynlib3_set_config,                                    /* String configuration setter    */
     H5Z_dynlib3_get_config,                                    /* String configuration getter    */
+    NULL, /* write_blob: use default global-heap storage */
+    NULL, /* read_blob  */
+    NULL, /* close_blob */
 }};
 
 H5PL_type_t

@@ -49,6 +49,7 @@ const unsigned H5O_layout_ver_bounds[] = {
     H5O_LAYOUT_VERSION_4,     /* H5F_LIBVER_V112 */
     H5O_LAYOUT_VERSION_4,     /* H5F_LIBVER_V114 */
     H5O_LAYOUT_VERSION_5,     /* H5F_LIBVER_V200 */
+    H5O_LAYOUT_VERSION_5,     /* H5F_LIBVER_V220 */
     H5O_LAYOUT_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 
@@ -436,6 +437,13 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
         if (NULL == H5O_msg_read(&(dataset->oloc), H5O_PLINE_ID, &dataset->shared->dcpl_cache.pline))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve message");
         pline_copied = true;
+
+        /* Recover any filter blobs before the pipeline is copied into the
+         * property list, so the plist copy carries the bytes rather than a
+         * file-specific locator */
+        if (H5Z_blob_read(dataset->oloc.file, &dataset->shared->dcpl_cache.pline) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to read filter blobs");
+
         /* Set the I/O pipeline info in the property list */
         if (H5P_set(plist, H5O_CRT_PIPELINE_NAME, &dataset->shared->dcpl_cache.pline) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set pipeline");

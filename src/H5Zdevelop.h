@@ -262,7 +262,79 @@ typedef size_t (*H5Z_func2_t)(unsigned int flags, size_t cd_nelmts, const unsign
                               size_t *buf_size, void **buf);
 
 /**
- * \brief Version 3 filter class structure with optional string-configuration callbacks.
+ * \brief Fixed-size on-disk locator for a filter blob's global-heap object.
+ *
+ * Opaque to plugin authors; the library passes it unchanged from
+ * \c write_blob to the pipeline-message encoder and later from the decoder
+ * to \c read_blob.  Plugin callbacks that implement custom storage may store
+ * whatever they need in the two fields, as long as \c read_blob can recover
+ * the blob from them.
+ *
+ * \since 2.2.0
+ */
+typedef struct H5Z_blob_loc_t {
+    haddr_t addr; /**< Global heap collection address           */
+    size_t  idx;  /**< Object index within the collection       */
+} H5Z_blob_loc_t;
+
+/**
+ * \brief Callback to persist a filter's blob at dataset-creation time.
+ *
+ * \param[in]  file_id  The file the dataset is being created in.
+ * \param[in]  buf      Blob bytes to persist.
+ * \param[in]  size     Length of \p buf in bytes.
+ * \param[out] loc_out  Locator identifying the stored object; handed back
+ *                      unchanged to \c read_blob at open time.
+ *
+ * \return Non-negative on success; negative on failure.
+ *
+ * \details Called once per blob-bearing filter during H5Dcreate(), after the
+ *          \c set_local callback runs.  If the filter class leaves this field
+ *          NULL, the library uses its default global-heap (H5HG) writer.
+ *
+ * \since 2.2.0
+ */
+typedef herr_t (*H5Z_write_blob_func_t)(hid_t file_id, const void *buf, size_t size, H5Z_blob_loc_t *loc_out);
+
+/**
+ * \brief Callback to recover a filter's blob at dataset-open time.
+ *
+ * \param[in]  file_id   The file the dataset is being opened from.
+ * \param[in]  loc       Locator produced by \c write_blob (or the default writer).
+ * \param[out] buf_out   Receives a pointer to the blob bytes, allocated by the
+ *                       callback; released via \c close_blob at dataset close.
+ * \param[out] size_out  Receives the blob's length in bytes.
+ *
+ * \return Non-negative on success; negative on failure.
+ *
+ * \details If the filter class leaves this field NULL, the library uses its
+ *          default global-heap (H5HG) reader.  A filter whose blob is a
+ *          reference to another object (e.g. a mask dataset) may dereference
+ *          it here using \p file_id and cache the result for later
+ *          \c H5Z_func2_t invocations.
+ *
+ * \since 2.2.0
+ */
+typedef herr_t (*H5Z_read_blob_func_t)(hid_t file_id, H5Z_blob_loc_t loc, void **buf_out, size_t *size_out);
+
+/**
+ * \brief Callback to release the in-memory blob buffer returned by \c read_blob.
+ *
+ * \param[in] buf   Buffer to release.
+ * \param[in] size  Length of \p buf in bytes.
+ *
+ * \return Non-negative on success; negative on failure.
+ *
+ * \details Called at dataset close.  If the filter class leaves this field
+ *          NULL, the library releases the buffer itself.
+ *
+ * \since 2.2.0
+ */
+typedef herr_t (*H5Z_close_blob_func_t)(void *buf, size_t size);
+
+/**
+ * \brief Version 3 filter class structure with optional string-configuration
+ *        and blob-storage callbacks.
  *
  * Plugin authors use H5Z_class3_t directly rather than relying on the H5Z_class_t alias.
  * This struct is NOT derived from H5Z_class2_t; it is an independent flat struct.
@@ -284,6 +356,12 @@ typedef struct H5Z_class3_t {
     H5Z_func2_t           filter;    /**< Extended filter callback: dxpl_id + scaled */
     H5Z_set_config_func_t set_config; /**< String configuration callback; may be NULL */
     H5Z_get_config_func_t get_config; /**< Parameter string reconstruction; may be NULL */
+    H5Z_write_blob_func_t write_blob; /**< Blob persist callback; NULL selects the default
+                                         global-heap writer */
+    H5Z_read_blob_func_t read_blob;   /**< Blob recover callback; NULL selects the default
+                                         global-heap reader */
+    H5Z_close_blob_func_t close_blob; /**< Blob release callback; NULL and the library
+                                         frees the buffer itself */
 } H5Z_class3_t;
 //! <!-- [H5Z_class3_t_snip] -->
 

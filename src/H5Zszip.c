@@ -52,6 +52,9 @@ H5Z_class3_t H5Z_SZIP[1] = {{
     H5Z__filter_szip,                                /* The actual filter function */
     H5Z__szip_set_config,                            /* String config setter */
     H5Z__szip_get_config,                            /* String config getter */
+    NULL,                                            /* write_blob: use default global-heap storage */
+    NULL,                                            /* read_blob */
+    NULL,                                            /* close_blob */
 }};
 
 /*-------------------------------------------------------------------------

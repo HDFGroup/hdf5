@@ -582,6 +582,8 @@ public class HDF5Constants {
     /** */
     public static final int H5F_LIBVER_V200 = H5F_LIBVER_V200();
     /** */
+    public static final int H5F_LIBVER_V220 = H5F_LIBVER_V220();
+    /** */
     public static final int H5F_LIBVER_LATEST = H5F_LIBVER_LATEST();
     /** */
     public static final int H5F_LIBVER_NBOUNDS = H5F_LIBVER_NBOUNDS();

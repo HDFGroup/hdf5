@@ -88,7 +88,7 @@ Java_hdf_hdf5lib_H5_H5Zget_1filter_1class_1info(JNIEnv *env, jclass clss, jint f
 {
     H5Z_class_info_t info;
     jobject          ret_obj = NULL;
-    jvalue           args[6];
+    jvalue           args[7];
     jstring          name_str = NULL;
     jstring          desc_str = NULL;
 
@@ -117,9 +117,10 @@ Java_hdf_hdf5lib_H5_H5Zget_1filter_1class_1info(JNIEnv *env, jclass clss, jint f
     args[3].l = desc_str;
     args[4].z = (jboolean)(info.has_set_config ? JNI_TRUE : JNI_FALSE);
     args[5].z = (jboolean)(info.has_get_config ? JNI_TRUE : JNI_FALSE);
+    args[6].z = (jboolean)(info.has_blob_callbacks ? JNI_TRUE : JNI_FALSE);
 
     CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5Z_class_info_t",
-                     "(IILjava/lang/String;Ljava/lang/String;ZZ)V", args, ret_obj);
+                     "(IILjava/lang/String;Ljava/lang/String;ZZZ)V", args, ret_obj);
 
 done:
     return ret_obj;

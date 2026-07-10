@@ -54,13 +54,20 @@ typedef struct H5Z_filter_info_t H5Z_filter_info_t;
 
 /* Structure to store information about each filter's parameters */
 struct H5Z_filter_info_t {
-    H5Z_filter_t id;                               /*filter identification number          */
-    unsigned     flags;                            /*defn and invocation flags             */
-    char         _name[H5Z_COMMON_NAME_LEN];       /*internal filter name                  */
-    char        *name;                             /*optional filter name                  */
-    size_t       cd_nelmts;                        /*number of elements in cd_values[]     */
-    unsigned     _cd_values[H5Z_COMMON_CD_VALUES]; /*internal client data values           */
-    unsigned    *cd_values;                        /*client data values                    */
+    H5Z_filter_t   id;                               /*filter identification number          */
+    unsigned       flags;                            /*defn and invocation flags             */
+    char           _name[H5Z_COMMON_NAME_LEN];       /*internal filter name                  */
+    char          *name;                             /*optional filter name                  */
+    size_t         cd_nelmts;                        /*number of elements in cd_values[]     */
+    unsigned       _cd_values[H5Z_COMMON_CD_VALUES]; /*internal client data values           */
+    unsigned      *cd_values;                        /*client data values                    */
+    void          *aux_data;                         /*in-memory blob; NULL if none          */
+    size_t         aux_size;                         /*byte length of aux_data               */
+    H5Z_blob_loc_t aux_loc;                          /*on-disk locator; undefined until the
+                                                      *blob is written at H5Dcreate time     */
+    bool aux_from_callback;                          /*aux_data was allocated by the filter's
+                                                      *read_blob callback and must be released
+                                                      *via close_blob, not H5MM_xfree        */
 };
 
 /*
@@ -77,6 +84,9 @@ typedef struct H5Z_entry_t {
     H5Z_set_config_func_t set_config;
     H5Z_get_config_func_t get_config;
     const char           *description; /* free-form description; may be NULL */
+    H5Z_write_blob_func_t write_blob;  /* NULL selects the default H5HG writer */
+    H5Z_read_blob_func_t  read_blob;   /* NULL selects the default H5HG reader */
+    H5Z_close_blob_func_t close_blob;  /* NULL and the library frees the buffer */
 } H5Z_entry_t;
 
 /*****************************/
@@ -114,6 +124,12 @@ H5_DLL htri_t             H5Z_all_filters_avail(const struct H5O_pline_t *pline)
 H5_DLL htri_t             H5Z_filter_avail(H5Z_filter_t id);
 H5_DLL herr_t             H5Z_delete(struct H5O_pline_t *pline, H5Z_filter_t filter);
 H5_DLL herr_t             H5Z_get_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags);
+
+/* Filter blob storage (in-file large binary configuration) */
+struct H5F_t; /*forward decl*/
+H5_DLL herr_t H5Z_blob_write(struct H5F_t *f, struct H5O_pline_t *pline);
+H5_DLL herr_t H5Z_blob_read(struct H5F_t *f, struct H5O_pline_t *pline);
+H5_DLL void   H5Z_blob_release(H5Z_filter_info_t *fi);
 
 /* Data Transform Functions */
 typedef struct H5Z_data_xform_t H5Z_data_xform_t; /* Defined in H5Ztrans.c */

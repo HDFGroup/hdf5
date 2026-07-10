@@ -746,9 +746,15 @@ typedef struct H5O_ginfo_t {
  */
 #define H5O_PLINE_VERSION_2 2
 
+/* This version appends a has_aux flag byte after each filter's cd_values
+ *      and, when set, a fixed-size locator (address + global-heap index)
+ *      for the filter's blob stored as a global-heap object
+ */
+#define H5O_PLINE_VERSION_3 3
+
 /* The latest version of the format.  Look through the 'encode' and 'size'
  *      callbacks for places to change when updating this. */
-#define H5O_PLINE_VERSION_LATEST H5O_PLINE_VERSION_2
+#define H5O_PLINE_VERSION_LATEST H5O_PLINE_VERSION_3
 
 typedef struct H5O_pline_t {
     H5O_shared_t sh_loc; /* Shared message info (must be first) */

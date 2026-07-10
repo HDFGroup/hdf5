@@ -2855,6 +2855,44 @@ H5_DLL herr_t H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int
 /**
  * \ingroup OCPL
  *
+ * \brief Appends a filter to the pipeline with an attached binary blob
+ *
+ * \ocpl_id{plist_id}
+ * \param[in] filter Filter identifier.  The registered filter must implement
+ *                   \c write_blob / \c read_blob or accept the library's
+ *                   default global-heap storage.
+ * \param[in] flags  Same semantics as H5Pappend_filter()
+ * \param[in] buf    Pointer to the blob bytes.  The library copies these
+ *                   bytes into property-list-owned storage before returning;
+ *                   the caller's buffer may be freed or reused immediately.
+ * \param[in] size   Length of \p buf in bytes.  There is no fixed upper
+ *                   bound analogous to #H5Z_CONFIG_STRING_MAX; the practical
+ *                   limit is available memory and, in parallel jobs, the
+ *                   cost of broadcasting the blob locator.
+ *
+ * \return \herr_t
+ *
+ * \details H5Pappend_filter_blob() appends filter \p filter to the pipeline
+ *          on \p plist_id, exactly as H5Pappend_filter() does, and attaches
+ *          \p buf / \p size as the filter's blob.  The bytes are opaque to
+ *          the library; they are handed to the filter's \c write_blob
+ *          callback (or the default global-heap writer) at H5Dcreate() time
+ *          and recovered via \c read_blob (or the default reader) at
+ *          H5Dopen() time.
+ *
+ *          The blob channel exists to carry configuration data that does
+ *          not fit through the parameter-string layer (for example,
+ *          JIT-compiled filter source of several megabytes, or a reference
+ *          to another dataset).  The filter's \c set_config callback is not
+ *          invoked for this entry point.
+ *
+ * \since 2.2.0
+ */
+H5_DLL herr_t H5Pappend_filter_blob(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const void *buf,
+                                    size_t size);
+/**
+ * \ingroup OCPL
+ *
  * \brief Returns the parameter string for a filter at a given pipeline index
  *
  * \ocpl_id{plist_id}

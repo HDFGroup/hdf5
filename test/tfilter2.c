@@ -21,7 +21,7 @@
 
 #include "h5test.h"
 
-static const char *FILENAME[] = {"tfilter2", NULL};
+static const char *FILENAME[] = {"tfilter2", "tfilter2_blob", "tfilter2_blob_custom", NULL};
 
 /* -----------------------------------------------------------------------
  * Parser tests - typed TOML accessor functions
@@ -938,6 +938,9 @@ test_canonical_name_display(void)
         title_filter_func,   /* filter         */
         NULL,                /* set_config     */
         NULL,                /* get_config     */
+        NULL,                /* write_blob: use default global-heap storage */
+        NULL,                /* read_blob  */
+        NULL,                /* close_blob */
     };
     hid_t    dcpl = H5I_INVALID_HID;
     unsigned flags;
@@ -1018,6 +1021,9 @@ test_class3_name(void)
             name_filter_func, /* filter         */
             NULL,             /* set_config     */
             NULL,             /* get_config     */
+            NULL,             /* write_blob: use default global-heap storage */
+            NULL,             /* read_blob  */
+            NULL,             /* close_blob */
         };
         H5E_BEGIN_TRY
         {
@@ -1043,6 +1049,9 @@ test_class3_name(void)
             name_filter_func,   /* filter         */
             NULL,               /* set_config     */
             NULL,               /* get_config     */
+            NULL,               /* write_blob: use default global-heap storage */
+            NULL,               /* read_blob  */
+            NULL,               /* close_blob */
         };
         if (H5Zregister(&valid_cls) < 0)
             TEST_ERROR;
@@ -1115,6 +1124,9 @@ test_empty_string_fast_path(void)
         fastpath_filter_func, /* filter          */
         fastpath_set_config,  /* set_config      */
         NULL,                 /* get_config      */
+        NULL,                 /* write_blob: use default global-heap storage */
+        NULL,                 /* read_blob  */
+        NULL,                 /* close_blob */
     };
     static const H5Z_class3_t nocfg_cls = {
         2,                    /* version         */
@@ -1128,6 +1140,9 @@ test_empty_string_fast_path(void)
         fastpath_filter_func, /* filter          */
         NULL,                 /* set_config (intentionally absent) */
         NULL,                 /* get_config      */
+        NULL,                 /* write_blob: use default global-heap storage */
+        NULL,                 /* read_blob  */
+        NULL,                 /* close_blob */
     };
     hid_t  dcpl = H5I_INVALID_HID;
     herr_t ret;
@@ -1264,6 +1279,9 @@ test_cdvalues_path(void)
         cdvals_filter_func, /* filter          */
         NULL,               /* set_config      */
         NULL,               /* get_config      */
+        NULL,               /* write_blob: use default global-heap storage */
+        NULL,               /* read_blob  */
+        NULL,               /* close_blob */
     };
     hid_t        dcpl   = H5I_INVALID_HID;
     unsigned     vals[] = {42, 99};
@@ -1389,6 +1407,9 @@ test_cdvalues_no_name_pollution(void)
         cdvals_clean_filter_func, /* filter          */
         cdvals_clean_set_config,  /* set_config      */
         NULL,                     /* get_config      */
+        NULL,                     /* write_blob: use default global-heap storage */
+        NULL,                     /* read_blob  */
+        NULL,                     /* close_blob */
     };
     hid_t    dcpl = H5I_INVALID_HID;
     unsigned flags2;
@@ -1464,6 +1485,9 @@ test_canonical_name_persistence(void)
         persist_filter_func, /* filter         */
         NULL,                /* set_config      */
         NULL,                /* get_config      */
+        NULL,                /* write_blob: use default global-heap storage */
+        NULL,                /* read_blob  */
+        NULL,                /* close_blob */
     };
     hid_t    dcpl = H5I_INVALID_HID;
     unsigned flags2;
@@ -1583,6 +1607,9 @@ test_canonical_name_length_limit(void)
         longtitle_filter_func, /* filter          */
         NULL,                  /* set_config      */
         NULL,                  /* get_config      */
+        NULL,                  /* write_blob: use default global-heap storage */
+        NULL,                  /* read_blob  */
+        NULL,                  /* close_blob */
     };
     herr_t ret;
 
@@ -1789,6 +1816,9 @@ test_set_get_config_callbacks(void)
         callback_filter_func, /* filter          */
         callback_set_config,  /* set_config      */
         callback_get_config,  /* get_config      */
+        NULL,                 /* write_blob: use default global-heap storage */
+        NULL,                 /* read_blob  */
+        NULL,                 /* close_blob */
     };
     hid_t  dcpl = H5I_INVALID_HID;
     char   pbuf[256];
@@ -1973,7 +2003,20 @@ ctxpass_filter_cb(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_v
 }
 
 static const H5Z_class3_t ctxpass_cls = {
-    2, CTXPASS_FILTER_ID, 1, 1, "test_ctxpass_filter", NULL, NULL, NULL, ctxpass_filter_cb, NULL, NULL,
+    2,
+    CTXPASS_FILTER_ID,
+    1,
+    1,
+    "test_ctxpass_filter",
+    NULL,
+    NULL,
+    NULL,
+    ctxpass_filter_cb,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
 };
 
 static int
@@ -2099,6 +2142,510 @@ error:
 }
 
 /* -----------------------------------------------------------------------
+ * In-file blob configuration storage (H5Pappend_filter_blob)
+ * ---------------------------------------------------------------------- */
+
+#define BLOB_DEFAULT_FILTER_ID 522
+#define BLOB_CUSTOM_FILTER_ID  523
+#define BLOB_TEST_SIZE         (64 * 1024)
+#define BLOB_MAGIC             "TFILTER2BLOBMAGIC"
+#define BLOB_MAGIC_LEN         (sizeof(BLOB_MAGIC) - 1)
+
+static size_t
+blob_passthrough_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                      hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
+                      size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
+{
+    (void)flags;
+    (void)cd_nelmts;
+    (void)cd_values;
+    (void)buf_size;
+    (void)buf;
+    return nbytes; /* pass-through */
+}
+
+/* Fill a blob buffer with a leading magic marker and a deterministic pattern */
+static void
+blob_fill_pattern(unsigned char *buf, size_t size)
+{
+    memcpy(buf, BLOB_MAGIC, BLOB_MAGIC_LEN);
+    for (size_t i = BLOB_MAGIC_LEN; i < size; i++)
+        buf[i] = (unsigned char)(i * 7 + 3);
+}
+
+/* Locate NEEDLE in HAYSTACK; returns true when found */
+static bool
+blob_find_bytes(const unsigned char *haystack, size_t hay_len, const unsigned char *needle, size_t nlen)
+{
+    if (nlen == 0 || hay_len < nlen)
+        return false;
+    for (size_t i = 0; i + nlen <= hay_len; i++)
+        if (haystack[i] == needle[0] && 0 == memcmp(haystack + i, needle, nlen))
+            return true;
+    return false;
+}
+
+/* Verify that PLIST's encoded form contains the blob pattern bytes */
+static int
+blob_check_encoded_plist(hid_t plist, const unsigned char *blob, size_t blob_size)
+{
+    void  *enc_buf  = NULL;
+    size_t enc_size = 0;
+
+    if (H5Pencode2(plist, NULL, &enc_size, H5P_DEFAULT) < 0)
+        goto error;
+    if (NULL == (enc_buf = malloc(enc_size)))
+        goto error;
+    if (H5Pencode2(plist, enc_buf, &enc_size, H5P_DEFAULT) < 0)
+        goto error;
+    if (!blob_find_bytes((unsigned char *)enc_buf, enc_size, blob, blob_size))
+        goto error;
+    free(enc_buf);
+    return 0;
+
+error:
+    free(enc_buf);
+    return -1;
+}
+
+/* Default (global-heap) blob storage: create/write/reopen/read round-trip,
+ * H5Pcopy and H5Pencode/H5Pdecode propagation, and dataset delete. */
+static int
+test_blob_default_storage(hid_t fapl)
+{
+    static const H5Z_class3_t blob_cls = {
+        2,                      /* version         */
+        BLOB_DEFAULT_FILTER_ID, /* id              */
+        1,                      /* encoder_present */
+        1,                      /* decoder_present */
+        "blob_default_filter",  /* canonical_name  */
+        NULL,                   /* description     */
+        NULL,                   /* can_apply       */
+        NULL,                   /* set_local       */
+        blob_passthrough_func,  /* filter          */
+        NULL,                   /* set_config      */
+        NULL,                   /* get_config      */
+        NULL,                   /* write_blob: use default global-heap storage */
+        NULL,                   /* read_blob       */
+        NULL,                   /* close_blob      */
+    };
+    char           filename[1024];
+    unsigned char *blob     = NULL;
+    void          *enc_buf  = NULL;
+    size_t         enc_size = 0;
+    hid_t          file = H5I_INVALID_HID, sid = H5I_INVALID_HID;
+    hid_t          dcpl = H5I_INVALID_HID, dcpl_copy = H5I_INVALID_HID, dcpl_dec = H5I_INVALID_HID;
+    hid_t          dcpl_out = H5I_INVALID_HID;
+    hid_t          dset = H5I_INVALID_HID, dset2 = H5I_INVALID_HID, dset3 = H5I_INVALID_HID;
+    hsize_t        dims[2] = {8, 8}, chunk[2] = {4, 4};
+    int            wdata[8][8], rdata[8][8];
+    H5Z_filter_t   filt_id;
+    unsigned       flags;
+    size_t         cd_nelmts = 0;
+    char           fname[64];
+
+    TESTING("H5Pappend_filter_blob: default global-heap storage round-trip");
+
+    if (H5Zregister(&blob_cls) < 0)
+        TEST_ERROR;
+
+    if (NULL == (blob = (unsigned char *)malloc(BLOB_TEST_SIZE)))
+        TEST_ERROR;
+    blob_fill_pattern(blob, BLOB_TEST_SIZE);
+
+    for (int i = 0; i < 8; i++)
+        for (int j = 0; j < 8; j++)
+            wdata[i][j] = i * 8 + j;
+
+    /* Build a blob-bearing DCPL */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+        TEST_ERROR;
+    if (H5Pappend_filter_blob(dcpl, BLOB_DEFAULT_FILTER_ID, 0, blob, BLOB_TEST_SIZE) < 0)
+        TEST_ERROR;
+
+    /* The caller's buffer must be copied, so scribbling on it now must not
+     * affect what reaches the file */
+    memset(blob, 0xEE, BLOB_TEST_SIZE);
+    blob_fill_pattern(blob, BLOB_TEST_SIZE); /* restore for later comparisons */
+
+    /* Create three datasets: from the original DCPL, from an H5Pcopy of it,
+     * and from an H5Pencode/H5Pdecode round-trip of it */
+    h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    if ((dset = H5Dcreate2(file, "blob_dset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
+        TEST_ERROR;
+
+    if ((dcpl_copy = H5Pcopy(dcpl)) < 0)
+        TEST_ERROR;
+    if ((dset2 = H5Dcreate2(file, "blob_dset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_copy, H5P_DEFAULT)) <
+        0)
+        TEST_ERROR;
+    if (H5Dwrite(dset2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
+        TEST_ERROR;
+
+    if (H5Pencode2(dcpl, NULL, &enc_size, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if (NULL == (enc_buf = malloc(enc_size)))
+        TEST_ERROR;
+    if (H5Pencode2(dcpl, enc_buf, &enc_size, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if ((dcpl_dec = H5Pdecode(enc_buf)) < 0)
+        TEST_ERROR;
+    if ((dset3 = H5Dcreate2(file, "blob_dset3", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_dec, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dwrite(dset3, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
+        TEST_ERROR;
+
+    if (H5Dclose(dset) < 0 || H5Dclose(dset2) < 0 || H5Dclose(dset3) < 0)
+        TEST_ERROR;
+    dset = dset2 = dset3 = H5I_INVALID_HID;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+
+    /* Reopen and verify each dataset: data reads back, the pipeline carries
+     * the filter, and the recovered DCPL carries the blob bytes */
+    if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR;
+    for (int d = 1; d <= 3; d++) {
+        snprintf(fname, sizeof(fname), "blob_dset%d", d);
+        if ((dset = H5Dopen2(file, fname, H5P_DEFAULT)) < 0)
+            TEST_ERROR;
+        memset(rdata, 0, sizeof(rdata));
+        if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
+            TEST_ERROR;
+        if (memcmp(wdata, rdata, sizeof(wdata)) != 0)
+            TEST_ERROR;
+
+        if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+            TEST_ERROR;
+        if (H5Pget_nfilters(dcpl_out) != 1)
+            TEST_ERROR;
+        cd_nelmts = 0;
+        if ((filt_id = H5Pget_filter2(dcpl_out, 0, &flags, &cd_nelmts, NULL, 0, NULL, NULL)) < 0)
+            TEST_ERROR;
+        if (filt_id != BLOB_DEFAULT_FILTER_ID)
+            TEST_ERROR;
+        if (blob_check_encoded_plist(dcpl_out, blob, BLOB_TEST_SIZE) < 0)
+            TEST_ERROR;
+        if (H5Pclose(dcpl_out) < 0)
+            TEST_ERROR;
+        dcpl_out = H5I_INVALID_HID;
+        if (H5Dclose(dset) < 0)
+            TEST_ERROR;
+        dset = H5I_INVALID_HID;
+    }
+
+    /* Deleting a blob-bearing dataset reclaims its heap object */
+    if (H5Ldelete(file, "blob_dset1", H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+
+    if (H5Sclose(sid) < 0 || H5Pclose(dcpl) < 0 || H5Pclose(dcpl_copy) < 0 || H5Pclose(dcpl_dec) < 0)
+        TEST_ERROR;
+    sid = dcpl = dcpl_copy = dcpl_dec = H5I_INVALID_HID;
+    if (H5Zunregister(BLOB_DEFAULT_FILTER_ID) < 0)
+        TEST_ERROR;
+
+    free(blob);
+    free(enc_buf);
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dset);
+        H5Dclose(dset2);
+        H5Dclose(dset3);
+        H5Pclose(dcpl);
+        H5Pclose(dcpl_copy);
+        H5Pclose(dcpl_dec);
+        H5Pclose(dcpl_out);
+        H5Sclose(sid);
+        H5Fclose(file);
+        H5Zunregister(BLOB_DEFAULT_FILTER_ID);
+    }
+    H5E_END_TRY
+    free(blob);
+    free(enc_buf);
+    return -1;
+}
+
+/* Custom blob callback state */
+#define BLOB_CUSTOM_STORE_MAX 1024
+static unsigned char blob_custom_store[BLOB_CUSTOM_STORE_MAX]; /* stands in for filter-managed storage */
+static size_t        blob_custom_store_size = 0;
+static int           blob_write_count       = 0;
+static int           blob_read_count        = 0;
+static int           blob_close_count       = 0;
+
+static herr_t
+blob_custom_write(hid_t file_id, const void *buf, size_t size, H5Z_blob_loc_t *loc_out)
+{
+    if (H5Iget_type(file_id) != H5I_FILE)
+        return FAIL;
+    if (size > sizeof(blob_custom_store))
+        return FAIL;
+    memcpy(blob_custom_store, buf, size);
+    blob_custom_store_size = size;
+    blob_write_count++;
+    /* Arbitrary token the library must hand back unchanged at read time */
+    loc_out->addr = (haddr_t)0x1234;
+    loc_out->idx  = 42;
+    return SUCCEED;
+}
+
+static herr_t
+blob_custom_read(hid_t file_id, H5Z_blob_loc_t loc, void **buf_out, size_t *size_out)
+{
+    if (H5Iget_type(file_id) != H5I_FILE)
+        return FAIL;
+    if (loc.addr != (haddr_t)0x1234 || loc.idx != 42)
+        return FAIL;
+    if (NULL == (*buf_out = malloc(blob_custom_store_size)))
+        return FAIL;
+    memcpy(*buf_out, blob_custom_store, blob_custom_store_size);
+    *size_out = blob_custom_store_size;
+    blob_read_count++;
+    return SUCCEED;
+}
+
+static herr_t
+blob_custom_close(void *buf, size_t H5_ATTR_UNUSED size)
+{
+    free(buf);
+    blob_close_count++;
+    return SUCCEED;
+}
+
+/* Custom write_blob/read_blob/close_blob callbacks: invocation points,
+ * locator round-trip, allocator symmetry, and class-info reporting. */
+static int
+test_blob_custom_callbacks(hid_t fapl)
+{
+    static const H5Z_class3_t blob_cls = {
+        2,                     /* version         */
+        BLOB_CUSTOM_FILTER_ID, /* id              */
+        1,                     /* encoder_present */
+        1,                     /* decoder_present */
+        "blob_custom_filter",  /* canonical_name  */
+        NULL,                  /* description     */
+        NULL,                  /* can_apply       */
+        NULL,                  /* set_local       */
+        blob_passthrough_func, /* filter          */
+        NULL,                  /* set_config      */
+        NULL,                  /* get_config      */
+        blob_custom_write,     /* write_blob      */
+        blob_custom_read,      /* read_blob       */
+        blob_custom_close,     /* close_blob      */
+    };
+    char             filename[1024];
+    unsigned char    small_blob[1024];
+    H5Z_class_info_t info;
+    hid_t            file = H5I_INVALID_HID, sid = H5I_INVALID_HID;
+    hid_t            dcpl = H5I_INVALID_HID, dset = H5I_INVALID_HID;
+    hsize_t          dims[2] = {8, 8}, chunk[2] = {4, 4};
+    int              wdata[8][8], rdata[8][8];
+
+    TESTING("H5Pappend_filter_blob: custom write/read/close callbacks");
+
+    blob_custom_store_size = 0;
+    blob_write_count = blob_read_count = blob_close_count = 0;
+
+    if (H5Zregister(&blob_cls) < 0)
+        TEST_ERROR;
+
+    /* Registry reports the custom callbacks */
+    if (H5Zget_filter_class_info(BLOB_CUSTOM_FILTER_ID, &info) < 0)
+        TEST_ERROR;
+    if (!info.has_blob_callbacks)
+        TEST_ERROR;
+
+    blob_fill_pattern(small_blob, sizeof(small_blob));
+    for (int i = 0; i < 8; i++)
+        for (int j = 0; j < 8; j++)
+            wdata[i][j] = i - j;
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+        TEST_ERROR;
+    if (H5Pappend_filter_blob(dcpl, BLOB_CUSTOM_FILTER_ID, 0, small_blob, sizeof(small_blob)) < 0)
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[2], fapl, filename, sizeof(filename));
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dcreate2(file, "blob_dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* write_blob fires once at create; the callback saw the exact bytes */
+    if (blob_write_count != 1 || blob_read_count != 0)
+        TEST_ERROR;
+    if (blob_custom_store_size != sizeof(small_blob))
+        TEST_ERROR;
+    if (memcmp(blob_custom_store, small_blob, sizeof(small_blob)) != 0)
+        TEST_ERROR;
+
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+
+    /* read_blob fires once at open with the locator write_blob produced */
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "blob_dset", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (blob_read_count != 1)
+        TEST_ERROR;
+
+    memset(rdata, 0, sizeof(rdata));
+    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
+        TEST_ERROR;
+    if (memcmp(wdata, rdata, sizeof(wdata)) != 0)
+        TEST_ERROR;
+
+    /* close_blob releases the callback-allocated buffer at dataset close */
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (blob_close_count != 1)
+        TEST_ERROR;
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+    if (H5Sclose(sid) < 0 || H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    sid = dcpl = H5I_INVALID_HID;
+    if (H5Zunregister(BLOB_CUSTOM_FILTER_ID) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dset);
+        H5Pclose(dcpl);
+        H5Sclose(sid);
+        H5Fclose(file);
+        H5Zunregister(BLOB_CUSTOM_FILTER_ID);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* Argument validation and the no-blob degenerate case */
+static int
+test_blob_errors(void)
+{
+    static const H5Z_class3_t blob_cls = {
+        2,                      /* version         */
+        BLOB_DEFAULT_FILTER_ID, /* id              */
+        1,                      /* encoder_present */
+        1,                      /* decoder_present */
+        "blob_default_filter",  /* canonical_name  */
+        NULL,                   /* description     */
+        NULL,                   /* can_apply       */
+        NULL,                   /* set_local       */
+        blob_passthrough_func,  /* filter          */
+        NULL,                   /* set_config      */
+        NULL,                   /* get_config      */
+        NULL,                   /* write_blob      */
+        NULL,                   /* read_blob       */
+        NULL,                   /* close_blob      */
+    };
+    unsigned char    bytes[16] = {1, 2, 3, 4};
+    H5Z_class_info_t info;
+    hid_t            dcpl = H5I_INVALID_HID;
+    herr_t           ret;
+
+    TESTING("H5Pappend_filter_blob: argument validation");
+
+    if (H5Zregister(&blob_cls) < 0)
+        TEST_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* NULL buf with nonzero size */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pappend_filter_blob(dcpl, BLOB_DEFAULT_FILTER_ID, 0, NULL, 16);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+
+    /* non-NULL buf with zero size */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pappend_filter_blob(dcpl, BLOB_DEFAULT_FILTER_ID, 0, bytes, 0);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+
+    /* unregistered, unloadable filter */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pappend_filter_blob(dcpl, 801, 0, bytes, sizeof(bytes));
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+
+    /* NULL buf with zero size appends the filter with no blob attached */
+    if (H5Pappend_filter_blob(dcpl, BLOB_DEFAULT_FILTER_ID, 0, NULL, 0) < 0)
+        TEST_ERROR;
+    if (H5Pget_nfilters(dcpl) != 1)
+        TEST_ERROR;
+
+    /* Default-storage filters report no custom blob callbacks */
+    if (H5Zget_filter_class_info(BLOB_DEFAULT_FILTER_ID, &info) < 0)
+        TEST_ERROR;
+    if (info.has_blob_callbacks)
+        TEST_ERROR;
+
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    if (H5Zunregister(BLOB_DEFAULT_FILTER_ID) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Zunregister(BLOB_DEFAULT_FILTER_ID);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
  * main
  * ---------------------------------------------------------------------- */
 int
@@ -2158,6 +2705,11 @@ main(void)
 
     /* filter2 context passthrough: dxpl_id, scaled, ndims */
     nerrors += test_filter2_context_passthrough(file) < 0 ? 1 : 0;
+
+    /* In-file blob configuration storage (H5Pappend_filter_blob) */
+    nerrors += test_blob_default_storage(fapl) < 0 ? 1 : 0;
+    nerrors += test_blob_custom_callbacks(fapl) < 0 ? 1 : 0;
+    nerrors += test_blob_errors() < 0 ? 1 : 0;
 
     if (H5Fclose(file) < 0)
         goto error;

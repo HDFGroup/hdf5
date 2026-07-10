@@ -242,6 +242,7 @@ static const unsigned H5O_sds_hyper_ver_bounds[] = {
     H5S_HYPER_VERSION_3, /* H5F_LIBVER_V112 */
     H5S_HYPER_VERSION_3, /* H5F_LIBVER_V114 */
     H5S_HYPER_VERSION_3, /* H5F_LIBVER_V200 */
+    H5S_HYPER_VERSION_3, /* H5F_LIBVER_V220 */
     H5S_HYPER_VERSION_3  /* H5F_LIBVER_LATEST */
 };
 
@@ -1646,7 +1647,7 @@ H5S__hyper_iter_get_seq_list_gen(H5S_sel_iter_t *iter, size_t maxseq, size_t max
                     /* Increment the number of sequences in arrays */
                     curr_seq++;
                 } /* end else */
-                  /* end COMMON */
+                /* end COMMON */
 
                 /* Break out now, we are finished with I/O */
                 break;
@@ -1669,7 +1670,7 @@ H5S__hyper_iter_get_seq_list_gen(H5S_sel_iter_t *iter, size_t maxseq, size_t max
                     /* Increment the number of sequences in arrays */
                     curr_seq++;
                 } /* end else */
-                  /* end COMMON */
+                /* end COMMON */
 
                 /* If the sequence & offset arrays are full, do what? */
                 if (curr_seq >= maxseq)

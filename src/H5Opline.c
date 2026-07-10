@@ -20,6 +20,7 @@
 #include "H5private.h"   /* Generic Functions            */
 #include "H5Eprivate.h"  /* Error handling               */
 #include "H5FLprivate.h" /* Free Lists                   */
+#include "H5HGprivate.h" /* Global Heaps                 */
 #include "H5MMprivate.h" /* Memory management            */
 #include "H5Opkg.h"      /* Object headers               */
 #include "H5Zpkg.h"      /* Data filters                 */
@@ -32,6 +33,7 @@ static void  *H5O__pline_copy(const void *_mesg, void *_dest);
 static size_t H5O__pline_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O__pline_reset(void *_mesg);
 static herr_t H5O__pline_free(void *_mesg);
+static herr_t H5O__pline_delete(H5F_t *f, H5O_t *open_oh, void *_mesg);
 static herr_t H5O__pline_pre_copy_file(H5F_t *file_src, const void *mesg_src, bool *deleted,
                                        const H5O_copy_t *cpy_info, void *_udata);
 static herr_t H5O__pline_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
@@ -45,8 +47,8 @@ static herr_t H5O__pline_debug(H5F_t *f, const void *_mesg, FILE *stream, int in
 #define H5O_SHARED_SIZE        H5O__pline_shared_size
 #define H5O_SHARED_SIZE_REAL   H5O__pline_size
 #define H5O_SHARED_DELETE      H5O__pline_shared_delete
-#undef H5O_SHARED_DELETE_REAL
-#define H5O_SHARED_LINK H5O__pline_shared_link
+#define H5O_SHARED_DELETE_REAL H5O__pline_delete
+#define H5O_SHARED_LINK        H5O__pline_shared_link
 #undef H5O_SHARED_LINK_REAL
 #define H5O_SHARED_COPY_FILE H5O__pline_shared_copy_file
 #undef H5O_SHARED_COPY_FILE_REAL
@@ -89,6 +91,7 @@ const unsigned H5O_pline_ver_bounds[] = {
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V112 */
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V114 */
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V200 */
+    H5O_PLINE_VERSION_3,     /* H5F_LIBVER_V220 */
     H5O_PLINE_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 
@@ -106,7 +109,7 @@ H5FL_DEFINE(H5O_pline_t);
  */
 
 static void *
-H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
+H5O__pline_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
                   unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
     H5O_pline_t       *pline = NULL;               /* Pipeline message */
@@ -240,6 +243,30 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                     p += 4; /* padding */
                 }
         }
+
+        /* Blob locator, for version 3+.  Only the locator is stored in the
+         * message; the blob bytes live in the global heap and are recovered
+         * via the filter's read_blob callback at dataset-open time. */
+        if (pline->version >= H5O_PLINE_VERSION_3) {
+            uint8_t has_aux;
+
+            if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+            has_aux = *p++;
+            if (has_aux) {
+                uint32_t idx;
+
+                if (H5_IS_BUFFER_OVERFLOW(p, H5F_SIZEOF_ADDR(f) + 4, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+                H5F_addr_decode(f, &p, &filter->aux_loc.addr);
+                UINT32DECODE(p, idx);
+                filter->aux_loc.idx = (size_t)idx;
+            }
+            else
+                filter->aux_loc.addr = HADDR_UNDEF;
+        }
+        else
+            filter->aux_loc.addr = HADDR_UNDEF;
     }
 
     /* Set return value */
@@ -264,7 +291,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
+H5O__pline_encode(H5F_t *f, uint8_t *p /*out*/, const void *mesg)
 {
     const H5O_pline_t       *pline = (const H5O_pline_t *)mesg; /* Pipeline message to encode */
     const H5Z_filter_info_t *filter;                            /* Filter to encode */
@@ -346,6 +373,18 @@ H5O__pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
         if (pline->version == H5O_PLINE_VERSION_1)
             if (filter->cd_nelmts % 2)
                 UINT32ENCODE(p, 0);
+
+        /* Blob locator, for version 3+.  The locator is defined only after
+         * the blob has been written at dataset-creation time. */
+        if (pline->version >= H5O_PLINE_VERSION_3) {
+            if (H5_addr_defined(filter->aux_loc.addr)) {
+                *p++ = (uint8_t) true;
+                H5F_addr_encode(f, &p, filter->aux_loc.addr);
+                UINT32ENCODE(p, (uint32_t)filter->aux_loc.idx);
+            }
+            else
+                *p++ = (uint8_t) false;
+        }
     } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -424,6 +463,17 @@ H5O__pline_copy(const void *_src, void *_dst /*out*/)
                 else
                     dst->filter[i].cd_values = dst->filter[i]._cd_values;
             } /* end if */
+
+            /* Blob bytes: deep copy.  The locator is copied verbatim but is
+             * only meaningful within the originating file; dataset creation
+             * always writes the blob afresh and assigns a new locator.  The
+             * copy is H5MM-owned regardless of how the source was recovered. */
+            if (src->filter[i].aux_data) {
+                if (NULL == (dst->filter[i].aux_data = H5MM_malloc(src->filter[i].aux_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for filter blob");
+                H5MM_memcpy(dst->filter[i].aux_data, src->filter[i].aux_data, src->filter[i].aux_size);
+                dst->filter[i].aux_from_callback = false;
+            } /* end if */
         }     /* end for */
     }         /* end if */
     else
@@ -454,7 +504,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O__pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
+H5O__pline_size(const H5F_t *f, const void *mesg)
 {
     const H5O_pline_t *pline = (const H5O_pline_t *)mesg; /* Pipeline message */
     size_t             i;                                 /* Local index variable */
@@ -501,6 +551,13 @@ H5O__pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
         if (pline->version == H5O_PLINE_VERSION_1)
             if (pline->filter[i].cd_nelmts % 2)
                 ret_value += 4;
+
+        /* Blob locator, for version 3+ */
+        if (pline->version >= H5O_PLINE_VERSION_3) {
+            ret_value += 1; /* has_aux flag */
+            if (H5_addr_defined(pline->filter[i].aux_loc.addr))
+                ret_value += (size_t)H5F_SIZEOF_ADDR(f) + 4; /* locator: address + heap index */
+        }
     } /* end for */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -542,6 +599,8 @@ H5O__pline_reset(void *mesg)
                 assert(pline->filter[i].cd_nelmts > H5Z_COMMON_CD_VALUES);
             if (pline->filter[i].cd_values != pline->filter[i]._cd_values)
                 pline->filter[i].cd_values = (unsigned *)H5MM_xfree(pline->filter[i].cd_values);
+
+            H5Z_blob_release(&pline->filter[i]);
         } /* end for */
 
         /* Free filter array */
@@ -577,6 +636,56 @@ H5O__pline_free(void *mesg)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__pline_free() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O__pline_delete
+ *
+ * Purpose:     Free file space referenced by the message: each blob-bearing
+ *              filter's global-heap object is removed, analogous to how the
+ *              fill-value message's delete handler frees vlen data.
+ *
+ *              Filters that implement a custom write_blob callback own
+ *              their on-disk layout; the library cannot reclaim storage it
+ *              did not allocate, so those locators are skipped.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O__pline_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
+{
+    H5O_pline_t *pline     = (H5O_pline_t *)_mesg; /* Pipeline message */
+    herr_t       ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(f);
+    assert(pline);
+
+    for (size_t i = 0; i < pline->nused; i++) {
+        H5Z_entry_t *entry = NULL;
+        H5HG_t       hobj;
+
+        if (!H5_addr_defined(pline->filter[i].aux_loc.addr))
+            continue;
+
+        /* Custom-storage filters own their on-disk layout; skip them.  If
+         * the filter is not registered, assume default global-heap storage. */
+        (void)H5Z_find_entry(true, pline->filter[i].id, &entry);
+        if (entry && entry->write_blob)
+            continue;
+
+        hobj.addr = pline->filter[i].aux_loc.addr;
+        hobj.idx  = pline->filter[i].aux_loc.idx;
+        if (H5HG_remove(f, &hobj) < 0)
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTREMOVE, FAIL, "unable to remove filter blob from global heap");
+        pline->filter[i].aux_loc.addr = HADDR_UNDEF;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O__pline_delete() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__pline_pre_copy_file
@@ -709,6 +818,13 @@ H5O_pline_set_version(H5F_t *f, H5O_pline_t *pline)
 
     /* Upgrade to the version indicated by the file's low bound if higher */
     version = MAX(pline->version, H5O_pline_ver_bounds[H5F_LOW_BOUND(f)]);
+
+    /* A blob-bearing filter requires the version-3 encoding for its locator */
+    for (size_t u = 0; u < pline->nused; u++)
+        if (pline->filter[u].aux_data != NULL) {
+            version = MAX(version, H5O_PLINE_VERSION_3);
+            break;
+        }
 
     /* Version bounds check */
     if (version > H5O_pline_ver_bounds[H5F_HIGH_BOUND(f)])

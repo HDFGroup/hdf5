@@ -106,6 +106,9 @@ H5Z_class3_t H5Z_SCALEOFFSET[1] = {{
     H5Z__filter_scaleoffset,                                 /* The actual filter function */
     H5Z__scaleoffset_set_config,                             /* String config setter */
     H5Z__scaleoffset_get_config,                             /* String config getter */
+    NULL,                                                    /* write_blob: use default global-heap storage */
+    NULL,                                                    /* read_blob */
+    NULL,                                                    /* close_blob */
 }};
 
 /* Local macros */

@@ -35,6 +35,9 @@ const H5Z_class3_t H5Z_FLETCHER32[1] = {{
     H5Z__filter_fletcher32,                              /* The actual filter function */
     H5Z__no_params_set_config,                           /* String config setter */
     NULL,                                                /* No string config getter */
+    NULL,                                                /* write_blob: use default global-heap storage */
+    NULL,                                                /* read_blob */
+    NULL,                                                /* close_blob */
 }};
 
 #define FLETCHER_LEN 4

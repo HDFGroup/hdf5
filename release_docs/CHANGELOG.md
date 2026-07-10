@@ -98,6 +98,51 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Added in-file blob configuration storage for filters (RFC-HDFG-2026-001)
+
+   Filters can now attach a binary blob - configuration data too large for
+   `cd_values` or a parameter string, such as JIT-compiled filter source or a
+   reference to another dataset - to a dataset's pipeline entry.  The blob is
+   stored in the file alongside the pipeline message and handed back to the
+   filter verbatim when the dataset is opened.
+
+   **New C API:** `H5Pappend_filter_blob(plist, filter_id, flags, buf, size)`
+   appends a filter exactly as `H5Pappend_filter` does and attaches
+   `buf`/`size` as its blob.  The bytes are copied into property-list-owned
+   storage; there is no fixed size limit.
+
+   **New filter class fields:** `H5Z_class3_t` gains three NULL-able
+   callbacks - `write_blob`, `read_blob`, and `close_blob`.  When NULL, the
+   library stores the blob as a global-heap object, reads it back at dataset
+   open, and frees the recovered buffer at dataset close.  Filters that need
+   a custom on-disk layout implement the callbacks; an opaque
+   `H5Z_blob_loc_t` locator is passed unchanged from `write_blob` through the
+   pipeline message to `read_blob`.  `H5Z_class_info_t` gains a
+   `has_blob_callbacks` field reporting whether a filter implements them.
+
+   **On-disk format:** A version-3 pipeline message appends a `has_aux` flag
+   byte per filter and, when set, the blob's locator.  Blob bytes live in the
+   global heap, not inline in the object header; deleting the dataset
+   reclaims the heap object.  Writing a blob-bearing dataset requires a
+   library-version high bound of `H5F_LIBVER_V220` (see below) or later;
+   files without blobs are unaffected.
+
+   `H5Pencode`/`H5Pdecode` serialize the blob bytes inline so an encoded DCPL
+   is self-contained, and `H5Pcopy` deep-copies them, so `h5repack` carries
+   blobs to the destination file with no tool-specific code.  In parallel
+   HDF5, rank 0 writes the blob and broadcasts the locator so all ranks
+   encode an identical pipeline message.
+
+### Added the H5F_LIBVER_V220 library version bound
+
+   The `H5F_libver_t` enumeration gains `H5F_LIBVER_V220`, and
+   `H5F_LIBVER_LATEST` now maps to it.  A file access property list's high
+   bound must be at least `H5F_LIBVER_V220` to write the version-3 filter
+   pipeline message introduced for blob storage; all other format versions
+   are unchanged from `H5F_LIBVER_V200`.  The constant is mirrored in the
+   Fortran (`H5F_LIBVER_V220_F`) and Java (`HDF5Constants.H5F_LIBVER_V220`)
+   bindings.
+
 ### Added string-based filter configuration API (RFC-HDFG-2026-001)
 
    A new API allows filters to be configured using human-readable `key=value`

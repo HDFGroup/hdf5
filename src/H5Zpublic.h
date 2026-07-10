@@ -441,6 +441,9 @@ typedef struct H5Z_class_info_t {
                                     \c set_config callback (v3 plugins) */
     bool has_get_config;       /**< true iff the filter exposes a
                                     \c get_config callback (v3 plugins) */
+    bool has_blob_callbacks;   /**< true iff the filter implements its own
+                                    \c write_blob / \c read_blob callbacks
+                                    rather than the library defaults        */
 } H5Z_class_info_t;
 
 /**

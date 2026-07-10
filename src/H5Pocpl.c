@@ -1320,6 +1320,20 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
             /* encode all values */
             for (v = 0; v < pline->filter[u].cd_nelmts; v++)
                 H5_ENCODE_UNSIGNED(*pp, pline->filter[u].cd_values[v]);
+
+            /* encode the blob bytes inline.  A serialized property must be
+             * self-contained; the on-disk locator is file-specific and is
+             * regenerated when the decoded plist is used with H5Dcreate. */
+            if (NULL != pline->filter[u].aux_data) {
+                uint64_t aux_size64 = (uint64_t)pline->filter[u].aux_size;
+
+                *(*pp)++ = (uint8_t) true;
+                UINT64ENCODE(*pp, aux_size64);
+                H5MM_memcpy(*pp, pline->filter[u].aux_data, pline->filter[u].aux_size);
+                *pp += pline->filter[u].aux_size;
+            } /* end if */
+            else
+                *(*pp)++ = (uint8_t) false;
         } /* end for */
     }     /* end if */
 
@@ -1332,7 +1346,10 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
             *size += H5Z_COMMON_NAME_LEN;
         *size += (1 + H5VM_limit_enc_size((uint64_t)pline->filter[u].cd_nelmts));
         *size += pline->filter[u].cd_nelmts * sizeof(unsigned);
-    } /* end for */
+        *size += 1; /* has_aux flag */
+        if (NULL != pline->filter[u].aux_data)
+            *size += 8 + pline->filter[u].aux_size; /* aux_size + blob bytes */
+    }                                               /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__ocrt_pipeline_enc() */
@@ -1380,9 +1397,12 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
     *pline = H5O_def_pline_g;
 
     for (u = 0; u < nused; u++) {
-        H5Z_filter_info_t filter;   /* Filter info, for pipeline */
-        uint8_t           has_name; /* Flag to indicate whether filter has a name */
-        unsigned          v;        /* Local index variable */
+        H5Z_filter_info_t filter;          /* Filter info, for pipeline */
+        uint8_t           has_name;        /* Flag to indicate whether filter has a name */
+        uint8_t           has_aux;         /* Flag to indicate whether filter has a blob */
+        void             *aux_data = NULL; /* Decoded blob bytes */
+        size_t            aux_size = 0;    /* Decoded blob length */
+        unsigned          v;               /* Local index variable */
 
         /* decode filter id */
         INT32DECODE(*pp, filter.id);
@@ -1417,9 +1437,31 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
         for (v = 0; v < filter.cd_nelmts; v++)
             H5_DECODE_UNSIGNED(*pp, filter.cd_values[v]);
 
+        /* decode the blob bytes, if present.  The on-disk locator is not
+         * serialized; a later H5Dcreate writes the blob afresh. */
+        has_aux = *(*pp)++;
+        if (has_aux) {
+            uint64_t aux_size64;
+
+            UINT64DECODE(*pp, aux_size64);
+            aux_size = (size_t)aux_size64;
+            if (aux_size == 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "encoded filter blob has zero length");
+            if (NULL == (aux_data = H5MM_malloc(aux_size)))
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for filter blob");
+            H5MM_memcpy(aux_data, *pp, aux_size);
+            *pp += aux_size;
+        } /* end if */
+
         /* Add the filter to the I/O pipeline */
-        if (H5Z_append(pline, filter.id, filter.flags, filter.cd_nelmts, filter.cd_values) < 0)
+        if (H5Z_append(pline, filter.id, filter.flags, filter.cd_nelmts, filter.cd_values) < 0) {
+            H5MM_xfree(aux_data);
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline");
+        }
+
+        /* Attach the blob to the just-appended entry */
+        pline->filter[pline->nused - 1].aux_data = aux_data;
+        pline->filter[pline->nused - 1].aux_size = aux_size;
 
         /* Free cd_values, if it was allocated */
         filter.cd_values = (unsigned *)H5MM_xfree(filter.cd_values);
@@ -1759,6 +1801,54 @@ done:
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5P__pline_persist_name
+ *
+ * Purpose:     Record the registered filter's canonical name in the last
+ *              pipeline entry so that H5Pget_filter2 and h5dump can display
+ *              it even when the plugin is not loaded at read time.  ENTRY
+ *              may be NULL, in which case a speculative registry lookup is
+ *              performed.  If the name does not fit the internal buffer it
+ *              is strdup'd and *heap_name_out receives the allocation so
+ *              the caller can free it if a later step fails (ownership
+ *              transfers to the property list on success).
+ *-------------------------------------------------------------------------
+ */
+static void
+H5P__pline_persist_name(H5O_pline_t *pline, H5Z_filter_t filter, H5Z_entry_t *entry, char **heap_name_out)
+{
+    H5Z_filter_info_t *fi = &pline->filter[pline->nused - 1];
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    if (entry == NULL)
+        (void)H5Z_find_entry(true, filter, &entry);
+
+    if (entry && entry->base.name) {
+        size_t nlen = strlen(entry->base.name) + 1;
+
+        if (nlen <= H5Z_COMMON_NAME_LEN) {
+            memcpy(fi->_name, entry->base.name, nlen);
+            fi->name = fi->_name;
+        }
+        else {
+            /* Name is longer than the internal buffer.  strdup it and
+             * track the pointer so the caller can free it if a later step
+             * fails (ownership transfers to the plist on success). */
+            fi->name = (char *)H5MM_strdup(entry->base.name);
+            if (fi->name == NULL) {
+                strncpy(fi->_name, entry->base.name, H5Z_COMMON_NAME_LEN - 1);
+                fi->_name[H5Z_COMMON_NAME_LEN - 1] = '\0';
+                fi->name                           = fi->_name;
+            }
+            else
+                *heap_name_out = fi->name;
+        }
+    }
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5P__pline_persist_name() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5Pappend_filter
  *
  * Purpose:     Configures the filter identified by FILTER and appends it to
@@ -1907,37 +1997,10 @@ append_to_pipeline:
     if (H5Z_append(&pline, filter, flags, cd_nelmts, cd_values) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline");
 
-    /* Persist the filter's canonical name into the pipeline record so that
-     * H5Pget_filter2 and h5dump can display it even when the plugin is not
-     * loaded at read time.  For the STRING path `entry` is already set; for
-     * the CDVALUES path perform a single speculative lookup here. */
-    {
-        H5Z_filter_info_t *fi = &pline.filter[pline.nused - 1];
-
-        if (entry == NULL)
-            (void)H5Z_find_entry(true, filter, &entry);
-
-        if (entry && entry->base.name) {
-            size_t nlen = strlen(entry->base.name) + 1;
-            if (nlen <= H5Z_COMMON_NAME_LEN) {
-                memcpy(fi->_name, entry->base.name, nlen);
-                fi->name = fi->_name;
-            }
-            else {
-                /* Name is longer than the internal buffer.  strdup it and
-                 * track the pointer so we can free it if H5P_poke fails
-                 * below (ownership transfers to the plist on success). */
-                fi->name = (char *)H5MM_strdup(entry->base.name);
-                if (fi->name == NULL) {
-                    strncpy(fi->_name, entry->base.name, H5Z_COMMON_NAME_LEN - 1);
-                    fi->_name[H5Z_COMMON_NAME_LEN - 1] = '\0';
-                    fi->name                           = fi->_name;
-                }
-                else
-                    fi_name_heap = fi->name;
-            }
-        }
-    }
+    /* Persist the filter's canonical name into the pipeline record.  For the
+     * STRING path `entry` is already set; for the CDVALUES path the helper
+     * performs a single speculative lookup. */
+    H5P__pline_persist_name(&pline, filter, entry, &fi_name_heap);
 
     /* Store updated pipeline back in property list */
     if (H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
@@ -1949,6 +2012,102 @@ done:
     H5MM_xfree(allocated_cd_values);
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pappend_filter() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pappend_filter_blob
+ *
+ * Purpose:     Appends filter FILTER to the pipeline on PLIST_ID, exactly
+ *              as H5Pappend_filter does, and attaches BUF/SIZE as the
+ *              filter's blob.  The bytes are opaque to the library: they
+ *              are copied into DCPL-owned storage here, handed to the
+ *              filter's write_blob callback (or the default global-heap
+ *              writer) at H5Dcreate time, and recovered via read_blob (or
+ *              the default reader) at H5Dopen time.
+ *
+ *              set_config is not invoked for this entry point - the blob
+ *              path bypasses the parameter-string layer entirely, since
+ *              the blob channel exists to carry data that does not fit
+ *              through it.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Since:       2.2.0
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pappend_filter_blob(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const void *buf, size_t size)
+{
+    H5P_genplist_t *plist;
+    H5O_pline_t     pline;
+    void           *aux_copy     = NULL; /* DCPL-owned copy of the blob bytes */
+    char           *fi_name_heap = NULL; /* non-NULL if fi->name was H5MM_strdup'd */
+    bool            aux_attached = false;
+    herr_t          ret_value    = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Validate filter ID, flags, and buf/size consistency */
+    if (filter < 0 || filter > H5Z_FILTER_MAX)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identifier");
+    if (flags & ~((unsigned)H5Z_FLAG_DEFMASK))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags");
+    if (buf == NULL && size > 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf is NULL but size > 0");
+    if (buf != NULL && size == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size is zero but buf is non-NULL");
+
+    /* Trigger dynamic plugin load if the filter is not already registered */
+    {
+        htri_t filter_avail;
+
+        if ((filter_avail = H5Z_filter_avail(filter)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't check filter availability");
+        if (!filter_avail)
+            HGOTO_ERROR(H5E_PLINE, H5E_NOFILTER, FAIL, "filter not found; register or load it first");
+    }
+
+    /* Copy the blob into DCPL-owned storage so the caller's buffer may be
+     * freed or reused immediately after this call returns */
+    if (size > 0) {
+        if (NULL == (aux_copy = H5MM_malloc(size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for filter blob");
+        H5MM_memcpy(aux_copy, buf, size);
+    }
+
+    /* Get the plist structure */
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE, false)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
+
+    /* Get the pipeline property */
+    if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+
+    /* Append the filter with no cd_values; the blob carries the configuration */
+    if (H5Z_append(&pline, filter, flags, 0, NULL) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline");
+
+    /* Attach the blob to the just-appended entry; aux_loc stays undefined
+     * until the blob is written at H5Dcreate time */
+    pline.filter[pline.nused - 1].aux_data = aux_copy;
+    pline.filter[pline.nused - 1].aux_size = size;
+    aux_attached                           = true;
+
+    /* Persist the filter's canonical name into the pipeline record */
+    H5P__pline_persist_name(&pline, filter, NULL, &fi_name_heap);
+
+    /* Store updated pipeline back in property list */
+    if (H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
+
+done:
+    if (ret_value < 0) {
+        H5MM_xfree(fi_name_heap);
+        if (aux_attached)
+            pline.filter[pline.nused - 1].aux_data = NULL;
+        H5MM_xfree(aux_copy);
+    }
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pappend_filter_blob() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_filter_params_by_idx

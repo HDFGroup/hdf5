@@ -742,6 +742,7 @@ const unsigned H5O_dtype_ver_bounds[] = {
     H5O_DTYPE_VERSION_4,     /* H5F_LIBVER_V112 */
     H5O_DTYPE_VERSION_4,     /* H5F_LIBVER_V114 */
     H5O_DTYPE_VERSION_5,     /* H5F_LIBVER_V200 */
+    H5O_DTYPE_VERSION_5,     /* H5F_LIBVER_V220 */
     H5O_DTYPE_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 
@@ -3033,7 +3034,8 @@ H5T_is_variable_str(const H5T_t *dt)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5T_IS_VL_STRING(dt->shared))
-} /* end H5T_is_variable_str() */
+}
+/* end H5T_is_variable_str() */
 
 /*-------------------------------------------------------------------------
  * Function:  H5Tget_size
