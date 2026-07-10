@@ -850,7 +850,7 @@ H5_DLL hid_t H5Pcreate(hid_t cls_id);
  * \details H5Pcreate_class() registers a new property list class with the
  *          library. The new property list class can inherit from an
  *          existing property list class, \p parent, or may be derived
- *          from the default "empty" class, NULL. New classes with
+ *          from the default “empty” class, NULL. New classes with
  *          inherited properties from existing classes may not remove
  *          those existing properties, only add or remove their own class
  *          properties. Property list classes defined and supported in the
@@ -3648,7 +3648,7 @@ H5_DLL hid_t H5Pget_driver(hid_t plist_id);
  *          information for the low-level driver associated with the file
  *          access or data transfer property list \p plist_id.
  *
- *          The pointer returned by this function points to an "uncopied"
+ *          The pointer returned by this function points to an “uncopied”
  *          struct. Driver-specific versions of that struct are defined
  *          for each low-level driver in the relevant source code file
  *          H5FD*.c. For example, the struct used for the MULTI driver is
@@ -4809,7 +4809,7 @@ H5_DLL herr_t H5Pset_fclose_degree(hid_t fapl_id, H5F_close_degree_t degree);
  *          \par Recommended Reading:
  *          This function is part of the file image
  *          operations feature set. It is highly recommended to study the guide
- *          \ref H5FIM_UG before using this feature set. See the "See Also" section below
+ *          \ref H5FIM_UG before using this feature set. See the “See Also” section below
  *          for links to other elements of HDF5 file image operations.
  *
  * \see
@@ -4841,7 +4841,7 @@ H5_DLL herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
  *            can then use the file without the overhead of disk I/O.\n
  *            **Recommended Reading:** This function is part of the file
  *            image operations feature set. It is highly recommended to study
- *            the guide \ref H5FIM_UG before using this feature set. See the "See Also" section below
+ *            the guide \ref H5FIM_UG before using this feature set. See the “See Also” section below
  *            for links to other elements of HDF5 file image operations.
  *
  * \fapl_id
@@ -6377,7 +6377,7 @@ H5_DLL herr_t H5Pget_virtual_count(hid_t dcpl_id, size_t *count /*out*/);
  * \dcpl_id
  * \param[in]  index Mapping index. The value of \p index is 0 (zero) or
  *                   greater and less than \p count
- *                   (0 <= \p index < \p count), where \p count is the
+ *                   (0 ≤ \p index < \p count), where \p count is the
  *                   number of mappings returned by H5Pget_virtual_count().
  * \param[out] name  A buffer containing the name of the source dataset
  * \param[in]  size  The size, in bytes, of the \p name buffer. Must be the
@@ -6413,7 +6413,7 @@ H5_DLL ssize_t H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index, char *name /
  * \dcpl_id
  * \param[in]  index Mapping index. The value of \p index is 0 (zero) or
  *                   greater and less than \p count
- *                   (0 <= \p index < \p count), where \p count is the
+ *                   (0 ≤ \p index < \p count), where \p count is the
  *                   number of mappings returned by H5Pget_virtual_count().
  * \param[out] name  A buffer containing the name of the file containing
  *                   the source dataset
@@ -6451,7 +6451,7 @@ H5_DLL ssize_t H5Pget_virtual_filename(hid_t dcpl_id, size_t index, char *name /
  * \dcpl_id
  * \param[in] index Mapping index. The value of \p index is 0 (zero) or
  *                  greater and less than \p count
- *                  (0 <= \p index < \p count), where \p count is the number
+ *                  (0 ≤ \p index < \p count), where \p count is the number
  *                  of mappings returned by H5Pget_virtual_count().
  *
  * \return \hid_t{valid dataspace identifier}
@@ -6476,7 +6476,7 @@ H5_DLL hid_t H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index);
  * \dcpl_id
  * \param[in] index Mapping index. The value of \p index is 0 (zero) or
  *                  greater and less than \p count
- *                  (0 <= \p index < \p count), where \p count is the number
+ *                  (0 ≤ \p index < \p count), where \p count is the number
  *                  of mappings returned by H5Pget_virtual_count()
  *
  * \return \hid_t{valid dataspace identifier}
@@ -7049,7 +7049,7 @@ H5_DLL herr_t H5Pset_nbit(hid_t plist_id);
  *          #H5Z_SO_FLOAT_DSCALE or 0.
  *
  *          When the D-scaling method is used, the original data is "D" scaled
- *          - multiplied by 10 to the power of \p scale_factor, and the
+ *          — multiplied by 10 to the power of \p scale_factor, and the
  *          "significant" part of the value is moved to the left of the decimal
  *          point. Care should be taken in setting the decimal \p scale_factor
  *          so that the integer part will have enough precision to contain the
@@ -7135,12 +7135,12 @@ H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type,
  *          for a dataset. SZIP is a compression method designed for use with
  *          scientific data.
  *
- *          Before proceeding, all users should review the "Limitations"
+ *          Before proceeding, all users should review the “Limitations”
  *          section below.
  *
  *          Users familiar with SZIP outside the HDF5 context may benefit
- *          from reviewing the Note "For Users Familiar with SZIP in Other
- *          Contexts" below.
+ *          from reviewing the Note “For Users Familiar with SZIP in Other
+ *          Contexts” below.
  *
  *          In the text below, the term pixel refers to an HDF5 data element.
  *          This terminology derives from SZIP compression's use with image
@@ -9227,7 +9227,7 @@ H5_DLL herr_t H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, uns
  * \return \herr_t
  *
  * \details H5Pset_local_heap_size_hint() is used with original-style HDF5
- *          groups (see "Motivation" below) to specify the anticipated maximum
+ *          groups (see “Motivation” below) to specify the anticipated maximum
  *          local heap size, size_hint, for groups created with the group
  *          creation property list \p plist_id. The HDF5 library then uses \p
  *          size_hint to allocate contiguous local heap space in the file for
@@ -10058,7 +10058,7 @@ H5_DLL herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, 
  *                    however, will be unaware of prior anonymous committed
  *                    datatypes and will create new ones.
  *
- *                    See the "See Also" section immediately below for
+ *                    See the “See Also” section immediately below for
  *                    functions related to the use of this flag.</td>
  *           </tr>
  *          </table>
