@@ -1146,9 +1146,9 @@ error:
 } /* end test_hive_style_object_key() */
 
 /*---------------------------------------------------------------------------
- * Function:    test_ros3_paging_apis
+ * Function:    test_ros3_block_caching_apis
  *
- * Purpose:     Tests the API functions for setting I/O page caching
+ * Purpose:     Tests the API functions for setting I/O block caching
  *              parameters for the ros3 VFD.
  *
  * Return:      PASS : 0
@@ -1156,18 +1156,18 @@ error:
  *---------------------------------------------------------------------------
  */
 static int
-test_ros3_paging_apis(void)
+test_ros3_block_caching_apis(void)
 {
     unsigned page_buf_min_meta;
     unsigned page_buf_min_raw;
-    size_t   page_size;
-    size_t   page_cache_size;
+    size_t   block_size;
+    size_t   block_cache_size;
     size_t   page_buf_size;
     hid_t    fid     = H5I_INVALID_HID;
     hid_t    fapl_id = H5I_INVALID_HID;
-    bool     lock_super_page;
+    bool     lock_superblock;
 
-    TESTING("ros3 I/O paging parameter APIs");
+    TESTING("ros3 I/O block caching parameter APIs");
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
@@ -1191,34 +1191,16 @@ test_ros3_paging_apis(void)
         if (H5Pset_fapl_ros3_token(fapl_id, s3_test_aws_session_token) < 0)
             TEST_ERROR;
 
-    /* Set page size to 0 - should disable page caching */
-    if (H5Pset_fapl_ros3_paging(fapl_id, 0, H5F_PAGE_BUFFER_SIZE_DEFAULT, true) < 0)
+    /* Set block size to 0 - should disable block caching */
+    if (H5Pset_fapl_ros3_block_caching(fapl_id, 0, H5F_PAGE_BUFFER_SIZE_DEFAULT, true) < 0)
         TEST_ERROR;
-    if (H5Pget_fapl_ros3_paging(fapl_id, &page_size, &page_cache_size, &lock_super_page) < 0)
+    if (H5Pget_fapl_ros3_block_caching(fapl_id, &block_size, &block_cache_size, &lock_superblock) < 0)
         TEST_ERROR;
-    if (page_size != 0)
+    if (block_size != 0)
         TEST_ERROR;
-    if (page_cache_size != (size_t)64 * 1024 * 1024) /* Note: Must be kept in sync with ROS3 VFD code */
+    if (block_cache_size != (size_t)64 * 1024 * 1024) /* Note: Must be kept in sync with ROS3 VFD code */
         TEST_ERROR;
-    if (!lock_super_page)
-        TEST_ERROR;
-
-    /* Check that parameters are accepted - no validation performed since H5FD_ros3_t fields are internal */
-    if ((fid = H5Fopen(url_h5_public, H5F_ACC_RDONLY, fapl_id)) < 0)
-        TEST_ERROR;
-    if (H5Fclose(fid) < 0)
-        TEST_ERROR;
-
-    /* Set page cache size to 0 - should disable page caching */
-    if (H5Pset_fapl_ros3_paging(fapl_id, 1048576, 0, true) < 0)
-        TEST_ERROR;
-    if (H5Pget_fapl_ros3_paging(fapl_id, &page_size, &page_cache_size, &lock_super_page) < 0)
-        TEST_ERROR;
-    if (page_size != 1048576)
-        TEST_ERROR;
-    if (page_cache_size != 0)
-        TEST_ERROR;
-    if (!lock_super_page)
+    if (!lock_superblock)
         TEST_ERROR;
 
     /* Check that parameters are accepted - no validation performed since H5FD_ros3_t fields are internal */
@@ -1227,16 +1209,16 @@ test_ros3_paging_apis(void)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
-    /* Set page size to slightly larger than page cache size - should round page size down */
-    if (H5Pset_fapl_ros3_paging(fapl_id, 1048580, 1048576, true) < 0)
+    /* Set block cache size to 0 - should disable block caching */
+    if (H5Pset_fapl_ros3_block_caching(fapl_id, 1048576, 0, true) < 0)
         TEST_ERROR;
-    if (H5Pget_fapl_ros3_paging(fapl_id, &page_size, &page_cache_size, &lock_super_page) < 0)
+    if (H5Pget_fapl_ros3_block_caching(fapl_id, &block_size, &block_cache_size, &lock_superblock) < 0)
         TEST_ERROR;
-    if (page_size != 1048576)
+    if (block_size != 1048576)
         TEST_ERROR;
-    if (page_cache_size != 1048576)
+    if (block_cache_size != 0)
         TEST_ERROR;
-    if (!lock_super_page)
+    if (!lock_superblock)
         TEST_ERROR;
 
     /* Check that parameters are accepted - no validation performed since H5FD_ros3_t fields are internal */
@@ -1245,12 +1227,30 @@ test_ros3_paging_apis(void)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
-    /* Set page buffer size to smaller than page size - should round page size down; no way to verify
+    /* Set block size to slightly larger than block cache size - should round block size down */
+    if (H5Pset_fapl_ros3_block_caching(fapl_id, 1048580, 1048576, true) < 0)
+        TEST_ERROR;
+    if (H5Pget_fapl_ros3_block_caching(fapl_id, &block_size, &block_cache_size, &lock_superblock) < 0)
+        TEST_ERROR;
+    if (block_size != 1048576)
+        TEST_ERROR;
+    if (block_cache_size != 1048576)
+        TEST_ERROR;
+    if (!lock_superblock)
+        TEST_ERROR;
+
+    /* Check that parameters are accepted - no validation performed since H5FD_ros3_t fields are internal */
+    if ((fid = H5Fopen(url_h5_public, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Set page buffer size to smaller than block size - should round block size down; no way to verify
      * currently
      */
     if (H5Pget_page_buffer_size(fapl_id, &page_buf_size, &page_buf_min_meta, &page_buf_min_raw) < 0)
         TEST_ERROR;
-    if (H5Pset_page_buffer_size(fapl_id, HDF5_ROS3_VFD_DEFAULT_PAGE_SIZE - 1, 50, 50) < 0)
+    if (H5Pset_page_buffer_size(fapl_id, HDF5_ROS3_VFD_DEFAULT_BLOCK_SIZE - 1, 50, 50) < 0)
         TEST_ERROR;
 
     /* Check that parameters are accepted - no validation performed since H5FD_ros3_t fields are internal */
@@ -1263,16 +1263,16 @@ test_ros3_paging_apis(void)
     if (H5Pset_page_buffer_size(fapl_id, page_buf_size, page_buf_min_meta, page_buf_min_raw) < 0)
         TEST_ERROR;
 
-    /* Disable locking of the superblock page into the page cache */
-    if (H5Pset_fapl_ros3_paging(fapl_id, 1048576, 4194304, false) < 0)
+    /* Disable locking of the superblock block into the block cache */
+    if (H5Pset_fapl_ros3_block_caching(fapl_id, 1048576, 4194304, false) < 0)
         TEST_ERROR;
-    if (H5Pget_fapl_ros3_paging(fapl_id, &page_size, &page_cache_size, &lock_super_page) < 0)
+    if (H5Pget_fapl_ros3_block_caching(fapl_id, &block_size, &block_cache_size, &lock_superblock) < 0)
         TEST_ERROR;
-    if (page_size != 1048576)
+    if (block_size != 1048576)
         TEST_ERROR;
-    if (page_cache_size != 4194304)
+    if (block_cache_size != 4194304)
         TEST_ERROR;
-    if (lock_super_page)
+    if (lock_superblock)
         TEST_ERROR;
 
     /* Check that parameters are accepted - no validation performed since H5FD_ros3_t fields are internal */
@@ -1469,7 +1469,7 @@ main(void)
         nerrors += test_cmp();
         nerrors += test_ros3_access_modes();
         nerrors += test_hive_style_object_key();
-        nerrors += test_ros3_paging_apis();
+        nerrors += test_ros3_block_caching_apis();
     }
 
     if (H5FD__s3comms_term() < 0) {
