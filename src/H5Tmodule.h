@@ -3981,8 +3981,8 @@ filled according to the value of this property. The padding can be:
  * datatypes.
  *
  * The currently supported text format used by #H5LTtext_to_dtype and #H5LTdtype_to_text is the
- * data description language (DDL) and conforms to the \ref DDLBNF220. The portion of the
- * \ref DDLBNF220 that defines HDF5 datatypes appears below.
+ * data description language (DDL) and conforms to the \ref DDLBNF230. The portion of the
+ * \ref DDLBNF230 that defines HDF5 datatypes appears below.
  *
  * <em>The definition of HDF5 datatypes from the HDF5 DDL</em>
  * \code

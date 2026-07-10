@@ -1773,7 +1773,7 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Since:       2.2.0
+ * Since:       2.3.0
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1963,7 +1963,7 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Since:       2.2.0
+ * Since:       2.3.0
  *-------------------------------------------------------------------------
  */
 herr_t

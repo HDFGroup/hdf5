@@ -343,7 +343,7 @@
  *
  * \ref sec_cltools_h5dump is described on the \ref sec_cltools page of the \ref UG.
  *
- * The HDF5 DDL grammar is described in the @ref DDLBNF220.
+ * The HDF5 DDL grammar is described in the @ref DDLBNF230.
  *
  * \subsection subsec_group_function Group Function Summaries
  * Functions that can be used with groups (\ref H5G functions) and property list functions that can used
