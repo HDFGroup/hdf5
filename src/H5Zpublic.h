@@ -427,20 +427,20 @@ H5_DLL herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_confi
  * \since 2.2.0
  */
 typedef struct H5Z_class_info_t {
-    H5Z_filter_t id;            /**< Numeric filter identifier         */
-    unsigned int config_flags;  /**< Bitwise OR of
-                                     #H5Z_FILTER_CONFIG_ENCODE_ENABLED and
-                                     #H5Z_FILTER_CONFIG_DECODE_ENABLED   */
-    const char *name;           /**< Canonical name (\c H5Z_class3_t::name);
-                                     \c NULL only for a class2-registered
-                                     filter that has no name field        */
-    const char *description;    /**< Free-form description
-                                     (\c H5Z_class3_t::description); may be
-                                     \c NULL                              */
-    bool has_set_config;     /**< true iff the filter exposes a
-                                  \c set_config callback (v3 plugins) */
-    bool has_get_config;     /**< true iff the filter exposes a
-                                  \c get_config callback (v3 plugins) */
+    H5Z_filter_t id;           /**< Numeric filter identifier         */
+    unsigned int config_flags; /**< Bitwise OR of
+                                    #H5Z_FILTER_CONFIG_ENCODE_ENABLED and
+                                    #H5Z_FILTER_CONFIG_DECODE_ENABLED   */
+    const char *name;          /**< Canonical name (\c H5Z_class3_t::name);
+                                    \c NULL only for a class2-registered
+                                    filter that has no name field        */
+    const char *description;   /**< Free-form description
+                                    (\c H5Z_class3_t::description); may be
+                                    \c NULL                              */
+    bool has_set_config;       /**< true iff the filter exposes a
+                                    \c set_config callback (v3 plugins) */
+    bool has_get_config;       /**< true iff the filter exposes a
+                                    \c get_config callback (v3 plugins) */
 } H5Z_class_info_t;
 
 /**

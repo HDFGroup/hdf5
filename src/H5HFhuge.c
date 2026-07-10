@@ -327,8 +327,8 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
 
         /* Push direct block data through I/O filter pipeline */
         nbytes = write_size;
-        if (H5Z_pipeline(&(hdr->pline), 0, H5P_DEFAULT, NULL, 0, &filter_mask, H5Z_NO_EDC, filter_cb,
-                         &nbytes, &write_size, &write_buf) < 0)
+        if (H5Z_pipeline(&(hdr->pline), 0, H5P_DEFAULT, NULL, 0, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes,
+                         &write_size, &write_buf) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "output pipeline failed");
 
         /* Update size of object on disk */

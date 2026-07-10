@@ -15760,8 +15760,8 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *            Error from the HDF5 Library.
      **/
-    public synchronized static native hdf.hdf5lib.structs.H5Z_class_info_t H5Zget_filter_class_info(int filter)
-        throws HDF5LibraryException;
+    public synchronized static native hdf.hdf5lib.structs.H5Z_class_info_t
+    H5Zget_filter_class_info(int filter) throws HDF5LibraryException;
 
     /**
      * @ingroup JH5Z

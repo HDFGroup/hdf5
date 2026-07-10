@@ -927,7 +927,7 @@ static int
 test_canonical_name_display(void)
 {
     static const H5Z_class3_t title_cls = {
-        2,   /* version        */
+        2,                   /* version        */
         TITLE_FILTER_ID,     /* id             */
         1,                   /* encoder_present */
         1,                   /* decoder_present */
@@ -1007,17 +1007,17 @@ test_class3_name(void)
     TESTING("H5Z_class3_t: NULL name rejected by H5Zregister");
     {
         static const H5Z_class3_t null_name_cls = {
-            2, /* version        */
-            NAME_FILTER_ID,    /* id             */
-            1,                 /* encoder_present */
-            1,                 /* decoder_present */
-            NULL,              /* canonical_name - intentionally NULL to trigger error */
-            NULL,              /* description    */
-            NULL,              /* can_apply      */
-            NULL,              /* set_local      */
-            name_filter_func,  /* filter         */
-            NULL,              /* set_config     */
-            NULL,              /* get_config     */
+            2,                /* version        */
+            NAME_FILTER_ID,   /* id             */
+            1,                /* encoder_present */
+            1,                /* decoder_present */
+            NULL,             /* canonical_name - intentionally NULL to trigger error */
+            NULL,             /* description    */
+            NULL,             /* can_apply      */
+            NULL,             /* set_local      */
+            name_filter_func, /* filter         */
+            NULL,             /* set_config     */
+            NULL,             /* get_config     */
         };
         H5E_BEGIN_TRY
         {
@@ -1032,7 +1032,7 @@ test_class3_name(void)
     TESTING("H5Z_class3_t: valid name accepted by H5Zregister");
     {
         static const H5Z_class3_t valid_cls = {
-            2,  /* version        */
+            2,                  /* version        */
             NAME_FILTER_ID,     /* id             */
             1,                  /* encoder_present */
             1,                  /* decoder_present */
@@ -1104,7 +1104,7 @@ static int
 test_empty_string_fast_path(void)
 {
     static const H5Z_class3_t fp_cls = {
-        2,    /* version         */
+        2,                    /* version         */
         FASTPATH_FILTER_ID,   /* id              */
         1,                    /* encoder_present */
         1,                    /* decoder_present */
@@ -1117,7 +1117,7 @@ test_empty_string_fast_path(void)
         NULL,                 /* get_config      */
     };
     static const H5Z_class3_t nocfg_cls = {
-        2,    /* version         */
+        2,                    /* version         */
         NOCFG_FILTER_ID,      /* id              */
         1,                    /* encoder_present */
         1,                    /* decoder_present */
@@ -1253,7 +1253,7 @@ static int
 test_cdvalues_path(void)
 {
     static const H5Z_class3_t cdv_cls = {
-        2,  /* version         */
+        2,                  /* version         */
         CDVALS_FILTER_ID,   /* id              */
         1,                  /* encoder_present */
         1,                  /* decoder_present */
@@ -1378,7 +1378,7 @@ static int
 test_cdvalues_no_name_pollution(void)
 {
     static const H5Z_class3_t tc_cls = {
-        2,        /* version         */
+        2,                        /* version         */
         CDVALS_CLEAN_FILTER_ID,   /* id              */
         1,                        /* encoder_present */
         1,                        /* decoder_present */
@@ -1453,7 +1453,7 @@ static int
 test_canonical_name_persistence(void)
 {
     static const H5Z_class3_t persist_cls = {
-        2,   /* version         */
+        2,                   /* version         */
         PERSIST_FILTER_ID,   /* id              */
         1,                   /* encoder_present */
         1,                   /* decoder_present */
@@ -1572,7 +1572,7 @@ test_canonical_name_length_limit(void)
                   "AAAAAAAAAAAAAAAAAAAA"
                   /*  56 */ "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"; /* 256 'A's + NUL */
     H5Z_class3_t long_cls = {
-        2,     /* version         */
+        2,                     /* version         */
         LONGTITLE_FILTER_ID,   /* id              */
         1,                     /* encoder_present */
         1,                     /* decoder_present */
@@ -1778,7 +1778,7 @@ static int
 test_set_get_config_callbacks(void)
 {
     static const H5Z_class3_t cb_cls = {
-        2,    /* version         */
+        2,                    /* version         */
         CALLBACK_FILTER_ID,   /* id              */
         1,                    /* encoder_present */
         1,                    /* decoder_present */
@@ -1973,17 +1973,7 @@ ctxpass_filter_cb(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_v
 }
 
 static const H5Z_class3_t ctxpass_cls = {
-    2,
-    CTXPASS_FILTER_ID,
-    1,
-    1,
-    "test_ctxpass_filter",
-    NULL,
-    NULL,
-    NULL,
-    ctxpass_filter_cb,
-    NULL,
-    NULL,
+    2, CTXPASS_FILTER_ID, 1, 1, "test_ctxpass_filter", NULL, NULL, NULL, ctxpass_filter_cb, NULL, NULL,
 };
 
 static int
