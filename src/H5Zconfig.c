@@ -482,7 +482,7 @@ done:
  *
  * Return:      > 0 present, 0 absent, < 0 error.
  *
- * Since:  2.2.0
+ * Since:  2.3.0
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -570,7 +570,7 @@ done:
  * Return:      > 0 found and converted, 0 not found, < 0 error (includes
  *              type mismatch and parse error).
  *
- * Since:  2.2.0
+ * Since:  2.3.0
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -594,7 +594,7 @@ H5Zconfig_get_int(const char *params, const char *key, int64_t *out)
  *
  * Return:      > 0 found and converted, 0 not found, < 0 error.
  *
- * Since:  2.2.0
+ * Since:  2.3.0
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -638,7 +638,7 @@ done:
  *
  * Return:      > 0 found, 0 not found, < 0 error.
  *
- * Since:  2.2.0
+ * Since:  2.3.0
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -755,7 +755,7 @@ done:
  *
  * Return:      > 0 found, 0 not found, < 0 error.
  *
- * Since:  2.2.0
+ * Since:  2.3.0
  *-------------------------------------------------------------------------
  */
 htri_t

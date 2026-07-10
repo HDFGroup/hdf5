@@ -2848,7 +2848,7 @@ H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int fl
  *          and H5Zconfig_get_str() inside a \c set_config callback to retrieve
  *          individual values from the parameter string.
  *
- * \since 2.2.0
+ * \since 2.3.0
  */
 H5_DLL herr_t H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
                                const H5Z_params_t *params);
@@ -2912,7 +2912,7 @@ H5_DLL herr_t H5Pappend_filter_blob(hid_t plist_id, H5Z_filter_t filter, unsigne
  *          (excluding NUL) in \p params_len, then allocate \p params_len + 1
  *          bytes and call again with \p params_buf_size = \p params_len + 1.
  *
- * \since 2.2.0
+ * \since 2.3.0
  */
 H5_DLL herr_t H5Pget_filter_params_by_idx(hid_t plist_id, unsigned idx, char *params_buf,
                                           size_t params_buf_size, size_t *params_len);
