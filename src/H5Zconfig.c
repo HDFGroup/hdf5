@@ -492,16 +492,16 @@ H5Zconfig_has_key(const char *params, const char *key)
     toml_datum_t  d;
     htri_t        ret_value = FAIL;
 
-    /* No API lock: this is a pure parser over caller-provided buffers and
-     * may be called from inside an H5Z_set_config_func_t callback that is
-     * already running under the API lock held by H5Pappend_filter. */
-    FUNC_ENTER_API_NOINIT_NOLOCK
+    /* The API lock is recursive, so this is safe to call from inside an
+     * H5Z_set_config_func_t callback that is already running under the API
+     * lock held by H5Pappend_filter. */
+    FUNC_ENTER_API_NOINIT
 
     ret_value = H5Z__config_get_datum(params, key, &tr, &d);
 
     if (ret_value > 0)
         toml_free(tr);
-    FUNC_LEAVE_API_NOINIT_NOLOCK(ret_value)
+    FUNC_LEAVE_API_NOINIT(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -578,12 +578,12 @@ H5Zconfig_get_int(const char *params, const char *key, int64_t *out)
 {
     htri_t ret_value = FAIL;
 
-    /* No API lock: see comment on H5Zconfig_has_key. */
-    FUNC_ENTER_API_NOINIT_NOLOCK
+    /* See comment on H5Zconfig_has_key about recursive re-entry. */
+    FUNC_ENTER_API_NOINIT
 
     ret_value = H5Z__config_get_int(params, key, out);
 
-    FUNC_LEAVE_API_NOINIT_NOLOCK(ret_value)
+    FUNC_LEAVE_API_NOINIT(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -606,8 +606,8 @@ H5Zconfig_get_double(const char *params, const char *key, double *out)
     htri_t        found;
     htri_t        ret_value = FAIL;
 
-    /* No API lock: see comment on H5Zconfig_has_key. */
-    FUNC_ENTER_API_NOINIT_NOLOCK
+    /* See comment on H5Zconfig_has_key about recursive re-entry. */
+    FUNC_ENTER_API_NOINIT
 
     if (!out)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "out must not be NULL");
@@ -628,7 +628,7 @@ H5Zconfig_get_double(const char *params, const char *key, double *out)
 done:
     if (tr_valid)
         toml_free(tr);
-    FUNC_LEAVE_API_NOINIT_NOLOCK(ret_value)
+    FUNC_LEAVE_API_NOINIT(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -650,8 +650,8 @@ H5Zconfig_get_bool(const char *params, const char *key, bool *out)
     htri_t        found;
     htri_t        ret_value = FAIL;
 
-    /* No API lock: see comment on H5Zconfig_has_key. */
-    FUNC_ENTER_API_NOINIT_NOLOCK
+    /* See comment on H5Zconfig_has_key about recursive re-entry. */
+    FUNC_ENTER_API_NOINIT
 
     if (!out)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "out must not be NULL");
@@ -669,7 +669,7 @@ H5Zconfig_get_bool(const char *params, const char *key, bool *out)
 done:
     if (tr_valid)
         toml_free(tr);
-    FUNC_LEAVE_API_NOINIT_NOLOCK(ret_value)
+    FUNC_LEAVE_API_NOINIT(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -763,10 +763,10 @@ H5Zconfig_get_str(const char *params, const char *key, char *buf, size_t *buf_si
 {
     htri_t ret_value = FAIL;
 
-    /* No API lock: see comment on H5Zconfig_has_key. */
-    FUNC_ENTER_API_NOINIT_NOLOCK
+    /* See comment on H5Zconfig_has_key about recursive re-entry. */
+    FUNC_ENTER_API_NOINIT
 
     ret_value = H5Z__config_get_str(params, key, buf, buf_size);
 
-    FUNC_LEAVE_API_NOINIT_NOLOCK(ret_value)
+    FUNC_LEAVE_API_NOINIT(ret_value)
 }
