@@ -103,6 +103,8 @@ TYPEDEF: H5O_iterate; v18, v112
 #        version as "v300" (rather than a real, supported API version)
 #        registers H5Z_class3_t as symbol version 3 without it ever being
 #        reachable through @versions, so it is only selected when an
-#        application explicitly defines H5Z_class_t_vers to 3.
+#        application explicitly defines H5Z_class_t_vers to 3.  When
+#        HDF5 3.0.0 is released, v300 should be added to @versions so
+#        that H5Z_class3_t becomes the default, and this note removed.
 TYPEDEF: H5Z_class; v16, v18, v300
 
