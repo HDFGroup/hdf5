@@ -32,6 +32,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## Performance Enhancements:
 
+- Improved the performance of several tools (h5dump, h5ls, h5diff, h5repack, h5stat and h5format_convert) for specific file structures where many objects are linked to with multiple hard links
 
 ## Significant Advancements:
 
@@ -263,6 +264,8 @@ The `h5repack` tool now obtains its default low and high library version bounds 
    being silently coerced to 0.
 
 ## Performance
+
+   Fixed performance issues in several tools (h5dump, h5ls, h5diff, h5repack, h5stat and h5format_convert) for specific file structures where many objects are linked to with multiple hard links. While traversing a file's structure, these tools internally track already visited objects to avoid redundant processing on objects linked to multiple times. Checking if an object was already visited previously used a linear scan over an array of all the already visited objects that were multiply linked, resulting in behavior that was potentially quadratic with the number of objects visited and causing most of the application runtime to be spent checking this array. Additionally, h5repack had a separate array for hard link name aliases for objects that further contributed to performance issues in that tool. Replacing these arrays with hash tables greatly improved the performance of these tools on files with structures matching the structure mentioned previously.
 
 ## Fortran API
 

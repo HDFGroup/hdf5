@@ -1418,8 +1418,8 @@ attr_search(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *a
 } /* end attr_search() */
 
 static herr_t
-obj_search(const char *path, const H5O_info2_t *oi, const char H5_ATTR_UNUSED *already_visited,
-           void *_op_data)
+obj_search(const char *path, const H5O_info2_t *oi, bool H5_ATTR_UNUSED already_visited,
+           const trav_seen_t H5_ATTR_UNUSED *visited_obj_info, void *_op_data)
 {
     trav_handle_udata_t *handle_data = (trav_handle_udata_t *)_op_data;
     const char          *op_name     = handle_data->op_name;
