@@ -414,8 +414,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
 
 /* Check and handle special situation for signed integer type */
 /* Compute (max - min) in the unsigned domain so the subtraction can't
- * trigger signed-integer overflow (undefined behavior, and a trap under
- * -ftrapv) when the data spans the full range of the type.
+ * trigger a signed int overflow when the data spans the full range of the type.
  */
 #define H5Z_scaleoffset_check_2(type, max, min, minbits)                                                     \
     {                                                                                                        \
