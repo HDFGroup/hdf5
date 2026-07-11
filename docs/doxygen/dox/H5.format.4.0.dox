@@ -947,18 +947,20 @@ Aside from that difference, internal nodes and leaf nodes are identical.
         <td>Size of chunk in bytes.</td>
       </tr>
       <tr valign=top align="left">
-        <td>Bytes 4-8</td>
+        <td>Bytes 5-8</td>
         <td>Filter mask, a 32-bit bit field indicating which filters have been skipped for this chunk. Each
             filter has an index number in the pipeline (starting at 0, with the first filter to apply) and
             if that filter is skipped, the bit corresponding to its index is set.</td>
       </tr>
       <tr valign=top align="left">
-        <td>(<em>D + 1</em>) 64-bit fields</td>
-        <td>The offset of the chunk within the dataset where <i>D</i> is the number
-            of dimensions of the dataset, and the last value is the offset within the dataset&rsquo;s
-            datatype and should always be zero. For example, if a chunk in a 3-dimensional dataset begins at the
+        <td>(<em>d</em> + 1) 64-bit fields</td>
+        <td>The offset of the chunk within the dataset, where <b>d</b> is the number of dimensions
+            of the dataset. The first <em>d</em> values are the chunk&rsquo;s offset along each real
+            dataset dimension. The extra (<em>d</em>+1)<sup>th</sup> value is not a real dimension
+            offset; it is a placeholder for the offset within the dataset&rsquo;s datatype element and
+            is always <code>0</code>. For example, if a chunk in a 3-dimensional dataset begins at the
             position <code>[5,5,5]</code>, there will be three such 64-bit indices, each with the value of
-            <code>5</code>, followed by a <code>0</code> value.</td>
+            <code>5</code>, followed by a <code>0</code> value for the datatype-element placeholder.</td>
       </tr>
       </table>
     </td>
@@ -1909,14 +1911,17 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4"><br />...<br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension \#n Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d - 1) Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li In the above table, <b>d</b> is the number of dimensions in the dataset&rsquo;s dataspace. Unlike
+    the version 1 B-tree chunk key, there is no extra field for the dataset&rsquo;s datatype element;
+    exactly <em>d</em> scaled offsets are stored, one per real dataset dimension.
 
 <table>
-<caption><strong>Fields: Version 2 B-tree, Type 10 Record Layout - Non-filtered Dataset Chunks</strong></caption>
+<caption>\anchor FMT4V2BtType10Fields <strong>Fields: Version 2 B-tree, Type 10 Record Layout - Non-filtered Dataset Chunks</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1926,8 +1931,8 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td>This field is the address of the dataset chunk in the file.</td>
 </tr>
 <tr>
-  <td>Dimension \#n Scaled Offset</td>
-  <td>This field is the scaled offset of the chunk within the dataset. <em>n</em> is the number of
+  <td>Dimension \#i Scaled Offset (i = 0 to (d-1))</td>
+  <td>This field is the scaled offset of the chunk within the dataset, where <b>d</b> is the number of
       dimensions for the dataset. The first scaled offset stored in the list is for the slowest
       changing dimension, and the last scaled offset stored is for the fastest changing dimension.
       Scaled offset is calculated by dividing the chunk dimension sizes into the chunk offsets.</td>
@@ -1961,15 +1966,16 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4"><br />...<br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension \#n Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d - 1) Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li See the note for @ref FMT4V2BtType10 "Type 10 Record Layout" above for the definition of <b>d</b> and the scaled offset fields.
 \li This encoding is used when this B-Tree is used as an index for a dataset with layout message version 4.
 
 <table>
-<caption>Type11 <strong>Layout: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks (Layout Version 5)</strong></caption>
+<caption>\anchor FMT4V2BtType11V5 <strong>Layout: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks (Layout Version 5)</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -1995,11 +2001,12 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4"><br />...<br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension \#n Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d - 1) Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li See the note for @ref FMT4V2BtType10 "Type 10 Record Layout" above for the definition of <b>d</b> and the scaled offset fields.
 \li This encoding is used when this B-tree is used as an index for a dataset with layout message version 5 or above.
 
 <table>
@@ -2038,10 +2045,8 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
       the bit corresponding to its index is set.</td>
 </tr>
 <tr>
-  <td>Dimension \#n Scaled Offset</td>
-  <td>This field is the scaled offset of the chunk within the dataset. <em>n</em> is the number of
-      dimensions for the dataset. The first scaled offset stored in the list is for the slowest
-      changing dimension, and the last scaled offset stored is for the fastest changing dimension.</td>
+  <td>Dimension \#i Scaled Offset (i = 0 to (d-1))</td>
+  <td>See the @ref FMT4V2BtType10Fields "Dimension #i Scaled Offset" field description in the Type 10 Record Layout Fields table above.</td>
 </tr>
 </table>
 
