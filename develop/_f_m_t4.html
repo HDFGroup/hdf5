@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-10</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-11</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -558,7 +558,7 @@ Bits 3-7 are reserved for future use. </li>
 </table>
 <h2 class="doxsection"><a class="anchor" id="subsec_fmt4_boot_driver"></a>
 II.B. Disk Format: Level 0B - File Driver Info</h2>
-<p>The <b>driver information block</b> is an optional region of the file which contains information needed by the file driver in order to reopen a file. The format is described below: </p><table class="doxtable">
+<p>The <b>driver information block</b> lives right after the superblock. It is an optional region of the file which contains information needed by the file driver in order to reopen a file and may only exist when superblock version is less than 2. The format is described below: </p><table class="doxtable">
 <caption align="top"><b>Layout: Driver Information Block</b></caption>
 <tr align="center">
 <th width="25%">byte</th><th width="25%">byte</th><th width="25%">byte</th><th>byte</th></tr>
@@ -595,7 +595,7 @@ Driver Information <em>(variable size)</em><br  />
 </table>
 <p>The two drivers encoded in the <em>Driver Identification</em> field are as follows: </p><ul>
 <li>Multi driver:<br  />
-The identifier for this driver is &ldquo;NCSAmulti&rdquo;. This driver provides a mechanism for segregating raw data and different types of metadata into multiple files. These files are viewed by the library as a single virtual HDF5 file with a single file address. A maximum of 6 files will be created for the following data: superblock, B-tree, raw data, global heap, local heap, and object header. More than one type of data can be written to the same file. </li>
+The identifier for this driver is &ldquo;NCSAmult&rdquo;. This driver provides a mechanism for segregating raw data and different types of metadata into multiple files. These files are viewed by the library as a single virtual HDF5 file with a single file address. A maximum of 6 files will be created for the following data: superblock, B-tree, raw data, global heap, local heap, and object header. More than one type of data can be written to the same file. </li>
 <li>Family driver:<br  />
 The identifier for this driver is &ldquo;NCSAfami&rdquo; and is encoded in this field for library version 1.8 and after. This driver is designed for systems that do not support files larger than 2 gigabytes by splitting the HDF5 file address space across several smaller files. It does nothing to segregate metadata and raw data; they are mixed in the address space just as they would be in a single contiguous file.</li>
 </ul>
