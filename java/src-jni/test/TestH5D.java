@@ -1650,7 +1650,14 @@ public class TestH5D {
                                    HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
             assertTrue("testH5DArray_datatype_ids_stable.H5Dcreate: ", dset_id >= 0);
 
+            /*
+             * The leaked IDs are transient datatypes (from H5Tget_super), which are not
+             * attached to any file, so they are only visible through the H5F_OBJ_ALL path
+             * that walks the global datatype ID list. Scoping the count to a single file id
+             * would miss them entirely.
+             */
             long before = H5.H5Fget_obj_count(HDF5Constants.H5F_OBJ_ALL, HDF5Constants.H5F_OBJ_DATATYPE);
+            assertTrue("testH5DArray_datatype_ids_stable.H5Fget_obj_count(before): ", before >= 0);
 
             for (int i = 0; i < NITER; i++) {
                 H5.H5Dwrite(dset_id, dtype_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
@@ -1660,6 +1667,7 @@ public class TestH5D {
             }
 
             long after = H5.H5Fget_obj_count(HDF5Constants.H5F_OBJ_ALL, HDF5Constants.H5F_OBJ_DATATYPE);
+            assertTrue("testH5DArray_datatype_ids_stable.H5Fget_obj_count(after): ", after >= 0);
 
             assertEquals("testH5DArray_datatype_ids_stable: open datatype count changed after " + NITER +
                              " write/read cycles on an array datatype",
