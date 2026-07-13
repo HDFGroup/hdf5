@@ -1158,14 +1158,11 @@ error:
 static int
 test_ros3_block_caching_apis(void)
 {
-    unsigned page_buf_min_meta;
-    unsigned page_buf_min_raw;
-    size_t   block_size;
-    size_t   block_cache_size;
-    size_t   page_buf_size;
-    hid_t    fid     = H5I_INVALID_HID;
-    hid_t    fapl_id = H5I_INVALID_HID;
-    bool     lock_superblock;
+    size_t block_size;
+    size_t block_cache_size;
+    hid_t  fid     = H5I_INVALID_HID;
+    hid_t  fapl_id = H5I_INVALID_HID;
+    bool   lock_superblock;
 
     TESTING("ros3 I/O block caching parameter APIs");
 
@@ -1192,13 +1189,13 @@ test_ros3_block_caching_apis(void)
             TEST_ERROR;
 
     /* Set block size to 0 - should disable block caching */
-    if (H5Pset_fapl_ros3_block_caching(fapl_id, 0, H5F_PAGE_BUFFER_SIZE_DEFAULT, true) < 0)
+    if (H5Pset_fapl_ros3_block_caching(fapl_id, 0, HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE, true) < 0)
         TEST_ERROR;
     if (H5Pget_fapl_ros3_block_caching(fapl_id, &block_size, &block_cache_size, &lock_superblock) < 0)
         TEST_ERROR;
     if (block_size != 0)
         TEST_ERROR;
-    if (block_cache_size != (size_t)64 * 1024 * 1024) /* Note: Must be kept in sync with ROS3 VFD code */
+    if (block_cache_size != HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE)
         TEST_ERROR;
     if (!lock_superblock)
         TEST_ERROR;
@@ -1243,24 +1240,6 @@ test_ros3_block_caching_apis(void)
     if ((fid = H5Fopen(url_h5_public, H5F_ACC_RDONLY, fapl_id)) < 0)
         TEST_ERROR;
     if (H5Fclose(fid) < 0)
-        TEST_ERROR;
-
-    /* Set page buffer size to smaller than block size - should round block size down; no way to verify
-     * currently
-     */
-    if (H5Pget_page_buffer_size(fapl_id, &page_buf_size, &page_buf_min_meta, &page_buf_min_raw) < 0)
-        TEST_ERROR;
-    if (H5Pset_page_buffer_size(fapl_id, HDF5_ROS3_VFD_DEFAULT_BLOCK_SIZE - 1, 50, 50) < 0)
-        TEST_ERROR;
-
-    /* Check that parameters are accepted - no validation performed since H5FD_ros3_t fields are internal */
-    if ((fid = H5Fopen(url_h5_public, H5F_ACC_RDONLY, fapl_id)) < 0)
-        TEST_ERROR;
-    if (H5Fclose(fid) < 0)
-        TEST_ERROR;
-
-    /* Restore page buffer settings */
-    if (H5Pset_page_buffer_size(fapl_id, page_buf_size, page_buf_min_meta, page_buf_min_raw) < 0)
         TEST_ERROR;
 
     /* Disable locking of the superblock block into the block cache */

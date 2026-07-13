@@ -1077,14 +1077,9 @@ H5Pset_fapl_ros3_block_caching(hid_t fapl_id, size_t block_size, size_t block_ca
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
                     "failed to check if I/O block caching parameters property exists in plist");
 
-    block_caching_params.block_size = block_size;
-
-    if (block_cache_size == H5F_PAGE_BUFFER_SIZE_DEFAULT)
-        block_caching_params.block_cache_size = ROS3_DEF_PAGE_BUF_SIZE;
-    else
-        block_caching_params.block_cache_size = block_cache_size;
-
-    block_caching_params.lock_superblock = lock_superblock;
+    block_caching_params.block_size       = block_size;
+    block_caching_params.block_cache_size = block_cache_size;
+    block_caching_params.lock_superblock  = lock_superblock;
 
     /* If block size is larger than block cache size, round block size down
      * to block cache size so that block cache size is an upper limit but
@@ -1272,7 +1267,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     }
     else {
         file->block_cache.block_size       = HDF5_ROS3_VFD_DEFAULT_BLOCK_SIZE;
-        file->block_cache.block_cache_size = H5F_PAGE_BUFFER_SIZE_DEFAULT;
+        file->block_cache.block_cache_size = HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE;
         file->block_cache.lock_superblock  = true;
     }
 
@@ -1281,27 +1276,11 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     /* Determine the maximum number of blocks to keep around in the block cache */
     if (!file->block_cache.disabled) {
-        size_t page_buf_size = 0;
+        /* final sanity check; the block size should never exceed the block cache size */
+        if (file->block_cache.block_size > file->block_cache.block_cache_size)
+            file->block_cache.block_size = file->block_cache.block_cache_size;
 
-        if (file->block_cache.block_cache_size != H5F_PAGE_BUFFER_SIZE_DEFAULT)
-            page_buf_size = file->block_cache.block_cache_size;
-        else {
-            if (H5P_get(plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get page buffer size");
-            if (page_buf_size == H5F_PAGE_BUFFER_SIZE_DEFAULT)
-                page_buf_size = ROS3_DEF_PAGE_BUF_SIZE;
-        }
-
-        if (page_buf_size == 0)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid page buffer size (0) specified");
-
-        /* Specified page buffer size should be the final say on the amount of bytes
-         * allocated; round block size down to page buffer size if the latter is smaller.
-         */
-        if (page_buf_size < file->block_cache.block_size)
-            file->block_cache.block_size = page_buf_size;
-
-        file->block_cache.max_num_blocks = (page_buf_size / file->block_cache.block_size);
+        file->block_cache.max_num_blocks = file->block_cache.block_cache_size / file->block_cache.block_size;
         assert(file->block_cache.max_num_blocks >= 1);
     }
 
@@ -1669,6 +1648,7 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         (addr + size <= file->block_cache.block_size) &&             /* Addr + size falls within cached block */
         (file->pub.paged_aggr || file->block_cache.lock_superblock); /* Paged aggr. or locked cached block */
     /* clang-format on */
+
     if (is_cached) {
         H5FD_ros_block_hash_t *super_block      = NULL;
         haddr_t                super_block_addr = 0;

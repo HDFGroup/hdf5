@@ -147,19 +147,30 @@
  * \since 2.0.0
  */
 #define HDF5_ROS3_VFD_FORCE_PATH_STYLE "HDF5_ROS3_VFD_FORCE_PATH_STYLE"
-
 /**
  * \def HDF5_ROS3_VFD_DEFAULT_BLOCK_SIZE
  * The default size, in bytes, of a cached I/O block. By default, the
- * ROS3 VFD tries to reduce requests to S3 by performing I/O in fixed-size
- * blocks and caching these blocks in an I/O block cache. This value may
- * be specified for the \p block_size parameter to
+ * #H5FD_ROS3 driver tries to reduce requests to S3 by performing I/O in
+ * fixed-size blocks and caching these blocks in an I/O block cache. This
+ * value may be specified for the \p block_size parameter to
  * H5Pset_fapl_ros3_block_caching() in order to set the default I/O block
  * size.
  *
  * \since 2.2.0
  */
 #define HDF5_ROS3_VFD_DEFAULT_BLOCK_SIZE 16777216
+/**
+ * \def HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE
+ * The default size, in bytes, of the #H5FD_ROS3 driver's I/O block cache.
+ * By default, the #H5FD_ROS3 driver tries to reduce requests to S3 by
+ * performing I/O in fixed-size blocks and caching these blocks in an I/O
+ * block cache. This value may be specified for the \p block_cache_size
+ * parameter to H5Pset_fapl_ros3_block_caching() in order to set the default
+ * I/O block cache size.
+ *
+ * \since 2.2.0
+ */
+#define HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE 134217728
 
 /**
  * \struct H5FD_ros3_fapl_t
@@ -391,7 +402,7 @@ H5_DLL herr_t H5Pget_fapl_ros3_block_caching(hid_t fapl_id, size_t *block_size, 
  * \param[in] block_size Specifies the size, in bytes, of a cached I/O block. The default
  *                       value is #HDF5_ROS3_VFD_DEFAULT_BLOCK_SIZE.
  * \param[in] block_cache_size Specifies the total size, in bytes, of the I/O block cache.
- *                             The default value is 64MiB.
+ *                             The default value is #HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE.
  * \param[in] lock_superblock Specifies whether or not to keep the I/O block containing a
  *                            file's superblock metadata locked in the I/O block cache and
  *                            unable to be evicted. The default value is \c true.
@@ -405,20 +416,19 @@ H5_DLL herr_t H5Pget_fapl_ros3_block_caching(hid_t fapl_id, size_t *block_size, 
  *
  *          For \p block_size, the macro #HDF5_ROS3_VFD_DEFAULT_BLOCK_SIZE may be used
  *          to specify that the default block size is desired. For \p block_cache_size,
- *          the macro #H5F_PAGE_BUFFER_SIZE_DEFAULT may be used to specify that the default
- *          block cache size (currently, 64MiB) is desired. Setting either \p block_size
- *          or \p block_cache_size to 0 will disable I/O block caching in the #H5FD_ROS3
+ *          the macro #HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE may be used to specify that
+ *          the default block cache size is desired. Setting either \p block_size or
+ *          \p block_cache_size to 0 will disable I/O block caching in the #H5FD_ROS3
  *          driver. This can be useful for reading small amounts of data from a file when
  *          the default \p block_size is much larger than the amount of data being read.
  *
  *          \p block_cache_size is an upper limit of the amount of bytes which will be
  *          allocated for caching I/O blocks, excluding a small amount of additional
  *          metadata bytes allocated for each block. The block cache will only keep whole
- *          blocks, so \p block_cache_size should ideally be set to some multiple of
- *          \p block_size. If \p block_cache_size is specified as a value smaller than
- *          \p block_size, \p block_size will be adjusted down to be equal to
- *          \p block_cache_size and the block cache will only hold a single cached I/O
- *          block.
+ *          blocks, so \p block_cache_size should be set to some multiple of \p block_size.
+ *          If \p block_cache_size is specified as a value smaller than \p block_size,
+ *          \p block_size will be adjusted down to be equal to \p block_cache_size and
+ *          the block cache will only hold a single cached I/O block.
  *
  *          \p lock_superblock determines whether the I/O block containing a file's
  *          superblock metadata should be locked in the block cache and prevented from
