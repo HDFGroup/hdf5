@@ -346,12 +346,13 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-convert_dsets_cb(const char *path, const H5O_info2_t *oi, const char *already_visited, void *_fid)
+convert_dsets_cb(const char *path, const H5O_info2_t *oi, bool already_visited,
+                 const trav_seen_t H5_ATTR_UNUSED *visited_obj_info, void *_fid)
 {
     hid_t fid = *(hid_t *)_fid;
 
     /* If the object has already been seen then just return */
-    if (NULL == already_visited) {
+    if (!already_visited) {
         if (oi->type == H5O_TYPE_DATASET) {
             if (verbose_g)
                 fprintf(rawoutstream, "Going to process dataset:%s...\n", path);
