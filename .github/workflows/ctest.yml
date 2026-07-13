@@ -405,7 +405,7 @@ jobs:
   # Linux (Ubuntu) w/ gcc
   #
     name: "Ubuntu gcc"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [check-secret]
     steps:
       - name: Install Dependencies (Linux)
@@ -583,7 +583,7 @@ jobs:
   # MacOS w/ Clang
   #
     name: "MacOS Clang"
-    runs-on: macos-latest
+    runs-on: macos-15
     needs: [check-secret]
     steps:
       - name: check clang version
@@ -773,14 +773,14 @@ jobs:
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/README.md ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
-          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz hdf5
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-macos15_clang.tar.gz hdf5
         shell: bash
 
       - name: Publish dmg binary (MacOS_latest)
         id: publish-ctest-dmg-binary
         run: |
           mkdir "${{ runner.workspace }}/builddmg"
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.dmg
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos15_clang.dmg
         shell: bash
 
       - name: List files in the space (MacOS_latest)
@@ -792,22 +792,22 @@ jobs:
       - name: Save published binary (MacOS_latest)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
-              name: tgz-macos14_clang-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz
+              name: tgz-macos15_clang-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-macos15_clang.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Save published dmg binary (MacOS_latest)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
-              name: tgz-macos14_clang-dmg-binary
-              path: ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos14_clang.dmg
+              name: tgz-macos15_clang-dmg-binary
+              path: ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos15_clang.dmg
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_S3_linux:
   # Linux S3 (Ubuntu) w/ gcc
   #
     name: "Ubuntu gcc S3"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Install Dependencies (Linux S3)
         run: |
@@ -1053,7 +1053,7 @@ jobs:
   # Linux (Ubuntu) w/ OneAPI
   #
     name: "Ubuntu Intel"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [check-secret]
     steps:
       - name: Install Dependencies (Linux_intel)

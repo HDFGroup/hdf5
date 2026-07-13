@@ -101,7 +101,7 @@ jobs:
           #
           - name: "Ubuntu gcc"
             ostype: ubuntu
-            os: ubuntu-latest
+            os: ubuntu-24.04
             shared: ON
             cpp: ON
             fortran: ON
@@ -121,7 +121,7 @@ jobs:
           #
           - name: "MacOS Clang"
             ostype: macos
-            os: macos-latest
+            os: macos-15
             shared: ON
             cpp: ON
             fortran: OFF
@@ -357,7 +357,7 @@ jobs:
       - name: Save published binary (Mac_latest)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
-              name: tgz-macos14_clang-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
+              name: tgz-macos15_clang-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if: ${{ (matrix.ostype == 'macos') && ( inputs.save_binary != 'skip') }}
