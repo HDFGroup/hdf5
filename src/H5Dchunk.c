@@ -298,6 +298,26 @@ typedef struct H5D_chunk_iter_ud_t {
     haddr_t             base_addr; /* Base address of the file, taking user block into account */
 } H5D_chunk_iter_ud_t;
 
+#ifdef H5_HAVE_CONCURRENCY
+typedef struct H5D_threaded_chunk_info_t {
+    struct H5D_threaded_io_info_t *threaded_io_info;
+    H5O_pline_t *old_pline;
+    H5D_chunk_ud_t udata;
+    
+} H5D_threaded_chunk_info_t;
+
+typedef struct H5D_threaded_io_info_t {
+    H5D_threaded_chunk_info_t *chunk_info;
+    size_t num_chunks;
+    haddr_t *addrs;
+    size_t *sizes;
+    void **bufs;
+    size_t vec_nalloc;
+    size_t vec_nused;
+    H5TS_semaphore_t *sem;
+    H5Z_EDC_t err_detect;
+    H5Z_cb_t  filter_cb;
+
 /********************/
 /* Local Prototypes */
 /********************/
@@ -3114,10 +3134,16 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate array of threaded chunk info structs");
 
             /* Initialize num chunks in threaded read info to 0 (will be incremented as info is filled in for each chunk */
-            threaded_read_info.num_chunks;
+            threaded_read_info.num_chunks = 0;
 
             /* Initialize other fields in threaded_io_info */
             threaded_io_info.
+
+            /* Retrieve filter settings from API context */
+            if (H5CX_get_err_detect(&threaded_io_info.err_detect) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get error detection info");
+            if (H5CX_get_filter_cb(&threaded_io_info.filter_cb) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function");
 
             /* Allocate initial vector I/O arrays */
 #error write me
@@ -3262,14 +3288,20 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
             /* Loop over threaded chunks, launching worker task function for each */
             for (size_t i = 0; i < threaded_read_info.num_chunks; i++) {
-                if (H5TS_pool_add_task(H5_thread_pool_g, H5TS_thread_start_func_t func, &(threaded_read_info.chunk_info[i])) < 0)
+                if (H5TS_pool_add_task(H5_thread_pool_g, H5D__chunk_thread_read, &(threaded_read_info.chunk_info[i])) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't launch worker thread");
             }
 
             /* Wait for all worker tasks to complete */
-            for (size_t i = 0; i < threaded_read_info.vec_nused; i++)
+            for (size_t i = 0; i < threaded_read_info.num_chunks; i++)
                 if (H5_UNLIKELY(H5TS_semaphore_wait(&threaded_read_info.sem) < 0))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTWAIT, FAIL, "can't wait for worker thread");
+
+            /* Unlock all chunks */
+
+            /* Prune chunk cache to maximum size */
+
+            /* Destroy semaphore */
         }
 #else /* H5_HAVE_CONCURRENCY */
         assert(threaded_read_info.vec_nused == 0);
@@ -3307,17 +3339,9 @@ done:
 static H5TS_THREAD_RETURN_TYPE
 H5D__chunk_thread_read(void *_chunk_info) {
     H5D_threaded_chunk_info_t *chunk_info = (H5D_threaded_chunk_info_t *)_chunk_info;
-    H5Z_EDC_t err_detect; /* Error detection info */
-    H5Z_cb_t  filter_cb;  /* I/O filter callback function */
     herr_t ret_value = SUCCEED; /* "Return value" for error macros (actual return value is always (H5TS_thread_ret_t)0) */
 
     FUNC_ENTER_NOAPI_NOINIT
-
-    /* Retrieve filter settings from API context */
-    if (H5CX_get_err_detect(&err_detect) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get error detection info");
-    if (H5CX_get_filter_cb(&filter_cb) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function");
 
     if (chunk_info->old_pline) {
         /* Perform filter pipeline */
@@ -3330,18 +3354,8 @@ H5D__chunk_thread_read(void *_chunk_info) {
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
                         "chunk size is incorrect after being unfiltered");
 
-        /* Reallocate chunk if necessary */
-        if (udata->new_unfilt_chunk) {
-            void *tmp_chunk = chunk;
-
-            if (NULL == (chunk = H5D__chunk_mem_alloc(chunk_nbytes, pline))) {
-                (void)H5D__chunk_mem_xfree(tmp_chunk, old_pline);
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
-                            "memory allocation failed for raw data chunk");
-            } /* end if */
-            H5MM_memcpy(chunk, tmp_chunk, chunk_size);
-            (void)H5D__chunk_mem_xfree(tmp_chunk, old_pline);
-        } /* end if */
+        /* The new_unfilt_chunk flag should only be set during an H5Dset_extent operation. This is not currently supported with internal threading. If this support is added, we will need to realloc the buffer in the associated threaded worker function. */
+        assert(!chunk_info->udata.new_unfilt_chunk);
     }
 
     /* Scatter data from chunk buffer to application buffer */
@@ -4977,7 +4991,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                     threaded_read_info->bufs[threaded_io_info->vec_nused] = chunk;
                     (threaded_io_info->vec_nused)++;
 
-                    /* Return old pipeline */
+                    /* Cache pipeline to use for decompression */
                     threaded_io_info->chunk_info[threaded_io_info->num_chunks].old_pline = old_pline;
                 }
                 else {
@@ -5133,7 +5147,8 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
             ent = NULL;
     } /* end else */
 
-    
+    /* Add chunk to list of chunks in threaded I/O */
+    threaded_io_info->chunk_info[threaded_io_info->num_chunks].
 
     /* Lock the chunk into the cache */
     if (ent) {
