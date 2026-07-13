@@ -32,7 +32,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## Performance Enhancements:
 
-- Added an I/O block cache to the ROS3 VFD to reduce requests to S3 for files not using paged allocation
+- Added an I/O block cache to the ROS3 VFD to reduce the number of requests to S3 for files not using paged allocation
 
 - Improved the performance of several tools (h5dump, h5ls, h5diff, h5repack, h5stat and h5format_convert) for specific file structures where many objects are linked to with multiple hard links
 
@@ -102,7 +102,7 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ### Added an I/O block cache to the ROS3 VFD
 
-   Added an I/O block cache to the ROS3 VFD to reduce requests to S3 for files that don't use paged allocation. This is a simple LRU cache that performs I/O in fixed-size blocks and serves I/O requests from the in-memory cached buffers. By default, the ROS3 VFD now performs I/O in 16MiB (see new macro `HDF5_ROS3_VFD_DEFAULT_BLOCK_SIZE`) blocks, caching up to a total of 128MiB (see new macro `HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE`) of data at a time. The new `H5Pset_fapl_ros3_block_caching()` / `H5Pget_fapl_ros3_block_caching()` API functions can be used to modify or retrieve the caching parameters set on a File Access Property List, respectively. Additionally, caching of the initial bytes of a file has been delayed from file open to the first read of a file instead to reduce the overhead of file opens.
+   Added an I/O block cache to the ROS3 VFD to reduce the number of requests to S3 for files that don't use paged allocation. This is a simple LRU cache that performs I/O in fixed-size blocks and serves I/O requests from the in-memory cached buffers. By default, the ROS3 VFD now performs I/O in 16 MiB (see new macro `HDF5_ROS3_VFD_DEFAULT_BLOCK_SIZE`) blocks, caching up to a total of 128 MiB (see new macro `HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE`) of data at a time. The new `H5Pset_fapl_ros3_block_caching()` / `H5Pget_fapl_ros3_block_caching()` API functions can be used to modify or retrieve the caching parameters set on a File Access Property List, respectively. Additionally, caching of the initial bytes of a file has been delayed from file open to the first read of a file instead to reduce the overhead of file opens.
 
 ### Added optional digital signature verification for dynamically loaded plugins
 
