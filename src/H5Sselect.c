@@ -527,7 +527,7 @@ H5S_select_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size)
     herr_t         ret_value = FAIL; /* Return value */
     const uint8_t *p_end     = NULL; /* Pointer to last valid byte in buffer */
     size_t         sel_info_size;    /* Size of selection-type-specific information */
-    bool           skip      = false;
+    bool           skip = false;
 
     FUNC_ENTER_NOAPI(FAIL)
 

@@ -16064,7 +16064,9 @@ static void
 test_select_deserialize_invalid(void)
 {
     uint8_t        hyper_bad_rank[14];
+    uint8_t        point_bad_rank[13];
     uint8_t        short_selection_type[1] = {0};
+    uint8_t        type_only[4];
     uint8_t        none_selection[16];
     uint8_t       *w;
     const uint8_t *r;
@@ -16089,10 +16091,41 @@ test_select_deserialize_invalid(void)
     VERIFY(ret, FAIL, "H5S_SELECT_DESERIALIZE");
     VERIFY(space, NULL, "H5S_SELECT_DESERIALIZE");
 
+    /* A point selection with a rank larger than H5S_MAX_RANK is rejected */
+    w = point_bad_rank;
+    UINT32ENCODE(w, (uint32_t)H5S_SEL_POINTS);
+    UINT32ENCODE(w, (uint32_t)H5S_POINT_VERSION_2);
+    *w++ = H5S_SELECT_INFO_ENC_SIZE_4;
+    UINT32ENCODE(w, (uint32_t)H5S_MAX_RANK + 1);
+
+    r = point_bad_rank;
+    H5E_BEGIN_TRY
+    {
+        ret = H5S_SELECT_DESERIALIZE(&space, &r, sizeof(point_bad_rank));
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5S_SELECT_DESERIALIZE");
+    VERIFY(space, NULL, "H5S_SELECT_DESERIALIZE");
+
     r = short_selection_type;
     H5E_BEGIN_TRY
     {
         ret = H5S_SELECT_DESERIALIZE(&space, &r, 0);
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5S_SELECT_DESERIALIZE");
+    VERIFY(space, NULL, "H5S_SELECT_DESERIALIZE");
+
+    /* A buffer holding only a valid selection type with no type-specific
+       payload passes the outer size check but is rejected by the concrete
+       deserializer's empty-payload guard */
+    w = type_only;
+    UINT32ENCODE(w, (uint32_t)H5S_SEL_HYPERSLABS);
+
+    r = type_only;
+    H5E_BEGIN_TRY
+    {
+        ret = H5S_SELECT_DESERIALIZE(&space, &r, sizeof(type_only));
     }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5S_SELECT_DESERIALIZE");
