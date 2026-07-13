@@ -673,14 +673,15 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-obj_stats(const char *path, const H5O_info2_t *oi, const char *already_visited, void *_iter)
+obj_stats(const char *path, const H5O_info2_t *oi, bool already_visited,
+          const trav_seen_t H5_ATTR_UNUSED *visited_obj_info, void *_iter)
 {
     H5O_native_info_t native_info;
     iter_t           *iter      = (iter_t *)_iter;
     herr_t            ret_value = SUCCEED;
 
     /* If the object has already been seen then just return */
-    if (NULL == already_visited) {
+    if (!already_visited) {
         /* Retrieve the native info for the object */
         if (H5Oget_native_info_by_name(iter->fid, path, &native_info, H5O_NATIVE_INFO_ALL, H5P_DEFAULT) < 0)
             H5TOOLS_GOTO_ERROR(FAIL, "H5Oget_native_info_by_name failed");
