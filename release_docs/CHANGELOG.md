@@ -187,6 +187,17 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ## Java Library
 
+### Fixed a datatype ID leak when reading or writing array/vlen datatypes
+
+   The JNI wrappers for `H5Dread`, `H5Dwrite`, `H5Aread` and `H5Awrite` inspect the
+   memory datatype with an internal helper (`h5str_detect_vlen_str()`). For an array
+   or variable-length datatype whose base type is not a variable-length string, the
+   helper opened the base type with `H5Tget_super()` but failed to close it when
+   no variable-length string was found, leaking one datatype ID per
+   read/write call. The base type ID is now closed on all paths, so Java applications
+   that repeatedly access datasets or attributes with such datatypes no longer leak
+   HDF5 datatype IDs.
+
 ## Configuration
 
 ## Tools

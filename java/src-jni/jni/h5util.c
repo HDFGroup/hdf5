@@ -2075,8 +2075,8 @@ h5str_detect_vlen_str(hid_t tid)
             goto done;
         } /* end if */
         ret = h5str_detect_vlen_str(btid);
+        H5Tclose(btid);
         if ((ret == 1) || (ret < 0)) {
-            H5Tclose(btid);
             goto done;
         } /* end if */
     }     /* end if */
