@@ -1144,6 +1144,139 @@ error:
     return 1;
 
 } /* end test_hive_style_object_key() */
+
+/*---------------------------------------------------------------------------
+ * Function:    test_ros3_block_caching_apis
+ *
+ * Purpose:     Tests the API functions for setting I/O block caching
+ *              parameters for the ros3 VFD.
+ *
+ * Return:      PASS : 0
+ *              FAIL : 1
+ *---------------------------------------------------------------------------
+ */
+static int
+test_ros3_block_caching_apis(void)
+{
+    size_t block_size;
+    size_t block_cache_size;
+    hid_t  fid     = H5I_INVALID_HID;
+    hid_t  fapl_id = H5I_INVALID_HID;
+    bool   lock_superblock;
+
+    TESTING("ros3 I/O block caching parameter APIs");
+
+    if (s3_test_credentials_loaded == 0) {
+        SKIPPED();
+        puts("    s3 credentials are not loaded");
+        fflush(stdout);
+        return 0;
+    }
+
+    if (false == s3_test_bucket_defined) {
+        SKIPPED();
+        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        fflush(stdout);
+        return 0;
+    }
+
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3(fapl_id, &anonymous_fa) < 0)
+        TEST_ERROR;
+    if (*s3_test_aws_session_token != '\0')
+        if (H5Pset_fapl_ros3_token(fapl_id, s3_test_aws_session_token) < 0)
+            TEST_ERROR;
+
+    /* Set block size to 0 - should disable block caching */
+    if (H5Pset_fapl_ros3_block_caching(fapl_id, 0, HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE, true) < 0)
+        TEST_ERROR;
+    if (H5Pget_fapl_ros3_block_caching(fapl_id, &block_size, &block_cache_size, &lock_superblock) < 0)
+        TEST_ERROR;
+    if (block_size != 0)
+        TEST_ERROR;
+    if (block_cache_size != HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE)
+        TEST_ERROR;
+    if (!lock_superblock)
+        TEST_ERROR;
+
+    /* Check that parameters are accepted - no validation performed since H5FD_ros3_t fields are internal */
+    if ((fid = H5Fopen(url_h5_public, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Set block cache size to 0 - should disable block caching */
+    if (H5Pset_fapl_ros3_block_caching(fapl_id, 1048576, 0, true) < 0)
+        TEST_ERROR;
+    if (H5Pget_fapl_ros3_block_caching(fapl_id, &block_size, &block_cache_size, &lock_superblock) < 0)
+        TEST_ERROR;
+    if (block_size != 1048576)
+        TEST_ERROR;
+    if (block_cache_size != 0)
+        TEST_ERROR;
+    if (!lock_superblock)
+        TEST_ERROR;
+
+    /* Check that parameters are accepted - no validation performed since H5FD_ros3_t fields are internal */
+    if ((fid = H5Fopen(url_h5_public, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Set block size to slightly larger than block cache size - should round block size down */
+    if (H5Pset_fapl_ros3_block_caching(fapl_id, 1048580, 1048576, true) < 0)
+        TEST_ERROR;
+    if (H5Pget_fapl_ros3_block_caching(fapl_id, &block_size, &block_cache_size, &lock_superblock) < 0)
+        TEST_ERROR;
+    if (block_size != 1048576)
+        TEST_ERROR;
+    if (block_cache_size != 1048576)
+        TEST_ERROR;
+    if (!lock_superblock)
+        TEST_ERROR;
+
+    /* Check that parameters are accepted - no validation performed since H5FD_ros3_t fields are internal */
+    if ((fid = H5Fopen(url_h5_public, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Disable locking of the superblock block into the block cache */
+    if (H5Pset_fapl_ros3_block_caching(fapl_id, 1048576, 4194304, false) < 0)
+        TEST_ERROR;
+    if (H5Pget_fapl_ros3_block_caching(fapl_id, &block_size, &block_cache_size, &lock_superblock) < 0)
+        TEST_ERROR;
+    if (block_size != 1048576)
+        TEST_ERROR;
+    if (block_cache_size != 4194304)
+        TEST_ERROR;
+    if (lock_superblock)
+        TEST_ERROR;
+
+    /* Check that parameters are accepted - no validation performed since H5FD_ros3_t fields are internal */
+    if ((fid = H5Fopen(url_h5_public, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl_id);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+
+    return 1;
+}
 #endif /* H5_HAVE_ROS3_VFD */
 
 /*-------------------------------------------------------------------------
@@ -1315,6 +1448,7 @@ main(void)
         nerrors += test_cmp();
         nerrors += test_ros3_access_modes();
         nerrors += test_hive_style_object_key();
+        nerrors += test_ros3_block_caching_apis();
     }
 
     if (H5FD__s3comms_term() < 0) {

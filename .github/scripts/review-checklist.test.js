@@ -3,6 +3,7 @@
 
 const assert = require('assert');
 const {
+  MARKER,
   matchesPattern,
   labelFromPattern,
   attributeFiles,
@@ -11,7 +12,32 @@ const {
   buildBody,
   parseExcluded,
   serializeExcluded,
+  withExcluded,
+  planSynchronizeSwaps,
+  coordinateReviewers,
 } = require('./review-checklist.js');
+
+// Minimal recording mock for the github.rest surface coordinateReviewers
+// touches. Each call resolves successfully and is appended to its call log.
+function makeGithubMock() {
+  const calls = { removeRequestedReviewers: [], requestReviewers: [], addAssignees: [] };
+  return {
+    calls,
+    rest: {
+      pulls: {
+        removeRequestedReviewers: async (opts) => { calls.removeRequestedReviewers.push(opts.reviewers[0]); },
+        requestReviewers:         async (opts) => { calls.requestReviewers.push(opts.reviewers[0]); },
+      },
+      issues: {
+        addAssignees: async (opts) => { calls.addAssignees.push(opts.assignees[0]); },
+      },
+    },
+  };
+}
+
+function makeCore() {
+  return { info: () => {}, warning: () => {}, setFailed: () => {} };
+}
 
 let passed = 0;
 let failed = 0;
@@ -25,6 +51,14 @@ function test(name, fn) {
     console.log(`✗ ${name} — ${e.message}`);
     failed++;
   }
+}
+
+// coordinateReviewers exercises real async API calls (mocked). test() doesn't
+// await, so an async fn's assertions would run after the pass/fail tally is
+// already printed — queue these separately and await them before the summary.
+const asyncTests = [];
+function asyncTest(name, fn) {
+  asyncTests.push({ name, fn });
 }
 
 // ----------------------------------------------------------------
@@ -500,9 +534,474 @@ test('serializeExcluded: round-trips through parseExcluded', () => {
 });
 
 // ----------------------------------------------------------------
+// withExcluded — used by /remove-reviewer to persist a deliberate removal
+// into the checklist comment's exclusion marker.
+// ----------------------------------------------------------------
+
+test('withExcluded: replaces an existing marker in place, preserving the rest of the body', () => {
+  const body = `${MARKER}\nsome checklist text\n<!-- hdf5-review-checklist-excluded:alice-->`;
+  const updated = withExcluded(body, new Set(['alice', 'bob']));
+  assert.ok(updated.includes('some checklist text'));
+  assert.ok(updated.startsWith(MARKER));
+  assert.deepStrictEqual([...parseExcluded(updated)].sort(), ['alice', 'bob']);
+  // Only one marker present afterward — not appended alongside the old one.
+  assert.strictEqual(updated.split('hdf5-review-checklist-excluded:').length - 1, 1);
+});
+
+test('withExcluded: appends a marker when the body has none', () => {
+  const body = `${MARKER}\nsome checklist text`;
+  const updated = withExcluded(body, new Set(['alice']));
+  assert.ok(updated.includes('some checklist text'));
+  assert.deepStrictEqual([...parseExcluded(updated)], ['alice']);
+});
+
+test('withExcluded: round-trips an empty set to the empty marker', () => {
+  const body = `${MARKER}\ntext\n<!-- hdf5-review-checklist-excluded:alice-->`;
+  const updated = withExcluded(body, new Set());
+  assert.strictEqual(parseExcluded(updated).size, 0);
+});
+
+// ----------------------------------------------------------------
+// planSynchronizeSwaps
+// ----------------------------------------------------------------
+
+function makeSyncCtx(overrides) {
+  return {
+    prAuthor:        'lrknox',
+    existingRequested: new Set(),
+    updatedExcluded: new Set(),
+    touchedAreaOwners: new Set(['jhendersonHDF', 'hyoklee', 'glennsong09', 'lrknox']),
+    ...overrides,
+  };
+}
+
+test('planSynchronizeSwaps: dismissed reviewer swaps out fresh CODEOWNERS pick (PR 6475 scenario)', () => {
+  // Jordan reviewed and got dismissed; GitHub auto-assigned Joe (hyoklee) for the fixup push.
+  const areas = [makeArea('.github', ['hyoklee', 'lrknox', 'jhendersonHDF', 'glennsong09'], 5)];
+  const reviews = [{ user: { login: 'jhendersonHDF' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({ existingRequested: new Set(['hyoklee']) });
+  const swaps = planSynchronizeSwaps(areas, reviews, ctx);
+  assert.strictEqual(swaps.length, 1);
+  assert.strictEqual(swaps[0].dismissedOwner, 'jhendersonHDF');
+  assert.strictEqual(swaps[0].freshPick, 'hyoklee');
+});
+
+test('planSynchronizeSwaps: no swaps when dismissed reviewer is already re-requested', () => {
+  const areas = [makeArea('.github', ['hyoklee', 'jhendersonHDF'], 5)];
+  const reviews = [{ user: { login: 'jhendersonHDF' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({ existingRequested: new Set(['jhendersonHDF']) });
+  const swaps = planSynchronizeSwaps(areas, reviews, ctx);
+  assert.strictEqual(swaps.length, 0);
+});
+
+test('planSynchronizeSwaps: no fresh pick when GitHub assigned no one for the area', () => {
+  // Dismissed reviewer exists but GitHub didn't auto-assign anyone new.
+  const areas = [makeArea('.github', ['hyoklee', 'jhendersonHDF'], 5)];
+  const reviews = [{ user: { login: 'jhendersonHDF' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({ existingRequested: new Set() });
+  const swaps = planSynchronizeSwaps(areas, reviews, ctx);
+  assert.strictEqual(swaps.length, 1);
+  assert.strictEqual(swaps[0].dismissedOwner, 'jhendersonHDF');
+  assert.strictEqual(swaps[0].freshPick, null);
+});
+
+test('planSynchronizeSwaps: dismissed reviewer who is excluded is skipped', () => {
+  const areas = [makeArea('.github', ['hyoklee', 'jhendersonHDF'], 5)];
+  const reviews = [{ user: { login: 'jhendersonHDF' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({
+    existingRequested: new Set(['hyoklee']),
+    updatedExcluded: new Set(['jhendersonHDF']),
+  });
+  const swaps = planSynchronizeSwaps(areas, reviews, ctx);
+  assert.strictEqual(swaps.length, 0);
+});
+
+test('planSynchronizeSwaps: PR author as dismissed reviewer is skipped', () => {
+  const areas = [makeArea('.github', ['lrknox', 'jhendersonHDF'], 5)];
+  const reviews = [{ user: { login: 'lrknox' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({ existingRequested: new Set(['jhendersonHDF']) });
+  const swaps = planSynchronizeSwaps(areas, reviews, ctx);
+  assert.strictEqual(swaps.length, 0);
+});
+
+test('planSynchronizeSwaps: no dismissed reviews produces no swaps', () => {
+  const areas = [makeArea('.github', ['hyoklee', 'jhendersonHDF'], 5)];
+  const reviews = [{ user: { login: 'jhendersonHDF' }, state: 'APPROVED' }];
+  const ctx = makeSyncCtx({ existingRequested: new Set(['hyoklee']) });
+  const swaps = planSynchronizeSwaps(areas, reviews, ctx);
+  assert.strictEqual(swaps.length, 0);
+});
+
+test('planSynchronizeSwaps: manually added non-CODEOWNER is not treated as a fresh pick', () => {
+  // 'outsider' is in existingRequested but NOT in touchedAreaOwners (manually added).
+  // Should not be removed as a fresh CODEOWNERS pick.
+  const areas = [makeArea('.github', ['hyoklee', 'jhendersonHDF'], 5)];
+  const reviews = [{ user: { login: 'jhendersonHDF' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({
+    existingRequested: new Set(['outsider']),
+    touchedAreaOwners: new Set(['hyoklee', 'jhendersonHDF', 'glennsong09']),
+  });
+  const swaps = planSynchronizeSwaps(areas, reviews, ctx);
+  assert.strictEqual(swaps.length, 1);
+  assert.strictEqual(swaps[0].freshPick, null); // outsider not swapped out
+});
+
+test('planSynchronizeSwaps: fresh pick covering a second, unrelated touched area is not removed', () => {
+  // joe covers both areas; jordan was dismissed only on area "a". Removing joe
+  // to restore jordan would silently uncover area "b", which has nothing to
+  // do with the dismissal.
+  const areaA = makeArea('a', ['jordan', 'joe'], 5);
+  const areaB = makeArea('b', ['joe', 'glenn'], 5);
+  const reviews = [{ user: { login: 'jordan' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({
+    prAuthor: 'author',
+    existingRequested: new Set(['joe']),
+    touchedAreaOwners: new Set(['jordan', 'joe', 'glenn']),
+  });
+  const swaps = planSynchronizeSwaps([areaA, areaB], reviews, ctx);
+  assert.strictEqual(swaps.length, 1);
+  assert.strictEqual(swaps[0].area.label, 'a');
+  assert.strictEqual(swaps[0].dismissedOwner, 'jordan');
+  assert.strictEqual(swaps[0].freshPick, null); // joe is NOT removed — still needed for area "b"
+});
+
+test('planSynchronizeSwaps: fresh pick is removed when not needed by any other area', () => {
+  // Sanity check that the "needed elsewhere" guard doesn't over-fire: when the
+  // candidate truly owns only the one area in question, they ARE swapped out.
+  const areaA = makeArea('a', ['jordan', 'joe'], 5);
+  const areaB = makeArea('b', ['glenn'], 5); // joe is not an owner of area b
+  const reviews = [{ user: { login: 'jordan' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({
+    prAuthor: 'author',
+    existingRequested: new Set(['joe']),
+    touchedAreaOwners: new Set(['jordan', 'joe', 'glenn']),
+  });
+  const swaps = planSynchronizeSwaps([areaA, areaB], reviews, ctx);
+  assert.strictEqual(swaps.length, 1);
+  assert.strictEqual(swaps[0].freshPick, 'joe');
+});
+
+test('planSynchronizeSwaps: two areas independently dismissed for the same owner both restore them', () => {
+  // jordan owns both areas and was dismissed on the PR as a whole (one review
+  // covers both); each area independently plans to re-request him. The
+  // consuming loop re-requesting him twice is idempotent, not a correctness bug.
+  const areaA = makeArea('a', ['jordan', 'joe'], 5);
+  const areaB = makeArea('b', ['jordan', 'glenn'], 5);
+  const reviews = [{ user: { login: 'jordan' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({
+    prAuthor: 'author',
+    existingRequested: new Set(['joe', 'glenn']),
+    touchedAreaOwners: new Set(['jordan', 'joe', 'glenn']),
+  });
+  const swaps = planSynchronizeSwaps([areaA, areaB], reviews, ctx);
+  assert.strictEqual(swaps.length, 2);
+  assert.ok(swaps.every(s => s.dismissedOwner === 'jordan'));
+});
+
+test('planSynchronizeSwaps: dismissedOwner already covering a different area is not re-flagged', () => {
+  // jordan was dismissed but is already requested (e.g. restored by a prior
+  // area's swap, or independently re-requested) — no duplicate swap planned.
+  const areaA = makeArea('a', ['jordan', 'joe'], 5);
+  const reviews = [{ user: { login: 'jordan' }, state: 'DISMISSED' }];
+  const ctx = makeSyncCtx({
+    prAuthor: 'author',
+    existingRequested: new Set(['jordan']),
+    touchedAreaOwners: new Set(['jordan', 'joe']),
+  });
+  const swaps = planSynchronizeSwaps([areaA], reviews, ctx);
+  assert.strictEqual(swaps.length, 0);
+});
+
+// ----------------------------------------------------------------
+// coordinateReviewers — ready_for_review CODEOWNERS-avalanche pruning
+// ----------------------------------------------------------------
+
+function makeCoordinateBaseArgs(overrides) {
+  const area = makeArea('.github', ['hyoklee', 'lrknox', 'jhendersonHDF', 'glennsong09'], 5);
+  return {
+    owner: 'HDFGroup', repo: 'hdf5', pr_number: 1,
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'hyoklee' }, { login: 'jhendersonHDF' }, { login: 'glennsong09' }],
+    },
+    allCodeOwners: new Set(['hyoklee', 'lrknox', 'jhendersonHDF', 'glennsong09']),
+    catchAllOwners: new Set(),
+    touchedAreas: [area],
+    reviewerLoad: {},
+    excludedReviewers: new Set(),
+    allReviews: [],
+    // Most scenarios model an already-established PR (checklist already
+    // posted); tests exercising the fresh-PR race override this explicitly.
+    hasExistingComment: true,
+    LINE_THRESHOLD: 300,
+    AREA_THRESHOLDS: {},
+    PUBLIC_HEADER: /public\.h$/,
+    ...overrides,
+  };
+}
+
+asyncTest('coordinateReviewers: ready_for_review prunes the CODEOWNERS avalanche to one load-balanced pick', async () => {
+  const github = makeGithubMock();
+  const context = { eventName: 'pull_request_target', payload: { action: 'ready_for_review', sender: { type: 'User' } } };
+  const args = makeCoordinateBaseArgs();
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  // hyoklee is first non-author owner in CODEOWNERS order with equal (zero) load.
+  assert.deepStrictEqual([...confirmedRequested], ['hyoklee']);
+  // The other two avalanche-assigned owners get removed.
+  assert.ok(github.calls.removeRequestedReviewers.includes('jhendersonHDF'));
+  assert.ok(github.calls.removeRequestedReviewers.includes('glennsong09'));
+  assert.strictEqual(github.calls.removeRequestedReviewers.length, 2);
+  // hyoklee was already requested, so no redundant request call.
+  assert.strictEqual(github.calls.requestReviewers.length, 0);
+});
+
+asyncTest('coordinateReviewers: ready_for_review on a draft-opened PR (still draft) does not prune', async () => {
+  // Sanity check the branch ordering: if somehow still draft (shouldn't
+  // happen for a real ready_for_review payload, but guards the isDraft
+  // branch precedence), the draft path's "leave alone" rule wins.
+  const github = makeGithubMock();
+  const context = { eventName: 'pull_request_target', payload: { action: 'ready_for_review', sender: { type: 'User' } } };
+  const args = makeCoordinateBaseArgs({ prData: { ...makeCoordinateBaseArgs().prData, draft: true } });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.strictEqual(github.calls.removeRequestedReviewers.length, 0);
+  assert.deepStrictEqual([...confirmedRequested].sort(), ['glennsong09', 'hyoklee', 'jhendersonHDF']);
+});
+
+asyncTest('coordinateReviewers: plain synchronize (no dismissed reviews, no avalanche) is left to additive fill', async () => {
+  // When only one CODEOWNER is requested per area (normal steady state after
+  // prior pruning), a plain synchronize with no dismissed reviews must stay on
+  // the additive-fill path: the area is already covered, nothing is removed,
+  // nothing new is requested.
+  const github = makeGithubMock();
+  const context = { eventName: 'pull_request_target', payload: { action: 'synchronize', sender: { type: 'User' } } };
+  const args = makeCoordinateBaseArgs({
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'hyoklee' }], // one .github owner — normal steady state
+    },
+  });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.strictEqual(github.calls.removeRequestedReviewers.length, 0);
+  assert.strictEqual(github.calls.requestReviewers.length, 0);
+  assert.ok(confirmedRequested.has('hyoklee'));
+});
+
+asyncTest('coordinateReviewers: review_requested survives the opened race and still prunes (PR #6479 scenario)', async () => {
+  // GitHub's CODEOWNERS engine fires one review_requested per auto-assigned
+  // owner; each re-triggers this workflow, and concurrency: cancel-in-progress
+  // means any of those runs — not necessarily the "opened" run — can be the
+  // one that actually executes. hasExistingComment: false (no checklist
+  // posted yet) is what lets a surviving review_requested run still prune
+  // the avalanche instead of falling through to additive-fill and keeping
+  // all three.
+  const github = makeGithubMock();
+  const context = {
+    eventName: 'pull_request_target',
+    payload: { action: 'review_requested', requested_reviewer: { login: 'jhendersonHDF' }, sender: { type: 'User' } },
+  };
+  const args = makeCoordinateBaseArgs({ hasExistingComment: false });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.strictEqual(confirmedRequested.size, 1);
+  assert.ok(github.calls.removeRequestedReviewers.length > 0);
+});
+
+asyncTest('coordinateReviewers: review_requested on an already-established PR is NOT treated as a fresh-PR prune', async () => {
+  // Contrast case: once a checklist comment exists, a routine review_requested
+  // later in the PR's life (e.g. a human manually adding a reviewer) must stay
+  // on the additive-fill path — it must not be reinterpreted as "first
+  // coordination pass" and prune reviewers an established PR already has.
+  // Use one requested reviewer per area so the per-area avalanche detector
+  // does not also fire — this isolates the isFirstCoordinationPass behavior.
+  const github = makeGithubMock();
+  const context = {
+    eventName: 'pull_request_target',
+    payload: { action: 'review_requested', requested_reviewer: { login: 'hyoklee' }, sender: { type: 'User' } },
+  };
+  const args = makeCoordinateBaseArgs({
+    hasExistingComment: true,
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'hyoklee' }], // one .github owner — no avalanche to detect
+    },
+  });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.strictEqual(github.calls.removeRequestedReviewers.length, 0);
+  assert.ok(confirmedRequested.has('hyoklee'));
+});
+
+// ----------------------------------------------------------------
+// coordinateReviewers — per-area CODEOWNERS avalanche detection (PR #6484)
+//
+// When a synchronize push first touches a new CODEOWNERS area, GitHub
+// auto-assigns ALL that area's owners simultaneously. The surviving
+// review_requested run (after cancel-in-progress) may then fall into
+// the additive-fill path, see the area as "already has owners → skip",
+// and leave all of them listed. The per-area avalanche detector must
+// prune that area to one load-balanced pick even on synchronize.
+// ----------------------------------------------------------------
+
+asyncTest('coordinateReviewers: synchronize with per-area avalanche prunes the area to one pick', async () => {
+  // Model PR #6484: PR has an existing checklist (hasExistingComment: true),
+  // a synchronize push touched a new area (.github), GitHub assigned 3 of its
+  // owners, the surviving run must prune to one.
+  const github = makeGithubMock();
+  const context = {
+    eventName: 'pull_request_target',
+    payload: { action: 'synchronize', sender: { type: 'User' } },
+  };
+  // Default args: 3 .github owners in requested_reviewers, hasExistingComment: true.
+  // That satisfies "existing PR + multiple CODEOWNERS for same area" = avalanche.
+  const args = makeCoordinateBaseArgs();
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.strictEqual(confirmedRequested.size, 1, 'Should prune to exactly one reviewer');
+  // Exactly 2 removed (the 2 non-picked avalanche owners).
+  assert.strictEqual(github.calls.removeRequestedReviewers.length, 2);
+  // The kept reviewer is never re-requested (already on the PR).
+  assert.strictEqual(github.calls.requestReviewers.length, 0);
+});
+
+asyncTest('coordinateReviewers: synchronize with one owner per area does not prune', async () => {
+  // Contrast: when each area already has exactly one CODEOWNER requested
+  // (normal steady state), synchronize must NOT trigger avalanche pruning.
+  const github = makeGithubMock();
+  const context = {
+    eventName: 'pull_request_target',
+    payload: { action: 'synchronize', sender: { type: 'User' } },
+  };
+  const args = makeCoordinateBaseArgs({
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'hyoklee' }], // only one .github owner — no avalanche
+    },
+  });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  // hyoklee stays, nothing pruned.
+  assert.ok(confirmedRequested.has('hyoklee'));
+  assert.strictEqual(github.calls.removeRequestedReviewers.length, 0);
+});
+
+// ----------------------------------------------------------------
+// coordinateReviewers — a direct review_requested must survive avalanche
+// detection on the very same run (reported bug: manually re-requesting a
+// reviewer via the GitHub UI got them immediately removed again, because
+// their area now had two currently-requested owners — themselves plus
+// whichever pick an earlier ready_for_review pruning pass had already made
+// — which is indistinguishable from an unpruned CODEOWNERS avalanche unless
+// the just-requested login is carved out).
+// ----------------------------------------------------------------
+
+asyncTest('coordinateReviewers: review_requested for a specific login is not undone by avalanche pruning', async () => {
+  const github = makeGithubMock();
+  const context = {
+    eventName: 'pull_request_target',
+    payload: {
+      action: 'review_requested',
+      requested_reviewer: { login: 'jhendersonHDF' },
+      sender: { type: 'User' },
+    },
+  };
+  const args = makeCoordinateBaseArgs({
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      // hyoklee is the load-balanced pick an earlier pass already made;
+      // jhendersonHDF was just manually re-requested on top of it.
+      requested_reviewers: [{ login: 'hyoklee' }, { login: 'jhendersonHDF' }],
+    },
+    // Rig the load-balancer so a fresh pick would land on hyoklee, not
+    // jhendersonHDF — proving jhendersonHDF survives because they were
+    // just requested, not because they'd have won the pick anyway.
+    reviewerLoad: { hyoklee: 0, jhendersonHDF: 99, glennsong09: 0 },
+  });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.strictEqual(github.calls.removeRequestedReviewers.length, 0, 'Nothing should be removed');
+  assert.ok(confirmedRequested.has('jhendersonHDF'), 'The just-requested reviewer must stay');
+});
+
+// ----------------------------------------------------------------
+// coordinateReviewers — bot-self-triggered review_request_removed must not
+// create a sticky exclusion (the bot's own removeUnselected/removeRequestedReviewers
+// calls fire this very event and would otherwise self-trigger a run that reads
+// its own bookkeeping removal as a deliberate human decision).
+// ----------------------------------------------------------------
+
+function makeRemovalContext(senderType) {
+  return {
+    eventName: 'pull_request_target',
+    payload: {
+      action: 'review_request_removed',
+      requested_reviewer: { login: 'jhendersonHDF' },
+      sender: { type: senderType },
+    },
+  };
+}
+
+asyncTest('coordinateReviewers: bot-sender review_request_removed does not persist a sticky exclusion', async () => {
+  const github = makeGithubMock();
+  const args = makeCoordinateBaseArgs({
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'hyoklee' }, { login: 'glennsong09' }],
+    },
+  });
+
+  const { excludedReviewers } = await coordinateReviewers(github, makeRemovalContext('Bot'), makeCore(), args);
+
+  assert.ok(!excludedReviewers.has('jhendersonHDF'));
+});
+
+asyncTest('coordinateReviewers: human-sender review_request_removed does persist a sticky exclusion', async () => {
+  const github = makeGithubMock();
+  const args = makeCoordinateBaseArgs({
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'hyoklee' }, { login: 'glennsong09' }],
+    },
+  });
+
+  const { excludedReviewers } = await coordinateReviewers(github, makeRemovalContext('User'), makeCore(), args);
+
+  assert.ok(excludedReviewers.has('jhendersonHDF'));
+});
+
+// ----------------------------------------------------------------
 // Summary
 // ----------------------------------------------------------------
 
-console.log('');
-console.log(`${passed} passed, ${failed} failed`);
-process.exit(failed > 0 ? 1 : 0);
+(async () => {
+  for (const { name, fn } of asyncTests) {
+    try {
+      await fn();
+      console.log(`✓ ${name}`);
+      passed++;
+    } catch (e) {
+      console.log(`✗ ${name} — ${e.message}`);
+      failed++;
+    }
+  }
+  console.log('');
+  console.log(`${passed} passed, ${failed} failed`);
+  process.exit(failed > 0 ? 1 : 0);
+})();

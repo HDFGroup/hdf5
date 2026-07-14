@@ -5972,7 +5972,12 @@ test_conv_int_fp_conv_to_schar(void *hw_p, unsigned char *src_buf, size_t idx, d
 #ifdef H5_HAVE__FLOAT16
             H5__Float16 f16;
             memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
-            aligned = (signed char)f16;
+            if (f16 > (H5__Float16)(SCHAR_MAX))
+                aligned = SCHAR_MAX;
+            else if (f16 < (H5__Float16)(SCHAR_MIN))
+                aligned = SCHAR_MIN;
+            else
+                aligned = (signed char)f16;
             break;
 #else
             H5_FAILED();
@@ -5984,50 +5989,74 @@ test_conv_int_fp_conv_to_schar(void *hw_p, unsigned char *src_buf, size_t idx, d
         case FLT_FLOAT: {
             float f;
             memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
-            aligned = (signed char)f;
+            if (f > (float)(SCHAR_MAX))
+                aligned = SCHAR_MAX;
+            else if (f < (float)(SCHAR_MIN))
+                aligned = SCHAR_MIN;
+            else
+                aligned = (signed char)f;
             break;
         }
         case FLT_DOUBLE: {
             double d;
             memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
-            aligned = (signed char)d;
+            if (d > (double)(SCHAR_MAX))
+                aligned = SCHAR_MAX;
+            else if (d < (double)(SCHAR_MIN))
+                aligned = SCHAR_MIN;
+            else
+                aligned = (signed char)d;
             break;
         }
         case FLT_LDOUBLE: {
             long double ld;
             memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
-            aligned = (signed char)ld;
+            if (ld > (long double)(SCHAR_MAX))
+                aligned = SCHAR_MAX;
+            else if (ld < (long double)(SCHAR_MIN))
+                aligned = SCHAR_MIN;
+            else
+                aligned = (signed char)ld;
             break;
         }
 #ifdef H5_HAVE_COMPLEX_NUMBERS
         case FLT_COMPLEX: {
             H5_float_complex fc;
+            float            real;
             memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (signed char)fc;
-#else
-            aligned = (signed char)crealf(fc);
-#endif
+            real = crealf(fc);
+            if (real > (float)(SCHAR_MAX))
+                aligned = SCHAR_MAX;
+            else if (real < (float)(SCHAR_MIN))
+                aligned = SCHAR_MIN;
+            else
+                aligned = (signed char)real;
             break;
         }
         case DBL_COMPLEX: {
             H5_double_complex dc;
+            double            real;
             memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (signed char)dc;
-#else
-            aligned = (signed char)creal(dc);
-#endif
+            real = creal(dc);
+            if (real > (double)(SCHAR_MAX))
+                aligned = SCHAR_MAX;
+            else if (real < (double)(SCHAR_MIN))
+                aligned = SCHAR_MIN;
+            else
+                aligned = (signed char)real;
             break;
         }
         case LDBL_COMPLEX: {
             H5_ldouble_complex ldc;
+            long double        real;
             memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (signed char)ldc;
-#else
-            aligned = (signed char)creall(ldc);
-#endif
+            real = creall(ldc);
+            if (real > (long double)(SCHAR_MAX))
+                aligned = SCHAR_MAX;
+            else if (real < (long double)(SCHAR_MIN))
+                aligned = SCHAR_MIN;
+            else
+                aligned = (signed char)real;
             break;
         }
 #else
@@ -6087,7 +6116,12 @@ test_conv_int_fp_conv_to_uchar(void *hw_p, unsigned char *src_buf, size_t idx, d
 #ifdef H5_HAVE__FLOAT16
             H5__Float16 f16;
             memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
-            aligned = (unsigned char)f16;
+            if (f16 > (H5__Float16)(UCHAR_MAX))
+                aligned = UCHAR_MAX;
+            else if (f16 < (H5__Float16)0)
+                aligned = 0;
+            else
+                aligned = (unsigned char)f16;
             break;
 #else
             H5_FAILED();
@@ -6099,50 +6133,74 @@ test_conv_int_fp_conv_to_uchar(void *hw_p, unsigned char *src_buf, size_t idx, d
         case FLT_FLOAT: {
             float f;
             memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
-            aligned = (unsigned char)f;
+            if (f > (float)(UCHAR_MAX))
+                aligned = UCHAR_MAX;
+            else if (f < (float)0)
+                aligned = 0;
+            else
+                aligned = (unsigned char)f;
             break;
         }
         case FLT_DOUBLE: {
             double d;
             memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
-            aligned = (unsigned char)d;
+            if (d > (double)(UCHAR_MAX))
+                aligned = UCHAR_MAX;
+            else if (d < (double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned char)d;
             break;
         }
         case FLT_LDOUBLE: {
             long double ld;
             memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
-            aligned = (unsigned char)ld;
+            if (ld > (long double)(UCHAR_MAX))
+                aligned = UCHAR_MAX;
+            else if (ld < (long double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned char)ld;
             break;
         }
 #ifdef H5_HAVE_COMPLEX_NUMBERS
         case FLT_COMPLEX: {
             H5_float_complex fc;
+            float            real;
             memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (unsigned char)fc;
-#else
-            aligned = (unsigned char)crealf(fc);
-#endif
+            real = crealf(fc);
+            if (real > (float)(UCHAR_MAX))
+                aligned = UCHAR_MAX;
+            else if (real < (float)0)
+                aligned = 0;
+            else
+                aligned = (unsigned char)real;
             break;
         }
         case DBL_COMPLEX: {
             H5_double_complex dc;
+            double            real;
             memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (unsigned char)dc;
-#else
-            aligned = (unsigned char)creal(dc);
-#endif
+            real = creal(dc);
+            if (real > (double)(UCHAR_MAX))
+                aligned = UCHAR_MAX;
+            else if (real < (double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned char)real;
             break;
         }
         case LDBL_COMPLEX: {
             H5_ldouble_complex ldc;
+            long double        real;
             memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (unsigned char)ldc;
-#else
-            aligned = (unsigned char)creall(ldc);
-#endif
+            real = creall(ldc);
+            if (real > (long double)(UCHAR_MAX))
+                aligned = UCHAR_MAX;
+            else if (real < (long double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned char)real;
             break;
         }
 #else
@@ -6202,7 +6260,12 @@ test_conv_int_fp_conv_to_short(void *hw_p, unsigned char *src_buf, size_t idx, d
 #ifdef H5_HAVE__FLOAT16
             H5__Float16 f16;
             memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
-            aligned = (short)f16;
+            if (f16 > (H5__Float16)(SHRT_MAX))
+                aligned = SHRT_MAX;
+            else if (f16 < (H5__Float16)(SHRT_MIN))
+                aligned = SHRT_MIN;
+            else
+                aligned = (short)f16;
             break;
 #else
             H5_FAILED();
@@ -6214,50 +6277,74 @@ test_conv_int_fp_conv_to_short(void *hw_p, unsigned char *src_buf, size_t idx, d
         case FLT_FLOAT: {
             float f;
             memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
-            aligned = (short)f;
+            if (f > (float)(SHRT_MAX))
+                aligned = SHRT_MAX;
+            else if (f < (float)(SHRT_MIN))
+                aligned = SHRT_MIN;
+            else
+                aligned = (short)f;
             break;
         }
         case FLT_DOUBLE: {
             double d;
             memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
-            aligned = (short)d;
+            if (d > (double)(SHRT_MAX))
+                aligned = SHRT_MAX;
+            else if (d < (double)(SHRT_MIN))
+                aligned = SHRT_MIN;
+            else
+                aligned = (short)d;
             break;
         }
         case FLT_LDOUBLE: {
             long double ld;
             memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
-            aligned = (short)ld;
+            if (ld > (long double)(SHRT_MAX))
+                aligned = SHRT_MAX;
+            else if (ld < (long double)(SHRT_MIN))
+                aligned = SHRT_MIN;
+            else
+                aligned = (short)ld;
             break;
         }
 #ifdef H5_HAVE_COMPLEX_NUMBERS
         case FLT_COMPLEX: {
             H5_float_complex fc;
+            float            real;
             memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (short)fc;
-#else
-            aligned = (short)crealf(fc);
-#endif
+            real = crealf(fc);
+            if (real > (float)(SHRT_MAX))
+                aligned = SHRT_MAX;
+            else if (real < (float)(SHRT_MIN))
+                aligned = SHRT_MIN;
+            else
+                aligned = (short)real;
             break;
         }
         case DBL_COMPLEX: {
             H5_double_complex dc;
+            double            real;
             memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (short)dc;
-#else
-            aligned = (short)creal(dc);
-#endif
+            real = creal(dc);
+            if (real > (double)(SHRT_MAX))
+                aligned = SHRT_MAX;
+            else if (real < (double)(SHRT_MIN))
+                aligned = SHRT_MIN;
+            else
+                aligned = (short)real;
             break;
         }
         case LDBL_COMPLEX: {
             H5_ldouble_complex ldc;
+            long double        real;
             memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (short)ldc;
-#else
-            aligned = (short)creall(ldc);
-#endif
+            real = creall(ldc);
+            if (real > (long double)(SHRT_MAX))
+                aligned = SHRT_MAX;
+            else if (real < (long double)(SHRT_MIN))
+                aligned = SHRT_MIN;
+            else
+                aligned = (short)real;
             break;
         }
 #else
@@ -6317,6 +6404,7 @@ test_conv_int_fp_conv_to_ushort(void *hw_p, unsigned char *src_buf, size_t idx, 
 #ifdef H5_HAVE__FLOAT16
             H5__Float16 f16;
             memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
+            /* No overflow/underflow checking needed here */
             aligned = (unsigned short)f16;
             break;
 #else
@@ -6329,50 +6417,74 @@ test_conv_int_fp_conv_to_ushort(void *hw_p, unsigned char *src_buf, size_t idx, 
         case FLT_FLOAT: {
             float f;
             memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
-            aligned = (unsigned short)f;
+            if (f > (float)(USHRT_MAX))
+                aligned = USHRT_MAX;
+            else if (f < (float)0)
+                aligned = 0;
+            else
+                aligned = (unsigned short)f;
             break;
         }
         case FLT_DOUBLE: {
             double d;
             memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
-            aligned = (unsigned short)d;
+            if (d > (double)(USHRT_MAX))
+                aligned = USHRT_MAX;
+            else if (d < (double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned short)d;
             break;
         }
         case FLT_LDOUBLE: {
             long double ld;
             memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
-            aligned = (unsigned short)ld;
+            if (ld > (long double)(USHRT_MAX))
+                aligned = USHRT_MAX;
+            else if (ld < (long double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned short)ld;
             break;
         }
 #ifdef H5_HAVE_COMPLEX_NUMBERS
         case FLT_COMPLEX: {
             H5_float_complex fc;
+            float            real;
             memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (unsigned short)fc;
-#else
-            aligned = (unsigned short)crealf(fc);
-#endif
+            real = crealf(fc);
+            if (real > (float)(USHRT_MAX))
+                aligned = USHRT_MAX;
+            else if (real < (float)0)
+                aligned = 0;
+            else
+                aligned = (unsigned short)real;
             break;
         }
         case DBL_COMPLEX: {
             H5_double_complex dc;
+            double            real;
             memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (unsigned short)dc;
-#else
-            aligned = (unsigned short)creal(dc);
-#endif
+            real = creal(dc);
+            if (real > (double)(USHRT_MAX))
+                aligned = USHRT_MAX;
+            else if (real < (double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned short)real;
             break;
         }
         case LDBL_COMPLEX: {
             H5_ldouble_complex ldc;
+            long double        real;
             memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (unsigned short)ldc;
-#else
-            aligned = (unsigned short)creall(ldc);
-#endif
+            real = creall(ldc);
+            if (real > (long double)(USHRT_MAX))
+                aligned = USHRT_MAX;
+            else if (real < (long double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned short)real;
             break;
         }
 #else
@@ -6432,6 +6544,7 @@ test_conv_int_fp_conv_to_int(void *hw_p, unsigned char *src_buf, size_t idx, dty
 #ifdef H5_HAVE__FLOAT16
             H5__Float16 f16;
             memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
+            /* No overflow/underflow checking needed here */
             aligned = (int)f16;
             break;
 #else
@@ -6444,50 +6557,74 @@ test_conv_int_fp_conv_to_int(void *hw_p, unsigned char *src_buf, size_t idx, dty
         case FLT_FLOAT: {
             float f;
             memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
-            aligned = (int)f;
+            if (f > (float)(INT_MAX))
+                aligned = INT_MAX;
+            else if (f < (float)(INT_MIN))
+                aligned = INT_MIN;
+            else
+                aligned = (int)f;
             break;
         }
         case FLT_DOUBLE: {
             double d;
             memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
-            aligned = (int)d;
+            if (d > (double)(INT_MAX))
+                aligned = INT_MAX;
+            else if (d < (double)(INT_MIN))
+                aligned = INT_MIN;
+            else
+                aligned = (int)d;
             break;
         }
         case FLT_LDOUBLE: {
             long double ld;
             memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
-            aligned = (int)ld;
+            if (ld > (long double)(INT_MAX))
+                aligned = INT_MAX;
+            else if (ld < (long double)(INT_MIN))
+                aligned = INT_MIN;
+            else
+                aligned = (int)ld;
             break;
         }
 #ifdef H5_HAVE_COMPLEX_NUMBERS
         case FLT_COMPLEX: {
             H5_float_complex fc;
+            float            real;
             memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (int)fc;
-#else
-            aligned = (int)crealf(fc);
-#endif
+            real = crealf(fc);
+            if (real > (float)(INT_MAX))
+                aligned = INT_MAX;
+            else if (real < (float)(INT_MIN))
+                aligned = INT_MIN;
+            else
+                aligned = (int)real;
             break;
         }
         case DBL_COMPLEX: {
             H5_double_complex dc;
+            double            real;
             memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (int)dc;
-#else
-            aligned = (int)creal(dc);
-#endif
+            real = creal(dc);
+            if (real > (double)(INT_MAX))
+                aligned = INT_MAX;
+            else if (real < (double)(INT_MIN))
+                aligned = INT_MIN;
+            else
+                aligned = (int)real;
             break;
         }
         case LDBL_COMPLEX: {
             H5_ldouble_complex ldc;
+            long double        real;
             memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (int)ldc;
-#else
-            aligned = (int)creall(ldc);
-#endif
+            real = creall(ldc);
+            if (real > (long double)(INT_MAX))
+                aligned = INT_MAX;
+            else if (real < (long double)(INT_MIN))
+                aligned = INT_MIN;
+            else
+                aligned = (int)real;
             break;
         }
 #else
@@ -6547,6 +6684,7 @@ test_conv_int_fp_conv_to_uint(void *hw_p, unsigned char *src_buf, size_t idx, dt
 #ifdef H5_HAVE__FLOAT16
             H5__Float16 f16;
             memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
+            /* No overflow/underflow checking needed here */
             aligned = (unsigned int)f16;
             break;
 #else
@@ -6559,50 +6697,74 @@ test_conv_int_fp_conv_to_uint(void *hw_p, unsigned char *src_buf, size_t idx, dt
         case FLT_FLOAT: {
             float f;
             memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
-            aligned = (unsigned int)f;
+            if (f > (float)(UINT_MAX))
+                aligned = UINT_MAX;
+            else if (f < (float)0)
+                aligned = 0;
+            else
+                aligned = (unsigned int)f;
             break;
         }
         case FLT_DOUBLE: {
             double d;
             memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
-            aligned = (unsigned int)d;
+            if (d > (double)(UINT_MAX))
+                aligned = UINT_MAX;
+            else if (d < (double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned int)d;
             break;
         }
         case FLT_LDOUBLE: {
             long double ld;
             memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
-            aligned = (unsigned int)ld;
+            if (ld > (long double)(UINT_MAX))
+                aligned = UINT_MAX;
+            else if (ld < (long double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned int)ld;
             break;
         }
 #ifdef H5_HAVE_COMPLEX_NUMBERS
         case FLT_COMPLEX: {
             H5_float_complex fc;
+            float            real;
             memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (unsigned int)fc;
-#else
-            aligned = (unsigned int)crealf(fc);
-#endif
+            real = crealf(fc);
+            if (real > (float)(UINT_MAX))
+                aligned = UINT_MAX;
+            else if (real < (float)0)
+                aligned = 0;
+            else
+                aligned = (unsigned int)real;
             break;
         }
         case DBL_COMPLEX: {
             H5_double_complex dc;
+            double            real;
             memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (unsigned int)dc;
-#else
-            aligned = (unsigned int)creal(dc);
-#endif
+            real = creal(dc);
+            if (real > (double)(UINT_MAX))
+                aligned = UINT_MAX;
+            else if (real < (double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned int)real;
             break;
         }
         case LDBL_COMPLEX: {
             H5_ldouble_complex ldc;
+            long double        real;
             memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (unsigned int)ldc;
-#else
-            aligned = (unsigned int)creall(ldc);
-#endif
+            real = creall(ldc);
+            if (real > (long double)(UINT_MAX))
+                aligned = UINT_MAX;
+            else if (real < (long double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned int)real;
             break;
         }
 #else
@@ -6662,6 +6824,7 @@ test_conv_int_fp_conv_to_long(void *hw_p, unsigned char *src_buf, size_t idx, dt
 #ifdef H5_HAVE__FLOAT16
             H5__Float16 f16;
             memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
+            /* No overflow/underflow checking needed here */
             aligned = (long)f16;
             break;
 #else
@@ -6674,50 +6837,74 @@ test_conv_int_fp_conv_to_long(void *hw_p, unsigned char *src_buf, size_t idx, dt
         case FLT_FLOAT: {
             float f;
             memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
-            aligned = (long)f;
+            if (f > (float)(LONG_MAX))
+                aligned = LONG_MAX;
+            else if (f < (float)(LONG_MIN))
+                aligned = LONG_MIN;
+            else
+                aligned = (long)f;
             break;
         }
         case FLT_DOUBLE: {
             double d;
             memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
-            aligned = (long)d;
+            if (d > (double)(LONG_MAX))
+                aligned = LONG_MAX;
+            else if (d < (double)(LONG_MIN))
+                aligned = LONG_MIN;
+            else
+                aligned = (long)d;
             break;
         }
         case FLT_LDOUBLE: {
             long double ld;
             memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
-            aligned = (long)ld;
+            if (ld > (long double)(LONG_MAX))
+                aligned = LONG_MAX;
+            else if (ld < (long double)(LONG_MIN))
+                aligned = LONG_MIN;
+            else
+                aligned = (long)ld;
             break;
         }
 #ifdef H5_HAVE_COMPLEX_NUMBERS
         case FLT_COMPLEX: {
             H5_float_complex fc;
+            float            real;
             memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (long)fc;
-#else
-            aligned = (long)crealf(fc);
-#endif
+            real = crealf(fc);
+            if (real > (float)(LONG_MAX))
+                aligned = LONG_MAX;
+            else if (real < (float)(LONG_MIN))
+                aligned = LONG_MIN;
+            else
+                aligned = (long)real;
             break;
         }
         case DBL_COMPLEX: {
             H5_double_complex dc;
+            double            real;
             memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (long)dc;
-#else
-            aligned = (long)creal(dc);
-#endif
+            real = creal(dc);
+            if (real > (double)(LONG_MAX))
+                aligned = LONG_MAX;
+            else if (real < (double)(LONG_MIN))
+                aligned = LONG_MIN;
+            else
+                aligned = (long)real;
             break;
         }
         case LDBL_COMPLEX: {
             H5_ldouble_complex ldc;
+            long double        real;
             memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (long)ldc;
-#else
-            aligned = (long)creall(ldc);
-#endif
+            real = creall(ldc);
+            if (real > (long double)(LONG_MAX))
+                aligned = LONG_MAX;
+            else if (real < (long double)(LONG_MIN))
+                aligned = LONG_MIN;
+            else
+                aligned = (long)real;
             break;
         }
 #else
@@ -6777,6 +6964,7 @@ test_conv_int_fp_conv_to_ulong(void *hw_p, unsigned char *src_buf, size_t idx, d
 #ifdef H5_HAVE__FLOAT16
             H5__Float16 f16;
             memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
+            /* No overflow/underflow checking needed here */
             aligned = (unsigned long)f16;
             break;
 #else
@@ -6789,50 +6977,74 @@ test_conv_int_fp_conv_to_ulong(void *hw_p, unsigned char *src_buf, size_t idx, d
         case FLT_FLOAT: {
             float f;
             memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
-            aligned = (unsigned long)f;
+            if (f > (float)(ULONG_MAX))
+                aligned = ULONG_MAX;
+            else if (f < (float)0)
+                aligned = 0;
+            else
+                aligned = (unsigned long)f;
             break;
         }
         case FLT_DOUBLE: {
             double d;
             memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
-            aligned = (unsigned long)d;
+            if (d > (double)(ULONG_MAX))
+                aligned = ULONG_MAX;
+            else if (d < (double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned long)d;
             break;
         }
         case FLT_LDOUBLE: {
             long double ld;
             memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
-            aligned = (unsigned long)ld;
+            if (ld > (long double)(ULONG_MAX))
+                aligned = ULONG_MAX;
+            else if (ld < (long double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned long)ld;
             break;
         }
 #ifdef H5_HAVE_COMPLEX_NUMBERS
         case FLT_COMPLEX: {
             H5_float_complex fc;
+            float            real;
             memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (unsigned long)fc;
-#else
-            aligned = (unsigned long)crealf(fc);
-#endif
+            real = crealf(fc);
+            if (real > (float)(ULONG_MAX))
+                aligned = ULONG_MAX;
+            else if (real < (float)0)
+                aligned = 0;
+            else
+                aligned = (unsigned long)real;
             break;
         }
         case DBL_COMPLEX: {
             H5_double_complex dc;
+            double            real;
             memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (unsigned long)dc;
-#else
-            aligned = (unsigned long)creal(dc);
-#endif
+            real = creal(dc);
+            if (real > (double)(ULONG_MAX))
+                aligned = ULONG_MAX;
+            else if (real < (double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned long)real;
             break;
         }
         case LDBL_COMPLEX: {
             H5_ldouble_complex ldc;
+            long double        real;
             memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (unsigned long)ldc;
-#else
-            aligned = (unsigned long)creall(ldc);
-#endif
+            real = creall(ldc);
+            if (real > (long double)(ULONG_MAX))
+                aligned = ULONG_MAX;
+            else if (real < (long double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned long)real;
             break;
         }
 #else
@@ -6892,6 +7104,7 @@ test_conv_int_fp_conv_to_llong(void *hw_p, unsigned char *src_buf, size_t idx, d
 #ifdef H5_HAVE__FLOAT16
             H5__Float16 f16;
             memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
+            /* No overflow/underflow checking needed here */
             aligned = (long long)f16;
             break;
 #else
@@ -6904,50 +7117,74 @@ test_conv_int_fp_conv_to_llong(void *hw_p, unsigned char *src_buf, size_t idx, d
         case FLT_FLOAT: {
             float f;
             memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
-            aligned = (long long)f;
+            if (f > (float)(LLONG_MAX))
+                aligned = LLONG_MAX;
+            else if (f < (float)(LLONG_MIN))
+                aligned = LLONG_MIN;
+            else
+                aligned = (long long)f;
             break;
         }
         case FLT_DOUBLE: {
             double d;
             memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
-            aligned = (long long)d;
+            if (d > (double)(LLONG_MAX))
+                aligned = LLONG_MAX;
+            else if (d < (double)(LLONG_MIN))
+                aligned = LLONG_MIN;
+            else
+                aligned = (long long)d;
             break;
         }
         case FLT_LDOUBLE: {
             long double ld;
             memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
-            aligned = (long long)ld;
+            if (ld > (long double)(LLONG_MAX))
+                aligned = LLONG_MAX;
+            else if (ld < (long double)(LLONG_MIN))
+                aligned = LLONG_MIN;
+            else
+                aligned = (long long)ld;
             break;
         }
 #ifdef H5_HAVE_COMPLEX_NUMBERS
         case FLT_COMPLEX: {
             H5_float_complex fc;
+            float            real;
             memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (long long)fc;
-#else
-            aligned = (long long)crealf(fc);
-#endif
+            real = crealf(fc);
+            if (real > (float)(LLONG_MAX))
+                aligned = LLONG_MAX;
+            else if (real < (float)(LLONG_MIN))
+                aligned = LLONG_MIN;
+            else
+                aligned = (long long)real;
             break;
         }
         case DBL_COMPLEX: {
             H5_double_complex dc;
+            double            real;
             memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (long long)dc;
-#else
-            aligned = (long long)creal(dc);
-#endif
+            real = creal(dc);
+            if (real > (double)(LLONG_MAX))
+                aligned = LLONG_MAX;
+            else if (real < (double)(LLONG_MIN))
+                aligned = LLONG_MIN;
+            else
+                aligned = (long long)real;
             break;
         }
         case LDBL_COMPLEX: {
             H5_ldouble_complex ldc;
+            long double        real;
             memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (long long)ldc;
-#else
-            aligned = (long long)creall(ldc);
-#endif
+            real = creall(ldc);
+            if (real > (long double)(LLONG_MAX))
+                aligned = LLONG_MAX;
+            else if (real < (long double)(LLONG_MIN))
+                aligned = LLONG_MIN;
+            else
+                aligned = (long long)real;
             break;
         }
 #else
@@ -7007,6 +7244,7 @@ test_conv_int_fp_conv_to_ullong(void *hw_p, unsigned char *src_buf, size_t idx, 
 #ifdef H5_HAVE__FLOAT16
             H5__Float16 f16;
             memcpy(&f16, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
+            /* No overflow/underflow checking needed here */
             aligned = (unsigned long long)f16;
             break;
 #else
@@ -7019,50 +7257,74 @@ test_conv_int_fp_conv_to_ullong(void *hw_p, unsigned char *src_buf, size_t idx, 
         case FLT_FLOAT: {
             float f;
             memcpy(&f, src_buf + idx * sizeof(float), sizeof(float));
-            aligned = (unsigned long long)f;
+            if (f > (float)(ULLONG_MAX))
+                aligned = ULLONG_MAX;
+            else if (f < (float)0)
+                aligned = 0;
+            else
+                aligned = (unsigned long long)f;
             break;
         }
         case FLT_DOUBLE: {
             double d;
             memcpy(&d, src_buf + idx * sizeof(double), sizeof(double));
-            aligned = (unsigned long long)d;
+            if (d > (double)(ULLONG_MAX))
+                aligned = ULLONG_MAX;
+            else if (d < (double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned long long)d;
             break;
         }
         case FLT_LDOUBLE: {
             long double ld;
             memcpy(&ld, src_buf + idx * sizeof(long double), sizeof(long double));
-            aligned = (unsigned long long)ld;
+            if (ld > (long double)(ULLONG_MAX))
+                aligned = ULLONG_MAX;
+            else if (ld < (long double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned long long)ld;
             break;
         }
 #ifdef H5_HAVE_COMPLEX_NUMBERS
         case FLT_COMPLEX: {
             H5_float_complex fc;
+            float            real;
             memcpy(&fc, src_buf + idx * sizeof(H5_float_complex), sizeof(H5_float_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (unsigned long long)fc;
-#else
-            aligned = (unsigned long long)crealf(fc);
-#endif
+            real = crealf(fc);
+            if (real > (float)(ULLONG_MAX))
+                aligned = ULLONG_MAX;
+            else if (real < (float)0)
+                aligned = 0;
+            else
+                aligned = (unsigned long long)real;
             break;
         }
         case DBL_COMPLEX: {
             H5_double_complex dc;
+            double            real;
             memcpy(&dc, src_buf + idx * sizeof(H5_double_complex), sizeof(H5_double_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (unsigned long long)dc;
-#else
-            aligned = (unsigned long long)creal(dc);
-#endif
+            real = creal(dc);
+            if (real > (double)(ULLONG_MAX))
+                aligned = ULLONG_MAX;
+            else if (real < (double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned long long)real;
             break;
         }
         case LDBL_COMPLEX: {
             H5_ldouble_complex ldc;
+            long double        real;
             memcpy(&ldc, src_buf + idx * sizeof(H5_ldouble_complex), sizeof(H5_ldouble_complex));
-#ifdef H5_HAVE_C99_COMPLEX_NUMBERS
-            aligned = (unsigned long long)ldc;
-#else
-            aligned = (unsigned long long)creall(ldc);
-#endif
+            real = creall(ldc);
+            if (real > (long double)(ULLONG_MAX))
+                aligned = ULLONG_MAX;
+            else if (real < (long double)0)
+                aligned = 0;
+            else
+                aligned = (unsigned long long)real;
             break;
         }
 #else
@@ -8890,6 +9152,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             }
 #else
                 assert(0 && "Should not reach this point!");
+                break;
 #endif
 #ifdef H5_HAVE_COMPLEX_NUMBERS
             case FLT_COMPLEX: {
@@ -8915,6 +9178,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             case DBL_COMPLEX:
             case LDBL_COMPLEX:
                 assert(0 && "Should not reach this point!");
+                break;
 #endif
             case OTHER:
             default:
@@ -9026,6 +9290,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             }
 #else
                 assert(0 && "Should not reach this point!");
+                break;
 #endif
 #ifdef H5_HAVE_COMPLEX_NUMBERS
             case FLT_COMPLEX: {
@@ -9051,6 +9316,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             case DBL_COMPLEX:
             case LDBL_COMPLEX:
                 assert(0 && "Should not reach this point!");
+                break;
 #endif
             case OTHER:
             default:
@@ -9119,6 +9385,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 break;
 #else
                 assert(0 && "Should not reach this point!");
+                break;
 #endif
 #ifdef H5_HAVE_COMPLEX_NUMBERS
             case FLT_COMPLEX:
@@ -9138,6 +9405,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             case DBL_COMPLEX:
             case LDBL_COMPLEX:
                 assert(0 && "Should not reach this point!");
+                break;
 #endif
             case OTHER:
             default:

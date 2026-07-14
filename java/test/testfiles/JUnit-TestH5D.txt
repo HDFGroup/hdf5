@@ -12,17 +12,27 @@ I.testH5Dget_type
 .testH5Dcreate_anon
 .testH5Dfill_null
 .testH5Dget_storage_size_empty
+.testH5DwriteVL_compound_wrong_member_type
 .testH5Dget_access_plist
+.testH5Dread_vlen_of_nested_compound
+.testH5DArray_string_buffer_flat_StringArray
 .testH5Dvlen_get_buf_size
 .testH5Dget_space_closed
+.testH5DArray_string_buffer_flat_StringArray_write
 .testH5DArray_string_buffer
+.testH5Dread_vlen_of_compound
+.testH5Dread_compound_of_vlen
 .testH5Dget_space_status
+.testH5DwriteVL_compound_wrong_member_count
 .testH5Dvlen_write_read
 .testH5Dget_space
+.testH5DwriteVL_vlen_element_not_arraylist
 .testH5Dget_type_closed
+.testH5Dwrite_compound_of_vlen
 .testH5Dwrite_readCompound
+.testH5DwriteVL_undersized_buffer
 
 Time:  XXXX
 
-OK (22 tests)
+OK (32 tests)
 

@@ -43,7 +43,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
           ref: '${{ github.head_ref || github.ref_name }}'
@@ -100,25 +100,25 @@ jobs:
       - name: Get published binary (Windows)
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-              name: zip-vs2022_cl-binary
+              name: zip-vs2026_cl-binary
               path: ${{ github.workspace }}
 
       - name: Get published msi binary (Windows)
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-              name: msi-vs2022_cl-binary
+              name: msi-vs2026_cl-binary
               path: ${{ github.workspace }}
 
       - name: Get published binary (MacOS)
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-              name: tgz-macos14_clang-binary
+              name: tgz-macos15_clang-binary
               path: ${{ github.workspace }}
 
       - name: Get published dmg binary (MacOS)
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-              name: tgz-macos14_clang-dmg-binary
+              name: tgz-macos15_clang-dmg-binary
               path: ${{ github.workspace }}
 
       - name: Get published binary (Linux)
@@ -188,14 +188,14 @@ jobs:
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip > ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-macos14_clang.dmg >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-macos15_clang.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-macos15_clang.dmg >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc_s3.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2026_cl.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2026_cl.msi >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_intel.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.msi >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
@@ -220,7 +220,7 @@ jobs:
       - name: PreRelease tag
         id: create_prerelease
         if: ${{ (inputs.use_environ == 'snapshots') }}
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
         with:
           tag_name: "${{ inputs.use_tag }}"
           prerelease: true
@@ -230,14 +230,14 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-macos14_clang.dmg
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-macos15_clang.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-macos15_clang.dmg
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc_s3.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2026_cl.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2026_cl.msi
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_intel.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.msi
@@ -261,7 +261,7 @@ jobs:
       - name: Release tag
         id: create_release
         if: ${{ (inputs.use_environ == 'release') }}
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
         with:
           tag_name: "${{ steps.create_release_tag_name.outputs.TAG_BASE }}"
           name: "HDF5 Release ${{ inputs.use_tag }}"
@@ -274,14 +274,14 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               hdf5.tar.gz
               hdf5.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-macos14_clang.dmg
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-macos15_clang.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-macos15_clang.dmg
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc_s3.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2026_cl.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2026_cl.msi
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_intel.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.msi
