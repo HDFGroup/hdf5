@@ -160,11 +160,10 @@ extern "C" {
  *          identifier loc_id.
  *
  *          \p type_size can be obtained with \c sizeof(), if the data is
- *          stored in a predefined C struct. Otherwise, \p type_size should
- *          be calculated as the sum of calling H5Tget_size() for each of
- *          the given field datatypes in \p field_types, plus any padding
- *          bytes included in the structure, based on the given field offsets
- *          in \p field_offset.
+ *          stored in a predefined C struct.  Otherwise, \p type_size should
+ *          be calculated based on the highest offset in \p field_offset, the
+ *          size of its corresponding datatype in \p field_types, and any
+ *          padding bytes desired after that field.
  *
  */
 H5HL_DLL herr_t H5TBmake_table(const char *table_title, hid_t loc_id, const char *dset_name, hsize_t nfields,
