@@ -1133,6 +1133,85 @@ asyncTest('coordinateReviewers: synchronize with one owner per area does not pru
 });
 
 // ----------------------------------------------------------------
+// coordinateReviewers — scope-shrink pruning (PR #6528 scenario): a
+// CODEOWNER requested for an area the PR used to touch, before a later push
+// narrowed the diff down, is never in touchedAreaOwners (that set only
+// reflects areas touched right now) — so none of the avalanche/first-pass
+// pruning considers removing them without this dedicated check.
+// ----------------------------------------------------------------
+
+asyncTest('coordinateReviewers: reviewer whose area dropped out of scope is removed', async () => {
+  const github = makeGithubMock();
+  const context = {
+    eventName: 'pull_request_target',
+    payload: { action: 'synchronize', sender: { type: 'User' } },
+  };
+  const args = makeCoordinateBaseArgs({
+    // gheber owns /docs/, not the .github area this fixture's touchedAreas
+    // covers — modeling a push that dropped doc changes from the diff.
+    allCodeOwners: new Set(['hyoklee', 'lrknox', 'jhendersonHDF', 'glennsong09', 'gheber']),
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'hyoklee' }, { login: 'gheber' }],
+    },
+  });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.ok(github.calls.removeRequestedReviewers.includes('gheber'));
+  assert.ok(!confirmedRequested.has('gheber'));
+  assert.ok(confirmedRequested.has('hyoklee'));
+});
+
+asyncTest('coordinateReviewers: manually-added CODEOWNER survives scope-shrink pruning', async () => {
+  // gheber's area is out of scope same as above, but a human deliberately
+  // requested him directly — that must not be undone by a later push.
+  const github = makeGithubMock();
+  const context = {
+    eventName: 'pull_request_target',
+    payload: { action: 'synchronize', sender: { type: 'User' } },
+  };
+  const args = makeCoordinateBaseArgs({
+    allCodeOwners: new Set(['hyoklee', 'lrknox', 'jhendersonHDF', 'glennsong09', 'gheber']),
+    manuallyAdded: new Set(['gheber']),
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'hyoklee' }, { login: 'gheber' }],
+    },
+  });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.ok(!github.calls.removeRequestedReviewers.includes('gheber'));
+  assert.ok(confirmedRequested.has('gheber'));
+});
+
+asyncTest('coordinateReviewers: non-CODEOWNER reviewer is untouched by scope-shrink pruning', async () => {
+  // driveby isn't a repo CODEOWNER at all (e.g. manually added for judgment,
+  // not path ownership) — scope-shrink pruning only concerns itself with
+  // CODEOWNERS-based auto-assignment, same as every other pruning path here.
+  const github = makeGithubMock();
+  const context = {
+    eventName: 'pull_request_target',
+    payload: { action: 'synchronize', sender: { type: 'User' } },
+  };
+  const args = makeCoordinateBaseArgs({
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'hyoklee' }, { login: 'driveby' }],
+    },
+  });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.ok(!github.calls.removeRequestedReviewers.includes('driveby'));
+  assert.ok(confirmedRequested.has('driveby'));
+});
+
+// ----------------------------------------------------------------
 // coordinateReviewers — a direct review_requested must survive avalanche
 // detection on the very same run (reported bug: manually re-requesting a
 // reviewer via the GitHub UI got them immediately removed again, because

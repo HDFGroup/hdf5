@@ -632,6 +632,29 @@ async function coordinateReviewers(github, context, core, {
     return { confirmedRequested: new Set(existingRequested), excludedReviewers: updatedExcluded, manuallyAdded: updatedManuallyAdded };
   }
 
+  // Scope-shrink pruning: a reviewer requested for an area this PR *used to*
+  // touch, before a later push narrowed the diff, is never in
+  // touchedAreaOwners (that set only reflects areas touched right now) — so
+  // none of the avalanche/first-pass pruning above ever considers removing
+  // them. Catch that here: any still-pending CODEOWNER (GitHub drops someone
+  // from requested_reviewers the moment they actually submit a review, so
+  // this can never strip a completed approval/change-request) who doesn't
+  // own any currently-touched area is stale. Manually-added CODEOWNERS are
+  // exempt — a human deliberately requesting them is not an artifact of a
+  // stale diff and must not be silently undone by a later push.
+  const outOfScopeOwners = [...existingRequested].filter(
+    o => allCodeOwners.has(o) && !touchedAreaOwners.has(o) && !updatedManuallyAdded.has(o)
+  );
+  for (const login of outOfScopeOwners) {
+    try {
+      await github.rest.pulls.removeRequestedReviewers({ owner, repo, pull_number: pr_number, reviewers: [login] });
+      existingRequested.delete(login);
+      core.info(`Removed ${login} — no longer owns any area this PR touches (scope shrank)`);
+    } catch (e) {
+      core.warning(`Could not remove out-of-scope reviewer ${login}: ${e.message}`);
+    }
+  }
+
   // Excluded owners are dropped from each area's candidate pool first — an
   // area that just lost its only owner to an explicit removal must not have
   // chooseReviewers immediately hand that exact person right back as "the
