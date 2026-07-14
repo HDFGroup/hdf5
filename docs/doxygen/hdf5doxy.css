@@ -1,29 +1,19 @@
 /**** Table of content in the side-nav ****/
 
 /*
- * Collapse the navigation tree to zero height instead of removing it from the layout.
- * This allows the Doxygen scripts to correctly calculate the side-panel's width
- * and apply the proper 'margin-left' to the main content, preventing overlap.
+ * Completely hide the side-nav panel. It is only included so that a
+ * page outline panel can be generated.
  */
-#nav-tree {
-    height: 0;
-    overflow: hidden;
-    padding: 0;
-    margin: 0;
-    border: none;
-}
-
-/* Make sure the side panel itself allows overflow */
 #side-nav {
-  overflow: visible; /* Don't clip the TOC */
-  width: 245px; /* Set initial width (default is usually around 250px) */
-  min-width: 200px; /* Prevent it from getting too small */
+  display: none;
 }
 
-/* Ensure main content and header never go behind the side panel */
-#doc-content,
-#top {
-  margin-left: 255px !important; /* 245px sidebar + 10px gap */
+/*
+ * Align the page navigation panel to the right hand side
+ */
+#page-nav {
+  margin-left: auto;
+  margin-right: 0;
 }
 
 /* Only reset margin on smaller screens */
@@ -38,7 +28,7 @@
 @media screen and (min-width: 1200px) {
   #doc-content,
   #top {
-    margin-left: 260px !important; /* Slightly wider gap for large screens */
+    margin-left: 10px !important; /* Slightly wider gap for large screens */
   }
 }
 
@@ -49,7 +39,7 @@ body {
 
 /* Additional specificity - target the content container directly */
 #doc-content > div {
-  margin-left: 0; /* Reset any inherited margins */
+  margin-left: auto; /* Reset any inherited margins */
   padding-left: 0; /* Reset any inherited padding */
 }
 
@@ -135,64 +125,6 @@ body {
     font-size: 0.9em !important; /* Smaller font size */
     height: 24px !important; /* Match the container height */
   }
-
-  /* Make sure the side nav stays fixed position */
-  #side-nav {
-    position: fixed !important;
-    left: 0 !important;
-    top: 0 !important;
-    height: 100vh !important;
-    z-index: 100 !important;
-  }
-}
-
-/* Style the TOC to fill the entire side panel with proper scrolling */
-div.toc {
-  margin: 0;
-  padding: 1em 0 0 0;
-  width: 100%;
-  height: calc(100vh - 2em); /* Fixed height to enable proper scrolling */
-  float: none;
-  position: relative;
-  border-radius: 0px;
-  border-style: none;
-  overflow: auto; /* Both horizontal and vertical scrolling */
-  box-sizing: border-box;
-}
-
-div.toc h3 {
-  margin-left: 0.5em;
-  margin-bottom: 0.2em;
-}
-
-/* Make sure nested lists also scroll properly */
-div.toc ul {
-  margin: 0.2em 0 0.4em 0.5em;
-  width: max-content; /* Allow content to determine width */
-  min-width: 100%;
-}
-
-/* Ensure the TOC root container can expand */
-div.toc > ul {
-  width: max-content;
-  min-width: 100%;
-}
-
-/* Ensure TOC entries don't wrap and enable horizontal scrolling */
-div.toc li a {
-    white-space: nowrap;
-    display: inline-block; /* Changed from block to inline-block */
-    width: auto; /* Let content determine width */
-    min-width: 100%; /* Ensure it takes at least full container width */
-}
-
-/*
- * Prevent long TOC entries from wrapping.
- * This keeps each entry on a single line and makes the panel
- * horizontally scrollable if an entry is too wide.
- */
-#side-nav div.toc li a {
-    white-space: nowrap;
 }
 
 span.cpp11,span.cpp14,span.cpp17 {
@@ -232,10 +164,6 @@ td.width20em p.endtd {
 }
 
 /* Style external links -- nav-tree is different */
-
-#nav-tree .label a {
-  padding:2px 16px 2px 2px;
-}
 
 a {
   outline: none;
@@ -287,3 +215,7 @@ div[style*="background:#FFDDDD"] a:hover {
 .dynheader:hover {
     text-decoration: underline;
 }
+
+/* Hide footer and surrounding lines/space */
+li.footer { display: none; }
+div.navpath { display: none; }
