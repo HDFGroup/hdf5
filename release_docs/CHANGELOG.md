@@ -189,7 +189,7 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ### Fixed a datatype ID leak when reading or writing array/vlen datatypes
 
-   The JNI wrappers for `H5Dread`, `H5Dwrite`, `H5Aread` , and `H5Awrite` inspect the
+   The JNI wrappers for `H5Dread`, `H5Dwrite`, `H5Aread`, and `H5Awrite` inspect the
    memory datatype using an internal helper (`h5str_detect_vlen_str()`). For an array
    or variable-length datatype whose base type is not a variable-length string, the
    helper opened the base type with `H5Tget_super()` but failed to close it if
