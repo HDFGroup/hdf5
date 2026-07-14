@@ -165,7 +165,7 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ### Fixed signed integer overflow in the scale-offset filter for full-range data
 
-   When a signed-integer dataset filtered with scale-offset contained values spanning the full range of the datatype, the filter's calculation of the difference between the maximum and minimum value would overflow, resulting in undefined behavior. The difference is now computed in the unsigned domain, producing the same result without triggering an overflow.
+   When a signed-integer dataset filtered with scale-offset contained values spanning the full range of the datatype, the filter's calculation of the difference between the maximum and minimum values would overflow, resulting in undefined behavior. The difference is now computed in the unsigned domain, producing the correct result without triggering an overflow.
 
 ### HTTP 403 errors in the ROS3 VFD for object keys with special characters
 
