@@ -899,6 +899,46 @@ asyncTest('coordinateReviewers: synchronize with one owner per area does not pru
 });
 
 // ----------------------------------------------------------------
+// coordinateReviewers — a direct review_requested must survive avalanche
+// detection on the very same run (reported bug: manually re-requesting a
+// reviewer via the GitHub UI got them immediately removed again, because
+// their area now had two currently-requested owners — themselves plus
+// whichever pick an earlier ready_for_review pruning pass had already made
+// — which is indistinguishable from an unpruned CODEOWNERS avalanche unless
+// the just-requested login is carved out).
+// ----------------------------------------------------------------
+
+asyncTest('coordinateReviewers: review_requested for a specific login is not undone by avalanche pruning', async () => {
+  const github = makeGithubMock();
+  const context = {
+    eventName: 'pull_request_target',
+    payload: {
+      action: 'review_requested',
+      requested_reviewer: { login: 'jhendersonHDF' },
+      sender: { type: 'User' },
+    },
+  };
+  const args = makeCoordinateBaseArgs({
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      // hyoklee is the load-balanced pick an earlier pass already made;
+      // jhendersonHDF was just manually re-requested on top of it.
+      requested_reviewers: [{ login: 'hyoklee' }, { login: 'jhendersonHDF' }],
+    },
+    // Rig the load-balancer so a fresh pick would land on hyoklee, not
+    // jhendersonHDF — proving jhendersonHDF survives because they were
+    // just requested, not because they'd have won the pick anyway.
+    reviewerLoad: { hyoklee: 0, jhendersonHDF: 99, glennsong09: 0 },
+  });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.strictEqual(github.calls.removeRequestedReviewers.length, 0, 'Nothing should be removed');
+  assert.ok(confirmedRequested.has('jhendersonHDF'), 'The just-requested reviewer must stay');
+});
+
+// ----------------------------------------------------------------
 // coordinateReviewers — bot-self-triggered review_request_removed must not
 // create a sticky exclusion (the bot's own removeUnselected/removeRequestedReviewers
 // calls fire this very event and would otherwise self-trigger a run that reads
