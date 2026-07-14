@@ -3205,7 +3205,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                     if (chunk &&
                         H5D__chunk_unlock(io_info, dset_info, &udata, false, chunk, src_accessed_bytes) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk");
-                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked read failed");
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked read failed");
                 }
 
                 /* Release the cache lock on the chunk in normal flow */
