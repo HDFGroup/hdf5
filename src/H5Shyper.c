@@ -3989,6 +3989,14 @@ H5S__hyper_serialize(H5S_t *space, uint8_t **p)
     pp = (*p);
     assert(pp);
 
+    /* A hyperslab selection is meaningless on a scalar/null dataspace. This
+     * state can arise if the extent is collapsed to a scalar after the
+     * selection was made, since changing the extent does not reset an
+     * existing hyperslab selection. */
+    if (0 == space->extent.rank)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
+                    "cannot serialize hyperslab selection with a rank of 0");
+
     /* Set some convenience values */
     ndims   = space->extent.rank;
     diminfo = space->select.sel_info.hslab->diminfo.opt;

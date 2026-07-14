@@ -16148,6 +16148,50 @@ test_select_deserialize_invalid(void)
 
 /****************************************************************
 **
+**  test_select_hyper_serialize_scalar:
+**  Attempting to serialize a hyperslab selection whose dataspace has been
+**  collapsed to a scalar extent (rank 0) must fail cleanly.
+**
+****************************************************************/
+static void
+test_select_hyper_serialize_scalar(void)
+{
+    hid_t   sid      = H5I_INVALID_HID;
+    hsize_t dims[1]  = {10};
+    hsize_t start[1] = {0}, stride[1] = {2}, count[1] = {5}, block[1] = {1};
+    uint8_t buf[2048];
+    size_t  buf_size = sizeof(buf);
+    herr_t  ret;
+
+    TESTING("serialization of hyperslab selection on a scalar extent");
+
+    sid = H5Screate_simple(1, dims, NULL);
+    CHECK(sid, H5I_INVALID_HID, "H5Screate_simple");
+
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Collapse the extent to scalar, leaving the rank-mismatched
+       hyperslab selection in place */
+    ret = H5Sset_extent_simple(sid, 0, NULL, NULL);
+    CHECK(ret, FAIL, "H5Sset_extent_simple");
+
+    /* Encoding the mismatched selection must fail rather than crash */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Sencode2(sid, buf, &buf_size, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Sencode2");
+
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    PASSED();
+} /* test_select_hyper_serialize_scalar() */
+
+/****************************************************************
+**
 **  test_select(): Main H5S selection testing routine.
 **
 ****************************************************************/
@@ -16354,6 +16398,9 @@ test_select(void H5_ATTR_UNUSED *params)
 
     /* Test malformed serialized selections */
     test_select_deserialize_invalid();
+
+    /* Test serialization of a hyperslab selection on a scalar extent */
+    test_select_hyper_serialize_scalar();
 
 } /* test_select() */
 
