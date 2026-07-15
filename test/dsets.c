@@ -18873,7 +18873,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_readonly_chunk_vlen_fill
  *
- * Purpose:     Test that chunked vlen datasets with a no file is opened in read only mode.
+ * Purpose:     Test reading a chunked vlen dataset with a fill value and unwritten chunks from a read-only file.
  *
  * Return:      Success:    0
  *              Failure:    -1
