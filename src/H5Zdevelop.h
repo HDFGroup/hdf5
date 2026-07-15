@@ -232,15 +232,16 @@ typedef herr_t (*H5Z_set_config_func_t)(const char *params, unsigned *flags, siz
  *
  * \return Non-negative on success; negative on failure.
  *
- * \note Implementations that format \c float or \c double values \b must use
- *       the C99 \c \%a format specifier (e.g., \c snprintf(buf,*buf_size,"\%a",val))
- *       rather than \c \%g, \c \%f, or \c \%e. \c \%a encodes the exact
- *       IEEE 754 bit pattern as a hexadecimal float literal, guaranteeing that
- *       \c strtod parses the output back to the identical value with no
- *       rounding. This makes exact round-trips possible for filters that store
- *       \c float or \c double parameters via the cd_values packing convention.
- *       Decimal float input (e.g., \c rate=3.5) remains valid for user
- *       convenience; the asymmetry (decimal in, hex-float out) is intentional.
+ * \details This callback is only a fallback for introspection: when a filter
+ *          was configured with a parameter string, H5Pget_filter_params_by_idx()
+ *          returns that stored string verbatim and never calls get_config.
+ *          get_config is used when no string was stored (for example, a filter
+ *          added through the raw cd_values API).  How a filter encodes values
+ *          into cd_values is entirely private to that filter.
+ *
+ * \note When reconstructing \c float or \c double values, formatting with the
+ *       C99 \c \%a specifier (a hexadecimal float literal) round-trips through
+ *       \c strtod with no rounding, unlike \c \%g / \c \%f / \c \%e.
  *
  * \since 3.0.0
  */

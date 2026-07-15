@@ -1309,6 +1309,10 @@ H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t
     pline->filter[idx].flags     = flags;
     pline->filter[idx].cd_nelmts = cd_nelmts;
 
+    /* Modifying the raw cd_values invalidates any stored configuration string;
+     * drop it so introspection falls back to the filter's get_config callback */
+    pline->filter[idx].config = (char *)H5MM_xfree(pline->filter[idx].config);
+
     /* Free any existing parameters */
     if (pline->filter[idx].cd_values != NULL && pline->filter[idx].cd_values != pline->filter[idx]._cd_values)
         H5MM_xfree(pline->filter[idx].cd_values);
@@ -1412,6 +1416,7 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_ne
     pline->filter[idx].flags     = flags;
     pline->filter[idx].name      = NULL; /*we'll pick it up later*/
     pline->filter[idx].cd_nelmts = cd_nelmts;
+    pline->filter[idx].config    = NULL; /*set by H5Pappend_filter or pline decode*/
     if (cd_nelmts > 0) {
         size_t i; /* Local index variable */
 
@@ -1950,6 +1955,7 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
             assert(pline->filter[idx].cd_nelmts > H5Z_COMMON_CD_VALUES);
         if (pline->filter[idx].cd_values != pline->filter[idx]._cd_values)
             pline->filter[idx].cd_values = (unsigned *)H5MM_xfree(pline->filter[idx].cd_values);
+        pline->filter[idx].config = (char *)H5MM_xfree(pline->filter[idx].config);
 
         /* Remove filter from pipeline array */
         if ((idx + 1) < pline->nused) {
