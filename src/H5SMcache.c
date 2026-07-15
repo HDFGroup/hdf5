@@ -489,6 +489,12 @@ H5SM__cache_list_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, vo
     assert(image);
     assert(udata);
 
+    /* The buffer only holds list_max messages; a corrupted header whose message
+     * count exceeds that would size the checksum region past the end of it.
+     */
+    if (udata->header->num_messages > udata->header->list_max)
+        HGOTO_ERROR(H5E_SOHM, H5E_BADVALUE, FAIL, "number of SOHM messages exceeds list size");
+
     /* Exact size with checksum at the end */
     chk_size = H5SM_LIST_SIZE(udata->f, udata->header->num_messages);
 
@@ -551,6 +557,14 @@ H5SM__cache_list_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED le
     if (memcmp(image, H5SM_LIST_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "bad SOHM list signature");
     image += H5_SIZEOF_MAGIC;
+
+    /* The message array is sized for list_max entries; a list index always
+     * holds at most that many before it is promoted to a B-tree. Reject a
+     * corrupted header whose message count would drive the decode loop past
+     * the allocation and the input buffer.
+     */
+    if (udata->header->num_messages > udata->header->list_max)
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "number of SOHM messages exceeds list size");
 
     /* Read messages into the list array */
     ctx.sizeof_addr = H5F_SIZEOF_ADDR(udata->f);
