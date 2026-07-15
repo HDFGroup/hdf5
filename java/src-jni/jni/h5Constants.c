@@ -1309,9 +1309,9 @@ Java_hdf_hdf5lib_HDF5Constants_H5F_1LIBVER_1V200(JNIEnv *env, jclass cls)
     return H5F_LIBVER_V200;
 }
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_HDF5Constants_H5F_1LIBVER_1V230(JNIEnv *env, jclass cls)
+Java_hdf_hdf5lib_HDF5Constants_H5F_1LIBVER_1V300(JNIEnv *env, jclass cls)
 {
-    return H5F_LIBVER_V230;
+    return H5F_LIBVER_V300;
 }
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5F_1LIBVER_1LATEST(JNIEnv *env, jclass cls)

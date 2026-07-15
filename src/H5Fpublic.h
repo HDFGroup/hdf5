@@ -184,7 +184,7 @@ typedef enum H5F_libver_t {
     H5F_LIBVER_V112     = 3, /**< Use the 1.12 file format for storing objects */
     H5F_LIBVER_V114     = 4, /**< Use the 1.14 file format for storing objects */
     H5F_LIBVER_V200     = 5, /**< Use the 2.0 file format for storing objects */
-    H5F_LIBVER_V230     = 6, /**< Use the 2.3 file format for storing objects */
+    H5F_LIBVER_V300     = 6, /**< Use the 3.0 file format for storing objects */
     H5F_LIBVER_LATEST   = 6, /**< Use the latest file format for storing objects */
     H5F_LIBVER_NBOUNDS       /**< Sentinel */
 } H5F_libver_t;

@@ -1863,7 +1863,7 @@ H5P__pline_persist_name(H5O_pline_t *pline, H5Z_filter_t filter, H5Z_entry_t *en
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Since:       2.3.0
+ * Since:       3.0.0
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2031,7 +2031,7 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Since:       2.3.0
+ * Since:       3.0.0
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2122,7 +2122,7 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Since:       2.3.0
+ * Since:       3.0.0
  *-------------------------------------------------------------------------
  */
 herr_t

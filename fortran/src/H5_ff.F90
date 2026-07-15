@@ -391,7 +391,7 @@ CONTAINS
     H5F_LIBVER_V200_F              = H5F_flags(31)
     H5F_ACC_SWMR_READ_F            = H5F_flags(32)
     H5F_ACC_SWMR_WRITE_F           = H5F_flags(33)
-    H5F_LIBVER_V230_F              = H5F_flags(34)
+    H5F_LIBVER_V300_F              = H5F_flags(34)
     !
     ! H5generic flags
     !

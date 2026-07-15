@@ -91,7 +91,7 @@ const unsigned H5O_pline_ver_bounds[] = {
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V112 */
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V114 */
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V200 */
-    H5O_PLINE_VERSION_3,     /* H5F_LIBVER_V230 */
+    H5O_PLINE_VERSION_3,     /* H5F_LIBVER_V300 */
     H5O_PLINE_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 

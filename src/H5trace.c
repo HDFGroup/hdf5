@@ -1456,8 +1456,8 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5F_LIBVER_V200");
                                     break;
 
-                                case H5F_LIBVER_V230:
-                                    HDcompile_assert(H5F_LIBVER_LATEST == H5F_LIBVER_V230);
+                                case H5F_LIBVER_V300:
+                                    HDcompile_assert(H5F_LIBVER_LATEST == H5F_LIBVER_V300);
                                     H5RS_acat(rs, "H5F_LIBVER_LATEST");
                                     break;
 

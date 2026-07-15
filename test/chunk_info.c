@@ -53,7 +53,7 @@
  * a new library version bound is added to H5F_libver_t in H5Fpublic.h. */
 static const char *FILENAME[] = {"tchunk_info_earliest", "tchunk_info_v18",  "tchunk_info_v110",
                                  "tchunk_info_v112",     "tchunk_info_v114", "tchunk_info_v200",
-                                 "tchunk_info_v230",     "tchunk_info_v300", NULL};
+                                 "tchunk_info_v300",     NULL};
 
 /* File to be used in test_failed_attempts */
 #define FILTERMASK_FILE "tflt_msk"

@@ -2217,7 +2217,7 @@ done:
  *
  * Return:   Non-negative on success / Negative on failure
  *
- * Since:    2.3.0
+ * Since:    3.0.0
  *-------------------------------------------------------------------------
  */
 herr_t
