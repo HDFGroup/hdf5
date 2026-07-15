@@ -32,6 +32,9 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## Performance Enhancements:
 
+- Added an I/O block cache to the ROS3 VFD to reduce the number of requests to S3 for files not using paged allocation
+
+- Improved the performance of several tools (h5dump, h5ls, h5diff, h5repack, h5stat and h5format_convert) for specific file structures where many objects are linked to with multiple hard links
 
 ## Significant Advancements:
 
@@ -97,6 +100,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Added an I/O block cache to the ROS3 VFD
+
+   Added an I/O block cache to the ROS3 VFD to reduce the number of requests to S3 for files that don't use paged allocation. This is a simple LRU cache that performs I/O in fixed-size blocks and serves I/O requests from the in-memory cached buffers. By default, the ROS3 VFD now performs I/O in 16 MiB (see new macro `HDF5_ROS3_VFD_DEFAULT_BLOCK_SIZE`) blocks, caching up to a total of 128 MiB (see new macro `HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE`) of data at a time. The new `H5Pset_fapl_ros3_block_caching()` / `H5Pget_fapl_ros3_block_caching()` API functions can be used to modify or retrieve the caching parameters set on a File Access Property List, respectively. Additionally, caching of the initial bytes of a file has been delayed from file open to the first read of a file instead to reduce the overhead of file opens.
+
 ### Added optional digital signature verification for dynamically loaded plugins
 
    When built with `-DHDF5_REQUIRE_SIGNED_PLUGINS=ON` and OpenSSL, HDF5 will cryptographically verify each plugin before loading it. Plugins are signed with the new `h5sign` tool, which appends an RSA signature and a compact footer to the plugin binary. Verification uses a keystore directory of trusted public keys, configurable at compile time (`-DHDF5_PLUGIN_KEYSTORE_DIR=<path>`) or at runtime via the `HDF5_PLUGIN_KEYSTORE` environment variable. Individual signatures can be revoked without removing the entire public key by listing their SHA-256 hashes in a `revoked_signatures.txt` file in the keystore directory. Supported algorithms include SHA-256, SHA-384, and SHA-512 with both PKCS#1 v1.5 and PSS padding. See `docs/PLUGIN_SIGNATURE_README.md` for details.
@@ -144,6 +151,10 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ## Library
 
+### Fixed a heap buffer overflow when decoding a shared message list
+
+   When reading a shared object header message (SOHM) list from the metadata cache, `H5SM__cache_list_deserialize()` allocated the message array for `list_max` entries but drove the decode loop with the `num_messages` count read from the on-disk index header. A corrupted or malicious file whose `num_messages` exceeds `list_max` caused writes past the end of the array and reads past the end of the input buffer. The count is now validated against `list_max` before the loop runs.
+
 ### HTTP 403 errors in the ROS3 VFD for object keys with special characters
 
    The ROS3 VFD did not URI-encode the S3 object key when building the HTTP request path, so keys containing characters that AWS Signature Version 4 requires to be percent-encoded — such as the '=' in Hive-style `key=value` partition prefixes, '+', or spaces — produced a signed request whose signature did not match S3's server-side recomputation. S3 rejects such requests with `SignatureDoesNotMatch`, which surfaces as an HTTP 403 error (indistinguishable from a permissions error on a HEAD request), even though tools like the AWS CLI could access the same object. The object key is now percent-encoded exactly once when the request path is built, matching the behavior of other S3 clients. Note that URLs must now be passed to the ROS3 VFD with their object keys unencoded; a key that was pre-encoded as a workaround for this issue will now be double-encoded and fail to resolve.
@@ -190,7 +201,18 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ## Tools
 
+### Fixed h5repack silently dropping a declared cd_nelmts for user-defined filters
+
+   `h5repack -f UD=<filtn>,<flag>,<cd_nelmts>` with no values following `cd_nelmts` silently
+   treated the declared count as 0 instead of validating it, because the trailing token (with
+   no comma after it) was never committed to `cd_nelmts` inside the parser. `parse_filter()` now
+   commits the trailing token to whichever UD field is still pending, so a declared, unfulfilled
+   `cd_nelmts` is correctly rejected with "incorrect number of compression parameters" instead of
+   being silently coerced to 0.
+
 ## Performance
+
+   Fixed performance issues in several tools (h5dump, h5ls, h5diff, h5repack, h5stat and h5format_convert) for specific file structures where many objects are linked to with multiple hard links. While traversing a file's structure, these tools internally track already visited objects to avoid redundant processing on objects linked to multiple times. Checking if an object was already visited previously used a linear scan over an array of all the already visited objects that were multiply linked, resulting in behavior that was potentially quadratic with the number of objects visited and causing most of the application runtime to be spent checking this array. Additionally, h5repack had a separate array for hard link name aliases for objects that further contributed to performance issues in that tool. Replacing these arrays with hash tables greatly improved the performance of these tools on files with structures matching the structure mentioned previously.
 
 ## Fortran API
 

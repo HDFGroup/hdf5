@@ -1892,6 +1892,9 @@ if (BUILD_SHARED_LIBS)
   ADD_H5_UD_TEST (plugin_test_ex 1 h5repack_layout.h5 --enable-error-stack -v -f UD=257,0,1,9,9,9)
   # check for extra parameters, which are ignored when nelms is 0
   ADD_H5_UD_TEST (plugin_zero_extra 0 h5repack_layout.h5 --enable-error-stack -v -f UD=250,0,0,1,2)
+  # check for a declared cd_nelmts with no values following it (filter 250 does no
+  # internal cd_values validation, so this only fails if parse_filter() catches it itself)
+  ADD_H5_UD_TEST (plugin_test_nelmts_no_values 1 h5repack_layout.h5 --enable-error-stack -v -f UD=250,0,1)
 endif ()
 
 ##############################################################################

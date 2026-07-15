@@ -652,19 +652,20 @@ search_obj(table_t *table, const H5O_token_t *obj_token)
  *-------------------------------------------------------------------------
  */
 static herr_t
-find_objs_cb(const char *name, const H5O_info2_t *oinfo, const char *already_seen, void *op_data)
+find_objs_cb(const char *name, const H5O_info2_t *oinfo, bool already_seen,
+             const trav_seen_t H5_ATTR_UNUSED *visited_obj_info, void *op_data)
 {
     find_objs_t *info      = (find_objs_t *)op_data;
     herr_t       ret_value = 0;
 
     switch (oinfo->type) {
         case H5O_TYPE_GROUP:
-            if (NULL == already_seen)
+            if (!already_seen)
                 add_obj(info->group_table, &oinfo->token, name, true);
             break;
 
         case H5O_TYPE_DATASET:
-            if (NULL == already_seen) {
+            if (!already_seen) {
                 hid_t dset = H5I_INVALID_HID;
 
                 /* Add the dataset to the list of objects */
@@ -691,7 +692,7 @@ find_objs_cb(const char *name, const H5O_info2_t *oinfo, const char *already_see
             break;
 
         case H5O_TYPE_NAMED_DATATYPE:
-            if (NULL == already_seen) {
+            if (!already_seen) {
                 obj_t *found_obj;
 
                 if ((found_obj = search_obj(info->type_table, &oinfo->token)) == NULL)
