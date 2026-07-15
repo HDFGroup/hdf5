@@ -20,7 +20,7 @@ jobs:
     name: "nvhpc ${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     env:
-      CUDAVERDOT: "13.1"
+      CUDAVERDOT: "13.2"
       NVERDOT: "26.5"
       NVERDASH: "26-5"
 
