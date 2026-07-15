@@ -1012,6 +1012,13 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
                 /* The type of this section */
                 sect_type = *image++;
 
+                /* Validate the section type before using it to index the class
+                 * array, otherwise a corrupted file can drive an out-of-bounds
+                 * read and an indirect call through a bogus function pointer.
+                 */
+                if (sect_type >= fspace->nclasses)
+                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "invalid free space section type");
+
                 /* Call 'deserialize' callback for this section */
                 des_flags = 0;
                 assert(fspace->sect_cls[sect_type].deserialize);
