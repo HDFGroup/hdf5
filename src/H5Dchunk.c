@@ -3121,17 +3121,19 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                 /* Set chunk's [scaled] coordinates */
                 dset_info->store->chunk.scaled = chunk_info->scaled;
 
-                /* Don't lock the chunk if it doesn't exist on disk or in cache, to avoid unnecessary allocation and conversion */
+                /* Don't lock the chunk if it doesn't exist on disk or in cache, to avoid unnecessary
+                 * allocation and conversion */
                 if (H5_addr_defined(udata.chunk_block.offset) || UINT_MAX != udata.idx_hint) {
                     /* Determine if we should use the chunk cache */
-                    if ((cacheable = H5D__chunk_cacheable(io_info, dset_info, udata.chunk_block.offset, false)) <
-                        0)
+                    if ((cacheable =
+                             H5D__chunk_cacheable(io_info, dset_info, udata.chunk_block.offset, false)) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't tell if chunk is cacheable");
                     if (cacheable) {
                         /* Load the chunk into cache and lock it. */
 
                         /* Compute # of bytes accessed in chunk */
-                        H5_CHECK_OVERFLOW(dset_info->type_info.src_type_size, /*From:*/ size_t, /*To:*/ hsize_t);
+                        H5_CHECK_OVERFLOW(dset_info->type_info.src_type_size, /*From:*/ size_t,
+                                          /*To:*/ hsize_t);
                         src_accessed_bytes =
                             chunk_info->piece_points * (hsize_t)dset_info->type_info.src_type_size;
 
@@ -3146,7 +3148,8 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                         chk_io_info = &cpt_io_info;
                     }
                     else {
-                        /* Since the chunk isn't cacheable it must not be in cache, therefore it must exist on disk if it made it into the outer if statement */
+                        /* Since the chunk isn't cacheable it must not be in cache, therefore it must exist on
+                         * disk if it made it into the outer if statement */
                         assert(H5_addr_defined(udata.chunk_block.offset));
 
                         /* Set up the storage address information for this chunk */

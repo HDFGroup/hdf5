@@ -18884,18 +18884,18 @@ static herr_t
 test_readonly_chunk_vlen_fill(hid_t fapl, bool chunk_cache)
 {
     char          filename[FILENAME_BUF_SIZE];
-    hid_t         file;                                            /* File ID */
-    hid_t          dsid          = H5I_INVALID_HID; /* Dataset ID */
-    hid_t          sid           = H5I_INVALID_HID; /* Dataspace ID */
-    hid_t          dcpl          = H5I_INVALID_HID; /* Dataset creation property list ID */
-    hid_t          dapl          = H5I_INVALID_HID; /* Dataset access property list ID */
-    hid_t          dtype         = H5I_INVALID_HID; /* Datatype ID */
-    const hsize_t  dims[1]       = {4}; /* Dataspace dimensions */
-    const hsize_t  chunk_dims[1] = {2}; /* Chunk dimensions */
-    const char    *fillval = "fillval";
-    const char    *writeval = "writeval";
-    char          *rdata[4];     /* Read buffer */
-    int            i, j, k;
+    hid_t         file;                            /* File ID */
+    hid_t         dsid          = H5I_INVALID_HID; /* Dataset ID */
+    hid_t         sid           = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t         dcpl          = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t         dapl          = H5I_INVALID_HID; /* Dataset access property list ID */
+    hid_t         dtype         = H5I_INVALID_HID; /* Datatype ID */
+    const hsize_t dims[1]       = {4};             /* Dataspace dimensions */
+    const hsize_t chunk_dims[1] = {2};             /* Chunk dimensions */
+    const char   *fillval       = "fillval";
+    const char   *writeval      = "writeval";
+    char         *rdata[4]; /* Read buffer */
+    int           i, j, k;
 
     if (chunk_cache)
         TESTING("vlen chunked dset in a read-only file with fill value (chunk cache enabled)");
@@ -19006,9 +19006,8 @@ test_readonly_chunk_vlen_fill(hid_t fapl, bool chunk_cache)
                     if (strncmp(rdata[j], writeval, strlen(writeval) + 1))
                         TEST_ERROR;
                 }
-                else
-                    if (strncmp(rdata[j], fillval, strlen(fillval) + 1))
-                        TEST_ERROR;
+                else if (strncmp(rdata[j], fillval, strlen(fillval) + 1))
+                    TEST_ERROR;
 
             /* Reclaim memory */
             if (H5Treclaim(dtype, sid, H5P_DEFAULT, rdata) < 0)
