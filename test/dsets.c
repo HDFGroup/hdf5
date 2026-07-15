@@ -81,6 +81,7 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
                                  "vds_strings",         /* 29 */
                                  "chunk_expand2",       /* 30 */
                                  "scalar_datasets",     /* 31 */
+                                 "read_only_vlen_fill", /* 32 */
                                  NULL};
 
 #define OHMIN_FILENAME_A "ohdr_min_a"
@@ -18870,6 +18871,191 @@ error:
 } /* end test_bad_buf_size() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_readonly_chunk_vlen_fill
+ *
+ * Purpose:     Test that chunked vlen datasets with a no file is opened in read only mode.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_readonly_chunk_vlen_fill(hid_t fapl, bool chunk_cache)
+{
+    char          filename[FILENAME_BUF_SIZE];
+    hid_t         file;                                            /* File ID */
+    hid_t          dsid          = H5I_INVALID_HID; /* Dataset ID */
+    hid_t          sid           = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t          dcpl          = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t          dapl          = H5I_INVALID_HID; /* Dataset access property list ID */
+    hid_t          dtype         = H5I_INVALID_HID; /* Datatype ID */
+    const hsize_t  dims[1]       = {4}; /* Dataspace dimensions */
+    const hsize_t  chunk_dims[1] = {2}; /* Chunk dimensions */
+    const char    *fillval = "fillval";
+    const char    *writeval = "writeval";
+    char          *rdata[4];     /* Read buffer */
+    int            i, j, k;
+
+    if (chunk_cache)
+        TESTING("vlen chunked dset in a read-only file with fill value (chunk cache enabled)");
+    else
+        TESTING("vlen chunked dset in a read-only file with fill value (chunk cache disabled)");
+
+    h5_fixname(FILENAME[32], fapl, filename, sizeof filename);
+
+    /* Create file */
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create dcpl */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* Create dapl */
+    if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        TEST_ERROR;
+
+    /* Set chunking */
+    if (H5Pset_chunk(dcpl, 1, chunk_dims) < 0)
+        TEST_ERROR;
+
+    /* Define variable-length (NULL-terminated) UTF-8 string datatype */
+    if ((dtype = H5Tcopy(H5T_C_S1)) < 0)
+        TEST_ERROR;
+    if (H5Tset_size(dtype, H5T_VARIABLE) < 0)
+        TEST_ERROR;
+
+    /* Set the fill value */
+    if (H5Pset_fill_value(dcpl, dtype, &fillval) < 0)
+        TEST_ERROR;
+
+    /* Disabled chunk cache if requested */
+    if (!chunk_cache)
+        if (H5Pset_chunk_cache(dapl, 0, 0, 0) < 0)
+            TEST_ERROR;
+
+    /* Create the data space */
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    /* Create new dataset */
+    if ((dsid = H5Dcreate2(file, "dset", dtype, sid, H5P_DEFAULT, dcpl, dapl)) < 0)
+        TEST_ERROR;
+
+    /* Close dataset and file */
+    if (H5Dclose(dsid) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+
+    /* Loop over number of written elements in dset */
+    for (i = -1; i < (int)dims[0]; i++) {
+        /* Write ith element if it is non-negative */
+        if (i >= 0) {
+            hsize_t start = (hsize_t)i;
+            hsize_t count = (hsize_t)1;
+
+            /* Open file with write access */
+            if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+                TEST_ERROR;
+
+            /* Open dataset */
+            if ((dsid = H5Dopen2(file, "dset", dapl)) < 0)
+                TEST_ERROR;
+
+            /* Select the ith element */
+            if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, &start, NULL, &count, NULL) < 0)
+                TEST_ERROR;
+
+            /* Write data */
+            if (H5Dwrite(dsid, dtype, H5S_BLOCK, sid, H5P_DEFAULT, &writeval) < 0)
+                TEST_ERROR;
+
+            /* Reset selection to "all" */
+            if (H5Sselect_all(sid) < 0)
+                TEST_ERROR;
+
+            /* Close dataset and file */
+            if (H5Dclose(dsid) < 0)
+                TEST_ERROR;
+            if (H5Fclose(file) < 0)
+                TEST_ERROR;
+        }
+
+        /* Open file read only */
+        if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+            TEST_ERROR;
+
+        /* Open dataset */
+        if ((dsid = H5Dopen2(file, "dset", dapl)) < 0)
+            TEST_ERROR;
+
+        /* Read the dataset twice if cache is enabled - once with cold cache, once with hot cache */
+        for (k = 0; k < (chunk_cache ? 2 : 1); k++) {
+            /* Clear read buffer */
+            memset(rdata, 0, sizeof(rdata));
+
+            /* Read entire dataset */
+            if (H5Dread(dsid, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
+                TEST_ERROR;
+
+            /* Verify data */
+            for (j = 0; j < (int)dims[0]; j++)
+                if (j <= i) {
+                    if (strncmp(rdata[j], writeval, strlen(writeval) + 1))
+                        TEST_ERROR;
+                }
+                else
+                    if (strncmp(rdata[j], fillval, strlen(fillval) + 1))
+                        TEST_ERROR;
+
+            /* Reclaim memory */
+            if (H5Treclaim(dtype, sid, H5P_DEFAULT, rdata) < 0)
+                TEST_ERROR;
+        }
+
+        /* Close dataset and file */
+        if (H5Dclose(dsid) < 0)
+            TEST_ERROR;
+        if (H5Fclose(file) < 0)
+            TEST_ERROR;
+    }
+
+    /* Close dataspace */
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* Close datatype */
+    if (H5Tclose(dtype) < 0)
+        TEST_ERROR;
+
+    /* Close dataset creation property list */
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    /* Close dataset access property list */
+    if (H5Pclose(dapl) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Tclose(dtype);
+        H5Pclose(dcpl);
+        H5Pclose(dapl);
+        H5Fclose(file);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_readonly_chunk_vlen_fill() */
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests the dataset interface (H5D)
@@ -19108,6 +19294,9 @@ main(void)
                 nerrors += (test_bad_decode_size(file) < 0 ? 1 : 0);
                 nerrors += (test_bad_decode_size_vlen(file) < 0 ? 1 : 0);
                 nerrors += (test_bad_buf_size(file) < 0 ? 1 : 0);
+
+                nerrors += (test_readonly_chunk_vlen_fill(fapl, false) < 0 ? 1 : 0);
+                nerrors += (test_readonly_chunk_vlen_fill(fapl, true) < 0 ? 1 : 0);
 
                 if (H5Fclose(file) < 0)
                     goto error;
