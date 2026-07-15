@@ -153,7 +153,7 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ### Fixed error when reading variable-length chunked datasets in read only mode
 
-   When reading from a chunked dataset wiht a variable-length type, a non-default fill value, the library would internally try to write data to the file and fail due to writing to a read-only file. Reworked the I/O code to avoid these writes in this case. This may also improve performance and file space usage in similar cases with files open with write access.
+   When reading from a chunked dataset with a variable-length type, a non-default fill value, the library would internally try to write data to the file and fail due to writing to a read-only file. Reworked the I/O code to avoid these writes in this case. This may also improve performance and file space usage in similar cases with files open with write access.
 
 ### Validate free space section type during decode
 
