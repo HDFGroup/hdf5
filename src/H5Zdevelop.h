@@ -33,13 +33,13 @@
 #define H5Z_CLASS_T_VERS (1)
 
 /**
- * Highest accepted version field value in H5Zregister(). \since 2.3.0
+ * Highest accepted version field value in H5Zregister(). \since 3.0.0
  */
 #define H5Z_CLASS_T_VERS_MAX (2)
 
 /**
  * Maximum byte length of the \c name field in H5Z_class3_t (not counting NUL).
- * H5Zregister() rejects names longer than this value. \since 2.3.0
+ * H5Zregister() rejects names longer than this value. \since 3.0.0
  */
 #define H5Z_CLASS3_NAME_MAX_LEN 255u
 
@@ -210,7 +210,7 @@ typedef struct H5Z_class2_t {
  *          (\c HDF5_ENABLE_CONCURRENCY) builds where this callback is invoked
  *          from within #H5Pappend_filter.
  *
- * \since 2.3.0
+ * \since 3.0.0
  */
 typedef herr_t (*H5Z_set_config_func_t)(const char *params, unsigned *flags, size_t *cd_nelmts,
                                         unsigned cd_values[], size_t cd_values_size);
@@ -242,7 +242,7 @@ typedef herr_t (*H5Z_set_config_func_t)(const char *params, unsigned *flags, siz
  *       Decimal float input (e.g., \c rate=3.5) remains valid for user
  *       convenience; the asymmetry (decimal in, hex-float out) is intentional.
  *
- * \since 2.3.0
+ * \since 3.0.0
  */
 typedef herr_t (*H5Z_get_config_func_t)(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
                                         char *buf, size_t *buf_size);
@@ -255,7 +255,7 @@ typedef herr_t (*H5Z_get_config_func_t)(unsigned flags, size_t cd_nelmts, const 
  * \c H5Z_class2_t continues to use \c H5Z_func_t; this type is used only by
  * \c H5Z_class3_t.
  *
- * \since 2.3.0
+ * \since 3.0.0
  */
 typedef size_t (*H5Z_func2_t)(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[],
                               hid_t dxpl_id, const hsize_t *scaled, size_t ndims, size_t nbytes,
@@ -267,7 +267,7 @@ typedef size_t (*H5Z_func2_t)(unsigned int flags, size_t cd_nelmts, const unsign
  * Plugin authors use H5Z_class3_t directly rather than relying on the H5Z_class_t alias.
  * This struct is NOT derived from H5Z_class2_t; it is an independent flat struct.
  *
- * \since 2.3.0
+ * \since 3.0.0
  */
 //! <!-- [H5Z_class3_t_snip] -->
 typedef struct H5Z_class3_t {
@@ -313,7 +313,7 @@ extern "C" {
  *          This function validates the entire parameter string on every call;
  *          duplicate keys or malformed syntax return negative.
  *
- * \since 2.3.0
+ * \since 3.0.0
  */
 H5_DLL htri_t H5Zconfig_has_key(const char *params, const char *key);
 
@@ -333,7 +333,7 @@ H5_DLL htri_t H5Zconfig_has_key(const char *params, const char *key);
  *          Returns negative (H5E_BADVALUE) if the key exists but its value
  *          is not a TOML integer (type mismatch).
  *
- * \since 2.3.0
+ * \since 3.0.0
  */
 H5_DLL htri_t H5Zconfig_get_int(const char *params, const char *key, int64_t *out);
 
@@ -353,7 +353,7 @@ H5_DLL htri_t H5Zconfig_get_int(const char *params, const char *key, int64_t *ou
  *          Returns negative if the key exists but its value is not a TOML
  *          float (type mismatch).
  *
- * \since 2.3.0
+ * \since 3.0.0
  */
 H5_DLL htri_t H5Zconfig_get_double(const char *params, const char *key, double *out);
 
@@ -373,7 +373,7 @@ H5_DLL htri_t H5Zconfig_get_double(const char *params, const char *key, double *
  *          Returns negative if the key exists but its value is not a TOML
  *          boolean (type mismatch).
  *
- * \since 2.3.0
+ * \since 3.0.0
  */
 H5_DLL htri_t H5Zconfig_get_bool(const char *params, const char *key, bool *out);
 
@@ -397,7 +397,7 @@ H5_DLL htri_t H5Zconfig_get_bool(const char *params, const char *key, bool *out)
  *          type mismatch error (H5E_BADVALUE).
  *          If the buffer is too small, H5E_OVERFLOW is pushed.
  *
- * \since 2.3.0
+ * \since 3.0.0
  */
 H5_DLL htri_t H5Zconfig_get_str(const char *params, const char *key, char *buf, size_t *buf_size);
 

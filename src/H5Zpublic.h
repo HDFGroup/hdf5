@@ -86,13 +86,13 @@ typedef int H5Z_filter_t;
 /** Maximum filter id \since 1.0.0 */
 #define H5Z_FILTER_MAX 65535
 
-/** Maximum number of cd_values elements per filter in H5Pappend_filter \since 2.3.0 */
+/** Maximum number of cd_values elements per filter in H5Pappend_filter \since 3.0.0 */
 #define H5Z_MAX_CD_NELMTS 65535u
 
-/** Maximum length of a filter parameter string (including NUL terminator) \since 2.3.0 */
+/** Maximum length of a filter parameter string (including NUL terminator) \since 3.0.0 */
 #define H5Z_CONFIG_STRING_MAX 4096
 
-/** Maximum number of key-value parameters in a filter parameter string \since 2.3.0 */
+/** Maximum number of key-value parameters in a filter parameter string \since 3.0.0 */
 #define H5Z_CONFIG_MAX_PARAMS 64
 
 /* General macros */
@@ -300,7 +300,7 @@ typedef H5Z_cb_return_t (*H5Z_filter_func_t)(H5Z_filter_t filter, void *buf, siz
 
 /**
  * \brief Selects how filter parameters are specified in H5Pappend_filter().
- * \since 2.3.0
+ * \since 3.0.0
  */
 typedef enum {
     H5Z_PARAMS_CDVALUES = 0, /**< raw cd_values array (same as H5Pset_filter) */
@@ -309,7 +309,7 @@ typedef enum {
 
 /**
  * \brief Tagged-union parameter descriptor passed to H5Pappend_filter().
- * \since 2.3.0
+ * \since 3.0.0
  */
 typedef struct {
     H5Z_params_type_t type;
@@ -424,7 +424,7 @@ H5_DLL herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_confi
  * shutdown).  Do not free them and do not use them after the filter is
  * unregistered.
  *
- * \since 2.3.0
+ * \since 3.0.0
  */
 typedef struct H5Z_class_info_t {
     H5Z_filter_t id;           /**< Numeric filter identifier         */
@@ -468,7 +468,7 @@ typedef struct H5Z_class_info_t {
  *          must not be freed.  They remain valid until the filter is
  *          unregistered.
  *
- * \since 2.3.0
+ * \since 3.0.0
  */
 H5_DLL herr_t H5Zget_filter_class_info(H5Z_filter_t filter, H5Z_class_info_t *info /*out*/);
 
