@@ -145,7 +145,7 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ## Library
 
-### Fixed a crash when reading a chunked dataset whose chunk rank mismatches the dataspace
+### Fixed a crash when reading a chunked dataset whose chunk rank does not match the dataspace rank
 
    The chunk layout's stored dimensionality was validated against the dataspace rank at creation time, but not at open time, so a file whose stored chunk rank disagreed with its dataspace rank was not caught. The resulting inconsistent selection ranks during chunk I/O caused a divide-by-zero in the hyperslab iterator. The chunk dimensionality is now also validated on open, and such a dataset is rejected with an error instead of crashing.
 
