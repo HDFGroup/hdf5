@@ -460,7 +460,7 @@ public class TestH5Arw {
     @Test
     public void testH5Aread_128bit_floats()
     {
-        byte[][][] attr_data = new byte[DIM_X][DIM128_Y][8];
+        byte[][][] attr_data = new byte[DIM_X][DIM128_Y][16];
 
         try {
             openH5file(H5_FLTS_FILE, DATASETF128);

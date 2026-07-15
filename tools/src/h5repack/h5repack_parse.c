@@ -14,6 +14,22 @@
 #include "h5tools.h"
 #include "h5tools_utils.h"
 
+/* Bounds-check a running index against a parse buffer before writing.
+ * buf_sz must be passed explicitly (sizeof at the call site) to avoid the
+ * silent pointer-decay bug where sizeof(ptr) == sizeof(void *) if the array
+ * is ever refactored to a heap allocation.
+ * free(NULL) is a safe no-op per C99, so no NULL guard is needed.
+ * Exits on overflow, consistent with all other error handling in parse_filter. */
+#define PARSE_BUF_WRITE(buf, buf_sz, idx, ch, obj_list_ptr, input_str)                                       \
+    do {                                                                                                     \
+        if ((size_t)(idx) >= (buf_sz)-1) {                                                                   \
+            free(obj_list_ptr);                                                                              \
+            error_msg("filter parameter field too long in <%s>\n", (input_str));                             \
+            exit(EXIT_FAILURE);                                                                              \
+        }                                                                                                    \
+        (buf)[(idx)] = (ch);                                                                                 \
+    } while (0)
+
 /*-------------------------------------------------------------------------
  * Function: parse_filter
  *
@@ -42,7 +58,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
     size_t      i, m, u;
     char        c;
     size_t      len = strlen(str);
-    int         f, k, l, p, q, end_obj = -1, no_param = 0;
+    int         f = -1, k, l = -1, p = -1, q, end_obj = -1, no_param = 0;
     unsigned    j, n;
     char        sobj[MAX_NC_NAME];
     char        scomp[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -111,8 +127,8 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
     /* get filter additional parameters */
     m = 0;
     for (i = (size_t)(end_obj + 1), k = 0, j = 0; i < len; i++, k++) {
-        c        = str[i];
-        scomp[k] = c;
+        c = str[i];
+        PARSE_BUF_WRITE(scomp, sizeof(scomp), k, c, obj_list, str);
         if (c == '=' || i == len - 1) {
             if (c == '=') {      /*one more parameter */
                 scomp[k] = '\0'; /*cut space */
@@ -139,13 +155,12 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                             exit(EXIT_FAILURE);
                         }
                         if (l == -1)
-                            stype[m] = c;
+                            PARSE_BUF_WRITE(stype, sizeof(stype), m, c, obj_list, str);
                         else {
-                            smask[l] = c;
+                            PARSE_BUF_WRITE(smask, sizeof(smask), l, c, obj_list, str);
                             l++;
                             if (l == 2) {
                                 smask[l] = '\0';
-                                i        = len - 1; /* end */
                                 if (strcmp(smask, "NN") == 0)
                                     filt->cd_values[j++] = H5_SZIP_NN_OPTION_MASK;
                                 else if (strcmp(smask, "EC") == 0)
@@ -154,6 +169,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                                     error_msg("szip mask must be 'NN' or 'EC' \n");
                                     exit(EXIT_FAILURE);
                                 }
+                                goto done_filter_params;
                             }
                         }
                     } /* u */
@@ -189,13 +205,12 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                             exit(EXIT_FAILURE);
                         }
                         if (l == -1)
-                            stype[m] = c;
+                            PARSE_BUF_WRITE(stype, sizeof(stype), m, c, obj_list, str);
                         else {
-                            smask[l] = c;
+                            PARSE_BUF_WRITE(smask, sizeof(smask), l, c, obj_list, str);
                             l++;
                             if (l == 2) {
                                 smask[l] = '\0';
-                                i        = len - 1; /* end */
                                 if (strcmp(smask, "IN") == 0)
                                     filt->cd_values[j++] = H5Z_SO_INT;
                                 else if (strcmp(smask, "DS") == H5Z_SO_FLOAT_DSCALE)
@@ -204,6 +219,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                                     error_msg("scale type must be 'IN' or 'DS' \n");
                                     exit(EXIT_FAILURE);
                                 }
+                                goto done_filter_params;
                             }
                         }
                     } /* u */
@@ -255,7 +271,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                             error_msg("filter flag parameter is not a digit in <%s>\n", str);
                             exit(EXIT_FAILURE);
                         }
-                        stype[q] = c;
+                        PARSE_BUF_WRITE(stype, sizeof(stype), q, c, obj_list, str);
                     } /* for u */
                     stype[q] = '\0';
                 } /*if */
@@ -274,18 +290,28 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                             error_msg("compression parameter is not a digit in <%s>\n", str);
                             exit(EXIT_FAILURE);
                         }
-                        stype[m] = c;
+                        PARSE_BUF_WRITE(stype, sizeof(stype), m, c, obj_list, str);
                     } /* u */
 
                     stype[m] = '\0';
                 } /*if */
 
-                if ((strcmp(scomp, "UD") == 0) && (filt->cd_nelmts == 0))
-                    j = 0;
+done_filter_params:;
+                if (strcmp(scomp, "UD") == 0) {
+                    /* the trailing token (no comma after it) was never committed inside
+                     * the loop above; commit it to whichever UD field is still pending,
+                     * mirroring the comma-triggered branch exactly */
+                    if (l == -1)
+                        filt->filtn = atoi(stype);
+                    else if (f == -1)
+                        filt->filt_flag = (unsigned)strtoul(stype, NULL, 0);
+                    else if (p == -1)
+                        filt->cd_nelmts = strtoull(stype, NULL, 0);
+                    else if (filt->cd_nelmts > 0)
+                        filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
+                }
                 else
                     filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
-
-                i += m; /* jump */
             }
             else if (i == len - 1) { /*no more parameters */
                 scomp[k + 1] = '\0';
@@ -438,7 +464,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
              *-------------------------------------------------------------------------
              */
         case H5Z_FILTER_SZIP:
-            pixels_per_block = filt->cd_values[0];
+            pixels_per_block = filt->cd_values[H5Z_SZIP_PARM_PPB];
             if ((pixels_per_block % 2) == 1) {
                 if (obj_list)
                     free(obj_list);

@@ -90,6 +90,7 @@ Navigate back: \ref index "Main" / \ref SPEC
       <li> @ref sec_fmt4_appendixd
         <ol type="A">
           <li> @ref subsec_fmt4_appendixd_encode
+          <li> @ref subsec_fmt4_appendixd_encodet
           <li> @ref subsec_fmt4_appendixd_encoderv
           <li> @ref subsec_fmt4_appendixd_encodedp
         </ol>
@@ -562,8 +563,10 @@ Versions 2 and 3 of the superblock is described below:
 </table>
 
 \subsection subsec_fmt4_boot_driver II.B. Disk Format: Level 0B - File Driver Info
-The <strong>driver information block</strong> is an optional region of the file which contains information
-needed by the file driver in order to reopen a file. The format is described below:
+The <strong>driver information block</strong> lives right after the superblock.
+It is an optional region of the file which contains information
+needed by the file driver in order to reopen a file and may only exist when superblock version is less than 2.
+The format is described below:
 <table>
 <caption align=top><strong>Layout: Driver Information Block</strong></caption>
 <tr align="center">
@@ -618,7 +621,7 @@ needed by the file driver in order to reopen a file. The format is described bel
 </table>
 
 The two drivers encoded in the <em>Driver Identification</em> field are as follows:
-\li Multi driver:<br />The identifier for this driver is &ldquo;NCSAmulti&rdquo;. This driver provides
+\li Multi driver:<br />The identifier for this driver is &ldquo;NCSAmult&rdquo;. This driver provides
     a mechanism for segregating raw data and different types of metadata into multiple files. These files
     are viewed by the library as a single virtual HDF5 file with a single file address. A maximum of 6
     files will be created for the following data: superblock, B-tree, raw data, global heap, local heap,
@@ -944,18 +947,20 @@ Aside from that difference, internal nodes and leaf nodes are identical.
         <td>Size of chunk in bytes.</td>
       </tr>
       <tr valign=top align="left">
-        <td>Bytes 4-8</td>
+        <td>Bytes 5-8</td>
         <td>Filter mask, a 32-bit bit field indicating which filters have been skipped for this chunk. Each
             filter has an index number in the pipeline (starting at 0, with the first filter to apply) and
             if that filter is skipped, the bit corresponding to its index is set.</td>
       </tr>
       <tr valign=top align="left">
-        <td>(<em>D + 1</em>) 64-bit fields</td>
-        <td>The offset of the chunk within the dataset where <i>D</i> is the number
-            of dimensions of the dataset, and the last value is the offset within the dataset&rsquo;s
-            datatype and should always be zero. For example, if a chunk in a 3-dimensional dataset begins at the
+        <td>(<em>d</em> + 1) 64-bit fields</td>
+        <td>The offset of the chunk within the dataset, where <b>d</b> is the number of dimensions
+            of the dataset. The first <em>d</em> values are the chunk&rsquo;s offset along each real
+            dataset dimension. The extra (<em>d</em>+1)<sup>th</sup> value is not a real dimension
+            offset; it is a placeholder for the offset within the dataset&rsquo;s datatype element and
+            is always <code>0</code>. For example, if a chunk in a 3-dimensional dataset begins at the
             position <code>[5,5,5]</code>, there will be three such 64-bit indices, each with the value of
-            <code>5</code>, followed by a <code>0</code> value.</td>
+            <code>5</code>, followed by a <code>0</code> value for the datatype-element placeholder.</td>
       </tr>
       </table>
     </td>
@@ -1906,14 +1911,17 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4"><br />...<br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension \#n Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d - 1) Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li In the above table, <b>d</b> is the number of dimensions in the dataset&rsquo;s dataspace. Unlike
+    the version 1 B-tree chunk key, there is no extra field for the dataset&rsquo;s datatype element;
+    exactly <em>d</em> scaled offsets are stored, one per real dataset dimension.
 
 <table>
-<caption><strong>Fields: Version 2 B-tree, Type 10 Record Layout - Non-filtered Dataset Chunks</strong></caption>
+<caption>\anchor FMT4V2BtType10Fields <strong>Fields: Version 2 B-tree, Type 10 Record Layout - Non-filtered Dataset Chunks</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1923,8 +1931,8 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td>This field is the address of the dataset chunk in the file.</td>
 </tr>
 <tr>
-  <td>Dimension \#n Scaled Offset</td>
-  <td>This field is the scaled offset of the chunk within the dataset. <em>n</em> is the number of
+  <td>Dimension \#i Scaled Offset (i = 0 to (d-1))</td>
+  <td>This field is the scaled offset of the chunk within the dataset, where <b>d</b> is the number of
       dimensions for the dataset. The first scaled offset stored in the list is for the slowest
       changing dimension, and the last scaled offset stored is for the fastest changing dimension.
       Scaled offset is calculated by dividing the chunk dimension sizes into the chunk offsets.</td>
@@ -1958,15 +1966,16 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4"><br />...<br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension \#n Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d - 1) Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li See the note for @ref FMT4V2BtType10 "Type 10 Record Layout" above for the definition of <b>d</b> and the scaled offset fields.
 \li This encoding is used when this B-Tree is used as an index for a dataset with layout message version 4.
 
 <table>
-<caption>Type11 <strong>Layout: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks (Layout Version 5)</strong></caption>
+<caption>\anchor FMT4V2BtType11V5 <strong>Layout: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks (Layout Version 5)</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -1992,11 +2001,12 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4"><br />...<br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension \#n Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d - 1) Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li See the note for @ref FMT4V2BtType10 "Type 10 Record Layout" above for the definition of <b>d</b> and the scaled offset fields.
 \li This encoding is used when this B-tree is used as an index for a dataset with layout message version 5 or above.
 
 <table>
@@ -2035,10 +2045,8 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
       the bit corresponding to its index is set.</td>
 </tr>
 <tr>
-  <td>Dimension \#n Scaled Offset</td>
-  <td>This field is the scaled offset of the chunk within the dataset. <em>n</em> is the number of
-      dimensions for the dataset. The first scaled offset stored in the list is for the slowest
-      changing dimension, and the last scaled offset stored is for the fastest changing dimension.</td>
+  <td>Dimension \#i Scaled Offset (i = 0 to (d-1))</td>
+  <td>See the @ref FMT4V2BtType10Fields "Dimension #i Scaled Offset" field description in the Type 10 Record Layout Fields table above.</td>
 </tr>
 </table>
 
@@ -6348,8 +6356,8 @@ about the region stored in the global heap.
 </tr>
 <tr>
   <td>0-3</td>
-  <td><strong>Type.</strong> This four-bit value contains the revised reference types. The values
-      defined are:
+  <td><strong>Type.</strong> This four-bit value contains the revised generic reference type. The value
+      defined is:
       <table width=100%>
       <tr>
         <th width="20%">Value</th>
@@ -6357,21 +6365,10 @@ about the region stored in the global heap.
       </tr>
       <tr>
         <td align="center"><code>2</code></td>
-        <td>Object Reference (#H5R_OBJECT2): A reference to another object in this file or an
-            external file.</td>
+        <td>It covers all three revised reference types: Object Reference (#H5R_OBJECT2), Dataset Region Reference (#H5R_DATASET_REGION2), and Attribute Reference (#H5R_ATTR).
       </tr>
       <tr>
-        <td align="center"><code>3</code></td>
-        <td>Dataset Region Reference (#H5R_DATASET_REGION2): A reference to a region within a
-            dataset in this file or an external file.</td>
-      </tr>
-      <tr>
-        <td align="center"><code>4</code></td>
-        <td>Attribute Reference (#H5R_ATTR): A reference to an attribute attached to an object
-            in this file or an external file.</td>
-      </tr>
-      <tr>
-        <td align="center"><code>5-15</code></td>
+        <td align="center"><code>3-15</code></td>
         <td>Reserved</td>
       </tr>
       </table>
@@ -7595,29 +7592,32 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <th width="25%">byte</th>
   <th>byte</th>
 </tr>
-<tr align="center">
+<tr>
   <td>Version</td>
   <td>Dimensionality</td>
   <td>Layout Class</td>
   <td>Reserved <em>(zero)</em></td>
 </tr>
-<tr align="center">
+<tr>
   <td colspan="4">Reserved <em>(zero)</em></td>
 </tr>
-<tr align="center">
+<tr>
   <td colspan="4"><br />Data Address<sup>O</sup> <em>(optional)</em><br /><br /></td>
 </tr>
-<tr align="center">
+<tr>
   <td colspan="4">Dimension 0 Size</td>
 </tr>
-<tr align="center">
+<tr>
   <td colspan="4">Dimension 1 Size</td>
 </tr>
-<tr align="center">
+<tr>
   <td colspan="4">...</td>
 </tr>
 <tr>
-  <td colspan="4">Dataset Element Size <em>(optional)</em></td>
+  <td colspan="4">Dimension \#(d - 1) Size</td>
+</tr>
+<tr>
+  <td colspan="4">Dataset Element Size <em>(stored as Dimension \#d)</em></td>
 </tr>
 <tr>
   <td colspan="4">Compact Data Size <em>(optional)</em></td>
@@ -7662,9 +7662,13 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 <tr valign=top>
   <td>Dimensionality</td>
-  <td>An array has a fixed dimensionality. This field specifies the number of dimension size fields later
-      in the message. The value stored for chunked storage is 1 greater than the number of dimensions in
-      the dataset&rsquo;s dataspace. For example, 2 is stored for a 1 dimensional dataset.</td>
+  <td>\anchor FMT4V12Dimensionality An array has a fixed dimensionality.
+      Let <b>d</b> be the number of dimensions in the dataset&rsquo;s dataspace.
+      For compact and contiguous storage, this field stores <b>d</b>.
+      <br />
+      For chunked storage, this field stores <b>d + 1</b>: entries 0 through d&minus;1 are the chunk
+      dimension sizes, and entry d holds the Dataset Element Size (see below).
+      For example, a 1-dimensional chunked dataset stores a value of 2.</td>
 </tr>
 <tr valign=top>
   <td>Layout Class</td>
@@ -7698,20 +7702,28 @@ another datatype) and the dataspace for a dataset describes the location of the 
       has not yet been allocated for this array.</td>
 </tr>
 <tr valign=top>
-  <td>Dimension \#n Size</td>
-  <td>For contiguous and compact storage the dimensions define the entire size of the array while for chunked storage
-      they define the size of a single chunk. In all cases, they are in units of array elements (not bytes). The
-      first dimension stored in the list of dimensions is the slowest changing dimension and the last dimension
-      stored is the fastest changing dimension.</td>
+  <td>Dimension \#i Size (i = 0 to (d-1))</td>
+  <td>\anchor FMT4V12DimInfoN For contiguous and compact storage the dimensions define the entire size of the array
+      in units of array elements (not bytes).
+      Dimension 0 is the slowest-changing axis and Dimension d&minus;1 is the fastest-changing axis.
+      <br />For chunked storage, the dimensions define the size of a single chunk in units of array
+      elements (not bytes).
+      Dimension 0 is the slowest-changing axis and Dimension d&minus;1 is the fastest-changing axis.
+      Dimension d stores the Dataset Element Size (see below) and is not a chunk dimension.</td>
 </tr>
 <tr>
   <td>Dataset Element Size</td>
-  <td>The size of a dataset element, in bytes. This field is only present for chunked storage.</td>
+  <td>\anchor FMT4V12DsetElmSz The size of a dataset element, in bytes.
+      This field is only present for chunked data storage.
+      Although logically distinct from the chunk dimensions, this value is encoded as
+      dimension entry d where d is the number of dataset dimensions,
+      which is why the Dimensionality field stores d + 1.</td>
 </tr>
 <tr>
   <td>Compact Data Size</td>
   <td>This field is only present for compact data storage. It contains the size of the raw data for the
       dataset array, in bytes.</td>
+</tr>
 <tr>
   <td>Compact Data</td>
   <td>This field is only present for compact data storage. It contains the raw data for the dataset
@@ -7890,14 +7902,16 @@ Class-specific information for chunked storage (layout class 2):
   <td colspan="4">...</td>
 </tr>
 <tr>
-  <td colspan="4">Dimension \#n Size</td>
+  <td colspan="4">Dimension \#(d - 1) Size</td>
 </tr>
 <tr>
-  <td colspan="4">Dataset Element Size</td>
+  <td colspan="4">Dataset Element Size <em>(stored as Dimension \#d)</em></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li In the above table, <b>d</b> is the number of dimensions in the dataset&rsquo;s dataspace;
+    see @ref FMT4V12Dimensionality "Dimensionality" in versions 1 and 2 Data Layout message, in particular the chunked storage portion.
 
 <table>
 <caption><strong>Fields: Chunked Storage Property Description</strong></caption>
@@ -7907,8 +7921,7 @@ Class-specific information for chunked storage (layout class 2):
 </tr>
 <tr>
   <td>Dimensionality</td>
-  <td>>A chunk has a fixed dimensionality. This field specifies the number of dimension size fields
-       later in the message.</td>
+  <td>\anchor FMT4Dimensionality See @ref FMT4V12Dimensionality "Dimensionality" description in versions 1 and 2 Data Layout message, in particular the chunked storage portion.</td>
 </tr>
 <tr>
   <td>Address</td>
@@ -7918,14 +7931,12 @@ Class-specific information for chunked storage (layout class 2):
       that storage has not yet been allocated for this array.</td>
 </tr>
 <tr>
-  <td>Dimension \#n Size</td>
-  <td>These values define the dimension size of a single chunk, in units of array elements (not bytes).
-      The first dimension stored in the list of dimensions is the slowest changing dimension and the
-      last dimension stored is the fastest changing dimension.</td>
+  <td>Dimension \#i Size (i = 0 to (d-1))</td>
+  <td>\anchor FMT4DimInfoN See @ref FMT4V12DimInfoN "Dimension \#i Size" description in versions 1 and 2 Data Layout message, in particular the chunked storage portion.</td>
 </tr>
 <tr>
   <td>Dataset Element Size</td>
-  <td>The size of a dataset element, in bytes.</td>
+  <td>\anchor FMT4DsetElmSz See @ref FMT4V12DsetElmSz "Dataset Element Size" description in versions 1 and 2 Data Layout message.</td>
 </tr>
 </table>
 
@@ -7977,7 +7988,7 @@ information for the virtual layout class as well as indexing information for the
 </tr>
 <tr>
   <td>Layout Class</td>
-  <td>The layout class specifies specifies the type of storage for the data and how the other fields
+  <td>The layout class specifies the type of storage for the data and how the other fields
       of the layout message are to be interpreted.
       <table>
       <tr>
@@ -8057,7 +8068,10 @@ information for the virtual layout class as well as indexing information for the
   <td colspan="4"><br />...<br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension \#n Size <em>(variable size)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d - 1) Size <em>(variable size)</em><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Dataset Element Size <em>(stored as Dimension \#d)</em> <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr>
   <td>Chunk Indexing Type</td>
@@ -8072,6 +8086,8 @@ information for the virtual layout class as well as indexing information for the
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li In the above table, <b>d</b> is the number of dimensions in the dataset&rsquo;s dataspace;
+    see @ref FMT4V12Dimensionality "Dimensionality" in versions 1 and 2 Data Layout message, in particular the chunked storage portion.
 
 <table>
 <caption><strong>Fields: Chunked Storage Property Description</strong></caption>
@@ -8099,18 +8115,19 @@ information for the virtual layout class as well as indexing information for the
 </tr>
 <tr>
   <td>Dimensionality</td>
-  <td>A chunk has fixed dimension. This field specifies the number of <em>Dimension Size</em> fields
-      later in the message.</td>
+  <td>See @ref FMT4V12Dimensionality "Dimensionality" description in versions 1 and 2 Data Layout message, in particular the chunked storage portion.</td>
 </tr>
 <tr>
   <td>Dimension Size Encoded Length</td>
   <td>This is the size in bytes used to encode <em>Dimension Size</em>.</td>
 </tr>
 <tr>
-  <td>Dimension \#n Size</td>
-  <td>These values define the dimension size of a single chunk, in units of array elements (not bytes).
-      The first dimension stored in the list of dimensions is the slowest changing dimension and the
-      last dimension stored is the fastest changing dimension.</td>
+  <td>Dimension \#i Size (i = 0 to (d-1))</td>
+  <td>See @ref FMT4V12DimInfoN "Dimension \#i Size" description in versions 1 and 2 Data Layout message, in particular the chunked storage portion.</td>
+</tr>
+<tr>
+  <td>Dataset Element Size</td>
+  <td>See @ref FMT4V12DsetElmSz "Dataset Element Size" description in versions 1 and 2 Data Layout message.</td>
 </tr>
 <tr>
   <td>Chunk Indexing Type</td>
@@ -8148,11 +8165,11 @@ information for the virtual layout class as well as indexing information for the
   <td>This variable-sized field encodes information specific to an indexing type. More information on
       what is encoded with each type can be found below this table.
       <ul>
-        <li>See @ref FMT4IndexInfoSingle "<i>Single Chunk</i>" below.</li>
-        <li>See @ref FMT4IndexInfoImplicit "<i>Implicit</i>" below.</li>
-        <li>See @ref FMT4IndexInfoFixed "<i>Fixed Array</i>" below.</li>
-        <li>See @ref FMT4IndexInfoExtensible "<i>Extensible Array</i>" below.</li>
-        <li>See @ref FMT4IndexInfoV2Btrees "<i>Version 2 B-tree</i>" below.</li>
+        <li>See <em>@ref FMT4IndexInfoSingle "Single Chunk"</em> below.</li>
+        <li>See <em>@ref FMT4IndexInfoImplicit "Implicit"</em> below.</li>
+        <li>See <em>@ref FMT4IndexInfoFixed "Fixed Array"</em> below.</li>
+        <li>See <em>@ref FMT4IndexInfoExtensible "Extensible Array"</em> below.</li>
+        <li>See <em>@ref FMT4IndexInfoV2Btrees "Version 2 B-tree"</em> below.</li>
       </ul></td>
 </tr>
 <tr>
@@ -8191,7 +8208,7 @@ information for the virtual layout class as well as indexing information for the
 <ol>
 <li>\anchor FMT4IndexInfoSingle <h4>Index-specific information for <i>Single Chunk</i>:</h4>
 The following information exists only when the chunk is filtered. In other words, when
-<code>DONT_FILTER_PARTIAL_BOUND_CHUNKS</code> (bit 0) is enabled in the field <em>flags</em>.
+<code>SINGLE_INDEX_WITH_FILTER</code> (bit 1) is enabled in the field <em>flags</em>.
 <table>
 <caption><strong>Layout: Single Chunk Indexing Information</strong></caption>
 <tr>
@@ -8792,7 +8809,7 @@ link may have changed. If the link does not work, use the latest version of this
   <td colspan="4"><br />Filter Description List <em>(variable size)</em><br /><br /></td>
 </tr>
 </table>
-
+u
 <table>
 <caption align="top"><strong>Fields: Filter Pipeline Message - Version 2</strong></caption>
 <tr>
@@ -8910,7 +8927,7 @@ link may have changed. If the link does not work, use the latest version of this
 <tr valign=top>
   <td>Name Length</td>
   <td>Each filter has an optional null-terminated ASCII name and this field holds the length of the name
-      including the null termination padded with nulls to be a multiple of eight. If the filter has no name
+      including the null termination. If the filter has no name
       then a value of zero is stored in this field.<br />
       Filters with IDs less than 256 (in other words, filters that are defined in this format documentation)
       do not store the <em>Name Length</em> or <em>Name</em> fields.</td>
@@ -8941,7 +8958,7 @@ link may have changed. If the link does not work, use the latest version of this
 </tr>
 <tr valign=top>
   <td>Name</td>
-  <td>If the <em>Name Length</em> field is non-zero then it will contain the size of this field, padded
+  <td>If the <em>Name Length</em> field is non-zero then it will contain the size of this field, not padded
       to a multiple of eight. This field contains a null-terminated, ASCII character string to serve as
       a comment/name for the filter.</td>
 </tr>
@@ -11775,7 +11792,7 @@ Version 2 B-trees can be used to index various objects in the library. See
 @ref FMT4V2BtType10 "10" and @ref FMT4V2BtType11 "11" record layouts are for
 indexing dataset chunks.
 
-\section sec_fmt4_appendixd VIII. Appendix D: Encoding for Dataspace and Reference
+\section sec_fmt4_appendixd VIII. Appendix D: Encoding for Dataspace, Datatype, and Reference
 
 \section subsec_fmt4_appendixd_encode VIII.A. Dataspace Encoding
 <i>#H5Sencode</i> is a public routine that encodes a dataspace description into a buffer while
@@ -12044,7 +12061,7 @@ See the reference manual description for these two public routines.
 </tr>
 <tr>
   <td>Length</td>
-  <td>The size in bytes from <em>Length</em> to the end of the selection info.</td>
+  <td>The size in bytes from <em>Rank</em> to the end of the selection info.</td>
 </tr>
 <tr>
   <td>Rank</td>
@@ -12610,21 +12627,53 @@ See the reference manual description for these two public routines.
 </tr>
 </table>
 
-\section subsec_fmt4_appendixd_encoderv VIII.B. Reference Encoding (Revised)
-For the following reference type, the Reference Header and Reference Block are stored together
-as the dataset's raw data:
-<ul>
-  <li>Object Reference (#H5R_OBJECT2) (without reference to an external file)</li>
-</ul>
+\section subsec_fmt4_appendixd_encodet VIII.B. Datatype Encoding
+<i>#H5Tencode</i> is a public routine that encodes a datatype description into a buffer while
+<i>#H5Tdecode</i> is the corresponding routine that decodes the description encoded in the buffer.
+See the reference manual description for these two public routines.
 
-For the following reference types, the Reference Header plus the @ref FMT4GlobalHeapID "Global Heap ID"
-are stored as the dataset's raw data in the file. The global heap ID is used to locate the
-Reference Block stored in the global heap:
-<ul>
-  <li>Object Reference (#H5R_OBJECT2) (with reference to an external file)</li>
-  <li>Dataset Region Reference (#H5R_DATASET_REGION2) (with/without reference to an external file)</li>
-  <li>Attribute Reference (#H5R_ATTR) (with/without reference to an external file)</li>
-</ul>
+<table>
+<caption><strong>Layout: Datatype Description for #H5Tencode/#H5Tdecode</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Datatype ID</td>
+  <td>Encode Version</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br /><br />Datatype Message <em>(variable size)</em><br /><br /></td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Fields: Datatype Description for #H5Tencode/#H5Tdecode</strong></caption>
+<tr>
+  <th width="40%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Datatype ID</td>
+  <td>The datatype message ID which is 3.</td>
+</tr>
+<tr>
+  <td>Encode Version</td>
+  <td>H5T_ENCODE_VERSION which is 0.</td>
+</tr>
+<tr>
+  <td>Datatype Message</td>
+  <td>The datatype message information. See @ref subsubsec_fmt4_dataobject_hdr_msg_dtmessage</td>
+</tr>
+</table>
+
+\section subsec_fmt4_appendixd_encoderv VIII.C. Reference Encoding (Revised)
+
+Reference information is stored as the dataset's raw data.  The layout format is described below as 
+the Reference Header and the Reference Block.
 
 <table>
 <caption><strong>Layout: Reference Header</strong></caption>
@@ -12634,7 +12683,7 @@ Reference Block stored in the global heap:
   <th width="25%">byte</th>
   <th>byte</th>
 </tr>
-<tr>
+<tr align="center">
   <td>Reference Type</td>
   <td>Flags</td>
   <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
@@ -12697,34 +12746,34 @@ Reference Block stored in the global heap:
   <th width="25%">byte</th>
   <th>byte</th>
 </tr>
-<tr>
+<tr align="center">
   <td>Token Size</td>
   <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
-<tr>
+<tr align="center">
   <td colspan="4"><br />Token <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr>
   <td colspan="2">Length of External File Name</td>
   <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
-<tr>
+<tr align="center">
   <td colspan="4"><br />External File Name <em>(variable size)</em><br /><br /></td>
 </tr>
-<tr>
+<tr align="center">
   <td colspan="4">Size of Dataspace Selection</td>
 </tr>
-<tr>
+<tr align="center">
   <td colspan="4">Rank of Dataspace Selection</td>
 </tr>
-<tr>
+<tr align="center">
   <td colspan="4"><br />Dataspace Selection Information <em>(variable size)</em><br /><br /></td>
 </tr>
-<tr>
+<tr align="center">
   <td colspan="2">Length of Attribute Name </td>
   <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
-<tr>
+<tr align="center">
   <td colspan="4"><br />Attribute Name <em>(variable size)</em><br /><br /></td>
 </tr>
 </table>
@@ -12753,7 +12802,19 @@ Reference Block stored in the global heap:
   <td>This is the name of the external file being referenced.<br />
       This field exists if bit 0 of <em>flags</em> is set.
 </td>
+<tr>
+  <td>Size of Dataspace Selection</td>
+  <td>This is the size of the Dataspace Selection Information.<br />
+      This field exists if the <em>Reference Type</em> is #H5R_DATASET_REGION2.
+</td>
 </tr>
+<tr>
+  <td>Rank of Dataspace Selection</td>
+  <td>This is the number of dimensions in the dataspace.<br />
+      This field exists if the <em>Reference Type</em> is #H5R_DATASET_REGION2.
+</td>
+</tr>
+
 <tr>
   <td>Dataspace Selection Information</td>
   <td>See @ref FMT4DataspaceSEL "Dataspace Selection".<br />
@@ -12771,7 +12832,75 @@ Reference Block stored in the global heap:
 </tr>
 </table>
 
-\section subsec_fmt4_appendixd_encodedp VIII.C. Reference Encoding (Backward Compatibility)
+<br />
+Depending on the <em>reference type</em> and the <em>flags</em> fields in the Reference Header, 
+the Reference Block is stored using one of two methods:
+<ul>
+  <li>Direct method</li>
+      <br />The Reference Header and Reference Block are stored together directly as the dataset's raw data.
+      This method is used by:
+      <ul>
+        <li>Object Reference (H5R_OBJECT2) without reference to an external file</li>
+      </ul>
+  <li>Indirect method</li>
+      <br />The Reference Header, the size of the blob, and the Global Heap ID are stored as the dataset's raw data.
+      The blob size gives the size of the Reference Block stored in the global heap, 
+      and the @ref FMT4GlobalHeapID "Global Heap ID" is used to locate it.
+      This method is used by:
+        <ul>
+        <li>Object Reference (#H5R_OBJECT2) (with reference to an external file)</li>
+        <li>Dataset Region Reference (#H5R_DATASET_REGION2) (with/without reference to an external file)</li>
+        <li>Attribute Reference (#H5R_ATTR) (with/without reference to an external file)</li>
+        </ul>
+      The layout for this method after the Reference Header is as follows:
+
+<table>
+<caption><strong>Layout: Indirect Method</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align="center">
+  <td colspan="4">Blob Size</td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Collection Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4">Object Index</td>
+</tr>
+
+</table>
+
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+
+<br />
+<table>
+<caption><strong>Fields: Indirect Method</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Blob Size</td>
+  <td>This is the size of the Reference Block stored in the global heap.</td>
+</tr>
+<tr>
+  <td>Collection Address</td>
+  <td>See @ref FMT4GlobalHeapID "Global Heap ID".</td>
+</tr>
+<tr>
+  <td>Object Index</td>
+  <td>See @ref FMT4GlobalHeapID "Global Heap ID".</td>
+</tr>
+</table>
+
+</ul>
+
+\section subsec_fmt4_appendixd_encodedp VIII.D. Reference Encoding (Backward Compatibility)
 The two references described below are maintained to preserve compatibility with previous versions
 of the library.<br />
 For the following reference type, the reference encoding is stored as the dataset's raw data in the file:

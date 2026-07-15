@@ -1343,8 +1343,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__copy_search_comm_dt_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5O_loc_t *obj_oloc,
-                            void *_udata)
+H5O__copy_search_comm_dt_cb(hid_t H5_ATTR_UNUSED group, const char H5_ATTR_UNUSED *name,
+                            const H5O_loc_t *obj_oloc, void *_udata)
 {
     H5O_copy_search_comm_dt_ud_t *udata =
         (H5O_copy_search_comm_dt_ud_t *)_udata; /* Skip list of dtypes in dest file */

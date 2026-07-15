@@ -46,6 +46,12 @@
 #define S3_TEST_RESOURCE_H5_PUBLIC       "charsets.h5"
 #define S3_TEST_RESOURCE_MISSING         "missing.csv"
 
+/* Object key containing characters ('=', '+') that must be URI-encoded
+ * when request paths are built and signed; mimics Hive-style "key=value"
+ * partition naming
+ */
+#define S3_TEST_RESOURCE_H5_HIVE_KEY "src=h5test/fmt=hive+style@cloud/charsets.h5"
+
 #define S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE 5458199
 #define S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE     6464
 #define S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEOVER 6400
@@ -54,6 +60,7 @@
 static char url_text_restricted[S3_TEST_MAX_URL_SIZE] = "";
 static char url_text_public[S3_TEST_MAX_URL_SIZE]     = "";
 static char url_h5_public[S3_TEST_MAX_URL_SIZE]       = "";
+static char url_h5_hive_key[S3_TEST_MAX_URL_SIZE]     = "";
 static char url_missing[S3_TEST_MAX_URL_SIZE]         = "";
 static char s3_test_bucket_url[S3_TEST_MAX_URL_SIZE]  = "";
 static bool s3_test_bucket_defined                    = false;
@@ -1068,6 +1075,208 @@ error:
     return 1;
 
 } /* end test_ros3_access_modes() */
+
+/*---------------------------------------------------------------------------
+ * Function:    test_hive_style_object_key
+ *
+ * Purpose:     Test opening a file whose object key contains characters,
+ *              such as the '=' in Hive-style "key=value" partition names,
+ *              that must be URI-encoded when request paths are built.
+ *              If the key is not URI-encoded exactly once, S3 rejects
+ *              the requests with HTTP 403 (SignatureDoesNotMatch).
+ *
+ * Return:      PASS : 0
+ *              FAIL : 1
+ *---------------------------------------------------------------------------
+ */
+static int
+test_hive_style_object_key(void)
+{
+    hid_t fid     = H5I_INVALID_HID;
+    hid_t fapl_id = H5I_INVALID_HID;
+
+    TESTING("ros3 object keys with characters requiring URI encoding");
+
+    if (s3_test_credentials_loaded == 0) {
+        SKIPPED();
+        puts("    s3 credentials are not loaded");
+        fflush(stdout);
+        return 0;
+    }
+
+    if (false == s3_test_bucket_defined) {
+        SKIPPED();
+        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        fflush(stdout);
+        return 0;
+    }
+
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
+        TEST_ERROR;
+    if (*s3_test_aws_session_token != '\0')
+        if (H5Pset_fapl_ros3_token(fapl_id, s3_test_aws_session_token) < 0)
+            TEST_ERROR;
+
+    /* The object is not public, so all of the requests made when opening
+     * and reading the file must be signed
+     */
+    if ((fid = H5Fopen(url_h5_hive_key, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY
+
+    return 1;
+
+} /* end test_hive_style_object_key() */
+
+/*---------------------------------------------------------------------------
+ * Function:    test_ros3_block_caching_apis
+ *
+ * Purpose:     Tests the API functions for setting I/O block caching
+ *              parameters for the ros3 VFD.
+ *
+ * Return:      PASS : 0
+ *              FAIL : 1
+ *---------------------------------------------------------------------------
+ */
+static int
+test_ros3_block_caching_apis(void)
+{
+    size_t block_size;
+    size_t block_cache_size;
+    hid_t  fid     = H5I_INVALID_HID;
+    hid_t  fapl_id = H5I_INVALID_HID;
+    bool   lock_superblock;
+
+    TESTING("ros3 I/O block caching parameter APIs");
+
+    if (s3_test_credentials_loaded == 0) {
+        SKIPPED();
+        puts("    s3 credentials are not loaded");
+        fflush(stdout);
+        return 0;
+    }
+
+    if (false == s3_test_bucket_defined) {
+        SKIPPED();
+        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        fflush(stdout);
+        return 0;
+    }
+
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3(fapl_id, &anonymous_fa) < 0)
+        TEST_ERROR;
+    if (*s3_test_aws_session_token != '\0')
+        if (H5Pset_fapl_ros3_token(fapl_id, s3_test_aws_session_token) < 0)
+            TEST_ERROR;
+
+    /* Set block size to 0 - should disable block caching */
+    if (H5Pset_fapl_ros3_block_caching(fapl_id, 0, HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE, true) < 0)
+        TEST_ERROR;
+    if (H5Pget_fapl_ros3_block_caching(fapl_id, &block_size, &block_cache_size, &lock_superblock) < 0)
+        TEST_ERROR;
+    if (block_size != 0)
+        TEST_ERROR;
+    if (block_cache_size != HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE)
+        TEST_ERROR;
+    if (!lock_superblock)
+        TEST_ERROR;
+
+    /* Check that parameters are accepted - no validation performed since H5FD_ros3_t fields are internal */
+    if ((fid = H5Fopen(url_h5_public, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Set block cache size to 0 - should disable block caching */
+    if (H5Pset_fapl_ros3_block_caching(fapl_id, 1048576, 0, true) < 0)
+        TEST_ERROR;
+    if (H5Pget_fapl_ros3_block_caching(fapl_id, &block_size, &block_cache_size, &lock_superblock) < 0)
+        TEST_ERROR;
+    if (block_size != 1048576)
+        TEST_ERROR;
+    if (block_cache_size != 0)
+        TEST_ERROR;
+    if (!lock_superblock)
+        TEST_ERROR;
+
+    /* Check that parameters are accepted - no validation performed since H5FD_ros3_t fields are internal */
+    if ((fid = H5Fopen(url_h5_public, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Set block size to slightly larger than block cache size - should round block size down */
+    if (H5Pset_fapl_ros3_block_caching(fapl_id, 1048580, 1048576, true) < 0)
+        TEST_ERROR;
+    if (H5Pget_fapl_ros3_block_caching(fapl_id, &block_size, &block_cache_size, &lock_superblock) < 0)
+        TEST_ERROR;
+    if (block_size != 1048576)
+        TEST_ERROR;
+    if (block_cache_size != 1048576)
+        TEST_ERROR;
+    if (!lock_superblock)
+        TEST_ERROR;
+
+    /* Check that parameters are accepted - no validation performed since H5FD_ros3_t fields are internal */
+    if ((fid = H5Fopen(url_h5_public, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Disable locking of the superblock block into the block cache */
+    if (H5Pset_fapl_ros3_block_caching(fapl_id, 1048576, 4194304, false) < 0)
+        TEST_ERROR;
+    if (H5Pget_fapl_ros3_block_caching(fapl_id, &block_size, &block_cache_size, &lock_superblock) < 0)
+        TEST_ERROR;
+    if (block_size != 1048576)
+        TEST_ERROR;
+    if (block_cache_size != 4194304)
+        TEST_ERROR;
+    if (lock_superblock)
+        TEST_ERROR;
+
+    /* Check that parameters are accepted - no validation performed since H5FD_ros3_t fields are internal */
+    if ((fid = H5Fopen(url_h5_public, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl_id);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+
+    return 1;
+}
 #endif /* H5_HAVE_ROS3_VFD */
 
 /*-------------------------------------------------------------------------
@@ -1127,6 +1336,13 @@ main(void)
                                         (const char *)s3_test_bucket_url,
                                         (const char *)S3_TEST_RESOURCE_H5_PUBLIC)) {
         printf("* ros3 setup failed (h5_public) ! *\n");
+        ret_value = EXIT_FAILURE;
+        goto done;
+    }
+    if (S3_TEST_MAX_URL_SIZE < snprintf(url_h5_hive_key, (size_t)S3_TEST_MAX_URL_SIZE, "%s/%s",
+                                        (const char *)s3_test_bucket_url,
+                                        (const char *)S3_TEST_RESOURCE_H5_HIVE_KEY)) {
+        printf("* ros3 setup failed (h5_hive_key) ! *\n");
         ret_value = EXIT_FAILURE;
         goto done;
     }
@@ -1231,6 +1447,8 @@ main(void)
         nerrors += test_noops_and_autofails();
         nerrors += test_cmp();
         nerrors += test_ros3_access_modes();
+        nerrors += test_hive_style_object_key();
+        nerrors += test_ros3_block_caching_apis();
     }
 
     if (H5FD__s3comms_term() < 0) {
