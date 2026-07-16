@@ -2738,18 +2738,25 @@ test_get_filter_info(void)
 #endif
 
 #ifdef H5_HAVE_FILTER_SZIP
-    if (H5Zget_filter_info(H5Z_FILTER_SZIP, &flags) < 0)
-        TEST_ERROR;
+    {
+        H5Z_class2_t *szip_cls;
 
-    if (H5Z_SZIP->encoder_present) {
-        if (((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) ||
-            ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
+        if (H5Zget_filter_info(H5Z_FILTER_SZIP, &flags) < 0)
             TEST_ERROR;
-    }
-    else {
-        if (((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) != 0) ||
-            ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
+
+        if (H5Z_find(false, H5Z_FILTER_SZIP, &szip_cls) < 0)
             TEST_ERROR;
+
+        if (szip_cls->encoder_present) {
+            if (((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) ||
+                ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
+                TEST_ERROR;
+        }
+        else {
+            if (((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) != 0) ||
+                ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
+                TEST_ERROR;
+        }
     }
 #endif /* H5_HAVE_FILTER_SZIP */
 
