@@ -12,16 +12,16 @@ needed by the HDF5 filter configuration API are included.
 |---------------|------------------------------------------------|
 | Upstream URL  | https://github.com/cktan/tomlc17               |
 | License       | MIT (see `LICENSE` in this directory)          |
-| Vendored on   | 2026-05-08                                     |
-| Release / tag | `R20260501`                                    |
+| Vendored on   | 2026-07-15                                     |
+| Release / tag | `R260618`                                      |
 
 Because tomlc17 does not include a version constant in its source, the
 vendored files are identified by their SHA-256 checksums:
 
 | File         | SHA-256                                                            |
 |--------------|--------------------------------------------------------------------|
-| `tomlc17.c`  | `e5d61c4960a4ef7254abb4077ffaefd2ba8935459e52314ea67537b5e340ddd5` |
-| `tomlc17.h`  | `9f6cae985cde199a64e0f63d4b395b2738455f9b62d501bb4385ca3a85e34728` |
+| `tomlc17.c`  | `f28f3742808505b5c55189b72cf62705e824276eca6533b36e8751a8433482aa` |
+| `tomlc17.h`  | `eef9a891b93fc6235a9552db16286cefc684be8fae49018bedf1c6ab9ca55b87` |
 
 Use these hashes to identify the exact upstream commit.
 
