@@ -1002,8 +1002,11 @@ endif ()
 
 list (APPEND H5Z_SOURCES ${HDF5_SRC_DIR}/tomlc17/tomlc17.c)
 if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+  # -Wno-cast-align: this vendored file's cell_realloc() intentionally casts
+  # a char* arena pointer to various toml_datum_t*/toml_arritem_t*-family
+  # pointers; suppress here rather than patching upstream source.
   set_source_files_properties (${HDF5_SRC_DIR}/tomlc17/tomlc17.c
-    PROPERTIES COMPILE_OPTIONS "-fvisibility=hidden"
+    PROPERTIES COMPILE_OPTIONS "-fvisibility=hidden;-Wno-cast-align"
   )
 endif ()
 
