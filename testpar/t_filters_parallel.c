@@ -10374,7 +10374,6 @@ test_par_append_filter_blob(hid_t fapl_id)
     C_DATATYPE    *rbuf     = NULL;
     unsigned char *blob     = NULL;
     void          *enc_buf  = NULL;
-    size_t         enc_size = 0;
     size_t         nbytes;
     herr_t         ret;
 
