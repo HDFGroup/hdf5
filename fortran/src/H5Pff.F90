@@ -1637,6 +1637,50 @@ CONTAINS
 !>
 !! \ingroup FH5P
 !!
+!! \brief Appends a filter to the pipeline with an attached binary blob.
+!!
+!! \param prp_id  Property list identifier.
+!! \param filter  Filter to be added to the pipeline.
+!! \param flags   Bit vector specifying general filter properties.
+!! \param buf_ptr Pointer to the blob bytes, or C_NULL_PTR if \p size is 0.
+!! \param size    Length of the blob pointed to by \p buf_ptr, in bytes.
+!! \param hdferr  \fortran_error
+!!
+!! \details h5pappend_filter_blob_f() appends \p filter to the pipeline on
+!!          \p prp_id, exactly as h5pappend_filter_f() does, and attaches the
+!!          bytes at \p buf_ptr as the filter's blob.  The library copies
+!!          these bytes into property-list-owned storage before returning;
+!!          the caller's buffer may be freed or reused immediately.  Obtain
+!!          \p buf_ptr for a Fortran array target via C_LOC().
+!!
+!! See C API: @ref H5Pappend_filter_blob()
+!!
+  SUBROUTINE h5pappend_filter_blob_f(prp_id, filter, flags, buf_ptr, size, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T),  INTENT(IN)  :: prp_id
+    INTEGER,         INTENT(IN)  :: filter
+    INTEGER,         INTENT(IN)  :: flags
+    TYPE(C_PTR),     INTENT(IN)  :: buf_ptr
+    INTEGER(SIZE_T), INTENT(IN)  :: size
+    INTEGER,         INTENT(OUT) :: hdferr
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pappend_filter_blob(plist_id, filter_c, flags_c, buf_ptr_c, size_c) &
+            BIND(C,NAME='H5Pappend_filter_blob')
+         IMPORT :: HID_T, C_INT, C_PTR, SIZE_T
+         INTEGER(HID_T), VALUE :: plist_id
+         INTEGER(C_INT), VALUE :: filter_c
+         INTEGER(C_INT), VALUE :: flags_c
+         TYPE(C_PTR),    VALUE :: buf_ptr_c
+         INTEGER(SIZE_T), VALUE :: size_c
+       END FUNCTION H5Pappend_filter_blob
+    END INTERFACE
+
+    hdferr = INT(H5Pappend_filter_blob(prp_id, INT(filter, C_INT), INT(flags, C_INT), buf_ptr, size))
+  END SUBROUTINE h5pappend_filter_blob_f
+
+!>
+!! \ingroup FH5P
+!!
 !! \brief Retrieves a filter's parameter string by pipeline index.
 !!
 !! \param prp_id      Property list identifier.

@@ -164,9 +164,11 @@ CONTAINS
      END SUBROUTINE filters_test
 
     SUBROUTINE filter_config_test(total_error)
-!   Tests h5pappend_filter_f, h5pget_filter_params_by_idx_f, h5zconfig_get_param_f
+!   Tests h5pappend_filter_f, h5pget_filter_params_by_idx_f, h5zconfig_get_param_f,
+!   h5pappend_filter_blob_f
 
-      USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_INT64_T, C_DOUBLE, C_NULL_CHAR
+      USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_INT64_T, C_DOUBLE, C_NULL_CHAR, C_NULL_PTR, &
+           C_LOC, C_PTR, C_SIGNED_CHAR
       IMPLICIT NONE
       INTEGER, INTENT(OUT) :: total_error
 
@@ -182,6 +184,8 @@ CONTAINS
       REAL(C_DOUBLE)     :: dval
       LOGICAL            :: bval
       LOGICAL            :: found
+      INTEGER(C_SIGNED_CHAR), TARGET :: blob_buf(16)
+      INTEGER             :: i
 
 !
 ! h5pappend_filter_f (raw cd_values variant): shuffle with no parameters
@@ -236,6 +240,43 @@ CONTAINS
          CALL h5pclose_f(dcpl, error)
               CALL check("h5pclose_f", error, total_error)
       END IF
+
+!
+! h5pappend_filter_blob_f: shuffle with an attached blob
+!
+      DO i = 1, SIZE(blob_buf)
+         blob_buf(i) = INT(MOD(i * 7 + 3, 128), C_SIGNED_CHAR)
+      END DO
+
+      CALL h5pcreate_f(H5P_DATASET_CREATE_F, dcpl, error)
+           CALL check("h5pcreate_f", error, total_error)
+      CALL h5pappend_filter_blob_f(dcpl, H5Z_FILTER_SHUFFLE_F, 0, C_LOC(blob_buf), &
+           INT(SIZE(blob_buf), SIZE_T), error)
+           CALL check("h5pappend_filter_blob_f", error, total_error)
+      CALL h5pget_nfilters_f(dcpl, nfilters, error)
+           CALL check("h5pget_nfilters_f", error, total_error)
+      IF (nfilters /= 1) THEN
+           WRITE(*,*) "h5pappend_filter_blob_f: expected 1 filter, got ", nfilters
+           total_error = total_error + 1
+      END IF
+      CALL h5pclose_f(dcpl, error)
+           CALL check("h5pclose_f", error, total_error)
+
+!
+! h5pappend_filter_blob_f: size=0 with C_NULL_PTR appends the filter with no blob attached
+!
+      CALL h5pcreate_f(H5P_DATASET_CREATE_F, dcpl, error)
+           CALL check("h5pcreate_f", error, total_error)
+      CALL h5pappend_filter_blob_f(dcpl, H5Z_FILTER_SHUFFLE_F, 0, C_NULL_PTR, 0_SIZE_T, error)
+           CALL check("h5pappend_filter_blob_f(no blob)", error, total_error)
+      CALL h5pget_nfilters_f(dcpl, nfilters, error)
+           CALL check("h5pget_nfilters_f", error, total_error)
+      IF (nfilters /= 1) THEN
+           WRITE(*,*) "h5pappend_filter_blob_f(no blob): expected 1 filter, got ", nfilters
+           total_error = total_error + 1
+      END IF
+      CALL h5pclose_f(dcpl, error)
+           CALL check("h5pclose_f", error, total_error)
 
 !
 ! h5zconfig_get_param_f (integer variant)
