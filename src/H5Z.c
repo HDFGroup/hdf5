@@ -1313,6 +1313,10 @@ H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t
     pline->filter[idx].flags     = flags;
     pline->filter[idx].cd_nelmts = cd_nelmts;
 
+    /* Modifying the raw cd_values invalidates any stored configuration string;
+     * drop it so introspection falls back to the filter's get_config callback */
+    pline->filter[idx].config = (char *)H5MM_xfree(pline->filter[idx].config);
+
     /* Free any existing parameters */
     if (pline->filter[idx].cd_values != NULL && pline->filter[idx].cd_values != pline->filter[idx]._cd_values)
         H5MM_xfree(pline->filter[idx].cd_values);
@@ -1416,6 +1420,7 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_ne
     pline->filter[idx].flags             = flags;
     pline->filter[idx].name              = NULL; /*we'll pick it up later*/
     pline->filter[idx].cd_nelmts         = cd_nelmts;
+    pline->filter[idx].config            = NULL; /*set by H5Pappend_filter or pline decode*/
     pline->filter[idx].aux_data          = NULL; /*set by H5Pappend_filter_blob or pline decode*/
     pline->filter[idx].aux_size          = 0;
     pline->filter[idx].aux_loc.addr      = HADDR_UNDEF;
@@ -1959,6 +1964,7 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
             assert(pline->filter[idx].cd_nelmts > H5Z_COMMON_CD_VALUES);
         if (pline->filter[idx].cd_values != pline->filter[idx]._cd_values)
             pline->filter[idx].cd_values = (unsigned *)H5MM_xfree(pline->filter[idx].cd_values);
+        pline->filter[idx].config = (char *)H5MM_xfree(pline->filter[idx].config);
         H5Z_blob_release(&pline->filter[idx]);
 
         /* Remove filter from pipeline array */
@@ -2032,11 +2038,22 @@ H5Z_blob_release(H5Z_filter_info_t *fi)
  *           callback control their own storage; otherwise the bytes are
  *           inserted into the file's global heap.
  *
- *           For parallel access, only rank 0 writes; the resulting locator
- *           is broadcast so all ranks encode an identical pipeline message.
- *           H5HG_insert allocates file space outside collective-I/O
- *           coordination, so independent per-rank writes would produce
- *           divergent locators.
+ *           For parallel access, EVERY rank performs the identical write
+ *           (same bytes, same point in H5D__create's collective metadata
+ *           sequence) rather than having rank 0 write and broadcast the
+ *           locator: dataset creation is already collective and requires
+ *           an identical DCPL -- and therefore identical blob bytes -- on
+ *           every rank, so H5MF_alloc allocates the same file-space address
+ *           deterministically on every rank, exactly as it already does for
+ *           every other piece of metadata dataset creation writes (object
+ *           header, layout message, etc).  A rank-0-writes-then-broadcasts
+ *           protocol was considered and rejected: H5HG_insert dirties a
+ *           metadata-cache entry, and only rank 0 doing so would desync the
+ *           parallel metadata cache's identical-operations invariant across
+ *           ranks.  A custom write_blob callback MUST follow the same rule:
+ *           perform identical file-modifying operations on every rank (or
+ *           none, by delegating to the default writer); per-rank divergent
+ *           behavior is undefined.
  *
  * Return:   Non-negative on success / Negative on failure
  *-------------------------------------------------------------------------
@@ -2055,7 +2072,6 @@ H5Z_blob_write(H5F_t *f, H5O_pline_t *pline)
         H5Z_filter_info_t *fi    = &pline->filter[u];
         H5Z_entry_t       *entry = NULL;
         H5Z_blob_loc_t     loc;
-        bool               do_write = true;
 
         if (fi->aux_data == NULL)
             continue;
@@ -2065,49 +2081,51 @@ H5Z_blob_write(H5F_t *f, H5O_pline_t *pline)
 
         (void)H5Z_find_entry(true, fi->id, &entry);
 
-#ifdef H5_HAVE_PARALLEL
-        if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI))
-            do_write = (H5F_mpi_get_rank(f) == 0);
-#endif
+        if (entry && entry->write_blob) {
+            hid_t file_id;
 
-        if (do_write) {
-            if (entry && entry->write_blob) {
-                hid_t file_id;
-
-                if ((file_id = H5F_get_id(f)) < 0)
-                    HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get file ID for blob callback");
-                if ((entry->write_blob)(file_id, fi->aux_data, fi->aux_size, &loc) < 0) {
-                    (void)H5I_dec_ref(file_id);
-                    HGOTO_ERROR(H5E_PLINE, H5E_CALLBACK, FAIL, "filter write_blob callback failed");
-                }
-                if (H5I_dec_ref(file_id) < 0)
-                    HGOTO_ERROR(H5E_PLINE, H5E_CANTDEC, FAIL, "can't release file ID");
+            if ((file_id = H5F_get_id(f)) < 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get file ID for blob callback");
+            if ((entry->write_blob)(file_id, fi->aux_data, fi->aux_size, &loc) < 0) {
+                (void)H5I_dec_ref(file_id);
+                HGOTO_ERROR(H5E_PLINE, H5E_CALLBACK, FAIL, "filter write_blob callback failed");
             }
-            else {
-                H5HG_t hobj;
-
-                if (H5HG_insert(f, fi->aux_size, fi->aux_data, &hobj) < 0)
-                    HGOTO_ERROR(H5E_PLINE, H5E_CANTINSERT, FAIL,
-                                "unable to insert filter blob into global heap");
-                loc.addr = hobj.addr;
-                loc.idx  = hobj.idx;
-            }
+            if (H5I_dec_ref(file_id) < 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTDEC, FAIL, "can't release file ID");
         }
+        else {
+            H5HG_t hobj;
 
-#ifdef H5_HAVE_PARALLEL
-        /* All ranks must agree on the locator before the pipeline message is
-         * encoded.  An undefined address after the broadcast means rank 0
-         * failed, so every rank fails consistently instead of deadlocking. */
-        if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
-            int mpi_code;
-
-            if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&loc, sizeof(loc), MPI_BYTE, 0, H5F_mpi_get_comm(f))))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+            if (H5HG_insert(f, fi->aux_size, fi->aux_data, &hobj) < 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTINSERT, FAIL,
+                            "unable to insert filter blob into global heap");
+            loc.addr = hobj.addr;
+            loc.idx  = hobj.idx;
         }
-#endif
 
         if (!H5_addr_defined(loc.addr))
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINSERT, FAIL, "filter blob was not assigned a valid locator");
+
+#if defined(H5_HAVE_PARALLEL) && !defined(NDEBUG)
+        /* Debug-build safety net: every rank just performed what should be
+         * an identical write, so every rank must have landed on the same
+         * locator.  This is not a substitute for collective consistency
+         * (a hang here means ranks already diverged before this point) but
+         * catches a non-collective or non-deterministic write_blob callback
+         * before it silently corrupts the file. */
+        if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
+            H5Z_blob_loc_t rank0_loc = loc;
+            int            mpi_code;
+
+            if (MPI_SUCCESS !=
+                (mpi_code = MPI_Bcast(&rank0_loc, sizeof(rank0_loc), MPI_BYTE, 0, H5F_mpi_get_comm(f))))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+            assert(H5_addr_eq(rank0_loc.addr, loc.addr) && rank0_loc.idx == loc.idx &&
+                   "write_blob produced a different locator on this rank than on rank 0 -- "
+                   "custom write_blob callbacks must perform identical file-modifying "
+                   "operations on every rank");
+        }
+#endif
 
         fi->aux_loc = loc;
     }

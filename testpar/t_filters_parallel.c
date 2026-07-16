@@ -10311,6 +10311,197 @@ test_par_append_filter_builtin_string_pipeline(hid_t fapl_id)
     VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
 }
 
+/* -----------------------------------------------------------------------
+ * RFC-HDFG-2026-003: In-file blob configuration storage, parallel write
+ * ---------------------------------------------------------------------- */
+
+#define PAR_BLOB_FILTER_ID 540
+#define PAR_BLOB_SIZE       4096
+#define PAR_BLOB_MAGIC      "TFILTERPARBLOBMAGIC"
+#define PAR_BLOB_MAGIC_LEN  (sizeof(PAR_BLOB_MAGIC) - 1)
+
+static size_t
+par_blob_passthrough_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                          hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
+                          size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
+{
+    (void)flags;
+    (void)cd_nelmts;
+    (void)cd_values;
+    (void)buf_size;
+    (void)buf;
+    return nbytes; /* pass-through */
+}
+
+static const H5Z_class3_t par_blob_cls = {
+    2,                          /* version         */
+    PAR_BLOB_FILTER_ID,         /* id              */
+    1,                          /* encoder_present */
+    1,                          /* decoder_present */
+    "par_blob_filter",          /* name            */
+    NULL,                       /* description     */
+    NULL,                       /* can_apply       */
+    NULL,                       /* set_local       */
+    par_blob_passthrough_func, /* filter          */
+    NULL,                       /* set_config      */
+    NULL,                       /* get_config      */
+    NULL,                       /* write_blob: use default global-heap storage */
+    NULL,                       /* read_blob       */
+    NULL,                       /* close_blob      */
+};
+
+/* Every rank must call H5Pappend_filter_blob with identical bytes: dataset
+ * creation is collective and requires an identical DCPL on every rank, and
+ * the blob-write protocol (H5Z_blob_write) relies on that to let every rank
+ * perform an identical H5HG_insert rather than broadcasting a locator from
+ * rank 0.  This test exercises exactly that path with the default (NULL
+ * write_blob/read_blob) global-heap storage. */
+static void
+test_par_append_filter_blob(hid_t fapl_id)
+{
+    hid_t          file_id   = H5I_INVALID_HID;
+    hid_t          group_id  = H5I_INVALID_HID;
+    hid_t          dcpl_id   = H5I_INVALID_HID;
+    hid_t          dcpl_out  = H5I_INVALID_HID;
+    hid_t          dxpl_id   = H5I_INVALID_HID;
+    hid_t          dset_id   = H5I_INVALID_HID;
+    hid_t          fspace_id = H5I_INVALID_HID;
+    hid_t          mspace_id = H5I_INVALID_HID;
+    hsize_t        dims[2]   = {(hsize_t)(mpi_size * 4), 4};
+    hsize_t        chunk[2]  = {4, 4};
+    hsize_t        start[2], count[2], block[2];
+    C_DATATYPE    *wbuf = NULL;
+    C_DATATYPE    *rbuf = NULL;
+    unsigned char *blob = NULL;
+    void          *enc_buf  = NULL;
+    size_t         enc_size = 0;
+    size_t         nbytes;
+    herr_t         ret;
+
+    if (MAINPROCESS)
+        puts("Testing par-05: H5Pappend_filter_blob collective write across MPI ranks");
+
+    VRFY((H5Zregister(&par_blob_cls) >= 0), "H5Zregister(par_blob_cls) succeeded");
+
+    /* Identical, rank-independent content: every rank must supply the same
+     * blob bytes for the collective dataset create to be well-defined. */
+    blob = (unsigned char *)malloc(PAR_BLOB_SIZE);
+    VRFY((blob != NULL), "malloc blob succeeded");
+    memcpy(blob, PAR_BLOB_MAGIC, PAR_BLOB_MAGIC_LEN);
+    for (size_t i = PAR_BLOB_MAGIC_LEN; i < PAR_BLOB_SIZE; i++)
+        blob[i] = (unsigned char)(i * 7 + 3);
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "H5Fopen succeeded");
+
+    group_id = H5Gcreate2(file_id, "par_append_filter_blob", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gcreate2 succeeded");
+
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((dcpl_id >= 0), "H5Pcreate DCPL succeeded");
+    VRFY((H5Pset_chunk(dcpl_id, 2, chunk) >= 0), "H5Pset_chunk succeeded");
+
+    ret = H5Pappend_filter_blob(dcpl_id, PAR_BLOB_FILTER_ID, 0, blob, PAR_BLOB_SIZE);
+    VRFY((ret >= 0), "H5Pappend_filter_blob succeeded");
+
+    fspace_id = H5Screate_simple(2, dims, NULL);
+    VRFY((fspace_id >= 0), "H5Screate_simple filespace succeeded");
+
+    /* Collective: every rank performs the identical H5HG_insert this
+     * exercises inside H5D__create. */
+    dset_id = H5Dcreate2(group_id, "dset", HDF5_DATATYPE_NAME, fspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "H5Dcreate2 succeeded");
+    VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose filespace succeeded");
+    fspace_id = H5I_INVALID_HID;
+
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_id >= 0), "H5Pcreate DXPL succeeded");
+    VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) >= 0), "H5Pset_dxpl_mpio succeeded");
+
+    /* Each rank writes one 4x4 chunk, to confirm the blob-bearing pipeline
+     * doesn't interfere with ordinary collective chunked I/O. */
+    nbytes = 4 * 4 * sizeof(C_DATATYPE);
+    wbuf   = (C_DATATYPE *)malloc(nbytes);
+    VRFY((wbuf != NULL), "malloc wbuf succeeded");
+    for (size_t i = 0; i < 16; i++)
+        wbuf[i] = (C_DATATYPE)(mpi_rank * 16 + (int)i);
+
+    start[0] = (hsize_t)(mpi_rank * 4);
+    start[1] = 0;
+    count[0] = 1;
+    count[1] = 1;
+    block[0] = 4;
+    block[1] = 4;
+
+    fspace_id = H5Dget_space(dset_id);
+    VRFY((fspace_id >= 0), "H5Dget_space succeeded");
+    VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, block) >= 0),
+         "H5Sselect_hyperslab write succeeded");
+
+    mspace_id = H5Screate_simple(2, block, NULL);
+    VRFY((mspace_id >= 0), "H5Screate_simple mspace succeeded");
+    ret = H5Dwrite(dset_id, HDF5_DATATYPE_NAME, mspace_id, fspace_id, dxpl_id, wbuf);
+    VRFY((ret >= 0), "H5Dwrite succeeded");
+    VRFY((H5Sclose(mspace_id) >= 0), "H5Sclose mspace succeeded");
+    mspace_id = H5I_INVALID_HID;
+    VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose fspace succeeded");
+    fspace_id = H5I_INVALID_HID;
+    VRFY((H5Dclose(dset_id) >= 0), "H5Dclose succeeded");
+
+    /* Re-open and read back on every rank independently, verifying both the
+     * chunk data and (via H5Pencode carrying the blob bytes inline) that
+     * every rank's H5HG_insert landed on a locator that reads back the
+     * exact bytes written -- the point of the every-rank-identical-insert
+     * protocol. */
+    dset_id = H5Dopen2(group_id, "dset", H5P_DEFAULT);
+    VRFY((dset_id >= 0), "H5Dopen2 succeeded");
+
+    rbuf = (C_DATATYPE *)calloc(1, nbytes);
+    VRFY((rbuf != NULL), "calloc rbuf succeeded");
+
+    fspace_id = H5Dget_space(dset_id);
+    VRFY((fspace_id >= 0), "H5Dget_space succeeded");
+    VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, block) >= 0),
+         "H5Sselect_hyperslab read succeeded");
+
+    mspace_id = H5Screate_simple(2, block, NULL);
+    VRFY((mspace_id >= 0), "H5Screate_simple mspace succeeded");
+    ret = H5Dread(dset_id, HDF5_DATATYPE_NAME, mspace_id, fspace_id, dxpl_id, rbuf);
+    VRFY((ret >= 0), "H5Dread succeeded");
+    VRFY((H5Sclose(mspace_id) >= 0), "H5Sclose mspace succeeded");
+    VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose fspace succeeded");
+
+    VRFY((memcmp(rbuf, wbuf, nbytes) == 0), "Data verification succeeded");
+
+    dcpl_out = H5Dget_create_plist(dset_id);
+    VRFY((dcpl_out >= 0), "H5Dget_create_plist succeeded");
+    VRFY((H5Pencode2(dcpl_out, NULL, &enc_size, H5P_DEFAULT) >= 0), "H5Pencode2 size-query succeeded");
+    enc_buf = malloc(enc_size);
+    VRFY((enc_buf != NULL), "malloc enc_buf succeeded");
+    VRFY((H5Pencode2(dcpl_out, enc_buf, &enc_size, H5P_DEFAULT) >= 0), "H5Pencode2 succeeded");
+    {
+        bool           found = false;
+        unsigned char *hay   = (unsigned char *)enc_buf;
+        for (size_t i = 0; i + PAR_BLOB_SIZE <= enc_size && !found; i++)
+            if (hay[i] == blob[0] && 0 == memcmp(hay + i, blob, PAR_BLOB_SIZE))
+                found = true;
+        VRFY(found, "encoded DCPL contains this rank's blob bytes verbatim");
+    }
+    free(enc_buf);
+    VRFY((H5Pclose(dcpl_out) >= 0), "H5Pclose dcpl_out succeeded");
+
+    free(wbuf);
+    free(rbuf);
+    free(blob);
+
+    VRFY((H5Dclose(dset_id) >= 0), "H5Dclose succeeded");
+    VRFY((H5Pclose(dxpl_id) >= 0), "H5Pclose DXPL succeeded");
+    VRFY((H5Pclose(dcpl_id) >= 0), "H5Pclose DCPL succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "H5Gclose succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+    VRFY((H5Zunregister(PAR_BLOB_FILTER_ID) >= 0), "H5Zunregister succeeded");
+}
+
 int
 main(int argc, char **argv)
 {
@@ -10707,6 +10898,7 @@ main(int argc, char **argv)
         test_par_append_filter_error_propagation(fapl_id);
         test_par_append_filter_rank_inconsistent_dcpl(fapl_id);
         test_par_append_filter_builtin_string_pipeline(fapl_id);
+        test_par_append_filter_blob(fapl_id);
     }
     else {
         if (MAINPROCESS)

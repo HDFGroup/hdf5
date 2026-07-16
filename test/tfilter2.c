@@ -21,7 +21,8 @@
 
 #include "h5test.h"
 
-static const char *FILENAME[] = {"tfilter2", "tfilter2_blob", "tfilter2_blob_custom", NULL};
+static const char *FILENAME[] = {"tfilter2", "tfilter2_blob",     "tfilter2_blob_custom",
+                                 "tfilter2_cfg", "tfilter2_cfg_copy", NULL};
 
 /* -----------------------------------------------------------------------
  * Parser tests - typed TOML accessor functions
@@ -495,8 +496,9 @@ test_callback_contracts(void)
             TEST_ERROR;
         if (plen == 0)
             TEST_ERROR;
-        /* Should contain "level = 9" (TOML output format) */
-        if (strstr(pbuf, "level = 9") == NULL)
+        /* The verbatim configuration string is retained and returned as-is
+         * ("level=9"), taking precedence over the get_config reconstruction. */
+        if (strcmp(pbuf, "level=9") != 0)
             TEST_ERROR;
         H5Pclose(dcpl);
         dcpl = H5I_INVALID_HID;
@@ -2142,6 +2144,288 @@ error:
 }
 
 /* -----------------------------------------------------------------------
+/* -----------------------------------------------------------------------
+ * On-disk configuration-string storage (pipeline v3, RFC-HDFG-2026-001)
+ *
+ * This filter's stored parameter string ("level=N", no spaces) differs
+ * from its get_config reconstruction ("level = N", with spaces) so tests
+ * can tell whether a returned string came from the persisted verbatim
+ * string or from the get_config fallback.
+ * ---------------------------------------------------------------------- */
+
+#define CFG_ONDISK_FILTER_ID 531
+
+static herr_t
+cfg_ondisk_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts,
+                      unsigned cd_values[], size_t cd_values_size)
+{
+    int64_t level = 0;
+
+    *cd_nelmts = 1;
+    if (cd_values && cd_values_size >= 1) {
+        if (params && *params)
+            H5Zconfig_get_int(params, "level", &level);
+        cd_values[0] = (unsigned)level;
+    }
+    return SUCCEED;
+}
+
+static herr_t
+cfg_ondisk_get_config(unsigned H5_ATTR_UNUSED flags, size_t cd_nelmts, const unsigned cd_values[], char *buf,
+                      size_t *buf_size)
+{
+    unsigned level  = (cd_nelmts >= 1) ? cd_values[0] : 0;
+    size_t   needed = (size_t)snprintf(NULL, 0, "level = %u", level) + 1;
+
+    if (buf_size)
+        *buf_size = needed;
+    if (buf)
+        snprintf(buf, needed, "level = %u", level);
+    return SUCCEED;
+}
+
+static size_t
+cfg_ondisk_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                       hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
+                       size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
+{
+    (void)flags;
+    (void)cd_nelmts;
+    (void)cd_values;
+    (void)buf_size;
+    (void)buf;
+    return nbytes; /* pass-through */
+}
+
+static const H5Z_class3_t cfg_ondisk_cls = {
+    2,                      /* version         */
+    CFG_ONDISK_FILTER_ID,   /* id              */
+    1,                      /* encoder_present */
+    1,                      /* decoder_present */
+    "cfg_ondisk_filter",    /* name            */
+    NULL,                   /* description     */
+    NULL,                   /* can_apply       */
+    NULL,                   /* set_local       */
+    cfg_ondisk_filter_func, /* filter         */
+    cfg_ondisk_set_config,  /* set_config      */
+    cfg_ondisk_get_config,  /* get_config      */
+};
+
+/* Build a chunked, filter-configured DCPL from a parameter string */
+static hid_t
+cfg_ondisk_make_dcpl(const char *params)
+{
+    hid_t        dcpl     = H5I_INVALID_HID;
+    hsize_t      chunk[2] = {4, 4};
+    H5Z_params_t p;
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        return H5I_INVALID_HID;
+    if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+        goto error;
+    p.type  = H5Z_PARAMS_STRING;
+    p.u.str = params;
+    if (H5Pappend_filter(dcpl, CFG_ONDISK_FILTER_ID, 0, &p) < 0)
+        goto error;
+    return dcpl;
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+    return H5I_INVALID_HID;
+}
+
+/* Fetch filter 0's parameter string from a DCPL into buf */
+static herr_t
+cfg_ondisk_get_params(hid_t dcpl, char *buf, size_t buf_size)
+{
+    size_t len = 0;
+
+    if (H5Pget_filter_params_by_idx(dcpl, 0, buf, buf_size, &len) < 0)
+        return FAIL;
+    return SUCCEED;
+}
+
+static int
+test_config_string_ondisk(hid_t fapl)
+{
+    hid_t   file = H5I_INVALID_HID, sid = H5I_INVALID_HID, dcpl = H5I_INVALID_HID, dset = H5I_INVALID_HID;
+    hid_t   dcpl_out = H5I_INVALID_HID, fapl_dg = H5I_INVALID_HID, dcpl_dec = H5I_INVALID_HID;
+    hid_t   file2   = H5I_INVALID_HID;
+    hsize_t dims[2] = {8, 8};
+    char    filename[1024], filename2[1024];
+    char    pbuf[H5Z_CONFIG_STRING_MAX + 1];
+    void   *enc_buf  = NULL;
+    size_t  enc_size = 0;
+
+    if (H5Zregister(&cfg_ondisk_cls) < 0)
+        TEST_ERROR;
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+    h5_fixname(FILENAME[3], fapl, filename, sizeof(filename));
+    h5_fixname(FILENAME[4], fapl, filename2, sizeof(filename2));
+
+    /* --- fmt-01/02: verbatim round-trip, recovered without the plugin --- */
+    TESTING("config string: verbatim on-disk round-trip without plugin");
+    if ((dcpl = cfg_ondisk_make_dcpl("level=7")) < 0)
+        TEST_ERROR;
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0 || H5Pclose(dcpl) < 0 || H5Fclose(file) < 0)
+        TEST_ERROR;
+    dset = dcpl = file = H5I_INVALID_HID;
+
+    /* Drop the plugin: the only remaining source is the persisted string */
+    if (H5Zunregister(CFG_ONDISK_FILTER_ID) < 0)
+        TEST_ERROR;
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    if (cfg_ondisk_get_params(dcpl_out, pbuf, sizeof(pbuf)) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "level=7") != 0) /* verbatim, not the "level = 7" get_config form */
+        TEST_ERROR;
+    if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Fclose(file) < 0)
+        TEST_ERROR;
+    dcpl_out = dset = file = H5I_INVALID_HID;
+    if (H5Zregister(&cfg_ondisk_cls) < 0) /* restore for later cases */
+        TEST_ERROR;
+    PASSED();
+
+    /* --- fmt-05: libver high bound below V300 silently omits the string --- */
+    TESTING("config string: silent v2 downgrade when libver bound too low");
+    if ((fapl_dg = H5Pcopy(fapl)) < 0)
+        TEST_ERROR;
+    if (H5Pset_libver_bounds(fapl_dg, H5F_LIBVER_EARLIEST, H5F_LIBVER_V200) < 0)
+        TEST_ERROR;
+    if ((dcpl = cfg_ondisk_make_dcpl("level=5")) < 0)
+        TEST_ERROR;
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_dg)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0 || H5Pclose(dcpl) < 0 || H5Fclose(file) < 0)
+        TEST_ERROR;
+    dset = dcpl = file = H5I_INVALID_HID;
+    /* Plugin still registered: getter falls back to get_config ("level = 5"),
+     * proving the verbatim string was not persisted at v2. */
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    if (cfg_ondisk_get_params(dcpl_out, pbuf, sizeof(pbuf)) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "level = 5") != 0) /* get_config form, not the stored "level=5" */
+        TEST_ERROR;
+    if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Fclose(file) < 0 || H5Pclose(fapl_dg) < 0)
+        TEST_ERROR;
+    dcpl_out = dset = file = fapl_dg = H5I_INVALID_HID;
+    PASSED();
+
+    /* --- fmt-07: H5Pmodify_filter clears the stored string --- */
+    TESTING("config string: H5Pmodify_filter clears the stored string");
+    if ((dcpl = cfg_ondisk_make_dcpl("level=3")) < 0)
+        TEST_ERROR;
+    {
+        unsigned cd[1] = {8};
+        if (H5Pmodify_filter(dcpl, CFG_ONDISK_FILTER_ID, 0, 1, cd) < 0)
+            TEST_ERROR;
+    }
+    if (cfg_ondisk_get_params(dcpl, pbuf, sizeof(pbuf)) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "level = 8") != 0) /* get_config of new cd_values, not "level=3" */
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    /* --- reg-07: stored string survives H5Pencode/H5Pdecode --- */
+    TESTING("config string: survives H5Pencode/H5Pdecode");
+    if ((dcpl = cfg_ondisk_make_dcpl("level=9")) < 0)
+        TEST_ERROR;
+    if (H5Pencode2(dcpl, NULL, &enc_size, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if (NULL == (enc_buf = malloc(enc_size)))
+        TEST_ERROR;
+    if (H5Pencode2(dcpl, enc_buf, &enc_size, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if ((dcpl_dec = H5Pdecode(enc_buf)) < 0)
+        TEST_ERROR;
+    if (cfg_ondisk_get_params(dcpl_dec, pbuf, sizeof(pbuf)) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "level=9") != 0)
+        TEST_ERROR;
+    free(enc_buf);
+    enc_buf = NULL;
+    if (H5Pclose(dcpl_dec) < 0 || H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl_dec = dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    /* --- fmt-06: H5Ocopy deep-copies the stored string to a new file --- */
+    TESTING("config string: survives H5Ocopy to another file");
+    if ((dcpl = cfg_ondisk_make_dcpl("level=9")) < 0)
+        TEST_ERROR;
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if ((file2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if (H5Ocopy(file, "dset", file2, "dset_copy", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file2, "dset_copy", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    if (cfg_ondisk_get_params(dcpl_out, pbuf, sizeof(pbuf)) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "level=9") != 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Pclose(dcpl) < 0 || H5Fclose(file) < 0 ||
+        H5Fclose(file2) < 0)
+        TEST_ERROR;
+    dcpl_out = dset = dcpl = file = file2 = H5I_INVALID_HID;
+    PASSED();
+
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+    if (H5Zunregister(CFG_ONDISK_FILTER_ID) < 0)
+        TEST_ERROR;
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Pclose(dcpl_out);
+        H5Pclose(dcpl_dec);
+        H5Pclose(fapl_dg);
+        H5Dclose(dset);
+        H5Sclose(sid);
+        H5Fclose(file);
+        H5Fclose(file2);
+        H5Zunregister(CFG_ONDISK_FILTER_ID);
+    }
+    H5E_END_TRY
+    free(enc_buf);
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
  * In-file blob configuration storage (H5Pappend_filter_blob)
  * ---------------------------------------------------------------------- */
 
@@ -2705,6 +2989,9 @@ main(void)
 
     /* filter2 context passthrough: dxpl_id, scaled, ndims */
     nerrors += test_filter2_context_passthrough(file) < 0 ? 1 : 0;
+
+    /* On-disk configuration-string storage (pipeline v3) */
+    nerrors += test_config_string_ondisk(fapl) < 0 ? 1 : 0;
 
     /* In-file blob configuration storage (H5Pappend_filter_blob) */
     nerrors += test_blob_default_storage(fapl) < 0 ? 1 : 0;

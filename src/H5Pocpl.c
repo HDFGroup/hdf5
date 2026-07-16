@@ -1321,6 +1321,21 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
             for (v = 0; v < pline->filter[u].cd_nelmts; v++)
                 H5_ENCODE_UNSIGNED(*pp, pline->filter[u].cd_values[v]);
 
+            /* encode the verbatim config string inline (a self-contained
+             * encoded DCPL carries the string, not a file locator) */
+            if (NULL != pline->filter[u].config) {
+                uint64_t config_len = (uint64_t)strlen(pline->filter[u].config);
+
+                *(*pp)++ = (uint8_t) true;
+                enc_size = H5VM_limit_enc_size(config_len);
+                *(*pp)++ = (uint8_t)enc_size;
+                UINT64ENCODE_VAR(*pp, config_len, enc_size);
+                H5MM_memcpy(*pp, pline->filter[u].config, (size_t)config_len);
+                *pp += config_len;
+            } /* end if */
+            else
+                *(*pp)++ = (uint8_t) false;
+
             /* encode the blob bytes inline.  A serialized property must be
              * self-contained; the on-disk locator is file-specific and is
              * regenerated when the decoded plist is used with H5Dcreate. */
@@ -1346,10 +1361,15 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
             *size += H5Z_COMMON_NAME_LEN;
         *size += (1 + H5VM_limit_enc_size((uint64_t)pline->filter[u].cd_nelmts));
         *size += pline->filter[u].cd_nelmts * sizeof(unsigned);
+        *size += 1; /* has_config flag */
+        if (NULL != pline->filter[u].config) {
+            uint64_t config_len = (uint64_t)strlen(pline->filter[u].config);
+            *size += (1 + H5VM_limit_enc_size(config_len) + (size_t)config_len);
+        }
         *size += 1; /* has_aux flag */
         if (NULL != pline->filter[u].aux_data)
             *size += 8 + pline->filter[u].aux_size; /* aux_size + blob bytes */
-    }                                               /* end for */
+    } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__ocrt_pipeline_enc() */
@@ -1399,6 +1419,8 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
     for (u = 0; u < nused; u++) {
         H5Z_filter_info_t filter;          /* Filter info, for pipeline */
         uint8_t           has_name;        /* Flag to indicate whether filter has a name */
+        uint8_t           has_config;      /* Flag to indicate whether filter has a config string */
+        char             *config = NULL;   /* Decoded verbatim config string */
         uint8_t           has_aux;         /* Flag to indicate whether filter has a blob */
         void             *aux_data = NULL; /* Decoded blob bytes */
         size_t            aux_size = 0;    /* Decoded blob length */
@@ -1437,6 +1459,23 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
         for (v = 0; v < filter.cd_nelmts; v++)
             H5_DECODE_UNSIGNED(*pp, filter.cd_values[v]);
 
+        /* decode the verbatim config string, if present */
+        has_config = *(*pp)++;
+        if (has_config) {
+            uint64_t config_len;
+
+            enc_size = *(*pp)++;
+            assert(enc_size < 256);
+            UINT64DECODE_VAR(*pp, config_len, enc_size);
+            if (NULL == (config = (char *)H5MM_malloc((size_t)config_len + 1))) {
+                filter.cd_values = (unsigned *)H5MM_xfree(filter.cd_values);
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for config string");
+            }
+            H5MM_memcpy(config, *pp, (size_t)config_len);
+            config[config_len] = '\0';
+            *pp += config_len;
+        }
+
         /* decode the blob bytes, if present.  The on-disk locator is not
          * serialized; a later H5Dcreate writes the blob afresh. */
         has_aux = *(*pp)++;
@@ -1445,21 +1484,30 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
 
             UINT64DECODE(*pp, aux_size64);
             aux_size = (size_t)aux_size64;
-            if (aux_size == 0)
+            if (aux_size == 0) {
+                H5MM_xfree(config);
+                filter.cd_values = (unsigned *)H5MM_xfree(filter.cd_values);
                 HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "encoded filter blob has zero length");
-            if (NULL == (aux_data = H5MM_malloc(aux_size)))
+            }
+            if (NULL == (aux_data = H5MM_malloc(aux_size))) {
+                H5MM_xfree(config);
+                filter.cd_values = (unsigned *)H5MM_xfree(filter.cd_values);
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for filter blob");
+            }
             H5MM_memcpy(aux_data, *pp, aux_size);
             *pp += aux_size;
         } /* end if */
 
         /* Add the filter to the I/O pipeline */
         if (H5Z_append(pline, filter.id, filter.flags, filter.cd_nelmts, filter.cd_values) < 0) {
+            H5MM_xfree(config);
             H5MM_xfree(aux_data);
+            filter.cd_values = (unsigned *)H5MM_xfree(filter.cd_values);
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline");
         }
 
-        /* Attach the blob to the just-appended entry */
+        /* Attach the decoded config string and blob to the just-appended entry */
+        pline->filter[pline->nused - 1].config   = config;
         pline->filter[pline->nused - 1].aux_data = aux_data;
         pline->filter[pline->nused - 1].aux_size = aux_size;
 
@@ -1875,6 +1923,8 @@ H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const 
     const unsigned *cd_values           = NULL;
     unsigned       *allocated_cd_values = NULL; /* owns heap mem for string path */
     char           *fi_name_heap        = NULL; /* non-NULL if fi->name was H5MM_strdup'd here */
+    const char     *retain_config       = NULL; /* verbatim string to persist (STRING path only) */
+    char           *fi_config_heap      = NULL; /* non-NULL if fi->config was H5MM_strdup'd here */
     size_t          cd_nelmts           = 0;
     herr_t          ret_value           = SUCCEED;
 
@@ -1943,6 +1993,12 @@ H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const 
                         "filter does not support string configuration (no set_config callback)");
         }
 
+        /* Persist the caller's verbatim parameter string so it can be
+         * recovered losslessly (pipeline v3) without loading the plugin.
+         * An empty input stores nothing. */
+        if (!empty_input)
+            retain_config = param_str;
+
         /* set_config is present: invoke it.  Normalise an empty input to
          * params = NULL so callbacks only need to handle one form. */
         {
@@ -2002,13 +2058,26 @@ append_to_pipeline:
      * performs a single speculative lookup. */
     H5P__pline_persist_name(&pline, filter, entry, &fi_name_heap);
 
+    /* Persist the verbatim configuration string on the entry.  Track the
+     * allocation so it can be freed if H5P_poke fails below (ownership
+     * transfers to the plist on success). */
+    if (retain_config) {
+        H5Z_filter_info_t *fi = &pline.filter[pline.nused - 1];
+
+        if (NULL == (fi->config = (char *)H5MM_strdup(retain_config)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for filter config string");
+        fi_config_heap = fi->config;
+    }
+
     /* Store updated pipeline back in property list */
     if (H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
 
 done:
-    if (ret_value < 0)
+    if (ret_value < 0) {
         H5MM_xfree(fi_name_heap);
+        H5MM_xfree(fi_config_heap);
+    }
     H5MM_xfree(allocated_cd_values);
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pappend_filter() */
@@ -2158,6 +2227,24 @@ H5Pget_filter_params_by_idx(hid_t plist_id, unsigned idx, char *params_buf, size
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter index out of range");
 
     filter = &pline.filter[idx];
+
+    /* Source 1 (highest fidelity): a verbatim configuration string stored on
+     * the entry.  This is byte-for-byte lossless and needs no plugin, so it
+     * short-circuits both the get_config and cd_values paths below. */
+    if (filter->config) {
+        size_t needed = strlen(filter->config);
+
+        if (params_len)
+            *params_len = needed;
+
+        if (params_buf && params_buf_size > 0) {
+            size_t copy_len = (needed < params_buf_size - 1) ? needed : params_buf_size - 1;
+            H5MM_memcpy(params_buf, filter->config, copy_len);
+            params_buf[copy_len] = '\0';
+        }
+
+        HGOTO_DONE(SUCCEED);
+    }
 
     /* Trigger a plugin load if the filter isn't registered yet -- mirrors
      * H5Zget_filter_class_info()'s use of H5Z_filter_avail() to get get_config

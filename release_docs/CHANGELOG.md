@@ -170,14 +170,30 @@ We would like to thank the many HDF5 community members who contributed to this r
    libhdf5.  Hex-float literals (`0x1.8p+1`) in parameter strings are
    transparently rewritten to decimal before parsing.
 
-   **On-disk format:** No new pipeline version is introduced.  Parameter
-   strings are converted to `cd_values` by the filter's `set_config` callback
-   at `H5Pappend_filter` time and stored using the existing v2 pipeline
-   message.  On read, `H5Pget_filter_params_by_idx` reconstructs the string
-   via the filter's `get_config` callback.  This means the on-disk format is
-   unchanged and full backward read compatibility is preserved.
+   **On-disk format:** A new pipeline message version, `H5O_PLINE_VERSION_3`,
+   stores each filter's verbatim parameter string after the filter name, so
+   the exact string can be recovered without loading the filter plugin.
+   `H5Pget_filter_params_by_idx` returns that stored string when present and
+   otherwise falls back to the filter's `get_config` callback, then to a
+   `cd_values` listing.  Version 3 is written only when a filter carries a
+   stored string and the file's high library-version bound admits it (see
+   `H5F_LIBVER_V300` below); otherwise the message is written at version 2
+   with the string omitted, so files without stored strings remain
+   byte-identical to previous releases.  `H5Pmodify_filter` clears the stored
+   string for the modified filter; `H5Pcopy`, `H5Pencode`/`H5Pdecode`, and
+   `H5Ocopy` carry it with the entry.
 
    Fixes GitHub issue [#6153](https://github.com/HDFGroup/hdf5/issues/6153)
+
+### Added the H5F_LIBVER_V300 library version bound
+
+   The `H5F_libver_t` enumeration gains `H5F_LIBVER_V300`, and
+   `H5F_LIBVER_LATEST` now maps to it.  A file access property list's high
+   bound must be at least `H5F_LIBVER_V300` to write the version-3 filter
+   pipeline message (used to persist filter parameter strings); all other
+   message versions are unchanged from `H5F_LIBVER_V200`.  The constant is
+   mirrored in the Fortran (`H5F_LIBVER_V300_F`) and Java
+   (`HDF5Constants.H5F_LIBVER_V300`) bindings.
 
 ### Added optional digital signature verification for dynamically loaded plugins
 

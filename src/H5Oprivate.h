@@ -746,9 +746,12 @@ typedef struct H5O_ginfo_t {
  */
 #define H5O_PLINE_VERSION_2 2
 
-/* This version appends a has_aux flag byte after each filter's cd_values
- *      and, when set, a fixed-size locator (address + global-heap index)
- *      for the filter's blob stored as a global-heap object
+/* This version stores each filter's verbatim key=value configuration string
+ *      (as passed to H5Pappend_filter) after the filter name, so it can be
+ *      recovered losslessly without loading the filter plugin.  It also
+ *      appends a has_aux flag byte after that string and, when set, a
+ *      fixed-size locator (address + global-heap index) for the filter's
+ *      blob stored as a global-heap object
  */
 #define H5O_PLINE_VERSION_3 3
 
