@@ -199,6 +199,10 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
    Fixed a bug where a flag in H5Cimage.c wasn't getting set correctly for release builds of HDF5, leading to incorrect error checking when reconstructing metadata cache entries.
 
+### Library shutdown now aborts on a detected infinite loop even when error output is disabled
+
+   When the library detects that it cannot make progress closing itself (an "infinite loop closing library"), it now aborts regardless of whether automatic error message display has been enabled via `H5Eset_auto2()`. Previously the abort was skipped whenever error output was turned off, so an application that had disabled error reporting would continue running in this unrecoverable state instead of terminating.
+
 ## Java Library
 
 ## Configuration
