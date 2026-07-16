@@ -54,22 +54,22 @@ typedef struct H5Z_filter_info_t H5Z_filter_info_t;
 
 /* Structure to store information about each filter's parameters */
 struct H5Z_filter_info_t {
-    H5Z_filter_t   id;                               /*filter identification number          */
-    unsigned       flags;                            /*defn and invocation flags             */
-    char           _name[H5Z_COMMON_NAME_LEN];       /*internal filter name                  */
-    char          *name;                             /*optional filter name                  */
-    size_t         cd_nelmts;                        /*number of elements in cd_values[]     */
-    unsigned       _cd_values[H5Z_COMMON_CD_VALUES]; /*internal client data values           */
-    unsigned      *cd_values;                        /*client data values                    */
-    char          *config;                           /*verbatim key=value config string, or
-                                                       *NULL; persisted in pipeline v3        */
-    void          *aux_data;                         /*in-memory blob; NULL if none          */
-    size_t         aux_size;                         /*byte length of aux_data               */
-    H5Z_blob_loc_t aux_loc;                          /*on-disk locator; undefined until the
-                                                      *blob is written at H5Dcreate time     */
-    bool aux_from_callback;                          /*aux_data was allocated by the filter's
-                                                      *read_blob callback and must be released
-                                                      *via close_blob, not H5MM_xfree        */
+    H5Z_filter_t id;                               /*filter identification number          */
+    unsigned     flags;                            /*defn and invocation flags             */
+    char         _name[H5Z_COMMON_NAME_LEN];       /*internal filter name                  */
+    char        *name;                             /*optional filter name                  */
+    size_t       cd_nelmts;                        /*number of elements in cd_values[]     */
+    unsigned     _cd_values[H5Z_COMMON_CD_VALUES]; /*internal client data values           */
+    unsigned    *cd_values;                        /*client data values                    */
+    char        *config;                           /*verbatim key=value config string, or
+                                                    *NULL; persisted in pipeline v3        */
+    void          *aux_data;                       /*in-memory blob; NULL if none          */
+    size_t         aux_size;                       /*byte length of aux_data               */
+    H5Z_blob_loc_t aux_loc;                        /*on-disk locator; undefined until the
+                                                    *blob is written at H5Dcreate time     */
+    bool aux_from_callback;                        /*aux_data was allocated by the filter's
+                                                    *read_blob callback and must be released
+                                                    *via close_blob, not H5MM_xfree        */
 };
 
 /*

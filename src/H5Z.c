@@ -2097,8 +2097,7 @@ H5Z_blob_write(H5F_t *f, H5O_pline_t *pline)
             H5HG_t hobj;
 
             if (H5HG_insert(f, fi->aux_size, fi->aux_data, &hobj) < 0)
-                HGOTO_ERROR(H5E_PLINE, H5E_CANTINSERT, FAIL,
-                            "unable to insert filter blob into global heap");
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTINSERT, FAIL, "unable to insert filter blob into global heap");
             loc.addr = hobj.addr;
             loc.idx  = hobj.idx;
         }
