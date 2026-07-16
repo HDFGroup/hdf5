@@ -293,6 +293,15 @@ typedef struct H5Z_blob_loc_t {
  *          \c set_local callback runs.  If the filter class leaves this field
  *          NULL, the library uses its default global-heap (H5HG) writer.
  *
+ * \attention In a parallel job, this callback runs on every rank and \b must
+ *            perform identical file-modifying operations on every rank (or
+ *            none at all, by leaving this field NULL to delegate storage to
+ *            the default writer).  The library relies on every rank's write
+ *            landing on the same on-disk locator without a broadcast; a
+ *            callback that behaves differently per rank -- including one
+ *            that internally attempts to write from only one rank -- results
+ *            in undefined behavior.
+ *
  * \since 3.0.0
  */
 typedef herr_t (*H5Z_write_blob_func_t)(hid_t file_id, const void *buf, size_t size, H5Z_blob_loc_t *loc_out);

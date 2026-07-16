@@ -1369,7 +1369,7 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
         *size += 1; /* has_aux flag */
         if (NULL != pline->filter[u].aux_data)
             *size += 8 + pline->filter[u].aux_size; /* aux_size + blob bytes */
-    } /* end for */
+    }                                               /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__ocrt_pipeline_enc() */
@@ -2177,6 +2177,95 @@ done:
     }
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pappend_filter_blob() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_filter_blob
+ *
+ * Purpose:     Retrieve the blob attached to the filter at pipeline index
+ *              IDX, addressed positionally (never by filter ID -- a
+ *              pipeline may carry the same filter ID more than once with
+ *              distinct blobs).
+ *
+ *              OFFSET is the starting byte within the blob; *size always
+ *              reports the number of bytes remaining from OFFSET to the
+ *              end of the blob (0 if the entry has no blob, or if OFFSET
+ *              is at or past its end).  Passing OFFSET 0 and reading
+ *              *size bytes retrieves the whole blob in one call; passing
+ *              a growing OFFSET across repeated calls streams through a
+ *              large blob without holding two full copies in memory.
+ *
+ *              Call with buf NULL for a size query: no bytes are copied.
+ *              Call with buf non-NULL to fill it: *size on entry is buf's
+ *              capacity; up to min(capacity, remaining) bytes are copied
+ *              from blob[OFFSET], and *size is set to the remaining count
+ *              on return (not the copy count), so the caller can detect
+ *              truncation by comparing against the capacity it supplied.
+ *
+ *              The bytes returned come from whatever the property list's
+ *              filter entry currently holds in memory -- populated by
+ *              H5Pappend_filter_blob(), by read_blob (or the default
+ *              global-heap reader) at H5Dopen time, or by H5Pdecode() --
+ *              regardless of whether the filter uses default or custom
+ *              blob storage.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Since:       3.0.0
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_filter_blob(hid_t plist_id, unsigned idx, size_t offset, void *buf, size_t *size)
+{
+    H5P_genplist_t          *plist;
+    H5O_pline_t              pline;
+    const H5Z_filter_info_t *filter;
+    size_t                   blob_size;
+    size_t                   remaining;
+    herr_t                   ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Validate args */
+    if (size == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size pointer must not be NULL");
+
+    /* Get the plist structure */
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE, true)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
+
+    /* Get the pipeline */
+    if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+
+    /* Validate index */
+    if (idx >= pline.nused)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter index out of range");
+
+    filter    = &pline.filter[idx];
+    blob_size = filter->aux_data ? filter->aux_size : 0;
+    remaining = (offset < blob_size) ? (blob_size - offset) : 0;
+
+    if (buf == NULL) {
+        /* Size query only */
+        *size = remaining;
+    }
+    else {
+        size_t capacity = *size;
+        size_t copy_len = remaining;
+
+        if (copy_len > capacity)
+            copy_len = capacity;
+        if (copy_len > 0)
+            H5MM_memcpy(buf, (const uint8_t *)filter->aux_data + offset, copy_len);
+
+        /* Report the count remaining from offset, not the (possibly
+         * truncated) copy length, so the caller can detect truncation. */
+        *size = remaining;
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_filter_blob() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_filter_params_by_idx

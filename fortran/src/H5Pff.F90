@@ -1681,6 +1681,54 @@ CONTAINS
 !>
 !! \ingroup FH5P
 !!
+!! \brief Retrieves the blob attached to a filter at a given pipeline index.
+!!
+!! \param prp_id  Property list identifier.
+!! \param idx     Zero-based index of the filter in the pipeline.
+!! \param offset  Starting byte within the blob.
+!! \param buf_ptr Pointer to receive the blob bytes, or C_NULL_PTR for a size query.
+!! \param size    On entry, when \p buf_ptr is not C_NULL_PTR, the capacity pointed to
+!!                by \p buf_ptr, in bytes; ignored when \p buf_ptr is C_NULL_PTR.  On
+!!                return, always set to the number of bytes remaining from \p offset
+!!                to the end of the blob (0 if the filter at \p idx has no blob
+!!                attached, or if \p offset is at or past the blob's end), regardless
+!!                of the capacity supplied.
+!! \param hdferr  \fortran_error
+!!
+!! \details h5pget_filter_blob_f() retrieves the bytes attached to the filter at
+!!          pipeline index \p idx via h5pappend_filter_blob_f().  Passing \p offset
+!!          0 and reading \p size bytes retrieves the whole blob in one call; passing
+!!          a growing \p offset across repeated calls streams through a large blob.
+!!          Obtain \p buf_ptr for a Fortran array target via C_LOC().
+!!
+!! See C API: @ref H5Pget_filter_blob()
+!!
+  SUBROUTINE h5pget_filter_blob_f(prp_id, idx, offset, buf_ptr, size, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T),  INTENT(IN)    :: prp_id
+    INTEGER,         INTENT(IN)    :: idx
+    INTEGER(SIZE_T), INTENT(IN)    :: offset
+    TYPE(C_PTR),     INTENT(IN)    :: buf_ptr
+    INTEGER(SIZE_T), INTENT(INOUT) :: size
+    INTEGER,         INTENT(OUT)   :: hdferr
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pget_filter_blob(plist_id, idx_c, offset_c, buf_ptr_c, size_c) &
+            BIND(C,NAME='H5Pget_filter_blob')
+         IMPORT :: HID_T, C_INT, C_PTR, SIZE_T
+         INTEGER(HID_T), VALUE          :: plist_id
+         INTEGER(C_INT), VALUE          :: idx_c
+         INTEGER(SIZE_T), VALUE         :: offset_c
+         TYPE(C_PTR),    VALUE          :: buf_ptr_c
+         INTEGER(SIZE_T), INTENT(INOUT) :: size_c
+       END FUNCTION H5Pget_filter_blob
+    END INTERFACE
+
+    hdferr = INT(H5Pget_filter_blob(prp_id, INT(idx, C_INT), offset, buf_ptr, size))
+  END SUBROUTINE h5pget_filter_blob_f
+
+!>
+!! \ingroup FH5P
+!!
 !! \brief Retrieves a filter's parameter string by pipeline index.
 !!
 !! \param prp_id      Property list identifier.

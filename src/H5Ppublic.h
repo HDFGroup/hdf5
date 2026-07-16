@@ -2893,6 +2893,49 @@ H5_DLL herr_t H5Pappend_filter_blob(hid_t plist_id, H5Z_filter_t filter, unsigne
 /**
  * \ingroup OCPL
  *
+ * \brief Retrieves the blob attached to a filter at a given pipeline index
+ *
+ * \ocpl_id{plist_id}
+ * \param[in]     idx    Zero-based index of the filter in the pipeline, as in
+ *                       H5Pget_filter2().  The blob is addressed positionally,
+ *                       never by filter ID: a pipeline may carry the same
+ *                       filter ID more than once, each with a distinct blob.
+ * \param[in]     offset Starting byte within the blob.
+ * \param[out]    buf    Buffer to receive the blob bytes, or NULL for a size
+ *                       query.
+ * \param[in,out] size   On entry, when \p buf is non-NULL, the capacity of
+ *                       \p buf in bytes; ignored when \p buf is NULL.  On
+ *                       return, always set to the number of bytes remaining
+ *                       from \p offset to the end of the blob (0 if the
+ *                       filter at \p idx has no blob attached, or if
+ *                       \p offset is at or past the blob's end), regardless
+ *                       of \p buf's capacity -- compare against the capacity
+ *                       supplied to detect truncation.
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_filter_blob() retrieves the bytes attached to the filter
+ *          at pipeline index \p idx via H5Pappend_filter_blob().  Passing
+ *          \p offset 0 and reading \p size bytes retrieves the whole blob
+ *          in one call; passing a growing \p offset across repeated calls
+ *          streams through a large blob without holding two full copies in
+ *          memory at once.
+ *
+ *          The bytes returned come from whatever the property list's filter
+ *          entry currently holds in memory: populated by
+ *          H5Pappend_filter_blob() itself, by the filter's \c read_blob
+ *          callback (or the default global-heap reader) at H5Dopen() time,
+ *          or by H5Pdecode() -- regardless of whether the filter uses
+ *          default or custom blob storage.  A filter at \p idx with no
+ *          attached blob is not an error: \p size is set to 0 and, if
+ *          \p buf is non-NULL, no bytes are copied.
+ *
+ * \since 3.0.0
+ */
+H5_DLL herr_t H5Pget_filter_blob(hid_t plist_id, unsigned idx, size_t offset, void *buf, size_t *size);
+/**
+ * \ingroup OCPL
+ *
  * \brief Returns the parameter string for a filter at a given pipeline index
  *
  * \ocpl_id{plist_id}

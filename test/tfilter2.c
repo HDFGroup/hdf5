@@ -21,7 +21,7 @@
 
 #include "h5test.h"
 
-static const char *FILENAME[] = {"tfilter2", "tfilter2_blob",     "tfilter2_blob_custom",
+static const char *FILENAME[] = {"tfilter2",     "tfilter2_blob",     "tfilter2_blob_custom",
                                  "tfilter2_cfg", "tfilter2_cfg_copy", NULL};
 
 /* -----------------------------------------------------------------------
@@ -2144,7 +2144,6 @@ error:
 }
 
 /* -----------------------------------------------------------------------
-/* -----------------------------------------------------------------------
  * On-disk configuration-string storage (pipeline v3, RFC-HDFG-2026-001)
  *
  * This filter's stored parameter string ("level=N", no spaces) differs
@@ -2209,6 +2208,9 @@ static const H5Z_class3_t cfg_ondisk_cls = {
     cfg_ondisk_filter_func, /* filter         */
     cfg_ondisk_set_config,  /* set_config      */
     cfg_ondisk_get_config,  /* get_config      */
+    NULL,                   /* write_blob      */
+    NULL,                   /* read_blob       */
+    NULL,                   /* close_blob      */
 };
 
 /* Build a chunked, filter-configured DCPL from a parameter string */
@@ -2492,6 +2494,38 @@ error:
     return -1;
 }
 
+/* Verify H5Pget_filter_blob(plist, idx, ...) returns exactly EXPECTED via
+ * both the size-query form (buf == NULL) and the fill form. */
+static int
+blob_check_getter(hid_t plist, unsigned idx, const unsigned char *expected, size_t expected_size)
+{
+    unsigned char *buf  = NULL;
+    size_t         size = 0;
+
+    if (H5Pget_filter_blob(plist, idx, 0, NULL, &size) < 0)
+        goto error;
+    if (size != expected_size)
+        goto error;
+
+    if (expected_size > 0) {
+        if (NULL == (buf = (unsigned char *)malloc(expected_size)))
+            goto error;
+        size = expected_size;
+        if (H5Pget_filter_blob(plist, idx, 0, buf, &size) < 0)
+            goto error;
+        if (size != expected_size)
+            goto error;
+        if (memcmp(buf, expected, expected_size) != 0)
+            goto error;
+        free(buf);
+    }
+    return 0;
+
+error:
+    free(buf);
+    return -1;
+}
+
 /* Default (global-heap) blob storage: create/write/reopen/read round-trip,
  * H5Pcopy and H5Pencode/H5Pdecode propagation, and dataset delete. */
 static int
@@ -2547,6 +2581,10 @@ test_blob_default_storage(hid_t fapl)
     if (H5Pset_chunk(dcpl, 2, chunk) < 0)
         TEST_ERROR;
     if (H5Pappend_filter_blob(dcpl, BLOB_DEFAULT_FILTER_ID, 0, blob, BLOB_TEST_SIZE) < 0)
+        TEST_ERROR;
+
+    /* H5Pget_filter_blob works immediately, before any file I/O */
+    if (blob_check_getter(dcpl, 0, blob, BLOB_TEST_SIZE) < 0)
         TEST_ERROR;
 
     /* The caller's buffer must be copied, so scribbling on it now must not
@@ -2619,6 +2657,8 @@ test_blob_default_storage(hid_t fapl)
         if (filt_id != BLOB_DEFAULT_FILTER_ID)
             TEST_ERROR;
         if (blob_check_encoded_plist(dcpl_out, blob, BLOB_TEST_SIZE) < 0)
+            TEST_ERROR;
+        if (blob_check_getter(dcpl_out, 0, blob, BLOB_TEST_SIZE) < 0)
             TEST_ERROR;
         if (H5Pclose(dcpl_out) < 0)
             TEST_ERROR;
@@ -2808,6 +2848,21 @@ test_blob_custom_callbacks(hid_t fapl)
     if (memcmp(wdata, rdata, sizeof(wdata)) != 0)
         TEST_ERROR;
 
+    /* H5Pget_filter_blob works uniformly regardless of custom vs default
+     * storage: the bytes came back via read_blob, but the getter doesn't
+     * care how they got into the property list. */
+    {
+        hid_t dcpl_out = H5Dget_create_plist(dset);
+        int   getter_ret;
+
+        if (dcpl_out < 0)
+            TEST_ERROR;
+        getter_ret = blob_check_getter(dcpl_out, 0, small_blob, sizeof(small_blob));
+        H5Pclose(dcpl_out);
+        if (getter_ret < 0)
+            TEST_ERROR;
+    }
+
     /* close_blob releases the callback-allocated buffer at dataset close */
     if (H5Dclose(dset) < 0)
         TEST_ERROR;
@@ -2929,6 +2984,159 @@ error:
     return -1;
 }
 
+/* H5Pget_filter_blob: no-blob-attached, out-of-range index, NULL size
+ * pointer, truncated-buffer reporting, and offset-based partial/streaming
+ * reads. */
+static int
+test_blob_getter(void)
+{
+    static const H5Z_class3_t blob_cls = {
+        2,                      /* version         */
+        BLOB_DEFAULT_FILTER_ID, /* id              */
+        1,                      /* encoder_present */
+        1,                      /* decoder_present */
+        "blob_default_filter",  /* canonical_name  */
+        NULL,                   /* description     */
+        NULL,                   /* can_apply       */
+        NULL,                   /* set_local       */
+        blob_passthrough_func,  /* filter          */
+        NULL,                   /* set_config      */
+        NULL,                   /* get_config      */
+        NULL,                   /* write_blob      */
+        NULL,                   /* read_blob       */
+        NULL,                   /* close_blob      */
+    };
+    unsigned char bytes[64];
+    unsigned char half[32];
+    hid_t         dcpl = H5I_INVALID_HID;
+    size_t        size;
+    herr_t        ret;
+
+    TESTING("H5Pget_filter_blob: no blob, bad index, truncation, offset streaming");
+
+    if (H5Zregister(&blob_cls) < 0)
+        TEST_ERROR;
+    blob_fill_pattern(bytes, sizeof(bytes));
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* A filter with no blob attached: size query reports 0, not an error */
+    if (H5Pappend_filter_blob(dcpl, BLOB_DEFAULT_FILTER_ID, 0, NULL, 0) < 0)
+        TEST_ERROR;
+    size = 999;
+    if (H5Pget_filter_blob(dcpl, 0, 0, NULL, &size) < 0)
+        TEST_ERROR;
+    if (size != 0)
+        TEST_ERROR;
+
+    /* Out-of-range index */
+    H5E_BEGIN_TRY
+    {
+        size = 0;
+        ret  = H5Pget_filter_blob(dcpl, 1, 0, NULL, &size);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+
+    /* NULL size pointer is rejected regardless of buf */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pget_filter_blob(dcpl, 0, 0, NULL, NULL);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+
+    /* Truncation: buffer smaller than the blob copies only what fits, but
+     * *size still reports the blob's full (untruncated) length. */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pappend_filter_blob(dcpl, BLOB_DEFAULT_FILTER_ID, 0, bytes, sizeof(bytes)) < 0)
+        TEST_ERROR;
+    size = sizeof(half);
+    if (H5Pget_filter_blob(dcpl, 0, 0, half, &size) < 0)
+        TEST_ERROR;
+    if (size != sizeof(bytes)) /* full size reported despite truncated copy */
+        TEST_ERROR;
+    if (memcmp(half, bytes, sizeof(half)) != 0)
+        TEST_ERROR;
+
+    /* Nonzero offset: remaining count and bytes both start from offset.
+     * half's capacity (32) is smaller than what remains (64-16=48), so
+     * only the first sizeof(half) bytes from the offset were copied. */
+    size = sizeof(half);
+    if (H5Pget_filter_blob(dcpl, 0, 16, half, &size) < 0)
+        TEST_ERROR;
+    if (size != sizeof(bytes) - 16)
+        TEST_ERROR;
+    if (memcmp(half, bytes + 16, sizeof(half)) != 0)
+        TEST_ERROR;
+
+    /* Offset at exactly the blob's end, and past it: both report 0
+     * remaining, neither is an error */
+    size = sizeof(half);
+    if (H5Pget_filter_blob(dcpl, 0, sizeof(bytes), half, &size) < 0)
+        TEST_ERROR;
+    if (size != 0)
+        TEST_ERROR;
+    size = sizeof(half);
+    if (H5Pget_filter_blob(dcpl, 0, sizeof(bytes) + 1000, half, &size) < 0)
+        TEST_ERROR;
+    if (size != 0)
+        TEST_ERROR;
+
+    /* Streaming: read the whole blob back in small chunks via repeated
+     * calls with a growing offset, and verify the reassembled bytes match. */
+    {
+        unsigned char reassembled[sizeof(bytes)];
+        size_t        off  = 0;
+        size_t        step = 7; /* deliberately does not evenly divide sizeof(bytes) */
+
+        while (off < sizeof(bytes)) {
+            unsigned char chunk[7];
+            size_t        chunk_size = sizeof(chunk);
+
+            if (H5Pget_filter_blob(dcpl, 0, off, chunk, &chunk_size) < 0)
+                TEST_ERROR;
+            /* chunk_size is bytes REMAINING from off, not bytes copied;
+             * the copy itself is capped at sizeof(chunk) by the callee. */
+            {
+                size_t copied = (chunk_size < step) ? chunk_size : step;
+                if (off + copied > sizeof(bytes))
+                    copied = sizeof(bytes) - off;
+                memcpy(reassembled + off, chunk, copied);
+                off += copied;
+            }
+        }
+        if (memcmp(reassembled, bytes, sizeof(bytes)) != 0)
+            TEST_ERROR;
+    }
+
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    if (H5Zunregister(BLOB_DEFAULT_FILTER_ID) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Zunregister(BLOB_DEFAULT_FILTER_ID);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
 /* -----------------------------------------------------------------------
  * main
  * ---------------------------------------------------------------------- */
@@ -2997,6 +3205,7 @@ main(void)
     nerrors += test_blob_default_storage(fapl) < 0 ? 1 : 0;
     nerrors += test_blob_custom_callbacks(fapl) < 0 ? 1 : 0;
     nerrors += test_blob_errors() < 0 ? 1 : 0;
+    nerrors += test_blob_getter() < 0 ? 1 : 0;
 
     if (H5Fclose(file) < 0)
         goto error;

@@ -185,6 +185,9 @@ CONTAINS
       LOGICAL            :: bval
       LOGICAL            :: found
       INTEGER(C_SIGNED_CHAR), TARGET :: blob_buf(16)
+      INTEGER(C_SIGNED_CHAR), TARGET :: blob_out(16)
+      INTEGER(C_SIGNED_CHAR), TARGET :: blob_out4(6)
+      INTEGER(SIZE_T)     :: blob_size
       INTEGER             :: i
 
 !
@@ -259,6 +262,44 @@ CONTAINS
            WRITE(*,*) "h5pappend_filter_blob_f: expected 1 filter, got ", nfilters
            total_error = total_error + 1
       END IF
+
+!
+! h5pget_filter_blob_f: size query, then fill, on the DCPL just built above
+!
+      blob_size = 0_SIZE_T
+      CALL h5pget_filter_blob_f(dcpl, 0, 0_SIZE_T, C_NULL_PTR, blob_size, error)
+           CALL check("h5pget_filter_blob_f(size)", error, total_error)
+      IF (blob_size /= INT(SIZE(blob_buf), SIZE_T)) THEN
+           WRITE(*,*) "h5pget_filter_blob_f(size): expected ", SIZE(blob_buf), ", got ", blob_size
+           total_error = total_error + 1
+      END IF
+
+      blob_out  = 0
+      blob_size = INT(SIZE(blob_out), SIZE_T)
+      CALL h5pget_filter_blob_f(dcpl, 0, 0_SIZE_T, C_LOC(blob_out), blob_size, error)
+           CALL check("h5pget_filter_blob_f(fill)", error, total_error)
+      IF (ANY(blob_out /= blob_buf)) THEN
+           WRITE(*,*) "h5pget_filter_blob_f(fill): returned bytes do not match what was appended"
+           total_error = total_error + 1
+      END IF
+
+!
+! h5pget_filter_blob_f: nonzero offset returns the tail of the blob and the
+! remaining (not total) byte count
+!
+      blob_size = INT(SIZE(blob_out4), SIZE_T)
+      CALL h5pget_filter_blob_f(dcpl, 0, 4_SIZE_T, C_LOC(blob_out4), blob_size, error)
+           CALL check("h5pget_filter_blob_f(offset)", error, total_error)
+      IF (blob_size /= INT(SIZE(blob_buf), SIZE_T) - 4) THEN
+           WRITE(*,*) "h5pget_filter_blob_f(offset): expected remaining ", SIZE(blob_buf) - 4, &
+                ", got ", blob_size
+           total_error = total_error + 1
+      END IF
+      IF (ANY(blob_out4 /= blob_buf(5:10))) THEN
+           WRITE(*,*) "h5pget_filter_blob_f(offset): returned bytes do not match blob_buf(5:10)"
+           total_error = total_error + 1
+      END IF
+
       CALL h5pclose_f(dcpl, error)
            CALL check("h5pclose_f", error, total_error)
 
@@ -273,6 +314,13 @@ CONTAINS
            CALL check("h5pget_nfilters_f", error, total_error)
       IF (nfilters /= 1) THEN
            WRITE(*,*) "h5pappend_filter_blob_f(no blob): expected 1 filter, got ", nfilters
+           total_error = total_error + 1
+      END IF
+      blob_size = 999_SIZE_T
+      CALL h5pget_filter_blob_f(dcpl, 0, 0_SIZE_T, C_NULL_PTR, blob_size, error)
+           CALL check("h5pget_filter_blob_f(no blob)", error, total_error)
+      IF (blob_size /= 0_SIZE_T) THEN
+           WRITE(*,*) "h5pget_filter_blob_f(no blob): expected size 0, got ", blob_size
            total_error = total_error + 1
       END IF
       CALL h5pclose_f(dcpl, error)

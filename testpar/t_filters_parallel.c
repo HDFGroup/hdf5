@@ -10316,9 +10316,9 @@ test_par_append_filter_builtin_string_pipeline(hid_t fapl_id)
  * ---------------------------------------------------------------------- */
 
 #define PAR_BLOB_FILTER_ID 540
-#define PAR_BLOB_SIZE       4096
-#define PAR_BLOB_MAGIC      "TFILTERPARBLOBMAGIC"
-#define PAR_BLOB_MAGIC_LEN  (sizeof(PAR_BLOB_MAGIC) - 1)
+#define PAR_BLOB_SIZE      4096
+#define PAR_BLOB_MAGIC     "TFILTERPARBLOBMAGIC"
+#define PAR_BLOB_MAGIC_LEN (sizeof(PAR_BLOB_MAGIC) - 1)
 
 static size_t
 par_blob_passthrough_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
@@ -10334,20 +10334,20 @@ par_blob_passthrough_func(unsigned int flags, size_t cd_nelmts, const unsigned i
 }
 
 static const H5Z_class3_t par_blob_cls = {
-    2,                          /* version         */
-    PAR_BLOB_FILTER_ID,         /* id              */
-    1,                          /* encoder_present */
-    1,                          /* decoder_present */
-    "par_blob_filter",          /* name            */
-    NULL,                       /* description     */
-    NULL,                       /* can_apply       */
-    NULL,                       /* set_local       */
+    2,                         /* version         */
+    PAR_BLOB_FILTER_ID,        /* id              */
+    1,                         /* encoder_present */
+    1,                         /* decoder_present */
+    "par_blob_filter",         /* name            */
+    NULL,                      /* description     */
+    NULL,                      /* can_apply       */
+    NULL,                      /* set_local       */
     par_blob_passthrough_func, /* filter          */
-    NULL,                       /* set_config      */
-    NULL,                       /* get_config      */
-    NULL,                       /* write_blob: use default global-heap storage */
-    NULL,                       /* read_blob       */
-    NULL,                       /* close_blob      */
+    NULL,                      /* set_config      */
+    NULL,                      /* get_config      */
+    NULL,                      /* write_blob: use default global-heap storage */
+    NULL,                      /* read_blob       */
+    NULL,                      /* close_blob      */
 };
 
 /* Every rank must call H5Pappend_filter_blob with identical bytes: dataset
@@ -10370,9 +10370,9 @@ test_par_append_filter_blob(hid_t fapl_id)
     hsize_t        dims[2]   = {(hsize_t)(mpi_size * 4), 4};
     hsize_t        chunk[2]  = {4, 4};
     hsize_t        start[2], count[2], block[2];
-    C_DATATYPE    *wbuf = NULL;
-    C_DATATYPE    *rbuf = NULL;
-    unsigned char *blob = NULL;
+    C_DATATYPE    *wbuf     = NULL;
+    C_DATATYPE    *rbuf     = NULL;
+    unsigned char *blob     = NULL;
     void          *enc_buf  = NULL;
     size_t         enc_size = 0;
     size_t         nbytes;
@@ -10475,17 +10475,19 @@ test_par_append_filter_blob(hid_t fapl_id)
 
     dcpl_out = H5Dget_create_plist(dset_id);
     VRFY((dcpl_out >= 0), "H5Dget_create_plist succeeded");
-    VRFY((H5Pencode2(dcpl_out, NULL, &enc_size, H5P_DEFAULT) >= 0), "H5Pencode2 size-query succeeded");
-    enc_buf = malloc(enc_size);
-    VRFY((enc_buf != NULL), "malloc enc_buf succeeded");
-    VRFY((H5Pencode2(dcpl_out, enc_buf, &enc_size, H5P_DEFAULT) >= 0), "H5Pencode2 succeeded");
     {
-        bool           found = false;
-        unsigned char *hay   = (unsigned char *)enc_buf;
-        for (size_t i = 0; i + PAR_BLOB_SIZE <= enc_size && !found; i++)
-            if (hay[i] == blob[0] && 0 == memcmp(hay + i, blob, PAR_BLOB_SIZE))
-                found = true;
-        VRFY(found, "encoded DCPL contains this rank's blob bytes verbatim");
+        size_t got_size = 0;
+
+        VRFY((H5Pget_filter_blob(dcpl_out, 0, 0, NULL, &got_size) >= 0),
+             "H5Pget_filter_blob size-query succeeded");
+        VRFY((got_size == PAR_BLOB_SIZE), "H5Pget_filter_blob reports the correct size on this rank");
+
+        enc_buf = malloc(got_size);
+        VRFY((enc_buf != NULL), "malloc enc_buf succeeded");
+        VRFY((H5Pget_filter_blob(dcpl_out, 0, 0, enc_buf, &got_size) >= 0),
+             "H5Pget_filter_blob fill succeeded");
+        VRFY((memcmp(enc_buf, blob, PAR_BLOB_SIZE) == 0),
+             "H5Pget_filter_blob returns this rank's blob bytes verbatim");
     }
     free(enc_buf);
     VRFY((H5Pclose(dcpl_out) >= 0), "H5Pclose dcpl_out succeeded");
