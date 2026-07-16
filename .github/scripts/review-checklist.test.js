@@ -8,11 +8,15 @@ const {
   labelFromPattern,
   attributeFiles,
   computeApprovals,
+  computeChangesRequested,
+  buildChangeRequestFileMap,
   chooseReviewers,
   buildBody,
   parseExcluded,
   serializeExcluded,
   withExcluded,
+  parseManuallyAdded,
+  serializeManuallyAdded,
   planSynchronizeSwaps,
   coordinateReviewers,
 } = require('./review-checklist.js');
@@ -246,6 +250,86 @@ test('computeApprovals: independent approvals from two users', () => {
   ]);
   assert.ok(approved.has('alice'));
   assert.ok(approved.has('bob'));
+});
+
+// ----------------------------------------------------------------
+// computeChangesRequested
+// ----------------------------------------------------------------
+
+test('computeChangesRequested: basic change request', () => {
+  const changesRequested = computeChangesRequested([{ user: { login: 'alice' }, state: 'CHANGES_REQUESTED' }]);
+  assert.ok(changesRequested.has('alice'));
+});
+
+test('computeChangesRequested: APPROVED after CHANGES_REQUESTED clears it', () => {
+  const changesRequested = computeChangesRequested([
+    { user: { login: 'alice' }, state: 'CHANGES_REQUESTED' },
+    { user: { login: 'alice' }, state: 'APPROVED' },
+  ]);
+  assert.strictEqual(changesRequested.has('alice'), false);
+});
+
+test('computeChangesRequested: DISMISSED after CHANGES_REQUESTED clears it', () => {
+  const changesRequested = computeChangesRequested([
+    { user: { login: 'alice' }, state: 'CHANGES_REQUESTED' },
+    { user: { login: 'alice' }, state: 'DISMISSED' },
+  ]);
+  assert.strictEqual(changesRequested.has('alice'), false);
+});
+
+test('computeChangesRequested: drive-by reviewer (never a requested reviewer) still counts', () => {
+  const changesRequested = computeChangesRequested([
+    { user: { login: 'driveby' }, state: 'CHANGES_REQUESTED' },
+  ]);
+  assert.ok(changesRequested.has('driveby'));
+});
+
+test('computeChangesRequested: null user is skipped (ghost / deleted account)', () => {
+  const changesRequested = computeChangesRequested([
+    { user: null, state: 'CHANGES_REQUESTED' },
+    { user: { login: 'bob' }, state: 'CHANGES_REQUESTED' },
+  ]);
+  assert.strictEqual(changesRequested.size, 1);
+  assert.ok(changesRequested.has('bob'));
+});
+
+// ----------------------------------------------------------------
+// buildChangeRequestFileMap
+// ----------------------------------------------------------------
+
+test('buildChangeRequestFileMap: maps a change-requester to their commented files', () => {
+  const map = buildChangeRequestFileMap(
+    [{ user: { login: 'alice' }, path: 'src/H5F.c' }],
+    new Set(['alice'])
+  );
+  assert.ok(map.get('alice').has('src/H5F.c'));
+});
+
+test('buildChangeRequestFileMap: excludes commenters not in changesRequestedUsers', () => {
+  const map = buildChangeRequestFileMap(
+    [{ user: { login: 'bob' }, path: 'src/H5F.c' }],
+    new Set(['alice'])
+  );
+  assert.strictEqual(map.has('bob'), false);
+});
+
+test('buildChangeRequestFileMap: skips comments with a null user (ghost / deleted account)', () => {
+  const map = buildChangeRequestFileMap(
+    [{ user: null, path: 'src/H5F.c' }],
+    new Set(['alice'])
+  );
+  assert.strictEqual(map.size, 0);
+});
+
+test('buildChangeRequestFileMap: aggregates multiple files from the same reviewer', () => {
+  const map = buildChangeRequestFileMap(
+    [
+      { user: { login: 'alice' }, path: 'src/H5F.c' },
+      { user: { login: 'alice' }, path: 'src/H5D.c' },
+    ],
+    new Set(['alice'])
+  );
+  assert.strictEqual(map.get('alice').size, 2);
 });
 
 // ----------------------------------------------------------------
@@ -495,6 +579,123 @@ test('buildBody: reviewer used as no-CODEOWNER fallback is not double-listed as 
   assert.ok(body.includes('— @charlie'));
 });
 
+// Change-requester sub-lines: someone with an outstanding CHANGES_REQUESTED
+// review is listed on a separate line under each area their inline comments
+// touch — whether or not they're a CODEOWNER or a requested reviewer at all.
+
+test('buildBody: change-requester on an area file gets a sub-line under that area', () => {
+  const areas = [makeArea('src', ['alice'], 10, [{ filename: 'src/H5F.c', changes: 10 }])];
+  const changeRequestFiles = new Map([['dan', new Set(['src/H5F.c'])]]);
+  const body = buildBody(areas, new Set(), new Set(['alice']), changeRequestFiles);
+  assert.ok(body.includes('  - ⚠️ Changes requested by @dan'));
+});
+
+test('buildBody: drive-by change-requester (not a CODEOWNER or requested reviewer) still gets a sub-line', () => {
+  const areas = [makeArea('src', ['alice'], 10, [{ filename: 'src/H5F.c', changes: 10 }])];
+  const changeRequestFiles = new Map([['driveby', new Set(['src/H5F.c'])]]);
+  const body = buildBody(areas, new Set(), new Set(['alice']), changeRequestFiles);
+  assert.ok(body.includes('  - ⚠️ Changes requested by @driveby'));
+});
+
+test('buildBody: change-requester is scoped to the area their comments touch, not every area', () => {
+  const areas = [
+    makeArea('src',     ['alice'], 10, [{ filename: 'src/H5F.c', changes: 10 }]),
+    makeArea('fortran', ['bob'],   10, [{ filename: 'fortran/H5f.F90', changes: 10 }]),
+  ];
+  const changeRequestFiles = new Map([['dan', new Set(['src/H5F.c'])]]);
+  const body = buildBody(areas, new Set(), new Set(['alice', 'bob']), changeRequestFiles);
+  const lines = body.split('\n');
+  const srcIdx     = lines.findIndex(l => l.includes('**src**'));
+  const fortranIdx = lines.findIndex(l => l.includes('**fortran**'));
+  assert.ok(lines[srcIdx + 1].includes('⚠️ Changes requested by @dan'));
+  assert.ok(!lines[fortranIdx + 1] || !lines[fortranIdx + 1].includes('@dan'));
+});
+
+test('buildBody: multiple change-requesters on the same area each get their own line', () => {
+  const areas = [makeArea('src', ['alice'], 10, [{ filename: 'src/H5F.c', changes: 10 }])];
+  const changeRequestFiles = new Map([
+    ['dan',  new Set(['src/H5F.c'])],
+    ['erin', new Set(['src/H5F.c'])],
+  ]);
+  const body = buildBody(areas, new Set(), new Set(['alice']), changeRequestFiles);
+  assert.ok(body.includes('  - ⚠️ Changes requested by @dan'));
+  assert.ok(body.includes('  - ⚠️ Changes requested by @erin'));
+});
+
+test('buildBody: no change-requesters produces no sub-lines and omitting the param is safe', () => {
+  const areas = [makeArea('src', ['alice'], 10, [{ filename: 'src/H5F.c', changes: 10 }])];
+  const body  = buildBody(areas, new Set(), new Set(['alice']));
+  assert.ok(!body.includes('⚠️'));
+});
+
+test('buildBody: change-requester with no commented files in any touched area gets no sub-line', () => {
+  const areas = [makeArea('src', ['alice'], 10, [{ filename: 'src/H5F.c', changes: 10 }])];
+  const changeRequestFiles = new Map([['dan', new Set(['unrelated/file.c'])]]);
+  const body = buildBody(areas, new Set(), new Set(['alice']), changeRequestFiles);
+  assert.ok(!body.includes('⚠️'));
+});
+
+// Manually-added-CODEOWNER sub-lines: a CODEOWNER who was review-requested
+// directly by a human (rather than auto-picked) gets their own required-
+// approval line, and the area doesn't sign off until they've approved too.
+
+test('buildBody: manually-added CODEOWNER gets a separate required-approval line', () => {
+  const areas = [makeArea('src', ['alice', 'bob'], 10)];
+  const body = buildBody(areas, new Set(), new Set(['alice', 'bob']), new Map(), new Set(['bob']));
+  assert.ok(body.includes('  - [ ] @bob (manually added) — approval required'));
+});
+
+test('buildBody: manually-added CODEOWNER is left out of the main mention line', () => {
+  const areas = [makeArea('src', ['alice', 'bob'], 10)];
+  const body = buildBody(areas, new Set(), new Set(['alice', 'bob']), new Map(), new Set(['bob']));
+  const mainRow = body.split('\n').find(l => l.startsWith('- ['));
+  assert.ok(mainRow.includes('— @alice'));
+  assert.ok(!mainRow.includes('@bob'));
+});
+
+test('buildBody: area does not sign off when auto-pick approved but manually-added CODEOWNER has not', () => {
+  const areas = [makeArea('src', ['alice', 'bob'], 10)];
+  const body = buildBody(areas, new Set(['alice']), new Set(['alice', 'bob']), new Map(), new Set(['bob']));
+  const mainRow = body.split('\n').find(l => l.startsWith('- ['));
+  assert.ok(mainRow.startsWith('- [ ] **src**'));
+  assert.ok(!mainRow.includes('✅'));
+  assert.ok(body.includes('  - [ ] @bob (manually added) — approval required'));
+});
+
+test('buildBody: area signs off once both the auto-pick and the manually-added CODEOWNER approve', () => {
+  const areas = [makeArea('src', ['alice', 'bob'], 10)];
+  const body = buildBody(areas, new Set(['alice', 'bob']), new Set(['alice', 'bob']), new Map(), new Set(['bob']));
+  const mainRow = body.split('\n').find(l => l.startsWith('- ['));
+  assert.ok(mainRow.startsWith('- [x] **src** ✅'));
+  assert.ok(body.includes('  - [x] @bob (manually added) ✅'));
+});
+
+test('buildBody: no manually-added CODEOWNERS produces no sub-lines and omitting the param is safe', () => {
+  const areas = [makeArea('src', ['alice'], 10)];
+  const body = buildBody(areas, new Set(), new Set(['alice']));
+  assert.ok(!body.includes('manually added'));
+});
+
+test('buildBody: manually-added sole owner of an area only needs their own approval', () => {
+  // alice is the only owner of this area and was manually requested — no
+  // separate auto-pick exists, so her own approval alone should sign it off.
+  const areas = [makeArea('src', ['alice'], 10)];
+  const body = buildBody(areas, new Set(['alice']), new Set(['alice']), new Map(), new Set(['alice']));
+  const mainRow = body.split('\n').find(l => l.startsWith('- ['));
+  assert.ok(mainRow.startsWith('- [x] **src** ✅'));
+  assert.ok(body.includes('  - [x] @alice (manually added) ✅'));
+});
+
+test('buildBody: a manually-added CODEOWNER who is no longer in confirmedRequested (removed) gets no line', () => {
+  // bob was manually added at some point (still in the persisted marker) but
+  // has since been removed from the PR — confirmedRequested no longer has
+  // him, so he must not show up as still owing an approval.
+  const areas = [makeArea('src', ['alice', 'bob'], 10)];
+  const body = buildBody(areas, new Set(), new Set(['alice']), new Map(), new Set(['bob']));
+  assert.ok(!body.includes('bob'));
+  assert.ok(!body.includes('manually added'));
+});
+
 // ----------------------------------------------------------------
 // parseExcluded / serializeExcluded — persisted "explicitly removed" list
 // ----------------------------------------------------------------
@@ -559,6 +760,39 @@ test('withExcluded: round-trips an empty set to the empty marker', () => {
   const body = `${MARKER}\ntext\n<!-- hdf5-review-checklist-excluded:alice-->`;
   const updated = withExcluded(body, new Set());
   assert.strictEqual(parseExcluded(updated).size, 0);
+});
+
+// ----------------------------------------------------------------
+// parseManuallyAdded / serializeManuallyAdded — persisted "manually
+// requested CODEOWNER" list (mirrors parseExcluded / serializeExcluded).
+// ----------------------------------------------------------------
+
+test('parseManuallyAdded: no comment body yet returns an empty set', () => {
+  const manuallyAdded = parseManuallyAdded(undefined);
+  assert.strictEqual(manuallyAdded.size, 0);
+});
+
+test('parseManuallyAdded: comment with no manual marker returns an empty set', () => {
+  const manuallyAdded = parseManuallyAdded('<!-- hdf5-review-checklist-v1 -->\nsome body text');
+  assert.strictEqual(manuallyAdded.size, 0);
+});
+
+test('parseManuallyAdded: extracts logins from the hidden marker', () => {
+  const body = '<!-- hdf5-review-checklist-v1 -->\nbody\n<!-- hdf5-review-checklist-manual:alice,bob-->';
+  const manuallyAdded = parseManuallyAdded(body);
+  assert.ok(manuallyAdded.has('alice'));
+  assert.ok(manuallyAdded.has('bob'));
+  assert.strictEqual(manuallyAdded.size, 2);
+});
+
+test('serializeManuallyAdded: empty set produces the empty marker', () => {
+  assert.strictEqual(serializeManuallyAdded(new Set()), '<!-- hdf5-review-checklist-manual:-->');
+});
+
+test('serializeManuallyAdded: round-trips through parseManuallyAdded', () => {
+  const original = new Set(['alice', 'bob']);
+  const roundTripped = parseManuallyAdded(serializeManuallyAdded(original));
+  assert.deepStrictEqual([...roundTripped].sort(), ['alice', 'bob']);
 });
 
 // ----------------------------------------------------------------
@@ -899,6 +1133,195 @@ asyncTest('coordinateReviewers: synchronize with one owner per area does not pru
 });
 
 // ----------------------------------------------------------------
+// coordinateReviewers — scope-shrink pruning (PR #6528 scenario): a
+// CODEOWNER requested for an area the PR used to touch, before a later push
+// narrowed the diff down, is never in touchedAreaOwners (that set only
+// reflects areas touched right now) — so none of the avalanche/first-pass
+// pruning considers removing them without this dedicated check.
+// ----------------------------------------------------------------
+
+asyncTest('coordinateReviewers: reviewer whose area dropped out of scope is removed', async () => {
+  const github = makeGithubMock();
+  const context = {
+    eventName: 'pull_request_target',
+    payload: { action: 'synchronize', sender: { type: 'User' } },
+  };
+  const args = makeCoordinateBaseArgs({
+    // gheber owns /docs/, not the .github area this fixture's touchedAreas
+    // covers — modeling a push that dropped doc changes from the diff.
+    allCodeOwners: new Set(['hyoklee', 'lrknox', 'jhendersonHDF', 'glennsong09', 'gheber']),
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'hyoklee' }, { login: 'gheber' }],
+    },
+  });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.ok(github.calls.removeRequestedReviewers.includes('gheber'));
+  assert.ok(!confirmedRequested.has('gheber'));
+  assert.ok(confirmedRequested.has('hyoklee'));
+});
+
+asyncTest('coordinateReviewers: manually-added CODEOWNER survives scope-shrink pruning', async () => {
+  // gheber's area is out of scope same as above, but a human deliberately
+  // requested him directly — that must not be undone by a later push.
+  const github = makeGithubMock();
+  const context = {
+    eventName: 'pull_request_target',
+    payload: { action: 'synchronize', sender: { type: 'User' } },
+  };
+  const args = makeCoordinateBaseArgs({
+    allCodeOwners: new Set(['hyoklee', 'lrknox', 'jhendersonHDF', 'glennsong09', 'gheber']),
+    manuallyAdded: new Set(['gheber']),
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'hyoklee' }, { login: 'gheber' }],
+    },
+  });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.ok(!github.calls.removeRequestedReviewers.includes('gheber'));
+  assert.ok(confirmedRequested.has('gheber'));
+});
+
+asyncTest('coordinateReviewers: non-CODEOWNER reviewer is untouched by scope-shrink pruning', async () => {
+  // driveby isn't a repo CODEOWNER at all (e.g. manually added for judgment,
+  // not path ownership) — scope-shrink pruning only concerns itself with
+  // CODEOWNERS-based auto-assignment, same as every other pruning path here.
+  const github = makeGithubMock();
+  const context = {
+    eventName: 'pull_request_target',
+    payload: { action: 'synchronize', sender: { type: 'User' } },
+  };
+  const args = makeCoordinateBaseArgs({
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'hyoklee' }, { login: 'driveby' }],
+    },
+  });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.ok(!github.calls.removeRequestedReviewers.includes('driveby'));
+  assert.ok(confirmedRequested.has('driveby'));
+});
+
+// ----------------------------------------------------------------
+// coordinateReviewers — a direct review_requested must survive avalanche
+// detection on the very same run (reported bug: manually re-requesting a
+// reviewer via the GitHub UI got them immediately removed again, because
+// their area now had two currently-requested owners — themselves plus
+// whichever pick an earlier ready_for_review pruning pass had already made
+// — which is indistinguishable from an unpruned CODEOWNERS avalanche unless
+// the just-requested login is carved out). The area is still pruned to one
+// pick, same as any other avalanche — it's just forced to be the login that
+// was directly requested, rather than the load-balancer's own choice.
+// ----------------------------------------------------------------
+
+asyncTest('coordinateReviewers: review_requested for a specific login becomes that area\'s forced pick', async () => {
+  const github = makeGithubMock();
+  const context = {
+    eventName: 'pull_request_target',
+    payload: {
+      action: 'review_requested',
+      requested_reviewer: { login: 'jhendersonHDF' },
+      sender: { type: 'User' },
+    },
+  };
+  const args = makeCoordinateBaseArgs({
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      // hyoklee is the load-balanced pick an earlier pass already made;
+      // jhendersonHDF was just manually re-requested on top of it.
+      requested_reviewers: [{ login: 'hyoklee' }, { login: 'jhendersonHDF' }],
+    },
+    // Rig the load-balancer so a fresh pick would land on hyoklee, not
+    // jhendersonHDF — proving jhendersonHDF survives because they were
+    // just requested, not because they'd have won the pick anyway.
+    reviewerLoad: { hyoklee: 0, jhendersonHDF: 99, glennsong09: 0 },
+  });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.deepStrictEqual(github.calls.removeRequestedReviewers, ['hyoklee'], 'The old pick is swapped out');
+  assert.ok(confirmedRequested.has('jhendersonHDF'), 'The just-requested reviewer must stay');
+  assert.ok(!confirmedRequested.has('hyoklee'), 'The area keeps exactly one reviewer');
+});
+
+// ----------------------------------------------------------------
+// coordinateReviewers — a genuine multi-owner avalanche must still prune to
+// one even when the surviving run's own action is one of the avalanche's own
+// review_requested sub-events (PR #6530: ready_for_review fired the
+// ready_for_review action plus one review_requested per CODEOWNERS owner,
+// all near-simultaneously; concurrency: cancel-in-progress let one of the
+// review_requested runs survive instead of ready_for_review itself. Since a
+// checklist comment already existed from the draft-open phase, that survivor
+// fell through past the ready_for_review-only pruning branch entirely).
+// ----------------------------------------------------------------
+
+asyncTest('coordinateReviewers: review_requested surviving a ready_for_review avalanche still prunes to one', async () => {
+  const github = makeGithubMock();
+  const context = {
+    eventName: 'pull_request_target',
+    payload: {
+      action: 'review_requested',
+      requested_reviewer: { login: 'jhendersonHDF' },
+      sender: { type: 'User' },
+    },
+  };
+  const args = makeCoordinateBaseArgs({
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      // GitHub's own CODEOWNERS avalanche assigned all 3 non-author owners —
+      // never pruned, since the surviving run isn't the ready_for_review action.
+      requested_reviewers: [{ login: 'hyoklee' }, { login: 'jhendersonHDF' }, { login: 'glennsong09' }],
+    },
+  });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.strictEqual(confirmedRequested.size, 1, 'Should prune to exactly one reviewer');
+  assert.ok(confirmedRequested.has('jhendersonHDF'), 'The directly-requested login wins the forced pick');
+  assert.strictEqual(github.calls.removeRequestedReviewers.length, 2, 'The other two avalanche owners are removed');
+});
+
+asyncTest('coordinateReviewers: bot-sourced review_requested is not treated as a forced pick', async () => {
+  // The bot's own requestReviewers calls (e.g. re-requesting a dismissed
+  // reviewer, or its normal load-balanced auto-pick) fire this identical
+  // review_requested event with a Bot sender — must not be mistaken for a
+  // deliberate human override the way a User-sent one is.
+  const github = makeGithubMock();
+  const context = {
+    eventName: 'pull_request_target',
+    payload: {
+      action: 'review_requested',
+      requested_reviewer: { login: 'jhendersonHDF' },
+      sender: { type: 'Bot' },
+    },
+  };
+  const args = makeCoordinateBaseArgs({
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'hyoklee' }, { login: 'jhendersonHDF' }, { login: 'glennsong09' }],
+    },
+    reviewerLoad: { hyoklee: 0, jhendersonHDF: 99, glennsong09: 0 },
+  });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.strictEqual(confirmedRequested.size, 1, 'Should still prune to exactly one reviewer');
+  assert.ok(confirmedRequested.has('hyoklee'), 'The normal load-balanced pick wins, not the bot-sourced login');
+});
+
+// ----------------------------------------------------------------
 // coordinateReviewers — bot-self-triggered review_request_removed must not
 // create a sticky exclusion (the bot's own removeUnselected/removeRequestedReviewers
 // calls fire this very event and would otherwise self-trigger a run that reads
@@ -944,6 +1367,99 @@ asyncTest('coordinateReviewers: human-sender review_request_removed does persist
   const { excludedReviewers } = await coordinateReviewers(github, makeRemovalContext('User'), makeCore(), args);
 
   assert.ok(excludedReviewers.has('jhendersonHDF'));
+});
+
+// ----------------------------------------------------------------
+// coordinateReviewers — manually-added-CODEOWNER tracking. A human directly
+// review-requesting a CODEOWNER (as opposed to the bot's own load-balanced
+// requestReviewers call, or GitHub's CODEOWNERS auto-assignment surviving
+// the cancel-in-progress race) marks them as needing their own approval —
+// see MANUAL_PREFIX and the buildBody tests above.
+// ----------------------------------------------------------------
+
+function makeManualAddContext(senderType, login) {
+  return {
+    eventName: 'pull_request_target',
+    payload: {
+      action: 'review_requested',
+      requested_reviewer: { login },
+      sender: { type: senderType },
+    },
+  };
+}
+
+asyncTest('coordinateReviewers: human review_requested for a CODEOWNER marks them manually-added', async () => {
+  const github = makeGithubMock();
+  const args = makeCoordinateBaseArgs({
+    hasExistingComment: true,
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'jhendersonHDF' }], // one .github owner — no avalanche
+    },
+  });
+
+  const { manuallyAdded } = await coordinateReviewers(
+    github, makeManualAddContext('User', 'jhendersonHDF'), makeCore(), args
+  );
+
+  assert.ok(manuallyAdded.has('jhendersonHDF'));
+});
+
+asyncTest('coordinateReviewers: bot-sender review_requested does NOT mark the reviewer manually-added', async () => {
+  // The bot's own load-balanced requestReviewers call fires this identical
+  // webhook event with a bot sender — must not be mistaken for a human's
+  // deliberate choice, or every auto-picked owner would end up requiring
+  // a redundant "manually added" approval.
+  const github = makeGithubMock();
+  const args = makeCoordinateBaseArgs({
+    hasExistingComment: true,
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'jhendersonHDF' }],
+    },
+  });
+
+  const { manuallyAdded } = await coordinateReviewers(
+    github, makeManualAddContext('Bot', 'jhendersonHDF'), makeCore(), args
+  );
+
+  assert.ok(!manuallyAdded.has('jhendersonHDF'));
+});
+
+asyncTest('coordinateReviewers: review_requested for a non-CODEOWNER does not mark them manually-added', async () => {
+  const github = makeGithubMock();
+  const args = makeCoordinateBaseArgs({
+    hasExistingComment: true,
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'jhendersonHDF' }, { login: 'driveby' }],
+    },
+  });
+
+  const { manuallyAdded } = await coordinateReviewers(
+    github, makeManualAddContext('User', 'driveby'), makeCore(), args
+  );
+
+  assert.ok(!manuallyAdded.has('driveby'));
+});
+
+asyncTest('coordinateReviewers: human-sender review_request_removed clears a prior manually-added flag', async () => {
+  const github = makeGithubMock();
+  const args = makeCoordinateBaseArgs({
+    manuallyAdded: new Set(['jhendersonHDF']),
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'hyoklee' }, { login: 'glennsong09' }],
+    },
+  });
+
+  const { manuallyAdded } = await coordinateReviewers(github, makeRemovalContext('User'), makeCore(), args);
+
+  assert.ok(!manuallyAdded.has('jhendersonHDF'));
 });
 
 // ----------------------------------------------------------------
