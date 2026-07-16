@@ -450,6 +450,16 @@ async function coordinateReviewers(github, context, core, {
     }
   }
 
+  // The specific login a direct review_requested action just added, if any —
+  // see its use below in avalanche detection. A deliberate re-request must
+  // survive this same run: it lands existingRequested at two owners for that
+  // login's area (them plus whoever an earlier pruning pass already picked),
+  // which is indistinguishable from an unpruned CODEOWNERS avalanche unless
+  // this login is carved out.
+  const justRequestedLogin = (action === 'review_requested' && context.payload.requested_reviewer)
+    ? context.payload.requested_reviewer.login
+    : null;
+
   const existingRequested = new Set(
     prData.requested_reviewers.map(r => r.login).filter(Boolean).filter(l => !updatedExcluded.has(l))
   );
@@ -561,8 +571,12 @@ async function coordinateReviewers(github, context, core, {
   // synchronize-swap or additive-fill logic runs, so those paths see an already-
   // correct one-per-area baseline. (PR #6484: user pushed a commit that first
   // touched .github; GitHub assigned all 4 .github CODEOWNERS simultaneously.)
+  // justRequestedLogin's area is exempted — a human just deliberately asked
+  // for exactly that person, which looks identical to an avalanche (two
+  // owners now requested) but isn't one.
   const avalancheAreas = eligibleAreas.filter(
     area => area.owners.filter(o => existingRequested.has(o)).length > 1
+      && !(justRequestedLogin && area.owners.includes(justRequestedLogin))
   );
   if (avalancheAreas.length > 0) {
     const { selected: avalanchePruned, log: pruneLog } = chooseReviewers(avalancheAreas, {
