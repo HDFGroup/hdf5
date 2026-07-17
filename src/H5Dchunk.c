@@ -2919,7 +2919,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
     H5S_t             *chunk_file_spaces_local[8];  /* Local buffer for chunk_file_spaces */
     haddr_t           *chunk_addrs = NULL;          /* Array of chunk addresses */
     haddr_t            chunk_addrs_local[8];        /* Local buffer for chunk_addrs */
-    void              *chunk = NULL;                /* Pointer to locked chunk buffer */
+    void              *chunk        = NULL;         /* Pointer to locked chunk buffer */
     bool               chunk_locked = false;        /* Indicates whether the chunk is locked */
     H5D_chunk_ud_t     udata;                       /* Chunk index pass-through    */
     herr_t             ret_value = SUCCEED;         /*return value        */
@@ -3155,7 +3155,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             /* Check for non-existent chunk & skip it if appropriate */
             if (H5_addr_defined(udata.chunk_block.offset) || UINT_MAX != udata.idx_hint ||
                 !skip_missing_chunks) {
-                H5D_io_info_t *chk_io_info;  /* Pointer to I/O info object for this chunk */
+                H5D_io_info_t *chk_io_info; /* Pointer to I/O info object for this chunk */
 
                 /* Set chunk's [scaled] coordinates */
                 dset_info->store->chunk.scaled = chunk_info->scaled;
@@ -3279,7 +3279,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
     void              *chunk;                      /* Pointer to locked chunk buffer */
     H5D_chunk_ud_t     udata;                      /* Index pass-through    */
     bool               chunk_locked = false;       /* Indicates whether the chunk is locked */
-    herr_t             ret_value = SUCCEED;        /* Return value        */
+    herr_t             ret_value    = SUCCEED;     /* Return value        */
 
     FUNC_ENTER_PACKAGE
 
@@ -3389,7 +3389,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             if (cacheable) {
                 /* Load the chunk into cache.  But if the whole chunk is written,
                  * simply allocate space instead of load the chunk. */
-                bool  entire_chunk = true; /* Whether whole chunk is selected */
+                bool entire_chunk = true; /* Whether whole chunk is selected */
 
                 /* Compute # of bytes accessed in chunk */
                 H5_CHECK_OVERFLOW(dset_info->type_info.dst_type_size, /*From:*/ size_t, /*To:*/ hsize_t);
@@ -6114,7 +6114,7 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, bool new_unfilt_chunk)
     hsize_t              bytes_accessed;          /* Bytes accessed in chunk */
     unsigned             u;                       /* Local index variable */
     bool                 chunk_locked = false;    /* Indicates whether the chunk is locked */
-    herr_t               ret_value = SUCCEED;     /* Return value */
+    herr_t               ret_value    = SUCCEED;  /* Return value */
 
     FUNC_ENTER_PACKAGE
 
