@@ -3276,7 +3276,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
     H5S_t             *chunk_file_spaces_local[8]; /* Local buffer for chunk_file_spaces */
     haddr_t           *chunk_addrs = NULL;         /* Array of chunk addresses */
     haddr_t            chunk_addrs_local[8];       /* Local buffer for chunk_addrs */
-    void              *chunk;                      /* Pointer to locked chunk buffer */
+    void              *chunk = NULL;               /* Pointer to locked chunk buffer */
     H5D_chunk_ud_t     udata;                      /* Index pass-through    */
     bool               chunk_locked = false;       /* Indicates whether the chunk is locked */
     herr_t             ret_value    = SUCCEED;     /* Return value        */
@@ -5723,7 +5723,7 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[])
     H5D_storage_t       chk_store;                        /* Chunk storage information */
     H5D_dset_io_info_t  chk_dset_info;                    /* Chunked I/O dset info object */
     bool                chunk_locked = false;             /* Indicates whether the chunk is locked */
-    void               *chunk;                            /* The file chunk  */
+    void               *chunk = NULL;                     /* The file chunk  */
     bool                carry; /* Flag to indicate that chunk increment carrys to higher dimension (sorta) */
     herr_t              ret_value = SUCCEED; /* Return value */
 
@@ -6109,7 +6109,7 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, bool new_unfilt_chunk)
     hsize_t              sel_nelmts;              /* Number of elements in selection */
     hsize_t              count[H5O_LAYOUT_NDIMS]; /* Element count of hyperslab */
     size_t               chunk_size;              /*size of a chunk       */
-    void                *chunk;                   /* The file chunk  */
+    void                *chunk = NULL;            /* The file chunk  */
     H5D_chunk_ud_t       chk_udata;               /* User data for locking chunk */
     hsize_t              bytes_accessed;          /* Bytes accessed in chunk */
     unsigned             u;                       /* Local index variable */
