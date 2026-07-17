@@ -6111,7 +6111,7 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, bool new_unfilt_chunk)
     size_t               chunk_size;              /*size of a chunk       */
     void                *chunk = NULL;            /* The file chunk  */
     H5D_chunk_ud_t       chk_udata;               /* User data for locking chunk */
-    hsize_t              bytes_accessed;          /* Bytes accessed in chunk */
+    hsize_t              bytes_accessed = 0;      /* Bytes accessed in chunk */
     unsigned             u;                       /* Local index variable */
     bool                 chunk_locked = false;    /* Indicates whether the chunk is locked */
     herr_t               ret_value    = SUCCEED;  /* Return value */
