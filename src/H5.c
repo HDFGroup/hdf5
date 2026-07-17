@@ -466,9 +466,6 @@ H5_term_library(void)
             fprintf(stderr, "HDF5: infinite loop closing library\n");
             fprintf(stderr, "      %s\n", loop);
         }
-#ifndef NDEBUG
-        abort();
-#endif
     }
 
     /* Free open debugging streams */
