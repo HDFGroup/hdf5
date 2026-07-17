@@ -151,6 +151,10 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ## Library
 
+### Fixed error when reading variable-length chunked datasets in read-only mode
+
+   When reading from a chunked dataset with a variable-length type, a non-default fill value, and unwritten chunks, the library would internally try to write data to the file and fail due to writing to a read-only file. Reworked the I/O code to avoid these writes in this case. This may also improve performance and file space usage in similar cases with files open with write access.
+
 ### Validate free space section type during decode
 
    When loading a free space section info block, the per-section type byte read from the file was used directly to index the free space manager's section class array and to call the class `deserialize` callback, guarded only by an assertion that is removed in release builds. A corrupted or fuzzed file could supply a type beyond the number of registered classes, causing an out-of-bounds read of the class array and an indirect call through a bogus function pointer. `H5FS__cache_sinfo_deserialize()` now rejects a section type that is not less than the number of section classes.
