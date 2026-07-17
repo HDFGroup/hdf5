@@ -10370,10 +10370,10 @@ test_par_append_filter_blob(hid_t fapl_id)
     hsize_t        dims[2]   = {(hsize_t)(mpi_size * 4), 4};
     hsize_t        chunk[2]  = {4, 4};
     hsize_t        start[2], count[2], block[2];
-    C_DATATYPE    *wbuf     = NULL;
-    C_DATATYPE    *rbuf     = NULL;
-    unsigned char *blob     = NULL;
-    void          *enc_buf  = NULL;
+    C_DATATYPE    *wbuf    = NULL;
+    C_DATATYPE    *rbuf    = NULL;
+    unsigned char *blob    = NULL;
+    void          *enc_buf = NULL;
     size_t         nbytes;
     herr_t         ret;
 
