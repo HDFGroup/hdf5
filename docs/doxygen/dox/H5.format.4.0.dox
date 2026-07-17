@@ -4227,7 +4227,8 @@ are: <em>Dataspace, Datatype, Fill Value, Filter Pipeline and Attribute</em>.
 
 The <em>shared object header message table</em> is pointed to from a
 @ref subsubsec_fmt4_dataobject_hdr_msg_shared message in the superblock extension for a file. This
-message stores the version of the table format, along with the number of index headers in the table.
+message stores the version of the table format, along with the number of index headers, \a N, in
+the table.
 
 <table>
 <caption><strong>Layout: Shared Object Header Message Table</strong></caption>
@@ -4387,8 +4388,9 @@ message stores the version of the table format, along with the number of index h
 </table>
 
 Shared messages are indexed either with a <em>shared message record list</em>, described below,
-or using a v2 B-tree (using record type 7). The number of records in the <em>shared message record
-list</em> is determined in the index&rsquo;s entry in the <em>shared object header message table</em>.
+or using a v2 B-tree (using record type 7). The number of records, \a M, in the <em>shared message
+record list</em> is determined in the index&rsquo;s entry in the <em>shared object header message
+table</em> (see &ldquo;Number of Messages for index \#N&rdquo; above).
 <table>
 <caption><strong>Layout: Shared Message Record List</strong></caption>
 <tr>
@@ -4410,7 +4412,7 @@ list</em> is determined in the index&rsquo;s entry in the <em>shared object head
   <td colspan="4">...</td>
 </tr>
 <tr>
-  <td colspan="4">Shared Message Record \#N-1</td>
+  <td colspan="4">Shared Message Record \#M-1</td>
 </tr>
 <tr>
   <td colspan="4">Checksum</td>
@@ -4430,7 +4432,7 @@ list</em> is determined in the index&rsquo;s entry in the <em>shared object head
       reconstructing a damaged file.</td>
 </tr>
 <tr>
-  <td>Shared Message Record \#N</td>
+  <td>Shared Message Record \#M</td>
   <td>The record for locating the shared message, either in the fractal heap for the index, or an object
       header (see format for <em>index nodes</em> below).</td>
 </tr>
