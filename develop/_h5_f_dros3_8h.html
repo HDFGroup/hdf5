@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-18</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -152,6 +152,8 @@ Macros</h2></td></tr>
 <tr class="memitem:aea0d0c807838178043b65ef66a6352c5" id="r_aea0d0c807838178043b65ef66a6352c5"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aea0d0c807838178043b65ef66a6352c5">H5FD_ROS3_VALUE</a>&#160;&#160;&#160;<a class="el" href="_h5_f_dpublic_8h.html#a498d8f0d3383daf1cc08312aece03c9f">H5_VFD_ROS3</a></td></tr>
 <tr class="memitem:ad5b1ae655dd2b2d090892c889555ea52" id="r_ad5b1ae655dd2b2d090892c889555ea52"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad5b1ae655dd2b2d090892c889555ea52">H5FD_ROS3_VFD_DEFAULT_LOG_FILE</a>&#160;&#160;&#160;&quot;hdf5_ros3_vfd.log&quot;</td></tr>
 <tr class="memitem:a035c6d49fb7957ebf8703bb011e36138" id="r_a035c6d49fb7957ebf8703bb011e36138"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a035c6d49fb7957ebf8703bb011e36138">HDF5_ROS3_VFD_DEBUG</a>&#160;&#160;&#160;&quot;HDF5_ROS3_VFD_DEBUG&quot;</td></tr>
+<tr class="memitem:afd16ed9c17bd44e4900ea2b7f20e5028" id="r_afd16ed9c17bd44e4900ea2b7f20e5028"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#afd16ed9c17bd44e4900ea2b7f20e5028">HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE</a>&#160;&#160;&#160;134217728</td></tr>
+<tr class="memitem:a5e52806808b5fac7598260d179f08ca0" id="r_a5e52806808b5fac7598260d179f08ca0"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5e52806808b5fac7598260d179f08ca0">HDF5_ROS3_VFD_DEFAULT_BLOCK_SIZE</a>&#160;&#160;&#160;16777216</td></tr>
 <tr class="memitem:a1528bec8381b8e66a455dcec41cc43b9" id="r_a1528bec8381b8e66a455dcec41cc43b9"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1528bec8381b8e66a455dcec41cc43b9">HDF5_ROS3_VFD_FORCE_PATH_STYLE</a>&#160;&#160;&#160;&quot;HDF5_ROS3_VFD_FORCE_PATH_STYLE&quot;</td></tr>
 <tr class="memitem:abe11b65d5fa98d2d2a46d745421c5217" id="r_abe11b65d5fa98d2d2a46d745421c5217"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#abe11b65d5fa98d2d2a46d745421c5217">HDF5_ROS3_VFD_LOG_FILE</a>&#160;&#160;&#160;&quot;HDF5_ROS3_VFD_LOG_FILE&quot;</td></tr>
 <tr class="memitem:a534552703357f9a61ea1fbf66e86b0b5" id="r_a534552703357f9a61ea1fbf66e86b0b5"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a534552703357f9a61ea1fbf66e86b0b5">HDF5_ROS3_VFD_LOG_LEVEL</a>&#160;&#160;&#160;&quot;HDF5_ROS3_VFD_LOG_LEVEL&quot;</td></tr>
@@ -160,12 +162,16 @@ Macros</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:gaee5e0b8373b4b493b0cd2616938d601e" id="r_gaee5e0b8373b4b493b0cd2616938d601e"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="group___f_a_p_l.html#gaee5e0b8373b4b493b0cd2616938d601e">H5Pget_fapl_ros3</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="struct_h5_f_d__ros3__fapl__t.html">H5FD_ros3_fapl_t</a> *fa_out)</td></tr>
 <tr class="memdesc:gaee5e0b8373b4b493b0cd2616938d601e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries a File Access Property List for <a class="el" href="#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> file driver properties.  <br /></td></tr>
+<tr class="memitem:gaed71cb2871386af97a40873d40b88a82" id="r_gaed71cb2871386af97a40873d40b88a82"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="group___f_a_p_l.html#gaed71cb2871386af97a40873d40b88a82">H5Pget_fapl_ros3_block_caching</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, size_t *block_size, size_t *block_cache_size, bool *lock_superblock)</td></tr>
+<tr class="memdesc:gaed71cb2871386af97a40873d40b88a82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries a File Access Property List for <a class="el" href="#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> I/O block caching parameters.  <br /></td></tr>
 <tr class="memitem:ga24b1d9fd0e33117b735635a9d198becb" id="r_ga24b1d9fd0e33117b735635a9d198becb"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="group___f_a_p_l.html#ga24b1d9fd0e33117b735635a9d198becb">H5Pget_fapl_ros3_endpoint</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, size_t size, char *endpoint)</td></tr>
 <tr class="memdesc:ga24b1d9fd0e33117b735635a9d198becb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries a File Access Property List for <a class="el" href="#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> file driver endpoint url.  <br /></td></tr>
 <tr class="memitem:ga255ea505c742118f8fd25b1eb948f8fb" id="r_ga255ea505c742118f8fd25b1eb948f8fb"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="group___f_a_p_l.html#ga255ea505c742118f8fd25b1eb948f8fb">H5Pget_fapl_ros3_token</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, size_t size, char *token)</td></tr>
 <tr class="memdesc:ga255ea505c742118f8fd25b1eb948f8fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries a File Access Property List for <a class="el" href="#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> file driver session/security token.  <br /></td></tr>
 <tr class="memitem:ga9dd7950acea860b716831488dd87ae8f" id="r_ga9dd7950acea860b716831488dd87ae8f"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="group___f_a_p_l.html#ga9dd7950acea860b716831488dd87ae8f">H5Pset_fapl_ros3</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, const <a class="el" href="struct_h5_f_d__ros3__fapl__t.html">H5FD_ros3_fapl_t</a> *fa)</td></tr>
 <tr class="memdesc:ga9dd7950acea860b716831488dd87ae8f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies the specified File Access Property List to use the <a class="el" href="#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver.  <br /></td></tr>
+<tr class="memitem:gac257c8f9fc42c4ba3dfc69df7b7b91b7" id="r_gac257c8f9fc42c4ba3dfc69df7b7b91b7"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="group___f_a_p_l.html#gac257c8f9fc42c4ba3dfc69df7b7b91b7">H5Pset_fapl_ros3_block_caching</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, size_t block_size, size_t block_cache_size, bool lock_superblock)</td></tr>
+<tr class="memdesc:gac257c8f9fc42c4ba3dfc69df7b7b91b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies the specified File Access Property List to set I/O block caching parameters for the <a class="el" href="#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver.  <br /></td></tr>
 <tr class="memitem:ga316f9801b3b0a02916fd4a721532aeda" id="r_ga316f9801b3b0a02916fd4a721532aeda"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="group___f_a_p_l.html#ga316f9801b3b0a02916fd4a721532aeda">H5Pset_fapl_ros3_endpoint</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, const char *endpoint)</td></tr>
 <tr class="memdesc:ga316f9801b3b0a02916fd4a721532aeda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies the specified File Access Property List to use an alternative endpoint URL when opening files with the <a class="el" href="#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver.  <br /></td></tr>
 <tr class="memitem:ga74d2ae62171700a1a50c9fd76713cf4d" id="r_ga74d2ae62171700a1a50c9fd76713cf4d"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="group___f_a_p_l.html#ga74d2ae62171700a1a50c9fd76713cf4d">H5Pset_fapl_ros3_token</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, const char *token)</td></tr>
@@ -309,6 +315,38 @@ Functions</h2></td></tr>
  '0' <br  />
 </p>
 <p>Debugging output will be printed to stderr. </p><dl class="section since"><dt>Since</dt><dd>2.0.0 </dd></dl>
+
+</div>
+</div>
+<a id="afd16ed9c17bd44e4900ea2b7f20e5028" name="afd16ed9c17bd44e4900ea2b7f20e5028"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd16ed9c17bd44e4900ea2b7f20e5028">&#9670;&#160;</a></span>HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE&#160;&#160;&#160;134217728</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The default size, in bytes, of the <a class="el" href="#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver's I/O block cache. By default, the <a class="el" href="#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver tries to reduce requests to S3 by performing I/O in fixed-size blocks and caching these blocks in an I/O block cache. This value may be specified for the <code class="param">block_cache_size</code> parameter to <a class="el" href="group___f_a_p_l.html#gac257c8f9fc42c4ba3dfc69df7b7b91b7" title="Modifies the specified File Access Property List to set I/O block caching parameters for the H5FD_ROS...">H5Pset_fapl_ros3_block_caching()</a> in order to set the default I/O block cache size.</p>
+<dl class="section since"><dt>Since</dt><dd>2.2.0 </dd></dl>
+
+</div>
+</div>
+<a id="a5e52806808b5fac7598260d179f08ca0" name="a5e52806808b5fac7598260d179f08ca0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e52806808b5fac7598260d179f08ca0">&#9670;&#160;</a></span>HDF5_ROS3_VFD_DEFAULT_BLOCK_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HDF5_ROS3_VFD_DEFAULT_BLOCK_SIZE&#160;&#160;&#160;16777216</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The default size, in bytes, of a cached I/O block. By default, the <a class="el" href="#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver tries to reduce requests to S3 by performing I/O in fixed-size blocks and caching these blocks in an I/O block cache. This value may be specified for the <code class="param">block_size</code> parameter to <a class="el" href="group___f_a_p_l.html#gac257c8f9fc42c4ba3dfc69df7b7b91b7" title="Modifies the specified File Access Property List to set I/O block caching parameters for the H5FD_ROS...">H5Pset_fapl_ros3_block_caching()</a> in order to set the default I/O block size.</p>
+<dl class="section since"><dt>Since</dt><dd>2.2.0 </dd></dl>
 
 </div>
 </div>

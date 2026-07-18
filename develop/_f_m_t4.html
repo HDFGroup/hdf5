@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-18</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -818,9 +818,9 @@ Address of Child 2<em>K</em><sup>O</sup><br  />
 <tr valign="top" align="left">
 <td width="20%">Bytes 1-4</td><td>Size of chunk in bytes.</td></tr>
 <tr valign="top" align="left">
-<td>Bytes 4-8</td><td>Filter mask, a 32-bit bit field indicating which filters have been skipped for this chunk. Each filter has an index number in the pipeline (starting at 0, with the first filter to apply) and if that filter is skipped, the bit corresponding to its index is set.</td></tr>
+<td>Bytes 5-8</td><td>Filter mask, a 32-bit bit field indicating which filters have been skipped for this chunk. Each filter has an index number in the pipeline (starting at 0, with the first filter to apply) and if that filter is skipped, the bit corresponding to its index is set.</td></tr>
 <tr valign="top" align="left">
-<td>(<em>D + 1</em>) 64-bit fields</td><td>The offset of the chunk within the dataset where <em>D</em> is the number of dimensions of the dataset, and the last value is the offset within the dataset&rsquo;s datatype and should always be zero. For example, if a chunk in a 3-dimensional dataset begins at the position <code>[5,5,5]</code>, there will be three such 64-bit indices, each with the value of <code>5</code>, followed by a <code>0</code> value.</td></tr>
+<td>(<em>d</em> + 1) 64-bit fields</td><td>The offset of the chunk within the dataset, where <b>d</b> is the number of dimensions of the dataset. The first <em>d</em> values are the chunk&rsquo;s offset along each real dataset dimension. The extra (<em>d</em>+1)<sup>th</sup> value is not a real dimension offset; it is a placeholder for the offset within the dataset&rsquo;s datatype element and is always <code>0</code>. For example, if a chunk in a 3-dimensional dataset begins at the position <code>[5,5,5]</code>, there will be three such 64-bit indices, each with the value of <code>5</code>, followed by a <code>0</code> value for the datatype-element placeholder.</td></tr>
 </table>
 </td></tr>
 <tr valign="top">
@@ -1390,21 +1390,22 @@ Dimension 1 Scaled Offset <em>(8 bytes)</em><br  />
 </td></tr>
 <tr>
 <td colspan="4"><br  />
-Dimension #n Scaled Offset <em>(8 bytes)</em><br  />
+Dimension #(d - 1) Scaled Offset <em>(8 bytes)</em><br  />
 <br  />
 </td></tr>
 </table>
 <ul>
-<li>Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0" title="FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock.</li>
+<li>Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0" title="FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock. </li>
+<li>In the above table, <b>d</b> is the number of dimensions in the dataset&rsquo;s dataspace. Unlike the version 1 B-tree chunk key, there is no extra field for the dataset&rsquo;s datatype element; exactly <em>d</em> scaled offsets are stored, one per real dataset dimension.</li>
 </ul>
 <table class="doxtable">
-<caption><b>Fields: Version 2 B-tree, Type 10 Record Layout - Non-filtered Dataset Chunks</b></caption>
+<caption><a class="anchor" id="FMT4V2BtType10Fields"></a><b>Fields: Version 2 B-tree, Type 10 Record Layout - Non-filtered Dataset Chunks</b></caption>
 <tr>
 <th width="30%">Field Name</th><th>Description</th></tr>
 <tr>
 <td>Address</td><td>This field is the address of the dataset chunk in the file.</td></tr>
 <tr>
-<td>Dimension #n Scaled Offset</td><td>This field is the scaled offset of the chunk within the dataset. <em>n</em> is the number of dimensions for the dataset. The first scaled offset stored in the list is for the slowest changing dimension, and the last scaled offset stored is for the fastest changing dimension. Scaled offset is calculated by dividing the chunk dimension sizes into the chunk offsets.</td></tr>
+<td>Dimension #i Scaled Offset (i = 0 to (d-1))</td><td>This field is the scaled offset of the chunk within the dataset, where <b>d</b> is the number of dimensions for the dataset. The first scaled offset stored in the list is for the slowest changing dimension, and the last scaled offset stored is for the fastest changing dimension. Scaled offset is calculated by dividing the chunk dimension sizes into the chunk offsets.</td></tr>
 </table>
 <table class="doxtable">
 <caption><a class="anchor" id="FMT4V2BtType11"></a><b>Layout: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks (Layout Version 4)</b></caption>
@@ -1439,16 +1440,17 @@ Dimension 1 Scaled Offset <em>(8 bytes)</em><br  />
 </td></tr>
 <tr>
 <td colspan="4"><br  />
-Dimension #n Scaled Offset <em>(8 bytes)</em><br  />
+Dimension #(d - 1) Scaled Offset <em>(8 bytes)</em><br  />
 <br  />
 </td></tr>
 </table>
 <ul>
 <li>Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0" title="FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock. </li>
+<li>See the note for <a class="el" href="#FMT4V2BtType10" title="FMT4V2BtType10">Type 10 Record Layout</a> above for the definition of <b>d</b> and the scaled offset fields. </li>
 <li>This encoding is used when this B-Tree is used as an index for a dataset with layout message version 4.</li>
 </ul>
 <table class="doxtable">
-<caption>Type11 <b>Layout: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks (Layout Version 5)</b></caption>
+<caption><a class="anchor" id="FMT4V2BtType11V5"></a><b>Layout: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks (Layout Version 5)</b></caption>
 <tr>
 <th width="25%">byte</th><th width="25%">byte</th><th width="25%">byte</th><th>byte</th></tr>
 <tr>
@@ -1480,12 +1482,13 @@ Dimension 1 Scaled Offset <em>(8 bytes)</em><br  />
 </td></tr>
 <tr>
 <td colspan="4"><br  />
-Dimension #n Scaled Offset <em>(8 bytes)</em><br  />
+Dimension #(d - 1) Scaled Offset <em>(8 bytes)</em><br  />
 <br  />
 </td></tr>
 </table>
 <ul>
 <li>Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0" title="FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock. </li>
+<li>See the note for <a class="el" href="#FMT4V2BtType10" title="FMT4V2BtType10">Type 10 Record Layout</a> above for the definition of <b>d</b> and the scaled offset fields. </li>
 <li>This encoding is used when this B-tree is used as an index for a dataset with layout message version 5 or above.</li>
 </ul>
 <table class="doxtable">
@@ -1507,7 +1510,7 @@ Dimension #n Scaled Offset <em>(8 bytes)</em><br  />
 <tr>
 <td>Filter Mask</td><td>This field is the filter mask which indicates the filter to skip for the dataset chunk. Each filter has an index number in the pipeline and if that filter is skipped, the bit corresponding to its index is set.</td></tr>
 <tr>
-<td>Dimension #n Scaled Offset</td><td>This field is the scaled offset of the chunk within the dataset. <em>n</em> is the number of dimensions for the dataset. The first scaled offset stored in the list is for the slowest changing dimension, and the last scaled offset stored is for the fastest changing dimension.</td></tr>
+<td>Dimension #i Scaled Offset (i = 0 to (d-1))</td><td>See the <a class="el" href="#FMT4V2BtType10Fields" title="FMT4V2BtType10Fields">Dimension #i Scaled Offset</a> field description in the Type 10 Record Layout Fields table above.</td></tr>
 </table>
 <h2 class="doxsection"><a class="anchor" id="subsec_fmt4_infra_symboltable"></a>
 III.B. Disk Format: Level 1B - Group Symbol Table Nodes</h2>
@@ -2867,7 +2870,7 @@ III.I. Disk Format: Level 1I - Shared Object Header Message Table</h2>
 <p>The <em>shared object header message table</em> is used to locate object header messages that are shared between two or more object headers in the file. Shared object header messages are stored and indexed in the file in one of two ways: indexed sequentially in a <em>shared header message list</em> or indexed with a v2 B-tree. The shared messages themselves are either stored in a fractal heap (when two or more objects share the message), or remain in an object&rsquo;s header (when only one object uses the message currently, but the message can be shared in the future).</p>
 <p>The <em>shared object header message table</em> contains a list of shared message index headers. Each index header records information about the version of the index format, the index storage type, flags for the message types indexed, the number of messages in the index, the address where the index resides, and the fractal heap address if shared messages are stored there.</p>
 <p>Each index can be either a list or a v2 B-tree and may transition between those two forms as the number of messages in the index varies. Each shared message record contains information used to locate the shared message from either a fractal heap or an object header. The types of messages that can be shared are: <em>Dataspace, Datatype, Fill Value, Filter Pipeline and Attribute</em>.</p>
-<p>The <em>shared object header message table</em> is pointed to from a <a class="el" href="#subsubsec_fmt4_dataobject_hdr_msg_shared" title="IV.A.2.p. The Shared Message Table Message">IV.A.2.p. The Shared Message Table Message</a> message in the superblock extension for a file. This message stores the version of the table format, along with the number of index headers in the table.</p>
+<p>The <em>shared object header message table</em> is pointed to from a <a class="el" href="#subsubsec_fmt4_dataobject_hdr_msg_shared" title="IV.A.2.p. The Shared Message Table Message">IV.A.2.p. The Shared Message Table Message</a> message in the superblock extension for a file. This message stores the version of the table format, along with the number of index headers, <em class="arg">N</em>, in the table.</p>
 <table class="doxtable">
 <caption><b>Layout: Shared Object Header Message Table</b></caption>
 <tr>
@@ -2963,7 +2966,7 @@ An index can track more than one type of message, but each type of message can o
 <tr>
 <td>Checksum</td><td>This is the checksum for the table.</td></tr>
 </table>
-<p>Shared messages are indexed either with a <em>shared message record list</em>, described below, or using a v2 B-tree (using record type 7). The number of records in the <em>shared message record list</em> is determined in the index&rsquo;s entry in the <em>shared object header message table</em>. </p><table class="doxtable">
+<p>Shared messages are indexed either with a <em>shared message record list</em>, described below, or using a v2 B-tree (using record type 7). The number of records, <em class="arg">M</em>, in the <em>shared message record list</em> is determined in the index&rsquo;s entry in the <em>shared object header message table</em> (see &ldquo;Number of Messages for index #N&rdquo; above). </p><table class="doxtable">
 <caption><b>Layout: Shared Message Record List</b></caption>
 <tr>
 <th width="25%">byte</th><th width="25%">byte</th><th width="25%">byte</th><th>byte</th></tr>
@@ -2976,7 +2979,7 @@ An index can track more than one type of message, but each type of message can o
 <tr>
 <td colspan="4">...</td></tr>
 <tr>
-<td colspan="4">Shared Message Record #N-1</td></tr>
+<td colspan="4">Shared Message Record #M-1</td></tr>
 <tr>
 <td colspan="4">Checksum</td></tr>
 </table>
@@ -2987,7 +2990,7 @@ An index can track more than one type of message, but each type of message can o
 <tr>
 <td>Signature</td><td>The ASCII character string &ldquo;<code>SMLI</code>&rdquo; is used to indicate the beginning of a list of index nodes. This gives file consistency checking utilities a better chance of reconstructing a damaged file.</td></tr>
 <tr>
-<td>Shared Message Record #N</td><td>The record for locating the shared message, either in the fractal heap for the index, or an object header (see format for <em>index nodes</em> below).</td></tr>
+<td>Shared Message Record #M</td><td>The record for locating the shared message, either in the fractal heap for the index, or an object header (see format for <em>index nodes</em> below).</td></tr>
 <tr>
 <td>Checksum</td><td>This is the checksum for the list.</td></tr>
 </table>

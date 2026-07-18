@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-18</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -304,6 +304,8 @@ Functions</h2></td></tr>
 <tr class="memdesc:gaedf8b83d7571bfffb7336a8e11a98107"><td class="mdescLeft">&#160;</td><td class="mdescRight">get the onion info from the file access property list  <br /></td></tr>
 <tr class="memitem:gaee5e0b8373b4b493b0cd2616938d601e" id="r_gaee5e0b8373b4b493b0cd2616938d601e"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#gaee5e0b8373b4b493b0cd2616938d601e">H5Pget_fapl_ros3</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="struct_h5_f_d__ros3__fapl__t.html">H5FD_ros3_fapl_t</a> *fa_out)</td></tr>
 <tr class="memdesc:gaee5e0b8373b4b493b0cd2616938d601e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries a File Access Property List for <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> file driver properties.  <br /></td></tr>
+<tr class="memitem:gaed71cb2871386af97a40873d40b88a82" id="r_gaed71cb2871386af97a40873d40b88a82"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#gaed71cb2871386af97a40873d40b88a82">H5Pget_fapl_ros3_block_caching</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, size_t *block_size, size_t *block_cache_size, bool *lock_superblock)</td></tr>
+<tr class="memdesc:gaed71cb2871386af97a40873d40b88a82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries a File Access Property List for <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> I/O block caching parameters.  <br /></td></tr>
 <tr class="memitem:ga24b1d9fd0e33117b735635a9d198becb" id="r_ga24b1d9fd0e33117b735635a9d198becb"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga24b1d9fd0e33117b735635a9d198becb">H5Pget_fapl_ros3_endpoint</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, size_t size, char *endpoint)</td></tr>
 <tr class="memdesc:ga24b1d9fd0e33117b735635a9d198becb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries a File Access Property List for <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> file driver endpoint url.  <br /></td></tr>
 <tr class="memitem:ga255ea505c742118f8fd25b1eb948f8fb" id="r_ga255ea505c742118f8fd25b1eb948f8fb"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga255ea505c742118f8fd25b1eb948f8fb">H5Pget_fapl_ros3_token</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, size_t size, char *token)</td></tr>
@@ -396,6 +398,8 @@ Functions</h2></td></tr>
 <tr class="memdesc:gade8995b5e2d1ea53861501d98129d762"><td class="mdescLeft">&#160;</td><td class="mdescRight">set the onion info for the file access property list  <br /></td></tr>
 <tr class="memitem:ga9dd7950acea860b716831488dd87ae8f" id="r_ga9dd7950acea860b716831488dd87ae8f"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga9dd7950acea860b716831488dd87ae8f">H5Pset_fapl_ros3</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, const <a class="el" href="struct_h5_f_d__ros3__fapl__t.html">H5FD_ros3_fapl_t</a> *fa)</td></tr>
 <tr class="memdesc:ga9dd7950acea860b716831488dd87ae8f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies the specified File Access Property List to use the <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver.  <br /></td></tr>
+<tr class="memitem:gac257c8f9fc42c4ba3dfc69df7b7b91b7" id="r_gac257c8f9fc42c4ba3dfc69df7b7b91b7"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#gac257c8f9fc42c4ba3dfc69df7b7b91b7">H5Pset_fapl_ros3_block_caching</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, size_t block_size, size_t block_cache_size, bool lock_superblock)</td></tr>
+<tr class="memdesc:gac257c8f9fc42c4ba3dfc69df7b7b91b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies the specified File Access Property List to set I/O block caching parameters for the <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver.  <br /></td></tr>
 <tr class="memitem:ga316f9801b3b0a02916fd4a721532aeda" id="r_ga316f9801b3b0a02916fd4a721532aeda"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga316f9801b3b0a02916fd4a721532aeda">H5Pset_fapl_ros3_endpoint</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, const char *endpoint)</td></tr>
 <tr class="memdesc:ga316f9801b3b0a02916fd4a721532aeda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies the specified File Access Property List to use an alternative endpoint URL when opening files with the <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver.  <br /></td></tr>
 <tr class="memitem:ga74d2ae62171700a1a50c9fd76713cf4d" id="r_ga74d2ae62171700a1a50c9fd76713cf4d"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga74d2ae62171700a1a50c9fd76713cf4d">H5Pset_fapl_ros3_token</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, const char *token)</td></tr>
@@ -1265,6 +1269,50 @@ For optimum performance, the <code class="param">page_size</code> parameter shou
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value. </dd></dl>
+
+</div>
+</div>
+<a id="gaed71cb2871386af97a40873d40b88a82" name="gaed71cb2871386af97a40873d40b88a82"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaed71cb2871386af97a40873d40b88a82">&#9670;&#160;</a></span>H5Pget_fapl_ros3_block_caching()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5Pget_fapl_ros3_block_caching </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>fapl_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>block_size</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>block_cache_size</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool *</td>          <td class="paramname"><span class="paramname"><em>lock_superblock</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Queries a File Access Property List for <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> I/O block caching parameters. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">fapl_id</td><td>File access property list identifier </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">block_size</td><td>Pointer for returning the currently set size, in bytes, of a cached I/O block. May be <code>NULL</code>, in which case no value is returned. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">block_cache_size</td><td>Pointer for returning the currently set maximum size, in bytes, of the <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> I/O block cache. This is an upper limit of the amount of bytes which will be allocated for caching I/O blocks, excluding a small amount of additional metadata bytes allocated for each block. May be <code>NULL</code>, in which case no value is returned. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">lock_superblock</td><td>Pointer for returning the currently set boolean value for whether the I/O block containing a file's superblock metadata should be locked in the I/O block cache. This will prevent that block from being evicted from the block cache when trying to make space for other I/O blocks. May be <code>NULL</code>, in which case no value is returned. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>2.2.0 </dd></dl>
 
 </div>
 </div>
@@ -3614,6 +3662,58 @@ Flavor of allocation </td></tr>
 <li>Disabling the page buffer with the ROS3 driver may cause severe performance degradation. </li>
 </ol>
 </dd></dl>
+
+</div>
+</div>
+<a id="gac257c8f9fc42c4ba3dfc69df7b7b91b7" name="gac257c8f9fc42c4ba3dfc69df7b7b91b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac257c8f9fc42c4ba3dfc69df7b7b91b7">&#9670;&#160;</a></span>H5Pset_fapl_ros3_block_caching()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5Pset_fapl_ros3_block_caching </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>fapl_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>block_size</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>block_cache_size</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>lock_superblock</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Modifies the specified File Access Property List to set I/O block caching parameters for the <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">fapl_id</td><td>File access property list identifier </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block_size</td><td>Specifies the size, in bytes, of a cached I/O block. The default value is <a class="el" href="_h5_f_dros3_8h.html#a5e52806808b5fac7598260d179f08ca0">HDF5_ROS3_VFD_DEFAULT_BLOCK_SIZE</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block_cache_size</td><td>Specifies the total size, in bytes, of the I/O block cache. The default value is <a class="el" href="_h5_f_dros3_8h.html#afd16ed9c17bd44e4900ea2b7f20e5028">HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">lock_superblock</td><td>Specifies whether or not to keep the I/O block containing a file's superblock metadata locked in the I/O block cache and unable to be evicted. The default value is <code>true</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p><a class="el" href="#gac257c8f9fc42c4ba3dfc69df7b7b91b7" title="Modifies the specified File Access Property List to set I/O block caching parameters for the H5FD_ROS...">H5Pset_fapl_ros3_block_caching()</a> sets parameters that control how the <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver caches I/O to reduce requests to S3. By default, the <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver performs I/O in large, fixed-size (<a class="el" href="_h5_f_dros3_8h.html#a5e52806808b5fac7598260d179f08ca0">HDF5_ROS3_VFD_DEFAULT_BLOCK_SIZE</a> bytes, by default) blocks which are cached in memory and used to serve I/O requests. This function can be used to modify the default parameters to better suit a particular I/O pattern.</p>
+<p>For <code class="param">block_size</code>, the macro <a class="el" href="_h5_f_dros3_8h.html#a5e52806808b5fac7598260d179f08ca0">HDF5_ROS3_VFD_DEFAULT_BLOCK_SIZE</a> may be used to specify that the default block size is desired. For <code class="param">block_cache_size</code>, the macro <a class="el" href="_h5_f_dros3_8h.html#afd16ed9c17bd44e4900ea2b7f20e5028">HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE</a> may be used to specify that the default block cache size is desired. Setting either <code class="param">block_size</code> or <code class="param">block_cache_size</code> to 0 will disable I/O block caching in the <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver. This can be useful for reading small amounts of data from a file when the default <code class="param">block_size</code> is much larger than the amount of data being read.</p>
+<p><code class="param">block_cache_size</code> is an upper limit of the amount of bytes which will be allocated for caching I/O blocks, excluding a small amount of additional metadata bytes allocated for each block. The block cache will only keep whole blocks, so <code class="param">block_cache_size</code> should be set to some multiple of <code class="param">block_size</code>. If <code class="param">block_cache_size</code> is specified as a value smaller than <code class="param">block_size</code>, <code class="param">block_size</code> will be adjusted down to be equal to <code class="param">block_cache_size</code> and the block cache will only hold a single cached I/O block.</p>
+<p><code class="param">lock_superblock</code> determines whether the I/O block containing a file's superblock metadata should be locked in the block cache and prevented from being evicted when trying to make space for other I/O blocks. Depending on the layout of a file, this can be useful for keeping specific often-used metadata in the block cache.</p>
+<dl class="section note"><dt>Note</dt><dd>The <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver only performs I/O block caching when a file does <b>NOT</b> use paged file space allocation. If a file uses paged file space allocation, the library's existing page buffering mechanism will be used instead. </dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>The value chosen for <code class="param">block_size</code> involves a tradeoff between the number of S3 requests the <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver might issue and how many bytes may be transferred as a result of those requests. Larger <code class="param">block_size</code> values may result in less S3 requests being made, while potentially increasing the total number of bytes transferred if more data than necessary is cached. If <code class="param">block_cache_size</code> is too small, I/O blocks may be evicted from the block cache and re-cached later, possibly resulting in the transferring of significantly more bytes than the size of the file.</dd>
+<dd>
+The value chosen for <code class="param">block_cache_size</code> involves a tradeoff between performance and memory usage, with larger <code class="param">block_cache_size</code> values causing more memory to be used to cache more I/O blocks. </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>When <code class="param">lock_superblock</code> is specified as <code>true</code>, the first I/O block cached when attempting to locate a file's superblock is assumed to contain the superblock metadata. If a file contains a user block that is as large as, or larger than, <code class="param">block_size</code>, this will cause the I/O block containing the file's superblock metadata to <b>NOT</b> be locked in the I/O block cache. For this case, <code class="param">block_size</code> should be adjusted accordingly to be at least as large as the user block plus some bytes for the superblock metadata. </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>2.2.0 </dd></dl>
 
 </div>
 </div>
