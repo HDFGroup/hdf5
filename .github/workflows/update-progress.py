@@ -28,6 +28,8 @@ FIELD_STATUS = "Status"
 # Expected values for Priority field
 VALUE_CRITICAL = "P0 - Critical"
 VALUE_HIGH = "P1 - High"
+VALUE_MEDIUM = "P2 - Medium"
+VALUE_LOW = "P3 - Low"
 
 # Expected value for Status field when an item is completed
 VALUE_STATUS_DONE = "Done"
@@ -129,16 +131,21 @@ class GitHubProjectTracker:
     
     def fetch_release_blocker_stats(self) -> Dict[str, int]:
         """
-        Fetches critical and high priority issue statistics from the GitHub project.
+        Fetches critical, high, medium, and low priority issue statistics from the GitHub project.
 
         Returns:
             Dict with 'total', 'done', 'percentage', 'blocker_total', 'blocker_done',
-            'mustdo_total', 'mustdo_done' keys
+            'mustdo_total', 'mustdo_done', 'medium_total', 'medium_done',
+            'low_total', 'low_done' keys
         """
         blocker_total = 0
         blocker_done = 0
         mustdo_total = 0
         mustdo_done = 0
+        medium_total = 0
+        medium_done = 0
+        low_total = 0
+        low_done = 0
         cursor = None
 
         # Track if we've seen the expected fields at least once
@@ -206,6 +213,14 @@ class GitHubProjectTracker:
                     mustdo_total += 1
                     if status == VALUE_STATUS_DONE:
                         mustdo_done += 1
+                elif priority == VALUE_MEDIUM:
+                    medium_total += 1
+                    if status == VALUE_STATUS_DONE:
+                        medium_done += 1
+                elif priority == VALUE_LOW:
+                    low_total += 1
+                    if status == VALUE_STATUS_DONE:
+                        low_done += 1
 
             # Check for next page
             page_info = items.get("pageInfo", {})
@@ -218,7 +233,7 @@ class GitHubProjectTracker:
         if not seen_priority:
             print(f"ERROR: Critical field '{FIELD_PRIORITY}' not found in any project items.",
                   file=sys.stderr)
-            print("This field is required to identify critical and high priority items.",
+            print("This field is required to identify priority items.",
                   file=sys.stderr)
             print("Possible causes:", file=sys.stderr)
             print(f"  1. Field '{FIELD_PRIORITY}' was renamed in the project", file=sys.stderr)
@@ -238,22 +253,22 @@ class GitHubProjectTracker:
             print("Action required: Update FIELD_STATUS constant in this script.", file=sys.stderr)
             raise ProjectFieldMissingError(f"Critical field '{FIELD_STATUS}' not found")
 
-        total = blocker_total + mustdo_total
-        done = blocker_done + mustdo_done
+        total = blocker_total + mustdo_total + medium_total + low_total
+        done = blocker_done + mustdo_done + medium_done + low_done
 
         # Validate that we found at least some items
         # If total is 0, either the project is empty or field matching failed
         if total == 0:
             if self.milestone_filter:
-                print(f"INFO: No critical or high priority items found for milestone '{self.milestone_filter}'.", file=sys.stderr)
+                print(f"INFO: No priority items found for milestone '{self.milestone_filter}'.", file=sys.stderr)
                 print("This may be expected if no items exist for this milestone yet.", file=sys.stderr)
                 # Don't fail - return N/A indicators when filtering by milestone with no items
                 percentage = -1.0  # Use -1 to indicate N/A
             else:
-                print("ERROR: No critical or high priority items found (total=0).", file=sys.stderr)
+                print("ERROR: No priority items found (total=0).", file=sys.stderr)
                 print("This likely indicates:", file=sys.stderr)
                 print(f"  1. The '{FIELD_PRIORITY}' field values changed", file=sys.stderr)
-                print(f"     Expected values: '{VALUE_CRITICAL}' or '{VALUE_HIGH}'", file=sys.stderr)
+                print(f"     Expected values: '{VALUE_CRITICAL}', '{VALUE_HIGH}', '{VALUE_MEDIUM}', or '{VALUE_LOW}'", file=sys.stderr)
                 print("  2. Project has no items with these field values", file=sys.stderr)
                 print("  3. Field matching logic needs to be updated", file=sys.stderr)
                 print("Refusing to report 0% or 100% with no items to prevent false positives.", file=sys.stderr)
@@ -268,6 +283,10 @@ class GitHubProjectTracker:
             'blocker_total': blocker_total,
             'blocker_done': blocker_done,
             'mustdo_total': mustdo_total,
+            'medium_total': medium_total,
+            'medium_done': medium_done,
+            'low_total': low_total,
+            'low_done': low_done,
             'mustdo_done': mustdo_done
         }
 
@@ -341,6 +360,10 @@ def main():
                 f.write(f"blocker_done={stats['blocker_done']}\n")
                 f.write(f"mustdo_total={stats['mustdo_total']}\n")
                 f.write(f"mustdo_done={stats['mustdo_done']}\n")
+                f.write(f"medium_total={stats['medium_total']}\n")
+                f.write(f"medium_done={stats['medium_done']}\n")
+                f.write(f"low_total={stats['low_total']}\n")
+                f.write(f"low_done={stats['low_done']}\n")
                 f.write(f"version={MILESTONE_FILTER or 'all'}\n")
 
         # Also output to stdout for local testing
@@ -349,11 +372,17 @@ def main():
         print(f"blocker_total={stats['blocker_total']}")
         print(f"mustdo_done={stats['mustdo_done']}")
         print(f"mustdo_total={stats['mustdo_total']}")
+        print(f"medium_done={stats['medium_done']}")
+        print(f"medium_total={stats['medium_total']}")
+        print(f"low_done={stats['low_done']}")
+        print(f"low_total={stats['low_total']}")
         print(f"version={MILESTONE_FILTER or 'all'}")
         print(f"Calculated progress: {stats['percentage']}%")
         print(f"Done / Total: {stats['done']} / {stats['total']}")
         print(f"Critical Priority: {stats['blocker_done']} / {stats['blocker_total']}")
         print(f"High Priority: {stats['mustdo_done']} / {stats['mustdo_total']}")
+        print(f"Medium Priority: {stats['medium_done']} / {stats['medium_total']}")
+        print(f"Low Priority: {stats['low_done']} / {stats['low_total']}")
         if MILESTONE_FILTER:
             print(f"Milestone filter: {MILESTONE_FILTER}")
         

@@ -15,6 +15,10 @@
 #   BLOCKER_TOTAL - Total number of critical priority items
 #   MUSTDO_DONE - Number of completed high priority items
 #   MUSTDO_TOTAL - Total number of high priority items
+#   MEDIUM_DONE - Number of completed medium priority items
+#   MEDIUM_TOTAL - Total number of medium priority items
+#   LOW_DONE - Number of completed low priority items
+#   LOW_TOTAL - Total number of low priority items
 #   VERSION - Version string (e.g., "2.1") - optional
 #
 
@@ -33,6 +37,10 @@ required_vars=(
   "BLOCKER_TOTAL"
   "MUSTDO_DONE"
   "MUSTDO_TOTAL"
+  "MEDIUM_DONE"
+  "MEDIUM_TOTAL"
+  "LOW_DONE"
+  "LOW_TOTAL"
 )
 
 for var in "${required_vars[@]}"; do
@@ -131,18 +139,48 @@ else
   MUSTDO_COLOR=$(get_badge_color "$MUSTDO_PERCENTAGE")
 fi
 
+if [ "$MEDIUM_TOTAL" -eq 0 ]; then
+  MEDIUM_PERCENTAGE="-1.0"
+else
+  MEDIUM_PERCENTAGE=$(awk "BEGIN {printf \"%.1f\", ($MEDIUM_DONE / $MEDIUM_TOTAL * 100)}")
+fi
+
+if [ "$LOW_TOTAL" -eq 0 ]; then
+  LOW_PERCENTAGE="-1.0"
+else
+  LOW_PERCENTAGE=$(awk "BEGIN {printf \"%.1f\", ($LOW_DONE / $LOW_TOTAL * 100)}")
+fi
+
+if [ "$MEDIUM_PERCENTAGE" = "-1.0" ]; then
+  MEDIUM_COLOR="lightgrey"
+else
+  MEDIUM_COLOR=$(get_badge_color "$MEDIUM_PERCENTAGE")
+fi
+
+if [ "$LOW_PERCENTAGE" = "-1.0" ]; then
+  LOW_COLOR="lightgrey"
+else
+  LOW_COLOR=$(get_badge_color "$LOW_PERCENTAGE")
+fi
+
 # Determine badge labels - include version if available
 if [ -n "${VERSION:-}" ] && [ "$VERSION" != "all" ]; then
   BLOCKER_LABEL="${VERSION} Critical Priority"
   MUSTDO_LABEL="${VERSION} High Priority"
+  MEDIUM_LABEL="${VERSION} Medium Priority"
+  LOW_LABEL="${VERSION} Low Priority"
 else
   BLOCKER_LABEL="Critical Priority"
   MUSTDO_LABEL="High Priority"
+  MEDIUM_LABEL="Medium Priority"
+  LOW_LABEL="Low Priority"
 fi
 
 # Create badge JSONs using the shared function
 BLOCKER_BADGE_JSON=$(create_badge_json "$BLOCKER_LABEL" "$BLOCKER_DONE" "$BLOCKER_TOTAL" "$BLOCKER_PERCENTAGE" "$BLOCKER_COLOR")
 MUSTDO_BADGE_JSON=$(create_badge_json "$MUSTDO_LABEL" "$MUSTDO_DONE" "$MUSTDO_TOTAL" "$MUSTDO_PERCENTAGE" "$MUSTDO_COLOR")
+MEDIUM_BADGE_JSON=$(create_badge_json "$MEDIUM_LABEL" "$MEDIUM_DONE" "$MEDIUM_TOTAL" "$MEDIUM_PERCENTAGE" "$MEDIUM_COLOR")
+LOW_BADGE_JSON=$(create_badge_json "$LOW_LABEL" "$LOW_DONE" "$LOW_TOTAL" "$LOW_PERCENTAGE" "$LOW_COLOR")
 
 # Validate JSONs were created successfully
 if [ -z "$BLOCKER_BADGE_JSON" ] || ! echo "$BLOCKER_BADGE_JSON" | jq empty 2>/dev/null; then
@@ -153,18 +191,63 @@ if [ -z "$MUSTDO_BADGE_JSON" ] || ! echo "$MUSTDO_BADGE_JSON" | jq empty 2>/dev/
   echo "::error::Failed to generate valid high priority badge JSON"
   exit 1
 fi
+if [ -z "$MEDIUM_BADGE_JSON" ] || ! echo "$MEDIUM_BADGE_JSON" | jq empty 2>/dev/null; then
+  echo "::error::Failed to generate valid medium priority badge JSON"
+  exit 1
+fi
+if [ -z "$LOW_BADGE_JSON" ] || ! echo "$LOW_BADGE_JSON" | jq empty 2>/dev/null; then
+  echo "::error::Failed to generate valid low priority badge JSON"
+  exit 1
+fi
+
+# "Next Release" badge - reports the in-development version (derived from
+# H5_VERS_MAJOR/H5_VERS_MINOR in src/H5public.h by update-progress.py), the
+# same value used as the label prefix above. Purely informational, so it
+# isn't colored by completion percentage.
+if [ -n "${VERSION:-}" ] && [ "$VERSION" != "all" ]; then
+  VERSION_MESSAGE="$VERSION"
+  VERSION_COLOR="blue"
+else
+  VERSION_MESSAGE="N/A"
+  VERSION_COLOR="lightgrey"
+fi
+
+VERSION_BADGE_JSON=$(jq -n \
+  --arg message "$VERSION_MESSAGE" \
+  --arg color "$VERSION_COLOR" \
+  '{
+    "schemaVersion": 1,
+    "label": "Next Release",
+    "message": $message,
+    "color": $color,
+    "style": "flat-square"
+  }')
+
+if [ -z "$VERSION_BADGE_JSON" ] || ! echo "$VERSION_BADGE_JSON" | jq empty 2>/dev/null; then
+  echo "::error::Failed to generate valid next release badge JSON"
+  exit 1
+fi
 
 # The filenames in the Gist
 BLOCKER_GIST_NAME="release-blocker-${GITHUB_REPOSITORY##*/}.json"
 MUSTDO_GIST_NAME="release-mustdo-${GITHUB_REPOSITORY##*/}.json"
-echo "::notice::Updating Gist files: $BLOCKER_GIST_NAME, $MUSTDO_GIST_NAME"
+MEDIUM_GIST_NAME="release-medium-${GITHUB_REPOSITORY##*/}.json"
+LOW_GIST_NAME="release-low-${GITHUB_REPOSITORY##*/}.json"
+VERSION_GIST_NAME="release-version-${GITHUB_REPOSITORY##*/}.json"
+echo "::notice::Updating Gist files: $BLOCKER_GIST_NAME, $MUSTDO_GIST_NAME, $MEDIUM_GIST_NAME, $LOW_GIST_NAME, $VERSION_GIST_NAME"
 
-# Create the request payload with both files
+# Create the request payload with all five files
 REQUEST_PAYLOAD=$(jq -n \
   --arg blocker_filename "$BLOCKER_GIST_NAME" \
   --arg mustdo_filename "$MUSTDO_GIST_NAME" \
+  --arg medium_filename "$MEDIUM_GIST_NAME" \
+  --arg low_filename "$LOW_GIST_NAME" \
+  --arg version_filename "$VERSION_GIST_NAME" \
   --argjson blocker_content "$BLOCKER_BADGE_JSON" \
   --argjson mustdo_content "$MUSTDO_BADGE_JSON" \
+  --argjson medium_content "$MEDIUM_BADGE_JSON" \
+  --argjson low_content "$LOW_BADGE_JSON" \
+  --argjson version_content "$VERSION_BADGE_JSON" \
   '{
     "files": {
       ($blocker_filename): {
@@ -172,6 +255,15 @@ REQUEST_PAYLOAD=$(jq -n \
       },
       ($mustdo_filename): {
         "content": ($mustdo_content | tostring)
+      },
+      ($medium_filename): {
+        "content": ($medium_content | tostring)
+      },
+      ($low_filename): {
+        "content": ($low_content | tostring)
+      },
+      ($version_filename): {
+        "content": ($version_content | tostring)
       }
     }
   }')
@@ -200,15 +292,24 @@ echo "::notice::Gist updated successfully"
 # Generate badge URLs for use in README
 BLOCKER_BADGE_URL="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/${GITHUB_REPOSITORY_OWNER}-Bot/${GIST_ID}/raw/${BLOCKER_GIST_NAME}"
 MUSTDO_BADGE_URL="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/${GITHUB_REPOSITORY_OWNER}-Bot/${GIST_ID}/raw/${MUSTDO_GIST_NAME}"
+MEDIUM_BADGE_URL="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/${GITHUB_REPOSITORY_OWNER}-Bot/${GIST_ID}/raw/${MEDIUM_GIST_NAME}"
+LOW_BADGE_URL="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/${GITHUB_REPOSITORY_OWNER}-Bot/${GIST_ID}/raw/${LOW_GIST_NAME}"
+VERSION_BADGE_URL="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/${GITHUB_REPOSITORY_OWNER}-Bot/${GIST_ID}/raw/${VERSION_GIST_NAME}"
 PROJECT_URL="https://github.com/${GITHUB_REPOSITORY}/projects/39"
 
 echo "::notice::Critical Priority Badge URL: $BLOCKER_BADGE_URL"
 echo "::notice::High Priority Badge URL: $MUSTDO_BADGE_URL"
+echo "::notice::Medium Priority Badge URL: $MEDIUM_BADGE_URL"
+echo "::notice::Low Priority Badge URL: $LOW_BADGE_URL"
+echo "::notice::Next Release Badge URL: $VERSION_BADGE_URL"
 
 # Output to GitHub Actions if GITHUB_OUTPUT is set
 if [ -n "${GITHUB_OUTPUT:-}" ]; then
   echo "blocker_badge_url=$BLOCKER_BADGE_URL" >> "$GITHUB_OUTPUT"
   echo "mustdo_badge_url=$MUSTDO_BADGE_URL" >> "$GITHUB_OUTPUT"
+  echo "medium_badge_url=$MEDIUM_BADGE_URL" >> "$GITHUB_OUTPUT"
+  echo "low_badge_url=$LOW_BADGE_URL" >> "$GITHUB_OUTPUT"
+  echo "version_badge_url=$VERSION_BADGE_URL" >> "$GITHUB_OUTPUT"
   echo "project_url=$PROJECT_URL" >> "$GITHUB_OUTPUT"
 fi
 
@@ -228,11 +329,25 @@ if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
 **Progress:** ${MUSTDO_DONE} of ${MUSTDO_TOTAL} completed (${MUSTDO_PERCENTAGE}%)
 **Badge Color:** ${MUSTDO_COLOR}
 
+### Medium Priority
+**Progress:** ${MEDIUM_DONE} of ${MEDIUM_TOTAL} completed (${MEDIUM_PERCENTAGE}%)
+**Badge Color:** ${MEDIUM_COLOR}
+
+### Low Priority
+**Progress:** ${LOW_DONE} of ${LOW_TOTAL} completed (${LOW_PERCENTAGE}%)
+**Badge Color:** ${LOW_COLOR}
+
 **Gist ID:** ${GIST_ID}
+
+### Next Release
+**Version:** ${VERSION_MESSAGE}
 
 ### Badge URLs
 **Critical Priority Markdown:** \`[![Critical Priority Progress](${BLOCKER_BADGE_URL})](${PROJECT_URL})\`
 **High Priority Markdown:** \`[![High Priority Progress](${MUSTDO_BADGE_URL})](${PROJECT_URL})\`
+**Medium Priority Markdown:** \`[![Medium Priority Progress](${MEDIUM_BADGE_URL})](${PROJECT_URL})\`
+**Low Priority Markdown:** \`[![Low Priority Progress](${LOW_BADGE_URL})](${PROJECT_URL})\`
+**Next Release Markdown:** \`[![Next Release](${VERSION_BADGE_URL})](${PROJECT_URL})\`
 
 ### Badge JSON Preview
 \`\`\`json
@@ -241,6 +356,15 @@ ${BLOCKER_BADGE_JSON}
 
 // High Priority Badge
 ${MUSTDO_BADGE_JSON}
+
+// Medium Priority Badge
+${MEDIUM_BADGE_JSON}
+
+// Low Priority Badge
+${LOW_BADGE_JSON}
+
+// Next Release Badge
+${VERSION_BADGE_JSON}
 \`\`\`
 EOF
 fi
