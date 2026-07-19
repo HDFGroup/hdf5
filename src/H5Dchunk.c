@@ -3507,7 +3507,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
         while (chunk_node) {
             H5D_piece_info_t  *chunk_info;  /* Chunk information */
             H5D_chk_idx_info_t idx_info;    /* Chunked index info */
-            H5D_io_info_t     *chk_io_info; /* Pointer to I/O info object for this chunk */
+            H5D_io_info_t     *chk_io_info = NULL; /* Pointer to I/O info object for this chunk */
             htri_t             cacheable;   /* Whether the chunk is cacheable */
             bool need_insert = false;       /* Whether the chunk needs to be inserted into the index */
 
@@ -3591,6 +3591,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             } /* end else */
 
             /* Perform the actual write operation */
+            assert(chk_io_info);
             assert(chk_io_info->count == 1);
             chk_io_info->dsets_info[0].layout_io_info.contig_piece_info = chunk_info;
             chk_io_info->dsets_info[0].file_space                       = chunk_info->fspace;
