@@ -3155,7 +3155,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             /* Check for non-existent chunk & skip it if appropriate */
             if (H5_addr_defined(udata.chunk_block.offset) || UINT_MAX != udata.idx_hint ||
                 !skip_missing_chunks) {
-                H5D_io_info_t *chk_io_info; /* Pointer to I/O info object for this chunk */
+                H5D_io_info_t *chk_io_info = NULL; /* Pointer to I/O info object for this chunk */
 
                 /* Set chunk's [scaled] coordinates */
                 dset_info->store->chunk.scaled = chunk_info->scaled;
@@ -3196,6 +3196,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                 } /* end else */
 
                 /* Perform the actual read operation */
+                assert(chk_io_info);
                 assert(chk_io_info->count == 1);
                 chk_io_info->dsets_info[0].layout_io_info.contig_piece_info = chunk_info;
                 chk_io_info->dsets_info[0].file_space                       = chunk_info->fspace;
