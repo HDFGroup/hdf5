@@ -92,7 +92,8 @@ conversation. Please read the [quickstart guide](https://forum.hdfgroup.org/t/qu
 
 HDF5 does not follow a regular release schedule. Instead, updates are based on the
 introduction of new features and the resolution of bugs. However, we aim to have at
-least one annual release for each maintenance branch. The chart above shows **past releases**.
+least one annual release for each maintenance branch. The chart above shows **past HDF5 releases that
+have reached end of life (EOL)**.
 
 ### Release Progress
 
