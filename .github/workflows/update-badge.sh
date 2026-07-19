@@ -20,6 +20,9 @@
 #   LOW_DONE - Number of completed low priority items
 #   LOW_TOTAL - Total number of low priority items
 #   VERSION - Version string (e.g., "2.1") - optional
+#   LATEST_RELEASE_TAG - Most recent published release tag in the current major series - optional
+#   LATEST_RELEASE_DATE - Publish date (YYYY-MM-DD) of LATEST_RELEASE_TAG - optional
+#   MILESTONE_DUE_DATE - Target due date (YYYY-MM-DD) of the in-development milestone - optional
 #
 
 set -euo pipefail
@@ -202,10 +205,15 @@ fi
 
 # "Next Release" badge - reports the in-development version (derived from
 # H5_VERS_MAJOR/H5_VERS_MINOR in src/H5public.h by update-progress.py), the
-# same value used as the label prefix above. Purely informational, so it
+# same value used as the label prefix above, annotated with the matching
+# milestone's target due date when one is set. Purely informational, so it
 # isn't colored by completion percentage.
 if [ -n "${VERSION:-}" ] && [ "$VERSION" != "all" ]; then
-  VERSION_MESSAGE="$VERSION"
+  if [ -n "${MILESTONE_DUE_DATE:-}" ]; then
+    VERSION_MESSAGE="$VERSION (target: $MILESTONE_DUE_DATE)"
+  else
+    VERSION_MESSAGE="$VERSION"
+  fi
   VERSION_COLOR="blue"
 else
   VERSION_MESSAGE="N/A"
@@ -228,26 +236,56 @@ if [ -z "$VERSION_BADGE_JSON" ] || ! echo "$VERSION_BADGE_JSON" | jq empty 2>/de
   exit 1
 fi
 
+# "Latest Release" badge - reports the most recent published release in the
+# current major version series (e.g. "2.1.1 (2026-03-23)"), fetched directly
+# from the GitHub Releases API. Purely informational.
+if [ -n "${LATEST_RELEASE_TAG:-}" ]; then
+  LATEST_RELEASE_MESSAGE="${LATEST_RELEASE_TAG} (${LATEST_RELEASE_DATE:-unknown date})"
+  LATEST_RELEASE_COLOR="blue"
+else
+  LATEST_RELEASE_MESSAGE="N/A"
+  LATEST_RELEASE_COLOR="lightgrey"
+fi
+
+LATEST_RELEASE_BADGE_JSON=$(jq -n \
+  --arg message "$LATEST_RELEASE_MESSAGE" \
+  --arg color "$LATEST_RELEASE_COLOR" \
+  '{
+    "schemaVersion": 1,
+    "label": "Latest Release",
+    "message": $message,
+    "color": $color,
+    "style": "flat-square"
+  }')
+
+if [ -z "$LATEST_RELEASE_BADGE_JSON" ] || ! echo "$LATEST_RELEASE_BADGE_JSON" | jq empty 2>/dev/null; then
+  echo "::error::Failed to generate valid latest release badge JSON"
+  exit 1
+fi
+
 # The filenames in the Gist
 BLOCKER_GIST_NAME="release-blocker-${GITHUB_REPOSITORY##*/}.json"
 MUSTDO_GIST_NAME="release-mustdo-${GITHUB_REPOSITORY##*/}.json"
 MEDIUM_GIST_NAME="release-medium-${GITHUB_REPOSITORY##*/}.json"
 LOW_GIST_NAME="release-low-${GITHUB_REPOSITORY##*/}.json"
 VERSION_GIST_NAME="release-version-${GITHUB_REPOSITORY##*/}.json"
-echo "::notice::Updating Gist files: $BLOCKER_GIST_NAME, $MUSTDO_GIST_NAME, $MEDIUM_GIST_NAME, $LOW_GIST_NAME, $VERSION_GIST_NAME"
+LATEST_RELEASE_GIST_NAME="release-latest-${GITHUB_REPOSITORY##*/}.json"
+echo "::notice::Updating Gist files: $BLOCKER_GIST_NAME, $MUSTDO_GIST_NAME, $MEDIUM_GIST_NAME, $LOW_GIST_NAME, $VERSION_GIST_NAME, $LATEST_RELEASE_GIST_NAME"
 
-# Create the request payload with all five files
+# Create the request payload with all six files
 REQUEST_PAYLOAD=$(jq -n \
   --arg blocker_filename "$BLOCKER_GIST_NAME" \
   --arg mustdo_filename "$MUSTDO_GIST_NAME" \
   --arg medium_filename "$MEDIUM_GIST_NAME" \
   --arg low_filename "$LOW_GIST_NAME" \
   --arg version_filename "$VERSION_GIST_NAME" \
+  --arg latest_release_filename "$LATEST_RELEASE_GIST_NAME" \
   --argjson blocker_content "$BLOCKER_BADGE_JSON" \
   --argjson mustdo_content "$MUSTDO_BADGE_JSON" \
   --argjson medium_content "$MEDIUM_BADGE_JSON" \
   --argjson low_content "$LOW_BADGE_JSON" \
   --argjson version_content "$VERSION_BADGE_JSON" \
+  --argjson latest_release_content "$LATEST_RELEASE_BADGE_JSON" \
   '{
     "files": {
       ($blocker_filename): {
@@ -264,6 +302,9 @@ REQUEST_PAYLOAD=$(jq -n \
       },
       ($version_filename): {
         "content": ($version_content | tostring)
+      },
+      ($latest_release_filename): {
+        "content": ($latest_release_content | tostring)
       }
     }
   }')
@@ -295,13 +336,16 @@ MUSTDO_BADGE_URL="https://img.shields.io/endpoint?url=https://gist.githubusercon
 MEDIUM_BADGE_URL="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/${GITHUB_REPOSITORY_OWNER}-Bot/${GIST_ID}/raw/${MEDIUM_GIST_NAME}"
 LOW_BADGE_URL="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/${GITHUB_REPOSITORY_OWNER}-Bot/${GIST_ID}/raw/${LOW_GIST_NAME}"
 VERSION_BADGE_URL="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/${GITHUB_REPOSITORY_OWNER}-Bot/${GIST_ID}/raw/${VERSION_GIST_NAME}"
+LATEST_RELEASE_BADGE_URL="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/${GITHUB_REPOSITORY_OWNER}-Bot/${GIST_ID}/raw/${LATEST_RELEASE_GIST_NAME}"
 PROJECT_URL="https://github.com/${GITHUB_REPOSITORY}/projects/39"
+RELEASES_URL="https://github.com/${GITHUB_REPOSITORY}/releases"
 
 echo "::notice::Critical Priority Badge URL: $BLOCKER_BADGE_URL"
 echo "::notice::High Priority Badge URL: $MUSTDO_BADGE_URL"
 echo "::notice::Medium Priority Badge URL: $MEDIUM_BADGE_URL"
 echo "::notice::Low Priority Badge URL: $LOW_BADGE_URL"
 echo "::notice::Next Release Badge URL: $VERSION_BADGE_URL"
+echo "::notice::Latest Release Badge URL: $LATEST_RELEASE_BADGE_URL"
 
 # Output to GitHub Actions if GITHUB_OUTPUT is set
 if [ -n "${GITHUB_OUTPUT:-}" ]; then
@@ -310,6 +354,7 @@ if [ -n "${GITHUB_OUTPUT:-}" ]; then
   echo "medium_badge_url=$MEDIUM_BADGE_URL" >> "$GITHUB_OUTPUT"
   echo "low_badge_url=$LOW_BADGE_URL" >> "$GITHUB_OUTPUT"
   echo "version_badge_url=$VERSION_BADGE_URL" >> "$GITHUB_OUTPUT"
+  echo "latest_release_badge_url=$LATEST_RELEASE_BADGE_URL" >> "$GITHUB_OUTPUT"
   echo "project_url=$PROJECT_URL" >> "$GITHUB_OUTPUT"
 fi
 
@@ -342,12 +387,16 @@ if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
 ### Next Release
 **Version:** ${VERSION_MESSAGE}
 
+### Latest Release
+**Release:** ${LATEST_RELEASE_MESSAGE}
+
 ### Badge URLs
 **Critical Priority Markdown:** \`[![Critical Priority Progress](${BLOCKER_BADGE_URL})](${PROJECT_URL})\`
 **High Priority Markdown:** \`[![High Priority Progress](${MUSTDO_BADGE_URL})](${PROJECT_URL})\`
 **Medium Priority Markdown:** \`[![Medium Priority Progress](${MEDIUM_BADGE_URL})](${PROJECT_URL})\`
 **Low Priority Markdown:** \`[![Low Priority Progress](${LOW_BADGE_URL})](${PROJECT_URL})\`
 **Next Release Markdown:** \`[![Next Release](${VERSION_BADGE_URL})](${PROJECT_URL})\`
+**Latest Release Markdown:** \`[![Latest Release](${LATEST_RELEASE_BADGE_URL})](${RELEASES_URL})\`
 
 ### Badge JSON Preview
 \`\`\`json
@@ -365,6 +414,9 @@ ${LOW_BADGE_JSON}
 
 // Next Release Badge
 ${VERSION_BADGE_JSON}
+
+// Latest Release Badge
+${LATEST_RELEASE_BADGE_JSON}
 \`\`\`
 EOF
 fi

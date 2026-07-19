@@ -125,6 +125,9 @@ jobs:
         LOW_DONE=$(grep "^low_done=" progress_output.txt | cut -d'=' -f2 | head -1)
         LOW_TOTAL=$(grep "^low_total=" progress_output.txt | cut -d'=' -f2 | head -1)
         VERSION=$(grep "^version=" progress_output.txt | cut -d'=' -f2 | head -1)
+        LATEST_RELEASE_TAG=$(grep "^latest_release_tag=" progress_output.txt | cut -d'=' -f2 | head -1)
+        LATEST_RELEASE_DATE=$(grep "^latest_release_date=" progress_output.txt | cut -d'=' -f2 | head -1)
+        MILESTONE_DUE_DATE=$(grep "^milestone_due_date=" progress_output.txt | cut -d'=' -f2 | head -1)
 
         # Set outputs for use in subsequent steps
         echo "percentage=$PERCENTAGE" >> $GITHUB_OUTPUT
@@ -139,9 +142,13 @@ jobs:
         echo "low_done=$LOW_DONE" >> $GITHUB_OUTPUT
         echo "low_total=$LOW_TOTAL" >> $GITHUB_OUTPUT
         echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "latest_release_tag=$LATEST_RELEASE_TAG" >> $GITHUB_OUTPUT
+        echo "latest_release_date=$LATEST_RELEASE_DATE" >> $GITHUB_OUTPUT
+        echo "milestone_due_date=$MILESTONE_DUE_DATE" >> $GITHUB_OUTPUT
 
         echo "::notice::Progress calculation successful: ${PERCENTAGE}% (${DONE}/${TOTAL})"
         echo "::notice::  Version: ${VERSION}, Critical Priority: ${BLOCKER_DONE}/${BLOCKER_TOTAL}, High Priority: ${MUSTDO_DONE}/${MUSTDO_TOTAL}, Medium Priority: ${MEDIUM_DONE}/${MEDIUM_TOTAL}, Low Priority: ${LOW_DONE}/${LOW_TOTAL}"
+        echo "::notice::  Latest release: ${LATEST_RELEASE_TAG} (${LATEST_RELEASE_DATE}), Milestone due date: ${MILESTONE_DUE_DATE}"
         
         # Clean up
         rm -f progress_output.txt
@@ -167,6 +174,9 @@ jobs:
         LOW_DONE: ${{ steps.progress.outputs.low_done }}
         LOW_TOTAL: ${{ steps.progress.outputs.low_total }}
         VERSION: ${{ steps.progress.outputs.version }}
+        LATEST_RELEASE_TAG: ${{ steps.progress.outputs.latest_release_tag }}
+        LATEST_RELEASE_DATE: ${{ steps.progress.outputs.latest_release_date }}
+        MILESTONE_DUE_DATE: ${{ steps.progress.outputs.milestone_due_date }}
       run: |
         # Execute dedicated badge generation script
         # This separates concerns: YAML orchestrates, scripts implement logic

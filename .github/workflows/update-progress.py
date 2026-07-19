@@ -325,6 +325,84 @@ def get_hdf5_version_from_header(header_path: str = "../../src/H5public.h") -> O
     return None
 
 
+def get_latest_series_release(token: str, repo: str, major_version: str) -> Optional[Dict[str, str]]:
+    """
+    Finds the most recent published (non-draft, non-prerelease) GitHub Release
+    whose tag belongs to the given major version series (e.g. "2" matches "2.1.1").
+
+    Returns a dict with 'tag' and 'date' (YYYY-MM-DD) keys, or None if no
+    matching release was found or the API call failed. Failures here are
+    non-fatal - this is purely informational, unlike the priority field checks.
+    """
+    try:
+        headers = {"Accept": "application/vnd.github.v3+json"}
+        if token:
+            headers["Authorization"] = f"token {token}"
+
+        response = requests.get(
+            f"https://api.github.com/repos/{repo}/releases",
+            headers=headers,
+            params={"per_page": 30},
+            timeout=30
+        )
+        response.raise_for_status()
+        releases = response.json()
+
+        prefix = f"{major_version}."
+        for release in releases:
+            if release.get("draft") or release.get("prerelease"):
+                continue
+            tag = release.get("tag_name", "")
+            if tag.startswith(prefix):
+                published_at = release.get("published_at", "")
+                return {
+                    "tag": tag,
+                    "date": published_at.split("T")[0] if published_at else ""
+                }
+
+        print(f"INFO: No published releases found for series '{major_version}.x'", file=sys.stderr)
+        return None
+
+    except requests.RequestException as e:
+        print(f"Warning: Could not fetch latest release from GitHub API: {e}", file=sys.stderr)
+        return None
+
+
+def get_milestone_due_date(token: str, repo: str, milestone_filter: str) -> Optional[str]:
+    """
+    Finds the open GitHub milestone whose title contains milestone_filter
+    (e.g. "2.2" matches "HDF5 2.2.0", the same substring match used for
+    project item filtering) and returns its due date (YYYY-MM-DD), or None
+    if no matching milestone exists or it has no due date set. Non-fatal.
+    """
+    try:
+        headers = {"Accept": "application/vnd.github.v3+json"}
+        if token:
+            headers["Authorization"] = f"token {token}"
+
+        response = requests.get(
+            f"https://api.github.com/repos/{repo}/milestones",
+            headers=headers,
+            params={"state": "open", "per_page": 100},
+            timeout=30
+        )
+        response.raise_for_status()
+        milestones = response.json()
+
+        for milestone in milestones:
+            title = milestone.get("title", "")
+            if milestone_filter in title:
+                due_on = milestone.get("due_on")
+                return due_on.split("T")[0] if due_on else None
+
+        print(f"INFO: No open milestone matching '{milestone_filter}' found", file=sys.stderr)
+        return None
+
+    except requests.RequestException as e:
+        print(f"Warning: Could not fetch milestone due date from GitHub API: {e}", file=sys.stderr)
+        return None
+
+
 def main():
     """Main function to run the tracker."""
     # Configuration - can be overridden by environment variables
@@ -345,12 +423,42 @@ def main():
     else:
         print("No milestone filter - counting all release items", file=sys.stderr)
 
+    # Look up the most recent published release in the current major version series
+    # (e.g. "2" -> "2.1.1"), independent of the project-board data above.
+    REPO = os.getenv("GITHUB_REPOSITORY", "HDFGroup/hdf5")
+    MAJOR_VERSION = MILESTONE_FILTER.split(".")[0] if MILESTONE_FILTER else None
+    latest_release = get_latest_series_release(TOKEN, REPO, MAJOR_VERSION) if MAJOR_VERSION else None
+    LATEST_RELEASE_TAG = latest_release["tag"] if latest_release else ""
+    LATEST_RELEASE_DATE = latest_release["date"] if latest_release else ""
+
+    # Look up the target due date for the in-development milestone (e.g. "HDF5 2.2.0"),
+    # to annotate the Next Release badge.
+    MILESTONE_DUE_DATE = get_milestone_due_date(TOKEN, REPO, MILESTONE_FILTER) if MILESTONE_FILTER else None
+    MILESTONE_DUE_DATE = MILESTONE_DUE_DATE or ""
+
+    # Write these independent of the project-board query below, so a project-board
+    # failure doesn't discard release/milestone data that was already fetched.
+    github_output = os.getenv("GITHUB_OUTPUT")
+    if github_output:
+        with open(github_output, "a") as f:
+            f.write(f"version={MILESTONE_FILTER or 'all'}\n")
+            f.write(f"latest_release_tag={LATEST_RELEASE_TAG}\n")
+            f.write(f"latest_release_date={LATEST_RELEASE_DATE}\n")
+            f.write(f"milestone_due_date={MILESTONE_DUE_DATE}\n")
+    print(f"version={MILESTONE_FILTER or 'all'}")
+    print(f"latest_release_tag={LATEST_RELEASE_TAG}")
+    print(f"latest_release_date={LATEST_RELEASE_DATE}")
+    print(f"milestone_due_date={MILESTONE_DUE_DATE}")
+    if LATEST_RELEASE_TAG:
+        print(f"Latest {MAJOR_VERSION}.x release: {LATEST_RELEASE_TAG} ({LATEST_RELEASE_DATE})")
+    if MILESTONE_DUE_DATE:
+        print(f"Milestone due date: {MILESTONE_DUE_DATE}")
+
     try:
         tracker = GitHubProjectTracker(TOKEN, OWNER, PROJECT_NUMBER, MILESTONE_FILTER)
         stats = tracker.fetch_release_blocker_stats()
-        
+
         # Output for GitHub Actions
-        github_output = os.getenv("GITHUB_OUTPUT")
         if github_output:
             with open(github_output, "a") as f:
                 f.write(f"percentage={stats['percentage']}\n")
@@ -364,7 +472,6 @@ def main():
                 f.write(f"medium_done={stats['medium_done']}\n")
                 f.write(f"low_total={stats['low_total']}\n")
                 f.write(f"low_done={stats['low_done']}\n")
-                f.write(f"version={MILESTONE_FILTER or 'all'}\n")
 
         # Also output to stdout for local testing
         print(f"percentage={stats['percentage']}")
@@ -376,7 +483,6 @@ def main():
         print(f"medium_total={stats['medium_total']}")
         print(f"low_done={stats['low_done']}")
         print(f"low_total={stats['low_total']}")
-        print(f"version={MILESTONE_FILTER or 'all'}")
         print(f"Calculated progress: {stats['percentage']}%")
         print(f"Done / Total: {stats['done']} / {stats['total']}")
         print(f"Critical Priority: {stats['blocker_done']} / {stats['blocker_total']}")
@@ -385,7 +491,7 @@ def main():
         print(f"Low Priority: {stats['low_done']} / {stats['low_total']}")
         if MILESTONE_FILTER:
             print(f"Milestone filter: {MILESTONE_FILTER}")
-        
+
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
