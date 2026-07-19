@@ -3279,6 +3279,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
     void              *chunk = NULL;               /* Pointer to locked chunk buffer */
     H5D_chunk_ud_t     udata;                      /* Index pass-through    */
     bool               chunk_locked = false;       /* Indicates whether the chunk is locked */
+    bool               chunk_dirty  = false;       /* Indicates whether writing is needed   */
     herr_t             ret_value    = SUCCEED;     /* Return value        */
 
     FUNC_ENTER_PACKAGE
@@ -3426,10 +3427,11 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                 /* Perform the actual write operation */
                 if ((dset_info->io_ops.single_write)(&cpt_io_info, &cpt_dset_info) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "chunked write failed");
+                chunk_dirty = true;
 
                 /* Release the cache lock on the chunk */
                 chunk_locked = false;
-                if (H5D__chunk_unlock(io_info, dset_info, &udata, true, chunk, dst_accessed_bytes) < 0)
+                if (H5D__chunk_unlock(io_info, dset_info, &udata, chunk_dirty, chunk, dst_accessed_bytes) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTUNLOCK, FAIL, "unable to unlock raw data chunk");
                 chunk = NULL;
             } /* end if */
@@ -3624,11 +3626,12 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             chk_io_info->dsets_info[0].nelmts                           = chunk_info->piece_points;
             if ((dset_info->io_ops.single_write)(chk_io_info, &chk_io_info->dsets_info[0]) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked write failed");
+            chunk_dirty = true;
 
             /* Release the cache lock on the chunk, or insert chunk into index. */
             if (chunk) {
                 chunk_locked = false;
-                if (H5D__chunk_unlock(io_info, dset_info, &udata, true, chunk, dst_accessed_bytes) < 0)
+                if (H5D__chunk_unlock(io_info, dset_info, &udata, chunk_dirty, chunk, dst_accessed_bytes) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTUNLOCK, FAIL, "unable to unlock raw data chunk");
                 chunk = NULL;
             } /* end if */
@@ -3655,7 +3658,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 done:
     /* Release chunk lock if we failed while holding it */
     if (chunk_locked && chunk)
-        if (H5D__chunk_unlock(io_info, dset_info, &udata, false, chunk, dst_accessed_bytes) < 0)
+        if (H5D__chunk_unlock(io_info, dset_info, &udata, chunk_dirty, chunk, dst_accessed_bytes) < 0)
             HDONE_ERROR(H5E_IO, H5E_CANTUNLOCK, FAIL, "unable to unlock raw data chunk");
 
     /* Free dataset sieve buffer and reset cached fields */
@@ -6107,12 +6110,13 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, bool new_unfilt_chunk)
     hsize_t              sel_nelmts;              /* Number of elements in selection */
     hsize_t              count[H5O_LAYOUT_NDIMS]; /* Element count of hyperslab */
     size_t               chunk_size;              /*size of a chunk       */
-    void                *chunk = NULL;            /* The file chunk  */
+    void                *chunk          = NULL;   /* The file chunk  */
     H5D_chunk_ud_t       chk_udata;               /* User data for locking chunk */
     hsize_t              bytes_accessed = 0;      /* Bytes accessed in chunk */
     unsigned             u;                       /* Local index variable */
-    bool                 chunk_locked = false;    /* Indicates whether the chunk is locked */
-    herr_t               ret_value    = SUCCEED;  /* Return value */
+    bool                 chunk_locked   = false;  /* Indicates whether the chunk is locked */
+    bool                 chunk_dirty    = false;  /* Indicates whether writing is needed */
+    herr_t               ret_value      = SUCCEED;/* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -6185,6 +6189,7 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, bool new_unfilt_chunk)
     /* Scatter the data into memory */
     if (H5D__scatter_mem(udata->fb_info.fill_buf, chunk_iter, (size_t)sel_nelmts, chunk /*out*/) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "scatter failed");
+    chunk_dirty = true;
 
     /* The number of bytes accessed in the chunk */
     /* (i.e. the bytes replaced with fill values) */
@@ -6192,18 +6197,19 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, bool new_unfilt_chunk)
 
     /* Release lock on chunk */
     chunk_locked = false;
-    if (H5D__chunk_unlock(io_info, udata->dset_info, &chk_udata, true, chunk, bytes_accessed) < 0)
+    if (H5D__chunk_unlock(io_info, udata->dset_info, &chk_udata, chunk_dirty, chunk, bytes_accessed) < 0)
         HGOTO_ERROR(H5E_IO, H5E_CANTUNLOCK, FAIL, "unable to unlock raw data chunk");
     chunk = NULL;
 
 done:
+    /* Release chunk lock if we failed while holding it */
     if (chunk_locked && chunk)
-        if (H5D__chunk_unlock(io_info, udata->dset_info, &chk_udata, false, chunk, bytes_accessed) < 0)
+        if (H5D__chunk_unlock(io_info, udata->dset_info, &chk_udata, chunk_dirty, chunk, bytes_accessed) < 0)
             HDONE_ERROR(H5E_IO, H5E_CANTUNLOCK, FAIL, "unable to unlock raw data chunk");
 
     /* Release the selection iterator */
     if (chunk_iter_init && H5S_SELECT_ITER_RELEASE(chunk_iter) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release selection iterator");
     if (chunk_iter)
         chunk_iter = H5FL_FREE(H5S_sel_iter_t, chunk_iter);
 
