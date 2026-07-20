@@ -19230,7 +19230,7 @@ test_filter_error_msg(hid_t file)
     if (H5Pset_chunk(dcpl, 1, chunk_dims) < 0)
         TEST_ERROR;
 
-    /* Register and apply "fitler error message" filter, using a reserved ID so it is treated as an internal library filter */
+    /* Register and apply "filter error message" filter, using a reserved ID so it is treated as an internal library filter */
     if (dsets_h5zregister_direct(H5Z_ERROR_MSG) < 0)
         TEST_ERROR;
     if (H5Pset_filter(dcpl, H5Z_ERROR_MSG->id, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
@@ -19245,7 +19245,7 @@ test_filter_error_msg(hid_t file)
                            H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    /* Use H5E_BEGIN/END_TRY as an easy way to make sure the previous erro printing funciton is preserved */
+    /* Use H5E_BEGIN/END_TRY as an easy way to make sure the previous error printing function is preserved */
     H5E_BEGIN_TRY
     {
         /* Set custom error handler */
@@ -19283,7 +19283,7 @@ test_filter_error_msg(hid_t file)
     if ((dsid = H5Dopen2(file, DSET_ERROR_MSG_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    /* Use H5E_BEGIN/END_TRY as an easy way to make sure the previous erro printing funciton is preserved */
+    /* Use H5E_BEGIN/END_TRY as an easy way to make sure the previous error printing function is preserved */
     H5E_BEGIN_TRY
     {
         /* Set custom error handler */
