@@ -151,6 +151,12 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ## Library
 
+### Fixed a possible heap leak in a utility function
+
+   A couple of unnecessary allocations in h5str_convert were never freed, causing memory leaks. These are now removed.
+
+   Fixes GitHub issue #6511
+
 ### Fixed error when reading variable-length chunked datasets in read-only mode
 
    When reading from a chunked dataset with a variable-length type, a non-default fill value, and unwritten chunks, the library would internally try to write data to the file and fail due to writing to a read-only file. Reworked the I/O code to avoid these writes in this case. This may also improve performance and file space usage in similar cases with files open with write access.
