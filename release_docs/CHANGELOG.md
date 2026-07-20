@@ -153,7 +153,7 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ### Fixed bug that prevented internal library filters from printing error messages
 
-   Previously the error stack would be cleared when exiting a data filter, even an internal library filter, so the user could not see what caused the filter to fail. This has been fixed by not treating interal data filters like a user callback. Note that user-defined or third-party filters that use the default error stack will need to print that stack before returning from their callbacks.
+   Previously the error stack would be cleared when exiting a data filter, even an internal library filter, so the user could not see what caused the filter to fail. This has been fixed by not treating internal data filters like a user callback. Note that user-defined or third-party filters that use the default error stack will need to print that stack before returning from their callbacks.
 
 ### Fixed error when reading variable-length chunked datasets in read-only mode
 
