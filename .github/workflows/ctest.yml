@@ -540,9 +540,9 @@ jobs:
               path: ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
-      # Verify the doxygen tag file was generated inside the html output
+      # Verify the Doxygen tag file was generated inside the HTML output
       # directory so it is captured by the docs-doxygen artifact below and
-      # published alongside the HTML documentation (e.g. to
+      # published alongside the HTML documentation (e.g., to
       # https://support.hdfgroup.org/documentation/hdf5/latest/hdf5.tag).
       - name: Verify hdf5.tag is present (Linux)
         env:
