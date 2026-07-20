@@ -16056,6 +16056,142 @@ test_h5s_set_extent_none(void)
 
 /****************************************************************
 **
+**  test_select_deserialize_invalid:
+**  Test malformed serialized selections that should fail cleanly.
+**
+****************************************************************/
+static void
+test_select_deserialize_invalid(void)
+{
+    uint8_t        hyper_bad_rank[14];
+    uint8_t        point_bad_rank[13];
+    uint8_t        short_selection_type[1] = {0};
+    uint8_t        type_only[4];
+    uint8_t        none_selection[16];
+    uint8_t       *w;
+    const uint8_t *r;
+    H5S_t         *space = NULL;
+    herr_t         ret;
+
+    TESTING("deserialization of malformed serialized selections");
+
+    w = hyper_bad_rank;
+    UINT32ENCODE(w, (uint32_t)H5S_SEL_HYPERSLABS);
+    UINT32ENCODE(w, (uint32_t)H5S_HYPER_VERSION_3);
+    *w++ = 0;
+    *w++ = H5S_SELECT_INFO_ENC_SIZE_4;
+    UINT32ENCODE(w, (uint32_t)H5S_MAX_RANK + 1);
+
+    r = hyper_bad_rank;
+    H5E_BEGIN_TRY
+    {
+        ret = H5S_SELECT_DESERIALIZE(&space, &r, sizeof(hyper_bad_rank));
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5S_SELECT_DESERIALIZE");
+    VERIFY(space, NULL, "H5S_SELECT_DESERIALIZE");
+
+    /* A point selection with a rank larger than H5S_MAX_RANK is rejected */
+    w = point_bad_rank;
+    UINT32ENCODE(w, (uint32_t)H5S_SEL_POINTS);
+    UINT32ENCODE(w, (uint32_t)H5S_POINT_VERSION_2);
+    *w++ = H5S_SELECT_INFO_ENC_SIZE_4;
+    UINT32ENCODE(w, (uint32_t)H5S_MAX_RANK + 1);
+
+    r = point_bad_rank;
+    H5E_BEGIN_TRY
+    {
+        ret = H5S_SELECT_DESERIALIZE(&space, &r, sizeof(point_bad_rank));
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5S_SELECT_DESERIALIZE");
+    VERIFY(space, NULL, "H5S_SELECT_DESERIALIZE");
+
+    r = short_selection_type;
+    H5E_BEGIN_TRY
+    {
+        ret = H5S_SELECT_DESERIALIZE(&space, &r, 0);
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5S_SELECT_DESERIALIZE");
+    VERIFY(space, NULL, "H5S_SELECT_DESERIALIZE");
+
+    /* A buffer holding only a valid selection type with no type-specific
+       payload passes the outer size check but is rejected by the concrete
+       deserializer's empty-payload guard */
+    w = type_only;
+    UINT32ENCODE(w, (uint32_t)H5S_SEL_HYPERSLABS);
+
+    r = type_only;
+    H5E_BEGIN_TRY
+    {
+        ret = H5S_SELECT_DESERIALIZE(&space, &r, sizeof(type_only));
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5S_SELECT_DESERIALIZE");
+    VERIFY(space, NULL, "H5S_SELECT_DESERIALIZE");
+
+    w = none_selection;
+    UINT32ENCODE(w, (uint32_t)H5S_SEL_NONE);
+    UINT32ENCODE(w, (uint32_t)H5S_NONE_VERSION_1);
+    memset(w, 0, 8);
+
+    r   = none_selection;
+    ret = H5S_SELECT_DESERIALIZE(&space, &r, SIZE_MAX);
+    CHECK(ret, FAIL, "H5S_SELECT_DESERIALIZE");
+    CHECK_PTR(space, "H5S_SELECT_DESERIALIZE");
+    ret = H5S_close(space);
+    CHECK(ret, FAIL, "H5S_close");
+
+    PASSED();
+} /* test_select_deserialize_invalid() */
+
+/****************************************************************
+**
+**  test_select_hyper_serialize_scalar:
+**  Attempting to serialize a hyperslab selection whose dataspace has been
+**  collapsed to a scalar extent (rank 0) must fail cleanly.
+**
+****************************************************************/
+static void
+test_select_hyper_serialize_scalar(void)
+{
+    hid_t   sid      = H5I_INVALID_HID;
+    hsize_t dims[1]  = {10};
+    hsize_t start[1] = {0}, stride[1] = {2}, count[1] = {5}, block[1] = {1};
+    uint8_t buf[2048];
+    size_t  buf_size = sizeof(buf);
+    herr_t  ret;
+
+    TESTING("serialization of hyperslab selection on a scalar extent");
+
+    sid = H5Screate_simple(1, dims, NULL);
+    CHECK(sid, H5I_INVALID_HID, "H5Screate_simple");
+
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Collapse the extent to scalar, leaving the rank-mismatched
+       hyperslab selection in place */
+    ret = H5Sset_extent_simple(sid, 0, NULL, NULL);
+    CHECK(ret, FAIL, "H5Sset_extent_simple");
+
+    /* Encoding the mismatched selection must fail rather than crash */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Sencode2(sid, buf, &buf_size, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Sencode2");
+
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    PASSED();
+} /* test_select_hyper_serialize_scalar() */
+
+/****************************************************************
+**
 **  test_select(): Main H5S selection testing routine.
 **
 ****************************************************************/
@@ -16259,6 +16395,12 @@ test_select(void H5_ATTR_UNUSED *params)
      * the class to H5S_NULL instead of H5S_NO_CLASS.
      */
     test_h5s_set_extent_none();
+
+    /* Test malformed serialized selections */
+    test_select_deserialize_invalid();
+
+    /* Test serialization of a hyperslab selection on a scalar extent */
+    test_select_hyper_serialize_scalar();
 
 } /* test_select() */
 

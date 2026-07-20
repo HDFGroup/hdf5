@@ -46,6 +46,7 @@ Navigate back: \ref index "Main" / \ref SPEC
                 <li> @ref subsubsec_fmt4_dataobject_hdr_prefix_two</li>
               </ol></li>
               <li> @ref subsec_fmt4_dataobject_hdr_msg</li>
+              <li> @ref subsec_fmt4_dataobject_hdr_msg_catalog</li>
               <ol type="a">
                 <li> @ref subsubsec_fmt4_dataobject_hdr_msg_nil</li>
                 <li> @ref subsubsec_fmt4_dataobject_hdr_msg_simple</li>
@@ -4207,7 +4208,7 @@ The section-type specific data for each free-space section record is described b
 </tr>
 </table>
 
-\subsection subsec_fmt4_infra_sohm III.I. Disk Format: Level 1I - Shared Object Header Message Table
+\subsection subsec_fmt4_infra_sohm III.I. Disk Format: Level 1I - Shared Object Header Message (SOHM) Master Table
 The <em>shared object header message table</em> is used to locate object header messages that are shared
 between two or more object headers in the file. Shared object header messages are stored and indexed in
 the file in one of two ways: indexed sequentially in a <em>shared header message list</em> or indexed
@@ -4225,12 +4226,13 @@ of messages in the index varies. Each shared message record contains information
 shared message from either a fractal heap or an object header. The types of messages that can be shared
 are: <em>Dataspace, Datatype, Fill Value, Filter Pipeline and Attribute</em>.
 
-The <em>shared object header message table</em> is pointed to from a
-@ref subsubsec_fmt4_dataobject_hdr_msg_shared message in the superblock extension for a file. This
-message stores the version of the table format, along with the number of index headers in the table.
+The <em>shared object header message master table</em> is pointed to from a
+@ref subsubsec_fmt4_dataobject_hdr_msg_shared in the superblock extension for a file. This
+message stores the version of the table format, along with the number of index headers, \a N, in
+the table.
 
 <table>
-<caption><strong>Layout: Shared Object Header Message Table</strong></caption>
+<caption><strong>Layout: Shared Object Header Message (SOHM) Master Table</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -4298,7 +4300,7 @@ message stores the version of the table format, along with the number of index h
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
-<caption><strong>Fields: Shared Object Header Message Table</strong></caption>
+<caption><strong>Fields: Shared Object Header Message (SOHM) Master Table</strong></caption>
 <tr>
   <th width="35%">Field Name</th>
   <th>Description</th>
@@ -4387,8 +4389,9 @@ message stores the version of the table format, along with the number of index h
 </table>
 
 Shared messages are indexed either with a <em>shared message record list</em>, described below,
-or using a v2 B-tree (using record type 7). The number of records in the <em>shared message record
-list</em> is determined in the index&rsquo;s entry in the <em>shared object header message table</em>.
+or using a v2 B-tree (using record type 7). The number of records, \a M, in the <em>shared message
+record list</em> is determined in the index&rsquo;s entry in the <em>shared object header message
+table</em> (see &ldquo;Number of Messages for index \#N&rdquo; above).
 <table>
 <caption><strong>Layout: Shared Message Record List</strong></caption>
 <tr>
@@ -4410,7 +4413,7 @@ list</em> is determined in the index&rsquo;s entry in the <em>shared object head
   <td colspan="4">...</td>
 </tr>
 <tr>
-  <td colspan="4">Shared Message Record \#N-1</td>
+  <td colspan="4">Shared Message Record \#M-1</td>
 </tr>
 <tr>
   <td colspan="4">Checksum</td>
@@ -4430,7 +4433,7 @@ list</em> is determined in the index&rsquo;s entry in the <em>shared object head
       reconstructing a damaged file.</td>
 </tr>
 <tr>
-  <td>Shared Message Record \#N</td>
+  <td>Shared Message Record \#M</td>
   <td>The record for locating the shared message, either in the fractal heap for the index, or an object
       header (see format for <em>index nodes</em> below).</td>
 </tr>
@@ -4958,13 +4961,8 @@ each object. Some header messages are required for each object while others are 
 header messages may also be repeated several times in the header itself, the requirements and number of
 times allowed in the header will be noted in each header message description below.
 
-\subsection subsec_fmt4_dataobject_hdr_msg IV.A.2 Disk Format: Level 2A2 - Data Object Header Messages
-Data object header messages are small pieces of metadata that are stored in the data object header for
-each object in an HDF5 file. Data object header messages provide the metadata required to describe an
-object and its contents, as well as optional pieces of metadata that annotate the meaning or purpose of
-the object.
-
-Data object header messages are either stored directly in the data object header for the object or are
+\subsection subsec_fmt4_dataobject_hdr_msg IV.A.2 Disk Format: Level 2A2 - Data Object Header Shared Message Encoding
+Data object header message data is either stored directly in the data object header for the object or is
 shared between multiple objects in the file. When a message is shared, a flag in the <em>Message Flags</em>
 indicates that the actual <em>Message Data</em> portion of that message is stored in another location
 (such as another data object header, or a heap in the file) and the <em>Message Data</em> field
@@ -5174,9 +5172,15 @@ The format of shared message data is described here:
 </tr>
 </table>
 
+\subsection subsec_fmt4_dataobject_hdr_msg_catalog IV.A.3 Disk Format: Level 2A3 - Data Object Header Messages
+Data object header messages are small pieces of metadata that are stored in the data object header for
+each object in an HDF5 file. Data object header messages provide the metadata required to describe an
+object and its contents, as well as optional pieces of metadata that annotate the meaning or purpose of
+the object.
+
 The following is a list of currently defined header messages:
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_nil IV.A.2.a. The NIL Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_nil IV.A.3.a. The NIL Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> NIL</td>
@@ -5200,7 +5204,7 @@ The following is a list of currently defined header messages:
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_simple IV.A.2.b. The Dataspace Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_simple IV.A.3.b. The Dataspace Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Dataspace</td>
@@ -5219,7 +5223,9 @@ The following is a list of currently defined header messages:
   <td><b>Description:</b></td>
   <td>The dataspace message describes the number of dimensions (in other words, &ldquo;rank&rdquo;) and size
       of each dimension that the data object has. This message is only used for datasets which have a
-      simple, rectilinear, array-like layout; datasets requiring a more complex layout are not yet supported.</td>
+      simple, rectilinear, array-like layout; datasets requiring a more complex layout are not yet supported.<br />
+      This message may be shared between multiple objects in the file; see @ref subsec_fmt4_dataobject_hdr_msg
+      for the shared message encoding.</td>
 </tr>
 <tr>
   <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
@@ -5415,7 +5421,7 @@ implemented in the HDF5 Library:
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_linkinfo IV.A.2.c. The Link Info Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_linkinfo IV.A.3.c. The Link Info Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Link Info</td>
@@ -5529,7 +5535,7 @@ implemented in the HDF5 Library:
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_dtmessage IV.A.2.d. The Datatype Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_dtmessage IV.A.3.d. The Datatype Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Datatype</td>
@@ -5551,9 +5557,10 @@ implemented in the HDF5 Library:
       floating-point type or more complex types like a C struct (compound datatype), array (array datatype)
       or C++ vector (variable-length datatype).<br />
       Datatype messages that are part of a dataset object do not describe how elements are related to one
-      another; the dataspace message is used for that purpose. Datatype messages that are part of a committed
-      datatype (formerly named datatype) message describe a common datatype that can be shared by multiple
-      datasets in the file.</td>
+      another; the dataspace message is used for that purpose.<br />
+      Datatype messages that are part of a committed datatype (formerly named datatype) message describe a
+      common datatype that can be shared by multiple datasets in the file. See @ref
+      subsec_fmt4_dataobject_hdr_msg for the shared message encoding.</td>
 </tr>
 <tr>
   <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
@@ -6829,7 +6836,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_ofvmessage IV.A.2.e. Data Storage - Fill Value (Old) Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_ofvmessage IV.A.3.e. Data Storage - Fill Value (Old) Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Fill Value (old)</td>
@@ -6853,7 +6860,9 @@ another datatype) and the dataspace for a dataset describes the location of the 
       Type 0x0005) and is only written to the file for forward compatibility with versions of the HDF5
       Library before the 1.6.0 version. Additionally, it only appears for datasets with a user-defined
       fill value (as opposed to the library default fill value or an explicitly set &ldquo;undefined&rdquo;
-      fill value).</td>
+      fill value).<br />
+      This message may be shared between multiple objects in the file; see @ref subsec_fmt4_dataobject_hdr_msg
+      for the shared message encoding.</td>
 </tr>
 <tr>
   <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
@@ -6892,7 +6901,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_fvmessage IV.A.2.f. The Data Storage - Fill Value Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_fvmessage IV.A.3.f. The Data Storage - Fill Value Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Fill Value</td>
@@ -6910,7 +6919,9 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <td><b>Description:</b></td>
   <td>The fill value message stores a single data value which is returned to the application when an
       uninitialized data element is read from a dataset. The fill value is interpreted with the same
-      datatype as the dataset.</td>
+      datatype as the dataset.<br />
+      This message may be shared between multiple objects in the file; see @ref subsec_fmt4_dataobject_hdr_msg
+      for the shared message encoding.</td>
 </tr>
 <tr>
     <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
@@ -7151,7 +7162,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_link IV.A.2.g. The Link Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_link IV.A.3.g. The Link Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Link</td>
@@ -7393,7 +7404,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_external IV.A.2.h. The Data Storage - External Data Files Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_external IV.A.3.h. The Data Storage - External Data Files Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> External Data Files</td>
@@ -7544,7 +7555,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_layout IV.A.2.i. The Data Layout Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_layout IV.A.3.i. The Data Layout Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Data Storage - Layout</td>
@@ -8416,7 +8427,7 @@ The following information exists only when the chunk is filtered. In other words
 </table>
 
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_bogus IV.A.2.j. The Bogus Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_bogus IV.A.3.j. The Bogus Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Bogus</td>
@@ -8465,7 +8476,7 @@ The following information exists only when the chunk is filtered. In other words
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_groupinfo IV.A.2.k. The Group Info Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_groupinfo IV.A.3.k. The Group Info Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Group Info</td>
@@ -8574,7 +8585,7 @@ The following information exists only when the chunk is filtered. In other words
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_filter IV.A.2.l. The Data Storage - Filter Pipeline Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_filter IV.A.3.l. The Data Storage - Filter Pipeline Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Data Storage - Filter Pipeline</td>
@@ -8595,7 +8606,9 @@ The following information exists only when the chunk is filtered. In other words
       This message may be present in the object headers of both dataset and group objects. For datasets, it
       specifies the filters to apply to raw data. For groups, it specifies the filters to apply to the
       group&rsquo;s fractal heap. Currently, only datasets using chunked data storage use the filter pipeline
-      on their raw data.</td>
+      on their raw data.<br />
+      This message may be shared between multiple objects in the file; see @ref subsec_fmt4_dataobject_hdr_msg
+      for the shared message encoding.</td>
 </tr>
 <tr>
   <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
@@ -8969,7 +8982,7 @@ u
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_attribute IV.A.2.m. The Attribute Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_attribute IV.A.3.m. The Attribute Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Attribute</td>
@@ -9151,8 +9164,8 @@ u
       </table></td>
 </tr>
 <tr>
-  <td>Flags</td>
-  <td>>This bit field contains extra information about interpreting the attribute message:
+  <td>\anchor FMT4AttrV2Flags Flags</td>
+  <td>This bit field contains extra information about interpreting the attribute message:
     <table>
     <tr>
       <th width="20%">Bit</th>
@@ -9169,39 +9182,41 @@ u
     </table></td>
 </tr>
 <tr>
-  <td>Name Size</td>
+  <td>\anchor FMT4AttrV2NameSize Name Size</td>
   <td>The length of the attribute name in bytes including the null terminator.</td>
 </tr>
 <tr>
-  <td>Datatype Size</td>
+  <td>\anchor FMT4AttrV2DatatypeSize Datatype Size</td>
   <td>The length of the datatype description in the <em>Datatype</em> field below.</td>
 </tr>
 <tr>
-  <td>Dataspace Size</td>
+  <td>\anchor FMT4AttrV2DataspaceSize Dataspace Size</td>
   <td>The length of the dataspace description in the <em>Dataspace</em> field below.</td>
 </tr>
 <tr>
-  <td>Name</td>
+  <td>\anchor FMT4AttrV2Name Name</td>
   <td>The null-terminated attribute name. This field is <em>not</em> padded with additional bytes.</td>
 </tr>
 <tr>
-  <td>Datatype</td>
+  <td>\anchor FMT4AttrV2Datatype Datatype</td>
   <td>The datatype description follows the same format as described for the datatype object
       header message.<br />
       If the <em>Flag</em> field indicates this attribute&rsquo;s datatype is shared, this field will
-      contain a &ldquo;shared message&rdquo; encoding instead of the datatype encoding.<br />
+      contain a @ref subsec_fmt4_dataobject_hdr_msg "shared message encoding" instead of
+      the datatype encoding.<br />
       This field is <em>not</em> padded with additional bytes.</td>
 </tr>
 <tr>
-  <td>Dataspace</td>
+  <td>\anchor FMT4AttrV2Dataspace Dataspace</td>
   <td>The dataspace description follows the same format as described for the dataspace object
       header message.<br />
       If the <em>Flag</em> field indicates this attribute&rsquo;s dataspace is shared, this field will
-      contain a &ldquo;shared message&rdquo; encoding instead of the dataspace encoding.<br />
+      contain a @ref subsec_fmt4_dataobject_hdr_msg "shared message encoding" instead of
+      the dataspace encoding.<br />
       This field is <em>not</em> padded with additional bytes.</td>
 </tr>
 <tr>
-  <td>Data</td>
+  <td>\anchor FMT4AttrV2Data Data</td>
   <td>The raw data for the attribute. The size is determined from the datatype and dataspace
       descriptions.<br />
       This field is <em>not</em> padded with additional zero bytes.</td>
@@ -9259,7 +9274,7 @@ u
         <th align="left">Description</th>
       </tr>
       <tr>
-        <td align="center"><code>2</code></td>
+        <td align="center"><code>3</code></td>
         <td>Used by the library of version 1.8.x and after to encode attribute messages. This version
             supports attributes with non-ASCII names.</td>
       </tr>
@@ -9267,37 +9282,23 @@ u
 </tr>
 <tr>
   <td>Flags</td>
-  <td>>This bit field contains extra information about interpreting the attribute message:
-    <table>
-    <tr>
-      <th width="20%">Bit</th>
-      <th align="left">Description</th>
-    </tr>
-    <tr>
-      <td align="center"><code>0</code></td>
-      <td>If set, datatype is shared.</td>
-    </tr>
-    <tr>
-      <td align="center"><code>1</code></td>
-      <td>If set, dataspace is shared.</td>
-    </tr>
-    </table></td>
+  <td>This field is the same as described for @ref FMT4AttrV2Flags "version 2" of the attribute message.</td>
 </tr>
 <tr>
   <td>Name Size</td>
-  <td>The length of the attribute name in bytes including the null terminator.</td>
+  <td>This field is the same as described for @ref FMT4AttrV2NameSize "version 2" of the attribute message.</td>
 </tr>
 <tr>
   <td>Datatype Size</td>
-  <td>The length of the datatype description in the <em>Datatype</em> field below.</td>
+  <td>This field is the same as described for @ref FMT4AttrV2DatatypeSize "version 2" of the attribute message.</td>
 </tr>
 <tr>
   <td>Dataspace Size</td>
-  <td>The length of the dataspace description in the <em>Dataspace</em> field below.</td>
+  <td>This field is the same as described for @ref FMT4AttrV2DataspaceSize "version 2" of the attribute message.</td>
 </tr>
 <tr>
   <td>Name Character Set Encoding</td>
-  <td>The character set encoding for the attribute&rsquo;s name:
+  <td>The character set encoding for the attribute&rsquo;s name:<br />
       <table>
       <tr>
         <th width="20%" align="center">Value</th>
@@ -9315,33 +9316,23 @@ u
 </tr>
 <tr>
   <td>Name</td>
-  <td>The null-terminated attribute name. This field is <em>not</em> padded with additional bytes.</td>
+  <td>This field is the same as described for @ref FMT4AttrV2Name "version 2" of the attribute message.</td>
 </tr>
 <tr>
   <td>Datatype</td>
-  <td>The datatype description follows the same format as described for the datatype object
-      header message.<br />
-      If the <em>Flag</em> field indicates this attribute&rsquo;s datatype is shared, this field will
-      contain a &ldquo;shared message&rdquo; encoding instead of the datatype encoding.<br />
-      This field is <em>not</em> padded with additional bytes.</td>
+  <td>This field is the same as described for @ref FMT4AttrV2Datatype "version 2" of the attribute message.</td>
 </tr>
 <tr>
   <td>Dataspace</td>
-  <td>The dataspace description follows the same format as described for the dataspace object
-      header message.<br />
-      If the <em>Flag</em> field indicates this attribute&rsquo;s dataspace is shared, this field will
-      contain a &ldquo;shared message&rdquo; encoding instead of the dataspace encoding.<br />
-      This field is <em>not</em> padded with additional bytes.</td>
+  <td>This field is the same as described for @ref FMT4AttrV2Dataspace "version 2" of the attribute message.</td>
 </tr>
 <tr>
   <td>Data</td>
-  <td>The raw data for the attribute. The size is determined from the datatype and dataspace
-      descriptions.<br />
-      This field is <em>not</em> padded with additional zero bytes.</td>
+  <td>This field is the same as described for @ref FMT4AttrV2Data "version 2" of the attribute message.</td>
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_comment IV.A.2.n. The Object Comment Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_comment IV.A.3.n. The Object Comment Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Object Comment</td>
@@ -9391,7 +9382,7 @@ u
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_omodified IV.A.2.o. The Object Modification Time (Old) Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_omodified IV.A.3.o. The Object Modification Time (Old) Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Object Modification Time (Old)</td>
@@ -9486,7 +9477,7 @@ u
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_shared IV.A.2.p. The Shared Message Table Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_shared IV.A.3.p. The Shared Message Table Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Shared Message Table</td>
@@ -9502,9 +9493,9 @@ u
 </tr>
 <tr>
   <td><b>Description:</b></td>
-  <td>This message is used to locate the table of shared object header message (SOHM) indexes. Each
-      index consists of information to find the shared messages from either the heap or object header.
-      This message is <em>only</em> found in the superblock extension.</td>
+  <td>This message is used to locate the @ref subsec_fmt4_infra_sohm "SOHM Master Table". Each
+      index in the table consists of information to find the shared messages from either the heap or
+      object header. This message is <em>only</em> found in the superblock extension.</td>
 </tr>
 <tr>
   <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
@@ -9554,7 +9545,7 @@ u
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_continuation IV.A.2.q. The Object Header Continuation Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_continuation IV.A.3.q. The Object Header Continuation Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Object Header Continuation</td>
@@ -9719,7 +9710,7 @@ described here (see also the description of @ref subsubsec_fmt4_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_stmgroup IV.A.2.r. The Symbol Table Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_stmgroup IV.A.3.r. The Symbol Table Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Symbol Table Message</td>
@@ -9778,7 +9769,7 @@ described here (see also the description of @ref subsubsec_fmt4_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_mod IV.A.2.s. The Object Modification Time Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_mod IV.A.3.s. The Object Modification Time Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Object Modification Time</td>
@@ -9853,7 +9844,7 @@ described here (see also the description of @ref subsubsec_fmt4_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_btreek IV.A.2.t. The B-tree &lsquo;K&rsquo; Values Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_btreek IV.A.3.t. The B-tree &lsquo;K&rsquo; Values Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> B-tree &lsquo;K&rsquo; Values</td>
@@ -9926,7 +9917,7 @@ described here (see also the description of @ref subsubsec_fmt4_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_drvinfo IV.A.2.u. The Driver Info Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_drvinfo IV.A.3.u. The Driver Info Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Driver Info</td>
@@ -10001,7 +9992,7 @@ described here (see also the description of @ref subsubsec_fmt4_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_attrinfo IV.A.2.v. The Attribute Info Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_attrinfo IV.A.3.v. The Attribute Info Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Attribute Info</td>
@@ -10107,7 +10098,7 @@ described here (see also the description of @ref subsubsec_fmt4_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_refcount IV.A.2.w. The Object Reference Count Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_refcount IV.A.3.w. The Object Reference Count Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Object Reference Count</td>
@@ -10166,7 +10157,7 @@ described here (see also the description of @ref subsubsec_fmt4_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_fsinfo IV.A.2.x. The File Space Info Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_fsinfo IV.A.3.x. The File Space Info Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> File Space Info</td>

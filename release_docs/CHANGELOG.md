@@ -151,6 +151,10 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ## Library
 
+### Fixed error when reading variable-length chunked datasets in read-only mode
+
+   When reading from a chunked dataset with a variable-length type, a non-default fill value, and unwritten chunks, the library would internally try to write data to the file and fail due to writing to a read-only file. Reworked the I/O code to avoid these writes in this case. This may also improve performance and file space usage in similar cases with files open with write access.
+
 ### Validate free space section type during decode
 
    When loading a free space section info block, the per-section type byte read from the file was used directly to index the free space manager's section class array and to call the class `deserialize` callback, guarded only by an assertion that is removed in release builds. A corrupted or fuzzed file could supply a type beyond the number of registered classes, causing an out-of-bounds read of the class array and an indirect call through a bogus function pointer. `H5FS__cache_sinfo_deserialize()` now rejects a section type that is not less than the number of section classes.
@@ -202,6 +206,10 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 ### Library shutdown no longer aborts on a detected infinite loop
 
    When the library detects that it cannot make progress closing itself (an "infinite loop closing library"), it no longer calls `abort()`. The abort behaved inconsistently, only firing when automatic error message display was enabled. Additionally, terminating the entire host process on a shutdown-time condition is undesirable for applications that embed HDF5. The library now reports the condition (when error display is enabled) and returns without aborting.
+
+### Hardened decoding of serialized dataspace selections against malformed buffers
+
+   `H5S_select_deserialize()` and the per-selection-type deserialize callbacks (all, hyperslab, none, and point) previously computed the pointer to the last valid buffer byte as `buffer + size - 1` without first checking the buffer size. A buffer shorter than the 4-byte selection-type header, or a zero-length selection-info buffer, would underflow this computation and produce an out-of-bounds end pointer, defeating subsequent overflow checks. The deserialize routines now reject a buffer that is too small to hold the selection type, and they reject an empty selection-info buffer before deriving the end pointer. Hyperslab decoding additionally now rejects a serialized rank of 0 or greater than `H5S_MAX_RANK`. As a companion fix, `H5S__hyper_serialize()` now returns an error when asked to serialize a hyperslab selection on a rank-0 (scalar or null) dataspace, a state that can arise when a dataspace extent is collapsed to a scalar after a hyperslab selection has already been made.
 
 ## Java Library
 

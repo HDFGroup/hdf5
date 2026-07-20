@@ -71,7 +71,7 @@ if (DOXYGEN_FOUND)
   )
   install (
       FILES ${HDF5_BINARY_DIR}/hdf5.tag
-      DESTINATION ${HDF5_INSTALL_DOC_DIR}
+      DESTINATION ${HDF5_INSTALL_DOC_DIR}/html
       COMPONENT hdfdocuments
   )
 
