@@ -54,14 +54,20 @@ jobs:
       id: gethdf5base
       run: echo "HDF5_NAME_BASE=$(cat last-file.txt)" >> $GITHUB_OUTPUT
 
-    - run: echo "hdf5 base name is ${{ steps.gethdf5base.outputs.HDF5_NAME_BASE }}."
+    - env:
+        HDF5_NAME_BASE: ${{ steps.gethdf5base.outputs.HDF5_NAME_BASE }}
+      run: echo "hdf5 base name is $HDF5_NAME_BASE."
 
     - name: Read inputs
       id: getinputs
+      env:
+        INPUTS_USE_IGNORE: ${{ inputs.use_ignore }}
       run: |
-        echo "INPUTS_IGNORE=${{ inputs.use_ignore }}" >> $GITHUB_OUTPUT
+        echo "INPUTS_IGNORE=$INPUTS_USE_IGNORE" >> $GITHUB_OUTPUT
 
-    - run: echo "use_ignore is ${{ steps.getinputs.outputs.INPUTS_IGNORE }}."
+    - env:
+        INPUTS_IGNORE: ${{ steps.getinputs.outputs.INPUTS_IGNORE }}
+      run: echo "use_ignore is $INPUTS_IGNORE."
 
   call-workflow-tarball:
     needs: [get-old-names]
