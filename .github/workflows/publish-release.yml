@@ -140,6 +140,13 @@ jobs:
               echo "❌ Documentation extraction failed"
               exit 1
             fi
+            # The doxygen tag file is published alongside the HTML docs
+            if [ -f "${{ inputs.file_name }}.doxygen/hdf5.tag" ]; then
+              echo "✅ Found: hdf5.tag"
+            else
+              echo "❌ hdf5.tag not found in documentation"
+              exit 1
+            fi
           else
             echo "⚠️  Documentation file not found, skipping..."
           fi

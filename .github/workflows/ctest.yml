@@ -540,6 +540,13 @@ jobs:
               path: ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
+      # Verify the doxygen tag file was generated inside the html output
+      # directory so it is captured by the docs-doxygen artifact below and
+      # published alongside the HTML documentation (e.g. to
+      # https://support.hdfgroup.org/documentation/hdf5/latest/hdf5.tag).
+      - name: Verify hdf5.tag is present (Linux)
+        run: test -f "${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/hdf5lib_docs/html/hdf5.tag"
+
       # Save doxygen files created by CTest script
       - name: Save published doxygen (Linux)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
