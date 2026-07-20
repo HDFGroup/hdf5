@@ -26,7 +26,7 @@ if (DOXYGEN_FOUND)
   set (DOXYGEN_HTML_FOOTER ${HDF5_DOXYGEN_DIR}/hdf5_footer.html)
   set (DOXYGEN_HTML_EXTRA_STYLESHEET "${HDF5_DOXYGEN_DIR}/hdf5doxy.css ${HDF5_DOXYGEN_DIR}/doxygen-awesome.css")
   set (DOXYGEN_HTML_EXTRA_FILES "${HDF5_DOXYGEN_DIR}/hdf5_navtree_hacks.js ${HDF5_DOXYGEN_DIR}/doxygen-awesome-tabs.js")
-  set (DOXYGEN_TAG_FILE ${HDF5_BINARY_DIR}/hdf5lib_docs/html/hdf5.tag)
+  set (DOXYGEN_TAG_FILE ${DOXYGEN_OUTPUT_DIRECTORY}/html/hdf5.tag)
   set (DOXYGEN_SERVER_BASED_SEARCH NO)
   set (DOXYGEN_EXTERNAL_SEARCH NO)
   set (DOXYGEN_SEARCHENGINE_URL)
@@ -70,7 +70,7 @@ if (DOXYGEN_FOUND)
   # output directory also ensures it is captured by the docs-doxygen CI artifact
   # that publishes the documentation (and hdf5.tag) to S3.
   install (
-      DIRECTORY ${HDF5_BINARY_DIR}/hdf5lib_docs/html
+      DIRECTORY ${DOXYGEN_OUTPUT_DIRECTORY}/html
       DESTINATION ${HDF5_INSTALL_DOC_DIR}
       COMPONENT hdfdocuments
   )

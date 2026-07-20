@@ -545,7 +545,15 @@ jobs:
       # published alongside the HTML documentation (e.g. to
       # https://support.hdfgroup.org/documentation/hdf5/latest/hdf5.tag).
       - name: Verify hdf5.tag is present (Linux)
-        run: test -f "${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/hdf5lib_docs/html/hdf5.tag"
+        env:
+          TAG_FILE: ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/hdf5lib_docs/html/hdf5.tag
+        run: |
+          if [ ! -f "$TAG_FILE" ]; then
+            echo "::error::Expected doxygen tag file not found: $TAG_FILE"
+            echo "The hdf5.tag file must be generated inside the doxygen html output directory so it is included in the docs-doxygen artifact."
+            exit 1
+          fi
+          echo "Found doxygen tag file: $TAG_FILE"
 
       # Save doxygen files created by CTest script
       - name: Save published doxygen (Linux)
