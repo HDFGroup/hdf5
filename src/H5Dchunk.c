@@ -3505,11 +3505,11 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
         /* Iterate through nodes in chunk skip list */
         chunk_node = H5D_CHUNK_GET_FIRST_NODE(dset_info);
         while (chunk_node) {
-            H5D_piece_info_t  *chunk_info;  /* Chunk information */
-            H5D_chk_idx_info_t idx_info;    /* Chunked index info */
+            H5D_piece_info_t  *chunk_info;         /* Chunk information */
+            H5D_chk_idx_info_t idx_info;           /* Chunked index info */
             H5D_io_info_t     *chk_io_info = NULL; /* Pointer to I/O info object for this chunk */
-            htri_t             cacheable;   /* Whether the chunk is cacheable */
-            bool need_insert = false;       /* Whether the chunk needs to be inserted into the index */
+            htri_t             cacheable;          /* Whether the chunk is cacheable */
+            bool need_insert = false;              /* Whether the chunk needs to be inserted into the index */
 
             /* Get the actual chunk information from the skip list node */
             chunk_info = H5D_CHUNK_GET_NODE_INFO(dset_info, chunk_node);
@@ -4157,33 +4157,33 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udat
             if ((sc->ops->get_addr)(&idx_info, udata) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query chunk address");
 
-                /*
-                 * Cache the information retrieved.
-                 *
-                 * Note that if we are writing to the dataset in parallel and filters
-                 * are involved, we skip caching this information as it is highly likely
-                 * that the chunk information will be invalidated as a result of the
-                 * filter operation (e.g. the chunk gets re-allocated to a different
-                 * address in the file and/or gets re-allocated with a different size).
-                 * If we were to cache this information, subsequent reads/writes would
-                 * retrieve the invalid information and cause a variety of issues.
-                 *
-                 * It has been verified that in the serial library, when writing to chunks
-                 * with the real chunk cache disabled and with filters involved, the
-                 * functions within this file are correctly called in such a manner that
-                 * this single chunk cache is always updated correctly. Therefore, this
-                 * check is not needed for the serial library.
-                 *
-                 * This is an ugly and potentially frail check, but the
-                 * H5D__chunk_cinfo_cache_reset() function is not currently available
-                 * to functions outside of this file, so outside functions can not
-                 * invalidate this single chunk cache. Even if the function were available,
-                 * this check prevents us from doing the work of going through and caching
-                 * each chunk in the write operation, when we're only going to invalidate
-                 * the cache at the end of a parallel write anyway.
-                 *
-                 *  - JTH (7/13/2018)
-                 */
+            /*
+             * Cache the information retrieved.
+             *
+             * Note that if we are writing to the dataset in parallel and filters
+             * are involved, we skip caching this information as it is highly likely
+             * that the chunk information will be invalidated as a result of the
+             * filter operation (e.g. the chunk gets re-allocated to a different
+             * address in the file and/or gets re-allocated with a different size).
+             * If we were to cache this information, subsequent reads/writes would
+             * retrieve the invalid information and cause a variety of issues.
+             *
+             * It has been verified that in the serial library, when writing to chunks
+             * with the real chunk cache disabled and with filters involved, the
+             * functions within this file are correctly called in such a manner that
+             * this single chunk cache is always updated correctly. Therefore, this
+             * check is not needed for the serial library.
+             *
+             * This is an ugly and potentially frail check, but the
+             * H5D__chunk_cinfo_cache_reset() function is not currently available
+             * to functions outside of this file, so outside functions can not
+             * invalidate this single chunk cache. Even if the function were available,
+             * this check prevents us from doing the work of going through and caching
+             * each chunk in the write operation, when we're only going to invalidate
+             * the cache at the end of a parallel write anyway.
+             *
+             *  - JTH (7/13/2018)
+             */
 #ifdef H5_HAVE_PARALLEL
             if (!((H5F_HAS_FEATURE(idx_info.f, H5FD_FEAT_HAS_MPI)) &&
                   (H5F_INTENT(dset->oloc.file) & H5F_ACC_RDWR) && dset->shared->dcpl_cache.pline.nused))
@@ -6083,13 +6083,13 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, bool new_unfilt_chunk)
     hsize_t              sel_nelmts;              /* Number of elements in selection */
     hsize_t              count[H5O_LAYOUT_NDIMS]; /* Element count of hyperslab */
     size_t               chunk_size;              /*size of a chunk       */
-    void                *chunk          = NULL;   /* The file chunk  */
+    void                *chunk = NULL;            /* The file chunk  */
     H5D_chunk_ud_t       chk_udata;               /* User data for locking chunk */
     hsize_t              bytes_accessed = 0;      /* Bytes accessed in chunk */
     unsigned             u;                       /* Local index variable */
-    bool                 chunk_locked   = false;  /* Indicates whether the chunk is locked */
-    bool                 chunk_dirty    = false;  /* Indicates whether writing is needed */
-    herr_t               ret_value      = SUCCEED;/* Return value */
+    bool                 chunk_locked = false;    /* Indicates whether the chunk is locked */
+    bool                 chunk_dirty  = false;    /* Indicates whether writing is needed */
+    herr_t               ret_value    = SUCCEED;  /* Return value */
 
     FUNC_ENTER_PACKAGE
 
