@@ -800,12 +800,17 @@ H5Z__prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id, hi
                         htri_t status;
 
                         /* Prepare & restore library for user callback */
-                        H5_BEFORE_USER_CB(FAIL)
-                            {
-                                /* Make callback to filter's "can apply" function */
-                                status = (fclass->can_apply)(dcpl_id, type_id, space_id);
-                            }
-                        H5_AFTER_USER_CB(FAIL)
+                        /* Don't prepare for a user callback if this is an internal filter */
+                        if (fclass->id < H5Z_FILTER_RESERVED)
+                            status = (fclass->can_apply)(dcpl_id, type_id, space_id);
+                        else {
+                            H5_BEFORE_USER_CB(FAIL)
+                                {
+                                    /* Make callback to filter's "can apply" function */
+                                    status = (fclass->can_apply)(dcpl_id, type_id, space_id);
+                                }
+                            H5_AFTER_USER_CB(FAIL)
+                        }
 
                         /* Indicate error during filter callback */
                         if (status < 0)
@@ -1444,8 +1449,15 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
             tmp_flags = flags | (pline->filter[idx].flags);
             tmp_flags |= (edc_read == H5Z_DISABLE_EDC) ? H5Z_FLAG_SKIP_EDC : 0;
 
-            H5E_PAUSE_ERRORS
-                {/* Prepare & restore library for user callback */
+            /* Pause errors if there's a callback defined */
+            if (cb_struct.func)
+                H5E_PAUSE_ERRORS
+
+            {/* Prepare & restore library for user callback */
+                /* Don't prepare for a user callback if this is an internal filter */
+                if (fclass->id < H5Z_FILTER_RESERVED)
+                    new_nbytes = (fclass->filter)(tmp_flags, pline->filter[idx].cd_nelmts, pline->filter[idx].cd_values, *nbytes, buf_size, buf);
+                else {
                     H5_BEFORE_USER_CB(FAIL)
                         {
                             new_nbytes = (fclass->filter)(tmp_flags, pline->filter[idx].cd_nelmts,
@@ -1453,7 +1465,10 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                         }
                     H5_AFTER_USER_CB(FAIL)
                 }
-            H5E_RESUME_ERRORS
+            }
+
+            if (cb_struct.func)
+                H5E_RESUME_ERRORS
 
 #ifdef H5Z_DEBUG
             H5_timer_stop(&timer);
@@ -1518,8 +1533,15 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
             H5_timer_start(&timer);
 #endif
 
-            H5E_PAUSE_ERRORS
-                {/* Prepare & restore library for user callback */
+            /* Pause errors if the filter is optional or if there's a callback defined */
+            if ((pline->filter[idx].flags & H5Z_FLAG_OPTIONAL) || cb_struct.func)
+                H5E_PAUSE_ERRORS
+
+            {/* Prepare & restore library for user callback */
+                /* Don't prepare for a user callback if this is an internal filter */
+                if (fclass->id < H5Z_FILTER_RESERVED)
+                    new_nbytes = (fclass->filter)(flags | (pline->filter[idx].flags), pline->filter[idx].cd_nelmts, pline->filter[idx].cd_values, *nbytes, buf_size, buf);
+                else {
                     H5_BEFORE_USER_CB(FAIL)
                         {
                             new_nbytes = (fclass->filter)(flags | (pline->filter[idx].flags), pline->filter[idx].cd_nelmts,
@@ -1527,7 +1549,10 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                         }
                     H5_AFTER_USER_CB(FAIL)
                 }
-            H5E_RESUME_ERRORS
+            }
+
+            if ((pline->filter[idx].flags & H5Z_FLAG_OPTIONAL) || cb_struct.func)
+                H5E_RESUME_ERRORS
 
 #ifdef H5Z_DEBUG
             H5_timer_stop(&timer);
