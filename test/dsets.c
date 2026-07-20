@@ -19125,7 +19125,8 @@ const H5Z_class2_t H5Z_ERROR_MSG[1] = {{
     NULL,                    /* The "set local" callback */
     filter_error_msg,        /* The actual filter function */
 }};
-static const char *filter_error_msg_msg = "Hello I am a unique error message written for the test_filter_error_msg test in dsets.c";
+static const char *filter_error_msg_msg =
+    "Hello I am a unique error message written for the test_filter_error_msg test in dsets.c";
 bool enable_error_msg;
 bool error_msg_found;
 
@@ -19140,8 +19141,8 @@ bool error_msg_found;
  */
 static size_t
 filter_error_msg(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
-                    const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes, size_t H5_ATTR_UNUSED *buf_size,
-                    void H5_ATTR_UNUSED **buf)
+                 const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes, size_t H5_ATTR_UNUSED *buf_size,
+                 void H5_ATTR_UNUSED **buf)
 {
     size_t ret_value = 0;
 
@@ -19160,7 +19161,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    filter_error_msg_handler
  *
- * Purpose:     Error message handler that simply checks if the description matches filter_error_msg_msg and sets error_msg_found to true if so.
+ * Purpose:     Error message handler that simply checks if the
+ *              description matches filter_error_msg_msg and sets
+ *              error_msg_found to true if so.
  *
  * Return:      Success:    0
  *              Failure:    -1
@@ -19178,7 +19181,8 @@ filter_error_msg_handler(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc
 /*-------------------------------------------------------------------------
  * Function:    filter_error_msg_stack_handler
  *
- * Purpose:     Error stack handler that simply calls H5Ewalk2() with filter_error_msg_handler() as the callback.
+ * Purpose:     Error stack handler that simply calls H5Ewalk2() with
+ *              filter_error_msg_handler() as the callback.
  *
  * Return:      Success:    0
  *              Failure:    -1
@@ -19241,8 +19245,8 @@ test_filter_error_msg(hid_t file)
         TEST_ERROR;
 
     /* Create new dataset with fixed-width integer type */
-    if ((dsid = H5Dcreate2(file, DSET_ERROR_MSG_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl,
-                           H5P_DEFAULT)) < 0)
+    if ((dsid = H5Dcreate2(file, DSET_ERROR_MSG_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) <
+        0)
         TEST_ERROR;
 
     /* Use H5E_BEGIN/END_TRY as an easy way to make sure the previous error printing function is preserved */
@@ -19254,6 +19258,7 @@ test_filter_error_msg(hid_t file)
         /* Write data with error message enabled (should fail) */
         enable_error_msg = true;
         error_msg_found = false;
+
         ret = H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata);
     }
     H5E_END_TRY
@@ -19292,6 +19297,7 @@ test_filter_error_msg(hid_t file)
         /* Read data back with bad buffer size enabled (should fail) */
         enable_error_msg = true;
         error_msg_found = false;
+
         ret = H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     }
     H5E_END_TRY
