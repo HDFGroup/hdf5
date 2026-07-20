@@ -366,8 +366,8 @@ static size_t filter_bad_buf_size(unsigned int flags, size_t cd_nelmts, const un
 static size_t filter_error_msg(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                                size_t nbytes, size_t *buf_size, void **buf);
 
-herr_t dsets_h5zregister_direct(const H5Z_class2_t *filter);
-herr_t dsets_h5zunregister_direct(H5Z_filter_t id);
+static herr_t dsets_h5zregister_direct(const H5Z_class2_t *filter);
+static herr_t dsets_h5zunregister_direct(H5Z_filter_t id);
 
 /*-------------------------------------------------------------------------
  * Function:    dsets_h5zregister_direct
@@ -380,7 +380,7 @@ herr_t dsets_h5zunregister_direct(H5Z_filter_t id);
  *              Failure:        -1
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 dsets_h5zregister_direct(const H5Z_class2_t *filter)
 {
     herr_t ret_value = SUCCEED; /* Return value */
@@ -405,7 +405,7 @@ done:
  *              Failure:        -1
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 dsets_h5zunregister_direct(H5Z_filter_t id)
 {
     herr_t ret_value = SUCCEED; /* Return value */
@@ -18784,7 +18784,7 @@ const H5Z_class2_t H5Z_BAD_BUF_SIZE[1] = {{
  *              Failure:        0
  *-------------------------------------------------------------------------
  */
-bool enable_bad_buf_size;
+static bool enable_bad_buf_size;
 
 static size_t
 filter_bad_buf_size(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
@@ -19127,8 +19127,8 @@ const H5Z_class2_t H5Z_ERROR_MSG[1] = {{
 }};
 static const char *filter_error_msg_msg =
     "Hello I am a unique error message written for the test_filter_error_msg test in dsets.c";
-bool enable_error_msg;
-bool error_msg_found;
+static bool enable_error_msg;
+static bool error_msg_found;
 
 /*-------------------------------------------------------------------------
  * Function:    filter_error_msg
@@ -19203,9 +19203,8 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_filter_error_msg
  *
- * Purpose:     Tests that the library properly fails when the buffer size
- *              returned by a filter is too small to hold the data length
- *              returned by that filter.
+ * Purpose:     Tests that error messages issued by internal library
+ *              filters are printed normally.
  *
  * Return:      Success:    0
  *              Failure:    -1

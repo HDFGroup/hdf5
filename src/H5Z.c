@@ -799,11 +799,12 @@ H5Z__prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id, hi
                     if (fclass->can_apply) {
                         htri_t status;
 
-                        /* Prepare & restore library for user callback */
                         /* Don't prepare for a user callback if this is an internal filter */
                         if (fclass->id < H5Z_FILTER_RESERVED)
+                            /* Make callback to filter's "can apply" function */
                             status = (fclass->can_apply)(dcpl_id, type_id, space_id);
                         else {
+                            /* Prepare & restore library for user callback */
                             H5_BEFORE_USER_CB(FAIL)
                                 {
                                     /* Make callback to filter's "can apply" function */
@@ -828,13 +829,19 @@ H5Z__prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id, hi
                     if (fclass->set_local) {
                         herr_t status;
 
-                        /* Prepare & restore library for user callback */
-                        H5_BEFORE_USER_CB(FAIL)
-                            {
-                                /* Make callback to filter's "set local" function */
-                                status = (fclass->set_local)(dcpl_id, type_id, space_id);
-                            }
-                        H5_AFTER_USER_CB(FAIL)
+                        /* Don't prepare for a user callback if this is an internal filter */
+                        if (fclass->id < H5Z_FILTER_RESERVED)
+                            /* Make callback to filter's "set local" function */
+                            status = (fclass->set_local)(dcpl_id, type_id, space_id);
+                        else {
+                            /* Prepare & restore library for user callback */
+                            H5_BEFORE_USER_CB(FAIL)
+                                {
+                                    /* Make callback to filter's "set local" function */
+                                    status = (fclass->set_local)(dcpl_id, type_id, space_id);
+                                }
+                            H5_AFTER_USER_CB(FAIL)
+                        }
 
                         /* Indicate error during filter callback */
                         if (status < 0)
@@ -1453,13 +1460,16 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
             if (cb_struct.func)
                 H5E_PAUSE_ERRORS
 
-            {/* Prepare & restore library for user callback */
+            {
                 /* Don't prepare for a user callback if this is an internal filter */
                 if (fclass->id < H5Z_FILTER_RESERVED)
+                    /* Invoke main "filter" callback */
                     new_nbytes = (fclass->filter)(tmp_flags, pline->filter[idx].cd_nelmts, pline->filter[idx].cd_values, *nbytes, buf_size, buf);
                 else {
+                    /* Prepare & restore library for user callback */
                     H5_BEFORE_USER_CB(FAIL)
                         {
+                            /* Invoke main "filter" callback */
                             new_nbytes = (fclass->filter)(tmp_flags, pline->filter[idx].cd_nelmts,
                                                           pline->filter[idx].cd_values, *nbytes, buf_size, buf);
                         }
@@ -1489,6 +1499,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                     /* Prepare & restore library for user callback */
                     H5_BEFORE_USER_CB(FAIL)
                         {
+                            /* Invoke user callback */
                             status = cb_struct.func(pline->filter[idx].id, *buf, *buf_size, cb_struct.op_data);
                         }
                     H5_AFTER_USER_CB(FAIL)
@@ -1537,13 +1548,16 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
             if ((pline->filter[idx].flags & H5Z_FLAG_OPTIONAL) || cb_struct.func)
                 H5E_PAUSE_ERRORS
 
-            {/* Prepare & restore library for user callback */
+            {
                 /* Don't prepare for a user callback if this is an internal filter */
                 if (fclass->id < H5Z_FILTER_RESERVED)
+                    /* Invoke main "filter" callback */
                     new_nbytes = (fclass->filter)(flags | (pline->filter[idx].flags), pline->filter[idx].cd_nelmts, pline->filter[idx].cd_values, *nbytes, buf_size, buf);
                 else {
+                    /* Prepare & restore library for user callback */
                     H5_BEFORE_USER_CB(FAIL)
                         {
+                            /* Invoke main "filter" callback */
                             new_nbytes = (fclass->filter)(flags | (pline->filter[idx].flags), pline->filter[idx].cd_nelmts,
                                                           pline->filter[idx].cd_values, *nbytes, buf_size, buf);
                         }
