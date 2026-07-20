@@ -19234,7 +19234,8 @@ test_filter_error_msg(hid_t file)
     if (H5Pset_chunk(dcpl, 1, chunk_dims) < 0)
         TEST_ERROR;
 
-    /* Register and apply "filter error message" filter, using a reserved ID so it is treated as an internal library filter */
+    /* Register and apply "filter error message" filter, using a reserved ID so it is treated as an internal
+     * library filter */
     if (dsets_h5zregister_direct(H5Z_ERROR_MSG) < 0)
         TEST_ERROR;
     if (H5Pset_filter(dcpl, H5Z_ERROR_MSG->id, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
@@ -19257,7 +19258,7 @@ test_filter_error_msg(hid_t file)
 
         /* Write data with error message enabled (should fail) */
         enable_error_msg = true;
-        error_msg_found = false;
+        error_msg_found  = false;
 
         ret = H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata);
     }
@@ -19296,7 +19297,7 @@ test_filter_error_msg(hid_t file)
 
         /* Read data back with bad buffer size enabled (should fail) */
         enable_error_msg = true;
-        error_msg_found = false;
+        error_msg_found  = false;
 
         ret = H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     }
