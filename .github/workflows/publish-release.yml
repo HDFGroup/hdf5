@@ -28,21 +28,33 @@ jobs:
   publish-tag:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    
+
+    # Expose the templated inputs/secrets/vars as environment variables so the
+    # run steps below reference plain shell variables ($USE_TAG, ...) instead of
+    # interpolating ${{ ... }} directly into the script body, which avoids
+    # template-injection (see zizmor/CodeQL findings).
+    env:
+      USE_TAG: ${{ inputs.use_tag }}
+      FILE_NAME: ${{ inputs.file_name }}
+      TARGET_DIR: ${{ inputs.target_dir }}
+      DRY_RUN: ${{ inputs.dry_run }}
+      S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+      TARGET_PATH: ${{ vars.TARGET_PATH }}
+
     steps:
       - name: Validate Inputs
         run: |
           set -euo pipefail
           echo "Validating inputs..."
-          if [[ ! "${{ inputs.use_tag }}" =~ ^hdf5[_-][0-9]+[._][0-9]+[._][0-9]+([._][0-9]+)?(-.*)?$ ]]; then
+          if [[ ! "$USE_TAG" =~ ^hdf5[_-][0-9]+[._][0-9]+[._][0-9]+([._][0-9]+)?(-.*)?$ ]]; then
             echo "❌ Invalid tag format. Expected: hdf5_X.Y.Z, hdf5-X_Y_Z, or hdf5_X.Y.Z.W"
             exit 1
           fi
-          if [[ "${{ inputs.target_dir }}" == *".."* ]] || [[ "${{ inputs.target_dir }}" == /* ]]; then
+          if [[ "$TARGET_DIR" == *".."* ]] || [[ "$TARGET_DIR" == /* ]]; then
             echo "❌ Invalid target_dir. Cannot contain '..' or start with '/'"
             exit 1
           fi
-          if [[ "${{ inputs.file_name }}" == *".."* ]] || [[ "${{ inputs.file_name }}" == *"/"* ]] || [[ "${{ inputs.file_name }}" =~ [^a-zA-Z0-9._-] ]]; then
+          if [[ "$FILE_NAME" == *".."* ]] || [[ "$FILE_NAME" == *"/"* ]] || [[ "$FILE_NAME" =~ [^a-zA-Z0-9._-] ]]; then
             echo "❌ Invalid file_name. Can only contain alphanumeric, dots, underscores, and hyphens"
             exit 1
           fi
@@ -54,6 +66,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: '${{ github.head_ref || github.ref_name }}'
+          persist-credentials: false
 
       - name: Create download directory
         run: mkdir -p HDF5
@@ -72,9 +85,9 @@ jobs:
           set -euo pipefail
           echo "📁 Downloaded files:"
           ls -la HDF5/
-          
+
           # Check for expected files
-          EXPECTED_FILES=("${{ inputs.file_name }}.doxygen.zip" "${{ inputs.file_name }}.html.abi.reports.tar.gz")
+          EXPECTED_FILES=("${FILE_NAME}.doxygen.zip" "${FILE_NAME}.html.abi.reports.tar.gz")
           for file in "${EXPECTED_FILES[@]}"; do
             if [ ! -f "HDF5/$file" ]; then
               echo "⚠️  Warning: Expected file not found: $file"
@@ -98,8 +111,8 @@ jobs:
           chmod +x .github/scripts/generate-index-html.sh
           .github/scripts/generate-index-html.sh \
             "./HDF5" \
-            "HDF5 ${{ inputs.use_tag }} - Downloads" \
-            "Release binaries, source code, and documentation packages for HDF5 ${{ inputs.use_tag }}" \
+            "HDF5 ${USE_TAG} - Downloads" \
+            "Release binaries, source code, and documentation packages for HDF5 ${USE_TAG}" \
             "../"
           echo "✅ Downloads index.html generated"
 
@@ -108,7 +121,7 @@ jobs:
         run: |
           set -euo pipefail
           echo "🚀 Syncing release files to S3..."
-          aws s3 sync ./HDF5 s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/downloads \
+          aws s3 sync ./HDF5 "s3://${S3_BUCKET}/${TARGET_PATH}/${TARGET_DIR}/downloads" \
             --delete \
             --exclude="*" \
             --include="*.tar.gz" \
@@ -122,7 +135,7 @@ jobs:
 
           # Upload index.html with proper content type
           aws s3 cp ./HDF5/index.html \
-            s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/downloads/index.html \
+            "s3://${S3_BUCKET}/${TARGET_PATH}/${TARGET_DIR}/downloads/index.html" \
             --content-type "text/html" \
             --metadata-directive REPLACE
           echo "✅ Release files sync completed"
@@ -130,11 +143,11 @@ jobs:
       - name: Process documentation
         run: |
           set -euo pipefail
-          DOC_FILE="HDF5/${{ inputs.file_name }}.doxygen.zip"
+          DOC_FILE="HDF5/${FILE_NAME}.doxygen.zip"
           if [ -f "$DOC_FILE" ]; then
             echo "📚 Processing documentation..."
             unzip -q "$DOC_FILE"
-            if [ -d "${{ inputs.file_name }}.doxygen" ]; then
+            if [ -d "${FILE_NAME}.doxygen" ]; then
               echo "✅ Documentation extracted successfully"
             else
               echo "❌ Documentation extraction failed"
@@ -147,12 +160,12 @@ jobs:
       - name: Generate index.html for documentation directory
         run: |
           set -euo pipefail
-          if [ -d "${{ inputs.file_name }}.doxygen" ]; then
+          if [ -d "${FILE_NAME}.doxygen" ]; then
             echo "📄 Generating index.html for documentation directory..."
             .github/scripts/generate-index-html.sh \
-              "./${{ inputs.file_name }}.doxygen" \
-              "HDF5 ${{ inputs.use_tag }} - Documentation" \
-              "Doxygen API documentation for HDF5 ${{ inputs.use_tag }}" \
+              "./${FILE_NAME}.doxygen" \
+              "HDF5 ${USE_TAG} - Documentation" \
+              "Doxygen API documentation for HDF5 ${USE_TAG}" \
               "../../"
             echo "✅ Documentation index.html generated"
           else
@@ -163,10 +176,10 @@ jobs:
         if: ${{ !inputs.dry_run }}
         run: |
           set -euo pipefail
-          if [ -d "${{ inputs.file_name }}.doxygen" ]; then
+          if [ -d "${FILE_NAME}.doxygen" ]; then
             echo "📚 Syncing documentation to S3..."
-            aws s3 sync ./${{ inputs.file_name }}.doxygen \
-              s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/documentation/doxygen \
+            aws s3 sync "./${FILE_NAME}.doxygen" \
+              "s3://${S3_BUCKET}/${TARGET_PATH}/${TARGET_DIR}/documentation/doxygen" \
               --delete \
               --content-type "text/html" \
               --metadata-directive REPLACE
@@ -178,7 +191,7 @@ jobs:
       - name: Process compatibility reports
         run: |
           set -euo pipefail
-          COMPAT_FILE="HDF5/${{ inputs.file_name }}.html.abi.reports.tar.gz"
+          COMPAT_FILE="HDF5/${FILE_NAME}.html.abi.reports.tar.gz"
           if [ -f "$COMPAT_FILE" ]; then
             echo "📊 Processing compatibility reports..."
             tar -xzf "$COMPAT_FILE"
@@ -199,8 +212,8 @@ jobs:
             echo "📄 Generating index.html for compatibility reports directory..."
             .github/scripts/generate-index-html.sh \
               "./hdf5" \
-              "HDF5 ${{ inputs.use_tag }} - Compatibility Reports" \
-              "ABI/API compatibility reports for HDF5 ${{ inputs.use_tag }}" \
+              "HDF5 ${USE_TAG} - Compatibility Reports" \
+              "ABI/API compatibility reports for HDF5 ${USE_TAG}" \
               "../"
             echo "✅ Compatibility reports index.html generated"
           else
@@ -214,7 +227,7 @@ jobs:
           if [ -d "hdf5" ]; then
             echo "📊 Syncing compatibility reports to S3..."
             aws s3 sync ./hdf5 \
-              s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/compat_report \
+              "s3://${S3_BUCKET}/${TARGET_PATH}/${TARGET_DIR}/compat_report" \
               --delete \
               --content-type "text/html" \
               --metadata-directive REPLACE
@@ -229,18 +242,18 @@ jobs:
           echo "📄 Generating main release directory index.html..."
 
           # Create a temporary directory structure to mimic the S3 layout
-          mkdir -p release_root/${{ inputs.target_dir }}/{downloads,documentation,compat_report}
+          mkdir -p "release_root/${TARGET_DIR}"/{downloads,documentation,compat_report}
 
           # Create placeholder files so the script can list them
-          touch "release_root/${{ inputs.target_dir }}/downloads/.placeholder"
-          touch "release_root/${{ inputs.target_dir }}/documentation/.placeholder"
-          touch "release_root/${{ inputs.target_dir }}/compat_report/.placeholder"
+          touch "release_root/${TARGET_DIR}/downloads/.placeholder"
+          touch "release_root/${TARGET_DIR}/documentation/.placeholder"
+          touch "release_root/${TARGET_DIR}/compat_report/.placeholder"
 
           # Generate index for the release directory
           .github/scripts/generate-index-html.sh \
-            "release_root/${{ inputs.target_dir }}" \
-            "HDF5 ${{ inputs.use_tag }}" \
-            "Release files, documentation, and compatibility reports for HDF5 ${{ inputs.use_tag }}" \
+            "release_root/${TARGET_DIR}" \
+            "HDF5 ${USE_TAG}" \
+            "Release files, documentation, and compatibility reports for HDF5 ${USE_TAG}" \
             "../"
 
           echo "✅ Main release index.html generated"
@@ -250,8 +263,8 @@ jobs:
         run: |
           set -euo pipefail
           echo "📤 Uploading main release directory index.html..."
-          aws s3 cp "release_root/${{ inputs.target_dir }}/index.html" \
-            s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/index.html \
+          aws s3 cp "release_root/${TARGET_DIR}/index.html" \
+            "s3://${S3_BUCKET}/${TARGET_PATH}/${TARGET_DIR}/index.html" \
             --content-type "text/html" \
             --metadata-directive REPLACE
           echo "✅ Main index.html uploaded"
@@ -261,17 +274,17 @@ jobs:
           set -euo pipefail
           echo "🎉 HDF5 Release Publication Summary"
           echo "=================================="
-          echo "🏷️  Tag: ${{ inputs.use_tag }}"
-          echo "📁 File Base: ${{ inputs.file_name }}"
-          echo "🎯 Target Directory: ${{ inputs.target_dir }}"
-          echo "🌐 Dry Run: ${{ inputs.dry_run }}"
+          echo "🏷️  Tag: ${USE_TAG}"
+          echo "📁 File Base: ${FILE_NAME}"
+          echo "🎯 Target Directory: ${TARGET_DIR}"
+          echo "🌐 Dry Run: ${DRY_RUN}"
           echo ""
-          if [ "${{ inputs.dry_run }}" == "true" ]; then
+          if [ "$DRY_RUN" == "true" ]; then
             echo "ℹ️  This was a dry run - no files were uploaded to S3"
           else
             echo "✅ Release published successfully!"
-            echo "📍 Main page: s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/index.html"
-            echo "📍 Downloads: s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/downloads"
-            echo "📖 Documentation: s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/documentation/doxygen"
-            echo "📊 Reports: s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/compat_report"
+            echo "📍 Main page: s3://${S3_BUCKET}/${TARGET_PATH}/${TARGET_DIR}/index.html"
+            echo "📍 Downloads: s3://${S3_BUCKET}/${TARGET_PATH}/${TARGET_DIR}/downloads"
+            echo "📖 Documentation: s3://${S3_BUCKET}/${TARGET_PATH}/${TARGET_DIR}/documentation/doxygen"
+            echo "📊 Reports: s3://${S3_BUCKET}/${TARGET_PATH}/${TARGET_DIR}/compat_report"
           fi
