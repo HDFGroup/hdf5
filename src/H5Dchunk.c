@@ -4157,7 +4157,7 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udat
             if ((sc->ops->get_addr)(&idx_info, udata) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query chunk address");
 
-                 /*
+                /*
                  * Cache the information retrieved.
                  *
                  * Note that if we are writing to the dataset in parallel and filters
