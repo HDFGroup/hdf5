@@ -1898,6 +1898,77 @@ public class TestH5D {
         }
     }
 
+    /*
+     * Reading or writing a dataset whose memory type is an array of a fixed base type
+     * must not accumulate open datatype IDs. Write and read such a dataset repeatedly
+     * and verify the library's open-datatype count is unchanged.
+     */
+    @Test
+    public void testH5DArray_datatype_ids_stable() throws Throwable
+    {
+        String dset_name = "ArrayIntData";
+        long dtype_id    = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id   = HDF5Constants.H5I_INVALID_HID;
+        long dset_id     = HDF5Constants.H5I_INVALID_HID;
+        long[] arr_dims  = {3};
+        final int NITER  = 50;
+        int[] wbuf       = {10, 20, 30};
+        int[] rbuf       = new int[3];
+
+        try {
+            dtype_id = H5.H5Tarray_create(HDF5Constants.H5T_NATIVE_INT, 1, arr_dims);
+            assertTrue("testH5DArray_datatype_ids_stable.H5Tarray_create: ", dtype_id >= 0);
+            dspace_id = H5.H5Screate(HDF5Constants.H5S_SCALAR);
+            assertTrue("testH5DArray_datatype_ids_stable.H5Screate: ", dspace_id >= 0);
+            dset_id = H5.H5Dcreate(H5fid, dset_name, dtype_id, dspace_id, HDF5Constants.H5P_DEFAULT,
+                                   HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            assertTrue("testH5DArray_datatype_ids_stable.H5Dcreate: ", dset_id >= 0);
+
+            /*
+             * The leaked IDs are transient datatypes (from H5Tget_super), which are not
+             * attached to any file, so they are only visible through the H5F_OBJ_ALL path
+             * that walks the global datatype ID list. Scoping the count to a single file id
+             * would miss them entirely.
+             */
+            long before = H5.H5Fget_obj_count(HDF5Constants.H5F_OBJ_ALL, HDF5Constants.H5F_OBJ_DATATYPE);
+            assertTrue("testH5DArray_datatype_ids_stable.H5Fget_obj_count(before): ", before >= 0);
+
+            for (int i = 0; i < NITER; i++) {
+                H5.H5Dwrite(dset_id, dtype_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                            HDF5Constants.H5P_DEFAULT, wbuf);
+                H5.H5Dread(dset_id, dtype_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                           HDF5Constants.H5P_DEFAULT, rbuf);
+            }
+
+            long after = H5.H5Fget_obj_count(HDF5Constants.H5F_OBJ_ALL, HDF5Constants.H5F_OBJ_DATATYPE);
+            assertTrue("testH5DArray_datatype_ids_stable.H5Fget_obj_count(after): ", after >= 0);
+
+            assertEquals("testH5DArray_datatype_ids_stable: open datatype count changed after " + NITER +
+                             " write/read cycles on an array datatype",
+                         before, after);
+        }
+        finally {
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dtype_id >= 0)
+                try {
+                    H5.H5Tclose(dtype_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dspace_id >= 0)
+                try {
+                    H5.H5Sclose(dspace_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
     @Test
     public void testH5DArray_string_buffer() throws Throwable
     {

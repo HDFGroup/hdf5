@@ -19,6 +19,7 @@ JUnit version 4.13.2
 .testH5DwriteVL_compound_wrong_member_type
 .testH5Dget_access_plist
 .testH5Dread_vlen_of_nested_compound
+.testH5DArray_datatype_ids_stable
 .testH5Dchunk_iter_all
 .testH5DArray_string_buffer_flat_StringArray
 .testH5Dchunk_iter
@@ -41,5 +42,5 @@ JUnit version 4.13.2
 
 Time:  XXXX
 
-OK (39 tests)
+OK (40 tests)
 
