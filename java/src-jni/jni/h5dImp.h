@@ -305,6 +305,13 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Dchunk_1iter(JNIEnv *, jclass, jlon
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dchunk_iter_all
+ * Signature: (JJ)Lhdf/hdf5lib/structs/H5D_chunk_info_t;
+ */
+JNIEXPORT jobject JNICALL Java_hdf_hdf5lib_H5_H5Dchunk_1iter_1all(JNIEnv *, jclass, jlong, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Diterate
  * Signature: ([BJJLjava/lang/Object;Ljava/lang/Object;)I
  */

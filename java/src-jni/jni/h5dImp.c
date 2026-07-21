@@ -44,6 +44,22 @@ typedef struct _chunk_iter_cb_wrapper {
     jlongArray offsetArray;
 } chunk_iter_cb_wrapper;
 
+/*
+ * Native-only accumulator used by H5Dchunk_iter_all() (see Java_hdf_hdf5lib_H5_H5Dchunk_1iter_1all and
+ * H5D_chunk_iter_all_cb below). Unlike chunk_iter_cb_wrapper, this collects every chunk's info into
+ * plain native buffers during the C-level H5Dchunk_iter() traversal, with zero JNI calls per chunk;
+ * the buffers are only converted to Java arrays once, in bulk, after iteration completes.
+ */
+typedef struct _chunk_iter_all_data {
+    hsize_t *offsets;      /* flattened, capacity * rank */
+    unsigned *filter_masks; /* capacity */
+    haddr_t *addrs;        /* capacity */
+    hsize_t *sizes;        /* capacity */
+    hsize_t  count;
+    hsize_t  capacity;
+    unsigned rank;
+} chunk_iter_all_data;
+
 /********************/
 /* Local Prototypes */
 /********************/
@@ -2185,6 +2201,140 @@ done:
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Dchunk_1iter */
+
+static herr_t
+H5D_chunk_iter_all_cb(const hsize_t *offset, unsigned filter_mask, haddr_t addr, hsize_t size, void *op_data)
+{
+    chunk_iter_all_data *data = (chunk_iter_all_data *)op_data;
+
+    /* Defensive: should not happen, since the caller pre-sizes these buffers using
+     * H5Dget_num_chunks() over the same dataspace this traversal visits. If it ever does (e.g. a
+     * library-internal inconsistency), fail loudly rather than writing out of bounds. */
+    if (data->count >= data->capacity)
+        return FAIL;
+
+    memcpy(data->offsets + data->count * data->rank, offset, (size_t)data->rank * sizeof(hsize_t));
+    data->filter_masks[data->count] = filter_mask;
+    data->addrs[data->count]        = addr;
+    data->sizes[data->count]        = size;
+    data->count++;
+
+    return SUCCEED;
+} /* end H5D_chunk_iter_all_cb */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dchunk_iter_all
+ * Signature: (JJ)Lhdf/hdf5lib/structs/H5D_chunk_info_t;
+ */
+JNIEXPORT jobject JNICALL
+Java_hdf_hdf5lib_H5_H5Dchunk_1iter_1all(JNIEnv *env, jclass clss, jlong dataset_id, jlong dxpl_id)
+{
+    chunk_iter_all_data data            = {NULL, NULL, NULL, NULL, 0, 0, 0};
+    hid_t               space_id        = H5I_INVALID_HID;
+    bool                close_space     = false;
+    int                 ndims;
+    hsize_t             nchunks         = 0;
+    jlongArray          offsetArray     = NULL;
+    jintArray           filterMaskArray = NULL;
+    jlongArray          addrArray       = NULL;
+    jlongArray          sizeArray       = NULL;
+    jint               *tmpInt          = NULL;
+    jvalue              args[5];
+    jobject             ret_obj = NULL;
+    herr_t              status  = FAIL;
+    hsize_t             i;
+
+    UNUSED(clss);
+
+    if ((space_id = H5Dget_space((hid_t)dataset_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+    close_space = true;
+
+    if ((ndims = H5Sget_simple_extent_ndims(space_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+    data.rank = (unsigned)ndims;
+
+    /* Pre-size the accumulation buffers exactly using H5Dget_num_chunks() over the dataset's own
+     * dataspace, per that function's documented requirement (passing H5S_ALL does not currently
+     * work correctly), so H5D_chunk_iter_all_cb never needs to grow anything mid-iteration. */
+    if (H5Dget_num_chunks((hid_t)dataset_id, space_id, &nchunks) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+    data.capacity = nchunks;
+
+    if (nchunks > 0) {
+        if (NULL == (data.offsets = (hsize_t *)malloc((size_t)nchunks * data.rank * sizeof(hsize_t))))
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Dchunk_iter_all: failed to allocate offsets buffer");
+        if (NULL == (data.filter_masks = (unsigned *)malloc((size_t)nchunks * sizeof(unsigned))))
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Dchunk_iter_all: failed to allocate filter_masks buffer");
+        if (NULL == (data.addrs = (haddr_t *)malloc((size_t)nchunks * sizeof(haddr_t))))
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Dchunk_iter_all: failed to allocate addrs buffer");
+        if (NULL == (data.sizes = (hsize_t *)malloc((size_t)nchunks * sizeof(hsize_t))))
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Dchunk_iter_all: failed to allocate sizes buffer");
+    }
+
+    if ((status = H5Dchunk_iter((hid_t)dataset_id, (hid_t)dxpl_id,
+                                (H5D_chunk_iter_op_t)H5D_chunk_iter_all_cb, (void *)&data)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    /* Bulk-convert the native buffers to Java arrays: one allocation and one copy per array,
+     * regardless of chunk count, instead of any per-chunk JNI traffic. */
+    if (NULL == (offsetArray = ENVPTR->NewLongArray(ENVONLY, (jsize)(data.count * data.rank))))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    if (NULL == (filterMaskArray = ENVPTR->NewIntArray(ENVONLY, (jsize)data.count)))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    if (NULL == (addrArray = ENVPTR->NewLongArray(ENVONLY, (jsize)data.count)))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    if (NULL == (sizeArray = ENVPTR->NewLongArray(ENVONLY, (jsize)data.count)))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (data.count > 0) {
+        ENVPTR->SetLongArrayRegion(ENVONLY, offsetArray, 0, (jsize)(data.count * data.rank),
+                                   (const jlong *)data.offsets);
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+        /* filter_masks is `unsigned`; jintArray wants jint. Same width, but reinterpret element-wise
+         * via a staging buffer rather than assuming the two array element types are bulk-copy
+         * compatible. */
+        if (NULL == (tmpInt = (jint *)malloc((size_t)data.count * sizeof(jint))))
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                                   "H5Dchunk_iter_all: failed to allocate filter mask staging buffer");
+        for (i = 0; i < data.count; i++)
+            tmpInt[i] = (jint)data.filter_masks[i];
+        ENVPTR->SetIntArrayRegion(ENVONLY, filterMaskArray, 0, (jsize)data.count, tmpInt);
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+        ENVPTR->SetLongArrayRegion(ENVONLY, addrArray, 0, (jsize)data.count, (const jlong *)data.addrs);
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+        ENVPTR->SetLongArrayRegion(ENVONLY, sizeArray, 0, (jsize)data.count, (const jlong *)data.sizes);
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    }
+
+    args[0].i = (jint)data.rank;
+    args[1].l = offsetArray;
+    args[2].l = filterMaskArray;
+    args[3].l = addrArray;
+    args[4].l = sizeArray;
+
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5D_chunk_info_t", "(I[J[I[J[J)V", args, ret_obj);
+
+done:
+    if (tmpInt)
+        free(tmpInt);
+    if (data.offsets)
+        free(data.offsets);
+    if (data.filter_masks)
+        free(data.filter_masks);
+    if (data.addrs)
+        free(data.addrs);
+    if (data.sizes)
+        free(data.sizes);
+    if (close_space)
+        H5Sclose(space_id);
+
+    return ret_obj;
+} /* end Java_hdf_hdf5lib_H5_H5Dchunk_1iter_1all */
 
 static herr_t
 H5D_iterate_cb(void *elem, hid_t elem_id, unsigned ndim, const hsize_t *point, void *cb_data)
