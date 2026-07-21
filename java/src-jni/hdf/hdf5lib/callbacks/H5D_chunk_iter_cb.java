@@ -22,7 +22,11 @@ public interface H5D_chunk_iter_cb extends H5Callbacks {
      *
      *  application callback for each chunk of a chunked dataset
      *
-     *  @param offset      the logical position of the chunk's first element in units of dataset elements
+     *  @param offset      the logical position of the chunk's first element in units of dataset
+     *                     elements. For performance, the same array object is reused for every chunk
+     *                     in a given H5Dchunk_iter() call; its contents are only valid for the
+     *                     duration of this callback invocation. Copy the values out if they need to
+     *                     be retained after the callback returns.
      *  @param filter_mask  bitmask indicating the filters used when the chunk was written
      *  @param addr        the chunk address in the file, taking the user block (if any) into account
      *  @param size        the chunk size in bytes, 0 if the chunk does not exist

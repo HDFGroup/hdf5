@@ -34,9 +34,14 @@ typedef struct _cb_wrapper {
 } cb_wrapper;
 
 typedef struct _chunk_iter_cb_wrapper {
-    jobject  visit_callback;
-    jobject  op_data;
-    unsigned rank;
+    jobject    visit_callback;
+    jobject    op_data;
+    unsigned   rank;
+    /* Resolved once, before iteration starts, and reused for every chunk instead of being
+     * re-resolved/re-allocated on each callback invocation -- see H5D_chunk_iter_cb. */
+    JNIEnv    *env;
+    jmethodID  mid;
+    jlongArray offsetArray;
 } chunk_iter_cb_wrapper;
 
 /********************/
@@ -2089,43 +2094,31 @@ static herr_t
 H5D_chunk_iter_cb(const hsize_t *offset, unsigned filter_mask, haddr_t addr, hsize_t size, void *cb_data)
 {
     chunk_iter_cb_wrapper *wrapper = (chunk_iter_cb_wrapper *)cb_data;
-    jlongArray             offsetArray;
-    jmethodID              mid;
-    jobject                visit_callback = wrapper->visit_callback;
-    jclass                 cls;
-    JNIEnv                *cbenv  = NULL;
-    jint                   status = FAIL;
-    void                  *op_data = (void *)wrapper->op_data;
-
-    if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
-        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_TRUE);
-        H5_JNI_FATAL_ERROR(CBENVONLY, "H5D_chunk_iter_cb: failed to attach current thread to JVM");
-    }
-
-    if (NULL == (cls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
-        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
-
-    if (NULL == (mid = CBENVPTR->GetMethodID(CBENVONLY, cls, "callback",
-                                             "([JIJJLhdf/hdf5lib/callbacks/H5D_chunk_iter_t;)I")))
-        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+    /* H5Dchunk_iter() runs synchronously on the thread that called into
+     * Java_hdf_hdf5lib_H5_H5Dchunk_1iter -- the JNIEnv captured there is still valid on this same
+     * thread, so there is no new/foreign thread to attach here (unlike a callback that might be
+     * invoked from a library-created worker thread). */
+    JNIEnv    *cbenv          = wrapper->env;
+    jobject    visit_callback = wrapper->visit_callback;
+    void      *op_data        = (void *)wrapper->op_data;
+    jint       status         = FAIL;
 
     if (NULL == offset)
         H5_NULL_ARGUMENT_ERROR(CBENVONLY, "H5D_chunk_iter_cb: offset is NULL");
 
-    if (NULL == (offsetArray = CBENVPTR->NewLongArray(CBENVONLY, (jsize)wrapper->rank)))
-        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
-
-    CBENVPTR->SetLongArrayRegion(CBENVONLY, offsetArray, 0, (jsize)wrapper->rank, (const jlong *)offset);
+    /* Refill the single offset array allocated once in Java_hdf_hdf5lib_H5_H5Dchunk_1iter instead of
+     * allocating a new one per chunk. The array (and its contents) is only valid for the duration of
+     * this callback invocation -- application code must copy the values out if it needs to retain
+     * them past the callback returning. */
+    CBENVPTR->SetLongArrayRegion(CBENVONLY, wrapper->offsetArray, 0, (jsize)wrapper->rank,
+                                 (const jlong *)offset);
     CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
-    status = CBENVPTR->CallIntMethod(CBENVONLY, visit_callback, mid, offsetArray, (jint)filter_mask,
-                                     (jlong)addr, (jlong)size, op_data);
+    status = CBENVPTR->CallIntMethod(CBENVONLY, visit_callback, wrapper->mid, wrapper->offsetArray,
+                                     (jint)filter_mask, (jlong)addr, (jlong)size, op_data);
     CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
 done:
-    if (cbenv)
-        JVMPTR->DetachCurrentThread(JVMPAR);
-
     return (herr_t)status;
 } /* end H5D_chunk_iter_cb */
 
@@ -2138,11 +2131,12 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Dchunk_1iter(JNIEnv *env, jclass clss, jlong dataset_id, jlong dxpl_id,
                                    jobject callback_op, jobject op_data)
 {
-    chunk_iter_cb_wrapper wrapper       = {callback_op, op_data, 0};
-    hid_t                 space_id      = H5I_INVALID_HID;
-    bool                  close_space   = false;
+    chunk_iter_cb_wrapper wrapper     = {callback_op, op_data, 0, NULL, NULL, NULL};
+    hid_t                 space_id    = H5I_INVALID_HID;
+    jclass                cls         = NULL;
+    bool                  close_space = false;
     int                   ndims;
-    herr_t                status        = FAIL;
+    herr_t                status = FAIL;
 
     UNUSED(clss);
 
@@ -2162,11 +2156,30 @@ Java_hdf_hdf5lib_H5_H5Dchunk_1iter(JNIEnv *env, jclass clss, jlong dataset_id, j
         H5_LIBRARY_ERROR(ENVONLY);
     wrapper.rank = (unsigned)ndims;
 
+    /* Resolve the callback method and allocate the (reused) offset array once, up front, rather than
+     * on every chunk inside H5D_chunk_iter_cb -- GetMethodID is a name/signature lookup and
+     * NewLongArray is a JVM heap allocation, neither of which needs to happen per chunk. */
+    wrapper.env = env;
+
+    if (NULL == (cls = ENVPTR->GetObjectClass(ENVONLY, callback_op)))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (NULL == (wrapper.mid = ENVPTR->GetMethodID(ENVONLY, cls, "callback",
+                                                   "([JIJJLhdf/hdf5lib/callbacks/H5D_chunk_iter_t;)I")))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (NULL == (wrapper.offsetArray = ENVPTR->NewLongArray(ENVONLY, (jsize)wrapper.rank)))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
     if ((status = H5Dchunk_iter((hid_t)dataset_id, (hid_t)dxpl_id, (H5D_chunk_iter_op_t)H5D_chunk_iter_cb,
                                 (void *)&wrapper)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
+    if (wrapper.offsetArray)
+        ENVPTR->DeleteLocalRef(ENVONLY, wrapper.offsetArray);
+    if (cls)
+        ENVPTR->DeleteLocalRef(ENVONLY, cls);
     if (close_space)
         H5Sclose(space_id);
 

@@ -66,14 +66,14 @@ public class TestH5DChunkIterPerf {
         _deleteFile(H5_FILE);
     }
 
-    private long createChunkedDataset(int size) throws Exception
+    private long createChunkedDataset(String name, int size) throws Exception
     {
         long dcpl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
         H5.H5Pset_alloc_time(dcpl_id, HDF5Constants.H5D_ALLOC_TIME_EARLY);
         H5.H5Pset_chunk(dcpl_id, 2, new long[] {CHUNK, CHUNK});
 
         long sid = H5.H5Screate_simple(2, new long[] {size, size}, null);
-        long did = H5.H5Dcreate(H5fid, "dset" + size, HDF5Constants.H5T_NATIVE_UINT8, sid,
+        long did = H5.H5Dcreate(H5fid, name, HDF5Constants.H5T_NATIVE_UINT8, sid,
                                 HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
         H5.H5Pclose(dcpl_id);
         H5.H5Sclose(sid);
@@ -115,11 +115,19 @@ public class TestH5DChunkIterPerf {
     @Test
     public void testH5Dchunk_iter_vs_get_chunk_info_perf() throws Exception
     {
+        // Warm up class loading/JIT/native-linkage overhead on a throwaway dataset before timing
+        // anything, so the smallest (and therefore most overhead-sensitive) sweep entry below isn't
+        // dominated by one-time costs that have nothing to do with the two approaches being compared.
+        long warmup_did = createChunkedDataset("warmup", SIZES[0]);
+        countByIterate(warmup_did);
+        countByIndex(warmup_did);
+        H5.H5Dclose(warmup_did);
+
         System.out.println();
         System.out.printf("%10s %14s %14s %10s%n", "size", "iter_ms", "indx_ms", "ratio");
 
         for (int size : SIZES) {
-            long did = createChunkedDataset(size);
+            long did = createChunkedDataset("dset" + size, size);
 
             long t0          = System.nanoTime();
             long count_iter  = countByIterate(did);
