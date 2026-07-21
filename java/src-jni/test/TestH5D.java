@@ -26,6 +26,8 @@ import java.util.List;
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFNativeData;
+import hdf.hdf5lib.callbacks.H5D_chunk_iter_cb;
+import hdf.hdf5lib.callbacks.H5D_chunk_iter_t;
 import hdf.hdf5lib.callbacks.H5D_iterate_cb;
 import hdf.hdf5lib.callbacks.H5D_iterate_t;
 import hdf.hdf5lib.exceptions.HDF5Exception;
@@ -752,6 +754,53 @@ public class TestH5D {
             for (int jndx = 0; jndx < DIM_Y; jndx++)
                 assertTrue("H5.H5Dfill: [" + indx + "," + jndx + "] ",
                            buf_data[(indx * DIM_Y) + jndx] == 254);
+    }
+
+    @Test
+    public void testH5Dchunk_iter()
+    {
+        final int[] chunk_count = {0};
+
+        class H5D_chunk_iter_data implements H5D_chunk_iter_t {
+        }
+
+        class H5D_chunk_iter_callback implements H5D_chunk_iter_cb {
+            public int callback(long[] offset, int filter_mask, long addr, long size, H5D_chunk_iter_t op_data)
+            {
+                assertEquals("testH5Dchunk_iter: offset rank", RANK, offset.length);
+                chunk_count[0]++;
+                return 0;
+            }
+        }
+
+        _createChunkDataset(H5fid, H5dsid, "dset_chunk_iter", HDF5Constants.H5P_DEFAULT);
+
+        int[][] write_dset_data = new int[DIM_X][DIM_Y];
+        for (int indx = 0; indx < DIM_X; indx++)
+            for (int jndx = 0; jndx < DIM_Y; jndx++)
+                write_dset_data[indx][jndx] = indx * jndx - jndx;
+
+        try {
+            H5.H5Dwrite(H5did, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                       HDF5Constants.H5P_DEFAULT, write_dset_data);
+        }
+        catch (Exception err) {
+            err.printStackTrace();
+            fail("H5.H5Dwrite: " + err);
+        }
+
+        H5D_chunk_iter_cb iter_cb   = new H5D_chunk_iter_callback();
+        H5D_chunk_iter_t  iter_data = new H5D_chunk_iter_data();
+        int op_status               = -1;
+        try {
+            op_status = H5.H5Dchunk_iter(H5did, HDF5Constants.H5P_DEFAULT, iter_cb, iter_data);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5.H5Dchunk_iter: " + err);
+        }
+        assertTrue("H5Dchunk_iter ", op_status == 0);
+        assertEquals("testH5Dchunk_iter: chunk count", 2, chunk_count[0]);
     }
 
     @Test

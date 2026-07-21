@@ -298,6 +298,13 @@ JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Dset_1extent(JNIEnv *, jclass, jlon
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dchunk_iter
+ * Signature: (JJLjava/lang/Object;Ljava/lang/Object;)I
+ */
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Dchunk_1iter(JNIEnv *, jclass, jlong, jlong, jobject, jobject);
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Diterate
  * Signature: ([BJJLjava/lang/Object;Ljava/lang/Object;)I
  */
@@ -317,6 +324,22 @@ JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Dflush(JNIEnv *, jclass, jlong);
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Drefresh(JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dget_num_chunks
+ * Signature: (JJ)J
+ */
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Dget_1num_1chunks(JNIEnv *, jclass, jlong, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dget_chunk_info
+ * Signature: (JJJ[J[I[J[J)V
+ */
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Dget_1chunk_1info(JNIEnv *, jclass, jlong, jlong, jlong,
+                                                               jlongArray, jintArray, jlongArray,
+                                                               jlongArray);
 
 #ifdef __cplusplus
 } /* end extern "C" */

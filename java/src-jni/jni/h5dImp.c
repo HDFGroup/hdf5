@@ -33,6 +33,12 @@ typedef struct _cb_wrapper {
     jobject op_data;
 } cb_wrapper;
 
+typedef struct _chunk_iter_cb_wrapper {
+    jobject  visit_callback;
+    jobject  op_data;
+    unsigned rank;
+} chunk_iter_cb_wrapper;
+
 /********************/
 /* Local Prototypes */
 /********************/
@@ -2080,6 +2086,94 @@ done:
 } /* end Java_hdf_hdf5lib_H5_H5Dset_1extent */
 
 static herr_t
+H5D_chunk_iter_cb(const hsize_t *offset, unsigned filter_mask, haddr_t addr, hsize_t size, void *cb_data)
+{
+    chunk_iter_cb_wrapper *wrapper = (chunk_iter_cb_wrapper *)cb_data;
+    jlongArray             offsetArray;
+    jmethodID              mid;
+    jobject                visit_callback = wrapper->visit_callback;
+    jclass                 cls;
+    JNIEnv                *cbenv  = NULL;
+    jint                   status = FAIL;
+    void                  *op_data = (void *)wrapper->op_data;
+
+    if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_TRUE);
+        H5_JNI_FATAL_ERROR(CBENVONLY, "H5D_chunk_iter_cb: failed to attach current thread to JVM");
+    }
+
+    if (NULL == (cls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    if (NULL == (mid = CBENVPTR->GetMethodID(CBENVONLY, cls, "callback",
+                                             "([JIJJLhdf/hdf5lib/callbacks/H5D_chunk_iter_t;)I")))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    if (NULL == offset)
+        H5_NULL_ARGUMENT_ERROR(CBENVONLY, "H5D_chunk_iter_cb: offset is NULL");
+
+    if (NULL == (offsetArray = CBENVPTR->NewLongArray(CBENVONLY, (jsize)wrapper->rank)))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    CBENVPTR->SetLongArrayRegion(CBENVONLY, offsetArray, 0, (jsize)wrapper->rank, (const jlong *)offset);
+    CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    status = CBENVPTR->CallIntMethod(CBENVONLY, visit_callback, mid, offsetArray, (jint)filter_mask,
+                                     (jlong)addr, (jlong)size, op_data);
+    CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+done:
+    if (cbenv)
+        JVMPTR->DetachCurrentThread(JVMPAR);
+
+    return (herr_t)status;
+} /* end H5D_chunk_iter_cb */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dchunk_iter
+ * Signature: (JJLjava/lang/Object;Ljava/lang/Object;)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5Dchunk_1iter(JNIEnv *env, jclass clss, jlong dataset_id, jlong dxpl_id,
+                                   jobject callback_op, jobject op_data)
+{
+    chunk_iter_cb_wrapper wrapper       = {callback_op, op_data, 0};
+    hid_t                 space_id      = H5I_INVALID_HID;
+    bool                  close_space   = false;
+    int                   ndims;
+    herr_t                status        = FAIL;
+
+    UNUSED(clss);
+
+    ENVPTR->GetJavaVM(ENVONLY, &jvm);
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (NULL == callback_op)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dchunk_iter: callback_op is NULL");
+    if (NULL == op_data)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dchunk_iter: op_data is NULL");
+
+    if ((space_id = H5Dget_space((hid_t)dataset_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+    close_space = true;
+
+    if ((ndims = H5Sget_simple_extent_ndims(space_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+    wrapper.rank = (unsigned)ndims;
+
+    if ((status = H5Dchunk_iter((hid_t)dataset_id, (hid_t)dxpl_id, (H5D_chunk_iter_op_t)H5D_chunk_iter_cb,
+                                (void *)&wrapper)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (close_space)
+        H5Sclose(space_id);
+
+    return (jint)status;
+} /* end Java_hdf_hdf5lib_H5_H5Dchunk_1iter */
+
+static herr_t
 H5D_iterate_cb(void *elem, hid_t elem_id, unsigned ndim, const hsize_t *point, void *cb_data)
 {
     cb_wrapper *wrapper = (cb_wrapper *)cb_data;
@@ -2212,6 +2306,96 @@ Java_hdf_hdf5lib_H5_H5Drefresh(JNIEnv *env, jclass clss, jlong loc_id)
 done:
     return;
 }
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dget_num_chunks
+ * Signature: (JJ)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5_H5Dget_1num_1chunks(JNIEnv *env, jclass clss, jlong dataset_id, jlong fspace_id)
+{
+    hsize_t nchunks = 0;
+    herr_t  status  = FAIL;
+
+    UNUSED(clss);
+
+    if ((status = H5Dget_num_chunks((hid_t)dataset_id, (hid_t)fspace_id, &nchunks)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return (jlong)nchunks;
+} /* end Java_hdf_hdf5lib_H5_H5Dget_1num_1chunks */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dget_chunk_info
+ * Signature: (JJJ[J[I[J[J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Dget_1chunk_1info(JNIEnv *env, jclass clss, jlong dataset_id, jlong fspace_id,
+                                        jlong chk_idx, jlongArray offset, jintArray filter_mask,
+                                        jlongArray addr, jlongArray size)
+{
+    jboolean isCopy;
+    jlong   *offsetArray    = NULL;
+    jint    *maskArray      = NULL;
+    jlong   *addrArray      = NULL;
+    jlong   *sizeArray      = NULL;
+    hsize_t *offsetBuf      = NULL;
+    hsize_t  size_val       = 0;
+    haddr_t  addr_val       = HADDR_UNDEF;
+    unsigned filter_mask_val = 0;
+    jsize    rank;
+    jsize    i;
+    herr_t   status = FAIL;
+
+    UNUSED(clss);
+
+    if (NULL == offset)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dget_chunk_info: offset is NULL");
+    if (NULL == filter_mask)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dget_chunk_info: filter_mask is NULL");
+    if (NULL == addr)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dget_chunk_info: addr is NULL");
+    if (NULL == size)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dget_chunk_info: size is NULL");
+
+    if ((rank = ENVPTR->GetArrayLength(ENVONLY, offset)) < 0)
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+
+    if (NULL == (offsetBuf = (hsize_t *)malloc((size_t)rank * sizeof(hsize_t))))
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Dget_chunk_info: failed to allocate offset buffer");
+
+    if ((status = H5Dget_chunk_info((hid_t)dataset_id, (hid_t)fspace_id, (hsize_t)chk_idx, offsetBuf,
+                                    &filter_mask_val, &addr_val, &size_val)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    PIN_LONG_ARRAY(ENVONLY, offset, offsetArray, &isCopy, "H5Dget_chunk_info: offset not pinned");
+    for (i = 0; i < rank; i++)
+        offsetArray[i] = (jlong)offsetBuf[i];
+
+    PIN_INT_ARRAY(ENVONLY, filter_mask, maskArray, &isCopy, "H5Dget_chunk_info: filter_mask not pinned");
+    maskArray[0] = (jint)filter_mask_val;
+
+    PIN_LONG_ARRAY(ENVONLY, addr, addrArray, &isCopy, "H5Dget_chunk_info: addr not pinned");
+    addrArray[0] = (jlong)addr_val;
+
+    PIN_LONG_ARRAY(ENVONLY, size, sizeArray, &isCopy, "H5Dget_chunk_info: size not pinned");
+    sizeArray[0] = (jlong)size_val;
+
+done:
+    if (offsetBuf)
+        free(offsetBuf);
+    if (sizeArray)
+        UNPIN_LONG_ARRAY(ENVONLY, size, sizeArray, (status < 0) ? JNI_ABORT : 0);
+    if (addrArray)
+        UNPIN_LONG_ARRAY(ENVONLY, addr, addrArray, (status < 0) ? JNI_ABORT : 0);
+    if (maskArray)
+        UNPIN_INT_ARRAY(ENVONLY, filter_mask, maskArray, (status < 0) ? JNI_ABORT : 0);
+    if (offsetArray)
+        UNPIN_LONG_ARRAY(ENVONLY, offset, offsetArray, (status < 0) ? JNI_ABORT : 0);
+} /* end Java_hdf_hdf5lib_H5_H5Dget_1chunk_1info */
 
 #ifdef __cplusplus
 } /* end extern "C" */

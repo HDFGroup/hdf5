@@ -19,6 +19,8 @@ import java.util.LinkedHashSet;
 
 import hdf.hdf5lib.callbacks.H5A_iterate_cb;
 import hdf.hdf5lib.callbacks.H5A_iterate_t;
+import hdf.hdf5lib.callbacks.H5D_chunk_iter_cb;
+import hdf.hdf5lib.callbacks.H5D_chunk_iter_t;
 import hdf.hdf5lib.callbacks.H5D_iterate_cb;
 import hdf.hdf5lib.callbacks.H5D_iterate_t;
 import hdf.hdf5lib.callbacks.H5E_walk_cb;
@@ -2780,6 +2782,33 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5D
      *
+     * H5Dchunk_iter iterates over all chunks in the dataset, calling the user supplied callback with the
+     * details of the chunk and the supplied context op_data.
+     *
+     * @param dataset_id
+     *            IN: Identifier of the dataset to query.
+     * @param dxpl_id
+     *            IN: Identifier of a transfer property list.
+     * @param op
+     *            IN: Callback function to operate on each chunk.
+     * @param op_data
+     *            IN/OUT: Pointer to any user-defined data for use by operator function.
+     *
+     * @return returns the return value of the first operator that returns a positive value, or zero if all
+     *            chunks were processed with no operator returning non-zero.
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     * @exception NullPointerException
+     *            op is null.
+     **/
+    public synchronized static native int H5Dchunk_iter(long dataset_id, long dxpl_id, H5D_chunk_iter_cb op,
+                                                        H5D_chunk_iter_t op_data)
+        throws HDF5LibraryException, NullPointerException;
+
+    /**
+     * @ingroup JH5D
+     *
      * H5Diterate iterates over all the data elements in the memory buffer buf, executing the callback
      * function operator once for each such data element.
      *
@@ -4243,6 +4272,59 @@ public class H5 implements java.io.Serializable {
      *            Error from the HDF5 Library.
      **/
     public synchronized static native void H5Drefresh(long dset_id) throws HDF5LibraryException;
+
+    /**
+     * @ingroup JH5D
+     *
+     * H5Dget_num_chunks retrieves the number of chunks that have a nonempty intersection with the
+     * selection specified by fspace_id.
+     *
+     * @param dataset_id
+     *            IN: Identifier of the dataset to query.
+     * @param fspace_id
+     *            IN: File dataspace selection identifier.
+     *
+     * @return the number of chunks
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public synchronized static native long H5Dget_num_chunks(long dataset_id, long fspace_id)
+        throws HDF5LibraryException;
+
+    /**
+     * @ingroup JH5D
+     *
+     * H5Dget_chunk_info retrieves the offset, filter mask, address, and size for the chunk specified
+     * by its index chk_idx within the selection specified by fspace_id.
+     *
+     * @param dataset_id
+     *            IN: Identifier of the dataset to query.
+     * @param fspace_id
+     *            IN: File dataspace selection identifier.
+     * @param chk_idx
+     *            IN: Index of the chunk.
+     * @param offset
+     *            OUT: Array of size equal to the dataset's rank; filled with the logical position of
+     *            the chunk's first element in each dimension.
+     * @param filter_mask
+     *            OUT: Array of size one; filled with the bitmask indicating the filters used when the
+     *            chunk was written.
+     * @param addr
+     *            OUT: Array of size one; filled with the chunk address in the file.
+     * @param size
+     *            OUT: Array of size one; filled with the chunk size in bytes, 0 if the chunk does not
+     *            exist.
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     * @exception NullPointerException
+     *            an output array is null.
+     **/
+    public synchronized static native void H5Dget_chunk_info(long dataset_id, long fspace_id, long chk_idx,
+                                                             long[] offset, int[] filter_mask, long[] addr,
+                                                             long[] size)
+        throws HDF5LibraryException, NullPointerException;
 
     // /////// unimplemented ////////
     // herr_t H5Ddebug(hid_t dset_id);
