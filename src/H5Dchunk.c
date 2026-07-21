@@ -4814,15 +4814,17 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                 size_t chunk_nbytes; /* Length of the chunk in memory */
                 size_t buf_alloc;    /* [Re-]allocated chunk buffer size */
 
-                /* Assign above variables and check for overflow */
+                /* Assign chunk_nbytes and check for overflow */
                 H5_CHECKED_ASSIGN(chunk_nbytes, size_t, chunk_disk_size, hsize_t);
-                H5_CHECKED_ASSIGN(buf_alloc, size_t, chunk_disk_size, hsize_t);
 
-                /* Ideally we should allocate a buffer at least as large as chunk_size, to give the filter the
-                 * opportunity to avoid doing a realloc when uncompressing. This causes problems now, however,
-                 * and needs more investigation. -NAF */
+                /* Allocate at MAX(chunk_disk_size, chunk_size) so the buffer is
+                 * large enough for the uncompressed output before filters run.
+                 * This ensures *buf_size accurately reflects the allocation that
+                 * filters receive, avoiding a buffer overflow if any filter writes
+                 * up to *buf_size bytes into *buf.  For incompressible chunks
+                 * chunk_disk_size >= chunk_size so buf_alloc stays at chunk_nbytes. */
+                buf_alloc = (chunk_nbytes < chunk_size) ? chunk_size : chunk_nbytes;
 
-                /* Allocate chunk buffer */
                 if (NULL ==
                     (chunk = H5D__chunk_mem_alloc(buf_alloc, (udata->new_unfilt_chunk ? old_pline : pline))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
