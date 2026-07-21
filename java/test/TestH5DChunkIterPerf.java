@@ -77,8 +77,8 @@ public class TestH5DChunkIterPerf {
         H5.H5Pset_chunk(dcpl_id, 2, new long[] {CHUNK, CHUNK});
 
         long sid = H5.H5Screate_simple(2, new long[] {size, size}, null);
-        long did = H5.H5Dcreate(H5fid, name, HDF5Constants.H5T_NATIVE_UINT8, sid,
-                                HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
+        long did = H5.H5Dcreate(H5fid, name, HDF5Constants.H5T_NATIVE_UINT8, sid, HDF5Constants.H5P_DEFAULT,
+                                dcpl_id, HDF5Constants.H5P_DEFAULT);
         H5.H5Pclose(dcpl_id);
         H5.H5Sclose(sid);
         return did;
@@ -87,8 +87,7 @@ public class TestH5DChunkIterPerf {
     private long countByIterate(long did) throws Exception
     {
         final long[] count = {0};
-        class Data implements H5D_chunk_iter_t {
-        }
+        class Data implements H5D_chunk_iter_t {}
         H5D_chunk_iter_cb cb = new H5D_chunk_iter_cb() {
             public int apply(MemorySegment offset, int filter_mask, long addr, long size,
                              MemorySegment op_data)
@@ -142,9 +141,8 @@ public class TestH5DChunkIterPerf {
             MemorySegment size_segment        = arena.allocate(ValueLayout.JAVA_LONG, 1);
 
             for (long i = 0; i < nchunks; i++)
-                org.hdfgroup.javahdf5.hdf5_h.H5Dget_chunk_info(did, sid, i, offset_segment,
-                                                               filter_mask_segment, addr_segment,
-                                                               size_segment);
+                org.hdfgroup.javahdf5.hdf5_h.H5Dget_chunk_info(
+                    did, sid, i, offset_segment, filter_mask_segment, addr_segment, size_segment);
         }
 
         H5.H5Sclose(sid);

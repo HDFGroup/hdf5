@@ -3976,7 +3976,7 @@ public class H5 implements java.io.Serializable {
         throws HDF5LibraryException
     {
         long space_id = H5Dget_space(dataset_id);
-        int  rank;
+        int rank;
         long nchunks;
         try {
             rank = H5Sget_simple_extent_ndims(space_id);
@@ -3988,10 +3988,10 @@ public class H5 implements java.io.Serializable {
             H5Sclose(space_id);
         }
 
-        final int    finalRank = rank;
-        final long   finalNchunks = nchunks;
-        final long[] count        = {0};
-        int          status;
+        final int finalRank     = rank;
+        final long finalNchunks = nchunks;
+        final long[] count      = {0};
+        int status;
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment offsetsSeg =
@@ -6189,13 +6189,14 @@ public class H5 implements java.io.Serializable {
             MemorySegment addr_segment        = arena.allocate(ValueLayout.JAVA_LONG, 1);
             MemorySegment size_segment        = arena.allocate(ValueLayout.JAVA_LONG, 1);
 
-            if (org.hdfgroup.javahdf5.hdf5_h.H5Dget_chunk_info(dataset_id, fspace_id, chk_idx,
-                                                               offset_segment, filter_mask_segment,
-                                                               addr_segment, size_segment) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Dget_chunk_info(dataset_id, fspace_id, chk_idx, offset_segment,
+                                                               filter_mask_segment, addr_segment,
+                                                               size_segment) < 0)
                 h5libraryError();
 
             for (int i = 0; i < offset.length; i++)
-                offset[i] = offset_segment.get(ValueLayout.JAVA_LONG, (long)i * ValueLayout.JAVA_LONG.byteSize());
+                offset[i] =
+                    offset_segment.get(ValueLayout.JAVA_LONG, (long)i * ValueLayout.JAVA_LONG.byteSize());
             filter_mask[0] = filter_mask_segment.get(ValueLayout.JAVA_INT, 0);
             addr[0]        = addr_segment.get(ValueLayout.JAVA_LONG, 0);
             size[0]        = size_segment.get(ValueLayout.JAVA_LONG, 0);
@@ -6242,9 +6243,8 @@ public class H5 implements java.io.Serializable {
             MemorySegment addr_segment        = arena.allocate(ValueLayout.JAVA_LONG, 1);
             MemorySegment size_segment        = arena.allocate(ValueLayout.JAVA_LONG, 1);
 
-            if (org.hdfgroup.javahdf5.hdf5_h.H5Dget_chunk_info_by_coord(dataset_id, offset_segment,
-                                                                        filter_mask_segment, addr_segment,
-                                                                        size_segment) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Dget_chunk_info_by_coord(
+                    dataset_id, offset_segment, filter_mask_segment, addr_segment, size_segment) < 0)
                 h5libraryError();
 
             filter_mask[0] = filter_mask_segment.get(ValueLayout.JAVA_INT, 0);
@@ -6404,9 +6404,8 @@ public class H5 implements java.io.Serializable {
             MemorySegment buf_size_segment = arena.allocate(ValueLayout.JAVA_LONG, 1);
             buf_size_segment.set(ValueLayout.JAVA_LONG, 0, (long)buf.length);
 
-            if (org.hdfgroup.javahdf5.hdf5_h.H5Dread_chunk2(dataset_id, dxpl_id, offset_segment,
-                                                            filters_segment, buf_segment,
-                                                            buf_size_segment) < 0)
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Dread_chunk2(
+                    dataset_id, dxpl_id, offset_segment, filters_segment, buf_segment, buf_size_segment) < 0)
                 h5libraryError();
 
             long actual_size = buf_size_segment.get(ValueLayout.JAVA_LONG, 0);
