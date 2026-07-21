@@ -23,6 +23,7 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.callbacks.H5D_chunk_iter_cb;
 import hdf.hdf5lib.callbacks.H5D_chunk_iter_t;
+import hdf.hdf5lib.structs.H5D_chunk_info_t;
 
 import org.junit.After;
 import org.junit.Before;
@@ -100,6 +101,12 @@ public class TestH5DChunkIterPerf {
         return count[0];
     }
 
+    private long countByIterateAll(long did) throws Exception
+    {
+        H5D_chunk_info_t info = H5.H5Dchunk_iter_all(did, HDF5Constants.H5P_DEFAULT);
+        return info.getNumChunks();
+    }
+
     private long countByIndex(long did) throws Exception
     {
         long sid          = H5.H5Dget_space(did);
@@ -152,13 +159,14 @@ public class TestH5DChunkIterPerf {
         // dominated by one-time costs that have nothing to do with the two approaches being compared.
         long warmup_did = createChunkedDataset("warmup", SIZES[0]);
         countByIterate(warmup_did);
+        countByIterateAll(warmup_did);
         countByIndex(warmup_did);
         countByIndexSharedArena(warmup_did);
         H5.H5Dclose(warmup_did);
 
         System.out.println();
-        System.out.printf("%10s %14s %14s %16s %10s %16s%n", "size", "iter_ms", "indx_ms", "indx_shared_ms",
-                          "ratio", "shared_ratio");
+        System.out.printf("%10s %14s %14s %14s %16s %10s %16s%n", "size", "iter_ms", "all_ms", "indx_ms",
+                          "indx_shared_ms", "ratio_all", "shared_ratio");
 
         for (int size : SIZES) {
             long did = createChunkedDataset("dset" + size, size);
@@ -166,24 +174,28 @@ public class TestH5DChunkIterPerf {
             long t0                 = System.nanoTime();
             long count_iter         = countByIterate(did);
             long t1                 = System.nanoTime();
-            long count_index        = countByIndex(did);
+            long count_all          = countByIterateAll(did);
             long t2                 = System.nanoTime();
-            long count_index_shared = countByIndexSharedArena(did);
+            long count_index        = countByIndex(did);
             long t3                 = System.nanoTime();
+            long count_index_shared = countByIndexSharedArena(did);
+            long t4                 = System.nanoTime();
 
             H5.H5Dclose(did);
 
             double iter_ms        = (t1 - t0) / 1.0e6;
-            double indx_ms        = (t2 - t1) / 1.0e6;
-            double indx_shared_ms = (t3 - t2) / 1.0e6;
+            double all_ms         = (t2 - t1) / 1.0e6;
+            double indx_ms        = (t3 - t2) / 1.0e6;
+            double indx_shared_ms = (t4 - t3) / 1.0e6;
 
             assertEquals("chunk counts must agree for size " + size, count_iter, count_index);
+            assertEquals("chunk counts must agree for size " + size, count_iter, count_all);
             assertEquals("chunk counts must agree for size " + size, count_iter, count_index_shared);
             long chunks_per_dim = (size + CHUNK - 1) / CHUNK;
             assertEquals("chunk count for size " + size, chunks_per_dim * chunks_per_dim, count_iter);
 
-            System.out.printf("%10d %14.3f %14.3f %16.3f %10.3f %16.3f%n", size, iter_ms, indx_ms,
-                              indx_shared_ms, indx_ms / iter_ms, indx_shared_ms / iter_ms);
+            System.out.printf("%10d %14.3f %14.3f %14.3f %16.3f %10.3f %16.3f%n", size, iter_ms, all_ms,
+                              indx_ms, indx_shared_ms, indx_ms / all_ms, indx_shared_ms / iter_ms);
         }
     }
 }

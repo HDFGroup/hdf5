@@ -87,6 +87,7 @@ set (HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES
     structs/H5_ih_info_t.java
     structs/H5A_info_t.java
     structs/H5AC_cache_config_t.java
+    structs/H5D_chunk_info_t.java
     structs/H5E_error2_t.java
     structs/H5F_info2_t.java
     structs/H5G_info_t.java

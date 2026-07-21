@@ -69,6 +69,7 @@ import hdf.hdf5lib.exceptions.HDF5ResourceUnavailableException;
 import hdf.hdf5lib.exceptions.HDF5SymbolTableException;
 // import hdf.hdf5lib.structs.H5AC_cache_config_t;
 // import hdf.hdf5lib.structs.H5A_info_t;
+import hdf.hdf5lib.structs.H5D_chunk_info_t;
 // import hdf.hdf5lib.structs.H5E_error2_t;
 // import hdf.hdf5lib.structs.H5FD_hdfs_fapl_t;
 import hdf.hdf5lib.structs.H5FD_ros3_fapl_t;
@@ -3942,6 +3943,108 @@ public class H5 implements java.io.Serializable {
                 h5libraryError();
         }
         return status;
+    }
+
+    /**
+     * @ingroup JH5D
+     *
+     * H5Dchunk_iter_all is a bulk convenience form of H5Dchunk_iter(): rather than requiring the
+     * caller to author a callback, it collects every chunk's offset, filter mask, address, and size
+     * and returns them all at once as a single H5D_chunk_info_t.
+     *
+     * Note: unlike the JNI implementation of this method, this FFM implementation is NOT faster than
+     * H5Dchunk_iter() -- it is measurably slower at large chunk counts in local measurements. The C
+     * library still invokes a callback once per chunk, and in the FFM binding that callback must be
+     * an upcall stub that crosses back into the JVM on every invocation; there is no way to give the
+     * native library a callback that runs without any JVM involvement using java.lang.foreign alone.
+     * This method still does that same per-chunk upcall work, plus the extra cost of copying each
+     * chunk's data into the accumulating buffers, so it is offered purely for a simpler call site
+     * (no callback to write), not as a performance optimization. If per-chunk callback overhead is a
+     * bottleneck, prefer the JNI implementation of the Java bindings.
+     *
+     * @param dataset_id
+     *            IN: Identifier of the dataset to query.
+     * @param dxpl_id
+     *            IN: Identifier of a transfer property list.
+     *
+     * @return an H5D_chunk_info_t holding the offset, filter mask, address, and size of every chunk.
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public static H5D_chunk_info_t H5Dchunk_iter_all(long dataset_id, long dxpl_id)
+        throws HDF5LibraryException
+    {
+        long space_id = H5Dget_space(dataset_id);
+        int  rank;
+        long nchunks;
+        try {
+            rank = H5Sget_simple_extent_ndims(space_id);
+            if (rank < 0)
+                h5libraryError();
+            nchunks = H5Dget_num_chunks(dataset_id, space_id);
+        }
+        finally {
+            H5Sclose(space_id);
+        }
+
+        final int    finalRank = rank;
+        final long   finalNchunks = nchunks;
+        final long[] count        = {0};
+        int          status;
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment offsetsSeg =
+                arena.allocate(ValueLayout.JAVA_LONG, Math.max(finalNchunks * finalRank, 1));
+            MemorySegment filterMasksSeg = arena.allocate(ValueLayout.JAVA_INT, Math.max(finalNchunks, 1));
+            MemorySegment addrsSeg       = arena.allocate(ValueLayout.JAVA_LONG, Math.max(finalNchunks, 1));
+            MemorySegment sizesSeg       = arena.allocate(ValueLayout.JAVA_LONG, Math.max(finalNchunks, 1));
+
+            hdf.hdf5lib.callbacks.H5D_chunk_iter_cb cb = new hdf.hdf5lib.callbacks.H5D_chunk_iter_cb() {
+                public int apply(MemorySegment offset, int filter_mask, long addr, long size,
+                                 MemorySegment op_data)
+                {
+                    /* Defensive: should not happen, since the buffers above are pre-sized using
+                     * H5Dget_num_chunks() over the same dataspace this traversal visits. If it ever
+                     * does, fail loudly rather than writing out of bounds. */
+                    if (count[0] >= finalNchunks)
+                        return -1;
+
+                    MemorySegment sized_offset =
+                        offset.reinterpret((long)finalRank * ValueLayout.JAVA_LONG.byteSize());
+                    MemorySegment.copy(sized_offset, 0, offsetsSeg,
+                                       count[0] * finalRank * ValueLayout.JAVA_LONG.byteSize(),
+                                       (long)finalRank * ValueLayout.JAVA_LONG.byteSize());
+                    filterMasksSeg.setAtIndex(ValueLayout.JAVA_INT, count[0], filter_mask);
+                    addrsSeg.setAtIndex(ValueLayout.JAVA_LONG, count[0], addr);
+                    sizesSeg.setAtIndex(ValueLayout.JAVA_LONG, count[0], size);
+                    count[0]++;
+                    return 0;
+                }
+            };
+
+            MemorySegment op_segment = H5D_chunk_iter_op_t.allocate(cb, arena);
+            MemorySegment op_data_segment =
+                Linker.nativeLinker().upcallStub(H5Dchunk_iter$handle(), H5Dchunk_iter$descriptor(), arena);
+
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Dchunk_iter(dataset_id, dxpl_id, op_segment,
+                                                                     op_data_segment)) < 0)
+                h5libraryError();
+
+            long actualCount    = count[0];
+            long[] offsetArr    = new long[(int)(actualCount * finalRank)];
+            int[] filterMaskArr = new int[(int)actualCount];
+            long[] addrArr      = new long[(int)actualCount];
+            long[] sizeArr      = new long[(int)actualCount];
+
+            MemorySegment.copy(offsetsSeg, ValueLayout.JAVA_LONG, 0L, offsetArr, 0, offsetArr.length);
+            MemorySegment.copy(filterMasksSeg, ValueLayout.JAVA_INT, 0L, filterMaskArr, 0,
+                               filterMaskArr.length);
+            MemorySegment.copy(addrsSeg, ValueLayout.JAVA_LONG, 0L, addrArr, 0, addrArr.length);
+            MemorySegment.copy(sizesSeg, ValueLayout.JAVA_LONG, 0L, sizeArr, 0, sizeArr.length);
+
+            return new H5D_chunk_info_t(finalRank, offsetArr, filterMaskArr, addrArr, sizeArr);
+        }
     }
 
     /**
