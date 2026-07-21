@@ -3903,6 +3903,50 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5D
      *
+     * H5Dchunk_iter iterates over all chunks in the dataset, calling the user supplied callback with the
+     * details of the chunk and the supplied context op_data.
+     *
+     * @param dataset_id
+     *            IN: Identifier of the dataset to query.
+     * @param dxpl_id
+     *            IN: Identifier of a transfer property list.
+     * @param op
+     *            IN: Callback function to operate on each chunk.
+     * @param op_data
+     *            IN/OUT: Pointer to any user-defined data for use by operator function.
+     *
+     * @return returns the return value of the first operator that returns a positive value, or zero if all
+     *            chunks were processed with no operator returning non-zero.
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     * @exception NullPointerException
+     *            op is null.
+     **/
+    public static int H5Dchunk_iter(long dataset_id, long dxpl_id, hdf.hdf5lib.callbacks.H5D_chunk_iter_cb op,
+                                    hdf.hdf5lib.callbacks.H5D_chunk_iter_t op_data)
+        throws HDF5LibraryException, NullPointerException
+    {
+        if (op == null) {
+            throw new NullPointerException("op is null");
+        }
+
+        int status = -1;
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment op_segment = H5D_chunk_iter_op_t.allocate(op, arena);
+            MemorySegment op_data_segment =
+                Linker.nativeLinker().upcallStub(H5Dchunk_iter$handle(), H5Dchunk_iter$descriptor(), arena);
+
+            if ((status = org.hdfgroup.javahdf5.hdf5_h.H5Dchunk_iter(dataset_id, dxpl_id, op_segment,
+                                                                     op_data_segment)) < 0)
+                h5libraryError();
+        }
+        return status;
+    }
+
+    /**
+     * @ingroup JH5D
+     *
      * H5Diterate iterates over all the data elements in the memory buffer buf, executing the callback
      * function operator once for each such data element.
      *
@@ -5967,6 +6011,91 @@ public class H5 implements java.io.Serializable {
     {
         if (org.hdfgroup.javahdf5.hdf5_h.H5Drefresh(dataset_id) < 0) {
             h5libraryError();
+        }
+    }
+
+    /**
+     * @ingroup JH5D
+     *
+     * H5Dget_num_chunks retrieves the number of chunks that have a nonempty intersection with the
+     * selection specified by fspace_id.
+     *
+     * @param dataset_id
+     *            IN: Identifier of the dataset to query.
+     * @param fspace_id
+     *            IN: File dataspace selection identifier.
+     *
+     * @return the number of chunks
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public static long H5Dget_num_chunks(long dataset_id, long fspace_id) throws HDF5LibraryException
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment nchunks_segment = arena.allocate(ValueLayout.JAVA_LONG, 1);
+
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Dget_num_chunks(dataset_id, fspace_id, nchunks_segment) < 0)
+                h5libraryError();
+
+            return nchunks_segment.get(ValueLayout.JAVA_LONG, 0);
+        }
+    }
+
+    /**
+     * @ingroup JH5D
+     *
+     * H5Dget_chunk_info retrieves the offset, filter mask, address, and size for the chunk specified
+     * by its index chk_idx within the selection specified by fspace_id.
+     *
+     * @param dataset_id
+     *            IN: Identifier of the dataset to query.
+     * @param fspace_id
+     *            IN: File dataspace selection identifier.
+     * @param chk_idx
+     *            IN: Index of the chunk.
+     * @param offset
+     *            OUT: Array of size equal to the dataset's rank; filled with the logical position of
+     *            the chunk's first element in each dimension.
+     * @param filter_mask
+     *            OUT: Array of size one; filled with the bitmask indicating the filters used when the
+     *            chunk was written.
+     * @param addr
+     *            OUT: Array of size one; filled with the chunk address in the file.
+     * @param size
+     *            OUT: Array of size one; filled with the chunk size in bytes, 0 if the chunk does not
+     *            exist.
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     * @exception NullPointerException
+     *            an output array is null.
+     **/
+    public static void H5Dget_chunk_info(long dataset_id, long fspace_id, long chk_idx, long[] offset,
+                                         int[] filter_mask, long[] addr, long[] size)
+        throws HDF5LibraryException, NullPointerException
+    {
+        if (offset == null || filter_mask == null || addr == null || size == null || offset.length < 1 ||
+            filter_mask.length < 1 || addr.length < 1 || size.length < 1) {
+            throw new NullPointerException("one or more arrays are null or have insufficient length");
+        }
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment offset_segment      = arena.allocate(ValueLayout.JAVA_LONG, offset.length);
+            MemorySegment filter_mask_segment = arena.allocate(ValueLayout.JAVA_INT, 1);
+            MemorySegment addr_segment        = arena.allocate(ValueLayout.JAVA_LONG, 1);
+            MemorySegment size_segment        = arena.allocate(ValueLayout.JAVA_LONG, 1);
+
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Dget_chunk_info(dataset_id, fspace_id, chk_idx,
+                                                               offset_segment, filter_mask_segment,
+                                                               addr_segment, size_segment) < 0)
+                h5libraryError();
+
+            for (int i = 0; i < offset.length; i++)
+                offset[i] = offset_segment.get(ValueLayout.JAVA_LONG, (long)i * ValueLayout.JAVA_LONG.byteSize());
+            filter_mask[0] = filter_mask_segment.get(ValueLayout.JAVA_INT, 0);
+            addr[0]        = addr_segment.get(ValueLayout.JAVA_LONG, 0);
+            size[0]        = size_segment.get(ValueLayout.JAVA_LONG, 0);
         }
     }
 
