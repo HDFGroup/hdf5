@@ -167,6 +167,31 @@ Java_hdf_hdf5lib_HDF5Constants_H5D_1CHUNK_1IDX_1BTREE(JNIEnv *env, jclass cls)
     return H5D_CHUNK_IDX_BTREE;
 }
 JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_HDF5Constants_H5D_1CHUNK_1IDX_1SINGLE(JNIEnv *env, jclass cls)
+{
+    return H5D_CHUNK_IDX_SINGLE;
+}
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_HDF5Constants_H5D_1CHUNK_1IDX_1NONE(JNIEnv *env, jclass cls)
+{
+    return H5D_CHUNK_IDX_NONE;
+}
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_HDF5Constants_H5D_1CHUNK_1IDX_1FARRAY(JNIEnv *env, jclass cls)
+{
+    return H5D_CHUNK_IDX_FARRAY;
+}
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_HDF5Constants_H5D_1CHUNK_1IDX_1EARRAY(JNIEnv *env, jclass cls)
+{
+    return H5D_CHUNK_IDX_EARRAY;
+}
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_HDF5Constants_H5D_1CHUNK_1IDX_1BT2(JNIEnv *env, jclass cls)
+{
+    return H5D_CHUNK_IDX_BT2;
+}
+JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5D_1ALLOC_1TIME_1DEFAULT(JNIEnv *env, jclass cls)
 {
     return H5D_ALLOC_TIME_DEFAULT;

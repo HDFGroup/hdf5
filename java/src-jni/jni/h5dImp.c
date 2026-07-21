@@ -2397,6 +2397,262 @@ done:
         UNPIN_LONG_ARRAY(ENVONLY, offset, offsetArray, (status < 0) ? JNI_ABORT : 0);
 } /* end Java_hdf_hdf5lib_H5_H5Dget_1chunk_1info */
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dget_chunk_info_by_coord
+ * Signature: (J[J[I[J[J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Dget_1chunk_1info_1by_1coord(JNIEnv *env, jclass clss, jlong dataset_id,
+                                                    jlongArray offset, jintArray filter_mask,
+                                                    jlongArray addr, jlongArray size)
+{
+    jboolean isCopy;
+    jlong   *offsetArray     = NULL;
+    jint    *maskArray       = NULL;
+    jlong   *addrArray       = NULL;
+    jlong   *sizeArray       = NULL;
+    hsize_t *offsetBuf       = NULL;
+    hsize_t  size_val        = 0;
+    haddr_t  addr_val        = HADDR_UNDEF;
+    unsigned filter_mask_val = 0;
+    jsize    rank;
+    jsize    i;
+    herr_t   status = FAIL;
+
+    UNUSED(clss);
+
+    if (NULL == offset)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dget_chunk_info_by_coord: offset is NULL");
+    if (NULL == filter_mask)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dget_chunk_info_by_coord: filter_mask is NULL");
+    if (NULL == addr)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dget_chunk_info_by_coord: addr is NULL");
+    if (NULL == size)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dget_chunk_info_by_coord: size is NULL");
+
+    if ((rank = ENVPTR->GetArrayLength(ENVONLY, offset)) < 0)
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+
+    PIN_LONG_ARRAY(ENVONLY, offset, offsetArray, &isCopy,
+                   "H5Dget_chunk_info_by_coord: offset not pinned");
+
+    if (NULL == (offsetBuf = (hsize_t *)malloc((size_t)rank * sizeof(hsize_t))))
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Dget_chunk_info_by_coord: failed to allocate offset buffer");
+
+    for (i = 0; i < rank; i++)
+        offsetBuf[i] = (hsize_t)offsetArray[i];
+
+    if ((status = H5Dget_chunk_info_by_coord((hid_t)dataset_id, offsetBuf, &filter_mask_val, &addr_val,
+                                             &size_val)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    PIN_INT_ARRAY(ENVONLY, filter_mask, maskArray, &isCopy,
+                  "H5Dget_chunk_info_by_coord: filter_mask not pinned");
+    maskArray[0] = (jint)filter_mask_val;
+
+    PIN_LONG_ARRAY(ENVONLY, addr, addrArray, &isCopy, "H5Dget_chunk_info_by_coord: addr not pinned");
+    addrArray[0] = (jlong)addr_val;
+
+    PIN_LONG_ARRAY(ENVONLY, size, sizeArray, &isCopy, "H5Dget_chunk_info_by_coord: size not pinned");
+    sizeArray[0] = (jlong)size_val;
+
+done:
+    if (offsetBuf)
+        free(offsetBuf);
+    if (sizeArray)
+        UNPIN_LONG_ARRAY(ENVONLY, size, sizeArray, (status < 0) ? JNI_ABORT : 0);
+    if (addrArray)
+        UNPIN_LONG_ARRAY(ENVONLY, addr, addrArray, (status < 0) ? JNI_ABORT : 0);
+    if (maskArray)
+        UNPIN_INT_ARRAY(ENVONLY, filter_mask, maskArray, (status < 0) ? JNI_ABORT : 0);
+    if (offsetArray)
+        UNPIN_LONG_ARRAY(ENVONLY, offset, offsetArray, JNI_ABORT);
+} /* end Java_hdf_hdf5lib_H5_H5Dget_1chunk_1info_1by_1coord */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dget_chunk_storage_size
+ * Signature: (J[J)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5_H5Dget_1chunk_1storage_1size(JNIEnv *env, jclass clss, jlong dataset_id,
+                                                 jlongArray offset)
+{
+    jboolean isCopy;
+    jlong   *offsetArray = NULL;
+    hsize_t *offsetBuf   = NULL;
+    hsize_t  chunk_bytes = 0;
+    jsize    rank;
+    jsize    i;
+    herr_t   status = FAIL;
+
+    UNUSED(clss);
+
+    if (NULL == offset)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dget_chunk_storage_size: offset is NULL");
+
+    if ((rank = ENVPTR->GetArrayLength(ENVONLY, offset)) < 0)
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+
+    PIN_LONG_ARRAY(ENVONLY, offset, offsetArray, &isCopy,
+                   "H5Dget_chunk_storage_size: offset not pinned");
+
+    if (NULL == (offsetBuf = (hsize_t *)malloc((size_t)rank * sizeof(hsize_t))))
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Dget_chunk_storage_size: failed to allocate offset buffer");
+
+    for (i = 0; i < rank; i++)
+        offsetBuf[i] = (hsize_t)offsetArray[i];
+
+    if ((status = H5Dget_chunk_storage_size((hid_t)dataset_id, offsetBuf, &chunk_bytes)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (offsetBuf)
+        free(offsetBuf);
+    if (offsetArray)
+        UNPIN_LONG_ARRAY(ENVONLY, offset, offsetArray, JNI_ABORT);
+
+    return (jlong)chunk_bytes;
+} /* end Java_hdf_hdf5lib_H5_H5Dget_1chunk_1storage_1size */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dget_chunk_index_type
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5Dget_1chunk_1index_1type(JNIEnv *env, jclass clss, jlong dataset_id)
+{
+    H5D_chunk_index_t idx_type = H5D_CHUNK_IDX_BTREE;
+    herr_t             status  = FAIL;
+
+    UNUSED(clss);
+
+    if ((status = H5Dget_chunk_index_type((hid_t)dataset_id, &idx_type)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return (jint)idx_type;
+} /* end Java_hdf_hdf5lib_H5_H5Dget_1chunk_1index_1type */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dwrite_chunk
+ * Signature: (JJI[J[B)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Dwrite_1chunk(JNIEnv *env, jclass clss, jlong dataset_id, jlong dxpl_id,
+                                    jint filters, jlongArray offset, jbyteArray buf)
+{
+    jboolean isCopy;
+    jlong   *offsetArray = NULL;
+    jbyte   *bufArray    = NULL;
+    hsize_t *offsetBuf   = NULL;
+    jsize    rank;
+    jsize    buf_len;
+    jsize    i;
+    herr_t   status = FAIL;
+
+    UNUSED(clss);
+
+    if (NULL == offset)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_chunk: offset is NULL");
+    if (NULL == buf)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_chunk: buf is NULL");
+
+    if ((rank = ENVPTR->GetArrayLength(ENVONLY, offset)) < 0)
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+    if ((buf_len = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0)
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+
+    PIN_LONG_ARRAY(ENVONLY, offset, offsetArray, &isCopy, "H5Dwrite_chunk: offset not pinned");
+
+    if (NULL == (offsetBuf = (hsize_t *)malloc((size_t)rank * sizeof(hsize_t))))
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Dwrite_chunk: failed to allocate offset buffer");
+
+    for (i = 0; i < rank; i++)
+        offsetBuf[i] = (hsize_t)offsetArray[i];
+
+    PIN_BYTE_ARRAY(ENVONLY, buf, bufArray, &isCopy, "H5Dwrite_chunk: buf not pinned");
+
+    if ((status = H5Dwrite_chunk((hid_t)dataset_id, (hid_t)dxpl_id, (uint32_t)filters, offsetBuf,
+                                 (size_t)buf_len, (const void *)bufArray)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (offsetBuf)
+        free(offsetBuf);
+    if (bufArray)
+        UNPIN_BYTE_ARRAY(ENVONLY, buf, bufArray, JNI_ABORT);
+    if (offsetArray)
+        UNPIN_LONG_ARRAY(ENVONLY, offset, offsetArray, JNI_ABORT);
+} /* end Java_hdf_hdf5lib_H5_H5Dwrite_1chunk */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dread_chunk
+ * Signature: (JJ[J[B)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5Dread_1chunk(JNIEnv *env, jclass clss, jlong dataset_id, jlong dxpl_id,
+                                   jlongArray offset, jbyteArray buf)
+{
+    jboolean isCopy;
+    jlong   *offsetArray = NULL;
+    jbyte   *bufArray    = NULL;
+    hsize_t *offsetBuf   = NULL;
+    uint32_t filters_val = 0;
+    size_t   buf_size    = 0;
+    jsize    rank;
+    jsize    buf_len;
+    jsize    i;
+    herr_t   status = FAIL;
+
+    UNUSED(clss);
+
+    if (NULL == offset)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dread_chunk: offset is NULL");
+    if (NULL == buf)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dread_chunk: buf is NULL");
+
+    if ((rank = ENVPTR->GetArrayLength(ENVONLY, offset)) < 0)
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+    if ((buf_len = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0)
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+
+    PIN_LONG_ARRAY(ENVONLY, offset, offsetArray, &isCopy, "H5Dread_chunk: offset not pinned");
+
+    if (NULL == (offsetBuf = (hsize_t *)malloc((size_t)rank * sizeof(hsize_t))))
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Dread_chunk: failed to allocate offset buffer");
+
+    for (i = 0; i < rank; i++)
+        offsetBuf[i] = (hsize_t)offsetArray[i];
+
+    buf_size = (size_t)buf_len;
+
+    PIN_BYTE_ARRAY(ENVONLY, buf, bufArray, &isCopy, "H5Dread_chunk: buf not pinned");
+
+    if ((status = H5Dread_chunk2((hid_t)dataset_id, (hid_t)dxpl_id, offsetBuf, &filters_val,
+                                 (void *)bufArray, &buf_size)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    if ((jsize)buf_size != buf_len) {
+        status = FAIL;
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread_chunk: buf length does not match on-disk chunk size");
+    }
+
+done:
+    if (offsetBuf)
+        free(offsetBuf);
+    if (bufArray)
+        UNPIN_BYTE_ARRAY(ENVONLY, buf, bufArray, (status < 0) ? JNI_ABORT : 0);
+    if (offsetArray)
+        UNPIN_LONG_ARRAY(ENVONLY, offset, offsetArray, JNI_ABORT);
+
+    return (jint)filters_val;
+} /* end Java_hdf_hdf5lib_H5_H5Dread_1chunk */
+
 #ifdef __cplusplus
 } /* end extern "C" */
 #endif /* __cplusplus */
