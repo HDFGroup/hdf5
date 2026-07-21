@@ -763,11 +763,11 @@ public class TestH5D {
     {
         final int[] chunk_count = {0};
 
-        class H5D_chunk_iter_data implements H5D_chunk_iter_t {
-        }
+        class H5D_chunk_iter_data implements H5D_chunk_iter_t {}
 
         class H5D_chunk_iter_callback implements H5D_chunk_iter_cb {
-            public int callback(long[] offset, int filter_mask, long addr, long size, H5D_chunk_iter_t op_data)
+            public int callback(long[] offset, int filter_mask, long addr, long size,
+                                H5D_chunk_iter_t op_data)
             {
                 assertEquals("testH5Dchunk_iter: offset rank", RANK, offset.length);
                 chunk_count[0]++;
@@ -784,16 +784,16 @@ public class TestH5D {
 
         try {
             H5.H5Dwrite(H5did, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                       HDF5Constants.H5P_DEFAULT, write_dset_data);
+                        HDF5Constants.H5P_DEFAULT, write_dset_data);
         }
         catch (Exception err) {
             err.printStackTrace();
             fail("H5.H5Dwrite: " + err);
         }
 
-        H5D_chunk_iter_cb iter_cb   = new H5D_chunk_iter_callback();
-        H5D_chunk_iter_t  iter_data = new H5D_chunk_iter_data();
-        int op_status               = -1;
+        H5D_chunk_iter_cb iter_cb  = new H5D_chunk_iter_callback();
+        H5D_chunk_iter_t iter_data = new H5D_chunk_iter_data();
+        int op_status              = -1;
         try {
             op_status = H5.H5Dchunk_iter(H5did, HDF5Constants.H5P_DEFAULT, iter_cb, iter_data);
         }
@@ -817,7 +817,7 @@ public class TestH5D {
 
         try {
             H5.H5Dwrite(H5did, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                       HDF5Constants.H5P_DEFAULT, write_dset_data);
+                        HDF5Constants.H5P_DEFAULT, write_dset_data);
         }
         catch (Exception err) {
             err.printStackTrace();
@@ -840,21 +840,21 @@ public class TestH5D {
         // offset rather than by position -- the two APIs are not guaranteed to visit chunks in the
         // same order.
         java.util.Map<String, long[]> byOffset = new java.util.HashMap<String, long[]>();
-        long sid = -1;
+        long sid                               = -1;
         try {
-            sid = H5.H5Dget_space(H5did);
+            sid                   = H5.H5Dget_space(H5did);
             long nchunks_by_index = H5.H5Dget_num_chunks(H5did, sid);
             assertEquals("testH5Dchunk_iter_all: H5Dget_num_chunks agrees", info.getNumChunks(),
-                        nchunks_by_index);
+                         nchunks_by_index);
 
             for (int i = 0; i < nchunks_by_index; i++) {
-                long[] offset      = new long[RANK];
-                int[] filter_mask  = new int[1];
-                long[] addr        = new long[1];
-                long[] size        = new long[1];
+                long[] offset     = new long[RANK];
+                int[] filter_mask = new int[1];
+                long[] addr       = new long[1];
+                long[] size       = new long[1];
                 H5.H5Dget_chunk_info(H5did, sid, i, offset, filter_mask, addr, size);
                 byOffset.put(java.util.Arrays.toString(offset),
-                            new long[] {filter_mask[0], addr[0], size[0]});
+                             new long[] {filter_mask[0], addr[0], size[0]});
             }
         }
         catch (Throwable err) {
@@ -875,11 +875,11 @@ public class TestH5D {
             long[] offset = new long[RANK];
             for (int d = 0; d < RANK; d++)
                 offset[d] = info.getOffset(i, d);
-            String key       = java.util.Arrays.toString(offset);
+            String key         = java.util.Arrays.toString(offset);
             long[] byIndexInfo = byOffset.get(key);
             assertNotNull("testH5Dchunk_iter_all: no by-index match for offset " + key, byIndexInfo);
             assertEquals("testH5Dchunk_iter_all: filterMask for offset " + key, byIndexInfo[0],
-                        info.filterMask[i]);
+                         info.filterMask[i]);
             assertEquals("testH5Dchunk_iter_all: addr for offset " + key, byIndexInfo[1], info.addr[i]);
             assertEquals("testH5Dchunk_iter_all: size for offset " + key, byIndexInfo[2], info.size[i]);
         }
@@ -897,7 +897,7 @@ public class TestH5D {
 
         try {
             H5.H5Dwrite(H5did, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                       HDF5Constants.H5P_DEFAULT, write_dset_data);
+                        HDF5Constants.H5P_DEFAULT, write_dset_data);
         }
         catch (Exception err) {
             err.printStackTrace();
@@ -931,7 +931,7 @@ public class TestH5D {
 
         try {
             H5.H5Dwrite(H5did, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                       HDF5Constants.H5P_DEFAULT, write_dset_data);
+                        HDF5Constants.H5P_DEFAULT, write_dset_data);
         }
         catch (Exception err) {
             err.printStackTrace();
@@ -988,7 +988,7 @@ public class TestH5D {
         }
 
         byte[] read_buf = new byte[64];
-        int filters      = -1;
+        int filters     = -1;
         try {
             filters = H5.H5Dread_chunk(H5did, HDF5Constants.H5P_DEFAULT, new long[] {0, 0}, read_buf);
         }

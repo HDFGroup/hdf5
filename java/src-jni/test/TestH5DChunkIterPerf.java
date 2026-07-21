@@ -74,8 +74,8 @@ public class TestH5DChunkIterPerf {
         H5.H5Pset_chunk(dcpl_id, 2, new long[] {CHUNK, CHUNK});
 
         long sid = H5.H5Screate_simple(2, new long[] {size, size}, null);
-        long did = H5.H5Dcreate(H5fid, name, HDF5Constants.H5T_NATIVE_UINT8, sid,
-                                HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
+        long did = H5.H5Dcreate(H5fid, name, HDF5Constants.H5T_NATIVE_UINT8, sid, HDF5Constants.H5P_DEFAULT,
+                                dcpl_id, HDF5Constants.H5P_DEFAULT);
         H5.H5Pclose(dcpl_id);
         H5.H5Sclose(sid);
         return did;
@@ -84,10 +84,10 @@ public class TestH5DChunkIterPerf {
     private long countByIterate(long did) throws Exception
     {
         final long[] count = {0};
-        class Data implements H5D_chunk_iter_t {
-        }
+        class Data implements H5D_chunk_iter_t {}
         H5D_chunk_iter_cb cb = new H5D_chunk_iter_cb() {
-            public int callback(long[] offset, int filter_mask, long addr, long size, H5D_chunk_iter_t op_data)
+            public int callback(long[] offset, int filter_mask, long addr, long size,
+                                H5D_chunk_iter_t op_data)
             {
                 count[0]++;
                 return 0;
@@ -132,8 +132,7 @@ public class TestH5DChunkIterPerf {
         H5.H5Dclose(warmup_did);
 
         System.out.println();
-        System.out.printf("%10s %14s %14s %14s %10s%n", "size", "iter_ms", "all_ms", "indx_ms",
-                          "ratio_all");
+        System.out.printf("%10s %14s %14s %14s %10s%n", "size", "iter_ms", "all_ms", "indx_ms", "ratio_all");
 
         for (int size : SIZES) {
             long did = createChunkedDataset("dset" + size, size);

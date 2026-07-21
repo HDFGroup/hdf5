@@ -4378,9 +4378,8 @@ public class H5 implements java.io.Serializable {
      * @exception NullPointerException
      *            an output array is null.
      **/
-    public synchronized static native void H5Dget_chunk_info_by_coord(long dataset_id, long[] offset,
-                                                                      int[] filter_mask, long[] addr,
-                                                                      long[] size)
+    public synchronized static native void
+    H5Dget_chunk_info_by_coord(long dataset_id, long[] offset, int[] filter_mask, long[] addr, long[] size)
         throws HDF5LibraryException, NullPointerException;
 
     /**

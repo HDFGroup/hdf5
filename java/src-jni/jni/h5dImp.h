@@ -345,25 +345,22 @@ JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Dget_1num_1chunks(JNIEnv *, jclass
  * Signature: (JJJ[J[I[J[J)V
  */
 JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Dget_1chunk_1info(JNIEnv *, jclass, jlong, jlong, jlong,
-                                                               jlongArray, jintArray, jlongArray,
-                                                               jlongArray);
+                                                               jlongArray, jintArray, jlongArray, jlongArray);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Dget_chunk_info_by_coord
  * Signature: (J[J[I[J[J)V
  */
-JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Dget_1chunk_1info_1by_1coord(JNIEnv *, jclass, jlong,
-                                                                         jlongArray, jintArray,
-                                                                         jlongArray, jlongArray);
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Dget_1chunk_1info_1by_1coord(JNIEnv *, jclass, jlong, jlongArray,
+                                                                          jintArray, jlongArray, jlongArray);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Dget_chunk_storage_size
  * Signature: (J[J)J
  */
-JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Dget_1chunk_1storage_1size(JNIEnv *, jclass, jlong,
-                                                                        jlongArray);
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Dget_1chunk_1storage_1size(JNIEnv *, jclass, jlong, jlongArray);
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -377,8 +374,8 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Dget_1chunk_1index_1type(JNIEnv *, 
  * Method:    H5Dwrite_chunk
  * Signature: (JJI[J[B)V
  */
-JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Dwrite_1chunk(JNIEnv *, jclass, jlong, jlong, jint,
-                                                           jlongArray, jbyteArray);
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Dwrite_1chunk(JNIEnv *, jclass, jlong, jlong, jint, jlongArray,
+                                                           jbyteArray);
 
 /*
  * Class:     hdf_hdf5lib_H5
