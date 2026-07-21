@@ -128,16 +128,25 @@ jobs:
           echo "✅ Release files sync completed"
 
       - name: Process documentation
+        env:
+          FILE_NAME: ${{ inputs.file_name }}
         run: |
           set -euo pipefail
-          DOC_FILE="HDF5/${{ inputs.file_name }}.doxygen.zip"
+          DOC_FILE="HDF5/${FILE_NAME}.doxygen.zip"
           if [ -f "$DOC_FILE" ]; then
             echo "📚 Processing documentation..."
             unzip -q "$DOC_FILE"
-            if [ -d "${{ inputs.file_name }}.doxygen" ]; then
+            if [ -d "${FILE_NAME}.doxygen" ]; then
               echo "✅ Documentation extracted successfully"
             else
               echo "❌ Documentation extraction failed"
+              exit 1
+            fi
+            # The doxygen tag file is published alongside the HTML docs
+            if [ -f "${FILE_NAME}.doxygen/hdf5.tag" ]; then
+              echo "✅ Found: hdf5.tag"
+            else
+              echo "❌ hdf5.tag not found in documentation"
               exit 1
             fi
           else
