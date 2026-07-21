@@ -6099,11 +6099,230 @@ public class H5 implements java.io.Serializable {
         }
     }
 
+    /**
+     * @ingroup JH5D
+     *
+     * H5Dget_chunk_info_by_coord retrieves the filter mask, address, and size for the chunk in the
+     * dataset specified by dataset_id, using the coordinates specified by offset.
+     *
+     * @param dataset_id
+     *            IN: Identifier of the dataset to query.
+     * @param offset
+     *            IN: Array of size equal to the dataset's rank; the logical position of the chunk's
+     *            first element in each dimension.
+     * @param filter_mask
+     *            OUT: Array of size one; filled with the bitmask indicating the filters used when the
+     *            chunk was written.
+     * @param addr
+     *            OUT: Array of size one; filled with the chunk address in the file.
+     * @param size
+     *            OUT: Array of size one; filled with the chunk size in bytes, 0 if the chunk does not
+     *            exist.
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     * @exception NullPointerException
+     *            an array is null.
+     **/
+    public static void H5Dget_chunk_info_by_coord(long dataset_id, long[] offset, int[] filter_mask,
+                                                  long[] addr, long[] size)
+        throws HDF5LibraryException, NullPointerException
+    {
+        if (offset == null || filter_mask == null || addr == null || size == null || filter_mask.length < 1 ||
+            addr.length < 1 || size.length < 1) {
+            throw new NullPointerException("one or more arrays are null or have insufficient length");
+        }
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment offset_segment      = arena.allocateFrom(ValueLayout.JAVA_LONG, offset);
+            MemorySegment filter_mask_segment = arena.allocate(ValueLayout.JAVA_INT, 1);
+            MemorySegment addr_segment        = arena.allocate(ValueLayout.JAVA_LONG, 1);
+            MemorySegment size_segment        = arena.allocate(ValueLayout.JAVA_LONG, 1);
+
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Dget_chunk_info_by_coord(dataset_id, offset_segment,
+                                                                        filter_mask_segment, addr_segment,
+                                                                        size_segment) < 0)
+                h5libraryError();
+
+            filter_mask[0] = filter_mask_segment.get(ValueLayout.JAVA_INT, 0);
+            addr[0]        = addr_segment.get(ValueLayout.JAVA_LONG, 0);
+            size[0]        = size_segment.get(ValueLayout.JAVA_LONG, 0);
+        }
+    }
+
+    /**
+     * @ingroup JH5D
+     *
+     * H5Dget_chunk_storage_size returns the size in bytes of the chunk, allocated in the file, which
+     * corresponds to the coordinates specified by offset.
+     *
+     * @param dataset_id
+     *            IN: Identifier of the dataset to query.
+     * @param offset
+     *            IN: Array of size equal to the dataset's rank; the logical position of the chunk's
+     *            first element in each dimension.
+     *
+     * @return the chunk size in bytes, 0 if the chunk does not exist.
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     * @exception NullPointerException
+     *            offset is null.
+     **/
+    public static long H5Dget_chunk_storage_size(long dataset_id, long[] offset)
+        throws HDF5LibraryException, NullPointerException
+    {
+        if (offset == null) {
+            throw new NullPointerException("offset is null");
+        }
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment offset_segment      = arena.allocateFrom(ValueLayout.JAVA_LONG, offset);
+            MemorySegment chunk_bytes_segment = arena.allocate(ValueLayout.JAVA_LONG, 1);
+
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Dget_chunk_storage_size(dataset_id, offset_segment,
+                                                                       chunk_bytes_segment) < 0)
+                h5libraryError();
+
+            return chunk_bytes_segment.get(ValueLayout.JAVA_LONG, 0);
+        }
+    }
+
+    /**
+     * @ingroup JH5D
+     *
+     * H5Dget_chunk_index_type queries the dataset's chunk indexing type.
+     *
+     * @param dataset_id
+     *            IN: Identifier of the dataset to query.
+     *
+     * @return the dataset's chunk indexing type, one of the HDF5Constants.H5D_CHUNK_IDX_* values.
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public static int H5Dget_chunk_index_type(long dataset_id) throws HDF5LibraryException
+    {
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment idx_type_segment = arena.allocate(ValueLayout.JAVA_INT, 1);
+
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Dget_chunk_index_type(dataset_id, idx_type_segment) < 0)
+                h5libraryError();
+
+            return idx_type_segment.get(ValueLayout.JAVA_INT, 0);
+        }
+    }
+
+    /**
+     * @ingroup JH5D
+     *
+     * H5Dwrite_chunk writes a raw data chunk from a buffer directly to a dataset in a file, bypassing
+     * the library's internal data transfer pipeline, including the filters.
+     *
+     * @param dataset_id
+     *            IN: Identifier of the dataset to write to.
+     * @param dxpl_id
+     *            IN: Identifier of a transfer property list.
+     * @param filters
+     *            IN: Mask for identifying the filters used with the chunk.
+     * @param offset
+     *            IN: Array of size equal to the dataset's rank; the logical position of the chunk's
+     *            first element in each dimension. Must specify a point on a dataset chunk boundary.
+     * @param buf
+     *            IN: Buffer containing the data to be written to the chunk; its length is used as the
+     *            chunk's data size in bytes.
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     * @exception NullPointerException
+     *            offset or buf is null.
+     **/
+    public static void H5Dwrite_chunk(long dataset_id, long dxpl_id, int filters, long[] offset, byte[] buf)
+        throws HDF5LibraryException, NullPointerException
+    {
+        if (offset == null) {
+            throw new NullPointerException("offset is null");
+        }
+        if (buf == null) {
+            throw new NullPointerException("buf is null");
+        }
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment offset_segment = arena.allocateFrom(ValueLayout.JAVA_LONG, offset);
+            MemorySegment buf_segment    = arena.allocateFrom(ValueLayout.JAVA_BYTE, buf);
+
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Dwrite_chunk(dataset_id, dxpl_id, filters, offset_segment,
+                                                            buf.length, buf_segment) < 0)
+                h5libraryError();
+        }
+    }
+
+    /**
+     * @ingroup JH5D
+     *
+     * H5Dread_chunk reads a raw data chunk directly from a dataset in a file into a buffer, bypassing
+     * the library's internal data transfer pipeline, including the filters.
+     *
+     * @param dataset_id
+     *            IN: Identifier of the dataset to read from.
+     * @param dxpl_id
+     *            IN: Identifier of a transfer property list.
+     * @param offset
+     *            IN: Array of size equal to the dataset's rank; the logical position of the chunk's
+     *            first element in each dimension. Must specify a point on a dataset chunk boundary.
+     * @param buf
+     *            OUT: Buffer to receive the data read from the chunk; must be exactly the size of the
+     *            on-disk chunk, obtainable via H5Dget_chunk_info(), H5Dget_chunk_info_by_coord(), or
+     *            H5Dget_chunk_storage_size().
+     *
+     * @return the filter mask indicating the filters used when the chunk was written.
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     * @exception NullPointerException
+     *            offset or buf is null.
+     * @exception IllegalArgumentException
+     *            buf's length does not match the chunk's actual on-disk size.
+     **/
+    public static int H5Dread_chunk(long dataset_id, long dxpl_id, long[] offset, byte[] buf)
+        throws HDF5LibraryException, NullPointerException, IllegalArgumentException
+    {
+        if (offset == null) {
+            throw new NullPointerException("offset is null");
+        }
+        if (buf == null) {
+            throw new NullPointerException("buf is null");
+        }
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment offset_segment   = arena.allocateFrom(ValueLayout.JAVA_LONG, offset);
+            MemorySegment filters_segment  = arena.allocate(ValueLayout.JAVA_INT, 1);
+            MemorySegment buf_segment      = arena.allocate(ValueLayout.JAVA_BYTE, buf.length);
+            MemorySegment buf_size_segment = arena.allocate(ValueLayout.JAVA_LONG, 1);
+            buf_size_segment.set(ValueLayout.JAVA_LONG, 0, (long)buf.length);
+
+            if (org.hdfgroup.javahdf5.hdf5_h.H5Dread_chunk2(dataset_id, dxpl_id, offset_segment,
+                                                            filters_segment, buf_segment,
+                                                            buf_size_segment) < 0)
+                h5libraryError();
+
+            long actual_size = buf_size_segment.get(ValueLayout.JAVA_LONG, 0);
+            if (actual_size != buf.length) {
+                throw new IllegalArgumentException("H5Dread_chunk: buf length (" + buf.length +
+                                                   ") does not match on-disk chunk size (" + actual_size +
+                                                   ")");
+            }
+
+            byte[] result = buf_segment.toArray(ValueLayout.JAVA_BYTE);
+            System.arraycopy(result, 0, buf, 0, buf.length);
+
+            return filters_segment.get(ValueLayout.JAVA_INT, 0);
+        }
+    }
+
     // /////// unimplemented ////////
     // herr_t H5Ddebug(hid_t dset_id);
-    // herr_t H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hsize_t *chunk_bytes);
     // herr_t H5Dformat_convert(hid_t dset_id);
-    // herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
 
     // herr_t H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id,
     //                  size_t dst_buf_size, void *dst_buf, H5D_gather_func_t op, void *op_data);
