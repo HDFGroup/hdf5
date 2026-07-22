@@ -190,8 +190,8 @@ static herr_t        H5FD__s3comms_free_purl(parsed_url_t *purl);
 
 static herr_t H5FD__s3comms_get_aws_region(const H5FD__s3comms_aws_params_t *aws_params,
                                            const H5FD_ros3_fapl_t *fa, char **aws_region_out);
-static herr_t
-H5FD__s3comms_get_credentials_provider(H5FD__s3comms_aws_params_t *aws_params, const H5FD_ros3_fapl_t *fa,
+
+static herr_t H5FD__s3comms_get_credentials_provider(H5FD__s3comms_aws_params_t *aws_params, const H5FD_ros3_fapl_t *fa,
                                        const char                       *fapl_token,
                                        struct aws_credentials_provider **credentials_provider_out);
 
