@@ -141,6 +141,7 @@ set (HDF5_REFERENCE_FILES
     tindicessub3.ddl
     tindicessub4.ddl
     tindicesyes.ddl
+    tintascii.ddl
     tints4dims.ddl
     tints4dimsBlock2.ddl
     tints4dimsBlockEq.ddl
@@ -329,6 +330,7 @@ set (HDF5_REFERENCE_TEST_FILES
     tgrpnullspace.h5
     thlink.h5
     thyperslab.h5
+    tintascii.h5
     tints4dims.h5
     tintsattrs.h5
     tintsnodata.h5
@@ -1151,6 +1153,7 @@ ADD_H5_TEST (tints4dimsBlockEq RESULT_CODE 0 --enable-error-stack -d FourDimInts
 
 # test printing characters in ASCII instead of decimal
 ADD_H5_TEST (tchar1 RESULT_CODE 0 --enable-error-stack -r TARGET_FILE tchar.h5)
+ADD_H5_TEST (tintascii RESULT_CODE 0 --enable-error-stack -r TARGET_FILE tintascii.h5)
 
 # test datatypes in ASCII and UTF8
 ADD_H5_TEST (charsets RESULT_CODE 0 --enable-error-stack TARGET_FILE charsets.h5)

@@ -136,6 +136,8 @@
 #define FILE111 "tfloat6.h5"
 #define FILE112 "tfloat4.h5"
 
+#define FILE113 "tintascii.h5"
+
 #define ONION_TEST_FIXNAME_SIZE 1024
 #define ONION_TEST_PAGE_SIZE    (uint32_t)32
 #define ONE_DIM_SIZE            16
@@ -15178,4 +15180,38 @@ error:
         H5Fclose(fid);
     }
     H5E_END_TRY;
+}
+
+void
+gent_tintascii(void)
+{
+    hsize_t dims[] = {81}; /* Assume default 80-column width for tools */
+    hid_t   file_id;
+    hid_t   dset_id;
+    hid_t   type_id;
+    hid_t   space_id;
+    hid_t   attr_id;
+
+    /* 81-byte string, including NUL terminator */
+    unsigned char *data = "abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz012345678901234567";
+
+    file_id = H5Fcreate(FILE113, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    type_id = H5Tcopy(H5T_NATIVE_UCHAR);
+
+    space_id = H5Screate_simple(1, dims, NULL);
+
+    dset_id = H5Dcreate2(file_id, "dset", type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+
+    attr_id = H5Acreate2(dset_id, "attr", type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Awrite(attr_id, type_id, data);
+
+    H5Sclose(space_id);
+    H5Tclose(type_id);
+    H5Aclose(attr_id);
+    H5Dclose(dset_id);
+    H5Fclose(file_id);
 }
