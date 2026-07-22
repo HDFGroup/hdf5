@@ -19,7 +19,7 @@ import java.lang.foreign.MemorySegment;
 import org.hdfgroup.javahdf5.*;
 
 /**
- * Information class for link callback for H5Dchunk_iter.
+ * Information class for the chunk iterator callback for H5Dchunk_iter.
  *
  */
 public interface H5D_chunk_iter_cb extends org.hdfgroup.javahdf5.H5D_chunk_iter_op_t.Function {

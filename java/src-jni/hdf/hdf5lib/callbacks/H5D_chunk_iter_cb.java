@@ -13,7 +13,7 @@
 package hdf.hdf5lib.callbacks;
 
 /**
- * Information class for link callback for H5Dchunk_iter.
+ * Information class for the chunk iterator callback for H5Dchunk_iter.
  *
  */
 public interface H5D_chunk_iter_cb extends H5Callbacks {

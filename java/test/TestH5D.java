@@ -929,7 +929,7 @@ public class TestH5D {
             assertEquals("testH5Dchunk_iter_all: H5Dget_num_chunks agrees", info.getNumChunks(),
                          nchunks_by_index);
 
-            for (int i = 0; i < nchunks_by_index; i++) {
+            for (long i = 0; i < nchunks_by_index; i++) {
                 long[] offset     = new long[RANK];
                 int[] filter_mask = new int[1];
                 long[] addr       = new long[1];

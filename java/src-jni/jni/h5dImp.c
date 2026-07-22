@@ -2116,7 +2116,7 @@ H5D_chunk_iter_cb(const hsize_t *offset, unsigned filter_mask, haddr_t addr, hsi
      * invoked from a library-created worker thread). */
     JNIEnv *cbenv          = wrapper->env;
     jobject visit_callback = wrapper->visit_callback;
-    void   *op_data        = (void *)wrapper->op_data;
+    jobject op_data        = wrapper->op_data;
     jint    status         = FAIL;
 
     if (NULL == offset)
