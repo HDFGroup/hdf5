@@ -19,9 +19,10 @@ on:
         required: true
         type: string
       file_ref:
-        description: "The reference name for the release binary"
-        required: true
+        description: "The reference release tag to compare against. Leave empty to auto-detect the latest published HDFGroup/hdf5 release."
+        required: false
         type: string
+        default: ''
 
 permissions:
   contents: read
@@ -38,12 +39,27 @@ jobs:
           sudo apt install -q -y abi-compliance-checker abi-dumper
           sudo apt install -q -y japi-compliance-checker
 
+      - name: Resolve reference release tag
+        id: resolve-file-ref
+        run: |
+          if [[ -n "${{ inputs.file_ref }}" ]]; then
+            REF="${{ inputs.file_ref }}"
+          else
+            REF=$(curl -fsSL https://api.github.com/repos/HDFGroup/hdf5/releases/latest | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p')
+            if [[ -z "$REF" ]]; then
+              echo "::error::Could not auto-detect the latest HDFGroup/hdf5 release tag"
+              exit 1
+            fi
+          fi
+          echo "Using reference release: $REF"
+          echo "FILE_REF=$REF" >> $GITHUB_OUTPUT
+
       - name: Convert hdf5 reference name (Linux)
         id: convert-hdf5lib-refname
         run:  |
-          FILE_DOTS=$(echo "${{ inputs.file_ref }}" | sed -r "s/([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+).*/\1\.\2\.\3-\4/")
+          FILE_DOTS=$(echo "${{ steps.resolve-file-ref.outputs.FILE_REF }}" | sed -r "s/([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+).*/\1\.\2\.\3-\4/")
           echo "HDF5R_DOTS=$FILE_DOTS" >> $GITHUB_OUTPUT
-          FILE_DOTSMAIN=$(echo "${{ inputs.file_ref }}" | sed -r "s/([0-9]+)\.([0-9]+)\.([0-9]+).*/\1\.\2\.\3/")
+          FILE_DOTSMAIN=$(echo "${{ steps.resolve-file-ref.outputs.FILE_REF }}" | sed -r "s/([0-9]+)\.([0-9]+)\.([0-9]+).*/\1\.\2\.\3/")
           echo "HDF5R_DOTSMAIN=$FILE_DOTSMAIN" >> $GITHUB_OUTPUT
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -84,7 +100,7 @@ jobs:
         run: |
           mkdir "${{ github.workspace }}/hdf5R"
           cd "${{ github.workspace }}/hdf5R"
-          wget -q https://github.com/HDFGroup/hdf5/releases/download/${{ inputs.file_ref }}/hdf5-${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTS }}-ubuntu-2404_gcc.tar.gz
+          wget -q https://github.com/HDFGroup/hdf5/releases/download/${{ steps.resolve-file-ref.outputs.FILE_REF }}/hdf5-${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTS }}-ubuntu-2404_gcc.tar.gz
           tar zxf hdf5-${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTS }}-ubuntu-2404_gcc.tar.gz
 
       - name: List files for the space (Linux)
@@ -94,7 +110,7 @@ jobs:
       - name: Uncompress hdf5 reference binary (Linux)
         run:  |
           cd "${{ github.workspace }}/hdf5R"
-          tar -zxvf ${{ github.workspace }}/hdf5R/hdf5/HDF5-${{ inputs.file_ref }}-Linux.tar.gz --strip-components 1
+          tar -zxvf ${{ github.workspace }}/hdf5R/hdf5/HDF5-${{ steps.resolve-file-ref.outputs.FILE_REF }}-Linux.tar.gz --strip-components 1
 
       - name: List files for the HDFR space (Linux)
         run: |
@@ -147,6 +163,16 @@ jobs:
           abi-compliance-checker -l ${{ inputs.file_base }}_hl_cpp -old ABI-6.dump -new ABI-7.dump
         continue-on-error: true
 
+      # NOTE ON READING THE FORTRAN REPORT: expect a large number of "Low" severity
+      # "Problems with Symbols" findings on the generic KIND/RANK-generated buffer
+      # procedures in H5_gen.F90 (h5aread_*, h5awrite_*, h5dread_*, h5dwrite_*), e.g.
+      # "Type of Nth parameter buf has been changed from integer(kind=K)[X] to
+      # integer(kind=K)[Y]". These are false positives: abi-dumper misreads gfortran's
+      # DWARF encoding of assumed-shape array descriptors as if the bound were a fixed
+      # compile-time array size, so the reported X/Y values are debug-info noise, not a
+      # real interface change. Real signal shows up in Added/Removed Symbols and in
+      # Medium/High severity findings (e.g. a module-level data size actually changing) -
+      # focus review there and disregard bulk Low-severity Symbol findings from H5_gen.F90.
       - name: Run fortran ABI report
         run: |
           abi-dumper ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/libhdf5_fortran.so -o ABI-8.dump
