@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-21</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-22</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -494,7 +494,7 @@ A return value &lt;0 indicates an error.</dd></dl>
     <tr><td class="paramdir">[in]</td><td class="paramname">loc_id</td><td>Location identifier. The identifier may be that of a file or group. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dset_name</td><td>The name of the dataset to overwrite </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">nrecords</td><td>The number of records to append </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">type_size</td><td>The size of the structure type, as calculated by <code>sizeof()</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type_size</td><td>The size of the structure type </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">field_offset</td><td>An array containing the offsets of the fields. These offsets can be calculated with the <a class="el" href="_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a> macro </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dst_sizes</td><td>An array containing the sizes of the fields </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">buf</td><td>Buffer with data</td></tr>
@@ -502,7 +502,8 @@ A return value &lt;0 indicates an error.</dd></dl>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="#ga4a8c5e6eca7119562365e796cbddb869" title="Adds records to the end of the table.">H5TBappend_records()</a> adds records to the end of the table named <code class="param">dset_name</code> attached to the object specified by the identifier <code class="param">loc_id</code>. The dataset is extended to hold the new records. </p>
+<p><a class="el" href="#ga4a8c5e6eca7119562365e796cbddb869" title="Adds records to the end of the table.">H5TBappend_records()</a> adds records to the end of the table named <code class="param">dset_name</code> attached to the object specified by the identifier <code class="param">loc_id</code>. The dataset is extended to hold the new records.</p>
+<p><code class="param">type_size</code> can be obtained with <code>sizeof()</code>, if the data is stored in a predefined C struct. Otherwise, it can be obtained by calling <a class="el" href="#gae9aa3c0aa43f468b56eb82cb04dff0b2" title="Gets information about a table.">H5TBget_field_info()</a> if not already known. </p>
 
 </div>
 </div>
@@ -871,7 +872,8 @@ A return value &lt;0 indicates an error.</dd></dl>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="#ga372a7ccb50846b8b93acfb3c31d38c75" title="Insert records.">H5TBinsert_record()</a> inserts records into the middle of the table ("pushing down" all the records after it) </p>
+<p><a class="el" href="#ga372a7ccb50846b8b93acfb3c31d38c75" title="Insert records.">H5TBinsert_record()</a> inserts records into the middle of the table ("pushing down" all the records after it)</p>
+<p><code class="param">dst_size</code> can be obtained with <code>sizeof()</code> if the predefined C structure is available, otherwise, use <a class="el" href="group___h5_t.html#ga1b971589cd7a86f3e84affdee455564e" title="Returns the size of a datatype.">H5Tget_size()</a> on the compound datatype. </p>
 
 </div>
 </div>
@@ -958,7 +960,7 @@ A return value &lt;0 indicates an error.</dd></dl>
     <tr><td class="paramdir">[in]</td><td class="paramname">dset_name</td><td>The name of the dataset to create </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">nfields</td><td>The number of fields </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">nrecords</td><td>The number of records </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">type_size</td><td>The size in bytes of the structure associated with the table; This value is obtained with <code>sizeof()</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type_size</td><td>The size in bytes of the structure associated with the table </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">field_names</td><td>An array containing the names of the fields. Names longer than <a class="el" href="_h5_t_bpublic_8h.html#a6e334305f873c1186fd7059586c5b696">HLTB_MAX_FIELD_LEN</a> - 1 characters are silently truncated when read back by <a class="el" href="#gae9aa3c0aa43f468b56eb82cb04dff0b2" title="Gets information about a table.">H5TBget_field_info()</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">field_offset</td><td>An array containing the offsets of the fields </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">field_types</td><td>An array containing the type of the fields </td></tr>
@@ -970,7 +972,8 @@ A return value &lt;0 indicates an error.</dd></dl>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="#ga083cfcddd7624068dc028f68437009e4" title="Creates and writes a table.">H5TBmake_table()</a> creates and writes a dataset named <code class="param">dset_name</code> attached to the object specified by the identifier loc_id. </p>
+<p><a class="el" href="#ga083cfcddd7624068dc028f68437009e4" title="Creates and writes a table.">H5TBmake_table()</a> creates and writes a dataset named <code class="param">dset_name</code> attached to the object specified by the identifier loc_id.</p>
+<p><code class="param">type_size</code> can be obtained with <code>sizeof()</code>, if the data is stored in a predefined C struct. Otherwise, <code class="param">type_size</code> should be calculated based on the highest offset in <code class="param">field_offset</code>, the size of its corresponding datatype in <code class="param">field_types</code>, and any padding bytes desired after that field. </p>
 
 </div>
 </div>
@@ -1043,7 +1046,7 @@ A return value &lt;0 indicates an error.</dd></dl>
     <tr><td class="paramdir">[in]</td><td class="paramname">field_index</td><td>The indexes of the fields to read </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">start</td><td>The start record to read from </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">nrecords</td><td>The number of records to read </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">type_size</td><td>The size in bytes of the structure associated with the table (This value is obtained with <code>sizeof()</code>) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type_size</td><td>The size in bytes of the structure associated with the table </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">field_offset</td><td>An array containing the offsets of the fields </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dst_sizes</td><td>An array containing the size in bytes of the fields </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>Buffer with data</td></tr>
@@ -1051,7 +1054,8 @@ A return value &lt;0 indicates an error.</dd></dl>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="#ga49aae7fc2576211d9da65ed02007a793" title="Reads one or several fields. The fields are identified by index.">H5TBread_fields_index()</a> reads the fields identified by <code class="param">field_index</code> from a dataset named <code class="param">dset_name</code> attached to the object specified by the identifier <code class="param">loc_id</code>. </p>
+<p><a class="el" href="#ga49aae7fc2576211d9da65ed02007a793" title="Reads one or several fields. The fields are identified by index.">H5TBread_fields_index()</a> reads the fields identified by <code class="param">field_index</code> from a dataset named <code class="param">dset_name</code> attached to the object specified by the identifier <code class="param">loc_id</code>.</p>
+<p><code class="param">type_size</code> can be obtained with <code>sizeof()</code>, if the data is stored in a predefined C struct. Otherwise, it can be obtained by calling <a class="el" href="#gae9aa3c0aa43f468b56eb82cb04dff0b2" title="Gets information about a table.">H5TBget_field_info()</a> if not already known. </p>
 
 </div>
 </div>
@@ -1118,7 +1122,7 @@ A return value &lt;0 indicates an error.</dd></dl>
     <tr><td class="paramdir">[in]</td><td class="paramname">field_names</td><td>An array containing the names of the fields to read </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">start</td><td>The start record to read from </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">nrecords</td><td>The number of records to read </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">type_size</td><td>The size in bytes of the structure associated with the table (This value is obtained with <code>sizeof()</code>.) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type_size</td><td>The size in bytes of the structure associated with the table </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">field_offset</td><td>An array containing the offsets of the fields </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dst_sizes</td><td>An array containing the size in bytes of the fields </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>Buffer with data</td></tr>
@@ -1126,7 +1130,8 @@ A return value &lt;0 indicates an error.</dd></dl>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="#ga6d4baea1ae71f3a4863bbbb40609811d" title="Reads one or several fields. The fields are identified by name.">H5TBread_fields_name()</a> reads the fields identified by <code class="param">field_names</code> from a dataset named <code class="param">dset_name</code> attached to the object specified by the identifier <code class="param">loc_id</code>. </p>
+<p><a class="el" href="#ga6d4baea1ae71f3a4863bbbb40609811d" title="Reads one or several fields. The fields are identified by name.">H5TBread_fields_name()</a> reads the fields identified by <code class="param">field_names</code> from a dataset named <code class="param">dset_name</code> attached to the object specified by the identifier <code class="param">loc_id</code>.</p>
+<p><code class="param">type_size</code> can be obtained with <code>sizeof()</code>, if the data is stored in a predefined C struct. Otherwise, it can be obtained by calling <a class="el" href="#gae9aa3c0aa43f468b56eb82cb04dff0b2" title="Gets information about a table.">H5TBget_field_info()</a> if not already known. </p>
 
 </div>
 </div>
@@ -1187,7 +1192,7 @@ A return value &lt;0 indicates an error.</dd></dl>
     <tr><td class="paramdir">[in]</td><td class="paramname">dset_name</td><td>The name of the dataset to read </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">start</td><td>The start record to read from </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">nrecords</td><td>The number of records to read </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">type_size</td><td>The size of the structure type, as calculated by <code>sizeof()</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type_size</td><td>The size of the structure type </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dst_offset</td><td>An array containing the offsets of the fields. These offsets can be calculated with the <a class="el" href="_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a> macro </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dst_sizes</td><td>An array containing the size in bytes of the fields </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>Buffer with data</td></tr>
@@ -1195,7 +1200,8 @@ A return value &lt;0 indicates an error.</dd></dl>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="#ga84846ed25ee8cc57b89a842d566bc187" title="Reads records.">H5TBread_records()</a> reads some records identified from a dataset named <code class="param">dset_name</code> attached to the object specified by the identifier <code class="param">loc_id</code>. </p>
+<p><a class="el" href="#ga84846ed25ee8cc57b89a842d566bc187" title="Reads records.">H5TBread_records()</a> reads some records identified from a dataset named <code class="param">dset_name</code> attached to the object specified by the identifier <code class="param">loc_id</code>.</p>
+<p><code class="param">type_size</code> can be obtained with <code>sizeof()</code>, if the data is stored in a predefined C struct. Otherwise, it can be obtained by calling <a class="el" href="#gae9aa3c0aa43f468b56eb82cb04dff0b2" title="Gets information about a table.">H5TBget_field_info()</a> if not already known. </p>
 
 </div>
 </div>
@@ -1244,7 +1250,7 @@ A return value &lt;0 indicates an error.</dd></dl>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">loc_id</td><td>Location identifier. The identifier may be that of a file or group. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dset_name</td><td>The name of the dataset to read </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dst_size</td><td>The size of the structure type, as calculated by <code>sizeof()</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dst_size</td><td>The size of the structure type </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dst_offset</td><td>An array containing the offsets of the fields. These offsets can be calculated with the <a class="el" href="_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a> macro </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dst_sizes</td><td>An array containing the sizes of the fields. These sizes can be calculated with the sizeof() macro. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dst_buf</td><td>Buffer with data</td></tr>
@@ -1252,7 +1258,8 @@ A return value &lt;0 indicates an error.</dd></dl>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="#gae2074f18c8fd2c4cea26639386e066b7" title="Reads a table.">H5TBread_table()</a> reads a table named <code class="param">dset_name</code> attached to the object specified by the identifier <code class="param">loc_id</code>. </p>
+<p><a class="el" href="#gae2074f18c8fd2c4cea26639386e066b7" title="Reads a table.">H5TBread_table()</a> reads a table named <code class="param">dset_name</code> attached to the object specified by the identifier <code class="param">loc_id</code>.</p>
+<p><code class="param">dst_size</code> can be obtained with <code>sizeof()</code>, if the data is stored in a predefined C struct. Otherwise, it can be obtained by calling <a class="el" href="#gae9aa3c0aa43f468b56eb82cb04dff0b2" title="Gets information about a table.">H5TBget_field_info()</a> if not already known. </p>
 
 </div>
 </div>
@@ -1325,7 +1332,7 @@ A return value &lt;0 indicates an error.</dd></dl>
     <tr><td class="paramdir">[in]</td><td class="paramname">field_index</td><td>The indexes of the fields to write </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">start</td><td>The zero based index record to start writing </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">nrecords</td><td>The number of records to write </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">type_size</td><td>The size of the structure type, as calculated by <code>sizeof()</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type_size</td><td>The size of the structure type </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">field_offset</td><td>An array containing the offsets of the fields. These offsets can be calculated with the <a class="el" href="_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a> macro </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dst_sizes</td><td>An array containing the sizes of the fields </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">buf</td><td>Buffer with data</td></tr>
@@ -1333,7 +1340,8 @@ A return value &lt;0 indicates an error.</dd></dl>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="#ga0b956c26a0e5257dbde15c3e69ac31ee" title="Overwrites fields.">H5TBwrite_fields_index()</a> overwrites one or several fields specified by <code class="param">field_index</code> with a buffer <code class="param">buf</code> from a dataset named <code class="param">dset_name</code> attached to the object specified by the identifier <code class="param">loc_id</code>. </p>
+<p><a class="el" href="#ga0b956c26a0e5257dbde15c3e69ac31ee" title="Overwrites fields.">H5TBwrite_fields_index()</a> overwrites one or several fields specified by <code class="param">field_index</code> with a buffer <code class="param">buf</code> from a dataset named <code class="param">dset_name</code> attached to the object specified by the identifier <code class="param">loc_id</code>.</p>
+<p><code class="param">type_size</code> can be obtained with <code>sizeof()</code>, if the data is stored in a predefined C struct. Otherwise, it can be obtained by calling <a class="el" href="#gae9aa3c0aa43f468b56eb82cb04dff0b2" title="Gets information about a table.">H5TBget_field_info()</a> if not already known. </p>
 
 </div>
 </div>
@@ -1400,7 +1408,7 @@ A return value &lt;0 indicates an error.</dd></dl>
     <tr><td class="paramdir">[in]</td><td class="paramname">field_names</td><td>The names of the fields to write </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">start</td><td>The zero index record to start writing </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">nrecords</td><td>The number of records to write </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">type_size</td><td>The size of the structure type, as calculated by <code>sizeof()</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type_size</td><td>The size of the structure type </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">field_offset</td><td>An array containing the offsets of the fields. These offsets can be calculated with the <a class="el" href="_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a> macro </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dst_sizes</td><td>An array containing the sizes of the fields </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">buf</td><td>Buffer with data</td></tr>
@@ -1408,7 +1416,8 @@ A return value &lt;0 indicates an error.</dd></dl>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="#ga1284baf9489d596c76fa0458c7b3def6" title="Overwrites fields.">H5TBwrite_fields_name()</a> overwrites one or several fields specified by <code class="param">field_names</code> with data in <code class="param">buf</code> from a dataset named <code class="param">dset_name</code> attached to the object specified by the identifier <code class="param">loc_id</code>. </p>
+<p><a class="el" href="#ga1284baf9489d596c76fa0458c7b3def6" title="Overwrites fields.">H5TBwrite_fields_name()</a> overwrites one or several fields specified by <code class="param">field_names</code> with data in <code class="param">buf</code> from a dataset named <code class="param">dset_name</code> attached to the object specified by the identifier <code class="param">loc_id</code>.</p>
+<p><code class="param">type_size</code> can be obtained with <code>sizeof()</code>, if the data is stored in a predefined C struct. Otherwise, it can be obtained by calling <a class="el" href="#gae9aa3c0aa43f468b56eb82cb04dff0b2" title="Gets information about a table.">H5TBget_field_info()</a> if not already known. </p>
 
 </div>
 </div>
@@ -1469,7 +1478,7 @@ A return value &lt;0 indicates an error.</dd></dl>
     <tr><td class="paramdir">[in]</td><td class="paramname">dset_name</td><td>The name of the dataset to overwrite </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">start</td><td>The zero index record to start writing </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">nrecords</td><td>The number of records to write </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">type_size</td><td>The size of the structure type, as calculated by <code>sizeof()</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type_size</td><td>The size of the structure type </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">field_offset</td><td>An array containing the offsets of the fields. These offsets can be calculated with the <a class="el" href="_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a> macro </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dst_sizes</td><td>An array containing the sizes of the fields </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">buf</td><td>Buffer with data</td></tr>
@@ -1477,7 +1486,8 @@ A return value &lt;0 indicates an error.</dd></dl>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="#ga55943628b2dfa001c679822bff0423b1" title="Overwrites records.">H5TBwrite_records()</a> overwrites records starting at the zero index position start of the table named <code class="param">dset_name</code> attached to the object specified by the identifier <code class="param">loc_id</code>. </p>
+<p><a class="el" href="#ga55943628b2dfa001c679822bff0423b1" title="Overwrites records.">H5TBwrite_records()</a> overwrites records starting at the zero index position start of the table named <code class="param">dset_name</code> attached to the object specified by the identifier <code class="param">loc_id</code>.</p>
+<p><code class="param">type_size</code> can be obtained with <code>sizeof()</code>, if the data is stored in a predefined C struct. Otherwise, it can be obtained by calling <a class="el" href="#gae9aa3c0aa43f468b56eb82cb04dff0b2" title="Gets information about a table.">H5TBget_field_info()</a> if not already known. </p>
 
 </div>
 </div>

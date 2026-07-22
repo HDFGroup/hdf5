@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-21</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-22</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -5009,6 +5009,11 @@ Failure Modes:<ul>
 <p><a class="el" href="#ga8008cddafa81bd1ddada23f6d9a161ca" title="Sets the maximum size for the page buffer and the minimum percentage for metadata and raw data pages.">H5Pset_page_buffer_size()</a> sets buf_size, the maximum size in bytes of the page buffer. The default value is zero, meaning that page buffering is disabled. When a non-zero page buffer size is set, the library will enable page buffering if that size is larger or equal than a single page size if a paged file space strategy is enabled using the functions <a class="el" href="group___f_c_p_l.html#gae9ed9b56f290d6d24421242f1c04914e" title="Sets the file space handling strategy and persisting free-space values for a file creation property l...">H5Pset_file_space_strategy()</a> and <a class="el" href="group___f_c_p_l.html#gad012d7f3c2f1e1999eb1770aae3a4963" title="Sets the file space page size for a file creation property list.">H5Pset_file_space_page_size()</a>.</p>
 <p>The page buffer layer captures all I/O requests before they are issued to the VFD and "caches" them in fixed sized pages. Once the total number of pages exceeds the page buffer size, the library evicts pages from the page buffer by writing them to the VFD. At file close, the page buffer is flushed writing all the pages to the file.</p>
 <p>If a non-zero page buffer size is set, and the file space strategy is not set to paged or the page size for the file space strategy is larger than the page buffer size, the subsequent call to <a class="el" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4" title="Creates an HDF5 file.">H5Fcreate()</a> using the <code class="param">plist_id</code> will fail.</p>
+<p>The arguments min_meta_perc and min_raw_perc are to prevent one type of data from evicting hot pages of the other type, that is, pushing them out of the buffer. Setting a minimum percentage for each type reserves a portion of the page buffer for that type, ensuring both metadata and raw data can maintain a presence in the buffer.</p>
+<p>The following constraints apply to min_meta_perc and min_raw_perc:</p><ul>
+<li>Each must be between 0 and 100 inclusive</li>
+<li>Their sum must not exceed 100, that is, together they can't reserve more than the entire page buffer.</li>
+</ul>
 <dl class="section note"><dt>Note</dt><dd>As of HDF5 1.14.4, this property will be ignored when an existing file is being opened and the file space strategy stored in the file isn't paged. This was previously a failure.</dd>
 <dd>
 As of HDF5 1.14.4, if a file with a paged file space strategy is opened with a page size that is smaller than the file's page size, the page cache size will be rounded up to the file's page size. This was previously a failure.</dd></dl>
