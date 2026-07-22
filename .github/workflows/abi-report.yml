@@ -147,6 +147,25 @@ jobs:
           abi-compliance-checker -l ${{ inputs.file_base }}_hl_cpp -old ABI-6.dump -new ABI-7.dump
         continue-on-error: true
 
+      - name: Run fortran ABI report
+        run: |
+          abi-dumper ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/libhdf5_fortran.so -o ABI-8.dump
+          abi-dumper ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/libhdf5_fortran.so -o ABI-9.dump
+          abi-compliance-checker -l ${{ inputs.file_base }}_fortran -old ABI-8.dump -new ABI-9.dump
+        continue-on-error: true
+
+      - name: Run fortran exported symbol diff
+        run: |
+          # gfortran mangled names don't encode argument lists, so abi-compliance-checker
+          # (DWARF-based) is the primary signal above; this is a cheap supplementary check
+          # that still catches added/removed exported symbols even if debug info is stripped.
+          nm -D --defined-only ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/libhdf5_fortran.so | awk '{print $3}' | sort > old_fortran_syms.txt
+          nm -D --defined-only ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/libhdf5_fortran.so | awk '{print $3}' | sort > new_fortran_syms.txt
+          diff -u old_fortran_syms.txt new_fortran_syms.txt > ${{ inputs.file_base }}-hdf5_fortran_symbol_diff.txt || true
+          echo "=== Fortran exported symbol diff (reference vs new) ==="
+          cat ${{ inputs.file_base }}-hdf5_fortran_symbol_diff.txt
+        continue-on-error: true
+
       - name: Copy ABI reports
         run: |
           cp compat_reports/jarhdf5-/${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTSMAIN }}_to_${{ steps.set-hdf5lib-name.outputs.HDF5_VERS }}/compat_report.html ${{ inputs.file_base }}-java_compat_report.html
@@ -158,6 +177,8 @@ jobs:
           cp compat_reports/${{ inputs.file_base }}_cpp/X_to_Y/compat_report.html ${{ inputs.file_base }}-hdf5_cpp_compat_report.html
           ls -l compat_reports/${{ inputs.file_base }}_hl_cpp/X_to_Y
           cp compat_reports/${{ inputs.file_base }}_hl_cpp/X_to_Y/compat_report.html ${{ inputs.file_base }}-hdf5_hl_cpp_compat_report.html
+          ls -l compat_reports/${{ inputs.file_base }}_fortran/X_to_Y
+          cp compat_reports/${{ inputs.file_base }}_fortran/X_to_Y/compat_report.html ${{ inputs.file_base }}-hdf5_fortran_compat_report.html
         continue-on-error: true
 
       - name: List files for the report spaces (Linux)
@@ -173,6 +194,8 @@ jobs:
           cp ${{ inputs.file_base }}-hdf5_compat_report.html ${{ runner.workspace }}/buildabi/hdf5
           cp ${{ inputs.file_base }}-hdf5_hl_compat_report.html ${{ runner.workspace }}/buildabi/hdf5
           cp ${{ inputs.file_base }}-hdf5_cpp_compat_report.html ${{ runner.workspace }}/buildabi/hdf5
+          cp ${{ inputs.file_base }}-hdf5_fortran_compat_report.html ${{ runner.workspace }}/buildabi/hdf5
+          cp ${{ inputs.file_base }}-hdf5_fortran_symbol_diff.txt ${{ runner.workspace }}/buildabi/hdf5
           cp ${{ inputs.file_base }}-java_compat_report.html ${{ runner.workspace }}/buildabi/hdf5
           cd "${{ runner.workspace }}/buildabi"
           tar -zcvf ${{ inputs.file_base }}.html.abi.reports.tar.gz hdf5
