@@ -13,14 +13,14 @@
 ########################
 # compression options
 ########################
-set (ZLIB_VERSION "1.3.2" CACHE INTERNAL "Version of zlib to use when building from external source")
+set (ZLIB_VERSION "1.3.2-cmakefix" CACHE INTERNAL "Version of zlib to use when building from external source")
 set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package")
 mark_as_advanced (ZLIB_PACKAGE_NAME)
-set (ZLIB_TGZ_NAME "zlib-${ZLIB_VERSION}.tar.gz" CACHE STRING "Base name of zlib compressed file")
-set (ZLIB_TGZ_ORIGPATH "https://github.com/madler/zlib/releases/download/v${ZLIB_VERSION}" CACHE STRING "URL to retrieve external zlib compressed file from")
+set (ZLIB_TGZ_NAME "v${ZLIB_VERSION}.tar.gz" CACHE STRING "Base name of zlib compressed file")
+set (ZLIB_TGZ_ORIGPATH "https://github.com/HDFGroup/zlib/archive/refs/tags" CACHE STRING "URL to retrieve external zlib compressed file from")
 mark_as_advanced (ZLIB_TGZ_NAME)
 mark_as_advanced (ZLIB_TGZ_ORIGPATH)
-set (ZLIB_GIT_URL "https://github.com/madler/zlib.git" CACHE STRING "GIT URL to retrieve external zlib source from")
+set (ZLIB_GIT_URL "https://github.com/HDFGroup/zlib.git" CACHE STRING "GIT URL to retrieve external zlib source from")
 set (ZLIB_GIT_TAG "v${ZLIB_VERSION}" CACHE STRING "GIT tag to retrieve external zlib source from")
 mark_as_advanced (ZLIB_GIT_URL)
 mark_as_advanced (ZLIB_GIT_TAG)
