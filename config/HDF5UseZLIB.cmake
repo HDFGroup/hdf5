@@ -157,11 +157,16 @@ function (external_zlib_library)
   set (ZLIB_INSTALL ON)
 
   # Set variables for use in HDF5 CMake configuration file when locating
-  # the installed CMake files, as they may not be in the same location as
-  # our targets file
-  set (${HDF5_PACKAGE_NAME}_ZLIB_INSTALL_NAME "zlib")
-  set (${HDF5_PACKAGE_NAME}_ZLIB_INSTALL_NAME "zlib" PARENT_SCOPE)
-  set (${HDF5_PACKAGE_NAME}_ZLIB_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/${${HDF5_PACKAGE_NAME}_ZLIB_INSTALL_NAME}" PARENT_SCOPE)
+  # the installed CMake files
+  string (TOUPPER "${ZLIB_PACKAGE_NAME}" ${HDF5_PACKAGE_NAME}_ZLIB_INSTALL_PACKAGE_NAME)
+  set (${HDF5_PACKAGE_NAME}_ZLIB_INSTALL_PACKAGE_NAME "${${HDF5_PACKAGE_NAME}_ZLIB_INSTALL_PACKAGE_NAME}" PARENT_SCOPE)
+  if (ZLIB_VERSION STREQUAL "1.3.2-cmakefix")
+    # Option not in upstream zlib; in HDFGroup-forked zlib only
+    set (ZLIB_INSTALL_CMAKEDIR "${${HDF5_PACKAGE_NAME}_INSTALL_CMAKE_DIR}")
+    set (${HDF5_PACKAGE_NAME}_ZLIB_INSTALL_CMAKEDIR "${${HDF5_PACKAGE_NAME}_INSTALL_CMAKE_DIR}" PARENT_SCOPE)
+  else ()
+    set (${HDF5_PACKAGE_NAME}_ZLIB_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/${ZLIB_PACKAGE_NAME}" PARENT_SCOPE)
+  endif ()
 
   if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR NOT ZLIB_USE_LOCALCONTENT)
     message (VERBOSE "Fetching and configuring filter zlib")
