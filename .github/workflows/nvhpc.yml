@@ -23,6 +23,16 @@ jobs:
       CUDAVERDOT: "13.2"
       NVERDOT: "26.5"
       NVERDASH: "26-5"
+      # CI stabilization: GitHub-hosted runners have no real InfiniBand, and the
+      # Open MPI bundled with NVIDIA HPC-X sometimes has UCX select a
+      # non-functional verbs interface (e.g. ud_verbs/mana_0), causing
+      # intermittent "Failed to create UCP worker" / MPI_Init unreachable (-12)
+      # failures. Force ob1 + tcp/shared-memory transports and skip UCX.
+      OMPI_MCA_pml: ob1
+      OMPI_MCA_btl: self,tcp,sm
+      OMPI_MCA_mtl: ^ucx
+      UCX_TLS: tcp,self,sm
+      OMPI_MCA_btl_tcp_if_exclude: lo,docker0
 
     steps:
       - name: Get Sources
