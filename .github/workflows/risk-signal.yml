@@ -1,0 +1,105 @@
+# ci/github_actions/risk-signal.yml
+# ==================================
+# HDF-R1 inline risk signal — posts a GitHub **check run** on every sandbox PR.
+#
+# DEPLOY TO (NOT this repo): sp26-hdfgroup/hdf5-sandbox
+#   Copy this file to:  .github/workflows/risk-signal.yml
+#   Merge to the sandbox default branch before the check runs on PRs.
+#
+# Posting mechanism: Option A — GitHub Actions in the sandbox repo using the
+# auto-provided GITHUB_TOKEN and the Checks API. No PAT, no PR comments.
+#
+# Scoring source of truth: checks out sp26-hdfgroup/revamp-pipeline at a pinned
+# ref and imports gates.scorer.score() — scorer code is NOT copied into sandbox.
+#
+# Trigger security: pull_request (same-repo branches). NOT pull_request_target.
+#
+# Tier → check conclusion (never blocks):
+#   Low/Medium  → success (green)
+#   High/Critical → neutral (visible, non-blocking)
+#
+# Owner: Abhinav (Pipeline & CI Lead)
+
+name: Revamp Risk Signal
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "src/H5*.c"
+
+permissions:
+  contents: read
+  checks: write
+  statuses: write
+  pull-requests: read
+
+env:
+  # ── Scorer version pin ───────────────────────────────────────────────────
+  # This SHA pins the version of revamp-pipeline used for scoring.
+  # IMPORTANT: update this ref whenever scorer weights, module_map.csv, or
+  # any scoring logic changes in revamp-pipeline — stale pin = stale risk
+  # scores with NO error or warning shown in the check output.
+  # To update: push the new commit to revamp-pipeline, copy its full SHA here.
+  # ─────────────────────────────────────────────────────────────────────────
+  REVAMP_PIPELINE_REF: bc6a922307cc98b3eaf040ddd8d14291d4bf8582
+
+jobs:
+  risk-signal:
+    name: "Risk signal"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout sandbox PR head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout revamp-pipeline (pinned)
+        uses: actions/checkout@v4
+        with:
+          repository: sp26-hdfgroup/revamp-pipeline
+          ref: ${{ env.REVAMP_PIPELINE_REF }}
+          path: revamp-pipeline
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pipeline dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r revamp-pipeline/requirements.txt
+
+      - name: Compute merge-base
+        id: base
+        run: |
+          BASE_SHA=$(git merge-base HEAD "origin/${{ github.base_ref }}")
+          echo "base_sha=${BASE_SHA}" >> "$GITHUB_OUTPUT"
+          echo "Merge base: ${BASE_SHA}"
+
+      - name: List changed HDF5 C sources
+        id: changed
+        run: |
+          FILES=$(git diff --name-only "${{ steps.base.outputs.base_sha }}" HEAD -- 'src/H5*.c' | tr '\n' ' ')
+          echo "files=${FILES}" >> "$GITHUB_OUTPUT"
+          echo "Changed: ${FILES}"
+
+      - name: Post inline risk check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_SHA: ${{ github.event.pull_request.head.sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python revamp-pipeline/ci/risk_signal/cli.py \
+            --sha "${{ github.event.pull_request.head.sha }}" \
+            --head-sha "${{ github.event.pull_request.head.sha }}" \
+            --repo "${{ github.repository }}" \
+            --base-sha "${{ steps.base.outputs.base_sha }}" \
+            --files ${{ steps.changed.outputs.files }} \
+            --pipeline-root "${{ github.workspace }}/revamp-pipeline" \
+            --run-url "${GITHUB_RUN_URL}" \
+            --token "${GITHUB_TOKEN}"
