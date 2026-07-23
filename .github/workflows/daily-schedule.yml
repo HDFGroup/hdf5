@@ -30,7 +30,7 @@ jobs:
         env:
           DAILY_BUILD_FILE_BASE: ${{ needs.daily-build.outputs.file_base }}
         run: |
-          FILE_NAME_BASE=$(echo "$DAILY_BUILD_FILE_BASE")
+          FILE_NAME_BASE="$DAILY_BUILD_FILE_BASE"
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
