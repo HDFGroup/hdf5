@@ -237,6 +237,17 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ## Configuration
 
+### Fixed INSTALL_CMAKE_DIR for GNU_DIRS and enabled it by default on Linux.
+
+   The previous `lib/cmake/hdf5-config.cmake` wasn't in CMake's find_package
+   search path since CMake expects that to be a common path with each
+   package having it's own subdirectory. This changes it to
+   `lib/cmake/hdf5/hdf5-config.cmake` so the config is now found when the
+   install prefix is in `CMAKE_PREFIX_PATH`.
+   This also sets `HDF5_USE_GNU_DIRS=ON` by default for non-Windows builds.
+
+   Fixes #6137
+
 ## Tools
 
 ### Fixed h5repack silently dropping a declared cd_nelmts for user-defined filters
