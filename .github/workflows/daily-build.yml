@@ -162,7 +162,7 @@ jobs:
     uses: ./.github/workflows/abi-report.yml
     with:
       # previous release version
-      file_ref: '2.0.0'
+      file_ref: '2.1.0'
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_tag: snapshot
       use_environ: snapshots

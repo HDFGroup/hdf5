@@ -309,7 +309,7 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
   build_v2_0_linux:
-    name: "gcc DBG v2.0.0 default API no deprecated"
+    name: "gcc DBG v200 default API no deprecated"
     runs-on: ubuntu-latest
     steps:
       # SETUP
@@ -365,7 +365,7 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
   build_v2_0_win:
-    name: "Intel DBG v2.0.0 default API no deprecated"
+    name: "Intel DBG v200 default API no deprecated"
     runs-on: windows-2022
     steps:
       # SETUP
