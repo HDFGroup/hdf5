@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-23</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -1556,7 +1556,7 @@ III.C. Disk Format: Level 1C - Symbol Table Entry</h2>
 <tr align="center">
 <th width="25%">byte</th><th width="25%">byte</th><th width="25%">byte</th><th>byte</th></tr>
 <tr align="center">
-<td colspan="4">Link Name Offset<sup>O</sup></td></tr>
+<td colspan="4">Link Name Offset<sup>L</sup></td></tr>
 <tr align="center">
 <td colspan="4">Object Header Address<sup>O</sup></td></tr>
 <tr align="center">
@@ -1572,7 +1572,8 @@ Scratch-pad Space <em>(16 bytes)</em><br  />
 </td></tr>
 </table>
 <ul>
-<li>Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0" title="FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock.</li>
+<li>Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0" title="FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock. </li>
+<li>Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfLengthsV0" title="FMT4SizeOfLengthsV0">Size of Lengths</a>&rdquo; field in the superblock.</li>
 </ul>
 <table class="doxtable">
 <caption align="top"><b>Fields: Symbol Table Entry</b></caption>
@@ -3283,13 +3284,16 @@ IV.A.2 Disk Format: Level 2A2 - Data Object Header Shared Message Encoding</h2>
 <tr>
 <td colspan="4">Reserved (zero)</td></tr>
 <tr>
+<td colspan="4">Link Name Offset<sup>L</sup></td></tr>
+<tr>
 <td colspan="4"><br  />
 Address<sup>O</sup><br  />
 <br  />
 </td></tr>
 </table>
 <ul>
-<li>Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0" title="FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock.</li>
+<li>Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfOffsetsV0" title="FMT4SizeOfOffsetsV0">Size of Offsets</a>&rdquo; field in the superblock. </li>
+<li>Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;<a class="el" href="#FMT4SizeOfLengthsV0" title="FMT4SizeOfLengthsV0">Size of Lengths</a>&rdquo; field in the superblock.</li>
 </ul>
 <table class="doxtable">
 <caption><b>Fields: Shared Message (Version 1)</b></caption>
@@ -3313,6 +3317,8 @@ Address<sup>O</sup><br  />
 <td align="center"><code>0</code></td><td>Message stored in another object&rsquo;s header (a <em>committed</em> message).</td></tr>
 </table>
 </td></tr>
+<tr>
+<td>Link Name Offset</td><td>This field is skipped over, but not read, by the library&rsquo;s shared message decoding code. Its name is deduced matching the <em>Link Name Offset</em> field of the <a class="el" href="#subsec_fmt4_infra_symboltableentry" title="III.C. Disk Format: Level 1C - Symbol Table Entry">III.C. Disk Format: Level 1C - Symbol Table Entry</a> structure, which this shared message format reuses.</td></tr>
 <tr>
 <td>Address</td><td>The address of the object header containing the message to be shared.</td></tr>
 </table>
