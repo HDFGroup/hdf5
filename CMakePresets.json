@@ -33,7 +33,7 @@
         },
         "ZLIB_TGZ_NAME": {
           "type": "STRING",
-          "value": "v1.3.2.tar.gz"
+          "value": "v1.3.2-cmakefix.tar.gz"
         },
         "ZLIBNG_PACKAGE_NAME": {
           "type": "STRING",
