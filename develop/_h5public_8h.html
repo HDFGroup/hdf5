@@ -166,12 +166,12 @@ Macros</h2></td></tr>
 <tr class="memitem:a5eaf0dbcfcddd88fa79ef9d8319f5d0e" id="r_a5eaf0dbcfcddd88fa79ef9d8319f5d0e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5eaf0dbcfcddd88fa79ef9d8319f5d0e">H5_UNLIKELY</a>(expression)</td></tr>
 <tr class="memitem:a9d1babf532b0c03a8c4ceb90b4abdad0" id="r_a9d1babf532b0c03a8c4ceb90b4abdad0"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9d1babf532b0c03a8c4ceb90b4abdad0">H5_VERS_INFO</a>&#160;&#160;&#160;&quot;HDF5 library version: &quot; H5_VERS_STR</td></tr>
 <tr class="memitem:a2e023f2234f425586a739326ed60a0e7" id="r_a2e023f2234f425586a739326ed60a0e7"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a2e023f2234f425586a739326ed60a0e7">H5_VERS_MAJOR</a>&#160;&#160;&#160;2</td></tr>
-<tr class="memitem:a5b3e8a3018bd75d21128679ac8f6ad27" id="r_a5b3e8a3018bd75d21128679ac8f6ad27"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5b3e8a3018bd75d21128679ac8f6ad27">H5_VERS_MINOR</a>&#160;&#160;&#160;3</td></tr>
+<tr class="memitem:a5b3e8a3018bd75d21128679ac8f6ad27" id="r_a5b3e8a3018bd75d21128679ac8f6ad27"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5b3e8a3018bd75d21128679ac8f6ad27">H5_VERS_MINOR</a>&#160;&#160;&#160;2</td></tr>
 <tr class="memitem:acdf2fb4576aa2977ee0e6192902c88aa" id="r_acdf2fb4576aa2977ee0e6192902c88aa"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#acdf2fb4576aa2977ee0e6192902c88aa">H5_VERS_RELEASE</a>&#160;&#160;&#160;0</td></tr>
 <tr class="memitem:a55f72619fa2357ee29920c7cb6336665" id="r_a55f72619fa2357ee29920c7cb6336665"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a55f72619fa2357ee29920c7cb6336665">H5_VERS_STR</a>&#160;&#160;&#160;<a class="el" href="#aa10285e2be474df381f891fcc90b5ab6">H5_VERS_STR_CONCAT</a>(<a class="el" href="#a2e023f2234f425586a739326ed60a0e7">H5_VERS_MAJOR</a>, <a class="el" href="#a5b3e8a3018bd75d21128679ac8f6ad27">H5_VERS_MINOR</a>, <a class="el" href="#acdf2fb4576aa2977ee0e6192902c88aa">H5_VERS_RELEASE</a>, <a class="el" href="#a65daa5febc7d5af096b9750337b24fff">H5_VERS_SUBRELEASE</a>)</td></tr>
 <tr class="memitem:aa10285e2be474df381f891fcc90b5ab6" id="r_aa10285e2be474df381f891fcc90b5ab6"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aa10285e2be474df381f891fcc90b5ab6">H5_VERS_STR_CONCAT</a>(major,  minor,  release,  sub)</td></tr>
 <tr class="memitem:af1cbaffbd4a538050fd383283e8df2df" id="r_af1cbaffbd4a538050fd383283e8df2df"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af1cbaffbd4a538050fd383283e8df2df">H5_VERS_STR_HELPER</a>(major,  minor,  release)</td></tr>
-<tr class="memitem:a65daa5febc7d5af096b9750337b24fff" id="r_a65daa5febc7d5af096b9750337b24fff"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a65daa5febc7d5af096b9750337b24fff">H5_VERS_SUBRELEASE</a>&#160;&#160;&#160;&quot;-3340ba5&quot;</td></tr>
+<tr class="memitem:a65daa5febc7d5af096b9750337b24fff" id="r_a65daa5febc7d5af096b9750337b24fff"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a65daa5febc7d5af096b9750337b24fff">H5_VERS_SUBRELEASE</a>&#160;&#160;&#160;&quot;-rc1&quot;</td></tr>
 <tr class="memitem:aa80cec001d4154b554aa2b0b6223a7f3" id="r_aa80cec001d4154b554aa2b0b6223a7f3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aa80cec001d4154b554aa2b0b6223a7f3">H5_VERSION_GE</a>(Maj,  Min,  Rel)</td></tr>
 <tr class="memdesc:aa80cec001d4154b554aa2b0b6223a7f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines whether the version of the library being used is greater than or equal to the specified version.  <br /></td></tr>
 <tr class="memitem:acc311aa4fed2832a44c4bb93f2625043" id="r_acc311aa4fed2832a44c4bb93f2625043"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#acc311aa4fed2832a44c4bb93f2625043">H5_VERSION_LE</a>(Maj,  Min,  Rel)</td></tr>
@@ -462,7 +462,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define H5_VERS_MINOR&#160;&#160;&#160;3</td>
+          <td class="memname">#define H5_VERS_MINOR&#160;&#160;&#160;2</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -568,7 +568,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define H5_VERS_SUBRELEASE&#160;&#160;&#160;&quot;-3340ba5&quot;</td>
+          <td class="memname">#define H5_VERS_SUBRELEASE&#160;&#160;&#160;&quot;-rc1&quot;</td>
         </tr>
       </table>
 </div><div class="memdoc">
