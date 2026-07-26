@@ -954,14 +954,6 @@ H5C__verify_len_eoa(H5F_t *f, const H5C_class_t *type, haddr_t addr, size_t *len
 
     FUNC_ENTER_PACKAGE
 
-    /*
-     * SWMR readers can observe metadata flushed by a writer before their local
-     * EOA cache is refreshed.  Lower VFD read paths already bypass EOA
-     * validation for SWMR reads and rely on read retries / EOF handling.
-     */
-    if (H5F_INTENT(f) & H5F_ACC_SWMR_READ)
-        HGOTO_DONE(SUCCEED);
-
     /* if type == H5FD_MEM_GHEAP, H5F_block_read() forces
      * type to H5FD_MEM_DRAW via its call to H5F__accum_read().
      * Thus we do the same for purposes of computing the EOA
@@ -1054,12 +1046,16 @@ H5C__load_entry(H5F_t *f,
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "can't retrieve image size");
     assert(len > 0);
 
-    /* Check for possible reads off the end of the file before allocating */
+    /*
+     * SWMR readers can observe newly flushed non-speculative metadata before
+     * their local EOA cache is refreshed. Preserve the existing EOA checks for
+     * speculative loads.
+     */
     if (type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG) {
         if (H5C__verify_len_eoa(f, type, addr, &len, false) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "invalid len with respect to EOA");
     }
-    else if (H5C__verify_len_eoa(f, type, addr, &len, true) < 0)
+    else if (!(H5F_INTENT(f) & H5F_ACC_SWMR_READ) && H5C__verify_len_eoa(f, type, addr, &len, true) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "invalid len with respect to EOA");
 
     /* Allocate the buffer for reading the on-disk entry image */

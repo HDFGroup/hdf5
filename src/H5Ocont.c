@@ -23,11 +23,9 @@
  */
 
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
-#define H5F_FRIEND     /*suppress error about including H5Fpkg   */
 
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fpkg.h"      /* Files				*/
 #include "H5FLprivate.h" /* Free Lists				*/
 #include "H5Opkg.h"      /* Object headers			*/
 
