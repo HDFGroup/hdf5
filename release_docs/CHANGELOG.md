@@ -212,6 +212,12 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
    Fixed a bug in H5O__dtype_decode_helper() where the loop computing the total number of elements in an array datatype had no per-step overflow check. On 64-bit systems, large dimension sizes could cause the element count to wrap around, bypassing the post-loop overflow check and producing silently incorrect results in downstream type conversion and size calculations.
 
+### Validate VL datatype type during decode
+
+   When decoding a variable-length datatype message, `H5O__dtype_decode_helper()` set `vlen.type` directly from the flags byte read from the file, guarded only by an assertion in `H5T__vlen_set_loc()` that is removed in release builds. A corrupted or fuzzed file could supply a `vlen.type` that is neither `H5T_VLEN_SEQUENCE` nor `H5T_VLEN_STRING`, triggering the assertion in debug builds or a NULL pointer dereference in release builds. `H5O__dtype_decode_helper()` now rejects an invalid `vlen.type` as soon as it is read, and `H5T_set_loc()` now also checks for a NULL file pointer before calling `H5T__vlen_set_loc()` for disk-based VL types.
+
+   Fixes CVE-2026-17574
+
 ### Fixed an issue with chunked datasets using the wrong index type with parallel HDF5
 
    Fixed a bug in parallel HDF5 that would cause chunked datasets with fixed dimensions and without filters applied to use the "none" index type instead of the "fixed array" index type.
