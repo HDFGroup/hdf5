@@ -29,7 +29,6 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 > - The format of the GitHub tag for HDF5 releases has been changed to Major.Minor.Patch, consistent with the versioning policy change to follow the Semantic Versioning Specification described in this [Wiki page](https://github.com/HDFGroup/hdf5/wiki/HDF5-Version-Numbers-and-Branch-Strategy).  The previous tag format hdf5_Major_Minor_Patch that was created in addition for the 2.0.0 and 2.1.0 releases will not be continued.
 > - An RPM package is not provided for this release of HDF5 as an issue with the package was found during testing. The HDF Group is investigating alternative packaging methods for future releases.
 
-
 ## Performance Enhancements:
 
 - Added an I/O block cache to the ROS3 VFD to reduce the number of requests to S3 for files not using paged allocation
@@ -149,6 +148,10 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 # 🪲 Bug Fixes
 
+## CVEs
+
+- Addresses CVE-2025-9274, CVE-2026-17572, CVE-2026-17573, and CVE-2026-17574.
+
 ## Library
 
 ### Fixed a possible heap leak in a utility function
@@ -156,6 +159,7 @@ The `h5repack` tool now obtains its default low and high library version bounds 
    A couple of unnecessary allocations in h5str_convert were never freed, causing memory leaks. These are now removed.
 
    Fixes GitHub issue #6511
+
 ### Fixed bug that prevented internal library filters from printing error messages
 
    Previously the error stack would be cleared when exiting a data filter, even an internal library filter, so the user could not see what caused the filter to fail. This has been fixed by not treating internal data filters like a user callback. Note that user-defined or third-party filters that use the default error stack will need to print that stack before returning from their callbacks.
@@ -177,6 +181,8 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 ### Fixed a heap buffer overflow when decoding a shared message list
 
    When reading a shared object header message (SOHM) list from the metadata cache, `H5SM__cache_list_deserialize()` allocated the message array for `list_max` entries but drove the decode loop with the `num_messages` count read from the on-disk index header. A corrupted or malicious file whose `num_messages` exceeds `list_max` caused writes past the end of the array and reads past the end of the input buffer. The count is now validated against `list_max` before the loop runs.
+
+   Fixes CVE-2026-17572
 
 ### HTTP 403 errors in the ROS3 VFD for object keys with special characters
 
