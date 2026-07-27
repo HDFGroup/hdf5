@@ -148,10 +148,6 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 # 🪲 Bug Fixes
 
-## CVEs
-
-- Addresses CVE-2025-9274, CVE-2026-17572, CVE-2026-17573, and CVE-2026-17574.
-
 ## Library
 
 ### Fixed a possible heap leak in a utility function
