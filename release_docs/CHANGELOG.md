@@ -239,7 +239,7 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ### Fixed INSTALL_CMAKE_DIR for GNU_DIRS and enabled it by default on Linux.
 
-   The previous `lib/cmake/hdf5-config.cmake` wasn't in CMake's find_package
+   The previous `lib/cmake/hdf5-config.cmake` wasn't in CMake's `find_package`
    search path since CMake expects that to be a common path with each
    package having its own subdirectory. This changes it to
    `lib/cmake/hdf5/hdf5-config.cmake` so the config is now found when the
