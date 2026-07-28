@@ -30,7 +30,27 @@ the HDF5 source code tree in the release_docs directory.
 
 \subsubsection subsubsec_rel_spec_2x_change_22versus21 Release 2.2.0 versus Release 2.1.0
 
+List of new public APIs/Macros
 
+<table>
+<tr><th>Function/Constant</th><th>Description</th></tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5Pget_fapl_ros3_block_caching()
+</td>
+<td>
+Queries a File Access Property List for H5FD_ROS3 I/O block caching parameters
+</td>
+</tr>
+<tr>
+<td style="background-color:#F5F5F5">
+H5Pset_fapl_ros3_block_caching()
+</td>
+<td>
+Modifies the specified File Access Property List to set I/O block caching parameters for the H5FD_ROS3 driver
+</td>
+</tr>
+</table>
 
 \subsubsection subsubsec_rel_spec_2x_change_21versus20 Release 2.1.0 versus Release 2.0.0
 

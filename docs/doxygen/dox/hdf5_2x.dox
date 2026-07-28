@@ -27,7 +27,7 @@
 Additional Release Information
 </td>
 <td>
-<a href="https://\SRCURLALL/hdf5_2.1.1/release_docs/CHANGELOG.md">CHANGELOG.md</a>
+<a href="https://\SRCURLALL/hdf5_2.2.0/release_docs/CHANGELOG.md">CHANGELOG.md</a>
 </td>
 </tr>
 <tr>
@@ -49,13 +49,6 @@ Additional Release Information
 </td>
 <td>
 \ref sec_rel_spec_2x_feat
-</td>
-</tr>
-<tr>
-<td style="background-color:#F5F5F5">
-</td>
-<td>
-[Newsletter Announcement](https://www.hdfgroup.org/2026/03/10/release-of-hdf5-2-1-0-newsletter-209/)
 </td>
 </tr>
 <tr>
@@ -123,7 +116,17 @@ This section highlights some changes that might affect migrating to HDF5 2.x, pl
 This section includes the new features introduced in the HDF5 2.x series:
 
 \li In 2.2.0
-Faster Access to Data Stored in S3                                                                                                                                                                A major enhancement in HDF5 2.2.0 is the addition of an I/O block cache for the ROS3 Virtual File Driver (VFD). By reducing the number of requests sent to Amazon S3 for files that do not use paged allocation, applications can achieve more efficient cloud-based data access with fewer network transactions and improved overall performance.                                                                                                                                                   Additional optimizations delay initial file caching until the first read operation, reducing file-open overhead.                                                                                                                                                                                   Enhanced Security with Signed Plugin Support                                                                                                                                                      HDF5 2.2.0 introduces optional digital signature verification for dynamically loaded plugins. Organizations can now cryptographically verify plugins before loading them, helping protect scientific and production environments from unauthorized or modified plugin binaries.                                                                                                                     A new h5sign utility allows developers to sign plugin libraries using RSA signatures, while configurable keystores support trusted-key management and signature revocation.
+Faster Access to Data Stored in S3
+
+A major enhancement in HDF5 2.2.0 is the addition of an I/O block cache for the ROS3 Virtual File Driver (VFD). By reducing the number of requests sent to Amazon S3 for files that do not use paged allocation, applications can achieve more efficient cloud-based data access with fewer network transactions and improved overall performance.
+
+Additional optimizations delay initial file caching until the first read operation, reducing file-open overhead.
+
+Enhanced Security with Signed Plugin Support
+
+HDF5 2.2.0 introduces optional digital signature verification for dynamically loaded plugins. Organizations can now cryptographically verify plugins before loading them, helping protect scientific and production environments from unauthorized or modified plugin binaries.
+
+A new h5sign utility allows developers to sign plugin libraries using RSA signatures, while configurable keystores support trusted-key management and signature revocation.
 
 \li In 2.0.0
 
