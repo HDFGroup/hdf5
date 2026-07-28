@@ -87,7 +87,7 @@ Please refer to [Build instructions](https://\SRCURLALL/hdf5_\CURRENT_VER/releas
     gzip -cd <distribution>.tar.gz | tar xvf -
 @endcode
 </div>
-<distribution> is hdf5-${PACKAGEVERSION}, where PACKAGEVERSION is \CURRENT_VER for this release
+\<distribution\> is hdf5-${PACKAGEVERSION}, where PACKAGEVERSION is \CURRENT_VER for this release
 
 
 \subsection subsec_dox_gen_doc_2x Doxygen Generated Reference Manual
