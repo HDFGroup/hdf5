@@ -1,4 +1,4 @@
-HDF5 version 2.2.0 released on 2026-07-27
+HDF5 version 2.2.0 released on 2026-07-28
 
 ---
 
