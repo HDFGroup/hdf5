@@ -160,9 +160,9 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
    Previously the error stack would be cleared when exiting a data filter, even an internal library filter, so the user could not see what caused the filter to fail. This has been fixed by not treating internal data filters like a user callback. Note that user-defined or third-party filters that use the default error stack will need to print that stack before returning from their callbacks.
 
-### Fixed error when reading variable-length chunked datasets in read-only mode
+### Fix NULL pointer access when H5A_operator2_t is NULL
 
-   Passing NULL for the callback function pointer to H5Aiterate2 and H5Aiterate_by_name was not detected, leading to a subsequent access of an uninitialized pointer. This is now fixed.
+   Passing NULL for the callback function pointer to H5Aiterate2 and H5Aiterate_by_name was not detected, leading to a subsequent access of a NULL pointer. This is now fixed.
 
     Fixes CVE-2025-9274
 
