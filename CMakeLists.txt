@@ -446,10 +446,6 @@ endif ()
 set (HDF5_PACKAGE "hdf5")
 set (HDF5_PACKAGE_NAME "HDF5")
 set (HDF5_PACKAGE_VERSION "${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}")
-# The previous released version, used for documentation that compares the
-# current release against its predecessor (e.g. ABI/API compatibility
-# reports). This must be updated by hand alongside each version bump.
-set (HDF5_PREVIOUS_VERSION "2.1.1")
 set (HDF5_PACKAGE_VERSION_MAJOR "${H5_VERS_MAJOR}.${H5_VERS_MINOR}")
 set (HDF5_PACKAGE_VERSION_MINOR "${H5_VERS_RELEASE}")
 if (H5_VERS_SUBRELEASE)
