@@ -125,6 +125,21 @@ jobs:
           echo "HDF5R_ROOT=$HDF5RDIR$FILE_NAME_HDF5R" >> $GITHUB_OUTPUT
           echo "HDF5R_VERS=$FILE_NAME_HDF5R" >> $GITHUB_OUTPUT
 
+      # These third-party header files are not part of the ABI and are currently
+      # installed incidentally, but will be removed or relocated in the future.
+      - name: Remove third-party header files (Linux)
+        run: |
+          rm -f ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/include/H5Zzfp*.h
+          rm -f ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/include/H5Zzfp*.h
+          rm -f ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/include/libaec*.h
+          rm -f ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/include/libaec*.h
+          rm -f ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/include/szlib*.h
+          rm -f ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/include/szlib*.h
+          rm -f ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/include/zconf*.h
+          rm -f ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/include/zconf*.h
+          rm -f ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/include/zlib*.h
+          rm -f ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/include/zlib*.h
+
       - name: List files for the lib spaces (Linux)
         run: |
           ls -l ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib
