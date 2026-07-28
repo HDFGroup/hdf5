@@ -188,7 +188,8 @@ TAB_SIZE               = 4
 # @} or use a double escape (\\{ and \\})
 
 
-ALIASES                =
+ALIASES                = "CURRENT_VER=@HDF5_PACKAGE_VERSION@" \
+                          "PREVIOUS_VER=@HDF5_PREVIOUS_VERSION@"
 
 @INCLUDE_PATH          = @DOXYGEN_INCLUDE_ALIASES_PATH@
 @INCLUDE               = @DOXYGEN_INCLUDE_ALIASES@
