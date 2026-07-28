@@ -85,7 +85,7 @@ Please refer to [Build instructions](https://\SRCURLALL/hdf5_2.2.0/release_docs/
     `wget github.com/HDFGroup/hdf5/releases/download/${PACKAGEVERSION}/<distribution>.tar.gz`<br>
     `gzip -cd <distribution>.tar.gz | tar xvf -`
 </div>
-\li `<distribution>` is hdf5-${PACKAGEVERSION}, where PACKAGEVERSION is 2.1.0 for this release
+\li `<distribution>` is hdf5-${PACKAGEVERSION}, where PACKAGEVERSION is 2.2.0 for this release
 
 
 \subsection subsec_dox_gen_doc_2x Doxygen Generated Reference Manual
