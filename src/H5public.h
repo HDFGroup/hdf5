@@ -81,7 +81,7 @@
  *   Invalid: #define H5_VERS_SUBRELEASE -snap0
  *
  */
-#define H5_VERS_SUBRELEASE "-rc1"
+#define H5_VERS_SUBRELEASE ""
 
 /* Derived version strings - automatically generated from the above */
 /**

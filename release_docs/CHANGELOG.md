@@ -1,4 +1,6 @@
-v2.2.0-rc1 -- July 22, 2026
+HDF5 version 2.2.0 released on 2026-07-28
+
+---
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
