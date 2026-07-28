@@ -86986,6 +86986,7 @@
     <docanchor file="rel_spec_2x_change.html" title="Software Changes from Release to Release in HDF5 2.x">sec_rel_spec_2x_change</docanchor>
     <docanchor file="rel_spec_2x_change.html" title="API Compatibility">subsec_rel_spec_2x_change_compat</docanchor>
     <docanchor file="rel_spec_2x_change.html" title="Changes between releases">subsec_rel_spec_2x_bw_releases</docanchor>
+    <docanchor file="rel_spec_2x_change.html" title="Release 2.2.0 versus Release 2.1.0">subsubsec_rel_spec_2x_change_22versus21</docanchor>
     <docanchor file="rel_spec_2x_change.html" title="Release 2.1.0 versus Release 2.0.0">subsubsec_rel_spec_2x_change_21versus20</docanchor>
     <docanchor file="rel_spec_2x_change.html" title="Release 2.0.0 versus Release 1.14.6">subsubsec_rel_spec_2x_change_20versus14_6</docanchor>
   </compound>
