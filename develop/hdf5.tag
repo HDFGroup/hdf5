@@ -86383,6 +86383,8 @@
     <docanchor file="rel_spec_2x.html" title="Migrating from HDF5 1.14 to HDF5 2.x">sec_rel_spec_2x_migrate</docanchor>
     <docanchor file="rel_spec_2x.html">fileformat</docanchor>
     <docanchor file="rel_spec_2x.html" title="New Features in HDF5 Release 2.x">sec_rel_spec_2x_feat</docanchor>
+    <docanchor file="rel_spec_2x.html" title="In 2.2.0">subsubsec_in220</docanchor>
+    <docanchor file="rel_spec_2x.html" title="In 2.0.0">subsubsec_in200</docanchor>
   </compound>
   <compound kind="page">
     <name>CompTS</name>
