@@ -1235,6 +1235,12 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         assert(minbits <= p.size * 8);
         p.minbits = minbits;
 
+        /* the compressed stream starts after the fixed-size parameter header, so
+         * the input buffer has to hold that header before it can be skipped
+         */
+        if (H5_IS_BUFFER_OVERFLOW((unsigned char *)*buf, buf_offset, (unsigned char *)*buf + *buf_size - 1))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
+
         /* calculate size of output buffer after decompression */
         size_out = d_nelmts * (size_t)p.size;
 
@@ -1245,6 +1251,10 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
 
         /* special case: minbits equal to full precision */
         if (minbits == p.size * 8) {
+            if (H5_IS_BUFFER_OVERFLOW((unsigned char *)(*buf) + buf_offset, size_out,
+                                      (unsigned char *)*buf + *buf_size - 1))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
+
             H5MM_memcpy(outbuf, (unsigned char *)(*buf) + buf_offset, size_out);
             /* free the original buffer */
             H5MM_xfree(*buf);

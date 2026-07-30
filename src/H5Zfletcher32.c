@@ -62,6 +62,12 @@ H5Z__filter_fletcher32(unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts,
     assert(sizeof(uint32_t) >= 4);
 
     if (flags & H5Z_FLAG_REVERSE) { /* Read */
+        /* The checksum is stored at the end of the chunk, so anything shorter
+         * than the checksum itself makes the length arithmetic below wrap
+         */
+        if (nbytes < FLETCHER_LEN)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
+
         /* Do checksum if it's enabled for read; otherwise skip it
          * to save performance. */
         if (!(flags & H5Z_FLAG_SKIP_EDC)) {

@@ -45,6 +45,12 @@
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 #define DATASETNAME14 "deprec"
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
+/* Datasets holding a chunk shorter than its filter's header/trailer */
+#define DATASETNAME15       "short_scaleoffset_header"
+#define DATASETNAME16       "short_scaleoffset_data"
+#define DATASETNAME17       "short_fletcher32"
+#define SHORT_CHUNK_NELMTS  4
+#define SHORT_CHUNK_RAW_MAX 25 /* longest raw chunk any of the cases stores */
 
 #define RANK     2
 #define NX       16
@@ -2139,6 +2145,153 @@ error:
 } /* test_read_unfiltered_dset() */
 
 /*-------------------------------------------------------------------------
+ * Function:    short_chunk_case
+ *
+ * Purpose:     Helper for test_short_filtered_chunk().  Stores RAW verbatim as
+ *              the dataset's only chunk and reads it back, expecting failure.
+ *
+ * Return:      Success:        0
+ *              Failure:        1
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+short_chunk_case(hid_t file, const char *name, hid_t dcpl, const unsigned char *raw, size_t raw_len)
+{
+    hid_t    sid       = H5I_INVALID_HID;
+    hid_t    did       = H5I_INVALID_HID;
+    hsize_t  dims[1]   = {SHORT_CHUNK_NELMTS};
+    hsize_t  offset[1] = {0};
+    uint32_t rdata[SHORT_CHUNK_NELMTS];
+    herr_t   status;
+
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        FAIL_STACK_ERROR;
+    if ((did = H5Dcreate2(file, name, H5T_NATIVE_UINT32, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* A filter mask of 0 means every filter in the pipeline was applied, so the
+     * read side runs the whole pipeline over these bytes */
+    if (H5Dwrite_chunk(did, H5P_DEFAULT, 0, offset, raw_len, raw) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Dclose(did) < 0)
+        FAIL_STACK_ERROR;
+
+    if ((did = H5Dopen2(file, name, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+
+    H5E_BEGIN_TRY
+    {
+        status = H5Dread(did, H5T_NATIVE_UINT32, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+    }
+    H5E_END_TRY
+
+    if (status >= 0)
+        TEST_ERROR;
+
+    if (H5Dclose(did) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Sclose(sid) < 0)
+        FAIL_STACK_ERROR;
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(did);
+        H5Sclose(sid);
+    }
+    H5E_END_TRY
+
+    return 1;
+} /* short_chunk_case() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_short_filtered_chunk
+ *
+ * Purpose:     Reads back chunks that are shorter than the header or trailer
+ *              the filter itself writes.  H5Dwrite_chunk() stores the bytes
+ *              verbatim, so this is the same input a truncated or corrupted
+ *              chunk record produces.  The filter has to reject the chunk
+ *              instead of running its length arithmetic past the buffer.
+ *
+ * Return:      Success:        0
+ *              Failure:        1
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_short_filtered_chunk(hid_t file)
+{
+    hid_t         dcpl     = H5I_INVALID_HID;
+    hsize_t       chunk[1] = {SHORT_CHUNK_NELMTS};
+    unsigned char raw[SHORT_CHUNK_RAW_MAX];
+    unsigned      i;
+
+    TESTING("reading a filtered chunk shorter than the filter's own header");
+
+    memset(raw, 0xAA, sizeof(raw));
+
+    /* scaleoffset writes a 21 byte parameter block ahead of the compressed
+     * stream: 4 bytes of minbits, 1 byte of sizeof(minval), then minval */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pset_chunk(dcpl, 1, chunk) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pset_scaleoffset(dcpl, H5Z_SO_INT, 0) < 0)
+        FAIL_STACK_ERROR;
+
+    raw[4] = (unsigned char)sizeof(unsigned long long);
+    for (i = 5; i < 13; i++)
+        raw[i] = 0;
+
+    /* minbits below full precision, chunk shorter than the parameter block */
+    raw[0] = 2;
+    raw[1] = raw[2] = raw[3] = 0;
+    if (short_chunk_case(file, DATASETNAME15, dcpl, raw, 16) != 0)
+        goto error;
+
+    /* minbits at full precision, so the read side copies the whole chunk out
+     * of the buffer rather than decompressing it */
+    raw[0] = (unsigned char)(sizeof(uint32_t) * 8);
+    raw[1] = raw[2] = raw[3] = 0;
+    if (short_chunk_case(file, DATASETNAME16, dcpl, raw, 25) != 0)
+        goto error;
+
+    if (H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
+    dcpl = H5I_INVALID_HID;
+
+    /* fletcher32 stores its 4 byte checksum after the data */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pset_chunk(dcpl, 1, chunk) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pset_fletcher32(dcpl) < 0)
+        FAIL_STACK_ERROR;
+    if (short_chunk_case(file, DATASETNAME17, dcpl, raw, 2) != 0)
+        goto error;
+
+    if (H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
+    dcpl = H5I_INVALID_HID;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+
+    H5_FAILED();
+    return 1;
+} /* test_short_filtered_chunk() */
+
+/*-------------------------------------------------------------------------
  * Function:    test_read_unallocated_chunk
  *
  * Purpose:     Tests the H5Dread_chunk2 and H5Dget_chunk_storage_size with valid
@@ -2747,6 +2900,7 @@ main(void)
     nerrors += test_direct_chunk_read_cache(file_id, false);
 #endif /* H5_HAVE_FILTER_DEFLATE */
     nerrors += test_read_unfiltered_dset(file_id);
+    nerrors += test_short_filtered_chunk(file_id);
     nerrors += test_read_unallocated_chunk(file_id);
     nerrors += test_direct_chunk_read_buf_size(file_id);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
