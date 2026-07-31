@@ -745,7 +745,7 @@ if (HDF5_BUILD_FORTRAN)
         message (VERBOSE "Detecting C ${FUNCTION_NAME}")
         file (WRITE
             ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
-            ${SOURCE_CODE}
+          "${SOURCE_CODE}"
         )
         try_run (RUN_RESULT_VAR COMPILE_RESULT_VAR
             SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
@@ -781,29 +781,30 @@ if (HDF5_BUILD_FORTRAN)
             message (FATAL_ERROR "Compilation of C ${FUNCTION_NAME} - Failed")
         endif ()
     endmacro ()
-    set (PROG_SRC
-        "
-#include <float.h>\n\
-#include <stdio.h>\n\
-#if ${C_HAVE_FLOAT128}\n\
-#  if ${C_INCLUDE_QUADMATH_H}\n\
-#    include <quadmath.h>\n\
-#  endif\n\
-#  ifdef FLT128_DIG\n\
-#    define C_FLT128_DIG FLT128_DIG\n\
-#  else\n\
-#    define C_FLT128_DIG 0\n\
-#  endif\n\
-#else\n\
-#  define C_FLT128_DIG 0\n\
-#endif\n\
-#define C_LDBL_DIG DECIMAL_DIG\n\
-\n\
-int main(void) {\nprintf(\"\\%d\\\;\\%d\\\;\", C_LDBL_DIG, C_FLT128_DIG)\\\;\n\nreturn 0\\\;\n}\n
-        "
-    )
+    string (CONFIGURE [=[
+  #include <float.h>
+  #include <stdio.h>
+  #if @C_HAVE_FLOAT128@
+  #  if @C_INCLUDE_QUADMATH_H@
+  #    include <quadmath.h>
+  #  endif
+  #  ifdef FLT128_DIG
+  #    define C_FLT128_DIG FLT128_DIG
+  #  else
+  #    define C_FLT128_DIG 0
+  #  endif
+  #else
+  #  define C_FLT128_DIG 0
+  #endif
+  #define C_LDBL_DIG DECIMAL_DIG
 
-    C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_RES PROG_OUTPUT4)
+  int main(void) {
+    printf("%d;%d;", C_LDBL_DIG, C_FLT128_DIG);
+    return 0;
+  }
+  ]=] PROG_SRC @ONLY)
+
+    C_RUN ("maximum decimal precision for C" "${PROG_SRC}" PROG_RES PROG_OUTPUT4)
     message (STATUS "Testing maximum decimal precision for C - ${PROG_OUTPUT4}")
 
     # The output from the above program will be:
