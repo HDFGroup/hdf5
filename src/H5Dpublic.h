@@ -864,13 +864,19 @@ H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
  *          be the constant #H5S_ALL, in which case the file dataspace is
  *          used for the memory dataspace and the selection defined with \p
  *          file_space_id is used for the selection within that dataspace.
+ *          \p mem_space_id can also be the constant #H5S_BLOCK, which
+ *          indicates that the buffer provided is a single contiguous block
+ *          of memory, with the same # of elements as specified in the
+ *          \p file_space_id selection, equivalent to a 1-D dataspace
+ *          containing this number of elements and all elements selected.
  *
  *          The number of elements selected in the memory dataspace \Emph{must}
  *          be equal to the number of elements selected in the file dataspace.
  *
  *          The behavior of the library for the various combinations of
- *          valid dataspace identifiers and #H5S_ALL for the \p mem_space_id
- *          and the \p file_space_id parameters is described below:
+ *          valid dataspace identifiers, #H5S_ALL, and #H5S_BLOCK for the \p
+            mem_space_id and the \p file_space_id parameters is described
+            below:
  *
  *          <table>
  *            <tr>
@@ -888,11 +894,20 @@ H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
  *            <tr>
  *              <td>#H5S_ALL</td>
  *              <td>valid dataspace ID</td>
- *              <td>The file dataset's dataspace is used for the memory
+ *              <td>The file dataset's dataspace is used for the file
  *                  dataspace and the selection specified with \p file_space_id
  *                  specifies the selection within it. The combination of the
  *                  file dataset's dataspace and the selection from
  *                  \p file_space_id is used for memory also.</td>
+ *            </tr>
+ *            <tr>
+ *              <td>#H5S_BLOCK</td>
+ *              <td>valid dataspace ID</td>
+ *              <td>The file dataset's dataspace is used for the file
+ *                  dataspace and the selection specified with \p file_space_id
+ *                  specifies the selection within it. The memory buffer is a
+ *                  pointer to a contiguous block of a number of elements equal
+ *                  to the number of elements selected in \p file_space_id.</td>
  *            </tr>
  *            <tr>
  *              <td>valid dataspace ID</td>
@@ -908,6 +923,15 @@ H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
  *                  dataspace and the selection within the memory dataspace
  *                  is set to the "all" selection. The selection within the
  *                  file dataset's dataspace is set to the "all" selection.</td>
+ *            </tr>
+ *            <tr>
+ *              <td>#H5S_BLOCK</td>
+ *              <td>#H5S_ALL</td>
+ *              <td>The selection within the file dataset's dataspace is set to
+ *                  the "all" selection. The memory buffer is a pointer to a
+ *                  contiguous block of a number of elements equal to the number
+ *                  of elements in the file dataset's dataspace
+ *                  extent.</td></td>
  *            </tr>
  *          </table>
  *
@@ -1037,44 +1061,77 @@ H5_DLL herr_t H5Dread_multi_async(size_t count, hid_t dset_id[], hid_t mem_type_
  *          be selected.
  *
  *          \p mem_space_id is used to specify both the memory dataspace
- *          and the selection within that dataspace. mem_space_id can be
+ *          and the selection within that dataspace. \p mem_space_id can be
  *          the constant #H5S_ALL, in which case the file dataspace is
  *          used for the memory dataspace and the selection defined with \p
  *          file_space_id is used for the selection within that dataspace.
+ *          \p mem_space_id can also be the constant #H5S_BLOCK, which
+ *          indicates that the buffer provided is a single contiguous block
+ *          of memory, with the same # of elements as specified in the
+ *          \p file_space_id selection, equivalent to a 1-D dataspace
+ *          containing this number of elements and all elements selected.
  *
  *          The behavior of the library for the various combinations of
- *          valid dataspace IDs and #H5S_ALL for the mem_space_id and
- *          thefile_space_id parameters is described below:
+ *          valid dataspace IDs, #H5S_ALL, and #H5S_BLOCK for the \p
+            mem_space_id and the \p file_space_id parameters is described
+            below:
  *
  *          <table>
- *          <tr><th>\c mem_space_id</th>
- *          <th>\c file_space_id</th>
- *          <th>Behavior</th></tr>
- *          <tr><td>valid dataspace ID</td>
+ *            <tr>
+ *              <th>\c mem_space_id</th>
+ *              <th>\c file_space_id</th>
+ *              <th>Behavior</th>
+ *            </tr>
+ *            <tr>
+ *              <td>valid dataspace ID</td>
  *              <td>valid dataspace ID</td>
  *              <td>\p mem_space_id specifies the memory dataspace and the
  *                  selection within it. \p file_space_id specifies the
- *                  selection within the file dataset's dataspace.</td></tr>
- *          <tr><td>#H5S_ALL</td>
+ *                  selection within the file dataset's dataspace.</td>
+ *            </tr>
+ *            <tr>
+ *              <td>#H5S_ALL</td>
  *              <td>valid dataspace ID</td>
- *              <td>The file dataset's dataspace is used for the memory
+ *              <td>The file dataset's dataspace is used for the file
  *                  dataspace and the selection specified with \p file_space_id
  *                  specifies the selection within it. The combination of the
  *                  file dataset's dataspace and the selection from \p
- *                  file_space_id is used for memory also. valid dataspace
- *                  ID</td></tr>
- *          <tr><td>valid dataspace ID</td>
+ *                  file_space_id is used for memory also.</td>
+ *            </tr>
+ *            <tr>
+ *              <td>#H5S_BLOCK</td>
+ *              <td>valid dataspace ID</td>
+ *              <td>The file dataset's dataspace is used for the file
+ *                  dataspace and the selection specified with \p file_space_id
+ *                  specifies the selection within it. The memory buffer is a
+ *                  pointer to a contiguous block of a number of elements equal
+ *                  to the number of elements selected in \p file_space_id.</td>
+ *            </tr>
+ *            <tr>
+ *              <td>valid dataspace ID</td>
  *              <td>#H5S_ALL</td>
  *              <td>\p mem_space_id specifies the memory dataspace and the
  *                  selection within it. The selection within the file
- *                  dataset's dataspace is set to "all" selection.</td></tr>
- *          <tr><td>#H5S_ALL</td>
+ *                  dataset's dataspace is set to "all" selection.</td>
+ *            </tr>
+ *            <tr>
+ *              <td>#H5S_ALL</td>
  *              <td>#H5S_ALL</td>
  *              <td>The file dataset's dataspace is used for the memory
  *                  dataspace and the selection within the memory dataspace is
  *                  set to the "all" selection. The selection within the file
  *                  dataset's dataspace is set to the "all"
- *                  selection.</td></tr>
+ *                  selection.</td>
+ *            </tr>
+ *            <tr>
+ *              <td>#H5S_BLOCK</td>
+ *              <td>#H5S_ALL</td>
+ *              <td>The selection within the file dataset's dataspace is set to
+ *                  the "all" selection. The memory buffer is a pointer to a
+ *                  contiguous block of a number of elements equal to the number
+ *                  of elements in the file dataset's dataspace
+ *                  extent.</td></td>
+ *            </tr>
  *          </table>
  *          Setting an "all" selection indicates that the entire dataspace,
  *          as defined by the current dimensions of a dataspace, will
