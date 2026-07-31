@@ -1204,8 +1204,12 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         unsigned long long minval_mask  = 0;
         unsigned           minval_size  = 0;
 
+        /* Bound every read below by nbytes rather than *buf_size.  The caller may
+         * provide a buffer larger than the data it holds, so restrict the read
+         * to the valid nbytes.
+         */
         minbits = 0;
-        if (H5_IS_BUFFER_OVERFLOW((unsigned char *)*buf, 5, (unsigned char *)*buf + *buf_size - 1))
+        if (H5_IS_BUFFER_OVERFLOW((unsigned char *)*buf, 5, (unsigned char *)*buf + nbytes - 1))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
 
         for (i = 0; i < 4; i++) {
@@ -1223,8 +1227,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         minval_size = sizeof(unsigned long long) <= ((unsigned char *)*buf)[4] ? sizeof(unsigned long long)
                                                                                : ((unsigned char *)*buf)[4];
         minval      = 0;
-        if (H5_IS_BUFFER_OVERFLOW((unsigned char *)*buf, 5 + minval_size,
-                                  (unsigned char *)*buf + *buf_size - 1))
+        if (H5_IS_BUFFER_OVERFLOW((unsigned char *)*buf, 5 + minval_size, (unsigned char *)*buf + nbytes - 1))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
         for (i = 0; i < minval_size; i++) {
             minval_mask = ((unsigned char *)*buf)[5 + i];
@@ -1235,10 +1238,10 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         assert(minbits <= p.size * 8);
         p.minbits = minbits;
 
-        /* the compressed stream starts after the fixed-size parameter header, so
-         * the input buffer has to hold that header before it can be skipped
+        /* The compressed stream starts after the fixed-size parameter header, so
+         * the chunk has to hold that header before it can be skipped
          */
-        if (H5_IS_BUFFER_OVERFLOW((unsigned char *)*buf, buf_offset, (unsigned char *)*buf + *buf_size - 1))
+        if (H5_IS_BUFFER_OVERFLOW((unsigned char *)*buf, buf_offset, (unsigned char *)*buf + nbytes - 1))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
 
         /* calculate size of output buffer after decompression */
@@ -1252,7 +1255,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         /* special case: minbits equal to full precision */
         if (minbits == p.size * 8) {
             if (H5_IS_BUFFER_OVERFLOW((unsigned char *)(*buf) + buf_offset, size_out,
-                                      (unsigned char *)*buf + *buf_size - 1))
+                                      (unsigned char *)*buf + nbytes - 1))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
 
             H5MM_memcpy(outbuf, (unsigned char *)(*buf) + buf_offset, size_out);
@@ -1273,7 +1276,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         /* decompress the buffer if minbits not equal to zero */
         if (minbits != 0) {
             if (H5Z__scaleoffset_decompress(outbuf, d_nelmts, (unsigned char *)(*buf) + buf_offset,
-                                            *buf_size - buf_offset, p))
+                                            nbytes - buf_offset, p))
                 HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, 0, "Scaleoffset decompression failed");
         }
         else {

@@ -63,9 +63,12 @@ H5Z__filter_fletcher32(unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts,
 
     if (flags & H5Z_FLAG_REVERSE) { /* Read */
         /* The checksum is stored at the end of the chunk, so anything shorter
-         * than the checksum itself makes the length arithmetic below wrap
+         * than the checksum itself makes the length arithmetic below wrap.  A
+         * chunk of exactly FLETCHER_LEN bytes holds no data and would return a
+         * filtered size of zero, which the pipeline reports as a filter failure,
+         * so reject it here where the reason can be stated.
          */
-        if (nbytes < FLETCHER_LEN)
+        if (nbytes <= FLETCHER_LEN)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
 
         /* Do checksum if it's enabled for read; otherwise skip it

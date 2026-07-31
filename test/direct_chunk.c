@@ -46,11 +46,16 @@
 #define DATASETNAME14 "deprec"
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 /* Datasets holding a chunk shorter than its filter's header/trailer */
-#define DATASETNAME15       "short_scaleoffset_header"
-#define DATASETNAME16       "short_scaleoffset_data"
-#define DATASETNAME17       "short_fletcher32"
-#define SHORT_CHUNK_NELMTS  4
-#define SHORT_CHUNK_RAW_MAX 25 /* longest raw chunk any of the cases stores */
+#define DATASETNAME15      "short_scaleoffset_header"
+#define DATASETNAME16      "short_scaleoffset_data"
+#define DATASETNAME17      "short_fletcher32"
+#define DATASETNAME18      "short_scaleoffset_oversized_buffer"
+#define DATASETNAME19      "short_szip_header"
+#define SHORT_CHUNK_NELMTS 4
+/* Large enough that the unfiltered chunk dwarfs the stored bytes, so the chunk
+ * buffer the filter is handed is much longer than the data read into it */
+#define SHORT_CHUNK_BIG_NELMTS 1000
+#define SHORT_CHUNK_RAW_MAX    25 /* longest raw chunk any of the cases stores */
 
 #define RANK     2
 #define NX       16
@@ -2149,6 +2154,8 @@ error:
  *
  * Purpose:     Helper for test_short_filtered_chunk().  Stores RAW verbatim as
  *              the dataset's only chunk and reads it back, expecting failure.
+ *              NELMTS sets the dataset extent, and so the unfiltered size of
+ *              the chunk, independently of how many bytes RAW_LEN stores.
  *
  * Return:      Success:        0
  *              Failure:        1
@@ -2156,14 +2163,20 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-short_chunk_case(hid_t file, const char *name, hid_t dcpl, const unsigned char *raw, size_t raw_len)
+short_chunk_case(hid_t file, const char *name, hid_t dcpl, hsize_t nelmts, const unsigned char *raw,
+                 size_t raw_len)
 {
-    hid_t    sid       = H5I_INVALID_HID;
-    hid_t    did       = H5I_INVALID_HID;
-    hsize_t  dims[1]   = {SHORT_CHUNK_NELMTS};
-    hsize_t  offset[1] = {0};
-    uint32_t rdata[SHORT_CHUNK_NELMTS];
-    herr_t   status;
+    hid_t     sid       = H5I_INVALID_HID;
+    hid_t     did       = H5I_INVALID_HID;
+    hsize_t   dims[1]   = {0};
+    hsize_t   offset[1] = {0};
+    uint32_t *rdata     = NULL;
+    herr_t    status;
+
+    dims[0] = nelmts;
+
+    if (NULL == (rdata = malloc((size_t)nelmts * sizeof(uint32_t))))
+        TEST_ERROR;
 
     if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
         FAIL_STACK_ERROR;
@@ -2194,6 +2207,8 @@ short_chunk_case(hid_t file, const char *name, hid_t dcpl, const unsigned char *
     if (H5Sclose(sid) < 0)
         FAIL_STACK_ERROR;
 
+    free(rdata);
+
     return 0;
 
 error:
@@ -2203,6 +2218,8 @@ error:
         H5Sclose(sid);
     }
     H5E_END_TRY
+
+    free(rdata);
 
     return 1;
 } /* short_chunk_case() */
@@ -2224,14 +2241,20 @@ error:
 static int
 test_short_filtered_chunk(hid_t file)
 {
-    hid_t         dcpl     = H5I_INVALID_HID;
-    hsize_t       chunk[1] = {SHORT_CHUNK_NELMTS};
+    hid_t         dcpl         = H5I_INVALID_HID;
+    hsize_t       chunk[1]     = {SHORT_CHUNK_NELMTS};
+    hsize_t       big_chunk[1] = {SHORT_CHUNK_BIG_NELMTS};
     unsigned char raw[SHORT_CHUNK_RAW_MAX];
     unsigned      i;
+    int           nerrs = 0;
 
     TESTING("reading a filtered chunk shorter than the filter's own header");
 
     memset(raw, 0xAA, sizeof(raw));
+
+    raw[4] = (unsigned char)sizeof(unsigned long long);
+    for (i = 5; i < 13; i++)
+        raw[i] = 0;
 
     /* scaleoffset writes a 21 byte parameter block ahead of the compressed
      * stream: 4 bytes of minbits, 1 byte of sizeof(minval), then minval */
@@ -2242,22 +2265,34 @@ test_short_filtered_chunk(hid_t file)
     if (H5Pset_scaleoffset(dcpl, H5Z_SO_INT, 0) < 0)
         FAIL_STACK_ERROR;
 
-    raw[4] = (unsigned char)sizeof(unsigned long long);
-    for (i = 5; i < 13; i++)
-        raw[i] = 0;
-
     /* minbits below full precision, chunk shorter than the parameter block */
     raw[0] = 2;
     raw[1] = raw[2] = raw[3] = 0;
-    if (short_chunk_case(file, DATASETNAME15, dcpl, raw, 16) != 0)
-        goto error;
+    nerrs += short_chunk_case(file, DATASETNAME15, dcpl, SHORT_CHUNK_NELMTS, raw, 16);
 
     /* minbits at full precision, so the read side copies the whole chunk out
      * of the buffer rather than decompressing it */
     raw[0] = (unsigned char)(sizeof(uint32_t) * 8);
     raw[1] = raw[2] = raw[3] = 0;
-    if (short_chunk_case(file, DATASETNAME16, dcpl, raw, 25) != 0)
-        goto error;
+    nerrs += short_chunk_case(file, DATASETNAME16, dcpl, SHORT_CHUNK_NELMTS, raw, 25);
+
+    if (H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
+    dcpl = H5I_INVALID_HID;
+
+    /* Same truncated chunk, but on a dataset whose unfiltered chunk is much
+     * larger than the bytes stored for it.
+     */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pset_chunk(dcpl, 1, big_chunk) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pset_scaleoffset(dcpl, H5Z_SO_INT, 0) < 0)
+        FAIL_STACK_ERROR;
+
+    raw[0] = 2;
+    raw[1] = raw[2] = raw[3] = 0;
+    nerrs += short_chunk_case(file, DATASETNAME18, dcpl, SHORT_CHUNK_BIG_NELMTS, raw, 25);
 
     if (H5Pclose(dcpl) < 0)
         FAIL_STACK_ERROR;
@@ -2270,12 +2305,42 @@ test_short_filtered_chunk(hid_t file)
         FAIL_STACK_ERROR;
     if (H5Pset_fletcher32(dcpl) < 0)
         FAIL_STACK_ERROR;
-    if (short_chunk_case(file, DATASETNAME17, dcpl, raw, 2) != 0)
-        goto error;
+    nerrs += short_chunk_case(file, DATASETNAME17, dcpl, SHORT_CHUNK_NELMTS, raw, 2);
 
     if (H5Pclose(dcpl) < 0)
         FAIL_STACK_ERROR;
     dcpl = H5I_INVALID_HID;
+
+#ifdef H5_HAVE_FILTER_SZIP
+    /* szip stores the unfiltered length in a 4 byte header ahead of the
+     * compressed stream.  Only run this when the szip encoder is present,
+     * since H5Dcreate2() applies the filter to the new dataset.
+     */
+    {
+        unsigned filter_config = 0;
+
+        if (H5Zget_filter_info(H5Z_FILTER_SZIP, &filter_config) < 0)
+            FAIL_STACK_ERROR;
+
+        if ((filter_config & H5Z_FILTER_CONFIG_ENCODE_ENABLED) &&
+            (filter_config & H5Z_FILTER_CONFIG_DECODE_ENABLED)) {
+            if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+                FAIL_STACK_ERROR;
+            if (H5Pset_chunk(dcpl, 1, big_chunk) < 0)
+                FAIL_STACK_ERROR;
+            if (H5Pset_szip(dcpl, H5_SZIP_NN_OPTION_MASK, 4) < 0)
+                FAIL_STACK_ERROR;
+            nerrs += short_chunk_case(file, DATASETNAME19, dcpl, SHORT_CHUNK_BIG_NELMTS, raw, 2);
+
+            if (H5Pclose(dcpl) < 0)
+                FAIL_STACK_ERROR;
+            dcpl = H5I_INVALID_HID;
+        }
+    }
+#endif /* H5_HAVE_FILTER_SZIP */
+
+    if (nerrs > 0)
+        return 1;
 
     PASSED();
     return 0;
