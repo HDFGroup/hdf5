@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-30</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-07-31</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -202,8 +202,8 @@ Migrating from HDF5 1.14 to HDF5 2.x</h1>
 <h1 class="doxsection"><a class="anchor" id="sec_rel_spec_2x_feat"></a>
 New Features in HDF5 Release 2.x</h1>
 <p>This section includes the new features introduced in the HDF5 2.x series:</p>
-<h3 class="doxsection"><a class="anchor" id="subsubsec_in220"></a>
-In 2.2.0</h3>
+<h2 class="doxsection"><a class="anchor" id="subsubsec_in220"></a>
+In 2.2.0</h2>
 <ul>
 <li>Faster Access to Data Stored in S3 <br  />
 A major enhancement in HDF5 2.2.0 is the addition of an I/O block cache for the ROS3 Virtual File Driver (VFD). By reducing the number of requests sent to Amazon S3 for files that do not use paged allocation, applications can achieve more efficient cloud-based data access with fewer network transactions and improved overall performance. <br  />
@@ -214,8 +214,8 @@ Additional optimizations delay initial file caching until the first read operati
 HDF5 2.2.0 introduces optional digital signature verification for dynamically loaded plugins. Organizations can now cryptographically verify plugins before loading them, helping protect scientific and production environments from unauthorized or modified plugin binaries. <br  />
 A new h5sign utility allows developers to sign plugin libraries using RSA signatures, while configurable keystores support trusted-key management and signature revocation.</li>
 </ul>
-<h3 class="doxsection"><a class="anchor" id="subsubsec_in200"></a>
-In 2.0.0</h3>
+<h2 class="doxsection"><a class="anchor" id="subsubsec_in200"></a>
+In 2.0.0</h2>
 <ul>
 <li><a href="https://support.hdfgroup.org/releases/hdf5/documentation/rfc/RFC__Adding_support_for_16_bit_floating_point_and_Complex_number_datatypes_to_HDF5.pdf">Support for Complex number datatypes</a> <br  />
 Support for the C99 <span class="tt">float _Complex</span>, <span class="tt">double _Complex</span> and <span class="tt">long double _Complex</span> (with MSVC, <span class="tt">_Fcomplex</span>, <span class="tt">_Dcomplex</span> and <span class="tt">_Lcomplex</span>) types has been added for platforms/compilers that support them. These types have been implemented with a new datatype class, <span class="tt"><a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2af2675ccd96bbe2c60daf885185774120">H5T_COMPLEX</a></span>. Note that any datatypes of class H5T_COMPLEX will not be readable with previous versions of HDF5. If a file is accessed with a library version bounds "high" setting less than <span class="tt"><a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a7e8e06822de9c57c31c7dd404520974d">H5F_LIBVER_V200</a></span>, an error will occur if the application tries to create an object with a complex number datatype. If compatibility with previous versions of HDF5 is desired, applications should instead consider adopting <a href="https://nc-complex.readthedocs.io/en/latest/#conventions-used-in-applications">one of the existing conventions</a>.<br  />
