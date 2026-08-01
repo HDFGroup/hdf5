@@ -931,7 +931,7 @@ H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
  *                  the "all" selection. The memory buffer is a pointer to a
  *                  contiguous block of a number of elements equal to the number
  *                  of elements in the file dataset's dataspace
- *                  extent.</td></td>
+ *                  extent.</td>
  *            </tr>
  *          </table>
  *
@@ -1130,7 +1130,7 @@ H5_DLL herr_t H5Dread_multi_async(size_t count, hid_t dset_id[], hid_t mem_type_
  *                  the "all" selection. The memory buffer is a pointer to a
  *                  contiguous block of a number of elements equal to the number
  *                  of elements in the file dataset's dataspace
- *                  extent.</td></td>
+ *                  extent.</td>
  *            </tr>
  *          </table>
  *          Setting an "all" selection indicates that the entire dataspace,
