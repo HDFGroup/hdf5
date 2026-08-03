@@ -22,7 +22,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 * [Platforms Tested](CHANGELOG.md#%EF%B8%8F-platforms-tested)
 * [Known Problems](CHANGELOG.md#-known-problems)
 
-# 🔆 Executive Summary: HDF5 Version 2.2.0
+# 🔆 Executive Summary: HDF5 Version 2.230
 
 
 ## Performance Enhancements:
