@@ -15193,11 +15193,11 @@ gent_tintascii(void)
     hid_t   attr_id;
 
     /* 81-byte string, including NUL terminator */
-    unsigned char *data = "abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz012345678901234567";
+    const char *data = "abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz012345678901234567";
 
     file_id = H5Fcreate(FILE113, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-    type_id = H5Tcopy(H5T_NATIVE_UCHAR);
+    type_id = H5Tcopy(H5T_NATIVE_CHAR);
 
     space_id = H5Screate_simple(1, dims, NULL);
 
