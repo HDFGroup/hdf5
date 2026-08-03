@@ -151,6 +151,12 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ## Library
 
+### Fixed a heap buffer overflow when decoding object header messages
+
+   The size stored in an object header message header was checked against the chunk before the rest of that message header was decoded, so the check allowed a message body to start up to four bytes further into the chunk than the check accounted for. A corrupted or fuzzed file could declare a size that passed the check and still ran past the end of the chunk image, and the message's decode callback was then handed a buffer end outside the allocation. `H5O__chunk_deserialize()` now checks the message size once the whole message header has been decoded.
+
+   Fixes GitHub issue #6401
+
 ### Fixed a possible heap leak in a utility function
 
    A couple of unnecessary allocations in h5str_convert were never freed, causing memory leaks. These are now removed.

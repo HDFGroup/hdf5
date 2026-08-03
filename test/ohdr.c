@@ -512,6 +512,132 @@ error:
     return FAIL;
 }
 
+/* Base name for the file used by test_ohdr_message_bounds() */
+#define MSG_BOUNDS_BASENAME "ohdr_msg_bounds"
+
+/*
+ * Tests that a message whose body runs past the end of its chunk is rejected.
+ *
+ * The message header is decoded before the body, so the size stored in the
+ * header has to be checked against what is left of the chunk after the
+ * header, not against what was left before it. The file is rejected either
+ * way, so running this under a sanitizer or valgrind is what catches the
+ * read past the end of the chunk image.
+ */
+static herr_t
+test_ohdr_message_bounds(hid_t fapl)
+{
+    hid_t       fid     = H5I_INVALID_HID;
+    hid_t       gid     = H5I_INVALID_HID;
+    hid_t       my_fapl = H5I_INVALID_HID;
+    FILE       *fp      = NULL;
+    H5O_info2_t oinfo;
+    haddr_t     addr;
+    char        filename[1024];
+    uint8_t     pfx[16];
+    uint8_t     msg[9];
+
+    TESTING("rejection of a message that runs off the end of a chunk");
+
+    /* Version 1 object headers carry no chunk checksum, so a header of that
+     * version can be modified in place
+     */
+    if ((my_fapl = H5Pcopy(fapl)) < 0)
+        TEST_ERROR;
+    if (H5Pset_libver_bounds(my_fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_V18) < 0)
+        TEST_ERROR;
+
+    if (NULL == h5_fixname(MSG_BOUNDS_BASENAME, my_fapl, filename, sizeof(filename)))
+        TEST_ERROR;
+
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0)
+        TEST_ERROR;
+
+    /* Give the file some content past the root group's object header */
+    if ((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Gclose(gid) < 0)
+        TEST_ERROR;
+    gid = H5I_INVALID_HID;
+
+    if (H5Oget_info_by_name3(fid, "/", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if (H5VLnative_token_to_addr(fid, oinfo.token, &addr) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+    fid = H5I_INVALID_HID;
+
+    /* Rewrite the root group's object header as a single mtime message that
+     * declares an 8 byte body, in a chunk with only 4 bytes left after the
+     * 8 byte message header
+     */
+    if (NULL == (fp = fopen(filename, "rb+")))
+        TEST_ERROR;
+    if (fseek(fp, (long)addr, SEEK_SET) != 0)
+        TEST_ERROR;
+    if (fread(pfx, 1, sizeof(pfx), fp) != sizeof(pfx))
+        TEST_ERROR;
+    if (pfx[0] != H5O_VERSION_1)
+        FAIL_PUTS_ERROR("root group does not have a version 1 object header");
+
+    /* Number of messages */
+    pfx[2] = 1;
+    pfx[3] = 0;
+    /* Chunk 0 data size */
+    pfx[8]  = 12;
+    pfx[9]  = 0;
+    pfx[10] = 0;
+    pfx[11] = 0;
+
+    memset(msg, 0, sizeof(msg));
+    msg[0] = (uint8_t)H5O_MTIME_NEW_ID; /* Message type */
+    msg[2] = 8;                         /* Message size */
+    msg[8] = 1;                         /* Version of the mtime message body */
+
+    if (fseek(fp, (long)addr, SEEK_SET) != 0)
+        TEST_ERROR;
+    if (fwrite(pfx, 1, sizeof(pfx), fp) != sizeof(pfx))
+        TEST_ERROR;
+    if (fwrite(msg, 1, sizeof(msg), fp) != sizeof(msg))
+        TEST_ERROR;
+    if (fclose(fp) != 0)
+        TEST_ERROR;
+    fp = NULL;
+
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fopen(filename, H5F_ACC_RDONLY, my_fapl);
+    }
+    H5E_END_TRY
+
+    if (fid >= 0)
+        FAIL_PUTS_ERROR("should not have been able to open a file with a message past the chunk end");
+
+    h5_delete_test_file(MSG_BOUNDS_BASENAME, my_fapl);
+
+    if (H5Pclose(my_fapl) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    if (fp)
+        fclose(fp);
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(gid);
+        H5Fclose(fid);
+        H5Pclose(my_fapl);
+    }
+    H5E_END_TRY
+
+    return FAIL;
+}
+
 /*
  *  To test objects with unknown messages in a file with:
  *      a) H5O_BOGUS_VALID_ID:
@@ -2126,6 +2252,16 @@ main(void)
 
     /* Verify bad ohdr message fixes work */
     test_ohdr_badness(fapl);
+
+    if (single_file_vfd) {
+        if (test_ohdr_message_bounds(fapl) < 0)
+            TEST_ERROR;
+    }
+    else {
+        TESTING("rejection of a message that runs off the end of a chunk");
+        SKIPPED();
+        puts("    Message bounds test not supported with the current VFD.");
+    }
 
     /* Verify symbol table messages are cached */
     if (h5_verify_cached_stabs(FILENAME, fapl) < 0)
