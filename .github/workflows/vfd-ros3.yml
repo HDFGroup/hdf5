@@ -138,6 +138,10 @@ jobs:
           java-version: '25'
 
       # For Windows, use vcpkg toolchain file to allow find_package() calls to resolve
+      # NOTE: VCPKG_USE_LEGACY_APPLOCAL is a temporary fix for an issue with vcpkg
+      # (https://github.com/microsoft/vcpkg-tool/issues/2076) that causes a race in
+      # CI which fails Windows ROS3 builds. This should be removed once the issue is
+      # resolved.
       - name: "Configure (vcpkg; ROS3 testing: ${{ matrix.test_ros3 }})"
         if: ${{ matrix.os_name == 'Windows MSVC' }}
         run: |
@@ -146,6 +150,7 @@ jobs:
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             --log-level=VERBOSE \
             -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
+            -DVCPKG_USE_LEGACY_APPLOCAL=ON \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
@@ -296,6 +301,10 @@ jobs:
           java-version: '25'
 
       # For Windows, use vcpkg toolchain file to allow find_package() calls to resolve
+      # NOTE: VCPKG_USE_LEGACY_APPLOCAL is a temporary fix for an issue with vcpkg
+      # (https://github.com/microsoft/vcpkg-tool/issues/2076) that causes a race in
+      # CI which fails Windows ROS3 builds. This should be removed once the issue is
+      # resolved.
       - name: "Configure (vcpkg; ROS3 testing: ${{ matrix.test_ros3 }})"
         if: ${{ matrix.os_name == 'Windows MSVC' }}
         run: |
@@ -304,6 +313,7 @@ jobs:
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             --log-level=VERBOSE \
             -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
+            -DVCPKG_USE_LEGACY_APPLOCAL=ON \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
