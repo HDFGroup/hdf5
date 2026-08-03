@@ -1208,10 +1208,14 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
          * provide a buffer larger than the data it holds, so restrict the read
          * to the valid nbytes.
          */
-        minbits = 0;
-        if (H5_IS_BUFFER_OVERFLOW((unsigned char *)*buf, 5, (unsigned char *)*buf + nbytes - 1))
+        /* The minbits and minval-size fields are the first five bytes of the
+         * stream, so validate that length before deriving an end-of-buffer
+         * pointer from nbytes
+         */
+        if (nbytes < 5)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
 
+        minbits = 0;
         for (i = 0; i < 4; i++) {
             minbits_mask = ((unsigned char *)*buf)[i];
             minbits_mask <<= i * 8;
