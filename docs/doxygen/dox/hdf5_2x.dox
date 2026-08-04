@@ -115,7 +115,7 @@ This section highlights some changes that might affect migrating to HDF5 2.x, pl
 
 This section includes the new features introduced in the HDF5 2.x series:
 
-\subsubsection subsubsec_in220 In 2.2.0
+\subsection subsubsec_in220 In 2.2.0
 
 \li Faster Access to Data Stored in S3
 <br>A major enhancement in HDF5 2.2.0 is the addition of an I/O block cache for the ROS3 Virtual File Driver (VFD). By reducing the number of requests sent to Amazon S3 for files that do not use paged allocation, applications can achieve more efficient cloud-based data access with fewer network transactions and improved overall performance.
@@ -125,7 +125,7 @@ This section includes the new features introduced in the HDF5 2.x series:
 <br>HDF5 2.2.0 introduces optional digital signature verification for dynamically loaded plugins. Organizations can now cryptographically verify plugins before loading them, helping protect scientific and production environments from unauthorized or modified plugin binaries.
 <br>A new h5sign utility allows developers to sign plugin libraries using RSA signatures, while configurable keystores support trusted-key management and signature revocation.
 
-\subsubsection subsubsec_in200 In 2.0.0
+\subsection subsubsec_in200 In 2.0.0
 
 \li \ref_rfc20240129complex
 <br>Support for the C99 `float _Complex`, `double _Complex` and `long double _Complex` (with MSVC, `_Fcomplex`, `_Dcomplex` and `_Lcomplex`) types has been added for platforms/compilers that support them. These types have been implemented with a new datatype class, `H5T_COMPLEX`. Note that any datatypes of class H5T_COMPLEX will not be readable with previous versions of HDF5. If a file is accessed with a library version bounds "high" setting less than `H5F_LIBVER_V200`, an error will occur if the application tries to create an object with a complex number datatype. If compatibility with previous versions of HDF5 is desired, applications should instead consider adopting [one of the existing conventions](https://nc-complex.readthedocs.io/en/latest/#conventions-used-in-applications).<br />
