@@ -27,7 +27,7 @@
 Additional Release Information
 </td>
 <td>
-<a href="https://\SRCURLALL/hdf5_2.1.1/release_docs/CHANGELOG.md">CHANGELOG.md</a>
+<a href="https://\SRCURLALL/\PREVIOUS_VER/release_docs/CHANGELOG.md">CHANGELOG.md</a>
 </td>
 </tr>
 <tr>
@@ -55,14 +55,7 @@ Additional Release Information
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-[Newsletter Announcement](https://www.hdfgroup.org/2026/03/10/release-of-hdf5-2-1-0-newsletter-209/)
-</td>
-</tr>
-<tr>
-<td style="background-color:#F5F5F5">
-</td>
-<td>
-ABI/API Compatibility Reports between 2.1.0 and 2.0.0 [tar file](https://github.com/HDFGroup/hdf5/releases/download/2.1.0/hdf5-2.1.0.html.abi.reports.tar.gz) or [individual html files](https://\RELURL/2.1.0/documentation/compat_reports/index.html)
+ABI/API Compatibility Reports [tar file](https://github.com/HDFGroup/hdf5/releases/download/\PREVIOUS_VER/hdf5-\PREVIOUS_VER.html.abi.reports.tar.gz) or [individual html files](https://\RELURL/\PREVIOUS_VER/documentation/compat_reports/index.html)
 </td>
 </tr>
 <tr>
@@ -78,22 +71,22 @@ ABI/API Compatibility Reports between 2.1.0 and 2.0.0 [tar file](https://github.
 \subsection subsec_download_2x Downloads
 
 Source code and binaries are available at:
-<a href="https://github.com/HDFGroup/hdf5/releases/tag/2.1.0">HDF5 2.1.0 on GitHub</a>
+<a href="https://github.com/HDFGroup/hdf5/releases/tag/\PREVIOUS_VER">HDF5 \PREVIOUS_VER on GitHub</a>
 
-Please refer to [Build instructions](https://\SRCURLALL/hdf5_2.1.0/release_docs/INSTALL) for building with CMake.
-
+Please refer to [Build instructions](https://\SRCURLALL/\PREVIOUS_VER/docs/INSTALL.md) for building with CMake.
 
 \subsection subsec_obtain_method_2x Methods to obtain (gz file)
 
-\li firefox – Download file and then run:  `gzip <distribution>.tar.gz | tar xzf -`
-\li chrome –  Download file and then run:  `gzip -cd <distribution>.tar.gz | tar xvf -`
-\li wget –
-<div style="margin-left: 2em;">
-    `wget https://github.com/HDFGroup/hdf5/releases/download/${PACKAGEVERSION}/<distribution>.tar.gz`<br>
-    `gzip -cd <distribution>.tar.gz | tar xvf -`
-</div>
-\li `<distribution>` is hdf5-${PACKAGEVERSION}, where PACKAGEVERSION is 2.1.0 for this release
+To download and extract the source tarfile, please follow one of the methods below, where ${PACKAGEVERSION} is \PREVIOUS_VER for this release.
 
+1. Download the tarfile in a web browser, and extract it with gzip as:
+@code gzip -cd hdf5-${PACKAGEVERSION}.tar.gz | tar xvf -@endcode
+
+2. Download the tarfile with wget on a terminal and extract with these commands:
+@code
+    wget https://github.com/HDFGroup/hdf5/releases/download/${PACKAGEVERSION}/hdf5-${PACKAGEVERSION}.tar.gz
+    gzip -cd hdf5-${PACKAGEVERSION}.tar.gz | tar xvf -
+@endcode
 
 \subsection subsec_dox_gen_doc_2x Doxygen Generated Reference Manual
 
@@ -105,7 +98,7 @@ Since this portion of the HDF5 documentation is now part of the source code, it 
 
 \section sec_rel_spec_2x_migrate Migrating from HDF5 1.14 to HDF5 2.x
 
-This section highlights some changes that might affect migrating to HDF5 2.x, please refer to the \ref sec_rel_spec_2x_change or the <a href="https://\SRCURLALL/hdf5_2.1.0/release_docs/CHANGELOG.md">CHANGELOG.md</a> for detail.
+This section highlights some changes that might affect migrating to HDF5 2.x, please refer to the \ref sec_rel_spec_2x_change or the HDF5 2.0.0 <a href="https://\SRCURLALL/hdf5_2.0.0/release_docs/CHANGELOG.md">CHANGELOG.md</a> for detail.
 
 \li Default file format is now 1.8
 \li The file format has been updated to 4.0<a name="fileformat"></a>
@@ -113,14 +106,26 @@ This section highlights some changes that might affect migrating to HDF5 2.x, pl
     - `H5Dread_chunk()`<br>
     - `H5Tdecode()`<br>
     - `H5Iregister_type()`<br>
-\li A new backend based on the [aws-c-s3 library](https://github.com/awslabs/aws-c-s3) replaced the ROS3 VFD's S3 backend based on libcurl.  The ROS3 VFD now requires the `aws-c-s3` library in order to be built.  See the <a href="https://\SRCURLALL/hdf5_2.1.0/release_docs/CHANGELOG.md">CHANGELOG.md</a> for a complete description on this feature.
+\li A new backend based on the [aws-c-s3 library](https://github.com/awslabs/aws-c-s3) replaced the ROS3 VFD's S3 backend based on libcurl.  The ROS3 VFD now requires the `aws-c-s3` library in order to be built.  See the <a href="https://\SRCURLALL/hdf5_2.0.0/release_docs/CHANGELOG.md">CHANGELOG.md</a> for a complete description on this feature.
 \li Significance in tools
     - The tool h5dump has a new option `--lformat` and its `XML` option is deprecated.
-    - The high-level GIF tools, `h52gif` and `gif2h5` have been removed. We may move them to a separate repository in the future.  See <a href="https://\SRCURLALL/hdf5_2.1.0/release_docs/CHANGELOG.md">CHANGELOG.md</a> for an explanation.
+    - The high-level GIF tools, `h52gif` and `gif2h5` have been removed. We may move them to a separate repository in the future.  See <a href="https://\SRCURLALL/hdf5_2.0.0/release_docs/CHANGELOG.md">CHANGELOG.md</a> for an explanation.
 
 \section sec_rel_spec_2x_feat New Features in HDF5 Release 2.x
 
 This section includes the new features introduced in the HDF5 2.x series:
+
+\subsection subsubsec_in220 In 2.2.0
+
+\li Faster Access to Data Stored in S3
+<br>A major enhancement in HDF5 2.2.0 is the addition of an I/O block cache for the ROS3 Virtual File Driver (VFD). By reducing the number of requests sent to Amazon S3 for files that do not use paged allocation, applications can achieve more efficient cloud-based data access with fewer network transactions and improved overall performance.
+<br>Additional optimizations delay initial file caching until the first read operation, reducing file-open overhead.
+
+\li Enhanced Security with Signed Plugin Support
+<br>HDF5 2.2.0 introduces optional digital signature verification for dynamically loaded plugins. Organizations can now cryptographically verify plugins before loading them, helping protect scientific and production environments from unauthorized or modified plugin binaries.
+<br>A new h5sign utility allows developers to sign plugin libraries using RSA signatures, while configurable keystores support trusted-key management and signature revocation.
+
+\subsection subsubsec_in200 In 2.0.0
 
 \li \ref_rfc20240129complex
 <br>Support for the C99 `float _Complex`, `double _Complex` and `long double _Complex` (with MSVC, `_Fcomplex`, `_Dcomplex` and `_Lcomplex`) types has been added for platforms/compilers that support them. These types have been implemented with a new datatype class, `H5T_COMPLEX`. Note that any datatypes of class H5T_COMPLEX will not be readable with previous versions of HDF5. If a file is accessed with a library version bounds "high" setting less than `H5F_LIBVER_V200`, an error will occur if the application tries to create an object with a complex number datatype. If compatibility with previous versions of HDF5 is desired, applications should instead consider adopting [one of the existing conventions](https://nc-complex.readthedocs.io/en/latest/#conventions-used-in-applications).<br />

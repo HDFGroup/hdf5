@@ -2131,7 +2131,7 @@ object header.
   <th>byte</th>
 </tr>
 <tr align="center">
-  <td colspan="4">Link Name Offset<sup>O</sup></td>
+  <td colspan="4">Link Name Offset<sup>L</sup></td>
 </tr>
 <tr align="center">
   <td colspan="4">Object Header Address<sup>O</sup></td>
@@ -2148,6 +2148,8 @@ object header.
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT4SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
 <caption align="top"><strong>Fields: Symbol Table Entry</strong></caption>
@@ -4986,11 +4988,16 @@ The format of shared message data is described here:
   <td colspan="4">Reserved (zero)</td>
 </tr>
 <tr>
+  <td colspan="4">Link Name Offset<sup>L</sup></td>
+</tr>
+<tr>
   <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT4SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
 <caption><strong>Fields: Shared Message (Version 1)</strong></caption>
@@ -5030,6 +5037,12 @@ The format of shared message data is described here:
         <td>Message stored in another object&rsquo;s header (a <em>committed</em> message).</td>
       </tr>
       </table></td>
+</tr>
+<tr>
+  <td>Link Name Offset</td>
+  <td>This field is skipped over, but not read, by the library&rsquo;s shared message decoding code. Its
+      name is deduced matching the <em>Link Name Offset</em> field of the
+      @ref subsec_fmt4_infra_symboltableentry structure, which this shared message format reuses.</td>
 </tr>
 <tr>
   <td>Address</td>
