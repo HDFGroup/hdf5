@@ -146,4 +146,3 @@ jobs:
       version: ${{ needs.call-workflow-maven-staging.outputs.version }}
       java_implementation: 'both'
       repository_url: ${{ inputs.maven_repository == 'github-packages' && format('https://maven.pkg.github.com/{0}', github.repository) || 'https://repo.maven.apache.org/maven2' }}
-    secrets: inherit
