@@ -30,8 +30,6 @@ concurrency:
 
 permissions:
   contents: read
-  packages: write
-  pull-requests: write
 
 jobs:
     call-workflow-special-cmake:
@@ -222,6 +220,10 @@ jobs:
     call-maven-staging:
         name: "Maven Staging Tests"
         needs: call-release-cmake
+        permissions:
+            contents: read
+            packages: write
+            pull-requests: write
         uses: ./.github/workflows/maven-staging.yml
         with:
             test_maven_deployment: true
@@ -232,6 +234,10 @@ jobs:
     call-maven-ffm-staging:
         name: "Maven Staging Tests"
         needs: call-ffm-latest-java
+        permissions:
+            contents: read
+            packages: write
+            pull-requests: write
         uses: ./.github/workflows/maven-staging.yml
         with:
             test_maven_deployment: true
