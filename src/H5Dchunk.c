@@ -317,6 +317,7 @@ typedef struct H5D_threaded_io_info_t {
     H5TS_semaphore_t          *sem;
     H5Z_EDC_t                  err_detect;
     H5Z_cb_t                   filter_cb;
+} H5D_threaded_io_info_t;
 
     /********************/
     /* Local Prototypes */
