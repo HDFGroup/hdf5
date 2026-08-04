@@ -21,17 +21,26 @@
  *
  *   bad_nbit_params.h5      The N-Bit filter's stored client-data parameter
  *                           count is set to 0, leaving cd_values == NULL at
- *                           filter time (GitHub issue #6489 "Null_Pointer").
+ *                           filter time.
  *
  *   bad_nbit_decompress.h5  The N-Bit filter's stored element count (cd[2]) is
  *                           inflated so decompression walks past the end of the
- *                           small compressed chunk (GitHub issue #6489
- *                           "Heap_Corruption_1").
+ *                           small compressed chunk.
+ *
+ *   bad_nbit_parms_walk.h5  The N-Bit filter's stored parameter count is cut to
+ *                           7, one short of the eight an atomic datatype is
+ *                           described by, so the walk through the parameters
+ *                           reads past the end of the list. Counts below 5 are
+ *                           rejected outright, and 5 and 6
+ *                           are caught by the precision/offset check reading
+ *                           parameters that happen to be invalid, so only 7
+ *                           reaches the end of the list with everything before
+ *                           it well formed.
  *
  *   bad_fletcher32.h5       A Fletcher32-filtered chunk's stored size is set to
  *                           2 (smaller than the 4-byte trailing checksum), so
  *                           the filter computes nbytes - FLETCHER_LEN and
- *                           underflows (GitHub issue #6490 "Heap_Corruption_2").
+ *                           underflows.
  *                           A value of 2 (rather than 0) is used so the file is
  *                           also exercisable in builds with assertions enabled,
  *                           which otherwise trip the chunk B-tree's
@@ -48,10 +57,14 @@
 
 #define NBIT_PARAMS_FILE     "bad_nbit_params.h5"
 #define NBIT_DECOMPRESS_FILE "bad_nbit_decompress.h5"
+#define NBIT_PARMS_WALK_FILE "bad_nbit_parms_walk.h5"
 #define FLETCHER32_FILE      "bad_fletcher32.h5"
 
 #define NBIT_DATASET       "Nbit_float_data_le"
+#define NBIT_WALK_DATASET  "Nbit_int_data_le"
 #define FLETCHER32_DATASET "Fletcher_float_data_be"
+
+#define WALK_NELMTS 40
 
 #define NX   7
 #define NY   6
@@ -255,6 +268,94 @@ error:
 }
 
 /*-------------------------------------------------------------------------
+ * Create an N-Bit-filtered integer dataset, then cut its stored parameter
+ * count to 7 so the walk through the parameters runs one past the end.
+ *-------------------------------------------------------------------------
+ */
+static int
+create_nbit_parms_walk_file(void)
+{
+    hid_t          fapl = H5I_INVALID_HID, file = H5I_INVALID_HID, sid = H5I_INVALID_HID;
+    hid_t          dcpl = H5I_INVALID_HID, dtype = H5I_INVALID_HID, dset = H5I_INVALID_HID;
+    hsize_t        dims[1]  = {WALK_NELMTS};
+    hsize_t        chunk[1] = {WALK_NELMTS};
+    int            data[WALK_NELMTS];
+    unsigned char *buf = NULL;
+    size_t         len, name_off;
+    int            i;
+
+    /* The 8-byte padded filter name in a version-1 pipeline message.  The
+     * record header sits in the 8 bytes before it (id, name length, flags,
+     * parameter count) and the parameters follow it. */
+    static const unsigned char nbit_name[] = {'n', 'b', 'i', 't', 0, 0, 0, 0};
+
+    for (i = 0; i < WALK_NELMTS; i++)
+        data[i] = i;
+
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
+        TEST_ERROR;
+    if ((file = H5Fcreate(NBIT_PARMS_WALK_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_nbit(dcpl) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 1, chunk) < 0)
+        TEST_ERROR;
+
+    /* 20 significant bits at offset 0, so nbit has something to pack */
+    if ((dtype = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        TEST_ERROR;
+    if (H5Tset_precision(dtype, (size_t)20) < 0)
+        TEST_ERROR;
+    if (H5Tset_offset(dtype, (size_t)0) < 0)
+        TEST_ERROR;
+
+    if ((dset = H5Dcreate2(file, NBIT_WALK_DATASET, dtype, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
+        TEST_ERROR;
+
+    if (H5Dclose(dset) < 0 || H5Tclose(dtype) < 0 || H5Pclose(dcpl) < 0 || H5Sclose(sid) < 0 ||
+        H5Fclose(file) < 0 || H5Pclose(fapl) < 0)
+        TEST_ERROR;
+
+    if (NULL == (buf = slurp(NBIT_PARMS_WALK_FILE, &len)))
+        TEST_ERROR;
+    if ((name_off = find_once(buf, len, nbit_name, sizeof(nbit_name))) == (size_t)-1 || name_off < 8)
+        TEST_ERROR;
+
+    /* Cut the stored count to 7, and the filter's own copy of it in cd[0] to
+     * match, so the list stops one short of cd[7]. */
+    put_le(buf + name_off - 2, 7, 2);
+    put_le(buf + name_off + 8, 7, 4);
+    if (spew(NBIT_PARMS_WALK_FILE, buf, len) < 0)
+        TEST_ERROR;
+
+    free(buf);
+    return 0;
+
+error:
+    free(buf);
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dset);
+        H5Tclose(dtype);
+        H5Pclose(dcpl);
+        H5Sclose(sid);
+        H5Fclose(file);
+        H5Pclose(fapl);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
  * Create a single Fletcher32-filtered float dataset, then set its one chunk's
  * stored size to 2 (smaller than the 4-byte checksum) to trigger the
  * checksum-length underflow.
@@ -346,10 +447,15 @@ main(void)
         fprintf(stderr, "failed to generate N-Bit bad-filter files\n");
         return EXIT_FAILURE;
     }
+    if (create_nbit_parms_walk_file() < 0) {
+        fprintf(stderr, "failed to generate N-Bit parameter-walk file\n");
+        return EXIT_FAILURE;
+    }
     if (create_fletcher32_file() < 0) {
         fprintf(stderr, "failed to generate Fletcher32 bad-filter file\n");
         return EXIT_FAILURE;
     }
-    printf("Generated %s, %s, %s\n", NBIT_PARAMS_FILE, NBIT_DECOMPRESS_FILE, FLETCHER32_FILE);
+    printf("Generated %s, %s, %s, %s\n", NBIT_PARAMS_FILE, NBIT_DECOMPRESS_FILE, NBIT_PARMS_WALK_FILE,
+           FLETCHER32_FILE);
     return EXIT_SUCCESS;
 }

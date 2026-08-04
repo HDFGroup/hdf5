@@ -8093,11 +8093,7 @@ error:
  *
  * Purpose: Reads datasets from crafted files whose filter metadata has been
  *          deliberately corrupted, verifying that the library rejects them
- *          gracefully instead of crashing.  These are regression tests for
- *          GitHub issues #6489 (N-Bit filter: NULL parameter array and
- *          compressed-buffer over-read) and #6490 (Fletcher32 filter:
- *          checksum length underflow).  The files are produced by
- *          gen_bad_filters.c.
+ *          gracefully instead of crashing.
  *
  * Return: Success: 0
  *         Failure: -1
@@ -8114,6 +8110,7 @@ test_filter_bad_params(void)
     } cases[] = {
         {"bad_nbit_params.h5", "Nbit_float_data_le"},
         {"bad_nbit_decompress.h5", "Nbit_float_data_le"},
+        {"bad_nbit_parms_walk.h5", "Nbit_int_data_le"},
         {"bad_fletcher32.h5", "Fletcher_float_data_be"},
     };
     hid_t  fid = H5I_INVALID_HID;
