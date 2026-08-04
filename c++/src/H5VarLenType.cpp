@@ -138,7 +138,7 @@ VarLenType::decode() const
     try {
         encoded_vltype_id = p_decode();
     }
-    catch (DataTypeIException &err) {
+    catch (DataTypeIException &) {
         throw;
     }
     VarLenType *encoded_vltype = new VarLenType;

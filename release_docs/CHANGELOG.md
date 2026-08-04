@@ -151,6 +151,21 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ## Library
 
+### Fixed a possible heap leak in a utility function
+
+   A couple of unnecessary allocations in h5str_convert were never freed, causing memory leaks. These are now removed.
+
+   Fixes GitHub issue #6511
+### Fixed bug that prevented internal library filters from printing error messages
+
+   Previously the error stack would be cleared when exiting a data filter, even an internal library filter, so the user could not see what caused the filter to fail. This has been fixed by not treating internal data filters like a user callback. Note that user-defined or third-party filters that use the default error stack will need to print that stack before returning from their callbacks.
+
+### Fixed error when reading variable-length chunked datasets in read-only mode
+
+   Passing NULL for the callback function pointer to H5Aiterate2 and H5Aiterate_by_name was not detected, leading to a subsequent access of an uninitialized pointer. This is now fixed.
+
+    Fixes CVE-2025-9274
+
 ### Fixed error when reading variable-length chunked datasets in read-only mode
 
    When reading from a chunked dataset with a variable-length type, a non-default fill value, and unwritten chunks, the library would internally try to write data to the file and fail due to writing to a read-only file. Reworked the I/O code to avoid these writes in this case. This may also improve performance and file space usage in similar cases with files open with write access.
@@ -208,6 +223,17 @@ The `h5repack` tool now obtains its default low and high library version bounds 
    `H5S_select_deserialize()` and the per-selection-type deserialize callbacks (all, hyperslab, none, and point) previously computed the pointer to the last valid buffer byte as `buffer + size - 1` without first checking the buffer size. A buffer shorter than the 4-byte selection-type header, or a zero-length selection-info buffer, would underflow this computation and produce an out-of-bounds end pointer, defeating subsequent overflow checks. The deserialize routines now reject a buffer that is too small to hold the selection type, and they reject an empty selection-info buffer before deriving the end pointer. Hyperslab decoding additionally now rejects a serialized rank of 0 or greater than `H5S_MAX_RANK`. As a companion fix, `H5S__hyper_serialize()` now returns an error when asked to serialize a hyperslab selection on a rank-0 (scalar or null) dataspace, a state that can arise when a dataspace extent is collapsed to a scalar after a hyperslab selection has already been made.
 
 ## Java Library
+
+### Fixed a datatype ID leak when reading or writing array/vlen datatypes
+
+   The JNI wrappers for `H5Dread`, `H5Dwrite`, `H5Aread`, and `H5Awrite` inspect the
+   memory datatype using an internal helper (`h5str_detect_vlen_str()`). For an array
+   or variable-length datatype whose base type is not a variable-length string, the
+   helper opened the base type with `H5Tget_super()` but failed to close it if
+   no variable-length string was found, leaking one datatype ID per
+   read/write call. The base type ID is now closed on all paths, so Java applications
+   that repeatedly access datasets or attributes with these datatypes no longer leak
+   HDF5 datatype IDs.
 
 ## Configuration
 
