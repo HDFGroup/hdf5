@@ -3,7 +3,8 @@
 
 This file contains development history of the HDF5 2.X.X releases
 
-03.      Release Information for hdf5-2.2.0
+04.      Release Information for hdf5-2.2.0
+03.      Release Information for hdf5-2.1.1
 02.      Release Information for hdf5-2.1.0
 01.      Release Information for hdf5-2.0.0
 
@@ -432,6 +433,19 @@ Current test results are available [here](https://my.cdash.org/index.php?project
 
 Known problems in previous releases can be found in the HISTORY*.txt files in the HDF5 source. Please report any new problems found to <a href="mailto:help@hdfgroup.org">help@hdfgroup.org</a>.
 
+
+%%%%2.1.1%%%%
+
+HDF5 version 2.1.1 released on 2026-03-23
+
+---
+
+> [!Note]
+>
+> - A typo in variable LT_HL_F_VERS_INTERFACE left H5_HL_F_SOVERS_INTERFACE empty, resulting in malformed macOS linker flags. The typo was fixed in this patch release.
+> - A change in the directory structure of one of the compression filters resulted in undetected failure signing the hdf5-2.1.0-macos14_clang.dmg release binary. This was found and fixed in this patch release.
+
+---
 
 
 %%%%2.1.0%%%%
