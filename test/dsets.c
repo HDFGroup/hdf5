@@ -168,6 +168,7 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
 #define DSET_BAD_DECODE_SIZE_VLEN_NAME    "bad_decode_size_vlen"
 #define DSET_BAD_DECODE_SIZE_VLEN_CP_NAME "bad_decode_size_vlen_copy"
 #define DSET_BAD_BUF_SIZE_NAME            "bad_buf_size"
+#define DSET_ERROR_MSG_NAME               "error_msg"
 
 /* Dataset names for testing Fixed Array Indexing */
 #define DSET_FIXED_MAX   "DSET_FIXED_MAX"
@@ -362,6 +363,61 @@ static size_t filter_bad_decode_size(unsigned int flags, size_t cd_nelmts, const
                                      size_t nbytes, size_t *buf_size, void **buf);
 static size_t filter_bad_buf_size(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                                   size_t nbytes, size_t *buf_size, void **buf);
+static size_t filter_error_msg(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                               size_t nbytes, size_t *buf_size, void **buf);
+
+static herr_t dsets_h5zregister_direct(const H5Z_class2_t *filter);
+static herr_t dsets_h5zunregister_direct(H5Z_filter_t id);
+
+/*-------------------------------------------------------------------------
+ * Function:    dsets_h5zregister_direct
+ *
+ * Purpose:     Thin API wrapper around H5Z_register(). Does not check
+ *              input, can be used to register filters with reserved
+ *              internal IDs.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+dsets_h5zregister_direct(const H5Z_class2_t *filter)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if (H5Z_register(filter) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end dsets_h5zregister_direct() */
+
+/*-------------------------------------------------------------------------
+ * Function:    dsets_h5zunregister_direct
+ *
+ * Purpose:     Thin API wrapper around H5Z__unregister(). Does not check
+ *              input, can be used to unregister filters with reserved
+ *              internal IDs.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+dsets_h5zunregister_direct(H5Z_filter_t id)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if (H5Z__unregister(id) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to unregister filter");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end dsets_h5zunregister_direct() */
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_COUNT[1] = {{
@@ -18728,7 +18784,7 @@ const H5Z_class2_t H5Z_BAD_BUF_SIZE[1] = {{
  *              Failure:        0
  *-------------------------------------------------------------------------
  */
-bool enable_bad_buf_size;
+static bool enable_bad_buf_size;
 
 static size_t
 filter_bad_buf_size(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
@@ -19056,6 +19112,245 @@ error:
 } /* end test_readonly_chunk_vlen_fill() */
 
 /*-------------------------------------------------------------------------
+ * Global variables used by test_filter_error_msg()
+ *-------------------------------------------------------------------------
+ */
+/* This message derives from H5Z */
+const H5Z_class2_t H5Z_ERROR_MSG[1] = {{
+    H5Z_CLASS_T_VERS,        /* H5Z_class_t version */
+    H5Z_FILTER_RESERVED - 1, /* Filter id number */
+    1, 1,                    /* Encoding and decoding enabled */
+    "error_msg",             /* Filter name for debugging */
+    NULL,                    /* The "can apply" callback */
+    NULL,                    /* The "set local" callback */
+    filter_error_msg,        /* The actual filter function */
+}};
+static const char *filter_error_msg_msg =
+    "Hello I am a unique error message written for the test_filter_error_msg test in dsets.c";
+static bool enable_error_msg;
+static bool error_msg_found;
+
+/*-------------------------------------------------------------------------
+ * Function:    filter_error_msg
+ *
+ * Purpose:     Filter that simply issues an error message.
+ *
+ * Return:      Success:        Data chunk size
+ *              Failure:        0
+ *-------------------------------------------------------------------------
+ */
+static size_t
+filter_error_msg(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                 const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes, size_t H5_ATTR_UNUSED *buf_size,
+                 void H5_ATTR_UNUSED **buf)
+{
+    size_t ret_value = 0;
+
+    H5_API_SETUP_ERROR_HANDLING
+
+    /* Issue unique error message */
+    if (enable_error_msg)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, 0, "%s", filter_error_msg_msg);
+
+    ret_value = nbytes;
+
+done:
+    return ret_value;
+} /* end filter_error_msg() */
+
+/*-------------------------------------------------------------------------
+ * Function:    filter_error_msg_handler
+ *
+ * Purpose:     Error message handler that simply checks if the
+ *              description matches filter_error_msg_msg and sets
+ *              error_msg_found to true if so.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+filter_error_msg_handler(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void H5_ATTR_UNUSED *udata)
+{
+    if (!strncmp(filter_error_msg_msg, err_desc->desc, strlen(filter_error_msg_msg) + 1))
+        error_msg_found = true;
+
+    return SUCCEED;
+} /* end filter_error_msg_handler() */
+
+/*-------------------------------------------------------------------------
+ * Function:    filter_error_msg_stack_handler
+ *
+ * Purpose:     Error stack handler that simply calls H5Ewalk2() with
+ *              filter_error_msg_handler() as the callback.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+filter_error_msg_stack_handler(hid_t estack_id, void H5_ATTR_UNUSED *udata)
+{
+    if (H5Ewalk2(estack_id, H5E_WALK_DOWNWARD, filter_error_msg_handler, NULL) < 0)
+        TEST_ERROR;
+
+    return SUCCEED;
+
+error:
+    return FAIL;
+} /* end filter_error_msg_stack_handler() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_filter_error_msg
+ *
+ * Purpose:     Tests that error messages issued by internal library
+ *              filters are printed normally.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_filter_error_msg(hid_t file)
+{
+    hid_t         dsid          = H5I_INVALID_HID; /* Dataset ID */
+    hid_t         sid           = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t         dcpl          = H5I_INVALID_HID; /* Dataset creation property list ID */
+    const hsize_t dims[1]       = {1};             /* Dataspace dimensions */
+    const hsize_t chunk_dims[1] = {1};             /* Chunk dimensions */
+    const int     wdata         = 2112;            /* Write buffer */
+    int           rdata         = 0;               /* Read buffer */
+    herr_t        ret;                             /* Generic return value */
+
+    TESTING("filter error messages are printed");
+
+    /* Create dcpl with special filter */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* Note: filters can only be applied to chunked datasets */
+    if (H5Pset_chunk(dcpl, 1, chunk_dims) < 0)
+        TEST_ERROR;
+
+    /* Register and apply "filter error message" filter, using a reserved ID so it is treated as an internal
+     * library filter */
+    if (dsets_h5zregister_direct(H5Z_ERROR_MSG) < 0)
+        TEST_ERROR;
+    if (H5Pset_filter(dcpl, H5Z_ERROR_MSG->id, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
+        TEST_ERROR;
+
+    /* Create the data space */
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    /* Create new dataset with fixed-width integer type */
+    if ((dsid = H5Dcreate2(file, DSET_ERROR_MSG_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) <
+        0)
+        TEST_ERROR;
+
+    /* Use H5E_BEGIN/END_TRY as an easy way to make sure the previous error printing function is preserved */
+    H5E_BEGIN_TRY
+    {
+        /* Set custom error handler */
+        (void)H5Eset_auto2(H5E_DEFAULT, filter_error_msg_stack_handler, NULL);
+
+        /* Write data with error message enabled (should fail) */
+        enable_error_msg = true;
+        error_msg_found  = false;
+
+        ret = H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata);
+    }
+    H5E_END_TRY
+
+    /* Verify the operation failed */
+    if (ret != FAIL)
+        TEST_ERROR;
+
+    /* Verify the unique error message was found */
+    if (!error_msg_found)
+        TEST_ERROR;
+
+    /* Write data with error message disabled */
+    enable_error_msg = false;
+    if (H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0)
+        TEST_ERROR;
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0)
+        TEST_ERROR;
+
+    /* Flush the file (to clear the cache) */
+    if (H5Fflush(file, H5F_SCOPE_GLOBAL) < 0)
+        TEST_ERROR;
+
+    /* Re-open dataset */
+    if ((dsid = H5Dopen2(file, DSET_ERROR_MSG_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Use H5E_BEGIN/END_TRY as an easy way to make sure the previous error printing function is preserved */
+    H5E_BEGIN_TRY
+    {
+        /* Set custom error handler */
+        (void)H5Eset_auto2(H5E_DEFAULT, filter_error_msg_stack_handler, NULL);
+
+        /* Read data back with bad buffer size enabled (should fail) */
+        enable_error_msg = true;
+        error_msg_found  = false;
+
+        ret = H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
+    }
+    H5E_END_TRY
+
+    /* Verify the operation failed */
+    if (ret != FAIL)
+        TEST_ERROR;
+
+    /* Verify the unique error message was found */
+    if (!error_msg_found)
+        TEST_ERROR;
+
+    /* Read data back with bad buffer size disabled */
+    enable_error_msg = false;
+    if (H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0)
+        TEST_ERROR;
+
+    /* Verify read data */
+    if (rdata != wdata)
+        TEST_ERROR;
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0)
+        TEST_ERROR;
+
+    /* Close dataspace */
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* Close dataset creation property list */
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    /* Unregister filter */
+    if (dsets_h5zunregister_direct(H5Z_ERROR_MSG->id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+        dsets_h5zunregister_direct(H5Z_ERROR_MSG->id);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_filter_error_msg() */
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests the dataset interface (H5D)
@@ -19297,6 +19592,8 @@ main(void)
 
                 nerrors += (test_readonly_chunk_vlen_fill(fapl, false) < 0 ? 1 : 0);
                 nerrors += (test_readonly_chunk_vlen_fill(fapl, true) < 0 ? 1 : 0);
+
+                nerrors += (test_filter_error_msg(file) < 0 ? 1 : 0);
 
                 if (H5Fclose(file) < 0)
                     goto error;

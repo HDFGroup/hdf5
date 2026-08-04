@@ -539,6 +539,14 @@ test_iter_attr(hid_t fapl, bool new_format)
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Aiterate2");
 
+    /* Test passing null pointer for callback */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, NULL, &info);
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Aiterate2");
+
     /* Test all attributes on dataset, when callback always returns 0 */
     info.command = RET_ZERO;
     idx          = 0;
