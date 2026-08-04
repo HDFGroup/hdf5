@@ -139,8 +139,7 @@ extern "C" {
  * \param[in] nfields       The number of fields
  * \param[in] nrecords      The number of records
  * \param[in] type_size     The size in bytes of the structure
- *                          associated with the table;
- *                          This value is obtained with \c sizeof().
+ *                          associated with the table
  * \param[in] field_names   An array containing the names of the fields.
  *                          Names longer than #HLTB_MAX_FIELD_LEN - 1 characters
  *                          are silently truncated when read back by
@@ -159,6 +158,12 @@ extern "C" {
  * \details H5TBmake_table() creates and writes a dataset named
  *          \p dset_name attached to the object specified by the
  *          identifier loc_id.
+ *
+ *          \p type_size can be obtained with \c sizeof(), if the data is
+ *          stored in a predefined C struct.  Otherwise, \p type_size should
+ *          be calculated based on the highest offset in \p field_offset, the
+ *          size of its corresponding datatype in \p field_types, and any
+ *          padding bytes desired after that field.
  *
  */
 H5HL_DLL herr_t H5TBmake_table(const char *table_title, hid_t loc_id, const char *dset_name, hsize_t nfields,
@@ -182,8 +187,7 @@ H5HL_DLL herr_t H5TBmake_table(const char *table_title, hid_t loc_id, const char
  * \fg_loc_id
  * \param[in] dset_name     The name of the dataset to overwrite
  * \param[in] nrecords      The number of records to append
- * \param[in] type_size     The size of the structure type,
- *                          as calculated by \c sizeof().
+ * \param[in] type_size     The size of the structure type
  * \param[in] field_offset  An array containing the offsets of
  *                          the fields. These offsets can be
  *                          calculated with the #HOFFSET macro
@@ -197,6 +201,10 @@ H5HL_DLL herr_t H5TBmake_table(const char *table_title, hid_t loc_id, const char
  *          named \p dset_name attached to the object specified by the
  *          identifier \p loc_id. The dataset is extended to hold the
  *          new records.
+ *
+ *          \p type_size can be obtained with \c sizeof(), if the data is
+ *          stored in a predefined C struct. Otherwise, it can be obtained
+ *          by calling H5TBget_field_info() if not already known.
  *
  */
 H5HL_DLL herr_t H5TBappend_records(hid_t loc_id, const char *dset_name, hsize_t nrecords, size_t type_size,
@@ -212,8 +220,7 @@ H5HL_DLL herr_t H5TBappend_records(hid_t loc_id, const char *dset_name, hsize_t 
  * \param[in] dset_name    The name of the dataset to overwrite
  * \param[in] start         The zero index record to start writing
  * \param[in] nrecords      The number of records to write
- * \param[in] type_size     The size of the structure type, as
- *                          calculated by \c sizeof().
+ * \param[in] type_size     The size of the structure type
  * \param[in] field_offset  An array containing the offsets of
  *                          the fields.  These offsets can be
  *                          calculated with the #HOFFSET macro
@@ -226,6 +233,10 @@ H5HL_DLL herr_t H5TBappend_records(hid_t loc_id, const char *dset_name, hsize_t 
  * \details H5TBwrite_records() overwrites records starting at the zero
  *          index position start of the table named \p dset_name attached
  *          to the object specified by the identifier \p loc_id.
+ *
+ *          \p type_size can be obtained with \c sizeof(), if the data is
+ *          stored in a predefined C struct. Otherwise, it can be obtained
+ *          by calling H5TBget_field_info() if not already known.
  *
  */
 H5HL_DLL herr_t H5TBwrite_records(hid_t loc_id, const char *dset_name, hsize_t start, hsize_t nrecords,
@@ -243,8 +254,7 @@ H5HL_DLL herr_t H5TBwrite_records(hid_t loc_id, const char *dset_name, hsize_t s
  * \param[in] field_names   The names of the fields to write
  * \param[in] start         The zero index record to start writing
  * \param[in] nrecords      The number of records to write
- * \param[in] type_size     The size of the structure type, as
- *                          calculated by \c sizeof().
+ * \param[in] type_size     The size of the structure type
  * \param[in] field_offset  An array containing the offsets of
  *                          the fields.  These offsets can be
  *                          calculated with the #HOFFSET macro
@@ -258,6 +268,10 @@ H5HL_DLL herr_t H5TBwrite_records(hid_t loc_id, const char *dset_name, hsize_t s
  *          specified by \p field_names with data in \p buf from a
  *          dataset named \p dset_name attached to the object specified
  *          by the identifier \p loc_id.
+ *
+ *          \p type_size can be obtained with \c sizeof(), if the data is
+ *          stored in a predefined C struct. Otherwise, it can be obtained
+ *          by calling H5TBget_field_info() if not already known.
  *
  */
 H5HL_DLL herr_t H5TBwrite_fields_name(hid_t loc_id, const char *dset_name, const char *field_names,
@@ -278,8 +292,7 @@ H5HL_DLL herr_t H5TBwrite_fields_name(hid_t loc_id, const char *dset_name, const
  * \param[in] field_index   The indexes of the fields to write
  * \param[in] start         The zero based index record to start writing
  * \param[in] nrecords      The number of records to write
- * \param[in] type_size     The size of the structure type, as
- *                          calculated by \c sizeof().
+ * \param[in] type_size     The size of the structure type
  * \param[in] field_offset  An array containing the offsets of
  *                          the fields.  These offsets can be
  *                          calculated with the #HOFFSET macro
@@ -293,6 +306,10 @@ H5HL_DLL herr_t H5TBwrite_fields_name(hid_t loc_id, const char *dset_name, const
  *          specified by \p field_index with a buffer \p buf from a
  *          dataset named \p dset_name attached to the object
  *          specified by the identifier \p loc_id.
+ *
+ *          \p type_size can be obtained with \c sizeof(), if the data is
+ *          stored in a predefined C struct. Otherwise, it can be obtained
+ *          by calling H5TBget_field_info() if not already known.
  *
  */
 H5HL_DLL herr_t H5TBwrite_fields_index(hid_t loc_id, const char *dset_name, hsize_t nfields,
@@ -315,8 +332,7 @@ H5HL_DLL herr_t H5TBwrite_fields_index(hid_t loc_id, const char *dset_name, hsiz
  *
  * \fg_loc_id
  * \param[in] dset_name    The name of the dataset to read
- * \param[in] dst_size     The size of the structure type,
- *                          as calculated by \c sizeof()
+ * \param[in] dst_size     The size of the structure type
  * \param[in] dst_offset    An array containing the offsets of
  *                          the fields.  These offsets can be
  *                          calculated with the #HOFFSET macro
@@ -330,6 +346,10 @@ H5HL_DLL herr_t H5TBwrite_fields_index(hid_t loc_id, const char *dset_name, hsiz
  * \details H5TBread_table() reads a table named
  *          \p dset_name attached to the object specified by
  *          the identifier \p loc_id.
+ *
+ *          \p dst_size can be obtained with \c sizeof(), if the data is
+ *          stored in a predefined C struct. Otherwise, it can be obtained
+ *          by calling H5TBget_field_info() if not already known.
  *
  */
 H5HL_DLL herr_t H5TBread_table(hid_t loc_id, const char *dset_name, size_t dst_size, const size_t *dst_offset,
@@ -349,7 +369,6 @@ H5HL_DLL herr_t H5TBread_table(hid_t loc_id, const char *dset_name, size_t dst_s
  * \param[in] nrecords      The number of records to read
  * \param[in] type_size     The size in bytes of the structure associated
  *                          with the table
- *                          (This value is obtained with \c sizeof().)
  * \param[in] field_offset  An array containing the offsets of the fields
  * \param[in] dst_sizes     An array containing the size in bytes of
  *                          the fields
@@ -360,6 +379,10 @@ H5HL_DLL herr_t H5TBread_table(hid_t loc_id, const char *dset_name, size_t dst_s
  * \details H5TBread_fields_name() reads the fields identified
  *          by \p field_names from a dataset named \p dset_name
  *          attached to the object specified by the identifier \p loc_id.
+ *
+ *          \p type_size can be obtained with \c sizeof(), if the data is
+ *          stored in a predefined C struct. Otherwise, it can be obtained
+ *          by calling H5TBget_field_info() if not already known.
  *
  */
 H5HL_DLL herr_t H5TBread_fields_name(hid_t loc_id, const char *dset_name, const char *field_names,
@@ -384,7 +407,6 @@ H5HL_DLL herr_t H5TBread_fields_name(hid_t loc_id, const char *dset_name, const 
  * \param[in] nrecords      The number of records to read
  * \param[in] type_size     The size in bytes of the structure associated
  *                          with the table
- *                          (This value is obtained with \c sizeof())
  * \param[in] field_offset  An array containing the offsets of the fields
  * \param[in] dst_sizes     An array containing the size in bytes of
  *                          the fields
@@ -395,6 +417,10 @@ H5HL_DLL herr_t H5TBread_fields_name(hid_t loc_id, const char *dset_name, const 
  * \details H5TBread_fields_index() reads the fields identified
  *          by \p field_index from a dataset named \p dset_name attached
  *          to the object specified by the identifier \p loc_id.
+ *
+ *          \p type_size can be obtained with \c sizeof(), if the data is
+ *          stored in a predefined C struct. Otherwise, it can be obtained
+ *          by calling H5TBget_field_info() if not already known.
  *
  */
 H5HL_DLL herr_t H5TBread_fields_index(hid_t loc_id, const char *dset_name, hsize_t nfields,
@@ -413,8 +439,7 @@ H5HL_DLL herr_t H5TBread_fields_index(hid_t loc_id, const char *dset_name, hsize
  * \param[in] dset_name     The name of the dataset to read
  * \param[in] start         The start record to read from
  * \param[in] nrecords      The number of records to read
- * \param[in] type_size     The size of the structure type,
- *                          as calculated by \c sizeof()
+ * \param[in] type_size     The size of the structure type
  * \param[in] dst_offset    An array containing the offsets of the
  *                          fields.  These offsets can be calculated
  *                          with the #HOFFSET macro
@@ -427,6 +452,10 @@ H5HL_DLL herr_t H5TBread_fields_index(hid_t loc_id, const char *dset_name, hsize
  * \details H5TBread_records() reads some records identified from a dataset
  *          named \p dset_name attached to the object specified by the
  *          identifier \p loc_id.
+ *
+ *          \p type_size can be obtained with \c sizeof(), if the data is
+ *          stored in a predefined C struct. Otherwise, it can be obtained
+ *          by calling H5TBget_field_info() if not already known.
  *
  */
 H5HL_DLL herr_t H5TBread_records(hid_t loc_id, const char *dset_name, hsize_t start, hsize_t nrecords,
@@ -548,6 +577,10 @@ H5HL_DLL herr_t H5TBdelete_record(hid_t loc_id, const char *dset_name, hsize_t s
  *
  * \details H5TBinsert_record() inserts records into the middle of the table
  *          ("pushing down" all the records after it)
+ *
+ *          \p dst_size can be obtained with \c sizeof() if the predefined C
+ *          structure is available, otherwise, use H5Tget_size() on the
+ *          compound datatype.
  *
  */
 H5HL_DLL herr_t H5TBinsert_record(hid_t loc_id, const char *dset_name, hsize_t start, hsize_t nrecords,

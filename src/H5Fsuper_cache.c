@@ -521,12 +521,36 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata, 
         udata->btree_k[H5B_CHUNK_ID] = chunk_btree_k;
 
         /* Remainder of "variable-sized" portion of superblock */
+
+        /* Check whether the image pointer will be out of bounds */
         if (H5_IS_BUFFER_OVERFLOW(image, H5F_sizeof_addr(udata->f) * 4, end))
             HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds");
+
+        /* Get and verify base address, delay additional verification */
         H5F_addr_decode(udata->f, (const uint8_t **)&image, &sblock->base_addr /*out*/);
+        if (!H5_addr_defined(sblock->base_addr))
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "base address is undefined");
+
+        /* Get extension address, delay verification until stored eof is avail */
         H5F_addr_decode(udata->f, (const uint8_t **)&image, &sblock->ext_addr /*out*/);
+
+        /* Get and verify stored eof */
         H5F_addr_decode(udata->f, (const uint8_t **)&image, &udata->stored_eof /*out*/);
+        if (!H5_addr_defined(udata->stored_eof))
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "stored EOF address is undefined");
+        if (udata->stored_eof == 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "stored EOF address cannot be 0");
+
+        /* Get driver address */
         H5F_addr_decode(udata->f, (const uint8_t **)&image, &sblock->driver_addr /*out*/);
+        if (H5_addr_defined(sblock->driver_addr) && sblock->driver_addr >= udata->stored_eof)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "driver info block address exceeds end of file");
+
+        /* Validate base and extension addresses against stored_eof */
+        if (sblock->base_addr >= udata->stored_eof)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "base address exceeds stored EOF");
+        if (H5_addr_defined(sblock->ext_addr) && sblock->ext_addr >= udata->stored_eof)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "superblock extension address exceeds stored EOF");
 
         /* Allocate space for the root group symbol table entry */
         if (sblock->root_ent)
@@ -579,10 +603,40 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata, 
             HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds");
 
         /* Base, superblock extension, end of file & root group object header addresses */
+
+        /* Get and verify base address, delay additional verification */
         H5F_addr_decode(udata->f, (const uint8_t **)&image, &sblock->base_addr /*out*/);
+        if (!H5_addr_defined(sblock->base_addr))
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "base address is undefined");
+
+        /* Get extension address, delay verification until stored eof is avail */
         H5F_addr_decode(udata->f, (const uint8_t **)&image, &sblock->ext_addr /*out*/);
+
+        /* Get and verify stored eof */
         H5F_addr_decode(udata->f, (const uint8_t **)&image, &udata->stored_eof /*out*/);
+        if (!H5_addr_defined(udata->stored_eof))
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "stored EOF address is undefined");
+        if (udata->stored_eof == 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "stored EOF address cannot be 0");
+
+        /* Get and verify root address */
         H5F_addr_decode(udata->f, (const uint8_t **)&image, &sblock->root_addr /*out*/);
+        if (!H5_addr_defined(sblock->root_addr))
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "root address is undefined");
+        if (sblock->root_addr == 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "root address cannot be 0");
+
+        /* Validate addresses against stored_eof.
+           Skip for VFDs that don't use absolute file offsets */
+        if (H5F_HAS_FEATURE(udata->f, H5FD_FEAT_DEFAULT_VFD_COMPATIBLE)) {
+            if (sblock->base_addr >= udata->stored_eof)
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "base address exceeds stored EOF");
+            if (sblock->root_addr >= (udata->stored_eof - sblock->base_addr))
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "root group address beyond stored EOF");
+            if (H5_addr_defined(sblock->ext_addr) &&
+                sblock->ext_addr >= (udata->stored_eof - sblock->base_addr))
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "superblock extension address exceeds stored EOF");
+        }
 
         /* checksum verification already done in verify_chksum cb */
 
