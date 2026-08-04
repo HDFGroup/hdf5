@@ -686,10 +686,24 @@ HDF5 Java bindings support two native interface implementations:
 
 Maven Artifacts:
 
-- `org.hdfgroup:hdf5-java-ffm` is FFM implementation
+- `org.hdfgroup:hdf5-native` (classified by platform, e.g. `linux-x86_64`) bundles the `libhdf5` shared library built by CMake
+- `org.hdfgroup:hdf5-zlib-native` (same classifiers) bundles zlib when `libhdf5` is built with dynamic zlib support for the built-in deflate/GZIP filter
+- `org.hdfgroup:hdf5-szip-native` (same classifiers) bundles libaec (`libaec` + `libsz`) when `libhdf5` is built with dynamic SZIP support for the built-in SZIP filter
+- `org.hdfgroup:hdf5-jni-native` (same classifiers) bundles only the JNI bridge (`hdf5_java`); use with `hdf5-java-jni`
 - `org.hdfgroup:hdf5-java-jni` is JNI implementation
+- `org.hdfgroup:hdf5-java-ffm` is FFM implementation
 
-Both implementations use the same `hdf.hdf5lib.*` package structure for seamless migration.
+When `HDF5_ENABLE_MAVEN_DEPLOY` is on, CMake produces `hdf5-native-*.jar`, `hdf5-zlib-native-*.jar` when shared zlib is enabled, `hdf5-szip-native-*.jar` when shared libaec (szip) is enabled, and (JNI only) `hdf5-jni-native-*.jar` with `COMPONENT maven`. Native artifacts place shared libraries under `natives/<platform>/` for [SciJava native-lib-loader](https://github.com/scijava/native-lib-loader) (BSD 2-clause), which is a declared dependency of `hdf5-java-ffm` / `hdf5-java-jni` alongside SLF4J.
+
+**Maven dependency layering:** `hdf5-java-jni` declares a **required** (transitive) dependency on `hdf5-jni-native`. The libhdf5 stack (`hdf5-native`, `hdf5-zlib-native`, `hdf5-szip-native`) is **optional** on the binding POMs — Maven consumers get Java bindings only by default and must add native artifacts explicitly for classpath-only deployments, or use a system HDF5 install (`LD_LIBRARY_PATH` / `java.library.path`, or `-Dhdf.hdf5lib.NativeLibraryBootstrap.skip=true`). At runtime, when native JARs are present, `hdf.hdf5lib.Hdf5NativeLoader` loads bundled zlib first, then bundled libaec/szip, then HDF5, then the JNI bridge when needed.
+
+Bundled native JARs contain HDF Group–built binaries only. If the C library links other vendors’ DLLs or `.so` files dynamically (for example zlib on some Windows builds), redistribution of those binaries may require separate license compliance. The MSVC Universal C Runtime is **not** bundled; Windows consumers may need the Visual C++ Redistributable installed.
+
+Transitive native dependencies that are **not** built-in filters (for example **dynamically loaded H5PL filter plugins** the HDF5 build links against or loads at runtime) are **not** packaged inside `hdf5-native` or `hdf5-jni-native` JARs. The built-in deflate/GZIP and SZIP filters are special-cased: when the corresponding shared libraries are part of the build they are published as `hdf5-zlib-native` / `hdf5-szip-native` so those filters work in classpath-only deployments. Other native dependencies still need to be resolved by the OS (system install, `LD_LIBRARY_PATH` / `PATH`, or an HDF5 build that links them statically).
+
+**Runtime init contract (Maven / classpath consumers):** call `hdf.hdf5lib.H5.loadH5Lib()` (or use any API that triggers it, such as the static initializer on `hdf.hdf5lib.H5`). When bundled native JARs are on the classpath, that loads zlib, then libaec/szip when present, then libhdf5. Add `hdf5-native` (+ `hdf5-zlib-native` / `hdf5-szip-native` when needed) explicitly to your Maven POM for classpath-only deployments; `hdf5-jni-native` is pulled in transitively via `hdf5-java-jni`. You do **not** need `HDF5_PLUGIN_PATH`, `HDF5_PLUGIN_PRELOAD`, or a system HDF5 install for the built-in deflate/GZIP filter when using artifacts built with the `ci-Maven-Zlib` preset (zlib enabled, shared). After `H5.loadH5Lib()`, `H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_DEFLATE)` must be non-zero and chunked+gzip datasets are readable. Set `-Dhdf.hdf5lib.NativeLibraryBootstrap.skip=true` only when supplying your own native libraries.
+
+Both Java implementations use the same `hdf.hdf5lib.*` package structure for seamless migration.
 
 To build HDF5 with Maven deployment support:
 

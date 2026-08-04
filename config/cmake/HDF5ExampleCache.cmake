@@ -139,7 +139,7 @@ else ()
     message (STATUS "HDF5 Provides JNI: ${HDF5_PROVIDES_JNI}, Compat: ${HDF5_PROVIDES_JAVA_COMPAT} (Implementation: ${HDF5_JAVA_IMPLEMENTATION})")
     # Set up Java library and include variables for examples
     message (STATUS "HDF5 java cache jar: ${HDF5_JAVA_JARS}")
-    set (HDF5_JAVA_INCLUDE_DIRS ${HDF5_JAVA_JARS} ${HDF5_JAVA_LOGGING_JAR})
+    set (HDF5_JAVA_INCLUDE_DIRS ${HDF5_JAVA_JARS} ${HDF5_JAVA_LOGGING_JAR} ${HDF5_JAVA_NATIVE_LIB_LOADER_JAR})
     set (HDF5_Java_FOUND 1)
     if (Java_VERSION_STRING VERSION_LESS "25.0.0" OR HDF5_ENABLE_JNI)
       set (H5EXAMPLE_JAVA_LIBRARY ${HDF5_JAVA_JNI_LIB_TARGET})

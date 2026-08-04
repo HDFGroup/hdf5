@@ -6,12 +6,18 @@ on:
     branches: [ develop, main ]
     paths:
       - 'java/src/hdf/hdf5lib/**'
+      - 'java/hdf/hdf5lib/**'
+      - 'java/src-jni/**'
+      - 'java/cmake/**'
+      - 'java/lib/**'
       - 'HDF5Examples/JAVA/**'
       - '.github/workflows/maven-*.yml'
       - '.github/workflows/java-examples-*.yml'
       - 'CMakePresets.json'
       - '**/CMakeLists.txt'
       - 'java/src/hdf/hdf5lib/pom.xml.in'
+      - 'java/hdf/hdf5lib/pom.xml.in'
+      - 'java/src-jni/hdf/hdf5lib/pom.xml.in'
       - 'HDF5Examples/JAVA/pom-examples.xml.in'
   workflow_call:
     inputs:
@@ -110,7 +116,7 @@ jobs:
           # For pull requests, check changed files
           if [ -n "${{ github.base_ref }}" ]; then
             git fetch origin ${{ github.base_ref }}
-            MAVEN_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E "(java/src/hdf/hdf5lib/|HDF5Examples/JAVA/|maven|pom\.xml|CMakePresets\.json)" || true)
+            MAVEN_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E "(java/src/hdf/hdf5lib/|java/hdf/hdf5lib/|java/src-jni/|java/cmake/|java/lib/|HDF5Examples/JAVA/|maven|pom\.xml|CMakePresets\.json)" || true)
           else
             # Fallback: assume changes if base_ref not available
             MAVEN_FILES="true"
@@ -381,9 +387,12 @@ jobs:
 
       - name: Collect Maven artifacts
         shell: bash
+        env:
+          ARTIFACTS_DIR: ${{ runner.workspace }}/maven-artifacts
+          JAVA_IMPL: ${{ matrix.implementation }}
         run: |
           echo "Collecting Maven artifacts for testing..."
-          mkdir -p "${{ runner.workspace }}/maven-artifacts"
+          mkdir -p "$ARTIFACTS_DIR"
 
           BUILD_ROOT="${{ runner.workspace }}/build/${{ steps.set-preset.outputs.preset }}"
           echo "Looking for Maven artifacts in build root: $BUILD_ROOT"
@@ -443,14 +452,14 @@ jobs:
           find "$BUILD_DIR" -name "*slf4j*.jar" -type f
 
           # Copy JAR files (excluding test and H5Ex_ example JARs)
-          find "$BUILD_DIR" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" -exec cp {} "${{ runner.workspace }}/maven-artifacts/" \;
+          find "$BUILD_DIR" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" -exec cp {} "$ARTIFACTS_DIR/" \;
 
           # Also look for Maven dependencies in common locations
           echo "Looking for Maven dependencies in additional locations..."
 
           # Check if there's a Maven repository in the build area
           if [ -d "$BUILD_ROOT" ]; then
-            find "$BUILD_ROOT" -name "*slf4j*.jar" -type f -exec cp {} "${{ runner.workspace }}/maven-artifacts/" \;
+            find "$BUILD_ROOT" -name "*slf4j*.jar" -type f -exec cp {} "$ARTIFACTS_DIR/" \;
           fi
 
           # Check common Maven local repository locations
@@ -466,27 +475,57 @@ jobs:
               find "$repo_path" -name "slf4j-api*.jar" -o -name "slf4j-simple*.jar" 2>/dev/null | head -2 | while read jar_file; do
                 if [ -f "$jar_file" ]; then
                   echo "Found dependency: $jar_file"
-                  cp "$jar_file" "${{ runner.workspace }}/maven-artifacts/"
+                  cp "$jar_file" "$ARTIFACTS_DIR/"
                 fi
               done
             fi
           done
 
-          # Copy POM files
-          find "$BUILD_DIR" -name "pom.xml" -exec cp {} "${{ runner.workspace }}/maven-artifacts/" \;
+          # Copy POM files from the Java tree for this matrix implementation only. A broad
+          # -name find plus flat cp would clobber: CMake emits pom.xml under either
+          # java/hdf/hdf5lib (FFM) or java/src-jni/hdf/hdf5lib (JNI), same basenames.
+          case "$JAVA_IMPL" in
+            ffm)
+              find "$BUILD_ROOT" \( \
+                -path '*/java/hdf/hdf5lib/pom.xml' -o \
+                -path '*/java/hdf/hdf5lib/pom-hdf5-native.xml' -o \
+                -path '*/java/hdf/hdf5lib/pom-hdf5-zlib-native.xml' -o \
+                -path '*/java/hdf/hdf5lib/pom-hdf5-szip-native.xml' -o \
+                -path '*/java/hdf/hdf5lib/pom-hdf5-jni-native.xml' \
+              \) -exec cp {} "$ARTIFACTS_DIR/" \;
+              ;;
+            jni|auto|*)
+              find "$BUILD_ROOT" \( \
+                -path '*/java/src-jni/hdf/hdf5lib/pom.xml' -o \
+                -path '*/java/src-jni/hdf/hdf5lib/pom-hdf5-native.xml' -o \
+                -path '*/java/src-jni/hdf/hdf5lib/pom-hdf5-zlib-native.xml' -o \
+                -path '*/java/src-jni/hdf/hdf5lib/pom-hdf5-szip-native.xml' -o \
+                -path '*/java/src-jni/hdf/hdf5lib/pom-hdf5-jni-native.xml' \
+              \) -exec cp {} "$ARTIFACTS_DIR/" \;
+              ;;
+          esac
 
           # List collected artifacts
           echo "Collected Maven artifacts:"
-          ls -la "${{ runner.workspace }}/maven-artifacts/"
+          ls -la "$ARTIFACTS_DIR/"
 
       - name: Validate artifacts
         id: artifacts-check
         shell: bash
+        env:
+          ARTIFACT_DIR: ${{ runner.workspace }}/maven-artifacts
         run: |
-          ARTIFACT_COUNT=$(find "${{ runner.workspace }}/maven-artifacts" -name "*.jar" | wc -l)
-          POM_COUNT=$(find "${{ runner.workspace }}/maven-artifacts" -name "pom.xml" | wc -l)
+          ARTIFACT_COUNT=$(find "$ARTIFACT_DIR" -name "*.jar" | wc -l | awk '{print $1}')
+          POM_COUNT=$(find "$ARTIFACT_DIR" \( -name "pom.xml" -o -name "pom-hdf5-native.xml" -o -name "pom-hdf5-zlib-native.xml" -o -name "pom-hdf5-szip-native.xml" -o -name "pom-hdf5-jni-native.xml" \) | wc -l | awk '{print $1}')
+          MAIN_POM_COUNT=$(find "$ARTIFACT_DIR" -name "pom.xml" | wc -l | awk '{print $1}')
 
-          echo "Found $ARTIFACT_COUNT JAR files and $POM_COUNT POM files"
+          echo "Found $ARTIFACT_COUNT JAR files and $POM_COUNT POM files (pom.xml count: $MAIN_POM_COUNT)"
+
+          if [ "$MAIN_POM_COUNT" -ne 1 ]; then
+            echo "❌ Expected exactly one pom.xml in maven-artifacts (flat layout); found $MAIN_POM_COUNT"
+            find "$ARTIFACT_DIR" -name "pom.xml" -print || true
+            exit 1
+          fi
 
           if [ $ARTIFACT_COUNT -gt 0 ] && [ $POM_COUNT -gt 0 ]; then
             echo "created=true" >> $GITHUB_OUTPUT
@@ -509,12 +548,11 @@ jobs:
           VERIFICATION_FAILED=false
           IMPL="${{ matrix.implementation }}"
 
-          # Find the main HDF5 JAR (not slf4j dependencies)
-          HDF5_JAR=$(find "$ARTIFACT_DIR" -name "*hdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" ! -name "*slf4j*" | head -1)
+          # Main Java API JAR (exclude native bundles hdf5-native-*, hdf5-zlib-native-*, hdf5-jni-native-*)
+          HDF5_JAR=$(find "$ARTIFACT_DIR" -name "jarhdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
 
           if [ -z "$HDF5_JAR" ]; then
-            # Try alternative naming (jarhdf5)
-            HDF5_JAR=$(find "$ARTIFACT_DIR" -name "jarhdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+            HDF5_JAR=$(find "$ARTIFACT_DIR" -name "*hdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" ! -name "*slf4j*" ! -name "hdf5-native-*" ! -name "hdf5-zlib-native-*" ! -name "hdf5-szip-native-*" ! -name "hdf5-jni-native-*" | head -1)
           fi
 
           if [ -z "$HDF5_JAR" ]; then
@@ -599,6 +637,34 @@ jobs:
           # Count total files in JAR
           TOTAL_FILES=$(jar tf "$HDF5_JAR" | wc -l)
           echo "✅ Total files in JAR: $TOTAL_FILES"
+
+          ZLIB_NATIVE_JAR=$(find "$ARTIFACT_DIR" -name "hdf5-zlib-native-*.jar" | head -1)
+          if [ -z "$ZLIB_NATIVE_JAR" ]; then
+            echo "::error::Could not find hdf5-zlib-native bundle"
+            VERIFICATION_FAILED=true
+          elif jar tf "$ZLIB_NATIVE_JAR" | grep -Eq 'natives/.*/(libz\.so|libz\.so\.[0-9]+|libz\.dylib|z\.dll|zlib\.dll|zlib1\.dll)'; then
+            echo "✅ hdf5-zlib-native contains SciJava zlib library layout"
+          else
+            echo "::error::hdf5-zlib-native is missing mapped zlib library under natives/<platform>/"
+            jar tf "$ZLIB_NATIVE_JAR" | head -30 2>/dev/null || true
+            VERIFICATION_FAILED=true
+          fi
+
+          SZIP_NATIVE_JAR=$(find "$ARTIFACT_DIR" -name "hdf5-szip-native-*.jar" | head -1)
+          if [ -z "$SZIP_NATIVE_JAR" ]; then
+            echo "::error::Could not find hdf5-szip-native bundle"
+            VERIFICATION_FAILED=true
+          else
+            HAS_LIBSZ=$(jar tf "$SZIP_NATIVE_JAR" | grep -E 'natives/.*/(libsz\.so|libsz\.dylib|sz\.dll)' || true)
+            HAS_LIBAEC=$(jar tf "$SZIP_NATIVE_JAR" | grep -E 'natives/.*/(libaec\.so|libaec\.dylib|aec\.dll)' || true)
+            if [ -n "$HAS_LIBSZ" ] && [ -n "$HAS_LIBAEC" ]; then
+              echo "✅ hdf5-szip-native contains SciJava libaec/libsz library layout"
+            else
+              echo "::error::hdf5-szip-native is missing mapped libaec/libsz under natives/<platform>/"
+              jar tf "$SZIP_NATIVE_JAR" | head -30 2>/dev/null || true
+              VERIFICATION_FAILED=true
+            fi
+          fi
 
           echo "::endgroup::"
 

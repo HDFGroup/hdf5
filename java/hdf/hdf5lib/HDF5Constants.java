@@ -37,7 +37,7 @@ import org.hdfgroup.javahdf5.*;
  */
 public class HDF5Constants {
 
-    static { System.err.println("OpenIDs = " + H5.getOpenIDCount()); }
+    static { Hdf5NativeLoader.loadBundledDependenciesBeforeHdf5(); }
 
     /** Special parameters for szip compression */
     public static final int H5_SZIP_MAX_PIXELS_PER_BLOCK = H5_SZIP_MAX_PIXELS_PER_BLOCK();

@@ -44,7 +44,7 @@ set (HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES
     callbacks/H5P_iterate_t.java
 )
 
-set (HDF5_JAVADOC_HDFH5I_INVALID_HID_HDF5_CALLBACKS_SOURCES
+set (HDF5_JAVADOC_HDF_HDF5_CALLBACKS_SOURCES
     ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES}
     callbacks/package-info.java
 )
@@ -119,6 +119,7 @@ set (HDF5_JAVA_HDF_HDF5_SOURCES
     HDF5Constants.java
     HDFNativeData.java
     H5.java
+    Hdf5NativeLoader.java
     ${CMAKE_CURRENT_BINARY_DIR}/H5Version.java
     VLDataConverter.java
 )
@@ -133,7 +134,7 @@ file (WRITE ${PROJECT_BINARY_DIR}/Manifest.txt
 "
 )
 
-set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVAHDF5_JARS};${HDF5_JAVA_LOGGING_JAR}")
+set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVAHDF5_JARS};${HDF5_JAVA_LOGGING_JAR};${HDF5_JAVA_NATIVE_LIB_LOADER_JAR}")
 
 # Create main JAR with platform classifier if Maven deployment is enabled
 if (HDF5_ENABLE_MAVEN_DEPLOY)
@@ -236,6 +237,10 @@ if (HDF5_ENABLE_MAVEN_DEPLOY)
 
   # Set HDF5_JAVA_LIBRARY for examples to depend on
   SET_GLOBAL_VARIABLE (HDF5_JAVA_LIBRARY ${HDF5_JAVA_UNIVERSAL_TARGET})
+
+  # Native shared libraries as Maven JARs (FFM: libhdf5 only)
+  set (HDF5JAVA_MAVEN_NATIVE_JNI FALSE)
+  include (${HDF5_SOURCE_DIR}/java/cmake/HDF5JavaNativeBundles.cmake)
 else ()
   # Standard JAR creation without Maven classifiers
   # Include FFM bindings if this is an FFM build
@@ -312,6 +317,11 @@ endif ()
 if (HDF5_ENABLE_FORMATTERS)
   clang_format (HDF5_JAVA_SRC_FORMAT ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES} ${HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES} ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES} ${HDF5_JAVA_HDF_HDF5_SOURCES})
 endif ()
+
+include (${HDF5_SOURCE_DIR}/java/cmake/HDF5JavaJavadoc.cmake)
+hdf5_java_add_javadoc_target (
+  "${HDF5_JAVAHDF5_JARS};${HDF5_JAVA_LOGGING_JAR};${HDF5_JAVA_NATIVE_LIB_LOADER_JAR}"
+)
 
 set (CMAKE_JAVA_INCLUDE_PATH "")
 

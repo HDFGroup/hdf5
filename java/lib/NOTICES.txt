@@ -1,0 +1,47 @@
+Vendored third-party JARs in this directory
+===========================================
+
+The following binary artifacts are copied from Maven Central for HDF5 Java
+builds and tests. CI verifies them offline against SHA-256 digests in
+vendored-jars.sha256 (see .github/scripts/verify-vendored-java-lib-jars.sh).
+
+When upgrading a vendored version, replace the JARs, confirm artifact integrity
+(for example against published checksums on repo1.maven.org), then refresh
+vendored-jars.sha256 from the repository root, for example:
+
+  sha256sum \
+    java/lib/slf4j-api-2.0.16.jar \
+    java/lib/ext/slf4j-nop-2.0.16.jar \
+    java/lib/ext/slf4j-simple-2.0.16.jar \
+    java/lib/native-lib-loader-2.5.0.jar \
+    > java/lib/vendored-jars.sha256
+
+1) SLF4J 2.0.16 (org.slf4j)
+   - slf4j-api-2.0.16.jar
+   - ext/slf4j-nop-2.0.16.jar
+   - ext/slf4j-simple-2.0.16.jar
+   License: MIT License
+   Project: https://www.slf4j.org/
+   Source repository: https://github.com/qos-ch/slf4j
+
+2) SciJava Native Library Loader 2.5.0 (org.scijava)
+   - native-lib-loader-2.5.0.jar
+   License: BSD 2-Clause "Simplified" License
+   Project: https://github.com/scijava/native-lib-loader
+
+Native Maven bundles produced by the HDF5 build may also redistribute zlib
+shared libraries in org.hdfgroup:hdf5-zlib-native when Maven deployment is
+configured with shared zlib support, and libaec shared libraries in
+org.hdfgroup:hdf5-szip-native when Maven deployment is configured with shared
+libaec (SZIP) support.
+
+3) zlib
+   License: zlib License
+   Project: https://zlib.net/
+
+4) libaec (Adaptive Entropy Coding library, providing the SZIP-compatible API)
+   License: 2-clause BSD License
+   Project: https://gitlab.dkrz.de/k202009/libaec
+
+Other JARs in this tree (for example test-only dependencies) are not covered
+by the checksum manifest unless listed here.

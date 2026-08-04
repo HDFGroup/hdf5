@@ -1,0 +1,66 @@
+    static final SymbolLookup SYMBOL_LOOKUP = createHdf5SymbolLookup();
+
+    /*
+     * Replaces jextract's flat chain:
+     *   libraryLookup(...).or(loaderLookup()).or(defaultLookup())
+     * with the same three lookups grouped as:
+     *   libraryLookup(...).or(loaderLookup().or(defaultLookup()))
+     *
+     * jextract still evaluates libraryLookup(...) first; if it throws, <clinit> would fail.
+     * So the non-bundled path keeps libraryLookup inside try/catch. The bundled Maven path
+     * extracts and loads natives via NativeLoader, then uses libraryLookup on the extracted
+     * libhdf5 path so symbols resolve before H5.loadH5Lib() runs.
+     */
+    private static void loadBundledNativeDependencies() {
+        try {
+            hdf.hdf5lib.Hdf5NativeLoader.loadBundledDependenciesBeforeHdf5();
+        }
+        catch (Throwable ignored) {
+        }
+    }
+
+    private static java.nio.file.Path bundledHdf5LibraryPath() {
+        try {
+            Object extractor =
+                    Class.forName("org.scijava.nativelib.NativeLoader")
+                            .getMethod("getJniExtractor")
+                            .invoke(null);
+            if (extractor == null) {
+                return null;
+            }
+            java.lang.reflect.Method getJniDir =
+                    Class.forName("org.scijava.nativelib.BaseJniExtractor")
+                            .getMethod("getJniDir");
+            java.io.File jniDir = (java.io.File) getJniDir.invoke(extractor);
+            java.io.File lib = new java.io.File(jniDir, System.mapLibraryName("hdf5"));
+            return lib.isFile() ? lib.toPath() : null;
+        }
+        catch (Throwable ignored) {
+            return null;
+        }
+    }
+
+    private static SymbolLookup createHdf5SymbolLookup() {
+        // HDF5_FFM_NATIVE_LOOKUP — marker for idempotent CMake post-process
+        loadBundledNativeDependencies();
+        java.nio.file.Path bundledHdf5 = bundledHdf5LibraryPath();
+        if (bundledHdf5 != null) {
+            try {
+                return SymbolLookup.libraryLookup(bundledHdf5, LIBRARY_ARENA)
+                        .or(SymbolLookup.loaderLookup()
+                                .or(Linker.nativeLinker().defaultLookup()));
+            }
+            catch (IllegalArgumentException e) {
+                return SymbolLookup.loaderLookup()
+                        .or(Linker.nativeLinker().defaultLookup());
+            }
+        }
+        try {
+            return SymbolLookup.libraryLookup(System.mapLibraryName("hdf5"), LIBRARY_ARENA)
+            .or(SymbolLookup.loaderLookup()
+                        .or(Linker.nativeLinker().defaultLookup()));
+        } catch (IllegalArgumentException e) {
+            return SymbolLookup.loaderLookup()
+            .or(Linker.nativeLinker().defaultLookup());
+        }
+    }

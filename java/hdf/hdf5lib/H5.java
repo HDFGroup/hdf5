@@ -329,6 +329,13 @@ public class H5 implements java.io.Serializable {
             return;
 
         try {
+            Hdf5NativeLoader.loadBundledDependenciesBeforeHdf5();
+        }
+        catch (Throwable err) {
+            log.debug("Bundled HDF5 native dependencies not loaded: " + err.getMessage());
+        }
+
+        try {
             H5.H5open();
             isLibraryLoaded = true;
         }
