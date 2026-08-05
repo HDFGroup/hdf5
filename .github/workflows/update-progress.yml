@@ -13,10 +13,12 @@ jobs:
     if: github.repository_owner == 'HDFGROUP'
     steps:
     - name: Checkout repository
-      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+ 
     - name: Set up Python
-      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: '3.11'  # Use specific version for consistency
         
@@ -115,12 +117,19 @@ jobs:
           exit 1
         fi
         
-        # Extract critical and high priority counts
+        # Extract critical, high, medium, and low priority counts
         BLOCKER_DONE=$(grep "^blocker_done=" progress_output.txt | cut -d'=' -f2 | head -1)
         BLOCKER_TOTAL=$(grep "^blocker_total=" progress_output.txt | cut -d'=' -f2 | head -1)
         MUSTDO_DONE=$(grep "^mustdo_done=" progress_output.txt | cut -d'=' -f2 | head -1)
         MUSTDO_TOTAL=$(grep "^mustdo_total=" progress_output.txt | cut -d'=' -f2 | head -1)
+        MEDIUM_DONE=$(grep "^medium_done=" progress_output.txt | cut -d'=' -f2 | head -1)
+        MEDIUM_TOTAL=$(grep "^medium_total=" progress_output.txt | cut -d'=' -f2 | head -1)
+        LOW_DONE=$(grep "^low_done=" progress_output.txt | cut -d'=' -f2 | head -1)
+        LOW_TOTAL=$(grep "^low_total=" progress_output.txt | cut -d'=' -f2 | head -1)
         VERSION=$(grep "^version=" progress_output.txt | cut -d'=' -f2 | head -1)
+        LATEST_RELEASE_TAG=$(grep "^latest_release_tag=" progress_output.txt | cut -d'=' -f2 | head -1)
+        LATEST_RELEASE_DATE=$(grep "^latest_release_date=" progress_output.txt | cut -d'=' -f2 | head -1)
+        MILESTONE_DUE_DATE=$(grep "^milestone_due_date=" progress_output.txt | cut -d'=' -f2 | head -1)
 
         # Set outputs for use in subsequent steps
         echo "percentage=$PERCENTAGE" >> $GITHUB_OUTPUT
@@ -130,10 +139,18 @@ jobs:
         echo "blocker_total=$BLOCKER_TOTAL" >> $GITHUB_OUTPUT
         echo "mustdo_done=$MUSTDO_DONE" >> $GITHUB_OUTPUT
         echo "mustdo_total=$MUSTDO_TOTAL" >> $GITHUB_OUTPUT
+        echo "medium_done=$MEDIUM_DONE" >> $GITHUB_OUTPUT
+        echo "medium_total=$MEDIUM_TOTAL" >> $GITHUB_OUTPUT
+        echo "low_done=$LOW_DONE" >> $GITHUB_OUTPUT
+        echo "low_total=$LOW_TOTAL" >> $GITHUB_OUTPUT
         echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "latest_release_tag=$LATEST_RELEASE_TAG" >> $GITHUB_OUTPUT
+        echo "latest_release_date=$LATEST_RELEASE_DATE" >> $GITHUB_OUTPUT
+        echo "milestone_due_date=$MILESTONE_DUE_DATE" >> $GITHUB_OUTPUT
 
         echo "::notice::Progress calculation successful: ${PERCENTAGE}% (${DONE}/${TOTAL})"
-        echo "::notice::  Version: ${VERSION}, Critical Priority: ${BLOCKER_DONE}/${BLOCKER_TOTAL}, High Priority: ${MUSTDO_DONE}/${MUSTDO_TOTAL}"
+        echo "::notice::  Version: ${VERSION}, Critical Priority: ${BLOCKER_DONE}/${BLOCKER_TOTAL}, High Priority: ${MUSTDO_DONE}/${MUSTDO_TOTAL}, Medium Priority: ${MEDIUM_DONE}/${MEDIUM_TOTAL}, Low Priority: ${LOW_DONE}/${LOW_TOTAL}"
+        echo "::notice::  Latest release: ${LATEST_RELEASE_TAG} (${LATEST_RELEASE_DATE}), Milestone due date: ${MILESTONE_DUE_DATE}"
         
         # Clean up
         rm -f progress_output.txt
@@ -154,7 +171,14 @@ jobs:
         BLOCKER_TOTAL: ${{ steps.progress.outputs.blocker_total }}
         MUSTDO_DONE: ${{ steps.progress.outputs.mustdo_done }}
         MUSTDO_TOTAL: ${{ steps.progress.outputs.mustdo_total }}
+        MEDIUM_DONE: ${{ steps.progress.outputs.medium_done }}
+        MEDIUM_TOTAL: ${{ steps.progress.outputs.medium_total }}
+        LOW_DONE: ${{ steps.progress.outputs.low_done }}
+        LOW_TOTAL: ${{ steps.progress.outputs.low_total }}
         VERSION: ${{ steps.progress.outputs.version }}
+        LATEST_RELEASE_TAG: ${{ steps.progress.outputs.latest_release_tag }}
+        LATEST_RELEASE_DATE: ${{ steps.progress.outputs.latest_release_date }}
+        MILESTONE_DUE_DATE: ${{ steps.progress.outputs.milestone_due_date }}
       run: |
         # Execute dedicated badge generation script
         # This separates concerns: YAML orchestrates, scripts implement logic
@@ -172,6 +196,8 @@ jobs:
         REPO_NAME="${GITHUB_REPOSITORY##*/}"
         BLOCKER_GIST_NAME="release-blocker-${REPO_NAME}.json"
         MUSTDO_GIST_NAME="release-mustdo-${REPO_NAME}.json"
+        MEDIUM_GIST_NAME="release-medium-${REPO_NAME}.json"
+        LOW_GIST_NAME="release-low-${REPO_NAME}.json"
 
         FAILURE_BADGE=$(jq -n '{
           "schemaVersion": 1,
@@ -184,11 +210,15 @@ jobs:
         REQUEST_PAYLOAD=$(jq -n \
           --arg blocker_filename "$BLOCKER_GIST_NAME" \
           --arg mustdo_filename "$MUSTDO_GIST_NAME" \
+          --arg medium_filename "$MEDIUM_GIST_NAME" \
+          --arg low_filename "$LOW_GIST_NAME" \
           --argjson content "$FAILURE_BADGE" \
           '{
             "files": {
               ($blocker_filename): { "content": ($content | tostring) },
-              ($mustdo_filename): { "content": ($content | tostring) }
+              ($mustdo_filename): { "content": ($content | tostring) },
+              ($medium_filename): { "content": ($content | tostring) },
+              ($low_filename): { "content": ($content | tostring) }
             }
           }')
 

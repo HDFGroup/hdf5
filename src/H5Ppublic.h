@@ -5763,6 +5763,17 @@ H5_DLL herr_t H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t 
  *          larger than the page buffer size, the subsequent call to H5Fcreate()
  *          using the \p plist_id will fail.
  *
+ *          The arguments min_meta_perc and min_raw_perc are to prevent one type
+ *          of data from evicting hot pages of the other type, that is, pushing
+ *          them out of the buffer.  Setting a minimum percentage for each type
+ *          reserves a portion of the page buffer for that type, ensuring both
+ *          metadata and raw data can maintain a presence in the buffer.
+ *
+ *          The following constraints apply to min_meta_perc and min_raw_perc:
+ *          - Each must be between 0 and 100 inclusive
+ *          - Their sum must not exceed 100, that is, together they can't reserve
+ *            more than the entire page buffer.
+ *
  * \note    As of HDF5 1.14.4, this property will be ignored when an existing
  *          file is being opened and the file space strategy stored in the
  *          file isn't paged. This was previously a failure.

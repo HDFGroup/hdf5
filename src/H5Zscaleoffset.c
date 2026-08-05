@@ -1191,10 +1191,8 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "minimum number of bits exceeds maximum");
 
         /* no need to process data */
-        if (scale_factor == (int)(cd_values[H5Z_SCALEOFFSET_PARM_SIZE] * 8)) {
-            ret_value = *buf_size;
-            goto done;
-        }
+        if (scale_factor == (int)(cd_values[H5Z_SCALEOFFSET_PARM_SIZE] * 8))
+            HGOTO_DONE(nbytes);
         minbits = (uint32_t)scale_factor;
     }
 
