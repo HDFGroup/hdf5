@@ -1,0 +1,26 @@
+name: Dependabot Auto-Merge Tests
+
+on:
+  push:
+    paths:
+      - .github/scripts/dependabot-auto-merge.js
+      - .github/scripts/dependabot-auto-merge.test.js
+  pull_request:
+    branches: [develop]
+    paths:
+      - .github/scripts/dependabot-auto-merge.js
+      - .github/scripts/dependabot-auto-merge.test.js
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    if: github.repository == 'HDFGroup/hdf5' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false # Prevents tokens from being written to Git config files
+
+      - run: node .github/scripts/dependabot-auto-merge.test.js

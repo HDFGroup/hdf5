@@ -1,0 +1,44 @@
+name: Dependabot Auto-Merge (GitHub Actions group)
+
+# Approves and squash-merges dependabot's "bump the github-actions group" PRs
+# once every check and status on the PR's head commit has completed
+# successfully. Runs daily, early morning Central time — dependabot creates
+# these PRs around 22:00-23:30 UTC, so this gives CI all night to finish and
+# still runs before typical developer activity begins. PRs that are still
+# running, have any failed check, or aren't otherwise mergeable are left
+# alone and picked up on a later run — see .github/scripts/dependabot-auto-merge.js.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 11 * * *" # 06:00 America/Chicago (CDT); 05:00 during CST
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependabot-auto-merge
+  cancel-in-progress: false
+
+jobs:
+  auto-merge:
+    if: github.repository == 'HDFGroup/hdf5'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to squash-merge
+      pull-requests: write # to approve and merge PRs
+      checks: read # to read check-run conclusions
+      statuses: read # to read legacy commit statuses
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false # Prevents tokens from being written to Git config files
+          sparse-checkout: .github/scripts
+          fetch-depth: 1
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          retries: 3
+          retry-exempt-status-codes: 400,403,404,422
+          script: |
+            const { run } = require('${{ github.workspace }}/.github/scripts/dependabot-auto-merge.js');
+            await run({ github, context, core });
