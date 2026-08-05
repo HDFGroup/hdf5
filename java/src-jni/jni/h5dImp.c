@@ -176,8 +176,8 @@ Java_hdf_hdf5lib_H5_H5Dread(JNIEnv *env, jclass clss, jlong dataset_id, jlong me
                             jboolean isCriticalPinning)
 {
     jboolean    readBufIsCopy;
-    jbyte      *readBuf = NULL;
-    size_t      typeSize;
+    jbyte      *readBuf  = NULL;
+    size_t      typeSize = 0; // Only used by vl_data_class types
     H5T_class_t type_class;
     jsize       vl_array_len = 0; // Only used by vl_data_class types
     htri_t      vl_data_class;
@@ -190,6 +190,13 @@ Java_hdf_hdf5lib_H5_H5Dread(JNIEnv *env, jclass clss, jlong dataset_id, jlong me
 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+
+    /* For fixed-length data the byte buffer must cover the selection. */
+    if (!vl_data_class &&
+        h5d_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
+                             (hid_t)dataset_id, ENVPTR->GetArrayLength(ENVONLY, buf), sizeof(jbyte),
+                             "H5Dread") < 0)
+        goto done;
 
     if (vl_data_class) {
         /* Get size of data array */
@@ -222,7 +229,8 @@ Java_hdf_hdf5lib_H5_H5Dread(JNIEnv *env, jclass clss, jlong dataset_id, jlong me
         if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
             H5_LIBRARY_ERROR(ENVONLY);
 
-        translate_rbuf(env, buf, mem_type_id, type_class, vl_array_len, readBuf);
+        translate_rbuf(env, buf, mem_type_id, type_class, vl_array_len, readBuf,
+                       (size_t)vl_array_len * typeSize);
     }
 
 done:
@@ -258,7 +266,7 @@ Java_hdf_hdf5lib_H5_H5Dwrite(JNIEnv *env, jclass clss, jlong dataset_id, jlong m
 {
     jboolean    writeBufIsCopy;
     jbyte      *writeBuf = NULL;
-    size_t      typeSize;
+    size_t      typeSize = 0; // Only used by vl_data_class types
     H5T_class_t type_class;
     jsize       vl_array_len = 0; // Only used by vl_data_class types
     htri_t      vl_data_class;
@@ -271,6 +279,13 @@ Java_hdf_hdf5lib_H5_H5Dwrite(JNIEnv *env, jclass clss, jlong dataset_id, jlong m
 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+
+    /* For fixed-length data the byte buffer must cover the selection. */
+    if (!vl_data_class &&
+        h5d_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
+                             (hid_t)dataset_id, ENVPTR->GetArrayLength(ENVONLY, buf), sizeof(jbyte),
+                             "H5Dwrite") < 0)
+        goto done;
 
     if (vl_data_class) {
         /* Get size of data array */
@@ -299,7 +314,8 @@ Java_hdf_hdf5lib_H5_H5Dwrite(JNIEnv *env, jclass clss, jlong dataset_id, jlong m
         if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
             H5_LIBRARY_ERROR(ENVONLY);
 
-        translate_wbuf(ENVONLY, buf, mem_type_id, type_class, vl_array_len, writeBuf);
+        translate_wbuf(ENVONLY, buf, mem_type_id, type_class, vl_array_len, writeBuf,
+                       (size_t)vl_array_len * typeSize);
     }
 
     if ((status = H5Dwrite((hid_t)dataset_id, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
@@ -430,11 +446,11 @@ Java_hdf_hdf5lib_H5_H5Dread_1short(JNIEnv *env, jclass clss, jlong dataset_id, j
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dread_short: read buffer is NULL");
 
-    /* Get size of data array */
-    if (ENVPTR->GetArrayLength(ENVONLY, buf) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread: readBuf length < 0");
-    }
+    /* Verify the buffer is large enough for the selection. */
+    if (h5d_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
+                             (hid_t)dataset_id, ENVPTR->GetArrayLength(ENVONLY, buf), sizeof(jshort),
+                             "H5Dread_short") < 0)
+        goto done;
 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -487,11 +503,11 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1short(JNIEnv *env, jclass clss, jlong dataset_id, 
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_short: write buffer is NULL");
 
-    /* Get size of data array */
-    if (ENVPTR->GetArrayLength(ENVONLY, buf) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread: readBuf length < 0");
-    }
+    /* Verify the buffer is large enough for the selection. */
+    if (h5d_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
+                             (hid_t)dataset_id, ENVPTR->GetArrayLength(ENVONLY, buf), sizeof(jshort),
+                             "H5Dwrite_short") < 0)
+        goto done;
 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -544,11 +560,11 @@ Java_hdf_hdf5lib_H5_H5Dread_1int(JNIEnv *env, jclass clss, jlong dataset_id, jlo
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dread_int: read buffer is NULL");
 
-    /* Get size of data array */
-    if (ENVPTR->GetArrayLength(ENVONLY, buf) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread: readBuf length < 0");
-    }
+    /* Verify the buffer is large enough for the selection. */
+    if (h5d_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
+                             (hid_t)dataset_id, ENVPTR->GetArrayLength(ENVONLY, buf), sizeof(jint),
+                             "H5Dread_int") < 0)
+        goto done;
 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -601,11 +617,11 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1int(JNIEnv *env, jclass clss, jlong dataset_id, jl
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_int: write buffer is NULL");
 
-    /* Get size of data array */
-    if (ENVPTR->GetArrayLength(ENVONLY, buf) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread: readBuf length < 0");
-    }
+    /* Verify the buffer is large enough for the selection. */
+    if (h5d_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
+                             (hid_t)dataset_id, ENVPTR->GetArrayLength(ENVONLY, buf), sizeof(jint),
+                             "H5Dwrite_int") < 0)
+        goto done;
 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -658,11 +674,11 @@ Java_hdf_hdf5lib_H5_H5Dread_1long(JNIEnv *env, jclass clss, jlong dataset_id, jl
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dread_long: read buffer is NULL");
 
-    /* Get size of data array */
-    if (ENVPTR->GetArrayLength(ENVONLY, buf) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread: readBuf length < 0");
-    }
+    /* Verify the buffer is large enough for the selection. */
+    if (h5d_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
+                             (hid_t)dataset_id, ENVPTR->GetArrayLength(ENVONLY, buf), sizeof(jlong),
+                             "H5Dread_long") < 0)
+        goto done;
 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -715,11 +731,11 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1long(JNIEnv *env, jclass clss, jlong dataset_id, j
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_long: write buffer is NULL");
 
-    /* Get size of data array */
-    if (ENVPTR->GetArrayLength(ENVONLY, buf) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
-    }
+    /* Verify the buffer is large enough for the selection. */
+    if (h5d_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
+                             (hid_t)dataset_id, ENVPTR->GetArrayLength(ENVONLY, buf), sizeof(jlong),
+                             "H5Dwrite_long") < 0)
+        goto done;
 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -772,11 +788,11 @@ Java_hdf_hdf5lib_H5_H5Dread_1float(JNIEnv *env, jclass clss, jlong dataset_id, j
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dread_float: read buffer is NULL");
 
-    /* Get size of data array */
-    if (ENVPTR->GetArrayLength(ENVONLY, buf) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
-    }
+    /* Verify the buffer is large enough for the selection. */
+    if (h5d_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
+                             (hid_t)dataset_id, ENVPTR->GetArrayLength(ENVONLY, buf), sizeof(jfloat),
+                             "H5Dread_float") < 0)
+        goto done;
 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -832,11 +848,11 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1float(JNIEnv *env, jclass clss, jlong dataset_id, 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    /* Get size of data array */
-    if (ENVPTR->GetArrayLength(ENVONLY, buf) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread: readBuf length < 0");
-    }
+    /* Verify the buffer is large enough for the selection. */
+    if (h5d_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
+                             (hid_t)dataset_id, ENVPTR->GetArrayLength(ENVONLY, buf), sizeof(jfloat),
+                             "H5Dwrite_float") < 0)
+        goto done;
 
     if (isCriticalPinning) {
         PIN_FLOAT_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, &writeBufIsCopy,
@@ -886,11 +902,11 @@ Java_hdf_hdf5lib_H5_H5Dread_1double(JNIEnv *env, jclass clss, jlong dataset_id, 
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dread_double: read buffer is NULL");
 
-    /* Get size of data array */
-    if (ENVPTR->GetArrayLength(ENVONLY, buf) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
-    }
+    /* Verify the buffer is large enough for the selection. */
+    if (h5d_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
+                             (hid_t)dataset_id, ENVPTR->GetArrayLength(ENVONLY, buf), sizeof(jdouble),
+                             "H5Dread_double") < 0)
+        goto done;
 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -943,10 +959,11 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1double(JNIEnv *env, jclass clss, jlong dataset_id,
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_double: write buffer is NULL");
 
-    if (ENVPTR->GetArrayLength(ENVONLY, buf) < 0) {
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_double: buf length < 0");
-    }
+    /* Verify the buffer is large enough for the selection. */
+    if (h5d_validate_raw_buf(env, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
+                             (hid_t)dataset_id, ENVPTR->GetArrayLength(ENVONLY, buf), sizeof(jdouble),
+                             "H5Dwrite_double") < 0)
+        goto done;
 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1006,6 +1023,11 @@ Java_hdf_hdf5lib_H5_H5Dread_1string(JNIEnv *env, jclass clss, jlong dataset_id, 
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread_string: read buffer length <= 0");
     }
+
+    /* The buffer must have one slot per selected point. */
+    if (h5d_validate_slot_buf(env, (hid_t)mem_space_id, (hid_t)file_space_id, (hid_t)dataset_id, n,
+                              "H5Dread_string") < 0)
+        goto done;
 
     if (!(str_len = H5Tget_size((hid_t)mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1074,6 +1096,11 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1string(JNIEnv *env, jclass clss, jlong dataset_id,
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_string: write buffer length <= 0");
     }
 
+    /* The buffer must have one slot per selected point. */
+    if (h5d_validate_slot_buf(env, (hid_t)mem_space_id, (hid_t)file_space_id, (hid_t)dataset_id, n,
+                              "H5Dwrite_string") < 0)
+        goto done;
+
     if (!(str_len = H5Tget_size((hid_t)mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
 
@@ -1132,6 +1159,7 @@ Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong 
     size_t      typeSize;
     H5T_class_t type_class;
     jsize       vl_array_len;
+    hssize_t    npoints;
     htri_t      vl_data_class;
     herr_t      status      = FAIL;
     htri_t      is_variable = 0;
@@ -1151,6 +1179,13 @@ Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong 
     if ((is_variable = H5Tis_variable_str(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
+    /* The buffer must hold at least one slot per selected point; otherwise the
+     * H5Dread below would overrun the raw read buffer. */
+    if ((npoints = h5d_io_npoints(env, (hid_t)mem_space_id, (hid_t)file_space_id, (hid_t)dataset_id)) < 0)
+        goto done;
+    if ((hssize_t)vl_array_len < npoints)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5DreadVL: read buffer is smaller than the selection");
+
     if (!(typeSize = H5Tget_size(mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
 
@@ -1163,7 +1198,7 @@ Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong 
     if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    translate_rbuf(env, buf, mem_type_id, type_class, vl_array_len, readBuf);
+    translate_rbuf(env, buf, mem_type_id, type_class, vl_array_len, readBuf, (size_t)vl_array_len * typeSize);
 
 done:
     if (readBuf) {
@@ -1192,6 +1227,7 @@ Java_hdf_hdf5lib_H5_H5DwriteVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong
     size_t      typeSize;
     H5T_class_t type_class;
     jsize       vl_array_len; // Only used by vl_data_class types
+    hssize_t    npoints;
     htri_t      vl_data_class;
     herr_t      status      = FAIL;
     htri_t      is_variable = 0;
@@ -1212,16 +1248,27 @@ Java_hdf_hdf5lib_H5_H5DwriteVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong
     if ((is_variable = H5Tis_variable_str(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
+    /* Verify the buffer holds at least one element per selected point. */
+    if ((npoints = h5d_io_npoints(env, (hid_t)mem_space_id, (hid_t)file_space_id, (hid_t)dataset_id)) < 0)
+        goto done;
+    if ((hssize_t)vl_array_len < npoints)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5DwriteVL: write buffer is smaller than the selection");
+
     if (!(typeSize = H5Tget_size(mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
-
-    if (NULL == (writeBuf = calloc((size_t)vl_array_len, typeSize)))
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5DwriteVL: failed to allocate raw VL write buffer");
 
     if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    translate_wbuf(ENVONLY, buf, mem_type_id, type_class, vl_array_len, writeBuf);
+    /* Verify the buffer structure matches mem_type_id before converting it. */
+    if (h5validate_wbuf(ENVONLY, buf, mem_type_id, type_class, vl_array_len) < 0)
+        goto done;
+
+    if (NULL == (writeBuf = calloc((size_t)vl_array_len, typeSize)))
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5DwriteVL: failed to allocate raw VL write buffer");
+
+    translate_wbuf(ENVONLY, buf, mem_type_id, type_class, vl_array_len, writeBuf,
+                   (size_t)vl_array_len * typeSize);
 
     if ((status = H5Dwrite((hid_t)dataset_id, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
                            (hid_t)xfer_plist_id, writeBuf)) < 0)
@@ -1265,6 +1312,11 @@ Java_hdf_hdf5lib_H5_H5Dread_1VLStrings(JNIEnv *env, jclass clss, jlong dataset_i
 
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5DreadVLStrings: read buffer is NULL");
+
+    /* The buffer must have one slot per selected point. */
+    if (h5d_validate_slot_buf(env, (hid_t)mem_space_id, (hid_t)file_space_id, (hid_t)dataset_id,
+                              ENVPTR->GetArrayLength(ENVONLY, buf), "H5Dread_VLStrings") < 0)
+        goto done;
 
     if ((isStr = H5Tdetect_class((hid_t)mem_type_id, H5T_STRING)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1491,6 +1543,11 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1VLStrings(JNIEnv *env, jclass clss, jlong dataset_
 
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5DwriteVLStrings: write buffer is NULL");
+
+    /* The buffer must have one slot per selected point. */
+    if (h5d_validate_slot_buf(env, (hid_t)mem_space_id, (hid_t)file_space_id, (hid_t)dataset_id,
+                              ENVPTR->GetArrayLength(ENVONLY, buf), "H5Dwrite_VLStrings") < 0)
+        goto done;
 
     if ((isStr = H5Tdetect_class((hid_t)mem_type_id, H5T_STRING)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1738,6 +1795,11 @@ Java_hdf_hdf5lib_H5_H5Dread_1reg_1ref(JNIEnv *env, jclass clss, jlong dataset_id
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread_reg_ref: buf length < 0");
     }
+
+    /* The buffer must have one slot per selected point. */
+    if (h5d_validate_slot_buf(env, (hid_t)mem_space_id, (hid_t)file_space_id, (hid_t)dataset_id, n,
+                              "H5Dread_reg_ref") < 0)
+        goto done;
 
     if (NULL == (ref_data = (H5R_ref_t *)calloc(1, (size_t)n * sizeof(H5R_ref_t))))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Dread_reg_ref: failed to allocate read buffer");

@@ -39,7 +39,9 @@ jobs:
       run-ignore: ${{ steps.getinputs.outputs.INPUTS_IGNORE }}
 
     steps:
-    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false # Prevents tokens from being written to Git config files
 
     - name: Get hdf5 release base name
       uses: dsaltares/fetch-gh-release-asset@aa2ab1243d6e0d5b405b973c89fa4d06a2d0fff7 # master
@@ -52,14 +54,22 @@ jobs:
       id: gethdf5base
       run: echo "HDF5_NAME_BASE=$(cat last-file.txt)" >> $GITHUB_OUTPUT
 
-    - run: echo "hdf5 base name is ${{ steps.gethdf5base.outputs.HDF5_NAME_BASE }}."
+    - name: Print hdf5 base name
+      env:
+        HDF5_NAME_BASE: ${{ steps.gethdf5base.outputs.HDF5_NAME_BASE }}
+      run: echo "hdf5 base name is $HDF5_NAME_BASE."
 
     - name: Read inputs
       id: getinputs
+      env:
+        INPUTS_USE_IGNORE: ${{ inputs.use_ignore }}
       run: |
-        echo "INPUTS_IGNORE=${{ inputs.use_ignore }}" >> $GITHUB_OUTPUT
+        echo "INPUTS_IGNORE=$INPUTS_USE_IGNORE" >> "$GITHUB_OUTPUT"
 
-    - run: echo "use_ignore is ${{ steps.getinputs.outputs.INPUTS_IGNORE }}."
+    - name: Print use_ignore
+      env:
+        INPUTS_IGNORE: ${{ steps.getinputs.outputs.INPUTS_IGNORE }}
+      run: echo "use_ignore is $INPUTS_IGNORE."
 
   call-workflow-tarball:
     needs: [get-old-names]
@@ -159,8 +169,8 @@ jobs:
     needs: [get-old-names, call-workflow-tarball, call-workflow-ctest]
     uses: ./.github/workflows/abi-report.yml
     with:
-      # previous release version
-      file_ref: '2.0.0'
+      # file_ref intentionally omitted: abi-report.yml auto-detects the latest
+      # published HDFGroup/hdf5 release when it isn't given one
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_tag: snapshot
       use_environ: snapshots

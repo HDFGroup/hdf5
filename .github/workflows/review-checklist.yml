@@ -5,16 +5,32 @@ name: Review Checklist
 #
 # Reviewer lists are derived entirely from .github/CODEOWNERS — no duplication.
 # To add an area or change owners, edit only CODEOWNERS.
+#
+# Uses pull_request_target so the workflow runs with the base repo's full token
+# even for fork PRs. The checkout and script execution always use the base
+# branch (develop), never the fork's code — this is the safe posture for
+# pull_request_target.
+#
+# Approval boxes are also updated immediately when a review is submitted, via
+# a two-workflow pattern: review-checklist-gather.yml fires on pull_request_review
+# (read-only token) and this workflow fires on its completion via workflow_run
+# (full write token, no fork approval gate). Requires the repo setting
+# "Fork pull request workflows from outside collaborators" to be
+# "Require approval for first-time contributors".
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  # zizmor: ignore[pull-request-target]
+  # Safe: checkout has no ref: override so the base branch (develop) is always
+  # used — the fork's code is never checked out or executed.
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review, review_requested, review_request_removed]
     branches: [develop]
-  pull_request_review:
-    types: [submitted]
+  workflow_run:
+    workflows: ["Review Checklist (gather)"]
+    types: [completed]
 
 concurrency:
-  group: review-checklist-${{ github.event.pull_request.number }}
+  group: review-checklist-${{ github.event.pull_request.number || github.event.workflow_run.head_sha }}
   cancel-in-progress: true
 
 permissions:
@@ -25,19 +41,22 @@ permissions:
 jobs:
   checklist:
     runs-on: ubuntu-latest
-    # Only run on PRs targeting develop from within the same repo (not forks).
-    # For review events, only run on approvals targeting develop.
-    if: |
-      github.event.pull_request.base.ref == 'develop' &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      (github.event_name == 'pull_request' ||
-       (github.event_name == 'pull_request_review' &&
-        github.event.review.state == 'approved'))
-
+    if: >
+      github.repository == 'HDFGroup/hdf5' &&
+      ((github.event_name == 'pull_request_target' && github.event.pull_request.base.ref == 'develop') ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'))
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
+          # checkout v7 blocks all checkouts on pull_request_target/workflow_run
+          # triggers by default. Safe to opt in here: no ref: override is set,
+          # so this always checks out the base branch (develop), never fork code.
+          allow-unsafe-pr-checkout: true
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          retries: 3
+          retry-exempt-status-codes: 400,403,404,422
           script: |
             const run = require('./.github/scripts/review-checklist.js');
             await run({ github, context, core });

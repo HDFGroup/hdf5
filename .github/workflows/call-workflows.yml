@@ -30,8 +30,6 @@ concurrency:
 
 permissions:
   contents: read
-  packages: write
-  pull-requests: write
 
 jobs:
     call-workflow-special-cmake:
@@ -173,6 +171,9 @@ jobs:
             thread_safety: ""
             build_mode: "Release"
             force_java_implementation: "jni"
+            java_version: 11
+            win_runner: "windows-2022"
+            win_vs_generator: "Visual Studio 17 2022"
 
     call-jni-latest-java:
         name: "JNI Latest Java Testing"
@@ -219,6 +220,10 @@ jobs:
     call-maven-staging:
         name: "Maven Staging Tests"
         needs: call-release-cmake
+        permissions:
+            contents: read
+            packages: write
+            pull-requests: write
         uses: ./.github/workflows/maven-staging.yml
         with:
             test_maven_deployment: true
@@ -229,6 +234,10 @@ jobs:
     call-maven-ffm-staging:
         name: "Maven Staging Tests"
         needs: call-ffm-latest-java
+        permissions:
+            contents: read
+            packages: write
+            pull-requests: write
         uses: ./.github/workflows/maven-staging.yml
         with:
             test_maven_deployment: true

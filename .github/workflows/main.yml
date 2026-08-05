@@ -35,6 +35,16 @@ on:
         required: false
         default: "jni"
         type: string
+      win_runner:
+        description: "Windows runner version to use (windows-2022, windows-latest, etc.)"
+        required: false
+        default: "windows-latest"
+        type: string
+      win_vs_generator:
+        description: "CMake generator to use for Visual Studio"
+        required: false
+        default: "Visual Studio 18 2026"
+        type: string
 
 permissions:
   contents: read
@@ -71,7 +81,7 @@ jobs:
           # No Fortran, parallel, or VFDs that rely on POSIX things
           - name: "Windows MSVC"
             ostype: windows
-            os: windows-latest
+            os: ${{ inputs.win_runner }}
             shared: ON
             cpp: ON
             fortran: OFF
@@ -84,14 +94,14 @@ jobs:
             parallel: OFF
             mirror_vfd: OFF
             direct_vfd: OFF
-            generator: "-G \"Visual Studio 17 2022\" -A x64"
+            generator: "-G \"${{ inputs.win_vs_generator }}\" -A x64"
             run_tests: true
 
           # Linux (Ubuntu) w/ gcc
           #
           - name: "Ubuntu gcc"
             ostype: ubuntu
-            os: ubuntu-latest
+            os: ubuntu-24.04
             shared: ON
             cpp: ON
             fortran: ON
@@ -111,7 +121,7 @@ jobs:
           #
           - name: "MacOS Clang"
             ostype: macos
-            os: macos-latest
+            os: macos-15
             shared: ON
             cpp: ON
             fortran: OFF
@@ -140,7 +150,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Doxygen
         uses: ./.github/actions/setup-doxygen
@@ -159,7 +169,7 @@ jobs:
       # CMake gets libaec from fetchcontent
 
       - name: Install CMake
-        uses: lukka/get-cmake@591817e96fcad43505fb4eae36172462abb3a42e # latest
+        uses: lukka/get-cmake@4a7d025fc60f00db0c7b44ebf783d19b52444830 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -172,7 +182,7 @@ jobs:
 
       - name: Set up Java (if specified or FFM required)
         if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
         with:
           distribution: ${{ inputs.force_java_implementation == 'ffm' && 'oracle' || 'temurin' }}
           java-version: |
@@ -331,7 +341,7 @@ jobs:
       - name: Save published binary (Windows)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
-              name: zip-vs2022_cl-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
+              name: zip-vs2026_cl-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if:  ${{ (matrix.ostype == 'windows') && ( inputs.save_binary != 'skip') }}
@@ -347,7 +357,7 @@ jobs:
       - name: Save published binary (Mac_latest)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
-              name: tgz-macos14_clang-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
+              name: tgz-macos15_clang-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if: ${{ (matrix.ostype == 'macos') && ( inputs.save_binary != 'skip') }}

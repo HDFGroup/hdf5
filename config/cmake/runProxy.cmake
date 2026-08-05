@@ -28,6 +28,9 @@
 #   - TEST_ENV_VAR/TEST_ENV_VALUE: (optional) Environment variable to set
 #   - TEST_FILES: (optional) List of files to upload
 #   - TEST_ACLS: (optional) List of ACLs for files (anon/public-read)
+#   - TEST_KEYS: (optional) List of object keys to upload files under; each
+#       entry overrides the object key for the corresponding TEST_FILES entry
+#       (an empty entry falls back to the file name)
 #   - TEST_NOERRDISPLAY: (optional) If set, suppress error output display on failure
 # -----------------------------------------------------------------------------
 
@@ -165,33 +168,39 @@ if (NOT TEST_RESULT EQUAL TEST_EXPECT)
   message (FATAL_ERROR "Failed: Create-Bucket exited != ${TEST_EXPECT}.\n${TEST_ERROR}")
 endif ()
 
-# Upload test files to the bucket, handling ACLs if provided
+# Upload test files to the bucket, handling ACLs and object keys if provided
 if (TEST_FILES AND TEST_ACLS)
-  foreach (dfile dacls IN ZIP_LISTS TEST_FILES TEST_ACLS)
+  foreach (dfile dacls dkey IN ZIP_LISTS TEST_FILES TEST_ACLS TEST_KEYS)
+    if ("${dkey}" STREQUAL "")
+      set (dkey "${dfile}")
+    endif ()
+    # Object keys may contain characters that are not filesystem-safe,
+    # so sanitize the key for use in log file names
+    string (MAKE_C_IDENTIFIER "${dkey}" dlog)
     if (dacls STREQUAL "anon")
         execute_process (
-            COMMAND aws s3api put-object --acl public-read --endpoint-url=http://localhost:${TEST_PORT} --body ${TEST_FOLDER}/testfiles/${dfile} --bucket ${TEST_BUCKET} --key ${dfile}
+            COMMAND aws s3api put-object --acl public-read --endpoint-url=http://localhost:${TEST_PORT} --body ${TEST_FOLDER}/testfiles/${dfile} --bucket ${TEST_BUCKET} --key ${dkey}
             WORKING_DIRECTORY ${TEST_FOLDER}
             RESULT_VARIABLE TEST_RESULT
-            OUTPUT_FILE s3proxy-${dfile}.out
-            ERROR_FILE s3proxy-${dfile}.err
+            OUTPUT_FILE s3proxy-${dlog}.out
+            ERROR_FILE s3proxy-${dlog}.err
             OUTPUT_VARIABLE TEST_OUT
             ERROR_VARIABLE TEST_ERROR
         )
     else ()
         execute_process (
-            COMMAND aws s3api put-object --endpoint-url=http://localhost:${TEST_PORT} --body ${TEST_FOLDER}/testfiles/${dfile} --bucket ${TEST_BUCKET} --key ${dfile}
+            COMMAND aws s3api put-object --endpoint-url=http://localhost:${TEST_PORT} --body ${TEST_FOLDER}/testfiles/${dfile} --bucket ${TEST_BUCKET} --key ${dkey}
             WORKING_DIRECTORY ${TEST_FOLDER}
             RESULT_VARIABLE TEST_RESULT
-            OUTPUT_FILE s3proxy-${dfile}.out
-            ERROR_FILE s3proxy-${dfile}.err
+            OUTPUT_FILE s3proxy-${dlog}.out
+            ERROR_FILE s3proxy-${dlog}.err
             OUTPUT_VARIABLE TEST_OUT
             ERROR_VARIABLE TEST_ERROR
         )
     endif ()
     # Print the output of the put-object command if it exists
-    if (EXISTS "${TEST_FOLDER}/s3proxy-${dfile}.out")
-      file (READ ${TEST_FOLDER}/s3proxy-${dfile}.out TEST_STREAM)
+    if (EXISTS "${TEST_FOLDER}/s3proxy-${dlog}.out")
+      file (READ ${TEST_FOLDER}/s3proxy-${dlog}.out TEST_STREAM)
       message (VERBOSE "Output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
     endif ()
     message (VERBOSE "COMMAND Put Result: ${TEST_RESULT}")
@@ -199,8 +208,8 @@ if (TEST_FILES AND TEST_ACLS)
     # If the return value is not as expected, print error output and fail
     if (NOT TEST_RESULT EQUAL TEST_EXPECT)
       if (NOT TEST_NOERRDISPLAY)
-        if (EXISTS "${TEST_FOLDER}/s3proxy-${dfile}.err")
-          file (READ ${TEST_FOLDER}/s3proxy-${dfile}.err TEST_STREAM)
+        if (EXISTS "${TEST_FOLDER}/s3proxy-${dlog}.err")
+          file (READ ${TEST_FOLDER}/s3proxy-${dlog}.err TEST_STREAM)
           message (STATUS "Error output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
         endif ()
       endif ()
@@ -208,19 +217,25 @@ if (TEST_FILES AND TEST_ACLS)
     endif ()
   endforeach ()
 elseif (TEST_FILES)
-  foreach (dfile ${TEST_FILES})
+  foreach (dfile dkey IN ZIP_LISTS TEST_FILES TEST_KEYS)
+    if ("${dkey}" STREQUAL "")
+      set (dkey "${dfile}")
+    endif ()
+    # Object keys may contain characters that are not filesystem-safe,
+    # so sanitize the key for use in log file names
+    string (MAKE_C_IDENTIFIER "${dkey}" dlog)
     execute_process (
-        COMMAND aws s3api put-object --endpoint-url=http://localhost:${TEST_PORT} --body ${TEST_FOLDER}/testfiles/${dfile} --bucket ${TEST_BUCKET} --key ${dfile}
+        COMMAND aws s3api put-object --endpoint-url=http://localhost:${TEST_PORT} --body ${TEST_FOLDER}/testfiles/${dfile} --bucket ${TEST_BUCKET} --key ${dkey}
         WORKING_DIRECTORY ${TEST_FOLDER}
         RESULT_VARIABLE TEST_RESULT
-        OUTPUT_FILE s3proxy-${dfile}.out
-        ERROR_FILE s3proxy-${dfile}.err
+        OUTPUT_FILE s3proxy-${dlog}.out
+        ERROR_FILE s3proxy-${dlog}.err
         OUTPUT_VARIABLE TEST_OUT
         ERROR_VARIABLE TEST_ERROR
     )
     # Print the output of the put-object command if it exists
-    if (EXISTS "${TEST_FOLDER}/s3proxy-${dfile}.out")
-      file (READ ${TEST_FOLDER}/s3proxy-${dfile}.out TEST_STREAM)
+    if (EXISTS "${TEST_FOLDER}/s3proxy-${dlog}.out")
+      file (READ ${TEST_FOLDER}/s3proxy-${dlog}.out TEST_STREAM)
       message (VERBOSE "Output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
     endif ()
     message (VERBOSE "COMMAND Put Result: ${TEST_RESULT}")
@@ -228,8 +243,8 @@ elseif (TEST_FILES)
     # If the return value is not as expected, print error output and fail
     if (NOT TEST_RESULT EQUAL TEST_EXPECT)
       if (NOT TEST_NOERRDISPLAY)
-        if (EXISTS "${TEST_FOLDER}/s3proxy-${dfile}.err")
-          file (READ ${TEST_FOLDER}/s3proxy-${dfile}.err TEST_STREAM)
+        if (EXISTS "${TEST_FOLDER}/s3proxy-${dlog}.err")
+          file (READ ${TEST_FOLDER}/s3proxy-${dlog}.err TEST_STREAM)
           message (STATUS "Error output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
         endif ()
       endif ()

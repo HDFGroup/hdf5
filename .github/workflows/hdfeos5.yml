@@ -1,27 +1,16 @@
 name: hdfeos5 dev
 
-# Triggers the workflow on push or pull request or on demand
+# Triggers the workflow on a daily schedule or on demand.
+#
+# This test downloads an HDF-EOS5 source tarball from an external host
+# (git.earthdata.nasa.gov) that has proven unreliable. Running it on a daily
+# schedule rather than on every pull request prevents transient network
+# failures to that host from blocking PR merges, while still catching genuine
+# HDF-EOS5 compatibility regressions on a daily cadence. See issue #6495.
 on:
   workflow_dispatch:
-  push:
-    paths-ignore:
-      - '.github/CODEOWNERS'
-      - '.github/FUNDING.yml'
-      - 'docs/**'
-      - 'release_docs/**'
-      - 'ACKNOWLEDGEMENTS'
-      - 'LICENSE**'
-      - '**.md'
-  pull_request:
-    branches: [ develop ]
-    paths-ignore:
-      - '.github/CODEOWNERS'
-      - '.github/FUNDING.yml'
-      - 'docs/**'
-      - 'release_docs/**'
-      - 'ACKNOWLEDGEMENTS'
-      - 'LICENSE**'
-      - '**.md'
+  schedule:
+    - cron: "30 0 * * *"
 
 permissions:
   contents: read
@@ -35,6 +24,7 @@ jobs:
   build:
     name: Build hdfeos5
     runs-on: ubuntu-latest
+    if: "github.repository_owner == 'HDFGroup'"
     steps:
       - name: Install System dependencies
         run: |
@@ -44,12 +34,16 @@ jobs:
             sudo apt install -y libaec-dev zlib1g-dev automake autoconf libcurl4-openssl-dev libjpeg-dev wget curl bzip2 m4 flex bison cmake libzip-dev doxygen openssl libtool libtool-bin
 
       - name: Checkout HDF5
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false # Prevents tokens from being written to Git config files
 
       - name: Configure
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
-            mkdir "${{ runner.workspace }}/build"
-            cd "${{ runner.workspace }}/build"
+            mkdir "$RUNNER_WORKSPACE/build"
+            cd "$RUNNER_WORKSPACE/build"
             cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
               -G Ninja \
               -DCMAKE_BUILD_TYPE=Release \

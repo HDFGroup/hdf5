@@ -10,5 +10,5 @@ jobs:
     name: Check for spelling errors
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-      - uses: codespell-project/actions-codespell@3b7da264292a727fcdc4acdc9eaf9a5abb92ba10 # master
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: codespell-project/actions-codespell@3c04c03694eb927ff908b8b5abfe9c58b239b0ae # master

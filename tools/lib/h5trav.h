@@ -15,11 +15,6 @@
 
 #include "hdf5.h"
 
-/* Typedefs for visiting objects */
-typedef herr_t (*h5trav_obj_func_t)(const char *path_name, const H5O_info2_t *oinfo, const char *first_seen,
-                                    void *udata);
-typedef herr_t (*h5trav_lnk_func_t)(const char *path_name, const H5L_info2_t *linfo, void *udata);
-
 /*-------------------------------------------------------------------------
  * public enum to specify type of an object
  * the TYPE can be:
@@ -78,6 +73,15 @@ typedef struct trav_info_t {
 } trav_info_t;
 
 /*-------------------------------------------------------------------------
+ * struct to store info about visited objects during traversal
+ *-------------------------------------------------------------------------
+ */
+typedef struct trav_seen_t {
+    H5O_token_t token;
+    char       *path;
+} trav_seen_t;
+
+/*-------------------------------------------------------------------------
  * keep record of hard link information
  *-------------------------------------------------------------------------
  */
@@ -108,10 +112,19 @@ typedef struct trav_obj_t {
 
 typedef struct trav_table_t {
     hid_t       fid;
+    size_t      obj_token_size;
     size_t      size;
     size_t      nobjs;
     trav_obj_t *objs;
+
+    /* Private data for this trav_table_t */
+    void *priv_data;
 } trav_table_t;
+
+/* Typedefs for visiting objects */
+typedef herr_t (*h5trav_obj_func_t)(const char *path_name, const H5O_info2_t *oinfo, bool already_visited,
+                                    const trav_seen_t *visited_obj_info, void *udata);
+typedef herr_t (*h5trav_lnk_func_t)(const char *path_name, const H5L_info2_t *linfo, void *udata);
 
 /*-------------------------------------------------------------------------
  * public functions
@@ -141,9 +154,9 @@ H5TOOLS_DLL bool   symlink_is_visited(symlink_trav_t *visited, H5L_type_t type, 
  */
 H5TOOLS_DLL int     h5trav_getinfo(hid_t file_id, trav_info_t *info);
 H5TOOLS_DLL ssize_t h5trav_getindex(const trav_info_t *info, const char *obj);
-H5TOOLS_DLL int trav_info_visit_obj(const char *path, const H5O_info2_t *oinfo, const char *already_visited,
-                                    void *udata);
-H5TOOLS_DLL int trav_info_visit_lnk(const char *path, const H5L_info2_t *linfo, void *udata);
+H5TOOLS_DLL int     trav_info_visit_obj(const char *path, const H5O_info2_t *oinfo, bool already_visited,
+                                        const trav_seen_t *visited_obj_info, void *udata);
+H5TOOLS_DLL int     trav_info_visit_lnk(const char *path, const H5L_info2_t *linfo, void *udata);
 
 /*-------------------------------------------------------------------------
  * "h5trav table" public functions
