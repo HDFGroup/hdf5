@@ -35,6 +35,7 @@ Navigate back: \ref index "Main" / \ref SPEC
           <li> @ref subsec_fmt4_infra_fractalheap</li>
           <li> @ref subsec_fmt4_infra_freespaceindex</li>
           <li> @ref subsec_fmt4_infra_sohm</li>
+          <li> @ref subsec_fmt4_infra_mdci</li>
           </ol></li>
       <li> @ref sec_fmt4_dataobject
         <ol type="A">
@@ -72,6 +73,7 @@ Navigate back: \ref index "Main" / \ref SPEC
                 <li> @ref subsubsec_fmt4_dataobject_hdr_msg_attrinfo</li>
                 <li> @ref subsubsec_fmt4_dataobject_hdr_msg_refcount</li>
                 <li> @ref subsubsec_fmt4_dataobject_hdr_msg_fsinfo</li>
+                <li> @ref subsubsec_fmt4_dataobject_hdr_msg_mdci</li>
               </ol></li>
             </ol></li>
           <li> @ref subsec_fmt4_dataobject_storage</li>
@@ -204,6 +206,7 @@ The following sections have been changed or added for the 1.10 release:
 \li @ref subsubsec_fmt4_dataobject_hdr_msg_layout section was changed. The name was changed,
     and @ref FMT4DataLayoutV4"version 4" of the data layout message was added for the virtual type.
 \li The @ref subsubsec_fmt4_dataobject_hdr_msg_fsinfo header message type was added.
+\li The @ref subsubsec_fmt4_dataobject_hdr_msg_mdci header message type was added.
 \li @ref sec_fmt4_appendixc was added. Five indexing types were added.
 
 \section sec_fmt4_meta II. Disk Format: Level 0 - File Metadata
@@ -792,6 +795,8 @@ later of the superblock is used. A superblock extension is an object header whic
 \li \ref subsubsec_fmt4_dataobject_hdr_msg_drvinfo containing information needed by the file driver in
          order to reopen a file. See also the \ref subsec_fmt4_boot_driver section above.
 \li \ref subsubsec_fmt4_dataobject_hdr_msg_fsinfo containing information about file space handling in the file.
+\li \ref subsubsec_fmt4_dataobject_hdr_msg_mdci containing the location and size of a
+         @ref subsec_fmt4_infra_mdci "metadata cache image block", when one is present in the file.
 
 \section sec_fmt4_infra III. Disk Format: Level 1 - File Infrastructure
 
@@ -4548,6 +4553,290 @@ The record for each shared message in an index is stored in one of the following
 </tr>
 </table>
 
+\subsection subsec_fmt4_infra_mdci III.J. Disk Format: Level 1J - Metadata Cache Image Block
+The <em>metadata cache image block</em> is a serialized copy of the contents of the metadata cache at file
+close, written when generation of a metadata cache image is enabled for the file (see
+#H5Pset_mdc_image_config). It allows the library to reconstruct the cache directly from this block the
+next time the file is opened, instead of reconstructing it by parsing the file&rsquo;s metadata, which can
+significantly reduce the time needed to open a file containing many pieces of cached metadata. The block
+is pointed to by the @ref subsubsec_fmt4_dataobject_hdr_msg_mdci in the superblock extension.
+
+The block begins with a signature, version, flags, image data length, and entry count, followed by one
+record for each metadata cache entry captured in the image, and ends with a checksum for the block.
+
+<table>
+<caption><strong>Layout: Metadata Cache Image Block</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4">Signature</td>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>Flags</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Image Data Length<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Number of Entries</td>
+</tr>
+<tr>
+  <td colspan="4">Image Entry \#0</td>
+</tr>
+<tr>
+  <td colspan="4">Image Entry \#1</td>
+</tr>
+<tr>
+  <td colspan="4">...</td>
+</tr>
+<tr>
+  <td colspan="4">Image Entry \#N-1</td>
+</tr>
+<tr>
+  <td colspan="4">Checksum</td>
+</tr>
+</table>
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT4SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
+
+<table>
+<caption><strong>Fields: Metadata Cache Image Block</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Signature</td>
+  <td>The ASCII character string &ldquo;<code>MDCI</code>&rdquo; is used to indicate the beginning of the
+      Metadata Cache Image Block. This gives file consistency checking utilities a better chance of
+      reconstructing a damaged file.</td>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>This is the version number for the Metadata Cache Image Block and this document describes version 0.</td>
+</tr>
+<tr>
+  <td>Flags</td>
+  <td>This field holds flags for the block, as follows:
+      <table>
+      <tr>
+        <th width="20%" align="center">Bits</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>If set, adaptive cache resize status information follows the entries, below. The library does
+            not currently generate this information, so this bit is always <code>0</code>.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1-7</code></td>
+        <td>Reserved (zero).</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Image Data Length</td>
+  <td>This is the total length, in bytes, of the metadata cache image block, including this header, all
+      entries, and the trailing checksum. This is the same value stored in the &ldquo;Metadata Cache Image
+      Block Size&rdquo; field of the @ref subsubsec_fmt4_dataobject_hdr_msg_mdci that points to this
+      block.</td>
+</tr>
+<tr>
+  <td>Number of Entries</td>
+  <td>This is the number of metadata cache entry records, \a N, that follow the header. This value must be
+      greater than 0.</td>
+</tr>
+<tr>
+  <td>Image Entry \#i (i = 0 to (N-1))</td>
+  <td>These are the \a N metadata cache entry records captured in the image, one per entry that was
+      resident in the metadata cache at file close. The format of each entry is described below in
+      &ldquo;Layout: Image Entry&rdquo;.</td>
+</tr>
+<tr>
+  <td>Checksum</td>
+  <td>This is the checksum for the entire metadata cache image block, computed over the header and all
+      \a N entries that precede it (that is, over the first &ldquo;Image Data Length&rdquo; minus 4 bytes
+      of the block).</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Layout: Image Entry</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Type ID</td>
+  <td>Flags</td>
+  <td>Ring</td>
+  <td>Age</td>
+</tr>
+<tr>
+  <td colspan="2">Flush Dependency Child Count</td>
+  <td colspan="2">Flush Dependency Dirty Child Count</td>
+</tr>
+<tr>
+  <td colspan="2">Flush Dependency Parent Count</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4">LRU Rank</td>
+</tr>
+<tr>
+  <td colspan="4"><br />Entry Offset<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Entry Length<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Flush Dependency Parent Addresses<sup>O</sup> <em>(0 or more, per &ldquo;Flush Dependency
+      Parent Count&rdquo;, above)</em></td>
+</tr>
+<tr>
+  <td colspan="4">Entry Image <em>(variable size, per &ldquo;Entry Length&rdquo;, above)</em></td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT4SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
+
+<table>
+<caption><strong>Fields: Image Entry</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Type ID</td>
+  <td>This is an internal, implementation-defined identifier for the type of metadata cache client (for
+      example, superblock, object header, B-tree node, or fractal heap header) that owns this entry. The
+      library uses this value to determine how to reconstruct the entry in memory when the image is
+      loaded.</td>
+</tr>
+<tr>
+  <td>Flags</td>
+  <td>This field holds flags for the entry, as follows:
+      <table>
+      <tr>
+        <th width="20%" align="center">Bits</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>If set, the entry was dirty (not yet written to the file) at the time the image was
+            generated.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>If set, the entry was on the cache&rsquo;s LRU list, and &ldquo;LRU Rank&rdquo;, below, gives
+            its position on that list.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>If set, the entry is the parent in one or more flush dependency relationships.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>If set, the entry is a child in one or more flush dependency relationships, and the entry
+            record is followed by one or more &ldquo;Flush Dependency Parent Address&rdquo; fields,
+            below.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4-7</code></td>
+        <td>Reserved (zero).</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Ring</td>
+  <td>This identifies the flush dependency &ldquo;ring&rdquo; the entry belongs to, which constrains the
+      order in which entries are flushed relative to entries in other rings (entries in an outer ring are
+      always flushed before entries in an inner ring), as follows:
+      <table>
+      <tr>
+        <th width="20%" align="center">Value</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>User data (datasets and groups). Outermost ring; flushed first.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>Raw data free-space manager.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>Metadata free-space manager.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>Superblock extension.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>5</code></td>
+        <td>Superblock. Innermost ring; flushed last.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Age</td>
+  <td>This is the number of file opens and closes since the entry was last accessed by the application. The
+      library uses this value to decide whether to continue including the entry in future cache
+      images.</td>
+</tr>
+<tr>
+  <td>Flush Dependency Child Count</td>
+  <td>This is the number of flush dependency children for which this entry is the parent. This is non-zero
+      only if bit 2 of &ldquo;Flags&rdquo;, above, is set.</td>
+</tr>
+<tr>
+  <td>Flush Dependency Dirty Child Count</td>
+  <td>This is the number of flush dependency children, of the total given in &ldquo;Flush Dependency Child
+      Count&rdquo;, above, that were dirty at the time the image was generated.</td>
+</tr>
+<tr>
+  <td>Flush Dependency Parent Count</td>
+  <td>This is the number of flush dependency parents for which this entry is a child, \a K. This is
+      non-zero only if bit 3 of &ldquo;Flags&rdquo;, above, is set.</td>
+</tr>
+<tr>
+  <td>LRU Rank</td>
+  <td>If bit 1 of &ldquo;Flags&rdquo;, above, is set, this is the entry&rsquo;s position on the cache&rsquo;s
+      LRU list (lower values are closer to the head of the list, i.e. more recently used). Otherwise, this
+      field has the value -1.</td>
+</tr>
+<tr>
+  <td>Entry Offset</td>
+  <td>This is the address in the file at which the entry&rsquo;s metadata is (or will be) stored.</td>
+</tr>
+<tr>
+  <td>Entry Length</td>
+  <td>This is the length, in bytes, of the &ldquo;Entry Image&rdquo;, below.</td>
+</tr>
+<tr>
+  <td>Flush Dependency Parent Address \#K</td>
+  <td>This is the file address of a flush dependency parent entry of this entry. There are as many of
+      these fields as given by &ldquo;Flush Dependency Parent Count&rdquo;, above.</td>
+</tr>
+<tr>
+  <td>Entry Image</td>
+  <td>This is a byte-for-byte copy of the entry&rsquo;s serialized on-disk image, as it would otherwise
+      appear at &ldquo;Entry Offset&rdquo;, above, in the file (for example, the disk format of an object
+      header, B-tree node, or other cached metadata structure).</td>
+</tr>
+</table>
+
 \section sec_fmt4_dataobject IV. Disk Format: Level 2 - Data Objects
 Data objects contain the &ldquo;real&rdquo; user-visible information in the file. These objects compose
 the scientific data and other information which are generally thought of as &ldquo;data&rdquo; by the
@@ -4662,9 +4951,9 @@ Header messages are aligned on 8-byte boundaries for version 1 object headers.
 </tr>
 <tr valign=top>
   <td>Size of Header Message \#n Data</td>
-  <td>This value specifies the number of bytes of header message data following the header message type and
-      length information for the current message. The size includes padding bytes to make the message a multiple
-      of eight bytes.</td>
+  <td>This value specifies the number of bytes of header message data following the header message type,
+      length, flags, and reserved fields for the current message. The size includes padding bytes to make
+      the message a multiple of eight bytes.</td>
 </tr>
 <tr valign=top>
   <td>Header Message \#n Flags</td>
@@ -4927,8 +5216,8 @@ or padding bytes inserted - they are stored packed together.
     <tr>
       <td>Size of Header Message \#n Data</td>
       <td>This value specifies the number of bytes of header message data following the header message
-          type and length information for the current message. The size of messages in this version does
-          <em>not</em> include any padding bytes.</td>
+          type, length, flags, and creation order (when present) fields for the current message. The size
+          of messages in this version does <em>not</em> include any padding bytes.</td>
     </tr>
     <tr>
       <td>Header Message \#n Flags</td>
@@ -10519,6 +10808,79 @@ described here (see also the description of @ref subsubsec_fmt4_dataobject_hdr_p
       </ul>
       Note that these six fields exist only if the value for the field
       &ldquo;<em>Persisting free-space</em>&rdquo; is true.</td>
+</tr>
+</table>
+
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_mdci IV.A.3.y. The Metadata Cache Image Message
+<table>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Metadata Cache Image</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x0018</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Fixed</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may not be repeated. 
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>This message records the location and size of a metadata cache image block written to the file, when
+      generation of a metadata cache image is enabled for the file (see #H5Pset_mdc_image_config). The
+      metadata cache image block is a serialized copy of the contents of the metadata cache at file close,
+      which allows the library to reconstruct the cache directly from this block the next time the file is
+      opened, instead of reconstructing it by parsing the file's metadata. This can significantly reduce the
+      time needed to open a file containing many pieces of cached metadata.<br />
+      The message is written to the superblock extension only when the file is closed with a metadata
+      cache image pending, and is removed from the superblock extension once the library has read the
+      referenced block back in at the next file open, at which point the file space it occupied is
+      reclaimed. See @ref subsec_fmt4_infra_mdci for the format of the metadata cache image block
+      itself.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Layout: Metadata Cache Image</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Metadata Cache Image Block Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Metadata Cache Image Block Size<sup>L</sup><br /><br /></td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Fields: Metadata Cache Image</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>The version number for this message. This document describes version 0.</td>
+</tr>
+<tr>
+  <td>Metadata Cache Image Block Address</td>
+  <td>This is the address in the file of the metadata cache image block.</td>
+</tr>
+<tr>
+  <td>Metadata Cache Image Block Size</td>
+  <td>This is the size, in bytes, of the metadata cache image block.</td>
 </tr>
 </table>
 
