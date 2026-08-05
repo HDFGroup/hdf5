@@ -63,7 +63,7 @@ async function alreadyApproved({ github, owner, repo, pull_number }) {
   return reviews.some((r) => r.user?.login === APPROVER_LOGIN && r.state === "APPROVED");
 }
 
-async function processPR({ github, owner, repo, pr, core }) {
+async function processPullRequest({ github, owner, repo, pr, core }) {
   const { ready, reason } = await allChecksPassed({ github, owner, repo, ref: pr.head.sha });
   if (!ready) {
     core.info(`Skipping: ${reason}`);
@@ -125,7 +125,7 @@ async function run({ github, context, core }) {
   for (const pr of candidates) {
     core.startGroup(`#${pr.number} — ${pr.title}`);
     try {
-      await processPR({ github, owner, repo, pr, core });
+      await processPullRequest({ github, owner, repo, pr, core });
     } catch (e) {
       core.error(`#${pr.number}: ${e.message}`);
     } finally {
