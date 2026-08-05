@@ -11,12 +11,15 @@ const {
   computeChangesRequested,
   buildChangeRequestFileMap,
   chooseReviewers,
+  resolveAreaPicks,
   buildBody,
   parseExcluded,
   serializeExcluded,
   withExcluded,
   parseManuallyAdded,
   serializeManuallyAdded,
+  parseAssigned,
+  serializeAssigned,
   planSynchronizeSwaps,
   coordinateReviewers,
 } = require('./review-checklist.js');
@@ -1319,6 +1322,184 @@ asyncTest('coordinateReviewers: bot-sourced review_requested is not treated as a
 
   assert.strictEqual(confirmedRequested.size, 1, 'Should still prune to exactly one reviewer');
   assert.ok(confirmedRequested.has('hyoklee'), 'The normal load-balanced pick wins, not the bot-sourced login');
+});
+
+// ----------------------------------------------------------------
+// resolveAreaPicks — sticky assignments survive avalanche re-pruning
+// (reported bug: a reviewer who was already assigned to an area gets
+// replaced by a different load-balanced pick every time a new avalanche is
+// detected for that area, because re-pruning re-ran the load-balancer from
+// scratch with no memory of who was already there). This is distinct from
+// the forced-pick tests above, which only cover the SAME run a human
+// directly review-requests someone — these cover persistence across LATER
+// runs, which is what ASSIGNED_PREFIX / assignedReviewers exists for.
+// ----------------------------------------------------------------
+
+test('resolveAreaPicks: a valid sticky assignment is kept over a fresh load-balanced pick', () => {
+  const area = makeArea('fortran', ['alice', 'bob'], 50);
+  const { picks, log } = resolveAreaPicks([area], {
+    existingRequested: new Set(['alice', 'bob']), // avalanche: both currently requested
+    assignedByArea: new Map([['fortran', 'alice']]),
+    prAuthor: 'charlie',
+    // Rigged so a fresh pick would land on bob, not alice — proves alice
+    // survives because of the sticky assignment, not by coincidence.
+    reviewerLoad: { alice: 99, bob: 0 },
+    LINE_THRESHOLD: 300, AREA_THRESHOLDS: {}, PUBLIC_HEADER: /public\.h$/,
+  });
+  assert.strictEqual(picks.get('fortran'), 'alice');
+  assert.ok(log.some(l => l.includes('sticky')));
+});
+
+test('resolveAreaPicks: a sticky assignment no longer requested falls back to a fresh pick', () => {
+  // alice was the sticky pick but has since been removed from the PR
+  // (e.g. an explicit removal) — must not "keep" someone who isn't there.
+  const area = makeArea('fortran', ['alice', 'bob'], 50);
+  const { picks } = resolveAreaPicks([area], {
+    existingRequested: new Set(['bob']),
+    assignedByArea: new Map([['fortran', 'alice']]),
+    prAuthor: 'charlie',
+    reviewerLoad: {},
+    LINE_THRESHOLD: 300, AREA_THRESHOLDS: {}, PUBLIC_HEADER: /public\.h$/,
+  });
+  assert.strictEqual(picks.get('fortran'), 'bob');
+});
+
+test('resolveAreaPicks: a single already-requested owner is kept without invoking the load-balancer', () => {
+  const area = makeArea('fortran', ['alice', 'bob'], 50);
+  const { picks, log } = resolveAreaPicks([area], {
+    existingRequested: new Set(['bob']), // no avalanche — only bob requested
+    assignedByArea: new Map(), // no sticky record yet
+    prAuthor: 'charlie',
+    reviewerLoad: { bob: 99, alice: 0 }, // fresh pick would prefer alice
+    LINE_THRESHOLD: 300, AREA_THRESHOLDS: {}, PUBLIC_HEADER: /public\.h$/,
+  });
+  assert.strictEqual(picks.get('fortran'), 'bob');
+  assert.ok(log.some(l => l.includes('no avalanche')));
+});
+
+test('resolveAreaPicks: no sticky and no single owner falls back to a fresh load-balanced pick', () => {
+  const area = makeArea('fortran', ['alice', 'bob'], 50);
+  const { picks } = resolveAreaPicks([area], {
+    existingRequested: new Set(['alice', 'bob']),
+    assignedByArea: new Map(),
+    prAuthor: 'charlie',
+    reviewerLoad: { alice: 0, bob: 99 },
+    LINE_THRESHOLD: 300, AREA_THRESHOLDS: {}, PUBLIC_HEADER: /public\.h$/,
+  });
+  assert.strictEqual(picks.get('fortran'), 'alice');
+});
+
+// ----------------------------------------------------------------
+// parseAssigned / serializeAssigned
+// ----------------------------------------------------------------
+
+test('serializeAssigned/parseAssigned round-trip', () => {
+  const map = new Map([['fortran', 'alice'], ['.github', 'bob']]);
+  const body = `some text\n${serializeAssigned(map)}\nmore text`;
+  const parsed = parseAssigned(body);
+  assert.strictEqual(parsed.get('fortran'), 'alice');
+  assert.strictEqual(parsed.get('.github'), 'bob');
+});
+
+test('parseAssigned: no marker returns an empty Map', () => {
+  assert.strictEqual(parseAssigned('no marker here').size, 0);
+  assert.strictEqual(parseAssigned(undefined).size, 0);
+});
+
+// ----------------------------------------------------------------
+// coordinateReviewers — sticky assignments across separate coordination
+// passes (reported bugs: reviewer churn on later pushes, manual review
+// requests getting silently undone, and reviewers vanishing when a draft is
+// marked ready for review). The forced-pick tests above only cover survival
+// within the SAME run a human directly review-requests someone; these cover
+// survival across LATER runs.
+// ----------------------------------------------------------------
+
+asyncTest('coordinateReviewers: a settled reviewer survives a later avalanche even when load has shifted', async () => {
+  // jhendersonHDF was already the settled reviewer for .github (recorded in
+  // assignedReviewers from a prior run). A later push causes GitHub to
+  // re-avalanche the area (all owners requested again). Without the sticky
+  // record, re-running the load-balancer with jhendersonHDF now heavily
+  // loaded would swap them out for glennsong09 — that's the reported bug.
+  const github = makeGithubMock();
+  const context = { eventName: 'pull_request_target', payload: { action: 'synchronize', sender: { type: 'User' } } };
+  const args = makeCoordinateBaseArgs({
+    assignedReviewers: new Map([['.github', 'jhendersonHDF']]),
+    reviewerLoad: { hyoklee: 0, jhendersonHDF: 50, glennsong09: 0 },
+  });
+
+  const { confirmedRequested, assignedReviewers } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.ok(confirmedRequested.has('jhendersonHDF'), 'The already-settled reviewer must stay despite higher load');
+  assert.ok(!github.calls.removeRequestedReviewers.includes('jhendersonHDF'));
+  assert.strictEqual(assignedReviewers.get('.github'), 'jhendersonHDF');
+});
+
+asyncTest('coordinateReviewers: a manual review request survives a subsequent avalanche event (not just the same run)', async () => {
+  // Step 1: a human manually requests jhendersonHDF — the forced-pick
+  // mechanism covers this run (see the forced-pick tests above). The sticky
+  // marker must now record jhendersonHDF for .github so a LATER event — one
+  // where justRequestedLogin is no longer set — doesn't treat the leftover
+  // two-owner state as an unresolved avalanche and re-roll it via the
+  // ordinary load-balanced path.
+  const github1 = makeGithubMock();
+  const context1 = {
+    eventName: 'pull_request_target',
+    payload: { action: 'review_requested', requested_reviewer: { login: 'jhendersonHDF' }, sender: { type: 'User' } },
+  };
+  const args1 = makeCoordinateBaseArgs({
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'hyoklee' }, { login: 'jhendersonHDF' }],
+    },
+    reviewerLoad: { hyoklee: 0, jhendersonHDF: 99, glennsong09: 0 },
+  });
+  const step1 = await coordinateReviewers(github1, context1, makeCore(), args1);
+  assert.strictEqual(step1.assignedReviewers.get('.github'), 'jhendersonHDF');
+
+  // Step 2: some unrelated later event (e.g. another push) re-evaluates the
+  // PR. Both hyoklee and jhendersonHDF are still requested (GitHub never
+  // removed either), which — absent the sticky record from step 1 — looks
+  // exactly like an unpruned avalanche.
+  const github2 = makeGithubMock();
+  const context2 = { eventName: 'pull_request_target', payload: { action: 'synchronize', sender: { type: 'User' } } };
+  const args2 = makeCoordinateBaseArgs({
+    prData: {
+      user: { login: 'lrknox' },
+      draft: false,
+      requested_reviewers: [{ login: 'hyoklee' }, { login: 'jhendersonHDF' }],
+    },
+    assignedReviewers: step1.assignedReviewers,
+    reviewerLoad: { hyoklee: 0, jhendersonHDF: 99, glennsong09: 0 },
+  });
+  const step2 = await coordinateReviewers(github2, context2, makeCore(), args2);
+
+  assert.ok(step2.confirmedRequested.has('jhendersonHDF'), 'Manually requested reviewer must still survive');
+  assert.ok(!github2.calls.removeRequestedReviewers.includes('jhendersonHDF'));
+});
+
+asyncTest('coordinateReviewers: ready_for_review keeps an already-settled reviewer instead of re-picking fresh', async () => {
+  // A PR sat in draft, was manually assigned jhendersonHDF (recorded as a
+  // sticky assignment by an earlier run), and is now marked ready for
+  // review. GitHub re-avalanches .github's owners on the ready transition.
+  // The old behavior always re-picked fresh here regardless of any prior
+  // settlement — this is the bug behind "marking ready for review removes
+  // reviewers and replaces them with different people."
+  const github = makeGithubMock();
+  const context = { eventName: 'pull_request_target', payload: { action: 'ready_for_review', sender: { type: 'User' } } };
+  const args = makeCoordinateBaseArgs({
+    assignedReviewers: new Map([['.github', 'jhendersonHDF']]),
+    // Load favors hyoklee heavily — old code would pick hyoklee fresh.
+    reviewerLoad: { hyoklee: 0, jhendersonHDF: 50, glennsong09: 0 },
+  });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.deepStrictEqual([...confirmedRequested], ['jhendersonHDF']);
+  assert.ok(github.calls.removeRequestedReviewers.includes('hyoklee'));
+  assert.ok(github.calls.removeRequestedReviewers.includes('glennsong09'));
+  assert.ok(!github.calls.removeRequestedReviewers.includes('jhendersonHDF'));
 });
 
 // ----------------------------------------------------------------
