@@ -90,7 +90,14 @@ if (CMAKE_CXX_COMPILER_LOADED)
   #-----------------------------------------------------------------------------
 
   if (${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
-    list (APPEND HDF5_CMAKE_CXX_FLAGS "-erroff=%none -DBSD_COMP")
+    # -erroff is an Oracle Developer Studio (SunPro) option. gcc quietly ignores
+    # it (it parses the leading -e as the linker entry option) but clang rejects
+    # it, so only hand it to the compiler that understands it. Each flag must be
+    # a separate list element or they are passed as one bogus argument.
+    if (CMAKE_CXX_COMPILER_ID MATCHES "SunPro")
+      list (APPEND HDF5_CMAKE_CXX_FLAGS "-erroff=%none")
+    endif ()
+    list (APPEND HDF5_CMAKE_CXX_FLAGS "-DBSD_COMP")
   else ()
     # General flags
     #
