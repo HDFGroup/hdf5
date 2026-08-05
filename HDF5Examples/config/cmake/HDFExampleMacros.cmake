@@ -37,7 +37,10 @@ macro (BASIC_SETTINGS varname)
   if (H5EXAMPLE_BUILD_CXX)
     ENABLE_LANGUAGE (CXX)
 
-    set (CMAKE_CXX_STANDARD 98)
+    # Match the standard the HDF5 C++ library itself is built with.
+    # H5public.h includes <cinttypes>, so any C++ translation unit
+    # with hdf5.h needs C++11
+    set (CMAKE_CXX_STANDARD 11)
     set (CMAKE_CXX_STANDARD_REQUIRED TRUE)
     set (CMAKE_CXX_EXTENSIONS OFF)
   endif ()
