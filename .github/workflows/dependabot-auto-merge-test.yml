@@ -1,6 +1,7 @@
 name: Dependabot Auto-Merge Tests
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - .github/scripts/dependabot-auto-merge.js
