@@ -85,6 +85,34 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    The installed CMake package version configuration file for the library previously used `SameMinorVersion` for the version compatibility logic, causing a `find_package(HDF5 X.Y.Z)` call to fail unless the version of a located HDF5 installation matched both `X` and `Y` of the version number exactly (i.e., releases with a greater minor version number weren't considered backward compatible). This reflected the version compatibility of HDF5 releases prior to version 2.0.0, but doesn't reflect the version compatibility of HDF5 version 2.0.0+ releases. The version compatibility logic now uses `SameMajorVersion`, so a `find_package(HDF5 X.Y.Z)` call will accept all versions of HDF5 where the major version matches `X` (i.e., only releases with a greater major version number will be rejected as not backward compatible).
 
+### Fixed the C++ examples failing to compile when built standalone
+
+  The standalone examples build used C++98, but `H5public.h` includes
+  `<cinttypes>`, which requires C++11. This affected any C++ translation unit
+  including `hdf5.h`, and did not match the HDF5 C++ library itself, which is
+  built as C++11. The C++ examples did not compile, against either static or
+  shared HDF5. The examples are now built as C++11.
+
+  Only the standalone build was affected. Examples built as part of the HDF5
+  build inherit the library's own C++ standard.
+
+### Fixed the examples skipping the HL, Fortran and C++ programs in some configurations
+
+  When built standalone against an installed HDF5, the examples chose between
+  the shared and static HL, Fortran and C++ libraries using `BUILD_SHARED_LIBS`,
+  while the C library used `H5EXAMPLE_USE_SHARED_LIBS`. Since
+  `H5EXAMPLE_USE_SHARED_LIBS` determines which component is requested from
+  `find_package`, and therefore which `HDF5_<linkage>_<lang>_FOUND` variables
+  exist, `BUILD_SHARED_LIBS` could not select a linkage on its own. With
+  `H5EXAMPLE_USE_SHARED_LIBS` on and `BUILD_SHARED_LIBS` unset, those examples
+  were disabled with a "libs not found" message even though the libraries were
+  installed and had been found. The selection now uses
+  `H5EXAMPLE_USE_SHARED_LIBS`, matching the C library.
+
+  Builds driven through `CTestScript.cmake` were not affected, since its cache
+  file forces `BUILD_SHARED_LIBS` on. This affected cases where the examples
+  were built directly without that cache file.
+
 ## Tools
 
 ## Performance
