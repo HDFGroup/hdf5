@@ -44,11 +44,15 @@ jobs:
 
     - name: Checkout HDF5
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false # Prevents tokens from being written to Git config files
 
     - name: Configure
+      env:
+        RUNNER_WORKSPACE: ${{ runner.workspace }}
       run: |
-          mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
+          mkdir "$RUNNER_WORKSPACE/build"
+          cd "$RUNNER_WORKSPACE/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             -G Ninja \
             --log-level=VERBOSE \
@@ -80,6 +84,7 @@ jobs:
     - name: Checkout netCDF
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
+        persist-credentials: false # Prevents tokens from being written to Git config files
         repository: unidata/netcdf-c
         path: netcdf-c
 
