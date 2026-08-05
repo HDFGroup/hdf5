@@ -194,7 +194,7 @@ StrType::decode() const
     try {
         encoded_strtype_id = p_decode();
     }
-    catch (DataTypeIException &err) {
+    catch (DataTypeIException &) {
         throw;
     }
     StrType *encoded_strtype = new StrType;

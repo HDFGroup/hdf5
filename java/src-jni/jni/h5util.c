@@ -316,11 +316,11 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
 
                     if (H5T_SGN_NONE == nsign) {
                         sscanf(token, "%hu", &tmp_ushort);
-                        memcpy(&tmp_ushort, cptr, sizeof(unsigned short));
+                        memcpy(cptr, &tmp_ushort, sizeof(unsigned short));
                     }
                     else {
                         sscanf(token, "%hd", &tmp_short);
-                        memcpy(&tmp_short, cptr, sizeof(short));
+                        memcpy(cptr, &tmp_short, sizeof(short));
                     }
 
                     break;
@@ -525,9 +525,6 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
             for (i = 0, total_elmts = 1; i < (hsize_t)rank; i++)
                 total_elmts *= dims[i];
 
-            if (NULL == (cptr = (char *)calloc((size_t)total_elmts, baseTypeSize)))
-                H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_convert: failed to allocate array buffer");
-
             for (i = 0; i < total_elmts; i++) {
                 if (!(h5str_convert(ENVONLY, &this_str, container, mtid, out_buf, i * baseTypeSize))) {
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
@@ -636,9 +633,6 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
 
             if (!(baseTypeSize = H5Tget_size(mtid)))
                 H5_LIBRARY_ERROR(ENVONLY);
-
-            if (NULL == (cptr = calloc(1, typeSize)))
-                H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_convert: failed to allocate array buffer");
 
             /* Convert real part */
             if (!(h5str_convert(ENVONLY, &this_str, container, mtid, out_buf, 0))) {
@@ -2075,8 +2069,8 @@ h5str_detect_vlen_str(hid_t tid)
             goto done;
         } /* end if */
         ret = h5str_detect_vlen_str(btid);
+        H5Tclose(btid);
         if ((ret == 1) || (ret < 0)) {
-            H5Tclose(btid);
             goto done;
         } /* end if */
     }     /* end if */

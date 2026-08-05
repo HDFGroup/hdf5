@@ -27,14 +27,17 @@ jobs:
     steps:
       - name: Get file base name
         id: get-file-base
+        env:
+          DAILY_BUILD_FILE_BASE: ${{ needs.daily-build.outputs.file_base }}
         run: |
-          FILE_NAME_BASE=$(echo "${{ needs.daily-build.outputs.file_base }}")
+          FILE_NAME_BASE="$DAILY_BUILD_FILE_BASE"
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false # Prevents tokens from being written to Git config files
           fetch-depth: 0
           ref: '${{ github.head_ref || github.ref_name }}'
 
@@ -46,13 +49,16 @@ jobs:
           path: ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
 
       - name: Setup AWS CLI
-        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
                aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
                aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
                aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Sync userguide to latest S3 bucket
+        env:
+          FILE_BASE: ${{ steps.get-file-base.outputs.FILE_BASE }}
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
         run: |
-          aws s3 sync ./${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen s3://${{ secrets.AWS_S3_BUCKET }}/documentation/hdf5/latest --delete
+          aws s3 sync ./"$FILE_BASE".doxygen s3://"$AWS_S3_BUCKET"/documentation/hdf5/latest --delete
 
