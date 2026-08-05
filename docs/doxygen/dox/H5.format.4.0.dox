@@ -10823,7 +10823,7 @@ described here (see also the description of @ref subsubsec_fmt4_dataobject_hdr_p
   <td colspan="2"><b>Length:</b> Fixed</td>
 </tr>
 <tr>
-  <td colspan="2"><b>Status:</b> Optional; may not be repeated. 
+  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
 </tr>
 <tr>
   <td><b>Description:</b></td>
@@ -10835,9 +10835,10 @@ described here (see also the description of @ref subsubsec_fmt4_dataobject_hdr_p
       time needed to open a file containing many pieces of cached metadata.<br />
       The message is written to the superblock extension only when the file is closed with a metadata
       cache image pending, and is removed from the superblock extension once the library has read the
-      referenced block back in at the next file open, at which point the file space it occupied is
-      reclaimed. See @ref subsec_fmt4_infra_mdci for the format of the metadata cache image block
-      itself.</td>
+      referenced block back in at the next file open when the file is opened for read/write access, at
+      which point the file space it occupied is reclaimed. If the file is opened read-only, the message
+      and image block are left unchanged. See @ref subsec_fmt4_infra_mdci for the format of the metadata
+      cache image block itself.</td>
 </tr>
 <tr>
   <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
