@@ -26,7 +26,7 @@ if (DOXYGEN_FOUND)
   set (DOXYGEN_HTML_FOOTER ${HDF5_DOXYGEN_DIR}/hdf5_footer.html)
   set (DOXYGEN_HTML_EXTRA_STYLESHEET "${HDF5_DOXYGEN_DIR}/hdf5doxy.css ${HDF5_DOXYGEN_DIR}/doxygen-awesome.css")
   set (DOXYGEN_HTML_EXTRA_FILES "${HDF5_DOXYGEN_DIR}/hdf5_navtree_hacks.js ${HDF5_DOXYGEN_DIR}/doxygen-awesome-tabs.js")
-  set (DOXYGEN_TAG_FILE ${HDF5_BINARY_DIR}/hdf5.tag)
+  set (DOXYGEN_TAG_FILE ${DOXYGEN_OUTPUT_DIRECTORY}/html/hdf5.tag)
   set (DOXYGEN_SERVER_BASED_SEARCH NO)
   set (DOXYGEN_EXTERNAL_SEARCH NO)
   set (DOXYGEN_SEARCHENGINE_URL)
@@ -64,14 +64,14 @@ if (DOXYGEN_FOUND)
   # Replace variables inside @@ with the current values
   configure_file (${HDF5_DOXYGEN_DIR}/Doxyfile.in ${HDF5_BINARY_DIR}/Doxyfile @ONLY)
 
+  # The hdf5.tag file is generated inside hdf5lib_docs/html (see
+  # DOXYGEN_TAG_FILE above), so this DIRECTORY install also installs it to
+  # ${HDF5_INSTALL_DOC_DIR}/html/hdf5.tag. Keeping the tag file within the html
+  # output directory also ensures it is captured by the docs-doxygen CI artifact
+  # that publishes the documentation (and hdf5.tag) to S3.
   install (
-      DIRECTORY ${HDF5_BINARY_DIR}/hdf5lib_docs/html
+      DIRECTORY ${DOXYGEN_OUTPUT_DIRECTORY}/html
       DESTINATION ${HDF5_INSTALL_DOC_DIR}
-      COMPONENT hdfdocuments
-  )
-  install (
-      FILES ${HDF5_BINARY_DIR}/hdf5.tag
-      DESTINATION ${HDF5_INSTALL_DOC_DIR}/html
       COMPONENT hdfdocuments
   )
 
