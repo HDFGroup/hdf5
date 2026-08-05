@@ -5,6 +5,9 @@ on:
    schedule:
      - cron: "0 9 * * *"
 
+permissions:
+  contents: read
+
 # Using concurrency to cancel any in-progress job or run
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
@@ -189,12 +192,16 @@ jobs:
         fi
 
     - name: Get Sources
-      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false # Prevents tokens from being written to Git config files
 
     - name: Configure
+      env:
+        RUNNER_WORKSPACE: ${{ runner.workspace }}
       run: |
-        mkdir "${{ runner.workspace }}/build"
-        cd "${{ runner.workspace }}/build"
+        mkdir "$RUNNER_WORKSPACE/build"
+        cd "$RUNNER_WORKSPACE/build"
 
         # Base CMake options
         CMAKE_OPTS="-G Ninja"
@@ -236,7 +243,6 @@ jobs:
           elif [[ "${{ matrix.mpi }}" == "mpich" ]]; then
             CMAKE_OPTS="$CMAKE_OPTS -DMPI_C_COMPILER=mpicc"
             CMAKE_OPTS="$CMAKE_OPTS -DCMAKE_Fortran_COMPILER=mpifort"
-            sudo ln -s /opt/homebrew/bin/gfortran-15 /opt/homebrew/bin/gfortran
             mpifort --version
           fi
         fi
