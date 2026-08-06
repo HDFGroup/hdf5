@@ -79,7 +79,11 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ### Fixed a crash when reading a dataset with a malformed fill value
 
-   An old-style (version 1/2) fill value message that is marked "defined" but encodes a negative size leaves the fill value with a negative size and no datatype; `H5Pget_fill_value()` then passed that NULL datatype to `H5T_path_find()` and dereferenced it. `H5P_get_fill_value()` now rejects a fill value that has no datatype and returns an error, so the dataset itself remains readable while the corrupt fill value is reported cleanly.
+   An old-style (either version 1 or version 2) fill value message that is marked "defined" but encodes a negative size leaves the fill value with a negative size and no datatype; `H5Pget_fill_value()` then passed that NULL datatype to `H5T_path_find()` and dereferenced it. `H5P_get_fill_value()` now rejects a fill value that has no datatype and returns an error, so the dataset itself remains readable while the corrupt fill value is reported cleanly.
+
+   Fixes GitHub issue #6487
+
+   Fixes CVE-2026-19024
 
 ## Java Library
 
@@ -93,12 +97,11 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ### Fixed a crash in h5dump binary output of variable-length string datasets
 
-   Dumping a variable-length string dataset with more than one element to native binary
-   (`h5dump -b`) could crash. `render_bin_output()` reused a single variable as both the
-   per-element stride and the length of the current string, so after the first element the
-   stride was corrupted and subsequent elements were read from misaligned addresses,
-   dereferencing a garbage pointer. The two uses are now kept separate and variable-length
-   string datasets can be binary dumped safely.
+   Dumping a variable-length string dataset with more than one element to native binary (`h5dump -b`) could crash. `render_bin_output()` reused a single variable as both the per-element stride and the length of the current string, so after the first element the stride was corrupted and subsequent elements were read from misaligned addresses, dereferencing a garbage pointer. The two uses are now kept separate and variable-length string datasets can be binary dumped safely.
+
+   Fixes GitHub issue #6486
+
+   Fixes CVE-2026-19023
 
 ## Performance
 
