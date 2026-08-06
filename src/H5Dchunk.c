@@ -933,8 +933,8 @@ H5D__chunk_construct(H5F_t *f, H5D_t *dset)
     /* Always prefer at least version 4 for performance due to new indexes */
     version_perf = H5O_LAYOUT_VERSION_4;
 
-    /* First check for chunk larger than can be represented in 32-bits - this requires layout version 5.
-     * While it could be encoded as version 4, those versions of the library would not be able to read it. */
+    /* First check for chunk larger than can be represented in 32-bits - this requires layout version 5. While
+     * it could be encoded as version 4, those versions of the library would not be able to read it. */
     if (layout->u.chunk.size > (hsize_t)0xffffffff) {
         if (H5O_layout_ver_bounds[H5F_HIGH_BOUND(f)] < H5O_LAYOUT_VERSION_5)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
@@ -1022,9 +1022,9 @@ H5D__chunk_construct(H5F_t *f, H5D_t *dset)
                 layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_SINGLE;
                 layout->storage.u.chunk.ops      = H5D_COPS_SINGLE;
 
-                /* If there are filters, we prefer version 5 since that version can handle greatly
-                 * expanding filters (>4 GiB) (technically allowed by the v4 format but disallowed by
-                 * library since older library version can't handle >4 GiB chunks even if the format can) */
+                /* If there are filters, we prefer version 5 since that version can handle greatly expanding
+                 * filters (>4 GiB) (technically allowed by the v4 format but disallowed by library since
+                 * older library version can't handle >4 GiB chunks even if the format can) */
                 if (dset->shared->dcpl_cache.pline.nused)
                     version_perf = H5O_LAYOUT_VERSION_5;
             }
@@ -1200,9 +1200,9 @@ H5D__chunk_init(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool open_op)
     if (open_op && (H5D__chunk_set_sizes(dset) < 0))
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to set chunk sizes");
 
-    /* Check for chunk larger than can be represented in 32-bits encoded as v1 b-tree. We don't allow
-     * creation of files with layout version < 5 with 64 bit chunks but we'll try to open them if they
-     * exist because they're not disallowed by the file format. */
+    /* Check for chunk larger than can be represented in 32-bits encoded as v1 b-tree. We don't allow creation
+     * of files with layout version < 5 with 64 bit chunks but we'll try to open them if they exist because
+     * they're not disallowed by the file format. */
     if (dset->shared->layout.u.chunk.size > (hsize_t)0xffffffff &&
         dset->shared->layout.u.chunk.idx_type == H5D_CHUNK_IDX_BTREE)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "chunk size must be < 4GB with v1 b-tree index");
