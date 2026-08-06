@@ -64,6 +64,12 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Tools
 
+### Added an `h5diff` option to exclude an individual attribute from the comparison
+
+   The new `-B` / `--exclude-attr` option excludes a single named attribute rather than every attribute on an object, which is what the existing `--exclude-attribute` option does. The argument is a path in the same convention `h5dump` uses: the last component is the attribute name and the preceding path is the object that owns it, so `-B "/group1/timestamp"` excludes only the `timestamp` attribute on `/group1`, and `-B "/timestamp"` excludes it on the root group. Attributes of the same name on other objects are still compared. The option may be given more than once to exclude several attributes.
+
+   Fixes GitHub issue #6364
+
 ## High-Level APIs
 
 ## C Packet Table API
