@@ -81,6 +81,8 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    When a signed-integer dataset filtered with scale-offset contained values spanning the full range of the datatype, the filter's calculation of the difference between the maximum and minimum values would overflow, resulting in undefined behavior. The difference is now computed in the unsigned domain, producing the correct result without triggering an overflow.
 
+   Fixes GitHub issue #5861
+
 ## Java Library
 
 ## Configuration
