@@ -86108,6 +86108,7 @@
     <docanchor file="_f_m_t4.html" title="III.G. Disk Format: Level 1G - Fractal Heap">subsec_fmt4_infra_fractalheap</docanchor>
     <docanchor file="_f_m_t4.html" title="III.H. Disk Format: Level 1H - Free-space Index">subsec_fmt4_infra_freespaceindex</docanchor>
     <docanchor file="_f_m_t4.html" title="III.I. Disk Format: Level 1I - Shared Object Header Message (SOHM) Master Table">subsec_fmt4_infra_sohm</docanchor>
+    <docanchor file="_f_m_t4.html" title="III.J. Disk Format: Level 1J - Metadata Cache Image Block">subsec_fmt4_infra_mdci</docanchor>
     <docanchor file="_f_m_t4.html" title="IV. Disk Format: Level 2 - Data Objects">sec_fmt4_dataobject</docanchor>
     <docanchor file="_f_m_t4.html" title="IV.A. Disk Format: Level 2A - Data Object Headers">subsec_fmt4_dataobject_hdr</docanchor>
     <docanchor file="_f_m_t4.html" title="IV.A.1 Disk Format: Level 2A1 - Data Object Header Prefix">subsec_fmt4_dataobject_hdr_prefix</docanchor>
@@ -86176,6 +86177,7 @@
     <docanchor file="_f_m_t4.html" title="IV.A.3.v. The Attribute Info Message">subsubsec_fmt4_dataobject_hdr_msg_attrinfo</docanchor>
     <docanchor file="_f_m_t4.html" title="IV.A.3.w. The Object Reference Count Message">subsubsec_fmt4_dataobject_hdr_msg_refcount</docanchor>
     <docanchor file="_f_m_t4.html" title="IV.A.3.x. The File Space Info Message">subsubsec_fmt4_dataobject_hdr_msg_fsinfo</docanchor>
+    <docanchor file="_f_m_t4.html" title="IV.A.3.y. The Metadata Cache Image Message">subsubsec_fmt4_dataobject_hdr_msg_mdci</docanchor>
     <docanchor file="_f_m_t4.html" title="IV.B. Disk Format: Level 2B - Data Object Data Storage">subsec_fmt4_dataobject_storage</docanchor>
     <docanchor file="_f_m_t4.html" title="V. Appendix A: Definitions">sec_fmt4_appendixa</docanchor>
     <docanchor file="_f_m_t4.html">FMT4UndefinedAddress</docanchor>

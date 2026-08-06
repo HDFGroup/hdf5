@@ -32,5 +32,6 @@ var searchData=
   ['3_20versus_20release_201_2014_202_29',['Release 1.14.3 versus Release 1.14.2',['../rel_spec_114_change.html#subsec_rel_spec_114_change_3versus2',1,'']]],
   ['3_20versus_20release_201_208_202_20may_202009_30',['Release 1.8.3 versus Release 1.8.2, May 2009',['../rel_spec_18.html#subsec_rel_spec_18_change_3',1,'']]],
   ['3_20w_20the_20object_20reference_20count_20message_31',['IV.A.3.w. The Object Reference Count Message',['../_f_m_t4.html#subsubsec_fmt4_dataobject_hdr_msg_refcount',1,'']]],
-  ['3_20x_20the_20file_20space_20info_20message_32',['IV.A.3.x. The File Space Info Message',['../_f_m_t4.html#subsubsec_fmt4_dataobject_hdr_msg_fsinfo',1,'']]]
+  ['3_20x_20the_20file_20space_20info_20message_32',['IV.A.3.x. The File Space Info Message',['../_f_m_t4.html#subsubsec_fmt4_dataobject_hdr_msg_fsinfo',1,'']]],
+  ['3_20y_20the_20metadata_20cache_20image_20message_33',['IV.A.3.y. The Metadata Cache Image Message',['../_f_m_t4.html#subsubsec_fmt4_dataobject_hdr_msg_mdci',1,'']]]
 ];
