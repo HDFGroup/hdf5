@@ -75,6 +75,45 @@ function serializeManuallyAdded(manuallyAdded) {
   return `${MANUAL_PREFIX}${[...manuallyAdded].join(',')}${MANUAL_SUFFIX}`;
 }
 
+// Persisted record of the single reviewer settled on for each area, keyed by
+// area label. This is the durable memory that "avalanche" pruning (multiple
+// CODEOWNERS-auto-assigned owners requested at once for the same area) was
+// missing: without it, every avalanche — whether from PR creation, a draft
+// being marked ready, or a later push touching a new file in an
+// already-covered area — got resolved by re-running the load-balancer from
+// scratch, with no notion that one of the avalanche's members might already
+// be the reviewer everyone has been treating as "the" reviewer for that area.
+// Load numbers drift as other PRs open and close, so a re-roll on every
+// avalanche silently swaps out an already-engaged reviewer for someone with
+// a lighter queue that day. This is distinct from MANUAL_PREFIX above: that
+// tracks *who* was manually added, for display/approval purposes; this
+// tracks the settled *pick per area*, for selection stability. A direct
+// review_requested for a login writes both (see coordinateReviewers), so a
+// human's manual pick for an area sticks across future runs instead of being
+// treated as just another avalanche member up for grabs next time one is
+// detected — same "forced pick" outcome as the very run it was requested on
+// (see the avalanche-detection comment below), just persisted.
+const ASSIGNED_PREFIX = '<!-- hdf5-review-checklist-assigned:';
+const ASSIGNED_SUFFIX = '-->';
+
+function parseAssigned(commentBody) {
+  if (!commentBody) return new Map();
+  const start = commentBody.indexOf(ASSIGNED_PREFIX);
+  if (start === -1) return new Map();
+  const end = commentBody.indexOf(ASSIGNED_SUFFIX, start);
+  if (end === -1) return new Map();
+  const raw = commentBody.slice(start + ASSIGNED_PREFIX.length, end);
+  try {
+    return new Map(Object.entries(JSON.parse(raw || '{}')));
+  } catch {
+    return new Map();
+  }
+}
+
+function serializeAssigned(assigned) {
+  return `${ASSIGNED_PREFIX}${JSON.stringify(Object.fromEntries(assigned))}${ASSIGNED_SUFFIX}`;
+}
+
 // ── Pure helpers ──────────────────────────────────────────────────────────────
 
 function labelFromPattern(pattern) {
@@ -352,6 +391,59 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested, changeReques
   return parts.join('\n');
 }
 
+// Resolves each area in `areas` to a single reviewer to keep, without
+// discarding an already-settled reviewer just because a fresh load-balanced
+// pick might land on someone else. Used to prune CODEOWNERS avalanches
+// (multiple owners of one area simultaneously requested) in a way that's
+// stable across repeated events on the same PR.
+//
+// Precedence per area:
+//   1. A persisted sticky assignment (assignedByArea), if it's still a valid
+//      owner of this area and still currently requested.
+//   2. The sole currently-requested owner, if exactly one — nothing to prune,
+//      so nothing to re-pick either.
+//   3. A fresh load-balanced pick via chooseReviewers, for whatever's left.
+//
+// Pure — no I/O. Returns { picks: Map<label, login>, log: string[] }.
+function resolveAreaPicks(areas, {
+  existingRequested, assignedByArea, prAuthor, reviewerLoad, LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
+}) {
+  const picks = new Map();
+  const log   = [];
+  const needsFreshPick = [];
+
+  for (const area of areas) {
+    const sticky = assignedByArea.get(area.label);
+    if (sticky && area.owners.includes(sticky) && existingRequested.has(sticky)) {
+      picks.set(area.label, sticky);
+      log.push(`Area "${area.label}": keeping sticky assignment ${sticky}`);
+      continue;
+    }
+
+    const requestedOwners = area.owners.filter(o => existingRequested.has(o));
+    if (requestedOwners.length === 1) {
+      picks.set(area.label, requestedOwners[0]);
+      log.push(`Area "${area.label}": single already-requested owner ${requestedOwners[0]} — no avalanche`);
+      continue;
+    }
+
+    needsFreshPick.push(area);
+  }
+
+  if (needsFreshPick.length > 0) {
+    const { selected, log: freshLog } = chooseReviewers(needsFreshPick, {
+      prAuthor, existingRequested: new Set(), reviewerLoad, LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
+    });
+    log.push(...freshLog);
+    for (const area of needsFreshPick) {
+      const pick = [...selected].find(l => area.owners.includes(l));
+      if (pick) picks.set(area.label, pick);
+    }
+  }
+
+  return { picks, log };
+}
+
 // ── GitHub API helpers ────────────────────────────────────────────────────────
 
 // Removes auto-assignable reviewers (per prunableOwners — see the
@@ -430,9 +522,11 @@ function planSynchronizeSwaps(eligibleAreas, allReviews, {
 //
 // Determines who should be in confirmedRequested (the checklist display set).
 // Returns { confirmedRequested: Set<login>, excludedReviewers: Set<login>,
-// manuallyAdded: Set<login> } — the last tracks CODEOWNERS requested
-// directly by a human (see MANUAL_PREFIX), updated alongside excludedReviewers
-// wherever a review_requested/review_request_removed event is inspected below.
+// manuallyAdded: Set<login>, assignedReviewers: Map<areaLabel, login> } —
+// manuallyAdded tracks CODEOWNERS requested directly by a human (see
+// MANUAL_PREFIX); assignedReviewers tracks the settled pick per area (see
+// ASSIGNED_PREFIX). Both are updated alongside excludedReviewers wherever a
+// review_requested/review_request_removed event is inspected below.
 // The bot strips reviewers only in three deliberate cases; everywhere else it
 // is purely additive (fills in a load-balanced pick for uncovered areas only):
 //
@@ -455,10 +549,16 @@ function planSynchronizeSwaps(eligibleAreas, allReviews, {
 //   OR no checklist comment posted yet
 //               → Same CODEOWNERS avalanche — GitHub auto-requests CODEOWNERS
 //                 reviewers both on creation and again when a draft is marked
-//                 ready for review. Pruned to the load-balanced single pick
-//                 per area before the checklist is first posted, so reviewers
-//                 aren't @-mentioned en masse before the final reviewer set
-//                 is known.
+//                 ready for review. Pruned to a single pick per area (via
+//                 resolveAreaPicks — see ASSIGNED_PREFIX) before the
+//                 checklist is first posted, so reviewers aren't @-mentioned
+//                 en masse before the final reviewer set is known. Critically,
+//                 this does NOT mean "always re-pick fresh": a reviewer
+//                 already sticky-assigned to an area (a prior coordination
+//                 pass, or a manual request made while the PR was in draft)
+//                 is kept rather than being re-rolled by the load-balancer —
+//                 otherwise every ready_for_review would risk silently
+//                 swapping out a reviewer someone had already settled on.
 //
 //                 The "no comment posted yet" clause covers a race: GitHub's
 //                 CODEOWNERS engine fires one review_requested per
@@ -506,7 +606,7 @@ function planSynchronizeSwaps(eligibleAreas, allReviews, {
 //
 async function coordinateReviewers(github, context, core, {
   owner, repo, pr_number, prData, allCodeOwners, catchAllOwners, touchedAreas, reviewerLoad,
-  excludedReviewers, manuallyAdded, allReviews, hasExistingComment, LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
+  excludedReviewers, manuallyAdded, assignedReviewers, allReviews, hasExistingComment, LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
 }) {
   const pr     = { owner, repo, pr_number };
   const action = context.payload.action;
@@ -543,6 +643,12 @@ async function coordinateReviewers(github, context, core, {
   // fire this identical webhook event with a bot sender, and must not be
   // mistaken for a deliberate human choice.
   const updatedManuallyAdded = new Set(manuallyAdded);
+  // Sticky per-area reviewer assignments (see the ASSIGNED_PREFIX comment
+  // near parseAssigned). Written alongside updatedManuallyAdded below so a
+  // human's manual pick for an area survives not just this run (that's what
+  // the avalanche detector's forced-pick handling further down guarantees
+  // regardless) but every future run too.
+  const updatedAssigned = new Map(assignedReviewers);
   if (action === 'review_request_removed' && context.payload.requested_reviewer && !isBotSender) {
     const login = context.payload.requested_reviewer.login;
     updatedExcluded.add(login);
@@ -556,6 +662,12 @@ async function coordinateReviewers(github, context, core, {
     if (allCodeOwners.has(login)) {
       updatedManuallyAdded.add(login);
       core.info(`${login} manually requested by a human — their own approval will be required on areas they own`);
+    }
+    for (const area of touchedAreas) {
+      if (area.owners.includes(login)) {
+        updatedAssigned.set(area.label, login);
+        core.info(`${login} explicitly requested — sticking as the assignment for area "${area.label}"`);
+      }
     }
   }
 
@@ -578,7 +690,12 @@ async function coordinateReviewers(github, context, core, {
   // ── read-only events ─────────────────────────────────────────────────────
   if (context.eventName === 'pull_request_review' || context.eventName === 'workflow_run') {
     core.info('Read-only event — reflecting current reviewer assignments');
-    return { confirmedRequested: new Set(existingRequested), excludedReviewers: updatedExcluded, manuallyAdded: updatedManuallyAdded };
+    return {
+      confirmedRequested: new Set(existingRequested),
+      excludedReviewers: updatedExcluded,
+      manuallyAdded: updatedManuallyAdded,
+      assignedReviewers: updatedAssigned,
+    };
   }
 
   // Enforce the exclusion list against whatever's actually still on the PR —
@@ -626,12 +743,27 @@ async function coordinateReviewers(github, context, core, {
       // judgment, not their path ownership) is never touched.
       await removeUnselected(github, core, pr, touchedAreaOwners, existingRequested, new Set());
       core.info('Draft PR opened — clearing auto-assigned reviewers, deferring until ready for review');
-      return { confirmedRequested: new Set(), excludedReviewers: updatedExcluded, manuallyAdded: updatedManuallyAdded };
+      // Sticky assignments are deliberately NOT cleared here: if this PR had
+      // a prior coordination pass (e.g. it was ready_for_review, picked up
+      // real reviewers, then got converted back to draft), those picks
+      // should resurface as the same people when it's marked ready again
+      // instead of being re-rolled by the load-balancer.
+      return {
+        confirmedRequested: new Set(),
+        excludedReviewers: updatedExcluded,
+        manuallyAdded: updatedManuallyAdded,
+        assignedReviewers: updatedAssigned,
+      };
     }
     // Any other event while draft (synchronize, review_requested, ...):
     // leave whoever's there alone, request no one new.
     core.info('Draft PR — leaving existing reviewer assignments untouched, no new requests while draft');
-    return { confirmedRequested: new Set(existingRequested), excludedReviewers: updatedExcluded, manuallyAdded: updatedManuallyAdded };
+    return {
+      confirmedRequested: new Set(existingRequested),
+      excludedReviewers: updatedExcluded,
+      manuallyAdded: updatedManuallyAdded,
+      assignedReviewers: updatedAssigned,
+    };
   }
 
   // Scope-shrink pruning: a reviewer requested for an area this PR *used to*
@@ -676,25 +808,34 @@ async function coordinateReviewers(github, context, core, {
     // those actions is the one that happened to survive the cancel-in-progress
     // race against the avalanche's own review_requested events (see the doc
     // comment above coordinateReviewers — this is exactly what happened on
-    // PR #6479). Prune to a load-balanced single pick per area BEFORE posting
-    // the checklist so reviewers aren't @-mentioned en masse. Pass an empty
-    // existingRequested so chooseReviewers treats every area as uncovered and
-    // picks fresh rather than seeing "already has an owner" and returning nothing.
-    const { selected, log } = chooseReviewers(eligibleAreas, {
-      prAuthor,
-      existingRequested: new Set(),
-      reviewerLoad,
-      LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
+    // PR #6479). Prune to a single pick per area BEFORE posting the checklist
+    // so reviewers aren't @-mentioned en masse. resolveAreaPicks prefers a
+    // sticky assignment or an already-uniquely-requested owner over a fresh
+    // load-balanced pick — without that, every ready_for_review (and every
+    // (re)open) would re-roll the load-balancer from scratch and could swap
+    // out a reviewer a human had already settled on (manually requested
+    // during the draft period, or picked by an earlier coordination pass)
+    // for whoever has the lightest queue right now.
+    const { picks, log } = resolveAreaPicks(eligibleAreas, {
+      existingRequested, assignedByArea: updatedAssigned,
+      prAuthor, reviewerLoad, LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
     });
     for (const msg of log) core.info(msg);
+    const selected = new Set(picks.values());
+    for (const [label, login] of picks) updatedAssigned.set(label, login);
 
     await removeUnselected(github, core, pr, touchedAreaOwners, existingRequested, selected);
 
     const toRequest = new Set([...selected].filter(l => !existingRequested.has(l)));
     if (toRequest.size > 0) await requestReviewers(github, core, pr, toRequest);
 
-    core.info(`Non-draft PR ${action} — pruned to load-balanced selection: ${[...selected].join(', ') || '(none)'}`);
-    return { confirmedRequested: selected, excludedReviewers: updatedExcluded, manuallyAdded: updatedManuallyAdded };
+    core.info(`Non-draft PR ${action} — pruned to selection: ${[...selected].join(', ') || '(none)'}`);
+    return {
+      confirmedRequested: selected,
+      excludedReviewers: updatedExcluded,
+      manuallyAdded: updatedManuallyAdded,
+      assignedReviewers: updatedAssigned,
+    };
   }
 
   // Per-area avalanche detection: GitHub's CODEOWNERS engine re-fires whenever a
@@ -716,6 +857,15 @@ async function coordinateReviewers(github, context, core, {
   // forced as that area's kept pick — still collapses a real avalanche to
   // one person, while guaranteeing a direct review_requested is never the
   // one removed.
+  //
+  // For every other avalanche area (algorithmAreas), resolveAreaPicks
+  // prefers a sticky assignment (see ASSIGNED_PREFIX) over a fresh
+  // load-balanced pick. Without that, every avalanche on an area that
+  // already had a settled reviewer — however it originated: a routine push
+  // touching a file whose area happens to share a CODEOWNERS pattern, a
+  // rebase, anything that makes GitHub's engine re-fire — would silently
+  // swap that reviewer out for whoever the load-balancer currently favors,
+  // even though nothing about the area's actual assignment needed to change.
   const avalancheAreas = eligibleAreas.filter(
     area => area.owners.filter(o => existingRequested.has(o)).length > 1
   );
@@ -725,17 +875,17 @@ async function coordinateReviewers(github, context, core, {
       : [];
     const algorithmAreas = avalancheAreas.filter(a => !forcedAreas.includes(a));
 
-    const { selected: algoPicked, log: pruneLog } = chooseReviewers(algorithmAreas, {
-      prAuthor,
-      existingRequested: new Set(), // pick fresh: treat each area as uncovered
-      reviewerLoad,
-      LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
+    const { picks, log: pruneLog } = resolveAreaPicks(algorithmAreas, {
+      existingRequested, assignedByArea: updatedAssigned,
+      prAuthor, reviewerLoad, LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
     });
     for (const msg of pruneLog) core.info(msg);
 
-    const avalanchePruned = new Set(algoPicked);
+    const avalanchePruned = new Set(picks.values());
+    for (const [label, login] of picks) updatedAssigned.set(label, login);
     if (forcedAreas.length > 0) {
       avalanchePruned.add(justRequestedLogin);
+      for (const area of forcedAreas) updatedAssigned.set(area.label, justRequestedLogin);
       core.info(
         `Area(s) ${forcedAreas.map(a => a.label).join(', ')}: keeping explicitly ` +
         `review_requested ${justRequestedLogin} instead of the load-balanced pick`
@@ -791,6 +941,7 @@ async function coordinateReviewers(github, context, core, {
           core.info(`synchronize: re-requested dismissed reviewer ${dismissedOwner} for area "${area.label}"`);
         } catch (e) { core.warning(`Could not re-request ${dismissedOwner}: ${e.message}`); }
       }
+      updatedAssigned.set(area.label, dismissedOwner);
     }
   }
 
@@ -807,11 +958,25 @@ async function coordinateReviewers(github, context, core, {
 
   if (selected.size === 0) {
     core.info('Every touched area already has a reviewer — nothing to add');
-    return { confirmedRequested: new Set(existingRequested), excludedReviewers: updatedExcluded, manuallyAdded: updatedManuallyAdded };
+    return {
+      confirmedRequested: new Set(existingRequested),
+      excludedReviewers: updatedExcluded,
+      manuallyAdded: updatedManuallyAdded,
+      assignedReviewers: updatedAssigned,
+    };
   }
 
   const confirmed = await requestReviewers(github, core, pr, selected);
-  return { confirmedRequested: new Set([...existingRequested, ...confirmed]), excludedReviewers: updatedExcluded, manuallyAdded: updatedManuallyAdded };
+  for (const area of eligibleAreas) {
+    const pick = [...confirmed].find(l => area.owners.includes(l));
+    if (pick) updatedAssigned.set(area.label, pick);
+  }
+  return {
+    confirmedRequested: new Set([...existingRequested, ...confirmed]),
+    excludedReviewers: updatedExcluded,
+    manuallyAdded: updatedManuallyAdded,
+    assignedReviewers: updatedAssigned,
+  };
 }
 
 // ── Entry point ───────────────────────────────────────────────────────────────
@@ -941,15 +1106,16 @@ module.exports = async function run({ github, context, core }) {
       });
       const stale = allComments.find(c => c.body.includes(MARKER));
       if (stale) {
-        // Preserve the exclusion and manually-added lists even though there's
-        // nothing to check off right now — they should still apply if this
-        // PR touches tracked areas again.
-        const preservedExcluded     = serializeExcluded(parseExcluded(stale.body));
+        // Preserve the exclusion, manually-added, and sticky-assignment lists
+        // even though there's nothing to check off right now — they should
+        // still apply if this PR touches tracked areas again.
+        const preservedExcluded      = serializeExcluded(parseExcluded(stale.body));
         const preservedManuallyAdded = serializeManuallyAdded(parseManuallyAdded(stale.body));
+        const preservedAssigned      = serializeAssigned(parseAssigned(stale.body));
         await github.rest.issues.updateComment({
           owner, repo, comment_id: stale.id,
           body: MARKER + '\n_No CODEOWNERS-tracked areas are touched by this PR — no review checklist required._'
-            + '\n' + preservedExcluded + '\n' + preservedManuallyAdded,
+            + '\n' + preservedExcluded + '\n' + preservedManuallyAdded + '\n' + preservedAssigned,
         });
         core.info(`Cleared stale checklist comment #${stale.id}`);
       }
@@ -1032,6 +1198,7 @@ module.exports = async function run({ github, context, core }) {
   }
   const excludedReviewers = parseExcluded(existingComment && existingComment.body);
   const manuallyAdded     = parseManuallyAdded(existingComment && existingComment.body);
+  const assignedReviewers = parseAssigned(existingComment && existingComment.body);
   // On a fetch failure we genuinely don't know whether a comment exists —
   // default to true (assume it does) so coordinateReviewers falls back to its
   // non-destructive additive-fill path rather than treating an API hiccup as
@@ -1042,16 +1209,19 @@ module.exports = async function run({ github, context, core }) {
     confirmedRequested,
     excludedReviewers: updatedExcluded,
     manuallyAdded: updatedManuallyAdded,
+    assignedReviewers: updatedAssigned,
   } = await coordinateReviewers(github, context, core, {
     owner, repo, pr_number, prData, allCodeOwners, catchAllOwners, touchedAreas, reviewerLoad,
-    excludedReviewers, manuallyAdded, allReviews, hasExistingComment, LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
+    excludedReviewers, manuallyAdded, assignedReviewers, allReviews, hasExistingComment,
+    LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
   });
 
   // ----------------------------------------------------------------
   // 8. Build and post (or update) the checklist comment.
   // ----------------------------------------------------------------
   const body = buildBody(touchedAreas, approvedUsers, confirmedRequested, changeRequestFilesByUser, updatedManuallyAdded) +
-    '\n' + serializeExcluded(updatedExcluded) + '\n' + serializeManuallyAdded(updatedManuallyAdded);
+    '\n' + serializeExcluded(updatedExcluded) + '\n' + serializeManuallyAdded(updatedManuallyAdded)
+    + '\n' + serializeAssigned(updatedAssigned);
 
   try {
     if (existingComment) {
@@ -1074,11 +1244,14 @@ module.exports.computeApprovals          = computeApprovals;
 module.exports.computeChangesRequested   = computeChangesRequested;
 module.exports.buildChangeRequestFileMap = buildChangeRequestFileMap;
 module.exports.chooseReviewers           = chooseReviewers;
+module.exports.resolveAreaPicks          = resolveAreaPicks;
 module.exports.buildBody                 = buildBody;
 module.exports.parseExcluded             = parseExcluded;
 module.exports.serializeExcluded         = serializeExcluded;
 module.exports.withExcluded              = withExcluded;
 module.exports.parseManuallyAdded        = parseManuallyAdded;
 module.exports.serializeManuallyAdded    = serializeManuallyAdded;
+module.exports.parseAssigned             = parseAssigned;
+module.exports.serializeAssigned         = serializeAssigned;
 module.exports.coordinateReviewers       = coordinateReviewers;
 module.exports.planSynchronizeSwaps      = planSynchronizeSwaps;
