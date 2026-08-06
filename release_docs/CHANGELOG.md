@@ -81,6 +81,8 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    When the library detects that it cannot make progress closing itself (an "infinite loop closing library"), it no longer calls `abort()`. The abort behaved inconsistently, only firing when automatic error message display was enabled. Additionally, terminating the entire host process on a shutdown-time condition is undesirable for applications that embed HDF5. The library now reports the condition (when error display is enabled) and returns without aborting.
 
+   Fixes GitHub issue #6531
+
 ## Java Library
 
 ## Configuration
