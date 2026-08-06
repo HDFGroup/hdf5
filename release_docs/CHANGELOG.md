@@ -81,6 +81,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    The chunk layout's stored dimensionality was validated against the dataspace rank at creation time, but not at open time, so a file whose stored chunk rank disagreed with its dataspace rank was not caught. The resulting inconsistent selection ranks during chunk I/O caused a divide-by-zero in the hyperslab iterator. The chunk dimensionality is now also validated on open, and such a dataset is rejected with an error instead of crashing.
 
+   Fixes GitHub issue #6491
+
+   Fixes CVE-2026-19025
+
 ## Java Library
 
 ## Configuration
