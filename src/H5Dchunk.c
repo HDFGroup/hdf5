@@ -611,9 +611,9 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, vo
     if (!H5_addr_defined(udata.chunk_block.offset))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunk address isn't defined");
 
-    /* If nalloc is provided, check if *nalloc is large enough.  If not provided, assume it is large
-     * enough (this is the insecure older behaviour that is disallowed by H5Dread_chunk2(), but we must
-     * support it here for the deprecated H5Dreach_chunk1()). */
+    /* If nalloc is provided, check if *nalloc is large enough.  If not provided, assume it is large enough
+     * (this is the insecure older behaviour that is disallowed by H5Dread_chunk2(), but we must support it
+     * here for the deprecated H5Dreach_chunk1()). */
     if (udata.chunk_block.length > 0 && buf && (!nalloc || *nalloc >= udata.chunk_block.length))
         /* Read the chunk data into the supplied buffer */
         if (H5F_shared_block_read(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, udata.chunk_block.offset,
@@ -831,8 +831,8 @@ H5D__chunk_set_sizes(H5D_t *dset)
     assert(dset);
     assert(dset->shared->layout.u.chunk.ndims > 0);
 
-    /* In this function, some of these sizes may have already been set since they are sometimes stored in
-     * the file. If this is the case, verify the calculated sizes match the stored sizes. */
+    /* In this function, some of these sizes may have already been set since they are sometimes stored in the
+     * file. If this is the case, verify the calculated sizes match the stored sizes. */
     /* Set the last dimension of the chunk size to the size of the datatype */
     if (dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1]) {
         if (dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1] !=
@@ -887,8 +887,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_construct
  *
- * Purpose:    Constructs new chunked layout information for dataset and upgrade layout version if
- *appropriate
+ * Purpose:    Constructs new chunked layout information for dataset and upgrade layout version if appropriate
  *
  * Return:    Non-negative on success/Negative on failure
  *
@@ -935,8 +934,7 @@ H5D__chunk_construct(H5F_t *f, H5D_t *dset)
     version_perf = H5O_LAYOUT_VERSION_4;
 
     /* First check for chunk larger than can be represented in 32-bits - this requires layout version 5.
-     * While it could be encoded as version 4, those versions of the library would not be able to read it.
-     */
+     * While it could be encoded as version 4, those versions of the library would not be able to read it. */
     if (layout->u.chunk.size > (hsize_t)0xffffffff) {
         if (H5O_layout_ver_bounds[H5F_HIGH_BOUND(f)] < H5O_LAYOUT_VERSION_5)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
@@ -992,8 +990,8 @@ H5D__chunk_construct(H5F_t *f, H5D_t *dset)
                 layout->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits =
                     H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS;
 
-                /* If there are filters, we prefer version 5 since that version can handle greatly
-                 * expanding filters */
+                /* If there are filters, we prefer version 5 since that version can handle greatly expanding
+                 * filters */
                 if (dset->shared->dcpl_cache.pline.nused)
                     version_perf = H5O_LAYOUT_VERSION_5;
             }
@@ -1011,8 +1009,8 @@ H5D__chunk_construct(H5F_t *f, H5D_t *dset)
                 layout->u.chunk.u.btree2.cparam.split_percent = H5D_BT2_SPLIT_PERC;
                 layout->u.chunk.u.btree2.cparam.merge_percent = H5D_BT2_MERGE_PERC;
 
-                /* If there are filters, we prefer version 5 since that version can handle greatly
-                 * expanding filters */
+                /* If there are filters, we prefer version 5 since that version can handle greatly expanding
+                 * filters */
                 if (dset->shared->dcpl_cache.pline.nused)
                     version_perf = H5O_LAYOUT_VERSION_5;
             }
@@ -1026,8 +1024,7 @@ H5D__chunk_construct(H5F_t *f, H5D_t *dset)
 
                 /* If there are filters, we prefer version 5 since that version can handle greatly
                  * expanding filters (>4 GiB) (technically allowed by the v4 format but disallowed by
-                 * library since older library version can't handle >4 GiB chunks even if the format can)
-                 */
+                 * library since older library version can't handle >4 GiB chunks even if the format can) */
                 if (dset->shared->dcpl_cache.pline.nused)
                     version_perf = H5O_LAYOUT_VERSION_5;
             }
@@ -1054,8 +1051,8 @@ H5D__chunk_construct(H5F_t *f, H5D_t *dset)
                 layout->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits =
                     H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS;
 
-                /* If there are filters, we prefer version 5 since that version can handle greatly
-                 * expanding filters */
+                /* If there are filters, we prefer version 5 since that version can handle greatly expanding
+                 * filters */
                 if (dset->shared->dcpl_cache.pline.nused)
                     version_perf = H5O_LAYOUT_VERSION_5;
             }
@@ -1063,9 +1060,9 @@ H5D__chunk_construct(H5F_t *f, H5D_t *dset)
     }
 
     /* Calculate final version - choose the maximum of the current version, the required version, and the
-     * minimum of the low bound and the version we would like to upgrade to for performance. This ensures
-     * that we are never below the current version or the required version, and that we always upgrade to
-     * at least the low bound when useful, but never farther unless required otherwise. */
+     * minimum of the low bound and the version we would like to upgrade to for performance. This ensures that
+     * we are never below the current version or the required version, and that we always upgrade to at least
+     * the low bound when useful, but never farther unless required otherwise. */
     layout->version =
         MAX3(layout->version, version_req, MIN(H5O_layout_ver_bounds[H5F_LOW_BOUND(f)], version_perf));
 
@@ -1345,8 +1342,7 @@ H5D__chunk_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         if (H5D__chunk_may_use_select_io(io_info, dinfo) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if selection I/O is possible");
 
-    /* Calculate type conversion buffer size if necessary.  Currently only implemented for selection I/O.
-     */
+    /* Calculate type conversion buffer size if necessary.  Currently only implemented for selection I/O. */
     if (io_info->use_select_io != H5D_SELECTION_IO_MODE_OFF &&
         !(dinfo->type_info.is_xform_noop && dinfo->type_info.is_conv_noop)) {
         H5SL_node_t *chunk_node; /* Current node in chunk skip list */
@@ -3537,8 +3533,8 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
                 /* Set request_nelmts.  This is not normally set by the upper layers because selection I/O
                  * usually does not use strip mining (H5D__scatgath_write), and instead allocates buffers
-                 * large enough for the entire I/O.  Set request_nelmts to be large enough for all
-                 * selected elements in this chunk because it must be at least that large */
+                 * large enough for the entire I/O.  Set request_nelmts to be large enough for all selected
+                 * elements in this chunk because it must be at least that large */
                 H5_CHECKED_ASSIGN(cpt_dset_info.type_info.request_nelmts, size_t, cpt_dset_info.nelmts,
                                   hsize_t);
 
@@ -5434,10 +5430,10 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
     H5D_fill_buf_info_t fb_info;                         /* Dataset's fill buffer info */
     bool                fb_info_init = false; /* Whether the fill value buffer has been initialized */
     bool has_unfilt_edge_chunks = false; /* Whether there are partial edge chunks with disabled filters */
-    bool unfilt_edge_chunk_dim[H5O_LAYOUT_NDIMS];     /* Whether there are unfiltered edge chunks at the edge
-                                                            of each dimension */
-    hsize_t edge_chunk_scaled[H5O_LAYOUT_NDIMS];      /* Offset of the unfiltered edge chunks at the edge of
-                                                         each  dimension */
+    bool unfilt_edge_chunk_dim[H5O_LAYOUT_NDIMS]; /* Whether there are unfiltered edge chunks at the edge
+                                                        of each dimension */
+    hsize_t edge_chunk_scaled[H5O_LAYOUT_NDIMS];  /* Offset of the unfiltered edge chunks at the edge of each
+                                                     dimension */
     unsigned             nunfilt_edge_chunk_dims = 0; /* Number of dimensions on an edge */
     H5O_storage_chunk_t *sc                      = &(layout->storage.u.chunk); /* Convenience variable */
     herr_t               ret_value               = SUCCEED;                    /* Return value */
@@ -5880,8 +5876,8 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[])
 {
     hsize_t old_edge_chunk_sc[H5O_LAYOUT_NDIMS]; /* Offset of first previously incomplete chunk in each
                                                     dimension */
-    hsize_t max_edge_chunk_sc[H5O_LAYOUT_NDIMS]; /* largest offset of chunks that might need to be
-                                                    modified in each dimension */
+    hsize_t max_edge_chunk_sc[H5O_LAYOUT_NDIMS]; /* largest offset of chunks that might need to be modified in
+                                                    each dimension */
     bool new_full_dim[H5O_LAYOUT_NDIMS];         /* Whether the plane of chunks in this dimension needs to be
                                                        modified */
     const H5O_layout_t *layout = &(dset->shared->layout); /* Dataset layout */
@@ -6485,8 +6481,8 @@ H5D__chunk_prune_by_extent(H5D_t *dset, const hsize_t *old_dim)
 {
     hsize_t min_mod_chunk_sc[H5O_LAYOUT_NDIMS]; /* Scaled offset of first chunk to modify in each dimension */
     hsize_t max_mod_chunk_sc[H5O_LAYOUT_NDIMS]; /* Scaled offset of last chunk to modify in each dimension */
-    hssize_t max_fill_chunk_sc[H5O_LAYOUT_NDIMS]; /* Scaled offset of last chunk that might be filled in
-                                                     each dimension */
+    hssize_t max_fill_chunk_sc[H5O_LAYOUT_NDIMS]; /* Scaled offset of last chunk that might be filled in each
+                                                     dimension */
     bool fill_dim[H5O_LAYOUT_NDIMS]; /* Whether the plane of edge chunks in this dimension needs to be
                                            filled */
     hsize_t min_partial_chunk_sc[H5O_LAYOUT_NDIMS]; /* Offset of first partial (or empty) chunk in each
@@ -7187,8 +7183,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         }
     }
 
-    /* Need to uncompress filtered variable-length & reference data elements that are not found in chunk
-     * cache
+    /* Need to uncompress filtered variable-length & reference data elements that are not found in chunk cache
      */
     if (must_filter && (is_vlen || fix_ref) && !udata->chunk_in_cache) {
         unsigned filter_mask = chunk_rec->filter_mask;
@@ -7257,8 +7252,8 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     udata_dst.chunk_block.length = chunk_rec->nbytes;
     udata_dst.filter_mask        = chunk_rec->filter_mask;
 
-    /* Need to compress variable-length or reference data elements or a chunk found in cache before
-     * writing to file */
+    /* Need to compress variable-length or reference data elements or a chunk found in cache before writing to
+     * file */
     if (must_filter && (is_vlen || fix_ref || udata->chunk_in_cache)) {
         if (H5Z_pipeline(pline, 0, &(udata_dst.filter_mask), H5Z_NO_EDC, filter_cb, &nbytes, &udata->buf_size,
                          &udata->buf) < 0)
@@ -8061,8 +8056,7 @@ H5D__chunk_format_convert(H5D_t *dset, H5D_chk_idx_info_t *idx_info, H5D_chk_idx
     udata.dset_ndims   = dset->shared->ndims;
     udata.dset_dims    = dset->shared->curr_dims;
 
-    /* Iterate over the chunks in the current index and insert the chunk addresses into version 1 B-tree
-     * index
+    /* Iterate over the chunks in the current index and insert the chunk addresses into version 1 B-tree index
      */
     if ((idx_info->layout->storage.u.chunk.ops->iterate)(idx_info, H5D__chunk_format_convert_cb, &udata) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to iterate over chunk index to chunk info");
