@@ -91,7 +91,20 @@ function (h5_define_public_tools)
 
   foreach (_tool IN LISTS H5PUB_TOOLS)
     set (_concrete "${H5PUB_PREFIX}${_tool}")
-    if (TARGET "${_concrete}" AND NOT TARGET "hdf5::${_tool}")
+    if (NOT TARGET "${_concrete}")
+      continue ()
+    endif ()
+
+    # Same rule as the libraries: an existing name must refer to our executable,
+    # or the consumer runs someone else's under the hdf5:: namespace.
+    if (TARGET "hdf5::${_tool}")
+      get_target_property (_aliased "hdf5::${_tool}" ALIASED_TARGET)
+      if (NOT _aliased STREQUAL _concrete)
+        message (FATAL_ERROR
+            "hdf5::${_tool} already exists and refers to ${_aliased}, not "
+            "${_concrete}. Has another project has claimed an hdf5:: name?")
+      endif ()
+    else ()
       add_executable ("hdf5::${_tool}" ALIAS "${_concrete}")
     endif ()
   endforeach ()
@@ -129,27 +142,26 @@ function (h5_define_public_targets)
   foreach (_public_name IN LISTS HDF5_PUBLIC_LIBRARY_NAMES)
     set (_concrete "${H5PUB_PREFIX}${H5PUB_CONCRETE_${_public_name}_${H5PUB_LINKAGE}}")
 
-    # A name that already exists is left alone, but must still refer to the
-    # target we would have aliased -- otherwise the consumer links something
-    # other than this HDF5. Nothing to check when our own component was not
-    # built, since then we have no expectation to compare against.
-    if (TARGET "hdf5::${_public_name}")
-      get_target_property (_aliased "hdf5::${_public_name}" ALIASED_TARGET)
-      if (TARGET "${_concrete}" AND NOT _aliased STREQUAL _concrete)
-        message (FATAL_ERROR
-            "hdf5::${_public_name} already exists and refers to ${_aliased}, not "
-            "${_concrete} -- another project has claimed the hdf5:: names.")
-      endif ()
-      list (APPEND _public_targets_defined "hdf5::${_public_name}")
-      continue ()
-    endif ()
-
-    # Components that were not built have no public name.
+    # Components that were not built have no public name. A same-named target
+    # from somewhere else is not ours to check, and must not reach the
+    # aggregate either.
     if (NOT TARGET "${_concrete}")
       continue ()
     endif ()
 
-    add_library ("hdf5::${_public_name}" ALIAS "${_concrete}")
+    # A name that already exists is left alone, but must refer to the target we
+    # would have aliased.
+    if (TARGET "hdf5::${_public_name}")
+      get_target_property (_aliased "hdf5::${_public_name}" ALIASED_TARGET)
+      if (NOT _aliased STREQUAL _concrete)
+        message (FATAL_ERROR
+            "hdf5::${_public_name} already exists and refers to ${_aliased}, not "
+            "${_concrete} -- another project has claimed the hdf5:: names.")
+      endif ()
+    else ()
+      add_library ("hdf5::${_public_name}" ALIAS "${_concrete}")
+    endif ()
+
     list (APPEND _public_targets_defined "hdf5::${_public_name}")
   endforeach ()
 
