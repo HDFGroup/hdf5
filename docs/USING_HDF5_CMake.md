@@ -151,25 +151,65 @@ Given the preconditions in Section I, create a `CMakeLists.txt` file at the sour
 cmake_minimum_required (VERSION 3.26)
 project (HDF5MyApp C)
 
-set (LIB_TYPE STATIC) # or SHARED
-string(TOLOWER ${LIB_TYPE} SEARCH_TYPE)
-
-find_package (HDF5 NAMES hdf5 COMPONENTS C ${SEARCH_TYPE})
+find_package (HDF5 NAMES hdf5 CONFIG REQUIRED COMPONENTS C)
 # find_package (HDF5) # Find non-cmake built HDF5
-
-set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_INCLUDE_DIR}")
-set (LINK_LIBS ${LINK_LIBS} ${HDF5_C_${LIB_TYPE}_LIBRARY})
 
 set (example hdf_example)
 
 add_executable (${example} ${PROJECT_SOURCE_DIR}/${example}.c)
-target_link_libraries (${example} ${LINK_LIBS})
+target_link_libraries (${example} PRIVATE hdf5::hdf5)
 
 enable_testing ()
 include (CTest)
 
 add_test (NAME test_example COMMAND ${example})
 ```
+
+`hdf5::hdf5` carries HDF5's include directories and its own dependencies, so
+there is no need to set `INCLUDE_DIRECTORIES` or to name the library variables
+directly.
+
+#### Public target names
+
+Link against these rather than against `hdf5-shared` or `hdf5-static`. The
+names do not encode the linkage, so the same project file works against a
+static installation, a shared one, or one providing both:
+
+| Target | Library |
+| ------ | ------- |
+| `hdf5::hdf5` | C |
+| `hdf5::hdf5_hl` | High-level C |
+| `hdf5::hdf5_cpp` | C++ |
+| `hdf5::hdf5_hl_cpp` | High-level C++ |
+| `hdf5::hdf5_fortran` | Fortran |
+| `hdf5::hdf5_hl_fortran` | High-level Fortran |
+| `HDF5::HDF5` | All of the above that are available |
+
+Each installed tool is available as `hdf5::<tool>`, for example `hdf5::h5diff`.
+
+These are the same names CMake's own `FindHDF5` module provides, so a project
+using them does not need to know whether HDF5 was located through `FindHDF5`
+or through HDF5's `hdf5-config.cmake`. They are also defined when HDF5 is
+built as a subproject with `add_subdirectory()`, so the same
+`target_link_libraries()` call works there too.
+
+#### Choosing static or shared
+
+When an installation provides both, the public targets refer to the shared
+libraries. To choose deliberately, request the linkage as a component:
+
+```cmake
+find_package (HDF5 NAMES hdf5 CONFIG REQUIRED COMPONENTS C static)
+target_link_libraries (${example} PRIVATE hdf5::hdf5)
+```
+
+Setting `HDF5_USE_STATIC_LIBRARIES` before `find_package()` has the same
+effect, matching `FindHDF5`. Requesting both `static` and `shared` leaves the
+public targets on the default and warns, since one name cannot refer to both.
+
+The linkage-qualified `hdf5-shared` and `hdf5-static` targets and the
+`HDF5_C_SHARED_LIBRARY` / `HDF5_C_STATIC_LIBRARY` variables remain available
+for existing projects.
 
 ---
 

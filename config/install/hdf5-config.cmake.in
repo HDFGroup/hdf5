@@ -346,6 +346,104 @@ foreach (libtype IN LISTS ${HDF5_PACKAGE_NAME}_LIB_TYPE)
   endforeach ()
 endforeach ()
 
+#-----------------------------------------------------------------------------
+# Stable, linkage-agnostic public target names: hdf5::hdf5, hdf5::hdf5_hl,
+# HDF5::HDF5 and friends.
+#
+# These are aliases onto the linkage-qualified targets loaded above, so they
+# are purely additive -- the targets and the HDF5_<lang>_<LINKAGE>_LIBRARY
+# variables set above are untouched. See HDF5PublicTargets.cmake for the full
+# list of names.
+#
+# Which linkage the public names resolve to, in order of precedence:
+#   1. an explicit "static" or "shared" component
+#   2. HDF5_USE_STATIC_LIBRARIES, for consistency with CMake's FindHDF5
+#   3. shared if this installation provides it, otherwise static
+#-----------------------------------------------------------------------------
+include ("${CMAKE_CURRENT_LIST_DIR}/HDF5PublicTargets.cmake")
+
+# Tool executables have no linkage variants, so they are defined independently
+# of the library linkage.
+h5_define_public_tools (
+    PREFIX "@HDF_PACKAGE_NAMESPACE@"
+    TOOLS  @HDF5_UTILS_TO_EXPORT@
+)
+
+h5_default_public_linkage (
+    "${${HDF5_PACKAGE_NAME}_PROVIDES_SHARED_LIBS}"
+    "${${HDF5_PACKAGE_NAME}_PROVIDES_STATIC_LIBS}"
+    _h5_default_linkage
+)
+
+list (FIND ${HDF5_PACKAGE_NAME}_LIB_TYPE "shared" _h5_wants_shared)
+list (FIND ${HDF5_PACKAGE_NAME}_LIB_TYPE "static" _h5_wants_static)
+
+if (_h5_wants_shared GREATER -1 AND _h5_wants_static GREATER -1)
+  # Both linkages were requested. The pre-2.3.0 variables can express that, but
+  # a single public target name cannot, so fall back to the default and say so
+  # rather than picking one silently.
+  set (_h5_public_linkage "${_h5_default_linkage}")
+  message (WARNING
+      "find_package(${CMAKE_FIND_PACKAGE_NAME}) requested both the \"static\" and \"shared\" "
+      "components. The hdf5:: targets can only refer to one linkage and will refer to the "
+      "${_h5_public_linkage} libraries. Request exactly one of \"static\" or \"shared\", or set "
+      "HDF5_USE_STATIC_LIBRARIES, to choose deliberately. The "
+      "${HDF5_PACKAGE_NAME}_<lang>_<LINKAGE>_LIBRARY variables still name both.")
+elseif (_h5_wants_shared GREATER -1)
+  set (_h5_public_linkage "shared")
+elseif (_h5_wants_static GREATER -1)
+  set (_h5_public_linkage "static")
+elseif (HDF5_USE_STATIC_LIBRARIES)
+  set (_h5_public_linkage "static")
+else ()
+  set (_h5_public_linkage "${_h5_default_linkage}")
+endif ()
+
+if (_h5_public_linkage STREQUAL "shared" AND NOT ${HDF5_PACKAGE_NAME}_PROVIDES_SHARED_LIBS)
+  message (WARNING
+      "This HDF5 installation does not provide shared libraries, so no hdf5:: targets were "
+      "defined. Request the \"static\" component instead.")
+elseif (_h5_public_linkage STREQUAL "static" AND NOT ${HDF5_PACKAGE_NAME}_PROVIDES_STATIC_LIBS)
+  message (WARNING
+      "This HDF5 installation does not provide static libraries, so no hdf5:: targets were "
+      "defined. Request the \"shared\" component instead.")
+elseif (_h5_public_linkage)
+  # The concrete names are substituted in from the build that produced this
+  # installation, so a build that renamed its libraries via HDF5_LIB_BASE still
+  # gets the same public names. These are the same target variables the build
+  # tree passes to h5_define_public_targets(), so the linkage suffix convention
+  # is not restated here.
+  set (H5PUB_CONCRETE_hdf5_static            "@HDF5_LIB_TARGET@")
+  set (H5PUB_CONCRETE_hdf5_shared            "@HDF5_LIBSH_TARGET@")
+  set (H5PUB_CONCRETE_hdf5_hl_static         "@HDF5_HL_LIB_TARGET@")
+  set (H5PUB_CONCRETE_hdf5_hl_shared         "@HDF5_HL_LIBSH_TARGET@")
+  set (H5PUB_CONCRETE_hdf5_cpp_static        "@HDF5_CPP_LIB_TARGET@")
+  set (H5PUB_CONCRETE_hdf5_cpp_shared        "@HDF5_CPP_LIBSH_TARGET@")
+  set (H5PUB_CONCRETE_hdf5_hl_cpp_static     "@HDF5_HL_CPP_LIB_TARGET@")
+  set (H5PUB_CONCRETE_hdf5_hl_cpp_shared     "@HDF5_HL_CPP_LIBSH_TARGET@")
+  set (H5PUB_CONCRETE_hdf5_fortran_static    "@HDF5_F90_LIB_TARGET@")
+  set (H5PUB_CONCRETE_hdf5_fortran_shared    "@HDF5_F90_LIBSH_TARGET@")
+  set (H5PUB_CONCRETE_hdf5_hl_fortran_static "@HDF5_HL_F90_LIB_TARGET@")
+  set (H5PUB_CONCRETE_hdf5_hl_fortran_shared "@HDF5_HL_F90_LIBSH_TARGET@")
+
+  h5_define_public_targets (
+      LINKAGE ${_h5_public_linkage}
+      PREFIX  "@HDF_PACKAGE_NAMESPACE@"
+  )
+
+  foreach (_h5_name IN LISTS HDF5_PUBLIC_LIBRARY_NAMES)
+    unset (H5PUB_CONCRETE_${_h5_name}_static)
+    unset (H5PUB_CONCRETE_${_h5_name}_shared)
+  endforeach ()
+  unset (_h5_name)
+endif ()
+
+unset (_h5_default_linkage)
+unset (_h5_wants_shared)
+unset (_h5_wants_static)
+unset (_h5_public_linkage)
+unset (HDF5_PUBLIC_LIBRARY_NAMES)
+
 foreach (libtype IN LISTS ${HDF5_PACKAGE_NAME}_LIB_TYPE)
   check_required_components(${HDF5_PACKAGE_NAME}_${libtype})
 endforeach ()
