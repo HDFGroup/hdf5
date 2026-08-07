@@ -4561,7 +4561,7 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
 done:
     /* The base type derived from a VLEN/ARRAY/COMPLEX memory type, or the member type of
      * a COMPOUND that has not been closed by the loop above, is owned by this call. */
-    if (memb >= 0)
+    if (memb > 0)
         H5Tclose(memb);
 
     /* Release the class references so a deep recursion (a compound read calls this helper
@@ -4882,7 +4882,7 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
 done:
     /* The base type derived from a VLEN/ARRAY/COMPLEX memory type, or the member type of
      * a COMPOUND that has not been closed by the loop above, is owned by this call. */
-    if (memb >= 0)
+    if (memb > 0)
         H5Tclose(memb);
 
     /* Release the class references so a deep recursion does not hold one set per level. */
@@ -5156,7 +5156,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
 done:
     /* The base type derived from a VLEN/ARRAY/COMPLEX memory type, or the member type of
      * a COMPOUND that has not been closed by the loop above, is owned by this call. */
-    if (memb >= 0)
+    if (memb > 0)
         H5Tclose(memb);
 
     if (arrCList)
@@ -5418,7 +5418,7 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
 done:
     /* The base type derived from a VLEN/ARRAY/COMPLEX memory type, or the member type of
      * a COMPOUND that has not been closed by the loop above, is owned by this call. */
-    if (memb >= 0)
+    if (memb > 0)
         H5Tclose(memb);
 
     if (arrCList)
@@ -5647,7 +5647,7 @@ h5validate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class
     ret_value = SUCCEED;
 
 done:
-    if (memb >= 0)
+    if (memb > 0)
         H5Tclose(memb);
     return ret_value;
 }
