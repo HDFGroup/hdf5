@@ -87,6 +87,14 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Tools
 
+### Fixed an issue with quoting of data values in h5ls and h5dump when displaying as ASCII characters
+
+   When using the `-s` (h5ls) or `-r` (h5dump) option to display 1-byte integer datasets and
+   attributes as ASCII characters, a closing double-quote character for data values was dropped
+   in some cases. This double-quote character has been restored and similar formatting issues
+   have been fixed for cases where elements wrap to new lines according to the particular tool's
+   column limit setting.
+
 ## Performance
 
 ## Fortran API
