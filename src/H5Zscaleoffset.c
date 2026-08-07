@@ -1248,7 +1248,12 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         if (H5_IS_BUFFER_OVERFLOW((unsigned char *)*buf, buf_offset, (unsigned char *)*buf + nbytes - 1))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
 
-        /* calculate size of output buffer after decompression */
+        /* calculate size of output buffer after decompression.  Both factors come
+         * from the stored filter parameters, so guard the product against wrapping
+         * before it is used as an allocation size
+         */
+        if (p.size && d_nelmts > SIZE_MAX / p.size)
+            HGOTO_ERROR(H5E_PLINE, H5E_OVERFLOW, 0, "scaleoffset output buffer size overflows");
         size_out = d_nelmts * (size_t)p.size;
 
         /* allocate memory space for decompressed buffer */
