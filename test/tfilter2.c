@@ -3831,6 +3831,280 @@ error:
 }
 
 /* -----------------------------------------------------------------------
+ * Reference example: migrating a real-world filter's oversized-config
+ * pattern to H5Pappend_filter_blob.
+ *
+ * Modeled directly on LibPressio's actual production HDF5 filter --
+ * https://github.com/robertu94/libpressio/blob/master/tools/hdf5_filter/
+ * src/libpressio_hdf5_filter.cc, functions H5Z_libpressio_set_local(),
+ * get_cd_values_from_options(), and get_options_from_cd_values() -- which
+ * hand-packs a compressor's serialized options (msgpack, via nlohmann
+ * json) directly into cd_values with no size bound. LibPressio's author
+ * reported this "cause[s] segfaults when attempting to store in CD
+ * values over a few KB" (HDFGroup/hdf5#6153, comment from @robertu94),
+ * citing two concrete cases: ROIBIN-SZ's binary spatial mask, and SZ4's
+ * (still unreleased) JIT compiler needing to store pre-processed source.
+ * Both are exactly the multi-megabyte-blob problem this RFC's mechanism
+ * targets.
+ *
+ * This models the migrated pattern: set_local still packs only the
+ * small, fixed-size stuff (datatype class, ndims, dims) into cd_values
+ * exactly as the real filter does -- that part was never the problem.
+ * The arbitrarily large "compressor options" travel via
+ * H5Pappend_filter_blob instead of being hand-serialized into cd_values,
+ * and set_local recovers them with H5Pget_filter_blob. Unlike this
+ * file's other blob tests (which pre-build the DCPL's blob and never
+ * touch cd_values), this one exercises the two mechanisms *together* --
+ * set_local computing cd_values dynamically per chunk shape while a
+ * blob is also attached -- which is the actual shape a filter migration
+ * would take. */
+#define LIBPRESSIO_PATTERN_FILTER_ID 550
+
+static size_t
+libpressio_pattern_filter_func(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                               const unsigned int H5_ATTR_UNUSED *cd_values, hid_t H5_ATTR_UNUSED dxpl_id,
+                               const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims,
+                               size_t nbytes, size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+{
+    /* Pass-through: this example is about the configuration path (the
+     * part LibPressio's author flagged as broken), not about actually
+     * invoking a compressor. */
+    return nbytes;
+}
+
+/* cd_values-packing filters like the real LibPressio one know their own
+ * filter ID at compile time but not their position in a (possibly
+ * multi-filter) pipeline -- H5Pget_filter_blob() is index-based, so
+ * set_local has to find itself first, same as any real filter author
+ * integrating this API would. */
+static herr_t
+libpressio_pattern_find_self(hid_t dcpl_id, unsigned *idx_out)
+{
+    int nfilters = H5Pget_nfilters(dcpl_id);
+
+    if (nfilters < 0)
+        return FAIL;
+    for (unsigned i = 0; i < (unsigned)nfilters; i++) {
+        unsigned     flags;
+        size_t       cd_nelmts = 0;
+        H5Z_filter_t id        = H5Pget_filter2(dcpl_id, i, &flags, &cd_nelmts, NULL, 0, NULL, NULL);
+
+        if (id == LIBPRESSIO_PATTERN_FILTER_ID) {
+            *idx_out = i;
+            return SUCCEED;
+        }
+    }
+    return FAIL;
+}
+
+/* Modeled on H5Z_libpressio_set_local(): computes dtype class and chunk
+ * dims from the chunk dataspace exactly as the real filter does. Where
+ * the real filter would msgpack-serialize the full compressor options
+ * and hand-pack them into cd_values here, this instead just confirms
+ * the options blob attached via H5Pappend_filter_blob is present and
+ * readable -- a real filter would parse it at this point (msgpack-decode
+ * it, or for a hypothetical SZ4-shaped filter, JIT-compile the embedded
+ * source once per dataset here rather than per chunk). */
+static herr_t
+libpressio_pattern_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
+{
+    unsigned    idx;
+    unsigned    flags;
+    size_t      cd_nelmts_cur = 0;
+    int         chunk_ndims;
+    hsize_t     dims[32];
+    unsigned    cd_values[34]; /* dtype class + ndims + up to 32 dims */
+    size_t      n         = 0;
+    size_t      blob_size = 0;
+    H5T_class_t dclass;
+
+    if (libpressio_pattern_find_self(dcpl_id, &idx) < 0)
+        return FAIL;
+
+    /* The compressor-options blob attached at H5Pappend_filter_blob
+     * time -- the multi-megabyte piece the real filter would have tried
+     * to jam into cd_values. */
+    if (H5Pget_filter_blob(dcpl_id, idx, 0, NULL, &blob_size) < 0)
+        return FAIL;
+    if (blob_size == 0)
+        return FAIL; /* this filter requires options */
+
+    if ((chunk_ndims = H5Sget_simple_extent_ndims(chunk_space_id)) < 0)
+        return FAIL;
+    if ((size_t)chunk_ndims > sizeof(dims) / sizeof(dims[0]))
+        return FAIL;
+    if (H5Sget_simple_extent_dims(chunk_space_id, dims, NULL) < 0)
+        return FAIL;
+
+    if ((dclass = H5Tget_class(type_id)) == H5T_NO_CLASS)
+        return FAIL;
+
+    cd_values[n++] = (unsigned)dclass;
+    cd_values[n++] = (unsigned)chunk_ndims;
+    for (int i = 0; i < chunk_ndims; i++)
+        cd_values[n++] = (unsigned)dims[i];
+
+    if (H5Pget_filter_by_id2(dcpl_id, LIBPRESSIO_PATTERN_FILTER_ID, &flags, &cd_nelmts_cur, NULL, 0, NULL,
+                             NULL) < 0)
+        return FAIL;
+    if (H5Pmodify_filter(dcpl_id, LIBPRESSIO_PATTERN_FILTER_ID, flags, n, cd_values) < 0)
+        return FAIL;
+
+    return SUCCEED;
+}
+
+/* Stands in for a msgpack-serialized pressio_options bag (or, for the
+ * SZ4-shaped variant, pre-processed JIT source). Sized well past any
+ * cd_values-array-based scheme's practical ceiling to make the point the
+ * real filter's approach can't handle. */
+#define LIBPRESSIO_OPTIONS_BLOB_SIZE (256 * 1024)
+
+static int
+test_blob_libpressio_migration_pattern(hid_t fapl)
+{
+    static const H5Z_class3_t libpressio_pattern_cls = {
+        2,                              /* version         */
+        LIBPRESSIO_PATTERN_FILTER_ID,   /* id              */
+        1,                              /* encoder_present */
+        1,                              /* decoder_present */
+        "libpressio_pattern_filter",    /* canonical_name  */
+        NULL,                           /* description     */
+        NULL,                           /* can_apply       */
+        libpressio_pattern_set_local,   /* set_local       */
+        libpressio_pattern_filter_func, /* filter        */
+        NULL,                           /* set_config      */
+        NULL,                           /* get_config      */
+        NULL,                           /* write_blob: default global-heap storage */
+        NULL,                           /* read_blob       */
+        NULL,                           /* close_blob      */
+    };
+    char           filename[1024];
+    unsigned char *options_blob = NULL;
+    hid_t          file = H5I_INVALID_HID, sid = H5I_INVALID_HID;
+    hid_t          dcpl = H5I_INVALID_HID, dset = H5I_INVALID_HID, dcpl_out = H5I_INVALID_HID;
+    hsize_t        dims[2] = {8, 8}, chunk[2] = {4, 4};
+    int            wdata[8][8], rdata[8][8];
+    unsigned       flags;
+    size_t         cd_nelmts = 0;
+    unsigned       cd_values[34];
+
+    TESTING("H5Pappend_filter_blob: LibPressio set_local + oversized-options migration pattern");
+
+    if (H5Zregister(&libpressio_pattern_cls) < 0)
+        TEST_ERROR;
+    if (NULL == (options_blob = (unsigned char *)malloc(LIBPRESSIO_OPTIONS_BLOB_SIZE)))
+        TEST_ERROR;
+    blob_fill_pattern(options_blob, LIBPRESSIO_OPTIONS_BLOB_SIZE);
+    for (int r = 0; r < 8; r++)
+        for (int c = 0; c < 8; c++)
+            wdata[r][c] = r * 8 + c;
+
+    /* User workflow: attach the (oversized) options as a blob, then
+     * create the dataset. H5Dcreate2 triggers set_local, which pulls the
+     * blob back out and derives the small cd_values summary -- the real
+     * filter's H5Z_libpressio_set_local() does the dims/dtype half of
+     * this already; only the options-into-cd_values half needed to
+     * change. */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+        TEST_ERROR;
+    if (H5Pappend_filter_blob(dcpl, LIBPRESSIO_PATTERN_FILTER_ID, 0, options_blob,
+                              LIBPRESSIO_OPTIONS_BLOB_SIZE) < 0)
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* set_local ran against the dataset's own private DCPL copy, not the
+     * "dcpl" template handle above (H5Dcreate2 never mutates the
+     * caller's original) -- H5Dget_create_plist(dset) is the only way to
+     * see what set_local actually wrote. cd_values now holds
+     * dclass/ndims/dims, not the options blob -- confirming the split
+     * actually took effect. */
+    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    cd_nelmts = NELMTS(cd_values);
+    if (H5Pget_filter_by_id2(dcpl_out, LIBPRESSIO_PATTERN_FILTER_ID, &flags, &cd_nelmts, cd_values, 0, NULL,
+                             NULL) < 0)
+        TEST_ERROR;
+    if (cd_nelmts != 4) /* dclass + ndims(2) + dims[4,4] */
+        TEST_ERROR;
+    if (cd_values[0] != (unsigned)H5T_INTEGER)
+        TEST_ERROR;
+    if (cd_values[1] != 2 || cd_values[2] != chunk[0] || cd_values[3] != chunk[1])
+        TEST_ERROR;
+    if (H5Pclose(dcpl_out) < 0)
+        TEST_ERROR;
+    dcpl_out = H5I_INVALID_HID;
+
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+
+    /* Reopen: data reads back, the small cd_values summary survived, and
+     * the full oversized options blob -- the part that would have
+     * segfaulted the real filter -- round-trips byte-for-byte. */
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    memset(rdata, 0, sizeof(rdata));
+    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
+        TEST_ERROR;
+    if (memcmp(wdata, rdata, sizeof(wdata)) != 0)
+        TEST_ERROR;
+
+    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    if (blob_check_getter(dcpl_out, 0, options_blob, LIBPRESSIO_OPTIONS_BLOB_SIZE) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_out) < 0)
+        TEST_ERROR;
+    dcpl_out = H5I_INVALID_HID;
+
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+    if (H5Sclose(sid) < 0 || H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    sid = dcpl = H5I_INVALID_HID;
+    if (H5Zunregister(LIBPRESSIO_PATTERN_FILTER_ID) < 0)
+        TEST_ERROR;
+
+    free(options_blob);
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl_out);
+        H5Dclose(dset);
+        H5Pclose(dcpl);
+        H5Sclose(sid);
+        H5Fclose(file);
+        H5Zunregister(LIBPRESSIO_PATTERN_FILTER_ID);
+    }
+    H5E_END_TRY
+    free(options_blob);
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
  * main
  * ---------------------------------------------------------------------- */
 int
@@ -3904,6 +4178,7 @@ main(void)
     nerrors += test_blob_per_dataset_copy_then_tweak(fapl) < 0 ? 1 : 0;
     nerrors += test_blob_usecaseb_path_association(fapl) < 0 ? 1 : 0;
     nerrors += test_blob_oversized_default_storage(fapl) < 0 ? 1 : 0;
+    nerrors += test_blob_libpressio_migration_pattern(fapl) < 0 ? 1 : 0;
 
     if (H5Fclose(file) < 0)
         goto error;
