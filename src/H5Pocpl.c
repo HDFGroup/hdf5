@@ -1394,15 +1394,12 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
         /* decode filter flags */
         H5_DECODE_UNSIGNED(*pp, filter.flags);
 
-        /* decode value indicating if the name is encoded */
+        /* decode value indicating if the name is encoded.  H5Z_append()
+         * does not take a name from the caller, so skip over an encoded one. */
         has_name = *(*pp)++;
-        if (has_name) {
-            /* decode name */
-            filter.name = H5MM_xstrdup((const char *)(*pp));
+        if (has_name)
             *pp += H5Z_COMMON_NAME_LEN;
-        } /* end if */
-        else
-            filter.name = NULL;
+        filter.name = NULL;
 
         /* decode num elements */
         enc_size = *(*pp)++;
