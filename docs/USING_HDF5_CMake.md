@@ -214,9 +214,23 @@ and Fortran module directory are set. Before HDF5 2.3.0, a call that named no
 linkage component preferred the static libraries. A project that relied on that
 should request the `static` component or set `HDF5_USE_STATIC_LIBRARIES`.
 
-The linkage-qualified `hdf5-shared` and `hdf5-static` targets and the
-`HDF5_C_SHARED_LIBRARY` / `HDF5_C_STATIC_LIBRARY` variables remain available
-for existing projects.
+#### Deprecated names
+
+The linkage-qualified targets, and the library variables that go with them, are
+deprecated as of 2.3.0:
+
+| Deprecated | Use instead |
+| ---------- | ----------- |
+| `hdf5-shared`, `hdf5-static` | `hdf5::hdf5` |
+| `hdf5_hl-shared`, `hdf5_hl-static` | `hdf5::hdf5_hl` |
+| `hdf5_cpp-shared`, `hdf5_cpp-static` | `hdf5::hdf5_cpp` |
+| `hdf5_hl_cpp-shared`, `hdf5_hl_cpp-static` | `hdf5::hdf5_hl_cpp` |
+| `hdf5_fortran-shared`, `hdf5_fortran-static` | `hdf5::hdf5_fortran` |
+| `hdf5_hl_fortran-shared`, `hdf5_hl_fortran-static` | `hdf5::hdf5_hl_fortran` |
+| `HDF5_<lang>_SHARED_LIBRARY`, `HDF5_<lang>_STATIC_LIBRARY` | the matching `hdf5::` target |
+
+They will be removed in a future major release, so new projects should use the `hdf5::` names, and existing
+projects should migrate to use the new names.
 
 ---
 

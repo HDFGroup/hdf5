@@ -52,6 +52,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 # 🪦 Deprecations
 
+### Deprecated the linkage-qualified CMake target names
+
+   The `hdf5-shared` / `hdf5-static` targets, their `_hl`, `_cpp`, `_hl_cpp`, `_fortran` and `_hl_fortran` counterparts, and the `HDF5_<lang>_<LINKAGE>_LIBRARY` variables are deprecated in favor of the stable `hdf5::` target names described under Configuration below. They will be removed in a future major release, so new projects should link `hdf5::hdf5` and friends, and existing projects should migrate to the name names when convenient. See `docs/USING_HDF5_CMake.md` for the mapping from old names to new ones.
+
 
 # 🚀 New Features & Improvements
 
