@@ -1432,15 +1432,15 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
         /* decode filter flags */
         H5_DECODE_UNSIGNED(*pp, filter.flags);
 
-        /* decode value indicating if the name is encoded */
+        /* decode value indicating if the name is encoded.  The name itself
+         * is not retained here -- H5Z_append() always sets the appended
+         * entry's name to NULL and it is picked up later (e.g. from the
+         * filter's canonical name) -- so just skip over the encoded field
+         * rather than allocating a copy that would never be used or freed. */
         has_name = *(*pp)++;
-        if (has_name) {
-            /* decode name */
-            filter.name = H5MM_xstrdup((const char *)(*pp));
+        if (has_name)
             *pp += H5Z_COMMON_NAME_LEN;
-        } /* end if */
-        else
-            filter.name = NULL;
+        filter.name = NULL;
 
         /* decode num elements */
         enc_size = *(*pp)++;
