@@ -1339,13 +1339,13 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
             /* encode the blob bytes inline.  A serialized property must be
              * self-contained; the on-disk locator is file-specific and is
              * regenerated when the decoded plist is used with H5Dcreate. */
-            if (NULL != pline->filter[u].aux_data) {
-                uint64_t aux_size64 = (uint64_t)pline->filter[u].aux_size;
+            if (NULL != pline->filter[u].aux) {
+                uint64_t aux_size64 = (uint64_t)pline->filter[u].aux->size;
 
                 *(*pp)++ = (uint8_t) true;
                 UINT64ENCODE(*pp, aux_size64);
-                H5MM_memcpy(*pp, pline->filter[u].aux_data, pline->filter[u].aux_size);
-                *pp += pline->filter[u].aux_size;
+                H5MM_memcpy(*pp, pline->filter[u].aux->data, pline->filter[u].aux->size);
+                *pp += pline->filter[u].aux->size;
             } /* end if */
             else
                 *(*pp)++ = (uint8_t) false;
@@ -1367,9 +1367,9 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
             *size += (1 + H5VM_limit_enc_size(config_len) + (size_t)config_len);
         }
         *size += 1; /* has_aux flag */
-        if (NULL != pline->filter[u].aux_data)
-            *size += 8 + pline->filter[u].aux_size; /* aux_size + blob bytes */
-    }                                               /* end for */
+        if (NULL != pline->filter[u].aux)
+            *size += 8 + pline->filter[u].aux->size; /* aux_size + blob bytes */
+    }                                                /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__ocrt_pipeline_enc() */
@@ -1507,9 +1507,13 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
         }
 
         /* Attach the decoded config string and blob to the just-appended entry */
-        pline->filter[pline->nused - 1].config   = config;
-        pline->filter[pline->nused - 1].aux_data = aux_data;
-        pline->filter[pline->nused - 1].aux_size = aux_size;
+        pline->filter[pline->nused - 1].config = config;
+        if (aux_data != NULL) {
+            if (NULL == (pline->filter[pline->nused - 1].aux = H5Z_blob_buf_new(aux_data, aux_size, false))) {
+                H5MM_xfree(aux_data);
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for blob buffer");
+            }
+        }
 
         /* Free cd_values, if it was allocated */
         filter.cd_values = (unsigned *)H5MM_xfree(filter.cd_values);
@@ -2109,6 +2113,7 @@ H5Pappend_filter_blob(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, c
     H5P_genplist_t *plist;
     H5O_pline_t     pline;
     void           *aux_copy     = NULL; /* DCPL-owned copy of the blob bytes */
+    H5Z_blob_buf_t *aux_buf      = NULL; /* refcounted wrapper around aux_copy */
     char           *fi_name_heap = NULL; /* non-NULL if fi->name was H5MM_strdup'd */
     bool            aux_attached = false;
     herr_t          ret_value    = SUCCEED;
@@ -2141,6 +2146,8 @@ H5Pappend_filter_blob(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, c
         if (NULL == (aux_copy = H5MM_malloc(size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for filter blob");
         H5MM_memcpy(aux_copy, buf, size);
+        if (NULL == (aux_buf = H5Z_blob_buf_new(aux_copy, size, false)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for blob buffer");
     }
 
     /* Get the plist structure */
@@ -2157,9 +2164,8 @@ H5Pappend_filter_blob(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, c
 
     /* Attach the blob to the just-appended entry; aux_loc stays undefined
      * until the blob is written at H5Dcreate time */
-    pline.filter[pline.nused - 1].aux_data = aux_copy;
-    pline.filter[pline.nused - 1].aux_size = size;
-    aux_attached                           = true;
+    pline.filter[pline.nused - 1].aux = aux_buf;
+    aux_attached                      = true;
 
     /* Persist the filter's canonical name into the pipeline record */
     H5P__pline_persist_name(&pline, filter, NULL, &fi_name_heap);
@@ -2172,7 +2178,8 @@ done:
     if (ret_value < 0) {
         H5MM_xfree(fi_name_heap);
         if (aux_attached)
-            pline.filter[pline.nused - 1].aux_data = NULL;
+            pline.filter[pline.nused - 1].aux = NULL;
+        H5MM_xfree(aux_buf); /* single ref; nothing else attached to it yet */
         H5MM_xfree(aux_copy);
     }
     FUNC_LEAVE_API(ret_value)
@@ -2242,7 +2249,7 @@ H5Pget_filter_blob(hid_t plist_id, unsigned idx, size_t offset, void *buf, size_
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter index out of range");
 
     filter    = &pline.filter[idx];
-    blob_size = filter->aux_data ? filter->aux_size : 0;
+    blob_size = filter->aux ? filter->aux->size : 0;
     remaining = (offset < blob_size) ? (blob_size - offset) : 0;
 
     if (buf == NULL) {
@@ -2256,7 +2263,7 @@ H5Pget_filter_blob(hid_t plist_id, unsigned idx, size_t offset, void *buf, size_
         if (copy_len > capacity)
             copy_len = capacity;
         if (copy_len > 0)
-            H5MM_memcpy(buf, (const uint8_t *)filter->aux_data + offset, copy_len);
+            H5MM_memcpy(buf, (const uint8_t *)filter->aux->data + offset, copy_len);
 
         /* Report the count remaining from offset, not the (possibly
          * truncated) copy length, so the caller can detect truncation. */

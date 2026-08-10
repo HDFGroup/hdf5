@@ -52,6 +52,21 @@ typedef struct H5Z_filter_info_t H5Z_filter_info_t;
 /* Library Private Typedefs */
 /****************************/
 
+/* Reference-counted blob buffer.  The buffer is immutable once created
+ * (by H5Pappend_filter_blob, by pipeline decode, or by read_blob at
+ * H5Dopen time), so every H5Pcopy of the pipeline property and every
+ * dataset's private DCPL copy at H5Dcreate can share one allocation
+ * instead of deep-copying a potentially multi-megabyte blob. Freed when
+ * the last reference is released (H5Z_blob_release). */
+typedef struct H5Z_blob_buf_t {
+    void  *data;          /*blob bytes                                     */
+    size_t size;           /*byte length of data                          */
+    bool   from_callback;  /*data was allocated by the filter's read_blob
+                            *callback and must be released via close_blob,
+                            *not H5MM_xfree                                */
+    size_t nrefs;           /*current reference count                     */
+} H5Z_blob_buf_t;
+
 /* Structure to store information about each filter's parameters */
 struct H5Z_filter_info_t {
     H5Z_filter_t id;                               /*filter identification number          */
@@ -63,13 +78,9 @@ struct H5Z_filter_info_t {
     unsigned    *cd_values;                        /*client data values                    */
     char        *config;                           /*verbatim key=value config string, or
                                                     *NULL; persisted in pipeline v3        */
-    void          *aux_data;                       /*in-memory blob; NULL if none          */
-    size_t         aux_size;                       /*byte length of aux_data               */
-    H5Z_blob_loc_t aux_loc;                        /*on-disk locator; undefined until the
+    H5Z_blob_buf_t *aux;                           /*refcounted blob; NULL if none          */
+    H5Z_blob_loc_t  aux_loc;                       /*on-disk locator; undefined until the
                                                     *blob is written at H5Dcreate time     */
-    bool aux_from_callback;                        /*aux_data was allocated by the filter's
-                                                    *read_blob callback and must be released
-                                                    *via close_blob, not H5MM_xfree        */
 };
 
 /*
@@ -132,6 +143,13 @@ struct H5F_t; /*forward decl*/
 H5_DLL herr_t H5Z_blob_write(struct H5F_t *f, struct H5O_pline_t *pline);
 H5_DLL herr_t H5Z_blob_read(struct H5F_t *f, struct H5O_pline_t *pline);
 H5_DLL void   H5Z_blob_release(H5Z_filter_info_t *fi);
+
+/* Reference-counted blob buffer: H5Z_blob_buf_new() takes ownership of
+ * data (nrefs=1); H5Z_blob_buf_incref() shares an existing buffer across
+ * a pipeline copy. Both are the shared-buffer half of H5Z_blob_release's
+ * decrement-and-maybe-free. */
+H5_DLL H5Z_blob_buf_t *H5Z_blob_buf_new(void *data, size_t size, bool from_callback);
+H5_DLL void            H5Z_blob_buf_incref(H5Z_blob_buf_t *buf);
 
 /* Data Transform Functions */
 typedef struct H5Z_data_xform_t H5Z_data_xform_t; /* Defined in H5Ztrans.c */

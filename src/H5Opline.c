@@ -508,15 +508,15 @@ H5O__pline_copy(const void *_src, void *_dst /*out*/)
                                 "memory allocation failed for filter config string");
             } /* end if */
 
-            /* Blob bytes: deep copy.  The locator is copied verbatim but is
-             * only meaningful within the originating file; dataset creation
-             * always writes the blob afresh and assigns a new locator.  The
-             * copy is H5MM-owned regardless of how the source was recovered. */
-            if (src->filter[i].aux_data) {
-                if (NULL == (dst->filter[i].aux_data = H5MM_malloc(src->filter[i].aux_size)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for filter blob");
-                H5MM_memcpy(dst->filter[i].aux_data, src->filter[i].aux_data, src->filter[i].aux_size);
-                dst->filter[i].aux_from_callback = false;
+            /* Blob bytes: share the reference-counted buffer instead of
+             * deep-copying it -- the buffer is immutable once created, so
+             * sharing across this pipeline's copies is safe.  The on-disk
+             * locator is copied verbatim but is only meaningful within the
+             * originating file; dataset creation always writes the blob
+             * afresh and assigns a new locator in the destination. */
+            if (src->filter[i].aux) {
+                H5Z_blob_buf_incref(src->filter[i].aux);
+                dst->filter[i].aux = src->filter[i].aux;
             } /* end if */
         }     /* end for */
     }         /* end if */
@@ -891,7 +891,7 @@ H5O_pline_set_version(H5F_t *f, H5O_pline_t *pline)
      * else to go, so this is not silently downgraded -- the version bounds
      * check below reports an error if the file's high bound doesn't admit it. */
     for (size_t u = 0; u < pline->nused; u++)
-        if (pline->filter[u].aux_data != NULL) {
+        if (pline->filter[u].aux != NULL) {
             version = MAX(version, H5O_PLINE_VERSION_3);
             break;
         }

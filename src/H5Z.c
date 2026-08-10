@@ -1420,12 +1420,10 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_ne
     pline->filter[idx].flags             = flags;
     pline->filter[idx].name              = NULL; /*we'll pick it up later*/
     pline->filter[idx].cd_nelmts         = cd_nelmts;
-    pline->filter[idx].config            = NULL; /*set by H5Pappend_filter or pline decode*/
-    pline->filter[idx].aux_data          = NULL; /*set by H5Pappend_filter_blob or pline decode*/
-    pline->filter[idx].aux_size          = 0;
-    pline->filter[idx].aux_loc.addr      = HADDR_UNDEF;
-    pline->filter[idx].aux_loc.idx       = 0;
-    pline->filter[idx].aux_from_callback = false;
+    pline->filter[idx].config       = NULL; /*set by H5Pappend_filter or pline decode*/
+    pline->filter[idx].aux          = NULL; /*set by H5Pappend_filter_blob or pline decode*/
+    pline->filter[idx].aux_loc.addr = HADDR_UNDEF;
+    pline->filter[idx].aux_loc.idx  = 0;
     if (cd_nelmts > 0) {
         size_t i; /* Local index variable */
 
@@ -1991,12 +1989,71 @@ done:
 } /* end H5Z_delete() */
 
 /*-------------------------------------------------------------------------
+ * Function: H5Z_blob_buf_new
+ *
+ * Purpose:  Allocate a reference-counted blob buffer wrapper, taking
+ *           ownership of data (nrefs starts at 1).  data must already be
+ *           in a form H5Z_blob_release() knows how to free: H5MM-allocated
+ *           if from_callback is false, or releasable via the filter's
+ *           close_blob callback if true.
+ *
+ * Return:   Non-NULL on success / NULL on failure
+ *-------------------------------------------------------------------------
+ */
+H5Z_blob_buf_t *
+H5Z_blob_buf_new(void *data, size_t size, bool from_callback)
+{
+    H5Z_blob_buf_t *buf;
+    H5Z_blob_buf_t *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if (NULL == (buf = H5MM_malloc(sizeof(H5Z_blob_buf_t))))
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTALLOC, NULL, "memory allocation failed for blob buffer");
+
+    buf->data          = data;
+    buf->size          = size;
+    buf->from_callback = from_callback;
+    buf->nrefs         = 1;
+
+    ret_value = buf;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_blob_buf_new() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5Z_blob_buf_incref
+ *
+ * Purpose:  Add a reference to a blob buffer shared by a pipeline copy
+ *           (H5Pcopy, or a dataset's private DCPL copy at H5Dcreate).
+ *
+ * Return:   void
+ *-------------------------------------------------------------------------
+ */
+void
+H5Z_blob_buf_incref(H5Z_blob_buf_t *buf)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    assert(buf);
+    assert(buf->nrefs > 0);
+    buf->nrefs++;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5Z_blob_buf_incref() */
+
+/*-------------------------------------------------------------------------
  * Function: H5Z_blob_release
  *
- * Purpose:  Release a filter entry's in-memory blob.  A buffer recovered
- *           by the filter's read_blob callback is released through its
- *           close_blob callback (allocator symmetry); library-owned copies
- *           use H5MM.  Safe to call on entries with no blob.
+ * Purpose:  Release a filter entry's reference to its in-memory blob.
+ *           The underlying buffer is shared (H5Z_blob_buf_incref) across
+ *           every H5Pcopy/H5Dcreate of the pipeline it was attached to,
+ *           so it is only actually freed when the last reference goes
+ *           away.  A buffer recovered by the filter's read_blob callback
+ *           is released through its close_blob callback (allocator
+ *           symmetry); library-owned copies use H5MM.  Safe to call on
+ *           entries with no blob.
  *
  * Return:   void
  *-------------------------------------------------------------------------
@@ -2008,23 +2065,25 @@ H5Z_blob_release(H5Z_filter_info_t *fi)
 
     assert(fi);
 
-    if (fi->aux_data) {
-        if (fi->aux_from_callback) {
-            H5Z_entry_t *entry = NULL;
+    if (fi->aux) {
+        assert(fi->aux->nrefs > 0);
+        if (--fi->aux->nrefs == 0) {
+            if (fi->aux->from_callback) {
+                H5Z_entry_t *entry = NULL;
 
-            (void)H5Z_find_entry(false, fi->id, &entry);
-            if (entry && entry->close_blob)
-                (void)(entry->close_blob)(fi->aux_data, fi->aux_size);
+                (void)H5Z_find_entry(false, fi->id, &entry);
+                if (entry && entry->close_blob)
+                    (void)(entry->close_blob)(fi->aux->data, fi->aux->size);
+                else
+                    H5MM_xfree(fi->aux->data);
+            }
             else
-                H5MM_xfree(fi->aux_data);
+                H5MM_xfree(fi->aux->data);
+            H5MM_xfree(fi->aux);
         }
-        else
-            H5MM_xfree(fi->aux_data);
-        fi->aux_data = NULL;
+        fi->aux = NULL;
     }
-    fi->aux_size          = 0;
-    fi->aux_from_callback = false;
-    fi->aux_loc.addr      = HADDR_UNDEF;
+    fi->aux_loc.addr = HADDR_UNDEF;
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5Z_blob_release() */
@@ -2073,7 +2132,7 @@ H5Z_blob_write(H5F_t *f, H5O_pline_t *pline)
         H5Z_entry_t       *entry = NULL;
         H5Z_blob_loc_t     loc;
 
-        if (fi->aux_data == NULL)
+        if (fi->aux == NULL)
             continue;
 
         loc.addr = HADDR_UNDEF;
@@ -2086,7 +2145,7 @@ H5Z_blob_write(H5F_t *f, H5O_pline_t *pline)
 
             if ((file_id = H5F_get_id(f)) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get file ID for blob callback");
-            if ((entry->write_blob)(file_id, fi->aux_data, fi->aux_size, &loc) < 0) {
+            if ((entry->write_blob)(file_id, fi->aux->data, fi->aux->size, &loc) < 0) {
                 (void)H5I_dec_ref(file_id);
                 HGOTO_ERROR(H5E_PLINE, H5E_CALLBACK, FAIL, "filter write_blob callback failed");
             }
@@ -2096,7 +2155,7 @@ H5Z_blob_write(H5F_t *f, H5O_pline_t *pline)
         else {
             H5HG_t hobj;
 
-            if (H5HG_insert(f, fi->aux_size, fi->aux_data, &hobj) < 0)
+            if (H5HG_insert(f, fi->aux->size, fi->aux->data, &hobj) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTINSERT, FAIL, "unable to insert filter blob into global heap");
             loc.addr = hobj.addr;
             loc.idx  = hobj.idx;
@@ -2137,7 +2196,7 @@ done:
  * Function: H5Z_blob_read
  *
  * Purpose:  Recover each blob-bearing filter's bytes at dataset-open time,
- *           populating aux_data/aux_size from the locator decoded out of
+ *           populating aux from the locator decoded out of
  *           the version-3 pipeline message.  Filters with a custom
  *           read_blob callback recover their own storage; otherwise the
  *           bytes are read from the file's global heap.
@@ -2156,10 +2215,13 @@ H5Z_blob_read(H5F_t *f, H5O_pline_t *pline)
     assert(pline);
 
     for (size_t u = 0; u < pline->nused; u++) {
-        H5Z_filter_info_t *fi    = &pline->filter[u];
-        H5Z_entry_t       *entry = NULL;
+        H5Z_filter_info_t *fi            = &pline->filter[u];
+        H5Z_entry_t       *entry         = NULL;
+        void              *data          = NULL;
+        size_t             size          = 0;
+        bool               from_callback = false;
 
-        if (!H5_addr_defined(fi->aux_loc.addr) || fi->aux_data != NULL)
+        if (!H5_addr_defined(fi->aux_loc.addr) || fi->aux != NULL)
             continue;
 
         (void)H5Z_find_entry(true, fi->id, &entry);
@@ -2169,22 +2231,34 @@ H5Z_blob_read(H5F_t *f, H5O_pline_t *pline)
 
             if ((file_id = H5F_get_id(f)) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get file ID for blob callback");
-            if ((entry->read_blob)(file_id, fi->aux_loc, &fi->aux_data, &fi->aux_size) < 0) {
+            if ((entry->read_blob)(file_id, fi->aux_loc, &data, &size) < 0) {
                 (void)H5I_dec_ref(file_id);
                 HGOTO_ERROR(H5E_PLINE, H5E_CALLBACK, FAIL, "filter read_blob callback failed");
             }
             if (H5I_dec_ref(file_id) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTDEC, FAIL, "can't release file ID");
-            fi->aux_from_callback = true;
+            from_callback = true;
         }
         else {
             H5HG_t hobj;
 
             hobj.addr = fi->aux_loc.addr;
             hobj.idx  = fi->aux_loc.idx;
-            if (NULL == (fi->aux_data = H5HG_read(f, &hobj, NULL, &fi->aux_size)))
+            if (NULL == (data = H5HG_read(f, &hobj, NULL, &size)))
                 HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "unable to read filter blob from global heap");
-            fi->aux_from_callback = false; /* H5HG_read allocates with H5MM */
+            from_callback = false; /* H5HG_read allocates with H5MM */
+        }
+
+        if (NULL == (fi->aux = H5Z_blob_buf_new(data, size, from_callback))) {
+            if (from_callback) {
+                if (entry && entry->close_blob)
+                    (void)(entry->close_blob)(data, size);
+                else
+                    H5MM_xfree(data);
+            }
+            else
+                H5MM_xfree(data);
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTALLOC, FAIL, "memory allocation failed for blob buffer");
         }
     }
 
