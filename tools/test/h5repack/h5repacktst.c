@@ -32,7 +32,7 @@
  * locator, not the source file's locator (RFC-HDFG-2026-003).  The
  * H5Z_blob_loc_t a filter receives is opaque to plugin authors, so a
  * custom filter's write_blob/read_blob callbacks are the only way to
- * observe it; they log each call's locator to these statics.
+ * observe it; they log each call's locator to these static variables.
  *-------------------------------------------------------------------------
  */
 #define REPACK_BLOB_FILTER_ID 530
