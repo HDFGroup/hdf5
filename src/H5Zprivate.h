@@ -60,11 +60,11 @@ typedef struct H5Z_filter_info_t H5Z_filter_info_t;
  * the last reference is released (H5Z_blob_release). */
 typedef struct H5Z_blob_buf_t {
     void  *data;          /*blob bytes                                     */
-    size_t size;           /*byte length of data                          */
-    bool   from_callback;  /*data was allocated by the filter's read_blob
-                            *callback and must be released via close_blob,
-                            *not H5MM_xfree                                */
-    size_t nrefs;           /*current reference count                     */
+    size_t size;          /*byte length of data                          */
+    bool   from_callback; /*data was allocated by the filter's read_blob
+                           *callback and must be released via close_blob,
+                           *not H5MM_xfree                                */
+    size_t nrefs;         /*current reference count                     */
 } H5Z_blob_buf_t;
 
 /* Structure to store information about each filter's parameters */

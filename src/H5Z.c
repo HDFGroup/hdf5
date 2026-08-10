@@ -1415,11 +1415,11 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_ne
     } /* end if */
 
     /* Add the new filter to the pipeline */
-    idx                                  = pline->nused;
-    pline->filter[idx].id                = filter;
-    pline->filter[idx].flags             = flags;
-    pline->filter[idx].name              = NULL; /*we'll pick it up later*/
-    pline->filter[idx].cd_nelmts         = cd_nelmts;
+    idx                             = pline->nused;
+    pline->filter[idx].id           = filter;
+    pline->filter[idx].flags        = flags;
+    pline->filter[idx].name         = NULL; /*we'll pick it up later*/
+    pline->filter[idx].cd_nelmts    = cd_nelmts;
     pline->filter[idx].config       = NULL; /*set by H5Pappend_filter or pline decode*/
     pline->filter[idx].aux          = NULL; /*set by H5Pappend_filter_blob or pline decode*/
     pline->filter[idx].aux_loc.addr = HADDR_UNDEF;
