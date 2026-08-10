@@ -33,12 +33,14 @@
 # The module defines identical names across the HDF5 build tree,
 # add_subdirectory() embeddings, and find_package() installations.
 #
-# This module is purely additive with respect to the pre-2.3.0 targets. It
-# defines new names and neither removes nor alters the existing hdf5-static /
-# hdf5-shared targets or the HDF5_<lang>_<LINKAGE>_LIBRARY variables.
+# This module only defines names. It neither removes nor alters the pre-2.3.0
+# hdf5-static / hdf5-shared targets or the HDF5_<lang>_<LINKAGE>_LIBRARY
+# variables.
 #
 # The default linkage is shared if shared libraries are available, otherwise
-# static.
+# static. As of 2.3.0 the rest of the package resolves the same way, reversing
+# the pre-2.3.0 preference for static in a find_package() call that names no
+# linkage component.
 # -----------------------------------------------------------------------------
 
 # The public library names this module can define. For each one, the caller

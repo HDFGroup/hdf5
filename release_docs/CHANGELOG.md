@@ -43,6 +43,12 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 # ⚠️ Breaking Changes
 
+### The installed CMake package now prefers the shared libraries when no linkage is requested
+
+   A `find_package(HDF5 NAMES hdf5 CONFIG)` call that names neither the `static` nor the `shared` component previously resolved to the static libraries of an installation providing both, and only fell back to shared when no static libraries were installed. That preference is now reversed: shared is used when available, with static as the fallback. Setting `HDF5_USE_STATIC_LIBRARIES` before the call still selects the static libraries, matching the behavior of CMake's `FindHDF5` module.
+
+   The preference decides which `HDF5_<lang>_<LINKAGE>_LIBRARY` variables and Fortran module directory the call sets, as well as the linkage the new `hdf5::` targets refer to, so a project that relied on the previous default and did not name a linkage will now link the shared libraries. Such a project should request the `static` component explicitly or set `HDF5_USE_STATIC_LIBRARIES`. Calls that already name a `static` or `shared` component are unaffected.
+
 
 # 🪦 Deprecations
 
@@ -53,7 +59,7 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ### Added stable, linkage-agnostic CMake target names to the installed package
 
-   Downstream projects can now link `hdf5::hdf5`, `hdf5::hdf5_hl`, `hdf5::hdf5_cpp`, `hdf5::hdf5_hl_cpp`, `hdf5::hdf5_fortran` and `hdf5::hdf5_hl_fortran` instead of the linkage-qualified `hdf5-shared` and `hdf5-static` targets, along with an `HDF5::HDF5` aggregate and `hdf5::<tool>` for each installed tool. The names do not encode whether the library is static or shared, so the same project file works against a static installation, a shared one, or one providing both. These are the names CMake's own `FindHDF5` module provides, so a project using them no longer needs different code depending on whether HDF5 was located through `FindHDF5` or through HDF5's `hdf5-config.cmake`, and they are defined identically when HDF5 is built as a subproject with `add_subdirectory()`. Which linkage the targets refer to is chosen while resolving the package: by a `static` or `shared` component, by `HDF5_USE_STATIC_LIBRARIES`, or by default shared-if-available and static otherwise. This change is purely additive, as the existing `hdf5-shared` / `hdf5-static` targets and the `HDF5_<lang>_<LINKAGE>_LIBRARY` variables are unchanged.
+   Downstream projects can now link `hdf5::hdf5`, `hdf5::hdf5_hl`, `hdf5::hdf5_cpp`, `hdf5::hdf5_hl_cpp`, `hdf5::hdf5_fortran` and `hdf5::hdf5_hl_fortran` instead of the linkage-qualified `hdf5-shared` and `hdf5-static` targets, along with an `HDF5::HDF5` aggregate and `hdf5::<tool>` for each installed tool. The names do not encode whether the library is static or shared, so the same project file works against a static installation, a shared one, or one providing both. These are the names CMake's own `FindHDF5` module provides, so a project using them no longer needs different code depending on whether HDF5 was located through `FindHDF5` or through HDF5's `hdf5-config.cmake`, and they are defined identically when HDF5 is built as a subproject with `add_subdirectory()`. Which linkage the targets refer to is chosen while resolving the package: by a `static` or `shared` component, by `HDF5_USE_STATIC_LIBRARIES`, or by default shared-if-available and static otherwise, which is the same order the rest of the package resolution now follows (see Breaking Changes). The existing `hdf5-shared` / `hdf5-static` targets and the `HDF5_<lang>_<LINKAGE>_LIBRARY` variables are otherwise unchanged, and the public names are aliases onto those same targets, so a project naming both on its link line still gets a single library.
 
 
 ## Library

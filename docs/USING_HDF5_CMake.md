@@ -195,8 +195,9 @@ built as a subproject with `add_subdirectory()`, so the same
 
 #### Choosing static or shared
 
-When an installation provides both, the public targets refer to the shared
-libraries. To choose deliberately, request the linkage as a component:
+When an installation provides both, `find_package()` resolves to the shared
+libraries and falls back to static. To choose deliberately, request the linkage
+as a component:
 
 ```cmake
 find_package (HDF5 NAMES hdf5 CONFIG REQUIRED COMPONENTS C static)
@@ -206,6 +207,12 @@ target_link_libraries (${example} PRIVATE hdf5::hdf5)
 Setting `HDF5_USE_STATIC_LIBRARIES` before `find_package()` has the same
 effect, matching `FindHDF5`. Requesting both `static` and `shared` leaves the
 public targets on the default and warns, since one name cannot refer to both.
+
+This preference applies to the whole `find_package()` call, not just to the
+public targets: it also decides which `HDF5_<lang>_<LINKAGE>_LIBRARY` variables
+and Fortran module directory are set. Before HDF5 2.3.0, a call that named no
+linkage component preferred the static libraries. A project that relied on that
+should request the `static` component or set `HDF5_USE_STATIC_LIBRARIES`.
 
 The linkage-qualified `hdf5-shared` and `hdf5-static` targets and the
 `HDF5_C_SHARED_LIBRARY` / `HDF5_C_STATIC_LIBRARY` variables remain available
