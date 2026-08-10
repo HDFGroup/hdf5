@@ -192,6 +192,17 @@ foreach (example ${dyn_examples})
   endif ()
 endforeach ()
 
+#self-registering example (no external plugin, no HDF5_PLUGIN_PATH):
+#built directly rather than through the dyn_examples/ADD_H5_TEST loop
+#above, which expects a tfiles/<name>.tst and .ddl reference pair per
+#entry.
+add_executable (${EXAMPLE_VARNAME}_h5ex_d_blob_libpressio ${PROJECT_SOURCE_DIR}/h5ex_d_blob_libpressio.c)
+TARGET_C_PROPERTIES (${EXAMPLE_VARNAME}_h5ex_d_blob_libpressio ${LIB_TYPE})
+if (H5_HAVE_PARALLEL)
+  target_include_directories (${EXAMPLE_VARNAME}_h5ex_d_blob_libpressio PUBLIC ${MPI_C_INCLUDE_DIRS})
+endif ()
+target_link_libraries (${EXAMPLE_VARNAME}_h5ex_d_blob_libpressio PRIVATE ${H5EXAMPLE_HDF5_LINK_LIBS})
+
 if (H5EXAMPLE_BUILD_TESTING)
   macro (ADD_H5_TEST testname)
     add_test (
@@ -344,5 +355,12 @@ if (H5EXAMPLE_BUILD_TESTING)
       endif ()
     endif ()
   endforeach ()
+
+  #self-registering example: no reference-file comparison, just an
+  #exit-code check
+  add_test (NAME ${EXAMPLE_VARNAME}_h5ex_d_blob_libpressio
+      COMMAND $<TARGET_FILE:${EXAMPLE_VARNAME}_h5ex_d_blob_libpressio>
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  )
 
 endif ()
