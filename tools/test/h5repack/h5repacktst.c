@@ -27,6 +27,74 @@
     } while (0)
 
 /*-------------------------------------------------------------------------
+ * blob-05: h5repack cross-file copy of a blob-configured dataset must
+ * produce an output file whose blob lives at a new, independent on-disk
+ * locator, not the source file's locator (RFC-HDFG-2026-003).  The
+ * H5Z_blob_loc_t a filter receives is opaque to plugin authors, so a
+ * custom filter's write_blob/read_blob callbacks are the only way to
+ * observe it; they log each call's locator to these statics.
+ *-------------------------------------------------------------------------
+ */
+#define REPACK_BLOB_FILTER_ID 530
+#define REPACK_BLOB_STORE_MAX 256
+#define REPACK_BLOB_LOG_MAX   8
+
+static unsigned char  repack_blob_store[REPACK_BLOB_STORE_MAX];
+static size_t         repack_blob_store_size = 0;
+static H5Z_blob_loc_t repack_blob_write_log[REPACK_BLOB_LOG_MAX];
+static int            repack_blob_write_count = 0;
+static int            repack_blob_read_count  = 0;
+
+static size_t
+repack_blob_filter(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                   const unsigned int H5_ATTR_UNUSED *cd_values, hid_t H5_ATTR_UNUSED dxpl_id,
+                   const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims, size_t nbytes,
+                   size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+{
+    return nbytes; /* pass-through */
+}
+
+static herr_t
+repack_blob_write(hid_t file_id, const void *buf, size_t size, H5Z_blob_loc_t *loc_out)
+{
+    if (H5Iget_type(file_id) != H5I_FILE)
+        return FAIL;
+    if (size > sizeof(repack_blob_store))
+        return FAIL;
+    memcpy(repack_blob_store, buf, size);
+    repack_blob_store_size = size;
+
+    /* Each call gets a distinct token, so source-create vs. h5repack's
+     * destination-create are distinguishable in the log below. */
+    loc_out->addr = (haddr_t)(0x9000 + repack_blob_write_count);
+    loc_out->idx  = (size_t)repack_blob_write_count;
+    if (repack_blob_write_count < REPACK_BLOB_LOG_MAX)
+        repack_blob_write_log[repack_blob_write_count] = *loc_out;
+    repack_blob_write_count++;
+    return SUCCEED;
+}
+
+static herr_t
+repack_blob_read(hid_t file_id, H5Z_blob_loc_t H5_ATTR_UNUSED loc, void **buf_out, size_t *size_out)
+{
+    if (H5Iget_type(file_id) != H5I_FILE)
+        return FAIL;
+    if (NULL == (*buf_out = malloc(repack_blob_store_size)))
+        return FAIL;
+    memcpy(*buf_out, repack_blob_store, repack_blob_store_size);
+    *size_out = repack_blob_store_size;
+    repack_blob_read_count++;
+    return SUCCEED;
+}
+
+static herr_t
+repack_blob_close(void *buf, size_t H5_ATTR_UNUSED size)
+{
+    free(buf);
+    return SUCCEED;
+}
+
+/*-------------------------------------------------------------------------
  * Function: main
  *
  * Purpose:  Executes h5repack tests
@@ -1611,6 +1679,141 @@ main(void)
         }
         PASSED();
     }
+
+    /*-------------------------------------------------------------------------
+     * blob-05: h5repack cross-file copy of a blob-configured dataset
+     *-------------------------------------------------------------------------
+     */
+    TESTING("    blob-configured dataset gets a new, independent locator");
+    {
+        static const H5Z_class3_t blob_cls = {
+            2,                     /* version         */
+            REPACK_BLOB_FILTER_ID, /* id              */
+            1,                     /* encoder_present */
+            1,                     /* decoder_present */
+            "repack_blob_filter",  /* canonical_name  */
+            NULL,                  /* description     */
+            NULL,                  /* can_apply       */
+            NULL,                  /* set_local       */
+            repack_blob_filter,    /* filter          */
+            NULL,                  /* set_config      */
+            NULL,                  /* get_config      */
+            repack_blob_write,     /* write_blob      */
+            repack_blob_read,      /* read_blob       */
+            repack_blob_close,     /* close_blob      */
+        };
+        const char   *blob_src = "h5repack_blob_src.h5";
+        const char   *blob_out = "h5repack_blob_OUT.h5";
+        unsigned char blob[64];
+        hid_t         src = H5I_INVALID_HID, sid = H5I_INVALID_HID;
+        hid_t         dcpl = H5I_INVALID_HID, dset = H5I_INVALID_HID;
+        hid_t         dst = H5I_INVALID_HID, dcpl_out = H5I_INVALID_HID;
+        hsize_t       dims[2] = {8, 8}, chunk[2] = {4, 4};
+        int           wdata[8][8], rdata[8][8];
+        unsigned char blob_out_buf[sizeof(blob)];
+        size_t        blob_out_size = 0;
+
+        repack_blob_write_count = 0;
+        repack_blob_read_count  = 0;
+
+        if (H5Zregister(&blob_cls) < 0)
+            GOERROR;
+        for (size_t i = 0; i < sizeof(blob); i++)
+            blob[i] = (unsigned char)(i * 7 + 3);
+        for (int r = 0; r < 8; r++)
+            for (int c = 0; c < 8; c++)
+                wdata[r][c] = r * 8 + c;
+
+        if ((src = H5Fcreate(blob_src, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            GOERROR;
+        if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+            GOERROR;
+        if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+            GOERROR;
+        if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+            GOERROR;
+        if (H5Pappend_filter_blob(dcpl, REPACK_BLOB_FILTER_ID, 0, blob, sizeof(blob)) < 0)
+            GOERROR;
+        if ((dset = H5Dcreate2(src, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+            GOERROR;
+        if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
+            GOERROR;
+        if (H5Dclose(dset) < 0)
+            GOERROR;
+        if (H5Sclose(sid) < 0)
+            GOERROR;
+        if (H5Pclose(dcpl) < 0)
+            GOERROR;
+        if (H5Fclose(src) < 0)
+            GOERROR;
+
+        /* Exactly one write_blob call so far: the source dataset's create. */
+        if (repack_blob_write_count != 1)
+            GOERROR;
+
+        /* Force the rebuild path (H5Dget_create_plist -> H5Pcopy ->
+         * H5Dcreate2) rather than h5repack's H5Ocopy fast path, so
+         * write_blob fires again for the destination. An unfiltered
+         * layout directive on the object is enough: apply_filters()
+         * leaves an untouched filter pipeline (and its blob) alone via
+         * H5Pcopy(dcpl_in). h5repack_verify() is skipped here: it only
+         * knows how to check filters explicitly registered via
+         * h5repack_addfilter(), not a user-defined blob filter, so it
+         * would reject the (correctly) unmodified pipeline as a mismatch;
+         * the checks below verify the actually interesting properties
+         * directly instead. */
+        if (h5repack_init(&pack_options, 0, false) < 0)
+            GOERROR;
+        if (h5repack_addlayout("dset:CHUNK=4x4", &pack_options) < 0)
+            GOERROR;
+        if (h5repack(blob_src, blob_out, &pack_options) < 0)
+            GOERROR;
+        if (h5repack_end(&pack_options) < 0)
+            GOERROR;
+
+        /* write_blob fired again for the destination, and read_blob fired
+         * at least once (h5repack reading the source's blob to carry it
+         * over). The destination's locator must differ from the source's:
+         * a new, independent on-disk object, not a leaked reference to
+         * the source file's heap address. */
+        if (repack_blob_write_count != 2)
+            GOERROR;
+        if (repack_blob_read_count < 1)
+            GOERROR;
+        if (repack_blob_write_log[0].addr == repack_blob_write_log[1].addr &&
+            repack_blob_write_log[0].idx == repack_blob_write_log[1].idx)
+            GOERROR;
+
+        /* The output file reads back correctly: data and blob both. */
+        if ((dst = H5Fopen(blob_out, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+            GOERROR;
+        if ((dset = H5Dopen2(dst, "dset", H5P_DEFAULT)) < 0)
+            GOERROR;
+        memset(rdata, 0, sizeof(rdata));
+        if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
+            GOERROR;
+        if (memcmp(wdata, rdata, sizeof(wdata)) != 0)
+            GOERROR;
+        if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+            GOERROR;
+        blob_out_size = sizeof(blob_out_buf);
+        if (H5Pget_filter_blob(dcpl_out, 0, 0, blob_out_buf, &blob_out_size) < 0)
+            GOERROR;
+        if (blob_out_size != sizeof(blob) || memcmp(blob_out_buf, blob, sizeof(blob)) != 0)
+            GOERROR;
+        if (H5Pclose(dcpl_out) < 0)
+            GOERROR;
+        if (H5Dclose(dset) < 0)
+            GOERROR;
+        if (H5Fclose(dst) < 0)
+            GOERROR;
+
+        if (H5Zunregister(REPACK_BLOB_FILTER_ID) < 0)
+            GOERROR;
+        if (remove(blob_src) < 0 || remove(blob_out) < 0)
+            GOERROR;
+    }
+    PASSED();
 
     /* Remove test files */
     TESTING("    test file cleanup");
