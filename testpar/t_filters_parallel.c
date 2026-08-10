@@ -10503,6 +10503,240 @@ test_par_append_filter_blob(hid_t fapl_id)
     VRFY((H5Zunregister(PAR_BLOB_FILTER_ID) >= 0), "H5Zunregister succeeded");
 }
 
+/* par-blob-02: after a collective blob-bearing dataset create, force many
+ * further metadata-cache sync points (a batch of unrelated small object
+ * creates, with periodic collective flushes) before closing collectively.
+ * This exercises the dirty_bytes/sync-point accounting that a
+ * rank-0-only locator-broadcast design would have broken -- the
+ * every-rank-identical-insert protocol must survive ordinary cache
+ * churn, not just a single quiet create. Completing without hanging is
+ * itself most of the point; reopening and re-verifying the blob
+ * afterward confirms the churn didn't silently corrupt it either. */
+#define PAR_BLOB_STRESS_NOPS 64
+static void
+test_par_blob_cache_sync_stress(hid_t fapl_id)
+{
+    hid_t          file_id   = H5I_INVALID_HID;
+    hid_t          group_id  = H5I_INVALID_HID;
+    hid_t          dcpl_id   = H5I_INVALID_HID;
+    hid_t          dset_id   = H5I_INVALID_HID;
+    hid_t          fspace_id = H5I_INVALID_HID;
+    hsize_t        dims[2]   = {(hsize_t)(mpi_size * 4), 4};
+    hsize_t        chunk[2]  = {4, 4};
+    unsigned char *blob      = NULL;
+    herr_t         ret;
+
+    if (MAINPROCESS)
+        puts("Testing par-blob-02: cache-sync stress after collective blob create");
+
+    VRFY((H5Zregister(&par_blob_cls) >= 0), "H5Zregister(par_blob_cls) succeeded");
+
+    blob = (unsigned char *)malloc(PAR_BLOB_SIZE);
+    VRFY((blob != NULL), "malloc blob succeeded");
+    memcpy(blob, PAR_BLOB_MAGIC, PAR_BLOB_MAGIC_LEN);
+    for (size_t i = PAR_BLOB_MAGIC_LEN; i < PAR_BLOB_SIZE; i++)
+        blob[i] = (unsigned char)(i * 11 + 5);
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "H5Fopen succeeded");
+
+    group_id = H5Gcreate2(file_id, "par_blob_cache_sync_stress", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gcreate2 succeeded");
+
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((dcpl_id >= 0), "H5Pcreate DCPL succeeded");
+    VRFY((H5Pset_chunk(dcpl_id, 2, chunk) >= 0), "H5Pset_chunk succeeded");
+    ret = H5Pappend_filter_blob(dcpl_id, PAR_BLOB_FILTER_ID, 0, blob, PAR_BLOB_SIZE);
+    VRFY((ret >= 0), "H5Pappend_filter_blob succeeded");
+
+    fspace_id = H5Screate_simple(2, dims, NULL);
+    VRFY((fspace_id >= 0), "H5Screate_simple fspace succeeded");
+    dset_id = H5Dcreate2(group_id, "dset", HDF5_DATATYPE_NAME, fspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "H5Dcreate2 (blob dataset) succeeded");
+    VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose fspace succeeded");
+    fspace_id = H5I_INVALID_HID;
+
+    /* Force cache churn while the blob-bearing dataset stays open. */
+    for (int i = 0; i < PAR_BLOB_STRESS_NOPS; i++) {
+        char    name[64];
+        hid_t   small_sid, small_did;
+        hsize_t small_dims[1] = {1};
+        int     val           = i;
+
+        snprintf(name, sizeof(name), "churn_%d", i);
+        small_sid = H5Screate_simple(1, small_dims, NULL);
+        VRFY((small_sid >= 0), "H5Screate_simple churn succeeded");
+        small_did =
+            H5Dcreate2(group_id, name, H5T_NATIVE_INT, small_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        VRFY((small_did >= 0), "H5Dcreate2 churn succeeded");
+        VRFY((H5Dwrite(small_did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &val) >= 0),
+             "H5Dwrite churn succeeded");
+        VRFY((H5Dclose(small_did) >= 0), "H5Dclose churn succeeded");
+        VRFY((H5Sclose(small_sid) >= 0), "H5Sclose churn succeeded");
+
+        if (i % 8 == 7)
+            VRFY((H5Fflush(file_id, H5F_SCOPE_GLOBAL) >= 0), "H5Fflush succeeded");
+    }
+
+    VRFY((H5Dclose(dset_id) >= 0), "H5Dclose (blob dataset) succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "H5Gclose succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+
+    /* Reopen independently on every rank and verify the blob-bearing
+     * dataset survived the churn intact. */
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
+    VRFY((file_id >= 0), "H5Fopen (reopen) succeeded");
+    group_id = H5Gopen2(file_id, "par_blob_cache_sync_stress", H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+    dset_id = H5Dopen2(group_id, "dset", H5P_DEFAULT);
+    VRFY((dset_id >= 0), "H5Dopen2 succeeded");
+    {
+        hid_t  dcpl_out = H5Dget_create_plist(dset_id);
+        size_t got_size = 0;
+        void  *enc_buf  = NULL;
+
+        VRFY((dcpl_out >= 0), "H5Dget_create_plist succeeded");
+        VRFY((H5Pget_filter_blob(dcpl_out, 0, 0, NULL, &got_size) >= 0), "H5Pget_filter_blob size succeeded");
+        VRFY((got_size == PAR_BLOB_SIZE), "blob size survived cache-sync stress");
+        enc_buf = malloc(got_size);
+        VRFY((enc_buf != NULL), "malloc enc_buf succeeded");
+        VRFY((H5Pget_filter_blob(dcpl_out, 0, 0, enc_buf, &got_size) >= 0),
+             "H5Pget_filter_blob fill succeeded");
+        VRFY((memcmp(enc_buf, blob, PAR_BLOB_SIZE) == 0), "blob bytes survived cache-sync stress");
+        free(enc_buf);
+        VRFY((H5Pclose(dcpl_out) >= 0), "H5Pclose dcpl_out succeeded");
+    }
+    VRFY((H5Dclose(dset_id) >= 0), "H5Dclose succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "H5Gclose succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+
+    VRFY((H5Pclose(dcpl_id) >= 0), "H5Pclose DCPL succeeded");
+    VRFY((H5Zunregister(PAR_BLOB_FILTER_ID) >= 0), "H5Zunregister succeeded");
+
+    free(blob);
+}
+
+/* Shared body for par-blob-04: the same collective identical-insert,
+ * write, close, reopen, and blob-verify pattern as
+ * test_par_append_filter_blob, parameterized by an FCPL so it can be run
+ * against different file-space allocation settings. Each variant gets
+ * its own freshly created file, since file-space strategy can only be
+ * set via FCPL at H5Fcreate time. */
+static void
+run_par_blob_alloc_variant(hid_t fapl_id, hid_t fcpl_id, const char *out_filename)
+{
+    hid_t          file_id   = H5I_INVALID_HID;
+    hid_t          dcpl_id   = H5I_INVALID_HID;
+    hid_t          dcpl_out  = H5I_INVALID_HID;
+    hid_t          dset_id   = H5I_INVALID_HID;
+    hid_t          fspace_id = H5I_INVALID_HID;
+    hsize_t        dims[2]   = {(hsize_t)(mpi_size * 4), 4};
+    hsize_t        chunk[2]  = {4, 4};
+    unsigned char *blob      = NULL;
+    void          *enc_buf   = NULL;
+    herr_t         ret;
+
+    blob = (unsigned char *)malloc(PAR_BLOB_SIZE);
+    VRFY((blob != NULL), "malloc blob succeeded");
+    memcpy(blob, PAR_BLOB_MAGIC, PAR_BLOB_MAGIC_LEN);
+    for (size_t i = PAR_BLOB_MAGIC_LEN; i < PAR_BLOB_SIZE; i++)
+        blob[i] = (unsigned char)(i * 13 + 1);
+
+    file_id = H5Fcreate(out_filename, H5F_ACC_TRUNC, fcpl_id, fapl_id);
+    VRFY((file_id >= 0), "H5Fcreate (alloc-settings variant) succeeded");
+
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((dcpl_id >= 0), "H5Pcreate DCPL succeeded");
+    VRFY((H5Pset_chunk(dcpl_id, 2, chunk) >= 0), "H5Pset_chunk succeeded");
+    ret = H5Pappend_filter_blob(dcpl_id, PAR_BLOB_FILTER_ID, 0, blob, PAR_BLOB_SIZE);
+    VRFY((ret >= 0), "H5Pappend_filter_blob succeeded");
+
+    fspace_id = H5Screate_simple(2, dims, NULL);
+    VRFY((fspace_id >= 0), "H5Screate_simple fspace succeeded");
+
+    /* Collective: every rank performs the identical H5HG_insert. */
+    dset_id = H5Dcreate2(file_id, "dset", HDF5_DATATYPE_NAME, fspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "H5Dcreate2 succeeded");
+    VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose fspace succeeded");
+    fspace_id = H5I_INVALID_HID;
+
+    VRFY((H5Dclose(dset_id) >= 0), "H5Dclose succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+
+    /* Reopen independently on every rank; every rank must recover the
+     * identical blob bytes regardless of the allocation strategy used. */
+    file_id = H5Fopen(out_filename, H5F_ACC_RDONLY, fapl_id);
+    VRFY((file_id >= 0), "H5Fopen (reopen) succeeded");
+    dset_id = H5Dopen2(file_id, "dset", H5P_DEFAULT);
+    VRFY((dset_id >= 0), "H5Dopen2 succeeded");
+
+    dcpl_out = H5Dget_create_plist(dset_id);
+    VRFY((dcpl_out >= 0), "H5Dget_create_plist succeeded");
+    {
+        size_t got_size = 0;
+
+        VRFY((H5Pget_filter_blob(dcpl_out, 0, 0, NULL, &got_size) >= 0), "H5Pget_filter_blob size succeeded");
+        VRFY((got_size == PAR_BLOB_SIZE),
+             "H5Pget_filter_blob reports correct size under this allocation setting");
+        enc_buf = malloc(got_size);
+        VRFY((enc_buf != NULL), "malloc enc_buf succeeded");
+        VRFY((H5Pget_filter_blob(dcpl_out, 0, 0, enc_buf, &got_size) >= 0),
+             "H5Pget_filter_blob fill succeeded");
+        VRFY((memcmp(enc_buf, blob, PAR_BLOB_SIZE) == 0),
+             "blob bytes recovered verbatim under this allocation setting");
+        free(enc_buf);
+    }
+    VRFY((H5Pclose(dcpl_out) >= 0), "H5Pclose dcpl_out succeeded");
+    VRFY((H5Dclose(dset_id) >= 0), "H5Dclose succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+    VRFY((H5Fdelete(out_filename, fapl_id) >= 0), "H5Fdelete (alloc-settings variant) succeeded");
+
+    VRFY((H5Pclose(dcpl_id) >= 0), "H5Pclose DCPL succeeded");
+    free(blob);
+}
+
+/* par-blob-04: repeat the collective identical-insert pattern under
+ * different file-space allocation settings (RFC-HDFG-2026-003
+ * Sec. blob-parallel open items) -- the library's default strategy, and
+ * paged allocation with persistent, non-default free-space management
+ * (the shared test file used by every other test in this file is paged
+ * with persist=false, threshold=1, so this exercises settings distinct
+ * from that fixture too). */
+static void
+test_par_blob_allocation_settings_matrix(hid_t fapl_id)
+{
+    hid_t fcpl_default = H5I_INVALID_HID;
+    hid_t fcpl_paged   = H5I_INVALID_HID;
+    char  fname_default[1024];
+    char  fname_paged[1024];
+
+    if (MAINPROCESS)
+        puts("Testing par-blob-04: allocation-settings matrix (default vs. paged/non-default FSM)");
+
+    VRFY((H5Zregister(&par_blob_cls) >= 0), "H5Zregister(par_blob_cls) succeeded");
+
+    fcpl_default = H5Pcreate(H5P_FILE_CREATE);
+    VRFY((fcpl_default >= 0), "H5Pcreate FCPL (default) succeeded");
+    VRFY((h5_fixname("t_filters_parallel_blob_alloc_default", fapl_id, fname_default,
+                     sizeof(fname_default)) != NULL),
+         "Test file name created (default)");
+    run_par_blob_alloc_variant(fapl_id, fcpl_default, fname_default);
+    VRFY((H5Pclose(fcpl_default) >= 0), "H5Pclose FCPL (default) succeeded");
+
+    fcpl_paged = H5Pcreate(H5P_FILE_CREATE);
+    VRFY((fcpl_paged >= 0), "H5Pcreate FCPL (paged) succeeded");
+    VRFY((H5Pset_file_space_strategy(fcpl_paged, H5F_FSPACE_STRATEGY_PAGE, true, 4096) >= 0),
+         "H5Pset_file_space_strategy (paged, persist, threshold=4096) succeeded");
+    VRFY((H5Pset_file_space_page_size(fcpl_paged, 8192) >= 0), "H5Pset_file_space_page_size succeeded");
+    VRFY((h5_fixname("t_filters_parallel_blob_alloc_paged", fapl_id, fname_paged, sizeof(fname_paged)) !=
+          NULL),
+         "Test file name created (paged)");
+    run_par_blob_alloc_variant(fapl_id, fcpl_paged, fname_paged);
+    VRFY((H5Pclose(fcpl_paged) >= 0), "H5Pclose FCPL (paged) succeeded");
+
+    VRFY((H5Zunregister(PAR_BLOB_FILTER_ID) >= 0), "H5Zunregister succeeded");
+}
+
 int
 main(int argc, char **argv)
 {
@@ -10900,6 +11134,8 @@ main(int argc, char **argv)
         test_par_append_filter_rank_inconsistent_dcpl(fapl_id);
         test_par_append_filter_builtin_string_pipeline(fapl_id);
         test_par_append_filter_blob(fapl_id);
+        test_par_blob_cache_sync_stress(fapl_id);
+        test_par_blob_allocation_settings_matrix(fapl_id);
     }
     else {
         if (MAINPROCESS)
