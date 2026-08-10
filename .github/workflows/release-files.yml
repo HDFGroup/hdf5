@@ -38,7 +38,6 @@ env:
 jobs:
   PreRelease-getfiles:
     runs-on: ubuntu-latest
-    needs: create-tag
     environment: ${{ inputs.use_environ }}
     permissions:
         contents: write
