@@ -21,8 +21,17 @@
 
 #include "h5test.h"
 
-static const char *FILENAME[] = {"tfilter2",     "tfilter2_blob",     "tfilter2_blob_custom",
-                                 "tfilter2_cfg", "tfilter2_cfg_copy", NULL};
+static const char *FILENAME[] = {"tfilter2",
+                                 "tfilter2_blob",
+                                 "tfilter2_blob_custom",
+                                 "tfilter2_cfg",
+                                 "tfilter2_cfg_copy",
+                                 "tfilter2_blob_delete",
+                                 "tfilter2_blob_dup",
+                                 "tfilter2_blob_percopy",
+                                 "tfilter2_blob_usecaseb",
+                                 "tfilter2_blob_oversized",
+                                 NULL};
 
 /* -----------------------------------------------------------------------
  * Parser tests - typed TOML accessor functions
@@ -3137,6 +3146,690 @@ error:
     return -1;
 }
 
+/* Deleting a blob-bearing dataset must reclaim the global-heap object
+ * holding its blob, not just the dataset's own storage. Compare the free
+ * space reclaimed by deleting a blob-bearing dataset against an
+ * otherwise-identical plain dataset; the blob-bearing delete should
+ * reclaim substantially more (the difference is the freed blob, not a
+ * leak). */
+static int
+test_blob_delete_reclaims_heap(hid_t fapl)
+{
+    static const H5Z_class3_t blob_cls = {
+        2,                      /* version         */
+        BLOB_DEFAULT_FILTER_ID, /* id              */
+        1,                      /* encoder_present */
+        1,                      /* decoder_present */
+        "blob_default_filter",  /* canonical_name  */
+        NULL,                   /* description     */
+        NULL,                   /* can_apply       */
+        NULL,                   /* set_local       */
+        blob_passthrough_func,  /* filter          */
+        NULL,                   /* set_config      */
+        NULL,                   /* get_config      */
+        NULL,                   /* write_blob      */
+        NULL,                   /* read_blob       */
+        NULL,                   /* close_blob      */
+    };
+    char           filename[1024];
+    unsigned char *blob = NULL;
+    hid_t          file = H5I_INVALID_HID, sid = H5I_INVALID_HID;
+    hid_t          dcpl_plain = H5I_INVALID_HID, dcpl_blob = H5I_INVALID_HID;
+    hid_t          dset    = H5I_INVALID_HID;
+    hsize_t        dims[2] = {8, 8}, chunk[2] = {4, 4};
+    int            wdata[8][8];
+    hssize_t       fs_before, fs_after;
+    hssize_t       delta_plain, delta_blob;
+
+    TESTING("H5Pappend_filter_blob: delete reclaims heap space");
+
+    if (H5Zregister(&blob_cls) < 0)
+        TEST_ERROR;
+    if (NULL == (blob = (unsigned char *)malloc(BLOB_TEST_SIZE)))
+        TEST_ERROR;
+    blob_fill_pattern(blob, BLOB_TEST_SIZE);
+    for (int i = 0; i < 8; i++)
+        for (int j = 0; j < 8; j++)
+            wdata[i][j] = i * 8 + j;
+
+    h5_fixname(FILENAME[5], fapl, filename, sizeof(filename));
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    /* Plain dataset: same shape/chunking, no filter, no blob */
+    if ((dcpl_plain = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl_plain, 2, chunk) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dcreate2(file, "plain", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_plain, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+
+    /* Blob-bearing dataset: same shape/chunking plus a blob-carrying filter */
+    if ((dcpl_blob = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl_blob, 2, chunk) < 0)
+        TEST_ERROR;
+    if (H5Pappend_filter_blob(dcpl_blob, BLOB_DEFAULT_FILTER_ID, 0, blob, BLOB_TEST_SIZE) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dcreate2(file, "blobby", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_blob, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+
+    /* Measure within one continuous open session: the default file space
+     * strategy does not persist free-space manager state across close, so
+     * a close/reopen between measurements would lose track of space freed
+     * in the prior session instead of reflecting it. */
+    if ((fs_before = H5Fget_freespace(file)) < 0)
+        TEST_ERROR;
+    if (H5Ldelete(file, "plain", H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if ((fs_after = H5Fget_freespace(file)) < 0)
+        TEST_ERROR;
+    delta_plain = fs_after - fs_before;
+
+    if ((fs_before = H5Fget_freespace(file)) < 0)
+        TEST_ERROR;
+    if (H5Ldelete(file, "blobby", H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if ((fs_after = H5Fget_freespace(file)) < 0)
+        TEST_ERROR;
+    delta_blob = fs_after - fs_before;
+
+    /* The extra space reclaimed by deleting the blob-bearing dataset,
+     * beyond what deleting an equivalent plain dataset reclaims, must
+     * account for most of the blob -- otherwise the heap object leaked. */
+    if (delta_blob < delta_plain + (hssize_t)(BLOB_TEST_SIZE / 2))
+        TEST_ERROR;
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+    if (H5Sclose(sid) < 0 || H5Pclose(dcpl_plain) < 0 || H5Pclose(dcpl_blob) < 0)
+        TEST_ERROR;
+    sid = dcpl_plain = dcpl_blob = H5I_INVALID_HID;
+    if (H5Zunregister(BLOB_DEFAULT_FILTER_ID) < 0)
+        TEST_ERROR;
+
+    free(blob);
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dset);
+        H5Pclose(dcpl_plain);
+        H5Pclose(dcpl_blob);
+        H5Sclose(sid);
+        H5Fclose(file);
+        H5Zunregister(BLOB_DEFAULT_FILTER_ID);
+    }
+    H5E_END_TRY
+    free(blob);
+    return -1;
+}
+
+/* Appending the same filter ID twice to one pipeline, each with a
+ * different blob, must recover each entry's own blob independently after
+ * create/reopen -- blob association is per pipeline-entry, not per filter
+ * ID. */
+static int
+test_blob_duplicate_filter_ids(hid_t fapl)
+{
+    static const H5Z_class3_t blob_cls = {
+        2,                      /* version         */
+        BLOB_DEFAULT_FILTER_ID, /* id              */
+        1,                      /* encoder_present */
+        1,                      /* decoder_present */
+        "blob_default_filter",  /* canonical_name  */
+        NULL,                   /* description     */
+        NULL,                   /* can_apply       */
+        NULL,                   /* set_local       */
+        blob_passthrough_func,  /* filter          */
+        NULL,                   /* set_config      */
+        NULL,                   /* get_config      */
+        NULL,                   /* write_blob      */
+        NULL,                   /* read_blob       */
+        NULL,                   /* close_blob      */
+    };
+    char          filename[1024];
+    unsigned char blob_a[256], blob_b[256];
+    hid_t         file = H5I_INVALID_HID, sid = H5I_INVALID_HID;
+    hid_t         dcpl = H5I_INVALID_HID, dset = H5I_INVALID_HID, dcpl_out = H5I_INVALID_HID;
+    hsize_t       dims[2] = {8, 8}, chunk[2] = {4, 4};
+
+    TESTING("H5Pappend_filter_blob: duplicate filter IDs, distinct blobs");
+
+    if (H5Zregister(&blob_cls) < 0)
+        TEST_ERROR;
+    blob_fill_pattern(blob_a, sizeof(blob_a));
+    blob_fill_pattern(blob_b, sizeof(blob_b));
+    memset(blob_b, 0x5A, BLOB_MAGIC_LEN); /* distinguish from blob_a's leading magic */
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+        TEST_ERROR;
+    if (H5Pappend_filter_blob(dcpl, BLOB_DEFAULT_FILTER_ID, 0, blob_a, sizeof(blob_a)) < 0)
+        TEST_ERROR;
+    if (H5Pappend_filter_blob(dcpl, BLOB_DEFAULT_FILTER_ID, 0, blob_b, sizeof(blob_b)) < 0)
+        TEST_ERROR;
+    if (H5Pget_nfilters(dcpl) != 2)
+        TEST_ERROR;
+
+    /* Both blobs are already independently recoverable before any file I/O */
+    if (blob_check_getter(dcpl, 0, blob_a, sizeof(blob_a)) < 0)
+        TEST_ERROR;
+    if (blob_check_getter(dcpl, 1, blob_b, sizeof(blob_b)) < 0)
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[6], fapl, filename, sizeof(filename));
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    if (H5Pget_nfilters(dcpl_out) != 2)
+        TEST_ERROR;
+    if (blob_check_getter(dcpl_out, 0, blob_a, sizeof(blob_a)) < 0)
+        TEST_ERROR;
+    if (blob_check_getter(dcpl_out, 1, blob_b, sizeof(blob_b)) < 0)
+        TEST_ERROR;
+
+    if (H5Pclose(dcpl_out) < 0)
+        TEST_ERROR;
+    dcpl_out = H5I_INVALID_HID;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+    if (H5Sclose(sid) < 0 || H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    sid = dcpl = H5I_INVALID_HID;
+    if (H5Zunregister(BLOB_DEFAULT_FILTER_ID) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl_out);
+        H5Dclose(dset);
+        H5Pclose(dcpl);
+        H5Sclose(sid);
+        H5Fclose(file);
+        H5Zunregister(BLOB_DEFAULT_FILTER_ID);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* Per-dataset blobs via the established H5Pcopy-then-tweak idiom: build a
+ * base DCPL, H5Pcopy it, append the same filter with a different blob in
+ * each copy, create two datasets, and verify each reads back its own
+ * blob. */
+static int
+test_blob_per_dataset_copy_then_tweak(hid_t fapl)
+{
+    static const H5Z_class3_t blob_cls = {
+        2,                      /* version         */
+        BLOB_DEFAULT_FILTER_ID, /* id              */
+        1,                      /* encoder_present */
+        1,                      /* decoder_present */
+        "blob_default_filter",  /* canonical_name  */
+        NULL,                   /* description     */
+        NULL,                   /* can_apply       */
+        NULL,                   /* set_local       */
+        blob_passthrough_func,  /* filter          */
+        NULL,                   /* set_config      */
+        NULL,                   /* get_config      */
+        NULL,                   /* write_blob      */
+        NULL,                   /* read_blob       */
+        NULL,                   /* close_blob      */
+    };
+    char          filename[1024];
+    unsigned char blob_1[128], blob_2[128];
+    hid_t         file = H5I_INVALID_HID, sid = H5I_INVALID_HID;
+    hid_t         dcpl_base = H5I_INVALID_HID, dcpl_1 = H5I_INVALID_HID, dcpl_2 = H5I_INVALID_HID;
+    hid_t         dset1 = H5I_INVALID_HID, dset2 = H5I_INVALID_HID, dcpl_out = H5I_INVALID_HID;
+    hsize_t       dims[2] = {8, 8}, chunk[2] = {4, 4};
+
+    TESTING("H5Pcopy-then-tweak: per-dataset blobs from one base DCPL");
+
+    if (H5Zregister(&blob_cls) < 0)
+        TEST_ERROR;
+    blob_fill_pattern(blob_1, sizeof(blob_1));
+    blob_fill_pattern(blob_2, sizeof(blob_2));
+    memset(blob_2, 0xA5, BLOB_MAGIC_LEN);
+
+    /* Base DCPL carries no blob yet */
+    if ((dcpl_base = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl_base, 2, chunk) < 0)
+        TEST_ERROR;
+
+    if ((dcpl_1 = H5Pcopy(dcpl_base)) < 0)
+        TEST_ERROR;
+    if (H5Pappend_filter_blob(dcpl_1, BLOB_DEFAULT_FILTER_ID, 0, blob_1, sizeof(blob_1)) < 0)
+        TEST_ERROR;
+
+    if ((dcpl_2 = H5Pcopy(dcpl_base)) < 0)
+        TEST_ERROR;
+    if (H5Pappend_filter_blob(dcpl_2, BLOB_DEFAULT_FILTER_ID, 0, blob_2, sizeof(blob_2)) < 0)
+        TEST_ERROR;
+
+    /* Tweaking dcpl_2 must not have disturbed dcpl_1's independently-owned
+     * blob (this is exactly the copy-on-write sharing path: dcpl_1 and
+     * dcpl_2 started from the same base but diverge here). */
+    if (blob_check_getter(dcpl_1, 0, blob_1, sizeof(blob_1)) < 0)
+        TEST_ERROR;
+    if (blob_check_getter(dcpl_2, 0, blob_2, sizeof(blob_2)) < 0)
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[7], fapl, filename, sizeof(filename));
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+    if ((dset1 = H5Dcreate2(file, "dset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_1, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dset2 = H5Dcreate2(file, "dset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_2, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset1) < 0 || H5Dclose(dset2) < 0)
+        TEST_ERROR;
+    dset1 = dset2 = H5I_INVALID_HID;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset1 = H5Dopen2(file, "dset1", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dcpl_out = H5Dget_create_plist(dset1)) < 0)
+        TEST_ERROR;
+    if (blob_check_getter(dcpl_out, 0, blob_1, sizeof(blob_1)) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_out) < 0)
+        TEST_ERROR;
+    dcpl_out = H5I_INVALID_HID;
+    if (H5Dclose(dset1) < 0)
+        TEST_ERROR;
+    dset1 = H5I_INVALID_HID;
+
+    if ((dset2 = H5Dopen2(file, "dset2", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dcpl_out = H5Dget_create_plist(dset2)) < 0)
+        TEST_ERROR;
+    if (blob_check_getter(dcpl_out, 0, blob_2, sizeof(blob_2)) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_out) < 0)
+        TEST_ERROR;
+    dcpl_out = H5I_INVALID_HID;
+    if (H5Dclose(dset2) < 0)
+        TEST_ERROR;
+    dset2 = H5I_INVALID_HID;
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+    if (H5Sclose(sid) < 0 || H5Pclose(dcpl_base) < 0 || H5Pclose(dcpl_1) < 0 || H5Pclose(dcpl_2) < 0)
+        TEST_ERROR;
+    sid = dcpl_base = dcpl_1 = dcpl_2 = H5I_INVALID_HID;
+    if (H5Zunregister(BLOB_DEFAULT_FILTER_ID) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl_out);
+        H5Dclose(dset1);
+        H5Dclose(dset2);
+        H5Pclose(dcpl_base);
+        H5Pclose(dcpl_1);
+        H5Pclose(dcpl_2);
+        H5Sclose(sid);
+        H5Fclose(file);
+        H5Zunregister(BLOB_DEFAULT_FILTER_ID);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* Use Case B pattern: a filter stores a companion mask dataset's path in
+ * its blob. On reopen, the filter's read_blob callback opens the mask via
+ * H5Dopen2(file_id, path, ...) using the file_id it's handed and reads
+ * correct contents -- exercising blob-as-cross-reference, not just
+ * blob-as-opaque-bytes. */
+#define USECASEB_MASK_PATH "/mask"
+static int
+usecaseb_read_blob(hid_t file_id, H5Z_blob_loc_t loc, void **buf_out, size_t *size_out)
+{
+    hid_t   mask_dset = H5I_INVALID_HID, mask_sid = H5I_INVALID_HID;
+    hsize_t mask_dims[1] = {4};
+    int     mask_data[4];
+    int    *result = NULL;
+
+    if (H5Iget_type(file_id) != H5I_FILE)
+        return FAIL;
+    if (loc.addr != (haddr_t)0xB100B || loc.idx != 7)
+        return FAIL;
+
+    if ((mask_dset = H5Dopen2(file_id, USECASEB_MASK_PATH, H5P_DEFAULT)) < 0)
+        return FAIL;
+    if ((mask_sid = H5Dget_space(mask_dset)) < 0) {
+        H5Dclose(mask_dset);
+        return FAIL;
+    }
+    if (H5Sget_simple_extent_dims(mask_sid, mask_dims, NULL) < 0) {
+        H5Sclose(mask_sid);
+        H5Dclose(mask_dset);
+        return FAIL;
+    }
+    H5Sclose(mask_sid);
+    if (H5Dread(mask_dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, mask_data) < 0) {
+        H5Dclose(mask_dset);
+        return FAIL;
+    }
+    if (H5Dclose(mask_dset) < 0)
+        return FAIL;
+
+    if (NULL == (result = (int *)malloc(sizeof(mask_data))))
+        return FAIL;
+    memcpy(result, mask_data, sizeof(mask_data));
+    *buf_out  = result;
+    *size_out = sizeof(mask_data);
+    return SUCCEED;
+}
+
+static herr_t
+usecaseb_write_blob(hid_t file_id, const void *buf, size_t size, H5Z_blob_loc_t *loc_out)
+{
+    (void)buf;
+    (void)size;
+    if (H5Iget_type(file_id) != H5I_FILE)
+        return FAIL;
+    /* The blob is the path string itself; this filter's on-disk locator
+     * is a fixed token since it never varies -- the path is recovered
+     * from the blob bytes the library already stores, not from loc. */
+    loc_out->addr = (haddr_t)0xB100B;
+    loc_out->idx  = 7;
+    return SUCCEED;
+}
+
+static herr_t
+usecaseb_close_blob(void *buf, size_t H5_ATTR_UNUSED size)
+{
+    free(buf);
+    return SUCCEED;
+}
+
+static int
+test_blob_usecaseb_path_association(hid_t fapl)
+{
+    static const H5Z_class3_t blob_cls = {
+        2,                      /* version         */
+        BLOB_CUSTOM_FILTER_ID,  /* id              */
+        1,                      /* encoder_present */
+        1,                      /* decoder_present */
+        "blob_usecaseb_filter", /* canonical_name  */
+        NULL,                   /* description     */
+        NULL,                   /* can_apply       */
+        NULL,                   /* set_local       */
+        blob_passthrough_func,  /* filter          */
+        NULL,                   /* set_config      */
+        NULL,                   /* get_config      */
+        usecaseb_write_blob,    /* write_blob      */
+        usecaseb_read_blob,     /* read_blob       */
+        usecaseb_close_blob,    /* close_blob      */
+    };
+    char    filename[1024];
+    hid_t   file = H5I_INVALID_HID, sid = H5I_INVALID_HID, mask_sid = H5I_INVALID_HID;
+    hid_t   dcpl = H5I_INVALID_HID, dset = H5I_INVALID_HID, mask_dset = H5I_INVALID_HID;
+    hsize_t dims[2] = {4, 4}, chunk[2] = {2, 2}, mask_dims[1] = {4};
+    int     mask_data[4] = {10, 20, 30, 40};
+
+    TESTING("H5Pappend_filter_blob: path-string dataset association (Use Case B)");
+
+    if (H5Zregister(&blob_cls) < 0)
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[8], fapl, filename, sizeof(filename));
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    /* The mask dataset the filter's blob will reference by path */
+    if ((mask_sid = H5Screate_simple(1, mask_dims, NULL)) < 0)
+        TEST_ERROR;
+    if ((mask_dset = H5Dcreate2(file, USECASEB_MASK_PATH + 1, H5T_NATIVE_INT, mask_sid, H5P_DEFAULT,
+                                H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dwrite(mask_dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, mask_data) < 0)
+        TEST_ERROR;
+    if (H5Dclose(mask_dset) < 0)
+        TEST_ERROR;
+    mask_dset = H5I_INVALID_HID;
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+        TEST_ERROR;
+    if (H5Pappend_filter_blob(dcpl, BLOB_CUSTOM_FILTER_ID, 0, (const void *)USECASEB_MASK_PATH,
+                              strlen(USECASEB_MASK_PATH) + 1) < 0)
+        TEST_ERROR;
+
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dcreate2(file, "filtered", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+
+    /* Reopen: the filter's read_blob callback must open the mask dataset
+     * by the path recovered from its blob and read back correct data. */
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "filtered", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    {
+        hid_t dcpl_out = H5Dget_create_plist(dset);
+        int   ret      = 0;
+
+        if (dcpl_out < 0)
+            TEST_ERROR;
+        ret = blob_check_getter(dcpl_out, 0, (const unsigned char *)mask_data, sizeof(mask_data));
+        H5Pclose(dcpl_out);
+        if (ret < 0)
+            TEST_ERROR;
+    }
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+    if (H5Sclose(sid) < 0 || H5Sclose(mask_sid) < 0 || H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    sid = mask_sid = dcpl = H5I_INVALID_HID;
+    if (H5Zunregister(BLOB_CUSTOM_FILTER_ID) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(mask_dset);
+        H5Dclose(dset);
+        H5Pclose(dcpl);
+        H5Sclose(mask_sid);
+        H5Sclose(sid);
+        H5Fclose(file);
+        H5Zunregister(BLOB_CUSTOM_FILTER_ID);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* Oversized default-storage blob: a multi-megabyte buffer stored via the
+ * default H5HG-based path must not affect create/open or the runtime
+ * chunk I/O path -- the blob is configuration data loaded once at open
+ * time, not something the per-chunk filter pipeline touches on every
+ * I/O call. */
+#define OVERSIZED_BLOB_SIZE (4 * 1024 * 1024) /* 4 MiB */
+static int
+test_blob_oversized_default_storage(hid_t fapl)
+{
+    static const H5Z_class3_t blob_cls = {
+        2,                      /* version         */
+        BLOB_DEFAULT_FILTER_ID, /* id              */
+        1,                      /* encoder_present */
+        1,                      /* decoder_present */
+        "blob_default_filter",  /* canonical_name  */
+        NULL,                   /* description     */
+        NULL,                   /* can_apply       */
+        NULL,                   /* set_local       */
+        blob_passthrough_func,  /* filter          */
+        NULL,                   /* set_config      */
+        NULL,                   /* get_config      */
+        NULL,                   /* write_blob      */
+        NULL,                   /* read_blob       */
+        NULL,                   /* close_blob      */
+    };
+    char           filename[1024];
+    unsigned char *blob = NULL;
+    hid_t          file = H5I_INVALID_HID, sid = H5I_INVALID_HID;
+    hid_t          dcpl = H5I_INVALID_HID, dset = H5I_INVALID_HID;
+    hsize_t        dims[2] = {64, 64}, chunk[2] = {8, 8};
+    int           *wdata = NULL, *rdata = NULL;
+
+    TESTING("H5Pappend_filter_blob: oversized (4 MiB) default-storage blob");
+
+    if (H5Zregister(&blob_cls) < 0)
+        TEST_ERROR;
+    if (NULL == (blob = (unsigned char *)malloc(OVERSIZED_BLOB_SIZE)))
+        TEST_ERROR;
+    blob_fill_pattern(blob, OVERSIZED_BLOB_SIZE);
+    if (NULL == (wdata = (int *)malloc(64 * 64 * sizeof(int))))
+        TEST_ERROR;
+    if (NULL == (rdata = (int *)malloc(64 * 64 * sizeof(int))))
+        TEST_ERROR;
+    for (int i = 0; i < 64 * 64; i++)
+        wdata[i] = i;
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+        TEST_ERROR;
+    if (H5Pappend_filter_blob(dcpl, BLOB_DEFAULT_FILTER_ID, 0, blob, OVERSIZED_BLOB_SIZE) < 0)
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[9], fapl, filename, sizeof(filename));
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
+        TEST_ERROR;
+    if (memcmp(wdata, rdata, 64 * 64 * sizeof(int)) != 0)
+        TEST_ERROR;
+    {
+        hid_t dcpl_out = H5Dget_create_plist(dset);
+        int   ret      = 0;
+
+        if (dcpl_out < 0)
+            TEST_ERROR;
+        ret = blob_check_getter(dcpl_out, 0, blob, OVERSIZED_BLOB_SIZE);
+        H5Pclose(dcpl_out);
+        if (ret < 0)
+            TEST_ERROR;
+    }
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+    if (H5Sclose(sid) < 0 || H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    sid = dcpl = H5I_INVALID_HID;
+    if (H5Zunregister(BLOB_DEFAULT_FILTER_ID) < 0)
+        TEST_ERROR;
+
+    free(blob);
+    free(wdata);
+    free(rdata);
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dset);
+        H5Pclose(dcpl);
+        H5Sclose(sid);
+        H5Fclose(file);
+        H5Zunregister(BLOB_DEFAULT_FILTER_ID);
+    }
+    H5E_END_TRY
+    free(blob);
+    free(wdata);
+    free(rdata);
+    return -1;
+}
+
 /* -----------------------------------------------------------------------
  * main
  * ---------------------------------------------------------------------- */
@@ -3206,6 +3899,11 @@ main(void)
     nerrors += test_blob_custom_callbacks(fapl) < 0 ? 1 : 0;
     nerrors += test_blob_errors() < 0 ? 1 : 0;
     nerrors += test_blob_getter() < 0 ? 1 : 0;
+    nerrors += test_blob_delete_reclaims_heap(fapl) < 0 ? 1 : 0;
+    nerrors += test_blob_duplicate_filter_ids(fapl) < 0 ? 1 : 0;
+    nerrors += test_blob_per_dataset_copy_then_tweak(fapl) < 0 ? 1 : 0;
+    nerrors += test_blob_usecaseb_path_association(fapl) < 0 ? 1 : 0;
+    nerrors += test_blob_oversized_default_storage(fapl) < 0 ? 1 : 0;
 
     if (H5Fclose(file) < 0)
         goto error;
