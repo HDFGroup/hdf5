@@ -97,14 +97,22 @@ function (h5_define_public_tools)
       continue ()
     endif ()
 
+    # Tools carry no linkage suffix, so wherever the export namespace is
+    # already hdf5:: the exported name is the public name and there is
+    # nothing to alias.
+    if (_concrete STREQUAL "hdf5::${_tool}")
+      continue ()
+    endif ()
+
     # Same rule as the libraries: an existing name must refer to our executable,
     # or the consumer runs someone else's under the hdf5:: namespace.
     if (TARGET "hdf5::${_tool}")
       get_target_property (_aliased "hdf5::${_tool}" ALIASED_TARGET)
       if (NOT _aliased STREQUAL _concrete)
         message (FATAL_ERROR
-            "hdf5::${_tool} already exists and refers to ${_aliased}, not "
-            "${_concrete}. Has another project has claimed an hdf5:: name?")
+            "hdf5::${_tool} already exists and does not refer to ${_concrete}. "
+            "Another project (possibly CMake's own FindHDF5 module) has "
+            "claimed a name in the hdf5:: namespace.")
       endif ()
     else ()
       add_executable ("hdf5::${_tool}" ALIAS "${_concrete}")
