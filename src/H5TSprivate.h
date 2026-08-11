@@ -297,6 +297,9 @@ typedef atomic_flag H5TS_spinlock_t;
 /* Global thread pool */
 extern H5TS_pool_t *H5TS_pool_g;
 
+/* Whether there are concurrent threads in the library (from internal spawning) */
+extern bool H5TS_currently_concurrent_g;
+
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/

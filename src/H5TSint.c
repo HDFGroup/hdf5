@@ -179,6 +179,10 @@ H5TS_term_package(void)
 #endif
     H5TS_atomic_destroy_uint(&H5TS_api_info_p.attempt_lock_count);
 
+    /* Destroy global thread pool if it exists */
+    if (H5TS_pool_g)
+        (void)H5TS_pool_destroy(H5TS_pool_g)
+
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5TS_term_package() */
 

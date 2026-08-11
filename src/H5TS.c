@@ -63,6 +63,9 @@ H5TS_api_info_t H5TS_api_info_p;
 /* Global thread pool */
 H5TS_pool_t *H5TS_pool_g = NULL;
 
+/* Whether there are concurrent threads in the library (from internal spawning) */
+bool H5TS_currently_concurrent_g = false;
+
 /*******************/
 /* Local Variables */
 /*******************/

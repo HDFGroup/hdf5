@@ -3151,7 +3151,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
 #ifdef H5_HAVE_CONCURRENCY
         /* Check if we're using threads */
-        do_threading = (H5TS_pool_g != NULL);
+        do_threading = (H5TS_pool_g != NULL) && !H5TS_currently_concurrent_g;
 
         if (do_threading) {
             if (NULL == (threaded_io_info = H5MM_calloc(sizeof(H5D_threaded_io_info_t))))
@@ -3278,10 +3278,13 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 #ifdef H5_HAVE_CONCURRENCY
                     /* Delay actual I/O for threaded chunks */
                     if (threaded_chunk) {
-                        /* Set up chunk I/O info. old_pline, chunk_nbytes, buf_alloc, and chunk were set up in H5D__chunk_lock. udata was set up in H5D__chunk_lookup. */
+                        /* Set up chunk I/O info. old_pline, chunk_nbytes, and buf_alloc were set up in H5D__chunk_lock. udata was set up in H5D__chunk_lookup. */
                         assert(chk_io_info);
                         assert(chk_io_info == &cpt_io_info);
                         assert(chk_io_info->count == 1);
+                        threaded_io_info->chunk_info[threaded_io_info->num_chunks].chunk = chunk;
+                        chunk = NULL;
+                        chunk_locked = false;
                         threaded_io_info->chunk_info[threaded_io_info->num_chunks].threaded_io_info = threaded_io_info;
                         H5MM_memcpy(&threaded_io_info->chunk_info[threaded_io_info->num_chunks].chk_dset_io_info, dset_info, sizeof(threaded_io_info->chunk_info[threaded_io_info->num_chunks].chk_dset_io_info));
                         threaded_io_info->chunk_info[threaded_io_info->num_chunks].chk_dset_io_info.layout_ops                       = *H5D_LOPS_COMPACT;
@@ -3325,10 +3328,8 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
         } /* end while */
 
 #ifdef H5_HAVE_CONCURRENCY
-        assert(!threaded_io_info || threaded_io_info->num_chunks == num_chunks);
-
         /* Handle chunks that were deferred for concurrent processing */
-        if (threaded_io_info && num_chunks > 0) {
+        if (threaded_io_info && threaded_io_info->num_chunks > 0) {
             H5FD_mem_t types[2] = {H5FD_MEM_DRAW, H5FD_MEM_NOLIST};
             assert(do_threading);
             assert(H5TS_pool_g);
@@ -3344,8 +3345,8 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             threaded_io_info->sem_init = true;
 
             /* Read all chunks from disk */
-            H5_CHECK_OVERFLOW(num_chunks, size_t, uint32_t);
-            if (H5F_shared_vector_read(io_info->f_sh, (uint32_t)num_chunks, types,
+            H5_CHECK_OVERFLOW(threaded_io_info->num_chunks, size_t, uint32_t);
+            if (H5F_shared_vector_read(io_info->f_sh, (uint32_t)threaded_io_info->num_chunks, types,
                                        threaded_io_info->addrs, threaded_io_info->sizes,
                                        threaded_io_info->bufs) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "vector read call failed");
@@ -3359,19 +3360,34 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             threaded_io_info->bufs = NULL;
             threaded_io_info->vec_nalloc = 0;
 
+            /* Mark that we are concurrent */
+            H5TS_currently_concurrent_g = true;
+
             /* Loop over threaded chunks, launching worker task function for each */
-            for (size_t i = 0; i < num_chunks; i++) {
+            for (size_t i = 0; i < threaded_io_info->num_chunks; i++) {
                 if (H5_UNLIKELY(H5TS_pool_add_task(H5TS_pool_g, H5D__chunk_thread_read, &(threaded_io_info->chunk_info[i])) < 0))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't launch worker thread");
             }
 
             /* Wait for all worker tasks to complete */
-            for (size_t i = 0; i < num_chunks; i++)
+            for (size_t i = 0; i < threaded_io_info->num_chunks; i++)
                 if (H5_UNLIKELY(H5TS_semaphore_wait(&threaded_io_info->sem) < 0))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTWAIT, FAIL, "can't wait for worker thread");
 
+            /* Mark that we are no longer concurrent */
+            H5TS_currently_concurrent_g = false;
+
             /* Unlock all chunks */
-            for (size_t i = 0; i < num_chunks; i++) {
+            for (size_t i = 0; i < threaded_io_info->num_chunks; i++) {
+#if 0
+                /* Set up the storage buffer information for this chunk */
+                cpt_store.compact.buf = threaded_io_info->chunk_info[i].chunk;
+                threaded_io_info->chunk_info[i].chk_dset_io_info.store = &cpt_store;
+
+                /* Scatter data from chunk buffer to application buffer. Even though this is protected by a mutex it must still not interfere with the threads in H5Z_pipeline() */
+                if (H5_UNLIKELY((dset_info->io_ops.single_read)(&cpt_io_info, &threaded_io_info->chunk_info[i].chk_dset_io_info) < 0))
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked read failed");
+#endif
                 if (H5_UNLIKELY(H5D__chunk_unlock(io_info, dset_info, &threaded_io_info->chunk_info[i].udata, false, threaded_io_info->chunk_info[i].chunk, threaded_io_info->chunk_info[i].src_accessed_bytes) < 0))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "unable to unlock raw data chunk");
                 threaded_io_info->chunk_info[i].chunk = NULL;
@@ -3438,9 +3454,10 @@ done:
             H5MM_xfree(threaded_io_info->bufs);
 
             /* Unlock all chunks */
-            for (size_t i = 0; i < threaded_io_info->num_chunks; i++)
-                if (threaded_io_info->chunk_info[i].chunk && H5D__chunk_unlock(io_info, dset_info, &threaded_io_info->chunk_info[i].udata, false, threaded_io_info->chunk_info[i].chunk, threaded_io_info->chunk_info[i].src_accessed_bytes) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "unable to unlock raw data chunk");
+            if (threaded_io_info->chunk_info)
+                for (size_t i = 0; i < threaded_io_info->num_chunks; i++)
+                    if (threaded_io_info->chunk_info[i].chunk && H5D__chunk_unlock(io_info, dset_info, &threaded_io_info->chunk_info[i].udata, false, threaded_io_info->chunk_info[i].chunk, threaded_io_info->chunk_info[i].src_accessed_bytes) < 0)
+                        HDONE_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "unable to unlock raw data chunk");
 
             /* Destroy semaphore */
             if (threaded_io_info->sem_init)
@@ -3486,6 +3503,9 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
     FUNC_ENTER_PACKAGE
 
     if (threaded_chunk_info->old_pline) {
+#ifndef NDEBUG
+        void *old_chunk = threaded_chunk_info->chunk;
+#endif /* NDEBUG */
         /* Lock internal mutex */
         //if (H5_UNLIKELY(H5TS_internal_lock() < 0))
         //    HGOTO_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't lock internal mutex");
@@ -3501,6 +3521,16 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
         //    HGOTO_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "can't unlock internal mutex");
         //mutex_held = false;
 
+        /* Patch chunk pointer in chunk cache. Ok to do in concurrent section since no other thread will touch this chunk. */
+        if (UINT_MAX != threaded_chunk_info->udata.idx_hint) {
+            H5D_rdcc_t *rdcc = &threaded_chunk_info->threaded_io_info->dset_info->dset->shared->cache.chunk;
+
+            assert(threaded_chunk_info->udata.idx_hint < rdcc->nslots);
+            assert(rdcc->slot[threaded_chunk_info->udata.idx_hint]);
+            assert(rdcc->slot[threaded_chunk_info->udata.idx_hint]->chunk == old_chunk);
+            rdcc->slot[threaded_chunk_info->udata.idx_hint]->chunk = threaded_chunk_info->chunk;
+        }
+
         /* Make sure the chunk is the correct size after being unfiltered */
         if (H5_UNLIKELY(threaded_chunk_info->chunk_nbytes != threaded_chunk_info->threaded_io_info->chunk_size))
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk size is incorrect after being unfiltered");
@@ -3511,6 +3541,7 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
         assert(!threaded_chunk_info->udata.new_unfilt_chunk);
     }
 
+#if 1
     /* Set up the storage buffer information for this chunk */
     cpt_store.compact.buf = threaded_chunk_info->chunk;
     cpt_store.compact.dirty = &cpt_dirty;
@@ -3529,6 +3560,7 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
     if (H5_UNLIKELY(H5TS_internal_unlock() < 0))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "can't unlock internal mutex");
     mutex_held = false;
+#endif
 
 done:
     /* Report failure to task invoker (actual return value is ignored by the thread pool) */
@@ -3539,13 +3571,18 @@ done:
                 HDONE_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "can't unlock internal mutex");
             mutex_held = false;
         }
+        (void)H5E_dump_api_stack();
+        (void)H5E_clear_stack();
     }
 
     assert(!mutex_held);
 
     /* Signal the semaphore to indicate that we've finished processing one chunk */
-    if (H5TS_semaphore_signal(&threaded_chunk_info->threaded_io_info->sem) < 0)
+    if (H5_UNLIKELY(H5TS_semaphore_signal(&threaded_chunk_info->threaded_io_info->sem) < 0)) {
         HDONE_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "can't signal semaphore");
+        (void)H5E_dump_api_stack();
+        (void)H5E_clear_stack();
+    }
 
     FUNC_LEAVE_NOAPI((H5TS_thread_ret_t)0);
 } /* end H5D__chunk_thread_read() */
@@ -5205,7 +5242,6 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                     threaded_io_info->chunk_info[threaded_io_info->num_chunks].old_pline = old_pline;
                     threaded_io_info->chunk_info[threaded_io_info->num_chunks].chunk_nbytes = chunk_nbytes;
                     threaded_io_info->chunk_info[threaded_io_info->num_chunks].buf_alloc = buf_alloc;
-                    threaded_io_info->chunk_info[threaded_io_info->num_chunks].chunk = chunk;
 
                     /* Report that this chunk is threaded */
                     *threaded_chunk = true;
