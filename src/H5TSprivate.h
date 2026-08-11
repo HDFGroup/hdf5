@@ -25,6 +25,7 @@
 
 #ifdef H5_HAVE_THREADSAFE_API
 /* Include package's public headers */
+#include "H5TSpublic.h"
 #include "H5TSdevelop.h"
 #endif /* H5_HAVE_THREADSAFE_API */
 
@@ -293,6 +294,9 @@ typedef atomic_flag H5TS_spinlock_t;
 /* Library-private Variables */
 /*****************************/
 
+/* Global thread pool */
+extern H5TS_pool_t *H5TS_pool_g;
+
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/
@@ -315,6 +319,13 @@ H5_DLL herr_t H5TS_api_lock(void);
 H5_DLL herr_t H5TS_api_lock(unsigned *dlftt);
 #endif
 H5_DLL herr_t H5TS_api_unlock(void);
+
+/* Internal locking */
+#ifdef H5_HAVE_CONCURRENCY
+H5_DLL herr_t H5TS_internal_lock(void);
+H5_DLL herr_t H5TS_internal_unlock(void);
+H5_DLL bool H5TS_internal_locked(void);
+#endif /* H5_HAVE_CONCURRENCY */
 
 /* Retrieve per-thread info */
 H5_DLL herr_t               H5TS_thread_id(uint64_t *id);

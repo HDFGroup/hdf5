@@ -60,6 +60,9 @@ H5TS_api_info_t H5TS_api_info_p;
 /* Library Private Variables */
 /*****************************/
 
+/* Global thread pool */
+H5TS_pool_t *H5TS_pool_g = NULL;
+
 /*******************/
 /* Local Variables */
 /*******************/
@@ -147,4 +150,44 @@ H5TSmutex_release(unsigned *lock_count)
 
     FUNC_LEAVE_API_NAMECHECK_ONLY(ret_value)
 } /* end H5TSmutex_release() */
+
+herr_t
+H5TSglobal_pool_create(unsigned num_threads)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check if pool already exists */
+    if (H5TS_pool_g)
+        HGOTO_ERROR(H5E_LIB, H5E_ALREADYEXISTS, FAIL, "global thread pool already exists");
+
+    /* Create global thread pool */
+    if (H5TS_pool_create(&H5TS_pool_g, num_threads) < 0)
+        HGOTO_ERROR(H5E_LIB, H5E_CANTINIT, FAIL, "can't create thread pool");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+} /* end H5TSglobal_pool_create() */
+
+herr_t
+H5TSglobal_pool_destroy(void)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check if pool exists */
+    if (!H5TS_pool_g)
+        HGOTO_ERROR(H5E_LIB, H5E_CANTFREE, FAIL, "global thread pool does not exist");
+
+    /* Destroy global thread pool */
+    if (H5TS_pool_destroy(H5TS_pool_g) < 0)
+        HGOTO_ERROR(H5E_LIB, H5E_CANTFREE, FAIL, "can't destroy thread pool");
+    H5TS_pool_g = NULL;
+
+done:
+    FUNC_LEAVE_API(ret_value);
+} /* end H5TSglobal_pool_destroy() */
+
 #endif /* H5_HAVE_THREADSAFE_API */

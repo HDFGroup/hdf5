@@ -55,6 +55,8 @@ typedef struct H5TS_api_info_t {
 #else /* H5_HAVE_CONCURRENCY */
     /* API lock */
     H5TS_rwlock_t api_lock;
+    H5TS_mutex_t  internal_mutex;
+    bool          internal_mutex_locked;
 #endif
 
     /* Count of # of attempts to acquire API lock */
