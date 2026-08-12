@@ -87,9 +87,14 @@ endfunction ()
 #
 # PREFIX is prepended to the concrete target names before lookup: empty in
 # HDF5's build tree, HDF_PACKAGE_NAMESPACE in an installed package.
+#
+# Sets H5PUB_ERROR in the caller's scope to a message if a public name is
+# already claimed by an unrelated target, and to an empty string otherwise.
 #-----------------------------------------------------------------------------
 function (h5_define_public_tools)
   cmake_parse_arguments (H5PUB "" "PREFIX" "TOOLS" ${ARGN})
+
+  set (H5PUB_ERROR "" PARENT_SCOPE)
 
   foreach (_tool IN LISTS H5PUB_TOOLS)
     set (_concrete "${H5PUB_PREFIX}${_tool}")
@@ -109,10 +114,10 @@ function (h5_define_public_tools)
     if (TARGET "hdf5::${_tool}")
       get_target_property (_aliased "hdf5::${_tool}" ALIASED_TARGET)
       if (NOT _aliased STREQUAL _concrete)
-        message (FATAL_ERROR
-            "hdf5::${_tool} already exists and does not refer to ${_concrete}. "
-            "Another project (possibly CMake's own FindHDF5 module) has "
-            "claimed a name in the hdf5:: namespace.")
+        set (H5PUB_ERROR
+            "hdf5::${_tool} already exists and does not refer to ${_concrete}. Another project (possibly CMake's own FindHDF5 module) has claimed a name in the hdf5:: namespace."
+            PARENT_SCOPE)
+        return ()
       endif ()
     else ()
       add_executable ("hdf5::${_tool}" ALIAS "${_concrete}")
@@ -130,21 +135,24 @@ endfunction ()
 #
 # Components that were not built are skipped silently. Every name is guarded
 # by an existence check, so repeated calls are harmless. A name already
-# claimed by another project, referring to a different target, is a fatal
-# error -- see the loop below.
+# claimed by another project, referring to a different target, is reported
+# through H5PUB_ERROR.
 #
 # The caller must have set H5PUB_CONCRETE_<name>_<linkage> for each public
 # library name it wants defined.
+#
+# Sets H5PUB_ERROR in the caller's scope as h5_define_public_tools() does.
 #-----------------------------------------------------------------------------
 function (h5_define_public_targets)
   cmake_parse_arguments (H5PUB "" "LINKAGE;PREFIX" "" ${ARGN})
 
-  if (NOT H5PUB_LINKAGE)
-    message (FATAL_ERROR "h5_define_public_targets: LINKAGE is required")
-  endif ()
+  set (H5PUB_ERROR "" PARENT_SCOPE)
+
   if (NOT H5PUB_LINKAGE STREQUAL "shared" AND NOT H5PUB_LINKAGE STREQUAL "static")
-    message (FATAL_ERROR
-        "h5_define_public_targets: LINKAGE must be \"shared\" or \"static\", got \"${H5PUB_LINKAGE}\"")
+    set (H5PUB_ERROR
+        "h5_define_public_targets: LINKAGE must be \"shared\" or \"static\", got \"${H5PUB_LINKAGE}\"."
+        PARENT_SCOPE)
+    return ()
   endif ()
 
   set (_public_targets_defined)
@@ -164,9 +172,10 @@ function (h5_define_public_targets)
     if (TARGET "hdf5::${_public_name}")
       get_target_property (_aliased "hdf5::${_public_name}" ALIASED_TARGET)
       if (NOT _aliased STREQUAL _concrete)
-        message (FATAL_ERROR
-            "hdf5::${_public_name} already exists and refers to ${_aliased}, not "
-            "${_concrete} -- another project has claimed the hdf5:: names.")
+        set (H5PUB_ERROR
+            "hdf5::${_public_name} already exists and refers to ${_aliased}, not ${_concrete} -- another project has claimed the hdf5:: names."
+            PARENT_SCOPE)
+        return ()
       endif ()
     else ()
       add_library ("hdf5::${_public_name}" ALIAS "${_concrete}")

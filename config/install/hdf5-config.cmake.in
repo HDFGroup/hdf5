@@ -371,6 +371,13 @@ h5_define_public_tools (
     PREFIX "@HDF_PACKAGE_NAMESPACE@"
     TOOLS  @HDF5_UTILS_TO_EXPORT@
 )
+if (H5PUB_ERROR)
+  set (${HDF5_PACKAGE_NAME}_FOUND FALSE)
+  set (${HDF5_PACKAGE_NAME}_NOT_FOUND_MESSAGE "${H5PUB_ERROR}")
+  unset (H5PUB_ERROR)
+  unset (HDF5_PUBLIC_LIBRARY_NAMES)
+  return ()
+endif ()
 
 h5_default_public_linkage (
     "${${HDF5_PACKAGE_NAME}_PROVIDES_SHARED_LIBS}"
@@ -382,16 +389,11 @@ list (FIND ${HDF5_PACKAGE_NAME}_LIB_TYPE "shared" _h5_wants_shared)
 list (FIND ${HDF5_PACKAGE_NAME}_LIB_TYPE "static" _h5_wants_static)
 
 if (_h5_wants_shared GREATER -1 AND _h5_wants_static GREATER -1)
-  # Both linkages were requested. The pre-2.3.0 variables can express that, but
-  # a single public target name cannot, so fall back to the default and say so
-  # rather than picking one silently.
+  # Both linkages were requested, and both are available. The
+  # ${HDF5_PACKAGE_NAME}_<lang>_<LINKAGE>_LIBRARY variables can name both and
+  # still do, but a single public target name cannot, so the public names fall
+  # back to the default linkage.
   set (_h5_public_linkage "${_h5_default_linkage}")
-  message (WARNING
-      "find_package(${CMAKE_FIND_PACKAGE_NAME}) requested both the \"static\" and \"shared\" "
-      "components. The hdf5:: targets can only refer to one linkage and will refer to the "
-      "${_h5_public_linkage} libraries. Request exactly one of \"static\" or \"shared\", or set "
-      "HDF5_USE_STATIC_LIBRARIES, to choose deliberately. The "
-      "${HDF5_PACKAGE_NAME}_<lang>_<LINKAGE>_LIBRARY variables still name both.")
 elseif (_h5_wants_shared GREATER -1)
   set (_h5_public_linkage "shared")
 elseif (_h5_wants_static GREATER -1)
@@ -403,13 +405,13 @@ else ()
 endif ()
 
 if (_h5_public_linkage STREQUAL "shared" AND NOT ${HDF5_PACKAGE_NAME}_PROVIDES_SHARED_LIBS)
-  message (WARNING
-      "This HDF5 installation does not provide shared libraries, so no hdf5:: targets were "
-      "defined. Request the \"static\" component instead.")
+  set (${HDF5_PACKAGE_NAME}_FOUND FALSE)
+  set (${HDF5_PACKAGE_NAME}_NOT_FOUND_MESSAGE
+      "The shared libraries were requested, but this HDF5 installation only provides static libraries. Request the \"static\" component instead.")
 elseif (_h5_public_linkage STREQUAL "static" AND NOT ${HDF5_PACKAGE_NAME}_PROVIDES_STATIC_LIBS)
-  message (WARNING
-      "This HDF5 installation does not provide static libraries, so no hdf5:: targets were "
-      "defined. Request the \"shared\" component instead.")
+  set (${HDF5_PACKAGE_NAME}_FOUND FALSE)
+  set (${HDF5_PACKAGE_NAME}_NOT_FOUND_MESSAGE
+      "The static libraries were requested, but this HDF5 installation only provides shared libraries. Request the \"shared\" component instead.")
 elseif (_h5_public_linkage)
   # The concrete names are substituted in from the build that produced this
   # installation, so a build that renamed its libraries via HDF5_LIB_BASE still
@@ -439,8 +441,14 @@ elseif (_h5_public_linkage)
     unset (H5PUB_CONCRETE_${_h5_name}_shared)
   endforeach ()
   unset (_h5_name)
+
+  if (H5PUB_ERROR)
+    set (${HDF5_PACKAGE_NAME}_FOUND FALSE)
+    set (${HDF5_PACKAGE_NAME}_NOT_FOUND_MESSAGE "${H5PUB_ERROR}")
+  endif ()
 endif ()
 
+unset (H5PUB_ERROR)
 unset (_h5_default_linkage)
 unset (_h5_wants_shared)
 unset (_h5_wants_static)

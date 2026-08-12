@@ -206,7 +206,8 @@ target_link_libraries (${example} PRIVATE hdf5::hdf5)
 
 Setting `HDF5_USE_STATIC_LIBRARIES` before `find_package()` has the same
 effect, matching `FindHDF5`. Requesting both `static` and `shared` leaves the
-public targets on the default and warns, since one name cannot refer to both.
+public targets on the default, since one name cannot refer to both; the
+`HDF5_<lang>_<LINKAGE>_LIBRARY` variables still name both.
 
 This preference applies to the whole `find_package()` call, not just to the
 public targets: it also decides which `HDF5_<lang>_<LINKAGE>_LIBRARY` variables

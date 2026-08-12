@@ -1441,10 +1441,16 @@ set (H5PUB_CONCRETE_hdf5_hl_fortran_static "${HDF5_HL_F90_LIB_TARGET}")
 set (H5PUB_CONCRETE_hdf5_hl_fortran_shared "${HDF5_HL_F90_LIBSH_TARGET}")
 
 h5_define_public_tools (TOOLS ${HDF5_UTILS_TO_EXPORT})
+if (H5PUB_ERROR)
+  message (FATAL_ERROR "${H5PUB_ERROR}")
+endif ()
 
 h5_default_public_linkage ("${BUILD_SHARED_LIBS}" "${BUILD_STATIC_LIBS}" HDF5_PUBLIC_TARGET_LINKAGE)
 if (HDF5_PUBLIC_TARGET_LINKAGE)
   h5_define_public_targets (LINKAGE ${HDF5_PUBLIC_TARGET_LINKAGE})
+  if (H5PUB_ERROR)
+    message (FATAL_ERROR "${H5PUB_ERROR}")
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
