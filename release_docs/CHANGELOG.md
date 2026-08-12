@@ -77,6 +77,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed out-of-bounds reads when a filtered chunk is shorter than its filter header
+
+   The scaleoffset, fletcher32, and szip filters each store a fixed-size block alongside the chunk data: a 21-byte parameter block in front of the compressed stream for scaleoffset, a 4-byte uncompressed-length header for szip, and a 4-byte checksum after the data for fletcher32. On read, each one subtracted that fixed size from the chunk length without first checking that the chunk was at least that long. A truncated or corrupted chunk record made the subtraction wrap around, so all three filters read far past the end of the chunk buffer. `H5Z__filter_scaleoffset()` also copied `d_nelmts * dtype_size` bytes out of the buffer in its full-precision path, with both counts taken from the filter pipeline message rather than from the buffer it was given, so a small chunk with a large declared element count returned adjacent heap contents as dataset data. Its bounds checks also measured the chunk buffer's allocated size, which the library deliberately sizes to hold the larger unfiltered chunk, so a truncated chunk could still decompress out of the uninitialized remainder of that allocation. All three filters now reject any chunk shorter than their own header or trailer, and scaleoffset validates every read against the number of bytes actually stored for the chunk rather than the size of the buffer holding them.
+
 ## Java Library
 
 ## Configuration
