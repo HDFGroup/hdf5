@@ -90,11 +90,13 @@
     } while (0)
 
 /* Macro to Check for chunk size being too big to encode. Early versions were simply limited to 32 bits.
- * Version 4, except for the single chunk index, was limited using a formula described below. Version 5 uses
- * 64 bits, as does the single chunk index (with all versions). We additionally impose the restriction that
- * version 4 cannot encode more than 32 bits, even though it is not precluded by the file format, because
- * those versions of the library cannot handle chunks larger than 32 bits internally. */
-#define H5D_CHUNK_ENCODE_SIZE_CHECK(layout, length, err)                                                     \
+ * Version 4, except for the single chunk index, was limited using a formula described below. Version 5, and
+ * the single chunk index with any version, encode the filtered chunk size in a fixed-width field whose size
+ * is the file's "size of sizes" (see H5Pset_sizes()); the chunk size must therefore fit in that many bytes.
+ * We additionally impose the restriction that version 4 cannot encode more than 32 bits, even though it is
+ * not precluded by the file format, because those versions of the library cannot handle chunks larger than
+ * 32 bits internally. */
+#define H5D_CHUNK_ENCODE_SIZE_CHECK(f, layout, length, err)                                                  \
     do {                                                                                                     \
         if ((layout)->version <= H5O_LAYOUT_VERSION_4) {                                                     \
             if ((length) > UINT32_MAX)                                                                       \
@@ -125,6 +127,19 @@
                                 "filter increased chunk size by too much and it cannot be encoded with "     \
                                 "this file format version - see H5Pset_libver_bounds()");                    \
             }                                                                                                \
+        }                                                                                                    \
+                                                                                                             \
+        /* For version 5 (all chunk index types) and for the single chunk index (any version), the */        \
+        /* filtered chunk size is encoded in a fixed-width field equal to the file's "size of sizes". */     \
+        /* Make sure the chunk size fits in that many bytes to avoid silently truncating it. */              \
+        if ((layout)->version > H5O_LAYOUT_VERSION_4 ||                                                      \
+            (layout)->storage.u.chunk.idx_type == H5D_CHUNK_IDX_SINGLE) {                                    \
+            unsigned size_of_sizes = (unsigned)H5F_SIZEOF_SIZE(f);                                           \
+                                                                                                             \
+            if (size_of_sizes < 8 && (length) > (((uint64_t)1 << (8 * size_of_sizes)) - 1))                  \
+                HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, err,                                                  \
+                            "filtered chunk size is too large to be encoded with the file's size of sizes "  \
+                            "- see H5Pset_sizes()");                                                         \
         }                                                                                                    \
     } while (0)
 
@@ -7670,7 +7685,7 @@ H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old
         /* Check for chunk size overflowing format limitations */
         /* Only needed for filtered datasets because the unfiltered chunk size
          * was already checked in H5D__chunk_construct() */
-        H5D_CHUNK_ENCODE_SIZE_CHECK(idx_info->layout, new_chunk->length, FAIL);
+        H5D_CHUNK_ENCODE_SIZE_CHECK(idx_info->f, idx_info->layout, new_chunk->length, FAIL);
 
         if (old_chunk && H5_addr_defined(old_chunk->offset)) {
             /* Sanity check */
