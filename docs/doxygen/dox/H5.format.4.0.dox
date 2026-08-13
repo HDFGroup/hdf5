@@ -1908,16 +1908,16 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 0 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#0 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 1 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#1 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 <tr>
   <td colspan="4"><br />...<br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension \#(d - 1) Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d-1) Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
@@ -1963,16 +1963,16 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4">Filter Mask</td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 0 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#0 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 1 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#1 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 <tr>
   <td colspan="4"><br />...<br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension \#(d - 1) Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d-1) Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
@@ -1998,16 +1998,16 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4">Filter Mask</td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 0 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#0 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 1 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#1 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 <tr>
   <td colspan="4"><br />...<br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension \#(d - 1) Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d-1) Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
@@ -5523,8 +5523,8 @@ The following is a list of currently defined header messages:
 </tr>
 <tr>
   <td><b>Description:</b></td>
-  <td>The dataspace message describes the number of dimensions (in other words, &ldquo;rank&rdquo;) and size
-      of each dimension that the data object has. This message is only used for datasets which have a
+  <td>The dataspace message describes the number of dimensions, <em>d</em> (also called the
+      &ldquo;rank&rdquo;), and the extent of each dimension that the data object has. This message is only used for datasets which have a
       simple, rectilinear, array-like layout; datasets requiring a more complex layout are not yet supported.<br />
       This message may be shared between multiple objects in the file; see @ref subsec_fmt4_dataobject_hdr_msg
       for the shared message encoding.</td>
@@ -5552,31 +5552,31 @@ The following is a list of currently defined header messages:
   <td colspan="4">Reserved</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Dimension \#1 Size<sup>L</sup><br /><br /></td>
+  <td colspan="4">Dimension \#0 Extent<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Dimension \#n Size<sup>L</sup><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d-1) Extent<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Dimension \#1 Maximum Size<sup>L</sup><br /><br /></td>
-</tr>
-<tr align="center">
-  <td colspan="4">.<br />.<br />.<br /></td>
-</tr>
-<tr align="center">
-  <td colspan="4"><br />Dimension \#n Maximum Size<sup>L</sup><br /><br /></td>
-</tr>
-<tr align="center">
-  <td colspan="4"><br />Permutation Index \#1<sup>L</sup><br /><br /></td>
+  <td colspan="4"><br />Dimension \#0 Maximum Extent<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Permutation Index \#n<sup>L</sup><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d-1) Maximum Extent<sup>L</sup><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Permutation Index \#0<sup>L</sup><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4">.<br />.<br />.<br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Permutation Index \#(d-1)<sup>L</sup><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
@@ -5597,7 +5597,8 @@ The following is a list of currently defined header messages:
 </tr>
 <tr valign=top>
   <td>Dimensionality</td>
-  <td>This value is the number of dimensions that the data object has.</td>
+  <td>This value is the number of dimensions, <em>d</em>, that the data object has (also known as the
+      &ldquo;rank&rdquo;).</td>
 </tr>
 <tr valign=top>
   <td>Flags</td>
@@ -5606,24 +5607,23 @@ The following is a list of currently defined header messages:
       that permutation indices are present.</td>
 </tr>
 <tr valign=top>
-  <td>Dimension \#n Size</td>
-  <td>This value is the current size of the dimension of the data as stored in the file. The first dimension
-      stored in the list of dimensions is the slowest changing dimension and the last dimension stored is the
-      fastest changing dimension.</td>
+  <td>Dimension \#i Extent (i = 0 to (d-1))</td>
+  <td>This value is the current extent of the dimension of the data as stored in the file, in units of
+      array elements (not bytes). Dimension \#0 is the slowest-changing axis and Dimension \#(d-1) is
+      the fastest-changing axis.</td>
 </tr>
 <tr valign=top>
-  <td>Dimension \#n Maximum Size</td>
-  <td>This value is the maximum size of the dimension of the data as stored in the file.  This value may be
-      the special &ldquo;@ref FMT4UnlimitedDim "unlimited size"&rdquo; which indicates that the data
-      may expand along this dimension indefinitely. If these values are not stored, the maximum size of each
-      dimension is assumed to be the dimension&rsquo;s current size.</td>
+  <td>Dimension \#i Maximum Extent (i = 0 to (d-1))</td>
+  <td>This value is the maximum extent of the dimension of the data as stored in the file. This value may be
+      the special &ldquo;@ref FMT4UnlimitedDim "unlimited extent"&rdquo; which indicates that the data
+      may expand along this dimension indefinitely. If these values are not stored, the maximum extent of
+      each dimension is assumed to be the dimension&rsquo;s current extent.</td>
 </tr>
 <tr valign=top>
-  <td>Permutation Index \#n</td>
+  <td>Permutation Index \#i (i = 0 to (d-1))</td>
   <td>This value is the index permutation used to map each dimension from the canonical representation to an
-    alternate axis for each dimension. If these values are not stored, the first dimension stored in the list
-    of dimensions is the slowest changing dimension and the last dimension stored is the fastest changing
-    dimension.</td>
+    alternate axis for each dimension. If these values are not stored, Dimension \#0 is the slowest changing
+    dimension and Dimension \#(d-1) is the fastest changing dimension.</td>
 </tr>
 </table>
 
@@ -5644,22 +5644,22 @@ implemented in the HDF5 Library:
   <td>Type</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Dimension \#1 Size<sup>L</sup><br /><br /></td>
+  <td colspan="4">Dimension \#0 Extent<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Dimension \#n Size<sup>L</sup><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d-1) Extent<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Dimension \#1 Maximum Size<sup>L</sup><br /><br /></td>
+  <td colspan="4"><br />Dimension \#0 Maximum Extent<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Dimension \#n Maximum Size<sup>L</sup><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d-1) Maximum Extent<sup>L</sup><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
@@ -5678,7 +5678,8 @@ implemented in the HDF5 Library:
 </tr>
 <tr valign=top>
   <td>Dimensionality</td>
-  <td>This value is the number of dimensions that the data object has.</td>
+  <td>This value is the number of dimensions, <em>d</em>, that the data object has (also known as the
+      &ldquo;rank&rdquo;).</td>
 </tr>
 <tr valign=top>
   <td>Flags</td>
@@ -5709,17 +5710,17 @@ implemented in the HDF5 Library:
       </table></td>
 </tr>
 <tr valign=top>
-  <td>Dimension \#n Size</td>
-  <td>This value is the current size of the dimension of the data as stored in the file. The first dimension
-      stored in the list of dimensions is the slowest changing dimension and the last dimension stored is the
-      fastest changing dimension.</td>
+  <td>Dimension \#i Extent (i = 0 to (d-1))</td>
+  <td>This value is the current extent of the dimension of the data as stored in the file, in units of
+      array elements (not bytes). Dimension \#0 is the slowest-changing axis and Dimension \#(d-1) is
+      the fastest-changing axis.</td>
 </tr>
 <tr valign=top>
-  <td>Dimension \#n Maximum Size</td>
-  <td>This value is the maximum size of the dimension of the data as stored in the file.  This value may be
-      the special &ldquo;@ref FMT4UnlimitedDim "unlimited size"&rdquo; which indicates that the data
-      may expand along this dimension indefinitely. If these values are not stored, the maximum size of each
-      dimension is assumed to be the dimension&rsquo;s current size.</td>
+  <td>Dimension \#i Maximum Extent (i = 0 to (d-1))</td>
+  <td>This value is the maximum extent of the dimension of the data as stored in the file. This value may be
+      the special &ldquo;@ref FMT4UnlimitedDim "unlimited extent"&rdquo; which indicates that the data
+      may expand along this dimension indefinitely. If these values are not stored, the maximum extent of
+      each dimension is assumed to be the dimension&rsquo;s current extent.</td>
 </tr>
 </table>
 
@@ -5887,7 +5888,7 @@ implemented in the HDF5 Library:
   <td colspan="4">Size</td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br /><br />Properties<br /><br> /<br /></td>
+  <td colspan="4"><br /><br />Properties<br /><br /></td>
 </tr>
 </table>
 
@@ -6464,7 +6465,7 @@ versions of the HDF5 library from the 1.4 release onward.
   <th>Byte</th>
 </tr>
 <tr align="center">
-  <td colspan="4"><br /><br />Name<br /><br >/<br /></td>
+  <td colspan="4"><br /><br />Name<br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4">Byte Offset of Member</td>
@@ -6480,16 +6481,16 @@ versions of the HDF5 library from the 1.4 release onward.
   <td colspan="4">Reserved (zero)</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Dimension \#1 Size (required)</td>
+  <td colspan="4">Dimension \#0 Extent (required)</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Dimension \#2 Size (required)</td>
+  <td colspan="4">Dimension \#1 Extent (required)</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Dimension \#3 Size (required)</td>
+  <td colspan="4">Dimension \#2 Extent (required)</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Dimension \#4 Size (required)</td>
+  <td colspan="4">Dimension \#3 Extent (required)</td>
 </tr>
 <tr align="center">
   <td colspan="4"><br />Member Type Message<br /><br /></td>
@@ -6514,8 +6515,9 @@ versions of the HDF5 library from the 1.4 release onward.
 <tr>
   <td>Dimensionality</td>
   <td>If set to zero, this field indicates a scalar member. If set to a value greater than zero,
-      this field indicates that the member is an array of values. For array members, the size of
-      the array is indicated by the &lsquo;Size of Dimension n&rsquo; field in this message.</td>
+      <em>d</em>, this field indicates that the member is an array of <em>d</em> dimensions, whose
+      extents are given by Dimension \#0 Extent through Dimension \#(d&minus;1) Extent; the
+      remaining Dimension Extent fields, if any, are unused.</td>
 </tr>
 <tr>
   <td>Dimension Permutation</td>
@@ -6523,10 +6525,11 @@ versions of the HDF5 library from the 1.4 release onward.
       never implemented. This field should always be set to zero.</td>
 </tr>
 <tr>
-  <td>Dimension \#n Size</td>
-  <td>This field is the size of a dimension of the array field as stored in the file. The first
-      dimension stored in the list of dimensions is the slowest changing dimension and the last
-      dimension stored is the fastest changing dimension.</td>
+  <td>Dimension \#i Extent (i = 0 to 3)</td>
+  <td>This field is the extent of a dimension of the array field, in units of array elements (not
+      bytes), as stored in the file. Dimension \#0 is the slowest-changing axis. Exactly 4 Dimension
+      Extent fields are always present; only the first <em>d</em> (Dimension \#0 Extent through
+      Dimension \#(d&minus;1) Extent) are meaningful, and any remaining fields are unused.</td>
 </tr>
 <tr>
   <td>Member Type Message</td>
@@ -6543,13 +6546,13 @@ versions of the HDF5 library from the 1.4 release onward.
   <th width="25%">Byte</th>
 </tr>
 <tr>
-  <td colspan="4"><br />Name<br><br /></td>
+  <td colspan="4"><br />Name<br /><br /></td>
 </tr>
 <tr>
   <td colspan="4">Byte Offset of Member</td>
 </tr>
 <tr>
-  <td colspan="4"><br />Member Type Message<br><br /></td>
+  <td colspan="4"><br />Member Type Message<br /><br /></td>
 </tr>
 </table>
 
@@ -6583,13 +6586,13 @@ versions of the HDF5 library from the 1.4 release onward.
   <th width="25%">Byte</th>
 </tr>
 <tr>
-  <td colspan="4"><br />Name<br><br /></td>
+  <td colspan="4"><br />Name<br /><br /></td>
 </tr>
 <tr>
   <td colspan="4">Byte Offset of Member</td>
 </tr>
 <tr>
-  <td colspan="4"><br />Member Type Message<br><br /></td>
+  <td colspan="4"><br />Member Type Message<br /><br /></td>
 </tr>
 </table>
 
@@ -6741,7 +6744,7 @@ There are no properties defined for the reference class.
   <th>Byte</th>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Base Type<br >/<br /></td>
+  <td colspan="4"><br />Base Type<br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4"><br />Names<br /><br /></td>
@@ -6783,7 +6786,7 @@ There are no properties defined for the reference class.
   <th>Byte</th>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Base Type<br >/<br /></td>
+  <td colspan="4"><br />Base Type<br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4"><br />Names<br /><br /></td>
@@ -6962,22 +6965,22 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <td colspan="3">Reserved (zero)</td>
 </tr>
 <tr>
-  <td colspan="4">Dimension \#1 Size</td>
+  <td colspan="4">Dimension \#0 Extent</td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Dimension \#n Size</td>
+  <td colspan="4">Dimension \#(d-1) Extent</td>
 </tr>
 <tr>
-  <td colspan="4">Permutation Index \#1</td>
+  <td colspan="4">Permutation Index \#0</td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Permutation Index \#n</td>
+  <td colspan="4">Permutation Index \#(d-1)</td>
 </tr>
 <tr>
   <td colspan="4"><br />Base Type<br /><br /></td>
@@ -6992,20 +6995,20 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 <tr>
   <td>Dimensionality</td>
-  <td>This value is the number of dimensions that the array has.</td>
+  <td>This value is the number of dimensions, <em>d</em>, that the array has.</td>
 </tr>
 <tr>
-  <td>Dimension \#n Size</td>
-  <td>This value is the size of the dimension of the array as stored in the file. The first dimension
-      stored in the list of dimensions is the slowest changing dimension and the last dimension stored
-      is the fastest changing dimension.</td>
+  <td>Dimension \#i Extent (i = 0 to (d-1))</td>
+  <td>This value is the extent of the dimension of the array as stored in the file, in units of array
+      elements (not bytes). Dimension \#0 is the slowest-changing axis and Dimension \#(d-1) is the
+      fastest-changing axis.</td>
 </tr>
 <tr>
-  <td>Permutation Index \#n</td>
+  <td>Permutation Index \#i (i = 0 to (d-1))</td>
   <td>This value is the index permutation used to map each dimension from the canonical representation
       to an alternate axis for each dimension. Currently, dimension permutations are not supported and
-      these indices should be set to the index position minus one (i.e. the first dimension should be
-      set to 0, the second dimension should be set to 1, and so on.)</td>
+      these indices should be set to the index position (i.e. Permutation Index \#0 should be set to 0,
+      Permutation Index \#1 should be set to 1, and so on.)</td>
 </tr>
 <tr>
   <td>Base Type</td>
@@ -7027,13 +7030,13 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
 <tr>
-  <td colspan="4">Dimension \#1 Size</td>
+  <td colspan="4">Dimension \#0 Extent</td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Dimension \#n Size</td>
+  <td colspan="4">Dimension \#(d-1) Extent</td>
 </tr>
 <tr>
   <td colspan="4"><br />Base Type<br /><br /></td>
@@ -7048,13 +7051,13 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 <tr>
   <td>Dimensionality</td>
-  <td>This value is the number of dimensions that the array has.</td>
+  <td>This value is the number of dimensions, <em>d</em>, that the array has.</td>
 </tr>
 <tr>
-  <td>Dimension \#n Size</td>
-  <td>This value is the size of the dimension of the array as stored in the file. The first dimension
-      stored in the list of dimensions is the slowest changing dimension and the last dimension stored
-      is the fastest changing dimension.</td>
+  <td>Dimension \#i Extent (i = 0 to (d-1))</td>
+  <td>This value is the extent of the dimension of the array as stored in the file, in units of array
+      elements (not bytes). Dimension \#0 is the slowest-changing axis and Dimension \#(d-1) is the
+      fastest-changing axis.</td>
 </tr>
 <tr>
   <td>Base Type</td>
@@ -7918,16 +7921,16 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <td colspan="4"><br />Data Address<sup>O</sup> <em>(optional)</em><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4">Dimension 0 Size</td>
+  <td colspan="4">Dimension \#0 Extent</td>
 </tr>
 <tr>
-  <td colspan="4">Dimension 1 Size</td>
+  <td colspan="4">Dimension \#1 Extent</td>
 </tr>
 <tr>
   <td colspan="4">...</td>
 </tr>
 <tr>
-  <td colspan="4">Dimension \#(d - 1) Size</td>
+  <td colspan="4">Dimension \#(d-1) Extent</td>
 </tr>
 <tr>
   <td colspan="4">Dataset Element Size <em>(stored as Dimension \#d)</em></td>
@@ -7976,12 +7979,14 @@ another datatype) and the dataspace for a dataset describes the location of the 
 <tr valign=top>
   <td>Dimensionality</td>
   <td>\anchor FMT4V12Dimensionality An array has a fixed dimensionality.
-      Let <b>d</b> be the number of dimensions in the dataset&rsquo;s dataspace.
-      For compact and contiguous storage, this field stores <b>d</b>.
+      Let <b>d</b> be the number of dimensions in the dataset&rsquo;s dataspace (its rank).
+      This field stores the number of entries in the Dimension Extent list below.
       <br />
-      For chunked storage, this field stores <b>d + 1</b>: entries 0 through d&minus;1 are the chunk
-      dimension sizes, and entry d holds the Dataset Element Size (see below).
-      For example, a 1-dimensional chunked dataset stores a value of 2.</td>
+      For compact and contiguous storage, that list has exactly <b>d</b> entries.
+      For chunked storage, the list has <b>d + 1</b> entries: the first <b>d</b> (Dimension \#0 Extent
+      through Dimension \#(d-1) Extent) are the chunk&rsquo;s dimension extents, and one additional
+      trailing entry &mdash; not a real dimension &mdash; holds the Dataset Element Size (see below).
+      For example, a 1-dimensional chunked dataset stores a Dimensionality value of 2.</td>
 </tr>
 <tr valign=top>
   <td>Layout Class</td>
@@ -8015,22 +8020,23 @@ another datatype) and the dataspace for a dataset describes the location of the 
       has not yet been allocated for this array.</td>
 </tr>
 <tr valign=top>
-  <td>Dimension \#i Size (i = 0 to (d-1))</td>
-  <td>\anchor FMT4V12DimInfoN For contiguous and compact storage the dimensions define the entire size of the array
-      in units of array elements (not bytes).
-      Dimension 0 is the slowest-changing axis and Dimension d&minus;1 is the fastest-changing axis.
-      <br />For chunked storage, the dimensions define the size of a single chunk in units of array
+  <td>Dimension \#i Extent (i = 0 to (d-1))</td>
+  <td>\anchor FMT4V12DimInfoN For contiguous and compact storage the dimensions define the entire extent
+      of the array, in units of array elements (not bytes).
+      Dimension \#0 is the slowest-changing axis and Dimension \#(d-1) is the fastest-changing axis.
+      <br />For chunked storage, the dimensions define the extent of a single chunk, in units of array
       elements (not bytes).
-      Dimension 0 is the slowest-changing axis and Dimension d&minus;1 is the fastest-changing axis.
-      Dimension d stores the Dataset Element Size (see below) and is not a chunk dimension.</td>
+      Dimension \#0 is the slowest-changing axis and Dimension \#(d-1) is the fastest-changing axis.
+      The following entry, Dimension \#d, is not a chunk dimension; it holds the Dataset Element Size
+      (see below).</td>
 </tr>
 <tr>
   <td>Dataset Element Size</td>
   <td>\anchor FMT4V12DsetElmSz The size of a dataset element, in bytes.
       This field is only present for chunked data storage.
-      Although logically distinct from the chunk dimensions, this value is encoded as
-      dimension entry d where d is the number of dataset dimensions,
-      which is why the Dimensionality field stores d + 1.</td>
+      Although it is not a dimension extent, it is encoded as the trailing entry, Dimension \#d, in the
+      Dimension Extent list above, which is why the Dimensionality field stores d + 1 rather than d
+      for chunked storage.</td>
 </tr>
 <tr>
   <td>Compact Data Size</td>
@@ -8206,16 +8212,16 @@ Class-specific information for chunked storage (layout class 2):
   <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4">Dimension 0 Size</td>
+  <td colspan="4">Dimension \#0 Extent</td>
 </tr>
 <tr>
-  <td colspan="4">Dimension 1 Size</td>
+  <td colspan="4">Dimension \#1 Extent</td>
 </tr>
 <tr>
   <td colspan="4">...</td>
 </tr>
 <tr>
-  <td colspan="4">Dimension \#(d - 1) Size</td>
+  <td colspan="4">Dimension \#(d-1) Extent</td>
 </tr>
 <tr>
   <td colspan="4">Dataset Element Size <em>(stored as Dimension \#d)</em></td>
@@ -8244,8 +8250,8 @@ Class-specific information for chunked storage (layout class 2):
       that storage has not yet been allocated for this array.</td>
 </tr>
 <tr>
-  <td>Dimension \#i Size (i = 0 to (d-1))</td>
-  <td>\anchor FMT4DimInfoN See @ref FMT4V12DimInfoN "Dimension \#i Size" description in versions 1 and 2 Data Layout message, in particular the chunked storage portion.</td>
+  <td>Dimension \#i Extent (i = 0 to (d-1))</td>
+  <td>\anchor FMT4DimInfoN See @ref FMT4V12DimInfoN "Dimension \#i Extent" description in versions 1 and 2 Data Layout message, in particular the chunked storage portion.</td>
 </tr>
 <tr>
   <td>Dataset Element Size</td>
@@ -8368,20 +8374,20 @@ information for the virtual layout class as well as indexing information for the
 <tr>
   <td>Flags</td>
   <td>Dimensionality</td>
-  <td>Dimension Size Encoded Length</td>
+  <td>Dimension Extent Encoded Length</td>
   <td bgcolor=#DDDDDD><em>This space inserted only to align table nicely</em></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 0 Size <em>(variable size)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#0 Extent <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 1 Size <em>(variable size)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#1 Extent <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr>
   <td colspan="4"><br />...<br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension \#(d - 1) Size <em>(variable size)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d-1) Extent <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr>
   <td colspan="4"><br />Dataset Element Size <em>(stored as Dimension \#d)</em> <em>(variable size)</em><br /><br /></td>
@@ -8431,12 +8437,12 @@ information for the virtual layout class as well as indexing information for the
   <td>See @ref FMT4V12Dimensionality "Dimensionality" description in versions 1 and 2 Data Layout message, in particular the chunked storage portion.</td>
 </tr>
 <tr>
-  <td>Dimension Size Encoded Length</td>
-  <td>This is the size in bytes used to encode <em>Dimension Size</em>.</td>
+  <td>Dimension Extent Encoded Length</td>
+  <td>This is the size in bytes used to encode each <em>Dimension Extent</em> value.</td>
 </tr>
 <tr>
-  <td>Dimension \#i Size (i = 0 to (d-1))</td>
-  <td>See @ref FMT4V12DimInfoN "Dimension \#i Size" description in versions 1 and 2 Data Layout message, in particular the chunked storage portion.</td>
+  <td>Dimension \#i Extent (i = 0 to (d-1))</td>
+  <td>See @ref FMT4V12DimInfoN "Dimension \#i Extent" description in versions 1 and 2 Data Layout message, in particular the chunked storage portion.</td>
 </tr>
 <tr>
   <td>Dataset Element Size</td>
@@ -10937,9 +10943,9 @@ Definitions of various terms used in this document are included in this section.
       set: in other words, <code>0xffff...ff</code>.</td>
 </tr>
 <tr>
-  <td><strong>Unlimited Size</strong></td>
-  <td>\anchor FMT4UnlimitedDim The "unlimited size" for a size is a value with all bits set: in other words,
-      <code>0xffff...ff</code>.</td>
+  <td><strong>Unlimited Extent</strong></td>
+  <td>\anchor FMT4UnlimitedDim The "unlimited extent" for a dimension extent is a value with all bits set:
+      in other words, <code>0xffff...ff</code>.</td>
 </tr>
 </table>
 
@@ -11093,16 +11099,16 @@ dimension, then the next fastest, and so on. The chunk index for a dataset chunk
       <code>nchunks = (curr_dims + chunk_dims - 1)/chunk_dims</code></li>
   <li>Calculate the down chunks for each dimension in <code>down_chunks</code>:<br />
       <code>
-        // n is the # of dimensions
-        for(i = (int)(n-1), acc = 1; i >= 0; i--) {
+        // d is the number of dimensions
+        for(i = (int)(d-1), acc = 1; i >= 0; i--) {
             down_chunks[i] = acc;
             acc *= nchunks[i];
         }
       </code></li>
   <li>Calculate the chunk index in <code>chunk_index</code>:<br />
       <code>
-        // n is the # of dimensions
-        for(u = 0, chunk_index = 0; u < n; u++)
+        // d is the number of dimensions
+        for(u = 0, chunk_index = 0; u < d; u++)
             chunk_index += down_chunks[u] * scaled_offset[u];
       </code></li>
 </ol>
@@ -12588,49 +12594,49 @@ See the reference manual description for these two public routines.
   <td colspan="4">Num Blocks</td>
 </tr>
 <tr>
-  <td colspan="4">Starting Offset \#1 for Block \#1</td>
+  <td colspan="4">Starting Offset \#0 for Block \#0</td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Starting Offset \#n for Block \#1</td>
+  <td colspan="4">Starting Offset \#(d-1) for Block \#0</td>
 </tr>
 <tr>
-  <td colspan="4">Ending Offset \#1 for Block \#1</td>
-</tr>
-<tr>
-  <td colspan="4">.<br />.<br />.<br /></td>
-</tr>
-<tr>
-  <td colspan="4">Ending Offset \#n for Block \#1</td>
+  <td colspan="4">Ending Offset \#0 for Block \#0</td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
+  <td colspan="4">Ending Offset \#(d-1) for Block \#0</td>
+</tr>
+<tr>
+  <td colspan="4">.<br />.<br />.<br /></td>
+</tr>
+<tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Starting Offset \#1 for Block \#u</td>
+  <td colspan="4">Starting Offset \#0 for Block \#(Num Blocks-1)</td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Starting Offset \#n for Block \#u</td>
+  <td colspan="4">Starting Offset \#(d-1) for Block \#(Num Blocks-1)</td>
 </tr>
 <tr>
-  <td colspan="4">Ending Offset \#1 for Block \#u</td>
+  <td colspan="4">Ending Offset \#0 for Block \#(Num Blocks-1)</td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Ending Offset \#n for Block \#u</td>
+  <td colspan="4">Ending Offset \#(d-1) for Block \#(Num Blocks-1)</td>
 </tr>
 </table>
 
@@ -12646,23 +12652,21 @@ See the reference manual description for these two public routines.
 </tr>
 <tr>
   <td>Rank</td>
-  <td>The number of dimensions in the dataspace.</td>
+  <td>The number of dimensions, <em>d</em>, in the dataspace.</td>
 </tr>
 <tr>
   <td>Num Blocks</td>
   <td>The number of blocks in the selection.</td>
 </tr>
 <tr>
-  <td>Starting Offset \#n for Block \#u</td>
-  <td>The offset \#n of the starting element in block \#u. \#n is from 1 to <em>Rank</em>.
-      \#u is from 1 to <em>Num Blocks</em> moving from the fastest changing dimension to
-      the slowest changing dimension.</td>
+  <td>Starting Offset \#i for Block \#j (i = 0 to (d-1), j = 0 to (Num Blocks-1))</td>
+  <td>The offset of the starting element, along dimension \#i, of block \#j. Blocks are ordered
+      moving from the fastest changing dimension to the slowest changing dimension.</td>
 </tr>
 <tr>
-  <td>Ending Offset \#n for Block \#u</td>
-  <td>The offset \#n of the ending element in block \#u. \#n is from 1 to <em>Rank</em>.
-      \#u is from 1 to <em>Num Blocks</em> moving from the fastest changing dimension to
-      the slowest changing dimension.</td>
+  <td>Ending Offset \#i for Block \#j (i = 0 to (d-1), j = 0 to (Num Blocks-1))</td>
+  <td>The offset of the ending element, along dimension \#i, of block \#j. Blocks are ordered
+      moving from the fastest changing dimension to the slowest changing dimension.</td>
 </tr>
 </table>
 
@@ -12686,31 +12690,31 @@ See the reference manual description for these two public routines.
   <td colspan="4">Rank</td>
 </tr>
 <tr>
-  <td colspan="4">Start \#1 <em>(8 bytes)</em></td>
+  <td colspan="4">Start \#0 <em>(8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Stride \#1 <em>(8 bytes)</em></td>
+  <td colspan="4">Stride \#0 <em>(8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Count \#1 <em>(8 bytes)</em></td>
+  <td colspan="4">Count \#0 <em>(8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Block \#1 <em>(8 bytes)</em></td>
+  <td colspan="4">Block \#0 <em>(8 bytes)</em></td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Start \#n <em>(8 bytes)</em></td>
+  <td colspan="4">Start \#(d-1) <em>(8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Stride \#n <em>(8 bytes)</em></td>
+  <td colspan="4">Stride \#(d-1) <em>(8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Count \#n <em>(8 bytes)</em></td>
+  <td colspan="4">Count \#(d-1) <em>(8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Block \#n <em>(8 bytes)</em></td>
+  <td colspan="4">Block \#(d-1) <em>(8 bytes)</em></td>
 </tr>
 </table>
 
@@ -12740,23 +12744,16 @@ See the reference manual description for these two public routines.
 </tr>
 <tr>
   <td>Rank</td>
-  <td>The number of dimensions in the dataspace.</td>
+  <td>The number of dimensions, <em>d</em>, in the dataspace.</td>
 </tr>
 <tr>
-  <td>Start \#n</td>
-  <td>The offset of the starting element in the block. \#n is from 1 to <em>Rank</em>.</td>
-</tr>
-<tr>
-  <td>Stride \#n</td>
-  <td>The number of elements to move in each dimension. \#n is from 1 to <em>Rank</em>. </td>
-</tr>
-<tr>
-  <td>Count \#n</td>
-  <td>The number of blocks to select in each dimension. \#n is from 1 to <em>Rank</em>.</td>
-</tr>
-<tr>
-  <td>Block \#n</td>
-  <td>The size (in elements) of each block in each dimension. \#n is from 1 to <em>Rank</em>.</td>
+  <td>Start \#i, Stride \#i, Count \#i, Block \#i (i = 0 to (d-1))</td>
+  <td>For each dimension \#i, these four values are stored together, in this order, before those of
+      dimension \#i+1:<br />
+      <em>Start \#i</em>: the offset of the starting element in the block, along dimension \#i.<br />
+      <em>Stride \#i</em>: the number of elements to move along dimension \#i.<br />
+      <em>Count \#i</em>: the number of blocks to select along dimension \#i.<br />
+      <em>Block \#i</em>: the extent (in elements) of each block along dimension \#i.</td>
 </tr>
 </table>
 
@@ -12808,7 +12805,7 @@ See the reference manual description for these two public routines.
 </tr>
 <tr>
   <td>Rank</td>
-  <td>The number of dimensions in the dataspace.</td>
+  <td>The number of dimensions, <em>d</em>, in the dataspace.</td>
 </tr>
 <tr>
   <td>Regular/Irregular Hyperslab Selection Info</td>
@@ -12829,31 +12826,31 @@ See the reference manual description for these two public routines.
   <th>byte</th>
 </tr>
 <tr>
-  <td colspan="4">Start \#1 <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Start \#0 <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Stride \#1 <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Stride \#0 <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Count \#1 <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Count \#0 <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Block \#1 <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Block \#0 <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Start \#n <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Start \#(d-1) <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Stride \#n <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Stride \#(d-1) <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Count \#n <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Count \#(d-1) <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Block \#n <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Block \#(d-1) <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 </table>
 
@@ -12864,24 +12861,14 @@ See the reference manual description for these two public routines.
   <th>Description</th>
 </tr>
 <tr>
-  <td>Start \#n</td>
-  <td>The offset of the starting element in the block. \#n is from 1 to <em>Rank</em>.
-      The field <em>Encode Size</em> indicates the size of this field.</td>
-</tr>
-<tr>
-  <td>Stride \#n</td>
-  <td>The number of elements to move in each dimension. \#n is from 1 to <em>Rank</em>.
-      The field <em>Encode Size</em> indicates the size of this field.</td>
-</tr>
-<tr>
-  <td>Count \#n</td>
-  <td>The number of blocks to select in each dimension. \#n is from 1 to <em>Rank</em>.
-      The field <em>Encode Size</em> indicates the size of this field.</td>
-</tr>
-<tr>
-  <td>Block \#n</td>
-  <td>The size (in elements) of each block in each dimension. \#n is from 1 to <em>Rank</em>.
-      The field <em>Encode Size</em> indicates the size of this field.</td>
+  <td>Start \#i, Stride \#i, Count \#i, Block \#i (i = 0 to (d-1))</td>
+  <td>For each dimension \#i, these four values are stored together, in this order, before those of
+      dimension \#i+1:<br />
+      <em>Start \#i</em>: the offset of the starting element in the block, along dimension \#i.<br />
+      <em>Stride \#i</em>: the number of elements to move along dimension \#i.<br />
+      <em>Count \#i</em>: the number of blocks to select along dimension \#i.<br />
+      <em>Block \#i</em>: the extent (in elements) of each block along dimension \#i.<br />
+      The field <em>Encode Size</em> indicates the size of each of these values.</td>
 </tr>
 </table>
 
@@ -12898,49 +12885,49 @@ See the reference manual description for these two public routines.
   <td colspan="4">Num Blocks <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Starting Offset \#1 for Block \#1 <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Starting Offset \#0 for Block \#0 <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Starting Offset \#n for Block \#1 <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Starting Offset \#(d-1) for Block \#0 <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Ending Offset \#1 for Block \#1 <em>(2, 4 or 8 bytes)</em></td>
-</tr>
-<tr>
-  <td colspan="4">.<br />.<br />.<br /></td>
-</tr>
-<tr>
-  <td colspan="4">Ending Offset \#n for Block \#1 <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Ending Offset \#0 for Block \#0 <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
+  <td colspan="4">Ending Offset \#(d-1) for Block \#0 <em>(2, 4 or 8 bytes)</em></td>
+</tr>
+<tr>
+  <td colspan="4">.<br />.<br />.<br /></td>
+</tr>
+<tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Starting Offset \#1 for Block \#u <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Starting Offset \#0 for Block \#(Num Blocks-1) <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Starting Offset \#n for Block \#u <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Starting Offset \#(d-1) for Block \#(Num Blocks-1) <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Ending Offset \#1 for Block \#u <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Ending Offset \#0 for Block \#(Num Blocks-1) <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Ending Offset \#n for Block \#u <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Ending Offset \#(d-1) for Block \#(Num Blocks-1) <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 </table>
 
@@ -12952,16 +12939,16 @@ See the reference manual description for these two public routines.
       this field</td>
 </tr>
 <tr>
-  <td>Starting Offset \#n for Block \#u</td>
-  <td>The offset \#n of the starting element in block \#u. \#n is from 1 to <em>Rank</em>.
-      \#u is from 1 to <em>Num Blocks</em> moving from the fastest changing dimension to the slowest
-      changing dimension. The field <em>Encode Size</em> indicates the size of this field</td>
+  <td>Starting Offset \#i for Block \#j (i = 0 to (d-1), j = 0 to (Num Blocks-1))</td>
+  <td>The offset of the starting element, along dimension \#i, of block \#j. Blocks are ordered
+      moving from the fastest changing dimension to the slowest changing dimension. The field
+      <em>Encode Size</em> indicates the size of this field.</td>
 </tr>
 <tr>
-  <td>Ending Offset \#n for Block \#u</td>
-  <td>The offset \#n of the ending element in block \#u. \#n is from 1 to <em>Rank</em>. \#u is from
-      1 to <em>Num Blocks</em> moving from the fastest changing dimension to the slowest changing
-      dimension. The field <em>Encode Size</em> indicates the size of this field</td>
+  <td>Ending Offset \#i for Block \#j (i = 0 to (d-1), j = 0 to (Num Blocks-1))</td>
+  <td>The offset of the ending element, along dimension \#i, of block \#j. Blocks are ordered
+      moving from the fastest changing dimension to the slowest changing dimension. The field
+      <em>Encode Size</em> indicates the size of this field.</td>
 </tr>
 </table>
 
