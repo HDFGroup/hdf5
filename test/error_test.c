@@ -16,6 +16,9 @@
 #include "h5test.h"
 #include "H5srcdir.h"
 
+#define H5E_FRIEND
+#include "H5Epkg.h" /* For access to H5E-specific macros */
+
 #ifdef H5_USE_16_API
 int
 main(void)
@@ -837,6 +840,50 @@ error:
 } /* end test_pause() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_overflow_stack
+ *
+ * Purpose:     Test pushing more than H5E_MAX_ENTRIES entries to an error
+ *              stack. Once the stack is full, the next push is simply a
+ *              no-op.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_overflow_stack(void)
+{
+    ssize_t err_num;
+    char    err_buf[32];
+
+    if (H5Eclear2(H5E_DEFAULT) < 0)
+        TEST_ERROR;
+
+    err_num = H5Eget_num(H5E_DEFAULT);
+    if (err_num != 0)
+        TEST_ERROR;
+
+    for (int i = 0; i < H5E_MAX_ENTRIES; i++) {
+        snprintf(err_buf, sizeof(err_buf), "error number %d", i + 1);
+
+        if (H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE,
+                    "%s", err_buf) < 0)
+            TEST_ERROR;
+    }
+
+    snprintf(err_buf, sizeof(err_buf), "error number %d", H5E_MAX_ENTRIES + 1);
+    if (H5Epush(H5E_DEFAULT, __FILE__, __func__, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, "%s",
+                err_buf) < 0)
+        TEST_ERROR;
+
+    return 0;
+
+error:
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    close_error
  *
  * Purpose:     Closes error information.
@@ -1021,6 +1068,10 @@ main(void)
 
     /* Test pausing error stacks */
     if (test_pause() < 0)
+        TEST_ERROR;
+
+    /* Test pushing more than H5E_MAX_ENTRIES entries to an error stack */
+    if (test_overflow_stack() < 0)
         TEST_ERROR;
 
     /* Close error information */

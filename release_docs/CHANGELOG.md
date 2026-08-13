@@ -77,6 +77,17 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed memory leaks and ID reference count issues when pushing an error to an error stack that is full
+
+   When an error is pushed to an error stack, the library may make a copy of the file
+   and function strings to ensure that they exist for the same duration as the error
+   stack entry. When an error stack is full, the library simply makes any further pushes
+   no-ops, but previously gave no information to calling code that this happened. This
+   caused calling code to assume that the duplicated strings were owned by an error stack
+   entry that was never pushed, leaking the duplicated strings. Additionally, IDs
+   associated with the error stack entry were left with incremented reference counts,
+   resulting in an infinite loop while closing the library.
+
 ### Library shutdown no longer aborts on a detected infinite loop
 
    When the library detects that it cannot make progress closing itself (an "infinite loop closing library"), it no longer calls `abort()`. The abort behaved inconsistently, only firing when automatic error message display was enabled. Additionally, terminating the entire host process on a shutdown-time condition is undesirable for applications that embed HDF5. The library now reports the condition (when error display is enabled) and returns without aborting.
