@@ -1221,37 +1221,37 @@ the header).
 <tr>
   <td>Version</td>
   <td>Type</td>
-  <td colspan="2">Records 0, 1, 2...N-1 <em>(variable size)</em></td>
+  <td colspan="2">Record \#0, Record \#1, ... Record \#(R-1) <em>(variable size)</em></td>
 </tr>
 <tr>
-    <td colspan="4"><br />Child Node Pointer 0<sup>O</sup><br /><br /></td>
+    <td colspan="4"><br />Child Node Pointer \#0<sup>O</sup><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Number of Records N<sub>0</sub> for Child Node 0 <em>(variable size)</em></td>
+  <td colspan="4"><br />Number of Records for Child Node \#0 <em>(variable size)</em></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Total Number of Records for Child Node 0 <em>(optional, variable size)</em></td>
+  <td colspan="4"><br />Total Number of Records for Child Node \#0 <em>(optional, variable size)</em></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Child Node Pointer 1<sup>O</sup><br /> <br /></td>
+  <td colspan="4"><br />Child Node Pointer \#1<sup>O</sup><br /> <br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Number of Records N<sub>1</sub> for Child Node 1 <em>(variable size)</em></td>
+  <td colspan="4"><br />Number of Records for Child Node \#1 <em>(variable size)</em></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Total Number of Records for Child Node 1 <em>(optional, variable size)</em></td>
+  <td colspan="4"><br />Total Number of Records for Child Node \#1 <em>(optional, variable size)</em></td>
 </tr>
 <tr>
   <td colspan="4">...</td>
 </tr>
 <tr>
-  <td colspan="4"><br />Child Node Pointer N<sup>O</sup><br /><br /></td>
+  <td colspan="4"><br />Child Node Pointer \#R<sup>O</sup><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Number of Records N<sub>n</sub> for Child Node N <em>(variable size)</em></td>
+  <td colspan="4"><br />Number of Records for Child Node \#R <em>(variable size)</em></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Total Number of Records for Child Node N <em>(optional, variable size)</em></td>
+  <td colspan="4"><br />Total Number of Records for Child Node \#R <em>(optional, variable size)</em></td>
 </tr>
 <tr>
   <td colspan="4">Checksum</td>
@@ -1281,35 +1281,45 @@ the header).
       the header.</td>
 </tr>
 <tr>
-  <td>Records</td>
-  <td>The size of this field is determined by the number of records for this node and the record size
-      (from the header). The format of records depends on the type of B-tree.</td>
+  <td>Record \#i (i = 0 to (R-1))</td>
+  <td>Let <em>R</em> be the number of records for this node: for the root node, <em>R</em> is given
+      by the B-tree Header's <em>Number of Records in Root Node</em> field; for any other node,
+      <em>R</em> is given by the <em>Number of Records for Child Node \#j</em> field in this node's
+      parent, specifically the pointer triplet whose <em>Child Node Pointer \#j</em> gave this
+      node's address. The size of this field is
+      determined by <em>R</em> and the <em>Record Size</em> (the latter always from the header); the
+      format of records depends on the type of B-tree. Because each internal node has one more child
+      pointer triplet than it has records, this node has <em>R</em>+1 child node pointers, indexed
+      \#0 through \#R (see below).</td>
 </tr>
 <tr>
-  <td>Child Node Pointer</td>
-  <td>This field is the address of the child node pointed to by the internal node.</td>
+  <td>Child Node Pointer \#j (j = 0 to R)</td>
+  <td>This field is the address of child \#j pointed to by this internal node. Together with the
+      following field, <em>Number of Records for Child Node \#j</em>, and (where present) the field
+      after that, <em>Total Number of Records for Child Node \#j</em>, this forms what the rest of
+      this table calls a <em>pointer triplet</em> &mdash; the repeating group of per-child fields
+      between <em>Child Node Pointer \#j</em> and <em>Child Node Pointer \#(j+1)</em>.</td>
 </tr>
 <tr>
-  <td>Number of Records in Child Node</td>
-  <td>This is the number of records in the child node pointed to by the corresponding <em>Node Pointer</em>.<br />
+  <td>Number of Records for Child Node \#j (j = 0 to R)</td>
+  <td>This is the number of records in child \#j (see the <em>Child Node Pointer</em> field above).<br />
       The number of bytes used to store this field is determined by the maximum possible number of records able
       to be stored in the child node.<br />
       The maximum number of records in a child node is computed in the following way:
       <ul>
         <li>Subtract the fixed size overhead for the child node (for example, its signature, version,
-            checksum, and so on and <em>one</em> pointer triplet of information for the child node
-            (because there is one more pointer triplet than records in each internal node)) from the size
-            of nodes for the B-tree.</li>
-        <li>Divide that result by the size of a record plus the pointer triplet of information stored to
-            reach each child node from this node.</li>
+            checksum, and so on, and one pointer triplet of information for the child node, per the
+            R+1 child pointers noted above) from the <em>Node Size</em> (see the header).</li>
+        <li>Divide that result by the sum of the <em>Record Size</em> and the pointer triplet of information
+            stored to reach each child node from this node.</li>
       </ul><br />
       Note that leaf nodes do not encode any child pointer triplets, so the maximum number of records in a
-      leaf node is just the node size minus the leaf node overhead, divided by the record size.<br />
-      Also note that the first level of internal nodes above the leaf nodes do not encode the <em>Total
-      Number of Records in Child Node</em> value in the child pointer triplets (since it is the same as
-      the <em>Number of Records in Child Node</em>), so the maximum number of records in these nodes is
-      computed with the equation above, but using (<em>Child Pointer</em>, <em>Number of Records in Child
-      Node</em>) pairs instead of triplets.<br />
+      leaf node is just the <em>Node Size</em> minus the leaf node overhead, divided by the <em>Record Size</em>.<br />
+      Also note that the first level of internal nodes above the leaf nodes &mdash; the &ldquo;twig&rdquo;
+      internal nodes &mdash; do not encode a <em>Total Number of Records for Child Node \#j</em> value
+      (since it would be the same as <em>Number of Records for Child Node \#j</em>), so the maximum number
+      of records in these nodes is computed with the equation above, but using (<em>Child Node Pointer
+      \#j</em>, <em>Number of Records for Child Node \#j</em>) pairs instead of full triplets.<br />
       The number of bytes used to encode this field is the least number of bytes required to encode the
       maximum number of records in a child node value for the child nodes below this level in the B-tree.<br />
       For example, if the maximum number of child records is 123, one byte will be used to encode these
@@ -1318,11 +1328,10 @@ the header).
       is 8 (in other words, an unsigned 64-bit integer).</td>
 </tr>
 <tr>
-  <td>Total Number of Records in Child Node</td>
-  <td>This is the total number of records for the node pointed to by the corresponding <em>Node Pointer</em>
-      and all its children. This field exists only in nodes whose depth in the B-tree node is greater than 1
-      (in other words, the &ldquo;twig&rdquo; internal nodes, just above leaf nodes, do not store this field
-      in their child node pointers).<br />
+  <td>Total Number of Records for Child Node \#j (j = 0 to R)</td>
+  <td>This is the total number of records for child \#j and all its descendants. This field exists
+      only in nodes whose depth in the B-tree node is greater than 1; see the note about
+      &ldquo;twig&rdquo; internal nodes under <em>Number of Records for Child Node \#j</em> above.<br />
       The number of bytes used to store this field is determined by the maximum possible number of records
       able to be stored in the child node and its descendants.<br />
       The maximum possible number of records able to be stored in a child node and its descendants is
@@ -1332,7 +1341,7 @@ the header).
       maximum possible number of records in child node pointers for the level of nodes two levels above
       leaf nodes. This process is continued up to any level in the B-tree.<br />
       The number of bytes used to encode this value is computed in the same way as for the <em>Number
-      of Records in Child Node</em> field.</td>
+      of Records for Child Node \#j</em> field.</td>
 </tr>
 <tr>
   <td>Checksum</td>
@@ -1354,7 +1363,7 @@ the header).
 <tr>
   <td>Version</td>
   <td>Type</td>
-  <td colspan="2">Record 0, 1, 2...N-1 <em>(variable size)</em></td>
+  <td colspan="2">Record \#0, Record \#1, ... Record \#(R-1) <em>(variable size)</em></td>
 </tr>
 <tr>
   <td colspan="4">Checksum</td>
@@ -1382,9 +1391,13 @@ the header).
       the header.</td>
 </tr>
 <tr>
-  <td>Records</td>
-  <td>The size of this field is determined by the number of records for this node and the record size
-      (from the header). The format of records depends on the type of B-tree.</td>
+  <td>Record \#i (i = 0 to (R-1))</td>
+  <td>Let <em>R</em> be the number of records for this node: for the root node, <em>R</em> is given
+      by the B-tree Header's <em>Number of Records in Root Node</em> field; for any other node,
+      <em>R</em> is given by the <em>Number of Records for Child Node \#j</em> field in this leaf's
+      parent (always a &ldquo;twig&rdquo; internal node, so this is one of a pointer pair, not a full
+      triplet). The size of this field is determined by <em>R</em> and the <em>Record Size</em> (the
+      latter always from the header); the format of records depends on the type of B-tree.</td>
 </tr>
 <tr>
   <td>Checksum</td>
@@ -2386,10 +2399,10 @@ as an atomic object, addressing goal A.
 
 When a global heap object is deleted from a collection (which occurs when its reference count falls to zero),
 objects located after the deleted object in the collection are packed down toward the beginning of the
-collection and the collection&rsquo;s global heap object 0 is created (if possible) or its size is increased
+collection and the collection&rsquo;s global heap object \#0 is created (if possible) or its size is increased
 to account for the recently freed space. There are no gaps between objects in each collection, with the possible
 exception of the final space in the collection, if it is not large enough to hold the header for the
-collection&rsquo;s global heap object 0. These features address goal C.
+collection&rsquo;s global heap object \#0. These features address goal C.
 
 The HDF5 library creates global heap collections as needed, so there may be multiple collections throughout
 the file. The set of all of them is abstractly called the &ldquo;global heap&rdquo;, although they do not
@@ -2417,19 +2430,19 @@ global heap ID. The format for global heap IDs is described at the end of this s
   <td colspan="4"><br />Collection Size<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Global Heap Object 1<br /><br /></td>
+  <td colspan="4"><br />Global Heap Object \#1<br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Global Heap Object 2<br /><br /></td>
+  <td colspan="4"><br />Global Heap Object \#2<br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4"><br />...<br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Global Heap Object <em>N</em><br /><br /></td>
+  <td colspan="4"><br />Global Heap Object \#N<br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Global Heap Object 0 <em>(free space)</em><br /><br /></td>
+  <td colspan="4"><br />Global Heap Object \#0 <em>(free space)</em><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
@@ -2459,16 +2472,19 @@ global heap ID. The format for global heap IDs is described at the end of this s
     about each heap object).</td>
 </tr>
 <tr valign=top>
-  <td>Global Heap Object 1 through <em>N</em></td>
-  <td>The objects are stored in any order with no intervening unused space.</td>
+  <td>Global Heap Object \#1 through \#N</td>
+  <td>Let <em>N</em> be the number of real (non-free-space) objects in this collection. <em>N</em> is not
+      stored explicitly; a reader determines it by parsing objects sequentially, in the order stored, until
+      either the free-space object (Global Heap Object \#0, Heap Object Index 0) is reached or the
+      Collection Size is exhausted. The objects are stored in any order with no intervening unused space.</td>
 </tr>
 <tr valign=top>
-  <td>Global Heap Object 0</td>
-  <td>Global Heap Object 0 (zero), when present, represents the free space in the collection. Free space always
-      appears at the end of the collection. If the free space is too small to store the header for Object 0
-      (described below) then the header is implied and is not written.<br />
-      The field <em>Object Size</em> for Object 0 indicates the amount of possible free space in the collection
-      including the 16-byte header size of Object 0.</td>
+  <td>Global Heap Object \#0</td>
+  <td>Global Heap Object \#0 (zero), when present, represents the free space in the collection. Free space
+      always appears at the end of the collection. If the free space is too small to store the header for
+      Object \#0 (described below) then the header is implied and is not written.<br />
+      The field <em>Object Size</em> for Object \#0 indicates the amount of possible free space in the
+      collection including the 16-byte header size of Object \#0.</td>
 </tr>
 </table>
 
@@ -2512,7 +2528,7 @@ global heap ID. The format for global heap IDs is described at the end of this s
 <tr valign=top>
   <td>Reference Count</td>
   <td>All heap objects have a reference count field. An object which is referenced from some other part of the
-    file will have a positive reference count. The reference count for Object 0 is always zero.</td>
+    file will have a positive reference count. The reference count for Object \#0 is always zero.</td>
 </tr>
 <tr valign=top>
   <td>Reserved</td>
