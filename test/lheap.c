@@ -15,9 +15,13 @@
  */
 #include "h5test.h"
 #include "H5srcdir.h"
+#include "H5Lpublic.h"  /* H5Lvisit2, H5L_info_t                       */
+#include "H5Opublic.h"  /* H5Oget_info_by_name3, H5O_type_t             */
 #include "H5ACprivate.h"
 #include "H5CXprivate.h" /* API Contexts                         */
 #include "H5HLprivate.h"
+#define H5HL_FRIEND
+#include "H5HLpkg.h"   /* H5HL_t definition (prfx/dblk fields)        */
 #include "H5Iprivate.h"
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
@@ -35,56 +39,152 @@ static const char *FILENAME[] = {"lheap", NULL};
 /*-------------------------------------------------------------------------
  * Function:    corrupt_heap_unprotect
  *
- * Purpose:     Regression test for a crash (segfault / assertion failure) in
- *              H5HL_unprotect() when reading a corrupted file whose local heap
- *              prefix or data block pointer became NULL during cache eviction.
- *              The file is from OSS-Fuzz (matio fuzzer, issue 504827191).
- *              Traversing the file's groups used to crash; it must now fail
- *              gracefully via the normal HDF5 error mechanism.
+ * Purpose:     Regression test for a NULL-pointer dereference in
+ *              H5HL_unprotect() when a local heap's prefix/data block pointer
+ *              has become NULL (as set by H5HL__prfx_dest during cache eviction
+ *              of a corrupted entry). The minimized fuzzer file from OSS-Fuzz
+ *              (matio fuzzer, issue 504827191) exercises this path; the
+ *              deterministic check below forces the exact condition directly.
  *
  * Return:      Success:        0
- *              Failure:        -1
+ *              Failure:        1
  *
  *-------------------------------------------------------------------------
  */
+/* Visitor: recurse into groups and open datasets by name. Best-effort smoke
+ * test for the fuzzer file (must not crash on open/traverse). */
+static herr_t
+corrupt_heap_visit(hid_t group, const char *name, const H5L_info_t *info, void *op_data)
+{
+    H5O_info_t oinfo;
+
+    H5E_BEGIN_TRY
+    {
+        if (H5Lget_info(group, name, (H5L_info_t *)info, H5P_DEFAULT) >= 0 &&
+            info->type == H5L_TYPE_HARD &&
+            H5Oget_info_by_name3(group, name, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) >= 0) {
+            if (oinfo.type == H5O_TYPE_GROUP) {
+                hid_t g = H5Gopen2(group, name, H5P_DEFAULT);
+                if (g >= 0) {
+                    hsize_t i = 0;
+                    H5Lvisit2(g, H5_INDEX_NAME, H5_ITER_INC, corrupt_heap_visit, NULL);
+                    H5Gclose(g);
+                }
+            }
+            else if (oinfo.type == H5O_TYPE_DATASET) {
+                hid_t d = H5Dopen2(group, name, H5P_DEFAULT);
+                if (d >= 0)
+                    H5Dclose(d);
+            }
+        }
+    }
+    H5E_END_TRY
+
+    return 0;
+}
+
+#define CORRUPT_HEAP_TESTFILE "heap_corrupt_unprotect.h5"
+
 static int
 corrupt_heap_unprotect(void)
 {
-    hid_t file = H5I_INVALID_HID; /* hdf5 file                */
-    hid_t grp  = H5I_INVALID_HID; /* root group               */
+    hid_t        file = H5I_INVALID_HID; /* hdf5 file                */
+    H5F_t       *f    = NULL;            /* hdf5 file pointer        */
+    hid_t        fapl = H5I_INVALID_HID; /* file access properties   */
+    char         filename[1024];         /* file name                */
+    haddr_t      heap_addr;              /* local heap address       */
+    H5HL_t      *heap = NULL;            /* local heap               */
+    H5HL_prfx_t *saved_prfx = NULL;      /* saved prefix pointer     */
+    H5HL_dblk_t *saved_dblk = NULL;      /* saved data block pointer */
+    herr_t       ret;
 
     TESTING("corrupted local heap unprotect (OSS-Fuzz 504827191)");
 
+    /* Best-effort smoke test: the minimized fuzzer file must open and traverse
+     * without crashing. The deterministic check below forces the exact buggy
+     * condition that the fuzzer file triggers inside HDF5. */
     {
-        const char *testfile = H5_get_srcdir_filename(CORRUPT_HEAP_FILE);
+        const char *tf = H5_get_srcdir_filename(CORRUPT_HEAP_FILE);
 
-        /* Opening and traversing the corrupted file's groups used to crash
-         * inside H5HL_unprotect(). It must now fail gracefully via the normal
-         * HDF5 error mechanism instead.
-         */
         H5E_BEGIN_TRY
         {
-            file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
+            file = H5Fopen(tf, H5F_ACC_RDONLY, H5P_DEFAULT);
             if (file >= 0) {
-                grp = H5Gopen2(file, "/", H5P_DEFAULT);
-                if (grp >= 0)
-                    H5Gclose(grp);
+                hsize_t i = 0;
+                H5Lvisit2(file, H5_INDEX_NAME, H5_ITER_INC, corrupt_heap_visit, NULL);
                 H5Fclose(file);
             }
         }
         H5E_END_TRY
-        if (file >= 0) {
-            H5_FAILED();
-            printf("***corrupted file (%s) opened and traversed without error\n", testfile);
-            goto error;
-        }
+        file = H5I_INVALID_HID;
     }
+
+    /* Deterministic regression test for the NULL-pointer dereference in
+     * H5HL_unprotect(). A corrupted entry whose local heap prefix/data block
+     * pointer became NULL (as set by H5HL__prfx_dest during cache eviction)
+     * used to crash. Simulate that by nulling the pointers on a protected heap
+     * and verify H5HL_unprotect() returns an error instead of dereferencing
+     * NULL.
+     */
+    fapl = h5_fileaccess();
+    h5_fixname(CORRUPT_HEAP_TESTFILE, fapl, filename, sizeof filename);
+    if (FAIL == (file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)))
+        goto cleanup_fail;
+    if (NULL == (f = (H5F_t *)H5VL_object(file)))
+        goto cleanup_fail;
+    if (FAIL == H5AC_ignore_tags(f))
+        goto cleanup_fail;
+    if (FAIL == H5HL_create(f, (size_t)0, &heap_addr))
+        goto cleanup_fail;
+    if (NULL == (heap = H5HL_protect(f, heap_addr, H5AC__NO_FLAGS_SET)))
+        goto cleanup_fail;
+
+    /* Save the valid pointers, then simulate a corrupted/evicted entry whose
+     * local heap prefix/data block pointer became NULL (as set by
+     * H5HL__prfx_dest during cache eviction), and verify that H5HL_unprotect()
+     * returns an error instead of dereferencing NULL.
+     */
+    saved_prfx = heap->prfx;
+    saved_dblk = heap->dblk;
+    heap->prfx = NULL;
+    heap->dblk = NULL;
+
+    H5E_BEGIN_TRY
+    {
+        ret = H5HL_unprotect(heap);
+    }
+    H5E_END_TRY
+
+    /* Restore the pointers so the cache entry can be cleaned up normally. */
+    heap->prfx = saved_prfx;
+    heap->dblk = saved_dblk;
+
+    if (ret >= 0) {
+        H5_FAILED();
+        printf("***H5HL_unprotect did not return an error for a heap with NULL prfx/dblk\n");
+        goto cleanup_fail;
+    }
+
+    /* The prefix is still pinned from H5HL_protect(); unpin it and close. */
+    H5E_BEGIN_TRY
+    {
+        H5AC_unpin_entry(saved_prfx);
+    }
+    H5E_END_TRY
+    if (FAIL == H5Fclose(file))
+        goto cleanup_fail;
 
     PASSED();
 
     return 0;
 
-error:
+cleanup_fail:
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
+    H5E_END_TRY
+
     return 1;
 } /* end corrupt_heap_unprotect() */
 
@@ -258,7 +358,7 @@ main(void)
     }
 
     /* Regression test: corrupted local heap must not crash on unprotect */
-    if (corrupt_heap_unprotect() < 0)
+    if (corrupt_heap_unprotect() != 0)
         TEST_ERROR;
 
     /* Verify symbol table messages are cached */
