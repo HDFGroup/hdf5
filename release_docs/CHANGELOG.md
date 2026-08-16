@@ -54,6 +54,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Bound nbit decompression reads to the stored chunk length
+
+   The reverse nbit filter walked its bit reader through the chunk buffer using only the element count and precision from the filter pipeline message, never the number of bytes actually stored for the chunk. The chunk buffer the filter is handed is sized to hold the larger unfiltered chunk, so a truncated or corrupted chunk decompressed out of the uninitialized remainder of that allocation and returned it as dataset data. The decompression path now carries the stored length and rejects any read past it.
+
 ## Parallel Library
 
 ## Fortran Library
