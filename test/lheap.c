@@ -25,7 +25,68 @@ static const char *FILENAME[] = {"lheap", NULL};
 
 #define TESTFILE "tsizeslheap.h5"
 
+/* File from OSS-Fuzz (matio fuzzer, issue 504827191): a corrupted local
+ * heap whose prefix/data block pointer becomes NULL during cache eviction.
+ * Opening and traversing it used to crash in H5HL_unprotect(). */
+#define CORRUPT_HEAP_FILE "heap_corrupt_prfx.h5"
+
 #define NOBJS 40
+
+/*-------------------------------------------------------------------------
+ * Function:    corrupt_heap_unprotect
+ *
+ * Purpose:     Regression test for a crash (segfault / assertion failure) in
+ *              H5HL_unprotect() when reading a corrupted file whose local heap
+ *              prefix or data block pointer became NULL during cache eviction.
+ *              The file is from OSS-Fuzz (matio fuzzer, issue 504827191).
+ *              Traversing the file's groups used to crash; it must now fail
+ *              gracefully via the normal HDF5 error mechanism.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+corrupt_heap_unprotect(void)
+{
+    hid_t file = H5I_INVALID_HID; /* hdf5 file                */
+    hid_t grp  = H5I_INVALID_HID; /* root group               */
+
+    TESTING("corrupted local heap unprotect (OSS-Fuzz 504827191)");
+
+    {
+        const char *testfile = H5_get_srcdir_filename(CORRUPT_HEAP_FILE);
+
+        /* Opening and traversing the corrupted file's groups used to crash
+         * inside H5HL_unprotect(). It must now fail gracefully via the normal
+         * HDF5 error mechanism instead.
+         */
+        H5E_BEGIN_TRY
+        {
+            file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
+            if (file >= 0) {
+                grp = H5Gopen2(file, "/", H5P_DEFAULT);
+                if (grp >= 0)
+                    H5Gclose(grp);
+                H5Fclose(file);
+            }
+        }
+        H5E_END_TRY
+        if (file >= 0) {
+            H5_FAILED();
+            printf("***corrupted file (%s) opened and traversed without error\n", testfile);
+            goto error;
+        }
+    }
+
+    PASSED();
+
+    return 0;
+
+error:
+    return 1;
+} /* end corrupt_heap_unprotect() */
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -195,6 +256,10 @@ main(void)
         }
         PASSED();
     }
+
+    /* Regression test: corrupted local heap must not crash on unprotect */
+    if (corrupt_heap_unprotect() < 0)
+        TEST_ERROR;
 
     /* Verify symbol table messages are cached */
     if (h5_verify_cached_stabs(FILENAME, fapl) < 0)

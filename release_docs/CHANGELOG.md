@@ -83,6 +83,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    Fixes GitHub issue #6531
 
+### Fixed NULL pointer dereferences when unprotecting a corrupted local heap
+
+   Fixed a crash (segfault / assertion failure) that could occur when reading a corrupted file whose local heap prefix or data block pointer became NULL during cache eviction. `H5HL_unprotect()` now validates these pointers and returns an error via the normal HDF5 error mechanism instead of dereferencing NULL. Found by OSS-Fuzz via the matio project's fuzzer.
+
 ## Java Library
 
 ## Configuration

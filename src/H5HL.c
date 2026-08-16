@@ -325,10 +325,6 @@ H5HL_protect(H5F_t *f, haddr_t addr, unsigned flags)
 
     /* Get the pointer to the heap */
     heap = prfx->heap;
-    if (NULL == heap)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "local heap is NULL");
-    if (NULL == heap->dblk_image)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "local heap data block image is NULL");
 
     /* Check if the heap is already pinned in memory */
     /* (for re-entrant situation) */
