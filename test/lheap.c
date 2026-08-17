@@ -15,8 +15,8 @@
  */
 #include "h5test.h"
 #include "H5srcdir.h"
-#include "H5Lpublic.h"  /* H5Lvisit2, H5L_info_t                       */
-#include "H5Opublic.h"  /* H5Oget_info_by_name3, H5O_type_t             */
+#include "H5Lpublic.h"  /* H5Lvisit2, H5L_info2_t                      */
+#include "H5Opublic.h"  /* H5Oget_info_by_name3, H5O_type_t            */
 #include "H5ACprivate.h"
 #include "H5CXprivate.h" /* API Contexts                         */
 #include "H5HLprivate.h"
@@ -25,7 +25,7 @@
 #include "H5Iprivate.h"
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
-static const char *FILENAME[] = {"lheap", NULL};
+static const char *FILENAME[] = {"lheap", "heap_corrupt_unprotect", NULL};
 
 #define TESTFILE "tsizeslheap.h5"
 
@@ -35,6 +35,50 @@ static const char *FILENAME[] = {"lheap", NULL};
 #define CORRUPT_HEAP_FILE "heap_corrupt_prfx.h5"
 
 #define NOBJS 40
+
+/*-------------------------------------------------------------------------
+ * Function:    corrupt_heap_visit
+ *
+ * Purpose:     Visitor for the best-effort smoke test of the OSS-Fuzz
+ *              minimized file. It recurses into groups and opens datasets
+ *              by name. The only requirement is that opening/traversing a
+ *              corrupted file must not crash (it used to crash in
+ *              H5HL_unprotect()).
+ *
+ * Return:      Success:        0
+ *              Failure:        0 (best-effort; errors are ignored)
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+corrupt_heap_visit(hid_t group, const char *name, const H5L_info2_t *info, void *op_data)
+{
+    (void)op_data;
+
+    /* info is already populated by the link iteration; only follow hard links */
+    if (info->type == H5L_TYPE_HARD) {
+        H5O_info_t oinfo;
+
+        if (H5Oget_info_by_name3(group, name, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) >= 0) {
+            if (oinfo.type == H5O_TYPE_GROUP) {
+                hid_t g = H5Gopen2(group, name, H5P_DEFAULT);
+
+                if (g >= 0) {
+                    H5Lvisit2(g, H5_INDEX_NAME, H5_ITER_INC, corrupt_heap_visit, NULL);
+                    H5Gclose(g);
+                }
+            }
+            else if (oinfo.type == H5O_TYPE_DATASET) {
+                hid_t d = H5Dopen2(group, name, H5P_DEFAULT);
+
+                if (d >= 0)
+                    H5Dclose(d);
+            }
+        }
+    }
+
+    return 0;
+} /* end corrupt_heap_visit() */
 
 /*-------------------------------------------------------------------------
  * Function:    corrupt_heap_unprotect
@@ -51,39 +95,7 @@ static const char *FILENAME[] = {"lheap", NULL};
  *
  *-------------------------------------------------------------------------
  */
-/* Visitor: recurse into groups and open datasets by name. Best-effort smoke
- * test for the fuzzer file (must not crash on open/traverse). */
-static herr_t
-corrupt_heap_visit(hid_t group, const char *name, const H5L_info_t *info, void *op_data)
-{
-    H5O_info_t oinfo;
-
-    H5E_BEGIN_TRY
-    {
-        if (H5Lget_info(group, name, (H5L_info_t *)info, H5P_DEFAULT) >= 0 &&
-            info->type == H5L_TYPE_HARD &&
-            H5Oget_info_by_name3(group, name, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) >= 0) {
-            if (oinfo.type == H5O_TYPE_GROUP) {
-                hid_t g = H5Gopen2(group, name, H5P_DEFAULT);
-                if (g >= 0) {
-                    hsize_t i = 0;
-                    H5Lvisit2(g, H5_INDEX_NAME, H5_ITER_INC, corrupt_heap_visit, NULL);
-                    H5Gclose(g);
-                }
-            }
-            else if (oinfo.type == H5O_TYPE_DATASET) {
-                hid_t d = H5Dopen2(group, name, H5P_DEFAULT);
-                if (d >= 0)
-                    H5Dclose(d);
-            }
-        }
-    }
-    H5E_END_TRY
-
-    return 0;
-}
-
-#define CORRUPT_HEAP_TESTFILE "heap_corrupt_unprotect.h5"
+#define CORRUPT_HEAP_TESTFILE "heap_corrupt_unprotect"
 
 static int
 corrupt_heap_unprotect(void)
@@ -100,22 +112,25 @@ corrupt_heap_unprotect(void)
 
     TESTING("corrupted local heap unprotect (OSS-Fuzz 504827191)");
 
-    /* Best-effort smoke test: the minimized fuzzer file must open and traverse
-     * without crashing. The deterministic check below forces the exact buggy
-     * condition that the fuzzer file triggers inside HDF5. */
+    /* Best-effort smoke test: if the minimized fuzzer file is present in the
+     * source tree, opening and traversing it must not crash. The deterministic
+     * check below forces the exact buggy condition inside HDF5.
+     */
     {
         const char *tf = H5_get_srcdir_filename(CORRUPT_HEAP_FILE);
 
-        H5E_BEGIN_TRY
-        {
-            file = H5Fopen(tf, H5F_ACC_RDONLY, H5P_DEFAULT);
-            if (file >= 0) {
-                hsize_t i = 0;
+        file = H5Fopen(tf, H5F_ACC_RDONLY, H5P_DEFAULT);
+        if (file >= 0) {
+            /* Only the traversal is expected to fail on a corrupted file; keep
+             * the try block narrowly scoped to that single operation.
+             */
+            H5E_BEGIN_TRY
+            {
                 H5Lvisit2(file, H5_INDEX_NAME, H5_ITER_INC, corrupt_heap_visit, NULL);
-                H5Fclose(file);
             }
+            H5E_END_TRY
+            H5Fclose(file);
         }
-        H5E_END_TRY
         file = H5I_INVALID_HID;
     }
 
@@ -173,6 +188,8 @@ corrupt_heap_unprotect(void)
     H5E_END_TRY
     if (FAIL == H5Fclose(file))
         goto cleanup_fail;
+    if (FAIL == H5Pclose(fapl))
+        goto cleanup_fail;
 
     PASSED();
 
@@ -182,6 +199,7 @@ cleanup_fail:
     H5E_BEGIN_TRY
     {
         H5Fclose(file);
+        H5Pclose(fapl);
     }
     H5E_END_TRY
 
