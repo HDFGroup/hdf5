@@ -51,6 +51,24 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Configuration
 
+### Various improvements in installed CMake package configuration file
+
+   - Fixed `find_dependency()` calls so that `PRIVATE`-linked libraries are only propagated as
+     transitive link requirements for static library targets (Fixes GitHub issue #6347)
+   - Added missing `find_dependency()` calls for some `PRIVATE`-linked libraries
+   - Fixed an issue where `find_package()` for parallel-enabled HDF5 installations may fail when
+     trying to locate MPI Fortran support, even if HDF5 Fortran support isn't requested (Fixes
+     GitHub issue #6366)
+   - Fixed an issue where the `HDF5_LIB_TYPE` CMake variable would be undefined if some HDF5
+     components were requested in a `find_package()` call, but "shared" or "static" was not requested
+   - Removed a call to `enable_language()` in favor of checking the currently enabled CMake languages
+     and failing if a required language isn't enabled
+   - Added a CMake variable for the enabled/disabled status of the "digitally signed plugins"
+     feature
+   - Fixed the CMake variable for the enabled/disabled status of the `HDF5_DIMENSION_SCALES_NEW_REF`
+     option
+   - Reduced the scope of some temporary variables and modifications so they don't propagate to
+     consuming CMake projects
 
 ## Library
 

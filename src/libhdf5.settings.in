@@ -70,7 +70,7 @@ Features:
   Parallel Filtered Dataset Writes: @PARALLEL_FILTERED_WRITES@
                 Large Parallel I/O: @LARGE_PARALLEL_IO@
                 High-level library: @HDF5_BUILD_HL_LIB@
-Dimension scales w/ new references: @DIMENSION_SCALES_WITH_NEW_REF@
+Dimension scales w/ new references: @HDF5_DIMENSION_SCALES_NEW_REF@
                   Build HDF5 Tests: @BUILD_TESTING@
                   Build HDF5 Tools: @HDF5_BUILD_TOOLS@
                            Threads: @HDF5_THREADS_ENABLED@
