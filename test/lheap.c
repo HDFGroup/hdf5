@@ -15,13 +15,13 @@
  */
 #include "h5test.h"
 #include "H5srcdir.h"
-#include "H5Lpublic.h"  /* H5Lvisit2, H5L_info2_t                      */
-#include "H5Opublic.h"  /* H5Oget_info_by_name3, H5O_type_t            */
+#include "H5Lpublic.h" /* H5Lvisit2, H5L_info2_t                      */
+#include "H5Opublic.h" /* H5Oget_info_by_name3, H5O_type_t            */
 #include "H5ACprivate.h"
 #include "H5CXprivate.h" /* API Contexts                         */
 #include "H5HLprivate.h"
 #define H5HL_FRIEND
-#include "H5HLpkg.h"   /* H5HL_t definition (prfx/dblk fields)        */
+#include "H5HLpkg.h" /* H5HL_t definition (prfx/dblk fields)        */
 #include "H5Iprivate.h"
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
@@ -105,7 +105,7 @@ corrupt_heap_unprotect(void)
     hid_t        fapl = H5I_INVALID_HID; /* file access properties   */
     char         filename[1024];         /* file name                */
     haddr_t      heap_addr;              /* local heap address       */
-    H5HL_t      *heap = NULL;            /* local heap               */
+    H5HL_t      *heap       = NULL;      /* local heap               */
     H5HL_prfx_t *saved_prfx = NULL;      /* saved prefix pointer     */
     H5HL_dblk_t *saved_dblk = NULL;      /* saved data block pointer */
     herr_t       ret;
