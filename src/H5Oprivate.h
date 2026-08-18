@@ -746,14 +746,33 @@ typedef struct H5O_ginfo_t {
  */
 #define H5O_PLINE_VERSION_2 2
 
-/* This version stores each filter's verbatim key=value configuration string
- *      (as passed to H5Pappend_filter) after the filter name, so it can be
- *      recovered losslessly without loading the filter plugin.  It also
- *      appends a has_aux flag byte after that string and, when set, a
- *      fixed-size locator (address + global-heap index) for the filter's
- *      blob stored as a global-heap object
+/* This version appends a list of self-describing extension blocks to each
+ *      filter entry, after its cd_values.  The list is a 2-byte count
+ *      followed by that many blocks of
+ *
+ *          type(2) flags(1) reserved(1) length(4) data(length)
+ *
+ *      Blocks are written in ascending type order and a type appears at
+ *      most once per entry.  Bit 0 of the flags byte marks a block as
+ *      critical: a decoder that does not recognise a critical type must
+ *      fail, while an unrecognised non-critical block is skipped using its
+ *      length.  That rule is what lets later features add block types
+ *      instead of a version 4.
  */
 #define H5O_PLINE_VERSION_3 3
+
+/* Extension block types.  Codes are assigned centrally; there is
+ * deliberately no private or experimental range, since a privately chosen
+ * code is indistinguishable from one assigned officially later. */
+#define H5O_PLINE_EXT_CONFIG 0x0001 /* verbatim key=value config string     */
+#define H5O_PLINE_EXT_BLOB   0x0002 /* global-heap locator for filter blob  */
+
+/* Bit 0 of a block's flags byte: the block is required in order to
+ * interpret the entry correctly. */
+#define H5O_PLINE_EXT_FLAG_CRITICAL 0x01
+
+/* Fixed framing of one block: type(2) + flags(1) + reserved(1) + length(4) */
+#define H5O_PLINE_EXT_HDR_SIZE 8
 
 /* The latest version of the format.  Look through the 'encode' and 'size'
  *      callbacks for places to change when updating this. */

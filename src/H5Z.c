@@ -1288,6 +1288,7 @@ done:
  */
 herr_t
 H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_nelmts,
+           bool keep_config,
            const unsigned int cd_values[/*cd_nelmts*/])
 {
     size_t idx;                 /* Index of filter in pipeline */
@@ -1313,9 +1314,14 @@ H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t
     pline->filter[idx].flags     = flags;
     pline->filter[idx].cd_nelmts = cd_nelmts;
 
-    /* Modifying the raw cd_values invalidates any stored configuration string;
-     * drop it so introspection falls back to the filter's get_config callback */
-    pline->filter[idx].config = (char *)H5MM_xfree(pline->filter[idx].config);
+    /* A caller that replaces cd_values directly invalidates any stored
+     * configuration string, so it is dropped and introspection falls back to
+     * the filter's get_config callback.  set_local is the exception: there the
+     * library is refining cd_values for this dataset's datatype and dataspace,
+     * not replacing what the user asked for, so the string still describes the
+     * entry and is kept (keep_config). */
+    if (!keep_config)
+        pline->filter[idx].config = (char *)H5MM_xfree(pline->filter[idx].config);
 
     /* Free any existing parameters */
     if (pline->filter[idx].cd_values != NULL && pline->filter[idx].cd_values != pline->filter[idx]._cd_values)

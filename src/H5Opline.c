@@ -244,54 +244,94 @@ H5O__pline_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
                 }
         }
 
-        /* Verbatim configuration string, for version 3+.  A zero length means
-         * no string was stored for this filter. */
+        /* Extension blocks, for version 3+.  Every block is skippable using
+         * its length alone, so an unrecognised non-critical type costs the
+         * decoder nothing; an unrecognised critical type is fatal. */
+        filter->aux_loc.addr = HADDR_UNDEF;
         if (pline->version >= H5O_PLINE_VERSION_3) {
-            size_t config_length;
+            unsigned ext_count;
+            unsigned prev_type = 0; /* enforces ascending order & no dups */
 
             if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-            UINT16DECODE(p, config_length);
+            UINT16DECODE(p, ext_count);
 
-            if (config_length > H5Z_CONFIG_STRING_MAX)
-                HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "filter config string exceeds maximum length");
+            for (size_t k = 0; k < ext_count; k++) {
+                unsigned ext_type;
+                uint8_t  ext_flags;
+                uint8_t  ext_reserved;
+                uint32_t ext_length;
 
-            if (config_length) {
-                if (H5_IS_BUFFER_OVERFLOW(p, config_length, p_end))
-                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-                /* Stored without a NUL terminator; add one on the way in */
-                if (NULL == (filter->config = (char *)H5MM_malloc(config_length + 1)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                                "memory allocation failed for filter config string");
-                H5MM_memcpy(filter->config, p, config_length);
-                filter->config[config_length] = '\0';
-                p += config_length;
+                if (H5_IS_BUFFER_OVERFLOW(p, H5O_PLINE_EXT_HDR_SIZE, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                "ran off end of input buffer while decoding");
+                UINT16DECODE(p, ext_type);
+                ext_flags    = *p++;
+                ext_reserved = *p++;
+                UINT32DECODE(p, ext_length);
+
+                if (0 != ext_reserved)
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL,
+                                "filter extension block reserved byte is not zero");
+
+                /* Blocks are written in ascending type order and a type
+                 * appears at most once, so a non-increasing type means the
+                 * message is malformed rather than merely unfamiliar. */
+                if (ext_type <= prev_type)
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL,
+                                "filter extension blocks are out of order or duplicated "
+                                "(type 0x%04x after 0x%04x)",
+                                ext_type, prev_type);
+                prev_type = ext_type;
+
+                if (H5_IS_BUFFER_OVERFLOW(p, ext_length, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                "ran off end of input buffer while decoding");
+
+                switch (ext_type) {
+                    case H5O_PLINE_EXT_CONFIG:
+                        if (ext_length > H5Z_CONFIG_STRING_MAX)
+                            HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL,
+                                        "filter config string exceeds maximum length");
+                        if (ext_length) {
+                            /* Stored without a NUL terminator; add one here */
+                            if (NULL == (filter->config = (char *)H5MM_malloc(ext_length + 1)))
+                                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+                                            "memory allocation failed for filter config string");
+                            H5MM_memcpy(filter->config, p, ext_length);
+                            filter->config[ext_length] = '\0';
+                        }
+                        break;
+
+                    case H5O_PLINE_EXT_BLOB: {
+                        const uint8_t *bp = p; /* leave p to the common advance below */
+                        uint32_t       idx;
+
+                        if (ext_length != (uint32_t)(H5F_SIZEOF_ADDR(f) + 4))
+                            HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL,
+                                        "filter blob locator has unexpected length");
+                        H5F_addr_decode(f, &bp, &filter->aux_loc.addr);
+                        UINT32DECODE(bp, idx);
+                        filter->aux_loc.idx = (size_t)idx;
+                        break;
+                    }
+
+                    default:
+                        /* Unknown type.  Skipping is safe only if the writer
+                         * said so; a critical block carries something this
+                         * build cannot reconstruct, and proceeding would
+                         * filter data with an incomplete configuration. */
+                        if (ext_flags & H5O_PLINE_EXT_FLAG_CRITICAL)
+                            HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL,
+                                        "unsupported critical filter extension block "
+                                        "(type 0x%04x on filter %u)",
+                                        ext_type, (unsigned)filter->id);
+                        break;
+                }
+
+                p += ext_length;
             }
         }
-
-        /* Blob locator, for version 3+.  Only the locator is stored in the
-         * message; the blob bytes live in the global heap and are recovered
-         * via the filter's read_blob callback at dataset-open time. */
-        if (pline->version >= H5O_PLINE_VERSION_3) {
-            uint8_t has_aux;
-
-            if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
-                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-            has_aux = *p++;
-            if (has_aux) {
-                uint32_t idx;
-
-                if (H5_IS_BUFFER_OVERFLOW(p, H5F_SIZEOF_ADDR(f) + 4, p_end))
-                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-                H5F_addr_decode(f, &p, &filter->aux_loc.addr);
-                UINT32DECODE(p, idx);
-                filter->aux_loc.idx = (size_t)idx;
-            }
-            else
-                filter->aux_loc.addr = HADDR_UNDEF;
-        }
-        else
-            filter->aux_loc.addr = HADDR_UNDEF;
     }
 
     /* Set return value */
@@ -399,28 +439,40 @@ H5O__pline_encode(H5F_t *f, uint8_t *p /*out*/, const void *mesg)
             if (filter->cd_nelmts % 2)
                 UINT32ENCODE(p, 0);
 
-        /* Verbatim configuration string, for version 3+.  Written without a
-         * NUL terminator; a zero length means no string for this filter. */
+        /* Extension blocks, for version 3+.  Emitted in ascending type
+         * order so that an entry encodes identically no matter what order
+         * the library populated it in. */
         if (pline->version >= H5O_PLINE_VERSION_3) {
             size_t config_length = filter->config ? strlen(filter->config) : 0;
+            bool   have_blob     = H5_addr_defined(filter->aux_loc.addr);
 
-            UINT16ENCODE(p, config_length);
+            UINT16ENCODE(p, (unsigned)((config_length ? 1 : 0) + (have_blob ? 1 : 0)));
+
+            /* Config string: non-critical.  A reader that skips it loses
+             * introspection fidelity, not correctness -- cd_values are
+             * complete on their own.  Written without a NUL terminator. */
             if (config_length > 0) {
+                UINT16ENCODE(p, H5O_PLINE_EXT_CONFIG);
+                *p++ = 0; /* flags: not critical */
+                *p++ = 0; /* reserved          */
+                UINT32ENCODE(p, (uint32_t)config_length);
                 H5MM_memcpy(p, filter->config, config_length);
                 p += config_length;
             }
-        }
 
-        /* Blob locator, for version 3+.  The locator is defined only after
-         * the blob has been written at dataset-creation time. */
-        if (pline->version >= H5O_PLINE_VERSION_3) {
-            if (H5_addr_defined(filter->aux_loc.addr)) {
-                *p++ = (uint8_t) true;
+            /* Blob locator: critical.  The blob holds configuration the
+             * filter cannot run without, so a reader that does not
+             * understand this block must not fall back to cd_values.  The
+             * locator is defined only once the blob has been written at
+             * dataset-creation time. */
+            if (have_blob) {
+                UINT16ENCODE(p, H5O_PLINE_EXT_BLOB);
+                *p++ = H5O_PLINE_EXT_FLAG_CRITICAL;
+                *p++ = 0; /* reserved */
+                UINT32ENCODE(p, (uint32_t)(H5F_SIZEOF_ADDR(f) + 4));
                 H5F_addr_encode(f, &p, filter->aux_loc.addr);
                 UINT32ENCODE(p, (uint32_t)filter->aux_loc.idx);
             }
-            else
-                *p++ = (uint8_t) false;
         }
     } /* end for */
 
@@ -596,16 +648,16 @@ H5O__pline_size(const H5F_t *f, const void *mesg)
             if (pline->filter[i].cd_nelmts % 2)
                 ret_value += 4;
 
-        /* Verbatim configuration string, for version 3+: 2-byte length prefix
-         * plus the string bytes (no NUL terminator on disk) */
-        if (pline->version >= H5O_PLINE_VERSION_3)
-            ret_value += 2 + (pline->filter[i].config ? strlen(pline->filter[i].config) : 0);
-
-        /* Blob locator, for version 3+ */
+        /* Extension block list, for version 3+: 2-byte count, then framing
+         * plus payload for each block actually written */
         if (pline->version >= H5O_PLINE_VERSION_3) {
-            ret_value += 1; /* has_aux flag */
+            size_t config_length = pline->filter[i].config ? strlen(pline->filter[i].config) : 0;
+
+            ret_value += 2; /* ext_count */
+            if (config_length)
+                ret_value += H5O_PLINE_EXT_HDR_SIZE + config_length;
             if (H5_addr_defined(pline->filter[i].aux_loc.addr))
-                ret_value += (size_t)H5F_SIZEOF_ADDR(f) + 4; /* locator: address + heap index */
+                ret_value += H5O_PLINE_EXT_HDR_SIZE + (size_t)H5F_SIZEOF_ADDR(f) + 4;
         }
     } /* end for */
 
