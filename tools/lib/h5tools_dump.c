@@ -4518,19 +4518,6 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                 status = h5tools_dump_mem(stream, &string_dataformat, &datactx, obj_id);
             }
         }
-        if (datactx.display_char && H5Tget_size(f_type) == 1 && H5Tget_class(f_type) == H5T_INTEGER) {
-            H5TOOLS_DEBUG("Print 1-byte integer data as an ASCII character string eol=%s",
-                          string_dataformat.line_suf);
-            datactx.need_prefix              = false;
-            string_dataformat.arr_linebreak  = 0;
-            string_dataformat.idx_fmt        = "";
-            string_dataformat.line_multi_new = 0;
-            string_dataformat.line_suf       = "";
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "\"");
-            h5tools_render_element(stream, &string_dataformat, &datactx, &buffer, &curr_pos, (size_t)ncols,
-                                   (hsize_t)0, (hsize_t)0);
-        }
         H5TOOLS_DEBUG("Print all the values Complete");
 
         if (status == FAIL) {
@@ -4540,10 +4527,18 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     }
 done:
     H5Sclose(space);
-    H5Tclose(f_type);
 
     ctx->need_prefix = true;
-    h5tools_simple_prefix(stream, &outputformat, ctx, (hsize_t)0, 0);
+    if ((datactx.display_char && H5Tget_size(f_type) == 1) && (H5Tget_class(f_type) == H5T_INTEGER)) {
+        string_dataformat.arr_linebreak  = 0;
+        string_dataformat.idx_fmt        = "";
+        string_dataformat.line_multi_new = 0;
+        h5tools_simple_prefix(stream, &string_dataformat, ctx, (hsize_t)0, 0);
+    }
+    else
+        h5tools_simple_prefix(stream, &outputformat, ctx, (hsize_t)0, 0);
+
+    H5Tclose(f_type);
 
     h5tools_str_reset(&buffer);
     if (strlen(h5tools_dump_header_format->datablockend)) {

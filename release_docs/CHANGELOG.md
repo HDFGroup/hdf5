@@ -77,6 +77,12 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Library shutdown no longer aborts on a detected infinite loop
+
+   When the library detects that it cannot make progress closing itself (an "infinite loop closing library"), it no longer calls `abort()`. The abort behaved inconsistently, only firing when automatic error message display was enabled. Additionally, terminating the entire host process on a shutdown-time condition is undesirable for applications that embed HDF5. The library now reports the condition (when error display is enabled) and returns without aborting.
+
+   Fixes GitHub issue #6531
+
 ### Fixed a crash when reading a chunked dataset whose chunk rank does not match the dataspace rank
 
    The chunk layout's stored dimensionality was validated against the dataspace rank at creation time, but not at open time, so a file whose stored chunk rank disagreed with its dataspace rank was not caught. The resulting inconsistent selection ranks during chunk I/O caused a divide-by-zero in the hyperslab iterator. The chunk dimensionality is now also validated on open, and such a dataset is rejected with an error instead of crashing.
@@ -94,6 +100,14 @@ We would like to thank the many HDF5 community members who contributed to this r
    The installed CMake package version configuration file for the library previously used `SameMinorVersion` for the version compatibility logic, causing a `find_package(HDF5 X.Y.Z)` call to fail unless the version of a located HDF5 installation matched both `X` and `Y` of the version number exactly (i.e., releases with a greater minor version number weren't considered backward compatible). This reflected the version compatibility of HDF5 releases prior to version 2.0.0, but doesn't reflect the version compatibility of HDF5 version 2.0.0+ releases. The version compatibility logic now uses `SameMajorVersion`, so a `find_package(HDF5 X.Y.Z)` call will accept all versions of HDF5 where the major version matches `X` (i.e., only releases with a greater major version number will be rejected as not backward compatible).
 
 ## Tools
+
+### Fixed an issue with quoting of data values in h5ls and h5dump when displaying as ASCII characters
+
+   When using the `-s` (h5ls) or `-r` (h5dump) option to display 1-byte integer datasets and
+   attributes as ASCII characters, a closing double-quote character for data values was dropped
+   in some cases. This double-quote character has been restored and similar formatting issues
+   have been fixed for cases where elements wrap to new lines according to the particular tool's
+   column limit setting.
 
 ## Performance
 
