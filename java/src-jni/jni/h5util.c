@@ -4291,7 +4291,7 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
 
     switch (type_class) {
         case H5T_VLEN: {
-            if (!(memb = H5Tget_super(mem_type_id)))
+            if ((memb = H5Tget_super(mem_type_id)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
             if ((vlClass = H5Tget_class(memb)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -4356,7 +4356,7 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
             void  *objBuf = NULL;
             size_t typeCount;
 
-            if (!(memb = H5Tget_super(mem_type_id)))
+            if ((memb = H5Tget_super(mem_type_id)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
             if ((vlClass = H5Tget_class(memb)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -4625,7 +4625,7 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
 
     switch (type_class) {
         case H5T_VLEN: {
-            if (!(memb = H5Tget_super(mem_type_id)))
+            if ((memb = H5Tget_super(mem_type_id)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
             if ((vlClass = H5Tget_class((hid_t)memb)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -4709,7 +4709,7 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
         case H5T_ARRAY: {
             void *objBuf = NULL;
 
-            if (!(memb = H5Tget_super(mem_type_id)))
+            if ((memb = H5Tget_super(mem_type_id)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
             if ((vlClass = H5Tget_class(memb)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -4959,7 +4959,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
 
     switch (type_class) {
         case H5T_VLEN: {
-            if (!(memb = H5Tget_super(mem_type_id)))
+            if ((memb = H5Tget_super(mem_type_id)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
             if ((vlClass = H5Tget_class(memb)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -5041,7 +5041,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
             void  *objBuf = NULL;
             size_t typeCount;
 
-            if (!(memb = H5Tget_super(mem_type_id)))
+            if ((memb = H5Tget_super(mem_type_id)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
             if ((vlClass = H5Tget_class(memb)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -5196,7 +5196,7 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
 
     switch (type_class) {
         case H5T_VLEN: {
-            if (!(memb = H5Tget_super(mem_type_id)))
+            if ((memb = H5Tget_super(mem_type_id)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
             if ((vlClass = H5Tget_class((hid_t)memb)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -5303,7 +5303,7 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
             break;
         } /* H5T_COMPOUND */
         case H5T_ARRAY: {
-            if (!(memb = H5Tget_super(mem_type_id)))
+            if ((memb = H5Tget_super(mem_type_id)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
             if ((vlClass = H5Tget_class(memb)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -5505,7 +5505,7 @@ h5validate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class
             if (!ENVPTR->IsInstanceOf(ENVONLY, in_obj, arrCList))
                 H5_BAD_ARGUMENT_ERROR(ENVONLY, "h5validate_wbuf: expected a java.util.ArrayList element");
 
-            if (!(memb = H5Tget_super(mem_type_id)))
+            if ((memb = H5Tget_super(mem_type_id)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
             if ((vlClass = H5Tget_class(memb)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
