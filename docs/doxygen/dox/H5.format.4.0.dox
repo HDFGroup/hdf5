@@ -35,6 +35,7 @@ Navigate back: \ref index "Main" / \ref SPEC
           <li> @ref subsec_fmt4_infra_fractalheap</li>
           <li> @ref subsec_fmt4_infra_freespaceindex</li>
           <li> @ref subsec_fmt4_infra_sohm</li>
+          <li> @ref subsec_fmt4_infra_mdci</li>
           </ol></li>
       <li> @ref sec_fmt4_dataobject
         <ol type="A">
@@ -46,6 +47,7 @@ Navigate back: \ref index "Main" / \ref SPEC
                 <li> @ref subsubsec_fmt4_dataobject_hdr_prefix_two</li>
               </ol></li>
               <li> @ref subsec_fmt4_dataobject_hdr_msg</li>
+              <li> @ref subsec_fmt4_dataobject_hdr_msg_catalog</li>
               <ol type="a">
                 <li> @ref subsubsec_fmt4_dataobject_hdr_msg_nil</li>
                 <li> @ref subsubsec_fmt4_dataobject_hdr_msg_simple</li>
@@ -71,6 +73,7 @@ Navigate back: \ref index "Main" / \ref SPEC
                 <li> @ref subsubsec_fmt4_dataobject_hdr_msg_attrinfo</li>
                 <li> @ref subsubsec_fmt4_dataobject_hdr_msg_refcount</li>
                 <li> @ref subsubsec_fmt4_dataobject_hdr_msg_fsinfo</li>
+                <li> @ref subsubsec_fmt4_dataobject_hdr_msg_mdci</li>
               </ol></li>
             </ol></li>
           <li> @ref subsec_fmt4_dataobject_storage</li>
@@ -203,6 +206,7 @@ The following sections have been changed or added for the 1.10 release:
 \li @ref subsubsec_fmt4_dataobject_hdr_msg_layout section was changed. The name was changed,
     and @ref FMT4DataLayoutV4"version 4" of the data layout message was added for the virtual type.
 \li The @ref subsubsec_fmt4_dataobject_hdr_msg_fsinfo header message type was added.
+\li The @ref subsubsec_fmt4_dataobject_hdr_msg_mdci header message type was added.
 \li @ref sec_fmt4_appendixc was added. Five indexing types were added.
 
 \section sec_fmt4_meta II. Disk Format: Level 0 - File Metadata
@@ -791,6 +795,8 @@ later of the superblock is used. A superblock extension is an object header whic
 \li \ref subsubsec_fmt4_dataobject_hdr_msg_drvinfo containing information needed by the file driver in
          order to reopen a file. See also the \ref subsec_fmt4_boot_driver section above.
 \li \ref subsubsec_fmt4_dataobject_hdr_msg_fsinfo containing information about file space handling in the file.
+\li \ref subsubsec_fmt4_dataobject_hdr_msg_mdci containing the location and size of a
+         @ref subsec_fmt4_infra_mdci "metadata cache image block", when one is present in the file.
 
 \section sec_fmt4_infra III. Disk Format: Level 1 - File Infrastructure
 
@@ -1902,16 +1908,16 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 0 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#0 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 1 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#1 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 <tr>
   <td colspan="4"><br />...<br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension \#(d - 1) Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d-1) Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
@@ -1957,16 +1963,16 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4">Filter Mask</td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 0 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#0 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 1 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#1 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 <tr>
   <td colspan="4"><br />...<br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension \#(d - 1) Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d-1) Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
@@ -1992,16 +1998,16 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4">Filter Mask</td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 0 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#0 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 1 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#1 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 <tr>
   <td colspan="4"><br />...<br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension \#(d - 1) Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d-1) Scaled Offset <em>(8 bytes)</em><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
@@ -2130,7 +2136,7 @@ object header.
   <th>byte</th>
 </tr>
 <tr align="center">
-  <td colspan="4">Link Name Offset<sup>O</sup></td>
+  <td colspan="4">Link Name Offset<sup>L</sup></td>
 </tr>
 <tr align="center">
   <td colspan="4">Object Header Address<sup>O</sup></td>
@@ -2147,6 +2153,8 @@ object header.
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT4SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
 <caption align="top"><strong>Fields: Symbol Table Entry</strong></caption>
@@ -4207,7 +4215,7 @@ The section-type specific data for each free-space section record is described b
 </tr>
 </table>
 
-\subsection subsec_fmt4_infra_sohm III.I. Disk Format: Level 1I - Shared Object Header Message Table
+\subsection subsec_fmt4_infra_sohm III.I. Disk Format: Level 1I - Shared Object Header Message (SOHM) Master Table
 The <em>shared object header message table</em> is used to locate object header messages that are shared
 between two or more object headers in the file. Shared object header messages are stored and indexed in
 the file in one of two ways: indexed sequentially in a <em>shared header message list</em> or indexed
@@ -4225,12 +4233,13 @@ of messages in the index varies. Each shared message record contains information
 shared message from either a fractal heap or an object header. The types of messages that can be shared
 are: <em>Dataspace, Datatype, Fill Value, Filter Pipeline and Attribute</em>.
 
-The <em>shared object header message table</em> is pointed to from a
-@ref subsubsec_fmt4_dataobject_hdr_msg_shared message in the superblock extension for a file. This
-message stores the version of the table format, along with the number of index headers in the table.
+The <em>shared object header message master table</em> is pointed to from a
+@ref subsubsec_fmt4_dataobject_hdr_msg_shared in the superblock extension for a file. This
+message stores the version of the table format, along with the number of index headers, \a N, in
+the table.
 
 <table>
-<caption><strong>Layout: Shared Object Header Message Table</strong></caption>
+<caption><strong>Layout: Shared Object Header Message (SOHM) Master Table</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -4298,7 +4307,7 @@ message stores the version of the table format, along with the number of index h
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
-<caption><strong>Fields: Shared Object Header Message Table</strong></caption>
+<caption><strong>Fields: Shared Object Header Message (SOHM) Master Table</strong></caption>
 <tr>
   <th width="35%">Field Name</th>
   <th>Description</th>
@@ -4387,8 +4396,9 @@ message stores the version of the table format, along with the number of index h
 </table>
 
 Shared messages are indexed either with a <em>shared message record list</em>, described below,
-or using a v2 B-tree (using record type 7). The number of records in the <em>shared message record
-list</em> is determined in the index&rsquo;s entry in the <em>shared object header message table</em>.
+or using a v2 B-tree (using record type 7). The number of records, \a M, in the <em>shared message
+record list</em> is determined in the index&rsquo;s entry in the <em>shared object header message
+table</em> (see &ldquo;Number of Messages for index \#N&rdquo; above).
 <table>
 <caption><strong>Layout: Shared Message Record List</strong></caption>
 <tr>
@@ -4410,7 +4420,7 @@ list</em> is determined in the index&rsquo;s entry in the <em>shared object head
   <td colspan="4">...</td>
 </tr>
 <tr>
-  <td colspan="4">Shared Message Record \#N-1</td>
+  <td colspan="4">Shared Message Record \#M-1</td>
 </tr>
 <tr>
   <td colspan="4">Checksum</td>
@@ -4430,7 +4440,7 @@ list</em> is determined in the index&rsquo;s entry in the <em>shared object head
       reconstructing a damaged file.</td>
 </tr>
 <tr>
-  <td>Shared Message Record \#N</td>
+  <td>Shared Message Record \#M</td>
   <td>The record for locating the shared message, either in the fractal heap for the index, or an object
       header (see format for <em>index nodes</em> below).</td>
 </tr>
@@ -4540,6 +4550,290 @@ The record for each shared message in an index is stored in one of the following
 <tr>
   <td>Object Header Address</td>
   <td>This is the address of the object header where the message is located.</td>
+</tr>
+</table>
+
+\subsection subsec_fmt4_infra_mdci III.J. Disk Format: Level 1J - Metadata Cache Image Block
+The <em>metadata cache image block</em> is a serialized copy of the contents of the metadata cache at file
+close, written when generation of a metadata cache image is enabled for the file (see
+#H5Pset_mdc_image_config). It allows the library to reconstruct the cache directly from this block the
+next time the file is opened, instead of reconstructing it by parsing the file&rsquo;s metadata, which can
+significantly reduce the time needed to open a file containing many pieces of cached metadata. The block
+is pointed to by the @ref subsubsec_fmt4_dataobject_hdr_msg_mdci in the superblock extension.
+
+The block begins with a signature, version, flags, image data length, and entry count, followed by one
+record for each metadata cache entry captured in the image, and ends with a checksum for the block.
+
+<table>
+<caption><strong>Layout: Metadata Cache Image Block</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4">Signature</td>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>Flags</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Image Data Length<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Number of Entries</td>
+</tr>
+<tr>
+  <td colspan="4">Image Entry \#0</td>
+</tr>
+<tr>
+  <td colspan="4">Image Entry \#1</td>
+</tr>
+<tr>
+  <td colspan="4">...</td>
+</tr>
+<tr>
+  <td colspan="4">Image Entry \#N-1</td>
+</tr>
+<tr>
+  <td colspan="4">Checksum</td>
+</tr>
+</table>
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT4SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
+
+<table>
+<caption><strong>Fields: Metadata Cache Image Block</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Signature</td>
+  <td>The ASCII character string &ldquo;<code>MDCI</code>&rdquo; is used to indicate the beginning of the
+      Metadata Cache Image Block. This gives file consistency checking utilities a better chance of
+      reconstructing a damaged file.</td>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>This is the version number for the Metadata Cache Image Block and this document describes version 0.</td>
+</tr>
+<tr>
+  <td>Flags</td>
+  <td>This field holds flags for the block, as follows:
+      <table>
+      <tr>
+        <th width="20%" align="center">Bits</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>If set, adaptive cache resize status information follows the entries, below. The library does
+            not currently generate this information, so this bit is always <code>0</code>.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1-7</code></td>
+        <td>Reserved (zero).</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Image Data Length</td>
+  <td>This is the total length, in bytes, of the metadata cache image block, including this header, all
+      entries, and the trailing checksum. This is the same value stored in the &ldquo;Metadata Cache Image
+      Block Size&rdquo; field of the @ref subsubsec_fmt4_dataobject_hdr_msg_mdci that points to this
+      block.</td>
+</tr>
+<tr>
+  <td>Number of Entries</td>
+  <td>This is the number of metadata cache entry records, \a N, that follow the header. This value must be
+      greater than 0.</td>
+</tr>
+<tr>
+  <td>Image Entry \#i (i = 0 to (N-1))</td>
+  <td>These are the \a N metadata cache entry records captured in the image, one per entry that was
+      resident in the metadata cache at file close. The format of each entry is described below in
+      &ldquo;Layout: Image Entry&rdquo;.</td>
+</tr>
+<tr>
+  <td>Checksum</td>
+  <td>This is the checksum for the entire metadata cache image block, computed over the header and all
+      \a N entries that precede it (that is, over the first &ldquo;Image Data Length&rdquo; minus 4 bytes
+      of the block).</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Layout: Image Entry</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Type ID</td>
+  <td>Flags</td>
+  <td>Ring</td>
+  <td>Age</td>
+</tr>
+<tr>
+  <td colspan="2">Flush Dependency Child Count</td>
+  <td colspan="2">Flush Dependency Dirty Child Count</td>
+</tr>
+<tr>
+  <td colspan="2">Flush Dependency Parent Count</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4">LRU Rank</td>
+</tr>
+<tr>
+  <td colspan="4"><br />Entry Offset<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Entry Length<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Flush Dependency Parent Addresses<sup>O</sup> <em>(0 or more, per &ldquo;Flush Dependency
+      Parent Count&rdquo;, above)</em></td>
+</tr>
+<tr>
+  <td colspan="4">Entry Image <em>(variable size, per &ldquo;Entry Length&rdquo;, above)</em></td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT4SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
+
+<table>
+<caption><strong>Fields: Image Entry</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Type ID</td>
+  <td>This is an internal, implementation-defined identifier for the type of metadata cache client (for
+      example, superblock, object header, B-tree node, or fractal heap header) that owns this entry. The
+      library uses this value to determine how to reconstruct the entry in memory when the image is
+      loaded.</td>
+</tr>
+<tr>
+  <td>Flags</td>
+  <td>This field holds flags for the entry, as follows:
+      <table>
+      <tr>
+        <th width="20%" align="center">Bits</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>If set, the entry was dirty (not yet written to the file) at the time the image was
+            generated.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>If set, the entry was on the cache&rsquo;s LRU list, and &ldquo;LRU Rank&rdquo;, below, gives
+            its position on that list.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>If set, the entry is the parent in one or more flush dependency relationships.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>If set, the entry is a child in one or more flush dependency relationships, and the entry
+            record is followed by one or more &ldquo;Flush Dependency Parent Address&rdquo; fields,
+            below.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4-7</code></td>
+        <td>Reserved (zero).</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Ring</td>
+  <td>This identifies the flush dependency &ldquo;ring&rdquo; the entry belongs to, which constrains the
+      order in which entries are flushed relative to entries in other rings (entries in an outer ring are
+      always flushed before entries in an inner ring), as follows:
+      <table>
+      <tr>
+        <th width="20%" align="center">Value</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>User data (datasets and groups). Outermost ring; flushed first.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>Raw data free-space manager.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>Metadata free-space manager.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>Superblock extension.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>5</code></td>
+        <td>Superblock. Innermost ring; flushed last.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Age</td>
+  <td>This is the number of file opens and closes since the entry was last accessed by the application. The
+      library uses this value to decide whether to continue including the entry in future cache
+      images.</td>
+</tr>
+<tr>
+  <td>Flush Dependency Child Count</td>
+  <td>This is the number of flush dependency children for which this entry is the parent. This is non-zero
+      only if bit 2 of &ldquo;Flags&rdquo;, above, is set.</td>
+</tr>
+<tr>
+  <td>Flush Dependency Dirty Child Count</td>
+  <td>This is the number of flush dependency children, of the total given in &ldquo;Flush Dependency Child
+      Count&rdquo;, above, that were dirty at the time the image was generated.</td>
+</tr>
+<tr>
+  <td>Flush Dependency Parent Count</td>
+  <td>This is the number of flush dependency parents for which this entry is a child, \a K. This is
+      non-zero only if bit 3 of &ldquo;Flags&rdquo;, above, is set.</td>
+</tr>
+<tr>
+  <td>LRU Rank</td>
+  <td>If bit 1 of &ldquo;Flags&rdquo;, above, is set, this is the entry&rsquo;s position on the cache&rsquo;s
+      LRU list (lower values are closer to the head of the list, i.e. more recently used). Otherwise, this
+      field has the value -1.</td>
+</tr>
+<tr>
+  <td>Entry Offset</td>
+  <td>This is the address in the file at which the entry&rsquo;s metadata is (or will be) stored.</td>
+</tr>
+<tr>
+  <td>Entry Length</td>
+  <td>This is the length, in bytes, of the &ldquo;Entry Image&rdquo;, below.</td>
+</tr>
+<tr>
+  <td>Flush Dependency Parent Address \#K</td>
+  <td>This is the file address of a flush dependency parent entry of this entry. There are as many of
+      these fields as given by &ldquo;Flush Dependency Parent Count&rdquo;, above.</td>
+</tr>
+<tr>
+  <td>Entry Image</td>
+  <td>This is a byte-for-byte copy of the entry&rsquo;s serialized on-disk image, as it would otherwise
+      appear at &ldquo;Entry Offset&rdquo;, above, in the file (for example, the disk format of an object
+      header, B-tree node, or other cached metadata structure).</td>
 </tr>
 </table>
 
@@ -4657,9 +4951,9 @@ Header messages are aligned on 8-byte boundaries for version 1 object headers.
 </tr>
 <tr valign=top>
   <td>Size of Header Message \#n Data</td>
-  <td>This value specifies the number of bytes of header message data following the header message type and
-      length information for the current message. The size includes padding bytes to make the message a multiple
-      of eight bytes.</td>
+  <td>This value specifies the number of bytes of header message data following the header message type,
+      length, flags, and reserved fields for the current message. The size includes padding bytes to make
+      the message a multiple of eight bytes.</td>
 </tr>
 <tr valign=top>
   <td>Header Message \#n Flags</td>
@@ -4922,8 +5216,8 @@ or padding bytes inserted - they are stored packed together.
     <tr>
       <td>Size of Header Message \#n Data</td>
       <td>This value specifies the number of bytes of header message data following the header message
-          type and length information for the current message. The size of messages in this version does
-          <em>not</em> include any padding bytes.</td>
+          type, length, flags, and creation order (when present) fields for the current message. The size
+          of messages in this version does <em>not</em> include any padding bytes.</td>
     </tr>
     <tr>
       <td>Header Message \#n Flags</td>
@@ -4958,13 +5252,8 @@ each object. Some header messages are required for each object while others are 
 header messages may also be repeated several times in the header itself, the requirements and number of
 times allowed in the header will be noted in each header message description below.
 
-\subsection subsec_fmt4_dataobject_hdr_msg IV.A.2 Disk Format: Level 2A2 - Data Object Header Messages
-Data object header messages are small pieces of metadata that are stored in the data object header for
-each object in an HDF5 file. Data object header messages provide the metadata required to describe an
-object and its contents, as well as optional pieces of metadata that annotate the meaning or purpose of
-the object.
-
-Data object header messages are either stored directly in the data object header for the object or are
+\subsection subsec_fmt4_dataobject_hdr_msg IV.A.2 Disk Format: Level 2A2 - Data Object Header Shared Message Encoding
+Data object header message data is either stored directly in the data object header for the object or is
 shared between multiple objects in the file. When a message is shared, a flag in the <em>Message Flags</em>
 indicates that the actual <em>Message Data</em> portion of that message is stored in another location
 (such as another data object header, or a heap in the file) and the <em>Message Data</em> field
@@ -4988,11 +5277,16 @@ The format of shared message data is described here:
   <td colspan="4">Reserved (zero)</td>
 </tr>
 <tr>
+  <td colspan="4">Link Name Offset<sup>L</sup></td>
+</tr>
+<tr>
   <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
     &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT4SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
 <caption><strong>Fields: Shared Message (Version 1)</strong></caption>
@@ -5032,6 +5326,12 @@ The format of shared message data is described here:
         <td>Message stored in another object&rsquo;s header (a <em>committed</em> message).</td>
       </tr>
       </table></td>
+</tr>
+<tr>
+  <td>Link Name Offset</td>
+  <td>This field is skipped over, but not read, by the library&rsquo;s shared message decoding code. Its
+      name is deduced matching the <em>Link Name Offset</em> field of the
+      @ref subsec_fmt4_infra_symboltableentry structure, which this shared message format reuses.</td>
 </tr>
 <tr>
   <td>Address</td>
@@ -5174,9 +5474,15 @@ The format of shared message data is described here:
 </tr>
 </table>
 
+\subsection subsec_fmt4_dataobject_hdr_msg_catalog IV.A.3 Disk Format: Level 2A3 - Data Object Header Messages
+Data object header messages are small pieces of metadata that are stored in the data object header for
+each object in an HDF5 file. Data object header messages provide the metadata required to describe an
+object and its contents, as well as optional pieces of metadata that annotate the meaning or purpose of
+the object.
+
 The following is a list of currently defined header messages:
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_nil IV.A.2.a. The NIL Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_nil IV.A.3.a. The NIL Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> NIL</td>
@@ -5200,7 +5506,7 @@ The following is a list of currently defined header messages:
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_simple IV.A.2.b. The Dataspace Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_simple IV.A.3.b. The Dataspace Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Dataspace</td>
@@ -5217,9 +5523,11 @@ The following is a list of currently defined header messages:
 </tr>
 <tr>
   <td><b>Description:</b></td>
-  <td>The dataspace message describes the number of dimensions (in other words, &ldquo;rank&rdquo;) and size
-      of each dimension that the data object has. This message is only used for datasets which have a
-      simple, rectilinear, array-like layout; datasets requiring a more complex layout are not yet supported.</td>
+  <td>The dataspace message describes the number of dimensions, <em>d</em> (also called the
+      &ldquo;rank&rdquo;), and the extent of each dimension that the data object has. This message is only used for datasets which have a
+      simple, rectilinear, array-like layout; datasets requiring a more complex layout are not yet supported.<br />
+      This message may be shared between multiple objects in the file; see @ref subsec_fmt4_dataobject_hdr_msg
+      for the shared message encoding.</td>
 </tr>
 <tr>
   <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
@@ -5244,31 +5552,31 @@ The following is a list of currently defined header messages:
   <td colspan="4">Reserved</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Dimension \#1 Size<sup>L</sup><br /><br /></td>
+  <td colspan="4">Dimension \#0 Extent<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Dimension \#n Size<sup>L</sup><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d-1) Extent<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Dimension \#1 Maximum Size<sup>L</sup><br /><br /></td>
-</tr>
-<tr align="center">
-  <td colspan="4">.<br />.<br />.<br /></td>
-</tr>
-<tr align="center">
-  <td colspan="4"><br />Dimension \#n Maximum Size<sup>L</sup><br /><br /></td>
-</tr>
-<tr align="center">
-  <td colspan="4"><br />Permutation Index \#1<sup>L</sup><br /><br /></td>
+  <td colspan="4"><br />Dimension \#0 Maximum Extent<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Permutation Index \#n<sup>L</sup><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d-1) Maximum Extent<sup>L</sup><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Permutation Index \#0<sup>L</sup><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4">.<br />.<br />.<br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Permutation Index \#(d-1)<sup>L</sup><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
@@ -5289,7 +5597,8 @@ The following is a list of currently defined header messages:
 </tr>
 <tr valign=top>
   <td>Dimensionality</td>
-  <td>This value is the number of dimensions that the data object has.</td>
+  <td>This value is the number of dimensions, <em>d</em>, that the data object has (also known as the
+      &ldquo;rank&rdquo;).</td>
 </tr>
 <tr valign=top>
   <td>Flags</td>
@@ -5298,24 +5607,23 @@ The following is a list of currently defined header messages:
       that permutation indices are present.</td>
 </tr>
 <tr valign=top>
-  <td>Dimension \#n Size</td>
-  <td>This value is the current size of the dimension of the data as stored in the file. The first dimension
-      stored in the list of dimensions is the slowest changing dimension and the last dimension stored is the
-      fastest changing dimension.</td>
+  <td>Dimension \#i Extent (i = 0 to (d-1))</td>
+  <td>This value is the current extent of the dimension of the data as stored in the file, in units of
+      array elements (not bytes). Dimension \#0 is the slowest-changing axis and Dimension \#(d-1) is
+      the fastest-changing axis.</td>
 </tr>
 <tr valign=top>
-  <td>Dimension \#n Maximum Size</td>
-  <td>This value is the maximum size of the dimension of the data as stored in the file.  This value may be
-      the special &ldquo;@ref FMT4UnlimitedDim "unlimited size"&rdquo; which indicates that the data
-      may expand along this dimension indefinitely. If these values are not stored, the maximum size of each
-      dimension is assumed to be the dimension&rsquo;s current size.</td>
+  <td>Dimension \#i Maximum Extent (i = 0 to (d-1))</td>
+  <td>This value is the maximum extent of the dimension of the data as stored in the file. This value may be
+      the special &ldquo;@ref FMT4UnlimitedDim "unlimited extent"&rdquo; which indicates that the data
+      may expand along this dimension indefinitely. If these values are not stored, the maximum extent of
+      each dimension is assumed to be the dimension&rsquo;s current extent.</td>
 </tr>
 <tr valign=top>
-  <td>Permutation Index \#n</td>
+  <td>Permutation Index \#i (i = 0 to (d-1))</td>
   <td>This value is the index permutation used to map each dimension from the canonical representation to an
-    alternate axis for each dimension. If these values are not stored, the first dimension stored in the list
-    of dimensions is the slowest changing dimension and the last dimension stored is the fastest changing
-    dimension.</td>
+    alternate axis for each dimension. If these values are not stored, Dimension \#0 is the slowest changing
+    dimension and Dimension \#(d-1) is the fastest changing dimension.</td>
 </tr>
 </table>
 
@@ -5336,22 +5644,22 @@ implemented in the HDF5 Library:
   <td>Type</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Dimension \#1 Size<sup>L</sup><br /><br /></td>
+  <td colspan="4">Dimension \#0 Extent<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Dimension \#n Size<sup>L</sup><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d-1) Extent<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Dimension \#1 Maximum Size<sup>L</sup><br /><br /></td>
+  <td colspan="4"><br />Dimension \#0 Maximum Extent<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Dimension \#n Maximum Size<sup>L</sup><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d-1) Maximum Extent<sup>L</sup><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
@@ -5370,7 +5678,8 @@ implemented in the HDF5 Library:
 </tr>
 <tr valign=top>
   <td>Dimensionality</td>
-  <td>This value is the number of dimensions that the data object has.</td>
+  <td>This value is the number of dimensions, <em>d</em>, that the data object has (also known as the
+      &ldquo;rank&rdquo;).</td>
 </tr>
 <tr valign=top>
   <td>Flags</td>
@@ -5401,21 +5710,21 @@ implemented in the HDF5 Library:
       </table></td>
 </tr>
 <tr valign=top>
-  <td>Dimension \#n Size</td>
-  <td>This value is the current size of the dimension of the data as stored in the file. The first dimension
-      stored in the list of dimensions is the slowest changing dimension and the last dimension stored is the
-      fastest changing dimension.</td>
+  <td>Dimension \#i Extent (i = 0 to (d-1))</td>
+  <td>This value is the current extent of the dimension of the data as stored in the file, in units of
+      array elements (not bytes). Dimension \#0 is the slowest-changing axis and Dimension \#(d-1) is
+      the fastest-changing axis.</td>
 </tr>
 <tr valign=top>
-  <td>Dimension \#n Maximum Size</td>
-  <td>This value is the maximum size of the dimension of the data as stored in the file.  This value may be
-      the special &ldquo;@ref FMT4UnlimitedDim "unlimited size"&rdquo; which indicates that the data
-      may expand along this dimension indefinitely. If these values are not stored, the maximum size of each
-      dimension is assumed to be the dimension&rsquo;s current size.</td>
+  <td>Dimension \#i Maximum Extent (i = 0 to (d-1))</td>
+  <td>This value is the maximum extent of the dimension of the data as stored in the file. This value may be
+      the special &ldquo;@ref FMT4UnlimitedDim "unlimited extent"&rdquo; which indicates that the data
+      may expand along this dimension indefinitely. If these values are not stored, the maximum extent of
+      each dimension is assumed to be the dimension&rsquo;s current extent.</td>
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_linkinfo IV.A.2.c. The Link Info Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_linkinfo IV.A.3.c. The Link Info Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Link Info</td>
@@ -5529,7 +5838,7 @@ implemented in the HDF5 Library:
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_dtmessage IV.A.2.d. The Datatype Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_dtmessage IV.A.3.d. The Datatype Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Datatype</td>
@@ -5551,9 +5860,10 @@ implemented in the HDF5 Library:
       floating-point type or more complex types like a C struct (compound datatype), array (array datatype)
       or C++ vector (variable-length datatype).<br />
       Datatype messages that are part of a dataset object do not describe how elements are related to one
-      another; the dataspace message is used for that purpose. Datatype messages that are part of a committed
-      datatype (formerly named datatype) message describe a common datatype that can be shared by multiple
-      datasets in the file.</td>
+      another; the dataspace message is used for that purpose.<br />
+      Datatype messages that are part of a committed datatype (formerly named datatype) message describe a
+      common datatype that can be shared by multiple datasets in the file. See @ref
+      subsec_fmt4_dataobject_hdr_msg for the shared message encoding.</td>
 </tr>
 <tr>
   <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
@@ -5578,7 +5888,7 @@ implemented in the HDF5 Library:
   <td colspan="4">Size</td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br /><br />Properties<br /><br> /<br /></td>
+  <td colspan="4"><br /><br />Properties<br /><br /></td>
 </tr>
 </table>
 
@@ -6155,7 +6465,7 @@ versions of the HDF5 library from the 1.4 release onward.
   <th>Byte</th>
 </tr>
 <tr align="center">
-  <td colspan="4"><br /><br />Name<br /><br >/<br /></td>
+  <td colspan="4"><br /><br />Name<br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4">Byte Offset of Member</td>
@@ -6171,16 +6481,16 @@ versions of the HDF5 library from the 1.4 release onward.
   <td colspan="4">Reserved (zero)</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Dimension \#1 Size (required)</td>
+  <td colspan="4">Dimension \#0 Extent (required)</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Dimension \#2 Size (required)</td>
+  <td colspan="4">Dimension \#1 Extent (required)</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Dimension \#3 Size (required)</td>
+  <td colspan="4">Dimension \#2 Extent (required)</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Dimension \#4 Size (required)</td>
+  <td colspan="4">Dimension \#3 Extent (required)</td>
 </tr>
 <tr align="center">
   <td colspan="4"><br />Member Type Message<br /><br /></td>
@@ -6205,8 +6515,9 @@ versions of the HDF5 library from the 1.4 release onward.
 <tr>
   <td>Dimensionality</td>
   <td>If set to zero, this field indicates a scalar member. If set to a value greater than zero,
-      this field indicates that the member is an array of values. For array members, the size of
-      the array is indicated by the &lsquo;Size of Dimension n&rsquo; field in this message.</td>
+      <em>d</em>, this field indicates that the member is an array of <em>d</em> dimensions, whose
+      extents are given by Dimension \#0 Extent through Dimension \#(d&minus;1) Extent; the
+      remaining Dimension Extent fields, if any, are unused.</td>
 </tr>
 <tr>
   <td>Dimension Permutation</td>
@@ -6214,10 +6525,11 @@ versions of the HDF5 library from the 1.4 release onward.
       never implemented. This field should always be set to zero.</td>
 </tr>
 <tr>
-  <td>Dimension \#n Size</td>
-  <td>This field is the size of a dimension of the array field as stored in the file. The first
-      dimension stored in the list of dimensions is the slowest changing dimension and the last
-      dimension stored is the fastest changing dimension.</td>
+  <td>Dimension \#i Extent (i = 0 to 3)</td>
+  <td>This field is the extent of a dimension of the array field, in units of array elements (not
+      bytes), as stored in the file. Dimension \#0 is the slowest-changing axis. Exactly 4 Dimension
+      Extent fields are always present; only the first <em>d</em> (Dimension \#0 Extent through
+      Dimension \#(d&minus;1) Extent) are meaningful, and any remaining fields are unused.</td>
 </tr>
 <tr>
   <td>Member Type Message</td>
@@ -6234,13 +6546,13 @@ versions of the HDF5 library from the 1.4 release onward.
   <th width="25%">Byte</th>
 </tr>
 <tr>
-  <td colspan="4"><br />Name<br><br /></td>
+  <td colspan="4"><br />Name<br /><br /></td>
 </tr>
 <tr>
   <td colspan="4">Byte Offset of Member</td>
 </tr>
 <tr>
-  <td colspan="4"><br />Member Type Message<br><br /></td>
+  <td colspan="4"><br />Member Type Message<br /><br /></td>
 </tr>
 </table>
 
@@ -6274,13 +6586,13 @@ versions of the HDF5 library from the 1.4 release onward.
   <th width="25%">Byte</th>
 </tr>
 <tr>
-  <td colspan="4"><br />Name<br><br /></td>
+  <td colspan="4"><br />Name<br /><br /></td>
 </tr>
 <tr>
   <td colspan="4">Byte Offset of Member</td>
 </tr>
 <tr>
-  <td colspan="4"><br />Member Type Message<br><br /></td>
+  <td colspan="4"><br />Member Type Message<br /><br /></td>
 </tr>
 </table>
 
@@ -6432,7 +6744,7 @@ There are no properties defined for the reference class.
   <th>Byte</th>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Base Type<br >/<br /></td>
+  <td colspan="4"><br />Base Type<br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4"><br />Names<br /><br /></td>
@@ -6474,7 +6786,7 @@ There are no properties defined for the reference class.
   <th>Byte</th>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Base Type<br >/<br /></td>
+  <td colspan="4"><br />Base Type<br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4"><br />Names<br /><br /></td>
@@ -6653,22 +6965,22 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <td colspan="3">Reserved (zero)</td>
 </tr>
 <tr>
-  <td colspan="4">Dimension \#1 Size</td>
+  <td colspan="4">Dimension \#0 Extent</td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Dimension \#n Size</td>
+  <td colspan="4">Dimension \#(d-1) Extent</td>
 </tr>
 <tr>
-  <td colspan="4">Permutation Index \#1</td>
+  <td colspan="4">Permutation Index \#0</td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Permutation Index \#n</td>
+  <td colspan="4">Permutation Index \#(d-1)</td>
 </tr>
 <tr>
   <td colspan="4"><br />Base Type<br /><br /></td>
@@ -6683,20 +6995,20 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 <tr>
   <td>Dimensionality</td>
-  <td>This value is the number of dimensions that the array has.</td>
+  <td>This value is the number of dimensions, <em>d</em>, that the array has.</td>
 </tr>
 <tr>
-  <td>Dimension \#n Size</td>
-  <td>This value is the size of the dimension of the array as stored in the file. The first dimension
-      stored in the list of dimensions is the slowest changing dimension and the last dimension stored
-      is the fastest changing dimension.</td>
+  <td>Dimension \#i Extent (i = 0 to (d-1))</td>
+  <td>This value is the extent of the dimension of the array as stored in the file, in units of array
+      elements (not bytes). Dimension \#0 is the slowest-changing axis and Dimension \#(d-1) is the
+      fastest-changing axis.</td>
 </tr>
 <tr>
-  <td>Permutation Index \#n</td>
+  <td>Permutation Index \#i (i = 0 to (d-1))</td>
   <td>This value is the index permutation used to map each dimension from the canonical representation
       to an alternate axis for each dimension. Currently, dimension permutations are not supported and
-      these indices should be set to the index position minus one (i.e. the first dimension should be
-      set to 0, the second dimension should be set to 1, and so on.)</td>
+      these indices should be set to the index position (i.e. Permutation Index \#0 should be set to 0,
+      Permutation Index \#1 should be set to 1, and so on.)</td>
 </tr>
 <tr>
   <td>Base Type</td>
@@ -6718,13 +7030,13 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
 <tr>
-  <td colspan="4">Dimension \#1 Size</td>
+  <td colspan="4">Dimension \#0 Extent</td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Dimension \#n Size</td>
+  <td colspan="4">Dimension \#(d-1) Extent</td>
 </tr>
 <tr>
   <td colspan="4"><br />Base Type<br /><br /></td>
@@ -6739,13 +7051,13 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 <tr>
   <td>Dimensionality</td>
-  <td>This value is the number of dimensions that the array has.</td>
+  <td>This value is the number of dimensions, <em>d</em>, that the array has.</td>
 </tr>
 <tr>
-  <td>Dimension \#n Size</td>
-  <td>This value is the size of the dimension of the array as stored in the file. The first dimension
-      stored in the list of dimensions is the slowest changing dimension and the last dimension stored
-      is the fastest changing dimension.</td>
+  <td>Dimension \#i Extent (i = 0 to (d-1))</td>
+  <td>This value is the extent of the dimension of the array as stored in the file, in units of array
+      elements (not bytes). Dimension \#0 is the slowest-changing axis and Dimension \#(d-1) is the
+      fastest-changing axis.</td>
 </tr>
 <tr>
   <td>Base Type</td>
@@ -6829,7 +7141,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_ofvmessage IV.A.2.e. Data Storage - Fill Value (Old) Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_ofvmessage IV.A.3.e. Data Storage - Fill Value (Old) Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Fill Value (old)</td>
@@ -6853,7 +7165,9 @@ another datatype) and the dataspace for a dataset describes the location of the 
       Type 0x0005) and is only written to the file for forward compatibility with versions of the HDF5
       Library before the 1.6.0 version. Additionally, it only appears for datasets with a user-defined
       fill value (as opposed to the library default fill value or an explicitly set &ldquo;undefined&rdquo;
-      fill value).</td>
+      fill value).<br />
+      This message may be shared between multiple objects in the file; see @ref subsec_fmt4_dataobject_hdr_msg
+      for the shared message encoding.</td>
 </tr>
 <tr>
   <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
@@ -6892,7 +7206,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_fvmessage IV.A.2.f. The Data Storage - Fill Value Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_fvmessage IV.A.3.f. The Data Storage - Fill Value Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Fill Value</td>
@@ -6910,7 +7224,9 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <td><b>Description:</b></td>
   <td>The fill value message stores a single data value which is returned to the application when an
       uninitialized data element is read from a dataset. The fill value is interpreted with the same
-      datatype as the dataset.</td>
+      datatype as the dataset.<br />
+      This message may be shared between multiple objects in the file; see @ref subsec_fmt4_dataobject_hdr_msg
+      for the shared message encoding.</td>
 </tr>
 <tr>
     <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
@@ -7151,7 +7467,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_link IV.A.2.g. The Link Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_link IV.A.3.g. The Link Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Link</td>
@@ -7393,7 +7709,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_external IV.A.2.h. The Data Storage - External Data Files Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_external IV.A.3.h. The Data Storage - External Data Files Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> External Data Files</td>
@@ -7544,7 +7860,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_layout IV.A.2.i. The Data Layout Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_layout IV.A.3.i. The Data Layout Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Data Storage - Layout</td>
@@ -7605,16 +7921,16 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <td colspan="4"><br />Data Address<sup>O</sup> <em>(optional)</em><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4">Dimension 0 Size</td>
+  <td colspan="4">Dimension \#0 Extent</td>
 </tr>
 <tr>
-  <td colspan="4">Dimension 1 Size</td>
+  <td colspan="4">Dimension \#1 Extent</td>
 </tr>
 <tr>
   <td colspan="4">...</td>
 </tr>
 <tr>
-  <td colspan="4">Dimension \#(d - 1) Size</td>
+  <td colspan="4">Dimension \#(d-1) Extent</td>
 </tr>
 <tr>
   <td colspan="4">Dataset Element Size <em>(stored as Dimension \#d)</em></td>
@@ -7663,12 +7979,14 @@ another datatype) and the dataspace for a dataset describes the location of the 
 <tr valign=top>
   <td>Dimensionality</td>
   <td>\anchor FMT4V12Dimensionality An array has a fixed dimensionality.
-      Let <b>d</b> be the number of dimensions in the dataset&rsquo;s dataspace.
-      For compact and contiguous storage, this field stores <b>d</b>.
+      Let <b>d</b> be the number of dimensions in the dataset&rsquo;s dataspace (its rank).
+      This field stores the number of entries in the Dimension Extent list below.
       <br />
-      For chunked storage, this field stores <b>d + 1</b>: entries 0 through d&minus;1 are the chunk
-      dimension sizes, and entry d holds the Dataset Element Size (see below).
-      For example, a 1-dimensional chunked dataset stores a value of 2.</td>
+      For compact and contiguous storage, that list has exactly <b>d</b> entries.
+      For chunked storage, the list has <b>d + 1</b> entries: the first <b>d</b> (Dimension \#0 Extent
+      through Dimension \#(d-1) Extent) are the chunk&rsquo;s dimension extents, and one additional
+      trailing entry &mdash; not a real dimension &mdash; holds the Dataset Element Size (see below).
+      For example, a 1-dimensional chunked dataset stores a Dimensionality value of 2.</td>
 </tr>
 <tr valign=top>
   <td>Layout Class</td>
@@ -7702,22 +8020,23 @@ another datatype) and the dataspace for a dataset describes the location of the 
       has not yet been allocated for this array.</td>
 </tr>
 <tr valign=top>
-  <td>Dimension \#i Size (i = 0 to (d-1))</td>
-  <td>\anchor FMT4V12DimInfoN For contiguous and compact storage the dimensions define the entire size of the array
-      in units of array elements (not bytes).
-      Dimension 0 is the slowest-changing axis and Dimension d&minus;1 is the fastest-changing axis.
-      <br />For chunked storage, the dimensions define the size of a single chunk in units of array
+  <td>Dimension \#i Extent (i = 0 to (d-1))</td>
+  <td>\anchor FMT4V12DimInfoN For contiguous and compact storage the dimensions define the entire extent
+      of the array, in units of array elements (not bytes).
+      Dimension \#0 is the slowest-changing axis and Dimension \#(d-1) is the fastest-changing axis.
+      <br />For chunked storage, the dimensions define the extent of a single chunk, in units of array
       elements (not bytes).
-      Dimension 0 is the slowest-changing axis and Dimension d&minus;1 is the fastest-changing axis.
-      Dimension d stores the Dataset Element Size (see below) and is not a chunk dimension.</td>
+      Dimension \#0 is the slowest-changing axis and Dimension \#(d-1) is the fastest-changing axis.
+      The following entry, Dimension \#d, is not a chunk dimension; it holds the Dataset Element Size
+      (see below).</td>
 </tr>
 <tr>
   <td>Dataset Element Size</td>
   <td>\anchor FMT4V12DsetElmSz The size of a dataset element, in bytes.
       This field is only present for chunked data storage.
-      Although logically distinct from the chunk dimensions, this value is encoded as
-      dimension entry d where d is the number of dataset dimensions,
-      which is why the Dimensionality field stores d + 1.</td>
+      Although it is not a dimension extent, it is encoded as the trailing entry, Dimension \#d, in the
+      Dimension Extent list above, which is why the Dimensionality field stores d + 1 rather than d
+      for chunked storage.</td>
 </tr>
 <tr>
   <td>Compact Data Size</td>
@@ -7893,16 +8212,16 @@ Class-specific information for chunked storage (layout class 2):
   <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4">Dimension 0 Size</td>
+  <td colspan="4">Dimension \#0 Extent</td>
 </tr>
 <tr>
-  <td colspan="4">Dimension 1 Size</td>
+  <td colspan="4">Dimension \#1 Extent</td>
 </tr>
 <tr>
   <td colspan="4">...</td>
 </tr>
 <tr>
-  <td colspan="4">Dimension \#(d - 1) Size</td>
+  <td colspan="4">Dimension \#(d-1) Extent</td>
 </tr>
 <tr>
   <td colspan="4">Dataset Element Size <em>(stored as Dimension \#d)</em></td>
@@ -7931,8 +8250,8 @@ Class-specific information for chunked storage (layout class 2):
       that storage has not yet been allocated for this array.</td>
 </tr>
 <tr>
-  <td>Dimension \#i Size (i = 0 to (d-1))</td>
-  <td>\anchor FMT4DimInfoN See @ref FMT4V12DimInfoN "Dimension \#i Size" description in versions 1 and 2 Data Layout message, in particular the chunked storage portion.</td>
+  <td>Dimension \#i Extent (i = 0 to (d-1))</td>
+  <td>\anchor FMT4DimInfoN See @ref FMT4V12DimInfoN "Dimension \#i Extent" description in versions 1 and 2 Data Layout message, in particular the chunked storage portion.</td>
 </tr>
 <tr>
   <td>Dataset Element Size</td>
@@ -8055,20 +8374,20 @@ information for the virtual layout class as well as indexing information for the
 <tr>
   <td>Flags</td>
   <td>Dimensionality</td>
-  <td>Dimension Size Encoded Length</td>
+  <td>Dimension Extent Encoded Length</td>
   <td bgcolor=#DDDDDD><em>This space inserted only to align table nicely</em></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 0 Size <em>(variable size)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#0 Extent <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension 1 Size <em>(variable size)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#1 Extent <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr>
   <td colspan="4"><br />...<br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Dimension \#(d - 1) Size <em>(variable size)</em><br /><br /></td>
+  <td colspan="4"><br />Dimension \#(d-1) Extent <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr>
   <td colspan="4"><br />Dataset Element Size <em>(stored as Dimension \#d)</em> <em>(variable size)</em><br /><br /></td>
@@ -8118,12 +8437,12 @@ information for the virtual layout class as well as indexing information for the
   <td>See @ref FMT4V12Dimensionality "Dimensionality" description in versions 1 and 2 Data Layout message, in particular the chunked storage portion.</td>
 </tr>
 <tr>
-  <td>Dimension Size Encoded Length</td>
-  <td>This is the size in bytes used to encode <em>Dimension Size</em>.</td>
+  <td>Dimension Extent Encoded Length</td>
+  <td>This is the size in bytes used to encode each <em>Dimension Extent</em> value.</td>
 </tr>
 <tr>
-  <td>Dimension \#i Size (i = 0 to (d-1))</td>
-  <td>See @ref FMT4V12DimInfoN "Dimension \#i Size" description in versions 1 and 2 Data Layout message, in particular the chunked storage portion.</td>
+  <td>Dimension \#i Extent (i = 0 to (d-1))</td>
+  <td>See @ref FMT4V12DimInfoN "Dimension \#i Extent" description in versions 1 and 2 Data Layout message, in particular the chunked storage portion.</td>
 </tr>
 <tr>
   <td>Dataset Element Size</td>
@@ -8416,7 +8735,7 @@ The following information exists only when the chunk is filtered. In other words
 </table>
 
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_bogus IV.A.2.j. The Bogus Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_bogus IV.A.3.j. The Bogus Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Bogus</td>
@@ -8465,7 +8784,7 @@ The following information exists only when the chunk is filtered. In other words
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_groupinfo IV.A.2.k. The Group Info Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_groupinfo IV.A.3.k. The Group Info Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Group Info</td>
@@ -8574,7 +8893,7 @@ The following information exists only when the chunk is filtered. In other words
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_filter IV.A.2.l. The Data Storage - Filter Pipeline Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_filter IV.A.3.l. The Data Storage - Filter Pipeline Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Data Storage - Filter Pipeline</td>
@@ -8595,7 +8914,9 @@ The following information exists only when the chunk is filtered. In other words
       This message may be present in the object headers of both dataset and group objects. For datasets, it
       specifies the filters to apply to raw data. For groups, it specifies the filters to apply to the
       group&rsquo;s fractal heap. Currently, only datasets using chunked data storage use the filter pipeline
-      on their raw data.</td>
+      on their raw data.<br />
+      This message may be shared between multiple objects in the file; see @ref subsec_fmt4_dataobject_hdr_msg
+      for the shared message encoding.</td>
 </tr>
 <tr>
   <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
@@ -8969,7 +9290,7 @@ u
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_attribute IV.A.2.m. The Attribute Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_attribute IV.A.3.m. The Attribute Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Attribute</td>
@@ -9151,8 +9472,8 @@ u
       </table></td>
 </tr>
 <tr>
-  <td>Flags</td>
-  <td>>This bit field contains extra information about interpreting the attribute message:
+  <td>\anchor FMT4AttrV2Flags Flags</td>
+  <td>This bit field contains extra information about interpreting the attribute message:
     <table>
     <tr>
       <th width="20%">Bit</th>
@@ -9169,39 +9490,41 @@ u
     </table></td>
 </tr>
 <tr>
-  <td>Name Size</td>
+  <td>\anchor FMT4AttrV2NameSize Name Size</td>
   <td>The length of the attribute name in bytes including the null terminator.</td>
 </tr>
 <tr>
-  <td>Datatype Size</td>
+  <td>\anchor FMT4AttrV2DatatypeSize Datatype Size</td>
   <td>The length of the datatype description in the <em>Datatype</em> field below.</td>
 </tr>
 <tr>
-  <td>Dataspace Size</td>
+  <td>\anchor FMT4AttrV2DataspaceSize Dataspace Size</td>
   <td>The length of the dataspace description in the <em>Dataspace</em> field below.</td>
 </tr>
 <tr>
-  <td>Name</td>
+  <td>\anchor FMT4AttrV2Name Name</td>
   <td>The null-terminated attribute name. This field is <em>not</em> padded with additional bytes.</td>
 </tr>
 <tr>
-  <td>Datatype</td>
+  <td>\anchor FMT4AttrV2Datatype Datatype</td>
   <td>The datatype description follows the same format as described for the datatype object
       header message.<br />
       If the <em>Flag</em> field indicates this attribute&rsquo;s datatype is shared, this field will
-      contain a &ldquo;shared message&rdquo; encoding instead of the datatype encoding.<br />
+      contain a @ref subsec_fmt4_dataobject_hdr_msg "shared message encoding" instead of
+      the datatype encoding.<br />
       This field is <em>not</em> padded with additional bytes.</td>
 </tr>
 <tr>
-  <td>Dataspace</td>
+  <td>\anchor FMT4AttrV2Dataspace Dataspace</td>
   <td>The dataspace description follows the same format as described for the dataspace object
       header message.<br />
       If the <em>Flag</em> field indicates this attribute&rsquo;s dataspace is shared, this field will
-      contain a &ldquo;shared message&rdquo; encoding instead of the dataspace encoding.<br />
+      contain a @ref subsec_fmt4_dataobject_hdr_msg "shared message encoding" instead of
+      the dataspace encoding.<br />
       This field is <em>not</em> padded with additional bytes.</td>
 </tr>
 <tr>
-  <td>Data</td>
+  <td>\anchor FMT4AttrV2Data Data</td>
   <td>The raw data for the attribute. The size is determined from the datatype and dataspace
       descriptions.<br />
       This field is <em>not</em> padded with additional zero bytes.</td>
@@ -9259,7 +9582,7 @@ u
         <th align="left">Description</th>
       </tr>
       <tr>
-        <td align="center"><code>2</code></td>
+        <td align="center"><code>3</code></td>
         <td>Used by the library of version 1.8.x and after to encode attribute messages. This version
             supports attributes with non-ASCII names.</td>
       </tr>
@@ -9267,37 +9590,23 @@ u
 </tr>
 <tr>
   <td>Flags</td>
-  <td>>This bit field contains extra information about interpreting the attribute message:
-    <table>
-    <tr>
-      <th width="20%">Bit</th>
-      <th align="left">Description</th>
-    </tr>
-    <tr>
-      <td align="center"><code>0</code></td>
-      <td>If set, datatype is shared.</td>
-    </tr>
-    <tr>
-      <td align="center"><code>1</code></td>
-      <td>If set, dataspace is shared.</td>
-    </tr>
-    </table></td>
+  <td>This field is the same as described for @ref FMT4AttrV2Flags "version 2" of the attribute message.</td>
 </tr>
 <tr>
   <td>Name Size</td>
-  <td>The length of the attribute name in bytes including the null terminator.</td>
+  <td>This field is the same as described for @ref FMT4AttrV2NameSize "version 2" of the attribute message.</td>
 </tr>
 <tr>
   <td>Datatype Size</td>
-  <td>The length of the datatype description in the <em>Datatype</em> field below.</td>
+  <td>This field is the same as described for @ref FMT4AttrV2DatatypeSize "version 2" of the attribute message.</td>
 </tr>
 <tr>
   <td>Dataspace Size</td>
-  <td>The length of the dataspace description in the <em>Dataspace</em> field below.</td>
+  <td>This field is the same as described for @ref FMT4AttrV2DataspaceSize "version 2" of the attribute message.</td>
 </tr>
 <tr>
   <td>Name Character Set Encoding</td>
-  <td>The character set encoding for the attribute&rsquo;s name:
+  <td>The character set encoding for the attribute&rsquo;s name:<br />
       <table>
       <tr>
         <th width="20%" align="center">Value</th>
@@ -9315,33 +9624,23 @@ u
 </tr>
 <tr>
   <td>Name</td>
-  <td>The null-terminated attribute name. This field is <em>not</em> padded with additional bytes.</td>
+  <td>This field is the same as described for @ref FMT4AttrV2Name "version 2" of the attribute message.</td>
 </tr>
 <tr>
   <td>Datatype</td>
-  <td>The datatype description follows the same format as described for the datatype object
-      header message.<br />
-      If the <em>Flag</em> field indicates this attribute&rsquo;s datatype is shared, this field will
-      contain a &ldquo;shared message&rdquo; encoding instead of the datatype encoding.<br />
-      This field is <em>not</em> padded with additional bytes.</td>
+  <td>This field is the same as described for @ref FMT4AttrV2Datatype "version 2" of the attribute message.</td>
 </tr>
 <tr>
   <td>Dataspace</td>
-  <td>The dataspace description follows the same format as described for the dataspace object
-      header message.<br />
-      If the <em>Flag</em> field indicates this attribute&rsquo;s dataspace is shared, this field will
-      contain a &ldquo;shared message&rdquo; encoding instead of the dataspace encoding.<br />
-      This field is <em>not</em> padded with additional bytes.</td>
+  <td>This field is the same as described for @ref FMT4AttrV2Dataspace "version 2" of the attribute message.</td>
 </tr>
 <tr>
   <td>Data</td>
-  <td>The raw data for the attribute. The size is determined from the datatype and dataspace
-      descriptions.<br />
-      This field is <em>not</em> padded with additional zero bytes.</td>
+  <td>This field is the same as described for @ref FMT4AttrV2Data "version 2" of the attribute message.</td>
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_comment IV.A.2.n. The Object Comment Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_comment IV.A.3.n. The Object Comment Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Object Comment</td>
@@ -9391,7 +9690,7 @@ u
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_omodified IV.A.2.o. The Object Modification Time (Old) Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_omodified IV.A.3.o. The Object Modification Time (Old) Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Object Modification Time (Old)</td>
@@ -9486,7 +9785,7 @@ u
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_shared IV.A.2.p. The Shared Message Table Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_shared IV.A.3.p. The Shared Message Table Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Shared Message Table</td>
@@ -9502,9 +9801,9 @@ u
 </tr>
 <tr>
   <td><b>Description:</b></td>
-  <td>This message is used to locate the table of shared object header message (SOHM) indexes. Each
-      index consists of information to find the shared messages from either the heap or object header.
-      This message is <em>only</em> found in the superblock extension.</td>
+  <td>This message is used to locate the @ref subsec_fmt4_infra_sohm "SOHM Master Table". Each
+      index in the table consists of information to find the shared messages from either the heap or
+      object header. This message is <em>only</em> found in the superblock extension.</td>
 </tr>
 <tr>
   <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
@@ -9554,7 +9853,7 @@ u
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_continuation IV.A.2.q. The Object Header Continuation Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_continuation IV.A.3.q. The Object Header Continuation Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Object Header Continuation</td>
@@ -9719,7 +10018,7 @@ described here (see also the description of @ref subsubsec_fmt4_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_stmgroup IV.A.2.r. The Symbol Table Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_stmgroup IV.A.3.r. The Symbol Table Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Symbol Table Message</td>
@@ -9778,7 +10077,7 @@ described here (see also the description of @ref subsubsec_fmt4_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_mod IV.A.2.s. The Object Modification Time Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_mod IV.A.3.s. The Object Modification Time Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Object Modification Time</td>
@@ -9853,7 +10152,7 @@ described here (see also the description of @ref subsubsec_fmt4_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_btreek IV.A.2.t. The B-tree &lsquo;K&rsquo; Values Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_btreek IV.A.3.t. The B-tree &lsquo;K&rsquo; Values Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> B-tree &lsquo;K&rsquo; Values</td>
@@ -9926,7 +10225,7 @@ described here (see also the description of @ref subsubsec_fmt4_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_drvinfo IV.A.2.u. The Driver Info Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_drvinfo IV.A.3.u. The Driver Info Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Driver Info</td>
@@ -10001,7 +10300,7 @@ described here (see also the description of @ref subsubsec_fmt4_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_attrinfo IV.A.2.v. The Attribute Info Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_attrinfo IV.A.3.v. The Attribute Info Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Attribute Info</td>
@@ -10107,7 +10406,7 @@ described here (see also the description of @ref subsubsec_fmt4_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_refcount IV.A.2.w. The Object Reference Count Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_refcount IV.A.3.w. The Object Reference Count Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Object Reference Count</td>
@@ -10166,7 +10465,7 @@ described here (see also the description of @ref subsubsec_fmt4_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt4_dataobject_hdr_msg_fsinfo IV.A.2.x. The File Space Info Message
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_fsinfo IV.A.3.x. The File Space Info Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> File Space Info</td>
@@ -10518,6 +10817,80 @@ described here (see also the description of @ref subsubsec_fmt4_dataobject_hdr_p
 </tr>
 </table>
 
+\subsubsection subsubsec_fmt4_dataobject_hdr_msg_mdci IV.A.3.y. The Metadata Cache Image Message
+<table>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Metadata Cache Image</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x0018</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Fixed</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>This message records the location and size of a metadata cache image block written to the file, when
+      generation of a metadata cache image is enabled for the file (see #H5Pset_mdc_image_config). The
+      metadata cache image block is a serialized copy of the contents of the metadata cache at file close,
+      which allows the library to reconstruct the cache directly from this block the next time the file is
+      opened, instead of reconstructing it by parsing the file's metadata. This can significantly reduce the
+      time needed to open a file containing many pieces of cached metadata.<br />
+      The message is written to the superblock extension only when the file is closed with a metadata
+      cache image pending, and is removed from the superblock extension once the library has read the
+      referenced block back in at the next file open when the file is opened for read/write access, at
+      which point the file space it occupied is reclaimed. If the file is opened read-only, the message
+      and image block are left unchanged. See @ref subsec_fmt4_infra_mdci for the format of the metadata
+      cache image block itself.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Layout: Metadata Cache Image</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Metadata Cache Image Block Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Metadata Cache Image Block Size<sup>L</sup><br /><br /></td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Fields: Metadata Cache Image</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>The version number for this message. This document describes version 0.</td>
+</tr>
+<tr>
+  <td>Metadata Cache Image Block Address</td>
+  <td>This is the address in the file of the metadata cache image block.</td>
+</tr>
+<tr>
+  <td>Metadata Cache Image Block Size</td>
+  <td>This is the size, in bytes, of the metadata cache image block.</td>
+</tr>
+</table>
+
 \subsection subsec_fmt4_dataobject_storage IV.B. Disk Format: Level 2B - Data Object Data Storage
 The data for an object is stored separately from the header information in the file and may not actually
 be located in the HDF5 file itself if the header indicates that the data is stored externally. The
@@ -10570,9 +10943,9 @@ Definitions of various terms used in this document are included in this section.
       set: in other words, <code>0xffff...ff</code>.</td>
 </tr>
 <tr>
-  <td><strong>Unlimited Size</strong></td>
-  <td>\anchor FMT4UnlimitedDim The "unlimited size" for a size is a value with all bits set: in other words,
-      <code>0xffff...ff</code>.</td>
+  <td><strong>Unlimited Extent</strong></td>
+  <td>\anchor FMT4UnlimitedDim The "unlimited extent" for a dimension extent is a value with all bits set:
+      in other words, <code>0xffff...ff</code>.</td>
 </tr>
 </table>
 
@@ -10726,16 +11099,16 @@ dimension, then the next fastest, and so on. The chunk index for a dataset chunk
       <code>nchunks = (curr_dims + chunk_dims - 1)/chunk_dims</code></li>
   <li>Calculate the down chunks for each dimension in <code>down_chunks</code>:<br />
       <code>
-        // n is the # of dimensions
-        for(i = (int)(n-1), acc = 1; i >= 0; i--) {
+        // d is the number of dimensions
+        for(i = (int)(d-1), acc = 1; i >= 0; i--) {
             down_chunks[i] = acc;
             acc *= nchunks[i];
         }
       </code></li>
   <li>Calculate the chunk index in <code>chunk_index</code>:<br />
       <code>
-        // n is the # of dimensions
-        for(u = 0, chunk_index = 0; u < n; u++)
+        // d is the number of dimensions
+        for(u = 0, chunk_index = 0; u < d; u++)
             chunk_index += down_chunks[u] * scaled_offset[u];
       </code></li>
 </ol>
@@ -12221,49 +12594,49 @@ See the reference manual description for these two public routines.
   <td colspan="4">Num Blocks</td>
 </tr>
 <tr>
-  <td colspan="4">Starting Offset \#1 for Block \#1</td>
+  <td colspan="4">Starting Offset \#0 for Block \#0</td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Starting Offset \#n for Block \#1</td>
+  <td colspan="4">Starting Offset \#(d-1) for Block \#0</td>
 </tr>
 <tr>
-  <td colspan="4">Ending Offset \#1 for Block \#1</td>
-</tr>
-<tr>
-  <td colspan="4">.<br />.<br />.<br /></td>
-</tr>
-<tr>
-  <td colspan="4">Ending Offset \#n for Block \#1</td>
+  <td colspan="4">Ending Offset \#0 for Block \#0</td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
+  <td colspan="4">Ending Offset \#(d-1) for Block \#0</td>
+</tr>
+<tr>
+  <td colspan="4">.<br />.<br />.<br /></td>
+</tr>
+<tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Starting Offset \#1 for Block \#u</td>
+  <td colspan="4">Starting Offset \#0 for Block \#(Num Blocks-1)</td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Starting Offset \#n for Block \#u</td>
+  <td colspan="4">Starting Offset \#(d-1) for Block \#(Num Blocks-1)</td>
 </tr>
 <tr>
-  <td colspan="4">Ending Offset \#1 for Block \#u</td>
+  <td colspan="4">Ending Offset \#0 for Block \#(Num Blocks-1)</td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Ending Offset \#n for Block \#u</td>
+  <td colspan="4">Ending Offset \#(d-1) for Block \#(Num Blocks-1)</td>
 </tr>
 </table>
 
@@ -12279,23 +12652,21 @@ See the reference manual description for these two public routines.
 </tr>
 <tr>
   <td>Rank</td>
-  <td>The number of dimensions in the dataspace.</td>
+  <td>The number of dimensions, <em>d</em>, in the dataspace.</td>
 </tr>
 <tr>
   <td>Num Blocks</td>
   <td>The number of blocks in the selection.</td>
 </tr>
 <tr>
-  <td>Starting Offset \#n for Block \#u</td>
-  <td>The offset \#n of the starting element in block \#u. \#n is from 1 to <em>Rank</em>.
-      \#u is from 1 to <em>Num Blocks</em> moving from the fastest changing dimension to
-      the slowest changing dimension.</td>
+  <td>Starting Offset \#i for Block \#j (i = 0 to (d-1), j = 0 to (Num Blocks-1))</td>
+  <td>The offset of the starting element, along dimension \#i, of block \#j. Blocks are ordered
+      moving from the fastest changing dimension to the slowest changing dimension.</td>
 </tr>
 <tr>
-  <td>Ending Offset \#n for Block \#u</td>
-  <td>The offset \#n of the ending element in block \#u. \#n is from 1 to <em>Rank</em>.
-      \#u is from 1 to <em>Num Blocks</em> moving from the fastest changing dimension to
-      the slowest changing dimension.</td>
+  <td>Ending Offset \#i for Block \#j (i = 0 to (d-1), j = 0 to (Num Blocks-1))</td>
+  <td>The offset of the ending element, along dimension \#i, of block \#j. Blocks are ordered
+      moving from the fastest changing dimension to the slowest changing dimension.</td>
 </tr>
 </table>
 
@@ -12319,31 +12690,31 @@ See the reference manual description for these two public routines.
   <td colspan="4">Rank</td>
 </tr>
 <tr>
-  <td colspan="4">Start \#1 <em>(8 bytes)</em></td>
+  <td colspan="4">Start \#0 <em>(8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Stride \#1 <em>(8 bytes)</em></td>
+  <td colspan="4">Stride \#0 <em>(8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Count \#1 <em>(8 bytes)</em></td>
+  <td colspan="4">Count \#0 <em>(8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Block \#1 <em>(8 bytes)</em></td>
+  <td colspan="4">Block \#0 <em>(8 bytes)</em></td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Start \#n <em>(8 bytes)</em></td>
+  <td colspan="4">Start \#(d-1) <em>(8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Stride \#n <em>(8 bytes)</em></td>
+  <td colspan="4">Stride \#(d-1) <em>(8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Count \#n <em>(8 bytes)</em></td>
+  <td colspan="4">Count \#(d-1) <em>(8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Block \#n <em>(8 bytes)</em></td>
+  <td colspan="4">Block \#(d-1) <em>(8 bytes)</em></td>
 </tr>
 </table>
 
@@ -12373,23 +12744,16 @@ See the reference manual description for these two public routines.
 </tr>
 <tr>
   <td>Rank</td>
-  <td>The number of dimensions in the dataspace.</td>
+  <td>The number of dimensions, <em>d</em>, in the dataspace.</td>
 </tr>
 <tr>
-  <td>Start \#n</td>
-  <td>The offset of the starting element in the block. \#n is from 1 to <em>Rank</em>.</td>
-</tr>
-<tr>
-  <td>Stride \#n</td>
-  <td>The number of elements to move in each dimension. \#n is from 1 to <em>Rank</em>. </td>
-</tr>
-<tr>
-  <td>Count \#n</td>
-  <td>The number of blocks to select in each dimension. \#n is from 1 to <em>Rank</em>.</td>
-</tr>
-<tr>
-  <td>Block \#n</td>
-  <td>The size (in elements) of each block in each dimension. \#n is from 1 to <em>Rank</em>.</td>
+  <td>Start \#i, Stride \#i, Count \#i, Block \#i (i = 0 to (d-1))</td>
+  <td>For each dimension \#i, these four values are stored together, in this order, before those of
+      dimension \#i+1:<br />
+      <em>Start \#i</em>: the offset of the starting element in the block, along dimension \#i.<br />
+      <em>Stride \#i</em>: the number of elements to move along dimension \#i.<br />
+      <em>Count \#i</em>: the number of blocks to select along dimension \#i.<br />
+      <em>Block \#i</em>: the extent (in elements) of each block along dimension \#i.</td>
 </tr>
 </table>
 
@@ -12441,7 +12805,7 @@ See the reference manual description for these two public routines.
 </tr>
 <tr>
   <td>Rank</td>
-  <td>The number of dimensions in the dataspace.</td>
+  <td>The number of dimensions, <em>d</em>, in the dataspace.</td>
 </tr>
 <tr>
   <td>Regular/Irregular Hyperslab Selection Info</td>
@@ -12462,31 +12826,31 @@ See the reference manual description for these two public routines.
   <th>byte</th>
 </tr>
 <tr>
-  <td colspan="4">Start \#1 <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Start \#0 <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Stride \#1 <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Stride \#0 <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Count \#1 <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Count \#0 <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Block \#1 <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Block \#0 <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Start \#n <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Start \#(d-1) <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Stride \#n <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Stride \#(d-1) <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Count \#n <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Count \#(d-1) <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Block \#n <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Block \#(d-1) <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 </table>
 
@@ -12497,24 +12861,14 @@ See the reference manual description for these two public routines.
   <th>Description</th>
 </tr>
 <tr>
-  <td>Start \#n</td>
-  <td>The offset of the starting element in the block. \#n is from 1 to <em>Rank</em>.
-      The field <em>Encode Size</em> indicates the size of this field.</td>
-</tr>
-<tr>
-  <td>Stride \#n</td>
-  <td>The number of elements to move in each dimension. \#n is from 1 to <em>Rank</em>.
-      The field <em>Encode Size</em> indicates the size of this field.</td>
-</tr>
-<tr>
-  <td>Count \#n</td>
-  <td>The number of blocks to select in each dimension. \#n is from 1 to <em>Rank</em>.
-      The field <em>Encode Size</em> indicates the size of this field.</td>
-</tr>
-<tr>
-  <td>Block \#n</td>
-  <td>The size (in elements) of each block in each dimension. \#n is from 1 to <em>Rank</em>.
-      The field <em>Encode Size</em> indicates the size of this field.</td>
+  <td>Start \#i, Stride \#i, Count \#i, Block \#i (i = 0 to (d-1))</td>
+  <td>For each dimension \#i, these four values are stored together, in this order, before those of
+      dimension \#i+1:<br />
+      <em>Start \#i</em>: the offset of the starting element in the block, along dimension \#i.<br />
+      <em>Stride \#i</em>: the number of elements to move along dimension \#i.<br />
+      <em>Count \#i</em>: the number of blocks to select along dimension \#i.<br />
+      <em>Block \#i</em>: the extent (in elements) of each block along dimension \#i.<br />
+      The field <em>Encode Size</em> indicates the size of each of these values.</td>
 </tr>
 </table>
 
@@ -12531,49 +12885,49 @@ See the reference manual description for these two public routines.
   <td colspan="4">Num Blocks <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Starting Offset \#1 for Block \#1 <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Starting Offset \#0 for Block \#0 <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Starting Offset \#n for Block \#1 <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Starting Offset \#(d-1) for Block \#0 <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Ending Offset \#1 for Block \#1 <em>(2, 4 or 8 bytes)</em></td>
-</tr>
-<tr>
-  <td colspan="4">.<br />.<br />.<br /></td>
-</tr>
-<tr>
-  <td colspan="4">Ending Offset \#n for Block \#1 <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Ending Offset \#0 for Block \#0 <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
+  <td colspan="4">Ending Offset \#(d-1) for Block \#0 <em>(2, 4 or 8 bytes)</em></td>
+</tr>
+<tr>
+  <td colspan="4">.<br />.<br />.<br /></td>
+</tr>
+<tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Starting Offset \#1 for Block \#u <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Starting Offset \#0 for Block \#(Num Blocks-1) <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Starting Offset \#n for Block \#u <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Starting Offset \#(d-1) for Block \#(Num Blocks-1) <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Ending Offset \#1 for Block \#u <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Ending Offset \#0 for Block \#(Num Blocks-1) <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 <tr>
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr>
-  <td colspan="4">Ending Offset \#n for Block \#u <em>(2, 4 or 8 bytes)</em></td>
+  <td colspan="4">Ending Offset \#(d-1) for Block \#(Num Blocks-1) <em>(2, 4 or 8 bytes)</em></td>
 </tr>
 </table>
 
@@ -12585,16 +12939,16 @@ See the reference manual description for these two public routines.
       this field</td>
 </tr>
 <tr>
-  <td>Starting Offset \#n for Block \#u</td>
-  <td>The offset \#n of the starting element in block \#u. \#n is from 1 to <em>Rank</em>.
-      \#u is from 1 to <em>Num Blocks</em> moving from the fastest changing dimension to the slowest
-      changing dimension. The field <em>Encode Size</em> indicates the size of this field</td>
+  <td>Starting Offset \#i for Block \#j (i = 0 to (d-1), j = 0 to (Num Blocks-1))</td>
+  <td>The offset of the starting element, along dimension \#i, of block \#j. Blocks are ordered
+      moving from the fastest changing dimension to the slowest changing dimension. The field
+      <em>Encode Size</em> indicates the size of this field.</td>
 </tr>
 <tr>
-  <td>Ending Offset \#n for Block \#u</td>
-  <td>The offset \#n of the ending element in block \#u. \#n is from 1 to <em>Rank</em>. \#u is from
-      1 to <em>Num Blocks</em> moving from the fastest changing dimension to the slowest changing
-      dimension. The field <em>Encode Size</em> indicates the size of this field</td>
+  <td>Ending Offset \#i for Block \#j (i = 0 to (d-1), j = 0 to (Num Blocks-1))</td>
+  <td>The offset of the ending element, along dimension \#i, of block \#j. Blocks are ordered
+      moving from the fastest changing dimension to the slowest changing dimension. The field
+      <em>Encode Size</em> indicates the size of this field.</td>
 </tr>
 </table>
 

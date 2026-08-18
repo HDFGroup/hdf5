@@ -7608,6 +7608,14 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Aiterate_by_name");
 
+    /* Test passing null pointer for callback */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Aiterate_by_name(obj_id, ".", idx_type, order, &skip, NULL, NULL, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Aiterate_by_name");
+
     /* Retrieve current # of errors */
     if (old_nerrs == GetTestNumErrs())
         return (0);

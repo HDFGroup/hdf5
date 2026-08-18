@@ -1027,7 +1027,7 @@ public class TestH5Affm {
     }
 
     @Test
-    public void testH5Aiterate()
+    public void testH5Aiterate_nullCallback()
     {
         System.out.print(testname.getMethodName());
 
@@ -1035,10 +1035,10 @@ public class TestH5Affm {
             MemorySegment idx = allocateLongArray(arena, 1);
             copyToSegment(idx, new long[] {0});
 
-            // Just verify the API works, iteration callback complex for FFM
+            // NULL callback must be rejected gracefully (H5E_BADVALUE), not crash
             long result = hdf5_h.H5Aiterate2(H5did, hdf5_h.H5_INDEX_NAME(), hdf5_h.H5_ITER_INC(), idx,
                                              MemorySegment.NULL, MemorySegment.NULL);
-            assertTrue("H5Aiterate2 should complete", result >= 0);
+            assertTrue("H5Aiterate2 should fail when callback is NULL", result < 0);
         }
     }
 }

@@ -636,6 +636,8 @@ H5S__all_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, bool
 
     if (skip)
         p_end = *p;
+    else if (p_size == 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "empty all selection buffer");
     else
         p_end = *p + p_size - 1; /* Pointer to last valid byte in buffer */
 

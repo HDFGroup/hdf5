@@ -58,10 +58,12 @@ jobs:
       inputs.java_implementation == 'jni'
     steps:
       - name: Checkout HDF5 repository (contains HDF5Examples)
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Set up Java 21 for JNI
-        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -290,12 +292,14 @@ jobs:
           path: ${{ runner.workspace }}/hdf5-install
 
       - name: Verify HDF5 installation
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           echo "HDF5 installation contents:"
-          ls -la "${{ runner.workspace }}/hdf5-install"
-          if [ -d "${{ runner.workspace }}/hdf5-install/lib" ]; then
+          ls -la "$RUNNER_WORKSPACE/hdf5-install"
+          if [ -d "$RUNNER_WORKSPACE/hdf5-install/lib" ]; then
             echo "Libraries:"
-            ls -la "${{ runner.workspace }}/hdf5-install/lib" | grep -E '\.so' || echo "No shared libraries found"
+            ls -la "$RUNNER_WORKSPACE/hdf5-install/lib" | grep -E '\.so' || echo "No shared libraries found"
           fi
 
       - name: Test JNI examples
@@ -325,10 +329,12 @@ jobs:
       inputs.java_implementation == 'ffm'
     steps:
       - name: Checkout HDF5 repository (contains HDF5Examples)
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Set up Java 25 for FFM
-        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
         with:
           java-version: '25'
           distribution: 'oracle'
@@ -558,12 +564,14 @@ jobs:
           path: ${{ runner.workspace }}/hdf5-install
 
       - name: Verify HDF5 installation
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
         run: |
           echo "HDF5 installation contents:"
-          ls -la "${{ runner.workspace }}/hdf5-install"
-          if [ -d "${{ runner.workspace }}/hdf5-install/lib" ]; then
+          ls -la "$RUNNER_WORKSPACE/hdf5-install"
+          if [ -d "$RUNNER_WORKSPACE/hdf5-install/lib" ]; then
             echo "Libraries:"
-            ls -la "${{ runner.workspace }}/hdf5-install/lib" | grep -E '\.so' || echo "No shared libraries found"
+            ls -la "$RUNNER_WORKSPACE/hdf5-install/lib" | grep -E '\.so' || echo "No shared libraries found"
           fi
 
       - name: Test FFM examples
