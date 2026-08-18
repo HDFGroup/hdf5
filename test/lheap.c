@@ -32,7 +32,7 @@ static const char *FILENAME[] = {"lheap", "heap_corrupt_unprotect", NULL};
 /* File from OSS-Fuzz (matio fuzzer, issue 504827191): a corrupted local
  * heap whose prefix/data block pointer becomes NULL during cache eviction.
  * Opening and traversing it used to crash in H5HL_unprotect(). */
-#define CORRUPT_HEAP_FILE "heap_corrupt_prfx.h5"
+#define CORRUPT_HEAP_FILE     "heap_corrupt_prfx.h5"
 #define CORRUPT_HEAP_TESTFILE "heap_corrupt_unprotect"
 
 #define NOBJS 40
@@ -53,7 +53,7 @@ static const char *FILENAME[] = {"lheap", "heap_corrupt_unprotect", NULL};
  */
 static herr_t
 corrupt_heap_attr_op(hid_t H5_ATTR_UNUSED loc_id, const char *H5_ATTR_UNUSED attr_name,
-                    const H5A_info_t H5_ATTR_UNUSED *ainfo, void *H5_ATTR_UNUSED op_data)
+                     const H5A_info_t H5_ATTR_UNUSED *ainfo, void *H5_ATTR_UNUSED op_data)
 {
     return 0;
 }
@@ -129,7 +129,8 @@ corrupt_heap_unprotect(void)
      * H5G__stab_lookup -> H5HL_unprotect).  Use a tiny metadata cache
      * so that the local-heap prefix can be evicted while still pinned.
      */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         fapl = H5Pcreate(H5P_FILE_ACCESS);
         if (fapl >= 0)
             H5Pset_cache(fapl, 0, 2, 256, 0.0);
@@ -139,7 +140,8 @@ corrupt_heap_unprotect(void)
     if (fapl >= 0) {
         const char *tf = H5_get_srcdir_filename(CORRUPT_HEAP_FILE);
 
-        H5E_BEGIN_TRY {
+        H5E_BEGIN_TRY
+        {
             file = H5Fopen(tf, H5F_ACC_RDONLY, fapl);
             if (file >= 0) {
                 /* Replicate matio's exact traversal: H5Literate2 on root,
@@ -148,7 +150,7 @@ corrupt_heap_unprotect(void)
                  * pressure that triggers the re-entrant eviction.
                  */
                 hsize_t idx = 0;
-                ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, corrupt_heap_visit, NULL);
+                ret         = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, corrupt_heap_visit, NULL);
                 H5Fclose(file);
             }
         }
@@ -169,7 +171,7 @@ corrupt_heap_unprotect(void)
         char         filename[1024];
         H5F_t       *f = NULL;
         haddr_t      heap_addr;
-        H5HL_t      *heap = NULL;
+        H5HL_t      *heap       = NULL;
         H5HL_prfx_t *saved_prfx = NULL;
         H5HL_dblk_t *saved_dblk = NULL;
 
