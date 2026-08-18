@@ -77,6 +77,12 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Library shutdown no longer aborts on a detected infinite loop
+
+   When the library detects that it cannot make progress closing itself (an "infinite loop closing library"), it no longer calls `abort()`. The abort behaved inconsistently, only firing when automatic error message display was enabled. Additionally, terminating the entire host process on a shutdown-time condition is undesirable for applications that embed HDF5. The library now reports the condition (when error display is enabled) and returns without aborting.
+
+   Fixes GitHub issue #6531
+
 ## Java Library
 
 ## Configuration
@@ -114,6 +120,14 @@ We would like to thank the many HDF5 community members who contributed to this r
   were built directly without that cache file.
 
 ## Tools
+
+### Fixed an issue with quoting of data values in h5ls and h5dump when displaying as ASCII characters
+
+   When using the `-s` (h5ls) or `-r` (h5dump) option to display 1-byte integer datasets and
+   attributes as ASCII characters, a closing double-quote character for data values was dropped
+   in some cases. This double-quote character has been restored and similar formatting issues
+   have been fixed for cases where elements wrap to new lines according to the particular tool's
+   column limit setting.
 
 ## Performance
 
