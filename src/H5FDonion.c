@@ -1154,7 +1154,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
          * We're getting this buffer from a fixed-size array in a struct, which
          * will be garbage and not null-terminated if the user isn't careful.
          * Be careful of this and do strndup first to ensure strdup gets a
-         * null-termianted string (HDF5 doesn't provide a strnlen call if you
+         * null-terminated string (HDF5 doesn't provide a strnlen call if you
          * don't have one).
          */
         if (NULL ==

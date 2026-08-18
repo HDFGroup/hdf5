@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get Actions
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           sparse-checkout: .github/actions
 
@@ -80,7 +80,7 @@ jobs:
           echo "FC=${{ runner.workspace }}/openmpi/bin/mpif90" >> $GITHUB_ENV
 
       - name: Install CMake
-        uses: lukka/get-cmake@f5b8fbb4d77cec1acc5a5f9f0df4beffaf5d98d9 # latest
+        uses: lukka/get-cmake@4a7d025fc60f00db0c7b44ebf783d19b52444830 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -171,7 +171,7 @@ jobs:
     name: "Parallel Mpich GCC-${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Linux Dependencies (MPICH)
         run: |
@@ -197,7 +197,7 @@ jobs:
           echo "FC=${{ runner.workspace }}/mpich/bin/mpif90" >> $GITHUB_ENV
 
       - name: Install CMake
-        uses: lukka/get-cmake@f5b8fbb4d77cec1acc5a5f9f0df4beffaf5d98d9 # latest
+        uses: lukka/get-cmake@4a7d025fc60f00db0c7b44ebf783d19b52444830 # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest

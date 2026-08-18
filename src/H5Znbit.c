@@ -973,7 +973,7 @@ H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], h
      * cd_values[1] stores the flag if true indicating no need to compress
      */
     if (cd_values[1])
-        HGOTO_DONE(*buf_size);
+        HGOTO_DONE(nbytes);
 
     /* copy a filter parameter to d_nelmts */
     d_nelmts = cd_values[2];

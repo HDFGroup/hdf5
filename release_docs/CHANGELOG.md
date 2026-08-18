@@ -1,4 +1,4 @@
-v2.2.0 --- January X , 2026
+v2.3.0 --- July X , 2026
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
@@ -22,30 +22,19 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 * [Platforms Tested](CHANGELOG.md#%EF%B8%8F-platforms-tested)
 * [Known Problems](CHANGELOG.md#-known-problems)
 
-# 🔆 Executive Summary: HDF5 Version 2.2.0
-
-> [!IMPORTANT]
->
-> - The format of the GitHub tag for HDF5 releases has been changed to Major.Minor.Patch, consistent with the versioning policy change to follow the Semantic Versioning Specification described in this [Wiki page](https://github.com/HDFGroup/hdf5/wiki/HDF5-Version-Numbers-and-Branch-Strategy).  The previous tag format hdf5_Major_Minor_Patch that was created in addition for the 2.0.0 and 2.1.0 releases will not be continued.
-> - An RPM package is not provided for this release of HDF5 as an issue with the package was found during testing. The HDF Group is investigating alternative packaging methods for future releases.
+# 🔆 Executive Summary: HDF5 Version 2.3.0
 
 
 ## Performance Enhancements:
 
-- Added an I/O block cache to the ROS3 VFD to reduce the number of requests to S3 for files not using paged allocation
-
-- Improved the performance of several tools (h5dump, h5ls, h5diff, h5repack, h5stat and h5format_convert) for specific file structures where many objects are linked to with multiple hard links
 
 ## Significant Advancements:
 
 
 ## Enhanced Features:
 
-- Made several improvements to the CMake logic for handling filter libraries
 
 ## Java Enhancements:
-
-- Java dependency JAR paths are now configurable CMake cache variables, allowing system-provided JARs to be used in place of the bundled copies.
 
 
 ## Acknowledgements:
@@ -54,49 +43,14 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 # ⚠️ Breaking Changes
 
+
 # 🪦 Deprecations
 
-- The CMake variable `ZLIB_GIT_BRANCH` has been deprecated in favor of `ZLIB_GIT_TAG`
-- The CMake variable `ZLIBNG_GIT_BRANCH` has been deprecated in favor of `ZLIBNG_GIT_TAG`
-- The CMake variable `LIBAEC_GIT_BRANCH` has been deprecated in favor of `LIBAEC_GIT_TAG`
-- The CMake variable `PLUGIN_GIT_BRANCH` has been deprecated in favor of `HDF5_FILTER_PLUGINS_GIT_TAG`
-- The CMake variable `PLUGIN_GIT_URL` has been deprecated in favor of `HDF5_FILTER_PLUGINS_GIT_URL`
-- The CMake variable `PLUGIN_TGZ_NAME` has been deprecated in favor of `HDF5_FILTER_PLUGINS_TGZ_NAME`
-- The CMake variable `PLUGIN_TGZ_ORIGPATH` has been deprecated in favor of `HDF5_FILTER_PLUGINS_TGZ_ORIGPATH`
-- The CMake variable `PLUGIN_PACKAGE_NAME` has been deprecated in favor of `HDF5_FILTER_PLUGINS_PACKAGE_NAME`
 
 # 🚀 New Features & Improvements
 
 ## Configuration
 
-### Consolidated documentation under docs/ directory
-
-   User-facing guides (installation, build instructions, platform-specific docs) and
-   Doxygen API documentation have been consolidated under a new top-level `docs/`
-   directory. All internal references (CMakeLists.txt, README.md, workflow files,
-   Doxygen sources, scripts, etc.) have been updated accordingly.
-
-### Updated external building of zlib, zlib-ng and libaec to not use a patching process
-
-   When building these libraries from external sources while building HDF5, the library previously used a patching process to adapt the libraries to its own build process. The sources for these libraries are no longer patched and build directly from the sources of the latest upstream releases (currently, zlib 1.3.2, zlib-ng 2.3.3 and libaec 1.1.6). This also fixed an issue with the build of zlib-ng failing due to updates that were made since the last version that HDF5 was patching the sources for.
-
-   Fixes GitHub issue #6204
-
-### Fixed an issue where CMake-built installations of zlib libraries couldn't be located on a system
-
-   An incorrect package name was being supplied to CMake's find_package() function when attempting to locate zlib libraries on the system in Config mode. The package name has been corrected and CMake-built zlib libraries can now be located.
-
-### Fixed an issue where static zlib libraries couldn't be found on the system
-
-   The value of the HDF5 CMake variable `HDF5_USE_ZLIB_STATIC` was previously used incorrectly when locating zlib libraries on the system with CMake's find_package() function, causing it to have no effect. This has been fixed and static zlib libraries can now be located.
-
-### Added a CMake module to locate zlib-ng for zlib support
-
-   A new `FindZLIBNG.cmake` CMake module has been added. This module is intended to locate zlib-ng on the system for zlib support in HDF5 when zlib-ng was built with Autotools instead of CMake. When zlib-ng support is enabled in HDF5 with the `HDF5_ENABLE_ZLIB_SUPPORT` and `HDF5_USE_ZLIB_NG` options, this module will first check for an existing CMake-built zlib-ng and use that if it's available. Otherwise, the module will heuristically search for zlib-ng on the system. If necessary, the module can be hinted toward a particular zlib-ng installation by setting the CMake variable `ZLIBNG_ROOT` to point to a directory.
-
-### Added a CMake module to locate libaec for SZIP support
-
-   A new `Findlibaec.cmake` CMake module has been added. This module is intended to locate libaec on the system for SZIP support in HDF5 when libaec was built with Autotools instead of CMake. When SZIP support is enabled in HDF5 with the `HDF5_ENABLE_SZIP_SUPPORT` option, this module will first check for an existing CMake-built libaec and use that if it's available. Otherwise, the module will heuristically search for libaec on the system. If necessary, the module can be hinted toward a particular libaec installation by setting the CMake variable `libaec_ROOT` to point to a directory. If it is known that a CMake-built libaec installation exists on the system in a non-standard location, the CMake variable `libaec_DIR` can instead be set to a directory containing a `libaec-config.cmake` file to cause the module to prefer that libaec installation.
 
 ## Library
 
@@ -254,14 +208,6 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Tools
 
-### Default low and high library version bounds in `h5repack` now use the HDF5 library's default
-
-The `h5repack` tool now obtains its default low and high library version bounds from the HDF5 library's default (`H5P_FILE_ACCESS_DEFAULT`). To revert to the previous behavior, apply the `--low=0` command option.
-
-### Added `h5sign` tool for signing plugins with RSA digital signatures
-
-   The `h5sign` command-line tool signs HDF5 plugin shared libraries by appending an RSA signature and a 14-byte footer. It supports SHA-256, SHA-384, SHA-512, and their PSS variants, and accepts passphrase-protected private keys. Use `-f` / `--force` to strip an existing signature before re-signing. The tool is built automatically when `HDF5_REQUIRE_SIGNED_PLUGINS` is enabled.
-
 ## High-Level APIs
 
 ## C Packet Table API
@@ -275,9 +221,11 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ## Library
 
-### Validate free space section type during decode
+### Library shutdown no longer aborts on a detected infinite loop
 
-   When loading a free space section info block, the per-section type byte read from the file was used directly to index the free space manager's section class array and to call the class `deserialize` callback, guarded only by an assertion that is removed in release builds. A corrupted or fuzzed file could supply a type beyond the number of registered classes, causing an out-of-bounds read of the class array and an indirect call through a bogus function pointer. `H5FS__cache_sinfo_deserialize()` now rejects a section type that is not less than the number of section classes.
+   When the library detects that it cannot make progress closing itself (an "infinite loop closing library"), it no longer calls `abort()`. The abort behaved inconsistently, only firing when automatic error message display was enabled. Additionally, terminating the entire host process on a shutdown-time condition is undesirable for applications that embed HDF5. The library now reports the condition (when error display is enabled) and returns without aborting.
+
+   Fixes GitHub issue #6531
 
 ### Fixed a heap buffer overflow when decoding a shared message list
 
@@ -327,20 +275,21 @@ The `h5repack` tool now obtains its default low and high library version bounds 
 
 ## Configuration
 
+### Fixed version handling in installed CMake package version configuration file
+
+   The installed CMake package version configuration file for the library previously used `SameMinorVersion` for the version compatibility logic, causing a `find_package(HDF5 X.Y.Z)` call to fail unless the version of a located HDF5 installation matched both `X` and `Y` of the version number exactly (i.e., releases with a greater minor version number weren't considered backward compatible). This reflected the version compatibility of HDF5 releases prior to version 2.0.0, but doesn't reflect the version compatibility of HDF5 version 2.0.0+ releases. The version compatibility logic now uses `SameMajorVersion`, so a `find_package(HDF5 X.Y.Z)` call will accept all versions of HDF5 where the major version matches `X` (i.e., only releases with a greater major version number will be rejected as not backward compatible).
+
 ## Tools
 
-### Fixed h5repack silently dropping a declared cd_nelmts for user-defined filters
+### Fixed an issue with quoting of data values in h5ls and h5dump when displaying as ASCII characters
 
-   `h5repack -f UD=<filtn>,<flag>,<cd_nelmts>` with no values following `cd_nelmts` silently
-   treated the declared count as 0 instead of validating it, because the trailing token (with
-   no comma after it) was never committed to `cd_nelmts` inside the parser. `parse_filter()` now
-   commits the trailing token to whichever UD field is still pending, so a declared, unfulfilled
-   `cd_nelmts` is correctly rejected with "incorrect number of compression parameters" instead of
-   being silently coerced to 0.
+   When using the `-s` (h5ls) or `-r` (h5dump) option to display 1-byte integer datasets and
+   attributes as ASCII characters, a closing double-quote character for data values was dropped
+   in some cases. This double-quote character has been restored and similar formatting issues
+   have been fixed for cases where elements wrap to new lines according to the particular tool's
+   column limit setting.
 
 ## Performance
-
-   Fixed performance issues in several tools (h5dump, h5ls, h5diff, h5repack, h5stat and h5format_convert) for specific file structures where many objects are linked to with multiple hard links. While traversing a file's structure, these tools internally track already visited objects to avoid redundant processing on objects linked to multiple times. Checking if an object was already visited previously used a linear scan over an array of all the already visited objects that were multiply linked, resulting in behavior that was potentially quadratic with the number of objects visited and causing most of the application runtime to be spent checking this array. Additionally, h5repack had a separate array for hard link name aliases for objects that further contributed to performance issues in that tool. Replacing these arrays with hash tables greatly improved the performance of these tools on files with structures matching the structure mentioned previously.
 
 ## Fortran API
 

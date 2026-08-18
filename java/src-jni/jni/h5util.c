@@ -316,11 +316,11 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
 
                     if (H5T_SGN_NONE == nsign) {
                         sscanf(token, "%hu", &tmp_ushort);
-                        memcpy(&tmp_ushort, cptr, sizeof(unsigned short));
+                        memcpy(cptr, &tmp_ushort, sizeof(unsigned short));
                     }
                     else {
                         sscanf(token, "%hd", &tmp_short);
-                        memcpy(&tmp_short, cptr, sizeof(short));
+                        memcpy(cptr, &tmp_short, sizeof(short));
                     }
 
                     break;
@@ -525,9 +525,6 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
             for (i = 0, total_elmts = 1; i < (hsize_t)rank; i++)
                 total_elmts *= dims[i];
 
-            if (NULL == (cptr = (char *)calloc((size_t)total_elmts, baseTypeSize)))
-                H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_convert: failed to allocate array buffer");
-
             for (i = 0; i < total_elmts; i++) {
                 if (!(h5str_convert(ENVONLY, &this_str, container, mtid, out_buf, i * baseTypeSize))) {
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
@@ -636,9 +633,6 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
 
             if (!(baseTypeSize = H5Tget_size(mtid)))
                 H5_LIBRARY_ERROR(ENVONLY);
-
-            if (NULL == (cptr = calloc(1, typeSize)))
-                H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_convert: failed to allocate array buffer");
 
             /* Convert real part */
             if (!(h5str_convert(ENVONLY, &this_str, container, mtid, out_buf, 0))) {
@@ -2075,8 +2069,8 @@ h5str_detect_vlen_str(hid_t tid)
             goto done;
         } /* end if */
         ret = h5str_detect_vlen_str(btid);
+        H5Tclose(btid);
         if ((ret == 1) || (ret < 0)) {
-            H5Tclose(btid);
             goto done;
         } /* end if */
     }     /* end if */
@@ -4297,7 +4291,7 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
 
     switch (type_class) {
         case H5T_VLEN: {
-            if (!(memb = H5Tget_super(mem_type_id)))
+            if ((memb = H5Tget_super(mem_type_id)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
             if ((vlClass = H5Tget_class(memb)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -4361,7 +4355,7 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
             void  *objBuf = NULL;
             size_t typeCount;
 
-            if (!(memb = H5Tget_super(mem_type_id)))
+            if ((memb = H5Tget_super(mem_type_id)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
             if ((vlClass = H5Tget_class(memb)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -4609,7 +4603,7 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
 
     switch (type_class) {
         case H5T_VLEN: {
-            if (!(memb = H5Tget_super(mem_type_id)))
+            if ((memb = H5Tget_super(mem_type_id)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
             if ((vlClass = H5Tget_class((hid_t)memb)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -4692,7 +4686,7 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
         case H5T_ARRAY: {
             void *objBuf = NULL;
 
-            if (!(memb = H5Tget_super(mem_type_id)))
+            if ((memb = H5Tget_super(mem_type_id)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
             if ((vlClass = H5Tget_class(memb)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -4922,7 +4916,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
 
     switch (type_class) {
         case H5T_VLEN: {
-            if (!(memb = H5Tget_super(mem_type_id)))
+            if ((memb = H5Tget_super(mem_type_id)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
             if ((vlClass = H5Tget_class(memb)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -5003,7 +4997,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
             void  *objBuf = NULL;
             size_t typeCount;
 
-            if (!(memb = H5Tget_super(mem_type_id)))
+            if ((memb = H5Tget_super(mem_type_id)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
             if ((vlClass = H5Tget_class(memb)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -5151,7 +5145,7 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
 
     switch (type_class) {
         case H5T_VLEN: {
-            if (!(memb = H5Tget_super(mem_type_id)))
+            if ((memb = H5Tget_super(mem_type_id)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
             if ((vlClass = H5Tget_class((hid_t)memb)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -5257,7 +5251,7 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
             break;
         } /* H5T_COMPOUND */
         case H5T_ARRAY: {
-            if (!(memb = H5Tget_super(mem_type_id)))
+            if ((memb = H5Tget_super(mem_type_id)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
             if ((vlClass = H5Tget_class(memb)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -5452,7 +5446,7 @@ h5validate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class
             if (!ENVPTR->IsInstanceOf(ENVONLY, in_obj, arrCList))
                 H5_BAD_ARGUMENT_ERROR(ENVONLY, "h5validate_wbuf: expected a java.util.ArrayList element");
 
-            if (!(memb = H5Tget_super(mem_type_id)))
+            if ((memb = H5Tget_super(mem_type_id)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
             if ((vlClass = H5Tget_class(memb)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
