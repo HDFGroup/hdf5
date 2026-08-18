@@ -1150,7 +1150,7 @@ H5Pget_fapl_ros3_block_caching(hid_t fapl_id, size_t *block_size, size_t *block_
         if (block_size)
             *block_size = HDF5_ROS3_VFD_DEFAULT_BLOCK_SIZE;
         if (block_cache_size)
-            *block_cache_size = ROS3_DEF_PAGE_BUF_SIZE;
+            *block_cache_size = HDF5_ROS3_VFD_DEFAULT_BLOCK_CACHE_SIZE;
         if (lock_superblock)
             *lock_superblock = true;
     }
