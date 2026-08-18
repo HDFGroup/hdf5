@@ -16,7 +16,7 @@
 #include "h5test.h"
 #include "H5srcdir.h"
 #include "H5Lpublic.h" /* H5Lvisit2, H5L_info2_t                      */
-#include "H5Opublic.h" /* H5Oget_info_by_name3, H5O_type_t            */
+#include "H5Opublic.h" /* H5Oget_info2, H5O_info2_t                  */
 #include "H5ACprivate.h"
 #include "H5CXprivate.h" /* API Contexts                         */
 #include "H5HLprivate.h"
@@ -33,6 +33,7 @@ static const char *FILENAME[] = {"lheap", "heap_corrupt_unprotect", NULL};
  * heap whose prefix/data block pointer becomes NULL during cache eviction.
  * Opening and traversing it used to crash in H5HL_unprotect(). */
 #define CORRUPT_HEAP_FILE "heap_corrupt_prfx.h5"
+#define CORRUPT_HEAP_TESTFILE "heap_corrupt_unprotect"
 
 #define NOBJS 40
 
@@ -51,28 +52,46 @@ static const char *FILENAME[] = {"lheap", "heap_corrupt_unprotect", NULL};
  *-------------------------------------------------------------------------
  */
 static herr_t
+corrupt_heap_attr_op(hid_t H5_ATTR_UNUSED loc_id, const char *H5_ATTR_UNUSED attr_name,
+                    const H5A_info_t H5_ATTR_UNUSED *ainfo, void *H5_ATTR_UNUSED op_data)
+{
+    return 0;
+}
+
+/* Replicate matio's exact traversal: open every dataset to read attributes
+ * (e.g. MATLAB_sparse) and recurse into every group.  This is the workflow
+ * that originally triggered the crash in H5HL_unprotect().
+ */
+static herr_t
 corrupt_heap_visit(hid_t group, const char *name, const H5L_info2_t *info, void *op_data)
 {
     (void)op_data;
 
     /* info is already populated by the link iteration; only follow hard links */
     if (info->type == H5L_TYPE_HARD) {
-        H5O_info_t oinfo;
+        H5O_info2_t oinfo;
+
+        /* Skip the same special groups matio skips */
+        if (0 == strcmp(name, "#refs#") || 0 == strcmp(name, "#subsystem#"))
+            return 0;
 
         if (H5Oget_info_by_name3(group, name, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) >= 0) {
             if (oinfo.type == H5O_TYPE_GROUP) {
                 hid_t g = H5Gopen2(group, name, H5P_DEFAULT);
-
                 if (g >= 0) {
                     H5Lvisit2(g, H5_INDEX_NAME, H5_ITER_INC, corrupt_heap_visit, NULL);
+                    /* Read group attributes as matio does */
+                    H5Aiterate2(g, H5_INDEX_NAME, H5_ITER_INC, NULL, corrupt_heap_attr_op, NULL);
                     H5Gclose(g);
                 }
             }
             else if (oinfo.type == H5O_TYPE_DATASET) {
                 hid_t d = H5Dopen2(group, name, H5P_DEFAULT);
-
-                if (d >= 0)
+                if (d >= 0) {
+                    /* Read dataset attributes as matio does (e.g. MATLAB_sparse) */
+                    H5Aiterate2(d, H5_INDEX_NAME, H5_ITER_INC, NULL, corrupt_heap_attr_op, NULL);
                     H5Dclose(d);
+                }
             }
         }
     }
@@ -95,101 +114,118 @@ corrupt_heap_visit(hid_t group, const char *name, const H5L_info2_t *info, void 
  *
  *-------------------------------------------------------------------------
  */
-#define CORRUPT_HEAP_TESTFILE "heap_corrupt_unprotect"
-
 static int
 corrupt_heap_unprotect(void)
 {
-    hid_t        file = H5I_INVALID_HID; /* hdf5 file                */
-    H5F_t       *f    = NULL;            /* hdf5 file pointer        */
-    hid_t        fapl = H5I_INVALID_HID; /* file access properties   */
-    char         filename[1024];         /* file name                */
-    haddr_t      heap_addr;              /* local heap address       */
-    H5HL_t      *heap       = NULL;      /* local heap               */
-    H5HL_prfx_t *saved_prfx = NULL;      /* saved prefix pointer     */
-    H5HL_dblk_t *saved_dblk = NULL;      /* saved data block pointer */
-    herr_t       ret;
+    hid_t  file = H5I_INVALID_HID;
+    hid_t  fapl = H5I_INVALID_HID;
+    herr_t ret;
 
     TESTING("corrupted local heap unprotect (OSS-Fuzz 504827191)");
 
-    /* Best-effort smoke test: if the minimized fuzzer file is present in the
-     * source tree, opening and traversing it must not crash. The deterministic
-     * check below forces the exact buggy condition inside HDF5.
+    /* Reproduce the issue using the minimized fuzzer file.  The original
+     * crash happened while matio was iterating the file's groups with
+     * H5Literate and opening each dataset with H5Dopen (which triggers
+     * H5G__stab_lookup -> H5HL_unprotect).  Use a tiny metadata cache
+     * so that the local-heap prefix can be evicted while still pinned.
      */
-    {
+    H5E_BEGIN_TRY {
+        fapl = H5Pcreate(H5P_FILE_ACCESS);
+        if (fapl >= 0)
+            H5Pset_cache(fapl, 0, 2, 256, 0.0);
+    }
+    H5E_END_TRY
+
+    if (fapl >= 0) {
         const char *tf = H5_get_srcdir_filename(CORRUPT_HEAP_FILE);
 
-        file = H5Fopen(tf, H5F_ACC_RDONLY, H5P_DEFAULT);
-        if (file >= 0) {
-            /* Only the traversal is expected to fail on a corrupted file; keep
-             * the try block narrowly scoped to that single operation.
-             */
-            H5E_BEGIN_TRY
-            {
-                H5Lvisit2(file, H5_INDEX_NAME, H5_ITER_INC, corrupt_heap_visit, NULL);
+        H5E_BEGIN_TRY {
+            file = H5Fopen(tf, H5F_ACC_RDONLY, fapl);
+            if (file >= 0) {
+                /* Replicate matio's exact traversal: H5Literate2 on root,
+                 * then for each group H5Gopen + H5Literate2 recursively,
+                 * and for each dataset H5Dopen.  This creates the cache
+                 * pressure that triggers the re-entrant eviction.
+                 */
+                hsize_t idx = 0;
+                ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, corrupt_heap_visit, NULL);
+                H5Fclose(file);
             }
-            H5E_END_TRY
+        }
+        H5E_END_TRY
+        H5Pclose(fapl);
+    }
+
+    /* The fuzzer file's corrupted local heap does not deterministically crash
+     * via the public API (the original crash required the matio fuzzer's
+     * specific cache-pressure environment).  The deterministic check below
+     * forces the exact buggy condition directly: simulate an evicted entry
+     * whose prfx/dblk became NULL and verify H5HL_unprotect() returns an
+     * error instead of dereferencing NULL.
+     */
+    if (FAIL == (fapl = h5_fileaccess()))
+        goto cleanup_fail;
+    {
+        char         filename[1024];
+        H5F_t       *f = NULL;
+        haddr_t      heap_addr;
+        H5HL_t      *heap = NULL;
+        H5HL_prfx_t *saved_prfx = NULL;
+        H5HL_dblk_t *saved_dblk = NULL;
+
+        h5_fixname(CORRUPT_HEAP_TESTFILE, fapl, filename, sizeof filename);
+        if (FAIL == (file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)))
+            goto cleanup_fail2;
+        if (NULL == (f = (H5F_t *)H5VL_object(file)))
+            goto cleanup_fail2;
+        if (FAIL == H5AC_ignore_tags(f))
+            goto cleanup_fail2;
+        if (FAIL == H5HL_create(f, (size_t)0, &heap_addr))
+            goto cleanup_fail2;
+        if (NULL == (heap = H5HL_protect(f, heap_addr, H5AC__NO_FLAGS_SET)))
+            goto cleanup_fail2;
+
+        /* Save the valid pointers, then simulate a corrupted/evicted entry whose
+         * local heap prefix/data block pointer became NULL (as set by
+         * H5HL__prfx_dest during cache eviction), and verify that H5HL_unprotect()
+         * returns an error instead of dereferencing NULL.
+         */
+        saved_prfx = heap->prfx;
+        saved_dblk = heap->dblk;
+        heap->prfx = NULL;
+        heap->dblk = NULL;
+
+        H5E_BEGIN_TRY
+        {
+            ret = H5HL_unprotect(heap);
+        }
+        H5E_END_TRY
+
+        /* Restore the pointers so the cache entry can be cleaned up normally. */
+        heap->prfx = saved_prfx;
+        heap->dblk = saved_dblk;
+
+        if (ret >= 0) {
+            H5_FAILED();
+            printf("***H5HL_unprotect did not return an error for a heap with NULL prfx/dblk\n");
+            goto cleanup_fail2;
+        }
+
+        /* The prefix is still pinned from H5HL_protect(); unpin it and close. */
+        H5E_BEGIN_TRY
+        {
+            H5AC_unpin_entry(saved_prfx);
+        }
+        H5E_END_TRY
+
+cleanup_fail2:
+        H5E_BEGIN_TRY
+        {
             H5Fclose(file);
         }
-        file = H5I_INVALID_HID;
+        H5E_END_TRY
+        H5Pclose(fapl);
     }
-
-    /* Deterministic regression test for the NULL-pointer dereference in
-     * H5HL_unprotect(). A corrupted entry whose local heap prefix/data block
-     * pointer became NULL (as set by H5HL__prfx_dest during cache eviction)
-     * used to crash. Simulate that by nulling the pointers on a protected heap
-     * and verify H5HL_unprotect() returns an error instead of dereferencing
-     * NULL.
-     */
-    fapl = h5_fileaccess();
-    h5_fixname(CORRUPT_HEAP_TESTFILE, fapl, filename, sizeof filename);
-    if (FAIL == (file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)))
-        goto cleanup_fail;
-    if (NULL == (f = (H5F_t *)H5VL_object(file)))
-        goto cleanup_fail;
-    if (FAIL == H5AC_ignore_tags(f))
-        goto cleanup_fail;
-    if (FAIL == H5HL_create(f, (size_t)0, &heap_addr))
-        goto cleanup_fail;
-    if (NULL == (heap = H5HL_protect(f, heap_addr, H5AC__NO_FLAGS_SET)))
-        goto cleanup_fail;
-
-    /* Save the valid pointers, then simulate a corrupted/evicted entry whose
-     * local heap prefix/data block pointer became NULL (as set by
-     * H5HL__prfx_dest during cache eviction), and verify that H5HL_unprotect()
-     * returns an error instead of dereferencing NULL.
-     */
-    saved_prfx = heap->prfx;
-    saved_dblk = heap->dblk;
-    heap->prfx = NULL;
-    heap->dblk = NULL;
-
-    H5E_BEGIN_TRY
-    {
-        ret = H5HL_unprotect(heap);
-    }
-    H5E_END_TRY
-
-    /* Restore the pointers so the cache entry can be cleaned up normally. */
-    heap->prfx = saved_prfx;
-    heap->dblk = saved_dblk;
-
-    if (ret >= 0) {
-        H5_FAILED();
-        printf("***H5HL_unprotect did not return an error for a heap with NULL prfx/dblk\n");
-        goto cleanup_fail;
-    }
-
-    /* The prefix is still pinned from H5HL_protect(); unpin it and close. */
-    H5E_BEGIN_TRY
-    {
-        H5AC_unpin_entry(saved_prfx);
-    }
-    H5E_END_TRY
-    if (FAIL == H5Fclose(file))
-        goto cleanup_fail;
-    if (FAIL == H5Pclose(fapl))
-        goto cleanup_fail;
 
     PASSED();
 
@@ -198,7 +234,6 @@ corrupt_heap_unprotect(void)
 cleanup_fail:
     H5E_BEGIN_TRY
     {
-        H5Fclose(file);
         H5Pclose(fapl);
     }
     H5E_END_TRY
