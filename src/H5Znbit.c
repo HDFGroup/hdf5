@@ -1173,6 +1173,9 @@ H5Z__nbit_decompress_one_array(unsigned char *data, size_t data_offset, unsigned
             if (p.precision > p.size * 8 || (p.precision + p.offset) > p.size * 8)
                 HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "invalid datatype precision/offset");
 
+            if (p.size == 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "invalid datatype size");
+
             n = total_size / p.size;
             for (i = 0; i < n; i++)
                 if (H5Z__nbit_decompress_one_atomic(data, data_offset + i * (size_t)p.size, buffer,
@@ -1181,7 +1184,9 @@ H5Z__nbit_decompress_one_array(unsigned char *data, size_t data_offset, unsigned
             break;
 
         case H5Z_NBIT_ARRAY:
-            base_size   = parms[*parms_index];    /* read in advance */
+            base_size = parms[*parms_index]; /* read in advance */
+            if (base_size == 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "invalid datatype size");
             n           = total_size / base_size; /* number of base_type elements inside the array datatype */
             begin_index = *parms_index;
             for (i = 0; i < n; i++) {
@@ -1193,7 +1198,9 @@ H5Z__nbit_decompress_one_array(unsigned char *data, size_t data_offset, unsigned
             break;
 
         case H5Z_NBIT_COMPOUND:
-            base_size   = parms[*parms_index];    /* read in advance */
+            base_size = parms[*parms_index]; /* read in advance */
+            if (base_size == 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "invalid datatype size");
             n           = total_size / base_size; /* number of base_type elements inside the array datatype */
             begin_index = *parms_index;
             for (i = 0; i < n; i++) {
