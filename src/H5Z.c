@@ -1657,9 +1657,9 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, hid_t dxpl_id, const hsiz
 
             {
                 /* Don't prepare for a user callback if this is an internal filter */
-                if (fclass->id < H5Z_FILTER_RESERVED)
+                if (fclass->base.id < H5Z_FILTER_RESERVED)
                     /* Invoke main "filter" callback */
-                    new_nbytes = (fclass->filter)(tmp_flags, pline->filter[idx].cd_nelmts, pline->filter[idx].cd_values, *nbytes, buf_size, buf);
+                    new_nbytes = (fclass->base.filter)(tmp_flags, pline->filter[idx].cd_nelmts, pline->filter[idx].cd_values, *nbytes, buf_size, buf);
                 else {
                     /* Prepare & restore library for user callback */
                     H5_BEFORE_USER_CB(FAIL)
@@ -1751,9 +1751,9 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, hid_t dxpl_id, const hsiz
 
             {
                 /* Don't prepare for a user callback if this is an internal filter */
-                if (fclass->id < H5Z_FILTER_RESERVED)
+                if (fclass->base.id < H5Z_FILTER_RESERVED)
                     /* Invoke main "filter" callback */
-                    new_nbytes = (fclass->filter)(flags | (pline->filter[idx].flags), pline->filter[idx].cd_nelmts, pline->filter[idx].cd_values, *nbytes, buf_size, buf);
+                    new_nbytes = (fclass->base.filter)(flags | (pline->filter[idx].flags), pline->filter[idx].cd_nelmts, pline->filter[idx].cd_values, *nbytes, buf_size, buf);
                 else {
                     /* Prepare & restore library for user callback */
                     H5_BEFORE_USER_CB(FAIL)
