@@ -41,6 +41,7 @@ There are a few that only get triggered manually.
 - java-examples-maven-test.yml comprehensive Java examples testing with Maven artifacts
 
 ## Triggered Workflows
+- cdash-status.yml links commit/PR statuses to their CDash build
 - clang-format-check.yml runs clang-format and reports issues
 - call-workflows.yml
 - codespell.yml checks spelling

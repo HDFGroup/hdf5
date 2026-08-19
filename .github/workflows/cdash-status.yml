@@ -1,0 +1,24 @@
+# GitHub Action to link commit/PR statuses to the corresponding CDash build
+# https://github.com/Kitware/cdash-status
+name: cdash-status
+on:
+  push:
+  pull_request_target:
+permissions:
+  contents: read
+jobs:
+  generate_statuses:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      statuses: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # Required for pull_request_target with checkout v7; safe here because no ref override is set.
+          allow-unsafe-pr-checkout: true
+      - uses: Kitware/cdash-status@697751fc655b300a9e16e285f2e2ee981f59e45a # v2.0.0
+        with:
+          project: HDF5
+          base_url: https://my.cdash.org
