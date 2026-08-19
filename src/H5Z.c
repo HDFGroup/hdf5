@@ -1669,10 +1669,20 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, hid_t dxpl_id, const hsiz
                 H5E_PAUSE_ERRORS
 
             {
-                /* Don't prepare for a user callback if this is an internal filter */
-                if (fclass->base.id < H5Z_FILTER_RESERVED)
-                    /* Invoke main "filter" callback */
-                    new_nbytes = (fclass->base.filter)(tmp_flags, pline->filter[idx].cd_nelmts, pline->filter[idx].cd_values, *nbytes, buf_size, buf);
+                /* Don't prepare for a user callback if this is an internal filter.
+                 * Built-ins registered as H5Z_class3_t only populate filter2 --
+                 * base.filter stays NULL (H5Z_register3) -- so the fast path must
+                 * check filter2 first, exactly like the user-callback branch below. */
+                if (fclass->base.id < H5Z_FILTER_RESERVED) {
+                    if (fclass->filter2)
+                        new_nbytes = (fclass->filter2)(tmp_flags, pline->filter[idx].cd_nelmts,
+                                                       pline->filter[idx].cd_values,
+                                                       dxpl_id, scaled, ndims,
+                                                       *nbytes, buf_size, buf);
+                    else
+                        new_nbytes = (fclass->base.filter)(tmp_flags, pline->filter[idx].cd_nelmts,
+                                                            pline->filter[idx].cd_values, *nbytes, buf_size, buf);
+                }
                 else {
                     /* Prepare & restore library for user callback */
                     H5_BEFORE_USER_CB(FAIL)
@@ -1763,10 +1773,22 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, hid_t dxpl_id, const hsiz
                 H5E_PAUSE_ERRORS
 
             {
-                /* Don't prepare for a user callback if this is an internal filter */
-                if (fclass->base.id < H5Z_FILTER_RESERVED)
-                    /* Invoke main "filter" callback */
-                    new_nbytes = (fclass->base.filter)(flags | (pline->filter[idx].flags), pline->filter[idx].cd_nelmts, pline->filter[idx].cd_values, *nbytes, buf_size, buf);
+                /* Don't prepare for a user callback if this is an internal filter.
+                 * Built-ins registered as H5Z_class3_t only populate filter2 --
+                 * base.filter stays NULL (H5Z_register3) -- so the fast path must
+                 * check filter2 first, exactly like the user-callback branch below. */
+                if (fclass->base.id < H5Z_FILTER_RESERVED) {
+                    if (fclass->filter2)
+                        new_nbytes = (fclass->filter2)(flags | (pline->filter[idx].flags),
+                                                       pline->filter[idx].cd_nelmts,
+                                                       pline->filter[idx].cd_values,
+                                                       dxpl_id, scaled, ndims,
+                                                       *nbytes, buf_size, buf);
+                    else
+                        new_nbytes = (fclass->base.filter)(flags | (pline->filter[idx].flags),
+                                                            pline->filter[idx].cd_nelmts,
+                                                            pline->filter[idx].cd_values, *nbytes, buf_size, buf);
+                }
                 else {
                     /* Prepare & restore library for user callback */
                     H5_BEFORE_USER_CB(FAIL)
