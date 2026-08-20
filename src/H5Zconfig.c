@@ -66,7 +66,11 @@ H5Z__copy_chars2(char *out, size_t cap, size_t *pos, const char **p)
 /*
  * H5Z__rewrite_hexfloats - return a copy of `src` with every C99 hex-float
  * literal (e.g. "0x1.8p+1", "-0x1p-1") replaced by an equivalent decimal
- * string.  Uses %.17g which guarantees IEEE 754 double round-trip fidelity.
+ * string.  Uses %.17e, which always carries a decimal point and an exponent
+ * (so tomlc17 types it TOML_FP64, not TOML_INTEGER) and which guarantees
+ * IEEE 754 double round-trip fidelity (C99 DBL_DECIMAL_DIG == 17).  %.17g
+ * must not be substituted: it drops the decimal point for whole values
+ * ("8.0" -> "8"), which a TOML parser reads as an integer.
  *
  * This pre-processing step lets callers produce parameter strings with `%a`
  * for exact float encoding without
@@ -265,6 +269,94 @@ H5Z__toml_wrap(const char *params)
         snprintf(buf, wlen, "__p__ = {%.*s}", (int)content_len, p);
     return buf;
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z_canonicalize_params
+ *
+ * Purpose:     Return a heap copy of PARAMS in the canonical form used for
+ *              on-disk storage (filter pipeline version 3).
+ *
+ *              Two value-preserving normalisations are applied:
+ *
+ *                1. Optional outer braces, and surrounding whitespace, are
+ *                   removed: both "{level = 6}" and "level = 6" store as
+ *                   "level = 6".  This mirrors the acceptance rule in
+ *                   H5Z__toml_wrap().
+ *                2. C99 hex-float literals are rewritten to %.17e decimal,
+ *                   which is bit-exact for IEEE 754 doubles.
+ *
+ *              The point of both is that the stored bytes are a valid TOML
+ *              v1.0.0 document, which neither the braced form nor a
+ *              hex-float literal is.  The stored string is read by tools
+ *              that are not the HDF5 library -- pure-reimplementation
+ *              readers such as jHDF and pyfive parse the object header
+ *              directly and use a stock TOML parser -- and for those a
+ *              braced or hex-float payload is a hard parse error.  Keeping
+ *              the canonical form a strict subset of TOML is what makes the
+ *              persisted string useful to them.  See RFC-HDFG-2026-001
+ *              sec:pline-v3.
+ *
+ *              Everything else is preserved byte-for-byte: interior
+ *              spacing, quote style, key case, and key order.  Values are
+ *              never re-serialised, so no decimal-precision rounding is
+ *              introduced (the reason a full parser-normalised
+ *              re-serialisation was rejected).
+ *
+ * Return:      Success:    Heap-allocated NUL-terminated string; the caller
+ *                          frees it with H5MM_xfree().
+ *              Failure:    NULL
+ *-------------------------------------------------------------------------
+ */
+char *
+H5Z_canonicalize_params(const char *params)
+{
+    char       *expanded  = NULL;
+    char       *ret_value = NULL;
+    const char *p;
+    const char *e;
+    size_t      len;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if (params == NULL)
+        HGOTO_DONE(NULL);
+
+    /* Rewrite hex-float literals first.  The rewriter skips quoted strings
+     * and comments, so it cannot disturb the brace characters examined
+     * below, nor rewrite hex-float-looking text inside a string value. */
+    if (NULL == (expanded = H5Z__rewrite_hexfloats(params)))
+        HGOTO_DONE(NULL);
+
+    /* Strip optional outer braces, then trim whitespace at both ends. */
+    p = expanded;
+    while (*p == ' ' || *p == '\t')
+        p++;
+    if (*p == '{') {
+        p++;
+        e = p + strlen(p);
+        while (e > p && (*(e - 1) == ' ' || *(e - 1) == '\t'))
+            e--;
+        if (e > p && *(e - 1) == '}')
+            e--;
+    }
+    else
+        e = p + strlen(p);
+
+    while (p < e && (*p == ' ' || *p == '\t'))
+        p++;
+    while (e > p && (*(e - 1) == ' ' || *(e - 1) == '\t'))
+        e--;
+
+    len = (size_t)(e - p);
+    if (NULL != (ret_value = (char *)H5MM_malloc(len + 1))) {
+        H5MM_memcpy(ret_value, p, len);
+        ret_value[len] = '\0';
+    }
+
+done:
+    H5MM_xfree(expanded);
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_canonicalize_params() */
 
 /*
  * H5Z__toml_parse_params - wrap params as a TOML document and parse it.

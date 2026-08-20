@@ -1830,7 +1830,8 @@ H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const 
     const unsigned *cd_values           = NULL;
     unsigned       *allocated_cd_values = NULL; /* owns heap mem for string path */
     char           *fi_name_heap        = NULL; /* non-NULL if fi->name was H5MM_strdup'd here */
-    const char     *retain_config       = NULL; /* verbatim string to persist (STRING path only) */
+    const char     *retain_config       = NULL; /* canonical string to persist (STRING path only) */
+    char           *canon_config        = NULL; /* owns the buffer retain_config points into */
     char           *fi_config_heap      = NULL; /* non-NULL if fi->config was H5MM_strdup'd here */
     size_t          cd_nelmts           = 0;
     herr_t          ret_value           = SUCCEED;
@@ -1900,11 +1901,19 @@ H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const 
                         "filter does not support string configuration (no set_config callback)");
         }
 
-        /* Persist the caller's verbatim parameter string so it can be
-         * recovered losslessly (pipeline v3) without loading the plugin.
+        /* Persist the caller's parameter string so it can be recovered
+         * losslessly (pipeline v3) without loading the plugin.  The string is
+         * canonicalised first -- outer braces stripped, hex-float literals
+         * rewritten to %.17e decimal -- so the persisted bytes are a valid
+         * TOML v1.0.0 document and can be parsed by readers that are not the
+         * HDF5 library.  Both normalisations preserve the value exactly.
          * An empty input stores nothing. */
-        if (!empty_input)
-            retain_config = param_str;
+        if (!empty_input) {
+            if (NULL == (canon_config = H5Z_canonicalize_params(param_str)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                            "can't canonicalize filter parameter string");
+            retain_config = canon_config;
+        }
 
         /* set_config is present: invoke it.  Normalise an empty input to
          * params = NULL so callbacks only need to handle one form. */
@@ -2011,6 +2020,7 @@ done:
         H5MM_xfree(fi_name_heap);
         H5MM_xfree(fi_config_heap);
     }
+    H5MM_xfree(canon_config);
     H5MM_xfree(allocated_cd_values);
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pappend_filter() */
