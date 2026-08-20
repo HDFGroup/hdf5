@@ -96,8 +96,12 @@ H5_DLL herr_t H5Z_register(const H5Z_class2_t *cls);
 H5_DLL herr_t H5Z_register3(const H5Z_class3_t *cls);
 H5_DLL herr_t H5Z_append(struct H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_nelmts,
                          const unsigned int cd_values[]);
+/* keep_config: true preserves the entry's stored configuration string (the
+ * library is refining cd_values for this dataset, as set_local does, and the
+ * string still describes what the user asked for); false drops it (the caller
+ * replaced cd_values outright, so the string no longer applies). */
 H5_DLL herr_t H5Z_modify(const struct H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
-                         size_t cd_nelmts, const unsigned int cd_values[]);
+                         size_t cd_nelmts, bool keep_config, const unsigned int cd_values[]);
 H5_DLL herr_t H5Z_pipeline(const struct H5O_pline_t *pline, unsigned flags, hid_t dxpl_id,
                            const hsize_t *scaled, size_t ndims, unsigned *filter_mask /*in,out*/,
                            H5Z_EDC_t edc_read, H5Z_cb_t cb_struct, size_t *nbytes /*in,out*/,

@@ -1290,13 +1290,18 @@ done:
  *
  * Purpose:  Modify filter parameters for specified pipeline.
  *
+ *           keep_config preserves the entry's stored configuration string.
+ *           A set_local callback refining cd_values for a particular dataset
+ *           passes true: the string still describes what the user asked for.
+ *           A caller replacing cd_values outright passes false.
+ *
  * Return:   Non-negative on success
  *           Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_nelmts,
-           const unsigned int cd_values[/*cd_nelmts*/])
+           bool keep_config, const unsigned int cd_values[/*cd_nelmts*/])
 {
     size_t idx;                 /* Index of filter in pipeline */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -1322,8 +1327,12 @@ H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t
     pline->filter[idx].cd_nelmts = cd_nelmts;
 
     /* Modifying the raw cd_values invalidates any stored configuration string;
-     * drop it so introspection falls back to the filter's get_config callback */
-    pline->filter[idx].config = (char *)H5MM_xfree(pline->filter[idx].config);
+     * drop it so introspection falls back to the filter's get_config callback.
+     * Unless keep_config: a set_local callback is specialising cd_values for
+     * this dataset, which does not change the configuration the user asked
+     * for, so the string must survive to be encoded by H5Dcreate. */
+    if (!keep_config)
+        pline->filter[idx].config = (char *)H5MM_xfree(pline->filter[idx].config);
 
     /* Free any existing parameters */
     if (pline->filter[idx].cd_values != NULL && pline->filter[idx].cd_values != pline->filter[idx]._cd_values)

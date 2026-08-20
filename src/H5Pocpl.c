@@ -479,7 +479,7 @@ done:
  */
 herr_t
 H5P_modify_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned flags, size_t cd_nelmts,
-                  const unsigned cd_values[/*cd_nelmts*/])
+                  bool keep_config, const unsigned cd_values[/*cd_nelmts*/])
 {
     H5O_pline_t pline;
     herr_t      ret_value = SUCCEED; /* return value */
@@ -491,7 +491,7 @@ H5P_modify_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned flags, si
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
     /* Modify the filter parameters of the I/O pipeline */
-    if (H5Z_modify(&pline, filter, flags, cd_nelmts, cd_values) < 0)
+    if (H5Z_modify(&pline, filter, flags, cd_nelmts, keep_config, cd_values) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline");
 
     /* Put the I/O pipeline information back into the property list */
@@ -556,8 +556,10 @@ H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
-    /* Modify the filter parameters of the I/O pipeline */
-    if (H5P_modify_filter(plist, filter, flags, cd_nelmts, cd_values) < 0)
+    /* Modify the filter parameters of the I/O pipeline.  The caller is
+     * replacing cd_values directly, so any stored configuration string no
+     * longer describes this entry: keep_config = false. */
+    if (H5P_modify_filter(plist, filter, flags, cd_nelmts, false, cd_values) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't modify filter");
 
 done:

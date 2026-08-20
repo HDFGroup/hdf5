@@ -2673,6 +2673,95 @@ error:
 }
 
 /* -----------------------------------------------------------------------
+ * set_local must not discard the stored configuration string
+ * (RFC-HDFG-2026-001 sec:dcpl-retention)
+ *
+ * scaleoffset, szip, nbit and shuffle each call H5P_modify_filter from
+ * their set_local callback to specialise cd_values for the dataset's
+ * datatype/dataspace. That is a library refinement, not a change to what
+ * the user asked for, so the entry's stored string must survive it -- it
+ * has to still be there for H5Dcreate to encode.
+ *
+ * The input below uses compact spacing ("a=1,b=2") while scaleoffset's
+ * get_config emits spaced output ("a = 1, b = 2"), so the two sources are
+ * distinguishable: recovering the compact form proves the stored string
+ * was used, not a reconstruction.
+ * ---------------------------------------------------------------------- */
+static int
+test_set_local_keeps_config(hid_t fapl)
+{
+    hid_t        dcpl = H5I_INVALID_HID, sid = H5I_INVALID_HID, file = H5I_INVALID_HID;
+    hid_t        dset = H5I_INVALID_HID, dcpl_out = H5I_INVALID_HID;
+    hsize_t      dims[2] = {8, 8}, chunk[2] = {4, 4};
+    char         filename[1024];
+    char         pbuf[H5Z_CONFIG_STRING_MAX + 1];
+    size_t       plen                 = 0;
+    const char  *compact              = "scale_type=\"int\",scale_factor=8";
+    H5Z_params_t p;
+
+    TESTING("set_local preserves the stored configuration string");
+
+    h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+        TEST_ERROR;
+    p.type  = H5Z_PARAMS_STRING;
+    p.u.str = compact;
+    if (H5Pappend_filter(dcpl, H5Z_FILTER_SCALEOFFSET, H5Z_FLAG_MANDATORY, &p) < 0)
+        TEST_ERROR;
+
+    /* Present in the DCPL before H5Dcreate runs set_local */
+    if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, compact) != 0)
+        TEST_ERROR;
+
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    /* H5Dcreate invokes scaleoffset's set_local -> H5P_modify_filter */
+    if ((dset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0 || H5Pclose(dcpl) < 0 || H5Fclose(file) < 0)
+        TEST_ERROR;
+    dset = dcpl = file = H5I_INVALID_HID;
+
+    /* Still the compact form on disk -> the stored string was encoded */
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    if (H5Pget_filter_params_by_idx(dcpl_out, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, compact) != 0) {
+        fprintf(stderr, "\n   expected stored \"%s\"\n   got             \"%s\"\n", compact, pbuf);
+        TEST_ERROR;
+    }
+    if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Fclose(file) < 0 || H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Pclose(dcpl_out);
+        H5Dclose(dset);
+        H5Fclose(file);
+        H5Sclose(sid);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
  * main
  * ---------------------------------------------------------------------- */
 int
@@ -2735,6 +2824,9 @@ main(void)
 
     /* On-disk configuration-string storage (pipeline v3) */
     nerrors += test_config_string_ondisk(fapl) < 0 ? 1 : 0;
+
+    /* set_local must not discard the stored configuration string */
+    nerrors += test_set_local_keeps_config(fapl) < 0 ? 1 : 0;
 
     /* Canonicalization of the persisted configuration string */
     nerrors += test_config_canonicalization(fapl) < 0 ? 1 : 0;
