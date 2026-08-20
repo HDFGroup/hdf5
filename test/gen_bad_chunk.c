@@ -113,7 +113,9 @@ main(void)
 
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
-    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
+    /* The high bound caps the layout message at version 3 to prevent
+     * drift if new chunk layout formats are introduced in the future. */
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_V18) < 0)
         TEST_ERROR;
     if ((file = H5Fcreate(BAD_CHUNK_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
