@@ -135,9 +135,8 @@
 #define FILE110 "tfloat8.h5"
 #define FILE111 "tfloat6.h5"
 #define FILE112 "tfloat4.h5"
-#define FILE113 "tbinvlstr.h5"
-
 #define FILE113 "tintascii.h5"
+#define FILE114 "tbinvlstr.h5"
 
 #define ONION_TEST_FIXNAME_SIZE 1024
 #define ONION_TEST_PAGE_SIZE    (uint32_t)32
@@ -4206,7 +4205,7 @@ gent_binvlstr(void)
     hid_t       tid;                                                      /* Datatype ID        */
     hsize_t     dims[] = {4};
 
-    fid = H5Fcreate(FILE113, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(FILE114, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     sid = H5Screate_simple(1, dims, NULL);
 
     /* Create a VL string datatype */
