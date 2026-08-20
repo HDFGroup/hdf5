@@ -1294,6 +1294,11 @@ done:
  *
  * Purpose:  Modify filter parameters for specified pipeline.
  *
+ *           keep_config preserves the entry's stored configuration string.
+ *           A set_local callback refining cd_values for a particular dataset
+ *           passes true: the string still describes what the user asked for.
+ *           A caller replacing cd_values outright passes false.
+ *
  * Return:   Non-negative on success
  *           Negative on failure
  *-------------------------------------------------------------------------

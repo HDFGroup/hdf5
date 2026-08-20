@@ -117,6 +117,10 @@ H5_DLL herr_t H5Z_register(const H5Z_class2_t *cls);
 H5_DLL herr_t H5Z_register3(const H5Z_class3_t *cls);
 H5_DLL herr_t H5Z_append(struct H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_nelmts,
                          const unsigned int cd_values[]);
+/* keep_config: true preserves the entry's stored configuration string (the
+ * library is refining cd_values for this dataset, as set_local does, and the
+ * string still describes what the user asked for); false drops it (the caller
+ * replaced cd_values outright, so the string no longer applies). */
 H5_DLL herr_t H5Z_modify(const struct H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
                          size_t cd_nelmts, bool keep_config, const unsigned int cd_values[]);
 H5_DLL herr_t H5Z_pipeline(const struct H5O_pline_t *pline, unsigned flags, hid_t dxpl_id,
@@ -137,6 +141,10 @@ H5_DLL htri_t             H5Z_all_filters_avail(const struct H5O_pline_t *pline)
 H5_DLL htri_t             H5Z_filter_avail(H5Z_filter_t id);
 H5_DLL herr_t             H5Z_delete(struct H5O_pline_t *pline, H5Z_filter_t filter);
 H5_DLL herr_t             H5Z_get_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags);
+/* Normalise a parameter string into the form persisted in pipeline v3:
+ * outer braces stripped and hex-float literals rewritten to %.17e decimal,
+ * so the stored bytes are valid TOML v1.0.0.  Caller frees with H5MM_xfree(). */
+H5_DLL char              *H5Z_canonicalize_params(const char *params);
 
 /* Filter blob storage (in-file large binary configuration) */
 struct H5F_t; /*forward decl*/
