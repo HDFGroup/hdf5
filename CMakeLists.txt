@@ -30,32 +30,10 @@
 cmake_minimum_required (VERSION 3.26)
 project (HDF5 C)
 
-if (POLICY CMP0074)
-  # find_package() uses <PackageName>_ROOT variables.
-  cmake_policy (SET CMP0074 NEW)
-endif ()
-
 if (POLICY CMP0144)
-  # <PACKAGENAME> is the upper-cased package name.
+  # CMake >= 3.27 <PACKAGENAME> is the upper-cased package name.
   cmake_policy (SET CMP0144 NEW)
 endif ()
-
-if (POLICY CMP0083)
-  # To control generation of Position Independent Executable (PIE) or not,
-  # some flags are required at link time.
-  cmake_policy (SET CMP0083 NEW)
-endif ()
-
-if (POLICY CMP0127)
-  # to evaluate each condition as if(<condition>), where <condition> is re-parsed
-  # as if literally written in a call to if().
-  cmake_policy (SET CMP0127 NEW)
-endif ()
-
-# Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24:
-if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
-    cmake_policy(SET CMP0135 NEW)
-endif()
 
 #-----------------------------------------------------------------------------
 # Instructions for use : Normal Build
@@ -1581,4 +1559,3 @@ option (HDF5_ENABLE_FUZZERS "Build the libFuzzer harnesses in test/fuzzing" OFF)
 if (HDF5_ENABLE_FUZZERS)
   add_subdirectory (test/fuzzing)
 endif ()
-
