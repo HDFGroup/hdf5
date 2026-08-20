@@ -43,6 +43,14 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 # ⚠️ Breaking Changes
 
+- When a `find_package (HDF5 ...)` call within a CMake project uses HDF5's `hdf5-config.cmake`
+  configuration file (a Config mode search), requesting both "shared" and "static" components
+  simultaneously will now fail. Only one of the "shared" or "static" components should be requested
+  when locating HDF5. Consequently, the `HDF5_LIB_TYPE` CMake variable set by the configuration file
+  will only be set to one of "shared" or "static", depending on the requested library type, rather
+  than potentially being a list of both. For the time being, both sets of HDF5's "-shared" and
+  "-static" CMake targets will continue to be available after the `find_package (HDF5 ...)` call,
+  regardless of which library type was requested.
 
 # 🪦 Deprecations
 
