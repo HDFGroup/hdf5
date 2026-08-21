@@ -57,6 +57,7 @@ MODULE H5P
   PRIVATE h5pregister_integer, h5pregister_ptr
   PRIVATE h5pinsert_integer, h5pinsert_char, h5pinsert_ptr
   PRIVATE h5pappend_filter_str_f, h5pappend_filter_raw_f
+  PRIVATE h5pmodify_filter_by_idx_str_f, h5pmodify_filter_by_idx_raw_f
 #ifdef H5_HAVE_PARALLEL
   PRIVATE MPI_INTEGER_KIND
   PRIVATE h5pset_fapl_mpio_f90, h5pget_fapl_mpio_f90
@@ -121,6 +122,11 @@ MODULE H5P
      MODULE PROCEDURE h5pappend_filter_str_f
      MODULE PROCEDURE h5pappend_filter_raw_f
   END INTERFACE h5pappend_filter_f
+
+  INTERFACE h5pmodify_filter_by_idx_f
+     MODULE PROCEDURE h5pmodify_filter_by_idx_str_f
+     MODULE PROCEDURE h5pmodify_filter_by_idx_raw_f
+  END INTERFACE h5pmodify_filter_by_idx_f
 
   INTERFACE
      INTEGER(C_INT) FUNCTION H5Pset_fill_value(prp_id, type_id, fillvalue) &
@@ -1631,6 +1637,106 @@ CONTAINS
     hdferr = INT(H5Pappend_filter_raw_c(prp_id, INT(filter, C_INT), INT(flags, C_INT), &
                                         INT(cd_nelmts, SIZE_T), cd_values))
   END SUBROUTINE h5pappend_filter_raw_f
+
+#endif
+
+#ifdef H5_DOXYGEN
+!>
+!! \ingroup FH5P
+!!
+!! \brief Replaces the configuration of the filter at a given pipeline index.
+!!
+!! \param prp_id     Property list identifier.
+!! \param filter_idx Zero-based index of the filter in the pipeline.
+!! \param flags      Bit vector specifying general filter properties.
+!! \param params     Parameter string in \c "key=value" format.
+!! \param hdferr     \fortran_error
+!!
+!! See C API: @ref H5Pmodify_filter_by_idx()
+!!
+  SUBROUTINE h5pmodify_filter_by_idx_f(prp_id, filter_idx, flags, params, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T),   INTENT(IN)  :: prp_id
+    INTEGER,          INTENT(IN)  :: filter_idx
+    INTEGER,          INTENT(IN)  :: flags
+    CHARACTER(LEN=*), INTENT(IN)  :: params
+    INTEGER,          INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pmodify_filter_by_idx_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Replaces the configuration of the filter at a given pipeline index.
+!!
+!! \param prp_id     Property list identifier.
+!! \param filter_idx Zero-based index of the filter in the pipeline.
+!! \param flags      Bit vector specifying general filter properties.
+!! \param cd_nelmts  Number of elements in \p cd_values.
+!! \param cd_values  Filter parameter array.  This form clears any stored
+!!                   configuration string on the entry.
+!! \param hdferr     \fortran_error
+!!
+!! See C API: @ref H5Pmodify_filter_by_idx()
+!!
+  SUBROUTINE h5pmodify_filter_by_idx_f(prp_id, filter_idx, flags, cd_nelmts, cd_values, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T),  INTENT(IN)               :: prp_id
+    INTEGER,         INTENT(IN)               :: filter_idx
+    INTEGER,         INTENT(IN)               :: flags
+    INTEGER(SIZE_T), INTENT(IN)               :: cd_nelmts
+    INTEGER,         DIMENSION(*), INTENT(IN) :: cd_values
+    INTEGER,         INTENT(OUT)              :: hdferr
+  END SUBROUTINE h5pmodify_filter_by_idx_f
+
+#else
+
+  SUBROUTINE h5pmodify_filter_by_idx_str_f(prp_id, filter_idx, flags, params, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T),   INTENT(IN)  :: prp_id
+    INTEGER,          INTENT(IN)  :: filter_idx
+    INTEGER,          INTENT(IN)  :: flags
+    CHARACTER(LEN=*), INTENT(IN)  :: params
+    INTEGER,          INTENT(OUT) :: hdferr
+
+    CHARACTER(LEN=LEN_TRIM(params)+1,KIND=C_CHAR) :: c_params
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pmodify_filter_by_idx_str_c(plist_id, filter_idx_c, flags_c, params_c) &
+            BIND(C,NAME='H5Pmodify_filter_by_idx_str_c')
+         IMPORT :: HID_T, C_INT, C_CHAR
+         INTEGER(HID_T), VALUE                            :: plist_id
+         INTEGER(C_INT), VALUE                            :: filter_idx_c
+         INTEGER(C_INT), VALUE                            :: flags_c
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: params_c
+       END FUNCTION H5Pmodify_filter_by_idx_str_c
+    END INTERFACE
+    c_params = TRIM(params)//C_NULL_CHAR
+    hdferr   = INT(H5Pmodify_filter_by_idx_str_c(prp_id, INT(filter_idx, C_INT), &
+                                                 INT(flags, C_INT), c_params))
+  END SUBROUTINE h5pmodify_filter_by_idx_str_f
+
+  SUBROUTINE h5pmodify_filter_by_idx_raw_f(prp_id, filter_idx, flags, cd_nelmts, cd_values, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T),  INTENT(IN)               :: prp_id
+    INTEGER,         INTENT(IN)               :: filter_idx
+    INTEGER,         INTENT(IN)               :: flags
+    INTEGER(SIZE_T), INTENT(IN)               :: cd_nelmts
+    INTEGER,         DIMENSION(*), INTENT(IN) :: cd_values
+    INTEGER,         INTENT(OUT)              :: hdferr
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pmodify_filter_by_idx_raw_c(plist_id, filter_idx_c, flags_c, &
+                                                            cd_nelmts_c, cd_vals) &
+            BIND(C,NAME='H5Pmodify_filter_by_idx_raw_c')
+         IMPORT :: HID_T, C_INT, SIZE_T
+         INTEGER(HID_T), VALUE                    :: plist_id
+         INTEGER(C_INT), VALUE                    :: filter_idx_c
+         INTEGER(C_INT), VALUE                    :: flags_c
+         INTEGER(SIZE_T), VALUE                   :: cd_nelmts_c
+         INTEGER(C_INT), DIMENSION(*), INTENT(IN) :: cd_vals
+       END FUNCTION H5Pmodify_filter_by_idx_raw_c
+    END INTERFACE
+    hdferr = INT(H5Pmodify_filter_by_idx_raw_c(prp_id, INT(filter_idx, C_INT), INT(flags, C_INT), &
+                                               INT(cd_nelmts, SIZE_T), cd_values))
+  END SUBROUTINE h5pmodify_filter_by_idx_raw_f
 
 #endif
 
