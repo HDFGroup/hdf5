@@ -8503,6 +8503,67 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5P
      *
+     * H5Pmodify_filter_by_idx replaces the configuration of the filter at a pipeline index using a
+     * human-readable key=value parameter string. The entry keeps a stored configuration string.
+     *
+     * @param plist_id
+     *            IN: Property list identifier.
+     * @param filter_idx
+     *            IN: Zero-based index of the filter in the pipeline.
+     * @param flags
+     *            IN: Bit vector specifying general filter properties.
+     * @param params
+     *            IN: Parameter string in "key=value" format, or null for no parameters.
+     *
+     * @return a non-negative value if successful
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public synchronized static int H5Pmodify_filter_by_idx(long plist_id, int filter_idx, int flags,
+                                                          String params) throws HDF5LibraryException
+    {
+        return H5Pmodify_filter_by_idx_str(plist_id, filter_idx, flags, params);
+    }
+
+    private synchronized static native int H5Pmodify_filter_by_idx_str(long plist_id, int filter_idx,
+                                                                       int flags, String params)
+        throws HDF5LibraryException;
+
+    /**
+     * @ingroup JH5P
+     *
+     * H5Pmodify_filter_by_idx replaces the configuration of the filter at a pipeline index using raw
+     * cd_values parameters. This form clears any stored configuration string on the entry, so
+     * introspection falls back to the filter's get_config reconstruction.
+     *
+     * @param plist_id
+     *            IN: Property list identifier.
+     * @param filter_idx
+     *            IN: Zero-based index of the filter in the pipeline.
+     * @param flags
+     *            IN: Bit vector specifying general filter properties.
+     * @param cd_values
+     *            IN: Auxiliary data for the filter, or null for no parameters.
+     *
+     * @return a non-negative value if successful
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public synchronized static int H5Pmodify_filter_by_idx(long plist_id, int filter_idx, int flags,
+                                                          int[] cd_values) throws HDF5LibraryException
+    {
+        return H5Pmodify_filter_by_idx_raw(plist_id, filter_idx, flags, cd_values);
+    }
+
+    private synchronized static native int H5Pmodify_filter_by_idx_raw(long plist_id, int filter_idx,
+                                                                       int flags, int[] cd_values)
+        throws HDF5LibraryException;
+
+    /**
+     * @ingroup JH5P
+     *
      * H5Pget_filter_params_by_idx retrieves a filter's parameter string by pipeline index.
      *
      * @param plist_id

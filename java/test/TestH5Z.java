@@ -244,6 +244,92 @@ public class TestH5Z {
     }
 
     @Test
+    public void testH5Pmodify_filter_by_idx_string()
+    {
+        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
+        try {
+            dcpl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+            assertTrue("H5Pcreate", dcpl_id >= 0);
+
+            if (1 == H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_DEFLATE)) {
+                int ret = H5.H5Pappend_filter(dcpl_id, HDF5Constants.H5Z_FILTER_DEFLATE, 0, "level=1");
+                assertTrue("H5Pappend_filter (string, deflate)", ret >= 0);
+
+                // Replace the configuration in place; position and ID are unchanged.
+                ret = H5.H5Pmodify_filter_by_idx(dcpl_id, 0, 0, "level=9");
+                assertTrue("H5Pmodify_filter_by_idx (string)", ret >= 0);
+
+                int nfilters = H5.H5Pget_nfilters(dcpl_id);
+                assertEquals("nfilters after H5Pmodify_filter_by_idx", 1, nfilters);
+
+                // The entry keeps a stored string, which reports the new value.
+                String[] params = new String[1];
+                ret             = H5.H5Pget_filter_params_by_idx(dcpl_id, 0, params);
+                assertTrue("H5Pget_filter_params_by_idx", ret >= 0);
+                assertNotNull("params[0] is non-null", params[0]);
+                assertTrue("stored string reflects the modify: " + params[0],
+                           params[0].contains("level=9"));
+            }
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Pmodify_filter_by_idx_string: " + err);
+        }
+        finally {
+            if (dcpl_id != HDF5Constants.H5I_INVALID_HID)
+                try {
+                    H5.H5Pclose(dcpl_id);
+                }
+                catch (Exception e) { /* ignore */
+                }
+        }
+    }
+
+    @Test
+    public void testH5Pmodify_filter_by_idx_cdvalues()
+    {
+        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
+        try {
+            dcpl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+            assertTrue("H5Pcreate", dcpl_id >= 0);
+
+            if (1 == H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_DEFLATE)) {
+                int ret = H5.H5Pappend_filter(dcpl_id, HDF5Constants.H5Z_FILTER_DEFLATE, 0, "level=1");
+                assertTrue("H5Pappend_filter (string, deflate)", ret >= 0);
+
+                int[] cd_values = new int[] {6};
+                ret             = H5.H5Pmodify_filter_by_idx(dcpl_id, 0, 0, cd_values);
+                assertTrue("H5Pmodify_filter_by_idx (cd_values)", ret >= 0);
+
+                int nfilters = H5.H5Pget_nfilters(dcpl_id);
+                assertEquals("nfilters after H5Pmodify_filter_by_idx", 1, nfilters);
+
+                // cd_values were replaced.
+                int[]    cd_out    = new int[1];
+                int[]    flags_out = new int[1];
+                long[]   cd_nelmts = new long[] {1};
+                String[] name_out  = new String[] {""};
+                int filter_id =
+                    H5.H5Pget_filter(dcpl_id, 0, flags_out, cd_nelmts, cd_out, 256, name_out, new int[1]);
+                assertEquals("filter id unchanged by modify", HDF5Constants.H5Z_FILTER_DEFLATE, filter_id);
+                assertEquals("cd_values[0] after modify", 6, cd_out[0]);
+            }
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Pmodify_filter_by_idx_cdvalues: " + err);
+        }
+        finally {
+            if (dcpl_id != HDF5Constants.H5I_INVALID_HID)
+                try {
+                    H5.H5Pclose(dcpl_id);
+                }
+                catch (Exception e) { /* ignore */
+                }
+        }
+    }
+
+    @Test
     public void testH5Pget_filter_params_by_idx()
     {
         long dcpl_id = HDF5Constants.H5I_INVALID_HID;

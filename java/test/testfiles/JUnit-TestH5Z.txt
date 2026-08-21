@@ -2,6 +2,8 @@ JUnit version 4.13.2
 .testH5Pappend_filter_cdvalues
 .testH5Pappend_filter_string
 .testH5Pget_filter_params_by_idx
+.testH5Pmodify_filter_by_idx_cdvalues
+.testH5Pmodify_filter_by_idx_string
 .testH5Zconfig_get_param_bool
 .testH5Zconfig_get_param_double
 .testH5Zconfig_get_param_int
@@ -15,5 +17,5 @@ JUnit version 4.13.2
 
 Time:  XXXX
 
-OK (13 tests)
+OK (15 tests)
 
