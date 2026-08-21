@@ -12498,6 +12498,111 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5P
      *
+     * H5Pmodify_filter_by_idx replaces the configuration of the filter at a pipeline index using a
+     * human-readable key=value parameter string. The entry keeps a stored configuration string.
+     *
+     * @param plist_id
+     *            IN: Property list identifier.
+     * @param filter_idx
+     *            IN: Zero-based index of the filter in the pipeline.
+     * @param flags
+     *            IN: Bit vector specifying certain general properties of the filter.
+     * @param params
+     *            IN: Parameter string in "key=value" format, or null for no parameters.
+     *
+     * @return a non-negative value if successful
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public static int H5Pmodify_filter_by_idx(long plist_id, int filter_idx, int flags, String params)
+        throws HDF5LibraryException
+    {
+        if (plist_id < 0)
+            throw new HDF5FunctionArgumentException("Negative property list identifier");
+
+        int retVal = -1;
+        /* H5Z_params_t layout (64-bit): int type(4) + pad(4) + union(16) = 24 bytes */
+        final int H5Z_PARAMS_STRING = 1;
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment str_seg =
+                (params != null && !params.isEmpty()) ? arena.allocateFrom(params) : MemorySegment.NULL;
+            MemorySegment params_struct = arena.allocate(24, 8);
+            params_struct.set(ValueLayout.JAVA_INT, 0, H5Z_PARAMS_STRING);
+            params_struct.set(ValueLayout.ADDRESS, 8, str_seg);
+            retVal = org.hdfgroup.javahdf5.hdf5_h.H5Pmodify_filter_by_idx(plist_id, filter_idx, flags,
+                                                                         params_struct);
+        }
+        catch (HDF5LibraryException e) {
+            throw e;
+        }
+        catch (Throwable t) {
+            throw new HDF5LibraryException("H5Pmodify_filter_by_idx failed: " + t.getMessage());
+        }
+        if (retVal < 0)
+            h5libraryError();
+        return retVal;
+    }
+
+    /**
+     * @ingroup JH5P
+     *
+     * H5Pmodify_filter_by_idx replaces the configuration of the filter at a pipeline index using raw
+     * cd_values parameters. This form clears any stored configuration string on the entry, so
+     * introspection falls back to the filter's get_config reconstruction.
+     *
+     * @param plist_id
+     *            IN: Property list identifier.
+     * @param filter_idx
+     *            IN: Zero-based index of the filter in the pipeline.
+     * @param flags
+     *            IN: Bit vector specifying certain general properties of the filter.
+     * @param cd_values
+     *            IN: Auxiliary data for the filter, or null for no parameters.
+     *
+     * @return a non-negative value if successful
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public static int H5Pmodify_filter_by_idx(long plist_id, int filter_idx, int flags, int[] cd_values)
+        throws HDF5LibraryException
+    {
+        if (plist_id < 0)
+            throw new HDF5FunctionArgumentException("Negative property list identifier");
+
+        int retVal = -1;
+        /* Unlike the append case this cannot delegate to H5Pmodify_filter: that
+         * addresses an entry by filter ID and resolves to the first match, whereas
+         * this API addresses by pipeline index.  The struct is built explicitly. */
+        final int H5Z_PARAMS_CDVALUES = 0;
+        int[]     values              = (cd_values != null) ? cd_values : new int[0];
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment vals_seg = (values.length > 0)
+                                         ? arena.allocateFrom(ValueLayout.JAVA_INT, values)
+                                         : MemorySegment.NULL;
+            MemorySegment params_struct = arena.allocate(24, 8);
+            params_struct.set(ValueLayout.JAVA_INT, 0, H5Z_PARAMS_CDVALUES);
+            /* union { struct { size_t cd_nelmts; const unsigned *cd_values; } raw; ... } */
+            params_struct.set(ValueLayout.JAVA_LONG, 8, (long)values.length);
+            params_struct.set(ValueLayout.ADDRESS, 16, vals_seg);
+            retVal = org.hdfgroup.javahdf5.hdf5_h.H5Pmodify_filter_by_idx(plist_id, filter_idx, flags,
+                                                                         params_struct);
+        }
+        catch (HDF5LibraryException e) {
+            throw e;
+        }
+        catch (Throwable t) {
+            throw new HDF5LibraryException("H5Pmodify_filter_by_idx failed: " + t.getMessage());
+        }
+        if (retVal < 0)
+            h5libraryError();
+        return retVal;
+    }
+
+    /**
+     * @ingroup JH5P
+     *
      * H5Pget_filter_params_by_idx retrieves the parameter string for a filter at a given pipeline index.
      *
      * @param plist_id

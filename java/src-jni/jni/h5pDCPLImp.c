@@ -1460,6 +1460,78 @@ done:
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pmodify_filter_by_idx (string form)
+ * Signature: (JIILjava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5Pmodify_1filter_1by_1idx_1str(JNIEnv *env, jclass clss, jlong plist_id,
+                                                    jint filter_idx, jint flags, jstring params)
+{
+    H5Z_params_t p;
+    const char  *c_params = NULL;
+    jboolean     isCopy;
+    herr_t       status = FAIL;
+
+    UNUSED(clss);
+
+    if (params)
+        PIN_JAVA_STRING(ENVONLY, params, c_params, &isCopy,
+                        "H5Pmodify_filter_by_idx: params string not pinned");
+
+    p.type  = H5Z_PARAMS_STRING;
+    p.u.str = c_params;
+
+    if ((status = H5Pmodify_filter_by_idx((hid_t)plist_id, (unsigned)filter_idx, (unsigned)flags, &p)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (c_params)
+        UNPIN_JAVA_STRING(ENVONLY, params, c_params);
+
+    return (jint)status;
+} /* end Java_hdf_hdf5lib_H5_H5Pmodify_1filter_1by_1idx_1str */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pmodify_filter_by_idx (raw cd_values form)
+ * Signature: (JII[I)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5Pmodify_1filter_1by_1idx_1raw(JNIEnv *env, jclass clss, jlong plist_id,
+                                                    jint filter_idx, jint flags, jintArray cd_values)
+{
+    H5Z_params_t p;
+    jint        *c_cd_values = NULL;
+    jboolean     isCopy;
+    herr_t       status    = FAIL;
+    jsize        cd_nelmts = 0;
+
+    UNUSED(clss);
+
+    if (cd_values) {
+        cd_nelmts = ENVPTR->GetArrayLength(ENVONLY, cd_values);
+        if (cd_nelmts < 0)
+            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pmodify_filter_by_idx: cd_values array length < 0");
+        PIN_INT_ARRAY(ENVONLY, cd_values, c_cd_values, &isCopy,
+                      "H5Pmodify_filter_by_idx: cd_values not pinned");
+    }
+
+    p.type            = H5Z_PARAMS_CDVALUES;
+    p.u.raw.cd_nelmts = (size_t)cd_nelmts;
+    p.u.raw.cd_values = (const unsigned *)c_cd_values;
+
+    if ((status = H5Pmodify_filter_by_idx((hid_t)plist_id, (unsigned)filter_idx, (unsigned)flags, &p)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (c_cd_values)
+        UNPIN_INT_ARRAY(ENVONLY, cd_values, c_cd_values, JNI_ABORT);
+
+    return (jint)status;
+} /* end Java_hdf_hdf5lib_H5_H5Pmodify_1filter_1by_1idx_1raw */
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Pget_filter_params_by_idx
  * Signature: (JI[Ljava/lang/String;)I
  */
