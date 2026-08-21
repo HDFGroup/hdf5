@@ -2855,6 +2855,58 @@ H5_DLL herr_t H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int
 /**
  * \ingroup OCPL
  *
+ * \brief Replaces the configuration of the filter at a given pipeline index
+ *
+ * \ocpl_id{plist_id}
+ * \param[in] filter_idx Zero-based index of the filter in the pipeline
+ * \param[in] flags      Replacement flags for the entry, subject to the same
+ *                       \c set_config adjustment rules as H5Pappend_filter()
+ * \param[in] params     New configuration, or NULL for a parameterless filter
+ *
+ * \return \herr_t
+ *
+ * \details H5Pmodify_filter_by_idx() replaces the configuration of the filter
+ *          already at position \p filter_idx in \p plist_id's pipeline, leaving
+ *          its position and filter ID unchanged.  \p params is interpreted
+ *          exactly as H5Pappend_filter() interprets it:
+ *
+ *          - #H5Z_PARAMS_STRING - the string is validated and resolved through
+ *            the filter's \c set_config callback, and both the resulting
+ *            \c cd_values and the stored configuration string are replaced, so
+ *            the entry keeps a stored string.
+ *          - #H5Z_PARAMS_CDVALUES - the \c cd_values array is replaced and any
+ *            stored string is cleared, matching H5Pmodify_filter().
+ *
+ *          Use this in preference to H5Pmodify_filter() when the entry was
+ *          configured with a parameter string.  H5Pmodify_filter() takes only
+ *          raw \c cd_values and therefore always clears the stored string,
+ *          silently downgrading the entry from an exact, plugin-free
+ *          configuration string to \c get_config reconstruction.  The only
+ *          alternative was H5Premove_filter() followed by a fresh
+ *          H5Pappend_filter(), which moves the entry to the end of the pipeline
+ *          and so changes filter order.
+ *
+ *          Entries are addressed by index rather than by filter ID because a
+ *          pipeline may legally contain the same filter ID more than once,
+ *          where an ID-addressed modify silently edits the first match.  The
+ *          index is the same one H5Pget_filter2() and
+ *          H5Pget_filter_params_by_idx() use, so the index a caller reads a
+ *          configuration with is the index it writes one back with.
+ *
+ *          It is an error if \p filter_idx is out of range, if \p params uses
+ *          #H5Z_PARAMS_STRING for a filter whose registered class does not
+ *          implement \c set_config, or if \c set_config rejects the string.  On
+ *          any failure the entry is left exactly as it was.
+ *
+ *          H5Pmodify_filter() is unchanged and remains supported.
+ *
+ * \since 3.0.0
+ */
+H5_DLL herr_t H5Pmodify_filter_by_idx(hid_t plist_id, unsigned filter_idx, unsigned flags,
+                                      const H5Z_params_t *params);
+/**
+ * \ingroup OCPL
+ *
  * \brief Returns the parameter string for a filter at a given pipeline index
  *
  * \ocpl_id{plist_id}

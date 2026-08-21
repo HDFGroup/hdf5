@@ -2762,6 +2762,237 @@ error:
 }
 
 /* -----------------------------------------------------------------------
+ * H5Pmodify_filter_by_idx (RFC-HDFG-2026-001 sec:modify-filter)
+ *
+ * Reuses the canon filter (CANON_FILTER_ID, one double "rate") so the
+ * stored string and the recovered value can both be checked.
+ * ---------------------------------------------------------------------- */
+static int
+test_modify_filter_by_idx(hid_t fapl)
+{
+    hid_t        dcpl = H5I_INVALID_HID, sid = H5I_INVALID_HID, file = H5I_INVALID_HID;
+    hid_t        dset = H5I_INVALID_HID, dcpl_out = H5I_INVALID_HID;
+    hsize_t      dims[2] = {8, 8};
+    char         filename[1024];
+    char         pbuf[H5Z_CONFIG_STRING_MAX + 1];
+    size_t       plen = 0;
+    double       got  = 0.0;
+    unsigned     flags_out = 0;
+    unsigned     cd[8];
+    size_t       cd_nelmts = 8;
+    char         nm[64];
+    unsigned     cfg = 0;
+    H5Z_params_t p;
+
+    if (H5Zregister(&canon_cls) < 0)
+        TEST_ERROR;
+
+    /* --- mod-01: STRING replaces cd_values and keeps a stored string --- */
+    TESTING("H5Pmodify_filter_by_idx: string form replaces config in place");
+    if ((dcpl = canon_make_dcpl("rate = 1.5")) < 0)
+        TEST_ERROR;
+    p.type  = H5Z_PARAMS_STRING;
+    p.u.str = "rate = 2.5";
+    if (H5Pmodify_filter_by_idx(dcpl, 0, H5Z_FLAG_MANDATORY, &p) < 0)
+        TEST_ERROR;
+    if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "rate = 2.5") != 0)
+        TEST_ERROR;
+    if (canon_stored_double(dcpl, &got) < 0)
+        TEST_ERROR;
+    if (memcmp(&got, &(double){2.5}, sizeof(got)) != 0)
+        TEST_ERROR;
+    /* Position and filter ID unchanged, and still exactly one entry */
+    if (H5Pget_nfilters(dcpl) != 1)
+        TEST_ERROR;
+    cd_nelmts = 8;
+    if (H5Pget_filter2(dcpl, 0, &flags_out, &cd_nelmts, cd, sizeof(nm), nm, &cfg) != CANON_FILTER_ID)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    /* --- mod-02: canonicalization applies on the modify path too --- */
+    TESTING("H5Pmodify_filter_by_idx: replacement string is canonicalized");
+    if ((dcpl = canon_make_dcpl("rate = 1.5")) < 0)
+        TEST_ERROR;
+    p.type  = H5Z_PARAMS_STRING;
+    p.u.str = "{rate = 0x1.8p+1}";
+    if (H5Pmodify_filter_by_idx(dcpl, 0, H5Z_FLAG_MANDATORY, &p) < 0)
+        TEST_ERROR;
+    if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "rate = 3.00000000000000000e+00") != 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    /* --- mod-03: CDVALUES form clears the stored string --- */
+    TESTING("H5Pmodify_filter_by_idx: cd_values form clears the stored string");
+    if ((dcpl = canon_make_dcpl("rate = 1.5")) < 0)
+        TEST_ERROR;
+    {
+        double   v      = 4.5;
+        unsigned raw[2] = {0, 0};
+
+        memcpy(raw, &v, sizeof(v));
+        p.type              = H5Z_PARAMS_CDVALUES;
+        p.u.raw.cd_nelmts   = 2;
+        p.u.raw.cd_values   = raw;
+        if (H5Pmodify_filter_by_idx(dcpl, 0, H5Z_FLAG_MANDATORY, &p) < 0)
+            TEST_ERROR;
+    }
+    if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    /* Stored string gone -> get_config reconstruction, which uses %.17e */
+    if (strcmp(pbuf, "rate = 4.50000000000000000e+00") != 0) {
+        fprintf(stderr, "\n   got \"%s\"\n", pbuf);
+        TEST_ERROR;
+    }
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    /* --- mod-04: index addressing distinguishes duplicate filter IDs --- */
+    TESTING("H5Pmodify_filter_by_idx: duplicate filter IDs addressed by index");
+    if ((dcpl = canon_make_dcpl("rate = 1.5")) < 0)
+        TEST_ERROR;
+    p.type  = H5Z_PARAMS_STRING;
+    p.u.str = "rate = 2.5";
+    if (H5Pappend_filter(dcpl, CANON_FILTER_ID, H5Z_FLAG_MANDATORY, &p) < 0)
+        TEST_ERROR;
+    if (H5Pget_nfilters(dcpl) != 2)
+        TEST_ERROR;
+    /* Edit the second entry only */
+    p.u.str = "rate = 9.5";
+    if (H5Pmodify_filter_by_idx(dcpl, 1, H5Z_FLAG_MANDATORY, &p) < 0)
+        TEST_ERROR;
+    if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "rate = 1.5") != 0) /* entry 0 untouched */
+        TEST_ERROR;
+    if (H5Pget_filter_params_by_idx(dcpl, 1, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "rate = 9.5") != 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    /* --- mod-05: errors, and the entry survives a rejected edit --- */
+    TESTING("H5Pmodify_filter_by_idx: errors leave the entry unchanged");
+    if ((dcpl = canon_make_dcpl("rate = 1.5")) < 0)
+        TEST_ERROR;
+
+    /* index out of range */
+    p.type  = H5Z_PARAMS_STRING;
+    p.u.str = "rate = 2.5";
+    H5E_BEGIN_TRY
+    {
+        if (H5Pmodify_filter_by_idx(dcpl, 1, H5Z_FLAG_MANDATORY, &p) >= 0)
+            TEST_ERROR;
+    }
+    H5E_END_TRY
+
+    /* invalid flags */
+    H5E_BEGIN_TRY
+    {
+        if (H5Pmodify_filter_by_idx(dcpl, 0, 0xFFFFFFFFu, &p) >= 0)
+            TEST_ERROR;
+    }
+    H5E_END_TRY
+
+    /* set_config rejects the string (canon_set_config fails a type mismatch) */
+    p.u.str = "rate = \"not a number\"";
+    H5E_BEGIN_TRY
+    {
+        if (H5Pmodify_filter_by_idx(dcpl, 0, H5Z_FLAG_MANDATORY, &p) >= 0)
+            TEST_ERROR;
+    }
+    H5E_END_TRY
+
+    /* After every rejected edit the original configuration is intact */
+    if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "rate = 1.5") != 0) {
+        fprintf(stderr, "\n   entry was disturbed: \"%s\"\n", pbuf);
+        TEST_ERROR;
+    }
+    if (canon_stored_double(dcpl, &got) < 0)
+        TEST_ERROR;
+    if (memcmp(&got, &(double){1.5}, sizeof(got)) != 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    /* --- mod-06 (fmt-07): the replacement string is what reaches disk --- */
+    TESTING("H5Pmodify_filter_by_idx: replacement string persists, not the original");
+    h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
+    if ((dcpl = canon_make_dcpl("rate = 1.5")) < 0)
+        TEST_ERROR;
+    p.type  = H5Z_PARAMS_STRING;
+    p.u.str = "rate = 7.25";
+    if (H5Pmodify_filter_by_idx(dcpl, 0, H5Z_FLAG_MANDATORY, &p) < 0)
+        TEST_ERROR;
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0 || H5Pclose(dcpl) < 0 || H5Fclose(file) < 0)
+        TEST_ERROR;
+    dset = dcpl = file = H5I_INVALID_HID;
+
+    /* Drop the plugin so only the persisted string can answer */
+    if (H5Zunregister(CANON_FILTER_ID) < 0)
+        TEST_ERROR;
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    if (H5Pget_filter_params_by_idx(dcpl_out, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "rate = 7.25") != 0) {
+        fprintf(stderr, "\n   expected \"rate = 7.25\" on disk, got \"%s\"\n", pbuf);
+        TEST_ERROR;
+    }
+    if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Fclose(file) < 0 || H5Sclose(sid) < 0)
+        TEST_ERROR;
+    dcpl_out = dset = file = sid = H5I_INVALID_HID;
+    if (H5Zregister(&canon_cls) < 0)
+        TEST_ERROR;
+    PASSED();
+
+    if (H5Zunregister(CANON_FILTER_ID) < 0)
+        TEST_ERROR;
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Pclose(dcpl_out);
+        H5Dclose(dset);
+        H5Fclose(file);
+        H5Sclose(sid);
+        H5Zunregister(CANON_FILTER_ID);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
  * main
  * ---------------------------------------------------------------------- */
 int
@@ -2830,6 +3061,9 @@ main(void)
 
     /* Canonicalization of the persisted configuration string */
     nerrors += test_config_canonicalization(fapl) < 0 ? 1 : 0;
+
+    /* H5Pmodify_filter_by_idx */
+    nerrors += test_modify_filter_by_idx(fapl) < 0 ? 1 : 0;
 
     if (H5Fclose(file) < 0)
         goto error;
