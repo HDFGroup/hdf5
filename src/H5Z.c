@@ -1323,8 +1323,12 @@ H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t
         if (pline->filter[idx].id == filter)
             break;
 
-    /* Check if the filter was not already in the pipeline */
-    if (idx > pline->nused)
+    /* Check if the filter was not already in the pipeline.  The loop above
+     * leaves idx == nused when the filter is absent, so this must be >= :
+     * with a strict > the absent case fell through and wrote to
+     * filter[nused] -- past the used entries, and past the end of the array
+     * entirely once nused has reached nalloc (H5Z_MAX_NFILTERS). */
+    if (idx >= pline->nused)
         HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "filter not in pipeline");
 
     /* Change parameters for filter */
