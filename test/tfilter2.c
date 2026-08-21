@@ -558,6 +558,79 @@ error:
  * This test verifies that a filter appended via the string API produces
  * cd_values that round-trip correctly through this pattern.
  * ---------------------------------------------------------------------- */
+
+/* H5Pmodify_filter on a filter that is not in the pipeline must fail.
+ *
+ * H5Z_modify locates the filter with a loop that leaves idx == nused when
+ * the filter is absent, so its not-found check has to be >= rather than >.
+ * With a strict >, the absent case fell through and wrote to
+ * filter[nused]: past the used entries, and past the end of the array
+ * altogether once nused reached nalloc (H5Z_MAX_NFILTERS), leaking the
+ * cd_values allocation it stored there. */
+static int
+test_modify_filter_absent(void)
+{
+    hid_t    dcpl = H5I_INVALID_HID;
+    unsigned cd[8];
+    herr_t   status;
+
+    TESTING("H5Pmodify_filter: absent filter is rejected");
+
+    for (size_t i = 0; i < 8; i++)
+        cd[i] = 0xAAAAAAAAu;
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_deflate(dcpl, 6) < 0)
+        TEST_ERROR;
+
+    /* Shuffle is not in the pipeline */
+    H5E_BEGIN_TRY
+    {
+        status = H5Pmodify_filter(dcpl, H5Z_FILTER_SHUFFLE, 0, 1, cd);
+    }
+    H5E_END_TRY
+    if (status >= 0)
+        TEST_ERROR;
+    if (H5Pget_nfilters(dcpl) != 1)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+
+    /* Same check with the pipeline filled to H5Z_MAX_NFILTERS, where
+     * nused == nalloc and the stray write ran off the end of the array.
+     * cd_nelmts > H5Z_COMMON_CD_VALUES so the entry would own a heap
+     * allocation that nothing could ever free. */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    for (int i = 0; i < H5Z_MAX_NFILTERS; i++)
+        if (H5Pset_filter(dcpl, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, 0, NULL) < 0)
+            TEST_ERROR;
+    if (H5Pget_nfilters(dcpl) != H5Z_MAX_NFILTERS)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        status = H5Pmodify_filter(dcpl, H5Z_FILTER_SZIP, 0, 8, cd);
+    }
+    H5E_END_TRY
+    if (status >= 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
 static int
 test_modify_filter_pattern(void)
 {
@@ -3024,6 +3097,7 @@ main(void)
     nerrors += test_callback_contracts() < 0 ? 1 : 0;
 
     /* Modify-filter pattern (H5Pget_filter_by_id2 + H5Pmodify_filter) */
+    nerrors += test_modify_filter_absent() < 0 ? 1 : 0;
     nerrors += test_modify_filter_pattern() < 0 ? 1 : 0;
 
     /* Round-trip tests */
