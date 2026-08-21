@@ -267,8 +267,7 @@ public class TestH5Z {
                 ret             = H5.H5Pget_filter_params_by_idx(dcpl_id, 0, params);
                 assertTrue("H5Pget_filter_params_by_idx", ret >= 0);
                 assertNotNull("params[0] is non-null", params[0]);
-                assertTrue("stored string reflects the modify: " + params[0],
-                           params[0].contains("level=9"));
+                assertTrue("stored string reflects the modify: " + params[0], params[0].contains("level=9"));
             }
         }
         catch (Throwable err) {
@@ -305,10 +304,10 @@ public class TestH5Z {
                 assertEquals("nfilters after H5Pmodify_filter_by_idx", 1, nfilters);
 
                 // cd_values were replaced.
-                int[]    cd_out    = new int[1];
-                int[]    flags_out = new int[1];
-                long[]   cd_nelmts = new long[] {1};
-                String[] name_out  = new String[] {""};
+                int[] cd_out      = new int[1];
+                int[] flags_out   = new int[1];
+                long[] cd_nelmts  = new long[] {1};
+                String[] name_out = new String[] {""};
                 int filter_id =
                     H5.H5Pget_filter(dcpl_id, 0, flags_out, cd_nelmts, cd_out, 256, name_out, new int[1]);
                 assertEquals("filter id unchanged by modify", HDF5Constants.H5Z_FILTER_DEFLATE, filter_id);

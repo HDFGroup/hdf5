@@ -1300,8 +1300,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_nelmts,
-           bool keep_config, const unsigned int cd_values[/*cd_nelmts*/])
+H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_nelmts, bool keep_config,
+           const unsigned int cd_values[/*cd_nelmts*/])
 {
     size_t idx;                 /* Index of filter in pipeline */
     herr_t ret_value = SUCCEED; /* Return value */
