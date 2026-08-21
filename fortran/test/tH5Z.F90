@@ -164,7 +164,8 @@ CONTAINS
      END SUBROUTINE filters_test
 
     SUBROUTINE filter_config_test(total_error)
-!   Tests h5pappend_filter_f, h5pget_filter_params_by_idx_f, h5zconfig_get_param_f
+!   Tests h5pappend_filter_f, h5pmodify_filter_by_idx_f,
+!   h5pget_filter_params_by_idx_f, h5zconfig_get_param_f
 
       USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_INT64_T, C_DOUBLE, C_NULL_CHAR
       IMPLICIT NONE
@@ -311,6 +312,54 @@ CONTAINS
       END IF
 
       RETURN
+!
+! h5pmodify_filter_by_idx_f: both generic forms
+!
+      CALL h5zfilter_avail_f(H5Z_FILTER_DEFLATE_F, avail, error)
+           CALL check("h5zfilter_avail_f", error, total_error)
+      IF (avail) THEN
+         CALL h5pcreate_f(H5P_DATASET_CREATE_F, dcpl, error)
+              CALL check("h5pcreate_f", error, total_error)
+         CALL h5pappend_filter_f(dcpl, H5Z_FILTER_DEFLATE_F, 0, "level=1"//C_NULL_CHAR, error)
+              CALL check("h5pappend_filter_f(deflate,str)", error, total_error)
+
+         ! String form: replace the configuration in place
+         CALL h5pmodify_filter_by_idx_f(dcpl, 0, 0, "level=9"//C_NULL_CHAR, error)
+              CALL check("h5pmodify_filter_by_idx_f(str)", error, total_error)
+         CALL h5pget_nfilters_f(dcpl, nfilters, error)
+              CALL check("h5pget_nfilters_f", error, total_error)
+         IF (nfilters /= 1) THEN
+              WRITE(*,*) "h5pmodify_filter_by_idx_f: expected 1 filter, got ", nfilters
+              total_error = total_error + 1
+         END IF
+         pbuf = ""
+         plen = 0_SIZE_T
+         CALL h5pget_filter_params_by_idx_f(dcpl, 0, error, params_buf=pbuf, params_len=plen)
+              CALL check("h5pget_filter_params_by_idx_f(after modify)", error, total_error)
+         IF (INDEX(pbuf, "level=9") == 0) THEN
+              WRITE(*,*) "h5pmodify_filter_by_idx_f(str): expected level=9, got ", TRIM(pbuf)
+              total_error = total_error + 1
+         END IF
+
+         ! Raw cd_values form: replaces cd_values and clears the stored string
+         cd_nelmts   = 1_SIZE_T
+         cd_dummy(1) = 4
+         CALL h5pmodify_filter_by_idx_f(dcpl, 0, 0, cd_nelmts, cd_dummy, error)
+              CALL check("h5pmodify_filter_by_idx_f(raw)", error, total_error)
+         pbuf = ""
+         plen = 0_SIZE_T
+         CALL h5pget_filter_params_by_idx_f(dcpl, 0, error, params_buf=pbuf, params_len=plen)
+              CALL check("h5pget_filter_params_by_idx_f(after raw modify)", error, total_error)
+         ! Stored string gone -> get_config reconstruction reports the new level
+         IF (INDEX(pbuf, "4") == 0) THEN
+              WRITE(*,*) "h5pmodify_filter_by_idx_f(raw): expected level 4, got ", TRIM(pbuf)
+              total_error = total_error + 1
+         END IF
+
+         CALL h5pclose_f(dcpl, error)
+              CALL check("h5pclose_f", error, total_error)
+      END IF
+
     END SUBROUTINE filter_config_test
 
         SUBROUTINE szip_test(szip_flag, cleanup, total_error)
