@@ -2099,6 +2099,225 @@ done:
 } /* end H5Pappend_filter() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Pmodify_filter_by_idx
+ *
+ * Purpose:     Replaces the configuration of the filter already at position
+ *              FILTER_IDX in PLIST_ID's pipeline, leaving its position and
+ *              filter ID unchanged.  PARAMS is interpreted exactly as
+ *              H5Pappend_filter interprets it:
+ *
+ *              H5Z_PARAMS_STRING   - resolved through the filter's
+ *                                    set_config callback; both the resulting
+ *                                    cd_values and the canonical string
+ *                                    replace the entry's current ones, so the
+ *                                    entry keeps a stored configuration
+ *                                    string.
+ *              H5Z_PARAMS_CDVALUES - the cd_values array replaces the
+ *                                    entry's current one and any stored
+ *                                    string is cleared, matching
+ *                                    H5Pmodify_filter.
+ *              NULL                - equivalent to CDVALUES with
+ *                                    cd_nelmts = 0.
+ *
+ *              This exists because H5Pmodify_filter takes only raw
+ *              cd_values and therefore always clears the stored string,
+ *              silently downgrading an entry from an exact, plugin-free
+ *              configuration string to get_config reconstruction.  The only
+ *              alternative was H5Premove_filter plus a fresh
+ *              H5Pappend_filter, which moves the entry to the end of the
+ *              pipeline and so changes filter order.
+ *
+ *              Addressing is by index rather than by filter ID because a
+ *              pipeline may legally contain the same filter ID more than
+ *              once, where an ID-addressed modify silently edits the first
+ *              match.  The index is the same one H5Pget_filter2 and
+ *              H5Pget_filter_params_by_idx use.
+ *
+ *              On failure the entry is left exactly as it was: the new
+ *              cd_values and string are staged and swapped in only after
+ *              set_config succeeds, so a rejected edit cannot leave an entry
+ *              holding a string that disagrees with its cd_values.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Since:       3.0.0
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pmodify_filter_by_idx(hid_t plist_id, unsigned filter_idx, unsigned flags, const H5Z_params_t *params)
+{
+    H5P_genplist_t    *plist;
+    H5O_pline_t        pline;
+    H5Z_filter_info_t *fi;
+    H5Z_entry_t       *entry               = NULL;
+    const unsigned    *cd_values           = NULL;
+    unsigned          *allocated_cd_values = NULL; /* owns heap mem for string path */
+    char              *canon_config        = NULL; /* owns the buffer retain_config points into */
+    const char        *retain_config       = NULL; /* canonical string to persist (STRING path only) */
+    unsigned          *staged_cd_values    = NULL; /* staged replacement for fi->cd_values */
+    char              *staged_config       = NULL; /* staged replacement for fi->config    */
+    size_t             cd_nelmts           = 0;
+    H5Z_filter_t       filter;
+    herr_t             ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Validate flags */
+    if (flags & ~((unsigned)H5Z_FLAG_DEFMASK))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags");
+
+    /* Get the plist and its pipeline.  The entry's existing filter ID selects
+     * the class whose set_config resolves a parameter string, so the index
+     * must be validated before params can be interpreted. */
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE, false)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
+    if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+    if (filter_idx >= pline.nused)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter index out of range");
+
+    fi     = &pline.filter[filter_idx];
+    filter = fi->id;
+
+    if (params == NULL || params->type == H5Z_PARAMS_CDVALUES) {
+        /* Raw cd_values path - behaves identically to H5Pmodify_filter */
+        if (params) {
+            cd_nelmts = params->u.raw.cd_nelmts;
+            cd_values = params->u.raw.cd_values;
+            if (cd_nelmts > 0 && cd_values == NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cd_values is NULL but cd_nelmts > 0");
+        }
+    }
+    else if (params->type == H5Z_PARAMS_STRING) {
+        /* String path - invoke set_config to translate into cd_values, using
+         * the same two-pass protocol as H5Pappend_filter. */
+        const char *param_str    = params->u.str;
+        bool        empty_input  = (!param_str || *param_str == '\0');
+        size_t      cd_nelmts2   = 0;
+        size_t      alloc_nelmts = 0;
+
+        if (!empty_input && strlen(param_str) > H5Z_CONFIG_STRING_MAX)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "params string exceeds H5Z_CONFIG_STRING_MAX");
+
+        /* Trigger dynamic plugin load if filter is not already registered */
+        {
+            htri_t filter_avail;
+            if ((filter_avail = H5Z_filter_avail(filter)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't check filter availability");
+            if (!filter_avail)
+                HGOTO_ERROR(H5E_PLINE, H5E_NOFILTER, FAIL, "filter not found; register or load it first");
+        }
+
+        /* Get the internal entry to access v3 callbacks */
+        if (H5Z_find_entry(false, filter, &entry) < 0 || entry == NULL)
+            HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "filter entry not found after availability check");
+
+        if (!entry->set_config) {
+            /* No set_config: empty input means "no parameters"; a non-empty
+             * parameter string has nowhere to go and is an error. */
+            if (!empty_input)
+                HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL,
+                            "filter does not support string configuration (no set_config callback)");
+            cd_nelmts = 0;
+            cd_values = NULL;
+        }
+        else {
+            const char *cfg_str = empty_input ? NULL : param_str;
+
+            /* Canonicalise the string that will be persisted, for the same
+             * reasons as in H5Pappend_filter (valid TOML v1.0.0 on disk). */
+            if (!empty_input) {
+                if (NULL == (canon_config = H5Z_canonicalize_params(param_str)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                                "can't canonicalize filter parameter string");
+                retain_config = canon_config;
+            }
+
+            /* Pass 1: determine cd_nelmts (size-query; cd_values is NULL) */
+            if (entry->set_config(cfg_str, &flags, &cd_nelmts, NULL, 0) < 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "set_config size-query call failed");
+
+            if (cd_nelmts > H5Z_MAX_CD_NELMTS)
+                HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL,
+                            "cd_nelmts from set_config exceeds H5Z_MAX_CD_NELMTS (%u)", H5Z_MAX_CD_NELMTS);
+
+            /* Allocate cd_values (at least 1 to avoid zero-length alloc) */
+            alloc_nelmts = cd_nelmts ? cd_nelmts : 1;
+            if (NULL == (allocated_cd_values = (unsigned *)H5MM_malloc(alloc_nelmts * sizeof(unsigned))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for cd_values");
+            cd_values = allocated_cd_values;
+
+            cd_nelmts2 = cd_nelmts;
+
+            /* Pass 2: populate cd_values */
+            if (entry->set_config(cfg_str, &flags, &cd_nelmts2, allocated_cd_values, alloc_nelmts) < 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "set_config populate call failed");
+
+            if (cd_nelmts2 != cd_nelmts)
+                HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL,
+                            "set_config returned different cd_nelmts on second call (contract violation)");
+
+            /* Re-validate flags: the callback may have modified them */
+            if (flags & ~((unsigned)H5Z_FLAG_DEFMASK))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "set_config callback returned invalid flags");
+        }
+    }
+    else {
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unrecognised H5Z_params_t type field");
+    }
+
+    /* ---- Stage every allocation before disturbing the entry, so that an
+     * allocation failure here leaves the entry exactly as it was. ---- */
+    if (cd_nelmts > H5Z_COMMON_CD_VALUES) {
+        if (NULL == (staged_cd_values = (unsigned *)H5MM_malloc(cd_nelmts * sizeof(unsigned))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for filter parameters");
+        H5MM_memcpy(staged_cd_values, cd_values, cd_nelmts * sizeof(unsigned));
+    }
+    if (retain_config) {
+        if (NULL == (staged_config = (char *)H5MM_strdup(retain_config)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                        "memory allocation failed for filter config string");
+    }
+
+    /* ---- Commit: nothing below can fail. ---- */
+
+    /* Release what the entry currently owns */
+    if (fi->cd_values != NULL && fi->cd_values != fi->_cd_values)
+        H5MM_xfree(fi->cd_values);
+    H5MM_xfree(fi->config);
+
+    fi->flags     = flags;
+    fi->cd_nelmts = cd_nelmts;
+
+    if (cd_nelmts == 0)
+        fi->cd_values = NULL;
+    else if (staged_cd_values) {
+        fi->cd_values    = staged_cd_values; /* ownership transfers to the entry */
+        staged_cd_values = NULL;
+    }
+    else {
+        /* Fits the entry's internal buffer */
+        fi->cd_values = fi->_cd_values;
+        H5MM_memcpy(fi->cd_values, cd_values, cd_nelmts * sizeof(unsigned));
+    }
+
+    /* NULL for the CDVALUES path, which clears the stored string */
+    fi->config    = staged_config; /* ownership transfers to the entry */
+    staged_config = NULL;
+
+    /* Store the updated pipeline back in the property list */
+    if (H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
+
+done:
+    H5MM_xfree(staged_cd_values);
+    H5MM_xfree(staged_config);
+    H5MM_xfree(canon_config);
+    H5MM_xfree(allocated_cd_values);
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pmodify_filter_by_idx() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5Pappend_filter_blob
  *
  * Purpose:     Appends filter FILTER to the pipeline on PLIST_ID, exactly
