@@ -4196,8 +4196,8 @@ error:
 #define CANON_FILTER_ID 532
 
 static herr_t
-canon_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts,
-                 unsigned cd_values[], size_t cd_values_size)
+canon_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts, unsigned cd_values[],
+                 size_t cd_values_size)
 {
     double rate = 0.0;
 
@@ -4492,8 +4492,8 @@ test_set_local_keeps_config(hid_t fapl)
     hsize_t      dims[2] = {8, 8}, chunk[2] = {4, 4};
     char         filename[1024];
     char         pbuf[H5Z_CONFIG_STRING_MAX + 1];
-    size_t       plen                 = 0;
-    const char  *compact              = "scale_type=\"int\",scale_factor=8";
+    size_t       plen    = 0;
+    const char  *compact = "scale_type=\"int\",scale_factor=8";
     H5Z_params_t p;
 
     TESTING("set_local preserves the stored configuration string");
@@ -4572,8 +4572,8 @@ test_modify_filter_by_idx(hid_t fapl)
     hsize_t      dims[2] = {8, 8};
     char         filename[1024];
     char         pbuf[H5Z_CONFIG_STRING_MAX + 1];
-    size_t       plen = 0;
-    double       got  = 0.0;
+    size_t       plen      = 0;
+    double       got       = 0.0;
     unsigned     flags_out = 0;
     unsigned     cd[8];
     size_t       cd_nelmts = 8;
@@ -4637,9 +4637,9 @@ test_modify_filter_by_idx(hid_t fapl)
         unsigned raw[2] = {0, 0};
 
         memcpy(raw, &v, sizeof(v));
-        p.type              = H5Z_PARAMS_CDVALUES;
-        p.u.raw.cd_nelmts   = 2;
-        p.u.raw.cd_values   = raw;
+        p.type            = H5Z_PARAMS_CDVALUES;
+        p.u.raw.cd_nelmts = 2;
+        p.u.raw.cd_values = raw;
         if (H5Pmodify_filter_by_idx(dcpl, 0, H5Z_FLAG_MANDATORY, &p) < 0)
             TEST_ERROR;
     }

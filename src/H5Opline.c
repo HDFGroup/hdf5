@@ -263,8 +263,7 @@ H5O__pline_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
                 uint32_t ext_length;
 
                 if (H5_IS_BUFFER_OVERFLOW(p, H5O_PLINE_EXT_HDR_SIZE, p_end))
-                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                "ran off end of input buffer while decoding");
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
                 UINT16DECODE(p, ext_type);
                 ext_flags    = *p++;
                 ext_reserved = *p++;
@@ -285,8 +284,7 @@ H5O__pline_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
                 prev_type = ext_type;
 
                 if (H5_IS_BUFFER_OVERFLOW(p, ext_length, p_end))
-                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                "ran off end of input buffer while decoding");
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
 
                 switch (ext_type) {
                     case H5O_PLINE_EXT_CONFIG:

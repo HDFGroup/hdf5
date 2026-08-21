@@ -144,7 +144,7 @@ H5_DLL herr_t             H5Z_get_filter_info(H5Z_filter_t filter, unsigned int 
 /* Normalise a parameter string into the form persisted in pipeline v3:
  * outer braces stripped and hex-float literals rewritten to %.17e decimal,
  * so the stored bytes are valid TOML v1.0.0.  Caller frees with H5MM_xfree(). */
-H5_DLL char              *H5Z_canonicalize_params(const char *params);
+H5_DLL char *H5Z_canonicalize_params(const char *params);
 
 /* Filter blob storage (in-file large binary configuration) */
 struct H5F_t; /*forward decl*/

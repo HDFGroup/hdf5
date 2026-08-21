@@ -1464,8 +1464,8 @@ done:
  * Signature: (JIILjava/lang/String;)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pmodify_1filter_1by_1idx_1str(JNIEnv *env, jclass clss, jlong plist_id,
-                                                    jint filter_idx, jint flags, jstring params)
+Java_hdf_hdf5lib_H5_H5Pmodify_1filter_1by_1idx_1str(JNIEnv *env, jclass clss, jlong plist_id, jint filter_idx,
+                                                    jint flags, jstring params)
 {
     H5Z_params_t p;
     const char  *c_params = NULL;
@@ -1497,8 +1497,8 @@ done:
  * Signature: (JII[I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pmodify_1filter_1by_1idx_1raw(JNIEnv *env, jclass clss, jlong plist_id,
-                                                    jint filter_idx, jint flags, jintArray cd_values)
+Java_hdf_hdf5lib_H5_H5Pmodify_1filter_1by_1idx_1raw(JNIEnv *env, jclass clss, jlong plist_id, jint filter_idx,
+                                                    jint flags, jintArray cd_values)
 {
     H5Z_params_t p;
     jint        *c_cd_values = NULL;

@@ -2009,8 +2009,7 @@ H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const 
          * An empty input stores nothing. */
         if (!empty_input) {
             if (NULL == (canon_config = H5Z_canonicalize_params(param_str)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                            "can't canonicalize filter parameter string");
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't canonicalize filter parameter string");
             retain_config = canon_config;
         }
 
@@ -2275,8 +2274,7 @@ H5Pmodify_filter_by_idx(hid_t plist_id, unsigned filter_idx, unsigned flags, con
     }
     if (retain_config) {
         if (NULL == (staged_config = (char *)H5MM_strdup(retain_config)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                        "memory allocation failed for filter config string");
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for filter config string");
     }
 
     /* ---- Commit: nothing below can fail. ---- */

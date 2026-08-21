@@ -198,8 +198,7 @@ H5_DLL int    H5P_fill_value_cmp(const void *value1, const void *value2, size_t 
 /* keep_config: see H5Z_modify() in H5Zprivate.h.  set_local callbacks pass
  * true; a caller replacing cd_values directly passes false. */
 H5_DLL herr_t H5P_modify_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned flags, size_t cd_nelmts,
-                                bool keep_config,
-                                const unsigned cd_values[]);
+                                bool keep_config, const unsigned cd_values[]);
 H5_DLL herr_t H5P_get_filter_by_id(H5P_genplist_t *plist, H5Z_filter_t id, unsigned int *flags,
                                    size_t *cd_nelmts, unsigned cd_values[], size_t namelen, char name[],
                                    unsigned *filter_config);

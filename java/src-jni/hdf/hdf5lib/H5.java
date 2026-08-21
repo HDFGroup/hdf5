@@ -8521,7 +8521,7 @@ public class H5 implements java.io.Serializable {
      *            Error from the HDF5 Library.
      **/
     public synchronized static int H5Pmodify_filter_by_idx(long plist_id, int filter_idx, int flags,
-                                                          String params) throws HDF5LibraryException
+                                                           String params) throws HDF5LibraryException
     {
         return H5Pmodify_filter_by_idx_str(plist_id, filter_idx, flags, params);
     }
@@ -8552,7 +8552,7 @@ public class H5 implements java.io.Serializable {
      *            Error from the HDF5 Library.
      **/
     public synchronized static int H5Pmodify_filter_by_idx(long plist_id, int filter_idx, int flags,
-                                                          int[] cd_values) throws HDF5LibraryException
+                                                           int[] cd_values) throws HDF5LibraryException
     {
         return H5Pmodify_filter_by_idx_raw(plist_id, filter_idx, flags, cd_values);
     }

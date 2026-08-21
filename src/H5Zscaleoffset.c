@@ -1217,8 +1217,7 @@ H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     /* set_local specialises cd_values for this dataset; keep the stored
      * configuration string (keep_config = true). */
     if (H5P_modify_filter(dcpl_plist, H5Z_FILTER_SCALEOFFSET, flags, (size_t)H5Z_SCALEOFFSET_TOTAL_NPARMS,
-                          true,
-                          cd_values) < 0)
+                          true, cd_values) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local scaleoffset parameters");
 
 done:

@@ -12531,7 +12531,7 @@ public class H5 implements java.io.Serializable {
             params_struct.set(ValueLayout.JAVA_INT, 0, H5Z_PARAMS_STRING);
             params_struct.set(ValueLayout.ADDRESS, 8, str_seg);
             retVal = org.hdfgroup.javahdf5.hdf5_h.H5Pmodify_filter_by_idx(plist_id, filter_idx, flags,
-                                                                         params_struct);
+                                                                          params_struct);
         }
         catch (HDF5LibraryException e) {
             throw e;
@@ -12576,18 +12576,17 @@ public class H5 implements java.io.Serializable {
          * addresses an entry by filter ID and resolves to the first match, whereas
          * this API addresses by pipeline index.  The struct is built explicitly. */
         final int H5Z_PARAMS_CDVALUES = 0;
-        int[]     values              = (cd_values != null) ? cd_values : new int[0];
+        int[] values                  = (cd_values != null) ? cd_values : new int[0];
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment vals_seg = (values.length > 0)
-                                         ? arena.allocateFrom(ValueLayout.JAVA_INT, values)
-                                         : MemorySegment.NULL;
+            MemorySegment vals_seg =
+                (values.length > 0) ? arena.allocateFrom(ValueLayout.JAVA_INT, values) : MemorySegment.NULL;
             MemorySegment params_struct = arena.allocate(24, 8);
             params_struct.set(ValueLayout.JAVA_INT, 0, H5Z_PARAMS_CDVALUES);
             /* union { struct { size_t cd_nelmts; const unsigned *cd_values; } raw; ... } */
             params_struct.set(ValueLayout.JAVA_LONG, 8, (long)values.length);
             params_struct.set(ValueLayout.ADDRESS, 16, vals_seg);
             retVal = org.hdfgroup.javahdf5.hdf5_h.H5Pmodify_filter_by_idx(plist_id, filter_idx, flags,
-                                                                         params_struct);
+                                                                          params_struct);
         }
         catch (HDF5LibraryException e) {
             throw e;
