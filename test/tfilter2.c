@@ -2727,6 +2727,140 @@ test_config_canonicalization(hid_t fapl)
         TEST_ERROR;
     PASSED();
 
+    /* --- canon-09: the canonical form is a fixed point.
+     *
+     * The stored string is an INPUT to set_config, not only a display
+     * artefact: the RFC guarantees the stored bytes are always valid
+     * set_config input, so a caller may retrieve a configuration and re-apply
+     * it, and h5repack -f accepts a parameter string on the command line.
+     * Re-canonicalising an already canonical string must therefore reproduce
+     * the identical bytes -- it has no outer braces and no hex-float tokens
+     * left to rewrite -- so re-application cannot drift.  (Note a plain
+     * h5repack copy does NOT exercise this: it duplicates the source DCPL
+     * with H5Pcopy, so the bytes travel as data and are never re-parsed.)
+     * (RFC-HDFG-2026-001 fmt-01b)                                        --- */
+    TESTING("canonicalization: stored form is a fixed point");
+    {
+        /* The getter truncates silently into an undersized buffer but always
+         * reports the full length in plen, so every read below is checked
+         * against plen -- a truncated compare must not be able to pass. */
+        char s1[128];
+        char s2[128];
+        char s3[128];
+
+        /* 2^-36, the case raised on HDFGroup/hdf5#6153: zfp's fixed-accuracy
+         * mode derives minexp via frexp and so rounds the requested tolerance
+         * DOWN to the next integer power of two, which is why a user writes
+         * the exponent exactly rather than in decimal. */
+        if ((dcpl = canon_make_dcpl("{ rate = 0x1p-36 }")) < 0)
+            TEST_ERROR;
+        if (H5Pget_filter_params_by_idx(dcpl, 0, s1, sizeof(s1), &plen) < 0)
+            TEST_ERROR;
+        if (plen >= sizeof(s1))
+            TEST_ERROR;
+        if (H5Pclose(dcpl) < 0)
+            TEST_ERROR;
+        dcpl = H5I_INVALID_HID;
+        if (strcmp(s1, "rate = 1.45519152283668518e-11") != 0) {
+            fprintf(stderr, "\n   stored \"%s\"\n", s1);
+            TEST_ERROR;
+        }
+
+        /* Cycle 1: feed the stored bytes back in */
+        if ((dcpl = canon_make_dcpl(s1)) < 0)
+            TEST_ERROR;
+        if (H5Pget_filter_params_by_idx(dcpl, 0, s2, sizeof(s2), &plen) < 0)
+            TEST_ERROR;
+        if (plen >= sizeof(s2))
+            TEST_ERROR;
+        if (H5Pclose(dcpl) < 0)
+            TEST_ERROR;
+        dcpl = H5I_INVALID_HID;
+        if (strcmp(s1, s2) != 0)
+            TEST_ERROR;
+
+        /* Cycle 2: still byte-identical, and the value survived both hops */
+        if ((dcpl = canon_make_dcpl(s2)) < 0)
+            TEST_ERROR;
+        if (H5Pget_filter_params_by_idx(dcpl, 0, s3, sizeof(s3), &plen) < 0)
+            TEST_ERROR;
+        if (plen >= sizeof(s3))
+            TEST_ERROR;
+        if (canon_stored_double(dcpl, &got) < 0)
+            TEST_ERROR;
+        if (H5Pclose(dcpl) < 0)
+            TEST_ERROR;
+        dcpl = H5I_INVALID_HID;
+        if (strcmp(s2, s3) != 0)
+            TEST_ERROR;
+        if (memcmp(&got, &(double){0x1p-36}, sizeof(got)) != 0)
+            TEST_ERROR;
+    }
+    PASSED();
+
+    /* --- canon-10: the hex-float rewrite is value-transparent at the
+     *               boundaries where it matters.
+     *
+     * A hex literal whose mantissa fits in 53 bits converts with no rounding
+     * step at all; the canonical decimal has to come back through a
+     * decimal-to-binary conversion, which C11 7.22.1.3 permits to be 1 ulp
+     * off.  That ulp is only observable where a filter quantises on a binary
+     * boundary -- and exact powers of two are both where such a boundary sits
+     * and what a user writes in hex in the first place.  Appending the hex
+     * form and appending its canonical decimal must pack the identical
+     * double.  (RFC-HDFG-2026-001 fmt-01c)                               --- */
+    TESTING("canonicalization: hex rewrite is value-transparent at powers of two");
+    {
+        /* smallest subnormal and smallest normal at the bottom, the 2^-36
+         * case from the issue thread, and a spread out to the top of the
+         * exponent range */
+        static const int exps[] = {-1074, -1073, -1022, -1021, -100, -37, -36, -35,
+                                   -1,    0,     1,     52,    53,   100, 512, 1023};
+        size_t           i;
+
+        for (i = 0; i < sizeof(exps) / sizeof(exps[0]); i++) {
+            char   hexstr[64];
+            char   canon[128];
+            double want     = ldexp(1.0, exps[i]);
+            double from_hex = 0.0;
+            double from_dec = 0.0;
+
+            snprintf(hexstr, sizeof(hexstr), "rate = 0x1p%+d", exps[i]);
+
+            if ((dcpl = canon_make_dcpl(hexstr)) < 0)
+                TEST_ERROR;
+            if (canon_stored_double(dcpl, &from_hex) < 0)
+                TEST_ERROR;
+            if (H5Pget_filter_params_by_idx(dcpl, 0, canon, sizeof(canon), &plen) < 0)
+                TEST_ERROR;
+            if (plen >= sizeof(canon)) /* never compare a truncated string */
+                TEST_ERROR;
+            if (H5Pclose(dcpl) < 0)
+                TEST_ERROR;
+            dcpl = H5I_INVALID_HID;
+
+            /* nothing a stock TOML parser would choke on may remain */
+            if (strstr(canon, "0x") != NULL)
+                TEST_ERROR;
+
+            if ((dcpl = canon_make_dcpl(canon)) < 0)
+                TEST_ERROR;
+            if (canon_stored_double(dcpl, &from_dec) < 0)
+                TEST_ERROR;
+            if (H5Pclose(dcpl) < 0)
+                TEST_ERROR;
+            dcpl = H5I_INVALID_HID;
+
+            if (memcmp(&from_hex, &want, sizeof(want)) != 0 ||
+                memcmp(&from_dec, &want, sizeof(want)) != 0) {
+                fprintf(stderr, "\n   2^%d: hex -> %a, canonical \"%s\" -> %a, want %a\n", exps[i], from_hex,
+                        canon, from_dec, want);
+                TEST_ERROR;
+            }
+        }
+    }
+    PASSED();
+
     if (H5Zunregister(CANON_FILTER_ID) < 0)
         TEST_ERROR;
     return 0;
