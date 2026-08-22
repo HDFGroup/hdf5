@@ -2401,7 +2401,14 @@ static int scan_float(scanner_t *sp, token_t *tok) {
   errno = 0;
   char *q;
   double fp64 = strtod(buffer, &q);
-  if (errno || *q || q == buffer) {
+  /* HDF5 local change: ERANGE alone is not a parse failure.  glibc raises it
+   * on underflow to a subnormal even though the conversion succeeded and
+   * returned the correctly rounded value, which rejected every subnormal
+   * literal -- "5e-324" and "0x1p-1074" alike.  Accept ERANGE when the result
+   * is finite and nonzero; still reject overflow (+/-HUGE_VAL) and total
+   * underflow to zero, where the value really was not representable. */
+  if ((errno && !(errno == ERANGE && fp64 != 0.0 && isfinite(fp64))) || *q ||
+      q == buffer) {
     return SETERROR(sp->ebuf, lineno, "error parsing float");
   }
 
