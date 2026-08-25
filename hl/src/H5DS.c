@@ -592,6 +592,13 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
                     H5Dclose(tmp_id);
                     goto out;
                 }
+                /* Only the error path above closed this, so each reference
+                 * already in REFERENCE_LIST leaked a dataset ID, which in turn
+                 * kept its file open. H5DSdetach_scale's matching loop closes
+                 * it here.
+                 */
+                if (H5Dclose(tmp_id) < 0)
+                    goto out;
             }
             else {
                 dsbuf_w[j] = dsbuf[j];

@@ -146,6 +146,23 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## High-Level Library
 
+### Fixed a leaked dataset ID in H5DSattach_scale()
+
+   When attaching a dimension scale that already had one or more datasets
+   attached to it, `H5DSattach_scale()` reopened each reference stored in the
+   scale's `REFERENCE_LIST` attribute with `H5Ropen_object()` but only closed
+   the resulting identifier on the error path. One dataset identifier was
+   leaked per reference already attached, and each leaked identifier kept its
+   file open, so a later `H5Fcreate()` with `H5F_ACC_TRUNC` on the same file
+   failed with "unable to truncate a file which is already open".
+
+   The identifier is now closed on the success path as well, matching the
+   equivalent loop in `H5DSdetach_scale()`. The leak was only reachable through
+   a pass-through VOL connector, since `H5DSwith_new_ref()` selects the
+   old-style reference path -- which opens nothing -- whenever the object is
+   native and the library was not built with
+   `H5_DIMENSION_SCALES_WITH_NEW_REF`.
+
 ## Fortran High-Level APIs
 
 ## Documentation
