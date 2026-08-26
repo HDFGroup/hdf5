@@ -86114,6 +86114,7 @@
     <docanchor file="_f_m_t4.html" title="IV.A.1 Disk Format: Level 2A1 - Data Object Header Prefix">subsec_fmt4_dataobject_hdr_prefix</docanchor>
     <docanchor file="_f_m_t4.html" title="IV.A.1.a Version 1 Data Object Header Prefix">subsubsec_fmt4_dataobject_hdr_prefix_one</docanchor>
     <docanchor file="_f_m_t4.html" title="IV.A.1.b Version 2 Data Object Header Prefix">subsubsec_fmt4_dataobject_hdr_prefix_two</docanchor>
+    <docanchor file="_f_m_t4.html">FMT4OhdrChunkDef</docanchor>
     <docanchor file="_f_m_t4.html" title="IV.A.2 Disk Format: Level 2A2 - Data Object Header Shared Message Encoding">subsec_fmt4_dataobject_hdr_msg</docanchor>
     <docanchor file="_f_m_t4.html" title="IV.A.3 Disk Format: Level 2A3 - Data Object Header Messages">subsec_fmt4_dataobject_hdr_msg_catalog</docanchor>
     <docanchor file="_f_m_t4.html" title="IV.A.3.a. The NIL Message">subsubsec_fmt4_dataobject_hdr_msg_nil</docanchor>
