@@ -45,7 +45,10 @@ typedef struct {
  * for version 1.4(after 1.4.3).  To get this data file, simply compile
  * gen_old_fill.c with HDF5 library (before v1.5) and run it. */
 #define FILE_COMPATIBLE "fill_old.h5"
-#define FILE_NAME_RAW   "fillval.raw"
+/* Crafted file (from gen_bad_fill.c) whose fill value message has a negative
+ * size and no datatype. */
+#define FILE_BAD_FILL "bad_fill_value.h5"
+#define FILE_NAME_RAW "fillval.raw"
 
 /*-------------------------------------------------------------------------
  * Function:    create_compound_type
@@ -2328,6 +2331,85 @@ error:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    test_bad_fill_value
+ *
+ * Purpose:     Tests that a dataset with a malformed fill value message
+ *              (negative size and no datatype) can be opened and its raw data
+ *              read, and that attempts to access its fill value will fail
+ *              safely.
+ *
+ * Return:      Success:    0
+ *              Failure:    1
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_bad_fill_value(void)
+{
+    hid_t       file = H5I_INVALID_HID, dset = H5I_INVALID_HID, dcpl = H5I_INVALID_HID;
+    int         rd_buf[4]   = {0, 0, 0, 0};
+    herr_t      fill_status = SUCCEED;
+    int         fill_rd     = 0;
+    const char *testfile    = H5_get_srcdir_filename(FILE_BAD_FILL);
+
+    TESTING("reading a dataset with a malformed fill value");
+
+    if ((file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) {
+        printf("    Could not open file %s. Try set $srcdir to point at the "
+               "source directory of test\n",
+               testfile);
+        goto error;
+    }
+
+    /* Raw data should be readable */
+    if ((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0)
+        goto error;
+    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rd_buf) < 0)
+        goto error;
+    if (rd_buf[0] != 10 || rd_buf[1] != 20 || rd_buf[2] != 30 || rd_buf[3] != 40) {
+        H5_FAILED();
+        puts("    Unexpected dataset data read back.");
+        goto error;
+    }
+
+    if ((dcpl = H5Dget_create_plist(dset)) < 0)
+        goto error;
+
+    /* Attempting to retrieve the malformed fill value should fail gracefully */
+    H5E_BEGIN_TRY
+    {
+        fill_status = H5Pget_fill_value(dcpl, H5T_NATIVE_INT, &fill_rd);
+    }
+    H5E_END_TRY
+    if (fill_status >= 0) {
+        H5_FAILED();
+        puts("    H5Pget_fill_value() should have failed on the malformed fill value.");
+        goto error;
+    }
+
+    if (H5Pclose(dcpl) < 0)
+        goto error;
+    if (H5Dclose(dset) < 0)
+        goto error;
+    if (H5Fclose(file) < 0)
+        goto error;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Dclose(dset);
+        H5Fclose(file);
+    }
+    H5E_END_TRY
+    return 1;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    test_partalloc_cases
  *
  * Purpose:    Tests fill values read and write for datasets.
@@ -2674,6 +2756,7 @@ main(int argc, char *argv[])
 
             if (driver_is_default_compatible) {
                 nerrors += test_compatible();
+                nerrors += test_bad_fill_value();
             }
         } /* end if */
 

@@ -135,8 +135,8 @@
 #define FILE110 "tfloat8.h5"
 #define FILE111 "tfloat6.h5"
 #define FILE112 "tfloat4.h5"
-
 #define FILE113 "tintascii.h5"
+#define FILE114 "tbinvlstr.h5"
 
 #define ONION_TEST_FIXNAME_SIZE 1024
 #define ONION_TEST_PAGE_SIZE    (uint32_t)32
@@ -4189,6 +4189,37 @@ gent_vlstr(void)
     H5Aclose(att);
     H5Gclose(root);
     H5Fclose(fid1);
+}
+
+/*
+ * Generate a 1-D variable-length string dataset with several
+ * non-NULL strings of differing lengths.
+ */
+void
+gent_binvlstr(void)
+{
+    const char *wdata[4] = {"abc", "0123456789ABCDEF0123", "hello", "z"}; /* Information to write */
+    hid_t       fid;                                                      /* HDF5 File ID       */
+    hid_t       dataset;                                                  /* Dataset ID         */
+    hid_t       sid;                                                      /* Dataspace ID       */
+    hid_t       tid;                                                      /* Datatype ID        */
+    hsize_t     dims[] = {4};
+
+    fid = H5Fcreate(FILE114, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    sid = H5Screate_simple(1, dims, NULL);
+
+    /* Create a VL string datatype */
+    tid = H5Tcopy(H5T_C_S1);
+    H5Tset_size(tid, H5T_VARIABLE);
+
+    /* Create a dataset and write the VL strings to it */
+    dataset = H5Dcreate2(fid, "vlenstr", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+
+    H5Dclose(dataset);
+    H5Tclose(tid);
+    H5Sclose(sid);
+    H5Fclose(fid);
 }
 
 void
