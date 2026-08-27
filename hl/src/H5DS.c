@@ -24,8 +24,11 @@ static herr_t H5DS_is_reserved(hid_t did, bool *is_reserved);
  * Purpose: Determines if new references are used with dimension scales.
  *   The function H5DSwith_new_ref takes any object identifier and checks
  *   if new references are used for dimension scales. Currently,
- *   new references are used when non-native VOL connector is used or when
- *   H5_DIMENSION_SCALES_WITH_NEW_REF is set up via configure option.
+ *   new references are used when the object's terminal VOL connector is not
+ *   the native one -- note that a pass-through connector stacked over the
+ *   native connector still has a native terminal connector, and so does not
+ *   count -- or when H5_DIMENSION_SCALES_WITH_NEW_REF is set up via configure
+ *   option.
  *
  * Return: Non-negative on success/Negative on failure
  *
@@ -592,11 +595,21 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
                     H5Dclose(tmp_id);
                     goto out;
                 }
-                /* Only the error path above closed this, so each reference
-                 * already in REFERENCE_LIST leaked a dataset ID, which in turn
-                 * kept its file open. H5DSdetach_scale's matching loop closes
-                 * it here.
-                 */
+                /* The error path above closed this; the success path did not,
+                 * so every reference already in REFERENCE_LIST leaked a dataset
+                 * ID (and, through it, kept the file open). H5DSdetach_scale's
+                 * identical loop has always had this close.
+                 *
+                 * Unreachable for a native object in a library built without
+                 * H5_DIMENSION_SCALES_WITH_NEW_REF, which takes the `else`
+                 * branch and opens nothing: H5DSwith_new_ref() sets
+                 * is_new_ref = (config_flag || !native), and the `native` there
+                 * is decided by the object's *terminal* connector, so a
+                 * pass-through connector over the native one is still native.
+                 * Where this does run, the leak surfaces as a later
+                 * H5Fcreate(H5F_ACC_TRUNC) on the same file failing with
+                 * "unable to truncate a file which is already open" -- an error
+                 * with nothing in it to suggest a dimension scale. */
                 if (H5Dclose(tmp_id) < 0)
                     goto out;
             }
@@ -632,13 +645,23 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
         if (is_new_ref) {
             if (H5Awrite(aid, ntid, ndsbuf_w) < 0)
                 goto out;
-            if (H5Treclaim(tid, sid, H5P_DEFAULT, ndsbuf_w) < 0)
+            /* Free the references.  The ones read from the old attribute hold
+             * the file they came from open until they are destroyed, and the
+             * new buffer has to be reclaimed with its own space: the reference
+             * just appended sits at index nelmts - 1, one past the extent of
+             * SID.  Leaving either behind kept the file open, so a later
+             * H5Fcreate(H5F_ACC_TRUNC) on it failed with "unable to truncate a
+             * file which is already open".  H5DSdetach_scale() reclaims both.
+             */
+            if (H5Treclaim(tid, sid, H5P_DEFAULT, ndsbuf) < 0)
+                goto out;
+            if (H5Treclaim(tid, sid_w, H5P_DEFAULT, ndsbuf_w) < 0)
                 goto out;
         }
         else {
             if (H5Awrite(aid, ntid, dsbuf_w) < 0)
                 goto out;
-            if (H5Treclaim(tid, sid, H5P_DEFAULT, dsbuf_w) < 0)
+            if (H5Treclaim(tid, sid_w, H5P_DEFAULT, dsbuf_w) < 0)
                 goto out;
         }
         if (H5Sclose(sid) < 0)

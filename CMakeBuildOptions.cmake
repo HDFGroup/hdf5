@@ -83,6 +83,17 @@ mark_as_advanced (HDF5_ENABLE_PLUGIN_SUPPORT)
 
 option (HDF5_BUILD_HL_LIB "Build HIGH Level HDF5 Library" ON)
 
+# Must be set here, not in hl/, so that it reaches the H5pubconf.h and
+# build-settings configure_file() calls
+option (HDF5_DIMENSION_SCALES_NEW_REF "Use new-style references with dimension scale APIs" OFF)
+mark_as_advanced (HDF5_DIMENSION_SCALES_NEW_REF)
+if (HDF5_DIMENSION_SCALES_NEW_REF)
+  set (H5_DIMENSION_SCALES_WITH_NEW_REF 1)
+  set (DIMENSION_SCALES_WITH_NEW_REF "yes")
+else ()
+  set (DIMENSION_SCALES_WITH_NEW_REF "no")
+endif ()
+
 option (HDF5_BUILD_FORTRAN "Build FORTRAN support" OFF)
 
 option (HDF5_BUILD_CPP_LIB "Build HDF5 C++ Library" OFF)

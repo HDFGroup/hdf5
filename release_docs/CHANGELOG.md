@@ -146,22 +146,28 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## High-Level Library
 
-### Fixed a leaked dataset ID in H5DSattach_scale()
+### Fixed leaked identifiers in H5DSattach_scale()
 
    When attaching a dimension scale that already had one or more datasets
-   attached to it, `H5DSattach_scale()` reopened each reference stored in the
-   scale's `REFERENCE_LIST` attribute with `H5Ropen_object()` but only closed
-   the resulting identifier on the error path. One dataset identifier was
-   leaked per reference already attached, and each leaked identifier kept its
-   file open, so a later `H5Fcreate()` with `H5F_ACC_TRUNC` on the same file
-   failed with "unable to truncate a file which is already open".
+   attached to it, `H5DSattach_scale()` rewrote the scale's `REFERENCE_LIST`
+   attribute without releasing everything it had acquired to do so. It reopened
+   each reference in the existing list with `H5Ropen_object()` but only closed
+   the resulting identifier on the error path, and it destroyed neither the
+   references it read from the old attribute nor the one it appended to the new
+   one -- the buffer being written was reclaimed with the old, one element
+   shorter, dataspace. Every one of those kept the file open, so a later
+   `H5Fcreate()` with `H5F_ACC_TRUNC` on the same file failed with "unable to
+   truncate a file which is already open", an error with nothing in it to point
+   back at a dimension scale.
 
-   The identifier is now closed on the success path as well, matching the
-   equivalent loop in `H5DSdetach_scale()`. The leak was only reachable through
-   a pass-through VOL connector, since `H5DSwith_new_ref()` selects the
-   old-style reference path -- which opens nothing -- whenever the object is
-   native and the library was not built with
-   `H5_DIMENSION_SCALES_WITH_NEW_REF`.
+   The identifier is now closed on the success path as well, and both reference
+   buffers are reclaimed, matching the equivalent code in
+   `H5DSdetach_scale()`. This code is only reached when `H5DSwith_new_ref()`
+   selects the new-style reference path, which happens when the object's
+   terminal VOL connector is not the native one -- a pass-through connector
+   stacked over the native connector does not qualify -- or when the library is
+   built with `H5_DIMENSION_SCALES_WITH_NEW_REF`; the old-style path opens
+   nothing.
 
 ## Fortran High-Level APIs
 
