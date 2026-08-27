@@ -148,20 +148,16 @@ H5D__select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info
         size_t mem_nelem;  /* Number of elements used in memory sequences */
         size_t file_nelem; /* Number of elements used in file sequences */
 
-        /* Get info from API context if available */
-        if (H5CX_pushed()) {
-            /* Get vector size */
-            if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve I/O vector size");
-            if (dxpl_vec_size > H5D_IO_VECTOR_SIZE)
-                vec_size = dxpl_vec_size;
-            else
-                vec_size = H5D_IO_VECTOR_SIZE;
-        }
+        /* Get info from API context */
+        if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve I/O vector size");
+
+        /* Allocate the vector I/O arrays */
+        if (dxpl_vec_size > H5D_IO_VECTOR_SIZE)
+            vec_size = dxpl_vec_size;
         else
             vec_size = H5D_IO_VECTOR_SIZE;
 
-        /* Allocate the vector I/O arrays */
         if (NULL == (mem_len = H5FL_SEQ_MALLOC(size_t, vec_size)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array");
         if (NULL == (mem_off = H5FL_SEQ_MALLOC(hsize_t, vec_size)))

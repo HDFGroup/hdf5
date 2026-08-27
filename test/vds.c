@@ -95,7 +95,12 @@ char vds_test_str_g[128]   = "";
 #define TEST_IO_REOPEN_VIRT    0x04U
 #define TEST_IO_FCLOSE_SEMI    0x08U
 #define TEST_IO_FCLOSE_STRONG  0x10U
+#ifdef H5_HAVE_CONCURRENCY
+#define TEST_IO_THREADS        0x20U
+#define TEST_IO_NTESTS         0x40U
+#else /* H5_HAVE_CONCURRENCY */
 #define TEST_IO_NTESTS         0x20U
+#endif /* H5_HAVE_CONCURRENCY */
 
 #define LIST_DOUBLE_SIZE (H5D_VIRTUAL_DEF_LIST_SIZE + 1)
 
@@ -12398,6 +12403,7 @@ main(void)
                     continue;
 
                 /* Print message */
+#ifdef H5_HAVE_CONCURRENCY
                 PRINT_CONFIG(
                     "%s%s%s, %s file close degree",
                     bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "",
@@ -12406,6 +12412,17 @@ main(void)
                     bit_config & TEST_IO_FCLOSE_SEMI
                         ? "H5F_CLOSE_SEMI"
                         : (bit_config & TEST_IO_FCLOSE_STRONG ? "H5F_CLOSE_STRONG" : "H5F_CLOSE_WEAK"));
+#else /* H5_HAVE_CONCURRENCY */
+                PRINT_CONFIG(
+                    "%s%s%s, %s file close degree%s",
+                    bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "",
+                    bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file",
+                    bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "",
+                    bit_config & TEST_IO_FCLOSE_SEMI
+                        ? "H5F_CLOSE_SEMI"
+                        : (bit_config & TEST_IO_FCLOSE_STRONG ? "H5F_CLOSE_STRONG" : "H5F_CLOSE_WEAK"),
+                    bit_config & TEST_IO_THREADS ? ", threads enabled" : ", threads disabled");
+#endif /* H5_HAVE_CONCURRENCY */
 
                 /* Set file close degree */
                 if (bit_config & TEST_IO_FCLOSE_SEMI) {
@@ -12421,12 +12438,25 @@ main(void)
                         TEST_ERROR;
                 }
 
+#ifdef H5_HAVE_CONCURRENCY
+                /* Enable threads if part of configuration */
+                if ((bit_config & TEST_IO_THREADS) && H5TSglobal_pool_create(4) < 0)
+                    TEST_ERROR;
+#endif  /* H5_HAVE_CONCURRENCY */
+
                 /* Run tests */
                 nerrors += test_basic_io(bit_config, vds_fapl, src_fapl);
                 nerrors += test_vds_prefix_first(bit_config, vds_fapl, src_fapl);
                 nerrors += test_unlim(bit_config, vds_fapl, src_fapl);
                 nerrors += test_printf(bit_config, vds_fapl, src_fapl);
                 nerrors += test_all(bit_config, vds_fapl, src_fapl);
+
+#ifdef H5_HAVE_CONCURRENCY
+                /* Destroy thread pool if appropriate */
+                if ((bit_config & TEST_IO_THREADS) && H5TSglobal_pool_destroy() < 0)
+                    TEST_ERROR;
+#endif  /* H5_HAVE_CONCURRENCY */
+
             }
 
 #ifndef VDS_TEST_VERBOSE

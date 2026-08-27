@@ -175,6 +175,9 @@ typedef struct H5CX_dxpl_cache_t {
     uint32_t actual_selection_io_mode;             /* Actual selection I/O mode
                                                          (H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME) */
     bool modify_write_buf;                         /* Whether the library can modify write buffers */
+#ifdef H5_HAVE_CONCURRENCY
+    bool io_threads_enabled;                       /* Whether the library can use concurrent threads to accelerate I/O */
+#endif /* H5_HAVE_CONCURRENCY */
 } H5CX_dxpl_cache_t;
 
 /* Typedef for cached default link creation property list information */
@@ -376,6 +379,10 @@ H5CX__init_package(void)
     /* Get the modify write buffer property */
     if (H5P_get(dx_plist, H5D_XFER_MODIFY_WRITE_BUF_NAME, &H5CX_def_dxpl_cache.modify_write_buf) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve modify write buffer property");
+
+    /* Get the modify write buffer property */
+    if (H5P_get(dx_plist, H5D_XFER_IO_THREADS_ENABLED_NAME, &H5CX_def_dxpl_cache.io_threads_enabled) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve I/O threads enabled property");
 
     /* Reset the "default LCPL cache" information */
     memset(&H5CX_def_lcpl_cache, 0, sizeof(H5CX_lcpl_cache_t));
@@ -2306,6 +2313,40 @@ H5CX_get_modify_write_buf(bool *modify_write_buf)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_selection_io_mode() */
+
+#ifdef H5_HAVE_CONCURRENCY
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_io_threads
+ *
+ * Purpose:     Retrieves the I/O threads enabled property for the current API call context.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_io_threads(bool *io_threads_enabled)
+{
+    H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
+    herr_t        ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    assert(io_threads_enabled);
+    head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
+    assert(head && *head);
+    assert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
+
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_MODIFY_WRITE_BUF_NAME, io_threads_enabled)
+
+    /* Get the value */
+    *io_threads_enabled = (*head)->ctx.io_threads_enabled;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_io_threads() */
+#endif /* H5_HAVE_CONCURRENCY */
 
 /*-------------------------------------------------------------------------
  * Function:    H5CX_get_encoding

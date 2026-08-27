@@ -63,8 +63,10 @@ H5TS_api_info_t H5TS_api_info_p;
 /* Global thread pool */
 H5TS_pool_t *H5TS_pool_g = NULL;
 
+#ifdef H5_HAVE_CONCURRENCY
 /* Whether there are concurrent threads in the library (from internal spawning) */
 bool H5TS_currently_concurrent_g = false;
+#endif /* H5_HAVE_CONCURRENCY */
 
 /*******************/
 /* Local Variables */
@@ -154,6 +156,24 @@ H5TSmutex_release(unsigned *lock_count)
     FUNC_LEAVE_API_NAMECHECK_ONLY(ret_value)
 } /* end H5TSmutex_release() */
 
+#ifdef H5_HAVE_CONCURRENCY
+/*--------------------------------------------------------------------------
+ * Function:    H5TSglobal_pool_create
+ *
+ * Purpose:     Creates a global thread pool for the HDF5 library to use to
+ *              accelerate parallelizable operations. The thread pool must
+ *              not already exist.
+ *
+ *              This function does use the error stack because it is not
+ *              meant to be called within a concurrent section.
+ *
+ * Parameters:
+ *              num_threads; IN: The number of threads to add to the newly
+ *              created thread pool.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *--------------------------------------------------------------------------
+ */
 herr_t
 H5TSglobal_pool_create(unsigned num_threads)
 {
@@ -173,6 +193,18 @@ done:
     FUNC_LEAVE_API(ret_value);
 } /* end H5TSglobal_pool_create() */
 
+/*--------------------------------------------------------------------------
+ * Function:    H5TSglobal_pool_create
+ *
+ * Purpose:     Destroys the global thread pool created with
+ *              H5TSglobal_pool_create().
+ *
+ *              This function does use the error stack because it is not
+ *              meant to be called within a concurrent section.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *--------------------------------------------------------------------------
+ */
 herr_t
 H5TSglobal_pool_destroy(void)
 {
@@ -192,5 +224,6 @@ H5TSglobal_pool_destroy(void)
 done:
     FUNC_LEAVE_API(ret_value);
 } /* end H5TSglobal_pool_destroy() */
+#endif /* H5_HAVE_CONCURRENCY */
 
 #endif /* H5_HAVE_THREADSAFE_API */

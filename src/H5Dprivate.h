@@ -89,6 +89,9 @@
 #define H5D_XFER_NO_SELECTION_IO_CAUSE_NAME    "no_selection_io_cause" /* Cause for no selection I/O */
 #define H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME "actual_selection_io_mode" /* Actual selection I/O mode */
 #define H5D_XFER_MODIFY_WRITE_BUF_NAME         "modify_write_buf"         /* Modify write buffers */
+#ifdef H5_HAVE_CONCURRENCY
+#define H5D_XFER_IO_THREADS_ENABLED_NAME "io_threads_enabled" /* I/O threads enabled */
+#endif /* H5_HAVE_CONCURRENCY */
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
 /* Collective chunk instrumentation properties */
 #define H5D_XFER_COLL_CHUNK_LINK_HARD_NAME        "coll_chunk_link_hard"

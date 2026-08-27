@@ -1412,6 +1412,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                 continue; /* filter excluded */
             }
 
+#ifdef H5_UNSAFE_CONCURRENCY /* We currently take this lock before entering H5Z_pipeline(), and this is not a recursive lock, so don't take it again here */
 #ifdef H5_HAVE_CONCURRENCY
             /* If we're using concurrent threads, lock the internal mutex to search for the plugin */
             if (H5TS_currently_concurrent_g) {
@@ -1420,6 +1421,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                 mutex_held = true;
             }
 #endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_UNSAFE_CONCURRENCY */
 
             /* If the filter isn't registered and the application doesn't
              * indicate no plugin through HDF5_PRELOAD_PLUG (using the symbol "::"),
@@ -1458,16 +1460,19 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                 }
             } /* end if */
 
+#ifdef H5_UNSAFE_CONCURRENCY
 #ifdef H5_HAVE_CONCURRENCY
             /* Unlock the internal mutex */
             if (H5TS_currently_concurrent_g) {
                 assert(mutex_held);
                 if (H5_UNLIKELY(H5TS_internal_unlock() < 0))
                     HGOTO_ERROR(H5E_PLINE, H5E_CANTUNLOCK, FAIL, "can't unlock internal mutex");
+                {uint64_t thread_id; H5TS_thread_id(&thread_id); printf("    thread %d, H5Z_pipeline unlock\n", (int)thread_id);}
                 mutex_held = false;
             }
             assert(!mutex_held);
 #endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_UNSAFE_CONCURRENCY */
 
             fclass = &H5Z_table_g[fclass_idx];
 
