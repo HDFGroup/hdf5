@@ -2131,9 +2131,6 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_
                 if (NULL == (next_chunk_info = (H5D_piece_info_t *)H5SL_item(piece_node)))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "couldn't get piece info from skip list");
             }
-
-            /* Pass in chunk's coordinates in a union. */
-            store.chunk.scaled = chunk_info->scaled;
         }
         else
             chunk_info = NULL;

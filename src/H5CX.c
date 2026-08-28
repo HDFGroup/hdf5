@@ -380,9 +380,11 @@ H5CX__init_package(void)
     if (H5P_get(dx_plist, H5D_XFER_MODIFY_WRITE_BUF_NAME, &H5CX_def_dxpl_cache.modify_write_buf) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve modify write buffer property");
 
+#ifdef H5_HAVE_CONCURRENCY
     /* Get the modify write buffer property */
     if (H5P_get(dx_plist, H5D_XFER_IO_THREADS_ENABLED_NAME, &H5CX_def_dxpl_cache.io_threads_enabled) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve I/O threads enabled property");
+#endif /* H5_HAVE_CONCURRENCY */
 
     /* Reset the "default LCPL cache" information */
     memset(&H5CX_def_lcpl_cache, 0, sizeof(H5CX_lcpl_cache_t));

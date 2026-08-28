@@ -2762,7 +2762,7 @@ done:
  */
 htri_t
 H5D__chunk_cacheable(const H5D_io_info_t H5_ATTR_PARALLEL_USED *io_info, H5D_dset_io_info_t *dset_info,
-                     haddr_t caddr, bool write_op)
+                     const hsize_t *scaled, haddr_t caddr, bool write_op)
 {
     const H5D_t *dataset     = NULL;  /* Local pointer to dataset info */
     bool         has_filters = false; /* Whether there are filters on the chunk or not */
@@ -2782,7 +2782,7 @@ H5D__chunk_cacheable(const H5D_io_info_t H5_ATTR_PARALLEL_USED *io_info, H5D_dse
         if (dataset->shared->layout.u.chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) {
             has_filters =
                 !H5D__chunk_is_partial_edge_chunk(dataset->shared->ndims, dataset->shared->layout.u.chunk.dim,
-                                                  dset_info->store->chunk.scaled, dataset->shared->curr_dims);
+                                                  scaled, dataset->shared->curr_dims);
         } /* end if */
         else
             has_filters = true;
@@ -3242,15 +3242,12 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                 !skip_missing_chunks) {
                 H5D_io_info_t *chk_io_info = NULL; /* Pointer to I/O info object for this chunk */
 
-                /* Set chunk's [scaled] coordinates */
-                dset_info->store->chunk.scaled = chunk_info->scaled;
-
                 /* Don't lock the chunk if it doesn't exist on disk or in cache, to avoid unnecessary
                  * allocation and conversion */
                 if (H5_addr_defined(udata_p->chunk_block.offset) || UINT_MAX != udata_p->idx_hint) {
                     /* Determine if we should use the chunk cache */
                     if ((cacheable =
-                             H5D__chunk_cacheable(io_info, dset_info, udata_p->chunk_block.offset, false)) < 0)
+                             H5D__chunk_cacheable(io_info, dset_info, chunk_info->scaled, udata_p->chunk_block.offset, false)) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't tell if chunk is cacheable");
                     if (cacheable) {
                         /* Load the chunk into cache and lock it. */
@@ -3284,8 +3281,10 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                          * disk if it made it into the outer if statement */
                         assert(H5_addr_defined(udata_p->chunk_block.offset));
 
+#ifdef H5_HAVE_CONCURRENCY
                         /* Disable threading for now since there's likely no performance gain and if it isn't cacheable it may be because it's very large and we don't want to load the whole thing into memory */
                         threaded_chunk = false;
+#endif /* H5_HAVE_CONCURRENCY */
 
                         /* Set up the storage address information for this chunk */
                         ctg_store.contig.dset_addr = udata_p->chunk_block.offset;
@@ -3584,7 +3583,7 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "can't unlock internal mutex");
     mutex_held = false;
 
-    if (api_ctx_pushed && H5CX_pop(false) < 0)
+    if (H5_UNLIKELY(H5CX_pop(false) < 0))
         HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context");
     api_ctx_pushed = false;
 
@@ -3748,11 +3747,8 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             assert((H5_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length > 0) ||
                    (!H5_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length == 0));
 
-            /* Set chunk's [scaled] coordinates */
-            dset_info->store->chunk.scaled = chunk_info->scaled;
-
             /* Determine if we should use the chunk cache */
-            if ((cacheable = H5D__chunk_cacheable(io_info, dset_info, udata.chunk_block.offset, true)) < 0)
+            if ((cacheable = H5D__chunk_cacheable(io_info, dset_info, chunk_info->scaled, udata.chunk_block.offset, true)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't tell if chunk is cacheable");
             if (cacheable) {
                 /* Load the chunk into cache.  But if the whole chunk is written,
@@ -3917,11 +3913,8 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             assert((H5_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length > 0) ||
                    (!H5_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length == 0));
 
-            /* Set chunk's [scaled] coordinates */
-            dset_info->store->chunk.scaled = chunk_info->scaled;
-
             /* Determine if we should use the chunk cache */
-            if ((cacheable = H5D__chunk_cacheable(io_info, dset_info, udata.chunk_block.offset, true)) < 0)
+            if ((cacheable = H5D__chunk_cacheable(io_info, dset_info, chunk_info->scaled, udata.chunk_block.offset, true)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't tell if chunk is cacheable");
             if (cacheable) {
                 /* Load the chunk into cache.  But if the whole chunk is written,
@@ -5054,7 +5047,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
 
             /* Make sure this is the right chunk */
             for (u = 0; u < layout->u.chunk.ndims - 1; u++)
-                assert(dset_info->store->chunk.scaled[u] == ent->scaled[u]);
+                assert(udata->common.scaled[u] == ent->scaled[u]);
         }
 #endif /* NDEBUG */
 
@@ -5170,8 +5163,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
             else if (layout->u.chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) {
                 /* Check if this is an edge chunk */
                 if (H5D__chunk_is_partial_edge_chunk(dset->shared->ndims, layout->u.chunk.dim,
-                                                     dset_info->store->chunk.scaled,
-                                                     dset->shared->curr_dims)) {
+                                                     udata->common.scaled, dset->shared->curr_dims)) {
                     /* Disable the filters for both writing and reading */
                     disable_filters = true;
                     old_pline       = NULL;
@@ -5487,7 +5479,7 @@ H5D__chunk_unlock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_
             /* Check if the chunk is an edge chunk, and disable filters if so */
             is_unfiltered_edge_chunk =
                 H5D__chunk_is_partial_edge_chunk(dset->shared->ndims, layout->u.chunk.dim,
-                                                 dset_info->store->chunk.scaled, dset->shared->curr_dims);
+                                                 udata->common.scaled, dset->shared->curr_dims);
         } /* end if */
 
         if (dirty) {
@@ -6148,11 +6140,7 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[])
             HGOTO_DONE(SUCCEED);
         } /* end if */
 
-    /* Set up chunked I/O info object, for operations on chunks (in callback).
-     * Note that we only need to set chunk_offset once, as the array's address
-     * will never change. */
-    chk_store.chunk.scaled = chunk_sc;
-
+    /* Set up chunked I/O info object, for operations on chunks (in callback) */
     chk_io_info.op_type = H5D_IO_OP_READ;
 
     chk_dset_info.dset     = dset;
@@ -6783,11 +6771,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, const hsize_t *old_dim)
     /* (hyperslabs will always start from origin) */
     memset(hyper_start, 0, sizeof(hyper_start));
 
-    /* Set up chunked I/O info object, for operations on chunks (in callback)
-     * Note that we only need to set scaled once, as the array's address
-     * will never change. */
-    chk_store.chunk.scaled = scaled;
-
+    /* Set up chunked I/O info object, for operations on chunks (in callback) */
     chk_io_info.op_type = H5D_IO_OP_READ;
 
     chk_dset_info.dset     = dset;

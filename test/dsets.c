@@ -19679,14 +19679,9 @@ main(void)
             for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
                 hid_t my_fcpl;
 
-                /* Set version bounds */
-                if (H5Pset_libver_bounds(fapl, low, H5F_LIBVER_LATEST) < 0)
-                    TEST_ERROR;
-
 #ifdef H5_HAVE_CONCURRENCY
                 /* Test with and without threads */
                 for (unsigned threads = false; threads <= true; threads++) {
-
 #endif /* H5_HAVE_CONCURRENCY */
 
                     /* Print partial message about file format */
@@ -19715,6 +19710,10 @@ main(void)
                         my_fcpl = fcpl;
                         puts(" and non-paged aggregation");
                     }
+
+                    /* Set version bounds */
+                    if (H5Pset_libver_bounds(fapl, low, H5F_LIBVER_LATEST) < 0)
+                        TEST_ERROR;
 
                     /* Create the file for this test */
                     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, my_fcpl, fapl)) < 0)
@@ -19811,10 +19810,10 @@ main(void)
                     nerrors += (test_chunk_fast(driver_name, fapl) < 0 ? 1 : 0);
                     nerrors += (test_reopen_chunk_fast(fapl) < 0 ? 1 : 0);
                     nerrors += (test_chunk_fast_bug1(fapl) < 0 ? 1 : 0);
-                    /*if (low >= H5F_LIBVER_V200)
+                    if (low >= H5F_LIBVER_V200)
                         nerrors += (test_chunk_expand2(fapl) < 0 ? 1 : 0);
                     else
-                        nerrors += (test_chunk_expand(fapl) < 0 ? 1 : 0);*/
+                        nerrors += (test_chunk_expand(fapl) < 0 ? 1 : 0);
                     nerrors += (test_layout_extend(fapl) < 0 ? 1 : 0);
                     nerrors += (test_fixed_array(fapl) < 0 ? 1 : 0);
 

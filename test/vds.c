@@ -12405,15 +12405,6 @@ main(void)
                 /* Print message */
 #ifdef H5_HAVE_CONCURRENCY
                 PRINT_CONFIG(
-                    "%s%s%s, %s file close degree",
-                    bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "",
-                    bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file",
-                    bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "",
-                    bit_config & TEST_IO_FCLOSE_SEMI
-                        ? "H5F_CLOSE_SEMI"
-                        : (bit_config & TEST_IO_FCLOSE_STRONG ? "H5F_CLOSE_STRONG" : "H5F_CLOSE_WEAK"));
-#else /* H5_HAVE_CONCURRENCY */
-                PRINT_CONFIG(
                     "%s%s%s, %s file close degree%s",
                     bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "",
                     bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file",
@@ -12422,6 +12413,15 @@ main(void)
                         ? "H5F_CLOSE_SEMI"
                         : (bit_config & TEST_IO_FCLOSE_STRONG ? "H5F_CLOSE_STRONG" : "H5F_CLOSE_WEAK"),
                     bit_config & TEST_IO_THREADS ? ", threads enabled" : ", threads disabled");
+#else /* H5_HAVE_CONCURRENCY */
+                PRINT_CONFIG(
+                    "%s%s%s, %s file close degree",
+                    bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "",
+                    bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file",
+                    bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "",
+                    bit_config & TEST_IO_FCLOSE_SEMI
+                        ? "H5F_CLOSE_SEMI"
+                        : (bit_config & TEST_IO_FCLOSE_STRONG ? "H5F_CLOSE_STRONG" : "H5F_CLOSE_WEAK"));
 #endif /* H5_HAVE_CONCURRENCY */
 
                 /* Set file close degree */

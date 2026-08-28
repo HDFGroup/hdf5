@@ -1467,7 +1467,6 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                 assert(mutex_held);
                 if (H5_UNLIKELY(H5TS_internal_unlock() < 0))
                     HGOTO_ERROR(H5E_PLINE, H5E_CANTUNLOCK, FAIL, "can't unlock internal mutex");
-                {uint64_t thread_id; H5TS_thread_id(&thread_id); printf("    thread %d, H5Z_pipeline unlock\n", (int)thread_id);}
                 mutex_held = false;
             }
             assert(!mutex_held);
