@@ -1681,28 +1681,27 @@ test_canonical_name_length_limit(void)
     {
         /* Each must be rejected, and for the stated reason. */
         static const char *const bad[] = {
-            "",              /* empty                                  */
-            "has space",     /* whitespace                             */
-            "semi;colon",    /* the reserved pipeline separator        */
-            "quote\"mark",   /* would need escaping in tool output     */
-            "brace{}",       /* TOML inline-table delimiters           */
-            "comma,sep",     /* the parameter-string separator         */
-            "new\nline",     /* would corrupt line-oriented tool output*/
-            "tab\there",     /* likewise                               */
-            "caf\xc3\xa9",    /* non-ASCII: outside the declared class  */
-            "slash/path",    /* path-like, unsafe as an identifier     */
-            "equals=sign",   /* the key/value separator                */
+            "",                 /* empty                                  */
+            "has space",        /* whitespace                             */
+            "semi;colon",       /* the reserved pipeline separator        */
+            "quote\"mark",      /* would need escaping in tool output     */
+            "brace{}",          /* TOML inline-table delimiters           */
+            "comma,sep",        /* the parameter-string separator         */
+            "new\nline",        /* would corrupt line-oriented tool output*/
+            "tab\there",        /* likewise                               */
+            "nonascii\xc3\xa9", /* UTF-8 e-acute: outside the declared class */
+            "slash/path",       /* path-like, unsafe as an identifier     */
+            "equals=sign",      /* the key/value separator                */
         };
         /* Each must be accepted: the full declared character class. */
         static const char *const good[] = {
-            "zfp", "deflate", "blosc2.lz4", "my_filter-2", "A", "0",
-            "aA0_.-",
+            "zfp", "deflate", "blosc2.lz4", "my_filter-2", "A", "0", "aA0_.-",
         };
         size_t i;
 
         for (i = 0; i < sizeof(bad) / sizeof(bad[0]); i++) {
-            H5Z_class3_t c = {2,   LONGTITLE_FILTER_ID, 1,    1,   bad[i], NULL,
-                              NULL, NULL,               longtitle_filter_func, NULL, NULL};
+            H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID,   1,    1,   bad[i], NULL, NULL,
+                              NULL, longtitle_filter_func, NULL, NULL};
             H5E_BEGIN_TRY
             {
                 ret = H5Zregister(&c);
@@ -1716,8 +1715,8 @@ test_canonical_name_length_limit(void)
         }
 
         for (i = 0; i < sizeof(good) / sizeof(good[0]); i++) {
-            H5Z_class3_t c = {2,   LONGTITLE_FILTER_ID, 1,    1,   good[i], NULL,
-                              NULL, NULL,               longtitle_filter_func, NULL, NULL};
+            H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID,   1,    1,   good[i], NULL, NULL,
+                              NULL, longtitle_filter_func, NULL, NULL};
             if (H5Zregister(&c) < 0) {
                 fprintf(stderr, "\n   rejected valid name \"%s\"\n", good[i]);
                 TEST_ERROR;
@@ -2660,7 +2659,6 @@ canon_stored_double(hid_t dcpl, double *out)
     return 0;
 }
 
-
 /* -----------------------------------------------------------------------
  * A version-2 plugin and a version-3 plugin in the SAME pipeline
  *
@@ -2715,8 +2713,8 @@ mixv3_filter_func(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
 }
 
 static herr_t
-mixv3_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts,
-                 unsigned cd_values[], size_t cd_values_size)
+mixv3_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts, unsigned cd_values[],
+                 size_t cd_values_size)
 {
     int64_t lvl = 0;
 
@@ -2735,14 +2733,14 @@ mixv3_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_
 }
 
 static const H5Z_class2_t mixv2_cls = {
-    H5Z_CLASS_T_VERS,  /* version -- a genuine v2 class, not a v3 in disguise */
-    MIXV2_FILTER_ID,   /* id              */
-    1,                 /* encoder_present */
-    1,                 /* decoder_present */
+    H5Z_CLASS_T_VERS,                       /* version -- a genuine v2 class, not a v3 in disguise */
+    MIXV2_FILTER_ID,                        /* id              */
+    1,                                      /* encoder_present */
+    1,                                      /* decoder_present */
     "legacy v2 filter (free-form comment)", /* name: v2 permits arbitrary text */
-    NULL,              /* can_apply       */
-    NULL,              /* set_local       */
-    mixv2_filter_func, /* filter          */
+    NULL,                                   /* can_apply       */
+    NULL,                                   /* set_local       */
+    mixv2_filter_func,                      /* filter          */
 };
 
 static const H5Z_class3_t mixv3_cls = {
@@ -2762,14 +2760,14 @@ static const H5Z_class3_t mixv3_cls = {
 static int
 test_mixed_v2_v3_pipeline(hid_t fapl)
 {
-    hid_t   file = H5I_INVALID_HID, dcpl = H5I_INVALID_HID, sid = H5I_INVALID_HID;
-    hid_t   dset = H5I_INVALID_HID, dcpl_out = H5I_INVALID_HID;
-    hsize_t dims[2] = {8, 8}, chunk[2] = {4, 4};
-    char    filename[1024];
-    int     wbuf[8][8], rbuf[8][8];
-    int     i, j;
-    char    pbuf[256];
-    size_t  plen = 0;
+    hid_t    file = H5I_INVALID_HID, dcpl = H5I_INVALID_HID, sid = H5I_INVALID_HID;
+    hid_t    dset = H5I_INVALID_HID, dcpl_out = H5I_INVALID_HID;
+    hsize_t  dims[2] = {8, 8}, chunk[2] = {4, 4};
+    char     filename[1024];
+    int      wbuf[8][8], rbuf[8][8];
+    int      i, j;
+    char     pbuf[256];
+    size_t   plen = 0;
     unsigned nfilt;
 
     if (H5Zregister(&mixv2_cls) < 0)
@@ -3138,8 +3136,7 @@ test_config_canonicalization(hid_t fapl)
                 TEST_ERROR;
             dcpl = H5I_INVALID_HID;
 
-            if (memcmp(&from_hex, &want, sizeof(want)) != 0 ||
-                memcmp(&from_dec, &want, sizeof(want)) != 0) {
+            if (memcmp(&from_hex, &want, sizeof(want)) != 0 || memcmp(&from_dec, &want, sizeof(want)) != 0) {
                 fprintf(stderr, "\n   2^%d: hex -> %a, canonical \"%s\" -> %a, want %a\n", exps[i], from_hex,
                         canon, from_dec, want);
                 TEST_ERROR;

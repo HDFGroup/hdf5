@@ -74,9 +74,9 @@ static const bool DUMP_DEBUG_STATS_g = false;
 /* Local functions */
 static herr_t H5Z__validate_class3_name(const char *name);
 static int    H5Z__find_idx(H5Z_filter_t id);
-static int H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t obj_id, void *key);
-static int H5Z__check_unregister_group_cb(void *obj_ptr, hid_t obj_id, void *key);
-static int H5Z__flush_file_cb(void *obj_ptr, hid_t obj_id, void *key);
+static int    H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t obj_id, void *key);
+static int    H5Z__check_unregister_group_cb(void *obj_ptr, hid_t obj_id, void *key);
+static int    H5Z__flush_file_cb(void *obj_ptr, hid_t obj_id, void *key);
 
 /*-------------------------------------------------------------------------
  * Function: H5Z__init_package
