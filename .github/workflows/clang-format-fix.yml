@@ -11,6 +11,10 @@ name: clang-format Commit Changes
 on: 
   workflow_dispatch:
   push:
+    paths-ignore:
+      - 'kotoba/**'
+      - '.github/workflows/kotoba.yml'
+      - '.github/workflows/**'
 
 permissions:
   contents: read

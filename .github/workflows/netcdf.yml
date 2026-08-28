@@ -7,21 +7,27 @@ on:
     paths-ignore:
       - '.github/CODEOWNERS'
       - '.github/FUNDING.yml'
+      - '.github/workflows/**'
       - 'docs/**'
       - 'release_docs/**'
       - 'ACKNOWLEDGEMENTS'
       - 'LICENSE**'
       - '**.md'
+      - 'kotoba/**'
+      - '.github/workflows/kotoba.yml'
   pull_request:
     branches: [ develop ]
     paths-ignore:
       - '.github/CODEOWNERS'
       - '.github/FUNDING.yml'
+      - '.github/workflows/**'
       - 'docs/**'
       - 'release_docs/**'
       - 'ACKNOWLEDGEMENTS'
       - 'LICENSE**'
       - '**.md'
+      - 'kotoba/**'
+      - '.github/workflows/kotoba.yml'
 
 permissions:
   contents: read

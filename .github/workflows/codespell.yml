@@ -2,7 +2,17 @@
 # https://github.com/codespell-project/codespell
 # https://github.com/codespell-project/actions-codespell
 name: codespell
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+      - 'kotoba/**'
+      - '.github/workflows/kotoba.yml'
+      - '.github/workflows/**'
+  pull_request:
+    paths-ignore:
+      - 'kotoba/**'
+      - '.github/workflows/kotoba.yml'
+      - '.github/workflows/**'
 permissions:
   contents: read
 jobs:

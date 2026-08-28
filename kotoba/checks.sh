@@ -40,7 +40,6 @@ fi
 # Independent field read from the fixture. These numbers come from the
 # file bytes, not from the .kotoba source.
 eval "$(python3 - "$FIXTURE" "$SRC" <<'PY'
-import re
 import sys
 from pathlib import Path
 
@@ -99,6 +98,56 @@ import json
 import sys
 from pathlib import Path
 
+WASM_IMPORT_SECTION = 2
+
+
+def read_uleb128(buf, i):
+    shift = 0
+    value = 0
+    while True:
+        if i >= len(buf):
+            raise ValueError("truncated uleb128")
+        byte = buf[i]
+        i += 1
+        value |= (byte & 0x7F) << shift
+        if byte & 0x80 == 0:
+            return value, i
+        shift += 7
+        if shift > 35:
+            raise ValueError("uleb128 too long")
+
+
+def wasm_import_section(buf):
+    if buf[:4] != b"\x00asm":
+        raise ValueError(f"artifact magic {buf[:4]!r} is not wasm")
+    if len(buf) < 8:
+        raise ValueError("truncated wasm header")
+    i = 8
+    found = False
+    import_count = None
+    while i < len(buf):
+        section_id = buf[i]
+        i += 1
+        size, i = read_uleb128(buf, i)
+        end = i + size
+        if end > len(buf):
+            raise ValueError("truncated wasm section")
+        payload = buf[i:end]
+        i = end
+        if section_id == WASM_IMPORT_SECTION:
+            found = True
+            import_count, _ = read_uleb128(payload, 0) if payload else (0, 0)
+    return found, import_count
+
+
+# Fail closed on the checker itself before trusting the artifact.
+_no_import = b"\x00asm\x01\x00\x00\x00"
+_empty_import = b"\x00asm\x01\x00\x00\x00\x02\x01\x00"
+if wasm_import_section(_no_import) != (False, None):
+    sys.exit("import-section checker failed on a no-section wasm")
+if wasm_import_section(_empty_import) != (True, 0):
+    sys.exit("import-section checker failed to see an import section")
+
 report = json.loads(Path(sys.argv[1]).read_text())
 wasm = Path(sys.argv[2])
 if report.get("kotoba.cli/ok?") is not True:
@@ -119,10 +168,14 @@ if blocked:
     sys.exit(f"unexpected floating/SIMD wasm features: {blocked}")
 if not wasm.is_file() or wasm.stat().st_size == 0:
     sys.exit("compile did not write a wasm artifact")
-magic = wasm.read_bytes()[:4]
-if magic != b"\x00asm":
-    sys.exit(f"artifact magic {magic!r} is not wasm")
-print(f"compile: value-profile={profile} target={target} wasm-features={features} bytes={wasm.stat().st_size}")
+raw = wasm.read_bytes()
+has_imports, import_count = wasm_import_section(raw)
+if has_imports:
+    sys.exit(f"wasm has import section (count={import_count}); FFI is out of v1 scope")
+print(
+    f"compile: value-profile={profile} target={target} "
+    f"wasm-features={features} bytes={len(raw)} import-section=absent"
+)
 PY
 
 GOT="$(node --input-type=module - "$WASM" <<'JS'

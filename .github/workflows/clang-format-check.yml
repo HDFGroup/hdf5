@@ -1,6 +1,10 @@
 name: clang-format Check
 on:
   pull_request:
+    paths-ignore:
+      - 'kotoba/**'
+      - '.github/workflows/kotoba.yml'
+      - '.github/workflows/**'
 
 permissions:
   contents: read
