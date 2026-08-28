@@ -144,6 +144,36 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Fortran API
 
+### h5open_f now re-initializes the Fortran interface after h5close_f
+
+   An h5open_f / h5close_f / h5open_f sequence could leave the Fortran interface
+   uninitialized. The second h5open_f reported success, but the predefined type
+   handles were left holding identifiers that h5close_f had released, so later calls
+   failed. Whether this happened depended on the Fortran compiler.
+
+   Fixes GitHub issue #6642
+
+### h5fget_obj_ids_f no longer returns the Fortran interface's own identifiers
+
+   h5fget_obj_count_f excludes the objects h5open_f opens to represent the predefined
+   types, but h5fget_obj_ids_f returned them, so the two disagreed about the same query
+   and an application walking the list found datatypes it never opened. Both now report
+   only what the application has open, matching the C API.
+
+   Fixes GitHub issue #6648
+
+### h5fget_obj_count_f and h5fget_obj_ids_f document their object type argument
+
+   Both listed the object types as alternatives without mentioning that they may be
+   combined with IOR(), which the C API supports and both have always passed through.
+
+### h5fget_obj_count_f no longer returns negative counts
+
+   With the Fortran interface open, counting a single object type across all files
+   subtracted the objects opened by h5open_f, so queries for files, groups, and
+   datasets returned a negative count and reported success. A negative count is now
+   reported as an error.
+
 ## High-Level Library
 
 ## Fortran High-Level APIs
@@ -155,6 +185,25 @@ We would like to thank the many HDF5 community members who contributed to this r
 ## C++ APIs
 
 ## Testing
+
+### Fortran test programs no longer exit successfully after a fatal error
+
+   The Fortran tests ended unrecoverable failures with STOP, which exits with a
+   success status, so a run that aborted part way through was reported as passing.
+
+### New test for the object count and identifier list
+
+   The Fortran tests had no coverage of h5fget_obj_ids_f over all files, and none that
+   compared it against h5fget_obj_count_f. A new test opens objects of several types
+   and checks that the two agree, that object types combined with IOR() count as the
+   sum of their parts, and that a buffer shorter than the number of open objects is
+   filled with the application's own.
+
+### The h5open/h5close test checks that the interface re-initializes
+
+   Its object counts were taken while the Fortran interface was closed, where no such
+   call is permitted. They now run after the interface has been reopened, and confirm
+   that the predefined types are usable again.
 
 # ✨ Support for new platforms and languages
 
