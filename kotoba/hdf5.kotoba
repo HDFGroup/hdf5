@@ -1,0 +1,152 @@
+(ns hdf5)
+
+;; Honest Kotoba v1: HDF5 format signature + superblock version/offsets.
+;; wasm32, i64-v1, no FFI, no IEEE floats. No datasets, filters, or reader.
+
+(defn fixture-byte-0 [i]
+  (if (= i 0) 137
+    (if (= i 1) 72
+      (if (= i 2) 68
+        (if (= i 3) 70
+          (if (= i 4) 13
+            (if (= i 5) 10
+              (if (= i 6) 26
+                (if (= i 7) 10
+                  0)))))))))
+
+(defn fixture-byte-8 [i]
+  (if (= i 8) 0
+    (if (= i 9) 0
+      (if (= i 10) 0
+        (if (= i 11) 0
+          (if (= i 12) 0
+            (if (= i 13) 8
+              (if (= i 14) 8
+                (if (= i 15) 0
+                  0)))))))))
+
+(defn fixture-byte-16 [i]
+  (if (= i 16) 4
+    (if (= i 17) 0
+      (if (= i 18) 16
+        (if (= i 19) 0
+          (if (= i 20) 0
+            (if (= i 21) 0
+              (if (= i 22) 0
+                (if (= i 23) 0
+                  0)))))))))
+
+(defn fixture-byte-24 [i]
+  (if (= i 24) 0
+    (if (= i 25) 0
+      (if (= i 26) 0
+        (if (= i 27) 0
+          (if (= i 28) 0
+            (if (= i 29) 0
+              (if (= i 30) 0
+                (if (= i 31) 0
+                  0)))))))))
+
+(defn fixture-byte-32 [i]
+  (if (= i 32) 255
+    (if (= i 33) 255
+      (if (= i 34) 255
+        (if (= i 35) 255
+          (if (= i 36) 255
+            (if (= i 37) 255
+              (if (= i 38) 255
+                (if (= i 39) 255
+                  0)))))))))
+
+(defn fixture-byte-40 [i]
+  (if (= i 40) 56
+    (if (= i 41) 0
+      (if (= i 42) 0
+        (if (= i 43) 0
+          (if (= i 44) 0
+            (if (= i 45) 0
+              (if (= i 46) 0
+                (if (= i 47) 0
+                  0)))))))))
+
+(defn fixture-byte-48 [i]
+  (if (= i 48) 255
+    (if (= i 49) 255
+      (if (= i 50) 255
+        (if (= i 51) 255
+          (if (= i 52) 255
+            (if (= i 53) 255
+              (if (= i 54) 255
+                (if (= i 55) 255
+                  0)))))))))
+
+(defn fixture-byte [i]
+  (if (< i 8)
+    (fixture-byte-0 i)
+    (if (< i 16)
+      (fixture-byte-8 i)
+      (if (< i 24)
+        (fixture-byte-16 i)
+        (if (< i 32)
+          (fixture-byte-24 i)
+          (if (< i 40)
+            (fixture-byte-32 i)
+            (if (< i 48)
+              (fixture-byte-40 i)
+              (if (< i 56)
+                (fixture-byte-48 i)
+                0))))))))
+
+(defn signature-ok []
+  (and (= (fixture-byte 0) 137)
+       (= (fixture-byte 1) 72)
+       (= (fixture-byte 2) 68)
+       (= (fixture-byte 3) 70)
+       (= (fixture-byte 4) 13)
+       (= (fixture-byte 5) 10)
+       (= (fixture-byte 6) 26)
+       (= (fixture-byte 7) 10)))
+
+(defn superblock-version []
+  (fixture-byte 8))
+
+(defn sizeof-addr []
+  (fixture-byte 13))
+
+(defn sizeof-size []
+  (fixture-byte 14))
+
+;; Superblock v0: after the 8-byte signature, 16 bytes of versions/K/flags,
+;; then four addresses each sizeof-addr bytes. This v1 only reads v0 with
+;; 8-byte offsets. High 4 address bytes must be 0 so the value stays in i64-v1.
+(defn addr8 [off]
+  (if (and (= (fixture-byte (+ off 4)) 0)
+           (= (fixture-byte (+ off 5)) 0)
+           (= (fixture-byte (+ off 6)) 0)
+           (= (fixture-byte (+ off 7)) 0))
+    (+ (fixture-byte off)
+       (* (fixture-byte (+ off 1)) 256)
+       (* (fixture-byte (+ off 2)) 65536)
+       (* (fixture-byte (+ off 3)) 16777216))
+    -1))
+
+(defn base-addr []
+  (if (and (= (superblock-version) 0) (= (sizeof-addr) 8))
+    (addr8 24)
+    -2))
+
+(defn eof-addr []
+  (if (and (= (superblock-version) 0) (= (sizeof-addr) 8))
+    (addr8 40)
+    -2))
+
+;; Packed i64 for checks.sh: 1 + 10*ver + 100*sa + 1000*ss + 10000*base + 1000000*eof
+(defn main []
+  (if (signature-ok)
+    (+ 1
+       (* (superblock-version) 10)
+       (* (sizeof-addr) 100)
+       (* (sizeof-size) 1000)
+       (* (base-addr) 10000)
+       (* (eof-addr) 1000000))
+    0))

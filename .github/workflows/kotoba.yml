@@ -1,0 +1,26 @@
+name: kotoba v1
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  hdf5-header:
+    name: signature and superblock
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Kotoba 0.7.2
+        env:
+          KOTOBA_VERSION: v0.7.2
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/kotoba-lang/kotoba/v0.7.2/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Run kotoba/checks.sh
+        run: bash kotoba/checks.sh
