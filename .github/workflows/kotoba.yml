@@ -2,7 +2,13 @@ name: kotoba v1
 
 on:
   push:
+    paths:
+      - 'kotoba/**'
+      - '.github/workflows/kotoba.yml'
   pull_request:
+    paths:
+      - 'kotoba/**'
+      - '.github/workflows/kotoba.yml'
 
 permissions:
   contents: read
