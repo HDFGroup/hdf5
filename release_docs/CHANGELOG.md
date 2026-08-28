@@ -94,6 +94,14 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    Fixes GitHub issue #6531
 
+### Fixed crashes when reading datasets with malformed N-Bit or Fletcher32 filter metadata
+
+   Reading a dataset from a corrupted or maliciously crafted file could crash the library in the N-Bit and Fletcher32 filter decode paths. The N-Bit filter dereferenced its client-data parameter array before validating it, crashing when the array was empty or NULL, and walked the compressed chunk during decompression without bounding the input against the chunk size, causing out-of-bounds reads. It also indexed that parameter array at offsets taken from the datatype description held in the array itself, without bounding those offsets against the number of parameters supplied, so a parameter list stopping short of the datatype it described was read past its end. The Fletcher32 filter subtracted the 4-byte checksum length from the chunk size without checking that the chunk was at least that large, underflowing the length passed to the checksum routine. These filters now validate their parameters and buffer sizes and fail with an error instead of crashing.
+
+   Fixes GitHub issues #6488, #6489, #6490, and #6492
+
+   Fixes CVE-2026-19026, CVE-2026-19027, and CVE-2026-19028
+
 ## Java Library
 
 ## Configuration

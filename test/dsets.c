@@ -8089,6 +8089,99 @@ error:
 } /* end test_filters_endianess() */
 
 /*-------------------------------------------------------------------------
+ * Function: test_filter_bad_params
+ *
+ * Purpose: Reads datasets from crafted files whose filter metadata has been
+ *          deliberately corrupted, verifying that the library rejects them
+ *          gracefully instead of crashing.
+ *
+ * Return: Success: 0
+ *         Failure: -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_filter_bad_params(void)
+{
+    /* Each entry: crafted file name and the dataset whose read must fail. */
+    static const struct {
+        const char *file;
+        const char *dset;
+    } cases[] = {
+        {"bad_nbit_params.h5", "Nbit_float_data_le"},
+        {"bad_nbit_decompress.h5", "Nbit_float_data_le"},
+        {"bad_nbit_parms_walk.h5", "Nbit_int_data_le"},
+        {"bad_fletcher32.h5", "Fletcher_float_data_be"},
+    };
+    hid_t  fid = H5I_INVALID_HID;
+    hid_t  did = H5I_INVALID_HID;
+    hid_t  sid = H5I_INVALID_HID;
+    void  *buf = NULL;
+    size_t i;
+
+    TESTING("filter decode with corrupted filter metadata");
+
+    for (i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
+        const char *data_file = H5_get_srcdir_filename(cases[i].file);
+        hssize_t    npoints;
+        herr_t      status;
+
+        if ((fid = H5Fopen(data_file, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR;
+        if ((did = H5Dopen2(fid, cases[i].dset, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR;
+        if ((sid = H5Dget_space(did)) < 0)
+            FAIL_STACK_ERROR;
+        if ((npoints = H5Sget_simple_extent_npoints(sid)) <= 0)
+            FAIL_STACK_ERROR;
+        if (NULL == (buf = calloc((size_t)npoints, sizeof(float))))
+            TEST_ERROR;
+
+        /* The corrupted filter metadata must make the read fail cleanly
+         * (return a negative value) rather than crash. */
+        H5E_BEGIN_TRY
+        {
+            status = H5Dread(did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+        }
+        H5E_END_TRY
+
+        if (status >= 0) {
+            H5_FAILED();
+            printf("    reading dataset \"%s\" from \"%s\" should have failed\n", cases[i].dset,
+                   cases[i].file);
+            goto error;
+        }
+
+        free(buf);
+        buf = NULL;
+        if (H5Sclose(sid) < 0)
+            FAIL_STACK_ERROR;
+        sid = H5I_INVALID_HID;
+        if (H5Dclose(did) < 0)
+            FAIL_STACK_ERROR;
+        did = H5I_INVALID_HID;
+        if (H5Fclose(fid) < 0)
+            FAIL_STACK_ERROR;
+        fid = H5I_INVALID_HID;
+    }
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    free(buf);
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(sid);
+        H5Dclose(did);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_filter_bad_params() */
+
+/*-------------------------------------------------------------------------
  * Function: test_zero_dims
  *
  * Purpose: Tests read/writes to zero-sized extendible datasets
@@ -19545,6 +19638,7 @@ main(void)
 
                 if (driver_is_default_compatible) {
                     nerrors += (test_filters_endianess() < 0 ? 1 : 0);
+                    nerrors += (test_filter_bad_params() < 0 ? 1 : 0);
                 }
 
                 nerrors += (test_zero_dims(file) < 0 ? 1 : 0);
