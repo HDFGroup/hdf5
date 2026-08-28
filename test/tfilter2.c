@@ -2459,7 +2459,7 @@ error:
  *
  * The stored string is normalised so the bytes on disk are a valid TOML
  * v1.0.0 document: optional outer braces are stripped, and C99 hex-float
- * literals are rewritten to %.17e decimal.  Neither the braced form nor a
+ * literals are rewritten to %.16e decimal.  Neither the braced form nor a
  * hex-float literal is accepted by a stock TOML parser, and the persisted
  * string is meant to be readable by tools that are not the HDF5 library
  * (pure-reimplementation readers such as jHDF and pyfive parse the object
@@ -2501,11 +2501,11 @@ canon_get_config(unsigned H5_ATTR_UNUSED flags, size_t cd_nelmts, const unsigned
 
     if (cd_nelmts >= 2)
         memcpy(&rate, cd_values, sizeof(rate));
-    needed = (size_t)snprintf(NULL, 0, "rate = %.17e", rate) + 1;
+    needed = (size_t)snprintf(NULL, 0, "rate = %.16e", rate) + 1;
     if (buf_size)
         *buf_size = needed;
     if (buf)
-        snprintf(buf, needed, "rate = %.17e", rate);
+        snprintf(buf, needed, "rate = %.16e", rate);
     return SUCCEED;
 }
 
@@ -2634,17 +2634,17 @@ test_config_canonicalization(hid_t fapl)
         TEST_ERROR;
     PASSED();
 
-    /* --- canon-03: hex-float rewritten to %.17e decimal --- */
+    /* --- canon-03: hex-float rewritten to %.16e decimal --- */
     TESTING("canonicalization: hex-float rewritten to decimal");
-    if (canon_check("rate = 0x1.8p+1", "rate = 3.00000000000000000e+00") < 0)
+    if (canon_check("rate = 0x1.8p+1", "rate = 3.0000000000000000e+00") < 0)
         TEST_ERROR;
-    if (canon_check("rate = 0x1.cp+1", "rate = 3.50000000000000000e+00") < 0)
+    if (canon_check("rate = 0x1.cp+1", "rate = 3.5000000000000000e+00") < 0)
         TEST_ERROR;
     PASSED();
 
     /* --- canon-04: both normalisations at once --- */
     TESTING("canonicalization: braces and hex-float together");
-    if (canon_check("{ rate = 0x1.8p+1 }", "rate = 3.00000000000000000e+00") < 0)
+    if (canon_check("{ rate = 0x1.8p+1 }", "rate = 3.0000000000000000e+00") < 0)
         TEST_ERROR;
     PASSED();
 
@@ -2716,7 +2716,7 @@ test_config_canonicalization(hid_t fapl)
     if (H5Pget_filter_params_by_idx(dcpl_out, 0, pbuf, sizeof(pbuf), &plen) < 0)
         TEST_ERROR;
     /* Canonical: no outer brace, no hex-float -- parseable as plain TOML */
-    if (strcmp(pbuf, "rate = 3.00000000000000000e+00") != 0)
+    if (strcmp(pbuf, "rate = 3.0000000000000000e+00") != 0)
         TEST_ERROR;
     if (pbuf[0] == '{' || strstr(pbuf, "0x") != NULL)
         TEST_ERROR;
@@ -2761,7 +2761,7 @@ test_config_canonicalization(hid_t fapl)
         if (H5Pclose(dcpl) < 0)
             TEST_ERROR;
         dcpl = H5I_INVALID_HID;
-        if (strcmp(s1, "rate = 1.45519152283668518e-11") != 0) {
+        if (strcmp(s1, "rate = 1.4551915228366852e-11") != 0) {
             fprintf(stderr, "\n   stored \"%s\"\n", s1);
             TEST_ERROR;
         }
@@ -3031,7 +3031,7 @@ test_modify_filter_by_idx(hid_t fapl)
         TEST_ERROR;
     if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
         TEST_ERROR;
-    if (strcmp(pbuf, "rate = 3.00000000000000000e+00") != 0)
+    if (strcmp(pbuf, "rate = 3.0000000000000000e+00") != 0)
         TEST_ERROR;
     if (H5Pclose(dcpl) < 0)
         TEST_ERROR;
@@ -3055,8 +3055,8 @@ test_modify_filter_by_idx(hid_t fapl)
     }
     if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
         TEST_ERROR;
-    /* Stored string gone -> get_config reconstruction, which uses %.17e */
-    if (strcmp(pbuf, "rate = 4.50000000000000000e+00") != 0) {
+    /* Stored string gone -> get_config reconstruction, which uses %.16e */
+    if (strcmp(pbuf, "rate = 4.5000000000000000e+00") != 0) {
         fprintf(stderr, "\n   got \"%s\"\n", pbuf);
         TEST_ERROR;
     }

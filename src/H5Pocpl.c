@@ -1906,7 +1906,7 @@ H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const 
         /* Persist the caller's parameter string so it can be recovered
          * losslessly (pipeline v3) without loading the plugin.  The string is
          * canonicalised first -- outer braces stripped, hex-float literals
-         * rewritten to %.17e decimal -- so the persisted bytes are a valid
+         * rewritten to %.16e decimal -- so the persisted bytes are a valid
          * TOML v1.0.0 document and can be parsed by readers that are not the
          * HDF5 library.  Both normalisations preserve the value exactly.
          * An empty input stores nothing. */
