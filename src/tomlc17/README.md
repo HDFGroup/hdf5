@@ -12,21 +12,21 @@ needed by the HDF5 filter configuration API are included.
 |---------------|------------------------------------------------|
 | Upstream URL  | https://github.com/cktan/tomlc17               |
 | License       | MIT (see `LICENSE` in this directory)          |
-| Vendored on   | 2026-05-08                                     |
-| Release / tag | `R20260501`                                    |
+| Vendored on   | 2026-08-28                                     |
+| Release / tag | `R260821`                                      |
 
 Because tomlc17 does not include a version constant in its source, the
 vendored files are identified by their SHA-256 checksums:
 
 | File         | SHA-256                                                            |
 |--------------|--------------------------------------------------------------------|
-| `tomlc17.c`  | `e5d61c4960a4ef7254abb4077ffaefd2ba8935459e52314ea67537b5e340ddd5` |
-| `tomlc17.h`  | `9f6cae985cde199a64e0f63d4b395b2738455f9b62d501bb4385ca3a85e34728` |
+| `tomlc17.c`  | `8df630f202c102c52a66027d8aa537e9006ea146bde744d6561adf0401517bc1` |
+| `tomlc17.h`  | `281708fa05b805c32c117fc6033b0f4248257fce3440b1ac3391853bfc8f8bb5` |
 
 Use these hashes to identify the exact upstream commit.  They are the
 checksums of the **pristine** upstream files; `tomlc17.c` as it sits in this
 directory carries one local change (see below) and hashes to
-`8b4898b2e23046de778e5e989720b8d714bb105f337efce73fb56a827bb7a9f7`.
+`89d3fe5ffe387360993c8b9df8f03eb13cd6df379b4482bcd039399f690a770f`.
 
 ## HDF5-local modifications
 
@@ -35,51 +35,35 @@ sources, and are intentionally excluded from the HDF5 clang-format pass (see
 `.github/workflows/clang-format-check.yml` and `bin/format_source`) so that
 future upstream updates can be dropped in without any re-formatting step.
 
-### `scan_float()`: `ERANGE` alone is not a parse failure
+### `scan_float()`: the subnormal fix, ahead of a release
 
-Upstream rejects any `strtod()` that sets `errno`:
+`tomlc17.c` carries exactly one change from the `R260821` tag: upstream commit
+`64a063b86`, *"Accept float literals that round to a subnormal double"*.  It is
+applied **verbatim**, not reimplemented, so this file is byte-for-byte
+identical to upstream `main`.
 
-```c
-if (errno || *q || q == buffer) {
-  return SETERROR(sp->ebuf, lineno, "error parsing float");
-}
-```
-
-C11 7.22.1.3 leaves it implementation-defined whether `strtod` sets `ERANGE`
-when the result underflows, and glibc sets it for a tiny *inexact* result even
-though the conversion succeeded and returned the correctly rounded value.  The
-effect is that every TOML float literal that rounds to a subnormal double is
-rejected as a syntax error -- `x = 5e-324` as surely as
-`x = 2.2250738585072011e-308`.  Python's `tomllib` accepts all of them.
+The bug: `scan_float()` rejected any `strtod()` that set `errno`.  C11 7.22.1.3
+leaves it implementation-defined whether `strtod` sets `ERANGE` on underflow,
+and glibc sets it for a tiny *inexact* result even though the conversion
+succeeded and returned the correctly rounded value.  Every TOML float literal
+rounding to a subnormal was therefore a syntax error -- `x = 5e-324` as surely
+as `x = 2.2250738585072011e-308`.
 
 For HDF5 this reached the filter configuration API through canonicalization:
-`H5Z__rewrite_hexfloats()` rewrites a hex-float literal to `%.17e` decimal, and
+`H5Z__rewrite_hexfloats()` rewrites hex-float literals to `%.16e` decimal, and
 the decimal spelling of a subnormal is inexact even when the hex spelling was
 exact, so `rate = 0x1p-1074` became a parse error on the way to disk.
 
-The local change accepts `ERANGE` when the result is finite and nonzero, and
-still rejects overflow to `+/-HUGE_VAL` and underflow all the way to zero:
-
-```c
-if ((errno && !(errno == ERANGE && fp64 != 0.0 && isfinite(fp64))) || *q ||
-    q == buffer) {
-```
-
-`<math.h>` is already included upstream, so `isfinite` needs no new header.
-The `isfinite` term is load-bearing: `HUGE_VAL` is nonzero, so without it
-overflow would start being accepted.
+Reported as <https://github.com/cktan/tomlc17/issues/48> and fixed upstream the
+same week.  The fix landed two days after `R260821` was tagged, so it is in
+`main` but not yet in any release; this directory tracks tagged releases only,
+hence the one-commit delta.  **Drop it at the next update**: once a tag at or
+after `64a063b86` exists, replacing these files with that tag leaves no local
+change at all.
 
 Covered by `canon-10` in `test/tfilter2.c`, which asserts value transparency
 across the hex-to-decimal rewrite at exact powers of two from 2^-1074 to
 2^1023.
-
-Reported upstream as <https://github.com/cktan/tomlc17/issues/48>.  Drop this
-delta once that is fixed and a release carrying the fix is vendored.
-
-Note: hex-float literal support (C99 `%a` output from `get_config` callbacks)
-is handled in `src/H5Zconfig.c` via a pre-processing step that rewrites
-hex-float tokens to their decimal equivalents before the parameter string is
-handed to tomlc17.  This keeps these vendored sources unmodified.
 
 ## Files
 
@@ -97,7 +81,9 @@ handed to tomlc17.  This keeps these vendored sources unmodified.
 2. Copy them into this directory, replacing the existing files.
 3. Record the new SHA-256 checksums and tag name in the table above.
 4. Update the "Vendored on" date.
-4a. Re-apply the local `scan_float()` change below, unless upstream has fixed
-   it, and record the new post-patch checksum.
+4a. Check whether the new tag already contains upstream commit `64a063b86`
+   (grep for `is_ok_subnormal`).  If it does, drop the local change entirely
+   and delete the section below.  If not, re-apply it verbatim and record the
+   new post-patch checksum.
 5. Do **not** run clang-format on these files.
 6. Run the HDF5 test suite (`ctest -R tfilter2`) to verify compatibility.
