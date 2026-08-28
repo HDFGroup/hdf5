@@ -96,9 +96,15 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ### Added pre-allocation validation for metadata cache entry image sizes
 
-   Metadata cache entries with non-speculative load sizes are now checked against the file's end of
-   allocation before allocating the on-disk image buffer. Object header continuation messages also
-   validate their decoded address and size fields before queuing continuation chunks.
+   Metadata cache entries with non-speculative load sizes are now checked against the file's end-of-allocation address before allocating the on-disk image buffer. Object header continuation messages also validate their decoded address and size fields before queuing continuation chunks.
+
+### Fixed a crash when reading a chunked dataset whose chunk rank does not match the dataspace rank
+
+   The chunk layout's stored dimensionality was validated against the dataspace rank at creation time, but not at open time, so a file whose stored chunk rank disagreed with its dataspace rank was not caught. The resulting inconsistent selection ranks during chunk I/O caused a divide-by-zero in the hyperslab iterator. The chunk dimensionality is now also validated on open, and such a dataset is rejected with an error instead of crashing.
+
+   Fixes GitHub issue #6491
+
+   Fixes CVE-2026-19025
 
 ## Java Library
 
