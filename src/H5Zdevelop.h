@@ -234,14 +234,33 @@ typedef herr_t (*H5Z_set_config_func_t)(const char *params, unsigned *flags, siz
  *
  * \details This callback is only a fallback for introspection: when a filter
  *          was configured with a parameter string, H5Pget_filter_params_by_idx()
- *          returns that stored string verbatim and never calls get_config.
+ *          returns that stored string -- the caller's own text in canonical
+ *          form, outer braces stripped and hex-float literals rewritten to
+ *          decimal -- and never calls get_config.
  *          get_config is used when no string was stored (for example, a filter
  *          added through the raw cd_values API).  How a filter encodes values
  *          into cd_values is entirely private to that filter.
  *
- * \note When reconstructing \c float or \c double values, formatting with the
- *       C99 \c \%a specifier (a hexadecimal float literal) round-trips through
- *       \c strtod with no rounding, unlike \c \%g / \c \%f / \c \%e.
+ * \note When reconstructing \c float or \c double values, format with
+ *       \c \%.16e and nothing else.  That is \c DBL_DECIMAL_DIG (17)
+ *       significant digits, the minimum that round-trips every IEEE 754
+ *       double, and it always carries a decimal point and exponent so a TOML
+ *       parser types the result as a float rather than an integer.
+ *
+ *       Do \b not use \c \%a: a hexadecimal float literal is not valid TOML,
+ *       and get_config output must parse for readers that are not the HDF5
+ *       library.  (\c \%a is still accepted on \e input to set_config, which
+ *       rewrites it to decimal.)  Do not use \c \%g, which drops the decimal
+ *       point for whole values so "8.0" becomes "8" and reads back as an
+ *       integer; nor \c \%f; nor fewer than 17 significant digits; nor more
+ *       than \c DECIMAL_DIG of them, since C11 7.22.1.3p11 recommends correct
+ *       rounding only within that bound.
+ *
+ * \note Recovering a value from a decimal literal requires the reader's
+ *       decimal-to-binary conversion to be correctly rounded.  C11 7.22.1.3p11
+ *       only recommends this, in contrast to p9, which requires it for the
+ *       hexadecimal form.  A 1 ulp difference is enough to change behaviour in
+ *       a filter that quantises on a binary boundary.
  *
  * \since 3.0.0
  */

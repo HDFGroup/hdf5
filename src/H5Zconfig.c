@@ -187,7 +187,7 @@ H5Z__rewrite_hexfloats(const char *src)
                              * contains a decimal point and exponent, so
                              * tomlc17 parses it as TOML_FP64 not TOML_INTEGER.
                              * 17 significant digits guarantee IEEE 754
-                             * double round-trip fidelity (C99 DBL_DECIMAL_DIG). */
+                             * double round-trip fidelity (C11 DBL_DECIMAL_DIG). */
                             char dec[32];
                             int  n = snprintf(dec, sizeof(dec), "%.16e", val);
                             /* LC_NUMERIC may replace '.' with the locale decimal
