@@ -1671,6 +1671,62 @@ test_canonical_name_length_limit(void)
         TEST_ERROR;
     }
     PASSED();
+
+    /* The canonical name is written into the filter-pipeline object header
+     * message, so it reaches disk and flows back out through h5dump and
+     * h5repack (which resolves names to filter IDs).  H5Zregister must
+     * therefore hold it to [A-Za-z0-9_.-], non-empty, rather than accepting
+     * arbitrary bytes.  RFC-HDFG-2026-001 sec:name-registry. */
+    TESTING("H5Zregister: canonical_name syntax is enforced");
+    {
+        /* Each must be rejected, and for the stated reason. */
+        static const char *const bad[] = {
+            "",              /* empty                                  */
+            "has space",     /* whitespace                             */
+            "semi;colon",    /* the reserved pipeline separator        */
+            "quote\"mark",   /* would need escaping in tool output     */
+            "brace{}",       /* TOML inline-table delimiters           */
+            "comma,sep",     /* the parameter-string separator         */
+            "new\nline",     /* would corrupt line-oriented tool output*/
+            "tab\there",     /* likewise                               */
+            "caf\xc3\xa9",    /* non-ASCII: outside the declared class  */
+            "slash/path",    /* path-like, unsafe as an identifier     */
+            "equals=sign",   /* the key/value separator                */
+        };
+        /* Each must be accepted: the full declared character class. */
+        static const char *const good[] = {
+            "zfp", "deflate", "blosc2.lz4", "my_filter-2", "A", "0",
+            "aA0_.-",
+        };
+        size_t i;
+
+        for (i = 0; i < sizeof(bad) / sizeof(bad[0]); i++) {
+            H5Z_class3_t c = {2,   LONGTITLE_FILTER_ID, 1,    1,   bad[i], NULL,
+                              NULL, NULL,               longtitle_filter_func, NULL, NULL};
+            H5E_BEGIN_TRY
+            {
+                ret = H5Zregister(&c);
+            }
+            H5E_END_TRY
+            if (ret >= 0) {
+                fprintf(stderr, "\n   accepted invalid name \"%s\"\n", bad[i]);
+                H5Zunregister(LONGTITLE_FILTER_ID);
+                TEST_ERROR;
+            }
+        }
+
+        for (i = 0; i < sizeof(good) / sizeof(good[0]); i++) {
+            H5Z_class3_t c = {2,   LONGTITLE_FILTER_ID, 1,    1,   good[i], NULL,
+                              NULL, NULL,               longtitle_filter_func, NULL, NULL};
+            if (H5Zregister(&c) < 0) {
+                fprintf(stderr, "\n   rejected valid name \"%s\"\n", good[i]);
+                TEST_ERROR;
+            }
+            if (H5Zunregister(LONGTITLE_FILTER_ID) < 0)
+                TEST_ERROR;
+        }
+    }
+    PASSED();
     return 0;
 
 error:
