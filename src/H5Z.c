@@ -73,10 +73,11 @@ static const bool DUMP_DEBUG_STATS_g = false;
 #endif /* H5Z_DEBUG */
 
 /* Local functions */
-static int H5Z__find_idx(H5Z_filter_t id);
-static int H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t obj_id, void *key);
-static int H5Z__check_unregister_group_cb(void *obj_ptr, hid_t obj_id, void *key);
-static int H5Z__flush_file_cb(void *obj_ptr, hid_t obj_id, void *key);
+static herr_t H5Z__validate_class3_name(const char *name);
+static int    H5Z__find_idx(H5Z_filter_t id);
+static int    H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t obj_id, void *key);
+static int    H5Z__check_unregister_group_cb(void *obj_ptr, hid_t obj_id, void *key);
+static int    H5Z__flush_file_cb(void *obj_ptr, hid_t obj_id, void *key);
 
 /*-------------------------------------------------------------------------
  * Function: H5Z__init_package
@@ -225,6 +226,59 @@ next:
  * Return:   Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
+/*-------------------------------------------------------------------------
+ * Function:    H5Z__validate_class3_name
+ *
+ * Purpose:     Enforce the canonical-name syntax for H5Z_class3_t filters:
+ *              non-NULL, non-empty, at most H5Z_CLASS3_NAME_MAX_LEN bytes,
+ *              and drawn entirely from [A-Za-z0-9_.-].
+ *
+ *              The restriction is not cosmetic.  A v3 filter's name is
+ *              written into the filter-pipeline object header message at
+ *              filter-add time, so it reaches disk and flows back out
+ *              through h5dump and the other tools.  Permitting arbitrary
+ *              bytes would let a plugin put whitespace, quotes, or embedded
+ *              newlines into a file's metadata, and h5repack resolves
+ *              canonical names to filter IDs, so the name has to be usable
+ *              as a stable command-line identifier.
+ *
+ *              The character test is written out rather than delegated to
+ *              isalnum(), which is locale-dependent and would admit letters
+ *              outside the intended set.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Z__validate_class3_name(const char *name)
+{
+    size_t len;
+    size_t i;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    if (name == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name must not be NULL for H5Z_class3_t");
+    if ((len = strlen(name)) == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name must not be empty for H5Z_class3_t");
+    if (len > H5Z_CLASS3_NAME_MAX_LEN)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name exceeds H5Z_CLASS3_NAME_MAX_LEN (%u) bytes",
+                    H5Z_CLASS3_NAME_MAX_LEN);
+
+    for (i = 0; i < len; i++) {
+        unsigned char c = (unsigned char)name[i];
+
+        if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' ||
+              c == '.' || c == '-'))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                        "H5Z_class3_t name contains a byte outside [A-Za-z0-9_.-] at offset %zu", i);
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z__validate_class3_name() */
+
 herr_t
 H5Zregister(const void *cls)
 {
@@ -260,11 +314,8 @@ H5Zregister(const void *cls)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to modify predefined filters");
         if (cls3->filter == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no filter function specified");
-        if (cls3->name == NULL)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name must not be NULL for H5Z_class3_t");
-        if (strlen(cls3->name) > H5Z_CLASS3_NAME_MAX_LEN)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name exceeds H5Z_CLASS3_NAME_MAX_LEN (%u) bytes",
-                        H5Z_CLASS3_NAME_MAX_LEN);
+        if (H5Z__validate_class3_name(cls3->name) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5Z_class3_t name");
 
         if (H5Z_register3(cls3) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter");
@@ -446,11 +497,11 @@ H5Z_register3(const H5Z_class3_t *cls)
     assert(cls->name); /* name is required for H5Z_class3_t */
 
     /* Runtime checks that survive NDEBUG - enforce for the plugin-load path
-     * which calls H5Z_register3 directly, bypassing the H5Zregister wrapper. */
-    if (cls->name == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter name must not be NULL for H5Z_class3_t");
-    if (strlen(cls->name) > H5Z_CLASS3_NAME_MAX_LEN)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter name exceeds H5Z_CLASS3_NAME_MAX_LEN");
+     * which calls H5Z_register3 directly, bypassing the H5Zregister wrapper.
+     * This is the untrusted path: the name arrives from a shared object on
+     * disk and is about to be written into object header messages. */
+    if (H5Z__validate_class3_name(cls->name) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5Z_class3_t filter name");
 
     /* Build entry */
     memset(&entry, 0, sizeof(entry));

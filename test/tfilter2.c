@@ -1708,6 +1708,61 @@ test_canonical_name_length_limit(void)
         TEST_ERROR;
     }
     PASSED();
+
+    /* The canonical name is written into the filter-pipeline object header
+     * message, so it reaches disk and flows back out through h5dump and
+     * h5repack (which resolves names to filter IDs).  H5Zregister must
+     * therefore hold it to [A-Za-z0-9_.-], non-empty, rather than accepting
+     * arbitrary bytes.  RFC-HDFG-2026-001 sec:name-registry. */
+    TESTING("H5Zregister: canonical_name syntax is enforced");
+    {
+        /* Each must be rejected, and for the stated reason. */
+        static const char *const bad[] = {
+            "",                 /* empty                                  */
+            "has space",        /* whitespace                             */
+            "semi;colon",       /* the reserved pipeline separator        */
+            "quote\"mark",      /* would need escaping in tool output     */
+            "brace{}",          /* TOML inline-table delimiters           */
+            "comma,sep",        /* the parameter-string separator         */
+            "new\nline",        /* would corrupt line-oriented tool output*/
+            "tab\there",        /* likewise                               */
+            "nonascii\xc3\xa9", /* UTF-8 e-acute: outside the declared class */
+            "slash/path",       /* path-like, unsafe as an identifier     */
+            "equals=sign",      /* the key/value separator                */
+        };
+        /* Each must be accepted: the full declared character class. */
+        static const char *const good[] = {
+            "zfp", "deflate", "blosc2.lz4", "my_filter-2", "A", "0", "aA0_.-",
+        };
+        size_t i;
+
+        for (i = 0; i < sizeof(bad) / sizeof(bad[0]); i++) {
+            H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID,   1,    1,   bad[i], NULL, NULL,
+                              NULL, longtitle_filter_func, NULL, NULL};
+            H5E_BEGIN_TRY
+            {
+                ret = H5Zregister(&c);
+            }
+            H5E_END_TRY
+            if (ret >= 0) {
+                fprintf(stderr, "\n   accepted invalid name \"%s\"\n", bad[i]);
+                H5Zunregister(LONGTITLE_FILTER_ID);
+                TEST_ERROR;
+            }
+        }
+
+        for (i = 0; i < sizeof(good) / sizeof(good[0]); i++) {
+            H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID,   1,    1,   good[i], NULL, NULL,
+                              NULL, longtitle_filter_func, NULL, NULL};
+            if (H5Zregister(&c) < 0) {
+                fprintf(stderr, "\n   rejected valid name \"%s\"\n", good[i]);
+                TEST_ERROR;
+            }
+            if (H5Zunregister(LONGTITLE_FILTER_ID) < 0)
+                TEST_ERROR;
+        }
+    }
+    PASSED();
     return 0;
 
 error:
@@ -4183,7 +4238,7 @@ error:
  *
  * The stored string is normalised so the bytes on disk are a valid TOML
  * v1.0.0 document: optional outer braces are stripped, and C99 hex-float
- * literals are rewritten to %.17e decimal.  Neither the braced form nor a
+ * literals are rewritten to %.16e decimal.  Neither the braced form nor a
  * hex-float literal is accepted by a stock TOML parser, and the persisted
  * string is meant to be readable by tools that are not the HDF5 library
  * (pure-reimplementation readers such as jHDF and pyfive parse the object
@@ -4225,11 +4280,11 @@ canon_get_config(unsigned H5_ATTR_UNUSED flags, size_t cd_nelmts, const unsigned
 
     if (cd_nelmts >= 2)
         memcpy(&rate, cd_values, sizeof(rate));
-    needed = (size_t)snprintf(NULL, 0, "rate = %.17e", rate) + 1;
+    needed = (size_t)snprintf(NULL, 0, "rate = %.16e", rate) + 1;
     if (buf_size)
         *buf_size = needed;
     if (buf)
-        snprintf(buf, needed, "rate = %.17e", rate);
+        snprintf(buf, needed, "rate = %.16e", rate);
     return SUCCEED;
 }
 
@@ -4328,6 +4383,236 @@ canon_stored_double(hid_t dcpl, double *out)
     return 0;
 }
 
+/* -----------------------------------------------------------------------
+ * A version-2 plugin and a version-3 plugin in the SAME pipeline
+ *
+ * The regression tests (reg-01..reg-07) cover v2 and v3 filters separately.
+ * They do not cover a pipeline that carries both at once, which is the shape
+ * a real file takes while an ecosystem is mid-migration: an old third-party
+ * compressor stacked with a newly ported one, plus a built-in.  The pipeline
+ * message must then hold entries of both kinds -- one with a stored
+ * configuration string, one without -- and still round-trip data, preserve
+ * order, and introspect correctly per entry.
+ * ---------------------------------------------------------------------- */
+#define MIXV2_FILTER_ID 533
+#define MIXV3_FILTER_ID 534
+
+/* An XOR transform is its own inverse, so a successful data round-trip is
+ * equally consistent with both filters running and with neither running.
+ * Count invocations so the test can tell those apart. */
+static int mixv2_calls = 0;
+static int mixv3_calls = 0;
+
+/* Both filters are byte-reversible transforms so a data round-trip actually
+ * proves each ran, rather than passing vacuously as a no-op would. */
+static size_t
+mixv2_filter_func(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                  const unsigned int H5_ATTR_UNUSED cd_values[], size_t nbytes,
+                  size_t H5_ATTR_UNUSED *buf_size, void **buf)
+{
+    unsigned char *p = (unsigned char *)*buf;
+    size_t         i;
+
+    (void)flags; /* XOR is its own inverse, so encode and decode are identical */
+    mixv2_calls++;
+    for (i = 0; i < nbytes; i++)
+        p[i] ^= 0x5AU;
+    return nbytes;
+}
+
+static size_t
+mixv3_filter_func(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                  const unsigned int H5_ATTR_UNUSED *cd_values, hid_t H5_ATTR_UNUSED dxpl_id,
+                  const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims, size_t nbytes,
+                  size_t H5_ATTR_UNUSED *buf_size, void **buf)
+{
+    unsigned char *p = (unsigned char *)*buf;
+    size_t         i;
+
+    (void)flags;
+    mixv3_calls++;
+    for (i = 0; i < nbytes; i++)
+        p[i] ^= 0xA5U;
+    return nbytes;
+}
+
+static herr_t
+mixv3_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts, unsigned cd_values[],
+                 size_t cd_values_size)
+{
+    int64_t lvl = 0;
+
+    if (H5Zconfig_get_int(params, "level", &lvl) < 0)
+        return FAIL;
+
+    /* Pass 1: size query.  Pass 2: populate.  Both must report the same
+     * count, and the second pass must respect the caller's capacity. */
+    *cd_nelmts = 1;
+    if (cd_values == NULL)
+        return SUCCEED;
+    if (cd_values_size < 1)
+        return FAIL;
+    cd_values[0] = (unsigned)lvl;
+    return SUCCEED;
+}
+
+static const H5Z_class2_t mixv2_cls = {
+    H5Z_CLASS_T_VERS,                       /* version -- a genuine v2 class, not a v3 in disguise */
+    MIXV2_FILTER_ID,                        /* id              */
+    1,                                      /* encoder_present */
+    1,                                      /* decoder_present */
+    "legacy v2 filter (free-form comment)", /* name: v2 permits arbitrary text */
+    NULL,                                   /* can_apply       */
+    NULL,                                   /* set_local       */
+    mixv2_filter_func,                      /* filter          */
+};
+
+static const H5Z_class3_t mixv3_cls = {
+    2,                 /* version -- H5Z_class3_t  */
+    MIXV3_FILTER_ID,   /* id              */
+    1,                 /* encoder_present */
+    1,                 /* decoder_present */
+    "mixv3",           /* canonical name  */
+    NULL,              /* description     */
+    NULL,              /* can_apply       */
+    NULL,              /* set_local       */
+    mixv3_filter_func, /* filter          */
+    mixv3_set_config,  /* set_config      */
+    NULL,              /* get_config      */
+};
+
+static int
+test_mixed_v2_v3_pipeline(hid_t fapl)
+{
+    hid_t    file = H5I_INVALID_HID, dcpl = H5I_INVALID_HID, sid = H5I_INVALID_HID;
+    hid_t    dset = H5I_INVALID_HID, dcpl_out = H5I_INVALID_HID;
+    hsize_t  dims[2] = {8, 8}, chunk[2] = {4, 4};
+    char     filename[1024];
+    int      wbuf[8][8], rbuf[8][8];
+    int      i, j;
+    char     pbuf[256];
+    size_t   plen = 0;
+    unsigned nfilt;
+
+    if (H5Zregister(&mixv2_cls) < 0)
+        TEST_ERROR;
+    if (H5Zregister(&mixv3_cls) < 0)
+        TEST_ERROR;
+
+    TESTING("mixed pipeline: v2 and v3 filters in one dataset");
+
+    for (i = 0; i < 8; i++)
+        for (j = 0; j < 8; j++)
+            wbuf[i][j] = i * 8 + j;
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+        TEST_ERROR;
+
+    /* Order matters and must survive: v2 (raw cd_values), then a built-in,
+     * then v3 (configuration string). */
+    if (H5Pset_filter(dcpl, MIXV2_FILTER_ID, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
+        TEST_ERROR;
+    if (H5Pset_shuffle(dcpl) < 0)
+        TEST_ERROR;
+    {
+        H5Z_params_t p;
+        p.type  = H5Z_PARAMS_STRING;
+        p.u.str = "level = 7";
+        if (H5Pappend_filter(dcpl, MIXV3_FILTER_ID, H5Z_FLAG_MANDATORY, &p) < 0)
+            TEST_ERROR;
+    }
+
+    h5_fixname(FILENAME[2], fapl, filename, sizeof(filename));
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dcreate2(file, "mixed", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0 || H5Fclose(file) < 0 || H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dset = file = dcpl = H5I_INVALID_HID;
+
+    /* Both must have run on the write path. */
+    if (mixv2_calls == 0 || mixv3_calls == 0)
+        TEST_ERROR;
+    mixv2_calls = mixv3_calls = 0;
+
+    /* Reopen: both filters must run in reverse and reproduce the data. */
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "mixed", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    memset(rbuf, 0, sizeof(rbuf));
+    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+        TEST_ERROR;
+    if (memcmp(wbuf, rbuf, sizeof(wbuf)) != 0)
+        TEST_ERROR;
+    /* ... and on the read path, which is what makes the compare meaningful. */
+    if (mixv2_calls == 0 || mixv3_calls == 0)
+        TEST_ERROR;
+
+    /* Pipeline shape and per-entry introspection. */
+    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    if ((nfilt = (unsigned)H5Pget_nfilters(dcpl_out)) != 3)
+        TEST_ERROR;
+
+    /* Entry 0: the v2 filter, in its original position, with no stored
+     * string -- it was configured through the raw cd_values path. */
+    if (H5Pget_filter2(dcpl_out, 0, NULL, NULL, NULL, 0, NULL, NULL) != MIXV2_FILTER_ID)
+        TEST_ERROR;
+    plen = 0;
+    H5E_BEGIN_TRY
+    {
+        (void)H5Pget_filter_params_by_idx(dcpl_out, 0, NULL, 0, &plen);
+    }
+    H5E_END_TRY
+    if (plen != 0)
+        TEST_ERROR;
+
+    /* Entry 1: the built-in, undisturbed between the two plugins. */
+    if (H5Pget_filter2(dcpl_out, 1, NULL, NULL, NULL, 0, NULL, NULL) != H5Z_FILTER_SHUFFLE)
+        TEST_ERROR;
+
+    /* Entry 2: the v3 filter, still carrying its configuration string. */
+    if (H5Pget_filter2(dcpl_out, 2, NULL, NULL, NULL, 0, NULL, NULL) != MIXV3_FILTER_ID)
+        TEST_ERROR;
+    if (H5Pget_filter_params_by_idx(dcpl_out, 2, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "level = 7") != 0) {
+        fprintf(stderr, "\n   entry 2 stored \"%s\", expected \"level = 7\"\n", pbuf);
+        TEST_ERROR;
+    }
+
+    if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Fclose(file) < 0 || H5Sclose(sid) < 0)
+        TEST_ERROR;
+    dcpl_out = dset = file = sid = H5I_INVALID_HID;
+
+    if (H5Zunregister(MIXV2_FILTER_ID) < 0 || H5Zunregister(MIXV3_FILTER_ID) < 0)
+        TEST_ERROR;
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Pclose(dcpl_out);
+        H5Dclose(dset);
+        H5Fclose(file);
+        H5Sclose(sid);
+        H5Zunregister(MIXV2_FILTER_ID);
+        H5Zunregister(MIXV3_FILTER_ID);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
 static int
 test_config_canonicalization(hid_t fapl)
 {
@@ -4358,17 +4643,17 @@ test_config_canonicalization(hid_t fapl)
         TEST_ERROR;
     PASSED();
 
-    /* --- canon-03: hex-float rewritten to %.17e decimal --- */
+    /* --- canon-03: hex-float rewritten to %.16e decimal --- */
     TESTING("canonicalization: hex-float rewritten to decimal");
-    if (canon_check("rate = 0x1.8p+1", "rate = 3.00000000000000000e+00") < 0)
+    if (canon_check("rate = 0x1.8p+1", "rate = 3.0000000000000000e+00") < 0)
         TEST_ERROR;
-    if (canon_check("rate = 0x1.cp+1", "rate = 3.50000000000000000e+00") < 0)
+    if (canon_check("rate = 0x1.cp+1", "rate = 3.5000000000000000e+00") < 0)
         TEST_ERROR;
     PASSED();
 
     /* --- canon-04: both normalisations at once --- */
     TESTING("canonicalization: braces and hex-float together");
-    if (canon_check("{ rate = 0x1.8p+1 }", "rate = 3.00000000000000000e+00") < 0)
+    if (canon_check("{ rate = 0x1.8p+1 }", "rate = 3.0000000000000000e+00") < 0)
         TEST_ERROR;
     PASSED();
 
@@ -4440,7 +4725,7 @@ test_config_canonicalization(hid_t fapl)
     if (H5Pget_filter_params_by_idx(dcpl_out, 0, pbuf, sizeof(pbuf), &plen) < 0)
         TEST_ERROR;
     /* Canonical: no outer brace, no hex-float -- parseable as plain TOML */
-    if (strcmp(pbuf, "rate = 3.00000000000000000e+00") != 0)
+    if (strcmp(pbuf, "rate = 3.0000000000000000e+00") != 0)
         TEST_ERROR;
     if (pbuf[0] == '{' || strstr(pbuf, "0x") != NULL)
         TEST_ERROR;
@@ -4449,6 +4734,139 @@ test_config_canonicalization(hid_t fapl)
     dcpl_out = dset = file = sid = H5I_INVALID_HID;
     if (H5Zregister(&canon_cls) < 0)
         TEST_ERROR;
+    PASSED();
+
+    /* --- canon-09: the canonical form is a fixed point.
+     *
+     * The stored string is an INPUT to set_config, not only a display
+     * artefact: the RFC guarantees the stored bytes are always valid
+     * set_config input, so a caller may retrieve a configuration and re-apply
+     * it, and h5repack -f accepts a parameter string on the command line.
+     * Re-canonicalising an already canonical string must therefore reproduce
+     * the identical bytes -- it has no outer braces and no hex-float tokens
+     * left to rewrite -- so re-application cannot drift.  (Note a plain
+     * h5repack copy does NOT exercise this: it duplicates the source DCPL
+     * with H5Pcopy, so the bytes travel as data and are never re-parsed.)
+     * (RFC-HDFG-2026-001 fmt-01b)                                        --- */
+    TESTING("canonicalization: stored form is a fixed point");
+    {
+        /* The getter truncates silently into an undersized buffer but always
+         * reports the full length in plen, so every read below is checked
+         * against plen -- a truncated compare must not be able to pass. */
+        char s1[128];
+        char s2[128];
+        char s3[128];
+
+        /* 2^-36, the case raised on HDFGroup/hdf5#6153: zfp's fixed-accuracy
+         * mode derives minexp via frexp and so rounds the requested tolerance
+         * DOWN to the next integer power of two, which is why a user writes
+         * the exponent exactly rather than in decimal. */
+        if ((dcpl = canon_make_dcpl("{ rate = 0x1p-36 }")) < 0)
+            TEST_ERROR;
+        if (H5Pget_filter_params_by_idx(dcpl, 0, s1, sizeof(s1), &plen) < 0)
+            TEST_ERROR;
+        if (plen >= sizeof(s1))
+            TEST_ERROR;
+        if (H5Pclose(dcpl) < 0)
+            TEST_ERROR;
+        dcpl = H5I_INVALID_HID;
+        if (strcmp(s1, "rate = 1.4551915228366852e-11") != 0) {
+            fprintf(stderr, "\n   stored \"%s\"\n", s1);
+            TEST_ERROR;
+        }
+
+        /* Cycle 1: feed the stored bytes back in */
+        if ((dcpl = canon_make_dcpl(s1)) < 0)
+            TEST_ERROR;
+        if (H5Pget_filter_params_by_idx(dcpl, 0, s2, sizeof(s2), &plen) < 0)
+            TEST_ERROR;
+        if (plen >= sizeof(s2))
+            TEST_ERROR;
+        if (H5Pclose(dcpl) < 0)
+            TEST_ERROR;
+        dcpl = H5I_INVALID_HID;
+        if (strcmp(s1, s2) != 0)
+            TEST_ERROR;
+
+        /* Cycle 2: still byte-identical, and the value survived both hops */
+        if ((dcpl = canon_make_dcpl(s2)) < 0)
+            TEST_ERROR;
+        if (H5Pget_filter_params_by_idx(dcpl, 0, s3, sizeof(s3), &plen) < 0)
+            TEST_ERROR;
+        if (plen >= sizeof(s3))
+            TEST_ERROR;
+        if (canon_stored_double(dcpl, &got) < 0)
+            TEST_ERROR;
+        if (H5Pclose(dcpl) < 0)
+            TEST_ERROR;
+        dcpl = H5I_INVALID_HID;
+        if (strcmp(s2, s3) != 0)
+            TEST_ERROR;
+        if (memcmp(&got, &(double){0x1p-36}, sizeof(got)) != 0)
+            TEST_ERROR;
+    }
+    PASSED();
+
+    /* --- canon-10: the hex-float rewrite is value-transparent at the
+     *               boundaries where it matters.
+     *
+     * A hex literal whose mantissa fits in 53 bits converts with no rounding
+     * step at all; the canonical decimal has to come back through a
+     * decimal-to-binary conversion, which C11 7.22.1.3 permits to be 1 ulp
+     * off.  That ulp is only observable where a filter quantises on a binary
+     * boundary -- and exact powers of two are both where such a boundary sits
+     * and what a user writes in hex in the first place.  Appending the hex
+     * form and appending its canonical decimal must pack the identical
+     * double.  (RFC-HDFG-2026-001 fmt-01c)                               --- */
+    TESTING("canonicalization: hex rewrite is value-transparent at powers of two");
+    {
+        /* smallest subnormal and smallest normal at the bottom, the 2^-36
+         * case from the issue thread, and a spread out to the top of the
+         * exponent range */
+        static const int exps[] = {-1074, -1073, -1022, -1021, -100, -37, -36, -35,
+                                   -1,    0,     1,     52,    53,   100, 512, 1023};
+        size_t           i;
+
+        for (i = 0; i < sizeof(exps) / sizeof(exps[0]); i++) {
+            char   hexstr[64];
+            char   canon[128];
+            double want     = ldexp(1.0, exps[i]);
+            double from_hex = 0.0;
+            double from_dec = 0.0;
+
+            snprintf(hexstr, sizeof(hexstr), "rate = 0x1p%+d", exps[i]);
+
+            if ((dcpl = canon_make_dcpl(hexstr)) < 0)
+                TEST_ERROR;
+            if (canon_stored_double(dcpl, &from_hex) < 0)
+                TEST_ERROR;
+            if (H5Pget_filter_params_by_idx(dcpl, 0, canon, sizeof(canon), &plen) < 0)
+                TEST_ERROR;
+            if (plen >= sizeof(canon)) /* never compare a truncated string */
+                TEST_ERROR;
+            if (H5Pclose(dcpl) < 0)
+                TEST_ERROR;
+            dcpl = H5I_INVALID_HID;
+
+            /* nothing a stock TOML parser would choke on may remain */
+            if (strstr(canon, "0x") != NULL)
+                TEST_ERROR;
+
+            if ((dcpl = canon_make_dcpl(canon)) < 0)
+                TEST_ERROR;
+            if (canon_stored_double(dcpl, &from_dec) < 0)
+                TEST_ERROR;
+            if (H5Pclose(dcpl) < 0)
+                TEST_ERROR;
+            dcpl = H5I_INVALID_HID;
+
+            if (memcmp(&from_hex, &want, sizeof(want)) != 0 || memcmp(&from_dec, &want, sizeof(want)) != 0) {
+                fprintf(stderr, "\n   2^%d: hex -> %a, canonical \"%s\" -> %a, want %a\n", exps[i], from_hex,
+                        canon, from_dec, want);
+                TEST_ERROR;
+            }
+        }
+    }
     PASSED();
 
     if (H5Zunregister(CANON_FILTER_ID) < 0)
@@ -4621,7 +5039,7 @@ test_modify_filter_by_idx(hid_t fapl)
         TEST_ERROR;
     if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
         TEST_ERROR;
-    if (strcmp(pbuf, "rate = 3.00000000000000000e+00") != 0)
+    if (strcmp(pbuf, "rate = 3.0000000000000000e+00") != 0)
         TEST_ERROR;
     if (H5Pclose(dcpl) < 0)
         TEST_ERROR;
@@ -4645,8 +5063,8 @@ test_modify_filter_by_idx(hid_t fapl)
     }
     if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
         TEST_ERROR;
-    /* Stored string gone -> get_config reconstruction, which uses %.17e */
-    if (strcmp(pbuf, "rate = 4.50000000000000000e+00") != 0) {
+    /* Stored string gone -> get_config reconstruction, which uses %.16e */
+    if (strcmp(pbuf, "rate = 4.5000000000000000e+00") != 0) {
         fprintf(stderr, "\n   got \"%s\"\n", pbuf);
         TEST_ERROR;
     }
@@ -4871,6 +5289,9 @@ main(void)
 
     /* Canonicalization of the persisted configuration string */
     nerrors += test_config_canonicalization(fapl) < 0 ? 1 : 0;
+
+    /* A v2 plugin and a v3 plugin in the same pipeline */
+    nerrors += test_mixed_v2_v3_pipeline(fapl) < 0 ? 1 : 0;
 
     /* H5Pmodify_filter_by_idx */
     nerrors += test_modify_filter_by_idx(fapl) < 0 ? 1 : 0;

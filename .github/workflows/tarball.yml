@@ -33,8 +33,8 @@ on:
         description: "The branch used for the source tarballs"
         value: ${{ jobs.check_commits.outputs.branch_ref }}
       file_sha:
-        description: "The sha used for the source tarballs"
-        value: ${{ jobs.check_commits.outputs.branch_sha }}
+        description: "The full commit sha used as target_commitish for the release tag"
+        value: ${{ jobs.check_commits.outputs.branch_full_sha }}
 
 permissions:
   contents: read

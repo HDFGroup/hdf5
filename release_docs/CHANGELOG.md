@@ -221,6 +221,17 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed memory leaks and ID reference count issues when pushing an error to an error stack that is full
+
+   When an error is pushed to an error stack, the library may make a copy of the file
+   and function strings to ensure that they exist for the same duration as the error
+   stack entry. When an error stack is full, the library simply makes any further pushes
+   no-ops, but previously gave no information to calling code that this happened. This
+   caused calling code to assume that the duplicated strings were owned by an error stack
+   entry that was never pushed, leaking the duplicated strings. Additionally, IDs
+   associated with the error stack entry were left with incremented reference counts,
+   resulting in an infinite loop while closing the library.
+
 ### Library shutdown no longer aborts on a detected infinite loop
 
    When the library detects that it cannot make progress closing itself (an "infinite loop closing library"), it no longer calls `abort()`. The abort behaved inconsistently, only firing when automatic error message display was enabled. Additionally, terminating the entire host process on a shutdown-time condition is undesirable for applications that embed HDF5. The library now reports the condition (when error display is enabled) and returns without aborting.
@@ -270,6 +281,13 @@ We would like to thank the many HDF5 community members who contributed to this r
 ### Fixed an issue with an incorrect file format validation check when decoding metadata cache entries
 
    Fixed a bug where a flag in H5Cimage.c wasn't getting set correctly for release builds of HDF5, leading to incorrect error checking when reconstructing metadata cache entries.
+### Fixed a crash when reading a chunked dataset whose chunk rank does not match the dataspace rank
+
+   The chunk layout's stored dimensionality was validated against the dataspace rank at creation time, but not at open time, so a file whose stored chunk rank disagreed with its dataspace rank was not caught. The resulting inconsistent selection ranks during chunk I/O caused a divide-by-zero in the hyperslab iterator. The chunk dimensionality is now also validated on open, and such a dataset is rejected with an error instead of crashing.
+
+   Fixes GitHub issue #6491
+
+   Fixes CVE-2026-19025
 
 ## Java Library
 
@@ -278,6 +296,34 @@ We would like to thank the many HDF5 community members who contributed to this r
 ### Fixed version handling in installed CMake package version configuration file
 
    The installed CMake package version configuration file for the library previously used `SameMinorVersion` for the version compatibility logic, causing a `find_package(HDF5 X.Y.Z)` call to fail unless the version of a located HDF5 installation matched both `X` and `Y` of the version number exactly (i.e., releases with a greater minor version number weren't considered backward compatible). This reflected the version compatibility of HDF5 releases prior to version 2.0.0, but doesn't reflect the version compatibility of HDF5 version 2.0.0+ releases. The version compatibility logic now uses `SameMajorVersion`, so a `find_package(HDF5 X.Y.Z)` call will accept all versions of HDF5 where the major version matches `X` (i.e., only releases with a greater major version number will be rejected as not backward compatible).
+
+### Fixed the C++ examples failing to compile when built standalone
+
+  The standalone examples build used C++98, but `H5public.h` includes
+  `<cinttypes>`, which requires C++11. This affected any C++ translation unit
+  including `hdf5.h`, and did not match the HDF5 C++ library itself, which is
+  built as C++11. The C++ examples did not compile, against either static or
+  shared HDF5. The examples are now built as C++11.
+
+  Only the standalone build was affected. Examples built as part of the HDF5
+  build inherit the library's own C++ standard.
+
+### Fixed the examples skipping the HL, Fortran and C++ programs in some configurations
+
+  When built standalone against an installed HDF5, the examples chose between
+  the shared and static HL, Fortran and C++ libraries using `BUILD_SHARED_LIBS`,
+  while the C library used `H5EXAMPLE_USE_SHARED_LIBS`. Since
+  `H5EXAMPLE_USE_SHARED_LIBS` determines which component is requested from
+  `find_package`, and therefore which `HDF5_<linkage>_<lang>_FOUND` variables
+  exist, `BUILD_SHARED_LIBS` could not select a linkage on its own. With
+  `H5EXAMPLE_USE_SHARED_LIBS` on and `BUILD_SHARED_LIBS` unset, those examples
+  were disabled with a "libs not found" message even though the libraries were
+  installed and had been found. The selection now uses
+  `H5EXAMPLE_USE_SHARED_LIBS`, matching the C library.
+
+  Builds driven through `CTestScript.cmake` were not affected, since its cache
+  file forces `BUILD_SHARED_LIBS` on. This affected cases where the examples
+  were built directly without that cache file.
 
 ## Tools
 

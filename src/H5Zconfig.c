@@ -66,9 +66,19 @@ H5Z__copy_chars2(char *out, size_t cap, size_t *pos, const char **p)
 /*
  * H5Z__rewrite_hexfloats - return a copy of `src` with every C99 hex-float
  * literal (e.g. "0x1.8p+1", "-0x1p-1") replaced by an equivalent decimal
- * string.  Uses %.17e, which always carries a decimal point and an exponent
- * (so tomlc17 types it TOML_FP64, not TOML_INTEGER) and which guarantees
- * IEEE 754 double round-trip fidelity (C99 DBL_DECIMAL_DIG == 17).  %.17g
+ * string.  Uses %.16e, which always carries a decimal point and an exponent
+ * (so tomlc17 types it TOML_FP64, not TOML_INTEGER) and which emits exactly
+ * DBL_DECIMAL_DIG == 17 significant digits -- one before the point plus 16
+ * after -- the minimum that round-trips every IEEE 754 double.
+ *
+ * The width is deliberate.  C11 7.22.1.3p11 recommends correct rounding only
+ * for decimal forms of at most DECIMAL_DIG significant digits; past that the
+ * recommendation weakens to a bounded-value rule.  DECIMAL_DIG is sized for
+ * long double, so it is 21 where that is x87 80-bit but 17 where long double
+ * == double (MSVC among others).  %.17e emits 18 digits, exceeding
+ * DECIMAL_DIG on those targets for no benefit, since 17 already round-trip
+ * exactly.  Contrast 7.22.1.3p9, which *requires* correct rounding for the
+ * hexadecimal form -- the asymmetry this rewrite trades away.  %.17g
  * must not be substituted: it drops the decimal point for whole values
  * ("8.0" -> "8"), which a TOML parser reads as an integer.
  *
@@ -89,7 +99,7 @@ H5Z__rewrite_hexfloats(const char *src)
     char       *out;
     size_t      pos = 0;
 
-    /* Worst case: every 3-char token "0x1" expands to ~24 chars "%.17e" -> 8x.
+    /* Worst case: every 3-char token "0x1" expands to ~23 chars "%.16e" -> 8x.
      * Guard against size_t overflow in the multiplication; callers normally
      * cap input at H5Z_CONFIG_STRING_MAX, but enforce the bound here too so
      * this static helper is safe for any future caller. */
@@ -177,9 +187,9 @@ H5Z__rewrite_hexfloats(const char *src)
                              * contains a decimal point and exponent, so
                              * tomlc17 parses it as TOML_FP64 not TOML_INTEGER.
                              * 17 significant digits guarantee IEEE 754
-                             * double round-trip fidelity (C99 DBL_DECIMAL_DIG). */
+                             * double round-trip fidelity (C11 DBL_DECIMAL_DIG). */
                             char dec[32];
-                            int  n = snprintf(dec, sizeof(dec), "%.17e", val);
+                            int  n = snprintf(dec, sizeof(dec), "%.16e", val);
                             /* LC_NUMERIC may replace '.' with the locale decimal
                              * separator (e.g. ',' in de_DE).  TOML requires '.'.
                              * Use localeconv() to find the actual separator rather
@@ -282,7 +292,7 @@ H5Z__toml_wrap(const char *params)
  *                   removed: both "{level = 6}" and "level = 6" store as
  *                   "level = 6".  This mirrors the acceptance rule in
  *                   H5Z__toml_wrap().
- *                2. C99 hex-float literals are rewritten to %.17e decimal,
+ *                2. C99 hex-float literals are rewritten to %.16e decimal,
  *                   which is bit-exact for IEEE 754 doubles.
  *
  *              The point of both is that the stored bytes are a valid TOML

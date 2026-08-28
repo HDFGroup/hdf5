@@ -99,6 +99,17 @@ struct toml_datum_t {
 };
 
 /**
+ * @brief Bit values for toml_datum_t::flag.
+ *
+ * These record how a datum appeared in the source document. They are set
+ * by the parser and are informational for API users.
+ */
+#define TOML_FLAG_INLINED                                                      \
+  1 /**< appeared in inline form, e.g. {x = 1} or [1, 2] */
+#define TOML_FLAG_STDEXPR 2  /**< table created by a [table] header */
+#define TOML_FLAG_EXPLICIT 4 /**< table explicitly defined */
+
+/**
  * @brief Result of a TOML parsing operation.
  */
 typedef struct toml_result_t toml_result_t;
@@ -112,26 +123,22 @@ struct toml_result_t {
 /**
  * @brief Parse a TOML document from a string.
  *
- * @param src A NUL-terminated string containing the TOML document.
- * @param len The length of the string (excluding the NUL terminator).
+ * @param src A string containing the TOML document.
+ * @param len The length of the string. src need not be NUL-terminated;
+ * only the first len bytes are read.
  * @return A toml_result_t structure. Must be freed with toml_free().
- *
- * IMPORTANT: src[] must be a NUL terminated string! The len parameter
- * does not include the NUL terminator.
  */
 TOML_EXTERN toml_result_t toml_parse(const char *src, int len);
 
 /**
  * @brief Parse a TOML document, tagging every datum with a source name.
  *
- * @param src A NUL-terminated string containing the TOML document.
- * @param len The length of the string (excluding the NUL terminator).
+ * @param src A string containing the TOML document.
+ * @param len The length of the string. src need not be NUL-terminated;
+ * only the first len bytes are read.
  * @param name A source name (e.g. filename) copied into the result, or NULL.
  *             Every parsed datum's `source` is set to this name (or NULL).
  * @return A toml_result_t structure. Must be freed with toml_free().
- *
- * IMPORTANT: src[] must be a NUL terminated string! The len parameter
- * does not include the NUL terminator.
  */
 TOML_EXTERN toml_result_t toml_parse_named(const char *src, int len,
                                            const char *name);
@@ -234,7 +241,8 @@ TOML_EXTERN toml_result_t toml_merge(const toml_result_t *r1,
 /**
  * @brief Compare two TOML results for equality.
  *
- * Comparison is sensitive to the order of elements in arrays and tables.
+ * Tables compare as unordered maps (keys matched by name); array element
+ * order is significant.
  *
  * @param r1 The first TOML result.
  * @param r2 The second TOML result.

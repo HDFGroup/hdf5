@@ -142,7 +142,7 @@ H5_DLL htri_t             H5Z_filter_avail(H5Z_filter_t id);
 H5_DLL herr_t             H5Z_delete(struct H5O_pline_t *pline, H5Z_filter_t filter);
 H5_DLL herr_t             H5Z_get_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags);
 /* Normalise a parameter string into the form persisted in pipeline v3:
- * outer braces stripped and hex-float literals rewritten to %.17e decimal,
+ * outer braces stripped and hex-float literals rewritten to %.16e decimal,
  * so the stored bytes are valid TOML v1.0.0.  Caller frees with H5MM_xfree(). */
 H5_DLL char *H5Z_canonicalize_params(const char *params);
 
