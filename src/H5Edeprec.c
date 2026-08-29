@@ -182,10 +182,13 @@ done:
 herr_t
 H5Epush1(const char *file, const char *func, unsigned line, H5E_major_t maj, H5E_minor_t min, const char *str)
 {
-    H5E_stack_t *estack;              /* Pointer to error stack to modify */
-    const char  *tmp_file;            /* Copy of the file name */
-    const char  *tmp_func;            /* Copy of the function name */
-    herr_t       ret_value = SUCCEED; /* Return value */
+    H5E_stack_t *estack;               /* Pointer to error stack to modify */
+    htri_t       push_ret   = true;    /* Was an error stack entry actually pushed? */
+    char        *tmp_file   = NULL;    /* Copy of the file name */
+    char        *tmp_func   = NULL;    /* Copy of the function name */
+    bool         inc_maj_id = false;   /* Incremented major error ID ref. count? */
+    bool         inc_min_id = false;   /* Incremented minor error ID ref. count? */
+    herr_t       ret_value  = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
@@ -203,19 +206,35 @@ H5Epush1(const char *file, const char *func, unsigned line, H5E_major_t maj, H5E
             HGOTO_ERROR(H5E_ERROR, H5E_CANTALLOC, FAIL, "can't duplicate function string");
 
         /* Increment refcount on non-library IDs */
-        if (maj < H5E_first_maj_id_g || maj > H5E_last_maj_id_g)
+        if (maj < H5E_first_maj_id_g || maj > H5E_last_maj_id_g) {
             if (H5I_inc_ref(maj, false) < 0)
                 HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "can't increment major error ID");
-        if (min < H5E_first_min_id_g || min > H5E_last_min_id_g)
+            inc_maj_id = true;
+        }
+        if (min < H5E_first_min_id_g || min > H5E_last_min_id_g) {
             if (H5I_inc_ref(min, false) < 0)
                 HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "can't increment minor error ID");
+            inc_min_id = true;
+        }
 
         /* Push the error on the default error stack */
-        if (H5E__push_stack(estack, true, tmp_file, tmp_func, line, H5E_ERR_CLS_g, maj, min, str, NULL) < 0)
+        push_ret =
+            H5E__push_stack(estack, true, tmp_file, tmp_func, line, H5E_ERR_CLS_g, maj, min, str, NULL);
+        if (push_ret < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't push error on stack");
     }
 
 done:
+    if (ret_value < 0 || !push_ret) {
+        if (inc_maj_id && H5I_dec_ref(maj) < 0)
+            HDONE_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "can't decrement major error ID");
+        if (inc_min_id && H5I_dec_ref(min) < 0)
+            HDONE_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "can't decrement minor error ID");
+
+        free(tmp_func);
+        free(tmp_file);
+    }
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Epush1() */
 

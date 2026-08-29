@@ -1594,20 +1594,22 @@ done:
  *              MIN_ID, the name of a function where the error was detected,
  *              the name of the file where the error was detected, the
  *              line within that file, and an error description string.  The
- *              function name, file name, and error description strings must
- *              be statically allocated (the FUNC_ENTER() macro takes care of
- *              the function name and file name automatically, but the
- *              programmer is responsible for the description string).
+ *              error description string must be statically allocated (the
+ *              FUNC_ENTER() macro takes care of the function name and file
+ *              name automatically, but the programmer is responsible for
+ *              the description string).
  *
- * Return:      SUCCEED/FAIL
+ * Return:      true if an error stack entry was pushed
+ *              false if an error stack entry was not pushed
+ *              FAIL on failure
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+htri_t
 H5E__push_stack(H5E_stack_t *estack, bool app_entry, const char *file, const char *func, unsigned line,
                 hid_t cls_id, hid_t maj_id, hid_t min_id, const char *fmt, va_list *ap)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    htri_t ret_value = true;
 
     /*
      * WARNING: We cannot call HERROR() from within this function or else we
@@ -1633,6 +1635,8 @@ H5E__push_stack(H5E_stack_t *estack, bool app_entry, const char *file, const cha
             HGOTO_DONE(FAIL);
         estack->nused++;
     } /* end if */
+    else
+        HGOTO_DONE(false);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

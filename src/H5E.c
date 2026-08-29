@@ -525,12 +525,16 @@ herr_t
 H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid_t cls_id, hid_t maj_id,
          hid_t min_id, const char *fmt, ...)
 {
-    H5E_stack_t *estack;              /* Pointer to error stack to modify */
-    va_list      ap;                  /* Varargs info */
-    bool         va_started = false;  /* Whether the variable argument list is open */
-    const char  *tmp_file;            /* Copy of the file name */
-    const char  *tmp_func;            /* Copy of the function name */
-    herr_t       ret_value = SUCCEED; /* Return value */
+    H5E_stack_t *estack;               /* Pointer to error stack to modify */
+    va_list      ap;                   /* Varargs info */
+    htri_t       push_ret   = true;    /* Was an error stack entry actually pushed? */
+    bool         va_started = false;   /* Whether the variable argument list is open */
+    char        *tmp_file   = NULL;    /* Copy of the file name */
+    char        *tmp_func   = NULL;    /* Copy of the function name */
+    bool         inc_cls_id = false;   /* Incremented error class ID ref. count? */
+    bool         inc_maj_id = false;   /* Incremented major error ID ref. count? */
+    bool         inc_min_id = false;   /* Incremented minor error ID ref. count? */
+    herr_t       ret_value  = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
@@ -562,24 +566,43 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid
             HGOTO_ERROR(H5E_ERROR, H5E_CANTALLOC, FAIL, "can't duplicate function string");
 
         /* Increment refcount on non-library IDs */
-        if (cls_id != H5E_ERR_CLS_g)
+        if (cls_id != H5E_ERR_CLS_g) {
             if (H5I_inc_ref(cls_id, false) < 0)
                 HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "can't increment class ID");
-        if (maj_id < H5E_first_maj_id_g || maj_id > H5E_last_maj_id_g)
+            inc_cls_id = true;
+        }
+        if (maj_id < H5E_first_maj_id_g || maj_id > H5E_last_maj_id_g) {
             if (H5I_inc_ref(maj_id, false) < 0)
                 HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "can't increment major error ID");
-        if (min_id < H5E_first_min_id_g || min_id > H5E_last_min_id_g)
+            inc_maj_id = true;
+        }
+        if (min_id < H5E_first_min_id_g || min_id > H5E_last_min_id_g) {
             if (H5I_inc_ref(min_id, false) < 0)
                 HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "can't increment minor error ID");
+            inc_min_id = true;
+        }
 
         /* Push the error on the stack */
-        if (H5E__push_stack(estack, true, tmp_file, tmp_func, line, cls_id, maj_id, min_id, fmt, &ap) < 0)
+        push_ret = H5E__push_stack(estack, true, tmp_file, tmp_func, line, cls_id, maj_id, min_id, fmt, &ap);
+        if (push_ret < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't push error on stack");
     }
 
 done:
     if (va_started)
         va_end(ap);
+
+    if (ret_value < 0 || !push_ret) {
+        if (inc_cls_id && H5I_dec_ref(cls_id) < 0)
+            HDONE_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "can't decrement class ID");
+        if (inc_maj_id && H5I_dec_ref(maj_id) < 0)
+            HDONE_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "can't decrement major error ID");
+        if (inc_min_id && H5I_dec_ref(min_id) < 0)
+            HDONE_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "can't decrement minor error ID");
+
+        free(tmp_func);
+        free(tmp_file);
+    }
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Epush2() */

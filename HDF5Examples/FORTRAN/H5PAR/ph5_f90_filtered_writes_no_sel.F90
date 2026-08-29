@@ -186,7 +186,7 @@ CONTAINS
        ! passed to H5Dwrite.
          
        CALL H5Sselect_none_f(file_dataspace, status)
-       sel_type = H5S_BLOCK_F
+       sel_type = H5S_ALL_F
     ELSE
         !
         ! Even MPI ranks contribute data to
@@ -206,7 +206,7 @@ CONTAINS
 
         CALL H5Sselect_hyperslab_f(file_dataspace, H5S_SELECT_SET_F, start, count, status, stride=stride)
 
-        sel_type = H5S_ALL_F
+        sel_type = H5S_BLOCK_F
         !
         ! --------------------------------------
         ! Fill data buffer with MPI rank's rank

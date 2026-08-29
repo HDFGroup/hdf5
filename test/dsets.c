@@ -8090,6 +8090,64 @@ error:
 } /* end test_filters_endianess() */
 
 /*-------------------------------------------------------------------------
+ * Function: test_chunk_dims_mismatch
+ *
+ * Purpose: Test that a malformed file whose stored chunk layout
+ *          dimensionality does not match the dataset's dataspace rank
+ *          is properly rejected at open-time.
+ *
+ * Return: Success: 0
+ *         Failure: -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_chunk_dims_mismatch(void)
+{
+    hid_t       fid       = H5I_INVALID_HID;
+    hid_t       did       = H5I_INVALID_HID;
+    const char *data_file = H5_get_srcdir_filename("bad_chunk_ndims.h5");
+
+    TESTING("rejection of chunk dimensionality that mismatches the dataspace");
+
+    if ((fid = H5Fopen(data_file, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) {
+        printf("    Could not open file %s. Try setting $srcdir to point at the "
+               "source directory of the test suite\n",
+               data_file);
+        goto error;
+    }
+
+    /* Opening the dataset must fail cleanly */
+    H5E_BEGIN_TRY
+    {
+        did = H5Dopen2(fid, "dset", H5P_DEFAULT);
+    }
+    H5E_END_TRY
+
+    if (did >= 0) {
+        H5_FAILED();
+        puts("    Opening a dataset with mismatched chunk/dataspace rank should have failed.");
+        goto error;
+    }
+
+    if (H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(did);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_chunk_dims_mismatch() */
+
+/*-------------------------------------------------------------------------
  * Function: test_zero_dims
  *
  * Purpose: Tests read/writes to zero-sized extendible datasets
@@ -19794,6 +19852,7 @@ main(void)
 
                     if (driver_is_default_compatible) {
                         nerrors += (test_filters_endianess() < 0 ? 1 : 0);
+                        nerrors += (test_chunk_dims_mismatch() < 0 ? 1 : 0);
                     }
 
                     nerrors += (test_zero_dims(file) < 0 ? 1 : 0);
