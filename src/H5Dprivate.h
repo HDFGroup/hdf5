@@ -91,7 +91,7 @@
 #define H5D_XFER_MODIFY_WRITE_BUF_NAME         "modify_write_buf"         /* Modify write buffers */
 #ifdef H5_HAVE_CONCURRENCY
 #define H5D_XFER_IO_THREADS_ENABLED_NAME "io_threads_enabled" /* I/O threads enabled */
-#endif /* H5_HAVE_CONCURRENCY */
+#endif                                                        /* H5_HAVE_CONCURRENCY */
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
 /* Collective chunk instrumentation properties */
 #define H5D_XFER_COLL_CHUNK_LINK_HARD_NAME        "coll_chunk_link_hard"

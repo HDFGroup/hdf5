@@ -327,7 +327,7 @@ H5_DLL herr_t H5TS_api_unlock(void);
 #ifdef H5_HAVE_CONCURRENCY
 H5_DLL herr_t H5TS_internal_lock(void);
 H5_DLL herr_t H5TS_internal_unlock(void);
-H5_DLL bool H5TS_internal_locked(void);
+H5_DLL bool   H5TS_internal_locked(void);
 #endif /* H5_HAVE_CONCURRENCY */
 
 /* Retrieve per-thread info */

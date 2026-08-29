@@ -1387,8 +1387,8 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
 #ifdef H5_HAVE_CONCURRENCY
     bool mutex_held = false;
 #endif /* H5_HAVE_CONCURRENCY */
-    size_t   i;
-    herr_t   ret_value = SUCCEED; /* Return value */
+    size_t i;
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

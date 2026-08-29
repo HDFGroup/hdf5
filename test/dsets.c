@@ -19425,9 +19425,10 @@ static herr_t
 test_threaded_chunks(void)
 {
     char  filename[FILENAME_BUF_SIZE] = "";
-    hid_t file = H5I_INVALID_HID, dataset = H5I_INVALID_HID, dcpl = H5I_INVALID_HID, dapl = H5I_INVALID_HID, space = H5I_INVALID_HID, xfer = H5I_INVALID_HID;
-    int   i, j, n = 0;
-    hsize_t dims[2], cdims[2];
+    hid_t file = H5I_INVALID_HID, dataset = H5I_INVALID_HID, dcpl = H5I_INVALID_HID, dapl = H5I_INVALID_HID,
+          space = H5I_INVALID_HID, xfer = H5I_INVALID_HID;
+    int      i, j, n = 0;
+    hsize_t  dims[2], cdims[2];
     unsigned pool_threads;
     unsigned dxpl_setting;
     unsigned cache_enabled;
@@ -19465,8 +19466,8 @@ test_threaded_chunks(void)
         TEST_ERROR;
 
     /* Create the dataset */
-    if ((dataset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT,
-                              H5P_DEFAULT)) < 0)
+    if ((dataset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
+        0)
         TEST_ERROR;
     if (H5Dclose(dataset) < 0)
         TEST_ERROR;
@@ -19476,7 +19477,8 @@ test_threaded_chunks(void)
     /* Create dataset with deflate filter */
     if (H5Pset_deflate(dcpl, 6) < 0)
         TEST_ERROR;
-    if ((dataset = H5Dcreate2(file, "dset_deflate", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((dataset = H5Dcreate2(file, "dset_deflate", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) <
+        0)
         TEST_ERROR;
     if (H5Dclose(dataset) < 0)
         TEST_ERROR;
@@ -19497,7 +19499,7 @@ test_threaded_chunks(void)
             TEST_ERROR;
 
         /* Loop over DXPL setting, 0 = off, 1 = on, 2 = use H5P_DEFAULT */
-        for (dxpl_setting = 0; dxpl_setting <=2; dxpl_setting++) {
+        for (dxpl_setting = 0; dxpl_setting <= 2; dxpl_setting++) {
             /* Set DXPL IO threads and verify */
             if (dxpl_setting != 2) {
                 bool dxpl_setting_out;
@@ -19522,11 +19524,13 @@ test_threaded_chunks(void)
                     TEST_ERROR;
 
                 /* Write the data to the dataset */
-                if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer, points_data) < 0)
+                if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                             (dxpl_setting == 2) ? H5P_DEFAULT : xfer, points_data) < 0)
                     TEST_ERROR;
 
                 /* Read the dataset back */
-                if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer, check_data) < 0)
+                if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                            (dxpl_setting == 2) ? H5P_DEFAULT : xfer, check_data) < 0)
                     TEST_ERROR;
 
                 /* Check that the values read are the same as the values written */
@@ -19557,11 +19561,13 @@ test_threaded_chunks(void)
                     TEST_ERROR;
 
                 /* Write the data to the dataset */
-                if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer, points_data) < 0)
+                if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                             (dxpl_setting == 2) ? H5P_DEFAULT : xfer, points_data) < 0)
                     TEST_ERROR;
 
                 /* Read the dataset back */
-                if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer, check_data) < 0)
+                if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                            (dxpl_setting == 2) ? H5P_DEFAULT : xfer, check_data) < 0)
                     TEST_ERROR;
 
                 /* Check that the values read are the same as the values written */
@@ -19759,7 +19765,8 @@ main(void)
                         printf(", without threads,");
 #endif /* H5_HAVE_CONCURRENCY */
 
-                    /* Set the FCPL and print the rest of the message depending on paged aggregation setting */
+                    /* Set the FCPL and print the rest of the message depending on paged aggregation setting
+                     */
                     if (paged) {
                         my_fcpl = fcpl2;
                         puts(" and paged aggregation");
@@ -19784,7 +19791,8 @@ main(void)
                     }
 
                     /* Cause the library to emit initial messages */
-                    if ((grp = H5Gcreate2(file, "emit diagnostics", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                    if ((grp = H5Gcreate2(file, "emit diagnostics", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
+                        0)
                         goto error;
                     if (H5Oset_comment(grp, "Causes diagnostic messages to be emitted") < 0)
                         goto error;
@@ -19821,18 +19829,20 @@ main(void)
                     nerrors += (test_floattypes(file) < 0 ? 1 : 0);
                     nerrors += (test_userblock_offset(driver_name, fapl, low >= H5F_LIBVER_V110) < 0 ? 1 : 0);
 
-                    /* Don't test these with threads yet since H5E_BEGIN_TRY doesn't yet apply to threads and these tests will otherwise produce lots of irrelevant error messages */
+                    /* Don't test these with threads yet since H5E_BEGIN_TRY doesn't yet apply to threads and
+                     * these tests will otherwise produce lots of irrelevant error messages */
                     if (driver_is_default_compatible
 #ifdef H5_HAVE_CONCURRENCY
-                            && !threads
+                        && !threads
 #endif /* H5_HAVE_CONCURRENCY */
-                            ) {
+                    ) {
                         nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
                         nerrors += (test_bad_decode_size(file) < 0 ? 1 : 0);
                         nerrors += (test_bad_decode_size_vlen(file) < 0 ? 1 : 0);
                         nerrors += (test_bad_buf_size(file) < 0 ? 1 : 0);
 
-                        /* This one will also fail because it doesn't detect the expected message in the main thread's stack (it is printed by the child thread) */
+                        /* This one will also fail because it doesn't detect the expected message in the main
+                         * thread's stack (it is printed by the child thread) */
                         nerrors += (test_filter_error_msg(file) < 0 ? 1 : 0);
                     }
 

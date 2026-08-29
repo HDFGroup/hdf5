@@ -176,8 +176,8 @@ typedef struct H5CX_dxpl_cache_t {
                                                          (H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME) */
     bool modify_write_buf;                         /* Whether the library can modify write buffers */
 #ifdef H5_HAVE_CONCURRENCY
-    bool io_threads_enabled;                       /* Whether the library can use concurrent threads to accelerate I/O */
-#endif /* H5_HAVE_CONCURRENCY */
+    bool io_threads_enabled; /* Whether the library can use concurrent threads to accelerate I/O */
+#endif                       /* H5_HAVE_CONCURRENCY */
 } H5CX_dxpl_cache_t;
 
 /* Typedef for cached default link creation property list information */
@@ -2340,7 +2340,8 @@ H5CX_get_io_threads(bool *io_threads_enabled)
     assert(head && *head);
     assert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_MODIFY_WRITE_BUF_NAME, io_threads_enabled)
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_MODIFY_WRITE_BUF_NAME,
+                             io_threads_enabled)
 
     /* Get the value */
     *io_threads_enabled = (*head)->ctx.io_threads_enabled;

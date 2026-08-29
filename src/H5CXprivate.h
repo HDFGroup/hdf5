@@ -176,9 +176,9 @@ typedef struct H5CX_t {
     bool modify_write_buf; /* Whether the library can modify write buffers (H5D_XFER_MODIFY_WRITE_BUF_NAME)*/
     bool modify_write_buf_valid; /* Whether the modify_write_buf field is valid */
 #ifdef H5_HAVE_CONCURRENCY
-    bool io_threads_enabled; /* Whether the library can use concurrent threads to accelerate I/O */
+    bool io_threads_enabled;       /* Whether the library can use concurrent threads to accelerate I/O */
     bool io_threads_enabled_valid; /* Whether the io_threads_enabled field is valid */
-#endif /* H5_HAVE_CONCURRENCY */
+#endif                             /* H5_HAVE_CONCURRENCY */
 
     /* Return-only DXPL properties to return to application */
 #ifdef H5_HAVE_PARALLEL

@@ -17,7 +17,7 @@
 #ifndef H5TSpublic_H
 #define H5TSpublic_H
 
-#include "H5public.h"  /* Generic Functions                        */
+#include "H5public.h" /* Generic Functions                        */
 
 /*****************/
 /* Public Macros */

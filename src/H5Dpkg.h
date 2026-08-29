@@ -273,7 +273,7 @@ typedef struct {
 } H5D_compact_storage_t;
 
 typedef union H5D_storage_t {
-    H5D_contig_storage_t  contig;  /* Contiguous information for dataset */
+    H5D_contig_storage_t contig; /* Contiguous information for dataset */
     /* No global storage information for a chunked dataset for this union */
     H5D_compact_storage_t compact; /* Compact information for dataset */
     H5O_efl_t             efl;     /* External file list information for dataset */
@@ -753,7 +753,8 @@ H5_DLL herr_t H5D__contig_check(const H5F_t *f, const H5O_layout_t *layout, cons
                                 const H5T_t *dt);
 
 /* Functions that operate on chunked dataset storage */
-H5_DLL htri_t H5D__chunk_cacheable(const H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, const hsize_t *scaled, haddr_t caddr, bool write_op);
+H5_DLL htri_t H5D__chunk_cacheable(const H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info,
+                                   const hsize_t *scaled, haddr_t caddr, bool write_op);
 H5_DLL herr_t H5D__chunk_create(const H5D_t *dset /*in,out*/);
 H5_DLL herr_t H5D__chunk_set_info(const H5D_t *dset);
 H5_DLL bool   H5D__chunk_is_space_alloc(const H5O_storage_t *storage);
