@@ -6,6 +6,15 @@ about contributing to HDF5, from getting started to submitting your changes.
 > [!IMPORTANT]
 > No contribution can be accepted unless the contributor agrees to the HDF Group's software license terms,
   which can be found in the LICENSE file located in the top source directory of every branch.
+>
+> Additionally, by submitting a contribution ("Enhancement") to HDF5, you agree to the following: you are
+  under no obligation whatsoever to provide any bug fixes, patches, or upgrades to the features,
+  functionality, or performance of the source code ("Enhancements") to anyone; however, if you choose to
+  make your Enhancements available either publicly, or directly to The HDF Group, without imposing a
+  separate written license agreement for such Enhancements, then you hereby grant the following license: a
+  non-exclusive, royalty-free perpetual license to install, use, modify, prepare derivative works,
+  incorporate into other computer software, distribute, and sublicense such Enhancements or derivative
+  works thereof, in binary and source code form.
 
 ## Table of Contents
 

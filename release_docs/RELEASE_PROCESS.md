@@ -45,7 +45,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - **See: Testing/Testing Systems(this is a page in confluence)**
 4. Update current compiler information for each platform in the PLATFORMS TESTED section of [CHANGELOG.md][u1].
 5. Review the [CHANGELOG.md][u1] for formatting and language to verify that it corresponds to guidelines found in **[Writing Notes in a CHANGELOG.md(this is missing)]()** File.
-6. Review and update, if needed, the [README][u2] and [LICENSE][u3] files.
+6. Review and update, if needed, the [README][u2], [LICENSE][u3], and [NOTICE][u18] files.
 7. Review and update all INSTALL_* files in [release_docs][u4], if needed.
     - [INSTALL][u5] should be general info and not require extensive changes
     - [INSTALL_CMake.md][u7] are the instructions for building under CMake.
@@ -231,3 +231,4 @@ For more information on the HDF5 versioning and backward and forward compatibili
 [u15]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot
 [u16]: https://github.com/HDFGroup/hdf5/wiki/HDF5-Version-Numbers-and-Branch-Strategy
 [u17]: https://github.com/HDFGroup/hdf5/blob/develop/docs/USING_CMake_Examples.md
+[u18]: https://github.com/HDFGroup/hdf5/blob/develop/NOTICE
