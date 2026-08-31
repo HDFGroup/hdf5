@@ -83,9 +83,11 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    Fixes GitHub issue #6531
 
-### Fixed NULL pointer dereferences when unprotecting a corrupted local heap
+### Fixed a crash when unprotecting a local heap with no cached prefix or data block
 
-   Fixed a crash (segfault / assertion failure) that could occur when reading a corrupted file whose local heap prefix or data block pointer became NULL during cache eviction. `H5HL_unprotect()` now validates these pointers and returns an error via the normal HDF5 error mechanism instead of dereferencing NULL. Found by OSS-Fuzz via the matio project's fuzzer.
+   `H5HL_protect()` pins one metadata cache entry for a local heap -- the prefix when the heap is a single cache object, otherwise the data block -- and `H5HL_unprotect()` unpins it again. The cache unlinks that entry from the heap when it destroys it, so a damaged file could reach `H5HL_unprotect()` with nothing to unpin, which triggered an assertion failure in debug builds and a NULL pointer dereference otherwise. `H5HL_unprotect()` now reports an error instead, and does so before decrementing the heap's protect count so that a rejected call leaves the heap unchanged rather than half unprotected with its cache entry still pinned.
+
+   Reported by OSS-Fuzz via the matio project's fuzzer.
 
 ## Java Library
 

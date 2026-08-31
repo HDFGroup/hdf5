@@ -124,7 +124,6 @@ set (HDF5_REFERENCE_TEST_FILES
     btree_idx_1_8.h5
     corrupt_stab_msg.h5
     cve_2020_10812.h5
-    heap_corrupt_prfx.h5
     deflate.h5
     family_v16-000000.h5
     family_v16-000001.h5
@@ -145,6 +144,7 @@ set (HDF5_REFERENCE_TEST_FILES
     h5fc_ext2_sf.h5
     h5fc_ext3_isf.h5
     h5fc_ext_none.h5
+    heap_corrupt_prfx.h5
     le_data.h5
     le_extlink1.h5
     le_extlink2.h5

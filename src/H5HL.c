@@ -416,32 +416,35 @@ H5HL_unprotect(H5HL_t *heap)
     /* Check arguments */
     assert(heap);
 
-    /* Decrement # of times heap is protected */
-    heap->prots--;
-
     /* Check for last unprotection of heap */
-    if (heap->prots == 0) {
-        /* Check for separate heap data block */
-        if (heap->single_cache_obj) {
-            /* Validate prefix pointer before unpinning */
-            if (NULL == heap->prfx)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "local heap prefix is NULL");
+    if (heap->prots == 1) {
+        void *pin_obj; /* Pointer to local heap object to unpin */
 
-            /* Mark local heap prefix as evictable again */
-            if (FAIL == H5AC_unpin_entry(heap->prfx))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin local heap data block");
+        /* Get the object that H5HL_protect() pinned.  It is unlinked from the
+         * heap when the cache destroys it, which a damaged file can provoke,
+         * so check for it before the protect count is decremented.
+         */
+        if (heap->single_cache_obj) {
+            if (NULL == heap->prfx)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "local heap prefix is not in the cache");
+
+            pin_obj = heap->prfx;
         }
         else {
-            /* Validate data block pointer before unpinning */
             if (NULL == heap->dblk)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "local heap data block is NULL");
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "local heap data block is not in the cache");
 
-            /* Mark local heap data block as evictable again */
             /* (data block still pins prefix) */
-            if (FAIL == H5AC_unpin_entry(heap->dblk))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin local heap data block");
+            pin_obj = heap->dblk;
         }
+
+        /* Mark local heap object as evictable again */
+        if (FAIL == H5AC_unpin_entry(pin_obj))
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin local heap object");
     }
+
+    /* Decrement # of times heap is protected */
+    heap->prots--;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
