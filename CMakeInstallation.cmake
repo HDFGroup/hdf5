@@ -252,10 +252,11 @@ endif ()
 HDF_README_PROPERTIES(HDF5_BUILD_FORTRAN)
 
 #-----------------------------------------------------------------------------
-# Configure the LICENSE.txt file for the windows binary package
+# Configure the LICENSE.txt and NOTICE.txt files for the windows binary package
 #-----------------------------------------------------------------------------
 if (WIN32)
   configure_file (${HDF5_SOURCE_DIR}/LICENSE ${HDF5_BINARY_DIR}/LICENSE.txt @ONLY)
+  configure_file (${HDF5_SOURCE_DIR}/NOTICE ${HDF5_BINARY_DIR}/NOTICE.txt @ONLY)
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -263,7 +264,7 @@ endif ()
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
   install (
-      FILES ${HDF5_SOURCE_DIR}/LICENSE
+      FILES ${HDF5_SOURCE_DIR}/LICENSE ${HDF5_SOURCE_DIR}/NOTICE
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       COMPONENT hdfdocuments
   )
@@ -494,7 +495,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
       set (CPACK_RPM_PACKAGE_NAME "${CPACK_PACKAGE_NAME}")
       set (CPACK_RPM_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")
       set (CPACK_RPM_PACKAGE_VENDOR "${CPACK_PACKAGE_VENDOR}")
-      set (CPACK_RPM_PACKAGE_LICENSE "BSD-style")
+      set (CPACK_RPM_PACKAGE_LICENSE "BSD-3-Clause")
       set (CPACK_RPM_PACKAGE_GROUP "Development/Libraries")
       set (CPACK_RPM_PACKAGE_URL "${HDF5_PACKAGE_URL}")
       set (CPACK_RPM_PACKAGE_SUMMARY "HDF5 is a unique technology suite that makes possible the management of extremely large and complex data collections.")
