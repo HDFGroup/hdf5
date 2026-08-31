@@ -252,11 +252,13 @@ endif ()
 HDF_README_PROPERTIES(HDF5_BUILD_FORTRAN)
 
 #-----------------------------------------------------------------------------
-# Configure the LICENSE.txt and NOTICE.txt files for the windows binary package
+# Configure the LICENSE.txt file for the windows binary package
+# (used below as CPACK_RESOURCE_FILE_LICENSE for the WiX installer's
+# license-acceptance screen, which requires a .txt or .rtf extension —
+# see the WiX license text a few lines down)
 #-----------------------------------------------------------------------------
 if (WIN32)
   configure_file (${HDF5_SOURCE_DIR}/LICENSE ${HDF5_BINARY_DIR}/LICENSE.txt @ONLY)
-  configure_file (${HDF5_SOURCE_DIR}/NOTICE ${HDF5_BINARY_DIR}/NOTICE.txt @ONLY)
 endif ()
 
 #-----------------------------------------------------------------------------
