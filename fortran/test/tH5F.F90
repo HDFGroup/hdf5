@@ -43,6 +43,198 @@ MODULE TH5F
 
 CONTAINS
 
+  ! Verify that h5open_f re-initialized the Fortran interface. Enter with the
+  ! interface closed; returns with it closed again.
+  SUBROUTINE check_reopen(total_error)
+    IMPLICIT NONE
+    INTEGER, INTENT(INOUT) :: total_error
+
+    INTEGER :: error
+    INTEGER(SIZE_T) :: obj_count ! open object count
+    INTEGER, DIMENSION(1:5) :: obj_type ! open object type to check
+    INTEGER(SIZE_T), PARAMETER :: max_ids = 20
+    INTEGER(HID_T), DIMENSION(1:max_ids) :: obj_ids
+    INTEGER(SIZE_T) :: num_objs
+    LOGICAL :: valid
+    INTEGER :: i
+
+    CALL h5open_f(error)
+    CALL check("h5open_f",error,total_error)
+
+    ! A skipped re-initialization leaves the predefined types holding the
+    ! identifiers h5close_f released, and h5open_f still reports success.
+    CALL h5iis_valid_f(H5T_NATIVE_INTEGER, valid, error)
+    CALL check("h5iis_valid_f",error,total_error)
+    IF(.NOT.valid)THEN
+       total_error = total_error + 1
+    ENDIF
+
+    obj_type(1) = H5F_OBJ_ALL_F
+    obj_type(2) = H5F_OBJ_FILE_F
+    obj_type(3) = H5F_OBJ_GROUP_F
+    obj_type(4) = H5F_OBJ_DATASET_F
+    obj_type(5) = H5F_OBJ_DATATYPE_F
+
+    ! Only the types belonging to this h5open_f are open, so the ones from the
+    ! preceding h5open_f were released by h5close_f.
+    DO i = 1, 5
+       CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), obj_type(i), obj_count, error)
+       CALL check("h5fget_obj_count_f",error,total_error)
+       IF(obj_count.NE.0)THEN
+          total_error = total_error + 1
+       ENDIF
+
+       ! The identifiers h5open_f opened are not the application's either, so the
+       ! list must agree with the count.
+       CALL h5fget_obj_ids_f(INT(H5F_OBJ_ALL_F,HID_T), obj_type(i), max_ids, obj_ids, error, num_objs)
+       CALL check("h5fget_obj_ids_f",error,total_error)
+       IF(num_objs.NE.obj_count)THEN
+          total_error = total_error + 1
+       ENDIF
+    ENDDO
+
+    CALL h5close_f(error)
+    CALL check("h5close_f",error,total_error)
+
+  END SUBROUTINE check_reopen
+
+  ! Check that the object counts and the identifier lists agree with each other,
+  ! and that both report only what the application has open.
+  SUBROUTINE objcount_ids(cleanup, total_error)
+    IMPLICIT NONE
+    LOGICAL, INTENT(IN) :: cleanup
+    INTEGER, INTENT(INOUT) :: total_error
+
+    CHARACTER(LEN=8), PARAMETER :: filename = "objcount"
+    CHARACTER(LEN=80) :: fix_filename
+    INTEGER(HID_T) :: fid, gid, did, sid, tid
+    INTEGER(HID_T), DIMENSION(1:20) :: obj_ids
+    INTEGER(SIZE_T) :: obj_count, obj_count2, num_objs
+    INTEGER :: error, i
+
+    CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+    IF (error .NE. 0) THEN
+       WRITE(*,*) "Cannot modify filename"
+       CALL h5_exit_f(1)
+    ENDIF
+
+    CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, fid, error)
+    CALL check("h5fcreate_f",error,total_error)
+    CALL h5gcreate_f(fid, "group", gid, error)
+    CALL check("h5gcreate_f",error,total_error)
+    CALL h5screate_f(H5S_SCALAR_F, sid, error)
+    CALL check("h5screate_f",error,total_error)
+    CALL h5dcreate_f(fid, "dset", H5T_NATIVE_INTEGER, sid, did, error)
+    CALL check("h5dcreate_f",error,total_error)
+
+    ! One file, one group and one dataset are open. The datatypes h5open_f opened
+    ! are not the application's and must not appear in either answer.
+    CALL count_and_list(H5F_OBJ_FILE_F,     1_SIZE_T, total_error)
+    CALL count_and_list(H5F_OBJ_GROUP_F,    1_SIZE_T, total_error)
+    CALL count_and_list(H5F_OBJ_DATASET_F,  1_SIZE_T, total_error)
+    CALL count_and_list(H5F_OBJ_DATATYPE_F, 0_SIZE_T, total_error)
+    CALL count_and_list(H5F_OBJ_ALL_F,      3_SIZE_T, total_error)
+
+    ! Several types combined with IOR must count as the sum of the parts.
+    CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), &
+         IOR(H5F_OBJ_GROUP_F,H5F_OBJ_DATASET_F), obj_count, error)
+    CALL check("h5fget_obj_count_f",error,total_error)
+    IF(obj_count.NE.2)THEN
+       total_error = total_error + 1
+       WRITE(*,*) "IOR of two object types did not count as the sum of the parts"
+    ENDIF
+
+    ! A combination that includes the types h5open_f opened is still adjusted.
+    CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), &
+         IOR(H5F_OBJ_GROUP_F,H5F_OBJ_DATATYPE_F), obj_count2, error)
+    CALL check("h5fget_obj_count_f",error,total_error)
+    IF(obj_count2.NE.1)THEN
+       total_error = total_error + 1
+       WRITE(*,*) "IOR including datatypes did not exclude the h5open_f objects"
+    ENDIF
+
+    ! max_objs smaller than the number of open objects must return exactly that
+    ! many, and all of them the application's.
+    obj_ids = -1
+    CALL h5fget_obj_ids_f(INT(H5F_OBJ_ALL_F,HID_T), H5F_OBJ_ALL_F, 2_SIZE_T, obj_ids, error, num_objs)
+    CALL check("h5fget_obj_ids_f",error,total_error)
+    IF(num_objs.NE.2)THEN
+       total_error = total_error + 1
+       WRITE(*,*) "h5fget_obj_ids_f did not fill max_objs identifiers"
+    ENDIF
+    DO i = 1, 2
+       IF(obj_ids(i).NE.fid .AND. obj_ids(i).NE.gid .AND. obj_ids(i).NE.did)THEN
+          total_error = total_error + 1
+          WRITE(*,*) "h5fget_obj_ids_f returned an identifier the application did not open"
+       ENDIF
+    ENDDO
+
+    CALL h5dclose_f(did, error)
+    CALL check("h5dclose_f",error,total_error)
+    CALL h5sclose_f(sid, error)
+    CALL check("h5sclose_f",error,total_error)
+    CALL h5gclose_f(gid, error)
+    CALL check("h5gclose_f",error,total_error)
+    CALL h5fclose_f(fid, error)
+    CALL check("h5fclose_f",error,total_error)
+
+    ! Nothing of the application's is left, and h5open_f's objects are still hidden.
+    CALL count_and_list(H5F_OBJ_ALL_F, 0_SIZE_T, total_error)
+
+    ! An application's own datatype is reported even though h5open_f's are not. Here
+    ! h5open_f's come first in the list, so a short buffer still has to be filled
+    ! with the application's rather than exhausted on the ones being skipped.
+    CALL h5tcopy_f(H5T_NATIVE_INTEGER, tid, error)
+    CALL check("h5tcopy_f",error,total_error)
+
+    CALL count_and_list(H5F_OBJ_DATATYPE_F, 1_SIZE_T, total_error)
+
+    obj_ids = -1
+    CALL h5fget_obj_ids_f(INT(H5F_OBJ_ALL_F,HID_T), H5F_OBJ_DATATYPE_F, 1_SIZE_T, obj_ids, error, num_objs)
+    CALL check("h5fget_obj_ids_f",error,total_error)
+    IF(num_objs.NE.1 .OR. obj_ids(1).NE.tid)THEN
+       total_error = total_error + 1
+       WRITE(*,*) "h5fget_obj_ids_f did not return the application's datatype"
+    ENDIF
+
+    CALL h5tclose_f(tid, error)
+    CALL check("h5tclose_f",error,total_error)
+
+    IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+    CALL check("h5_cleanup_f",error,total_error)
+
+    RETURN
+  END SUBROUTINE objcount_ids
+
+  ! Check that a count of obj_type is expected and that the identifier list
+  ! reports the same number.
+  SUBROUTINE count_and_list(obj_type, expected, total_error)
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: obj_type
+    INTEGER(SIZE_T), INTENT(IN) :: expected
+    INTEGER, INTENT(INOUT) :: total_error
+
+    INTEGER(HID_T), DIMENSION(1:20) :: obj_ids
+    INTEGER(SIZE_T) :: obj_count, num_objs
+    INTEGER :: error
+
+    CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), obj_type, obj_count, error)
+    CALL check("h5fget_obj_count_f",error,total_error)
+    IF(obj_count.NE.expected)THEN
+       total_error = total_error + 1
+       WRITE(*,*) "h5fget_obj_count_f reported ", obj_count, " instead of ", expected
+    ENDIF
+
+    CALL h5fget_obj_ids_f(INT(H5F_OBJ_ALL_F,HID_T), obj_type, 20_SIZE_T, obj_ids, error, num_objs)
+    CALL check("h5fget_obj_ids_f",error,total_error)
+    IF(num_objs.NE.obj_count)THEN
+       total_error = total_error + 1
+       WRITE(*,*) "h5fget_obj_ids_f reported ", num_objs, " but the count was ", obj_count
+    ENDIF
+
+    RETURN
+  END SUBROUTINE count_and_list
+
   SUBROUTINE h5openclose(total_error)
     IMPLICIT NONE
     INTEGER, INTENT(INOUT) :: total_error
@@ -51,30 +243,19 @@ CONTAINS
     ! flag to check operation success
     !
     INTEGER :: error
-    INTEGER(SIZE_T) :: obj_count ! open object count
-    INTEGER, DIMENSION(1:5) :: obj_type ! open object type to check
-    INTEGER :: i, j
+    INTEGER :: j
+
+    ! h5open_f is the only call allowed once h5close_f has closed the Fortran
+    ! interface, so every check below is made from check_reopen.
 
     DO j = 1, 2
        CALL h5open_f(error)
        CALL check("h5open_f",error,total_error)
 
-       obj_type(1) = H5F_OBJ_ALL_F
-       obj_type(2) = H5F_OBJ_FILE_F
-       obj_type(3) = H5F_OBJ_GROUP_F
-       obj_type(4) = H5F_OBJ_DATASET_F
-       obj_type(5) = H5F_OBJ_DATATYPE_F
-
        CALL h5close_f(error)
        CALL check("h5close_f",error,total_error)
-       ! Check all the datatypes created during h5open_f are closed in h5close_f
-       DO i = 1, 5
-          CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), obj_type(i), obj_count, error)
-          CALL check("h5fget_obj_count_f",error,total_error)
-          IF(obj_count.NE.0)THEN
-             total_error = total_error + 1
-          ENDIF
-       ENDDO
+
+       CALL check_reopen(total_error)
     ENDDO
 
     ! Test calling h5open_f multiple times without calling h5close_f
@@ -85,14 +266,8 @@ CONTAINS
 
     CALL h5close_f(error)
     CALL check("h5close_f",error,total_error)
-    ! Check all the datatypes created during h5open_f are closed in h5close_f
-    DO i = 1, 5
-       CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), obj_type(i), obj_count, error)
-       CALL check("h5fget_obj_count_f",error,total_error)
-       IF(obj_count.NE.0)THEN
-          total_error = total_error + 1
-       ENDIF
-    ENDDO
+
+    CALL check_reopen(total_error)
 
     ! Test calling h5open_f multiple times with a h5close_f in the series of h5open_f
     DO j = 1, 5
@@ -101,39 +276,21 @@ CONTAINS
        IF(j.EQ.3)THEN
           CALL h5close_f(error)
           CALL check("h5close_f",error,total_error)
-          ! Check all the datatypes created during h5open_f are closed in h5close_f
-          DO i = 1, 5
-             CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), obj_type(i), obj_count, error)
-             CALL check("h5fget_obj_count_f",error,total_error)
-             IF(obj_count.NE.0)THEN
-                total_error = total_error + 1
-             ENDIF
-          ENDDO
+
+          CALL check_reopen(total_error)
        ENDIF
     ENDDO
 
     CALL h5close_f(error)
     CALL check("h5close_f",error,total_error)
-    ! Check all the datatypes created during h5open_f are closed in h5close_f
-    DO i = 1, 5
-       CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), obj_type(i), obj_count, error)
-       CALL check("h5fget_obj_count_f",error,total_error)
-       IF(obj_count.NE.0)THEN
-          total_error = total_error + 1
-       ENDIF
-    ENDDO
+
+    CALL check_reopen(total_error)
 
     ! Check calling h5close_f after already calling h5close_f
     CALL h5close_f(error)
     CALL check("h5close_f",error,total_error)
-    ! Check all the datatypes created during h5open_f are closed in h5close_f
-    DO i = 1, 5
-       CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), obj_type(i), obj_count, error)
-       CALL check("h5fget_obj_count_f",error,total_error)
-       IF(obj_count.NE.0)THEN
-          total_error = total_error + 1
-       ENDIF
-    ENDDO
+
+    CALL check_reopen(total_error)
 
     RETURN
   END SUBROUTINE h5openclose
@@ -345,14 +502,14 @@ CONTAINS
     CALL check("h5fis_accessible_f",error,total_error)
     IF ( .NOT. status ) THEN
        write(*,*) "File ", fix_filename1, " is not accessible as hdf5"
-       stop
+       CALL h5_exit_f(1)
     END IF
 
     CALL h5fis_accessible_f(fix_filename2, status, error)
     CALL check("h5fis_accessible_f",error,total_error)
     IF ( .NOT. status ) THEN
        write(*,*) "File ", fix_filename2, " is not accessible as hdf5"
-       stop
+       CALL h5_exit_f(1)
     END IF
 
     !
@@ -362,14 +519,14 @@ CONTAINS
     CALL check("h5fis_hdf5_f",error,total_error)
     IF ( .NOT. status ) THEN
        write(*,*) "File ", fix_filename1, " is not in hdf5 format"
-       stop
+       CALL h5_exit_f(1)
     END IF
 
     CALL h5fis_hdf5_f(fix_filename2, status, error)
     CALL check("h5fis_hdf5_f",error,total_error)
     IF ( .NOT. status ) THEN
        write(*,*) "File ", fix_filename2, " is not in hdf5 format"
-       stop
+       CALL h5_exit_f(1)
     END IF
 
     !
@@ -575,7 +732,7 @@ CONTAINS
     CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
     if (error .ne. 0) then
        write(*,*) "Cannot modify filename"
-       stop
+       CALL h5_exit_f(1)
     endif
     CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
     CALL check("h5fcreate_f",error,total_error)
@@ -802,7 +959,7 @@ CONTAINS
     CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
     IF (error .NE. 0) THEN
        WRITE(*,*) "Cannot modify filename"
-       STOP
+       CALL h5_exit_f(1)
     ENDIF
     CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
     CALL check("h5fcreate_f",error,total_error)
@@ -871,7 +1028,7 @@ CONTAINS
     CALL h5_fixname_f(filename1, fix_filename1, H5P_DEFAULT_F, error)
     if (error .ne. 0) then
        write(*,*) "Cannot modify file name"
-       stop
+       CALL h5_exit_f(1)
     endif
     CALL h5fcreate_f(fix_filename1, H5F_ACC_TRUNC_F, file1_id, error)
     CALL check("h5fcreate_f",error,total_error)
@@ -907,7 +1064,7 @@ CONTAINS
     CALL h5_fixname_f(filename2, fix_filename2, H5P_DEFAULT_F, error)
     if (error .ne. 0) then
        write(*,*) "Cannot modify file name"
-       stop
+       CALL h5_exit_f(1)
     endif
     CALL h5fcreate_f(fix_filename2, H5F_ACC_TRUNC_F, file2_id, error, &
          prop_id, access_id)
@@ -993,7 +1150,7 @@ CONTAINS
     CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
     if (error .ne. 0) then
        write(*,*) "Cannot modify filename"
-       stop
+       CALL h5_exit_f(1)
     endif
     CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, fid, error)
     CALL check("h5fcreate_f",error,total_error)
@@ -1120,7 +1277,7 @@ CONTAINS
     CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
     if (error .ne. 0) then
        write(*,*) "Cannot modify filename"
-       stop
+       CALL h5_exit_f(1)
     endif
 
     CALL h5pcreate_f(H5P_FILE_CREATE_F, fcpl, error)
@@ -1212,7 +1369,7 @@ CONTAINS
     CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
     if (error .ne. 0) then
        write(*,*) "Cannot modify filename"
-       stop
+       CALL h5_exit_f(1)
     endif
 
     CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl, error)

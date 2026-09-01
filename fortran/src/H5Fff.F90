@@ -41,7 +41,13 @@ MODULE H5F
   IMPLICIT NONE
 
   ! Number of objects opened in H5open_f
-  INTEGER(SIZE_T) :: H5OPEN_NUM_OBJ
+  INTEGER(SIZE_T) :: H5OPEN_NUM_OBJ = 0
+  ! The same count broken down by object type, in the order of the object type
+  ! list in h5fget_obj_count_f, so that a count can be adjusted without assuming
+  ! which types h5open_f creates.
+  INTEGER(SIZE_T), DIMENSION(1:4) :: H5OPEN_NUM_OBJ_BY_TYPE = 0
+
+  PRIVATE :: h5open_num_obj_matching, h5open_owns_id
 
 
 #ifndef H5_DOXYGEN
@@ -863,20 +869,54 @@ CONTAINS
 
   END SUBROUTINE h5fclose_async_f
 
+  ! Number of the objects h5open_f left open that a count or list of obj_type
+  ! would include.
+  FUNCTION h5open_num_obj_matching(obj_type) RESULT(num_obj)
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: obj_type
+    INTEGER(SIZE_T) :: num_obj
+
+    IF(obj_type.EQ.H5F_OBJ_ALL_F)THEN
+       num_obj = H5OPEN_NUM_OBJ
+    ELSE
+       num_obj = 0
+       IF(IAND(obj_type,H5F_OBJ_FILE_F    ).NE.0) num_obj = num_obj + H5OPEN_NUM_OBJ_BY_TYPE(1)
+       IF(IAND(obj_type,H5F_OBJ_DATASET_F ).NE.0) num_obj = num_obj + H5OPEN_NUM_OBJ_BY_TYPE(2)
+       IF(IAND(obj_type,H5F_OBJ_GROUP_F   ).NE.0) num_obj = num_obj + H5OPEN_NUM_OBJ_BY_TYPE(3)
+       IF(IAND(obj_type,H5F_OBJ_DATATYPE_F).NE.0) num_obj = num_obj + H5OPEN_NUM_OBJ_BY_TYPE(4)
+    ENDIF
+
+  END FUNCTION h5open_num_obj_matching
+
+  ! Whether id is one of the identifiers h5open_f opened for the Fortran interface.
+  FUNCTION h5open_owns_id(id) RESULT(owns)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: id
+    LOGICAL :: owns
+
+    owns = ANY(predef_types.EQ.id) .OR. ANY(floating_types.EQ.id) .OR. ANY(integer_types.EQ.id)
+
+  END FUNCTION h5open_owns_id
+
 !>
 !! \ingroup FH5F
 !!
 !! \brief Gets number of the objects open within a file.
 !!
 !! \param file_id   File identifier
-!! \param obj_type  Type of the object; possible values are:
+!! \param obj_type  Type of the objects to count, either one of the following or
+!!                  several of them combined with IOR():
 !!                  \li H5F_OBJ_FILE_F
 !!                  \li H5F_OBJ_DATASET_F
 !!                  \li H5F_OBJ_GROUP_F
 !!                  \li H5F_OBJ_DATATYPE_F
-!!                  \li H5F_OBJ_ALL_F
+!!                  \li H5F_OBJ_ALL_F, which counts all of the above
 !! \param obj_count Number of open objects
 !! \param hdferr    \fortran_error
+!!
+!! \note When \p file_id is H5F_OBJ_ALL_F the count excludes the objects that
+!!       h5open_f opens for the Fortran interface, so it reports only what the
+!!       application itself has open.
 !!
 !! See C API: @ref H5Fget_obj_count()
 !!
@@ -886,6 +926,8 @@ CONTAINS
     INTEGER        , INTENT(IN)  :: obj_type
     INTEGER(SIZE_T), INTENT(OUT) :: obj_count
     INTEGER        , INTENT(OUT) :: hdferr
+
+    INTEGER(SIZE_T) :: count_loc
 
     INTERFACE
        INTEGER(SIZE_T) FUNCTION H5Fget_obj_count(file_id, obj_type) BIND(C,NAME='H5Fget_obj_count')
@@ -897,15 +939,21 @@ CONTAINS
        END FUNCTION H5Fget_obj_count
     END INTERFACE
 
-    obj_count = H5Fget_obj_count(file_id, INT(obj_type, C_INT))
+    count_loc = H5Fget_obj_count(file_id, INT(obj_type, C_INT))
 
     hdferr = 0
-    IF(obj_count.LT.0) hdferr = -1
 
-    ! Don't include objects created by H5open in the H5F_OBJ_ALL_F count
-    IF(file_id.EQ.INT(H5F_OBJ_ALL_F,HID_T))THEN
-       obj_count = obj_count - H5OPEN_NUM_OBJ
-    ENDIF
+    ! H5Fget_obj_count reports failure as a negative count.
+    IF(count_loc.LT.0) hdferr = -1
+
+    ! Don't include the objects h5open_f left open.
+    IF(file_id.EQ.INT(H5F_OBJ_ALL_F,HID_T)) &
+         count_loc = count_loc - h5open_num_obj_matching(obj_type)
+
+    ! A count is never negative, so neither is one that has been adjusted.
+    IF(count_loc.LT.0) hdferr = -1
+
+    obj_count = count_loc
 
   END SUBROUTINE h5fget_obj_count_f
 
@@ -915,16 +963,21 @@ CONTAINS
 !! \brief Get list of open objects identifiers within a file.
 !!
 !! \param file_id  File identifier
-!! \param obj_type Type of the object; possible values are:
+!! \param obj_type Type of the objects to list, either one of the following or
+!!                 several of them combined with IOR():
 !!                 \li H5F_OBJ_FILE_F
 !!                 \li H5F_OBJ_DATASET_F
 !!                 \li H5F_OBJ_GROUP_F
 !!                 \li H5F_OBJ_DATATYPE_F
-!!                 \li H5F_OBJ_ALL_F
+!!                 \li H5F_OBJ_ALL_F, which lists all of the above
 !! \param max_objs Maximum # of objects to retrieve
 !! \param obj_ids  Array of open object identifiers
 !! \param hdferr   \fortran_error
 !! \param num_objs Number of open objects
+!!
+!! \note When \p file_id is H5F_OBJ_ALL_F the list excludes the identifiers that
+!!       h5open_f opens for the Fortran interface, matching h5fget_obj_count_f, so
+!!       it reports only what the application itself has open.
 !!
 !! See C API: @ref H5Fget_obj_ids()
 !!
@@ -938,6 +991,10 @@ CONTAINS
     INTEGER(SIZE_T), INTENT(OUT), OPTIONAL :: num_objs
 
     INTEGER(SIZE_T) :: c_num_objs ! Number of open objects of the specified type
+    INTEGER(SIZE_T) :: num_skip   ! Objects h5open_f left open that this query would return
+    INTEGER(SIZE_T) :: idx, num_kept
+    INTEGER :: alloc_stat
+    INTEGER(HID_T), ALLOCATABLE :: obj_ids_loc(:)
 
     INTERFACE
        INTEGER(SIZE_T) FUNCTION H5Fget_obj_ids(file_id, obj_type, max_objs, obj_ids) &
@@ -952,9 +1009,42 @@ CONTAINS
        END FUNCTION H5Fget_obj_ids
     END INTERFACE
 
-    c_num_objs = H5Fget_obj_ids(file_id, INT(obj_type, C_INT), max_objs, obj_ids)
+    ! Don't return the identifiers h5open_f opened, so that this agrees with
+    ! h5fget_obj_count_f about what the application has open.
+    num_skip = 0
+    IF(file_id.EQ.INT(H5F_OBJ_ALL_F,HID_T)) num_skip = h5open_num_obj_matching(obj_type)
 
     hdferr = 0
+
+    IF(num_skip.EQ.0)THEN
+
+       c_num_objs = H5Fget_obj_ids(file_id, INT(obj_type, C_INT), max_objs, obj_ids)
+
+    ELSE
+       ! Ask for enough identifiers that max_objs of the application's own can still be
+       ! returned when h5open_f's are interleaved with them.
+       ALLOCATE(obj_ids_loc(1:max_objs+num_skip), STAT=alloc_stat)
+       IF(alloc_stat.NE.0)THEN
+          hdferr = -1
+          RETURN
+       ENDIF
+
+       c_num_objs = H5Fget_obj_ids(file_id, INT(obj_type, C_INT), max_objs+num_skip, obj_ids_loc)
+
+       IF(c_num_objs.GE.0)THEN
+          num_kept = 0
+          DO idx = 1, c_num_objs
+             IF(num_kept.EQ.max_objs) EXIT
+             IF(h5open_owns_id(obj_ids_loc(idx))) CYCLE
+             num_kept = num_kept + 1
+             obj_ids(num_kept) = obj_ids_loc(idx)
+          ENDDO
+          c_num_objs = num_kept
+       ENDIF
+
+       DEALLOCATE(obj_ids_loc)
+    ENDIF
+
     IF(c_num_objs.LT.0) hdferr = -1
 
     IF (PRESENT(num_objs)) num_objs= c_num_objs
