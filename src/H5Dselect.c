@@ -157,7 +157,6 @@ H5D__select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info
             vec_size = dxpl_vec_size;
         else
             vec_size = H5D_IO_VECTOR_SIZE;
-
         if (NULL == (mem_len = H5FL_SEQ_MALLOC(size_t, vec_size)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array");
         if (NULL == (mem_off = H5FL_SEQ_MALLOC(hsize_t, vec_size)))
