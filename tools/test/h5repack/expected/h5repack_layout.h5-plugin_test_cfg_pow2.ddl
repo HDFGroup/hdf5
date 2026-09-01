@@ -1,4 +1,4 @@
-HDF5 "out-plugin_test_cfg.h5repack_layout.h5" {
+HDF5 "out-plugin_test_cfg_pow2.h5repack_layout.h5" {
 GROUP "/" {
    DATASET "dset1" {
       DATATYPE  H5T_STD_I32LE
@@ -11,9 +11,9 @@ GROUP "/" {
          USER_DEFINED_FILTER {
             FILTER_ID 261
             COMMENT dynlib3
-            PARAMS { 35 }
-            PARAMS_STRING 'mode="rate",rate=3.5'
-            # rate = 0x1.cp+1
+            PARAMS { 1 }
+            PARAMS_STRING 'mode="rate",rate=1.2500000000000000e-01'
+            # rate = 0x1p-3
             DESCRIPTION "Test filter with string-based configuration (mode=rate)"
          }
       }
@@ -36,9 +36,9 @@ GROUP "/" {
          USER_DEFINED_FILTER {
             FILTER_ID 261
             COMMENT dynlib3
-            PARAMS { 35 }
-            PARAMS_STRING 'mode="rate",rate=3.5'
-            # rate = 0x1.cp+1
+            PARAMS { 1 }
+            PARAMS_STRING 'mode="rate",rate=1.2500000000000000e-01'
+            # rate = 0x1p-3
             DESCRIPTION "Test filter with string-based configuration (mode=rate)"
          }
       }
@@ -61,9 +61,9 @@ GROUP "/" {
          USER_DEFINED_FILTER {
             FILTER_ID 261
             COMMENT dynlib3
-            PARAMS { 35 }
-            PARAMS_STRING 'mode="rate",rate=3.5'
-            # rate = 0x1.cp+1
+            PARAMS { 1 }
+            PARAMS_STRING 'mode="rate",rate=1.2500000000000000e-01'
+            # rate = 0x1p-3
             DESCRIPTION "Test filter with string-based configuration (mode=rate)"
          }
       }
@@ -86,9 +86,9 @@ GROUP "/" {
          USER_DEFINED_FILTER {
             FILTER_ID 261
             COMMENT dynlib3
-            PARAMS { 35 }
-            PARAMS_STRING 'mode="rate",rate=3.5'
-            # rate = 0x1.cp+1
+            PARAMS { 1 }
+            PARAMS_STRING 'mode="rate",rate=1.2500000000000000e-01'
+            # rate = 0x1p-3
             DESCRIPTION "Test filter with string-based configuration (mode=rate)"
          }
       }
@@ -111,9 +111,9 @@ GROUP "/" {
          USER_DEFINED_FILTER {
             FILTER_ID 261
             COMMENT dynlib3
-            PARAMS { 35 }
-            PARAMS_STRING 'mode="rate",rate=3.5'
-            # rate = 0x1.cp+1
+            PARAMS { 1 }
+            PARAMS_STRING 'mode="rate",rate=1.2500000000000000e-01'
+            # rate = 0x1p-3
             DESCRIPTION "Test filter with string-based configuration (mode=rate)"
          }
       }
@@ -136,9 +136,9 @@ GROUP "/" {
          USER_DEFINED_FILTER {
             FILTER_ID 261
             COMMENT dynlib3
-            PARAMS { 35 }
-            PARAMS_STRING 'mode="rate",rate=3.5'
-            # rate = 0x1.cp+1
+            PARAMS { 1 }
+            PARAMS_STRING 'mode="rate",rate=1.2500000000000000e-01'
+            # rate = 0x1p-3
             DESCRIPTION "Test filter with string-based configuration (mode=rate)"
          }
       }
@@ -161,9 +161,9 @@ GROUP "/" {
          USER_DEFINED_FILTER {
             FILTER_ID 261
             COMMENT dynlib3
-            PARAMS { 35 }
-            PARAMS_STRING 'mode="rate",rate=3.5'
-            # rate = 0x1.cp+1
+            PARAMS { 1 }
+            PARAMS_STRING 'mode="rate",rate=1.2500000000000000e-01'
+            # rate = 0x1p-3
             DESCRIPTION "Test filter with string-based configuration (mode=rate)"
          }
       }

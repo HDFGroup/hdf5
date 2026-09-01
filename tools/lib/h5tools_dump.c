@@ -3178,6 +3178,249 @@ h5tools_print_fill_value(h5tools_str_t *buffer /*in,out*/, const h5tool_format_t
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    h5tools_float_is_short_binary
+ *
+ * Purpose:     Determines whether a double is a small multiple of a power of
+ *              two -- value == m * 2^e for an integer m with |m| < 2^13,
+ *              equivalently at most three hexadecimal fraction digits.
+ *
+ *              This is the selection rule for the hexadecimal annotation
+ *              emitted alongside PARAMS_STRING.  Annotating merely because
+ *              the hexadecimal form is shorter than the decimal would be
+ *              nearly vacuous: 0.1 renders as 0x1.999999999999ap-4, shorter
+ *              than its canonical decimal form but no more readable, so
+ *              almost every float would acquire a comment that tells the
+ *              reader nothing.
+ *
+ * Return:      true if the value should be annotated, false otherwise
+ *-------------------------------------------------------------------------
+ */
+static bool
+h5tools_float_is_short_binary(double v)
+{
+    double f;
+    int    e;
+
+    if (v == 0.0 || !isfinite(v))
+        return false;
+
+    /* frexp normalizes to f in [0.5, 1), so the significand of a value with
+     * at most 13 significant bits is f * 2^13 -- scaling by 8192 makes
+     * exactly those values integral.  0x1.fffp+0 is the widest accepted. */
+    f = frexp(fabs(v), &e);
+    f *= 8192.0;
+
+    return f == floor(f);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_format_hexfloat
+ *
+ * Purpose:     Formats a double as a C99 hexadecimal float literal in a
+ *              canonical spelling: normalized leading digit, trailing zeros
+ *              of the fraction removed, the fraction and its separator
+ *              omitted entirely when zero, lowercase 0x and p, signed
+ *              exponent.
+ *
+ *              printf("%a") is deliberately not used.  C17 7.21.6.1p8
+ *              requires only that a precision-free %a be "sufficient for an
+ *              exact representation" when FLT_RADIX is a power of 2, and
+ *              constrains the leading digit only to be nonzero for
+ *              normalized values -- so 0x1.8p-36, 0x1.8000000000000p-36 and
+ *              0x3p-37 are all conforming renderings of one double.  glibc
+ *              trims trailing zeros and the Microsoft CRT does not, and
+ *              h5dump output is compared byte for byte against expected
+ *              files, so the spelling has to be ours.
+ *
+ *              Normalizing through frexp also gives the legible rendering
+ *              for subnormals: 2^-1074 formats as 0x1p-1074 rather than the
+ *              0x0.0000000000001p-1022 that a denormalized %a produces.
+ *              Both are exact and re-read to the identical double.
+ *
+ * Return:      void
+ *-------------------------------------------------------------------------
+ */
+static void
+h5tools_format_hexfloat(double v, char *out, size_t out_size)
+{
+    static const char hexdigits[] = "0123456789abcdef";
+    char              frac[16];
+    const char       *sign = "";
+    double            f, r;
+    int               e;
+    int               n = 0;
+
+    if (v < 0.0) {
+        sign = "-";
+        v    = -v;
+    }
+
+    f = frexp(v, &e); /* v == f * 2^e, f in [0.5, 1) */
+    f *= 2.0;
+    e -= 1; /* f now in [1, 2) */
+
+    r = f - 1.0;
+    while (r > 0.0 && n < (int)sizeof(frac) - 1) {
+        int d;
+
+        r *= 16.0;
+        d         = (int)r;
+        frac[n++] = hexdigits[d];
+        r -= (double)d;
+    }
+    frac[n] = '\0';
+
+    snprintf(out, out_size, "%s0x1%s%sp%+d", sign, n ? "." : "", frac, e);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_params_hex_annotation
+ *
+ * Purpose:     Builds the comment text that follows a PARAMS_STRING line,
+ *              naming every float in the parameter string that is a small
+ *              multiple of a power of two, e.g. "accuracy = 0x1p-36".
+ *
+ *              Canonicalization preserves a float's value exactly but not
+ *              its text: a caller who writes accuracy = 0x1p-36 reads back
+ *              accuracy = 1.4551915228366852e-11, which is unrecognizable as
+ *              a power of two -- the form a user tuning a quantizing filter
+ *              reasons in.  The original text cannot be carried in the file,
+ *              because a conforming TOML parser discards comments and a
+ *              comment-aware reader would then derive a different value from
+ *              identical bytes.  The hexadecimal rendering is therefore
+ *              produced here, at display time, from the parsed double, and
+ *              nothing is added to the file.
+ *
+ *              The floats are located by a lexical scan rather than through
+ *              the typed accessors, which are lookup-by-name: h5dump does
+ *              not know the key names of a filter it has not loaded, and the
+ *              point of the stored string is that it displays without the
+ *              plugin.  A scan is admissible precisely because the
+ *              annotation is display-only -- it cannot alter a value, only
+ *              fail to comment on one.
+ *
+ *              params must be the raw string as retrieved, not the
+ *              single-quote-escaped form used for display.
+ *
+ * Return:      void; out receives the empty string when nothing qualifies
+ *-------------------------------------------------------------------------
+ */
+static void
+h5tools_params_hex_annotation(const char *params, char *out, size_t out_size)
+{
+    const char *p = params;
+    char        key[128];
+    size_t      keylen = 0;
+    size_t      outlen = 0;
+
+    assert(out != NULL);
+    assert(out_size > 0);
+
+    out[0] = '\0';
+    key[0] = '\0';
+
+    if (params == NULL)
+        return;
+
+    while (*p) {
+        /* Skip a basic string, honoring backslash escapes so that \" does
+         * not end it early.  Its content is a value, never a numeral. */
+        if (*p == '"') {
+            p++;
+            while (*p && *p != '"') {
+                if (*p == '\\' && p[1])
+                    p++;
+                p++;
+            }
+            if (*p)
+                p++;
+            continue;
+        }
+
+        /* Skip a literal string, which has no escapes. */
+        if (*p == '\'') {
+            p++;
+            while (*p && *p != '\'')
+                p++;
+            if (*p)
+                p++;
+            continue;
+        }
+
+        /* Skip a comment.  A "key = value" written inside one is text, not
+         * a parameter. */
+        if (*p == '#') {
+            while (*p && *p != '\n')
+                p++;
+            continue;
+        }
+
+        /* A bare key, dotted keys included; remember it as the name to echo
+         * for whatever value follows. */
+        if (isalpha((unsigned char)*p) || *p == '_') {
+            keylen = 0;
+            while (isalnum((unsigned char)*p) || *p == '_' || *p == '-' || *p == '.') {
+                if (keylen + 1 < sizeof(key))
+                    key[keylen++] = *p;
+                p++;
+            }
+            key[keylen] = '\0';
+            continue;
+        }
+
+        /* A numeric literal.  Only floats are annotated: an integer needs no
+         * second spelling. */
+        if (isdigit((unsigned char)*p) || ((*p == '-' || *p == '+') && isdigit((unsigned char)p[1]))) {
+            const char *tok     = p;
+            bool        isfloat = false;
+            bool        ishex   = false;
+            char       *end;
+            double      v;
+
+            if (*p == '-' || *p == '+')
+                p++;
+            while (isdigit((unsigned char)*p) || *p == '_')
+                p++;
+            if (*p == 'x' || *p == 'X')
+                isfloat = ishex = true; /* a C99 hex-float literal */
+            else if (*p == '.' || *p == 'e' || *p == 'E' || *p == 'p' || *p == 'P')
+                isfloat = true;
+
+            v = strtod(tok, &end);
+            if (end > tok)
+                p = end;
+            else
+                p = tok + 1; /* not convertible; step past to make progress */
+
+            /* A literal already written in hexadecimal needs no annotation --
+             * the reader can see it.  This arises for a string that has not
+             * been canonicalized, such as a get_config reconstruction. */
+            if (isfloat && !ishex && keylen > 0 && h5tools_float_is_short_binary(v)) {
+                char hexbuf[64];
+                char piece[256];
+                int  n;
+
+                h5tools_format_hexfloat(v, hexbuf, sizeof(hexbuf));
+                n = snprintf(piece, sizeof(piece), "%s%s = %s", outlen > 0 ? ", " : "", key, hexbuf);
+
+                if (n > 0 && outlen + (size_t)n < out_size) {
+                    memcpy(out + outlen, piece, (size_t)n);
+                    outlen += (size_t)n;
+                    out[outlen] = '\0';
+                }
+            }
+
+            /* The key is spent; do not let it attach to a later numeral. */
+            keylen = 0;
+            key[0] = '\0';
+            continue;
+        }
+
+        p++;
+    }
+}
+
+/*-------------------------------------------------------------------------
  * Function:    h5tools_dump_filter_extra
  *
  * Purpose:     Emits PARAMS_STRING and DESCRIPTION lines for a single
@@ -3189,13 +3432,23 @@ h5tools_print_fill_value(h5tools_str_t *buffer /*in,out*/, const h5tool_format_t
 static void
 h5tools_dump_filter_extra(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx,
                           h5tools_str_t *buffer, hsize_t *curr_pos, size_t ncols, const char *params_str,
-                          const char *description)
+                          const char *params_annot, const char *description)
 {
     if (params_str) {
         ctx->need_prefix = true;
         h5tools_str_reset(buffer);
         h5tools_str_append(buffer, "%s '%s'", PARAMS_STRING, params_str);
         h5tools_render_element(stream, info, ctx, buffer, curr_pos, ncols, (hsize_t)0, (hsize_t)0);
+
+        /* The annotation is emitted outside the quoted value, never within
+         * it, so a script that extracts the quoted span still recovers
+         * exactly the stored bytes. */
+        if (params_annot && params_annot[0] != '\0') {
+            ctx->need_prefix = true;
+            h5tools_str_reset(buffer);
+            h5tools_str_append(buffer, "# %s", params_annot);
+            h5tools_render_element(stream, info, ctx, buffer, curr_pos, ncols, (hsize_t)0, (hsize_t)0);
+        }
     }
 
     /* DESCRIPTION is a best-effort, registry-sourced label: it comes from the
@@ -3591,9 +3844,12 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
         if (nfilters) {
             for (i = 0; i < nfilters; i++) {
                 char        params_str_buf[H5Z_CONFIG_STRING_MAX + 1];
-                char       *params_str   = NULL; /* escaped, NULL if none to print */
-                const char *filter_descr = NULL; /* library-owned, no free needed */
+                char        params_annot[H5Z_CONFIG_STRING_MAX + 1]; /* hex comment, "" if none */
+                char       *params_str   = NULL;                     /* escaped, NULL if none to print */
+                const char *filter_descr = NULL;                     /* library-owned, no free needed */
                 bool        have_extra; /* true if this filter has a PARAMS_STRING and/or DESCRIPTION */
+
+                params_annot[0] = '\0';
 
                 cd_nelmts = NELMTS(cd_values);
                 filtn     = H5Pget_filter2(dcpl_id, (unsigned)i, &filt_flags, &cd_nelmts, cd_values,
@@ -3609,6 +3865,13 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                     if (H5Pget_filter_params_by_idx(dcpl_id, (unsigned)i, params_str_buf,
                                                     sizeof(params_str_buf), &plen) >= 0 &&
                         plen > 0) {
+                        /* Scan the raw string -- not the escaped form below -- for
+                         * floats worth annotating in hexadecimal. */
+                        if (plen < sizeof(params_str_buf))
+                            params_str_buf[plen] = '\0';
+                        h5tools_params_hex_annotation(params_str_buf, params_annot,
+                                                      sizeof(params_annot));
+
                         /* PARAMS_STRING is wrapped in single quotes: its content is
                          * TOML, whose only quoted forms are "..." and '...', neither
                          * of which can contain a literal unescaped single quote --
@@ -3663,7 +3926,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                                                    (hsize_t)0, (hsize_t)0);
 
                             h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols,
-                                                      params_str, filter_descr);
+                                                      params_str, params_annot, filter_descr);
 
                             ctx->indent_level--;
 
@@ -3689,7 +3952,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
 
                             ctx->indent_level++;
                             h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols,
-                                                      params_str, filter_descr);
+                                                      params_str, params_annot, filter_descr);
                             ctx->indent_level--;
 
                             ctx->need_prefix = true;
@@ -3713,7 +3976,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
 
                             ctx->indent_level++;
                             h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols,
-                                                      params_str, filter_descr);
+                                                      params_str, params_annot, filter_descr);
                             ctx->indent_level--;
 
                             ctx->need_prefix = true;
@@ -3786,7 +4049,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                         }
 
                         h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols, params_str,
-                                                  filter_descr);
+                                                  params_annot, filter_descr);
 
                         ctx->indent_level--;
 
@@ -3805,7 +4068,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
 
                             ctx->indent_level++;
                             h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols,
-                                                      params_str, filter_descr);
+                                                      params_str, params_annot, filter_descr);
                             ctx->indent_level--;
 
                             ctx->need_prefix = true;
@@ -3837,7 +4100,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                                                    (hsize_t)0, (hsize_t)0);
 
                             h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols,
-                                                      params_str, filter_descr);
+                                                      params_str, params_annot, filter_descr);
 
                             ctx->indent_level--;
 
@@ -3890,7 +4153,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                         }
 
                         h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols, params_str,
-                                                  filter_descr);
+                                                  params_annot, filter_descr);
 
                         ctx->indent_level--;
 
