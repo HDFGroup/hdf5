@@ -158,7 +158,7 @@ CONTAINS
           CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
           if (error .ne. 0) then
               write(*,*) "Cannot modify filename"
-              stop
+              CALL h5_exit_f(1)
           endif
     CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
     CALL check("h5fcreate_f", error, total_error)
@@ -575,7 +575,7 @@ CONTAINS
           CALL h5_fixname_f(filename1, fix_filename1, H5P_DEFAULT_F, error)
           if (error .ne. 0) then
               write(*,*) "Cannot modify filename"
-              stop
+              CALL h5_exit_f(1)
           endif
     CALL h5fcreate_f(fix_filename1, H5F_ACC_TRUNC_F, file1_id, error)
     CALL check("h5fcreate_f", error, total_error)
@@ -583,7 +583,7 @@ CONTAINS
           CALL h5_fixname_f(filename2, fix_filename2, H5P_DEFAULT_F, error)
           if (error .ne. 0) then
               write(*,*) "Cannot modify filename"
-              stop
+              CALL h5_exit_f(1)
           endif
     CALL h5fcreate_f(fix_filename2, H5F_ACC_TRUNC_F, file2_id, error)
     CALL check("h5fcreate_f", error, total_error)
@@ -978,7 +978,7 @@ CONTAINS
           CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
           if (error .ne. 0) then
               write(*,*) "Cannot modify filename"
-              stop
+              CALL h5_exit_f(1)
           endif
      CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
      CALL check("h5fcreate_f", error, total_error)
@@ -1104,7 +1104,7 @@ CONTAINS
      !
      ALLOCATE(blocklist(num_blocks*RANK*2), STAT= error)
      if(error .NE. 0) then
-         STOP
+         CALL h5_exit_f(1)
      endif
 
      !
@@ -1146,7 +1146,7 @@ CONTAINS
 !     ALLOCATE(pointlist(num_blocks*RANK), STAT= error)
      ALLOCATE(pointlist(20), STAT= error)
      if(error .NE. 0) then
-         STOP
+         CALL h5_exit_f(1)
      endif
 
      !
@@ -1264,7 +1264,7 @@ SUBROUTINE test_select_point(cleanup, total_error)
   CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
   IF (error .NE. 0) THEN
      WRITE(*,*) "Cannot modify filename"
-     STOP
+     CALL h5_exit_f(1)
   ENDIF
   xfer_plist = H5P_DEFAULT_F
 !    MESSAGE(5, ("Testing Element Selection Functions\n"));
