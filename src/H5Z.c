@@ -1394,7 +1394,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
     assert(nbytes && *nbytes > 0);
     assert(buf_size && *buf_size > 0);
     assert(buf && *buf);
-    assert(!pline || pline->nused < H5Z_MAX_NFILTERS);
+    assert(!pline || pline->nused <= H5Z_MAX_NFILTERS);
 
     /* clang-format off */
 
