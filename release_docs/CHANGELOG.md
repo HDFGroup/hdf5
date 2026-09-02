@@ -94,13 +94,9 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    Fixes GitHub issue #6531
 
-### Fixed a crash when reading a chunked dataset whose chunk rank does not match the dataspace rank
+### Fixed a crash when unprotecting a local heap with no cached prefix or data block
 
-   The chunk layout's stored dimensionality was validated against the dataspace rank at creation time, but not at open time, so a file whose stored chunk rank disagreed with its dataspace rank was not caught. The resulting inconsistent selection ranks during chunk I/O caused a divide-by-zero in the hyperslab iterator. The chunk dimensionality is now also validated on open, and such a dataset is rejected with an error instead of crashing.
-
-   Fixes GitHub issue #6491
-
-   Fixes CVE-2026-19025
+   `H5HL_protect()` pins one metadata cache entry for a local heap -- either the prefix when the heap is a single cache object, or the data block otherwise -- and `H5HL_unprotect()` unpins it again. The cache unlinks that entry from the heap when it destroys it, so a damaged file could reach `H5HL_unprotect()` with nothing to unpin, which triggered an assertion failure in debug builds and a NULL pointer dereference otherwise. `H5HL_unprotect()` now reports an error instead, and does so before decrementing the heap's protect count so that a rejected call leaves the heap unchanged rather than half unprotected with its cache entry still pinned.
 
 ## Java Library
 
