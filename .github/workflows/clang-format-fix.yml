@@ -37,7 +37,7 @@ jobs:
         style: file
         exclude: './config ./hl/src/H5LTanalyze.c ./hl/src/H5LTparse.c ./hl/src/H5LTparse.h ./src/H5Epubgen.h ./src/H5Einit.h ./src/H5Eterm.h ./src/H5Edefin.h ./src/H5version.h ./src/H5overflow.h'
 
-    - uses: EndBug/add-and-commit@290ea2c423ad77ca9c62ae0f5b224379612c0321 # v10.0.0
+    - uses: EndBug/add-and-commit@cc9c08ba6c8df3b93a8f2db63e89b98368ae2ae8 # v11.1.1
       with:
           author_name: github-actions
           author_email: 41898282+github-actions[bot]@users.noreply.github.com
