@@ -462,8 +462,7 @@ done:
  *
  * Note:        This is not currently a recursive lock, so the library must
  *              not spawn internal threads when recursively entering such a
- *              section while this mutex is locked. The state of this mutex
- *              can be queried with H5TS_internal_locked().
+ *              section while this mutex is locked.
  *
  * Return:      Non-negative on success / Negative on failure
  *
@@ -500,7 +499,7 @@ H5TS_internal_unlock(void)
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    /* Acquire the library's internal lock */
+    /* Release the library's internal lock */
     if (H5_UNLIKELY(H5TS_mutex_unlock(&H5TS_api_info_p.internal_mutex) < 0))
         HGOTO_DONE(FAIL);
 
