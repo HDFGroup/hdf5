@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-08-29</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-09-02</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -1067,12 +1067,12 @@ Variables</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">file_id</td><td>File identifier </td></tr>
-    <tr><td class="paramname">obj_type</td><td>Type of the object; possible values are: <ul>
+    <tr><td class="paramname">obj_type</td><td>Type of the objects to count, either one of the following or several of them combined with IOR(): <ul>
 <li>H5F_OBJ_FILE_F </li>
 <li>H5F_OBJ_DATASET_F </li>
 <li>H5F_OBJ_GROUP_F </li>
 <li>H5F_OBJ_DATATYPE_F </li>
-<li>H5F_OBJ_ALL_F </li>
+<li>H5F_OBJ_ALL_F, which counts all of the above </li>
 </ul>
 </td></tr>
     <tr><td class="paramname">obj_count</td><td>Number of open objects </td></tr>
@@ -1080,6 +1080,7 @@ Variables</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section note"><dt>Note</dt><dd>When <code class="param">file_id</code> is H5F_OBJ_ALL_F the count excludes the objects that h5open_f opens for the Fortran interface, so it reports only what the application itself has open.</dd></dl>
 <p>See C API: <a class="el" href="group___h5_f.html#gadcdae0aca7c88064db0d32de7f1e31f2" title="H5Fget_obj_count()">H5Fget_obj_count()</a> </p>
 
 </div>
@@ -1127,12 +1128,12 @@ Variables</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">file_id</td><td>File identifier </td></tr>
-    <tr><td class="paramname">obj_type</td><td>Type of the object; possible values are: <ul>
+    <tr><td class="paramname">obj_type</td><td>Type of the objects to list, either one of the following or several of them combined with IOR(): <ul>
 <li>H5F_OBJ_FILE_F </li>
 <li>H5F_OBJ_DATASET_F </li>
 <li>H5F_OBJ_GROUP_F </li>
 <li>H5F_OBJ_DATATYPE_F </li>
-<li>H5F_OBJ_ALL_F </li>
+<li>H5F_OBJ_ALL_F, which lists all of the above </li>
 </ul>
 </td></tr>
     <tr><td class="paramname">max_objs</td><td>Maximum # of objects to retrieve </td></tr>
@@ -1142,6 +1143,7 @@ Variables</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section note"><dt>Note</dt><dd>When <code class="param">file_id</code> is H5F_OBJ_ALL_F the list excludes the identifiers that h5open_f opens for the Fortran interface, matching h5fget_obj_count_f, so it reports only what the application itself has open.</dd></dl>
 <p>See C API: <a class="el" href="group___h5_f.html#ga35e72579bd07433162b80ddc0bd0c5b1" title="H5Fget_obj_ids()">H5Fget_obj_ids()</a> </p>
 
 </div>

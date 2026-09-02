@@ -55711,6 +55711,13 @@
       <anchor>a620717ad8fadfb96ee6e5eaccdccaf1a</anchor>
       <arglist></arglist>
     </member>
+    <member kind="variable">
+      <type>integer(size_t), dimension(1:4)</type>
+      <name>h5open_num_obj_by_type</name>
+      <anchorfile>namespaceh5f.html</anchorfile>
+      <anchor>a34a65302d523643568e2a66b03689e5c</anchor>
+      <arglist></arglist>
+    </member>
   </compound>
   <compound kind="namespace">
     <name>h5fd</name>
