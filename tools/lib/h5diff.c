@@ -20,6 +20,482 @@
 static diff_err_t handle_worker_request(char *worker_tasks, int *n_busy_tasks, diff_opt_t *opts,
                                         hsize_t *n_diffs);
 static diff_err_t dispatch_diff_to_worker(struct diff_mpi_args *args, char *worker_tasks, int *n_busy_tasks);
+
+/* ---------------------------------------------------------------------------
+ * MPI_Pack / MPI_Unpack helpers for MPI_TAG_ARGS messages.
+ *
+ * Packing format:
+ *
+ *   name1 length (MPI_INT), name1 chars (MPI_CHAR x len)
+ *   name2 length (MPI_INT), name2 chars (MPI_CHAR x len)
+ *   diff_opt_t scalars (see pack_diff_args)
+ *   3 x exclude list: count (MPI_INT),
+ *                     count x [str_len (MPI_INT), chars (MPI_CHAR x len)]
+ *   2 x sset: has_sset (MPI_INT), if nonzero:
+ *             4 x [len (MPI_UNSIGNED), len x hsize_t (MPI_UNSIGNED_LONG_LONG)]
+ *   argdata: type[0], type[1], is_same_trgobj (3 x MPI_INT)
+ *
+ * --------------------------------------------------------------------------*/
+
+/*-------------------------------------------------------------------------
+ * Function: pack_exclude_list
+ *
+ * Purpose:  Pack an exclude_path_list into a MPI pack buffer.
+ *
+ * Parameters:
+ *   list    IN:     list to pack (may be NULL)
+ *   buf     OUT:    MPI pack buffer
+ *   bufsiz  IN:     size of buf in bytes
+ *   pos     IN/OUT: pack cursor; advanced by bytes written
+ *
+ * Return:   none
+ *-------------------------------------------------------------------------
+ */
+static void
+pack_exclude_list(const struct exclude_path_list *list, void *buf, int bufsiz, int *pos)
+{
+    const struct exclude_path_list *node;
+    int                             count = 0;
+
+    for (node = list; node; node = node->next)
+        count++;
+    MPI_CHECK(MPI_Pack(&count, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+
+    for (node = list; node; node = node->next) {
+        int len = (int)strlen(node->obj_path) + 1;
+        MPI_CHECK(MPI_Pack(&len, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+        MPI_CHECK(MPI_Pack(node->obj_path, len, MPI_CHAR, buf, bufsiz, pos, MPI_COMM_WORLD));
+    }
+}
+
+/*-------------------------------------------------------------------------
+ * Function: pack_sset
+ *
+ * Purpose:  Pack a subset_t into a MPI pack buffer.
+ *
+ * Parameters:
+ *   sset    IN:     subset parameters to pack (NULL encodes as absent)
+ *   buf     OUT:    MPI pack buffer
+ *   bufsiz  IN:     size of buf in bytes
+ *   pos     IN/OUT: pack cursor; advanced by bytes written
+ *
+ * Return:   none
+ *-------------------------------------------------------------------------
+ */
+static void
+pack_sset(const struct subset_t *sset, void *buf, int bufsiz, int *pos)
+{
+    int             has_sset       = (sset != NULL) ? 1 : 0;
+    const subset_d *subset_dims[4] = {&sset->start, &sset->stride, &sset->count, &sset->block};
+
+    MPI_CHECK(MPI_Pack(&has_sset, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+
+    if (!sset)
+        return;
+
+    for (int i = 0; i < 4; i++) {
+        unsigned int len = subset_dims[i]->len;
+        MPI_CHECK(MPI_Pack(&len, 1, MPI_UNSIGNED, buf, bufsiz, pos, MPI_COMM_WORLD));
+        if (len > 0)
+            MPI_CHECK(MPI_Pack(subset_dims[i]->data, (int)len, MPI_UNSIGNED_LONG_LONG, buf, bufsiz, pos,
+                               MPI_COMM_WORLD));
+    }
+}
+
+/*-------------------------------------------------------------------------
+ * Function: calc_pack_buf_size
+ *
+ * Purpose:  Compute the MPI_Pack_size upper bound for one diff_mpi_args
+ *           message.
+ *
+ * Parameters:
+ *   args    IN:     diff args to be packed
+ *
+ * Return:   required buffer size in bytes
+ *-------------------------------------------------------------------------
+ */
+static int
+calc_pack_buf_size(const struct diff_mpi_args *args)
+{
+    int mpi_int_size, mpi_dbl_size, mpi_ull_size, mpi_uint_size;
+    int name1_size, name2_size;
+    int total_size = 0;
+
+    MPI_CHECK(MPI_Pack_size(1, MPI_INT, MPI_COMM_WORLD, &mpi_int_size));
+    MPI_CHECK(MPI_Pack_size(1, MPI_DOUBLE, MPI_COMM_WORLD, &mpi_dbl_size));
+    MPI_CHECK(MPI_Pack_size(1, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD, &mpi_ull_size));
+    MPI_CHECK(MPI_Pack_size(1, MPI_UNSIGNED, MPI_COMM_WORLD, &mpi_uint_size));
+
+    MPI_CHECK(MPI_Pack_size((int)strlen(args->name1) + 1, MPI_CHAR, MPI_COMM_WORLD, &name1_size));
+    MPI_CHECK(MPI_Pack_size((int)strlen(args->name2) + 1, MPI_CHAR, MPI_COMM_WORLD, &name2_size));
+    /* string length + string itself */
+    total_size += mpi_int_size + name1_size;
+    total_size += mpi_int_size + name2_size;
+
+    total_size += mpi_int_size; /* mode_quiet */
+    total_size += mpi_int_size; /* mode_report */
+    total_size += mpi_int_size; /* mode_verbose */
+    total_size += mpi_int_size; /* mode_verbose_level */
+    total_size += mpi_int_size; /* mode_list_not_cmp */
+    total_size += mpi_int_size; /* print_header */
+    total_size += mpi_int_size; /* print_percentage */
+    total_size += mpi_int_size; /* print_dims */
+    total_size += mpi_int_size; /* delta_bool */
+    total_size += mpi_dbl_size; /* delta */
+    total_size += mpi_int_size; /* use_system_epsilon */
+    total_size += mpi_int_size; /* percent_bool */
+    total_size += mpi_dbl_size; /* percent */
+    total_size += mpi_int_size; /* follow_links (widened to int) */
+    total_size += mpi_int_size; /* no_dangle_links */
+    total_size += mpi_int_size; /* cmn_objs */
+    total_size += mpi_int_size; /* not_cmp */
+    total_size += mpi_int_size; /* contents */
+    total_size += mpi_int_size; /* do_nans */
+    total_size += mpi_int_size; /* disable_compact_subset */
+    total_size += mpi_int_size; /* exclude_path */
+    total_size += mpi_int_size; /* exclude_attr_path */
+    total_size += mpi_int_size; /* exclude_attr_name */
+    total_size += mpi_int_size; /* count_bool */
+    total_size += mpi_ull_size; /* count (widened to unsigned long long) */
+    total_size += mpi_int_size; /* err_stat (widened to int) */
+
+    /* 3 exclude lists */
+    const struct exclude_path_list *lists[3] = {args->opts.exclude, args->opts.exclude_attr,
+                                                args->opts.exclude_attr_names};
+    for (int i = 0; i < 3; i++) {
+        total_size += mpi_int_size; /* count */
+        for (const struct exclude_path_list *n = lists[i]; n; n = n->next) {
+            int str_size;
+            MPI_CHECK(MPI_Pack_size((int)strlen(n->obj_path) + 1, MPI_CHAR, MPI_COMM_WORLD, &str_size));
+            total_size += mpi_int_size + str_size;
+        }
+    }
+
+    /* 2 ssets */
+    for (int i = 0; i < 2; i++) {
+        total_size += mpi_int_size; /* has_sset */
+        if (args->opts.sset[i]) {
+            const subset_d *subset_dims[4] = {&args->opts.sset[i]->start, &args->opts.sset[i]->stride,
+                                              &args->opts.sset[i]->count, &args->opts.sset[i]->block};
+            for (int j = 0; j < 4; j++) {
+                total_size += mpi_uint_size;
+                if (subset_dims[j]->len > 0) {
+                    int str_size;
+                    MPI_CHECK(MPI_Pack_size((int)subset_dims[j]->len, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD,
+                                            &str_size));
+                    total_size += str_size;
+                }
+            }
+        }
+    }
+
+    total_size += mpi_int_size; /* argdata.type[0] (widened to int) */
+    total_size += mpi_int_size; /* argdata.type[1] (widened to int) */
+    total_size += mpi_int_size; /* argdata.is_same_trgobj (widened to int) */
+
+    return total_size;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: pack_diff_args
+ *
+ * Purpose:  Pack a diff_mpi_args into a MPI pack buffer.
+ *
+ * Parameters:
+ *   args    IN:     diff args to pack
+ *   buf     OUT:    MPI pack buffer (sized by calc_pack_buf_size)
+ *   bufsiz  IN:     size of buf in bytes
+ *   pos     IN/OUT: pack cursor; caller initializes to 0, equals total
+ *                   packed size on return
+ *
+ * Return:   none
+ *-------------------------------------------------------------------------
+ */
+static void
+pack_diff_args(const struct diff_mpi_args *args, void *buf, int bufsiz, int *pos)
+{
+    const diff_opt_t *o = &args->opts;
+
+    /* Object names as length-prefixed strings */
+    int n1len = (int)strlen(args->name1) + 1;
+    int n2len = (int)strlen(args->name2) + 1;
+    MPI_CHECK(MPI_Pack(&n1len, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(args->name1, n1len, MPI_CHAR, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&n2len, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(args->name2, n2len, MPI_CHAR, buf, bufsiz, pos, MPI_COMM_WORLD));
+
+    /* Pack diff_opt_t scalars in declaration order.
+     * bool and enum fields are widened to int before packing so that the
+     * unpacker can always read a full MPI_INT. */
+    MPI_CHECK(MPI_Pack(&o->mode_quiet, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->mode_report, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->mode_verbose, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->mode_verbose_level, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->mode_list_not_cmp, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->print_header, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->print_percentage, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->print_dims, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->delta_bool, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->delta, 1, MPI_DOUBLE, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->use_system_epsilon, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->percent_bool, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->percent, 1, MPI_DOUBLE, buf, bufsiz, pos, MPI_COMM_WORLD));
+    int follow = (int)o->follow_links;
+    MPI_CHECK(MPI_Pack(&follow, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->no_dangle_links, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->cmn_objs, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->not_cmp, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->contents, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->do_nans, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->disable_compact_subset, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->exclude_path, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->exclude_attr_path, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->exclude_attr_name, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&o->count_bool, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    unsigned long long count_v = (unsigned long long)o->count;
+    MPI_CHECK(MPI_Pack(&count_v, 1, MPI_UNSIGNED_LONG_LONG, buf, bufsiz, pos, MPI_COMM_WORLD));
+    int err_v = (int)o->err_stat;
+    MPI_CHECK(MPI_Pack(&err_v, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+
+    /* Dynamic exclude lists */
+    pack_exclude_list(o->exclude, buf, bufsiz, pos);
+    pack_exclude_list(o->exclude_attr, buf, bufsiz, pos);
+    pack_exclude_list(o->exclude_attr_names, buf, bufsiz, pos);
+
+    /* Subsetting parameters */
+    pack_sset(o->sset[0], buf, bufsiz, pos);
+    pack_sset(o->sset[1], buf, bufsiz, pos);
+
+    /* diff_args_t */
+    int type0 = (int)args->argdata.type[0];
+    int type1 = (int)args->argdata.type[1];
+    int same  = (int)args->argdata.is_same_trgobj;
+    MPI_CHECK(MPI_Pack(&type0, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&type1, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Pack(&same, 1, MPI_INT, buf, bufsiz, pos, MPI_COMM_WORLD));
+}
+
+/*-------------------------------------------------------------------------
+ * Function: unpack_exclude_list
+ *
+ * Purpose:  Unpack an exclude_path_list from a MPI pack buffer.
+ *
+ * Parameters:
+ *   buf     IN:     MPI pack buffer
+ *   bufsiz  IN:     size of buf in bytes
+ *   pos     IN/OUT: unpack cursor; advanced by bytes consumed
+ *
+ * Return:   heap-allocated list (caller must free via free_exclude_*_list),
+ *           or NULL if the list was empty
+ *-------------------------------------------------------------------------
+ */
+static struct exclude_path_list *
+unpack_exclude_list(const void *buf, int bufsiz, int *pos)
+{
+    struct exclude_path_list *head  = NULL;
+    struct exclude_path_list *prev  = NULL;
+    int                       count = 0;
+    int                       i;
+
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, pos, &count, 1, MPI_INT, MPI_COMM_WORLD));
+    for (i = 0; i < count; i++) {
+        int                       slen = 0;
+        char                     *tmp;
+        struct exclude_path_list *node;
+
+        MPI_CHECK(MPI_Unpack(buf, bufsiz, pos, &slen, 1, MPI_INT, MPI_COMM_WORLD));
+        tmp = (char *)malloc((size_t)slen + 1);
+        if (!tmp)
+            break;
+        MPI_CHECK(MPI_Unpack(buf, bufsiz, pos, tmp, slen, MPI_CHAR, MPI_COMM_WORLD));
+        tmp[slen] = '\0';
+
+        node = (struct exclude_path_list *)malloc(sizeof(*node));
+        if (!node) {
+            free(tmp);
+            break;
+        }
+        node->obj_path = tmp;
+        node->obj_type = H5TRAV_TYPE_UNKNOWN;
+        node->next     = NULL;
+        if (!head)
+            head = node;
+        else
+            prev->next = node;
+        prev = node;
+    }
+    return head;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: unpack_sset
+ *
+ * Purpose:  Unpack a subset_t from a MPI pack buffer.
+ *
+ * Parameters:
+ *   buf     IN:     MPI pack buffer
+ *   bufsiz  IN:     size of buf in bytes
+ *   pos     IN/OUT: unpack cursor; advanced by bytes consumed
+ *
+ * Return:   heap-allocated subset_t (free with free_unpacked_sset),
+ *           or NULL if the sset was encoded as absent
+ *-------------------------------------------------------------------------
+ */
+static struct subset_t *
+unpack_sset(const void *buf, int bufsiz, int *pos)
+{
+    int              has_sset = 0;
+    struct subset_t *sset;
+    hsize_t        **fields[4];
+    unsigned int    *lens[4];
+    int              f;
+
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, pos, &has_sset, 1, MPI_INT, MPI_COMM_WORLD));
+    if (!has_sset)
+        return NULL;
+
+    sset = (struct subset_t *)calloc(1, sizeof(*sset));
+    if (!sset)
+        return NULL;
+
+    fields[0] = &sset->start.data;
+    fields[1] = &sset->stride.data;
+    fields[2] = &sset->count.data;
+    fields[3] = &sset->block.data;
+    lens[0]   = &sset->start.len;
+    lens[1]   = &sset->stride.len;
+    lens[2]   = &sset->count.len;
+    lens[3]   = &sset->block.len;
+
+    for (f = 0; f < 4; f++) {
+        int nelem = 0;
+        MPI_CHECK(MPI_Unpack(buf, bufsiz, pos, &nelem, 1, MPI_INT, MPI_COMM_WORLD));
+        *lens[f] = (unsigned int)nelem;
+        if (nelem > 0) {
+            *fields[f] = (hsize_t *)malloc((size_t)nelem * sizeof(hsize_t));
+            if (*fields[f])
+                MPI_CHECK(
+                    MPI_Unpack(buf, bufsiz, pos, *fields[f], nelem, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD));
+        }
+    }
+    return sset;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: free_unpacked_sset
+ *
+ * Purpose:  Free a subset_t allocated by unpack_sset.
+ *
+ * Parameters:
+ *   sset    IN:     subset_t to free (may be NULL)
+ *
+ * Return:   none
+ *-------------------------------------------------------------------------
+ */
+void
+free_unpacked_sset(struct subset_t *sset)
+{
+    if (!sset)
+        return;
+    free(sset->start.data);
+    free(sset->stride.data);
+    free(sset->count.data);
+    free(sset->block.data);
+    free(sset);
+}
+
+/*-------------------------------------------------------------------------
+ * Function: unpack_diff_args
+ *
+ * Purpose:  Unpack a diff_mpi_args from a MPI pack buffer produced by
+ *           pack_diff_args.
+ *
+ * Parameters:
+ *   buf     IN:     MPI pack buffer
+ *   bufsiz  IN:     size of buf in bytes
+ *   args    OUT:    populated diff_mpi_args; name1, name2, sset[0], and
+ *                   sset[1] are heap-allocated and must be freed by the
+ *                   caller; exclude lists are freed internally by diff()
+ *
+ * Return:   none
+ *-------------------------------------------------------------------------
+ */
+void
+unpack_diff_args(const void *buf, int bufsiz, struct diff_mpi_args *args)
+{
+    int pos  = 0;
+    int slen = 0;
+
+    /* name1 */
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &slen, 1, MPI_INT, MPI_COMM_WORLD));
+    args->name1 = (char *)malloc((size_t)slen + 1);
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, args->name1, slen, MPI_CHAR, MPI_COMM_WORLD));
+    args->name1[slen] = '\0';
+
+    /* name2 */
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &slen, 1, MPI_INT, MPI_COMM_WORLD));
+    args->name2 = (char *)malloc((size_t)slen + 1);
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, args->name2, slen, MPI_CHAR, MPI_COMM_WORLD));
+    args->name2[slen] = '\0';
+
+    /* scalar diff_opt_t fields — must match pack order in pack_diff_args().
+     * bool and enum fields are narrowed from int via a local variable to
+     * avoid writing 4 bytes into a 1-byte (bool) or potentially-smaller
+     * (enum) field. */
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_quiet, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_report, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_verbose, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_verbose_level, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.mode_list_not_cmp, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.print_header, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.print_percentage, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.print_dims, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.delta_bool, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.delta, 1, MPI_DOUBLE, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.use_system_epsilon, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.percent_bool, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.percent, 1, MPI_DOUBLE, MPI_COMM_WORLD));
+    {
+        int v;
+        MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &v, 1, MPI_INT, MPI_COMM_WORLD));
+        args->opts.follow_links = (bool)v;
+    }
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.no_dangle_links, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.cmn_objs, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.not_cmp, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.contents, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.do_nans, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.disable_compact_subset, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.exclude_path, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.exclude_attr_path, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.exclude_attr_name, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.count_bool, 1, MPI_INT, MPI_COMM_WORLD));
+    MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &args->opts.count, 1, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD));
+    {
+        int v;
+        MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &v, 1, MPI_INT, MPI_COMM_WORLD));
+        args->opts.err_stat = (diff_err_t)v;
+    }
+
+    args->opts.exclude            = unpack_exclude_list(buf, bufsiz, &pos);
+    args->opts.exclude_attr       = unpack_exclude_list(buf, bufsiz, &pos);
+    args->opts.exclude_attr_names = unpack_exclude_list(buf, bufsiz, &pos);
+
+    args->opts.sset[0] = unpack_sset(buf, bufsiz, &pos);
+    args->opts.sset[1] = unpack_sset(buf, bufsiz, &pos);
+
+    /* argdata: unpack type[2] and is_same_trgobj via local ints to avoid
+     * writing int-sized data into enum/bool fields */
+    {
+        int t0, t1, same;
+        MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &t0, 1, MPI_INT, MPI_COMM_WORLD));
+        MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &t1, 1, MPI_INT, MPI_COMM_WORLD));
+        MPI_CHECK(MPI_Unpack(buf, bufsiz, &pos, &same, 1, MPI_INT, MPI_COMM_WORLD));
+        args->argdata.type[0]        = (h5trav_type_t)t0;
+        args->argdata.type[1]        = (h5trav_type_t)t1;
+        args->argdata.is_same_trgobj = (bool)same;
+    }
+}
 #endif
 
 /*-------------------------------------------------------------------------
@@ -274,6 +750,7 @@ free_exclude_path_list(diff_opt_t *opts)
 
     while (NULL != curr) {
         next = curr->next;
+        free(curr->obj_path);
         free(curr);
         curr = next;
     }
@@ -292,9 +769,32 @@ free_exclude_attr_list(diff_opt_t *opts)
 
     while (NULL != curr) {
         next = curr->next;
+        free(curr->obj_path);
         free(curr);
         curr = next;
     }
+}
+
+/*-------------------------------------------------------------------------
+ * Function: free_exclude_attr_name_list
+ *
+ * Purpose:  free exclude attribute name list from diff options
+ *------------------------------------------------------------------------*/
+static void
+free_exclude_attr_name_list(diff_opt_t *opts)
+{
+    struct exclude_path_list *curr = opts->exclude_attr_names;
+    struct exclude_path_list *next;
+
+    while (NULL != curr) {
+        next = curr->next;
+        free(curr->obj_path);
+        free(curr);
+        curr = next;
+    }
+
+    opts->exclude_attr_names = NULL;
+    opts->exclude_attr_name  = 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -431,8 +931,6 @@ build_match_list(const char *objname1, trav_info_t *info1, const char *objname2,
         }
         curr2++;
     } /* end while */
-
-    free_exclude_path_list(opts);
 
 done:
     *table_out = table;
@@ -1240,19 +1738,14 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
              * handling incoming requests from worker tasks.
              */
 
-            /* Check length of object names before handling and dispatching work */
-            if (strlen(obj1_fullpath) > 255 || strlen(obj2_fullpath) > 255)
-                H5TOOLS_GOTO_ERROR(H5DIFF_ERR,
-                                   "parallel h5diff only supports object names up to 255 characters");
-
             /* If no worker tasks are available, handle requests until one is */
             if (busyTasks == g_nTasks - 1)
                 if (H5DIFF_ERR == handle_worker_request(workerTasks, &busyTasks, opts, &nfound))
                     H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "couldn't handle parallel worker task request");
 
             /* Set up args to pass to worker task. */
-            strcpy(args.name1, obj1_fullpath);
-            strcpy(args.name2, obj2_fullpath);
+            args.name1   = obj1_fullpath;
+            args.name2   = obj2_fullpath;
             args.opts    = *opts;
             args.argdata = argdata;
 
@@ -1295,7 +1788,9 @@ done:
 
     opts->err_stat = opts->err_stat | ret_value;
 
+    free_exclude_path_list(opts);
     free_exclude_attr_list(opts);
+    free_exclude_attr_name_list(opts);
 
     /* free table */
     if (table)
@@ -1843,6 +2338,9 @@ dispatch_diff_to_worker(struct diff_mpi_args *args, char *worker_tasks, int *n_b
 {
     int        target_task = -1;
     diff_err_t ret_value   = H5DIFF_NO_ERR;
+    void      *buf         = NULL;
+    int        bufsiz;
+    int        pos = 0;
 
     /* Must have a free worker task */
     assert(*n_busy_tasks < g_nTasks - 1);
@@ -1851,7 +2349,6 @@ dispatch_diff_to_worker(struct diff_mpi_args *args, char *worker_tasks, int *n_b
      * Manager task never does work, so workerTasks[0] is
      * really worker task 0, or MPI rank 1.
      */
-    target_task = -1;
     for (int n = 1; n < g_nTasks; n++)
         if (worker_tasks[n - 1]) {
             target_task = n - 1;
@@ -1862,9 +2359,14 @@ dispatch_diff_to_worker(struct diff_mpi_args *args, char *worker_tasks, int *n_b
     if (target_task < 0)
         H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "couldn't find a free worker task to dispatch diff request to");
 
-    /* Send diff arguments to worker */
-    if (MPI_SUCCESS != (MPI_Send(args, sizeof(struct diff_mpi_args), MPI_BYTE, target_task + 1, MPI_TAG_ARGS,
-                                 MPI_COMM_WORLD)))
+    bufsiz = calc_pack_buf_size(args);
+
+    if (NULL == (buf = malloc((size_t)bufsiz)))
+        H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "malloc failed for MPI args buffer");
+
+    pack_diff_args(args, buf, bufsiz, &pos);
+
+    if (MPI_SUCCESS != MPI_Send(buf, pos, MPI_PACKED, target_task + 1, MPI_TAG_ARGS, MPI_COMM_WORLD))
         H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "couldn't send diff arguments to worker task");
 
     /* Mark worker task as busy */
@@ -1872,6 +2374,7 @@ dispatch_diff_to_worker(struct diff_mpi_args *args, char *worker_tasks, int *n_b
     (*n_busy_tasks)++;
 
 done:
+    free(buf);
     return ret_value;
 }
 #endif

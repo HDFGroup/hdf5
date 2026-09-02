@@ -57,6 +57,9 @@
 /* only one file has unique objs  */
 #define EXCLUDE_FILE3_1 "h5diff_exclude3-1.h5"
 #define EXCLUDE_FILE3_2 "h5diff_exclude3-2.h5"
+/* exclude specific attribute name */
+#define EXCLUDE_ATTR_NAME_FILE1 "h5diff_exclude_attr_name1.h5"
+#define EXCLUDE_ATTR_NAME_FILE2 "h5diff_exclude_attr_name2.h5"
 
 /* compound type with multiple vlen string types */
 #define COMP_VL_STRS_FILE "h5diff_comp_vl_strs.h5"
@@ -98,6 +101,7 @@ int test_group_recurse2(void);
 int test_exclude_obj1(const char *fname1, const char *fname2);
 int test_exclude_obj2(const char *fname1, const char *fname2);
 int test_exclude_obj3(const char *fname1, const char *fname2);
+int test_exclude_attr_name(const char *fname1, const char *fname2);
 int test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new);
 int test_attributes_verbose_level(const char *fname1, const char *fname2);
 int test_enums(const char *fname);

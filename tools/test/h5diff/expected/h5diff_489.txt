@@ -1,0 +1,33 @@
+
+file1     file2
+---------------------------------------
+    x      x    /              
+    x      x    /dset          
+    x      x    /group1        
+
+group  : </> and </>
+0 differences found
+attribute: <data_value of </>> and <data_value of </>>
+0 differences found
+attribute: <source_id of </>> and <source_id of </>>
+size:           H5S_SCALAR           H5S_SCALAR
+position        source_id of </> source_id of </> difference          
+------------------------------------------------------------
+                99              101             2              
+1 differences found
+dataset: </dset> and </dset>
+0 differences found
+group  : </group1> and </group1>
+0 differences found
+attribute: <source_id of </group1>> and <source_id of </group1>>
+size:           H5S_SCALAR           H5S_SCALAR
+position        source_id of </group1> source_id of </group1> difference          
+------------------------------------------------------------
+                99              101             2              
+1 differences found
+attribute: <timestamp of </group1>> and <timestamp of </group1>>
+size:           H5S_SCALAR           H5S_SCALAR
+position        timestamp of </group1> timestamp of </group1> difference          
+------------------------------------------------------------
+                100             200             100            
+1 differences found

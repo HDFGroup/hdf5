@@ -3797,6 +3797,98 @@ out:
 
 /*-------------------------------------------------------------------------
  *
+ * Purpose: Create test files for excluding specific attribute names.
+ *
+ *-------------------------------------------------------------------------*/
+int
+test_exclude_attr_name(const char *fname1, const char *fname2)
+{
+    hid_t   fid1     = H5I_INVALID_HID;
+    hid_t   fid2     = H5I_INVALID_HID;
+    hid_t   gid1     = H5I_INVALID_HID;
+    hid_t   gid2     = H5I_INVALID_HID;
+    hsize_t dims1[1] = {4};
+    int     data[4]  = {1, 2, 3, 4};
+    int     ts1      = 100;
+    int     ts2      = 200;
+    int     sid1     = 99;
+    int     sid2     = 101;
+    int     val      = 42;
+    herr_t  status   = SUCCEED;
+
+    fid1 = H5Fcreate(fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid1 < 0) {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    fid2 = H5Fcreate(fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid2 < 0) {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    /* datasets with identical data */
+    status = write_dset(fid1, 1, dims1, "dset", H5T_NATIVE_INT, data);
+    if (status == FAIL) {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        goto out;
+    }
+    status = write_dset(fid2, 1, dims1, "dset", H5T_NATIVE_INT, data);
+    if (status == FAIL) {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        goto out;
+    }
+
+    /* groups */
+    gid1 = H5Gcreate2(fid1, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid1 < 0) {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+    gid2 = H5Gcreate2(fid2, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid2 < 0) {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    /* "timestamp" attribute - different values between files */
+    write_attr(fid1, 0, NULL, "timestamp", H5T_NATIVE_INT, &ts1);
+    write_attr(fid2, 0, NULL, "timestamp", H5T_NATIVE_INT, &ts2);
+
+    /* "source_id" attribute - different values between files */
+    write_attr(fid1, 0, NULL, "source_id", H5T_NATIVE_INT, &sid1);
+    write_attr(fid2, 0, NULL, "source_id", H5T_NATIVE_INT, &sid2);
+
+    /* "data_value" attribute - same values in both files */
+    write_attr(fid1, 0, NULL, "data_value", H5T_NATIVE_INT, &val);
+    write_attr(fid2, 0, NULL, "data_value", H5T_NATIVE_INT, &val);
+
+    /* also put differing "timestamp" and "source_id" on group1 */
+    write_attr(gid1, 0, NULL, "timestamp", H5T_NATIVE_INT, &ts1);
+    write_attr(gid2, 0, NULL, "timestamp", H5T_NATIVE_INT, &ts2);
+    write_attr(gid1, 0, NULL, "source_id", H5T_NATIVE_INT, &sid1);
+    write_attr(gid2, 0, NULL, "source_id", H5T_NATIVE_INT, &sid2);
+
+out:
+    if (fid1 > 0)
+        H5Fclose(fid1);
+    if (fid2 > 0)
+        H5Fclose(fid2);
+    if (gid1 > 0)
+        H5Gclose(gid1);
+    if (gid2 > 0)
+        H5Gclose(gid2);
+
+    return status;
+}
+
+/*-------------------------------------------------------------------------
+ *
  * Purpose: Create test files for multiple variable length string/string array
  *          along with fixed length string/string array types in
  *          a compound type dataset.
