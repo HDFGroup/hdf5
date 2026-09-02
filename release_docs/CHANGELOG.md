@@ -104,6 +104,12 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Java Library
 
+### Fixed datatype ID leaks when reading or writing nested datatypes through the JNI
+
+   The object-tree read and write helpers in the JNI derived a base datatype from the memory type with `H5Tget_super()` for the variable-length, array and complex classes, but never closed it. Because an `hid_t` is not reclaimed when a native method returns, every read or write of such data leaked at least one datatype ID for the lifetime of the process, and a nested type leaked one per level. The helpers now close the derived type on both the success and error paths.
+
+   Fixes GitHub issue #6592
+
 ## Configuration
 
 ### Fixed version handling in installed CMake package version configuration file
