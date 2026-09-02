@@ -66,7 +66,7 @@ extern "C" {
  *          The thread pool must not already exist. If this function is called
  *          when the thread pool already exists, an error will be returned.
  *
- * \note    This function is only present when the library is compiled with HDF5_ENABLE_CONCURRENCY ON.
+ * \note    This function is only present when the library is compiled with HDF5_ENABLE_CONCURRENCY=ON.
  *
  * \since 2.3.0
  *
@@ -89,7 +89,7 @@ H5_DLL herr_t H5TSglobal_pool_create(unsigned num_threads);
  *          The thread pool must exist. If this function is called when the
  *          thread pool does not exist, an error will be returned.
  *
- * \note    This function is only present when the library is compiled with HDF5_ENABLE_CONCURRENCY ON.
+ * \note    This function is only present when the library is compiled with HDF5_ENABLE_CONCURRENCY=ON.
  *
  * \since 2.3.0
  *

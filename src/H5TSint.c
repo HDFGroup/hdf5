@@ -140,7 +140,6 @@ H5TS__init_package(void)
         HGOTO_DONE(FAIL);
     if (H5_UNLIKELY(H5TS_mutex_init(&H5TS_api_info_p.internal_mutex, H5TS_MUTEX_TYPE_PLAIN) < 0))
         HGOTO_DONE(FAIL);
-    H5TS_api_info_p.internal_mutex_locked = false;
 #endif
     H5TS_atomic_init_uint(&H5TS_api_info_p.attempt_lock_count, 0);
 
@@ -480,7 +479,6 @@ H5TS_internal_lock(void)
     /* Acquire the library's internal lock */
     if (H5_UNLIKELY(H5TS_mutex_lock(&H5TS_api_info_p.internal_mutex) < 0))
         HGOTO_DONE(FAIL);
-    H5TS_api_info_p.internal_mutex_locked = true;
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -509,23 +507,6 @@ H5TS_internal_unlock(void)
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_internal_unlock() */
-
-/*--------------------------------------------------------------------------
- * Function:    H5TS_internal_locked
- *
- * Purpose:     Unlock the mutex locked by H5TS_internal_lock().
- *
- * Return:      Non-negative on success / Negative on failure
- *
- *--------------------------------------------------------------------------
- */
-bool
-H5TS_internal_locked(void)
-{
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
-
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(H5TS_api_info_p.internal_mutex_locked)
-} /* end H5TS_internal_locked() */
 #endif
 
 /*--------------------------------------------------------------------------

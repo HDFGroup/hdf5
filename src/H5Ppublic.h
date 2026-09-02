@@ -8816,7 +8816,7 @@ H5_DLL herr_t H5Pget_modify_write_buf(hid_t plist_id, bool *modify_write_buf);
  * H5TSglobal_pool_create() before the library can use threads to accelerate I/O. H5Pset_io_threads() can be
  * used to disable this acceleration even if the global thread pool exists.
  *
- * \note    This function is only present when the library is compiled with HDF5_ENABLE_CONCURRENCY ON.
+ * \note    This function is only present when the library is compiled with HDF5_ENABLE_CONCURRENCY=ON.
  *
  * \since 2.3.0
  *
@@ -8839,7 +8839,7 @@ H5_DLL herr_t H5Pset_io_threads(hid_t plist_id, bool io_threads_enabled);
  * accelerate I/O. The default value for io_threads_enabled is true. However, the global thread pool must be
  * created using H5TSglobal_pool_create() before the library can use threads to accelerate I/O.
  *
- * \note    This function is only present when the library is compiled with HDF5_ENABLE_CONCURRENCY ON.
+ * \note    This function is only present when the library is compiled with HDF5_ENABLE_CONCURRENCY=ON.
  *
  * \since 2.3.0
  *
