@@ -607,10 +607,10 @@ h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, char ch)
                     h5tools_str_append(str, "\\t");
                 break;
             default:
-                if (isprint(ch))
+                if (isprint((unsigned char)ch))
                     h5tools_str_append(str, "%c", ch);
                 else
-                    h5tools_str_append(str, "\\%03o", ch);
+                    h5tools_str_append(str, "\\%03o", (unsigned char)ch);
 
                 break;
         }
@@ -1610,7 +1610,7 @@ h5tools_escape(char *s /*in,out*/, size_t size)
                 escape = "\\v";
                 break;
             default:
-                if (!isprint(s[i])) {
+                if (!isprint((unsigned char)s[i])) {
                     snprintf(octal, sizeof(octal), "\\%03o", (unsigned char)s[i]);
                     escape = octal;
                 }
