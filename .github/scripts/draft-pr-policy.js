@@ -39,6 +39,17 @@ async function findKeepAliveComment(github, owner, repo, issue_number) {
 // milestone, assignee, etc.), which would let a draft dodge the staleness check forever
 // without any real work happening. Use the latest commit/comment/review activity instead.
 // Bot comments are excluded — they represent automated activity, not real human progress.
+//
+// One exception: a checked keepalive checkbox (see KEEPALIVE_CHECKBOX) IS real human
+// activity, even though it's an edit to the bot's own comment rather than a new one of
+// the human's own — GitHub lets any collaborator toggle a task-list checkbox in-place
+// without changing the comment's author. Without counting it here, confirming via the
+// checkbox would remove the label and post "Thanks for confirming" without ever moving
+// the underlying clock, so the very next scheduled run would see the same stale
+// last-activity timestamp and immediately re-flag it — contradicting the checkbox's own
+// promise that checking it "resets this" (PR #6326 thrashed the label on a ~1-2 day loop
+// once its true last activity fell behind the 60-day window and only the checkbox, never
+// a new commit or comment, was being used to confirm it).
 async function lastRealActivityAt(github, owner, repo, pr) {
   const timestamps = [new Date(pr.created_at).getTime()];
 
@@ -50,7 +61,11 @@ async function lastRealActivityAt(github, owner, repo, pr) {
 
   const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: pr.number, per_page: 100 });
   for (const c of comments) {
-    if (c.user?.type !== "Bot") timestamps.push(new Date(c.created_at).getTime());
+    if (c.user?.type !== "Bot") {
+      timestamps.push(new Date(c.created_at).getTime());
+    } else if (c.body?.includes(KEEPALIVE_MARKER) && KEEPALIVE_CHECKED_RE.test(c.body)) {
+      timestamps.push(new Date(c.updated_at).getTime());
+    }
   }
 
   const reviews = await github.paginate(github.rest.pulls.listReviews, { owner, repo, pull_number: pr.number, per_page: 100 });
