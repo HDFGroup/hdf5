@@ -19494,8 +19494,8 @@ test_threaded_chunks(void)
 
     /* Loop over number of threads (0 = no thread pool) */
     for (pool_threads = 0; pool_threads <= 8; pool_threads++) {
-        /* Create pool if requested */
-        if (pool_threads && H5TSglobal_pool_create(pool_threads) < 0)
+        /* Set number of threads */
+        if (H5TSset_internal_threads(pool_threads) < 0)
             TEST_ERROR;
 
         /* Loop over DXPL setting, 0 = off, 1 = on, 2 = use H5P_DEFAULT */
@@ -19589,11 +19589,11 @@ test_threaded_chunks(void)
 #endif /* H5_HAVE_FILTER_DEFLATE */
             }
         }
-
-        /* Destroy pool if it was created */
-        if (pool_threads && H5TSglobal_pool_destroy() < 0)
-            TEST_ERROR;
     }
+
+    /* Disable threads */
+    if (H5TSset_internal_threads(0) < 0)
+        TEST_ERROR;
 
     if (H5Pclose(xfer) < 0)
         TEST_ERROR;
@@ -19610,6 +19610,8 @@ test_threaded_chunks(void)
     return SUCCEED;
 
 error:
+    if (H5TSset_internal_threads(0) < 0)
+        TEST_ERROR;
     if (space > 0)
         if (H5Sclose(space) < 0)
             TEST_ERROR;
@@ -19752,9 +19754,9 @@ main(void)
                     printf("\nTesting with %s file format", h5_get_version_string(low));
 
 #ifdef H5_HAVE_CONCURRENCY
-                    /* Create thread pool with 4 threads */
+                    /* Set internal threading with 4 threads */
                     if (threads) {
-                        if (H5TSglobal_pool_create(4) < 0)
+                        if (H5TSset_internal_threads(4) < 0)
                             goto error;
 
                         /* Print message about threads */
@@ -19910,8 +19912,8 @@ main(void)
                     if (H5Fclose(file) < 0)
                         goto error;
 #ifdef H5_HAVE_CONCURRENCY
-                    /* Destroy thread pool */
-                    if (threads && H5TSglobal_pool_destroy() < 0)
+                    /* Disable internal threading */
+                    if (threads && H5TSset_internal_threads(0) < 0)
                         goto error;
                 }
 #endif /* H5_HAVE_CONCURRENCY */

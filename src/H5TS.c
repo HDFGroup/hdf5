@@ -60,10 +60,11 @@ H5TS_api_info_t H5TS_api_info_p;
 /* Library Private Variables */
 /*****************************/
 
+#ifdef H5_HAVE_CONCURRENCY
 /* Global thread pool */
 H5TS_pool_t *H5TS_pool_g = NULL;
+unsigned H5TS_global_pool_nthreads_g = 0;
 
-#ifdef H5_HAVE_CONCURRENCY
 /* Whether there are concurrent threads in the library (from internal spawning) */
 bool H5TS_currently_concurrent_g = false;
 #endif /* H5_HAVE_CONCURRENCY */
@@ -158,72 +159,59 @@ H5TSmutex_release(unsigned *lock_count)
 
 #ifdef H5_HAVE_CONCURRENCY
 /*--------------------------------------------------------------------------
- * Function:    H5TSglobal_pool_create
+ * Function:    H5TSset_internal_threads
  *
- * Purpose:     Creates a global thread pool for the HDF5 library to use to
- *              accelerate parallelizable operations. The thread pool must
- *              not already exist.
+ * Purpose:     Sets the number of threads that the library can use
+ *              internally to accelerate operations that be parallelized.
+ *              This number is in addition to the main thread, which the
+ *              library currently does not use for this type of parallel
+ *              execution.
+ *
+ *              Creates a global thread pool for the HDF5 library to use to
+ *              accelerate parallelizable operations, or destroys it if
+ *              num_threads == 0.
  *
  *              This function does use the error stack because it is not
  *              meant to be called within a concurrent section.
  *
  * Parameters:
- *              num_threads; IN: The number of threads to add to the newly
- *              created thread pool.
+ *              num_threads; IN: The number of threads to use for
+ *              internally concurrent execution.
  *
  * Return:      Non-negative on success / Negative on failure
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TSglobal_pool_create(unsigned num_threads)
+H5TSset_internal_threads(unsigned num_threads)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
-    /* Check if pool already exists */
-    if (H5TS_pool_g)
-        HGOTO_ERROR(H5E_LIB, H5E_ALREADYEXISTS, FAIL, "global thread pool already exists");
+    assert((H5TS_global_pool_nthreads_g && H5TS_pool_g) || (!H5TS_global_pool_nthreads_g && !H5TS_pool_g));
 
-    /* Create global thread pool */
-    if (H5TS_pool_create(&H5TS_pool_g, num_threads) < 0)
-        HGOTO_ERROR(H5E_LIB, H5E_CANTINIT, FAIL, "can't create thread pool");
+    /* Check if the pool already exists with the requested number of threads */
+    if (num_threads == H5TS_global_pool_nthreads_g)
+        HGOTO_DONE(SUCCEED);
 
-done:
-    FUNC_LEAVE_API(ret_value);
-} /* end H5TSglobal_pool_create() */
+    /* Check if the pool already exists, destroy it if so */
+    if (H5TS_pool_g) {
+        if (H5TS_pool_destroy(H5TS_pool_g) < 0)
+            HGOTO_ERROR(H5E_LIB, H5E_CANTFREE, FAIL, "can't destroy thread pool");
+        H5TS_pool_g = NULL;
+        H5TS_global_pool_nthreads_g = 0;
+    }
 
-/*--------------------------------------------------------------------------
- * Function:    H5TSglobal_pool_create
- *
- * Purpose:     Destroys the global thread pool created with
- *              H5TSglobal_pool_create().
- *
- *              This function does use the error stack because it is not
- *              meant to be called within a concurrent section.
- *
- * Return:      Non-negative on success / Negative on failure
- *--------------------------------------------------------------------------
- */
-herr_t
-H5TSglobal_pool_destroy(void)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_API(FAIL)
-
-    /* Check if pool exists */
-    if (!H5TS_pool_g)
-        HGOTO_ERROR(H5E_LIB, H5E_CANTFREE, FAIL, "global thread pool does not exist");
-
-    /* Destroy global thread pool */
-    if (H5TS_pool_destroy(H5TS_pool_g) < 0)
-        HGOTO_ERROR(H5E_LIB, H5E_CANTFREE, FAIL, "can't destroy thread pool");
-    H5TS_pool_g = NULL;
+    /* Create global thread pool if num_threads > 0 */
+    if (num_threads > 0) {
+        if (H5TS_pool_create(&H5TS_pool_g, num_threads) < 0)
+            HGOTO_ERROR(H5E_LIB, H5E_CANTINIT, FAIL, "can't create thread pool");
+        H5TS_global_pool_nthreads_g = num_threads;
+    }
 
 done:
     FUNC_LEAVE_API(ret_value);
-} /* end H5TSglobal_pool_destroy() */
+} /* end H5TSset_internal_threads() */
 #endif /* H5_HAVE_CONCURRENCY */
 
 #endif /* H5_HAVE_THREADSAFE_API */

@@ -44,57 +44,35 @@ extern "C" {
 /**
  * \ingroup H5TS
  *
- * \brief Creates the global thread pool
+ * \brief Sets the number of internal threads to use for internal multithreading
  *
- * \param[in] num_threads Number of threads to add to thread pool
+ * \param[in] num_threads Number of threads to use for internal multithreading
  *
  * \return \herr_t
  *
- * \details H5TSglobal_pool_create() creates the global thread pool with
- *          \p num_threads threads for the HDF5 library to use to accelerate
- *          parallelizable operations.
+ * \details H5TSset_internal_threads() directs the HDF5 library to us
+ *          \p num_threads threads to accelerate parallelizable operations.
  *
  *          This is currently only used to accelerate read operations for
- *          chunked datasets that either have data filters applied or the chunks
- *          are small enough to fit in cache. In this case, the library
- *          parallelizes the reads from disk, the data filter operations, and
- *          the memory scatter operation. However, all of these operations are
- *          currently protected by a mutex so no performance gain is expected
- *          and this feature is purely experimental. These mutexes will be
- *          relaxed in the future to enable performance acceleration.
+ *          chunked datasets that either have data filters applied or for which
+ *          the chunks are small enough to fit in cache. In this case, the
+ *          library parallelizes the reads from disk, the data filter
+ *          operations, and the memory scatter operation. However, all of these
+ *          operations are currently protected by a mutex so no performance gain
+ *          is expected and this feature is purely experimental. These mutexes
+ *          will be relaxed in the future to enable performance acceleration.
  *
- *          The thread pool must not already exist. If this function is called
- *          when the thread pool already exists, an error will be returned.
- *
- * \note    This function is only present when the library is compiled with HDF5_ENABLE_CONCURRENCY=ON.
- *
- * \since 2.3.0
- *
- */
-H5_DLL herr_t H5TSglobal_pool_create(unsigned num_threads);
-
-/**
- * \ingroup H5TS
- *
- * \brief Destroys the global thread pool
- *
- * \return \herr_t
- *
- * \details H5TSglobal_pool_destroy() destroys the global thread pool created
- *          with H5TSglobal_pool_create(). After calling this function, the
- *          library will no longer use this thread pool to accelerate
- *          operations. The global thread pool may be created again with another
- *          call to H5TSglobal_pool_create().
- *
- *          The thread pool must exist. If this function is called when the
- *          thread pool does not exist, an error will be returned.
+ *          Currently, the library will immediately create \p num_threads
+ *          threads and retain them until this function is called again. Calling
+ *          this function with \p num_threads set to \c 0 will terminate these
+ *          threads and disable internal multithreading.
  *
  * \note    This function is only present when the library is compiled with HDF5_ENABLE_CONCURRENCY=ON.
  *
  * \since 2.3.0
  *
  */
-H5_DLL herr_t H5TSglobal_pool_destroy(void);
+H5_DLL herr_t H5TSset_internal_threads(unsigned num_threads);
 
 #ifdef __cplusplus
 }

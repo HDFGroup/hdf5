@@ -12440,7 +12440,7 @@ main(void)
 
 #ifdef H5_HAVE_CONCURRENCY
                 /* Enable threads if part of configuration */
-                if ((bit_config & TEST_IO_THREADS) && H5TSglobal_pool_create(4) < 0)
+                if ((bit_config & TEST_IO_THREADS) && H5TSset_internal_threads(4) < 0)
                     TEST_ERROR;
 #endif /* H5_HAVE_CONCURRENCY */
 
@@ -12452,8 +12452,8 @@ main(void)
                 nerrors += test_all(bit_config, vds_fapl, src_fapl);
 
 #ifdef H5_HAVE_CONCURRENCY
-                /* Destroy thread pool if appropriate */
-                if ((bit_config & TEST_IO_THREADS) && H5TSglobal_pool_destroy() < 0)
+                /* Disable threads if appropriate */
+                if ((bit_config & TEST_IO_THREADS) && H5TSset_internal_threads(0) < 0)
                     TEST_ERROR;
 #endif /* H5_HAVE_CONCURRENCY */
             }
