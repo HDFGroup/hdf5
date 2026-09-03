@@ -66,29 +66,25 @@ H5Z__copy_chars2(char *out, size_t cap, size_t *pos, const char **p)
 /*
  * H5Z__rewrite_hexfloats - return a copy of `src` with every C99 hex-float
  * literal (e.g. "0x1.8p+1", "-0x1p-1") replaced by an equivalent decimal
- * string.  Uses %.16e, which always carries a decimal point and an exponent
- * (so tomlc17 types it TOML_FP64, not TOML_INTEGER) and which emits exactly
- * DBL_DECIMAL_DIG == 17 significant digits -- one before the point plus 16
- * after -- the minimum that round-trips every IEEE 754 double.
+ * string.  Uses %.16e: it always carries a decimal point and exponent (so
+ * tomlc17 types it TOML_FP64, not TOML_INTEGER) and emits DBL_DECIMAL_DIG ==
+ * 17 significant digits, the minimum that round-trips every IEEE 754 double.
  *
  * The width is deliberate.  C11 7.22.1.3p11 recommends correct rounding only
- * for decimal forms of at most DECIMAL_DIG significant digits; past that the
- * recommendation weakens to a bounded-value rule.  DECIMAL_DIG is sized for
- * long double, so it is 21 where that is x87 80-bit but 17 where long double
- * == double (MSVC among others).  %.17e emits 18 digits, exceeding
- * DECIMAL_DIG on those targets for no benefit, since 17 already round-trip
- * exactly.  Contrast 7.22.1.3p9, which *requires* correct rounding for the
- * hexadecimal form -- the asymmetry this rewrite trades away.  %.17g
- * must not be substituted: it drops the decimal point for whole values
- * ("8.0" -> "8"), which a TOML parser reads as an integer.
+ * up to DECIMAL_DIG significant digits.  DECIMAL_DIG is sized for long
+ * double, so it is 21 where that is x87 80-bit but 17 where long double ==
+ * double (MSVC among others); %.17e would emit 18 digits, exceeding
+ * DECIMAL_DIG on those targets for no benefit.  Contrast 7.22.1.3p9, which
+ * *requires* correct rounding for the hexadecimal form -- the asymmetry
+ * this rewrite trades away.  %.17g must not be substituted: it drops the
+ * decimal point for whole values ("8.0" -> "8"), which a TOML parser reads
+ * as an integer.
  *
- * This pre-processing step lets callers produce parameter strings with `%a`
- * for exact float encoding without
- * requiring changes to the vendored tomlc17 scanner, which does not support
- * hex-float syntax natively.
+ * Lets callers write `%a` hex-float literals for exact float encoding
+ * without requiring hex-float support in the vendored tomlc17 scanner.
  *
- * Returns a heap-allocated NUL-terminated string; caller frees with
- * H5MM_xfree().  Returns NULL on allocation failure.
+ * Caller frees the returned buffer with H5MM_xfree(); NULL on allocation
+ * failure.
  */
 static char *
 H5Z__rewrite_hexfloats(const char *src)
@@ -112,11 +108,8 @@ H5Z__rewrite_hexfloats(const char *src)
         return NULL;
 
     while (*p) {
-        /* ----------------------------------------------------------------
-         * Skip TOML double-quoted strings verbatim - do not rewrite content
-         * inside "...".  Honours backslash escapes so that \" does not end
-         * the string prematurely.
-         * ---------------------------------------------------------------- */
+        /* Skip TOML double-quoted strings verbatim (honours backslash
+         * escapes so \" does not end the string early). */
         if (*p == '"') {
             H5Z__copy_char(out, cap, &pos, &p);
             while (*p && *p != '"') {
@@ -130,9 +123,7 @@ H5Z__rewrite_hexfloats(const char *src)
             continue;
         }
 
-        /* ----------------------------------------------------------------
-         * Skip TOML single-quoted (literal) strings verbatim - no escapes.
-         * ---------------------------------------------------------------- */
+        /* Skip TOML single-quoted (literal) strings verbatim (no escapes). */
         if (*p == '\'') {
             H5Z__copy_char(out, cap, &pos, &p);
             while (*p && *p != '\'')
@@ -142,9 +133,7 @@ H5Z__rewrite_hexfloats(const char *src)
             continue;
         }
 
-        /* ----------------------------------------------------------------
-         * Skip TOML comments (# to end of line) verbatim.
-         * ---------------------------------------------------------------- */
+        /* Skip TOML comments (# to end of line) verbatim. */
         if (*p == '#') {
             while (*p && *p != '\n')
                 H5Z__copy_char(out, cap, &pos, &p);
@@ -157,7 +146,6 @@ H5Z__rewrite_hexfloats(const char *src)
             p++;
 
         if (p[0] == '0' && (p[1] == 'x' || p[1] == 'X')) {
-            /* Scan hex digits */
             const char *q = p + 2;
             while (isxdigit((unsigned char)*q) || *q == '_')
                 q++;
@@ -182,24 +170,19 @@ H5Z__rewrite_hexfloats(const char *src)
                         char  *end;
                         double val = strtod(tmp, &end);
                         if (end == tmp + tok_len) {
-                            /* Emit decimal equivalent as a TOML float.
-                             * Use %e (scientific notation) which always
-                             * contains a decimal point and exponent, so
-                             * tomlc17 parses it as TOML_FP64 not TOML_INTEGER.
-                             * 17 significant digits guarantee IEEE 754
-                             * double round-trip fidelity (C11 DBL_DECIMAL_DIG). */
+                            /* Decimal form of the hex-float literal; see
+                             * H5Z__rewrite_hexfloats() rationale above. */
                             char dec[32];
                             int  n = snprintf(dec, sizeof(dec), "%.16e", val);
-                            /* LC_NUMERIC may replace '.' with the locale decimal
-                             * separator (e.g. ',' in de_DE).  TOML requires '.'.
-                             * Use localeconv() to find the actual separator rather
-                             * than hardcoding ','. */
+                            /* snprintf() is locale-sensitive: LC_NUMERIC may
+                             * substitute e.g. ',' for '.', but TOML requires '.'.
+                             * Look up the actual separator via localeconv()
+                             * rather than assuming ','. */
                             if (n > 0 && n < (int)sizeof(dec)) {
-                                /* localeconv() returns a pointer to thread-shared
-                                 * static storage; we read decimal_point[0] exactly
-                                 * once.  In HDF5_ENABLE_THREADSAFE builds the global
-                                 * library lock serializes concurrent setlocale() calls,
-                                 * so this is safe. */
+                                /* localeconv() returns thread-shared static storage;
+                                 * decimal_point[0] is read exactly once.  HDF5_ENABLE_THREADSAFE
+                                 * builds serialize concurrent setlocale() calls via the global
+                                 * library lock, making this safe. */
                                 const char *locale_sep = localeconv()->decimal_point; /* always non-NULL */
                                 if (locale_sep[0] != '.' && locale_sep[0] != '\0') {
                                     char *dp;
@@ -283,37 +266,23 @@ H5Z__toml_wrap(const char *params)
 /*-------------------------------------------------------------------------
  * Function:    H5Z_canonicalize_params
  *
- * Purpose:     Return a heap copy of PARAMS in the canonical form used for
- *              on-disk storage (filter pipeline version 3).
+ * Purpose:     Return a heap copy of PARAMS in the canonical form persisted
+ *              on disk (filter pipeline v3): optional outer braces and
+ *              surrounding whitespace stripped, and C99 hex-float literals
+ *              rewritten to bit-exact %.16e decimal.  Both normalisations
+ *              exist because the stored bytes must be valid TOML v1.0.0 --
+ *              pure-reimplementation readers (e.g. jHDF, pyfive) parse the
+ *              object header directly with a stock TOML parser, for which a
+ *              braced or hex-float payload is a hard error.  See
+ *              RFC-HDFG-2026-001 sec:pline-v3.
  *
- *              Two value-preserving normalisations are applied:
+ *              Everything else -- interior spacing, quote style, key case,
+ *              key order -- is preserved byte-for-byte; values are never
+ *              re-serialised, so no decimal-precision rounding is
+ *              introduced.
  *
- *                1. Optional outer braces, and surrounding whitespace, are
- *                   removed: both "{level = 6}" and "level = 6" store as
- *                   "level = 6".  This mirrors the acceptance rule in
- *                   H5Z__toml_wrap().
- *                2. C99 hex-float literals are rewritten to %.16e decimal,
- *                   which is bit-exact for IEEE 754 doubles.
- *
- *              The point of both is that the stored bytes are a valid TOML
- *              v1.0.0 document, which neither the braced form nor a
- *              hex-float literal is.  The stored string is read by tools
- *              that are not the HDF5 library -- pure-reimplementation
- *              readers such as jHDF and pyfive parse the object header
- *              directly and use a stock TOML parser -- and for those a
- *              braced or hex-float payload is a hard parse error.  Keeping
- *              the canonical form a strict subset of TOML is what makes the
- *              persisted string useful to them.  See RFC-HDFG-2026-001
- *              sec:pline-v3.
- *
- *              Everything else is preserved byte-for-byte: interior
- *              spacing, quote style, key case, and key order.  Values are
- *              never re-serialised, so no decimal-precision rounding is
- *              introduced (the reason a full parser-normalised
- *              re-serialisation was rejected).
- *
- * Return:      Success:    Heap-allocated NUL-terminated string; the caller
- *                          frees it with H5MM_xfree().
+ * Return:      Success:    Heap-allocated NUL-terminated string, freed by
+ *                          the caller with H5MM_xfree().
  *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
@@ -806,8 +775,8 @@ H5Z__config_get_str(const char *params, const char *key, char *buf, size_t *buf_
     {
         size_t cap;
 
-        /* Reject ambiguous (buf != NULL, buf_size == NULL): we have no way to
-         * know the caller's buffer size, and an unbounded memcpy is unsafe. */
+        /* Reject ambiguous (buf != NULL, buf_size == NULL): the caller's
+         * buffer size is unknown, and an unbounded memcpy would be unsafe. */
         if (buf && !buf_size)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf_size must not be NULL when buf is non-NULL");
 

@@ -15816,7 +15816,7 @@ public class H5 implements java.io.Serializable {
      * @param filter
      *            IN: filter number.
      *
-     * @return an H5Z_class_info_t object, or null on failure
+     * @return an H5Z_class_info_t object
      *
      * @exception HDF5LibraryException
      *            Error from the HDF5 Library.

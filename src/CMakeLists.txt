@@ -1001,7 +1001,16 @@ if (H5_ZLIB_HEADER)
 endif ()
 
 list (APPEND H5Z_SOURCES ${HDF5_SRC_DIR}/tomlc17/tomlc17.c)
-if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+# Hide the vendored TOML parser's symbols so they cannot collide with a
+# different tomlc17 (or a differently-versioned one) an application links
+# separately. Tested by capability (does the compiler accept the flag?)
+# rather than by matching a fixed compiler-ID allowlist, which silently
+# fails to protect the many other compilers HDF5 supports and tests in CI
+# (Intel, NVHPC, AOCC, Cray, ...) whenever one of them happens not to match
+# the list.
+include (CheckCCompilerFlag)
+check_c_compiler_flag ("-fvisibility=hidden" HDF5_C_HAS_FVISIBILITY_HIDDEN)
+if (HDF5_C_HAS_FVISIBILITY_HIDDEN)
   set_source_files_properties (${HDF5_SRC_DIR}/tomlc17/tomlc17.c
     PROPERTIES COMPILE_OPTIONS "-fvisibility=hidden"
   )

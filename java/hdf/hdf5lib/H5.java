@@ -24030,6 +24030,8 @@ public class H5 implements java.io.Serializable {
         catch (Throwable t) {
             throw new HDF5LibraryException("H5Zconfig_has_key failed: " + t.getMessage());
         }
+        if (retVal < 0)
+            h5libraryError();
         return retVal;
     }
 

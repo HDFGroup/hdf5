@@ -10040,6 +10040,27 @@ test_par_append_filter_dcpl_consistency(hid_t fapl_id)
     dset_id = H5Dopen2(group_id, "dset", H5P_DEFAULT);
     VRFY((dset_id >= 0), "H5Dopen2 succeeded");
 
+    /* Confirm the pipeline-v3 stored configuration string itself -- not
+     * just the cd_values it produced -- survived a close/reopen under this
+     * test's collective-metadata parallel I/O setup.  cd_values matching
+     * would also pass under a plain version-2 message reconstructed via
+     * get_config, so only this check actually proves H5Pappend_filter's
+     * string was persisted and decoded correctly here. */
+    {
+        hid_t  reopened_dcpl = H5I_INVALID_HID;
+        char   stored_params[64];
+        size_t stored_len = 0;
+
+        reopened_dcpl = H5Dget_create_plist(dset_id);
+        VRFY((reopened_dcpl >= 0), "H5Dget_create_plist on reopened dataset succeeded");
+        VRFY((H5Pget_filter_params_by_idx(reopened_dcpl, 0, stored_params, sizeof(stored_params),
+                                          &stored_len) >= 0),
+             "H5Pget_filter_params_by_idx on reopened dataset succeeded");
+        VRFY((strcmp(stored_params, "level=6") == 0),
+             "Reopened dataset returns the exact stored string, not a get_config reconstruction");
+        VRFY((H5Pclose(reopened_dcpl) >= 0), "H5Pclose reopened_dcpl succeeded");
+    }
+
     rbuf = (C_DATATYPE *)calloc(1, nbytes);
     VRFY((rbuf != NULL), "calloc rbuf succeeded");
 
@@ -10101,7 +10122,7 @@ test_par_append_filter_error_propagation(hid_t fapl_id)
     if (ret < 0)
         local_err = 1;
 
-    /* Collective reduce - if any rank deadlocked we would never get here */
+    /* Collective reduce; a deadlocked rank would never reach this point */
     mpi_code = MPI_Allreduce(&local_err, &global_err, 1, MPI_INT, MPI_SUM, comm);
     VRFY((mpi_code == MPI_SUCCESS), "MPI_Allreduce succeeded");
     VRFY((global_err == mpi_size), "All ranks received H5Pappend_filter error for unknown key");

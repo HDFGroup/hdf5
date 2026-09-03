@@ -32,8 +32,8 @@ public class H5Z_class_info_t implements Serializable {
     /** True if the plugin implements the get_config callback */
     public boolean has_get_config;
 
-    public H5Z_class_info_t(int id, int config_flags, String name, String description, boolean has_set_config,
-                            boolean has_get_config)
+    H5Z_class_info_t(int id, int config_flags, String name, String description, boolean has_set_config,
+                     boolean has_get_config)
     {
         this.id             = id;
         this.config_flags   = config_flags;

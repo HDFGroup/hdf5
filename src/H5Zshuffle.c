@@ -28,7 +28,7 @@ static size_t H5Z__filter_shuffle(unsigned flags, size_t cd_nelmts, const unsign
 
 /* This message derives from H5Z */
 H5_ATTR_VISIBILITY_HIDDEN const H5Z_class3_t H5Z_SHUFFLE[1] = {{
-    2,                                                              /* H5Z_class3_t version (literal 2) */
+    2,                                                              /* H5Z_class3_t version */
     H5Z_FILTER_SHUFFLE,                                             /* Filter id number */
     1,                                                              /* encoder_present flag (set to true) */
     1,                                                              /* decoder_present flag (set to true) */
@@ -85,8 +85,7 @@ H5Z__set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_
         HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size");
 
     /* Modify the filter's parameters for this dataset */
-    /* set_local specialises cd_values for this dataset; keep the stored
-     * configuration string (keep_config = true). */
+    /* keep_config = true: set_local only refines cd_values, not the stored config string */
     if (H5P_modify_filter(dcpl_plist, H5Z_FILTER_SHUFFLE, flags, (size_t)H5Z_SHUFFLE_TOTAL_NPARMS, true,
                           cd_values) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local shuffle parameters");

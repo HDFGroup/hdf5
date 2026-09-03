@@ -3195,6 +3195,10 @@ h5tools_print_fill_value(h5tools_str_t *buffer /*in,out*/, const h5tool_format_t
  * Return:      true if the value should be annotated, false otherwise
  *-------------------------------------------------------------------------
  */
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+#endif
 static bool
 h5tools_float_is_short_binary(double v)
 {
@@ -3206,12 +3210,16 @@ h5tools_float_is_short_binary(double v)
 
     /* frexp normalizes to f in [0.5, 1), so the significand of a value with
      * at most 13 significant bits is f * 2^13 -- scaling by 8192 makes
-     * exactly those values integral.  0x1.fffp+0 is the widest accepted. */
+     * exactly those values integral.  0x1.fffp+0 is the widest accepted.
+     * The equality checks below are intentionally exact, not a precision bug. */
     f = frexp(fabs(v), &e);
     f *= 8192.0;
 
     return f == floor(f);
 }
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:    h5tools_format_hexfloat
@@ -3382,7 +3390,19 @@ h5tools_params_hex_annotation(const char *params, char *out, size_t out_size)
             while (isdigit((unsigned char)*p) || *p == '_')
                 p++;
             if (*p == 'x' || *p == 'X')
-                isfloat = ishex = true; /* a C99 hex-float literal */
+                isfloat = ishex = true; /* C99 hex float or bare hex integer -- strtod()
+                                          * consumes either in full; ishex suppresses
+                                          * annotation for both. */
+            else if (*p == 'b' || *p == 'B' || *p == 'o' || *p == 'O') {
+                /* TOML binary/octal prefix (0b1010, 0o17): never a float, and
+                 * strtod() stops after the leading "0" without understanding this
+                 * notation, so consume the token by hand -- otherwise the leftover
+                 * "b1010"/"o17" suffix would be re-scanned and mis-lexed as a key. */
+                p++;
+                while (isalnum((unsigned char)*p) || *p == '_')
+                    p++;
+                continue;
+            }
             else if (*p == '.' || *p == 'e' || *p == 'E' || *p == 'p' || *p == 'P')
                 isfloat = true;
 
@@ -3451,14 +3471,13 @@ h5tools_dump_filter_extra(FILE *stream, const h5tool_format_t *info, h5tools_con
         }
     }
 
-    /* DESCRIPTION is a best-effort, registry-sourced label: it comes from the
-     * filter class's in-memory registration (H5Zget_filter_class_info), not from
-     * anything persisted in the file. Unlike COMMENT (the filter's
-     * canonical_name, which is stored in the pipeline message and always
-     * displays), DESCRIPTION is omitted whenever the filter isn't currently
-     * registered/loadable on the machine running h5dump -- e.g. `h5dump -p`
-     * on the same file will show DESCRIPTION on a machine with the plugin
-     * installed and omit it on one without. */
+    /* DESCRIPTION is a best-effort label from the filter class's in-memory
+     * registration (H5Zget_filter_class_info), not from anything persisted in
+     * the file -- unlike COMMENT (the filter's canonical_name, stored in the
+     * pipeline message and always shown). It is therefore omitted whenever
+     * the filter isn't registered/loadable on the machine running h5dump:
+     * `h5dump -p` on the same file shows it where the plugin is installed and
+     * omits it where it is not. */
     if (description) {
         ctx->need_prefix = true;
         h5tools_str_reset(buffer);
@@ -3843,11 +3862,20 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
 
         if (nfilters) {
             for (i = 0; i < nfilters; i++) {
-                char        params_str_buf[H5Z_CONFIG_STRING_MAX + 1];
-                char        params_annot[H5Z_CONFIG_STRING_MAX + 1]; /* hex comment, "" if none */
-                char       *params_str   = NULL;                     /* escaped, NULL if none to print */
-                const char *filter_descr = NULL;                     /* library-owned, no free needed */
-                bool        have_extra; /* true if this filter has a PARAMS_STRING and/or DESCRIPTION */
+                /* Heap-allocated: two H5Z_CONFIG_STRING_MAX+1-byte buffers per loop
+                 * iteration would exceed this function's stack-frame budget. */
+                const size_t params_buf_size = H5Z_CONFIG_STRING_MAX + 1;
+                char        *params_str_buf  = (char *)malloc(params_buf_size);
+                char        *params_annot    = (char *)malloc(params_buf_size); /* hex comment, "" if none */
+                char        *params_str      = NULL;                     /* escaped, NULL if none to print */
+                const char  *filter_descr    = NULL;                     /* library-owned, no free needed */
+                bool         have_extra; /* true if this filter has a PARAMS_STRING and/or DESCRIPTION */
+
+                if (!params_str_buf || !params_annot) {
+                    free(params_str_buf);
+                    free(params_annot);
+                    continue;
+                }
 
                 params_annot[0] = '\0';
 
@@ -3855,34 +3883,57 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                 filtn     = H5Pget_filter2(dcpl_id, (unsigned)i, &filt_flags, &cd_nelmts, cd_values,
                                            sizeof(f_name), f_name, NULL);
 
-                if (filtn < 0)
+                if (filtn < 0) {
+                    free(params_str_buf);
+                    free(params_annot);
                     continue; /* nothing to print for invalid filter */
+                }
 
                 /* -p prints PARAMS_STRING and DESCRIPTION nested inside this
                  * filter's own FILTERS{} entry. */
                 if (dcpl_id >= 0 && ctx->show_filter_params) {
                     size_t plen = 0;
-                    if (H5Pget_filter_params_by_idx(dcpl_id, (unsigned)i, params_str_buf,
-                                                    sizeof(params_str_buf), &plen) >= 0 &&
+                    if (H5Pget_filter_params_by_idx(dcpl_id, (unsigned)i, params_str_buf, params_buf_size,
+                                                    &plen) >= 0 &&
                         plen > 0) {
+                        /* H5Pget_filter_params_by_idx() reports the full length
+                         * needed in plen, not the number of bytes actually
+                         * copied into params_str_buf -- a filter or plugin
+                         * reporting a length past params_buf_size would
+                         * otherwise read out of bounds below.  Clamp to what was
+                         * really copied before using it as a bound. */
+                        size_t copied = (plen < params_buf_size) ? plen : params_buf_size - 1;
+                        params_str_buf[copied] = '\0';
+
                         /* Scan the raw string -- not the escaped form below -- for
                          * floats worth annotating in hexadecimal. */
-                        if (plen < sizeof(params_str_buf))
-                            params_str_buf[plen] = '\0';
-                        h5tools_params_hex_annotation(params_str_buf, params_annot,
-                                                      sizeof(params_annot));
+                        h5tools_params_hex_annotation(params_str_buf, params_annot, params_buf_size);
 
                         /* PARAMS_STRING is wrapped in single quotes: its content is
                          * TOML, whose only quoted forms are "..." and '...', neither
                          * of which can contain a literal unescaped single quote --
                          * except a TOML double-quoted string value may itself contain
-                         * one (e.g. "it's"), so still escape it here for that case. */
-                        size_t ebuf_size = 2 * plen + 1;
+                         * one (e.g. "it's"), so still escape it here for that case.
+                         *
+                         * The string may also be read back from an untrusted file's
+                         * object header (H5O__pline_decode only bounds its length, not
+                         * its content), so control characters -- in particular a raw
+                         * newline, which would inject an extra line into this
+                         * line-oriented DDL output -- are hex-escaped too, the same
+                         * concern H5Z__validate_class3_name already guards for filter
+                         * names. Worst case every byte is a 4-byte "\xHH" escape. */
+                        size_t ebuf_size = 4 * copied + 1;
                         char  *ebuf      = (char *)malloc(ebuf_size);
                         if (ebuf) {
                             size_t in_i, out_i = 0;
-                            for (in_i = 0; in_i < plen; in_i++) {
-                                if (params_str_buf[in_i] == '\\' || params_str_buf[in_i] == '\'')
+                            for (in_i = 0; in_i < copied; in_i++) {
+                                unsigned char c = (unsigned char)params_str_buf[in_i];
+                                if (c < 0x20 || c == 0x7f) {
+                                    out_i += (size_t)snprintf(ebuf + out_i, ebuf_size - out_i, "\\x%02x",
+                                                              (unsigned)c);
+                                    continue;
+                                }
+                                if (c == '\\' || c == '\'')
                                     ebuf[out_i++] = '\\';
                                 ebuf[out_i++] = params_str_buf[in_i];
                             }
@@ -4168,6 +4219,8 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
 
                 if (params_str)
                     free(params_str);
+                free(params_str_buf);
+                free(params_annot);
             } /*i*/
         }     /*nfilters*/
         else {

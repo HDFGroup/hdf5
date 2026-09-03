@@ -89,7 +89,9 @@ typedef int H5Z_filter_t;
 /** Maximum number of cd_values elements per filter in H5Pappend_filter \since 3.0.0 */
 #define H5Z_MAX_CD_NELMTS 65535u
 
-/** Maximum length of a filter parameter string (including NUL terminator) \since 3.0.0 */
+/** Maximum length of a filter parameter string, in bytes, not counting the
+ *  NUL terminator (matches the enforcement in H5Pappend_filter(),
+ *  H5Pmodify_filter_by_idx(), and H5O__pline_decode()) \since 3.0.0 */
 #define H5Z_CONFIG_STRING_MAX 4096
 
 /** Maximum number of key-value parameters in a filter parameter string \since 3.0.0 */
@@ -327,12 +329,16 @@ typedef struct {
    H5Z_PARAMS_RAW can be expressed as a brace-initialised aggregate.
    H5Z_PARAMS_STR cannot: a C++ aggregate initialiser cannot carry a
    runtime pointer argument without risking silent argument loss.
-   C++ callers MUST use the named-variable form instead. */
+   C++ callers MUST use the named-variable form instead:
+     H5Z_params_t p; p.type = H5Z_PARAMS_STRING; p.u.str = (s);
+   H5Z_PARAMS_STR is intentionally left undefined for C++ (rather than
+   defined as a macro that expands to a static_assert(false, ...), which
+   is a declaration, not an expression -- it would fail with a confusing
+   syntax error at the point of use, such as "H5Z_params_t p =
+   H5Z_PARAMS_STR(s);", rather than the intended diagnostic message).
+   Leaving it undefined instead gives a clean "not declared" error naming
+   the macro itself. */
 #define H5Z_PARAMS_RAW(n, vals) (H5Z_params_t{H5Z_PARAMS_CDVALUES, {{(n), (vals)}}})
-#define H5Z_PARAMS_STR(s)                                                                                    \
-    static_assert(false, "H5Z_PARAMS_STR is not available in C++. "                                          \
-                         "Use the named-variable form: "                                                     \
-                         "H5Z_params_t p; p.type = H5Z_PARAMS_STRING; p.u.str = (s);")
 #else
 /* C99: compound literals with designated initialisers */
 #define H5Z_PARAMS_RAW(n, vals) ((H5Z_params_t){H5Z_PARAMS_CDVALUES, {.raw = {(n), (vals)}}})

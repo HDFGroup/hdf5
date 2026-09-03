@@ -20,23 +20,21 @@
 /* Include private header file */
 #include "H5Zprivate.h" /* Filter functions                */
 
-/* Version-field value identifying H5Z_class3_t, for internal dispatch in
- * H5Zregister()/H5Z_register(). Pinned to 2, independent of
- * H5Z_CLASS_T_VERS_MAX. */
-#define H5Z_CLASS3_T_VERS_INTERNAL (2)
+/* Internal dispatch alias for H5Z_CLASS3_T_VERS (used in
+ * H5Zregister()/H5Z_register()), so the two values cannot drift apart. */
+#define H5Z_CLASS3_T_VERS_INTERNAL H5Z_CLASS3_T_VERS
 
 /********************/
 /* Internal filters */
 /********************/
 
-/* These built-in filter class structs are package-private: referenced only
- * from within libhdf5 (H5Z.c), never part of the public API. H5_DLLVAR's
- * default-visibility export is therefore wrong for them -- it previously
- * caused these symbols to appear in libhdf5's dynamic symbol table, where
- * they can collide with identically-named globals in dynamically loaded
- * third-party filter plugins that happen to share the same symbol name.
- * Plain "extern" plus hidden visibility keeps them linkable across this
- * library's own translation units without exposing them externally. */
+/* These built-in filter class structs are package-private: used only within
+ * libhdf5 (H5Z.c), never part of the public API. Default-visibility export
+ * (H5_DLLVAR) would place them in libhdf5's dynamic symbol table, where they
+ * could collide with identically-named globals in dynamically loaded
+ * third-party filter plugins. Plain "extern" with hidden visibility keeps
+ * them linkable across this library's own translation units without
+ * external exposure. */
 
 /* Shuffle filter */
 H5_ATTR_VISIBILITY_HIDDEN extern const H5Z_class3_t H5Z_SHUFFLE[1];

@@ -311,7 +311,6 @@ CONTAINS
            total_error = total_error + 1
       END IF
 
-      RETURN
 !
 ! h5pmodify_filter_by_idx_f: both generic forms
 !
