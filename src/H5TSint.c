@@ -182,7 +182,7 @@ H5TS_term_package(void)
     /* Destroy global thread pool if it exists */
     if (H5TS_pool_g) {
         (void)H5TS_pool_destroy(H5TS_pool_g);
-        H5TS_pool_g = NULL;
+        H5TS_pool_g                 = NULL;
         H5TS_global_pool_nthreads_g = 0;
     }
 #endif /* H5_HAVE_CONCURRENCY */
