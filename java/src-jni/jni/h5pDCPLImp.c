@@ -1556,8 +1556,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1filter_1params_1by_1idx(JNIEnv *env, jclass clss, jl
 
     if (plen > 0) {
         /* Populate the exact-size buffer. */
-        if ((status = H5Pget_filter_params_by_idx((hid_t)plist_id, (unsigned)idx, buf, plen + 1, &plen)) <
-            0)
+        if ((status = H5Pget_filter_params_by_idx((hid_t)plist_id, (unsigned)idx, buf, plen + 1, &plen)) < 0)
             H5_LIBRARY_ERROR(ENVONLY);
     }
     buf[plen] = '\0';

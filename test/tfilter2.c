@@ -1800,29 +1800,11 @@ error:
 static int
 test_canonical_name_uniqueness(void)
 {
-    H5Z_class3_t cls_a = {2,
-                          UNIQUENAME_FILTER_ID_A,
-                          1,
-                          1,
-                          "test-unique-name",
-                          NULL,
-                          NULL,
-                          NULL,
-                          longtitle_filter_func,
-                          NULL,
-                          NULL};
-    H5Z_class3_t cls_b = {2,
-                          UNIQUENAME_FILTER_ID_B,
-                          1,
-                          1,
-                          "test-unique-name",
-                          NULL,
-                          NULL,
-                          NULL,
-                          longtitle_filter_func,
-                          NULL,
-                          NULL};
-    herr_t ret;
+    H5Z_class3_t cls_a = {2,    UNIQUENAME_FILTER_ID_A, 1,    1,   "test-unique-name", NULL, NULL,
+                          NULL, longtitle_filter_func,  NULL, NULL};
+    H5Z_class3_t cls_b = {2,    UNIQUENAME_FILTER_ID_B, 1,    1,   "test-unique-name", NULL, NULL,
+                          NULL, longtitle_filter_func,  NULL, NULL};
+    herr_t       ret;
 
     TESTING("H5Zregister: canonical_name collision across different filter ids is rejected");
 
@@ -1975,16 +1957,16 @@ error:
 
 static size_t
 growth_filter_func(unsigned H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
-                    const unsigned H5_ATTR_UNUSED *cd_values, hid_t H5_ATTR_UNUSED dxpl_id,
-                    const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims, size_t nbytes,
-                    size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+                   const unsigned H5_ATTR_UNUSED *cd_values, hid_t H5_ATTR_UNUSED dxpl_id,
+                   const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims, size_t nbytes,
+                   size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
     return nbytes; /* pass-through; never actually applied by this test */
 }
 
 static herr_t
 growth_set_config(const char H5_ATTR_UNUSED *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts,
-                   unsigned H5_ATTR_UNUSED cd_values[], size_t H5_ATTR_UNUSED cd_values_size)
+                  unsigned H5_ATTR_UNUSED cd_values[], size_t H5_ATTR_UNUSED cd_values_size)
 {
     /* Ignores params entirely -- any syntactically valid TOML is "accepted",
      * so the test below is free to pack the string with as many distinct
@@ -1997,17 +1979,17 @@ static int
 test_config_string_canonicalization_growth(void)
 {
     static const H5Z_class3_t growth_cls = {
-        2,                   /* version         */
-        GROWTH_FILTER_ID,    /* id              */
-        1,                   /* encoder_present */
-        1,                   /* decoder_present */
-        "growth_filter",     /* canonical_name  */
-        NULL,                /* description     */
-        NULL,                /* can_apply       */
-        NULL,                /* set_local       */
-        growth_filter_func,  /* filter          */
-        growth_set_config,   /* set_config      */
-        NULL,                /* get_config      */
+        2,                  /* version         */
+        GROWTH_FILTER_ID,   /* id              */
+        1,                  /* encoder_present */
+        1,                  /* decoder_present */
+        "growth_filter",    /* canonical_name  */
+        NULL,               /* description     */
+        NULL,               /* can_apply       */
+        NULL,               /* set_local       */
+        growth_filter_func, /* filter          */
+        growth_set_config,  /* set_config      */
+        NULL,               /* get_config      */
     };
     hid_t    dcpl = H5I_INVALID_HID;
     char    *raw  = NULL;
@@ -2795,8 +2777,10 @@ test_config_string_golden_file(void)
     if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
         TEST_ERROR;
     if (strcmp(pbuf, "scale_type = \"int\", scale_factor = 3") != 0) {
-        fprintf(stderr, "\n   golden file stored \"%s\"\n   expected  \"scale_type = \\\"int\\\", scale_factor = 3\"\n",
-                pbuf);
+        fprintf(
+            stderr,
+            "\n   golden file stored \"%s\"\n   expected  \"scale_type = \\\"int\\\", scale_factor = 3\"\n",
+            pbuf);
         TEST_ERROR;
     }
 
@@ -2843,8 +2827,7 @@ error:
 /* Copy SRC to DST, patching the 2 bytes at BYTE_OFFSET (little-endian) to
  * NEW_LEN.  Returns 0 on success, -1 on any I/O or verification failure. */
 static int
-patch_config_length(const char *src, const char *dst, long byte_offset, uint16_t expect_len,
-                    uint16_t new_len)
+patch_config_length(const char *src, const char *dst, long byte_offset, uint16_t expect_len, uint16_t new_len)
 {
     FILE  *in = NULL, *out = NULL;
     char  *buf   = NULL;
@@ -2904,11 +2887,11 @@ test_config_string_corrupted_decode(void)
      * re-verifies the current value at this offset is still 36 before
      * patching, so a future regeneration that shifts this offset fails the
      * test loudly rather than corrupting an unrelated field. */
-    const long   config_length_offset = 357;
-    const char  *over_max_file        = "tfilter2_v3_corrupt_over_max.h5";
-    const char  *over_buffer_file     = "tfilter2_v3_corrupt_over_buffer.h5";
-    hid_t        file = H5I_INVALID_HID, dset = H5I_INVALID_HID;
-    herr_t       open_ret;
+    const long  config_length_offset = 357;
+    const char *over_max_file        = "tfilter2_v3_corrupt_over_max.h5";
+    const char *over_buffer_file     = "tfilter2_v3_corrupt_over_buffer.h5";
+    hid_t       file = H5I_INVALID_HID, dset = H5I_INVALID_HID;
+    herr_t      open_ret;
 
     TESTING("config string: corrupted on-disk config_length is rejected, not crashed on");
 
@@ -2995,11 +2978,11 @@ error:
 static int
 test_config_string_pdecode_corrupted(void)
 {
-    hid_t   dcpl = H5I_INVALID_HID, dcpl_dec = H5I_INVALID_HID;
-    void   *enc_buf  = NULL;
-    size_t  enc_size = 0;
-    char   *padded   = NULL;
-    size_t  padded_len;
+    hid_t    dcpl = H5I_INVALID_HID, dcpl_dec = H5I_INVALID_HID;
+    void    *enc_buf  = NULL;
+    size_t   enc_size = 0;
+    char    *padded   = NULL;
+    size_t   padded_len;
     uint8_t *needle = NULL;
     size_t   i;
 
@@ -3019,8 +3002,8 @@ test_config_string_pdecode_corrupted(void)
     if (NULL == (padded = (char *)malloc(padded_len + 1)))
         TEST_ERROR;
     {
-        int  n   = snprintf(padded, padded_len + 1, "level=9");
-        size_t pos = (size_t)n;
+        int      n   = snprintf(padded, padded_len + 1, "level=9");
+        size_t   pos = (size_t)n;
         unsigned k;
         for (k = 0; pos + 16 < padded_len; k++) {
             int flen = snprintf(padded + pos, padded_len + 1 - pos, ",p%u=1", k);

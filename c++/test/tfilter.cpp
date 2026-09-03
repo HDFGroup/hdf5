@@ -324,8 +324,8 @@ test_append_filter()
 
     SUBTEST("H5FilterParam::config_get_param (type mismatch throws)");
     try {
-        int64_t val          = 0;
-        bool    threw        = false;
+        int64_t val   = 0;
+        bool    threw = false;
         try {
             /* "level" holds a string value here, not an integer. */
             FilterParam::config_get_param("level = \"six\"", "level", val);

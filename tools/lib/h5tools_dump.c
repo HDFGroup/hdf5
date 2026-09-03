@@ -3391,8 +3391,8 @@ h5tools_params_hex_annotation(const char *params, char *out, size_t out_size)
                 p++;
             if (*p == 'x' || *p == 'X')
                 isfloat = ishex = true; /* C99 hex float or bare hex integer -- strtod()
-                                          * consumes either in full; ishex suppresses
-                                          * annotation for both. */
+                                         * consumes either in full; ishex suppresses
+                                         * annotation for both. */
             else if (*p == 'b' || *p == 'B' || *p == 'o' || *p == 'O') {
                 /* TOML binary/octal prefix (0b1010, 0o17): never a float, and
                  * strtod() stops after the leading "0" without understanding this
@@ -3867,8 +3867,8 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                 const size_t params_buf_size = H5Z_CONFIG_STRING_MAX + 1;
                 char        *params_str_buf  = (char *)malloc(params_buf_size);
                 char        *params_annot    = (char *)malloc(params_buf_size); /* hex comment, "" if none */
-                char        *params_str      = NULL;                     /* escaped, NULL if none to print */
-                const char  *filter_descr    = NULL;                     /* library-owned, no free needed */
+                char        *params_str      = NULL; /* escaped, NULL if none to print */
+                const char  *filter_descr    = NULL; /* library-owned, no free needed */
                 bool         have_extra; /* true if this filter has a PARAMS_STRING and/or DESCRIPTION */
 
                 if (!params_str_buf || !params_annot) {
@@ -3902,7 +3902,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                          * reporting a length past params_buf_size would
                          * otherwise read out of bounds below.  Clamp to what was
                          * really copied before using it as a bound. */
-                        size_t copied = (plen < params_buf_size) ? plen : params_buf_size - 1;
+                        size_t copied          = (plen < params_buf_size) ? plen : params_buf_size - 1;
                         params_str_buf[copied] = '\0';
 
                         /* Scan the raw string -- not the escaped form below -- for

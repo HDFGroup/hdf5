@@ -80,8 +80,8 @@ static void   H5Z__nbit_compress_one_array(unsigned char *data, size_t data_offs
 static void   H5Z__nbit_compress_one_compound(unsigned char *data, size_t data_offset, unsigned char *buffer,
                                               size_t *j, size_t *buf_len, const unsigned parms[],
                                               unsigned *parms_index);
-static void H5Z__nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer,
-                               size_t *buffer_size, const unsigned parms[]);
+static void   H5Z__nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer,
+                                 size_t *buffer_size, const unsigned parms[]);
 
 /* This message derives from H5Z */
 H5_ATTR_VISIBILITY_HIDDEN H5Z_class3_t H5Z_NBIT[1] = {{
@@ -94,9 +94,9 @@ H5_ATTR_VISIBILITY_HIDDEN H5Z_class3_t H5Z_NBIT[1] = {{
     H5Z__can_apply_nbit,                                        /* The "can apply" callback */
     H5Z__set_local_nbit,                                        /* The "set local" callback */
     H5Z__filter_nbit,                                           /* The actual filter function */
-    H5Z__no_params_set_config, /* String config setter: no-op (params come
-                                * from set_local); shared with shuffle/fletcher32 */
-    NULL,                      /* No string config getter */
+    H5Z__no_params_set_config,                                  /* String config setter: no-op (params come
+                                                                 * from set_local); shared with shuffle/fletcher32 */
+    NULL,                                                       /* No string config getter */
 }};
 
 /* Local macros */
