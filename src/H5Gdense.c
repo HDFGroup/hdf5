@@ -714,7 +714,16 @@ H5G__dense_build_table_cb(const H5O_link_t *lnk, void *_udata)
     /* check arguments */
     assert(lnk);
     assert(udata);
-    assert(udata->curr_lnk < udata->ltable->nlinks);
+
+    /* The table was sized from the name index's stored record count, which is
+     * attacker-controlled metadata, while this callback is driven by the tree
+     * walk.  A malformed count below the tree's real size makes the walk
+     * overrun the table, so this bound must hold in a Release build and cannot
+     * remain an assert.
+     */
+    if (udata->curr_lnk >= udata->ltable->nlinks)
+        HGOTO_ERROR(H5E_SYM, H5E_OVERFLOW, H5_ITER_ERROR,
+                    "dense link index yields more links than its record count declares");
 
     /* Copy link information */
     if (H5O_msg_copy(H5O_LINK_ID, lnk, &(udata->ltable->lnks[udata->curr_lnk])) == NULL)
@@ -777,6 +786,18 @@ H5G__dense_build_table(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type, 
         if (H5G__dense_iterate(f, linfo, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL,
                                H5G__dense_build_table_cb, &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links");
+
+        /* The walk must have filled the table exactly.  A stored record count
+         * ABOVE the tree's real size leaves entries as H5MM_calloc made them,
+         * with a NULL name, and the sort below hands those to strcmp.  There is
+         * no second copy of this count to reconcile against -- H5O__linfo_decode
+         * sets linfo->nlinks to HSIZET_MAX and H5G__obj_get_linfo fills it from
+         * H5B2_get_nrec -- so the fill count is the only thing that can falsify
+         * it.
+         */
+        if (udata.curr_lnk != ltable->nlinks)
+            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL,
+                        "dense link index record count does not match the links found");
 
         /* Sort link table in correct iteration order */
         if (H5G__link_sort_table(ltable, idx_type, order) < 0)

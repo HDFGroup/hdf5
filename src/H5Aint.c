@@ -1613,7 +1613,15 @@ H5A__dense_build_table_cb(const H5A_t *attr, void *_udata)
     /* check arguments */
     assert(attr);
     assert(atable);
-    assert(atable->num_attrs < atable->max_attrs);
+
+    /* max_attrs comes from the name index's stored record count, which is
+     * attacker-controlled metadata, while this callback is driven by the tree
+     * walk.  A count below the tree's real size makes the walk overrun the
+     * table, so this bound must hold in a Release build.
+     */
+    if (atable->num_attrs >= atable->max_attrs)
+        HGOTO_ERROR(H5E_ATTR, H5E_OVERFLOW, H5_ITER_ERROR,
+                    "dense attribute index yields more attributes than its record count declares");
 
     /* Allocate attribute for entry in the table */
     if (NULL == (atable->attrs[atable->num_attrs] = H5FL_CALLOC(H5A_t)))
@@ -1691,6 +1699,15 @@ H5A__dense_build_table(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type, 
         if (H5A__dense_iterate(f, (hid_t)0, ainfo, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL, &attr_op,
                                atable) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table");
+
+        /* The walk must have filled the table exactly.  A stored record count
+         * above the tree's real size leaves NULL entries that the sort below
+         * dereferences; the fill count is the only thing that can falsify the
+         * stored one.
+         */
+        if (atable->num_attrs != atable->max_attrs)
+            HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL,
+                        "dense attribute index record count does not match the attributes found");
 
         /* Sort attribute table in correct iteration order */
         if (H5A__attr_sort_table(atable, idx_type, order) < 0)
