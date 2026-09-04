@@ -3472,6 +3472,27 @@ error:
     return -1;
 }
 
+/* Construct 2^exp as an exact double via its IEEE-754 bit pattern, bypassing
+ * ldexp(). Some compilers (Intel icc/icx via -fp-model=fast, NVHPC) flush
+ * subnormal *results* of floating-point operations to zero by default at
+ * -O2 and above; ldexp(1.0, exp) for a subnormal exp is such an operation,
+ * which would silently corrupt exactly the reference values the powers-of-
+ * two canonicalization test below needs to trust. */
+static double
+pow2_exact(int exp)
+{
+    uint64_t bits;
+    double   d;
+
+    if (exp >= -1022)
+        bits = (uint64_t)(exp + 1023) << 52; /* normal: implicit leading 1 */
+    else
+        bits = (uint64_t)1 << (exp + 1074); /* subnormal: explicit mantissa bit */
+
+    memcpy(&d, &bits, sizeof(d));
+    return d;
+}
+
 static int
 test_config_canonicalization(hid_t fapl)
 {
@@ -3689,7 +3710,7 @@ test_config_canonicalization(hid_t fapl)
         for (i = 0; i < sizeof(exps) / sizeof(exps[0]); i++) {
             char   hexstr[64];
             char   canon[128];
-            double want     = ldexp(1.0, exps[i]);
+            double want     = pow2_exact(exps[i]);
             double from_hex = 0.0;
             double from_dec = 0.0;
 
