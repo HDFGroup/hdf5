@@ -113,6 +113,9 @@ add_subdirectory (h5copy)
 #-- Add the h5stat tests
 add_subdirectory (h5stat)
 
+#-- Add the h5soto tests
+add_subdirectory (h5soto)
+
 #-- Add the h5dump tests
 add_subdirectory (h5dump)
 
