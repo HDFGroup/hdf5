@@ -163,6 +163,204 @@ CONTAINS
      RETURN
      END SUBROUTINE filters_test
 
+    SUBROUTINE filter_config_test(total_error)
+!   Tests h5pappend_filter_f, h5pmodify_filter_by_idx_f,
+!   h5pget_filter_params_by_idx_f, h5zconfig_get_param_f
+
+      USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_INT64_T, C_DOUBLE, C_NULL_CHAR
+      IMPLICIT NONE
+      INTEGER, INTENT(OUT) :: total_error
+
+      INTEGER(HID_T)     :: dcpl
+      INTEGER            :: nfilters
+      INTEGER            :: error
+      INTEGER(SIZE_T)    :: cd_nelmts
+      INTEGER            :: cd_dummy(1)
+      LOGICAL            :: avail
+      CHARACTER(LEN=64)  :: pbuf
+      INTEGER(SIZE_T)    :: plen
+      INTEGER(C_INT64_T) :: ival
+      REAL(C_DOUBLE)     :: dval
+      LOGICAL            :: bval
+      LOGICAL            :: found
+
+!
+! h5pappend_filter_f (raw cd_values variant): shuffle with no parameters
+!
+      CALL h5pcreate_f(H5P_DATASET_CREATE_F, dcpl, error)
+           CALL check("h5pcreate_f", error, total_error)
+      cd_nelmts = 0_SIZE_T
+      CALL h5pappend_filter_f(dcpl, H5Z_FILTER_SHUFFLE_F, 0, cd_nelmts, cd_dummy, error)
+           CALL check("h5pappend_filter_f(shuffle,raw)", error, total_error)
+      CALL h5pget_nfilters_f(dcpl, nfilters, error)
+           CALL check("h5pget_nfilters_f", error, total_error)
+      IF (nfilters /= 1) THEN
+           WRITE(*,*) "h5pappend_filter_f: expected 1 filter, got ", nfilters
+           total_error = total_error + 1
+      END IF
+      CALL h5pclose_f(dcpl, error)
+           CALL check("h5pclose_f", error, total_error)
+
+!
+! h5pappend_filter_f (string variant) + h5pget_filter_params_by_idx_f: deflate
+!
+      CALL h5zfilter_avail_f(H5Z_FILTER_DEFLATE_F, avail, error)
+           CALL check("h5zfilter_avail_f", error, total_error)
+      IF (avail) THEN
+         CALL h5pcreate_f(H5P_DATASET_CREATE_F, dcpl, error)
+              CALL check("h5pcreate_f", error, total_error)
+         CALL h5pappend_filter_f(dcpl, H5Z_FILTER_DEFLATE_F, 0, "level=6"//C_NULL_CHAR, error)
+              CALL check("h5pappend_filter_f(deflate,str)", error, total_error)
+         CALL h5pget_nfilters_f(dcpl, nfilters, error)
+              CALL check("h5pget_nfilters_f", error, total_error)
+         IF (nfilters /= 1) THEN
+              WRITE(*,*) "h5pappend_filter_f(deflate): expected 1 filter, got ", nfilters
+              total_error = total_error + 1
+         END IF
+         ! size query only
+         plen = 0_SIZE_T
+         CALL h5pget_filter_params_by_idx_f(dcpl, 0, error, params_len=plen)
+              CALL check("h5pget_filter_params_by_idx_f(size)", error, total_error)
+         IF (plen == 0) THEN
+              WRITE(*,*) "h5pget_filter_params_by_idx_f: empty params string"
+              total_error = total_error + 1
+         END IF
+         ! fill + verify length
+         pbuf = ""
+         plen = 0_SIZE_T
+         CALL h5pget_filter_params_by_idx_f(dcpl, 0, error, params_buf=pbuf, params_len=plen)
+              CALL check("h5pget_filter_params_by_idx_f(fill)", error, total_error)
+         IF (LEN_TRIM(pbuf) == 0) THEN
+              WRITE(*,*) "h5pget_filter_params_by_idx_f: buffer not filled"
+              total_error = total_error + 1
+         END IF
+         CALL h5pclose_f(dcpl, error)
+              CALL check("h5pclose_f", error, total_error)
+      END IF
+
+!
+! h5zconfig_get_param_f (integer variant)
+!
+      CALL h5zconfig_get_param_f("level = 6, mode = 2", "level", ival, found, error)
+           CALL check("h5zconfig_get_param_f(int)", error, total_error)
+      IF (.NOT. found) THEN
+           WRITE(*,*) "h5zconfig_get_param_f: key 'level' not found"
+           total_error = total_error + 1
+      END IF
+      IF (ival /= 6_C_INT64_T) THEN
+           WRITE(*,*) "h5zconfig_get_param_f: expected 6, got ", ival
+           total_error = total_error + 1
+      END IF
+
+!
+! h5zconfig_get_param_f (integer variant): key not found returns found=.FALSE.
+!
+      CALL h5zconfig_get_param_f("level = 6", "missing", ival, found, error)
+           CALL check("h5zconfig_get_param_f(int,notfound)", error, total_error)
+      IF (found) THEN
+           WRITE(*,*) "h5zconfig_get_param_f: absent key should set found=.FALSE."
+           total_error = total_error + 1
+      END IF
+
+!
+! h5zconfig_get_param_f (double variant)
+!
+      CALL h5zconfig_get_param_f("tol = 1.5", "tol", dval, found, error)
+           CALL check("h5zconfig_get_param_f(double)", error, total_error)
+      IF (.NOT. found) THEN
+           WRITE(*,*) "h5zconfig_get_param_f(double): key 'tol' not found"
+           total_error = total_error + 1
+      END IF
+      IF (ABS(dval - 1.5_C_DOUBLE) > 1.0e-15_C_DOUBLE) THEN
+           WRITE(*,*) "h5zconfig_get_param_f(double): expected 1.5, got ", dval
+           total_error = total_error + 1
+      END IF
+
+!
+! h5zconfig_get_param_f (logical variant)
+!
+      CALL h5zconfig_get_param_f("compress = true", "compress", bval, found, error)
+           CALL check("h5zconfig_get_param_f(logical,true)", error, total_error)
+      IF (.NOT. found) THEN
+           WRITE(*,*) "h5zconfig_get_param_f(logical): key 'compress' not found"
+           total_error = total_error + 1
+      END IF
+      IF (.NOT. bval) THEN
+           WRITE(*,*) "h5zconfig_get_param_f(logical): expected .TRUE."
+           total_error = total_error + 1
+      END IF
+
+      CALL h5zconfig_get_param_f("compress = false", "compress", bval, found, error)
+           CALL check("h5zconfig_get_param_f(logical,false)", error, total_error)
+      IF (bval) THEN
+           WRITE(*,*) "h5zconfig_get_param_f(logical): expected .FALSE."
+           total_error = total_error + 1
+      END IF
+
+!
+! h5zconfig_get_param_f (string variant): hdferr > 0 = found, 0 = not found, < 0 = error
+!
+      pbuf = ""
+      plen = 0_SIZE_T
+      CALL h5zconfig_get_param_f('name = "blosc2"', "name", pbuf, plen, error)
+      IF (error <= 0) THEN
+           WRITE(*,*) "h5zconfig_get_param_f(str): key 'name' not found or error, hdferr=", error
+           total_error = total_error + 1
+      ELSE IF (TRIM(pbuf) /= "blosc2") THEN
+           WRITE(*,*) "h5zconfig_get_param_f(str): expected 'blosc2', got '", TRIM(pbuf), "'"
+           total_error = total_error + 1
+      END IF
+
+!
+! h5pmodify_filter_by_idx_f: both generic forms
+!
+      CALL h5zfilter_avail_f(H5Z_FILTER_DEFLATE_F, avail, error)
+           CALL check("h5zfilter_avail_f", error, total_error)
+      IF (avail) THEN
+         CALL h5pcreate_f(H5P_DATASET_CREATE_F, dcpl, error)
+              CALL check("h5pcreate_f", error, total_error)
+         CALL h5pappend_filter_f(dcpl, H5Z_FILTER_DEFLATE_F, 0, "level=1"//C_NULL_CHAR, error)
+              CALL check("h5pappend_filter_f(deflate,str)", error, total_error)
+
+         ! String form: replace the configuration in place
+         CALL h5pmodify_filter_by_idx_f(dcpl, 0, 0, "level=9"//C_NULL_CHAR, error)
+              CALL check("h5pmodify_filter_by_idx_f(str)", error, total_error)
+         CALL h5pget_nfilters_f(dcpl, nfilters, error)
+              CALL check("h5pget_nfilters_f", error, total_error)
+         IF (nfilters /= 1) THEN
+              WRITE(*,*) "h5pmodify_filter_by_idx_f: expected 1 filter, got ", nfilters
+              total_error = total_error + 1
+         END IF
+         pbuf = ""
+         plen = 0_SIZE_T
+         CALL h5pget_filter_params_by_idx_f(dcpl, 0, error, params_buf=pbuf, params_len=plen)
+              CALL check("h5pget_filter_params_by_idx_f(after modify)", error, total_error)
+         IF (INDEX(pbuf, "level=9") == 0) THEN
+              WRITE(*,*) "h5pmodify_filter_by_idx_f(str): expected level=9, got ", TRIM(pbuf)
+              total_error = total_error + 1
+         END IF
+
+         ! Raw cd_values form: replaces cd_values and clears the stored string
+         cd_nelmts   = 1_SIZE_T
+         cd_dummy(1) = 4
+         CALL h5pmodify_filter_by_idx_f(dcpl, 0, 0, cd_nelmts, cd_dummy, error)
+              CALL check("h5pmodify_filter_by_idx_f(raw)", error, total_error)
+         pbuf = ""
+         plen = 0_SIZE_T
+         CALL h5pget_filter_params_by_idx_f(dcpl, 0, error, params_buf=pbuf, params_len=plen)
+              CALL check("h5pget_filter_params_by_idx_f(after raw modify)", error, total_error)
+         ! Stored string gone -> get_config reconstruction reports the new level
+         IF (INDEX(pbuf, "4") == 0) THEN
+              WRITE(*,*) "h5pmodify_filter_by_idx_f(raw): expected level 4, got ", TRIM(pbuf)
+              total_error = total_error + 1
+         END IF
+
+         CALL h5pclose_f(dcpl, error)
+              CALL check("h5pclose_f", error, total_error)
+      END IF
+
+    END SUBROUTINE filter_config_test
+
         SUBROUTINE szip_test(szip_flag, cleanup, total_error)
 
           IMPLICIT NONE
@@ -416,4 +614,95 @@ CONTAINS
 
           RETURN
         END SUBROUTINE szip_test
+
+    SUBROUTINE get_filter_info2_test(total_error)
+!   Tests the h5zget_filter_info_f generic interface:
+!     - variant 1 (INTEGER second arg) dispatches to H5Zget_filter_info
+!     - variant 2 (TYPE(h5z_class_info_f_t) second arg) dispatches to H5Zget_filter_class_info
+
+      IMPLICIT NONE
+      INTEGER, INTENT(OUT) :: total_error
+
+      INTEGER                  :: error
+      INTEGER                  :: config_flag
+      TYPE(h5z_class_info_f_t) :: info
+      LOGICAL                  :: avail
+
+      total_error = 0
+
+      !
+      ! Variant 1: integer second argument (original H5Zget_filter_info behaviour)
+      !
+      CALL h5zfilter_avail_f(H5Z_FILTER_DEFLATE_F, avail, error)
+           CALL check("h5zfilter_avail_f(deflate)", error, total_error)
+      IF (avail) THEN
+         config_flag = 0
+         CALL h5zget_filter_info_f(H5Z_FILTER_DEFLATE_F, config_flag, error)
+              CALL check("h5zget_filter_info_f(deflate,v1)", error, total_error)
+         ! At least the decoder must be present (inflate is always compiled in with zlib)
+         IF (IAND(config_flag, H5Z_FILTER_DECODE_ENABLED_F) == 0) THEN
+              WRITE(*,*) "h5zget_filter_info_f v1: DEFLATE decode flag not set"
+              total_error = total_error + 1
+         END IF
+      END IF
+
+      !
+      ! Variant 2: TYPE(h5z_class_info_f_t) second argument (H5Zget_filter_class_info)
+      !
+      ! --- DEFLATE ---
+      CALL h5zfilter_avail_f(H5Z_FILTER_DEFLATE_F, avail, error)
+           CALL check("h5zfilter_avail_f(deflate)", error, total_error)
+      IF (avail) THEN
+         info = h5z_class_info_f_t()
+         CALL h5zget_filter_info_f(H5Z_FILTER_DEFLATE_F, info, error)
+              CALL check("h5zget_filter_info_f(deflate,v2)", error, total_error)
+         IF (info%id /= H5Z_FILTER_DEFLATE_F) THEN
+              WRITE(*,*) "h5zget_filter_info_f v2: DEFLATE id mismatch, got ", info%id
+              total_error = total_error + 1
+         END IF
+         IF (IAND(info%config_flags, H5Z_FILTER_DECODE_ENABLED_F) == 0) THEN
+              WRITE(*,*) "h5zget_filter_info_f v2: DEFLATE decode flag not set"
+              total_error = total_error + 1
+         END IF
+      END IF
+
+      ! --- SHUFFLE ---
+      CALL h5zfilter_avail_f(H5Z_FILTER_SHUFFLE_F, avail, error)
+           CALL check("h5zfilter_avail_f(shuffle)", error, total_error)
+      IF (avail) THEN
+         info = h5z_class_info_f_t()
+         CALL h5zget_filter_info_f(H5Z_FILTER_SHUFFLE_F, info, error)
+              CALL check("h5zget_filter_info_f(shuffle,v2)", error, total_error)
+         IF (info%id /= H5Z_FILTER_SHUFFLE_F) THEN
+              WRITE(*,*) "h5zget_filter_info_f v2: SHUFFLE id mismatch, got ", info%id
+              total_error = total_error + 1
+         END IF
+      END IF
+
+      ! --- FLETCHER32 ---
+      CALL h5zfilter_avail_f(H5Z_FILTER_FLETCHER32_F, avail, error)
+           CALL check("h5zfilter_avail_f(fletcher32)", error, total_error)
+      IF (avail) THEN
+         info = h5z_class_info_f_t()
+         CALL h5zget_filter_info_f(H5Z_FILTER_FLETCHER32_F, info, error)
+              CALL check("h5zget_filter_info_f(fletcher32,v2)", error, total_error)
+         IF (info%id /= H5Z_FILTER_FLETCHER32_F) THEN
+              WRITE(*,*) "h5zget_filter_info_f v2: FLETCHER32 id mismatch, got ", info%id
+              total_error = total_error + 1
+         END IF
+      END IF
+
+      !
+      ! Error case: unregistered filter ID must return hdferr < 0
+      !
+      info = h5z_class_info_f_t()
+      CALL h5zget_filter_info_f(32999, info, error)
+      IF (error >= 0) THEN
+           WRITE(*,*) "h5zget_filter_info_f v2: expected error for unknown filter 32999"
+           total_error = total_error + 1
+      END IF
+
+      RETURN
+    END SUBROUTINE get_filter_info2_test
+
 END MODULE TH5Z

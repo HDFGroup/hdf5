@@ -7,7 +7,11 @@ DATASET "scaleoffset" {
       SIZE XXXX (4.XXX:1 COMPRESSION)
    }
    FILTERS {
-      COMPRESSION SCALEOFFSET { MIN BITS 2 }
+      COMPRESSION SCALEOFFSET {
+         MIN BITS 2
+         PARAMS_STRING 'scale_type = "int", scale_factor = 4'
+         DESCRIPTION "Scale+offset lossy compression for integer/float data"
+      }
    }
    FILLVALUE {
       FILL_TIME H5D_FILL_TIME_IFSET

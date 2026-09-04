@@ -34,8 +34,9 @@ typedef struct {
 /* Local function prototypes */
 static htri_t H5Z__can_apply_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static herr_t H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id);
-static size_t H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
-                               size_t *buf_size, void **buf);
+static size_t H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], hid_t dxpl_id,
+                               const hsize_t *scaled, size_t ndims, size_t nbytes, size_t *buf_size,
+                               void **buf);
 
 static void   H5Z__calc_parms_nooptype(size_t *cd_values_actual_nparms);
 static void   H5Z__calc_parms_atomic(size_t *cd_values_actual_nparms);
@@ -83,15 +84,19 @@ static void   H5Z__nbit_compress(unsigned char *data, unsigned d_nelmts, unsigne
                                  size_t *buffer_size, const unsigned parms[]);
 
 /* This message derives from H5Z */
-H5Z_class2_t H5Z_NBIT[1] = {{
-    H5Z_CLASS_T_VERS,    /* H5Z_class_t version */
-    H5Z_FILTER_NBIT,     /* Filter id number		*/
-    1,                   /* Assume encoder present: check before registering */
-    1,                   /* decoder_present flag (set to true) */
-    "nbit",              /* Filter name for debugging	*/
-    H5Z__can_apply_nbit, /* The "can apply" callback     */
-    H5Z__set_local_nbit, /* The "set local" callback     */
-    H5Z__filter_nbit,    /* The actual filter function	*/
+H5_ATTR_VISIBILITY_HIDDEN H5Z_class3_t H5Z_NBIT[1] = {{
+    2,               /* H5Z_class3_t version */
+    H5Z_FILTER_NBIT, /* Filter id number */
+    1,               /* Assume encoder present: check before registering */
+    1,               /* decoder_present flag (set to true) */
+    "nbit",          /* name */
+    H5Z__can_apply_nbit,                                        /* The "can apply" callback */
+    H5Z__set_local_nbit,                                        /* The "set local" callback */
+    H5Z__filter_nbit,                                           /* The actual filter function */
+    H5Z__no_params_set_config,                                  /* String config setter: no-op (params come
+                                                                 * from set_local); shared with shuffle/fletcher32 */
+    NULL,                                                       /* No string config getter */
+    "N-bit packing for non-byte-aligned integer/float storage", /* description */
 }};
 
 /* Local macros */
@@ -898,7 +903,8 @@ H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     cd_values[1] = (unsigned)need_not_compress;
 
     /* Modify the filter's parameters for this dataset */
-    if (H5P_modify_filter(dcpl_plist, H5Z_FILTER_NBIT, flags, cd_values_actual_nparms, cd_values) < 0)
+    /* keep_config = true: set_local only refines cd_values, not the stored config string */
+    if (H5P_modify_filter(dcpl_plist, H5Z_FILTER_NBIT, flags, cd_values_actual_nparms, true, cd_values) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local nbit parameters");
 
 done:
@@ -919,7 +925,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
+H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], hid_t H5_ATTR_UNUSED dxpl_id,
+                 const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims, size_t nbytes,
                  size_t *buf_size, void **buf)
 {
     unsigned char *outbuf;        /* pointer to new output buffer */

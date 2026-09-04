@@ -46,5 +46,6 @@
 #include "H5Group.h"
 #include "H5File.h"
 #include "H5Library.h"
+#include "H5FilterParam.h"
 
 #endif // H5Cpp_H

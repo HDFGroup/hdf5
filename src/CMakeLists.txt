@@ -984,6 +984,7 @@ set (H5WB_PRIVATE_HDRS
 
 set (H5Z_SOURCES
     ${HDF5_SRC_DIR}/H5Z.c
+    ${HDF5_SRC_DIR}/H5Zconfig.c
     ${HDF5_SRC_DIR}/H5Zdeflate.c
     ${HDF5_SRC_DIR}/H5Zfletcher32.c
     ${HDF5_SRC_DIR}/H5Znbit.c
@@ -997,6 +998,37 @@ if (H5_ZLIB_HEADER)
   set_source_files_properties(${HDF5_SRC_DIR}/H5Zdeflate.c
                PROPERTIES COMPILE_DEFINITIONS H5_ZLIB_HEADER="${H5_ZLIB_HEADER}"
   )
+endif ()
+
+list (APPEND H5Z_SOURCES ${HDF5_SRC_DIR}/tomlc17/tomlc17.c)
+# Hide the vendored TOML parser's symbols so they cannot collide with a
+# different tomlc17 (or a differently-versioned one) an application links
+# separately. Tested by capability (does the compiler accept the flag?)
+# rather than by matching a fixed compiler-ID allowlist, which silently
+# fails to protect the many other compilers HDF5 supports and tests in CI
+# (Intel, NVHPC, AOCC, Cray, ...) whenever one of them happens not to match
+# the list.
+include (CheckCCompilerFlag)
+check_c_compiler_flag ("-fvisibility=hidden" HDF5_C_HAS_FVISIBILITY_HIDDEN)
+if (HDF5_C_HAS_FVISIBILITY_HIDDEN)
+  set_source_files_properties (${HDF5_SRC_DIR}/tomlc17/tomlc17.c
+    PROPERTIES COMPILE_OPTIONS "-fvisibility=hidden"
+  )
+endif ()
+
+# Vendored third-party code should not be held to HDF5_ENABLE_WARNINGS_AS_ERRORS'
+# own strict internal warning set: it legitimately trips several of them
+# (e.g. -Werror=cast-align in its pointer-arithmetic tokenizer), which would
+# otherwise fail every HDF5 CI job built with that option on. Suppress
+# warnings for this one file only, the same way HDF5_DISABLE_COMPILER_WARNINGS
+# does for the whole build (see config/flags/HDFCompilerFlags.cmake).
+if (MSVC)
+  set_property (SOURCE ${HDF5_SRC_DIR}/tomlc17/tomlc17.c APPEND PROPERTY COMPILE_OPTIONS "/W0")
+else ()
+  check_c_compiler_flag ("-w" HDF5_C_HAS_W)
+  if (HDF5_C_HAS_W)
+    set_property (SOURCE ${HDF5_SRC_DIR}/tomlc17/tomlc17.c APPEND PROPERTY COMPILE_OPTIONS "-w")
+  endif ()
 endif ()
 
 set (H5Z_PUBLIC_HDRS

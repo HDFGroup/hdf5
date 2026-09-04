@@ -95,5 +95,16 @@ FUNCTION: H5Tdecode; ; v18, v200
 TYPEDEF: H5E_auto; v10, v18
 TYPEDEF: H5O_info; v18, v112
 TYPEDEF: H5O_iterate; v18, v112
-TYPEDEF: H5Z_class; v16, v18
+# Note:  v300 is allowed in make_vers for a similar reason to the v111
+#        exception above, but for the opposite purpose.  H5Z_class3_t must
+#        NOT become the version selected by H5Z_class_t by default --
+#        existing code using H5Z_class_t would otherwise silently get the
+#        larger struct with uninitialized callback fields.  Tagging the
+#        version as "v300" (rather than a real, supported API version)
+#        registers H5Z_class3_t as symbol version 3 without it ever being
+#        reachable through @versions, so it is only selected when an
+#        application explicitly defines H5Z_class_t_vers to 3.  When
+#        HDF5 3.0.0 is released, v300 should be added to @versions so
+#        that H5Z_class3_t becomes the default, and this note removed.
+TYPEDEF: H5Z_class; v16, v18, v300
 

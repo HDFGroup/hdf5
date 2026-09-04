@@ -480,6 +480,7 @@ set (H5_TESTS
     cmpd_dset
     mdset
     filter_fail
+    tfilter2
     extend
     direct_chunk # compression lib link
     external

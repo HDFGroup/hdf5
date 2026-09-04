@@ -162,6 +162,7 @@ set (HDF5_REFERENCE_TEST_FILES
     tbogus.h5
     test_filters_be.h5
     test_filters_le.h5
+    test_filters_v3.h5
     th5s.h5
     tlayouto.h5
     tmisc38a.h5

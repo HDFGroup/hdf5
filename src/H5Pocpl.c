@@ -24,6 +24,7 @@
 /****************/
 
 #define H5O_FRIEND     /*suppress error about including H5Opkg      */
+#define H5Z_FRIEND     /*suppress error about including H5Zpkg      */
 #include "H5Pmodule.h" /* This source code file is part of the H5P module */
 
 /***********/
@@ -36,6 +37,7 @@
 #include "H5Ppkg.h"      /* Property lists                           */
 #include "H5VMprivate.h" /* Vector Functions                         */
 #include "H5Zprivate.h"  /* Filter pipeline                          */
+#include "H5Zpkg.h"      /* Filter internals (H5Z_entry_t)           */
 
 /****************/
 /* Local Macros */
@@ -477,7 +479,7 @@ done:
  */
 herr_t
 H5P_modify_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned flags, size_t cd_nelmts,
-                  const unsigned cd_values[/*cd_nelmts*/])
+                  bool keep_config, const unsigned cd_values[/*cd_nelmts*/])
 {
     H5O_pline_t pline;
     herr_t      ret_value = SUCCEED; /* return value */
@@ -489,7 +491,7 @@ H5P_modify_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned flags, si
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
     /* Modify the filter parameters of the I/O pipeline */
-    if (H5Z_modify(&pline, filter, flags, cd_nelmts, cd_values) < 0)
+    if (H5Z_modify(&pline, filter, flags, cd_nelmts, keep_config, cd_values) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline");
 
     /* Put the I/O pipeline information back into the property list */
@@ -554,8 +556,9 @@ H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
-    /* Modify the filter parameters of the I/O pipeline */
-    if (H5P_modify_filter(plist, filter, flags, cd_nelmts, cd_values) < 0)
+    /* Caller replaces cd_values directly, so any stored config string no
+     * longer applies: keep_config = false. */
+    if (H5P_modify_filter(plist, filter, flags, cd_nelmts, false, cd_values) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't modify filter");
 
 done:
@@ -1153,11 +1156,11 @@ H5P__get_filter(const H5Z_filter_info_t *filter, unsigned int *flags /*out*/, si
 
         /* If there's no name on the filter, use the class's filter name */
         if (!s) {
-            H5Z_class2_t *cls;
+            H5Z_entry_t *entry_p = NULL;
 
-            H5Z_find(true, filter->id, &cls);
-            if (cls)
-                s = cls->name;
+            H5Z_find_entry(true, filter->id, &entry_p);
+            if (entry_p)
+                s = entry_p->base.name;
         } /* end if */
 
         /* Check for actual name */
@@ -1166,15 +1169,9 @@ H5P__get_filter(const H5Z_filter_info_t *filter, unsigned int *flags /*out*/, si
             name[namelen - 1] = '\0';
         } /* end if */
         else {
-            /* Check for unknown library filter */
-            /* (probably from a future version of the library) */
-            if (filter->id < 256) {
-                strncpy(name, "Unknown library filter", namelen);
-                name[namelen - 1] = '\0';
-            } /* end if */
-            else
-                name[0] = '\0';
-        } /* end if */
+            /* No name and no stored name: fall back to decimal filter ID */
+            snprintf(name, namelen, "%d", (int)filter->id);
+        } /* end else */
     }     /* end if */
 
     /* Filter configuration (assume filter ID has already been checked) */
@@ -1324,6 +1321,21 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
             /* encode all values */
             for (v = 0; v < pline->filter[u].cd_nelmts; v++)
                 H5_ENCODE_UNSIGNED(*pp, pline->filter[u].cd_values[v]);
+
+            /* Encode the verbatim config string inline: a self-contained
+             * encoded DCPL must carry the string itself, not a file locator. */
+            if (NULL != pline->filter[u].config) {
+                uint64_t config_len = (uint64_t)strlen(pline->filter[u].config);
+
+                *(*pp)++ = (uint8_t) true;
+                enc_size = H5VM_limit_enc_size(config_len);
+                *(*pp)++ = (uint8_t)enc_size;
+                UINT64ENCODE_VAR(*pp, config_len, enc_size);
+                H5MM_memcpy(*pp, pline->filter[u].config, (size_t)config_len);
+                *pp += config_len;
+            } /* end if */
+            else
+                *(*pp)++ = (uint8_t) false;
         } /* end for */
     }     /* end if */
 
@@ -1336,6 +1348,11 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
             *size += H5Z_COMMON_NAME_LEN;
         *size += (1 + H5VM_limit_enc_size((uint64_t)pline->filter[u].cd_nelmts));
         *size += pline->filter[u].cd_nelmts * sizeof(unsigned);
+        *size += 1; /* has_config flag */
+        if (NULL != pline->filter[u].config) {
+            uint64_t config_len = (uint64_t)strlen(pline->filter[u].config);
+            *size += (1 + H5VM_limit_enc_size(config_len) + (size_t)config_len);
+        }
     } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1384,9 +1401,11 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
     *pline = H5O_def_pline_g;
 
     for (u = 0; u < nused; u++) {
-        H5Z_filter_info_t filter;   /* Filter info, for pipeline */
-        uint8_t           has_name; /* Flag to indicate whether filter has a name */
-        unsigned          v;        /* Local index variable */
+        H5Z_filter_info_t filter;        /* Filter info, for pipeline */
+        uint8_t           has_name;      /* Flag to indicate whether filter has a name */
+        uint8_t           has_config;    /* Flag to indicate whether filter has a config string */
+        char             *config = NULL; /* Decoded verbatim config string */
+        unsigned          v;             /* Local index variable */
 
         /* decode filter id */
         INT32DECODE(*pp, filter.id);
@@ -1394,15 +1413,13 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
         /* decode filter flags */
         H5_DECODE_UNSIGNED(*pp, filter.flags);
 
-        /* decode value indicating if the name is encoded */
+        /* Skip the encoded name rather than copying it: H5Z_append() always
+         * sets the new entry's name to NULL, resolved later from the
+         * filter's canonical name, so a copy here would never be used. */
         has_name = *(*pp)++;
-        if (has_name) {
-            /* decode name */
-            filter.name = H5MM_xstrdup((const char *)(*pp));
+        if (has_name)
             *pp += H5Z_COMMON_NAME_LEN;
-        } /* end if */
-        else
-            filter.name = NULL;
+        filter.name = NULL;
 
         /* decode num elements */
         enc_size = *(*pp)++;
@@ -1421,9 +1438,46 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
         for (v = 0; v < filter.cd_nelmts; v++)
             H5_DECODE_UNSIGNED(*pp, filter.cd_values[v]);
 
+        /* decode the verbatim config string, if present */
+        has_config = *(*pp)++;
+        if (has_config) {
+            uint64_t config_len;
+
+            enc_size = *(*pp)++;
+            assert(enc_size < 256);
+            UINT64DECODE_VAR(*pp, config_len, enc_size);
+
+            /* This decode callback has no end-of-buffer pointer to bound
+             * the memcpy below against (unlike H5O__pline_decode, which
+             * validates against p_end for the on-disk equivalent of this
+             * same field) -- capping config_len here is what keeps a
+             * corrupted/malicious H5Pdecode() buffer from driving an
+             * unbounded allocation and an unbounded read past the real
+             * buffer, and also prevents (size_t)config_len + 1 from
+             * wrapping on a maximal config_len. */
+            if (config_len > H5Z_CONFIG_STRING_MAX) {
+                filter.cd_values = (unsigned *)H5MM_xfree(filter.cd_values);
+                HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "filter config string exceeds maximum length");
+            }
+
+            if (NULL == (config = (char *)H5MM_malloc((size_t)config_len + 1))) {
+                filter.cd_values = (unsigned *)H5MM_xfree(filter.cd_values);
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for config string");
+            }
+            H5MM_memcpy(config, *pp, (size_t)config_len);
+            config[config_len] = '\0';
+            *pp += config_len;
+        }
+
         /* Add the filter to the I/O pipeline */
-        if (H5Z_append(pline, filter.id, filter.flags, filter.cd_nelmts, filter.cd_values) < 0)
+        if (H5Z_append(pline, filter.id, filter.flags, filter.cd_nelmts, filter.cd_values) < 0) {
+            H5MM_xfree(config);
+            filter.cd_values = (unsigned *)H5MM_xfree(filter.cd_values);
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline");
+        }
+
+        /* Attach the decoded config string to the just-appended entry */
+        pline->filter[pline->nused - 1].config = config;
 
         /* Free cd_values, if it was allocated */
         filter.cd_values = (unsigned *)H5MM_xfree(filter.cd_values);
@@ -1761,3 +1815,638 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_filter_by_id1() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pappend_filter
+ *
+ * Purpose:     Configures the filter identified by FILTER and appends it to
+ *              the pipeline on PLIST_ID.  PARAMS selects the configuration
+ *              mode via its type field:
+ *
+ *              H5Z_PARAMS_CDVALUES - pass raw cd_values directly (same as
+ *                                    H5Pset_filter).
+ *              H5Z_PARAMS_STRING   - invoke the filter's set_config callback
+ *                                    with the key=value string.
+ *              NULL                - equivalent to CDVALUES with cd_nelmts=0.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Since:       3.0.0
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const H5Z_params_t *params)
+{
+    H5P_genplist_t *plist;
+    H5O_pline_t     pline;
+    H5Z_entry_t    *entry               = NULL; /* filter registry entry; set in STRING path */
+    const unsigned *cd_values           = NULL;
+    unsigned       *allocated_cd_values = NULL; /* owns heap mem for string path */
+    char           *fi_name_heap        = NULL; /* non-NULL if fi->name was H5MM_strdup'd here */
+    const char     *retain_config       = NULL; /* canonical string to persist (STRING path only) */
+    char           *canon_config        = NULL; /* owns the buffer retain_config points into */
+    char           *fi_config_heap      = NULL; /* non-NULL if fi->config was H5MM_strdup'd here */
+    size_t          cd_nelmts           = 0;
+    herr_t          ret_value           = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Validate filter ID and flags */
+    if (filter < 0 || filter > H5Z_FILTER_MAX)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identifier");
+    if (flags & ~((unsigned)H5Z_FLAG_DEFMASK))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags");
+
+    if (params == NULL || params->type == H5Z_PARAMS_CDVALUES) {
+        /* Raw cd_values path - behaves identically to H5Pset_filter */
+        if (params) {
+            cd_nelmts = params->u.raw.cd_nelmts;
+            cd_values = params->u.raw.cd_values;
+            if (cd_nelmts > 0 && cd_values == NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cd_values is NULL but cd_nelmts > 0");
+        }
+    }
+    else if (params->type == H5Z_PARAMS_STRING) {
+        /* String path: invoke set_config to translate into cd_values.
+         *
+         * NULL or "" means "no parameters" - the filter plugin is still
+         * located so its class record can be inspected.
+         *   - No set_config callback: the filter is appended with
+         *     cd_nelmts = 0 and no callback runs.
+         *   - Has set_config: the callback is invoked with params = NULL.
+         *     Parameterless/fully-defaulted filters can return success;
+         *     filters that strictly require parameters (e.g., Scale-Offset)
+         *     can return H5E_BADVALUE so the failure surfaces here rather
+         *     than later in H5Dcreate / set_local / I/O.
+         */
+        const char *param_str    = params->u.str;
+        bool        empty_input  = (!param_str || *param_str == '\0');
+        size_t      cd_nelmts2   = 0;
+        size_t      alloc_nelmts = 0;
+
+        if (!empty_input && strlen(param_str) > H5Z_CONFIG_STRING_MAX)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "params string exceeds H5Z_CONFIG_STRING_MAX");
+
+        /* Trigger dynamic plugin load if filter is not already registered */
+        {
+            htri_t filter_avail;
+            if ((filter_avail = H5Z_filter_avail(filter)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't check filter availability");
+            if (!filter_avail)
+                HGOTO_ERROR(H5E_PLINE, H5E_NOFILTER, FAIL, "filter not found; register or load it first");
+        }
+
+        /* Get the internal entry to access v3 callbacks */
+        if (H5Z_find_entry(false, filter, &entry) < 0 || entry == NULL)
+            HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "filter entry not found after availability check");
+
+        if (!entry->set_config) {
+            /* No set_config: empty input is accepted as "no parameters";
+             * a non-empty parameter string has nowhere to go and is an error. */
+            if (empty_input) {
+                cd_nelmts = 0;
+                cd_values = NULL;
+                goto append_to_pipeline;
+            }
+            HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL,
+                        "filter does not support string configuration (no set_config callback)");
+        }
+
+        /* Persist the caller's string so it can be recovered losslessly
+         * (pipeline v3) without loading the plugin.  Canonicalised first --
+         * outer braces stripped, hex-float literals rewritten to %.16e
+         * decimal -- so the stored bytes are a valid TOML v1.0.0 document
+         * parseable outside HDF5; both rewrites preserve the value exactly.
+         * Empty input stores nothing. */
+        if (!empty_input) {
+            if (NULL == (canon_config = H5Z_canonicalize_params(param_str)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't canonicalize filter parameter string");
+
+            /* Canonicalization (hex-float rewriting in particular) can grow
+             * the string past the length already validated on param_str
+             * above.  Re-check here: this is the value that gets persisted
+             * and is what H5O__pline_encode/decode bound against on disk. */
+            if (strlen(canon_config) > H5Z_CONFIG_STRING_MAX)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                            "canonicalized params string exceeds H5Z_CONFIG_STRING_MAX");
+
+            retain_config = canon_config;
+        }
+
+        /* set_config is present: invoke it.  Normalise an empty input to
+         * params = NULL so callbacks only need to handle one form. */
+        {
+            const char *cfg_str = empty_input ? NULL : param_str;
+
+            /* Both passes supply stack addresses; the H5Z_set_config_func_t
+             * contract (documented on the typedef) guarantees cd_nelmts != NULL. */
+
+            /* Pass 1: determine cd_nelmts (size-query; cd_values is NULL) */
+            if (entry->set_config(cfg_str, &flags, &cd_nelmts, NULL, 0) < 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "set_config size-query call failed");
+
+            if (cd_nelmts > H5Z_MAX_CD_NELMTS)
+                HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL,
+                            "cd_nelmts from set_config exceeds H5Z_MAX_CD_NELMTS (%u)", H5Z_MAX_CD_NELMTS);
+
+            /* Allocate cd_values (at least 1 to avoid zero-length alloc) */
+            alloc_nelmts = cd_nelmts ? cd_nelmts : 1;
+            if (NULL == (allocated_cd_values = (unsigned *)H5MM_malloc(alloc_nelmts * sizeof(unsigned))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for cd_values");
+            cd_values = allocated_cd_values;
+
+            cd_nelmts2 = cd_nelmts;
+
+            /* Pass 2: populate cd_values */
+            if (entry->set_config(cfg_str, &flags, &cd_nelmts2, allocated_cd_values, alloc_nelmts) < 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "set_config populate call failed");
+
+            if (cd_nelmts2 != cd_nelmts)
+                HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL,
+                            "set_config returned different cd_nelmts on second call (contract violation)");
+
+            /* Re-validate flags: the callback may have modified them */
+            if (flags & ~((unsigned)H5Z_FLAG_DEFMASK))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "set_config callback returned invalid flags");
+        }
+    }
+    else {
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unrecognised H5Z_params_t type field");
+    }
+
+append_to_pipeline:
+    /* Get the plist structure */
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE, false)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
+
+    /* Get the pipeline property */
+    if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+
+    /* Append the filter */
+    if (H5Z_append(&pline, filter, flags, cd_nelmts, cd_values) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline");
+
+    /* Persist the filter's canonical name into the pipeline record so that
+     * H5Pget_filter2 and h5dump can display it even when the plugin is not
+     * loaded at read time.  For the STRING path `entry` is already set; for
+     * the CDVALUES path perform a single speculative lookup here.
+     *
+     * This means a pipeline built via H5Pappend_filter() and one built via
+     * H5Pset_filter() (which leaves the name slot NULL) can carry different
+     * name-slot bytes for otherwise-identical id/flags/cd_values, and so
+     * compare unequal under H5Pequal() -- H5P__pline_cmp() does a strcmp of
+     * the name slot, unchanged since the v2 pipeline-message format and not
+     * introduced by this asymmetry. Not correctness-relevant for I/O: code
+     * that needs to test pipeline equivalence at that level should compare
+     * id and cd_values directly via H5Pget_filter2(), not H5Pequal(). */
+    {
+        H5Z_filter_info_t *fi = &pline.filter[pline.nused - 1];
+
+        if (entry == NULL)
+            (void)H5Z_find_entry(true, filter, &entry);
+
+        if (entry && entry->base.name) {
+            size_t nlen = strlen(entry->base.name) + 1;
+            if (nlen <= H5Z_COMMON_NAME_LEN) {
+                memcpy(fi->_name, entry->base.name, nlen);
+                fi->name = fi->_name;
+            }
+            else {
+                /* Name is longer than the internal buffer: strdup it and
+                 * track the pointer so it can be freed if H5P_poke fails
+                 * below (ownership transfers to the plist on success). */
+                fi->name = (char *)H5MM_strdup(entry->base.name);
+                if (fi->name == NULL) {
+                    strncpy(fi->_name, entry->base.name, H5Z_COMMON_NAME_LEN - 1);
+                    fi->_name[H5Z_COMMON_NAME_LEN - 1] = '\0';
+                    fi->name                           = fi->_name;
+                }
+                else
+                    fi_name_heap = fi->name;
+            }
+        }
+
+        /* Persist the verbatim configuration string on the entry.  Track the
+         * allocation so it can be freed if H5P_poke fails below (ownership
+         * transfers to the plist on success). */
+        if (retain_config) {
+            if (NULL == (fi->config = (char *)H5MM_strdup(retain_config)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                            "memory allocation failed for filter config string");
+            fi_config_heap = fi->config;
+        }
+    }
+
+    /* Store updated pipeline back in property list */
+    if (H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
+
+done:
+    if (ret_value < 0) {
+        H5MM_xfree(fi_name_heap);
+        H5MM_xfree(fi_config_heap);
+    }
+    H5MM_xfree(canon_config);
+    H5MM_xfree(allocated_cd_values);
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pappend_filter() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pmodify_filter_by_idx
+ *
+ * Purpose:     Replaces the configuration of the filter already at position
+ *              FILTER_IDX in PLIST_ID's pipeline, leaving its position and
+ *              filter ID unchanged.  PARAMS is interpreted exactly as
+ *              H5Pappend_filter interprets it:
+ *
+ *              H5Z_PARAMS_STRING   - resolved through the filter's
+ *                                    set_config callback; both the resulting
+ *                                    cd_values and the canonical string
+ *                                    replace the entry's current ones, so the
+ *                                    entry keeps a stored configuration
+ *                                    string.
+ *              H5Z_PARAMS_CDVALUES - the cd_values array replaces the
+ *                                    entry's current one and any stored
+ *                                    string is cleared, matching
+ *                                    H5Pmodify_filter.
+ *              NULL                - equivalent to CDVALUES with
+ *                                    cd_nelmts = 0.
+ *
+ *              This exists because H5Pmodify_filter takes only raw
+ *              cd_values and therefore always clears the stored string,
+ *              silently downgrading an entry from an exact, plugin-free
+ *              configuration string to get_config reconstruction.  The only
+ *              alternative was H5Premove_filter plus a fresh
+ *              H5Pappend_filter, which moves the entry to the end of the
+ *              pipeline and so changes filter order.
+ *
+ *              Addressing is by index rather than by filter ID because a
+ *              pipeline may legally contain the same filter ID more than
+ *              once, where an ID-addressed modify silently edits the first
+ *              match.  The index is the same one H5Pget_filter2 and
+ *              H5Pget_filter_params_by_idx use.
+ *
+ *              On failure the entry is left exactly as it was: the new
+ *              cd_values and string are staged and swapped in only after
+ *              set_config succeeds, so a rejected edit cannot leave an entry
+ *              holding a string that disagrees with its cd_values.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Since:       3.0.0
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pmodify_filter_by_idx(hid_t plist_id, unsigned filter_idx, unsigned flags, const H5Z_params_t *params)
+{
+    H5P_genplist_t    *plist;
+    H5O_pline_t        pline;
+    H5Z_filter_info_t *fi;
+    H5Z_entry_t       *entry               = NULL;
+    const unsigned    *cd_values           = NULL;
+    unsigned          *allocated_cd_values = NULL; /* owns heap mem for string path */
+    char              *canon_config        = NULL; /* owns the buffer retain_config points into */
+    const char        *retain_config       = NULL; /* canonical string to persist (STRING path only) */
+    unsigned          *staged_cd_values    = NULL; /* staged replacement for fi->cd_values */
+    char              *staged_config       = NULL; /* staged replacement for fi->config    */
+    size_t             cd_nelmts           = 0;
+    H5Z_filter_t       filter;
+    herr_t             ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Validate flags */
+    if (flags & ~((unsigned)H5Z_FLAG_DEFMASK))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags");
+
+    /* Get the plist and its pipeline.  The entry's existing filter ID selects
+     * the class whose set_config resolves a parameter string, so the index
+     * must be validated before params can be interpreted. */
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE, false)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
+    if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+    if (filter_idx >= pline.nused)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter index out of range");
+
+    fi     = &pline.filter[filter_idx];
+    filter = fi->id;
+
+    if (params == NULL || params->type == H5Z_PARAMS_CDVALUES) {
+        /* Raw cd_values path - behaves identically to H5Pmodify_filter */
+        if (params) {
+            cd_nelmts = params->u.raw.cd_nelmts;
+            cd_values = params->u.raw.cd_values;
+            if (cd_nelmts > 0 && cd_values == NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cd_values is NULL but cd_nelmts > 0");
+        }
+    }
+    else if (params->type == H5Z_PARAMS_STRING) {
+        /* String path - invoke set_config to translate into cd_values, using
+         * the same two-pass protocol as H5Pappend_filter. */
+        const char *param_str    = params->u.str;
+        bool        empty_input  = (!param_str || *param_str == '\0');
+        size_t      cd_nelmts2   = 0;
+        size_t      alloc_nelmts = 0;
+
+        if (!empty_input && strlen(param_str) > H5Z_CONFIG_STRING_MAX)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "params string exceeds H5Z_CONFIG_STRING_MAX");
+
+        /* Trigger dynamic plugin load if filter is not already registered */
+        {
+            htri_t filter_avail;
+            if ((filter_avail = H5Z_filter_avail(filter)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't check filter availability");
+            if (!filter_avail)
+                HGOTO_ERROR(H5E_PLINE, H5E_NOFILTER, FAIL, "filter not found; register or load it first");
+        }
+
+        /* Get the internal entry to access v3 callbacks */
+        if (H5Z_find_entry(false, filter, &entry) < 0 || entry == NULL)
+            HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "filter entry not found after availability check");
+
+        if (!entry->set_config) {
+            /* No set_config: empty input means "no parameters"; a non-empty
+             * parameter string has nowhere to go and is an error. */
+            if (!empty_input)
+                HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL,
+                            "filter does not support string configuration (no set_config callback)");
+            cd_nelmts = 0;
+            cd_values = NULL;
+        }
+        else {
+            const char *cfg_str = empty_input ? NULL : param_str;
+
+            /* Canonicalise the string that will be persisted, for the same
+             * reasons as in H5Pappend_filter (valid TOML v1.0.0 on disk). */
+            if (!empty_input) {
+                if (NULL == (canon_config = H5Z_canonicalize_params(param_str)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                                "can't canonicalize filter parameter string");
+
+                /* Canonicalization (hex-float rewriting in particular) can
+                 * grow the string past the length already validated on
+                 * param_str above.  Re-check here: this is the value that
+                 * gets persisted and is what H5O__pline_encode/decode bound
+                 * against on disk. */
+                if (strlen(canon_config) > H5Z_CONFIG_STRING_MAX)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                "canonicalized params string exceeds H5Z_CONFIG_STRING_MAX");
+
+                retain_config = canon_config;
+            }
+
+            /* Pass 1: determine cd_nelmts (size-query; cd_values is NULL) */
+            if (entry->set_config(cfg_str, &flags, &cd_nelmts, NULL, 0) < 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "set_config size-query call failed");
+
+            if (cd_nelmts > H5Z_MAX_CD_NELMTS)
+                HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL,
+                            "cd_nelmts from set_config exceeds H5Z_MAX_CD_NELMTS (%u)", H5Z_MAX_CD_NELMTS);
+
+            /* Allocate cd_values (at least 1 to avoid zero-length alloc) */
+            alloc_nelmts = cd_nelmts ? cd_nelmts : 1;
+            if (NULL == (allocated_cd_values = (unsigned *)H5MM_malloc(alloc_nelmts * sizeof(unsigned))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for cd_values");
+            cd_values = allocated_cd_values;
+
+            cd_nelmts2 = cd_nelmts;
+
+            /* Pass 2: populate cd_values */
+            if (entry->set_config(cfg_str, &flags, &cd_nelmts2, allocated_cd_values, alloc_nelmts) < 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "set_config populate call failed");
+
+            if (cd_nelmts2 != cd_nelmts)
+                HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL,
+                            "set_config returned different cd_nelmts on second call (contract violation)");
+
+            /* Re-validate flags: the callback may have modified them */
+            if (flags & ~((unsigned)H5Z_FLAG_DEFMASK))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "set_config callback returned invalid flags");
+        }
+    }
+    else {
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unrecognised H5Z_params_t type field");
+    }
+
+    /* ---- Stage every allocation before disturbing the entry, so that an
+     * allocation failure here leaves the entry exactly as it was. ---- */
+    if (cd_nelmts > H5Z_COMMON_CD_VALUES) {
+        if (NULL == (staged_cd_values = (unsigned *)H5MM_malloc(cd_nelmts * sizeof(unsigned))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for filter parameters");
+        H5MM_memcpy(staged_cd_values, cd_values, cd_nelmts * sizeof(unsigned));
+    }
+    if (retain_config) {
+        if (NULL == (staged_config = (char *)H5MM_strdup(retain_config)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for filter config string");
+    }
+
+    /* ---- Commit: nothing below can fail. ---- */
+
+    /* Release what the entry currently owns */
+    if (fi->cd_values != NULL && fi->cd_values != fi->_cd_values)
+        H5MM_xfree(fi->cd_values);
+    H5MM_xfree(fi->config);
+
+    fi->flags     = flags;
+    fi->cd_nelmts = cd_nelmts;
+
+    if (cd_nelmts == 0)
+        fi->cd_values = NULL;
+    else if (staged_cd_values) {
+        fi->cd_values    = staged_cd_values; /* ownership transfers to the entry */
+        staged_cd_values = NULL;
+    }
+    else {
+        /* Fits the entry's internal buffer */
+        fi->cd_values = fi->_cd_values;
+        H5MM_memcpy(fi->cd_values, cd_values, cd_nelmts * sizeof(unsigned));
+    }
+
+    /* NULL for the CDVALUES path, which clears the stored string */
+    fi->config    = staged_config; /* ownership transfers to the entry */
+    staged_config = NULL;
+
+    /* Store the updated pipeline back in the property list */
+    if (H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
+
+done:
+    H5MM_xfree(staged_cd_values);
+    H5MM_xfree(staged_config);
+    H5MM_xfree(canon_config);
+    H5MM_xfree(allocated_cd_values);
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pmodify_filter_by_idx() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_filter_params_by_idx
+ *
+ * Purpose:     Return the human-readable parameter string for the filter
+ *              at pipeline index IDX, from the first source that applies:
+ *              a stored configuration string (verbatim, no get_config
+ *              call), else the filter's get_config callback reconstructing
+ *              from cd_values, else a fallback of the form
+ *              "cd_values=v0:v1:...".
+ *
+ *              Call with params_buf NULL to obtain the required buffer
+ *              size in *params_len, then allocate and call again.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Since:       3.0.0
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_filter_params_by_idx(hid_t plist_id, unsigned idx, char *params_buf, size_t params_buf_size,
+                            size_t *params_len)
+{
+    H5P_genplist_t          *plist;
+    H5O_pline_t              pline;
+    const H5Z_filter_info_t *filter;
+    H5Z_entry_t             *entry     = NULL;
+    char                    *tmp_buf   = NULL;
+    herr_t                   ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Validate args */
+    if (params_buf != NULL && params_buf_size == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "params_buf_size must be > 0 when params_buf is non-NULL");
+    if (params_buf == NULL && params_len == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "at least one of params_buf or params_len must be non-NULL");
+
+    /* Get the plist structure */
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE, true)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
+
+    /* Get the pipeline */
+    if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+
+    /* Validate index */
+    if (idx >= pline.nused)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter index out of range");
+
+    filter = &pline.filter[idx];
+
+    /* Source 1 (highest fidelity): a verbatim configuration string stored on
+     * the entry.  This is byte-for-byte lossless and needs no plugin, so it
+     * short-circuits both the get_config and cd_values paths below. */
+    if (filter->config) {
+        size_t needed = strlen(filter->config);
+
+        if (params_len)
+            *params_len = needed;
+
+        if (params_buf && params_buf_size > 0) {
+            size_t copy_len = (needed < params_buf_size - 1) ? needed : params_buf_size - 1;
+            H5MM_memcpy(params_buf, filter->config, copy_len);
+            params_buf[copy_len] = '\0';
+        }
+
+        HGOTO_DONE(SUCCEED);
+    }
+
+    /* Trigger a plugin load if the filter isn't registered yet, so get_config
+     * is available on the first query rather than only subsequent ones
+     * (mirrors H5Zget_filter_class_info()).  Availability itself is ignored
+     * here; the fallback path below handles filters that remain unavailable. */
+    (void)H5Z_filter_avail(filter->id);
+
+    /* Attempt to find the entry (try plugin load if not yet registered) */
+    (void)H5Z_find_entry(true, filter->id, &entry);
+
+    if (entry && entry->get_config) {
+        /* --- Two-pass get_config --- */
+        size_t needed = 0;
+        size_t out_size;
+
+        /* Pass 1: size query */
+        if (entry->get_config(filter->flags, filter->cd_nelmts, filter->cd_values, NULL, &needed) < 0)
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "get_config size-query call failed");
+
+        if (params_len)
+            *params_len = needed;
+
+        if (params_buf && params_buf_size > 0) {
+            /* Allocate a temp buffer of exact size and fill it */
+            if (NULL == (tmp_buf = (char *)H5MM_malloc(needed + 1)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+            /* Pass the buffer's total capacity (including the NUL slot) so that
+             * callbacks can use snprintf(buf, *buf_size, ...) safely, consistent
+             * with standard C buffer-size conventions. */
+            out_size = needed + 1;
+            if (entry->get_config(filter->flags, filter->cd_nelmts, filter->cd_values, tmp_buf, &out_size) <
+                0)
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "get_config populate call failed");
+
+            /* out_size is now the chars-written count (excl. NUL) returned by the
+             * callback; clamp before NUL-terminating in case a buggy callback
+             * returns a count equal to the full capacity (needed+1). */
+            if (out_size > needed)
+                out_size = needed;
+            tmp_buf[out_size] = '\0';
+
+            /* Copy (truncating if params_buf is smaller) */
+            {
+                size_t copy_len = (out_size < params_buf_size - 1) ? out_size : params_buf_size - 1;
+                H5MM_memcpy(params_buf, tmp_buf, copy_len);
+                params_buf[copy_len] = '\0';
+            }
+        } /* end if params_buf */
+    }     /* end if get_config */
+    else {
+        /* --- Fallback: "cd_values=v0:v1:..." --- */
+        size_t true_len = 0; /* actual string length, uncapped */
+        size_t i;
+        int    n;
+
+        /* Compute the true needed length without writing (C99 snprintf-to-NULL) */
+        if (filter->cd_nelmts > 0) {
+            n = snprintf(NULL, 0, "cd_values=%u", filter->cd_values[0]);
+            if (n > 0)
+                true_len = (size_t)n;
+            for (i = 1; i < filter->cd_nelmts; i++) {
+                n = snprintf(NULL, 0, ":%u", filter->cd_values[i]);
+                if (n > 0)
+                    true_len += (size_t)n;
+            }
+        }
+
+        if (params_len)
+            *params_len = true_len;
+
+        if (params_buf && params_buf_size > 0) {
+            size_t pos = 0;
+
+            if (NULL == (tmp_buf = (char *)H5MM_malloc(true_len + 1)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fallback buffer");
+
+            if (filter->cd_nelmts > 0) {
+                n   = snprintf(tmp_buf, true_len + 1, "cd_values=%u", filter->cd_values[0]);
+                pos = (n > 0) ? (size_t)n : 0;
+                for (i = 1; i < filter->cd_nelmts; i++) {
+                    n = snprintf(tmp_buf + pos, true_len + 1 - pos, ":%u", filter->cd_values[i]);
+                    if (n > 0)
+                        pos += (size_t)n;
+                }
+            }
+            tmp_buf[pos] = '\0';
+
+            /* Copy to caller's buffer; truncate if smaller than needed */
+            {
+                size_t copy_len = (true_len < params_buf_size - 1) ? true_len : params_buf_size - 1;
+                H5MM_memcpy(params_buf, tmp_buf, copy_len);
+                params_buf[copy_len] = '\0';
+            }
+        }
+    } /* end else (fallback) */
+
+done:
+    H5MM_xfree(tmp_buf);
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_filter_params_by_idx() */

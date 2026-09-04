@@ -27,20 +27,112 @@
 #endif
 
 /* Local function prototypes */
-static size_t H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
-                                  size_t *buf_size, void **buf);
+static size_t H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], hid_t dxpl_id,
+                                  const hsize_t *scaled, size_t ndims, size_t nbytes, size_t *buf_size,
+                                  void **buf);
+static herr_t H5Z__deflate_set_config(const char *params, unsigned *flags, size_t *cd_nelmts,
+                                      unsigned cd_values[], size_t cd_values_size);
+static herr_t H5Z__deflate_get_config(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], char *buf,
+                                      size_t *buf_size);
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_DEFLATE[1] = {{
-    H5Z_CLASS_T_VERS,    /* H5Z_class_t version */
-    H5Z_FILTER_DEFLATE,  /* Filter id number		*/
-    1,                   /* encoder_present flag (set to true) */
-    1,                   /* decoder_present flag (set to true) */
-    "deflate",           /* Filter name for debugging	*/
-    NULL,                /* The "can apply" callback     */
-    NULL,                /* The "set local" callback     */
-    H5Z__filter_deflate, /* The actual filter function	*/
+H5_ATTR_VISIBILITY_HIDDEN const H5Z_class3_t H5Z_DEFLATE[1] = {{
+    2,                                                     /* H5Z_class3_t version */
+    H5Z_FILTER_DEFLATE,                                    /* Filter id number */
+    1,                                                     /* encoder_present flag (set to true) */
+    1,                                                     /* decoder_present flag (set to true) */
+    "deflate",                                             /* name */
+    NULL,                                                  /* The "can apply" callback */
+    NULL,                                                  /* The "set local" callback */
+    H5Z__filter_deflate,                                   /* The actual filter function */
+    H5Z__deflate_set_config,                               /* String config setter */
+    H5Z__deflate_get_config,                               /* String config getter */
+    "Deflate (zlib) general-purpose lossless compression", /* description */
 }};
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z__deflate_set_config
+ *
+ * Purpose:     Parse TOML "level = N" (N in 0..9; default 6) into cd_values.
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Z__deflate_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts,
+                        unsigned cd_values[], size_t cd_values_size)
+{
+    unsigned level     = 6; /* default compression level */
+    herr_t   ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    *cd_nelmts = 1;
+
+    if (cd_values) {
+        if (cd_values_size < 1)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cd_values buffer too small");
+
+        if (params) {
+            static const char *const known[] = {"level", NULL};
+            htri_t                   found;
+            int64_t                  lval;
+
+            if (H5Z__config_validate_keys(params, known) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown parameter key in deflate filter config");
+
+            found = H5Z__config_get_int(params, "level", &lval);
+            if (found < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "malformed params string for deflate filter");
+
+            if (found > 0) {
+                if (lval < 0 || lval > 9)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                "deflate 'level' must be an integer in [0,9], got %" PRId64, lval);
+                level = (unsigned)lval;
+            }
+        }
+
+        cd_values[0] = level;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z__deflate_get_config
+ *
+ * Purpose:     Reconstruct "level=N" from cd_values.
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Z__deflate_get_config(unsigned H5_ATTR_UNUSED flags, size_t cd_nelmts, const unsigned cd_values[],
+                        char *buf, size_t *buf_size)
+{
+    char   tmp[32];
+    int    rv;
+    size_t n;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    rv = snprintf(tmp, sizeof(tmp), "level = %u", (cd_nelmts >= 1) ? cd_values[0] : 6u);
+    if (rv < 0 || (size_t)rv >= sizeof(tmp))
+        HGOTO_ERROR(H5E_PLINE, H5E_OVERFLOW, FAIL, "snprintf failed in deflate get_config");
+    n = (size_t)rv;
+
+    if (buf) {
+        if (!buf_size || *buf_size < n + 1)
+            HGOTO_ERROR(H5E_PLINE, H5E_OVERFLOW, FAIL,
+                        "output buffer too small for deflate get_config string");
+        H5MM_memcpy(buf, tmp, n);
+        buf[n] = '\0';
+    }
+    if (buf_size)
+        *buf_size = n;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
 
 /*-------------------------------------------------------------------------
  * Function:	H5Z__filter_deflate
@@ -54,8 +146,9 @@ const H5Z_class2_t H5Z_DEFLATE[1] = {{
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
-                    size_t *buf_size, void **buf)
+H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
+                    hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
+                    size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
 {
     void  *outbuf = NULL; /* Pointer to new buffer */
     int    status;        /* Status from zlib operation */

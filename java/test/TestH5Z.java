@@ -12,6 +12,9 @@
 
 package test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -21,10 +24,13 @@ import hdf.hdf5lib.exceptions.HDF5LibraryException;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+import org.junit.runners.MethodSorters;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestH5Z {
     @Rule
     public TestName testname = new TestName();
@@ -117,6 +123,47 @@ public class TestH5Z {
         }
     }
 
+    @Test
+    public void testH5Zget_filter_class_info()
+    {
+        try {
+            hdf.hdf5lib.structs.H5Z_class_info_t info;
+
+            // DEFLATE (if available)
+            if (1 == H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_DEFLATE)) {
+                info = H5.H5Zget_filter_class_info(HDF5Constants.H5Z_FILTER_DEFLATE);
+                assertTrue("H5Zget_filter_class_info: info must not be null", info != null);
+                assertTrue("H5Zget_filter_class_info: DEFLATE id",
+                           info.id == HDF5Constants.H5Z_FILTER_DEFLATE);
+                assertTrue("H5Zget_filter_class_info: DEFLATE decode flag",
+                           (info.config_flags & HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) != 0);
+            }
+
+            // SHUFFLE
+            info = H5.H5Zget_filter_class_info(HDF5Constants.H5Z_FILTER_SHUFFLE);
+            assertTrue("H5Zget_filter_class_info: SHUFFLE info must not be null", info != null);
+            assertTrue("H5Zget_filter_class_info: SHUFFLE id", info.id == HDF5Constants.H5Z_FILTER_SHUFFLE);
+            assertTrue("H5Zget_filter_class_info: SHUFFLE decode flag",
+                       (info.config_flags & HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) != 0);
+
+            // FLETCHER32
+            info = H5.H5Zget_filter_class_info(HDF5Constants.H5Z_FILTER_FLETCHER32);
+            assertTrue("H5Zget_filter_class_info: FLETCHER32 info must not be null", info != null);
+            assertTrue("H5Zget_filter_class_info: FLETCHER32 id",
+                       info.id == HDF5Constants.H5Z_FILTER_FLETCHER32);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5.H5Zget_filter_class_info " + err);
+        }
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Zget_filter_class_info_invalid() throws Throwable
+    {
+        H5.H5Zget_filter_class_info(32999);
+    }
+
     @Test(expected = HDF5LibraryException.class)
     public void testH5Zunregister_predefined() throws Throwable
     {
@@ -124,5 +171,274 @@ public class TestH5Z {
         assertTrue("H5.H5Zfilter_avail", filter_found > 0);
 
         H5.H5Zunregister(HDF5Constants.H5Z_FILTER_SHUFFLE);
+    }
+
+    @Test
+    public void testH5Pappend_filter_string()
+    {
+        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
+        try {
+            dcpl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+            assertTrue("H5Pcreate", dcpl_id >= 0);
+
+            int ret = H5.H5Pappend_filter(dcpl_id, HDF5Constants.H5Z_FILTER_SHUFFLE, 0, "");
+            assertTrue("H5Pappend_filter (string, shuffle)", ret >= 0);
+
+            int nfilters = H5.H5Pget_nfilters(dcpl_id);
+            assertEquals("nfilters after H5Pappend_filter", 1, nfilters);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Pappend_filter_string: " + err);
+        }
+        finally {
+            if (dcpl_id != HDF5Constants.H5I_INVALID_HID)
+                try {
+                    H5.H5Pclose(dcpl_id);
+                }
+                catch (Exception e) { /* ignore */
+                }
+        }
+    }
+
+    @Test
+    public void testH5Pappend_filter_cdvalues()
+    {
+        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
+        try {
+            dcpl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+            assertTrue("H5Pcreate", dcpl_id >= 0);
+
+            int[] cd_values = new int[] {9};
+            if (1 == H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_DEFLATE)) {
+                int ret = H5.H5Pappend_filter(dcpl_id, HDF5Constants.H5Z_FILTER_DEFLATE, 0, cd_values);
+                assertTrue("H5Pappend_filter (cd_values, deflate)", ret >= 0);
+
+                int nfilters = H5.H5Pget_nfilters(dcpl_id);
+                assertEquals("nfilters after H5Pappend_filter", 1, nfilters);
+
+                // Verify the cd_values round-trip via H5Pget_filter.
+                int[] cd_out      = new int[1];
+                int[] flags_out   = new int[1];
+                long[] cd_nelmts  = new long[] {1};
+                String[] name_out = new String[] {""};
+                int filter_id =
+                    H5.H5Pget_filter(dcpl_id, 0, flags_out, cd_nelmts, cd_out, 256, name_out, new int[1]);
+                assertEquals("filter id from H5Pget_filter", HDF5Constants.H5Z_FILTER_DEFLATE, filter_id);
+                assertEquals("cd_nelmts", 1L, cd_nelmts[0]);
+                assertEquals("cd_values[0] (deflate level)", 9, cd_out[0]);
+            }
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Pappend_filter_cdvalues: " + err);
+        }
+        finally {
+            if (dcpl_id != HDF5Constants.H5I_INVALID_HID)
+                try {
+                    H5.H5Pclose(dcpl_id);
+                }
+                catch (Exception e) { /* ignore */
+                }
+        }
+    }
+
+    @Test
+    public void testH5Pmodify_filter_by_idx_string()
+    {
+        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
+        try {
+            dcpl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+            assertTrue("H5Pcreate", dcpl_id >= 0);
+
+            if (1 == H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_DEFLATE)) {
+                int ret = H5.H5Pappend_filter(dcpl_id, HDF5Constants.H5Z_FILTER_DEFLATE, 0, "level=1");
+                assertTrue("H5Pappend_filter (string, deflate)", ret >= 0);
+
+                // Replace the configuration in place; position and ID are unchanged.
+                ret = H5.H5Pmodify_filter_by_idx(dcpl_id, 0, 0, "level=9");
+                assertTrue("H5Pmodify_filter_by_idx (string)", ret >= 0);
+
+                int nfilters = H5.H5Pget_nfilters(dcpl_id);
+                assertEquals("nfilters after H5Pmodify_filter_by_idx", 1, nfilters);
+
+                // The entry keeps a stored string, which reports the new value.
+                String[] params = new String[1];
+                ret             = H5.H5Pget_filter_params_by_idx(dcpl_id, 0, params);
+                assertTrue("H5Pget_filter_params_by_idx", ret >= 0);
+                assertNotNull("params[0] is non-null", params[0]);
+                assertTrue("stored string reflects the modify: " + params[0], params[0].contains("level=9"));
+            }
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Pmodify_filter_by_idx_string: " + err);
+        }
+        finally {
+            if (dcpl_id != HDF5Constants.H5I_INVALID_HID)
+                try {
+                    H5.H5Pclose(dcpl_id);
+                }
+                catch (Exception e) { /* ignore */
+                }
+        }
+    }
+
+    @Test
+    public void testH5Pmodify_filter_by_idx_cdvalues()
+    {
+        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
+        try {
+            dcpl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+            assertTrue("H5Pcreate", dcpl_id >= 0);
+
+            if (1 == H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_DEFLATE)) {
+                int ret = H5.H5Pappend_filter(dcpl_id, HDF5Constants.H5Z_FILTER_DEFLATE, 0, "level=1");
+                assertTrue("H5Pappend_filter (string, deflate)", ret >= 0);
+
+                int[] cd_values = new int[] {6};
+                ret             = H5.H5Pmodify_filter_by_idx(dcpl_id, 0, 0, cd_values);
+                assertTrue("H5Pmodify_filter_by_idx (cd_values)", ret >= 0);
+
+                int nfilters = H5.H5Pget_nfilters(dcpl_id);
+                assertEquals("nfilters after H5Pmodify_filter_by_idx", 1, nfilters);
+
+                // cd_values were replaced.
+                int[] cd_out      = new int[1];
+                int[] flags_out   = new int[1];
+                long[] cd_nelmts  = new long[] {1};
+                String[] name_out = new String[] {""};
+                int filter_id =
+                    H5.H5Pget_filter(dcpl_id, 0, flags_out, cd_nelmts, cd_out, 256, name_out, new int[1]);
+                assertEquals("filter id unchanged by modify", HDF5Constants.H5Z_FILTER_DEFLATE, filter_id);
+                assertEquals("cd_values[0] after modify", 6, cd_out[0]);
+            }
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Pmodify_filter_by_idx_cdvalues: " + err);
+        }
+        finally {
+            if (dcpl_id != HDF5Constants.H5I_INVALID_HID)
+                try {
+                    H5.H5Pclose(dcpl_id);
+                }
+                catch (Exception e) { /* ignore */
+                }
+        }
+    }
+
+    @Test
+    public void testH5Pget_filter_params_by_idx()
+    {
+        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
+        try {
+            dcpl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+            assertTrue("H5Pcreate", dcpl_id >= 0);
+
+            int ret = H5.H5Pappend_filter(dcpl_id, HDF5Constants.H5Z_FILTER_SHUFFLE, 0, "");
+            assertTrue("H5Pappend_filter shuffle", ret >= 0);
+
+            String[] params = new String[1];
+            int retval      = H5.H5Pget_filter_params_by_idx(dcpl_id, 0, params);
+            assertTrue("H5Pget_filter_params_by_idx returned non-negative", retval >= 0);
+            assertNotNull("params[0] is non-null", params[0]);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Pget_filter_params_by_idx: " + err);
+        }
+        finally {
+            if (dcpl_id != HDF5Constants.H5I_INVALID_HID)
+                try {
+                    H5.H5Pclose(dcpl_id);
+                }
+                catch (Exception e) { /* ignore */
+                }
+        }
+    }
+
+    @Test
+    public void testH5Zconfig_get_param_int()
+    {
+        try {
+            String cfg = "level = 6";
+            long[] val = new long[1];
+            int ret    = H5.H5Zconfig_get_param(cfg, "level", val);
+            assertTrue("H5Zconfig_get_param (int) returned non-negative", ret >= 0);
+            assertEquals("H5Zconfig_get_param (int) value", 6L, val[0]);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Zconfig_get_param_int: " + err);
+        }
+    }
+
+    @Test
+    public void testH5Zconfig_get_param_double()
+    {
+        try {
+            String cfg   = "scale = 1.5";
+            double[] val = new double[1];
+            int ret      = H5.H5Zconfig_get_param(cfg, "scale", val);
+            assertTrue("H5Zconfig_get_param (double) returned non-negative", ret >= 0);
+            assertEquals("H5Zconfig_get_param (double) value", 1.5, val[0], 1e-10);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Zconfig_get_param_double: " + err);
+        }
+    }
+
+    @Test
+    public void testH5Zconfig_get_param_bool()
+    {
+        try {
+            String cfg    = "lossless = true";
+            boolean[] val = new boolean[1];
+            int ret       = H5.H5Zconfig_get_param(cfg, "lossless", val);
+            assertTrue("H5Zconfig_get_param (bool) returned non-negative", ret >= 0);
+            assertTrue("H5Zconfig_get_param (bool) value", val[0]);
+
+            String cfg2 = "lossless = false";
+            int ret2    = H5.H5Zconfig_get_param(cfg2, "lossless", val);
+            assertTrue("H5Zconfig_get_param (bool, false) returned non-negative", ret2 >= 0);
+            assertFalse("H5Zconfig_get_param (bool) value (false)", val[0]);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Zconfig_get_param_bool: " + err);
+        }
+    }
+
+    @Test
+    public void testH5Zconfig_get_param_str()
+    {
+        try {
+            String cfg   = "mode = \"fast\"";
+            String[] val = new String[1];
+            int ret      = H5.H5Zconfig_get_param(cfg, "mode", val);
+            assertTrue("H5Zconfig_get_param (str) returned non-negative", ret >= 0);
+            assertEquals("H5Zconfig_get_param (str) value", "fast", val[0]);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Zconfig_get_param_str: " + err);
+        }
+    }
+
+    @Test
+    public void testH5Zconfig_get_param_missing_key()
+    {
+        try {
+            String cfg = "level = 5";
+            long[] val = new long[1];
+            int ret    = H5.H5Zconfig_get_param(cfg, "missing_key", val);
+            assertTrue("H5Zconfig_get_param with missing key returns 0 (not found)", ret == 0);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Zconfig_get_param_missing_key: " + err);
+        }
     }
 }

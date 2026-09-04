@@ -19,6 +19,7 @@
 using std::cerr;
 using std::endl;
 
+#include <cstdint>
 #include <string>
 #include "H5Cpp.h" // C++ API header file
 using namespace H5;
@@ -218,6 +219,130 @@ test_szip_filter(H5File &file1)
 } // test_szip_filter
 
 /*-------------------------------------------------------------------------
+ * Function:    test_append_filter
+ *
+ * Purpose      Smoke test for DSetCreatPropList::appendFilter and
+ *              H5FilterParam::config_get_param.
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
+static void
+test_append_filter()
+{
+    SUBTEST("appendFilter (raw cd_values, shuffle)");
+    try {
+        DSetCreatPropList dcpl;
+        dcpl.appendFilter(H5Z_FILTER_SHUFFLE, 0, 0, nullptr);
+        if (dcpl.getNfilters() != 1)
+            throw Exception("test_append_filter", "expected 1 filter after appendFilter");
+        PASSED();
+    }
+    catch (Exception &E) {
+        issue_fail_msg("test_append_filter()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+
+    SUBTEST("appendFilter (string params, deflate if available)");
+    if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) > 0) {
+        try {
+            DSetCreatPropList dcpl;
+            dcpl.appendFilter(H5Z_FILTER_DEFLATE, 0, H5std_string("level=6"));
+            if (dcpl.getNfilters() != 1)
+                throw Exception("test_append_filter", "expected 1 filter after appendFilter");
+            H5std_string params = dcpl.getFilterParams(0);
+            if (params.empty())
+                throw Exception("test_append_filter", "getFilterParams returned empty string");
+            PASSED();
+        }
+        catch (Exception &E) {
+            issue_fail_msg("test_append_filter()", __LINE__, __FILE__, E.getCDetailMsg());
+        }
+    }
+    else {
+        SKIPPED();
+    }
+
+    SUBTEST("H5FilterParam::config_get_param (int64_t)");
+    try {
+        int64_t val   = 0;
+        bool    found = FilterParam::config_get_param("level = 6, mode = 2", "level", val);
+        if (!found)
+            throw Exception("test_append_filter", "config_get_param: key not found");
+        if (val != 6)
+            throw Exception("test_append_filter", "config_get_param: wrong value");
+        PASSED();
+    }
+    catch (Exception &E) {
+        issue_fail_msg("test_append_filter()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+
+    SUBTEST("H5FilterParam::config_get_param (double)");
+    try {
+        double val   = 0.0;
+        bool   found = FilterParam::config_get_param("rate = 1.5, mode = 2", "rate", val);
+        if (!found)
+            throw Exception("test_append_filter", "config_get_param: key not found");
+        if (val != 1.5)
+            throw Exception("test_append_filter", "config_get_param: wrong value");
+        /* Absent key returns false and does not throw. */
+        double absent_val = 0.0;
+        if (FilterParam::config_get_param("rate = 1.5", "missing", absent_val))
+            throw Exception("test_append_filter", "config_get_param: expected key not found");
+        PASSED();
+    }
+    catch (Exception &E) {
+        issue_fail_msg("test_append_filter()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+
+    SUBTEST("H5FilterParam::config_get_param (bool)");
+    try {
+        bool val   = false;
+        bool found = FilterParam::config_get_param("lossless = true, mode = 2", "lossless", val);
+        if (!found)
+            throw Exception("test_append_filter", "config_get_param: key not found");
+        if (!val)
+            throw Exception("test_append_filter", "config_get_param: wrong value");
+        PASSED();
+    }
+    catch (Exception &E) {
+        issue_fail_msg("test_append_filter()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+
+    SUBTEST("H5FilterParam::config_get_param (H5std_string)");
+    try {
+        H5std_string val;
+        bool         found = FilterParam::config_get_param("name = \"zlib\", mode = 2", "name", val);
+        if (!found)
+            throw Exception("test_append_filter", "config_get_param: key not found");
+        if (val != "zlib")
+            throw Exception("test_append_filter", "config_get_param: wrong value");
+        PASSED();
+    }
+    catch (Exception &E) {
+        issue_fail_msg("test_append_filter()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+
+    SUBTEST("H5FilterParam::config_get_param (type mismatch throws)");
+    try {
+        int64_t val   = 0;
+        bool    threw = false;
+        try {
+            /* "level" holds a string value here, not an integer. */
+            FilterParam::config_get_param("level = \"six\"", "level", val);
+        }
+        catch (LibraryIException &) {
+            threw = true;
+        }
+        if (!threw)
+            throw Exception("test_append_filter", "config_get_param: expected type-mismatch exception");
+        PASSED();
+    }
+    catch (Exception &E) {
+        issue_fail_msg("test_append_filter()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+}
+
+/*-------------------------------------------------------------------------
  * Function:    test_filters
  *
  * Purpose      Main routine for testing filters
@@ -246,6 +371,7 @@ test_filters(void *params)
         // Test basic VL string datatype
         test_null_filter();
         test_szip_filter(file1);
+        test_append_filter();
     }
     catch (Exception &E) {
         issue_fail_msg("test_filters()", __LINE__, __FILE__, E.getCDetailMsg());

@@ -107,6 +107,28 @@ class H5CPP_DLL DSetCreatPropList : public ObjCreatPropList {
     void setFilter(H5Z_filter_t filter, unsigned int flags = 0, size_t cd_nelmts = 0,
                    const unsigned int cd_values[] = NULL) const;
 
+    // Configures a filter with a key=value string and appends it to the pipeline.
+    void appendFilter(H5Z_filter_t filter_id, unsigned flags, const H5std_string &params) const;
+
+    // Configures a filter with raw cd_values and appends it to the pipeline.
+    void appendFilter(H5Z_filter_t filter_id, unsigned flags, size_t cd_nelmts,
+                      const unsigned cd_values[]) const;
+
+    // Returns the parameter string for the filter at pipeline index filter_idx.
+    H5std_string getFilterParams(unsigned filter_idx) const;
+
+    // Configures the filter at pipeline index filter_idx with a key=value
+    // string, in place, preserving its position and stored configuration
+    // string semantics. Unlike modifyFilter(), does not clear a stored
+    // string when replacing it with another string-form configuration.
+    void modifyFilterByIdx(unsigned filter_idx, unsigned flags, const H5std_string &params) const;
+
+    // Configures the filter at pipeline index filter_idx with raw
+    // cd_values, in place; clears any stored configuration string on that
+    // entry, since raw cd_values are being set directly.
+    void modifyFilterByIdx(unsigned filter_idx, unsigned flags, size_t cd_nelmts,
+                           const unsigned cd_values[]) const;
+
     // Sets Fletcher32 checksum of EDC for this property list.
     void setFletcher32() const;
 

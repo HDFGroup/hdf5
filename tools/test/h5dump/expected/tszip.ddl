@@ -13,6 +13,8 @@ DATASET "szip" {
          CODING NEAREST NEIGHBOUR
          BYTE_ORDER LSB
          HEADER RAW
+         PARAMS_STRING 'coding = "nn", pixels_per_block = 4'
+         DESCRIPTION "SZIP lossless compression for scientific data"
       }
    }
    FILLVALUE {
