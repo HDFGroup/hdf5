@@ -109,12 +109,20 @@ We would like to thank the many HDF5 community members who contributed to this r
    - `H5Pappend_filter(plist, filter_id, flags, params)` - appends a filter to
      a dataset creation property list; `params` is an `H5Z_params_t` that
      carries either a `key=value` string or a raw `cd_values` array.
+   - `H5Pmodify_filter_by_idx(plist, filter_idx, flags, params)` - replaces
+     the configuration of the filter already at pipeline index `filter_idx`,
+     preferred over `H5Pmodify_filter()` for a string-configured entry since
+     it preserves the stored configuration string when given a new string.
    - `H5Pget_filter_params_by_idx(plist, idx, buf, buf_size, content_len)` -
      retrieves the parameter string for the filter at pipeline index `idx`.
    - `H5Zconfig_get_int`, `H5Zconfig_get_double`, `H5Zconfig_get_bool`,
      `H5Zconfig_get_str` - typed accessors that extract individual parameters
      from a `key=value` string; intended for use inside filter `set_config`
      callbacks.
+   - `H5Zget_filter_class_info(filter_id, info)` - returns registry-level
+     information about a filter (canonical name, description, whether
+     `set_config`/`get_config` are implemented) into a new `H5Z_class_info_t`
+     output struct.
 
    **New filter class fields:**  `H5Z_class3_t` gains a `name` string field
    (canonical identifier used in config strings) and a `description` string
@@ -140,6 +148,15 @@ We would like to thank the many HDF5 community members who contributed to this r
    `H5Ocopy` carry it with the entry.
 
    Fixes GitHub issue [#6153](https://github.com/HDFGroup/hdf5/issues/6153)
+
+### Changed: `H5Pget_filter2`/`H5Pget_filter_by_id2` no-name fallback
+
+   When a filter has no stored or registered name, `H5Pget_filter2()` and
+   `H5Pget_filter_by_id2()` now write the filter's decimal ID (e.g. `"307"`)
+   into the output `name[]` buffer, rather than an empty string as in prior
+   releases. Existing code that tested `name[0] == '\0'` to detect "no name
+   available" will no longer see that sentinel; check the return value and
+   `namelen` instead if that distinction is needed.
 
 ### Added the H5F_LIBVER_V300 library version bound
 
@@ -175,11 +192,15 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    - `h5pappend_filter_f` - generic interface with two overloads: string
      `params` variant and raw `cd_values` variant.
+   - `h5pmodify_filter_by_idx_f` - replaces the configuration of the filter
+     already at a given pipeline index, in place.
    - `h5pget_filter_params_by_idx_f` - retrieves the parameter string for a
      filter by pipeline index.
    - `h5zconfig_get_param_f` - generic interface dispatching to
      `h5zconfig_get_param_int_f`, `_double_f`, `_logical_f`, and `_str_f`
      based on the value argument type.
+   - `h5zget_filter_info_class_f` - returns registry-level information about
+     a filter into a new `h5z_class_info_f_t` derived type.
 
 ## C++ Library
 
@@ -187,6 +208,9 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    - `DSetCreatPropList::appendFilter` - two overloads: string `params` and
      raw `cd_values`.
+   - `DSetCreatPropList::modifyFilterByIdx` - two overloads, replaces the
+     configuration of the filter already at a given pipeline index, in
+     place.
    - `DSetCreatPropList::getFilterParams` - retrieves a filter's parameter
      string by pipeline index.
    - `H5FilterParam::config_get_param` - four overloads dispatching on value
@@ -197,16 +221,45 @@ We would like to thank the many HDF5 community members who contributed to this r
 ### Added Java wrappers for the string-based filter configuration API
 
    - `H5.H5Pappend_filter` - two overloads: `String params` and `int[] cd_values`.
+   - `H5.H5Pmodify_filter_by_idx` - two overloads, replaces the
+     configuration of the filter already at a given pipeline index, in
+     place.
    - `H5.H5Pget_filter_params_by_idx` - retrieves a filter's parameter string
      by pipeline index.
-   - `H5.H5Zconfig_get_int`, `H5Zconfig_get_double`, `H5Zconfig_get_bool`,
-     `H5Zconfig_get_str` - typed parameter accessors.
+   - `H5.H5Zconfig_get_param` - four overloads (`long[]`, `double[]`,
+     `boolean[]`, `String[]` output arrays) providing typed parameter
+     accessors equivalent to the C `H5Zconfig_get_int/double/bool/str`.
+   - `H5.H5Zget_filter_class_info` - returns registry-level information
+     about a filter into a new `H5Z_class_info_t` output object.
 
 ### Java dependency JAR paths are now user-configurable
 
    The CMake variables `HDF5_JAVA_LOGGING_JAR`, `HDF5_JAVA_LOGGING_NOP_JAR`, `HDF5_JAVA_LOGGING_SIMPLE_JAR`, `HDF5_JAVA_JUNIT_JAR`, and `HDF5_JAVA_HAMCREST_JAR` are now CMake cache variables with the bundled JARs as defaults. Users can override these at configure time to use system-provided JARs. See `INSTALL_CMake_options.md` for details.
 
 ## Tools
+
+### h5dump: display string-based filter configuration (RFC-HDFG-2026-001)
+
+   - `h5dump -p` now nests a `PARAMS_STRING` line inside each filter's
+     `FILTERS` block, showing the filter's `key=value` configuration string
+     when one is stored on disk.
+   - A binary-exact floating-point value in `PARAMS_STRING` is annotated with
+     its equivalent C99 hexadecimal-float spelling (e.g. `rate = 0.125 /*
+     0x1p-3 */`) so the exact stored value is visible even when the decimal
+     form is a truncated approximation.
+   - `h5dump -p` also nests a `DESCRIPTION` line showing the filter's
+     registry-sourced human-readable label, when the filter is currently
+     registered and provides one. Because this is a best-effort, in-memory
+     lookup rather than data recorded on disk, `DESCRIPTION` is omitted
+     whenever the filter isn't currently registered, and its text can differ
+     between machines with different plugin versions.
+
+### h5repack: `UD=` string-form filter configuration
+
+   - `h5repack -f` accepts a new string form of the `UD=` filter
+     specification: `UD=filter_number,filter_flag,key=value[,key2=value2,...]`,
+     alongside the existing `cd_value_count,value1[,value2,...]` integer
+     form. For example: `h5repack -f UD=32013,0,rate="3.0" file1 file2`.
 
 ## High-Level APIs
 
@@ -216,6 +269,12 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Documentation
 
+   - Added a "Filter Pipeline Message - Version 3" section to the on-disk
+     format specification (`H5.format.4.0.dox`), documenting the new object
+     header message layout that stores a filter's `key=value` configuration
+     string alongside its `cd_values`.
+   - Added `DDLBNF300.dox`, the DDL grammar reference for the new
+     `PARAMS_STRING`/`DESCRIPTION` display syntax introduced above.
 
 # 🪲 Bug Fixes
 

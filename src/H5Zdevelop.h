@@ -27,15 +27,16 @@
 
 /**
  * Version of the filter class struct's \c version field used by
- * \c H5Z_class2_t. \c H5Z_class3_t plugins set \c version to the literal
- * value \c 2 instead (see \c H5Z_class3_t's documentation).
+ * \c H5Z_class2_t. \c H5Z_class3_t plugins set \c version to
+ * #H5Z_CLASS3_T_VERS instead (see \c H5Z_class3_t's documentation).
  */
 #define H5Z_CLASS_T_VERS (1)
 
 /**
- * Highest accepted version field value in H5Zregister(). \since 3.0.0
+ * Value of \c H5Z_class3_t's \c version field. H5Zregister() dispatches to
+ * v3 handling for a class whose \c version equals this value. \since 3.0.0
  */
-#define H5Z_CLASS_T_VERS_MAX (2)
+#define H5Z_CLASS3_T_VERS (2)
 
 /**
  * Maximum byte length of the \c name field in H5Z_class3_t (not counting NUL).
@@ -372,7 +373,7 @@ typedef herr_t (*H5Z_close_blob_func_t)(void *buf, size_t size);
  */
 //! <!-- [H5Z_class3_t_snip] -->
 typedef struct H5Z_class3_t {
-    int          version;            /**< Set to the literal value 2                */
+    int          version;            /**< Set to #H5Z_CLASS3_T_VERS                 */
     H5Z_filter_t id;                 /**< Filter ID number                           */
     unsigned     encoder_present;    /**< Does this filter have an encoder?          */
     unsigned     decoder_present;    /**< Does this filter have a decoder?           */
@@ -412,11 +413,12 @@ extern "C" {
  * \brief Check whether a key is present in a TOML-subset filter parameter string.
  *
  * \param[in] params  TOML-subset key=value parameter string, or NULL.
- * \param[in] key     Key to search for (case-insensitive).
+ * \param[in] key     Key to search for (case-sensitive).
  *
  * \return Positive if the key is present, 0 if absent, negative on error.
  *
- * \details Bare keys (no '=' sign, boolean flags) return positive.
+ * \details A bare key with no '=' sign (e.g. "fast_mode") is not valid TOML
+ *          and returns negative, not positive; use "fast_mode = true" instead.
  *          This function validates the entire parameter string on every call;
  *          duplicate keys or malformed syntax return negative.
  *
@@ -430,7 +432,7 @@ H5_DLL htri_t H5Zconfig_has_key(const char *params, const char *key);
  * \brief Look up a TOML integer value in a filter parameter string.
  *
  * \param[in]  params  TOML-subset key=value parameter string.
- * \param[in]  key     Key to search for (case-insensitive).
+ * \param[in]  key     Key to search for (case-sensitive).
  * \param[out] out     Receives the parsed int64_t value.
  *
  * \return Positive if found and converted, 0 if not found, negative on error.
@@ -450,7 +452,7 @@ H5_DLL htri_t H5Zconfig_get_int(const char *params, const char *key, int64_t *ou
  * \brief Look up a TOML float value in a filter parameter string.
  *
  * \param[in]  params  TOML-subset key=value parameter string.
- * \param[in]  key     Key to search for (case-insensitive).
+ * \param[in]  key     Key to search for (case-sensitive).
  * \param[out] out     Receives the parsed double value.
  *
  * \return Positive if found and converted, 0 if not found, negative on error.
@@ -470,13 +472,14 @@ H5_DLL htri_t H5Zconfig_get_double(const char *params, const char *key, double *
  * \brief Look up a TOML boolean value in a filter parameter string.
  *
  * \param[in]  params  TOML-subset key=value parameter string.
- * \param[in]  key     Key to search for (case-insensitive).
+ * \param[in]  key     Key to search for (case-sensitive).
  * \param[out] out     Receives TRUE or FALSE.
  *
  * \return Positive if found, 0 if not found, negative on error.
  *
  * \details Accepts "true" or "false" (lowercase only, per TOML).
- *          Bare keys (boolean flags with no '=' sign) are treated as TRUE.
+ *          A bare key with no '=' sign (e.g. "fast_mode") is not valid TOML
+ *          and returns negative, not TRUE; use "fast_mode = true" instead.
  *          Returns negative if the key exists but its value is not a TOML
  *          boolean (type mismatch).
  *
@@ -490,7 +493,7 @@ H5_DLL htri_t H5Zconfig_get_bool(const char *params, const char *key, bool *out)
  * \brief Look up a TOML string value in a filter parameter string.
  *
  * \param[in]     params    TOML-subset key=value parameter string.
- * \param[in]     key       Key to search for (case-insensitive).
+ * \param[in]     key       Key to search for (case-sensitive).
  * \param[out]    buf       Buffer to receive the decoded string (without quotes),
  *                          or NULL for a size query.
  * \param[in,out] buf_size  On entry, capacity of buf; on return, bytes required
@@ -534,6 +537,25 @@ H5_DLL htri_t H5Zconfig_get_str(const char *params, const char *key, char *buf, 
  *          \snippet this H5Z_class1_t_snip
  *          or
  *          \snippet this H5Z_class2_t_snip
+ *          or, for filters that also support the string-based configuration
+ *          API (#H5Pappend_filter, \c set_config / \c get_config), the newer
+ *          #H5Z_class3_t:
+ *          \snippet this H5Z_class3_t_snip
+ *          #H5Z_class3_t is a separate, non-derived struct (see its own
+ *          field documentation) rather than an extension of
+ *          #H5Z_class2_t; the fields below that describe \c version and
+ *          \c name apply to #H5Z_class1_t / #H5Z_class2_t only.
+ *          #H5Z_class3_t's \c version must be set to #H5Z_CLASS3_T_VERS (not
+ *          #H5Z_CLASS_T_VERS, which is for #H5Z_class1_t / #H5Z_class2_t)
+ *          and its \c name must be non-NULL,
+ *          non-empty, at most 255 bytes, and drawn only from the character
+ *          class <tt>[A-Za-z0-9_.-]</tt> - a name that fails this check is
+ *          rejected with H5E_BADVALUE at registration, including when the
+ *          filter is loaded as a plugin. This canonical name is written to
+ *          disk as part of the filter pipeline and is what \c h5repack
+ *          resolves to a filter ID from its command line, so it cannot
+ *          contain whitespace, quotes, or other characters that would be
+ *          unsafe in a file's metadata or in line-oriented tool output.
  *
  *          \c version is a library-defined value reporting the version number
  *          of the #H5Z_class_t struct. This currently must be set to

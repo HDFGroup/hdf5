@@ -20,6 +20,7 @@
  */
 
 #include "h5test.h"
+#include "H5srcdir.h"
 
 static const char *FILENAME[] = {"tfilter2",
                                  "tfilter2_blob",
@@ -54,6 +55,16 @@ test_parser(void)
 
     TESTING("H5Zconfig_get_int: key not found");
     ret = H5Zconfig_get_int("level = 6", "mode", &ival);
+    if (ret != 0)
+        TEST_ERROR;
+    PASSED();
+
+    /* RFC-HDFG-2026-001 test parse-09: key lookup is case-sensitive, per TOML
+     * v1.0.0 bare-key semantics -- LEVEL and level are distinct keys.
+     * Folding key case would be the only case-insensitive comparison in an
+     * otherwise case-sensitive grammar, silently masking caller typos. */
+    TESTING("H5Zconfig_get_int: key lookup is case-sensitive (LEVEL != level)");
+    ret = H5Zconfig_get_int("LEVEL = 6", "level", &ival);
     if (ret != 0)
         TEST_ERROR;
     PASSED();
@@ -986,6 +997,47 @@ error:
 }
 
 /* -----------------------------------------------------------------------
+ * scale_factor upper bound: a value that fits unsigned but flips sign when
+ * later re-cast to int (H5Z__filter_scaleoffset) must be rejected here,
+ * not silently substituted with 0 downstream.
+ * ---------------------------------------------------------------------- */
+static int
+test_scaleoffset_scale_factor_upper_bound(void)
+{
+    hid_t  dcpl = H5I_INVALID_HID;
+    herr_t ret;
+
+    TESTING("scaleoffset: scale_factor above INT_MAX is rejected");
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    {
+        /* INT_MAX + 1 = 2147483648: valid as unsigned, but negative when
+         * re-cast to int -- exactly the value that used to be silently
+         * reset to 0 downstream instead of being rejected here. */
+        H5Z_params_t _p = H5Z_PARAMS_STR("scale_type = \"int\", scale_factor = 2147483648");
+        H5E_BEGIN_TRY
+        {
+            ret = H5Pappend_filter(dcpl, H5Z_FILTER_SCALEOFFSET, 0, &_p);
+        }
+        H5E_END_TRY
+    }
+    if (ret >= 0)
+        TEST_ERROR;
+
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+    return 0;
+
+error:
+    if (dcpl != H5I_INVALID_HID)
+        H5Pclose(dcpl);
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
  * canonical_name display tests
  *
  * Registers a minimal class3 filter and verifies that H5Pget_filter_by_id2
@@ -1730,9 +1782,13 @@ test_canonical_name_length_limit(void)
             "slash/path",       /* path-like, unsafe as an identifier     */
             "equals=sign",      /* the key/value separator                */
         };
-        /* Each must be accepted: the full declared character class. */
+        /* Each must be accepted: the full declared character class.
+         * "deflate" deliberately avoided -- it collides with the built-in
+         * deflate filter's own canonical name, rejected by the separate
+         * uniqueness check in test_canonical_name_uniqueness() below, a
+         * different concern from the syntax check this loop covers. */
         static const char *const good[] = {
-            "zfp", "deflate", "blosc2.lz4", "my_filter-2", "A", "0", "aA0_.-",
+            "zfp", "not-deflate", "blosc2.lz4", "my_filter-2", "A", "0", "aA0_.-",
         };
         size_t i;
 
@@ -1762,6 +1818,63 @@ test_canonical_name_length_limit(void)
                 TEST_ERROR;
         }
     }
+    PASSED();
+    return 0;
+
+error:
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
+ * A canonical name must be unique among v3-registered filters: it is
+ * written to disk and is what h5repack resolves to a filter ID from its
+ * command line, so two different filters sharing one name would make that
+ * resolution ambiguous.
+ * ---------------------------------------------------------------------- */
+#define UNIQUENAME_FILTER_ID_A 536
+#define UNIQUENAME_FILTER_ID_B 537
+
+static int
+test_canonical_name_uniqueness(void)
+{
+    H5Z_class3_t cls_a = {2,    UNIQUENAME_FILTER_ID_A, 1,    1,   "test-unique-name", NULL, NULL,
+                          NULL, longtitle_filter_func,  NULL, NULL};
+    H5Z_class3_t cls_b = {2,    UNIQUENAME_FILTER_ID_B, 1,    1,   "test-unique-name", NULL, NULL,
+                          NULL, longtitle_filter_func,  NULL, NULL};
+    herr_t       ret;
+
+    TESTING("H5Zregister: canonical_name collision across different filter ids is rejected");
+
+    if (H5Zregister(&cls_a) < 0)
+        TEST_ERROR;
+
+    /* A different id claiming the same name must fail. */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Zregister(&cls_b);
+    }
+    H5E_END_TRY
+    if (ret >= 0) {
+        H5Zunregister(UNIQUENAME_FILTER_ID_A);
+        H5Zunregister(UNIQUENAME_FILTER_ID_B);
+        TEST_ERROR;
+    }
+
+    /* Re-registering the SAME id under its own unchanged name is not a
+     * collision -- H5Z__insert_entry replaces the entry in place. */
+    if (H5Zregister(&cls_a) < 0) {
+        H5Zunregister(UNIQUENAME_FILTER_ID_A);
+        TEST_ERROR;
+    }
+
+    /* Once A is gone, B may claim the name that's no longer in use. */
+    if (H5Zunregister(UNIQUENAME_FILTER_ID_A) < 0)
+        TEST_ERROR;
+    if (H5Zregister(&cls_b) < 0)
+        TEST_ERROR;
+    if (H5Zunregister(UNIQUENAME_FILTER_ID_B) < 0)
+        TEST_ERROR;
+
     PASSED();
     return 0;
 
@@ -1864,6 +1977,123 @@ error:
     }
     H5E_END_TRY
     free(ok_str);
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
+ * 8c. Canonicalization can grow a parameter string past H5Z_CONFIG_STRING_MAX
+ * even when the caller's raw input is well under it -- hex-float rewriting
+ * expands "0x1p0" (5 bytes) to "1.0000000000000000e+00" (23 bytes).  Nothing
+ * re-validates the canonicalized string's length before it is persisted, so
+ * H5Pappend_filter must reject it here: H5O__pline_decode caps a stored
+ * config string at H5Z_CONFIG_STRING_MAX on read, so anything longer than
+ * that can never be recovered from disk once written.
+ * ---------------------------------------------------------------------- */
+
+#define GROWTH_FILTER_ID 535
+
+static size_t
+growth_filter_func(unsigned H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                   const unsigned H5_ATTR_UNUSED *cd_values, hid_t H5_ATTR_UNUSED dxpl_id,
+                   const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims, size_t nbytes,
+                   size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+{
+    return nbytes; /* pass-through; never actually applied by this test */
+}
+
+static herr_t
+growth_set_config(const char H5_ATTR_UNUSED *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts,
+                  unsigned H5_ATTR_UNUSED cd_values[], size_t H5_ATTR_UNUSED cd_values_size)
+{
+    /* Ignores params entirely -- any syntactically valid TOML is "accepted",
+     * so the test below is free to pack the string with as many distinct
+     * keys as needed without tripping a per-key allowlist. */
+    *cd_nelmts = 0;
+    return SUCCEED;
+}
+
+static int
+test_config_string_canonicalization_growth(void)
+{
+    static const H5Z_class3_t growth_cls = {
+        2,                  /* version         */
+        GROWTH_FILTER_ID,   /* id              */
+        1,                  /* encoder_present */
+        1,                  /* decoder_present */
+        "growth_filter",    /* canonical_name  */
+        NULL,               /* description     */
+        NULL,               /* can_apply       */
+        NULL,               /* set_local       */
+        growth_filter_func, /* filter          */
+        growth_set_config,  /* set_config      */
+        NULL,               /* get_config      */
+    };
+    hid_t    dcpl = H5I_INVALID_HID;
+    char    *raw  = NULL;
+    size_t   pos  = 0;
+    unsigned n;
+    herr_t   ret;
+
+    TESTING("H5Pappend_filter: canonicalization growth past H5Z_CONFIG_STRING_MAX is rejected");
+
+    if (H5Zregister(&growth_cls) < 0)
+        TEST_ERROR;
+
+    if (NULL == (raw = (char *)malloc(H5Z_CONFIG_STRING_MAX + 1))) {
+        H5Zunregister(GROWTH_FILTER_ID);
+        TEST_ERROR;
+    }
+    raw[0] = '\0';
+
+    /* Pack short hex-float fields ("aN=0x1p0,") up to ~half the raw limit --
+     * each field individually is tiny, but every "0x1p0" the canonicalizer
+     * sees becomes a 23-byte decimal literal, so ~half the raw budget in
+     * 9-11-byte fields canonicalizes to well over the full budget. */
+    for (n = 0; pos < H5Z_CONFIG_STRING_MAX / 2; n++) {
+        char field[32];
+        int  flen = snprintf(field, sizeof(field), "a%u=0x1p0,", n);
+        if (flen < 0 || pos + (size_t)flen >= H5Z_CONFIG_STRING_MAX)
+            break;
+        memcpy(raw + pos, field, (size_t)flen);
+        pos += (size_t)flen;
+    }
+    if (pos > 0)
+        raw[pos - 1] = '\0'; /* drop the trailing comma */
+    else
+        raw[0] = '\0';
+
+    /* Sanity check on the test itself: the raw input must be comfortably
+     * under the limit, or this isn't exercising the growth path at all. */
+    if (strlen(raw) >= H5Z_CONFIG_STRING_MAX * 3 / 4) {
+        free(raw);
+        H5Zunregister(GROWTH_FILTER_ID);
+        TEST_ERROR;
+    }
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
+        free(raw);
+        H5Zunregister(GROWTH_FILTER_ID);
+        TEST_ERROR;
+    }
+    H5E_BEGIN_TRY
+    {
+        H5Z_params_t _p;
+        _p.type  = H5Z_PARAMS_STRING;
+        _p.u.str = raw;
+        ret      = H5Pappend_filter(dcpl, GROWTH_FILTER_ID, 0, &_p);
+    }
+    H5E_END_TRY
+
+    H5Pclose(dcpl);
+    free(raw);
+    H5Zunregister(GROWTH_FILTER_ID);
+
+    if (ret >= 0)
+        TEST_ERROR;
+    PASSED();
+    return 0;
+
+error:
     return -1;
 }
 
@@ -2180,9 +2410,8 @@ test_filter2_context_passthrough(hid_t file)
 {
     /* 8x8 dataset with 4x4 chunks -> 2x2 chunk grid, 4 total chunks.
      * Chunk cache is disabled (nslots=0) so the filter fires during
-     * H5Dwrite / H5Dread rather than at a later flush, letting us verify
-     * the dxpl_id, scaled[], and ndims values that arrive at filter2.
-     */
+     * H5Dwrite / H5Dread rather than at a later flush, exposing the
+     * dxpl_id, scaled[], and ndims values that arrive at filter2. */
     static const hsize_t dims[2]   = {8, 8};
     static const hsize_t chunks[2] = {4, 4};
     hid_t                dxpl      = H5I_INVALID_HID;
@@ -4233,6 +4462,366 @@ error:
 }
 
 /* -----------------------------------------------------------------------
+ * Read-only regression test against a checked-in pipeline-v3 golden file
+ *
+ * Every other config-string test in this file encodes and decodes with the
+ * SAME build in the SAME process, so a bug that breaks encode and decode
+ * symmetrically (e.g. both sides silently swap a length field's byte
+ * order, or both grow/shrink a field the same way) would round-trip
+ * cleanly and go undetected forever.  test/testfiles/test_filters_v3.h5 is
+ * a fixed, checked-in artifact -- generated once by test/gen_filters.c and
+ * never regenerated by a routine test run -- so a decode regression against
+ * that historical byte layout actually fails here.  It uses a built-in
+ * filter (scaleoffset) with no custom plugin, so it is also readable by any
+ * unmodified HDF5 3.0+ build or an independent reader implementing only
+ * docs/doxygen/dox/H5.format.4.0.dox's "Filter Pipeline Message - Version
+ * 3" layout.
+ * ---------------------------------------------------------------------- */
+static int
+test_config_string_golden_file(void)
+{
+    hid_t       file = H5I_INVALID_HID, dset = H5I_INVALID_HID, dcpl = H5I_INVALID_HID;
+    char        pbuf[H5Z_CONFIG_STRING_MAX + 1];
+    size_t      plen = 0;
+    const char *data_file;
+
+    TESTING("config string: decodes correctly from a checked-in golden file");
+
+    data_file = H5_get_srcdir_filename("test_filters_v3.h5");
+    if (NULL == data_file)
+        TEST_ERROR;
+
+    if ((file = H5Fopen(data_file, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "dataset_with_filter", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dcpl = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+
+    if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "scale_type = \"int\", scale_factor = 3") != 0) {
+        fprintf(
+            stderr,
+            "\n   golden file stored \"%s\"\n   expected  \"scale_type = \\\"int\\\", scale_factor = 3\"\n",
+            pbuf);
+        TEST_ERROR;
+    }
+
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Dclose(dset);
+        H5Fclose(file);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
+ * Corrupted on-disk config_length must be rejected cleanly, not crash
+ *
+ * H5O__pline_decode() (src/H5Opline.c) is the function that actually parses
+ * a pipeline-v3 message out of an object header when a file is opened --
+ * this is the trust boundary a crafted or corrupted file crosses.  It
+ * checks the 4-byte ext_length field (the pipeline-v3 extension-block
+ * length, H5O_PLINE_EXT_CONFIG) two ways: rejecting anything over
+ * H5Z_CONFIG_STRING_MAX outright, and rejecting anything that would read
+ * past the end of the message buffer even if under that cap.  Neither path
+ * is exercised by any other test in this file, all of which only ever
+ * decode a config string this same process just encoded moments earlier.
+ *
+ * This test hand-patches raw bytes in a private copy of the golden file
+ * from test_config_string_golden_file(), at the exact offset that file's
+ * ext_length field is known to live at (verified against the checked-in
+ * bytes below before patching, so a future regeneration of the golden file
+ * that changes its layout fails loudly here instead of silently patching
+ * the wrong bytes).
+ * ---------------------------------------------------------------------- */
+
+/* Copy SRC to DST, patching the 4 bytes at BYTE_OFFSET (little-endian) to
+ * NEW_LEN.  Returns 0 on success, -1 on any I/O or verification failure. */
+static int
+patch_config_length(const char *src, const char *dst, long byte_offset, uint32_t expect_len, uint32_t new_len)
+{
+    FILE  *in = NULL, *out = NULL;
+    char  *buf   = NULL;
+    long   fsize = 0;
+    size_t nread;
+    int    ret_value = -1;
+
+    if (NULL == (in = fopen(src, "rb")))
+        goto done;
+    if (fseek(in, 0, SEEK_END) != 0)
+        goto done;
+    if ((fsize = ftell(in)) < 0)
+        goto done;
+    if (byte_offset < 0 || byte_offset + 4 > fsize)
+        goto done;
+    rewind(in);
+
+    if (NULL == (buf = (char *)malloc((size_t)fsize)))
+        goto done;
+    nread = fread(buf, 1, (size_t)fsize, in);
+    if (nread != (size_t)fsize)
+        goto done;
+
+    /* Confirm the target field matches the expected value before patching,
+     * to catch an out-of-date offset after an unrelated golden-file change. */
+    if ((uint8_t)buf[byte_offset] != (expect_len & 0xff) ||
+        (uint8_t)buf[byte_offset + 1] != ((expect_len >> 8) & 0xff) ||
+        (uint8_t)buf[byte_offset + 2] != ((expect_len >> 16) & 0xff) ||
+        (uint8_t)buf[byte_offset + 3] != ((expect_len >> 24) & 0xff))
+        goto done;
+
+    buf[byte_offset]     = (char)(new_len & 0xff);
+    buf[byte_offset + 1] = (char)((new_len >> 8) & 0xff);
+    buf[byte_offset + 2] = (char)((new_len >> 16) & 0xff);
+    buf[byte_offset + 3] = (char)((new_len >> 24) & 0xff);
+
+    if (NULL == (out = fopen(dst, "wb")))
+        goto done;
+    if (fwrite(buf, 1, (size_t)fsize, out) != (size_t)fsize)
+        goto done;
+
+    ret_value = 0;
+
+done:
+    if (in)
+        fclose(in);
+    if (out)
+        fclose(out);
+    free(buf);
+    return ret_value;
+}
+
+static int
+test_config_string_corrupted_decode(void)
+{
+    const char *golden;
+    /* Byte offset of the 4-byte ext_length field in
+     * test/testfiles/test_filters_v3.h5 (the H5O_PLINE_EXT_CONFIG extension
+     * block's length, within its 8-byte type/flags/reserved/length header),
+     * immediately preceding the stored "scale_type = \"int\", scale_factor =
+     * 3" (36-byte) string -- located by inspection when the golden file was
+     * generated. patch_config_length() re-verifies the current value at this
+     * offset is still 36 before patching, so a future regeneration that
+     * shifts this offset fails the test loudly rather than corrupting an
+     * unrelated field. */
+    const long  config_length_offset = 363;
+    const char *over_max_file        = "tfilter2_v3_corrupt_over_max.h5";
+    const char *over_buffer_file     = "tfilter2_v3_corrupt_over_buffer.h5";
+    hid_t       file = H5I_INVALID_HID, dset = H5I_INVALID_HID;
+    herr_t      open_ret;
+
+    TESTING("config string: corrupted on-disk config_length is rejected, not crashed on");
+
+    golden = H5_get_srcdir_filename("test_filters_v3.h5");
+    if (NULL == golden)
+        TEST_ERROR;
+
+    /* Case 1: config_length far exceeds H5Z_CONFIG_STRING_MAX (4096). */
+    if (patch_config_length(golden, over_max_file, config_length_offset, 36, 65535) < 0)
+        TEST_ERROR;
+
+    H5E_BEGIN_TRY
+    {
+        file = H5Fopen(over_max_file, H5F_ACC_RDONLY, H5P_DEFAULT);
+        if (file >= 0)
+            dset = H5Dopen2(file, "dataset_with_filter", H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    open_ret = (file >= 0 && dset >= 0) ? SUCCEED : FAIL;
+    if (dset >= 0)
+        H5Dclose(dset);
+    if (file >= 0)
+        H5Fclose(file);
+    file = dset = H5I_INVALID_HID;
+    remove(over_max_file);
+    if (open_ret >= 0)
+        TEST_ERROR; /* must fail: config_length > H5Z_CONFIG_STRING_MAX */
+
+    /* Case 2: config_length is under H5Z_CONFIG_STRING_MAX but far exceeds
+     * the bytes actually remaining in the message -- the buffer-overflow
+     * guard, a materially different code path than the cap above. */
+    if (patch_config_length(golden, over_buffer_file, config_length_offset, 36, 2000) < 0)
+        TEST_ERROR;
+
+    H5E_BEGIN_TRY
+    {
+        file = H5Fopen(over_buffer_file, H5F_ACC_RDONLY, H5P_DEFAULT);
+        if (file >= 0)
+            dset = H5Dopen2(file, "dataset_with_filter", H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    open_ret = (file >= 0 && dset >= 0) ? SUCCEED : FAIL;
+    if (dset >= 0)
+        H5Dclose(dset);
+    if (file >= 0)
+        H5Fclose(file);
+    file = dset = H5I_INVALID_HID;
+    remove(over_buffer_file);
+    if (open_ret >= 0)
+        TEST_ERROR; /* must fail: config_length runs past the message buffer */
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        if (dset >= 0)
+            H5Dclose(dset);
+        if (file >= 0)
+            H5Fclose(file);
+    }
+    H5E_END_TRY
+    remove(over_max_file);
+    remove(over_buffer_file);
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
+ * Corrupted config_len in an H5Pencode()/H5Pdecode() buffer must be
+ * rejected cleanly, not overflow
+ *
+ * H5P__ocrt_pipeline_dec() (src/H5Pocpl.c) decodes the same conceptual
+ * field as H5O__pline_decode() (config_len) but from a caller-supplied
+ * H5Pdecode() buffer rather than an on-disk object header -- a buffer that
+ * crosses MPI broadcasts and VOL-connector wire protocols in real
+ * deployments, with none of the object-header layer's checksum protection
+ * that test_config_string_corrupted_decode() above relies on. This test
+ * hand-patches a legitimately-encoded H5Pencode() buffer's config_len
+ * field to a value that exceeds H5Z_CONFIG_STRING_MAX and confirms
+ * H5Pdecode() rejects it instead of driving an oversized allocation and
+ * read.
+ * ---------------------------------------------------------------------- */
+static int
+test_config_string_pdecode_corrupted(void)
+{
+    hid_t    dcpl = H5I_INVALID_HID, dcpl_dec = H5I_INVALID_HID;
+    void    *enc_buf  = NULL;
+    size_t   enc_size = 0;
+    char    *padded   = NULL;
+    size_t   padded_len;
+    uint8_t *needle = NULL;
+    size_t   i;
+
+    TESTING("config string: corrupted H5Pdecode() config_len is rejected, not overflowed");
+
+    if (H5Zregister(&cfg_ondisk_cls) < 0)
+        TEST_ERROR;
+
+    /* A config string long enough (>= 256 bytes) that H5VM_limit_enc_size()
+     * encodes its length in 2 bytes rather than 1 -- so patching the value
+     * to something over H5Z_CONFIG_STRING_MAX (4096, still < 65536) doesn't
+     * also require changing the number of length-prefix bytes and shifting
+     * the rest of the buffer.  "level=9," first so cfg_ondisk_set_config
+     * still accepts it; the rest is inert padding via distinct keys (a
+     * duplicate key would be a TOML parse error). */
+    padded_len = 320;
+    if (NULL == (padded = (char *)malloc(padded_len + 1)))
+        TEST_ERROR;
+    {
+        int      n   = snprintf(padded, padded_len + 1, "level=9");
+        size_t   pos = (size_t)n;
+        unsigned k;
+        for (k = 0; pos + 16 < padded_len; k++) {
+            int flen = snprintf(padded + pos, padded_len + 1 - pos, ",p%u=1", k);
+            if (flen < 0)
+                break;
+            pos += (size_t)flen;
+        }
+        padded[pos] = '\0';
+        padded_len  = pos;
+    }
+    if (padded_len < 256) {
+        free(padded);
+        TEST_ERROR; /* sanity: must be long enough to force a 2-byte length prefix */
+    }
+
+    if ((dcpl = cfg_ondisk_make_dcpl(padded)) < 0) {
+        free(padded);
+        TEST_ERROR;
+    }
+
+    if (H5Pencode2(dcpl, NULL, &enc_size, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if (NULL == (enc_buf = malloc(enc_size)))
+        TEST_ERROR;
+    if (H5Pencode2(dcpl, enc_buf, &enc_size, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Locate the stored string inside the encoded buffer and read the
+     * 2-byte little-endian length field immediately preceding it. */
+    for (i = 0; i + padded_len <= enc_size; i++) {
+        if (memcmp((uint8_t *)enc_buf + i, padded, padded_len) == 0) {
+            needle = (uint8_t *)enc_buf + i;
+            break;
+        }
+    }
+    if (NULL == needle || i < 2) {
+        free(padded);
+        TEST_ERROR; /* the encoding changed shape; nothing to patch */
+    }
+    {
+        uint16_t stored_len = (uint16_t)(needle[-2] | (needle[-1] << 8));
+        if (stored_len != padded_len) {
+            free(padded);
+            TEST_ERROR; /* not the expected field; refuse to patch blindly */
+        }
+    }
+    free(padded);
+
+    /* Patch to a value that exceeds H5Z_CONFIG_STRING_MAX (4096) but still
+     * fits the existing 2-byte field (max 65535), leaving the rest of the
+     * buffer's shape untouched. */
+    {
+        uint16_t bad_len = 60000;
+        needle[-2]       = (uint8_t)(bad_len & 0xff);
+        needle[-1]       = (uint8_t)((bad_len >> 8) & 0xff);
+    }
+
+    H5E_BEGIN_TRY
+    {
+        dcpl_dec = H5Pdecode(enc_buf);
+    }
+    H5E_END_TRY
+    if (dcpl_dec >= 0) {
+        H5Pclose(dcpl_dec);
+        TEST_ERROR; /* must fail: config_len exceeds H5Z_CONFIG_STRING_MAX */
+    }
+
+    free(enc_buf);
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    if (H5Zunregister(CFG_ONDISK_FILTER_ID) < 0)
+        TEST_ERROR;
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl_dec);
+        H5Pclose(dcpl);
+        H5Zunregister(CFG_ONDISK_FILTER_ID);
+    }
+    H5E_END_TRY
+    free(enc_buf);
+    return -1;
+}
+/* -----------------------------------------------------------------------
  * Canonicalization of the persisted configuration string
  * (RFC-HDFG-2026-001 sec:pline-v3)
  *
@@ -5247,6 +5836,7 @@ main(void)
     nerrors += test_roundtrip_shuffle(file) < 0 ? 1 : 0;
     nerrors += test_roundtrip_fletcher32(file) < 0 ? 1 : 0;
     nerrors += test_scaleoffset_params(file) < 0 ? 1 : 0;
+    nerrors += test_scaleoffset_scale_factor_upper_bound() < 0 ? 1 : 0;
 
     /* Regression tests */
     nerrors += test_regression_old_api(file) < 0 ? 1 : 0;
@@ -5260,8 +5850,10 @@ main(void)
     nerrors += test_canonical_name_persistence() < 0 ? 1 : 0;
     nerrors += test_name_id_fallback() < 0 ? 1 : 0;
     nerrors += test_canonical_name_length_limit() < 0 ? 1 : 0;
+    nerrors += test_canonical_name_uniqueness() < 0 ? 1 : 0;
     nerrors += test_config_string_max() < 0 ? 1 : 0;
     nerrors += test_config_string_max_boundary() < 0 ? 1 : 0;
+    nerrors += test_config_string_canonicalization_growth() < 0 ? 1 : 0;
     nerrors += test_config_get_str_null_buf_size() < 0 ? 1 : 0;
     nerrors += test_set_get_config_callbacks() < 0 ? 1 : 0;
     nerrors += test_get_filter_info2_builtin() < 0 ? 1 : 0;
@@ -5283,6 +5875,15 @@ main(void)
     nerrors += test_blob_usecaseb_path_association(fapl) < 0 ? 1 : 0;
     nerrors += test_blob_oversized_default_storage(fapl) < 0 ? 1 : 0;
     nerrors += test_blob_libpressio_migration_pattern(fapl) < 0 ? 1 : 0;
+
+    /* Decode a fixed, checked-in golden file (not encoded this run) */
+    nerrors += test_config_string_golden_file() < 0 ? 1 : 0;
+
+    /* A corrupted on-disk config_length must be rejected, not crash */
+    nerrors += test_config_string_corrupted_decode() < 0 ? 1 : 0;
+
+    /* A corrupted H5Pdecode() config_len must be rejected, not overflow */
+    nerrors += test_config_string_pdecode_corrupted() < 0 ? 1 : 0;
 
     /* set_local must not discard the stored configuration string */
     nerrors += test_set_local_keeps_config(fapl) < 0 ? 1 : 0;

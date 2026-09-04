@@ -44,7 +44,8 @@
  *  FLET, to apply the HDF5 checksum filter
  *  NBIT, to apply the HDF5 NBIT filter (NBIT compression)
  *  SOFF, to apply the HDF5 scale+offset filter (compression)
- *  UD, to apply a User Defined filter k,m,n1[,...,nm]
+ *  UD, to apply a User Defined filter: id,flags,n1[,...,nm] (raw cd_values)
+ *      or id,flags,key=value[,...] (string form, via set_config)
  *  NONE, to remove the filter
  *
  * Examples:
@@ -250,18 +251,13 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                             }
                         }
                     }
-                    /* Distinguish the two forms by scanning for '=' anywhere
-                     * from the third field to the end of the string.
-                     *
-                     * Legacy form:  UD=id,flags,nelmts,v1,v2,...,vN
-                     *   - The third field ("nelmts") and every subsequent
-                     *     field ("v1"..."vN") are pure decimal integers and
-                     *     can never contain '='.  Scanning to len is safe.
-                     *
-                     * TOML/string form:  UD=id,flags,key=value[,...]
-                     *   - At least one "key=value" pair always contains '=',
-                     *     regardless of whether the key starts with a digit
-                     *     (e.g. "2bit=true"), a letter, or a special char. */
+                    /* Distinguish the two forms by scanning for '=' from the third
+                     * field to the end of the string. In the legacy form
+                     * (UD=id,flags,nelmts,v1,...,vN) that span is pure decimal
+                     * integers and can never contain '=', so scanning to len is
+                     * safe; in the TOML form (UD=id,flags,key=value[,...]) at
+                     * least one "key=value" pair always contains '=', even when
+                     * the key itself starts with a digit (e.g. "2bit=true"). */
                     if (cm == 2 && third_pos < len) {
                         size_t s;
                         for (s = third_pos; s < len; s++) {
@@ -346,12 +342,11 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                         filt->cd_nelmts        = 0;
                         m                      = len - i - 1; /* advance outer loop to end */
 
-                        /* This form doesn't use stype/l/f/p at all -- everything needed
-                         * is already committed above. Mark l/f/p as "already found" (not
-                         * -1) so the done_filter_params epilogue below (which commits a
-                         * trailing token left in stype for the legacy comma-separated
-                         * forms) doesn't clobber filt->filtn/filt_flag from stale/unset
-                         * stype contents. */
+                        /* This form doesn't use stype/l/f/p; everything needed is
+                         * already committed above. Mark l/f/p as already-found (not
+                         * -1) so the trailing-token-commit logic below, which exists
+                         * for the legacy comma-separated form, doesn't clobber
+                         * filt->filtn/filt_flag with stale stype contents. */
                         l = 0;
                         f = 0;
                         p = 0;

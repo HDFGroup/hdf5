@@ -391,11 +391,10 @@ H5Z__insert_entry(const H5Z_entry_t *entry)
             size_t       n         = MAX(H5Z_MAX_NFILTERS, 2 * H5Z_table_alloc_g);
             H5Z_entry_t *new_table = NULL;
 #ifdef H5Z_DEBUG
-            /* Grow the stat table first and commit it immediately.  If the
-             * main-table realloc then fails, stat_table has one extra unused
-             * slot (H5Z_table_alloc_g is not updated), which is harmless.
-             * Committing stat_table before calling realloc on H5Z_table_g
-             * ensures H5Z_stat_table_g is never a dangling pointer. */
+            /* Grow the stat table first and commit immediately: if the
+             * main-table realloc below then fails, stat_table has one
+             * harmless extra unused slot (H5Z_table_alloc_g stays
+             * unchanged), but H5Z_stat_table_g is never left dangling. */
             H5Z_stats_t *new_stat = (H5Z_stats_t *)H5MM_realloc(H5Z_stat_table_g, n * sizeof(H5Z_stats_t));
             if (!new_stat)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to extend filter statistics table");
@@ -502,6 +501,29 @@ H5Z_register3(const H5Z_class3_t *cls)
      * disk and is about to be written into object header messages. */
     if (H5Z__validate_class3_name(cls->name) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5Z_class3_t filter name");
+
+    /* The canonical name must be unique among v3-registered filters: it is
+     * written to disk and is what h5repack resolves to a filter ID from its
+     * command line, so two different filters sharing one name would make
+     * that resolution ambiguous.  Only compared against other v3 entries --
+     * a v2 filter's free-form descriptive name is not a canonical
+     * identifier and is not part of this namespace.  A filter re-registered
+     * under its own unchanged id/name is not a collision; H5Z__insert_entry
+     * below replaces that entry in place. */
+    {
+        size_t i;
+
+        for (i = 0; i < H5Z_table_used_g; i++) {
+            if (H5Z_table_g[i].base.version != H5Z_CLASS3_T_VERS_INTERNAL)
+                continue;
+            if (H5Z_table_g[i].base.id == cls->id)
+                continue;
+            if (H5Z_table_g[i].base.name && strcmp(H5Z_table_g[i].base.name, cls->name) == 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                            "canonical filter name '%s' is already registered to filter id %d", cls->name,
+                            (int)H5Z_table_g[i].base.id);
+        }
+    }
 
     /* Build entry */
     memset(&entry, 0, sizeof(entry));
@@ -1466,7 +1488,7 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_ne
          * a separate block of memory.
          * For each filter, if cd_values points to the internal array _cd_values,
          * the pointer will need to be updated when the filter struct is reallocated.
-         * Set the pointer to ~NULL so that we can reset it after reallocating.
+         * Set the pointer to ~NULL so it can be reset after reallocating.
          */
         for (n = 0; n < pline->nalloc; ++n) {
             if (pline->filter[n].cd_values == pline->filter[n]._cd_values)

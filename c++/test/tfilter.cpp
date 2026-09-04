@@ -275,6 +275,71 @@ test_append_filter()
     catch (Exception &E) {
         issue_fail_msg("test_append_filter()", __LINE__, __FILE__, E.getCDetailMsg());
     }
+
+    SUBTEST("H5FilterParam::config_get_param (double)");
+    try {
+        double val   = 0.0;
+        bool   found = FilterParam::config_get_param("rate = 1.5, mode = 2", "rate", val);
+        if (!found)
+            throw Exception("test_append_filter", "config_get_param: key not found");
+        if (val != 1.5)
+            throw Exception("test_append_filter", "config_get_param: wrong value");
+        /* Absent key returns false and does not throw. */
+        double absent_val = 0.0;
+        if (FilterParam::config_get_param("rate = 1.5", "missing", absent_val))
+            throw Exception("test_append_filter", "config_get_param: expected key not found");
+        PASSED();
+    }
+    catch (Exception &E) {
+        issue_fail_msg("test_append_filter()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+
+    SUBTEST("H5FilterParam::config_get_param (bool)");
+    try {
+        bool val   = false;
+        bool found = FilterParam::config_get_param("lossless = true, mode = 2", "lossless", val);
+        if (!found)
+            throw Exception("test_append_filter", "config_get_param: key not found");
+        if (!val)
+            throw Exception("test_append_filter", "config_get_param: wrong value");
+        PASSED();
+    }
+    catch (Exception &E) {
+        issue_fail_msg("test_append_filter()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+
+    SUBTEST("H5FilterParam::config_get_param (H5std_string)");
+    try {
+        H5std_string val;
+        bool         found = FilterParam::config_get_param("name = \"zlib\", mode = 2", "name", val);
+        if (!found)
+            throw Exception("test_append_filter", "config_get_param: key not found");
+        if (val != "zlib")
+            throw Exception("test_append_filter", "config_get_param: wrong value");
+        PASSED();
+    }
+    catch (Exception &E) {
+        issue_fail_msg("test_append_filter()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+
+    SUBTEST("H5FilterParam::config_get_param (type mismatch throws)");
+    try {
+        int64_t val   = 0;
+        bool    threw = false;
+        try {
+            /* "level" holds a string value here, not an integer. */
+            FilterParam::config_get_param("level = \"six\"", "level", val);
+        }
+        catch (LibraryIException &) {
+            threw = true;
+        }
+        if (!threw)
+            throw Exception("test_append_filter", "config_get_param: expected type-mismatch exception");
+        PASSED();
+    }
+    catch (Exception &E) {
+        issue_fail_msg("test_append_filter()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
 }
 
 /*-------------------------------------------------------------------------

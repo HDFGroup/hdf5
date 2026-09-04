@@ -2141,7 +2141,7 @@ H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *f
  * \param[in,out] cd_nelmts     Number of elements in \p cd_values
  * \param[out]    cd_values[]   Auxiliary data for the filter
  * \param[in]     namelen       Length of \p name buffer in bytes
- * \param[out]    name[]        Human-readable display name of the filter
+ * \param[out]    name[]        Canonical name of the filter (see \details below)
  * \param[out]    filter_config Bit field, as described in
  *                              H5Zget_filter_info()
  *
@@ -2783,6 +2783,14 @@ H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int fl
  *                      \code
  *                        H5Z_params_t p = H5Z_PARAMS_STR("level=6");
  *                      \endcode
+ *                      C++ callers use the named-variable form instead
+ *                      (#H5Z_PARAMS_STR is not defined in C++, since C++
+ *                      lacks the compound-literal syntax the macro needs):
+ *                      \code
+ *                        H5Z_params_t p;
+ *                        p.type  = H5Z_PARAMS_STRING;
+ *                        p.u.str = "level=6";
+ *                      \endcode
  *                      See the \ref subsec_filter_param_string section below
  *                      for the supported syntax.
  *
@@ -2816,6 +2824,30 @@ H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int fl
  *
  *          Unknown keys in a \c #H5Z_PARAMS_STRING string are rejected by
  *          built-in filters and should be rejected by third-party plugins.
+ *
+ *          H5Pappend_filter() stamps the filter's canonical name into the
+ *          pipeline entry so it can be displayed without the plugin loaded;
+ *          H5Pset_filter() does not.  A property list built with each
+ *          function can therefore compare unequal under H5Pequal() even
+ *          with identical \p filter and \p flags -- a pre-existing
+ *          consequence of H5Pequal() comparing the name slot, predating
+ *          this API.  Compare \p id and \p cd_values via H5Pget_filter2()
+ *          instead when testing I/O-behavior equivalence.
+ *
+ *          <b>Interaction with the file's library-version bound:</b> the
+ *          parameter string is persisted to disk (see
+ *          H5Pget_filter_params_by_idx()) only when the file's high bound,
+ *          set with H5Pset_libver_bounds(), is at least #H5F_LIBVER_V300.
+ *          Below that bound the pipeline is encoded in the older,
+ *          string-free on-disk format instead: the filter still applies
+ *          exactly as configured and \c H5Pappend_filter() still succeeds,
+ *          but the string is silently dropped and cannot later be
+ *          recovered verbatim -- consistent with how the library-version
+ *          bound gates other format features.  To confirm a string was
+ *          actually persisted, reopen the dataset and call
+ *          H5Pget_filter_params_by_idx(); a string that differs from what
+ *          was set (or a lossily-reconstructed one) means the bound was
+ *          too low.
  *
  * \anchor subsec_filter_param_string
  * <b>Parameter string syntax (#H5Z_PARAMS_STRING)</b>
@@ -2998,10 +3030,25 @@ H5_DLL herr_t H5Pget_filter_blob(hid_t plist_id, unsigned idx, size_t offset, vo
  *
  * \return \herr_t
  *
- * \details H5Pget_filter_params_by_idx() reconstructs the human-readable parameter
- *          string for the filter at pipeline index \p idx by calling the filter's
- *          \c get_config callback.  If the filter has no \c get_config callback a
- *          fallback string of the form \c "cd_values=v0:v1:..." is produced.
+ * \details H5Pget_filter_params_by_idx() returns the human-readable parameter
+ *          string for the filter at pipeline index \p idx, from the first of
+ *          three sources that applies:
+ *
+ *          -# If the filter was configured with #H5Z_PARAMS_STRING and the
+ *             entry carries a stored configuration string (see
+ *             H5Pappend_filter()), that exact stored string is returned
+ *             verbatim -- the filter's \c get_config callback is not called.
+ *             This is the common case and the entire point of persisting the
+ *             string: the plugin need not even be loaded.
+ *          -# Otherwise, if the filter's registered class has a \c get_config
+ *             callback, that callback is invoked to reconstruct a string from
+ *             the entry's raw \c cd_values.  Because \c cd_values encoding can
+ *             be lossy (for example, a \c double quantised into integer
+ *             slots), the reconstructed string is not guaranteed to be
+ *             identical to any string a caller originally set.
+ *          -# Otherwise, a fallback string of the form
+ *             \c "cd_values=v0:v1:..." is produced directly from the raw
+ *             \c cd_values array.
  *
  *          Call with \p params_buf NULL to obtain the required character count
  *          (excluding NUL) in \p params_len, then allocate \p params_len + 1

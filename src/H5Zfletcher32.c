@@ -24,7 +24,7 @@ static size_t H5Z__filter_fletcher32(unsigned flags, size_t cd_nelmts, const uns
 
 /* This message derives from H5Z */
 H5_ATTR_VISIBILITY_HIDDEN const H5Z_class3_t H5Z_FLETCHER32[1] = {{
-    2,                                                   /* H5Z_class3_t version (literal 2) */
+    2,                                                   /* H5Z_class3_t version */
     H5Z_FILTER_FLETCHER32,                               /* Filter id number */
     1,                                                   /* encoder_present flag (set to true) */
     1,                                                   /* decoder_present flag (set to true) */

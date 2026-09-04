@@ -21,9 +21,8 @@
 #include "H5f90.h"
 #include "H5Zpublic.h"
 
-/* Thin C helpers for Fortran BIND(C) -- Fortran cannot represent H5Z_params_t
-   (a C union), so these helpers construct the appropriate H5Z_params_t value
-   and call H5Pappend_filter. */
+/* Fortran cannot represent H5Z_params_t (a C union); these BIND(C) helpers
+   build it before calling H5Pappend_filter. */
 
 herr_t
 H5Pappend_filter_str_c(hid_t plist, H5Z_filter_t id, unsigned flags, const char *params)
@@ -45,9 +44,8 @@ H5Pappend_filter_raw_c(hid_t plist, H5Z_filter_t id, unsigned flags, size_t cd_n
     return H5Pappend_filter(plist, id, flags, &p);
 }
 
-/* The same two calling modes for H5Pmodify_filter_by_idx.  The only
-   difference from the append helpers above is that the entry is selected
-   by pipeline index rather than by filter ID. */
+/* Same two calling modes for H5Pmodify_filter_by_idx, selecting the filter
+   by pipeline index instead of filter ID. */
 
 herr_t
 H5Pmodify_filter_by_idx_str_c(hid_t plist, unsigned filter_idx, unsigned flags, const char *params)

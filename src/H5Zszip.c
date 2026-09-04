@@ -41,7 +41,7 @@ static herr_t H5Z__szip_get_config(unsigned flags, size_t cd_nelmts, const unsig
 
 /* This message derives from H5Z */
 H5_ATTR_VISIBILITY_HIDDEN H5Z_class3_t H5Z_SZIP[1] = {{
-    2,                                               /* H5Z_class3_t version (literal 2) */
+    2,                                               /* H5Z_class3_t version */
     H5Z_FILTER_SZIP,                                 /* Filter id number */
     1,                                               /* Assume encoder present: check before registering */
     1,                                               /* decoder_present flag (set to true) */
@@ -74,7 +74,7 @@ H5Z__szip_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size_t 
 
     FUNC_ENTER_PACKAGE
 
-    *cd_nelmts = H5Z_SZIP_USER_NPARMS; /* 2 user params */
+    *cd_nelmts = H5Z_SZIP_USER_NPARMS;
 
     if (cd_values) {
         unsigned mask = H5_SZIP_NN_OPTION_MASK; /* default: nearest neighbour */
@@ -356,8 +356,7 @@ H5Z__set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     } /* end switch */
 
     /* Modify the filter's parameters for this dataset */
-    /* set_local specialises cd_values for this dataset; keep the stored
-     * configuration string (keep_config = true). */
+    /* keep_config = true: set_local only refines cd_values, not the stored config string */
     if (H5P_modify_filter(dcpl_plist, H5Z_FILTER_SZIP, flags, H5Z_SZIP_TOTAL_NPARMS, true, cd_values) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local szip parameters");
 

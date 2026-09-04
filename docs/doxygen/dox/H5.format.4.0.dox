@@ -9321,6 +9321,120 @@ u
 </tr>
 </table>
 
+<table>
+<caption align="top"><strong>Layout: Filter Pipeline Message - Version 3</strong></caption>
+<tr align="center">
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align="center">
+  <td>Version</td>
+  <td>Number of Filters</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Filter Description List <em>(variable size)</em><br /><br /></td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Fields: Filter Pipeline Message - Version 3</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Version</td>
+  <td>The version number for this message. This table describes version 3. A filter pipeline message is
+      version 3 only when at least one filter in the pipeline carries a stored configuration string (see
+      <em>Config String Length</em> and <em>Config String</em> below); a pipeline with no stored strings is
+      still written as version 2, so version 2 and version 3 files remain byte-identical whenever this
+      feature is unused. Version 3 messages are written only when the file's high library-version bound
+      (set with <code>H5Pset_libver_bounds()</code>) is high enough to permit this message version; if the
+      bound does not permit version 3, the configuration string is not persisted and the pipeline falls
+      back to a version 2 message with no error raised.</td>
+</tr>
+<tr valign=top>
+  <td>Number of Filters</td>
+  <td>The total number of filters described in this message. The maximum possible number of filters in a
+      message is 32.</td>
+</tr>
+<tr valign=top>
+  <td>Filter Description List</td>
+  <td>A description of each filter. A filter description appears in the next table.</td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Layout: Filter Description - Version 3</strong></caption>
+<tr align="center">
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align="center">
+  <td colspan="2">Filter Identification</td>
+  <td colspan="2">Name Length <em>(optional)</em></td>
+</tr>
+<tr align="center">
+  <td colspan="2">Flags</td>
+  <td colspan="2">Number Client Data Values</td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Name <em>(variable size, optional)</em><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Client Data <em>(variable size, optional)</em><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="2">Config String Length</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Config String <em>(variable size, optional)</em><br /><br /></td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Fields: Filter Description - Version 3</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Filter Identification, Name Length, Flags, Number of Client Data Values, Name, Client Data</td>
+  <td>Identical in encoding and semantics to the version 2 <em>Filter Description</em> fields described
+      above.</td>
+</tr>
+<tr valign=top>
+  <td>Config String Length</td>
+  <td>A two-byte unsigned integer giving the length, in bytes, of the <em>Config String</em> field that
+      follows. A value of zero means this filter has no stored configuration string, and the <em>Config
+      String</em> field is absent (zero bytes). This field is present for every filter description in a
+      version 3 message, unlike <em>Name Length</em>, which may be omitted for internal filters. The
+      maximum value the library will write or accept on read is 4096 (<code>H5Z_CONFIG_STRING_MAX</code>);
+      a reader encountering a larger value should reject the message rather than attempt to read
+      <em>Config String</em>, since the value could otherwise index past the end of the containing
+      message.</td>
+</tr>
+<tr valign=top>
+  <td>Config String</td>
+  <td>Present only when <em>Config String Length</em> is non-zero, in which case it occupies exactly that
+      many bytes. This is the caller's filter parameter string in canonical form: the bytes are a valid
+      <a href="https://toml.io/en/v1.0.0">TOML v1.0.0</a> document body (a sequence of
+      <code>key = value</code> pairs) with any optional outer braces stripped and any C99 hex-float literal
+      (e.g. <code>0x1p-3</code>) rewritten to a <code>%.16e</code>-style decimal float literal, so that a
+      reader implementing only standard TOML v1.0.0 parsing &mdash; not just the HDF5 library &mdash; can
+      recover the exact value. The field is <strong>not</strong> null-terminated on disk; its length is
+      given entirely by <em>Config String Length</em>. This is the field that allows a filter's
+      configuration to be recovered by a program that has not loaded the filter plugin: see
+      <code>H5Pget_filter_params_by_idx()</code> in the C API reference.</td>
+</tr>
+</table>
+
 \subsubsection subsubsec_fmt4_dataobject_hdr_msg_attribute IV.A.3.m. The Attribute Message
 <table>
 <tr>

@@ -1001,12 +1001,29 @@ if (H5_ZLIB_HEADER)
 endif ()
 
 list (APPEND H5Z_SOURCES ${HDF5_SRC_DIR}/tomlc17/tomlc17.c)
-if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
-  # -Wno-cast-align: this vendored file's cell_realloc() intentionally casts
-  # a char* arena pointer to various toml_datum_t*/toml_arritem_t*-family
-  # pointers; suppress here rather than patching upstream source.
+# Hide the vendored TOML parser's symbols so they cannot collide with a
+# different tomlc17 (or a differently-versioned one) an application links
+# separately, and suppress its cell_realloc() cast-align warning (it
+# intentionally casts a char* arena pointer to various
+# toml_datum_t*/toml_arritem_t*-family pointers; suppress here rather than
+# patching upstream source). Tested by capability (does the compiler accept
+# the flag?) rather than by matching a fixed compiler-ID allowlist, which
+# silently fails to protect the many other compilers HDF5 supports and
+# tests in CI (Intel, NVHPC, AOCC, Cray, ...) whenever one of them happens
+# not to match the list.
+include (CheckCCompilerFlag)
+check_c_compiler_flag ("-fvisibility=hidden" HDF5_C_HAS_FVISIBILITY_HIDDEN)
+check_c_compiler_flag ("-Wno-cast-align" HDF5_C_HAS_WNO_CAST_ALIGN)
+set (H5Z_TOMLC17_COMPILE_OPTIONS "")
+if (HDF5_C_HAS_FVISIBILITY_HIDDEN)
+  list (APPEND H5Z_TOMLC17_COMPILE_OPTIONS "-fvisibility=hidden")
+endif ()
+if (HDF5_C_HAS_WNO_CAST_ALIGN)
+  list (APPEND H5Z_TOMLC17_COMPILE_OPTIONS "-Wno-cast-align")
+endif ()
+if (H5Z_TOMLC17_COMPILE_OPTIONS)
   set_source_files_properties (${HDF5_SRC_DIR}/tomlc17/tomlc17.c
-    PROPERTIES COMPILE_OPTIONS "-fvisibility=hidden;-Wno-cast-align"
+    PROPERTIES COMPILE_OPTIONS "${H5Z_TOMLC17_COMPILE_OPTIONS}"
   )
 endif ()
 
