@@ -1058,12 +1058,12 @@ test_canonical_name_display(void)
         1,                   /* encoder_present */
         1,                   /* decoder_present */
         "test_title_filter", /* canonical_name */
-        NULL,                /* description    */
         NULL,                /* can_apply      */
         NULL,                /* set_local      */
         title_filter_func,   /* filter         */
         NULL,                /* set_config     */
         NULL,                /* get_config     */
+        NULL,                /* description    */
     };
     hid_t    dcpl = H5I_INVALID_HID;
     unsigned flags;
@@ -1138,12 +1138,12 @@ test_class3_name(void)
             1,                /* encoder_present */
             1,                /* decoder_present */
             NULL,             /* canonical_name - intentionally NULL to trigger error */
-            NULL,             /* description    */
             NULL,             /* can_apply      */
             NULL,             /* set_local      */
             name_filter_func, /* filter         */
             NULL,             /* set_config     */
             NULL,             /* get_config     */
+            NULL,             /* description    */
         };
         H5E_BEGIN_TRY
         {
@@ -1163,12 +1163,12 @@ test_class3_name(void)
             1,                  /* encoder_present */
             1,                  /* decoder_present */
             "test_name_filter", /* canonical_name */
-            NULL,               /* description    */
             NULL,               /* can_apply      */
             NULL,               /* set_local      */
             name_filter_func,   /* filter         */
             NULL,               /* set_config     */
             NULL,               /* get_config     */
+            NULL,               /* description    */
         };
         if (H5Zregister(&valid_cls) < 0)
             TEST_ERROR;
@@ -1235,12 +1235,12 @@ test_empty_string_fast_path(void)
         1,                    /* encoder_present */
         1,                    /* decoder_present */
         "fastpath_filter",    /* canonical_name  */
-        NULL,                 /* description     */
         NULL,                 /* can_apply       */
         NULL,                 /* set_local       */
         fastpath_filter_func, /* filter          */
         fastpath_set_config,  /* set_config      */
         NULL,                 /* get_config      */
+        NULL,                 /* description     */
     };
     static const H5Z_class3_t nocfg_cls = {
         2,                    /* version         */
@@ -1248,12 +1248,12 @@ test_empty_string_fast_path(void)
         1,                    /* encoder_present */
         1,                    /* decoder_present */
         "nocfg_filter",       /* canonical_name  */
-        NULL,                 /* description     */
         NULL,                 /* can_apply       */
         NULL,                 /* set_local       */
         fastpath_filter_func, /* filter          */
         NULL,                 /* set_config (intentionally absent) */
         NULL,                 /* get_config      */
+        NULL,                 /* description     */
     };
     hid_t  dcpl = H5I_INVALID_HID;
     herr_t ret;
@@ -1384,12 +1384,12 @@ test_cdvalues_path(void)
         1,                  /* encoder_present */
         1,                  /* decoder_present */
         "cdvals_filter",    /* canonical_name  */
-        NULL,               /* description     */
         NULL,               /* can_apply       */
         NULL,               /* set_local       */
         cdvals_filter_func, /* filter          */
         NULL,               /* set_config      */
         NULL,               /* get_config      */
+        NULL,               /* description     */
     };
     hid_t        dcpl   = H5I_INVALID_HID;
     unsigned     vals[] = {42, 99};
@@ -1509,12 +1509,12 @@ test_cdvalues_no_name_pollution(void)
         1,                        /* encoder_present */
         1,                        /* decoder_present */
         "cdvals_clean_filter",    /* canonical_name  */
-        NULL,                     /* description     */
         NULL,                     /* can_apply       */
         NULL,                     /* set_local       */
         cdvals_clean_filter_func, /* filter          */
         cdvals_clean_set_config,  /* set_config      */
         NULL,                     /* get_config      */
+        NULL,                     /* description     */
     };
     hid_t    dcpl = H5I_INVALID_HID;
     unsigned flags2;
@@ -1584,12 +1584,12 @@ test_canonical_name_persistence(void)
         1,                   /* encoder_present */
         1,                   /* decoder_present */
         "persist_filter",    /* canonical_name  */
-        NULL,                /* description     */
         NULL,                /* can_apply       */
         NULL,                /* set_local       */
         persist_filter_func, /* filter         */
         NULL,                /* set_config      */
         NULL,                /* get_config      */
+        NULL,                /* description     */
     };
     hid_t    dcpl = H5I_INVALID_HID;
     unsigned flags2;
@@ -1703,12 +1703,12 @@ test_canonical_name_length_limit(void)
         1,                     /* encoder_present */
         1,                     /* decoder_present */
         long_title,            /* canonical_name  */
-        NULL,                  /* description     */
         NULL,                  /* can_apply       */
         NULL,                  /* set_local       */
         longtitle_filter_func, /* filter          */
         NULL,                  /* set_config      */
         NULL,                  /* get_config      */
+        NULL,                  /* description     */
     };
     herr_t ret;
 
@@ -1756,8 +1756,8 @@ test_canonical_name_length_limit(void)
         size_t i;
 
         for (i = 0; i < sizeof(bad) / sizeof(bad[0]); i++) {
-            H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID,   1,    1,   bad[i], NULL, NULL,
-                              NULL, longtitle_filter_func, NULL, NULL};
+            H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID, 1,    1,    bad[i], NULL,
+                              NULL, longtitle_filter_func, NULL, NULL, NULL};
             H5E_BEGIN_TRY
             {
                 ret = H5Zregister(&c);
@@ -1771,8 +1771,8 @@ test_canonical_name_length_limit(void)
         }
 
         for (i = 0; i < sizeof(good) / sizeof(good[0]); i++) {
-            H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID,   1,    1,   good[i], NULL, NULL,
-                              NULL, longtitle_filter_func, NULL, NULL};
+            H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID, 1,    1,    good[i], NULL,
+                              NULL, longtitle_filter_func, NULL, NULL, NULL};
             if (H5Zregister(&c) < 0) {
                 fprintf(stderr, "\n   rejected valid name \"%s\"\n", good[i]);
                 TEST_ERROR;
@@ -1800,10 +1800,10 @@ error:
 static int
 test_canonical_name_uniqueness(void)
 {
-    H5Z_class3_t cls_a = {2,    UNIQUENAME_FILTER_ID_A, 1,    1,   "test-unique-name", NULL, NULL,
-                          NULL, longtitle_filter_func,  NULL, NULL};
-    H5Z_class3_t cls_b = {2,    UNIQUENAME_FILTER_ID_B, 1,    1,   "test-unique-name", NULL, NULL,
-                          NULL, longtitle_filter_func,  NULL, NULL};
+    H5Z_class3_t cls_a = {2,    UNIQUENAME_FILTER_ID_A, 1,    1,    "test-unique-name", NULL,
+                          NULL, longtitle_filter_func,  NULL, NULL, NULL};
+    H5Z_class3_t cls_b = {2,    UNIQUENAME_FILTER_ID_B, 1,    1,    "test-unique-name", NULL,
+                          NULL, longtitle_filter_func,  NULL, NULL, NULL};
     herr_t       ret;
 
     TESTING("H5Zregister: canonical_name collision across different filter ids is rejected");
@@ -1984,12 +1984,12 @@ test_config_string_canonicalization_growth(void)
         1,                  /* encoder_present */
         1,                  /* decoder_present */
         "growth_filter",    /* canonical_name  */
-        NULL,               /* description     */
         NULL,               /* can_apply       */
         NULL,               /* set_local       */
         growth_filter_func, /* filter          */
         growth_set_config,  /* set_config      */
         NULL,               /* get_config      */
+        NULL,               /* description     */
     };
     hid_t    dcpl = H5I_INVALID_HID;
     char    *raw  = NULL;
@@ -2142,12 +2142,12 @@ test_set_get_config_callbacks(void)
         1,                    /* encoder_present */
         1,                    /* decoder_present */
         "callback_filter",    /* canonical_name  */
-        NULL,                 /* description     */
         NULL,                 /* can_apply       */
         NULL,                 /* set_local       */
         callback_filter_func, /* filter          */
         callback_set_config,  /* set_config      */
         callback_get_config,  /* get_config      */
+        NULL,                 /* description     */
     };
     hid_t  dcpl = H5I_INVALID_HID;
     char   pbuf[256];
@@ -2332,7 +2332,7 @@ ctxpass_filter_cb(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_v
 }
 
 static const H5Z_class3_t ctxpass_cls = {
-    2, CTXPASS_FILTER_ID, 1, 1, "test_ctxpass_filter", NULL, NULL, NULL, ctxpass_filter_cb, NULL, NULL,
+    2, CTXPASS_FILTER_ID, 1, 1, "test_ctxpass_filter", NULL, NULL, ctxpass_filter_cb, NULL, NULL, NULL,
 };
 
 static int
@@ -2515,12 +2515,12 @@ static const H5Z_class3_t cfg_ondisk_cls = {
     1,                      /* encoder_present */
     1,                      /* decoder_present */
     "cfg_ondisk_filter",    /* name            */
-    NULL,                   /* description     */
     NULL,                   /* can_apply       */
     NULL,                   /* set_local       */
     cfg_ondisk_filter_func, /* filter         */
     cfg_ondisk_set_config,  /* set_config      */
     cfg_ondisk_get_config,  /* get_config      */
+    NULL,                   /* description     */
 };
 
 /* Build a chunked, filter-configured DCPL from a parameter string */
@@ -3162,12 +3162,12 @@ static const H5Z_class3_t canon_cls = {
     1,                 /* encoder_present */
     1,                 /* decoder_present */
     "canon_filter",    /* name            */
-    NULL,              /* description     */
     NULL,              /* can_apply       */
     NULL,              /* set_local       */
     canon_filter_func, /* filter          */
     canon_set_config,  /* set_config      */
     canon_get_config,  /* get_config      */
+    NULL,              /* description     */
 };
 
 /* Append CANON_FILTER_ID configured with PARAMS and return the DCPL */
@@ -3332,12 +3332,12 @@ static const H5Z_class3_t mixv3_cls = {
     1,                 /* encoder_present */
     1,                 /* decoder_present */
     "mixv3",           /* canonical name  */
-    NULL,              /* description     */
     NULL,              /* can_apply       */
     NULL,              /* set_local       */
     mixv3_filter_func, /* filter          */
     mixv3_set_config,  /* set_config      */
     NULL,              /* get_config      */
+    NULL,              /* description     */
 };
 
 static int

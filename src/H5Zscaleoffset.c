@@ -100,12 +100,12 @@ H5_ATTR_VISIBILITY_HIDDEN H5Z_class3_t H5Z_SCALEOFFSET[1] = {{
     1,                      /* Assume encoder present: check before registering */
     1,                      /* decoder_present flag (set to true) */
     "scaleoffset",          /* name */
-    "Scale+offset lossy compression for integer/float data", /* description */
     H5Z__can_apply_scaleoffset,                              /* The "can apply" callback */
     H5Z__set_local_scaleoffset,                              /* The "set local" callback */
     H5Z__filter_scaleoffset,                                 /* The actual filter function */
     H5Z__scaleoffset_set_config,                             /* String config setter */
     H5Z__scaleoffset_get_config,                             /* String config getter */
+    "Scale+offset lossy compression for integer/float data", /* description */
 }};
 
 /* Local macros */

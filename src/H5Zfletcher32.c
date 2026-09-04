@@ -29,12 +29,12 @@ H5_ATTR_VISIBILITY_HIDDEN const H5Z_class3_t H5Z_FLETCHER32[1] = {{
     1,                                                   /* encoder_present flag (set to true) */
     1,                                                   /* decoder_present flag (set to true) */
     "fletcher32",                                        /* name */
-    "Fletcher32 checksum for end-to-end data integrity", /* description */
     NULL,                                                /* The "can apply" callback */
     NULL,                                                /* The "set local" callback */
     H5Z__filter_fletcher32,                              /* The actual filter function */
     H5Z__no_params_set_config,                           /* String config setter */
     NULL,                                                /* No string config getter */
+    "Fletcher32 checksum for end-to-end data integrity", /* description */
 }};
 
 #define FLETCHER_LEN 4

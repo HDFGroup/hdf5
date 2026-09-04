@@ -42,12 +42,12 @@ H5_ATTR_VISIBILITY_HIDDEN const H5Z_class3_t H5Z_DEFLATE[1] = {{
     1,                                                     /* encoder_present flag (set to true) */
     1,                                                     /* decoder_present flag (set to true) */
     "deflate",                                             /* name */
-    "Deflate (zlib) general-purpose lossless compression", /* description */
     NULL,                                                  /* The "can apply" callback */
     NULL,                                                  /* The "set local" callback */
     H5Z__filter_deflate,                                   /* The actual filter function */
     H5Z__deflate_set_config,                               /* String config setter */
     H5Z__deflate_get_config,                               /* String config getter */
+    "Deflate (zlib) general-purpose lossless compression", /* description */
 }};
 
 /*-------------------------------------------------------------------------
