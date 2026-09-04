@@ -34,7 +34,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10"]
+        # HSDS requires Python >= 3.11 (its pinned numpy has no 3.10 wheels).
+        # 3.12 matches the Python version HSDS uses for its own unix-socket
+        # test job, which is the configuration exercised here.
+        python-version: ["3.12"]
 
     steps:
       - name: Install dependencies
@@ -128,11 +131,6 @@ jobs:
       #  with:
       #    path: ${{ runner.workspace }}/hsds-${{ env.HSDS_COMMIT_SHORT }}-install
       #    key: ${{ runner.os }}-${{ runner.arch }}-hsds-${{ env.HSDS_COMMIT }}-${{ inputs.build_mode }}-cache
-
-      # Requests 2.32.0 breaks requests-unixsocket, used by HSDS for socket connections
-      - name: Fix requests version
-        run: |
-          pip install requests==2.31.0
 
       - name: Run HSDS unit tests
         shell: bash
