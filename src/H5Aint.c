@@ -1614,21 +1614,25 @@ H5A__dense_build_table_cb(const H5A_t *attr, void *_udata)
     assert(attr);
     assert(atable);
 
-    /* max_attrs comes from the name index's stored record count, which is
-     * attacker-controlled metadata, while this callback is driven by the tree
-     * walk.  A count below the tree's real size makes the walk overrun the
-     * table, so this bound must hold in a Release build.
+    /* Grow only as attributes are found.  Leave room for the free-list
+     * block header as well as checking the element-size multiplication.
      */
-    if (atable->num_attrs >= atable->max_attrs)
-        HGOTO_ERROR(H5E_ATTR, H5E_OVERFLOW, H5_ITER_ERROR,
-                    "dense attribute index yields more attributes than its record count declares");
+    if (atable->num_attrs == atable->max_attrs) {
+        H5A_t **new_table;
+        size_t  new_capacity;
+        size_t  max_capacity = (SIZE_MAX - sizeof(H5FL_blk_list_t)) / sizeof(*atable->attrs);
 
-    /* Allocate attribute for entry in the table */
-    if (NULL == (atable->attrs[atable->num_attrs] = H5FL_CALLOC(H5A_t)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, H5_ITER_ERROR, "can't allocate attribute");
+        if (atable->max_attrs >= max_capacity)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_OVERFLOW, H5_ITER_ERROR, "attribute table is too large");
+        new_capacity = atable->max_attrs > max_capacity / 2 ? max_capacity : MAX(1, 2 * atable->max_attrs);
+        if (NULL == (new_table = (H5A_t **)H5FL_SEQ_REALLOC(H5A_t_ptr, atable->attrs, new_capacity)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "unable to extend attribute table");
+        atable->attrs     = new_table;
+        atable->max_attrs = new_capacity;
+    }
 
-    /* Copy attribute information.  Share the attribute object in copying. */
-    if (NULL == H5A__copy(atable->attrs[atable->num_attrs], attr))
+    /* Let H5A__copy own allocation and cleanup if copying fails. */
+    if (NULL == (atable->attrs[atable->num_attrs] = H5A__copy(NULL, attr)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute");
 
     /* Increment number of attributes stored */
@@ -1656,10 +1660,10 @@ herr_t
 H5A__dense_build_table(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type, H5_iter_order_t order,
                        H5A_attr_table_t *atable)
 {
-    H5B2_t *bt2_name = NULL;     /* v2 B-tree handle for name index */
-    haddr_t eoa;                 /* End of allocated space in the file */
-    hsize_t nrec;                /* # of records in v2 B-tree */
-    herr_t  ret_value = SUCCEED; /* Return value */
+    H5B2_t           *bt2_name = NULL;     /* v2 B-tree handle for name index */
+    H5A_attr_iter_op_t attr_op;             /* Attribute operator */
+    hsize_t           nrec;                /* # of records in v2 B-tree */
+    herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1670,6 +1674,10 @@ H5A__dense_build_table(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type, 
     assert(H5_addr_defined(ainfo->name_bt2_addr));
     assert(atable);
 
+    atable->attrs     = NULL;
+    atable->num_attrs = 0;
+    atable->max_attrs = 0;
+
     /* Open the name index v2 B-tree */
     if (NULL == (bt2_name = H5B2_open(f, ainfo->name_bt2_addr, NULL)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index");
@@ -1679,51 +1687,29 @@ H5A__dense_build_table(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type, 
     if (H5B2_get_nrec(bt2_name, &nrec) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve # of records in index");
 
-    /* Allocate space for the table entries */
-    if (nrec > 0) {
-        H5A_attr_iter_op_t attr_op; /* Attribute operator */
+    attr_op.op_type  = H5A_ATTR_OP_LIB;
+    attr_op.u.lib_op = H5A__dense_build_table_cb;
 
-        /* Reject counts that cannot be represented by the file or allocation. */
-        if (HADDR_UNDEF == (eoa = H5F_get_eoa(f, H5FD_MEM_DEFAULT)))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine file size");
-        if (nrec > eoa || nrec > (hsize_t)(SIZE_MAX / sizeof(*atable->attrs)))
-            HGOTO_ERROR(H5E_ATTR, H5E_OVERFLOW, FAIL, "invalid dense attribute index record count");
+    /* Visit records even when the declared count is zero. */
+    if (H5A__dense_iterate(f, (hid_t)0, ainfo, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL, &attr_op,
+                         atable) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table");
 
-        /* Allocate the table to store the attributes */
-        if (NULL == (atable->attrs = (H5A_t **)H5FL_SEQ_CALLOC(H5A_t_ptr, (size_t)nrec)))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "memory allocation failed");
-        atable->num_attrs = 0;
-        atable->max_attrs = (size_t)nrec;
+    /* Reject inconsistent metadata without allocating from the stored count. */
+    if (atable->num_attrs != nrec)
+        HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL,
+                    "dense attribute index record count does not match the attributes found");
 
-        /* Build iterator operator */
-        attr_op.op_type  = H5A_ATTR_OP_LIB;
-        attr_op.u.lib_op = H5A__dense_build_table_cb;
-
-        /* Iterate over the links in the group, building a table of the link messages */
-        if (H5A__dense_iterate(f, (hid_t)0, ainfo, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL, &attr_op,
-                               atable) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table");
-
-        /* The walk must have filled the table exactly.  A stored record count
-         * above the tree's real size would otherwise silently return a
-         * truncated attribute list; the fill count is the only thing that can
-         * falsify the stored one.
-         */
-        if (atable->num_attrs != atable->max_attrs)
-            HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL,
-                        "dense attribute index record count does not match the attributes found");
-
-        /* Sort attribute table in correct iteration order */
-        if (H5A__attr_sort_table(atable, idx_type, order) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTSORT, FAIL, "error sorting attribute table");
-    } /* end if */
-    else
-        atable->attrs = NULL;
+    if (atable->num_attrs > 0 && H5A__attr_sort_table(atable, idx_type, order) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSORT, FAIL, "error sorting attribute table");
 
 done:
     /* Release resources */
     if (bt2_name && H5B2_close(bt2_name) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index");
+
+    if (ret_value < 0 && atable->attrs && H5A__attr_release_table(atable) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A__dense_build_table() */
@@ -1993,6 +1979,8 @@ H5A__attr_release_table(H5A_attr_table_t *atable)
         /* Release array */
         atable->attrs = (H5A_t **)H5FL_SEQ_FREE(H5A_t_ptr, atable->attrs);
     } /* end if */
+    atable->num_attrs = 0;
+    atable->max_attrs = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

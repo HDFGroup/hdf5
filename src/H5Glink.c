@@ -532,6 +532,53 @@ H5G__link_iterate_table(const H5G_link_table_t *ltable, hsize_t skip, hsize_t *l
 } /* end H5G__link_iterate_table() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5G__link_append_table
+ *
+ * Purpose:     Grow a link table as links are found, without allocating from
+ *              an untrusted stored record count.  Only successfully copied
+ *              links are counted, so sorting and cleanup visit valid entries.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G__link_append_table(H5G_link_table_t *ltable, size_t *capacity, const H5O_link_t *lnk)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    assert(ltable);
+    assert(capacity);
+    assert(lnk);
+    assert(ltable->nlinks <= *capacity);
+
+    if (ltable->nlinks == *capacity) {
+        H5O_link_t *new_table;
+        size_t      new_capacity;
+        size_t      max_capacity = SIZE_MAX / sizeof(*ltable->lnks);
+
+        /* Check both doubling and the allocation-size multiplication. */
+        if (*capacity >= max_capacity)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_OVERFLOW, FAIL, "link table is too large");
+        new_capacity = *capacity > max_capacity / 2 ? max_capacity : MAX(1, 2 * *capacity);
+        if (NULL == (new_table = (H5O_link_t *)H5MM_realloc(ltable->lnks,
+                                                          new_capacity * sizeof(*ltable->lnks))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to extend link table");
+        ltable->lnks = new_table;
+        *capacity   = new_capacity;
+    }
+
+    /* H5O_msg_copy cleans up its copy on failure; do not count that slot. */
+    if (NULL == H5O_msg_copy(H5O_LINK_ID, lnk, &ltable->lnks[ltable->nlinks]))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, FAIL, "can't copy link message");
+    ltable->nlinks++;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G__link_append_table() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5G__link_release_table
  *
  * Purpose:     Release table containing a list of links for a group
@@ -552,18 +599,15 @@ H5G__link_release_table(H5G_link_table_t *ltable)
     /* Sanity check */
     assert(ltable);
 
-    /* Release link info, if any */
-    if (ltable->nlinks > 0) {
-        /* Free link message information */
+    /* An allocated table may be empty if copying the first link failed. */
+    if (ltable->lnks) {
         for (u = 0; u < ltable->nlinks; u++)
             if (H5O_msg_reset(H5O_LINK_ID, &(ltable->lnks[u])) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link message");
 
-        /* Free table of links */
-        H5MM_xfree(ltable->lnks);
-    } /* end if */
-    else
-        assert(ltable->lnks == NULL);
+        ltable->lnks = (H5O_link_t *)H5MM_xfree(ltable->lnks);
+    }
+    ltable->nlinks = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
