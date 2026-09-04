@@ -298,6 +298,20 @@ JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Dset_1extent(JNIEnv *, jclass, jlon
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dchunk_iter
+ * Signature: (JJLjava/lang/Object;Ljava/lang/Object;)I
+ */
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Dchunk_1iter(JNIEnv *, jclass, jlong, jlong, jobject, jobject);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dchunk_iter_all
+ * Signature: (JJ)Lhdf/hdf5lib/structs/H5D_chunk_info_t;
+ */
+JNIEXPORT jobject JNICALL Java_hdf_hdf5lib_H5_H5Dchunk_1iter_1all(JNIEnv *, jclass, jlong, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Diterate
  * Signature: ([BJJLjava/lang/Object;Ljava/lang/Object;)I
  */
@@ -317,6 +331,59 @@ JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Dflush(JNIEnv *, jclass, jlong);
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Drefresh(JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dget_num_chunks
+ * Signature: (JJ)J
+ */
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Dget_1num_1chunks(JNIEnv *, jclass, jlong, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dget_chunk_info
+ * Signature: (JJJ[J[I[J[J)V
+ */
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Dget_1chunk_1info(JNIEnv *, jclass, jlong, jlong, jlong,
+                                                               jlongArray, jintArray, jlongArray, jlongArray);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dget_chunk_info_by_coord
+ * Signature: (J[J[I[J[J)V
+ */
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Dget_1chunk_1info_1by_1coord(JNIEnv *, jclass, jlong, jlongArray,
+                                                                          jintArray, jlongArray, jlongArray);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dget_chunk_storage_size
+ * Signature: (J[J)J
+ */
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Dget_1chunk_1storage_1size(JNIEnv *, jclass, jlong, jlongArray);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dget_chunk_index_type
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Dget_1chunk_1index_1type(JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dwrite_chunk
+ * Signature: (JJI[J[B)V
+ */
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Dwrite_1chunk(JNIEnv *, jclass, jlong, jlong, jint, jlongArray,
+                                                           jbyteArray);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dread_chunk
+ * Signature: (JJ[J[B)I
+ */
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Dread_1chunk(JNIEnv *, jclass, jlong, jlong, jlongArray,
+                                                          jbyteArray);
 
 #ifdef __cplusplus
 } /* end extern "C" */

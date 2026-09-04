@@ -2,6 +2,7 @@ JUnit version 4.13.2
 .testH5DArrayenum_rw
 .testH5DVLwrVL
 .testH5Dget_storage_size
+.testH5Dget_chunk_info_by_coord
 .testH5DArraywr
 .testH5Diterate_write
 .testH5Dcreate
@@ -10,6 +11,7 @@ JUnit version 4.13.2
 .testH5DVLwr
 .testH5Dfill
 .testH5Dopen
+.testH5Dget_chunk_index_type
 .testH5Dcreate_anon
 .testH5Dfill_null
 .testH5Dget_storage_size_empty
@@ -18,9 +20,12 @@ JUnit version 4.13.2
 .testH5Dget_access_plist
 .testH5Dread_vlen_of_nested_compound
 .testH5DArray_datatype_ids_stable
+.testH5Dchunk_iter_all
 .testH5DArray_string_buffer_flat_StringArray
+.testH5Dchunk_iter
 .testH5Dget_space_closed
 .testH5DArray_string_buffer_flat_StringArray_write
+.testH5Dwrite_chunk_and_read_chunk
 .testH5DArray_string_buffer
 .testH5Dread_vlen_of_compound
 .testH5Dread_compound_of_vlen
@@ -29,11 +34,13 @@ JUnit version 4.13.2
 .testH5Dvlen_write_read
 .testH5Dget_space
 .testH5DwriteVL_vlen_element_not_arraylist
+.testH5Dget_chunk_storage_size
 .testH5Dget_type_closed
+.testH5Dread_chunk_buffer_size_mismatch
 .testH5Dwrite_compound_of_vlen
 .testH5DwriteVL_undersized_buffer
 
 Time:  XXXX
 
-OK (33 tests)
+OK (40 tests)
 
