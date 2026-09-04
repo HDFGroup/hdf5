@@ -60,10 +60,11 @@ We would like to thank the many HDF5 community members who contributed to this r
    H5Pset_io_threads(), and H5Pget_io_threads(). When the library is configured
    with HDF5_ENABLE_CONCURRENCY=ON, the number of internal threads is greater
    than zero (set by H5TSset_internal_threads()), and I/O threads are not
-   disabled (using H concurrently read from disk, unfilter, and scatter to
-   memory all chunks in a read operation on a chunked dataset. Currently each of
-   these sub-operations is serialized (protected by a mutex) so there is not yet
-   likely to be any performance improvement.
+   disabled (using H5Pset_io_threads()), the library will concurrently read from
+   disk, unfilter, and scatter to memory all chunks in a read operation on a
+   chunked dataset. Currently each of these sub-operations is serialized
+   (protected by a mutex) so there is not yet likely to be any performance
+   improvement.
 
 ## Parallel Library
 

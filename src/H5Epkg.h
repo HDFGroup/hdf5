@@ -52,11 +52,6 @@
 #define H5E__get_my_stack() (H5E_stack_g + 0)
 #endif /* H5_HAVE_THREADSAFE_API */
 
-/* Disable free lists in this package when concurrency is enabled until free lists are threadsafe */
-#ifdef H5_HAVE_CONCURRENCY
-#define H5_NO_FREE_LISTS
-#endif /* H5_HAVE_CONCURRENCY */
-
 /****************************/
 /* Package Private Typedefs */
 /****************************/

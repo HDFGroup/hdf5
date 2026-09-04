@@ -67,7 +67,22 @@ extern "C" {
  *          this function with \p num_threads set to \c 0 will terminate these
  *          threads and disable internal multithreading.
  *
+ *          This is currently only used to accelerate raw data reads of chunked
+ *          datasets. This will occur when the following conditions are met:
+ *          \li This function is called with \p num_threads > \c 0 .
+ *          \li H5Pset_io_threads() was not called with \c threads_enabled set
+ *          to \c false .
+ *          \li Selection I/O is not used. See H5Pset_selection_io().
+ *          \li At least one chunk exists on disk and is not cached by the
+ *          dataset chunk cache.
+ *          \li For unfiltered datasets, the chunk cache is large enough to fit
+ *          at least one chunk. See H5Pset_chunk_cache().
+ *
  * \note    This function is only present when the library is compiled with HDF5_ENABLE_CONCURRENCY=ON.
+ *
+ * \warning Errors that are printed inside the threaded area, for example by the
+ *          data filters, do not currently respect non-default error settings,
+ *          and print their errors to stderr upon thread completion.
  *
  * \since 2.3.0
  *

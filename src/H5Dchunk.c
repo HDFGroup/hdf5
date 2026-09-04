@@ -3420,6 +3420,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
             /* Free chunk_info array */
             H5MM_free(threaded_io_info->chunk_info);
+            threaded_io_info->chunk_info = NULL;
 
             /* Free threaded I/O info struct */
             H5MM_free(threaded_io_info);
