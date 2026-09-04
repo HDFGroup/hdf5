@@ -2673,8 +2673,17 @@ static int scan_float(scanner_t *sp, token_t *tok) {
   char *q;
   double fp64 = strtod(buffer, &q);
   // glibc sets ERANGE on underflow even when strtod's result is correctly
-  // rounded, e.g. 5e-324; allow acceptance of such subnormal results.
-  int is_ok_subnormal = (errno == ERANGE) && fp64 != 0.0 && isfinite(fp64);
+  // rounded, e.g. 5e-324; allow acceptance of such subnormal results.  Test
+  // the raw bit pattern rather than "fp64 != 0.0": under flush-to-zero mode
+  // (enabled by default at -O2 and above by some compilers, e.g. Intel's
+  // icc/icx via -fp-model=fast unless -fp-model=precise is given), the CPU
+  // treats a genuinely nonzero subnormal operand as 0.0 for the purposes of
+  // an SSE floating-point comparison, without altering the value in memory.
+  // An integer comparison against the bit pattern is immune to that.
+  // Reported/fixed upstream: https://github.com/cktan/tomlc17/pull/50
+  uint64_t fp64_bits;
+  memcpy(&fp64_bits, &fp64, sizeof(fp64_bits));
+  int is_ok_subnormal = (errno == ERANGE) && fp64_bits != 0 && isfinite(fp64);
   if ((errno && !is_ok_subnormal) || *q || q == buffer) {
     return SETERROR(sp->ebuf, lineno, "error parsing float");
   }
