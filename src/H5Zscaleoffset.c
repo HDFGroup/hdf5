@@ -100,7 +100,6 @@ H5_ATTR_VISIBILITY_HIDDEN H5Z_class3_t H5Z_SCALEOFFSET[1] = {{
     1,                      /* Assume encoder present: check before registering */
     1,                      /* decoder_present flag (set to true) */
     "scaleoffset",          /* name */
-    "Scale+offset lossy compression for integer/float data", /* description */
     H5Z__can_apply_scaleoffset,                              /* The "can apply" callback */
     H5Z__set_local_scaleoffset,                              /* The "set local" callback */
     H5Z__filter_scaleoffset,                                 /* The actual filter function */
@@ -109,6 +108,7 @@ H5_ATTR_VISIBILITY_HIDDEN H5Z_class3_t H5Z_SCALEOFFSET[1] = {{
     NULL,                                                    /* write_blob: use default global-heap storage */
     NULL,                                                    /* read_blob */
     NULL,                                                    /* close_blob */
+    "Scale+offset lossy compression for integer/float data", /* description */
 }};
 
 /* Local macros */

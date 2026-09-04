@@ -3215,7 +3215,7 @@ h5tools_float_is_short_binary(double v)
     f = frexp(fabs(v), &e);
     f *= 8192.0;
 
-    return f == floor(f);
+    return f == floor(f); // lgtm[cpp/equality-on-floats]
 }
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
@@ -3926,19 +3926,30 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                         char  *ebuf      = (char *)malloc(ebuf_size);
                         if (ebuf) {
                             size_t in_i, out_i = 0;
-                            for (in_i = 0; in_i < copied; in_i++) {
+                            /* ebuf_size's 4x-worst-case sizing means out_i should never
+                             * reach ebuf_size before the loop ends, but never trust that
+                             * invariant alone: snprintf() returns the length it *would*
+                             * have written, not what actually fit, so blindly adding it
+                             * to out_i could walk out_i past ebuf_size and underflow the
+                             * "ebuf_size - out_i" size argument on a later iteration.
+                             * Bound every write against the buffer's remaining capacity
+                             * instead. */
+                            for (in_i = 0; in_i < copied && out_i < ebuf_size; in_i++) {
                                 unsigned char c = (unsigned char)params_str_buf[in_i];
                                 if (c < 0x20 || c == 0x7f) {
-                                    out_i += (size_t)snprintf(ebuf + out_i, ebuf_size - out_i, "\\x%02x",
-                                                              (unsigned)c);
+                                    int n = snprintf(ebuf + out_i, ebuf_size - out_i, "\\x%02x", (unsigned)c);
+                                    out_i += (n > 0) ? MIN((size_t)n, ebuf_size - out_i) : 0;
                                     continue;
                                 }
-                                if (c == '\\' || c == '\'')
+                                if (c == '\\' || c == '\'') {
                                     ebuf[out_i++] = '\\';
+                                    if (out_i >= ebuf_size)
+                                        break;
+                                }
                                 ebuf[out_i++] = params_str_buf[in_i];
                             }
-                            ebuf[out_i] = '\0';
-                            params_str  = ebuf;
+                            ebuf[MIN(out_i, ebuf_size - 1)] = '\0';
+                            params_str                      = ebuf;
                         }
                     }
 

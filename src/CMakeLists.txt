@@ -1027,6 +1027,21 @@ if (H5Z_TOMLC17_COMPILE_OPTIONS)
   )
 endif ()
 
+# Vendored third-party code should not be held to HDF5_ENABLE_WARNINGS_AS_ERRORS'
+# own strict internal warning set: it legitimately trips several of them
+# (e.g. -Werror=cast-align in its pointer-arithmetic tokenizer), which would
+# otherwise fail every HDF5 CI job built with that option on. Suppress
+# warnings for this one file only, the same way HDF5_DISABLE_COMPILER_WARNINGS
+# does for the whole build (see config/flags/HDFCompilerFlags.cmake).
+if (MSVC)
+  set_property (SOURCE ${HDF5_SRC_DIR}/tomlc17/tomlc17.c APPEND PROPERTY COMPILE_OPTIONS "/W0")
+else ()
+  check_c_compiler_flag ("-w" HDF5_C_HAS_W)
+  if (HDF5_C_HAS_W)
+    set_property (SOURCE ${HDF5_SRC_DIR}/tomlc17/tomlc17.c APPEND PROPERTY COMPILE_OPTIONS "-w")
+  endif ()
+endif ()
+
 set (H5Z_PUBLIC_HDRS
     ${HDF5_SRC_DIR}/H5Zdevelop.h
     ${HDF5_SRC_DIR}/H5Zpublic.h

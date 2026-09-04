@@ -1068,7 +1068,6 @@ test_canonical_name_display(void)
         1,                   /* encoder_present */
         1,                   /* decoder_present */
         "test_title_filter", /* canonical_name */
-        NULL,                /* description    */
         NULL,                /* can_apply      */
         NULL,                /* set_local      */
         title_filter_func,   /* filter         */
@@ -1077,6 +1076,7 @@ test_canonical_name_display(void)
         NULL,                /* write_blob: use default global-heap storage */
         NULL,                /* read_blob  */
         NULL,                /* close_blob */
+        NULL,                /* description    */
     };
     hid_t    dcpl = H5I_INVALID_HID;
     unsigned flags;
@@ -1151,7 +1151,6 @@ test_class3_name(void)
             1,                /* encoder_present */
             1,                /* decoder_present */
             NULL,             /* canonical_name - intentionally NULL to trigger error */
-            NULL,             /* description    */
             NULL,             /* can_apply      */
             NULL,             /* set_local      */
             name_filter_func, /* filter         */
@@ -1160,6 +1159,7 @@ test_class3_name(void)
             NULL,             /* write_blob: use default global-heap storage */
             NULL,             /* read_blob  */
             NULL,             /* close_blob */
+            NULL,             /* description    */
         };
         H5E_BEGIN_TRY
         {
@@ -1179,7 +1179,6 @@ test_class3_name(void)
             1,                  /* encoder_present */
             1,                  /* decoder_present */
             "test_name_filter", /* canonical_name */
-            NULL,               /* description    */
             NULL,               /* can_apply      */
             NULL,               /* set_local      */
             name_filter_func,   /* filter         */
@@ -1188,6 +1187,7 @@ test_class3_name(void)
             NULL,               /* write_blob: use default global-heap storage */
             NULL,               /* read_blob  */
             NULL,               /* close_blob */
+            NULL,               /* description    */
         };
         if (H5Zregister(&valid_cls) < 0)
             TEST_ERROR;
@@ -1254,7 +1254,6 @@ test_empty_string_fast_path(void)
         1,                    /* encoder_present */
         1,                    /* decoder_present */
         "fastpath_filter",    /* canonical_name  */
-        NULL,                 /* description     */
         NULL,                 /* can_apply       */
         NULL,                 /* set_local       */
         fastpath_filter_func, /* filter          */
@@ -1263,6 +1262,7 @@ test_empty_string_fast_path(void)
         NULL,                 /* write_blob: use default global-heap storage */
         NULL,                 /* read_blob  */
         NULL,                 /* close_blob */
+        NULL,                 /* description     */
     };
     static const H5Z_class3_t nocfg_cls = {
         2,                    /* version         */
@@ -1270,7 +1270,6 @@ test_empty_string_fast_path(void)
         1,                    /* encoder_present */
         1,                    /* decoder_present */
         "nocfg_filter",       /* canonical_name  */
-        NULL,                 /* description     */
         NULL,                 /* can_apply       */
         NULL,                 /* set_local       */
         fastpath_filter_func, /* filter          */
@@ -1279,6 +1278,7 @@ test_empty_string_fast_path(void)
         NULL,                 /* write_blob: use default global-heap storage */
         NULL,                 /* read_blob  */
         NULL,                 /* close_blob */
+        NULL,                 /* description     */
     };
     hid_t  dcpl = H5I_INVALID_HID;
     herr_t ret;
@@ -1409,7 +1409,6 @@ test_cdvalues_path(void)
         1,                  /* encoder_present */
         1,                  /* decoder_present */
         "cdvals_filter",    /* canonical_name  */
-        NULL,               /* description     */
         NULL,               /* can_apply       */
         NULL,               /* set_local       */
         cdvals_filter_func, /* filter          */
@@ -1418,6 +1417,7 @@ test_cdvalues_path(void)
         NULL,               /* write_blob: use default global-heap storage */
         NULL,               /* read_blob  */
         NULL,               /* close_blob */
+        NULL,               /* description     */
     };
     hid_t        dcpl   = H5I_INVALID_HID;
     unsigned     vals[] = {42, 99};
@@ -1537,7 +1537,6 @@ test_cdvalues_no_name_pollution(void)
         1,                        /* encoder_present */
         1,                        /* decoder_present */
         "cdvals_clean_filter",    /* canonical_name  */
-        NULL,                     /* description     */
         NULL,                     /* can_apply       */
         NULL,                     /* set_local       */
         cdvals_clean_filter_func, /* filter          */
@@ -1546,6 +1545,7 @@ test_cdvalues_no_name_pollution(void)
         NULL,                     /* write_blob: use default global-heap storage */
         NULL,                     /* read_blob  */
         NULL,                     /* close_blob */
+        NULL,                     /* description     */
     };
     hid_t    dcpl = H5I_INVALID_HID;
     unsigned flags2;
@@ -1615,7 +1615,6 @@ test_canonical_name_persistence(void)
         1,                   /* encoder_present */
         1,                   /* decoder_present */
         "persist_filter",    /* canonical_name  */
-        NULL,                /* description     */
         NULL,                /* can_apply       */
         NULL,                /* set_local       */
         persist_filter_func, /* filter         */
@@ -1624,6 +1623,7 @@ test_canonical_name_persistence(void)
         NULL,                /* write_blob: use default global-heap storage */
         NULL,                /* read_blob  */
         NULL,                /* close_blob */
+        NULL,                /* description     */
     };
     hid_t    dcpl = H5I_INVALID_HID;
     unsigned flags2;
@@ -1737,7 +1737,6 @@ test_canonical_name_length_limit(void)
         1,                     /* encoder_present */
         1,                     /* decoder_present */
         long_title,            /* canonical_name  */
-        NULL,                  /* description     */
         NULL,                  /* can_apply       */
         NULL,                  /* set_local       */
         longtitle_filter_func, /* filter          */
@@ -1746,6 +1745,7 @@ test_canonical_name_length_limit(void)
         NULL,                  /* write_blob: use default global-heap storage */
         NULL,                  /* read_blob  */
         NULL,                  /* close_blob */
+        NULL,                  /* description     */
     };
     herr_t ret;
 
@@ -1793,8 +1793,8 @@ test_canonical_name_length_limit(void)
         size_t i;
 
         for (i = 0; i < sizeof(bad) / sizeof(bad[0]); i++) {
-            H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID,   1,    1,   bad[i], NULL, NULL,
-                              NULL, longtitle_filter_func, NULL, NULL};
+            H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID, 1,    1,    bad[i], NULL,
+                              NULL, longtitle_filter_func, NULL, NULL, NULL};
             H5E_BEGIN_TRY
             {
                 ret = H5Zregister(&c);
@@ -1808,8 +1808,8 @@ test_canonical_name_length_limit(void)
         }
 
         for (i = 0; i < sizeof(good) / sizeof(good[0]); i++) {
-            H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID,   1,    1,   good[i], NULL, NULL,
-                              NULL, longtitle_filter_func, NULL, NULL};
+            H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID, 1,    1,    good[i], NULL,
+                              NULL, longtitle_filter_func, NULL, NULL, NULL};
             if (H5Zregister(&c) < 0) {
                 fprintf(stderr, "\n   rejected valid name \"%s\"\n", good[i]);
                 TEST_ERROR;
@@ -1837,10 +1837,10 @@ error:
 static int
 test_canonical_name_uniqueness(void)
 {
-    H5Z_class3_t cls_a = {2,    UNIQUENAME_FILTER_ID_A, 1,    1,   "test-unique-name", NULL, NULL,
-                          NULL, longtitle_filter_func,  NULL, NULL};
-    H5Z_class3_t cls_b = {2,    UNIQUENAME_FILTER_ID_B, 1,    1,   "test-unique-name", NULL, NULL,
-                          NULL, longtitle_filter_func,  NULL, NULL};
+    H5Z_class3_t cls_a = {2,    UNIQUENAME_FILTER_ID_A, 1,    1,    "test-unique-name", NULL,
+                          NULL, longtitle_filter_func,  NULL, NULL, NULL};
+    H5Z_class3_t cls_b = {2,    UNIQUENAME_FILTER_ID_B, 1,    1,    "test-unique-name", NULL,
+                          NULL, longtitle_filter_func,  NULL, NULL, NULL};
     herr_t       ret;
 
     TESTING("H5Zregister: canonical_name collision across different filter ids is rejected");
@@ -2021,12 +2021,12 @@ test_config_string_canonicalization_growth(void)
         1,                  /* encoder_present */
         1,                  /* decoder_present */
         "growth_filter",    /* canonical_name  */
-        NULL,               /* description     */
         NULL,               /* can_apply       */
         NULL,               /* set_local       */
         growth_filter_func, /* filter          */
         growth_set_config,  /* set_config      */
         NULL,               /* get_config      */
+        NULL,               /* description     */
     };
     hid_t    dcpl = H5I_INVALID_HID;
     char    *raw  = NULL;
@@ -2179,7 +2179,6 @@ test_set_get_config_callbacks(void)
         1,                    /* encoder_present */
         1,                    /* decoder_present */
         "callback_filter",    /* canonical_name  */
-        NULL,                 /* description     */
         NULL,                 /* can_apply       */
         NULL,                 /* set_local       */
         callback_filter_func, /* filter          */
@@ -2188,6 +2187,7 @@ test_set_get_config_callbacks(void)
         NULL,                 /* write_blob: use default global-heap storage */
         NULL,                 /* read_blob  */
         NULL,                 /* close_blob */
+        NULL,                 /* description     */
     };
     hid_t  dcpl = H5I_INVALID_HID;
     char   pbuf[256];
@@ -2379,8 +2379,8 @@ static const H5Z_class3_t ctxpass_cls = {
     "test_ctxpass_filter",
     NULL,
     NULL,
-    NULL,
     ctxpass_filter_cb,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -2568,7 +2568,6 @@ static const H5Z_class3_t cfg_ondisk_cls = {
     1,                      /* encoder_present */
     1,                      /* decoder_present */
     "cfg_ondisk_filter",    /* name            */
-    NULL,                   /* description     */
     NULL,                   /* can_apply       */
     NULL,                   /* set_local       */
     cfg_ondisk_filter_func, /* filter         */
@@ -2577,6 +2576,7 @@ static const H5Z_class3_t cfg_ondisk_cls = {
     NULL,                   /* write_blob      */
     NULL,                   /* read_blob       */
     NULL,                   /* close_blob      */
+    NULL,                   /* description     */
 };
 
 /* Build a chunked, filter-configured DCPL from a parameter string */
@@ -2903,7 +2903,6 @@ test_blob_default_storage(hid_t fapl)
         1,                      /* encoder_present */
         1,                      /* decoder_present */
         "blob_default_filter",  /* canonical_name  */
-        NULL,                   /* description     */
         NULL,                   /* can_apply       */
         NULL,                   /* set_local       */
         blob_passthrough_func,  /* filter          */
@@ -2912,6 +2911,7 @@ test_blob_default_storage(hid_t fapl)
         NULL,                   /* write_blob: use default global-heap storage */
         NULL,                   /* read_blob       */
         NULL,                   /* close_blob      */
+        NULL,                   /* description     */
     };
     char           filename[1024];
     unsigned char *blob     = NULL;
@@ -3131,7 +3131,6 @@ test_blob_custom_callbacks(hid_t fapl)
         1,                     /* encoder_present */
         1,                     /* decoder_present */
         "blob_custom_filter",  /* canonical_name  */
-        NULL,                  /* description     */
         NULL,                  /* can_apply       */
         NULL,                  /* set_local       */
         blob_passthrough_func, /* filter          */
@@ -3140,6 +3139,7 @@ test_blob_custom_callbacks(hid_t fapl)
         blob_custom_write,     /* write_blob      */
         blob_custom_read,      /* read_blob       */
         blob_custom_close,     /* close_blob      */
+        NULL,                  /* description     */
     };
     char             filename[1024];
     unsigned char    small_blob[1024];
@@ -3271,7 +3271,6 @@ test_blob_errors(void)
         1,                      /* encoder_present */
         1,                      /* decoder_present */
         "blob_default_filter",  /* canonical_name  */
-        NULL,                   /* description     */
         NULL,                   /* can_apply       */
         NULL,                   /* set_local       */
         blob_passthrough_func,  /* filter          */
@@ -3280,6 +3279,7 @@ test_blob_errors(void)
         NULL,                   /* write_blob      */
         NULL,                   /* read_blob       */
         NULL,                   /* close_blob      */
+        NULL,                   /* description     */
     };
     unsigned char    bytes[16] = {1, 2, 3, 4};
     H5Z_class_info_t info;
@@ -3362,7 +3362,6 @@ test_blob_getter(void)
         1,                      /* encoder_present */
         1,                      /* decoder_present */
         "blob_default_filter",  /* canonical_name  */
-        NULL,                   /* description     */
         NULL,                   /* can_apply       */
         NULL,                   /* set_local       */
         blob_passthrough_func,  /* filter          */
@@ -3371,6 +3370,7 @@ test_blob_getter(void)
         NULL,                   /* write_blob      */
         NULL,                   /* read_blob       */
         NULL,                   /* close_blob      */
+        NULL,                   /* description     */
     };
     unsigned char bytes[64];
     unsigned char half[32];
@@ -3518,7 +3518,6 @@ test_blob_delete_reclaims_heap(hid_t fapl)
         1,                      /* encoder_present */
         1,                      /* decoder_present */
         "blob_default_filter",  /* canonical_name  */
-        NULL,                   /* description     */
         NULL,                   /* can_apply       */
         NULL,                   /* set_local       */
         blob_passthrough_func,  /* filter          */
@@ -3527,6 +3526,7 @@ test_blob_delete_reclaims_heap(hid_t fapl)
         NULL,                   /* write_blob      */
         NULL,                   /* read_blob       */
         NULL,                   /* close_blob      */
+        NULL,                   /* description     */
     };
     char           filename[1024];
     unsigned char *blob = NULL;
@@ -3650,7 +3650,6 @@ test_blob_duplicate_filter_ids(hid_t fapl)
         1,                      /* encoder_present */
         1,                      /* decoder_present */
         "blob_default_filter",  /* canonical_name  */
-        NULL,                   /* description     */
         NULL,                   /* can_apply       */
         NULL,                   /* set_local       */
         blob_passthrough_func,  /* filter          */
@@ -3659,6 +3658,7 @@ test_blob_duplicate_filter_ids(hid_t fapl)
         NULL,                   /* write_blob      */
         NULL,                   /* read_blob       */
         NULL,                   /* close_blob      */
+        NULL,                   /* description     */
     };
     char          filename[1024];
     unsigned char blob_a[256], blob_b[256];
@@ -3763,7 +3763,6 @@ test_blob_per_dataset_copy_then_tweak(hid_t fapl)
         1,                      /* encoder_present */
         1,                      /* decoder_present */
         "blob_default_filter",  /* canonical_name  */
-        NULL,                   /* description     */
         NULL,                   /* can_apply       */
         NULL,                   /* set_local       */
         blob_passthrough_func,  /* filter          */
@@ -3772,6 +3771,7 @@ test_blob_per_dataset_copy_then_tweak(hid_t fapl)
         NULL,                   /* write_blob      */
         NULL,                   /* read_blob       */
         NULL,                   /* close_blob      */
+        NULL,                   /* description     */
     };
     char          filename[1024];
     unsigned char blob_1[128], blob_2[128];
@@ -3962,7 +3962,6 @@ test_blob_usecaseb_path_association(hid_t fapl)
         1,                      /* encoder_present */
         1,                      /* decoder_present */
         "blob_usecaseb_filter", /* canonical_name  */
-        NULL,                   /* description     */
         NULL,                   /* can_apply       */
         NULL,                   /* set_local       */
         blob_passthrough_func,  /* filter          */
@@ -3971,6 +3970,7 @@ test_blob_usecaseb_path_association(hid_t fapl)
         usecaseb_write_blob,    /* write_blob      */
         usecaseb_read_blob,     /* read_blob       */
         usecaseb_close_blob,    /* close_blob      */
+        NULL,                   /* description     */
     };
     char    filename[1024];
     hid_t   file = H5I_INVALID_HID, sid = H5I_INVALID_HID, mask_sid = H5I_INVALID_HID;
@@ -4080,7 +4080,6 @@ test_blob_oversized_default_storage(hid_t fapl)
         1,                      /* encoder_present */
         1,                      /* decoder_present */
         "blob_default_filter",  /* canonical_name  */
-        NULL,                   /* description     */
         NULL,                   /* can_apply       */
         NULL,                   /* set_local       */
         blob_passthrough_func,  /* filter          */
@@ -4089,6 +4088,7 @@ test_blob_oversized_default_storage(hid_t fapl)
         NULL,                   /* write_blob      */
         NULL,                   /* read_blob       */
         NULL,                   /* close_blob      */
+        NULL,                   /* description     */
     };
     char           filename[1024];
     unsigned char *blob = NULL;
@@ -4325,7 +4325,6 @@ test_blob_libpressio_migration_pattern(hid_t fapl)
         1,                              /* encoder_present */
         1,                              /* decoder_present */
         "libpressio_pattern_filter",    /* canonical_name  */
-        NULL,                           /* description     */
         NULL,                           /* can_apply       */
         libpressio_pattern_set_local,   /* set_local       */
         libpressio_pattern_filter_func, /* filter        */
@@ -4334,6 +4333,7 @@ test_blob_libpressio_migration_pattern(hid_t fapl)
         NULL,                           /* write_blob: default global-heap storage */
         NULL,                           /* read_blob       */
         NULL,                           /* close_blob      */
+        NULL,                           /* description     */
     };
     char           filename[1024];
     unsigned char *options_blob = NULL;
@@ -4901,12 +4901,12 @@ static const H5Z_class3_t canon_cls = {
     1,                 /* encoder_present */
     1,                 /* decoder_present */
     "canon_filter",    /* name            */
-    NULL,              /* description     */
     NULL,              /* can_apply       */
     NULL,              /* set_local       */
     canon_filter_func, /* filter          */
     canon_set_config,  /* set_config      */
     canon_get_config,  /* get_config      */
+    NULL,              /* description     */
 };
 
 /* Append CANON_FILTER_ID configured with PARAMS and return the DCPL */
@@ -5071,12 +5071,12 @@ static const H5Z_class3_t mixv3_cls = {
     1,                 /* encoder_present */
     1,                 /* decoder_present */
     "mixv3",           /* canonical name  */
-    NULL,              /* description     */
     NULL,              /* can_apply       */
     NULL,              /* set_local       */
     mixv3_filter_func, /* filter          */
     mixv3_set_config,  /* set_config      */
     NULL,              /* get_config      */
+    NULL,              /* description     */
 };
 
 static int
@@ -5209,6 +5209,27 @@ error:
     }
     H5E_END_TRY
     return -1;
+}
+
+/* Construct 2^exp as an exact double via its IEEE-754 bit pattern, bypassing
+ * ldexp(). Some compilers (Intel icc/icx via -fp-model=fast, NVHPC) flush
+ * subnormal *results* of floating-point operations to zero by default at
+ * -O2 and above; ldexp(1.0, exp) for a subnormal exp is such an operation,
+ * which would silently corrupt exactly the reference values the powers-of-
+ * two canonicalization test below needs to trust. */
+static double
+pow2_exact(int exp)
+{
+    uint64_t bits;
+    double   d;
+
+    if (exp >= -1022)
+        bits = (uint64_t)(exp + 1023) << 52; /* normal: implicit leading 1 */
+    else
+        bits = (uint64_t)1 << (exp + 1074); /* subnormal: explicit mantissa bit */
+
+    memcpy(&d, &bits, sizeof(d));
+    return d;
 }
 
 static int
@@ -5415,7 +5436,17 @@ test_config_canonicalization(hid_t fapl)
      * boundary -- and exact powers of two are both where such a boundary sits
      * and what a user writes in hex in the first place.  Appending the hex
      * form and appending its canonical decimal must pack the identical
-     * double.  (RFC-HDFG-2026-001 fmt-01c)                               --- */
+     * double.  (RFC-HDFG-2026-001 fmt-01c)
+     *
+     * True subnormal exponents (below -1022) are probed, not assumed: some
+     * toolchains (Intel icc/icx via -fp-model=fast -- the default at -O2 and
+     * above -- NVHPC, and some Clang-on-AArch64 configurations) enable
+     * flush-to-zero mode process-wide by default, which silently corrupts
+     * subnormal results inside strtod()/printf() *in the platform's own
+     * libc*, not just in code this file compiled. Rather than guessing which
+     * toolchains that affects, round-trip a known subnormal through the same
+     * two calls H5Z__rewrite_hexfloats() itself uses and skip only the
+     * exponents that probe demonstrates are unsafe to assert on here. ---  */
     TESTING("canonicalization: hex rewrite is value-transparent at powers of two");
     {
         /* smallest subnormal and smallest normal at the bottom, the 2^-36
@@ -5424,13 +5455,30 @@ test_config_canonicalization(hid_t fapl)
         static const int exps[] = {-1074, -1073, -1022, -1021, -100, -37, -36, -35,
                                    -1,    0,     1,     52,    53,   100, 512, 1023};
         size_t           i;
+        bool             subnormals_ok;
+
+        {
+            char   probe[32];
+            double smallest_subnormal = pow2_exact(-1074);
+            double roundtrip;
+
+            snprintf(probe, sizeof(probe), "%.16e", smallest_subnormal);
+            roundtrip     = strtod(probe, NULL);
+            subnormals_ok = (memcmp(&roundtrip, &smallest_subnormal, sizeof(roundtrip)) == 0);
+            if (!subnormals_ok)
+                puts("    (skipping true-subnormal exponents: this platform's strtod()/printf() "
+                     "flush them to zero)");
+        }
 
         for (i = 0; i < sizeof(exps) / sizeof(exps[0]); i++) {
             char   hexstr[64];
             char   canon[128];
-            double want     = ldexp(1.0, exps[i]);
+            double want     = pow2_exact(exps[i]);
             double from_hex = 0.0;
             double from_dec = 0.0;
+
+            if (!subnormals_ok && exps[i] < -1022)
+                continue;
 
             snprintf(hexstr, sizeof(hexstr), "rate = 0x1p%+d", exps[i]);
 

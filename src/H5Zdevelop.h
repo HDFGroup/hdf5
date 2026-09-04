@@ -379,8 +379,6 @@ typedef struct H5Z_class3_t {
     unsigned     decoder_present;    /**< Does this filter have a decoder?           */
     const char  *name;               /**< Canonical string identifier (e.g., "zfp"); must not be NULL; used as
                                         display name */
-    const char *description;         /**< Human-readable description of the filter (e.g., "Deflate (zlib)
-                                        general-purpose compression"); may be NULL */
     H5Z_can_apply_func_t  can_apply; /**< The "can apply" callback for a filter      */
     H5Z_set_local_func_t  set_local; /**< The "set local" callback for a filter      */
     H5Z_func2_t           filter;    /**< Extended filter callback: dxpl_id + scaled */
@@ -392,6 +390,13 @@ typedef struct H5Z_class3_t {
                                          global-heap reader */
     H5Z_close_blob_func_t close_blob; /**< Blob release callback; NULL and the library
                                          frees the buffer itself */
+    const char *description;         /**< Human-readable description of the filter (e.g., "Deflate (zlib)
+                                        general-purpose compression"); may be NULL. Appended last (not
+                                        inserted after \c name) so that a caller positionally initializing
+                                        this struct from an H5Z_class2_t literal -- version, id,
+                                        encoder_present, decoder_present, name, can_apply, set_local, filter --
+                                        and simply appending the new v3 fields keeps every original field in
+                                        its original slot. */
 } H5Z_class3_t;
 //! <!-- [H5Z_class3_t_snip] -->
 

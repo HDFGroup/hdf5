@@ -38,7 +38,6 @@ static const H5Z_class3_t H5Z_DYNLIB3[1] = {{
     H5Z_FILTER_DYNLIB3,                                        /* Filter id number               */
     1, 1,                                                      /* Encoding and decoding enabled  */
     "dynlib3",                                                 /* Filter name for debugging      */
-    "Test filter with string-based configuration (mode=rate)", /* Description                   */
     NULL,                                                      /* The "can apply" callback       */
     NULL,                                                      /* The "set local" callback       */
     H5Z_filter_dynlib3,                                        /* The actual filter function     */
@@ -47,6 +46,7 @@ static const H5Z_class3_t H5Z_DYNLIB3[1] = {{
     NULL, /* write_blob: use default global-heap storage */
     NULL, /* read_blob  */
     NULL, /* close_blob */
+    "Test filter with string-based configuration (mode=rate)", /* Description                   */
 }};
 
 H5PL_type_t

@@ -33,7 +33,6 @@ H5_ATTR_VISIBILITY_HIDDEN const H5Z_class3_t H5Z_SHUFFLE[1] = {{
     1,                                                              /* encoder_present flag (set to true) */
     1,                                                              /* decoder_present flag (set to true) */
     "shuffle",                                                      /* name */
-    "Byte shuffle preprocessing to improve downstream compression", /* description */
     NULL,                                                           /* The "can apply" callback */
     H5Z__set_local_shuffle,                                         /* The "set local" callback */
     H5Z__filter_shuffle,                                            /* The actual filter function */
@@ -42,6 +41,7 @@ H5_ATTR_VISIBILITY_HIDDEN const H5Z_class3_t H5Z_SHUFFLE[1] = {{
     NULL, /* write_blob: use default global-heap storage */
     NULL, /* read_blob */
     NULL, /* close_blob */
+    "Byte shuffle preprocessing to improve downstream compression", /* description */
 }};
 
 /* Local macros */

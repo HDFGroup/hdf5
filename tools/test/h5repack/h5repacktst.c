@@ -1692,7 +1692,6 @@ main(void)
             1,                     /* encoder_present */
             1,                     /* decoder_present */
             "repack_blob_filter",  /* canonical_name  */
-            NULL,                  /* description     */
             NULL,                  /* can_apply       */
             NULL,                  /* set_local       */
             repack_blob_filter,    /* filter          */
@@ -1701,6 +1700,7 @@ main(void)
             repack_blob_write,     /* write_blob      */
             repack_blob_read,      /* read_blob       */
             repack_blob_close,     /* close_blob      */
+            NULL,                  /* description     */
         };
         const char   *blob_src = "h5repack_blob_src.h5";
         const char   *blob_out = "h5repack_blob_OUT.h5";

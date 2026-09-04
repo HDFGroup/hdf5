@@ -10360,7 +10360,6 @@ static const H5Z_class3_t par_blob_cls = {
     1,                         /* encoder_present */
     1,                         /* decoder_present */
     "par_blob_filter",         /* name            */
-    NULL,                      /* description     */
     NULL,                      /* can_apply       */
     NULL,                      /* set_local       */
     par_blob_passthrough_func, /* filter          */
@@ -10369,6 +10368,7 @@ static const H5Z_class3_t par_blob_cls = {
     NULL,                      /* write_blob: use default global-heap storage */
     NULL,                      /* read_blob       */
     NULL,                      /* close_blob      */
+    NULL,                      /* description     */
 };
 
 /* Every rank must call H5Pappend_filter_blob with identical bytes: dataset
