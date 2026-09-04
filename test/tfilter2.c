@@ -3697,7 +3697,17 @@ test_config_canonicalization(hid_t fapl)
      * boundary -- and exact powers of two are both where such a boundary sits
      * and what a user writes in hex in the first place.  Appending the hex
      * form and appending its canonical decimal must pack the identical
-     * double.  (RFC-HDFG-2026-001 fmt-01c)                               --- */
+     * double.  (RFC-HDFG-2026-001 fmt-01c)
+     *
+     * True subnormal exponents (below -1022) are probed, not assumed: some
+     * toolchains (Intel icc/icx via -fp-model=fast -- the default at -O2 and
+     * above -- NVHPC, and some Clang-on-AArch64 configurations) enable
+     * flush-to-zero mode process-wide by default, which silently corrupts
+     * subnormal results inside strtod()/printf() *in the platform's own
+     * libc*, not just in code this file compiled. Rather than guessing which
+     * toolchains that affects, round-trip a known subnormal through the same
+     * two calls H5Z__rewrite_hexfloats() itself uses and skip only the
+     * exponents that probe demonstrates are unsafe to assert on here. ---  */
     TESTING("canonicalization: hex rewrite is value-transparent at powers of two");
     {
         /* smallest subnormal and smallest normal at the bottom, the 2^-36
@@ -3706,6 +3716,20 @@ test_config_canonicalization(hid_t fapl)
         static const int exps[] = {-1074, -1073, -1022, -1021, -100, -37, -36, -35,
                                    -1,    0,     1,     52,    53,   100, 512, 1023};
         size_t           i;
+        bool             subnormals_ok;
+
+        {
+            char   probe[32];
+            double smallest_subnormal = pow2_exact(-1074);
+            double roundtrip;
+
+            snprintf(probe, sizeof(probe), "%.16e", smallest_subnormal);
+            roundtrip     = strtod(probe, NULL);
+            subnormals_ok = (memcmp(&roundtrip, &smallest_subnormal, sizeof(roundtrip)) == 0);
+            if (!subnormals_ok)
+                puts("    (skipping true-subnormal exponents: this platform's strtod()/printf() "
+                     "flush them to zero)");
+        }
 
         for (i = 0; i < sizeof(exps) / sizeof(exps[0]); i++) {
             char   hexstr[64];
@@ -3713,6 +3737,9 @@ test_config_canonicalization(hid_t fapl)
             double want     = pow2_exact(exps[i]);
             double from_hex = 0.0;
             double from_dec = 0.0;
+
+            if (!subnormals_ok && exps[i] < -1022)
+                continue;
 
             snprintf(hexstr, sizeof(hexstr), "rate = 0x1p%+d", exps[i]);
 
