@@ -771,6 +771,18 @@ typedef struct H5O_ginfo_t {
  * interpret the entry correctly. */
 #define H5O_PLINE_EXT_FLAG_CRITICAL 0x01
 
+/* Bit 1 of a H5O_PLINE_EXT_BLOB block's flags byte: the locator is a
+ * library-managed global-heap address, safe for H5O__pline_delete() to
+ * H5HG_remove().  Clear means the locator is opaque, produced by the
+ * filter's own write_blob callback, and must be left alone at delete
+ * time.  Recorded on disk -- rather than inferred at delete time from
+ * whether the owning filter happens to be currently registered -- since
+ * that registration state has nothing to do with which storage scheme
+ * actually wrote the bytes, and guessing wrong risks either leaking file
+ * space or calling H5HG_remove() on a value that was never a global-heap
+ * locator.  Meaningless for H5O_PLINE_EXT_CONFIG blocks. */
+#define H5O_PLINE_EXT_BLOB_FLAG_DEFAULT_STORAGE 0x02
+
 /* Fixed framing of one block: type(2) + flags(1) + reserved(1) + length(4) */
 #define H5O_PLINE_EXT_HDR_SIZE 8
 

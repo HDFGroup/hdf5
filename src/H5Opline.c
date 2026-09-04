@@ -36,6 +36,9 @@ static herr_t H5O__pline_free(void *_mesg);
 static herr_t H5O__pline_delete(H5F_t *f, H5O_t *open_oh, void *_mesg);
 static herr_t H5O__pline_pre_copy_file(H5F_t *file_src, const void *mesg_src, bool *deleted,
                                        const H5O_copy_t *cpy_info, void *_udata);
+static void  *H5O__pline_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type, void *native_src,
+                                   H5F_t *file_dst, bool *recompute_size, H5O_copy_t *cpy_info,
+                                   void *udata);
 static herr_t H5O__pline_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
 /* Set up & include shared message "interface" info */
@@ -50,8 +53,8 @@ static herr_t H5O__pline_debug(H5F_t *f, const void *_mesg, FILE *stream, int in
 #define H5O_SHARED_DELETE_REAL H5O__pline_delete
 #define H5O_SHARED_LINK        H5O__pline_shared_link
 #undef H5O_SHARED_LINK_REAL
-#define H5O_SHARED_COPY_FILE H5O__pline_shared_copy_file
-#undef H5O_SHARED_COPY_FILE_REAL
+#define H5O_SHARED_COPY_FILE      H5O__pline_shared_copy_file
+#define H5O_SHARED_COPY_FILE_REAL H5O__pline_copy_file
 #define H5O_SHARED_POST_COPY_FILE H5O__pline_shared_post_copy_file
 #undef H5O_SHARED_POST_COPY_FILE_REAL
 #undef H5O_SHARED_POST_COPY_FILE_UPD
@@ -310,7 +313,8 @@ H5O__pline_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
                                         "filter blob locator has unexpected length");
                         H5F_addr_decode(f, &bp, &filter->aux_loc.addr);
                         UINT32DECODE(bp, idx);
-                        filter->aux_loc.idx = (size_t)idx;
+                        filter->aux_loc.idx           = (size_t)idx;
+                        filter->blob_default_storage  = (ext_flags & H5O_PLINE_EXT_BLOB_FLAG_DEFAULT_STORAGE) != 0;
                         break;
                     }
 
@@ -465,7 +469,8 @@ H5O__pline_encode(H5F_t *f, uint8_t *p /*out*/, const void *mesg)
              * dataset-creation time. */
             if (have_blob) {
                 UINT16ENCODE(p, H5O_PLINE_EXT_BLOB);
-                *p++ = H5O_PLINE_EXT_FLAG_CRITICAL;
+                *p++ = (uint8_t)(H5O_PLINE_EXT_FLAG_CRITICAL |
+                                (filter->blob_default_storage ? H5O_PLINE_EXT_BLOB_FLAG_DEFAULT_STORAGE : 0));
                 *p++ = 0; /* reserved */
                 UINT32ENCODE(p, (uint32_t)(H5F_SIZEOF_ADDR(f) + 4));
                 H5F_addr_encode(f, &p, filter->aux_loc.addr);
@@ -518,6 +523,17 @@ H5O__pline_copy(const void *_src, void *_dst /*out*/)
         for (i = 0; i < src->nused; i++) {
             /* Basic filter information */
             dst->filter[i] = src->filter[i];
+
+            /* The struct copy above just aliased src->filter[i].aux without
+             * incrementing its refcount; null it out immediately so that if
+             * any allocation below fails, done:'s H5O__pline_reset(dst) --
+             * which releases every entry up to and including this one --
+             * finds a NULL aux here and safely no-ops instead of decrementing
+             * a reference this copy was never given (which, if it dropped
+             * the count to zero, would free a buffer SRC still points at).
+             * The real reference is taken further down, once every fallible
+             * allocation for this entry has already succeeded. */
+            dst->filter[i].aux = NULL;
 
             /* Filter name */
             if (src->filter[i].name) {
@@ -585,6 +601,58 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__pline_copy() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O__pline_copy_file
+ *
+ * Purpose:    Copies a filter pipeline message from one file to another,
+ *        as part of H5Ocopy().  Every filter blob (H5Z_filter_info_t.aux)
+ *        is re-persisted into FILE_DST and assigned a fresh locator there
+ *        -- H5O__pline_copy()'s in-memory copy shares SRC's on-disk
+ *        locator (aux_loc) verbatim, but that locator is only meaningful
+ *        within the file it was written to, so it must never reach
+ *        FILE_DST unmodified.  Reuses H5Z_blob_write(), the same routine
+ *        H5D__create() calls for a newly created dataset, so a blob
+ *        attached via a filter's custom write_blob callback is
+ *        re-invoked against FILE_DST rather than the destination
+ *        silently inheriting bytes that only make sense in the source
+ *        file.
+ *
+ * Return:    Success:    Ptr to the newly allocated destination message.
+ *
+ *        Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5O__pline_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const H5O_msg_class_t H5_ATTR_UNUSED *mesg_type,
+                     void *native_src, H5F_t *file_dst, bool H5_ATTR_UNUSED *recompute_size,
+                     H5O_copy_t H5_ATTR_UNUSED *cpy_info, void H5_ATTR_UNUSED *udata)
+{
+    H5O_pline_t *dst_pline = NULL;
+    void        *ret_value = NULL;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(native_src);
+    assert(file_dst);
+
+    if (NULL == (dst_pline = (H5O_pline_t *)H5O__pline_copy(native_src, NULL)))
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTCOPY, NULL, "unable to copy pipeline message");
+
+    if (H5Z_blob_write(file_dst, dst_pline) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, NULL, "unable to write filter blob to destination file");
+
+    ret_value = dst_pline;
+
+done:
+    if (!ret_value && dst_pline) {
+        H5O__pline_reset(dst_pline);
+        H5O__pline_free(dst_pline);
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O__pline_copy_file() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__pline_size
@@ -746,7 +814,16 @@ H5O__pline_free(void *mesg)
  *
  *              Filters that implement a custom write_blob callback own
  *              their on-disk layout; the library cannot reclaim storage it
- *              did not allocate, so those locators are skipped.
+ *              did not allocate, so those locators are skipped.  Which case
+ *              applies is read from H5Z_filter_info_t.blob_default_storage
+ *              (persisted on disk in the BLOB extension block's flags byte
+ *              and populated at decode time) rather than inferred from
+ *              whether the filter happens to be registered right now: the
+ *              owning filter's current registration state has nothing to
+ *              do with which storage scheme actually wrote the bytes, and
+ *              treating "not registered" as "must be default storage"
+ *              risks calling H5HG_remove() on an opaque value a custom
+ *              write_blob produced.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -764,16 +841,14 @@ H5O__pline_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
     assert(pline);
 
     for (size_t i = 0; i < pline->nused; i++) {
-        H5Z_entry_t *entry = NULL;
-        H5HG_t       hobj;
+        H5HG_t hobj;
 
         if (!H5_addr_defined(pline->filter[i].aux_loc.addr))
             continue;
 
-        /* Custom-storage filters own their on-disk layout; skip them.  If
-         * the filter is not registered, assume default global-heap storage. */
-        (void)H5Z_find_entry(true, pline->filter[i].id, &entry);
-        if (entry && entry->write_blob)
+        /* Custom-storage filters own their on-disk layout; the library
+         * cannot reclaim it. */
+        if (!pline->filter[i].blob_default_storage)
             continue;
 
         hobj.addr = pline->filter[i].aux_loc.addr;

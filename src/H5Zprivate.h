@@ -48,6 +48,21 @@ typedef struct H5Z_filter_info_t H5Z_filter_info_t;
  * filter parameter validation (e.g. "section.subsection.key"). */
 #define H5Z_CONFIG_MAX_KEY_PATH 256
 
+/* Maximum blob size (in bytes) accepted by H5P__ocrt_pipeline_dec() when
+ * decoding an H5Pencode()'d property list.  That decode callback has no
+ * end-of-buffer pointer to bound its H5MM_memcpy() against (the generic
+ * H5P_prop_decode_func_t signature carries none), so an attacker-supplied
+ * or corrupted buffer's encoded blob length must be capped independently
+ * of the buffer's real size -- otherwise it drives an unbounded heap
+ * allocation and an unbounded read past the real buffer.  Unlike
+ * H5Z_CONFIG_STRING_MAX, this is not a format-level limit: a blob
+ * attached via H5Pappend_filter_blob() and persisted to a file's global
+ * heap has no size limit at all (H5Pappend_filter_blob()'s own docs say
+ * so).  This bound applies only to the H5Pencode()/H5Pdecode() wire
+ * format, generously sized above the largest blob exercised by the test
+ * suite (4 MiB) while still closing the unbounded-read window. */
+#define H5Z_BLOB_DECODE_MAX ((size_t)(64 * 1024 * 1024)) /* 64 MiB */
+
 /****************************/
 /* Library Private Typedefs */
 /****************************/
@@ -64,7 +79,17 @@ typedef struct H5Z_blob_buf_t {
     bool   from_callback; /*data was allocated by the filter's read_blob
                            *callback and must be released via close_blob,
                            *not H5MM_xfree                                */
-    size_t nrefs;         /*current reference count                     */
+    H5Z_close_blob_func_t close_blob; /*the owning filter's close_blob callback
+                                       *at the time this buffer was created, captured
+                                       *here rather than re-resolved by a filter-table
+                                       *lookup at release time: the filter may be
+                                       *H5Zunregister()'d before the last reference is
+                                       *released, and looking it up again then would
+                                       *silently fall back to H5MM_xfree() on memory
+                                       *the filter's own (possibly non-H5MM) allocator
+                                       *produced.  NULL when from_callback is false
+                                       *(H5MM-allocated; freed via H5MM_xfree)        */
+    size_t nrefs;                     /*current reference count                     */
 } H5Z_blob_buf_t;
 
 /* Structure to store information about each filter's parameters */
@@ -81,6 +106,21 @@ struct H5Z_filter_info_t {
     H5Z_blob_buf_t *aux;                           /*refcounted blob; NULL if none          */
     H5Z_blob_loc_t  aux_loc;                       /*on-disk locator; undefined until the
                                                     *blob is written at H5Dcreate time     */
+    bool blob_default_storage;                     /*true iff aux_loc is a library-managed
+                                                    *global-heap locator (H5Z_blob_write()
+                                                    *found no write_blob callback) rather
+                                                    *than an opaque value a filter's own
+                                                    *write_blob produced.  Set when the blob
+                                                    *is written (H5Z_blob_write()) and
+                                                    *persisted on disk (the BLOB extension
+                                                    *block's flags byte) so H5O__pline_delete()
+                                                    *can tell whether aux_loc is safe to
+                                                    *H5HG_remove() without depending on
+                                                    *whether the owning filter happens to be
+                                                    *registered at delete time -- it may not
+                                                    *be, and the locator's meaning must not
+                                                    *change with that.  Meaningless when
+                                                    *aux_loc is undefined.                 */
 };
 
 /*
@@ -162,8 +202,14 @@ H5_DLL void   H5Z_blob_release(H5Z_filter_info_t *fi);
 /* Reference-counted blob buffer: H5Z_blob_buf_new() takes ownership of
  * data (nrefs=1); H5Z_blob_buf_incref() shares an existing buffer across
  * a pipeline copy. Both are the shared-buffer half of H5Z_blob_release's
- * decrement-and-maybe-free. */
-H5_DLL H5Z_blob_buf_t *H5Z_blob_buf_new(void *data, size_t size, bool from_callback);
+ * decrement-and-maybe-free.  CLOSE_BLOB must be the owning filter's
+ * close_blob callback (captured now, while the caller already has it in
+ * hand from a filter-table lookup) whenever FROM_CALLBACK is true, and
+ * NULL otherwise; H5Z_register3() requires read_blob and close_blob to
+ * be registered as a pair, so no from_callback=true caller should ever
+ * have a NULL close_blob to pass. */
+H5_DLL H5Z_blob_buf_t *H5Z_blob_buf_new(void *data, size_t size, bool from_callback,
+                                        H5Z_close_blob_func_t close_blob);
 H5_DLL void            H5Z_blob_buf_incref(H5Z_blob_buf_t *buf);
 
 /* Data Transform Functions */

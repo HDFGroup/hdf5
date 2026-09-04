@@ -9348,13 +9348,15 @@ u
 <tr valign=top>
   <td>Version</td>
   <td>The version number for this message. This table describes version 3. A filter pipeline message is
-      version 3 only when at least one filter in the pipeline carries a stored configuration string (see
-      <em>Config String Length</em> and <em>Config String</em> below); a pipeline with no stored strings is
-      still written as version 2, so version 2 and version 3 files remain byte-identical whenever this
-      feature is unused. Version 3 messages are written only when the file's high library-version bound
-      (set with <code>H5Pset_libver_bounds()</code>) is high enough to permit this message version; if the
-      bound does not permit version 3, the configuration string is not persisted and the pipeline falls
-      back to a version 2 message with no error raised.</td>
+      version 3 only when at least one filter in the pipeline carries a stored configuration string or a
+      filter blob (see <em>Extension Block List</em> below); a pipeline with neither is still written as
+      version 2, so version 2 and version 3 files remain byte-identical whenever these features are
+      unused. Version 3 messages are written only when the file's high library-version bound (set with
+      <code>H5Pset_libver_bounds()</code>) is high enough to permit this message version. For a
+      configuration string, if the bound does not permit version 3 the string is silently not persisted
+      and the pipeline falls back to a version 2 message with no error raised; a filter blob has no such
+      fallback; writing one when the bound does not permit version 3 fails with an error, since a filter
+      blob (unlike a configuration string) is often data a filter cannot function correctly without.</td>
 </tr>
 <tr valign=top>
   <td>Number of Filters</td>
@@ -9390,11 +9392,32 @@ u
   <td colspan="4"><br />Client Data <em>(variable size, optional)</em><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="2">Config String Length</td>
+  <td colspan="2">Number of Extension Blocks</td>
   <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Config String <em>(variable size, optional)</em><br /><br /></td>
+  <td colspan="4"><br />Extension Block List <em>(variable size, optional)</em><br /><br /></td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Layout: Extension Block</strong></caption>
+<tr align="center">
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align="center">
+  <td colspan="2">Extension Block Type</td>
+  <td>Flags</td>
+  <td>Reserved</td>
+</tr>
+<tr align="center">
+  <td colspan="4">Length</td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Data <em>(variable size)</em><br /><br /></td>
 </tr>
 </table>
 
@@ -9410,28 +9433,138 @@ u
       above.</td>
 </tr>
 <tr valign=top>
-  <td>Config String Length</td>
-  <td>A two-byte unsigned integer giving the length, in bytes, of the <em>Config String</em> field that
-      follows. A value of zero means this filter has no stored configuration string, and the <em>Config
-      String</em> field is absent (zero bytes). This field is present for every filter description in a
-      version 3 message, unlike <em>Name Length</em>, which may be omitted for internal filters. The
-      maximum value the library will write or accept on read is 4096 (<code>H5Z_CONFIG_STRING_MAX</code>);
-      a reader encountering a larger value should reject the message rather than attempt to read
-      <em>Config String</em>, since the value could otherwise index past the end of the containing
-      message.</td>
+  <td>Number of Extension Blocks</td>
+  <td>A two-byte unsigned integer giving the number of blocks in the <em>Extension Block List</em> that
+      follows. A value of zero means this filter has neither a stored configuration string nor a blob;
+      the <em>Extension Block List</em> is then absent (zero bytes). This field is present for every
+      filter description in a version 3 message, unlike <em>Name Length</em>, which may be omitted for
+      internal filters. Blocks are written in ascending <em>Extension Block Type</em> order (see below)
+      and a given type appears at most once per filter description; a reader encountering blocks out of
+      order, or a repeated type, should reject the message as malformed.</td>
 </tr>
 <tr valign=top>
-  <td>Config String</td>
-  <td>Present only when <em>Config String Length</em> is non-zero, in which case it occupies exactly that
-      many bytes. This is the caller's filter parameter string in canonical form: the bytes are a valid
-      <a href="https://toml.io/en/v1.0.0">TOML v1.0.0</a> document body (a sequence of
-      <code>key = value</code> pairs) with any optional outer braces stripped and any C99 hex-float literal
-      (e.g. <code>0x1p-3</code>) rewritten to a <code>%.16e</code>-style decimal float literal, so that a
-      reader implementing only standard TOML v1.0.0 parsing &mdash; not just the HDF5 library &mdash; can
-      recover the exact value. The field is <strong>not</strong> null-terminated on disk; its length is
-      given entirely by <em>Config String Length</em>. This is the field that allows a filter's
-      configuration to be recovered by a program that has not loaded the filter plugin: see
-      <code>H5Pget_filter_params_by_idx()</code> in the C API reference.</td>
+  <td>Extension Block List</td>
+  <td>A sequence of exactly <em>Number of Extension Blocks</em> self-describing blocks, each laid out per
+      the <em>Extension Block</em> table below. Every block, recognized or not, is skippable using its own
+      <em>Length</em> field alone, which is what lets later library versions add new extension block
+      types without a version 4 pipeline message: a reader that does not recognize a block's
+      <em>Extension Block Type</em> either skips it (using <em>Length</em>) or rejects the whole message,
+      depending on that block's <em>Flags</em> (see below) &mdash; it must never guess at the block's
+      internal structure.</td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Fields: Extension Block</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Extension Block Type</td>
+  <td>A two-byte unsigned integer identifying the kind of data this block carries. Type codes are assigned
+      centrally by the format specification, with no private or experimental range: a privately chosen
+      code would be indistinguishable from one assigned officially in a later library version, defeating
+      the forward-compatibility this mechanism exists for. Two types are currently assigned:
+      <table>
+      <tr>
+        <th width="20%">Value</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0x0001</code></td>
+        <td>Configuration String &mdash; a verbatim <code>key=value</code> filter parameter string. Not
+            critical (see <em>Flags</em> below): the filter's <em>Client Data</em> array is a complete,
+            independent encoding of the same configuration, so a reader that skips this block loses only
+            introspection fidelity, not the ability to run the filter correctly.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>0x0002</code></td>
+        <td>Filter Blob Locator &mdash; the location of a binary blob attached to this filter (see
+            <code>H5Pappend_filter_blob()</code> in the C API reference). Critical: the blob may hold
+            configuration the filter cannot run without and has no independent encoding elsewhere in the
+            message, so a reader that does not understand this block type must reject the message rather
+            than run the filter without it.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr valign=top>
+  <td>Flags</td>
+  <td>Per-block flag bits, interpreted according to <em>Extension Block Type</em>. Bit 0 is defined for
+      every block type; the remaining bits are reserved for that type's own use and a reader must not
+      reject a block solely because one of them is set, unless a future revision of this document assigns
+      that bit a meaning it defines as rejectable.
+      <table>
+      <tr>
+        <th width="20%">Bit</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>Critical. If set, and the reader does not recognize this block's <em>Extension Block Type</em>,
+            the reader must reject the whole filter description rather than skip the block. If clear, an
+            unrecognized block is silently skipped using its <em>Length</em> field.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>Meaningful only for a Filter Blob Locator block (type <code>0x0002</code>); reserved (zero) for
+            every other type. If set, <em>Data</em> is a library-managed global heap address and index
+            (see below), and the library reclaims that heap object when the filter is removed from the
+            pipeline or the containing object is deleted. If clear, <em>Data</em> is an opaque value a
+            filter's own storage callback produced when the blob was written; the library does not
+            interpret it and does not attempt to reclaim anything when the filter is removed, since doing
+            so would mean treating filter-private bytes as if they were always a global heap reference.
+            A reader must not assume this bit reflects whether the filter that wrote it happens to be
+            available now: it is a permanent, on-disk record of which storage scheme was actually used at
+            write time, independent of the reader's own plugin configuration.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2-7</code></td>
+        <td>Reserved (zero).</td>
+      </tr>
+      </table></td>
+</tr>
+<tr valign=top>
+  <td>Reserved</td>
+  <td>Must be zero on write; a reader encountering a non-zero value here should reject the message as
+      malformed. Distinct from the reserved <em>Flags</em> bits above, which a reader must not reject on.</td>
+</tr>
+<tr valign=top>
+  <td>Length</td>
+  <td>A four-byte unsigned integer giving the length, in bytes, of the <em>Data</em> field that follows.
+      Valid for every block regardless of whether its <em>Extension Block Type</em> is recognized; a
+      reader must reject the message rather than read past the containing filter description if this
+      value would extend beyond it.</td>
+</tr>
+<tr valign=top>
+  <td>Data</td>
+  <td>Exactly <em>Length</em> bytes, interpreted according to <em>Extension Block Type</em>:
+      <ul>
+      <li><strong>Configuration String</strong> (<code>0x0001</code>): the caller's filter parameter
+          string in canonical form. The bytes are a valid <a href="https://toml.io/en/v1.0.0">TOML
+          v1.0.0</a> document body (a sequence of <code>key = value</code> pairs) with any optional outer
+          braces stripped and any C99 hex-float literal (e.g. <code>0x1p-3</code>) rewritten to a
+          <code>%.16e</code>-style decimal float literal, so that a reader implementing only standard
+          TOML v1.0.0 parsing &mdash; not just the HDF5 library &mdash; can recover the exact value. Not
+          null-terminated; its length is given entirely by this block's <em>Length</em>. The maximum
+          value the library will write or accept on read is 4096 (<code>H5Z_CONFIG_STRING_MAX</code>);
+          a reader encountering a larger <em>Length</em> for this block type should reject the message
+          rather than attempt to read it. This is the field that allows a filter's configuration to be
+          recovered by a program that has not loaded the filter plugin: see
+          <code>H5Pget_filter_params_by_idx()</code> in the C API reference.</li>
+      <li><strong>Filter Blob Locator</strong> (<code>0x0002</code>): laid out identically to a
+          @ref FMT4GlobalHeapID "Global Heap ID" (a <em>Collection Address</em>, of the size given by the
+          &ldquo;@ref FMT4SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock, followed by a
+          four-byte unsigned <em>Object Index</em>), so <em>Length</em> is always
+          <em>Size of Offsets</em> + 4 for this block type; a reader encountering any other <em>Length</em>
+          for type <code>0x0002</code> should reject the message.
+          When this block's <em>Flags</em> bit 1 is set, it <strong>is</strong> a Global Heap ID in the
+          usual sense: it identifies a global heap collection and the object within it whose bytes are the
+          blob, copied verbatim from the caller's buffer with no further encoding. When bit 1 is clear,
+          the two fields are opaque values with no format-defined interpretation &mdash; produced by, and
+          meaningful only to, the filter that wrote the blob &mdash; and merely share a Global Heap ID's
+          byte layout by convention, not its meaning.</li>
+      </ul></td>
 </tr>
 </table>
 

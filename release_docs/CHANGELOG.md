@@ -54,40 +54,69 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
-### Added in-file blob configuration storage for filters (RFC-HDFG-2026-001)
+### Added in-file blob configuration storage for filters (RFC-HDFG-2026-003)
 
    Filters can now attach a binary blob - configuration data too large for
    `cd_values` or a parameter string, such as JIT-compiled filter source or a
    reference to another dataset - to a dataset's pipeline entry.  The blob is
-   stored in the file alongside the pipeline message and handed back to the
-   filter verbatim when the dataset is opened.
+   stored in the file alongside the pipeline message and recovered into
+   memory when the dataset is opened, retrievable via `H5Pget_filter_blob`
+   (below); the library does not hand it to the filter's transform callback
+   automatically, so a filter that needs its blob during I/O must retrieve
+   it itself (e.g. via `set_local` at creation time, as this release's own
+   `H5FLT` examples do) or have the application retrieve and supply it.
 
    **New C API:** `H5Pappend_filter_blob(plist, filter_id, flags, buf, size)`
    appends a filter exactly as `H5Pappend_filter` does and attaches
-   `buf`/`size` as its blob.  The bytes are copied into property-list-owned
-   storage; there is no fixed size limit.
+   `buf`/`size` as its blob; only valid on a dataset creation property list.
+   `H5Pget_filter_blob(plist, filter_idx, flags, buf, size)` recovers a
+   previously-attached blob by filter index, mirroring `H5Pget_filter2`'s
+   indexing and `H5Pget_filter_params_by_idx`'s size-query/truncation
+   contract (`buf == NULL` queries the size; `*size` always reports bytes
+   remaining, not bytes copied, so truncation is detectable).  The bytes are
+   copied into property-list-owned storage; there is no fixed size limit
+   analogous to `H5Z_CONFIG_STRING_MAX`.
 
    **New filter class fields:** `H5Z_class3_t` gains three NULL-able
-   callbacks - `write_blob`, `read_blob`, and `close_blob`.  When NULL, the
-   library stores the blob as a global-heap object, reads it back at dataset
-   open, and frees the recovered buffer at dataset close.  Filters that need
-   a custom on-disk layout implement the callbacks; an opaque
-   `H5Z_blob_loc_t` locator is passed unchanged from `write_blob` through the
-   pipeline message to `read_blob`.  `H5Z_class_info_t` gains a
-   `has_blob_callbacks` field reporting whether a filter implements them.
+   callbacks - `write_blob`, `read_blob`, and `close_blob`.  When all three
+   are NULL, the library stores the blob as a global-heap object, reads it
+   back at dataset open, and frees the recovered buffer at dataset close.
+   Filters that need a custom on-disk layout implement `write_blob` and
+   `read_blob` together (registering only one is rejected at
+   `H5Zregister`/`H5Zregister3` time); `read_blob` additionally requires
+   `close_blob`, since the library cannot safely free memory a filter's own
+   `read_blob` allocated. An opaque `H5Z_blob_loc_t` locator is passed
+   unchanged from `write_blob` through the pipeline message to `read_blob`.
+   `H5Z_class_info_t` gains a `has_blob_callbacks` field, true only when a
+   filter implements both `write_blob` and `read_blob`.
 
-   **On-disk format:** A version-3 pipeline message appends a `has_aux` flag
-   byte per filter and, when set, the blob's locator.  Blob bytes live in the
+   **On-disk format:** A version-3 pipeline message appends a 2-byte count
+   of typed, length-delimited "extension blocks" per filter entry (type,
+   flags, a reserved byte, a 4-byte length, and the block's data), currently
+   two block types: a verbatim `key=value` configuration string
+   (non-critical: an older reader that does not recognise it loses
+   introspection fidelity, not correctness) and the blob's locator
+   (critical: a reader that does not recognise it must fail rather than run
+   the filter without configuration it needs). Blob bytes live in the
    global heap, not inline in the object header; deleting the dataset
-   reclaims the heap object.  Writing a blob-bearing dataset requires a
+   reclaims the heap object for filters using the library's default
+   storage (custom-storage filters own their on-disk layout and must
+   reclaim it themselves - the library records on disk, per blob, which
+   case applies, so this does not depend on whether the filter happens to
+   be loaded at delete time). Writing a blob-bearing dataset requires a
    library-version high bound of `H5F_LIBVER_V300` (see below) or later;
    files without blobs are unaffected.
 
    `H5Pencode`/`H5Pdecode` serialize the blob bytes inline so an encoded DCPL
-   is self-contained, and `H5Pcopy` deep-copies them, so `h5repack` carries
-   blobs to the destination file with no tool-specific code.  In parallel
-   HDF5, rank 0 writes the blob and broadcasts the locator so all ranks
-   encode an identical pipeline message.
+   is self-contained, and `H5Pcopy` and `H5Ocopy` share the in-memory buffer
+   by reference count rather than deep-copying it - `H5Ocopy` additionally
+   re-persists the blob into the destination file and assigns it a fresh
+   locator there, so `h5repack` carries blobs to the destination file with
+   no tool-specific code. In parallel HDF5, every rank performs an
+   identical write (a rank-0-writes-then-broadcasts-the-locator design was
+   considered and rejected, since it would leave non-writing ranks with an
+   inconsistent view of file metadata for a subsequent collective
+   operation); a custom `write_blob` callback must do the same.
 
 ### Added the H5F_LIBVER_V300 library version bound
 

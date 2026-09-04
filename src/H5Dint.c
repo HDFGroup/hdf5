@@ -978,6 +978,17 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
     if (H5D__use_minimized_dset_headers(file, &use_minimized_header) == FAIL)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get minimize settings");
 
+    /* Persist any filter blobs so their locators are defined before the
+     * pipeline message is encoded into the object header just below.
+     * Deliberately deferred to the last possible point before the object
+     * header is created (rather than run any earlier in H5D__create()):
+     * writing a blob durably persists it in FILE (via H5HG_insert(), or a
+     * custom write_blob callback) and nothing reclaims it if a later step
+     * fails before the object header -- the only thing that can reference
+     * it for cleanup via H5O_delete() -- exists. */
+    if (H5Z_blob_write(file, &dset->shared->dcpl_cache.pline) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write filter blobs");
+
     if (true == use_minimized_header) {
         if (H5D__prepare_minimized_oh(file, dset, oloc) == FAIL)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create minimized dataset object header");
@@ -1322,11 +1333,6 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
     /* Set the version for the I/O pipeline message */
     if (H5O_pline_set_version(file, &new_dset->shared->dcpl_cache.pline) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of I/O filter pipeline");
-
-    /* Persist any filter blobs so their locators are defined before the
-     * pipeline message is encoded into the object header below */
-    if (H5Z_blob_write(file, &new_dset->shared->dcpl_cache.pline) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to write filter blobs");
 
     /* Set the version for the fill message */
     if (H5O_fill_set_version(file, &new_dset->shared->dcpl_cache.fill) < 0)

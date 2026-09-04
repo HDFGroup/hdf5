@@ -1502,6 +1502,19 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
                 filter.cd_values = (unsigned *)H5MM_xfree(filter.cd_values);
                 HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "encoded filter blob has zero length");
             }
+
+            /* This decode callback has no end-of-buffer pointer to bound
+             * the memcpy below against (see H5Z_BLOB_DECODE_MAX's
+             * comment) -- capping aux_size here is what keeps a
+             * corrupted/malicious H5Pdecode() buffer from driving an
+             * unbounded allocation and an unbounded read past the real
+             * buffer. */
+            if (aux_size64 > H5Z_BLOB_DECODE_MAX) {
+                H5MM_xfree(config);
+                filter.cd_values = (unsigned *)H5MM_xfree(filter.cd_values);
+                HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "encoded filter blob exceeds maximum length");
+            }
+
             if (NULL == (aux_data = H5MM_malloc(aux_size))) {
                 H5MM_xfree(config);
                 filter.cd_values = (unsigned *)H5MM_xfree(filter.cd_values);
@@ -1522,7 +1535,8 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
         /* Attach the decoded config string and blob to the just-appended entry */
         pline->filter[pline->nused - 1].config = config;
         if (aux_data != NULL) {
-            if (NULL == (pline->filter[pline->nused - 1].aux = H5Z_blob_buf_new(aux_data, aux_size, false))) {
+            if (NULL ==
+                (pline->filter[pline->nused - 1].aux = H5Z_blob_buf_new(aux_data, aux_size, false, NULL))) {
                 H5MM_xfree(aux_data);
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for blob buffer");
             }
@@ -2412,13 +2426,28 @@ H5Pappend_filter_blob(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, c
         if (NULL == (aux_copy = H5MM_malloc(size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for filter blob");
         H5MM_memcpy(aux_copy, buf, size);
-        if (NULL == (aux_buf = H5Z_blob_buf_new(aux_copy, size, false)))
+        if (NULL == (aux_buf = H5Z_blob_buf_new(aux_copy, size, false, NULL)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for blob buffer");
     }
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
+
+    /* Restrict to dataset creation property lists.  H5Z_blob_write() --
+     * the routine that actually persists the blob and assigns it a valid
+     * locator -- is called only from the dataset-creation path
+     * (H5D__update_oh_info()); a group creation property list's pipeline
+     * goes through the fractal-heap link-storage path instead, which
+     * never calls it.  Accepting a blob-bearing pipeline there would
+     * bump the pipeline to version 3 and then silently encode no blob
+     * block at all, since aux_loc would never become defined -- losing
+     * the caller's data with no error.  H5P_OBJECT_CREATE (used above)
+     * is the broader class shared with H5P_GROUP_CREATE and
+     * H5P_DATATYPE_CREATE, so it alone does not rule this out. */
+    if (true != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "H5Pappend_filter_blob() is only valid on a dataset creation property list");
 
     /* Get the pipeline property */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)

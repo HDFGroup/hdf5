@@ -525,6 +525,33 @@ H5Z_register3(const H5Z_class3_t *cls)
         }
     }
 
+    /* write_blob and read_blob describe two halves of one storage scheme
+     * and must be supplied together (or both left NULL, selecting the
+     * library's default global-heap storage for both halves).  A filter
+     * registering only one silently falls through to the *default*
+     * handler for the other, which then misinterprets whatever the
+     * custom half produced -- e.g. a custom write_blob's opaque locator
+     * gets handed to H5HG_read() as if it were a real global-heap
+     * address, or a filter expecting its own read_blob to run never
+     * gets the chance because the default reader already consumed the
+     * locator.  Rejecting the mismatch here, at registration, turns a
+     * silent misconfiguration into a clear, actionable error instead of
+     * data corruption discovered later.
+     *
+     * Separately, read_blob's buffer is documented (H5Zdevelop.h) as
+     * "allocated by the callback"; H5Z_blob_release() falls back to
+     * H5MM_xfree() whenever close_blob is NULL, on the assumption that
+     * the buffer came from the library's own allocator.  A read_blob
+     * without a close_blob invites exactly the cross-allocator free
+     * that assumption is meant to avoid, so require the pair. */
+    if ((cls->write_blob != NULL) != (cls->read_blob != NULL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "write_blob and read_blob must be supplied together, or both left NULL");
+    if (cls->read_blob != NULL && cls->close_blob == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "read_blob requires a matching close_blob (the default release path assumes "
+                    "library-allocated memory, which a custom read_blob does not produce)");
+
     /* Build entry */
     memset(&entry, 0, sizeof(entry));
     entry.base.version         = cls->version; /* H5Z_CLASS3_T_VERS_INTERNAL for v3-aware downstream checks */
@@ -2140,19 +2167,24 @@ done:
  * Purpose:  Allocate a reference-counted blob buffer wrapper, taking
  *           ownership of data (nrefs starts at 1).  data must already be
  *           in a form H5Z_blob_release() knows how to free: H5MM-allocated
- *           if from_callback is false, or releasable via the filter's
- *           close_blob callback if true.
+ *           if from_callback is false, or releasable via close_blob if
+ *           true -- close_blob is captured here, at creation time, rather
+ *           than re-resolved from the filter table when the last
+ *           reference is released, since the filter may be
+ *           H5Zunregister()'d in between.
  *
  * Return:   Non-NULL on success / NULL on failure
  *-------------------------------------------------------------------------
  */
 H5Z_blob_buf_t *
-H5Z_blob_buf_new(void *data, size_t size, bool from_callback)
+H5Z_blob_buf_new(void *data, size_t size, bool from_callback, H5Z_close_blob_func_t close_blob)
 {
     H5Z_blob_buf_t *buf;
     H5Z_blob_buf_t *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    assert(from_callback || close_blob == NULL);
 
     if (NULL == (buf = H5MM_malloc(sizeof(H5Z_blob_buf_t))))
         HGOTO_ERROR(H5E_PLINE, H5E_CANTALLOC, NULL, "memory allocation failed for blob buffer");
@@ -2160,6 +2192,7 @@ H5Z_blob_buf_new(void *data, size_t size, bool from_callback)
     buf->data          = data;
     buf->size          = size;
     buf->from_callback = from_callback;
+    buf->close_blob    = close_blob;
     buf->nrefs         = 1;
 
     ret_value = buf;
@@ -2197,8 +2230,13 @@ H5Z_blob_buf_incref(H5Z_blob_buf_t *buf)
  *           every H5Pcopy/H5Dcreate of the pipeline it was attached to,
  *           so it is only actually freed when the last reference goes
  *           away.  A buffer recovered by the filter's read_blob callback
- *           is released through its close_blob callback (allocator
- *           symmetry); library-owned copies use H5MM.  Safe to call on
+ *           is released through the close_blob callback captured at
+ *           H5Z_blob_buf_new() time (allocator symmetry) rather than a
+ *           fresh filter-table lookup here -- the filter may have been
+ *           H5Zunregister()'d since the buffer was created, and a lookup
+ *           at this point would silently fall back to H5MM_xfree() on
+ *           memory that callback's own (possibly non-H5MM) allocator
+ *           produced.  Library-owned copies use H5MM.  Safe to call on
  *           entries with no blob.
  *
  * Return:   void
@@ -2215,11 +2253,8 @@ H5Z_blob_release(H5Z_filter_info_t *fi)
         assert(fi->aux->nrefs > 0);
         if (--fi->aux->nrefs == 0) {
             if (fi->aux->from_callback) {
-                H5Z_entry_t *entry = NULL;
-
-                (void)H5Z_find_entry(false, fi->id, &entry);
-                if (entry && entry->close_blob)
-                    (void)(entry->close_blob)(fi->aux->data, fi->aux->size);
+                if (fi->aux->close_blob)
+                    (void)(fi->aux->close_blob)(fi->aux->data, fi->aux->size);
                 else
                     H5MM_xfree(fi->aux->data);
             }
@@ -2277,6 +2312,7 @@ H5Z_blob_write(H5F_t *f, H5O_pline_t *pline)
         H5Z_filter_info_t *fi    = &pline->filter[u];
         H5Z_entry_t       *entry = NULL;
         H5Z_blob_loc_t     loc;
+        bool               default_storage;
 
         if (fi->aux == NULL)
             continue;
@@ -2289,6 +2325,8 @@ H5Z_blob_write(H5F_t *f, H5O_pline_t *pline)
         if (entry && entry->write_blob) {
             hid_t file_id;
 
+            default_storage = false;
+
             if ((file_id = H5F_get_id(f)) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get file ID for blob callback");
             if ((entry->write_blob)(file_id, fi->aux->data, fi->aux->size, &loc) < 0) {
@@ -2300,6 +2338,8 @@ H5Z_blob_write(H5F_t *f, H5O_pline_t *pline)
         }
         else {
             H5HG_t hobj;
+
+            default_storage = true;
 
             if (H5HG_insert(f, fi->aux->size, fi->aux->data, &hobj) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTINSERT, FAIL, "unable to insert filter blob into global heap");
@@ -2331,7 +2371,8 @@ H5Z_blob_write(H5F_t *f, H5O_pline_t *pline)
         }
 #endif
 
-        fi->aux_loc = loc;
+        fi->aux_loc              = loc;
+        fi->blob_default_storage = default_storage;
     }
 
 done:
@@ -2395,7 +2436,8 @@ H5Z_blob_read(H5F_t *f, H5O_pline_t *pline)
             from_callback = false; /* H5HG_read allocates with H5MM */
         }
 
-        if (NULL == (fi->aux = H5Z_blob_buf_new(data, size, from_callback))) {
+        if (NULL ==
+            (fi->aux = H5Z_blob_buf_new(data, size, from_callback, from_callback ? entry->close_blob : NULL))) {
             if (from_callback) {
                 if (entry && entry->close_blob)
                     (void)(entry->close_blob)(data, size);
@@ -2492,7 +2534,13 @@ H5Zget_filter_class_info(H5Z_filter_t filter, H5Z_class_info_t *info /*out*/)
     info->description        = entry->description; /* may be NULL */
     info->has_set_config     = (entry->set_config != NULL);
     info->has_get_config     = (entry->get_config != NULL);
-    info->has_blob_callbacks = (entry->write_blob != NULL || entry->read_blob != NULL);
+    /* AND, not OR: H5Z_register3() now rejects registering only one of the
+     * two, so in practice they are always both-NULL or both-set -- but
+     * report the conjunction regardless, so this field's documented
+     * meaning ("implements its own write_blob/read_blob callbacks",
+     * plural) stays correct even for an entry from a code path that
+     * predates or bypasses that check. */
+    info->has_blob_callbacks = (entry->write_blob != NULL && entry->read_blob != NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)
