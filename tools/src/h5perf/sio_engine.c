@@ -1127,7 +1127,7 @@ set_vfd(parameters *param)
     }
     else if (vfd == core) {
         /* In-core temporary file with 1MB increment */
-        if (H5Pset_fapl_core(my_fapl, (size_t)1024 * 1024, true) < 0)
+        if (H5Pset_fapl_core(my_fapl, 0, (size_t)1024 * 1024, true) < 0)
             return -1;
     }
     else if (vfd == split) {
@@ -1282,7 +1282,7 @@ do_cleanupfile(iotype iot, char *filename)
                 else if (driver == H5FD_CORE) {
                     bool backing; /* Whether the core file has backing store */
 
-                    H5Pget_fapl_core(fapl, NULL, &backing);
+                    H5Pget_fapl_core(fapl, NULL, NULL, &backing);
 
                     /* If the file was stored to disk with bacing store, remove it */
                     if (backing)

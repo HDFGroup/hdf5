@@ -3464,8 +3464,8 @@ H5_DLL herr_t H5Pget_cache(hid_t plist_id, int *mdc_nelmts, /* out */
  *
  * \note This function only applies to the backing store write operation,
  *       which typically occurs when the file is flushed or closed. This
- *       function has no relationship to the increment parameter passed
- *       to H5Pset_fapl_core().
+ *       function has no relationship to the initial_size or increment
+ *       parameters passed to H5Pset_fapl_core().
  *
  * \note For optimum performance, the \p page_size parameter should be
  *       a power of two.
@@ -4364,7 +4364,8 @@ H5_DLL herr_t H5Pset_cache(hid_t plist_id, int mdc_nelmts, size_t rdcc_nslots, s
  *            This function only applies to the backing store write
  *            operation which typically occurs when the file is flushed
  *            or closed. This function has no relationship to the
- *            increment parameter passed to H5Pset_fapl_core().
+ *            initial_size or increment parameters passed to
+ *            H5Pset_fapl_core().
  *
  *            For optimum performance, the \p page_size parameter should be
  *            a power of two.

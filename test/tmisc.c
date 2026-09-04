@@ -1814,7 +1814,7 @@ test_misc9(void)
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
 
-    ret = H5Pset_fapl_core(fapl, (size_t)1024, 0);
+    ret = H5Pset_fapl_core(fapl, 0, (size_t)1024, 0);
     CHECK(ret, FAIL, "H5Pset_fapl_core");
 
     H5E_BEGIN_TRY
