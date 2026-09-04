@@ -82,7 +82,10 @@ H5G__compact_build_table_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void
     /* check arguments */
     assert(lnk);
     assert(udata);
-    assert(udata->curr_lnk < udata->ltable->nlinks);
+
+    if (udata->curr_lnk >= udata->ltable->nlinks)
+        HGOTO_ERROR(H5E_SYM, H5E_OVERFLOW, H5_ITER_ERROR,
+                    "compact link messages exceed the declared link count");
 
     /* Copy link message into table */
     if (NULL == H5O_msg_copy(H5O_LINK_ID, lnk, &(udata->ltable->lnks[udata->curr_lnk])))
@@ -110,7 +113,8 @@ static herr_t
 H5G__compact_build_table(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5_index_t idx_type,
                          H5_iter_order_t order, H5G_link_table_t *ltable)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    haddr_t eoa;                  /* End of allocated space in the file */
+    herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -119,8 +123,13 @@ H5G__compact_build_table(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5_ind
     assert(linfo);
     assert(ltable);
 
+    /* Reject counts that cannot be represented by the file or allocation. */
+    if (HADDR_UNDEF == (eoa = H5F_get_eoa(oloc->file, H5FD_MEM_DEFAULT)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to determine file size");
+    if (linfo->nlinks > eoa || linfo->nlinks > (hsize_t)(SIZE_MAX / sizeof(*ltable->lnks)))
+        HGOTO_ERROR(H5E_SYM, H5E_OVERFLOW, FAIL, "invalid compact link count");
+
     /* Set size of table */
-    H5_CHECK_OVERFLOW(linfo->nlinks, hsize_t, size_t);
     ltable->nlinks = (size_t)linfo->nlinks;
 
     /* Allocate space for the table entries */
@@ -141,6 +150,11 @@ H5G__compact_build_table(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5_ind
         op.u.app_op = H5G__compact_build_table_cb;
         if (H5O_msg_iterate(oloc, H5O_LINK_ID, &op, &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over link messages");
+
+        /* The link-info count and the number of link messages must agree. */
+        if (udata.curr_lnk != ltable->nlinks)
+            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL,
+                        "compact link count does not match the link messages found");
 
         /* Sort link table in correct iteration order */
         if (H5G__link_sort_table(ltable, idx_type, order) < 0)

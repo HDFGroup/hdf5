@@ -753,7 +753,8 @@ herr_t
 H5G__dense_build_table(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type, H5_iter_order_t order,
                        H5G_link_table_t *ltable)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    haddr_t eoa;                  /* End of allocated space in the file */
+    herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -762,8 +763,13 @@ H5G__dense_build_table(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type, 
     assert(linfo);
     assert(ltable);
 
+    /* Reject counts that cannot be represented by the file or allocation. */
+    if (HADDR_UNDEF == (eoa = H5F_get_eoa(f, H5FD_MEM_DEFAULT)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to determine file size");
+    if (linfo->nlinks > eoa || linfo->nlinks > (hsize_t)(SIZE_MAX / sizeof(*ltable->lnks)))
+        HGOTO_ERROR(H5E_SYM, H5E_OVERFLOW, FAIL, "invalid dense link index record count");
+
     /* Set size of table */
-    H5_CHECK_OVERFLOW(linfo->nlinks, /* From: */ hsize_t, /* To: */ size_t);
     ltable->nlinks = (size_t)linfo->nlinks;
 
     /* Allocate space for the table entries */

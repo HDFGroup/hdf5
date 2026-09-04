@@ -816,7 +816,8 @@ done:
 static herr_t
 H5G__obj_remove_update_linfo(const H5O_loc_t *oloc, H5O_linfo_t *linfo)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5G_link_table_t ltable    = {0, NULL}; /* Table of links */
+    herr_t           ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -841,7 +842,7 @@ H5G__obj_remove_update_linfo(const H5O_loc_t *oloc, H5O_linfo_t *linfo)
         } /* end if */
         /* Check for switching back to compact storage */
         else {
-            H5O_ginfo_t ginfo; /* Group info message            */
+            H5O_ginfo_t ginfo; /* Group info message */
 
             /* Get the group info */
             if (NULL == H5O_msg_read(oloc, H5O_GINFO_ID, &ginfo))
@@ -849,10 +850,9 @@ H5G__obj_remove_update_linfo(const H5O_loc_t *oloc, H5O_linfo_t *linfo)
 
             /* Check if we should switch from dense storage back to link messages */
             if (linfo->nlinks < ginfo.min_dense) {
-                struct H5O_t    *oh = NULL;          /* Pointer to group's object header */
-                H5G_link_table_t ltable;             /* Table of links */
-                bool             can_convert = true; /* Whether converting to link messages is possible */
-                size_t           u;                  /* Local index */
+                struct H5O_t *oh          = NULL; /* Pointer to group's object header */
+                bool          can_convert = true; /* Whether converting to link messages is possible */
+                size_t        u;                  /* Local index */
 
                 /* Build the table of links for this group */
                 if (H5G__dense_build_table(oloc->file, linfo, H5_INDEX_NAME, H5_ITER_NATIVE, &ltable) < 0)
@@ -895,10 +895,6 @@ H5G__obj_remove_update_linfo(const H5O_loc_t *oloc, H5O_linfo_t *linfo)
                 /* Release object header */
                 if (H5O_unpin(oh) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTUNPIN, FAIL, "unable to unpin group object header");
-
-                /* Free link table information */
-                if (H5G__link_release_table(&ltable) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table");
             } /* end if */
         }     /* end else */
     }         /* end if */
@@ -908,6 +904,10 @@ H5G__obj_remove_update_linfo(const H5O_loc_t *oloc, H5O_linfo_t *linfo)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update link info message");
 
 done:
+    /* Release resources */
+    if (ltable.lnks && H5G__link_release_table(&ltable) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table");
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__obj_remove_update_linfo() */
 
