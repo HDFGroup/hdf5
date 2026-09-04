@@ -28,6 +28,8 @@ static herr_t H5TB_attach_attributes(const char *table_title, hid_t loc_id, cons
 static hid_t H5TB_create_type(hid_t loc_id, const char *dset_name, size_t type_size,
                               const size_t *field_offset, const size_t *field_sizes, hid_t ftype_id);
 
+static herr_t H5TB_get_title(hid_t loc_id, char *title, size_t title_size);
+
 /*-------------------------------------------------------------------------
  *
  * Create functions
@@ -2027,7 +2029,7 @@ H5TBinsert_field(hid_t loc_id, const char *dset_name, const char *field_name, hi
      */
 
     /* get the table title */
-    if ((H5TBAget_title(did_1, table_title)) < 0)
+    if (H5TB_get_title(did_1, table_title, sizeof(table_title)) < 0)
         goto out;
 
     /* alloc fill value attribute buffer */
@@ -2502,7 +2504,7 @@ H5TBdelete_field(hid_t loc_id, const char *dset_name, const char *field_name)
      */
 
     /* get the table title */
-    if ((H5TBAget_title(did_1, table_title)) < 0)
+    if (H5TB_get_title(did_1, table_title, sizeof(table_title)) < 0)
         goto out;
 
     /* insert the old fields except the one to delete */
@@ -2804,6 +2806,61 @@ out:
  *
  *-------------------------------------------------------------------------
  */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TB_get_title
+ *
+ * Purpose: Read the TITLE attribute into a caller-supplied buffer without
+ *          writing past it. H5TBAget_title() hands the buffer straight to
+ *          H5Aread(), which copies the whole stored attribute, so a table
+ *          whose TITLE is longer than the buffer overruns it. Read into a
+ *          buffer sized to the stored attribute instead and copy back a
+ *          bounded, NUL-terminated title.
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5TB_get_title(hid_t loc_id, char *title, size_t title_size)
+{
+    hid_t  attr_id   = H5I_INVALID_HID;
+    hid_t  attr_type = H5I_INVALID_HID;
+    size_t attr_size;
+    size_t copy_len;
+    char  *buf     = NULL;
+    herr_t ret_val = -1;
+
+    if (title == NULL || title_size == 0)
+        goto out;
+
+    if ((attr_id = H5Aopen(loc_id, "TITLE", H5P_DEFAULT)) < 0)
+        goto out;
+    if ((attr_type = H5Aget_type(attr_id)) < 0)
+        goto out;
+    if (0 == (attr_size = H5Tget_size(attr_type)))
+        goto out;
+
+    if (NULL == (buf = (char *)malloc(attr_size)))
+        goto out;
+    if (H5Aread(attr_id, attr_type, buf) < 0)
+        goto out;
+
+    copy_len = (attr_size < title_size) ? attr_size : title_size - 1;
+    memcpy(title, buf, copy_len);
+    title[copy_len] = '\0';
+
+    ret_val = 0;
+
+out:
+    free(buf);
+    if (attr_type != H5I_INVALID_HID)
+        H5Tclose(attr_type);
+    if (attr_id != H5I_INVALID_HID)
+        H5Aclose(attr_id);
+
+    return ret_val;
+}
 
 /*-------------------------------------------------------------------------
  * Function: H5TBAget_title
