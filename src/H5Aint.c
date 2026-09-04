@@ -1657,7 +1657,7 @@ H5A__dense_build_table(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type, 
                        H5A_attr_table_t *atable)
 {
     H5B2_t *bt2_name = NULL;     /* v2 B-tree handle for name index */
-    haddr_t eoa;                  /* End of allocated space in the file */
+    haddr_t eoa;                 /* End of allocated space in the file */
     hsize_t nrec;                /* # of records in v2 B-tree */
     herr_t  ret_value = SUCCEED; /* Return value */
 

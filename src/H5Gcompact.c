@@ -113,7 +113,7 @@ static herr_t
 H5G__compact_build_table(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5_index_t idx_type,
                          H5_iter_order_t order, H5G_link_table_t *ltable)
 {
-    haddr_t eoa;                  /* End of allocated space in the file */
+    haddr_t eoa;                 /* End of allocated space in the file */
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
