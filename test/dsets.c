@@ -109,6 +109,7 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
 #define DSET_DEFLATE_NAME "deflate"
 #endif
 #define DSET_SHUFFLE_NAME      "shuffle"
+#define DSET_SHUFFLE_NAME2     "shuffle_h5z_max_nfilters"
 #define DSET_FLETCHER32_NAME   "fletcher32"
 #define DSET_FLETCHER32_NAME_2 "fletcher32_2"
 #define DSET_FLETCHER32_NAME_3 "fletcher32_3"
@@ -2839,9 +2840,10 @@ error:
 static herr_t
 test_filters(hid_t file)
 {
-    hid_t         dc; /* Dataset creation property list ID */
+    hid_t         dc            = H5I_INVALID_HID; /* Dataset creation property list ID */
     const hsize_t chunk_size[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2}; /* Chunk dimensions */
     hsize_t       null_size; /* Size of dataset with null filter */
+    herr_t        status;
 
     hsize_t  fletcher32_size; /* Size of dataset with Fletcher32 checksum */
     unsigned data_corrupt[3]; /* position and length of data to be corrupted */
@@ -3163,9 +3165,64 @@ test_filters(hid_t file)
     SKIPPED();
     puts("    szip filter not enabled");
 #endif /* H5_HAVE_FILTER_SZIP */
+
+    /*----------------------------------------------------------
+     * STEP 7: Test filter pipeline containing H5Z_MAX_NFILTERS
+     *         filters
+     *----------------------------------------------------------
+     */
+    TESTING("filter pipeline with H5Z_MAX_NFILTERS filters");
+    if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+    if (H5Pset_chunk(dc, 2, chunk_size) < 0)
+        goto error;
+    for (size_t i = 0; i < H5Z_MAX_NFILTERS; i++)
+        if (H5Pset_shuffle(dc) < 0)
+            goto error;
+
+    puts("");
+    if (test_filter_internal(file, DSET_SHUFFLE_NAME2, dc, DISABLE_FLETCHER32, DATA_NOT_CORRUPTED,
+                             &shuffle_size) < 0)
+        goto error;
+
+    if (H5Pclose(dc) < 0)
+        goto error;
+
+    /*----------------------------------------------------------
+     * STEP 8: Test trying to add more than H5Z_MAX_NFILTERS
+     *         filters to a pipeline
+     *----------------------------------------------------------
+     */
+    TESTING("filter pipeline with more than H5Z_MAX_NFILTERS filters");
+    if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+    if (H5Pset_chunk(dc, 2, chunk_size) < 0)
+        goto error;
+    for (size_t i = 0; i < H5Z_MAX_NFILTERS; i++)
+        if (H5Pset_shuffle(dc) < 0)
+            goto error;
+
+    H5E_BEGIN_TRY
+    {
+        status = H5Pset_shuffle(dc);
+    }
+    H5E_END_TRY
+    if (status > 0)
+        goto error;
+
+    if (H5Pclose(dc) < 0)
+        goto error;
+    PASSED();
+
     return SUCCEED;
 
 error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dc);
+    }
+    H5E_END_TRY
+
     return FAIL;
 } /* end test_filters() */
 
