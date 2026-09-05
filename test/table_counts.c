@@ -44,28 +44,28 @@ check_link(const H5O_link_t *lnk, void *op_data)
 static int
 test_table_counts(bool attributes, bool dense)
 {
-    hid_t             file = H5I_INVALID_HID, group = H5I_INVALID_HID;
-    hid_t             gcpl = H5I_INVALID_HID, space = H5I_INVALID_HID, attr = H5I_INVALID_HID;
-    H5G_t            *grp;
-    H5O_loc_t        *oloc;
-    H5O_linfo_t       linfo;
-    H5O_ainfo_t       ainfo;
-    H5B2_t           *bt2 = NULL;
-    H5G_link_table_t  ltable = {0, NULL};
-    H5A_attr_table_t  atable = {0, 0, NULL};
-    H5CX_node_t       api_ctx = {{0}, NULL};
-    bool              pushed = false;
-    hsize_t           saved_count = 0;
-    unsigned          saved_node_count = 0;
-    const hsize_t     counts[] = {0, 1, NRECORDS - 1, NRECORDS, NRECORDS + 1,
-                                 (hsize_t)0x3ffffffd, (hsize_t)0x3fffffff, HSIZET_MAX};
-    char              name[32];
-    herr_t            status;
-    unsigned          seen;
+    hid_t            file = H5I_INVALID_HID, group = H5I_INVALID_HID;
+    hid_t            gcpl = H5I_INVALID_HID, space = H5I_INVALID_HID, attr = H5I_INVALID_HID;
+    H5G_t           *grp;
+    H5O_loc_t       *oloc;
+    H5O_linfo_t      linfo;
+    H5O_ainfo_t      ainfo;
+    H5B2_t          *bt2              = NULL;
+    H5G_link_table_t ltable           = {0, NULL};
+    H5A_attr_table_t atable           = {0, 0, NULL};
+    H5CX_node_t      api_ctx          = {{0}, NULL};
+    bool             pushed           = false;
+    hsize_t          saved_count      = 0;
+    unsigned         saved_node_count = 0;
+    const hsize_t    counts[]         = {
+        0, 1, NRECORDS - 1, NRECORDS, NRECORDS + 1, (hsize_t)0x3ffffffd, (hsize_t)0x3fffffff, HSIZET_MAX};
+    char     name[32];
+    herr_t   status;
+    unsigned seen;
 
     TESTING(attributes ? "dense attribute tables with fabricated counts"
-                       : dense ? "dense link tables with fabricated counts"
-                               : "compact link tables with fabricated counts");
+            : dense ? "dense link tables with fabricated counts"
+                    : "compact link tables with fabricated counts");
 
     if ((file = H5Fcreate("table_counts.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
@@ -140,7 +140,7 @@ test_table_counts(bool attributes, bool dense)
                     status = H5G__dense_build_table(oloc->file, &linfo, H5_INDEX_NAME, H5_ITER_INC, &ltable);
                 else
                     status = H5G__compact_iterate(oloc, &linfo, H5_INDEX_NAME, H5_ITER_INC, 0, NULL,
-                                                 check_link, &seen);
+                                                  check_link, &seen);
             }
             H5E_END_TRY
             if (counts[i] != actual) {

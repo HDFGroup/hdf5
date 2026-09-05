@@ -1660,10 +1660,10 @@ herr_t
 H5A__dense_build_table(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type, H5_iter_order_t order,
                        H5A_attr_table_t *atable)
 {
-    H5B2_t           *bt2_name = NULL;     /* v2 B-tree handle for name index */
+    H5B2_t            *bt2_name = NULL;     /* v2 B-tree handle for name index */
     H5A_attr_iter_op_t attr_op;             /* Attribute operator */
-    hsize_t           nrec;                /* # of records in v2 B-tree */
-    herr_t            ret_value = SUCCEED; /* Return value */
+    hsize_t            nrec;                /* # of records in v2 B-tree */
+    herr_t             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1692,7 +1692,7 @@ H5A__dense_build_table(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type, 
 
     /* Visit records even when the declared count is zero. */
     if (H5A__dense_iterate(f, (hid_t)0, ainfo, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL, &attr_op,
-                         atable) < 0)
+                           atable) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table");
 
     /* Reject inconsistent metadata without allocating from the stored count. */

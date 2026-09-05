@@ -737,7 +737,7 @@ H5G__dense_build_table(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type, 
                        H5G_link_table_t *ltable)
 {
     H5G_dense_bt_ud_t udata;               /* User data for iteration callback */
-    herr_t           ret_value = SUCCEED; /* Return value */
+    herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 

@@ -562,11 +562,11 @@ H5G__link_append_table(H5G_link_table_t *ltable, size_t *capacity, const H5O_lin
         if (*capacity >= max_capacity)
             HGOTO_ERROR(H5E_RESOURCE, H5E_OVERFLOW, FAIL, "link table is too large");
         new_capacity = *capacity > max_capacity / 2 ? max_capacity : MAX(1, 2 * *capacity);
-        if (NULL == (new_table = (H5O_link_t *)H5MM_realloc(ltable->lnks,
-                                                          new_capacity * sizeof(*ltable->lnks))))
+        if (NULL ==
+            (new_table = (H5O_link_t *)H5MM_realloc(ltable->lnks, new_capacity * sizeof(*ltable->lnks))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to extend link table");
         ltable->lnks = new_table;
-        *capacity   = new_capacity;
+        *capacity    = new_capacity;
     }
 
     /* H5O_msg_copy cleans up its copy on failure; do not count that slot. */

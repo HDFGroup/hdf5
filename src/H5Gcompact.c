@@ -104,7 +104,7 @@ H5G__compact_build_table(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5_ind
 {
     H5G_iter_bt_t       udata;               /* User data for iteration callback */
     H5O_mesg_operator_t op;                  /* Message operator */
-    herr_t             ret_value = SUCCEED; /* Return value */
+    herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
