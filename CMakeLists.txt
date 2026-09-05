@@ -513,6 +513,7 @@ include (${HDF_CONFIG_DIR}/HDFMacros.cmake)
 HDF_DIR_PATHS(${HDF5_PACKAGE_NAME})
 
 include (${HDF_CONFIG_DIR}/HDF5Macros.cmake)
+include (${HDF_RESOURCES_DIR}/HDF5PublicTargets.cmake)
 
 #-----------------------------------------------------------------------------
 # Targets built within this project are exported at Install time for use
@@ -1389,6 +1390,44 @@ if (EXISTS "${HDF5_SOURCE_DIR}/java" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/java")
       endif ()
       add_subdirectory (java)
     endif ()
+  endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
+# Define stable, linkage-agnostic public target names (hdf5::hdf5 and
+# friends) as aliases onto the built targets.
+#
+# This must appear AFTER every library and tool add_subdirectory() call, so
+# that all of the concrete targets exist and HDF5_UTILS_TO_EXPORT has
+# collected the full set of tool executables. It must appear BEFORE
+# HDF5Examples is added, so that the examples can consume the public names.
+#
+# The same names are defined for an installed package by hdf5-config.cmake,
+# which calls the same function from the same module.
+#-----------------------------------------------------------------------------
+set (H5PUB_CONCRETE_hdf5_static            "${HDF5_LIB_TARGET}")
+set (H5PUB_CONCRETE_hdf5_shared            "${HDF5_LIBSH_TARGET}")
+set (H5PUB_CONCRETE_hdf5_hl_static         "${HDF5_HL_LIB_TARGET}")
+set (H5PUB_CONCRETE_hdf5_hl_shared         "${HDF5_HL_LIBSH_TARGET}")
+set (H5PUB_CONCRETE_hdf5_cpp_static        "${HDF5_CPP_LIB_TARGET}")
+set (H5PUB_CONCRETE_hdf5_cpp_shared        "${HDF5_CPP_LIBSH_TARGET}")
+set (H5PUB_CONCRETE_hdf5_hl_cpp_static     "${HDF5_HL_CPP_LIB_TARGET}")
+set (H5PUB_CONCRETE_hdf5_hl_cpp_shared     "${HDF5_HL_CPP_LIBSH_TARGET}")
+set (H5PUB_CONCRETE_hdf5_fortran_static    "${HDF5_F90_LIB_TARGET}")
+set (H5PUB_CONCRETE_hdf5_fortran_shared    "${HDF5_F90_LIBSH_TARGET}")
+set (H5PUB_CONCRETE_hdf5_hl_fortran_static "${HDF5_HL_F90_LIB_TARGET}")
+set (H5PUB_CONCRETE_hdf5_hl_fortran_shared "${HDF5_HL_F90_LIBSH_TARGET}")
+
+h5_define_public_tools (TOOLS ${HDF5_UTILS_TO_EXPORT})
+if (H5PUB_ERROR)
+  message (FATAL_ERROR "${H5PUB_ERROR}")
+endif ()
+
+h5_default_public_linkage ("${BUILD_SHARED_LIBS}" "${BUILD_STATIC_LIBS}" HDF5_PUBLIC_TARGET_LINKAGE)
+if (HDF5_PUBLIC_TARGET_LINKAGE)
+  h5_define_public_targets (LINKAGE ${HDF5_PUBLIC_TARGET_LINKAGE})
+  if (H5PUB_ERROR)
+    message (FATAL_ERROR "${H5PUB_ERROR}")
   endif ()
 endif ()
 
