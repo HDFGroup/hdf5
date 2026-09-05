@@ -302,29 +302,30 @@ typedef struct H5D_chunk_iter_ud_t {
 } H5D_chunk_iter_ud_t;
 
 #ifdef H5_HAVE_CONCURRENCY
+/* Information about a single chunk in an internally concurrent operation */
 typedef struct H5D_threaded_chunk_info_t {
-    struct H5D_threaded_io_info_t *threaded_io_info;
-    H5O_pline_t                   *old_pline;
-    H5D_chunk_ud_t                 udata;
-    size_t                         chunk_nbytes;
-    size_t                         buf_alloc;
-    void                          *chunk;
-    hsize_t                        src_accessed_bytes;
-    H5D_dset_io_info_t             chk_dset_io_info;
+    struct H5D_threaded_io_info_t *threaded_io_info;   /* Pointer to the dataset-global struct for this operation */
+    H5O_pline_t                   *old_pline;          /* Filter pipeline used to compress this chunk */
+    H5D_chunk_ud_t                 udata;              /* Chunk udata struct (from lookup */
+    size_t                         chunk_nbytes;       /* Size of chunk on disk */
+    size_t                         buf_alloc;          /* Allocated size of chunk buffer */
+    void                          *chunk;              /* Chunk buffer */
+    hsize_t                        src_accessed_bytes; /* Number of bytes accessed in the chunk */
+    H5D_dset_io_info_t             chk_dset_io_info;   /* Temporary dataset I/O info for individual chunk I/O */
 } H5D_threaded_chunk_info_t;
 
+/* Dataset-global information about an internally concurrent operation */
 typedef struct H5D_threaded_io_info_t {
-    H5D_threaded_chunk_info_t *chunk_info;
-    H5D_dset_io_info_t        *dset_info;
-    H5D_io_info_t              cpt_io_info;
-    size_t                     num_chunks;
-    size_t                     chunk_nalloc;
-    size_t                     chunk_size;
-    H5TS_semaphore_t           sem;
-    bool                       sem_init;
-    H5Z_EDC_t                  err_detect;
-    H5Z_cb_t                   filter_cb;
-    bool                       failed;
+    H5D_threaded_chunk_info_t *chunk_info;   /* Array of info structs for each chunk */
+    H5D_dset_io_info_t        *dset_info;    /* Dataset I/O info */
+    H5D_io_info_t              cpt_io_info;  /* I/O info struct for memory scatter */
+    size_t                     num_chunks;   /* Number of chunks in concurrent operation */
+    size_t                     chunk_nalloc; /* Allocated size of chunk_info array */
+    size_t                     chunk_size;   /* Size of an unfiltered chunk */
+    H5TS_semaphore_t           sem;          /* Semaphore for waiting on threads */
+    bool                       sem_init;     /* Whether the semaphore has been initialized */
+    bool                       failed;       /* Whether any threads failed */
+    hid_t                      dxpl_id;      /* Dataset transfer property list ID */
 } H5D_threaded_io_info_t;
 #endif /* H5_HAVE_CONCURRENCY */
 
@@ -2950,6 +2951,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
     H5D_chunk_ud_t     udata;                       /* Chunk index pass-through    */
 #ifdef H5_HAVE_CONCURRENCY
     H5D_threaded_io_info_t *threaded_io_info = NULL; /* Info for concurrent threaded execution */
+    unsigned                threads_in_flight = 0;   /* Number of threads currently executing */
 #endif                                               /* H5_HAVE_CONCURRENCY */
     herr_t ret_value = SUCCEED;                      /*return value        */
 
@@ -3162,6 +3164,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if threading is enabled");
 
             if (do_threading) {
+                /* Allocate threaded I/O infor struct */
                 if (NULL == (threaded_io_info = H5MM_calloc(sizeof(H5D_threaded_io_info_t))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate threaded I/O info struct");
 
@@ -3185,14 +3188,16 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                  * for each chunk */
                 threaded_io_info->num_chunks = 0;
 
-                /* Retrieve filter settings from API context */
-                if (H5CX_get_err_detect(&threaded_io_info->err_detect) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get error detection info");
-                if (H5CX_get_filter_cb(&threaded_io_info->filter_cb) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function");
-
                 /* Cache chunk size */
                 threaded_io_info->chunk_size = dset_info->dset->shared->layout.u.chunk.size;
+
+                /* If a non-default DXPL is set, save the DXPL for the threads to use. Note that this means
+                 * that H5CX_get* operations must be protected by a mutex unless we're sure they've been
+                 * cached previously */
+                if (!H5CX_is_def_dxpl())
+                    threaded_io_info->dxpl_id = H5CX_get_dxpl();
+                else
+                    threaded_io_info->dxpl_id = H5I_INVALID_HID;
             }
         }
 #endif /* H5_HAVE_CONCURRENCY */
@@ -3384,12 +3389,16 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                     if (H5_UNLIKELY(H5TS_pool_add_task(H5TS_pool_g, H5D__chunk_thread_read,
                                                        &(threaded_io_info->chunk_info[i])) < 0))
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't launch worker thread");
+                    threads_in_flight++;
                 }
 
                 /* Wait for all worker tasks to complete */
-                for (size_t i = 0; i < threaded_io_info->num_chunks; i++)
+                assert(threads_in_flight);
+                do {
                     if (H5_UNLIKELY(H5TS_semaphore_wait(&threaded_io_info->sem) < 0))
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTWAIT, FAIL, "can't wait for worker thread");
+                    threads_in_flight--;
+                } while (threads_in_flight);
 
                 /* Mark that we are no longer concurrent */
                 H5TS_currently_concurrent_g = false;
@@ -3458,7 +3467,15 @@ done:
 #ifdef H5_HAVE_CONCURRENCY
         /* Free threaded I/O info struct */
         if (threaded_io_info) {
-            assert(ret_value < 0);
+            /* Wait for any threads to finish */
+            while (threads_in_flight) {
+                if (H5TS_semaphore_wait(&threaded_io_info->sem) < 0)
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTWAIT, FAIL, "can't wait for worker thread");
+                threads_in_flight--;
+            }
+
+            /* Mark that we are no longer concurrent */
+            H5TS_currently_concurrent_g = false;
 
             /* Unlock all chunks */
             if (threaded_io_info->chunk_info)
@@ -3491,6 +3508,8 @@ done:
     assert(!chunk);
 #ifdef H5_HAVE_CONCURRENCY
     assert(!threaded_io_info);
+    assert(!threads_in_flight);
+    assert(!H5TS_currently_concurrent_g);
 #endif /* H5_HAVE_CONCURRENCY */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3532,6 +3551,10 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context");
     api_ctx_pushed = true;
 
+    /* Set DXPL on context if it exists */
+    if (threaded_chunk_info->threaded_io_info->dxpl_id != H5I_INVALID_HID)
+        H5CX_set_dxpl(threaded_chunk_info->threaded_io_info->dxpl_id);
+
     /* Lock internal mutex */
     if (H5_UNLIKELY(H5TS_internal_lock() < 0))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't lock internal mutex");
@@ -3549,6 +3572,8 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
     mutex_held = false;
 
     if (threaded_chunk_info->old_pline) {
+        H5Z_EDC_t err_detect;
+        H5Z_cb_t  filter_cb;
 #ifndef NDEBUG
         void *old_chunk = threaded_chunk_info->chunk;
 #endif /* NDEBUG */
@@ -3560,19 +3585,24 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
         mutex_held = true;
 #endif /* H5_UNSAFE_CONCURRENCY */
 
-        /* Perform filter pipeline */
+        /* Retrieve filter settings from API context. These must be protected by a mutex if using a
+         * non-default DXPL. */
+        if (H5CX_get_err_detect(&err_detect) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get error detection info");
+        if (H5CX_get_filter_cb(&filter_cb) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function");
+
+        /* Perform filter pipeline. Defer going to done on error so the chunk cache is always patched. */
         if (H5_UNLIKELY(H5Z_pipeline(threaded_chunk_info->old_pline, H5Z_FLAG_REVERSE,
                                      &(threaded_chunk_info->udata.filter_mask),
-                                     threaded_chunk_info->threaded_io_info->err_detect,
-                                     threaded_chunk_info->threaded_io_info->filter_cb,
-                                     &threaded_chunk_info->chunk_nbytes, &threaded_chunk_info->buf_alloc,
-                                     &threaded_chunk_info->chunk) < 0))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "data pipeline read failed");
+                                     err_detect, filter_cb, &threaded_chunk_info->chunk_nbytes,
+                                     &threaded_chunk_info->buf_alloc, &threaded_chunk_info->chunk) < 0))
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "data pipeline read failed");
 
 #ifndef H5_UNSAFE_CONCURRENCY
-        /* Unlock internal mutex */
+        /* Unlock internal mutex. Also defer going to done here. */
         if (H5_UNLIKELY(H5TS_internal_unlock() < 0))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "can't unlock internal mutex");
+            HDONE_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "can't unlock internal mutex");
         mutex_held = false;
 #endif /* H5_UNSAFE_CONCURRENCY */
 
@@ -3586,6 +3616,10 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
             assert(rdcc->slot[threaded_chunk_info->udata.idx_hint]->chunk == old_chunk);
             rdcc->slot[threaded_chunk_info->udata.idx_hint]->chunk = threaded_chunk_info->chunk;
         }
+
+        /* Now goto done if the call to H5Z_pipeline() failed */
+        if (ret_value < 0)
+            HGOTO_DONE(ret_value);
 
         /* Make sure the chunk is the correct size after being unfiltered */
         if (H5_UNLIKELY(threaded_chunk_info->chunk_nbytes !=

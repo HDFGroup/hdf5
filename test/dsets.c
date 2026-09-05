@@ -336,6 +336,9 @@ const char *OLD_FILENAME[] = {
 /* Declarations for test test_vds_shared_strings */
 #define NUM_MAPPINGS_MANY 1000
 
+/* Whether to test with threads */
+unsigned threads = 0;
+
 /* Local prototypes for filter functions */
 static size_t filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
                            size_t *buf_size, void **buf);
@@ -2345,13 +2348,15 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if (corrupted) {
         /* Default behavior is failure when data is corrupted. */
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY
-        {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+        if (!threads) {
+            H5E_BEGIN_TRY
+            {
+                status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            }
+            H5E_END_TRY
+            if (status >= 0)
+                TEST_ERROR;
         }
-        H5E_END_TRY
-        if (status >= 0)
-            TEST_ERROR;
 
         /* Callback decides to continue in spite data is corrupted. */
         if (H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0)
@@ -2363,13 +2368,15 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if (H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL) < 0)
             TEST_ERROR;
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY
-        {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+        if (!threads) {
+            H5E_BEGIN_TRY
+            {
+                status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            }
+            H5E_END_TRY
+            if (status >= 0)
+                TEST_ERROR;
         }
-        H5E_END_TRY
-        if (status >= 0)
-            TEST_ERROR;
     }
     else {
         if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
@@ -2412,13 +2419,15 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if (corrupted) {
         /* Default behavior is failure when data is corrupted. */
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY
-        {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+        if (!threads) {
+            H5E_BEGIN_TRY
+            {
+                status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            }
+            H5E_END_TRY
+            if (status >= 0)
+                TEST_ERROR;
         }
-        H5E_END_TRY
-        if (status >= 0)
-            TEST_ERROR;
 
         /* Callback decides to continue in spite data is corrupted. */
         if (H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0)
@@ -2430,13 +2439,15 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if (H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL) < 0)
             TEST_ERROR;
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY
-        {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+        if (!threads) {
+            H5E_BEGIN_TRY
+            {
+                status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            }
+            H5E_END_TRY
+            if (status >= 0)
+                TEST_ERROR;
         }
-        H5E_END_TRY
-        if (status >= 0)
-            TEST_ERROR;
     }
     else {
         /* Read the dataset back and check it */
@@ -2476,13 +2487,15 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if (corrupted) {
         /* Default behavior is failure when data is corrupted. */
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY
-        {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+        if (!threads) {
+            H5E_BEGIN_TRY
+            {
+                status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            }
+            H5E_END_TRY
+            if (status >= 0)
+                TEST_ERROR;
         }
-        H5E_END_TRY
-        if (status >= 0)
-            TEST_ERROR;
 
         /* Callback decides to continue in spite data is corrupted. */
         if (H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0)
@@ -2495,13 +2508,15 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
             TEST_ERROR;
 
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY
-        {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+        if (!threads) {
+            H5E_BEGIN_TRY
+            {
+                status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            }
+            H5E_END_TRY
+            if (status >= 0)
+                TEST_ERROR;
         }
-        H5E_END_TRY
-        if (status >= 0)
-            TEST_ERROR;
     } /* end if */
     else {
         if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
@@ -2543,13 +2558,15 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if (corrupted) {
         /* Default behavior is failure when data is corrupted. */
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY
-        {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+        if (!threads) {
+            H5E_BEGIN_TRY
+            {
+                status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            }
+            H5E_END_TRY
+            if (status >= 0)
+                TEST_ERROR;
         }
-        H5E_END_TRY
-        if (status >= 0)
-            TEST_ERROR;
 
         /* Callback decides to continue in spite data is corrupted. */
         if (H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0)
@@ -2561,13 +2578,15 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if (H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL) < 0)
             TEST_ERROR;
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY
-        {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+        if (!threads) {
+            H5E_BEGIN_TRY
+            {
+                status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            }
+            H5E_END_TRY
+            if (status >= 0)
+                TEST_ERROR;
         }
-        H5E_END_TRY
-        if (status >= 0)
-            TEST_ERROR;
     }
     else {
         if (H5Dread(dataset, H5T_NATIVE_INT, sid, sid, dxpl, check_data) < 0)
@@ -19610,27 +19629,17 @@ test_threaded_chunks(void)
     return SUCCEED;
 
 error:
-    if (H5TSset_internal_threads(0) < 0)
-        TEST_ERROR;
-    if (space > 0)
-        if (H5Sclose(space) < 0)
-            TEST_ERROR;
-    if (xfer > 0)
-        if (H5Pclose(xfer) < 0)
-            TEST_ERROR;
-    if (dcpl > 0)
-        if (H5Pclose(dcpl) < 0)
-            TEST_ERROR;
-    if (dapl > 0)
-        if (H5Pclose(dapl) < 0)
-            TEST_ERROR;
-    if (dataset > 0)
-        if (H5Dclose(dataset) < 0)
-            TEST_ERROR;
-    if (file > 0)
-        if (H5Fclose(file) < 0)
-            TEST_ERROR;
-
+    H5E_BEGIN_TRY
+    {
+        H5TSset_internal_threads(0);
+        H5Sclose(space);
+        H5Pclose(xfer);
+        H5Pclose(dcpl);
+        H5Pclose(dapl);
+        H5Dclose(dataset);
+        H5Fclose(file);
+    }
+    H5E_END_TRY
     return FAIL;
 } /* end test_threaded_chunks() */
 #endif /* H5_HAVE_CONCURRENCY */
@@ -19747,7 +19756,7 @@ main(void)
 
 #ifdef H5_HAVE_CONCURRENCY
                 /* Test with and without threads */
-                for (unsigned threads = false; threads <= true; threads++) {
+                for (threads = false; threads <= true; threads++) {
 #endif /* H5_HAVE_CONCURRENCY */
 
                     /* Print partial message about file format */
@@ -19833,11 +19842,10 @@ main(void)
 
                     /* Don't test these with threads yet since H5E_BEGIN_TRY doesn't yet apply to threads and
                      * these tests will otherwise produce lots of irrelevant error messages */
-                    if (driver_is_default_compatible
 #ifdef H5_HAVE_CONCURRENCY
-                        && !threads
+                    if (!threads)
 #endif /* H5_HAVE_CONCURRENCY */
-                    ) {
+                    {
                         nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
                         nerrors += (test_bad_decode_size(file) < 0 ? 1 : 0);
                         nerrors += (test_bad_decode_size_vlen(file) < 0 ? 1 : 0);

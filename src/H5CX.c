@@ -2340,7 +2340,7 @@ H5CX_get_io_threads(bool *io_threads_enabled)
     assert(head && *head);
     assert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_MODIFY_WRITE_BUF_NAME,
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_IO_THREADS_ENABLED_NAME,
                              io_threads_enabled)
 
     /* Get the value */
