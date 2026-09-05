@@ -55,6 +55,7 @@ typedef struct H5TS_api_info_t {
 #else /* H5_HAVE_CONCURRENCY */
     /* API lock */
     H5TS_rwlock_t api_lock;
+    H5TS_mutex_t  internal_mutex;
 #endif
 
     /* Count of # of attempts to acquire API lock */
@@ -226,6 +227,11 @@ extern H5TS_api_info_t H5TS_api_info_p;
 /* Per-thread info */
 extern H5TS_key_t H5TS_thrd_info_key_g;
 #endif /* H5_HAVE_THREADSAFE_API */
+
+#ifdef H5_HAVE_CONCURRENCY
+/* Number of threads in the internal thread pool */
+extern unsigned H5TS_global_pool_nthreads_g;
+#endif /* H5_HAVE_CONCURRENCY */
 
 /******************************/
 /* Package Private Prototypes */

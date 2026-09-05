@@ -82,6 +82,7 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
                                  "chunk_expand2",       /* 30 */
                                  "scalar_datasets",     /* 31 */
                                  "read_only_vlen_fill", /* 32 */
+                                 "threaded_chunks",     /* 33 */
                                  NULL};
 
 #define OHMIN_FILENAME_A "ohdr_min_a"
@@ -334,6 +335,9 @@ const char *OLD_FILENAME[] = {
 
 /* Declarations for test test_vds_shared_strings */
 #define NUM_MAPPINGS_MANY 1000
+
+/* Whether to test with threads */
+unsigned threads = 0;
 
 /* Local prototypes for filter functions */
 static size_t filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
@@ -2344,13 +2348,15 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if (corrupted) {
         /* Default behavior is failure when data is corrupted. */
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY
-        {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+        if (!threads) {
+            H5E_BEGIN_TRY
+            {
+                status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            }
+            H5E_END_TRY
+            if (status >= 0)
+                TEST_ERROR;
         }
-        H5E_END_TRY
-        if (status >= 0)
-            TEST_ERROR;
 
         /* Callback decides to continue in spite data is corrupted. */
         if (H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0)
@@ -2362,13 +2368,15 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if (H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL) < 0)
             TEST_ERROR;
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY
-        {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+        if (!threads) {
+            H5E_BEGIN_TRY
+            {
+                status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            }
+            H5E_END_TRY
+            if (status >= 0)
+                TEST_ERROR;
         }
-        H5E_END_TRY
-        if (status >= 0)
-            TEST_ERROR;
     }
     else {
         if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
@@ -2411,13 +2419,15 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if (corrupted) {
         /* Default behavior is failure when data is corrupted. */
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY
-        {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+        if (!threads) {
+            H5E_BEGIN_TRY
+            {
+                status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            }
+            H5E_END_TRY
+            if (status >= 0)
+                TEST_ERROR;
         }
-        H5E_END_TRY
-        if (status >= 0)
-            TEST_ERROR;
 
         /* Callback decides to continue in spite data is corrupted. */
         if (H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0)
@@ -2429,13 +2439,15 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if (H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL) < 0)
             TEST_ERROR;
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY
-        {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+        if (!threads) {
+            H5E_BEGIN_TRY
+            {
+                status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            }
+            H5E_END_TRY
+            if (status >= 0)
+                TEST_ERROR;
         }
-        H5E_END_TRY
-        if (status >= 0)
-            TEST_ERROR;
     }
     else {
         /* Read the dataset back and check it */
@@ -2475,13 +2487,15 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if (corrupted) {
         /* Default behavior is failure when data is corrupted. */
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY
-        {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+        if (!threads) {
+            H5E_BEGIN_TRY
+            {
+                status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            }
+            H5E_END_TRY
+            if (status >= 0)
+                TEST_ERROR;
         }
-        H5E_END_TRY
-        if (status >= 0)
-            TEST_ERROR;
 
         /* Callback decides to continue in spite data is corrupted. */
         if (H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0)
@@ -2494,13 +2508,15 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
             TEST_ERROR;
 
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY
-        {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+        if (!threads) {
+            H5E_BEGIN_TRY
+            {
+                status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            }
+            H5E_END_TRY
+            if (status >= 0)
+                TEST_ERROR;
         }
-        H5E_END_TRY
-        if (status >= 0)
-            TEST_ERROR;
     } /* end if */
     else {
         if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
@@ -2542,13 +2558,15 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if (corrupted) {
         /* Default behavior is failure when data is corrupted. */
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY
-        {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+        if (!threads) {
+            H5E_BEGIN_TRY
+            {
+                status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            }
+            H5E_END_TRY
+            if (status >= 0)
+                TEST_ERROR;
         }
-        H5E_END_TRY
-        if (status >= 0)
-            TEST_ERROR;
 
         /* Callback decides to continue in spite data is corrupted. */
         if (H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0)
@@ -2560,13 +2578,15 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if (H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL) < 0)
             TEST_ERROR;
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY
-        {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+        if (!threads) {
+            H5E_BEGIN_TRY
+            {
+                status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check_data);
+            }
+            H5E_END_TRY
+            if (status >= 0)
+                TEST_ERROR;
         }
-        H5E_END_TRY
-        if (status >= 0)
-            TEST_ERROR;
     }
     else {
         if (H5Dread(dataset, H5T_NATIVE_INT, sid, sid, dxpl, check_data) < 0)
@@ -19408,6 +19428,222 @@ error:
     return FAIL;
 } /* end test_filter_error_msg() */
 
+#ifdef H5_HAVE_CONCURRENCY
+/*-------------------------------------------------------------------------
+ * Function:   test_threaded_chunks
+ *
+ * Purpose:    Tests threading in simple chunk I/O.
+ *
+ * Return:    Success:    0
+ *            Failure:    -1
+ *-------------------------------------------------------------------------
+ */
+#define THREADED_CHUNKS_CDIM1 10
+#define THREADED_CHUNKS_CDIM2 10
+static herr_t
+test_threaded_chunks(void)
+{
+    char  filename[FILENAME_BUF_SIZE] = "";
+    hid_t file = H5I_INVALID_HID, dataset = H5I_INVALID_HID, dcpl = H5I_INVALID_HID, dapl = H5I_INVALID_HID,
+          space = H5I_INVALID_HID, xfer = H5I_INVALID_HID;
+    int      i, j, n = 0;
+    hsize_t  dims[2], cdims[2];
+    unsigned pool_threads;
+    unsigned dxpl_setting;
+    unsigned cache_enabled;
+
+    TESTING("threaded chunk I/O");
+
+    if (NULL == h5_fixname(FILENAME[33], H5P_DEFAULT, filename, sizeof(filename)))
+        TEST_ERROR;
+
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Create the data space */
+    dims[0] = DSET_DIM1;
+    dims[1] = DSET_DIM2;
+    if ((space = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    /* Create DXPL, DCPL, and DAPL */
+    if ((xfer = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        TEST_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        TEST_ERROR;
+
+    /* Set chunk dimensions */
+    cdims[0] = THREADED_CHUNKS_CDIM1;
+    cdims[1] = THREADED_CHUNKS_CDIM2;
+    if (H5Pset_chunk(dcpl, 2, cdims) < 0)
+        TEST_ERROR;
+
+    /* Disable chunk cache on dapl */
+    if (H5Pset_chunk_cache(dapl, 0, 0, 0.) < 0)
+        TEST_ERROR;
+
+    /* Create the dataset */
+    if ((dataset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
+        0)
+        TEST_ERROR;
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+    dataset = H5I_INVALID_HID;
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+    /* Create dataset with deflate filter */
+    if (H5Pset_deflate(dcpl, 6) < 0)
+        TEST_ERROR;
+    if ((dataset = H5Dcreate2(file, "dset_deflate", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) <
+        0)
+        TEST_ERROR;
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+    dataset = H5I_INVALID_HID;
+#endif /* H5_HAVE_FILTER_DEFLATE */
+
+    if (H5Sclose(space) < 0)
+        TEST_ERROR;
+    space = H5I_INVALID_HID;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+
+    /* Loop over number of threads (0 = no thread pool) */
+    for (pool_threads = 0; pool_threads <= 8; pool_threads++) {
+        /* Set number of threads */
+        if (H5TSset_internal_threads(pool_threads) < 0)
+            TEST_ERROR;
+
+        /* Loop over DXPL setting, 0 = off, 1 = on, 2 = use H5P_DEFAULT */
+        for (dxpl_setting = 0; dxpl_setting <= 2; dxpl_setting++) {
+            /* Set DXPL IO threads and verify */
+            if (dxpl_setting != 2) {
+                bool dxpl_setting_out;
+
+                if (H5Pset_io_threads(xfer, (bool)dxpl_setting) < 0)
+                    TEST_ERROR;
+                if (H5Pget_io_threads(xfer, &dxpl_setting_out) < 0)
+                    TEST_ERROR;
+                if ((bool)dxpl_setting != dxpl_setting_out)
+                    TEST_ERROR;
+            }
+
+            /* Loop over chunk cache */
+            for (cache_enabled = false; cache_enabled <= true; cache_enabled++) {
+                /* Initialize the write buffer */
+                for (i = 0; i < DSET_DIM1; i++)
+                    for (j = 0; j < DSET_DIM2; j++)
+                        points[i][j] = n++;
+
+                /* Open dataset */
+                if ((dataset = H5Dopen2(file, "dset", cache_enabled ? H5P_DEFAULT : dapl)) < 0)
+                    TEST_ERROR;
+
+                /* Write the data to the dataset */
+                if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                             (dxpl_setting == 2) ? H5P_DEFAULT : xfer, points_data) < 0)
+                    TEST_ERROR;
+
+                /* Read the dataset back */
+                if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                            (dxpl_setting == 2) ? H5P_DEFAULT : xfer, check_data) < 0)
+                    TEST_ERROR;
+
+                /* Check that the values read are the same as the values written */
+                for (i = 0; i < DSET_DIM1; i++) {
+                    for (j = 0; j < DSET_DIM2; j++) {
+                        if (points[i][j] != check[i][j]) {
+                            H5_FAILED();
+                            printf("    Read different values than written.\n");
+                            printf("    At index %d,%d\n", i, j);
+                            goto error;
+                        }
+                    }
+                }
+
+                /* Close dataset */
+                if (H5Dclose(dataset) < 0)
+                    TEST_ERROR;
+                dataset = H5I_INVALID_HID;
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+                /* Initialize the write buffer */
+                for (i = 0; i < DSET_DIM1; i++)
+                    for (j = 0; j < DSET_DIM2; j++)
+                        points[i][j] = n++;
+
+                /* Open dataset with deflate filter */
+                if ((dataset = H5Dopen2(file, "dset_deflate", cache_enabled ? H5P_DEFAULT : dapl)) < 0)
+                    TEST_ERROR;
+
+                /* Write the data to the dataset */
+                if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                             (dxpl_setting == 2) ? H5P_DEFAULT : xfer, points_data) < 0)
+                    TEST_ERROR;
+
+                /* Read the dataset back */
+                if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                            (dxpl_setting == 2) ? H5P_DEFAULT : xfer, check_data) < 0)
+                    TEST_ERROR;
+
+                /* Check that the values read are the same as the values written */
+                for (i = 0; i < DSET_DIM1; i++) {
+                    for (j = 0; j < DSET_DIM2; j++) {
+                        if (points[i][j] != check[i][j]) {
+                            H5_FAILED();
+                            printf("    Read different values than written.\n");
+                            printf("    At index %d,%d\n", i, j);
+                            goto error;
+                        }
+                    }
+                }
+
+                /* Close dataset */
+                if (H5Dclose(dataset) < 0)
+                    TEST_ERROR;
+                dataset = H5I_INVALID_HID;
+#endif /* H5_HAVE_FILTER_DEFLATE */
+            }
+        }
+    }
+
+    /* Disable threads */
+    if (H5TSset_internal_threads(0) < 0)
+        TEST_ERROR;
+
+    if (H5Pclose(xfer) < 0)
+        TEST_ERROR;
+    xfer = -1;
+    if (H5Pclose(dapl) < 0)
+        TEST_ERROR;
+    dapl = -1;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = -1;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5TSset_internal_threads(0);
+        H5Sclose(space);
+        H5Pclose(xfer);
+        H5Pclose(dcpl);
+        H5Pclose(dapl);
+        H5Dclose(dataset);
+        H5Fclose(file);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_threaded_chunks() */
+#endif /* H5_HAVE_CONCURRENCY */
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -19518,144 +19754,178 @@ main(void)
             for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
                 hid_t my_fcpl;
 
-                /* Set version bounds */
-                if (H5Pset_libver_bounds(fapl, low, H5F_LIBVER_LATEST) < 0)
-                    TEST_ERROR;
+#ifdef H5_HAVE_CONCURRENCY
+                /* Test with and without threads */
+                for (threads = false; threads <= true; threads++) {
+#endif /* H5_HAVE_CONCURRENCY */
 
-                /* Print partial message about file format */
-                printf("\nTesting with %s file format ", h5_get_version_string(low));
+                    /* Print partial message about file format */
+                    printf("\nTesting with %s file format", h5_get_version_string(low));
 
-                /* Set the FCPL and print the rest of the message depending on paged aggregation setting */
-                if (paged) {
-                    my_fcpl = fcpl2;
-                    puts("and paged aggregation");
-                }
-                else {
-                    my_fcpl = fcpl;
-                    puts("and non-paged aggregation");
-                }
+#ifdef H5_HAVE_CONCURRENCY
+                    /* Set internal threading with 4 threads */
+                    if (threads) {
+                        if (H5TSset_internal_threads(4) < 0)
+                            goto error;
 
-                /* Create the file for this test */
-                if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, my_fcpl, fapl)) < 0)
-                    goto error;
+                        /* Print message about threads */
+                        printf(", with threads,");
+                    }
+                    else
+                        /* Print message about threads */
+                        printf(", without threads,");
+#endif /* H5_HAVE_CONCURRENCY */
 
-                if (true == minimized_ohdr) {
-                    if (0 > H5Fset_dset_no_attrs_hint(file, true))
+                    /* Set the FCPL and print the rest of the message depending on paged aggregation setting
+                     */
+                    if (paged) {
+                        my_fcpl = fcpl2;
+                        puts(" and paged aggregation");
+                    }
+                    else {
+                        my_fcpl = fcpl;
+                        puts(" and non-paged aggregation");
+                    }
+
+                    /* Set version bounds */
+                    if (H5Pset_libver_bounds(fapl, low, H5F_LIBVER_LATEST) < 0)
+                        TEST_ERROR;
+
+                    /* Create the file for this test */
+                    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, my_fcpl, fapl)) < 0)
                         goto error;
-                    puts("(minimized dataset object headers with file setting)");
-                }
 
-                /* Cause the library to emit initial messages */
-                if ((grp = H5Gcreate2(file, "emit diagnostics", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-                    goto error;
-                if (H5Oset_comment(grp, "Causes diagnostic messages to be emitted") < 0)
-                    goto error;
-                if (H5Gclose(grp) < 0)
-                    goto error;
+                    if (true == minimized_ohdr) {
+                        if (0 > H5Fset_dset_no_attrs_hint(file, true))
+                            goto error;
+                        puts("(minimized dataset object headers with file setting)");
+                    }
 
-                nerrors += (test_create(file) < 0 ? 1 : 0);
-                nerrors += (test_simple_io(driver_name, fapl) < 0 ? 1 : 0);
-                nerrors += (test_scalar_io(fapl) < 0 ? 1 : 0);
-                nerrors += (test_compact_io(fapl) < 0 ? 1 : 0);
-                nerrors += (test_max_compact(fapl) < 0 ? 1 : 0);
-                nerrors += (test_compact_open_close_dirty(fapl) < 0 ? 1 : 0);
-                nerrors += (test_conv_buffer(file) < 0 ? 1 : 0);
-                nerrors += (test_tconv(file) < 0 ? 1 : 0);
-                nerrors += (test_filters(file) < 0 ? 1 : 0);
-                nerrors += (test_onebyte_shuffle(file) < 0 ? 1 : 0);
-                nerrors += (test_nbit_int(file) < 0 ? 1 : 0);
-                nerrors += (test_nbit_float(file) < 0 ? 1 : 0);
-                nerrors += (test_nbit_double(file) < 0 ? 1 : 0);
-                nerrors += (test_nbit_array(file) < 0 ? 1 : 0);
-                nerrors += (test_nbit_compound(file) < 0 ? 1 : 0);
-                nerrors += (test_nbit_compound_2(file) < 0 ? 1 : 0);
-                nerrors += (test_nbit_compound_3(file) < 0 ? 1 : 0);
-                nerrors += (test_nbit_int_size(file) < 0 ? 1 : 0);
-                nerrors += (test_nbit_flt_size(file) < 0 ? 1 : 0);
-                nerrors += (test_scaleoffset_int(file) < 0 ? 1 : 0);
-                nerrors += (test_scaleoffset_int_2(file) < 0 ? 1 : 0);
-                nerrors += (test_scaleoffset_float(file) < 0 ? 1 : 0);
-                nerrors += (test_scaleoffset_float_2(file) < 0 ? 1 : 0);
-                nerrors += (test_scaleoffset_double(file) < 0 ? 1 : 0);
-                nerrors += (test_scaleoffset_double_2(file) < 0 ? 1 : 0);
-                nerrors += (test_multiopen(file) < 0 ? 1 : 0);
-                nerrors += (test_types(file) < 0 ? 1 : 0);
-                nerrors += (test_floattypes(file) < 0 ? 1 : 0);
-                nerrors += (test_userblock_offset(driver_name, fapl, low >= H5F_LIBVER_V110) < 0 ? 1 : 0);
+                    /* Cause the library to emit initial messages */
+                    if ((grp = H5Gcreate2(file, "emit diagnostics", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
+                        0)
+                        goto error;
+                    if (H5Oset_comment(grp, "Causes diagnostic messages to be emitted") < 0)
+                        goto error;
+                    if (H5Gclose(grp) < 0)
+                        goto error;
 
-                if (driver_is_default_compatible) {
-                    nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
-                }
+                    nerrors += (test_create(file) < 0 ? 1 : 0);
+                    nerrors += (test_simple_io(driver_name, fapl) < 0 ? 1 : 0);
+                    nerrors += (test_scalar_io(fapl) < 0 ? 1 : 0);
+                    nerrors += (test_compact_io(fapl) < 0 ? 1 : 0);
+                    nerrors += (test_max_compact(fapl) < 0 ? 1 : 0);
+                    nerrors += (test_compact_open_close_dirty(fapl) < 0 ? 1 : 0);
+                    nerrors += (test_conv_buffer(file) < 0 ? 1 : 0);
+                    nerrors += (test_tconv(file) < 0 ? 1 : 0);
+                    nerrors += (test_filters(file) < 0 ? 1 : 0);
+                    nerrors += (test_onebyte_shuffle(file) < 0 ? 1 : 0);
+                    nerrors += (test_nbit_int(file) < 0 ? 1 : 0);
+                    nerrors += (test_nbit_float(file) < 0 ? 1 : 0);
+                    nerrors += (test_nbit_double(file) < 0 ? 1 : 0);
+                    nerrors += (test_nbit_array(file) < 0 ? 1 : 0);
+                    nerrors += (test_nbit_compound(file) < 0 ? 1 : 0);
+                    nerrors += (test_nbit_compound_2(file) < 0 ? 1 : 0);
+                    nerrors += (test_nbit_compound_3(file) < 0 ? 1 : 0);
+                    nerrors += (test_nbit_int_size(file) < 0 ? 1 : 0);
+                    nerrors += (test_nbit_flt_size(file) < 0 ? 1 : 0);
+                    nerrors += (test_scaleoffset_int(file) < 0 ? 1 : 0);
+                    nerrors += (test_scaleoffset_int_2(file) < 0 ? 1 : 0);
+                    nerrors += (test_scaleoffset_float(file) < 0 ? 1 : 0);
+                    nerrors += (test_scaleoffset_float_2(file) < 0 ? 1 : 0);
+                    nerrors += (test_scaleoffset_double(file) < 0 ? 1 : 0);
+                    nerrors += (test_scaleoffset_double_2(file) < 0 ? 1 : 0);
+                    nerrors += (test_multiopen(file) < 0 ? 1 : 0);
+                    nerrors += (test_types(file) < 0 ? 1 : 0);
+                    nerrors += (test_floattypes(file) < 0 ? 1 : 0);
+                    nerrors += (test_userblock_offset(driver_name, fapl, low >= H5F_LIBVER_V110) < 0 ? 1 : 0);
 
-                nerrors += (test_can_apply(file) < 0 ? 1 : 0);
-                nerrors += (test_can_apply2(file) < 0 ? 1 : 0);
-                nerrors += (test_optional_filters(file) < 0 ? 1 : 0);
-                nerrors += (test_optional_filters_scalar(file) < 0 ? 1 : 0);
-                nerrors += (test_optional_filters_null(file) < 0 ? 1 : 0);
-                nerrors += (test_set_local(fapl) < 0 ? 1 : 0);
-                nerrors += (test_set_local_updates_cd(file) < 0 ? 1 : 0);
-                nerrors += (test_set_local_updates_cd_vlen(file) < 0 ? 1 : 0);
-                nerrors += (test_deflate_vlen(file) < 0 ? 1 : 0);
-                nerrors += (test_can_apply_szip(file) < 0 ? 1 : 0);
-                nerrors += (test_compare_dcpl(file) < 0 ? 1 : 0);
-                nerrors += (test_copy_dcpl(file, fapl) < 0 ? 1 : 0);
-                nerrors += (test_filter_delete(file) < 0 ? 1 : 0);
+                    /* Don't test these with threads yet since H5E_BEGIN_TRY doesn't yet apply to threads and
+                     * these tests will otherwise produce lots of irrelevant error messages */
+#ifdef H5_HAVE_CONCURRENCY
+                    if (!threads)
+#endif /* H5_HAVE_CONCURRENCY */
+                    {
+                        nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
+                        nerrors += (test_bad_decode_size(file) < 0 ? 1 : 0);
+                        nerrors += (test_bad_decode_size_vlen(file) < 0 ? 1 : 0);
+                        nerrors += (test_bad_buf_size(file) < 0 ? 1 : 0);
 
-                if (driver_is_default_compatible) {
-                    nerrors += (test_filters_endianess() < 0 ? 1 : 0);
-                    nerrors += (test_chunk_dims_mismatch() < 0 ? 1 : 0);
-                }
+                        /* This one will also fail because it doesn't detect the expected message in the main
+                         * thread's stack (it is printed by the child thread) */
+                        nerrors += (test_filter_error_msg(file) < 0 ? 1 : 0);
+                    }
 
-                nerrors += (test_zero_dims(file) < 0 ? 1 : 0);
-                nerrors += (test_missing_chunk(file) < 0 ? 1 : 0);
-                nerrors += (test_random_chunks(fapl) < 0 ? 1 : 0);
+                    nerrors += (test_can_apply(file) < 0 ? 1 : 0);
+                    nerrors += (test_can_apply2(file) < 0 ? 1 : 0);
+                    nerrors += (test_optional_filters(file) < 0 ? 1 : 0);
+                    nerrors += (test_optional_filters_scalar(file) < 0 ? 1 : 0);
+                    nerrors += (test_optional_filters_null(file) < 0 ? 1 : 0);
+                    nerrors += (test_set_local(fapl) < 0 ? 1 : 0);
+                    nerrors += (test_set_local_updates_cd(file) < 0 ? 1 : 0);
+                    nerrors += (test_set_local_updates_cd_vlen(file) < 0 ? 1 : 0);
+                    nerrors += (test_deflate_vlen(file) < 0 ? 1 : 0);
+                    nerrors += (test_can_apply_szip(file) < 0 ? 1 : 0);
+                    nerrors += (test_compare_dcpl(file) < 0 ? 1 : 0);
+                    nerrors += (test_copy_dcpl(file, fapl) < 0 ? 1 : 0);
+                    nerrors += (test_filter_delete(file) < 0 ? 1 : 0);
+
+                    if (driver_is_default_compatible) {
+                        nerrors += (test_filters_endianess() < 0 ? 1 : 0);
+                        nerrors += (test_chunk_dims_mismatch() < 0 ? 1 : 0);
+                    }
+
+                    nerrors += (test_zero_dims(file) < 0 ? 1 : 0);
+                    nerrors += (test_missing_chunk(file) < 0 ? 1 : 0);
+                    nerrors += (test_random_chunks(fapl) < 0 ? 1 : 0);
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-                nerrors += (test_deprec(file) < 0 ? 1 : 0);
+                    nerrors += (test_deprec(file) < 0 ? 1 : 0);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-                nerrors += (test_huge_chunks(fapl, low) < 0 ? 1 : 0);
-                nerrors += (test_chunk_cache(fapl) < 0 ? 1 : 0);
-                nerrors += (test_big_chunks_bypass_cache(fapl) < 0 ? 1 : 0);
-                nerrors += (test_chunk_fast(driver_name, fapl) < 0 ? 1 : 0);
-                nerrors += (test_reopen_chunk_fast(fapl) < 0 ? 1 : 0);
-                nerrors += (test_chunk_fast_bug1(fapl) < 0 ? 1 : 0);
-                if (low >= H5F_LIBVER_V200)
-                    nerrors += (test_chunk_expand2(fapl) < 0 ? 1 : 0);
-                else
-                    nerrors += (test_chunk_expand(fapl) < 0 ? 1 : 0);
-                nerrors += (test_layout_extend(fapl) < 0 ? 1 : 0);
-                nerrors += (test_fixed_array(fapl) < 0 ? 1 : 0);
+                    nerrors += (test_huge_chunks(fapl, low) < 0 ? 1 : 0);
+                    nerrors += (test_chunk_cache(fapl) < 0 ? 1 : 0);
+                    nerrors += (test_big_chunks_bypass_cache(fapl) < 0 ? 1 : 0);
+                    nerrors += (test_chunk_fast(driver_name, fapl) < 0 ? 1 : 0);
+                    nerrors += (test_reopen_chunk_fast(fapl) < 0 ? 1 : 0);
+                    nerrors += (test_chunk_fast_bug1(fapl) < 0 ? 1 : 0);
+                    if (low >= H5F_LIBVER_V200)
+                        nerrors += (test_chunk_expand2(fapl) < 0 ? 1 : 0);
+                    else
+                        nerrors += (test_chunk_expand(fapl) < 0 ? 1 : 0);
+                    nerrors += (test_layout_extend(fapl) < 0 ? 1 : 0);
+                    nerrors += (test_fixed_array(fapl) < 0 ? 1 : 0);
 
-                if (driver_is_default_compatible) {
-                    nerrors += (test_idx_compatible() < 0 ? 1 : 0);
+                    if (driver_is_default_compatible) {
+                        nerrors += (test_idx_compatible() < 0 ? 1 : 0);
+                    }
+
+                    nerrors += (test_unfiltered_edge_chunks(fapl) < 0 ? 1 : 0);
+                    nerrors += (test_single_chunk(fapl) < 0 ? 1 : 0);
+                    nerrors += (test_large_chunk_shrink(fapl) < 0 ? 1 : 0);
+                    nerrors += (test_zero_dim_dset(fapl) < 0 ? 1 : 0);
+                    nerrors += (test_storage_size(fapl) < 0 ? 1 : 0);
+                    nerrors += (test_power2up(fapl) < 0 ? 1 : 0);
+
+                    nerrors += (test_swmr_non_latest(driver_name, fapl) < 0 ? 1 : 0);
+                    nerrors += (test_earray_hdr_fd(driver_name, fapl) < 0 ? 1 : 0);
+                    nerrors += (test_farray_hdr_fd(driver_name, fapl) < 0 ? 1 : 0);
+                    nerrors += (test_bt2_hdr_fd(driver_name, fapl) < 0 ? 1 : 0);
+
+                    nerrors += (test_downsize_vlen_scalar_dataset(file) < 0 ? 1 : 0);
+
+                    nerrors += (test_readonly_chunk_vlen_fill(fapl, false) < 0 ? 1 : 0);
+                    nerrors += (test_readonly_chunk_vlen_fill(fapl, true) < 0 ? 1 : 0);
+
+                    if (H5Fclose(file) < 0)
+                        goto error;
+#ifdef H5_HAVE_CONCURRENCY
+                    /* Disable internal threading */
+                    if (threads && H5TSset_internal_threads(0) < 0)
+                        goto error;
                 }
+#endif /* H5_HAVE_CONCURRENCY */
 
-                nerrors += (test_unfiltered_edge_chunks(fapl) < 0 ? 1 : 0);
-                nerrors += (test_single_chunk(fapl) < 0 ? 1 : 0);
-                nerrors += (test_large_chunk_shrink(fapl) < 0 ? 1 : 0);
-                nerrors += (test_zero_dim_dset(fapl) < 0 ? 1 : 0);
-                nerrors += (test_storage_size(fapl) < 0 ? 1 : 0);
-                nerrors += (test_power2up(fapl) < 0 ? 1 : 0);
-
-                nerrors += (test_swmr_non_latest(driver_name, fapl) < 0 ? 1 : 0);
-                nerrors += (test_earray_hdr_fd(driver_name, fapl) < 0 ? 1 : 0);
-                nerrors += (test_farray_hdr_fd(driver_name, fapl) < 0 ? 1 : 0);
-                nerrors += (test_bt2_hdr_fd(driver_name, fapl) < 0 ? 1 : 0);
-
-                nerrors += (test_downsize_vlen_scalar_dataset(file) < 0 ? 1 : 0);
-
-                nerrors += (test_bad_decode_size(file) < 0 ? 1 : 0);
-                nerrors += (test_bad_decode_size_vlen(file) < 0 ? 1 : 0);
-                nerrors += (test_bad_buf_size(file) < 0 ? 1 : 0);
-
-                nerrors += (test_readonly_chunk_vlen_fill(fapl, false) < 0 ? 1 : 0);
-                nerrors += (test_readonly_chunk_vlen_fill(fapl, true) < 0 ? 1 : 0);
-
-                nerrors += (test_filter_error_msg(file) < 0 ? 1 : 0);
-
-                if (H5Fclose(file) < 0)
-                    goto error;
             } /* end for low */
         }     /* end for minimized_ohdr */
     }         /* end for paged */
@@ -19681,6 +19951,9 @@ main(void)
     nerrors += (test_object_header_minimization_dcpl() < 0 ? 1 : 0);
     nerrors += (test_h5s_block() < 0 ? 1 : 0);
     nerrors += (test_h5s_plist() < 0 ? 1 : 0);
+#ifdef H5_HAVE_CONCURRENCY
+    nerrors += (test_threaded_chunks() < 0 ? 1 : 0);
+#endif /* H5_HAVE_CONCURRENCY */
 
     /* Run misc tests */
     nerrors += (dls_01_main() < 0 ? 1 : 0);

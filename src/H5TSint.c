@@ -138,6 +138,8 @@ H5TS__init_package(void)
 #else /* H5_HAVE_CONCURRENCY */
     if (H5_UNLIKELY(H5TS_rwlock_init(&H5TS_api_info_p.api_lock) < 0))
         HGOTO_DONE(FAIL);
+    if (H5_UNLIKELY(H5TS_mutex_init(&H5TS_api_info_p.internal_mutex, H5TS_MUTEX_TYPE_PLAIN) < 0))
+        HGOTO_DONE(FAIL);
 #endif
     H5TS_atomic_init_uint(&H5TS_api_info_p.attempt_lock_count, 0);
 
@@ -175,6 +177,15 @@ H5TS_term_package(void)
     H5TS_rwlock_destroy(&H5TS_api_info_p.api_lock);
 #endif
     H5TS_atomic_destroy_uint(&H5TS_api_info_p.attempt_lock_count);
+
+#ifdef H5_HAVE_CONCURRENCY
+    /* Destroy global thread pool if it exists */
+    if (H5TS_pool_g) {
+        (void)H5TS_pool_destroy(H5TS_pool_g);
+        H5TS_pool_g                 = NULL;
+        H5TS_global_pool_nthreads_g = 0;
+    }
+#endif /* H5_HAVE_CONCURRENCY */
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5TS_term_package() */
@@ -445,6 +456,62 @@ H5TS_api_unlock(void)
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS_api_unlock */
+
+#ifdef H5_HAVE_CONCURRENCY
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_internal_lock
+ *
+ * Purpose:     Acquire the internal mutex, which is meant for when
+ *              internally concurrent code (threads spawned inside the
+ *              library) enters a non-threadsafe section.
+ *
+ * Note:        This is not currently a recursive lock, so the library must
+ *              not spawn internal threads when recursively entering such a
+ *              section while this mutex is locked.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TS_internal_lock(void)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Acquire the library's internal lock */
+    if (H5_UNLIKELY(H5TS_mutex_lock(&H5TS_api_info_p.internal_mutex) < 0))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_internal_lock() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_internal_unlock
+ *
+ * Purpose:     Unlock the mutex locked by H5TS_internal_lock().
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TS_internal_unlock(void)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Release the library's internal lock */
+    if (H5_UNLIKELY(H5TS_mutex_unlock(&H5TS_api_info_p.internal_mutex) < 0))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_internal_unlock() */
+#endif
 
 /*--------------------------------------------------------------------------
  * Function:    H5TS__tinfo_init
