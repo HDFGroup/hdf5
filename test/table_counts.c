@@ -64,8 +64,8 @@ test_table_counts(bool attributes, bool dense)
     unsigned seen;
 
     TESTING(attributes ? "dense attribute tables with fabricated counts"
-            : dense ? "dense link tables with fabricated counts"
-                    : "compact link tables with fabricated counts");
+            : dense    ? "dense link tables with fabricated counts"
+                       : "compact link tables with fabricated counts");
 
     if ((file = H5Fcreate("table_counts.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
