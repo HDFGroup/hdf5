@@ -304,14 +304,15 @@ typedef struct H5D_chunk_iter_ud_t {
 #ifdef H5_HAVE_CONCURRENCY
 /* Information about a single chunk in an internally concurrent operation */
 typedef struct H5D_threaded_chunk_info_t {
-    struct H5D_threaded_io_info_t *threaded_io_info;   /* Pointer to the dataset-global struct for this operation */
-    H5O_pline_t                   *old_pline;          /* Filter pipeline used to compress this chunk */
-    H5D_chunk_ud_t                 udata;              /* Chunk udata struct (from lookup */
-    size_t                         chunk_nbytes;       /* Size of chunk on disk */
-    size_t                         buf_alloc;          /* Allocated size of chunk buffer */
-    void                          *chunk;              /* Chunk buffer */
-    hsize_t                        src_accessed_bytes; /* Number of bytes accessed in the chunk */
-    H5D_dset_io_info_t             chk_dset_io_info;   /* Temporary dataset I/O info for individual chunk I/O */
+    struct H5D_threaded_io_info_t
+                      *threaded_io_info;   /* Pointer to the dataset-global struct for this operation */
+    H5O_pline_t       *old_pline;          /* Filter pipeline used to compress this chunk */
+    H5D_chunk_ud_t     udata;              /* Chunk udata struct (from lookup */
+    size_t             chunk_nbytes;       /* Size of chunk on disk */
+    size_t             buf_alloc;          /* Allocated size of chunk buffer */
+    void              *chunk;              /* Chunk buffer */
+    hsize_t            src_accessed_bytes; /* Number of bytes accessed in the chunk */
+    H5D_dset_io_info_t chk_dset_io_info;   /* Temporary dataset I/O info for individual chunk I/O */
 } H5D_threaded_chunk_info_t;
 
 /* Dataset-global information about an internally concurrent operation */
@@ -2950,10 +2951,10 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
     bool               chunk_locked = false;        /* Indicates whether the chunk is locked */
     H5D_chunk_ud_t     udata;                       /* Chunk index pass-through    */
 #ifdef H5_HAVE_CONCURRENCY
-    H5D_threaded_io_info_t *threaded_io_info = NULL; /* Info for concurrent threaded execution */
-    unsigned                threads_in_flight = 0;   /* Number of threads currently executing */
-#endif                                               /* H5_HAVE_CONCURRENCY */
-    herr_t ret_value = SUCCEED;                      /*return value        */
+    H5D_threaded_io_info_t *threaded_io_info  = NULL; /* Info for concurrent threaded execution */
+    unsigned                threads_in_flight = 0;    /* Number of threads currently executing */
+#endif                                                /* H5_HAVE_CONCURRENCY */
+    herr_t ret_value = SUCCEED;                       /*return value        */
 
     FUNC_ENTER_PACKAGE
 
@@ -3164,7 +3165,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if threading is enabled");
 
             if (do_threading) {
-                /* Allocate threaded I/O infor struct */
+                /* Allocate threaded I/O info struct */
                 if (NULL == (threaded_io_info = H5MM_calloc(sizeof(H5D_threaded_io_info_t))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate threaded I/O info struct");
 
@@ -3594,9 +3595,9 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
 
         /* Perform filter pipeline. Defer going to done on error so the chunk cache is always patched. */
         if (H5_UNLIKELY(H5Z_pipeline(threaded_chunk_info->old_pline, H5Z_FLAG_REVERSE,
-                                     &(threaded_chunk_info->udata.filter_mask),
-                                     err_detect, filter_cb, &threaded_chunk_info->chunk_nbytes,
-                                     &threaded_chunk_info->buf_alloc, &threaded_chunk_info->chunk) < 0))
+                                     &(threaded_chunk_info->udata.filter_mask), err_detect, filter_cb,
+                                     &threaded_chunk_info->chunk_nbytes, &threaded_chunk_info->buf_alloc,
+                                     &threaded_chunk_info->chunk) < 0))
             HDONE_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "data pipeline read failed");
 
 #ifndef H5_UNSAFE_CONCURRENCY
