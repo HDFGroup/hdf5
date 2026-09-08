@@ -1783,7 +1783,7 @@ test_canonical_name_length_limit(void)
         size_t i;
 
         for (i = 0; i < sizeof(bad) / sizeof(bad[0]); i++) {
-            H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID, 1,    1,    bad[i], NULL,
+            H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID,   1,    1,    bad[i], NULL,
                               NULL, longtitle_filter_func, NULL, NULL, NULL};
             H5E_BEGIN_TRY
             {
@@ -1798,7 +1798,7 @@ test_canonical_name_length_limit(void)
         }
 
         for (i = 0; i < sizeof(good) / sizeof(good[0]); i++) {
-            H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID, 1,    1,    good[i], NULL,
+            H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID,   1,    1,    good[i], NULL,
                               NULL, longtitle_filter_func, NULL, NULL, NULL};
             if (H5Zregister(&c) < 0) {
                 fprintf(stderr, "\n   rejected valid name \"%s\"\n", good[i]);
@@ -1827,11 +1827,13 @@ error:
 static int
 test_canonical_name_uniqueness(void)
 {
-    H5Z_class3_t cls_a = {2,    UNIQUENAME_FILTER_ID_A, 1,    1,    "test-unique-name", NULL,
-                          NULL, longtitle_filter_func,  NULL, NULL, NULL};
-    H5Z_class3_t cls_b = {2,    UNIQUENAME_FILTER_ID_B, 1,    1,    "test-unique-name", NULL,
-                          NULL, longtitle_filter_func,  NULL, NULL, NULL};
-    herr_t       ret;
+    H5Z_class3_t cls_a = {
+        2,   UNIQUENAME_FILTER_ID_A, 1, 1, "test-unique-name", NULL, NULL, longtitle_filter_func, NULL, NULL,
+        NULL};
+    H5Z_class3_t cls_b = {
+        2,   UNIQUENAME_FILTER_ID_B, 1, 1, "test-unique-name", NULL, NULL, longtitle_filter_func, NULL, NULL,
+        NULL};
+    herr_t ret;
 
     TESTING("H5Zregister: canonical_name collision across different filter ids is rejected");
 

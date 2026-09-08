@@ -85,17 +85,17 @@ static void   H5Z__nbit_compress(unsigned char *data, unsigned d_nelmts, unsigne
 
 /* This message derives from H5Z */
 H5_ATTR_VISIBILITY_HIDDEN H5Z_class3_t H5Z_NBIT[1] = {{
-    2,               /* H5Z_class3_t version */
-    H5Z_FILTER_NBIT, /* Filter id number */
-    1,               /* Assume encoder present: check before registering */
-    1,               /* decoder_present flag (set to true) */
-    "nbit",          /* name */
-    H5Z__can_apply_nbit,                                        /* The "can apply" callback */
-    H5Z__set_local_nbit,                                        /* The "set local" callback */
-    H5Z__filter_nbit,                                           /* The actual filter function */
-    H5Z__no_params_set_config,                                  /* String config setter: no-op (params come
-                                                                 * from set_local); shared with shuffle/fletcher32 */
-    NULL,                                                       /* No string config getter */
+    2,                         /* H5Z_class3_t version */
+    H5Z_FILTER_NBIT,           /* Filter id number */
+    1,                         /* Assume encoder present: check before registering */
+    1,                         /* decoder_present flag (set to true) */
+    "nbit",                    /* name */
+    H5Z__can_apply_nbit,       /* The "can apply" callback */
+    H5Z__set_local_nbit,       /* The "set local" callback */
+    H5Z__filter_nbit,          /* The actual filter function */
+    H5Z__no_params_set_config, /* String config setter: no-op (params come
+                                * from set_local); shared with shuffle/fletcher32 */
+    NULL,                      /* No string config getter */
     "N-bit packing for non-byte-aligned integer/float storage", /* description */
 }};
 

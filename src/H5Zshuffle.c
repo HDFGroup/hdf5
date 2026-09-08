@@ -28,16 +28,16 @@ static size_t H5Z__filter_shuffle(unsigned flags, size_t cd_nelmts, const unsign
 
 /* This message derives from H5Z */
 H5_ATTR_VISIBILITY_HIDDEN const H5Z_class3_t H5Z_SHUFFLE[1] = {{
-    2,                                                              /* H5Z_class3_t version */
-    H5Z_FILTER_SHUFFLE,                                             /* Filter id number */
-    1,                                                              /* encoder_present flag (set to true) */
-    1,                                                              /* decoder_present flag (set to true) */
-    "shuffle",                                                      /* name */
-    NULL,                                                           /* The "can apply" callback */
-    H5Z__set_local_shuffle,                                         /* The "set local" callback */
-    H5Z__filter_shuffle,                                            /* The actual filter function */
-    H5Z__no_params_set_config,                                      /* String config setter */
-    NULL, /* No string config getter (no user params) */
+    2,                         /* H5Z_class3_t version */
+    H5Z_FILTER_SHUFFLE,        /* Filter id number */
+    1,                         /* encoder_present flag (set to true) */
+    1,                         /* decoder_present flag (set to true) */
+    "shuffle",                 /* name */
+    NULL,                      /* The "can apply" callback */
+    H5Z__set_local_shuffle,    /* The "set local" callback */
+    H5Z__filter_shuffle,       /* The actual filter function */
+    H5Z__no_params_set_config, /* String config setter */
+    NULL,                      /* No string config getter (no user params) */
     "Byte shuffle preprocessing to improve downstream compression", /* description */
 }};
 
