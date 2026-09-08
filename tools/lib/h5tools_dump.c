@@ -3206,13 +3206,16 @@ h5tools_float_is_short_binary(double v)
     int    e;
 
     /* Reject zero and non-finite input on the bit pattern rather than with
-     * "v == 0.0" and isfinite(): a fast-math build -- Intel icx's
-     * -fp-model=fast (its default at -O2 and above), or gcc/clang
-     * -ffast-math or -ffinite-math-only -- may assume every operand is
-     * finite and fold isfinite() to 1, which would send an inf or a nan on
-     * into the frexp() below and annotate it as if it were short.  A
-     * magnitude of zero is +-0.0; one at or above the all-ones exponent is
-     * inf or nan. */
+     * "v == 0.0" and isfinite(); each of those fails differently.  A
+     * fast-math build -- Intel icx's -fp-model=fast (its default at -O2 and
+     * above), or gcc/clang -ffast-math or -ffinite-math-only -- may assume
+     * every operand is finite and fold isfinite() to 1, sending an inf or a
+     * nan on into the frexp() below to be annotated as if it were short.
+     * And under denormals-are-zero (DAZ, MXCSR bit 6, which -ffast-math and
+     * icx -fp-model=fast set process-wide) "v == 0.0" is true for a genuine
+     * subnormal, suppressing the annotation for exactly the values whose
+     * hexadecimal spelling is most worth showing.  A magnitude of zero is
+     * +-0.0; one at or above the all-ones exponent is inf or nan. */
 #if H5_SIZEOF_DOUBLE == 8
     {
         uint64_t mag;

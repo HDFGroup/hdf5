@@ -26,7 +26,7 @@ vendored files are identified by their SHA-256 checksums:
 Use these hashes to identify the exact upstream commit.  They are the
 checksums of the **pristine** upstream files; `tomlc17.c` as it sits in this
 directory carries two local changes (see below) and hashes to
-`7eff4f9c51e1ce67fa9af6326fe582753d09914b4c896007eed08ad95255f0bf`.
+`f3b41671ae5a99fc0d12807ce6b998dcb7139827333b29f668e9d6cdd9682d19`.
 
 ## HDF5-local modifications
 
@@ -80,11 +80,23 @@ rejected again. This is why it surfaced as an Intel-only CI failure
 (`tfilter2`'s `canon-10`/`test_config_canonicalization`) rather than on GCC or
 Clang.
 
-Note that the mechanism is compile-time, not the MXCSR state: `ucomisd`, which
-is what GCC emits for `fp64 != 0.0` on x86-64, ignores DAZ, and a GCC build
-with FTZ+DAZ forced on via SSE intrinsics parses `5e-324` correctly even
-without this patch. Earlier revisions of this file and of upstream issue #49
-attributed the failure to the hardware flag; that was wrong.
+The flag responsible is DAZ (denormals-are-zero, `MXCSR` bit 6), not FTZ.
+FTZ acts on the *results* of SSE arithmetic; DAZ acts on its *inputs*, which
+is what makes a comparison read a subnormal operand as `0.0`. Measured
+against the parser as of `64a063b86`, with the register read back to confirm
+each setting took effect:
+
+```
+default   (FTZ=0 DAZ=0)   x = 5e-324 -> ACCEPT
+FTZ only  (FTZ=1 DAZ=0)   x = 5e-324 -> ACCEPT
+FTZ+DAZ   (FTZ=1 DAZ=1)   x = 5e-324 -> REJECT
+```
+
+The toolchains named above enable both together, which is why the original
+diagnosis pointed at the right behaviour under the wrong name. Note that a
+build need not use fast-math itself to be affected: DAZ is process-wide
+state, so anything that sets it -- including a shared library elsewhere in
+the process built with `-ffast-math` -- puts the parser in this mode.
 
 The fix decides on the raw bit pattern, which no FP mode or fast-math
 assumption can alter: mask off the sign bit, then require the magnitude to be

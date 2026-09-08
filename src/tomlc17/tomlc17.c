@@ -2675,13 +2675,22 @@ static int scan_float(scanner_t *sp, token_t *tok) {
   // glibc sets ERANGE on underflow even when strtod's result is correctly
   // rounded, e.g. 5e-324; accept such results, but still reject a value that
   // underflowed to zero or overflowed to infinity.  Decide on the raw bit
-  // pattern rather than with "fp64 != 0.0" and isfinite(): a fast-math build
-  // (gcc/clang -ffast-math or -ffinite-math-only, Intel icx -fp-model=fast,
-  // its default at -O2 and above) may assume that no operand is subnormal
-  // and that every operand is finite, folding isfinite() to 1 and evaluating
-  // the comparison as if a subnormal were zero -- and FTZ/DAZ can flush
-  // subnormals in SSE operations at run time.  Integer tests on the bits
-  // depend on neither.
+  // pattern rather than with "fp64 != 0.0" and isfinite(), each of which
+  // fails in its own way:
+  //
+  //   - denormals-are-zero (DAZ, MXCSR bit 6) makes an SSE compare read a
+  //     subnormal operand as 0.0, so "fp64 != 0.0" is false for a value the
+  //     conversion got right.  This is the reported bug (issue #49): with
+  //     DAZ set the old check rejects 5e-324, and with only flush-to-zero
+  //     (FTZ, bit 15) set it does not -- FTZ acts on results, DAZ on inputs.
+  //     Toolchains that enable DAZ process-wide include Intel icc/icx under
+  //     -fp-model=fast, their default at -O2 and above, and gcc/clang under
+  //     -ffast-math, which links a startup that sets it.
+  //
+  //   - isfinite() is folded to 1 by gcc and clang under -ffast-math and
+  //     -ffinite-math-only, which would let an overflow to infinity through.
+  //
+  // Integer tests on the bits depend on neither.
   // Reported/fixed upstream: https://github.com/cktan/tomlc17/pull/50
   static_assert(sizeof(fp64) == sizeof(uint64_t), "double must be 64 bits");
   uint64_t fp64_bits;
