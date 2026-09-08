@@ -657,6 +657,27 @@ H5Zconfig_get_int(const char *params, const char *key, int64_t *out)
     FUNC_LEAVE_API_NOINIT_NOLOCK(ret_value)
 }
 
+/* Is v an inf or a nan?
+ *
+ * Decided on the bit pattern rather than with isnan()/isinf(): a fast-math
+ * build -- Intel icx's -fp-model=fast (its default at -O2 and above), or
+ * gcc/clang -ffast-math or -ffinite-math-only -- may assume no operand is
+ * ever inf or nan and fold both classifiers to 0, letting through exactly
+ * the values the caller means to reject.  An exponent field of all ones is
+ * inf (zero mantissa) or nan (nonzero mantissa). */
+static inline bool
+H5Z__fp64_is_inf_or_nan(double v)
+{
+#if H5_SIZEOF_DOUBLE == 8
+    uint64_t bits;
+
+    memcpy(&bits, &v, sizeof(v));
+    return (bits & 0x7ff0000000000000ULL) == 0x7ff0000000000000ULL;
+#else
+    return isnan(v) || isinf(v);
+#endif
+}
+
 /*-------------------------------------------------------------------------
  * Function:    H5Zconfig_get_double
  *
@@ -690,7 +711,7 @@ H5Zconfig_get_double(const char *params, const char *key, double *out)
 
     if (d.type != TOML_FP64)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "type mismatch: key '%s' is not a TOML float", key);
-    if (isnan(d.u.fp64) || isinf(d.u.fp64))
+    if (H5Z__fp64_is_inf_or_nan(d.u.fp64))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "inf/nan float values are not supported for filter parameters (key '%s')", key);
     *out      = d.u.fp64;
