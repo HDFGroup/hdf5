@@ -26,7 +26,7 @@ vendored files are identified by their SHA-256 checksums:
 Use these hashes to identify the exact upstream commit.  They are the
 checksums of the **pristine** upstream files; `tomlc17.c` as it sits in this
 directory carries two local changes (see below) and hashes to
-`9aaadec08393ef5c33c3ecf51e4a83f047549eae6e761a02c208af14b3d6d4fc`.
+`7eff4f9c51e1ce67fa9af6326fe582753d09914b4c896007eed08ad95255f0bf`.
 
 ## HDF5-local modifications
 
