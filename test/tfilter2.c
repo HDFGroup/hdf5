@@ -244,6 +244,33 @@ test_parser(void)
         TEST_ERROR;
     PASSED();
 
+    /* The two cases above use TOML's inf/nan keywords.  These two arrive as
+     * ordinary decimal literals that strtod() cannot represent, and are the
+     * regressions found reviewing https://github.com/cktan/tomlc17/pull/50:
+     * a literal overflowing to infinity was accepted wherever isfinite() had
+     * been folded away by a fast-math build, and one underflowing to -0.0 was
+     * accepted everywhere, because the sign bit made the bit pattern nonzero.
+     * Neither needs a special build to assert on -- both must be rejected. */
+    TESTING("H5Zconfig_get_double: literal overflowing to inf rejected");
+    H5E_BEGIN_TRY
+    {
+        ret = H5Zconfig_get_double("tol = 1e400", "tol", &dval);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    PASSED();
+
+    TESTING("H5Zconfig_get_double: literal underflowing to -0.0 rejected");
+    H5E_BEGIN_TRY
+    {
+        ret = H5Zconfig_get_double("tol = -1e-400", "tol", &dval);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    PASSED();
+
     TESTING("H5Zconfig_get_int: semicolon outside quotes rejected");
     H5E_BEGIN_TRY
     {
