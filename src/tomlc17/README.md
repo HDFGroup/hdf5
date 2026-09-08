@@ -66,22 +66,32 @@ Covered by `canon-10` in `test/tfilter2.c`, which asserts value transparency
 across the hex-to-decimal rewrite at exact powers of two from 2^-1074 to
 2^1023.
 
-### `scan_float()`: the flush-to-zero fix, also ahead of a release
+### `scan_float()`: the fast-math fix, also ahead of a release
 
-A second, independent change to the same `is_ok_subnormal` line: it compared
-the parsed value with `fp64 != 0.0`, a floating-point comparison. Under
-flush-to-zero (FTZ) mode -- the default for Intel's icc/icx at `-O2` and above
-via `-fp-model=fast`, unless `-fp-model=precise`/`-fp-model=strict` is given --
-the CPU evaluates that comparison as if a genuinely nonzero subnormal `fp64`
-were `0.0`, without altering the value in memory. `is_ok_subnormal` then comes
-out false and the same class of literal the `64a063b86` fix above was meant to
-accept (e.g. `x = 5e-324`) is rejected again, but only on FTZ-default builds --
-this is why it surfaced as an Intel-only CI failure (`tfilter2`'s
-`canon-10`/`test_config_canonicalization`) rather than on GCC or Clang.
+A second, independent change to the same `is_ok_subnormal` line, which decided
+whether to forgive `ERANGE` using `fp64 != 0.0` and `isfinite(fp64)` -- two
+floating-point operations a fast-math build is free to reinterpret. Intel's
+icc/icx use `-fp-model=fast` by default at `-O2` and above (unless
+`-fp-model=precise`/`-fp-model=strict` is given), under which the compiler may
+assume no operand is subnormal and every operand is finite. `is_ok_subnormal`
+then comes out false for a correctly-rounded subnormal, and the same class of
+literal the `64a063b86` fix above was meant to accept (e.g. `x = 5e-324`) is
+rejected again. This is why it surfaced as an Intel-only CI failure
+(`tfilter2`'s `canon-10`/`test_config_canonicalization`) rather than on GCC or
+Clang.
 
-The fix compares the raw bit pattern instead, which an integer comparison
-cannot flush: `uint64_t fp64_bits; memcpy(&fp64_bits, &fp64,
-sizeof(fp64_bits)); ... fp64_bits != 0 ...`.
+Note that the mechanism is compile-time, not the MXCSR state: `ucomisd`, which
+is what GCC emits for `fp64 != 0.0` on x86-64, ignores DAZ, and a GCC build
+with FTZ+DAZ forced on via SSE intrinsics parses `5e-324` correctly even
+without this patch. Earlier revisions of this file and of upstream issue #49
+attributed the failure to the hardware flag; that was wrong.
+
+The fix decides on the raw bit pattern, which no FP mode or fast-math
+assumption can alter: mask off the sign bit, then require the magnitude to be
+nonzero (rejecting an underflow to +-0.0) and below the infinity/NaN exponent
+(rejecting an overflow). Testing the exponent bits directly also replaces
+`isfinite()`, which gcc and clang fold to 1 under `-ffast-math` and
+`-ffinite-math-only`.
 
 Reported as <https://github.com/cktan/tomlc17/issues/49>, fix proposed as
 <https://github.com/cktan/tomlc17/pull/50>. Not yet merged upstream at the time
@@ -90,8 +100,23 @@ once a tag containing that fix exists, replacing these files with that tag
 leaves no local change for this issue.
 
 Covered by the same `canon-10` test above; the failure is otherwise silent on
-compilers that do not default to FTZ, so it will not reproduce locally on a
-typical GCC/Clang build.
+compilers that do not default to fast-math, so it will not reproduce locally on
+a typical GCC/Clang build.
+
+### What this patch does *not* fix
+
+It only helps where `strtod()` itself returned a genuine subnormal and the
+parser then misjudged it. On platforms whose libc flushes inside `strtod()`
+under ambient FTZ/DAZ -- observed on Windows Intel oneAPI and MSYS2
+clangarm64, where `0x1p-1074` round-trips to a literal `0.0` -- the bits truly
+are zero, no bit-pattern test can recover the value, and tomlc17 still rejects
+the literal. HDF5 handles that case outside the parser: `tfilter2` probes the
+platform's `strtod`/`snprintf` round-trip at run time and skips only the two
+true-subnormal exponents when the probe shows the libc does not preserve them
+(see `test/tfilter2.c`). Filter parameters that are exact subnormal doubles
+(magnitude below ~2.2e-308) are not a realistic compression level, tolerance,
+or scale factor, so this is a documented limitation rather than a gap to close
+in the parser.
 
 ## Files
 
@@ -112,8 +137,8 @@ typical GCC/Clang build.
 4a. Check whether the new tag already contains upstream commit `64a063b86`
    (grep for `is_ok_subnormal`).  If it does, drop that local change and
    delete its section above.  If not, re-apply it verbatim.
-4b. Check whether the new tag already contains the flush-to-zero fix from
-   <https://github.com/cktan/tomlc17/pull/50> (grep for `fp64_bits`).  If it
+4b. Check whether the new tag already contains the fast-math fix from
+   <https://github.com/cktan/tomlc17/pull/50> (grep for `fp64_mag`).  If it
    does, drop that local change too and delete its section above.  If not,
    re-apply it verbatim.
 4c. Record the resulting file's new post-patch checksum in the table above.
