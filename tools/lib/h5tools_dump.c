@@ -3205,8 +3205,27 @@ h5tools_float_is_short_binary(double v)
     double f;
     int    e;
 
+    /* Reject zero and non-finite input on the bit pattern rather than with
+     * "v == 0.0" and isfinite(): a fast-math build -- Intel icx's
+     * -fp-model=fast (its default at -O2 and above), or gcc/clang
+     * -ffast-math or -ffinite-math-only -- may assume every operand is
+     * finite and fold isfinite() to 1, which would send an inf or a nan on
+     * into the frexp() below and annotate it as if it were short.  A
+     * magnitude of zero is +-0.0; one at or above the all-ones exponent is
+     * inf or nan. */
+#if H5_SIZEOF_DOUBLE == 8
+    {
+        uint64_t mag;
+
+        memcpy(&mag, &v, sizeof(v));
+        mag &= 0x7fffffffffffffffULL; /* drop the sign bit */
+        if (mag == 0 || mag >= 0x7ff0000000000000ULL)
+            return false;
+    }
+#else
     if (v == 0.0 || !isfinite(v))
         return false;
+#endif
 
     /* frexp normalizes to f in [0.5, 1), so the significand of a value with
      * at most 13 significant bits is f * 2^13 -- scaling by 8192 makes
