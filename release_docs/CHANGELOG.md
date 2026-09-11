@@ -77,6 +77,21 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed a deadlock in the ROS3 VFD on Windows
+
+   When an HDF5 application running on Windows and using the ROS3 VFD exited normally,
+   a deadlock would occur when the VFD called the aws-c-s3 library's cleanup function
+   during process shutdown. This was due to the aws-c-s3 library attempting to join
+   threads while the Windows loader lock was held. As a temporary workaround for Windows
+   builds of the library, the aws-c-s3 cleanup logic has been moved to the VFD's
+   termination callback (other platforms still use an atexit() handler) and will be
+   skipped if the VFD determines that the process is being shutdown. Due to the current
+   architecture of the library, the aws-c-s3 library's resources can only be properly
+   cleaned up if the HDF5 application makes sure to call H5close() before exiting.
+   Otherwise, memory leaks and other resource cleanup issues may be observed.
+
+   Fixes GitHub issue #6560
+
 ### Fixed memory leaks and ID reference count issues when pushing an error to an error stack that is full
 
    When an error is pushed to an error stack, the library may make a copy of the file
