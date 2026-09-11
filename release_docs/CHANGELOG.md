@@ -77,6 +77,16 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed an assertion failure when a filter pipeline contains `H5Z_MAX_NFILTERS` filters
+
+   An `assert()` in the internal function `H5Z_pipeline()` caused a crash in debug builds
+   of the library when a filter pipeline contained exactly `H5Z_MAX_NFILTERS` filters. The
+   HDF5 file format specification documents that 32, the number which `H5Z_MAX_NFILTERS` is
+   currently mapped to, is the maximum number of filters that a filter pipeline can contain,
+   so the `assert()` has been fixed for this case.
+
+   Fixes GitHub issue #6655
+
 ### Fixed memory leaks and ID reference count issues when pushing an error to an error stack that is full
 
    When an error is pushed to an error stack, the library may make a copy of the file
