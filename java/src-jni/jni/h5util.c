@@ -4347,6 +4347,7 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
                     ENVPTR->DeleteLocalRef(ENVONLY, memb_jobj);
                 }
                 H5Tclose(memb);
+                memb = H5I_INVALID_HID;
             }
             jobj = jList;
             break;
@@ -4558,6 +4559,27 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
     } /* switch(type_class) */
 
 done:
+    /* The base type derived from a VLEN/ARRAY/COMPLEX memory type, or the member type of
+     * a COMPOUND that has not been closed by the loop above, is owned by this call. */
+    if (memb >= 0)
+        H5Tclose(memb);
+
+    /* Release the class references so a deep recursion (a compound read calls this helper
+     * once per member per element) does not hold one set per level until the JNI call ends. */
+    if (arrCList)
+        ENVPTR->DeleteLocalRef(ENVONLY, arrCList);
+    if (cByte)
+        ENVPTR->DeleteLocalRef(ENVONLY, cByte);
+    if (cShort)
+        ENVPTR->DeleteLocalRef(ENVONLY, cShort);
+    if (cInt)
+        ENVPTR->DeleteLocalRef(ENVONLY, cInt);
+    if (cLong)
+        ENVPTR->DeleteLocalRef(ENVONLY, cLong);
+    if (cFloat)
+        ENVPTR->DeleteLocalRef(ENVONLY, cFloat);
+    if (cDouble)
+        ENVPTR->DeleteLocalRef(ENVONLY, cDouble);
 
     return jobj;
 }
@@ -4678,6 +4700,7 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
                                       memb_vlSize);
                 ENVPTR->DeleteLocalRef(ENVONLY, arr_obj);
                 H5Tclose(memb);
+                memb = H5I_INVALID_HID;
             }
 
             ENVPTR->DeleteLocalRef(ENVONLY, array);
@@ -4857,6 +4880,26 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
     } /* switch(type_class) */
 
 done:
+    /* The base type derived from a VLEN/ARRAY/COMPLEX memory type, or the member type of
+     * a COMPOUND that has not been closed by the loop above, is owned by this call. */
+    if (memb >= 0)
+        H5Tclose(memb);
+
+    /* Release the class references so a deep recursion does not hold one set per level. */
+    if (arrCList)
+        ENVPTR->DeleteLocalRef(ENVONLY, arrCList);
+    if (cByte)
+        ENVPTR->DeleteLocalRef(ENVONLY, cByte);
+    if (cShort)
+        ENVPTR->DeleteLocalRef(ENVONLY, cShort);
+    if (cInt)
+        ENVPTR->DeleteLocalRef(ENVONLY, cInt);
+    if (cLong)
+        ENVPTR->DeleteLocalRef(ENVONLY, cLong);
+    if (cFloat)
+        ENVPTR->DeleteLocalRef(ENVONLY, cFloat);
+    if (cDouble)
+        ENVPTR->DeleteLocalRef(ENVONLY, cDouble);
 
     return;
 }
@@ -4983,6 +5026,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                     }
 
                     H5Tclose(memb);
+                    memb = H5I_INVALID_HID;
                 }
                 if (retIsList)
                     ENVPTR->CallBooleanMethod(ENVONLY, ret_buf, arrAddMethod, jList);
@@ -5110,6 +5154,13 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
     } /* switch(type_class) */
 
 done:
+    /* The base type derived from a VLEN/ARRAY/COMPLEX memory type, or the member type of
+     * a COMPOUND that has not been closed by the loop above, is owned by this call. */
+    if (memb >= 0)
+        H5Tclose(memb);
+
+    if (arrCList)
+        ENVPTR->DeleteLocalRef(ENVONLY, arrCList);
 
     return;
 }
@@ -5243,6 +5294,7 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
                                           char_buf + i * typeSize + memb_offset, memb_vlSize);
                     ENVPTR->DeleteLocalRef(ENVONLY, arr_obj);
                     H5Tclose(memb);
+                    memb = H5I_INVALID_HID;
                 }
 
                 ENVPTR->DeleteLocalRef(ENVONLY, array);
@@ -5364,6 +5416,13 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
     } /* switch(type_class) */
 
 done:
+    /* The base type derived from a VLEN/ARRAY/COMPLEX memory type, or the member type of
+     * a COMPOUND that has not been closed by the loop above, is owned by this call. */
+    if (memb >= 0)
+        H5Tclose(memb);
+
+    if (arrCList)
+        ENVPTR->DeleteLocalRef(ENVONLY, arrCList);
 
     return;
 }
