@@ -30,8 +30,9 @@ init_packobject(pack_info_t *obj)
 
     obj->path[0] = '\0';
     for (j = 0; j < H5_REPACK_MAX_NFILTERS; j++) {
-        obj->filter[j].filtn     = -1;
-        obj->filter[j].cd_nelmts = DEFAULT_CDELEMTS;
+        obj->filter[j].filtn         = -1;
+        obj->filter[j].cd_nelmts     = DEFAULT_CDELEMTS;
+        obj->filter[j].params_str[0] = '\0';
         for (k = 0; k < DEFAULT_CDELEMTS; k++)
             obj->filter[j].cd_values[k] = 0;
     }

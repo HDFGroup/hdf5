@@ -20,7 +20,7 @@ echo "parameter is optional and can be used to force a specific"
 echo "installed version of clang-format to be used."
 echo ""
 
-find . \( -type d -path ./config -prune -and -not -path ./config \) \
+find . \( -type d \( -path ./config -o -path ./src/tomlc17 \) -prune \) \
     -or \( \( \! \( \
         -name H5LTanalyze.c \
         -or -name H5LTparse.c \

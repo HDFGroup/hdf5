@@ -7,7 +7,11 @@ DATASET "deflate" {
       SIZE XXXX (2.XXX:1 COMPRESSION)
    }
    FILTERS {
-      COMPRESSION DEFLATE { LEVEL 9 }
+      COMPRESSION DEFLATE {
+         LEVEL 9
+         PARAMS_STRING 'level = 9'
+         DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
+      }
    }
    FILLVALUE {
       FILL_TIME H5D_FILL_TIME_IFSET

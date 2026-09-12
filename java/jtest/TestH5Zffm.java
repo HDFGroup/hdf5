@@ -17,8 +17,12 @@ import static org.junit.Assert.*;
 import static jtest.FfmTestSupport.*;
 
 import java.lang.foreign.Arena;
+import java.lang.foreign.MemoryLayout;
+import java.lang.foreign.MemoryLayout.PathElement;
 import java.lang.foreign.MemorySegment;
+import java.lang.foreign.StructLayout;
 import java.lang.foreign.ValueLayout;
+import java.lang.invoke.VarHandle;
 
 import org.hdfgroup.javahdf5.hdf5_h;
 import org.junit.Rule;
@@ -352,6 +356,126 @@ public class TestH5Zffm {
 
         // Verify reserved value
         assertEquals("H5Z_FILTER_RESERVED should be 256", 256, hdf5_h.H5Z_FILTER_RESERVED());
+
+        System.out.println();
+    }
+
+    /**
+     * Helper: build the StructLayout for H5Z_class_info_t (64-bit ABI).
+     *   int            id             @ 0
+     *   unsigned int   config_flags   @ 4
+     *   const char    *name           @ 8
+     *   const char    *description    @ 16
+     *   bool           has_set_config @ 24
+     *   bool           has_get_config @ 25
+     *   padding                       @ 26-31
+     */
+    private static StructLayout classInfoLayout()
+    {
+        return MemoryLayout.structLayout(
+            ValueLayout.JAVA_INT.withName("id"), ValueLayout.JAVA_INT.withName("config_flags"),
+            ValueLayout.ADDRESS.withName("name"), ValueLayout.ADDRESS.withName("description"),
+            ValueLayout.JAVA_BOOLEAN.withName("has_set_config"),
+            ValueLayout.JAVA_BOOLEAN.withName("has_get_config"), MemoryLayout.paddingLayout(6));
+    }
+
+    /**
+     * Test H5Zget_filter_class_info for DEFLATE via raw FFM binding
+     */
+    @Test
+    public void testH5Zget_filter_class_info_deflate()
+    {
+        System.out.print(testname.getMethodName());
+
+        int available = hdf5_h.H5Zfilter_avail(hdf5_h.H5Z_FILTER_DEFLATE());
+        if (available > 0) {
+            StructLayout layout = classInfoLayout();
+            VarHandle idH       = layout.varHandle(PathElement.groupElement("id"));
+            VarHandle flagsH    = layout.varHandle(PathElement.groupElement("config_flags"));
+
+            try (Arena arena = Arena.ofConfined()) {
+                MemorySegment infoSeg = arena.allocate(layout);
+                int result            = hdf5_h.H5Zget_filter_class_info(hdf5_h.H5Z_FILTER_DEFLATE(), infoSeg);
+                assertEquals("H5Zget_filter_class_info(DEFLATE) should succeed", 0, result);
+
+                int id    = (int)idH.get(infoSeg, 0L);
+                int flags = (int)flagsH.get(infoSeg, 0L);
+
+                assertEquals("H5Zget_filter_class_info: DEFLATE id", hdf5_h.H5Z_FILTER_DEFLATE(), id);
+                assertTrue("H5Zget_filter_class_info: DEFLATE decode enabled",
+                           (flags & hdf5_h.H5Z_FILTER_CONFIG_DECODE_ENABLED()) != 0);
+            }
+        }
+
+        System.out.println();
+    }
+
+    /**
+     * Test H5Zget_filter_class_info for SHUFFLE via raw FFM binding
+     */
+    @Test
+    public void testH5Zget_filter_class_info_shuffle()
+    {
+        System.out.print(testname.getMethodName());
+
+        StructLayout layout = classInfoLayout();
+        VarHandle idH       = layout.varHandle(PathElement.groupElement("id"));
+        VarHandle flagsH    = layout.varHandle(PathElement.groupElement("config_flags"));
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment infoSeg = arena.allocate(layout);
+            int result            = hdf5_h.H5Zget_filter_class_info(hdf5_h.H5Z_FILTER_SHUFFLE(), infoSeg);
+            assertEquals("H5Zget_filter_class_info(SHUFFLE) should succeed", 0, result);
+
+            int id    = (int)idH.get(infoSeg, 0L);
+            int flags = (int)flagsH.get(infoSeg, 0L);
+
+            assertEquals("H5Zget_filter_class_info: SHUFFLE id", hdf5_h.H5Z_FILTER_SHUFFLE(), id);
+            assertTrue("H5Zget_filter_class_info: SHUFFLE decode enabled",
+                       (flags & hdf5_h.H5Z_FILTER_CONFIG_DECODE_ENABLED()) != 0);
+        }
+
+        System.out.println();
+    }
+
+    /**
+     * Test H5Zget_filter_class_info for FLETCHER32 via raw FFM binding
+     */
+    @Test
+    public void testH5Zget_filter_class_info_fletcher32()
+    {
+        System.out.print(testname.getMethodName());
+
+        StructLayout layout = classInfoLayout();
+        VarHandle idH       = layout.varHandle(PathElement.groupElement("id"));
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment infoSeg = arena.allocate(layout);
+            int result            = hdf5_h.H5Zget_filter_class_info(hdf5_h.H5Z_FILTER_FLETCHER32(), infoSeg);
+            assertEquals("H5Zget_filter_class_info(FLETCHER32) should succeed", 0, result);
+
+            int id = (int)idH.get(infoSeg, 0L);
+            assertEquals("H5Zget_filter_class_info: FLETCHER32 id", hdf5_h.H5Z_FILTER_FLETCHER32(), id);
+        }
+
+        System.out.println();
+    }
+
+    /**
+     * Test H5Zget_filter_class_info with invalid filter ID returns error
+     */
+    @Test
+    public void testH5Zget_filter_class_info_invalid()
+    {
+        System.out.print(testname.getMethodName());
+
+        StructLayout layout = classInfoLayout();
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment infoSeg = arena.allocate(layout);
+            int result            = hdf5_h.H5Zget_filter_class_info(32999, infoSeg);
+            assertTrue("H5Zget_filter_class_info with invalid filter should fail", result < 0);
+        }
 
         System.out.println();
     }

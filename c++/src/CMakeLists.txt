@@ -64,6 +64,7 @@ set (CPP_HDRS
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5FaccProp.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5FcreatProp.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5File.h
+    ${HDF5_CPP_SRC_SOURCE_DIR}/H5FilterParam.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5FloatType.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Group.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5IdComponent.h

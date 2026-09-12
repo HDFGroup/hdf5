@@ -44,20 +44,42 @@ typedef struct H5Z_filter_info_t H5Z_filter_info_t;
 /* (avoids dynamic memory allocation in most cases) */
 #define H5Z_COMMON_NAME_LEN 12
 
+/* Maximum length (in bytes) of a dotted TOML key path used during
+ * filter parameter validation (e.g. "section.subsection.key"). */
+#define H5Z_CONFIG_MAX_KEY_PATH 256
+
 /****************************/
 /* Library Private Typedefs */
 /****************************/
 
 /* Structure to store information about each filter's parameters */
 struct H5Z_filter_info_t {
-    H5Z_filter_t id;                               /*filter identification number	     */
-    unsigned     flags;                            /*defn and invocation flags	     */
-    char         _name[H5Z_COMMON_NAME_LEN];       /*internal filter name		     */
-    char        *name;                             /*optional filter name		     */
-    size_t       cd_nelmts;                        /*number of elements in cd_values[]  */
-    unsigned     _cd_values[H5Z_COMMON_CD_VALUES]; /*internal client data values		     */
-    unsigned    *cd_values;                        /*client data values		     */
+    H5Z_filter_t id;                               /*filter identification number          */
+    unsigned     flags;                            /*defn and invocation flags             */
+    char         _name[H5Z_COMMON_NAME_LEN];       /*internal filter name                  */
+    char        *name;                             /*optional filter name                  */
+    size_t       cd_nelmts;                        /*number of elements in cd_values[]     */
+    unsigned     _cd_values[H5Z_COMMON_CD_VALUES]; /*internal client data values           */
+    unsigned    *cd_values;                        /*client data values                    */
+    char        *config;                           /*verbatim key=value config string, or
+                                                    *NULL; persisted in pipeline v3        */
 };
+
+/*
+ * Internal filter table entry.  H5Z_class2_t is embedded as the first member
+ * so that a pointer to H5Z_entry_t can be safely cast to H5Z_class2_t * per
+ * C11 6.7.2.1p15 without relying on struct-layout coincidence.  V3-specific
+ * fields are zero-initialised for filters registered via H5Z_class2_t or
+ * H5Z_class1_t.
+ */
+typedef struct H5Z_entry_t {
+    H5Z_class2_t base; /* must stay first; safe to cast to H5Z_class2_t * */
+    /* --- V3 extensions (NULL for v1/v2 plugins) --- */
+    H5Z_func2_t           filter2; /* Extended callback (class3); NULL for class1/class2 */
+    H5Z_set_config_func_t set_config;
+    H5Z_get_config_func_t get_config;
+    const char           *description; /* free-form description; may be NULL */
+} H5Z_entry_t;
 
 /*****************************/
 /* Library-private Variables */
@@ -71,25 +93,44 @@ struct H5O_pline_t; /*forward decl*/
 /* Internal API routines */
 H5_DLL herr_t H5Z_init(void);
 H5_DLL herr_t H5Z_register(const H5Z_class2_t *cls);
+H5_DLL herr_t H5Z_register3(const H5Z_class3_t *cls);
 H5_DLL herr_t H5Z_append(struct H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_nelmts,
                          const unsigned int cd_values[]);
+/* keep_config: true when refining cd_values for this dataset (as set_local
+ * does) and the stored string still applies; false when the caller replaces
+ * cd_values outright, so the string no longer describes them. */
 H5_DLL herr_t H5Z_modify(const struct H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
-                         size_t cd_nelmts, const unsigned int cd_values[]);
-H5_DLL herr_t H5Z_pipeline(const struct H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*in,out*/,
+                         size_t cd_nelmts, bool keep_config, const unsigned int cd_values[]);
+H5_DLL herr_t H5Z_pipeline(const struct H5O_pline_t *pline, unsigned flags, hid_t dxpl_id,
+                           const hsize_t *scaled, size_t ndims, unsigned *filter_mask /*in,out*/,
                            H5Z_EDC_t edc_read, H5Z_cb_t cb_struct, size_t *nbytes /*in,out*/,
                            size_t *buf_size /*in,out*/, void **buf /*in,out*/);
+/* For a v3-registered filter, the returned struct's `filter` member is NULL
+ * (the callback lives in the internal H5Z_entry_t's separate `filter2`
+ * slot, not reachable through this H5Z_class2_t view) even though `version`
+ * reads 2, a value that is also legal for a genuine v2 registration -- so
+ * a v3 entry cannot be distinguished from a v2 one through this return
+ * type. Safe for name-only lookups; do not call cls->filter(...) without
+ * first checking it for NULL, and use H5Z_find_entry() instead if the
+ * filter callback itself needs to be invoked. */
 H5_DLL herr_t H5Z_find(bool attempt, H5Z_filter_t id, H5Z_class2_t **cls);
-H5_DLL herr_t H5Z_can_apply(hid_t dcpl_id, hid_t type_id);
-H5_DLL herr_t H5Z_set_local(hid_t dcpl_id, hid_t type_id);
-H5_DLL herr_t H5Z_can_apply_direct(const struct H5O_pline_t *pline);
-H5_DLL herr_t H5Z_set_local_direct(const struct H5O_pline_t *pline);
-H5_DLL htri_t H5Z_ignore_filters(hid_t dcpl_id, const H5S_t *space);
+/* Find filter entry; returns pointer into internal table (cast-compatible with H5Z_class2_t *) */
+H5_DLL herr_t             H5Z_find_entry(bool attempt, H5Z_filter_t id, H5Z_entry_t **entry);
+H5_DLL herr_t             H5Z_can_apply(hid_t dcpl_id, hid_t type_id);
+H5_DLL herr_t             H5Z_set_local(hid_t dcpl_id, hid_t type_id);
+H5_DLL herr_t             H5Z_can_apply_direct(const struct H5O_pline_t *pline);
+H5_DLL herr_t             H5Z_set_local_direct(const struct H5O_pline_t *pline);
+H5_DLL htri_t             H5Z_ignore_filters(hid_t dcpl_id, const H5S_t *space);
 H5_DLL H5Z_filter_info_t *H5Z_filter_info(const struct H5O_pline_t *pline, H5Z_filter_t filter);
 H5_DLL htri_t             H5Z_filter_in_pline(const struct H5O_pline_t *pline, H5Z_filter_t filter);
 H5_DLL htri_t             H5Z_all_filters_avail(const struct H5O_pline_t *pline);
 H5_DLL htri_t             H5Z_filter_avail(H5Z_filter_t id);
 H5_DLL herr_t             H5Z_delete(struct H5O_pline_t *pline, H5Z_filter_t filter);
 H5_DLL herr_t             H5Z_get_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags);
+/* Normalise a parameter string into the form persisted in pipeline v3:
+ * outer braces stripped and hex-float literals rewritten to %.16e decimal,
+ * so the stored bytes are valid TOML v1.0.0.  Caller frees with H5MM_xfree(). */
+H5_DLL char *H5Z_canonicalize_params(const char *params);
 
 /* Data Transform Functions */
 typedef struct H5Z_data_xform_t H5Z_data_xform_t; /* Defined in H5Ztrans.c */

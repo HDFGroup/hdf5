@@ -103,6 +103,7 @@ set (HDF5_REFERENCE_FILES
     tdatareg.ddl
     tdataregR.ddl
     tdeflate.ddl
+    tdeflate_noavail.ddl
     tdset-1.ddl
     tdset-2.ddl
     tdset-3s.ddl
@@ -206,6 +207,7 @@ set (HDF5_REFERENCE_FILES
     tstring2.ddl
     tstringe.ddl
     tszip.ddl
+    tszip_noavail.ddl
     tudfilter.ddl
     tudlink-1.ddl
     tudlink-2.ddl
@@ -1232,23 +1234,24 @@ ADD_H5_TEST (texceedsubblock RESULT_CODE 1 H5ERRREF "exceed dataset dims" --enab
 
 # tests for filters
 # SZIP
-# For VOL connectors, test files are generated during testing, which requires the filter itself to be available.
+# For VOL connectors, test files are generated during testing, which requires the filter itself to be available,
+# so the VOL-connector variant of this test only registers when SZIP is available. The native-only variant runs
+# either way: tfilters.h5 is a static fixture, and -H suppresses data (so no decoding is needed), but the
+# PARAMS_STRING line differs -- the SZIP get_config form (e.g. coding = "nn", pixels_per_block = 4) when SZIP is
+# available, the raw cd_values fallback form otherwise -- hence the separate reference files.
 if (HDF5_ENABLE_SZIP_SUPPORT)
-  set (SZIP_NATIVE_ONLY "")
+  ADD_H5_TEST (tszip RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H -p -d szip TARGET_FILE tfilters.h5)
 else ()
-  set (SZIP_NATIVE_ONLY "NATIVE_ONLY")
+  ADD_H5_TEST (tszip_noavail RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H -p -d szip TARGET_FILE tfilters.h5)
 endif ()
-
-ADD_H5_TEST (tszip RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H -p -d szip TARGET_FILE tfilters.h5 ${SZIP_NATIVE_ONLY})
 
 # deflate
-# For VOL connectors, test files are generated during testing, which requires the filter itself to be available.
+# Same constraint and native/VOL split as SZIP above.
 if (H5_HAVE_FILTER_DEFLATE)
-  set (DEFLATE_NATIVE_ONLY "")
+  ADD_H5_TEST (tdeflate RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H -p -d deflate TARGET_FILE tfilters.h5)
 else ()
-  set (DEFLATE_NATIVE_ONLY "NATIVE_ONLY")
+  ADD_H5_TEST (tdeflate_noavail RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H -p -d deflate TARGET_FILE tfilters.h5)
 endif ()
-ADD_H5_TEST (tdeflate RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H -p -d deflate TARGET_FILE tfilters.h5 ${DEFLATE_NATIVE_ONLY})
 
 # shuffle
 ADD_H5_TEST (tshuffle RESULT_CODE 0 --enable-error-stack -H -p -d shuffle TARGET_FILE tfilters.h5)
@@ -1263,12 +1266,12 @@ ADD_H5_TEST (tnbit RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H -p -d n
 ADD_H5_TEST (tscaleoffset RESULT_CODE 0 APPLY_FILTERS 4 --enable-error-stack -H -p -d scaleoffset  TARGET_FILE tfilters.h5)
 
 # all
+# Reference includes PARAMS_STRING lines that depend on SZIP and deflate
+# both being registered as v3 plugins (get_config returns the prose form);
+# without them the library falls back to the raw cd_values form.
 if (HDF5_ENABLE_SZIP_SUPPORT AND H5_HAVE_FILTER_DEFLATE)
-  set (ALL_NATIVE_ONLY "")
-else ()
-  set (ALL_NATIVE_ONLY "NATIVE_ONLY")
+  ADD_H5_TEST (tallfilters RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H -p -d all TARGET_FILE tfilters.h5 APPLY_FILTERS 1)
 endif ()
-ADD_H5_TEST (tallfilters RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H -p -d all  TARGET_FILE tfilters.h5 APPLY_FILTERS 1 ${ALL_NATIVE_ONLY})
 
 # user defined
 ADD_H5_TEST (tuserfilter RESULT_CODE 0 --enable-error-stack -H  -p -d myfilter  TARGET_FILE tfilters.h5)

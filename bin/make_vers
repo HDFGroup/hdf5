@@ -26,6 +26,18 @@ $func_params = {};
 # Global hash of typedefs ==> # symbol versions parsed from H5vers.txt
 $typedefs = {};
 
+# Global hash of functions/typedefs ==> the symbol version that is selected
+# when the application hasn't picked a version explicitly and hasn't chosen
+# a default "global" API version (H5_USE_*_API) that reaches this symbol
+# either. This is normally the same as the total number of versions in
+# %functions/%typedefs, but a version tag outside of @versions (e.g. "v300",
+# handled the same way as the "v111" exception in validate_line()) can
+# register a new symbol version that is never selected automatically -- only
+# via an explicit *_vers override. See the note in H5vers.txt next to the
+# H5Z_class TYPEDEF for why this is needed.
+$functions_default = {};
+$typedefs_default  = {};
+
 # Hash of API versions to a hash of (API call name --> symbol version)
 #
 # There is one hash for each version in @versions and the (API call name
@@ -233,12 +245,15 @@ sub print_defaultapivers ($) {
     print $fh "/*************/\n";
     for $curr_name (sort keys %functions) {
         my $curr_vers_name;     # Name of version macro for current function
-        my $curr_vers;          # Version of function
+        my $total_vers;         # Total number of symbol versions for function
+        my $curr_vers;          # Version of function selected by default
         my @param_list;         # Typedefs for the function parameters
 
         # Set up variables for later use
         $curr_vers_name = $curr_name . "_vers";
-        $curr_vers = $functions{$curr_name};
+        $total_vers = $functions{$curr_name};
+        $curr_vers  = $functions_default{$curr_name};
+        $curr_vers  = $total_vers if !defined($curr_vers) || $curr_vers == 0;
 
         # Split up parameter info
         @param_list = split(/\s*,\s*/, $func_params{$curr_name});
@@ -256,18 +271,18 @@ sub print_defaultapivers ($) {
             print $fh " " x $indent, "#define ${_}_t $_${curr_vers}_t\n";
         }
 
-        # Loop to print earlier version name mappings
-        $curr_vers--;
-        while($curr_vers > 0) {
-            print $fh "#elif $curr_vers_name == $curr_vers\n";
-            print $fh " " x $indent, "#define $curr_name $curr_name$curr_vers\n";
+        # Loop to print the remaining version name mappings, in descending
+        # order, skipping the default version already handled above.
+        for (my $v = $total_vers; $v >= 1; $v--) {
+            next if $v == $curr_vers;
+
+            print $fh "#elif $curr_vers_name == $v\n";
+            print $fh " " x $indent, "#define $curr_name $curr_name$v\n";
 
             # Print function's dependent parameter types
             foreach (sort (@param_list)) {
-                print $fh " " x $indent, "#define ${_}_t $_${curr_vers}_t\n";
+                print $fh " " x $indent, "#define ${_}_t $_${v}_t\n";
             }
-
-            $curr_vers--;
         }
 
         # Finish up with error for unknown version and endif
@@ -282,11 +297,14 @@ sub print_defaultapivers ($) {
     print $fh "/************/\n";
     for $curr_name (sort keys %typedefs) {
         my $curr_vers_name;     # Name of version macro for current function
-        my $curr_vers;          # Version of function
+        my $total_vers;         # Total number of symbol versions for typedef
+        my $curr_vers;          # Version of typedef selected by default
 
         # Set up variables for later use
         $curr_vers_name = $curr_name . "_t_vers";
-        $curr_vers = $typedefs{$curr_name};
+        $total_vers = $typedefs{$curr_name};
+        $curr_vers  = $typedefs_default{$curr_name};
+        $curr_vers  = $total_vers if !defined($curr_vers) || $curr_vers == 0;
 
         # Set up default/latest version name mapping
         print $fh "\n#if !defined($curr_vers_name) || $curr_vers_name == $curr_vers\n";
@@ -295,12 +313,13 @@ sub print_defaultapivers ($) {
         print $fh " " x $indent, "#endif /* $curr_vers_name */\n";
         print $fh " " x $indent, "#define ${curr_name}_t $curr_name${curr_vers}_t\n";
 
-        # Loop to print earlier version name mappings
-        $curr_vers--;
-        while ($curr_vers > 0) {
-            print $fh "#elif $curr_vers_name == $curr_vers\n";
-            print $fh " " x $indent, "#define ${curr_name}_t $curr_name${curr_vers}_t\n";
-            $curr_vers--;
+        # Loop to print the remaining version name mappings, in descending
+        # order, skipping the default version already handled above.
+        for (my $v = $total_vers; $v >= 1; $v--) {
+            next if $v == $curr_vers;
+
+            print $fh "#elif $curr_vers_name == $v\n";
+            print $fh " " x $indent, "#define ${curr_name}_t $curr_name${v}_t\n";
         }
 
         # Finish up with error for unknown version and endif
@@ -359,7 +378,13 @@ sub validate_line {
         #        and the H5O function version should be version 3 for default api=v112
         #        (the default api version for 1.12).  Allowing a v111 entry allows
         #        a version 2 that is never accessed via the H5O function macros.
-        if (!( $_ =~ /v1[02468]/ || $_ =~ /v11[02468]/ ||  $_ =~ /v111/ || $_ =~ /v200/ )) {
+        #
+        # Note:  v300 is allowed for the same reason, but for the opposite
+        #        purpose: it registers a symbol version that is *never*
+        #        reached through @versions (there is no H5_USE_300_API), so
+        #        it is only ever selected via an explicit *_vers override.
+        #        See the H5Z_class TYPEDEF entry below.
+        if (!( $_ =~ /v1[02468]/ || $_ =~ /v11[02468]/ ||  $_ =~ /v111/ || $_ =~ /v200/ || $_ =~ /v300/ )) {
             die "bad version information: $name";
         }
 
@@ -446,14 +471,28 @@ sub parse_line ($) {
             }
         }
 
+        # Compute the "default" symbol version: the highest version reachable
+        # from any real API version in @versions. Usually this equals the
+        # total number of versions, but a version tag that isn't in
+        # @versions (like "v300") is never reachable, so it can add a symbol
+        # version without changing what gets selected by default.
+        my $reachable_max = 0;
+        foreach my $hash_vers (@versions) {
+            my $v = ($line_type == 1) ? $api_vers_to_function_vers{$hash_vers}{$name}
+                                       : $api_vers_to_type_vers{$hash_vers}{$name};
+            $reachable_max = $v if defined($v) && $v > $reachable_max;
+        }
+
         # Store the number of symbol versions in a hash table, indexed by the name
         if ($line_type == 1) {
-            $functions{$name} = $#vers_list + 1;
+            $functions{$name}         = $#vers_list + 1;
+            $functions_default{$name} = $reachable_max;
 
             # Store the function's parameter types for later
             $func_params{$name} = $params;
         } elsif ($line_type == 2) {
-            $typedefs{$name} = $#vers_list + 1;
+            $typedefs{$name}         = $#vers_list + 1;
+            $typedefs_default{$name} = $reachable_max;
         }
 #print "\n";
     }

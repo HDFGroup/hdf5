@@ -20,21 +20,33 @@
 /* Include private header file */
 #include "H5Zprivate.h" /* Filter functions                */
 
+/* Internal dispatch alias for H5Z_CLASS3_T_VERS (used in
+ * H5Zregister()/H5Z_register()), so the two values cannot drift apart. */
+#define H5Z_CLASS3_T_VERS_INTERNAL H5Z_CLASS3_T_VERS
+
 /********************/
 /* Internal filters */
 /********************/
 
+/* These built-in filter class structs are package-private: used only within
+ * libhdf5 (H5Z.c), never part of the public API. Default-visibility export
+ * (H5_DLLVAR) would place them in libhdf5's dynamic symbol table, where they
+ * could collide with identically-named globals in dynamically loaded
+ * third-party filter plugins. Plain "extern" with hidden visibility keeps
+ * them linkable across this library's own translation units without
+ * external exposure. */
+
 /* Shuffle filter */
-H5_DLLVAR const H5Z_class2_t H5Z_SHUFFLE[1];
+H5_ATTR_VISIBILITY_HIDDEN extern const H5Z_class3_t H5Z_SHUFFLE[1];
 
 /* Fletcher32 filter */
-H5_DLLVAR const H5Z_class2_t H5Z_FLETCHER32[1];
+H5_ATTR_VISIBILITY_HIDDEN extern const H5Z_class3_t H5Z_FLETCHER32[1];
 
 /* n-bit filter */
-H5_DLLVAR H5Z_class2_t H5Z_NBIT[1];
+H5_ATTR_VISIBILITY_HIDDEN extern H5Z_class3_t H5Z_NBIT[1];
 
 /* Scale/offset filter */
-H5_DLLVAR H5Z_class2_t H5Z_SCALEOFFSET[1];
+H5_ATTR_VISIBILITY_HIDDEN extern H5Z_class3_t H5Z_SCALEOFFSET[1];
 
 /********************/
 /* External filters */
@@ -42,15 +54,24 @@ H5_DLLVAR H5Z_class2_t H5Z_SCALEOFFSET[1];
 
 /* Deflate filter */
 #ifdef H5_HAVE_FILTER_DEFLATE
-H5_DLLVAR const H5Z_class2_t H5Z_DEFLATE[1];
+H5_ATTR_VISIBILITY_HIDDEN extern const H5Z_class3_t H5Z_DEFLATE[1];
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
 /* szip filter */
 #ifdef H5_HAVE_FILTER_SZIP
-H5_DLLVAR H5Z_class2_t H5Z_SZIP[1];
+H5_ATTR_VISIBILITY_HIDDEN extern H5Z_class3_t H5Z_SZIP[1];
 #endif /* H5_HAVE_FILTER_SZIP */
 
 /* Package internal routines */
+H5_DLL herr_t H5Z__reregister_deflate(void);
 H5_DLL herr_t H5Z__unregister(H5Z_filter_t filter_id);
+H5_DLL herr_t H5Z__config_validate_keys(const char *params, const char *const *known_keys);
+H5_DLL htri_t H5Z__config_get_int(const char *params, const char *key, int64_t *out);
+H5_DLL htri_t H5Z__config_get_str(const char *params, const char *key, char *buf, size_t *buf_size);
+
+/* Shared set_config implementation for filters that take no user parameters
+ * (shuffle, fletcher32).  Sets *cd_nelmts = 0 and rejects non-empty params. */
+H5_DLL herr_t H5Z__no_params_set_config(const char *params, unsigned *flags, size_t *cd_nelmts,
+                                        unsigned cd_values[], size_t cd_values_size);
 
 #endif /* H5Zpkg_H */

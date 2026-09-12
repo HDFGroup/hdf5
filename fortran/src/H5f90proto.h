@@ -416,8 +416,6 @@ H5FC_DLL int_f h5pset_gc_references_c(hid_t_f *prp_id, int_f *gc_references);
 H5FC_DLL int_f h5pget_gc_references_c(hid_t_f *prp_id, int_f *gc_references);
 H5FC_DLL int_f h5pset_layout_c(hid_t_f *prp_id, int_f *layout);
 H5FC_DLL int_f h5pget_layout_c(hid_t_f *prp_id, int_f *layout);
-H5FC_DLL int_f h5pset_filter_c(hid_t_f *prp_id, int_f *filter, int_f *flags, size_t_f *cd_nelmts,
-                               int_f *cd_values);
 H5FC_DLL int_f h5premove_filter_c(hid_t_f *prp_id, int_f *filter);
 H5FC_DLL int_f h5pmodify_filter_c(hid_t_f *prp_id, int_f *filter, int_f *flags, size_t_f *cd_nelmts,
                                   int_f *cd_values);
@@ -587,9 +585,13 @@ H5FC_DLL int_f h5dont_atexit_c(void);
 /*
  * Functions from H5Zf.c
  */
-H5FC_DLL int_f h5zunregister_c(int_f *filter);
-H5FC_DLL int_f h5zfilter_avail_c(int_f *filter, int_f *flag);
-H5FC_DLL int_f h5zget_filter_info_c(int_f *filter, int_f *flag);
+H5FC_DLL herr_t H5Pappend_filter_str_c(hid_t plist, H5Z_filter_t id, unsigned flags, const char *params);
+H5FC_DLL herr_t H5Pappend_filter_raw_c(hid_t plist, H5Z_filter_t id, unsigned flags, size_t cd_nelmts,
+                                       const unsigned *cd_values);
+H5FC_DLL herr_t H5Pmodify_filter_by_idx_str_c(hid_t plist, unsigned filter_idx, unsigned flags,
+                                              const char *params);
+H5FC_DLL herr_t H5Pmodify_filter_by_idx_raw_c(hid_t plist, unsigned filter_idx, unsigned flags,
+                                              size_t cd_nelmts, const unsigned *cd_values);
 
 /*
  * Functions from H5Lf.c

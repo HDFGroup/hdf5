@@ -363,6 +363,20 @@ apply_filters(const char    *name,    /* object name from traverse list */
             if (obj->filter[i].filtn < 0)
                 H5TOOLS_GOTO_ERROR((-1), "invalid filter");
 
+            /* UD=id,flags,key=value... string form: dispatch through
+             * H5Pappend_filter so the filter's set_config callback converts it
+             * to cd_values, bypassing the per-filter H5Pset_* switch below. */
+            if (obj->filter[i].params_str[0] != '\0') {
+                H5Z_params_t params;
+                params.type  = H5Z_PARAMS_STRING;
+                params.u.str = obj->filter[i].params_str;
+                if (H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths) < 0)
+                    H5TOOLS_GOTO_ERROR((-1), "H5Pset_chunk failed");
+                if (H5Pappend_filter(dcpl_id, obj->filter[i].filtn, obj->filter[i].filt_flag, &params) < 0)
+                    H5TOOLS_GOTO_ERROR((-1), "H5Pappend_filter failed");
+                continue;
+            }
+
             switch (obj->filter[i].filtn) {
                 /*-------------------------------------------------------------------------
                  * H5Z_FILTER_NONE       0 , uncompress if compressed

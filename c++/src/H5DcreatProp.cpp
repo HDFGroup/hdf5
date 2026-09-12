@@ -362,6 +362,115 @@ DSetCreatPropList::setFilter(H5Z_filter_t filter_id, unsigned int flags, size_t 
 }
 
 //--------------------------------------------------------------------------
+// Function:    DSetCreatPropList::appendFilter (string overload)
+///\brief       Configures a filter with a key=value string and appends it to the pipeline
+///\param       filter_id - IN: Filter identifier
+///\param       flags     - IN: Filter flags (H5Z_FLAG_MANDATORY or H5Z_FLAG_OPTIONAL)
+///\param       params    - IN: Comma-separated key=value parameter string
+///\exception   H5::PropListIException
+//--------------------------------------------------------------------------
+void
+DSetCreatPropList::appendFilter(H5Z_filter_t filter_id, unsigned flags, const H5std_string &params) const
+{
+    H5Z_params_t p;
+    p.type           = H5Z_PARAMS_STRING;
+    p.u.str          = params.c_str();
+    herr_t ret_value = H5Pappend_filter(id, filter_id, flags, &p);
+    if (ret_value < 0)
+        throw PropListIException("DSetCreatPropList::appendFilter", "H5Pappend_filter failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    DSetCreatPropList::appendFilter (raw cd_values overload)
+///\brief       Configures a filter with raw cd_values and appends it to the pipeline
+///\param       filter_id - IN: Filter identifier
+///\param       flags     - IN: Filter flags
+///\param       cd_nelmts - IN: Number of elements in cd_values
+///\param       cd_values - IN: Auxiliary data for the filter
+///\exception   H5::PropListIException
+//--------------------------------------------------------------------------
+void
+DSetCreatPropList::appendFilter(H5Z_filter_t filter_id, unsigned flags, size_t cd_nelmts,
+                                const unsigned cd_values[]) const
+{
+    H5Z_params_t p;
+    p.type            = H5Z_PARAMS_CDVALUES;
+    p.u.raw.cd_nelmts = cd_nelmts;
+    p.u.raw.cd_values = cd_values;
+    herr_t ret_value  = H5Pappend_filter(id, filter_id, flags, &p);
+    if (ret_value < 0)
+        throw PropListIException("DSetCreatPropList::appendFilter", "H5Pappend_filter failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    DSetCreatPropList::getFilterParams
+///\brief       Returns the parameter string for the filter at pipeline index filter_idx
+///\param       filter_idx - IN: Zero-based index of the filter in the pipeline
+///\return      Parameter string: the stored configuration string if one was
+///             set (see appendFilter), else from the filter's get_config
+///             callback, else a cd_values fallback
+///\exception   H5::PropListIException
+//--------------------------------------------------------------------------
+H5std_string
+DSetCreatPropList::getFilterParams(unsigned filter_idx) const
+{
+    size_t params_len = 0;
+    herr_t ret_value  = H5Pget_filter_params_by_idx(id, filter_idx, NULL, 0, &params_len);
+    if (ret_value < 0)
+        throw PropListIException("DSetCreatPropList::getFilterParams", "H5Pget_filter_params_by_idx failed");
+
+    std::string buf(params_len + 1, '\0');
+    ret_value = H5Pget_filter_params_by_idx(id, filter_idx, &buf[0], params_len + 1, &params_len);
+    if (ret_value < 0)
+        throw PropListIException("DSetCreatPropList::getFilterParams", "H5Pget_filter_params_by_idx failed");
+    buf.resize(params_len);
+    return buf;
+}
+
+//--------------------------------------------------------------------------
+// Function:    DSetCreatPropList::modifyFilterByIdx (string overload)
+///\brief       Configures the filter at pipeline index filter_idx with a
+///             key=value string, in place
+///\param       filter_idx - IN: Zero-based index of the filter in the pipeline
+///\param       flags      - IN: Replacement flags for the entry
+///\param       params     - IN: Comma-separated key=value parameter string
+///\exception   H5::PropListIException
+//--------------------------------------------------------------------------
+void
+DSetCreatPropList::modifyFilterByIdx(unsigned filter_idx, unsigned flags, const H5std_string &params) const
+{
+    H5Z_params_t p;
+    p.type           = H5Z_PARAMS_STRING;
+    p.u.str          = params.c_str();
+    herr_t ret_value = H5Pmodify_filter_by_idx(id, filter_idx, flags, &p);
+    if (ret_value < 0)
+        throw PropListIException("DSetCreatPropList::modifyFilterByIdx", "H5Pmodify_filter_by_idx failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    DSetCreatPropList::modifyFilterByIdx (raw cd_values overload)
+///\brief       Configures the filter at pipeline index filter_idx with raw
+///             cd_values, in place
+///\param       filter_idx - IN: Zero-based index of the filter in the pipeline
+///\param       flags      - IN: Replacement flags for the entry
+///\param       cd_nelmts  - IN: Number of elements in cd_values
+///\param       cd_values  - IN: Auxiliary data for the filter
+///\exception   H5::PropListIException
+//--------------------------------------------------------------------------
+void
+DSetCreatPropList::modifyFilterByIdx(unsigned filter_idx, unsigned flags, size_t cd_nelmts,
+                                     const unsigned cd_values[]) const
+{
+    H5Z_params_t p;
+    p.type            = H5Z_PARAMS_CDVALUES;
+    p.u.raw.cd_nelmts = cd_nelmts;
+    p.u.raw.cd_values = cd_values;
+    herr_t ret_value  = H5Pmodify_filter_by_idx(id, filter_idx, flags, &p);
+    if (ret_value < 0)
+        throw PropListIException("DSetCreatPropList::modifyFilterByIdx", "H5Pmodify_filter_by_idx failed");
+}
+
+//--------------------------------------------------------------------------
 // Function:    DSetCreatPropList::removeFilter
 ///\brief       Removes one or more filters
 ///\param       filter_id - IN: Filter to remove

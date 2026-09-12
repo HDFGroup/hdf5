@@ -21,10 +21,13 @@ import hdf.hdf5lib.exceptions.HDF5LibraryException;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+import org.junit.runners.MethodSorters;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestH5Z {
     @Rule
     public TestName testname = new TestName();
@@ -115,6 +118,47 @@ public class TestH5Z {
             err.printStackTrace();
             fail("H5.H5Zget_filter_info " + err);
         }
+    }
+
+    @Test
+    public void testH5Zget_filter_class_info()
+    {
+        try {
+            hdf.hdf5lib.structs.H5Z_class_info_t info;
+
+            // DEFLATE (if available)
+            if (1 == H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_DEFLATE)) {
+                info = H5.H5Zget_filter_class_info(HDF5Constants.H5Z_FILTER_DEFLATE);
+                assertTrue("H5Zget_filter_class_info: info must not be null", info != null);
+                assertTrue("H5Zget_filter_class_info: DEFLATE id",
+                           info.id == HDF5Constants.H5Z_FILTER_DEFLATE);
+                assertTrue("H5Zget_filter_class_info: DEFLATE decode flag",
+                           (info.config_flags & HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) != 0);
+            }
+
+            // SHUFFLE
+            info = H5.H5Zget_filter_class_info(HDF5Constants.H5Z_FILTER_SHUFFLE);
+            assertTrue("H5Zget_filter_class_info: SHUFFLE info must not be null", info != null);
+            assertTrue("H5Zget_filter_class_info: SHUFFLE id", info.id == HDF5Constants.H5Z_FILTER_SHUFFLE);
+            assertTrue("H5Zget_filter_class_info: SHUFFLE decode flag",
+                       (info.config_flags & HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) != 0);
+
+            // FLETCHER32
+            info = H5.H5Zget_filter_class_info(HDF5Constants.H5Z_FILTER_FLETCHER32);
+            assertTrue("H5Zget_filter_class_info: FLETCHER32 info must not be null", info != null);
+            assertTrue("H5Zget_filter_class_info: FLETCHER32 id",
+                       info.id == HDF5Constants.H5Z_FILTER_FLETCHER32);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5.H5Zget_filter_class_info " + err);
+        }
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Zget_filter_class_info_invalid() throws Throwable
+    {
+        H5.H5Zget_filter_class_info(32999);
     }
 
     @Test(expected = HDF5LibraryException.class)

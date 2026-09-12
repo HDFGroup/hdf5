@@ -1351,55 +1351,6 @@ h5pget_layout_c(hid_t_f *prp_id, int_f *layout)
     return ret_value;
 }
 
-/****if* H5Pf/h5pset_filter_c
- * NAME
- *  h5pset_filter_c
- * PURPOSE
- *  Call H5Pset_filter to add a filter to the filter pipeline.
- * INPUTS
- *  prp_id - property list identifier
- *  filter - Filter to be added to the pipeline.
- *  flags - Bit vector specifying certain general
- *  properties of the filter.
- *  cd_nelmts - Number of elements in cd_values.
- *  cd_values - Auxiliary data for the filter.
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-int_f
-h5pset_filter_c(hid_t_f *prp_id, int_f *filter, int_f *flags, size_t_f *cd_nelmts, int_f *cd_values)
-/******/
-{
-    int           ret_value = -1;
-    hid_t         c_prp_id  = (hid_t)*prp_id;
-    herr_t        ret;
-    size_t        c_cd_nelmts = (size_t)*cd_nelmts;
-    unsigned int  c_flags     = (unsigned)*flags;
-    H5Z_filter_t  c_filter    = (H5Z_filter_t)*filter;
-    unsigned int *c_cd_values;
-    unsigned      i;
-
-    c_cd_values = (unsigned int *)malloc(sizeof(unsigned int) * c_cd_nelmts);
-    if (!c_cd_values)
-        return ret_value;
-    for (i = 0; i < c_cd_nelmts; i++)
-        c_cd_values[i] = (unsigned int)cd_values[i];
-
-    /*
-     * Call H5Pset_filter function.
-     */
-    ret = H5Pset_filter(c_prp_id, c_filter, c_flags, c_cd_nelmts, c_cd_values);
-
-    if (ret < 0)
-        goto DONE;
-    ret_value = 0;
-
-DONE:
-    free(c_cd_values);
-    return ret_value;
-}
-
 /****if* H5Pf/h5pget_nfilters_c
  * NAME
  *  h5pget_nfilters_c
