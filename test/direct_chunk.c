@@ -45,6 +45,7 @@
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 #define DATASETNAME14 "deprec"
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
+#define DATASETNAME15 "short_nbit_chunk"
 
 #define RANK     2
 #define NX       16
@@ -2267,6 +2268,103 @@ error:
 } /* test_read_unallocated_chunk() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_read_short_nbit_chunk
+ *
+ * Purpose:     Store, via H5Dwrite_chunk, an nbit-filtered chunk whose raw
+ *              length is far shorter than the unfiltered chunk, then read it
+ *              back.  The reverse nbit filter must reject the truncated chunk
+ *              instead of decompressing past its stored bytes.
+ *
+ * Return:      Success:    0
+ *              Failure:    1
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_read_short_nbit_chunk(hid_t file)
+{
+    hid_t         sid         = H5I_INVALID_HID;
+    hid_t         did         = H5I_INVALID_HID;
+    hid_t         dcpl        = H5I_INVALID_HID;
+    hid_t         dtype       = H5I_INVALID_HID;
+    hsize_t       dims[1]     = {1000}; /* unfiltered chunk dwarfs the stored bytes */
+    hsize_t       offset[1]   = {0};
+    unsigned char raw[8]      = {0}; /* absurdly short stored chunk */
+    unsigned      filter_mask = 0;
+    uint32_t     *rdata       = NULL;
+    herr_t        status;
+
+    TESTING("reading a truncated nbit chunk");
+
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* 16 significant bits in a 4-byte type so nbit actually packs the data */
+    if ((dtype = H5Tcopy(H5T_NATIVE_UINT32)) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Tset_precision(dtype, 16) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Tset_offset(dtype, 0) < 0)
+        FAIL_STACK_ERROR;
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pset_chunk(dcpl, 1, dims) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pset_nbit(dcpl) < 0)
+        FAIL_STACK_ERROR;
+
+    if ((did = H5Dcreate2(file, DATASETNAME15, dtype, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Store only 8 raw bytes as the whole chunk */
+    if (H5Dwrite_chunk(did, H5P_DEFAULT, filter_mask, offset, sizeof(raw), raw) < 0)
+        FAIL_STACK_ERROR;
+
+    if (NULL == (rdata = malloc((size_t)dims[0] * sizeof(uint32_t))))
+        TEST_ERROR;
+
+    /* The reverse nbit filter should fail rather than read past the stored bytes */
+    H5E_BEGIN_TRY
+    {
+        status = H5Dread(did, H5T_NATIVE_UINT32, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+    }
+    H5E_END_TRY
+
+    if (status >= 0)
+        TEST_ERROR;
+
+    free(rdata);
+    rdata = NULL;
+
+    if (H5Dclose(did) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Tclose(dtype) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Sclose(sid) < 0)
+        FAIL_STACK_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    free(rdata);
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(did);
+        H5Tclose(dtype);
+        H5Pclose(dcpl);
+        H5Sclose(sid);
+    }
+    H5E_END_TRY
+
+    H5_FAILED();
+    return 1;
+} /* test_read_short_nbit_chunk() */
+
+/*-------------------------------------------------------------------------
  * Function:    test_direct_chunk_read_buf_size
  *
  * Purpose:     Test buffer size parameter/query for H5Dread_chunk2
@@ -2748,6 +2846,7 @@ main(void)
 #endif /* H5_HAVE_FILTER_DEFLATE */
     nerrors += test_read_unfiltered_dset(file_id);
     nerrors += test_read_unallocated_chunk(file_id);
+    nerrors += test_read_short_nbit_chunk(file_id);
     nerrors += test_direct_chunk_read_buf_size(file_id);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     nerrors += test_deprec(file_id);
