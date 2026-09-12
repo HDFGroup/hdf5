@@ -1447,14 +1447,23 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
             assert(enc_size < 256);
             UINT64DECODE_VAR(*pp, config_len, enc_size);
 
-            /* This decode callback has no end-of-buffer pointer to bound
-             * the memcpy below against (unlike H5O__pline_decode, which
-             * validates against p_end for the on-disk equivalent of this
-             * same field) -- capping config_len here is what keeps a
-             * corrupted/malicious H5Pdecode() buffer from driving an
-             * unbounded allocation and an unbounded read past the real
-             * buffer, and also prevents (size_t)config_len + 1 from
-             * wrapping on a maximal config_len. */
+            /* H5P_prp_decode_func_t (the public typedef every property
+             * decode callback, including this one, must match) is
+             * herr_t (*)(const void **buf, void *value) -- there is no
+             * end-of-buffer pointer anywhere in this call chain, down to
+             * H5Pdecode() itself, whose contract is "the user is
+             * responsible for passing in the correct buffer" (see its
+             * doxygen). That is a pre-existing, systemic property of every
+             * field this function decodes (cd_nelmts/cd_values above are
+             * equally unbounded against the real buffer length) -- adding
+             * an end pointer here alone would not close that, and doing so
+             * for real would mean changing a public callback typedef used
+             * by every third-party property, not a fix scoped to this
+             * field. The H5Z_CONFIG_STRING_MAX cap below is therefore only
+             * a bound on how FAR a malformed/corrupted config_len can walk
+             * past the real buffer on a bad H5Pdecode() input -- not a
+             * guarantee that it can't happen at all -- and it also keeps
+             * (size_t)config_len + 1 from wrapping on a maximal value. */
             if (config_len > H5Z_CONFIG_STRING_MAX) {
                 filter.cd_values = (unsigned *)H5MM_xfree(filter.cd_values);
                 HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "filter config string exceeds maximum length");
@@ -2345,6 +2354,8 @@ H5Pget_filter_params_by_idx(hid_t plist_id, unsigned idx, char *params_buf, size
             size_t copy_len = (needed < params_buf_size - 1) ? needed : params_buf_size - 1;
             H5MM_memcpy(params_buf, filter->config, copy_len);
             params_buf[copy_len] = '\0';
+            if (copy_len < needed)
+                HGOTO_ERROR(H5E_PLIST, H5E_OVERFLOW, FAIL, "params_buf too small for stored config string");
         }
 
         HGOTO_DONE(SUCCEED);
@@ -2352,9 +2363,15 @@ H5Pget_filter_params_by_idx(hid_t plist_id, unsigned idx, char *params_buf, size
 
     /* Trigger a plugin load if the filter isn't registered yet, so get_config
      * is available on the first query rather than only subsequent ones
-     * (mirrors H5Zget_filter_class_info()).  Availability itself is ignored
-     * here; the fallback path below handles filters that remain unavailable. */
-    (void)H5Z_filter_avail(filter->id);
+     * (mirrors H5Zget_filter_class_info()).  A "not available" result is
+     * ignored here; the fallback path below handles filters that remain
+     * unavailable. A genuine failure (e.g. H5PL_load() found a plugin but
+     * H5Z_register() rejected it) pushes a real error onto the stack, which
+     * we must not leave for an unrelated later H5Eprint()/H5Ewalk() to
+     * surface confusingly -- clear it explicitly instead of discarding the
+     * return value outright. */
+    if (H5Z_filter_avail(filter->id) < 0)
+        H5E_clear_stack();
 
     /* Attempt to find the entry (try plugin load if not yet registered) */
     (void)H5Z_find_entry(true, filter->id, &entry);
@@ -2396,6 +2413,9 @@ H5Pget_filter_params_by_idx(hid_t plist_id, unsigned idx, char *params_buf, size
                 size_t copy_len = (out_size < params_buf_size - 1) ? out_size : params_buf_size - 1;
                 H5MM_memcpy(params_buf, tmp_buf, copy_len);
                 params_buf[copy_len] = '\0';
+                if (copy_len < out_size)
+                    HGOTO_ERROR(H5E_PLIST, H5E_OVERFLOW, FAIL,
+                                "params_buf too small for get_config-reconstructed string");
             }
         } /* end if params_buf */
     }     /* end if get_config */
@@ -2442,6 +2462,9 @@ H5Pget_filter_params_by_idx(hid_t plist_id, unsigned idx, char *params_buf, size
                 size_t copy_len = (true_len < params_buf_size - 1) ? true_len : params_buf_size - 1;
                 H5MM_memcpy(params_buf, tmp_buf, copy_len);
                 params_buf[copy_len] = '\0';
+                if (copy_len < true_len)
+                    HGOTO_ERROR(H5E_PLIST, H5E_OVERFLOW, FAIL,
+                                "params_buf too small for synthesized cd_values string");
             }
         }
     } /* end else (fallback) */

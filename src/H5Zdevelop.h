@@ -305,11 +305,16 @@ typedef struct H5Z_class3_t {
     H5Z_get_config_func_t get_config;  /**< Parameter string reconstruction; may be NULL */
     const char           *description; /**< Human-readable description of the filter (e.g., "Deflate (zlib)
                                           general-purpose compression"); may be NULL. Appended last (not
-                                          inserted after \c name) so that a caller positionally initializing
-                                          this struct from an H5Z_class2_t literal -- version, id,
+                                          inserted after \c name) so the first eight fields -- version, id,
                                           encoder_present, decoder_present, name, can_apply, set_local, filter --
-                                          and simply appending the new v3 fields keeps every original field in
-                                          its original slot. */
+                                          share the same slots an H5Z_class2_t literal would occupy positionally.
+                                          \warning That slot correspondence does NOT make \c filter itself
+                                          reusable: it is typed \c H5Z_func2_t here (9 parameters, adding
+                                          \p dxpl_id, \p scaled, \p ndims) versus \c H5Z_func_t (7 parameters)
+                                          in H5Z_class2_t. A callback written against the old signature must be
+                                          rewritten to accept and, if unneeded, ignore the three new parameters
+                                          before it can be assigned to this field -- reusing the old function
+                                          pointer as-is is undefined behavior. */
 } H5Z_class3_t;
 //! <!-- [H5Z_class3_t_snip] -->
 

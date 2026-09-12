@@ -442,10 +442,14 @@ H5Z_register(const H5Z_class2_t *cls)
 
     /* H5Z_register() is typed as const H5Z_class2_t *, but external callers
      * (H5Zregister, H5PL_load) may pass a H5Z_class3_t * cast to that type.
-     * Re-sniff the version here so that the description field
-     * (at the same offset as can_apply in H5Z_class2_t) is never misread.
-     * Do NOT "simplify" away this check - the v3 dispatch must happen inside
-     * H5Z_register, not only at the H5Zregister API boundary. */
+     * version is the first field in both structs, so it can be read safely
+     * through either type; re-sniff it here before touching anything past
+     * set_local, since H5Z_class3_t's filter field is a wider-signature
+     * H5Z_func2_t (not H5Z_func_t) and the struct carries three more fields
+     * (set_config, get_config, description) that H5Z_class2_t does not have
+     * at all -- treating a v3-cast struct as v2 past that point would misread
+     * those fields. Do NOT "simplify" away this check - the v3 dispatch must
+     * happen inside H5Z_register, not only at the H5Zregister API boundary. */
     if (cls->version == H5Z_CLASS3_T_VERS_INTERNAL) {
         if (H5Z_register3((const H5Z_class3_t *)cls) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter");

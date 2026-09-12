@@ -40,6 +40,12 @@
 #include "H5MMprivate.h" /* Memory management   */
 #include "H5Zpkg.h"      /* Filter internals    */
 
+/* Renames every public tomlc17 symbol to an H5Z__toml_c17_-prefixed name so
+ * a statically-linked libhdf5.a cannot collide with an application's own
+ * copy of tomlc17 (see h5_toml_prefix.h for the full rationale). Must be
+ * included before tomlc17.h so every call site below picks up the renamed
+ * declarations. */
+#include "tomlc17/h5_toml_prefix.h"
 #include "tomlc17/tomlc17.h"
 
 /* Append one source character to the output buffer, or skip it if full. */
@@ -338,6 +344,30 @@ done:
 } /* end H5Z_canonicalize_params() */
 
 /*
+ * H5Z__count_table_keys - recursively count leaf key=value assignments in a
+ * parsed TOML table, including keys nested inside inline tables / dotted-key
+ * groups (a nested table itself is not counted, only its own leaves are).
+ * Used to enforce H5Z_CONFIG_MAX_PARAMS.
+ */
+static size_t
+H5Z__count_table_keys(toml_datum_t tab)
+{
+    size_t  count = 0;
+    int32_t i;
+
+    for (i = 0; i < tab.u.tab.size; i++) {
+        toml_datum_t v = tab.u.tab.value[i];
+
+        if (v.type == TOML_TABLE)
+            count += H5Z__count_table_keys(v);
+        else
+            count++;
+    }
+
+    return count;
+}
+
+/*
  * H5Z__toml_parse_params - wrap params as a TOML document and parse it.
  *
  * On success: *tr_out holds a valid result; *ptab_out is the inline-table
@@ -397,6 +427,14 @@ H5Z__toml_parse_params(const char *params, toml_result_t *tr_out, toml_datum_t *
         memset(tr_out, 0, sizeof(*tr_out));
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "malformed filter parameter string (not a valid TOML inline table)");
+    }
+
+    if (H5Z__count_table_keys(*ptab_out) > H5Z_CONFIG_MAX_PARAMS) {
+        toml_free(*tr_out);
+        memset(tr_out, 0, sizeof(*tr_out));
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "filter parameter string exceeds H5Z_CONFIG_MAX_PARAMS (%d key-value pairs)",
+                    H5Z_CONFIG_MAX_PARAMS);
     }
 
 done:

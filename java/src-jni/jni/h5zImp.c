@@ -187,6 +187,8 @@ Java_hdf_hdf5lib_H5_H5Zconfig_1get_1param__Ljava_lang_String_2Ljava_lang_String_
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Zconfig_get_param: key string is NULL");
     if (NULL == out)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Zconfig_get_param: out array is NULL");
+    if (ENVPTR->GetArrayLength(ENVONLY, out) < 1)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Zconfig_get_param: out array must have at least one element");
 
     PIN_JAVA_STRING(ENVONLY, params, c_params, &isCopy1, "H5Zconfig_get_param: params not pinned");
     PIN_JAVA_STRING(ENVONLY, key, c_key, &isCopy2, "H5Zconfig_get_param: key not pinned");
@@ -238,6 +240,8 @@ Java_hdf_hdf5lib_H5_H5Zconfig_1get_1param__Ljava_lang_String_2Ljava_lang_String_
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Zconfig_get_param: key string is NULL");
     if (NULL == out)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Zconfig_get_param: out array is NULL");
+    if (ENVPTR->GetArrayLength(ENVONLY, out) < 1)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Zconfig_get_param: out array must have at least one element");
 
     PIN_JAVA_STRING(ENVONLY, params, c_params, &isCopy1, "H5Zconfig_get_param: params not pinned");
     PIN_JAVA_STRING(ENVONLY, key, c_key, &isCopy2, "H5Zconfig_get_param: key not pinned");
@@ -289,6 +293,8 @@ Java_hdf_hdf5lib_H5_H5Zconfig_1get_1param__Ljava_lang_String_2Ljava_lang_String_
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Zconfig_get_param: key string is NULL");
     if (NULL == out)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Zconfig_get_param: out array is NULL");
+    if (ENVPTR->GetArrayLength(ENVONLY, out) < 1)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Zconfig_get_param: out array must have at least one element");
 
     PIN_JAVA_STRING(ENVONLY, params, c_params, &isCopy1, "H5Zconfig_get_param: params not pinned");
     PIN_JAVA_STRING(ENVONLY, key, c_key, &isCopy2, "H5Zconfig_get_param: key not pinned");

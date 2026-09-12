@@ -2640,8 +2640,14 @@ test_config_string_ondisk(hid_t fapl)
         TEST_ERROR;
     PASSED();
 
-    /* --- fmt-05: libver high bound below V300 silently omits the string --- */
-    TESTING("config string: silent v2 downgrade when libver bound too low");
+    /* --- fmt-05: libver high bound below V300 rejects the create, rather
+     * than silently persisting the dataset without the config string ---
+     * (H5O_pline_set_version() now fails outright instead of downgrading
+     * the pipeline message version and dropping the string: a caller who
+     * set a config string is entitled to know it will not round-trip,
+     * rather than getting a success return and a file that silently no
+     * longer carries the exact string they set.) */
+    TESTING("config string: create fails when libver bound too low to persist it");
     if ((fapl_dg = H5Pcopy(fapl)) < 0)
         TEST_ERROR;
     if (H5Pset_libver_bounds(fapl_dg, H5F_LIBVER_EARLIEST, H5F_LIBVER_V200) < 0)
@@ -2650,26 +2656,36 @@ test_config_string_ondisk(hid_t fapl)
         TEST_ERROR;
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_dg)) < 0)
         TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        dset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    if (dset >= 0)
+        TEST_ERROR; /* must fail: string cannot be persisted at this libver bound */
+    dset = H5I_INVALID_HID;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+
+    /* The same filter with no config string (a fresh DCPL, raw cd_values
+     * form) is unaffected by the bound and still succeeds. */
+    {
+        hsize_t  chunk[2] = {4, 4};
+        unsigned cd[1]    = {5};
+
+        if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+            TEST_ERROR;
+        if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+            TEST_ERROR;
+        if (H5Pset_filter(dcpl, CFG_ONDISK_FILTER_ID, 0, 1, cd) < 0)
+            TEST_ERROR;
+    }
     if ((dset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         TEST_ERROR;
-    if (H5Dclose(dset) < 0 || H5Pclose(dcpl) < 0 || H5Fclose(file) < 0)
+    if (H5Dclose(dset) < 0 || H5Pclose(dcpl) < 0 || H5Fclose(file) < 0 || H5Pclose(fapl_dg) < 0)
         TEST_ERROR;
-    dset = dcpl = file = H5I_INVALID_HID;
-    /* Plugin still registered: getter falls back to get_config ("level = 5"),
-     * proving the verbatim string was not persisted at v2. */
-    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-        TEST_ERROR;
-    if ((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0)
-        TEST_ERROR;
-    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
-        TEST_ERROR;
-    if (cfg_ondisk_get_params(dcpl_out, pbuf, sizeof(pbuf)) < 0)
-        TEST_ERROR;
-    if (strcmp(pbuf, "level = 5") != 0) /* get_config form, not the stored "level=5" */
-        TEST_ERROR;
-    if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Fclose(file) < 0 || H5Pclose(fapl_dg) < 0)
-        TEST_ERROR;
-    dcpl_out = dset = file = fapl_dg = H5I_INVALID_HID;
+    dset = dcpl = file = fapl_dg = H5I_INVALID_HID;
     PASSED();
 
     /* --- fmt-07: H5Pmodify_filter clears the stored string --- */

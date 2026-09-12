@@ -763,8 +763,12 @@ H5O_pline_set_version(H5F_t *f, H5O_pline_t *pline)
 
     /* A filter carrying a verbatim configuration string needs the version-3
      * encoding to persist it.  Request v3 only when the file's high bound
-     * admits it; otherwise fall back silently to the current version -- the
-     * strings are simply not written and introspection relies on get_config. */
+     * admits it; if it doesn't, fail outright instead of silently falling
+     * back to an older version that drops the string on encode (see the
+     * `pline->version >= H5O_PLINE_VERSION_3` guards in H5O__pline_encode())
+     * -- a caller who set a config string is entitled to know it was not
+     * persisted, rather than getting a success return and a file that
+     * silently no longer round-trips the exact string they set. */
     if (version < H5O_PLINE_VERSION_3) {
         bool have_config = false;
 
@@ -774,8 +778,16 @@ H5O_pline_set_version(H5F_t *f, H5O_pline_t *pline)
                 break;
             }
 
-        if (have_config && H5O_pline_ver_bounds[H5F_HIGH_BOUND(f)] >= H5O_PLINE_VERSION_3)
-            version = H5O_PLINE_VERSION_3;
+        if (have_config) {
+            if (H5O_pline_ver_bounds[H5F_HIGH_BOUND(f)] >= H5O_PLINE_VERSION_3)
+                version = H5O_PLINE_VERSION_3;
+            else
+                HGOTO_ERROR(H5E_PLINE, H5E_BADRANGE, FAIL,
+                            "filter configuration string cannot be persisted: file's high library "
+                            "version bound does not support the version-3 filter pipeline message "
+                            "required to store it (raise the bound with H5Pset_libver_bounds(), or "
+                            "append the filter without a configuration string)");
+        }
     }
 
     /* Version bounds check */

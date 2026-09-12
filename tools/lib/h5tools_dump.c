@@ -3893,13 +3893,16 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                 const char  *filter_descr    = NULL; /* library-owned, no free needed */
                 bool         have_extra; /* true if this filter has a PARAMS_STRING and/or DESCRIPTION */
 
-                if (!params_str_buf || !params_annot) {
-                    free(params_str_buf);
-                    free(params_annot);
-                    continue;
-                }
-
-                params_annot[0] = '\0';
+                /* On allocation failure, do NOT skip the whole filter: fall through
+                 * with both buffers left NULL, so the guard below simply omits the
+                 * PARAMS_STRING/DESCRIPTION decoration (have_extra stays false) while
+                 * the filter's own FILTERS{} entry is still rendered by the switch
+                 * below. Silently dropping an entire filter from -p output would make
+                 * the DDL look complete while actually under-reporting the pipeline.
+                 * The unconditional free() calls at the end of this loop iteration
+                 * handle cleanup either way (free(NULL) is a no-op). */
+                if (params_annot)
+                    params_annot[0] = '\0';
 
                 cd_nelmts = NELMTS(cd_values);
                 filtn     = H5Pget_filter2(dcpl_id, (unsigned)i, &filt_flags, &cd_nelmts, cd_values,
@@ -3912,8 +3915,10 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                 }
 
                 /* -p prints PARAMS_STRING and DESCRIPTION nested inside this
-                 * filter's own FILTERS{} entry. */
-                if (dcpl_id >= 0 && ctx->show_filter_params) {
+                 * filter's own FILTERS{} entry. Both buffers must have allocated
+                 * successfully above; if either failed, skip decoration for this
+                 * filter (have_extra stays false below) rather than the whole entry. */
+                if (dcpl_id >= 0 && ctx->show_filter_params && params_str_buf && params_annot) {
                     size_t plen = 0;
                     if (H5Pget_filter_params_by_idx(dcpl_id, (unsigned)i, params_str_buf, params_buf_size,
                                                     &plen) >= 0 &&

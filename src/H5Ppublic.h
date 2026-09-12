@@ -2973,6 +2973,15 @@ H5_DLL herr_t H5Pmodify_filter_by_idx(hid_t plist_id, unsigned filter_idx, unsig
  *          (excluding NUL) in \p params_len, then allocate \p params_len + 1
  *          bytes and call again with \p params_buf_size = \p params_len + 1.
  *
+ * \note    If \p params_buf is non-NULL but \p params_buf_size is smaller
+ *          than the required size, \p params_buf is still filled with a
+ *          truncated, NUL-terminated string (in case the caller wants the
+ *          partial content), \p params_len (if non-NULL) is still set to the
+ *          true, untruncated required length, and the function fails with a
+ *          minor error code of #H5E_OVERFLOW. Check the return value, not
+ *          just whether \p params_buf came back non-empty, to detect
+ *          truncation.
+ *
  * \since 3.0.0
  */
 H5_DLL herr_t H5Pget_filter_params_by_idx(hid_t plist_id, unsigned idx, char *params_buf,
