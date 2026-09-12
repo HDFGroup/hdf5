@@ -42,3 +42,4 @@ jobs:
           author_name: github-actions
           author_email: 41898282+github-actions[bot]@users.noreply.github.com
           message: 'Committing clang-format changes'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
