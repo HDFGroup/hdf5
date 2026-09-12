@@ -2845,7 +2845,7 @@ H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int fl
  *          \c H5Dcreate_anon(), or \c H5Ocopy() into a lower-bound file --
  *          and if the file's high bound is below #H5F_LIBVER_V300 while any
  *          filter in the pipeline carries a configuration string, that call
- *          fails with #H5E_BADRANGE rather than silently persisting the
+ *          fails with a minor error code of \c H5E_BADRANGE rather than silently persisting the
  *          filter without its string. Either raise the file's high bound
  *          with H5Pset_libver_bounds(), or append the filter with
  *          #H5Z_PARAMS_CDVALUES (or a filter with no \c set_config at all)
@@ -2981,7 +2981,7 @@ H5_DLL herr_t H5Pmodify_filter_by_idx(hid_t plist_id, unsigned filter_idx, unsig
  *          truncated, NUL-terminated string (in case the caller wants the
  *          partial content), \p params_len (if non-NULL) is still set to the
  *          true, untruncated required length, and the function fails with a
- *          minor error code of #H5E_OVERFLOW. Check the return value, not
+ *          minor error code of \c H5E_OVERFLOW. Check the return value, not
  *          just whether \p params_buf came back non-empty, to detect
  *          truncation.
  *
