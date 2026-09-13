@@ -62,10 +62,6 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
      *-------------------------------------------------------------------------
      */
     for (i = 0; i < travt->nobjs; i++) {
-
-        /* reset pointers to avoid double free in cleanup */
-        buf = refbuf = NULL;
-
         switch (travt->objs[i].type) {
             /*-------------------------------------------------------------------------
              * H5TRAV_TYPE_GROUP
@@ -211,7 +207,9 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                 H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
 
                         free(buf);
+                        buf = NULL;
                         free(refbuf);
+                        refbuf = NULL;
 
                         /*------------------------------------------------------
                          * copy attrs
@@ -300,7 +298,9 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                 H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
 
                         free(buf);
+                        buf = NULL;
                         free(refbuf);
+                        refbuf = NULL;
 
                         /*-----------------------------------------------------
                          * copy attrs
