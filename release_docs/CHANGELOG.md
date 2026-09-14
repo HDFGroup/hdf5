@@ -77,6 +77,12 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed a heap buffer overflow when decoding object header messages
+
+   The size stored in an object header message header was checked against the chunk before the rest of that message header was decoded, allowing a message body to start up to four bytes further into the chunk than the check accounted for. A corrupted or fuzzed file could declare a size that passed the check and still extended past the end of the chunk image, and the message's decode callback was then handed a buffer end outside the allocation. `H5O__chunk_deserialize()` now checks the message size once the whole message header has been decoded.
+
+   Fixes GitHub issue #6401
+   
 ### Fixed memory leaks and ID reference count issues when pushing an error to an error stack that is full
 
    When an error is pushed to an error stack, the library may make a copy of the file
@@ -103,6 +109,12 @@ We would like to thank the many HDF5 community members who contributed to this r
    Fixes CVE-2026-19025
 
 ## Java Library
+
+### Fixed datatype ID leaks when reading or writing nested datatypes through the JNI
+
+   The object-tree read and write helpers in the JNI derived a base datatype from the memory type with `H5Tget_super()` for the variable-length, array and complex classes, but never closed it. Because an `hid_t` is not reclaimed when a native method returns, every read or write of such data leaked at least one datatype ID for the lifetime of the process, and a nested type leaked one per level. The helpers now close the derived type on both the success and error paths.
+
+   Fixes GitHub issue #6592
 
 ## Configuration
 
@@ -152,6 +164,36 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Fortran API
 
+### h5open_f now re-initializes the Fortran interface after h5close_f
+
+   An h5open_f / h5close_f / h5open_f sequence could leave the Fortran interface
+   uninitialized. The second h5open_f reported success, but the predefined type
+   handles were left holding identifiers that h5close_f had released, so later calls
+   failed. Whether this happened depended on the Fortran compiler.
+
+   Fixes GitHub issue #6642
+
+### h5fget_obj_ids_f no longer returns the Fortran interface's own identifiers
+
+   h5fget_obj_count_f excludes the objects h5open_f opens to represent the predefined
+   types, but h5fget_obj_ids_f returned them, so the two disagreed about the same query
+   and an application walking the list found datatypes it never opened. Both now report
+   only what the application has open, matching the C API.
+
+   Fixes GitHub issue #6648
+
+### h5fget_obj_count_f and h5fget_obj_ids_f document their object type argument
+
+   Both listed the object types as alternatives without mentioning that they may be
+   combined with IOR(), which the C API supports and both have always passed through.
+
+### h5fget_obj_count_f no longer returns negative counts
+
+   With the Fortran interface open, counting a single object type across all files
+   subtracted the objects opened by h5open_f, so queries for files, groups, and
+   datasets returned a negative count and reported success. A negative count is now
+   reported as an error.
+
 ## High-Level Library
 
 ## Fortran High-Level APIs
@@ -163,6 +205,25 @@ We would like to thank the many HDF5 community members who contributed to this r
 ## C++ APIs
 
 ## Testing
+
+### Fortran test programs no longer exit successfully after a fatal error
+
+   The Fortran tests ended unrecoverable failures with STOP, which exits with a
+   success status, so a run that aborted part way through was reported as passing.
+
+### New test for the object count and identifier list
+
+   The Fortran tests had no coverage of h5fget_obj_ids_f over all files, and none that
+   compared it against h5fget_obj_count_f. A new test opens objects of several types
+   and checks that the two agree, that object types combined with IOR() count as the
+   sum of their parts, and that a buffer shorter than the number of open objects is
+   filled with the application's own.
+
+### The h5open/h5close test checks that the interface re-initializes
+
+   Its object counts were taken while the Fortran interface was closed, where no such
+   call is permitted. They now run after the interface has been reopened, and confirm
+   that the predefined types are usable again.
 
 # ✨ Support for new platforms and languages
 

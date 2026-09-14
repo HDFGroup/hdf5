@@ -399,24 +399,40 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested, changeReques
 //
 // Precedence per area:
 //   1. A persisted sticky assignment (assignedByArea), if it's still a valid
-//      owner of this area and still currently requested.
+//      owner of this area and either still currently requested, or absent
+//      from `existingRequested` only because GitHub un-requests a reviewer
+//      the instant they submit ANY review — including a comment-only one
+//      from batching several inline comments into a single "Comment"
+//      submission, which never produces a DISMISSED transition the way a
+//      stale APPROVED review does (see planSynchronizeSwaps). Without this,
+//      an actively-reviewing sticky pick who has only left comments so far
+//      would look identical to one who's abandoned the area (PR #6645:
+//      jhendersonHDF's batched review comments repeatedly dropped him from
+//      requested_reviewers mid-review). A sticky pick with an actual
+//      APPROVED/CHANGES_REQUESTED/DISMISSED review on record does NOT get
+//      this pass — that's a real state transition other logic already
+//      handles (approval sign-off, change-request lines, synchronize swaps).
 //   2. The sole currently-requested owner, if exactly one — nothing to prune,
 //      so nothing to re-pick either.
 //   3. A fresh load-balanced pick via chooseReviewers, for whatever's left.
 //
 // Pure — no I/O. Returns { picks: Map<label, login>, log: string[] }.
 function resolveAreaPicks(areas, {
-  existingRequested, assignedByArea, prAuthor, reviewerLoad, LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
+  existingRequested, assignedByArea, prAuthor, reviewerLoad, LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER, allReviews,
 }) {
   const picks = new Map();
   const log   = [];
   const needsFreshPick = [];
+  const finalStateLogins = new Set(Object.keys(latestReviewStates(allReviews || [])));
 
   for (const area of areas) {
     const sticky = assignedByArea.get(area.label);
-    if (sticky && area.owners.includes(sticky) && existingRequested.has(sticky)) {
+    const stickyStillEngaged = sticky && (existingRequested.has(sticky) || !finalStateLogins.has(sticky));
+    if (sticky && area.owners.includes(sticky) && stickyStillEngaged) {
       picks.set(area.label, sticky);
-      log.push(`Area "${area.label}": keeping sticky assignment ${sticky}`);
+      log.push(existingRequested.has(sticky)
+        ? `Area "${area.label}": keeping sticky assignment ${sticky}`
+        : `Area "${area.label}": keeping sticky assignment ${sticky} (still engaged via comment-only review)`);
       continue;
     }
 
@@ -442,6 +458,33 @@ function resolveAreaPicks(areas, {
   }
 
   return { picks, log };
+}
+
+// Returns Map<areaLabel, login> of areas whose sticky assignment (see
+// ASSIGNED_PREFIX) is a valid owner who is NOT currently in GitHub's live
+// requested_reviewers set, but who hasn't given a review whose state governs
+// anything else (APPROVED/CHANGES_REQUESTED/DISMISSED are each already
+// tracked and displayed through their own mechanism). GitHub removes a
+// reviewer from requested_reviewers the instant they submit ANY review,
+// including a comment-only one from batching several inline comments into a
+// single "Comment" submission — with no corresponding DISMISSED transition
+// the way a stale APPROVED review gets (see planSynchronizeSwaps). Used by
+// both the read-only reflect-current-state path and the additive-fill path
+// so a mid-review reviewer never silently vanishes from the checklist
+// display, nor has their area handed to a brand-new load-balanced pick,
+// merely for having left comments so far (PR #6645).
+//
+// Pure — no I/O.
+function stillEngagedAssignees(areas, { assignedByArea, existingRequested, allReviews }) {
+  const finalStateLogins = new Set(Object.keys(latestReviewStates(allReviews || [])));
+  const result = new Map();
+  for (const area of areas) {
+    const sticky = assignedByArea.get(area.label);
+    if (sticky && area.owners.includes(sticky) && !existingRequested.has(sticky) && !finalStateLogins.has(sticky)) {
+      result.set(area.label, sticky);
+    }
+  }
+  return result;
 }
 
 // ── GitHub API helpers ────────────────────────────────────────────────────────
@@ -690,8 +733,22 @@ async function coordinateReviewers(github, context, core, {
   // ── read-only events ─────────────────────────────────────────────────────
   if (context.eventName === 'pull_request_review' || context.eventName === 'workflow_run') {
     core.info('Read-only event — reflecting current reviewer assignments');
+    // Excluded owners are dropped first so a still-engaged sticky pick is
+    // only honored while they remain a legitimate (non-excluded) owner —
+    // see the eligibleAreas comment further down for why this mirrors that
+    // filtering rather than checking touchedAreas directly.
+    const readOnlyEligibleAreas = touchedAreas.map(area => ({
+      ...area,
+      owners: area.owners.filter(o => !updatedExcluded.has(o)),
+    }));
+    const stillEngaged = stillEngagedAssignees(readOnlyEligibleAreas, {
+      assignedByArea: updatedAssigned, existingRequested, allReviews,
+    });
+    for (const [label, login] of stillEngaged) {
+      core.info(`Area "${label}": ${login} still engaged via comment-only review — showing as pending reviewer`);
+    }
     return {
-      confirmedRequested: new Set(existingRequested),
+      confirmedRequested: new Set([...existingRequested, ...stillEngaged.values()]),
       excludedReviewers: updatedExcluded,
       manuallyAdded: updatedManuallyAdded,
       assignedReviewers: updatedAssigned,
@@ -817,7 +874,7 @@ async function coordinateReviewers(github, context, core, {
     // during the draft period, or picked by an earlier coordination pass)
     // for whoever has the lightest queue right now.
     const { picks, log } = resolveAreaPicks(eligibleAreas, {
-      existingRequested, assignedByArea: updatedAssigned,
+      existingRequested, assignedByArea: updatedAssigned, allReviews,
       prAuthor, reviewerLoad, LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
     });
     for (const msg of log) core.info(msg);
@@ -876,7 +933,7 @@ async function coordinateReviewers(github, context, core, {
     const algorithmAreas = avalancheAreas.filter(a => !forcedAreas.includes(a));
 
     const { picks, log: pruneLog } = resolveAreaPicks(algorithmAreas, {
-      existingRequested, assignedByArea: updatedAssigned,
+      existingRequested, assignedByArea: updatedAssigned, allReviews,
       prAuthor, reviewerLoad, LINE_THRESHOLD, AREA_THRESHOLDS, PUBLIC_HEADER,
     });
     for (const msg of pruneLog) core.info(msg);
@@ -948,7 +1005,21 @@ async function coordinateReviewers(github, context, core, {
   // Non-draft, any other event: fill in a load-balanced reviewer only for
   // areas that don't already have one requested. Never removes anyone already
   // on the PR.
-  const { selected, log } = chooseReviewers(eligibleAreas, {
+  //
+  // Areas whose sticky pick is still engaged via a comment-only review (see
+  // stillEngagedAssignees) are held back from chooseReviewers entirely —
+  // otherwise a mid-review reviewer silently un-requested by GitHub for
+  // leaving a batch of comments would look "uncovered" and have their area
+  // handed to a completely different load-balanced pick (PR #6645).
+  const stillEngaged     = stillEngagedAssignees(eligibleAreas, {
+    assignedByArea: updatedAssigned, existingRequested, allReviews,
+  });
+  const areasNeedingFill = eligibleAreas.filter(a => !stillEngaged.has(a.label));
+  for (const [label, login] of stillEngaged) {
+    core.info(`Area "${label}": ${login} still engaged via comment-only review — not re-picking`);
+  }
+
+  const { selected, log } = chooseReviewers(areasNeedingFill, {
     prAuthor,
     existingRequested, // real existing set — areas with an owner already present are skipped
     reviewerLoad,
@@ -959,7 +1030,7 @@ async function coordinateReviewers(github, context, core, {
   if (selected.size === 0) {
     core.info('Every touched area already has a reviewer — nothing to add');
     return {
-      confirmedRequested: new Set(existingRequested),
+      confirmedRequested: new Set([...existingRequested, ...stillEngaged.values()]),
       excludedReviewers: updatedExcluded,
       manuallyAdded: updatedManuallyAdded,
       assignedReviewers: updatedAssigned,
@@ -967,12 +1038,12 @@ async function coordinateReviewers(github, context, core, {
   }
 
   const confirmed = await requestReviewers(github, core, pr, selected);
-  for (const area of eligibleAreas) {
+  for (const area of areasNeedingFill) {
     const pick = [...confirmed].find(l => area.owners.includes(l));
     if (pick) updatedAssigned.set(area.label, pick);
   }
   return {
-    confirmedRequested: new Set([...existingRequested, ...confirmed]),
+    confirmedRequested: new Set([...existingRequested, ...confirmed, ...stillEngaged.values()]),
     excludedReviewers: updatedExcluded,
     manuallyAdded: updatedManuallyAdded,
     assignedReviewers: updatedAssigned,
@@ -1245,6 +1316,7 @@ module.exports.computeChangesRequested   = computeChangesRequested;
 module.exports.buildChangeRequestFileMap = buildChangeRequestFileMap;
 module.exports.chooseReviewers           = chooseReviewers;
 module.exports.resolveAreaPicks          = resolveAreaPicks;
+module.exports.stillEngagedAssignees     = stillEngagedAssignees;
 module.exports.buildBody                 = buildBody;
 module.exports.parseExcluded             = parseExcluded;
 module.exports.serializeExcluded         = serializeExcluded;
