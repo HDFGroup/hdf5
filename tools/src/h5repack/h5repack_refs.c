@@ -168,8 +168,8 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                             for (u = 0; u < nelmts; u++) {
                                 H5E_BEGIN_TRY
                                 {
-                                    if ((refobj_id =
-                                             H5Rdereference2(dset_in, H5P_DEFAULT, H5R_OBJECT, &(((hobj_ref_t *)buf)[u]))) < 0)
+                                    if ((refobj_id = H5Rdereference2(dset_in, H5P_DEFAULT, H5R_OBJECT,
+                                                                     &(((hobj_ref_t *)buf)[u]))) < 0)
                                         continue;
                                 }
                                 H5E_END_TRY
@@ -179,7 +179,8 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                  */
                                 if ((refname = MapIdToName(refobj_id, travt)) != NULL) {
                                     /* create the reference, -1 parameter for objects */
-                                    if (H5Rcreate(&(((hobj_ref_t *)refbuf)[u]), fidout, refname, H5R_OBJECT, (hid_t)-1) < 0)
+                                    if (H5Rcreate(&(((hobj_ref_t *)refbuf)[u]), fidout, refname, H5R_OBJECT,
+                                                  (hid_t)-1) < 0)
                                         H5TOOLS_GOTO_ERROR((-1), "H5Rcreate failed");
                                     if (options->verbose > 0) {
                                         if (options->verbose == 2)
@@ -223,9 +224,9 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                      *-------------------------------------------------------------------------
                      */
                     else if (H5Tequal(mtype_id, H5T_STD_REF_DSETREG)) {
-                        hid_t            refobj_id = H5I_INVALID_HID;
-                        const char      *refname;
-                        unsigned         u;
+                        hid_t       refobj_id = H5I_INVALID_HID;
+                        const char *refname;
+                        unsigned    u;
 
                         /*-------------------------------------------------------------------------
                          * read input to memory
@@ -254,7 +255,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                 H5E_BEGIN_TRY
                                 {
                                     if ((refobj_id = H5Rdereference2(dset_in, H5P_DEFAULT, H5R_DATASET_REGION,
-                                                        &((hdset_reg_ref_t *)buf)[u])) < 0)
+                                                                     &((hdset_reg_ref_t *)buf)[u])) < 0)
                                         continue;
                                 }
                                 H5E_END_TRY
@@ -266,12 +267,13 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                     hid_t region_id =
                                         H5I_INVALID_HID; /* region id of the referenced dataset */
 
-                                    if ((region_id = H5Rget_region(dset_in, H5R_DATASET_REGION, &(((hdset_reg_ref_t *)buf)[u]))) < 0)
+                                    if ((region_id = H5Rget_region(dset_in, H5R_DATASET_REGION,
+                                                                   &(((hdset_reg_ref_t *)buf)[u]))) < 0)
                                         H5TOOLS_GOTO_ERROR((-1), "H5Rget_region failed");
 
                                     /* create the reference, we need the space_id */
-                                    if (H5Rcreate(&(((hdset_reg_ref_t *)refbuf)[u]), fidout, refname, H5R_DATASET_REGION,
-                                                  region_id) < 0)
+                                    if (H5Rcreate(&(((hdset_reg_ref_t *)refbuf)[u]), fidout, refname,
+                                                  H5R_DATASET_REGION, region_id) < 0)
                                         H5TOOLS_GOTO_ERROR((-1), "H5Rcreate failed");
                                     if (H5Sclose(region_id) < 0)
                                         H5TOOLS_GOTO_ERROR((-1), "H5Sclose failed");
