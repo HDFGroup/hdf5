@@ -1,0 +1,80 @@
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the LICENSE file, which can be found at the root of the source code
+# distribution tree, or in https://www.hdfgroup.org/licenses.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+# Used by the nightly "Analyze" CDash job (.github/workflows/analysis.yml)
+# when configured with -DHDF5_ENABLE_ANALYZER_TOOLS:BOOL=ON. Not run on pull
+# requests.
+#
+# Starting check set is deliberately conservative: the static-analyzer and
+# bug-finding checks have a low false-positive rate and are actionable on a
+# codebase this size. readability-*, modernize-*, and naming-convention
+# checks are intentionally left out for now - turning those on against 25+
+# years of existing C code would produce thousands of stylistic findings
+# with little signal, and would blow past CTEST_CUSTOM_MAXIMUM_NUMBER_OF_WARNINGS
+# in config/CTestCustom.cmake. Broaden the check set in a follow-up once the
+# initial findings have been triaged.
+#
+# The exclusions below were not guessed - they were measured by running
+# this check set across src/, hl/, c++/src/, and tools/src/ (matching what
+# the "Analyze" CI job actually builds) before adding them, and the total
+# came in comfortably under the 3000-warning CDash cap. Each excluded check
+# was, on inspection of its hits, flagging this codebase's own idioms
+# rather than bugs; re-measure before broadening the check set, since exact
+# counts go stale as the code changes:
+#
+# -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
+#   fires on every fprintf/sprintf/scanf call, suggesting C11 Annex K _s
+#   replacements that glibc does not implement - unactionable, and on its
+#   own would dominate the report given how much of the codebase uses these.
+#
+# -bugprone-assignment-in-if-condition was the single largest contributor
+#   to warning volume by a wide margin. Nearly all of its hits were this
+#   codebase's standard error-check idiom, e.g. `if (NULL == (dset =
+#   H5VL_object_verify(...))) HGOTO_ERROR(...)`, used throughout - not a
+#   bug, just how this project checks return values.
+#
+# -bugprone-multi-level-implicit-pointer-conversion: essentially every hit
+#   was a typed pointer (T **) passed to the void* params of
+#   memmove/memcpy/memset/memcmp, which is ordinary, safe C.
+#
+# -bugprone-narrowing-conversions and -bugprone-easily-swappable-parameters
+#   are excluded per clang-tidy's own upstream guidance that they are
+#   high-noise/low-precision on C code; not separately re-measured here.
+#
+# clang-analyzer-deadcode.DeadStores was also high-volume but kept: most
+# hits were not the H5FL_FREE/H5MM_xfree "assign the freed pointer back to
+# itself" idiom, and looked like plausible real findings on inspection.
+# Worth revisiting if it proves noisy in practice.
+#
+# clang-analyzer-unix.Stream was concentrated almost entirely in
+# tools/src/h5import/h5import.c, which does a lot of manual fscanf-loop
+# parsing - that looked like a real hotspot, not a repeated-idiom artifact,
+# so it was kept too.
+Checks: >
+  -*,
+  clang-analyzer-*,
+  bugprone-*,
+  performance-*,
+  portability-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-narrowing-conversions,
+  -bugprone-assignment-in-if-condition,
+  -bugprone-multi-level-implicit-pointer-conversion,
+  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
+
+WarningsAsErrors: ''
+
+# Left unset on purpose: an empty HeaderFilterRegex restricts diagnostics to
+# the file being compiled, so a problem in a shared header is reported once
+# per translation unit that triggers it there, not fanned out across every
+# header included by the whole codebase.
+HeaderFilterRegex: ''
+
+FormatStyle: none
