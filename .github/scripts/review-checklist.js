@@ -7,6 +7,12 @@ const MARKER = '<!-- hdf5-review-checklist-v1 -->';
 // comment for it to detect the false→true transition) so the two can't drift.
 const ALL_DONE_MARKER = '> ✅ All areas have been signed off.';
 
+// Label toggled to reflect the checklist's current all-done state, so it's
+// visible as a badge on the repo's /pulls list without opening each PR.
+// The label itself (color, description) is repo config, created once by
+// hand — this script only ever adds/removes it from PRs, never defines it.
+const CHECKLIST_COMPLETE_LABEL = 'checklist-complete';
+
 // Persisted record of reviewers explicitly removed via review_request_removed.
 // The checklist comment is the only durable storage available to this script,
 // so the exclusion list rides along as a second hidden marker in its body.
@@ -1314,6 +1320,7 @@ module.exports = async function run({ github, context, core }) {
   const checklistBody = buildBody(
     touchedAreas, approvedUsers, confirmedRequested, changeRequestFilesByUser, updatedManuallyAdded
   );
+  const allDone  = checklistBody.includes(ALL_DONE_MARKER);
   const pingBody = computeAssigneePing(checklistBody, existingComment, prData);
   const body = checklistBody +
     '\n' + serializeExcluded(updatedExcluded) + '\n' + serializeManuallyAdded(updatedManuallyAdded)
@@ -1340,6 +1347,27 @@ module.exports = async function run({ github, context, core }) {
       core.info('Pinged assignee(s) — checklist complete');
     } catch (error) {
       core.warning(`Could not ping assignee(s): ${error.message}`);
+    }
+  }
+
+  // Keep the checklist-complete label in sync with the current all-done
+  // state (level-triggered, unlike the once-only assignee ping above) — a
+  // PR that regresses after a change request loses the label again, and
+  // re-gains it once it's fully signed off a second time.
+  const hasCompleteLabel = (prData.labels || []).some(l => l.name === CHECKLIST_COMPLETE_LABEL);
+  if (allDone && !hasCompleteLabel) {
+    try {
+      await github.rest.issues.addLabels({ owner, repo, issue_number: pr_number, labels: [CHECKLIST_COMPLETE_LABEL] });
+      core.info(`Added "${CHECKLIST_COMPLETE_LABEL}" label`);
+    } catch (error) {
+      core.warning(`Could not add "${CHECKLIST_COMPLETE_LABEL}" label: ${error.message}`);
+    }
+  } else if (!allDone && hasCompleteLabel) {
+    try {
+      await github.rest.issues.removeLabel({ owner, repo, issue_number: pr_number, name: CHECKLIST_COMPLETE_LABEL });
+      core.info(`Removed "${CHECKLIST_COMPLETE_LABEL}" label`);
+    } catch (error) {
+      core.warning(`Could not remove "${CHECKLIST_COMPLETE_LABEL}" label: ${error.message}`);
     }
   }
 };
