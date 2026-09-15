@@ -77,8 +77,23 @@ class GitHubProjectTracker:
                       ... on ProjectV2ItemFieldNumberValue { 
                         number, field { ... on ProjectV2Field { name } } 
                       }
-                      ... on ProjectV2ItemFieldDateValue { 
-                        date, field { ... on ProjectV2Field { name } } 
+                      ... on ProjectV2ItemFieldDateValue {
+                        date, field { ... on ProjectV2Field { name } }
+                      }
+                      ... on ProjectV2ItemIssueFieldValue {
+                        field {
+                          ... on ProjectV2Field { name }
+                          ... on ProjectV2SingleSelectField { name }
+                          ... on ProjectV2IterationField { name }
+                          ... on ProjectV2MultiSelectField { name }
+                        }
+                        issueFieldValue {
+                          __typename
+                          ... on IssueFieldSingleSelectValue { value }
+                          ... on IssueFieldTextValue { value }
+                          ... on IssueFieldNumberValue { value }
+                          ... on IssueFieldDateValue { value }
+                        }
                       }
                     }
                   }
@@ -102,15 +117,24 @@ class GitHubProjectTracker:
     def _extract_field_value(self, field_data: Dict[str, Any]) -> Optional[str]:
         """Extracts value from a field based on its type."""
         type_name = field_data.get("__typename")
-        
+
+        # Fields backed by GitHub's native issue-level custom fields (e.g. a
+        # Priority field managed at the org/repo level rather than as a
+        # project-only field) are mirrored into the project as
+        # ProjectV2ItemIssueFieldValue, with the actual value nested under
+        # issueFieldValue instead of alongside __typename like the other cases.
+        if type_name == "ProjectV2ItemIssueFieldValue":
+            issue_value = field_data.get("issueFieldValue") or {}
+            return issue_value.get("value")
+
         value_map = {
             "ProjectV2ItemFieldSingleSelectValue": "name",
-            "ProjectV2ItemFieldIterationValue": "title", 
+            "ProjectV2ItemFieldIterationValue": "title",
             "ProjectV2ItemFieldTextValue": "text",
             "ProjectV2ItemFieldNumberValue": "number",
             "ProjectV2ItemFieldDateValue": "date"
         }
-        
+
         value_key = value_map.get(type_name)
         return field_data.get(value_key) if value_key else None
     

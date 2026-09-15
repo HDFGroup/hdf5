@@ -1049,7 +1049,10 @@ asyncTest('coordinateReviewers: review_requested survives the opened race and st
 
   const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
 
-  assert.strictEqual(confirmedRequested.size, 1);
+  // Must prune to the normal load-balanced pick (hyoklee) — not stick with
+  // whichever CODEOWNERS auto-assignment happened to survive as this run's
+  // review_requested event (jhendersonHDF).
+  assert.deepStrictEqual([...confirmedRequested], ['hyoklee']);
   assert.ok(github.calls.removeRequestedReviewers.length > 0);
 });
 
@@ -1594,6 +1597,29 @@ function makeManualAddContext(senderType, login) {
     },
   };
 }
+
+asyncTest('coordinateReviewers: review_requested surviving the FIRST coordination pass does NOT mark the reviewer manually-added', async () => {
+  // The exact false positive this guards against: GitHub's own CODEOWNERS
+  // auto-assignment fires review_requested (sender type "User", the PR's own
+  // opener) for every owner of a touched area at PR-open time. If the
+  // cancel-in-progress race lets one of those survive as this run's event
+  // instead of "opened" itself (hasExistingComment: false — no checklist
+  // posted yet), it must not be mistaken for a human's deliberate pick, or
+  // every CODEOWNER — including a catch-all "*" owner — ends up permanently
+  // flagged "manually added, approval required" on every PR that happens to
+  // touch their area.
+  const github = makeGithubMock();
+  const args = makeCoordinateBaseArgs({ hasExistingComment: false });
+
+  const { manuallyAdded, confirmedRequested } = await coordinateReviewers(
+    github, makeManualAddContext('User', 'jhendersonHDF'), makeCore(), args
+  );
+
+  assert.ok(!manuallyAdded.has('jhendersonHDF'));
+  // And the sticky-assignment short-circuit must not have hijacked the
+  // area's pick either — it still falls to the normal load-balanced owner.
+  assert.deepStrictEqual([...confirmedRequested], ['hyoklee']);
+});
 
 asyncTest('coordinateReviewers: human review_requested for a CODEOWNER marks them manually-added', async () => {
   const github = makeGithubMock();

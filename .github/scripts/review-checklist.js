@@ -697,7 +697,18 @@ async function coordinateReviewers(github, context, core, {
     updatedExcluded.add(login);
     updatedManuallyAdded.delete(login);
     core.info(`${login} explicitly removed — excluding from future auto-reassignment`);
-  } else if (action === 'review_requested' && context.payload.requested_reviewer && !isBotSender) {
+  } else if (action === 'review_requested' && context.payload.requested_reviewer && !isBotSender && !isFirstCoordinationPass) {
+    // Also gated on !isFirstCoordinationPass: on a PR's first coordination
+    // pass, GitHub's own CODEOWNERS auto-assignment fires this identical
+    // review_requested event, attributed to the PR's own opener (a User, not
+    // a Bot) — isBotSender can't catch that one. Without this guard, every
+    // owner CODEOWNERS auto-assigns at PR-open time gets mistaken for a
+    // deliberate human pick, permanently sticking them as "manually added"
+    // (e.g. a catch-all "*" owner who is also named on a touched area's
+    // CODEOWNERS line ends up flagged for approval on every single PR that
+    // touches that area). Once the checklist has been posted once, a later
+    // review_requested is a real signal again — a maintainer choosing to
+    // add someone, not the initial avalanche.
     const login = context.payload.requested_reviewer.login;
     if (updatedExcluded.delete(login)) {
       core.info(`${login} explicitly re-requested — clearing prior exclusion`);
@@ -719,10 +730,12 @@ async function coordinateReviewers(github, context, core, {
   // must survive this same run: it lands existingRequested at two owners for
   // that login's area (them plus whoever an earlier pruning pass already
   // picked), which is indistinguishable from an unpruned CODEOWNERS avalanche
-  // unless this login is carved out. Gated on !isBotSender for the same
-  // reason as updatedManuallyAdded above — the bot's own requestReviewers
-  // calls fire this identical event and aren't a human decision.
-  const justRequestedLogin = (action === 'review_requested' && context.payload.requested_reviewer && !isBotSender)
+  // unless this login is carved out. Gated on !isBotSender and
+  // !isFirstCoordinationPass for the same reasons as updatedManuallyAdded
+  // above — the bot's own requestReviewers calls fire this identical event
+  // and aren't a human decision, and neither is GitHub's own CODEOWNERS
+  // auto-assignment surviving as the first coordination pass's event.
+  const justRequestedLogin = (action === 'review_requested' && context.payload.requested_reviewer && !isBotSender && !isFirstCoordinationPass)
     ? context.payload.requested_reviewer.login
     : null;
 
