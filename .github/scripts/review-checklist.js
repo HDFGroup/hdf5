@@ -2,6 +2,17 @@
 
 const MARKER = '<!-- hdf5-review-checklist-v1 -->';
 
+// Line appended to the checklist body once every area is signed off. Shared
+// between buildBody (which appends it) and the caller (which greps a prior
+// comment for it to detect the false→true transition) so the two can't drift.
+const ALL_DONE_MARKER = '> ✅ All areas have been signed off.';
+
+// Label toggled to reflect the checklist's current all-done state, so it's
+// visible as a badge on the repo's /pulls list without opening each PR.
+// The label itself (color, description) is repo config, created once by
+// hand — this script only ever adds/removes it from PRs, never defines it.
+const CHECKLIST_COMPLETE_LABEL = 'checklist-complete';
+
 // Persisted record of reviewers explicitly removed via review_request_removed.
 // The checklist comment is the only durable storage available to this script,
 // so the exclusion list rides along as a second hidden marker in its body.
@@ -387,8 +398,24 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested, changeReques
     const mentions = extraReviewers.map(o => approvedUsers.has(o) ? `@${o} ✅` : `@${o}`).join(', ');
     parts.push('', `**Additional reviewers** (not owners of a touched area): ${mentions}`);
   }
-  if (allDone) parts.push('', '> ✅ All areas have been signed off.');
+  if (allDone) parts.push('', ALL_DONE_MARKER);
   return parts.join('\n');
+}
+
+// Returns the comment body to post pinging the PR's GitHub assignee(s), or
+// null if no ping should go out this run. Fires only on the false→true
+// transition (checklistBody now all-done, existingComment wasn't yet) so a
+// PR that's been fully signed off for a while doesn't get re-pinged on every
+// later workflow run — and only when the PR actually has assignees to ping.
+function computeAssigneePing(checklistBody, existingComment, prData) {
+  const allDone    = checklistBody.includes(ALL_DONE_MARKER);
+  const wasAllDone = !!existingComment && existingComment.body.includes(ALL_DONE_MARKER);
+  if (!allDone || wasAllDone) return null;
+
+  const assignees = (prData.assignees || []).map(a => a.login).filter(Boolean);
+  if (assignees.length === 0) return null;
+
+  return `🎉 All checklist items are signed off — ${assignees.map(a => `@${a}`).join(' ')}, this PR is ready to merge.`;
 }
 
 // Resolves each area in `areas` to a single reviewer to keep, without
@@ -1303,7 +1330,12 @@ module.exports = async function run({ github, context, core }) {
   // ----------------------------------------------------------------
   // 8. Build and post (or update) the checklist comment.
   // ----------------------------------------------------------------
-  const body = buildBody(touchedAreas, approvedUsers, confirmedRequested, changeRequestFilesByUser, updatedManuallyAdded) +
+  const checklistBody = buildBody(
+    touchedAreas, approvedUsers, confirmedRequested, changeRequestFilesByUser, updatedManuallyAdded
+  );
+  const allDone  = checklistBody.includes(ALL_DONE_MARKER);
+  const pingBody = computeAssigneePing(checklistBody, existingComment, prData);
+  const body = checklistBody +
     '\n' + serializeExcluded(updatedExcluded) + '\n' + serializeManuallyAdded(updatedManuallyAdded)
     + '\n' + serializeAssigned(updatedAssigned);
 
@@ -1318,6 +1350,39 @@ module.exports = async function run({ github, context, core }) {
   } catch (error) {
     core.setFailed(`Failed to post checklist comment: ${error.message}`);
   }
+
+  // Posted as its own fresh comment rather than folded into the checklist
+  // comment above — editing an existing comment to add a mention isn't a
+  // reliable way to trigger a notification.
+  if (pingBody) {
+    try {
+      await github.rest.issues.createComment({ owner, repo, issue_number: pr_number, body: pingBody });
+      core.info('Pinged assignee(s) — checklist complete');
+    } catch (error) {
+      core.warning(`Could not ping assignee(s): ${error.message}`);
+    }
+  }
+
+  // Keep the checklist-complete label in sync with the current all-done
+  // state (level-triggered, unlike the once-only assignee ping above) — a
+  // PR that regresses after a change request loses the label again, and
+  // re-gains it once it's fully signed off a second time.
+  const hasCompleteLabel = (prData.labels || []).some(l => l.name === CHECKLIST_COMPLETE_LABEL);
+  if (allDone && !hasCompleteLabel) {
+    try {
+      await github.rest.issues.addLabels({ owner, repo, issue_number: pr_number, labels: [CHECKLIST_COMPLETE_LABEL] });
+      core.info(`Added "${CHECKLIST_COMPLETE_LABEL}" label`);
+    } catch (error) {
+      core.warning(`Could not add "${CHECKLIST_COMPLETE_LABEL}" label: ${error.message}`);
+    }
+  } else if (!allDone && hasCompleteLabel) {
+    try {
+      await github.rest.issues.removeLabel({ owner, repo, issue_number: pr_number, name: CHECKLIST_COMPLETE_LABEL });
+      core.info(`Removed "${CHECKLIST_COMPLETE_LABEL}" label`);
+    } catch (error) {
+      core.warning(`Could not remove "${CHECKLIST_COMPLETE_LABEL}" label: ${error.message}`);
+    }
+  }
 };
 
 module.exports.MARKER                    = MARKER;
@@ -1331,6 +1396,7 @@ module.exports.chooseReviewers           = chooseReviewers;
 module.exports.resolveAreaPicks          = resolveAreaPicks;
 module.exports.stillEngagedAssignees     = stillEngagedAssignees;
 module.exports.buildBody                 = buildBody;
+module.exports.computeAssigneePing       = computeAssigneePing;
 module.exports.parseExcluded             = parseExcluded;
 module.exports.serializeExcluded         = serializeExcluded;
 module.exports.withExcluded              = withExcluded;
