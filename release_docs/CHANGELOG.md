@@ -54,6 +54,21 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Added support for internally concurrent multithreaded reads of chunked datasets
+
+   Added 3 new functions to support this: H5TSset_internal_threads(),
+   H5Pset_io_threads(), and H5Pget_io_threads().
+
+   This feature internally parallelizes read operations on chunked datasets.
+   H5TSset_internal_threads() is used to enable the feature globally, while
+   H5Pset_io_threads() can be used to disable the feature on a per-operation
+   basis. These functions are only available when the library is configured with
+   HDF5_ENABLE_CONCURRENCY=ON. When performing an internally threaded read, the
+   library will concurrently read from disk, unfilter, and scatter to memory all
+   chunks in a read operation on a chunked dataset. Currently each of these
+   sub-operations is serialized (protected by a mutex), so there is not yet
+   likely to be any performance improvement.
+
 ## Parallel Library
 
 ## Fortran Library
