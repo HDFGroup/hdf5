@@ -14,6 +14,7 @@ const {
   resolveAreaPicks,
   stillEngagedAssignees,
   buildBody,
+  computeAssigneePing,
   parseExcluded,
   serializeExcluded,
   withExcluded,
@@ -698,6 +699,51 @@ test('buildBody: a manually-added CODEOWNER who is no longer in confirmedRequest
   const body = buildBody(areas, new Set(), new Set(['alice']), new Map(), new Set(['bob']));
   assert.ok(!body.includes('bob'));
   assert.ok(!body.includes('manually added'));
+});
+
+// ----------------------------------------------------------------
+// computeAssigneePing
+// ----------------------------------------------------------------
+
+const ALL_DONE_BODY = '> ✅ All areas have been signed off.';
+const NOT_DONE_BODY = '- [ ] **src** — @alice';
+
+test('computeAssigneePing: all-done with no prior comment pings the assignee', () => {
+  const ping = computeAssigneePing(ALL_DONE_BODY, undefined, { assignees: [{ login: 'alice' }] });
+  assert.ok(ping);
+  assert.ok(ping.includes('@alice'));
+});
+
+test('computeAssigneePing: all-done transitioning from a not-yet-done prior comment pings', () => {
+  const existingComment = { body: NOT_DONE_BODY };
+  const ping = computeAssigneePing(ALL_DONE_BODY, existingComment, { assignees: [{ login: 'alice' }] });
+  assert.ok(ping);
+  assert.ok(ping.includes('@alice'));
+});
+
+test('computeAssigneePing: still all-done from an already-done prior comment does not re-ping', () => {
+  const existingComment = { body: ALL_DONE_BODY };
+  const ping = computeAssigneePing(ALL_DONE_BODY, existingComment, { assignees: [{ login: 'alice' }] });
+  assert.strictEqual(ping, null);
+});
+
+test('computeAssigneePing: not all done never pings, regardless of prior comment', () => {
+  assert.strictEqual(computeAssigneePing(NOT_DONE_BODY, undefined, { assignees: [{ login: 'alice' }] }), null);
+  const existingComment = { body: NOT_DONE_BODY };
+  assert.strictEqual(computeAssigneePing(NOT_DONE_BODY, existingComment, { assignees: [{ login: 'alice' }] }), null);
+});
+
+test('computeAssigneePing: all-done with no PR assignees does not ping', () => {
+  const ping = computeAssigneePing(ALL_DONE_BODY, undefined, { assignees: [] });
+  assert.strictEqual(ping, null);
+});
+
+test('computeAssigneePing: mentions every assignee', () => {
+  const ping = computeAssigneePing(ALL_DONE_BODY, undefined, {
+    assignees: [{ login: 'alice' }, { login: 'bob' }],
+  });
+  assert.ok(ping.includes('@alice'));
+  assert.ok(ping.includes('@bob'));
 });
 
 // ----------------------------------------------------------------
