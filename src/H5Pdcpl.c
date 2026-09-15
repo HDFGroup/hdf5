@@ -3208,6 +3208,13 @@ H5P_get_fill_value(H5P_genplist_t *plist, const H5T_t *type, void *value /*out*/
     } /* end if */
 
     /*
+     * A fill value with a nonzero size must have an associated datatype in
+     * order to be converted to the destination type.
+     */
+    if (NULL == fill.type)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "fill value has no datatype");
+
+    /*
      * Can we convert between the source and destination datatypes?
      */
     if (NULL == (tpath = H5T_path_find(fill.type, type)))
