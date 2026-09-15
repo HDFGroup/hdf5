@@ -77,7 +77,7 @@ public class H5F_info2_t implements Serializable {
     }
     /**
      * Constructor for current "global" information about file
-     * @param info_segment: Memory segment for H5F_info2_t
+     * @param finfo_segment Memory segment for H5F_info2_t
      */
     public H5F_info2_t(MemorySegment finfo_segment)
     {
