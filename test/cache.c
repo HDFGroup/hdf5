@@ -32119,7 +32119,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged, H5CX_n
             pass         = false;
             failure_mssg = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
         }
-        else if (H5Pset_fapl_core(fapl_id, MAX_ADDR, false) < 0) {
+        else if (H5Pset_fapl_core(fapl_id, 0, MAX_ADDR, false) < 0) {
             H5Pclose(fapl_id);
             fapl_id      = H5P_DEFAULT;
             pass         = false;

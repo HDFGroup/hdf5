@@ -1121,32 +1121,35 @@ CONTAINS
 !! \brief Modifies the file access property list to use the H5FD_CORE driver.
 !!
 !! \param prp_id        File access property list identifier.
+!! \param initial_size  Initial size, in bytes, of the backing memory buffer.
 !! \param increment     Size, in bytes, of memory increments.
 !! \param backing_store Boolean flag indicating whether to write the file contents to disk when the file is closed.
 !! \param hdferr        \fortran_error
 !!
 !! See C API: @ref H5Pset_fapl_core()
 !!
-  SUBROUTINE h5pset_fapl_core_f(prp_id, increment, backing_store, hdferr)
+  SUBROUTINE h5pset_fapl_core_f(prp_id, initial_size, increment, backing_store, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
+    INTEGER(SIZE_T), INTENT(IN) :: initial_size
     INTEGER(SIZE_T), INTENT(IN) :: increment
     LOGICAL, INTENT(IN) :: backing_store
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER :: backing_store_flag
     INTERFACE
-       INTEGER FUNCTION h5pset_fapl_core_c(prp_id, increment, backing_store_flag) &
+       INTEGER FUNCTION h5pset_fapl_core_c(prp_id, initial_size, increment, backing_store_flag) &
             BIND(C,NAME='h5pset_fapl_core_c')
          IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
+         INTEGER(SIZE_T), INTENT(IN) :: initial_size
          INTEGER(SIZE_T), INTENT(IN) :: increment
          INTEGER :: backing_store_flag
        END FUNCTION h5pset_fapl_core_c
     END INTERFACE
     backing_store_flag = 0
     IF(backing_store) backing_store_flag = 1
-    hdferr = h5pset_fapl_core_c(prp_id, increment, backing_store_flag)
+    hdferr = h5pset_fapl_core_c(prp_id, initial_size, increment, backing_store_flag)
   END SUBROUTINE h5pset_fapl_core_f
 
 !>
@@ -1155,32 +1158,35 @@ CONTAINS
 !! \brief Queries core file driver properties.
 !!
 !! \param prp_id        File access property list identifier.
+!! \param initial_size  Initial size, in bytes, of the backing memory buffer.
 !! \param increment     Size, in bytes, of memory increments.
 !! \param backing_store Boolean flag indicating whether to write the file contents to disk when the file is closed.
 !! \param hdferr        \fortran_error
 !!
 !! See C API: @ref H5Pget_fapl_core()
 !!
-  SUBROUTINE h5pget_fapl_core_f(prp_id, increment, backing_store, hdferr)
+  SUBROUTINE h5pget_fapl_core_f(prp_id, initial_size, increment, backing_store, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
+    INTEGER(SIZE_T), INTENT(OUT) :: initial_size
     INTEGER(SIZE_T), INTENT(OUT) :: increment
     LOGICAL, INTENT(OUT) :: backing_store
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER :: backing_store_flag
 
     INTERFACE
-       INTEGER FUNCTION h5pget_fapl_core_c(prp_id, increment, backing_store_flag) &
+       INTEGER FUNCTION h5pget_fapl_core_c(prp_id, initial_size, increment, backing_store_flag) &
             BIND(C,NAME='h5pget_fapl_core_c')
          IMPORT :: HID_T,SIZE_T
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
+         INTEGER(SIZE_T), INTENT(OUT) :: initial_size
          INTEGER(SIZE_T), INTENT(OUT) :: increment
          INTEGER :: backing_store_flag
        END FUNCTION h5pget_fapl_core_c
     END INTERFACE
 
-    hdferr = h5pget_fapl_core_c(prp_id, increment, backing_store_flag)
+    hdferr = h5pget_fapl_core_c(prp_id, initial_size, increment, backing_store_flag)
     backing_store =.FALSE.
     IF (backing_store_flag .EQ. 1) backing_store =.TRUE.
   END SUBROUTINE h5pget_fapl_core_f
@@ -7012,4 +7018,3 @@ END SUBROUTINE h5pget_virtual_dsetname_f
    END SUBROUTINE h5pget_actual_selection_io_mode_f
 
 END MODULE H5P
-

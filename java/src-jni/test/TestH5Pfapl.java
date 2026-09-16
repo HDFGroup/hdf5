@@ -855,7 +855,7 @@ public class TestH5Pfapl {
         if (HDF5Constants.H5FD_CORE < 0)
             return;
         try {
-            H5.H5Pset_fapl_core(fapl_id, 4096, false);
+            H5.H5Pset_fapl_core(fapl_id, 0, 4096, false);
             long driver_type = H5.H5Pget_driver(fapl_id);
             assertTrue("H5Pget_driver: core = " + driver_type, HDF5Constants.H5FD_CORE == driver_type);
         }
@@ -864,9 +864,11 @@ public class TestH5Pfapl {
             fail("H5Pset_fapl_core: " + err);
         }
         try {
+            long[] initialSize     = {-1};
             long[] increment       = {-1};
             boolean[] backingstore = {true};
-            H5.H5Pget_fapl_core(fapl_id, increment, backingstore);
+            H5.H5Pget_fapl_core(fapl_id, initialSize, increment, backingstore);
+            assertTrue("H5Pget_fapl_core: initial_size=" + initialSize[0], initialSize[0] == 0);
             assertTrue("H5Pget_fapl_core: increment=" + increment[0], increment[0] == 4096);
             assertTrue("H5Pget_fapl_core: backingstore=" + backingstore[0], !backingstore[0]);
         }
