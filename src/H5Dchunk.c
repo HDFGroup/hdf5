@@ -382,8 +382,8 @@ static herr_t   H5D__chunk_cache_evict(const H5D_t *dset, H5D_rdcc_ent_t *ent, b
 static herr_t   H5D__chunk_lock(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
                                 H5D_chunk_ud_t *udata, void **_chunk, bool relax, bool prev_unfilt_chunk
 #ifdef H5_HAVE_CONCURRENCY
-                             ,
-                             H5D_threaded_io_info_t *threaded_io_info, bool *threaded_chunk
+                              ,
+                              H5D_threaded_io_info_t *threaded_io_info, bool *threaded_chunk
 #endif /* H5_HAVE_CONCURRENCY */
 );
 static herr_t H5D__chunk_unlock(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
@@ -3270,8 +3270,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 #ifdef H5_HAVE_CONCURRENCY
                         threaded_chunk = false;
                         if (H5D__chunk_lock(io_info, dset_info, udata_p, &chunk, false, false,
-                                                             do_threading ? threaded_io_info : NULL,
-                                                             &threaded_chunk) < 0)
+                                            do_threading ? threaded_io_info : NULL, &threaded_chunk) < 0)
 #else  /* H5_HAVE_CONCURRENCY */
                         if (H5D__chunk_lock(io_info, dset_info, udata_p, &chunk, false, false) < 0)
 #endif /* H5_HAVE_CONCURRENCY */
@@ -3459,7 +3458,8 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                     /* We must evict all chunks if a worker failed, because the chunk may be in an
                      * inconsistent state in memory */
                     for (size_t i = 0; i < threaded_io_info->num_chunks; i++)
-                        if (dset_info->dset->shared->cache.chunk.slot[udata.idx_hint] && H5D__chunk_cache_evict(dset_info->dset,
+                        if (dset_info->dset->shared->cache.chunk.slot[udata.idx_hint] &&
+                            H5D__chunk_cache_evict(dset_info->dset,
                                                    dset_info->dset->shared->cache.chunk.slot[udata.idx_hint],
                                                    false) < 0)
                             HDONE_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "unable to evict chunk");
@@ -3605,14 +3605,17 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
      * filters receive, avoiding a buffer overflow if any filter writes
      * up to *buf_size bytes into *buf.  For incompressible chunks
      * chunk_disk_size >= chunk_size so buf_alloc stays at chunk_nbytes. */
-    buf_alloc = (threaded_chunk_info->chunk_nbytes < threaded_chunk_info->threaded_io_info->chunk_size) ? threaded_chunk_info->threaded_io_info->chunk_size : threaded_chunk_info->chunk_nbytes;
+    buf_alloc = (threaded_chunk_info->chunk_nbytes < threaded_chunk_info->threaded_io_info->chunk_size)
+                    ? threaded_chunk_info->threaded_io_info->chunk_size
+                    : threaded_chunk_info->chunk_nbytes;
 
-    /* If we're using filters we can allocate the chunk outside of the mutex, otherwise we need to protect it since the free list package isn't yet threadsafe. This is a hack that should be removed once H5FL is threadsafe. */
+    /* If we're using filters we can allocate the chunk outside of the mutex, otherwise we need to protect it
+     * since the free list package isn't yet threadsafe. This is a hack that should be removed once H5FL is
+     * threadsafe. */
     if (threaded_chunk_info->old_pline->nused)
         if (NULL ==
             (threaded_chunk_info->chunk = H5D__chunk_mem_alloc(buf_alloc, threaded_chunk_info->old_pline)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                    "memory allocation failed for raw data chunk");
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk");
 
     /* Lock internal mutex */
     if (H5_UNLIKELY(H5TS_internal_lock() < 0))
@@ -3623,8 +3626,7 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
     if (!threaded_chunk_info->old_pline->nused)
         if (NULL ==
             (threaded_chunk_info->chunk = H5D__chunk_mem_alloc(buf_alloc, threaded_chunk_info->old_pline)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                        "memory allocation failed for raw data chunk");
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk");
 
     /* Read chunk from disk */
     if (H5_UNLIKELY(H5F_shared_block_read(H5F_SHARED(threaded_chunk_info->chk_dset_io_info.dset->oloc.file),
@@ -3933,7 +3935,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
                 /* Lock the chunk into the cache */
                 if (H5D__chunk_lock(io_info, dset_info, &udata, &chunk, entire_chunk,
-                                                     false H5D_CHUNK_LOCK_NO_THREADING_PARAMS) < 0)
+                                    false H5D_CHUNK_LOCK_NO_THREADING_PARAMS) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTLOCK, FAIL, "unable to lock raw data chunk");
                 assert(chunk);
                 chunk_locked = true;
@@ -4102,7 +4104,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
                 /* Lock the chunk into the cache */
                 if (H5D__chunk_lock(io_info, dset_info, &udata, &chunk, entire_chunk,
-                                                     false H5D_CHUNK_LOCK_NO_THREADING_PARAMS) < 0)
+                                    false H5D_CHUNK_LOCK_NO_THREADING_PARAMS) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTLOCK, FAIL, "unable to lock raw data chunk");
                 assert(chunk);
                 chunk_locked = true;
@@ -5405,8 +5407,8 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                      * chunk_disk_size >= chunk_size so buf_alloc stays at chunk_nbytes. */
                     buf_alloc = (chunk_nbytes < chunk_size) ? chunk_size : chunk_nbytes;
 
-                    if (NULL ==
-                        (chunk = H5D__chunk_mem_alloc(buf_alloc, (udata->new_unfilt_chunk ? old_pline : pline))))
+                    if (NULL == (chunk = H5D__chunk_mem_alloc(buf_alloc,
+                                                              (udata->new_unfilt_chunk ? old_pline : pline))))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                                     "memory allocation failed for raw data chunk");
 
@@ -6382,7 +6384,7 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[])
                 /* Lock the chunk into cache.  H5D__chunk_lock will take care of
                  * updating the chunk to no longer be an edge chunk. */
                 if (H5D__chunk_lock(&chk_io_info, &chk_dset_info, &chk_udata, &chunk, false,
-                                                             true H5D_CHUNK_LOCK_NO_THREADING_PARAMS) < 0)
+                                    true H5D_CHUNK_LOCK_NO_THREADING_PARAMS) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "unable to lock raw data chunk");
                 assert(chunk);
 
@@ -6711,7 +6713,7 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, bool new_unfilt_chunk)
 
     /* Lock the chunk into the cache, to get a pointer to the chunk buffer */
     if (H5D__chunk_lock(io_info, udata->dset_info, &chk_udata, &chunk, false,
-                                                 false H5D_CHUNK_LOCK_NO_THREADING_PARAMS) < 0)
+                        false H5D_CHUNK_LOCK_NO_THREADING_PARAMS) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "unable to lock raw data chunk");
     assert(chunk);
     chunk_locked = true;
