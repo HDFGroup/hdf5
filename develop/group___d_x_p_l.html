@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-09-13</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-09-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -184,6 +184,8 @@ $(function(){initNavTree('group___d_x_p_l.html','',''); });
 <tr>
 <td><a class="el" href="#ga8ebd4b1ffbae81732cdbf1195c8d7c11" title="Allows the library to modify the contents of the write buffer.">H5Pset_modify_write_buf</a>/<a class="el" href="#ga417d80e0d7fc4eba52c8f1c4713a0c7b" title="Retrieves the &quot;modify write buffer&quot; property.">H5Pget_modify_write_buf</a></td><td>Sets/gets a flag allowing the library to modify the contents of the write buffer.</td></tr>
 <tr>
+<td><a class="el" href="#ga137c71367b2b24d05c4820b99708f4d0" title="Allows the library to use internal multithreading to accelerate I/O.">H5Pset_io_threads</a>/<a class="el" href="#ga1fcf8cc91370586ea0a949fd4117b988" title="Retrieves the &quot;I/O threads enabled&quot; property.">H5Pget_io_threads</a></td><td>Sets/gets a flag allowing the library to use the global thread pool to accelerate I/O.</td></tr>
+<tr>
 <td>H5Pset_preserve/H5Pget_preserve</td><td>No longer available, deprecated as it no longer has any effect.</td></tr>
 </table>
 </div><div></div> </div><table class="memberdecls">
@@ -203,6 +205,8 @@ Functions</h2></td></tr>
 <tr class="memdesc:gabc2b1e2af542ac15ee1613f4f89117e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines whether error-detection is enabled for dataset reads.  <br /></td></tr>
 <tr class="memitem:gaa55e7a6dd26a8df51b331febfeeb376b" id="r_gaa55e7a6dd26a8df51b331febfeeb376b"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#gaa55e7a6dd26a8df51b331febfeeb376b">H5Pget_hyper_vector_size</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, size_t *size)</td></tr>
 <tr class="memdesc:gaa55e7a6dd26a8df51b331febfeeb376b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves number of I/O vectors to be read/written in hyperslab I/O.  <br /></td></tr>
+<tr class="memitem:ga1fcf8cc91370586ea0a949fd4117b988" id="r_ga1fcf8cc91370586ea0a949fd4117b988"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga1fcf8cc91370586ea0a949fd4117b988">H5Pget_io_threads</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, bool *io_threads_enabled)</td></tr>
+<tr class="memdesc:ga1fcf8cc91370586ea0a949fd4117b988"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the "I/O threads enabled" property.  <br /></td></tr>
 <tr class="memitem:ga417d80e0d7fc4eba52c8f1c4713a0c7b" id="r_ga417d80e0d7fc4eba52c8f1c4713a0c7b"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga417d80e0d7fc4eba52c8f1c4713a0c7b">H5Pget_modify_write_buf</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, bool *modify_write_buf)</td></tr>
 <tr class="memdesc:ga417d80e0d7fc4eba52c8f1c4713a0c7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the "modify write buffer" property.  <br /></td></tr>
 <tr class="memitem:ga37ec8c3b3f1880ed6e1b300bc4ee9ed5" id="r_ga37ec8c3b3f1880ed6e1b300bc4ee9ed5"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga37ec8c3b3f1880ed6e1b300bc4ee9ed5">H5Pget_mpio_actual_chunk_opt_mode</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, <a class="el" href="_h5_ppublic_8h.html#a3d1f48e6c05b649980ddc5837e227956">H5D_mpio_actual_chunk_opt_mode_t</a> *actual_chunk_opt_mode)</td></tr>
@@ -245,6 +249,8 @@ Functions</h2></td></tr>
 <tr class="memdesc:ga1890e730c34efa20cd6a5d1d2a0e8caa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets user-defined filter callback function.  <br /></td></tr>
 <tr class="memitem:gad8c1582c86e3316c70b0658b3b8e2071" id="r_gad8c1582c86e3316c70b0658b3b8e2071"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#gad8c1582c86e3316c70b0658b3b8e2071">H5Pset_hyper_vector_size</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, size_t size)</td></tr>
 <tr class="memdesc:gad8c1582c86e3316c70b0658b3b8e2071"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets number of I/O vectors to be read/written in hyperslab I/O.  <br /></td></tr>
+<tr class="memitem:ga137c71367b2b24d05c4820b99708f4d0" id="r_ga137c71367b2b24d05c4820b99708f4d0"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga137c71367b2b24d05c4820b99708f4d0">H5Pset_io_threads</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, bool io_threads_enabled)</td></tr>
+<tr class="memdesc:ga137c71367b2b24d05c4820b99708f4d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allows the library to use internal multithreading to accelerate I/O.  <br /></td></tr>
 <tr class="memitem:ga8ebd4b1ffbae81732cdbf1195c8d7c11" id="r_ga8ebd4b1ffbae81732cdbf1195c8d7c11"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga8ebd4b1ffbae81732cdbf1195c8d7c11">H5Pset_modify_write_buf</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, bool modify_write_buf)</td></tr>
 <tr class="memdesc:ga8ebd4b1ffbae81732cdbf1195c8d7c11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allows the library to modify the contents of the write buffer.  <br /></td></tr>
 <tr class="memitem:ga55445d27d058dadcd34fdba93344855e" id="r_ga55445d27d058dadcd34fdba93344855e"><td class="memItemLeft"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga55445d27d058dadcd34fdba93344855e">H5Pset_preserve</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, bool status)</td></tr>
@@ -525,6 +531,40 @@ Functions</h2></td></tr>
 <p><a class="el" href="#gaa55e7a6dd26a8df51b331febfeeb376b" title="Retrieves number of I/O vectors to be read/written in hyperslab I/O.">H5Pget_hyper_vector_size()</a> retrieves the number of I/O vectors to be accumulated in memory before being issued to the lower levels of the HDF5 library for reading or writing the actual data.</p>
 <p>The number of I/O vectors set in the dataset transfer property list <code class="param">fapl_id</code> is returned in <code class="param">size</code>. Unless the default value is in use, <code class="param">size</code> was previously set with a call to <a class="el" href="#gad8c1582c86e3316c70b0658b3b8e2071" title="Sets number of I/O vectors to be read/written in hyperslab I/O.">H5Pset_hyper_vector_size()</a>.</p>
 <dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
+
+</div>
+</div>
+<a id="ga1fcf8cc91370586ea0a949fd4117b988" name="ga1fcf8cc91370586ea0a949fd4117b988"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga1fcf8cc91370586ea0a949fd4117b988">&#9670;&#160;</a></span>H5Pget_io_threads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5Pget_io_threads </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>plist_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool *</td>          <td class="paramname"><span class="paramname"><em>io_threads_enabled</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves the "I/O threads enabled" property. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">plist_id</td><td>Dataset transfer property list identifier </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">io_threads_enabled</td><td>Whether the library can use internal multithreading to accelerate I/O</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p><a class="el" href="#ga1fcf8cc91370586ea0a949fd4117b988" title="Retrieves the &quot;I/O threads enabled&quot; property.">H5Pget_io_threads()</a> gets the "I/O threads enabled" property from the dataset transfer property list <code class="param">plist_id</code>. This property determines whether the library is allowed to use internal multithreading to accelerate I/O. The default value for io_threads_enabled is true. However, internal threading must be enabled using <a class="el" href="group___h5_t_s.html#ga820be65780a76c15f23a17252c237d09" title="Sets the number of internal threads to use for internal multithreading.">H5TSset_internal_threads()</a> before the library can use threads to accelerate I/O.</p>
+<dl class="section note"><dt>Note</dt><dd>This function is only present when the library is compiled with HDF5_ENABLE_CONCURRENCY=ON.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>2.3.0 </dd></dl>
 
 </div>
 </div>
@@ -1412,6 +1452,40 @@ Functions</h2></td></tr>
 <p>The number of I/O vectors is passed in <code class="param">size</code> to be set in the dataset transfer property list <code class="param">plist_id</code>. <code class="param">size</code> must be greater than 1 (one).</p>
 <p><a class="el" href="#gad8c1582c86e3316c70b0658b3b8e2071" title="Sets number of I/O vectors to be read/written in hyperslab I/O.">H5Pset_hyper_vector_size()</a> is an I/O optimization function; increasing vector_size should provide better performance, but the library will use more memory during hyperslab I/O. The default value of <code class="param">size</code> is 1024.</p>
 <dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
+
+</div>
+</div>
+<a id="ga137c71367b2b24d05c4820b99708f4d0" name="ga137c71367b2b24d05c4820b99708f4d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga137c71367b2b24d05c4820b99708f4d0">&#9670;&#160;</a></span>H5Pset_io_threads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5Pset_io_threads </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>plist_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>io_threads_enabled</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Allows the library to use internal multithreading to accelerate I/O. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">plist_id</td><td>Dataset transfer property list identifier </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">io_threads_enabled</td><td>Whether the library can use internal multithreading to accelerate I/O</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p><a class="el" href="#ga137c71367b2b24d05c4820b99708f4d0" title="Allows the library to use internal multithreading to accelerate I/O.">H5Pset_io_threads()</a> sets whether the library is allowed to use internal multithreading to accelerate I/O. By default this is set to true. However, internal threading must be enabled using <a class="el" href="group___h5_t_s.html#ga820be65780a76c15f23a17252c237d09" title="Sets the number of internal threads to use for internal multithreading.">H5TSset_internal_threads()</a> before the library can use threads to accelerate I/O. <a class="el" href="#ga137c71367b2b24d05c4820b99708f4d0" title="Allows the library to use internal multithreading to accelerate I/O.">H5Pset_io_threads()</a> can be used to disable this acceleration for a specific operation even if internal threading is enabled globally.</p>
+<dl class="section note"><dt>Note</dt><dd>This function is only present when the library is compiled with HDF5_ENABLE_CONCURRENCY=ON.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>2.3.0 </dd></dl>
 
 </div>
 </div>
