@@ -23,7 +23,7 @@ import hdf.hdf5lib.HDF5Constants;
  * this class, and by default the 'detailedMessage' is set according to the
  * minor error code from the HDF5 Library.
  * <p>
- * For major and minor error codes, @see <b>@ref H5E</b> in the HDF5 library.
+ * For major and minor error codes, see @ref H5E in the HDF5 library.
  *
  * @defgroup JERRLIB HDF5 Library JNI Exception Interface
  *
