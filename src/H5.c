@@ -224,14 +224,14 @@ H5_init_library(void)
      */
     if (!H5_dont_atexit_g) {
 
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_THREAD_LOCAL_STATE
         /* Clean up thread resources.
          *
          * This must be pushed before the library cleanup code so it's
          * executed in LIFO order (i.e., last).
          */
         (void)atexit(H5TS_term_package);
-#endif /* H5_HAVE_THREADSAFE_API */
+#endif /* H5_HAVE_THREAD_LOCAL_STATE */
 
         /* Normal library termination code */
         (void)atexit(H5_term_library);

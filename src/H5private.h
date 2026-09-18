@@ -1142,10 +1142,29 @@ extern char H5_lib_vers_info_g[];
 #define H5_HAVE_THREADSAFE_API
 #endif
 
-#ifdef H5_HAVE_THREADSAFE_API
+/* The 'concurrency' option is a superset of the 'internal threads' option,
+ * providing both the internal thread pool and thread safety for API
+ * calls.  The 'internal threads' option provides only the former, so that a
+ * build can parallelize the internals of a single API call without claiming
+ * that the API itself may be called from several application threads at once.
+ */
+#if defined(H5_HAVE_CONCURRENCY) && !defined(H5_HAVE_INTERNAL_THREADS)
+#define H5_HAVE_INTERNAL_THREADS
+#endif
 
+/* Thread-local library state is required both for API thread safety and for
+ * the library's own worker threads.
+ */
+#if defined(H5_HAVE_THREADSAFE_API) || defined(H5_HAVE_INTERNAL_THREADS)
+#define H5_HAVE_THREAD_LOCAL_STATE
+#endif
+
+#ifdef H5_HAVE_THREAD_LOCAL_STATE
 /* Lock headers */
 #include "H5TSprivate.h"
+#endif
+
+#ifdef H5_HAVE_THREADSAFE_API
 
 /* Thread cancellation is only possible w/pthreads */
 #if defined(H5_HAVE_PTHREAD_H)
@@ -1221,9 +1240,18 @@ extern char H5_lib_vers_info_g[];
 /* Local variable for 'disable locking for this thread' (DLFTT) state */
 #define H5DLFTT_DECL  /* */
 
+#ifdef H5_HAVE_INTERNAL_THREADS
+/* No API lock, but the thread-local state this build relies on still needs
+ * its one-time initialization, which the API lock would otherwise have
+ * performed on the first API call.
+ */
+#define H5_API_LOCK   H5TS_first_thread_init();
+#define H5_API_UNLOCK /* no-op */
+#else
 /* No locks (non-threadsafe builds) */
 #define H5_API_LOCK   /* no-op */
 #define H5_API_UNLOCK /* no-op */
+#endif
 
 #endif /* H5_HAVE_THREADSAFE_API */
 

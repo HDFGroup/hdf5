@@ -64,7 +64,7 @@ static herr_t H5TS__win32_thread_exit(void);
 /* Local Variables */
 /*******************/
 
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_THREAD_LOCAL_STATE
 /*--------------------------------------------------------------------------
  * Function:    H5TS__win32_process_enter
  *
@@ -206,6 +206,6 @@ DllMain(_In_ HINSTANCE hinstDLL, _In_ DWORD fdwReason, _In_ LPVOID lpvReserved)
     return fOkay;
 }
 #endif /* H5_HAVE_WIN32_API && H5_BUILT_AS_DYNAMIC_LIB */
-#endif /* H5_HAVE_THREADSAFE_API */
+#endif /* H5_HAVE_THREAD_LOCAL_STATE */
 
 #endif /* H5_HAVE_WIN_THREADS */

@@ -59,6 +59,7 @@ These options concern the general build process of the main HDF5 libraries, util
 | `HDF5_DEFAULT_API_VERSION` | `STRING` | `v200` | Specifies the default HDF5 API version to use when compiling HDF5 libraries. Valid values are `v200` (2.x API), `v114` (1.14.x API), `v112` (1.12.x API), `v110` (1.10.x API), `v18` (1.8.x API) and `v16` (1.6.x API). See [API Compatibility Macros](https://support.hdfgroup.org/documentation/hdf5/latest/api-compat-macros.html#title5) for more information on this option. |
 | `HDF5_ALLOW_UNSUPPORTED` | `BOOL` | `OFF` | If `ON`, allows configuring and building HDF5 with unsupported combinations of features. Otherwise, causes a configuration error if an unsupported combination is enabled. See [Unsupported option combinations](#unsupported_combos) for a list of unsupported combinations. |
 | `HDF5_ENABLE_CONCURRENCY` | `BOOL` | `OFF` | If `ON`, enables building of a multi-thread concurrent HDF5 library. Requires C11 threads, Win32 threads or Pthreads. Requires shared HDF5 libraries on Windows. **NOTE:** Currently only used to enable internal multithreading where the library spawns its own threads and internally parallelizes a single operation. Does not yet allow multiple concurrent application threads inside the library. |
+| `HDF5_ENABLE_INTERNAL_THREADS` | `BOOL` | `OFF` | If `ON`, enables the library's internal thread pool without enabling thread-safety for API calls. Requires C11 threads, Win32 threads or Pthreads. Requires shared HDF5 libraries on Windows. Implied by `HDF5_ENABLE_CONCURRENCY`, which is a superset. |
 | `HDF5_ENABLE_THREADSAFE` | `BOOL` | `OFF` | If `ON`, enables building of a thread-safe HDF5 library. Requires C11 threads, Win32 threads or Pthreads. Requires shared HDF5 libraries on Windows. |
 | `HDF5_ENABLE_NONSTANDARD_FEATURES` | `BOOL` | `ON` | If `ON`, enables non-standard programming language features. If `OFF`, disables all non-standard programming language features. Each feature has its own separate option. |
 | `HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16` | `BOOL` | `ON` (if `_Float16` type is supported) | If `ON`, enables building of support for the `_Float16` 16-bit floating-point datatype. |
@@ -449,7 +450,7 @@ Some HDF5 feature configuration options are incompatible with each other and wil
     - `HDF5_ENABLE_THREADSAFE`
     - `HDF5_BUILD_CPP_LIB`
 
-- The multi-thread concurrency (`HDF5_ENABLE_CONCURRENCY`) and thread-safe (`HDF5_ENABLE_THREADSAFE`) features are incompatible with the high-level, Fortran, Java and C++ interfaces, as locking is not hoisted into the higher-level API calls. Unless `HDF5_ALLOW_UNSUPPORTED` has been specified, the following options must be disabled:
+- The multi-thread concurrency (`HDF5_ENABLE_CONCURRENCY`) and thread-safe (`HDF5_ENABLE_THREADSAFE`) features are incompatible with the high-level, Fortran, Java and C++ interfaces, as locking is not hoisted into the higher-level API calls. (This does not apply to the library's internal threading controlled by `HDF5_ENABLE_INTERNAL_THREADS`, which is a subset of `HDF5_ENABLE_CONURRENCY`.) Unless `HDF5_ALLOW_UNSUPPORTED` has been specified, the following options must be disabled for the concurrent/threadsafe builds:
 
     - `HDF5_BUILD_HL_LIB`
     - `HDF5_BUILD_FORTRAN`

@@ -68,6 +68,8 @@ option (HDF5_ENABLE_THREADSAFE "Enable thread-safety" OFF)
 
 option (HDF5_ENABLE_CONCURRENCY "Enable multi-threaded concurrency" OFF)
 
+option (HDF5_ENABLE_INTERNAL_THREADS "Enable the library's internal thread pool, without API thread-safety" OFF)
+
 option (HDF5_ENABLE_MAP_API "Build the map API" OFF)
 mark_as_advanced (HDF5_ENABLE_MAP_API)
 
