@@ -3458,9 +3458,9 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                     /* We must evict all chunks if a worker failed, because the chunk may be in an
                      * inconsistent state in memory */
                     for (size_t i = 0; i < threaded_io_info->num_chunks; i++)
-                        if (dset_info->dset->shared->cache.chunk.slot[udata.idx_hint] &&
+                        if (dset_info->dset->shared->cache.chunk.slot[threaded_io_info->chunk_info[i].udata.idx_hint] &&
                             H5D__chunk_cache_evict(dset_info->dset,
-                                                   dset_info->dset->shared->cache.chunk.slot[udata.idx_hint],
+                                                   dset_info->dset->shared->cache.chunk.slot[threaded_io_info->chunk_info[i].udata.idx_hint],
                                                    false) < 0)
                             HDONE_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "unable to evict chunk");
                 }
@@ -3524,8 +3524,7 @@ done:
             if (threaded_io_info->chunk_info && threaded_io_info->chunks_locked) {
                 /* Unlock all chunks */
                 for (size_t i = 0; i < threaded_io_info->num_chunks; i++)
-                    if (threaded_io_info->chunk_info[i].chunk &&
-                        H5D__chunk_unlock(io_info, dset_info, &threaded_io_info->chunk_info[i].udata, false,
+                    if (H5D__chunk_unlock(io_info, dset_info, &threaded_io_info->chunk_info[i].udata, false,
                                           threaded_io_info->chunk_info[i].chunk,
                                           threaded_io_info->chunk_info[i].src_accessed_bytes) < 0)
                         HDONE_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "unable to unlock raw data chunk");
@@ -5135,14 +5134,13 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_lock
  *
- * Purpose:    Return a pointer to a dataset chunk.  The pointer points
- *        directly into the chunk cache and should not be freed
- *        by the caller but will be valid until it is unlocked.  The
- *        input value IDX_HINT is used to speed up cache lookups and
- *        it's output value should be given to H5D__chunk_unlock().
- *        IDX_HINT is ignored if it is out of range, and if it points
- *        to the wrong entry then we fall back to the normal search
- *        method.
+ * Purpose:    Return a pointer to a dataset chunk via the _chunk
+ *        parameter.  The pointer points directly into the chunk cache
+ *        and should not be freed by the caller but will be valid
+ *        until it is unlocked.  The value in udata->idx_hunt is used
+ *        to speed up cache lookups and its output value should be
+ *        given to H5D__chunk_unlock(). udata->idx_hint is ignored if
+ *        it is equal to UINT_MAX.
  *
  *        If RELAX is non-zero and the chunk isn't in the cache then
  *        don't try to read it from the file, but just allocate an
@@ -5150,9 +5148,16 @@ done:
  *        for output functions that are about to overwrite the entire
  *        chunk.
  *
- * Return:    Success:    Ptr to a file chunk.
+ *        If threaded_io_info is non-NULL, then, if it is appropriate
+ *        to process this chunk in a threaded fashion, this function
+ *        will set *threaded_chunk to true, will not read the chunk
+ *        from disk, and will not allocate a chunk buffer. It will
+ *        fill in old_pline and chunk_nbytes in
+ *        threaded_io_info->chunk_info[threaded_io_info->num_chunks]
+ *        and will do the rest of the normal things, including
+ *        inserting the chunk entry into cache (without a buffer).
  *
- *        Failure:    NULL
+ * Return:    Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -6656,7 +6661,7 @@ static herr_t
 H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, bool new_unfilt_chunk)
 {
     const H5D_io_info_t *io_info         = udata->io_info;          /* Local pointer to I/O info */
-    const H5D_t         *dset            = udata->dset_info->dset;  /* Local pointer to qthe dataset info */
+    const H5D_t         *dset            = udata->dset_info->dset;  /* Local pointer to the dataset info */
     const H5O_layout_t  *layout          = &(dset->shared->layout); /* Dataset's layout */
     unsigned             rank            = udata->common.layout->ndims - 1; /* Dataset rank */
     const hsize_t       *scaled          = udata->common.scaled;            /* Scaled chunk offset */
