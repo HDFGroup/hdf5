@@ -3612,7 +3612,7 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
     /* If we're using filters we can allocate the chunk outside of the mutex, otherwise we need to protect it
      * since the free list package isn't yet threadsafe. This is a hack that should be removed once H5FL is
      * threadsafe. */
-    if (threaded_chunk_info->old_pline->nused)
+    if (threaded_chunk_info->old_pline && threaded_chunk_info->old_pline->nused)
         if (NULL ==
             (threaded_chunk_info->chunk = H5D__chunk_mem_alloc(buf_alloc, threaded_chunk_info->old_pline)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk");
@@ -3623,7 +3623,7 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
     mutex_held = true;
 
     /* Allocate unfiltered chunk */
-    if (!threaded_chunk_info->old_pline->nused)
+    if (!(threaded_chunk_info->old_pline && threaded_chunk_info->old_pline->nused))
         if (NULL ==
             (threaded_chunk_info->chunk = H5D__chunk_mem_alloc(buf_alloc, threaded_chunk_info->old_pline)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk");
@@ -3672,31 +3672,31 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
         mutex_held = false;
 #endif /* H5_UNSAFE_CONCURRENCY */
 
-        /* Patch chunk pointer in chunk cache. Ok to do in concurrent section since no other thread will touch
-         * this chunk. */
-        if (UINT_MAX != threaded_chunk_info->udata.idx_hint) {
-            H5D_rdcc_t *rdcc = &threaded_chunk_info->threaded_io_info->dset_info->dset->shared->cache.chunk;
-
-            assert(threaded_chunk_info->udata.idx_hint < rdcc->nslots);
-            assert(rdcc->slot[threaded_chunk_info->udata.idx_hint]);
-            assert(rdcc->slot[threaded_chunk_info->udata.idx_hint]->chunk == NULL);
-            rdcc->slot[threaded_chunk_info->udata.idx_hint]->chunk = threaded_chunk_info->chunk;
-        }
-
-        /* Now goto done if the call to H5Z_pipeline() failed */
-        if (H5_UNLIKELY(ret_value < 0))
-            HGOTO_DONE(ret_value);
-
         /* Make sure the chunk is the correct size after being unfiltered */
         if (H5_UNLIKELY(threaded_chunk_info->chunk_nbytes !=
                         threaded_chunk_info->threaded_io_info->chunk_size))
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk size is incorrect after being unfiltered");
+            HDONE_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk size is incorrect after being unfiltered");
 
         /* The new_unfilt_chunk flag should only be set during an H5Dset_extent operation. This is not
          * currently supported with internal threading. If this support is added, we will need to realloc
          * the buffer in the associated threaded worker function. */
         assert(!threaded_chunk_info->udata.new_unfilt_chunk);
     }
+
+    /* Patch chunk pointer in chunk cache. Ok to do in concurrent section since no other thread will touch
+     * this chunk. */
+    if (UINT_MAX != threaded_chunk_info->udata.idx_hint) {
+        H5D_rdcc_t *rdcc = &threaded_chunk_info->threaded_io_info->dset_info->dset->shared->cache.chunk;
+
+        assert(threaded_chunk_info->udata.idx_hint < rdcc->nslots);
+        assert(rdcc->slot[threaded_chunk_info->udata.idx_hint]);
+        assert(rdcc->slot[threaded_chunk_info->udata.idx_hint]->chunk == NULL);
+        rdcc->slot[threaded_chunk_info->udata.idx_hint]->chunk = threaded_chunk_info->chunk;
+    }
+
+    /* Now goto done if the call to H5Z_pipeline() failed (or returned the wrong size chunk) */
+    if (H5_UNLIKELY(ret_value < 0))
+        HGOTO_DONE(ret_value);
 
     /* Set up the storage buffer information for this chunk */
     cpt_store.compact.buf                       = threaded_chunk_info->chunk;
