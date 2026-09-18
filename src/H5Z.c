@@ -1384,9 +1384,9 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
 #endif
     unsigned failed = 0;
     unsigned tmp_flags;
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
     bool mutex_held = false;
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */
     size_t i;
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1413,14 +1413,14 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
             }
 
 #ifdef H5_UNSAFE_CONCURRENCY /* We currently take this lock before entering H5Z_pipeline(), and this is not a recursive lock, so don't take it again here */
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
             /* If we're using concurrent threads, lock the internal mutex to search for the plugin */
             if (H5TS_currently_concurrent_g) {
                 if (H5_UNLIKELY(H5TS_internal_lock() < 0))
                     HGOTO_ERROR(H5E_PLINE, H5E_CANTLOCK, FAIL, "can't lock internal mutex");
                 mutex_held = true;
             }
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 #endif /* H5_UNSAFE_CONCURRENCY */
 
             /* If the filter isn't registered and the application doesn't
@@ -1461,7 +1461,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
             } /* end if */
 
 #ifdef H5_UNSAFE_CONCURRENCY
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
             /* Unlock the internal mutex */
             if (H5TS_currently_concurrent_g) {
                 assert(mutex_held);
@@ -1470,7 +1470,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                 mutex_held = false;
             }
             assert(!mutex_held);
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 #endif /* H5_UNSAFE_CONCURRENCY */
 
             fclass = &H5Z_table_g[fclass_idx];
@@ -1642,7 +1642,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
     *filter_mask = failed;
 
 done:
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
     /* Unlock the internal mutex */
     if (mutex_held) {
         assert(H5TS_currently_concurrent_g);
@@ -1651,7 +1651,7 @@ done:
             HDONE_ERROR(H5E_PLINE, H5E_CANTUNLOCK, FAIL, "can't unlock internal mutex");
         mutex_held = false;
     }
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
     FUNC_LEAVE_NOAPI(ret_value)
 
