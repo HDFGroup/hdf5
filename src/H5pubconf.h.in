@@ -329,6 +329,14 @@
 # cmakedefine H5_HAVE_CONCURRENCY @H5_HAVE_CONCURRENCY@
 #endif
 
+#if defined(_WIN32) && !defined(H5_BUILT_AS_DYNAMIC_LIB)
+/* Not supported on WIN32 platforms with static linking */
+/* #undef H5_HAVE_INTERNAL_THREADS */
+#else
+/* Define if we have internal (library-spawned) threading support */
+# cmakedefine H5_HAVE_INTERNAL_THREADS @H5_HAVE_INTERNAL_THREADS@
+#endif
+
 /* Define if timezone is a global variable */
 #cmakedefine H5_HAVE_TIMEZONE @H5_HAVE_TIMEZONE@
 

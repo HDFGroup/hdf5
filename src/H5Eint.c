@@ -83,12 +83,12 @@ static herr_t H5E__close_stack(void *err_stack, void **request);
 /* Package Variables */
 /*********************/
 
-#ifndef H5_HAVE_THREADSAFE_API
+#ifndef H5_HAVE_THREAD_LOCAL_STATE
 /*
  * The current error stack.
  */
 H5E_stack_t H5E_stack_g[1];
-#endif /* H5_HAVE_THREADSAFE_API */
+#endif /* H5_HAVE_THREAD_LOCAL_STATE */
 
 /* Declare a free list to manage the H5E_stack_t struct */
 H5FL_DEFINE(H5E_stack_t);
@@ -260,9 +260,9 @@ H5E__init_package(void)
     if (H5I_register_type(H5I_ERRSTK_CLS) < 0)
         HGOTO_ERROR(H5E_ID, H5E_CANTINIT, FAIL, "unable to initialize ID group");
 
-#ifndef H5_HAVE_THREADSAFE_API
+#ifndef H5_HAVE_THREAD_LOCAL_STATE
     H5E__set_default_auto(H5E_stack_g);
-#endif /* H5_HAVE_THREADSAFE_API */
+#endif /* H5_HAVE_THREAD_LOCAL_STATE */
 
     /* Register the HDF5 error class */
     if ((H5E_ERR_CLS_g = H5I_register(H5I_ERROR_CLASS, &H5E_err_cls_s, false)) < 0)
@@ -1027,7 +1027,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     const char      *maj_str   = "No major description"; /* Major error description */
     const char      *min_str   = "No minor description"; /* Minor error description */
     bool             have_desc = true; /* Flag to indicate whether the error has a "real" description */
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_THREAD_LOCAL_STATE
     uint64_t thread_id = 0; /* ID of thread */
 #endif
     herr_t ret_value = SUCCEED;
@@ -1059,7 +1059,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     /* Get error class info */
     cls_ptr = maj_ptr->cls;
 
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_THREAD_LOCAL_STATE
     if (H5TS_thread_id(&thread_id) < 0)
         HGOTO_DONE(FAIL);
 #endif
@@ -1091,13 +1091,13 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
                 MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
                 fprintf(stream, " MPI-process %d", mpi_rank);
             } /* end if */
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_THREAD_LOCAL_STATE
             else
                 fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
         } /* end block */
 #else
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_THREAD_LOCAL_STATE
         fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
 #endif
@@ -1158,7 +1158,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     const char  *maj_str   = "No major description"; /* Major error description */
     const char  *min_str   = "No minor description"; /* Minor error description */
     bool         have_desc = true; /* Flag to indicate whether the error has a "real" description */
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_THREAD_LOCAL_STATE
     uint64_t thread_id = 0; /* ID of thread */
 #endif
     herr_t ret_value = SUCCEED;
@@ -1195,7 +1195,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     if (!cls_ptr)
         HGOTO_DONE(FAIL);
 
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_THREAD_LOCAL_STATE
     if (H5TS_thread_id(&thread_id) < 0)
         HGOTO_DONE(FAIL);
 #endif
@@ -1227,13 +1227,13 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
                 MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
                 fprintf(stream, " MPI-process %d", mpi_rank);
             } /* end if */
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_THREAD_LOCAL_STATE
             else
                 fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
         } /* end block */
 #else
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_THREAD_LOCAL_STATE
         fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
 #endif

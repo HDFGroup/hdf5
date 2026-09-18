@@ -48,9 +48,9 @@
 /* Headers */
 /***********/
 /* Disable free lists in this package when concurrency is enabled until free lists are threadsafe */
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
 #define H5_NO_FREE_LISTS
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5Epkg.h"      /* Error handling                           */

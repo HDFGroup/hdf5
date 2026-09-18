@@ -23,11 +23,11 @@
 
 #ifdef H5_HAVE_THREADS
 
-#ifdef H5_HAVE_THREADSAFE_API
+#if defined(H5_HAVE_THREADSAFE_API) || defined(H5_HAVE_INTERNAL_THREADS)
 /* Include package's public headers */
 #include "H5TSpublic.h"
 #include "H5TSdevelop.h"
-#endif /* H5_HAVE_THREADSAFE_API */
+#endif
 
 /**************************/
 /* Library Private Macros */
@@ -294,23 +294,41 @@ typedef atomic_flag H5TS_spinlock_t;
 /* Library-private Variables */
 /*****************************/
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
 /* Global thread pool */
 extern H5TS_pool_t *H5TS_pool_g;
 
 /* Whether there are concurrent threads in the library (from internal spawning) */
 extern bool H5TS_currently_concurrent_g;
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/
 
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_THREAD_LOCAL_STATE
 /* Library/thread init/term operations */
 H5_DLL void H5TS_term_package(void);
 H5_DLL int  H5TS_top_term_package(void);
 
+/* Retrieve per-thread info */
+H5_DLL herr_t               H5TS_thread_id(uint64_t *id);
+H5_DLL struct H5CX_node_t **H5TS_get_api_ctx_ptr(void);
+H5_DLL struct H5E_stack_t  *H5TS_get_err_stack(void);
+#endif /* H5_HAVE_THREAD_LOCAL_STATE */
+
+#if defined(H5_HAVE_THREAD_LOCAL_STATE) && !defined(H5_HAVE_THREADSAFE_API)
+/* One-time init, for builds with thread-local state but no API lock */
+H5_DLL herr_t H5TS_first_thread_init(void);
+#endif
+
+#ifdef H5_HAVE_INTERNAL_THREADS
+/* Internal locking, between the library's own worker threads */
+H5_DLL herr_t H5TS_internal_lock(void);
+H5_DLL herr_t H5TS_internal_unlock(void);
+#endif /* H5_HAVE_INTERNAL_THREADS */
+
+#ifdef H5_HAVE_THREADSAFE_API
 /* Prepare for / restore after user callback */
 #ifdef H5_HAVE_CONCURRENCY
 H5_DLL herr_t H5TS_user_cb_prepare(void);
@@ -324,17 +342,6 @@ H5_DLL herr_t H5TS_api_lock(void);
 H5_DLL herr_t H5TS_api_lock(unsigned *dlftt);
 #endif
 H5_DLL herr_t H5TS_api_unlock(void);
-
-/* Internal locking */
-#ifdef H5_HAVE_CONCURRENCY
-H5_DLL herr_t H5TS_internal_lock(void);
-H5_DLL herr_t H5TS_internal_unlock(void);
-#endif /* H5_HAVE_CONCURRENCY */
-
-/* Retrieve per-thread info */
-H5_DLL herr_t               H5TS_thread_id(uint64_t *id);
-H5_DLL struct H5CX_node_t **H5TS_get_api_ctx_ptr(void);
-H5_DLL struct H5E_stack_t  *H5TS_get_err_stack(void);
 #endif /* H5_HAVE_THREADSAFE_API */
 
 /* 'Once' operationss */
