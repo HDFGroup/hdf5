@@ -1923,10 +1923,10 @@ H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const 
 
         /* Persist the caller's string so it can be recovered losslessly
          * (pipeline v3) without loading the plugin.  Canonicalised first --
-         * outer braces stripped, hex-float literals rewritten to %.16e
-         * decimal -- so the stored bytes are a valid TOML v1.0.0 document
-         * parseable outside HDF5; both rewrites preserve the value exactly.
-         * Empty input stores nothing. */
+         * outer braces stripped, hex-float literals rewritten to the
+         * shortest bit-exact decimal -- so the stored bytes are a valid
+         * TOML v1.0.0 document parseable outside HDF5; both rewrites
+         * preserve the value exactly.  Empty input stores nothing. */
         if (!empty_input) {
             if (NULL == (canon_config = H5Z_canonicalize_params(param_str)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't canonicalize filter parameter string");

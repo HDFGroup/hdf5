@@ -51,9 +51,10 @@ rounding to a subnormal was therefore a syntax error -- `x = 5e-324` as surely
 as `x = 2.2250738585072011e-308`.
 
 For HDF5 this reached the filter configuration API through canonicalization:
-`H5Z__rewrite_hexfloats()` rewrites hex-float literals to `%.16e` decimal, and
-the decimal spelling of a subnormal is inexact even when the hex spelling was
-exact, so `rate = 0x1p-1074` became a parse error on the way to disk.
+`H5Z__rewrite_hexfloats()` rewrites hex-float literals to the shortest
+bit-exact decimal (`H5Z__format_double_canonical()`), and the decimal
+spelling of a subnormal is inexact even when the hex spelling was exact, so
+`rate = 0x1p-1074` became a parse error on the way to disk.
 
 Reported as <https://github.com/cktan/tomlc17/issues/48> and fixed upstream the
 same week.  The fix landed two days after `R260821` was tagged, so it is in

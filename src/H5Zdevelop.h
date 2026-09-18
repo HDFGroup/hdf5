@@ -242,20 +242,32 @@ typedef herr_t (*H5Z_set_config_func_t)(const char *params, unsigned *flags, siz
  *          added through the raw cd_values API).  How a filter encodes values
  *          into cd_values is entirely private to that filter.
  *
- * \note When reconstructing \c float or \c double values, format with
- *       \c \%.16e and nothing else.  That is \c DBL_DECIMAL_DIG (17)
- *       significant digits, the minimum that round-trips every IEEE 754
- *       double, and it always carries a decimal point and exponent so a TOML
- *       parser types the result as a float rather than an integer.
+ * \note When reconstructing \c float or \c double values, the simplest
+ *       correct choice is to format with \c \%.16e and nothing else.  That is
+ *       \c DBL_DECIMAL_DIG (17) significant digits, the minimum that
+ *       round-trips every IEEE 754 double, and it always carries a decimal
+ *       point and exponent so a TOML parser types the result as a float
+ *       rather than an integer.
+ *
+ *       For more compact output, the library's own canonicalization (the
+ *       form H5Pget_filter_params_by_idx() returns when a string \e was
+ *       stored) instead emits the shortest decimal literal that still
+ *       round-trips: try successively wider precisions with \c \%.*g,
+ *       confirm each candidate with an actual \c strtod() round-trip rather
+ *       than assuming a given width suffices, and append ".0" if the
+ *       winning candidate carries no decimal point or exponent.  A fixed
+ *       \c \%.16e is still always correct; it is just not the shortest
+ *       spelling, and get_config callbacks are free to use either.
  *
  *       Do \b not use \c \%a: a hexadecimal float literal is not valid TOML,
  *       and get_config output must parse for readers that are not the HDF5
  *       library.  (\c \%a is still accepted on \e input to set_config, which
- *       rewrites it to decimal.)  Do not use \c \%g, which drops the decimal
- *       point for whole values so "8.0" becomes "8" and reads back as an
- *       integer; nor \c \%f; nor fewer than 17 significant digits; nor more
- *       than \c DECIMAL_DIG of them, since C11 7.22.1.3p11 recommends correct
- *       rounding only within that bound.
+ *       rewrites it to decimal.)  Do not use plain \c \%g without the
+ *       round-trip check above: on its own it drops the decimal point for
+ *       whole values so "8.0" becomes "8" and reads back as an integer; nor
+ *       \c \%f; nor fewer than 17 significant digits without verifying the
+ *       round-trip; nor more than \c DECIMAL_DIG of them, since C11
+ *       7.22.1.3p11 recommends correct rounding only within that bound.
  *
  * \note Recovering a value from a decimal literal requires the reader's
  *       decimal-to-binary conversion to be correctly rounded.  C11 7.22.1.3p11

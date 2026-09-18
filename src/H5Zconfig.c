@@ -70,21 +70,98 @@ H5Z__copy_chars2(char *out, size_t cap, size_t *pos, const char **p)
 }
 
 /*
+ * H5Z__format_double_canonical - format VAL into BUF (capacity BUFSIZE) as
+ * the shortest decimal literal that round-trips back to the identical IEEE
+ * 754 double via strtod(), and that a TOML scanner types as a float rather
+ * than an integer.
+ *
+ * Tries successively wider precisions with "%.*g" -- which picks fixed or
+ * scientific notation the way a person would -- and keeps the first result
+ * whose strtod() readback reproduces VAL bit-for-bit (memcmp, not ==, so a
+ * canonical -0.0 cannot alias +0.0).  Common values canonicalize short
+ * ("3.0", "0.1"); a value whose mantissa doesn't line up with a short
+ * decimal takes up to DBL_DECIMAL_DIG (17) significant digits, the minimum
+ * that round-trips every IEEE 754 double, and precision 17 always succeeds
+ * by construction, so the loop cannot fall through.
+ *
+ * 17 is deliberate.  C11 7.22.1.3p11 recommends correct rounding only up to
+ * DECIMAL_DIG significant digits.  DECIMAL_DIG is sized for long double, so
+ * it is 21 where that is x87 80-bit but 17 where long double == double
+ * (MSVC among others); 18 digits would exceed DECIMAL_DIG on those targets
+ * for no round-trip benefit.  Contrast 7.22.1.3p9, which *requires* correct
+ * rounding for the hexadecimal form -- the asymmetry this rewrite trades
+ * away.
+ *
+ * "%g" alone must not be trusted as-is: it drops the decimal point for
+ * whole values ("8.0" -> "8"), which a TOML scanner then reads as an
+ * integer; whenever the winning candidate has no '.' and no exponent
+ * marker, ".0" is appended to force float lexical class.
+ *
+ * Returns the length written (excluding the NUL), or -1 if BUFSIZE was too
+ * small for the winning candidate.
+ */
+static int
+H5Z__format_double_canonical(char *buf, size_t bufsize, double val)
+{
+    int prec;
+
+    for (prec = 1; prec <= 17; prec++) {
+        char        tmp[32];
+        char       *end;
+        double      rt;
+        const char *locale_sep;
+        int         n = snprintf(tmp, sizeof(tmp), "%.*g", prec, val);
+
+        if (n <= 0 || n >= (int)sizeof(tmp))
+            continue;
+
+        /* Round-trip check in the same locale snprintf() just used, before
+         * any rewriting below, so strtod() parses exactly what was
+         * written. */
+        rt = strtod(tmp, &end);
+        if (end != tmp + n || memcmp(&rt, &val, sizeof(double)) != 0)
+            continue;
+
+        /* snprintf() is locale-sensitive: LC_NUMERIC may substitute e.g.
+         * ',' for '.', but TOML requires '.'.  Look up the actual separator
+         * via localeconv() rather than assuming ','.  Do this before the
+         * float-lexical-class check below, or a comma-locale fixed-point
+         * result (e.g. "3,5") would look integer-shaped and get a spurious
+         * ".0" appended. */
+        locale_sep = localeconv()->decimal_point; /* always non-NULL */
+        if (locale_sep[0] != '.' && locale_sep[0] != '\0') {
+            char *dp;
+            for (dp = tmp; *dp; dp++) {
+                if (*dp == locale_sep[0]) {
+                    *dp = '.';
+                    break; /* one separator per number */
+                }
+            }
+        }
+
+        /* Force float lexical class whenever no '.' or exponent marker
+         * survived (see function header). */
+        if (strpbrk(tmp, ".eE") == NULL) {
+            if (n + 2 >= (int)sizeof(tmp))
+                continue; /* leave room for ".0"; try the next precision */
+            tmp[n++] = '.';
+            tmp[n++] = '0';
+            tmp[n]   = '\0';
+        }
+
+        if ((size_t)n >= bufsize)
+            return -1;
+        memcpy(buf, tmp, (size_t)n + 1);
+        return n;
+    }
+
+    return -1; /* unreachable: %.17g round-trips every double */
+}
+
+/*
  * H5Z__rewrite_hexfloats - return a copy of `src` with every C99 hex-float
  * literal (e.g. "0x1.8p+1", "-0x1p-1") replaced by an equivalent decimal
- * string.  Uses %.16e: it always carries a decimal point and exponent (so
- * tomlc17 types it TOML_FP64, not TOML_INTEGER) and emits DBL_DECIMAL_DIG ==
- * 17 significant digits, the minimum that round-trips every IEEE 754 double.
- *
- * The width is deliberate.  C11 7.22.1.3p11 recommends correct rounding only
- * up to DECIMAL_DIG significant digits.  DECIMAL_DIG is sized for long
- * double, so it is 21 where that is x87 80-bit but 17 where long double ==
- * double (MSVC among others); %.17e would emit 18 digits, exceeding
- * DECIMAL_DIG on those targets for no benefit.  Contrast 7.22.1.3p9, which
- * *requires* correct rounding for the hexadecimal form -- the asymmetry
- * this rewrite trades away.  %.17g must not be substituted: it drops the
- * decimal point for whole values ("8.0" -> "8"), which a TOML parser reads
- * as an integer.
+ * string, via H5Z__format_double_canonical() above.
  *
  * Lets callers write `%a` hex-float literals for exact float encoding
  * without requiring hex-float support in the vendored tomlc17 scanner.
@@ -177,34 +254,19 @@ H5Z__rewrite_hexfloats(const char *src)
                         double val = strtod(tmp, &end);
                         if (end == tmp + tok_len) {
                             /* Decimal form of the hex-float literal; see
-                             * H5Z__rewrite_hexfloats() rationale above. */
+                             * H5Z__format_double_canonical() above.
+                             * localeconv() returns thread-shared static
+                             * storage inside that call; HDF5_ENABLE_THREADSAFE
+                             * builds serialize concurrent setlocale() calls
+                             * via the global library lock, making this
+                             * safe. */
                             char dec[32];
-                            int  n = snprintf(dec, sizeof(dec), "%.16e", val);
-                            /* snprintf() is locale-sensitive: LC_NUMERIC may
-                             * substitute e.g. ',' for '.', but TOML requires '.'.
-                             * Look up the actual separator via localeconv()
-                             * rather than assuming ','. */
-                            if (n > 0 && n < (int)sizeof(dec)) {
-                                /* localeconv() returns thread-shared static storage;
-                                 * decimal_point[0] is read exactly once.  HDF5_ENABLE_THREADSAFE
-                                 * builds serialize concurrent setlocale() calls via the global
-                                 * library lock, making this safe. */
-                                const char *locale_sep = localeconv()->decimal_point; /* always non-NULL */
-                                if (locale_sep[0] != '.' && locale_sep[0] != '\0') {
-                                    char *dp;
-                                    for (dp = dec; *dp; dp++) {
-                                        if (*dp == locale_sep[0]) {
-                                            *dp = '.';
-                                            break; /* one separator per number */
-                                        }
-                                    }
-                                }
-                                if (pos + (size_t)n < cap) {
-                                    memcpy(out + pos, dec, (size_t)n);
-                                    pos += (size_t)n;
-                                    p = q;
-                                    continue;
-                                }
+                            int  n = H5Z__format_double_canonical(dec, sizeof(dec), val);
+                            if (n >= 0 && pos + (size_t)n < cap) {
+                                memcpy(out + pos, dec, (size_t)n);
+                                pos += (size_t)n;
+                                p = q;
+                                continue;
                             }
                         }
                     }
@@ -275,7 +337,9 @@ H5Z__toml_wrap(const char *params)
  * Purpose:     Return a heap copy of PARAMS in the canonical form persisted
  *              on disk (filter pipeline v3): optional outer braces and
  *              surrounding whitespace stripped, and C99 hex-float literals
- *              rewritten to bit-exact %.16e decimal.  Both normalisations
+ *              rewritten to the shortest bit-exact decimal (up to
+ *              DBL_DECIMAL_DIG == 17 significant digits; see
+ *              H5Z__format_double_canonical()).  Both normalisations
  *              exist because the stored bytes must be valid TOML v1.0.0 --
  *              pure-reimplementation readers (e.g. jHDF, pyfive) parse the
  *              object header directly with a stock TOML parser, for which a

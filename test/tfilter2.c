@@ -1975,8 +1975,12 @@ error:
 /* -----------------------------------------------------------------------
  * 8c. Canonicalization can grow a parameter string past H5Z_CONFIG_STRING_MAX
  * even when the caller's raw input is well under it -- hex-float rewriting
- * expands "0x1p0" (5 bytes) to "1.0000000000000000e+00" (23 bytes).  Nothing
- * re-validates the canonicalized string's length before it is persisted, so
+ * expands "0x1.0001p0" (10 bytes) to "1.0000152587890625" (18 bytes): the
+ * canonical form is the shortest decimal that round-trips
+ * (H5Z__format_double_canonical()), so a value whose mantissa doesn't line
+ * up with a short decimal, not any short hex-float token, is what still
+ * forces close to the full DBL_DECIMAL_DIG-17 digits.  Nothing re-validates
+ * the canonicalized string's length before it is persisted, so
  * H5Pappend_filter must reject it here: H5O__pline_decode caps a stored
  * config string at H5Z_CONFIG_STRING_MAX on read, so anything longer than
  * that can never be recovered from disk once written.
@@ -2037,13 +2041,16 @@ test_config_string_canonicalization_growth(void)
     }
     raw[0] = '\0';
 
-    /* Pack short hex-float fields ("aN=0x1p0,") up to ~half the raw limit --
-     * each field individually is tiny, but every "0x1p0" the canonicalizer
-     * sees becomes a 23-byte decimal literal, so ~half the raw budget in
-     * 9-11-byte fields canonicalizes to well over the full budget. */
-    for (n = 0; pos < H5Z_CONFIG_STRING_MAX / 2; n++) {
+    /* Pack short hex-float fields ("aN=0x1.0001p0,") up to just under the
+     * raw sanity ceiling below -- each field individually is tiny, but every
+     * "0x1.0001p0" the canonicalizer sees becomes an 18-byte decimal literal
+     * (its mantissa doesn't line up with a short decimal, so the shortest
+     * round-trip form -- H5Z__format_double_canonical() -- still needs all
+     * 17 significant digits), so packing close to the raw ceiling in
+     * 14-15-byte fields canonicalizes to well over the full budget. */
+    for (n = 0; pos < H5Z_CONFIG_STRING_MAX * 3 / 4 - 128; n++) {
         char field[32];
-        int  flen = snprintf(field, sizeof(field), "a%u=0x1p0,", n);
+        int  flen = snprintf(field, sizeof(field), "a%u=0x1.0001p0,", n);
         if (flen < 0 || pos + (size_t)flen >= H5Z_CONFIG_STRING_MAX)
             break;
         memcpy(raw + pos, field, (size_t)flen);
@@ -3142,7 +3149,8 @@ error:
  *
  * The stored string is normalised so the bytes on disk are a valid TOML
  * v1.0.0 document: optional outer braces are stripped, and C99 hex-float
- * literals are rewritten to %.16e decimal.  Neither the braced form nor a
+ * literals are rewritten to the shortest bit-exact decimal (up to
+ * DBL_DECIMAL_DIG == 17 significant digits).  Neither the braced form nor a
  * hex-float literal is accepted by a stock TOML parser, and the persisted
  * string is meant to be readable by tools that are not the HDF5 library
  * (pure-reimplementation readers such as jHDF and pyfive parse the object
@@ -3568,17 +3576,17 @@ test_config_canonicalization(hid_t fapl)
         TEST_ERROR;
     PASSED();
 
-    /* --- canon-03: hex-float rewritten to %.16e decimal --- */
+    /* --- canon-03: hex-float rewritten to the shortest round-trip decimal --- */
     TESTING("canonicalization: hex-float rewritten to decimal");
-    if (canon_check("rate = 0x1.8p+1", "rate = 3.0000000000000000e+00") < 0)
+    if (canon_check("rate = 0x1.8p+1", "rate = 3.0") < 0)
         TEST_ERROR;
-    if (canon_check("rate = 0x1.cp+1", "rate = 3.5000000000000000e+00") < 0)
+    if (canon_check("rate = 0x1.cp+1", "rate = 3.5") < 0)
         TEST_ERROR;
     PASSED();
 
     /* --- canon-04: both normalisations at once --- */
     TESTING("canonicalization: braces and hex-float together");
-    if (canon_check("{ rate = 0x1.8p+1 }", "rate = 3.0000000000000000e+00") < 0)
+    if (canon_check("{ rate = 0x1.8p+1 }", "rate = 3.0") < 0)
         TEST_ERROR;
     PASSED();
 
@@ -3650,7 +3658,7 @@ test_config_canonicalization(hid_t fapl)
     if (H5Pget_filter_params_by_idx(dcpl_out, 0, pbuf, sizeof(pbuf), &plen) < 0)
         TEST_ERROR;
     /* Canonical: no outer brace, no hex-float -- parseable as plain TOML */
-    if (strcmp(pbuf, "rate = 3.0000000000000000e+00") != 0)
+    if (strcmp(pbuf, "rate = 3.0") != 0)
         TEST_ERROR;
     if (pbuf[0] == '{' || strstr(pbuf, "0x") != NULL)
         TEST_ERROR;
@@ -3991,7 +3999,7 @@ test_modify_filter_by_idx(hid_t fapl)
         TEST_ERROR;
     if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
         TEST_ERROR;
-    if (strcmp(pbuf, "rate = 3.0000000000000000e+00") != 0)
+    if (strcmp(pbuf, "rate = 3.0") != 0)
         TEST_ERROR;
     if (H5Pclose(dcpl) < 0)
         TEST_ERROR;

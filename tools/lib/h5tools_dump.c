@@ -3185,12 +3185,19 @@ h5tools_print_fill_value(h5tools_str_t *buffer /*in,out*/, const h5tool_format_t
  *              equivalently at most three hexadecimal fraction digits.
  *
  *              This is the selection rule for the hexadecimal annotation
- *              emitted alongside PARAMS_STRING.  Annotating merely because
- *              the hexadecimal form is shorter than the decimal would be
- *              nearly vacuous: 0.1 renders as 0x1.999999999999ap-4, shorter
- *              than its canonical decimal form but no more readable, so
- *              almost every float would acquire a comment that tells the
- *              reader nothing.
+ *              emitted alongside PARAMS_STRING.  A length comparison against
+ *              the hexadecimal form is not used instead, and fails in both
+ *              directions: since the canonical decimal is itself the
+ *              shortest round-trip form (H5Z__format_double_canonical()),
+ *              exactly the values this annotation is for -- 0.5, 0.25, 3.0
+ *              -- already have a canonical decimal ("0.5", "0.25", "3.0")
+ *              shorter than their hex spelling ("0x1p-1", "0x1p-2",
+ *              "0x1.8p+1"), so a shorter-than-hex test would stay silent on
+ *              all of them; conversely a value with no short binary
+ *              structure at all can still have a hex form shorter than its
+ *              17-digit canonical decimal by coincidence of digit patterns.
+ *              Testing the value's structure directly, as below, is
+ *              unaffected by either spelling's length.
  *
  * Return:      true if the value should be annotated, false otherwise
  *-------------------------------------------------------------------------
