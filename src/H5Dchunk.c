@@ -3458,9 +3458,11 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                     /* We must evict all chunks if a worker failed, because the chunk may be in an
                      * inconsistent state in memory */
                     for (size_t i = 0; i < threaded_io_info->num_chunks; i++)
-                        if (dset_info->dset->shared->cache.chunk.slot[threaded_io_info->chunk_info[i].udata.idx_hint] &&
+                        if (dset_info->dset->shared->cache.chunk
+                                .slot[threaded_io_info->chunk_info[i].udata.idx_hint] &&
                             H5D__chunk_cache_evict(dset_info->dset,
-                                                   dset_info->dset->shared->cache.chunk.slot[threaded_io_info->chunk_info[i].udata.idx_hint],
+                                                   dset_info->dset->shared->cache.chunk
+                                                       .slot[threaded_io_info->chunk_info[i].udata.idx_hint],
                                                    false) < 0)
                             HDONE_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "unable to evict chunk");
                 }
