@@ -1060,6 +1060,39 @@ else ()
   endif ()
 endif ()
 
+# The vendored Ryu float formatter (src/ryu/README.md) gets the same three
+# treatments as tomlc17 above, for the same three reasons documented there:
+# hide its symbols from a shared libhdf5, rename them out of the global
+# namespace for a static libhdf5.a (d2s/d2s_buffered/d2s_buffered_n are
+# short, unnamespaced names), and exempt third-party code from HDF5's own
+# strict warning set. The compiler-capability variables were all computed
+# above, so none of those checks are repeated here.
+list (APPEND H5Z_SOURCES ${HDF5_SRC_DIR}/ryu/d2s.c)
+if (HDF5_C_HAS_FVISIBILITY_HIDDEN)
+  set_source_files_properties (${HDF5_SRC_DIR}/ryu/d2s.c
+    PROPERTIES COMPILE_OPTIONS "-fvisibility=hidden"
+  )
+endif ()
+if (MSVC)
+  set_property (SOURCE ${HDF5_SRC_DIR}/ryu/d2s.c APPEND PROPERTY COMPILE_OPTIONS
+    "/FI${HDF5_SRC_DIR}/ryu/h5_ryu_prefix.h" "/W0"
+  )
+else ()
+  if (HDF5_C_HAS_INCLUDE_FLAG)
+    set_property (SOURCE ${HDF5_SRC_DIR}/ryu/d2s.c APPEND PROPERTY COMPILE_OPTIONS
+      "-include" "${HDF5_SRC_DIR}/ryu/h5_ryu_prefix.h"
+    )
+  else ()
+    message (WARNING
+      "Compiler does not support -include; the vendored Ryu symbols will NOT "
+      "be prefixed and may collide with an application's own copy of Ryu when "
+      "statically linked. See src/CMakeLists.txt.")
+  endif ()
+  if (HDF5_C_HAS_W)
+    set_property (SOURCE ${HDF5_SRC_DIR}/ryu/d2s.c APPEND PROPERTY COMPILE_OPTIONS "-w")
+  endif ()
+endif ()
+
 set (H5Z_PUBLIC_HDRS
     ${HDF5_SRC_DIR}/H5Zdevelop.h
     ${HDF5_SRC_DIR}/H5Zpublic.h

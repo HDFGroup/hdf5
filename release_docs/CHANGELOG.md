@@ -89,6 +89,11 @@ We would like to thank the many HDF5 community members who contributed to this r
    libhdf5.  Hex-float literals (`0x1.8p+1`) in parameter strings are
    transparently rewritten to decimal before parsing.
 
+   **Float formatting:**  The [Ryu](https://github.com/ulfjack/ryu) library is
+   vendored in `src/ryu/` and compiled unconditionally into libhdf5.  It gives
+   that hex-float rewrite the shortest decimal spelling that still reads back
+   bit-for-bit, so `rate = 0x1.cp+1` canonicalizes to `rate = 3.5`.
+
    **On-disk format:** A new pipeline message version, `H5O_PLINE_VERSION_3`,
    stores each filter's verbatim parameter string after the filter name, so
    the exact string can be recovered without loading the filter plugin.

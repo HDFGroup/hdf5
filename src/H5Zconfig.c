@@ -33,8 +33,6 @@
 
 #include "H5Zmodule.h"
 
-#include <locale.h> /* localeconv() for decimal_point */
-
 #include "H5private.h"   /* Generic Functions   */
 #include "H5Eprivate.h"  /* Error handling      */
 #include "H5MMprivate.h" /* Memory management   */
@@ -47,6 +45,11 @@
  * declarations. */
 #include "tomlc17/h5_toml_prefix.h"
 #include "tomlc17/tomlc17.h"
+
+/* Same treatment for the vendored Ryu shortest-round-trip float formatter
+ * (see ryu/h5_ryu_prefix.h); must precede ryu/ryu.h for the same reason. */
+#include "ryu/h5_ryu_prefix.h"
+#include "ryu/ryu.h"
 
 /* Append one source character to the output buffer, or skip it if full. */
 static inline void
@@ -69,93 +72,179 @@ H5Z__copy_chars2(char *out, size_t cap, size_t *pos, const char **p)
     (*p) += 2;
 }
 
+/* Is v an inf or a nan?
+ *
+ * Decided on the bit pattern rather than with isnan()/isinf(): a fast-math
+ * build -- Intel icx's -fp-model=fast (its default at -O2 and above), or
+ * gcc/clang -ffast-math or -ffinite-math-only -- may assume no operand is
+ * ever inf or nan and fold both classifiers to 0, letting through exactly
+ * the values the caller means to reject.  An exponent field of all ones is
+ * inf (zero mantissa) or nan (nonzero mantissa). */
+static inline bool
+H5Z__fp64_is_inf_or_nan(double v)
+{
+#if H5_SIZEOF_DOUBLE == 8
+    uint64_t bits;
+
+    memcpy(&bits, &v, sizeof(v));
+    return (bits & 0x7ff0000000000000ULL) == 0x7ff0000000000000ULL;
+#else
+    return isnan(v) || isinf(v);
+#endif
+}
+
+/* TOML's spelling of a non-finite double ("nan", "inf", "-inf"), or NULL if V
+ * is finite.  Ryu spells these "NaN", "Infinity" and "-Infinity", none of
+ * which any TOML scanner accepts.  Discriminates on the bit pattern for the
+ * same fast-math reason as H5Z__fp64_is_inf_or_nan() above. */
+static inline const char *
+H5Z__fp64_nonfinite_toml(double v)
+{
+    if (!H5Z__fp64_is_inf_or_nan(v))
+        return NULL;
+
+#if H5_SIZEOF_DOUBLE == 8
+    {
+        uint64_t bits;
+
+        memcpy(&bits, &v, sizeof(v));
+        if (bits & 0x000fffffffffffffULL)
+            return "nan";
+        return (bits & 0x8000000000000000ULL) ? "-inf" : "inf";
+    }
+#else
+    if (isnan(v))
+        return "nan";
+    return (v < 0.0) ? "-inf" : "inf";
+#endif
+}
+
 /*
  * H5Z__format_double_canonical - format VAL into BUF (capacity BUFSIZE) as
  * the shortest decimal literal that round-trips back to the identical IEEE
- * 754 double via strtod(), and that a TOML scanner types as a float rather
- * than an integer.
+ * 754 double, and that a TOML scanner types as a float rather than an
+ * integer.
  *
- * Tries successively wider precisions with "%.*g" -- which picks fixed or
- * scientific notation the way a person would -- and keeps the first result
- * whose strtod() readback reproduces VAL bit-for-bit (memcmp, not ==, so a
- * canonical -0.0 cannot alias +0.0).  Common values canonicalize short
- * ("3.0", "0.1"); a value whose mantissa doesn't line up with a short
- * decimal takes up to DBL_DECIMAL_DIG (17) significant digits, the minimum
- * that round-trips every IEEE 754 double, and precision 17 always succeeds
- * by construction, so the loop cannot fall through.
+ * The digits come from the vendored Ryu library (src/ryu), which computes the
+ * shortest round-tripping decimal directly from the bit pattern.  HDF5 does
+ * not attempt that conversion itself: getting it right in every rounding
+ * corner is the whole subject of a PLDI paper, and the result is written into
+ * the file format, where a wrong digit is permanent.  See
+ * <https://github.com/HDFGroup/hdf5/issues/6153>.
  *
- * 17 is deliberate.  C11 7.22.1.3p11 recommends correct rounding only up to
- * DECIMAL_DIG significant digits.  DECIMAL_DIG is sized for long double, so
- * it is 21 where that is x87 80-bit but 17 where long double == double
- * (MSVC among others); 18 digits would exceed DECIMAL_DIG on those targets
- * for no round-trip benefit.  Contrast 7.22.1.3p9, which *requires* correct
- * rounding for the hexadecimal form -- the asymmetry this rewrite trades
- * away.
+ * Ryu emits scientific notation unconditionally and with no padding -- 3.0 is
+ * "3E0", 0.1 is "1E-1" -- which would make the canonical form of an ordinary
+ * compression level read `rate = 3.5E0`.  Its output is therefore taken apart
+ * into the digit string and decimal exponent it really represents and laid
+ * out again below, using printf("%g")'s rule: fixed-point while the exponent
+ * stays in human-scale range, scientific outside it.  That re-layout only
+ * moves the decimal point -- it never rounds, drops or adds a significant
+ * digit -- so Ryu's round-trip guarantee carries over verbatim, and no
+ * strtod() readback is needed to confirm it.
  *
- * "%g" alone must not be trusted as-is: it drops the decimal point for
- * whole values ("8.0" -> "8"), which a TOML scanner then reads as an
- * integer; whenever the winning candidate has no '.' and no exponent
- * marker, ".0" is appended to force float lexical class.
+ * Nothing here is locale-sensitive.  Ryu writes ASCII digits directly instead
+ * of going through snprintf(), so LC_NUMERIC cannot substitute ',' for the
+ * '.' that TOML requires.
+ *
+ * TOML types a bare "8" as an integer, not a float, which would fail the
+ * typed getters; the fixed-point branch appends ".0" whenever the digits run
+ * out at the decimal point, and the scientific branch always carries an
+ * exponent, so every result lexes as a float.
  *
  * Returns the length written (excluding the NUL), or -1 if BUFSIZE was too
- * small for the winning candidate.
+ * small.
  */
 static int
 H5Z__format_double_canonical(char *buf, size_t bufsize, double val)
 {
-    int prec;
+    const char *nonfinite = H5Z__fp64_nonfinite_toml(val);
+    char        ryu[32];  /* d2s_buffered_n() writes at most 24 chars */
+    char        dig[24];  /* at most 17 significant digits */
+    char        tmp[40];  /* longest result is 24 chars + NUL */
+    int         ryu_len, i, ndigits = 0, e10 = 0, n = 0;
+    bool        neg, exp_neg;
 
-    for (prec = 1; prec <= 17; prec++) {
-        char        tmp[32];
-        char       *end;
-        double      rt;
-        const char *locale_sep;
-        int         n = snprintf(tmp, sizeof(tmp), "%.*g", prec, val);
-
-        if (n <= 0 || n >= (int)sizeof(tmp))
-            continue;
-
-        /* Round-trip check in the same locale snprintf() just used, before
-         * any rewriting below, so strtod() parses exactly what was
-         * written. */
-        rt = strtod(tmp, &end);
-        if (end != tmp + n || memcmp(&rt, &val, sizeof(double)) != 0)
-            continue;
-
-        /* snprintf() is locale-sensitive: LC_NUMERIC may substitute e.g.
-         * ',' for '.', but TOML requires '.'.  Look up the actual separator
-         * via localeconv() rather than assuming ','.  Do this before the
-         * float-lexical-class check below, or a comma-locale fixed-point
-         * result (e.g. "3,5") would look integer-shaped and get a spurious
-         * ".0" appended. */
-        locale_sep = localeconv()->decimal_point; /* always non-NULL */
-        if (locale_sep[0] != '.' && locale_sep[0] != '\0') {
-            char *dp;
-            for (dp = tmp; *dp; dp++) {
-                if (*dp == locale_sep[0]) {
-                    *dp = '.';
-                    break; /* one separator per number */
-                }
-            }
-        }
-
-        /* Force float lexical class whenever no '.' or exponent marker
-         * survived (see function header). */
-        if (strpbrk(tmp, ".eE") == NULL) {
-            if (n + 2 >= (int)sizeof(tmp))
-                continue; /* leave room for ".0"; try the next precision */
-            tmp[n++] = '.';
-            tmp[n++] = '0';
-            tmp[n]   = '\0';
-        }
-
+    if (nonfinite) {
+        n = (int)strlen(nonfinite);
         if ((size_t)n >= bufsize)
             return -1;
-        memcpy(buf, tmp, (size_t)n + 1);
+        memcpy(buf, nonfinite, (size_t)n + 1);
         return n;
     }
 
-    return -1; /* unreachable: %.17g round-trips every double */
+    /* Ryu's output is "[-]d[.ddd]E[-]ddd", and d2s_buffered_n() returns its
+     * length without NUL-terminating it.  Split it back into sign, the
+     * significant digits with the '.' removed, and the exponent of the
+     * leading digit. */
+    ryu_len = d2s_buffered_n(val, ryu);
+
+    i   = 0;
+    neg = (ryu[0] == '-');
+    if (neg)
+        i++;
+    while (i < ryu_len && ryu[i] != 'E') {
+        if (ryu[i] != '.')
+            dig[ndigits++] = ryu[i];
+        i++;
+    }
+    i++; /* skip 'E' */
+    exp_neg = (ryu[i] == '-');
+    if (exp_neg)
+        i++;
+    while (i < ryu_len)
+        e10 = e10 * 10 + (ryu[i++] - '0');
+    if (exp_neg)
+        e10 = -e10;
+
+    if (neg)
+        tmp[n++] = '-';
+
+    if (e10 >= -4 && e10 < ndigits) {
+        /* Fixed-point.  e10 < ndigits keeps the decimal point inside the
+         * digits, so no zero padding is ever needed on the right. */
+        if (e10 >= 0) {
+            for (i = 0; i <= e10; i++)
+                tmp[n++] = dig[i];
+            tmp[n++] = '.';
+            if (e10 + 1 == ndigits)
+                tmp[n++] = '0'; /* force float lexical class */
+            else
+                for (i = e10 + 1; i < ndigits; i++)
+                    tmp[n++] = dig[i];
+        }
+        else {
+            tmp[n++] = '0';
+            tmp[n++] = '.';
+            for (i = 0; i < -e10 - 1; i++)
+                tmp[n++] = '0';
+            for (i = 0; i < ndigits; i++)
+                tmp[n++] = dig[i];
+        }
+    }
+    else {
+        /* Scientific, spelled the way printf("%e") would: a signed exponent
+         * of at least two digits. */
+        int abs_e10 = (e10 < 0) ? -e10 : e10;
+
+        tmp[n++] = dig[0];
+        if (ndigits > 1) {
+            tmp[n++] = '.';
+            for (i = 1; i < ndigits; i++)
+                tmp[n++] = dig[i];
+        }
+        tmp[n++] = 'e';
+        tmp[n++] = (e10 < 0) ? '-' : '+';
+        if (abs_e10 >= 100)
+            tmp[n++] = (char)('0' + abs_e10 / 100);
+        tmp[n++] = (char)('0' + (abs_e10 / 10) % 10);
+        tmp[n++] = (char)('0' + abs_e10 % 10);
+    }
+    tmp[n] = '\0';
+
+    if ((size_t)n >= bufsize)
+        return -1;
+    memcpy(buf, tmp, (size_t)n + 1);
+    return n;
 }
 
 /*
@@ -178,7 +267,9 @@ H5Z__rewrite_hexfloats(const char *src)
     char       *out;
     size_t      pos = 0;
 
-    /* Worst case: every 3-char token "0x1" expands to ~23 chars "%.16e" -> 8x.
+    /* Worst case: a short token whose value needs the full 17 significant
+     * digits, e.g. "0x1p99" (6 chars) -> "6.338253001141147e+29" (21), just
+     * under 4x; 8x leaves ample headroom.
      * Guard against size_t overflow in the multiplication; callers normally
      * cap input at H5Z_CONFIG_STRING_MAX, but enforce the bound here too so
      * this static helper is safe for any future caller. */
@@ -757,27 +848,6 @@ H5Zconfig_get_int(const char *params, const char *key, int64_t *out)
     ret_value = H5Z__config_get_int(params, key, out);
 
     FUNC_LEAVE_API_NOINIT_NOLOCK(ret_value)
-}
-
-/* Is v an inf or a nan?
- *
- * Decided on the bit pattern rather than with isnan()/isinf(): a fast-math
- * build -- Intel icx's -fp-model=fast (its default at -O2 and above), or
- * gcc/clang -ffast-math or -ffinite-math-only -- may assume no operand is
- * ever inf or nan and fold both classifiers to 0, letting through exactly
- * the values the caller means to reject.  An exponent field of all ones is
- * inf (zero mantissa) or nan (nonzero mantissa). */
-static inline bool
-H5Z__fp64_is_inf_or_nan(double v)
-{
-#if H5_SIZEOF_DOUBLE == 8
-    uint64_t bits;
-
-    memcpy(&bits, &v, sizeof(v));
-    return (bits & 0x7ff0000000000000ULL) == 0x7ff0000000000000ULL;
-#else
-    return isnan(v) || isinf(v);
-#endif
 }
 
 /*-------------------------------------------------------------------------

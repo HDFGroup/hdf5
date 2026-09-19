@@ -249,15 +249,18 @@ typedef herr_t (*H5Z_set_config_func_t)(const char *params, unsigned *flags, siz
  *       point and exponent so a TOML parser types the result as a float
  *       rather than an integer.
  *
- *       For more compact output, the library's own canonicalization (the
- *       form H5Pget_filter_params_by_idx() returns when a string \e was
- *       stored) instead emits the shortest decimal literal that still
- *       round-trips: try successively wider precisions with \c \%.*g,
- *       confirm each candidate with an actual \c strtod() round-trip rather
- *       than assuming a given width suffices, and append ".0" if the
- *       winning candidate carries no decimal point or exponent.  A fixed
- *       \c \%.16e is still always correct; it is just not the shortest
- *       spelling, and get_config callbacks are free to use either.
+ *       The library's own canonicalization (the form
+ *       H5Pget_filter_params_by_idx() returns when a string \e was stored)
+ *       emits something more compact: the shortest decimal literal that
+ *       still round-trips, computed with the vendored Ryu library.  A filter
+ *       that wants comparably short output without taking on that dependency
+ *       can approximate it with the standard library alone -- try
+ *       successively wider precisions with \c \%.*g, confirm each candidate
+ *       with an actual \c strtod() round-trip rather than assuming a given
+ *       width suffices, and append ".0" if the winning candidate carries no
+ *       decimal point or exponent.  A fixed \c \%.16e remains always
+ *       correct; it is just not the shortest spelling, and get_config
+ *       callbacks are free to use any of the three.
  *
  *       Do \b not use \c \%a: a hexadecimal float literal is not valid TOML,
  *       and get_config output must parse for readers that are not the HDF5
