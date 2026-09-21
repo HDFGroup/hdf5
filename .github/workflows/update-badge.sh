@@ -212,7 +212,7 @@ if [ -n "${VERSION:-}" ] && [ "$VERSION" != "all" ]; then
   if [ -n "${MILESTONE_DUE_DATE:-}" ]; then
     VERSION_MESSAGE="$VERSION (target: $MILESTONE_DUE_DATE)"
   else
-    VERSION_MESSAGE="$VERSION"
+    VERSION_MESSAGE="$VERSION (target: TBD)"
   fi
   VERSION_COLOR="blue"
 else
