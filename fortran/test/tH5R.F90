@@ -82,7 +82,7 @@ SUBROUTINE refobjtest(cleanup, total_error)
   CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
   IF (error .NE. 0) THEN
      WRITE(*,*) "Cannot modify filename"
-     STOP
+     CALL h5_exit_f(1)
   ENDIF
   CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
   CALL check("h5fcreate_f",error,total_error)
@@ -299,7 +299,7 @@ SUBROUTINE refregtest(cleanup, total_error)
   CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
   IF (error .NE. 0) THEN
      WRITE(*,*) "Cannot modify filename"
-     STOP
+     CALL h5_exit_f(1)
   ENDIF
   CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
   ! Default file access and file creation
@@ -536,7 +536,7 @@ SUBROUTINE v3reftest(cleanup, total_error)
   CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
   IF (error .NE. 0) THEN
      WRITE(*,*) "Cannot modify filename"
-     STOP
+     CALL h5_exit_f(1)
   ENDIF
   CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
   CALL check("h5fcreate_f",error,total_error)

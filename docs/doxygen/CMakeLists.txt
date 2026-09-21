@@ -43,6 +43,7 @@ if (DOXYGEN_FOUND)
   # This ensures the Doxygen configuration stays synchronized with the
   # actual default versions defined in src/H5version.h.
   set (_doxygen_predefined_entries
+    H5_HAVE_CONCURRENCY
     H5_HAVE_DIRECT
     H5_HAVE_LIBHDFS
     H5_HAVE_MAP_API
