@@ -271,6 +271,8 @@ gen_h5dump_files(void)
     gent_float6();
     gent_float4();
 
+    gent_tintascii();
+
     gent_trefer_attr();
     gent_tattr4_be();
     gent_tno_subset();
@@ -462,6 +464,8 @@ gen_h5ls_files(void)
     gent_complex();
     gent_complex_be();
 #endif
+
+    gent_tintascii();
 
     nerrors += (gent_tdset() < 0 ? 1 : 0);
     gent_dataset_idx();

@@ -50,6 +50,7 @@ set (LIST_HDF5_TEST_FILES
     tgrp_comments.h5
     tgrpnullspace.h5
     thlink.h5
+    tintascii.h5
     tloop.h5
     tnestedcomp.h5
     tsaf.h5
@@ -118,6 +119,7 @@ set (LIST_OTHER_TEST_FILES
     tgrp_comments.ls
     thlinks-nodangle-1.ls
     thlink-1.ls
+    tintascii.ls
     tloop-1.ls
     tmultifile.ls
     tnestcomp-1.ls
@@ -558,6 +560,9 @@ ADD_H5_TEST (tmultifile RESULT_CODE 0 -w80 thlink.h5 tslink.h5)
 
 # tests for hard links
 ADD_H5_TEST (thlink-1 RESULT_CODE 0 -w80 thlink.h5)
+
+# test printing characters in ASCII instead of decimal
+ADD_H5_TEST (tintascii RESULT_CODE 0 -w80 -vldrs tintascii.h5)
 
 # tests for compound data types
 ADD_H5_TEST (tcomp-1 RESULT_CODE 0 -w80 -r -d tcompound.h5)

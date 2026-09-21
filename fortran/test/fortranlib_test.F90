@@ -73,6 +73,11 @@ PROGRAM fortranlibtest
 !      '========================================='
 
   ret_total_error = 0
+  ret_total_error = 0
+  CALL objcount_ids(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Object count and identifier test', total_error)
+
+  ret_total_error = 0
   CALL mountingtest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Mounting test', total_error)
 
