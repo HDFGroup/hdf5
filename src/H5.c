@@ -400,9 +400,9 @@ H5_term_library(void)
             pending += DOWN(M_top);
             pending += DOWN(S_top);
             pending += DOWN(T_top);
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_THREAD_LOCAL_STATE
             pending += DOWN(TS_top);
-#endif    /* H5_HAVE_THREADSAFE_API */
+#endif    /* H5_HAVE_THREAD_LOCAL_STATE */
         } /* end if */
 
         /* Don't shut down the file code until objects in files are shut down */

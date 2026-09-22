@@ -3160,6 +3160,15 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
          * a concurrency event, and there's at least one chunk selected */
         do_threading = (H5TS_pool_g != NULL) && !H5TS_currently_concurrent_g && (init_chunk_nalloc > 0);
 
+        /* The worker threads read through the VFD, so a file on an MPI-based
+         * driver would have them calling MPI from outside the main thread.
+         * That is only legal when the application initialized MPI at
+         * MPI_THREAD_SERIALIZED or above, which the library cannot guarantee, so
+         * leave the internals of these reads serial.
+         */
+        if (do_threading && H5F_HAS_FEATURE(dset_info->dset->oloc.file, H5FD_FEAT_HAS_MPI))
+            do_threading = false;
+
         if (do_threading) {
             /* Now check if threading is disabled by the context (DXPL) */
             if (H5CX_get_io_threads(&do_threading) < 0)

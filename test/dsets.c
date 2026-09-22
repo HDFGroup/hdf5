@@ -19428,7 +19428,7 @@ error:
     return FAIL;
 } /* end test_filter_error_msg() */
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
 /*-------------------------------------------------------------------------
  * Function:   test_threaded_chunks
  *
@@ -19641,7 +19641,7 @@ error:
     H5E_END_TRY
     return FAIL;
 } /* end test_threaded_chunks() */
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -19753,15 +19753,15 @@ main(void)
             for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
                 hid_t my_fcpl;
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
                 /* Test with and without threads */
                 for (threads = false; threads <= true; threads++) {
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
                     /* Print partial message about file format */
                     printf("\nTesting with %s file format", h5_get_version_string(low));
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
                     /* Set internal threading with 4 threads */
                     if (threads) {
                         if (H5TSset_internal_threads(4) < 0)
@@ -19773,7 +19773,7 @@ main(void)
                     else
                         /* Print message about threads */
                         printf(", without threads,");
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
                     /* Set the FCPL and print the rest of the message depending on paged aggregation setting
                      */
@@ -19841,9 +19841,9 @@ main(void)
 
                     /* Don't test these with threads yet since H5E_BEGIN_TRY doesn't yet apply to threads and
                      * these tests will otherwise produce lots of irrelevant error messages */
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
                     if (!threads)
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */
                     {
                         nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
                         nerrors += (test_bad_decode_size(file) < 0 ? 1 : 0);
@@ -19918,12 +19918,12 @@ main(void)
 
                     if (H5Fclose(file) < 0)
                         goto error;
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
                     /* Disable internal threading */
                     if (threads && H5TSset_internal_threads(0) < 0)
                         goto error;
                 }
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
             } /* end for low */
         }     /* end for minimized_ohdr */
@@ -19950,9 +19950,9 @@ main(void)
     nerrors += (test_object_header_minimization_dcpl() < 0 ? 1 : 0);
     nerrors += (test_h5s_block() < 0 ? 1 : 0);
     nerrors += (test_h5s_plist() < 0 ? 1 : 0);
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
     nerrors += (test_threaded_chunks() < 0 ? 1 : 0);
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
     /* Run misc tests */
     nerrors += (dls_01_main() < 0 ? 1 : 0);
@@ -19970,11 +19970,11 @@ main(void)
     /* Verify that source file/dataset names are shared properly */
     nerrors += (test_vds_shared_strings(fapl) < 0 ? 1 : 0);
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
     /* Set threading now to ensure the library can shut down cleanly with threading enabled */
     if (H5TSset_internal_threads(4) < 0)
         TEST_ERROR;
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
     if (nerrors)
         goto error;

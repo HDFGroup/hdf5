@@ -51,6 +51,17 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Configuration
 
+### Built the library's internal thread pool by default
+
+   The internal thread pool lets the library parallelize the internals of a
+   single API call using its own worker threads. It adds no application
+   threads, and its workers never enter the public API, so it is not a build-time
+   choice exposed through CMake. It is built in wherever a threading package is available.
+
+   Note that nothing in the library is threaded until the application enables it via
+   H5TSset_internal_threads().
+   
+   The internal thread pool can now be used with the high-level, Fortran, Java and C++ interfaces.
 
 ## Library
 
@@ -62,13 +73,12 @@ We would like to thank the many HDF5 community members who contributed to this r
    This feature internally parallelizes read operations on chunked datasets.
    H5TSset_internal_threads() is used to enable the feature globally, while
    H5Pset_io_threads() can be used to disable the feature on a per-operation
-   basis. These functions are only available when the library is configured with
-   HDF5_ENABLE_INTERNAL_THREADS=ON, which HDF5_ENABLE_CONCURRENCY=ON also
-   enables. When performing an internally threaded read, the
-   library will concurrently read from disk, unfilter, and scatter to memory all
-   chunks in a read operation on a chunked dataset. Currently each of these
-   sub-operations is serialized (protected by a mutex), so there is not yet
-   likely to be any performance improvement.
+   basis. These functions are available whenever the library is built with a
+   threading package; see the Configuration section above. When performing an
+   internally threaded read, the library will concurrently read from disk,
+   unfilter, and scatter to memory all chunks in a read operation on a chunked
+   dataset. Currently each of these sub-operations is serialized (protected by
+   a mutex), so there is not yet likely to be any performance improvement.
 
 ## Parallel Library
 

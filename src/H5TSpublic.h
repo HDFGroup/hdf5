@@ -79,8 +79,8 @@ extern "C" {
  *          \li For unfiltered datasets, the chunk cache is large enough to fit
  *          at least one chunk. See H5Pset_chunk_cache().
  *
- * \note    This function is only present when the library is compiled with
- *          HDF5_ENABLE_INTERNAL_THREADS=ON, or HDF5_ENABLE_CONCURRENCY=ON.
+ * \note    This function is present whenever the library is built with a
+ *          threading package, which is the standard case.
  *
  * \note    Use of this function may increase memory usage during concurrent
  *          operations due to the need to maintain state for each thread

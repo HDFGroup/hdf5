@@ -8817,8 +8817,11 @@ H5_DLL herr_t H5Pget_modify_write_buf(hid_t plist_id, bool *modify_write_buf);
  * H5Pset_io_threads() can be used to disable this acceleration for a specific operation even if
  * internal threading is enabled globally.
  *
- * \note    This function is only present when the library is compiled with
- *          HDF5_ENABLE_INTERNAL_THREADS=ON, or HDF5_ENABLE_CONCURRENCY=ON.
+ * \note    This function is present whenever the library is built with a
+ *          threading package, which is the usual case.  It is absent only
+ *          where the library's internal threads are unavailable, currently a
+ *          static library on Windows.  Test for #H5_HAVE_INTERNAL_THREADS to
+ *          detect this at compile time.
  *
  * \since 2.3.0
  *
@@ -8842,8 +8845,8 @@ H5_DLL herr_t H5Pset_io_threads(hid_t plist_id, bool io_threads_enabled);
  * internal threading must be enabled using H5TSset_internal_threads() before the library can use
  * threads to accelerate I/O.
  *
- * \note    This function is only present when the library is compiled with
- *          HDF5_ENABLE_INTERNAL_THREADS=ON, or HDF5_ENABLE_CONCURRENCY=ON.
+ * \note    This function is present whenever the library is built with a
+ *          threading package, which is the standard case.
  *
  * \since 2.3.0
  *
