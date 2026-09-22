@@ -92,6 +92,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed a memory leak when metadata cannot be written while closing a file
+
+   If writing metadata failed while a file was being closed, the file's metadata cache was left allocated with the unwritten entries still in it. The cache and everything in it were leaked, which also prevented the library from shutting down cleanly. The close still fails in this case, but the unwritten entries are now discarded and the cache is freed.
+
 ### Fixed a heap buffer overflow when decoding object header messages
 
    The size stored in an object header message header was checked against the chunk before the rest of that message header was decoded, allowing a message body to start up to four bytes further into the chunk than the check accounted for. A corrupted or fuzzed file could declare a size that passed the check and still extended past the end of the chunk image, and the message's decode callback was then handed a buffer end outside the allocation. `H5O__chunk_deserialize()` now checks the message size once the whole message header has been decoded.
