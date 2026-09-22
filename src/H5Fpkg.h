@@ -176,6 +176,7 @@ typedef struct H5F_superblock_cache_ud_t {
 typedef struct H5F_drvrinfo_cache_ud_t {
     H5F_t  *f;           /* Pointer to file */
     haddr_t driver_addr; /* address of driver info block */
+    haddr_t stored_eof;  /* End-of-file stored in superblock, relative to base address */
 } H5F_drvrinfo_cache_ud_t;
 
 /* Structure for metadata & "small [raw] data" block aggregation fields */

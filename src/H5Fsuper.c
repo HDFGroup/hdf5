@@ -599,6 +599,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
         /* Set up user data */
         drvrinfo_udata.f           = f;
         drvrinfo_udata.driver_addr = sblock->driver_addr;
+        drvrinfo_udata.stored_eof  = udata.stored_eof - sblock->base_addr;
 
         /* extend EOA so we can read at least the fixed sized
          * portion of the driver info block
