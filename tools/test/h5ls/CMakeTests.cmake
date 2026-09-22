@@ -119,7 +119,8 @@ set (LIST_OTHER_TEST_FILES
     tgrp_comments.ls
     thlinks-nodangle-1.ls
     thlink-1.ls
-    tintascii.ls
+    tintascii_be.ls
+    tintascii_le.ls
     tloop-1.ls
     tmultifile.ls
     tnestcomp-1.ls
@@ -562,7 +563,13 @@ ADD_H5_TEST (tmultifile RESULT_CODE 0 -w80 thlink.h5 tslink.h5)
 ADD_H5_TEST (thlink-1 RESULT_CODE 0 -w80 thlink.h5)
 
 # test printing characters in ASCII instead of decimal
-ADD_H5_TEST (tintascii RESULT_CODE 0 -w80 -vldrs tintascii.h5)
+# The file's 1-byte integer type is little-endian, so it only matches
+# H5T_NATIVE_SCHAR (and prints as a native type name) on little-endian hosts
+if (H5_WORDS_BIGENDIAN)
+  ADD_H5_TEST (tintascii_be RESULT_CODE 0 -w80 -vldrs tintascii.h5)
+else ()
+  ADD_H5_TEST (tintascii_le RESULT_CODE 0 -w80 -vldrs tintascii.h5)
+endif ()
 
 # tests for compound data types
 ADD_H5_TEST (tcomp-1 RESULT_CODE 0 -w80 -r -d tcompound.h5)
