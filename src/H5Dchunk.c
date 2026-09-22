@@ -3458,9 +3458,9 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                     /* We must evict all chunks if a worker failed, because the chunk may be in an
                      * inconsistent state in memory */
                     for (size_t i = 0; i < threaded_io_info->num_chunks; i++)
-                        if (dset_info->dset->shared->cache.chunk
-                                .slot[threaded_io_info->chunk_info[i].udata.idx_hint] &&
-                            H5D__chunk_cache_evict(dset_info->dset,
+                        if ((UINT_MAX != threaded_io_info->chunk_info[i].udata.idx_hint)
+                            && dset_info->dset->shared->cache.chunk.slot[threaded_io_info->chunk_info[i].udata.idx_hint]
+                            && H5D__chunk_cache_evict(dset_info->dset,
                                                    dset_info->dset->shared->cache.chunk
                                                        .slot[threaded_io_info->chunk_info[i].udata.idx_hint],
                                                    false) < 0)
@@ -5139,7 +5139,7 @@ done:
  * Purpose:    Return a pointer to a dataset chunk via the _chunk
  *        parameter.  The pointer points directly into the chunk cache
  *        and should not be freed by the caller but will be valid
- *        until it is unlocked.  The value in udata->idx_hunt is used
+ *        until it is unlocked.  The value in udata->idx_hint is used
  *        to speed up cache lookups and its output value should be
  *        given to H5D__chunk_unlock(). udata->idx_hint is ignored if
  *        it is equal to UINT_MAX.
