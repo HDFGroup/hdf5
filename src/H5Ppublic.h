@@ -8800,6 +8800,7 @@ H5_DLL herr_t H5Pset_modify_write_buf(hid_t plist_id, bool modify_write_buf);
  */
 H5_DLL herr_t H5Pget_modify_write_buf(hid_t plist_id, bool *modify_write_buf);
 
+#ifdef H5_HAVE_INTERNAL_THREADS
 /**
  *
  * \ingroup DXPL
@@ -8820,7 +8821,7 @@ H5_DLL herr_t H5Pget_modify_write_buf(hid_t plist_id, bool *modify_write_buf);
  * \note    This function is present whenever the library is built with a
  *          threading package, which is the usual case.  It is absent only
  *          where the library's internal threads are unavailable, currently a
- *          static library on Windows.  Test for #H5_HAVE_INTERNAL_THREADS to
+ *          static library on Windows.  Test for \c H5_HAVE_INTERNAL_THREADS to
  *          detect this at compile time.
  *
  * \since 2.3.0
@@ -8852,6 +8853,7 @@ H5_DLL herr_t H5Pset_io_threads(hid_t plist_id, bool io_threads_enabled);
  *
  */
 H5_DLL herr_t H5Pget_io_threads(hid_t plist_id, bool *io_threads_enabled);
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
 /**
  * \ingroup LCPL
