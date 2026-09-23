@@ -1483,7 +1483,12 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
     /* Get the type's size */
     if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mpi_code)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_size_x failed", mpi_code)
+    if (MPI_UNDEFINED == type_size)
+        HGOTO_ERROR(H5E_VFL, H5E_BADRANGE, FAIL,
+                    "size of MPI datatype for memory buffer couldn't fit in MPI_Count");
+    else if (type_size < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "size of MPI datatype for memory buffer was negative");
 
     /* Compute the actual number of bytes requested */
     io_size = type_size * size_i;
@@ -1693,7 +1698,12 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
     /* Get the type's size */
     if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mpi_code)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_size_x failed", mpi_code)
+    if (MPI_UNDEFINED == type_size)
+        HGOTO_ERROR(H5E_VFL, H5E_BADRANGE, FAIL,
+                    "size of MPI datatype for memory buffer couldn't fit in MPI_Count");
+    else if (type_size < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "size of MPI datatype for memory buffer was negative");
 
     /* Compute the actual number of bytes requested */
     io_size = type_size * size_i;
@@ -2285,7 +2295,12 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
         /* Get the type's size */
         if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mpi_code)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_size_x failed", mpi_code)
+        if (MPI_UNDEFINED == type_size)
+            HGOTO_ERROR(H5E_VFL, H5E_BADRANGE, FAIL,
+                        "size of MPI datatype for memory buffer couldn't fit in MPI_Count");
+        else if (type_size < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "size of MPI datatype for memory buffer was negative");
 
         /* Compute the actual number of bytes requested */
         io_size = type_size * size_i;
@@ -3248,7 +3263,12 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
 
         /* Get the type's size */
         if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(final_mtype, &type_size)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mpi_code);
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_size_x failed", mpi_code);
+        if (MPI_UNDEFINED == type_size)
+            HGOTO_ERROR(H5E_VFL, H5E_BADRANGE, FAIL,
+                        "size of MPI datatype for memory buffer couldn't fit in MPI_Count");
+        else if (type_size < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "size of MPI datatype for memory buffer was negative");
 
         /* Compute the actual number of bytes requested */
         io_size = type_size * size_i;
@@ -3560,7 +3580,12 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
 
         /* Get the type's size */
         if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(final_mtype, &type_size)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mpi_code);
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_size_x failed", mpi_code);
+        if (MPI_UNDEFINED == type_size)
+            HGOTO_ERROR(H5E_VFL, H5E_BADRANGE, FAIL,
+                        "size of MPI datatype for memory buffer couldn't fit in MPI_Count");
+        else if (type_size < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "size of MPI datatype for memory buffer was negative");
 
         /* Compute the actual number of bytes requested */
         io_size = type_size * size_i;

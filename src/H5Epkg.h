@@ -142,7 +142,7 @@ H5_DLL void         H5E__set_default_auto(H5E_stack_t *stk);
 H5_DLL H5E_stack_t *H5E__get_current_stack(void);
 H5_DLL herr_t       H5E__set_current_stack(H5E_stack_t *estack);
 H5_DLL ssize_t      H5E__get_num(const H5E_stack_t *err_stack);
-H5_DLL herr_t       H5E__push_stack(H5E_stack_t *estack, bool app_entry, const char *file, const char *func,
+H5_DLL htri_t       H5E__push_stack(H5E_stack_t *estack, bool app_entry, const char *file, const char *func,
                                     unsigned line, hid_t cls_id, hid_t maj_id, hid_t min_id, const char *fmt,
                                     va_list *ap);
 H5_DLL herr_t       H5E__print(const H5E_stack_t *estack, FILE *stream, bool bk_compat);
