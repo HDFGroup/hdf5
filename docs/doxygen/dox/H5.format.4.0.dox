@@ -5036,6 +5036,16 @@ Header messages are aligned on 8-byte boundaries for version 1 object headers.
 </table>
 
 \subsubsection subsubsec_fmt4_dataobject_hdr_prefix_two IV.A.1.b Version 2 Data Object Header Prefix
+\anchor FMT4OhdrChunkDef A version 2 object header&rsquo;s messages are stored in one or more <em>chunks</em>.
+<em>Chunk \#0</em> is the chunk embedded directly in this prefix, below: it runs from the <code>OHDR</code>
+signature through this chunk&rsquo;s own <em>Gap</em> and <em>Checksum</em> fields. Additional chunks
+(<em>chunk \#1</em> through <em>chunk \#n</em>) are stored in continuation blocks, each located and sized
+by an Object Header Continuation message in some earlier chunk (see
+@ref subsubsec_fmt4_dataobject_hdr_msg_continuation). Each chunk, including chunk \#0, ends with its
+<em>own</em> <em>Gap</em> and <em>Checksum</em> fields, computed only over that chunk&rsquo;s bytes. This
+use of &ldquo;chunk&rdquo; is unrelated to the raw data <em>chunks</em> of a chunked-storage dataset (see
+@ref subsubsec_fmt4_dataobject_hdr_msg_layout and @ref sec_fmt4_appendixc).
+
 Note that the &ldquo;total number of messages&rdquo; field has been dropped from the data object header
 prefix in this version. The number of messages in the data object header is just determined by the
 messages encountered in all the object header blocks.
@@ -5220,9 +5230,10 @@ or padding bytes inserted - they are stored packed together.
     </tr>
     <tr>
       <td>Size of Chunk \#0</td>
-      <td>This unsigned value specifies the number of bytes of header message data following this field
-          that contain object header information. This value does not include the size of object header
-          continuation blocks for this object elsewhere in the file. The length of this field varies
+      <td>This unsigned value specifies the number of bytes of header message data following this field,
+          within @ref FMT4OhdrChunkDef "chunk \#0" (the messages, and the Gap, if present, but not the
+          Checksum field). This value does not include the size of object header continuation blocks
+          (chunk \#1 and beyond) for this object elsewhere in the file. The length of this field varies
           depending on bits 0 and 1 of the <em>flags</em> field.</td>
     </tr>
     <tr>
@@ -5250,16 +5261,20 @@ or padding bytes inserted - they are stored packed together.
     </tr>
     <tr>
       <td>Gap</td>
-      <td>A gap in an object header chunk is inferred by the end of the messages for the chunk before the
-          beginning of the chunk&rsquo;s checksum. Gaps are always smaller than the size of an object header
-          message prefix (message type + message size + message flags).<br />
+      <td>A gap in @ref FMT4OhdrChunkDef "chunk \#0" is inferred by the end of the messages for the chunk
+          before the beginning of this chunk&rsquo;s Checksum field. Gaps are always smaller than the size
+          of an object header message prefix (message type + message size + message flags).<br />
           Gaps are formed when a message (typically an attribute message) in an earlier chunk is deleted
           and a message from a later chunk that does not quite fit into the free space is moved into the
           earlier chunk.</td>
     </tr>
     <tr>
       <td>Checksum</td>
-      <td>This is the checksum for the object header chunk.</td>
+      <td>This is the checksum for chunk \#0 only (see @ref FMT4OhdrChunkDef "object header chunks"),
+          computed over every byte of this chunk from the <code>OHDR</code> signature through the end of
+          this chunk&rsquo;s Gap field (if present), excluding this Checksum field itself. Each continuation
+          chunk, if any, carries its own separate checksum; see
+          @ref subsubsec_fmt4_dataobject_hdr_msg_continuation.</td>
     </tr>
 </table>
 
@@ -10021,16 +10036,20 @@ described here (see also the description of @ref subsubsec_fmt4_dataobject_hdr_p
 </tr>
 <tr>
   <td>Gap</td>
-  <td>A gap in an object header chunk is inferred by the end of the messages for the chunk before the
-      beginning of the chunk&rsquo;s checksum. Gaps are always smaller than the size of an object header
-      message prefix (message type + message size + message flags).<br />
+  <td>A gap in this @ref FMT4OhdrChunkDef "continuation chunk" is inferred by the end of the messages for
+      the chunk before the beginning of this chunk&rsquo;s Checksum field. Gaps are always smaller than the
+      size of an object header message prefix (message type + message size + message flags).<br />
       Gaps are formed when a message (typically an attribute message) in an earlier chunk is deleted
       and a message from a later chunk that does not quite fit into the free space is moved into the
       earlier chunk.</td>
 </tr>
 <tr>
   <td>Checksum</td>
-  <td>This is the checksum for the object header chunk.</td>
+  <td>This is the checksum for this continuation chunk only (see
+      @ref FMT4OhdrChunkDef "object header chunks"), computed over every byte of this chunk from the
+      <code>OCHK</code> signature through the end of this chunk&rsquo;s Gap field (if present), excluding
+      this Checksum field itself. Chunk \#0, in the object header prefix, and every other continuation
+      chunk each carry their own separate checksum.</td>
 </tr>
 </table>
 
