@@ -119,8 +119,7 @@ set (LIST_OTHER_TEST_FILES
     tgrp_comments.ls
     thlinks-nodangle-1.ls
     thlink-1.ls
-    tintascii_be.ls
-    tintascii_le.ls
+    tintascii.ls
     tloop-1.ls
     tmultifile.ls
     tnestcomp-1.ls
@@ -248,6 +247,9 @@ add_custom_target (h5ls_vol_files ALL COMMENT "Copying files needed by h5ls test
 # OPTIONAL KEYWORD ARGUMENTS:
 # RESULT_ERRCHECK <string> - value to pass to test script as TEST_ERRREF
 #                            Ignored if memchecker is enabled.
+# FILTER_IN <regex>        - text in the output and reference to replace before
+#                            comparing them. Ignored if memchecker is enabled.
+# FILTER_OUT <string>      - replacement text for FILTER_IN
 #
 # OPTIONAL FLAGS:
 # WILL_FAIL - indicates that the test is expected to fail. Defaults to false
@@ -257,7 +259,7 @@ add_custom_target (h5ls_vol_files ALL COMMENT "Copying files needed by h5ls test
 macro (ADD_H5_TEST testname)
   cmake_parse_arguments (ARG
       "WILL_FAIL;SKIP_TEST;NATIVE_ONLY" # flags
-      "RESULT_CODE;RESULT_ERRCHECK" # one-value args
+      "RESULT_CODE;RESULT_ERRCHECK;FILTER_IN;FILTER_OUT" # one-value args
       "" # multi-value args
       ${ARGN}
   )
@@ -308,6 +310,8 @@ macro (ADD_H5_TEST testname)
               -D "TEST_EXPECT=${ARG_RESULT_CODE}"
               -D "TEST_ERRREF=${ARG_RESULT_ERRCHECK}"
               -D "TEST_REFERENCE=${testname}.ls"
+              -D "TEST_FILTER:STRING=${ARG_FILTER_IN}"
+              -D "TEST_FILTER_REPLACE:STRING=${ARG_FILTER_OUT}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
@@ -563,13 +567,12 @@ ADD_H5_TEST (tmultifile RESULT_CODE 0 -w80 thlink.h5 tslink.h5)
 ADD_H5_TEST (thlink-1 RESULT_CODE 0 -w80 thlink.h5)
 
 # test printing characters in ASCII instead of decimal
-# The file's 1-byte integer type is little-endian, so it only matches
-# H5T_NATIVE_SCHAR (and prints as a native type name) on little-endian hosts
-if (H5_WORDS_BIGENDIAN)
-  ADD_H5_TEST (tintascii_be RESULT_CODE 0 -w80 -vldrs tintascii.h5)
-else ()
-  ADD_H5_TEST (tintascii_le RESULT_CODE 0 -w80 -vldrs tintascii.h5)
-endif ()
+# mask the type name to avoid endian-related disagreements between machines
+# over a 1-byte type
+ADD_H5_TEST (tintascii RESULT_CODE 0
+    FILTER_IN "Type:      (native signed char|8-bit integer)"
+    FILTER_OUT "Type:      XXXX"
+    -w80 -vldrs tintascii.h5)
 
 # tests for compound data types
 ADD_H5_TEST (tcomp-1 RESULT_CODE 0 -w80 -r -d tcompound.h5)
