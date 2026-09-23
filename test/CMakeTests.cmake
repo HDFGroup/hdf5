@@ -115,6 +115,7 @@ endforeach ()
 # --------------------------------------------------------------------
 set (HDF5_REFERENCE_TEST_FILES
     aggr.h5
+    bad_chunk_ndims.h5
     bad_compound.h5
     bad_fletcher32.h5
     bad_nbit_decompress.h5
@@ -1169,6 +1170,7 @@ endmacro ()
 
 # generator executables
 set (H5_GENERATORS
+    gen_bad_chunk
     gen_bad_filters
     gen_bad_offset
     gen_bad_ohdr

@@ -181,6 +181,13 @@
 #define H5D_XFER_MODIFY_WRITE_BUF_DEF  false
 #define H5D_XFER_MODIFY_WRITE_BUF_ENC  H5P__dxfr_modify_write_buf_enc
 #define H5D_XFER_MODIFY_WRITE_BUF_DEC  H5P__dxfr_modify_write_buf_dec
+#ifdef H5_HAVE_CONCURRENCY
+/* Definitions for modify write buffer property */
+#define H5D_XFER_IO_THREADS_ENABLED_SIZE sizeof(bool)
+#define H5D_XFER_IO_THREADS_ENABLED_DEF  true
+#define H5D_XFER_IO_THREADS_ENABLED_ENC  H5P__encode_bool
+#define H5D_XFER_IO_THREADS_ENABLED_DEC  H5P__decode_bool
+#endif /* H5_HAVE_CONCURRENCY */
 
 /******************/
 /* Local Typedefs */
@@ -298,6 +305,9 @@ static const H5D_selection_io_mode_t H5D_def_selection_io_mode_g     = H5D_XFER_
 static const uint32_t                H5D_def_no_selection_io_cause_g = H5D_XFER_NO_SELECTION_IO_CAUSE_DEF;
 static const uint32_t H5D_def_actual_selection_io_mode_g             = H5D_XFER_ACTUAL_SELECTION_IO_MODE_DEF;
 static const bool     H5D_def_modify_write_buf_g                     = H5D_XFER_MODIFY_WRITE_BUF_DEF;
+#ifdef H5_HAVE_CONCURRENCY
+static const bool H5D_def_io_threads_enabled_g = H5D_XFER_IO_THREADS_ENABLED_DEF;
+#endif /* H5_HAVE_CONCURRENCY */
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__dxfr_reg_prop
@@ -484,6 +494,14 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
                            &H5D_def_modify_write_buf_g, NULL, NULL, NULL, H5D_XFER_MODIFY_WRITE_BUF_ENC,
                            H5D_XFER_MODIFY_WRITE_BUF_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
+
+#ifdef H5_HAVE_CONCURRENCY
+    /* Register the I/O threads enabled property */
+    if (H5P__register_real(pclass, H5D_XFER_IO_THREADS_ENABLED_NAME, H5D_XFER_IO_THREADS_ENABLED_SIZE,
+                           &H5D_def_io_threads_enabled_g, NULL, NULL, NULL, H5D_XFER_IO_THREADS_ENABLED_ENC,
+                           H5D_XFER_IO_THREADS_ENABLED_DEC, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
+#endif /* H5_HAVE_CONCURRENCY */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2602,3 +2620,72 @@ H5Pget_modify_write_buf(hid_t plist_id, bool *modify_write_buf /*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_modify_write_buf() */
+
+#ifdef H5_HAVE_CONCURRENCY
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_io_threads
+ *
+ * Purpose:     Sets whether the library can use the global thread pool to
+ *              accelerate I/O using concurrent execution.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_io_threads(hid_t plist_id, bool io_threads_enabled)
+{
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (plist_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
+
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER, false)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
+
+    /* Set the threads enabled property */
+    if (H5P_set(plist, H5D_XFER_IO_THREADS_ENABLED_NAME, &io_threads_enabled) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_io_threads() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_io_threads
+ *
+ * Purpose:     Retrieves the setting that determines whether the library
+ *              can use the global thread pool to accelerate I/O using
+ *              concurrent execution.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_io_threads(hid_t plist_id, bool *io_threads_enabled /*out*/)
+{
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER, true)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
+
+    /* Get the threads enabled property */
+    if (io_threads_enabled)
+        if (H5P_get(plist, H5D_XFER_IO_THREADS_ENABLED_NAME, io_threads_enabled) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_io_threads() */
+#endif /* H5_HAVE_CONCURRENCY */
