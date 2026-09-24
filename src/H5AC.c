@@ -500,43 +500,30 @@ H5AC_dest(H5F_t *f)
 
     /* Destroy the cache */
     if (H5C_dest(f) < 0) {
-        H5C_t *cache_ptr = f->shared->cache;
+        /* The cache can be destroyed even though some entries couldn't be
+         * written.  If it wasn't, stop here.
+         */
+        if (f->shared->cache != NULL)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't destroy cache");
 
         /* Push error, but keep going */
         HDONE_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't destroy cache");
-
-        /* The file is being closed regardless, so discard any entries that
-         * could not be written (without generating a cache image of them)
-         * and destroy the cache again.
-         */
-        cache_ptr->image_ctl.generate_image = false;
-        if (!cache_ptr->slist_enabled)
-            if (H5C_set_slist_enabled(cache_ptr, true, true) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't enable skip list");
-        if (H5C_flush_cache(f, H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't discard cache entries");
-        if (H5C_set_slist_enabled(cache_ptr, false, false) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't disable skip list");
-        if (H5C_dest(f) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't destroy cache");
     }
-
-    f->shared->cache = NULL;
 
 #ifdef H5_HAVE_PARALLEL
     if (aux_ptr != NULL) {
         if (aux_ptr->d_slist_ptr != NULL) {
-            assert(ret_value < 0 || H5SL_count(aux_ptr->d_slist_ptr) == 0);
+            assert(H5SL_count(aux_ptr->d_slist_ptr) == 0);
             H5SL_close(aux_ptr->d_slist_ptr);
         } /* end if */
 
         if (aux_ptr->c_slist_ptr != NULL) {
-            assert(ret_value < 0 || H5SL_count(aux_ptr->c_slist_ptr) == 0);
+            assert(H5SL_count(aux_ptr->c_slist_ptr) == 0);
             H5SL_close(aux_ptr->c_slist_ptr);
         } /* end if */
 
         if (aux_ptr->candidate_slist_ptr != NULL) {
-            assert(ret_value < 0 || H5SL_count(aux_ptr->candidate_slist_ptr) == 0);
+            assert(H5SL_count(aux_ptr->candidate_slist_ptr) == 0);
             H5SL_close(aux_ptr->candidate_slist_ptr);
         } /* end if */
 

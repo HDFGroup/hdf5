@@ -63,6 +63,8 @@ static herr_t H5C__pin_entry_from_client(H5C_t *cache_ptr, H5C_cache_entry_t *en
 static herr_t H5C__unpin_entry_real(H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr, bool update_rp);
 static herr_t H5C__unpin_entry_from_client(H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr, bool update_rp);
 static herr_t H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr);
+static herr_t H5C__write_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr, bool write_entry,
+                               bool generate_image, bool suppress_image_entry_writes);
 static herr_t H5C__discard_single_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,
                                         bool destroy_entry, bool free_file_space,
                                         bool suppress_image_entry_frees);
@@ -402,133 +404,22 @@ done:
 } /* H5C__generate_image */
 
 /*-------------------------------------------------------------------------
- * Function:    H5C__flush_single_entry
+ * Function:    H5C__write_entry
  *
- * Purpose:     Flush or clear (and evict if requested) the cache entry
- *              with the specified address and type.  If the type is NULL,
- *              any unprotected entry at the specified address will be
- *              flushed (and possibly evicted).
+ * Purpose:     Serialize the entry's image if needed, and write the image
+ *              to the file if requested.
  *
- *              Attempts to flush a protected entry will result in an
- *              error.
- *
- *              If the H5C__FLUSH_INVALIDATE_FLAG flag is set, the entry will
- *              be cleared and not flushed, and the call can't be part of a
- *              sequence of flushes.
- *
- *              The function does nothing silently if there is no entry
- *              at the supplied address, or if the entry found has the
- *              wrong type.
- *
- * Return:      Non-negative on success/Negative on failure or if there was
- *              an attempt to flush a protected item.
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
+static herr_t
+H5C__write_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr, bool write_entry,
+                 bool generate_image, bool suppress_image_entry_writes)
 {
-    H5C_t  *cache_ptr;                 /* Cache for file */
-    bool    destroy;                   /* external flag */
-    bool    clear_only;                /* external flag */
-    bool    free_file_space;           /* external flag */
-    bool    take_ownership;            /* external flag */
-    bool    del_from_slist_on_destroy; /* external flag */
-    bool    during_flush;              /* external flag */
-    bool    write_entry;               /* internal flag */
-    bool    destroy_entry;             /* internal flag */
-    bool    generate_image;            /* internal flag */
-    bool    update_page_buffer;        /* internal flag */
-    bool    was_dirty;
-    bool    suppress_image_entry_writes = false;
-    bool    suppress_image_entry_frees  = false;
-    haddr_t entry_addr                  = HADDR_UNDEF;
-    herr_t  ret_value                   = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
-
-    assert(f);
-    cache_ptr = f->shared->cache;
-    assert(cache_ptr);
-    assert(entry_ptr);
-    assert(entry_ptr->ring != H5C_RING_UNDEFINED);
-    assert(entry_ptr->type);
-
-    /* setup external flags from the flags parameter */
-    destroy                   = ((flags & H5C__FLUSH_INVALIDATE_FLAG) != 0);
-    clear_only                = ((flags & H5C__FLUSH_CLEAR_ONLY_FLAG) != 0);
-    free_file_space           = ((flags & H5C__FREE_FILE_SPACE_FLAG) != 0);
-    take_ownership            = ((flags & H5C__TAKE_OWNERSHIP_FLAG) != 0);
-    del_from_slist_on_destroy = ((flags & H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) != 0);
-    during_flush              = ((flags & H5C__DURING_FLUSH_FLAG) != 0);
-    generate_image            = ((flags & H5C__GENERATE_IMAGE_FLAG) != 0);
-    update_page_buffer        = ((flags & H5C__UPDATE_PAGE_BUFFER_FLAG) != 0);
-
-    /* Set the flag for destroying the entry, based on the 'take ownership'
-     * and 'destroy' flags
-     */
-    if (take_ownership)
-        destroy_entry = false;
-    else
-        destroy_entry = destroy;
-
-    /* we will write the entry to disk if it exists, is dirty, and if the
-     * clear only flag is not set.
-     */
-    if (entry_ptr->is_dirty && !clear_only)
-        write_entry = true;
-    else
-        write_entry = false;
-
-    /* if we have received close warning, and we have been instructed to
-     * generate a metadata cache image, and we have actually constructed
-     * the entry images, set suppress_image_entry_frees to true.
-     *
-     * Set suppress_image_entry_writes to true if indicated by the
-     * image_ctl flags.
-     */
-    if (cache_ptr->close_warning_received && cache_ptr->image_ctl.generate_image &&
-        cache_ptr->num_entries_in_image > 0 && cache_ptr->image_entries != NULL) {
-
-        /* Sanity checks */
-        assert(entry_ptr->image_up_to_date || !(entry_ptr->include_in_image));
-        assert(entry_ptr->image_ptr || !(entry_ptr->include_in_image));
-        assert((!clear_only) || !(entry_ptr->include_in_image));
-        assert((!take_ownership) || !(entry_ptr->include_in_image));
-        assert((!free_file_space) || !(entry_ptr->include_in_image));
-
-        suppress_image_entry_frees = true;
-
-        if (cache_ptr->image_ctl.flags & H5C_CI__SUPRESS_ENTRY_WRITES)
-            suppress_image_entry_writes = true;
-    } /* end if */
-
-    /* run initial sanity checks */
-#ifdef H5C_DO_SANITY_CHECKS
-    if (cache_ptr->slist_enabled) {
-        if (entry_ptr->in_slist) {
-            assert(entry_ptr->is_dirty);
-            if (!entry_ptr->is_dirty)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry in slist failed sanity checks");
-        } /* end if */
-    }
-    else /* slist is disabled */
-        assert(!entry_ptr->in_slist);
-#endif /* H5C_DO_SANITY_CHECKS */
-
-    if (entry_ptr->is_protected)
-        /* Attempt to flush a protected entry -- scream and die. */
-        HGOTO_ERROR(H5E_CACHE, H5E_PROTECT, FAIL, "Attempt to flush a protected entry");
-
-    /* Set entry_ptr->flush_in_progress = true
-     *
-     * We will set flush_in_progress back to false at the end if the
-     * entry still exists at that point.
-     */
-    entry_ptr->flush_in_progress = true;
-
-    /* Preserve current dirty state for later */
-    was_dirty = entry_ptr->is_dirty;
 
     /* The entry is dirty, and we are doing a flush, a flush destroy or have
      * been requested to generate an image.  In those cases, serialize the
@@ -603,14 +494,172 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
             }
 #endif    /* H5_HAVE_PARALLEL */
         } /* end if */
+    }     /* end if */
 
-        /* if the entry has a notify callback, notify it that we have
-         * just flushed the entry.
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__write_entry */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C__flush_single_entry
+ *
+ * Purpose:     Flush or clear (and evict if requested) the cache entry
+ *              with the specified address and type.  If the type is NULL,
+ *              any unprotected entry at the specified address will be
+ *              flushed (and possibly evicted).
+ *
+ *              Attempts to flush a protected entry will result in an
+ *              error.
+ *
+ *              If the H5C__FLUSH_INVALIDATE_FLAG flag is set, the entry will
+ *              be cleared and not flushed, and the call can't be part of a
+ *              sequence of flushes.
+ *
+ *              The function does nothing silently if there is no entry
+ *              at the supplied address, or if the entry found has the
+ *              wrong type.
+ *
+ *              If the H5C__DISCARD_ON_WRITE_FAILURE_FLAG flag is set and the
+ *              entry can't be serialized or written, the error is pushed
+ *              on the error stack, and the entry is cleared instead of
+ *              flushed, and cache_ptr->unwritable_entries_discarded is
+ *              set, which the caller must check to detect the failure.
+ *
+ * Return:      Non-negative on success/Negative on failure or if there was
+ *              an attempt to flush a protected item.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
+{
+    H5C_t  *cache_ptr;                 /* Cache for file */
+    bool    destroy;                   /* external flag */
+    bool    clear_only;                /* external flag */
+    bool    free_file_space;           /* external flag */
+    bool    take_ownership;            /* external flag */
+    bool    del_from_slist_on_destroy; /* external flag */
+    bool    during_flush;              /* external flag */
+    bool    discard_on_write_failure;  /* external flag */
+    bool    write_entry;               /* internal flag */
+    bool    destroy_entry;             /* internal flag */
+    bool    generate_image;            /* internal flag */
+    bool    update_page_buffer;        /* internal flag */
+    bool    was_dirty;
+    bool    suppress_image_entry_writes = false;
+    bool    suppress_image_entry_frees  = false;
+    haddr_t entry_addr                  = HADDR_UNDEF;
+    herr_t  ret_value                   = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    assert(f);
+    cache_ptr = f->shared->cache;
+    assert(cache_ptr);
+    assert(entry_ptr);
+    assert(entry_ptr->ring != H5C_RING_UNDEFINED);
+    assert(entry_ptr->type);
+
+    /* setup external flags from the flags parameter */
+    destroy                   = ((flags & H5C__FLUSH_INVALIDATE_FLAG) != 0);
+    clear_only                = ((flags & H5C__FLUSH_CLEAR_ONLY_FLAG) != 0);
+    free_file_space           = ((flags & H5C__FREE_FILE_SPACE_FLAG) != 0);
+    take_ownership            = ((flags & H5C__TAKE_OWNERSHIP_FLAG) != 0);
+    del_from_slist_on_destroy = ((flags & H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) != 0);
+    during_flush              = ((flags & H5C__DURING_FLUSH_FLAG) != 0);
+    generate_image            = ((flags & H5C__GENERATE_IMAGE_FLAG) != 0);
+    update_page_buffer        = ((flags & H5C__UPDATE_PAGE_BUFFER_FLAG) != 0);
+    discard_on_write_failure  = ((flags & H5C__DISCARD_ON_WRITE_FAILURE_FLAG) != 0);
+
+    /* Set the flag for destroying the entry, based on the 'take ownership'
+     * and 'destroy' flags
+     */
+    if (take_ownership)
+        destroy_entry = false;
+    else
+        destroy_entry = destroy;
+
+    /* we will write the entry to disk if it exists, is dirty, and if the
+     * clear only flag is not set.
+     */
+    if (entry_ptr->is_dirty && !clear_only)
+        write_entry = true;
+    else
+        write_entry = false;
+
+    /* if we have received close warning, and we have been instructed to
+     * generate a metadata cache image, and we have actually constructed
+     * the entry images, set suppress_image_entry_frees to true.
+     *
+     * Set suppress_image_entry_writes to true if indicated by the
+     * image_ctl flags.
+     */
+    if (cache_ptr->close_warning_received && cache_ptr->image_ctl.generate_image &&
+        cache_ptr->num_entries_in_image > 0 && cache_ptr->image_entries != NULL) {
+
+        /* Sanity checks */
+        assert(entry_ptr->image_up_to_date || !(entry_ptr->include_in_image));
+        assert(entry_ptr->image_ptr || !(entry_ptr->include_in_image));
+        assert((!clear_only) || !(entry_ptr->include_in_image));
+        assert((!take_ownership) || !(entry_ptr->include_in_image));
+        assert((!free_file_space) || !(entry_ptr->include_in_image));
+
+        suppress_image_entry_frees = true;
+
+        if (cache_ptr->image_ctl.flags & H5C_CI__SUPRESS_ENTRY_WRITES)
+            suppress_image_entry_writes = true;
+    } /* end if */
+
+    /* run initial sanity checks */
+#ifdef H5C_DO_SANITY_CHECKS
+    if (cache_ptr->slist_enabled) {
+        if (entry_ptr->in_slist) {
+            assert(entry_ptr->is_dirty);
+            if (!entry_ptr->is_dirty)
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry in slist failed sanity checks");
+        } /* end if */
+    }
+    else /* slist is disabled */
+        assert(!entry_ptr->in_slist);
+#endif /* H5C_DO_SANITY_CHECKS */
+
+    if (entry_ptr->is_protected)
+        /* Attempt to flush a protected entry -- scream and die. */
+        HGOTO_ERROR(H5E_CACHE, H5E_PROTECT, FAIL, "Attempt to flush a protected entry");
+
+    /* Set entry_ptr->flush_in_progress = true
+     *
+     * We will set flush_in_progress back to false at the end if the
+     * entry still exists at that point.
+     */
+    entry_ptr->flush_in_progress = true;
+
+    /* Preserve current dirty state for later */
+    was_dirty = entry_ptr->is_dirty;
+
+    /* Serialize the entry and write it to disk, as appropriate */
+    if (H5C__write_entry(f, cache_ptr, entry_ptr, write_entry, generate_image, suppress_image_entry_writes) <
+        0) {
+        if (!discard_on_write_failure)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't write entry to file");
+
+        /* Push the error, but keep going, and clear the entry instead of
+         * flushing it
          */
-        if (entry_ptr->type->notify &&
-            (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_FLUSH, entry_ptr) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client of entry flush");
-    } /* if ( write_entry ) */
+        HERROR(H5E_CACHE, H5E_CANTFLUSH, "can't write entry at address %" PRIuHADDR ", discarding it",
+               entry_ptr->addr);
+        cache_ptr->unwritable_entries_discarded = true;
+
+        write_entry = false;
+        clear_only  = true;
+    }
+
+    /* if the entry has a notify callback, notify it that we have
+     * just flushed the entry.
+     */
+    if (write_entry && entry_ptr->type->notify &&
+        (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_FLUSH, entry_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client of entry flush");
 
     /* At this point, all pre-serialize and serialize calls have been
      * made if it was appropriate to make them.  Similarly, the entry

@@ -171,6 +171,7 @@
  *    H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG
  *    H5C__GENERATE_IMAGE_FLAG
  *    H5C__UPDATE_PAGE_BUFFER_FLAG
+ *    H5C__DISCARD_ON_WRITE_FAILURE_FLAG
  */
 #define H5C__NO_FLAGS_SET                   0x00000
 #define H5C__DELETED_FLAG                   0x00001
@@ -190,6 +191,7 @@
 #define H5C__DURING_FLUSH_FLAG              0x04000 /* Set when the entire cache is being flushed */
 #define H5C__GENERATE_IMAGE_FLAG            0x08000 /* Set during parallel I/O */
 #define H5C__UPDATE_PAGE_BUFFER_FLAG        0x10000 /* Set during parallel I/O */
+#define H5C__DISCARD_ON_WRITE_FAILURE_FLAG  0x20000 /* Set when the cache is being destroyed */
 
 /* Debugging/sanity checking/statistics settings */
 /* #define H5C_DO_SANITY_CHECKS */

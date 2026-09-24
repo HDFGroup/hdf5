@@ -12456,9 +12456,10 @@ check_destroy_protected_err(unsigned paged)
 /*-------------------------------------------------------------------------
  * Function:    check_destroy_write_err()
  *
- * Purpose:    Verify that when dirty entries cannot be written while
+ * Purpose:    Verify that when a dirty entry cannot be written while
  *        destroying the cache at file close, the destroy reports
- *        failure but still discards the entries and frees the cache.
+ *        failure, but still writes the entries that can be written,
+ *        discards the one that can't, and frees the cache.
  *
  * Return:    void
  *
@@ -12471,6 +12472,8 @@ check_destroy_write_err(unsigned paged)
     H5F_t        *file_ptr            = NULL;
     haddr_t       saved_eoa           = HADDR_UNDEF;
     unsigned long saved_feature_flags = 0;
+    H5AC_ring_t   orig_ring           = H5AC_RING_INV;
+    uint8_t       image_byte          = 0;
     H5CX_node_t   api_ctx             = {{0}, NULL}; /* API context node to push */
 
     if (paged)
@@ -12480,9 +12483,12 @@ check_destroy_write_err(unsigned paged)
 
     pass = true;
 
-    /* allocate a cache and insert two dirty entries.  Move the EOA below
-     * the entries so they cannot be written, then flush destroy.  This
-     * should fail, but still discard the entries and free the cache.
+    /* allocate a cache and insert two dirty entries: one in the user ring,
+     * and one after it in the file, in the superblock ring.  Move the EOA
+     * between the entries so the first one flushed (in the user ring)
+     * cannot be written, then flush destroy.  This should fail, but still
+     * write the entry in the superblock ring, discard both entries, and
+     * free the cache.
      */
     if (pass) {
 
@@ -12492,8 +12498,11 @@ check_destroy_write_err(unsigned paged)
     }
 
     if (pass) {
-        insert_entry(file_ptr, PICO_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
+        insert_entry(file_ptr, PICO_ENTRY_TYPE, 2, H5C__NO_FLAGS_SET);
+
+        H5AC_set_ring(H5AC_RING_SB, &orig_ring);
         insert_entry(file_ptr, PICO_ENTRY_TYPE, 1, H5C__NO_FLAGS_SET);
+        H5AC_set_ring(orig_ring, NULL);
     }
 
     if (pass) {
@@ -12506,9 +12515,9 @@ check_destroy_write_err(unsigned paged)
         saved_eoa = H5FD_get_eoa(file_ptr->shared->lf, H5FD_MEM_DEFAULT);
 
         if (!H5_addr_defined(saved_eoa) ||
-            H5FD_set_eoa(file_ptr->shared->lf, H5FD_MEM_DEFAULT, entries[PICO_ENTRY_TYPE][0].addr) < 0) {
+            H5FD_set_eoa(file_ptr->shared->lf, H5FD_MEM_DEFAULT, entries[PICO_ENTRY_TYPE][2].addr) < 0) {
             pass         = false;
-            failure_mssg = "unable to move EOA below entries.\n";
+            failure_mssg = "unable to move EOA between entries.\n";
         }
     }
 
@@ -12520,7 +12529,7 @@ check_destroy_write_err(unsigned paged)
     }
 
     if (pass) {
-        if (H5AC_dest(file_ptr) >= 0) {
+        if (H5C_dest(file_ptr) >= 0) {
             pass         = false;
             failure_mssg = "destroy succeeded despite entry write error.\n";
         }
@@ -12530,12 +12539,17 @@ check_destroy_write_err(unsigned paged)
 
             /* Restore the EOA so the cache can be destroyed */
             H5FD_set_eoa(file_ptr->shared->lf, H5FD_MEM_DEFAULT, saved_eoa);
-            if (H5C_dest(file_ptr) >= 0)
-                file_ptr->shared->cache = NULL;
+            H5C_dest(file_ptr);
         }
-        else if (!entries[PICO_ENTRY_TYPE][0].destroyed || !entries[PICO_ENTRY_TYPE][1].destroyed) {
+        else if (!entries[PICO_ENTRY_TYPE][1].destroyed || !entries[PICO_ENTRY_TYPE][2].destroyed) {
             pass         = false;
             failure_mssg = "entries not destroyed after entry write error.\n";
+        }
+        else if (H5F_block_read(file_ptr, H5FD_MEM_DEFAULT, entries[PICO_ENTRY_TYPE][1].addr, (size_t)1,
+                                &image_byte) < 0 ||
+                 image_byte != 1) {
+            pass         = false;
+            failure_mssg = "writable entry not written after entry write error.\n";
         }
     }
 
