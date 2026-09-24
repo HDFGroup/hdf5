@@ -122,6 +122,7 @@ typedef struct {
 /********************/
 /* Local Prototypes */
 /********************/
+static H5_ATTR_PURE bool H5PB__entry_is_raw(const H5PB_entry_t *page_entry);
 static herr_t H5PB__insert_entry(H5PB_t *page_buf, H5PB_entry_t *page_entry);
 static htri_t H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type);
 static herr_t H5PB__write_entry(H5F_shared_t *f_sh, H5PB_entry_t *page_entry);
@@ -620,7 +621,14 @@ H5PB_remove_entry(const H5F_shared_t *f_sh, haddr_t addr)
 
     /* If found, remove the entry from the PB cache */
     if (page_entry) {
-        assert(page_entry->type != H5F_MEM_PAGE_DRAW);
+        /* No assertion on the entry type here.  The caller excludes raw
+         * data by allocation type, but that does not bound the entry type:
+         * a global heap page carries H5F_MEM_PAGE_GHEAP when the free space
+         * manager created it, and H5F_MEM_PAGE_DRAW once it has been
+         * evicted and faulted back in, since the I/O paths map GHEAP to
+         * DRAW.  Both are raw by the page counts, and the decrement below
+         * handles them.
+         */
         if (NULL == H5SL_remove(page_buf->slist_ptr, &(page_entry->addr)))
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Page Entry is not in skip list");
 
@@ -628,7 +636,19 @@ H5PB_remove_entry(const H5F_shared_t *f_sh, haddr_t addr)
         H5PB__REMOVE_LRU(page_buf, page_entry)
         assert(H5SL_count(page_buf->slist_ptr) == page_buf->LRU_list_len);
 
-        page_buf->meta_count--;
+        /* Decrement the count the page was charged to.  The caller excludes
+         * raw data, but a page allocated for the global heap reaches here
+         * carrying H5F_MEM_PAGE_GHEAP: H5PB_add_new_page() records the
+         * allocation type, and H5PB_write() reuses that entry without
+         * changing it.  H5PB__insert_entry() charges such a page to
+         * raw_count, so decrementing meta_count unconditionally would
+         * corrupt both counts -- and meta_count is unsigned, so it can wrap
+         * and leave the eviction thresholds wrong for the life of the file.
+         */
+        if (H5PB__entry_is_raw(page_entry))
+            page_buf->raw_count--;
+        else
+            page_buf->meta_count--;
 
         page_entry->page_buf_ptr = H5FL_FAC_FREE(page_buf->page_fac, page_entry->page_buf_ptr);
         page_entry               = H5FL_FREE(H5PB_entry_t, page_entry);
@@ -1114,7 +1134,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                     H5PB__REMOVE_LRU(page_buf, page_entry)
 
                     /* Decrement page count of appropriate type */
-                    if (H5F_MEM_PAGE_DRAW == page_entry->type || H5F_MEM_PAGE_GHEAP == page_entry->type)
+                    if (H5PB__entry_is_raw(page_entry))
                         page_buf->raw_count--;
                     else
                         page_buf->meta_count--;
@@ -1356,6 +1376,44 @@ H5PB_enabled(H5F_shared_t *f_sh, H5FD_mem_t type, bool *enabled)
 } /* end H5PB_enabled() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5PB__entry_is_raw()
+ *
+ * Purpose:     Determine whether a page buffer entry belongs to the raw
+ *              data population rather than the metadata population.
+ *
+ *              Every page in the buffer is charged to exactly one of
+ *              raw_count and meta_count, so this classification is made
+ *              here and used both by the code that maintains those counts
+ *              and by the code that decides which pages the min_raw_count
+ *              and min_meta_count protect.
+ *
+ *              A page entry's type is always assigned from an H5FD_mem_t,
+ *              so only the values H5F_MEM_PAGE_SUPER through
+ *              H5F_MEM_PAGE_OHDR occur here; the H5F_MEM_PAGE_LARGE_*
+ *              values would be classified as metadata, which is what the
+ *              count arithmetic already does with them.
+ *
+ *              Both the raw values occur in practice.  The I/O paths map
+ *              H5FD_MEM_GHEAP to H5FD_MEM_DRAW before entering the page
+ *              buffer, so an entry created by a read or a write is never
+ *              H5F_MEM_PAGE_GHEAP.
+ *
+ * Return:      true if the entry holds raw data, false if it holds
+ *              metadata.  Cannot fail.
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5_ATTR_PURE bool
+H5PB__entry_is_raw(const H5PB_entry_t *page_entry)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    assert(page_entry);
+
+    FUNC_LEAVE_NOAPI(H5F_MEM_PAGE_DRAW == page_entry->type || H5F_MEM_PAGE_GHEAP == page_entry->type)
+} /* end H5PB__entry_is_raw() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5PB__insert_entry()
  *
  * Purpose:     This function was created without documentation.
@@ -1388,7 +1446,7 @@ H5PB__insert_entry(H5PB_t *page_buf, H5PB_entry_t *page_entry)
     assert(H5SL_count(page_buf->slist_ptr) * page_buf->page_size <= page_buf->max_size);
 
     /* Increment appropriate page count */
-    if (H5F_MEM_PAGE_DRAW == page_entry->type || H5F_MEM_PAGE_GHEAP == page_entry->type)
+    if (H5PB__entry_is_raw(page_entry))
         page_buf->raw_count++;
     else
         page_buf->meta_count++;
@@ -1442,7 +1500,7 @@ H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
 
         /* check the metadata threshold before evicting metadata items */
         while (1) {
-            if (page_entry->prev && H5F_MEM_PAGE_META == page_entry->type &&
+            if (page_entry->prev && !H5PB__entry_is_raw(page_entry) &&
                 page_buf->min_meta_count >= page_buf->meta_count)
                 page_entry = page_entry->prev;
             else
@@ -1459,8 +1517,7 @@ H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
 
         /* check the raw data threshold before evicting raw data items */
         while (1) {
-            if (page_entry->prev &&
-                (H5F_MEM_PAGE_DRAW == page_entry->type || H5F_MEM_PAGE_GHEAP == page_entry->type) &&
+            if (page_entry->prev && H5PB__entry_is_raw(page_entry) &&
                 page_buf->min_raw_count >= page_buf->raw_count)
                 page_entry = page_entry->prev;
             else
@@ -1477,7 +1534,7 @@ H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
     assert(H5SL_count(page_buf->slist_ptr) == page_buf->LRU_list_len);
 
     /* Decrement appropriate page type counter */
-    if (H5F_MEM_PAGE_DRAW == page_entry->type || H5F_MEM_PAGE_GHEAP == page_entry->type)
+    if (H5PB__entry_is_raw(page_entry))
         page_buf->raw_count--;
     else
         page_buf->meta_count--;
@@ -1488,7 +1545,7 @@ H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
             HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, "file write failed");
 
     /* Update statistics */
-    if (page_entry->type == H5F_MEM_PAGE_DRAW || H5F_MEM_PAGE_GHEAP == page_entry->type)
+    if (H5PB__entry_is_raw(page_entry))
         page_buf->evictions[1]++;
     else
         page_buf->evictions[0]++;

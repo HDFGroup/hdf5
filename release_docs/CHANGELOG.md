@@ -92,12 +92,22 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed the page buffer's minimum metadata threshold protecting only superblock pages
+
+The page buffer charges every page it holds to either `raw_count` or `meta_count`, counting `H5F_MEM_PAGE_DRAW` and `H5F_MEM_PAGE_GHEAP` pages as raw data and every other page as metadata. The minimum metadata reservation set by `H5Pset_page_buffer_size()` was not written as the complement of that test: it compared the page's type for equality with `H5F_MEM_PAGE_META`, which is an alias for `H5F_MEM_PAGE_SUPER`. A page entry's type is copied verbatim from the memory type of the access that brought the page into the buffer, so B-tree, local heap and object header pages carried other values and were evicted by raw data regardless of `min_meta_perc`, while still counting toward the threshold the reservation was measured against. In practice the reservation protected only the superblock and driver information pages. The classification is now made in one place, `H5PB__entry_is_raw()`, and both the page counts and the two reservations use it, so the metadata reservation protects the same population that `meta_count` measures.
+
+Fixes GitHub issue #6679.
+
+### Fixed the page buffer corrupting its page counts when a global heap page is removed
+
+`H5PB_remove_entry()` decremented `meta_count` for every entry it removed. A page allocated for the global heap reaches the page buffer carrying `H5F_MEM_PAGE_GHEAP`. Because `H5MF__alloc_pagefs()` passes the allocation type to `H5PB_add_new_page()`, and `H5PB_write()` reuses that entry without changing its type, `H5PB__insert_entry()` charges such a page to `raw_count`. Removing it therefore left `raw_count` higher and decremented `meta_count` for a page it had never counted. Both counts govern the minimum metadata and minimum raw data page protection, and because they are unsigned, `meta_count` could wrap and leave those reservations wrong for the remaining life of the file. The counts are now decremented according to the same classification that incremented them.
+
 ### Fixed a heap buffer overflow when decoding object header messages
 
    The size stored in an object header message header was checked against the chunk before the rest of that message header was decoded, allowing a message body to start up to four bytes further into the chunk than the check accounted for. A corrupted or fuzzed file could declare a size that passed the check and still extended past the end of the chunk image, and the message's decode callback was then handed a buffer end outside the allocation. `H5O__chunk_deserialize()` now checks the message size once the whole message header has been decoded.
 
    Fixes GitHub issue #6401
-   
+
 ### Fixed memory leaks and ID reference count issues when pushing an error to an error stack that is full
 
    When an error is pushed to an error stack, the library may make a copy of the file
