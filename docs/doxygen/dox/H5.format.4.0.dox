@@ -5767,7 +5767,7 @@ implemented in the HDF5 Library:
   <td colspan="2"><b>Length:</b> Varies</td>
 </tr>
 <tr>
-  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
+  <td colspan="2"><b>Status:</b> Required for &ldquo;new style&rdquo; groups; may not be repeated.</td>
 </tr>
 <tr>
   <td><b>Description:</b></td>
@@ -6536,7 +6536,7 @@ versions of the HDF5 library from the 1.4 release onward.
 </tr>
 <tr>
   <td>Name</td>
-  <td>This NUL-terminated string provides a description for the opaque type. It is NUL-padded to a
+  <td>This NUL-terminated string is the name of the member. It is NUL-padded to a
       multiple of 8 bytes.</td>
 </tr>
 <tr>
@@ -6595,7 +6595,7 @@ versions of the HDF5 library from the 1.4 release onward.
 </tr>
 <tr>
   <td>Name</td>
-  <td>This NUL-terminated string provides a description for the opaque type. It is NUL-padded to a multiple
+  <td>This NUL-terminated string is the name of the member. It is NUL-padded to a multiple
       of 8 bytes.</td>
 </tr>
 <tr>
@@ -6635,7 +6635,7 @@ versions of the HDF5 library from the 1.4 release onward.
 </tr>
 <tr>
   <td>Name</td>
-  <td>This NUL-terminated string provides a description for the opaque type. It is <em>not</em> NUL-padded to a
+  <td>This NUL-terminated string is the name of the member. It is <em>not</em> NUL-padded to a
       multiple of 8 bytes.</td>
 </tr>
 <tr>
@@ -6798,8 +6798,12 @@ There are no properties defined for the reference class.
 </tr>
 <tr align="left" valign=top>
   <td valign=top>Names</td>
-  <td valign=top>The name for each name/value pair. Each name is stored as a null terminated ASCII string
-      in a multiple of eight bytes. The names are in no particular order.</td>
+  <td valign=top>The name for each name/value pair. Each name is stored as a null terminated string
+      in a multiple of eight bytes. The format does not constrain the character encoding of the
+      string beyond disallowing a NUL byte within the name itself, since the format always appends
+      one as a terminator; the library has historically documented it as ASCII, but the reference
+      implementation does not reject other encodings, such as UTF-8. The names are in no particular
+      order.</td>
 </tr>
 <tr align="left" valign=top>
   <td valign=top>Values</td>
@@ -6840,8 +6844,12 @@ There are no properties defined for the reference class.
 </tr>
 <tr align="left" valign=top>
   <td valign=top>Names</td>
-  <td valign=top>The name for each name/value pair. Each name is stored as a null terminated ASCII string,
-      <em>not</em> padded to a multiple of eight bytes. The names are in no particular order.</td>
+  <td valign=top>The name for each name/value pair. Each name is stored as a null terminated string,
+      <em>not</em> padded to a multiple of eight bytes. The format does not constrain the character
+      encoding of the string beyond disallowing a NUL byte within the name itself, since the format
+      always appends one as a terminator; the library has historically documented it as ASCII, but
+      the reference implementation does not reject other encodings, such as UTF-8. The names are in
+      no particular order.</td>
 </tr>
 <tr align="left" valign=top>
   <td valign=top>Values</td>
@@ -8827,7 +8835,7 @@ The following information exists only when the chunk is filtered. In other words
   <td colspan="2"><b>Length:</b> Varies</td>
 </tr>
 <tr>
-  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
+  <td colspan="2"><b>Status:</b> Required for &ldquo;new style&rdquo; groups; may not be repeated.</td>
 </tr>
 <tr>
   <td><b>Description:</b></td>
@@ -8900,14 +8908,17 @@ The following information exists only when the chunk is filtered. In other words
 </tr>
 <tr>
   <td>Link Phase Change: Maximum Compact Value</td>
-  <td>The is the maximum number of links to store &ldquo;compactly&rdquo; (in the group&rsquo;s object header).<br />
+  <td>This is the maximum number of links to store &ldquo;compactly&rdquo; (in the group&rsquo;s object header).
+      If this field is not present, the default value of <code>8</code> will be used for the maximum compact
+      value.<br />
       This field is present if bit 0 of <em>Flags</em> is set.</td>
 </tr>
 <tr>
   <td>Link Phase Change: Minimum Dense Value</td>
   <td>This is the minimum number of links to store &ldquo;densely&rdquo; (in the group&rsquo;s fractal
       heap). The fractal heap&rsquo;s address is located in the @ref subsubsec_fmt4_dataobject_hdr_msg_linkinfo
-      message.<br />
+      message. If this field is not present, the default value of <code>6</code> will be used for the minimum
+      dense value.<br />
       This field is present if bit 0 of <em>Flags</em> is set.</td>
 </tr>
 <tr>
