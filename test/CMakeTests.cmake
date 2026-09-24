@@ -145,6 +145,7 @@ set (HDF5_REFERENCE_TEST_FILES
     h5fc_ext2_sf.h5
     h5fc_ext3_isf.h5
     h5fc_ext_none.h5
+    heap_corrupt_prfx.h5
     le_data.h5
     le_extlink1.h5
     le_extlink2.h5
