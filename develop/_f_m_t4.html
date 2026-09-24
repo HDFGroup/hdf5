@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-09-23</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-09-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -3739,7 +3739,7 @@ IV.A.3.c. The Link Info Message</h3>
 <tr>
 <td colspan="2"><b>Length:</b> Varies</td></tr>
 <tr>
-<td colspan="2"><b>Status:</b> Optional; may not be repeated.</td></tr>
+<td colspan="2"><b>Status:</b> Required for &ldquo;new style&rdquo; groups; may not be repeated.</td></tr>
 <tr>
 <td><b>Description:</b></td><td>The link info message tracks variable information about the current state of the links for a &ldquo;new style&rdquo; group&rsquo;s behavior. Variable information will be stored in this message and constant information will be stored in the <a class="el" href="#subsubsec_fmt4_dataobject_hdr_msg_groupinfo" title="IV.A.3.k. The Group Info Message">IV.A.3.k. The Group Info Message</a> message.</td></tr>
 <tr>
@@ -4170,7 +4170,7 @@ Member Type Message<br  />
 <tr>
 <th width="30%">Field Name</th><th>Description</th></tr>
 <tr>
-<td>Name</td><td>This NUL-terminated string provides a description for the opaque type. It is NUL-padded to a multiple of 8 bytes.</td></tr>
+<td>Name</td><td>This NUL-terminated string is the name of the member. It is NUL-padded to a multiple of 8 bytes.</td></tr>
 <tr>
 <td>Byte Offset of Member</td><td>This is the byte offset of the member within the datatype.</td></tr>
 <tr>
@@ -4204,7 +4204,7 @@ Member Type Message<br  />
 <tr>
 <th width="30%">Field Name</th><th>Description</th></tr>
 <tr>
-<td>Name</td><td>This NUL-terminated string provides a description for the opaque type. It is NUL-padded to a multiple of 8 bytes.</td></tr>
+<td>Name</td><td>This NUL-terminated string is the name of the member. It is NUL-padded to a multiple of 8 bytes.</td></tr>
 <tr>
 <td>Byte Offset of Member</td><td>This is the byte offset of the member within the datatype.</td></tr>
 <tr>
@@ -4232,7 +4232,7 @@ Member Type Message<br  />
 <tr>
 <th width="30%">Field Name</th><th>Description</th></tr>
 <tr>
-<td>Name</td><td>This NUL-terminated string provides a description for the opaque type. It is <em>not</em> NUL-padded to a multiple of 8 bytes.</td></tr>
+<td>Name</td><td>This NUL-terminated string is the name of the member. It is <em>not</em> NUL-padded to a multiple of 8 bytes.</td></tr>
 <tr>
 <td>Byte Offset of Member</td><td>This is the byte offset of the member within the datatype. The field size is the minimum number of bytes necessary, based on the size of the datatype element. For example, a datatype element size of less than 256 bytes uses a 1 byte length, a datatype element size of 256-65535 bytes uses a 2 byte length, and so on.</td></tr>
 <tr>
@@ -4327,7 +4327,7 @@ Values<br  />
 <tr align="left" valign="top">
 <td valign="top">Base Type</td><td valign="top">Each enumeration type is based on some parent type, usually an integer. The information for that parent type is described recursively by this field.</td></tr>
 <tr align="left" valign="top">
-<td valign="top">Names</td><td valign="top">The name for each name/value pair. Each name is stored as a null terminated ASCII string in a multiple of eight bytes. The names are in no particular order.</td></tr>
+<td valign="top">Names</td><td valign="top">The name for each name/value pair. Each name is stored as a null terminated string in a multiple of eight bytes. The format does not constrain the character encoding of the string beyond disallowing a NUL byte within the name itself, since the format always appends one as a terminator; the library has historically documented it as ASCII, but the reference implementation does not reject other encodings, such as UTF-8. The names are in no particular order.</td></tr>
 <tr align="left" valign="top">
 <td valign="top">Values</td><td valign="top">The list of values in the same order as the names. The values are packed (no inter-value padding) and the size of each value is determined by the parent type.</td></tr>
 </table>
@@ -4358,7 +4358,7 @@ Values<br  />
 <tr align="left" valign="top">
 <td valign="top">Base Type</td><td valign="top">Each enumeration type is based on some parent type, usually an integer. The information for that parent type is described recursively by this field.</td></tr>
 <tr align="left" valign="top">
-<td valign="top">Names</td><td valign="top">The name for each name/value pair. Each name is stored as a null terminated ASCII string, <em>not</em> padded to a multiple of eight bytes. The names are in no particular order.</td></tr>
+<td valign="top">Names</td><td valign="top">The name for each name/value pair. Each name is stored as a null terminated string, <em>not</em> padded to a multiple of eight bytes. The format does not constrain the character encoding of the string beyond disallowing a NUL byte within the name itself, since the format always appends one as a terminator; the library has historically documented it as ASCII, but the reference implementation does not reject other encodings, such as UTF-8. The names are in no particular order.</td></tr>
 <tr align="left" valign="top">
 <td valign="top">Values</td><td valign="top">The list of values in the same order as the names. The values are packed (no inter-value padding) and the size of each value is determined by the parent type.</td></tr>
 </table>
@@ -5535,7 +5535,7 @@ IV.A.3.k. The Group Info Message</h3>
 <tr>
 <td colspan="2"><b>Length:</b> Varies</td></tr>
 <tr>
-<td colspan="2"><b>Status:</b> Optional; may not be repeated.</td></tr>
+<td colspan="2"><b>Status:</b> Required for &ldquo;new style&rdquo; groups; may not be repeated.</td></tr>
 <tr>
 <td><b>Description:</b></td><td>This message stores information for the constants defining a &ldquo;new style&rdquo; group&rsquo;s behavior. Constant information will be stored in this message and variable information will be stored in the <a class="el" href="#subsubsec_fmt4_dataobject_hdr_msg_linkinfo" title="IV.A.3.c. The Link Info Message">IV.A.3.c. The Link Info Message</a> message.<br  />
  Note: the &ldquo;estimated entry&rdquo; information below is used when determining the size of the object header for the group when it is created.</td></tr>
@@ -5572,10 +5572,10 @@ IV.A.3.k. The Group Info Message</h3>
 </table>
 </td></tr>
 <tr>
-<td>Link Phase Change: Maximum Compact Value</td><td>The is the maximum number of links to store &ldquo;compactly&rdquo; (in the group&rsquo;s object header).<br  />
+<td>Link Phase Change: Maximum Compact Value</td><td>This is the maximum number of links to store &ldquo;compactly&rdquo; (in the group&rsquo;s object header). If this field is not present, the default value of <code>8</code> will be used for the maximum compact value.<br  />
  This field is present if bit 0 of <em>Flags</em> is set.</td></tr>
 <tr>
-<td>Link Phase Change: Minimum Dense Value</td><td>This is the minimum number of links to store &ldquo;densely&rdquo; (in the group&rsquo;s fractal heap). The fractal heap&rsquo;s address is located in the <a class="el" href="#subsubsec_fmt4_dataobject_hdr_msg_linkinfo" title="IV.A.3.c. The Link Info Message">IV.A.3.c. The Link Info Message</a> message.<br  />
+<td>Link Phase Change: Minimum Dense Value</td><td>This is the minimum number of links to store &ldquo;densely&rdquo; (in the group&rsquo;s fractal heap). The fractal heap&rsquo;s address is located in the <a class="el" href="#subsubsec_fmt4_dataobject_hdr_msg_linkinfo" title="IV.A.3.c. The Link Info Message">IV.A.3.c. The Link Info Message</a> message. If this field is not present, the default value of <code>6</code> will be used for the minimum dense value.<br  />
  This field is present if bit 0 of <em>Flags</em> is set.</td></tr>
 <tr>
 <td>Estimated Number of Entries</td><td>This is the estimated number of entries in groups. If this field is not present, the default value of <code>4</code> will be used for the estimated number of group entries.<br  />
