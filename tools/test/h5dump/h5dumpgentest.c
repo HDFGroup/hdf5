@@ -15197,7 +15197,7 @@ gent_tintascii(void)
 
     file_id = H5Fcreate(FILE113, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-    type_id = H5Tcopy(H5T_NATIVE_CHAR);
+    type_id = H5Tcopy(H5T_STD_I8LE);
 
     space_id = H5Screate_simple(1, dims, NULL);
 
