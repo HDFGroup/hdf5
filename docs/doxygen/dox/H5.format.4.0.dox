@@ -5767,7 +5767,7 @@ implemented in the HDF5 Library:
   <td colspan="2"><b>Length:</b> Varies</td>
 </tr>
 <tr>
-  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
+  <td colspan="2"><b>Status:</b> Required for &ldquo;new style&rdquo; groups; may not be repeated.</td>
 </tr>
 <tr>
   <td><b>Description:</b></td>
@@ -8835,7 +8835,7 @@ The following information exists only when the chunk is filtered. In other words
   <td colspan="2"><b>Length:</b> Varies</td>
 </tr>
 <tr>
-  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
+  <td colspan="2"><b>Status:</b> Required for &ldquo;new style&rdquo; groups; may not be repeated.</td>
 </tr>
 <tr>
   <td><b>Description:</b></td>
@@ -8908,14 +8908,17 @@ The following information exists only when the chunk is filtered. In other words
 </tr>
 <tr>
   <td>Link Phase Change: Maximum Compact Value</td>
-  <td>The is the maximum number of links to store &ldquo;compactly&rdquo; (in the group&rsquo;s object header).<br />
+  <td>This is the maximum number of links to store &ldquo;compactly&rdquo; (in the group&rsquo;s object header).
+      If this field is not present, the default value of <code>8</code> will be used for the maximum compact
+      value.<br />
       This field is present if bit 0 of <em>Flags</em> is set.</td>
 </tr>
 <tr>
   <td>Link Phase Change: Minimum Dense Value</td>
   <td>This is the minimum number of links to store &ldquo;densely&rdquo; (in the group&rsquo;s fractal
       heap). The fractal heap&rsquo;s address is located in the @ref subsubsec_fmt4_dataobject_hdr_msg_linkinfo
-      message.<br />
+      message. If this field is not present, the default value of <code>6</code> will be used for the minimum
+      dense value.<br />
       This field is present if bit 0 of <em>Flags</em> is set.</td>
 </tr>
 <tr>
