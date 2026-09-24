@@ -43,6 +43,14 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 # ⚠️ Breaking Changes
 
+- When a `find_package (HDF5 ...)` call within a CMake project uses HDF5's `hdf5-config.cmake`
+  configuration file (a Config mode search), requesting both "shared" and "static" components
+  simultaneously will now fail. Only one of the "shared" or "static" components should be requested
+  when locating HDF5. Consequently, the `HDF5_LIB_TYPE` CMake variable set by the configuration file
+  will only be set to one of "shared" or "static", depending on the requested library type, rather
+  than potentially being a list of both. For the time being, both sets of HDF5's "-shared" and
+  "-static" CMake targets will continue to be available after the `find_package (HDF5 ...)` call,
+  regardless of which library type was requested.
 
 # 🪦 Deprecations
 
@@ -51,6 +59,24 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Configuration
 
+### Various improvements in installed CMake package configuration file
+
+   - Fixed `find_dependency()` calls so that `PRIVATE`-linked libraries are only propagated as
+     transitive link requirements for static library targets (Fixes GitHub issue #6347)
+   - Added missing `find_dependency()` calls for some `PRIVATE`-linked libraries
+   - Fixed an issue where `find_package()` for parallel-enabled HDF5 installations may fail when
+     trying to locate MPI Fortran support, even if HDF5 Fortran support isn't requested (Fixes
+     GitHub issue #6366)
+   - Fixed an issue where the `HDF5_LIB_TYPE` CMake variable would be undefined if some HDF5
+     components were requested in a `find_package()` call, but "shared" or "static" was not requested
+   - Removed a call to `enable_language()` in favor of checking the currently enabled CMake languages
+     and failing if a required language isn't enabled
+   - Added a CMake variable for the enabled/disabled status of the "digitally signed plugins"
+     feature
+   - Fixed the CMake variable for the enabled/disabled status of the `HDF5_DIMENSION_SCALES_NEW_REF`
+     option
+   - Reduced the scope of some temporary variables and modifications so they don't propagate to
+     consuming CMake projects
 
 ## Library
 
