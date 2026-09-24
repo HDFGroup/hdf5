@@ -33,8 +33,7 @@
 typedef struct H5PB_entry_t {
     void          *page_buf_ptr; /* Pointer to the buffer containing the data */
     haddr_t        addr;         /* Address of the page in the file */
-    H5F_mem_page_t type;         /* H5FD_mem_t of the access that brought the page   */
-                                 /* in; use H5PB__entry_is_raw() to classify it      */
+    H5F_mem_page_t type;         /* H5FD_mem_t of the access that created or faulted in the page */
     bool           is_dirty;     /* Flag indicating whether the page has dirty data or not */
 
     /* Fields supporting replacement policies */

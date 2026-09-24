@@ -1677,17 +1677,17 @@ error:
 static unsigned
 test_min_threshold_all_meta_types(hid_t orig_fapl, const char *driver_name)
 {
-    char    filename[FILENAME_LEN];          /* Filename to use */
-    hid_t   file_id = H5I_INVALID_HID;       /* File ID */
-    hid_t   fcpl    = H5I_INVALID_HID;
-    hid_t   fapl    = H5I_INVALID_HID;
-    int     i;
-    int     num_elements = 1000;
-    H5PB_t *page_buf     = NULL;
-    haddr_t meta_addr    = HADDR_UNDEF;
-    haddr_t raw_addr     = HADDR_UNDEF;
-    int     *data         = NULL;
-    H5F_t   *f            = NULL;
+    char     filename[FILENAME_LEN];    /* Filename to use */
+    hid_t    file_id = H5I_INVALID_HID; /* File ID */
+    hid_t    fcpl    = H5I_INVALID_HID;
+    hid_t    fapl    = H5I_INVALID_HID;
+    int      i;
+    int      num_elements  = 1000;
+    H5PB_t  *page_buf      = NULL;
+    haddr_t  meta_addr     = HADDR_UNDEF;
+    haddr_t  raw_addr      = HADDR_UNDEF;
+    int     *data          = NULL;
+    H5F_t   *f             = NULL;
     unsigned base_meta_cnt = 0;
     unsigned base_raw_cnt  = 0;
 
@@ -1770,8 +1770,8 @@ test_min_threshold_all_meta_types(hid_t orig_fapl, const char *driver_name)
      * for H5F_MEM_PAGE_SUPER.
      */
     for (i = 0; i < 4; i++)
-        if (H5F_block_write(f, meta_types[i], meta_addr + (sizeof(int) * 200 * (size_t)i),
-                            sizeof(int) * 100, data) < 0)
+        if (H5F_block_write(f, meta_types[i], meta_addr + (sizeof(int) * 200 * (size_t)i), sizeof(int) * 100,
+                            data) < 0)
             FAIL_STACK_ERROR;
 
     /* The buffer is now full, and holds nothing but metadata */
@@ -1788,8 +1788,8 @@ test_min_threshold_all_meta_types(hid_t orig_fapl, const char *driver_name)
      * evicted, but the reservation itself must never be breached.
      */
     for (i = 0; i < 5; i++) {
-        if (H5F_block_write(f, H5FD_MEM_DRAW, raw_addr + (sizeof(int) * 200 * (size_t)i),
-                            sizeof(int) * 100, data) < 0)
+        if (H5F_block_write(f, H5FD_MEM_DRAW, raw_addr + (sizeof(int) * 200 * (size_t)i), sizeof(int) * 100,
+                            data) < 0)
             FAIL_STACK_ERROR;
 
         if (page_buf->meta_count < page_buf->min_meta_count) {
@@ -1868,10 +1868,10 @@ error:
 static unsigned
 test_remove_entry_type_accounting(hid_t orig_fapl, const char *driver_name)
 {
-    char     filename[FILENAME_LEN];          /* Filename to use */
-    hid_t    file_id = H5I_INVALID_HID;       /* File ID */
-    hid_t    fcpl    = H5I_INVALID_HID;
-    hid_t    fapl    = H5I_INVALID_HID;
+    char     filename[FILENAME_LEN];        /* Filename to use */
+    hid_t    file_id     = H5I_INVALID_HID; /* File ID */
+    hid_t    fcpl        = H5I_INVALID_HID;
+    hid_t    fapl        = H5I_INVALID_HID;
     unsigned meta_before = 0;
     unsigned raw_before  = 0;
     H5PB_t  *page_buf    = NULL;

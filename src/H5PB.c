@@ -123,9 +123,9 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 static H5_ATTR_PURE bool H5PB__entry_is_raw(const H5PB_entry_t *page_entry);
-static herr_t H5PB__insert_entry(H5PB_t *page_buf, H5PB_entry_t *page_entry);
-static htri_t H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type);
-static herr_t H5PB__write_entry(H5F_shared_t *f_sh, H5PB_entry_t *page_entry);
+static herr_t            H5PB__insert_entry(H5PB_t *page_buf, H5PB_entry_t *page_entry);
+static htri_t            H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type);
+static herr_t            H5PB__write_entry(H5F_shared_t *f_sh, H5PB_entry_t *page_entry);
 
 /*********************/
 /* Package Variables */
