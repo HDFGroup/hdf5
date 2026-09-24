@@ -169,6 +169,28 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
 endif ()
 
 #-----------------------------------------------------------------------------
+# Ship the module that defines the public target names (hdf5::hdf5 and
+# friends) alongside the config file, which includes it from its own
+# directory.
+#
+# The copy into the build tree is what the build-tree config file includes,
+# so that consuming HDF5 from its build directory yields the same names as
+# consuming it from an installation.
+#-----------------------------------------------------------------------------
+configure_file (
+    ${HDF_RESOURCES_DIR}/HDF5PublicTargets.cmake
+    ${HDF5_BINARY_DIR}/HDF5PublicTargets.cmake
+    COPYONLY
+)
+if (NOT HDF5_EXTERNALLY_CONFIGURED)
+  install (
+      FILES ${HDF_RESOURCES_DIR}/HDF5PublicTargets.cmake
+      DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
+      COMPONENT configinstall
+  )
+endif ()
+
+#-----------------------------------------------------------------------------
 # Add CMake Find modules to installation
 #-----------------------------------------------------------------------------
 install (
