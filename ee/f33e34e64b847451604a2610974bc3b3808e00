@@ -1,0 +1,19 @@
+src/H5Zconfig.c
+  s_e227c87f8a894f::t_4fae314d41ec18 161-163
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "eef33e34e64b847451604a2610974bc3b3808e00",
+  "prompts": {},
+  "sessions": {
+    "s_e227c87f8a894f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d9167f9e-a3af-40f9-a782-2bcdab1e702b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
