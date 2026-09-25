@@ -1,0 +1,117 @@
+config/ConfigureChecks.cmake
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 645-650
+src/H5TSpublic.h
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 1-102
+test/ohdr.c
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 515-640,2256-2264
+  s_71c3fd9a1c4bf7::t_06f3c8cb07ce48 2265
+docs/doxygen/dox/H5.format.4.0.dox
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 5770,6539,6598,6638,6801-6806,6847-6852,8838,8911-8913,8920-8921
+test/dtransform.c
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 332-337,339-340,342-361,363,365-383,385-399,401-441
+.github/ISSUE_TEMPLATE/blank-non-secu-issue.md
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 1-15
+release_docs/MAINTAINERS.md
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 9-11,17-50
+  s_71c3fd9a1c4bf7::t_d43fd7d18e98c0 51
+src/H5CXprivate.h
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 178-181,355-357
+src/H5TSmodule.h
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 28-34
+test/vds.c
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 98-103,12405-12416,12425,12441-12446,12453-12458
+src/CMakeLists.txt
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 903
+src/H5Dpkg.h
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 276-277,756-757
+config/install/hdf5-config.cmake.in
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 19,21,36-44,55-56,60-69,71-72,76-78,88-91,94,96-107,109-110,113-115,137-151,153-154,158-198,202-204,206-207,209-228,230,232-239,241-242,244,248-250,252-300,333,338,353,357,379-382,384-402,404-409,411,413,415-418,423,425-432,434,436,438-439
+docs/doxygen/examples/tables/propertyLists.dox
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 726-729
+src/H5E.c
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 50-54
+src/H5Pdxpl.c
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 184-190,308-310,498-505,2623-2691
+src/H5TSint.c
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 141-142,161,170-171,182-189,460-515,894-895,908-914
+docs/INSTALL_CMake_options.md
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 61
+src/H5Dchunk.c
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 60,164-171,304-333,360-378,382-392,433,2769,2789,2954-2957,2987,3116-3120,3154-3205,3210,3213-3236,3241,3245-3246,3249,3255,3257-3258,3270-3276,3289-3296,3299,3305-3359,3371-3392,3394-3499,3516-3547,3553-3558,3563-3663,3668-3788,3922-3923,3942-3943,3945,4091-4092,4111-4112,4114,5145-5151,5159-5166,5168,5172,5174-5179,5184-5193,5204-5205,5220,5238,5267,5293,5354,5366,5379,5399-5403,5405-5407,5409-5445,5449-5466,5469,5471-5474,5487,5491,5506,5513,5534,5537,5541,5597-5598,5603,5606,5668-5669,6332,6403-6404,6406,6732-6733,6735,6967
+  s_71c3fd9a1c4bf7::t_f3787ffca5cafc 5446-5448
+  s_71c3fd9a1c4bf7::t_214536552c308e 3664-3667
+src/libhdf5.settings.in
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 73
+src/H5Dint.c
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 833-834
+README.md
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 115-116
+src/H5Z.c
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 1891-1895,1919-1929,1967-1979,2208-2218
+src/H5.c
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 403-405
+src/hdf5.h
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 40
+.github/scripts/review-checklist.test.js
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 17,704-748,1098-1101,1647-1668
+  s_71c3fd9a1c4bf7::t_c8f37dbef0f5f7 1669
+release_docs/CHANGELOG.md
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 46-60,69-86,194-208,305-324
+  s_71c3fd9a1c4bf7::t_8a1caf22545e04 325
+docs/doxygen/dox/ReferenceManual.dox
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 87-90
+src/H5TSpkg.h
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 58
+.github/workflows/update-progress.py
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 65,80-96,120-129,132,137
+docs/doxygen/CMakeLists.txt
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 46
+.github/workflows/update-badge.sh
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 215
+release_docs/img/release-schedule.plantuml
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 4,10-24,26-29,32-37
+src/H5Ocache.c
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 1305-1310
+  s_71c3fd9a1c4bf7::t_938a35dc57767d 1311
+src/H5TSprivate.h
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 28,297-304,323,328-332
+  s_71c3fd9a1c4bf7::t_adec5490e3297b 333
+test/dsets.c
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 85,339-341,2351-2358,2371-2378,2422-2429,2442-2449,2490-2497,2511-2518,2561-2568,2581-2588,19438-19652,19763-19766,19768-19769,19771-19775,19777-19798,19800-19801,19804-19808,19810-19817,19819-19882,19884-19886,19889,19892-19907,19909-19914,19916-19919,19921,19923-19924,19926-19933,19960-19962,19980-19984
+  s_71c3fd9a1c4bf7::t_1cd06915ef3875 19985
+src/H5Dprivate.h
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 92-94
+src/H5CX.c
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 178-180,383-388,2319-2352
+  s_71c3fd9a1c4bf7::t_1b8d5f990f4b65 2353
+src/H5Eint.c
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 31-35
+src/H5TS.c
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 63-70,158-212
+src/H5FDros3_s3comms.c
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 49-56,346-349,351,355,383-384,386-397,426-427,429-431
+.github/workflows/clang-format-fix.yml
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 45
+.github/scripts/review-checklist.js
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 5-15,401,405-420,727-738,760-765,1333-1338,1353-1385,1399
+src/H5Ppublic.h
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 9041-9088
+src/H5pubconf.h.in
+  s_71c3fd9a1c4bf7::t_993bd19b001dcf 268-270
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c1a57a18ccf775c8b932b9e94ce16c72e9975296",
+  "prompts": {},
+  "sessions": {
+    "s_71c3fd9a1c4bf7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4d43baf-ffcf-476b-982a-5d7c16d1debb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
