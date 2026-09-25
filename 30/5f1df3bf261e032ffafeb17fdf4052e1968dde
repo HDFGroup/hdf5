@@ -1,0 +1,60 @@
+src/ryu/d2s_intrinsics.h
+  s_b8d78984f1d7b6::t_89f4663d6aff2d 1-357
+src/ryu/common.h
+  s_b8d78984f1d7b6::t_89f4663d6aff2d 1-114
+.codespellrc
+  s_b8d78984f1d7b6::t_922f33bd481d5e 3
+src/ryu/digit_table.h
+  s_b8d78984f1d7b6::t_89f4663d6aff2d 1-35
+src/ryu/h5_ryu_prefix.h
+  s_b8d78984f1d7b6::t_ca501c7f18c45a 1-54
+.github/workflows/clang-format-fix.yml
+  s_b8d78984f1d7b6::t_7304620e101756 38
+src/H5Zconfig.c
+  s_b8d78984f1d7b6::t_53aa42d9ca11bf 147
+  s_b8d78984f1d7b6::t_648f0f04c6cad5 75-121,125-126,128-133,135-143,145-146,148-152,155,160-173,175-207,209-215,217-221,223-227,229-240,242,244-247
+  s_b8d78984f1d7b6::t_a23784de9e2e46 270-272
+  s_b8d78984f1d7b6::t_ebf695cb78866f 49-52
+  s_b8d78984f1d7b6::t_b47c43bcdc4135 53
+src/ryu/ryu.h
+  s_b8d78984f1d7b6::t_89f4663d6aff2d 1-46
+LICENSE
+  s_b8d78984f1d7b6::t_cac6b1a4f52eb3 138-169
+release_docs/CHANGELOG.md
+  s_b8d78984f1d7b6::t_d1bb4be0fae22d 92-96
+src/ryu/LICENSE-Apache2
+  s_b8d78984f1d7b6::t_89f4663d6aff2d 1-201
+src/H5Zdevelop.h
+  s_b8d78984f1d7b6::t_19d69a6007796a 252-263
+src/CMakeLists.txt
+  s_b8d78984f1d7b6::t_91a4b802875b82 1063-1095
+.github/workflows/clang-format-check.yml
+  s_b8d78984f1d7b6::t_7304620e101756 25
+bin/format_source
+  s_b8d78984f1d7b6::t_7e93a3e088ec32 23
+src/ryu/LICENSE-Boost
+  s_b8d78984f1d7b6::t_89f4663d6aff2d 1-23
+src/ryu/d2s.c
+  s_b8d78984f1d7b6::t_89f4663d6aff2d 1-509
+src/ryu/d2s_full_table.h
+  s_b8d78984f1d7b6::t_89f4663d6aff2d 1-367
+src/ryu/README.md
+  s_b8d78984f1d7b6::t_781fb4e60a126e 79-80
+  s_b8d78984f1d7b6::t_eb7a896e73f3b7 1-78,81-111
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "305f1df3bf261e032ffafeb17fdf4052e1968dde",
+  "prompts": {},
+  "sessions": {
+    "s_b8d78984f1d7b6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fbbb2be2-86a7-424a-a666-7a9511b01b40",
+        "model": "claude-opus-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
