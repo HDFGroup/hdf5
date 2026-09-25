@@ -52,6 +52,13 @@ We would like to thank the many HDF5 community members who contributed to this r
   "-static" CMake targets will continue to be available after the `find_package (HDF5 ...)` call,
   regardless of which library type was requested.
 
+- When a `find_package (HDF5 ...)` call within a CMake project uses HDF5's `hdf5-config.cmake`
+  configuration file (a Config mode search), the consuming project may now be required to have
+  one or more CMake languages enabled, depending on the specific COMPONENTS requested. HDF5's
+  configuration file previously enabled these languages automatically with calls to
+  `enable_language()`, but these calls were removed in favor of checking the enabled languages
+  and issuing an error if required languages aren't enabled.
+
 # 🪦 Deprecations
 
 
