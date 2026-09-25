@@ -62,6 +62,14 @@ H5Z__filter_fletcher32(unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts,
     assert(sizeof(uint32_t) >= 4);
 
     if (flags & H5Z_FLAG_REVERSE) { /* Read */
+        /* A Fletcher32-filtered buffer must contain at least the trailing
+         * checksum.  Reject anything smaller to avoid a size_t underflow
+         * when computing the data length.
+         */
+        if (nbytes < FLETCHER_LEN)
+            HGOTO_ERROR(H5E_STORAGE, H5E_OVERFLOW, 0,
+                        "fletcher32 filter input buffer too small to contain checksum");
+
         /* Do checksum if it's enabled for read; otherwise skip it
          * to save performance. */
         if (!(flags & H5Z_FLAG_SKIP_EDC)) {
