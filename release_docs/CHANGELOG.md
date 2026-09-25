@@ -256,6 +256,17 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Documentation
 
+### Clarified that direct chunk writes must supply an entire chunk
+
+   The documentation for `H5Dwrite_chunk()` and `H5DOwrite_chunk()` did not state that the
+   buffer must encode an entire chunk. Before filtering, a chunk always holds every element
+   covered by the chunk dimensions, including the elements of a partial edge chunk that lie
+   outside the dataspace. A precompressed chunk must therefore be the compressed form of the
+   full chunk, not only of the elements inside the dataspace. Since HDF5 2.2.0, the library
+   checks that a filtered chunk unfilters to exactly the full chunk size, so a filtered chunk
+   written without its edge padding can no longer be read with `H5Dread()`. The documentation
+   and the file format specification now state this requirement explicitly.
+
 ## F90 APIs
 
 ## C++ APIs
