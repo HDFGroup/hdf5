@@ -1,0 +1,21 @@
+release_docs/CHANGELOG.md
+  s_71c3fd9a1c4bf7::t_20241549b5394e 128-131
+src/H5Pocpl.c
+  s_71c3fd9a1c4bf7::t_b021f89e128922 1397-1398,1400,1402
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f2728f69e5aa7460fe028384cde67eae22607ee0",
+  "prompts": {},
+  "sessions": {
+    "s_71c3fd9a1c4bf7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4d43baf-ffcf-476b-982a-5d7c16d1debb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
