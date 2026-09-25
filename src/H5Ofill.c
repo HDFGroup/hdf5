@@ -186,13 +186,13 @@ H5FL_BLK_EXTERN(type_conv);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
-                     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
-                     const uint8_t *p)
+H5O__fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
+                     unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
     H5O_fill_t    *fill      = NULL;
     const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
-    void          *ret_value = NULL;           /* Return value */
+    H5T_t         *dt        = NULL;
+    void          *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -303,10 +303,28 @@ H5O__fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
             fill->fill_defined = true;
     }
 
+    /* Verify fill value size against datatype size */
+    if (fill->fill_defined && fill->size > 0) {
+        htri_t msg_exists = false;
+
+        if ((msg_exists = H5O_msg_exists_oh(open_oh, H5O_DTYPE_ID)) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, NULL, "unable to read object header");
+        if (msg_exists) {
+            if (NULL == (dt = H5O_msg_read_oh(f, open_oh, H5O_DTYPE_ID, NULL)))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "can't read datatype message");
+
+            if ((size_t)fill->size != H5T_GET_SIZE(dt))
+                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "inconsistent fill value size");
+        }
+    }
+
     /* Set return value */
     ret_value = (void *)fill;
 
 done:
+    if (dt)
+        H5O_msg_free(H5O_DTYPE_ID, dt);
+
     if (!ret_value && fill) {
         H5MM_xfree(fill->buf);
         fill = H5FL_FREE(H5O_fill_t, fill);
@@ -362,13 +380,13 @@ H5O__fill_old_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flag
 
         /* Get the datatype message  */
         if ((exists = H5O_msg_exists_oh(open_oh, H5O_DTYPE_ID)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read object header");
+            HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, NULL, "unable to read object header");
         if (exists) {
             if (NULL == (dt = (H5T_t *)H5O_msg_read_oh(f, open_oh, H5O_DTYPE_ID, NULL)))
-                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't read DTYPE message");
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "can't read DTYPE message");
             /* Verify size */
             if (fill->size != (ssize_t)H5T_GET_SIZE(dt))
-                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "inconsistent fill value size");
+                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "inconsistent fill value size");
         }
 
         if (NULL == (fill->buf = H5MM_malloc((size_t)fill->size)))

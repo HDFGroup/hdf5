@@ -335,7 +335,7 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
             if (total_nelmts > 0)
                 fb_info->elmts_per_buf = MIN(total_nelmts, MAX(1, (max_buf_size / fb_info->max_elmt_size)));
             else
-                fb_info->elmts_per_buf = max_buf_size / fb_info->max_elmt_size;
+                fb_info->elmts_per_buf = MAX(1, (max_buf_size / fb_info->max_elmt_size));
             assert(fb_info->elmts_per_buf > 0);
 
             /* Compute the buffer size to use */
@@ -388,13 +388,18 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
         else {
             /* If fill value is not library default, use it to set the element size */
             assert(fill->size >= 0);
+
+            if (H5T_get_size(dset_type) != (size_t)fill->size)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
+                            "fill value type size doesn't match file type size");
+
             fb_info->max_elmt_size = fb_info->file_elmt_size = fb_info->mem_elmt_size = (size_t)fill->size;
 
             /* Compute the number of elements that fit within a buffer to write */
             if (total_nelmts > 0)
                 fb_info->elmts_per_buf = MIN(total_nelmts, MAX(1, (max_buf_size / fb_info->max_elmt_size)));
             else
-                fb_info->elmts_per_buf = max_buf_size / fb_info->max_elmt_size;
+                fb_info->elmts_per_buf = MAX(1, (max_buf_size / fb_info->max_elmt_size));
             assert(fb_info->elmts_per_buf > 0);
 
             /* Compute the buffer size to use */
@@ -433,7 +438,7 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
         if (total_nelmts > 0)
             fb_info->elmts_per_buf = MIN(total_nelmts, MAX(1, (max_buf_size / fb_info->max_elmt_size)));
         else
-            fb_info->elmts_per_buf = max_buf_size / fb_info->max_elmt_size;
+            fb_info->elmts_per_buf = MAX(1, (max_buf_size / fb_info->max_elmt_size));
         assert(fb_info->elmts_per_buf > 0);
 
         /* Compute the buffer size to use */
