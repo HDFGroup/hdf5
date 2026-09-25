@@ -1142,24 +1142,23 @@ extern char H5_lib_vers_info_g[];
 #define H5_HAVE_THREADSAFE_API
 #endif
 
-/* The 'concurrency' option is a superset of the 'internal threads' option,
- * providing both the internal thread pool and thread safety for API
- * calls.  The 'internal threads' option provides only the former, so that a
- * build can parallelize the internals of a single API call without claiming
- * that the API itself may be called from several application threads at once.
+/* H5_HAVE_INTERNAL_THREADS covers the thread-local library state - the
+ * per-thread API context and error stack - together with the worker pool that
+ * relies on it.  CMake defines it wherever a threading package is available,
+ * except for a static library on Windows, where there is no DllMain to clean
+ * up a thread's state when it exits.
+ *
+ * API thread safety needs the same per-thread state, so the 'threadsafe' and
+ * 'concurrency' options imply it.  Both are rejected at configure time
+ * without a threading package, and both are unavailable in the one build
+ * where internal threads are, so this only ever restates what CMake already
+ * decided.  Keeping it here means the dependency does not rely on that.
  */
-#if defined(H5_HAVE_CONCURRENCY) && !defined(H5_HAVE_INTERNAL_THREADS)
+#if defined(H5_HAVE_THREADSAFE_API) && !defined(H5_HAVE_INTERNAL_THREADS)
 #define H5_HAVE_INTERNAL_THREADS
 #endif
 
-/* Thread-local library state is required both for API thread safety and for
- * the library's own worker threads.
- */
-#if defined(H5_HAVE_THREADSAFE_API) || defined(H5_HAVE_INTERNAL_THREADS)
-#define H5_HAVE_THREAD_LOCAL_STATE
-#endif
-
-#ifdef H5_HAVE_THREAD_LOCAL_STATE
+#ifdef H5_HAVE_INTERNAL_THREADS
 /* Lock headers */
 #include "H5TSprivate.h"
 #endif

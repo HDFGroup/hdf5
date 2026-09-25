@@ -35,7 +35,7 @@
 #include "H5Eprivate.h" /* Error handling                      */
 #include "H5TSpkg.h"    /* Threadsafety                        */
 
-#ifdef H5_HAVE_THREAD_LOCAL_STATE
+#ifdef H5_HAVE_INTERNAL_THREADS
 
 /****************/
 /* Local Macros */
@@ -212,4 +212,4 @@ done:
 } /* end H5TSset_internal_threads() */
 #endif /* H5_HAVE_INTERNAL_THREADS */
 
-#endif /* H5_HAVE_THREAD_LOCAL_STATE */
+#endif /* H5_HAVE_INTERNAL_THREADS */

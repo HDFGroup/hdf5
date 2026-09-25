@@ -224,14 +224,14 @@ H5_init_library(void)
      */
     if (!H5_dont_atexit_g) {
 
-#ifdef H5_HAVE_THREAD_LOCAL_STATE
+#ifdef H5_HAVE_INTERNAL_THREADS
         /* Clean up thread resources.
          *
          * This must be pushed before the library cleanup code so it's
          * executed in LIFO order (i.e., last).
          */
         (void)atexit(H5TS_term_package);
-#endif /* H5_HAVE_THREAD_LOCAL_STATE */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
         /* Normal library termination code */
         (void)atexit(H5_term_library);
@@ -400,9 +400,9 @@ H5_term_library(void)
             pending += DOWN(M_top);
             pending += DOWN(S_top);
             pending += DOWN(T_top);
-#ifdef H5_HAVE_THREAD_LOCAL_STATE
+#ifdef H5_HAVE_INTERNAL_THREADS
             pending += DOWN(TS_top);
-#endif    /* H5_HAVE_THREAD_LOCAL_STATE */
+#endif    /* H5_HAVE_INTERNAL_THREADS */
         } /* end if */
 
         /* Don't shut down the file code until objects in files are shut down */

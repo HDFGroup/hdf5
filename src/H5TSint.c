@@ -37,7 +37,7 @@
 #include "H5Epkg.h"      /* Error handling                      */
 #include "H5TSpkg.h"     /* Threadsafety                        */
 
-#ifdef H5_HAVE_THREAD_LOCAL_STATE
+#ifdef H5_HAVE_INTERNAL_THREADS
 
 /****************/
 /* Local Macros */
