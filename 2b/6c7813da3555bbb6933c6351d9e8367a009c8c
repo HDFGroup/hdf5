@@ -1,0 +1,23 @@
+release_docs/CHANGELOG.md
+  s_71c3fd9a1c4bf7::t_99ef049507c028 128-131
+src/H5Z.c
+  s_71c3fd9a1c4bf7::t_48332f8c371326 1154-1156
+test/dsets.c
+  s_71c3fd9a1c4bf7::t_0ef4711956f9e3 7955-8033,19950
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "2b6c7813da3555bbb6933c6351d9e8367a009c8c",
+  "prompts": {},
+  "sessions": {
+    "s_71c3fd9a1c4bf7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4d43baf-ffcf-476b-982a-5d7c16d1debb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
