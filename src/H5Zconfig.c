@@ -158,9 +158,9 @@ static int
 H5Z__format_double_canonical(char *buf, size_t bufsize, double val)
 {
     const char *nonfinite = H5Z__fp64_nonfinite_toml(val);
-    char        ryu[32];  /* d2s_buffered_n() writes at most 24 chars */
-    char        dig[24];  /* at most 17 significant digits */
-    char        tmp[40];  /* longest result is 24 chars + NUL */
+    char        ryu[32]; /* d2s_buffered_n() writes at most 24 chars */
+    char        dig[24]; /* at most 17 significant digits */
+    char        tmp[40]; /* longest result is 24 chars + NUL */
     int         ryu_len, i, ndigits = 0, e10 = 0, n = 0;
     bool        neg, exp_neg;
 
