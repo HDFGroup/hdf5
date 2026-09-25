@@ -430,7 +430,7 @@ H5FL_SEQ_DEFINE_STATIC(H5D_rdcc_ent_ptr_t);
 /* Declare a free list to manage H5D_rdcc_ent_t objects */
 H5FL_DEFINE_STATIC(H5D_rdcc_ent_t);
 
-/* Declare a free list to manage the H5D_chunk_info_t struct */
+/* Declare a free list to manage the H5D_chunk_map_t struct */
 H5FL_DEFINE_STATIC(H5D_chunk_map_t);
 
 /* Declare a free list to manage the H5D_piece_info_t struct */
