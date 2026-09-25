@@ -46,6 +46,8 @@ static unsigned test_args(hid_t fapl, const char *driver_name);
 static unsigned test_raw_data_handling(hid_t orig_fapl, const char *driver_name);
 static unsigned test_lru_processing(hid_t orig_fapl, const char *driver_name);
 static unsigned test_min_threshold(hid_t orig_fapl, const char *driver_name);
+static unsigned test_min_threshold_all_meta_types(hid_t orig_fapl, const char *driver_name);
+static unsigned test_remove_entry_type_accounting(hid_t orig_fapl, const char *driver_name);
 static unsigned test_stats_collection(hid_t orig_fapl, const char *driver_name);
 
 /* helper routines */
@@ -1642,6 +1644,348 @@ error:
 } /* test_min_threshold */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_min_threshold_all_meta_types()
+ *
+ * Purpose:     Verify that the minimum metadata reservation protects every
+ *              metadata page type, not just pages whose type was set from
+ *              an H5FD_MEM_SUPER access.
+ *
+ *              test_min_threshold() drives all of its metadata traffic
+ *              with H5FD_MEM_SUPER.  A page buffer entry's type is copied
+ *              verbatim from the H5FD_mem_t of the access that brought the
+ *              page in, and H5F_MEM_PAGE_META is an alias for
+ *              H5F_MEM_PAGE_SUPER, so a reservation check written as an
+ *              equality against H5F_MEM_PAGE_META passes for superblock
+ *              pages and fails for every other kind of metadata.  This
+ *              test uses H5FD_MEM_BTREE so that the page type is
+ *              H5F_MEM_PAGE_BTREE, and then forces raw data insertions
+ *              against a full buffer.
+ *
+ *              The buffer holds 5 pages and min_meta_perc is 40%, giving
+ *              a reservation of 2 pages.  Metadata is driven above the
+ *              reservation and raw data is then inserted repeatedly.  Each
+ *              insertion may evict metadata while meta_count is above the
+ *              reservation, but once meta_count reaches min_meta_count the
+ *              reservation must hold and raw pages must be evicted
+ *              instead.
+ *
+ * Return:      0 if test is successful
+ *              1 if test fails
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_min_threshold_all_meta_types(hid_t orig_fapl, const char *driver_name)
+{
+    char     filename[FILENAME_LEN];    /* Filename to use */
+    hid_t    file_id = H5I_INVALID_HID; /* File ID */
+    hid_t    fcpl    = H5I_INVALID_HID;
+    hid_t    fapl    = H5I_INVALID_HID;
+    int      i;
+    int      num_elements  = 1000;
+    H5PB_t  *page_buf      = NULL;
+    haddr_t  meta_addr     = HADDR_UNDEF;
+    haddr_t  raw_addr      = HADDR_UNDEF;
+    int     *data          = NULL;
+    H5F_t   *f             = NULL;
+    unsigned base_meta_cnt = 0;
+    unsigned base_raw_cnt  = 0;
+
+    /* Metadata types to drive the buffer with.  None is H5FD_MEM_SUPER, so
+     * none of the resulting page types is H5F_MEM_PAGE_META.
+     */
+    const H5FD_mem_t meta_types[4] = {H5FD_MEM_BTREE, H5FD_MEM_LHEAP, H5FD_MEM_OHDR, H5FD_MEM_BTREE};
+
+    TESTING("Minimum metadata threshold with non-superblock metadata");
+
+    h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
+
+    if ((fapl = H5Pcopy(orig_fapl)) < 0)
+        TEST_ERROR;
+
+    if (set_multi_split(driver_name, fapl, sizeof(int) * 200) != 0)
+        TEST_ERROR;
+
+    if ((data = (int *)calloc((size_t)num_elements, sizeof(int))) == NULL)
+        TEST_ERROR;
+
+    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Pset_file_space_page_size(fcpl, sizeof(int) * 200) < 0)
+        FAIL_STACK_ERROR;
+
+    /* 5 pages in the buffer, 40% of them reserved for metadata */
+    if (H5Pset_page_buffer_size(fapl, sizeof(int) * 1000, 40, 0) < 0)
+        FAIL_STACK_ERROR;
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+        FAIL_STACK_ERROR;
+
+    if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
+        FAIL_STACK_ERROR;
+
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->page_buf);
+
+    page_buf = f->shared->page_buf;
+
+    /* Record what file creation left behind; the counts below are relative
+     * to it, as in test_min_threshold().
+     */
+    base_meta_cnt = page_buf->meta_count;
+    base_raw_cnt  = page_buf->raw_count;
+
+    /* The page-by-page trace below assumes creation leaves exactly one
+     * metadata page, so that the four writes that follow fill the buffer.
+     * Fail loudly rather than silently changing shape if that ever moves.
+     */
+    if (base_raw_cnt != 0)
+        TEST_ERROR;
+
+    if (base_meta_cnt != 1)
+        TEST_ERROR;
+
+    if (page_buf->min_meta_count != 2)
+        TEST_ERROR;
+
+    if (page_buf->min_raw_count != 0)
+        TEST_ERROR;
+
+    if (HADDR_UNDEF == (meta_addr = H5MF_alloc(f, H5FD_MEM_BTREE, sizeof(int) * (size_t)num_elements)))
+        FAIL_STACK_ERROR;
+
+    if (HADDR_UNDEF == (raw_addr = H5MF_alloc(f, H5FD_MEM_DRAW, sizeof(int) * (size_t)num_elements)))
+        FAIL_STACK_ERROR;
+
+    for (i = 0; i < 100; i++)
+        data[i] = i;
+
+    /* Fill the buffer with metadata pages.  These count toward meta_count,
+     * but none of their page types is H5F_MEM_PAGE_META, which is an alias
+     * for H5F_MEM_PAGE_SUPER.
+     */
+    for (i = 0; i < 4; i++)
+        if (H5F_block_write(f, meta_types[i], meta_addr + (sizeof(int) * 200 * (size_t)i), sizeof(int) * 100,
+                            data) < 0)
+            FAIL_STACK_ERROR;
+
+    /* The buffer is now full, and holds nothing but metadata */
+    if (H5SL_count(page_buf->slist_ptr) != 5)
+        TEST_ERROR;
+
+    if (page_buf->meta_count != 5)
+        TEST_ERROR;
+
+    if (page_buf->raw_count != 0)
+        TEST_ERROR;
+
+    /* Now insert raw data pages.  Metadata above the reservation may be
+     * evicted, but the reservation itself must never be breached.
+     */
+    for (i = 0; i < 5; i++) {
+        if (H5F_block_write(f, H5FD_MEM_DRAW, raw_addr + (sizeof(int) * 200 * (size_t)i), sizeof(int) * 100,
+                            data) < 0)
+            FAIL_STACK_ERROR;
+
+        if (page_buf->meta_count < page_buf->min_meta_count) {
+            H5_FAILED();
+            AT();
+            printf("    meta_count %u fell below min_meta_count %u after raw write %d\n",
+                   page_buf->meta_count, page_buf->min_meta_count, i);
+            goto error;
+        }
+    }
+
+    /* The reservation must have been held by evicting raw pages, not by the
+     * buffer declining to hold raw data at all: it is still full, it has been
+     * driven down to exactly the reservation, and the rest is raw.
+     */
+    if (H5SL_count(page_buf->slist_ptr) != 5)
+        TEST_ERROR;
+
+    if (page_buf->meta_count != page_buf->min_meta_count)
+        TEST_ERROR;
+
+    if (page_buf->raw_count != 5 - page_buf->min_meta_count)
+        TEST_ERROR;
+
+    if (H5Fclose(file_id) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(fcpl) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(fapl) < 0)
+        FAIL_STACK_ERROR;
+
+    free(data);
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl);
+        H5Pclose(fcpl);
+        H5Fclose(file_id);
+    }
+    H5E_END_TRY
+
+    if (data)
+        free(data);
+
+    return 1;
+} /* test_min_threshold_all_meta_types */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_remove_entry_type_accounting()
+ *
+ * Purpose:     Verify that H5PB_remove_entry() decrements the page count
+ *              the entry was actually charged to.
+ *
+ *              A page allocated for the global heap reaches the page
+ *              buffer carrying H5F_MEM_PAGE_GHEAP: H5MF__alloc_pagefs()
+ *              passes the allocation type to H5PB_add_new_page(), and
+ *              H5PB_write() reuses that entry without changing its type
+ *              even though H5F_block_write() has mapped the access itself
+ *              to H5FD_MEM_DRAW.  H5PB__insert_entry() charges such a page
+ *              to raw_count, while H5PB_remove_entry() previously
+ *              decremented meta_count unconditionally.  Both counts were
+ *              then wrong, and since they are unsigned, meta_count could
+ *              wrap and leave the eviction thresholds corrupted for the
+ *              remaining life of the file.
+ *
+ * Return:      0 if test is successful
+ *              1 if test fails
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_remove_entry_type_accounting(hid_t orig_fapl, const char *driver_name)
+{
+    char     filename[FILENAME_LEN];        /* Filename to use */
+    hid_t    file_id     = H5I_INVALID_HID; /* File ID */
+    hid_t    fcpl        = H5I_INVALID_HID;
+    hid_t    fapl        = H5I_INVALID_HID;
+    unsigned meta_before = 0;
+    unsigned raw_before  = 0;
+    H5PB_t  *page_buf    = NULL;
+    haddr_t  gheap_addr  = HADDR_UNDEF;
+    int     *data        = NULL;
+    H5F_t   *f           = NULL;
+
+    TESTING("Page count accounting in H5PB_remove_entry()");
+
+    h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
+
+    if ((fapl = H5Pcopy(orig_fapl)) < 0)
+        TEST_ERROR;
+
+    if (set_multi_split(driver_name, fapl, sizeof(int) * 200) != 0)
+        TEST_ERROR;
+
+    if ((data = (int *)calloc((size_t)100, sizeof(int))) == NULL)
+        TEST_ERROR;
+
+    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Pset_file_space_page_size(fcpl, sizeof(int) * 200) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Pset_page_buffer_size(fapl, sizeof(int) * 1000, 0, 0) < 0)
+        FAIL_STACK_ERROR;
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+        FAIL_STACK_ERROR;
+
+    if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
+        FAIL_STACK_ERROR;
+
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->page_buf);
+
+    page_buf = f->shared->page_buf;
+
+    /* A sub-page global heap allocation starts a new page, which
+     * H5MF__alloc_pagefs() hands to H5PB_add_new_page() with the allocation
+     * type, so the entry carries H5F_MEM_PAGE_GHEAP.
+     */
+    if (HADDR_UNDEF == (gheap_addr = H5MF_alloc(f, H5FD_MEM_GHEAP, sizeof(int) * 100)))
+        FAIL_STACK_ERROR;
+
+    /* Writing it moves the entry onto the LRU, where it is charged to
+     * raw_count, the page type rather than the access type deciding.
+     */
+    if (H5F_block_write(f, H5FD_MEM_GHEAP, gheap_addr, sizeof(int) * 100, data) < 0)
+        FAIL_STACK_ERROR;
+
+    meta_before = page_buf->meta_count;
+    raw_before  = page_buf->raw_count;
+
+    /* The page must have been charged to raw_count.  Its entry type is
+     * H5F_MEM_PAGE_GHEAP here, but H5F_MEM_PAGE_DRAW would exercise the same
+     * defect, so this checks the charge rather than the type.
+     */
+    if (0 == raw_before)
+        TEST_ERROR;
+
+    /* This is the call the free-space merge path makes */
+    if (H5PB_remove_entry(f->shared, gheap_addr) < 0)
+        FAIL_STACK_ERROR;
+
+    if (page_buf->raw_count != raw_before - 1) {
+        H5_FAILED();
+        AT();
+        printf("    raw_count %u, expected %u\n", page_buf->raw_count, raw_before - 1);
+        goto error;
+    }
+
+    if (page_buf->meta_count != meta_before) {
+        H5_FAILED();
+        AT();
+        printf("    meta_count %u, expected %u\n", page_buf->meta_count, meta_before);
+        goto error;
+    }
+
+    if (H5Fclose(file_id) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(fcpl) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(fapl) < 0)
+        FAIL_STACK_ERROR;
+
+    free(data);
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl);
+        H5Pclose(fcpl);
+        H5Fclose(file_id);
+    }
+    H5E_END_TRY
+
+    if (data)
+        free(data);
+
+    return 1;
+} /* test_remove_entry_type_accounting */
+
+/*-------------------------------------------------------------------------
  * Function:    test_pb_fapl_tolerance_at_open()
  *
  * Purpose:     Tests if the library tolerates setting fapl page buffer
@@ -2084,6 +2428,8 @@ main(void)
     nerrors += test_raw_data_handling(fapl, driver_name);
     nerrors += test_lru_processing(fapl, driver_name);
     nerrors += test_min_threshold(fapl, driver_name);
+    nerrors += test_min_threshold_all_meta_types(fapl, driver_name);
+    nerrors += test_remove_entry_type_accounting(fapl, driver_name);
     nerrors += test_stats_collection(fapl, driver_name);
     nerrors += test_pb_fapl_tolerance_at_open();
 
