@@ -1,0 +1,23 @@
+.github/workflows/main.yml
+  s_71c3fd9a1c4bf7::t_65e39d32172ec5 297-298
+.github/workflows/main-spc.yml
+  s_71c3fd9a1c4bf7::t_863d22e5312e7d 62-63,126-127,185-186,244-245,301-302,358-359,415
+.github/workflows/main-par.yml
+  s_71c3fd9a1c4bf7::t_bebc166092b1b7 59-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "9dcfc9947f0d533f0bcc8c4e5a3e071cc6b9d950",
+  "prompts": {},
+  "sessions": {
+    "s_71c3fd9a1c4bf7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4d43baf-ffcf-476b-982a-5d7c16d1debb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
