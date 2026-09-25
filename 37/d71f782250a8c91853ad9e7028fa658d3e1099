@@ -1,0 +1,197 @@
+.codespellrc
+  s_e227c87f8a894f::t_a4b3ad25423199 3
+.github/scripts/draft-pr-policy.js
+  s_e227c87f8a894f::t_e4919d70706cd0 42-52,64-68
+.github/scripts/review-checklist.js
+  s_e227c87f8a894f::t_12d765d747f9c6 402-414,421,426,430-431,433-435,463-489,736-749,751,877,936,1008-1022,1033,1041,1046,1319
+.github/scripts/review-checklist.test.js
+  s_e227c87f8a894f::t_1cbc245535b196 15,1354-1360,1365,1373-1392,1672-1830
+.github/workflows/arm-main.yml
+  s_e227c87f8a894f::t_80f3ffc0ed79c9 48,60,289
+.github/workflows/bintest.yml
+  s_e227c87f8a894f::t_9a24eb63d2250a 39,122,176,216,244
+.github/workflows/clang-format-check.yml
+  s_e227c87f8a894f::t_d0d54d31f42fc7 25
+.github/workflows/clang-format-fix.yml
+  s_e227c87f8a894f::t_55842a338f9617 38,40
+.github/workflows/codeql.yml
+  s_e227c87f8a894f::t_5008a982a8fac5 28,95,182,210,259
+.github/workflows/ctest.yml
+  s_e227c87f8a894f::t_8ad7f7b949f2df 97,109,254,266,425,437,611,645,680,833,928,935,941,1080,1087
+.github/workflows/freebsd.yml
+  s_e227c87f8a894f::t_17d8ef73a9de33 57
+.github/workflows/intel.yml
+  s_e227c87f8a894f::t_f34feb0152fa62 34,83,90
+.github/workflows/java-examples-maven-test.yml
+  s_e227c87f8a894f::t_2dd36db37e1206 40,203,322
+.github/workflows/java-implementation-test.yml
+  s_e227c87f8a894f::t_b92fed74329612 132
+.github/workflows/main-spc.yml
+  s_e227c87f8a894f::t_c448929794c611 395,402
+.github/workflows/main-static.yml
+  s_e227c87f8a894f::t_7b2889b5fadd47 145
+.github/workflows/main.yml
+  s_e227c87f8a894f::t_4359f37f370152 172,185
+.github/workflows/maven-build-test.yml
+  s_e227c87f8a894f::t_d1aa4acacf0485 86,158,217
+.github/workflows/maven-deploy.yml
+  s_e227c87f8a894f::t_e8e81284ccf0ed 272
+.github/workflows/maven-staging.yml
+  s_e227c87f8a894f::t_4131ca71a08678 265,697,828
+.github/workflows/openbsd.yml
+  s_e227c87f8a894f::t_131bac510ca73b 57
+.github/workflows/par-script.yml
+  s_e227c87f8a894f::t_a421d3287f3837 50,181
+.github/workflows/par-source.yml
+  s_e227c87f8a894f::t_2feec5f0429b85 83,200
+.github/workflows/release-files.yml
+  s_e227c87f8a894f::t_1a6e0d278a9942 197,239
+.github/workflows/scorecard.yml
+  s_e227c87f8a894f::t_bec9bb7e6592d4 70
+.github/workflows/script.yml
+  s_e227c87f8a894f::t_2fc1c0b7831e1d 51,164,263,275,315,382,498,505,511,623,630,738
+.github/workflows/stale-pr-policy.yml
+  s_e227c87f8a894f::t_a08bf9769d3bbd 42-45,49-51
+.github/workflows/test-binary-installation.yml
+  s_e227c87f8a894f::t_4afc115bb45ccd 81,286
+.github/workflows/test-maven-packages.yml
+  s_e227c87f8a894f::t_82bc290ddfd19f 66,337
+.github/workflows/vfd-ros3.yml
+  s_e227c87f8a894f::t_d1f44a6edfaa65 107,270
+.github/workflows/vol_rest.yml
+  s_e227c87f8a894f::t_d6e32e055a486e 37-40
+.github/workflows/zizmor.yml
+  s_e227c87f8a894f::t_ec6c8becacd970 50
+HDF5Examples/C/H5PAR/C_sourcefiles.cmake
+  s_e227c87f8a894f::t_a4eb7cafed92e9 13
+HDF5Examples/C/H5PAR/ph5_comm_split.c
+  s_e227c87f8a894f::t_4df8f64f4f2468 1-365
+LICENSE
+  s_e227c87f8a894f::t_284ac849194e31 138-169
+bin/format_source
+  s_e227c87f8a894f::t_4ff4c0f18ab6ab 23
+fortran/src/H5Fff.F90
+  s_e227c87f8a894f::t_a6901242f3556d 44-50,872-900,907-908,913,917-920,930-931,942,946-956,966-967,972,978-981,994-997,1012-1015,1018-1047
+fortran/src/H5_ff.F90
+  s_e227c87f8a894f::t_0d4603cba3e03e 180,184-185,809-822,837,862-864
+fortran/test/fortranlib_test.F90
+  s_e227c87f8a894f::t_3286bf369167a5 75-79
+fortran/test/tH5A.F90
+  s_e227c87f8a894f::t_979c1f2452a522 151
+fortran/test/tH5A_1_8.F90
+  s_e227c87f8a894f::t_ca1d49c73d7999 2527
+fortran/test/tH5D.F90
+  s_e227c87f8a894f::t_8b96686c2962c8 87,328,431,441,540,1031
+fortran/test/tH5E.F90
+  s_e227c87f8a894f::t_cd5e137944c321 64,77
+fortran/test/tH5F.F90
+  s_e227c87f8a894f::t_3611a1c3ca23e0 46-237,246-249,257-258,269-270,279-280,286-287,292-293,505,512,522,529,735,962,1031,1067,1153,1280,1372
+fortran/test/tH5G.F90
+  s_e227c87f8a894f::t_cc30dbb61ef3ec 84
+fortran/test/tH5I.F90
+  s_e227c87f8a894f::t_c69151efefb764 110
+fortran/test/tH5P.F90
+  s_e227c87f8a894f::t_4cd757ce88d621 74-75,267,485
+fortran/test/tH5R.F90
+  s_e227c87f8a894f::t_fa391eb1b1af81 85,302,539
+fortran/test/tH5S.F90
+  s_e227c87f8a894f::t_f3385a960f4e44 104,112
+fortran/test/tH5Sselect.F90
+  s_e227c87f8a894f::t_54ce45beff5b4c 161,578,586,981,1107,1149,1267
+fortran/test/tH5T.F90
+  s_e227c87f8a894f::t_0b1c5d972fc4b5 189,870,988
+fortran/test/tH5VL.F90
+  s_e227c87f8a894f::t_0b752655f4894f 90,252,410
+fortran/test/tH5Z.F90
+  s_e227c87f8a894f::t_cdd3dba659ca86 553
+java/src-jni/jni/h5util.c
+  s_e227c87f8a894f::t_15481f0085b5c1 4350,4562-4582,4703,4883-4902,5029,5157-5163,5297,5419-5425
+java/src-jni/jni/h5zImp.c
+  s_e227c87f8a894f::t_2674dec31edca2 191-192,244-245,297-298
+java/src-jni/test/TestH5D.java
+  s_e227c87f8a894f::t_499ac421f0360a 1698-1920
+java/src-jni/test/testfiles/JUnit-TestH5D.txt
+  s_e227c87f8a894f::t_73660929c5c6f0 4,22,36,41
+release_docs/CHANGELOG.md
+  s_e227c87f8a894f::t_97c211195dcb6e 183-187,404-409,458-487,563-581
+src/CMakeLists.txt
+  s_e227c87f8a894f::t_ef7cff8c15a2d2 1030-1058,1078-1110
+src/H5Opline.c
+  s_e227c87f8a894f::t_780ea5c1c5c4d2 1086-1091,1101-1110
+src/H5Pocpl.c
+  s_e227c87f8a894f::t_0be2c2b9041136 1489-1505,2056-2059,2666-2667,2675-2683,2725-2727,2774-2776
+src/H5Ppublic.h
+  s_e227c87f8a894f::t_87f914e333e7b4 2841-2853,3071-3079
+src/H5Z.c
+  s_e227c87f8a894f::t_d0416095a3e239 459-466
+src/H5Zconfig.c
+  s_e227c87f8a894f::t_df91d6cdd7a3a0 41-46,49-53,75-249,253,270-272,348-353,355-360,431-433,501-524,587-594,886
+src/H5Zdeflate.c
+  s_e227c87f8a894f::t_f9baef333ead11 40
+src/H5Zdevelop.h
+  s_e227c87f8a894f::t_924ea15e82955b 245-263,268-273
+src/H5Zfletcher32.c
+  s_e227c87f8a894f::t_26f5100236b63c 27
+src/H5Znbit.c
+  s_e227c87f8a894f::t_bc7d1d12bbb2c0 88
+src/H5Zprivate.h
+  s_e227c87f8a894f::t_cb9f3bc88106ef 232-234
+src/H5Zscaleoffset.c
+  s_e227c87f8a894f::t_81d27f19a0bd75 98
+src/H5Zshuffle.c
+  s_e227c87f8a894f::t_4b593d8b8929ab 31
+src/H5Zszip.c
+  s_e227c87f8a894f::t_a7bf7a3e73508d 44
+src/ryu/LICENSE-Apache2
+  s_e227c87f8a894f::t_4aa7bcfcbbb069 1-201
+src/ryu/LICENSE-Boost
+  s_e227c87f8a894f::t_d99d6fb29de24d 1-23
+src/ryu/README.md
+  s_e227c87f8a894f::t_bff4d5956348c0 1-111
+src/ryu/common.h
+  s_e227c87f8a894f::t_6b5b8ecb4fabce 1-114
+src/ryu/d2s.c
+  s_e227c87f8a894f::t_58866188464c5b 1-509
+src/ryu/d2s_full_table.h
+  s_e227c87f8a894f::t_8b12b445b8fa7c 1-367
+src/ryu/d2s_intrinsics.h
+  s_e227c87f8a894f::t_9da71ed88e7484 1-357
+src/ryu/digit_table.h
+  s_e227c87f8a894f::t_5da478e05b7b8a 1-35
+src/ryu/h5_ryu_prefix.h
+  s_e227c87f8a894f::t_1623c90e8b0a44 1-54
+src/ryu/ryu.h
+  s_e227c87f8a894f::t_33601955e477de 1-46
+src/tomlc17/README.md
+  s_e227c87f8a894f::t_8331da2fcbb422 28-29,33,54-57,70-107,113,116-132,153-154,157
+src/tomlc17/h5_toml_prefix.h
+  s_e227c87f8a894f::t_1d34b3cf1935fd 1-60
+src/tomlc17/tomlc17.c
+  s_e227c87f8a894f::t_046456dd016695 2676-2693,2695,2697-2700
+test/tfilter2.c
+  s_e227c87f8a894f::t_891de9d0272103 267-293,2059-2064,2128-2135,2137,3227-3234,3243-3251,3253-3268,3270,3272,6516-6517,6948,6950,6952,6958,7030,7371
+tools/lib/h5diff_array.c
+  s_e227c87f8a894f::t_e7d8e17bb6736e 4680,4683
+tools/lib/h5tools_dump.c
+  s_e227c87f8a894f::t_33cbc56e33e884 3188-3200,3215-3235,3238,3903-3912,3925-3928
+tools/lib/h5tools_str.c
+  s_e227c87f8a894f::t_1ee5b071ee00b1 610,613,1613
+tools/src/h5ls/h5ls.c
+  s_e227c87f8a894f::t_efd2af1138ba61 344
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "37d71f782250a8c91853ad9e7028fa658d3e1099",
+  "prompts": {},
+  "sessions": {
+    "s_e227c87f8a894f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d9167f9e-a3af-40f9-a782-2bcdab1e702b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
