@@ -413,9 +413,12 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
     }
 
 /* Check and handle special situation for signed integer type */
+/* Compute (max - min) in the unsigned domain so the subtraction can't
+ * trigger a signed int overflow when the data spans the full range of the type.
+ */
 #define H5Z_scaleoffset_check_2(type, max, min, minbits)                                                     \
     {                                                                                                        \
-        if ((unsigned type)(max - min) > (unsigned type)(~(unsigned type)0 - 2)) {                           \
+        if (((unsigned type)max - (unsigned type)min) > (unsigned type)(~(unsigned type)0 - 2)) {            \
             *minbits = sizeof(type) * 8;                                                                     \
             return;                                                                                          \
         }                                                                                                    \
@@ -498,7 +501,8 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
             if (*minbits ==                                                                                  \
                 H5Z_SO_INT_MINBITS_DEFAULT) { /* minbits not set yet, calculate max, min, and minbits */     \
                 H5Z_scaleoffset_max_min_1(i, d_nelmts, buf, filval, max, min)                                \
-                    H5Z_scaleoffset_check_2(type, max, min, minbits) span = (unsigned type)(max - min + 1);  \
+                    H5Z_scaleoffset_check_2(type, max, min, minbits) span =                                  \
+                        (unsigned type)((unsigned type)max - (unsigned type)min + 1);                        \
                 *minbits = H5Z__scaleoffset_log2((unsigned long long)(span + 1));                            \
             }                                                                                                \
             else /* minbits already set, only calculate min */                                               \
@@ -512,7 +516,8 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
             if (*minbits ==                                                                                  \
                 H5Z_SO_INT_MINBITS_DEFAULT) { /* minbits not set yet, calculate max, min, and minbits */     \
                 H5Z_scaleoffset_max_min_2(i, d_nelmts, buf, max, min)                                        \
-                    H5Z_scaleoffset_check_2(type, max, min, minbits) span = (unsigned type)(max - min + 1);  \
+                    H5Z_scaleoffset_check_2(type, max, min, minbits) span =                                  \
+                        (unsigned type)((unsigned type)max - (unsigned type)min + 1);                        \
                 *minbits = H5Z__scaleoffset_log2((unsigned long long)span);                                  \
             }                                                                                                \
             else /* minbits already set, only calculate min */                                               \
