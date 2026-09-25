@@ -1,0 +1,67 @@
+fortran/src/H5_f.c
+  s_71c3fd9a1c4bf7::t_e287bf67910c47 563
+fortran/src/H5_ff.F90
+  s_71c3fd9a1c4bf7::t_e0db5defdb3a37 59,396
+fortran/src/H5f90global.F90
+  s_71c3fd9a1c4bf7::t_de9b29fe40b646 258,295
+java/hdf/hdf5lib/HDF5Constants.java
+  s_71c3fd9a1c4bf7::t_b8a72fe4767898 585-586
+java/src-jni/hdf/hdf5lib/HDF5Constants.java
+  s_71c3fd9a1c4bf7::t_c50fc94007663e 578-579,2099-2100
+java/src-jni/jni/h5Constants.c
+  s_71c3fd9a1c4bf7::t_852f14f5954be3 1312-1316
+release_docs/CHANGELOG.md
+  s_71c3fd9a1c4bf7::t_dd3b6c9b92ab0c 90-93
+src/H5Aint.c
+  s_71c3fd9a1c4bf7::t_0f16489b5d4d3c 102
+src/H5Dlayout.c
+  s_71c3fd9a1c4bf7::t_b1cd8918f21c81 52
+src/H5Fpublic.h
+  s_71c3fd9a1c4bf7::t_270235fab4315d 187-188
+src/H5Fsuper.c
+  s_71c3fd9a1c4bf7::t_20344c4a0f5461 75
+src/H5Ofill.c
+  s_71c3fd9a1c4bf7::t_7f8db738b5f1ca 157
+src/H5Ofsinfo.c
+  s_71c3fd9a1c4bf7::t_962ec39da87245 73
+src/H5Oint.c
+  s_71c3fd9a1c4bf7::t_849a156c83b3e0 132
+src/H5Opline.c
+  s_71c3fd9a1c4bf7::t_cff9798a62c90d 92
+src/H5S.c
+  s_71c3fd9a1c4bf7::t_2ed7e5a62d6b44 68
+src/H5Shyper.c
+  s_71c3fd9a1c4bf7::t_bb969bab24cb88 245
+src/H5Spoint.c
+  s_71c3fd9a1c4bf7::t_57bbd38813ca1d 130
+src/H5T.c
+  s_71c3fd9a1c4bf7::t_790f11976fd58d 745
+src/H5trace.c
+  s_71c3fd9a1c4bf7::t_79cc78ffee9883 1456-1460
+test/chunk_info.c
+  s_71c3fd9a1c4bf7::t_ad296829fe67b3 58
+test/h5test.c
+  s_71c3fd9a1c4bf7::t_a1ce2099d512e5 114
+tools/src/h5repack/h5repack.h
+  s_71c3fd9a1c4bf7::t_3f1426ac7971eb 126-127
+tools/src/h5repack/h5repack_main.c
+  s_71c3fd9a1c4bf7::t_158b8141c64335 232,234
+tools/test/h5repack/expected/h5repack-help.txt
+  s_71c3fd9a1c4bf7::t_710c49157ab37f 46,96-97
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "9736eab11c2732bd8ff172d5b9c61019bcfc26b1",
+  "prompts": {},
+  "sessions": {
+    "s_71c3fd9a1c4bf7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4d43baf-ffcf-476b-982a-5d7c16d1debb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
