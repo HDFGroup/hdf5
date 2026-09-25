@@ -43,8 +43,8 @@
 /* Package Private Typedefs */
 /****************************/
 
-#ifdef H5_HAVE_THREADSAFE_API
-/* Info for the global API lock */
+#ifdef H5_HAVE_INTERNAL_THREADS
+/* Info for the global API lock and the internal mutex */
 typedef struct H5TS_api_info_t {
 #ifdef H5_HAVE_THREADSAFE
     /* API lock */
@@ -52,16 +52,23 @@ typedef struct H5TS_api_info_t {
 
     /* Count of recursive API calls by the same thread */
     unsigned lock_count;
-#else /* H5_HAVE_CONCURRENCY */
+#elif defined(H5_HAVE_CONCURRENCY)
     /* API lock */
     H5TS_rwlock_t api_lock;
-    H5TS_mutex_t  internal_mutex;
+#endif
+
+#ifdef H5_HAVE_INTERNAL_THREADS
+    /* Mutex serializing the library's own worker threads.  Independent of the
+     * API lock: it exists whenever the library spawns threads internally,
+     * whether or not the API itself is thread-safe.
+     */
+    H5TS_mutex_t internal_mutex;
 #endif
 
     /* Count of # of attempts to acquire API lock */
     H5TS_atomic_uint_t attempt_lock_count;
 } H5TS_api_info_t;
-#endif /* H5_HAVE_THREADSAFE_API */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
 #if H5TS_ENABLE_REC_RWLOCK_STATS
 /******************************************************************************
@@ -220,24 +227,27 @@ typedef struct H5TS_rec_rwlock_t {
 /* Package Private Variables */
 /*****************************/
 
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_INTERNAL_THREADS
 /* API threadsafety info */
 extern H5TS_api_info_t H5TS_api_info_p;
 
 /* Per-thread info */
 extern H5TS_key_t H5TS_thrd_info_key_g;
-#endif /* H5_HAVE_THREADSAFE_API */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_INTERNAL_THREADS
 H5_DLL herr_t H5TS__init_package(void);
-H5_DLL herr_t H5TS__api_mutex_acquire(unsigned lock_count, bool *acquired);
-H5_DLL herr_t H5TS__api_mutex_release(unsigned *lock_count);
 H5_DLL herr_t H5TS__tinfo_init(void);
 H5_DLL void   H5TS__tinfo_destroy(void *tinfo_node);
 H5_DLL herr_t H5TS__tinfo_term(void);
+#endif /* H5_HAVE_INTERNAL_THREADS */
+
+#ifdef H5_HAVE_THREADSAFE_API
+H5_DLL herr_t H5TS__api_mutex_acquire(unsigned lock_count, bool *acquired);
+H5_DLL herr_t H5TS__api_mutex_release(unsigned *lock_count);
 #endif /* H5_HAVE_THREADSAFE_API */
 
 /* Recursive R/W lock related function declarations */
@@ -249,7 +259,7 @@ H5_DLL herr_t H5TS__rec_rwlock_wrunlock(H5TS_rec_rwlock_t *lock);
 H5_DLL herr_t H5TS__rec_rwlock_destroy(H5TS_rec_rwlock_t *lock);
 
 /* 'once' callbacks */
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_INTERNAL_THREADS
 #ifdef H5_HAVE_C11_THREADS
 H5_DLL void H5TS__c11_first_thread_init(void);
 #else
@@ -259,7 +269,7 @@ H5_DLL BOOL CALLBACK H5TS__win32_process_enter(PINIT_ONCE InitOnce, PVOID Parame
 H5_DLL void H5TS__pthread_first_thread_init(void);
 #endif /* H5_HAVE_WIN_THREADS */
 #endif
-#endif /* H5_HAVE_THREADSAFE_API */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
 #if H5TS_ENABLE_REC_RWLOCK_STATS
 H5_DLL herr_t H5TS__rec_rwlock_get_stats(H5TS_rec_rwlock_t *lock, H5TS_rec_rwlock_stats_t *stats);

@@ -175,10 +175,10 @@ typedef struct H5CX_t {
     bool                    selection_io_mode_valid; /* Whether selection I/O mode is valid */
     bool modify_write_buf; /* Whether the library can modify write buffers (H5D_XFER_MODIFY_WRITE_BUF_NAME)*/
     bool modify_write_buf_valid; /* Whether the modify_write_buf field is valid */
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
     bool io_threads_enabled;       /* Whether the library can use concurrent threads to accelerate I/O */
     bool io_threads_enabled_valid; /* Whether the io_threads_enabled field is valid */
-#endif                             /* H5_HAVE_CONCURRENCY */
+#endif                             /* H5_HAVE_INTERNAL_THREADS */
 
     /* Return-only DXPL properties to return to application */
 #ifdef H5_HAVE_PARALLEL
@@ -352,9 +352,9 @@ H5_DLL herr_t H5CX_get_selection_io_mode(H5D_selection_io_mode_t *selection_io_m
 H5_DLL herr_t H5CX_get_no_selection_io_cause(uint32_t *no_selection_io_cause);
 H5_DLL herr_t H5CX_get_actual_selection_io_mode(uint32_t *actual_selection_io_mode);
 H5_DLL herr_t H5CX_get_modify_write_buf(bool *modify_write_buf);
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
 H5_DLL herr_t H5CX_get_io_threads(bool *io_threads_enabled);
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
 /* "Getter" routines for LCPL properties cached in API context */
 H5_DLL herr_t H5CX_get_encoding(H5T_cset_t *encoding);

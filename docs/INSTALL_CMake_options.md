@@ -449,7 +449,7 @@ Some HDF5 feature configuration options are incompatible with each other and wil
     - `HDF5_ENABLE_THREADSAFE`
     - `HDF5_BUILD_CPP_LIB`
 
-- The multi-thread concurrency (`HDF5_ENABLE_CONCURRENCY`) and thread-safe (`HDF5_ENABLE_THREADSAFE`) features are incompatible with the high-level, Fortran, Java and C++ interfaces, as locking is not hoisted into the higher-level API calls. Unless `HDF5_ALLOW_UNSUPPORTED` has been specified, the following options must be disabled:
+- The multi-thread concurrency (`HDF5_ENABLE_CONCURRENCY`) and thread-safe (`HDF5_ENABLE_THREADSAFE`) features are incompatible with the high-level, Fortran, Java and C++ interfaces, as locking is not hoisted into the higher-level API calls. (This does not apply to the library's internal thread pool, which is built in whenever a threading package is available and is not controlled by an option.) Unless `HDF5_ALLOW_UNSUPPORTED` has been specified, the following options must be disabled for the concurrent/threadsafe builds:
 
     - `HDF5_BUILD_HL_LIB`
     - `HDF5_BUILD_FORTRAN`

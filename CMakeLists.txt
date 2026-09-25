@@ -906,6 +906,12 @@ if (Threads_FOUND)
   set (HDF5_THREADS_ENABLED ON) # Used to init hdf5-config.cmake
   list (APPEND LINK_LIBS Threads::Threads)
 
+  # The library's internal thread pool is constructed with threading package.
+  #
+  # This is set up internally since it adds no applications threads
+  # and no workers ever enter the public API.
+  set (H5_HAVE_INTERNAL_THREADS 1)
+
   # Check for compiler support for atomic variables
   CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
   if (HAVE_STDATOMIC_H)

@@ -181,13 +181,13 @@
 #define H5D_XFER_MODIFY_WRITE_BUF_DEF  false
 #define H5D_XFER_MODIFY_WRITE_BUF_ENC  H5P__dxfr_modify_write_buf_enc
 #define H5D_XFER_MODIFY_WRITE_BUF_DEC  H5P__dxfr_modify_write_buf_dec
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
 /* Definitions for modify write buffer property */
 #define H5D_XFER_IO_THREADS_ENABLED_SIZE sizeof(bool)
 #define H5D_XFER_IO_THREADS_ENABLED_DEF  true
 #define H5D_XFER_IO_THREADS_ENABLED_ENC  H5P__encode_bool
 #define H5D_XFER_IO_THREADS_ENABLED_DEC  H5P__decode_bool
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
 /******************/
 /* Local Typedefs */
@@ -305,9 +305,9 @@ static const H5D_selection_io_mode_t H5D_def_selection_io_mode_g     = H5D_XFER_
 static const uint32_t                H5D_def_no_selection_io_cause_g = H5D_XFER_NO_SELECTION_IO_CAUSE_DEF;
 static const uint32_t H5D_def_actual_selection_io_mode_g             = H5D_XFER_ACTUAL_SELECTION_IO_MODE_DEF;
 static const bool     H5D_def_modify_write_buf_g                     = H5D_XFER_MODIFY_WRITE_BUF_DEF;
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
 static const bool H5D_def_io_threads_enabled_g = H5D_XFER_IO_THREADS_ENABLED_DEF;
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__dxfr_reg_prop
@@ -495,13 +495,13 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
                            H5D_XFER_MODIFY_WRITE_BUF_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
     /* Register the I/O threads enabled property */
     if (H5P__register_real(pclass, H5D_XFER_IO_THREADS_ENABLED_NAME, H5D_XFER_IO_THREADS_ENABLED_SIZE,
                            &H5D_def_io_threads_enabled_g, NULL, NULL, NULL, H5D_XFER_IO_THREADS_ENABLED_ENC,
                            H5D_XFER_IO_THREADS_ENABLED_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2621,7 +2621,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_modify_write_buf() */
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_io_threads
  *
@@ -2688,4 +2688,4 @@ H5Pget_io_threads(hid_t plist_id, bool *io_threads_enabled /*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_io_threads() */
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */

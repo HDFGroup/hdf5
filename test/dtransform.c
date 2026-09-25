@@ -329,12 +329,12 @@ main(void)
     /* inverses the utrans transform in init_test to get back original array */
     const char *utrans_inv = "(x/3 - 25)*4";
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
     /* Test with and without threads */
     for (unsigned threads = false; threads <= true; threads++) {
         if (threads && H5TSset_internal_threads(4) < 0)
             TEST_ERROR;
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
         if ((file_id = H5Fcreate("dtransform.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
@@ -433,12 +433,12 @@ main(void)
         if (H5Pclose(dxpl_id_utrans_inv) < 0)
             TEST_ERROR;
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_INTERNAL_THREADS
         /* Disable internal threading */
         if (threads && H5TSset_internal_threads(0) < 0)
             goto error;
     }
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
     return 0;
 

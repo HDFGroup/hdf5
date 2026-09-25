@@ -1142,10 +1142,28 @@ extern char H5_lib_vers_info_g[];
 #define H5_HAVE_THREADSAFE_API
 #endif
 
-#ifdef H5_HAVE_THREADSAFE_API
+/* H5_HAVE_INTERNAL_THREADS covers the thread-local library state - the
+ * per-thread API context and error stack - together with the worker pool that
+ * relies on it.  CMake defines it wherever a threading package is available,
+ * except for a static library on Windows, where there is no DllMain to clean
+ * up a thread's state when it exits.
+ *
+ * API thread safety needs the same per-thread state, so the 'threadsafe' and
+ * 'concurrency' options imply it.  Both are rejected at configure time
+ * without a threading package, and both are unavailable in the one build
+ * where internal threads are, so this only ever restates what CMake already
+ * decided.  Keeping it here means the dependency does not rely on that.
+ */
+#if defined(H5_HAVE_THREADSAFE_API) && !defined(H5_HAVE_INTERNAL_THREADS)
+#define H5_HAVE_INTERNAL_THREADS
+#endif
 
+#ifdef H5_HAVE_INTERNAL_THREADS
 /* Lock headers */
 #include "H5TSprivate.h"
+#endif
+
+#ifdef H5_HAVE_THREADSAFE_API
 
 /* Thread cancellation is only possible w/pthreads */
 #if defined(H5_HAVE_PTHREAD_H)
@@ -1221,9 +1239,18 @@ extern char H5_lib_vers_info_g[];
 /* Local variable for 'disable locking for this thread' (DLFTT) state */
 #define H5DLFTT_DECL  /* */
 
+#ifdef H5_HAVE_INTERNAL_THREADS
+/* No API lock, but the thread-local state this build relies on still needs
+ * its one-time initialization, which the API lock would otherwise have
+ * performed on the first API call.
+ */
+#define H5_API_LOCK   H5TS_first_thread_init();
+#define H5_API_UNLOCK /* no-op */
+#else
 /* No locks (non-threadsafe builds) */
 #define H5_API_LOCK   /* no-op */
 #define H5_API_UNLOCK /* no-op */
+#endif
 
 #endif /* H5_HAVE_THREADSAFE_API */
 
