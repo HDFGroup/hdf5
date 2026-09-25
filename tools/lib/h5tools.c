@@ -1825,24 +1825,27 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t 
             H5T_str_t     pad;
             char         *s = NULL;
             unsigned char tempuchar;
+            size_t        str_len; /* # of bytes to write for this element */
 
             H5TOOLS_DEBUG("H5T_STRING");
             pad = H5Tget_strpad(tid);
 
             for (block_index = 0; block_index < block_nelmts; block_index++) {
+                /* Advance by the datatype size */
                 mem = ((unsigned char *)_mem) + block_index * size;
 
                 if (H5Tis_variable_str(tid)) {
                     s = *(char **)((void *)mem);
                     if (s != NULL)
-                        size = strlen(s);
+                        str_len = strlen(s);
                     else
                         H5TOOLS_THROW((-1), "NULL string");
                 }
                 else {
-                    s = (char *)mem;
+                    s       = (char *)mem;
+                    str_len = size;
                 }
-                for (i = 0; i < size && (s[i] || pad != H5T_STR_NULLTERM); i++) {
+                for (i = 0; i < str_len && (s[i] || pad != H5T_STR_NULLTERM); i++) {
                     memcpy(&tempuchar, &s[i], sizeof(unsigned char));
                     if (1 != fwrite(&tempuchar, sizeof(unsigned char), 1, stream))
                         H5TOOLS_THROW((-1), "fwrite failed");
