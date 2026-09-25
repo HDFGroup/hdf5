@@ -2112,9 +2112,10 @@ H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, un
  *
  *          If \p name is a pointer to an array of at least \p namelen bytes,
  *          the filter name will be copied into that array. The name will be
- *          null terminated if \p namelen is large enough. The filter name
- *          returned will be the name appearing in the file, the name
- *          registered for the filter, or an empty string.
+ *          null terminated if \p namelen is large enough. The name returned
+ *          is the canonical name of the filter: the name appearing in the
+ *          file, the \p name registered with H5Zregister(), or, if neither
+ *          is available, the decimal filter ID as a string.
  *
  *          \p filter_config is the bit field described in
  *          H5Zget_filter_info().
@@ -2138,9 +2139,8 @@ H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *f
  *                              properties of the filter
  * \param[in,out] cd_nelmts     Number of elements in \p cd_values
  * \param[out]    cd_values[]   Auxiliary data for the filter
- * \param[in]     namelen       Length of filter name and number of
- *                              elements in \p name
- * \param[out]    name[]        Name of filter
+ * \param[in]     namelen       Length of \p name buffer in bytes
+ * \param[out]    name[]        Canonical name of the filter (see \details below)
  * \param[out]    filter_config Bit field, as described in
  *                              H5Zget_filter_info()
  *
@@ -2165,9 +2165,9 @@ H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *f
  *
  *          On input, the \p namelen parameter indicates the number of
  *          characters allocated for the filter name by the calling program
- *          in the array \p name[]. On exit \p name[] contains the name of the
- *          filter with one character of the name in each element of the
- *          array.
+ *          in the array \p name[]. On exit \p name[] contains the
+ *          canonical name of the filter, null-terminated if \p namelen is
+ *          large enough.
  *
  *          \p filter_config is the bit field described in
  *          H5Zget_filter_info().

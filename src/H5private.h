@@ -244,6 +244,13 @@
 #       define H5_ATTR_THREAD_ANNOT(X) /*void*/
 #  endif
 
+/* Marks a symbol as not exported from a shared library */
+#  if defined(__GNUC__)
+#       define H5_ATTR_VISIBILITY_HIDDEN __attribute__((visibility("hidden")))
+#  else
+#       define H5_ATTR_VISIBILITY_HIDDEN /*void*/
+#  endif
+
 #else
 #   define H5_ATTR_FORMAT(X, Y, Z) /*void*/
 #   define H5_ATTR_UNUSED          /*void*/
@@ -258,6 +265,7 @@
 #   define H5_ATTR_MALLOC          /*void*/
 #   define H5_ATTR_NO_OPTIMIZE     /*void*/
 #   define H5_ATTR_THREAD_ANNOT(X) /*void*/
+#   define H5_ATTR_VISIBILITY_HIDDEN /*void*/
 #endif
 /* clang-format on */
 
