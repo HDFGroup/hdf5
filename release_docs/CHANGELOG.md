@@ -87,6 +87,12 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Added typed accessors for filter parameter strings
+
+   Filter plugins can read `key = value` parameter strings with the new `H5Zconfig_has_key()`, `H5Zconfig_get_int()`, `H5Zconfig_get_double()`, `H5Zconfig_get_bool()` and `H5Zconfig_get_str()` functions, declared in `H5Zdevelop.h`. The strings use a subset of TOML v1.0.0 syntax, and hex-float literals such as `0x1.8p+1` are accepted and read back bit-for-bit. These functions do not take the library's API lock, so they can be called from inside a filter callback that runs while the lock is held. This is the first part of the string-based filter configuration API (RFC-HDFG-2026-001).
+
+   Two third-party libraries are now compiled into libhdf5: the [tomlc17](https://github.com/cktan/tomlc17) TOML parser (MIT license) in `src/tomlc17/`, and the [Ryu](https://github.com/ulfjack/ryu) shortest round-trip float formatter (Boost/Apache-2.0 license) in `src/ryu/`. Their symbols are hidden in the shared library and renamed in the static library, so they cannot collide with an application's own copies.
+
 ### Added the H5F_LIBVER_V300 library version bound
 
    The `H5F_libver_t` enumeration gains `H5F_LIBVER_V300` for the 3.0 file format, and `H5F_LIBVER_LATEST` now maps to it. Every object header message version admitted by `H5F_LIBVER_V300` is currently the same as for `H5F_LIBVER_V200`; later format changes in the 3.0 release will be gated on it. The constant is also available in the Fortran (`H5F_LIBVER_V300_F`) and Java (`HDF5Constants.H5F_LIBVER_V300`) bindings, and `h5repack --low`/`--high` accept the value 6.

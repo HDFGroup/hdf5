@@ -52,5 +52,8 @@ H5_DLLVAR H5Z_class2_t H5Z_SZIP[1];
 
 /* Package internal routines */
 H5_DLL herr_t H5Z__unregister(H5Z_filter_t filter_id);
+H5_DLL herr_t H5Z__config_validate_keys(const char *params, const char *const *known_keys);
+H5_DLL htri_t H5Z__config_get_int(const char *params, const char *key, int64_t *out);
+H5_DLL htri_t H5Z__config_get_str(const char *params, const char *key, char *buf, size_t *buf_size);
 
 #endif /* H5Zpkg_H */
