@@ -1165,7 +1165,7 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
 
     /* Filter out the flags that are not relevant to the flush/invalidate.
      */
-    cooked_flags = flags & H5C__FLUSH_CLEAR_ONLY_FLAG;
+    cooked_flags = flags & (H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__DISCARD_ON_WRITE_FAILURE_FLAG);
     evict_flags  = flags & H5C__EVICT_ALLOW_LAST_PINS_FLAG;
 
     /* The flush procedure here is a bit strange.
@@ -1325,7 +1325,9 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
                     protected_entries++;
                 } /* end if */
                 else if (entry_ptr->is_pinned) {
-                    if (H5C__flush_single_entry(f, entry_ptr, H5C__DURING_FLUSH_FLAG) < 0)
+                    if (H5C__flush_single_entry(f, entry_ptr,
+                                                (cooked_flags & H5C__DISCARD_ON_WRITE_FAILURE_FLAG) |
+                                                    H5C__DURING_FLUSH_FLAG) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "dirty pinned entry flush failed");
 
                     if (cache_ptr->slist_changed) {

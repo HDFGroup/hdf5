@@ -499,10 +499,16 @@ H5AC_dest(H5F_t *f)
 #endif    /* H5_HAVE_PARALLEL */
 
     /* Destroy the cache */
-    if (H5C_dest(f) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't destroy cache");
+    if (H5C_dest(f) < 0) {
+        /* The cache can be destroyed even though some entries couldn't be
+         * written.  If it wasn't, stop here.
+         */
+        if (f->shared->cache != NULL)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't destroy cache");
 
-    f->shared->cache = NULL;
+        /* Push error, but keep going */
+        HDONE_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't destroy cache");
+    }
 
 #ifdef H5_HAVE_PARALLEL
     if (aux_ptr != NULL) {

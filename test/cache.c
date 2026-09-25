@@ -187,6 +187,7 @@ static unsigned check_evictions_enabled(unsigned paged);
 static unsigned check_flush_protected_err(unsigned paged);
 static unsigned check_destroy_pinned_err(unsigned paged);
 static unsigned check_destroy_protected_err(unsigned paged);
+static unsigned check_destroy_write_err(unsigned paged);
 static unsigned check_duplicate_insert_err(unsigned paged);
 static unsigned check_double_pin_err(unsigned paged);
 static unsigned check_double_unpin_err(unsigned paged);
@@ -12451,6 +12452,136 @@ check_destroy_protected_err(unsigned paged)
 
     return (unsigned)!pass;
 } /* check_destroy_protected_err() */
+
+/*-------------------------------------------------------------------------
+ * Function:    check_destroy_write_err()
+ *
+ * Purpose:    Verify that when a dirty entry cannot be written while
+ *        destroying the cache at file close, the destroy reports
+ *        failure, but still writes the entries that can be written,
+ *        discards the one that can't, and frees the cache.
+ *
+ * Return:    void
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static unsigned
+check_destroy_write_err(unsigned paged)
+{
+    H5F_t        *file_ptr            = NULL;
+    haddr_t       saved_eoa           = HADDR_UNDEF;
+    unsigned long saved_feature_flags = 0;
+    H5AC_ring_t   orig_ring           = H5AC_RING_INV;
+    uint8_t       image_byte          = 0;
+    H5CX_node_t   api_ctx             = {{0}, NULL}; /* API context node to push */
+
+    if (paged)
+        TESTING("destroy cache with entry write error (paged aggregation)");
+    else
+        TESTING("destroy cache with entry write error");
+
+    pass = true;
+
+    /* allocate a cache and insert two dirty entries: one in the user ring,
+     * and one after it in the file, in the superblock ring.  Move the EOA
+     * between the entries so the first one flushed (in the user ring)
+     * cannot be written, then flush destroy.  This should fail, but still
+     * write the entry in the superblock ring, discard both entries, and
+     * free the cache.
+     */
+    if (pass) {
+
+        reset_entries();
+
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
+    }
+
+    if (pass) {
+        insert_entry(file_ptr, PICO_ENTRY_TYPE, 2, H5C__NO_FLAGS_SET);
+
+        H5AC_set_ring(H5AC_RING_SB, &orig_ring);
+        insert_entry(file_ptr, PICO_ENTRY_TYPE, 1, H5C__NO_FLAGS_SET);
+        H5AC_set_ring(orig_ring, NULL);
+    }
+
+    if (pass) {
+        /* Bypass the metadata accumulator, so the entries are written to the
+         * file driver (which enforces the EOA) during the destroy
+         */
+        saved_feature_flags = file_ptr->shared->feature_flags;
+        file_ptr->shared->feature_flags &= ~(unsigned long)H5FD_FEAT_ACCUMULATE_METADATA;
+
+        saved_eoa = H5FD_get_eoa(file_ptr->shared->lf, H5FD_MEM_DEFAULT);
+
+        if (!H5_addr_defined(saved_eoa) ||
+            H5FD_set_eoa(file_ptr->shared->lf, H5FD_MEM_DEFAULT, entries[PICO_ENTRY_TYPE][2].addr) < 0) {
+            pass         = false;
+            failure_mssg = "unable to move EOA between entries.\n";
+        }
+    }
+
+    if (pass) {
+        if (H5C_prep_for_file_close(file_ptr) < 0) {
+            pass         = false;
+            failure_mssg = "unexpected failure of prep for file close.\n";
+        }
+    }
+
+    if (pass) {
+        if (H5C_dest(file_ptr) >= 0) {
+            pass         = false;
+            failure_mssg = "destroy succeeded despite entry write error.\n";
+        }
+        else if (file_ptr->shared->cache != NULL) {
+            pass         = false;
+            failure_mssg = "cache not freed after entry write error.\n";
+
+            /* Restore the EOA so the cache can be destroyed */
+            H5FD_set_eoa(file_ptr->shared->lf, H5FD_MEM_DEFAULT, saved_eoa);
+            H5C_dest(file_ptr);
+        }
+        else if (!entries[PICO_ENTRY_TYPE][1].destroyed || !entries[PICO_ENTRY_TYPE][2].destroyed) {
+            pass         = false;
+            failure_mssg = "entries not destroyed after entry write error.\n";
+        }
+        else if (H5F_block_read(file_ptr, H5FD_MEM_DEFAULT, entries[PICO_ENTRY_TYPE][1].addr, (size_t)1,
+                                &image_byte) < 0 ||
+                 image_byte != 1) {
+            pass         = false;
+            failure_mssg = "writable entry not written after entry write error.\n";
+        }
+    }
+
+    /* Restore the EOA, accumulator, and the file's own cache, then close
+     * the file
+     */
+    if (file_ptr != NULL) {
+        if (H5_addr_defined(saved_eoa))
+            H5FD_set_eoa(file_ptr->shared->lf, H5FD_MEM_DEFAULT, saved_eoa);
+        if (saved_feature_flags != 0)
+            file_ptr->shared->feature_flags = saved_feature_flags;
+
+        if (saved_cache != NULL) {
+            file_ptr->shared->cache = saved_cache;
+            saved_cache             = NULL;
+        }
+
+        takedown_cache(NULL, false, false);
+    }
+
+    if (pass) {
+        PASSED();
+    }
+    else {
+        H5_FAILED();
+    }
+
+    if (!pass)
+        fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
+
+    return (unsigned)!pass;
+} /* check_destroy_write_err() */
 
 /*-------------------------------------------------------------------------
  * Function:    check_duplicate_insert_err()
@@ -32456,6 +32587,7 @@ main(void)
         nerrs += check_flush_protected_err(paged);
         nerrs += check_destroy_pinned_err(paged);
         nerrs += check_destroy_protected_err(paged);
+        nerrs += check_destroy_write_err(paged);
         nerrs += check_duplicate_insert_err(paged);
         nerrs += check_double_pin_err(paged);
         nerrs += check_double_unpin_err(paged);
