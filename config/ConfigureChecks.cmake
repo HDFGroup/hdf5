@@ -642,6 +642,12 @@ if (HDF5_ENABLE_ROS3_VFD)
       message (FATAL_ERROR "Found aws-c-s3 library but CMake target for library didn't exist")
     endif ()
 
+    if (WINDOWS)
+      # RtlDllShutdownInProgress is used to avoid potential Windows loader lock
+      # deadlocks during library shutdown
+      CHECK_LIBRARY_EXISTS_CONCAT ("ntdll" RtlDllShutdownInProgress ${HDF_PREFIX}_HAVE_RTLDLLSHUTDOWNINPROGRESS)
+    endif ()
+
     list (APPEND LINK_LIBS AWS::aws-c-s3)
 
     set (${HDF_PREFIX}_HAVE_ROS3_VFD 1)
