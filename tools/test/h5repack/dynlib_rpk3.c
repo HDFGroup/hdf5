@@ -25,8 +25,8 @@
 #define H5Z_FILTER_DYNLIB3 261
 
 static size_t H5Z_filter_dynlib3(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
-                                 hid_t dxpl_id, const hsize_t *scaled, size_t ndims, size_t nbytes,
-                                 size_t *buf_size, void **buf);
+                                 hid_t dxpl_id, const hsize_t *scaled, size_t ndims, void *state,
+                                 size_t nbytes, size_t *buf_size, void **buf);
 static herr_t H5Z_dynlib3_set_config(const char *params, unsigned *flags, size_t *cd_nelmts,
                                      unsigned cd_values[], size_t cd_values_size);
 static herr_t H5Z_dynlib3_get_config(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], char *buf,
@@ -44,6 +44,8 @@ static const H5Z_class3_t H5Z_DYNLIB3[1] = {{
     H5Z_dynlib3_set_config,                                    /* String configuration setter    */
     H5Z_dynlib3_get_config,                                    /* String configuration getter    */
     "Test filter with string-based configuration (mode=rate)", /* Description                   */
+    NULL,                                                      /* init */
+    NULL,                                                      /* term */
 }};
 
 H5PL_type_t
@@ -136,7 +138,8 @@ H5Z_dynlib3_get_config(unsigned flags, size_t cd_nelmts, const unsigned cd_value
  */
 static size_t
 H5Z_filter_dynlib3(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, hid_t dxpl_id,
-                   const hsize_t *scaled, size_t ndims, size_t nbytes, size_t *buf_size, void **buf)
+                   const hsize_t *scaled, size_t ndims, void *state, size_t nbytes, size_t *buf_size,
+                   void **buf)
 {
     (void)flags;
     (void)cd_nelmts;

@@ -22,7 +22,8 @@
 #include "h5test.h"
 #include "H5srcdir.h"
 
-static const char *FILENAME[] = {"tfilter2", "tfilter2_cfg", "tfilter2_cfg_copy", NULL};
+static const char *FILENAME[] = {"tfilter2",       "tfilter2_cfg",        "tfilter2_cfg_copy",
+                                 "tfilter2_state", "tfilter2_state_copy", NULL};
 
 /* -----------------------------------------------------------------------
  * Parser tests - typed TOML accessor functions
@@ -1066,7 +1067,8 @@ error:
 static size_t
 title_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                   hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                  size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
+                  size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size,
+                  void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
@@ -1091,6 +1093,8 @@ test_canonical_name_display(void)
         NULL,                /* set_config     */
         NULL,                /* get_config     */
         NULL,                /* description    */
+        NULL,                /* init */
+        NULL,                /* term */
     };
     hid_t    dcpl = H5I_INVALID_HID;
     unsigned flags;
@@ -1142,7 +1146,8 @@ error:
 static size_t
 name_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                  hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                 size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
+                 size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size,
+                 void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
@@ -1171,6 +1176,8 @@ test_class3_name(void)
             NULL,             /* set_config     */
             NULL,             /* get_config     */
             NULL,             /* description    */
+            NULL,             /* init */
+            NULL,             /* term */
         };
         H5E_BEGIN_TRY
         {
@@ -1196,6 +1203,8 @@ test_class3_name(void)
             NULL,               /* set_config     */
             NULL,               /* get_config     */
             NULL,               /* description    */
+            NULL,               /* init */
+            NULL,               /* term */
         };
         if (H5Zregister(&valid_cls) < 0)
             TEST_ERROR;
@@ -1243,7 +1252,8 @@ fastpath_set_config(const char *params, unsigned *flags, size_t *cd_nelmts, unsi
 static size_t
 fastpath_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                      hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                     size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
+                     size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size,
+                     void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
@@ -1268,6 +1278,8 @@ test_empty_string_fast_path(void)
         fastpath_set_config,  /* set_config      */
         NULL,                 /* get_config      */
         NULL,                 /* description     */
+        NULL,                 /* init */
+        NULL,                 /* term */
     };
     static const H5Z_class3_t nocfg_cls = {
         2,                    /* version         */
@@ -1281,6 +1293,8 @@ test_empty_string_fast_path(void)
         NULL,                 /* set_config (intentionally absent) */
         NULL,                 /* get_config      */
         NULL,                 /* description     */
+        NULL,                 /* init */
+        NULL,                 /* term */
     };
     hid_t  dcpl = H5I_INVALID_HID;
     herr_t ret;
@@ -1392,7 +1406,8 @@ error:
 static size_t
 cdvals_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                    hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                   size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
+                   size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size,
+                   void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
@@ -1417,6 +1432,8 @@ test_cdvalues_path(void)
         NULL,               /* set_config      */
         NULL,               /* get_config      */
         NULL,               /* description     */
+        NULL,               /* init */
+        NULL,               /* term */
     };
     hid_t        dcpl   = H5I_INVALID_HID;
     unsigned     vals[] = {42, 99};
@@ -1517,7 +1534,8 @@ cdvals_clean_set_config(const char *params, unsigned *flags, size_t *cd_nelmts, 
 static size_t
 cdvals_clean_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                          hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                         size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
+                         size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes,
+                         size_t *buf_size, void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
@@ -1542,6 +1560,8 @@ test_cdvalues_no_name_pollution(void)
         cdvals_clean_set_config,  /* set_config      */
         NULL,                     /* get_config      */
         NULL,                     /* description     */
+        NULL,                     /* init */
+        NULL,                     /* term */
     };
     hid_t    dcpl = H5I_INVALID_HID;
     unsigned flags2;
@@ -1592,7 +1612,8 @@ error:
 static size_t
 persist_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                     hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                    size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
+                    size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size,
+                    void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
@@ -1617,6 +1638,8 @@ test_canonical_name_persistence(void)
         NULL,                /* set_config      */
         NULL,                /* get_config      */
         NULL,                /* description     */
+        NULL,                /* init */
+        NULL,                /* term */
     };
     hid_t    dcpl = H5I_INVALID_HID;
     unsigned flags2;
@@ -1704,7 +1727,8 @@ error:
 static size_t
 longtitle_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                       hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                      size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
+                      size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes,
+                      size_t *buf_size, void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
@@ -1736,6 +1760,8 @@ test_canonical_name_length_limit(void)
         NULL,                  /* set_config      */
         NULL,                  /* get_config      */
         NULL,                  /* description     */
+        NULL,                  /* init */
+        NULL,                  /* term */
     };
     herr_t ret;
 
@@ -1784,7 +1810,8 @@ test_canonical_name_length_limit(void)
 
         for (i = 0; i < sizeof(bad) / sizeof(bad[0]); i++) {
             H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID,   1,    1,    bad[i], NULL,
-                              NULL, longtitle_filter_func, NULL, NULL, NULL};
+                              NULL, longtitle_filter_func, NULL, NULL, NULL,   NULL,
+                              NULL};
             H5E_BEGIN_TRY
             {
                 ret = H5Zregister(&c);
@@ -1799,7 +1826,8 @@ test_canonical_name_length_limit(void)
 
         for (i = 0; i < sizeof(good) / sizeof(good[0]); i++) {
             H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID,   1,    1,    good[i], NULL,
-                              NULL, longtitle_filter_func, NULL, NULL, NULL};
+                              NULL, longtitle_filter_func, NULL, NULL, NULL,    NULL,
+                              NULL};
             if (H5Zregister(&c) < 0) {
                 fprintf(stderr, "\n   rejected valid name \"%s\"\n", good[i]);
                 TEST_ERROR;
@@ -1827,13 +1855,33 @@ error:
 static int
 test_canonical_name_uniqueness(void)
 {
-    H5Z_class3_t cls_a = {
-        2,   UNIQUENAME_FILTER_ID_A, 1, 1, "test-unique-name", NULL, NULL, longtitle_filter_func, NULL, NULL,
-        NULL};
-    H5Z_class3_t cls_b = {
-        2,   UNIQUENAME_FILTER_ID_B, 1, 1, "test-unique-name", NULL, NULL, longtitle_filter_func, NULL, NULL,
-        NULL};
-    herr_t ret;
+    H5Z_class3_t cls_a = {2,
+                          UNIQUENAME_FILTER_ID_A,
+                          1,
+                          1,
+                          "test-unique-name",
+                          NULL,
+                          NULL,
+                          longtitle_filter_func,
+                          NULL,
+                          NULL,
+                          NULL,
+                          NULL,
+                          NULL};
+    H5Z_class3_t cls_b = {2,
+                          UNIQUENAME_FILTER_ID_B,
+                          1,
+                          1,
+                          "test-unique-name",
+                          NULL,
+                          NULL,
+                          longtitle_filter_func,
+                          NULL,
+                          NULL,
+                          NULL,
+                          NULL,
+                          NULL};
+    herr_t       ret;
 
     TESTING("H5Zregister: canonical_name collision across different filter ids is rejected");
 
@@ -1991,8 +2039,9 @@ error:
 static size_t
 growth_filter_func(unsigned H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
                    const unsigned H5_ATTR_UNUSED *cd_values, hid_t H5_ATTR_UNUSED dxpl_id,
-                   const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims, size_t nbytes,
-                   size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+                   const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims,
+                   void H5_ATTR_UNUSED *state, size_t nbytes, size_t H5_ATTR_UNUSED *buf_size,
+                   void H5_ATTR_UNUSED **buf)
 {
     return nbytes; /* pass-through; never actually applied by this test */
 }
@@ -2023,6 +2072,8 @@ test_config_string_canonicalization_growth(void)
         growth_set_config,  /* set_config      */
         NULL,               /* get_config      */
         NULL,               /* description     */
+        NULL,               /* init */
+        NULL,               /* term */
     };
     hid_t    dcpl = H5I_INVALID_HID;
     char    *raw  = NULL;
@@ -2159,7 +2210,8 @@ callback_get_config(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
 static size_t
 callback_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                      hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                     size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
+                     size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size,
+                     void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
@@ -2184,6 +2236,8 @@ test_set_get_config_callbacks(void)
         callback_set_config,  /* set_config      */
         callback_get_config,  /* get_config      */
         NULL,                 /* description     */
+        NULL,                 /* init */
+        NULL,                 /* term */
     };
     hid_t  dcpl = H5I_INVALID_HID;
     char   pbuf[256];
@@ -2343,11 +2397,13 @@ static ctxpass_state_t g_ctxpass;
 
 static size_t
 ctxpass_filter_cb(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, hid_t dxpl_id,
-                  const hsize_t *scaled, size_t ndims, size_t nbytes, size_t *buf_size, void **buf)
+                  const hsize_t *scaled, size_t ndims, void *state, size_t nbytes, size_t *buf_size,
+                  void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
     (void)cd_values;
+    (void)state; /* class has no init callback */
     (void)buf_size;
     (void)buf;
 
@@ -2368,7 +2424,19 @@ ctxpass_filter_cb(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_v
 }
 
 static const H5Z_class3_t ctxpass_cls = {
-    2, CTXPASS_FILTER_ID, 1, 1, "test_ctxpass_filter", NULL, NULL, ctxpass_filter_cb, NULL, NULL, NULL,
+    2,
+    CTXPASS_FILTER_ID,
+    1,
+    1,
+    "test_ctxpass_filter",
+    NULL,
+    NULL,
+    ctxpass_filter_cb,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
 };
 
 static int
@@ -2493,6 +2561,471 @@ error:
 }
 
 /* -----------------------------------------------------------------------
+ * Per-dataset filter state: H5Z_class3_t init/term and the H5Z_func2_t
+ * state parameter.
+ *
+ * The test filter tags its state with cd_values[0], read back from the
+ * DCPL inside init, and the filter callback checks every call's state
+ * against the cd_values it is invoked with.  A state that reached the
+ * wrong dataset or the wrong pipeline entry therefore shows up as a
+ * mismatch, not just a missing pointer.
+ * ---------------------------------------------------------------------- */
+
+#define STATE_FILTER_ID 540
+#define STATE_MAGIC     0x53544154u /* "STAT" */
+
+typedef struct state_obj_t {
+    unsigned magic;
+    unsigned tag;    /* cd_values[0] seen by init */
+    int      rank;   /* rank of the chunk dataspace init received */
+    unsigned ncalls; /* filter calls that received this state */
+} state_obj_t;
+
+static struct {
+    unsigned     ninit;           /* successful init calls */
+    unsigned     nterm;           /* term calls */
+    unsigned     nbad;            /* filter or term calls with a missing or wrong state */
+    unsigned     nattempts;       /* init calls, successful or not */
+    unsigned     fail_on_attempt; /* make the Nth init call fail (0 = never) */
+    bool         fail_init;       /* make every init call fail */
+    state_obj_t *last;            /* state built by the most recent init */
+} g_state;
+
+static herr_t
+state_init(hid_t file_id, hid_t dcpl_id, hid_t type_id, hid_t space_id, unsigned idx, void **state_out)
+{
+    state_obj_t *st;
+    unsigned     flags;
+    size_t       cd_nelmts = 1;
+    unsigned     cd[1]     = {0};
+
+    g_state.nattempts++;
+    if (g_state.fail_init || g_state.nattempts == g_state.fail_on_attempt)
+        return -1;
+    if (H5Iget_type(file_id) != H5I_FILE || H5Iget_type(type_id) != H5I_DATATYPE)
+        return -1;
+
+    /* idx must name this entry: a pipeline may hold the same ID twice */
+    if (H5Pget_filter2(dcpl_id, idx, &flags, &cd_nelmts, cd, 0, NULL, NULL) != STATE_FILTER_ID)
+        return -1;
+
+    if (NULL == (st = (state_obj_t *)calloc(1, sizeof(*st))))
+        return -1;
+    st->magic = STATE_MAGIC;
+    st->tag   = cd[0];
+    st->rank  = H5Sget_simple_extent_ndims(space_id);
+
+    g_state.ninit++;
+    g_state.last = st;
+    *state_out   = st;
+    return 0;
+}
+
+static herr_t
+state_term(void *state)
+{
+    state_obj_t *st = (state_obj_t *)state;
+
+    if (!st || st->magic != STATE_MAGIC) {
+        g_state.nbad++;
+        return -1;
+    }
+    st->magic = 0;
+    free(st);
+    g_state.nterm++;
+    return 0;
+}
+
+static size_t
+state_filter(unsigned int H5_ATTR_UNUSED flags, size_t cd_nelmts, const unsigned int cd_values[],
+             hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims,
+             void *state, size_t nbytes, size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+{
+    state_obj_t *st = (state_obj_t *)state;
+
+    if (!st || st->magic != STATE_MAGIC || cd_nelmts < 1 || st->tag != cd_values[0])
+        g_state.nbad++;
+    else
+        st->ncalls++;
+
+    return nbytes; /* pass-through */
+}
+
+static const H5Z_class3_t state_cls = {
+    2,    STATE_FILTER_ID, 1,          1, "test_state_filter", NULL, NULL, state_filter, NULL, NULL,
+    NULL, state_init,      state_term,
+};
+
+/* Create a 2-D 8x8 int dataset, 4x4 chunks, with one state-filter entry
+ * per element of TAGS.  The chunk cache is disabled so the filter runs
+ * inside H5Dwrite/H5Dread rather than at a later flush. */
+static hid_t
+state_create_dset(hid_t loc, const char *name, const unsigned *tags, size_t ntags)
+{
+    static const hsize_t dims[2]   = {8, 8};
+    static const hsize_t chunks[2] = {4, 4};
+    hid_t                dcpl      = H5I_INVALID_HID;
+    hid_t                dapl      = H5I_INVALID_HID;
+    hid_t                sid       = H5I_INVALID_HID;
+    hid_t                dset      = H5I_INVALID_HID;
+
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        goto done;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto done;
+    if (H5Pset_chunk(dcpl, 2, chunks) < 0)
+        goto done;
+    for (size_t i = 0; i < ntags; i++)
+        if (H5Pset_filter(dcpl, STATE_FILTER_ID, H5Z_FLAG_MANDATORY, 1, &tags[i]) < 0)
+            goto done;
+    if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        goto done;
+    if (H5Pset_chunk_cache(dapl, 0, H5D_CHUNK_CACHE_NBYTES_DEFAULT, H5D_CHUNK_CACHE_W0_DEFAULT) < 0)
+        goto done;
+    dset = H5Dcreate2(loc, name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl);
+
+done:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dapl);
+        H5Pclose(dcpl);
+        H5Sclose(sid);
+    }
+    H5E_END_TRY
+    return dset;
+}
+
+static hid_t
+state_open_dset(hid_t loc, const char *name)
+{
+    hid_t dapl = H5I_INVALID_HID;
+    hid_t dset = H5I_INVALID_HID;
+
+    if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        return H5I_INVALID_HID;
+    if (H5Pset_chunk_cache(dapl, 0, H5D_CHUNK_CACHE_NBYTES_DEFAULT, H5D_CHUNK_CACHE_W0_DEFAULT) >= 0)
+        dset = H5Dopen2(loc, name, dapl);
+    H5Pclose(dapl);
+    return dset;
+}
+
+static int
+test_filter_state(hid_t fapl_in)
+{
+    const unsigned tag_a = 7, tag_b = 9, tags_dup[2] = {1, 2}, tag_v = 5;
+    hid_t          fapl = H5I_INVALID_HID;
+    hid_t          file = H5I_INVALID_HID, file2 = H5I_INVALID_HID;
+    hid_t          dset = H5I_INVALID_HID, dset2 = H5I_INVALID_HID, dset3 = H5I_INVALID_HID;
+    hid_t          dcpl = H5I_INVALID_HID, gcpl = H5I_INVALID_HID;
+    hid_t          sid = H5I_INVALID_HID, vtype = H5I_INVALID_HID, grp = H5I_INVALID_HID;
+    int            wbuf[64], rbuf[64];
+    char           filename[1024], filename2[1024];
+    herr_t         ret;
+
+    for (int i = 0; i < 64; i++)
+        wbuf[i] = i * 3;
+
+    /* Latest format: dense group storage (the fractal-heap case) needs it */
+    if ((fapl = H5Pcopy(fapl_in)) < 0)
+        TEST_ERROR;
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        TEST_ERROR;
+    h5_fixname(FILENAME[3], fapl, filename, sizeof(filename));
+    h5_fixname(FILENAME[4], fapl, filename2, sizeof(filename2));
+
+    if (H5Zregister(&state_cls) < 0)
+        TEST_ERROR;
+
+    /* ------------------------------------------------------------------ */
+    TESTING("filter state: init at create, reaches every chunk, term at close");
+
+    memset(&g_state, 0, sizeof(g_state));
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = state_create_dset(file, "a", &tag_a, 1)) < 0)
+        TEST_ERROR;
+    if (g_state.ninit != 1 || g_state.nterm != 0 || g_state.last->rank != 2)
+        TEST_ERROR;
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+        TEST_ERROR;
+    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+        TEST_ERROR;
+    if (memcmp(wbuf, rbuf, sizeof(wbuf)) != 0)
+        TEST_ERROR;
+    /* 4 chunks written + 4 read, all with this dataset's state */
+    if (g_state.nbad != 0 || g_state.last->ncalls != 8)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (g_state.nterm != 1)
+        TEST_ERROR;
+
+    PASSED();
+
+    /* ------------------------------------------------------------------ */
+    TESTING("filter state: rebuilt at open, one per dataset, shared by handles");
+
+    if ((dset = state_create_dset(file, "b", &tag_b, 1)) < 0)
+        TEST_ERROR;
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+
+    memset(&g_state, 0, sizeof(g_state));
+    if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = state_open_dset(file, "a")) < 0)
+        TEST_ERROR;
+    if ((dset2 = state_open_dset(file, "a")) < 0) /* second handle, same shared dataset */
+        TEST_ERROR;
+    if (g_state.ninit != 1)
+        TEST_ERROR;
+    if ((dset3 = state_open_dset(file, "b")) < 0)
+        TEST_ERROR;
+    if (g_state.ninit != 2)
+        TEST_ERROR;
+    /* Reading each dataset checks its chunks against its own tag */
+    if (H5Dread(dset2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+        TEST_ERROR;
+    if (memcmp(wbuf, rbuf, sizeof(wbuf)) != 0)
+        TEST_ERROR;
+    if (H5Dread(dset3, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+        TEST_ERROR;
+    if (memcmp(wbuf, rbuf, sizeof(wbuf)) != 0)
+        TEST_ERROR;
+    if (g_state.nbad != 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (g_state.nterm != 0) /* "a" still open through dset2 */
+        TEST_ERROR;
+    if (H5Dclose(dset2) < 0 || H5Dclose(dset3) < 0)
+        TEST_ERROR;
+    dset2 = dset3 = H5I_INVALID_HID;
+    if (g_state.nterm != 2)
+        TEST_ERROR;
+
+    PASSED();
+
+    /* ------------------------------------------------------------------ */
+    TESTING("filter state: duplicate entries each get their own state");
+
+    memset(&g_state, 0, sizeof(g_state));
+    if ((dset = state_create_dset(file, "dup", tags_dup, 2)) < 0)
+        TEST_ERROR;
+    if (g_state.ninit != 2)
+        TEST_ERROR;
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+        TEST_ERROR;
+    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+        TEST_ERROR;
+    if (memcmp(wbuf, rbuf, sizeof(wbuf)) != 0 || g_state.nbad != 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (g_state.nterm != 2)
+        TEST_ERROR;
+
+    PASSED();
+
+    /* ------------------------------------------------------------------ */
+    TESTING("filter state: init failure fails H5Dcreate without leaking");
+
+    memset(&g_state, 0, sizeof(g_state));
+    g_state.fail_init = true;
+    H5E_BEGIN_TRY
+    {
+        dset = state_create_dset(file, "c", &tag_a, 1);
+    }
+    H5E_END_TRY
+    g_state.fail_init = false;
+    if (dset >= 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (g_state.ninit != 0 || g_state.nterm != 0)
+        TEST_ERROR;
+    if (H5Lexists(file, "c", H5P_DEFAULT) != 0)
+        TEST_ERROR;
+
+    /* Two entries where only the second init fails: the first entry's
+     * state must be released as the create unwinds */
+    {
+        const unsigned tags2[2] = {3, 4};
+
+        memset(&g_state, 0, sizeof(g_state));
+        g_state.fail_on_attempt = 2;
+        H5E_BEGIN_TRY
+        {
+            dset = state_create_dset(file, "c2", tags2, 2);
+        }
+        H5E_END_TRY
+        g_state.fail_on_attempt = 0;
+        if (dset >= 0)
+            TEST_ERROR;
+        dset = H5I_INVALID_HID;
+        if (g_state.ninit != 1 || g_state.nterm != 1 || g_state.nbad != 0)
+            TEST_ERROR;
+    }
+
+    PASSED();
+
+    /* ------------------------------------------------------------------ */
+    TESTING("filter state: init failure at open defers the error to I/O");
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+    memset(&g_state, 0, sizeof(g_state));
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    g_state.fail_init = true;
+    if ((dset = state_open_dset(file, "a")) < 0) /* metadata stays reachable */
+        TEST_ERROR;
+    g_state.fail_init = false;
+    if ((dcpl = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    if (g_state.ninit != 0 || g_state.nterm != 0 || g_state.nbad != 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    /* ------------------------------------------------------------------ */
+    TESTING("filter state: rejected on a group's fractal heap");
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+    if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR;
+    if ((gcpl = H5Pcreate(H5P_GROUP_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_link_phase_change(gcpl, 0, 0) < 0) /* dense storage from the start */
+        TEST_ERROR;
+    if (H5Pset_filter(gcpl, STATE_FILTER_ID, H5Z_FLAG_MANDATORY, 1, &tag_a) < 0)
+        TEST_ERROR;
+    /* The group itself is created; its fractal heap is created, and the
+     * filter refused, when the first link is inserted */
+    if ((grp = H5Gcreate2(file, "g", H5P_DEFAULT, gcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        ret = H5Lcreate_soft("/a", grp, "link", H5P_DEFAULT, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    if (H5Gclose(grp) < 0)
+        TEST_ERROR;
+    grp = H5I_INVALID_HID;
+
+    PASSED();
+
+    /* ------------------------------------------------------------------ */
+    TESTING("filter state: H5Ocopy of variable-length data brackets init/term");
+
+    {
+        static const hsize_t vdims[1] = {4}, vchunk[1] = {2};
+        int                  v0[1] = {10}, v1[2] = {20, 21}, v2[3] = {30, 31, 32}, v3[1] = {40};
+        hvl_t                vw[4] = {{1, v0}, {2, v1}, {3, v2}, {1, v3}}, vr[4];
+
+        if ((vtype = H5Tvlen_create(H5T_NATIVE_INT)) < 0)
+            TEST_ERROR;
+        if ((sid = H5Screate_simple(1, vdims, NULL)) < 0)
+            TEST_ERROR;
+        if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+            TEST_ERROR;
+        if (H5Pset_chunk(dcpl, 1, vchunk) < 0)
+            TEST_ERROR;
+        if (H5Pset_filter(dcpl, STATE_FILTER_ID, H5Z_FLAG_MANDATORY, 1, &tag_v) < 0)
+            TEST_ERROR;
+        if ((dset = H5Dcreate2(file, "v", vtype, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+            TEST_ERROR;
+        if (H5Dwrite(dset, vtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, vw) < 0)
+            TEST_ERROR;
+        if (H5Dclose(dset) < 0)
+            TEST_ERROR;
+        dset = H5I_INVALID_HID;
+
+        if ((file2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            TEST_ERROR;
+        memset(&g_state, 0, sizeof(g_state));
+        if (H5Ocopy(file, "v", file2, "v", H5P_DEFAULT, H5P_DEFAULT) < 0)
+            TEST_ERROR;
+        /* The copy decoded and re-encoded every chunk with its own state */
+        if (g_state.ninit != 1 || g_state.nterm != 1 || g_state.nbad != 0)
+            TEST_ERROR;
+
+        if ((dset = H5Dopen2(file2, "v", H5P_DEFAULT)) < 0)
+            TEST_ERROR;
+        if (H5Dread(dset, vtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, vr) < 0)
+            TEST_ERROR;
+        for (size_t i = 0; i < 4; i++) {
+            if (vr[i].len != vw[i].len || memcmp(vr[i].p, vw[i].p, vw[i].len * sizeof(int)) != 0)
+                TEST_ERROR;
+        }
+        if (H5Treclaim(vtype, sid, H5P_DEFAULT, vr) < 0)
+            TEST_ERROR;
+        if (H5Dclose(dset) < 0)
+            TEST_ERROR;
+        dset = H5I_INVALID_HID;
+        if (g_state.nbad != 0 || g_state.ninit != g_state.nterm)
+            TEST_ERROR;
+    }
+
+    PASSED();
+
+    H5Tclose(vtype);
+    H5Sclose(sid);
+    H5Pclose(dcpl);
+    H5Pclose(gcpl);
+    H5Fclose(file2);
+    H5Fclose(file);
+    H5Pclose(fapl);
+    H5Zunregister(STATE_FILTER_ID);
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(grp);
+        H5Dclose(dset);
+        H5Dclose(dset2);
+        H5Dclose(dset3);
+        H5Tclose(vtype);
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+        H5Pclose(gcpl);
+        H5Fclose(file2);
+        H5Fclose(file);
+        H5Pclose(fapl);
+        H5Zunregister(STATE_FILTER_ID);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
  * On-disk configuration-string storage (pipeline v3, RFC-HDFG-2026-001)
  *
  * This filter's stored parameter string ("level=N", no spaces) differs
@@ -2535,7 +3068,8 @@ cfg_ondisk_get_config(unsigned H5_ATTR_UNUSED flags, size_t cd_nelmts, const uns
 static size_t
 cfg_ondisk_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                        hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                       size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
+                       size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes,
+                       size_t *buf_size, void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
@@ -2557,6 +3091,8 @@ static const H5Z_class3_t cfg_ondisk_cls = {
     cfg_ondisk_set_config,  /* set_config      */
     cfg_ondisk_get_config,  /* get_config      */
     NULL,                   /* description     */
+    NULL,                   /* init */
+    NULL,                   /* term */
 };
 
 /* Build a chunked, filter-configured DCPL from a parameter string */
@@ -3203,8 +3739,9 @@ canon_get_config(unsigned H5_ATTR_UNUSED flags, size_t cd_nelmts, const unsigned
 static size_t
 canon_filter_func(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
                   const unsigned int H5_ATTR_UNUSED *cd_values, hid_t H5_ATTR_UNUSED dxpl_id,
-                  const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims, size_t nbytes,
-                  size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+                  const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims,
+                  void H5_ATTR_UNUSED *state, size_t nbytes, size_t H5_ATTR_UNUSED *buf_size,
+                  void H5_ATTR_UNUSED **buf)
 {
     return nbytes; /* pass-through */
 }
@@ -3221,6 +3758,8 @@ static const H5Z_class3_t canon_cls = {
     canon_set_config,  /* set_config      */
     canon_get_config,  /* get_config      */
     NULL,              /* description     */
+    NULL,              /* init */
+    NULL,              /* term */
 };
 
 /* Append CANON_FILTER_ID configured with PARAMS and return the DCPL */
@@ -3335,8 +3874,8 @@ mixv2_filter_func(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
 static size_t
 mixv3_filter_func(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
                   const unsigned int H5_ATTR_UNUSED *cd_values, hid_t H5_ATTR_UNUSED dxpl_id,
-                  const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims, size_t nbytes,
-                  size_t H5_ATTR_UNUSED *buf_size, void **buf)
+                  const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims,
+                  void H5_ATTR_UNUSED *state, size_t nbytes, size_t H5_ATTR_UNUSED *buf_size, void **buf)
 {
     unsigned char *p = (unsigned char *)*buf;
     size_t         i;
@@ -3391,6 +3930,8 @@ static const H5Z_class3_t mixv3_cls = {
     mixv3_set_config,  /* set_config      */
     NULL,              /* get_config      */
     NULL,              /* description     */
+    NULL,              /* init */
+    NULL,              /* term */
 };
 
 static int
@@ -4255,6 +4796,9 @@ main(void)
 
     /* H5Pmodify_filter_by_idx */
     nerrors += test_modify_filter_by_idx(fapl) < 0 ? 1 : 0;
+
+    /* Per-dataset filter state (init/term) */
+    nerrors += test_filter_state(fapl) < 0 ? 1 : 0;
 
     if (H5Fclose(file) < 0)
         goto error;

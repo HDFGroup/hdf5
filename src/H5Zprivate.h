@@ -63,7 +63,18 @@ struct H5Z_filter_info_t {
     unsigned    *cd_values;                        /*client data values                    */
     char        *config;                           /*verbatim key=value config string, or
                                                     *NULL; persisted in pipeline v3        */
+    /* Per-dataset runtime state from the class's init callback.  Only ever
+     * set on an open dataset's own pipeline (dcpl_cache.pline) or on a
+     * transient copy owned by H5D__chunk_copy; never carried into property
+     * lists or pipeline copies (H5O__pline_copy clears both fields). */
+    void    *state;        /*value init stored; passed to the filter callback  */
+    unsigned state_status; /*H5Z_STATE_* below                                 */
 };
+
+/* Values for H5Z_filter_info_t.state_status */
+#define H5Z_STATE_NONE   0 /* init not run (no init callback, or not an open dataset) */
+#define H5Z_STATE_READY  1 /* init succeeded; term owed                               */
+#define H5Z_STATE_FAILED 2 /* init failed or class unavailable at open; I/O must fail  */
 
 /*
  * Internal filter table entry.  H5Z_class2_t is embedded as the first member
@@ -78,6 +89,8 @@ typedef struct H5Z_entry_t {
     H5Z_func2_t           filter2; /* Extended callback (class3); NULL for class1/class2 */
     H5Z_set_config_func_t set_config;
     H5Z_get_config_func_t get_config;
+    H5Z_init_func_t       init;        /* per-dataset state setup; may be NULL */
+    H5Z_term_func_t       term;        /* per-dataset state release; may be NULL */
     const char           *description; /* free-form description; may be NULL */
 } H5Z_entry_t;
 
@@ -127,6 +140,18 @@ H5_DLL htri_t             H5Z_all_filters_avail(const struct H5O_pline_t *pline)
 H5_DLL htri_t             H5Z_filter_avail(H5Z_filter_t id);
 H5_DLL herr_t             H5Z_delete(struct H5O_pline_t *pline, H5Z_filter_t filter);
 H5_DLL herr_t             H5Z_get_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags);
+/* Run each class's init callback on PLINE, which must be a pipeline the
+ * caller owns for the lifetime of the state (an open dataset's
+ * dcpl_cache.pline, or a transient copy).  CHUNK_DIMS/RANK describe one
+ * chunk, excluding the element-size dimension.  STRICT: fail on the first
+ * init failure or missing class (create, copy); otherwise record
+ * H5Z_STATE_FAILED on the entry and succeed (open). */
+H5_DLL herr_t H5Z_state_init(struct H5O_pline_t *pline, struct H5F_t *f, hid_t dcpl_id, hid_t type_id,
+                             const hsize_t *chunk_dims, unsigned rank, bool strict);
+/* Call term for every entry in the H5Z_STATE_READY state and clear it. */
+H5_DLL herr_t H5Z_state_term(struct H5O_pline_t *pline);
+/* True if any entry's class defines init (and so needs state at I/O time). */
+H5_DLL bool H5Z_pline_needs_state(const struct H5O_pline_t *pline);
 /* Normalise a parameter string into the form persisted in pipeline v3:
  * outer braces stripped and hex-float literals rewritten to the shortest
  * bit-exact decimal (up to DBL_DECIMAL_DIG == 17 significant digits), so the

@@ -1204,8 +1204,9 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
     bool            fill_copied   = false; /* Flag to indicate that fill-value message was copied */
     bool            pline_copied  = false; /* Flag to indicate that pipeline message was copied */
     bool            efl_copied    = false; /* Flag to indicate that external file list message was copied */
-    H5G_loc_t       dset_loc;              /* Dataset location */
-    H5D_t          *ret_value = NULL;      /* Return value */
+    bool            filter_state_init = false; /* Flag to indicate that filter init callbacks ran */
+    H5G_loc_t       dset_loc;                  /* Dataset location */
+    H5D_t          *ret_value = NULL;          /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1340,6 +1341,16 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
     if (new_dset->shared->layout.version > H5O_layout_ver_bounds[H5F_HIGH_BOUND(file)])
         HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, NULL, "layout version out of bounds");
 
+    /* Build per-dataset filter state.  Must precede H5D__update_oh_info():
+     * early allocation there runs the pipeline over fill-value chunks. */
+    if (new_dset->shared->dcpl_cache.pline.nused > 0 && H5D_CHUNKED == new_dset->shared->layout.type) {
+        if (H5Z_state_init(&new_dset->shared->dcpl_cache.pline, file, new_dset->shared->dcpl_id,
+                           new_dset->shared->type_id, new_dset->shared->layout.u.chunk.dim,
+                           new_dset->shared->layout.u.chunk.ndims - 1, true) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize filter state");
+        filter_state_init = true;
+    }
+
     /* Check if the file driver would like to force early space allocation */
     if (H5F_HAS_FEATURE(file, H5FD_FEAT_ALLOCATE_EARLY))
         new_dset->shared->dcpl_cache.fill.alloc_time = H5D_ALLOC_TIME_EARLY;
@@ -1388,6 +1399,9 @@ done:
             if (layout_init)
                 if (new_dset->shared->layout.ops->dest && (new_dset->shared->layout.ops->dest)(new_dset) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, NULL, "unable to destroy layout info");
+            if (filter_state_init)
+                if (H5Z_state_term(&new_dset->shared->dcpl_cache.pline) < 0)
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, NULL, "unable to release filter state");
             if (pline_copied)
                 if (H5O_msg_reset(H5O_PLINE_ID, &new_dset->shared->dcpl_cache.pline) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, NULL, "unable to reset I/O pipeline info");
@@ -1726,6 +1740,7 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
     bool            layout_init       = false; /* Flag to indicate that chunk information was initialized */
     bool            must_init_storage = false;
     bool            fill_init         = false;   /* Flag to indicate that fill information was initialized */
+    bool            filter_state_init = false;   /* Flag to indicate that filter init callbacks ran */
     herr_t          ret_value         = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dataset->oloc.addr)
@@ -1769,6 +1784,17 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
 
     /* Indicate that the layout information was initialized */
     layout_init = true;
+
+    /* Build per-dataset filter state.  Lenient: an unavailable plugin or a
+     * failing init does not fail the open (the pipeline reports it at the
+     * first I/O, as for a missing plugin), so metadata stays readable. */
+    if (dataset->shared->dcpl_cache.pline.nused > 0 && H5D_CHUNKED == dataset->shared->layout.type) {
+        if (H5Z_state_init(&dataset->shared->dcpl_cache.pline, dataset->oloc.file, dataset->shared->dcpl_id,
+                           dataset->shared->type_id, dataset->shared->layout.u.chunk.dim,
+                           dataset->shared->layout.u.chunk.ndims - 1, false) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize filter state");
+        filter_state_init = true;
+    }
 
     /* Set up flush append property */
     if (H5D__append_flush_setup(dataset, dapl_id))
@@ -1903,6 +1929,9 @@ done:
             if (layout_init)
                 if (dataset->shared->layout.ops->dest && (dataset->shared->layout.ops->dest)(dataset) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy layout info");
+            if (filter_state_init)
+                if (H5Z_state_term(&dataset->shared->dcpl_cache.pline) < 0)
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release filter state");
             if (dataset->shared->space && H5S_close(dataset->shared->space) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace");
             if (dataset->shared->type) {
@@ -2044,6 +2073,11 @@ H5D_close(H5D_t *dataset)
         /* Destroy any cached layout information for the dataset */
         if (dataset->shared->layout.ops->dest && (dataset->shared->layout.ops->dest)(dataset) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy layout info");
+
+        /* Release per-dataset filter state.  After the layout destroy above,
+         * whose chunk-cache flush is the last use of the pipeline. */
+        if (H5Z_state_term(&dataset->shared->dcpl_cache.pline) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release filter state");
 
         /* Free the external file prefix */
         dataset->shared->extfile_prefix = (char *)H5MM_xfree(dataset->shared->extfile_prefix);

@@ -84,6 +84,20 @@ We would like to thank the many HDF5 community members who contributed to this r
    field (human-readable display name), plus `set_config` / `get_config`
    callbacks that translate between `key=value` strings and internal state.
 
+   **Per-dataset filter state:**  `H5Z_class3_t` also gains optional `init`
+   and `term` callbacks, appended after `description`, and the class-3 filter
+   callback (`H5Z_func2_t`) gains a `void *state` parameter.  `init` runs once
+   per pipeline entry when a dataset is created or first opened, and whatever
+   it returns is passed to every chunk call for that dataset.  `term` releases
+   it when the last handle to the dataset closes.  This lets a filter do
+   expensive setup once per dataset, such as loading model weights or
+   compiling a kernel, instead of once per chunk.  An `init` failure fails
+   `H5Dcreate`; at `H5Dopen` it does not fail the open, but I/O through that
+   filter then fails.  Because `init` needs the filter class, `H5Dopen` now
+   tries to load filter plugins for chunked datasets at open time instead of
+   at first I/O; a plugin that cannot be loaded is still not an error at open.
+   Filters that define `init` cannot be used on group (fractal heap) storage.
+
    **TOML subset parser:**  The [tomlc17](https://github.com/cktan/tomlc17)
    library is now vendored in `src/tomlc17/` and compiled unconditionally into
    libhdf5.  Hex-float literals (`0x1.8p+1`) in parameter strings are

@@ -431,6 +431,11 @@ H5O__pline_copy(const void *_src, void *_dst /*out*/)
             /* Basic filter information */
             dst->filter[i] = src->filter[i];
 
+            /* Per-dataset state belongs to the pipeline it was built on; a
+             * copy (a property list, another dataset) starts without it */
+            dst->filter[i].state        = NULL;
+            dst->filter[i].state_status = H5Z_STATE_NONE;
+
             /* Filter name */
             if (src->filter[i].name) {
                 size_t namelen; /* Length of source filter name, including null terminator  */

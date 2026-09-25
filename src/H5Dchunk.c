@@ -7128,27 +7128,31 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
                 const H5S_extent_t *ds_extent_src, H5T_t *dt_src, const H5O_pline_t *pline_src,
                 H5O_copy_t *cpy_info)
 {
-    H5D_chunk_it_ud3_t udata = {0};                 /* User data for iteration callback */
-    H5D_chk_idx_info_t idx_info_dst;                /* Dest. chunked index info */
-    H5D_chk_idx_info_t idx_info_src;                /* Source chunked index info */
-    int                sndims;                      /* Rank of dataspace */
-    hsize_t            curr_dims[H5O_LAYOUT_NDIMS]; /* Curr. size of dataset dimensions */
-    hsize_t            max_dims[H5O_LAYOUT_NDIMS];  /* Curr. size of dataset dimensions */
-    H5O_pline_t        _pline;                      /* Temporary pipeline info */
-    const H5O_pline_t *pline;                       /* Pointer to pipeline info to use */
-    H5T_path_t        *tpath_src_mem = NULL;        /* Source datatype conversion path */
-    H5T_path_t        *tpath_mem_dst = NULL;        /* Memory datatype conversion path */
-    H5T_t             *dt_dst        = NULL;        /* Destination datatype */
-    H5T_t             *dt_mem        = NULL;        /* Memory datatype */
-    size_t             buf_size;                    /* Size of copy buffer */
-    size_t             bkg_size;                    /* Size of background buffer */
-    size_t             reclaim_buf_size;            /* Size of reclaim buffer */
-    void              *reclaim_buf     = NULL;      /* Buffer for reclaiming data */
-    H5S_t             *buf_space       = NULL;      /* Dataspace describing buffer */
-    size_t             nelmts          = 0;         /* Number of elements in buffer */
-    bool               do_convert      = false;     /* Indicate that type conversions should be performed */
-    bool               copy_setup_done = false;     /* Indicate that 'copy setup' is done */
-    herr_t             ret_value       = SUCCEED;   /* Return value */
+    H5D_chunk_it_ud3_t udata = {0};                        /* User data for iteration callback */
+    H5D_chk_idx_info_t idx_info_dst;                       /* Dest. chunked index info */
+    H5D_chk_idx_info_t idx_info_src;                       /* Source chunked index info */
+    int                sndims;                             /* Rank of dataspace */
+    hsize_t            curr_dims[H5O_LAYOUT_NDIMS];        /* Curr. size of dataset dimensions */
+    hsize_t            max_dims[H5O_LAYOUT_NDIMS];         /* Curr. size of dataset dimensions */
+    H5O_pline_t        _pline;                             /* Temporary pipeline info */
+    const H5O_pline_t *pline;                              /* Pointer to pipeline info to use */
+    H5O_pline_t        state_pline;                        /* Pipeline copy carrying filter state */
+    bool               state_pline_init = false;           /* Whether state_pline holds a copy */
+    hid_t              state_dcpl_id    = H5I_INVALID_HID; /* DCPL handed to filter init callbacks */
+    hid_t              state_type_id    = H5I_INVALID_HID; /* Datatype handed to filter init callbacks */
+    H5T_path_t        *tpath_src_mem    = NULL;            /* Source datatype conversion path */
+    H5T_path_t        *tpath_mem_dst    = NULL;            /* Memory datatype conversion path */
+    H5T_t             *dt_dst           = NULL;            /* Destination datatype */
+    H5T_t             *dt_mem           = NULL;            /* Memory datatype */
+    size_t             buf_size;                           /* Size of copy buffer */
+    size_t             bkg_size;                           /* Size of background buffer */
+    size_t             reclaim_buf_size;                   /* Size of reclaim buffer */
+    void              *reclaim_buf     = NULL;             /* Buffer for reclaiming data */
+    H5S_t             *buf_space       = NULL;             /* Dataspace describing buffer */
+    size_t             nelmts          = 0;                /* Number of elements in buffer */
+    bool               do_convert      = false;   /* Indicate that type conversions should be performed */
+    bool               copy_setup_done = false;   /* Indicate that 'copy setup' is done */
+    herr_t             ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -7282,6 +7286,38 @@ H5D__chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, H5O_layout
         reclaim_buf_size = 0;
     } /* end else */
 
+    /* Only variable-length and reference data are run through the pipeline
+     * on this path (see H5D__chunk_copy_cb).  No dataset is open to own the
+     * filters' per-dataset state, so build it here, against the source file,
+     * and release it when the copy finishes. */
+    if (do_convert && pline->nused > 0) {
+        H5P_genplist_t *dc_plist;
+        H5T_t          *type_copy;
+
+        if (NULL == H5O_msg_copy(H5O_PLINE_ID, pline, &state_pline))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy I/O pipeline");
+        state_pline_init = true;
+
+        if ((state_dcpl_id = H5P_create_id(H5P_CLS_DATASET_CREATE_g, false)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create dataset creation property list");
+        if (NULL == (dc_plist = (H5P_genplist_t *)H5I_object(state_dcpl_id)))
+            HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "can't get dataset creation property list");
+        if (H5P_set(dc_plist, H5O_CRT_PIPELINE_NAME, &state_pline) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set I/O pipeline");
+
+        if (NULL == (type_copy = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "unable to copy datatype");
+        if ((state_type_id = H5I_register(H5I_DATATYPE, type_copy, false)) < 0) {
+            (void)H5T_close_real(type_copy);
+            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register datatype ID");
+        }
+
+        if (H5Z_state_init(&state_pline, f_src, state_dcpl_id, state_type_id, layout_src->u.chunk.dim,
+                           layout_src->u.chunk.ndims - 1, true) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize filter state");
+        pline = &state_pline;
+    }
+
     /* Set up conversion buffer, if appropriate */
     if (do_convert) {
         /* Allocate background memory for converting the chunk */
@@ -7360,6 +7396,18 @@ done:
     H5MM_xfree(udata.buf);
     H5MM_xfree(udata.bkg);
     H5MM_xfree(reclaim_buf);
+
+    /* Release filter state built for this copy */
+    if (state_pline_init) {
+        if (H5Z_state_term(&state_pline) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release filter state");
+        if (H5O_msg_reset(H5O_PLINE_ID, &state_pline) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset I/O pipeline");
+    }
+    if (state_type_id != H5I_INVALID_HID && H5I_dec_ref(state_type_id) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't release datatype ID");
+    if (state_dcpl_id != H5I_INVALID_HID && H5I_dec_ref(state_dcpl_id) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't release property list ID");
 
     /* Clean up any index information */
     if (copy_setup_done)

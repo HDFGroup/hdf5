@@ -286,16 +286,75 @@ typedef herr_t (*H5Z_get_config_func_t)(unsigned flags, size_t cd_nelmts, const 
 /**
  * \brief Extended filter callback type for H5Z_class3_t.
  *
- * Extends \c H5Z_func_t with two additional parameters: the active data-transfer
- * property list (\p dxpl_id) and the chunk's scaled coordinates (\p scaled, \p ndims).
+ * Extends \c H5Z_func_t with three additional parameters: the active
+ * data-transfer property list (\p dxpl_id), the chunk's scaled coordinates
+ * (\p scaled, \p ndims), and the per-dataset filter state (\p state) that the
+ * class's \c init callback produced for this pipeline entry.
  * \c H5Z_class2_t continues to use \c H5Z_func_t; this type is used only by
  * \c H5Z_class3_t.
+ *
+ * \p state is NULL when the class has no \c init callback, or when \c init
+ * stored NULL.  When the class does have \c init, the library never invokes
+ * this callback for an entry whose \c init did not succeed: the pipeline fails
+ * (or, for an optional filter on write, skips the entry) instead.  The callback
+ * must treat \p state as read-only unless it provides its own synchronization.
  *
  * \since 3.0.0
  */
 typedef size_t (*H5Z_func2_t)(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[],
-                              hid_t dxpl_id, const hsize_t *scaled, size_t ndims, size_t nbytes,
+                              hid_t dxpl_id, const hsize_t *scaled, size_t ndims, void *state, size_t nbytes,
                               size_t *buf_size, void **buf);
+
+/**
+ * \brief Callback to build a filter's per-dataset state.
+ *
+ * \param[in]  file_id    File containing the dataset.
+ * \param[in]  dcpl_id    The dataset's creation property list.
+ * \param[in]  type_id    The dataset's datatype.
+ * \param[in]  space_id   A dataspace with the dataset's chunk dimensions -- the
+ *                        same shape \c set_local receives.
+ * \param[in]  idx        This entry's position in the pipeline, for index-based
+ *                        property accessors (a pipeline may contain the same
+ *                        filter ID more than once).
+ * \param[out] state_out  Receives the state handed to every \c H5Z_func2_t
+ *                        call for this entry; may be set to NULL.
+ *
+ * \return Non-negative on success; negative on failure.
+ *
+ * \details Called once per pipeline entry when a dataset is created (after
+ *          \c set_local) and when it is first opened, so that expensive setup
+ *          -- deserializing a model, compiling a kernel, uploading weights to a
+ *          device -- happens once per open dataset instead of once per chunk.
+ *          The state is released by \c term when the last handle to the dataset
+ *          closes.  It is never copied into property lists.
+ *
+ *          At dataset creation a failure fails H5Dcreate().  At dataset open a
+ *          failure does not fail H5Dopen(); the entry is marked unusable and
+ *          any later I/O through it fails, the same way I/O fails today when a
+ *          filter plugin cannot be loaded.
+ *
+ * \attention The callback must not modify the file.  In a parallel job it runs
+ *            on every rank during the collective H5Dcreate() or H5Dopen() and
+ *            must make the same HDF5 calls on every rank.
+ *
+ * \since 3.0.0
+ */
+typedef herr_t (*H5Z_init_func_t)(hid_t file_id, hid_t dcpl_id, hid_t type_id, hid_t space_id, unsigned idx,
+                                  void **state_out);
+
+/**
+ * \brief Callback to release a filter's per-dataset state.
+ *
+ * \param[in] state  The value \c init stored; may be NULL.
+ *
+ * \return Non-negative on success; negative on failure.
+ *
+ * \details Called exactly once for every successful \c init, when the last
+ *          handle to the dataset closes (or when a failed H5Dcreate() unwinds).
+ *
+ * \since 3.0.0
+ */
+typedef herr_t (*H5Z_term_func_t)(void *state);
 
 /**
  * \brief Version 3 filter class structure with optional string-configuration callbacks.
@@ -324,12 +383,17 @@ typedef struct H5Z_class3_t {
                                           encoder_present, decoder_present, name, can_apply, set_local, filter --
                                           share the same slots an H5Z_class2_t literal would occupy positionally.
                                           \warning That slot correspondence does NOT make \c filter itself
-                                          reusable: it is typed \c H5Z_func2_t here (9 parameters, adding
-                                          \p dxpl_id, \p scaled, \p ndims) versus \c H5Z_func_t (7 parameters)
-                                          in H5Z_class2_t. A callback written against the old signature must be
-                                          rewritten to accept and, if unneeded, ignore the three new parameters
+                                          reusable: it is typed \c H5Z_func2_t here (10 parameters, adding
+                                          \p dxpl_id, \p scaled, \p ndims, \p state) versus \c H5Z_func_t (6
+                                          parameters) in H5Z_class2_t. A callback written against the old signature
+                                          must be rewritten to accept and, if unneeded, ignore the four new parameters
                                           before it can be assigned to this field -- reusing the old function
                                           pointer as-is is undefined behavior. */
+    /* Members added after description are appended, never inserted, so a
+     * positional initializer written for an earlier layout still places
+     * every field it names correctly and zero-initializes the rest. */
+    H5Z_init_func_t init; /**< Per-dataset state setup; may be NULL */
+    H5Z_term_func_t term; /**< Per-dataset state release; may be NULL */
 } H5Z_class3_t;
 //! <!-- [H5Z_class3_t_snip] -->
 

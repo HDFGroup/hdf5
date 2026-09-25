@@ -541,6 +541,8 @@ H5Z_register3(const H5Z_class3_t *cls)
     entry.filter2              = cls->filter; /* class3 extended callback; base.filter stays NULL */
     entry.set_config           = cls->set_config;
     entry.get_config           = cls->get_config;
+    entry.init                 = cls->init;
+    entry.term                 = cls->term;
 
     if (H5Z__insert_entry(&entry) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to insert filter into table");
@@ -1267,6 +1269,14 @@ H5Z_can_apply_direct(const H5O_pline_t *pline)
     if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, H5Z_PRELUDE_CAN_APPLY) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter");
 
+    /* A byte-stream pipeline (a group's fractal heap) belongs to no dataset,
+     * so a filter that needs per-dataset state could never run on it.  Refuse
+     * it when the heap is created (at the first dense link or attribute
+     * insert), rather than at the first heap write. */
+    if (H5Z_pline_needs_state(pline))
+        HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL,
+                    "filters with a per-dataset init callback cannot be applied to a group");
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_can_apply_direct() */
@@ -1302,6 +1312,213 @@ H5Z_set_local_direct(const H5O_pline_t *pline)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_set_local_direct() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5Z_pline_needs_state
+ *
+ * Purpose:  Reports whether any registered class in PLINE defines an init
+ *           callback, i.e. whether the pipeline can only run with
+ *           per-dataset state.  Unregistered filters are not loaded here.
+ *
+ * Return:   true/false
+ *-------------------------------------------------------------------------
+ */
+bool
+H5Z_pline_needs_state(const H5O_pline_t *pline)
+{
+    size_t u;
+    bool   ret_value = false;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if (pline)
+        for (u = 0; u < pline->nused; u++) {
+            int idx = H5Z__find_idx(pline->filter[u].id);
+
+            if (idx >= 0 && H5Z_table_g[idx].init) {
+                ret_value = true;
+                break;
+            }
+        }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_pline_needs_state() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5Z_state_init
+ *
+ * Purpose:  Runs the init callback of every class in PLINE that defines
+ *           one, storing each result on its pipeline entry.  Filters not
+ *           yet registered are loaded as plugins first, the same way the
+ *           can_apply/set_local prelude and H5Z_pipeline load them.
+ *
+ *           STRICT (dataset create, object copy): any init failure is an
+ *           error, after releasing the state already built by this call.
+ *
+ *           Not STRICT (dataset open): nothing here fails the open.  A class
+ *           that cannot be loaded leaves its entry H5Z_STATE_NONE; an init
+ *           that fails leaves it H5Z_STATE_FAILED.  H5Z_pipeline refuses to
+ *           run either, so the error surfaces at the first I/O -- the same
+ *           point it surfaces today when a filter plugin is missing.
+ *
+ * Return:   Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z_state_init(H5O_pline_t *pline, H5F_t *f, hid_t dcpl_id, hid_t type_id, const hsize_t *chunk_dims,
+               unsigned rank, bool strict)
+{
+    hid_t  file_id  = H5I_INVALID_HID; /* Registered on first use */
+    hid_t  space_id = H5I_INVALID_HID; /* Chunk-shaped dataspace, built on first use */
+    bool   paused   = false;           /* Error stack paused around a lenient init */
+    size_t u;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    assert(pline);
+    assert(f);
+    assert(chunk_dims || rank == 0);
+
+    for (u = 0; u < pline->nused; u++) {
+        H5Z_filter_info_t *fi        = &pline->filter[u];
+        H5Z_entry_t       *entry     = NULL;
+        void              *new_state = NULL; /* not "state": H5_BEFORE_USER_CB declares one */
+        herr_t             status;
+
+        if (fi->state_status == H5Z_STATE_READY)
+            continue;
+
+        /* Load the filter if necessary.  A class that cannot be loaded is not
+         * this function's error to report: at create, can_apply has already
+         * rejected a missing required filter; at open, the first I/O will. */
+        H5E_PAUSE_ERRORS
+            if (H5Z__find_idx(fi->id) < 0) {
+                H5PL_key_t          key;
+                const H5Z_class2_t *filter_info;
+
+                key.id = (int)fi->id;
+                if (NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, &key)))
+                    (void)H5Z_register(filter_info);
+            }
+            (void)H5Z_find_entry(true, fi->id, &entry);
+        H5E_RESUME_ERRORS
+
+        if (NULL == entry || NULL == entry->init)
+            continue;
+
+        /* Build the callback's handles once, on the first filter that needs them */
+        if (file_id == H5I_INVALID_HID && (file_id = H5F_get_id(f)) < 0)
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get file ID for filter init callback");
+        if (space_id == H5I_INVALID_HID) {
+            hsize_t  dims[H5O_LAYOUT_NDIMS];
+            H5S_t   *space;
+            unsigned d;
+
+            for (d = 0; d < rank; d++)
+                dims[d] = chunk_dims[d];
+            if (NULL == (space = H5S_create_simple(rank, dims, NULL)))
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create chunk dataspace");
+            if ((space_id = H5I_register(H5I_DATASPACE, space, false)) < 0) {
+                (void)H5S_close(space);
+                HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID");
+            }
+        }
+
+        if (!strict) {
+            H5E_PAUSE_ERRORS
+                paused = true;
+        }
+        if (entry->base.id < H5Z_FILTER_RESERVED)
+            status = (entry->init)(file_id, dcpl_id, type_id, space_id, (unsigned)u, &new_state);
+        else {
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    status = (entry->init)(file_id, dcpl_id, type_id, space_id, (unsigned)u, &new_state);
+                }
+            H5_AFTER_USER_CB(FAIL)
+        }
+        if (paused) {
+H5E_RESUME_ERRORS
+paused = false;
+}
+
+if (status < 0) {
+    if (strict)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "init callback for filter %d failed", (int)fi->id);
+    fi->state_status = H5Z_STATE_FAILED;
+    continue;
+}
+
+fi->state        = new_state;
+fi->state_status = H5Z_STATE_READY;
+}
+
+done : if (paused)
+H5E_RESUME_ERRORS
+if (ret_value < 0)
+    /* Unwind: a strict caller treats the whole pipeline as uninitialized */
+    (void)H5Z_state_term(pline);
+if (space_id != H5I_INVALID_HID && H5I_dec_ref(space_id) < 0)
+    HDONE_ERROR(H5E_PLINE, H5E_CANTRELEASE, FAIL, "unable to close chunk dataspace");
+if (file_id != H5I_INVALID_HID && H5I_dec_ref(file_id) < 0)
+    HDONE_ERROR(H5E_PLINE, H5E_CANTDEC, FAIL, "can't release file ID");
+
+FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_state_init() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5Z_state_term
+ *
+ * Purpose:  Releases the per-dataset state on every H5Z_STATE_READY entry
+ *           of PLINE and returns all entries to H5Z_STATE_NONE.  Every
+ *           entry is visited even if one term callback fails.
+ *
+ * Return:   Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z_state_term(H5O_pline_t *pline)
+{
+    size_t u;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    assert(pline);
+
+    for (u = 0; u < pline->nused; u++) {
+        H5Z_filter_info_t *fi    = &pline->filter[u];
+        H5Z_entry_t       *entry = NULL;
+
+        if (fi->state_status == H5Z_STATE_READY) {
+            /* H5Zunregister refuses a filter still used by an open dataset,
+             * so the class that built this state is still registered. */
+            (void)H5Z_find_entry(true, fi->id, &entry);
+            if (entry && entry->term) {
+                herr_t status = SUCCEED;
+
+                if (entry->base.id < H5Z_FILTER_RESERVED)
+                    status = (entry->term)(fi->state);
+                else {
+                    H5_BEFORE_USER_CB_NOERR(FAIL)
+                        {
+                            status = (entry->term)(fi->state);
+                        }
+                    H5_AFTER_USER_CB_NOERR(FAIL)
+                }
+                if (status < 0)
+                    HDONE_ERROR(H5E_PLINE, H5E_CANTRELEASE, FAIL, "term callback for filter %d failed",
+                                (int)fi->id);
+            }
+        }
+        fi->state        = NULL;
+        fi->state_status = H5Z_STATE_NONE;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_state_term() */
 
 /*-------------------------------------------------------------------------
  * Function: H5Z_ignore_filters
@@ -1513,12 +1730,14 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_ne
     } /* end if */
 
     /* Add the new filter to the pipeline */
-    idx                          = pline->nused;
-    pline->filter[idx].id        = filter;
-    pline->filter[idx].flags     = flags;
-    pline->filter[idx].name      = NULL; /*we'll pick it up later*/
-    pline->filter[idx].cd_nelmts = cd_nelmts;
-    pline->filter[idx].config    = NULL; /*set by H5Pappend_filter or pline decode*/
+    idx                             = pline->nused;
+    pline->filter[idx].id           = filter;
+    pline->filter[idx].flags        = flags;
+    pline->filter[idx].name         = NULL; /*we'll pick it up later*/
+    pline->filter[idx].cd_nelmts    = cd_nelmts;
+    pline->filter[idx].config       = NULL; /*set by H5Pappend_filter or pline decode*/
+    pline->filter[idx].state        = NULL; /*set only on an open dataset's pipeline*/
+    pline->filter[idx].state_status = H5Z_STATE_NONE;
     if (cd_nelmts > 0) {
         size_t i; /* Local index variable */
 
@@ -1733,6 +1952,16 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, hid_t dxpl_id, const hsiz
 
             fclass = &H5Z_table_g[fclass_idx];
 
+            /* A filter with per-dataset state is never run without it: its
+             * init either failed at open, or never ran because this pipeline
+             * does not belong to an open dataset (e.g. a group's heap). */
+            if (fclass->init && pline->filter[idx].state_status != H5Z_STATE_READY)
+                HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL,
+                            "filter %d has no per-dataset state (its init callback %s)",
+                            (int)pline->filter[idx].id,
+                            pline->filter[idx].state_status == H5Z_STATE_FAILED ? "failed at dataset open"
+                                                                                : "was not run");
+
 #ifdef H5Z_DEBUG
             fstats = &H5Z_stat_table_g[fclass_idx];
             H5_timer_start(&timer);
@@ -1754,7 +1983,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, hid_t dxpl_id, const hsiz
                     if (fclass->filter2)
                         new_nbytes = (fclass->filter2)(tmp_flags, pline->filter[idx].cd_nelmts,
                                                        pline->filter[idx].cd_values,
-                                                       dxpl_id, scaled, ndims,
+                                                       dxpl_id, scaled, ndims, pline->filter[idx].state,
                                                        *nbytes, buf_size, buf);
                     else
                         new_nbytes = (fclass->base.filter)(tmp_flags, pline->filter[idx].cd_nelmts,
@@ -1767,7 +1996,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, hid_t dxpl_id, const hsiz
                             if (fclass->filter2)
                                 new_nbytes = (fclass->filter2)(tmp_flags, pline->filter[idx].cd_nelmts,
                                                                pline->filter[idx].cd_values,
-                                                               dxpl_id, scaled, ndims,
+                                                               dxpl_id, scaled, ndims, pline->filter[idx].state,
                                                                *nbytes, buf_size, buf);
                             else
                                 new_nbytes = (fclass->base.filter)(tmp_flags, pline->filter[idx].cd_nelmts,
@@ -1840,6 +2069,19 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, hid_t dxpl_id, const hsiz
 
             fclass = &H5Z_table_g[fclass_idx];
 
+            /* Same rule as the read path; an optional filter is skipped, the
+             * way an unregistered optional filter is skipped above. */
+            if (fclass->init && pline->filter[idx].state_status != H5Z_STATE_READY) {
+                if ((pline->filter[idx].flags & H5Z_FLAG_OPTIONAL) == 0)
+                    HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL,
+                                "filter %d has no per-dataset state (its init callback %s)",
+                                (int)pline->filter[idx].id,
+                                pline->filter[idx].state_status == H5Z_STATE_FAILED ? "failed at dataset open"
+                                                                                    : "was not run");
+                failed |= (unsigned)1 << idx;
+                continue; /* filter excluded */
+            }
+
 #ifdef H5Z_DEBUG
             fstats = &H5Z_stat_table_g[fclass_idx];
             H5_timer_start(&timer);
@@ -1859,7 +2101,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, hid_t dxpl_id, const hsiz
                         new_nbytes = (fclass->filter2)(flags | (pline->filter[idx].flags),
                                                        pline->filter[idx].cd_nelmts,
                                                        pline->filter[idx].cd_values,
-                                                       dxpl_id, scaled, ndims,
+                                                       dxpl_id, scaled, ndims, pline->filter[idx].state,
                                                        *nbytes, buf_size, buf);
                     else
                         new_nbytes = (fclass->base.filter)(flags | (pline->filter[idx].flags),
@@ -1874,7 +2116,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, hid_t dxpl_id, const hsiz
                                 new_nbytes = (fclass->filter2)(flags | (pline->filter[idx].flags),
                                                                pline->filter[idx].cd_nelmts,
                                                                pline->filter[idx].cd_values,
-                                                               dxpl_id, scaled, ndims,
+                                                               dxpl_id, scaled, ndims, pline->filter[idx].state,
                                                                *nbytes, buf_size, buf);
                             else
                                 new_nbytes = (fclass->base.filter)(flags | (pline->filter[idx].flags),
