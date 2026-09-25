@@ -24,9 +24,10 @@ import hdf.hdf5lib.exceptions.HDF5JavaException;
  * The purpose is to allow the storage and retrieval of arbitrary array types containing scientific data.
  * <p>
  * The methods support the conversion of an array to and from Java to a one-dimensional array of bytes
- * suitable for I/O by the C library. <p> This class heavily uses the
- * @ref HDFNATIVE
- * class to convert between Java and C representations.
+ * suitable for I/O by the C library. <p> This class heavily uses the HDFNativeData class to convert between
+ * Java and C representations.
+ *
+ * See also @ref HDFNATIVE
  */
 
 public class HDFArray {

@@ -28,11 +28,11 @@ public interface H5D_iterate_cb extends org.hdfgroup.javahdf5.H5D_operator_t.Fun
      *
      *  application callback for each dataset element
      *
-     *  @param elem      the pointer to the element in memory containing the current point
-     *  @param elem_type the datatype ID for the elements stored in elem
-     *  @param ndim      the number of dimensions for POINT array
-     *  @param point     the array containing the location of the element within the original dataspace
-     *  @param op_data   the operator data passed in to H5Diterate
+     *  @param elem            the pointer to the element in memory containing the current point
+     *  @param type_id         the datatype ID for the elements stored in elem
+     *  @param ndim            the number of dimensions for POINT array
+     *  @param point           the array containing the location of the element within the original dataspace
+     *  @param operator_data   the operator data passed in to H5Diterate
      *
      *  @return operation status
      *      A. Zero causes the iterator to continue, returning zero when all
