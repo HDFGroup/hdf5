@@ -742,6 +742,7 @@ const unsigned H5O_dtype_ver_bounds[] = {
     H5O_DTYPE_VERSION_4,     /* H5F_LIBVER_V112 */
     H5O_DTYPE_VERSION_4,     /* H5F_LIBVER_V114 */
     H5O_DTYPE_VERSION_5,     /* H5F_LIBVER_V200 */
+    H5O_DTYPE_VERSION_5,     /* H5F_LIBVER_V300 */
     H5O_DTYPE_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 
