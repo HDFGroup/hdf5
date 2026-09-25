@@ -34,6 +34,7 @@
 #include "H5Fpkg.h"      /* Files                            */
 #include "H5FDprivate.h" /* File drivers                     */
 #include "H5FLprivate.h" /* Free Lists                               */
+#include "H5MFprivate.h" /* File memory management           */
 #include "H5MMprivate.h" /* Memory management                */
 #include "H5PBpkg.h"     /* File access                      */
 #include "H5SLprivate.h" /* Skip List                        */
@@ -122,10 +123,9 @@ typedef struct {
 /********************/
 /* Local Prototypes */
 /********************/
-static H5_ATTR_PURE bool H5PB__entry_is_raw(const H5PB_entry_t *page_entry);
-static herr_t            H5PB__insert_entry(H5PB_t *page_buf, H5PB_entry_t *page_entry);
-static htri_t            H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type);
-static herr_t            H5PB__write_entry(H5F_shared_t *f_sh, H5PB_entry_t *page_entry);
+static herr_t H5PB__insert_entry(H5PB_t *page_buf, H5PB_entry_t *page_entry);
+static htri_t H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type);
+static herr_t H5PB__write_entry(H5F_shared_t *f_sh, H5PB_entry_t *page_entry);
 
 /*********************/
 /* Package Variables */
@@ -621,13 +621,11 @@ H5PB_remove_entry(const H5F_shared_t *f_sh, haddr_t addr)
 
     /* If found, remove the entry from the PB cache */
     if (page_entry) {
-        /* No assertion on the entry type here.  The caller excludes raw
-         * data by allocation type, but that does not bound the entry type:
-         * a global heap page carries H5F_MEM_PAGE_GHEAP when the free space
-         * manager created it, and H5F_MEM_PAGE_DRAW once it has been
-         * evicted and faulted back in, since the I/O paths map GHEAP to
-         * DRAW.  Both are raw by the page counts, and the decrement below
-         * handles them.
+        /* No assertion on the entry type here. The caller filters on the
+         * allocation type of the operation it is performing, and that does
+         * not bound the type recorded on the entry: page_entry->type is
+         * stamped when the entry is created and is never revisited, so it
+         * names whichever access first brought the page into the buffer.
          */
         if (NULL == H5SL_remove(page_buf->slist_ptr, &(page_entry->addr)))
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Page Entry is not in skip list");
@@ -636,16 +634,13 @@ H5PB_remove_entry(const H5F_shared_t *f_sh, haddr_t addr)
         H5PB__REMOVE_LRU(page_buf, page_entry)
         assert(H5SL_count(page_buf->slist_ptr) == page_buf->LRU_list_len);
 
-        /* Decrement the count the page was charged to.  The caller excludes
-         * raw data, but a page allocated for the global heap reaches here
-         * carrying H5F_MEM_PAGE_GHEAP: H5PB_add_new_page() records the
-         * allocation type, and H5PB_write() reuses that entry without
-         * changing it.  H5PB__insert_entry() charges such a page to
-         * raw_count, so decrementing meta_count unconditionally would
-         * corrupt both counts -- and meta_count is unsigned, so it can wrap
-         * and leave the eviction thresholds wrong for the life of the file.
+        /* Decrement the count this page was charged to. The charge was made
+         * by entry type in H5PB__insert_entry(), so it has to be released
+         * by entry type as well. Both counters are unsigned: decrementing
+         * the wrong one wraps it, and the eviction thresholds then stay
+         * wrong for the life of the file with nothing reporting it.
          */
-        if (H5PB__entry_is_raw(page_entry))
+        if (H5MF_mem_page_type_is_raw(page_entry->type))
             page_buf->raw_count--;
         else
             page_buf->meta_count--;
@@ -718,7 +713,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
 
         /* Update statistics */
         if (page_buf) {
-            if (type == H5FD_MEM_DRAW)
+            if (H5MF_mem_type_is_raw(type))
                 page_buf->bypasses[1]++;
             else
                 page_buf->bypasses[0]++;
@@ -734,7 +729,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
 
     /* Update statistics */
     if (page_buf) {
-        if (type == H5FD_MEM_DRAW)
+        if (H5MF_mem_type_is_raw(type))
             page_buf->accesses[1]++;
         else
             page_buf->accesses[0]++;
@@ -870,7 +865,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
                 H5PB__MOVE_TO_TOP_LRU(page_buf, page_entry)
 
                 /* Update statistics */
-                if (type == H5FD_MEM_DRAW)
+                if (H5MF_mem_type_is_raw(type))
                     page_buf->hits[1]++;
                 else
                     page_buf->hits[0]++;
@@ -953,7 +948,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTSET, FAIL, "error inserting new page in page buffer");
 
                 /* Update statistics */
-                if (type == H5FD_MEM_DRAW)
+                if (H5MF_mem_type_is_raw(type))
                     page_buf->misses[1]++;
                 else
                     page_buf->misses[0]++;
@@ -1025,7 +1020,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
 
         /* Update statistics */
         if (page_buf) {
-            if (type == H5FD_MEM_DRAW || type == H5FD_MEM_GHEAP)
+            if (H5MF_mem_type_is_raw(type))
                 page_buf->bypasses[1]++;
             else
                 page_buf->bypasses[0]++;
@@ -1049,7 +1044,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
 
     /* Update statistics */
     if (page_buf) {
-        if (type == H5FD_MEM_DRAW || type == H5FD_MEM_GHEAP)
+        if (H5MF_mem_type_is_raw(type))
             page_buf->accesses[1]++;
         else
             page_buf->accesses[0]++;
@@ -1134,7 +1129,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                     H5PB__REMOVE_LRU(page_buf, page_entry)
 
                     /* Decrement page count of appropriate type */
-                    if (H5PB__entry_is_raw(page_entry))
+                    if (H5MF_mem_page_type_is_raw(page_entry->type))
                         page_buf->raw_count--;
                     else
                         page_buf->meta_count--;
@@ -1179,7 +1174,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                 H5PB__MOVE_TO_TOP_LRU(page_buf, page_entry)
 
                 /* Update statistics */
-                if (type == H5FD_MEM_DRAW || type == H5FD_MEM_GHEAP)
+                if (H5MF_mem_type_is_raw(type))
                     page_buf->hits[1]++;
                 else
                     page_buf->hits[0]++;
@@ -1236,7 +1231,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                     page_entry->page_buf_ptr = new_page_buf;
 
                     /* Update statistics */
-                    if (type == H5FD_MEM_DRAW || type == H5FD_MEM_GHEAP)
+                    if (H5MF_mem_type_is_raw(type))
                         page_buf->hits[1]++;
                     else
                         page_buf->hits[0]++;
@@ -1284,7 +1279,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                             HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, "driver read request failed");
 
                         /* Update statistics */
-                        if (type == H5FD_MEM_DRAW || type == H5FD_MEM_GHEAP)
+                        if (H5MF_mem_type_is_raw(type))
                             page_buf->misses[1]++;
                         else
                             page_buf->misses[0]++;
@@ -1376,44 +1371,6 @@ H5PB_enabled(H5F_shared_t *f_sh, H5FD_mem_t type, bool *enabled)
 } /* end H5PB_enabled() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5PB__entry_is_raw()
- *
- * Purpose:     Determine whether a page buffer entry belongs to the raw
- *              data population rather than the metadata population.
- *
- *              Every page in the buffer is charged to exactly one of
- *              raw_count and meta_count, so this classification is made
- *              here and used both by the code that maintains those counts
- *              and by the code that decides which pages the min_raw_count
- *              and min_meta_count protect.
- *
- *              A page entry's type is always assigned from an H5FD_mem_t,
- *              so only the values H5F_MEM_PAGE_SUPER through
- *              H5F_MEM_PAGE_OHDR occur here; the H5F_MEM_PAGE_LARGE_*
- *              values would be classified as metadata, which is what the
- *              count arithmetic already does with them.
- *
- *              Both the raw values occur in practice.  The I/O paths map
- *              H5FD_MEM_GHEAP to H5FD_MEM_DRAW before entering the page
- *              buffer, so an entry created by a read or a write is never
- *              H5F_MEM_PAGE_GHEAP.
- *
- * Return:      true if the entry holds raw data, false if it holds
- *              metadata.  Cannot fail.
- *
- *-------------------------------------------------------------------------
- */
-static H5_ATTR_PURE bool
-H5PB__entry_is_raw(const H5PB_entry_t *page_entry)
-{
-    FUNC_ENTER_PACKAGE_NOERR
-
-    assert(page_entry);
-
-    FUNC_LEAVE_NOAPI(H5F_MEM_PAGE_DRAW == page_entry->type || H5F_MEM_PAGE_GHEAP == page_entry->type)
-} /* end H5PB__entry_is_raw() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5PB__insert_entry()
  *
  * Purpose:     This function was created without documentation.
@@ -1446,7 +1403,7 @@ H5PB__insert_entry(H5PB_t *page_buf, H5PB_entry_t *page_entry)
     assert(H5SL_count(page_buf->slist_ptr) * page_buf->page_size <= page_buf->max_size);
 
     /* Increment appropriate page count */
-    if (H5PB__entry_is_raw(page_entry))
+    if (H5MF_mem_page_type_is_raw(page_entry->type))
         page_buf->raw_count++;
     else
         page_buf->meta_count++;
@@ -1500,7 +1457,7 @@ H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
 
         /* check the metadata threshold before evicting metadata items */
         while (1) {
-            if (page_entry->prev && !H5PB__entry_is_raw(page_entry) &&
+            if (page_entry->prev && !H5MF_mem_page_type_is_raw(page_entry->type) &&
                 page_buf->min_meta_count >= page_buf->meta_count)
                 page_entry = page_entry->prev;
             else
@@ -1517,7 +1474,7 @@ H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
 
         /* check the raw data threshold before evicting raw data items */
         while (1) {
-            if (page_entry->prev && H5PB__entry_is_raw(page_entry) &&
+            if (page_entry->prev && H5MF_mem_page_type_is_raw(page_entry->type) &&
                 page_buf->min_raw_count >= page_buf->raw_count)
                 page_entry = page_entry->prev;
             else
@@ -1534,7 +1491,7 @@ H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
     assert(H5SL_count(page_buf->slist_ptr) == page_buf->LRU_list_len);
 
     /* Decrement appropriate page type counter */
-    if (H5PB__entry_is_raw(page_entry))
+    if (H5MF_mem_page_type_is_raw(page_entry->type))
         page_buf->raw_count--;
     else
         page_buf->meta_count--;
@@ -1545,7 +1502,7 @@ H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
             HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, "file write failed");
 
     /* Update statistics */
-    if (H5PB__entry_is_raw(page_entry))
+    if (H5MF_mem_page_type_is_raw(page_entry->type))
         page_buf->evictions[1]++;
     else
         page_buf->evictions[0]++;
