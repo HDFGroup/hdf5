@@ -1,0 +1,118 @@
+.github/workflows/clang-format-check.yml
+  s_71c3fd9a1c4bf7::t_aeff3690188c3a 25
+src/H5private.h
+  s_71c3fd9a1c4bf7::t_a8c203456011d3 1456-1474,1693-1703
+  s_71c3fd9a1c4bf7::t_4020df55d4476c 247-253,268
+src/ryu/README.md
+  s_71c3fd9a1c4bf7::t_501ea2c92b536f 1-111
+src/tomlc17/LICENSE
+  s_71c3fd9a1c4bf7::t_b35a87f8fd5f0e 1-21
+src/H5Zpkg.h
+  s_71c3fd9a1c4bf7::t_856e0574627232 68-70
+  s_71c3fd9a1c4bf7::t_a6e9b2da223f3e 23-26,31-38,40,43,46,49,57,62,66
+src/tomlc17/tomlc17.c
+  s_71c3fd9a1c4bf7::t_e36d5b858b6e61 1-3276
+src/ryu/common.h
+  s_71c3fd9a1c4bf7::t_2506c3827d5d78 1-114
+src/ryu/d2s_full_table.h
+  s_71c3fd9a1c4bf7::t_990d698079d371 1-367
+.codespellrc
+  s_71c3fd9a1c4bf7::t_c6391944f1e7db 3
+src/H5Zconfig.c
+  s_71c3fd9a1c4bf7::t_75aacf61483aee 1-160,164-1013
+bin/format_source
+  s_71c3fd9a1c4bf7::t_c0c3a6b4b64f80 23
+src/H5Zprivate.h
+  s_71c3fd9a1c4bf7::t_c0d9ac76c3d299 47-50,125-129
+  s_71c3fd9a1c4bf7::t_97aaed06d8746d 66-81,94,99-100,103-110,112-118
+src/ryu/d2s.c
+  s_71c3fd9a1c4bf7::t_cb3fcf3fe94d4c 1-509
+src/tomlc17/tomlc17.h
+  s_71c3fd9a1c4bf7::t_2a1c7acd0e5ff0 1-285
+src/H5Zpublic.h
+  s_71c3fd9a1c4bf7::t_2e066735aeba2f 89-95
+  s_71c3fd9a1c4bf7::t_4b4c46575772f3 375-431
+src/tomlc17/README.md
+  s_71c3fd9a1c4bf7::t_9b97c86022f0da 1-159
+src/ryu/ryu.h
+  s_71c3fd9a1c4bf7::t_cb03d84057d329 1-46
+release_docs/CHANGELOG.md
+  s_71c3fd9a1c4bf7::t_1ad07c2d3359fe 90-95
+  s_71c3fd9a1c4bf7::t_e60bddf798ab07 100-111
+LICENSE
+  s_71c3fd9a1c4bf7::t_18985554f09b32 111-169
+test/tfilter2.c
+  s_71c3fd9a1c4bf7::t_c86fc0a040c0be 1-15,19-22,25-473,1308-1310,1315-1316,1323-1327,1353-1360,1367-1368
+  s_71c3fd9a1c4bf7::t_94f59b214f0e4b 16-18,23-24,474-1307,1311-1314,1317-1322,1328-1352,1361-1366
+src/tomlc17/h5_toml_prefix.h
+  s_71c3fd9a1c4bf7::t_3315125694f11e 1-60
+src/ryu/LICENSE-Boost
+  s_71c3fd9a1c4bf7::t_c7ae2ea5a85d77 1-23
+src/ryu/h5_ryu_prefix.h
+  s_71c3fd9a1c4bf7::t_5f0be049eb662d 1-54
+src/ryu/LICENSE-Apache2
+  s_71c3fd9a1c4bf7::t_31e7f36f889b50 1-201
+src/ryu/d2s_intrinsics.h
+  s_71c3fd9a1c4bf7::t_6ba3da9dfbc376 1-357
+src/ryu/digit_table.h
+  s_71c3fd9a1c4bf7::t_cedadc5d311393 1-35
+.github/workflows/clang-format-fix.yml
+  s_71c3fd9a1c4bf7::t_e6a986ac6bcf9b 38
+src/CMakeLists.txt
+  s_71c3fd9a1c4bf7::t_3ef73cd10bbb23 988,1004-1096
+src/H5Zdevelop.h
+  s_71c3fd9a1c4bf7::t_167a35bf5bc607 347-450
+  s_71c3fd9a1c4bf7::t_333c505ef8dc34 29-31,35-46,188-334,477-495
+test/CMakeLists.txt
+  s_71c3fd9a1c4bf7::t_2fd839be5dcd29 483
+src/H5Zfletcher32.c
+  s_71c3fd9a1c4bf7::t_3e5bc5e4cb3bbc 22,26-37,54-56
+src/H5HFhuge.c
+  s_71c3fd9a1c4bf7::t_bcaee5755d4de0 330-331,750-751
+src/H5version.h
+  s_71c3fd9a1c4bf7::t_c5e4e37ff7cb4b 1684-1685
+src/H5Ppublic.h
+  s_71c3fd9a1c4bf7::t_105d9301173102 2115-2118,2142-2143,2168-2170
+src/H5Zscaleoffset.c
+  s_71c3fd9a1c4bf7::t_da1ef7420912d2 57,93-95,98-104,1102-1104
+test/dsets.c
+  s_71c3fd9a1c4bf7::t_c8f8758b46a04b 2818-2819,2821,2823-2824,2826-2837,3424
+src/H5Dchunk.c
+  s_71c3fd9a1c4bf7::t_12cf0eb547153f 3664-3667,4852-4854,5446-5448,5970-5972,6114-6117,7597-7598,7663-7664,8400-8401
+src/H5Zdeflate.c
+  s_71c3fd9a1c4bf7::t_8ad323f990bb23 30-31,35-46,61-64
+src/H5HFcache.c
+  s_71c3fd9a1c4bf7::t_f4463cd0715441 1578-1579,1732-1733,2093-2094
+src/H5Znbit.c
+  s_71c3fd9a1c4bf7::t_6ac0e3915522e2 37-38,90-92,95-101,936-938
+src/H5Zszip.c
+  s_71c3fd9a1c4bf7::t_865606092241ff 34-35,39-50,255-257
+src/H5Dmpio.c
+  s_71c3fd9a1c4bf7::t_4b507cb99d4e76 4612,4614,4838,4930-4932
+src/H5Z.c
+  s_71c3fd9a1c4bf7::t_9c7452fdc7a005 65-67,75-79,97-98,100,102,104,109,119,172-176,202,220-271,305-323,345,363,365-368,370,373-374,377,379,383,387,389-390,392-397,399,401-404,406,408-409,413-471,477-575,629,666,970,1533,1567-1568,1574-1602,1627-1629,1631-1634,1746-1759,1764-1772,1850-1865,1870-1880,2048,2164-2223
+src/H5Zshuffle.c
+  s_71c3fd9a1c4bf7::t_aadbfdbbecafc5 25-26,30-41,112-115
+src/H5vers.txt
+  s_71c3fd9a1c4bf7::t_0c223d3be0e20f 98-109
+src/H5Pocpl.c
+  s_71c3fd9a1c4bf7::t_c4ca46a5620873 1169-1171
+bin/make_vers
+  s_71c3fd9a1c4bf7::t_e6d860530703b3 29-40,248-249,254-256,274-280,284,300-301,305-307,316-322,381-387,474-485,488-489,494-495
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "4dde7745cf89a77d11fdca2e30e7f1e9b57f860a",
+  "prompts": {},
+  "sessions": {
+    "s_71c3fd9a1c4bf7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4d43baf-ffcf-476b-982a-5d7c16d1debb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
