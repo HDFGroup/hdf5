@@ -125,6 +125,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed a memory leak when decoding a dataset creation property list with filters
+
+   `H5Pdecode()` copied the name of each encoded filter and then discarded the copy, leaking it for every named filter in an encoded dataset creation property list, including on the error path. The decoder now skips over the encoded name.
+
 ### Fixed a deadlock in the ROS3 VFD on Windows
 
    When an HDF5 application running on Windows and using the ROS3 VFD exited normally,
