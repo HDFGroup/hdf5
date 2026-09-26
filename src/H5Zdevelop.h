@@ -238,10 +238,11 @@ typedef herr_t (*H5Z_set_config_func_t)(const char *params, unsigned *flags, siz
  *          H5Pget_filter_params_by_idx() returns that string -- the caller's
  *          own text in canonical form, outer braces stripped and hex-float
  *          literals rewritten to decimal -- and never calls get_config.
- *          get_config is used when no string is stored (for example, a filter
- *          added through the raw cd_values API, or a pipeline read back from
- *          a file).  How a filter encodes values into cd_values is entirely
- *          private to that filter.
+ *          The string is stored in the file with the dataset, so this also
+ *          holds for a dataset opened from a file.  get_config is used when
+ *          no string is stored (for example, a filter added through the raw
+ *          cd_values API).  How a filter encodes values into cd_values is
+ *          entirely private to that filter.
  *
  * \note When reconstructing \c float or \c double values, the simplest
  *       correct choice is to format with \c \%.16e and nothing else.  That is

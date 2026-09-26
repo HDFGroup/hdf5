@@ -95,7 +95,7 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ### Added the H5F_LIBVER_V300 library version bound
 
-   The `H5F_libver_t` enumeration gains `H5F_LIBVER_V300` for the 3.0 file format, and `H5F_LIBVER_LATEST` now maps to it. Every object header message version admitted by `H5F_LIBVER_V300` is currently the same as for `H5F_LIBVER_V200`; later format changes in the 3.0 release will be gated on it. The constant is also available in the Fortran (`H5F_LIBVER_V300_F`) and Java (`HDF5Constants.H5F_LIBVER_V300`) bindings, and `h5repack --low`/`--high` accept the value 6.
+   The `H5F_libver_t` enumeration gains `H5F_LIBVER_V300` for the 3.0 file format, and `H5F_LIBVER_LATEST` now maps to it. Every object header message version admitted by `H5F_LIBVER_V300` is the same as for `H5F_LIBVER_V200` except the filter pipeline message, which admits version 3 (see below); later format changes in the 3.0 release will also be gated on it. The constant is also available in the Fortran (`H5F_LIBVER_V300_F`) and Java (`HDF5Constants.H5F_LIBVER_V300`) bindings, and `h5repack --low`/`--high` accept the value 6.
 
 ### Added the H5Z_class3_t filter class and H5Zget_filter_class_info()
 
@@ -113,11 +113,17 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    The new `H5Pappend_filter()` function appends a filter to a pipeline from an `H5Z_params_t` descriptor, declared in `H5Zpublic.h`. With `H5Z_PARAMS_RAW(n, cd_values)` it behaves like `H5Pset_filter()`; with `H5Z_PARAMS_STR("level = 6")` the library loads the filter if necessary and calls its `set_config` callback to translate the `key = value` string into `cd_values`. The string is canonicalized (outer braces stripped, hex-float literals rewritten to the shortest decimal that round-trips) and stored on the pipeline entry together with the resulting `cd_values`, and the filter's canonical name is recorded in the entry. `H5Pmodify_filter_by_idx()` replaces the configuration of the filter at a given pipeline index, in either form, without changing the filter order. `H5Pget_filter_params_by_idx()` returns the parameter string of the filter at a given index: the stored string if there is one, otherwise the filter's `get_config` reconstruction from `cd_values`, otherwise a `cd_values=v0:v1:...` listing. `H5Pmodify_filter()` clears a stored string, since the new `cd_values` no longer match it.
 
-   Stored strings are carried by `H5Pcopy()` and by `H5Pencode()`/`H5Pdecode()`, but are not yet written to files: a dataset created from such a property list stores only its `cd_values`, and the creation property list of a dataset opened from a file reports the `get_config` or `cd_values` form.
+   Stored strings are carried by `H5Pcopy()` and by `H5Pencode()`/`H5Pdecode()`, and are written to files in version 3 of the filter pipeline message (see below), so the creation property list of a dataset opened from a file returns the stored string.
 
    The built-in filters now implement `set_config`: deflate accepts `level` (0-9, default 6), szip accepts `coding` (`"nn"` or `"entropy"`) and `pixels_per_block`, and scale-offset requires `scale_type` (`"int"`, `"float_dscale"` or `"float_escale"`) and `scale_factor`. Shuffle, Fletcher32 and N-bit accept only an empty string. Deflate, szip and scale-offset also implement `get_config`.
 
    An `H5Pencode()` buffer for a dataset creation property list in which some filter carries a parameter string uses an extended encoding of the filter pipeline property that earlier releases reject when decoding. Property lists without parameter strings encode exactly as before, and buffers produced by earlier releases decode as before.
+
+### Added version 3 of the filter pipeline message
+
+   Version 3 of the filter pipeline object header message stores each filter's configuration string after its client data values, as a 2-byte length followed by the string bytes without a NUL terminator; a zero length means the filter has no string. The library writes version 3 for a dataset whose pipeline carries at least one configuration string when the file's high library version bound is `H5F_LIBVER_V300` or later. If the high bound is lower, `H5Dcreate()`, `H5Dcreate_anon()` and `H5Ocopy()` fail with a minor error code of `H5E_BADRANGE` rather than write the pipeline without its strings. `H5Ocopy()` carries the strings to the copy, and `H5Pget_filter_params_by_idx()` returns them for a dataset opened from a file without loading the filter.
+
+   Pipelines without configuration strings are written as version 1 or 2 as before, so a file that stores no strings is byte-identical to one written by earlier releases when the low bound is below `H5F_LIBVER_V300`. Because `H5F_LIBVER_V300` and `H5F_LIBVER_LATEST` admit version 3, a low bound of either writes every filter pipeline message as version 3, even one without strings, and HDF5 2.x and earlier releases cannot open the datasets in such a file. The version 3 layout is described in the file format specification.
 
 ### Added support for internally concurrent multithreaded reads of chunked datasets
 

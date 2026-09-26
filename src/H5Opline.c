@@ -89,7 +89,7 @@ const unsigned H5O_pline_ver_bounds[] = {
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V112 */
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V114 */
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V200 */
-    H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V300 */
+    H5O_PLINE_VERSION_3,     /* H5F_LIBVER_V300 */
     H5O_PLINE_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 
@@ -241,6 +241,31 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                     p += 4; /* padding */
                 }
         }
+
+        /* Configuration string, for version 3+.  A zero length means no
+         * string was stored for this filter. */
+        if (pline->version >= H5O_PLINE_VERSION_3) {
+            size_t config_length;
+
+            if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+            UINT16DECODE(p, config_length);
+
+            if (config_length > H5Z_CONFIG_STRING_MAX)
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "filter config string exceeds maximum length");
+
+            if (config_length) {
+                if (H5_IS_BUFFER_OVERFLOW(p, config_length, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+                /* Stored without a NUL terminator; add one on the way in */
+                if (NULL == (filter->config = (char *)H5MM_malloc(config_length + 1)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+                                "memory allocation failed for filter config string");
+                H5MM_memcpy(filter->config, p, config_length);
+                filter->config[config_length] = '\0';
+                p += config_length;
+            }
+        }
     }
 
     /* Set return value */
@@ -347,6 +372,19 @@ H5O__pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
         if (pline->version == H5O_PLINE_VERSION_1)
             if (filter->cd_nelmts % 2)
                 UINT32ENCODE(p, 0);
+
+        /* Configuration string, for version 3+.  Written without a NUL
+         * terminator; a zero length means no string for this filter. */
+        if (pline->version >= H5O_PLINE_VERSION_3) {
+            size_t config_length = filter->config ? strlen(filter->config) : 0;
+
+            assert(config_length <= H5Z_CONFIG_STRING_MAX);
+            UINT16ENCODE(p, config_length);
+            if (config_length > 0) {
+                H5MM_memcpy(p, filter->config, config_length);
+                p += config_length;
+            }
+        }
     } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -513,6 +551,11 @@ H5O__pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
         if (pline->version == H5O_PLINE_VERSION_1)
             if (pline->filter[i].cd_nelmts % 2)
                 ret_value += 4;
+
+        /* Configuration string, for version 3+: 2-byte length prefix plus the
+         * string bytes (no NUL terminator on disk) */
+        if (pline->version >= H5O_PLINE_VERSION_3)
+            ret_value += 2 + (pline->filter[i].config ? strlen(pline->filter[i].config) : 0);
     } /* end for */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -722,6 +765,31 @@ H5O_pline_set_version(H5F_t *f, H5O_pline_t *pline)
 
     /* Upgrade to the version indicated by the file's low bound if higher */
     version = MAX(pline->version, H5O_pline_ver_bounds[H5F_LOW_BOUND(f)]);
+
+    /* A filter carrying a configuration string needs the version-3 encoding
+     * to store it.  Use version 3 when the file's high bound admits it;
+     * otherwise fail, so the caller learns the string would not be stored
+     * rather than getting a file that does not return the string it set. */
+    if (version < H5O_PLINE_VERSION_3) {
+        bool have_config = false;
+
+        for (size_t u = 0; u < pline->nused; u++)
+            if (pline->filter[u].config) {
+                have_config = true;
+                break;
+            }
+
+        if (have_config) {
+            if (H5O_pline_ver_bounds[H5F_HIGH_BOUND(f)] >= H5O_PLINE_VERSION_3)
+                version = H5O_PLINE_VERSION_3;
+            else
+                HGOTO_ERROR(H5E_PLINE, H5E_BADRANGE, FAIL,
+                            "filter configuration string cannot be stored: the file's high library "
+                            "version bound does not admit the version-3 filter pipeline message "
+                            "(raise the bound with H5Pset_libver_bounds(), or append the filter "
+                            "without a configuration string)");
+        }
+    }
 
     /* Version bounds check */
     if (version > H5O_pline_ver_bounds[H5F_HIGH_BOUND(f)])
