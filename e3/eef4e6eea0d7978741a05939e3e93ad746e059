@@ -1,0 +1,35 @@
+java/hdf/hdf5lib/H5.java
+  s_71c3fd9a1c4bf7::t_0e59be24212440 12419-12655
+java/src-jni/hdf/hdf5lib/H5.java
+  s_71c3fd9a1c4bf7::t_ed45e6d0770997 8448-8582
+java/src-jni/jni/h5pDCPLImp.c
+  s_71c3fd9a1c4bf7::t_033b3848fe202b 1391-1573
+java/src-jni/jni/h5pDCPLImp.h
+  s_71c3fd9a1c4bf7::t_5bc999d87c9bfd 142-180
+java/src-jni/test/TestH5Z.java
+  s_71c3fd9a1c4bf7::t_e1ca2c348c8677 15-16,26,30,32,133-313
+java/src-jni/test/testfiles/JUnit-TestH5Z.txt
+  s_71c3fd9a1c4bf7::t_862ed823b97a6c 2-6,9,13
+java/test/TestH5Z.java
+  s_71c3fd9a1c4bf7::t_7c3876172e6fad 15-16,26,30,32,133-313
+java/test/testfiles/JUnit-TestH5Z.txt
+  s_71c3fd9a1c4bf7::t_e9fb9f77cdf7b9 2-6,9,13
+release_docs/CHANGELOG.md
+  s_71c3fd9a1c4bf7::t_6728729667414f 155-158
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e3eef4e6eea0d7978741a05939e3e93ad746e059",
+  "prompts": {},
+  "sessions": {
+    "s_71c3fd9a1c4bf7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4d43baf-ffcf-476b-982a-5d7c16d1debb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
