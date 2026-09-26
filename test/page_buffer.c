@@ -1848,17 +1848,22 @@ error:
  * Purpose:     Verify that H5PB_remove_entry() decrements the page count
  *              the entry was actually charged to.
  *
- *              A page allocated for the global heap reaches the page
- *              buffer carrying H5F_MEM_PAGE_GHEAP: H5MF__alloc_pagefs()
- *              passes the allocation type to H5PB_add_new_page(), and
- *              H5PB_write() reuses that entry without changing its type
- *              even though H5F_block_write() has mapped the access itself
- *              to H5FD_MEM_DRAW.  H5PB__insert_entry() charges such a page
+ *              A page entry's type is stamped when the entry is created
+ *              and is never revisited, so it names whichever access first
+ *              brought the page into the buffer rather than whatever the
+ *              page holds now, and it is not bounded by the allocation
+ *              type the caller is operating on. A page allocated for the
+ *              global heap is stamped H5F_MEM_PAGE_GHEAP. H5PB__insert_entry() charges such a page
  *              to raw_count, while H5PB_remove_entry() previously
- *              decremented meta_count unconditionally.  Both counts were
+ *              decremented meta_count unconditionally. Both counts were
  *              then wrong, and since they are unsigned, meta_count could
  *              wrap and leave the eviction thresholds corrupted for the
  *              remaining life of the file.
+ *
+ *              This drives H5PB_remove_entry() directly. The free-space
+ *              merge path now excludes raw allocation types, so it does not
+ *              deliver a global heap page itself, but the charge still has
+ *              to be released by entry type.
  *
  * Return:      0 if test is successful
  *              1 if test fails
@@ -1939,7 +1944,11 @@ test_remove_entry_type_accounting(hid_t orig_fapl, const char *driver_name)
     if (0 == raw_before)
         TEST_ERROR;
 
-    /* This is the call the free-space merge path makes */
+    /* Drive the function directly.  The free-space merge path excludes raw
+     * allocation types, so it does not deliver this page itself. The entry
+     * type is still not bounded by the caller's allocation type, so the
+     * charge has to be released by entry type.
+     */
     if (H5PB_remove_entry(f->shared, gheap_addr) < 0)
         FAIL_STACK_ERROR;
 
