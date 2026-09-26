@@ -1,0 +1,77 @@
+.github/workflows/clang-format-check.yml
+  s_71c3fd9a1c4bf7::t_aeff3690188c3a 25
+src/H5private.h
+  s_71c3fd9a1c4bf7::t_a8c203456011d3 1448-1466,1685-1695
+src/ryu/README.md
+  s_71c3fd9a1c4bf7::t_501ea2c92b536f 1-111
+src/tomlc17/LICENSE
+  s_71c3fd9a1c4bf7::t_b35a87f8fd5f0e 1-21
+src/H5Zpkg.h
+  s_71c3fd9a1c4bf7::t_856e0574627232 55-57
+src/tomlc17/tomlc17.c
+  s_71c3fd9a1c4bf7::t_e36d5b858b6e61 1-3276
+src/ryu/common.h
+  s_71c3fd9a1c4bf7::t_2506c3827d5d78 1-114
+src/ryu/d2s_full_table.h
+  s_71c3fd9a1c4bf7::t_990d698079d371 1-367
+.codespellrc
+  s_71c3fd9a1c4bf7::t_c6391944f1e7db 3
+src/H5Zconfig.c
+  s_71c3fd9a1c4bf7::t_75aacf61483aee 1-1013
+bin/format_source
+  s_71c3fd9a1c4bf7::t_c0c3a6b4b64f80 23
+src/H5Zprivate.h
+  s_71c3fd9a1c4bf7::t_c0d9ac76c3d299 47-50,97-101
+src/ryu/d2s.c
+  s_71c3fd9a1c4bf7::t_cb3fcf3fe94d4c 1-509
+src/tomlc17/tomlc17.h
+  s_71c3fd9a1c4bf7::t_2a1c7acd0e5ff0 1-285
+src/H5Zpublic.h
+  s_71c3fd9a1c4bf7::t_2e066735aeba2f 89-95
+src/tomlc17/README.md
+  s_71c3fd9a1c4bf7::t_9b97c86022f0da 1-159
+src/ryu/ryu.h
+  s_71c3fd9a1c4bf7::t_cb03d84057d329 1-46
+release_docs/CHANGELOG.md
+  s_71c3fd9a1c4bf7::t_1ad07c2d3359fe 90-95
+LICENSE
+  s_71c3fd9a1c4bf7::t_18985554f09b32 111-169
+test/tfilter2.c
+  s_71c3fd9a1c4bf7::t_c86fc0a040c0be 1-489
+src/tomlc17/h5_toml_prefix.h
+  s_71c3fd9a1c4bf7::t_3315125694f11e 1-60
+src/ryu/LICENSE-Boost
+  s_71c3fd9a1c4bf7::t_c7ae2ea5a85d77 1-23
+src/ryu/h5_ryu_prefix.h
+  s_71c3fd9a1c4bf7::t_5f0be049eb662d 1-54
+src/ryu/LICENSE-Apache2
+  s_71c3fd9a1c4bf7::t_31e7f36f889b50 1-201
+src/ryu/d2s_intrinsics.h
+  s_71c3fd9a1c4bf7::t_6ba3da9dfbc376 1-357
+src/ryu/digit_table.h
+  s_71c3fd9a1c4bf7::t_cedadc5d311393 1-35
+.github/workflows/clang-format-fix.yml
+  s_71c3fd9a1c4bf7::t_e6a986ac6bcf9b 38
+src/CMakeLists.txt
+  s_71c3fd9a1c4bf7::t_3ef73cd10bbb23 988,1004-1096
+src/H5Zdevelop.h
+  s_71c3fd9a1c4bf7::t_167a35bf5bc607 186-289
+test/CMakeLists.txt
+  s_71c3fd9a1c4bf7::t_2fd839be5dcd29 483
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "47ab25cbc708027fa8fd189b99652e84ee793f8e",
+  "prompts": {},
+  "sessions": {
+    "s_71c3fd9a1c4bf7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4d43baf-ffcf-476b-982a-5d7c16d1debb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
