@@ -1,0 +1,53 @@
+src/H5Zszip.c
+  s_71c3fd9a1c4bf7::t_6d2ab6938f18d8 37-40,52-53,57-172,356-357
+src/H5Ppublic.h
+  s_71c3fd9a1c4bf7::t_853987fe4bf998 2116-2119,2755-2982
+release_docs/CHANGELOG.md
+  s_71c3fd9a1c4bf7::t_9d91fee3d24a76 112-121
+src/H5Zprivate.h
+  s_71c3fd9a1c4bf7::t_bd6039ac5dd913 64,98-100,102
+src/H5Pprivate.h
+  s_71c3fd9a1c4bf7::t_e08cea0a2ae8ce 198-199,201
+src/H5Zscaleoffset.c
+  s_71c3fd9a1c4bf7::t_b283486ad2289f 91-94,98-107,751-883,1219,1221
+src/H5Zdeflate.c
+  s_71c3fd9a1c4bf7::t_e16a7dea3c6c5d 33-36,48-49,53-136
+src/H5Opline.c
+  s_71c3fd9a1c4bf7::t_c248cb00f28128 397-400,432-440,557
+src/H5Znbit.c
+  s_71c3fd9a1c4bf7::t_bd382b98a257e6 91-100,915-916
+src/H5Z.c
+  s_71c3fd9a1c4bf7::t_18b6fbc8b4639a 228-231,234-235,505-506,1359-1363,1369,1395-1402,1505,2132
+src/H5Zdevelop.h
+  s_71c3fd9a1c4bf7::t_27d9fb81c01684 197,212,236-244,253-258,263-264,268-274,489-491,505-509
+src/H5Zpkg.h
+  s_71c3fd9a1c4bf7::t_be370c02106265 72-76
+src/H5Zshuffle.c
+  s_71c3fd9a1c4bf7::t_21fb490ed2219f 39-40,88-89
+src/H5Zconfig.c
+  s_71c3fd9a1c4bf7::t_d0f0a32a62c3db 806-832
+test/tfilter2.c
+  s_71c3fd9a1c4bf7::t_9ac386878a0c7a 15,17,25,477,479-695,697-702,706-707,721,753-756,758,766-771,789,809,884-1009,1172-1187,1189-1196,1198-1637,1835-2168,2192,2212,2216,2226,2437-2450,2452,2454-2461,2463-2475,2477-2511,2513-2525,2527-2531,2533-2536,2538-2547,2549-2553,2555-3713
+src/H5Zpublic.h
+  s_71c3fd9a1c4bf7::t_ffb6137fdc3da7 89-91,93-94,303-347
+src/H5Pocpl.c
+  s_71c3fd9a1c4bf7::t_a12d029f1fa29a 68-85,498,510,575-577,1285-1286,1294-1300,1305-1310,1354-1372,1375-1376,1385-1393,1418,1426-1436,1453-1456,1464-1465,1467,1469,1488-1509,1511-1513,1515-1518,1856-2497
+src/H5Zfletcher32.c
+  s_71c3fd9a1c4bf7::t_63a925d7beec63 35-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "991852fce9acb32588d9c278fdef855ebf01b799",
+  "prompts": {},
+  "sessions": {
+    "s_71c3fd9a1c4bf7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4d43baf-ffcf-476b-982a-5d7c16d1debb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
