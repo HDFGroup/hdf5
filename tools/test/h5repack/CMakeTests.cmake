@@ -156,6 +156,9 @@ set (LIST_TST_TEST_FILES
     plugin_version_test.h5repack_layout.h5.tst
     plugin_zero.h5repack_layout.h5.tst
     plugin_none.h5repack_layout.UD.h5.tst
+    plugin_test_cfg.h5repack_layout.h5.tst
+    plugin_test_cfg_legacy.h5repack_layout.h5.tst
+    plugin_test_cfg_pow2.h5repack_layout.h5.tst
     # tools/testfiles for external links
     tsoftlinks-merge.tsoftlinks.h5.tst
     textlinkfar-merge.textlinkfar.h5.tst
@@ -173,6 +176,9 @@ set (LIST_DDL_TEST_FILES
     h5repack_layout.h5-plugin_version_test.ddl
     h5repack_layout.h5-plugin_zero.ddl
     h5repack_layout.UD.h5-plugin_none.ddl
+    h5repack_layout.h5-plugin_test_cfg.ddl
+    h5repack_layout.h5-plugin_test_cfg_legacy.ddl
+    h5repack_layout.h5-plugin_test_cfg_pow2.ddl
     # fsm
     STG.h5repack_none.h5.ddl
     SPT.h5repack_aggr.h5.ddl
@@ -1895,6 +1901,17 @@ if (BUILD_SHARED_LIBS)
   # check for a declared cd_nelmts with no values following it (filter 250 does no
   # internal cd_values validation, so this only fails if parse_filter() catches it itself)
   ADD_H5_UD_TEST (plugin_test_nelmts_no_values 1 h5repack_layout.h5 --enable-error-stack -v -f UD=250,0,1)
+  # UD= accepts a TOML key=value string for v3 (set_config) plugins,
+  # dispatched via H5Pappend_filter/H5Z_PARAMS_STRING. "mode" is a TOML
+  # string value, so it must be quoted.
+  ADD_H5_UD_TEST (plugin_test_cfg 0 h5repack_layout.h5 -v -f UD=261,0,mode="rate",rate=3.5)
+  # Guard against regressions in the UD= string-vs-raw-integer dispatch: the
+  # same v3 plugin exercised via the legacy raw cd_values form.
+  ADD_H5_UD_TEST (plugin_test_cfg_legacy 0 h5repack_layout.h5 -v -f UD=261,0,1,9)
+  # h5dump -p annotates a float that is a small multiple of a power of two with
+  # its hexadecimal spelling, which the decimal form hides: 1.25e-01 is 0x1p-3.
+  # The annotation is display-only and sits outside the quoted PARAMS_STRING.
+  ADD_H5_UD_TEST (plugin_test_cfg_pow2 0 h5repack_layout.h5 -v -f UD=261,0,mode="rate",rate=1.2500000000000000e-01)
 endif ()
 
 ##############################################################################

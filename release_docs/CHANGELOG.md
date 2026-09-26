@@ -150,6 +150,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Tools
 
+### h5repack -f accepts filter configuration strings
+
+   The `UD=` filter specification of `h5repack -f` has a string form, `UD=filter_number,filter_flag,key=value[,key=value...]`, in addition to the `cd_value_count,value1[,value2...]` form. The string goes to the filter's `set_config` callback through `H5Pappend_filter()`, and the filter plugin must implement `set_config`. For example: `h5repack -f UD=32013,0,rate="3.0" file1 file2`. A third field containing `=` selects the string form.
+
 ### h5dump -p shows each filter's configuration string
 
    With `-p`/`--properties`, h5dump now prints a `PARAMS_STRING` line inside each filter's entry in the `FILTERS` block. It shows the configuration string stored in the file, or else the filter's `get_config` form, or else a `cd_values=` listing. When the string contains a float that is a small multiple of a power of two, a following `# key = <hex float>` line gives its exact value; this line is outside the quoted string and is display-only. A `DESCRIPTION` line gives the filter's registered description when the filter is available on the machine running h5dump, so it can differ between machines.
