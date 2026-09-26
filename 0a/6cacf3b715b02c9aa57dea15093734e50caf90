@@ -1,0 +1,67 @@
+docs/doxygen/dox/DDLBNF300.dox
+  s_71c3fd9a1c4bf7::t_c48eb30d2aa667 1-708
+docs/doxygen/dox/IntroHDF5.dox
+  s_71c3fd9a1c4bf7::t_afb4f435ef50a1 207
+docs/doxygen/dox/LearnBasics1.dox
+  s_71c3fd9a1c4bf7::t_6f6e591d8ff68b 370,401
+docs/doxygen/dox/Specifications.dox
+  s_71c3fd9a1c4bf7::t_2962a3e30ff53e 12
+release_docs/CHANGELOG.md
+  s_71c3fd9a1c4bf7::t_87119dc1881f7b 153-158
+src/H5Fmodule.h
+  s_71c3fd9a1c4bf7::t_008cca924b2589 244
+src/H5Gmodule.h
+  s_71c3fd9a1c4bf7::t_9c9e895a5523b3 346
+src/H5Tmodule.h
+  s_71c3fd9a1c4bf7::t_0dfe40a3d05717 3984-3985
+tools/lib/CMakeLists.txt
+  s_71c3fd9a1c4bf7::t_cebd10af46ef19 57,83
+tools/lib/h5tools.h
+  s_71c3fd9a1c4bf7::t_88260a54da053d 88-89,571-574
+tools/lib/h5tools_dump.c
+  s_71c3fd9a1c4bf7::t_f7ae22627a8350 3180-3517,3894-3913,3918-3920,3922-4003,4010-4041,4044-4065,4068-4089,4147-4149,4160-4181,4184-4215,4250-4253,4264-4270
+tools/src/h5dump/h5dump_ddl.c
+  s_71c3fd9a1c4bf7::t_44ff61e8c0ed7a 959-961
+tools/test/h5dump/CMakeTests.cmake
+  s_71c3fd9a1c4bf7::t_bc687fa8db99b6 106,210,1237-1240,1242,1244,1248,1250,1252,1268-1270,1272
+tools/test/h5dump/expected/tallfilters.ddl
+  s_71c3fd9a1c4bf7::t_63417d9fc461f4 10-13,20-33
+tools/test/h5dump/expected/tdeflate.ddl
+  s_71c3fd9a1c4bf7::t_94c9e4f2b5ac6d 10-14
+tools/test/h5dump/expected/tdeflate_noavail.ddl
+  s_71c3fd9a1c4bf7::t_583fda4c23e408 1-23
+tools/test/h5dump/expected/tfletcher32.ddl
+  s_71c3fd9a1c4bf7::t_03a7cd76c31314 10-12
+tools/test/h5dump/expected/tnbit.ddl
+  s_71c3fd9a1c4bf7::t_01f2b1bf41bdea 10-13
+tools/test/h5dump/expected/tscaleoffset.ddl
+  s_71c3fd9a1c4bf7::t_2c5672780b1b9d 10-14
+tools/test/h5dump/expected/tshuffle.ddl
+  s_71c3fd9a1c4bf7::t_0da057df7008a9 10-13
+tools/test/h5dump/expected/tszip.ddl
+  s_71c3fd9a1c4bf7::t_9cb542656b0fb0 16-17
+tools/test/h5dump/expected/tszip_noavail.ddl
+  s_71c3fd9a1c4bf7::t_5ecfff3d93bb0c 1-27
+tools/test/h5dump/expected/tuserfilter.ddl
+  s_71c3fd9a1c4bf7::t_c07bb67285162e 14
+tools/test/h5repack/expected/deflate_limit.h5repack_layout.h5.ddl
+  s_71c3fd9a1c4bf7::t_d8b70c42a32cd2 11-15,33-37,55-59,77-81,99-103,121-125,143-147
+tools/test/h5repack/expected/h5repack_layout.h5-plugin_test.ddl
+  s_71c3fd9a1c4bf7::t_523f7f1b386d97 15,38,61,84,107,130,153
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "0a6cacf3b715b02c9aa57dea15093734e50caf90",
+  "prompts": {},
+  "sessions": {
+    "s_71c3fd9a1c4bf7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4d43baf-ffcf-476b-982a-5d7c16d1debb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
