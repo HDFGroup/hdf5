@@ -1,0 +1,65 @@
+src/H5Zfletcher32.c
+  s_71c3fd9a1c4bf7::t_3e5bc5e4cb3bbc 22,26-37,54-56
+src/H5HFhuge.c
+  s_71c3fd9a1c4bf7::t_bcaee5755d4de0 330-331,750-751
+src/H5version.h
+  s_71c3fd9a1c4bf7::t_c5e4e37ff7cb4b 1684-1685
+test/tfilter2.c
+  s_71c3fd9a1c4bf7::t_94f59b214f0e4b 16-18,23-24,474-1307,1311-1314,1317-1322,1328-1352,1361-1366
+src/H5Ppublic.h
+  s_71c3fd9a1c4bf7::t_105d9301173102 2115-2118,2142-2143,2168-2170
+src/H5Zscaleoffset.c
+  s_71c3fd9a1c4bf7::t_da1ef7420912d2 57,93-95,98-104,1102-1104
+src/H5Zprivate.h
+  s_71c3fd9a1c4bf7::t_97aaed06d8746d 66-81,94,99-100,103-110,112-118
+src/H5Zpublic.h
+  s_71c3fd9a1c4bf7::t_4b4c46575772f3 375-431
+test/dsets.c
+  s_71c3fd9a1c4bf7::t_c8f8758b46a04b 2818-2819,2821,2823-2824,2826-2837,3424
+src/H5Dchunk.c
+  s_71c3fd9a1c4bf7::t_12cf0eb547153f 3664-3667,4852-4854,5446-5448,5970-5972,6114-6117,7597-7598,7663-7664,8400-8401
+src/H5Zdeflate.c
+  s_71c3fd9a1c4bf7::t_8ad323f990bb23 30-31,35-46,61-64
+src/H5HFcache.c
+  s_71c3fd9a1c4bf7::t_f4463cd0715441 1578-1579,1732-1733,2093-2094
+src/H5Znbit.c
+  s_71c3fd9a1c4bf7::t_6ac0e3915522e2 37-38,90-92,95-101,936-938
+src/H5private.h
+  s_71c3fd9a1c4bf7::t_4020df55d4476c 247-253,268
+src/H5Zszip.c
+  s_71c3fd9a1c4bf7::t_865606092241ff 34-35,39-50,255-257
+src/H5Dmpio.c
+  s_71c3fd9a1c4bf7::t_4b507cb99d4e76 4612,4614,4838,4930-4932
+src/H5Z.c
+  s_71c3fd9a1c4bf7::t_9c7452fdc7a005 65-67,75-79,97-98,100,102,104,109,119,172-176,202,220-271,305-323,345,363,365-368,370,373-374,377,379,383,387,389-390,392-397,399,401-404,406,408-409,413-471,477-575,629,666,970,1533,1567-1568,1574-1602,1627-1629,1631-1634,1746-1759,1764-1772,1850-1865,1870-1880,2048,2164-2223
+src/H5Zpkg.h
+  s_71c3fd9a1c4bf7::t_a6e9b2da223f3e 23-26,31-38,40,43,46,49,57,62,66
+src/H5Zshuffle.c
+  s_71c3fd9a1c4bf7::t_aadbfdbbecafc5 25-26,30-41,112-115
+src/H5vers.txt
+  s_71c3fd9a1c4bf7::t_0c223d3be0e20f 98-109
+src/H5Pocpl.c
+  s_71c3fd9a1c4bf7::t_c4ca46a5620873 1169-1171
+release_docs/CHANGELOG.md
+  s_71c3fd9a1c4bf7::t_e60bddf798ab07 100-111
+bin/make_vers
+  s_71c3fd9a1c4bf7::t_e6d860530703b3 29-40,248-249,254-256,274-280,284,300-301,305-307,316-322,381-387,474-485,488-489,494-495
+src/H5Zdevelop.h
+  s_71c3fd9a1c4bf7::t_333c505ef8dc34 29-31,35-46,188-334,477-495
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "d73634f1d8fd68d6a72f1eb631e65bb044a274c7",
+  "prompts": {},
+  "sessions": {
+    "s_71c3fd9a1c4bf7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4d43baf-ffcf-476b-982a-5d7c16d1debb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
