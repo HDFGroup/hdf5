@@ -154,6 +154,11 @@ usage: h5repack [OPTIONS] file1 file2
             Required values: filter_number, filter_flag, cd_value_count, value1
             Optional values: value2 to valueN
             filter_flag: 1 is OPTIONAL or 0 is MANDATORY
+        UD=<filter_number,filter_flag,key=value[,key2=value2,...]> string form
+            Required values: filter_number, filter_flag, at least one key=value pair
+            Configures the filter via its string-based set_config callback instead
+            of raw cd_values; distinguished from the legacy form above by the third
+            field containing '=' instead of being a plain digit
         NONE (no parameter)
 
     LAYT - is a string with the format:
@@ -200,7 +205,12 @@ Examples of use:
 
    Add bzip2 filter to all datasets
 
-7) h5repack --low=0 --high=1 file1 file2
+7) h5repack -f UD=32013,0,rate="3.0" file1 file2
+
+   Add a filter configured via its string-based set_config callback (the
+   filter plugin must implement set_config for this form to work)
+
+8) h5repack --low=0 --high=1 file1 file2
 
    Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via
    H5Pset_libver_bounds() when creating the repacked file, file2
