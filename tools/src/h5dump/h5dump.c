@@ -131,6 +131,7 @@ static struct h5_long_options l_opts[] = {{"attribute", require_arg, 'a'},
                                           {"vfd-value", require_arg, '4'},
                                           {"vfd-name", require_arg, '5'},
                                           {"vfd-info", require_arg, '6'},
+                                          {"filter-params", no_arg, '7'},
                                           {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
@@ -257,6 +258,9 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "     -i,   --object-ids   Print the object ids\n");
     PRINTVALSTREAM(rawoutstream,
                    "     -p,   --properties   Print dataset filters, storage layout and fill value\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     --filter-params      Same as -p, and also print each filter's parameter string\n");
+    PRINTVALSTREAM(rawoutstream, "                          (PARAMS_STRING) and description (DESCRIPTION)\n");
     PRINTVALSTREAM(rawoutstream,
                    "     -M L, --packedbits=L Print packed bits as unsigned integers, using mask\n");
     PRINTVALSTREAM(rawoutstream,
@@ -785,6 +789,10 @@ parse_start:
                 break;
             case 'p':
                 dump_opts.display_dcpl = true;
+                break;
+            case '7':
+                dump_opts.display_dcpl          = true;
+                dump_opts.display_filter_params = true;
                 break;
             case 'y':
                 dump_opts.display_ai = false;

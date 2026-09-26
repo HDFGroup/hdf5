@@ -85,6 +85,8 @@
 #define NBIT               "COMPRESSION NBIT"
 #define SCALEOFFSET        "COMPRESSION SCALEOFFSET"
 #define SCALEOFFSET_MINBIT "MIN BITS"
+#define PARAMS_STRING      "PARAMS_STRING"
+#define FILTER_DESCRIPTION "DESCRIPTION"
 #define STORAGE_LAYOUT     "STORAGE_LAYOUT"
 #define CONTIGUOUS         "CONTIGUOUS"
 #define COMPACT            "COMPACT"
@@ -566,9 +568,10 @@ typedef struct h5tools_context_t {
     hsize_t  sm_pos;               /* current stripmine element position */
     const struct H5LD_memb_t *const
         *cmpd_listv; /* h5watch: vector containing info about the list of compound fields to be printed */
-    struct subset_t *sset;          /* subsetting parameters */
-    int              display_index; /* */
-    int              display_char;  /* */
+    struct subset_t *sset;               /* subsetting parameters */
+    int              display_index;      /* */
+    int              display_char;       /* */
+    int              show_filter_params; /* emit PARAMS_STRING lines in FILTERS block */
 } h5tools_context_t;
 
 /* VOL and VFD info structs used to set the file access property

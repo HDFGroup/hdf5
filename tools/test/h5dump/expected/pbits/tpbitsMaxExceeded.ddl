@@ -64,6 +64,8 @@ usage: h5dump [OPTIONS] files
 --------------- Object Property Options ---------------
      -i,   --object-ids   Print the object ids
      -p,   --properties   Print dataset filters, storage layout and fill value
+     --filter-params      Same as -p, and also print each filter's parameter string
+                          (PARAMS_STRING) and description (DESCRIPTION)
      -M L, --packedbits=L Print packed bits as unsigned integers, using mask
                           format L for an integer dataset specified with
                           option -d. L is a list of offset,length values,
