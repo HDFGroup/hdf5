@@ -746,9 +746,53 @@ typedef struct H5O_ginfo_t {
  */
 #define H5O_PLINE_VERSION_2 2
 
+/* This version appends a list of self-describing extension blocks to each
+ *      filter entry, after its cd_values.  The list is a 2-byte count
+ *      followed by that many blocks of
+ *
+ *          type(2) flags(1) reserved(1) length(4) data(length)
+ *
+ *      Blocks are written in ascending type order and a type appears at
+ *      most once per entry.  Bit 0 of the flags byte marks a block as
+ *      critical: a decoder that does not recognise a critical type must
+ *      fail, while an unrecognised non-critical block is skipped using its
+ *      length.  That rule is what lets later features add block types
+ *      instead of a version 4.  The reserved byte is written as zero and
+ *      ignored on read.
+ */
+#define H5O_PLINE_VERSION_3 3
+
+/* Extension block types.  Codes are assigned centrally; there is
+ * deliberately no private or experimental range, since a privately chosen
+ * code is indistinguishable from one assigned officially later. */
+#define H5O_PLINE_EXT_CONFIG 0x0001 /* canonical key=value config string   */
+#define H5O_PLINE_EXT_BLOB   0x0002 /* reserved: critical, for a filter    */
+                                    /* configuration blob; this build does */
+                                    /* not define it, so decoding fails    */
+
+/* Flags-byte bit allocation: bit 0 is generic, defined once and meaningful
+ * for every block type; bits 1-7 are block-type-specific, their meaning
+ * (if any) set by the block's own `type` field, and reserved (must be 0 at
+ * encode, rejected if set at decode) for a recognized type that does not
+ * define them.  A decoder must not silently accept a bit it does not
+ * recognize for a block type it does recognize -- that would let a file
+ * depend on behavior that this build cannot honor, without any indication
+ * anything was missed.  For an unrecognized block type only bit 0 is
+ * consulted (see H5O_PLINE_VERSION_3's comment above); bits 1-7 are
+ * ignored. */
+
+/* Bit 0, all block types: the block is required in order to interpret the
+ * entry correctly. */
+#define H5O_PLINE_EXT_FLAG_CRITICAL 0x01
+/* Every flags bit this build defines for a H5O_PLINE_EXT_CONFIG block. */
+#define H5O_PLINE_EXT_CONFIG_FLAGS_KNOWN H5O_PLINE_EXT_FLAG_CRITICAL
+
+/* Fixed framing of one block: type(2) + flags(1) + reserved(1) + length(4) */
+#define H5O_PLINE_EXT_HDR_SIZE 8
+
 /* The latest version of the format.  Look through the 'encode' and 'size'
  *      callbacks for places to change when updating this. */
-#define H5O_PLINE_VERSION_LATEST H5O_PLINE_VERSION_2
+#define H5O_PLINE_VERSION_LATEST H5O_PLINE_VERSION_3
 
 typedef struct H5O_pline_t {
     H5O_shared_t sh_loc; /* Shared message info (must be first) */

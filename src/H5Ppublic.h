@@ -2830,9 +2830,10 @@ H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int fl
  *          \c cd_values produced by \c set_config.  The stored string is
  *          carried by copies of the property list and by H5Pencode() /
  *          H5Pdecode(), and is returned by H5Pget_filter_params_by_idx().
- *          It is held in memory only: it is not written to the file when a
- *          dataset is created, so a pipeline read back from a file carries
- *          \c cd_values alone.
+ *          When a dataset is created from the property list, the string is
+ *          written to the file in a version 3 filter pipeline message, so it
+ *          is also returned for the creation property list of the dataset
+ *          after it is reopened, and H5Ocopy() carries it to the copy.
  *
  *          H5Pappend_filter() stamps the filter's canonical name into the
  *          pipeline entry so it can be displayed without the plugin loaded;
@@ -2841,6 +2842,23 @@ H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int fl
  *          with identical \p filter and \p flags, because H5Pequal()
  *          compares the name slot.  Compare \p id and \p cd_values via
  *          H5Pget_filter2() instead when testing I/O-behavior equivalence.
+ *
+ *          <b>Interaction with the file's library version bounds:</b> a
+ *          version 3 filter pipeline message is admitted only when the
+ *          file's high bound, set with H5Pset_libver_bounds(), is at least
+ *          #H5F_LIBVER_V300.  H5Pappend_filter() itself succeeds regardless
+ *          of the bound, since the property list is not yet associated with
+ *          a file.  The bound is checked when the pipeline is written:
+ *          H5Dcreate(), H5Dcreate_anon(), or H5Ocopy() into a file whose
+ *          high bound is below #H5F_LIBVER_V300 fails with a minor error
+ *          code of \c H5E_BADRANGE if any filter in the pipeline carries a
+ *          configuration string, rather than writing the pipeline without
+ *          it.  Either raise the file's high bound, or append the filter
+ *          with #H5Z_PARAMS_CDVALUES if the lower bound is required.  A
+ *          pipeline without configuration strings is written as a version 1
+ *          or 2 message under the usual rules unless the file's low bound
+ *          is #H5F_LIBVER_V300 or later, in which case it is written as
+ *          version 3.
  *
  * \anchor subsec_filter_param_string
  * <b>Parameter string syntax (#H5Z_PARAMS_STRING)</b>
@@ -2959,9 +2977,10 @@ H5_DLL herr_t H5Pmodify_filter_by_idx(hid_t plist_id, unsigned filter_idx, unsig
  *             \c "cd_values=v0:v1:..." is produced directly from the raw
  *             \c cd_values array.
  *
- *          Stored configuration strings are not written to the file, so for
- *          the creation property list of a dataset opened from a file the
- *          result always comes from the second or third source.
+ *          A configuration string stored on a pipeline entry is written to
+ *          the file with the dataset (see H5Pappend_filter()), so the first
+ *          source also applies to the creation property list of a dataset
+ *          opened from a file.
  *
  *          Call with \p params_buf NULL to obtain the required character count
  *          (excluding NUL) in \p params_len, then allocate \p params_len + 1

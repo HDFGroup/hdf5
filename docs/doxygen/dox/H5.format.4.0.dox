@@ -9219,7 +9219,7 @@ u
 </table>
 
 <table>
-<caption align="top"><strong>Fields: Filter Description</strong></caption>
+<caption align="top">\anchor FMT4FilterDescV2Fields <strong>Fields: Filter Description</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -9329,6 +9329,228 @@ u
   <td>Client Data</td>
   <td>This is an array of four-byte integers which will be passed to the filter function. The <em>Client Data
       Number of Values</em> determines the number of elements in the array.</td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Layout: Filter Pipeline Message - Version 3</strong></caption>
+<tr align="center">
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align="center">
+  <td>Version</td>
+  <td>Number of Filters</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Filter Description List <em>(variable size)</em><br /><br /></td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Fields: Filter Pipeline Message - Version 3</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Version</td>
+  <td>The version number for this message. This table describes version 3. The library writes version 3
+      when at least one filter in the pipeline carries an extension block (see the Filter Description and
+      Extension Block tables below; the library writes a block only for a stored configuration string)
+      and the file's latest format version bound (set with <code>H5Pset_libver_bounds()</code>) is
+      <code>H5F_LIBVER_V300</code> or later; if that bound is lower, creating the dataset or copying the
+      object fails rather than writing the pipeline without its blocks. A pipeline with no extension blocks
+      is written as version 1 or 2 under the usual rules, byte-identical to earlier releases, unless the file's earliest format version bound is
+      <code>H5F_LIBVER_V300</code> or later, in which case it is written as version 3 with every
+      <em>Number of Extension Blocks</em> zero.</td>
+</tr>
+<tr valign=top>
+  <td>Number of Filters</td>
+  <td>The total number of filters described in this message. The maximum possible number of filters in a
+      message is 32.</td>
+</tr>
+<tr valign=top>
+  <td>Filter Description List</td>
+  <td>A description of each filter. A filter description appears in the next table.</td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Layout: Filter Description - Version 3</strong></caption>
+<tr align="center">
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align="center">
+  <td colspan="2">Filter Identification</td>
+  <td colspan="2">Name Length <em>(optional)</em></td>
+</tr>
+<tr align="center">
+  <td colspan="2">Flags</td>
+  <td colspan="2">Number Client Data Values</td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Name <em>(variable size, optional)</em><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Client Data <em>(variable size, optional)</em><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="2">Number of Extension Blocks</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Extension Block List <em>(variable size, optional)</em><br /><br /></td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Fields: Filter Description - Version 3</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Filter Identification, Name Length, Flags, Number of Client Data Values, Name, Client Data</td>
+  <td>Identical in encoding and semantics to the
+      \ref FMT4FilterDescV2Fields "version 2 Filter Description fields".</td>
+</tr>
+<tr valign=top>
+  <td>Number of Extension Blocks</td>
+  <td>A two-byte unsigned integer giving the number of extension blocks in the <em>Extension Block
+      List</em> that follows. This field is present for every filter description in a version 3 message,
+      unlike <em>Name Length</em>, which may be omitted for internal filters. A value of zero means the
+      filter has no extension blocks, and the description is a version 2 description followed by these two
+      bytes.</td>
+</tr>
+<tr valign=top>
+  <td>Extension Block List</td>
+  <td>A sequence of <em>Number of Extension Blocks</em> extension blocks, laid out one after another with
+      no padding. Each block is described in the next table. Blocks are written in ascending order of
+      <em>Block Type</em>. A block type that is not defined as repeatable appears at most once in a
+      filter description, and no type defined so far is repeatable; a reader that finds a block type
+      more than once in one filter description rejects the message. A reader also rejects the message
+      when the blocks do not fit within it.</td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Layout: Filter Pipeline Extension Block</strong></caption>
+<tr align="center">
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align="center">
+  <td colspan="2">Block Type</td>
+  <td>Block Flags</td>
+  <td>Reserved (zero)</td>
+</tr>
+<tr align="center">
+  <td colspan="4">Block Length</td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Block Data <em>(variable size, optional)</em><br /><br /></td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Fields: Filter Pipeline Extension Block</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Block Type</td>
+  <td>A two-byte unsigned integer identifying the kind of data in <em>Block Data</em>. Type codes are
+      assigned by The HDF Group; there is no private or experimental range. The types defined so far are:
+      <table>
+      <tr>
+        <th width="15%">Type</th>
+        <th width="15%">Critical</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0x0000</code></td>
+        <td align="center">N/A</td>
+        <td>Reserved</td>
+      </tr>
+      <tr>
+        <td align="center"><code>0x0001</code></td>
+        <td align="center">No</td>
+        <td>Configuration string (see below)</td>
+      </tr>
+      <tr>
+        <td align="center"><code>0x0002</code></td>
+        <td align="center">Yes</td>
+        <td>Reserved for a future configuration blob. Until that block is defined, a reader treats it as an
+            unrecognized critical block.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>0x0003-0xFFFF</code></td>
+        <td align="center">N/A</td>
+        <td>Unassigned</td>
+      </tr>
+      </table></td>
+</tr>
+<tr valign=top>
+  <td>Block Flags</td>
+  <td>A one-byte bit field. The bit values defined so far are:
+      <table>
+      <tr>
+        <th width="20%">Bit</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>Critical. A reader that does not recognize <em>Block Type</em> skips a block with this bit clear,
+            using <em>Block Length</em>, and continues; the filter remains usable. A reader that does not
+            recognize <em>Block Type</em> in a block with this bit set fails to decode the message, since the
+            filter cannot be applied correctly without the block. A given block type is always written with
+            the same value of this bit.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1-7</code></td>
+        <td>Defined by each block type, and written as zero unless the type assigns them. None of the types
+            defined so far assigns them. A reader ignores these bits in a block whose type it does not
+            recognize, and rejects a block of a type it recognizes that sets a bit the type does not
+            assign.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr valign=top>
+  <td>Reserved</td>
+  <td>Written as zero and ignored by readers.</td>
+</tr>
+<tr valign=top>
+  <td>Block Length</td>
+  <td>A four-byte unsigned integer giving the size, in bytes, of <em>Block Data</em>. A reader rejects a
+      block whose header or data runs past the end of the message.</td>
+</tr>
+<tr valign=top>
+  <td>Block Data</td>
+  <td>The block's payload, exactly <em>Block Length</em> bytes, interpreted according to <em>Block
+      Type</em>.<br />
+      For a configuration string block (type <code>0x0001</code>), the payload is the caller's filter
+      parameter string in canonical form: the contents of a
+      <a href="https://toml.io/en/v1.0.0">TOML v1.0.0</a> inline table (comma-separated
+      <code>key = value</code> pairs) with any optional outer braces and surrounding whitespace stripped and
+      any C99 hex-float literal (e.g. <code>0x1p-3</code>) rewritten to the shortest decimal float literal
+      that reads back to the same double, so that a reader implementing only standard TOML v1.0.0 parsing
+      &mdash; not just the HDF5 library &mdash; can recover the exact values by enclosing the bytes in
+      braces. The string is UTF-8 and is <strong>not</strong> null-terminated; its length is given entirely
+      by <em>Block Length</em>, which the library limits to 4096 (<code>H5Z_CONFIG_STRING_MAX</code>) on
+      write and on read. A configuration string block is written only for a filter that has a stored
+      string, and at most once in a filter description. This
+      block allows a filter's configuration to be recovered by a program that has not loaded the filter
+      plugin: see <code>H5Pget_filter_params_by_idx()</code> in the C API reference.</td>
 </tr>
 </table>
 
