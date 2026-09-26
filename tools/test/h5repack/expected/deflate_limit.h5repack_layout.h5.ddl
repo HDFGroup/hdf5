@@ -8,7 +8,11 @@ GROUP "/" {
          SIZE XXXX (2.XXX:1 COMPRESSION)
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 2 }
+         COMPRESSION DEFLATE {
+            LEVEL 2
+            PARAMS_STRING 'level = 2'
+            DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
+         }
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -26,7 +30,11 @@ GROUP "/" {
          SIZE XXXX (2.XXX:1 COMPRESSION)
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 2 }
+         COMPRESSION DEFLATE {
+            LEVEL 2
+            PARAMS_STRING 'level = 2'
+            DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
+         }
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -44,7 +52,11 @@ GROUP "/" {
          SIZE XXXX (2.XXX:1 COMPRESSION)
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 2 }
+         COMPRESSION DEFLATE {
+            LEVEL 2
+            PARAMS_STRING 'level = 2'
+            DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
+         }
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -62,7 +74,11 @@ GROUP "/" {
          SIZE XXXX (2.XXX:1 COMPRESSION)
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 2 }
+         COMPRESSION DEFLATE {
+            LEVEL 2
+            PARAMS_STRING 'level = 2'
+            DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
+         }
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -80,7 +96,11 @@ GROUP "/" {
          SIZE XXXX (2.XXX:1 COMPRESSION)
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 2 }
+         COMPRESSION DEFLATE {
+            LEVEL 2
+            PARAMS_STRING 'level = 2'
+            DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
+         }
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -98,7 +118,11 @@ GROUP "/" {
          SIZE XXXX (2.XXX:1 COMPRESSION)
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 2 }
+         COMPRESSION DEFLATE {
+            LEVEL 2
+            PARAMS_STRING 'level = 2'
+            DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
+         }
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -116,7 +140,11 @@ GROUP "/" {
          SIZE XXXX (2.XXX:1 COMPRESSION)
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 2 }
+         COMPRESSION DEFLATE {
+            LEVEL 2
+            PARAMS_STRING 'level = 2'
+            DESCRIPTION "Deflate (zlib) general-purpose lossless compression"
+         }
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
