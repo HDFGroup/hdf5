@@ -1,0 +1,265 @@
+src/H5Zdevelop.h
+  s_71c3fd9a1c4bf7::t_167a35bf5bc607 360-463
+  s_71c3fd9a1c4bf7::t_333c505ef8dc34 29-31,35-46,188-196,198-211,213-235,246-253,260-263,266-268,276-279,281-347,493-505
+  s_71c3fd9a1c4bf7::t_27d9fb81c01684 197,212,236-240,254-259,264-265,269-275,490-492,506-510
+  s_71c3fd9a1c4bf7::t_f056a29f27eef5 241-245
+src/ryu/README.md
+  s_71c3fd9a1c4bf7::t_501ea2c92b536f 1-71,73-111
+src/CMakeLists.txt
+  s_71c3fd9a1c4bf7::t_3ef73cd10bbb23 988,1004-1096
+src/tomlc17/tomlc17.c
+  s_71c3fd9a1c4bf7::t_e36d5b858b6e61 1-3276
+.codespellrc
+  s_71c3fd9a1c4bf7::t_c6391944f1e7db 3
+src/tomlc17/LICENSE
+  s_71c3fd9a1c4bf7::t_b35a87f8fd5f0e 1-21
+.github/workflows/clang-format-check.yml
+  s_71c3fd9a1c4bf7::t_aeff3690188c3a 25
+src/ryu/LICENSE-Boost
+  s_71c3fd9a1c4bf7::t_c7ae2ea5a85d77 1-23
+src/ryu/common.h
+  s_71c3fd9a1c4bf7::t_2506c3827d5d78 1-114
+src/ryu/h5_ryu_prefix.h
+  s_71c3fd9a1c4bf7::t_5f0be049eb662d 1-54
+release_docs/CHANGELOG.md
+  s_71c3fd9a1c4bf7::t_1ad07c2d3359fe 90-95
+  s_71c3fd9a1c4bf7::t_e60bddf798ab07 100-111
+  s_71c3fd9a1c4bf7::t_9d91fee3d24a76 112-115,117-121
+  s_71c3fd9a1c4bf7::t_6b397e4ec0b649 98,116,122-127
+  s_71c3fd9a1c4bf7::t_87119dc1881f7b 165-170
+  s_71c3fd9a1c4bf7::t_715c0daff7973c 161-164
+  s_71c3fd9a1c4bf7::t_011743eccc12aa 147-150
+  s_71c3fd9a1c4bf7::t_6728729667414f 155-158
+src/H5private.h
+  s_71c3fd9a1c4bf7::t_a8c203456011d3 1456-1474,1456-1471,1472-1474,1693-1703
+  s_71c3fd9a1c4bf7::t_4020df55d4476c 247-253,268
+src/tomlc17/README.md
+  s_71c3fd9a1c4bf7::t_9b97c86022f0da 1-159
+src/tomlc17/tomlc17.h
+  s_71c3fd9a1c4bf7::t_2a1c7acd0e5ff0 1-285
+LICENSE
+  s_71c3fd9a1c4bf7::t_18985554f09b32 111-169
+src/tomlc17/h5_toml_prefix.h
+  s_71c3fd9a1c4bf7::t_3315125694f11e 1-60
+test/CMakeLists.txt
+  s_71c3fd9a1c4bf7::t_2fd839be5dcd29 483
+bin/format_source
+  s_71c3fd9a1c4bf7::t_c0c3a6b4b64f80 23
+src/ryu/digit_table.h
+  s_71c3fd9a1c4bf7::t_cedadc5d311393 1-35
+test/tfilter2.c
+  s_71c3fd9a1c4bf7::t_c86fc0a040c0be 1-14,16,22-24,26,28-477,29-477,483,488,491,509,522,605-606,2453,2455,2528,2534,4546-4553,4560-4561
+  s_71c3fd9a1c4bf7::t_94f59b214f0e4b 18-19,21,28,478,480,698,705-707,710-722,724-754,759,761-767,774-790,792-810,812-885,1012-1173,1190,1199,1640-1836,2171-2193,2195-2213,2215-2217,2219-2227,2229-2438,2464,2478,2518,2539,2556,2566,4539-4545,4554-4559
+  s_71c3fd9a1c4bf7::t_9ac386878a0c7a 15,17,479,481-697,699-704,708-709,723,755-758,760,768-773,791,811,886-1011,1174-1189,1191-1198,1200-1639,1837-2170,2194,2214,2218,2228,2439-2452,2454,2456-2463,2465-2477,2479-2513,2515-2527,2529-2533,2535-2538,2540-2549,2551-2555,2557-2674,2679-2696,2698-2726,3496-3662,3664-3667,3669-3832,3834,3842-3869,3871-3916,3955-3957,3959-4118,4123-4132,4134-4195,4198-4205,4208-4400,4403-4419,4423-4430,4433-4441,4444-4524,4531-4534,4536-4538
+  s_71c3fd9a1c4bf7::t_39f8ca6b56973b 20,25,27,2675-2678,2697,2727-3495,3833,3835-3841,3917-3954,4119-4122,4196-4197,4206-4207,4401-4402,4420-4422,4431-4432,4442-4443,4525-4530,4535
+.github/workflows/clang-format-fix.yml
+  s_71c3fd9a1c4bf7::t_e6a986ac6bcf9b 38
+src/ryu/ryu.h
+  s_71c3fd9a1c4bf7::t_cb03d84057d329 1-46
+src/H5Zprivate.h
+  s_71c3fd9a1c4bf7::t_c0d9ac76c3d299 47-50,131-134
+  s_71c3fd9a1c4bf7::t_97aaed06d8746d 68-71,73-83,96,104-105,108-115,117-123
+  s_71c3fd9a1c4bf7::t_bd6039ac5dd913 99-101,103
+  s_71c3fd9a1c4bf7::t_50842005d8580d 64-65
+src/ryu/d2s.c
+  s_71c3fd9a1c4bf7::t_cb3fcf3fe94d4c 1-509
+src/H5Zconfig.c
+  s_71c3fd9a1c4bf7::t_75aacf61483aee 1-284,286-432,434-441,443-805,833-1040
+  s_71c3fd9a1c4bf7::t_d0f0a32a62c3db 806-832
+src/ryu/LICENSE-Apache2
+  s_71c3fd9a1c4bf7::t_31e7f36f889b50 1-201
+src/ryu/d2s_intrinsics.h
+  s_71c3fd9a1c4bf7::t_6ba3da9dfbc376 1-357
+src/H5Zpkg.h
+  s_71c3fd9a1c4bf7::t_856e0574627232 68-70
+  s_71c3fd9a1c4bf7::t_a6e9b2da223f3e 23-26,31-38,40,43,46,49,57,62,66
+  s_71c3fd9a1c4bf7::t_be370c02106265 72-76
+src/ryu/d2s_full_table.h
+  s_71c3fd9a1c4bf7::t_990d698079d371 1-367
+src/H5Zpublic.h
+  s_71c3fd9a1c4bf7::t_2e066735aeba2f 92,96-100
+  s_71c3fd9a1c4bf7::t_4b4c46575772f3 425-481
+  s_71c3fd9a1c4bf7::t_ffb6137fdc3da7 89-91,304-329,332-343,345-348
+  s_71c3fd9a1c4bf7::t_3aa2d3acb4969e 93-95
+bin/make_vers
+  s_71c3fd9a1c4bf7::t_e6d860530703b3 29-40,248-249,254-256,274-280,284,300-301,305-307,316-322,381-387,474-485,488-489,494-495
+src/H5Dchunk.c
+  s_71c3fd9a1c4bf7::t_12cf0eb547153f 3664-3667,4852-4854,5446-5448,5970-5972,6114-6117,7597-7598,7663-7664,8400-8401
+src/H5Dmpio.c
+  s_71c3fd9a1c4bf7::t_4b507cb99d4e76 4612,4614,4838,4930-4932
+src/H5HFcache.c
+  s_71c3fd9a1c4bf7::t_f4463cd0715441 1578-1579,1732-1733,2093-2094
+src/H5HFhuge.c
+  s_71c3fd9a1c4bf7::t_bcaee5755d4de0 330-331,750-751
+src/H5Pocpl.c
+  s_71c3fd9a1c4bf7::t_c4ca46a5620873 1188-1190
+  s_71c3fd9a1c4bf7::t_a12d029f1fa29a 68-85,498,510,575-577,1285-1286,1294-1300,1305-1310,1354-1372,1375-1376,1385-1393,1418,1426-1436,1453-1456,1464-1465,1467,1469,1488-1509,1511-1513,1515-1518,1856-1972,1974-2497
+src/H5Ppublic.h
+  s_71c3fd9a1c4bf7::t_105d9301173102 2115,2143-2144,2169-2171
+  s_71c3fd9a1c4bf7::t_853987fe4bf998 2116-2119,2755-2832,2837-2845,2863-2979,2984-3001
+  s_71c3fd9a1c4bf7::t_8330834eaeed76 2833-2836,2846-2862,2980-2983
+src/H5Z.c
+  s_71c3fd9a1c4bf7::t_9c7452fdc7a005 65-67,75-79,97-98,100,102,104,109,119,172-176,202,220-227,232-233,236-273,307-325,347,365,367-370,372,375-376,379,381,385,389,391-392,394-399,401,403-406,408,410-411,415-473,479-504,507-578,632,669,973,1550,1584-1585,1591-1619,1644-1646,1648-1651,1763-1776,1781-1789,1867-1882,1887-1897,2065,2182-2241
+  s_71c3fd9a1c4bf7::t_18b6fbc8b4639a 228-231,234-235,505-506,1359-1363,1369,1395-1396,1398-1402,1505,2132
+src/H5Zdeflate.c
+  s_71c3fd9a1c4bf7::t_8ad323f990bb23 30-31,39-47,50,149-152
+  s_71c3fd9a1c4bf7::t_e16a7dea3c6c5d 33-36,48-49,53-136
+src/H5Zfletcher32.c
+  s_71c3fd9a1c4bf7::t_3e5bc5e4cb3bbc 22,26-34,37,54-56
+  s_71c3fd9a1c4bf7::t_63a925d7beec63 35-36
+src/H5Znbit.c
+  s_71c3fd9a1c4bf7::t_6ac0e3915522e2 37-38,90,101,937-939
+  s_71c3fd9a1c4bf7::t_bd382b98a257e6 91-100,915-916
+src/H5Zscaleoffset.c
+  s_71c3fd9a1c4bf7::t_da1ef7420912d2 57,97,108,1240-1242
+  s_71c3fd9a1c4bf7::t_b283486ad2289f 91-94,98-107,751-883,1219,1221
+src/H5Zshuffle.c
+  s_71c3fd9a1c4bf7::t_aadbfdbbecafc5 25-26,30-38,41,113-116
+  s_71c3fd9a1c4bf7::t_21fb490ed2219f 39-40,88-89
+src/H5Zszip.c
+  s_71c3fd9a1c4bf7::t_865606092241ff 34-35,43-51,54,376-378
+  s_71c3fd9a1c4bf7::t_6d2ab6938f18d8 37-40,52-53,57-172,356-357
+src/H5vers.txt
+  s_71c3fd9a1c4bf7::t_0c223d3be0e20f 98-109
+src/H5version.h
+  s_71c3fd9a1c4bf7::t_c5e4e37ff7cb4b 1684-1685
+test/dsets.c
+  s_71c3fd9a1c4bf7::t_c8f8758b46a04b 2818-2819,2821,2823-2824,2826-2837,3424
+src/H5Opline.c
+  s_71c3fd9a1c4bf7::t_c248cb00f28128 435-438,470-478,600
+  s_71c3fd9a1c4bf7::t_8c1146223727d5 92,244-268,375-387,554-558,769-793
+src/H5Pprivate.h
+  s_71c3fd9a1c4bf7::t_e08cea0a2ae8ce 198-199,201
+docs/doxygen/dox/H5.format.4.0.dox
+  s_71c3fd9a1c4bf7::t_0e7ce5df21eb3b 9335-9362,9366,9368-9420,9423-9450
+src/H5Oprivate.h
+  s_71c3fd9a1c4bf7::t_89c4b881c28c45 749-754,757
+test/CMakeTests.cmake
+  s_71c3fd9a1c4bf7::t_03ec7b9f083d5f 169
+test/gen_filters.c
+  s_71c3fd9a1c4bf7::t_6f94c49453b7e3 17,225-328,336
+testpar/t_filters_parallel.c
+  s_71c3fd9a1c4bf7::t_50bc09360371c5 9930-10333,10719-10736
+docs/doxygen/dox/DDLBNF300.dox
+  s_71c3fd9a1c4bf7::t_c48eb30d2aa667 1-708
+docs/doxygen/dox/IntroHDF5.dox
+  s_71c3fd9a1c4bf7::t_afb4f435ef50a1 207
+docs/doxygen/dox/LearnBasics1.dox
+  s_71c3fd9a1c4bf7::t_6f6e591d8ff68b 370,401
+docs/doxygen/dox/Specifications.dox
+  s_71c3fd9a1c4bf7::t_2962a3e30ff53e 12
+src/H5Fmodule.h
+  s_71c3fd9a1c4bf7::t_008cca924b2589 244
+src/H5Gmodule.h
+  s_71c3fd9a1c4bf7::t_9c9e895a5523b3 346
+src/H5Tmodule.h
+  s_71c3fd9a1c4bf7::t_0dfe40a3d05717 3984-3985
+tools/lib/CMakeLists.txt
+  s_71c3fd9a1c4bf7::t_cebd10af46ef19 57,83
+tools/lib/h5tools.h
+  s_71c3fd9a1c4bf7::t_88260a54da053d 88-89,571-574
+tools/lib/h5tools_dump.c
+  s_71c3fd9a1c4bf7::t_f7ae22627a8350 3180-3517,3894-3913,3918-3920,3922-4003,4010-4041,4044-4065,4068-4089,4147-4149,4160-4181,4184-4215,4250-4253,4264-4270
+tools/src/h5dump/h5dump_ddl.c
+  s_71c3fd9a1c4bf7::t_44ff61e8c0ed7a 959-961
+tools/test/h5dump/CMakeTests.cmake
+  s_71c3fd9a1c4bf7::t_bc687fa8db99b6 106,210,1237-1240,1242,1244,1248,1250,1252,1268-1270,1272
+tools/test/h5dump/expected/tallfilters.ddl
+  s_71c3fd9a1c4bf7::t_63417d9fc461f4 10-13,20-33
+tools/test/h5dump/expected/tdeflate.ddl
+  s_71c3fd9a1c4bf7::t_94c9e4f2b5ac6d 10-14
+tools/test/h5dump/expected/tdeflate_noavail.ddl
+  s_71c3fd9a1c4bf7::t_583fda4c23e408 1-23
+tools/test/h5dump/expected/tfletcher32.ddl
+  s_71c3fd9a1c4bf7::t_03a7cd76c31314 10-12
+tools/test/h5dump/expected/tnbit.ddl
+  s_71c3fd9a1c4bf7::t_01f2b1bf41bdea 10-13
+tools/test/h5dump/expected/tscaleoffset.ddl
+  s_71c3fd9a1c4bf7::t_2c5672780b1b9d 10-14
+tools/test/h5dump/expected/tshuffle.ddl
+  s_71c3fd9a1c4bf7::t_0da057df7008a9 10-13
+tools/test/h5dump/expected/tszip.ddl
+  s_71c3fd9a1c4bf7::t_9cb542656b0fb0 16-17
+tools/test/h5dump/expected/tszip_noavail.ddl
+  s_71c3fd9a1c4bf7::t_5ecfff3d93bb0c 1-27
+tools/test/h5dump/expected/tuserfilter.ddl
+  s_71c3fd9a1c4bf7::t_c07bb67285162e 14
+tools/test/h5repack/expected/deflate_limit.h5repack_layout.h5.ddl
+  s_71c3fd9a1c4bf7::t_d8b70c42a32cd2 11-15,33-37,55-59,77-81,99-103,121-125,143-147
+tools/test/h5repack/expected/h5repack_layout.h5-plugin_test.ddl
+  s_71c3fd9a1c4bf7::t_523f7f1b386d97 15,38,61,84,107,130,153
+tools/test/h5repack/expected/h5repack_layout.h5-plugin_test_cfg_legacy.ddl
+  s_71c3fd9a1c4bf7::t_664b089891ad82 1-172
+tools/src/h5repack/h5repack_opttable.c
+  s_71c3fd9a1c4bf7::t_c5beff5b975d95 33-35
+tools/test/h5repack/CMakeTests.cmake
+  s_71c3fd9a1c4bf7::t_7ec39b7f6c794d 159-161,179-181,1904-1914
+tools/test/h5repack/expected/h5repack-help.txt
+  s_71c3fd9a1c4bf7::t_cc2ab3f05cd1a4 157-161,208-213
+tools/test/h5repack/expected/plugin_test_cfg_legacy.h5repack_layout.h5.tst
+  s_71c3fd9a1c4bf7::t_01c30d26665086 1-15
+tools/src/h5repack/h5repack_main.c
+  s_71c3fd9a1c4bf7::t_a182fc848d574c 309-317,369-375
+tools/test/h5repack/expected/h5repack_layout.h5-plugin_test_cfg.ddl
+  s_71c3fd9a1c4bf7::t_069df0b77f5792 1-179
+tools/src/h5repack/h5repack.h
+  s_71c3fd9a1c4bf7::t_b5088b0722479c 301-306
+tools/src/h5repack/h5repack_parse.c
+  s_71c3fd9a1c4bf7::t_6d99329c8b0072 47-48,237-250,252-266,268-285,287-291,293,295-305,307-332,335-337,340-404
+tools/test/h5repack/expected/plugin_test_cfg.h5repack_layout.h5.tst
+  s_71c3fd9a1c4bf7::t_f8fe1eace7ac9d 1-15
+tools/test/h5repack/expected/h5repack_layout.h5-plugin_test_cfg_pow2.ddl
+  s_71c3fd9a1c4bf7::t_9b1361a6ea0ae6 1-179
+tools/test/h5repack/CMakeLists.txt
+  s_71c3fd9a1c4bf7::t_116983c0fe755e 59-61,75-80,87,111-118,125
+tools/test/h5repack/expected/plugin_test_cfg_pow2.h5repack_layout.h5.tst
+  s_71c3fd9a1c4bf7::t_2cd90310391aba 1-15
+tools/src/h5repack/h5repack_filters.c
+  s_71c3fd9a1c4bf7::t_33ff3f5206d5d1 366-379
+tools/test/h5repack/dynlib_rpk3.c
+  s_71c3fd9a1c4bf7::t_02b4c265f3b5d8 1-152
+fortran/src/H5Pff.F90
+  s_71c3fd9a1c4bf7::t_79109757a8ea47 59-60,120-129,1546-1604,1607-1611,1613-1614,1616-1629,1632-1637,1639-1640,1642-1706,1709-1713,1715-1716,1718-1732,1734,1736-1741,1743-1744,1746-1845
+fortran/src/H5Zf.c
+  s_71c3fd9a1c4bf7::t_7411544c9eecb7 111-115,117-124,126-138,140-147,149-156
+fortran/src/H5f90proto.h
+  s_71c3fd9a1c4bf7::t_81d9d4561ea5ba 590-592,595,597,599
+fortran/src/hdf5_fortrandll.def.in
+  s_71c3fd9a1c4bf7::t_986ea89664ed05 317-320,323
+fortran/test/fortranlib_test.F90
+  s_71c3fd9a1c4bf7::t_2374924607adc2 267-270
+fortran/test/tH5Z.F90
+  s_71c3fd9a1c4bf7::t_d4c5f626831604 166-286
+java/hdf/hdf5lib/H5.java
+  s_71c3fd9a1c4bf7::t_0e59be24212440 12419-12655
+java/src-jni/hdf/hdf5lib/H5.java
+  s_71c3fd9a1c4bf7::t_ed45e6d0770997 8448-8582
+java/src-jni/jni/h5pDCPLImp.c
+  s_71c3fd9a1c4bf7::t_033b3848fe202b 1391-1573
+java/src-jni/jni/h5pDCPLImp.h
+  s_71c3fd9a1c4bf7::t_5bc999d87c9bfd 142-180
+java/src-jni/test/TestH5Z.java
+  s_71c3fd9a1c4bf7::t_e1ca2c348c8677 15-16,26,30,32,133-313
+java/src-jni/test/testfiles/JUnit-TestH5Z.txt
+  s_71c3fd9a1c4bf7::t_862ed823b97a6c 2-6,9,13
+java/test/TestH5Z.java
+  s_71c3fd9a1c4bf7::t_7c3876172e6fad 15-16,26,30,32,133-313
+java/test/testfiles/JUnit-TestH5Z.txt
+  s_71c3fd9a1c4bf7::t_e9fb9f77cdf7b9 2-6,9,13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "326704cef13206daabde4c7d07ca5ad17e4c5678",
+  "prompts": {},
+  "sessions": {
+    "s_71c3fd9a1c4bf7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4d43baf-ffcf-476b-982a-5d7c16d1debb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
