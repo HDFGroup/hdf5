@@ -217,6 +217,9 @@ typedef herr_t (*H5Z_set_config_func_t)(const char *params, unsigned *flags, siz
  *
  * \return Non-negative on success; negative on failure.
  *
+ * \details Used only when no parameter string is stored for the filter, e.g.
+ *          one added with cd_values or read from a file.
+ *
  * \note Format \c float and \c double values with \c \%.16e: 17 significant
  *       digits round-trip every double, and the exponent makes TOML read the
  *       value as a float.  Do not use \c \%a (not valid TOML) or plain
@@ -408,9 +411,9 @@ H5_DLL htri_t H5Zconfig_get_str(const char *params, const char *key, char *buf, 
  *          \snippet this H5Z_class1_t_snip
  *          or
  *          \snippet this H5Z_class2_t_snip
- *          or, for filters that use the extended filter callback and the
- *          string-configuration callbacks (\c set_config / \c get_config),
- *          the newer #H5Z_class3_t:
+ *          or, for filters that also support the string-based configuration
+ *          API (#H5Pappend_filter, \c set_config / \c get_config), the newer
+ *          #H5Z_class3_t:
  *          \snippet this H5Z_class3_t_snip
  *          For #H5Z_class3_t, \c version is #H5Z_CLASS3_T_VERS and \c name
  *          is required: at most #H5Z_CLASS3_NAME_MAX_LEN bytes from

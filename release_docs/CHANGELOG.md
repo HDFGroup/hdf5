@@ -109,6 +109,16 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    `H5Pget_filter2()` and `H5Pget_filter_by_id2()` now return the decimal filter ID as a string (for example, `"32000"`) as the name of a filter that has no name stored in the pipeline and is not registered. They returned `"Unknown library filter"` for such a filter with an ID below 256, and an empty string otherwise.
 
+### Added string-based filter configuration to dataset creation property lists
+
+   The new `H5Pappend_filter()` function appends a filter to a pipeline from an `H5Z_params_t` descriptor, declared in `H5Zpublic.h`. With `H5Z_PARAMS_RAW(n, cd_values)` it behaves like `H5Pset_filter()`; with `H5Z_PARAMS_STR("level = 6")` the library loads the filter if necessary and calls its `set_config` callback to translate the `key = value` string into `cd_values`. The string is canonicalized (outer braces stripped, hex-float literals rewritten to the shortest decimal that round-trips) and stored on the pipeline entry together with the resulting `cd_values`, and the filter's canonical name is recorded in the entry. `H5Pmodify_filter_by_idx()` replaces the configuration of the filter at a given pipeline index, in either form, without changing the filter order. `H5Pget_filter_params_by_idx()` returns the parameter string of the filter at a given index: the stored string if there is one, otherwise the filter's `get_config` reconstruction from `cd_values`, otherwise a `cd_values=v0:v1:...` listing. `H5Pmodify_filter()` clears a stored string, since the new `cd_values` no longer match it.
+
+   Stored strings are carried by `H5Pcopy()` and by `H5Pencode()`/`H5Pdecode()`, but are not yet written to files: a dataset created from such a property list stores only its `cd_values`, and the creation property list of a dataset opened from a file reports the `get_config` or `cd_values` form.
+
+   The built-in filters now implement `set_config`: deflate accepts `level` (0-9, default 6), szip accepts `coding` (`"nn"` or `"entropy"`) and `pixels_per_block`, and scale-offset requires `scale_type` (`"int"`, `"float_dscale"` or `"float_escale"`) and `scale_factor`. Shuffle, Fletcher32 and N-bit accept only an empty string. Deflate, szip and scale-offset also implement `get_config`.
+
+   An `H5Pencode()` buffer for a dataset creation property list in which some filter carries a parameter string uses an extended encoding of the filter pipeline property that earlier releases reject when decoding. Property lists without parameter strings encode exactly as before, and buffers produced by earlier releases decode as before.
+
 ### Added support for internally concurrent multithreaded reads of chunked datasets
 
    Added 3 new functions to support this: H5TSset_internal_threads(),
