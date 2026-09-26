@@ -1,0 +1,49 @@
+tools/test/h5repack/expected/h5repack_layout.h5-plugin_test_cfg_legacy.ddl
+  s_71c3fd9a1c4bf7::t_664b089891ad82 1-172
+tools/src/h5repack/h5repack_opttable.c
+  s_71c3fd9a1c4bf7::t_c5beff5b975d95 33-35
+tools/test/h5repack/CMakeTests.cmake
+  s_71c3fd9a1c4bf7::t_7ec39b7f6c794d 159-161,179-181,1904-1914
+tools/test/h5repack/expected/h5repack-help.txt
+  s_71c3fd9a1c4bf7::t_cc2ab3f05cd1a4 157-161,208-213
+tools/test/h5repack/expected/plugin_test_cfg_legacy.h5repack_layout.h5.tst
+  s_71c3fd9a1c4bf7::t_01c30d26665086 1-15
+tools/src/h5repack/h5repack_main.c
+  s_71c3fd9a1c4bf7::t_a182fc848d574c 309-317,369-375
+tools/test/h5repack/expected/h5repack_layout.h5-plugin_test_cfg.ddl
+  s_71c3fd9a1c4bf7::t_069df0b77f5792 1-179
+tools/src/h5repack/h5repack.h
+  s_71c3fd9a1c4bf7::t_b5088b0722479c 301-306
+release_docs/CHANGELOG.md
+  s_71c3fd9a1c4bf7::t_715c0daff7973c 153-156
+tools/src/h5repack/h5repack_parse.c
+  s_71c3fd9a1c4bf7::t_6d99329c8b0072 47-48,237-250,252-266,268-285,287-291,293,295-305,307-332,335-337,340-404
+tools/test/h5repack/expected/plugin_test_cfg.h5repack_layout.h5.tst
+  s_71c3fd9a1c4bf7::t_f8fe1eace7ac9d 1-15
+tools/test/h5repack/expected/h5repack_layout.h5-plugin_test_cfg_pow2.ddl
+  s_71c3fd9a1c4bf7::t_9b1361a6ea0ae6 1-179
+tools/test/h5repack/CMakeLists.txt
+  s_71c3fd9a1c4bf7::t_116983c0fe755e 59-61,75-80,87,111-118,125
+tools/test/h5repack/expected/plugin_test_cfg_pow2.h5repack_layout.h5.tst
+  s_71c3fd9a1c4bf7::t_2cd90310391aba 1-15
+tools/src/h5repack/h5repack_filters.c
+  s_71c3fd9a1c4bf7::t_33ff3f5206d5d1 366-379
+tools/test/h5repack/dynlib_rpk3.c
+  s_71c3fd9a1c4bf7::t_02b4c265f3b5d8 1-152
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "887693335692952611fa26f3c59d2a0edbe2ba8b",
+  "prompts": {},
+  "sessions": {
+    "s_71c3fd9a1c4bf7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4d43baf-ffcf-476b-982a-5d7c16d1debb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
