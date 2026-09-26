@@ -640,10 +640,14 @@ H5PB_remove_entry(const H5F_shared_t *f_sh, haddr_t addr)
          * the wrong one wraps it, and the eviction thresholds then stay
          * wrong for the life of the file with nothing reporting it.
          */
-        if (H5MF_mem_page_type_is_raw(page_entry->type))
+        if (H5MF_mem_page_type_is_raw(page_entry->type)) {
+            assert(page_buf->raw_count > 0);
             page_buf->raw_count--;
-        else
+        }
+        else {
+            assert(page_buf->meta_count > 0);
             page_buf->meta_count--;
+        }
 
         page_entry->page_buf_ptr = H5FL_FAC_FREE(page_buf->page_fac, page_entry->page_buf_ptr);
         page_entry               = H5FL_FREE(H5PB_entry_t, page_entry);
@@ -1129,10 +1133,14 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                     H5PB__REMOVE_LRU(page_buf, page_entry)
 
                     /* Decrement page count of appropriate type */
-                    if (H5MF_mem_page_type_is_raw(page_entry->type))
+                    if (H5MF_mem_page_type_is_raw(page_entry->type)) {
+                        assert(page_buf->raw_count > 0);
                         page_buf->raw_count--;
-                    else
+                    }
+                    else {
+                        assert(page_buf->meta_count > 0);
                         page_buf->meta_count--;
+                    }
 
                     /* Free page info */
                     page_entry->page_buf_ptr = H5FL_FAC_FREE(page_buf->page_fac, page_entry->page_buf_ptr);
@@ -1491,10 +1499,14 @@ H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
     assert(H5SL_count(page_buf->slist_ptr) == page_buf->LRU_list_len);
 
     /* Decrement appropriate page type counter */
-    if (H5MF_mem_page_type_is_raw(page_entry->type))
+    if (H5MF_mem_page_type_is_raw(page_entry->type)) {
+        assert(page_buf->raw_count > 0);
         page_buf->raw_count--;
-    else
+    }
+    else {
+        assert(page_buf->meta_count > 0);
         page_buf->meta_count--;
+    }
 
     /* Flush page if dirty */
     if (page_entry->is_dirty)
