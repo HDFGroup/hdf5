@@ -804,6 +804,33 @@ done:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Z__no_params_set_config
+ *
+ * Purpose:     Shared set_config implementation for filters that accept no
+ *              user parameters (shuffle, fletcher32, nbit).  Sets
+ *              *cd_nelmts = 0 and rejects any non-empty params.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z__no_params_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts,
+                          unsigned H5_ATTR_UNUSED cd_values[], size_t H5_ATTR_UNUSED cd_values_size)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    *cd_nelmts = 0;
+
+    if (params && *params != '\0')
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter takes no parameters");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
  * Function:    H5Zconfig_get_int
  *
  * Purpose:     Look up a key and return its TOML integer value (int64_t).

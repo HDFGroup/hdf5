@@ -194,7 +194,7 @@ typedef struct H5Z_class2_t {
  *                               (or required when cd_values is NULL).
  *                               \b Must \b not \b be \b NULL; the HDF5 library
  *                               guarantees this precondition when invoking the
- *                               callback.
+ *                               callback through #H5Pappend_filter.
  * \param[out]    cd_values      Array to populate, or NULL for a size query.
  * \param[in]     cd_values_size Capacity of cd_values in elements (0 when cd_values is NULL).
  *
@@ -209,7 +209,7 @@ typedef struct H5Z_class2_t {
  *          over the caller-provided \p params buffer and do not take the
  *          HDF5 API lock, so they will not deadlock in concurrency-mode
  *          (\c HDF5_ENABLE_CONCURRENCY) builds where this callback is invoked
- *          from within a public API call.
+ *          from within #H5Pappend_filter.
  *
  * \since 3.0.0
  */
@@ -233,9 +233,15 @@ typedef herr_t (*H5Z_set_config_func_t)(const char *params, unsigned *flags, siz
  *
  * \return Non-negative on success; negative on failure.
  *
- * \details How a filter encodes values into cd_values is entirely private to
- *          that filter; this callback is the filter's own inverse mapping
- *          from cd_values back to a parameter string.
+ * \details This callback is only a fallback for introspection: when a
+ *          property list entry carries a stored parameter string,
+ *          H5Pget_filter_params_by_idx() returns that string -- the caller's
+ *          own text in canonical form, outer braces stripped and hex-float
+ *          literals rewritten to decimal -- and never calls get_config.
+ *          get_config is used when no string is stored (for example, a filter
+ *          added through the raw cd_values API, or a pipeline read back from
+ *          a file).  How a filter encodes values into cd_values is entirely
+ *          private to that filter.
  *
  * \note When reconstructing \c float or \c double values, the simplest
  *       correct choice is to format with \c \%.16e and nothing else.  That is
@@ -244,22 +250,28 @@ typedef herr_t (*H5Z_set_config_func_t)(const char *params, unsigned *flags, siz
  *       point and exponent so a TOML parser types the result as a float
  *       rather than an integer.
  *
- *       A filter that wants shorter output can approximate the shortest
- *       round-tripping literal with the standard library alone -- try
+ *       The library's own canonicalization (the form
+ *       H5Pget_filter_params_by_idx() returns when a string \e was stored)
+ *       emits something more compact: the shortest decimal literal that
+ *       still round-trips, computed with the vendored Ryu library.  A filter
+ *       that wants comparably short output without taking on that dependency
+ *       can approximate it with the standard library alone -- try
  *       successively wider precisions with \c \%.*g, confirm each candidate
  *       with an actual \c strtod() round-trip rather than assuming a given
  *       width suffices, and append ".0" if the winning candidate carries no
  *       decimal point or exponent.  A fixed \c \%.16e remains always
- *       correct; it is just not the shortest spelling.
+ *       correct; it is just not the shortest spelling, and get_config
+ *       callbacks are free to use any of the three.
  *
  *       Do \b not use \c \%a: a hexadecimal float literal is not valid TOML,
  *       and get_config output must parse for readers that are not the HDF5
- *       library.  Do not use plain \c \%g without the round-trip check above:
- *       on its own it drops the decimal point for whole values so "8.0"
- *       becomes "8" and reads back as an integer; nor \c \%f; nor fewer than
- *       17 significant digits without verifying the round-trip; nor more than
- *       \c DECIMAL_DIG of them, since C11 7.22.1.3p11 recommends correct
- *       rounding only within that bound.
+ *       library.  (\c \%a is still accepted on \e input to set_config, which
+ *       rewrites it to decimal.)  Do not use plain \c \%g without the
+ *       round-trip check above: on its own it drops the decimal point for
+ *       whole values so "8.0" becomes "8" and reads back as an integer; nor
+ *       \c \%f; nor fewer than 17 significant digits without verifying the
+ *       round-trip; nor more than \c DECIMAL_DIG of them, since C11
+ *       7.22.1.3p11 recommends correct rounding only within that bound.
  *
  * \note Recovering a value from a decimal literal requires the reader's
  *       decimal-to-binary conversion to be correctly rounded.  C11 7.22.1.3p11
@@ -474,9 +486,9 @@ H5_DLL htri_t H5Zconfig_get_str(const char *params, const char *key, char *buf, 
  *          \snippet this H5Z_class1_t_snip
  *          or
  *          \snippet this H5Z_class2_t_snip
- *          or, for filters that use the extended filter callback and the
- *          string-configuration callbacks (\c set_config / \c get_config),
- *          the newer #H5Z_class3_t:
+ *          or, for filters that also support the string-based configuration
+ *          API (#H5Pappend_filter, \c set_config / \c get_config), the newer
+ *          #H5Z_class3_t:
  *          \snippet this H5Z_class3_t_snip
  *          #H5Z_class3_t is a separate, non-derived struct (see its own
  *          field documentation) rather than an extension of
@@ -490,9 +502,11 @@ H5_DLL htri_t H5Zconfig_get_str(const char *params, const char *key, char *buf, 
  *          rejected with H5E_BADVALUE at registration, including when the
  *          filter is loaded as a plugin. The canonical name is a stable
  *          identifier for the filter and must be unique among registered
- *          #H5Z_class3_t filters, so it cannot contain whitespace, quotes,
- *          or other characters that would be unsafe in a file's metadata or
- *          in line-oriented tool output.
+ *          #H5Z_class3_t filters. H5Pappend_filter() writes it into the
+ *          pipeline entry, so it is stored with the filter pipeline in the
+ *          file; it therefore cannot contain whitespace, quotes, or other
+ *          characters that would be unsafe in a file's metadata or in
+ *          line-oriented tool output.
  *
  *          \c version is a library-defined value reporting the version number
  *          of the #H5Z_class_t struct. This currently must be set to
