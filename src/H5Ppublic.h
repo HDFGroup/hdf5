@@ -2811,7 +2811,11 @@ H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int fl
  *
  *          A non-empty string is also stored, in canonical form, on the
  *          pipeline entry and returned by H5Pget_filter_params_by_idx().  It
- *          is kept in memory only and not written to the file.
+ *          is written to the file in a version 3 filter pipeline message, so
+ *          a dataset whose pipeline carries one can only be created in a file
+ *          whose high library version bound is at least #H5F_LIBVER_V300;
+ *          otherwise H5Dcreate(), H5Dcreate_anon() and H5Ocopy() fail with
+ *          \c H5E_BADRANGE.  Use #H5Z_PARAMS_CDVALUES for older files.
  *
  *          H5Pappend_filter() also records the filter's name, which
  *          H5Pset_filter() does not, so H5Pequal() treats the two as different.
@@ -2895,7 +2899,8 @@ H5_DLL herr_t H5Pmodify_filter_by_idx(hid_t plist_id, unsigned filter_idx, unsig
  *          the filter at \p idx, from the first of these that applies:
  *
  *          -# The string stored by H5Pappend_filter() or
- *             H5Pmodify_filter_by_idx(), returned as is.
+ *             H5Pmodify_filter_by_idx(), or read from the file, returned as
+ *             is.
  *          -# The filter's \c get_config callback, which reconstructs a
  *             string from \c cd_values.  This may differ from the string
  *             originally set.
