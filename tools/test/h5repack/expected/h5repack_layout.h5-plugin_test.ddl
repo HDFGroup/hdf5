@@ -12,6 +12,7 @@ GROUP "/" {
             FILTER_ID 257
             COMMENT dynlib1
             PARAMS { 9 }
+            PARAMS_STRING 'cd_values=9'
          }
       }
       FILLVALUE {
@@ -34,6 +35,7 @@ GROUP "/" {
             FILTER_ID 257
             COMMENT dynlib1
             PARAMS { 9 }
+            PARAMS_STRING 'cd_values=9'
          }
       }
       FILLVALUE {
@@ -56,6 +58,7 @@ GROUP "/" {
             FILTER_ID 257
             COMMENT dynlib1
             PARAMS { 9 }
+            PARAMS_STRING 'cd_values=9'
          }
       }
       FILLVALUE {
@@ -78,6 +81,7 @@ GROUP "/" {
             FILTER_ID 257
             COMMENT dynlib1
             PARAMS { 9 }
+            PARAMS_STRING 'cd_values=9'
          }
       }
       FILLVALUE {
@@ -100,6 +104,7 @@ GROUP "/" {
             FILTER_ID 257
             COMMENT dynlib1
             PARAMS { 9 }
+            PARAMS_STRING 'cd_values=9'
          }
       }
       FILLVALUE {
@@ -122,6 +127,7 @@ GROUP "/" {
             FILTER_ID 257
             COMMENT dynlib1
             PARAMS { 9 }
+            PARAMS_STRING 'cd_values=9'
          }
       }
       FILLVALUE {
@@ -144,6 +150,7 @@ GROUP "/" {
             FILTER_ID 257
             COMMENT dynlib1
             PARAMS { 9 }
+            PARAMS_STRING 'cd_values=9'
          }
       }
       FILLVALUE {

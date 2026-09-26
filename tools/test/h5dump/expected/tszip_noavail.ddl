@@ -1,16 +1,19 @@
 HDF5 "tfilters.h5" {
-DATASET "scaleoffset" {
+DATASET "szip" {
    DATATYPE  H5T_STD_I32LE
    DATASPACE  SIMPLE { ( 20, 10 ) / ( 20, 10 ) }
    STORAGE_LAYOUT {
       CHUNKED ( 10, 5 )
-      SIZE XXXX (4.XXX:1 COMPRESSION)
+      SIZE XXXX (2.XXX:1 COMPRESSION)
    }
    FILTERS {
-      COMPRESSION SCALEOFFSET {
-         MIN BITS 2
-         PARAMS_STRING 'scale_type = "int", scale_factor = 4'
-         DESCRIPTION "Scale+offset lossy compression for integer/float data"
+      COMPRESSION SZIP {
+         PIXELS_PER_BLOCK 4
+         MODE K13
+         CODING NEAREST NEIGHBOUR
+         BYTE_ORDER LSB
+         HEADER RAW
+         PARAMS_STRING 'cd_values=169:4:32:5'
       }
    }
    FILLVALUE {

@@ -150,6 +150,12 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Tools
 
+### h5dump -p shows each filter's configuration string
+
+   With `-p`/`--properties`, h5dump now prints a `PARAMS_STRING` line inside each filter's entry in the `FILTERS` block. It shows the configuration string stored in the file, or else the filter's `get_config` form, or else a `cd_values=` listing. When the string contains a float that is a small multiple of a power of two, a following `# key = <hex float>` line gives its exact value; this line is outside the quoted string and is display-only. A `DESCRIPTION` line gives the filter's registered description when the filter is available on the machine running h5dump, so it can differ between machines.
+
+   This changes the layout of `h5dump -p` output for every filtered dataset: filters that printed on one line, such as `COMPRESSION DEFLATE { LEVEL 9 }` or `PREPROCESSING SHUFFLE`, now print as multi-line blocks. Scripts that parse `h5dump -p` output may need updating. The grammar is documented in the new DDL in BNF for HDF5 3.0.0 page.
+
 ## High-Level APIs
 
 ## C Packet Table API
