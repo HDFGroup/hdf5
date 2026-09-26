@@ -108,3 +108,49 @@ h5zget_filter_info_c(int_f *filter, int_f *flag)
 
     return ret_value;
 }
+
+/* Fortran cannot represent H5Z_params_t (a C union); these BIND(C) helpers
+   build it before calling H5Pappend_filter. */
+
+herr_t
+h5pappend_filter_str_c(hid_t plist, H5Z_filter_t id, unsigned flags, const char *params)
+{
+    H5Z_params_t p;
+    p.type  = H5Z_PARAMS_STRING;
+    p.u.str = params;
+    return H5Pappend_filter(plist, id, flags, &p);
+}
+
+herr_t
+h5pappend_filter_raw_c(hid_t plist, H5Z_filter_t id, unsigned flags, size_t cd_nelmts,
+                       const unsigned *cd_values)
+{
+    H5Z_params_t p;
+    p.type            = H5Z_PARAMS_CDVALUES;
+    p.u.raw.cd_nelmts = cd_nelmts;
+    p.u.raw.cd_values = cd_values;
+    return H5Pappend_filter(plist, id, flags, &p);
+}
+
+/* Same two calling modes for H5Pmodify_filter_by_idx, selecting the filter
+   by pipeline index instead of filter ID. */
+
+herr_t
+h5pmodify_filter_by_idx_str_c(hid_t plist, unsigned filter_idx, unsigned flags, const char *params)
+{
+    H5Z_params_t p;
+    p.type  = H5Z_PARAMS_STRING;
+    p.u.str = params;
+    return H5Pmodify_filter_by_idx(plist, filter_idx, flags, &p);
+}
+
+herr_t
+h5pmodify_filter_by_idx_raw_c(hid_t plist, unsigned filter_idx, unsigned flags, size_t cd_nelmts,
+                              const unsigned *cd_values)
+{
+    H5Z_params_t p;
+    p.type            = H5Z_PARAMS_CDVALUES;
+    p.u.raw.cd_nelmts = cd_nelmts;
+    p.u.raw.cd_values = cd_values;
+    return H5Pmodify_filter_by_idx(plist, filter_idx, flags, &p);
+}
