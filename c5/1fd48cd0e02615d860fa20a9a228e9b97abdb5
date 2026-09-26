@@ -1,0 +1,31 @@
+release_docs/CHANGELOG.md
+  s_71c3fd9a1c4bf7::t_011743eccc12aa 147-150
+fortran/src/H5Pff.F90
+  s_71c3fd9a1c4bf7::t_79109757a8ea47 59-60,120-129,1546-1845
+fortran/src/H5Zf.c
+  s_71c3fd9a1c4bf7::t_7411544c9eecb7 111-156
+fortran/test/fortranlib_test.F90
+  s_71c3fd9a1c4bf7::t_2374924607adc2 267-270
+fortran/src/H5f90proto.h
+  s_71c3fd9a1c4bf7::t_81d9d4561ea5ba 590-599
+fortran/src/hdf5_fortrandll.def.in
+  s_71c3fd9a1c4bf7::t_986ea89664ed05 317-320,323
+fortran/test/tH5Z.F90
+  s_71c3fd9a1c4bf7::t_d4c5f626831604 166-286
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c51fd48cd0e02615d860fa20a9a228e9b97abdb5",
+  "prompts": {},
+  "sessions": {
+    "s_71c3fd9a1c4bf7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4d43baf-ffcf-476b-982a-5d7c16d1debb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
