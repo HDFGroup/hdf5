@@ -1,0 +1,85 @@
+tools/test/h5dump/expected/tfilter_params_deflate.ddl
+  s_71c3fd9a1c4bf7::t_bd9bff46009365 1-24
+tools/test/h5dump/CMakeTests.cmake
+  s_71c3fd9a1c4bf7::t_24c5f95fdbc223 121-130,1286-1309
+tools/test/h5dump/expected/tfilter_params_szip.ddl
+  s_71c3fd9a1c4bf7::t_c9732a8fc4b02d 1-28
+docs/doxygen/dox/DDLBNF300.dox
+  s_71c3fd9a1c4bf7::t_c48eb30d2aa667 1-708
+tools/lib/h5tools_dump.c
+  s_71c3fd9a1c4bf7::t_f7ae22627a8350 3180-3517,3894-3913,3918-3920,3922-4003,4010-4041,4044-4065,4068-4089,4147-4149,4160-4181,4184-4215,4250-4253,4264-4270
+src/H5Fmodule.h
+  s_71c3fd9a1c4bf7::t_008cca924b2589 244
+tools/test/h5dump/expected/tfilter_params_shuffle.ddl
+  s_71c3fd9a1c4bf7::t_3541d9be2b5993 1-23
+tools/test/h5dump/expected/tfilter_params_scaleoffset.ddl
+  s_71c3fd9a1c4bf7::t_2a279e3991dc84 1-24
+docs/doxygen/dox/IntroHDF5.dox
+  s_71c3fd9a1c4bf7::t_afb4f435ef50a1 207
+docs/doxygen/dox/Specifications.dox
+  s_71c3fd9a1c4bf7::t_2962a3e30ff53e 12
+tools/src/h5dump/h5dump_extern.h
+  s_71c3fd9a1c4bf7::t_e5b6d68f985f30 81
+tools/src/h5dump/h5dump.c
+  s_71c3fd9a1c4bf7::t_375d4078f3cea7 134,261-263,793-796
+docs/doxygen/dox/LearnBasics1.dox
+  s_71c3fd9a1c4bf7::t_6f6e591d8ff68b 370,401
+tools/lib/h5tools.h
+  s_71c3fd9a1c4bf7::t_88260a54da053d 88-89,571-574
+src/H5Gmodule.h
+  s_71c3fd9a1c4bf7::t_9c9e895a5523b3 346
+tools/lib/CMakeLists.txt
+  s_71c3fd9a1c4bf7::t_cebd10af46ef19 57,83
+tools/test/h5dump/expected/tfilter_params_fletcher32.ddl
+  s_71c3fd9a1c4bf7::t_c06eb1ee11a33d 1-22
+release_docs/CHANGELOG.md
+  s_71c3fd9a1c4bf7::t_87119dc1881f7b 153-158
+tools/test/h5dump/expected/tfilter_params_nbit.ddl
+  s_71c3fd9a1c4bf7::t_379b725392ff15 1-23
+tools/test/h5dump/expected/tfilter_params_all.ddl
+  s_71c3fd9a1c4bf7::t_d99993c4b619da 1-44
+src/H5Tmodule.h
+  s_71c3fd9a1c4bf7::t_0dfe40a3d05717 3984-3985
+tools/test/h5dump/expected/h5dump-help.txt
+  s_71c3fd9a1c4bf7::t_a079dbabc3a509 67-68
+tools/test/h5dump/expected/tfilter_params_szip_noavail.ddl
+  s_71c3fd9a1c4bf7::t_4109f83d6a4940 1-27
+tools/src/h5dump/h5dump_ddl.c
+  s_71c3fd9a1c4bf7::t_44ff61e8c0ed7a 959-961
+tools/test/h5dump/expected/tfilter_params_deflate_noavail.ddl
+  s_71c3fd9a1c4bf7::t_b62df079634942 1-23
+tools/test/h5dump/expected/tfilter_params_userfilter.ddl
+  s_71c3fd9a1c4bf7::t_8a817a90d02a30 1-25
+tools/src/h5dump/h5dump.h
+  s_71c3fd9a1c4bf7::t_b8473a4707e47c 286,289
+tools/test/h5dump/expected/pbits/tnofilename-with-packed-bits.ddl
+  s_71c3fd9a1c4bf7::t_74f4b82837b327 67-68
+tools/test/h5dump/expected/pbits/tpbitsIncomplete.ddl
+  s_71c3fd9a1c4bf7::t_3c9e08e92e8d4e 67-68
+tools/test/h5dump/expected/pbits/tpbitsLengthExceeded.ddl
+  s_71c3fd9a1c4bf7::t_2b62f0d06b7ebe 67-68
+tools/test/h5dump/expected/pbits/tpbitsLengthPositive.ddl
+  s_71c3fd9a1c4bf7::t_009185863894c1 67-68
+tools/test/h5dump/expected/pbits/tpbitsMaxExceeded.ddl
+  s_71c3fd9a1c4bf7::t_524d0a253e98ec 67-68
+tools/test/h5dump/expected/pbits/tpbitsOffsetExceeded.ddl
+  s_71c3fd9a1c4bf7::t_88b3d5ece34226 67-68
+tools/test/h5dump/expected/pbits/tpbitsOffsetNegative.ddl
+  s_71c3fd9a1c4bf7::t_5ffbf2b51224db 67-68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ad2c58153d6d1820df9e05b537be0789c69b8fe1",
+  "prompts": {},
+  "sessions": {
+    "s_71c3fd9a1c4bf7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4d43baf-ffcf-476b-982a-5d7c16d1debb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
