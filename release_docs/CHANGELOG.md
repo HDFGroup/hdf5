@@ -144,6 +144,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Fortran Library
 
+### Added Fortran wrappers for string-based filter configuration
+
+   `h5pappend_filter_f` and `h5pmodify_filter_by_idx_f` add or replace a filter from either a `key=value` parameter string or a `cd_values` array (generic interfaces), and `h5pget_filter_params_by_idx_f` returns a filter's parameter string. They wrap `H5Pappend_filter()`, `H5Pmodify_filter_by_idx()` and `H5Pget_filter_params_by_idx()`. The string is passed as a Fortran character variable; the wrapper adds the C terminator.
+
 ## C++ Library
 
 ## Java Library
