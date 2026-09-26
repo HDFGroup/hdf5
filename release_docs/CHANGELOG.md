@@ -152,6 +152,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Java Library
 
+### Added Java wrappers for string-based filter configuration
+
+   `H5.H5Pappend_filter` and `H5.H5Pmodify_filter_by_idx` each have a `String` overload for a `key=value` parameter string and an `int[]` overload for `cd_values`. `H5.H5Pget_filter_params_by_idx(plist_id, filter_idx)` returns the filter's parameter string. They are available in both the JNI and FFM implementations.
+
 ## Tools
 
 ### h5repack -f accepts filter configuration strings
