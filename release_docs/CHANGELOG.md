@@ -181,6 +181,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Java Library
 
+### Fixed H5Pget_filter2() returning wrong values in the FFM Java bindings
+
+   The FFM implementation of `H5Pget_filter2()` allocated a 4-byte buffer for the C `size_t` element count, so on 64-bit platforms the library's write ran into the adjacent client data buffer. It also read the element count back from the wrong buffer and never copied the client data values or flags back to the caller's arrays. The count is now passed as a 64-bit value initialized to the caller's array capacity, and all three outputs are copied back.
+
 ### Fixed datatype ID leaks when reading or writing nested datatypes through the JNI
 
    The object-tree read and write helpers in the JNI derived a base datatype from the memory type with `H5Tget_super()` for the variable-length, array and complex classes, but never closed it. Because an `hid_t` is not reclaimed when a native method returns, every read or write of such data leaked at least one datatype ID for the lifetime of the process, and a nested type leaked one per level. The helpers now close the derived type on both the success and error paths.
