@@ -1,0 +1,22 @@
+release_docs/CHANGELOG.md
+  s_71c3fd9a1c4bf7::t_8e38ce23b38d1b 240-243
+java/hdf/hdf5lib/H5.java
+  s_71c3fd9a1c4bf7::t_1a7d72d188154a 12751-12756,12762,12768-12772
+  s_71c3fd9a1c4bf7::t_6b9c5fac56f39e 12760-12761
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3e8bb2971cf149bb3f406bd75bed7aeb9ef057ca",
+  "prompts": {},
+  "sessions": {
+    "s_71c3fd9a1c4bf7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4d43baf-ffcf-476b-982a-5d7c16d1debb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
