@@ -26,9 +26,23 @@
 /*****************/
 
 /**
- * Current version of the H5Z_class_t struct
+ * Version of the filter class struct's \c version field used by
+ * \c H5Z_class2_t. \c H5Z_class3_t plugins set \c version to
+ * #H5Z_CLASS3_T_VERS instead (see \c H5Z_class3_t's documentation).
  */
 #define H5Z_CLASS_T_VERS (1)
+
+/**
+ * Value of \c H5Z_class3_t's \c version field. H5Zregister() dispatches to
+ * v3 handling for a class whose \c version equals this value. \since 3.0.0
+ */
+#define H5Z_CLASS3_T_VERS (2)
+
+/**
+ * Maximum byte length of the \c name field in H5Z_class3_t (not counting NUL).
+ * H5Zregister() rejects names longer than this value. \since 3.0.0
+ */
+#define H5Z_CLASS3_NAME_MAX_LEN 255u
 
 /*******************/
 /* Public Typedefs */
@@ -170,6 +184,153 @@ typedef struct H5Z_class2_t {
     H5Z_func_t           filter;          /**< The actual filter function                   */
 } H5Z_class2_t;
 //! <!-- [H5Z_class2_t_snip] -->
+
+/**
+ * \brief Callback to configure a filter from a key=value parameter string.
+ *
+ * \param[in]     params         Comma-separated key=value parameter string, or NULL.
+ * \param[in,out] flags          Caller's flags; callback may modify them.
+ * \param[in,out] cd_nelmts      On input 0; on output, number of cd_values slots written
+ *                               (or required when cd_values is NULL).
+ *                               \b Must \b not \b be \b NULL; the HDF5 library
+ *                               guarantees this precondition when invoking the
+ *                               callback.
+ * \param[out]    cd_values      Array to populate, or NULL for a size query.
+ * \param[in]     cd_values_size Capacity of cd_values in elements (0 when cd_values is NULL).
+ *
+ * \return Non-negative on success; negative on failure.
+ *
+ * \details Must return the same cd_nelmts on both the size-query pass
+ *          (cd_values == NULL) and the populate pass (cd_values != NULL).
+ *
+ *          The public typed accessors #H5Zconfig_has_key, #H5Zconfig_get_int,
+ *          #H5Zconfig_get_double, #H5Zconfig_get_bool, and #H5Zconfig_get_str
+ *          are safe to call from inside this callback: they are pure parsers
+ *          over the caller-provided \p params buffer and do not take the
+ *          HDF5 API lock, so they will not deadlock in concurrency-mode
+ *          (\c HDF5_ENABLE_CONCURRENCY) builds where this callback is invoked
+ *          from within a public API call.
+ *
+ * \since 3.0.0
+ */
+typedef herr_t (*H5Z_set_config_func_t)(const char *params, unsigned *flags, size_t *cd_nelmts,
+                                        unsigned cd_values[], size_t cd_values_size);
+
+/**
+ * \brief Callback to reconstruct a human-readable parameter string from cd_values.
+ *
+ * \param[in]  flags      Definition flags stored in the pipeline.
+ * \param[in]  cd_nelmts  Number of elements in cd_values.
+ * \param[in]  cd_values  Client data values.
+ * \param[out] buf        Buffer to receive the parameter string, or NULL for size query.
+ * \param[in,out] buf_size On entry, total capacity of \p buf in bytes, <b>including</b> the
+ *                        NUL terminator slot (i.e., <tt>*buf_size >= strlen(output) + 1</tt>).
+ *                        On return, set to the number of characters written, excluding the NUL
+ *                        terminator. When \p buf is NULL the callback sets \p *buf_size to the
+ *                        required character count (excluding NUL) and returns success, enabling
+ *                        a size query. Because the capacity includes the NUL slot, implementations
+ *                        may write with <tt>snprintf(buf, *buf_size, ...)</tt> directly.
+ *
+ * \return Non-negative on success; negative on failure.
+ *
+ * \details How a filter encodes values into cd_values is entirely private to
+ *          that filter; this callback is the filter's own inverse mapping
+ *          from cd_values back to a parameter string.
+ *
+ * \note When reconstructing \c float or \c double values, the simplest
+ *       correct choice is to format with \c \%.16e and nothing else.  That is
+ *       \c DBL_DECIMAL_DIG (17) significant digits, the minimum that
+ *       round-trips every IEEE 754 double, and it always carries a decimal
+ *       point and exponent so a TOML parser types the result as a float
+ *       rather than an integer.
+ *
+ *       A filter that wants shorter output can approximate the shortest
+ *       round-tripping literal with the standard library alone -- try
+ *       successively wider precisions with \c \%.*g, confirm each candidate
+ *       with an actual \c strtod() round-trip rather than assuming a given
+ *       width suffices, and append ".0" if the winning candidate carries no
+ *       decimal point or exponent.  A fixed \c \%.16e remains always
+ *       correct; it is just not the shortest spelling.
+ *
+ *       Do \b not use \c \%a: a hexadecimal float literal is not valid TOML,
+ *       and get_config output must parse for readers that are not the HDF5
+ *       library.  Do not use plain \c \%g without the round-trip check above:
+ *       on its own it drops the decimal point for whole values so "8.0"
+ *       becomes "8" and reads back as an integer; nor \c \%f; nor fewer than
+ *       17 significant digits without verifying the round-trip; nor more than
+ *       \c DECIMAL_DIG of them, since C11 7.22.1.3p11 recommends correct
+ *       rounding only within that bound.
+ *
+ * \note Recovering a value from a decimal literal requires the reader's
+ *       decimal-to-binary conversion to be correctly rounded.  C11 7.22.1.3p11
+ *       only recommends this, in contrast to p9, which requires it for the
+ *       hexadecimal form.  A 1 ulp difference is enough to change behavior in
+ *       a filter that quantises on a binary boundary.
+ *
+ * \since 3.0.0
+ */
+typedef herr_t (*H5Z_get_config_func_t)(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
+                                        char *buf, size_t *buf_size);
+
+/**
+ * \brief Extended filter callback type for H5Z_class3_t.
+ *
+ * Extends \c H5Z_func_t with additional parameters: the active data-transfer
+ * property list (\p dxpl_id), the chunk's scaled coordinates (\p scaled,
+ * \p ndims), and \p state.
+ * \c H5Z_class2_t continues to use \c H5Z_func_t; this type is used only by
+ * \c H5Z_class3_t.
+ *
+ * \p scaled is NULL and \p ndims is 0 when the data being filtered has no
+ * chunk position, such as a fill-value template or a fractal heap block.
+ *
+ * \p state is reserved for future per-dataset filter state; it is always
+ * NULL in this release.
+ *
+ * \since 3.0.0
+ */
+typedef size_t (*H5Z_func2_t)(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[],
+                              hid_t dxpl_id, const hsize_t *scaled, size_t ndims, void *state, size_t nbytes,
+                              size_t *buf_size, void **buf);
+
+/**
+ * \brief Version 3 filter class structure with optional string-configuration callbacks.
+ *
+ * Plugin authors use H5Z_class3_t directly rather than relying on the H5Z_class_t alias.
+ * This struct is NOT derived from H5Z_class2_t; it is an independent flat struct.
+ *
+ * \since 3.0.0
+ */
+//! <!-- [H5Z_class3_t_snip] -->
+typedef struct H5Z_class3_t {
+    int          version;            /**< Set to #H5Z_CLASS3_T_VERS                 */
+    H5Z_filter_t id;                 /**< Filter ID number                           */
+    unsigned     encoder_present;    /**< Does this filter have an encoder?          */
+    unsigned     decoder_present;    /**< Does this filter have a decoder?           */
+    const char  *name;               /**< Canonical string identifier (e.g., "zfp"); must not be NULL; used as
+                                        display name */
+    H5Z_can_apply_func_t  can_apply; /**< The "can apply" callback for a filter      */
+    H5Z_set_local_func_t  set_local; /**< The "set local" callback for a filter      */
+    H5Z_func2_t           filter;    /**< Extended filter callback: dxpl_id + scaled */
+    H5Z_set_config_func_t set_config;  /**< String configuration callback; may be NULL */
+    H5Z_get_config_func_t get_config;  /**< Parameter string reconstruction; may be NULL */
+    const char           *description; /**< Human-readable description of the filter (e.g., "Deflate (zlib)
+                                          general-purpose compression"); may be NULL. Appended last (not
+                                          inserted after \c name) so the first eight fields -- version, id,
+                                          encoder_present, decoder_present, name, can_apply, set_local, filter --
+                                          share the same slots an H5Z_class2_t literal would occupy positionally.
+                                          \warning That slot correspondence does NOT make \c filter itself
+                                          reusable: it is typed \c H5Z_func2_t here (10 parameters, adding
+                                          \p dxpl_id, \p scaled, \p ndims, \p state) versus \c H5Z_func_t (6
+                                          parameters) in H5Z_class2_t. A callback written against the old signature
+                                          must be rewritten to accept and, if unneeded, ignore the four new parameters
+                                          before it can be assigned to this field -- reusing the old function
+                                          pointer as-is is undefined behavior. */
+    /* Members added after description are appended, never inserted, so a
+     * positional initializer written for an earlier layout still places
+     * every field it names correctly and zero-initializes the rest. */
+} H5Z_class3_t;
+//! <!-- [H5Z_class3_t_snip] -->
 
 /********************/
 /* Public Variables */
@@ -313,6 +474,25 @@ H5_DLL htri_t H5Zconfig_get_str(const char *params, const char *key, char *buf, 
  *          \snippet this H5Z_class1_t_snip
  *          or
  *          \snippet this H5Z_class2_t_snip
+ *          or, for filters that use the extended filter callback and the
+ *          string-configuration callbacks (\c set_config / \c get_config),
+ *          the newer #H5Z_class3_t:
+ *          \snippet this H5Z_class3_t_snip
+ *          #H5Z_class3_t is a separate, non-derived struct (see its own
+ *          field documentation) rather than an extension of
+ *          #H5Z_class2_t; the fields below that describe \c version and
+ *          \c name apply to #H5Z_class1_t / #H5Z_class2_t only.
+ *          #H5Z_class3_t's \c version must be set to #H5Z_CLASS3_T_VERS (not
+ *          #H5Z_CLASS_T_VERS, which is for #H5Z_class1_t / #H5Z_class2_t)
+ *          and its \c name must be non-NULL,
+ *          non-empty, at most 255 bytes, and drawn only from the character
+ *          class <tt>[A-Za-z0-9_.-]</tt> - a name that fails this check is
+ *          rejected with H5E_BADVALUE at registration, including when the
+ *          filter is loaded as a plugin. The canonical name is a stable
+ *          identifier for the filter and must be unique among registered
+ *          #H5Z_class3_t filters, so it cannot contain whitespace, quotes,
+ *          or other characters that would be unsafe in a file's metadata or
+ *          in line-oriented tool output.
  *
  *          \c version is a library-defined value reporting the version number
  *          of the #H5Z_class_t struct. This currently must be set to
