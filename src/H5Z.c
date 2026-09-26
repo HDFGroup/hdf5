@@ -225,12 +225,14 @@ next:
  *              and drawn entirely from [A-Za-z0-9_.-].
  *
  *              The restriction is not cosmetic.  A v3 filter's name is
- *              its canonical identifier: it is reported through
- *              H5Pget_filter2() and H5Zget_filter_class_info() and flows
+ *              its canonical identifier: H5Pappend_filter() writes it into
+ *              the pipeline entry at filter-add time, so it is stored in the
+ *              filter-pipeline object header message, reported through
+ *              H5Pget_filter2() and H5Zget_filter_class_info(), and flows
  *              out through h5dump and the other tools.  Permitting
  *              arbitrary bytes would let a plugin put whitespace, quotes,
- *              or embedded newlines into line-oriented tool output, and the
- *              name has to be usable as a stable command-line identifier.
+ *              or embedded newlines into a file's metadata, and the name
+ *              has to be usable as a stable command-line identifier.
  *
  *              The character test is written out rather than delegated to
  *              isalnum(), which is locale-dependent and would admit letters
@@ -500,7 +502,8 @@ H5Z_register3(const H5Z_class3_t *cls)
     /* Runtime checks that survive NDEBUG - enforce for the plugin-load path,
      * which reaches this function through H5Z_register and bypasses the
      * H5Zregister wrapper.  This is the untrusted path: the name arrives
-     * from a shared object on disk. */
+     * from a shared object on disk and is written into object header
+     * messages by H5Pappend_filter(). */
     if (H5Z__validate_class3_name(cls->name) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5Z_class3_t filter name");
 
@@ -1353,12 +1356,17 @@ done:
  *
  * Purpose:  Modify filter parameters for specified pipeline.
  *
+ *           keep_config preserves the entry's stored configuration string.
+ *           A set_local callback refining cd_values for a particular dataset
+ *           passes true: the string still describes what the user asked for.
+ *           A caller replacing cd_values outright passes false.
+ *
  * Return:   Non-negative on success
  *           Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_nelmts,
+H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_nelmts, bool keep_config,
            const unsigned int cd_values[/*cd_nelmts*/])
 {
     size_t idx;                 /* Index of filter in pipeline */
@@ -1383,6 +1391,14 @@ H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t
     /* Change parameters for filter */
     pline->filter[idx].flags     = flags;
     pline->filter[idx].cd_nelmts = cd_nelmts;
+
+    /* Replacing the raw cd_values invalidates any stored configuration
+     * string; drop it so introspection falls back to the filter's get_config
+     * callback.  Unless keep_config: a set_local callback is specializing
+     * cd_values for this dataset, which does not change the configuration
+     * the user asked for, so the string is kept. */
+    if (!keep_config)
+        pline->filter[idx].config = (char *)H5MM_xfree(pline->filter[idx].config);
 
     /* Free any existing parameters */
     if (pline->filter[idx].cd_values != NULL && pline->filter[idx].cd_values != pline->filter[idx]._cd_values)
@@ -1486,6 +1502,7 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_ne
     pline->filter[idx].flags     = flags;
     pline->filter[idx].name      = NULL; /*we'll pick it up later*/
     pline->filter[idx].cd_nelmts = cd_nelmts;
+    pline->filter[idx].config    = NULL; /*set by H5Pappend_filter or plist decode*/
     if (cd_nelmts > 0) {
         size_t i; /* Local index variable */
 
@@ -2112,6 +2129,7 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
             assert(pline->filter[idx].cd_nelmts > H5Z_COMMON_CD_VALUES);
         if (pline->filter[idx].cd_values != pline->filter[idx]._cd_values)
             pline->filter[idx].cd_values = (unsigned *)H5MM_xfree(pline->filter[idx].cd_values);
+        pline->filter[idx].config = (char *)H5MM_xfree(pline->filter[idx].config);
 
         /* Remove filter from pipeline array */
         if ((idx + 1) < pline->nused) {

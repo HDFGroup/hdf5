@@ -12,7 +12,9 @@
 
 /*
  * Tests for the string-based filter configuration API:
+ *   - H5Pappend_filter / H5Pmodify_filter_by_idx / H5Pget_filter_params_by_idx
  *   - Typed TOML accessor functions (H5Zconfig_get_int, _get_str, etc.)
+ *   - Built-in filter set_config / get_config round-trips
  *   - H5Z_class3_t registration, canonical names and H5Zget_filter_class_info
  *   - The H5Z_func2_t extended filter callback
  *   - Regression: existing H5Pset_filter still works
@@ -20,7 +22,7 @@
 
 #include "h5test.h"
 
-static const char *FILENAME[] = {"tfilter2", NULL};
+static const char *FILENAME[] = {"tfilter2", "tfilter2_cfg", NULL};
 
 /* -----------------------------------------------------------------------
  * Parser tests - typed TOML accessor functions
@@ -472,16 +474,237 @@ error:
 }
 
 /* -----------------------------------------------------------------------
- * Round-trip tests: write and read a chunked dataset through the built-in
- * filters, which are registered as H5Z_class3_t and run through filter2
+ * H5Pappend_filter / H5Pget_filter_params_by_idx callback contract tests
+ * ---------------------------------------------------------------------- */
+static int
+test_callback_contracts(void)
+{
+    hid_t  dcpl = H5I_INVALID_HID;
+    char   pbuf[256];
+    size_t plen;
+    htri_t deflate_avail;
+
+    if ((deflate_avail = H5Zfilter_avail(H5Z_FILTER_DEFLATE)) < 0)
+        TEST_ERROR;
+
+    TESTING("H5Pappend_filter: deflate with level=6");
+    if (deflate_avail) {
+        if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+            TEST_ERROR;
+        {
+            H5Z_params_t _p = H5Z_PARAMS_STR("level=6");
+            if (H5Pappend_filter(dcpl, H5Z_FILTER_DEFLATE, 0, &_p) < 0)
+                TEST_ERROR;
+        }
+        if (H5Pget_nfilters(dcpl) != 1)
+            TEST_ERROR;
+        H5Pclose(dcpl);
+        dcpl = H5I_INVALID_HID;
+        PASSED();
+    }
+    else
+        SKIPPED();
+
+    TESTING("H5Pappend_filter: deflate default (no params)");
+    if (deflate_avail) {
+        if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+            TEST_ERROR;
+        if (H5Pappend_filter(dcpl, H5Z_FILTER_DEFLATE, 0, NULL) < 0)
+            TEST_ERROR;
+        H5Pclose(dcpl);
+        dcpl = H5I_INVALID_HID;
+        PASSED();
+    }
+    else
+        SKIPPED();
+
+    TESTING("H5Pappend_filter: shuffle (no params)");
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pappend_filter(dcpl, H5Z_FILTER_SHUFFLE, 0, NULL) < 0)
+        TEST_ERROR;
+    H5Pclose(dcpl);
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    TESTING("H5Pappend_filter: shuffle rejects params");
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        H5Z_params_t _p  = H5Z_PARAMS_STR("blocksize=8");
+        herr_t       ret = H5Pappend_filter(dcpl, H5Z_FILTER_SHUFFLE, 0, &_p);
+        if (ret >= 0)
+            TEST_ERROR;
+    }
+    H5E_END_TRY
+    H5Pclose(dcpl);
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    TESTING("H5Pget_filter_params_by_idx: deflate level=9");
+    if (deflate_avail) {
+        if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+            TEST_ERROR;
+        {
+            H5Z_params_t _p = H5Z_PARAMS_STR("level=9");
+            if (H5Pappend_filter(dcpl, H5Z_FILTER_DEFLATE, 0, &_p) < 0)
+                TEST_ERROR;
+        }
+        plen = 0;
+        if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+            TEST_ERROR;
+        if (plen == 0)
+            TEST_ERROR;
+        /* The verbatim configuration string is retained and returned as-is
+         * ("level=9"), taking precedence over the get_config reconstruction. */
+        if (strcmp(pbuf, "level=9") != 0)
+            TEST_ERROR;
+        H5Pclose(dcpl);
+        dcpl = H5I_INVALID_HID;
+        PASSED();
+    }
+    else
+        SKIPPED();
+
+    TESTING("H5Pget_filter_params_by_idx: fallback for filter without get_config");
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pappend_filter(dcpl, H5Z_FILTER_SHUFFLE, 0, NULL) < 0)
+        TEST_ERROR;
+    plen = 0;
+    /* Fletcher32 has no get_config, should fall back to cd_values= format */
+    if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    H5Pclose(dcpl);
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    TESTING("H5Pappend_filter: invalid level rejects");
+    if (deflate_avail) {
+        if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+            TEST_ERROR;
+        H5E_BEGIN_TRY
+        {
+            H5Z_params_t _p  = H5Z_PARAMS_STR("level=99");
+            herr_t       ret = H5Pappend_filter(dcpl, H5Z_FILTER_DEFLATE, 0, &_p);
+            if (ret >= 0)
+                TEST_ERROR;
+        }
+        H5E_END_TRY
+        H5Pclose(dcpl);
+        dcpl = H5I_INVALID_HID;
+        PASSED();
+    }
+    else
+        SKIPPED();
+
+    return 0;
+
+error:
+    if (dcpl != H5I_INVALID_HID)
+        H5Pclose(dcpl);
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
+ * Modify-filter pattern test
+ *
+ * The raw cd_values pattern for updating a filter's parameters on a copied
+ * DCPL is:
+ *   1. H5Pget_filter_by_id2 -> retrieve current cd_values
+ *   2. Mutate cd_values in place
+ *   3. H5Pmodify_filter -> write back
+ *
+ * This test verifies that a filter appended via the string API produces
+ * cd_values that round-trip correctly through this pattern.  The string
+ * form, H5Pmodify_filter_by_idx, is covered by test_modify_filter_by_idx.
  * ---------------------------------------------------------------------- */
 
-/* Shared helper: create dataset with H5Pset_filter, write wbuf, read back
+static int
+test_modify_filter_pattern(void)
+{
+    hid_t    dcpl_orig = H5I_INVALID_HID;
+    hid_t    dcpl      = H5I_INVALID_HID;
+    unsigned flags;
+    size_t   cd_nelmts;
+    unsigned cd_values[8];
+    char     name[64];
+    unsigned config;
+
+    TESTING("modify filter params: H5Pget_filter_by_id2 + H5Pmodify_filter");
+
+    if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) <= 0) {
+        SKIPPED();
+        puts("    deflate filter not available");
+        return 0;
+    }
+
+    /* Build original DCPL with deflate level=6 via string API */
+    if ((dcpl_orig = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    {
+        H5Z_params_t _p = H5Z_PARAMS_STR("level=6");
+        if (H5Pappend_filter(dcpl_orig, H5Z_FILTER_DEFLATE, 0, &_p) < 0)
+            TEST_ERROR;
+    }
+
+    /* Copy it - simulates a caller receiving a DCPL they did not create */
+    if ((dcpl = H5Pcopy(dcpl_orig)) < 0)
+        TEST_ERROR;
+
+    /* Retrieve current cd_values */
+    cd_nelmts = 8;
+    if (H5Pget_filter_by_id2(dcpl, H5Z_FILTER_DEFLATE, &flags, &cd_nelmts, cd_values, sizeof(name), name,
+                             &config) < 0)
+        TEST_ERROR;
+    if (cd_nelmts < 1)
+        TEST_ERROR;
+
+    /* Verify level=6 is present before modification */
+    if (cd_values[0] != 6)
+        TEST_ERROR;
+
+    /* Bump level to 9 and write back */
+    cd_values[0] = 9;
+    if (H5Pmodify_filter(dcpl, H5Z_FILTER_DEFLATE, flags, cd_nelmts, cd_values) < 0)
+        TEST_ERROR;
+
+    /* Read back and confirm level=9 */
+    cd_nelmts = 8;
+    if (H5Pget_filter_by_id2(dcpl, H5Z_FILTER_DEFLATE, &flags, &cd_nelmts, cd_values, sizeof(name), name,
+                             &config) < 0)
+        TEST_ERROR;
+    if (cd_values[0] != 9)
+        TEST_ERROR;
+
+    H5Pclose(dcpl_orig);
+    H5Pclose(dcpl);
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl_orig);
+        H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
+ * Round-trip tests: write and read a chunked dataset configured through
+ * H5Pappend_filter
+ * ---------------------------------------------------------------------- */
+
+/* Shared helper: create dataset with H5Pappend_filter, write wbuf, read back
  * into rbuf, verify every element matches.  Returns SUCCEED or FAIL. */
 static herr_t
 h5_run_filter_roundtrip(hid_t file, const char *dset_name, hsize_t *dims, hsize_t *chunks, int ndims,
-                        H5Z_filter_t filter_id, size_t cd_nelmts, const unsigned cd_values[], int *wbuf,
-                        int *rbuf, size_t total_elements)
+                        H5Z_filter_t filter_id, const H5Z_params_t *params, int *wbuf, int *rbuf,
+                        size_t total_elements)
 {
     hid_t  sid  = H5I_INVALID_HID;
     hid_t  dcpl = H5I_INVALID_HID;
@@ -495,7 +718,7 @@ h5_run_filter_roundtrip(hid_t file, const char *dset_name, hsize_t *dims, hsize_
         goto done;
     if (H5Pset_chunk(dcpl, ndims, chunks) < 0)
         goto done;
-    if (H5Pset_filter(dcpl, filter_id, 0, cd_nelmts, cd_values) < 0)
+    if (H5Pappend_filter(dcpl, filter_id, 0, params) < 0)
         goto done;
 
     if ((dset = H5Dcreate2(file, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -527,13 +750,12 @@ done:
 static int
 test_roundtrip_deflate(hid_t file)
 {
-    hsize_t  dims[2]    = {32, 32};
-    hsize_t  chunks[2]  = {8, 8};
-    unsigned cd_vals[1] = {6}; /* deflate level 6 */
-    int      wbuf[32 * 32], rbuf[32 * 32];
-    int      i;
+    hsize_t dims[2]   = {32, 32};
+    hsize_t chunks[2] = {8, 8};
+    int     wbuf[32 * 32], rbuf[32 * 32];
+    int     i;
 
-    TESTING("Round-trip: deflate level 6 write/read");
+    TESTING("Round-trip: deflate=level=6 write/read");
     if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) <= 0) {
         SKIPPED();
         puts("    deflate filter not available");
@@ -541,9 +763,12 @@ test_roundtrip_deflate(hid_t file)
     }
     for (i = 0; i < 32 * 32; i++)
         wbuf[i] = i;
-    if (h5_run_filter_roundtrip(file, "deflate_rt", dims, chunks, 2, H5Z_FILTER_DEFLATE, 1, cd_vals, wbuf,
-                                rbuf, 32 * 32) < 0)
-        TEST_ERROR;
+    {
+        H5Z_params_t _p = H5Z_PARAMS_STR("level=6");
+        if (h5_run_filter_roundtrip(file, "deflate_rt", dims, chunks, 2, H5Z_FILTER_DEFLATE, &_p, wbuf, rbuf,
+                                    32 * 32) < 0)
+            TEST_ERROR;
+    }
     PASSED();
     return 0;
 error:
@@ -561,7 +786,7 @@ test_roundtrip_shuffle(hid_t file)
     TESTING("Round-trip: shuffle write/read");
     for (i = 0; i < 64; i++)
         wbuf[i] = i;
-    if (h5_run_filter_roundtrip(file, "shuffle_rt", dims, chunks, 1, H5Z_FILTER_SHUFFLE, 0, NULL, wbuf, rbuf,
+    if (h5_run_filter_roundtrip(file, "shuffle_rt", dims, chunks, 1, H5Z_FILTER_SHUFFLE, NULL, wbuf, rbuf,
                                 64) < 0)
         TEST_ERROR;
     PASSED();
@@ -581,7 +806,7 @@ test_roundtrip_fletcher32(hid_t file)
     TESTING("Round-trip: fletcher32 write/read");
     for (i = 0; i < 32; i++)
         wbuf[i] = i * 3;
-    if (h5_run_filter_roundtrip(file, "fletcher32_rt", dims, chunks, 1, H5Z_FILTER_FLETCHER32, 0, NULL, wbuf,
+    if (h5_run_filter_roundtrip(file, "fletcher32_rt", dims, chunks, 1, H5Z_FILTER_FLETCHER32, NULL, wbuf,
                                 rbuf, 32) < 0)
         TEST_ERROR;
     PASSED();
@@ -651,6 +876,132 @@ error:
         H5Dclose(dset);
     if (sid != H5I_INVALID_HID)
         H5Sclose(sid);
+    if (dcpl != H5I_INVALID_HID)
+        H5Pclose(dcpl);
+    return -1;
+}
+
+static int
+test_regression_filter2_appends(void)
+{
+    hid_t dcpl = H5I_INVALID_HID;
+    int   nfilters;
+
+    TESTING("Regression: H5Pappend_filter appends (matches H5Pset_filter behavior)");
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pappend_filter(dcpl, H5Z_FILTER_SHUFFLE, 0, NULL) < 0)
+        TEST_ERROR;
+    {
+        int expected = 1;
+        if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) > 0) {
+            H5Z_params_t _p = H5Z_PARAMS_STR("level=3");
+            if (H5Pappend_filter(dcpl, H5Z_FILTER_DEFLATE, 0, &_p) < 0)
+                TEST_ERROR;
+            expected = 2;
+        }
+        if ((nfilters = H5Pget_nfilters(dcpl)) != expected)
+            TEST_ERROR;
+    }
+
+    H5Pclose(dcpl);
+    PASSED();
+    return 0;
+
+error:
+    if (dcpl != H5I_INVALID_HID)
+        H5Pclose(dcpl);
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
+ * ScaleOffset set_config / get_config round-trip
+ * ---------------------------------------------------------------------- */
+static int
+test_scaleoffset_params(hid_t file)
+{
+    hid_t   dcpl      = H5I_INVALID_HID;
+    hsize_t dims[1]   = {32};
+    hsize_t chunks[1] = {8};
+    int     wbuf[32], rbuf[32];
+    char    pbuf[256];
+    size_t  plen;
+    int     i;
+
+    TESTING("Round-trip: scaleoffset scale_type = \"int\", scale_factor = 0");
+
+    /* Verify get_config round-trip on the dcpl before writing */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 1, chunks) < 0)
+        TEST_ERROR;
+    {
+        H5Z_params_t _p = H5Z_PARAMS_STR("scale_type = \"int\", scale_factor = 0");
+        if (H5Pappend_filter(dcpl, H5Z_FILTER_SCALEOFFSET, 0, &_p) < 0)
+            TEST_ERROR;
+    }
+    plen = 0;
+    if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (plen == 0)
+        TEST_ERROR;
+    H5Pclose(dcpl);
+    dcpl = H5I_INVALID_HID;
+
+    for (i = 0; i < 32; i++)
+        wbuf[i] = i * 2;
+    {
+        H5Z_params_t _p = H5Z_PARAMS_STR("scale_type = \"int\", scale_factor = 0");
+        if (h5_run_filter_roundtrip(file, "scaleoffset_rt", dims, chunks, 1, H5Z_FILTER_SCALEOFFSET, &_p,
+                                    wbuf, rbuf, 32) < 0)
+            TEST_ERROR;
+    }
+    PASSED();
+    return 0;
+
+error:
+    if (dcpl != H5I_INVALID_HID)
+        H5Pclose(dcpl);
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
+ * scale_factor upper bound: a value that fits unsigned but flips sign when
+ * later re-cast to int (H5Z__filter_scaleoffset) must be rejected here,
+ * not silently substituted with 0 downstream.
+ * ---------------------------------------------------------------------- */
+static int
+test_scaleoffset_scale_factor_upper_bound(void)
+{
+    hid_t  dcpl = H5I_INVALID_HID;
+    herr_t ret;
+
+    TESTING("scaleoffset: scale_factor above INT_MAX is rejected");
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    {
+        /* INT_MAX + 1 = 2147483648: valid as unsigned, but negative when
+         * re-cast to int -- exactly the value that used to be silently
+         * reset to 0 downstream instead of being rejected here. */
+        H5Z_params_t _p = H5Z_PARAMS_STR("scale_type = \"int\", scale_factor = 2147483648");
+        H5E_BEGIN_TRY
+        {
+            ret = H5Pappend_filter(dcpl, H5Z_FILTER_SCALEOFFSET, 0, &_p);
+        }
+        H5E_END_TRY
+    }
+    if (ret >= 0)
+        TEST_ERROR;
+
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+    return 0;
+
+error:
     if (dcpl != H5I_INVALID_HID)
         H5Pclose(dcpl);
     return -1;
@@ -813,6 +1164,451 @@ error:
     H5E_BEGIN_TRY
     {
         H5Zunregister(NAME_FILTER_ID);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
+ * Additional coverage tests
+ * ---------------------------------------------------------------------- */
+
+/* 1. Empty-input handling: when set_config is present it is invoked with
+ *    params=NULL so the plugin can fail-fast. When set_config is absent,
+ *    the filter is appended with cd_nelmts=0 and no callback runs. */
+#define FASTPATH_FILTER_ID 514
+#define NOCFG_FILTER_ID    518
+
+static int fastpath_set_config_called   = 0;
+static int fastpath_set_config_was_null = 0;
+
+static herr_t
+fastpath_set_config(const char *params, unsigned *flags, size_t *cd_nelmts, unsigned cd_values[],
+                    size_t cd_values_size)
+{
+    (void)flags;
+    (void)cd_values;
+    (void)cd_values_size;
+    fastpath_set_config_called   = 1;
+    fastpath_set_config_was_null = (params == NULL);
+    *cd_nelmts                   = 0;
+    return 0;
+}
+
+static size_t
+fastpath_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                     hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
+                     size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size,
+                     void **buf)
+{
+    (void)flags;
+    (void)cd_nelmts;
+    (void)cd_values;
+    (void)buf_size;
+    (void)buf;
+    return nbytes;
+}
+
+static int
+test_empty_string_fast_path(void)
+{
+    static const H5Z_class3_t fp_cls = {
+        2,                    /* version         */
+        FASTPATH_FILTER_ID,   /* id              */
+        1,                    /* encoder_present */
+        1,                    /* decoder_present */
+        "fastpath_filter",    /* canonical_name  */
+        NULL,                 /* can_apply       */
+        NULL,                 /* set_local       */
+        fastpath_filter_func, /* filter          */
+        fastpath_set_config,  /* set_config      */
+        NULL,                 /* get_config      */
+        NULL,                 /* description     */
+    };
+    static const H5Z_class3_t nocfg_cls = {
+        2,                    /* version         */
+        NOCFG_FILTER_ID,      /* id              */
+        1,                    /* encoder_present */
+        1,                    /* decoder_present */
+        "nocfg_filter",       /* canonical_name  */
+        NULL,                 /* can_apply       */
+        NULL,                 /* set_local       */
+        fastpath_filter_func, /* filter          */
+        NULL,                 /* set_config (intentionally absent) */
+        NULL,                 /* get_config      */
+        NULL,                 /* description     */
+    };
+    hid_t  dcpl = H5I_INVALID_HID;
+    herr_t ret;
+
+    /* NULL passed as the 4th argument means "no params" via the CDVALUES
+     * path; the filter is appended with cd_nelmts = 0 and set_config is
+     * not consulted (the STRING path is only entered when the caller
+     * supplies an H5Z_params_t with type == H5Z_PARAMS_STRING). */
+    TESTING("H5Pappend_filter: NULL params (4th arg) takes CDVALUES path; set_config not called");
+    if (H5Zregister(&fp_cls) < 0)
+        TEST_ERROR;
+    fastpath_set_config_called   = 0;
+    fastpath_set_config_was_null = 0;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pappend_filter(dcpl, FASTPATH_FILTER_ID, 0, NULL) < 0)
+        TEST_ERROR;
+    if (fastpath_set_config_called != 0)
+        TEST_ERROR;
+    H5Pclose(dcpl);
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    TESTING("H5Pappend_filter: H5Z_PARAMS_STRING with NULL str invokes set_config with params=NULL");
+    fastpath_set_config_called   = 0;
+    fastpath_set_config_was_null = 0;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    {
+        H5Z_params_t _p = H5Z_PARAMS_STR(NULL);
+        if (H5Pappend_filter(dcpl, FASTPATH_FILTER_ID, 0, &_p) < 0)
+            TEST_ERROR;
+    }
+    if (fastpath_set_config_called == 0)
+        TEST_ERROR;
+    if (fastpath_set_config_was_null == 0)
+        TEST_ERROR;
+    H5Pclose(dcpl);
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    TESTING("H5Pappend_filter: empty string params invokes set_config with params=NULL");
+    fastpath_set_config_called   = 0;
+    fastpath_set_config_was_null = 0;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    {
+        H5Z_params_t _p = H5Z_PARAMS_STR("");
+        if (H5Pappend_filter(dcpl, FASTPATH_FILTER_ID, 0, &_p) < 0)
+            TEST_ERROR;
+    }
+    if (fastpath_set_config_called == 0)
+        TEST_ERROR;
+    if (fastpath_set_config_was_null == 0)
+        TEST_ERROR;
+    H5Pclose(dcpl);
+    dcpl = H5I_INVALID_HID;
+    H5Zunregister(FASTPATH_FILTER_ID);
+    PASSED();
+
+    TESTING("H5Pappend_filter: filter without set_config accepts NULL/empty params");
+    if (H5Zregister(&nocfg_cls) < 0)
+        TEST_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pappend_filter(dcpl, NOCFG_FILTER_ID, 0, NULL) < 0)
+        TEST_ERROR;
+    {
+        H5Z_params_t _p = H5Z_PARAMS_STR("");
+        if (H5Pappend_filter(dcpl, NOCFG_FILTER_ID, 0, &_p) < 0)
+            TEST_ERROR;
+    }
+    H5Pclose(dcpl);
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    TESTING("H5Pappend_filter: filter without set_config rejects non-empty params");
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        H5Z_params_t _p = H5Z_PARAMS_STR("level=6");
+        ret             = H5Pappend_filter(dcpl, NOCFG_FILTER_ID, 0, &_p);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    H5Pclose(dcpl);
+    dcpl = H5I_INVALID_HID;
+    H5Zunregister(NOCFG_FILTER_ID);
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        if (dcpl != H5I_INVALID_HID)
+            H5Pclose(dcpl);
+        H5Zunregister(FASTPATH_FILTER_ID);
+        H5Zunregister(NOCFG_FILTER_ID);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* 2. CDVALUES path: H5Z_PARAMS_CDVALUES is passed through correctly */
+#define CDVALS_FILTER_ID 515
+
+static size_t
+cdvals_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                   hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
+                   size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size,
+                   void **buf)
+{
+    (void)flags;
+    (void)cd_nelmts;
+    (void)cd_values;
+    (void)buf_size;
+    (void)buf;
+    return nbytes;
+}
+
+static int
+test_cdvalues_path(void)
+{
+    static const H5Z_class3_t cdv_cls = {
+        2,                  /* version         */
+        CDVALS_FILTER_ID,   /* id              */
+        1,                  /* encoder_present */
+        1,                  /* decoder_present */
+        "cdvals_filter",    /* canonical_name  */
+        NULL,               /* can_apply       */
+        NULL,               /* set_local       */
+        cdvals_filter_func, /* filter          */
+        NULL,               /* set_config      */
+        NULL,               /* get_config      */
+        NULL,               /* description     */
+    };
+    hid_t        dcpl   = H5I_INVALID_HID;
+    unsigned     vals[] = {42, 99};
+    H5Z_params_t p      = H5Z_PARAMS_RAW(2, vals);
+    unsigned     flags2;
+    unsigned     cd_out[8];
+    size_t       cd_nelmts = 8;
+    char         name[64];
+    unsigned     config;
+
+    TESTING("H5Pappend_filter: CDVALUES path stores raw cd_values");
+    if (H5Zregister(&cdv_cls) < 0)
+        TEST_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pappend_filter(dcpl, CDVALS_FILTER_ID, 0, &p) < 0)
+        TEST_ERROR;
+    if (H5Pget_filter_by_id2(dcpl, CDVALS_FILTER_ID, &flags2, &cd_nelmts, cd_out, sizeof(name), name,
+                             &config) < 0)
+        TEST_ERROR;
+    if (cd_nelmts < 2 || cd_out[0] != 42 || cd_out[1] != 99)
+        TEST_ERROR;
+    H5Pclose(dcpl);
+    dcpl = H5I_INVALID_HID;
+    H5Zunregister(CDVALS_FILTER_ID);
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        if (dcpl != H5I_INVALID_HID)
+            H5Pclose(dcpl);
+        H5Zunregister(CDVALS_FILTER_ID);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* 3. CDVALUES path: cd_values=NULL with cd_nelmts>0 is rejected */
+static int
+test_cdvalues_null_check(void)
+{
+    hid_t        dcpl = H5I_INVALID_HID;
+    H5Z_params_t p;
+    herr_t       ret;
+
+    TESTING("H5Pappend_filter: CDVALUES with NULL pointer and nelmts>0 is rejected");
+    p.type            = H5Z_PARAMS_CDVALUES;
+    p.u.raw.cd_nelmts = 3;
+    p.u.raw.cd_values = NULL;
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pappend_filter(dcpl, H5Z_FILTER_SHUFFLE, 0, &p);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    H5Pclose(dcpl);
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        if (dcpl != H5I_INVALID_HID)
+            H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* 4. canonical_name does NOT pollute cd_values; H5Pappend_filter via
+ *    H5Z_PARAMS_STRING writes only set_config's cd_values to the pipeline. */
+#define CDVALS_CLEAN_FILTER_ID 516
+
+static int64_t cdvals_clean_param_value = 0;
+
+static herr_t
+cdvals_clean_set_config(const char *params, unsigned *flags, size_t *cd_nelmts, unsigned cd_values[],
+                        size_t cd_values_size)
+{
+    int64_t val = 0;
+    (void)flags;
+    (void)cd_values_size;
+    if (params && *params)
+        H5Zconfig_get_int(params, "alpha", &val);
+    cdvals_clean_param_value = val;
+    *cd_nelmts               = 1;
+    if (cd_values)
+        cd_values[0] = (unsigned)val;
+    return 0;
+}
+
+static size_t
+cdvals_clean_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                         hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
+                         size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes,
+                         size_t *buf_size, void **buf)
+{
+    (void)flags;
+    (void)cd_nelmts;
+    (void)cd_values;
+    (void)buf_size;
+    (void)buf;
+    return nbytes;
+}
+
+static int
+test_cdvalues_no_name_pollution(void)
+{
+    static const H5Z_class3_t tc_cls = {
+        2,                        /* version         */
+        CDVALS_CLEAN_FILTER_ID,   /* id              */
+        1,                        /* encoder_present */
+        1,                        /* decoder_present */
+        "cdvals_clean_filter",    /* canonical_name  */
+        NULL,                     /* can_apply       */
+        NULL,                     /* set_local       */
+        cdvals_clean_filter_func, /* filter          */
+        cdvals_clean_set_config,  /* set_config      */
+        NULL,                     /* get_config      */
+        NULL,                     /* description     */
+    };
+    hid_t    dcpl = H5I_INVALID_HID;
+    unsigned flags2;
+    unsigned cd_out[32];
+    size_t   cd_nelmts = 32;
+    char     name[64];
+    unsigned config;
+
+    TESTING("canonical_name: not packed into cd_values");
+    if (H5Zregister(&tc_cls) < 0)
+        TEST_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    {
+        H5Z_params_t _p = H5Z_PARAMS_STR("alpha=7");
+        if (H5Pappend_filter(dcpl, CDVALS_CLEAN_FILTER_ID, 0, &_p) < 0)
+            TEST_ERROR;
+    }
+    if (H5Pget_filter_by_id2(dcpl, CDVALS_CLEAN_FILTER_ID, &flags2, &cd_nelmts, cd_out, sizeof(name), name,
+                             &config) < 0)
+        TEST_ERROR;
+    /* cd_nelmts should be exactly what set_config wrote (1), with no
+     * trailing canonical_name slots appended by the library. */
+    if (cd_nelmts != 1)
+        TEST_ERROR;
+    if (cd_out[0] != 7)
+        TEST_ERROR;
+    H5Pclose(dcpl);
+    dcpl = H5I_INVALID_HID;
+    H5Zunregister(CDVALS_CLEAN_FILTER_ID);
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        if (dcpl != H5I_INVALID_HID)
+            H5Pclose(dcpl);
+        H5Zunregister(CDVALS_CLEAN_FILTER_ID);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* 5. canonical_name persists as the pipeline name field after H5Zunregister */
+#define PERSIST_FILTER_ID 517
+
+static size_t
+persist_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                    hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
+                    size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size,
+                    void **buf)
+{
+    (void)flags;
+    (void)cd_nelmts;
+    (void)cd_values;
+    (void)buf_size;
+    (void)buf;
+    return nbytes;
+}
+
+static int
+test_canonical_name_persistence(void)
+{
+    static const H5Z_class3_t persist_cls = {
+        2,                   /* version         */
+        PERSIST_FILTER_ID,   /* id              */
+        1,                   /* encoder_present */
+        1,                   /* decoder_present */
+        "persist_filter",    /* canonical_name  */
+        NULL,                /* can_apply       */
+        NULL,                /* set_local       */
+        persist_filter_func, /* filter         */
+        NULL,                /* set_config      */
+        NULL,                /* get_config      */
+        NULL,                /* description     */
+    };
+    hid_t    dcpl = H5I_INVALID_HID;
+    unsigned flags2;
+    unsigned cd_out[8];
+    size_t   cd_nelmts = 8;
+    char     name[64];
+    unsigned config;
+
+    TESTING("canonical_name: persists as pipeline name after H5Zunregister");
+    if (H5Zregister(&persist_cls) < 0)
+        TEST_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pappend_filter(dcpl, PERSIST_FILTER_ID, 0, NULL) < 0)
+        TEST_ERROR;
+    /* Unregister so the only name source is the pipeline name field */
+    H5Zunregister(PERSIST_FILTER_ID);
+    /* Name should still be "persist_filter" (canonical_name) from the stored pipeline entry */
+    if (H5Pget_filter_by_id2(dcpl, PERSIST_FILTER_ID, &flags2, &cd_nelmts, cd_out, sizeof(name), name,
+                             &config) < 0)
+        TEST_ERROR;
+    if (strcmp(name, "persist_filter") != 0)
+        TEST_ERROR;
+    H5Pclose(dcpl);
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        if (dcpl != H5I_INVALID_HID)
+            H5Pclose(dcpl);
+        H5Zunregister(PERSIST_FILTER_ID);
     }
     H5E_END_TRY
     return -1;
@@ -1036,6 +1832,339 @@ error:
     return -1;
 }
 
+/* 8. H5Pappend_filter rejects a param string longer than H5Z_CONFIG_STRING_MAX */
+static int
+test_config_string_max(void)
+{
+    hid_t  dcpl    = H5I_INVALID_HID;
+    char  *big_str = NULL;
+    herr_t ret;
+
+    TESTING("H5Pappend_filter: param string > H5Z_CONFIG_STRING_MAX is rejected");
+    /* Build a string one byte over the limit */
+    if (NULL == (big_str = (char *)malloc(H5Z_CONFIG_STRING_MAX + 2)))
+        TEST_ERROR;
+    memset(big_str, 'x', H5Z_CONFIG_STRING_MAX + 1);
+    big_str[H5Z_CONFIG_STRING_MAX + 1] = '\0';
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        H5Z_params_t _p;
+        _p.type  = H5Z_PARAMS_STRING;
+        _p.u.str = big_str;
+        ret      = H5Pappend_filter(dcpl, H5Z_FILTER_DEFLATE, 0, &_p);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    H5Pclose(dcpl);
+    dcpl = H5I_INVALID_HID;
+    free(big_str);
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        if (dcpl != H5I_INVALID_HID)
+            H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+    free(big_str);
+    return -1;
+}
+
+/* 8b. H5Pappend_filter accepts a param string of exactly H5Z_CONFIG_STRING_MAX bytes */
+static int
+test_config_string_max_boundary(void)
+{
+    hid_t      dcpl       = H5I_INVALID_HID;
+    char      *ok_str     = NULL;
+    const char prefix[]   = "level = 6";
+    size_t     prefix_len = sizeof(prefix) - 1;
+    herr_t     ret;
+    htri_t     deflate_avail;
+
+    TESTING("H5Pappend_filter: param string == H5Z_CONFIG_STRING_MAX is accepted");
+    /* Deflate (zlib) required as the test filter - skip if not compiled in */
+    if ((deflate_avail = H5Zfilter_avail(H5Z_FILTER_DEFLATE)) < 0)
+        TEST_ERROR;
+    if (!deflate_avail) {
+        SKIPPED();
+        return 0;
+    }
+    if (NULL == (ok_str = (char *)malloc(H5Z_CONFIG_STRING_MAX + 1)))
+        TEST_ERROR;
+    /* Valid TOML string of exactly H5Z_CONFIG_STRING_MAX bytes:
+     * "level = 6" followed by trailing spaces (valid in TOML). */
+    memcpy(ok_str, prefix, prefix_len);
+    memset(ok_str + prefix_len, ' ', H5Z_CONFIG_STRING_MAX - prefix_len);
+    ok_str[H5Z_CONFIG_STRING_MAX] = '\0';
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    {
+        H5Z_params_t _p;
+        _p.type  = H5Z_PARAMS_STRING;
+        _p.u.str = ok_str;
+        ret      = H5Pappend_filter(dcpl, H5Z_FILTER_DEFLATE, 0, &_p);
+    }
+    if (ret < 0)
+        TEST_ERROR;
+    H5Pclose(dcpl);
+    dcpl = H5I_INVALID_HID;
+    free(ok_str);
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        if (dcpl != H5I_INVALID_HID)
+            H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+    free(ok_str);
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
+ * 8c. Canonicalization can grow a parameter string past H5Z_CONFIG_STRING_MAX
+ * even when the caller's raw input is well under it -- hex-float rewriting
+ * expands "0x1.0001p0" (10 bytes) to "1.0000152587890625" (18 bytes): the
+ * canonical form is the shortest decimal that round-trips
+ * (H5Z__format_double_canonical()), so a value whose mantissa doesn't line
+ * up with a short decimal, not any short hex-float token, is what still
+ * forces close to the full DBL_DECIMAL_DIG-17 digits.  The stored string is
+ * the canonical form, and H5Z_CONFIG_STRING_MAX bounds the stored string, so
+ * H5Pappend_filter must check the canonicalized length, not only the raw
+ * input's.
+ * ---------------------------------------------------------------------- */
+
+#define GROWTH_FILTER_ID 535
+
+static size_t
+growth_filter_func(unsigned H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                   const unsigned H5_ATTR_UNUSED *cd_values, hid_t H5_ATTR_UNUSED dxpl_id,
+                   const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims,
+                   void H5_ATTR_UNUSED *state, size_t nbytes, size_t H5_ATTR_UNUSED *buf_size,
+                   void H5_ATTR_UNUSED **buf)
+{
+    return nbytes; /* pass-through; never actually applied by this test */
+}
+
+static herr_t
+growth_set_config(const char H5_ATTR_UNUSED *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts,
+                  unsigned H5_ATTR_UNUSED cd_values[], size_t H5_ATTR_UNUSED cd_values_size)
+{
+    /* Ignores params entirely -- any syntactically valid TOML is "accepted",
+     * so the test below is free to pack the string with as many distinct
+     * keys as needed without tripping a per-key allowlist. */
+    *cd_nelmts = 0;
+    return SUCCEED;
+}
+
+static int
+test_config_string_canonicalization_growth(void)
+{
+    static const H5Z_class3_t growth_cls = {
+        2,                  /* version         */
+        GROWTH_FILTER_ID,   /* id              */
+        1,                  /* encoder_present */
+        1,                  /* decoder_present */
+        "growth_filter",    /* canonical_name  */
+        NULL,               /* can_apply       */
+        NULL,               /* set_local       */
+        growth_filter_func, /* filter          */
+        growth_set_config,  /* set_config      */
+        NULL,               /* get_config      */
+        NULL,               /* description     */
+    };
+    hid_t    dcpl = H5I_INVALID_HID;
+    char    *raw  = NULL;
+    size_t   pos  = 0;
+    unsigned n;
+    herr_t   ret;
+
+    TESTING("H5Pappend_filter: canonicalization growth past H5Z_CONFIG_STRING_MAX is rejected");
+
+    if (H5Zregister(&growth_cls) < 0)
+        TEST_ERROR;
+
+    if (NULL == (raw = (char *)malloc(H5Z_CONFIG_STRING_MAX + 1))) {
+        H5Zunregister(GROWTH_FILTER_ID);
+        TEST_ERROR;
+    }
+    raw[0] = '\0';
+
+    /* Pack short hex-float fields ("aN=0x1.0001p0,") up to just under the
+     * raw sanity ceiling below -- each field individually is tiny, but every
+     * "0x1.0001p0" the canonicalizer sees becomes an 18-byte decimal literal
+     * (its mantissa doesn't line up with a short decimal, so the shortest
+     * round-trip form -- H5Z__format_double_canonical() -- still needs all
+     * 17 significant digits), so packing close to the raw ceiling in
+     * 14-15-byte fields canonicalizes to well over the full budget. */
+    for (n = 0; pos < H5Z_CONFIG_STRING_MAX * 3 / 4 - 128; n++) {
+        char field[32];
+        int  flen = snprintf(field, sizeof(field), "a%u=0x1.0001p0,", n);
+        if (flen < 0 || pos + (size_t)flen >= H5Z_CONFIG_STRING_MAX)
+            break;
+        memcpy(raw + pos, field, (size_t)flen);
+        pos += (size_t)flen;
+    }
+    if (pos > 0)
+        raw[pos - 1] = '\0'; /* drop the trailing comma */
+    else
+        raw[0] = '\0';
+
+    /* Sanity check on the test itself: the raw input must be comfortably
+     * under the limit, or this isn't exercising the growth path at all. */
+    if (strlen(raw) >= H5Z_CONFIG_STRING_MAX * 3 / 4) {
+        free(raw);
+        H5Zunregister(GROWTH_FILTER_ID);
+        TEST_ERROR;
+    }
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
+        free(raw);
+        H5Zunregister(GROWTH_FILTER_ID);
+        TEST_ERROR;
+    }
+    H5E_BEGIN_TRY
+    {
+        H5Z_params_t _p;
+        _p.type  = H5Z_PARAMS_STRING;
+        _p.u.str = raw;
+        ret      = H5Pappend_filter(dcpl, GROWTH_FILTER_ID, 0, &_p);
+    }
+    H5E_END_TRY
+
+    H5Pclose(dcpl);
+    free(raw);
+    H5Zunregister(GROWTH_FILTER_ID);
+
+    if (ret >= 0)
+        TEST_ERROR;
+    PASSED();
+    return 0;
+
+error:
+    return -1;
+}
+
+/* 10. set_config and get_config are invoked and their output is consistent */
+#define CALLBACK_FILTER_ID 519
+
+static int     callback_set_called = 0;
+static int64_t callback_stored_val = 0;
+
+static herr_t
+callback_set_config(const char *params, unsigned *flags, size_t *cd_nelmts, unsigned cd_values[],
+                    size_t cd_values_size)
+{
+    int64_t v = 0;
+    (void)flags;
+    (void)cd_nelmts;
+    (void)cd_values;
+    (void)cd_values_size;
+    callback_set_called = 1;
+    if (params && *params)
+        H5Zconfig_get_int(params, "beta", &v);
+    callback_stored_val = v;
+    return 0;
+}
+
+static herr_t
+callback_get_config(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], char *buf, size_t *buf_size)
+{
+    size_t needed;
+    (void)flags;
+    (void)cd_nelmts;
+    (void)cd_values;
+    needed = (size_t)snprintf(NULL, 0, "beta = %" PRId64, callback_stored_val) + 1;
+    if (buf_size)
+        *buf_size = needed;
+    if (buf)
+        snprintf(buf, needed, "beta = %" PRId64, callback_stored_val);
+    return 0;
+}
+
+static size_t
+callback_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                     hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
+                     size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size,
+                     void **buf)
+{
+    (void)flags;
+    (void)cd_nelmts;
+    (void)cd_values;
+    (void)buf_size;
+    (void)buf;
+    return nbytes;
+}
+
+static int
+test_set_get_config_callbacks(void)
+{
+    static const H5Z_class3_t cb_cls = {
+        2,                    /* version         */
+        CALLBACK_FILTER_ID,   /* id              */
+        1,                    /* encoder_present */
+        1,                    /* decoder_present */
+        "callback_filter",    /* canonical_name  */
+        NULL,                 /* can_apply       */
+        NULL,                 /* set_local       */
+        callback_filter_func, /* filter          */
+        callback_set_config,  /* set_config      */
+        callback_get_config,  /* get_config      */
+        NULL,                 /* description     */
+    };
+    hid_t  dcpl = H5I_INVALID_HID;
+    char   pbuf[256];
+    size_t plen = 0;
+
+    TESTING("set_config and get_config callbacks are invoked and output is consistent");
+    if (H5Zregister(&cb_cls) < 0)
+        TEST_ERROR;
+    callback_set_called = 0;
+    callback_stored_val = 0;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    {
+        H5Z_params_t _p = H5Z_PARAMS_STR("beta=42");
+        if (H5Pappend_filter(dcpl, CALLBACK_FILTER_ID, 0, &_p) < 0)
+            TEST_ERROR;
+    }
+    if (callback_set_called == 0)
+        TEST_ERROR;
+    if (callback_stored_val != 42)
+        TEST_ERROR;
+    /* get_config should produce "beta = 42" */
+    if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strstr(pbuf, "beta") == NULL)
+        TEST_ERROR;
+    if (strstr(pbuf, "42") == NULL)
+        TEST_ERROR;
+    H5Pclose(dcpl);
+    dcpl = H5I_INVALID_HID;
+    H5Zunregister(CALLBACK_FILTER_ID);
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        if (dcpl != H5I_INVALID_HID)
+            H5Pclose(dcpl);
+        H5Zunregister(CALLBACK_FILTER_ID);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
 /* -----------------------------------------------------------------------
  * H5Zget_filter_class_info: registry-level info incl. name + description
  * ---------------------------------------------------------------------- */
@@ -1060,7 +2189,7 @@ test_get_filter_info2_builtin(void)
         TEST_ERROR;
     if (info.description == NULL || strstr(info.description, "Deflate") == NULL)
         TEST_ERROR;
-    if (info.has_set_config || info.has_get_config)
+    if (!info.has_set_config || !info.has_get_config)
         TEST_ERROR;
     PASSED();
 #else
@@ -1080,11 +2209,11 @@ test_get_filter_info2_builtin(void)
         TEST_ERROR;
     if (info.description == NULL || strstr(info.description, "Scale+offset") == NULL)
         TEST_ERROR;
-    if (info.has_set_config || info.has_get_config)
+    if (!info.has_set_config || !info.has_get_config)
         TEST_ERROR;
     PASSED();
 
-    TESTING("H5Zget_filter_class_info: shuffle built-in (canonical name)");
+    TESTING("H5Zget_filter_class_info: shuffle built-in (set_config but no get_config)");
     memset(&info, 0xAA, sizeof(info));
     if (H5Zget_filter_class_info(H5Z_FILTER_SHUFFLE, &info) < 0)
         TEST_ERROR;
@@ -1094,7 +2223,7 @@ test_get_filter_info2_builtin(void)
         TEST_ERROR;
     if (info.description == NULL)
         TEST_ERROR;
-    if (info.has_set_config || info.has_get_config)
+    if (!info.has_set_config || info.has_get_config)
         TEST_ERROR;
     PASSED();
 
@@ -1305,6 +2434,1214 @@ error:
     return -1;
 }
 
+/* -----------------------------------------------------------------------
+ * Configuration strings held in property lists
+ *
+ * This filter's stored parameter string ("level=N", no spaces) differs
+ * from its get_config reconstruction ("level = N", with spaces) so tests
+ * can tell whether a returned string came from the stored string or from
+ * the get_config fallback.
+ * ---------------------------------------------------------------------- */
+
+#define CFGSTR_FILTER_ID 531
+
+static herr_t
+cfgstr_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts, unsigned cd_values[],
+                  size_t cd_values_size)
+{
+    int64_t level = 0;
+
+    *cd_nelmts = 1;
+    if (cd_values && cd_values_size >= 1) {
+        if (params && *params)
+            H5Zconfig_get_int(params, "level", &level);
+        cd_values[0] = (unsigned)level;
+    }
+    return SUCCEED;
+}
+
+static herr_t
+cfgstr_get_config(unsigned H5_ATTR_UNUSED flags, size_t cd_nelmts, const unsigned cd_values[], char *buf,
+                  size_t *buf_size)
+{
+    unsigned level  = (cd_nelmts >= 1) ? cd_values[0] : 0;
+    size_t   needed = (size_t)snprintf(NULL, 0, "level = %u", level) + 1;
+
+    if (buf_size)
+        *buf_size = needed;
+    if (buf)
+        snprintf(buf, needed, "level = %u", level);
+    return SUCCEED;
+}
+
+static size_t
+cfgstr_filter_func(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                   const unsigned int H5_ATTR_UNUSED *cd_values, hid_t H5_ATTR_UNUSED dxpl_id,
+                   const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims,
+                   void H5_ATTR_UNUSED *state, size_t nbytes, size_t H5_ATTR_UNUSED *buf_size,
+                   void H5_ATTR_UNUSED **buf)
+{
+    return nbytes; /* pass-through */
+}
+
+static const H5Z_class3_t cfgstr_cls = {
+    2,                  /* version         */
+    CFGSTR_FILTER_ID,   /* id              */
+    1,                  /* encoder_present */
+    1,                  /* decoder_present */
+    "cfgstr_filter",    /* name            */
+    NULL,               /* can_apply       */
+    NULL,               /* set_local       */
+    cfgstr_filter_func, /* filter          */
+    cfgstr_set_config,  /* set_config      */
+    cfgstr_get_config,  /* get_config      */
+    NULL,               /* description     */
+};
+
+/* Build a chunked, filter-configured DCPL from a parameter string */
+static hid_t
+cfgstr_make_dcpl(const char *params)
+{
+    hid_t        dcpl     = H5I_INVALID_HID;
+    hsize_t      chunk[2] = {4, 4};
+    H5Z_params_t p;
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        return H5I_INVALID_HID;
+    if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+        goto error;
+    p.type  = H5Z_PARAMS_STRING;
+    p.u.str = params;
+    if (H5Pappend_filter(dcpl, CFGSTR_FILTER_ID, 0, &p) < 0)
+        goto error;
+    return dcpl;
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+    return H5I_INVALID_HID;
+}
+
+/* Fetch filter IDX's parameter string from a DCPL into buf */
+static herr_t
+cfgstr_get_params(hid_t dcpl, unsigned idx, char *buf, size_t buf_size)
+{
+    size_t len = 0;
+
+    if (H5Pget_filter_params_by_idx(dcpl, idx, buf, buf_size, &len) < 0)
+        return FAIL;
+    return SUCCEED;
+}
+
+static int
+test_config_string_plist(hid_t fapl)
+{
+    hid_t   file = H5I_INVALID_HID, sid = H5I_INVALID_HID, dcpl = H5I_INVALID_HID, dset = H5I_INVALID_HID;
+    hid_t   dcpl_out = H5I_INVALID_HID, dcpl_dec = H5I_INVALID_HID, dcpl_cpy = H5I_INVALID_HID;
+    hsize_t dims[2] = {8, 8};
+    char    filename[1024];
+    char    pbuf[H5Z_CONFIG_STRING_MAX + 1];
+    void   *enc_buf  = NULL;
+    size_t  enc_size = 0;
+
+    if (H5Zregister(&cfgstr_cls) < 0)
+        TEST_ERROR;
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+    h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
+
+    /* The stored string is returned as given, not the get_config form */
+    TESTING("config string: stored in the DCPL and returned as given");
+    if ((dcpl = cfgstr_make_dcpl("level=7")) < 0)
+        TEST_ERROR;
+    if (cfgstr_get_params(dcpl, 0, pbuf, sizeof(pbuf)) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "level=7") != 0)
+        TEST_ERROR;
+    PASSED();
+
+    /* H5Pcopy carries the string; closing either copy leaves the other intact */
+    TESTING("config string: survives H5Pcopy");
+    if ((dcpl_cpy = H5Pcopy(dcpl)) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    if (cfgstr_get_params(dcpl_cpy, 0, pbuf, sizeof(pbuf)) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "level=7") != 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_cpy) < 0)
+        TEST_ERROR;
+    dcpl_cpy = H5I_INVALID_HID;
+    PASSED();
+
+    /* H5Pmodify_filter replaces cd_values and clears the stored string */
+    TESTING("config string: H5Pmodify_filter clears the stored string");
+    if ((dcpl = cfgstr_make_dcpl("level=3")) < 0)
+        TEST_ERROR;
+    {
+        unsigned cd[1] = {8};
+        if (H5Pmodify_filter(dcpl, CFGSTR_FILTER_ID, 0, 1, cd) < 0)
+            TEST_ERROR;
+    }
+    if (cfgstr_get_params(dcpl, 0, pbuf, sizeof(pbuf)) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "level = 8") != 0) /* get_config of new cd_values, not "level=3" */
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    /* H5Pencode/H5Pdecode carries the string, next to a filter without one */
+    TESTING("config string: survives H5Pencode/H5Pdecode");
+    if ((dcpl = cfgstr_make_dcpl("level=9")) < 0)
+        TEST_ERROR;
+    if (H5Pset_shuffle(dcpl) < 0)
+        TEST_ERROR;
+    if (H5Pencode2(dcpl, NULL, &enc_size, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if (NULL == (enc_buf = malloc(enc_size)))
+        TEST_ERROR;
+    if (H5Pencode2(dcpl, enc_buf, &enc_size, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if ((dcpl_dec = H5Pdecode(enc_buf)) < 0)
+        TEST_ERROR;
+    if (H5Pget_nfilters(dcpl_dec) != 2)
+        TEST_ERROR;
+    if (cfgstr_get_params(dcpl_dec, 0, pbuf, sizeof(pbuf)) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "level=9") != 0)
+        TEST_ERROR;
+    /* Shuffle has no stored string and no get_config: cd_values listing */
+    if (cfgstr_get_params(dcpl_dec, 1, pbuf, sizeof(pbuf)) < 0)
+        TEST_ERROR;
+    if (strncmp(pbuf, "level", 5) == 0)
+        TEST_ERROR;
+    free(enc_buf);
+    enc_buf = NULL;
+    if (H5Pclose(dcpl_dec) < 0 || H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl_dec = dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    /* A pipeline without strings encodes to the same size as one built with
+     * H5Pset_filter: the base encoding, readable by earlier releases */
+    TESTING("config string: pipeline without strings keeps the base encoding");
+    {
+        hid_t    dcpl_raw = H5I_INVALID_HID;
+        size_t   raw_size = 0, str_size = 0;
+        unsigned cd[1]    = {4};
+        hsize_t  chunk[2] = {4, 4};
+
+        if ((dcpl_raw = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+            TEST_ERROR;
+        if (H5Pset_chunk(dcpl_raw, 2, chunk) < 0)
+            TEST_ERROR;
+        if (H5Pset_filter(dcpl_raw, CFGSTR_FILTER_ID, 0, 1, cd) < 0)
+            TEST_ERROR;
+        if (H5Pencode2(dcpl_raw, NULL, &raw_size, H5P_DEFAULT) < 0)
+            TEST_ERROR;
+        if (H5Pclose(dcpl_raw) < 0)
+            TEST_ERROR;
+
+        /* Same filter through the string API, then the string cleared */
+        if ((dcpl = cfgstr_make_dcpl("level=4")) < 0)
+            TEST_ERROR;
+        if (H5Pencode2(dcpl, NULL, &str_size, H5P_DEFAULT) < 0)
+            TEST_ERROR;
+        /* marker + version + has_config + length size + length + "level=4",
+         * plus the canonical name H5Pappend_filter records */
+        if (str_size <= raw_size)
+            TEST_ERROR;
+        if (H5Pmodify_filter(dcpl, CFGSTR_FILTER_ID, 0, 1, cd) < 0)
+            TEST_ERROR;
+        if (H5Pencode2(dcpl, NULL, &str_size, H5P_DEFAULT) < 0)
+            TEST_ERROR;
+        /* Only the name slot differs from the H5Pset_filter encoding */
+        if (str_size != raw_size + 12)
+            TEST_ERROR;
+        if (H5Pclose(dcpl) < 0)
+            TEST_ERROR;
+        dcpl = H5I_INVALID_HID;
+    }
+    PASSED();
+
+    /* Dataset creation succeeds with a string-carrying DCPL at the default
+     * library version bounds; the string is not written to the file, so the
+     * reopened dataset's DCPL reports the get_config reconstruction of the
+     * stored cd_values */
+    TESTING("config string: not written to the file; reopen falls back to get_config");
+    if ((dcpl = cfgstr_make_dcpl("level=7")) < 0)
+        TEST_ERROR;
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0 || H5Pclose(dcpl) < 0 || H5Fclose(file) < 0)
+        TEST_ERROR;
+    dset = dcpl = file = H5I_INVALID_HID;
+
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    if (cfgstr_get_params(dcpl_out, 0, pbuf, sizeof(pbuf)) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "level = 7") != 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Fclose(file) < 0)
+        TEST_ERROR;
+    dcpl_out = dset = file = H5I_INVALID_HID;
+    PASSED();
+
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+    if (H5Zunregister(CFGSTR_FILTER_ID) < 0)
+        TEST_ERROR;
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Pclose(dcpl_cpy);
+        H5Pclose(dcpl_out);
+        H5Pclose(dcpl_dec);
+        H5Dclose(dset);
+        H5Sclose(sid);
+        H5Fclose(file);
+        H5Zunregister(CFGSTR_FILTER_ID);
+    }
+    H5E_END_TRY
+    free(enc_buf);
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
+ * Corrupted config_len in an H5Pencode()/H5Pdecode() buffer must be
+ * rejected cleanly, not overflow
+ *
+ * H5P__ocrt_pipeline_dec() (src/H5Pocpl.c) decodes config_len from a
+ * caller-supplied H5Pdecode() buffer -- a buffer that crosses MPI
+ * broadcasts and VOL-connector wire protocols in real deployments, with no
+ * checksum protection.  This test hand-patches a legitimately-encoded
+ * H5Pencode() buffer's config_len field to a value that exceeds
+ * H5Z_CONFIG_STRING_MAX and confirms H5Pdecode() rejects it instead of
+ * driving an oversized allocation and read.  It also patches the
+ * pipeline property's extended-encoding version byte to an unknown value
+ * and confirms H5Pdecode() rejects that too.
+ * ---------------------------------------------------------------------- */
+static int
+test_config_string_pdecode_corrupted(void)
+{
+    hid_t    dcpl = H5I_INVALID_HID, dcpl_dec = H5I_INVALID_HID;
+    void    *enc_buf  = NULL;
+    size_t   enc_size = 0;
+    char    *padded   = NULL;
+    size_t   padded_len;
+    uint8_t *needle = NULL;
+    size_t   i;
+
+    TESTING("config string: corrupted H5Pdecode() config_len is rejected, not overflowed");
+
+    if (H5Zregister(&cfgstr_cls) < 0)
+        TEST_ERROR;
+
+    /* A config string long enough (>= 256 bytes) that H5VM_limit_enc_size()
+     * encodes its length in 2 bytes rather than 1 -- so patching the value
+     * to something over H5Z_CONFIG_STRING_MAX (4096, still < 65536) doesn't
+     * also require changing the number of length-prefix bytes and shifting
+     * the rest of the buffer.  "level=9," first so cfg_ondisk_set_config
+     * still accepts it; the rest is inert padding via distinct keys (a
+     * duplicate key would be a TOML parse error). */
+    padded_len = 320;
+    if (NULL == (padded = (char *)malloc(padded_len + 1)))
+        TEST_ERROR;
+    {
+        int      n   = snprintf(padded, padded_len + 1, "level=9");
+        size_t   pos = (size_t)n;
+        unsigned k;
+        for (k = 0; pos + 16 < padded_len; k++) {
+            int flen = snprintf(padded + pos, padded_len + 1 - pos, ",p%u=1", k);
+            if (flen < 0)
+                break;
+            pos += (size_t)flen;
+        }
+        padded[pos] = '\0';
+        padded_len  = pos;
+    }
+    if (padded_len < 256) {
+        free(padded);
+        TEST_ERROR; /* sanity: must be long enough to force a 2-byte length prefix */
+    }
+
+    if ((dcpl = cfgstr_make_dcpl(padded)) < 0) {
+        free(padded);
+        TEST_ERROR;
+    }
+
+    if (H5Pencode2(dcpl, NULL, &enc_size, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if (NULL == (enc_buf = malloc(enc_size)))
+        TEST_ERROR;
+    if (H5Pencode2(dcpl, enc_buf, &enc_size, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Locate the stored string inside the encoded buffer and read the
+     * 2-byte little-endian length field immediately preceding it. */
+    for (i = 0; i + padded_len <= enc_size; i++) {
+        if (memcmp((uint8_t *)enc_buf + i, padded, padded_len) == 0) {
+            needle = (uint8_t *)enc_buf + i;
+            break;
+        }
+    }
+    if (NULL == needle || i < 2) {
+        free(padded);
+        TEST_ERROR; /* the encoding changed shape; nothing to patch */
+    }
+    {
+        uint16_t stored_len = (uint16_t)(needle[-2] | (needle[-1] << 8));
+        if (stored_len != padded_len) {
+            free(padded);
+            TEST_ERROR; /* not the expected field; refuse to patch blindly */
+        }
+    }
+    free(padded);
+
+    /* Patch to a value that exceeds H5Z_CONFIG_STRING_MAX (4096) but still
+     * fits the existing 2-byte field (max 65535), leaving the rest of the
+     * buffer's shape untouched. */
+    {
+        uint16_t bad_len = 60000;
+        needle[-2]       = (uint8_t)(bad_len & 0xff);
+        needle[-1]       = (uint8_t)((bad_len >> 8) & 0xff);
+    }
+
+    H5E_BEGIN_TRY
+    {
+        dcpl_dec = H5Pdecode(enc_buf);
+    }
+    H5E_END_TRY
+    if (dcpl_dec >= 0) {
+        H5Pclose(dcpl_dec);
+        TEST_ERROR; /* must fail: config_len exceeds H5Z_CONFIG_STRING_MAX */
+    }
+
+    /* Restore the length; the buffer must decode again */
+    needle[-2] = (uint8_t)(padded_len & 0xff);
+    needle[-1] = (uint8_t)((padded_len >> 8) & 0xff);
+    if ((dcpl_dec = H5Pdecode(enc_buf)) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_dec) < 0)
+        TEST_ERROR;
+    dcpl_dec = H5I_INVALID_HID;
+
+    /* The pipeline property's value follows its NUL-terminated name and, in
+     * the extended form, starts with a zero marker byte and a version byte.
+     * An unknown version must be rejected. */
+    needle = NULL;
+    for (i = 0; i + 8 <= enc_size; i++) {
+        if (memcmp((uint8_t *)enc_buf + i, "pline", 6) == 0) {
+            needle = (uint8_t *)enc_buf + i + 6;
+            break;
+        }
+    }
+    if (NULL == needle || needle[0] != 0 || needle[1] != 1)
+        TEST_ERROR;
+    needle[1] = 2;
+    H5E_BEGIN_TRY
+    {
+        dcpl_dec = H5Pdecode(enc_buf);
+    }
+    H5E_END_TRY
+    if (dcpl_dec >= 0) {
+        H5Pclose(dcpl_dec);
+        TEST_ERROR; /* must fail: unknown pipeline encoding version */
+    }
+    dcpl_dec = H5I_INVALID_HID;
+
+    free(enc_buf);
+    enc_buf = NULL;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    if (H5Zunregister(CFGSTR_FILTER_ID) < 0)
+        TEST_ERROR;
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl_dec);
+        H5Pclose(dcpl);
+        H5Zunregister(CFGSTR_FILTER_ID);
+    }
+    H5E_END_TRY
+    free(enc_buf);
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
+ * Canonicalization of the stored configuration string
+ *
+ * The stored string is normalized into a valid TOML v1.0.0 document:
+ * optional outer braces are stripped, and C99 hex-float literals are
+ * rewritten to the shortest bit-exact decimal (up to DBL_DECIMAL_DIG == 17
+ * significant digits).  Neither the braced form nor a hex-float literal is
+ * accepted by a stock TOML parser, and the stored string is meant to be
+ * readable by tools that are not the HDF5 library.  Both normalizations
+ * preserve the value exactly.
+ *
+ * This filter carries a double so bit-exactness can be asserted: the
+ * value is memcpy'd into cd_values rather than quantised.
+ * ---------------------------------------------------------------------- */
+
+#define CANON_FILTER_ID 532
+
+static herr_t
+canon_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts, unsigned cd_values[],
+                 size_t cd_values_size)
+{
+    double rate = 0.0;
+
+    /* A double occupies two unsigned slots; cd_values_size is an element
+     * count, matching the value H5Pappend_filter passes. */
+    *cd_nelmts = 2;
+    if (cd_values) {
+        if (cd_values_size < 2)
+            return FAIL;
+        if (params && *params) {
+            if (H5Zconfig_get_double(params, "rate", &rate) < 0)
+                return FAIL;
+        }
+        memcpy(cd_values, &rate, sizeof(rate));
+    }
+    return SUCCEED;
+}
+
+static herr_t
+canon_get_config(unsigned H5_ATTR_UNUSED flags, size_t cd_nelmts, const unsigned cd_values[], char *buf,
+                 size_t *buf_size)
+{
+    double rate = 0.0;
+    size_t needed;
+
+    if (cd_nelmts >= 2)
+        memcpy(&rate, cd_values, sizeof(rate));
+    needed = (size_t)snprintf(NULL, 0, "rate = %.16e", rate) + 1;
+    if (buf_size)
+        *buf_size = needed;
+    if (buf)
+        snprintf(buf, needed, "rate = %.16e", rate);
+    return SUCCEED;
+}
+
+static size_t
+canon_filter_func(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                  const unsigned int H5_ATTR_UNUSED *cd_values, hid_t H5_ATTR_UNUSED dxpl_id,
+                  const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims,
+                  void H5_ATTR_UNUSED *state, size_t nbytes, size_t H5_ATTR_UNUSED *buf_size,
+                  void H5_ATTR_UNUSED **buf)
+{
+    return nbytes; /* pass-through */
+}
+
+static const H5Z_class3_t canon_cls = {
+    2,                 /* version         */
+    CANON_FILTER_ID,   /* id              */
+    1,                 /* encoder_present */
+    1,                 /* decoder_present */
+    "canon_filter",    /* name            */
+    NULL,              /* can_apply       */
+    NULL,              /* set_local       */
+    canon_filter_func, /* filter          */
+    canon_set_config,  /* set_config      */
+    canon_get_config,  /* get_config      */
+    NULL,              /* description     */
+};
+
+/* Append CANON_FILTER_ID configured with PARAMS and return the DCPL */
+static hid_t
+canon_make_dcpl(const char *params)
+{
+    hid_t        dcpl     = H5I_INVALID_HID;
+    hsize_t      chunk[2] = {4, 4};
+    H5Z_params_t p;
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        return H5I_INVALID_HID;
+    if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+        goto error;
+    p.type  = H5Z_PARAMS_STRING;
+    p.u.str = params;
+    if (H5Pappend_filter(dcpl, CANON_FILTER_ID, 0, &p) < 0)
+        goto error;
+    return dcpl;
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+    return H5I_INVALID_HID;
+}
+
+/* Assert that appending INPUT stores exactly EXPECT */
+static int
+canon_check(const char *input, const char *expect)
+{
+    hid_t  dcpl = H5I_INVALID_HID;
+    char   pbuf[H5Z_CONFIG_STRING_MAX + 1];
+    size_t plen = 0;
+
+    if ((dcpl = canon_make_dcpl(input)) < 0)
+        return -1;
+    if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        goto error;
+    if (strcmp(pbuf, expect) != 0) {
+        fprintf(stderr, "\n   input  \"%s\"\n   stored \"%s\"\n   expect \"%s\"\n", input, pbuf, expect);
+        goto error;
+    }
+    if (H5Pclose(dcpl) < 0)
+        return -1;
+    return 0;
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* Recover the double that set_config packed into cd_values */
+static int
+canon_stored_double(hid_t dcpl, double *out)
+{
+    unsigned     cd[8];
+    size_t       cd_nelmts = 8;
+    unsigned     flags     = 0;
+    char         name[64];
+    unsigned     cfg = 0;
+    H5Z_filter_t id;
+
+    id = H5Pget_filter2(dcpl, 0, &flags, &cd_nelmts, cd, sizeof(name), name, &cfg);
+    if (id < 0 || cd_nelmts < 2)
+        return -1;
+    memcpy(out, cd, sizeof(*out));
+    return 0;
+}
+
+/* Construct 2^exp as an exact double via its IEEE-754 bit pattern, bypassing
+ * ldexp(). Some compilers (Intel icc/icx via -fp-model=fast, NVHPC) flush
+ * subnormal *results* of floating-point operations to zero by default at
+ * -O2 and above; ldexp(1.0, exp) for a subnormal exp is such an operation,
+ * which would silently corrupt exactly the reference values the powers-of-
+ * two canonicalization test below needs to trust. */
+static double
+pow2_exact(int exp)
+{
+    uint64_t bits;
+    double   d;
+
+    if (exp >= -1022)
+        bits = (uint64_t)(exp + 1023) << 52; /* normal: implicit leading 1 */
+    else
+        bits = (uint64_t)1 << (exp + 1074); /* subnormal: explicit mantissa bit */
+
+    memcpy(&d, &bits, sizeof(d));
+    return d;
+}
+
+static int
+test_config_canonicalization(void)
+{
+    hid_t  dcpl = H5I_INVALID_HID;
+    char   pbuf[H5Z_CONFIG_STRING_MAX + 1];
+    size_t plen = 0;
+    double got  = 0.0;
+
+    if (H5Zregister(&canon_cls) < 0)
+        TEST_ERROR;
+
+    /* --- canon-01: a plain bare string is stored unchanged --- */
+    TESTING("canonicalization: bare string stored unchanged");
+    if (canon_check("rate = 1.5", "rate = 1.5") < 0)
+        TEST_ERROR;
+    PASSED();
+
+    /* --- canon-02: outer braces are stripped --- */
+    TESTING("canonicalization: outer braces stripped");
+    if (canon_check("{rate = 1.5}", "rate = 1.5") < 0)
+        TEST_ERROR;
+    if (canon_check("{ rate = 1.5 }", "rate = 1.5") < 0)
+        TEST_ERROR;
+    if (canon_check("  {rate = 1.5}  ", "rate = 1.5") < 0)
+        TEST_ERROR;
+    PASSED();
+
+    /* --- canon-03: hex-float rewritten to the shortest round-trip decimal --- */
+    TESTING("canonicalization: hex-float rewritten to decimal");
+    if (canon_check("rate = 0x1.8p+1", "rate = 3.0") < 0)
+        TEST_ERROR;
+    if (canon_check("rate = 0x1.cp+1", "rate = 3.5") < 0)
+        TEST_ERROR;
+    PASSED();
+
+    /* --- canon-04: both normalizations at once --- */
+    TESTING("canonicalization: braces and hex-float together");
+    if (canon_check("{ rate = 0x1.8p+1 }", "rate = 3.0") < 0)
+        TEST_ERROR;
+    PASSED();
+
+    /* --- canon-05: hex-float text inside a quoted string is preserved --- */
+    TESTING("canonicalization: hex-float inside a string is not rewritten");
+    if (canon_check("rate = 1.5, note = \"0x1.8p+1\"", "rate = 1.5, note = \"0x1.8p+1\"") < 0)
+        TEST_ERROR;
+    if (canon_check("rate = 1.5, note = '0x1.8p+1'", "rate = 1.5, note = '0x1.8p+1'") < 0)
+        TEST_ERROR;
+    PASSED();
+
+    /* --- canon-06: rewriting a hex-float loses no precision --- */
+    TESTING("canonicalization: hex-float value is bit-exact after rewrite");
+    if ((dcpl = canon_make_dcpl("rate = 0x1.5555555555555p-2")) < 0)
+        TEST_ERROR;
+    if (canon_stored_double(dcpl, &got) < 0)
+        TEST_ERROR;
+    if (memcmp(&got, &(double){0x1.5555555555555p-2}, sizeof(got)) != 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    /* --- canon-07: the canonical form is itself valid set_config input --- */
+    TESTING("canonicalization: stored form round-trips through set_config");
+    if ((dcpl = canon_make_dcpl("{rate = 0x1.cp+1}")) < 0)
+        TEST_ERROR;
+    if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    /* Feed the stored string back in; it must parse and yield the same value */
+    if ((dcpl = canon_make_dcpl(pbuf)) < 0)
+        TEST_ERROR;
+    if (canon_stored_double(dcpl, &got) < 0)
+        TEST_ERROR;
+    if (memcmp(&got, &(double){0x1.cp+1}, sizeof(got)) != 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    /* --- canon-09: the canonical form is a fixed point.
+     *
+     * The stored string is an INPUT to set_config, not only a display
+     * artifact: the stored bytes are always valid set_config input, so a
+     * caller may retrieve a configuration and re-apply it.  Re-canonicalising
+     * an already canonical string must therefore reproduce the identical
+     * bytes -- it has no outer braces and no hex-float tokens left to
+     * rewrite -- so re-application cannot drift.                          --- */
+    TESTING("canonicalization: stored form is a fixed point");
+    {
+        /* The getter truncates silently into an undersized buffer but always
+         * reports the full length in plen, so every read below is checked
+         * against plen -- a truncated compare must not be able to pass. */
+        char s1[128];
+        char s2[128];
+        char s3[128];
+
+        /* 2^-36, the case raised on HDFGroup/hdf5#6153: zfp's fixed-accuracy
+         * mode derives minexp via frexp and so rounds the requested tolerance
+         * DOWN to the next integer power of two, which is why a user writes
+         * the exponent exactly rather than in decimal. */
+        if ((dcpl = canon_make_dcpl("{ rate = 0x1p-36 }")) < 0)
+            TEST_ERROR;
+        if (H5Pget_filter_params_by_idx(dcpl, 0, s1, sizeof(s1), &plen) < 0)
+            TEST_ERROR;
+        if (plen >= sizeof(s1))
+            TEST_ERROR;
+        if (H5Pclose(dcpl) < 0)
+            TEST_ERROR;
+        dcpl = H5I_INVALID_HID;
+        if (strcmp(s1, "rate = 1.4551915228366852e-11") != 0) {
+            fprintf(stderr, "\n   stored \"%s\"\n", s1);
+            TEST_ERROR;
+        }
+
+        /* Cycle 1: feed the stored bytes back in */
+        if ((dcpl = canon_make_dcpl(s1)) < 0)
+            TEST_ERROR;
+        if (H5Pget_filter_params_by_idx(dcpl, 0, s2, sizeof(s2), &plen) < 0)
+            TEST_ERROR;
+        if (plen >= sizeof(s2))
+            TEST_ERROR;
+        if (H5Pclose(dcpl) < 0)
+            TEST_ERROR;
+        dcpl = H5I_INVALID_HID;
+        if (strcmp(s1, s2) != 0)
+            TEST_ERROR;
+
+        /* Cycle 2: still byte-identical, and the value survived both hops */
+        if ((dcpl = canon_make_dcpl(s2)) < 0)
+            TEST_ERROR;
+        if (H5Pget_filter_params_by_idx(dcpl, 0, s3, sizeof(s3), &plen) < 0)
+            TEST_ERROR;
+        if (plen >= sizeof(s3))
+            TEST_ERROR;
+        if (canon_stored_double(dcpl, &got) < 0)
+            TEST_ERROR;
+        if (H5Pclose(dcpl) < 0)
+            TEST_ERROR;
+        dcpl = H5I_INVALID_HID;
+        if (strcmp(s2, s3) != 0)
+            TEST_ERROR;
+        if (memcmp(&got, &(double){0x1p-36}, sizeof(got)) != 0)
+            TEST_ERROR;
+    }
+    PASSED();
+
+    /* --- canon-10: the hex-float rewrite is value-transparent at the
+     *               boundaries where it matters.
+     *
+     * A hex literal whose mantissa fits in 53 bits converts with no rounding
+     * step at all; the canonical decimal has to come back through a
+     * decimal-to-binary conversion, which C11 7.22.1.3 permits to be 1 ulp
+     * off.  That ulp is only observable where a filter quantises on a binary
+     * boundary -- and exact powers of two are both where such a boundary sits
+     * and what a user writes in hex in the first place.  Appending the hex
+     * form and appending its canonical decimal must pack the identical
+     * double.
+     *
+     * True subnormal exponents (below -1022) are probed, not assumed: some
+     * toolchains (Intel icc/icx via -fp-model=fast -- the default at -O2 and
+     * above -- NVHPC, and some Clang-on-AArch64 configurations) enable
+     * flush-to-zero mode process-wide by default, which silently corrupts
+     * subnormal results inside strtod()/printf() *in the platform's own
+     * libc*, not just in code this file compiled. Rather than guessing which
+     * toolchains that affects, round-trip a known subnormal through the same
+     * two calls H5Z__rewrite_hexfloats() itself uses and skip only the
+     * exponents that probe demonstrates are unsafe to assert on here. ---  */
+    TESTING("canonicalization: hex rewrite is value-transparent at powers of two");
+    {
+        /* smallest subnormal and smallest normal at the bottom, the 2^-36
+         * case from the issue thread, and a spread out to the top of the
+         * exponent range */
+        static const int exps[] = {-1074, -1073, -1022, -1021, -100, -37, -36, -35,
+                                   -1,    0,     1,     52,    53,   100, 512, 1023};
+        size_t           i;
+        bool             subnormals_ok;
+
+        {
+            char   probe[32];
+            double smallest_subnormal = pow2_exact(-1074);
+            double roundtrip;
+
+            snprintf(probe, sizeof(probe), "%.16e", smallest_subnormal);
+            roundtrip     = strtod(probe, NULL);
+            subnormals_ok = (memcmp(&roundtrip, &smallest_subnormal, sizeof(roundtrip)) == 0);
+            if (!subnormals_ok)
+                puts("    (skipping true-subnormal exponents: this platform's strtod()/printf() "
+                     "flush them to zero)");
+        }
+
+        for (i = 0; i < sizeof(exps) / sizeof(exps[0]); i++) {
+            char   hexstr[64];
+            char   canon[128];
+            double want     = pow2_exact(exps[i]);
+            double from_hex = 0.0;
+            double from_dec = 0.0;
+
+            if (!subnormals_ok && exps[i] < -1022)
+                continue;
+
+            snprintf(hexstr, sizeof(hexstr), "rate = 0x1p%+d", exps[i]);
+
+            if ((dcpl = canon_make_dcpl(hexstr)) < 0)
+                TEST_ERROR;
+            if (canon_stored_double(dcpl, &from_hex) < 0)
+                TEST_ERROR;
+            if (H5Pget_filter_params_by_idx(dcpl, 0, canon, sizeof(canon), &plen) < 0)
+                TEST_ERROR;
+            if (plen >= sizeof(canon)) /* never compare a truncated string */
+                TEST_ERROR;
+            if (H5Pclose(dcpl) < 0)
+                TEST_ERROR;
+            dcpl = H5I_INVALID_HID;
+
+            /* nothing a stock TOML parser would choke on may remain */
+            if (strstr(canon, "0x") != NULL)
+                TEST_ERROR;
+
+            if ((dcpl = canon_make_dcpl(canon)) < 0)
+                TEST_ERROR;
+            if (canon_stored_double(dcpl, &from_dec) < 0)
+                TEST_ERROR;
+            if (H5Pclose(dcpl) < 0)
+                TEST_ERROR;
+            dcpl = H5I_INVALID_HID;
+
+            if (memcmp(&from_hex, &want, sizeof(want)) != 0 || memcmp(&from_dec, &want, sizeof(want)) != 0) {
+                fprintf(stderr, "\n   2^%d: hex -> %a, canonical \"%s\" -> %a, want %a\n", exps[i], from_hex,
+                        canon, from_dec, want);
+                TEST_ERROR;
+            }
+        }
+    }
+    PASSED();
+
+    if (H5Zunregister(CANON_FILTER_ID) < 0)
+        TEST_ERROR;
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Zunregister(CANON_FILTER_ID);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
+ * set_local must not discard the stored configuration string
+ *
+ * scaleoffset, szip, nbit and shuffle each call H5P_modify_filter from
+ * their set_local callback to specialize cd_values for the dataset's
+ * datatype/dataspace. That is a library refinement, not a change to what
+ * the user asked for, so the entry's stored string must survive it in the
+ * dataset's creation property list.
+ *
+ * The input below uses compact spacing ("a=1,b=2") while scaleoffset's
+ * get_config emits spaced output ("a = 1, b = 2"), so the two sources are
+ * distinguishable: recovering the compact form proves the stored string
+ * was used, not a reconstruction.  The string is not written to the file,
+ * so after the dataset is reopened the get_config form is returned.
+ * ---------------------------------------------------------------------- */
+static int
+test_set_local_keeps_config(hid_t fapl)
+{
+    hid_t        dcpl = H5I_INVALID_HID, sid = H5I_INVALID_HID, file = H5I_INVALID_HID;
+    hid_t        dset = H5I_INVALID_HID, dcpl_out = H5I_INVALID_HID;
+    hsize_t      dims[2] = {8, 8}, chunk[2] = {4, 4};
+    char         filename[1024];
+    char         pbuf[H5Z_CONFIG_STRING_MAX + 1];
+    size_t       plen    = 0;
+    const char  *compact = "scale_type=\"int\",scale_factor=8";
+    H5Z_params_t p;
+
+    TESTING("set_local preserves the stored configuration string");
+
+    h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+        TEST_ERROR;
+    p.type  = H5Z_PARAMS_STRING;
+    p.u.str = compact;
+    if (H5Pappend_filter(dcpl, H5Z_FILTER_SCALEOFFSET, H5Z_FLAG_MANDATORY, &p) < 0)
+        TEST_ERROR;
+
+    /* Present in the DCPL before H5Dcreate runs set_local */
+    if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, compact) != 0)
+        TEST_ERROR;
+
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    /* H5Dcreate invokes scaleoffset's set_local -> H5P_modify_filter */
+    if ((dset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Still the compact form in the new dataset's DCPL, after set_local */
+    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    if (H5Pget_filter_params_by_idx(dcpl_out, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, compact) != 0) {
+        fprintf(stderr, "\n   expected stored \"%s\"\n   got             \"%s\"\n", compact, pbuf);
+        TEST_ERROR;
+    }
+    if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Pclose(dcpl) < 0 || H5Fclose(file) < 0)
+        TEST_ERROR;
+    dcpl_out = dset = dcpl = file = H5I_INVALID_HID;
+
+    /* Reopened from the file: only cd_values were written, so the string
+     * is reconstructed by scaleoffset's get_config */
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    if (H5Pget_filter_params_by_idx(dcpl_out, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "scale_type = \"int\", scale_factor = 8") != 0) {
+        fprintf(stderr, "\n   got \"%s\"\n", pbuf);
+        TEST_ERROR;
+    }
+    if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Fclose(file) < 0 || H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Pclose(dcpl_out);
+        H5Dclose(dset);
+        H5Fclose(file);
+        H5Sclose(sid);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
+ * H5Pmodify_filter_by_idx
+ *
+ * Reuses the canon filter (CANON_FILTER_ID, one double "rate") so the
+ * stored string and the recovered value can both be checked.
+ * ---------------------------------------------------------------------- */
+static int
+test_modify_filter_by_idx(hid_t fapl)
+{
+    hid_t        dcpl = H5I_INVALID_HID, sid = H5I_INVALID_HID, file = H5I_INVALID_HID;
+    hid_t        dset = H5I_INVALID_HID, dcpl_out = H5I_INVALID_HID;
+    hsize_t      dims[2] = {8, 8};
+    char         filename[1024];
+    char         pbuf[H5Z_CONFIG_STRING_MAX + 1];
+    size_t       plen      = 0;
+    double       got       = 0.0;
+    unsigned     flags_out = 0;
+    unsigned     cd[8];
+    size_t       cd_nelmts = 8;
+    char         nm[64];
+    unsigned     cfg = 0;
+    H5Z_params_t p;
+
+    if (H5Zregister(&canon_cls) < 0)
+        TEST_ERROR;
+
+    /* --- mod-01: STRING replaces cd_values and keeps a stored string --- */
+    TESTING("H5Pmodify_filter_by_idx: string form replaces config in place");
+    if ((dcpl = canon_make_dcpl("rate = 1.5")) < 0)
+        TEST_ERROR;
+    p.type  = H5Z_PARAMS_STRING;
+    p.u.str = "rate = 2.5";
+    if (H5Pmodify_filter_by_idx(dcpl, 0, H5Z_FLAG_MANDATORY, &p) < 0)
+        TEST_ERROR;
+    if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "rate = 2.5") != 0)
+        TEST_ERROR;
+    if (canon_stored_double(dcpl, &got) < 0)
+        TEST_ERROR;
+    if (memcmp(&got, &(double){2.5}, sizeof(got)) != 0)
+        TEST_ERROR;
+    /* Position and filter ID unchanged, and still exactly one entry */
+    if (H5Pget_nfilters(dcpl) != 1)
+        TEST_ERROR;
+    cd_nelmts = 8;
+    if (H5Pget_filter2(dcpl, 0, &flags_out, &cd_nelmts, cd, sizeof(nm), nm, &cfg) != CANON_FILTER_ID)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    /* --- mod-02: canonicalization applies on the modify path too --- */
+    TESTING("H5Pmodify_filter_by_idx: replacement string is canonicalized");
+    if ((dcpl = canon_make_dcpl("rate = 1.5")) < 0)
+        TEST_ERROR;
+    p.type  = H5Z_PARAMS_STRING;
+    p.u.str = "{rate = 0x1.8p+1}";
+    if (H5Pmodify_filter_by_idx(dcpl, 0, H5Z_FLAG_MANDATORY, &p) < 0)
+        TEST_ERROR;
+    if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "rate = 3.0") != 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    /* --- mod-03: CDVALUES form clears the stored string --- */
+    TESTING("H5Pmodify_filter_by_idx: cd_values form clears the stored string");
+    if ((dcpl = canon_make_dcpl("rate = 1.5")) < 0)
+        TEST_ERROR;
+    {
+        double   v      = 4.5;
+        unsigned raw[2] = {0, 0};
+
+        memcpy(raw, &v, sizeof(v));
+        p.type            = H5Z_PARAMS_CDVALUES;
+        p.u.raw.cd_nelmts = 2;
+        p.u.raw.cd_values = raw;
+        if (H5Pmodify_filter_by_idx(dcpl, 0, H5Z_FLAG_MANDATORY, &p) < 0)
+            TEST_ERROR;
+    }
+    if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    /* Stored string gone -> get_config reconstruction, which uses %.16e */
+    if (strcmp(pbuf, "rate = 4.5000000000000000e+00") != 0) {
+        fprintf(stderr, "\n   got \"%s\"\n", pbuf);
+        TEST_ERROR;
+    }
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    /* --- mod-04: index addressing distinguishes duplicate filter IDs --- */
+    TESTING("H5Pmodify_filter_by_idx: duplicate filter IDs addressed by index");
+    if ((dcpl = canon_make_dcpl("rate = 1.5")) < 0)
+        TEST_ERROR;
+    p.type  = H5Z_PARAMS_STRING;
+    p.u.str = "rate = 2.5";
+    if (H5Pappend_filter(dcpl, CANON_FILTER_ID, H5Z_FLAG_MANDATORY, &p) < 0)
+        TEST_ERROR;
+    if (H5Pget_nfilters(dcpl) != 2)
+        TEST_ERROR;
+    /* Edit the second entry only */
+    p.u.str = "rate = 9.5";
+    if (H5Pmodify_filter_by_idx(dcpl, 1, H5Z_FLAG_MANDATORY, &p) < 0)
+        TEST_ERROR;
+    if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "rate = 1.5") != 0) /* entry 0 untouched */
+        TEST_ERROR;
+    if (H5Pget_filter_params_by_idx(dcpl, 1, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "rate = 9.5") != 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    /* --- mod-05: errors, and the entry survives a rejected edit --- */
+    TESTING("H5Pmodify_filter_by_idx: errors leave the entry unchanged");
+    if ((dcpl = canon_make_dcpl("rate = 1.5")) < 0)
+        TEST_ERROR;
+
+    /* index out of range */
+    p.type  = H5Z_PARAMS_STRING;
+    p.u.str = "rate = 2.5";
+    H5E_BEGIN_TRY
+    {
+        if (H5Pmodify_filter_by_idx(dcpl, 1, H5Z_FLAG_MANDATORY, &p) >= 0)
+            TEST_ERROR;
+    }
+    H5E_END_TRY
+
+    /* invalid flags */
+    H5E_BEGIN_TRY
+    {
+        if (H5Pmodify_filter_by_idx(dcpl, 0, 0xFFFFFFFFu, &p) >= 0)
+            TEST_ERROR;
+    }
+    H5E_END_TRY
+
+    /* set_config rejects the string (canon_set_config fails a type mismatch) */
+    p.u.str = "rate = \"not a number\"";
+    H5E_BEGIN_TRY
+    {
+        if (H5Pmodify_filter_by_idx(dcpl, 0, H5Z_FLAG_MANDATORY, &p) >= 0)
+            TEST_ERROR;
+    }
+    H5E_END_TRY
+
+    /* After every rejected edit the original configuration is intact */
+    if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "rate = 1.5") != 0) {
+        fprintf(stderr, "\n   entry was disturbed: \"%s\"\n", pbuf);
+        TEST_ERROR;
+    }
+    if (canon_stored_double(dcpl, &got) < 0)
+        TEST_ERROR;
+    if (memcmp(&got, &(double){1.5}, sizeof(got)) != 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    /* --- mod-06: the replacement configuration is what reaches the file --- */
+    TESTING("H5Pmodify_filter_by_idx: replacement cd_values are written, not the original");
+    h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
+    if ((dcpl = canon_make_dcpl("rate = 1.5")) < 0)
+        TEST_ERROR;
+    p.type  = H5Z_PARAMS_STRING;
+    p.u.str = "rate = 7.25";
+    if (H5Pmodify_filter_by_idx(dcpl, 0, H5Z_FLAG_MANDATORY, &p) < 0)
+        TEST_ERROR;
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0 || H5Pclose(dcpl) < 0 || H5Fclose(file) < 0)
+        TEST_ERROR;
+    dset = dcpl = file = H5I_INVALID_HID;
+
+    /* Only cd_values are written to the file: get_config reconstructs */
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    if (H5Pget_filter_params_by_idx(dcpl_out, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "rate = 7.2500000000000000e+00") != 0) {
+        fprintf(stderr, "\n   expected \"rate = 7.2500000000000000e+00\", got \"%s\"\n", pbuf);
+        TEST_ERROR;
+    }
+    if (canon_stored_double(dcpl_out, &got) < 0)
+        TEST_ERROR;
+    if (memcmp(&got, &(double){7.25}, sizeof(got)) != 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Fclose(file) < 0 || H5Sclose(sid) < 0)
+        TEST_ERROR;
+    dcpl_out = dset = file = sid = H5I_INVALID_HID;
+    PASSED();
+
+    if (H5Zunregister(CANON_FILTER_ID) < 0)
+        TEST_ERROR;
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Pclose(dcpl_out);
+        H5Dclose(dset);
+        H5Fclose(file);
+        H5Sclose(sid);
+        H5Zunregister(CANON_FILTER_ID);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
 int
 main(void)
 {
@@ -1325,6 +3662,10 @@ main(void)
     nerrors += test_parser() < 0 ? 1 : 0;
     nerrors += test_config_get_str_null_buf_size() < 0 ? 1 : 0;
 
+    /* H5Pappend_filter / H5Pget_filter_params_by_idx callback contracts */
+    nerrors += test_callback_contracts() < 0 ? 1 : 0;
+    nerrors += test_modify_filter_pattern() < 0 ? 1 : 0;
+
     /* H5Z_class3_t registration and canonical names */
     nerrors += test_canonical_name_display() < 0 ? 1 : 0;
     nerrors += test_class3_name() < 0 ? 1 : 0;
@@ -1333,16 +3674,43 @@ main(void)
     nerrors += test_canonical_name_uniqueness() < 0 ? 1 : 0;
     nerrors += test_get_filter_info2_builtin() < 0 ? 1 : 0;
 
+    /* Additional H5Pappend_filter coverage */
+    nerrors += test_empty_string_fast_path() < 0 ? 1 : 0;
+    nerrors += test_cdvalues_path() < 0 ? 1 : 0;
+    nerrors += test_cdvalues_null_check() < 0 ? 1 : 0;
+    nerrors += test_cdvalues_no_name_pollution() < 0 ? 1 : 0;
+    nerrors += test_canonical_name_persistence() < 0 ? 1 : 0;
+    nerrors += test_config_string_max() < 0 ? 1 : 0;
+    nerrors += test_config_string_max_boundary() < 0 ? 1 : 0;
+    nerrors += test_config_string_canonicalization_growth() < 0 ? 1 : 0;
+    nerrors += test_set_get_config_callbacks() < 0 ? 1 : 0;
+
     /* Round-trip tests through the built-in filters */
     nerrors += test_roundtrip_deflate(file) < 0 ? 1 : 0;
     nerrors += test_roundtrip_shuffle(file) < 0 ? 1 : 0;
     nerrors += test_roundtrip_fletcher32(file) < 0 ? 1 : 0;
+    nerrors += test_scaleoffset_params(file) < 0 ? 1 : 0;
+    nerrors += test_scaleoffset_scale_factor_upper_bound() < 0 ? 1 : 0;
 
     /* Regression tests */
     nerrors += test_regression_old_api(file) < 0 ? 1 : 0;
+    nerrors += test_regression_filter2_appends() < 0 ? 1 : 0;
 
     /* filter2 context passthrough: dxpl_id, scaled, ndims */
     nerrors += test_filter2_context_passthrough(file) < 0 ? 1 : 0;
+
+    /* Configuration strings in property lists, H5Pencode/H5Pdecode */
+    nerrors += test_config_string_plist(fapl) < 0 ? 1 : 0;
+    nerrors += test_config_string_pdecode_corrupted() < 0 ? 1 : 0;
+
+    /* set_local keeps the stored string */
+    nerrors += test_set_local_keeps_config(fapl) < 0 ? 1 : 0;
+
+    /* Canonicalization of the stored configuration string */
+    nerrors += test_config_canonicalization() < 0 ? 1 : 0;
+
+    /* H5Pmodify_filter_by_idx */
+    nerrors += test_modify_filter_by_idx(fapl) < 0 ? 1 : 0;
 
     if (H5Fclose(file) < 0)
         goto error;

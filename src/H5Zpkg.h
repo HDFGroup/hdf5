@@ -69,4 +69,9 @@ H5_DLL herr_t H5Z__config_validate_keys(const char *params, const char *const *k
 H5_DLL htri_t H5Z__config_get_int(const char *params, const char *key, int64_t *out);
 H5_DLL htri_t H5Z__config_get_str(const char *params, const char *key, char *buf, size_t *buf_size);
 
+/* Shared set_config implementation for filters that take no user parameters
+ * (shuffle, fletcher32, nbit).  Sets *cd_nelmts = 0 and rejects non-empty params. */
+H5_DLL herr_t H5Z__no_params_set_config(const char *params, unsigned *flags, size_t *cd_nelmts,
+                                        unsigned cd_values[], size_t cd_values_size);
+
 #endif /* H5Zpkg_H */
