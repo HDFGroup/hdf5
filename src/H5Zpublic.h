@@ -90,8 +90,9 @@ typedef int H5Z_filter_t;
 #define H5Z_MAX_CD_NELMTS 65535u
 
 /** Maximum length of a filter parameter string, in bytes, not counting the
- *  NUL terminator (enforced by H5Pappend_filter() and
- *  H5Pmodify_filter_by_idx()) \since 3.0.0 */
+ *  NUL terminator (enforced by H5Pappend_filter(),
+ *  H5Pmodify_filter_by_idx(), and when a filter pipeline message is read
+ *  from a file) \since 3.0.0 */
 #define H5Z_CONFIG_STRING_MAX 4096
 
 /** Maximum number of key-value parameters in a filter parameter string \since 3.0.0 */
