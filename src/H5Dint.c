@@ -830,8 +830,8 @@ H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
 
         if (H5O_OH_GET_VERSION(ohdr) == 1) {
             /* v1 object headers store modification time as a message */
-            time_t mtime;
-            get_value = H5O_msg_size_oh(file, ohdr, H5O_MTIME_NEW_ID, &mtime, 0);
+            time_t mtime = 0;
+            get_value    = H5O_msg_size_oh(file, ohdr, H5O_MTIME_NEW_ID, &mtime, 0);
             if (get_value == 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of modification time message");
             ret_value += get_value;
