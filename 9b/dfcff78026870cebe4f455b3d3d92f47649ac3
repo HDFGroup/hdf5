@@ -1,0 +1,25 @@
+test/enc_dec_plist.c
+  s_2bea1451f87056::t_fd90d9ce6fa84a 353-431
+  s_2bea1451f87056::t_1504f7d86d3496 998-1000
+  s_2bea1451f87056::t_464ea37e975b02 20
+release_docs/CHANGELOG.md
+  s_2bea1451f87056::t_36be36e09af9fb 128,132-133
+src/H5Pocpl.c
+  s_2bea1451f87056::t_bdbd71ffa3b3bc 1364,1372-1375,1411-1412,1417,1420,1424,1428-1436
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "9bdfcff78026870cebe4f455b3d3d92f47649ac3",
+  "prompts": {},
+  "sessions": {
+    "s_2bea1451f87056": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ed5cb9a0-1049-49d7-a992-ca5cfbcafab7",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
