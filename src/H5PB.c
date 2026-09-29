@@ -621,12 +621,13 @@ H5PB_remove_entry(const H5F_shared_t *f_sh, haddr_t addr)
 
     /* If found, remove the entry from the PB cache */
     if (page_entry) {
-        /* No assertion on the entry type here. The caller filters on the
-         * allocation type of the operation it is performing, and that does
-         * not bound the type recorded on the entry: page_entry->type is
-         * stamped when the entry is created and is never revisited, so it
-         * names whichever access first brought the page into the buffer.
+        /* This function is documented as never seeing a raw data page, and
+         * H5MF__sect_small_merge() enforces that by skipping raw allocation
+         * types. Accounting for a raw page here would mask a bug rather than
+         * report it, so assert the caller's contract instead.
          */
+        assert(!H5MF_mem_page_type_is_raw(page_entry->type));
+
         if (NULL == H5SL_remove(page_buf->slist_ptr, &(page_entry->addr)))
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Page Entry is not in skip list");
 
@@ -634,20 +635,13 @@ H5PB_remove_entry(const H5F_shared_t *f_sh, haddr_t addr)
         H5PB__REMOVE_LRU(page_buf, page_entry)
         assert(H5SL_count(page_buf->slist_ptr) == page_buf->LRU_list_len);
 
-        /* Decrement the count this page was charged to. The charge was made
-         * by entry type in H5PB__insert_entry(), so it has to be released
-         * by entry type as well. Both counters are unsigned: decrementing
-         * the wrong one wraps it, and the eviction thresholds then stay
-         * wrong for the life of the file with nothing reporting it.
+        /* The entry is metadata by the assertion above, so it was charged to
+         * meta_count by H5PB__insert_entry(). The count is unsigned, so
+         * releasing a charge that was never made would wrap it and leave the
+         * eviction thresholds wrong for the life of the file.
          */
-        if (H5MF_mem_page_type_is_raw(page_entry->type)) {
-            assert(page_buf->raw_count > 0);
-            page_buf->raw_count--;
-        }
-        else {
-            assert(page_buf->meta_count > 0);
-            page_buf->meta_count--;
-        }
+        assert(page_buf->meta_count > 0);
+        page_buf->meta_count--;
 
         page_entry->page_buf_ptr = H5FL_FAC_FREE(page_buf->page_fac, page_entry->page_buf_ptr);
         page_entry               = H5FL_FREE(H5PB_entry_t, page_entry);

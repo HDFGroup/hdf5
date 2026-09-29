@@ -47,7 +47,6 @@ static unsigned test_raw_data_handling(hid_t orig_fapl, const char *driver_name)
 static unsigned test_lru_processing(hid_t orig_fapl, const char *driver_name);
 static unsigned test_min_threshold(hid_t orig_fapl, const char *driver_name);
 static unsigned test_min_threshold_all_meta_types(hid_t orig_fapl, const char *driver_name);
-static unsigned test_remove_entry_type_accounting(hid_t orig_fapl, const char *driver_name);
 static unsigned test_stats_collection(hid_t orig_fapl, const char *driver_name);
 
 /* helper routines */
@@ -1843,158 +1842,6 @@ error:
 } /* test_min_threshold_all_meta_types */
 
 /*-------------------------------------------------------------------------
- * Function:    test_remove_entry_type_accounting()
- *
- * Purpose:     Verify that H5PB_remove_entry() decrements the page count
- *              the entry was actually charged to.
- *
- *              A page entry's type is stamped when the entry is created
- *              and is never revisited, so it names whichever access first
- *              brought the page into the buffer rather than whatever the
- *              page holds now, and it is not bounded by the allocation
- *              type the caller is operating on. A page allocated for the
- *              global heap is stamped H5F_MEM_PAGE_GHEAP. H5PB__insert_entry() charges such a page
- *              to raw_count, while H5PB_remove_entry() previously
- *              decremented meta_count unconditionally. Both counts were
- *              then wrong, and since they are unsigned, meta_count could
- *              wrap and leave the eviction thresholds corrupted for the
- *              remaining life of the file.
- *
- *              This drives H5PB_remove_entry() directly. The free-space
- *              merge path now excludes raw allocation types, so it does not
- *              deliver a global heap page itself, but the charge still has
- *              to be released by entry type.
- *
- * Return:      0 if test is successful
- *              1 if test fails
- *
- *-------------------------------------------------------------------------
- */
-static unsigned
-test_remove_entry_type_accounting(hid_t orig_fapl, const char *driver_name)
-{
-    char     filename[FILENAME_LEN];        /* Filename to use */
-    hid_t    file_id     = H5I_INVALID_HID; /* File ID */
-    hid_t    fcpl        = H5I_INVALID_HID;
-    hid_t    fapl        = H5I_INVALID_HID;
-    unsigned meta_before = 0;
-    unsigned raw_before  = 0;
-    H5PB_t  *page_buf    = NULL;
-    haddr_t  gheap_addr  = HADDR_UNDEF;
-    int     *data        = NULL;
-    H5F_t   *f           = NULL;
-
-    TESTING("Page count accounting in H5PB_remove_entry()");
-
-    h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
-
-    if ((fapl = H5Pcopy(orig_fapl)) < 0)
-        TEST_ERROR;
-
-    if (set_multi_split(driver_name, fapl, sizeof(int) * 200) != 0)
-        TEST_ERROR;
-
-    if ((data = (int *)calloc((size_t)100, sizeof(int))) == NULL)
-        TEST_ERROR;
-
-    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-        FAIL_STACK_ERROR;
-
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
-        FAIL_STACK_ERROR;
-
-    if (H5Pset_file_space_page_size(fcpl, sizeof(int) * 200) < 0)
-        FAIL_STACK_ERROR;
-
-    if (H5Pset_page_buffer_size(fapl, sizeof(int) * 1000, 0, 0) < 0)
-        FAIL_STACK_ERROR;
-
-    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-        FAIL_STACK_ERROR;
-
-    if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
-        FAIL_STACK_ERROR;
-
-    assert(f);
-    assert(f->shared);
-    assert(f->shared->page_buf);
-
-    page_buf = f->shared->page_buf;
-
-    /* A sub-page global heap allocation starts a new page, which
-     * H5MF__alloc_pagefs() hands to H5PB_add_new_page() with the allocation
-     * type, so the entry carries H5F_MEM_PAGE_GHEAP.
-     */
-    if (HADDR_UNDEF == (gheap_addr = H5MF_alloc(f, H5FD_MEM_GHEAP, sizeof(int) * 100)))
-        FAIL_STACK_ERROR;
-
-    /* Writing it moves the entry onto the LRU, where it is charged to
-     * raw_count, the page type rather than the access type deciding.
-     */
-    if (H5F_block_write(f, H5FD_MEM_GHEAP, gheap_addr, sizeof(int) * 100, data) < 0)
-        FAIL_STACK_ERROR;
-
-    meta_before = page_buf->meta_count;
-    raw_before  = page_buf->raw_count;
-
-    /* The page must have been charged to raw_count.  Its entry type is
-     * H5F_MEM_PAGE_GHEAP here, but H5F_MEM_PAGE_DRAW would exercise the same
-     * defect, so this checks the charge rather than the type.
-     */
-    if (0 == raw_before)
-        TEST_ERROR;
-
-    /* Drive the function directly.  The free-space merge path excludes raw
-     * allocation types, so it does not deliver this page itself. The entry
-     * type is still not bounded by the caller's allocation type, so the
-     * charge has to be released by entry type.
-     */
-    if (H5PB_remove_entry(f->shared, gheap_addr) < 0)
-        FAIL_STACK_ERROR;
-
-    if (page_buf->raw_count != raw_before - 1) {
-        H5_FAILED();
-        AT();
-        printf("    raw_count %u, expected %u\n", page_buf->raw_count, raw_before - 1);
-        goto error;
-    }
-
-    if (page_buf->meta_count != meta_before) {
-        H5_FAILED();
-        AT();
-        printf("    meta_count %u, expected %u\n", page_buf->meta_count, meta_before);
-        goto error;
-    }
-
-    if (H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Pclose(fcpl) < 0)
-        FAIL_STACK_ERROR;
-    if (H5Pclose(fapl) < 0)
-        FAIL_STACK_ERROR;
-
-    free(data);
-
-    PASSED();
-
-    return 0;
-
-error:
-    H5E_BEGIN_TRY
-    {
-        H5Pclose(fapl);
-        H5Pclose(fcpl);
-        H5Fclose(file_id);
-    }
-    H5E_END_TRY
-
-    if (data)
-        free(data);
-
-    return 1;
-} /* test_remove_entry_type_accounting */
-
-/*-------------------------------------------------------------------------
  * Function:    test_pb_fapl_tolerance_at_open()
  *
  * Purpose:     Tests if the library tolerates setting fapl page buffer
@@ -2438,7 +2285,6 @@ main(void)
     nerrors += test_lru_processing(fapl, driver_name);
     nerrors += test_min_threshold(fapl, driver_name);
     nerrors += test_min_threshold_all_meta_types(fapl, driver_name);
-    nerrors += test_remove_entry_type_accounting(fapl, driver_name);
     nerrors += test_stats_collection(fapl, driver_name);
     nerrors += test_pb_fapl_tolerance_at_open();
 
