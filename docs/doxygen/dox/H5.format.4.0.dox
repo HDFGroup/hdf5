@@ -7928,7 +7928,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
           size of the entire array; the size of the entire array can be calculated by traversing the B-tree that
           stores the chunk addresses. Every chunk holds all of the elements covered by the chunk dimensions,
           even when the chunk extends past the current extent of the dataspace (a partial edge chunk). Before
-          any filters are applied, and after they are reversed, a chunk is therefore always exactly the product
+          any filters are applied, and after they are reversed, the size of the chunk is exactly the product
           of the chunk dimensions and the dataset element size, in bytes.</li>
       <li>Compact: The array is stored in one contiguous block, as part of this object header messagei.</li>
       <li>Virtual: This is only supported for version 4 of the Data Layout message. The message stores information
