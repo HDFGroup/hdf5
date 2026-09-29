@@ -35,7 +35,7 @@ static size_t H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned 
                                size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-H5Z_class2_t H5Z_SZIP[1] = {{
+H5Z_class3_t H5Z_SZIP[1] = {{
     H5Z_CLASS_T_VERS,    /* H5Z_class_t version */
     H5Z_FILTER_SZIP,     /* Filter id number		*/
     1,                   /* Assume encoder present: check before registering */
@@ -44,6 +44,7 @@ H5Z_class2_t H5Z_SZIP[1] = {{
     H5Z__can_apply_szip, /* The "can apply" callback     */
     H5Z__set_local_szip, /* The "set local" callback     */
     H5Z__filter_szip,    /* The actual filter function	*/
+    false,               /* theadsafe flag (set to false). We believe libaec is thread-safe, but because the developers do not explicitly make this claim, we are marking it as not thread-safe for now. */
 }};
 
 /*-------------------------------------------------------------------------

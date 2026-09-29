@@ -370,7 +370,7 @@ static size_t filter_bad_buf_size(unsigned int flags, size_t cd_nelmts, const un
 static size_t filter_error_msg(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                                size_t nbytes, size_t *buf_size, void **buf);
 
-static herr_t dsets_h5zregister_direct(const H5Z_class2_t *filter);
+static herr_t dsets_h5zregister_direct(const H5Z_class3_t *filter);
 static herr_t dsets_h5zunregister_direct(H5Z_filter_t id);
 
 /*-------------------------------------------------------------------------
@@ -385,7 +385,7 @@ static herr_t dsets_h5zunregister_direct(H5Z_filter_t id);
  *-------------------------------------------------------------------------
  */
 static herr_t
-dsets_h5zregister_direct(const H5Z_class2_t *filter)
+dsets_h5zregister_direct(const H5Z_class3_t *filter)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -19194,7 +19194,7 @@ error:
  *-------------------------------------------------------------------------
  */
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_ERROR_MSG[1] = {{
+const H5Z_class3_t H5Z_ERROR_MSG[1] = {{
     H5Z_CLASS_T_VERS,        /* H5Z_class_t version */
     H5Z_FILTER_RESERVED - 1, /* Filter id number */
     1, 1,                    /* Encoding and decoding enabled */
@@ -19202,6 +19202,7 @@ const H5Z_class2_t H5Z_ERROR_MSG[1] = {{
     NULL,                    /* The "can apply" callback */
     NULL,                    /* The "set local" callback */
     filter_error_msg,        /* The actual filter function */
+    0,                       /* Threading disabled */
 }};
 static const char *filter_error_msg_msg =
     "Hello I am a unique error message written for the test_filter_error_msg test in dsets.c";
