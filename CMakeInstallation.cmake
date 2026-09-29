@@ -190,6 +190,7 @@ if (H5_WORDS_BIGENDIAN)
 else ()
   set (BYTESEX little-endian)
 endif ()
+H5_SET_LANG_SETTINGS ()
 configure_file (
     ${HDF5_SOURCE_DIR}/src/libhdf5.settings.in
     ${HDF5_SRC_BINARY_DIR}/libhdf5.settings ESCAPE_QUOTES @ONLY

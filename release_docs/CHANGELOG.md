@@ -97,7 +97,7 @@ We would like to thank the many HDF5 community members who contributed to this r
    The size stored in an object header message header was checked against the chunk before the rest of that message header was decoded, allowing a message body to start up to four bytes further into the chunk than the check accounted for. A corrupted or fuzzed file could declare a size that passed the check and still extended past the end of the chunk image, and the message's decode callback was then handed a buffer end outside the allocation. `H5O__chunk_deserialize()` now checks the message size once the whole message header has been decoded.
 
    Fixes GitHub issue #6401
-   
+
 ### Fixed memory leaks and ID reference count issues when pushing an error to an error stack that is full
 
    When an error is pushed to an error stack, the library may make a copy of the file
@@ -164,6 +164,12 @@ We would like to thank the many HDF5 community members who contributed to this r
   Builds driven through `CTestScript.cmake` were not affected, since its cache
   file forces `BUILD_SHARED_LIBS` on. This affected cases where the examples
   were built directly without that cache file.
+
+### Fixed the Fortran and C++ information reported in the build settings
+
+The "Shared/Static Fortran Library" and "Shared/Static C++ Library" lines in `libhdf5.settings` and in the build settings string compiled into the library reused the C library values, so they reported `YES` even when `HDF5_BUILD_FORTRAN` or `HDF5_BUILD_CPP_LIB` was off. These lines now report `NO` unless that language's library is built. The "Fortran Compiler", "Module Directory" and "C++ Compiler" lines are now also left empty when that language's library is not built.
+
+Fixes #5723.
 
 ## Tools
 
