@@ -44,7 +44,8 @@ H5Z_class3_t H5Z_SZIP[1] = {{
     H5Z__can_apply_szip, /* The "can apply" callback     */
     H5Z__set_local_szip, /* The "set local" callback     */
     H5Z__filter_szip,    /* The actual filter function	*/
-    false,               /* theadsafe flag (set to false). We believe libaec is thread-safe, but because the developers do not explicitly make this claim, we are marking it as not thread-safe for now. */
+    false, /* theadsafe flag (set to false). We believe libaec is thread-safe, but because the developers do
+              not explicitly make this claim, we are marking it as not thread-safe for now. */
 }};
 
 /*-------------------------------------------------------------------------

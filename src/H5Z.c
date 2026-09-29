@@ -73,10 +73,10 @@ static const bool DUMP_DEBUG_STATS_g = false;
 
 /* Local functions */
 static const H5Z_class3_t *H5Z__upgrade_class_vers(const void *cls, H5Z_class3_t *cls3_buf);
-static int H5Z__find_idx(H5Z_filter_t id);
-static int H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t obj_id, void *key);
-static int H5Z__check_unregister_group_cb(void *obj_ptr, hid_t obj_id, void *key);
-static int H5Z__flush_file_cb(void *obj_ptr, hid_t obj_id, void *key);
+static int                 H5Z__find_idx(H5Z_filter_t id);
+static int                 H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t obj_id, void *key);
+static int                 H5Z__check_unregister_group_cb(void *obj_ptr, hid_t obj_id, void *key);
+static int                 H5Z__flush_file_cb(void *obj_ptr, hid_t obj_id, void *key);
 
 /*-------------------------------------------------------------------------
  * Function: H5Z__init_package
@@ -228,7 +228,7 @@ H5Zregister(const void *cls)
 {
     const H5Z_class3_t *cls_real;            /* "Real" class pointer */
     herr_t              ret_value = SUCCEED; /* Return value */
-    H5Z_class3_t cls_new; /* Translated class struct */
+    H5Z_class3_t        cls_new;             /* Translated class struct */
 
     FUNC_ENTER_API(FAIL)
 
@@ -274,12 +274,12 @@ done:
 static const H5Z_class3_t *
 H5Z__upgrade_class_vers(const void *_cls, H5Z_class3_t *cls3_buf)
 {
-    const H5Z_class3_t *cls = (const H5Z_class3_t *)_cls;
+    const H5Z_class3_t *cls       = (const H5Z_class3_t *)_cls;
     const H5Z_class3_t *ret_value = NULL;
 
 #ifdef H5_NO_DEPRECATED_SYMBOLS
     FUNC_ENTER_PACKAGE
-#else /* H5_NO_DEPRECATED_SYMBOLS */
+#else  /* H5_NO_DEPRECATED_SYMBOLS */
     FUNC_ENTER_PACKAGE_NOERR
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
@@ -313,7 +313,7 @@ H5Z__upgrade_class_vers(const void *_cls, H5Z_class3_t *cls3_buf)
 
         /* Set cls_real to point to the translated structure */
         ret_value = cls3_buf;
-    }  /* end if */
+    } /* end if */
     else if (cls->version != H5Z_CLASS_T_VERS_3) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         /* Assume it is an old "H5Z_class1_t" instead */
@@ -1555,7 +1555,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
             tmp_flags |= (edc_read == H5Z_DISABLE_EDC) ? H5Z_FLAG_SKIP_EDC : 0;
 
 #ifdef H5_HAVE_CONCURRENCY
-            /* If we're using concurrent threads and the fitler is not threadsafe, lock the internal mutex */
+            /* If we're using concurrent threads and the filter is not threadsafe, lock the internal mutex */
             if (H5TS_currently_concurrent_g && !fclass->threadsafe) {
                 if (H5_UNLIKELY(H5TS_internal_lock() < 0))
                     HGOTO_ERROR(H5E_PLINE, H5E_CANTLOCK, FAIL, "can't lock internal mutex");
@@ -1683,7 +1683,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
 #endif
 
 #ifdef H5_HAVE_CONCURRENCY
-            /* If we're using concurrent threads and the fitler is not threadsafe, lock the internal mutex */
+            /* If we're using concurrent threads and the filter is not threadsafe, lock the internal mutex */
             if (H5TS_currently_concurrent_g && !fclass->threadsafe) {
                 if (H5_UNLIKELY(H5TS_internal_lock() < 0))
                     HGOTO_ERROR(H5E_PLINE, H5E_CANTLOCK, FAIL, "can't lock internal mutex");

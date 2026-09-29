@@ -30,7 +30,7 @@
  */
 #define H5Z_CLASS_T_VERS_3 (2)
 #define H5Z_CLASS_T_VERS_2 (1)
-#define H5Z_CLASS_T_VERS H5Z_CLASS_T_VERS_2
+#define H5Z_CLASS_T_VERS   H5Z_CLASS_T_VERS_2
 
 /*******************/
 /* Public Typedefs */
