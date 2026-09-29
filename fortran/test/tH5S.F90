@@ -101,7 +101,7 @@ CONTAINS
           CALL h5_fixname_f(filename1, fix_filename1, H5P_DEFAULT_F, error)
           if (error .ne. 0) then
               write(*,*) "Cannot modify filename"
-              stop
+              CALL h5_exit_f(1)
           endif
           CALL h5fcreate_f(fix_filename1, H5F_ACC_TRUNC_F, file1_id, error)
               CALL check("h5fcreate_f", error, total_error)
@@ -109,7 +109,7 @@ CONTAINS
           CALL h5_fixname_f(filename2, fix_filename2, H5P_DEFAULT_F, error)
           if (error .ne. 0) then
               write(*,*) "Cannot modify filename"
-              stop
+              CALL h5_exit_f(1)
           endif
           CALL h5fcreate_f(fix_filename2, H5F_ACC_TRUNC_F, file2_id, error)
               CALL check("h5fcreate_f", error, total_error)

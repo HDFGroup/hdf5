@@ -26,8 +26,8 @@ jobs:
         ./spack/bin/spack spec py-h5py@master+mpi
          sed -i 's/hdf5@1.10.7:1.14/hdf5@1.10.7:/g' \
         /home/runner/.spack/package_repos/*/repos/spack_repo/builtin/packages/py_h5py/package.py
-        ./spack/bin/spack spec py-h5py@master+mpi ^hdf5@develop-2.0
-        ./spack/bin/spack install py-h5py@master+mpi ^hdf5@develop-2.0
+        ./spack/bin/spack spec py-h5py@master+mpi ^hdf5@develop-2
+        ./spack/bin/spack install py-h5py@master+mpi ^hdf5@develop-2
         ./spack/bin/spack install py-pytest
         ./spack/bin/spack install py-pytest-mpi
         spack load py-h5py

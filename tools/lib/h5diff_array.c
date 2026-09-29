@@ -4677,10 +4677,10 @@ h5diff_print_char(char ch)
             parallel_print("\\t");
             break;
         default:
-            if (isprint(ch))
+            if (isprint((unsigned char)ch))
                 parallel_print("%c", ch);
             else
-                parallel_print("\\%03o", ch);
+                parallel_print("\\%03o", (unsigned char)ch);
             break;
     }
 }

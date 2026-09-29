@@ -39,39 +39,28 @@ jobs:
             await runMarkStale({ github, context, core });
 
   draft-pr-policy:
+    # For issue_comment: the draft-stale label only ever lands on draft PRs
+    # (see draft-pr-policy.js), so checking for it straight from the webhook
+    # payload tells us this is a draft PR worth reacting to without spending
+    # an API call or a runner on the common case (a comment on some other PR).
     if: >-
       github.repository_owner == 'HDFGroup' &&
       (github.event_name != 'issue_comment' ||
-       (github.event.issue.pull_request != null && github.event.comment.user.type != 'Bot'))
+       (github.event.issue.pull_request != null &&
+        github.event.comment.user.type != 'Bot' &&
+        contains(github.event.issue.labels.*.name, 'draft-stale')))
     runs-on: ubuntu-latest
     permissions:
       contents: read
       issues: write
       pull-requests: write
     steps:
-      # No checkout needed here — just an API call to see if this comment's
-      # PR is even a draft, before paying for checkout + loading the script.
-      - name: Check draft status
-        id: check
-        if: github.event_name == 'issue_comment'
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        with:
-          script: |
-            const { data: pr } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.issue.number,
-            });
-            core.setOutput('is_draft', pr.draft ? 'true' : 'false');
-
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: steps.check.outputs.is_draft != 'false'
         with:
           persist-credentials: false
           sparse-checkout: .github/scripts
           fetch-depth: 1
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        if: steps.check.outputs.is_draft != 'false'
         with:
           script: |
             const { runDraftPolicy } = require('${{ github.workspace }}/.github/scripts/draft-pr-policy.js');
