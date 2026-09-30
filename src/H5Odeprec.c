@@ -989,7 +989,6 @@ herr_t
 H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate1_t op, void *op_data,
           unsigned fields)
 {
-    H5I_type_t vol_obj_type = H5I_BADID; /* Object type */
     H5VL_object_t              *vol_obj;     /* Object of loc_id */
     H5VL_object_specific_args_t vol_cb_args; /* Arguments to VOL callback */
     H5VL_loc_params_t           loc_params;  /* Location parameters for object access */
