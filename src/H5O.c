@@ -809,13 +809,12 @@ done:
 herr_t
 H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5I_type_t vol_obj_type  = H5I_BADID,
-               vol_obj_type1 = H5I_BADID;     /* Object types */
-    H5VL_object_t           *vol_obj1 = NULL; /* object of obj_id */
-    H5VL_object_t           *vol_obj2 = NULL; /* object of new_loc_id */
-    H5VL_link_create_args_t  vol_cb_args;     /* Arguments to VOL callback */
-    H5VL_loc_params_t        new_loc_params;
-    herr_t                   ret_value = SUCCEED; /* Return value */
+    H5I_type_t              vol_obj_type = H5I_BADID, vol_obj_type1 = H5I_BADID; /* Object types */
+    H5VL_object_t          *vol_obj1 = NULL;                                     /* object of obj_id */
+    H5VL_object_t          *vol_obj2 = NULL;                                     /* object of new_loc_id */
+    H5VL_link_create_args_t vol_cb_args; /* Arguments to VOL callback */
+    H5VL_loc_params_t       new_loc_params;
+    herr_t                  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
 

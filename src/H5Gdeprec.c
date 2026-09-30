@@ -152,9 +152,9 @@ H5G_map_obj_type(H5O_type_t obj_type)
 hid_t
 H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
 {
-    void             *grp = NULL; /* New group created */
-    H5I_type_t vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    H5VL_object_t    *vol_obj;    /* Object of loc_id */
+    void             *grp          = NULL;      /* New group created */
+    H5I_type_t        vol_obj_type = H5I_BADID; /* Object type of loc_id */
+    H5VL_object_t    *vol_obj;                  /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t             tmp_gcpl  = H5I_INVALID_HID; /* Temporary group creation property list */
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
@@ -249,9 +249,9 @@ done:
 hid_t
 H5Gopen1(hid_t loc_id, const char *name)
 {
-    void             *grp     = NULL; /* Group opened */
-    H5I_type_t vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    H5VL_object_t    *vol_obj = NULL; /* Object of loc_id */
+    void             *grp          = NULL;      /* Group opened */
+    H5I_type_t        vol_obj_type = H5I_BADID; /* Object type of loc_id */
+    H5VL_object_t    *vol_obj      = NULL;      /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -1052,7 +1052,7 @@ H5G__get_objinfo_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char *name, 
             statbuf->ohdr.nmesgs  = nat_info.hdr.nmesgs;
             statbuf->ohdr.nchunks = nat_info.hdr.nchunks;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
 done:
     /* Indicate that this callback didn't take ownership of the group *

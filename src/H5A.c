@@ -152,7 +152,7 @@ H5A__create_api_common(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t
                        hid_t aapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
     H5I_type_t      vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj  = NULL;      /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -298,7 +298,7 @@ H5A__create_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
                                H5VL_object_t **_vol_obj_ptr)
 {
     H5I_type_t      vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj  = NULL;      /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -487,7 +487,7 @@ H5A__open_api_common(hid_t loc_id, const char *attr_name, hid_t aapl_id, void **
                      H5VL_object_t **_vol_obj_ptr)
 {
     H5I_type_t      vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj  = NULL;      /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -610,7 +610,7 @@ H5A__open_by_name_api_common(hid_t loc_id, const char *obj_name, const char *att
                              hid_t lapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
     H5I_type_t      vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj  = NULL;      /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -742,7 +742,7 @@ H5A__open_by_idx_api_common(hid_t loc_id, const char *obj_name, H5_index_t idx_t
                             H5VL_object_t **_vol_obj_ptr)
 {
     H5I_type_t      vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj  = NULL;      /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -1309,10 +1309,10 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_i
                    char *name /*out*/, size_t size, hid_t lapl_id)
 {
     H5I_type_t           vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    H5VL_object_t       *vol_obj = NULL;    /* Attribute object for ID */
-    H5VL_attr_get_args_t vol_cb_args;       /* Arguments to VOL callback */
-    size_t               attr_name_len = 0; /* Length of attribute name */
-    ssize_t              ret_value;         /* Return value */
+    H5VL_object_t       *vol_obj      = NULL;      /* Attribute object for ID */
+    H5VL_attr_get_args_t vol_cb_args;              /* Arguments to VOL callback */
+    size_t               attr_name_len = 0;        /* Length of attribute name */
+    ssize_t              ret_value;                /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -1464,9 +1464,9 @@ H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, H
                     hid_t lapl_id)
 {
     H5I_type_t           vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    H5VL_object_t       *vol_obj = NULL;      /* Attribute object for ID */
-    H5VL_attr_get_args_t vol_cb_args;         /* Arguments to VOL callback */
-    herr_t               ret_value = SUCCEED; /* Return value */
+    H5VL_object_t       *vol_obj      = NULL;      /* Attribute object for ID */
+    H5VL_attr_get_args_t vol_cb_args;              /* Arguments to VOL callback */
+    herr_t               ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -1523,9 +1523,9 @@ H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_i
                    H5A_info_t *ainfo /*out*/, hid_t lapl_id)
 {
     H5I_type_t           vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    H5VL_object_t       *vol_obj = NULL;      /* Attribute object for ID */
-    H5VL_attr_get_args_t vol_cb_args;         /* Arguments to VOL callback */
-    herr_t               ret_value = SUCCEED; /* Return value */
+    H5VL_object_t       *vol_obj      = NULL;      /* Attribute object for ID */
+    H5VL_attr_get_args_t vol_cb_args;              /* Arguments to VOL callback */
+    herr_t               ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -1625,7 +1625,7 @@ H5A__rename_api_common(hid_t loc_id, const char *old_name, const char *new_name,
                        H5VL_object_t **_vol_obj_ptr)
 {
     H5I_type_t      vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj  = NULL;      /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -1736,7 +1736,7 @@ H5A__rename_by_name_api_common(hid_t loc_id, const char *obj_name, const char *o
                                hid_t lapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
     H5I_type_t      vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj  = NULL;      /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -1885,10 +1885,10 @@ H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *i
             H5A_operator2_t op, void *op_data)
 {
     H5I_type_t                vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    H5VL_object_t            *vol_obj = NULL; /* Object for loc_id */
-    H5VL_loc_params_t         loc_params;     /* Location parameters for object access */
-    H5VL_attr_specific_args_t vol_cb_args;    /* Arguments to VOL callback */
-    herr_t                    ret_value;      /* Return value */
+    H5VL_object_t            *vol_obj      = NULL;      /* Object for loc_id */
+    H5VL_loc_params_t         loc_params;               /* Location parameters for object access */
+    H5VL_attr_specific_args_t vol_cb_args;              /* Arguments to VOL callback */
+    herr_t                    ret_value;                /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -1977,10 +1977,10 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_i
                    hsize_t *idx /*in,out */, H5A_operator2_t op, void *op_data, hid_t lapl_id)
 {
     H5I_type_t                vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    H5VL_object_t            *vol_obj = NULL;      /* Object for loc_id */
-    H5VL_loc_params_t         loc_params;          /* Location parameters for object access */
-    H5VL_attr_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
-    herr_t                    ret_value = SUCCEED; /* Return value */
+    H5VL_object_t            *vol_obj      = NULL;      /* Object for loc_id */
+    H5VL_loc_params_t         loc_params;               /* Location parameters for object access */
+    H5VL_attr_specific_args_t vol_cb_args;              /* Arguments to VOL callback */
+    herr_t                    ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -2047,10 +2047,10 @@ herr_t
 H5Adelete(hid_t loc_id, const char *name)
 {
     H5I_type_t                vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    H5VL_object_t            *vol_obj = NULL;      /* Object for loc_id */
-    H5VL_loc_params_t         loc_params;          /* Location parameters for object access */
-    H5VL_attr_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
-    herr_t                    ret_value = SUCCEED; /* Return value */
+    H5VL_object_t            *vol_obj      = NULL;      /* Object for loc_id */
+    H5VL_loc_params_t         loc_params;               /* Location parameters for object access */
+    H5VL_attr_specific_args_t vol_cb_args;              /* Arguments to VOL callback */
+    herr_t                    ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -2108,10 +2108,10 @@ herr_t
 H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t lapl_id)
 {
     H5I_type_t                vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    H5VL_object_t            *vol_obj = NULL;      /* Object for loc_id */
-    H5VL_loc_params_t         loc_params;          /* Location parameters for object access */
-    H5VL_attr_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
-    herr_t                    ret_value = SUCCEED; /* Return value */
+    H5VL_object_t            *vol_obj      = NULL;      /* Object for loc_id */
+    H5VL_loc_params_t         loc_params;               /* Location parameters for object access */
+    H5VL_attr_specific_args_t vol_cb_args;              /* Arguments to VOL callback */
+    herr_t                    ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -2180,10 +2180,10 @@ H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_ite
                  hid_t lapl_id)
 {
     H5I_type_t                vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    H5VL_object_t            *vol_obj = NULL;      /* Object for loc_id */
-    H5VL_loc_params_t         loc_params;          /* Location parameters for object access */
-    H5VL_attr_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
-    herr_t                    ret_value = SUCCEED; /* Return value */
+    H5VL_object_t            *vol_obj      = NULL;      /* Object for loc_id */
+    H5VL_loc_params_t         loc_params;               /* Location parameters for object access */
+    H5VL_attr_specific_args_t vol_cb_args;              /* Arguments to VOL callback */
+    herr_t                    ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -2370,7 +2370,7 @@ H5A__exists_api_common(hid_t obj_id, const char *attr_name, bool *attr_exists, v
                        H5VL_object_t **_vol_obj_ptr)
 {
     H5I_type_t      vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj  = NULL;      /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -2483,7 +2483,7 @@ H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
                                hid_t lapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
     H5I_type_t      vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj  = NULL;      /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */

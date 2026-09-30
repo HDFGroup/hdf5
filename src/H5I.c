@@ -851,9 +851,9 @@ done:
 ssize_t
 H5Iget_name(hid_t id, char *name /*out*/, size_t size)
 {
-    H5I_type_t vol_obj_type = H5I_BADID;   /* Object type of loc_id */
-    H5VL_object_t         *vol_obj = NULL; /* Object stored in ID */
-    H5VL_object_get_args_t vol_cb_args;    /* Arguments to VOL callback */
+    H5I_type_t             vol_obj_type = H5I_BADID; /* Object type of loc_id */
+    H5VL_object_t         *vol_obj      = NULL;      /* Object stored in ID */
+    H5VL_object_get_args_t vol_cb_args;              /* Arguments to VOL callback */
     H5VL_loc_params_t      loc_params;
     size_t                 obj_name_len = 0;  /* Length of object's name */
     ssize_t                ret_value    = -1; /* Return value */
