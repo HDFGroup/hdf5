@@ -112,8 +112,9 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
     if (H5CX_set_loc(loc_id) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info");
 
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(loc_id);
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    if ((loc_params.obj_type = H5I_get_type(loc_id)) == H5I_BADID)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* get the object from the loc_id */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
@@ -163,8 +164,9 @@ H5Topen1(hid_t loc_id, const char *name)
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no name");
 
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(loc_id);
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    if ((loc_params.obj_type = H5I_get_type(loc_id)) == H5I_BADID)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* Get the location object */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))

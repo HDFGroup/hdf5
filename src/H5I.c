@@ -851,6 +851,7 @@ done:
 ssize_t
 H5Iget_name(hid_t id, char *name /*out*/, size_t size)
 {
+    H5I_type_t vol_obj_type = H5I_BADID;   /* Object type of loc_id */
     H5VL_object_t         *vol_obj = NULL; /* Object stored in ID */
     H5VL_object_get_args_t vol_cb_args;    /* Arguments to VOL callback */
     H5VL_loc_params_t      loc_params;
@@ -858,6 +859,10 @@ H5Iget_name(hid_t id, char *name /*out*/, size_t size)
     ssize_t                ret_value    = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
+
+    /* Get object type */
+    if ((vol_obj_type = H5I_get_type(id)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "invalid identifier");
 
     /* If name size is zero, treat as length query and do not write, even a '\0' */
     if (name && size == 0)
@@ -869,7 +874,7 @@ H5Iget_name(hid_t id, char *name /*out*/, size_t size)
 
     /* Set location parameters */
     loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(id);
+    loc_params.obj_type = vol_obj_type;
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type                = H5VL_OBJECT_GET_NAME;
