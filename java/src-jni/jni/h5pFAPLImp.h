@@ -51,16 +51,17 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pget_1fclose_1degree(JNIEnv *, jcla
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pset_fapl_core
- * Signature: (JJZ)I
+ * Signature: (JJJZ)I
  */
-JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pset_1fapl_1core(JNIEnv *, jclass, jlong, jlong, jboolean);
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pset_1fapl_1core(JNIEnv *, jclass, jlong, jlong, jlong,
+                                                              jboolean);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pget_fapl_core
- * Signature: (J[J[Z)I
+ * Signature: (J[J[J[Z)I
  */
-JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pget_1fapl_1core(JNIEnv *, jclass, jlong, jlongArray,
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pget_1fapl_1core(JNIEnv *, jclass, jlong, jlongArray, jlongArray,
                                                               jbooleanArray);
 
 /*

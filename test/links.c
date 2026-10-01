@@ -9457,7 +9457,7 @@ external_set_elink_fapl2(hid_t fapl, bool new_format)
 
     /* create fapl for the target file to be a "core" file */
     core_fapl = h5_fileaccess();
-    if (H5Pset_fapl_core(core_fapl, (size_t)CORE_INCREMENT, true) < 0)
+    if (H5Pset_fapl_core(core_fapl, 0, (size_t)CORE_INCREMENT, true) < 0)
         TEST_ERROR;
 
     /* set up name for external linked target file: "extlinks17"  */
@@ -9513,7 +9513,7 @@ external_set_elink_fapl2(hid_t fapl, bool new_format)
         TEST_ERROR;
 
     /* create fapl to be a "core" file without backing store */
-    if (H5Pset_fapl_core(core_fapl, (size_t)CORE_INCREMENT, false) < 0)
+    if (H5Pset_fapl_core(core_fapl, 0, (size_t)CORE_INCREMENT, false) < 0)
         TEST_ERROR;
 
     /* Set file access property list for link access to use the "core" driver */
@@ -9629,7 +9629,7 @@ external_set_elink_fapl3(bool new_format)
 
     /* create fapl for the target file to be a "core" file */
     core_fapl = h5_fileaccess();
-    if (H5Pset_fapl_core(core_fapl, (size_t)CORE_INCREMENT, true) < 0)
+    if (H5Pset_fapl_core(core_fapl, 0, (size_t)CORE_INCREMENT, true) < 0)
         TEST_ERROR;
 
     stdio_fapl = h5_fileaccess();
