@@ -92,7 +92,11 @@ static herr_t H5TS__dec_dlftt(void);
 bool H5_PKG_INIT_VAR = false;
 
 /* Per-thread info */
+#ifdef H5_HAVE_WIN_THREADS
+H5TS_key_t H5TS_thrd_info_key_g = TLS_OUT_OF_INDEXES;
+#else
 H5TS_key_t H5TS_thrd_info_key_g;
+#endif
 
 /*****************************/
 /* Library Private Variables */
@@ -976,6 +980,9 @@ H5TS__tinfo_term(void)
     /* Release key for thread-specific API contexts */
     if (H5_UNLIKELY(H5TS_key_delete(H5TS_thrd_info_key_g) < 0))
         HGOTO_DONE(FAIL);
+#ifdef H5_HAVE_WIN_THREADS
+    H5TS_thrd_info_key_g = TLS_OUT_OF_INDEXES;
+#endif
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
