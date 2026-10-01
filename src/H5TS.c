@@ -35,7 +35,7 @@
 #include "H5Eprivate.h" /* Error handling                      */
 #include "H5TSpkg.h"    /* Threadsafety                        */
 
-#ifdef H5_HAVE_INTERNAL_THREADS
+#ifdef H5_HAVE_THREADS
 
 /****************/
 /* Local Macros */
@@ -60,13 +60,11 @@ H5TS_api_info_t H5TS_api_info_p;
 /* Library Private Variables */
 /*****************************/
 
-#ifdef H5_HAVE_INTERNAL_THREADS
 /* Global thread pool */
 H5TS_pool_t *H5TS_pool_g = NULL;
 
 /* Whether there are concurrent threads in the library (from internal spawning) */
 bool H5TS_currently_concurrent_g = false;
-#endif /* H5_HAVE_INTERNAL_THREADS */
 
 /*******************/
 /* Local Variables */
@@ -158,7 +156,6 @@ H5TSmutex_release(unsigned *lock_count)
 } /* end H5TSmutex_release() */
 #endif /* H5_HAVE_THREADSAFE_API */
 
-#ifdef H5_HAVE_INTERNAL_THREADS
 /*--------------------------------------------------------------------------
  * Function:    H5TSset_internal_threads
  *
@@ -210,6 +207,5 @@ H5TSset_internal_threads(unsigned num_threads)
 done:
     FUNC_LEAVE_API(ret_value);
 } /* end H5TSset_internal_threads() */
-#endif /* H5_HAVE_INTERNAL_THREADS */
 
-#endif /* H5_HAVE_INTERNAL_THREADS */
+#endif /* H5_HAVE_THREADS */

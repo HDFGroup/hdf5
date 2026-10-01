@@ -71,7 +71,8 @@ We would like to thank the many HDF5 community members who contributed to this r
    The internal thread pool lets the library parallelize the internals of a
    single API call using its own worker threads. It adds no application
    threads, and its workers never enter the public API, so it is not a build-time
-   choice exposed through CMake. It is built in wherever a threading package is available.
+   choice exposed through CMake. It is built in wherever a threading package is
+   available, except in a static library on Windows.
 
    Note that nothing in the library is threaded until the application enables it via
    H5TSset_internal_threads().

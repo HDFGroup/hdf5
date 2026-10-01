@@ -37,7 +37,7 @@
 #include "H5Epkg.h"      /* Error handling                      */
 #include "H5TSpkg.h"     /* Threadsafety                        */
 
-#ifdef H5_HAVE_INTERNAL_THREADS
+#ifdef H5_HAVE_THREADS
 
 /****************/
 /* Local Macros */
@@ -140,11 +140,9 @@ H5TS__init_package(void)
         HGOTO_DONE(FAIL);
 #endif
 
-#ifdef H5_HAVE_INTERNAL_THREADS
     /* Initialize the mutex between the library's own worker threads */
     if (H5_UNLIKELY(H5TS_mutex_init(&H5TS_api_info_p.internal_mutex, H5TS_MUTEX_TYPE_PLAIN) < 0))
         HGOTO_DONE(FAIL);
-#endif
     H5TS_atomic_init_uint(&H5TS_api_info_p.attempt_lock_count, 0);
 
     /* Initialize per-thread library info */
@@ -182,9 +180,7 @@ H5TS_term_package(void)
     H5TS_rwlock_destroy(&H5TS_api_info_p.api_lock);
 #endif
 
-#ifdef H5_HAVE_INTERNAL_THREADS
     H5TS_mutex_destroy(&H5TS_api_info_p.internal_mutex);
-#endif
     H5TS_atomic_destroy_uint(&H5TS_api_info_p.attempt_lock_count);
 
     /* Check if info for thread has been created, free it if so */
@@ -491,7 +487,6 @@ done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_first_thread_init() */
 
-#ifdef H5_HAVE_INTERNAL_THREADS
 /*--------------------------------------------------------------------------
  * Function:    H5TS_internal_lock
  *
@@ -545,7 +540,6 @@ H5TS_internal_unlock(void)
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_internal_unlock() */
-#endif /* H5_HAVE_INTERNAL_THREADS */
 
 /*--------------------------------------------------------------------------
  * Function:    H5TS__tinfo_init
@@ -939,13 +933,11 @@ H5TS_top_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-#ifdef H5_HAVE_INTERNAL_THREADS
     /* Destroy global thread pool if it exists */
     if (H5TS_pool_g) {
         (void)H5TS_pool_destroy(H5TS_pool_g);
         H5TS_pool_g = NULL;
     }
-#endif /* H5_HAVE_INTERNAL_THREADS */
 
     FUNC_LEAVE_NOAPI(n)
 }
@@ -989,4 +981,4 @@ done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__tinfo_term() */
 
-#endif /* H5_HAVE_THREADSAFE_API */
+#endif /* H5_HAVE_THREADS */
