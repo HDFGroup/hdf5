@@ -28,7 +28,7 @@ public interface H5L_iterate_t extends H5L_iterate2_t.Function {
      *
      *  application callback for each group
      *
-     *  @param loc_id    the ID for the group being iterated over
+     *  @param group     the ID for the group being iterated over
      *  @param name      the name of the current link
      *  @param info      the link's "info" struct
      *  @param op_data   the operator data passed in to H5Literate

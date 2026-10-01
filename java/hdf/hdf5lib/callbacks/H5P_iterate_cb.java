@@ -28,9 +28,9 @@ public interface H5P_iterate_cb extends org.hdfgroup.javahdf5.H5P_iterate_t.Func
      *
      *  application callback for each property list
      *
-     *  @param plist     the ID for the property list being iterated over
-     *  @param name      the name of the current property list
-     *  @param op_data   the operator data passed in to H5Piterate
+     *  @param id         the ID for the property list being iterated over
+     *  @param name       the name of the current property list
+     *  @param iter_data  the operator data passed in to H5Piterate
      *
      *  @return operation status
      *      A. Zero causes the iterator to continue, returning zero when all

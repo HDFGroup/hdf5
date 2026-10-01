@@ -28,9 +28,9 @@ public interface H5E_walk_cb extends H5E_walk2_t.Function {
      *
      *  application callback for each error stack element
      *
-     *  @param nidx      the index of the current error stack element
-     *  @param info      the error stack "info" struct
-     *  @param op_data   the operator data passed in to H5Ewalk
+     *  @param n             the index of the current error stack element
+     *  @param err_desc      the error stack "info" struct
+     *  @param client_data   the operator data passed in to H5Ewalk
      *
      *  @return operation status
      *      A. Zero causes the iterator to continue, returning zero when all

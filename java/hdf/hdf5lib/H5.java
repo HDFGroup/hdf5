@@ -92,7 +92,7 @@ import org.slf4j.LoggerFactory;
  * This code is the called by Java programs to access the entry points of the HDF5 library. Each routine wraps
  * a single HDF5 entry point, generally with the arguments and return codes analogous to the C interface.
  * <p>
- * For details of the HDF5 library, @see @ref RM
+ * For details of the HDF5 library, see also @ref RM
  * <hr>
  * <p>
  * <b>Mapping of arguments for Java</b>
@@ -132,7 +132,7 @@ import org.slf4j.LoggerFactory;
  * <td>java.lang.String</td>
  * </tr>
  * <tr>
- * <td>void * <br />
+ * <td>void * <br>
  * (i.e., pointer to Any)</td>
  * <td>Special -- see @ref HDFARRAY</td>
  * </tr>
@@ -147,7 +147,7 @@ import org.slf4j.LoggerFactory;
  * rather than just return <i>int</i> as in the C. Functions that return a value are declared
  * equivalent to the C function.
  * However, in most cases the Java method will raise an exception instead of returning an error code.
- * @see @ref ERRORS.
+ * See also @ref ERRORS.
  * <p>
  * Java does not support pass by reference of arguments, so arguments that are returned through <b>OUT</b>
  * parameters must be wrapped in an object or array. The Java API for HDF consistently wraps arguments in
@@ -263,7 +263,7 @@ import org.slf4j.LoggerFactory;
  *          @ref ERRORS hdf.hdf5lib.HDF5Exception<br />
  *          <a href="https://hdfgroup.org/HDF5/">HDF5</a>
  *
- * For details of the HDF5 library, @see @ref RM
+ * For details of the HDF5 library, see also @ref RM
  */
 
 /**
@@ -274,9 +274,9 @@ import org.slf4j.LoggerFactory;
  * This code is the called by Java programs to access the entry points of the HDF5 library. Each routine wraps
  * a single HDF5 entry point, generally with the arguments and return codes analogous to the C interface.
  *
- * @see H5, C-API
+ * @ref H5, C-API
  *
- * @see @ref H5_UG, User Guide
+ * @ref H5_UG, User Guide
  *
  */
 public class H5 implements java.io.Serializable {
@@ -832,9 +832,9 @@ public class H5 implements java.io.Serializable {
      * An HDF5 attribute is a small metadata object describing the nature and/or intended usage of a primary
      *data object. A primary data object may be a dataset, group, or committed datatype.
      *
-     * @see H5A, C-API
+     * @ref H5A, C-API
      *
-     * @see @ref H5A_UG, User Guide
+     * @ref H5A_UG, User Guide
      **/
 
     /**
@@ -3529,9 +3529,9 @@ public class H5 implements java.io.Serializable {
     /**
      * @defgroup JH5D Java Datasets (H5D) Interface
      *
-     * @see H5D, C-API
+     * @ref H5D, C-API
      *
-     * @see @ref H5D_UG, User Guide
+     * @ref H5D_UG, User Guide
      **/
 
     /**
@@ -5990,9 +5990,9 @@ public class H5 implements java.io.Serializable {
      *
      * @defgroup JH5E Java Error (H5E) Interface
      *
-     * @see H5E, C-API
+     * @ref H5E, C-API
      *
-     * @see @ref H5E_UG, User Guide
+     * @ref H5E_UG, User Guide
      */
 
     /**
@@ -6604,9 +6604,9 @@ public class H5 implements java.io.Serializable {
      *
      * @defgroup JH5ES Java Event Set (H5ES) Interface
      *
-     * @see H5ES, C-API
+     * @ref H5ES, C-API
      *
-     * @see @ref H5ES_UG, User Guide
+     * @ref H5ES_UG, User Guide
      */
 
     // /////// unimplemented ////////
@@ -6634,9 +6634,9 @@ public class H5 implements java.io.Serializable {
      *
      * @defgroup JH5F Java File (H5F) Interface
      *
-     * @see H5F, C-API
+     * @ref H5F, C-API
      *
-     * @see @ref H5F_UG, User Guide
+     * @ref H5F_UG, User Guide
      */
 
     /**
@@ -6740,17 +6740,11 @@ public class H5 implements java.io.Serializable {
      * @param flags
      *            File access flags. Possible values include:
      *            <ul>
-     *            <li>
-     *            @ref H5F_ACC_RDWR Allow read and write access to file.</li>
-     *            <li>
-     *            @ref H5F_ACC_RDONLY Allow read-only access to file.</li>
-     *            <li>
-     *            @ref H5F_ACC_TRUNC Truncate file, if it already exists, erasing all data previously stored
-     *                               in the file.</li>
-     *            <li>
-     *            @ref H5F_ACC_EXCL Fail if file already exists.</li>
-     *            <li>
-     *            @ref H5P_DEFAULT Apply default file access and creation properties.</li>
+     *            <li>@ref H5F_ACC_RDWR Allow read and write access to file.</li>
+     *            <li>@ref H5F_ACC_RDONLY Allow read-only access to file.</li>
+     *            <li>@ref H5F_ACC_TRUNC Truncate file, if it already exists, erasing all data previously
+     * stored in the file.</li> <li>@ref H5F_ACC_EXCL Fail if file already exists.</li> <li>@ref H5P_DEFAULT
+     * Apply default file access and creation properties.</li>
      *            </ul>
      *
      * @param create_id
@@ -7668,9 +7662,9 @@ public class H5 implements java.io.Serializable {
     /**
      * @defgroup JH5G Java Group (H5G) Interface
      *
-     * @see H5G, C-API
+     * @ref H5G, C-API
      *
-     * @see @ref H5G_UG, User Guide
+     * @ref H5G_UG, User Guide
      **/
 
     /**
@@ -8666,9 +8660,9 @@ public class H5 implements java.io.Serializable {
     /**
      * @defgroup JH5I Java Identifier (H5I) Interface
      *
-     * @see H5I, C-API
+     * @ref H5I, C-API
      *
-     * @see @ref H5I_UG, User Guide
+     * @ref H5I_UG, User Guide
      **/
 
     /**
@@ -9069,9 +9063,9 @@ public class H5 implements java.io.Serializable {
     /**
      * @defgroup JH5L Java Link (H5L) Interface
      *
-     * @see H5L, C-API
+     * @ref H5L, C-API
      *
-     * @see @ref H5L_UG, User Guide
+     * @ref H5L_UG, User Guide
      **/
 
     /**
@@ -10031,9 +10025,9 @@ public class H5 implements java.io.Serializable {
     /**
      * @defgroup JH5O Java Object (H5O) Interface
      *
-     * @see H5O, C-API
+     * @ref H5O, C-API
      *
-     * @see @ref H5O_UG, User Guide
+     * @ref H5O_UG, User Guide
      **/
 
     /**
@@ -11340,9 +11334,9 @@ public class H5 implements java.io.Serializable {
     /**
      * @defgroup JH5P Java Property List (H5P) Interface
      *
-     * @see H5P, C-API
+     * @ref H5P, C-API
      *
-     * @see @ref H5P_UG, User Guide
+     * @ref H5P_UG, User Guide
      **/
 
     /**
@@ -12493,8 +12487,7 @@ public class H5 implements java.io.Serializable {
      * H5Pget_filter2 returns information about a filter, specified by its filter number, in a filter
      * pipeline, specified by the property list with which it is associated.
      *
-     * @see public static int H5Pget_filter(int plist, int filter_number, int[] flags, int[] cd_nelmts, int[]
-     *      cd_values, int namelen, String[] name, int[] filter_config)
+     * @see #H5Pget_filter(long, int, int[], long[], int[], long, String[], int[])
      *
      **/
     private static int H5Pget_filter2(long plist, int filter_number, int[] flags, long[] cd_nelmts,
@@ -18096,9 +18089,9 @@ public class H5 implements java.io.Serializable {
     /**
      * @defgroup JH5PL Java Plugin (H5PL) Interface
      *
-     * @see H5PL, C-API
+     * @ref H5PL, C-API
      *
-     * @see @ref H5PL_UG, User Guide
+     * @ref H5PL_UG, User Guide
      **/
 
     /**
@@ -18386,9 +18379,9 @@ public class H5 implements java.io.Serializable {
     /**
      * @defgroup JH5R Java Reference (H5R) Interface
      *
-     * @see H5R, C-API
+     * @ref H5R, C-API
      *
-     * @see @ref H5R_UG, User Guide
+     * @ref H5R_UG, User Guide
      * @deprecated As of HDF5 1.12.0 in favor of H5Rcreate_object(), H5Rcreate_region() and H5Rcreate_attr()
      **/
     @Deprecated
@@ -18668,7 +18661,7 @@ public class H5 implements java.io.Serializable {
      *
      * H5Rget_obj_type2 Retrieves the type of object that an object reference points to.
      *
-     * @see public static int H5Rget_obj_type(int loc_id, int ref_type, byte ref[])
+     * @see #H5Rget_obj_type(long, int, byte[])
      **/
     private static int H5Rget_obj_type2(long loc_id, int ref_type, byte ref[], int[] obj_type)
         throws HDF5LibraryException, NullPointerException, HDF5FunctionArgumentException
@@ -19335,7 +19328,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5S, C-API
      *
-     * @see @ref H5S_UG, User Guide
+     * @ref H5S_UG, User Guide
      **/
 
     /**
@@ -20809,7 +20802,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5T, C-API
      *
-     * @see @ref H5T_UG, User Guide
+     * @ref H5T_UG, User Guide
      **/
 
     /**
@@ -23255,7 +23248,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5VL, C-API
      *
-     * @see @ref H5VL_UG, User Guide
+     * @ref H5VL_UG, User Guide
      **/
 
     /**
@@ -23594,7 +23587,7 @@ public class H5 implements java.io.Serializable {
      *
      * @see H5Z, C-API
      *
-     * @see @ref H5Z_UG, User Guide
+     * @ref H5Z_UG, User Guide
      **/
 
     /**

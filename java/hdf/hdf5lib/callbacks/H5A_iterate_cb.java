@@ -28,9 +28,9 @@ public interface H5A_iterate_cb extends org.hdfgroup.javahdf5.H5A_operator2_t.Fu
      *
      *  application callback for each attribute
      *
-     *  @param loc_id    the ID for the group or dataset being iterated over
-     *  @param name      the name of the current attribute about the object
-     *  @param info      the attribute's "info" struct
+     *  @param location_id  the ID for the group or dataset being iterated over
+     *  @param attr_name    the name of the current attribute about the object
+     *  @param ainfo        the attribute's "info" struct
      *  @param op_data   the operator data passed in to H5Aiterate
      *
      *  @return operation status

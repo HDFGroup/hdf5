@@ -30,7 +30,7 @@ import hdf.hdf5lib.exceptions.HDF5JavaException;
  * Variant interfaces convert a section of an array, and also can convert to
  * sub-classes of Java <b>Number</b>.
  * <P>
- * @see @ref HDFARRAY.
+ * @ref HDFARRAY.
  */
 
 public class HDFNativeData {
