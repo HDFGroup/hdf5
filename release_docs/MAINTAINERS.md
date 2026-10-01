@@ -6,10 +6,48 @@ This document is a catch-all file with general notes for HDF5 library maintainer
 
 ## Table of Contents
 
+* [Updating the installed `hdf5-config.cmake` CMake configuration file](#updating-the-installed-hdf5-config-cmake-cmake-configuration-file)
+    * [CMake variables for new features](#cmake-variables-for-new-features)
+    * [PRIVATE dependencies](#private-dependencies)
 * [Maintaining external libraries built with CMake FetchContent](#maintaining-external-libraries-built-with-cmake-fetchcontent)
     * [Updating libraries to new versions](#updating-libraries-to-new-versions)
 
 ---
+
+## Updating the installed `hdf5-config.cmake` CMake configuration file
+
+### CMake variables for new features
+
+When a new feature is added to the library, developers should consider whether the ability to check
+for the existence of that feature should be programmatically available in the CMake logic for a
+project which uses HDF5. If so, an entry should be added under the "User Options" section such that
+the enabled/disabled status of that feature will be reflected in the installed file.
+
+### PRIVATE dependencies
+
+When `target_link_libraries()` is used to add linking against a library with `PRIVATE` scope for a
+particular CMake target exposed by the installed `hdf5-config.cmake`, that dependency may need to be
+propagated as a transitive link requirement with a call to `find_dependency()` if the target is a
+static library. Otherwise, a CMake project trying to use that target may fail during configuration
+with an error similar to:
+
+```CMake
+The link interface of target "hdf5-static" contains:
+
+  ZLIB::ZLIB
+
+but the target was not found.  Possible reasons include:
+
+  * There is a typo in the target name.
+  * A find_package call is missing for an IMPORTED target.
+  * An ALIAS target is missing.
+```
+
+Failing to propagate these dependencies creates a situation where the CMake project using HDF5 has
+to know ahead of time which `find_package()` calls it needs to include in its own logic to satisfy the
+requirements of HDF5's CMake targets. For testing, developers should use a standalone CMake project
+which tries linking against one of an HDF5 installation's static library CMake targets that links
+against the `PRIVATE` library.
 
 ## Maintaining external libraries built with CMake FetchContent
 
