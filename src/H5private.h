@@ -1239,18 +1239,9 @@ extern char H5_lib_vers_info_g[];
 /* Local variable for 'disable locking for this thread' (DLFTT) state */
 #define H5DLFTT_DECL  /* */
 
-#ifdef H5_HAVE_INTERNAL_THREADS
-/* No API lock, but the thread-local state this build relies on still needs
- * its one-time initialization, which the API lock would otherwise have
- * performed on the first API call.
- */
-#define H5_API_LOCK   H5TS_first_thread_init();
-#define H5_API_UNLOCK /* no-op */
-#else
 /* No locks (non-threadsafe builds) */
 #define H5_API_LOCK   /* no-op */
 #define H5_API_UNLOCK /* no-op */
-#endif
 
 #endif /* H5_HAVE_THREADSAFE_API */
 

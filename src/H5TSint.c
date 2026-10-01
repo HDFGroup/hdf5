@@ -467,14 +467,12 @@ done:
 } /* H5TS_api_unlock */
 #endif /* H5_HAVE_THREADSAFE_API */
 
-#ifndef H5_HAVE_THREADSAFE_API
 /*--------------------------------------------------------------------------
  * Function:    H5TS_first_thread_init
  *
- * Purpose:     Perform the one-time initialization of the thread-safety code.
- *
- *              This is used to set up per-thread state in builds with
- *              internal threads but no API lock.
+ * Purpose:     Perform the one-time initialization of the thread-safety code,
+ *              including the key for the per-thread API context and error
+ *              stack.  Safe to call more than once.
  *
  * Return:      Non-negative on success / Negative on failure
  *--------------------------------------------------------------------------
@@ -492,7 +490,6 @@ H5TS_first_thread_init(void)
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_first_thread_init() */
-#endif /* H5_HAVE_THREADSAFE_API */
 
 #ifdef H5_HAVE_INTERNAL_THREADS
 /*--------------------------------------------------------------------------

@@ -315,12 +315,10 @@ H5_DLL int  H5TS_top_term_package(void);
 H5_DLL herr_t               H5TS_thread_id(uint64_t *id);
 H5_DLL struct H5CX_node_t **H5TS_get_api_ctx_ptr(void);
 H5_DLL struct H5E_stack_t  *H5TS_get_err_stack(void);
-#endif /* H5_HAVE_INTERNAL_THREADS */
 
-#if defined(H5_HAVE_INTERNAL_THREADS) && !defined(H5_HAVE_THREADSAFE_API)
-/* One-time init, for builds with thread-local state but no API lock */
+/* One-time init of the thread-local state */
 H5_DLL herr_t H5TS_first_thread_init(void);
-#endif
+#endif /* H5_HAVE_INTERNAL_THREADS */
 
 #ifdef H5_HAVE_INTERNAL_THREADS
 /* Internal locking, between the library's own worker threads */

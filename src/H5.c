@@ -150,6 +150,14 @@ H5_init_library(void)
     if (H5_INIT_GLOBAL || H5_TERM_GLOBAL)
         HGOTO_DONE(SUCCEED);
 
+#ifdef H5_HAVE_INTERNAL_THREADS
+    /* Set up the per-thread API context and error stack before anything
+     * uses them.  The error stack isn't available yet, so no error is pushed.
+     */
+    if (H5_UNLIKELY(H5TS_first_thread_init() < 0))
+        HGOTO_DONE(FAIL);
+#endif /* H5_HAVE_INTERNAL_THREADS */
+
     /* Check library version */
     /* (Will abort() on failure) */
     H5_check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
