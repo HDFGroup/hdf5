@@ -1,6 +1,7 @@
 JUnit version 4.13.2
 .testH5DArrayenum_rw
 .testH5DVLwrVL
+.testH5DArrayVL_datatype_ids_stable
 .testH5Dget_storage_size
 .testH5DArraywr
 .testH5Diterate_write
@@ -18,6 +19,7 @@ JUnit version 4.13.2
 .testH5Dget_access_plist
 .testH5Dread_vlen_of_nested_compound
 .testH5DArray_datatype_ids_stable
+.testH5Dcompound_of_vlen_datatype_ids_stable
 .testH5DArray_string_buffer_flat_StringArray
 .testH5Dget_space_closed
 .testH5DArray_string_buffer_flat_StringArray_write
@@ -31,9 +33,10 @@ JUnit version 4.13.2
 .testH5DwriteVL_vlen_element_not_arraylist
 .testH5Dget_type_closed
 .testH5Dwrite_compound_of_vlen
+.testH5DVL_datatype_ids_stable
 .testH5DwriteVL_undersized_buffer
 
 Time:  XXXX
 
-OK (33 tests)
+OK (36 tests)
 
