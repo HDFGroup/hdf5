@@ -43,6 +43,21 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 # ⚠️ Breaking Changes
 
+- When a `find_package (HDF5 ...)` call within a CMake project uses HDF5's `hdf5-config.cmake`
+  configuration file (a Config mode search), requesting both "shared" and "static" components
+  simultaneously will now fail. Only one of the "shared" or "static" components should be requested
+  when locating HDF5. Consequently, the `HDF5_LIB_TYPE` CMake variable set by the configuration file
+  will only be set to one of "shared" or "static", depending on the requested library type, rather
+  than potentially being a list of both. For the time being, both sets of HDF5's "-shared" and
+  "-static" CMake targets will continue to be available after the `find_package (HDF5 ...)` call,
+  regardless of which library type was requested.
+
+- When a `find_package (HDF5 ...)` call within a CMake project uses HDF5's `hdf5-config.cmake`
+  configuration file (a Config mode search), the consuming project may now be required to have
+  one or more CMake languages enabled, depending on the specific COMPONENTS requested. HDF5's
+  configuration file previously enabled these languages automatically with calls to
+  `enable_language()`, but these calls were removed in favor of checking the enabled languages
+  and issuing an error if required languages aren't enabled.
 
 # 🪦 Deprecations
 
@@ -51,8 +66,41 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Configuration
 
+### Various improvements in installed CMake package configuration file
+
+   - Fixed `find_dependency()` calls so that `PRIVATE`-linked libraries are only propagated as
+     transitive link requirements for static library targets (Fixes GitHub issue #6347)
+   - Added missing `find_dependency()` calls for some `PRIVATE`-linked libraries
+   - Fixed an issue where `find_package()` for parallel-enabled HDF5 installations may fail when
+     trying to locate MPI Fortran support, even if HDF5 Fortran support isn't requested (Fixes
+     GitHub issue #6366)
+   - Fixed an issue where the `HDF5_LIB_TYPE` CMake variable would be undefined if some HDF5
+     components were requested in a `find_package()` call, but "shared" or "static" was not requested
+   - Removed a call to `enable_language()` in favor of checking the currently enabled CMake languages
+     and failing if a required language isn't enabled
+   - Added a CMake variable for the enabled/disabled status of the "digitally signed plugins"
+     feature
+   - Fixed the CMake variable for the enabled/disabled status of the `HDF5_DIMENSION_SCALES_NEW_REF`
+     option
+   - Reduced the scope of some temporary variables and modifications so they don't propagate to
+     consuming CMake projects
 
 ## Library
+
+### Added support for internally concurrent multithreaded reads of chunked datasets
+
+   Added 3 new functions to support this: H5TSset_internal_threads(),
+   H5Pset_io_threads(), and H5Pget_io_threads().
+
+   This feature internally parallelizes read operations on chunked datasets.
+   H5TSset_internal_threads() is used to enable the feature globally, while
+   H5Pset_io_threads() can be used to disable the feature on a per-operation
+   basis. These functions are only available when the library is configured with
+   HDF5_ENABLE_CONCURRENCY=ON. When performing an internally threaded read, the
+   library will concurrently read from disk, unfilter, and scatter to memory all
+   chunks in a read operation on a chunked dataset. Currently each of these
+   sub-operations is serialized (protected by a mutex), so there is not yet
+   likely to be any performance improvement.
 
 ## Parallel Library
 
@@ -76,6 +124,27 @@ We would like to thank the many HDF5 community members who contributed to this r
 # 🪲 Bug Fixes
 
 ## Library
+
+### Fixed a deadlock in the ROS3 VFD on Windows
+
+   When an HDF5 application running on Windows and using the ROS3 VFD exited normally,
+   a deadlock would occur when the VFD called the aws-c-s3 library's cleanup function
+   during process shutdown. This was due to the aws-c-s3 library attempting to join
+   threads while the Windows loader lock was held. As a temporary workaround for Windows
+   builds of the library, the aws-c-s3 cleanup logic has been moved to the VFD's
+   termination callback (other platforms still use an atexit() handler) and will be
+   skipped if the VFD determines that the process is being shutdown. Due to the current
+   architecture of the library, the aws-c-s3 library's resources can only be properly
+   cleaned up if the HDF5 application makes sure to call H5close() before exiting.
+   Otherwise, memory leaks and other resource cleanup issues may be observed.
+
+   Fixes GitHub issue #6560
+
+### Fixed a heap buffer overflow when decoding object header messages
+
+   The size stored in an object header message header was checked against the chunk before the rest of that message header was decoded, allowing a message body to start up to four bytes further into the chunk than the check accounted for. A corrupted or fuzzed file could declare a size that passed the check and still extended past the end of the chunk image, and the message's decode callback was then handed a buffer end outside the allocation. `H5O__chunk_deserialize()` now checks the message size once the whole message header has been decoded.
+
+   Fixes GitHub issue #6401
 
 ### Fixed memory leaks and ID reference count issues when pushing an error to an error stack that is full
 
@@ -110,7 +179,21 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    Fixes CVE-2026-19024
 
+### Fixed crashes when reading datasets with malformed N-Bit or Fletcher32 filter metadata
+
+   Reading a dataset from a corrupted or maliciously crafted file could crash the library in the N-Bit and Fletcher32 filter decode paths. The N-Bit filter dereferenced its client-data parameter array before validating it, crashing when the array was empty or NULL, and walked the compressed chunk during decompression without bounding the input against the chunk size, causing out-of-bounds reads. It also indexed that parameter array at offsets taken from the datatype description held in the array itself, without bounding those offsets against the number of parameters supplied, so a parameter list stopping short of the datatype it described was read past its end. The Fletcher32 filter subtracted the 4-byte checksum length from the chunk size without checking that the chunk was at least that large, underflowing the length passed to the checksum routine. These filters now validate their parameters and buffer sizes and fail with an error instead of crashing.
+
+   Fixes GitHub issues #6488, #6489, #6490, and #6492
+
+   Fixes CVE-2026-19026, CVE-2026-19027, and CVE-2026-19028
+
 ## Java Library
+
+### Fixed datatype ID leaks when reading or writing nested datatypes through the JNI
+
+   The object-tree read and write helpers in the JNI derived a base datatype from the memory type with `H5Tget_super()` for the variable-length, array and complex classes, but never closed it. Because an `hid_t` is not reclaimed when a native method returns, every read or write of such data leaked at least one datatype ID for the lifetime of the process, and a nested type leaked one per level. The helpers now close the derived type on both the success and error paths.
+
+   Fixes GitHub issue #6592
 
 ## Configuration
 
