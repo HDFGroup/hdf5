@@ -140,6 +140,15 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    Fixes GitHub issue #6560
 
+### Fixed a heap buffer over-read when traversing a malformed external link
+
+   The default external link traversal callback located the target file name and object
+   path inside the link's user data with `strlen()`, without checking that the buffer was
+   NULL-terminated or large enough to hold both strings. A corrupted or fuzzed file whose
+   external link data was not properly terminated caused a read past the end of the udata
+   buffer. `H5L__extern_traverse()` now validates the buffer against its stored size before
+   parsing, the same way `H5Lunpack_elink_val()` does.
+
 ### Fixed a heap buffer overflow when decoding object header messages
 
    The size stored in an object header message header was checked against the chunk before the rest of that message header was decoded, allowing a message body to start up to four bytes further into the chunk than the check accounted for. A corrupted or fuzzed file could declare a size that passed the check and still extended past the end of the chunk image, and the message's decode callback was then handed a buffer end outside the allocation. `H5O__chunk_deserialize()` now checks the message size once the whole message header has been decoded.
