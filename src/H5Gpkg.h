@@ -396,6 +396,7 @@ H5_DLL herr_t H5G__node_free(H5G_node_t *sym);
 H5_DLL herr_t H5G__link_to_ent(H5F_t *f, H5HL_t *heap, const H5O_link_t *lnk, H5O_type_t obj_type,
                                const void *crt_info, H5G_entry_t *ent);
 H5_DLL herr_t H5G__link_to_loc(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, H5G_loc_t *obj_loc);
+H5_DLL herr_t H5G__link_append_table(H5G_link_table_t *ltable, size_t *capacity, const H5O_link_t *lnk);
 H5_DLL herr_t H5G__link_sort_table(H5G_link_table_t *ltable, H5_index_t idx_type, H5_iter_order_t order);
 H5_DLL herr_t H5G__link_iterate_table(const H5G_link_table_t *ltable, hsize_t skip, hsize_t *last_lnk,
                                       const H5G_lib_iterate_t op, void *op_data);
