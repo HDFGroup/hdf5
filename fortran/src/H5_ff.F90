@@ -177,10 +177,12 @@ CONTAINS
 !! \param error \fortran_error
 !!
   SUBROUTINE h5open_f(error)
-    USE H5F, ONLY : h5fget_obj_count_f, H5OPEN_NUM_OBJ
+    USE H5F, ONLY : h5fget_obj_count_f, H5OPEN_NUM_OBJ, H5OPEN_NUM_OBJ_BY_TYPE
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: error
     INTEGER(SIZE_T) :: H5OPEN_NUM_OBJ_LOC = 0
+    INTEGER, DIMENSION(1:4) :: obj_type_loc
+    INTEGER :: iobj
     INTERFACE
 
        INTEGER FUNCTION h5init_types_c(p_types, f_types, i_types) &
@@ -803,6 +805,20 @@ CONTAINS
     H5_SZIP_EC_OM_F = H5LIB_flags(1)
     H5_SZIP_NN_OM_F = H5LIB_flags(2)
 
+    ! Record what this call left open so that h5fget_obj_count_f can exclude it.
+    ! The counts are taken per object type rather than assuming which types the
+    ! initialization above created. Each count goes through a local variable
+    ! because h5fget_obj_count_f reads these by use association.
+    obj_type_loc(1) = H5F_OBJ_FILE_F
+    obj_type_loc(2) = H5F_OBJ_DATASET_F
+    obj_type_loc(3) = H5F_OBJ_GROUP_F
+    obj_type_loc(4) = H5F_OBJ_DATATYPE_F
+
+    DO iobj = 1, 4
+       CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), obj_type_loc(iobj), H5OPEN_NUM_OBJ_LOC, error)
+       H5OPEN_NUM_OBJ_BY_TYPE(iobj) = H5OPEN_NUM_OBJ_LOC
+    ENDDO
+
     CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), H5F_OBJ_ALL_F, H5OPEN_NUM_OBJ_LOC,  error)
 
     H5OPEN_NUM_OBJ = H5OPEN_NUM_OBJ_LOC
@@ -817,7 +833,7 @@ CONTAINS
 !! \param error \fortran_error
 !!
   SUBROUTINE h5close_f(error)
-    USE H5F, ONLY : h5fget_obj_count_f, H5OPEN_NUM_OBJ
+    USE H5F, ONLY : H5OPEN_NUM_OBJ, H5OPEN_NUM_OBJ_BY_TYPE
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: error
     INTERFACE
@@ -842,8 +858,9 @@ CONTAINS
          floating_types, FLOATING_TYPES_LEN, &
          integer_types, INTEGER_TYPES_LEN )
 
-    ! Reset the number of open objects from h5open_f to zero
-    CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), H5F_OBJ_ALL_F, H5OPEN_NUM_OBJ,  error)
+    ! Reset the counts of the objects created by h5open_f.
+    H5OPEN_NUM_OBJ = 0
+    H5OPEN_NUM_OBJ_BY_TYPE = 0
 
   END SUBROUTINE h5close_f
 
