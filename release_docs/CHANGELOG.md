@@ -140,6 +140,16 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    Fixes GitHub issue #6560
 
+### Fixed the page buffer's minimum metadata threshold failure to protect B-tree, local heap and object header metadata pages
+
+The page buffer charges every page it holds to either `raw_count` or `meta_count`, counting `H5F_MEM_PAGE_DRAW` and `H5F_MEM_PAGE_GHEAP` pages as raw data and every other page as metadata. The minimum metadata reservation set by `H5Pset_page_buffer_size()` was not written as the complement of that test: it compared the page's type for equality with `H5F_MEM_PAGE_META`, which is an alias for `H5F_MEM_PAGE_SUPER`. A page entry's type is copied verbatim from the memory type of the access that brought the page into the buffer, so B-tree, local heap and object header pages carried other values and were evicted by raw data regardless of `min_meta_perc`, while still counting toward the threshold the reservation was measured against. In practice the reservation protected only the superblock and driver information pages. The classification is now made in one place, `H5MF_mem_page_type_is_raw()`, alongside its `H5F_mem_t` counterpart `H5MF_mem_type_is_raw()`, and both the page counts and the two reservations use it, so the metadata reservation protects the same population that `meta_count` measures.
+
+Fixes GitHub issue #6679.
+
+### Fixed the page buffer corrupting its page counts when a global heap page is freed
+
+`H5PB_remove_entry()` is documented as never being given a raw data page, and it decremented `meta_count` unconditionally on that basis. Its only caller, `H5MF__sect_small_merge()`, excluded `H5FD_MEM_DRAW` but not `H5FD_MEM_GHEAP`, so a freed global heap page could reach it. Such a page is charged to `raw_count` rather than `meta_count` by `H5PB__insert_entry()`, because `H5MF__alloc_pagefs()` passes the allocation type to `H5PB_add_new_page()`, and `H5PB_write()` reuses that entry without changing its type. Removing such a page therefore left `raw_count` too high and decremented `meta_count` for a page it had never counted. Both counts govern the minimum metadata and minimum raw data page protection, and because they are unsigned, `meta_count` could wrap and leave those reservations wrong for the remaining life of the file. The caller now excludes the global heap along with raw data, `H5PB_remove_entry()` asserts that the page it was given is metadata rather than silently accounting for a raw one, and every page count decrement in the page buffer asserts the count it is releasing is non-zero.
+
 ### Fixed a heap buffer overflow when decoding object header messages
 
    The size stored in an object header message header was checked against the chunk before the rest of that message header was decoded, allowing a message body to start up to four bytes further into the chunk than the check accounted for. A corrupted or fuzzed file could declare a size that passed the check and still extended past the end of the chunk image, and the message's decode callback was then handed a buffer end outside the allocation. `H5O__chunk_deserialize()` now checks the message size once the whole message header has been decoded.
