@@ -95,6 +95,7 @@ static int read_data(const char *fname, int ndims, hsize_t *dims, float **buf);
 static int test_attach_detach(void);
 static int test_is_scale_class_prefix(void);
 static int test_is_reserved_class_prefix(void);
+static int test_attach_scale_id_leak(void);
 
 #define RANK1     1
 #define RANK      2
@@ -148,14 +149,15 @@ static int test_is_reserved_class_prefix(void);
 #define FILENAME "test_ds"
 #define FILEEXT  ".h5"
 
-#define FILE1 "test_ds3.h5"
-#define FILE2 "test_ds4.h5"
-#define FILE3 "test_ds5.h5"
-#define FILE4 "test_ds6.h5"
-#define FILE5 "test_ds7.h5"
-#define FILE6 "test_ds8.h5"
-#define FILE7 "test_ds9.h5"
-#define FILE8 "test_ds10.h5"
+#define FILE1     "test_ds3.h5"
+#define FILE2     "test_ds4.h5"
+#define FILE3     "test_ds5.h5"
+#define FILE4     "test_ds6.h5"
+#define FILE5     "test_ds7.h5"
+#define FILE6     "test_ds8.h5"
+#define FILE7     "test_ds9.h5"
+#define FILE8     "test_ds10.h5"
+#define FILE_LEAK "test_ds_id_leak.h5"
 
 #define DIMENSION_LIST "DIMENSION_LIST"
 #define REFERENCE_LIST "REFERENCE_LIST"
@@ -215,6 +217,7 @@ main(void)
     nerrors += test_data() < 0 ? 1 : 0;
     nerrors += test_is_scale_class_prefix() < 0 ? 1 : 0;
     nerrors += test_is_reserved_class_prefix() < 0 ? 1 : 0;
+    nerrors += test_attach_scale_id_leak() < 0 ? 1 : 0;
 
     if (nerrors)
         goto error;
@@ -5701,6 +5704,116 @@ out:
         H5Tclose(atid);
         H5Dclose(dsid);
         H5Dclose(did);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+    H5_FAILED();
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
+ * test that H5DSattach_scale() does not leak the dataset IDs it opens while
+ * rewriting an existing REFERENCE_LIST attribute
+ *
+ * That rewriting loop only runs on the "new reference" code path, which
+ * H5DSwith_new_ref() selects when the library is built with
+ * H5_DIMENSION_SCALES_WITH_NEW_REF (-DHDF5_DIMENSION_SCALES_NEW_REF=ON) or
+ * when the object lives behind a VOL connector whose terminal connector is not
+ * the native one.  The test skips itself on the old-reference path, where the
+ * loop reopens nothing.
+ *
+ * Every reference already stored in the scale's REFERENCE_LIST used to leak one
+ * dataset ID, and the references themselves were never destroyed.  Both kept
+ * the file open, so a later H5Fcreate(H5F_ACC_TRUNC) on it failed with "unable
+ * to truncate a file which is already open".  Both symptoms are checked here.
+ *-------------------------------------------------------------------------
+ */
+static int
+test_attach_scale_id_leak(void)
+{
+    hid_t   fid       = H5I_INVALID_HID;
+    hid_t   sid       = H5I_INVALID_HID;
+    hid_t   dsid      = H5I_INVALID_HID;
+    hid_t   did       = H5I_INVALID_HID;
+    bool    new_ref   = false;
+    hsize_t dims[1]   = {4};
+    ssize_t ndatasets = 0;
+    int     i;
+
+    HL_TESTING2("H5DSattach_scale does not leak dataset IDs");
+
+    if ((fid = H5Fcreate(FILE_LEAK, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        goto out;
+
+    /* the dimension scale that all of the datasets below get attached to */
+    if ((dsid = H5Dcreate2(fid, "ds", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if (H5DSset_scale(dsid, "xdim") < 0)
+        goto out;
+
+    /* the leaking loop only exists on the new-reference path */
+    if (H5DSwith_new_ref(dsid, &new_ref) < 0)
+        goto out;
+
+    /* Attach the scale to several datasets.  On the new-reference path, each
+     * attach after the first rewrites the scale's REFERENCE_LIST attribute,
+     * reopening every reference already stored in it -- one leaked dataset ID
+     * apiece. */
+    for (i = 0; i < 4; i++) {
+        char dname[32];
+
+        snprintf(dname, sizeof(dname), "data%d", i);
+        if ((did = H5Dcreate2(fid, dname, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            goto out;
+        if (H5DSattach_scale(did, dsid, 0) < 0)
+            goto out;
+        if (H5Dclose(did) < 0)
+            goto out;
+        did = H5I_INVALID_HID;
+    }
+
+    /* the scale is the only dataset this test still holds open */
+    if ((ndatasets = H5Fget_obj_count(fid, H5F_OBJ_DATASET | H5F_OBJ_LOCAL)) < 0)
+        goto out;
+    if (ndatasets != 1) {
+        printf("    %ld dataset ID(s) open after attaching, expected 1\n", (long)ndatasets);
+        goto out;
+    }
+
+    if (H5Dclose(dsid) < 0)
+        goto out;
+    dsid = H5I_INVALID_HID;
+    if (H5Sclose(sid) < 0)
+        goto out;
+    sid = H5I_INVALID_HID;
+    if (H5Fclose(fid) < 0)
+        goto out;
+    fid = H5I_INVALID_HID;
+
+    /* With anything left open, the file cannot be truncated */
+    if ((fid = H5Fcreate(FILE_LEAK, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if (H5Fclose(fid) < 0)
+        goto out;
+    fid = H5I_INVALID_HID;
+
+    if (!new_ref) {
+        SKIPPED();
+        printf("    dimension scales do not use new references in this build\n");
+        return 0;
+    }
+
+    PASSED();
+    return 0;
+
+out:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(did);
+        H5Dclose(dsid);
         H5Sclose(sid);
         H5Fclose(fid);
     }
