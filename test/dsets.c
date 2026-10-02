@@ -7953,6 +7953,85 @@ error:
 } /* end test_filter_delete() */
 
 /*-------------------------------------------------------------------------
+ * Function: test_modify_filter_absent
+ *
+ * Purpose: Tests that H5Pmodify_filter fails for a filter that is not in
+ *          the pipeline, including when the pipeline is full.
+ *
+ *          H5Z_modify locates the filter with a loop that leaves
+ *          idx == nused when the filter is absent.  A not-found check of
+ *          idx > nused would let the absent case write to filter[nused],
+ *          which is past the end of the array once nused reaches nalloc
+ *          (H5Z_MAX_NFILTERS).
+ *
+ * Return: Success: 0
+ *  Failure: -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_modify_filter_absent(void)
+{
+    hid_t    dcpl = H5I_INVALID_HID; /* dataset creation property list ID */
+    unsigned cd_values[8];           /* filter client data values */
+    herr_t   ret;                    /* generic return value */
+    int      i;
+
+    TESTING("H5Pmodify_filter rejects a filter not in the pipeline");
+
+    for (i = 0; i < 8; i++)
+        cd_values[i] = 0xAAAAAAAAu;
+
+    /* Shuffle is not in a pipeline containing only fletcher32 */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_fletcher32(dcpl) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pmodify_filter(dcpl, H5Z_FILTER_SHUFFLE, 0, (size_t)1, cd_values);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    if (H5Pget_nfilters(dcpl) != 1)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    /* Fill the pipeline to H5Z_MAX_NFILTERS so nused == nalloc, and use
+     * cd_nelmts > H5Z_COMMON_CD_VALUES so a stray write would also leave
+     * behind a heap allocation */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    for (i = 0; i < H5Z_MAX_NFILTERS; i++)
+        if (H5Pset_filter(dcpl, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0, NULL) < 0)
+            TEST_ERROR;
+    if (H5Pget_nfilters(dcpl) != H5Z_MAX_NFILTERS)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pmodify_filter(dcpl, H5Z_FILTER_FLETCHER32, 0, (size_t)8, cd_values);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_modify_filter_absent() */
+
+/*-------------------------------------------------------------------------
  * Function: auxread_fdata
  *
  * Purpose: reads a dataset "NAME" from FID
@@ -19964,6 +20043,7 @@ main(void)
                     nerrors += (test_compare_dcpl(file) < 0 ? 1 : 0);
                     nerrors += (test_copy_dcpl(file, fapl) < 0 ? 1 : 0);
                     nerrors += (test_filter_delete(file) < 0 ? 1 : 0);
+                    nerrors += (test_modify_filter_absent() < 0 ? 1 : 0);
 
                     if (driver_is_default_compatible) {
                         nerrors += (test_filters_endianess() < 0 ? 1 : 0);
