@@ -297,8 +297,8 @@ Fixes GitHub issue #6679.
    selects the new-style reference path, which happens when the object's
    terminal VOL connector is not the native one -- a pass-through connector
    stacked over the native connector does not qualify -- or when the library is
-   built with `H5_DIMENSION_SCALES_WITH_NEW_REF`; the old-style path opens
-   nothing.
+   built with `H5_DIMENSION_SCALES_WITH_NEW_REF`; the old-style reference
+   path opens nothing.
 
 ## Fortran High-Level APIs
 
