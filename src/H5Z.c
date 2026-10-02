@@ -1255,11 +1255,13 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_ne
         pline->filter = x.filter;
     } /* end if */
 
-    /* Add the new filter to the pipeline */
+    /* Add the new filter to the pipeline.  A NULL name is resolved from the
+     * registered filter class when the pipeline is encoded or queried
+     * (H5O__pline_encode, H5P__get_filter). */
     idx                          = pline->nused;
     pline->filter[idx].id        = filter;
     pline->filter[idx].flags     = flags;
-    pline->filter[idx].name      = NULL; /*we'll pick it up later*/
+    pline->filter[idx].name      = NULL;
     pline->filter[idx].cd_nelmts = cd_nelmts;
     if (cd_nelmts > 0) {
         size_t i; /* Local index variable */

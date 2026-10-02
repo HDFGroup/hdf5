@@ -125,6 +125,12 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed memory leaks when decoding a dataset creation property list with filters
+
+   `H5Pdecode()` copied the name of each encoded filter and then discarded the copy, leaking it for every named filter in an encoded dataset creation property list, including on the error path. The decoder now skips over the encoded name.
+
+   When decoding the filter pipeline failed partway, for example because the encoded pipeline held more than `H5Z_MAX_NFILTERS` filters, `H5Pdecode()` also leaked the filters already decoded and the client data of the filter being decoded. The decoder now releases them before returning the error.
+
 ### Fixed a deadlock in the ROS3 VFD on Windows
 
    When an HDF5 application running on Windows and using the ROS3 VFD exited normally,

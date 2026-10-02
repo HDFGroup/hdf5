@@ -1361,12 +1361,17 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
     size_t          nused;               /* Number of filters used for pipeline */
     unsigned        enc_size;            /* Size of encoded value (in bytes) */
     uint64_t        enc_value;           /* Value to encode */
+    unsigned       *cd_values = NULL;    /* Client data values for the filter being decoded */
     size_t          u;                   /* Local index variable */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+
+    /* Set property default value, so the pipeline is valid to reset on error */
+    memset(pline, 0, sizeof(H5O_pline_t));
+    *pline = H5O_def_pline_g;
 
     /* Decode the size of size_t */
     enc_size = *(*pp)++;
@@ -1379,10 +1384,6 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
     nused = (size_t)enc_value;
 
-    /* Set property default value */
-    memset(pline, 0, sizeof(H5O_pline_t));
-    *pline = H5O_def_pline_g;
-
     for (u = 0; u < nused; u++) {
         H5Z_filter_info_t filter;   /* Filter info, for pipeline */
         uint8_t           has_name; /* Flag to indicate whether filter has a name */
@@ -1394,15 +1395,12 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
         /* decode filter flags */
         H5_DECODE_UNSIGNED(*pp, filter.flags);
 
-        /* decode value indicating if the name is encoded */
+        /* decode value indicating if the name is encoded.  H5Z_append()
+         * does not take a name from the caller, so skip over an encoded one. */
         has_name = *(*pp)++;
-        if (has_name) {
-            /* decode name */
-            filter.name = H5MM_xstrdup((const char *)(*pp));
+        if (has_name)
             *pp += H5Z_COMMON_NAME_LEN;
-        } /* end if */
-        else
-            filter.name = NULL;
+        filter.name = NULL;
 
         /* decode num elements */
         enc_size = *(*pp)++;
@@ -1410,26 +1408,32 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
         UINT64DECODE_VAR(*pp, enc_value, enc_size);
         filter.cd_nelmts = (size_t)enc_value;
 
-        if (filter.cd_nelmts) {
-            if (NULL == (filter.cd_values = (unsigned *)H5MM_malloc(sizeof(unsigned) * filter.cd_nelmts)))
+        if (filter.cd_nelmts)
+            if (NULL == (cd_values = (unsigned *)H5MM_malloc(sizeof(unsigned) * filter.cd_nelmts)))
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for cd_values");
-        } /* end if */
-        else
-            filter.cd_values = NULL;
 
         /* decode values */
         for (v = 0; v < filter.cd_nelmts; v++)
-            H5_DECODE_UNSIGNED(*pp, filter.cd_values[v]);
+            H5_DECODE_UNSIGNED(*pp, cd_values[v]);
 
         /* Add the filter to the I/O pipeline */
-        if (H5Z_append(pline, filter.id, filter.flags, filter.cd_nelmts, filter.cd_values) < 0)
+        if (H5Z_append(pline, filter.id, filter.flags, filter.cd_nelmts, cd_values) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline");
 
         /* Free cd_values, if it was allocated */
-        filter.cd_values = (unsigned *)H5MM_xfree(filter.cd_values);
+        cd_values = (unsigned *)H5MM_xfree(cd_values);
     } /* end for */
 
 done:
+    if (ret_value < 0) {
+        cd_values = (unsigned *)H5MM_xfree(cd_values);
+
+        /* Release the filters already added, since the caller only frees the
+         * property buffer */
+        if (H5O_msg_reset(H5O_PLINE_ID, pline) < 0)
+            HDONE_ERROR(H5E_PLIST, H5E_CANTRESET, FAIL, "can't release I/O pipeline message");
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5P__ocrt_pipeline_dec() */
 
