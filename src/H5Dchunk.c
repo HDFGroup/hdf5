@@ -3646,13 +3646,6 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
         H5Z_EDC_t err_detect;
         H5Z_cb_t  filter_cb;
 
-#ifndef H5_UNSAFE_CONCURRENCY
-        /* Lock internal mutex */
-        if (H5_UNLIKELY(H5TS_internal_lock() < 0))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't lock internal mutex");
-        mutex_held = true;
-#endif /* H5_UNSAFE_CONCURRENCY */
-
         /* Retrieve filter settings from API context. These must be protected by a mutex if using a
          * non-default DXPL. */
         if (H5_UNLIKELY(H5CX_get_err_detect(&err_detect) < 0))
@@ -3666,13 +3659,6 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
                                      &threaded_chunk_info->chunk_nbytes, &buf_alloc,
                                      &threaded_chunk_info->chunk) < 0))
             HDONE_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "data pipeline read failed");
-
-#ifndef H5_UNSAFE_CONCURRENCY
-        /* Unlock internal mutex. Also defer going to done here. */
-        if (H5_UNLIKELY(H5TS_internal_unlock() < 0))
-            HDONE_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "can't unlock internal mutex");
-        mutex_held = false;
-#endif /* H5_UNSAFE_CONCURRENCY */
 
         /* Make sure the chunk is the correct size after being unfiltered */
         if (H5_UNLIKELY(threaded_chunk_info->chunk_nbytes !=
