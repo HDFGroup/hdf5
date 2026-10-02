@@ -313,12 +313,17 @@ done:
 hid_t
 H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
 {
-    void             *grp     = NULL;              /* Structure for new group */
-    H5VL_object_t    *vol_obj = NULL;              /* Object for loc_id */
+    void             *grp          = NULL;         /* Structure for new group */
+    H5I_type_t        vol_obj_type = H5I_BADID;    /* Object type of loc_id */
+    H5VL_object_t    *vol_obj      = NULL;         /* Object for loc_id */
     H5VL_loc_params_t loc_params;                  /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
+
+    /* Check arguments */
+    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* Check group property list */
     if (H5P_DEFAULT == gcpl_id)
@@ -337,7 +342,7 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
 
     /* Set location struct fields */
     loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(loc_id);
+    loc_params.obj_type = vol_obj_type;
 
     /* Get the location object */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
@@ -549,7 +554,8 @@ H5G__get_info_api_common(hid_t loc_id, H5G_info_t *group_info /*out*/, void **to
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    id_type = H5I_get_type(loc_id);
+    if (H5I_BADID == (id_type = H5I_get_type(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
     if (!(H5I_GROUP == id_type || H5I_FILE == id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group (or file) ID");
     if (!group_info)

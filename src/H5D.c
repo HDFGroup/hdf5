@@ -272,14 +272,18 @@ done:
 hid_t
 H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id)
 {
-    void             *dset    = NULL;              /* dset object from VOL connector */
-    H5VL_object_t    *vol_obj = NULL;              /* Object for loc_id */
+    void             *dset         = NULL;         /* dset object from VOL connector */
+    H5I_type_t        vol_obj_type = H5I_BADID;    /* Object type of loc_id */
+    H5VL_object_t    *vol_obj      = NULL;         /* Object for loc_id */
     H5VL_loc_params_t loc_params;                  /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check arguments */
+    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
+
     if (H5P_DEFAULT == dcpl_id)
         dcpl_id = H5P_DATASET_CREATE_DEFAULT;
     else if (true != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
@@ -303,7 +307,7 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t
 
     /* Set location parameters */
     loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(loc_id);
+    loc_params.obj_type = vol_obj_type;
 
     /* Create the dataset */
     if (NULL ==

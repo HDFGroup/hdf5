@@ -152,8 +152,9 @@ H5G_map_obj_type(H5O_type_t obj_type)
 hid_t
 H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
 {
-    void             *grp = NULL; /* New group created */
-    H5VL_object_t    *vol_obj;    /* Object of loc_id */
+    void             *grp          = NULL;      /* New group created */
+    H5I_type_t        vol_obj_type = H5I_BADID; /* Object type of loc_id */
+    H5VL_object_t    *vol_obj;                  /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t             tmp_gcpl  = H5I_INVALID_HID; /* Temporary group creation property list */
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
@@ -161,6 +162,8 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
     FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check arguments */
+    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no name given");
     if (size_hint > UINT32_MAX)
@@ -201,7 +204,7 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
 
     /* Set location parameters */
     loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(loc_id);
+    loc_params.obj_type = vol_obj_type;
 
     /* get the location object */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
@@ -246,20 +249,23 @@ done:
 hid_t
 H5Gopen1(hid_t loc_id, const char *name)
 {
-    void             *grp     = NULL; /* Group opened */
-    H5VL_object_t    *vol_obj = NULL; /* Object of loc_id */
+    void             *grp          = NULL;      /* Group opened */
+    H5I_type_t        vol_obj_type = H5I_BADID; /* Object type of loc_id */
+    H5VL_object_t    *vol_obj      = NULL;      /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check args */
+    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no name");
 
     /* Set location parameters */
     loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(loc_id);
+    loc_params.obj_type = vol_obj_type;
 
     /* get the location object */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
@@ -536,11 +542,13 @@ H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *d
     else if (dst_loc_id == H5L_SAME_LOC)
         dst_loc_id = src_loc_id;
 
-    src_id_type = H5I_get_type(src_loc_id);
+    if (H5I_BADID == (src_id_type = H5I_get_type(src_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid source identifier");
     if (!(H5I_GROUP == src_id_type || H5I_FILE == src_id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group (or file) ID, src_loc_id");
 
-    dst_id_type = H5I_get_type(dst_loc_id);
+    if (H5I_BADID == (dst_id_type = H5I_get_type(dst_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid destination identifier");
     if (!(H5I_GROUP == dst_id_type || H5I_FILE == dst_id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group (or file) ID, dst_loc_id");
 
@@ -893,7 +901,8 @@ H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs /*out*/)
     FUNC_ENTER_API(FAIL)
 
     /* Check args */
-    id_type = H5I_get_type(loc_id);
+    if (H5I_BADID == (id_type = H5I_get_type(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (!(H5I_GROUP == id_type || H5I_FILE == id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group (or file) ID");
     if (!num_objs)
@@ -1043,7 +1052,7 @@ H5G__get_objinfo_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char *name, 
             statbuf->ohdr.nmesgs  = nat_info.hdr.nmesgs;
             statbuf->ohdr.nchunks = nat_info.hdr.nchunks;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
 done:
     /* Indicate that this callback didn't take ownership of the group *

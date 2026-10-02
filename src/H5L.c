@@ -115,9 +115,13 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
 
     /* verify that src and dst IDs are either a file or a group ID */
     src_id_type = H5I_get_type(src_loc_id);
+    if (src_id_type == H5I_BADID)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (!(H5I_GROUP == src_id_type || H5I_FILE == src_id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group (or file) ID, src_loc_id");
     dst_id_type = H5I_get_type(dst_loc_id);
+    if (dst_id_type == H5I_BADID)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (!(H5I_GROUP == dst_id_type || H5I_FILE == dst_id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group (or file) ID, dst_loc_id");
 
@@ -218,9 +222,13 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
 
     /* verify that src and dst IDs are either a file or a group ID */
     src_id_type = H5I_get_type(src_loc_id);
+    if (src_id_type == H5I_BADID)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (!(H5I_GROUP == src_id_type || H5I_FILE == src_id_type) && src_loc_id != H5L_SAME_LOC)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group (or file) ID, src_loc_id");
     dst_id_type = H5I_get_type(dst_loc_id);
+    if (dst_id_type == H5I_BADID)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (!(H5I_GROUP == dst_id_type || H5I_FILE == dst_id_type) && dst_loc_id != H5L_SAME_LOC)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group (or file) ID, dst_loc_id");
 
@@ -1549,6 +1557,8 @@ H5L__iterate_api_common(hid_t group_id, H5_index_t idx_type, H5_iter_order_t ord
 
     /* Check arguments */
     id_type = H5I_get_type(group_id);
+    if (id_type == H5I_BADID)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid group identifier");
     if (!(H5I_GROUP == id_type || H5I_FILE == id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument");
     if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -1775,6 +1785,8 @@ H5Lvisit2(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterat
 
     /* Check args */
     id_type = H5I_get_type(group_id);
+    if (id_type == H5I_BADID)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid group identifier");
     if (!(H5I_GROUP == id_type || H5I_FILE == id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument");
     if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -1784,13 +1796,14 @@ H5Lvisit2(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterat
     if (!op)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified");
 
-    /* Set location struct fields */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(group_id);
-
     /* Get the location object */
     if (NULL == (vol_obj = H5VL_vol_object(group_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+
+    /* Set location struct fields */
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    if ((loc_params.obj_type = H5I_get_type(group_id)) == H5I_BADID)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to get type");
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type                = H5VL_LINK_ITER;

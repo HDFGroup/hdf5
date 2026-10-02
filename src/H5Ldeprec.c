@@ -151,7 +151,8 @@ H5Literate1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t 
     FUNC_ENTER_API(FAIL)
 
     /* Check arguments */
-    id_type = H5I_get_type(group_id);
+    if (H5I_BADID == (id_type = H5I_get_type(group_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid group identifier");
     if (!(H5I_GROUP == id_type || H5I_FILE == id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument");
     if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -174,7 +175,7 @@ H5Literate1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t 
 
     /* Set location struct fields */
     loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(group_id);
+    loc_params.obj_type = id_type;
 
     /* Set up shim */
     shim_data.real_op      = op;
@@ -500,7 +501,8 @@ H5Lvisit1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterat
     FUNC_ENTER_API(FAIL)
 
     /* Check args */
-    id_type = H5I_get_type(group_id);
+    if (H5I_BADID == (id_type = H5I_get_type(group_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid group identifier");
     if (!(H5I_GROUP == id_type || H5I_FILE == id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument");
     if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -512,7 +514,7 @@ H5Lvisit1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterat
 
     /* Set location struct fields */
     loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(group_id);
+    loc_params.obj_type = id_type;
 
     /* Get the location object */
     if (NULL == (vol_obj = H5VL_vol_object(group_id)))

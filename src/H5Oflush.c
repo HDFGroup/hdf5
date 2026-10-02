@@ -362,7 +362,8 @@ H5O_refresh_metadata_reopen(hid_t oid, hid_t apl_id, H5G_loc_t *obj_loc, H5VL_co
     assert(vol_connector);
 
     /* Get object's type */
-    type = H5I_get_type(oid);
+    if (H5I_BADID == (type = H5I_get_type(oid)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
 
     switch (type) {
         case H5I_GROUP:
