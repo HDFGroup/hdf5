@@ -274,6 +274,13 @@ H5F__drvrinfo_prefix_decode(H5O_drvinfo_t *drvrinfo, char *drv_name, const uint8
         if (!H5_addr_defined(eoa))
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "driver get_eoa request failed");
 
+        /* The block must lie within the stored EOF, since that becomes the
+         * file's EOA once the superblock is loaded
+         */
+        if (H5_addr_ge(udata->driver_addr, udata->stored_eof) ||
+            (udata->stored_eof - udata->driver_addr) < (H5F_DRVINFOBLOCK_HDR_SIZE + (haddr_t)drvrinfo->len))
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "driver info block extends past end of file");
+
         /* ... if it is too small, extend it. */
         min_eoa = udata->driver_addr + H5F_DRVINFOBLOCK_HDR_SIZE + drvrinfo->len;
 

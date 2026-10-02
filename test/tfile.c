@@ -8387,6 +8387,135 @@ test_deprec(const char *driver_name)
 
 /****************************************************************
 **
+**  create_file_with_drvinfo_block(): Helper for
+**      test_drvinfo_block_extent().  Creates a file with a version 0
+**      superblock, then appends a driver info block header whose
+**      variable-length portion is 'drvinfo_len' bytes and points the
+**      superblock at it.  The superblock's stored EOF is set to the
+**      end of the header, so any nonzero 'drvinfo_len' describes a
+**      block that extends past the end of the file.
+**
+*****************************************************************/
+#define DRVINFO_FILE            "tfile_drvinfo.h5"
+#define DRVINFO_SB_V0_ADDR_SIZE 13 /* Offset of "size of offsets" field */
+#define DRVINFO_SB_V0_EOF_ADDR  40 /* Offset of "end of file address" field */
+#define DRVINFO_SB_V0_DRVR_ADDR 48 /* Offset of "driver information block address" field */
+#define DRVINFO_BLOCK_HDR_SIZE  16 /* Fixed-size portion of a driver info block */
+static void
+create_file_with_drvinfo_block(uint32_t drvinfo_len)
+{
+    hid_t             fid  = H5I_INVALID_HID;
+    hid_t             fapl = H5I_INVALID_HID;
+    uint8_t           sb[DRVINFO_SB_V0_DRVR_ADDR + 8];
+    uint8_t           drvinfo[DRVINFO_BLOCK_HDR_SIZE];
+    uint64_t          eof = 0;
+    h5_stat_t         st;
+    int               fd = -1;
+    unsigned          u;
+    h5_posix_io_ret_t nbytes;
+    herr_t            ret;
+
+    /* Create a file with a version 0 superblock */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, H5I_INVALID_HID, "H5Pcreate");
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_V18);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+    fid = H5Fcreate(DRVINFO_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    fd = HDopen(DRVINFO_FILE, O_RDWR);
+    CHECK(fd, (-1), "HDopen");
+
+    /* Read the superblock and confirm the layout this test depends on */
+    nbytes = HDread(fd, sb, sizeof(sb));
+    VERIFY(nbytes, (h5_posix_io_ret_t)sizeof(sb), "HDread");
+    VERIFY(sb[8], 0, "superblock version");
+    VERIFY(sb[DRVINFO_SB_V0_ADDR_SIZE], 8, "size of offsets");
+
+    for (u = 0; u < 8; u++)
+        eof |= (uint64_t)sb[DRVINFO_SB_V0_EOF_ADDR + u] << (8 * u);
+    ret = HDfstat(fd, &st);
+    CHECK(ret, (-1), "HDfstat");
+    VERIFY(eof, (uint64_t)st.st_size, "stored EOF");
+
+    /* Append the driver info block header at the current EOF:
+     * version 0, 3 reserved bytes, 4-byte length, 8-byte (empty) name
+     */
+    memset(drvinfo, 0, sizeof(drvinfo));
+    for (u = 0; u < 4; u++)
+        drvinfo[4 + u] = (uint8_t)(drvinfo_len >> (8 * u));
+    VERIFY(HDlseek(fd, (HDoff_t)eof, SEEK_SET), (HDoff_t)eof, "HDlseek");
+    nbytes = HDwrite(fd, drvinfo, sizeof(drvinfo));
+    VERIFY(nbytes, (h5_posix_io_ret_t)sizeof(drvinfo), "HDwrite");
+
+    /* Point the superblock at the block, with the stored EOF at the end
+     * of the header
+     */
+    for (u = 0; u < 8; u++) {
+        sb[DRVINFO_SB_V0_DRVR_ADDR + u] = (uint8_t)(eof >> (8 * u));
+        sb[DRVINFO_SB_V0_EOF_ADDR + u]  = (uint8_t)((eof + DRVINFO_BLOCK_HDR_SIZE) >> (8 * u));
+    }
+    VERIFY(HDlseek(fd, 0, SEEK_SET), 0, "HDlseek");
+    nbytes = HDwrite(fd, sb, sizeof(sb));
+    VERIFY(nbytes, (h5_posix_io_ret_t)sizeof(sb), "HDwrite");
+
+    ret = HDclose(fd);
+    CHECK(ret, (-1), "HDclose");
+} /* create_file_with_drvinfo_block() */
+
+/****************************************************************
+**
+**  test_drvinfo_block_extent(): Verify that a driver info block
+**      must lie within the file's stored EOF.
+**
+*****************************************************************/
+static void
+test_drvinfo_block_extent(void)
+{
+    hid_t  fid = H5I_INVALID_HID;
+    herr_t ret;
+
+    MESSAGE(5, ("Testing driver info block extent validation\n"));
+
+    /* A block that ends exactly at the stored EOF opens and closes */
+    create_file_with_drvinfo_block(0);
+    fid = H5Fopen(DRVINFO_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid, H5I_INVALID_HID, "H5Fopen");
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* A block that ends past the stored EOF is rejected */
+    create_file_with_drvinfo_block(1);
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fopen(DRVINFO_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    VERIFY(fid, H5I_INVALID_HID, "H5Fopen");
+    if (fid != H5I_INVALID_HID)
+        H5Fclose(fid);
+
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fopen(DRVINFO_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    VERIFY(fid, H5I_INVALID_HID, "H5Fopen");
+    if (fid != H5I_INVALID_HID) {
+        H5E_BEGIN_TRY
+        {
+            H5Fclose(fid);
+        }
+        H5E_END_TRY
+    }
+} /* test_drvinfo_block_extent() */
+
+/****************************************************************
+**
 **  test_file(): Main low-level file I/O test routine.
 **
 ****************************************************************/
@@ -8436,6 +8565,7 @@ test_file(void H5_ATTR_UNUSED *params)
 
     if (driver_is_default_compatible) {
         test_rw_noupdate(); /* Test to ensure that RW permissions don't write the file unless dirtied */
+        test_drvinfo_block_extent(); /* Test that driver info blocks must lie within the stored EOF */
     }
 
     test_userblock_alignment(
@@ -8506,6 +8636,7 @@ cleanup_file(void H5_ATTR_UNUSED *params)
             H5Fdelete(FILE7, H5P_DEFAULT);
             H5Fdelete(FILE8, H5P_DEFAULT);
             H5Fdelete(DST_FILE, H5P_DEFAULT);
+            H5Fdelete(DRVINFO_FILE, H5P_DEFAULT);
         }
         H5E_END_TRY
     }
