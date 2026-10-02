@@ -179,6 +179,8 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     cache_ptr->evictions_enabled      = true;
     cache_ptr->close_warning_received = false;
 
+    cache_ptr->unwritable_entries_discarded = false;
+
     cache_ptr->index_len        = 0;
     cache_ptr->index_size       = (size_t)0;
     cache_ptr->clean_index_size = (size_t)0;
@@ -471,7 +473,14 @@ done:
  *              This function fails if any object are protected since the
  *              resulting file might not be consistent.
  *
- * Note:        *cache_ptr has been freed upon successful return.
+ *              Since the file is being closed, entries that can't be
+ *              written are discarded.  The remaining entries are still
+ *              flushed and the cache is still destroyed, but the function
+ *              returns failure.
+ *
+ * Note:        *cache_ptr has been freed and f->shared->cache set to NULL
+ *              upon successful return, or if the only failures were in
+ *              writing entries or the cache image.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -500,14 +509,20 @@ H5C_dest(H5F_t *f)
     if (H5C_set_slist_enabled(f->shared->cache, true, true) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed");
 
-    /* Flush and invalidate all cache entries */
-    if (H5C__flush_invalidate_cache(f, H5C__NO_FLAGS_SET) < 0)
+    /* Flush and invalidate all cache entries, discarding any that can't
+     * be written
+     */
+    if (H5C__flush_invalidate_cache(f, H5C__DISCARD_ON_WRITE_FAILURE_FLAG) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache");
+    if (cache_ptr->unwritable_entries_discarded)
+        /* Push error, but keep going */
+        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to write all cache entries");
 
     /* Generate & write cache image if requested */
     if (cache_ptr->image_ctl.generate_image)
         if (H5C__generate_cache_image(f, cache_ptr) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "Can't generate metadata cache image");
+            /* Push error, but keep going */
+            HDONE_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "Can't generate metadata cache image");
 
     /* Question: Is it possible for cache_ptr->slist be non-null at this
      *           point?  If no, shouldn't this if statement be an assert?
@@ -535,7 +550,8 @@ H5C_dest(H5F_t *f)
                 cache_ptr->get_entry_ptr_from_addr_counter);
 #endif /* H5C_DO_SANITY_CHECKS */
 
-    cache_ptr = H5FL_FREE(H5C_t, cache_ptr);
+    cache_ptr        = H5FL_FREE(H5C_t, cache_ptr);
+    f->shared->cache = NULL;
 
 done:
     if (ret_value < 0 && cache_ptr && cache_ptr->slist_ptr)

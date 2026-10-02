@@ -125,6 +125,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed a memory leak when metadata cannot be written while closing a file
+
+   If writing metadata failed while a file was being closed, the file's metadata cache was left allocated with the unwritten entries still in it. The cache and everything in it were leaked, which also prevented the library from shutting down cleanly. The close still fails in this case, but the entries that can't be written are discarded, and the cache is freed.
+
 ### Fixed a deadlock in the ROS3 VFD on Windows
 
    When an HDF5 application running on Windows and using the ROS3 VFD exited normally,
