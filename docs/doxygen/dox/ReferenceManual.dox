@@ -84,6 +84,10 @@ The functions provided by the HDF5 API are grouped into the following
 <th>VOL Connector (H5VL)</th><td>@ref H5VL "C"</td><td style="white-space: nowrap;">C++</td><td>@ref FH5VL "Fortran"</td><td>@ref JH5VL "Java"</td><td>Manage HDF5 VOL connector plugins.
 </td>
 </tr>
+<tr>
+<th>Thread Safety (H5TS)</th><td>@ref H5TS "C"</td><td style="white-space: nowrap;">C++</td><td>Fortran</td><td>Java</td><td>Threadsafety and threading-related operations.
+</td>
+</tr>
 </table>
 <table>
 <caption>High-level Reference Manual Modules</caption>

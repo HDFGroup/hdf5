@@ -43,6 +43,21 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 # ⚠️ Breaking Changes
 
+- When a `find_package (HDF5 ...)` call within a CMake project uses HDF5's `hdf5-config.cmake`
+  configuration file (a Config mode search), requesting both "shared" and "static" components
+  simultaneously will now fail. Only one of the "shared" or "static" components should be requested
+  when locating HDF5. Consequently, the `HDF5_LIB_TYPE` CMake variable set by the configuration file
+  will only be set to one of "shared" or "static", depending on the requested library type, rather
+  than potentially being a list of both. For the time being, both sets of HDF5's "-shared" and
+  "-static" CMake targets will continue to be available after the `find_package (HDF5 ...)` call,
+  regardless of which library type was requested.
+
+- When a `find_package (HDF5 ...)` call within a CMake project uses HDF5's `hdf5-config.cmake`
+  configuration file (a Config mode search), the consuming project may now be required to have
+  one or more CMake languages enabled, depending on the specific COMPONENTS requested. HDF5's
+  configuration file previously enabled these languages automatically with calls to
+  `enable_language()`, but these calls were removed in favor of checking the enabled languages
+  and issuing an error if required languages aren't enabled.
 
 # 🪦 Deprecations
 
@@ -51,8 +66,41 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Configuration
 
+### Various improvements in installed CMake package configuration file
+
+   - Fixed `find_dependency()` calls so that `PRIVATE`-linked libraries are only propagated as
+     transitive link requirements for static library targets (Fixes GitHub issue #6347)
+   - Added missing `find_dependency()` calls for some `PRIVATE`-linked libraries
+   - Fixed an issue where `find_package()` for parallel-enabled HDF5 installations may fail when
+     trying to locate MPI Fortran support, even if HDF5 Fortran support isn't requested (Fixes
+     GitHub issue #6366)
+   - Fixed an issue where the `HDF5_LIB_TYPE` CMake variable would be undefined if some HDF5
+     components were requested in a `find_package()` call, but "shared" or "static" was not requested
+   - Removed a call to `enable_language()` in favor of checking the currently enabled CMake languages
+     and failing if a required language isn't enabled
+   - Added a CMake variable for the enabled/disabled status of the "digitally signed plugins"
+     feature
+   - Fixed the CMake variable for the enabled/disabled status of the `HDF5_DIMENSION_SCALES_NEW_REF`
+     option
+   - Reduced the scope of some temporary variables and modifications so they don't propagate to
+     consuming CMake projects
 
 ## Library
+
+### Added support for internally concurrent multithreaded reads of chunked datasets
+
+   Added 3 new functions to support this: H5TSset_internal_threads(),
+   H5Pset_io_threads(), and H5Pget_io_threads().
+
+   This feature internally parallelizes read operations on chunked datasets.
+   H5TSset_internal_threads() is used to enable the feature globally, while
+   H5Pset_io_threads() can be used to disable the feature on a per-operation
+   basis. These functions are only available when the library is configured with
+   HDF5_ENABLE_CONCURRENCY=ON. When performing an internally threaded read, the
+   library will concurrently read from disk, unfilter, and scatter to memory all
+   chunks in a read operation on a chunked dataset. Currently each of these
+   sub-operations is serialized (protected by a mutex), so there is not yet
+   likely to be any performance improvement.
 
 ## Parallel Library
 
@@ -77,6 +125,37 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed a deadlock in the ROS3 VFD on Windows
+
+   When an HDF5 application running on Windows and using the ROS3 VFD exited normally,
+   a deadlock would occur when the VFD called the aws-c-s3 library's cleanup function
+   during process shutdown. This was due to the aws-c-s3 library attempting to join
+   threads while the Windows loader lock was held. As a temporary workaround for Windows
+   builds of the library, the aws-c-s3 cleanup logic has been moved to the VFD's
+   termination callback (other platforms still use an atexit() handler) and will be
+   skipped if the VFD determines that the process is being shutdown. Due to the current
+   architecture of the library, the aws-c-s3 library's resources can only be properly
+   cleaned up if the HDF5 application makes sure to call H5close() before exiting.
+   Otherwise, memory leaks and other resource cleanup issues may be observed.
+
+   Fixes GitHub issue #6560
+
+### Fixed the page buffer's minimum metadata threshold failure to protect B-tree, local heap and object header metadata pages
+
+The page buffer charges every page it holds to either `raw_count` or `meta_count`, counting `H5F_MEM_PAGE_DRAW` and `H5F_MEM_PAGE_GHEAP` pages as raw data and every other page as metadata. The minimum metadata reservation set by `H5Pset_page_buffer_size()` was not written as the complement of that test: it compared the page's type for equality with `H5F_MEM_PAGE_META`, which is an alias for `H5F_MEM_PAGE_SUPER`. A page entry's type is copied verbatim from the memory type of the access that brought the page into the buffer, so B-tree, local heap and object header pages carried other values and were evicted by raw data regardless of `min_meta_perc`, while still counting toward the threshold the reservation was measured against. In practice the reservation protected only the superblock and driver information pages. The classification is now made in one place, `H5MF_mem_page_type_is_raw()`, alongside its `H5F_mem_t` counterpart `H5MF_mem_type_is_raw()`, and both the page counts and the two reservations use it, so the metadata reservation protects the same population that `meta_count` measures.
+
+Fixes GitHub issue #6679.
+
+### Fixed the page buffer corrupting its page counts when a global heap page is freed
+
+`H5PB_remove_entry()` is documented as never being given a raw data page, and it decremented `meta_count` unconditionally on that basis. Its only caller, `H5MF__sect_small_merge()`, excluded `H5FD_MEM_DRAW` but not `H5FD_MEM_GHEAP`, so a freed global heap page could reach it. Such a page is charged to `raw_count` rather than `meta_count` by `H5PB__insert_entry()`, because `H5MF__alloc_pagefs()` passes the allocation type to `H5PB_add_new_page()`, and `H5PB_write()` reuses that entry without changing its type. Removing such a page therefore left `raw_count` too high and decremented `meta_count` for a page it had never counted. Both counts govern the minimum metadata and minimum raw data page protection, and because they are unsigned, `meta_count` could wrap and leave those reservations wrong for the remaining life of the file. The caller now excludes the global heap along with raw data, `H5PB_remove_entry()` asserts that the page it was given is metadata rather than silently accounting for a raw one, and every page count decrement in the page buffer asserts the count it is releasing is non-zero.
+
+### Fixed a heap buffer overflow when decoding object header messages
+
+   The size stored in an object header message header was checked against the chunk before the rest of that message header was decoded, allowing a message body to start up to four bytes further into the chunk than the check accounted for. A corrupted or fuzzed file could declare a size that passed the check and still extended past the end of the chunk image, and the message's decode callback was then handed a buffer end outside the allocation. `H5O__chunk_deserialize()` now checks the message size once the whole message header has been decoded.
+
+   Fixes GitHub issue #6401
+
 ### Fixed memory leaks and ID reference count issues when pushing an error to an error stack that is full
 
    When an error is pushed to an error stack, the library may make a copy of the file
@@ -98,7 +177,21 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    `H5HL_protect()` pins one metadata cache entry for a local heap -- either the prefix when the heap is a single cache object, or the data block otherwise -- and `H5HL_unprotect()` unpins it again. The cache unlinks that entry from the heap when it destroys it, so a damaged file could reach `H5HL_unprotect()` with nothing to unpin, which triggered an assertion failure in debug builds and a NULL pointer dereference otherwise. `H5HL_unprotect()` now reports an error instead, and does so before decrementing the heap's protect count so that a rejected call leaves the heap unchanged rather than half unprotected with its cache entry still pinned.
 
+### Fixed crashes when reading datasets with malformed N-Bit or Fletcher32 filter metadata
+
+   Reading a dataset from a corrupted or maliciously crafted file could crash the library in the N-Bit and Fletcher32 filter decode paths. The N-Bit filter dereferenced its client-data parameter array before validating it, crashing when the array was empty or NULL, and walked the compressed chunk during decompression without bounding the input against the chunk size, causing out-of-bounds reads. It also indexed that parameter array at offsets taken from the datatype description held in the array itself, without bounding those offsets against the number of parameters supplied, so a parameter list stopping short of the datatype it described was read past its end. The Fletcher32 filter subtracted the 4-byte checksum length from the chunk size without checking that the chunk was at least that large, underflowing the length passed to the checksum routine. These filters now validate their parameters and buffer sizes and fail with an error instead of crashing.
+
+   Fixes GitHub issues #6488, #6489, #6490, and #6492
+
+   Fixes CVE-2026-19026, CVE-2026-19027, and CVE-2026-19028
+
 ## Java Library
+
+### Fixed datatype ID leaks when reading or writing nested datatypes through the JNI
+
+   The object-tree read and write helpers in the JNI derived a base datatype from the memory type with `H5Tget_super()` for the variable-length, array and complex classes, but never closed it. Because an `hid_t` is not reclaimed when a native method returns, every read or write of such data leaked at least one datatype ID for the lifetime of the process, and a nested type leaked one per level. The helpers now close the derived type on both the success and error paths.
+
+   Fixes GitHub issue #6592
 
 ## Configuration
 
@@ -148,6 +241,36 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Fortran API
 
+### h5open_f now re-initializes the Fortran interface after h5close_f
+
+   An h5open_f / h5close_f / h5open_f sequence could leave the Fortran interface
+   uninitialized. The second h5open_f reported success, but the predefined type
+   handles were left holding identifiers that h5close_f had released, so later calls
+   failed. Whether this happened depended on the Fortran compiler.
+
+   Fixes GitHub issue #6642
+
+### h5fget_obj_ids_f no longer returns the Fortran interface's own identifiers
+
+   h5fget_obj_count_f excludes the objects h5open_f opens to represent the predefined
+   types, but h5fget_obj_ids_f returned them, so the two disagreed about the same query
+   and an application walking the list found datatypes it never opened. Both now report
+   only what the application has open, matching the C API.
+
+   Fixes GitHub issue #6648
+
+### h5fget_obj_count_f and h5fget_obj_ids_f document their object type argument
+
+   Both listed the object types as alternatives without mentioning that they may be
+   combined with IOR(), which the C API supports and both have always passed through.
+
+### h5fget_obj_count_f no longer returns negative counts
+
+   With the Fortran interface open, counting a single object type across all files
+   subtracted the objects opened by h5open_f, so queries for files, groups, and
+   datasets returned a negative count and reported success. A negative count is now
+   reported as an error.
+
 ## High-Level Library
 
 ## Fortran High-Level APIs
@@ -159,6 +282,25 @@ We would like to thank the many HDF5 community members who contributed to this r
 ## C++ APIs
 
 ## Testing
+
+### Fortran test programs no longer exit successfully after a fatal error
+
+   The Fortran tests ended unrecoverable failures with STOP, which exits with a
+   success status, so a run that aborted part way through was reported as passing.
+
+### New test for the object count and identifier list
+
+   The Fortran tests had no coverage of h5fget_obj_ids_f over all files, and none that
+   compared it against h5fget_obj_count_f. A new test opens objects of several types
+   and checks that the two agree, that object types combined with IOR() count as the
+   sum of their parts, and that a buffer shorter than the number of open objects is
+   filled with the application's own.
+
+### The h5open/h5close test checks that the interface re-initializes
+
+   Its object counts were taken while the Fortran interface was closed, where no such
+   call is permitted. They now run after the interface has been reopened, and confirm
+   that the predefined types are usable again.
 
 # ✨ Support for new platforms and languages
 

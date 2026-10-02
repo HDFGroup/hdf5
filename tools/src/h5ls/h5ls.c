@@ -341,7 +341,7 @@ print_string(h5tools_str_t *buffer, const char *s, bool escape_spaces)
                 }
                 break;
             default:
-                if (isprint((int)*s)) {
+                if (isprint((unsigned char)*s)) {
                     if (buffer)
                         h5tools_str_append(buffer, "%c", *s);
                     nprint++;
