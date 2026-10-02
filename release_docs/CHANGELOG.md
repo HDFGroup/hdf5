@@ -145,7 +145,7 @@ We would like to thank the many HDF5 community members who contributed to this r
    The default external link traversal callback located the target file name and object
    path inside the link's user data with `strlen()`, without checking that the buffer was
    NULL-terminated or large enough to hold both strings. A corrupted or fuzzed file whose
-   external link data was not properly terminated caused a read past the end of the udata
+   external link data was not properly terminated caused a read past the end of the `udata`
    buffer. `H5L__extern_traverse()` now validates the buffer against its stored size before
    parsing, the same way `H5Lunpack_elink_val()` does.
 
