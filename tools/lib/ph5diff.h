@@ -27,9 +27,20 @@
 #define MPI_TAG_END      7
 #define MPI_TAG_PARALLEL 8
 
+/* Abort immediately on any MPI Pack/Unpack failure. */
+#define MPI_CHECK(call)                                                                                      \
+    do {                                                                                                     \
+        int _err = (call);                                                                                   \
+        if (H5_UNLIKELY(_err != MPI_SUCCESS)) {                                                              \
+            printf("ph5diff: MPI error %d at %s:%d\n", _err, __FILE__, __LINE__);                            \
+            MPI_Abort(MPI_COMM_WORLD, _err);                                                                 \
+        }                                                                                                    \
+    } while (0)
+
 struct diff_mpi_args {
-    char        name1[256];
-    char        name2[256];
+    char *name1; /* on manager: points into caller's path buffer (not owned);
+                  * on worker: heap-allocated during unpack (must be freed) */
+    char       *name2;
     diff_opt_t  opts;
     diff_args_t argdata; /* rest args */
 };
@@ -38,5 +49,8 @@ struct diffs_found {
     hsize_t nfound;
     int     not_cmp;
 };
+
+void free_unpacked_sset(struct subset_t *sset);
+void unpack_diff_args(const void *buf, int bufsiz, struct diff_mpi_args *args);
 
 #endif /* PH5DIFF_H */

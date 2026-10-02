@@ -24,7 +24,7 @@ static int check_d_input(const char *);
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char            *s_opts   = "cd:ehln:p:qrv*xA:CE:K:NS*V";
+static const char            *s_opts   = "cd:ehln:p:qrv*xA:B:CE:K:NS*V";
 static struct h5_long_options l_opts[] = {{"compare", no_arg, 'c'},
                                           {"delta", require_arg, 'd'},
                                           {"use-system-epsilon", no_arg, 'e'},
@@ -37,6 +37,7 @@ static struct h5_long_options l_opts[] = {{"compare", no_arg, 'c'},
                                           {"verbose", optional_arg, 'v'},
                                           {"no-dangling-links", no_arg, 'x'},
                                           {"exclude-attribute", require_arg, 'A'},
+                                          {"exclude-attr", require_arg, 'B'},
                                           {"no-compact-subset", no_arg, 'C'},
                                           {"exclude-path", require_arg, 'E'},
                                           {"page-buffer-size", require_arg, 'K'},
@@ -120,6 +121,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
     int                       opt;
     struct exclude_path_list *exclude_head, *exclude_prev, *exclude_node;
     struct exclude_path_list *exclude_attr_head, *exclude_attr_prev, *exclude_attr_node;
+    struct exclude_path_list *exclude_attr_name_head, *exclude_attr_name_prev, *exclude_attr_name_node;
 
     H5TOOLS_START_DEBUG(" ");
     /* process the command-line */
@@ -146,6 +148,9 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
     /* init for exclude-attribute option */
     exclude_attr_head = NULL;
+
+    /* init for exclude-attr option */
+    exclude_attr_name_head = NULL;
 
     /* parse command line options */
     while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
@@ -227,7 +232,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 }
 
                 /* init */
-                exclude_node->obj_path = H5_optarg;
+                exclude_node->obj_path = strdup(H5_optarg);
                 exclude_node->obj_type = H5TRAV_TYPE_UNKNOWN;
                 exclude_prev           = exclude_head;
 
@@ -259,7 +264,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 }
 
                 /* init */
-                exclude_attr_node->obj_path = H5_optarg;
+                exclude_attr_node->obj_path = strdup(H5_optarg);
                 exclude_attr_node->obj_type = H5TRAV_TYPE_UNKNOWN;
                 exclude_attr_prev           = exclude_attr_head;
 
@@ -273,6 +278,34 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
                     exclude_attr_node->next = NULL;
                     exclude_attr_prev->next = exclude_attr_node;
+                }
+                break;
+
+            case 'B':
+                opts->exclude_attr_name = 1;
+
+                /* create linked list of excluded attribute names */
+                if ((exclude_attr_name_node =
+                         (struct exclude_path_list *)malloc(sizeof(struct exclude_path_list))) == NULL) {
+                    printf("Error: lack of memory!\n");
+                    h5diff_exit(EXIT_FAILURE);
+                }
+
+                /* init */
+                exclude_attr_name_node->obj_path = strdup(H5_optarg);
+                exclude_attr_name_node->obj_type = H5TRAV_TYPE_UNKNOWN;
+                exclude_attr_name_prev           = exclude_attr_name_head;
+
+                if (NULL == exclude_attr_name_head) {
+                    exclude_attr_name_head       = exclude_attr_name_node;
+                    exclude_attr_name_head->next = NULL;
+                }
+                else {
+                    while (NULL != exclude_attr_name_prev->next)
+                        exclude_attr_name_prev = exclude_attr_name_prev->next;
+
+                    exclude_attr_name_node->next = NULL;
+                    exclude_attr_name_prev->next = exclude_attr_name_node;
                 }
                 break;
 
@@ -438,6 +471,10 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
     /* if exclude-attribute option is used, keep the exclude attr list */
     if (opts->exclude_attr_path)
         opts->exclude_attr = exclude_attr_head;
+
+    /* if exclude-attr option is used, keep the exclude attr list */
+    if (opts->exclude_attr_name)
+        opts->exclude_attr_names = exclude_attr_name_head;
 
     /* check for file names to be processed */
     if (argc <= H5_optind || argv[H5_optind + 1] == NULL) {
@@ -799,6 +836,20 @@ usage(void)
                    "         will be excluded; the comparison will include any path not explicitly\n");
     PRINTVALSTREAM(rawoutstream, "         excluded.\n");
     PRINTVALSTREAM(rawoutstream, "         This option can be used repeatedly to exclude multiple paths.\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "   -B \"path/to/attr\", --exclude-attr \"path/to/attr\"\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "         Exclude the specified attribute from comparison. The path uses the\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "         same convention as h5dump: the last component is the attribute name\n");
+    PRINTVALSTREAM(rawoutstream, "         and the preceding path is the object that owns it.\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "         For example, to exclude attribute \"timestamp\" on object \"/group1\",\n");
+    PRINTVALSTREAM(rawoutstream, "         specify: -B \"/group1/timestamp\"\n");
+    PRINTVALSTREAM(rawoutstream, "         To target an attribute on the root group: -B \"/timestamp\"\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "         This option can be used repeatedly to exclude multiple attributes:\n");
+    PRINTVALSTREAM(rawoutstream, "         e.g. -B /group1/attr1 -B /group2/attr2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, " Modes of output:\n");
     PRINTVALSTREAM(rawoutstream,
