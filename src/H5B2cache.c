@@ -565,6 +565,13 @@ H5B2__cache_int_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, voi
     assert(image);
     assert(udata);
 
+    /* A node cannot hold more records than the capacity for its depth; reject a
+     * corrupted count before it sizes the checksummed region, which would
+     * otherwise read past the node image.
+     */
+    if (udata->nrec > udata->hdr->node_info[udata->depth].max_nrec)
+        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "number of records is greater than maximum");
+
     /* Internal node prefix header + records + child pointer triplets: size with checksum at the end */
     chk_size = H5B2_INT_PREFIX_SIZE + (udata->nrec * udata->hdr->rrec_size) +
                ((size_t)(udata->nrec + 1) * H5B2_INT_POINTER_SIZE(udata->hdr, udata->depth));
@@ -635,6 +642,13 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
     /* B-tree type */
     if (*image++ != (uint8_t)udata->hdr->cls->id)
         HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "incorrect B-tree type");
+
+    /* Reject a record count that exceeds the node capacity for this depth
+     * before it drives the decode loops below, which write into the int_native
+     * and node_ptrs arrays sized for node_info[depth].max_nrec.
+     */
+    if (udata->nrec > udata->hdr->node_info[udata->depth].max_nrec)
+        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "number of records is greater than maximum");
 
     /* Allocate space for the native keys in memory */
     if (NULL ==
@@ -966,6 +980,13 @@ H5B2__cache_leaf_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, vo
     assert(image);
     assert(udata);
 
+    /* A leaf cannot hold more records than the leaf node capacity; reject a
+     * corrupted count before it sizes the checksummed region, which would
+     * otherwise read past the node image.
+     */
+    if (udata->nrec > udata->hdr->node_info[0].max_nrec)
+        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "number of records is greater than maximum");
+
     /* Leaf node prefix header + records: size with checksum at the end */
     chk_size = H5B2_LEAF_PREFIX_SIZE + (udata->nrec * udata->hdr->rrec_size);
 
@@ -1033,6 +1054,13 @@ H5B2__cache_leaf_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void
     /* B-tree type */
     if (*image++ != (uint8_t)udata->hdr->cls->id)
         HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "incorrect B-tree type");
+
+    /* Reject a record count that exceeds the leaf node capacity before it
+     * drives the decode loop below, which writes into the leaf_native array
+     * sized for node_info[0].max_nrec.
+     */
+    if (udata->nrec > udata->hdr->node_info[0].max_nrec)
+        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "number of records is greater than maximum");
 
     /* Allocate space for the native keys in memory */
     if (NULL == (leaf->leaf_native = (uint8_t *)H5FL_FAC_MALLOC(udata->hdr->node_info[0].nat_rec_fac)))
