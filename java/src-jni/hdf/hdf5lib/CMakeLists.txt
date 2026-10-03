@@ -120,6 +120,7 @@ set (HDF5_JAVA_HDF_HDF5_SOURCES
     HDF5Constants.java
     HDFNativeData.java
     H5.java
+    ${HDF5_SOURCE_DIR}/java/hdf/hdf5lib/Hdf5NativeLoader.java
     ${CMAKE_CURRENT_BINARY_DIR}/H5Version.java
 )
 
@@ -135,7 +136,7 @@ file (WRITE ${PROJECT_BINARY_DIR}/Manifest.txt
 "
 )
 
-set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVA_LOGGING_JAR}")
+set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVA_LOGGING_JAR};${HDF5_JAVA_NATIVE_LIB_LOADER_JAR}")
 
 # Create main JAR with platform classifier if Maven deployment is enabled
 if (HDF5_ENABLE_MAVEN_DEPLOY)
@@ -211,6 +212,10 @@ if (HDF5_ENABLE_MAVEN_DEPLOY)
 
   # Set HDF5_JAVA_LIBRARY for examples to depend on
   SET_GLOBAL_VARIABLE (HDF5_JAVA_LIBRARY ${HDF5_JAVA_UNIVERSAL_TARGET})
+
+  # Native shared libraries as Maven JARs (JNI: libhdf5 + hdf5_java bridge)
+  set (HDF5JAVA_MAVEN_NATIVE_JNI TRUE)
+  include (${HDF5_SOURCE_DIR}/java/cmake/HDF5JavaNativeBundles.cmake)
 else ()
   # Standard JAR creation without Maven classifiers
   add_jar (${HDF5_JAVA_HDF5_LIB_TARGET} OUTPUT_NAME "${HDF5_JAVA_HDF5_LIB_TARGET}-${HDF5_PACKAGE_VERSION}" MANIFEST ${PROJECT_BINARY_DIR}/Manifest.txt ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES} ${HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES} ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES} ${HDF5_JAVA_HDF_HDF5_SOURCES})

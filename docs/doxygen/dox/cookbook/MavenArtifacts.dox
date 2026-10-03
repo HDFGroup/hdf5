@@ -15,7 +15,7 @@ platform and Java version.
 
 \subsection subsec_maven_artifacts Maven Artifact Selection
 
-HDF5 provides three main Maven artifacts:
+HDF5 provides Java API artifacts and platform-specific native bundles:
 
 <table>
 <tr><th>Artifact ID</th><th>Java Version</th><th>Description</th><th>Status</th></tr>
@@ -32,12 +32,40 @@ HDF5 provides three main Maven artifacts:
   <td>Production-ready</td>
 </tr>
 <tr>
+  <td><strong>hdf5-native</strong></td>
+  <td>Java 8+</td>
+  <td>Platform native libhdf5 bundle loaded via SciJava native-lib-loader</td>
+  <td>Optional; add explicitly for bundled libhdf5</td>
+</tr>
+<tr>
+  <td><strong>hdf5-zlib-native</strong></td>
+  <td>Java 8+</td>
+  <td>Platform zlib bundle used by libhdf5's built-in deflate/GZIP filter</td>
+  <td>Optional; add explicitly when shared zlib is enabled</td>
+</tr>
+<tr>
+  <td><strong>hdf5-szip-native</strong></td>
+  <td>Java 8+</td>
+  <td>Platform libaec (libsz + libaec) bundle used by libhdf5's built-in SZIP filter</td>
+  <td>Optional; add explicitly when shared libaec (szip) is enabled</td>
+</tr>
+<tr>
+  <td><strong>hdf5-jni-native</strong></td>
+  <td>Java 8+</td>
+  <td>Platform JNI bridge bundle for hdf5-java-jni</td>
+  <td>Required transitive dependency of hdf5-java-jni</td>
+</tr>
+<tr>
   <td><strong>hdf5-java-examples</strong></td>
   <td>Java 8+</td>
   <td>example programs</td>
   <td>Platform-independent</td>
 </tr>
 </table>
+
+The HDF5 deflate filter is exposed through APIs such as <code>H5Pset_deflate</code> and through tools as <code>GZIP=level</code>. It is built into libhdf5 when zlib support is enabled; <code>hdf5-zlib-native</code> ships the runtime zlib library needed by that built-in filter when libhdf5 links zlib dynamically. Call <code>H5.loadH5Lib()</code> once at startup; bundled zlib is loaded automatically before libhdf5. No <code>HDF5_PLUGIN_PATH</code> or external HDF5 installation is required for gzip/chunked datasets when using these Maven artifacts.
+
+The HDF5 SZIP filter is exposed through <code>H5Pset_szip</code> and uses the libaec szip-compatible API. It is built into libhdf5 when SZIP support is enabled; <code>hdf5-szip-native</code> ships the runtime libaec/libsz shared libraries needed by that built-in filter when libhdf5 links libaec dynamically.
 
 <em>Note: FFM will become the default implementation in the next major HDF5 release.</em>
 
