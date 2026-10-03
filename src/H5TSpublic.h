@@ -41,7 +41,7 @@ extern "C" {
 
 /* HDF5 global thread pool routines */
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_THREADS
 /**
  * \ingroup H5TS
  *
@@ -79,7 +79,10 @@ extern "C" {
  *          \li For unfiltered datasets, the chunk cache is large enough to fit
  *          at least one chunk. See H5Pset_chunk_cache().
  *
- * \note    This function is only present when the library is compiled with HDF5_ENABLE_CONCURRENCY=ON.
+ * \note    This function is only present when the library is built with
+ *          thread support, i.e. when \c H5_HAVE_THREADS is defined.  This is
+ *          the usual case; the exceptions are builds without a threading
+ *          package and static libraries on Windows.
  *
  * \note    Use of this function may increase memory usage during concurrent
  *          operations due to the need to maintain state for each thread
@@ -93,7 +96,7 @@ extern "C" {
  *
  */
 H5_DLL herr_t H5TSset_internal_threads(unsigned num_threads);
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_THREADS */
 
 #ifdef __cplusplus
 }
