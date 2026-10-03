@@ -227,6 +227,12 @@ Fixes GitHub issue #6679.
   file forces `BUILD_SHARED_LIBS` on. This affected cases where the examples
   were built directly without that cache file.
 
+### Fixed the Fortran and C++ information reported in the build settings
+
+The "Shared/Static Fortran Library" and "Shared/Static C++ Library" lines in `libhdf5.settings` and in the build settings string compiled into the library reused the C library values, so they reported `YES` even when `HDF5_BUILD_FORTRAN` or `HDF5_BUILD_CPP_LIB` was off. These lines now report `NO` unless that language's library is built. The "Fortran Compiler", "Module Directory" and "C++ Compiler" lines are now also left empty when that language's library is not built.
+
+Fixes #5723.
+
 ## Tools
 
 ### Fixed an issue with quoting of data values in h5ls and h5dump when displaying as ASCII characters
