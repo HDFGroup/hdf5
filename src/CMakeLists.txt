@@ -856,6 +856,13 @@ set (H5T_SOURCES
     ${HDF5_SRC_DIR}/H5Tvlen.c
 )
 
+# MSVC 19.51 (VS 2026) hits an internal compiler error when optimizing
+# H5Tinit_float.c for ARM64. This code only runs once at library init.
+if (MSVC AND CMAKE_C_COMPILER_ARCHITECTURE_ID MATCHES "^ARM64")
+  message (STATUS "MSVC ARM64: Disabling optimization for H5Tinit_float.c")
+  set_source_files_properties (${HDF5_SRC_DIR}/H5Tinit_float.c PROPERTIES COMPILE_OPTIONS "/Od")
+endif ()
+
 set (H5T_PUBLIC_HDRS
     ${HDF5_SRC_DIR}/H5Tdevelop.h
     ${HDF5_SRC_DIR}/H5Tpublic.h
