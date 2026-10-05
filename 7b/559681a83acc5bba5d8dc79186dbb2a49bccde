@@ -1,0 +1,25 @@
+src/tomlc17/README.md
+  s_2f7969eb2a15d6::t_46969f760c6593 15-16,23-24,28-63,79,81-86
+src/tomlc17/h5_toml_prefix.h
+  s_2f7969eb2a15d6::t_66e1d0d8711131 17-18,36
+src/tomlc17/tomlc17.c
+  s_2f7969eb2a15d6::t_237531f498442e 110,275-283,677-681,683,2327,2473,2482-2484,2510,2573-2575,2673,2685-2687,2700-2703,2723,2750-2752,2785-2787
+src/tomlc17/tomlc17.h
+  s_2f7969eb2a15d6::t_b3e56c4f02c5ff 260-262
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7b559681a83acc5bba5d8dc79186dbb2a49bccde",
+  "prompts": {},
+  "sessions": {
+    "s_2f7969eb2a15d6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "11632f05-dc55-4c8b-995c-a62ceb117b5b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
