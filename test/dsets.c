@@ -7958,12 +7958,6 @@ error:
  * Purpose: Tests that H5Pmodify_filter fails for a filter that is not in
  *          the pipeline, including when the pipeline is full.
  *
- *          H5Z_modify locates the filter with a loop that leaves
- *          idx == nused when the filter is absent.  A not-found check of
- *          idx > nused would let the absent case write to filter[nused],
- *          which is past the end of the array once nused reaches nalloc
- *          (H5Z_MAX_NFILTERS).
- *
  * Return: Success: 0
  *  Failure: -1
  *
