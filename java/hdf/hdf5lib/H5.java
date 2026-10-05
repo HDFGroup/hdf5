@@ -12488,8 +12488,7 @@ public class H5 implements java.io.Serializable {
     {
         if (plist_id < 0)
             throw new HDF5FunctionArgumentException("Negative property list identifier");
-        // H5Pappend_filter with CDVALUES is identical to H5Pset_filter; delegate to avoid
-        // constructing an H5Z_params_t struct in FFM heap memory.
+        // Same as H5Pset_filter
         int[] values = (cd_values != null) ? cd_values : new int[0];
         return H5Pset_filter(plist_id, filter_id, flags, (long)values.length, values);
     }
@@ -12571,9 +12570,7 @@ public class H5 implements java.io.Serializable {
             throw new HDF5FunctionArgumentException("Negative property list identifier");
 
         int retVal = -1;
-        /* Unlike the append case this cannot delegate to H5Pmodify_filter: that
-         * addresses an entry by filter ID and resolves to the first match, whereas
-         * this API addresses by pipeline index.  The struct is built explicitly. */
+        /* H5Pmodify_filter addresses by filter ID, so it cannot be used here */
         final int H5Z_PARAMS_CDVALUES = 0;
         int[] values                  = (cd_values != null) ? cd_values : new int[0];
         try (Arena arena = Arena.ofConfined()) {
