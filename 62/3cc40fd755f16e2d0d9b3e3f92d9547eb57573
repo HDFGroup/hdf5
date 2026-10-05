@@ -1,0 +1,19 @@
+test/enc_dec_plist.c
+  s_2f7969eb2a15d6::t_ad3a16bc88e569 438-439,496
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "623cc40fd755f16e2d0d9b3e3f92d9547eb57573",
+  "prompts": {},
+  "sessions": {
+    "s_2f7969eb2a15d6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "11632f05-dc55-4c8b-995c-a62ceb117b5b",
+        "model": "unknown"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
