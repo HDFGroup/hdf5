@@ -1235,6 +1235,14 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         assert(minbits <= p.size * 8);
         p.minbits = minbits;
 
+        /* the compressed buffer must at least hold the parameter header */
+        if (*buf_size < buf_offset)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
+
+        /* guard against overflow when computing the output buffer size */
+        if (p.size != 0 && d_nelmts > SIZE_MAX / p.size)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid number of data elements");
+
         /* calculate size of output buffer after decompression */
         size_out = d_nelmts * (size_t)p.size;
 
@@ -1245,6 +1253,9 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
 
         /* special case: minbits equal to full precision */
         if (minbits == p.size * 8) {
+            if (size_out > *buf_size - buf_offset)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
+
             H5MM_memcpy(outbuf, (unsigned char *)(*buf) + buf_offset, size_out);
             /* free the original buffer */
             H5MM_xfree(*buf);
