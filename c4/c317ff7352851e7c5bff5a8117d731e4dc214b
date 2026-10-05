@@ -1,0 +1,21 @@
+tools/lib/h5tools.h
+  s_de8bab5ceb8651::t_ef427d617c1d5b 574
+tools/lib/h5tools_dump.c
+  s_de8bab5ceb8651::t_df69d0ca677f30 3183-3185,3200-3201,3216-3217,3230-3232,3273-3278,3301,3324,3331,3343,3356,3358,3373,3419,3428-3429,3814,3817-3823,3842,3848-3850
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c4c317ff7352851e7c5bff5a8117d731e4dc214b",
+  "prompts": {},
+  "sessions": {
+    "s_de8bab5ceb8651": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "61b7cbaa-0fce-4a5e-aedc-c5a4411acfe3",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
