@@ -97,6 +97,18 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    The `H5F_libver_t` enumeration gains `H5F_LIBVER_V300` for the 3.0 file format, and `H5F_LIBVER_LATEST` now maps to it. Every object header message version admitted by `H5F_LIBVER_V300` is currently the same as for `H5F_LIBVER_V200`; later format changes in the 3.0 release will be gated on it. The constant is also available in the Fortran (`H5F_LIBVER_V300_F`) and Java (`HDF5Constants.H5F_LIBVER_V300`) bindings, and `h5repack --low`/`--high` accept the value 6.
 
+### Added the H5Z_class3_t filter class and H5Zget_filter_class_info()
+
+   Filters can now be registered with the new `H5Z_class3_t` structure, declared in `H5Zdevelop.h` with its `version` field set to `H5Z_CLASS3_T_VERS`. A class3 filter carries a required canonical `name` (1-255 bytes from `[A-Za-z0-9_.-]`, unique among registered class3 filters), an optional free-form `description`, and optional `set_config`/`get_config` callbacks for string-based configuration. Its filter callback has the new `H5Z_func2_t` signature, which adds the data transfer property list, the chunk's scaled coordinates and the dataset rank to the arguments of `H5Z_func_t`. `H5Z_func2_t` also has a `void *state` parameter that is reserved for future per-dataset filter state; the library always passes NULL for it in this release. The built-in deflate, shuffle, Fletcher32, N-bit, scale-offset and szip filters are now registered as class3 filters.
+
+   `H5Z_class_t` still selects `H5Z_class2_t` by default; an application can map it to `H5Z_class3_t` by defining `H5Z_class_t_vers` to 3. `H5Zregister()` accepts all three class versions.
+
+   The new `H5Zget_filter_class_info()` function returns a registered filter's encode/decode configuration flags, canonical name and description in an `H5Z_class_info_t` structure, along with whether the filter provides `set_config` and `get_config` callbacks. Like `H5Zfilter_avail()`, it loads the filter plugin if the filter is not yet registered.
+
+### Changed the filter name reported for filters with no known name
+
+   `H5Pget_filter2()` and `H5Pget_filter_by_id2()` now return the decimal filter ID as a string (for example, `"32000"`) as the name of a filter that has no name stored in the pipeline and is not registered. They returned `"Unknown library filter"` for such a filter with an ID below 256, and an empty string otherwise.
+
 ### Added support for internally concurrent multithreaded reads of chunked datasets
 
    Added 3 new functions to support this: H5TSset_internal_threads(),

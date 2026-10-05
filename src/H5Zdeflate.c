@@ -27,19 +27,23 @@
 #endif
 
 /* Local function prototypes */
-static size_t H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
+static size_t H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], hid_t dxpl_id,
+                                  const hsize_t *scaled, size_t ndims, void *state, size_t nbytes,
                                   size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_DEFLATE[1] = {{
-    H5Z_CLASS_T_VERS,    /* H5Z_class_t version */
-    H5Z_FILTER_DEFLATE,  /* Filter id number		*/
-    1,                   /* encoder_present flag (set to true) */
-    1,                   /* decoder_present flag (set to true) */
-    "deflate",           /* Filter name for debugging	*/
-    NULL,                /* The "can apply" callback     */
-    NULL,                /* The "set local" callback     */
-    H5Z__filter_deflate, /* The actual filter function	*/
+H5_ATTR_VISIBILITY_HIDDEN const H5Z_class3_t H5Z_DEFLATE[1] = {{
+    H5Z_CLASS3_T_VERS,                                     /* H5Z_class3_t version */
+    H5Z_FILTER_DEFLATE,                                    /* Filter id number */
+    1,                                                     /* encoder_present flag (set to true) */
+    1,                                                     /* decoder_present flag (set to true) */
+    "deflate",                                             /* name */
+    NULL,                                                  /* The "can apply" callback */
+    NULL,                                                  /* The "set local" callback */
+    H5Z__filter_deflate,                                   /* The actual filter function */
+    NULL,                                                  /* String config setter */
+    NULL,                                                  /* String config getter */
+    "Deflate (zlib) general-purpose lossless compression", /* description */
 }};
 
 /*-------------------------------------------------------------------------
@@ -54,8 +58,10 @@ const H5Z_class2_t H5Z_DEFLATE[1] = {{
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
-                    size_t *buf_size, void **buf)
+H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
+                    hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
+                    size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size,
+                    void **buf)
 {
     void  *outbuf = NULL; /* Pointer to new buffer */
     int    status;        /* Status from zlib operation */

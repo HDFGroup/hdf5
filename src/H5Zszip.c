@@ -31,19 +31,23 @@
 /* Local function prototypes */
 static htri_t H5Z__can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static herr_t H5Z__set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);
-static size_t H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
+static size_t H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], hid_t dxpl_id,
+                               const hsize_t *scaled, size_t ndims, void *state, size_t nbytes,
                                size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-H5Z_class2_t H5Z_SZIP[1] = {{
-    H5Z_CLASS_T_VERS,    /* H5Z_class_t version */
-    H5Z_FILTER_SZIP,     /* Filter id number		*/
-    1,                   /* Assume encoder present: check before registering */
-    1,                   /* decoder_present flag (set to true) */
-    "szip",              /* Filter name for debugging	*/
-    H5Z__can_apply_szip, /* The "can apply" callback     */
-    H5Z__set_local_szip, /* The "set local" callback     */
-    H5Z__filter_szip,    /* The actual filter function	*/
+H5_ATTR_VISIBILITY_HIDDEN H5Z_class3_t H5Z_SZIP[1] = {{
+    H5Z_CLASS3_T_VERS,                               /* H5Z_class3_t version */
+    H5Z_FILTER_SZIP,                                 /* Filter id number */
+    1,                                               /* Assume encoder present: check before registering */
+    1,                                               /* decoder_present flag (set to true) */
+    "szip",                                          /* name */
+    H5Z__can_apply_szip,                             /* The "can apply" callback */
+    H5Z__set_local_szip,                             /* The "set local" callback */
+    H5Z__filter_szip,                                /* The actual filter function */
+    NULL,                                            /* String config setter */
+    NULL,                                            /* String config getter */
+    "SZIP lossless compression for scientific data", /* description */
 }};
 
 /*-------------------------------------------------------------------------
@@ -248,8 +252,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
-                 size_t *buf_size, void **buf)
+H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], hid_t H5_ATTR_UNUSED dxpl_id,
+                 const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims,
+                 void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size, void **buf)
 {
     size_t         ret_value = 0;    /* Return value */
     size_t         size_out  = 0;    /* Size of output buffer */

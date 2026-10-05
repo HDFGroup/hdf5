@@ -372,6 +372,44 @@ H5_DLL htri_t H5Zfilter_avail(H5Z_filter_t id);
  */
 H5_DLL herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags);
 
+/**
+ * \brief Registry-level information about a filter (output of
+ *        #H5Zget_filter_class_info).
+ *
+ * \since 3.0.0
+ */
+typedef struct H5Z_class_info_t {
+    H5Z_filter_t id;            /**< Numeric filter identifier         */
+    unsigned int config_flags;  /**< Bitwise OR of
+                                     #H5Z_FILTER_CONFIG_ENCODE_ENABLED and
+                                     #H5Z_FILTER_CONFIG_DECODE_ENABLED   */
+    const char *name;           /**< Filter name; may be \c NULL         */
+    const char *description;    /**< Filter description; may be \c NULL  */
+    bool        has_set_config; /**< Has a \c set_config callback       */
+    bool        has_get_config; /**< Has a \c get_config callback       */
+} H5Z_class_info_t;
+
+/**
+ * \ingroup H5Z
+ *
+ * \brief Retrieves registry-level information about a registered filter
+ *
+ * \param[in]  filter Filter identifier
+ * \param[out] info   Filled with the filter's class-level information
+ *
+ * \return \herr_t
+ *
+ * \details Like #H5Zget_filter_info, but also returns the filter's name,
+ *          description, and which configuration callbacks it has.  Loads the
+ *          filter plugin if needed.
+ *
+ *          The strings in \p info belong to the library and remain valid
+ *          until the filter is unregistered.
+ *
+ * \since 3.0.0
+ */
+H5_DLL herr_t H5Zget_filter_class_info(H5Z_filter_t filter, H5Z_class_info_t *info /*out*/);
+
 #ifdef __cplusplus
 }
 #endif

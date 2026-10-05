@@ -20,21 +20,25 @@
 /* Include private header file */
 #include "H5Zprivate.h" /* Filter functions                */
 
+#define H5Z_CLASS3_T_VERS_INTERNAL H5Z_CLASS3_T_VERS
+
 /********************/
 /* Internal filters */
 /********************/
 
+/* Hidden so they cannot collide with symbols in filter plugins */
+
 /* Shuffle filter */
-H5_DLLVAR const H5Z_class2_t H5Z_SHUFFLE[1];
+H5_ATTR_VISIBILITY_HIDDEN extern const H5Z_class3_t H5Z_SHUFFLE[1];
 
 /* Fletcher32 filter */
-H5_DLLVAR const H5Z_class2_t H5Z_FLETCHER32[1];
+H5_ATTR_VISIBILITY_HIDDEN extern const H5Z_class3_t H5Z_FLETCHER32[1];
 
 /* n-bit filter */
-H5_DLLVAR H5Z_class2_t H5Z_NBIT[1];
+H5_ATTR_VISIBILITY_HIDDEN extern H5Z_class3_t H5Z_NBIT[1];
 
 /* Scale/offset filter */
-H5_DLLVAR H5Z_class2_t H5Z_SCALEOFFSET[1];
+H5_ATTR_VISIBILITY_HIDDEN extern H5Z_class3_t H5Z_SCALEOFFSET[1];
 
 /********************/
 /* External filters */
@@ -42,15 +46,16 @@ H5_DLLVAR H5Z_class2_t H5Z_SCALEOFFSET[1];
 
 /* Deflate filter */
 #ifdef H5_HAVE_FILTER_DEFLATE
-H5_DLLVAR const H5Z_class2_t H5Z_DEFLATE[1];
+H5_ATTR_VISIBILITY_HIDDEN extern const H5Z_class3_t H5Z_DEFLATE[1];
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
 /* szip filter */
 #ifdef H5_HAVE_FILTER_SZIP
-H5_DLLVAR H5Z_class2_t H5Z_SZIP[1];
+H5_ATTR_VISIBILITY_HIDDEN extern H5Z_class3_t H5Z_SZIP[1];
 #endif /* H5_HAVE_FILTER_SZIP */
 
 /* Package internal routines */
+H5_DLL herr_t H5Z__reregister_deflate(void);
 H5_DLL herr_t H5Z__unregister(H5Z_filter_t filter_id);
 H5_DLL herr_t H5Z__config_validate_keys(const char *params, const char *const *known_keys);
 H5_DLL htri_t H5Z__config_get_int(const char *params, const char *key, int64_t *out);
