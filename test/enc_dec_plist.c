@@ -17,6 +17,7 @@
 #include "h5test.h"
 #include "H5ACprivate.h"
 #include "H5Iprivate.h"
+#include "H5Oprivate.h"
 #include "H5Pprivate.h"
 #include "H5PBprivate.h"
 
@@ -348,6 +349,181 @@ error:
 
     return (-1);
 } /* end test_encode_decode_page_buf_size() */
+
+/*-------------------------------------------------------------------------
+ * Function: test_decode_pline_too_many_filters
+ *
+ * Purpose:  Tests that H5Pdecode fails cleanly for an encoded DCPL whose
+ *           pipeline holds more than H5Z_MAX_NFILTERS filters.  Each filter
+ *           has more than H5Z_COMMON_CD_VALUES client data values, so the
+ *           filters added before the failure own heap allocations that the
+ *           decoder must release; a memory checker reports a leak if it
+ *           does not.
+ *
+ * Return:   Success: 0
+ *           Failure: -1
+ *-------------------------------------------------------------------------
+ */
+static int
+test_decode_pline_too_many_filters(void)
+{
+    const size_t nfilters = H5Z_MAX_NFILTERS + 1;
+    const size_t ncd      = H5Z_COMMON_CD_VALUES + 1;
+    uint8_t     *buf      = NULL;
+    uint8_t     *p;
+    size_t       u, v;
+    hid_t        plist_id = H5I_INVALID_HID;
+
+    TESTING("DCPL decoding of a pipeline with too many filters");
+
+    /* Header, property name, pipeline header, filters, and terminator */
+    if (NULL == (buf = (uint8_t *)malloc(2 + sizeof(H5O_CRT_PIPELINE_NAME) + 3 +
+                                         nfilters * (4 + 4 + 1 + 2 + ncd * 4) + 1)))
+        TEST_ERROR;
+    p = buf;
+
+    /* Encoded plist version (H5P_ENCODE_VERS) and type */
+    *p++ = 0;
+    *p++ = (uint8_t)H5P_TYPE_DATASET_CREATE;
+
+    /* Pipeline property, laid out as H5P__ocrt_pipeline_enc writes it */
+    memcpy(p, H5O_CRT_PIPELINE_NAME, sizeof(H5O_CRT_PIPELINE_NAME));
+    p += sizeof(H5O_CRT_PIPELINE_NAME);
+    *p++ = (uint8_t)sizeof(unsigned);
+    *p++ = 1; /* Encoded size of the filter count */
+    *p++ = (uint8_t)nfilters;
+    for (u = 0; u < nfilters; u++) {
+        INT32ENCODE(p, H5Z_FILTER_FLETCHER32);
+        H5_ENCODE_UNSIGNED(p, 0U); /* Flags */
+        *p++ = 0;                  /* No name */
+        *p++ = 1;                  /* Encoded size of cd_nelmts */
+        *p++ = (uint8_t)ncd;
+        for (v = 0; v < ncd; v++)
+            H5_ENCODE_UNSIGNED(p, (unsigned)v);
+    }
+
+    /* End of properties */
+    *p++ = 0;
+
+    H5E_BEGIN_TRY
+    {
+        plist_id = H5Pdecode(buf);
+    }
+    H5E_END_TRY
+    if (plist_id >= 0)
+        FAIL_PUTS_ERROR("decoded a pipeline with too many filters\n");
+
+    free(buf);
+
+    PASSED();
+    return 0;
+
+error:
+    free(buf);
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(plist_id);
+    }
+    H5E_END_TRY
+
+    return -1;
+} /* end test_decode_pline_too_many_filters() */
+
+/*-------------------------------------------------------------------------
+ * Function: test_decode_pline_filter_name
+ *
+ * Purpose:  Tests that H5Pdecode restores a filter name that fits in the
+ *           encoded name slot, and that the name survives appending a filter
+ *           to a copy of the decoded pipeline.  A name that fills the slot
+ *           without a terminator is not restored.  The filters are not
+ *           registered.
+ *
+ * Return:   Success: 0
+ *           Failure: -1
+ *-------------------------------------------------------------------------
+ */
+static int
+test_decode_pline_filter_name(void)
+{
+    const char short_name[H5Z_COMMON_NAME_LEN] = "short_name";
+    const char long_name[H5Z_COMMON_NAME_LEN]  = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'};
+    uint8_t    buf[2 + sizeof(H5O_CRT_PIPELINE_NAME) + 3 + 2 * (4 + 4 + 1 + H5Z_COMMON_NAME_LEN + 2) + 1];
+    uint8_t   *p = buf;
+    char       name[64];
+    unsigned   flags;
+    hid_t      plist_id = H5I_INVALID_HID;
+    hid_t      copy_id  = H5I_INVALID_HID;
+
+    TESTING("DCPL decoding of filter names");
+
+    /* Encoded plist version (H5P_ENCODE_VERS) and type */
+    *p++ = 0;
+    *p++ = (uint8_t)H5P_TYPE_DATASET_CREATE;
+
+    /* Pipeline property, laid out as H5P__ocrt_pipeline_enc writes it */
+    memcpy(p, H5O_CRT_PIPELINE_NAME, sizeof(H5O_CRT_PIPELINE_NAME));
+    p += sizeof(H5O_CRT_PIPELINE_NAME);
+    *p++ = (uint8_t)sizeof(unsigned);
+    *p++ = 1; /* Encoded size of the filter count */
+    *p++ = 2;
+    INT32ENCODE(p, 300);
+    H5_ENCODE_UNSIGNED(p, (unsigned)H5Z_FLAG_OPTIONAL);
+    *p++ = 1; /* Has a name */
+    memcpy(p, short_name, H5Z_COMMON_NAME_LEN);
+    p += H5Z_COMMON_NAME_LEN;
+    *p++ = 1; /* Encoded size of cd_nelmts */
+    *p++ = 0;
+    INT32ENCODE(p, 301);
+    H5_ENCODE_UNSIGNED(p, (unsigned)H5Z_FLAG_OPTIONAL);
+    *p++ = 1; /* Has a name */
+    memcpy(p, long_name, H5Z_COMMON_NAME_LEN);
+    p += H5Z_COMMON_NAME_LEN;
+    *p++ = 1; /* Encoded size of cd_nelmts */
+    *p++ = 0;
+
+    /* End of properties */
+    *p++ = 0;
+
+    if ((plist_id = H5Pdecode(buf)) < 0)
+        TEST_ERROR;
+
+    if (H5Pget_filter2(plist_id, 0, &flags, NULL, NULL, sizeof(name), name, NULL) < 0)
+        TEST_ERROR;
+    if (strcmp(name, short_name) != 0)
+        FAIL_PUTS_ERROR("decoded filter name not restored\n");
+    if (H5Pget_filter2(plist_id, 1, &flags, NULL, NULL, sizeof(name), name, NULL) < 0)
+        TEST_ERROR;
+    if (strncmp(name, long_name, H5Z_COMMON_NAME_LEN) == 0)
+        FAIL_PUTS_ERROR("unterminated filter name was restored\n");
+
+    /* The copy's filter array is full, so appending reallocates it */
+    if ((copy_id = H5Pcopy(plist_id)) < 0)
+        TEST_ERROR;
+    if (H5Pset_filter(copy_id, 302, H5Z_FLAG_OPTIONAL, 0, NULL) < 0)
+        TEST_ERROR;
+    if (H5Pget_filter2(copy_id, 0, &flags, NULL, NULL, sizeof(name), name, NULL) < 0)
+        TEST_ERROR;
+    if (strcmp(name, short_name) != 0)
+        FAIL_PUTS_ERROR("filter name lost when the pipeline grew\n");
+
+    if (H5Pclose(copy_id) < 0)
+        TEST_ERROR;
+    if (H5Pclose(plist_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(copy_id);
+        H5Pclose(plist_id);
+    }
+    H5E_END_TRY
+
+    return -1;
+} /* end test_decode_pline_filter_name() */
 
 int
 main(void)
@@ -914,6 +1090,12 @@ main(void)
 
         } /* end high */
     }     /* end low */
+
+    if (test_decode_pline_too_many_filters() < 0)
+        goto error;
+
+    if (test_decode_pline_filter_name() < 0)
+        goto error;
 
     return 0;
 

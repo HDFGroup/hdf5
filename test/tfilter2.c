@@ -2547,6 +2547,9 @@ test_config_string_plist(hid_t fapl)
         TEST_ERROR;
     if (strncmp(pbuf, "level", 5) == 0)
         TEST_ERROR;
+    /* Includes the recorded name, which is too long for the name slot */
+    if (H5Pequal(dcpl, dcpl_dec) <= 0)
+        TEST_ERROR;
     free(enc_buf);
     enc_buf = NULL;
     if (H5Pclose(dcpl_dec) < 0 || H5Pclose(dcpl) < 0)
