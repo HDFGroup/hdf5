@@ -17,12 +17,14 @@
  *   - Built-in filter set_config / get_config round-trips
  *   - H5Z_class3_t registration, canonical names and H5Zget_filter_class_info
  *   - The H5Z_func2_t extended filter callback
+ *   - Configuration strings in the filter pipeline message (version 3)
  *   - Regression: existing H5Pset_filter still works
  */
 
 #include "h5test.h"
+#include "H5srcdir.h"
 
-static const char *FILENAME[] = {"tfilter2", "tfilter2_cfg", NULL};
+static const char *FILENAME[] = {"tfilter2", "tfilter2_cfg", "tfilter2_cfg_copy", NULL};
 
 /* -----------------------------------------------------------------------
  * Parser tests - typed TOML accessor functions
@@ -2597,9 +2599,9 @@ test_config_string_plist(hid_t fapl)
     }
     PASSED();
 
-    /* The string is not written to the file, so a reopened dataset reports
-     * get_config's output */
-    TESTING("config string: not written to the file; reopen falls back to get_config");
+    /* The string is written to the file, so a reopened dataset returns it
+     * rather than get_config's output */
+    TESTING("config string: written to the file; reopen returns the stored string");
     if ((dcpl = cfgstr_make_dcpl("level=7")) < 0)
         TEST_ERROR;
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -2618,7 +2620,7 @@ test_config_string_plist(hid_t fapl)
         TEST_ERROR;
     if (cfgstr_get_params(dcpl_out, 0, pbuf, sizeof(pbuf)) < 0)
         TEST_ERROR;
-    if (strcmp(pbuf, "level = 7") != 0)
+    if (strcmp(pbuf, "level=7") != 0)
         TEST_ERROR;
     if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Fclose(file) < 0)
         TEST_ERROR;
@@ -2645,6 +2647,1097 @@ error:
     }
     H5E_END_TRY
     free(enc_buf);
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
+ * Configuration strings in the file: filter pipeline message version 3
+ * ---------------------------------------------------------------------- */
+
+/* H5Ewalk2 callback: set *udata when an entry has minor code H5E_BADRANGE */
+static herr_t
+cfgstr_find_badrange_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *udata)
+{
+    if (err_desc->min_num == H5E_BADRANGE)
+        *(bool *)udata = true;
+    return 0;
+}
+
+/* True if the default error stack holds an H5E_BADRANGE entry */
+static bool
+cfgstr_stack_has_badrange(void)
+{
+    bool found = false;
+
+    if (H5Ewalk2(H5E_DEFAULT, H5E_WALK_UPWARD, cfgstr_find_badrange_cb, &found) < 0)
+        return false;
+    return found;
+}
+
+static int
+test_config_string_ondisk(hid_t fapl)
+{
+    hid_t   file = H5I_INVALID_HID, sid = H5I_INVALID_HID, dcpl = H5I_INVALID_HID, dset = H5I_INVALID_HID;
+    hid_t   dcpl_out = H5I_INVALID_HID, fapl_dg = H5I_INVALID_HID, fapl_hi = H5I_INVALID_HID;
+    hid_t   file2   = H5I_INVALID_HID;
+    hsize_t dims[2] = {8, 8};
+    char    filename[1024], filename2[1024];
+    char    pbuf[H5Z_CONFIG_STRING_MAX + 1];
+    bool    badrange = false;
+
+    if (H5Zregister(&cfgstr_cls) < 0)
+        TEST_ERROR;
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+    h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
+    h5_fixname(FILENAME[2], fapl, filename2, sizeof(filename2));
+
+    /* A file access property list whose high bound does not admit a version 3
+     * pipeline message */
+    if ((fapl_dg = H5Pcopy(fapl)) < 0)
+        TEST_ERROR;
+    if (H5Pset_libver_bounds(fapl_dg, H5F_LIBVER_EARLIEST, H5F_LIBVER_V200) < 0)
+        TEST_ERROR;
+
+    /* --- The string is recovered from the file without the plugin --- */
+    TESTING("config string: on-disk round-trip without the plugin");
+    if ((dcpl = cfgstr_make_dcpl("level=7")) < 0)
+        TEST_ERROR;
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0 || H5Pclose(dcpl) < 0 || H5Fclose(file) < 0)
+        TEST_ERROR;
+    dset = dcpl = file = H5I_INVALID_HID;
+
+    /* Drop the plugin: the only remaining source is the stored string */
+    if (H5Zunregister(CFGSTR_FILTER_ID) < 0)
+        TEST_ERROR;
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    if (cfgstr_get_params(dcpl_out, 0, pbuf, sizeof(pbuf)) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "level=7") != 0) /* as given, not the "level = 7" get_config form */
+        TEST_ERROR;
+    if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Fclose(file) < 0)
+        TEST_ERROR;
+    dcpl_out = dset = file = H5I_INVALID_HID;
+    if (H5Zregister(&cfgstr_cls) < 0)
+        TEST_ERROR;
+    PASSED();
+
+    /* --- H5Ocopy carries the stored string to another file --- */
+    TESTING("config string: survives H5Ocopy to another file");
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((file2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if (H5Ocopy(file, "dset", file2, "dset_copy", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file2) < 0)
+        TEST_ERROR;
+    file2 = H5I_INVALID_HID;
+    if ((file2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file2, "dset_copy", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    if (cfgstr_get_params(dcpl_out, 0, pbuf, sizeof(pbuf)) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "level=7") != 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Fclose(file2) < 0)
+        TEST_ERROR;
+    dcpl_out = dset = file2 = H5I_INVALID_HID;
+
+    /* Copying into a file whose high bound is below V300 fails */
+    if ((file2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_dg)) < 0)
+        TEST_ERROR;
+    badrange = false;
+    H5E_BEGIN_TRY
+    {
+        if (H5Ocopy(file, "dset", file2, "dset_copy", H5P_DEFAULT, H5P_DEFAULT) < 0)
+            badrange = cfgstr_stack_has_badrange();
+        else
+            badrange = false;
+    }
+    H5E_END_TRY
+    if (!badrange)
+        TEST_ERROR;
+    if (H5Lexists(file2, "dset_copy", H5P_DEFAULT) != 0)
+        TEST_ERROR;
+    if (H5Fclose(file2) < 0 || H5Fclose(file) < 0)
+        TEST_ERROR;
+    file2 = file = H5I_INVALID_HID;
+    PASSED();
+
+    /* --- A high bound below V300 rejects a string-carrying pipeline rather
+     *     than writing it without the string --- */
+    TESTING("config string: H5Dcreate fails when the high bound is below V300");
+    if ((dcpl = cfgstr_make_dcpl("level=5")) < 0)
+        TEST_ERROR;
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_dg)) < 0)
+        TEST_ERROR;
+    badrange = false;
+    H5E_BEGIN_TRY
+    {
+        dset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        if (dset < 0)
+            badrange = cfgstr_stack_has_badrange();
+    }
+    H5E_END_TRY
+    if (dset >= 0 || !badrange)
+        TEST_ERROR;
+    dset     = H5I_INVALID_HID;
+    badrange = false;
+    H5E_BEGIN_TRY
+    {
+        dset = H5Dcreate_anon(file, H5T_NATIVE_INT, sid, dcpl, H5P_DEFAULT);
+        if (dset < 0)
+            badrange = cfgstr_stack_has_badrange();
+    }
+    H5E_END_TRY
+    if (dset >= 0 || !badrange)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (H5Lexists(file, "dset", H5P_DEFAULT) != 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+
+    /* The same filter without a string (raw cd_values) is unaffected by the
+     * bound, and the reopened dataset falls back to get_config */
+    {
+        hsize_t  chunk[2] = {4, 4};
+        unsigned cd[1]    = {5};
+
+        if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+            TEST_ERROR;
+        if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+            TEST_ERROR;
+        if (H5Pset_filter(dcpl, CFGSTR_FILTER_ID, 0, 1, cd) < 0)
+            TEST_ERROR;
+    }
+    if ((dset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0 || H5Pclose(dcpl) < 0 || H5Fclose(file) < 0)
+        TEST_ERROR;
+    dset = dcpl = file = H5I_INVALID_HID;
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl_dg)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    if (cfgstr_get_params(dcpl_out, 0, pbuf, sizeof(pbuf)) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "level = 5") != 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Fclose(file) < 0)
+        TEST_ERROR;
+    dcpl_out = dset = file = H5I_INVALID_HID;
+    PASSED();
+
+    /* --- A low bound of V300 writes version 3 even without strings --- */
+    TESTING("config string: version 3 message without strings (low bound V300)");
+    if ((fapl_hi = H5Pcopy(fapl)) < 0)
+        TEST_ERROR;
+    if (H5Pset_libver_bounds(fapl_hi, H5F_LIBVER_V300, H5F_LIBVER_LATEST) < 0)
+        TEST_ERROR;
+    {
+        hsize_t  chunk[2] = {4, 4};
+        unsigned cd[1]    = {6};
+
+        if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+            TEST_ERROR;
+        if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+            TEST_ERROR;
+        if (H5Pset_filter(dcpl, CFGSTR_FILTER_ID, 0, 1, cd) < 0)
+            TEST_ERROR;
+        if (H5Pset_shuffle(dcpl) < 0)
+            TEST_ERROR;
+    }
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_hi)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0 || H5Pclose(dcpl) < 0 || H5Fclose(file) < 0)
+        TEST_ERROR;
+    dset = dcpl = file = H5I_INVALID_HID;
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl_hi)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    if (H5Pget_nfilters(dcpl_out) != 2)
+        TEST_ERROR;
+    if (cfgstr_get_params(dcpl_out, 0, pbuf, sizeof(pbuf)) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "level = 6") != 0)
+        TEST_ERROR;
+    if (H5Pget_filter2(dcpl_out, 1, NULL, NULL, NULL, 0, NULL, NULL) != H5Z_FILTER_SHUFFLE)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Fclose(file) < 0 || H5Pclose(fapl_hi) < 0)
+        TEST_ERROR;
+    dcpl_out = dset = file = fapl_hi = H5I_INVALID_HID;
+    PASSED();
+
+    if (H5Pclose(fapl_dg) < 0)
+        TEST_ERROR;
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+    if (H5Zunregister(CFGSTR_FILTER_ID) < 0)
+        TEST_ERROR;
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Pclose(dcpl_out);
+        H5Pclose(fapl_dg);
+        H5Pclose(fapl_hi);
+        H5Dclose(dset);
+        H5Sclose(sid);
+        H5Fclose(file);
+        H5Fclose(file2);
+        H5Zunregister(CFGSTR_FILTER_ID);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
+ * Read test/testfiles/test_filters_v3.h5 (from test/gen_filters.c), to
+ * catch a change to the format that encode and decode would both follow
+ * ---------------------------------------------------------------------- */
+static int
+test_config_string_golden_file(void)
+{
+    hid_t       file = H5I_INVALID_HID, dset = H5I_INVALID_HID, dcpl = H5I_INVALID_HID;
+    char        pbuf[H5Z_CONFIG_STRING_MAX + 1];
+    size_t      plen = 0;
+    const char *data_file;
+
+    TESTING("config string: decodes correctly from a checked-in golden file");
+
+    data_file = H5_get_srcdir_filename("test_filters_v3.h5");
+    if (NULL == data_file)
+        TEST_ERROR;
+
+    if ((file = H5Fopen(data_file, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "dataset_with_filter", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dcpl = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+
+    if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "scale_type = \"int\", scale_factor = 3") != 0) {
+        fprintf(
+            stderr,
+            "\n   golden file stored \"%s\"\n   expected  \"scale_type = \\\"int\\\", scale_factor = 3\"\n",
+            pbuf);
+        TEST_ERROR;
+    }
+
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Dclose(dset);
+        H5Fclose(file);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
+ * Hand-built version 3 extension block lists
+ *
+ * The block list is patched in place in a file written with version 1
+ * object headers, which have no checksum.  It is located by searching for
+ * EXT_CONFIG_STR and replaced with a list of the same size.
+ * ---------------------------------------------------------------------- */
+
+#define EXT_CONFIG_STR  "scale_type = \"int\", scale_factor = 3"
+#define EXT_HDR_SIZE    8 /* type, flags, reserved, length */
+#define EXT_LIST_SIZE   (2 + EXT_HDR_SIZE + sizeof(EXT_CONFIG_STR) - 1)
+#define EXT_TYPE_CONFIG 0x0001
+#define EXT_TYPE_BLOB   0x0002 /* reserved, critical, not defined by this library */
+#define EXT_TYPE_UNUSED 0x7ABC /* an unassigned block type */
+#define EXT_CRITICAL    0x01
+
+/* H5Ewalk2 callback: set match->found when an entry has the requested
+ * major and minor codes */
+typedef struct {
+    hid_t maj;
+    hid_t min;
+    bool  found;
+} corrupt_err_match_t;
+
+static herr_t
+corrupt_find_err_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *udata)
+{
+    corrupt_err_match_t *match = (corrupt_err_match_t *)udata;
+
+    if (err_desc->maj_num == match->maj && err_desc->min_num == match->min)
+        match->found = true;
+    return 0;
+}
+
+/* Builder for a hand-made extension block list */
+typedef struct {
+    uint8_t bytes[EXT_LIST_SIZE];
+    size_t  len;
+} ext_list_t;
+
+static void
+ext_list_init(ext_list_t *list, unsigned count)
+{
+    list->bytes[0] = (uint8_t)(count & 0xff);
+    list->bytes[1] = (uint8_t)((count >> 8) & 0xff);
+    list->len      = 2;
+}
+
+/* Append a block header with the given type, flags and reserved byte,
+ * declaring LENGTH payload bytes, followed by NDATA bytes of DATA (NDATA
+ * may be less than LENGTH to declare a length that runs past the end of
+ * the message).  Returns -1 if the list would outgrow EXT_LIST_SIZE. */
+static int
+ext_list_add_raw(ext_list_t *list, unsigned type, unsigned flags, unsigned reserved, uint32_t length,
+                 const void *data, size_t ndata)
+{
+    uint8_t *p;
+
+    if (list->len + EXT_HDR_SIZE + ndata > EXT_LIST_SIZE)
+        return -1;
+    p    = list->bytes + list->len;
+    p[0] = (uint8_t)(type & 0xff);
+    p[1] = (uint8_t)((type >> 8) & 0xff);
+    p[2] = (uint8_t)flags;
+    p[3] = (uint8_t)reserved;
+    p[4] = (uint8_t)(length & 0xff);
+    p[5] = (uint8_t)((length >> 8) & 0xff);
+    p[6] = (uint8_t)((length >> 16) & 0xff);
+    p[7] = (uint8_t)((length >> 24) & 0xff);
+    if (ndata)
+        memcpy(p + EXT_HDR_SIZE, data, ndata);
+    list->len += EXT_HDR_SIZE + ndata;
+    return 0;
+}
+
+/* Append a block with a zero reserved byte */
+static int
+ext_list_add(ext_list_t *list, unsigned type, unsigned flags, uint32_t length, const void *data, size_t ndata)
+{
+    return ext_list_add_raw(list, type, flags, 0, length, data, ndata);
+}
+
+/* Append a block whose payload is NPAD filler bytes */
+static int
+ext_list_add_pad(ext_list_t *list, unsigned type, unsigned flags, size_t npad)
+{
+    uint8_t pad[EXT_LIST_SIZE];
+
+    if (npad > sizeof(pad))
+        return -1;
+    memset(pad, 0xA5, npad);
+    return ext_list_add(list, type, flags, (uint32_t)npad, pad, npad);
+}
+
+/* Number of payload bytes left for a final block that fills the list */
+static size_t
+ext_list_room(const ext_list_t *list)
+{
+    return EXT_LIST_SIZE - list->len - EXT_HDR_SIZE;
+}
+
+/* Copy SRC to DST, replacing the extension block list of the filter that
+ * carries EXT_CONFIG_STR with LIST, which must fill exactly EXT_LIST_SIZE
+ * bytes.  Returns 0 on success, -1 on an I/O failure or if the list is not
+ * found as expected. */
+static int
+patch_ext_list(const char *src, const char *dst, const ext_list_t *list)
+{
+    FILE       *in = NULL, *out = NULL;
+    char       *buf       = NULL;
+    const char *needle    = EXT_CONFIG_STR;
+    size_t      nlen      = strlen(EXT_CONFIG_STR);
+    long        fsize     = 0;
+    long        offset    = -1;
+    uint8_t    *hdr       = NULL;
+    int         ret_value = -1;
+
+    if (list->len != EXT_LIST_SIZE)
+        goto done;
+
+    if (NULL == (in = fopen(src, "rb")))
+        goto done;
+    if (fseek(in, 0, SEEK_END) != 0)
+        goto done;
+    if ((fsize = ftell(in)) < 0)
+        goto done;
+    rewind(in);
+
+    if (NULL == (buf = (char *)malloc((size_t)fsize)))
+        goto done;
+    if (fread(buf, 1, (size_t)fsize, in) != (size_t)fsize)
+        goto done;
+
+    /* Locate the string; it must occur exactly once */
+    for (long i = 2 + EXT_HDR_SIZE; i + (long)nlen <= fsize; i++)
+        if (0 == memcmp(buf + i, needle, nlen)) {
+            if (offset >= 0)
+                goto done;
+            offset = i - 2 - EXT_HDR_SIZE;
+        }
+    if (offset < 0)
+        goto done;
+
+    /* The list must be exactly one non-critical configuration string block
+     * holding the string */
+    hdr = (uint8_t *)buf + offset;
+    if (hdr[0] != 1 || hdr[1] != 0)
+        goto done;
+    if (hdr[2] != (EXT_TYPE_CONFIG & 0xff) || hdr[3] != ((EXT_TYPE_CONFIG >> 8) & 0xff) || hdr[4] != 0 ||
+        hdr[5] != 0)
+        goto done;
+    if (hdr[6] != (nlen & 0xff) || hdr[7] != ((nlen >> 8) & 0xff) || hdr[8] != 0 || hdr[9] != 0)
+        goto done;
+
+    memcpy(hdr, list->bytes, EXT_LIST_SIZE);
+
+    if (NULL == (out = fopen(dst, "wb")))
+        goto done;
+    if (fwrite(buf, 1, (size_t)fsize, out) != (size_t)fsize)
+        goto done;
+
+    ret_value = 0;
+
+done:
+    if (in)
+        fclose(in);
+    if (out)
+        fclose(out);
+    free(buf);
+    return ret_value;
+}
+
+/* Open DSET_NAME in FILENAME and return true if the open fails with an
+ * error carrying MAJ/MIN on the stack */
+static bool
+corrupt_open_fails_with(const char *filename, const char *dset_name, hid_t maj, hid_t min)
+{
+    hid_t               file = H5I_INVALID_HID, dset = H5I_INVALID_HID;
+    corrupt_err_match_t match = {maj, min, false};
+
+    H5E_BEGIN_TRY
+    {
+        file = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+        if (file >= 0) {
+            dset = H5Dopen2(file, dset_name, H5P_DEFAULT);
+            if (dset < 0)
+                H5Ewalk2(H5E_DEFAULT, H5E_WALK_UPWARD, corrupt_find_err_cb, &match);
+            else
+                H5Dclose(dset);
+            H5Fclose(file);
+        }
+    }
+    H5E_END_TRY
+
+    return dset < 0 && match.found;
+}
+
+/* Check DSET_NAME's data and, if EXPECT_CONFIG is not NULL, its parameter
+ * string.  Returns 0 on success, -1 on failure. */
+static int
+ext_open_and_check(const char *filename, const char *dset_name, const char *expect_config)
+{
+    hid_t  file = H5I_INVALID_HID, dset = H5I_INVALID_HID, dcpl = H5I_INVALID_HID;
+    int    rbuf[20];
+    char   pbuf[H5Z_CONFIG_STRING_MAX + 1];
+    size_t plen = 0;
+
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        goto error;
+    if ((dset = H5Dopen2(file, dset_name, H5P_DEFAULT)) < 0)
+        goto error;
+    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+        goto error;
+    for (int i = 0; i < 20; i++)
+        if (rbuf[i] != i % 8)
+            goto error;
+    if (expect_config) {
+        if ((dcpl = H5Dget_create_plist(dset)) < 0)
+            goto error;
+        if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
+            goto error;
+        if (strcmp(pbuf, expect_config) != 0) {
+            fprintf(stderr, "\n   stored \"%s\"\n   expected \"%s\"\n", pbuf, expect_config);
+            goto error;
+        }
+        if (H5Pclose(dcpl) < 0)
+            goto error;
+        dcpl = H5I_INVALID_HID;
+    }
+    if (H5Dclose(dset) < 0)
+        goto error;
+    if (H5Fclose(file) < 0)
+        goto error;
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Dclose(dset);
+        H5Fclose(file);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* Write GOOD_FILE: dataset "dset" carrying EXT_CONFIG_STR and dataset
+ * "sibling" with the same filter and no string, both with version 1 object
+ * headers and a version 3 pipeline message */
+static int
+ext_write_good_file(const char *good_file)
+{
+    hid_t        fapl = H5I_INVALID_HID, file = H5I_INVALID_HID, sid = H5I_INVALID_HID;
+    hid_t        dcpl = H5I_INVALID_HID, dset = H5I_INVALID_HID;
+    hsize_t      dims[1] = {20}, chunk[1] = {10};
+    int          buf[20];
+    H5Z_params_t p;
+
+    /* scale_factor = 3 keeps 3 bits of each integer */
+    for (int i = 0; i < 20; i++)
+        buf[i] = i % 8;
+
+    /* Low bound EARLIEST gives a version 1 object header (no checksum); the
+     * high bound admits the version 3 pipeline message */
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        goto error;
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
+        goto error;
+    if ((file = H5Fcreate(good_file, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        goto error;
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        goto error;
+
+    for (int d = 0; d < 2; d++) {
+        if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+            goto error;
+        if (H5Pset_chunk(dcpl, 1, chunk) < 0)
+            goto error;
+        if (d == 0) {
+            p.type  = H5Z_PARAMS_STRING;
+            p.u.str = EXT_CONFIG_STR;
+            if (H5Pappend_filter(dcpl, H5Z_FILTER_SCALEOFFSET, 0, &p) < 0)
+                goto error;
+        }
+        else if (H5Pset_scaleoffset(dcpl, H5Z_SO_INT, 3) < 0)
+            goto error;
+        if ((dset = H5Dcreate2(file, d == 0 ? "dset" : "sibling", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl,
+                               H5P_DEFAULT)) < 0)
+            goto error;
+        if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+            goto error;
+        if (H5Dclose(dset) < 0 || H5Pclose(dcpl) < 0)
+            goto error;
+        dset = dcpl = H5I_INVALID_HID;
+    }
+
+    if (H5Sclose(sid) < 0 || H5Fclose(file) < 0 || H5Pclose(fapl) < 0)
+        goto error;
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dset);
+        H5Pclose(dcpl);
+        H5Sclose(sid);
+        H5Fclose(file);
+        H5Pclose(fapl);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+#define EXT_GOOD_FILE    "tfilter2_v3_ext_good.h5"
+#define EXT_PATCHED_FILE "tfilter2_v3_ext_patched.h5"
+
+static int
+test_config_string_ext_unknown_blocks(void)
+{
+    const char *short_str = "scale_factor = 3";
+    size_t      short_len = strlen(short_str);
+    ext_list_t  list;
+
+    TESTING("config string: unknown extension blocks are skipped or rejected by the critical bit");
+
+    if (ext_write_good_file(EXT_GOOD_FILE) < 0)
+        TEST_ERROR;
+
+    /* The unpatched list reads back as written */
+    if (ext_open_and_check(EXT_GOOD_FILE, "dset", EXT_CONFIG_STR) < 0)
+        TEST_ERROR;
+
+    /* A non-critical block of an unknown type after the configuration
+     * string block is skipped */
+    ext_list_init(&list, 2);
+    if (ext_list_add(&list, EXT_TYPE_CONFIG, 0, (uint32_t)short_len, short_str, short_len) < 0)
+        TEST_ERROR;
+    if (ext_list_add_pad(&list, EXT_TYPE_UNUSED, 0, ext_list_room(&list)) < 0)
+        TEST_ERROR;
+    if (patch_ext_list(EXT_GOOD_FILE, EXT_PATCHED_FILE, &list) < 0)
+        TEST_ERROR;
+    if (ext_open_and_check(EXT_PATCHED_FILE, "dset", short_str) < 0)
+        TEST_ERROR;
+
+    /* The same block before the configuration string block is skipped */
+    ext_list_init(&list, 2);
+    if (ext_list_add_pad(&list, EXT_TYPE_UNUSED, 0, ext_list_room(&list) - EXT_HDR_SIZE - short_len) < 0)
+        TEST_ERROR;
+    if (ext_list_add(&list, EXT_TYPE_CONFIG, 0, (uint32_t)short_len, short_str, short_len) < 0)
+        TEST_ERROR;
+    if (patch_ext_list(EXT_GOOD_FILE, EXT_PATCHED_FILE, &list) < 0)
+        TEST_ERROR;
+    if (ext_open_and_check(EXT_PATCHED_FILE, "dset", short_str) < 0)
+        TEST_ERROR;
+
+    /* An entry holding only an unknown non-critical block has no stored
+     * string, and introspection falls back to get_config */
+    ext_list_init(&list, 1);
+    if (ext_list_add_pad(&list, EXT_TYPE_UNUSED, 0, ext_list_room(&list)) < 0)
+        TEST_ERROR;
+    if (patch_ext_list(EXT_GOOD_FILE, EXT_PATCHED_FILE, &list) < 0)
+        TEST_ERROR;
+    if (ext_open_and_check(EXT_PATCHED_FILE, "dset", NULL) < 0)
+        TEST_ERROR;
+
+    /* The reserved byte, and flag bits other than the critical bit of an
+     * unknown block type, are ignored */
+    ext_list_init(&list, 2);
+    if (ext_list_add_raw(&list, EXT_TYPE_CONFIG, 0, 0xFF, (uint32_t)short_len, short_str, short_len) < 0)
+        TEST_ERROR;
+    if (ext_list_add_raw(&list, EXT_TYPE_UNUSED, 0xFE, 0xFF, (uint32_t)ext_list_room(&list), EXT_CONFIG_STR,
+                         ext_list_room(&list)) < 0)
+        TEST_ERROR;
+    if (patch_ext_list(EXT_GOOD_FILE, EXT_PATCHED_FILE, &list) < 0)
+        TEST_ERROR;
+    if (ext_open_and_check(EXT_PATCHED_FILE, "dset", short_str) < 0)
+        TEST_ERROR;
+
+    /* A critical block of an unknown type makes the dataset open fail,
+     * whether it comes before or after the configuration string block,
+     * while the sibling dataset in the same file still opens */
+    for (int before = 0; before < 2; before++) {
+        ext_list_init(&list, 2);
+        if (before) {
+            if (ext_list_add_pad(&list, EXT_TYPE_UNUSED, EXT_CRITICAL,
+                                 ext_list_room(&list) - EXT_HDR_SIZE - short_len) < 0)
+                TEST_ERROR;
+            if (ext_list_add(&list, EXT_TYPE_CONFIG, 0, (uint32_t)short_len, short_str, short_len) < 0)
+                TEST_ERROR;
+        }
+        else {
+            if (ext_list_add(&list, EXT_TYPE_CONFIG, 0, (uint32_t)short_len, short_str, short_len) < 0)
+                TEST_ERROR;
+            if (ext_list_add_pad(&list, EXT_TYPE_UNUSED, EXT_CRITICAL, ext_list_room(&list)) < 0)
+                TEST_ERROR;
+        }
+        if (patch_ext_list(EXT_GOOD_FILE, EXT_PATCHED_FILE, &list) < 0)
+            TEST_ERROR;
+        if (!corrupt_open_fails_with(EXT_PATCHED_FILE, "dset", H5E_PLINE, H5E_CANTLOAD))
+            TEST_ERROR;
+        if (ext_open_and_check(EXT_PATCHED_FILE, "sibling", NULL) < 0)
+            TEST_ERROR;
+    }
+
+    /* Block type 0x0002 is reserved for a critical block this library does
+     * not define, so it is rejected like any other unknown critical block */
+    ext_list_init(&list, 2);
+    if (ext_list_add(&list, EXT_TYPE_CONFIG, 0, (uint32_t)short_len, short_str, short_len) < 0)
+        TEST_ERROR;
+    if (ext_list_add_pad(&list, EXT_TYPE_BLOB, EXT_CRITICAL, ext_list_room(&list)) < 0)
+        TEST_ERROR;
+    if (patch_ext_list(EXT_GOOD_FILE, EXT_PATCHED_FILE, &list) < 0)
+        TEST_ERROR;
+    if (!corrupt_open_fails_with(EXT_PATCHED_FILE, "dset", H5E_PLINE, H5E_CANTLOAD))
+        TEST_ERROR;
+
+    remove(EXT_GOOD_FILE);
+    remove(EXT_PATCHED_FILE);
+    PASSED();
+    return 0;
+
+error:
+    remove(EXT_GOOD_FILE);
+    remove(EXT_PATCHED_FILE);
+    return -1;
+}
+
+static int
+test_config_string_corrupted_decode(void)
+{
+    const char *short_str = "scale_factor = 3";
+    size_t      short_len = strlen(short_str);
+    ext_list_t  list;
+    size_t      half;
+
+    TESTING("config string: malformed on-disk extension block lists are rejected");
+
+    if (ext_write_good_file(EXT_GOOD_FILE) < 0)
+        TEST_ERROR;
+
+    /* A configuration string length above H5Z_CONFIG_STRING_MAX */
+    ext_list_init(&list, 1);
+    if (ext_list_add(&list, EXT_TYPE_CONFIG, 0, H5Z_CONFIG_STRING_MAX + 1, NULL, 0) < 0)
+        TEST_ERROR;
+    if (ext_list_add_pad(&list, EXT_TYPE_UNUSED, 0, ext_list_room(&list)) < 0) /* filler, never read */
+        TEST_ERROR;
+    if (patch_ext_list(EXT_GOOD_FILE, EXT_PATCHED_FILE, &list) < 0)
+        TEST_ERROR;
+    if (!corrupt_open_fails_with(EXT_PATCHED_FILE, "dset", H5E_PLINE, H5E_CANTLOAD))
+        TEST_ERROR;
+
+    /* A configuration string length under H5Z_CONFIG_STRING_MAX that runs
+     * past the end of the message */
+    ext_list_init(&list, 1);
+    if (ext_list_add(&list, EXT_TYPE_CONFIG, 0, 2000, EXT_CONFIG_STR, strlen(EXT_CONFIG_STR)) < 0)
+        TEST_ERROR;
+    if (patch_ext_list(EXT_GOOD_FILE, EXT_PATCHED_FILE, &list) < 0)
+        TEST_ERROR;
+    if (!corrupt_open_fails_with(EXT_PATCHED_FILE, "dset", H5E_OHDR, H5E_OVERFLOW))
+        TEST_ERROR;
+
+    /* A non-critical unknown block whose length runs past the end of the
+     * message, including one that would wrap a 32-bit offset */
+    for (int wrap = 0; wrap < 2; wrap++) {
+        ext_list_init(&list, 1);
+        if (ext_list_add(&list, EXT_TYPE_UNUSED, 0, wrap ? UINT32_MAX : 2000, EXT_CONFIG_STR,
+                         strlen(EXT_CONFIG_STR)) < 0)
+            TEST_ERROR;
+        if (patch_ext_list(EXT_GOOD_FILE, EXT_PATCHED_FILE, &list) < 0)
+            TEST_ERROR;
+        if (!corrupt_open_fails_with(EXT_PATCHED_FILE, "dset", H5E_OHDR, H5E_OVERFLOW))
+            TEST_ERROR;
+    }
+
+    /* A block count larger than the number of blocks the message holds */
+    ext_list_init(&list, 3);
+    if (ext_list_add(&list, EXT_TYPE_CONFIG, 0, (uint32_t)short_len, short_str, short_len) < 0)
+        TEST_ERROR;
+    if (ext_list_add_pad(&list, EXT_TYPE_UNUSED, 0, ext_list_room(&list)) < 0)
+        TEST_ERROR;
+    if (patch_ext_list(EXT_GOOD_FILE, EXT_PATCHED_FILE, &list) < 0)
+        TEST_ERROR;
+    if (!corrupt_open_fails_with(EXT_PATCHED_FILE, "dset", H5E_OHDR, H5E_OVERFLOW))
+        TEST_ERROR;
+
+    /* Two configuration string blocks in one entry */
+    half = (EXT_LIST_SIZE - 2 - 2 * EXT_HDR_SIZE) / 2;
+    ext_list_init(&list, 2);
+    if (ext_list_add(&list, EXT_TYPE_CONFIG, 0, (uint32_t)half, EXT_CONFIG_STR, half) < 0)
+        TEST_ERROR;
+    if (ext_list_add(&list, EXT_TYPE_CONFIG, 0, (uint32_t)ext_list_room(&list), EXT_CONFIG_STR,
+                     ext_list_room(&list)) < 0)
+        TEST_ERROR;
+    if (patch_ext_list(EXT_GOOD_FILE, EXT_PATCHED_FILE, &list) < 0)
+        TEST_ERROR;
+    if (!corrupt_open_fails_with(EXT_PATCHED_FILE, "dset", H5E_PLINE, H5E_CANTLOAD))
+        TEST_ERROR;
+
+    /* A configuration string block setting a flags bit that type does not
+     * define */
+    ext_list_init(&list, 1);
+    if (ext_list_add(&list, EXT_TYPE_CONFIG, 0x02, (uint32_t)strlen(EXT_CONFIG_STR), EXT_CONFIG_STR,
+                     strlen(EXT_CONFIG_STR)) < 0)
+        TEST_ERROR;
+    if (patch_ext_list(EXT_GOOD_FILE, EXT_PATCHED_FILE, &list) < 0)
+        TEST_ERROR;
+    if (!corrupt_open_fails_with(EXT_PATCHED_FILE, "dset", H5E_PLINE, H5E_CANTLOAD))
+        TEST_ERROR;
+
+    /* Two blocks of the same unknown, non-critical type in one entry */
+    ext_list_init(&list, 2);
+    if (ext_list_add_pad(&list, EXT_TYPE_UNUSED, 0, half) < 0)
+        TEST_ERROR;
+    if (ext_list_add_pad(&list, EXT_TYPE_UNUSED, 0, ext_list_room(&list)) < 0)
+        TEST_ERROR;
+    if (patch_ext_list(EXT_GOOD_FILE, EXT_PATCHED_FILE, &list) < 0)
+        TEST_ERROR;
+    if (!corrupt_open_fails_with(EXT_PATCHED_FILE, "dset", H5E_PLINE, H5E_CANTLOAD))
+        TEST_ERROR;
+
+    /* A configuration string holding a NUL byte */
+    {
+        char nul_str[sizeof(EXT_CONFIG_STR)];
+
+        memcpy(nul_str, EXT_CONFIG_STR, sizeof(nul_str));
+        nul_str[5] = '\0';
+        ext_list_init(&list, 1);
+        if (ext_list_add(&list, EXT_TYPE_CONFIG, 0, (uint32_t)strlen(EXT_CONFIG_STR), nul_str,
+                         strlen(EXT_CONFIG_STR)) < 0)
+            TEST_ERROR;
+        if (patch_ext_list(EXT_GOOD_FILE, EXT_PATCHED_FILE, &list) < 0)
+            TEST_ERROR;
+        if (!corrupt_open_fails_with(EXT_PATCHED_FILE, "dset", H5E_PLINE, H5E_CANTLOAD))
+            TEST_ERROR;
+    }
+
+    /* The sibling dataset is unaffected by any of the above */
+    if (ext_open_and_check(EXT_PATCHED_FILE, "sibling", NULL) < 0)
+        TEST_ERROR;
+
+    remove(EXT_GOOD_FILE);
+    remove(EXT_PATCHED_FILE);
+    PASSED();
+    return 0;
+
+error:
+    remove(EXT_GOOD_FILE);
+    remove(EXT_PATCHED_FILE);
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
+ * An H5Z_class2_t filter and an H5Z_class3_t filter in the same pipeline
+ * ---------------------------------------------------------------------- */
+#define MIXV2_FILTER_ID 533
+#define MIXV3_FILTER_ID 534
+
+/* XOR is its own inverse, so count calls to confirm the filters ran */
+static int mixv2_calls = 0;
+static int mixv3_calls = 0;
+
+/* Both filters are byte-reversible transforms so a data round-trip actually
+ * proves each ran, rather than passing vacuously as a no-op would. */
+static size_t
+mixv2_filter_func(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                  const unsigned int H5_ATTR_UNUSED cd_values[], size_t nbytes,
+                  size_t H5_ATTR_UNUSED *buf_size, void **buf)
+{
+    unsigned char *p = (unsigned char *)*buf;
+    size_t         i;
+
+    (void)flags; /* XOR is its own inverse, so encode and decode are identical */
+    mixv2_calls++;
+    for (i = 0; i < nbytes; i++)
+        p[i] ^= 0x5AU;
+    return nbytes;
+}
+
+static size_t
+mixv3_filter_func(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                  const unsigned int H5_ATTR_UNUSED *cd_values, hid_t H5_ATTR_UNUSED dxpl_id,
+                  const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims,
+                  void H5_ATTR_UNUSED *state, size_t nbytes, size_t H5_ATTR_UNUSED *buf_size, void **buf)
+{
+    unsigned char *p = (unsigned char *)*buf;
+    size_t         i;
+
+    (void)flags;
+    mixv3_calls++;
+    for (i = 0; i < nbytes; i++)
+        p[i] ^= 0xA5U;
+    return nbytes;
+}
+
+static herr_t
+mixv3_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts, unsigned cd_values[],
+                 size_t cd_values_size)
+{
+    int64_t lvl = 0;
+
+    if (H5Zconfig_get_int(params, "level", &lvl) < 0)
+        return FAIL;
+
+    /* Pass 1: size query.  Pass 2: populate.  Both must report the same
+     * count, and the second pass must respect the caller's capacity. */
+    *cd_nelmts = 1;
+    if (cd_values == NULL)
+        return SUCCEED;
+    if (cd_values_size < 1)
+        return FAIL;
+    cd_values[0] = (unsigned)lvl;
+    return SUCCEED;
+}
+
+static const H5Z_class2_t mixv2_cls = {
+    H5Z_CLASS_T_VERS,                       /* version         */
+    MIXV2_FILTER_ID,                        /* id              */
+    1,                                      /* encoder_present */
+    1,                                      /* decoder_present */
+    "legacy v2 filter (free-form comment)", /* name: v2 permits arbitrary text */
+    NULL,                                   /* can_apply       */
+    NULL,                                   /* set_local       */
+    mixv2_filter_func,                      /* filter          */
+};
+
+static const H5Z_class3_t mixv3_cls = {
+    2,                 /* version         */
+    MIXV3_FILTER_ID,   /* id              */
+    1,                 /* encoder_present */
+    1,                 /* decoder_present */
+    "mixv3",           /* canonical name  */
+    NULL,              /* can_apply       */
+    NULL,              /* set_local       */
+    mixv3_filter_func, /* filter          */
+    mixv3_set_config,  /* set_config      */
+    NULL,              /* get_config      */
+    NULL,              /* description     */
+};
+
+static int
+test_mixed_v2_v3_pipeline(hid_t fapl)
+{
+    hid_t    file = H5I_INVALID_HID, dcpl = H5I_INVALID_HID, sid = H5I_INVALID_HID;
+    hid_t    dset = H5I_INVALID_HID, dcpl_out = H5I_INVALID_HID;
+    hsize_t  dims[2] = {8, 8}, chunk[2] = {4, 4};
+    char     filename[1024];
+    int      wbuf[8][8], rbuf[8][8];
+    int      i, j;
+    char     pbuf[256];
+    size_t   plen = 0;
+    unsigned nfilt;
+
+    if (H5Zregister(&mixv2_cls) < 0)
+        TEST_ERROR;
+    if (H5Zregister(&mixv3_cls) < 0)
+        TEST_ERROR;
+
+    TESTING("mixed pipeline: class2 and class3 filters in one dataset");
+
+    for (i = 0; i < 8; i++)
+        for (j = 0; j < 8; j++)
+            wbuf[i][j] = i * 8 + j;
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+        TEST_ERROR;
+
+    /* Order matters and must survive: v2 (raw cd_values), then a built-in,
+     * then v3 (configuration string). */
+    if (H5Pset_filter(dcpl, MIXV2_FILTER_ID, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
+        TEST_ERROR;
+    if (H5Pset_shuffle(dcpl) < 0)
+        TEST_ERROR;
+    {
+        H5Z_params_t p;
+        p.type  = H5Z_PARAMS_STRING;
+        p.u.str = "level = 7";
+        if (H5Pappend_filter(dcpl, MIXV3_FILTER_ID, H5Z_FLAG_MANDATORY, &p) < 0)
+            TEST_ERROR;
+    }
+
+    h5_fixname(FILENAME[2], fapl, filename, sizeof(filename));
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dcreate2(file, "mixed", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0 || H5Fclose(file) < 0 || H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dset = file = dcpl = H5I_INVALID_HID;
+
+    /* Both must have run on the write path. */
+    if (mixv2_calls == 0 || mixv3_calls == 0)
+        TEST_ERROR;
+    mixv2_calls = mixv3_calls = 0;
+
+    /* Reopen: both filters must run in reverse and reproduce the data. */
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "mixed", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    memset(rbuf, 0, sizeof(rbuf));
+    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+        TEST_ERROR;
+    if (memcmp(wbuf, rbuf, sizeof(wbuf)) != 0)
+        TEST_ERROR;
+    /* ... and on the read path, which is what makes the compare meaningful. */
+    if (mixv2_calls == 0 || mixv3_calls == 0)
+        TEST_ERROR;
+
+    /* Pipeline shape and per-entry introspection. */
+    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    if ((nfilt = (unsigned)H5Pget_nfilters(dcpl_out)) != 3)
+        TEST_ERROR;
+
+    /* Entry 0: the v2 filter, in its original position, with no stored
+     * string -- it was configured through the raw cd_values path. */
+    if (H5Pget_filter2(dcpl_out, 0, NULL, NULL, NULL, 0, NULL, NULL) != MIXV2_FILTER_ID)
+        TEST_ERROR;
+    plen = 0;
+    H5E_BEGIN_TRY
+    {
+        (void)H5Pget_filter_params_by_idx(dcpl_out, 0, NULL, 0, &plen);
+    }
+    H5E_END_TRY
+    if (plen != 0)
+        TEST_ERROR;
+
+    /* Entry 1: the built-in, undisturbed between the two plugins. */
+    if (H5Pget_filter2(dcpl_out, 1, NULL, NULL, NULL, 0, NULL, NULL) != H5Z_FILTER_SHUFFLE)
+        TEST_ERROR;
+
+    /* Entry 2: the v3 filter, still carrying its configuration string. */
+    if (H5Pget_filter2(dcpl_out, 2, NULL, NULL, NULL, 0, NULL, NULL) != MIXV3_FILTER_ID)
+        TEST_ERROR;
+    if (H5Pget_filter_params_by_idx(dcpl_out, 2, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    if (strcmp(pbuf, "level = 7") != 0) {
+        fprintf(stderr, "\n   entry 2 stored \"%s\", expected \"level = 7\"\n", pbuf);
+        TEST_ERROR;
+    }
+
+    if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Fclose(file) < 0 || H5Sclose(sid) < 0)
+        TEST_ERROR;
+    dcpl_out = dset = file = sid = H5I_INVALID_HID;
+
+    if (H5Zunregister(MIXV2_FILTER_ID) < 0 || H5Zunregister(MIXV3_FILTER_ID) < 0)
+        TEST_ERROR;
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Pclose(dcpl_out);
+        H5Dclose(dset);
+        H5Fclose(file);
+        H5Sclose(sid);
+        H5Zunregister(MIXV2_FILTER_ID);
+        H5Zunregister(MIXV3_FILTER_ID);
+    }
+    H5E_END_TRY
     return -1;
 }
 
@@ -2951,12 +4044,15 @@ pow2_exact(int exp)
 }
 
 static int
-test_config_canonicalization(void)
+test_config_canonicalization(hid_t fapl)
 {
-    hid_t  dcpl = H5I_INVALID_HID;
-    char   pbuf[H5Z_CONFIG_STRING_MAX + 1];
-    size_t plen = 0;
-    double got  = 0.0;
+    hid_t   dcpl = H5I_INVALID_HID, sid = H5I_INVALID_HID, file = H5I_INVALID_HID, dset = H5I_INVALID_HID;
+    hid_t   dcpl_out = H5I_INVALID_HID;
+    hsize_t dims[2]  = {8, 8};
+    char    filename[1024];
+    char    pbuf[H5Z_CONFIG_STRING_MAX + 1];
+    size_t  plen = 0;
+    double  got  = 0.0;
 
     if (H5Zregister(&canon_cls) < 0)
         TEST_ERROR;
@@ -3030,6 +4126,44 @@ test_config_canonicalization(void)
     if (H5Pclose(dcpl) < 0)
         TEST_ERROR;
     dcpl = H5I_INVALID_HID;
+    PASSED();
+
+    /* --- canon-08: the canonical form survives to the file and back with no
+     *               plugin loaded (the case a non-HDF5 reader faces) --- */
+    TESTING("canonicalization: canonical form persists and reads back plugin-free");
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+    h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
+    if ((dcpl = canon_make_dcpl("{ rate = 0x1.8p+1 }")) < 0)
+        TEST_ERROR;
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0 || H5Pclose(dcpl) < 0 || H5Fclose(file) < 0)
+        TEST_ERROR;
+    dset = dcpl = file = H5I_INVALID_HID;
+
+    if (H5Zunregister(CANON_FILTER_ID) < 0) /* only the stored bytes remain */
+        TEST_ERROR;
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dcpl_out = H5Dget_create_plist(dset)) < 0)
+        TEST_ERROR;
+    if (H5Pget_filter_params_by_idx(dcpl_out, 0, pbuf, sizeof(pbuf), &plen) < 0)
+        TEST_ERROR;
+    /* Canonical: no outer brace, no hex-float -- parseable as plain TOML */
+    if (strcmp(pbuf, "rate = 3.0") != 0)
+        TEST_ERROR;
+    if (pbuf[0] == '{' || strstr(pbuf, "0x") != NULL)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Fclose(file) < 0 || H5Sclose(sid) < 0)
+        TEST_ERROR;
+    dcpl_out = dset = file = sid = H5I_INVALID_HID;
+    if (H5Zregister(&canon_cls) < 0)
+        TEST_ERROR;
     PASSED();
 
     /* --- canon-09: re-applying a stored string reproduces it exactly --- */
@@ -3163,6 +4297,10 @@ error:
     H5E_BEGIN_TRY
     {
         H5Pclose(dcpl);
+        H5Pclose(dcpl_out);
+        H5Dclose(dset);
+        H5Fclose(file);
+        H5Sclose(sid);
         H5Zunregister(CANON_FILTER_ID);
     }
     H5E_END_TRY
@@ -3226,8 +4364,8 @@ test_set_local_keeps_config(hid_t fapl)
         TEST_ERROR;
     dcpl_out = dset = dcpl = file = H5I_INVALID_HID;
 
-    /* Reopened from the file: only cd_values were written, so the string
-     * is reconstructed by scaleoffset's get_config */
+    /* Still the compact form after reopening: the stored string was
+     * written to the file */
     if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
         TEST_ERROR;
     if ((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0)
@@ -3236,8 +4374,8 @@ test_set_local_keeps_config(hid_t fapl)
         TEST_ERROR;
     if (H5Pget_filter_params_by_idx(dcpl_out, 0, pbuf, sizeof(pbuf), &plen) < 0)
         TEST_ERROR;
-    if (strcmp(pbuf, "scale_type = \"int\", scale_factor = 8") != 0) {
-        fprintf(stderr, "\n   got \"%s\"\n", pbuf);
+    if (strcmp(pbuf, compact) != 0) {
+        fprintf(stderr, "\n   expected stored \"%s\"\n   got             \"%s\"\n", compact, pbuf);
         TEST_ERROR;
     }
     if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Fclose(file) < 0 || H5Sclose(sid) < 0)
@@ -3431,8 +4569,8 @@ test_modify_filter_by_idx(hid_t fapl)
     dcpl = H5I_INVALID_HID;
     PASSED();
 
-    /* --- mod-06: the replacement configuration is what reaches the file --- */
-    TESTING("H5Pmodify_filter_by_idx: replacement cd_values are written, not the original");
+    /* --- mod-06: the replacement string is what reaches the file --- */
+    TESTING("H5Pmodify_filter_by_idx: replacement string persists, not the original");
     h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
     if ((dcpl = canon_make_dcpl("rate = 1.5")) < 0)
         TEST_ERROR;
@@ -3450,7 +4588,9 @@ test_modify_filter_by_idx(hid_t fapl)
         TEST_ERROR;
     dset = dcpl = file = H5I_INVALID_HID;
 
-    /* Only cd_values are written to the file: get_config reconstructs */
+    /* Drop the plugin so only the stored string can answer */
+    if (H5Zunregister(CANON_FILTER_ID) < 0)
+        TEST_ERROR;
     if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
         TEST_ERROR;
     if ((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0)
@@ -3459,8 +4599,8 @@ test_modify_filter_by_idx(hid_t fapl)
         TEST_ERROR;
     if (H5Pget_filter_params_by_idx(dcpl_out, 0, pbuf, sizeof(pbuf), &plen) < 0)
         TEST_ERROR;
-    if (strcmp(pbuf, "rate = 7.2500000000000000e+00") != 0) {
-        fprintf(stderr, "\n   expected \"rate = 7.2500000000000000e+00\", got \"%s\"\n", pbuf);
+    if (strcmp(pbuf, "rate = 7.25") != 0) {
+        fprintf(stderr, "\n   expected \"rate = 7.25\" in the file, got \"%s\"\n", pbuf);
         TEST_ERROR;
     }
     if (canon_stored_double(dcpl_out, &got) < 0)
@@ -3470,6 +4610,8 @@ test_modify_filter_by_idx(hid_t fapl)
     if (H5Pclose(dcpl_out) < 0 || H5Dclose(dset) < 0 || H5Fclose(file) < 0 || H5Sclose(sid) < 0)
         TEST_ERROR;
     dcpl_out = dset = file = sid = H5I_INVALID_HID;
+    if (H5Zregister(&canon_cls) < 0)
+        TEST_ERROR;
     PASSED();
 
     if (H5Zunregister(CANON_FILTER_ID) < 0)
@@ -3551,11 +4693,18 @@ main(void)
     nerrors += test_config_string_plist(fapl) < 0 ? 1 : 0;
     nerrors += test_config_string_pdecode_corrupted() < 0 ? 1 : 0;
 
+    /* Configuration strings in the file (filter pipeline message version 3) */
+    nerrors += test_config_string_ondisk(fapl) < 0 ? 1 : 0;
+    nerrors += test_config_string_golden_file() < 0 ? 1 : 0;
+    nerrors += test_config_string_ext_unknown_blocks() < 0 ? 1 : 0;
+    nerrors += test_config_string_corrupted_decode() < 0 ? 1 : 0;
+    nerrors += test_mixed_v2_v3_pipeline(fapl) < 0 ? 1 : 0;
+
     /* set_local keeps the stored string */
     nerrors += test_set_local_keeps_config(fapl) < 0 ? 1 : 0;
 
     /* Canonicalization of the stored configuration string */
-    nerrors += test_config_canonicalization() < 0 ? 1 : 0;
+    nerrors += test_config_canonicalization(fapl) < 0 ? 1 : 0;
 
     /* H5Pmodify_filter_by_idx */
     nerrors += test_modify_filter_by_idx(fapl) < 0 ? 1 : 0;

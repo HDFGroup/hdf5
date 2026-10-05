@@ -14,6 +14,7 @@
 
 #define TESTFILE1 "test_filters.h5"
 #define TESTFILE2 "filter_error.h5"
+#define TESTFILE3 "test_filters_v3.h5"
 #define DSETNAME  "dataset_with_filter"
 
 /* Temporary filter IDs used for testing */
@@ -221,6 +222,107 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+/*-------------------------------------------------------------------------
+ * Function:    create_file_with_pline_v3
+ *
+ * Purpose:     Create test/testfiles/test_filters_v3.h5: a scaleoffset
+ *              dataset configured with a parameter string, so it has a
+ *              version 3 pipeline message.  It uses a built-in filter so any
+ *              reader can open it.  The checked-in copy should only be
+ *              replaced after an intentional format change.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+create_file_with_pline_v3(void)
+{
+    hid_t        fid           = H5I_INVALID_HID;
+    hid_t        dsid          = H5I_INVALID_HID;
+    hid_t        sid           = H5I_INVALID_HID;
+    hid_t        dcpl          = H5I_INVALID_HID;
+    hid_t        fapl          = H5I_INVALID_HID;
+    hid_t        fcpl          = H5I_INVALID_HID;
+    hsize_t      dims[1]       = {20};
+    hsize_t      chunk_dims[1] = {10};
+    int          buf[20];
+    int          rank = 1;
+    int          i;
+    H5Z_params_t params;
+
+    for (i = 0; i < 20; i++)
+        buf[i] = i;
+
+    /* The stored config string is written into a version-3 pipeline
+     * message only when the file's high libver bound admits it. */
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        goto error;
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_V300, H5F_LIBVER_V300) < 0)
+        goto error;
+
+    /* No object timestamps, so regenerating the file gives the same bytes */
+    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        goto error;
+    if (H5Pset_obj_track_times(fcpl, false) < 0)
+        goto error;
+
+    if ((fid = H5Fcreate(TESTFILE3, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+        goto error;
+
+    if ((sid = H5Screate_simple(rank, dims, NULL)) < 0)
+        goto error;
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+    if (H5Pset_chunk(dcpl, rank, chunk_dims) < 0)
+        goto error;
+    if (H5Pset_obj_track_times(dcpl, false) < 0)
+        goto error;
+
+    /* A string value and an integer value */
+    params.type  = H5Z_PARAMS_STRING;
+    params.u.str = "scale_type = \"int\", scale_factor = 3";
+    if (H5Pappend_filter(dcpl, H5Z_FILTER_SCALEOFFSET, 0, &params) < 0)
+        goto error;
+
+    if ((dsid = H5Dcreate2(fid, DSETNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        goto error;
+
+    if (H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+        goto error;
+
+    if (H5Pclose(dcpl) < 0)
+        goto error;
+    if (H5Dclose(dsid) < 0)
+        goto error;
+    if (H5Sclose(sid) < 0)
+        goto error;
+    if (H5Fclose(fid) < 0)
+        goto error;
+    if (H5Pclose(fapl) < 0)
+        goto error;
+    if (H5Pclose(fcpl) < 0)
+        goto error;
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Fclose(fid);
+        H5Pclose(fapl);
+        H5Pclose(fcpl);
+    }
+    H5E_END_TRY
+    return -1;
+} /* end create_file_with_pline_v3() */
+
 int
 main(void)
 {
@@ -228,6 +330,7 @@ main(void)
 
     nerrors += test_filters_endianess() < 0 ? 1 : 0;
     nerrors += create_file_with_bogus_filter() < 0 ? 1 : 0;
+    nerrors += create_file_with_pline_v3() < 0 ? 1 : 0;
 
     if (nerrors)
         goto error;

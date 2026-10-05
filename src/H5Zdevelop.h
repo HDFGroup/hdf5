@@ -218,7 +218,7 @@ typedef herr_t (*H5Z_set_config_func_t)(const char *params, unsigned *flags, siz
  * \return Non-negative on success; negative on failure.
  *
  * \details Used only when no parameter string is stored for the filter, e.g.
- *          one added with cd_values or read from a file.
+ *          one added with cd_values.
  *
  * \note Format \c float and \c double values with \c \%.16e: 17 significant
  *       digits round-trip every double, and the exponent makes TOML read the
