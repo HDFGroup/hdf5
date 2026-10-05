@@ -507,9 +507,7 @@ jobs:
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
               set (MODEL "Analyze")
               set (GROUP "Analyze")
-              # This job only needs a configure+build to collect clang-tidy
-              # diagnostics as CDash build warnings; running the test suite
-              # here would just slow the nightly run down for no extra signal.
+              # Build only; the diagnostics are reported as build warnings
               set (LOCAL_SKIP_TEST "TRUE")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=ON")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_STATIC_LIBS:BOOL=OFF")
