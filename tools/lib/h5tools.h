@@ -571,7 +571,7 @@ typedef struct h5tools_context_t {
     struct subset_t *sset;               /* subsetting parameters */
     int              display_index;      /* */
     int              display_char;       /* */
-    int              show_filter_params; /* emit PARAMS_STRING lines in FILTERS block */
+    int              show_filter_params; /* --filter-params */
 } h5tools_context_t;
 
 /* VOL and VFD info structs used to set the file access property

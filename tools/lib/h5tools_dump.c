@@ -3180,24 +3180,9 @@ h5tools_print_fill_value(h5tools_str_t *buffer /*in,out*/, const h5tool_format_t
 /*-------------------------------------------------------------------------
  * Function:    h5tools_float_is_short_binary
  *
- * Purpose:     Determines whether a double is a small multiple of a power of
- *              two -- value == m * 2^e for an integer m with |m| < 2^13,
- *              equivalently at most three hexadecimal fraction digits.
- *
- *              This is the selection rule for the hexadecimal annotation
- *              emitted alongside PARAMS_STRING.  A length comparison against
- *              the hexadecimal form is not used instead, and fails in both
- *              directions: since the canonical decimal is itself the
- *              shortest round-trip form (H5Z__format_double_canonical()),
- *              exactly the values this annotation is for -- 0.5, 0.25, 3.0
- *              -- already have a canonical decimal ("0.5", "0.25", "3.0")
- *              shorter than their hex spelling ("0x1p-1", "0x1p-2",
- *              "0x1.8p+1"), so a shorter-than-hex test would stay silent on
- *              all of them; conversely a value with no short binary
- *              structure at all can still have a hex form shorter than its
- *              17-digit canonical decimal by coincidence of digit patterns.
- *              Testing the value's structure directly, as below, is
- *              unaffected by either spelling's length.
+ * Purpose:     Determines whether a double is m * 2^e for an integer m with
+ *              |m| < 2^13, i.e. at most three hexadecimal fraction digits.
+ *              These are the floats annotated in hexadecimal.
  *
  * Return:      true if the value should be annotated, false otherwise
  *-------------------------------------------------------------------------
@@ -3212,17 +3197,8 @@ h5tools_float_is_short_binary(double v)
     double f;
     int    e;
 
-    /* Reject zero and non-finite input on the bit pattern rather than with
-     * "v == 0.0" and isfinite(); each of those fails differently.  A
-     * fast-math build -- Intel icx's -fp-model=fast (its default at -O2 and
-     * above), or gcc/clang -ffast-math or -ffinite-math-only -- may assume
-     * every operand is finite and fold isfinite() to 1, sending an inf or a
-     * nan on into the frexp() below to be annotated as if it were short.
-     * And under denormals-are-zero (DAZ, MXCSR bit 6, which -ffast-math and
-     * icx -fp-model=fast set process-wide) "v == 0.0" is true for a genuine
-     * subnormal, suppressing the annotation for exactly the values whose
-     * hexadecimal spelling is most worth showing.  A magnitude of zero is
-     * +-0.0; one at or above the all-ones exponent is inf or nan. */
+    /* Reject zero, inf and nan on the bit pattern: fast-math builds can fold
+     * isfinite() to 1 and make "v == 0.0" true for subnormals */
 #if H5_SIZEOF_DOUBLE == 8
     {
         uint64_t mag;
@@ -3237,10 +3213,8 @@ h5tools_float_is_short_binary(double v)
         return false;
 #endif
 
-    /* frexp normalizes to f in [0.5, 1), so the significand of a value with
-     * at most 13 significant bits is f * 2^13 -- scaling by 8192 makes
-     * exactly those values integral.  0x1.fffp+0 is the widest accepted.
-     * The equality checks below are intentionally exact, not a precision bug. */
+    /* f is in [0.5, 1), so f * 2^13 is integral iff there are at most 13
+     * significant bits.  The comparisons are meant to be exact. */
     f = frexp(fabs(v), &e);
     f *= 8192.0;
 
@@ -3253,26 +3227,9 @@ h5tools_float_is_short_binary(double v)
 /*-------------------------------------------------------------------------
  * Function:    h5tools_format_hexfloat
  *
- * Purpose:     Formats a double as a C99 hexadecimal float literal in a
- *              canonical spelling: normalized leading digit, trailing zeros
- *              of the fraction removed, the fraction and its separator
- *              omitted entirely when zero, lowercase 0x and p, signed
- *              exponent.
- *
- *              printf("%a") is deliberately not used.  C17 7.21.6.1p8
- *              requires only that a precision-free %a be "sufficient for an
- *              exact representation" when FLT_RADIX is a power of 2, and
- *              constrains the leading digit only to be nonzero for
- *              normalized values -- so 0x1.8p-36, 0x1.8000000000000p-36 and
- *              0x3p-37 are all conforming renderings of one double.  glibc
- *              trims trailing zeros and the Microsoft CRT does not, and
- *              h5dump output is compared byte for byte against expected
- *              files, so the spelling has to be ours.
- *
- *              Normalizing through frexp also gives the legible rendering
- *              for subnormals: 2^-1074 formats as 0x1p-1074 rather than the
- *              0x0.0000000000001p-1022 that a denormalized %a produces.
- *              Both are exact and re-read to the identical double.
+ * Purpose:     Formats a double as a hexadecimal float literal such as
+ *              0x1.8p-36 (subnormals too, e.g. 0x1p-1074).  printf("%a")
+ *              is not used because its spelling varies between C libraries.
  *
  * Return:      void
  *-------------------------------------------------------------------------
@@ -3313,31 +3270,12 @@ h5tools_format_hexfloat(double v, char *out, size_t out_size)
 /*-------------------------------------------------------------------------
  * Function:    h5tools_params_hex_annotation
  *
- * Purpose:     Builds the comment text that follows a PARAMS_STRING line,
- *              naming every float in the parameter string that is a small
- *              multiple of a power of two, e.g. "accuracy = 0x1p-36".
- *
- *              Canonicalization preserves a float's value exactly but not
- *              its text: a caller who writes accuracy = 0x1p-36 reads back
- *              accuracy = 1.4551915228366852e-11, which is unrecognizable as
- *              a power of two -- the form a user tuning a quantizing filter
- *              reasons in.  The original text cannot be carried in the file,
- *              because a conforming TOML parser discards comments and a
- *              comment-aware reader would then derive a different value from
- *              identical bytes.  The hexadecimal rendering is therefore
- *              produced here, at display time, from the parsed double, and
- *              nothing is added to the file.
- *
- *              The floats are located by a lexical scan rather than through
- *              the typed accessors, which are lookup-by-name: h5dump does
- *              not know the key names of a filter it has not loaded, and the
- *              point of the stored string is that it displays without the
- *              plugin.  A scan is admissible precisely because the
- *              annotation is display-only -- it cannot alter a value, only
- *              fail to comment on one.
- *
- *              params must be the raw string as retrieved, not the
- *              single-quote-escaped form used for display.
+ * Purpose:     Builds the comment that follows a PARAMS_STRING line,
+ *              showing each float that is a small multiple of a power of two
+ *              in hexadecimal, e.g. "accuracy = 0x1p-36", since the stored
+ *              decimal (1.4551915228366852e-11) hides that.  The string is
+ *              scanned lexically because h5dump does not know the keys.
+ *              PARAMS must be the unescaped string.
  *
  * Return:      void; out receives the empty string when nothing qualifies
  *-------------------------------------------------------------------------
@@ -3360,8 +3298,7 @@ h5tools_params_hex_annotation(const char *params, char *out, size_t out_size)
         return;
 
     while (*p) {
-        /* Skip a basic string, honoring backslash escapes so that \" does
-         * not end it early.  Its content is a value, never a numeral. */
+        /* Skip a basic string */
         if (*p == '"') {
             p++;
             while (*p && *p != '"') {
@@ -3384,16 +3321,14 @@ h5tools_params_hex_annotation(const char *params, char *out, size_t out_size)
             continue;
         }
 
-        /* Skip a comment.  A "key = value" written inside one is text, not
-         * a parameter. */
+        /* Skip a comment */
         if (*p == '#') {
             while (*p && *p != '\n')
                 p++;
             continue;
         }
 
-        /* A bare key, dotted keys included; remember it as the name to echo
-         * for whatever value follows. */
+        /* A key, possibly dotted */
         if (isalpha((unsigned char)*p) || *p == '_') {
             keylen = 0;
             while (isalnum((unsigned char)*p) || *p == '_' || *p == '-' || *p == '.') {
@@ -3405,8 +3340,7 @@ h5tools_params_hex_annotation(const char *params, char *out, size_t out_size)
             continue;
         }
 
-        /* A numeric literal.  Only floats are annotated: an integer needs no
-         * second spelling. */
+        /* A number; only floats are annotated */
         if (isdigit((unsigned char)*p) || ((*p == '-' || *p == '+') && isdigit((unsigned char)p[1]))) {
             const char *tok     = p;
             bool        isfloat = false;
@@ -3419,14 +3353,9 @@ h5tools_params_hex_annotation(const char *params, char *out, size_t out_size)
             while (isdigit((unsigned char)*p) || *p == '_')
                 p++;
             if (*p == 'x' || *p == 'X')
-                isfloat = ishex = true; /* C99 hex float or bare hex integer -- strtod()
-                                         * consumes either in full; ishex suppresses
-                                         * annotation for both. */
+                isfloat = ishex = true;
             else if (*p == 'b' || *p == 'B' || *p == 'o' || *p == 'O') {
-                /* TOML binary/octal prefix (0b1010, 0o17): never a float, and
-                 * strtod() stops after the leading "0" without understanding this
-                 * notation, so consume the token by hand -- otherwise the leftover
-                 * "b1010"/"o17" suffix would be re-scanned and mis-lexed as a key. */
+                /* 0b/0o integers, which strtod() does not consume */
                 p++;
                 while (isalnum((unsigned char)*p) || *p == '_')
                     p++;
@@ -3441,9 +3370,7 @@ h5tools_params_hex_annotation(const char *params, char *out, size_t out_size)
             else
                 p = tok + 1; /* not convertible; step past to make progress */
 
-            /* A literal already written in hexadecimal needs no annotation --
-             * the reader can see it.  This arises for a string that has not
-             * been canonicalized, such as a get_config reconstruction. */
+            /* Already hexadecimal */
             if (isfloat && !ishex && keylen > 0 && h5tools_float_is_short_binary(v)) {
                 char hexbuf[64];
                 char piece[256];
@@ -3489,9 +3416,7 @@ h5tools_dump_filter_extra(FILE *stream, const h5tool_format_t *info, h5tools_con
         h5tools_str_append(buffer, "%s '%s'", PARAMS_STRING, params_str);
         h5tools_render_element(stream, info, ctx, buffer, curr_pos, ncols, (hsize_t)0, (hsize_t)0);
 
-        /* The annotation is emitted outside the quoted value, never within
-         * it, so a script that extracts the quoted span still recovers
-         * exactly the stored bytes. */
+        /* Outside the quotes, so the quoted text is exactly what is stored */
         if (params_annot && params_annot[0] != '\0') {
             ctx->need_prefix = true;
             h5tools_str_reset(buffer);
@@ -3500,13 +3425,8 @@ h5tools_dump_filter_extra(FILE *stream, const h5tool_format_t *info, h5tools_con
         }
     }
 
-    /* DESCRIPTION is a best-effort label from the filter class's in-memory
-     * registration (H5Zget_filter_class_info), not from anything persisted in
-     * the file -- unlike COMMENT (the filter's canonical_name, stored in the
-     * pipeline message and always shown). It is therefore omitted whenever
-     * the filter isn't registered/loadable on the machine running h5dump:
-     * `h5dump -p` on the same file shows it where the plugin is installed and
-     * omits it where it is not. */
+    /* DESCRIPTION comes from the registered filter, not the file, so it is
+     * shown only when the filter is available */
     if (description) {
         ctx->need_prefix = true;
         h5tools_str_reset(buffer);
@@ -3891,23 +3811,16 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
 
         if (nfilters) {
             for (i = 0; i < nfilters; i++) {
-                /* Heap-allocated: two H5Z_CONFIG_STRING_MAX+1-byte buffers per loop
-                 * iteration would exceed this function's stack-frame budget. */
+                /* Too large for the stack */
                 const size_t params_buf_size = H5Z_CONFIG_STRING_MAX + 1;
                 char        *params_str_buf  = (char *)malloc(params_buf_size);
-                char        *params_annot    = (char *)malloc(params_buf_size); /* hex comment, "" if none */
-                char        *params_str      = NULL; /* escaped, NULL if none to print */
-                const char  *filter_descr    = NULL; /* library-owned, no free needed */
-                bool         have_extra; /* true if this filter has a PARAMS_STRING and/or DESCRIPTION */
+                char        *params_annot    = (char *)malloc(params_buf_size);
+                char        *params_str      = NULL;
+                const char  *filter_descr    = NULL;
+                bool         have_extra;
 
-                /* On allocation failure, do NOT skip the whole filter: fall through
-                 * with both buffers left NULL, so the guard below simply omits the
-                 * PARAMS_STRING/DESCRIPTION decoration (have_extra stays false) while
-                 * the filter's own FILTERS{} entry is still rendered by the switch
-                 * below. Silently dropping an entire filter from -p output would make
-                 * the DDL look complete while actually under-reporting the pipeline.
-                 * The unconditional free() calls at the end of this loop iteration
-                 * handle cleanup either way (free(NULL) is a no-op). */
+                /* On allocation failure, still print the filter, without the
+                 * extra lines */
                 if (params_annot)
                     params_annot[0] = '\0';
 
@@ -3921,53 +3834,24 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                     continue; /* nothing to print for invalid filter */
                 }
 
-                /* --filter-params prints PARAMS_STRING and DESCRIPTION nested inside this
-                 * filter's own FILTERS{} entry. Both buffers must have allocated
-                 * successfully above; if either failed, skip decoration for this
-                 * filter (have_extra stays false below) rather than the whole entry. */
                 if (dcpl_id >= 0 && ctx->show_filter_params && params_str_buf && params_annot) {
                     size_t plen = 0;
                     if (H5Pget_filter_params_by_idx(dcpl_id, (unsigned)i, params_str_buf, params_buf_size,
                                                     &plen) >= 0 &&
                         plen > 0) {
-                        /* H5Pget_filter_params_by_idx() reports the full length
-                         * needed in plen, not the number of bytes actually
-                         * copied into params_str_buf -- a filter or plugin
-                         * reporting a length past params_buf_size would
-                         * otherwise read out of bounds below.  Clamp to what was
-                         * really copied before using it as a bound. */
+                        /* plen is the full length, which may exceed what was copied */
                         size_t copied          = (plen < params_buf_size) ? plen : params_buf_size - 1;
                         params_str_buf[copied] = '\0';
 
-                        /* Scan the raw string -- not the escaped form below -- for
-                         * floats worth annotating in hexadecimal. */
                         h5tools_params_hex_annotation(params_str_buf, params_annot, params_buf_size);
 
-                        /* PARAMS_STRING is wrapped in single quotes: its content is
-                         * TOML, whose only quoted forms are "..." and '...', neither
-                         * of which can contain a literal unescaped single quote --
-                         * except a TOML double-quoted string value may itself contain
-                         * one (e.g. "it's"), so still escape it here for that case.
-                         *
-                         * The string may also be read back from an untrusted file's
-                         * object header (H5O__pline_decode only bounds its length, not
-                         * its content), so control characters -- in particular a raw
-                         * newline, which would inject an extra line into this
-                         * line-oriented DDL output -- are hex-escaped too, the same
-                         * concern H5Z__validate_class3_name already guards for filter
-                         * names. Worst case every byte is a 4-byte "\xHH" escape. */
+                        /* Escape single quotes, and control characters since the
+                         * string comes from the file.  Each byte expands to at
+                         * most 4 ("\xHH"). */
                         size_t ebuf_size = 4 * copied + 1;
                         char  *ebuf      = (char *)malloc(ebuf_size);
                         if (ebuf) {
                             size_t in_i, out_i = 0;
-                            /* ebuf_size's 4x-worst-case sizing means out_i should never
-                             * reach ebuf_size before the loop ends, but never trust that
-                             * invariant alone: snprintf() returns the length it *would*
-                             * have written, not what actually fit, so blindly adding it
-                             * to out_i could walk out_i past ebuf_size and underflow the
-                             * "ebuf_size - out_i" size argument on a later iteration.
-                             * Bound every write against the buffer's remaining capacity
-                             * instead. */
                             for (in_i = 0; in_i < copied && out_i < ebuf_size; in_i++) {
                                 unsigned char c = (unsigned char)params_str_buf[in_i];
                                 if (c < 0x20 || c == 0x7f) {
