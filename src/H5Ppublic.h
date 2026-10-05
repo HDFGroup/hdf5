@@ -2113,9 +2113,10 @@ H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, un
  *          If \p name is a pointer to an array of at least \p namelen bytes,
  *          the filter name will be copied into that array. The name will be
  *          null terminated if \p namelen is large enough. The name returned
- *          is the canonical name of the filter: the name appearing in the
- *          file, the \p name registered with H5Zregister(), or, if neither
- *          is available, the decimal filter ID as a string.
+ *          is the canonical name of the filter: the value stored in the file
+ *          when the filter was added, the \p name registered with
+ *          H5Zregister(), or, if neither is available, the decimal filter ID
+ *          as a string.
  *
  *          \p filter_config is the bit field described in
  *          H5Zget_filter_info().
@@ -2751,6 +2752,163 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  */
 H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts,
                             const unsigned int cd_values[]);
+/**
+ * \ingroup OCPL
+ *
+ * \brief Configures a filter and appends it to the pipeline
+ *
+ * \ocpl_id{plist_id}
+ * \param[in] filter  Filter identifier (e.g. #H5Z_FILTER_DEFLATE)
+ * \param[in] flags   Bit vector of filter flags; same meaning as in H5Pset_filter()
+ * \param[in] params  Pointer to an #H5Z_params_t tagged-union that describes how the
+ *                    filter should be configured, or \c NULL to use the filter's
+ *                    built-in defaults (equivalent to calling H5Pset_filter() with
+ *                    zero \c cd_nelmts).
+ *
+ *                    The union has two modes selected by the \c type field:
+ *
+ *                    - <b>#H5Z_PARAMS_CDVALUES</b> - raw integer parameter array,
+ *                      identical to H5Pset_filter().  Set \c params->u.raw.cd_nelmts
+ *                      and \c params->u.raw.cd_values.  Convenience macro:
+ *                      \code
+ *                        H5Z_params_t p = H5Z_PARAMS_RAW(cd_nelmts, cd_values_array);
+ *                      \endcode
+ *
+ *                    - <b>#H5Z_PARAMS_STRING</b> - human-readable parameter
+ *                      string in TOML inline-table format (e.g. \c "level=6"
+ *                      or \c "{level=6, mode=\"fast\"}").
+ *                      Set \c params->u.str to a NUL-terminated string, or
+ *                      \c NULL / \c "" for no parameters.
+ *                      Convenience macro (C only):
+ *                      \code
+ *                        H5Z_params_t p = H5Z_PARAMS_STR("level=6");
+ *                      \endcode
+ *                      C++ callers use the named-variable form instead
+ *                      (#H5Z_PARAMS_STR is not defined in C++, since C++
+ *                      lacks the compound-literal syntax the macro needs):
+ *                      \code
+ *                        H5Z_params_t p;
+ *                        p.type  = H5Z_PARAMS_STRING;
+ *                        p.u.str = "level=6";
+ *                      \endcode
+ *                      See the \ref subsec_filter_param_string section below
+ *                      for the supported syntax.
+ *
+ * \return \herr_t
+ *
+ * \details H5Pappend_filter() configures the filter identified by \p filter and
+ *          appends it to the existing filter pipeline on \p plist_id.  The pipeline
+ *          may contain at most #H5Z_MAX_NFILTERS (32) entries.
+ *
+ *          If \p params is \c NULL or \c params->type is #H5Z_PARAMS_CDVALUES, the
+ *          function behaves identically to H5Pset_filter().
+ *
+ *          If \p params->type is #H5Z_PARAMS_STRING, the filter's \c set_config
+ *          callback converts the string to \c cd_values.  The filter must be
+ *          available at call time, or the function fails with H5E_NOFILTER.  An
+ *          empty or \c NULL string is passed to \c set_config as \c NULL; a
+ *          filter without \c set_config accepts only an empty string.
+ *
+ *          A non-empty string is also stored, in canonical form, on the
+ *          pipeline entry and returned by H5Pget_filter_params_by_idx().  It
+ *          is kept in memory only and not written to the file.
+ *
+ *          H5Pappend_filter() also records the filter's name, which
+ *          H5Pset_filter() does not, so H5Pequal() treats the two as different.
+ *
+ * \anchor subsec_filter_param_string
+ * <b>Parameter string syntax (#H5Z_PARAMS_STRING)</b>
+ *
+ *          The parameter string is a subset of TOML inline-table syntax: a
+ *          comma-separated list of \c key=value pairs.  Both the bare form
+ *          (\c "level=6") and the explicitly braced form (\c "{level=6}") are
+ *          accepted.  The maximum length is #H5Z_CONFIG_STRING_MAX bytes.
+ *
+ *          Supported value types:
+ *          - <b>Integer</b> - unquoted decimal with optional sign, or TOML
+ *            prefixes \c 0x (hex), \c 0o (octal), \c 0b (binary).  Underscore
+ *            digit separators are allowed (e.g. \c 1_000_000).\n
+ *            Example: \c "level=6", \c "offset=-4", \c "mask=0xff"
+ *          - <b>Float</b> - decimal floating-point with a decimal point or
+ *            exponent (e.g. \c 3.14, \c 6.0e2).  C99 hex-float literals
+ *            (\c 0x1.8p+1) are also accepted and converted internally.\n
+ *            Example: \c "scale=1.5", \c "tol=1.0e-6"
+ *          - <b>Boolean</b> - bare \c true or \c false (lowercase).\n
+ *            Example: \c "lossless=true"
+ *          - <b>String</b> - double-quoted with standard TOML escape sequences
+ *            (\c \\n, \c \\t, \c \\", \c \\\\, etc.).  Single-quoted literal
+ *            strings (\c 'no escapes here') are also accepted.\n
+ *            Example: \c "mode=\"fast\"", \c "name='zlib'"
+ *          - <b>Inline table (nested)</b> - a value may itself be a braced
+ *            key=value list for sub-filter or sub-driver configuration.\n
+ *            Example: \c "compressor={name=\"zlib\",level=6}"
+ *
+ *          Use H5Zconfig_get_int(), H5Zconfig_get_double(), H5Zconfig_get_bool(),
+ *          and H5Zconfig_get_str() inside a \c set_config callback to retrieve
+ *          individual values from the parameter string.
+ *
+ * \since 3.0.0
+ */
+H5_DLL herr_t H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
+                               const H5Z_params_t *params);
+/**
+ * \ingroup OCPL
+ *
+ * \brief Replaces the configuration of the filter at a given pipeline index
+ *
+ * \ocpl_id{plist_id}
+ * \param[in] filter_idx Zero-based index of the filter in the pipeline
+ * \param[in] flags      Replacement flags for the entry, subject to the same
+ *                       \c set_config adjustment rules as H5Pappend_filter()
+ * \param[in] params     New configuration, or NULL for a parameterless filter
+ *
+ * \return \herr_t
+ *
+ * \details H5Pmodify_filter_by_idx() replaces the configuration of the filter
+ *          at \p filter_idx, keeping its position in the pipeline.  \p params
+ *          is interpreted as in H5Pappend_filter().  A #H5Z_PARAMS_STRING
+ *          update replaces the stored parameter string; a #H5Z_PARAMS_CDVALUES
+ *          update clears it, as H5Pmodify_filter() does.
+ *
+ *          The index is the one used by H5Pget_filter2(), so this works when
+ *          the same filter appears more than once.  On failure the entry is
+ *          unchanged.
+ *
+ * \since 3.0.0
+ */
+H5_DLL herr_t H5Pmodify_filter_by_idx(hid_t plist_id, unsigned filter_idx, unsigned flags,
+                                      const H5Z_params_t *params);
+/**
+ * \ingroup OCPL
+ *
+ * \brief Returns the parameter string for a filter at a given pipeline index
+ *
+ * \ocpl_id{plist_id}
+ * \param[in]  idx             Zero-based index of the filter in the pipeline
+ * \param[out] params_buf      Buffer for the result string, or NULL for a size query
+ * \param[in]  params_buf_size Size of \p params_buf in bytes
+ * \param[out] params_len      Set to the number of characters in the result (not counting NUL)
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_filter_params_by_idx() returns the parameter string for
+ *          the filter at \p idx, from the first of these that applies:
+ *
+ *          -# The string stored by H5Pappend_filter() or
+ *             H5Pmodify_filter_by_idx(), returned as is.
+ *          -# The filter's \c get_config callback, which reconstructs a
+ *             string from \c cd_values.  This may differ from the string
+ *             originally set.
+ *          -# \c "cd_values=v0:v1:...".
+ *
+ *          Call with \p params_buf NULL to get the length in \p params_len.
+ *          If \p params_buf is too small, it receives a truncated string and
+ *          the function fails with \c H5E_OVERFLOW.
+ *
+ * \since 3.0.0
+ */
+H5_DLL herr_t H5Pget_filter_params_by_idx(hid_t plist_id, unsigned idx, char *params_buf,
+                                          size_t params_buf_size, size_t *params_len);
 /**
  * \ingroup OCPL
  *

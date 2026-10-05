@@ -86,8 +86,12 @@ typedef int H5Z_filter_t;
 /** Maximum filter id \since 1.0.0 */
 #define H5Z_FILTER_MAX 65535
 
+/** Maximum number of cd_values elements per filter in H5Pappend_filter \since 3.0.0 */
+#define H5Z_MAX_CD_NELMTS 65535u
+
 /** Maximum length of a filter parameter string, in bytes, not counting the
- *  NUL terminator \since 3.0.0 */
+ *  NUL terminator (enforced by H5Pappend_filter() and
+ *  H5Pmodify_filter_by_idx()) \since 3.0.0 */
 #define H5Z_CONFIG_STRING_MAX 4096
 
 /** Maximum number of key-value parameters in a filter parameter string \since 3.0.0 */
@@ -295,6 +299,39 @@ typedef enum H5Z_cb_return_t {
  */
 typedef H5Z_cb_return_t (*H5Z_filter_func_t)(H5Z_filter_t filter, void *buf, size_t buf_size, void *op_data);
 //! <!-- [H5Z_filter_func_t_snip] -->
+
+/**
+ * \brief Selects how filter parameters are specified in H5Pappend_filter().
+ * \since 3.0.0
+ */
+typedef enum {
+    H5Z_PARAMS_CDVALUES = 0, /**< raw cd_values array (same as H5Pset_filter) */
+    H5Z_PARAMS_STRING   = 1  /**< human-readable key=value string              */
+} H5Z_params_type_t;
+
+/**
+ * \brief Tagged-union parameter descriptor passed to H5Pappend_filter().
+ * \since 3.0.0
+ */
+typedef struct {
+    H5Z_params_type_t type;
+    union {
+        struct {
+            size_t          cd_nelmts;
+            const unsigned *cd_values;
+        } raw;
+        const char *str;
+    } u;
+} H5Z_params_t;
+
+#ifdef __cplusplus
+/* Without designated initializers, C++ can only initialize the union's first
+ * member, so there is no H5Z_PARAMS_STR; set p.u.str directly. */
+#define H5Z_PARAMS_RAW(n, vals) (H5Z_params_t{H5Z_PARAMS_CDVALUES, {{(n), (vals)}}})
+#else
+#define H5Z_PARAMS_RAW(n, vals) ((H5Z_params_t){H5Z_PARAMS_CDVALUES, {.raw = {(n), (vals)}}})
+#define H5Z_PARAMS_STR(s)       ((H5Z_params_t){H5Z_PARAMS_STRING, {.str = (s)}})
+#endif
 
 #ifdef __cplusplus
 extern "C" {
