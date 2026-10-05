@@ -257,9 +257,9 @@ typedef struct toml_option_t toml_option_t;
 struct toml_option_t {
   bool check_utf8; /**< If true, check if all characters are valid UTF-8.
                       Default: false. */
-  void *(*mem_realloc)(
-      void *ptr,
-      size_t size); /**< Custom realloc function. Default: realloc(). */
+  void *(*mem_realloc)(void *ptr,
+                       size_t size); /**< Custom realloc function (called with
+                                        size > 0). Default: realloc(). */
   void (*mem_free)(void *ptr); /**< Custom free function. Default: free(). */
 };
 
