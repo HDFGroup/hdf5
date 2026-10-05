@@ -435,8 +435,8 @@ error:
  * Purpose:  Tests that H5Pdecode restores a filter name that fits in the
  *           encoded name slot, and that the name survives appending a filter
  *           to a copy of the decoded pipeline.  A name that fills the slot
- *           without a terminator falls back to the registered class's name.
- *           The filters are not registered.
+ *           without a terminator is not restored.  The filters are not
+ *           registered.
  *
  * Return:   Success: 0
  *           Failure: -1
@@ -493,7 +493,7 @@ test_decode_pline_filter_name(void)
         FAIL_PUTS_ERROR("decoded filter name not restored\n");
     if (H5Pget_filter2(plist_id, 1, &flags, NULL, NULL, sizeof(name), name, NULL) < 0)
         TEST_ERROR;
-    if (name[0] != '\0')
+    if (strncmp(name, long_name, H5Z_COMMON_NAME_LEN) == 0)
         FAIL_PUTS_ERROR("unterminated filter name was restored\n");
 
     /* The copy's filter array is full, so appending reallocates it */
