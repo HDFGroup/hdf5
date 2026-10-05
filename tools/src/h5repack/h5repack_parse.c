@@ -234,10 +234,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                  *-------------------------------------------------------------------------
                  */
                 else if (strcmp(scomp, "UD") == 0) {
-                    /* UD= accepts two forms.
-                     *   Legacy: UD=id,flags,nelmts,v1,v2,...,vN  (third field is a digit)
-                     *   New:    UD=id,flags,key=value,...        (third field is TOML)
-                     * Peek at the third field to decide which path to take. */
+                    /* UD=id,flags,nelmts,v1,...,vN or UD=id,flags,key=value,... */
                     bool   is_str_form = false;
                     size_t scan;
                     int    cm        = 0;
@@ -251,13 +248,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                             }
                         }
                     }
-                    /* Distinguish the two forms by scanning for '=' from the third
-                     * field to the end of the string. In the legacy form
-                     * (UD=id,flags,nelmts,v1,...,vN) that span is pure decimal
-                     * integers and can never contain '=', so scanning to len is
-                     * safe; in the TOML form (UD=id,flags,key=value[,...]) at
-                     * least one "key=value" pair always contains '=', even when
-                     * the key itself starts with a digit (e.g. "2bit=true"). */
+                    /* Only the key=value form contains '=' */
                     if (cm == 2 && third_pos < len) {
                         size_t s;
                         for (s = third_pos; s < len; s++) {
@@ -269,8 +260,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                     }
 
                     if (is_str_form) {
-                        /* Parse id, flags, then capture remainder as params_str.
-                         * cd_nelmts stays 0; H5Pappend_filter+set_config will populate. */
+                        /* set_config fills in cd_values later */
                         size_t pos = i + 1;
                         size_t nlen, plen;
                         char   num[32];
@@ -342,11 +332,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                         filt->cd_nelmts        = 0;
                         m                      = len - i - 1; /* advance outer loop to end */
 
-                        /* This form doesn't use stype/l/f/p; everything needed is
-                         * already committed above. Mark l/f/p as already-found (not
-                         * -1) so the trailing-token-commit logic below, which exists
-                         * for the legacy comma-separated form, doesn't clobber
-                         * filt->filtn/filt_flag with stale stype contents. */
+                        /* Keep the code below from overwriting filtn/filt_flag */
                         l = 0;
                         f = 0;
                         p = 0;

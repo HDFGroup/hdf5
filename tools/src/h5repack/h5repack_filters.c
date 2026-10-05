@@ -363,9 +363,7 @@ apply_filters(const char    *name,    /* object name from traverse list */
             if (obj->filter[i].filtn < 0)
                 H5TOOLS_GOTO_ERROR((-1), "invalid filter");
 
-            /* UD=id,flags,key=value... string form: dispatch through
-             * H5Pappend_filter so the filter's set_config callback converts it
-             * to cd_values, bypassing the per-filter H5Pset_* switch below. */
+            /* key=value form */
             if (obj->filter[i].params_str[0] != '\0') {
                 H5Z_params_t params;
                 params.type  = H5Z_PARAMS_STRING;
