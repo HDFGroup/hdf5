@@ -220,21 +220,10 @@ next:
 /*-------------------------------------------------------------------------
  * Function:    H5Z__validate_class3_name
  *
- * Purpose:     Enforce the canonical-name syntax for H5Z_class3_t filters:
- *              non-NULL, non-empty, at most H5Z_CLASS3_NAME_MAX_LEN bytes,
- *              and drawn entirely from [A-Za-z0-9_.-].
- *
- *              The restriction is not cosmetic.  A v3 filter's name is
- *              its canonical identifier: it is reported through
- *              H5Pget_filter2() and H5Zget_filter_class_info() and flows
- *              out through h5dump and the other tools.  Permitting
- *              arbitrary bytes would let a plugin put whitespace, quotes,
- *              or embedded newlines into line-oriented tool output, and the
- *              name has to be usable as a stable command-line identifier.
- *
- *              The character test is written out rather than delegated to
- *              isalnum(), which is locale-dependent and would admit letters
- *              outside the intended set.
+ * Purpose:     Check that a class3 filter name is non-empty, at most
+ *              H5Z_CLASS3_NAME_MAX_LEN bytes, and only [A-Za-z0-9_.-], so it
+ *              is safe to use on a command line and in tool output.
+ *              (isalnum() is avoided because it is locale-dependent.)
  *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
@@ -303,7 +292,6 @@ H5Zregister(const void *cls)
      * can be determined by the value of the first field.
      */
     if (cls_real->version == H5Z_CLASS3_T_VERS_INTERNAL) {
-        /* New H5Z_class3_t path */
         const H5Z_class3_t *cls3 = (const H5Z_class3_t *)cls;
 
         if (cls3->id < 0 || cls3->id > H5Z_FILTER_MAX)
@@ -362,10 +350,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5Z__insert_entry
  *
- * Purpose:  Shared table-insert/replace logic used by H5Z_register and
- *           H5Z_register3.  Looks up filter_id in the global table; if not
- *           found, grows the table if necessary and appends; if found,
- *           replaces the existing entry.
+ * Purpose:  Add ENTRY to the filter table, replacing any entry with the
+ *           same ID.
  *
  * Return:   Non-negative on success / Negative on failure
  *-------------------------------------------------------------------------
@@ -389,10 +375,6 @@ H5Z__insert_entry(const H5Z_entry_t *entry)
             size_t       n         = MAX(H5Z_MAX_NFILTERS, 2 * H5Z_table_alloc_g);
             H5Z_entry_t *new_table = NULL;
 #ifdef H5Z_DEBUG
-            /* Grow the stat table first and commit immediately: if the
-             * main-table realloc below then fails, stat_table has one
-             * harmless extra unused slot (H5Z_table_alloc_g stays
-             * unchanged), but H5Z_stat_table_g is never left dangling. */
             H5Z_stats_t *new_stat = (H5Z_stats_t *)H5MM_realloc(H5Z_stat_table_g, n * sizeof(H5Z_stats_t));
             if (!new_stat)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to extend filter statistics table");
@@ -439,23 +421,14 @@ H5Z_register(const H5Z_class2_t *cls)
     assert(cls);
     assert(cls->id >= 0 && cls->id <= H5Z_FILTER_MAX);
 
-    /* H5Z_register() is typed as const H5Z_class2_t *, but external callers
-     * (H5Zregister, H5PL_load) may pass a H5Z_class3_t * cast to that type.
-     * version is the first field in both structs, so it can be read safely
-     * through either type; re-sniff it here before touching anything past
-     * set_local, since H5Z_class3_t's filter field is a wider-signature
-     * H5Z_func2_t (not H5Z_func_t) and the struct carries three more fields
-     * (set_config, get_config, description) that H5Z_class2_t does not have
-     * at all -- treating a v3-cast struct as v2 past that point would misread
-     * those fields. Do NOT "simplify" away this check - the v3 dispatch must
-     * happen inside H5Z_register, not only at the H5Zregister API boundary. */
+    /* The plugin loader passes class3 structs through here cast to
+     * H5Z_class2_t; version is the first field of both */
     if (cls->version == H5Z_CLASS3_T_VERS_INTERNAL) {
         if (H5Z_register3((const H5Z_class3_t *)cls) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter");
         HGOTO_DONE(SUCCEED);
     }
 
-    /* Build an H5Z_entry_t from the v2 class struct; zero-init v3 extensions */
     memset(&entry, 0, sizeof(entry));
     entry.base.version         = cls->version;
     entry.base.id              = cls->id;
@@ -465,7 +438,6 @@ H5Z_register(const H5Z_class2_t *cls)
     entry.base.can_apply       = cls->can_apply;
     entry.base.set_local       = cls->set_local;
     entry.base.filter          = cls->filter;
-    /* set_config, get_config remain NULL for v1/v2 */
 
     if (H5Z__insert_entry(&entry) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to insert filter into table");
@@ -477,10 +449,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5Z_register3
  *
- * Purpose:  Register a filter using an H5Z_class3_t struct. Used for built-in
- *           filters and by H5Zregister() when version == H5Z_CLASS3_T_VERS_INTERNAL.
- *           Validates the canonical name and populates the internal entry with
- *           v3 callbacks.
+ * Purpose:  Register an H5Z_class3_t filter.
  *
  * Return:   Non-negative on success / Negative on failure
  *-------------------------------------------------------------------------
@@ -495,23 +464,14 @@ H5Z_register3(const H5Z_class3_t *cls)
 
     assert(cls);
     assert(cls->id >= 0 && cls->id <= H5Z_FILTER_MAX);
-    assert(cls->name); /* name is required for H5Z_class3_t */
+    assert(cls->name);
 
-    /* Runtime checks that survive NDEBUG - enforce for the plugin-load path,
-     * which reaches this function through H5Z_register and bypasses the
-     * H5Zregister wrapper.  This is the untrusted path: the name arrives
-     * from a shared object on disk. */
+    /* Plugins reach here without going through H5Zregister() */
     if (H5Z__validate_class3_name(cls->name) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5Z_class3_t filter name");
 
-    /* The canonical name must be unique among v3-registered filters: it
-     * identifies the filter, so two different filters sharing one name
-     * would make resolving a name to a filter ID ambiguous.  Only compared
-     * against other v3 entries --
-     * a v2 filter's free-form descriptive name is not a canonical
-     * identifier and is not part of this namespace.  A filter re-registered
-     * under its own unchanged id/name is not a collision; H5Z__insert_entry
-     * below replaces that entry in place. */
+    /* Names identify class3 filters, so they must be unique among them.
+     * class2 names are free-form and not compared. */
     {
         size_t i;
 
@@ -527,17 +487,16 @@ H5Z_register3(const H5Z_class3_t *cls)
         }
     }
 
-    /* Build entry */
     memset(&entry, 0, sizeof(entry));
-    entry.base.version         = cls->version; /* H5Z_CLASS3_T_VERS_INTERNAL for v3-aware downstream checks */
+    entry.base.version         = cls->version;
     entry.base.id              = cls->id;
     entry.base.encoder_present = cls->encoder_present;
     entry.base.decoder_present = cls->decoder_present;
     entry.base.name            = cls->name;
-    entry.description          = cls->description; /* may be NULL */
+    entry.description          = cls->description;
     entry.base.can_apply       = cls->can_apply;
     entry.base.set_local       = cls->set_local;
-    entry.filter2              = cls->filter; /* class3 extended callback; base.filter stays NULL */
+    entry.filter2              = cls->filter;
     entry.set_config           = cls->set_config;
     entry.get_config           = cls->get_config;
 
@@ -551,10 +510,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Z__reregister_deflate
  *
- * Purpose:     Re-register the built-in deflate filter.  Used by the test
- *              suite after deliberately unregistering deflate to test the
- *              re-registration path; uses H5Z_register3 directly to bypass
- *              the public-API range checks on built-in filter IDs.
+ * Purpose:     Re-register the built-in deflate filter (for testing).
  *
  * Return:      Non-negative on success / Negative on failure
  *-------------------------------------------------------------------------
@@ -1564,7 +1520,6 @@ H5Z_find(bool try, H5Z_filter_t id, H5Z_class2_t **cls)
             HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "required filter %d is not registered", id);
     }
     else
-        /* base is the first member of H5Z_entry_t; cast is valid per C11 Sec. 6.7.2.1p15 */
         *cls = &H5Z_table_g[idx].base;
 
 done:
@@ -1743,10 +1698,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, hid_t dxpl_id, const hsiz
                 H5E_PAUSE_ERRORS
 
             {
-                /* Don't prepare for a user callback if this is an internal filter.
-                 * Built-ins registered as H5Z_class3_t only populate filter2 --
-                 * base.filter stays NULL (H5Z_register3) -- so the fast path must
-                 * check filter2 first, exactly like the user-callback branch below. */
+                /* Don't prepare for a user callback if this is an internal filter */
                 if (fclass->base.id < H5Z_FILTER_RESERVED) {
                     if (fclass->filter2)
                         new_nbytes = (fclass->filter2)(tmp_flags, pline->filter[idx].cd_nelmts,
@@ -1847,10 +1799,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, hid_t dxpl_id, const hsiz
                 H5E_PAUSE_ERRORS
 
             {
-                /* Don't prepare for a user callback if this is an internal filter.
-                 * Built-ins registered as H5Z_class3_t only populate filter2 --
-                 * base.filter stays NULL (H5Z_register3) -- so the fast path must
-                 * check filter2 first, exactly like the user-callback branch below. */
+                /* Don't prepare for a user callback if this is an internal filter */
                 if (fclass->base.id < H5Z_FILTER_RESERVED) {
                     if (fclass->filter2)
                         new_nbytes = (fclass->filter2)(flags | (pline->filter[idx].flags),
@@ -2164,17 +2113,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5Zget_filter_class_info
  *
- * Purpose:  Retrieves registry-level information about a registered filter:
- *           the encode/decode config flags (same bits returned by the v1
- *           call), the filter's canonical name, its free-form description,
- *           and whether the plugin implements the v3 set_config/get_config
- *           callbacks.
- *
- *           Triggers a dynamic plugin load if the filter is not yet
- *           registered (same policy as H5Zfilter_avail).
- *
- *           String fields in `info` point into library-owned storage; they
- *           are valid until the filter is unregistered.
+ * Purpose:  Retrieves registry-level information about a filter.
  *
  * Return:   Non-negative on success / Negative on failure
  *
@@ -2193,11 +2132,10 @@ H5Zget_filter_class_info(H5Z_filter_t filter, H5Z_class_info_t *info /*out*/)
     if (info == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "info pointer must not be NULL");
 
-    /* Zero the output up front so partial population on error is well-defined. */
     memset(info, 0, sizeof(*info));
     info->id = filter;
 
-    /* Trigger plugin load if needed; if still unavailable, fail */
+    /* Loads the plugin if needed */
     if ((avail = H5Z_filter_avail(filter)) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't check filter availability");
     if (!avail)
@@ -2206,14 +2144,13 @@ H5Zget_filter_class_info(H5Z_filter_t filter, H5Z_class_info_t *info /*out*/)
     if (H5Z_find_entry(false, filter, &entry) < 0 || entry == NULL)
         HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "filter entry not found after availability check");
 
-    /* Reconstruct config flags from the entry's encoder/decoder presence. */
     if (entry->base.encoder_present)
         info->config_flags |= H5Z_FILTER_CONFIG_ENCODE_ENABLED;
     if (entry->base.decoder_present)
         info->config_flags |= H5Z_FILTER_CONFIG_DECODE_ENABLED;
 
-    info->name           = entry->base.name;   /* may be NULL for class2 entries */
-    info->description    = entry->description; /* may be NULL */
+    info->name           = entry->base.name;
+    info->description    = entry->description;
     info->has_set_config = (entry->set_config != NULL);
     info->has_get_config = (entry->get_config != NULL);
 

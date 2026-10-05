@@ -643,10 +643,7 @@ error:
 }
 
 /* -----------------------------------------------------------------------
- * canonical_name display tests
- *
- * Registers a minimal class3 filter and verifies that H5Pget_filter_by_id2
- * returns the registered canonical name as the filter name.
+ * H5Pget_filter_by_id2 reports a class3 filter's registered name
  * ---------------------------------------------------------------------- */
 
 #define TITLE_FILTER_ID 512
@@ -808,7 +805,6 @@ error:
 static int
 test_name_id_fallback(void)
 {
-    /* Use a filter ID that is not registered and has no built-in entry */
     H5Z_filter_t unregistered_id = 800;
     hid_t        dcpl            = H5I_INVALID_HID;
     unsigned     flags2;
@@ -819,14 +815,11 @@ test_name_id_fallback(void)
     char         expected[32];
 
     TESTING("name fallback: unregistered filter returns decimal ID string");
-    /* Build a dcpl with the unregistered filter via H5Pset_filter */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR;
-    /* H5Pset_filter does not load plugins or validate existence at property-set time */
     if (H5Pset_filter(dcpl, unregistered_id, H5Z_FLAG_OPTIONAL, 0, NULL) < 0)
         TEST_ERROR;
     cd_nelmts = 8;
-    /* H5Pget_filter_by_id2: with no registered entry, name should be "800" */
     if (H5Pget_filter_by_id2(dcpl, unregistered_id, &flags2, &cd_nelmts, cd_out, sizeof(name), name,
                              &config) < 0)
         TEST_ERROR;
@@ -901,13 +894,8 @@ test_canonical_name_length_limit(void)
     }
     PASSED();
 
-    /* The canonical name is the filter's stable identifier and flows out
-     * through H5Pget_filter2() and the command-line tools.  H5Zregister
-     * must therefore hold it to [A-Za-z0-9_.-], non-empty, rather than
-     * accepting arbitrary bytes. */
     TESTING("H5Zregister: canonical_name syntax is enforced");
     {
-        /* Each must be rejected, and for the stated reason. */
         static const char *const bad[] = {
             "",                 /* empty                                  */
             "has space",        /* whitespace                             */
@@ -921,11 +909,7 @@ test_canonical_name_length_limit(void)
             "slash/path",       /* path-like, unsafe as an identifier     */
             "equals=sign",      /* the key/value separator                */
         };
-        /* Each must be accepted: the full declared character class.
-         * "deflate" deliberately avoided -- it collides with the built-in
-         * deflate filter's own canonical name, rejected by the separate
-         * uniqueness check in test_canonical_name_uniqueness() below, a
-         * different concern from the syntax check this loop covers. */
+        /* Not "deflate", which is taken by the built-in filter */
         static const char *const good[] = {
             "zfp", "not-deflate", "blosc2.lz4", "my_filter-2", "A", "0", "aA0_.-",
         };
@@ -965,9 +949,7 @@ error:
 }
 
 /* -----------------------------------------------------------------------
- * A canonical name must be unique among v3-registered filters: it
- * identifies the filter, so two different filters sharing one name would
- * make resolving a name to a filter ID ambiguous.
+ * Class3 filter names must be unique
  * ---------------------------------------------------------------------- */
 #define UNIQUENAME_FILTER_ID_A 536
 #define UNIQUENAME_FILTER_ID_B 537
@@ -988,7 +970,7 @@ test_canonical_name_uniqueness(void)
     if (H5Zregister(&cls_a) < 0)
         TEST_ERROR;
 
-    /* A different id claiming the same name must fail. */
+    /* A different id claiming the same name must fail */
     H5E_BEGIN_TRY
     {
         ret = H5Zregister(&cls_b);
@@ -1000,14 +982,13 @@ test_canonical_name_uniqueness(void)
         TEST_ERROR;
     }
 
-    /* Re-registering the SAME id under its own unchanged name is not a
-     * collision -- H5Z__insert_entry replaces the entry in place. */
+    /* Re-registering the same id and name is allowed */
     if (H5Zregister(&cls_a) < 0) {
         H5Zunregister(UNIQUENAME_FILTER_ID_A);
         TEST_ERROR;
     }
 
-    /* Once A is gone, B may claim the name that's no longer in use. */
+    /* Once A is gone, B may take the name */
     if (H5Zunregister(UNIQUENAME_FILTER_ID_A) < 0)
         TEST_ERROR;
     if (H5Zregister(&cls_b) < 0)
@@ -1111,9 +1092,7 @@ error:
 }
 
 /* -----------------------------------------------------------------------
- * filter2 context passthrough: verify dxpl_id, scaled[], ndims arrive
- * at the H5Z_func2_t callback with correct values during chunk I/O, and
- * that the reserved state argument is NULL.
+ * H5Z_func2_t receives the right dxpl_id, scaled and ndims, and NULL state
  * ---------------------------------------------------------------------- */
 
 #define CTXPASS_FILTER_ID 520
@@ -1150,7 +1129,6 @@ ctxpass_filter_cb(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_v
     if (ndims != 2)
         g_ctxpass.ndims_ok = false;
 
-    /* state is reserved and always NULL */
     if (state != NULL)
         g_ctxpass.state_ok = false;
 
@@ -1188,10 +1166,8 @@ check_ctxpass_state(void)
 static int
 test_filter2_context_passthrough(hid_t file)
 {
-    /* 8x8 dataset with 4x4 chunks -> 2x2 chunk grid, 4 total chunks.
-     * Chunk cache is disabled (nslots=0) so the filter fires during
-     * H5Dwrite / H5Dread rather than at a later flush, exposing the
-     * dxpl_id, scaled[], and ndims values that arrive at filter2. */
+    /* 8x8 dataset, 4x4 chunks.  The chunk cache is disabled so the filter
+     * runs inside H5Dwrite/H5Dread with their dxpl. */
     static const hsize_t dims[2]   = {8, 8};
     static const hsize_t chunks[2] = {4, 4};
     hid_t                dxpl      = H5I_INVALID_HID;
@@ -1210,8 +1186,6 @@ test_filter2_context_passthrough(hid_t file)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         TEST_ERROR;
 
-    /* nslots=0 disables the chunk cache; each chunk is encoded/decoded
-     * immediately during the I/O call rather than deferred to flush. */
     if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
         TEST_ERROR;
     if (H5Pset_chunk_cache(dapl, 0, H5D_CHUNK_CACHE_NBYTES_DEFAULT, H5D_CHUNK_CACHE_W0_DEFAULT) < 0)
