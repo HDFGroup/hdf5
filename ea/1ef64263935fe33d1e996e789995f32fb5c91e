@@ -1,0 +1,22 @@
+fortran/src/H5Zff.F90
+  s_a109afe3d2c109::t_1c762d6251c399 228,233,237
+  s_a109afe3d2c109::t_bf002a4baa2f58 268,274,277
+  s_a109afe3d2c109::t_d7db413da24150 182,186,190
+  s_a109afe3d2c109::t_340bff00909a90 148,152,154
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "ea1ef64263935fe33d1e996e789995f32fb5c91e",
+  "prompts": {},
+  "sessions": {
+    "s_a109afe3d2c109": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d42fab0f-372b-4e5d-b30c-36da96dcac0b",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

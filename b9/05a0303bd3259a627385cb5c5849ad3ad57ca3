@@ -1,0 +1,22 @@
+docs/doxygen/dox/DDLBNF200.dox
+  s_36d4c2a1504613::t_fa71c3aa610b64 442-446,454-456
+  s_36d4c2a1504613::t_2b0dadad6e9d90 457
+tools/lib/h5tools_dump.c
+  s_36d4c2a1504613::t_24bb5f01e5ffef 3732-3739
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "b905a0303bd3259a627385cb5c5849ad3ad57ca3",
+  "prompts": {},
+  "sessions": {
+    "s_36d4c2a1504613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "571ac08e-3c5f-42d2-8451-cb3aa0da3d2f",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+HDF5Examples/config/cmake/runExecute.cmake
+  s_4e50a4ffb87a96::t_e22385c3db3022 249,259
+config/cmake/runExecute.cmake
+  s_4e50a4ffb87a96::t_f1a9d68e15ffc2 254,264
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "e9738c0afe1b056c004d8ac0995ecc0075e38fa6",
+  "prompts": {},
+  "sessions": {
+    "s_4e50a4ffb87a96": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3324801e-434e-41d6-92bd-aeb343b75a3f",
+        "model": "unknown"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

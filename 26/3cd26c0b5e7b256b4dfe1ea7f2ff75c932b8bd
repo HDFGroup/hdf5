@@ -1,0 +1,19 @@
+.github/workflows/remove-reviewer.yml
+  s_9627dd5cd50267::t_8e9815a4aa31cc 21,23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "263cd26c0b5e7b256b4dfe1ea7f2ff75c932b8bd",
+  "prompts": {},
+  "sessions": {
+    "s_9627dd5cd50267": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e022fc47-19f4-4391-89cc-6b1bc72d67d6",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

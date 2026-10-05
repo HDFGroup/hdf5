@@ -1,0 +1,20 @@
+.github/workflows/abi-report.yml
+  s_46b37e05fbad4e::t_ab8ec32d991615 197-198
+  s_46b37e05fbad4e::t_3f79f1b803feee 150-168,180-181
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "770d60cd2e7a979c648194605c5b7823acd2c90a",
+  "prompts": {},
+  "sessions": {
+    "s_46b37e05fbad4e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "994038ba-a70b-4eb6-9dd6-a0a9f8077ea1",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+.github/workflows/stale-pr-policy.yml
+  s_f67baaf245619f::t_d49d181d844c60 42-45,49-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "e3ed062285c682f0b73de246fb1f7b2202b51c7c",
+  "prompts": {},
+  "sessions": {
+    "s_f67baaf245619f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2c938d58-cecc-4156-b1eb-c97d32caa1a8",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

@@ -1,0 +1,59 @@
+src/H5MV.c
+  s_4d065b9b1ecf39::t_c63ae493cc0035 230-232,243-245,247
+src/H5Fvfd_swmr.c
+  s_4d065b9b1ecf39::t_8f5dbcf3fe7620 2428
+  s_4d065b9b1ecf39::t_80572e7913c680 2087
+  s_4d065b9b1ecf39::t_c0242fe02e87b8 2441-2442
+  s_4d065b9b1ecf39::t_8fcca2f17e4f55 475-476
+  s_4d065b9b1ecf39::t_62fe54910d4bc4 1031
+utils/vfd_swmr/aux_process.c
+  s_4d065b9b1ecf39::t_01a70a7ba4d415 1132-1138
+  s_4d065b9b1ecf39::t_71102b9b4e7635 1077-1086
+  s_4d065b9b1ecf39::t_c4f597e5766353 595-598
+  s_4d065b9b1ecf39::t_9e551fb425f0a6 1543
+  s_4d065b9b1ecf39::t_383f55343863f4 990-995,997-1000
+  s_4d065b9b1ecf39::t_b000024e81bb58 1212-1215
+  s_4d065b9b1ecf39::t_2406c1df94a78a 1452-1456,1459-1463
+src/H5MVsection.c
+  s_4d065b9b1ecf39::t_f5e5dd7300dc4a 360-365
+src/H5FDvfd_swmr.c
+  s_4d065b9b1ecf39::t_92ef55646a87c7 1573-1579
+  s_4d065b9b1ecf39::t_42e7e38d70c423 1600-1602
+utils/vfd_swmr/recovery_tool.c
+  s_4d065b9b1ecf39::t_db3f93d508b911 1435-1443
+  s_4d065b9b1ecf39::t_bf3d30d76139f0 790-799
+  s_4d065b9b1ecf39::t_ee9a21f77fdf55 853-859
+  s_4d065b9b1ecf39::t_f625d76a2f067c 987-990
+  s_4d065b9b1ecf39::t_87e536bb49a57a 703-708,710-713
+src/H5PBpkg.h
+  s_4d065b9b1ecf39::t_8c221e059b1de0 419-426
+  s_4d065b9b1ecf39::t_b4e55f9e528e2c 1554-1555
+CODE_REVIEW_VFD_SWMR.md
+  s_4d065b9b1ecf39::t_0b7939b7680765 4
+  s_4d065b9b1ecf39::t_b0616f97812988 140-141
+  s_4d065b9b1ecf39::t_4dfcf97d40b3e8 99
+  s_4d065b9b1ecf39::t_67c090ebf69ed1 124
+  s_4d065b9b1ecf39::t_b660ceab6dda3a 167
+  s_4d065b9b1ecf39::t_0c10e6c35efad0 122-123
+  s_4d065b9b1ecf39::t_cd30ce01869c83 107
+  s_4d065b9b1ecf39::t_31ab883ab06de4 137
+  s_4d065b9b1ecf39::t_af9e37981e65c4 152-156
+  s_4d065b9b1ecf39::t_70e760a8ef9884 172
+  s_4d065b9b1ecf39::t_ae5bc554516ec4 120
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "c5c333ca8cd05c24ced53ead47d407c21586adc2",
+  "prompts": {},
+  "sessions": {
+    "s_4d065b9b1ecf39": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c819b12b-44e0-4488-9345-af8a1a0dab3a",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

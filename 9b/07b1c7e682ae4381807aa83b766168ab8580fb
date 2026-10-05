@@ -1,0 +1,40 @@
+src/H5Zdevelop.h
+  s_36d4c2a1504613::t_87d02378e826be 276
+  s_36d4c2a1504613::t_e8adbddf60385f 29-33,38
+src/H5Zfletcher32.c
+  s_36d4c2a1504613::t_bee5c161792839 27
+src/H5Znbit.c
+  s_36d4c2a1504613::t_439be57e0cb662 90
+src/H5Zszip.c
+  s_36d4c2a1504613::t_767abba6dd902e 44
+src/H5Zscaleoffset.c
+  s_36d4c2a1504613::t_95b48e246ed648 98
+src/H5Zshuffle.c
+  s_36d4c2a1504613::t_b99d0fbde50395 31
+test/tfilter2.c
+  s_36d4c2a1504613::t_c82a326f22dd9b 930,1013,1041,1216,1232,1371,1499,1577,1699,1908,2106
+src/H5Zpkg.h
+  s_36d4c2a1504613::t_0f999e52c49dab 23-30
+tools/test/h5repack/dynlib_rpk3.c
+  s_36d4c2a1504613::t_11cbf33a95058a 37
+src/H5Zdeflate.c
+  s_36d4c2a1504613::t_a8c7a40d94998a 40
+src/H5Z.c
+  s_36d4c2a1504613::t_c1a1827b727ba2 252,399,428,456
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "9b07b1c7e682ae4381807aa83b766168ab8580fb",
+  "prompts": {},
+  "sessions": {
+    "s_36d4c2a1504613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "571ac08e-3c5f-42d2-8451-cb3aa0da3d2f",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+.github/workflows/bigendian.yml
+  s_51c3ffb87f28e6::t_316a57c40db37c 78
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.9",
+  "base_commit_sha": "101181767ae5703c4d6e6f60cd3c408eaffdfd1d",
+  "prompts": {},
+  "sessions": {
+    "s_51c3ffb87f28e6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "84ff612e-773a-42c7-bd46-889066ae94d4",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

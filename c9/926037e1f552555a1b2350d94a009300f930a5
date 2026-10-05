@@ -1,0 +1,24 @@
+docs/vfd-swmr-user-guide.md
+  s_aae42cb38736c2::t_4a29898ff9564b 299-301
+  s_aae42cb38736c2::t_a9806a0f26f748 81-82,87
+  s_aae42cb38736c2::t_6914588e77a5fc 176-180,182,184,191
+  s_aae42cb38736c2::t_c164d2e47e5763 3-4
+  s_aae42cb38736c2::t_2ca672a58f2cec 224-225
+  s_aae42cb38736c2::t_e34c62a18ace22 491-511
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "c9926037e1f552555a1b2350d94a009300f930a5",
+  "prompts": {},
+  "sessions": {
+    "s_aae42cb38736c2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c1bfef63-1330-445b-9c71-4c8170b7d030",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

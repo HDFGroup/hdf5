@@ -1,0 +1,19 @@
+tools/src/h5repack/h5repack_parse.c
+  s_5bdd6327855e49::t_65df436f93b3f6 299
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "cfd19ca2dcddfe8222fc1612ab253eb4f4b4bffc",
+  "prompts": {},
+  "sessions": {
+    "s_5bdd6327855e49": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "06722a10-1f25-4a18-b9f8-2ae0a6c5a892",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

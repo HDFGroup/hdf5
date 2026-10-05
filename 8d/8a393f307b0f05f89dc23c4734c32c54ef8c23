@@ -1,0 +1,19 @@
+VFD_SWMR_PORT_PLAN.md
+  s_4d065b9b1ecf39::t_8d13b60833c751 1-116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "8d8a393f307b0f05f89dc23c4734c32c54ef8c23",
+  "prompts": {},
+  "sessions": {
+    "s_4d065b9b1ecf39": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c819b12b-44e0-4488-9345-af8a1a0dab3a",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

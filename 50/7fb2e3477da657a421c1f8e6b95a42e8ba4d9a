@@ -1,0 +1,25 @@
+test/API/H5_api_dataset_test.c
+  a839c7ffb7e04232 1700-1703,1705,1714-1715,1719
+.github/workflows/bigendian.yml
+  a839c7ffb7e04232 66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "507fb2e3477da657a421c1f8e6b95a42e8ba4d9a",
+  "prompts": {
+    "a839c7ffb7e04232": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "72cacedb-db62-4030-85ad-e5815885b0c6",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "M. Scot Breitenfeld",
+      "messages": [],
+      "total_additions": 9,
+      "total_deletions": 5,
+      "accepted_lines": 9,
+      "overriden_lines": 0
+    }
+  }
+}

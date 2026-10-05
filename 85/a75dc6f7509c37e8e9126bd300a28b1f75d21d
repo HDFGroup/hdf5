@@ -1,0 +1,19 @@
+.github/workflows/review-checklist.yml
+  s_6d22897799c39f::t_6bb47c393498c2 51-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "85a75dc6f7509c37e8e9126bd300a28b1f75d21d",
+  "prompts": {},
+  "sessions": {
+    "s_6d22897799c39f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2572cbc1-e006-48ad-9495-4cc0a35a882b",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

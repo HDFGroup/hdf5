@@ -1,0 +1,21 @@
+docs/doxygen/dox/hdf5_2x.dox
+  s_2bbd722882a805::t_d3aaa36204131a 101,109,112
+docs/doxygen/dox/sw_changes_2.x.dox
+  s_2bbd722882a805::t_b24a49aa941c58 18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "da297438426cd876c36b15eee7afa8987927ce51",
+  "prompts": {},
+  "sessions": {
+    "s_2bbd722882a805": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3d678a63-9c9d-4851-ade7-65919c36a2ef",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

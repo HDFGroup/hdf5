@@ -1,0 +1,27 @@
+.github/workflows/release.yml
+  s_46b37e05fbad4e::t_b9a6199b300969 85-86
+.github/workflows/daily-build.yml
+  s_46b37e05fbad4e::t_73c98f9d9aba16 164-165
+.github/workflows/abi-report.yml
+  s_46b37e05fbad4e::t_dfd964396c990a 22-23,25
+  s_46b37e05fbad4e::t_ee8b58628d168d 42-56,60,62
+  s_46b37e05fbad4e::t_c8807bba2a190f 103
+  s_46b37e05fbad4e::t_1daf05f1627c0d 166-175
+  s_46b37e05fbad4e::t_bbcfc23b14f837 113
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "1c7f2029ce6a557535b3d1866ca74a8042d764a4",
+  "prompts": {},
+  "sessions": {
+    "s_46b37e05fbad4e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "994038ba-a70b-4eb6-9dd6-a0a9f8077ea1",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

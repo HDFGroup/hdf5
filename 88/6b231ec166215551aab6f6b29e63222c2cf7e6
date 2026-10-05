@@ -1,0 +1,19 @@
+CMakeBuildOptions.cmake
+  s_f81c0146438ba6::t_319689d96f2ae1 76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "886b231ec166215551aab6f6b29e63222c2cf7e6",
+  "prompts": {},
+  "sessions": {
+    "s_f81c0146438ba6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4a870170-0697-43f9-9f1e-07f55b431308",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

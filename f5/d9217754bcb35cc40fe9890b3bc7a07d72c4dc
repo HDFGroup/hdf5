@@ -1,0 +1,44 @@
+.github/workflows/update-progress.py
+  s_23748e5524d22e::t_eb493c912a91ef 134,138-139,145-148
+  s_23748e5524d22e::t_c7970f95339d57 216-223
+  s_23748e5524d22e::t_292fdeab4c54b3 31-32
+  s_23748e5524d22e::t_bb95fe3af0be6a 236
+  s_23748e5524d22e::t_e3c8c00364bc82 363-366
+  s_23748e5524d22e::t_e24125b0e326a6 375-378,384-385
+  s_23748e5524d22e::t_54b224cb161af6 256-257,263,268,271,286-289
+README.md
+  s_23748e5524d22e::t_f472bd51b7415a 101-102,111
+  s_23748e5524d22e::t_acea17bc7b1e1d 95,99-100,107-109,112-113
+  s_23748e5524d22e::t_4dd4c27839bbd2 110
+.github/workflows/update-progress.yml
+  s_23748e5524d22e::t_4cde0f2e3af9c5 118,123-126,137-140,144
+  s_23748e5524d22e::t_d343164befff75 165-168
+  s_23748e5524d22e::t_b2dd390ef3a715 187-188,201-202,207-209
+.github/workflows/update-badge.sh
+  s_23748e5524d22e::t_3238e24772ca5d 18-21
+  s_23748e5524d22e::t_c5d74a9705b8c3 295-296,302-303,310-311
+  s_23748e5524d22e::t_ee729a08560d4e 332-339,348-349,359-364
+  s_23748e5524d22e::t_5d61a5b18fe441 200-201,203-229,236,245,250,264-266
+  s_23748e5524d22e::t_5df1c5992afcc8 234-235,237,239,243-244,248-249,258-263
+  s_23748e5524d22e::t_568bda90d03c5f 297,304,312
+  s_23748e5524d22e::t_13d5418baf1d56 142-165,170-171,175-176,182-183,194-199
+  s_23748e5524d22e::t_60747306577d05 40-43
+  s_23748e5524d22e::t_24b5f776b0f3f8 342-344,350,365-367
+  s_23748e5524d22e::t_bd3e702d4c2180 202
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "f5d9217754bcb35cc40fe9890b3bc7a07d72c4dc",
+  "prompts": {},
+  "sessions": {
+    "s_23748e5524d22e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a7c00bb2-aa9f-4c1e-823a-875748c20153",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

@@ -1,0 +1,55 @@
+java/src-jni/jni/h5zImp.c
+  s_36d4c2a1504613::t_47a06b67b23c22 83,87,99,105,111,127
+fortran/test/tH5Z.F90
+  s_36d4c2a1504613::t_b88a2b393bedfc 573,602
+java/src-jni/jni/h5zImp.h
+  s_36d4c2a1504613::t_47a06b67b23c22 47,50
+src/H5Pocpl.c
+  s_36d4c2a1504613::t_47a06b67b23c22 2009
+java/jtest/TestH5Zffm.java
+  s_36d4c2a1504613::t_47a06b67b23c22 383,386,398-399,404-405,414,417,427-428,433-434,442,445,454-455,458,465,468,476-477
+java/src-jni/hdf/hdf5lib/H5.java
+  s_36d4c2a1504613::t_47a06b67b23c22 15751,15763
+src/H5Z.c
+  s_36d4c2a1504613::t_47a06b67b23c22 2006,2026,2064
+tools/lib/h5tools_dump.c
+  s_36d4c2a1504613::t_47a06b67b23c22 3203,3631
+java/src-jni/test/testfiles/JUnit-TestH5Z.txt
+  s_36d4c2a1504613::t_7f4a406aad38a3 3-4
+java/test/TestH5Z.java
+  s_36d4c2a1504613::t_47a06b67b23c22 124,131-134,139-142,146-148,152,157,159
+src/H5Zpublic.h
+  s_36d4c2a1504613::t_183b2bb591db19 462-466
+  s_36d4c2a1504613::t_47a06b67b23c22 422,479
+java/hdf/hdf5lib/H5.java
+  s_36d4c2a1504613::t_47a06b67b23c22 23802,23814,23843,23871
+fortran/src/H5Zff.F90
+  s_36d4c2a1504613::t_63a17124907e5b 82-83,100-103
+  s_36d4c2a1504613::t_b88a2b393bedfc 86,255,268-269,274,277
+java/src-jni/test/TestH5Z.java
+  s_36d4c2a1504613::t_47a06b67b23c22 121,128-131,136-139,143-145,149,154,156
+java/hdf/hdf5lib/structs/H5Z_class_info_t.java
+  s_36d4c2a1504613::t_47a06b67b23c22 18
+java/src-jni/hdf/hdf5lib/structs/H5Z_class_info_t.java
+  s_36d4c2a1504613::t_47a06b67b23c22 18
+test/tfilter2.c
+  s_36d4c2a1504613::t_47a06b67b23c22 1968,1976,1979,2003,2005,2020,2022,2034,2037,2044,2047
+java/test/testfiles/JUnit-TestH5Z.txt
+  s_36d4c2a1504613::t_7f4a406aad38a3 8-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "79e9bd95dfd57353fceb20aa6331dd0c1e19c1eb",
+  "prompts": {},
+  "sessions": {
+    "s_36d4c2a1504613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "571ac08e-3c5f-42d2-8451-cb3aa0da3d2f",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

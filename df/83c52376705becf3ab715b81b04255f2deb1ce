@@ -1,0 +1,43 @@
+src/H5FDvfd_swmr.c
+  s_4d065b9b1ecf39::t_47bc19f4c499d6 1764
+test/h5test.c
+  s_4d065b9b1ecf39::t_c34ddbd80d8302 2025,2033
+src/H5retry_private.h
+  s_4d065b9b1ecf39::t_4c324f341f9240 33
+src/H5Pfapl.c
+  s_4d065b9b1ecf39::t_e2f2361d37ac17 6592-6593,6596-6597,6600-6601,6604-6605
+src/H5Fvfd_swmr.c
+  s_4d065b9b1ecf39::t_3a2e45d7df2317 2002,2048-2049
+  s_4d065b9b1ecf39::t_3c18dfaccecde9 2046-2047,2050
+src/H5MVpkg.h
+  s_4d065b9b1ecf39::t_16374d82e67d89 81-82
+  s_4d065b9b1ecf39::t_72808f6b613654 84
+src/H5MVsection.c
+  s_4d065b9b1ecf39::t_5cba7e11529421 28
+src/H5PBpkg.h
+  s_4d065b9b1ecf39::t_5ad5fa195f4c14 1684
+utils/vfd_swmr/recovery_tool.c
+  s_4d065b9b1ecf39::t_aba3db2336bd60 1169
+src/H5CL.c
+  s_4d065b9b1ecf39::t_c6205aec743f9e 438,472,475,477,530,537-538,544,548-549,554,565,572,600-601
+  s_4d065b9b1ecf39::t_3182b9a19546c2 494
+  s_4d065b9b1ecf39::t_104bd310c25811 40-43
+src/H5CLmodule.h
+  s_4d065b9b1ecf39::t_bef927e80d735e 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "df83c52376705becf3ab715b81b04255f2deb1ce",
+  "prompts": {},
+  "sessions": {
+    "s_4d065b9b1ecf39": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c819b12b-44e0-4488-9345-af8a1a0dab3a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

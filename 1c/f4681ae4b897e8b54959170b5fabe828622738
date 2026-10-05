@@ -1,0 +1,214 @@
+.github/workflows/intel.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 24,34,77,83,90
+.github/workflows/vol_ext_passthru.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 28,33
+java/test/TestH5D.java
+  s_36d4c2a1504613::t_da01a8ded9ae4d 2382-3226
+.github/workflows/dev.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 33,112,191,278
+.github/workflows/codespell.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 13-14
+java/src-jni/hdf/hdf5lib/H5.java
+  s_36d4c2a1504613::t_da01a8ded9ae4d 197-212,1700-1701,2283-2284,3446-3448,4168-4170
+.github/scripts/review-checklist.js
+  s_36d4c2a1504613::t_da01a8ded9ae4d 33-46,299-334,350,357-385,412,416-422,499,525,528-536,552,556-627,836,844,847-851,855,877-888
+.github/scripts/draft-pr-policy.js
+  s_36d4c2a1504613::t_da01a8ded9ae4d 6-7,41,52-54,58,62-64,69-102,107-130,149,156
+.github/workflows/main-spc.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 32,96,155,214,271,328,386,395,402,442,503,559,615,666
+.github/workflows/zizmor.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 24
+.github/workflows/cve.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 39-41,51
+.github/workflows/bintest.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 39,122,176,216,244
+java/src-jni/jni/h5util.c
+  s_36d4c2a1504613::t_da01a8ded9ae4d 74-75,77-90,4254,4269,4294-4297,4323,4337,4347-4354,4386,4468,4470-4472,4502-4509,4550,4572-4573,4606-4609,4619-4628,4633-4634,4640-4641,4644-4645,4655-4661,4682-4684,4688-4689,4706-4712,4720,4723-4724,4777,4779-4780,4832-4838,4846-4847,4854,4870-4892,4895,4897-4900,4916-4921,4935,4943-4944,4946-4952,4954,4960,4962-4963,4966,4981-4982,4984,4986,4993,5020,5023,5027-5028,5030-5031,5053-5055,5057,5086,5089,5093-5094,5096-5097,5123-5129,5132,5165-5166,5168-5172,5177-5181,5191-5192,5194,5197,5205-5206,5208-5213,5220-5224,5246-5247,5249,5254,5269-5270,5272-5276,5281-5285,5290-5291,5293,5295,5311-5313,5331-5332,5334-5339,5344-5348,5353-5354,5356,5358,5377-5727
+  s_36d4c2a1504613::t_223dccb3b14bfb 5728
+.github/workflows/macos-26-matrix.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 192
+.github/workflows/analysis.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 36,88,138,188,241,291,344,394
+java/src-jni/test/testfiles/JUnit-TestH5D.txt
+  s_36d4c2a1504613::t_da01a8ded9ae4d 17,19-20,22,24-25,27,30,32-33,37
+.github/workflows/hdfeos5.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 3-9,12-13,27,37
+.github/workflows/i386.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 24
+.github/workflows/openbsd.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 52,55
+test/dt_arith.c
+  s_36d4c2a1504613::t_da01a8ded9ae4d 5975-5980,5992-5997,6003-6008,6014-6019,6025,6027-6033,6038,6040-6046,6051,6053-6059,6119-6124,6136-6141,6147-6152,6158-6163,6169,6171-6177,6182,6184-6190,6195,6197-6203,6263-6268,6280-6285,6291-6296,6302-6307,6313,6315-6321,6326,6328-6334,6339,6341-6347,6407,6420-6425,6431-6436,6442-6447,6453,6455-6461,6466,6468-6474,6479,6481-6487,6547,6560-6565,6571-6576,6582-6587,6593,6595-6601,6606,6608-6614,6619,6621-6627,6687,6700-6705,6711-6716,6722-6727,6733,6735-6741,6746,6748-6754,6759,6761-6767,6827,6840-6845,6851-6856,6862-6867,6873,6875-6881,6886,6888-6894,6899,6901-6907,6967,6980-6985,6991-6996,7002-7007,7013,7015-7021,7026,7028-7034,7039,7041-7047,7107,7120-7125,7131-7136,7142-7147,7153,7155-7161,7166,7168-7174,7179,7181-7187,7247,7260-7265,7271-7276,7282-7287,7293,7295-7301,7306,7308-7314,7319,7321-7327,9155,9181,9293,9319,9388,9408
+.github/workflows/publish-branch.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 25,36
+.github/workflows/maven-deploy.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 272
+.github/workflows/update-progress.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 16,19,24
+docs/doxygen/dox/H5.format.4.0.dox
+  s_36d4c2a1504613::t_da01a8ded9ae4d 7587,7593,7596,7599,7602,7605,7609-7612,7657-7663,7697-7704,7708-7712,7718,7897,7900,7905-7906,7916,7926-7927,7931,7983,8063-8066,8081-8082,8110,8117-8122,8160-8164,8203
+.github/workflows/vol_rest.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 46,81,86
+.github/workflows/cygwin.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 39,42,87
+.github/workflows/script.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 40,51,109,154,164,207,252,263,275,315,326,372,382,444,490,498,505,511,563,613,623,630,673,722,738,787
+.github/workflows/test-binary-installation.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 74,80,278,284
+tools/src/h5repack/h5repack_parse.c
+  s_36d4c2a1504613::t_da01a8ded9ae4d 61,423-435
+.github/workflows/msys2.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 39,59
+.github/workflows/julia.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 20,67,81
+.github/workflows/remove-reviewer.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 28
+.github/workflows/tarball.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 51,95
+.github/workflows/build-aws-c-s3.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 55,62,81,88,95,102,109,116,123,130,137,144,151
+.github/scripts/review-checklist.test.js
+  s_36d4c2a1504613::t_da01a8ded9ae4d 6,15-17,20-41,56-63,536-948,953-967
+.github/workflows/netcdf.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 46,81
+.github/workflows/par-source.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 55,83,126,174,200,243
+.github/workflows/publish-release.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 53,88
+java/src-jni/test/TestH5Arw.java
+  s_36d4c2a1504613::t_da01a8ded9ae4d 463
+release_docs/CHANGELOG.md
+  s_36d4c2a1504613::t_da01a8ded9ae4d 256-264
+.github/workflows/ctest.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 97,109,243,254,266,417,425,437,596,630,665,818,913,920,926,1065,1072
+.github/workflows/main-static.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 126,145
+.github/workflows/build_openmpi_source.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 33,52
+.github/workflows/review-checklist-test.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 22-25
+.github/workflows/test-maven-packages.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 61,64,328,331
+.github/workflows/daily-schedule.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 36,49
+java/src-jni/test/TestH5D.java
+  s_36d4c2a1504613::t_da01a8ded9ae4d 15,17,439,1760-1919,2112-2796
+.github/scripts/mark-stale.js
+  s_36d4c2a1504613::t_da01a8ded9ae4d 1-125
+.github/workflows/cross-compile.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 39
+.github/workflows/main.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 153,172,185
+.github/workflows/stale-pr-policy.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 3-7,15-16,23,26,30-33,35-37,47,50,58,65,68
+src/H5Fio.c
+  s_36d4c2a1504613::t_da01a8ded9ae4d 308-320
+.github/workflows/arm-main.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 42,48,60,174,283,289
+.github/workflows/par-script.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 44,50,60,116,168,181,188,236,287,291,338
+.github/workflows/abi-report.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 49
+.github/workflows/README.md
+  s_36d4c2a1504613::t_da01a8ded9ae4d 48
+.github/workflows/clang-format-fix.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 26-28
+.github/workflows/vfd-ros3.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 107,132,265,290
+.github/workflows/vol_async.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 28,33
+.github/workflows/vol_log.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 29,62
+HDF5Examples/config/cmake/runExecute.cmake
+  s_36d4c2a1504613::t_da01a8ded9ae4d 168-172,247,249-251,259
+.github/workflows/markdown-link-check.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 18-21
+.github/workflows/main-par-spc.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 29
+.github/workflows/maven-build-test.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 71,85,146,149,196,199
+.github/workflows/signed-plugins.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 79
+.github/workflows/vol_adios2.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 30,70,77,100
+.github/workflows/vol_cache.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 41,46
+config/cmake/runExecute.cmake
+  s_36d4c2a1504613::t_da01a8ded9ae4d 173-178,252,254-256,264
+java/hdf/hdf5lib/VLDataConverter.java
+  s_36d4c2a1504613::t_da01a8ded9ae4d 72-146,1106-1108,1325-1350,1955-2233,2285-2287,2292-2294,2296-2298,2322-2326,2405-2407,2409-2430,2433-2436,2438-2439,2445-2449
+.github/workflows/h5py.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 17
+.github/workflows/main-par.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 29
+java/src-jni/jni/h5dImp.c
+  s_36d4c2a1504613::t_da01a8ded9ae4d 179-180,194-200,232-233,269,283-289,317-318,449-453,506-510,563-567,620-624,677-681,734-738,791-795,851-855,905-909,962-966,1027-1031,1099-1103,1162,1182-1188,1201,1230,1251-1256,1263-1271,1316-1320,1547-1551,1799-1802
+  s_36d4c2a1504613::t_655023408dbeef 1803
+.github/workflows/test-maven-deployment.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 34
+java/src-jni/jni/h5util.h
+  s_36d4c2a1504613::t_da01a8ded9ae4d 49,51-84
+java/src-jni/test/TestH5Drw.java
+  s_36d4c2a1504613::t_da01a8ded9ae4d 383
+src/H5Gname.c
+  s_36d4c2a1504613::t_da01a8ded9ae4d 1043
+.github/workflows/linkchecker.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 21
+.github/workflows/freebsd.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 52,55
+.github/workflows/codeql.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 23,67,90,177,205,254
+.github/workflows/review-checklist.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 48,51
+java/hdf/hdf5lib/H5.java
+  s_36d4c2a1504613::t_da01a8ded9ae4d 5744-5767,5790-5793
+.github/workflows/nvhpc.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 29,79-81
+.github/workflows/release-files.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 46,223,264
+.github/workflows/testxpr.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 29
+.github/workflows/vfd-subfiling.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 71
+java/src-jni/jni/h5aImp.c
+  s_36d4c2a1504613::t_da01a8ded9ae4d 155-156,170-175,204-205,249-250,264-269,297-298,355-360,431-435,495-500,571-574,634-639,710-713,773-778,849-853,913-918,988-992,1054-1057,1123-1126,1185,1203-1208,1220,1258,1279-1284,1291-1299,1347-1351,1557-1561,1797-1799
+  s_36d4c2a1504613::t_db2ab92304bf15 1800
+.github/workflows/aocc.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 30,48,55,57,63,67,74-76
+.github/workflows/build_mpich_source.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 33,52
+.github/workflows/maven-staging.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 89,264,270,673,686,796,799,819
+.github/workflows/scorecard.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 35,70
+src/H5Ocopy.c
+  s_36d4c2a1504613::t_da01a8ded9ae4d 1346-1347
+.github/workflows/java-implementation-test.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 123,128,156,218,324
+java/test/testfiles/JUnit-TestH5D.txt
+  s_36d4c2a1504613::t_da01a8ded9ae4d 15,17-18,21,23-24,26,29,31,33,37
+.github/workflows/clang-format-check.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 14
+.github/workflows/java-examples-maven-test.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 30,40,46,193,203,209,312,322,328
+tools/test/h5repack/CMakeTests.cmake
+  s_36d4c2a1504613::t_e007305c470469 1899-1901
+.github/workflows/daily-build.yml
+  s_36d4c2a1504613::t_da01a8ded9ae4d 42-44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "1cf4681ae4b897e8b54959170b5fabe828622738",
+  "prompts": {},
+  "sessions": {
+    "s_36d4c2a1504613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "571ac08e-3c5f-42d2-8451-cb3aa0da3d2f",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

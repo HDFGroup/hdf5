@@ -1,0 +1,22 @@
+release_docs/CHANGELOG.md
+  s_be0c66ce491337::t_06b902bc5e08dd 202-204
+hl/src/H5DS.c
+  s_be0c66ce491337::t_3160104018d4eb 2265-2267
+  s_be0c66ce491337::t_c606b8e7e1e511 2489-2492
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.10",
+  "base_commit_sha": "7b85800e9c10e313c766b3f69e06816c503fef39",
+  "prompts": {},
+  "sessions": {
+    "s_be0c66ce491337": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2d51c51f-3d97-4f34-8772-8634adf3decc",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+bin/make_vers
+  s_36d4c2a1504613::t_df4d4a13e40e43 248-249,254-256,274-280,284
+  s_36d4c2a1504613::t_a6339602351bd9 29-40
+  s_36d4c2a1504613::t_209875d70ce897 300-301,305-307,316-322
+  s_36d4c2a1504613::t_a8b70285b0340f 474-485,488-489,494-495
+  s_36d4c2a1504613::t_28694a9b67e307 381-387
+src/H5version.h
+  s_36d4c2a1504613::t_3d830467dffa82 1686-1687
+src/H5vers.txt
+  s_36d4c2a1504613::t_fc0f785b7168c7 98-109
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "da7e83c8af53e44711d977424dafe467c940e74e",
+  "prompts": {},
+  "sessions": {
+    "s_36d4c2a1504613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "571ac08e-3c5f-42d2-8451-cb3aa0da3d2f",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

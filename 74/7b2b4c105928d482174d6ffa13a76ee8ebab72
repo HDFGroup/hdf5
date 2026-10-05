@@ -1,0 +1,21 @@
+.github/scripts/review-checklist.js
+  s_91c8a7f2e383d2::t_d4f10c4ca3da26 482,484-486
+  s_91c8a7f2e383d2::t_d5d196aeb9748b 12-23,40
+  s_91c8a7f2e383d2::t_68f9780b66af86 438,440-442
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "747b2b4c105928d482174d6ffa13a76ee8ebab72",
+  "prompts": {},
+  "sessions": {
+    "s_91c8a7f2e383d2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7a4244f7-e467-4b08-9d82-d5bb37fe7582",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

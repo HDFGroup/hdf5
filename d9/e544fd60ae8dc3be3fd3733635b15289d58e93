@@ -1,0 +1,30 @@
+.github/scripts/review-checklist.test.js
+  s_f74632a87051b1::t_253b9c8a95c5fc 704-748
+  s_f74632a87051b1::t_5ef54df15163dc 17
+.github/scripts/review-checklist.js
+  s_f74632a87051b1::t_0ea4f8196c8dcb 399-414
+  s_f74632a87051b1::t_f1e0c8bd183940 1315-1316,1318,1333,1343
+  s_f74632a87051b1::t_349a86ace34892 1314
+  s_f74632a87051b1::t_739b13bda344b3 1317
+  s_f74632a87051b1::t_b9d12eabe80715 1358
+  s_f74632a87051b1::t_35af2961cb973e 5-9
+  s_f74632a87051b1::t_4832673341c5a9 1334-1342
+  s_f74632a87051b1::t_b1cac8bd1c314e 395
+  s_f74632a87051b1::t_830c8b97526cc7 1344
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "d9e544fd60ae8dc3be3fd3733635b15289d58e93",
+  "prompts": {},
+  "sessions": {
+    "s_f74632a87051b1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0229a3d-a27e-45e0-8992-c890cc1e8c52",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

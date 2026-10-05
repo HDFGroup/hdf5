@@ -1,0 +1,25 @@
+.github/workflows/bigendian.yml
+  a839c7ffb7e04232 1-67
+.github/workflows/call-workflows.yml
+  a839c7ffb7e04232 320-325
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "8cab757e11c4f477db8deb3774d5d3b1b59ac046",
+  "prompts": {
+    "a839c7ffb7e04232": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "72cacedb-db62-4030-85ad-e5815885b0c6",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "M. Scot Breitenfeld",
+      "messages": [],
+      "total_additions": 73,
+      "total_deletions": 0,
+      "accepted_lines": 73,
+      "overriden_lines": 0
+    }
+  }
+}

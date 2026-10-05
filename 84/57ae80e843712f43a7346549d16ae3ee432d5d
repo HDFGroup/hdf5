@@ -1,0 +1,37 @@
+.github/workflows/update-progress.yml
+  s_23748e5524d22e::t_44657bb97d3561 177-179
+  s_23748e5524d22e::t_9ce2e8a80df819 128-130,145-147,151
+.github/workflows/update-badge.sh
+  s_23748e5524d22e::t_f884f8ad845a97 390-392,399,417-419
+  s_23748e5524d22e::t_4a05d97759be01 23-25
+  s_23748e5524d22e::t_22d72d3ab6f578 208-209,212-216,239-262,264
+  s_23748e5524d22e::t_6f3a3b3d0116f2 272-273,275,282,288,305-307
+  s_23748e5524d22e::t_135a912e262882 339,341,348,357
+  s_23748e5524d22e::t_19ccc58367a852 263
+  s_23748e5524d22e::t_13fac03c08c074 265
+.github/workflows/update-progress.py
+  s_23748e5524d22e::t_2d90d8264d6ce2 370-404
+  s_23748e5524d22e::t_cb782fc3cc315e 494
+  s_23748e5524d22e::t_808893694e8988 328-369,405
+  s_23748e5524d22e::t_80edbefb7c0368 426-433
+  s_23748e5524d22e::t_3db04a48641254 434-438
+  s_23748e5524d22e::t_8e59f3e07722fd 439-456,460
+README.md
+  s_23748e5524d22e::t_1a533984582e06 104-105,115-118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "8457ae80e843712f43a7346549d16ae3ee432d5d",
+  "prompts": {},
+  "sessions": {
+    "s_23748e5524d22e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a7c00bb2-aa9f-4c1e-823a-875748c20153",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

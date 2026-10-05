@@ -1,0 +1,47 @@
+tools/test/h5repack/expected/h5repack_layout.h5-plugin_test_cfg_legacy.ddl
+  s_36d4c2a1504613::t_3c2347f8b7b82c 15,39,63,87,111,135,159
+tools/test/h5dump/expected/tscaleoffset.ddl
+  s_36d4c2a1504613::t_5e146ca4ecc2a5 12
+tools/test/h5repack/expected/deflate_limit.h5repack_layout.h5.ddl
+  s_36d4c2a1504613::t_4005495286160d 13,35,57,79,101,123,145
+tools/test/h5dump/expected/tuserfilter.ddl
+  s_36d4c2a1504613::t_4005495286160d 14
+docs/doxygen/dox/DDLBNF220.dox
+  s_36d4c2a1504613::t_29ea6382fba1b4 495,500-503
+  s_36d4c2a1504613::t_badbedd0fa2b72 504
+tools/lib/h5tools_dump.c
+  s_36d4c2a1504613::t_6d260e72b824a2 3197
+  s_36d4c2a1504613::t_5240b79b9710f9 3183-3184
+  s_36d4c2a1504613::t_00afbd8e398b70 3612-3616,3622
+  s_36d4c2a1504613::t_39d891091307d7 3605-3606
+tools/test/h5dump/expected/tallfilters.ddl
+  s_36d4c2a1504613::t_4005495286160d 11,20,25,32
+tools/test/h5repack/expected/h5repack_layout.h5-plugin_test_cfg.ddl
+  s_36d4c2a1504613::t_3c2347f8b7b82c 15,39,63,87,111,135,159
+tools/test/h5dump/expected/tshuffle.ddl
+  s_36d4c2a1504613::t_4005495286160d 11
+tools/test/h5dump/expected/tdeflate.ddl
+  s_36d4c2a1504613::t_4005495286160d 12
+tools/test/h5dump/expected/tnbit.ddl
+  s_36d4c2a1504613::t_4005495286160d 11
+tools/test/h5repack/expected/h5repack_layout.h5-plugin_test.ddl
+  s_36d4c2a1504613::t_4005495286160d 15,38,61,84,107,130,153
+tools/test/h5dump/expected/tszip.ddl
+  s_36d4c2a1504613::t_4005495286160d 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "489ddd5e8ad91d8a246835cb2742763381daa2c1",
+  "prompts": {},
+  "sessions": {
+    "s_36d4c2a1504613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "571ac08e-3c5f-42d2-8451-cb3aa0da3d2f",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

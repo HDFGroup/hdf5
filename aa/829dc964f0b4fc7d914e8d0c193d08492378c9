@@ -1,0 +1,21 @@
+config/cmake/FindMFU.cmake
+  s_bda03f0bdb94f6::t_645ce1ba85db77 88
+CMakeBuildOptions.cmake
+  s_bda03f0bdb94f6::t_d6a439b1c8e8c7 76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "aa829dc964f0b4fc7d914e8d0c193d08492378c9",
+  "prompts": {},
+  "sessions": {
+    "s_bda03f0bdb94f6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e2e73d8d-9d6f-4ae7-a3ce-74a372a3d187",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

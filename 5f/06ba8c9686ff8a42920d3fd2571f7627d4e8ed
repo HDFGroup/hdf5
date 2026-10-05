@@ -1,0 +1,36 @@
+tools/test/h5repack/expected/plugin_test_cfg_legacy.h5repack_layout.h5.tst
+  s_36d4c2a1504613::t_446344ab2c99f5 1-15
+tools/test/h5repack/expected/h5repack_layout.h5-plugin_test_cfg.ddl
+  s_36d4c2a1504613::t_446344ab2c99f5 1-172
+tools/test/h5repack/dynlib_rpk3.c
+  s_36d4c2a1504613::t_231523511d7b37 1-147
+tools/test/h5repack/CMakeTests.cmake
+  s_36d4c2a1504613::t_bb939cb4d3b831 1895-1896,1899-1901
+  s_36d4c2a1504613::t_d9cfed2e419956 1897-1898
+tools/test/h5repack/CMakeLists.txt
+  s_36d4c2a1504613::t_bc9b3817705eb0 59-61
+  s_36d4c2a1504613::t_b4be804fdddfab 75-80,87
+  s_36d4c2a1504613::t_41b590cd43613d 111-118,125
+src/H5Pocpl.c
+  s_36d4c2a1504613::t_92c0d5249789f4 1980-1986
+tools/test/h5repack/expected/plugin_test_cfg.h5repack_layout.h5.tst
+  s_36d4c2a1504613::t_446344ab2c99f5 1-15
+tools/test/h5repack/expected/h5repack_layout.h5-plugin_test_cfg_legacy.ddl
+  s_36d4c2a1504613::t_446344ab2c99f5 1-172
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "5f06ba8c9686ff8a42920d3fd2571f7627d4e8ed",
+  "prompts": {},
+  "sessions": {
+    "s_36d4c2a1504613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "571ac08e-3c5f-42d2-8451-cb3aa0da3d2f",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

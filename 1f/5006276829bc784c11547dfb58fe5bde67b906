@@ -1,0 +1,20 @@
+test/vfd_swmr_remove_reader.c
+  s_3d1f3a5f3e2e0f::t_9edf850319a623 142-150
+  s_3d1f3a5f3e2e0f::t_2184227d51a45e 151-168,171-172
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "1f5006276829bc784c11547dfb58fe5bde67b906",
+  "prompts": {},
+  "sessions": {
+    "s_3d1f3a5f3e2e0f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d8a40291-4152-420b-a644-1054e20cbf50",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

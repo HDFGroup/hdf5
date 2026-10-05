@@ -1,0 +1,19 @@
+docs/doxygen/dox/sw_changes_2.x.dox
+  s_2bbd722882a805::t_9740f2be39e10e 18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "1ad574c308a7cb5397bab392c0971c8484d638ee",
+  "prompts": {},
+  "sessions": {
+    "s_2bbd722882a805": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3d678a63-9c9d-4851-ade7-65919c36a2ef",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

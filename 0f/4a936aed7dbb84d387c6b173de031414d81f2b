@@ -1,0 +1,27 @@
+src/H5Cpkg.h
+  s_4d065b9b1ecf39::t_d68962a202f2d2 854-861
+  s_4d065b9b1ecf39::t_0c168c45d84472 894-904
+src/H5Centry.c
+  s_4d065b9b1ecf39::t_333b54524e10c8 1997-2002
+  s_4d065b9b1ecf39::t_f4f1b1484cfc51 1337-1342
+  s_4d065b9b1ecf39::t_ed2747f4af9ca2 2282-2287
+  s_4d065b9b1ecf39::t_1979b5102f4eec 2751-2752
+.gitignore
+  s_4d065b9b1ecf39::t_b10a38a0cee04b 37-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "0f4a936aed7dbb84d387c6b173de031414d81f2b",
+  "prompts": {},
+  "sessions": {
+    "s_4d065b9b1ecf39": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c819b12b-44e0-4488-9345-af8a1a0dab3a",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

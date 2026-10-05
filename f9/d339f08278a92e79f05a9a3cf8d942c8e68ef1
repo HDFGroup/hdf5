@@ -1,0 +1,277 @@
+.github/scripts/review-checklist.js
+  s_2dcd805dd0ed75::t_dc87f24550318f 47-116,180-183,192-197,199,205-229,301-306,320-325,332,334-335,338-341,344-364,394-446,524-529,552-561,609,640-651,653-657,662-671,674-682,693-698,746-756,761-789,811-821,824-825,832-838,849-868,873-880,884-894,944,961-966,970-979,1109-1114,1118,1139-1155,1200-1201,1208-1213,1215-1216,1222-1224,1239-1257
+.github/scripts/review-checklist.test.js
+  s_2dcd805dd0ed75::t_704ee41b56bb6c 11-12,14,19-22,258-337,585-701,768-800,1138-1216,1224-1226,1229,1255,1257-1502,1553-1645
+.github/workflows/abi-report.yml
+  s_2dcd805dd0ed75::t_baf9c5256c8bab 22-23,25,42-56,60,62,65,103,113,166-194,206-207,223-224
+.github/workflows/analysis.yml
+  s_2dcd805dd0ed75::t_e9fa366ef56c7f 36,138,241,344
+.github/workflows/aocc.yml
+  s_2dcd805dd0ed75::t_be2a79e68074bd 30
+.github/workflows/arm-main.yml
+  s_2dcd805dd0ed75::t_540404244a5798 42,48,60,174,283,289
+.github/workflows/bintest.yml
+  s_2dcd805dd0ed75::t_ba1d388ad6e438 39,122,176,244
+.github/workflows/build-aws-c-s3.yml
+  s_2dcd805dd0ed75::t_66911e5cea527e 55,62,88,95,102,109,116,123,130,137,144,151
+.github/workflows/build_mpich_source.yml
+  s_2dcd805dd0ed75::t_d13fd66916a361 33
+.github/workflows/build_openmpi_source.yml
+  s_2dcd805dd0ed75::t_b5f2fd6486d14f 33
+.github/workflows/call-workflows.yml
+  s_2dcd805dd0ed75::t_dba77af9ba3e19 223-226,237-240
+.github/workflows/clang-format-check.yml
+  s_2dcd805dd0ed75::t_e64eaba980c421 14-16
+.github/workflows/clang-format-fix.yml
+  s_2dcd805dd0ed75::t_51dcd8be88b0e9 26
+.github/workflows/codeql.yml
+  s_2dcd805dd0ed75::t_f70d328c20063f 23-26,28,70-72,95,182,210,259
+.github/workflows/codespell.yml
+  s_2dcd805dd0ed75::t_f27b702d0cd479 13-14
+.github/workflows/cross-compile.yml
+  s_2dcd805dd0ed75::t_2030eaea3eddd3 39
+.github/workflows/ctest.yml
+  s_2dcd805dd0ed75::t_0773826cd9fe87 97,109,228,243,254,266,417,425,437,543-557,611,645,833,935,941,1087
+.github/workflows/cve.yml
+  s_2dcd805dd0ed75::t_1fad800a897287 39,44-45,47-48,53,55
+.github/workflows/cygwin.yml
+  s_2dcd805dd0ed75::t_5016c0467e19b8 39
+.github/workflows/daily-build.yml
+  s_2dcd805dd0ed75::t_67eb3e11294365 42,57-60,64-65,67,69-72,172-173
+.github/workflows/daily-schedule.yml
+  s_2dcd805dd0ed75::t_fe5295fe39e8e9 30-31,33,38,40,52,59-61,63
+.github/workflows/dev.yml
+  s_2dcd805dd0ed75::t_2491fb611756cc 33,112,191,278
+.github/workflows/freebsd.yml
+  s_2dcd805dd0ed75::t_980a38de851475 52-54,57
+.github/workflows/h5py.yml
+  s_2dcd805dd0ed75::t_7d30256691af41 17,19
+.github/workflows/hdfeos5.yml
+  s_2dcd805dd0ed75::t_3d78eb71afe68c 37-39,42-43,45-46
+.github/workflows/i386.yml
+  s_2dcd805dd0ed75::t_2835634198e0da 24
+.github/workflows/intel.yml
+  s_2dcd805dd0ed75::t_f2738397a317a1 24,77,90
+.github/workflows/java-examples-maven-test.yml
+  s_2dcd805dd0ed75::t_7801ffdae4bf0f 30,40,193,203,312,322
+.github/workflows/java-implementation-test.yml
+  s_2dcd805dd0ed75::t_eb5b10c4db3f5b 58-60,126,129,132,222-224
+.github/workflows/julia.yml
+  s_2dcd805dd0ed75::t_de1fa1ae897be0 20,67,81
+.github/workflows/linkchecker.yml
+  s_2dcd805dd0ed75::t_01e8fd2a4f2b70 21-23,45,87-88,93,95
+.github/workflows/macos-26-matrix.yml
+  s_2dcd805dd0ed75::t_e7ac9e57dd0dbc 8-10,195-197,200-201,203-204
+.github/workflows/main-par-spc.yml
+  s_2dcd805dd0ed75::t_5695d9e335e151 29
+.github/workflows/main-par.yml
+  s_2dcd805dd0ed75::t_53730a2d88f851 29
+.github/workflows/main-spc.yml
+  s_2dcd805dd0ed75::t_e81cfc9712415a 32,96,155,214,271,328,386,402,442,503,559,615,666
+.github/workflows/main-static.yml
+  s_2dcd805dd0ed75::t_8fe3dfc27d94b8 126,145
+.github/workflows/main.yml
+  s_2dcd805dd0ed75::t_566d7e45d2a9fd 153,172,185
+.github/workflows/markdown-link-check.yml
+  s_2dcd805dd0ed75::t_79fbfc1de1343e 18
+.github/workflows/maven-build-test.yml
+  s_2dcd805dd0ed75::t_5f51557ee0ea9c 70-72,86,121,127-129,136-138,144-146,153-155,158,170-171,174-175,177,183,188-189,203-205,212-214,217,229-230,233-234,236,242,247-248,270,287
+.github/workflows/maven-deploy.yml
+  s_2dcd805dd0ed75::t_6e2b0bf74dd71b 272
+.github/workflows/maven-staging.yml
+  s_2dcd805dd0ed75::t_7817f181346398 87,90,94-95,112-114,265,271-273,286-288,291,310,314,319-320,333,336,340,346-348,351,367-368,395-397,400,402,460,467,474,483,490,494,499-500,502-503,518-520,527,529,644-645,649,656-658,660-661,697,710,713,750-751,754,823-825,828,860-861,863,869-870,1052,1073-1074,1082
+.github/workflows/msys2.yml
+  s_2dcd805dd0ed75::t_2852290d1d62c3 59
+.github/workflows/netcdf.yml
+  s_2dcd805dd0ed75::t_298d16f6eaf4e3 46-48,51-52,54-55,85,87
+.github/workflows/nvhpc.yml
+  s_2dcd805dd0ed75::t_cbd3ffb0aea6ce 26-35,39
+.github/workflows/openbsd.yml
+  s_2dcd805dd0ed75::t_ec7e2b0a0a2b06 52-54,57
+.github/workflows/par-script.yml
+  s_2dcd805dd0ed75::t_cb1aa76c479a21 44,50,60,168,181,188,287,291
+.github/workflows/par-source.yml
+  s_2dcd805dd0ed75::t_1cc1b19aea5d39 55,83,174,200
+.github/workflows/publish-branch.yml
+  s_2dcd805dd0ed75::t_69332612d981d7 25,29,37
+.github/workflows/publish-release.yml
+  s_2dcd805dd0ed75::t_4900dd3eca976c 31-43,49,53,57,65,69,88,90,101,114-115,124,138,144-145,148,152,158-164,172,175-177,188,190-191,203,224-225,239,254,257-259,263-265,275-276,286-289,291,295-298
+.github/workflows/release-files.yml
+  s_2dcd805dd0ed75::t_8fbe2a6a53f67c 46,223,264
+.github/workflows/release.yml
+  s_2dcd805dd0ed75::t_3297affb828c0d 85-86
+.github/workflows/review-checklist-test.yml
+  s_2dcd805dd0ed75::t_664db975bc5e30 22
+.github/workflows/review-checklist.yml
+  s_2dcd805dd0ed75::t_360806fa25e99d 49
+.github/workflows/scorecard.yml
+  s_2dcd805dd0ed75::t_cd2b91c180918b 35,40,70
+.github/workflows/script.yml
+  s_2dcd805dd0ed75::t_8c5d8055bedc58 40,51,154,164,252,263,275,372,382,490,505,511,613,630,722,738
+.github/workflows/signed-plugins.yml
+  s_2dcd805dd0ed75::t_4f86fb09629fe4 79-81
+.github/workflows/stale-pr-policy.yml
+  s_2dcd805dd0ed75::t_6795248a65f17c 30,67,89
+.github/workflows/tarball.yml
+  s_2dcd805dd0ed75::t_9b56b8c91a91a6 51,95
+.github/workflows/test-binary-installation.yml
+  s_2dcd805dd0ed75::t_c779263dcdbb2c 74,76,81,279,281,286
+.github/workflows/test-maven-deployment.yml
+  s_2dcd805dd0ed75::t_cb3f3d8d223b7b 31-33,36-38,41-42,47,136-138,158-160
+.github/workflows/test-maven-packages.yml
+  s_2dcd805dd0ed75::t_7b096bb98fccba 61-63,66,295-296,299-300,302,332-334,337,567-568,571-572,574
+.github/workflows/testxpr.yml
+  s_2dcd805dd0ed75::t_1410fbab0d4bca 29
+.github/workflows/update-badge.sh
+  s_2dcd805dd0ed75::t_a83d8f0d519ea5 18-21,23-25,43-46,145-168,173-174,178-179,185-186,197-264,269-273,275,279-282,285-288,296-307,336-339,341,345-348,354-357,377-384,387-392,396-399,408-419
+.github/workflows/update-progress.py
+  s_2dcd805dd0ed75::t_e029ab8221080a 31-32,134,138-139,145-148,216-223,236,256-257,263,268,271,286-289,328-405,426-456,460,471-474,482-485,490-491,494
+.github/workflows/update-progress.yml
+  s_2dcd805dd0ed75::t_714fb4f7e801c2 16-19,21,120,125-128,130-132,142-145,147-149,152-153,174-177,179-181,199-200,213-214,219-221
+.github/workflows/vfd-ros3.yml
+  s_2dcd805dd0ed75::t_08690138a53293 107,132,141-144,153,270,295,304-307,316
+.github/workflows/vfd-subfiling.yml
+  s_2dcd805dd0ed75::t_d766e4c8eb3c66 71
+.github/workflows/vol_adios2.yml
+  s_2dcd805dd0ed75::t_bfdca7cf7c04fd 30,77
+.github/workflows/vol_async.yml
+  s_2dcd805dd0ed75::t_202d98c625940c 28,33
+.github/workflows/vol_cache.yml
+  s_2dcd805dd0ed75::t_437f706bfe4434 41,46
+.github/workflows/vol_ext_passthru.yml
+  s_2dcd805dd0ed75::t_6412c3b223161a 28,33
+.github/workflows/vol_log.yml
+  s_2dcd805dd0ed75::t_179a6a9aaa9f52 29,62
+.github/workflows/vol_rest.yml
+  s_2dcd805dd0ed75::t_ea80736715109a 46,81,86
+.github/workflows/zizmor.yml
+  s_2dcd805dd0ed75::t_46143eca8785ba 24,50
+CMakeInstallation.cmake
+  s_2dcd805dd0ed75::t_2d098e5bf8fe4d 162
+CMakeLists.txt
+  s_2dcd805dd0ed75::t_c01760be40af3f 1184-1210
+HDF5Examples/config/HDFMacros.cmake
+  s_2dcd805dd0ed75::t_f6fbbaea537cbe 93-97,99-100,122-124
+README.md
+  s_2dcd805dd0ed75::t_a6d30e61b6f7e9 95-96,100-105,110-118
+c++/src/H5StrType.cpp
+  s_2dcd805dd0ed75::t_98dc7e1d8584f8 197
+c++/src/H5VarLenType.cpp
+  s_2dcd805dd0ed75::t_c86d1dc404d560 141
+config/ConfigureChecks.cmake
+  s_2dcd805dd0ed75::t_b26b900ea56cc6 748,784-807
+config/HDFMacros.cmake
+  s_2dcd805dd0ed75::t_ca2f490b3dac49 429-436,461-463
+config/flags/HDFCompilerCXXFlags.cmake
+  s_2dcd805dd0ed75::t_a9c67186db2049 93-100
+config/flags/HDFCompilerFlags.cmake
+  s_2dcd805dd0ed75::t_89c0e348eaef34 99-106
+docs/INSTALL_CMake_options.md
+  s_2dcd805dd0ed75::t_c36693cd1ffeee 91,97,318
+docs/doxygen/CMakeLists.txt
+  s_2dcd805dd0ed75::t_394b18b454d725 29,67-71,73
+docs/doxygen/Doxyfile.in
+  s_2dcd805dd0ed75::t_d33eb5588b4756 190-195
+docs/doxygen/dox/H5.format.4.0.dox
+  s_2dcd805dd0ed75::t_88cb7fc81a5047 38,50,76,209,798-799,1911,1914,1920,1966,1969,1975,2001,2004,2010,2139,2156-2157,4218,4236-4239,4242,4310,4399-4401,4423,4443,4556-4839,4954-4956,5219-5220,5255-5256,5279-5281,5288-5289,5330-5335,5477-5482,5485,5509,5526-5530,5555,5561,5564,5570,5573,5579,5600-5601,5610-5613,5616-5620,5623,5625-5626,5647,5653,5656,5662,5681-5682,5713-5716,5719-5723,5727,5841,5863-5866,5891,6468,6484,6487,6490,6493,6518-6520,6528-6532,6549,6555,6589,6595,6747,6789,6968,6974,6977,6983,6998,7001-7004,7007,7010-7011,7033,7039,7054,7057-7060,7144,7168-7170,7209,7227-7229,7470,7712,7863,7924,7927,7933,7982-7983,7985-7989,8023-8027,8029-8031,8037-8039,8215,8218,8224,8253-8254,8377,8381,8384,8390,8440-8441,8444-8445,8738,8787,8896,8917-8919,9293,9475-9476,9493,9497,9501,9505,9509,9513-9514,9518,9522-9523,9527,9585,9593,9597,9601,9605,9609,9627,9631,9635,9639,9643,9693,9788,9804-9806,9856,10021,10080,10155,10228,10303,10409,10468,10820-10893,10946-10948,11102-11103,11110-11111,12597,12603,12606,12612,12624,12630,12633,12639,12655,12662-12664,12667-12669,12693,12696,12699,12702,12708,12711,12714,12717,12747,12750-12756,12808,12829,12832,12835,12838,12844,12847,12850,12853,12864-12871,12888,12894,12897,12903,12915,12921,12924,12930,12942-12945,12948-12951
+docs/doxygen/dox/hdf5_2x.dox
+  s_2dcd805dd0ed75::t_58c3043c0c0074 30,58,74,76,80-83,85-89,101,109,112,118-129
+docs/doxygen/dox/sw_changes_2.x.dox
+  s_2dcd805dd0ed75::t_6bd8af50ac9715 18-19,23,31-54,57
+hl/src/H5TBpublic.h
+  s_2dcd805dd0ed75::t_e52a8eb53b399c 142,162-167,190,205-208,223,237-240,257,272-275,295,310-313,335,350-353,383-386,421-424,442,456-459,581-584
+java/jtest/TestH5Affm.java
+  s_2dcd805dd0ed75::t_190f46f7770b17 1030,1038,1041
+java/src-jni/jni/h5util.c
+  s_2dcd805dd0ed75::t_c6b6682d25d9be 319,323,2072,4294,4358,4606,4689,4919,5000,5148,5254,5449
+java/src-jni/test/TestH5D.java
+  s_2dcd805dd0ed75::t_85282130504a0c 1627-1697
+java/src-jni/test/testfiles/JUnit-TestH5D.txt
+  s_2dcd805dd0ed75::t_5420f86e863333 20,38
+release_docs/CHANGELOG.md
+  s_2dcd805dd0ed75::t_91866c1a05d19f 1,25,46,179-181,183,233-236,239,241-245
+release_docs/HISTORY-2.X.md
+  s_2dcd805dd0ed75::t_406827e523e7e3 6-7,13-450
+release_docs/img/release-schedule.plantuml
+  s_2dcd805dd0ed75::t_2c9ef2efe50660 9,11,14-22,24-25,27
+src/H5A.c
+  s_2dcd805dd0ed75::t_3c278a1ef76e58 1872-1873,1963-1964
+src/H5Dchunk.c
+  s_2dcd805dd0ed75::t_b793f6fffab17c 2904-2906,3021-3026,3119,3124-3154,3156-3157,3159-3161,3163-3178,3180-3185,3193-3197,3251-3255,3365,3380-3381,3401-3402,3405-3408,3508-3512,3549-3550,3594,3602,3606-3609,3632-3636,4819,4822-4828,5709,5815,5819-5820,6094,6096,6098-6100,6142-6143,6173,6180-6183,6186-6190,6193
+src/H5Dpublic.h
+  s_2dcd805dd0ed75::t_55cee4c4f78937 867-871,877-879,897,904-912,927-935,1064,1068-1072,1075-1077,1080-1086,1090-1093,1095,1099-1111,1115-1118,1124-1134
+src/H5FDmpio.c
+  s_2dcd805dd0ed75::t_c3d76f492522fb 1486-1491,1701-1706,2298-2303,3266-3271,3583-3588
+src/H5FDonion.c
+  s_2dcd805dd0ed75::t_c5d66ac19b963e 1157
+src/H5FDros3.c
+  s_2dcd805dd0ed75::t_cdca9d1740d17a 1153
+src/H5Fsuper_cache.c
+  s_2dcd805dd0ed75::t_543596a915077d 524-525,528-529,531-534,536-537,539-544,546-553,606-607,609-612,614-615,617-622,624-639
+src/H5Ppublic.h
+  s_2dcd805dd0ed75::t_1311dcb8c7a7eb 5893-5903
+src/H5Sall.c
+  s_2dcd805dd0ed75::t_977218bbfcc2bf 639-640
+src/H5Shyper.c
+  s_2dcd805dd0ed75::t_85a8697a91150a 3993-4000,4275-4276,4342-4344
+src/H5Snone.c
+  s_2dcd805dd0ed75::t_7125457595a5ef 582-586,593-599
+src/H5Spoint.c
+  s_2dcd805dd0ed75::t_8fd5d141d2c210 1379-1380
+src/H5Sselect.c
+  s_2dcd805dd0ed75::t_9cc019dcaa90ef 529-530,540-541,551,556,560,564,568
+src/H5VM.c
+  s_2dcd805dd0ed75::t_9ede627e660e1a 1311
+src/H5Z.c
+  s_2dcd805dd0ed75::t_9134d500c02036 964-976,994-1006,1654-1664,1679-1682,1703,1748-1758,1775-1778,1829
+src/H5Znbit.c
+  s_2dcd805dd0ed75::t_09b0db5f6d6194 973
+src/H5Zscaleoffset.c
+  s_2dcd805dd0ed75::t_5973acf2baee74 1326-1327
+src/H5public.h
+  s_2dcd805dd0ed75::t_db1198f11eac9b 68
+test/dsets.c
+  s_2dcd805dd0ed75::t_f585889d0a8e43 84,171,366-420,18794,18936-19359,19600-19604
+test/ros3.c
+  s_2dcd805dd0ed75::t_fbe8409fe88cef 1191-1200
+test/tattr.c
+  s_2dcd805dd0ed75::t_21335ed389a3d2 7611-7618
+test/titerate.c
+  s_2dcd805dd0ed75::t_3452884ac721b7 542-549
+test/tselect.c
+  s_2dcd805dd0ed75::t_5ecb836df955a2 16057-16192,16399-16404
+tools/lib/h5tools_dump.c
+  s_2dcd805dd0ed75::t_63de14161d9782 4738-4747
+tools/src/h5ls/h5ls.c
+  s_2dcd805dd0ed75::t_a3983059440c55 1550-1564,1752-1766
+tools/test/h5dump/CMakeTests.cmake
+  s_2dcd805dd0ed75::t_4c34def7cafa00 145,335,484,599,625,801,1025-1034,1166
+tools/test/h5dump/expected/tintascii.ddl
+  s_2dcd805dd0ed75::t_035e2dec11fd0c 1-20
+tools/test/h5dump/h5dumpgentest.c
+  s_2dcd805dd0ed75::t_6d0d986e47c11a 139-140,15184-15217
+tools/test/h5dump/h5dumpgentest.h
+  s_2dcd805dd0ed75::t_4a7b6e1b0ac5f7 135-136
+tools/test/h5gentest.c
+  s_2dcd805dd0ed75::t_30a48c1a508aa3 274-275,468-469
+tools/test/h5ls/CMakeTests.cmake
+  s_2dcd805dd0ed75::t_af9fd4bda20891 53,122,564-566
+tools/test/h5ls/expected/tintascii.ls
+  s_2dcd805dd0ed75::t_9ddaab30b91c50 1-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "f9d339f08278a92e79f05a9a3cf8d942c8e68ef1",
+  "prompts": {},
+  "sessions": {
+    "s_2dcd805dd0ed75": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0737e9df-fe8a-4672-8e5d-7c47d4d16c5e",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

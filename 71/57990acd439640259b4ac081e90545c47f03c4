@@ -1,0 +1,36 @@
+tools/test/h5repack/CMakeTests.cmake
+  s_20826e5e1f133b::t_b78ec712878dc4 181
+  s_20826e5e1f133b::t_c82294f6a180a7 161
+  s_20826e5e1f133b::t_95fe63e342418c 1911-1914
+tools/lib/h5tools_dump.c
+  s_20826e5e1f133b::t_aa831ae3924341 3207-3211
+  s_20826e5e1f133b::t_561b29730d34a2 3412-3415
+  s_20826e5e1f133b::t_2ff2eb53bb7943 3852-3853
+  s_20826e5e1f133b::t_23d95325c2fff2 3180-3206,3212-3375,3377-3383,3387-3394,3399-3411,3416-3422,3435,3442-3451
+  s_20826e5e1f133b::t_0dedc6132a3a55 3847-3849
+  s_20826e5e1f133b::t_2997b90ebddfb8 3868-3874
+  s_20826e5e1f133b::t_db8da35f75789c 3376,3384-3386,3395-3398
+  s_20826e5e1f133b::t_f8a97704a073cd 3929,3955,3979,4052,4071,4103,4156
+tools/test/h5repack/expected/h5repack_layout.h5-plugin_test_cfg.ddl
+  s_20826e5e1f133b::t_2e75c9359b2fb4 16,41,66,91,116,141,166
+tools/test/h5repack/expected/h5repack_layout.h5-plugin_test_cfg_pow2.ddl
+  s_20826e5e1f133b::t_ba195fd1812de4 1-179
+tools/test/h5repack/expected/plugin_test_cfg_pow2.h5repack_layout.h5.tst
+  s_20826e5e1f133b::t_99c491d034b652 1-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "7157990acd439640259b4ac081e90545c47f03c4",
+  "prompts": {},
+  "sessions": {
+    "s_20826e5e1f133b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c55da2fe-40e3-428f-b80e-21f8ef01b5c5",
+        "model": "claude-opus-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

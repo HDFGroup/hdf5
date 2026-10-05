@@ -1,0 +1,21 @@
+.github/workflows/test-maven-packages.yml
+  s_9627dd5cd50267::t_f974c6a01273a7 327-330
+  s_9627dd5cd50267::t_1431f8b6b840b6 598
+  s_9627dd5cd50267::t_d96a6e869a7803 57-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "cc1208226ddd9eb8f600d8af9ae7aa06a1989ca1",
+  "prompts": {},
+  "sessions": {
+    "s_9627dd5cd50267": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e022fc47-19f4-4391-89cc-6b1bc72d67d6",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

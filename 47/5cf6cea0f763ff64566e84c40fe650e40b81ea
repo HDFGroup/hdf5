@@ -1,0 +1,19 @@
+src/H5Zscaleoffset.c
+  s_accb2a49e6a13a::t_3fe54796c77ee6 1189-1190
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "475cf6cea0f763ff64566e84c40fe650e40b81ea",
+  "prompts": {},
+  "sessions": {
+    "s_accb2a49e6a13a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7df68f01-0a6e-4ee4-aaab-0b4f89f8b299",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

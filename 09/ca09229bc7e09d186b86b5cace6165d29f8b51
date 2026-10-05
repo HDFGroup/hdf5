@@ -1,0 +1,23 @@
+.github/workflows/call-workflows.yml
+  a839c7ffb7e04232 323
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "09ca09229bc7e09d186b86b5cace6165d29f8b51",
+  "prompts": {
+    "a839c7ffb7e04232": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "72cacedb-db62-4030-85ad-e5815885b0c6",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "M. Scot Breitenfeld",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 0,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}

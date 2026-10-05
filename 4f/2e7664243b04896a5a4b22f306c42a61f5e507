@@ -1,0 +1,55 @@
+src/H5Zszip.c
+  s_36d4c2a1504613::t_21ccc14dff7247 81
+tools/src/h5repack/h5repack_parse.c
+  s_36d4c2a1504613::t_35e3b8122cb37d 47,258
+src/H5Zscaleoffset.c
+  s_36d4c2a1504613::t_a3cfca732d7494 782
+src/H5Z.c
+  s_36d4c2a1504613::t_4b4ee257da26eb 337,397,447,1493
+src/H5Zdevelop.h
+  s_36d4c2a1504613::t_86ba1d26a70ac8 287-289
+tools/src/h5repack/h5repack_filters.c
+  s_36d4c2a1504613::t_e92732acde2440 366-369
+testpar/t_filters_parallel.c
+  s_36d4c2a1504613::t_35e3b8122cb37d 10254
+  s_36d4c2a1504613::t_b5a3b049f983fd 10701
+  s_36d4c2a1504613::t_4b4ee257da26eb 10104,10173,10196
+java/src-jni/jni/h5zImp.c
+  s_36d4c2a1504613::t_4b4ee257da26eb 120
+src/H5Pocpl.c
+  s_36d4c2a1504613::t_4b4ee257da26eb 1768,1770,1772,1800,1814,1817
+test/tfilter2.c
+  s_36d4c2a1504613::t_e063b4b8cc531e 1078-1079
+  s_36d4c2a1504613::t_2e49af5ed11811 27,588,1017,1689
+  s_36d4c2a1504613::t_35e3b8122cb37d 1966,2042
+  s_36d4c2a1504613::t_33eb3edc63dc3e 14
+  s_36d4c2a1504613::t_5ee906b01d383c 144-146
+  s_36d4c2a1504613::t_4b4ee257da26eb 553,555
+src/H5Zconfig.c
+  s_36d4c2a1504613::t_d8e326cca16e6b 395
+  s_36d4c2a1504613::t_f1a647e5ba4d79 463-465
+  s_36d4c2a1504613::t_4b4ee257da26eb 14,67,88,102,120,221,226,231-233,270,311,338,392,432,436,508,543,676
+tools/src/h5repack/h5repack.h
+  s_36d4c2a1504613::t_932e66106a0686 304
+src/H5Zprivate.h
+  s_36d4c2a1504613::t_9dcdebb650f814 80
+src/H5Ppublic.h
+  s_36d4c2a1504613::t_35e3b8122cb37d 853,3651,4812,4844,7138,7142-7143,9230,10061
+  s_36d4c2a1504613::t_4b4ee257da26eb 2770,2777,2829,2833,2837,2839,2843,6380,6416,6454,6479,7052
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "4f2e7664243b04896a5a4b22f306c42a61f5e507",
+  "prompts": {},
+  "sessions": {
+    "s_36d4c2a1504613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "571ac08e-3c5f-42d2-8451-cb3aa0da3d2f",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

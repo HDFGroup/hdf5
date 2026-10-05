@@ -1,0 +1,30 @@
+java/hdf/hdf5lib/structs/H5Z_class_info_t.java
+  s_36d4c2a1504613::t_1a385e83ad3b6b 36,38-43
+src/H5Z.c
+  s_36d4c2a1504613::t_5d26927783c7bf 2053-2056
+java/src-jni/jni/h5zImp.c
+  s_36d4c2a1504613::t_d0552ed6a75723 91
+  s_36d4c2a1504613::t_f7697e0e4ce5c6 122
+java/hdf/hdf5lib/H5.java
+  s_36d4c2a1504613::t_b94c736222609d 23823,23828,23830-23835,23844-23847,23860
+java/src-jni/hdf/hdf5lib/structs/H5Z_class_info_t.java
+  s_36d4c2a1504613::t_1a385e83ad3b6b 36,38-43
+src/H5Zpublic.h
+  s_36d4c2a1504613::t_b17ee362128b85 307
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "97cec8d9889addedd3d369f4a8196c2f1f6dfa70",
+  "prompts": {},
+  "sessions": {
+    "s_36d4c2a1504613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "571ac08e-3c5f-42d2-8451-cb3aa0da3d2f",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

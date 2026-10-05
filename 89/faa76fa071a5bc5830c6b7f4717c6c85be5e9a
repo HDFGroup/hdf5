@@ -1,0 +1,19 @@
+hl/src/H5IM.c
+  s_be0c66ce491337::t_07e940afc06033 1013-1014
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.10",
+  "base_commit_sha": "89faa76fa071a5bc5830c6b7f4717c6c85be5e9a",
+  "prompts": {},
+  "sessions": {
+    "s_be0c66ce491337": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2d51c51f-3d97-4f34-8772-8634adf3decc",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

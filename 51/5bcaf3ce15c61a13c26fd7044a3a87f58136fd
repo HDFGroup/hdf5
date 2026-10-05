@@ -1,0 +1,43 @@
+.github/scripts/review-checklist.test.js
+  s_4bcecc2c7d334b::t_309e78717d5bd7 11-12
+  s_4bcecc2c7d334b::t_e86b4c224260dd 256-334
+  s_4bcecc2c7d334b::t_e183d44e27532f 689-698
+  s_4bcecc2c7d334b::t_be505ac4a847d7 766-797
+  s_4bcecc2c7d334b::t_018992d28ca2c8 582-637
+  s_4bcecc2c7d334b::t_64bfa968e01d9b 638-688
+  s_4bcecc2c7d334b::t_21ff4580fcc579 255,765,1183-1275
+  s_4bcecc2c7d334b::t_4d7a4163c0c071 18-19
+.github/scripts/review-checklist.js
+  s_4bcecc2c7d334b::t_8b98d84e7875fd 509
+  s_4bcecc2c7d334b::t_c9d2e968e1552c 884-888,892
+  s_4bcecc2c7d334b::t_54b2d8e58accc3 262-263
+  s_4bcecc2c7d334b::t_4038d5547d0fb3 974,981-985,987,993-994
+  s_4bcecc2c7d334b::t_2421b3289524c4 1009-1013,1016-1020,1023-1024
+  s_4bcecc2c7d334b::t_d7a39b815bd49a 1021-1022
+  s_4bcecc2c7d334b::t_8b4986893af98f 1014-1015
+  s_4bcecc2c7d334b::t_e5cca7f63f4aff 559,913-929
+  s_4bcecc2c7d334b::t_48c9e5f941c568 47-77
+  s_4bcecc2c7d334b::t_6647b25f0d5911 141-144,153-158,160,166-189
+  s_4bcecc2c7d334b::t_5413a96b1bd895 540-545,547-551,556-558
+  s_4bcecc2c7d334b::t_eb7cacf78f079b 264-267,281-286,293,295-296,299-302,305,307-311,322-325
+  s_4bcecc2c7d334b::t_f185f0c13516be 432-435
+  s_4bcecc2c7d334b::t_0b4599f1163661 306,312-321
+  s_4bcecc2c7d334b::t_ae310194dc9951 569,617,622,662,750,754
+  s_4bcecc2c7d334b::t_27fe64ea068f56 190
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "515bcaf3ce15c61a13c26fd7044a3a87f58136fd",
+  "prompts": {},
+  "sessions": {
+    "s_4bcecc2c7d334b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1552b6c-475c-4408-8d45-b73a99ea6048",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}

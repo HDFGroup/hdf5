@@ -1,0 +1,21 @@
+README.md
+  s_23748e5524d22e::t_dcc3f5a9d4e49e 95-96
+release_docs/img/release-schedule.plantuml
+  s_23748e5524d22e::t_9db472b6ba5c46 39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "3971327b00e6a898e27169aa906555d057032837",
+  "prompts": {},
+  "sessions": {
+    "s_23748e5524d22e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a7c00bb2-aa9f-4c1e-823a-875748c20153",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
