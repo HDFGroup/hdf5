@@ -723,6 +723,10 @@ of the library for reading or writing the actual data.</td>
 <td>Sets/gets a flag allowing the library to modify the contents of the write buffer.</td>
 </tr>
 <tr>
+<td>#H5Pset_io_threads/#H5Pget_io_threads</td>
+<td>Sets/gets a flag allowing the library to use the global thread pool to accelerate I/O.</td>
+</tr>
+<tr>
 <td>H5Pset_preserve/H5Pget_preserve</td>
 <td>No longer available, deprecated as it no longer has any effect.</td>
 </tr>

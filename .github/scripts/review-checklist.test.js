@@ -14,6 +14,7 @@ const {
   resolveAreaPicks,
   stillEngagedAssignees,
   buildBody,
+  computeAssigneePing,
   parseExcluded,
   serializeExcluded,
   withExcluded,
@@ -701,6 +702,51 @@ test('buildBody: a manually-added CODEOWNER who is no longer in confirmedRequest
 });
 
 // ----------------------------------------------------------------
+// computeAssigneePing
+// ----------------------------------------------------------------
+
+const ALL_DONE_BODY = '> ✅ All areas have been signed off.';
+const NOT_DONE_BODY = '- [ ] **src** — @alice';
+
+test('computeAssigneePing: all-done with no prior comment pings the assignee', () => {
+  const ping = computeAssigneePing(ALL_DONE_BODY, undefined, { assignees: [{ login: 'alice' }] });
+  assert.ok(ping);
+  assert.ok(ping.includes('@alice'));
+});
+
+test('computeAssigneePing: all-done transitioning from a not-yet-done prior comment pings', () => {
+  const existingComment = { body: NOT_DONE_BODY };
+  const ping = computeAssigneePing(ALL_DONE_BODY, existingComment, { assignees: [{ login: 'alice' }] });
+  assert.ok(ping);
+  assert.ok(ping.includes('@alice'));
+});
+
+test('computeAssigneePing: still all-done from an already-done prior comment does not re-ping', () => {
+  const existingComment = { body: ALL_DONE_BODY };
+  const ping = computeAssigneePing(ALL_DONE_BODY, existingComment, { assignees: [{ login: 'alice' }] });
+  assert.strictEqual(ping, null);
+});
+
+test('computeAssigneePing: not all done never pings, regardless of prior comment', () => {
+  assert.strictEqual(computeAssigneePing(NOT_DONE_BODY, undefined, { assignees: [{ login: 'alice' }] }), null);
+  const existingComment = { body: NOT_DONE_BODY };
+  assert.strictEqual(computeAssigneePing(NOT_DONE_BODY, existingComment, { assignees: [{ login: 'alice' }] }), null);
+});
+
+test('computeAssigneePing: all-done with no PR assignees does not ping', () => {
+  const ping = computeAssigneePing(ALL_DONE_BODY, undefined, { assignees: [] });
+  assert.strictEqual(ping, null);
+});
+
+test('computeAssigneePing: mentions every assignee', () => {
+  const ping = computeAssigneePing(ALL_DONE_BODY, undefined, {
+    assignees: [{ login: 'alice' }, { login: 'bob' }],
+  });
+  assert.ok(ping.includes('@alice'));
+  assert.ok(ping.includes('@bob'));
+});
+
+// ----------------------------------------------------------------
 // parseExcluded / serializeExcluded — persisted "explicitly removed" list
 // ----------------------------------------------------------------
 
@@ -1049,7 +1095,10 @@ asyncTest('coordinateReviewers: review_requested survives the opened race and st
 
   const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
 
-  assert.strictEqual(confirmedRequested.size, 1);
+  // Must prune to the normal load-balanced pick (hyoklee) — not stick with
+  // whichever CODEOWNERS auto-assignment happened to survive as this run's
+  // review_requested event (jhendersonHDF).
+  assert.deepStrictEqual([...confirmedRequested], ['hyoklee']);
   assert.ok(github.calls.removeRequestedReviewers.length > 0);
 });
 
@@ -1594,6 +1643,29 @@ function makeManualAddContext(senderType, login) {
     },
   };
 }
+
+asyncTest('coordinateReviewers: review_requested surviving the FIRST coordination pass does NOT mark the reviewer manually-added', async () => {
+  // The exact false positive this guards against: GitHub's own CODEOWNERS
+  // auto-assignment fires review_requested (sender type "User", the PR's own
+  // opener) for every owner of a touched area at PR-open time. If the
+  // cancel-in-progress race lets one of those survive as this run's event
+  // instead of "opened" itself (hasExistingComment: false — no checklist
+  // posted yet), it must not be mistaken for a human's deliberate pick, or
+  // every CODEOWNER — including a catch-all "*" owner — ends up permanently
+  // flagged "manually added, approval required" on every PR that happens to
+  // touch their area.
+  const github = makeGithubMock();
+  const args = makeCoordinateBaseArgs({ hasExistingComment: false });
+
+  const { manuallyAdded, confirmedRequested } = await coordinateReviewers(
+    github, makeManualAddContext('User', 'jhendersonHDF'), makeCore(), args
+  );
+
+  assert.ok(!manuallyAdded.has('jhendersonHDF'));
+  // And the sticky-assignment short-circuit must not have hijacked the
+  // area's pick either — it still falls to the normal load-balanced owner.
+  assert.deepStrictEqual([...confirmedRequested], ['hyoklee']);
+});
 
 asyncTest('coordinateReviewers: human review_requested for a CODEOWNER marks them manually-added', async () => {
   const github = makeGithubMock();
