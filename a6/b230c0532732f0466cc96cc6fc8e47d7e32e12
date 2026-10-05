@@ -1,0 +1,27 @@
+src/H5Opline.c
+  s_de8bab5ceb8651::t_103ceba7daec5d 249,277,314,437,444,839-840
+src/H5Oprivate.h
+  s_de8bab5ceb8651::t_aff3ded6827cdb 758-759,763,769-770
+test/gen_filters.c
+  s_de8bab5ceb8651::t_9a1e38c3bec836 228-232,285
+test/tfilter2.c
+  s_de8bab5ceb8651::t_ca23f34b4a6f7b 2845,2916-2917,2973-2975,3167-3168,3527,3585,3596
+testpar/t_filters_parallel.c
+  s_de8bab5ceb8651::t_277619f91d4017 10043,10129-10130
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a6b230c0532732f0466cc96cc6fc8e47d7e32e12",
+  "prompts": {},
+  "sessions": {
+    "s_de8bab5ceb8651": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "61b7cbaa-0fce-4a5e-aedc-c5a4411acfe3",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
