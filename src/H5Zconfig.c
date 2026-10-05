@@ -649,9 +649,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Z__no_params_set_config
  *
- * Purpose:     Shared set_config implementation for filters that accept no
- *              user parameters (shuffle, fletcher32, nbit).  Sets
- *              *cd_nelmts = 0 and rejects any non-empty params.
+ * Purpose:     set_config callback for filters that take no parameters.
  *
  * Return:      Non-negative on success / Negative on failure
  *-------------------------------------------------------------------------

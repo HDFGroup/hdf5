@@ -2803,44 +2803,18 @@ H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int fl
  *          If \p params is \c NULL or \c params->type is #H5Z_PARAMS_CDVALUES, the
  *          function behaves identically to H5Pset_filter().
  *
- *          If \p params->type is #H5Z_PARAMS_STRING, the library locates or loads
- *          the filter plugin, validates that it exposes a \c set_config callback,
- *          and invokes that callback to translate the parameter string into
- *          \c cd_values.  The filter plugin must be available at call time; if it
- *          cannot be found, the function fails with H5E_NOFILTER.
+ *          If \p params->type is #H5Z_PARAMS_STRING, the filter's \c set_config
+ *          callback converts the string to \c cd_values.  The filter must be
+ *          available at call time, or the function fails with H5E_NOFILTER.  An
+ *          empty or \c NULL string is passed to \c set_config as \c NULL; a
+ *          filter without \c set_config accepts only an empty string.
  *
- *          <b>Empty-input handling:</b> If \c params->u.str is \c NULL or an
- *          empty string \c "", the filter plugin is still located so that
- *          its class record can be inspected.  If the filter has no
- *          \c set_config callback, it is appended with \c cd_nelmts = 0 and
- *          no callback runs.  If the filter does have a \c set_config
- *          callback, the callback is invoked with \c params = NULL;
- *          parameterless or fully-defaulted filters can return success,
- *          while filters that strictly require parameters (e.g.,
- *          Scale-Offset) can return H5E_BADVALUE so the failure surfaces at
- *          \c H5Pappend_filter time rather than later in \c H5Dcreate or I/O.
+ *          A non-empty string is also stored, in canonical form, on the
+ *          pipeline entry and returned by H5Pget_filter_params_by_idx().  It
+ *          is kept in memory only and not written to the file.
  *
- *          Unknown keys in a \c #H5Z_PARAMS_STRING string are rejected by
- *          built-in filters and should be rejected by third-party plugins.
- *
- *          <b>Stored configuration string:</b> a non-empty
- *          #H5Z_PARAMS_STRING string is canonicalized (outer braces
- *          stripped, hex-float literals rewritten to the shortest decimal
- *          that round-trips) and stored on the pipeline entry alongside the
- *          \c cd_values produced by \c set_config.  The stored string is
- *          carried by copies of the property list and by H5Pencode() /
- *          H5Pdecode(), and is returned by H5Pget_filter_params_by_idx().
- *          It is held in memory only: it is not written to the file when a
- *          dataset is created, so a pipeline read back from a file carries
- *          \c cd_values alone.
- *
- *          H5Pappend_filter() stamps the filter's canonical name into the
- *          pipeline entry so it can be displayed without the plugin loaded;
- *          H5Pset_filter() does not.  A property list built with each
- *          function can therefore compare unequal under H5Pequal() even
- *          with identical \p filter and \p flags, because H5Pequal()
- *          compares the name slot.  Compare \p id and \p cd_values via
- *          H5Pget_filter2() instead when testing I/O-behavior equivalence.
+ *          H5Pappend_filter() also records the filter's name, which
+ *          H5Pset_filter() does not, so H5Pequal() treats the two as different.
  *
  * \anchor subsec_filter_param_string
  * <b>Parameter string syntax (#H5Z_PARAMS_STRING)</b>
@@ -2891,37 +2865,14 @@ H5_DLL herr_t H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int
  * \return \herr_t
  *
  * \details H5Pmodify_filter_by_idx() replaces the configuration of the filter
- *          already at position \p filter_idx in \p plist_id's pipeline, leaving
- *          its position and filter ID unchanged.  \p params is interpreted
- *          exactly as H5Pappend_filter() interprets it:
+ *          at \p filter_idx, keeping its position in the pipeline.  \p params
+ *          is interpreted as in H5Pappend_filter().  A #H5Z_PARAMS_STRING
+ *          update replaces the stored parameter string; a #H5Z_PARAMS_CDVALUES
+ *          update clears it, as H5Pmodify_filter() does.
  *
- *          - #H5Z_PARAMS_STRING - the string is validated and resolved through
- *            the filter's \c set_config callback, and both the resulting
- *            \c cd_values and the stored configuration string are replaced, so
- *            the entry keeps a stored string.
- *          - #H5Z_PARAMS_CDVALUES - the \c cd_values array is replaced and any
- *            stored string is cleared, matching H5Pmodify_filter().
- *
- *          Use this in preference to H5Pmodify_filter() when the entry was
- *          configured with a parameter string.  H5Pmodify_filter() takes only
- *          raw \c cd_values and therefore always clears the stored string,
- *          so H5Pget_filter_params_by_idx() falls back to \c get_config
- *          reconstruction for that entry.  Removing the filter with
- *          H5Premove_filter() and appending it again with H5Pappend_filter()
- *          would move the entry to the end of the pipeline and so change the
- *          filter order.
- *
- *          Entries are addressed by index rather than by filter ID because a
- *          pipeline may legally contain the same filter ID more than once,
- *          where an ID-addressed modify silently edits the first match.  The
- *          index is the same one H5Pget_filter2() and
- *          H5Pget_filter_params_by_idx() use, so the index a caller reads a
- *          configuration with is the index it writes one back with.
- *
- *          It is an error if \p filter_idx is out of range, if \p params uses
- *          #H5Z_PARAMS_STRING for a filter whose registered class does not
- *          implement \c set_config, or if \c set_config rejects the string.  On
- *          any failure the entry is left exactly as it was.
+ *          The index is the one used by H5Pget_filter2(), so this works when
+ *          the same filter appears more than once.  On failure the entry is
+ *          unchanged.
  *
  * \since 3.0.0
  */
@@ -2940,41 +2891,19 @@ H5_DLL herr_t H5Pmodify_filter_by_idx(hid_t plist_id, unsigned filter_idx, unsig
  *
  * \return \herr_t
  *
- * \details H5Pget_filter_params_by_idx() returns the human-readable parameter
- *          string for the filter at pipeline index \p idx, from the first of
- *          three sources that applies:
+ * \details H5Pget_filter_params_by_idx() returns the parameter string for
+ *          the filter at \p idx, from the first of these that applies:
  *
- *          -# If the entry carries a stored configuration string (set by
- *             H5Pappend_filter() or H5Pmodify_filter_by_idx() with
- *             #H5Z_PARAMS_STRING), that string is returned verbatim -- the
- *             filter's \c get_config callback is not called and the plugin
- *             need not be loaded.
- *          -# Otherwise, if the filter's registered class has a \c get_config
- *             callback, that callback is invoked to reconstruct a string from
- *             the entry's raw \c cd_values.  Because \c cd_values encoding can
- *             be lossy (for example, a \c double quantised into integer
- *             slots), the reconstructed string is not guaranteed to be
- *             identical to any string a caller originally set.
- *          -# Otherwise, a fallback string of the form
- *             \c "cd_values=v0:v1:..." is produced directly from the raw
- *             \c cd_values array.
+ *          -# The string stored by H5Pappend_filter() or
+ *             H5Pmodify_filter_by_idx(), returned as is.
+ *          -# The filter's \c get_config callback, which reconstructs a
+ *             string from \c cd_values.  This may differ from the string
+ *             originally set.
+ *          -# \c "cd_values=v0:v1:...".
  *
- *          Stored configuration strings are not written to the file, so for
- *          the creation property list of a dataset opened from a file the
- *          result always comes from the second or third source.
- *
- *          Call with \p params_buf NULL to obtain the required character count
- *          (excluding NUL) in \p params_len, then allocate \p params_len + 1
- *          bytes and call again with \p params_buf_size = \p params_len + 1.
- *
- * \note    If \p params_buf is non-NULL but \p params_buf_size is smaller
- *          than the required size, \p params_buf is still filled with a
- *          truncated, NUL-terminated string (in case the caller wants the
- *          partial content), \p params_len (if non-NULL) is still set to the
- *          true, untruncated required length, and the function fails with a
- *          minor error code of \c H5E_OVERFLOW. Check the return value, not
- *          just whether \p params_buf came back non-empty, to detect
- *          truncation.
+ *          Call with \p params_buf NULL to get the length in \p params_len.
+ *          If \p params_buf is too small, it receives a truncated string and
+ *          the function fails with \c H5E_OVERFLOW.
  *
  * \since 3.0.0
  */

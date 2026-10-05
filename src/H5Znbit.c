@@ -912,7 +912,6 @@ H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     cd_values[1] = (unsigned)need_not_compress;
 
     /* Modify the filter's parameters for this dataset */
-    /* keep_config = true: set_local only refines cd_values, not the stored config string */
     if (H5P_modify_filter(dcpl_plist, H5Z_FILTER_NBIT, flags, cd_values_actual_nparms, true, cd_values) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local nbit parameters");
 

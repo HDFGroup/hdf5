@@ -1310,10 +1310,9 @@ done:
  *
  * Purpose:  Modify filter parameters for specified pipeline.
  *
- *           keep_config preserves the entry's stored configuration string.
- *           A set_local callback refining cd_values for a particular dataset
- *           passes true: the string still describes what the user asked for.
- *           A caller replacing cd_values outright passes false.
+ *           KEEP_CONFIG keeps the stored parameter string; set_local
+ *           callbacks pass true since they only specialize cd_values for
+ *           a dataset.
  *
  * Return:   Non-negative on success
  *           Negative on failure
@@ -1346,11 +1345,6 @@ H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t
     pline->filter[idx].flags     = flags;
     pline->filter[idx].cd_nelmts = cd_nelmts;
 
-    /* Replacing the raw cd_values invalidates any stored configuration
-     * string; drop it so introspection falls back to the filter's get_config
-     * callback.  Unless keep_config: a set_local callback is specializing
-     * cd_values for this dataset, which does not change the configuration
-     * the user asked for, so the string is kept. */
     if (!keep_config)
         pline->filter[idx].config = (char *)H5MM_xfree(pline->filter[idx].config);
 
@@ -1456,7 +1450,7 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_ne
     pline->filter[idx].flags     = flags;
     pline->filter[idx].name      = NULL; /*we'll pick it up later*/
     pline->filter[idx].cd_nelmts = cd_nelmts;
-    pline->filter[idx].config    = NULL; /*set by H5Pappend_filter or plist decode*/
+    pline->filter[idx].config    = NULL;
     if (cd_nelmts > 0) {
         size_t i; /* Local index variable */
 

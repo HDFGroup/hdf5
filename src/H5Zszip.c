@@ -353,7 +353,6 @@ H5Z__set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     } /* end switch */
 
     /* Modify the filter's parameters for this dataset */
-    /* keep_config = true: set_local only refines cd_values, not the stored config string */
     if (H5P_modify_filter(dcpl_plist, H5Z_FILTER_SZIP, flags, H5Z_SZIP_TOTAL_NPARMS, true, cd_values) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local szip parameters");
 

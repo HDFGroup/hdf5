@@ -594,17 +594,8 @@ error:
 }
 
 /* -----------------------------------------------------------------------
- * Modify-filter pattern test
- *
- * The raw cd_values pattern for updating a filter's parameters on a copied
- * DCPL is:
- *   1. H5Pget_filter_by_id2 -> retrieve current cd_values
- *   2. Mutate cd_values in place
- *   3. H5Pmodify_filter -> write back
- *
- * This test verifies that a filter appended via the string API produces
- * cd_values that round-trip correctly through this pattern.  The string
- * form, H5Pmodify_filter_by_idx, is covered by test_modify_filter_by_idx.
+ * cd_values from the string API work with H5Pget_filter_by_id2 +
+ * H5Pmodify_filter
  * ---------------------------------------------------------------------- */
 
 static int
@@ -953,9 +944,7 @@ error:
 }
 
 /* -----------------------------------------------------------------------
- * scale_factor upper bound: a value that fits unsigned but flips sign when
- * later re-cast to int (H5Z__filter_scaleoffset) must be rejected here,
- * not silently substituted with 0 downstream.
+ * scaleoffset rejects a scale_factor above INT_MAX
  * ---------------------------------------------------------------------- */
 static int
 test_scaleoffset_scale_factor_upper_bound(void)
@@ -968,9 +957,6 @@ test_scaleoffset_scale_factor_upper_bound(void)
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR;
     {
-        /* INT_MAX + 1 = 2147483648: valid as unsigned, but negative when
-         * re-cast to int -- exactly the value that used to be silently
-         * reset to 0 downstream instead of being rejected here. */
         H5Z_params_t _p = H5Z_PARAMS_STR("scale_type = \"int\", scale_factor = 2147483648");
         H5E_BEGIN_TRY
         {
@@ -1156,9 +1142,8 @@ error:
  * Additional coverage tests
  * ---------------------------------------------------------------------- */
 
-/* 1. Empty-input handling: when set_config is present it is invoked with
- *    params=NULL so the plugin can fail-fast. When set_config is absent,
- *    the filter is appended with cd_nelmts=0 and no callback runs. */
+/* 1. An empty string reaches set_config as NULL; with no set_config it is
+ *    accepted */
 #define FASTPATH_FILTER_ID 514
 #define NOCFG_FILTER_ID    518
 
@@ -1217,17 +1202,14 @@ test_empty_string_fast_path(void)
         NULL,                 /* can_apply       */
         NULL,                 /* set_local       */
         fastpath_filter_func, /* filter          */
-        NULL,                 /* set_config (intentionally absent) */
+        NULL,                 /* set_config      */
         NULL,                 /* get_config      */
         NULL,                 /* description     */
     };
     hid_t  dcpl = H5I_INVALID_HID;
     herr_t ret;
 
-    /* NULL passed as the 4th argument means "no params" via the CDVALUES
-     * path; the filter is appended with cd_nelmts = 0 and set_config is
-     * not consulted (the STRING path is only entered when the caller
-     * supplies an H5Z_params_t with type == H5Z_PARAMS_STRING). */
+    /* NULL params does not call set_config */
     TESTING("H5Pappend_filter: NULL params (4th arg) takes CDVALUES path; set_config not called");
     if (H5Zregister(&fp_cls) < 0)
         TEST_ERROR;
@@ -1898,16 +1880,8 @@ error:
 }
 
 /* -----------------------------------------------------------------------
- * 8c. Canonicalization can grow a parameter string past H5Z_CONFIG_STRING_MAX
- * even when the caller's raw input is well under it -- hex-float rewriting
- * expands "0x1.0001p0" (10 bytes) to "1.0000152587890625" (18 bytes): the
- * canonical form is the shortest decimal that round-trips
- * (H5Z__format_double_canonical()), so a value whose mantissa doesn't line
- * up with a short decimal, not any short hex-float token, is what still
- * forces close to the full DBL_DECIMAL_DIG-17 digits.  The stored string is
- * the canonical form, and H5Z_CONFIG_STRING_MAX bounds the stored string, so
- * H5Pappend_filter must check the canonicalized length, not only the raw
- * input's.
+ * 8c. H5Z_CONFIG_STRING_MAX applies to the canonical string, which can be
+ * longer than the input ("0x1.0001p0" becomes "1.0000152587890625")
  * ---------------------------------------------------------------------- */
 
 #define GROWTH_FILTER_ID 535
@@ -1926,9 +1900,7 @@ static herr_t
 growth_set_config(const char H5_ATTR_UNUSED *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts,
                   unsigned H5_ATTR_UNUSED cd_values[], size_t H5_ATTR_UNUSED cd_values_size)
 {
-    /* Ignores params entirely -- any syntactically valid TOML is "accepted",
-     * so the test below is free to pack the string with as many distinct
-     * keys as needed without tripping a per-key allowlist. */
+    /* Accepts any keys */
     *cd_nelmts = 0;
     return SUCCEED;
 }
@@ -1966,13 +1938,7 @@ test_config_string_canonicalization_growth(void)
     }
     raw[0] = '\0';
 
-    /* Pack short hex-float fields ("aN=0x1.0001p0,") up to just under the
-     * raw sanity ceiling below -- each field individually is tiny, but every
-     * "0x1.0001p0" the canonicalizer sees becomes an 18-byte decimal literal
-     * (its mantissa doesn't line up with a short decimal, so the shortest
-     * round-trip form -- H5Z__format_double_canonical() -- still needs all
-     * 17 significant digits), so packing close to the raw ceiling in
-     * 14-15-byte fields canonicalizes to well over the full budget. */
+    /* Input under the limit whose canonical form is over it */
     for (n = 0; pos < H5Z_CONFIG_STRING_MAX * 3 / 4 - 128; n++) {
         char field[32];
         int  flen = snprintf(field, sizeof(field), "a%u=0x1.0001p0,", n);
@@ -2397,10 +2363,8 @@ error:
 /* -----------------------------------------------------------------------
  * Configuration strings held in property lists
  *
- * This filter's stored parameter string ("level=N", no spaces) differs
- * from its get_config reconstruction ("level = N", with spaces) so tests
- * can tell whether a returned string came from the stored string or from
- * the get_config fallback.
+ * get_config adds spaces ("level = N"), so its output can be told apart from
+ * a stored "level=N".
  * ---------------------------------------------------------------------- */
 
 #define CFGSTR_FILTER_ID 531
@@ -2630,10 +2594,8 @@ test_config_string_plist(hid_t fapl)
     }
     PASSED();
 
-    /* Dataset creation succeeds with a string-carrying DCPL at the default
-     * library version bounds; the string is not written to the file, so the
-     * reopened dataset's DCPL reports the get_config reconstruction of the
-     * stored cd_values */
+    /* The string is not written to the file, so a reopened dataset reports
+     * get_config's output */
     TESTING("config string: not written to the file; reopen falls back to get_config");
     if ((dcpl = cfgstr_make_dcpl("level=7")) < 0)
         TEST_ERROR;
@@ -2684,18 +2646,8 @@ error:
 }
 
 /* -----------------------------------------------------------------------
- * Corrupted config_len in an H5Pencode()/H5Pdecode() buffer must be
- * rejected cleanly, not overflow
- *
- * H5P__ocrt_pipeline_dec() (src/H5Pocpl.c) decodes config_len from a
- * caller-supplied H5Pdecode() buffer -- a buffer that crosses MPI
- * broadcasts and VOL-connector wire protocols in real deployments, with no
- * checksum protection.  This test hand-patches a legitimately-encoded
- * H5Pencode() buffer's config_len field to a value that exceeds
- * H5Z_CONFIG_STRING_MAX and confirms H5Pdecode() rejects it instead of
- * driving an oversized allocation and read.  It also patches the
- * pipeline property's extended-encoding version byte to an unknown value
- * and confirms H5Pdecode() rejects that too.
+ * H5Pdecode() rejects an oversized config_len and an unknown encoding
+ * version
  * ---------------------------------------------------------------------- */
 static int
 test_config_string_pdecode_corrupted(void)
@@ -2713,13 +2665,8 @@ test_config_string_pdecode_corrupted(void)
     if (H5Zregister(&cfgstr_cls) < 0)
         TEST_ERROR;
 
-    /* A config string long enough (>= 256 bytes) that H5VM_limit_enc_size()
-     * encodes its length in 2 bytes rather than 1 -- so patching the value
-     * to something over H5Z_CONFIG_STRING_MAX (4096, still < 65536) doesn't
-     * also require changing the number of length-prefix bytes and shifting
-     * the rest of the buffer.  "level=9," first so cfg_ondisk_set_config
-     * still accepts it; the rest is inert padding via distinct keys (a
-     * duplicate key would be a TOML parse error). */
+    /* At least 256 bytes, so the encoded length takes 2 bytes and can be
+     * patched above H5Z_CONFIG_STRING_MAX in place */
     padded_len = 320;
     if (NULL == (padded = (char *)malloc(padded_len + 1)))
         TEST_ERROR;
@@ -2774,9 +2721,6 @@ test_config_string_pdecode_corrupted(void)
     }
     free(padded);
 
-    /* Patch to a value that exceeds H5Z_CONFIG_STRING_MAX (4096) but still
-     * fits the existing 2-byte field (max 65535), leaving the rest of the
-     * buffer's shape untouched. */
     {
         uint16_t bad_len = 60000;
         needle[-2]       = (uint8_t)(bad_len & 0xff);
@@ -2802,9 +2746,7 @@ test_config_string_pdecode_corrupted(void)
         TEST_ERROR;
     dcpl_dec = H5I_INVALID_HID;
 
-    /* The pipeline property's value follows its NUL-terminated name and, in
-     * the extended form, starts with a zero marker byte and a version byte.
-     * An unknown version must be rejected. */
+    /* The extended form starts with a zero byte, then the version */
     needle = NULL;
     for (i = 0; i + 8 <= enc_size; i++) {
         if (memcmp((uint8_t *)enc_buf + i, "pline", 6) == 0) {
@@ -2850,16 +2792,7 @@ error:
 /* -----------------------------------------------------------------------
  * Canonicalization of the stored configuration string
  *
- * The stored string is normalized into a valid TOML v1.0.0 document:
- * optional outer braces are stripped, and C99 hex-float literals are
- * rewritten to the shortest bit-exact decimal (up to DBL_DECIMAL_DIG == 17
- * significant digits).  Neither the braced form nor a hex-float literal is
- * accepted by a stock TOML parser, and the stored string is meant to be
- * readable by tools that are not the HDF5 library.  Both normalizations
- * preserve the value exactly.
- *
- * This filter carries a double so bit-exactness can be asserted: the
- * value is memcpy'd into cd_values rather than quantised.
+ * This filter stores its double bit-for-bit in cd_values.
  * ---------------------------------------------------------------------- */
 
 #define CANON_FILTER_ID 532
@@ -2998,12 +2931,7 @@ canon_stored_double(hid_t dcpl, double *out)
     return 0;
 }
 
-/* Construct 2^exp as an exact double via its IEEE-754 bit pattern, bypassing
- * ldexp(). Some compilers (Intel icc/icx via -fp-model=fast, NVHPC) flush
- * subnormal *results* of floating-point operations to zero by default at
- * -O2 and above; ldexp(1.0, exp) for a subnormal exp is such an operation,
- * which would silently corrupt exactly the reference values the powers-of-
- * two canonicalization test below needs to trust. */
+/* 2^exp from its bit pattern, since ldexp() can flush subnormals to zero */
 static double
 pow2_exact(int exp)
 {
@@ -3101,27 +3029,15 @@ test_config_canonicalization(void)
     dcpl = H5I_INVALID_HID;
     PASSED();
 
-    /* --- canon-09: the canonical form is a fixed point.
-     *
-     * The stored string is an INPUT to set_config, not only a display
-     * artifact: the stored bytes are always valid set_config input, so a
-     * caller may retrieve a configuration and re-apply it.  Re-canonicalising
-     * an already canonical string must therefore reproduce the identical
-     * bytes -- it has no outer braces and no hex-float tokens left to
-     * rewrite -- so re-application cannot drift.                          --- */
+    /* --- canon-09: re-applying a stored string reproduces it exactly --- */
     TESTING("canonicalization: stored form is a fixed point");
     {
-        /* The getter truncates silently into an undersized buffer but always
-         * reports the full length in plen, so every read below is checked
-         * against plen -- a truncated compare must not be able to pass. */
+        /* Check plen too, so a truncated read cannot pass */
         char s1[128];
         char s2[128];
         char s3[128];
 
-        /* 2^-36, the case raised on HDFGroup/hdf5#6153: zfp's fixed-accuracy
-         * mode derives minexp via frexp and so rounds the requested tolerance
-         * DOWN to the next integer power of two, which is why a user writes
-         * the exponent exactly rather than in decimal. */
+        /* 2^-36, from issue #6153 (a zfp tolerance) */
         if ((dcpl = canon_make_dcpl("{ rate = 0x1p-36 }")) < 0)
             TEST_ERROR;
         if (H5Pget_filter_params_by_idx(dcpl, 0, s1, sizeof(s1), &plen) < 0)
@@ -3168,32 +3084,11 @@ test_config_canonicalization(void)
     }
     PASSED();
 
-    /* --- canon-10: the hex-float rewrite is value-transparent at the
-     *               boundaries where it matters.
-     *
-     * A hex literal whose mantissa fits in 53 bits converts with no rounding
-     * step at all; the canonical decimal has to come back through a
-     * decimal-to-binary conversion, which C11 7.22.1.3 permits to be 1 ulp
-     * off.  That ulp is only observable where a filter quantises on a binary
-     * boundary -- and exact powers of two are both where such a boundary sits
-     * and what a user writes in hex in the first place.  Appending the hex
-     * form and appending its canonical decimal must pack the identical
-     * double.
-     *
-     * True subnormal exponents (below -1022) are probed, not assumed: some
-     * toolchains (Intel icc/icx via -fp-model=fast -- the default at -O2 and
-     * above -- NVHPC, and some Clang-on-AArch64 configurations) enable
-     * flush-to-zero mode process-wide by default, which silently corrupts
-     * subnormal results inside strtod()/printf() *in the platform's own
-     * libc*, not just in code this file compiled. Rather than guessing which
-     * toolchains that affects, round-trip a known subnormal through the same
-     * two calls H5Z__rewrite_hexfloats() itself uses and skip only the
-     * exponents that probe demonstrates are unsafe to assert on here. ---  */
+    /* --- canon-10: a power of two written in hex and as its canonical
+     * decimal give the same double.  Subnormal exponents are skipped if
+     * this platform's libc flushes them to zero. --- */
     TESTING("canonicalization: hex rewrite is value-transparent at powers of two");
     {
-        /* smallest subnormal and smallest normal at the bottom, the 2^-36
-         * case from the issue thread, and a spread out to the top of the
-         * exponent range */
         static const int exps[] = {-1074, -1073, -1022, -1021, -100, -37, -36, -35,
                                    -1,    0,     1,     52,    53,   100, 512, 1023};
         size_t           i;
@@ -3274,17 +3169,7 @@ error:
 /* -----------------------------------------------------------------------
  * set_local must not discard the stored configuration string
  *
- * scaleoffset, szip, nbit and shuffle each call H5P_modify_filter from
- * their set_local callback to specialize cd_values for the dataset's
- * datatype/dataspace. That is a library refinement, not a change to what
- * the user asked for, so the entry's stored string must survive it in the
- * dataset's creation property list.
- *
- * The input below uses compact spacing ("a=1,b=2") while scaleoffset's
- * get_config emits spaced output ("a = 1, b = 2"), so the two sources are
- * distinguishable: recovering the compact form proves the stored string
- * was used, not a reconstruction.  The string is not written to the file,
- * so after the dataset is reopened the get_config form is returned.
+ * The input is unspaced so it can be told apart from get_config's output.
  * ---------------------------------------------------------------------- */
 static int
 test_set_local_keeps_config(hid_t fapl)

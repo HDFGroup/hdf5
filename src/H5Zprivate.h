@@ -87,9 +87,6 @@ H5_DLL herr_t H5Z_register(const H5Z_class2_t *cls);
 H5_DLL herr_t H5Z_register3(const H5Z_class3_t *cls);
 H5_DLL herr_t H5Z_append(struct H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_nelmts,
                          const unsigned int cd_values[]);
-/* keep_config: true when refining cd_values for this dataset (as set_local
- * does) and the stored string still applies; false when the caller replaces
- * cd_values outright, so the string no longer describes them. */
 H5_DLL herr_t H5Z_modify(const struct H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
                          size_t cd_nelmts, bool keep_config, const unsigned int cd_values[]);
 H5_DLL herr_t H5Z_pipeline(const struct H5O_pline_t *pline, unsigned flags, hid_t dxpl_id,

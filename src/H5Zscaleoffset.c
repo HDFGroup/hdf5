@@ -814,11 +814,7 @@ H5Z__scaleoffset_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, 
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "malformed params string for scaleoffset filter");
         if (found == 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "scaleoffset filter requires 'scale_factor' parameter");
-        /* Upper bound matches what downstream code assumes: scale_factor is
-         * stored in a single cd_values slot and later re-cast to `int`
-         * (H5Z__filter_scaleoffset); a value between INT_MAX+1 and UINT_MAX
-         * would be unsigned-valid here but flip sign under that later cast,
-         * silently substituting scale_factor = 0 rather than erroring. */
+        /* H5Z__filter_scaleoffset() reads it back as an int */
         if (lval < 0 || lval > INT_MAX)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                         "scaleoffset 'scale_factor' must be in [0, %d], got %" PRId64, INT_MAX, lval);
@@ -1216,7 +1212,6 @@ H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     } /* end else */
 
     /* Modify the filter's parameters for this dataset */
-    /* keep_config = true: set_local only refines cd_values, not the stored config string */
     if (H5P_modify_filter(dcpl_plist, H5Z_FILTER_SCALEOFFSET, flags, (size_t)H5Z_SCALEOFFSET_TOTAL_NPARMS,
                           true, cd_values) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local scaleoffset parameters");

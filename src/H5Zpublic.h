@@ -325,22 +325,10 @@ typedef struct {
 } H5Z_params_t;
 
 #ifdef __cplusplus
-/* C++ does not support C99 compound literals.
-   H5Z_PARAMS_RAW can be expressed as a brace-initialized aggregate.
-   H5Z_PARAMS_STR cannot: a C++ aggregate initializer cannot carry a
-   runtime pointer argument without risking silent argument loss.
-   C++ callers MUST use the named-variable form instead:
-     H5Z_params_t p; p.type = H5Z_PARAMS_STRING; p.u.str = (s);
-   H5Z_PARAMS_STR is intentionally left undefined for C++ (rather than
-   defined as a macro that expands to a static_assert(false, ...), which
-   is a declaration, not an expression -- it would fail with a confusing
-   syntax error at the point of use, such as "H5Z_params_t p =
-   H5Z_PARAMS_STR(s);", rather than the intended diagnostic message).
-   Leaving it undefined instead gives a clean "not declared" error naming
-   the macro itself. */
+/* Without designated initializers, C++ can only initialize the union's first
+ * member, so there is no H5Z_PARAMS_STR; set p.u.str directly. */
 #define H5Z_PARAMS_RAW(n, vals) (H5Z_params_t{H5Z_PARAMS_CDVALUES, {{(n), (vals)}}})
 #else
-/* C99: compound literals with designated initializers */
 #define H5Z_PARAMS_RAW(n, vals) ((H5Z_params_t){H5Z_PARAMS_CDVALUES, {.raw = {(n), (vals)}}})
 #define H5Z_PARAMS_STR(s)       ((H5Z_params_t){H5Z_PARAMS_STRING, {.str = (s)}})
 #endif
