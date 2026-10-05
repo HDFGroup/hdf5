@@ -1,0 +1,53 @@
+test/CMakeTests.cmake
+  s_71c3fd9a1c4bf7::t_03ec7b9f083d5f 169
+src/H5Zprivate.h
+  s_71c3fd9a1c4bf7::t_50842005d8580d 63-64
+src/H5Oprivate.h
+  s_71c3fd9a1c4bf7::t_89c4b881c28c45 749-792,795
+test/gen_filters.c
+  s_71c3fd9a1c4bf7::t_6f94c49453b7e3 17,225-341,349
+src/H5Zpublic.h
+  s_71c3fd9a1c4bf7::t_3aa2d3acb4969e 93-95
+testpar/t_filters_parallel.c
+  s_71c3fd9a1c4bf7::t_50bc09360371c5 9930-10333,10719-10736
+release_docs/CHANGELOG.md
+  s_71c3fd9a1c4bf7::t_6b397e4ec0b649 98,116,122-127
+docs/doxygen/dox/H5.format.4.0.dox
+  s_71c3fd9a1c4bf7::t_0e7ce5df21eb3b 9335-9556
+  s_71c3fd9a1c4bf7::t_fcdff06451beea 9222
+test/tfilter2.c
+  s_71c3fd9a1c4bf7::t_39f8ca6b56973b 20,25,27,2599-2601,2620,2651-2657,2659-2662,2664-2667,2669-2689,2693-2696,2698-2702,2705-2707,2709-2715,2717-2718,2720,2722-2733,2735,2737-2766,2768-2771,2773-2781,2783-2791,2793-2795,2797-2801,2804-2806,2809-2829,2831-2849,2851-2855,2857,2859-2861,2863-2870,2872,2874-2906,2909-2917,2920-2965,2970-2972,2981-2982,2989,2991-3337,3339-3343,3345-3425,3427,3429-3445,3447-3756,3758-3771,3781-3783,4092,4094-4100,4176-4213,4345-4348,4412-4413,4422-4423,4617-4618,4636-4638,4647-4648,4658-4659,4741-4747,4752
+  s_71c3fd9a1c4bf7::t_9ac386878a0c7a 2621-2650,2658,2663,2668,2690-2692,2697,2703-2704,2708,2716,2719,2721,2734,2736,2767,2772,2782,2792,2796,2802-2803,2807-2808,2830,2850,2856,2858,2862,2871,2873,2907-2908,2918-2919,2966-2969,2973-2980,2983-2988,2990
+src/H5Opline.c
+  s_71c3fd9a1c4bf7::t_63bfea68ed31ef 27-29,852-855
+  s_71c3fd9a1c4bf7::t_8c1146223727d5 95,121,248-337,344,445-452
+  s_de8bab5ceb8651::t_0bee3a0c839887 453-466,550,632-641,856-876
+src/H5Ppublic.h
+  s_de8bab5ceb8651::t_90a349d5a05ca5 2814-2818,2902-2903
+src/H5Zdevelop.h
+  s_de8bab5ceb8651::t_bc2e0ac16c9061 221
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9b4141faf2ae935daf8c0ab126e07ce4d7737868",
+  "prompts": {},
+  "sessions": {
+    "s_71c3fd9a1c4bf7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4d43baf-ffcf-476b-982a-5d7c16d1debb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": null
+    },
+    "s_de8bab5ceb8651": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "61b7cbaa-0fce-4a5e-aedc-c5a4411acfe3",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
