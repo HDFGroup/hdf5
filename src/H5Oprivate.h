@@ -755,31 +755,19 @@ typedef struct H5O_ginfo_t {
  *      Blocks are written in ascending type order and a type appears at
  *      most once per entry.  Bit 0 of the flags byte marks a block as
  *      critical: a decoder that does not recognise a critical type must
- *      fail, while an unrecognised non-critical block is skipped using its
- *      length.  That rule is what lets later features add block types
- *      instead of a version 4.  The reserved byte is written as zero and
- *      ignored on read.
+ *      fail, while an unrecognised non-critical block is skipped.  The
+ *      reserved byte is written as zero and ignored on read.
  */
 #define H5O_PLINE_VERSION_3 3
 
-/* Extension block types.  Codes are assigned centrally; there is
- * deliberately no private or experimental range, since a privately chosen
- * code is indistinguishable from one assigned officially later. */
+/* Extension block types.  There is no private range. */
 #define H5O_PLINE_EXT_CONFIG 0x0001 /* canonical key=value config string   */
 #define H5O_PLINE_EXT_BLOB   0x0002 /* reserved: critical, for a filter    */
                                     /* configuration blob; this build does */
                                     /* not define it, so decoding fails    */
 
-/* Flags-byte bit allocation: bit 0 is generic, defined once and meaningful
- * for every block type; bits 1-7 are block-type-specific, their meaning
- * (if any) set by the block's own `type` field, and reserved (must be 0 at
- * encode, rejected if set at decode) for a recognized type that does not
- * define them.  A decoder must not silently accept a bit it does not
- * recognize for a block type it does recognize -- that would let a file
- * depend on behavior that this build cannot honor, without any indication
- * anything was missed.  For an unrecognized block type only bit 0 is
- * consulted (see H5O_PLINE_VERSION_3's comment above); bits 1-7 are
- * ignored. */
+/* Flags bits 1-7 are defined per block type.  An undefined bit set on a
+ * known type is an error; on an unknown type, bits 1-7 are ignored. */
 
 /* Bit 0, all block types: the block is required in order to interpret the
  * entry correctly. */

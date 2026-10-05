@@ -10040,11 +10040,7 @@ test_par_append_filter_dcpl_consistency(hid_t fapl_id)
     dset_id = H5Dopen2(group_id, "dset", H5P_DEFAULT);
     VRFY((dset_id >= 0), "H5Dopen2 succeeded");
 
-    /* Confirm the stored configuration string itself -- not just the
-     * cd_values it produced -- survived a close/reopen under this test's
-     * parallel I/O setup.  Matching cd_values would also pass for a version 2
-     * pipeline message read back through get_config, so only this check shows
-     * that the string was written in the version 3 message and decoded. */
+    /* Check the string itself, which only a version 3 message keeps */
     {
         hid_t  reopened_dcpl = H5I_INVALID_HID;
         char   stored_params[64];
@@ -10130,10 +10126,8 @@ test_par_append_filter_error_propagation(hid_t fapl_id)
 }
 
 /*
- * par-03: Rank 0 uses deflate level=9; all other ranks use level=1.
- *         The test verifies that the per-rank cd_values differ (documenting
- *         the inconsistency) and that attempting H5Dcreate collectively does
- *         not deadlock, regardless of whether the call succeeds.
+ * par-03: Rank 0 uses deflate level=9, the others level=1.  H5Dcreate must
+ *         not deadlock, whether or not it succeeds.
  */
 static void
 test_par_append_filter_rank_inconsistent_dcpl(hid_t fapl_id)

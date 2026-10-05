@@ -246,10 +246,7 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                 }
         }
 
-        /* Extension blocks, for version 3+.  Every block is skippable using
-         * its length alone, so an unrecognised non-critical type costs the
-         * decoder nothing; an unrecognised critical type is fatal.  The
-         * reserved byte is ignored. */
+        /* Extension blocks, for version 3+ */
         if (pline->version >= H5O_PLINE_VERSION_3) {
             unsigned ext_count;
 
@@ -277,9 +274,7 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                 p++; /* reserved */
                 UINT32DECODE(p, ext_length);
 
-                /* A type appears at most once per entry, so a repeated type
-                 * means the message is malformed rather than merely
-                 * unfamiliar */
+                /* A type may appear only once per entry */
                 if (ext_count > 1) {
                     if (ext_seen[ext_type / 8] & (1U << (ext_type % 8)))
                         HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL,
@@ -316,11 +311,7 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                         break;
 
                     default:
-                        /* Unknown type.  Skipping is safe only if the writer
-                         * said so; a critical block carries something this
-                         * build cannot reconstruct, and proceeding would
-                         * filter data with an incomplete configuration.
-                         * Flags bits 1-7 of an unknown type are ignored. */
+                        /* Unknown type: skip it unless it is critical */
                         if (ext_flags & H5O_PLINE_EXT_FLAG_CRITICAL)
                             HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL,
                                         "unsupported critical filter extension block "
@@ -443,18 +434,14 @@ H5O__pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
             if (filter->cd_nelmts % 2)
                 UINT32ENCODE(p, 0);
 
-        /* Extension blocks, for version 3+.  Emitted in ascending type
-         * order so that an entry encodes identically no matter what order
-         * the library populated it in. */
+        /* Extension blocks, for version 3+, in ascending type order */
         if (pline->version >= H5O_PLINE_VERSION_3) {
             size_t config_length = filter->config ? strlen(filter->config) : 0;
 
             assert(config_length <= H5Z_CONFIG_STRING_MAX);
             UINT16ENCODE(p, (unsigned)(config_length ? 1 : 0));
 
-            /* Config string: non-critical.  A reader that skips it loses
-             * introspection fidelity, not correctness -- cd_values are
-             * complete on their own.  Written without a NUL terminator. */
+            /* Non-critical, since cd_values are complete without it */
             if (config_length > 0) {
                 UINT16ENCODE(p, H5O_PLINE_EXT_CONFIG);
                 *p++ = 0; /* flags: not critical */
@@ -849,10 +836,8 @@ H5O_pline_set_version(H5F_t *f, H5O_pline_t *pline)
     /* Upgrade to the version indicated by the file's low bound if higher */
     version = MAX(pline->version, H5O_pline_ver_bounds[H5F_LOW_BOUND(f)]);
 
-    /* A filter carrying a configuration string needs the version-3 encoding
-     * to store it.  Use version 3 when the file's high bound admits it;
-     * otherwise fail, so the caller learns the string would not be stored
-     * rather than getting a file that does not return the string it set. */
+    /* A configuration string needs version 3.  Fail rather than drop it if
+     * the file's high bound is too low. */
     if (version < H5O_PLINE_VERSION_3) {
         bool have_config = false;
 
