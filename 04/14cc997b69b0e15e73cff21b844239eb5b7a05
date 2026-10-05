@@ -1,0 +1,23 @@
+.clang-tidy
+  s_de8bab5ceb8651::t_5c269832a171fb 11-18,33
+.github/workflows/analysis.yml
+  s_de8bab5ceb8651::t_c9446739de3055 510
+CMakeLists.txt
+  s_de8bab5ceb8651::t_0413638afd2d76 617
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0414cc997b69b0e15e73cff21b844239eb5b7a05",
+  "prompts": {},
+  "sessions": {
+    "s_de8bab5ceb8651": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "61b7cbaa-0fce-4a5e-aedc-c5a4411acfe3",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
