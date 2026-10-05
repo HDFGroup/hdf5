@@ -1446,14 +1446,9 @@ extern char H5_lib_vers_info_g[];
                 {
 
 /*
- * Use this macro for public API functions that may be re-entered from inside
- * a library callback that already holds the API lock (e.g. filter v3
- * H5Z_set_config_func_t callbacks invoked from H5Pappend_filter).  Performs
- * the same error-handling and function-name setup as FUNC_ENTER_API_NOINIT
- * but skips H5_API_LOCK, so the function is safe to call while another
- * public API frame already holds the lock.  Only appropriate for pure
- * helpers that touch no global library state.  Examples: H5Zconfig_get_int,
- * H5Zconfig_get_double, etc.
+ * Use this macro for public API functions that touch no library state and
+ * may be called from a callback while the API lock is held.  Same as
+ * FUNC_ENTER_API_NOINIT without taking the lock.
  */
 #define FUNC_ENTER_API_NOINIT_NOLOCK                                                                         \
     {                                                                                                        \

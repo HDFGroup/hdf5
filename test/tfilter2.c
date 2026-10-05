@@ -42,10 +42,7 @@ test_parser(void)
         TEST_ERROR;
     PASSED();
 
-    /* RFC-HDFG-2026-001 test parse-09: key lookup is case-sensitive, per TOML
-     * v1.0.0 bare-key semantics -- LEVEL and level are distinct keys.
-     * Folding key case would be the only case-insensitive comparison in an
-     * otherwise case-sensitive grammar, silently masking caller typos. */
+    /* RFC-HDFG-2026-001 parse-09: keys are case-sensitive */
     TESTING("H5Zconfig_get_int: key lookup is case-sensitive (LEVEL != level)");
     ret = H5Zconfig_get_int("LEVEL = 6", "level", &ival);
     if (ret != 0)
@@ -145,9 +142,7 @@ test_parser(void)
         TEST_ERROR;
     PASSED();
 
-    /* Dotted-key form: nested inline tables addressed through a single
-     * dotted accessor call. Both surface forms below must resolve
-     * identically. */
+    /* "a = {b = ...}" and "a.b = ..." must resolve identically */
     TESTING("H5Zconfig_get_str: dotted-key into nested table (dotted form)");
     vsz = sizeof(vbuf);
     ret = H5Zconfig_get_str("compressor.name = \"zlib\", shuffle = 1", "compressor.name", vbuf, &vsz);
@@ -237,13 +232,7 @@ test_parser(void)
         TEST_ERROR;
     PASSED();
 
-    /* The two cases above use TOML's inf/nan keywords.  These two arrive as
-     * ordinary decimal literals that strtod() cannot represent, and are the
-     * regressions found reviewing https://github.com/cktan/tomlc17/pull/50:
-     * a literal overflowing to infinity was accepted wherever isfinite() had
-     * been folded away by a fast-math build, and one underflowing to -0.0 was
-     * accepted everywhere, because the sign bit made the bit pattern nonzero.
-     * Neither needs a special build to assert on -- both must be rejected. */
+    /* Decimal literals that overflow or underflow a double (tomlc17 PR #50) */
     TESTING("H5Zconfig_get_double: literal overflowing to inf rejected");
     H5E_BEGIN_TRY
     {
@@ -310,9 +299,6 @@ test_parser(void)
         TEST_ERROR;
     PASSED();
 
-    /* Verify that %a output round-trips exactly for a value that is not
-     * representable exactly in decimal (0.1 requires hex-float to preserve
-     * the exact IEEE 754 bit pattern through a serialize/parse cycle). */
     TESTING("H5Zconfig_get_double: %%a round-trip for non-decimal-exact value");
     {
         char   pstr[64];

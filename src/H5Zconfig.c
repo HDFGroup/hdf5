@@ -11,22 +11,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * H5Zconfig.c - TOML parameter string parser for the string-based filter
- *               configuration API.
- *
- * Uses the vendored tomlc17 library for all TOML parsing.
- *
- * Public typed accessor functions:
- *   H5Zconfig_has_key    - key presence check
- *   H5Zconfig_get_int    - TOML integer  -> int64_t
- *   H5Zconfig_get_double - TOML float    -> double
- *   H5Zconfig_get_bool   - TOML boolean  -> bool
- *   H5Zconfig_get_str    - TOML string   -> char buffer
- *
- * Package-internal:
- *   H5Z__config_validate_keys - validate all keys in params against a
- *                               known-key list; called by built-in filter
- *                               set_config callbacks.
+ * Parsing and typed lookup of filter parameter strings, built on the vendored
+ * tomlc17 parser.
  */
 
 #define H5Z_FRIEND /* suppress error on H5Zpkg.h include */
@@ -38,16 +24,9 @@
 #include "H5MMprivate.h" /* Memory management   */
 #include "H5Zpkg.h"      /* Filter internals    */
 
-/* Renames every public tomlc17 symbol to an H5Z__toml_c17_-prefixed name so
- * a statically-linked libhdf5.a cannot collide with an application's own
- * copy of tomlc17 (see h5_toml_prefix.h for the full rationale). Must be
- * included before tomlc17.h so every call site below picks up the renamed
- * declarations. */
+/* The prefix headers rename the vendored symbols and must come first */
 #include "tomlc17/h5_toml_prefix.h"
 #include "tomlc17/tomlc17.h"
-
-/* Same treatment for the vendored Ryu shortest-round-trip float formatter
- * (see ryu/h5_ryu_prefix.h); must precede ryu/ryu.h for the same reason. */
 #include "ryu/h5_ryu_prefix.h"
 #include "ryu/ryu.h"
 
@@ -60,8 +39,7 @@ H5Z__copy_char(char *out, size_t cap, size_t *pos, const char **p)
     (*p)++;
 }
 
-/* Append two source characters (e.g. a backslash escape) to the output
- * buffer, or skip both if there is insufficient space. */
+/* Append two source characters (a backslash escape), or skip both if full. */
 static inline void
 H5Z__copy_chars2(char *out, size_t cap, size_t *pos, const char **p)
 {
@@ -72,14 +50,8 @@ H5Z__copy_chars2(char *out, size_t cap, size_t *pos, const char **p)
     (*p) += 2;
 }
 
-/* Is v an inf or a nan?
- *
- * Decided on the bit pattern rather than with isnan()/isinf(): a fast-math
- * build -- Intel icx's -fp-model=fast (its default at -O2 and above), or
- * gcc/clang -ffast-math or -ffinite-math-only -- may assume no operand is
- * ever inf or nan and fold both classifiers to 0, letting through exactly
- * the values the caller means to reject.  An exponent field of all ones is
- * inf (zero mantissa) or nan (nonzero mantissa). */
+/* Tests the bit pattern because fast-math builds (icx's default, or
+ * -ffinite-math-only) may fold isnan()/isinf() to 0. */
 static inline bool
 H5Z__fp64_is_inf_or_nan(double v)
 {
@@ -93,10 +65,8 @@ H5Z__fp64_is_inf_or_nan(double v)
 #endif
 }
 
-/* TOML's spelling of a non-finite double ("nan", "inf", "-inf"), or NULL if V
- * is finite.  Ryu spells these "NaN", "Infinity" and "-Infinity", none of
- * which any TOML scanner accepts.  Discriminates on the bit pattern for the
- * same fast-math reason as H5Z__fp64_is_inf_or_nan() above. */
+/* TOML's spelling of a non-finite double, or NULL if V is finite.  Ryu's
+ * "NaN"/"Infinity" are not valid TOML. */
 static inline const char *
 H5Z__fp64_nonfinite_toml(double v)
 {
@@ -120,38 +90,13 @@ H5Z__fp64_nonfinite_toml(double v)
 }
 
 /*
- * H5Z__format_double_canonical - format VAL into BUF (capacity BUFSIZE) as
- * the shortest decimal literal that round-trips back to the identical IEEE
- * 754 double, and that a TOML scanner types as a float rather than an
- * integer.
+ * Format VAL as the shortest decimal that round-trips to the same double and
+ * that TOML lexes as a float (never a bare integer like "8").  Ryu supplies
+ * the digits (see issue #6153); they are re-laid out with printf("%g")'s
+ * fixed/scientific rule, which moves the decimal point but never changes a
+ * digit.  Locale-independent.
  *
- * The digits come from the vendored Ryu library (src/ryu), which computes the
- * shortest round-tripping decimal directly from the bit pattern.  HDF5 does
- * not attempt that conversion itself: getting it right in every rounding
- * corner is the whole subject of a PLDI paper, and the result is written into
- * the file format, where a wrong digit is permanent.  See
- * <https://github.com/HDFGroup/hdf5/issues/6153>.
- *
- * Ryu emits scientific notation unconditionally and with no padding -- 3.0 is
- * "3E0", 0.1 is "1E-1" -- which would make the canonical form of an ordinary
- * compression level read `rate = 3.5E0`.  Its output is therefore taken apart
- * into the digit string and decimal exponent it really represents and laid
- * out again below, using printf("%g")'s rule: fixed-point while the exponent
- * stays in human-scale range, scientific outside it.  That re-layout only
- * moves the decimal point -- it never rounds, drops or adds a significant
- * digit -- so Ryu's round-trip guarantee carries over verbatim, and no
- * strtod() readback is needed to confirm it.
- *
- * Nothing here is locale-sensitive.  Ryu writes ASCII digits directly instead
- * of going through snprintf(), so LC_NUMERIC cannot substitute ',' for the
- * '.' that TOML requires.
- *
- * TOML types a bare "8" as an integer, not a float, which would fail the
- * typed getters; the fixed-point branch appends ".0" whenever the digits run
- * out at the decimal point, and the scientific branch always carries an
- * exponent, so every result lexes as a float.
- *
- * Returns the length written (excluding the NUL), or -1 if BUFSIZE was too
+ * Returns the length written (excluding the NUL), or -1 if BUFSIZE is too
  * small.
  */
 static int
@@ -172,10 +117,8 @@ H5Z__format_double_canonical(char *buf, size_t bufsize, double val)
         return n;
     }
 
-    /* Ryu's output is "[-]d[.ddd]E[-]ddd", and d2s_buffered_n() returns its
-     * length without NUL-terminating it.  Split it back into sign, the
-     * significant digits with the '.' removed, and the exponent of the
-     * leading digit. */
+    /* Split Ryu's "[-]d[.ddd]E[-]ddd" (not NUL-terminated) into sign, digits
+     * and exponent */
     ryu_len = d2s_buffered_n(val, ryu);
 
     i   = 0;
@@ -200,8 +143,7 @@ H5Z__format_double_canonical(char *buf, size_t bufsize, double val)
         tmp[n++] = '-';
 
     if (e10 >= -4 && e10 < ndigits) {
-        /* Fixed-point.  e10 < ndigits keeps the decimal point inside the
-         * digits, so no zero padding is ever needed on the right. */
+        /* Fixed-point; e10 < ndigits means no right-hand zero padding */
         if (e10 >= 0) {
             for (i = 0; i <= e10; i++)
                 tmp[n++] = dig[i];
@@ -222,8 +164,7 @@ H5Z__format_double_canonical(char *buf, size_t bufsize, double val)
         }
     }
     else {
-        /* Scientific, spelled the way printf("%e") would: a signed exponent
-         * of at least two digits. */
+        /* Scientific, with printf("%e")'s two-digit signed exponent */
         int abs_e10 = (e10 < 0) ? -e10 : e10;
 
         tmp[n++] = dig[0];
@@ -248,15 +189,9 @@ H5Z__format_double_canonical(char *buf, size_t bufsize, double val)
 }
 
 /*
- * H5Z__rewrite_hexfloats - return a copy of `src` with every C99 hex-float
- * literal (e.g. "0x1.8p+1", "-0x1p-1") replaced by an equivalent decimal
- * string, via H5Z__format_double_canonical() above.
- *
- * Lets callers write `%a` hex-float literals for exact float encoding
- * without requiring hex-float support in the vendored tomlc17 scanner.
- *
- * Caller frees the returned buffer with H5MM_xfree(); NULL on allocation
- * failure.
+ * Return a copy of SRC with C99 hex-float literals ("0x1.8p+1") replaced by
+ * exact decimals, since TOML has no hex-float syntax.  Quoted strings and
+ * comments are left alone.  Caller frees with H5MM_xfree().
  */
 static char *
 H5Z__rewrite_hexfloats(const char *src)
@@ -267,12 +202,7 @@ H5Z__rewrite_hexfloats(const char *src)
     char       *out;
     size_t      pos = 0;
 
-    /* Worst case: a short token whose value needs the full 17 significant
-     * digits, e.g. "0x1p99" (6 chars) -> "6.338253001141147e+29" (21), just
-     * under 4x; 8x leaves ample headroom.
-     * Guard against size_t overflow in the multiplication; callers normally
-     * cap input at H5Z_CONFIG_STRING_MAX, but enforce the bound here too so
-     * this static helper is safe for any future caller. */
+    /* A rewrite grows a token by under 4x ("0x1p99" -> "6.338253001141147e+29") */
     if (len > (SIZE_MAX - 1) / 8)
         return NULL;
     cap = len * 8 + 1;
@@ -282,8 +212,6 @@ H5Z__rewrite_hexfloats(const char *src)
         return NULL;
 
     while (*p) {
-        /* Skip TOML double-quoted strings verbatim (honors backslash
-         * escapes so \" does not end the string early). */
         if (*p == '"') {
             H5Z__copy_char(out, cap, &pos, &p);
             while (*p && *p != '"') {
@@ -297,7 +225,6 @@ H5Z__rewrite_hexfloats(const char *src)
             continue;
         }
 
-        /* Skip TOML single-quoted (literal) strings verbatim (no escapes). */
         if (*p == '\'') {
             H5Z__copy_char(out, cap, &pos, &p);
             while (*p && *p != '\'')
@@ -307,14 +234,12 @@ H5Z__rewrite_hexfloats(const char *src)
             continue;
         }
 
-        /* Skip TOML comments (# to end of line) verbatim. */
         if (*p == '#') {
             while (*p && *p != '\n')
                 H5Z__copy_char(out, cap, &pos, &p);
             continue;
         }
 
-        /* Detect optional sign followed by "0x" or "0X" */
         const char *tok_start = p;
         if (*p == '+' || *p == '-')
             p++;
@@ -323,7 +248,6 @@ H5Z__rewrite_hexfloats(const char *src)
             const char *q = p + 2;
             while (isxdigit((unsigned char)*q) || *q == '_')
                 q++;
-            /* Is this a hex-float? Requires '.' or 'p'/'P' after hex digits */
             if (*q == '.' || *q == 'p' || *q == 'P') {
                 if (*q == '.')
                     q++;
@@ -335,7 +259,6 @@ H5Z__rewrite_hexfloats(const char *src)
                         q++;
                     while (isdigit((unsigned char)*q))
                         q++;
-                    /* q now points past the hex-float token; convert it */
                     size_t tok_len = (size_t)(q - tok_start);
                     char   tmp[64];
                     if (tok_len < sizeof(tmp)) {
@@ -344,13 +267,6 @@ H5Z__rewrite_hexfloats(const char *src)
                         char  *end;
                         double val = strtod(tmp, &end);
                         if (end == tmp + tok_len) {
-                            /* Decimal form of the hex-float literal; see
-                             * H5Z__format_double_canonical() above.
-                             * localeconv() returns thread-shared static
-                             * storage inside that call; HDF5_ENABLE_THREADSAFE
-                             * builds serialize concurrent setlocale() calls
-                             * via the global library lock, making this
-                             * safe. */
                             char dec[32];
                             int  n = H5Z__format_double_canonical(dec, sizeof(dec), val);
                             if (n >= 0 && pos + (size_t)n < cap) {
@@ -365,7 +281,6 @@ H5Z__rewrite_hexfloats(const char *src)
             }
         }
 
-        /* Not a hex-float: copy one character verbatim */
         p = tok_start;
         H5Z__copy_char(out, cap, &pos, &p);
     }
@@ -374,19 +289,9 @@ H5Z__rewrite_hexfloats(const char *src)
 }
 
 /*
- * H5Z__toml_wrap - allocate a NUL-terminated TOML document that wraps the
- * inline-table content in params.  Returns a heap buffer that the caller
- * must free with H5MM_xfree().
- *
- * The wrapper key "__p__" is chosen specifically because TOML bare keys cannot
- * contain two consecutive underscores - "__p__" is therefore impossible to
- * produce in user-supplied content.  User keys become *values* inside the
- * inline table, so a user key named "__p__" would still not collide.
- *
- * Accepts both bare content and an already-braced inline table:
- *   "level = 6"        ->  "__p__ = {level = 6}"
- *   "{level = 6}"      ->  "__p__ = {level = 6}"
- *   "{ level = 6 }"   ->  "__p__ = {level = 6}"  (whitespace trimmed inside braces)
+ * Wrap PARAMS, with or without its outer braces, as the TOML document
+ * "__p__ = {...}".  User keys live inside the inline table, so they cannot
+ * collide with "__p__".  Caller frees with H5MM_xfree().
  */
 static char *
 H5Z__toml_wrap(const char *params)
@@ -397,11 +302,9 @@ H5Z__toml_wrap(const char *params)
     size_t      wlen;
     char       *buf;
 
-    /* skip leading whitespace */
     while (*p == ' ' || *p == '\t')
         p++;
 
-    /* strip optional outer { } */
     if (*p == '{') {
         p++;
         e = p + strlen(p);
@@ -415,7 +318,7 @@ H5Z__toml_wrap(const char *params)
     }
     content_len = (size_t)(e - p);
 
-    wlen = content_len + 12; /* "__p__ = {" (9) + content + "}" (1) + NUL */
+    wlen = content_len + sizeof("__p__ = {}");
     buf  = (char *)H5MM_malloc(wlen);
     if (buf)
         snprintf(buf, wlen, "__p__ = {%.*s}", (int)content_len, p);
@@ -425,22 +328,11 @@ H5Z__toml_wrap(const char *params)
 /*-------------------------------------------------------------------------
  * Function:    H5Z_canonicalize_params
  *
- * Purpose:     Return a heap copy of PARAMS in the canonical form persisted
- *              on disk (filter pipeline v3): optional outer braces and
- *              surrounding whitespace stripped, and C99 hex-float literals
- *              rewritten to the shortest bit-exact decimal (up to
- *              DBL_DECIMAL_DIG == 17 significant digits; see
- *              H5Z__format_double_canonical()).  Both normalizations
- *              exist because the stored bytes must be valid TOML v1.0.0 --
- *              pure-reimplementation readers (e.g. jHDF, pyfive) parse the
- *              object header directly with a stock TOML parser, for which a
- *              braced or hex-float payload is a hard error.  See
- *              RFC-HDFG-2026-001 sec:pline-v3.
- *
- *              Everything else -- interior spacing, quote style, key case,
- *              key order -- is preserved byte-for-byte; values are never
- *              re-serialized, so no decimal-precision rounding is
- *              introduced.
+ * Purpose:     Return a copy of PARAMS in the form stored in pipeline v3:
+ *              outer braces and surrounding whitespace removed, hex-floats
+ *              rewritten as exact decimals, everything else unchanged.  The
+ *              result is valid TOML, so other readers can use a stock TOML
+ *              parser.
  *
  * Return:      Success:    Heap-allocated NUL-terminated string, freed by
  *                          the caller with H5MM_xfree().
@@ -461,13 +353,9 @@ H5Z_canonicalize_params(const char *params)
     if (params == NULL)
         HGOTO_DONE(NULL);
 
-    /* Rewrite hex-float literals first.  The rewriter skips quoted strings
-     * and comments, so it cannot disturb the brace characters examined
-     * below, nor rewrite hex-float-looking text inside a string value. */
     if (NULL == (expanded = H5Z__rewrite_hexfloats(params)))
         HGOTO_DONE(NULL);
 
-    /* Strip optional outer braces, then trim whitespace at both ends. */
     p = expanded;
     while (*p == ' ' || *p == '\t')
         p++;
@@ -498,12 +386,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_canonicalize_params() */
 
-/*
- * H5Z__count_table_keys - recursively count leaf key=value assignments in a
- * parsed TOML table, including keys nested inside inline tables / dotted-key
- * groups (a nested table itself is not counted, only its own leaves are).
- * Used to enforce H5Z_CONFIG_MAX_PARAMS.
- */
+/* Count leaf keys, including those in nested tables */
 static size_t
 H5Z__count_table_keys(toml_datum_t tab)
 {
@@ -523,11 +406,8 @@ H5Z__count_table_keys(toml_datum_t tab)
 }
 
 /*
- * H5Z__toml_parse_params - wrap params as a TOML document and parse it.
- *
- * On success: *tr_out holds a valid result; *ptab_out is the inline-table
- *             datum.  The caller MUST call toml_free(*tr_out) when done.
- * On failure: *tr_out is zeroed; an HDF5 error is pushed; returns FAIL.
+ * Parse PARAMS.  On success *ptab_out is the parameter table and the caller
+ * must toml_free(*tr_out); on failure *tr_out is zeroed.
  */
 static htri_t
 H5Z__toml_parse_params(const char *params, toml_result_t *tr_out, toml_datum_t *ptab_out)
@@ -538,18 +418,11 @@ H5Z__toml_parse_params(const char *params, toml_result_t *tr_out, toml_datum_t *
 
     FUNC_ENTER_PACKAGE
 
-    /* Defence-in-depth length check: callers SHOULD enforce
-     * H5Z_CONFIG_STRING_MAX, but enforce it here too so that the
-     * downstream `len * 8` worst-case allocation in H5Z__rewrite_hexfloats
-     * cannot overflow size_t. */
     if (params && strlen(params) > H5Z_CONFIG_STRING_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "filter parameter string exceeds H5Z_CONFIG_STRING_MAX (%d bytes)",
                     H5Z_CONFIG_STRING_MAX);
 
-    /* Replace hex-float literals (e.g. 0x1.8p+1) with decimal equivalents
-     * so the tomlc17 scanner, which does not support C99 hex-float syntax,
-     * can parse the resulting string without modification. */
     if (params && *params) {
         if (NULL == (expanded = H5Z__rewrite_hexfloats(params)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "out of memory rewriting hex-float literals");
@@ -562,13 +435,9 @@ H5Z__toml_parse_params(const char *params, toml_result_t *tr_out, toml_datum_t *
     *tr_out = toml_parse(wrapped, (int)strlen(wrapped));
 
     if (!tr_out->ok) {
-        /* Guard: errmsg must be a fixed-size char array so sizeof gives the
-         * full capacity.  If a future tomlc17 update changes it to a pointer,
-         * sizeof would equal sizeof(char *) (<=8) and the memcpy below would
-         * silently truncate.  The assert catches that at compile time. */
+        /* errbuf below is sized with sizeof */
         _Static_assert(sizeof(tr_out->errmsg) > sizeof(void *),
                        "toml_result_t.errmsg must be a fixed-size char array, not a pointer");
-        /* Copy errmsg before toml_free invalidates it */
         char errbuf[sizeof(tr_out->errmsg)];
         memcpy(errbuf, tr_out->errmsg, sizeof(errbuf));
         toml_free(*tr_out);
@@ -598,11 +467,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-/*
- * H5Z__validate_table_keys - walk one TOML table level, checking each leaf
- * key against known_keys.  When a value is a nested table, recurse with the
- * dotted prefix accumulated so far.  Returns FAIL on first unknown leaf.
- */
+/* Check each leaf key's dotted path against KNOWN_KEYS */
 static herr_t
 H5Z__validate_table_keys(toml_datum_t tab, const char *prefix, const char *const *known_keys)
 {
@@ -628,9 +493,6 @@ H5Z__validate_table_keys(toml_datum_t tab, const char *prefix, const char *const
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter parameter key too long: %s", k);
         }
 
-        /* Nested inline table: recurse rather than checking against known_keys.
-         * (The dotted-key form "compressor.name = ..." also parses to a nested
-         * table, so this is the single canonical traversal path.) */
         if (v.type == TOML_TABLE) {
             if (H5Z__validate_table_keys(v, full, known_keys) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown parameter key in nested table");
@@ -653,11 +515,8 @@ done:
 }
 
 /*
- * H5Z__config_validate_keys - verify every leaf key in params is in known_keys.
- * Nested inline tables are walked recursively so the dotted-key form
- * ("compressor.name") and the inline-table form ("compressor = {name = ...}")
- * are validated identically.
- * Package-internal; called by built-in filter set_config callbacks.
+ * Fail if PARAMS contains a key not in KNOWN_KEYS.  Nested keys are matched
+ * by dotted path, so "a = {b = 1}" and "a.b = 1" are equivalent.
  */
 herr_t
 H5Z__config_validate_keys(const char *params, const char *const *known_keys)
@@ -692,15 +551,9 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-/*-------------------------------------------------------------------------
- * H5Z__config_get_datum - shared lookup core for all public accessors.
- *
- * Parses params, looks up key, and returns the raw toml_datum_t.
- *
- * Return:  > 0  key found;   *tr is valid - caller MUST toml_free(*tr)
- *           0   key absent;  helper already called toml_free(*tr)
- *         < 0   error;       error pushed; helper already cleaned up *tr
- *-------------------------------------------------------------------------
+/*
+ * Parse PARAMS and look up KEY (a dotted path is allowed).  The caller must
+ * toml_free(*tr) only when this returns > 0.
  */
 static htri_t
 H5Z__config_get_datum(const char *params, const char *key, toml_result_t *tr, toml_datum_t *d)
@@ -722,11 +575,6 @@ H5Z__config_get_datum(const char *params, const char *key, toml_result_t *tr, to
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "failed to parse parameter string");
     tr_valid = true;
 
-    /* toml_seek traverses dotted paths (e.g. "compressor.name") through
-     * nested inline tables; for flat keys it behaves identically to toml_get.
-     * Both surface forms - "compressor = {name = ...}" and the dotted form
-     * "compressor.name = ..." - parse to the same nested layout, so callers
-     * see one canonical lookup convention. */
     *d = toml_seek(ptab, key);
     if (d->type == TOML_UNKNOWN)
         HGOTO_DONE(false);
@@ -756,9 +604,8 @@ H5Zconfig_has_key(const char *params, const char *key)
     toml_datum_t  d;
     htri_t        ret_value = FAIL;
 
-    /* No API lock: this is a pure parser over caller-provided buffers and
-     * may be called from inside an H5Z_set_config_func_t callback that is
-     * already running under the API lock held by H5Pappend_filter. */
+    /* No API lock: filter set_config callbacks call this while
+     * H5Pappend_filter holds it */
     FUNC_ENTER_API_NOINIT_NOLOCK
 
     ret_value = H5Z__config_get_datum(params, key, &tr, &d);
@@ -768,11 +615,7 @@ H5Zconfig_has_key(const char *params, const char *key)
     FUNC_LEAVE_API_NOINIT_NOLOCK(ret_value)
 }
 
-/*-------------------------------------------------------------------------
- * H5Z__config_get_int - package-level integer lookup (no API lock).
- * Called by set_config callbacks which already run inside an API context.
- *-------------------------------------------------------------------------
- */
+/* Internal version of H5Zconfig_get_int() */
 htri_t
 H5Z__config_get_int(const char *params, const char *key, int64_t *out)
 {
@@ -913,11 +756,7 @@ done:
     FUNC_LEAVE_API_NOINIT_NOLOCK(ret_value)
 }
 
-/*-------------------------------------------------------------------------
- * H5Z__config_get_str - package-level string lookup (no API lock).
- * Called by set_config callbacks which already run inside an API context.
- *-------------------------------------------------------------------------
- */
+/* Internal version of H5Zconfig_get_str() */
 htri_t
 H5Z__config_get_str(const char *params, const char *key, char *buf, size_t *buf_size)
 {
@@ -945,8 +784,6 @@ H5Z__config_get_str(const char *params, const char *key, char *buf, size_t *buf_
     {
         size_t cap;
 
-        /* Reject ambiguous (buf != NULL, buf_size == NULL): the caller's
-         * buffer size is unknown, and an unbounded memcpy would be unsafe. */
         if (buf && !buf_size)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf_size must not be NULL when buf is non-NULL");
 
@@ -981,18 +818,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Zconfig_get_str
  *
- * Purpose:     Look up a key and return its TOML string value (decoded,
- *              without surrounding quotes).  Only TOML_STRING values are
- *              accepted; bare integers, floats, and booleans are type errors.
- *
- *              Size-query pattern:
- *                - buf == NULL: only *buf_size is set to the required length
- *                  (excluding NUL), returns > 0.
- *                - buf != NULL, *buf_size > 0: copies up to *buf_size - 1
- *                  bytes plus NUL; always sets *buf_size to required length.
- *                  Returns H5E_OVERFLOW if the buffer is too small.
- *                - buf != NULL, buf_size == NULL: rejected with H5E_BADVALUE
- *                  (the function has no way to know the buffer capacity).
+ * Purpose:     Look up a key and return its TOML string value, unquoted.
+ *              With BUF NULL, only *BUF_SIZE is set (length excluding NUL).
  *
  * Return:      > 0 found, 0 not found, < 0 error.
  *

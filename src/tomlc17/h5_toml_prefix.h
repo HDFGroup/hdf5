@@ -11,34 +11,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * h5_toml_prefix.h - HDF5-authored symbol-prefixing shim for the vendored
- * tomlc17 library (src/tomlc17/tomlc17.c, tomlc17.h -- pristine, unmodified
- * copies; see src/tomlc17/README.md for provenance and the update procedure).
- *
- * -fvisibility=hidden (applied to tomlc17.c in src/CMakeLists.txt) only
- * strips these symbols from the dynamic symbol table of a *shared* libhdf5;
- * it does nothing for a static libhdf5.a, whose object files still export
- * ordinary global symbols. An application that statically links libhdf5.a
- * alongside its own copy of tomlc17 (same version or not) would then hit a
- * duplicate-symbol link error, or worse, silently link against whichever
- * copy the linker picks first.
- *
- * This header renames every public tomlc17 symbol to an H5Z__toml_-prefixed
- * name via plain object-like macros, force-included ahead of both tomlc17.c
- * itself (via a compiler flag in src/CMakeLists.txt, since editing an
- * #include into the pristine tomlc17.c would defeat the point) and every
- * HDF5 file that calls into it (H5Zconfig.c, via an explicit #include
- * immediately before "tomlc17/tomlc17.h"). Because a #define is a textual
- * substitution, this renames both tomlc17.c's function *definitions* and
- * every call site consistently, without editing a single byte of the
- * pristine vendored files -- their checked-in SHA-256 hashes in
- * src/tomlc17/README.md remain valid.
- *
- * When updating the vendored copy (see README.md's "Updating the vendored
- * copy" section), diff the new tomlc17.h's public API against the list
- * below and add/remove entries to match -- an unprefixed new public
- * function would silently reintroduce the exact collision this header
- * exists to prevent.
+ * Renames the public tomlc17 symbols so a static libhdf5 cannot collide with
+ * an application's own tomlc17.  Force-included into tomlc17.c by
+ * src/CMakeLists.txt, so the vendored files stay byte-identical, and included
+ * by H5Zconfig.c.  Keep this list in sync with tomlc17.h when updating.
  */
 
 #ifndef H5_TOML_PREFIX_H
