@@ -118,6 +118,16 @@ set (HDF5_REFERENCE_FILES
     tfamily.ddl
     tfill.ddl
     tfletcher32.ddl
+    tfilter_params_all.ddl
+    tfilter_params_deflate.ddl
+    tfilter_params_deflate_noavail.ddl
+    tfilter_params_fletcher32.ddl
+    tfilter_params_nbit.ddl
+    tfilter_params_scaleoffset.ddl
+    tfilter_params_shuffle.ddl
+    tfilter_params_szip.ddl
+    tfilter_params_szip_noavail.ddl
+    tfilter_params_userfilter.ddl
     tfloatsattrs.ddl
     tfloat4.ddl
     tfloat6.ddl
@@ -1272,6 +1282,30 @@ ADD_H5_TEST (tallfilters RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H -
 
 # user defined
 ADD_H5_TEST (tuserfilter RESULT_CODE 0 --enable-error-stack -H  -p -d myfilter  TARGET_FILE tfilters.h5)
+
+# --filter-params: -p plus each filter's PARAMS_STRING and DESCRIPTION. PARAMS_STRING
+# is the filter's get_config form when the filter is available and the raw cd_values
+# form otherwise, and DESCRIPTION appears only for available filters, so SZIP and
+# deflate have separate reference files for the unavailable case. Without the filter,
+# only the native variant runs, as for tszip and tdeflate above.
+if (HDF5_ENABLE_SZIP_SUPPORT)
+  ADD_H5_TEST (tfilter_params_szip RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H --filter-params -d szip TARGET_FILE tfilters.h5)
+else ()
+  ADD_H5_TEST (tfilter_params_szip_noavail RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H --filter-params -d szip TARGET_FILE tfilters.h5 NATIVE_ONLY)
+endif ()
+if (H5_HAVE_FILTER_DEFLATE)
+  ADD_H5_TEST (tfilter_params_deflate RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H --filter-params -d deflate TARGET_FILE tfilters.h5)
+else ()
+  ADD_H5_TEST (tfilter_params_deflate_noavail RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H --filter-params -d deflate TARGET_FILE tfilters.h5 NATIVE_ONLY)
+endif ()
+ADD_H5_TEST (tfilter_params_shuffle RESULT_CODE 0 --enable-error-stack -H --filter-params -d shuffle TARGET_FILE tfilters.h5)
+ADD_H5_TEST (tfilter_params_fletcher32 RESULT_CODE 0 APPLY_FILTERS 0 --enable-error-stack -H --filter-params -d fletcher32 TARGET_FILE tfilters.h5)
+ADD_H5_TEST (tfilter_params_nbit RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H --filter-params -d nbit TARGET_FILE tfilters.h5)
+ADD_H5_TEST (tfilter_params_scaleoffset RESULT_CODE 0 APPLY_FILTERS 4 --enable-error-stack -H --filter-params -d scaleoffset TARGET_FILE tfilters.h5)
+if (HDF5_ENABLE_SZIP_SUPPORT AND H5_HAVE_FILTER_DEFLATE)
+  ADD_H5_TEST (tfilter_params_all RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H --filter-params -d all TARGET_FILE tfilters.h5 APPLY_FILTERS 1)
+endif ()
+ADD_H5_TEST (tfilter_params_userfilter RESULT_CODE 0 --enable-error-stack -H --filter-params -d myfilter TARGET_FILE tfilters.h5)
 
 
 # See which filters are usable (and skip tests for filters we
