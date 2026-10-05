@@ -125,11 +125,15 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
-### Fixed memory leaks when decoding a dataset creation property list with filters
+### Fixed memory leaks and lost filter names when decoding a dataset creation property list
 
-   `H5Pdecode()` copied the name of each encoded filter and then discarded the copy, leaking it for every named filter in an encoded dataset creation property list, including on the error path. The decoder now skips over the encoded name.
+   `H5Pdecode()` copied the name of each encoded filter and then discarded the copy, leaking it for every named filter in an encoded dataset creation property list, including on the error path. The decoded property list also lost the name, so `H5Pequal()` reported it different from the list that was encoded. The decoder now restores the name without allocating. The encoding holds only the first 12 bytes of a name, so a name of 12 or more characters is still not restored, and `H5Pget_filter2()` returns the registered filter's name for it, as before.
 
    When decoding the filter pipeline failed partway, for example because the encoded pipeline held more than `H5Z_MAX_NFILTERS` filters, `H5Pdecode()` also leaked the filters already decoded and the client data of the filter being decoded. The decoder now releases them before returning the error.
+
+### Fixed a use-after-free when adding a filter to a copied filter pipeline
+
+   A filter name of up to 11 characters is stored inside the pipeline's filter array. When a filter was added to a full array, such as the one in a dataset creation property list returned by `H5Dget_create_plist()` for a dataset with a named third-party filter, `H5Z_append()` reallocated the array without updating those names, so `H5Pget_filter2()` and dataset creation could read freed memory. The names are now updated along with the client data.
 
 ### Fixed a deadlock in the ROS3 VFD on Windows
 

@@ -1385,9 +1385,10 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
     nused = (size_t)enc_value;
 
     for (u = 0; u < nused; u++) {
-        H5Z_filter_info_t filter;   /* Filter info, for pipeline */
-        uint8_t           has_name; /* Flag to indicate whether filter has a name */
-        unsigned          v;        /* Local index variable */
+        H5Z_filter_info_t filter;      /* Filter info, for pipeline */
+        uint8_t           has_name;    /* Flag to indicate whether filter has a name */
+        const char       *name = NULL; /* Encoded name, if it is terminated */
+        unsigned          v;           /* Local index variable */
 
         /* decode filter id */
         INT32DECODE(*pp, filter.id);
@@ -1395,12 +1396,15 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
         /* decode filter flags */
         H5_DECODE_UNSIGNED(*pp, filter.flags);
 
-        /* decode value indicating if the name is encoded.  H5Z_append()
-         * does not take a name from the caller, so skip over an encoded one. */
+        /* decode the filter name, if one is encoded.  The encoder writes only
+         * the first H5Z_COMMON_NAME_LEN bytes, so a longer name has no
+         * terminator and is not restored. */
         has_name = *(*pp)++;
-        if (has_name)
+        if (has_name) {
+            if (memchr(*pp, '\0', H5Z_COMMON_NAME_LEN))
+                name = (const char *)*pp;
             *pp += H5Z_COMMON_NAME_LEN;
-        filter.name = NULL;
+        }
 
         /* decode num elements */
         enc_size = *(*pp)++;
@@ -1419,6 +1423,14 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
         /* Add the filter to the I/O pipeline */
         if (H5Z_append(pline, filter.id, filter.flags, filter.cd_nelmts, cd_values) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline");
+
+        /* H5Z_append() leaves the name NULL */
+        if (name) {
+            H5Z_filter_info_t *added = &pline->filter[pline->nused - 1];
+
+            strcpy(added->_name, name);
+            added->name = added->_name;
+        }
 
         /* Free cd_values, if it was allocated */
         cd_values = (unsigned *)H5MM_xfree(cd_values);
