@@ -235,6 +235,12 @@ Fixes GitHub issue #6679.
   file forces `BUILD_SHARED_LIBS` on. This affected cases where the examples
   were built directly without that cache file.
 
+### Fixed the Fortran and C++ information reported in the build settings
+
+The "Shared/Static Fortran Library" and "Shared/Static C++ Library" lines in `libhdf5.settings` and in the build settings string compiled into the library reused the C library values, so they reported `YES` even when `HDF5_BUILD_FORTRAN` or `HDF5_BUILD_CPP_LIB` was off. These lines now report `NO` unless that language's library is built. The "Fortran Compiler", "Module Directory" and "C++ Compiler" lines are now also left empty when that language's library is not built.
+
+Fixes #5723.
+
 ## Tools
 
 ### Fixed an issue with quoting of data values in h5ls and h5dump when displaying as ASCII characters
@@ -280,6 +286,29 @@ Fixes GitHub issue #6679.
    reported as an error.
 
 ## High-Level Library
+
+### Fixed leaked identifiers in H5DSattach_scale()
+
+   When attaching a dimension scale that already had one or more datasets
+   attached to it, `H5DSattach_scale()` rewrote the scale's `REFERENCE_LIST`
+   attribute without releasing everything it had acquired to do so. It reopened
+   each reference in the existing list with `H5Ropen_object()` but only closed
+   the resulting identifier on the error path, and it destroyed neither the
+   references it read from the old attribute nor the one it appended to the new
+   one -- the buffer being written was reclaimed with the old, one element
+   shorter, dataspace. Every one of those kept the file open, so a later
+   `H5Fcreate()` with `H5F_ACC_TRUNC` on the same file failed with "unable to
+   truncate a file which is already open", an error with nothing in it to point
+   back at a dimension scale.
+
+   The identifier is now closed on the success path as well, and both reference
+   buffers are reclaimed, matching the equivalent code in
+   `H5DSdetach_scale()`. This code is only reached when `H5DSwith_new_ref()`
+   selects the new-style reference path, which happens when the object's
+   terminal VOL connector is not the native one -- a pass-through connector
+   stacked over the native connector does not qualify -- or when the library is
+   built with `H5_DIMENSION_SCALES_WITH_NEW_REF`; the old-style reference
+   path opens nothing.
 
 ## Fortran High-Level APIs
 
