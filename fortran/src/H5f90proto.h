@@ -397,8 +397,8 @@ H5FC_DLL int_f h5pget_fapl_sec2_c(hid_t_f *prp_id, int_f *sec2);
 #endif
 H5FC_DLL int_f h5pset_alignment_c(hid_t_f *prp_id, hsize_t_f *threshold, hsize_t_f *alignment);
 H5FC_DLL int_f h5pget_alignment_c(hid_t_f *prp_id, hsize_t_f *threshold, hsize_t_f *alignment);
-H5FC_DLL int_f h5pget_fapl_core_c(hid_t_f *prp_id, size_t_f *increment, int_f *flag);
-H5FC_DLL int_f h5pset_fapl_core_c(hid_t_f *prp_id, size_t_f *increment, int_f *flag);
+H5FC_DLL int_f h5pget_fapl_core_c(hid_t_f *prp_id, size_t_f *initial_size, size_t_f *increment, int_f *flag);
+H5FC_DLL int_f h5pset_fapl_core_c(hid_t_f *prp_id, size_t_f *initial_size, size_t_f *increment, int_f *flag);
 H5FC_DLL int_f h5pset_fapl_family_c(hid_t_f *prp_id, hsize_t_f *memb_size, hid_t_f *memb_plist);
 H5FC_DLL int_f h5pget_fapl_family_c(hid_t_f *prp_id, hsize_t_f *memb_size, hid_t_f *memb_plist);
 H5FC_DLL int_f h5pset_cache_c(hid_t_f *prp_id, int_f *mdc_nelmts, size_t_f *rdcc_nelmts,
