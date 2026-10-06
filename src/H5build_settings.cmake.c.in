@@ -89,7 +89,7 @@ const char H5build_settings[]=
     "  Parallel Filtered Dataset Writes: @PARALLEL_FILTERED_WRITES@\n"
     "                Large Parallel I/O: @LARGE_PARALLEL_IO@\n"
     "                High-level library: @HDF5_BUILD_HL_LIB@\n"
-    "Dimension scales w/ new references: @DIMENSION_SCALES_WITH_NEW_REF@\n"
+    "Dimension scales w/ new references: @HDF5_DIMENSION_SCALES_NEW_REF@\n"
     "                  Build HDF5 Tests: @BUILD_TESTING@\n"
     "                  Build HDF5 Tools: @HDF5_BUILD_TOOLS@\n"
     "                      Threadsafety: @HDF5_ENABLE_THREADSAFE@\n"
