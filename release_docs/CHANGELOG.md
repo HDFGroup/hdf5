@@ -194,6 +194,10 @@ Fixes GitHub issue #6679.
 
    Fixes CVE-2026-19025
 
+### Fixed a crash when unprotecting a local heap with no cached prefix or data block
+
+   `H5HL_protect()` pins one metadata cache entry for a local heap -- either the prefix when the heap is a single cache object, or the data block otherwise -- and `H5HL_unprotect()` unpins it again. The cache unlinks that entry from the heap when it destroys it, so a damaged file could reach `H5HL_unprotect()` with nothing to unpin, which triggered an assertion failure in debug builds and a NULL pointer dereference otherwise. `H5HL_unprotect()` now reports an error instead, and does so before decrementing the heap's protect count so that a rejected call leaves the heap unchanged rather than half unprotected with its cache entry still pinned.
+
 ### Fixed crashes when reading datasets with malformed N-Bit or Fletcher32 filter metadata
 
    Reading a dataset from a corrupted or maliciously crafted file could crash the library in the N-Bit and Fletcher32 filter decode paths. The N-Bit filter dereferenced its client-data parameter array before validating it, crashing when the array was empty or NULL, and walked the compressed chunk during decompression without bounding the input against the chunk size, causing out-of-bounds reads. It also indexed that parameter array at offsets taken from the datatype description held in the array itself, without bounding those offsets against the number of parameters supplied, so a parameter list stopping short of the datatype it described was read past its end. The Fletcher32 filter subtracted the 4-byte checksum length from the chunk size without checking that the chunk was at least that large, underflowing the length passed to the checksum routine. These filters now validate their parameters and buffer sizes and fail with an error instead of crashing.
@@ -243,6 +247,12 @@ Fixes GitHub issue #6679.
   Builds driven through `CTestScript.cmake` were not affected, since its cache
   file forces `BUILD_SHARED_LIBS` on. This affected cases where the examples
   were built directly without that cache file.
+
+### Fixed the Fortran and C++ information reported in the build settings
+
+The "Shared/Static Fortran Library" and "Shared/Static C++ Library" lines in `libhdf5.settings` and in the build settings string compiled into the library reused the C library values, so they reported `YES` even when `HDF5_BUILD_FORTRAN` or `HDF5_BUILD_CPP_LIB` was off. These lines now report `NO` unless that language's library is built. The "Fortran Compiler", "Module Directory" and "C++ Compiler" lines are now also left empty when that language's library is not built.
+
+Fixes #5723.
 
 ## Tools
 
