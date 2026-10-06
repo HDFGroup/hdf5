@@ -199,7 +199,7 @@ static unsigned check_move_entry_errs(unsigned paged);
 static unsigned check_resize_entry_errs(unsigned paged);
 static unsigned check_unprotect_ro_dirty_err(unsigned paged);
 static unsigned check_protect_ro_rw_err(unsigned paged);
-static unsigned check_protect_retries(unsigned paged);
+static unsigned check_protect_retries(unsigned paged, unsigned swmr_eoa_test);
 static unsigned check_check_evictions_enabled_err(unsigned paged);
 static unsigned check_auto_cache_resize(bool cork_ageout, unsigned paged);
 static unsigned check_auto_cache_resize_disable(unsigned paged);
@@ -13599,13 +13599,15 @@ check_protect_ro_rw_err(unsigned paged)
  *-------------------------------------------------------------------------
  */
 static unsigned
-check_protect_retries(unsigned paged)
+check_protect_retries(unsigned paged, unsigned swmr_eoa_test)
 {
     H5F_t             *file_ptr        = NULL;
     H5C_t             *cache_ptr       = NULL;
     test_entry_t      *base_addr       = NULL;
     test_entry_t      *entry_ptr       = NULL;
     H5C_cache_entry_t *cache_entry_ptr = NULL;
+    haddr_t            saved_eoa       = HADDR_UNDEF;
+    unsigned           saved_flags = 0, saved_access_flags = 0;
     int32_t            type;
     int32_t            idx;
     H5CX_node_t        api_ctx = {{0}, NULL}; /* API context node to push */
@@ -13614,6 +13616,9 @@ check_protect_retries(unsigned paged)
         TESTING("protect an entry to verify retries (paged aggregation)");
     else
         TESTING("protect an entry to verify retries");
+
+    if (swmr_eoa_test)
+        printf(" (SWMR stale EOA case %u)", swmr_eoa_test);
 
     pass = true;
 
@@ -13648,6 +13653,23 @@ check_protect_retries(unsigned paged)
         entry_ptr->max_verify_ct = 3;
         entry_ptr->verify_ct     = 0;
 
+        /* Model a SWMR reader with a stale local EOA. Case 1 rejects the
+         * initial load with the old guard; case 2 allows a trimmed initial
+         * load but rejects the resolved size. The synthetic client and VFD
+         * must both see SWMR read mode, as they would for a real reader. */
+        if (swmr_eoa_test) {
+            saved_eoa          = H5F_get_eoa(file_ptr, H5FD_MEM_DEFAULT);
+            saved_flags        = file_ptr->shared->flags;
+            saved_access_flags = file_ptr->shared->lf->access_flags;
+            file_ptr->shared->flags |= H5F_ACC_SWMR_READ;
+            file_ptr->shared->lf->access_flags |= H5F_ACC_SWMR_READ;
+            if (H5F__set_eoa(file_ptr, H5FD_MEM_DEFAULT,
+                            entry_ptr->addr + (swmr_eoa_test == 1 ? 0 : entry_ptr->size / 4)) < 0) {
+                pass         = false;
+                failure_mssg = "could not set stale EOA";
+            }
+        }
+
         cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, types[type], entry_ptr->addr,
                                                            &entry_ptr->addr, H5C__READ_ONLY_FLAG);
 
@@ -13671,11 +13693,22 @@ check_protect_retries(unsigned paged)
             entry_ptr->ro_ref_count++;
         }
 
-        assert(((entry_ptr->header).type)->id == type);
+        if (pass)
+            assert(((entry_ptr->header).type)->id == type);
     }
 
     if (pass)
         unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, idx, H5C__NO_FLAGS_SET);
+
+    /* Restore normal file state before the checksum-failure case and cleanup. */
+    if (swmr_eoa_test && H5_addr_defined(saved_eoa)) {
+        if (H5F__set_eoa(file_ptr, H5FD_MEM_DEFAULT, saved_eoa) < 0) {
+            pass         = false;
+            failure_mssg = "could not restore EOA";
+        }
+        file_ptr->shared->flags            = saved_flags;
+        file_ptr->shared->lf->access_flags = saved_access_flags;
+    }
 
     if (pass) {
         entry_ptr = &(base_addr[++idx]);
@@ -32468,7 +32501,9 @@ main(void)
         nerrs += check_resize_entry_errs(paged);
         nerrs += check_unprotect_ro_dirty_err(paged);
         nerrs += check_protect_ro_rw_err(paged);
-        nerrs += check_protect_retries(paged);
+        nerrs += check_protect_retries(paged, 0);
+        nerrs += check_protect_retries(paged, 1);
+        nerrs += check_protect_retries(paged, 2);
         nerrs += check_check_evictions_enabled_err(paged);
         nerrs += check_auto_cache_resize(false, paged);
         nerrs += check_auto_cache_resize(true, paged);

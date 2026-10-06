@@ -96,7 +96,7 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ### Added pre-allocation validation for metadata cache entry image sizes
 
-   Metadata cache entries with non-speculative load sizes are now checked against the file's end-of-allocation address before allocating the on-disk image buffer. Object header continuation messages also validate their decoded address and size fields before queuing continuation chunks.
+   Metadata cache entries with non-speculative load sizes are now checked against the file's end-of-allocation address before allocating the on-disk image buffer. Object header continuation messages also validate their decoded address and size fields before queuing continuation chunks. SWMR readers skip the end-of-allocation checks for both speculative and non-speculative metadata loads because their local end-of-allocation address may lag behind the writer.
 
 ### Fixed a crash when reading a chunked dataset whose chunk rank does not match the dataspace rank
 
