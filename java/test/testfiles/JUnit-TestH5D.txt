@@ -17,7 +17,6 @@ I.testH5Dget_type
 .testH5DwriteVL_compound_wrong_member_type
 .testH5Dget_access_plist
 .testH5Dread_vlen_of_nested_compound
-.testH5Dchunk_iter_all
 .testH5DArray_string_buffer_flat_StringArray
 .testH5Dvlen_get_buf_size
 .testH5Dchunk_iter
@@ -41,5 +40,5 @@ I.testH5Dget_type
 
 Time:  XXXX
 
-OK (39 tests)
+OK (38 tests)
 
