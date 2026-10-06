@@ -13664,7 +13664,7 @@ check_protect_retries(unsigned paged, unsigned swmr_eoa_test)
             file_ptr->shared->flags |= H5F_ACC_SWMR_READ;
             file_ptr->shared->lf->access_flags |= H5F_ACC_SWMR_READ;
             if (H5F__set_eoa(file_ptr, H5FD_MEM_DEFAULT,
-                            entry_ptr->addr + (swmr_eoa_test == 1 ? 0 : entry_ptr->size / 4)) < 0) {
+                             entry_ptr->addr + (swmr_eoa_test == 1 ? 0 : entry_ptr->size / 4)) < 0) {
                 pass         = false;
                 failure_mssg = "could not set stale EOA";
             }
