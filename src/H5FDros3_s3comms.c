@@ -46,6 +46,14 @@
 #include <aws/http/request_response.h>
 #include <aws/sdkutils/aws_profile.h>
 
+#if defined(H5_HAVE_WINDOWS) && defined(H5_HAVE_RTLDLLSHUTDOWNINPROGRESS)
+/* Prototype for RtlDllShutdownInProgress has to be declared - see
+ * https://learn.microsoft.com/en-us/windows/win32/devnotes/rtldllshutdowninprogress.
+ */
+#include <windows.h>
+BOOLEAN NTAPI RtlDllShutdownInProgress(VOID);
+#endif
+
 /****************/
 /* Local Macros */
 /****************/
@@ -335,12 +343,16 @@ H5FD__s3comms_init(void)
         }
     }
 
-    /* Work around issue where aws-c-s3 library doesn't shut down
-     * cleanly when called from HDF5's default atexit() handler.
+    /* On non-Windows platforms, work around issue where aws-c-s3 library
+     * doesn't shut down cleanly when called from HDF5's default atexit()
+     * handler. On Windows platforms, this cleanup is performed during VFD
+     * termination.
      */
+#ifndef H5_HAVE_WINDOWS
     if (0 != atexit(H5FD__s3comms_term_func))
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
                     "couldn't register function for cleaning up aws-c-s3 library");
+#endif
 
     H5FD_ros3_aws_init_g = true;
 
@@ -368,7 +380,21 @@ H5FD__s3comms_term_func(void)
     if (H5FD_ros3_aws_init_g) {
         aws_host_resolver_release(H5FD_ros3_aws_host_resolver_g);
         aws_event_loop_group_release(H5FD_ros3_aws_event_loop_group_g);
+
+#ifndef H5_HAVE_WINDOWS
         aws_s3_library_clean_up();
+#elif defined(H5_HAVE_RTLDLLSHUTDOWNINPROGRESS)
+        /* On Windows, the loader lock can be held if the library is terminating
+         * as a result of the process terminating. In this case, calling the
+         * aws-c-s3 library cleanup routine might cause a deadlock when trying to
+         * cleanup threads. If DLL shutdown is in progress, just skip cleanup for
+         * now until a better solution is available. Ideally, calling H5close()
+         * would be a requirement so that aws-c-s3 cleanup can be properly handled
+         * at that time rather than during process termination.
+         */
+        if (!RtlDllShutdownInProgress())
+            aws_s3_library_clean_up();
+#endif
 
         /* Clean up logger interface after being sure everything else
          * has finished cleaning up
@@ -397,9 +423,12 @@ H5FD__s3comms_term(void)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Currently handled by atexit() function above to work around cleanup
-     * ordering issues.
+    /* On non-Windows platforms, cleanup is currently handled by an atexit()
+     * function above to work around cleanup ordering issues.
      */
+#ifdef H5_HAVE_WINDOWS
+    H5FD__s3comms_term_func();
+#endif
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__s3comms_term() */

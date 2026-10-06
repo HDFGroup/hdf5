@@ -117,6 +117,10 @@ set (HDF5_REFERENCE_TEST_FILES
     aggr.h5
     bad_chunk_ndims.h5
     bad_compound.h5
+    bad_fletcher32.h5
+    bad_nbit_decompress.h5
+    bad_nbit_params.h5
+    bad_nbit_parms_walk.h5
     bad_offset.h5
     be_data.h5
     be_extlink1.h5
@@ -145,6 +149,7 @@ set (HDF5_REFERENCE_TEST_FILES
     h5fc_ext2_sf.h5
     h5fc_ext3_isf.h5
     h5fc_ext_none.h5
+    heap_corrupt_prfx.h5
     le_data.h5
     le_extlink1.h5
     le_extlink2.h5
@@ -1167,6 +1172,7 @@ endmacro ()
 # generator executables
 set (H5_GENERATORS
     gen_bad_chunk
+    gen_bad_filters
     gen_bad_offset
     gen_bad_ohdr
     gen_bogus

@@ -62,7 +62,7 @@ class GitHubProjectTracker:
                 pageInfo { hasNextPage, endCursor }
                 nodes {
                   id
-                  fieldValues(first: 20) {
+                  fieldValues(first: 100) {
                     nodes {
                       __typename
                       ... on ProjectV2ItemFieldTextValue { 
