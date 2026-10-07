@@ -196,6 +196,7 @@ gen_h5dump_files(void)
     gent_multi();
     gent_large_objname();
     gent_vlstr();
+    gent_binvlstr();
     gent_vlenstr_array();
     gent_char();
     gent_attr_all();
