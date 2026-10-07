@@ -1003,16 +1003,10 @@ endif ()
 
 list (APPEND H5Z_SOURCES ${HDF5_SRC_DIR}/tomlc17/tomlc17.c)
 # Keep the vendored tomlc17 symbols from colliding with an application's own
-# copy: hidden visibility for a shared library, and renaming via a
-# force-included h5_toml_prefix.h for a static one (so the vendored files stay
-# unmodified).  Vendored code is also exempt from HDF5's warnings-as-errors.
+# copy by renaming them via a force-included h5_toml_prefix.h (so the vendored
+# files stay unmodified).  Vendored code is also exempt from HDF5's
+# warnings-as-errors.
 include (CheckCCompilerFlag)
-check_c_compiler_flag ("-fvisibility=hidden" HDF5_C_HAS_FVISIBILITY_HIDDEN)
-if (HDF5_C_HAS_FVISIBILITY_HIDDEN)
-  set_source_files_properties (${HDF5_SRC_DIR}/tomlc17/tomlc17.c
-    PROPERTIES COMPILE_OPTIONS "-fvisibility=hidden"
-  )
-endif ()
 
 if (MSVC)
   set_property (SOURCE ${HDF5_SRC_DIR}/tomlc17/tomlc17.c APPEND PROPERTY COMPILE_OPTIONS

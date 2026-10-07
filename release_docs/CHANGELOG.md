@@ -91,7 +91,7 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    Filter plugins can read `key = value` parameter strings with the new `H5Zconfig_has_key()`, `H5Zconfig_get_int()`, `H5Zconfig_get_double()`, `H5Zconfig_get_bool()` and `H5Zconfig_get_str()` functions, declared in `H5Zdevelop.h`. The strings use a subset of TOML v1.0.0 syntax. This is the first part of the string-based filter configuration API (RFC-HDFG-2026-001).
 
-   The [tomlc17](https://github.com/cktan/tomlc17) TOML parser (MIT license) is now compiled into libhdf5 from `src/tomlc17/`. Its symbols are hidden in the shared library and renamed in the static library, so they cannot collide with an application's own copy.
+   The [tomlc17](https://github.com/cktan/tomlc17) TOML parser (MIT license) is now compiled into libhdf5 from `src/tomlc17/`. Its symbols are renamed with an `H5Z__toml_c17_` prefix, so they cannot collide with an application's own copy.
 
 ### Added the H5F_LIBVER_V300 library version bound
 
