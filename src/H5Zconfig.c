@@ -21,6 +21,7 @@
 
 #include "H5private.h"   /* Generic Functions   */
 #include "H5Eprivate.h"  /* Error handling      */
+#include "H5FLprivate.h" /* Free lists          */
 #include "H5MMprivate.h" /* Memory management   */
 #include "H5Zpkg.h"      /* Filter internals    */
 
@@ -239,313 +240,227 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-/*
- * Fail if PARAMS contains a key not in KNOWN_KEYS.  Nested keys are matched
- * by dotted path, so "a = {b = 1}" and "a.b = 1" are equivalent.
+/* A parsed filter parameter string */
+struct H5Z_config_t {
+    toml_result_t tr;     /* Parse result; owns the memory behind tab */
+    toml_datum_t  tab;    /* The parameter table */
+    bool          parsed; /* false for an empty string (no keys, nothing to free) */
+};
+
+/* Declare a free list to manage H5Z_config_t objects */
+H5FL_DEFINE_STATIC(H5Z_config_t);
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z_config_parse
+ *
+ * Purpose:     Parse PARAMS once.  NULL or "" yields an empty config.
+ *
+ * Return:      Success:    Config, freed with H5Z_config_close()
+ *              Failure:    NULL
+ *-------------------------------------------------------------------------
+ */
+H5Z_config_t *
+H5Z_config_parse(const char *params)
+{
+    H5Z_config_t *config    = NULL;
+    H5Z_config_t *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    if (NULL == (config = H5FL_CALLOC(H5Z_config_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate filter config");
+
+    if (params && *params) {
+        if (H5Z__toml_parse_params(params, &config->tr, &config->tab) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "failed to parse filter parameter string");
+        config->parsed = true;
+    }
+
+    ret_value = config;
+
+done:
+    if (!ret_value && config)
+        config = H5FL_FREE(H5Z_config_t, config);
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_config_parse() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z_config_close
+ *
+ * Purpose:     Free a config from H5Z_config_parse().  NULL is a no-op.
+ *
+ * Return:      SUCCEED
+ *-------------------------------------------------------------------------
  */
 herr_t
-H5Z__config_validate_keys(const char *params, const char *const *known_keys)
+H5Z_config_close(H5Z_config_t *config)
 {
-    toml_result_t tr;
-    toml_datum_t  ptab;
-    bool          tr_valid  = false;
-    herr_t        ret_value = SUCCEED;
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if (config) {
+        if (config->parsed)
+            toml_free(config->tr);
+        config = H5FL_FREE(H5Z_config_t, config);
+    }
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5Z_config_close() */
+
+/*
+ * Fail if CONFIG contains a key not in KNOWN_KEYS (a NULL-terminated list).
+ * Nested keys are matched by dotted path, so "a = {b = 1}" and "a.b = 1" are
+ * equivalent.
+ */
+herr_t
+H5Z__config_validate_keys(const H5Z_config_t *config, const char *const *known_keys)
+{
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
-    if (!params || *params == '\0')
-        HGOTO_DONE(SUCCEED);
+    if (!config)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config must not be NULL");
+    if (!known_keys)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "known_keys must not be NULL");
 
-    if (strlen(params) > H5Z_CONFIG_STRING_MAX)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "filter parameter string exceeds H5Z_CONFIG_STRING_MAX (%d bytes)",
-                    H5Z_CONFIG_STRING_MAX);
-
-    if (H5Z__toml_parse_params(params, &tr, &ptab) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "failed to parse filter parameter string");
-    tr_valid = true;
-
-    if (known_keys) {
-        if (H5Z__validate_table_keys(ptab, NULL, known_keys) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown parameter key in filter configuration");
-    }
+    if (config->parsed && H5Z__validate_table_keys(config->tab, NULL, known_keys) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown parameter key in filter configuration");
 
 done:
-    if (tr_valid)
-        toml_free(tr);
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-/*
- * Parse PARAMS and look up KEY (a dotted path is allowed).  The caller must
- * toml_free(*tr) only when this returns > 0.
- */
+/* Look up KEY (a dotted path is allowed) in CONFIG */
 static htri_t
-H5Z__config_get_datum(const char *params, const char *key, toml_result_t *tr, toml_datum_t *d)
+H5Z__config_get_datum(const H5Z_config_t *config, const char *key, toml_datum_t *d)
 {
-    toml_datum_t ptab;
-    bool         tr_valid  = false;
-    htri_t       ret_value = FAIL;
+    htri_t ret_value = true;
 
     FUNC_ENTER_PACKAGE
 
-    if (!params)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "params must not be NULL");
+    if (!config)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config must not be NULL");
     if (!key || !*key)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "key must be a non-empty string");
-    if (!params[0])
+    if (!config->parsed)
         HGOTO_DONE(false);
 
-    if (H5Z__toml_parse_params(params, tr, &ptab) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "failed to parse parameter string");
-    tr_valid = true;
-
-    *d = toml_seek(ptab, key);
+    *d = toml_seek(config->tab, key);
     if (d->type == TOML_UNKNOWN)
         HGOTO_DONE(false);
 
-    ret_value = true;
-
 done:
-    if (tr_valid && ret_value <= 0)
-        toml_free(*tr);
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /* Internal version of H5Zconfig_has_key() */
 htri_t
-H5Z__config_has_key(const char *params, const char *key)
+H5Z__config_has_key(const H5Z_config_t *config, const char *key)
 {
-    toml_result_t tr;
-    toml_datum_t  d;
-    htri_t        ret_value = FAIL;
+    toml_datum_t d;
+    htri_t       ret_value = FAIL;
 
     FUNC_ENTER_PACKAGE
 
-    if ((ret_value = H5Z__config_get_datum(params, key, &tr, &d)) < 0)
+    if ((ret_value = H5Z__config_get_datum(config, key, &d)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "failed to look up key");
-    if (ret_value > 0)
-        toml_free(tr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
-
-/*-------------------------------------------------------------------------
- * Function:    H5Zconfig_has_key
- *
- * Purpose:     Check whether a key exists in a TOML parameter string.
- *
- * Return:      > 0 present, 0 absent, < 0 error.
- *
- * Since:  3.0.0
- *-------------------------------------------------------------------------
- */
-htri_t
-H5Zconfig_has_key(const char *params, const char *key)
-{
-    htri_t ret_value = FAIL;
-
-    FUNC_ENTER_API(FAIL)
-
-    if ((ret_value = H5Z__config_has_key(params, key)) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to look up filter parameter key");
-
-done:
-    FUNC_LEAVE_API(ret_value)
 }
 
 /* Internal version of H5Zconfig_get_int() */
 htri_t
-H5Z__config_get_int(const char *params, const char *key, int64_t *out)
+H5Z__config_get_int(const H5Z_config_t *config, const char *key, int64_t *out)
 {
-    toml_result_t tr;
-    toml_datum_t  d;
-    bool          tr_valid = false;
-    htri_t        found;
-    htri_t        ret_value = FAIL;
+    toml_datum_t d;
+    htri_t       ret_value = FAIL;
 
     FUNC_ENTER_PACKAGE
 
     if (!out)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "out must not be NULL");
-    if ((found = H5Z__config_get_datum(params, key, &tr, &d)) < 0)
+    if ((ret_value = H5Z__config_get_datum(config, key, &d)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "failed to look up key");
-    if (found == 0)
+    if (ret_value == 0)
         HGOTO_DONE(false);
-    tr_valid = true;
 
     if (d.type != TOML_INT64)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "type mismatch: key '%s' is not a TOML integer", key);
-    *out      = d.u.int64;
-    ret_value = true;
+    *out = d.u.int64;
 
 done:
-    if (tr_valid)
-        toml_free(tr);
     FUNC_LEAVE_NOAPI(ret_value)
-}
-
-/*-------------------------------------------------------------------------
- * Function:    H5Zconfig_get_int
- *
- * Purpose:     Look up a key and return its TOML integer value (int64_t).
- *
- * Return:      > 0 found and converted, 0 not found, < 0 error (includes
- *              type mismatch and parse error).
- *
- * Since:  3.0.0
- *-------------------------------------------------------------------------
- */
-htri_t
-H5Zconfig_get_int(const char *params, const char *key, int64_t *out)
-{
-    htri_t ret_value = FAIL;
-
-    FUNC_ENTER_API(FAIL)
-
-    if ((ret_value = H5Z__config_get_int(params, key, out)) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get integer filter parameter");
-
-done:
-    FUNC_LEAVE_API(ret_value)
 }
 
 /* Internal version of H5Zconfig_get_double() */
 htri_t
-H5Z__config_get_double(const char *params, const char *key, double *out)
+H5Z__config_get_double(const H5Z_config_t *config, const char *key, double *out)
 {
-    toml_result_t tr;
-    toml_datum_t  d;
-    bool          tr_valid = false;
-    htri_t        found;
-    htri_t        ret_value = FAIL;
+    toml_datum_t d;
+    htri_t       ret_value = FAIL;
 
     FUNC_ENTER_PACKAGE
 
     if (!out)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "out must not be NULL");
-    if ((found = H5Z__config_get_datum(params, key, &tr, &d)) < 0)
+    if ((ret_value = H5Z__config_get_datum(config, key, &d)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "failed to look up key");
-    if (found == 0)
+    if (ret_value == 0)
         HGOTO_DONE(false);
-    tr_valid = true;
 
     if (d.type != TOML_FP64)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "type mismatch: key '%s' is not a TOML float", key);
     if (!isfinite(d.u.fp64))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "inf/nan float values are not supported for filter parameters (key '%s')", key);
-    *out      = d.u.fp64;
-    ret_value = true;
+    *out = d.u.fp64;
 
 done:
-    if (tr_valid)
-        toml_free(tr);
     FUNC_LEAVE_NOAPI(ret_value)
-}
-
-/*-------------------------------------------------------------------------
- * Function:    H5Zconfig_get_double
- *
- * Purpose:     Look up a key and return its TOML float value (double).
- *              inf and nan are rejected with H5E_BADVALUE.
- *
- * Return:      > 0 found and converted, 0 not found, < 0 error.
- *
- * Since:  3.0.0
- *-------------------------------------------------------------------------
- */
-htri_t
-H5Zconfig_get_double(const char *params, const char *key, double *out)
-{
-    htri_t ret_value = FAIL;
-
-    FUNC_ENTER_API(FAIL)
-
-    if ((ret_value = H5Z__config_get_double(params, key, out)) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get float filter parameter");
-
-done:
-    FUNC_LEAVE_API(ret_value)
 }
 
 /* Internal version of H5Zconfig_get_bool() */
 htri_t
-H5Z__config_get_bool(const char *params, const char *key, bool *out)
+H5Z__config_get_bool(const H5Z_config_t *config, const char *key, bool *out)
 {
-    toml_result_t tr;
-    toml_datum_t  d;
-    bool          tr_valid = false;
-    htri_t        found;
-    htri_t        ret_value = FAIL;
+    toml_datum_t d;
+    htri_t       ret_value = FAIL;
 
     FUNC_ENTER_PACKAGE
 
     if (!out)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "out must not be NULL");
-    if ((found = H5Z__config_get_datum(params, key, &tr, &d)) < 0)
+    if ((ret_value = H5Z__config_get_datum(config, key, &d)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "failed to look up key");
-    if (found == 0)
+    if (ret_value == 0)
         HGOTO_DONE(false);
-    tr_valid = true;
 
     if (d.type != TOML_BOOLEAN)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "type mismatch: key '%s' is not a TOML boolean", key);
-    *out      = d.u.boolean ? true : false;
-    ret_value = true;
+    *out = d.u.boolean ? true : false;
 
 done:
-    if (tr_valid)
-        toml_free(tr);
     FUNC_LEAVE_NOAPI(ret_value)
-}
-
-/*-------------------------------------------------------------------------
- * Function:    H5Zconfig_get_bool
- *
- * Purpose:     Look up a key and return its TOML boolean value (bool).
- *
- * Return:      > 0 found, 0 not found, < 0 error.
- *
- * Since:  3.0.0
- *-------------------------------------------------------------------------
- */
-htri_t
-H5Zconfig_get_bool(const char *params, const char *key, bool *out)
-{
-    htri_t ret_value = FAIL;
-
-    FUNC_ENTER_API(FAIL)
-
-    if ((ret_value = H5Z__config_get_bool(params, key, out)) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get boolean filter parameter");
-
-done:
-    FUNC_LEAVE_API(ret_value)
 }
 
 /* Internal version of H5Zconfig_get_str() */
 htri_t
-H5Z__config_get_str(const char *params, const char *key, char *buf, size_t *buf_size)
+H5Z__config_get_str(const H5Z_config_t *config, const char *key, char *buf, size_t *buf_size)
 {
-    toml_result_t tr;
-    toml_datum_t  d;
-    bool          tr_valid = false;
-    htri_t        found;
-    size_t        vlen;
-    size_t        cap;
-    htri_t        ret_value = FAIL;
+    toml_datum_t d;
+    size_t       vlen;
+    size_t       cap;
+    htri_t       ret_value = FAIL;
 
     FUNC_ENTER_PACKAGE
 
     if (buf && !buf_size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf_size must not be NULL when buf is non-NULL");
-    if ((found = H5Z__config_get_datum(params, key, &tr, &d)) < 0)
+    if ((ret_value = H5Z__config_get_datum(config, key, &d)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "failed to look up key");
-    if (found == 0)
+    if (ret_value == 0)
         HGOTO_DONE(false);
-    tr_valid = true;
 
     if (d.type != TOML_STRING)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
@@ -569,12 +484,180 @@ H5Z__config_get_str(const char *params, const char *key, char *buf, size_t *buf_
         }
     }
 
-    ret_value = true;
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Zconfig_parse
+ *
+ * Purpose:     Parse a filter parameter string.  NULL or "" yields a config
+ *              with no keys.
+ *
+ * Return:      Success:    Config, freed with H5Zconfig_close()
+ *              Failure:    NULL
+ *
+ * Since:  3.0.0
+ *-------------------------------------------------------------------------
+ */
+H5Z_config_t *
+H5Zconfig_parse(const char *params)
+{
+    H5Z_config_t *ret_value = NULL;
+
+    FUNC_ENTER_API(NULL)
+
+    if (NULL == (ret_value = H5Z_config_parse(params)))
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, NULL, "unable to parse filter parameter string");
 
 done:
-    if (tr_valid)
-        toml_free(tr);
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_API(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Zconfig_close
+ *
+ * Purpose:     Free a config from H5Zconfig_parse().  NULL is a no-op.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Since:  3.0.0
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Zconfig_close(H5Z_config_t *config)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    if (H5Z_config_close(config) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTFREE, FAIL, "unable to free filter config");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Zconfig_validate_keys
+ *
+ * Purpose:     Fail if CONFIG contains a key not in KNOWN_KEYS, a
+ *              NULL-terminated list of dotted key paths.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Since:  3.0.0
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Zconfig_validate_keys(const H5Z_config_t *config, const char *const known_keys[])
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    if (H5Z__config_validate_keys(config, known_keys) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "filter parameter validation failed");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Zconfig_has_key
+ *
+ * Purpose:     Check whether a key exists in a filter config.
+ *
+ * Return:      > 0 present, 0 absent, < 0 error.
+ *
+ * Since:  3.0.0
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Zconfig_has_key(const H5Z_config_t *config, const char *key)
+{
+    htri_t ret_value = FAIL;
+
+    FUNC_ENTER_API(FAIL)
+
+    if ((ret_value = H5Z__config_has_key(config, key)) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to look up filter parameter key");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Zconfig_get_int
+ *
+ * Purpose:     Look up a key and return its TOML integer value (int64_t).
+ *
+ * Return:      > 0 found, 0 not found, < 0 error (including type mismatch).
+ *
+ * Since:  3.0.0
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Zconfig_get_int(const H5Z_config_t *config, const char *key, int64_t *out)
+{
+    htri_t ret_value = FAIL;
+
+    FUNC_ENTER_API(FAIL)
+
+    if ((ret_value = H5Z__config_get_int(config, key, out)) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get integer filter parameter");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Zconfig_get_double
+ *
+ * Purpose:     Look up a key and return its TOML float value (double).
+ *              inf and nan are rejected with H5E_BADVALUE.
+ *
+ * Return:      > 0 found, 0 not found, < 0 error.
+ *
+ * Since:  3.0.0
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Zconfig_get_double(const H5Z_config_t *config, const char *key, double *out)
+{
+    htri_t ret_value = FAIL;
+
+    FUNC_ENTER_API(FAIL)
+
+    if ((ret_value = H5Z__config_get_double(config, key, out)) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get float filter parameter");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Zconfig_get_bool
+ *
+ * Purpose:     Look up a key and return its TOML boolean value (bool).
+ *
+ * Return:      > 0 found, 0 not found, < 0 error.
+ *
+ * Since:  3.0.0
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Zconfig_get_bool(const H5Z_config_t *config, const char *key, bool *out)
+{
+    htri_t ret_value = FAIL;
+
+    FUNC_ENTER_API(FAIL)
+
+    if ((ret_value = H5Z__config_get_bool(config, key, out)) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get boolean filter parameter");
+
+done:
+    FUNC_LEAVE_API(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -589,13 +672,13 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5Zconfig_get_str(const char *params, const char *key, char *buf, size_t *buf_size)
+H5Zconfig_get_str(const H5Z_config_t *config, const char *key, char *buf, size_t *buf_size)
 {
     htri_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
 
-    if ((ret_value = H5Z__config_get_str(params, key, buf, buf_size)) < 0)
+    if ((ret_value = H5Z__config_get_str(config, key, buf, buf_size)) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get string filter parameter");
 
 done:
