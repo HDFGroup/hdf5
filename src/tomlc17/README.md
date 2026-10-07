@@ -37,22 +37,30 @@ local changes, for subnormal float literals:
 <https://github.com/cktan/tomlc17/issues/48> (commit `64a063b86`) and their
 rejection when denormals-are-zero is set, e.g. under Intel icx or
 `-ffast-math` (<https://github.com/cktan/tomlc17/issues/49>, commit
-`4d2a53f02`).  Both are covered by `canon-10` in `test/tfilter2.c`.
+`4d2a53f02`).
 
 ## Known limitations
 
 ### Subnormal literals where `strtod()` flushes them
 
 On platforms whose libc flushes inside `strtod()` under ambient FTZ/DAZ --
-observed on Windows Intel oneAPI and MSYS2 clangarm64, where `0x1p-1074`
-round-trips to a literal `0.0` -- the parsed value truly is zero and tomlc17
-rejects the literal as an underflow. HDF5 handles that case outside the
+observed on Windows Intel oneAPI and MSYS2 clangarm64, where the smallest
+subnormal, `4.9406564584124654e-324`, converts to `0.0` -- the parsed value
+truly is zero and tomlc17 rejects the literal as an underflow. HDF5 handles that case outside the
 parser: `tfilter2` probes the platform's `strtod`/`snprintf` round-trip at
 run time and skips only the two true-subnormal exponents when the probe shows
 the libc does not preserve them (see `test/tfilter2.c`). Filter parameters
 that are exact subnormal doubles (magnitude below ~2.2e-308) are not a
 realistic compression level, tolerance, or scale factor, so this is a
 documented limitation rather than a gap to close in the parser.
+
+### Float parsing depends on `LC_NUMERIC`
+
+`scan_float()` converts float literals with `strtod()`, which follows the
+calling thread's `LC_NUMERIC` locale.  If an application switches to a locale
+whose decimal point is not '.', such as `de_DE`, every float literal fails to
+parse.  Not patched here, so that the files stay identical to a tagged
+release.
 
 ### UBSan report in `page_create()`
 

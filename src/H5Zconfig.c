@@ -27,221 +27,6 @@
 /* The prefix headers rename the vendored symbols and must come first */
 #include "tomlc17/h5_toml_prefix.h"
 #include "tomlc17/tomlc17.h"
-#include "ryu/h5_ryu_prefix.h"
-#include "ryu/ryu.h"
-
-/* Append one source character to the output buffer, or skip it if full. */
-static inline void
-H5Z__copy_char(char *out, size_t cap, size_t *pos, const char **p)
-{
-    if (*pos + 1 < cap)
-        out[(*pos)++] = **p;
-    (*p)++;
-}
-
-/* Append two source characters (a backslash escape), or skip both if full. */
-static inline void
-H5Z__copy_chars2(char *out, size_t cap, size_t *pos, const char **p)
-{
-    if (*pos + 2 < cap) {
-        out[(*pos)++] = (*p)[0];
-        out[(*pos)++] = (*p)[1];
-    }
-    (*p) += 2;
-}
-
-/*
- * Format finite VAL as the shortest decimal that round-trips to the same double and
- * that TOML lexes as a float (never a bare integer like "8").  Ryu supplies
- * the digits (see issue #6153); they are re-laid out with printf("%g")'s
- * fixed/scientific rule, which moves the decimal point but never changes a
- * digit.  Locale-independent.
- *
- * Returns the length written (excluding the NUL), or -1 if BUFSIZE is too
- * small.
- */
-static int
-H5Z__format_double_canonical(char *buf, size_t bufsize, double val)
-{
-    char ryu[32];       /* d2s_buffered_n() writes at most 24 chars */
-    char dig[24] = {0}; /* at most 17 significant digits */
-    char tmp[40];       /* longest result is 24 chars + NUL */
-    int  ryu_len, i, ndigits = 0, e10 = 0, n = 0;
-    bool neg, exp_neg;
-
-    assert(isfinite(val));
-
-    /* Split Ryu's "[-]d[.ddd]E[-]ddd" (not NUL-terminated) into sign, digits
-     * and exponent */
-    ryu_len = d2s_buffered_n(val, ryu);
-
-    i   = 0;
-    neg = (ryu[0] == '-');
-    if (neg)
-        i++;
-    while (i < ryu_len && ryu[i] != 'E') {
-        if (ryu[i] != '.')
-            dig[ndigits++] = ryu[i];
-        i++;
-    }
-    i++; /* skip 'E' */
-    exp_neg = (ryu[i] == '-');
-    if (exp_neg)
-        i++;
-    while (i < ryu_len)
-        e10 = e10 * 10 + (ryu[i++] - '0');
-    if (exp_neg)
-        e10 = -e10;
-
-    if (neg)
-        tmp[n++] = '-';
-
-    if (e10 >= -4 && e10 < ndigits) {
-        /* Fixed-point; e10 < ndigits means no right-hand zero padding */
-        if (e10 >= 0) {
-            for (i = 0; i <= e10; i++)
-                tmp[n++] = dig[i];
-            tmp[n++] = '.';
-            if (e10 + 1 == ndigits)
-                tmp[n++] = '0'; /* force float lexical class */
-            else
-                for (i = e10 + 1; i < ndigits; i++)
-                    tmp[n++] = dig[i];
-        }
-        else {
-            tmp[n++] = '0';
-            tmp[n++] = '.';
-            for (i = 0; i < -e10 - 1; i++)
-                tmp[n++] = '0';
-            for (i = 0; i < ndigits; i++)
-                tmp[n++] = dig[i];
-        }
-    }
-    else {
-        /* Scientific, with printf("%e")'s two-digit signed exponent */
-        int abs_e10 = (e10 < 0) ? -e10 : e10;
-
-        tmp[n++] = dig[0];
-        if (ndigits > 1) {
-            tmp[n++] = '.';
-            for (i = 1; i < ndigits; i++)
-                tmp[n++] = dig[i];
-        }
-        tmp[n++] = 'e';
-        tmp[n++] = (e10 < 0) ? '-' : '+';
-        if (abs_e10 >= 100)
-            tmp[n++] = (char)('0' + abs_e10 / 100);
-        tmp[n++] = (char)('0' + (abs_e10 / 10) % 10);
-        tmp[n++] = (char)('0' + abs_e10 % 10);
-    }
-    tmp[n] = '\0';
-
-    if ((size_t)n >= bufsize)
-        return -1;
-    memcpy(buf, tmp, (size_t)n + 1);
-    return n;
-}
-
-/*
- * Return a copy of SRC with C99 hex-float literals ("0x1.8p+1") replaced by
- * exact decimals, since TOML has no hex-float syntax.  Quoted strings,
- * comments and literals that overflow a double are left alone.  Caller frees with H5MM_xfree().
- */
-static char *
-H5Z__rewrite_hexfloats(const char *src)
-{
-    const char *p   = src;
-    size_t      len = strlen(src);
-    size_t      cap;
-    char       *out;
-    size_t      pos = 0;
-
-    /* A rewrite grows a token by under 4x ("0x1p99" -> "6.338253001141147e+29") */
-    if (len > (SIZE_MAX - 1) / 8)
-        return NULL;
-    cap = len * 8 + 1;
-    out = (char *)H5MM_malloc(cap);
-
-    if (!out)
-        return NULL;
-
-    while (*p) {
-        if (*p == '"') {
-            H5Z__copy_char(out, cap, &pos, &p);
-            while (*p && *p != '"') {
-                if (*p == '\\' && *(p + 1))
-                    H5Z__copy_chars2(out, cap, &pos, &p);
-                else
-                    H5Z__copy_char(out, cap, &pos, &p);
-            }
-            if (*p == '"')
-                H5Z__copy_char(out, cap, &pos, &p);
-            continue;
-        }
-
-        if (*p == '\'') {
-            H5Z__copy_char(out, cap, &pos, &p);
-            while (*p && *p != '\'')
-                H5Z__copy_char(out, cap, &pos, &p);
-            if (*p == '\'')
-                H5Z__copy_char(out, cap, &pos, &p);
-            continue;
-        }
-
-        if (*p == '#') {
-            while (*p && *p != '\n')
-                H5Z__copy_char(out, cap, &pos, &p);
-            continue;
-        }
-
-        const char *tok_start = p;
-        if (*p == '+' || *p == '-')
-            p++;
-
-        if (p[0] == '0' && (p[1] == 'x' || p[1] == 'X')) {
-            const char *q = p + 2;
-            while (isxdigit((unsigned char)*q) || *q == '_')
-                q++;
-            if (*q == '.' || *q == 'p' || *q == 'P') {
-                if (*q == '.')
-                    q++;
-                while (isxdigit((unsigned char)*q) || *q == '_')
-                    q++;
-                if (*q == 'p' || *q == 'P') {
-                    q++;
-                    if (*q == '+' || *q == '-')
-                        q++;
-                    while (isdigit((unsigned char)*q))
-                        q++;
-                    size_t tok_len = (size_t)(q - tok_start);
-                    char   tmp[64];
-                    if (tok_len < sizeof(tmp)) {
-                        memcpy(tmp, tok_start, tok_len);
-                        tmp[tok_len] = '\0';
-                        char  *end;
-                        double val = strtod(tmp, &end);
-                        /* An overflowing literal is left as-is for the parser to reject */
-                        if (end == tmp + tok_len && isfinite(val)) {
-                            char dec[32];
-                            int  n = H5Z__format_double_canonical(dec, sizeof(dec), val);
-                            if (n >= 0 && pos + (size_t)n < cap) {
-                                memcpy(out + pos, dec, (size_t)n);
-                                pos += (size_t)n;
-                                p = q;
-                                continue;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        p = tok_start;
-        H5Z__copy_char(out, cap, &pos, &p);
-    }
-    out[pos] = '\0';
-    return out;
-}
 
 /*
  * Wrap PARAMS, with or without its outer braces, as the TOML document
@@ -284,10 +69,8 @@ H5Z__toml_wrap(const char *params)
  * Function:    H5Z_canonicalize_params
  *
  * Purpose:     Return a copy of PARAMS in the form stored in pipeline v3:
- *              outer braces and surrounding whitespace removed, hex-floats
- *              rewritten as exact decimals, everything else unchanged.  The
- *              result is valid TOML, so other readers can use a stock TOML
- *              parser.
+ *              outer braces and surrounding whitespace removed, everything
+ *              else unchanged.
  *
  * Return:      Success:    Heap-allocated NUL-terminated string, freed by
  *                          the caller with H5MM_xfree().
@@ -297,21 +80,17 @@ H5Z__toml_wrap(const char *params)
 char *
 H5Z_canonicalize_params(const char *params)
 {
-    char       *expanded  = NULL;
-    char       *ret_value = NULL;
     const char *p;
     const char *e;
     size_t      len;
+    char       *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (params == NULL)
         HGOTO_DONE(NULL);
 
-    if (NULL == (expanded = H5Z__rewrite_hexfloats(params)))
-        HGOTO_DONE(NULL);
-
-    p = expanded;
+    p = params;
     while (*p == ' ' || *p == '\t')
         p++;
     if (*p == '{') {
@@ -337,7 +116,6 @@ H5Z_canonicalize_params(const char *params)
     }
 
 done:
-    H5MM_xfree(expanded);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_canonicalize_params() */
 
@@ -367,7 +145,6 @@ H5Z__count_table_keys(toml_datum_t tab)
 static htri_t
 H5Z__toml_parse_params(const char *params, toml_result_t *tr_out, toml_datum_t *ptab_out)
 {
-    char  *expanded  = NULL;
     char  *wrapped   = NULL;
     htri_t ret_value = true;
 
@@ -377,12 +154,6 @@ H5Z__toml_parse_params(const char *params, toml_result_t *tr_out, toml_datum_t *
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "filter parameter string exceeds H5Z_CONFIG_STRING_MAX (%d bytes)",
                     H5Z_CONFIG_STRING_MAX);
-
-    if (params && *params) {
-        if (NULL == (expanded = H5Z__rewrite_hexfloats(params)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "out of memory rewriting hex-float literals");
-        params = expanded;
-    }
 
     if (NULL == (wrapped = H5Z__toml_wrap(params)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "out of memory for TOML wrapper buffer");
@@ -418,7 +189,6 @@ H5Z__toml_parse_params(const char *params, toml_result_t *tr_out, toml_datum_t *
 
 done:
     H5MM_xfree(wrapped);
-    H5MM_xfree(expanded);
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -576,13 +346,13 @@ H5Zconfig_has_key(const char *params, const char *key)
 {
     htri_t ret_value = FAIL;
 
-    FUNC_ENTER_API_NOINIT
+    FUNC_ENTER_API(FAIL)
 
     if ((ret_value = H5Z__config_has_key(params, key)) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to look up filter parameter key");
 
 done:
-    FUNC_LEAVE_API_NOINIT(ret_value)
+    FUNC_LEAVE_API(ret_value)
 }
 
 /* Internal version of H5Zconfig_get_int() */
@@ -632,13 +402,13 @@ H5Zconfig_get_int(const char *params, const char *key, int64_t *out)
 {
     htri_t ret_value = FAIL;
 
-    FUNC_ENTER_API_NOINIT
+    FUNC_ENTER_API(FAIL)
 
     if ((ret_value = H5Z__config_get_int(params, key, out)) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get integer filter parameter");
 
 done:
-    FUNC_LEAVE_API_NOINIT(ret_value)
+    FUNC_LEAVE_API(ret_value)
 }
 
 /* Internal version of H5Zconfig_get_double() */
@@ -691,13 +461,13 @@ H5Zconfig_get_double(const char *params, const char *key, double *out)
 {
     htri_t ret_value = FAIL;
 
-    FUNC_ENTER_API_NOINIT
+    FUNC_ENTER_API(FAIL)
 
     if ((ret_value = H5Z__config_get_double(params, key, out)) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get float filter parameter");
 
 done:
-    FUNC_LEAVE_API_NOINIT(ret_value)
+    FUNC_LEAVE_API(ret_value)
 }
 
 /* Internal version of H5Zconfig_get_bool() */
@@ -746,13 +516,13 @@ H5Zconfig_get_bool(const char *params, const char *key, bool *out)
 {
     htri_t ret_value = FAIL;
 
-    FUNC_ENTER_API_NOINIT
+    FUNC_ENTER_API(FAIL)
 
     if ((ret_value = H5Z__config_get_bool(params, key, out)) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get boolean filter parameter");
 
 done:
-    FUNC_LEAVE_API_NOINIT(ret_value)
+    FUNC_LEAVE_API(ret_value)
 }
 
 /* Internal version of H5Zconfig_get_str() */
@@ -823,11 +593,11 @@ H5Zconfig_get_str(const char *params, const char *key, char *buf, size_t *buf_si
 {
     htri_t ret_value = FAIL;
 
-    FUNC_ENTER_API_NOINIT
+    FUNC_ENTER_API(FAIL)
 
     if ((ret_value = H5Z__config_get_str(params, key, buf, buf_size)) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get string filter parameter");
 
 done:
-    FUNC_LEAVE_API_NOINIT(ret_value)
+    FUNC_LEAVE_API(ret_value)
 }

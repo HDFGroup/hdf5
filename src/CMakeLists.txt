@@ -1041,33 +1041,6 @@ else ()
   endif ()
 endif ()
 
-# Same treatment for the vendored Ryu float formatter
-list (APPEND H5Z_SOURCES ${HDF5_SRC_DIR}/ryu/d2s.c)
-if (HDF5_C_HAS_FVISIBILITY_HIDDEN)
-  set_source_files_properties (${HDF5_SRC_DIR}/ryu/d2s.c
-    PROPERTIES COMPILE_OPTIONS "-fvisibility=hidden"
-  )
-endif ()
-if (MSVC)
-  set_property (SOURCE ${HDF5_SRC_DIR}/ryu/d2s.c APPEND PROPERTY COMPILE_OPTIONS
-    "/FI${HDF5_SRC_DIR}/ryu/h5_ryu_prefix.h" "/W0"
-  )
-else ()
-  if (HDF5_C_HAS_INCLUDE_FLAG)
-    set_property (SOURCE ${HDF5_SRC_DIR}/ryu/d2s.c APPEND PROPERTY COMPILE_OPTIONS
-      "-include" "${HDF5_SRC_DIR}/ryu/h5_ryu_prefix.h"
-    )
-  else ()
-    message (WARNING
-      "Compiler does not support -include; the vendored Ryu symbols will NOT "
-      "be prefixed and may collide with an application's own copy of Ryu when "
-      "statically linked. See src/CMakeLists.txt.")
-  endif ()
-  if (HDF5_C_HAS_W)
-    set_property (SOURCE ${HDF5_SRC_DIR}/ryu/d2s.c APPEND PROPERTY COMPILE_OPTIONS "-w")
-  endif ()
-endif ()
-
 set (H5Z_PUBLIC_HDRS
     ${HDF5_SRC_DIR}/H5Zdevelop.h
     ${HDF5_SRC_DIR}/H5Zpublic.h

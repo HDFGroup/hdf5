@@ -233,7 +233,10 @@ H5_DLL htri_t H5Zconfig_get_int(const char *params, const char *key, int64_t *ou
  *
  * \return Positive if found and converted, 0 if not found, negative on error.
  *
- * \details The decimal separator is always '.', regardless of locale.
+ * \details The decimal separator is always '.', as TOML requires.  The value
+ *          is converted with the C library's strtod(), so the calling thread's
+ *          LC_NUMERIC locale must use '.' as its decimal point (as the default
+ *          "C" locale does); otherwise the parse fails.
  *          TOML special floats (inf, nan) are rejected with H5E_BADVALUE.
  *          Returns negative if the key exists but its value is not a TOML
  *          float (type mismatch).
