@@ -1,4 +1,4 @@
-v2.3.0 --- July X , 2026
+v3.0.0 --- July X , 2026
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
@@ -22,7 +22,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 * [Platforms Tested](CHANGELOG.md#%EF%B8%8F-platforms-tested)
 * [Known Problems](CHANGELOG.md#-known-problems)
 
-# 🔆 Executive Summary: HDF5 Version 2.3.0
+# 🔆 Executive Summary: HDF5 Version 3.0.0
 
 
 ## Performance Enhancements:
