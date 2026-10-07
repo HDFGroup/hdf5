@@ -294,9 +294,7 @@ H5_DLL htri_t H5Zconfig_get_int(const H5Z_config_t *config, const char *key, int
  *
  * \details Returns negative (H5E_BADVALUE) if the value is not a TOML float,
  *          or is inf or nan.  The decimal separator is always '.', as TOML
- *          requires.  The string is converted with the C library's strtod(),
- *          so the LC_NUMERIC locale of the thread that parsed it must use '.'
- *          as its decimal point (as the default "C" locale does).
+ *          requires, whatever the application's LC_NUMERIC locale.
  *
  * \since 3.0.0
  */

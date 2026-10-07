@@ -17,6 +17,8 @@
 
 #include "h5test.h"
 
+#include <locale.h>
+
 /* Parse PARAMS, call an accessor on the result, and free it.  A NULL PARAMS
  * passes a NULL config so that the accessor's own argument check runs. */
 #define CFG_CALL(params, call)                                                                               \
@@ -556,6 +558,40 @@ error:
     return -1;
 }
 
+/* Floats parse with '.' even when LC_NUMERIC uses a comma decimal point */
+static int
+test_config_locale(void)
+{
+    char  *saved = NULL;
+    double dval  = 0.0;
+
+    TESTING("H5Zconfig_get_double: '.' parses under a comma-decimal locale");
+
+    if (NULL == (saved = strdup(setlocale(LC_NUMERIC, NULL))))
+        TEST_ERROR;
+    if (!setlocale(LC_NUMERIC, "de_DE.UTF-8") && !setlocale(LC_NUMERIC, "de_DE")) {
+        free(saved);
+        SKIPPED();
+        puts("    de_DE locale not installed");
+        return 0;
+    }
+
+    if (cfg_get_double("rate = 1.5", "rate", &dval) <= 0 || !dbl_same(dval, 1.5))
+        TEST_ERROR;
+
+    setlocale(LC_NUMERIC, saved);
+    free(saved);
+    PASSED();
+    return 0;
+
+error:
+    if (saved) {
+        setlocale(LC_NUMERIC, saved);
+        free(saved);
+    }
+    return -1;
+}
+
 int
 main(void)
 {
@@ -567,6 +603,7 @@ main(void)
     nerrors += test_parser() < 0 ? 1 : 0;
     nerrors += test_config_get_str_null_buf_size() < 0 ? 1 : 0;
     nerrors += test_config_handle() < 0 ? 1 : 0;
+    nerrors += test_config_locale() < 0 ? 1 : 0;
 
     if (nerrors)
         goto error;

@@ -25,6 +25,8 @@
 #include "H5MMprivate.h" /* Memory management   */
 #include "H5Zpkg.h"      /* Filter internals    */
 
+#include <locale.h>
+
 /* The prefix headers rename the vendored symbols and must come first */
 #include "tomlc17/h5_toml_prefix.h"
 #include "tomlc17/tomlc17.h"
@@ -140,6 +142,52 @@ H5Z__count_table_keys(toml_datum_t tab)
 }
 
 /*
+ * toml_parse() in the "C" numeric locale.  tomlc17 converts floats with
+ * strtod(), which follows LC_NUMERIC, so a locale whose decimal point is not
+ * '.' would reject every TOML float (cktan/tomlc17#57).  Only the calling
+ * thread's locale is changed.
+ */
+static toml_result_t
+H5Z__toml_parse_c_locale(const char *src, int len)
+{
+    const char   *dp = localeconv()->decimal_point;
+    toml_result_t tr;
+
+    if (dp && dp[0] == '.' && dp[1] == '\0')
+        return toml_parse(src, len);
+
+#if defined(H5_HAVE_WIN32_API)
+    {
+        int   prev_cfg = _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
+        char *saved    = H5MM_strdup(setlocale(LC_NUMERIC, NULL));
+
+        setlocale(LC_NUMERIC, "C");
+        tr = toml_parse(src, len);
+        if (saved)
+            setlocale(LC_NUMERIC, saved);
+        H5MM_xfree(saved);
+        if (prev_cfg != -1)
+            _configthreadlocale(prev_cfg);
+    }
+#elif defined(H5_HAVE_USELOCALE)
+    {
+        locale_t c_loc = newlocale(LC_NUMERIC_MASK, "C", (locale_t)0);
+        locale_t prev  = c_loc ? uselocale(c_loc) : (locale_t)0;
+
+        tr = toml_parse(src, len);
+        if (c_loc) {
+            uselocale(prev);
+            freelocale(c_loc);
+        }
+    }
+#else
+    tr = toml_parse(src, len);
+#endif
+
+    return tr;
+}
+
+/*
  * Parse PARAMS.  On success *ptab_out is the parameter table and the caller
  * must toml_free(*tr_out); on failure *tr_out is zeroed.
  */
@@ -159,7 +207,7 @@ H5Z__toml_parse_params(const char *params, toml_result_t *tr_out, toml_datum_t *
     if (NULL == (wrapped = H5Z__toml_wrap(params)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "out of memory for TOML wrapper buffer");
 
-    *tr_out = toml_parse(wrapped, (int)strlen(wrapped));
+    *tr_out = H5Z__toml_parse_c_locale(wrapped, (int)strlen(wrapped));
 
     if (!tr_out->ok) {
         /* errbuf below is sized with sizeof */
