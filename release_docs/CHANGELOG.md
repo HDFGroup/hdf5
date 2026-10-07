@@ -115,6 +115,8 @@ We would like to thank the many HDF5 community members who contributed to this r
    dataset. Currently each of these sub-operations is serialized (protected by
    a mutex), so there is not yet likely to be any performance improvement.
 
+   Reads are not threaded in builds with HDF5_ENABLE_THREADSAFE.
+
 ## Parallel Library
 
 ## Fortran Library

@@ -3155,9 +3155,16 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
         /* Get number of chunks */
         init_chunk_nalloc = H5D_CHUNK_GET_NODE_COUNT(dset_info);
 
+#ifdef H5_HAVE_THREADSAFE
+        /* The thread that called H5Dread() holds the API lock while it waits for the worker threads, so a
+         * worker that called back into the API, e.g. from a filter or file driver callback, would deadlock.
+         * Don't use threads in threadsafe builds */
+        do_threading = false;
+#else
         /* Check if we're using threads - first check if the global thread pool exists , we're not already in
          * a concurrency event, and there's at least one chunk selected */
         do_threading = (H5TS_pool_g != NULL) && !H5TS_currently_concurrent_g && (init_chunk_nalloc > 0);
+#endif
 
         /* The worker threads read through the VFD, so a file on an MPI-based
          * driver would have them calling MPI from outside the main thread.

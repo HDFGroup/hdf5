@@ -78,6 +78,8 @@ extern "C" {
  *          dataset chunk cache.
  *          \li For unfiltered datasets, the chunk cache is large enough to fit
  *          at least one chunk. See H5Pset_chunk_cache().
+ *          \li The library is not built with the \c HDF5_ENABLE_THREADSAFE
+ *          option.
  *
  * \note    This function is only present when the library is built with
  *          thread support, i.e. when \c H5_HAVE_THREADS is defined.  This is
