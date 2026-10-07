@@ -9,6 +9,7 @@
 #include <math.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -107,7 +108,7 @@ static page_t *page_create(int size) {
   if (!(0 <= size && size <= (1 << 30))) { // [0..1GB]
     return NULL;
   }
-  size_t totalsz = (size_t)&((page_t *)0)->data[size];
+  size_t totalsz = offsetof(page_t, data) + (size_t)size;
   page_t *page = MALLOC(totalsz);
   if (!page) {
     return NULL;
@@ -1004,13 +1005,16 @@ toml_result_t toml_parse_file_named(FILE *fp, const char *name) {
   char *buf = 0;
   int top = 0;                 // number of bytes read into buf[]
   enum { CHUNKSZ = 8 * 1024 }; // bytes to read per iteration
+  // File size limit. This also keeps cell_realloc's 30% growth margin
+  // well within INT_MAX.
+  enum { MAXFILESZ = 1 << 30 }; // 1GB
 
   // Read file into memory. cell_realloc handles capacity growth, so we only
   // need to ask for room for one more chunk each pass. Drive the loop off
   // fread's return value rather than feof(): feof() only reports true after
   // a read has already hit EOF.
   for (;;) {
-    if (top > INT_MAX - CHUNKSZ) {
+    if (top >= MAXFILESZ) {
       snprintf(result.errmsg, sizeof(result.errmsg), "file is too big");
       break;
     }

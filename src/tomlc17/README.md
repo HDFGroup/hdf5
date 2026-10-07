@@ -12,28 +12,32 @@ needed by the HDF5 filter configuration API are included.
 |---------------|------------------------------------------------|
 | Upstream URL  | https://github.com/cktan/tomlc17               |
 | License       | MIT (see `LICENSE` in this directory)          |
-| Vendored on   | 2026-10-05                                     |
-| Release / tag | `R261003` (commit `8d3766dda`)                 |
+| Vendored on   | 2026-10-07                                     |
+| Release / tag | `main` at commit `fba134d7d` (after `R261003`)  |
 
 Because tomlc17 does not include a version constant in its source, the
 vendored files are identified by their SHA-256 checksums:
 
 | File         | SHA-256                                                            |
 |--------------|--------------------------------------------------------------------|
-| `tomlc17.c`  | `c382824bdfdd12f89a6a228d0838f99deae2f2c1763c3215547a0d7137ffa39d` |
-| `tomlc17.h`  | `fa7f05a6057d7b4da1b63ce6185f07f5c734c98043a5d3a30ee7b9289060cba8` |
+| `tomlc17.c`  | `40de13f674959b120606ccee5064d07d7a7c5c0b0affe69d6b10b12248ca950e` |
+| `tomlc17.h`  | `29c0909092f4b23c7edce705167064f4a90548db5334b4aa2cd95d7ad801adb9` |
 
 ## HDF5-local modifications
 
-None.  Both files are byte-for-byte identical to the `R261003` tag, and are
-intentionally excluded from the HDF5 clang-format pass (see
+None.  Both files are byte-for-byte identical to upstream commit
+`fba134d7d`, and are intentionally excluded from the HDF5 clang-format pass (see
 `.github/workflows/clang-format-check.yml` and `bin/format_source`) so that
 future upstream updates can be dropped in without any re-formatting step.
 Symbols are renamed for static builds by force-including `h5_toml_prefix.h`
 from `src/CMakeLists.txt`, not by editing the sources.
 
-`R261003` contains the two `scan_float()` fixes earlier copies carried as
-local changes, for subnormal float literals:
+This commit is untagged; it is used instead of `R261003` for the
+`page_create()` UBSan fix (<https://github.com/cktan/tomlc17/issues/56>).
+Replace it with the next tagged release.
+
+The vendored copy contains the two `scan_float()` fixes earlier copies carried
+as local changes, for subnormal float literals:
 <https://github.com/cktan/tomlc17/issues/48> (commit `64a063b86`) and their
 rejection when denormals-are-zero is set, e.g. under Intel icx or
 `-ffast-math` (<https://github.com/cktan/tomlc17/issues/49>, commit
@@ -60,14 +64,6 @@ documented limitation rather than a gap to close in the parser.
 calling thread's `LC_NUMERIC` locale.  If an application switches to a locale
 whose decimal point is not '.', such as `de_DE`, every float literal fails to
 parse.  Reported as <https://github.com/cktan/tomlc17/issues/57>; not
-patched here, so that the files stay identical to a tagged release.
-
-### UBSan report in `page_create()`
-
-`page_create()` computes its allocation size as
-`&((page_t *)0)->data[size]`, which UBSan reports as a member access within
-a null pointer when built with `-Og` or higher.  The computed size is
-correct.  Reported as <https://github.com/cktan/tomlc17/issues/56>; not
 patched here, so that the files stay identical to a tagged release.
 
 ## Files
