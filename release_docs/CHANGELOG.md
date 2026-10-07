@@ -193,6 +193,10 @@ Fixes GitHub issue #6679.
 
    Fixes CVE-2026-19026, CVE-2026-19027, and CVE-2026-19028
 
+### Fixed a division by zero when reading an N-Bit dataset with a zero datatype size
+
+   `H5Z__nbit_decompress_one_array()` divides the stored size of an array or compound datatype by the size of its base type to work out how many elements to decompress. Both sizes come from the filter's client-data parameters, so a corrupted or crafted file could supply a zero base size. A zero atomic size also passes the existing precision/offset check when the precision and offset are zero as well, so it was not caught there. The three divisions in that function now reject a zero divisor with an error instead.
+
 ## Java Library
 
 ### Fixed datatype ID leaks when reading or writing nested datatypes through the JNI
