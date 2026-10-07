@@ -17,6 +17,13 @@
 
 #include "h5test.h"
 
+/* Bit-for-bit double comparison; the accessors must round-trip exactly */
+static bool
+dbl_same(double a, double b)
+{
+    return memcmp(&a, &b, sizeof(double)) == 0;
+}
+
 /* -----------------------------------------------------------------------
  * Parser tests - typed TOML accessor functions
  * ---------------------------------------------------------------------- */
@@ -89,7 +96,7 @@ test_parser(void)
 
     TESTING("H5Zconfig_get_double: float value");
     ret = H5Zconfig_get_double("tol = 1.5", "tol", &dval);
-    if (ret <= 0 || dval != 1.5)
+    if (ret <= 0 || !dbl_same(dval, 1.5))
         TEST_ERROR;
     PASSED();
 
@@ -277,25 +284,25 @@ test_parser(void)
 
     TESTING("H5Zconfig_get_double: hex-float 0x1.8p+1 == 3.0");
     ret = H5Zconfig_get_double("rate = 0x1.8p+1", "rate", &dval);
-    if (ret <= 0 || dval != 3.0)
+    if (ret <= 0 || !dbl_same(dval, 3.0))
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_double: hex-float 0x1.cp+1 == 3.5");
     ret = H5Zconfig_get_double("rate = 0x1.cp+1", "rate", &dval);
-    if (ret <= 0 || dval != 3.5)
+    if (ret <= 0 || !dbl_same(dval, 3.5))
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_double: negative hex-float -0x1p-1 == -0.5");
     ret = H5Zconfig_get_double("offset = -0x1p-1", "offset", &dval);
-    if (ret <= 0 || dval != -0.5)
+    if (ret <= 0 || !dbl_same(dval, -0.5))
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_double: hex-float without fraction 0xAp0 == 10.0");
     ret = H5Zconfig_get_double("val = 0xAp0", "val", &dval);
-    if (ret <= 0 || dval != 10.0)
+    if (ret <= 0 || !dbl_same(dval, 10.0))
         TEST_ERROR;
     PASSED();
 
@@ -305,7 +312,7 @@ test_parser(void)
         double orig = 0.1, rt;
         snprintf(pstr, sizeof(pstr), "rate = %a", orig);
         ret = H5Zconfig_get_double(pstr, "rate", &rt);
-        if (ret <= 0 || orig != rt)
+        if (ret <= 0 || !dbl_same(orig, rt))
             TEST_ERROR;
     }
     PASSED();

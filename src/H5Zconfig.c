@@ -50,47 +50,8 @@ H5Z__copy_chars2(char *out, size_t cap, size_t *pos, const char **p)
     (*p) += 2;
 }
 
-/* Tests the bit pattern because fast-math builds (icx's default, or
- * -ffinite-math-only) may fold isnan()/isinf() to 0. */
-static inline bool
-H5Z__fp64_is_inf_or_nan(double v)
-{
-#if H5_SIZEOF_DOUBLE == 8
-    uint64_t bits;
-
-    memcpy(&bits, &v, sizeof(v));
-    return (bits & 0x7ff0000000000000ULL) == 0x7ff0000000000000ULL;
-#else
-    return isnan(v) || isinf(v);
-#endif
-}
-
-/* TOML's spelling of a non-finite double, or NULL if V is finite.  Ryu's
- * "NaN"/"Infinity" are not valid TOML. */
-static inline const char *
-H5Z__fp64_nonfinite_toml(double v)
-{
-    if (!H5Z__fp64_is_inf_or_nan(v))
-        return NULL;
-
-#if H5_SIZEOF_DOUBLE == 8
-    {
-        uint64_t bits;
-
-        memcpy(&bits, &v, sizeof(v));
-        if (bits & 0x000fffffffffffffULL)
-            return "nan";
-        return (bits & 0x8000000000000000ULL) ? "-inf" : "inf";
-    }
-#else
-    if (isnan(v))
-        return "nan";
-    return (v < 0.0) ? "-inf" : "inf";
-#endif
-}
-
 /*
- * Format VAL as the shortest decimal that round-trips to the same double and
+ * Format finite VAL as the shortest decimal that round-trips to the same double and
  * that TOML lexes as a float (never a bare integer like "8").  Ryu supplies
  * the digits (see issue #6153); they are re-laid out with printf("%g")'s
  * fixed/scientific rule, which moves the decimal point but never changes a
@@ -102,20 +63,13 @@ H5Z__fp64_nonfinite_toml(double v)
 static int
 H5Z__format_double_canonical(char *buf, size_t bufsize, double val)
 {
-    const char *nonfinite = H5Z__fp64_nonfinite_toml(val);
-    char        ryu[32];       /* d2s_buffered_n() writes at most 24 chars */
-    char        dig[24] = {0}; /* at most 17 significant digits */
-    char        tmp[40];       /* longest result is 24 chars + NUL */
-    int         ryu_len, i, ndigits = 0, e10 = 0, n = 0;
-    bool        neg, exp_neg;
+    char ryu[32];       /* d2s_buffered_n() writes at most 24 chars */
+    char dig[24] = {0}; /* at most 17 significant digits */
+    char tmp[40];       /* longest result is 24 chars + NUL */
+    int  ryu_len, i, ndigits = 0, e10 = 0, n = 0;
+    bool neg, exp_neg;
 
-    if (nonfinite) {
-        n = (int)strlen(nonfinite);
-        if ((size_t)n >= bufsize)
-            return -1;
-        memcpy(buf, nonfinite, (size_t)n + 1);
-        return n;
-    }
+    assert(isfinite(val));
 
     /* Split Ryu's "[-]d[.ddd]E[-]ddd" (not NUL-terminated) into sign, digits
      * and exponent */
@@ -190,8 +144,8 @@ H5Z__format_double_canonical(char *buf, size_t bufsize, double val)
 
 /*
  * Return a copy of SRC with C99 hex-float literals ("0x1.8p+1") replaced by
- * exact decimals, since TOML has no hex-float syntax.  Quoted strings and
- * comments are left alone.  Caller frees with H5MM_xfree().
+ * exact decimals, since TOML has no hex-float syntax.  Quoted strings,
+ * comments and literals that overflow a double are left alone.  Caller frees with H5MM_xfree().
  */
 static char *
 H5Z__rewrite_hexfloats(const char *src)
@@ -266,7 +220,8 @@ H5Z__rewrite_hexfloats(const char *src)
                         tmp[tok_len] = '\0';
                         char  *end;
                         double val = strtod(tmp, &end);
-                        if (end == tmp + tok_len) {
+                        /* An overflowing literal is left as-is for the parser to reject */
+                        if (end == tmp + tok_len && isfinite(val)) {
                             char dec[32];
                             int  n = H5Z__format_double_canonical(dec, sizeof(dec), val);
                             if (n >= 0 && pos + (size_t)n < cap) {
@@ -387,7 +342,7 @@ done:
 } /* end H5Z_canonicalize_params() */
 
 /* Count leaf keys, including those in nested tables */
-static size_t
+static H5_ATTR_PURE size_t
 H5Z__count_table_keys(toml_datum_t tab)
 {
     size_t  count = 0;
@@ -587,6 +542,25 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
+/* Internal version of H5Zconfig_has_key() */
+htri_t
+H5Z__config_has_key(const char *params, const char *key)
+{
+    toml_result_t tr;
+    toml_datum_t  d;
+    htri_t        ret_value = FAIL;
+
+    FUNC_ENTER_PACKAGE
+
+    if ((ret_value = H5Z__config_get_datum(params, key, &tr, &d)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "failed to look up key");
+    if (ret_value > 0)
+        toml_free(tr);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
 /*-------------------------------------------------------------------------
  * Function:    H5Zconfig_has_key
  *
@@ -600,19 +574,15 @@ done:
 htri_t
 H5Zconfig_has_key(const char *params, const char *key)
 {
-    toml_result_t tr;
-    toml_datum_t  d;
-    htri_t        ret_value = FAIL;
+    htri_t ret_value = FAIL;
 
-    /* No API lock: filter set_config callbacks call this while
-     * H5Pappend_filter holds it */
-    FUNC_ENTER_API_NOINIT_NOLOCK
+    FUNC_ENTER_API_NOINIT
 
-    ret_value = H5Z__config_get_datum(params, key, &tr, &d);
+    if ((ret_value = H5Z__config_has_key(params, key)) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to look up filter parameter key");
 
-    if (ret_value > 0)
-        toml_free(tr);
-    FUNC_LEAVE_API_NOINIT_NOLOCK(ret_value)
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
 }
 
 /* Internal version of H5Zconfig_get_int() */
@@ -630,7 +600,7 @@ H5Z__config_get_int(const char *params, const char *key, int64_t *out)
     if (!out)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "out must not be NULL");
     if ((found = H5Z__config_get_datum(params, key, &tr, &d)) < 0)
-        HGOTO_DONE(FAIL);
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "failed to look up key");
     if (found == 0)
         HGOTO_DONE(false);
     tr_valid = true;
@@ -662,12 +632,47 @@ H5Zconfig_get_int(const char *params, const char *key, int64_t *out)
 {
     htri_t ret_value = FAIL;
 
-    /* No API lock: see comment on H5Zconfig_has_key. */
-    FUNC_ENTER_API_NOINIT_NOLOCK
+    FUNC_ENTER_API_NOINIT
 
-    ret_value = H5Z__config_get_int(params, key, out);
+    if ((ret_value = H5Z__config_get_int(params, key, out)) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get integer filter parameter");
 
-    FUNC_LEAVE_API_NOINIT_NOLOCK(ret_value)
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+}
+
+/* Internal version of H5Zconfig_get_double() */
+htri_t
+H5Z__config_get_double(const char *params, const char *key, double *out)
+{
+    toml_result_t tr;
+    toml_datum_t  d;
+    bool          tr_valid = false;
+    htri_t        found;
+    htri_t        ret_value = FAIL;
+
+    FUNC_ENTER_PACKAGE
+
+    if (!out)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "out must not be NULL");
+    if ((found = H5Z__config_get_datum(params, key, &tr, &d)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "failed to look up key");
+    if (found == 0)
+        HGOTO_DONE(false);
+    tr_valid = true;
+
+    if (d.type != TOML_FP64)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "type mismatch: key '%s' is not a TOML float", key);
+    if (!isfinite(d.u.fp64))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "inf/nan float values are not supported for filter parameters (key '%s')", key);
+    *out      = d.u.fp64;
+    ret_value = true;
+
+done:
+    if (tr_valid)
+        toml_free(tr);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -684,49 +689,20 @@ H5Zconfig_get_int(const char *params, const char *key, int64_t *out)
 htri_t
 H5Zconfig_get_double(const char *params, const char *key, double *out)
 {
-    toml_result_t tr;
-    toml_datum_t  d;
-    bool          tr_valid = false;
-    htri_t        found;
-    htri_t        ret_value = FAIL;
+    htri_t ret_value = FAIL;
 
-    /* No API lock: see comment on H5Zconfig_has_key. */
-    FUNC_ENTER_API_NOINIT_NOLOCK
+    FUNC_ENTER_API_NOINIT
 
-    if (!out)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "out must not be NULL");
-    if ((found = H5Z__config_get_datum(params, key, &tr, &d)) < 0)
-        HGOTO_DONE(FAIL);
-    if (found == 0)
-        HGOTO_DONE(false);
-    tr_valid = true;
-
-    if (d.type != TOML_FP64)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "type mismatch: key '%s' is not a TOML float", key);
-    if (H5Z__fp64_is_inf_or_nan(d.u.fp64))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "inf/nan float values are not supported for filter parameters (key '%s')", key);
-    *out      = d.u.fp64;
-    ret_value = true;
+    if ((ret_value = H5Z__config_get_double(params, key, out)) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get float filter parameter");
 
 done:
-    if (tr_valid)
-        toml_free(tr);
-    FUNC_LEAVE_API_NOINIT_NOLOCK(ret_value)
+    FUNC_LEAVE_API_NOINIT(ret_value)
 }
 
-/*-------------------------------------------------------------------------
- * Function:    H5Zconfig_get_bool
- *
- * Purpose:     Look up a key and return its TOML boolean value (hbool_t).
- *
- * Return:      > 0 found, 0 not found, < 0 error.
- *
- * Since:  3.0.0
- *-------------------------------------------------------------------------
- */
+/* Internal version of H5Zconfig_get_bool() */
 htri_t
-H5Zconfig_get_bool(const char *params, const char *key, bool *out)
+H5Z__config_get_bool(const char *params, const char *key, bool *out)
 {
     toml_result_t tr;
     toml_datum_t  d;
@@ -734,13 +710,12 @@ H5Zconfig_get_bool(const char *params, const char *key, bool *out)
     htri_t        found;
     htri_t        ret_value = FAIL;
 
-    /* No API lock: see comment on H5Zconfig_has_key. */
-    FUNC_ENTER_API_NOINIT_NOLOCK
+    FUNC_ENTER_PACKAGE
 
     if (!out)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "out must not be NULL");
     if ((found = H5Z__config_get_datum(params, key, &tr, &d)) < 0)
-        HGOTO_DONE(FAIL);
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "failed to look up key");
     if (found == 0)
         HGOTO_DONE(false);
     tr_valid = true;
@@ -753,7 +728,31 @@ H5Zconfig_get_bool(const char *params, const char *key, bool *out)
 done:
     if (tr_valid)
         toml_free(tr);
-    FUNC_LEAVE_API_NOINIT_NOLOCK(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Zconfig_get_bool
+ *
+ * Purpose:     Look up a key and return its TOML boolean value (bool).
+ *
+ * Return:      > 0 found, 0 not found, < 0 error.
+ *
+ * Since:  3.0.0
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Zconfig_get_bool(const char *params, const char *key, bool *out)
+{
+    htri_t ret_value = FAIL;
+
+    FUNC_ENTER_API_NOINIT
+
+    if ((ret_value = H5Z__config_get_bool(params, key, out)) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get boolean filter parameter");
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
 }
 
 /* Internal version of H5Zconfig_get_str() */
@@ -765,12 +764,15 @@ H5Z__config_get_str(const char *params, const char *key, char *buf, size_t *buf_
     bool          tr_valid = false;
     htri_t        found;
     size_t        vlen;
+    size_t        cap;
     htri_t        ret_value = FAIL;
 
     FUNC_ENTER_PACKAGE
 
+    if (buf && !buf_size)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf_size must not be NULL when buf is non-NULL");
     if ((found = H5Z__config_get_datum(params, key, &tr, &d)) < 0)
-        HGOTO_DONE(FAIL);
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "failed to look up key");
     if (found == 0)
         HGOTO_DONE(false);
     tr_valid = true;
@@ -780,30 +782,20 @@ H5Z__config_get_str(const char *params, const char *key, char *buf, size_t *buf_
                     "type mismatch: key '%s' is not a TOML string (value must be quoted)", key);
 
     vlen = (size_t)d.u.str.len;
+    cap  = buf_size ? *buf_size : 0;
+    if (buf_size)
+        *buf_size = vlen;
 
-    {
-        size_t cap;
-
-        if (buf && !buf_size)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf_size must not be NULL when buf is non-NULL");
-
-        cap = buf_size ? *buf_size : 0;
-
-        if (buf_size)
-            *buf_size = vlen;
-
-        if (buf) {
-            if (cap > vlen) {
-                memcpy(buf, d.u.s, vlen + 1);
+    if (buf) {
+        if (cap > vlen)
+            memcpy(buf, d.u.s, vlen + 1);
+        else {
+            if (cap > 0) {
+                memcpy(buf, d.u.s, cap - 1);
+                buf[cap - 1] = '\0';
             }
-            else {
-                if (cap > 0) {
-                    memcpy(buf, d.u.s, cap - 1);
-                    buf[cap - 1] = '\0';
-                }
-                HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
-                            "output buffer too small for string value of key '%s'", key);
-            }
+            HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "output buffer too small for string value of key '%s'",
+                        key);
         }
     }
 
@@ -831,10 +823,11 @@ H5Zconfig_get_str(const char *params, const char *key, char *buf, size_t *buf_si
 {
     htri_t ret_value = FAIL;
 
-    /* No API lock: see comment on H5Zconfig_has_key. */
-    FUNC_ENTER_API_NOINIT_NOLOCK
+    FUNC_ENTER_API_NOINIT
 
-    ret_value = H5Z__config_get_str(params, key, buf, buf_size);
+    if ((ret_value = H5Z__config_get_str(params, key, buf, buf_size)) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get string filter parameter");
 
-    FUNC_LEAVE_API_NOINIT_NOLOCK(ret_value)
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
 }

@@ -1446,20 +1446,6 @@ extern char H5_lib_vers_info_g[];
                 {
 
 /*
- * Use this macro for public API functions that touch no library state and
- * may be called from a callback while the API lock is held.  Same as
- * FUNC_ENTER_API_NOINIT without taking the lock.
- */
-#define FUNC_ENTER_API_NOINIT_NOLOCK                                                                         \
-    {                                                                                                        \
-        {                                                                                                    \
-            {                                                                                                \
-                H5_CHECK_FUNCTION_NAME(H5_IS_PUBLIC(__func__));                                              \
-                                                                                                             \
-                H5_API_SETUP_ERROR_HANDLING                                                                  \
-                {
-
-/*
  * Use this macro for public API functions that shouldn't perform _any_
  * initialization of the library or an interface or push themselves on the
  * function stack, just perform tracing, etc. Examples are: H5dont_atexit,
@@ -1677,17 +1663,6 @@ extern char H5_lib_vers_info_g[];
     if (H5_UNLIKELY(err_occurred))                                                                           \
         (void)H5E_dump_api_stack();                                                                          \
     H5_API_UNLOCK                                                                                            \
-    return (ret_value);                                                                                      \
-    }                                                                                                        \
-    }                                                                                                        \
-    } /* end scope from beginning of FUNC_ENTER */
-
-/* Use this macro to match the FUNC_ENTER_API_NOINIT_NOLOCK macro */
-#define FUNC_LEAVE_API_NOINIT_NOLOCK(ret_value)                                                              \
-    ;                                                                                                        \
-    } /* end scope from end of FUNC_ENTER */                                                                 \
-    if (H5_UNLIKELY(err_occurred))                                                                           \
-        (void)H5E_dump_api_stack();                                                                          \
     return (ret_value);                                                                                      \
     }                                                                                                        \
     }                                                                                                        \
