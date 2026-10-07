@@ -148,6 +148,16 @@ We would like to thank the many HDF5 community members who contributed to this r
    external link data was not properly terminated caused a read past the end of the `udata`
    buffer. `H5L__extern_traverse()` now validates the buffer against its stored size before
    parsing, the same way `H5Lunpack_elink_val()` does.
+   
+### Fixed the page buffer's minimum metadata threshold failure to protect B-tree, local heap and object header metadata pages
+
+The page buffer charges every page it holds to either `raw_count` or `meta_count`, counting `H5F_MEM_PAGE_DRAW` and `H5F_MEM_PAGE_GHEAP` pages as raw data and every other page as metadata. The minimum metadata reservation set by `H5Pset_page_buffer_size()` was not written as the complement of that test: it compared the page's type for equality with `H5F_MEM_PAGE_META`, which is an alias for `H5F_MEM_PAGE_SUPER`. A page entry's type is copied verbatim from the memory type of the access that brought the page into the buffer, so B-tree, local heap and object header pages carried other values and were evicted by raw data regardless of `min_meta_perc`, while still counting toward the threshold the reservation was measured against. In practice the reservation protected only the superblock and driver information pages. The classification is now made in one place, `H5MF_mem_page_type_is_raw()`, alongside its `H5F_mem_t` counterpart `H5MF_mem_type_is_raw()`, and both the page counts and the two reservations use it, so the metadata reservation protects the same population that `meta_count` measures.
+
+Fixes GitHub issue #6679.
+
+### Fixed the page buffer corrupting its page counts when a global heap page is freed
+
+`H5PB_remove_entry()` is documented as never being given a raw data page, and it decremented `meta_count` unconditionally on that basis. Its only caller, `H5MF__sect_small_merge()`, excluded `H5FD_MEM_DRAW` but not `H5FD_MEM_GHEAP`, so a freed global heap page could reach it. Such a page is charged to `raw_count` rather than `meta_count` by `H5PB__insert_entry()`, because `H5MF__alloc_pagefs()` passes the allocation type to `H5PB_add_new_page()`, and `H5PB_write()` reuses that entry without changing its type. Removing such a page therefore left `raw_count` too high and decremented `meta_count` for a page it had never counted. Both counts govern the minimum metadata and minimum raw data page protection, and because they are unsigned, `meta_count` could wrap and leave those reservations wrong for the remaining life of the file. The caller now excludes the global heap along with raw data, `H5PB_remove_entry()` asserts that the page it was given is metadata rather than silently accounting for a raw one, and every page count decrement in the page buffer asserts the count it is releasing is non-zero.
 
 ### Fixed a heap buffer overflow when decoding object header messages
 
@@ -179,6 +189,18 @@ We would like to thank the many HDF5 community members who contributed to this r
    Fixes GitHub issue #6491
 
    Fixes CVE-2026-19025
+
+### Fixed a crash when reading a dataset with a malformed fill value
+
+   An old-style (either version 1 or version 2) fill value message that is marked "defined" but encodes a negative size leaves the fill value with a negative size and no datatype; `H5Pget_fill_value()` then passed that NULL datatype to `H5T_path_find()` and dereferenced it. `H5P_get_fill_value()` now rejects a fill value that has no datatype and returns an error, so the dataset itself remains readable while the corrupt fill value is reported cleanly.
+
+   Fixes GitHub issue #6487
+
+   Fixes CVE-2026-19024
+   
+### Fixed a crash when unprotecting a local heap with no cached prefix or data block
+
+   `H5HL_protect()` pins one metadata cache entry for a local heap -- either the prefix when the heap is a single cache object, or the data block otherwise -- and `H5HL_unprotect()` unpins it again. The cache unlinks that entry from the heap when it destroys it, so a damaged file could reach `H5HL_unprotect()` with nothing to unpin, which triggered an assertion failure in debug builds and a NULL pointer dereference otherwise. `H5HL_unprotect()` now reports an error instead, and does so before decrementing the heap's protect count so that a rejected call leaves the heap unchanged rather than half unprotected with its cache entry still pinned.
 
 ### Fixed crashes when reading datasets with malformed N-Bit or Fletcher32 filter metadata
 
@@ -230,6 +252,12 @@ We would like to thank the many HDF5 community members who contributed to this r
   file forces `BUILD_SHARED_LIBS` on. This affected cases where the examples
   were built directly without that cache file.
 
+### Fixed the Fortran and C++ information reported in the build settings
+
+The "Shared/Static Fortran Library" and "Shared/Static C++ Library" lines in `libhdf5.settings` and in the build settings string compiled into the library reused the C library values, so they reported `YES` even when `HDF5_BUILD_FORTRAN` or `HDF5_BUILD_CPP_LIB` was off. These lines now report `NO` unless that language's library is built. The "Fortran Compiler", "Module Directory" and "C++ Compiler" lines are now also left empty when that language's library is not built.
+
+Fixes #5723.
+
 ## Tools
 
 ### Fixed an issue with quoting of data values in h5ls and h5dump when displaying as ASCII characters
@@ -239,6 +267,14 @@ We would like to thank the many HDF5 community members who contributed to this r
    in some cases. This double-quote character has been restored and similar formatting issues
    have been fixed for cases where elements wrap to new lines according to the particular tool's
    column limit setting.
+
+### Fixed a crash in h5dump binary output of variable-length string datasets
+
+   Dumping a variable-length string dataset with more than one element to native binary (`h5dump -b`) could crash. `render_bin_output()` reused a single variable as both the per-element stride and the length of the current string, so after the first element the stride was corrupted and subsequent elements were read from misaligned addresses, dereferencing a garbage pointer. The two uses are now kept separate and variable-length string datasets can be binary dumped safely.
+
+   Fixes GitHub issue #6486
+
+   Fixes CVE-2026-19023
 
 ## Performance
 
@@ -276,9 +312,43 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## High-Level Library
 
+### Fixed leaked identifiers in H5DSattach_scale()
+
+   When attaching a dimension scale that already had one or more datasets
+   attached to it, `H5DSattach_scale()` rewrote the scale's `REFERENCE_LIST`
+   attribute without releasing everything it had acquired to do so. It reopened
+   each reference in the existing list with `H5Ropen_object()` but only closed
+   the resulting identifier on the error path, and it destroyed neither the
+   references it read from the old attribute nor the one it appended to the new
+   one -- the buffer being written was reclaimed with the old, one element
+   shorter, dataspace. Every one of those kept the file open, so a later
+   `H5Fcreate()` with `H5F_ACC_TRUNC` on the same file failed with "unable to
+   truncate a file which is already open", an error with nothing in it to point
+   back at a dimension scale.
+
+   The identifier is now closed on the success path as well, and both reference
+   buffers are reclaimed, matching the equivalent code in
+   `H5DSdetach_scale()`. This code is only reached when `H5DSwith_new_ref()`
+   selects the new-style reference path, which happens when the object's
+   terminal VOL connector is not the native one -- a pass-through connector
+   stacked over the native connector does not qualify -- or when the library is
+   built with `H5_DIMENSION_SCALES_WITH_NEW_REF`; the old-style reference
+   path opens nothing.
+
 ## Fortran High-Level APIs
 
 ## Documentation
+
+### Clarified that direct chunk writes must supply an entire chunk
+
+   The documentation for `H5Dwrite_chunk()` and `H5DOwrite_chunk()` did not state that the
+   buffer must encode an entire chunk. Before filtering, a chunk always holds every element
+   covered by the chunk dimensions, including the elements of a partial edge chunk that lie
+   outside the dataspace. A precompressed chunk must therefore be the compressed form of the
+   full chunk, not only of the elements inside the dataspace. Since HDF5 2.2.0, the library
+   checks that a filtered chunk unfilters to exactly the full chunk size, so a filtered chunk
+   written without its edge padding can no longer be read with `H5Dread()`. The documentation
+   and the file format specification now state this requirement explicitly.
 
 ## F90 APIs
 
