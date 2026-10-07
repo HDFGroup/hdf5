@@ -171,6 +171,17 @@ typedef struct H5Z_class2_t {
 } H5Z_class2_t;
 //! <!-- [H5Z_class2_t_snip] -->
 
+/**
+ * Opaque handle to a parsed filter parameter string.  The library parses the
+ * string once and passes the handle to a filter's set_config callback; read
+ * it with the H5Zconfig_*() functions.  That handle is owned by the library
+ * and is valid only for the duration of the callback.  H5Zconfig_parse()
+ * creates one outside a callback.
+ *
+ * \since 3.0.0
+ */
+typedef struct H5Z_config_t H5Z_config_t;
+
 /********************/
 /* Public Variables */
 /********************/
@@ -182,6 +193,150 @@ typedef struct H5Z_class2_t {
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * \ingroup H5Z
+ *
+ * \brief Parses a filter parameter string
+ *
+ * \param[in] params  TOML key=value parameter string, with or without outer
+ *                    braces; NULL or "" gives a config with no keys
+ *
+ * \return Parsed config, or NULL on failure (e.g. invalid TOML)
+ *
+ * \details Filters receive an already-parsed config in their set_config
+ *          callback and do not need this function.  It is for code that
+ *          reads a parameter string outside a callback, such as a test that
+ *          checks a filter's get_config output.  Free the result with
+ *          H5Zconfig_close().
+ *
+ * \since 3.0.0
+ */
+H5_DLL H5Z_config_t *H5Zconfig_parse(const char *params);
+
+/**
+ * \ingroup H5Z
+ *
+ * \brief Frees a config returned by H5Zconfig_parse()
+ *
+ * \param[in] config  Config to free, or NULL
+ *
+ * \return \herr_t
+ *
+ * \details Do not call this on the config passed to a set_config callback;
+ *          the library owns that one.
+ *
+ * \since 3.0.0
+ */
+H5_DLL herr_t H5Zconfig_close(H5Z_config_t *config);
+
+/**
+ * \ingroup H5Z
+ *
+ * \brief Rejects keys a filter does not recognize
+ *
+ * \param[in] config      Parsed filter parameters
+ * \param[in] known_keys  NULL-terminated list of accepted keys
+ *
+ * \return \herr_t
+ *
+ * \details Fails if \p config contains a key that is not in \p known_keys.
+ *          Nested keys are matched by dotted path, so "a = {b = 1}" and
+ *          "a.b = 1" both match "a.b".
+ *
+ * \since 3.0.0
+ */
+H5_DLL herr_t H5Zconfig_validate_keys(const H5Z_config_t *config, const char *const known_keys[]);
+
+/**
+ * \ingroup H5Z
+ *
+ * \brief Checks whether a key is present in parsed filter parameters
+ *
+ * \param[in] config  Parsed filter parameters
+ * \param[in] key     Key to search for (case-sensitive; a dotted path is allowed)
+ *
+ * \return Positive if the key is present, 0 if absent, negative on error.
+ *
+ * \since 3.0.0
+ */
+H5_DLL htri_t H5Zconfig_has_key(const H5Z_config_t *config, const char *key);
+
+/**
+ * \ingroup H5Z
+ *
+ * \brief Looks up a TOML integer value in parsed filter parameters
+ *
+ * \param[in]  config  Parsed filter parameters
+ * \param[in]  key     Key to search for (case-sensitive; a dotted path is allowed)
+ * \param[out] out     Receives the value
+ *
+ * \return Positive if found, 0 if not found, negative on error.
+ *
+ * \details Accepts decimal, 0x (hex), 0o (octal) and 0b (binary) integers
+ *          with optional sign and TOML underscore digit separators.  Returns
+ *          negative (H5E_BADVALUE) if the value is not a TOML integer.
+ *
+ * \since 3.0.0
+ */
+H5_DLL htri_t H5Zconfig_get_int(const H5Z_config_t *config, const char *key, int64_t *out);
+
+/**
+ * \ingroup H5Z
+ *
+ * \brief Looks up a TOML float value in parsed filter parameters
+ *
+ * \param[in]  config  Parsed filter parameters
+ * \param[in]  key     Key to search for (case-sensitive; a dotted path is allowed)
+ * \param[out] out     Receives the value
+ *
+ * \return Positive if found, 0 if not found, negative on error.
+ *
+ * \details Returns negative (H5E_BADVALUE) if the value is not a TOML float,
+ *          or is inf or nan.  The decimal separator is always '.', as TOML
+ *          requires, whatever the application's LC_NUMERIC locale.
+ *
+ * \since 3.0.0
+ */
+H5_DLL htri_t H5Zconfig_get_double(const H5Z_config_t *config, const char *key, double *out);
+
+/**
+ * \ingroup H5Z
+ *
+ * \brief Looks up a TOML boolean value in parsed filter parameters
+ *
+ * \param[in]  config  Parsed filter parameters
+ * \param[in]  key     Key to search for (case-sensitive; a dotted path is allowed)
+ * \param[out] out     Receives the value
+ *
+ * \return Positive if found, 0 if not found, negative on error.
+ *
+ * \details Accepts "true" or "false" (lowercase, per TOML).  Returns negative
+ *          if the value is not a TOML boolean.
+ *
+ * \since 3.0.0
+ */
+H5_DLL htri_t H5Zconfig_get_bool(const H5Z_config_t *config, const char *key, bool *out);
+
+/**
+ * \ingroup H5Z
+ *
+ * \brief Looks up a TOML string value in parsed filter parameters
+ *
+ * \param[in]     config    Parsed filter parameters
+ * \param[in]     key       Key to search for (case-sensitive; a dotted path is allowed)
+ * \param[out]    buf       Buffer for the unquoted string, or NULL for a size query
+ * \param[in,out] buf_size  On entry, capacity of \p buf; on return, the string
+ *                          length excluding the NUL.  May be NULL when \p buf is NULL.
+ *
+ * \return Positive if found, 0 if not found, negative on error.
+ *
+ * \details Returns negative (H5E_BADVALUE) if the value is not a TOML string,
+ *          and pushes H5E_OVERFLOW if \p buf is too small.
+ *
+ * \since 3.0.0
+ */
+H5_DLL htri_t H5Zconfig_get_str(const H5Z_config_t *config, const char *key, char *buf, size_t *buf_size);
 
 /**
  * \ingroup H5Z

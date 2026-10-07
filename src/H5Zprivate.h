@@ -44,6 +44,9 @@ typedef struct H5Z_filter_info_t H5Z_filter_info_t;
 /* (avoids dynamic memory allocation in most cases) */
 #define H5Z_COMMON_NAME_LEN 12
 
+/* Maximum length of a dotted filter parameter key ("a.b.c") */
+#define H5Z_CONFIG_MAX_KEY_PATH 256
+
 /****************************/
 /* Library Private Typedefs */
 /****************************/
@@ -90,6 +93,9 @@ H5_DLL htri_t             H5Z_all_filters_avail(const struct H5O_pline_t *pline)
 H5_DLL htri_t             H5Z_filter_avail(H5Z_filter_t id);
 H5_DLL herr_t             H5Z_delete(struct H5O_pline_t *pline, H5Z_filter_t filter);
 H5_DLL herr_t             H5Z_get_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags);
+H5_DLL char              *H5Z_canonicalize_params(const char *params);
+H5_DLL H5Z_config_t      *H5Z_config_parse(const char *params);
+H5_DLL herr_t             H5Z_config_close(H5Z_config_t *config);
 
 /* Data Transform Functions */
 typedef struct H5Z_data_xform_t H5Z_data_xform_t; /* Defined in H5Ztrans.c */
