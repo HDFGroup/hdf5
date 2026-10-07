@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-10-06</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-10-07</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -4964,7 +4964,7 @@ IV.A.3.i. The Data Layout Message</h3>
 <li>
 Contiguous: The array is stored in one contiguous area of the file. This layout requires that the size of the array be constant: data manipulations such as chunking, compression, checksums or encryption are not permitted. The message stores the total storage size of the array. The offset of an element from the beginning of the storage area is computed as in a C array. </li>
 <li>
-Chunked: The array domain is regularly decomposed into chunks, and each chunk is allocated and stored separately. This layout supports arbitrary element traversals, compression, encryption, and checksums (these features are described in other messages). The message stores the size of a chunk instead of the size of the entire array; the size of the entire array can be calculated by traversing the B-tree that stores the chunk addresses. </li>
+Chunked: The array domain is regularly decomposed into chunks, and each chunk is allocated and stored separately. This layout supports arbitrary element traversals, compression, encryption, and checksums (these features are described in other messages). The message stores the size of a chunk instead of the size of the entire array; the size of the entire array can be calculated by traversing the B-tree that stores the chunk addresses. Every chunk holds all of the elements covered by the chunk dimensions, even when the chunk extends past the current extent of the dataspace (a partial edge chunk). Before any filters are applied, and after they are reversed, the size of the chunk is exactly the product of the chunk dimensions and the dataset element size, in bytes. </li>
 <li>
 Compact: The array is stored in one contiguous block, as part of this object header messagei. </li>
 <li>

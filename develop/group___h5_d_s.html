@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-10-06</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-10-07</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -657,7 +657,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="#gafd2a9719c14946b1478e3e79736b3094" title="Determines if new references are used with dimension scales.">H5DSwith_new_ref()</a> takes any object identifier and checks if new references are used for dimension scales. Currently, new references are used when non-native VOL connector is used or when H5_DIMENSION_SCALES_WITH_NEW_REF is set up via configure option. </p>
+<p><a class="el" href="#gafd2a9719c14946b1478e3e79736b3094" title="Determines if new references are used with dimension scales.">H5DSwith_new_ref()</a> takes any object identifier and checks if new references are used for dimension scales. Currently, new references are used when the object's terminal VOL connector is not the native one &ndash; a pass-through connector stacked over the native connector still has a native terminal connector, and so does not count &ndash; or when H5_DIMENSION_SCALES_WITH_NEW_REF is set up via configure option. </p>
 
 </div>
 </div>
