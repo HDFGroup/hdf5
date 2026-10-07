@@ -59,8 +59,8 @@ documented limitation rather than a gap to close in the parser.
 `scan_float()` converts float literals with `strtod()`, which follows the
 calling thread's `LC_NUMERIC` locale.  If an application switches to a locale
 whose decimal point is not '.', such as `de_DE`, every float literal fails to
-parse.  Not patched here, so that the files stay identical to a tagged
-release.
+parse.  Reported as <https://github.com/cktan/tomlc17/issues/57>; not
+patched here, so that the files stay identical to a tagged release.
 
 ### UBSan report in `page_create()`
 
