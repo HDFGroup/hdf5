@@ -43,7 +43,7 @@ usage: h5repack [OPTIONS] file1 file2
                            (default is 1)
    --high=BOUND            The high bound for library release versions to use
                            when creating objects in the file
-                           (default is 5)
+                           (default is 6)
    --merge                 Follow external soft link recursively and merge data
    --prune                 Do not follow external soft links and remove link
    --merge --prune         Follow external link, merge data and remove dangling link
@@ -93,7 +93,8 @@ usage: h5repack [OPTIONS] file1 file2
         3: This is H5F_LIBVER_V112 in H5F_libver_t struct
         4: This is H5F_LIBVER_V114 in H5F_libver_t struct
         5: This is H5F_LIBVER_V200 in H5F_libver_t struct
-           (H5F_LIBVER_LATEST is aliased to H5F_LIBVER_V200 for this release
+        6: This is H5F_LIBVER_V300 in H5F_libver_t struct
+           (H5F_LIBVER_LATEST is aliased to H5F_LIBVER_V300 for this release
 
     FS_STRATEGY is a string indicating the file space strategy used:
         FSM_AGGR:

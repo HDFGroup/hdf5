@@ -1,4 +1,4 @@
-v2.3.0 --- July X , 2026
+v3.0.0 --- July X , 2026
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
@@ -22,7 +22,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 * [Platforms Tested](CHANGELOG.md#%EF%B8%8F-platforms-tested)
 * [Known Problems](CHANGELOG.md#-known-problems)
 
-# 🔆 Executive Summary: HDF5 Version 2.3.0
+# 🔆 Executive Summary: HDF5 Version 3.0.0
 
 
 ## Performance Enhancements:
@@ -86,6 +86,10 @@ We would like to thank the many HDF5 community members who contributed to this r
      consuming CMake projects
 
 ## Library
+
+### Added the H5F_LIBVER_V300 library version bound
+
+   The `H5F_libver_t` enumeration gains `H5F_LIBVER_V300` for the 3.0 file format, and `H5F_LIBVER_LATEST` now maps to it. Every object header message version admitted by `H5F_LIBVER_V300` is currently the same as for `H5F_LIBVER_V200`; later format changes in the 3.0 release will be gated on it. The constant is also available in the Fortran (`H5F_LIBVER_V300_F`) and Java (`HDF5Constants.H5F_LIBVER_V300`) bindings, and `h5repack --low`/`--high` accept the value 6.
 
 ### Added support for internally concurrent multithreaded reads of chunked datasets
 
