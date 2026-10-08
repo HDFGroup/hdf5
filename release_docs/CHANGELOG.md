@@ -125,6 +125,18 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed a hang in other AWS libraries' shutdown after the ROS3 VFD was used
+
+   The ROS3 VFD's AWS event loop group and host resolver were released only in an
+   atexit() handler on non-Windows platforms. Their threads are "managed"
+   aws-c-common threads, so another aws-c-* user in the same process that joins all
+   managed threads during its own shutdown, such as Aws::ShutdownAPI() in the AWS C++
+   SDK, would wait forever for them. OPeNDAP BES hits this when unloading its modules.
+   H5close() now releases the event loop group and host resolver so that their threads
+   exit. aws_s3_library_clean_up() still runs from the atexit() handler, as it also
+   joins threads owned by other aws-c-* users, and the ROS3 VFD can be used again after
+   H5close().
+
 ### Fixed a deadlock in the ROS3 VFD on Windows
 
    When an HDF5 application running on Windows and using the ROS3 VFD exited normally,
