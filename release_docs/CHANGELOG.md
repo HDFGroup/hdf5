@@ -140,6 +140,15 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    Fixes GitHub issue #6560
 
+### Fixed a heap buffer over-read when traversing a malformed external link
+
+   The default external link traversal callback located the target file name and object
+   path inside the link's user data with `strlen()`, without checking that the buffer was
+   NULL-terminated or large enough to hold both strings. A corrupted or fuzzed file whose
+   external link data was not properly terminated caused a read past the end of the `udata`
+   buffer. `H5L__extern_traverse()` now validates the buffer against its stored size before
+   parsing, the same way `H5Lunpack_elink_val()` does.
+   
 ### Fixed the page buffer's minimum metadata threshold failure to protect B-tree, local heap and object header metadata pages
 
 The page buffer charges every page it holds to either `raw_count` or `meta_count`, counting `H5F_MEM_PAGE_DRAW` and `H5F_MEM_PAGE_GHEAP` pages as raw data and every other page as metadata. The minimum metadata reservation set by `H5Pset_page_buffer_size()` was not written as the complement of that test: it compared the page's type for equality with `H5F_MEM_PAGE_META`, which is an alias for `H5F_MEM_PAGE_SUPER`. A page entry's type is copied verbatim from the memory type of the access that brought the page into the buffer, so B-tree, local heap and object header pages carried other values and were evicted by raw data regardless of `min_meta_perc`, while still counting toward the threshold the reservation was measured against. In practice the reservation protected only the superblock and driver information pages. The classification is now made in one place, `H5MF_mem_page_type_is_raw()`, alongside its `H5F_mem_t` counterpart `H5MF_mem_type_is_raw()`, and both the page counts and the two reservations use it, so the metadata reservation protects the same population that `meta_count` measures.
@@ -200,6 +209,12 @@ Fixes GitHub issue #6679.
    Fixes GitHub issues #6488, #6489, #6490, and #6492
 
    Fixes CVE-2026-19026, CVE-2026-19027, and CVE-2026-19028
+
+### Fixed a stack overflow when iterating a corrupted B-tree
+
+   `H5B__iterate_helper()` now verifies that a B-tree node it has just protected has the level the traversal expects, when the expected level is known. The equivalent check in `H5B__cache_deserialize()` only runs when a node is first loaded into the metadata cache, so a corrupted B-tree whose child pointer revisits a node that is already cached (for example, a node that points to itself) could bypass that check and recurse without bound until the stack was exhausted. Such a file is now rejected with an error instead of crashing. This was observed through `H5Gget_info()`.
+
+   Fixes GitHub issue #6403
 
 ## Java Library
 
