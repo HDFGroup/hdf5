@@ -125,6 +125,12 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed a memory leak for malformed files whose driver info block extends past the end of the file
+
+   The length of a version 0 or 1 superblock's driver info block was not checked against the end of the file. A corrupted or fuzzed file could declare a block extending past the stored end of file, and the library would allocate a buffer of the declared size and open the file. For files opened read-write, writing the block back failed when the file was closed, so `H5Fclose()` failed and the file's metadata cache was leaked, which also prevented the library from shutting down cleanly. Such a file is now rejected when it is opened.
+
+   Fixes GitHub issue #6677
+
 ### Fixed a deadlock in the ROS3 VFD on Windows
 
    When an HDF5 application running on Windows and using the ROS3 VFD exited normally,
