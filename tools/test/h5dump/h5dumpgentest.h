@@ -64,6 +64,7 @@ void gent_family(void);
 void gent_multi(void);
 void gent_large_objname(void);
 void gent_vlstr(void);
+void gent_binvlstr(void);
 void gent_char(void);
 
 void gent_attr_all(void);
