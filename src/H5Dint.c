@@ -2319,6 +2319,12 @@ H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, bool full_overwrite
     f = dset->oloc.file;
     assert(f);
 
+    /* Patch the file pointer for VL datatypes if needed, as initializing the
+     * storage may write the fill value, which is converted with the dataset's
+     * datatype (see H5D_get_create_plist) */
+    if (H5T_patch_vlen_file(dset->shared->type, H5F_VOL_OBJ(f)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch VL datatype file pointer");
+
     /* If the data is stored in external files, don't set an address for the layout
      * We assume that external storage is already
      * allocated by the caller, or at least will be before I/O is performed.
@@ -3072,6 +3078,12 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
     if (0 == (H5F_INTENT(dset->oloc.file) & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file");
 
+    /* Patch the file pointer for VL datatypes if needed, as changing the
+     * extent may write the fill value into existing chunks, which is converted
+     * with the dataset's datatype (see H5D_get_create_plist) */
+    if (H5T_patch_vlen_file(dset->shared->type, H5F_VOL_OBJ(dset->oloc.file)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch VL datatype file pointer");
+
     /* Check if we are allowed to modify the space; only datasets with chunked and external storage are
      * allowed to be modified */
     if (H5D_COMPACT == dset->shared->layout.type)
@@ -3711,6 +3723,13 @@ H5D_get_create_plist(const H5D_t *dset)
     /* Check if there is a fill value, but no type yet */
     if (copied_fill.buf != NULL && copied_fill.type == NULL) {
         H5T_path_t *tpath; /* Conversion information*/
+
+        /* Patch the file pointer for VL datatypes if needed, as for reading
+         * data: the dataset's datatype is shared by all open handles of the
+         * dataset, and may still refer to the file of a handle that has been
+         * closed in the meantime */
+        if (H5T_patch_vlen_file(dset->shared->type, H5F_VOL_OBJ(dset->oloc.file)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch VL datatype file pointer");
 
         /* Copy the dataset type into the fill value message */
         if (NULL == (copied_fill.type = H5T_copy(dset->shared->type, H5T_COPY_TRANSIENT)))

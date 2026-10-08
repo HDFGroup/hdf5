@@ -23,6 +23,7 @@
 #define DATAFILE  "tvlstr.h5"
 #define DATAFILE2 "tvlstr2.h5"
 #define DATAFILE3 "sel2el.h5"
+#define DATAFILE4 "tvlstr_closed.h5"
 
 #define DATASET "1Darray"
 
@@ -964,6 +965,163 @@ test_write_same_element(void)
 
 /****************************************************************
 **
+**  test_vl_closed_handle(): Test using VL data through a dataset
+**      handle after another handle of the same dataset, from a
+**      different file handle, has been closed.
+**
+**      The dataset's datatype is shared by all its open handles,
+**      and its VL types refer to the file of the handle that
+**      opened the dataset first. That file must not be used once
+**      it has been closed, neither for reading data of a VL type
+**      nested in a compound type, nor for converting a VL fill
+**      value when getting the creation property list or when
+**      initializing new storage.
+**
+****************************************************************/
+typedef struct {
+    int   i;
+    char *s;
+} vl_closed_rec_t;
+
+static void
+test_vl_closed_handle(void)
+{
+    const char     *wdata[2]    = {"a", "b"};
+    const char     *fill        = "fill";
+    char           *rfill       = NULL;
+    char           *rdata[4]    = {NULL, NULL, NULL, NULL};
+    vl_closed_rec_t wrec        = {1, "x"};
+    vl_closed_rec_t rrec        = {0, NULL};
+    hsize_t         dims[1]     = {2};
+    hsize_t         maxdims[1]  = {H5S_UNLIMITED};
+    hsize_t         newdims[1]  = {4};
+    hsize_t         rec_dims[1] = {1};
+    hid_t           fid, fid_a, fid_b;
+    hid_t           str_dset_a, str_dset_b, rec_dset_a, rec_dset_b;
+    hid_t           str_tid, rec_tid, sid, rec_sid, dcpl, dcpl_b;
+    unsigned        u;
+    herr_t          ret;
+
+    MESSAGE(5, ("Testing VL data through a dataset handle after closing another handle\n"));
+
+    str_tid = H5Tcopy(H5T_C_S1);
+    CHECK(str_tid, FAIL, "H5Tcopy");
+    ret = H5Tset_size(str_tid, H5T_VARIABLE);
+    CHECK(ret, FAIL, "H5Tset_size");
+
+    rec_tid = H5Tcreate(H5T_COMPOUND, sizeof(vl_closed_rec_t));
+    CHECK(rec_tid, FAIL, "H5Tcreate");
+    ret = H5Tinsert(rec_tid, "i", HOFFSET(vl_closed_rec_t, i), H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert");
+    ret = H5Tinsert(rec_tid, "s", HOFFSET(vl_closed_rec_t, s), str_tid);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    /* VL string dataset with a VL fill value, which can be extended */
+    sid = H5Screate_simple(1, dims, maxdims);
+    CHECK(sid, FAIL, "H5Screate_simple");
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+    ret = H5Pset_chunk(dcpl, 1, dims);
+    CHECK(ret, FAIL, "H5Pset_chunk");
+    ret = H5Pset_fill_value(dcpl, str_tid, &fill);
+    CHECK(ret, FAIL, "H5Pset_fill_value");
+    ret = H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC);
+    CHECK(ret, FAIL, "H5Pset_fill_time");
+
+    rec_sid = H5Screate_simple(1, rec_dims, NULL);
+    CHECK(rec_sid, FAIL, "H5Screate_simple");
+
+    fid = H5Fcreate(DATAFILE4, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+    str_dset_a = H5Dcreate2(fid, "strings", str_tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(str_dset_a, FAIL, "H5Dcreate2");
+    ret = H5Dwrite(str_dset_a, str_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+    ret = H5Dclose(str_dset_a);
+    CHECK(ret, FAIL, "H5Dclose");
+    rec_dset_a = H5Dcreate2(fid, "records", rec_tid, rec_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(rec_dset_a, FAIL, "H5Dcreate2");
+    ret = H5Dwrite(rec_dset_a, rec_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wrec);
+    CHECK(ret, FAIL, "H5Dwrite");
+    ret = H5Dclose(rec_dset_a);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Open the datasets through two file handles, then close the first */
+    fid_a = H5Fopen(DATAFILE4, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid_a, FAIL, "H5Fopen");
+    str_dset_a = H5Dopen2(fid_a, "strings", H5P_DEFAULT);
+    CHECK(str_dset_a, FAIL, "H5Dopen2");
+    rec_dset_a = H5Dopen2(fid_a, "records", H5P_DEFAULT);
+    CHECK(rec_dset_a, FAIL, "H5Dopen2");
+
+    fid_b = H5Fopen(DATAFILE4, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid_b, FAIL, "H5Fopen");
+    str_dset_b = H5Dopen2(fid_b, "strings", H5P_DEFAULT);
+    CHECK(str_dset_b, FAIL, "H5Dopen2");
+    rec_dset_b = H5Dopen2(fid_b, "records", H5P_DEFAULT);
+    CHECK(rec_dset_b, FAIL, "H5Dopen2");
+
+    ret = H5Dclose(str_dset_a);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Dclose(rec_dset_a);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Fclose(fid_a);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Read a VL string nested in a compound type */
+    ret = H5Dread(rec_dset_b, rec_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rrec);
+    CHECK(ret, FAIL, "H5Dread");
+    VERIFY(rrec.i, wrec.i, "H5Dread");
+    VERIFY_STR(rrec.s, wrec.s, "H5Dread");
+    ret = H5Treclaim(rec_tid, rec_sid, H5P_DEFAULT, &rrec);
+    CHECK(ret, FAIL, "H5Treclaim");
+
+    /* Get the VL fill value from the creation property list */
+    dcpl_b = H5Dget_create_plist(str_dset_b);
+    CHECK(dcpl_b, FAIL, "H5Dget_create_plist");
+    ret = H5Pget_fill_value(dcpl_b, str_tid, &rfill);
+    CHECK(ret, FAIL, "H5Pget_fill_value");
+    VERIFY_STR(rfill, fill, "H5Pget_fill_value");
+    H5free_memory(rfill);
+    ret = H5Pclose(dcpl_b);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Extend the dataset, which writes the VL fill value into new storage */
+    ret = H5Dset_extent(str_dset_b, newdims);
+    CHECK(ret, FAIL, "H5Dset_extent");
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    sid = H5Dget_space(str_dset_b);
+    CHECK(sid, FAIL, "H5Dget_space");
+    ret = H5Dread(str_dset_b, str_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+    CHECK(ret, FAIL, "H5Dread");
+    for (u = 0; u < 4; u++)
+        VERIFY_STR(rdata[u], u < 2 ? wdata[u] : fill, "H5Dread");
+    ret = H5Treclaim(str_tid, sid, H5P_DEFAULT, rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
+
+    ret = H5Dclose(str_dset_b);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Dclose(rec_dset_b);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Fclose(fid_b);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(rec_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Tclose(rec_tid);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Tclose(str_tid);
+    CHECK(ret, FAIL, "H5Tclose");
+} /* end test_vl_closed_handle() */
+
+/****************************************************************
+**
 **  test_vlstrings(): Main VL string testing routine.
 **
 ****************************************************************/
@@ -988,6 +1146,8 @@ test_vlstrings(void H5_ATTR_UNUSED *params)
     test_vl_rewrite();
     /* Test writing to the same element more than once using H5Sselect_elements */
     test_write_same_element();
+    /* Test using VL data after closing another handle of the same dataset */
+    test_vl_closed_handle();
 } /* test_vlstrings() */
 
 /*-------------------------------------------------------------------------
@@ -1008,6 +1168,7 @@ cleanup_vlstrings(void H5_ATTR_UNUSED *params)
             H5Fdelete(DATAFILE, H5P_DEFAULT);
             H5Fdelete(DATAFILE2, H5P_DEFAULT);
             H5Fdelete(DATAFILE3, H5P_DEFAULT);
+            H5Fdelete(DATAFILE4, H5P_DEFAULT);
         }
         H5E_END_TRY
     }
