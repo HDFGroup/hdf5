@@ -444,6 +444,13 @@ H5C__generate_cache_image(H5F_t *f, H5C_t *cache_ptr)
     cache_ptr->image_buffer = H5MM_xfree(cache_ptr->image_buffer);
 
 done:
+    if (ret_value < 0) {
+        /* Release the image state, since the cache is about to be destroyed */
+        if (H5C__free_image_entries_array(cache_ptr) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "Can't free image entries array");
+        cache_ptr->image_buffer = H5MM_xfree(cache_ptr->image_buffer);
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__generate_cache_image() */
 
