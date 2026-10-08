@@ -652,6 +652,9 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
 
         write_entry = false;
         clear_only  = true;
+
+        /* The log_flush callback must see the entry as cleared, not flushed */
+        flags |= H5C__FLUSH_CLEAR_ONLY_FLAG;
     }
 
     /* if the entry has a notify callback, notify it that we have
