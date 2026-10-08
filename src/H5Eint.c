@@ -1027,7 +1027,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     const char      *maj_str   = "No major description"; /* Major error description */
     const char      *min_str   = "No minor description"; /* Minor error description */
     bool             have_desc = true; /* Flag to indicate whether the error has a "real" description */
-#ifdef H5_HAVE_THREADS
+#ifdef H5_HAVE_THREADSAFE_API
     uint64_t thread_id = 0; /* ID of thread */
 #endif
     herr_t ret_value = SUCCEED;
@@ -1059,7 +1059,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     /* Get error class info */
     cls_ptr = maj_ptr->cls;
 
-#ifdef H5_HAVE_THREADS
+#ifdef H5_HAVE_THREADSAFE_API
     if (H5TS_thread_id(&thread_id) < 0)
         HGOTO_DONE(FAIL);
 #endif
@@ -1091,13 +1091,13 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
                 MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
                 fprintf(stream, " MPI-process %d", mpi_rank);
             } /* end if */
-#ifdef H5_HAVE_THREADS
+#ifdef H5_HAVE_THREADSAFE_API
             else
                 fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
         } /* end block */
 #else
-#ifdef H5_HAVE_THREADS
+#ifdef H5_HAVE_THREADSAFE_API
         fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
 #endif
@@ -1158,7 +1158,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     const char  *maj_str   = "No major description"; /* Major error description */
     const char  *min_str   = "No minor description"; /* Minor error description */
     bool         have_desc = true; /* Flag to indicate whether the error has a "real" description */
-#ifdef H5_HAVE_THREADS
+#ifdef H5_HAVE_THREADSAFE_API
     uint64_t thread_id = 0; /* ID of thread */
 #endif
     herr_t ret_value = SUCCEED;
@@ -1195,7 +1195,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     if (!cls_ptr)
         HGOTO_DONE(FAIL);
 
-#ifdef H5_HAVE_THREADS
+#ifdef H5_HAVE_THREADSAFE_API
     if (H5TS_thread_id(&thread_id) < 0)
         HGOTO_DONE(FAIL);
 #endif
@@ -1227,13 +1227,13 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
                 MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
                 fprintf(stream, " MPI-process %d", mpi_rank);
             } /* end if */
-#ifdef H5_HAVE_THREADS
+#ifdef H5_HAVE_THREADSAFE_API
             else
                 fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
         } /* end block */
 #else
-#ifdef H5_HAVE_THREADS
+#ifdef H5_HAVE_THREADSAFE_API
         fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
 #endif
