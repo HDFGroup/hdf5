@@ -1142,10 +1142,12 @@ extern char H5_lib_vers_info_g[];
 #define H5_HAVE_THREADSAFE_API
 #endif
 
-#ifdef H5_HAVE_THREADSAFE_API
-
+#ifdef H5_HAVE_THREADS
 /* Lock headers */
 #include "H5TSprivate.h"
+#endif
+
+#ifdef H5_HAVE_THREADSAFE_API
 
 /* Thread cancellation is only possible w/pthreads */
 #if defined(H5_HAVE_PTHREAD_H)
