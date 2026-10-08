@@ -95,6 +95,7 @@ gen_h5diff_files(void)
     nerrors += (test_exclude_obj1(EXCLUDE_FILE1_1, EXCLUDE_FILE1_2) < 0 ? 1 : 0);
     nerrors += (test_exclude_obj2(EXCLUDE_FILE2_1, EXCLUDE_FILE2_2) < 0 ? 1 : 0);
     nerrors += (test_exclude_obj3(EXCLUDE_FILE3_1, EXCLUDE_FILE3_2) < 0 ? 1 : 0);
+    nerrors += (test_exclude_attr_name(EXCLUDE_ATTR_NAME_FILE1, EXCLUDE_ATTR_NAME_FILE2) < 0 ? 1 : 0);
 
     /* diff various multiple vlen and fixlen string types in a compound dataset */
     nerrors += (test_comp_vlen_strings(COMP_VL_STRS_FILE, "group", 1) < 0 ? 1 : 0);
