@@ -62,9 +62,10 @@
 /*--------------------------------------------------------------------------
  * Function:    H5TS__pthread_first_thread_init
  *
- * Purpose:     Initialize global API lock, keys for per-thread error stacks
- *              and cancallability information. Called by the first thread
- *              that enters the library.
+ * Purpose:     Initialize the H5TS package: the global API lock (threadsafe
+ *              and concurrency builds only), the internal mutex for the
+ *              library's worker threads, and the key for per-thread library
+ *              state.  Called once, through H5TS_once().
  *
  * Return:      None
  *
