@@ -222,6 +222,12 @@ Fixes GitHub issue #6679.
 
    Fixes CVE-2026-19026, CVE-2026-19027, and CVE-2026-19028
 
+### Fixed a stack overflow when iterating a corrupted B-tree
+
+   `H5B__iterate_helper()` now verifies that a B-tree node it has just protected has the level the traversal expects, when the expected level is known. The equivalent check in `H5B__cache_deserialize()` only runs when a node is first loaded into the metadata cache, so a corrupted B-tree whose child pointer revisits a node that is already cached (for example, a node that points to itself) could bypass that check and recurse without bound until the stack was exhausted. Such a file is now rejected with an error instead of crashing. This was observed through `H5Gget_info()`.
+
+   Fixes GitHub issue #6403
+
 ## Java Library
 
 ### Fixed datatype ID leaks when reading or writing nested datatypes through the JNI
