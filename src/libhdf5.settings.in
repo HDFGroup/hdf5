@@ -45,21 +45,21 @@ Languages:
                Static C Library: @H5_ENABLE_STATIC_LIB@
 
                         Fortran: @HDF5_BUILD_FORTRAN@
-               Fortran Compiler: @CMAKE_Fortran_COMPILER@ @CMAKE_Fortran_COMPILER_VERSION@
+               Fortran Compiler: @H5_FORTRAN_COMPILER@
                   Fortran Flags: @CMAKE_Fortran_FLAGS@ @HDF5_BUILD_MODE_Fortran_FLAGS@
                H5 Fortran Flags: @HDF5_CMAKE_Fortran_FLAGS@
                AM Fortran Flags: @AM_FCFLAGS@
-         Shared Fortran Library: @H5_ENABLE_SHARED_LIB@
-         Static Fortran Library: @H5_ENABLE_STATIC_LIB@
-               Module Directory: @CMAKE_Fortran_MODULE_DIRECTORY@
+         Shared Fortran Library: @H5_FORTRAN_SHARED_LIB@
+         Static Fortran Library: @H5_FORTRAN_STATIC_LIB@
+               Module Directory: @H5_FORTRAN_MODULE_DIR@
 
                             C++: @HDF5_BUILD_CPP_LIB@
-                   C++ Compiler: @CMAKE_CXX_COMPILER@ @CMAKE_CXX_COMPILER_VERSION@
+                   C++ Compiler: @H5_CPP_COMPILER@
                       C++ Flags: @CMAKE_CXX_FLAGS@ @HDF5_BUILD_MODE_CXX_FLAGS@
                    H5 C++ Flags: @HDF5_CMAKE_CXX_FLAGS@
                    AM C++ Flags: @AM_CXXFLAGS@
-             Shared C++ Library: @H5_ENABLE_SHARED_LIB@
-             Static C++ Library: @H5_ENABLE_STATIC_LIB@
+             Shared C++ Library: @H5_CPP_SHARED_LIB@
+             Static C++ Library: @H5_CPP_STATIC_LIB@
 
                            JAVA: @HDF5_BUILD_JAVA@
                   JAVA Compiler: @CMAKE_Java_COMPILER@ @Java_VERSION@
@@ -70,7 +70,7 @@ Features:
   Parallel Filtered Dataset Writes: @PARALLEL_FILTERED_WRITES@
                 Large Parallel I/O: @LARGE_PARALLEL_IO@
                 High-level library: @HDF5_BUILD_HL_LIB@
-Dimension scales w/ new references: @DIMENSION_SCALES_WITH_NEW_REF@
+Dimension scales w/ new references: @HDF5_DIMENSION_SCALES_NEW_REF@
                   Build HDF5 Tests: @BUILD_TESTING@
                   Build HDF5 Tools: @HDF5_BUILD_TOOLS@
                            Threads: @HDF5_THREADS_ENABLED@

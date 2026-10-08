@@ -24,7 +24,6 @@ env:
   HSDS_PATH: /home/test_user1/
   HDF5_API_TEST_PATH_PREFIX: /home/test_user1/
   HSDS_ENDPOINT: http+unix://%2Ftmp%2Fhs%2Fsn_1.sock
-  HDF5_VOL_CONNECTOR: REST
   ROOT_DIR: ${{github.workspace}}/hsdsdata
   BUCKET_NAME: hsdstest
 
@@ -34,7 +33,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10"]
+        # HSDS requires Python >= 3.11 (its pinned numpy has no 3.10 wheels).
+        # 3.12 matches the Python version HSDS uses for its own unix-socket
+        # test job, which is the configuration exercised here.
+        python-version: ["3.12"]
 
     steps:
       - name: Install dependencies
@@ -129,11 +131,6 @@ jobs:
       #    path: ${{ runner.workspace }}/hsds-${{ env.HSDS_COMMIT_SHORT }}-install
       #    key: ${{ runner.os }}-${{ runner.arch }}-hsds-${{ env.HSDS_COMMIT }}-${{ inputs.build_mode }}-cache
 
-      # Requests 2.32.0 breaks requests-unixsocket, used by HSDS for socket connections
-      - name: Fix requests version
-        run: |
-          pip install requests==2.31.0
-
       - name: Run HSDS unit tests
         shell: bash
         working-directory: ${{github.workspace}}/hsds
@@ -171,7 +168,7 @@ jobs:
           HSDS_ENDPOINT=http+unix://%2Ftmp%2Fhs%2Fsn_1.sock \
           ROOT_DIR=${{github.workspace}}/hsdsdata \
           BUCKET_NAME=hsdstest \
-          ctest --build-config ${{ inputs.build_mode }} -R "test_rest_vol" .
+          ctest --build-config ${{ inputs.build_mode }} --output-on-failure -R "test_rest_vol" .
 
       - name: Test HDF5 REST VOL connector with HDF5 API tests
         working-directory: ${{github.workspace}}/hdf5/build/
@@ -192,4 +189,10 @@ jobs:
           HSDS_ENDPOINT=http+unix://%2Ftmp%2Fhs%2Fsn_1.sock \
           ROOT_DIR=${{github.workspace}}/hsdsdata \
           BUCKET_NAME=hsdstest \
-          ctest --build-config ${{ inputs.build_mode }} -R "h5_api" -E "H5COPY|H5DIFF|H5LS|H5DUMP|H5REPACK" .
+          ctest --build-config ${{ inputs.build_mode }} --output-on-failure -R "h5_api" -E "H5COPY|H5DIFF|H5LS|H5DUMP|H5REPACK" .
+
+      - name: Show HSDS log on failure
+        if: ${{ failure() }}
+        working-directory: ${{github.workspace}}/hsds
+        run: |
+          tail -n 1000 hs.log

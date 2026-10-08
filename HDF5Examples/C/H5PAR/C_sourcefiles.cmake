@@ -10,6 +10,7 @@ set (examples
   ph5_hyperslab_by_col
   ph5_hyperslab_by_pattern
   ph5_hyperslab_by_chunk
+  ph5_comm_split
 )
 if (${HDF5_PROVIDES_SUBFILING_VFD})
     list (APPEND examples ph5_subfiling)

@@ -54,7 +54,7 @@ jobs:
           persist-credentials: false
 
       - name: Build and test on OpenBSD
-        uses: vmactions/openbsd-vm@c941015845c0f0c429676840963dc63b226d4f69
+        uses: vmactions/openbsd-vm@5f7b2c933b8846a138361d6843c52af4bef5d945
         with:
           release: ${{ matrix.openbsd-version }}
           usesh: true

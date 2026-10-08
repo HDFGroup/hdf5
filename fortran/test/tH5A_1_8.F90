@@ -2524,7 +2524,7 @@ SUBROUTINE test_attr_basic_write(fapl, total_error)
      WRITE(*,*) 'ERROR: attribute name different: attr_name ='//TRIM(check_name)//'.'
      WRITE(*,*) '                                 should be ='//TRIM(ATTR_TMP_NAME)//'.'
      total_error = total_error + 1
-     stop
+     CALL h5_exit_f(1)
   ENDIF
 
   ! Try with a string buffer that is exactly the correct size

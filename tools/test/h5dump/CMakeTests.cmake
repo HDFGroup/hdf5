@@ -141,6 +141,7 @@ set (HDF5_REFERENCE_FILES
     tindicessub3.ddl
     tindicessub4.ddl
     tindicesyes.ddl
+    tintascii.ddl
     tints4dims.ddl
     tints4dimsBlock2.ddl
     tints4dimsBlockEq.ddl
@@ -248,6 +249,7 @@ set (HDF5_N_REFERENCE_FILES
 )
 set (HDF5_REFERENCE_EXP_FILES
     tall-6.exp
+    tbinvlstr.exp
     tnoddlfile.exp
     trawdatafile.exp
     trawssetfile.exp
@@ -329,6 +331,7 @@ set (HDF5_REFERENCE_TEST_FILES
     tgrpnullspace.h5
     thlink.h5
     thyperslab.h5
+    tintascii.h5
     tints4dims.h5
     tintsattrs.h5
     tintsnodata.h5
@@ -355,6 +358,7 @@ set (HDF5_REFERENCE_TEST_FILES
     tscalarintattrsize.h5
     tscalarintsize.h5
     tscalarstring.h5
+    tbinvlstr.h5
     tslink.h5
     tsplit_file-m.h5
     tsplit_file-r.h5
@@ -477,7 +481,7 @@ foreach (external_vol_tgt ${HDF5_EXTERNAL_VOL_TARGETS})
   # Special file handling
   # --------------------------------------------------------------------
   HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5dump/expected/tbin1.ddl" "${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/tbin1LE.ddl" "h5dump_vol_files")
-  
+
   # Certain versions of Visual Studio produce rounding differences compared with the reference data of the tfloatsattr test
   if (WIN32 AND (CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION VERSION_LESS 10.0.18362.0))
     configure_file (${HDF5_TOOLS_TST_DIR}/h5dump/exportfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/${ext_vol_dir_name}/testfiles/std/tbinregR.exp NEWLINE_STYLE CRLF)
@@ -592,7 +596,7 @@ macro (ADD_H5_TEST testname)
     # With -n, oputput that must be filtered appears different
     list (APPEND filters_in "datatype [ \t]*(/?#)[0-9]+")
     list (APPEND filters_out "datatype [ \t]*(/?#)XXXX")
-  
+
     # Size/Offset within file will differ across VOL connectors
     list (APPEND filters_in "OFFSET [0-9]+")
     list (APPEND filters_out "OFFSET XXXX")
@@ -618,7 +622,7 @@ macro (ADD_H5_TEST testname)
   endif ()
 
   # both of these args want to define argument to -o flag
-  if (DEFINED ARG_OUTPUT_FILE AND ${ARG_BINFILE}) 
+  if (DEFINED ARG_OUTPUT_FILE AND ${ARG_BINFILE})
     message  (FATAL_ERROR "ADD_H5_TEST: OUTPUT_FILE and BINFILE are mutually exclusive")
   endif()
 
@@ -794,7 +798,7 @@ macro (ADD_H5_TEST testname)
     if ("${vol_prefix}H5DUMP-${ctest_testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (${vol_prefix}H5DUMP-${ctest_testname} PROPERTIES DISABLED true)
     endif ()
-      
+
     set (CLEANUP_DEPENDENCIES "${vol_prefix}H5DUMP-${ctest_testname}")
 
     if (DEFINED ARG_TARGET_FILE AND DEFINED ARG_OUTPUT_FILE)
@@ -1018,8 +1022,16 @@ ADD_H5_TEST (tdset-2 RESULT_CODE 1 H5ERRREF "h5dump error: unable to get link in
 # test for displaying attributes
 ADD_H5_TEST (tattr-1 RESULT_CODE 0 --enable-error-stack TARGET_FILE tattr.h5)
 # test for displaying the selected attributes of string type and scalar space
-ADD_H5_TEST (tattr-2 RESULT_CODE 0 --enable-error-stack -a /\\\\/attr1 --attribute /attr4 --attribute=/attr5 TARGET_FILE tattr.h5)
-ADD_H5_TEST (tattr-2-N RESULT_CODE 0 --enable-error-stack  TARGET_FILE tattr.h5 ANY_PATHS /\\\\/attr1 /attr4 /attr5)
+block (SCOPE_FOR POLICIES)
+  if (POLICY CMP0219)
+    cmake_policy (SET CMP0219 NEW)
+    set (_H5DUMP_ATTR1_PATH /\\/attr1)
+  else ()
+    set (_H5DUMP_ATTR1_PATH /\\\\/attr1)
+  endif ()
+  ADD_H5_TEST (tattr-2 RESULT_CODE 0 --enable-error-stack -a ${_H5DUMP_ATTR1_PATH} --attribute /attr4 --attribute=/attr5 TARGET_FILE tattr.h5)
+  ADD_H5_TEST (tattr-2-N RESULT_CODE 0 --enable-error-stack  TARGET_FILE tattr.h5 ANY_PATHS ${_H5DUMP_ATTR1_PATH} /attr4 /attr5)
+endblock ()
 # test for header and error messages
 ADD_H5_TEST (tattr-3 RESULT_CODE 1 H5ERRREF "h5dump error: unable to open attribute \"attr\"" --enable-error-stack --header -a /attr2 --attribute=/attr TARGET_FILE tattr.h5)
 # test for displaying at least 9 attributes on root from a be machine
@@ -1151,6 +1163,7 @@ ADD_H5_TEST (tints4dimsBlockEq RESULT_CODE 0 --enable-error-stack -d FourDimInts
 
 # test printing characters in ASCII instead of decimal
 ADD_H5_TEST (tchar1 RESULT_CODE 0 --enable-error-stack -r TARGET_FILE tchar.h5)
+ADD_H5_TEST (tintascii RESULT_CODE 0 --enable-error-stack -r TARGET_FILE tintascii.h5)
 
 # test datatypes in ASCII and UTF8
 ADD_H5_TEST (charsets RESULT_CODE 0 --enable-error-stack TARGET_FILE charsets.h5)
@@ -1375,6 +1388,8 @@ ADD_H5_TEST (tbin1LE BINFILE RESULT_CODE 0 TARGET_FILE tbinary.h5 --enable-error
 # test for string binary output
 ADD_H5_TEST (tstr2bin2 OUTPUT_FILE tstr2bin2 TARGET_FILE tstr2.h5 RESULT_CODE 0 --enable-error-stack -d /g2/dset2 BINARY_OUTPUT)
 ADD_H5_TEST (tstr2bin6 OUTPUT_FILE tstr2bin6 TARGET_FILE tstr2.h5 RESULT_CODE 0 --enable-error-stack -d /g6/dset6 BINARY_OUTPUT)
+# test for binary output of a variable-length string dataset
+ADD_H5_TEST (tbinvlstr OUTPUT_FILE tbinvlstr TARGET_FILE tbinvlstr.h5 RESULT_CODE 0 --enable-error-stack -d vlenstr BINARY_OUTPUT)
 
 # NATIVE default. the NATIVE test can be validated with h5import/h5diff
 #  ADD_H5_TEST_IMPORT (tbin1 out1D TARGET_FILE tbinary.h5 0 --enable-error-stack -d integer -b)

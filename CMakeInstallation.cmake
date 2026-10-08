@@ -159,12 +159,8 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
   write_basic_package_version_file (
     "${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config-version.cmake"
     VERSION ${HDF5_PACKAGE_VERSION}
-    COMPATIBILITY SameMinorVersion
+    COMPATIBILITY SameMajorVersion
   )
-  #configure_file (
-  #    ${HDF_CONFIG_DIR}/install/hdf5-config-version.cmake.in
-  #    ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config-version.cmake @ONLY
-  #)
   install (
       FILES ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config-version.cmake
       DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
@@ -194,6 +190,7 @@ if (H5_WORDS_BIGENDIAN)
 else ()
   set (BYTESEX little-endian)
 endif ()
+H5_SET_LANG_SETTINGS ()
 configure_file (
     ${HDF5_SOURCE_DIR}/src/libhdf5.settings.in
     ${HDF5_SRC_BINARY_DIR}/libhdf5.settings ESCAPE_QUOTES @ONLY

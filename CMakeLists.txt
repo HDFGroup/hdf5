@@ -30,32 +30,10 @@
 cmake_minimum_required (VERSION 3.26)
 project (HDF5 C)
 
-if (POLICY CMP0074)
-  # find_package() uses <PackageName>_ROOT variables.
-  cmake_policy (SET CMP0074 NEW)
-endif ()
-
 if (POLICY CMP0144)
-  # <PACKAGENAME> is the upper-cased package name.
+  # CMake >= 3.27 <PACKAGENAME> is the upper-cased package name.
   cmake_policy (SET CMP0144 NEW)
 endif ()
-
-if (POLICY CMP0083)
-  # To control generation of Position Independent Executable (PIE) or not,
-  # some flags are required at link time.
-  cmake_policy (SET CMP0083 NEW)
-endif ()
-
-if (POLICY CMP0127)
-  # to evaluate each condition as if(<condition>), where <condition> is re-parsed
-  # as if literally written in a call to if().
-  cmake_policy (SET CMP0127 NEW)
-endif ()
-
-# Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24:
-if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
-    cmake_policy(SET CMP0135 NEW)
-endif()
 
 #-----------------------------------------------------------------------------
 # Instructions for use : Normal Build
@@ -1181,6 +1159,33 @@ if (HDF5_BUILD_JAVA)
   else ()
     find_package (Java)
     message (VERBOSE "Java version is ${Java_VERSION_STRING}")
+
+    # Pin the Java language toolchain to the JDK that find_package(Java) just
+    # probed. FindJava searches JAVA_HOME via HINTS, which outrank $PATH, but
+    # the toolchain enabled by project(... Java) in java/ searches
+    # $ENV{JAVA_HOME}/bin only as a low-priority PATHS entry, below $PATH. The
+    # two can therefore land on different JDKs - on macOS the toolchain picks
+    # the /usr/bin stubs, which re-resolve through JAVA_HOME on every
+    # invocation, so javac and java can differ and the resulting class files
+    # fail to load. Java_VERSION_STRING also gates the FFM/JNI choice in
+    # java/CMakeLists.txt, so it must describe the JDK that actually builds.
+    #
+    # Each variable is filled in independently. The guard in
+    # CMakeDetermineJavaCompiler.cmake is if(NOT CMAKE_Java_COMPILER) and it
+    # closes only after the runtime and archive lookups, so a caller passing
+    # just -DCMAKE_Java_COMPILER= suppresses the other two entirely and leaves
+    # CMAKE_Java_RUNTIME empty. Filling them one at a time keeps an explicit
+    # override working while still completing the toolchain.
+    if (NOT CMAKE_Java_COMPILER AND Java_JAVAC_EXECUTABLE)
+      set (CMAKE_Java_COMPILER "${Java_JAVAC_EXECUTABLE}")
+    endif ()
+    if (NOT CMAKE_Java_RUNTIME AND Java_JAVA_EXECUTABLE)
+      set (CMAKE_Java_RUNTIME "${Java_JAVA_EXECUTABLE}")
+    endif ()
+    if (NOT CMAKE_Java_ARCHIVE AND Java_JAR_EXECUTABLE)
+      set (CMAKE_Java_ARCHIVE "${Java_JAR_EXECUTABLE}")
+    endif ()
+    message (VERBOSE "Java toolchain: ${CMAKE_Java_COMPILER} / ${CMAKE_Java_RUNTIME} / ${CMAKE_Java_ARCHIVE}")
   endif ()
 endif ()
 
@@ -1544,4 +1549,3 @@ include (CMakeInstallation.cmake)
 # Hide some miscellaneous CMake variables from the default GUI
 #-----------------------------------------------------------------------------
 mark_as_advanced (FETCHCONTENT_BASE_DIR FETCHCONTENT_FULLY_DISCONNECTED FETCHCONTENT_QUIET FETCHCONTENT_UPDATES_DISCONNECTED)
-
