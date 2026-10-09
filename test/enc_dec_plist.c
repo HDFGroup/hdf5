@@ -349,6 +349,76 @@ error:
     return (-1);
 } /* end test_encode_decode_page_buf_size() */
 
+/* Verify that H5Pdecode() rejects an encoded DCPL whose chunked layout declares
+ * more dimensions than the library's fixed chunk rank limit (H5S_MAX_RANK + 1),
+ * instead of writing past the dimension array in H5P__dcrt_layout_dec(). */
+static int
+test_decode_corrupted_layout_ndims(void)
+{
+    hid_t          dcpl     = H5I_INVALID_HID;
+    hid_t          decoded  = H5I_INVALID_HID;
+    void          *buf      = NULL;
+    size_t         buf_size = 0;
+    hsize_t        chunk[2] = {17, 19};
+    unsigned char *p;
+    size_t         u;
+
+    TESTING("H5Pdecode of DCPL with out-of-range chunk rank");
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Pencode2(dcpl, NULL, &buf_size, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR;
+    if (NULL == (buf = malloc(buf_size)))
+        FAIL_PUTS_ERROR("couldn't allocate buffer");
+    if (H5Pencode2(dcpl, buf, &buf_size, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR;
+
+    /* The chunk layout is encoded as [type][rank][dim0][dim1] with the
+     * dimensions written as 32-bit values; locate the two dimension words and
+     * corrupt the preceding rank byte with a value well above H5S_MAX_RANK. */
+    p = (unsigned char *)buf;
+    for (u = 1; u + 8 <= buf_size; u++)
+        if (p[u] == 17 && p[u + 1] == 0 && p[u + 2] == 0 && p[u + 3] == 0 && p[u + 4] == 19 &&
+            p[u + 5] == 0 && p[u + 6] == 0 && p[u + 7] == 0 && p[u - 1] == 2) {
+            p[u - 1] = 200;
+            break;
+        }
+    if (u + 8 > buf_size)
+        FAIL_PUTS_ERROR("couldn't locate encoded chunk rank");
+
+    H5E_BEGIN_TRY
+    {
+        decoded = H5Pdecode(buf);
+    }
+    H5E_END_TRY
+
+    if (decoded != H5I_INVALID_HID) {
+        H5Pclose(decoded);
+        FAIL_PUTS_ERROR("H5Pdecode accepted an out-of-range chunk rank");
+    }
+
+    free(buf);
+    if (H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    if (buf)
+        free(buf);
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+    return 1;
+} /* end test_decode_corrupted_layout_ndims() */
+
 int
 main(void)
 {
@@ -914,6 +984,9 @@ main(void)
 
         } /* end high */
     }     /* end low */
+
+    if (test_decode_corrupted_layout_ndims() < 0)
+        goto error;
 
     return 0;
 
