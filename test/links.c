@@ -8410,6 +8410,93 @@ error:
 } /* end external_link_dangling() */
 
 /*-------------------------------------------------------------------------
+ * Function:    external_link_malformed
+ *
+ * Purpose:     Check that traversing an external link whose stored user data
+ *              is not a well-formed (file name, object path) pair fails
+ *              cleanly instead of reading past the udata buffer.  The link is
+ *              written with H5Lcreate_ud() so the payload bytes are stored
+ *              verbatim, then read back from disk.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *-------------------------------------------------------------------------
+ */
+static int
+external_link_malformed(hid_t fapl, bool new_format)
+{
+    hid_t fid = H5I_INVALID_HID; /* File ID */
+    hid_t gid = H5I_INVALID_HID; /* Group ID */
+    char  filename[NAME_BUF_SIZE];
+    /* External link payload with no NULL terminator: version/flags byte
+     * followed by an unterminated file name (no object path either). */
+    const uint8_t no_term[3] = {0x00, 'a', 'a'};
+    /* Payload that is terminated but carries no object path. */
+    const uint8_t no_path[3] = {0x00, 'a', 0x00};
+
+    if (new_format)
+        TESTING("external links with malformed data (w/new group format)");
+    else
+        TESTING("external links with malformed data");
+
+    /* Set up filename */
+    h5_fixname(FILENAME[12], fapl, filename, sizeof filename);
+
+    /* Create a file with two malformed external links */
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if (H5Lcreate_ud(fid, "no_term", H5L_TYPE_EXTERNAL, no_term, sizeof(no_term), H5P_DEFAULT, H5P_DEFAULT) <
+        0)
+        TEST_ERROR;
+    if (H5Lcreate_ud(fid, "no_path", H5L_TYPE_EXTERNAL, no_path, sizeof(no_path), H5P_DEFAULT, H5P_DEFAULT) <
+        0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Reopen and try to traverse each link; both must fail without crashing */
+    if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+
+    H5E_BEGIN_TRY
+    {
+        gid = H5Oopen(fid, "no_term", H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    if (gid >= 0) {
+        H5_FAILED();
+        puts("    Traversing an unterminated external link should have failed.");
+        goto error;
+    }
+
+    H5E_BEGIN_TRY
+    {
+        gid = H5Oopen(fid, "no_path", H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    if (gid >= 0) {
+        H5_FAILED();
+        puts("    Traversing an external link with no object path should have failed.");
+        goto error;
+    }
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Oclose(gid);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end external_link_malformed() */
+
+/*-------------------------------------------------------------------------
  * Function:    external_link_prefix
  *
  * Purpose:     1. target link: "extlinks2"
@@ -23657,6 +23744,7 @@ main(void)
                     nerrors += external_link_pingpong(my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_link_toomany(my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_link_dangling(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_malformed(my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_link_recursive(my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_link_query(my_fapl, new_format) < 0 ? 1 : 0;
 #ifndef H5_NO_DEPRECATED_SYMBOLS
