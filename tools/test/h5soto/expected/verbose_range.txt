@@ -1,0 +1,5 @@
+File versions: 7 (revisions 0-6)
+Revision 3 -> 4: 0 added, 0 removed, 1 modified
+  modified: / (group)
+Revision 4 -> 5: 1 added, 0 removed, 0 modified
+  added: /new_group (group)

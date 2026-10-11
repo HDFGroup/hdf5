@@ -1,0 +1,3 @@
+Objects in revision 6 (of 7):
+  / (group)
+  /DS1 (dataset)
