@@ -297,6 +297,16 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
 #define STORAGE_SIZE_CHUNK_DIM1 5
 #define STORAGE_SIZE_CHUNK_DIM2 5
 
+/* Names for scaleoffset bound test */
+#define SCALEOFFSET_FILENAME "scaleoffset_bounds.h5"
+#define DS1_NAME             "Dataset 1"
+#define DS2_NAME             "Dataset 2"
+#define DS3_NAME             "Dataset 3"
+
+/* Parameters for scaleoffset bound test */
+#define NELMTS_PCHK          64  /* elements per (single) chunk */
+#define BUF_OFFSET           21  /* on-disk scale-offset header size */
+
 /* Shared global arrays */
 #define DSET_DIM1 100
 #define DSET_DIM2 200
@@ -5967,6 +5977,171 @@ test_scaleoffset_double_2(hid_t file)
 error:
     return FAIL;
 } /* end test_scaleoffset_double_2() */
+
+/*--------------------------------------------------------------------------
+ * Regression test for the scale-offset decode bounds guards
+ *
+ * This test builds a normal scale-offset dataset, then uses H5Dwrite_chunk
+ * to store a deliberately undersized compressed chunk, and reads it back
+ * so the reverse filter runs.
+ *
+ * With the bound guards, each malformed chunk must be rejected: H5Dread
+ * returns < 0 rather than copying past the stored data, and in the valid
+ * case, reading succeeds and returns the written data. This is a
+ * regression guard -- without the bound check, H5Dread would wrongly
+ * succeed here, and an AddressSanitizer build would report the over-read.
+ *--------------------------------------------------------------------------
+ */
+static int
+test_scaleoffset_bound(void)
+{
+    hid_t         file = H5I_INVALID_HID,
+                  dc = H5I_INVALID_HID,
+                  space = H5I_INVALID_HID,
+                  dataset = H5I_INVALID_HID;
+    const hsize_t dims[1]   = {NELMTS_PCHK};
+    const hsize_t cdims[1]  = {NELMTS_PCHK};
+    const hsize_t offset[1] = {0};
+    unsigned char chunk25[25], /* 21-byte header + 4 payload bytes */
+                  chunk13[13], /* shorter than the 21-byte header */
+                  orig_data[NELMTS_PCHK],
+                  read_data[NELMTS_PCHK];
+    int           i;
+    herr_t        ret;         /* Generic return value */
+
+    /* For size_out exceeds payload */
+    memset(chunk25, 0, sizeof(chunk25));
+    chunk25[0] = 8; /* minbits = 8 */
+    chunk25[4] = 8; /* minval size: 8 bytes of minval follow at [5..12] */
+
+    /* For chunk shorter than the parameter header */
+    memset(chunk13, 0, sizeof(chunk13));
+    chunk13[0] = 8; /* minbits = 8 */
+    chunk13[4] = 8; /* minval size: 8 bytes of minval follow at [5..12] */
+
+    if ((file = H5Fcreate(SCALEOFFSET_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        fprintf(stderr, "cannot create %s\n", SCALEOFFSET_FILENAME);
+        goto error;
+    }
+
+    /* Create the data space */
+    if ((space = H5Screate_simple(1, dims, NULL)) < 0)
+        goto error;
+
+    /* Create the dataset property list  */
+    if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+
+    /* Set up to use scaleoffset filter, let library calculate minbits */
+    if (H5Pset_chunk(dc, 1, cdims) < 0)
+        goto error;
+    if (H5Pset_scaleoffset(dc, H5Z_SO_INT, H5Z_SO_INT_MINBITS_DEFAULT) < 0)
+        goto error;
+
+    /* Case 1: buffer size exceeds the 4 payload bytes */
+
+    if ((dataset = H5Dcreate2(file, DS1_NAME, H5T_NATIVE_UINT8, space, H5P_DEFAULT, dc, H5P_DEFAULT)) < 0)
+        goto error;
+    if (H5Dwrite_chunk(dataset, H5P_DEFAULT, 0, offset, sizeof(chunk25), chunk25) < 0)
+        goto error;
+
+    H5E_BEGIN_TRY
+    {
+        /* reading should fail */
+        ret = H5Dread(dataset, H5T_NATIVE_UINT8, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_data);
+    }
+    H5E_END_TRY
+
+    if (ret >= 0) {
+        H5_FAILED();
+        puts("    H5Dread should have rejected the undersized chunk");
+        goto error;
+    }
+
+    if (H5Dclose(dataset) < 0)
+        goto error;
+    dataset = H5I_INVALID_HID;
+
+    /* Case 2: chunk shorter than the 21-byte parameter header. */
+
+    if ((dataset = H5Dcreate2(file, DS2_NAME, H5T_NATIVE_UINT8, space, H5P_DEFAULT, dc, H5P_DEFAULT)) < 0)
+        goto error;
+    if (H5Dwrite_chunk(dataset, H5P_DEFAULT, 0, offset, sizeof(chunk13), chunk13) < 0)
+        goto error;
+
+    H5E_BEGIN_TRY
+    {
+        /* reading should fail */
+        ret = H5Dread(dataset, H5T_NATIVE_UINT8, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_data);
+    }
+    H5E_END_TRY
+
+    if (ret >= 0) {
+        H5_FAILED();
+        puts("    H5Dread should have rejected the undersized chunk");
+        goto error;
+    }
+
+    if (H5Dclose(dataset) < 0)
+        goto error;
+    dataset = H5I_INVALID_HID;
+
+    /* Case 3: genuine full-precision round-trip must still work, proving the guards
+     * don't reject valid data. */
+
+    for (i = 0; i < NELMTS_PCHK; i++)
+        orig_data[i] = (unsigned char)(i * 4);
+    orig_data[NELMTS_PCHK - 1] = 255;
+
+    if ((dataset = H5Dcreate2(file, DS3_NAME, H5T_NATIVE_UINT8, space, H5P_DEFAULT, dc, H5P_DEFAULT)) < 0)
+        goto error;
+    if (H5Dwrite(dataset, H5T_NATIVE_UINT8, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig_data) < 0)
+        goto error;
+    if (H5Dread(dataset, H5T_NATIVE_UINT8, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_data) < 0)
+        goto error;
+
+    for (i = 0; i < NELMTS_PCHK; i++)
+        if (read_data[i] != orig_data[i]) {
+            H5_FAILED();
+            puts("    Written and read values mismatch");
+            goto error;
+        }
+
+    /*----------------------------------------------------------------------
+     * Cleanup
+     *----------------------------------------------------------------------
+     */
+    if (H5Pclose(dc) < 0)
+        goto error;
+    dc = H5I_INVALID_HID;
+    if (H5Sclose(space) < 0)
+        goto error;
+    space = H5I_INVALID_HID;
+    if (H5Dclose(dataset) < 0)
+        goto error;
+    dataset = H5I_INVALID_HID;
+    if (H5Fclose(file) < 0)
+        goto error;
+    file = H5I_INVALID_HID;
+    HDremove(SCALEOFFSET_FILENAME);
+
+    PASSED();
+
+    return SUCCEED;
+error:
+    if (dc != H5I_INVALID_HID)
+        H5Pclose(dc);
+    if (space != H5I_INVALID_HID)
+        H5Sclose(space);
+    if (dataset != H5I_INVALID_HID)
+        H5Dclose(dataset);
+    if (file != H5I_INVALID_HID) {
+        H5Fclose(file);
+        HDremove(SCALEOFFSET_FILENAME);
+    }
+
+    return FAIL;
+} /* end test_scaleoffset_bound() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_multiopen
@@ -19927,6 +20102,7 @@ main(void)
                     nerrors += (test_scaleoffset_float_2(file) < 0 ? 1 : 0);
                     nerrors += (test_scaleoffset_double(file) < 0 ? 1 : 0);
                     nerrors += (test_scaleoffset_double_2(file) < 0 ? 1 : 0);
+                    nerrors += (test_scaleoffset_bound() < 0 ? 1 : 0);
                     nerrors += (test_multiopen(file) < 0 ? 1 : 0);
                     nerrors += (test_types(file) < 0 ? 1 : 0);
                     nerrors += (test_floattypes(file) < 0 ? 1 : 0);
