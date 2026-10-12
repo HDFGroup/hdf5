@@ -125,6 +125,15 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed a heap buffer over-read in scale-offset decode
+
+   The scale-offset filter's decode path used the size computed from the user's filter
+   parameters for the decompressed output without checking it against the actual
+   compressed chunk. This caused a heap out-of-bound read when encountered a malformed
+   file. The issue is now fixed with bound guards.
+
+   Fixes CVE-2026-19025
+
 ### Fixed a deadlock in the ROS3 VFD on Windows
 
    When an HDF5 application running on Windows and using the ROS3 VFD exited normally,
