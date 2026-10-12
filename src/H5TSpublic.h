@@ -80,6 +80,7 @@ extern "C" {
  *          at least one chunk. See H5Pset_chunk_cache().
  *          \li The library is not built with the \c HDF5_ENABLE_THREADSAFE
  *          option.
+ *          \li The file does not use an MPI-based file driver.
  *
  * \note    This function is only present when the library is built with
  *          thread support, i.e. when \c H5_HAVE_THREADS is defined.  This is

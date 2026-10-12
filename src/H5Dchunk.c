@@ -328,6 +328,8 @@ typedef struct H5D_threaded_io_info_t {
     H5TS_mutex_t               cond_mutex;    /* Mutex associated with cond */
     bool                       failed;        /* Whether any threads failed */
     hid_t                      dxpl_id;       /* Dataset transfer property list ID */
+    H5Z_EDC_t                  err_detect;    /* Error detection setting for the filter pipeline */
+    H5Z_cb_t                   filter_cb;     /* Filter callback for the filter pipeline */
 } H5D_threaded_io_info_t;
 #endif /* H5_HAVE_THREADS */
 
@@ -3158,7 +3160,8 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 #ifdef H5_HAVE_THREADSAFE
         /* The thread that called H5Dread() holds the API lock while it waits for the worker threads, so a
          * worker that called back into the API, e.g. from a filter or file driver callback, would deadlock.
-         * Don't use threads in threadsafe builds */
+         * Don't use threads in threadsafe builds, for now.  If filters and file drivers get a way to declare
+         * that they never call back into the library, this will no longer be needed for those. */
         do_threading = false;
 #else
         /* Check if we're using threads - first check if the global thread pool exists , we're not already in
@@ -3215,6 +3218,12 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                     threaded_io_info->dxpl_id = H5CX_get_dxpl();
                 else
                     threaded_io_info->dxpl_id = H5I_INVALID_HID;
+
+                /* Retrieve the filter pipeline settings here, so the threads don't need to */
+                if (H5CX_get_err_detect(&threaded_io_info->err_detect) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get error detection info");
+                if (H5CX_get_filter_cb(&threaded_io_info->filter_cb) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function");
             }
         }
 #endif /* H5_HAVE_THREADS */
@@ -3431,7 +3440,8 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                 if (H5_UNLIKELY(H5TS_mutex_lock(&threaded_io_info->cond_mutex) < 0))
                     HDONE_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't lock mutex for condition variable");
 
-                /* If we failed, subtract any unlaunched threads from chunks_left */
+                /* If we failed, subtract any unlaunched threads from chunks_left.  Their chunks are never
+                 * read, so they're evicted below. */
                 if (H5_UNLIKELY(ret_value < 0)) {
                     assert(threaded_io_info->num_chunks >= threads_launched);
                     threaded_io_info->chunks_left -= threaded_io_info->num_chunks - threads_launched;
@@ -3468,11 +3478,12 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                 threaded_io_info->chunks_locked = false;
 
                 /* Check for thread failure */
-                if (H5_UNLIKELY(threaded_io_info->failed)) {
+                if (H5_UNLIKELY(threaded_io_info->failed))
                     HDONE_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "threaded read worker(s) failed");
 
-                    /* We must evict all chunks if a worker failed, because the chunk may be in an
-                     * inconsistent state in memory */
+                /* We must evict all chunks if the read failed, because a chunk may be in an inconsistent
+                 * state in memory, or may not have been read at all */
+                if (H5_UNLIKELY(ret_value < 0)) {
                     for (size_t i = 0; i < threaded_io_info->num_chunks; i++)
                         if ((UINT_MAX != threaded_io_info->chunk_info[i].udata.idx_hint) &&
                             dset_info->dset->shared->cache.chunk
@@ -3598,7 +3609,8 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
     H5CX_node_t   api_ctx = {{0}, NULL};                   /* API context node to push */
     H5D_storage_t cpt_store;                               /* Chunk storage information as compact dataset */
     bool          cpt_dirty;                /* Temporary placeholder for compact storage "dirty" flag */
-    bool          mutex_held     = false;   /* Whether we hold the internal mutex */
+    bool          mutex_held = false;       /* Whether we hold the internal mutex */
+    bool          cond_mutex_held;          /* Whether we hold the condition variable mutex */
     bool          api_ctx_pushed = false;   /* Whether API context pushed */
     herr_t        ret_value      = SUCCEED; /* "Return value" for error macros (actual return value is always
                                                (H5TS_thread_ret_t)0) */
@@ -3659,9 +3671,6 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
     mutex_held = false;
 
     if (threaded_chunk_info->old_pline) {
-        H5Z_EDC_t err_detect;
-        H5Z_cb_t  filter_cb;
-
 #ifndef H5_UNSAFE_CONCURRENCY
         /* Lock internal mutex */
         if (H5_UNLIKELY(H5TS_internal_lock() < 0))
@@ -3669,16 +3678,11 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
         mutex_held = true;
 #endif /* H5_UNSAFE_CONCURRENCY */
 
-        /* Retrieve filter settings from API context. These must be protected by a mutex if using a
-         * non-default DXPL. */
-        if (H5_UNLIKELY(H5CX_get_err_detect(&err_detect) < 0))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get error detection info");
-        if (H5_UNLIKELY(H5CX_get_filter_cb(&filter_cb) < 0))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function");
-
         /* Perform filter pipeline. Defer going to done on error so the chunk cache is always patched. */
         if (H5_UNLIKELY(H5Z_pipeline(threaded_chunk_info->old_pline, H5Z_FLAG_REVERSE,
-                                     &(threaded_chunk_info->udata.filter_mask), err_detect, filter_cb,
+                                     &(threaded_chunk_info->udata.filter_mask),
+                                     threaded_chunk_info->threaded_io_info->err_detect,
+                                     threaded_chunk_info->threaded_io_info->filter_cb,
                                      &threaded_chunk_info->chunk_nbytes, &buf_alloc,
                                      &threaded_chunk_info->chunk) < 0))
             HDONE_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "data pipeline read failed");
@@ -3743,30 +3747,9 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
     api_ctx_pushed = false;
 
 done:
-    /* Report failure to task invoker (actual return value is ignored by the thread pool) */
-    if (H5_UNLIKELY(ret_value < 0))
-        threaded_chunk_info->threaded_io_info->failed = true;
-
-    /* Acquire condition variable mutex */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&threaded_chunk_info->threaded_io_info->cond_mutex) < 0))
-        HDONE_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't lock mutex for condition variable");
-
-    /* Decrement the number of chunks left, and signal the main thread if this was the last */
-    if (1 == threaded_chunk_info->threaded_io_info->chunks_left--)
-        /* Signal condition variable */
-        if (H5_UNLIKELY(H5TS_cond_signal(&threaded_chunk_info->threaded_io_info->cond) < 0))
-            HDONE_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't signal condition variable");
-
-    /* Unlock condition variable mutex */
-    if (H5_UNLIKELY(H5TS_mutex_unlock(&threaded_chunk_info->threaded_io_info->cond_mutex) < 0))
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "can't unlock mutex for condition variable");
-
-    /* Handle failures */
+    /* Handle failures.  This must happen before this chunk is reported as done. Once the last chunk
+     * is reported done, the thread that started the read frees threaded_io_info and goes on using the library. */
     if (H5_UNLIKELY(ret_value < 0)) {
-        /* Set failed again in case something failed in the cond_signal block. This is best effort, it's
-         * possible at this point for the main thread to race ahead and not see the failure. */
-        threaded_chunk_info->threaded_io_info->failed = true;
-
         /* Clean up */
         if (api_ctx_pushed && H5CX_pop(false) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context");
@@ -3794,6 +3777,20 @@ done:
 
     assert(!mutex_held);
     assert(!api_ctx_pushed);
+
+    /* Report failure to task invoker (actual return value is ignored by the thread pool), and decrement the
+     * number of chunks left, signaling the main thread if this was the last. Decrement even if the lock fails
+     * so the main thread doesn't wait forever. */
+    cond_mutex_held = H5TS_mutex_lock(&threaded_chunk_info->threaded_io_info->cond_mutex) >= 0;
+
+    if (H5_UNLIKELY(ret_value < 0))
+        threaded_chunk_info->threaded_io_info->failed = true;
+
+    if (1 == threaded_chunk_info->threaded_io_info->chunks_left--)
+        (void)H5TS_cond_signal(&threaded_chunk_info->threaded_io_info->cond);
+
+    if (H5_LIKELY(cond_mutex_held))
+        (void)H5TS_mutex_unlock(&threaded_chunk_info->threaded_io_info->cond_mutex);
 
     FUNC_LEAVE_NOAPI((H5TS_thread_ret_t)0);
 } /* end H5D__chunk_thread_read() */
