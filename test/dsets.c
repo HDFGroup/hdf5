@@ -304,8 +304,8 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
 #define DS3_NAME             "Dataset 3"
 
 /* Parameters for scaleoffset bound test */
-#define NELMTS_PCHK          64  /* elements per (single) chunk */
-#define BUF_OFFSET           21  /* on-disk scale-offset header size */
+#define NELMTS_PCHK 64  /* elements per (single) chunk */
+#define BUF_OFFSET  21  /* on-disk scale-offset header size */
 
 /* Shared global arrays */
 #define DSET_DIM1 100
