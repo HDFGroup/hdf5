@@ -6000,11 +6000,10 @@ test_scaleoffset_bound(void)
     const hsize_t cdims[1]  = {NELMTS_PCHK};
     const hsize_t offset[1] = {0};
     unsigned char chunk25[25], /* 21-byte header + 4 payload bytes */
-        chunk13[13], /* shorter than the 21-byte header */
-        orig_data[NELMTS_PCHK],
-        read_data[NELMTS_PCHK];
+        chunk13[13],           /* shorter than the 21-byte header */
+        orig_data[NELMTS_PCHK], read_data[NELMTS_PCHK];
     int    i;
-    herr_t ret;         /* Generic return value */
+    herr_t ret; /* Generic return value */
 
     /* For size_out exceeds payload */
     memset(chunk25, 0, sizeof(chunk25));
