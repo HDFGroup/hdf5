@@ -342,6 +342,14 @@
       }
     },
     {
+      "name": "ci-StdShar-S3",
+      "hidden": true,
+      "inherits": [
+        "ci-StdShar",
+        "ci-S3"
+      ]
+    },
+    {
       "name": "ci-StdShar-MSVC",
       "description": "MSVC Standard Config for x64 (Release)",
       "inherits": [
@@ -481,8 +489,11 @@
       "name": "ci-StdShar-GNUC-S3",
       "description": "GNUC S3 Config for x64 (Release)",
       "inherits": [
-        "ci-StdShar-GNUC",
-        "ci-S3"
+        "ci-x64-Release-GNUC",
+        "ci-CPP",
+        "ci-Fortran",
+        "ci-Java",
+        "ci-StdShar-S3"
       ]
     },
     {
