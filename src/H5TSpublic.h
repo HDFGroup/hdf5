@@ -78,7 +78,7 @@ extern "C" {
  *          dataset chunk cache.
  *          \li For unfiltered datasets, the chunk cache must be large enough to
  *          fit at least one chunk. See H5Pset_chunk_cache().
- *          \li No data filters re-enter the HDF5 API. All data fitlers must
+ *          \li No data filters re-enter the HDF5 API. All data filters must
  *          set the \p H5Z_FEAT_FILTER_NO_H5_CALLS capability flag.
  *          \li The file driver must not re-enter the HDF5 API. It must set the
  *          \p H5FD_FEAT_READWRITE_NO_H5_CALLS capability flag.

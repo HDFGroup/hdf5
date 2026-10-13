@@ -19978,7 +19978,7 @@ test_threaded_filters(void)
         TEST_ERROR;
     dataset = H5I_INVALID_HID;
 
-    /* Append "threads required" fitler to create filter pipeline with bith threads required and non threadsafe filters */
+    /* Append "threads required" filter to create filter pipeline with bith threads required and non threadsafe filters */
     if (H5Pset_filter(dcpl, H5Z_FILTER_THREADS_REQUIRED, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
         TEST_ERROR;
 
