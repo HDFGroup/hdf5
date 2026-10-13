@@ -78,6 +78,7 @@ typedef struct {
     int include_attrs;          /* Display attributes */
     int display_vds_first;      /* vds display to all by default */
     int vds_gap_size;           /* vds skip missing files default is none */
+    int display_filter_params;  /* print filter parameter strings (implies display_dcpl) */
 } dump_opt_t;
 extern dump_opt_t dump_opts;
 

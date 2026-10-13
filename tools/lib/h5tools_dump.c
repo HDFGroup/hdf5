@@ -3178,6 +3178,264 @@ h5tools_print_fill_value(h5tools_str_t *buffer /*in,out*/, const h5tool_format_t
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    h5tools_float_is_short_binary
+ *
+ * Purpose:     Determines whether a double is m * 2^e for an integer m with
+ *              |m| < 2^13, i.e. at most three hexadecimal fraction digits.
+ *              These are the floats annotated in hexadecimal.
+ *
+ * Return:      true if the value should be annotated, false otherwise
+ *-------------------------------------------------------------------------
+ */
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+#endif
+static bool
+h5tools_float_is_short_binary(double v)
+{
+    double f;
+    int    e;
+
+    /* Reject zero, inf and nan on the bit pattern: fast-math builds can fold
+     * isfinite() to 1 and make "v == 0.0" true for subnormals */
+#if H5_SIZEOF_DOUBLE == 8
+    {
+        uint64_t mag;
+
+        memcpy(&mag, &v, sizeof(v));
+        mag &= 0x7fffffffffffffffULL; /* drop the sign bit */
+        if (mag == 0 || mag >= 0x7ff0000000000000ULL)
+            return false;
+    }
+#else
+    if (v == 0.0 || !isfinite(v))
+        return false;
+#endif
+
+    /* f is in [0.5, 1), so f * 2^13 is integral iff there are at most 13
+     * significant bits.  The comparisons are meant to be exact. */
+    f = frexp(fabs(v), &e);
+    f *= 8192.0;
+
+    return f == floor(f); // lgtm[cpp/equality-on-floats]
+}
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_format_hexfloat
+ *
+ * Purpose:     Formats a double as a hexadecimal float literal such as
+ *              0x1.8p-36 (subnormals too, e.g. 0x1p-1074).  printf("%a")
+ *              is not used because its spelling varies between C libraries.
+ *
+ * Return:      void
+ *-------------------------------------------------------------------------
+ */
+static void
+h5tools_format_hexfloat(double v, char *out, size_t out_size)
+{
+    static const char hexdigits[] = "0123456789abcdef";
+    char              frac[16];
+    const char       *sign = "";
+    double            f, r;
+    int               e;
+    int               n = 0;
+
+    if (v < 0.0) {
+        sign = "-";
+        v    = -v;
+    }
+
+    f = frexp(v, &e); /* v == f * 2^e, f in [0.5, 1) */
+    f *= 2.0;
+    e -= 1; /* f now in [1, 2) */
+
+    r = f - 1.0;
+    while (r > 0.0 && n < (int)sizeof(frac) - 1) {
+        int d;
+
+        r *= 16.0;
+        d         = (int)r;
+        frac[n++] = hexdigits[d];
+        r -= (double)d;
+    }
+    frac[n] = '\0';
+
+    snprintf(out, out_size, "%s0x1%s%sp%+d", sign, n ? "." : "", frac, e);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_params_hex_annotation
+ *
+ * Purpose:     Builds the comment that follows a PARAMS_STRING line,
+ *              showing each float that is a small multiple of a power of two
+ *              in hexadecimal, e.g. "accuracy = 0x1p-36", since the stored
+ *              decimal (1.4551915228366852e-11) hides that.  The string is
+ *              scanned lexically because h5dump does not know the keys.
+ *              PARAMS must be the unescaped string.
+ *
+ * Return:      void; out receives the empty string when nothing qualifies
+ *-------------------------------------------------------------------------
+ */
+static void
+h5tools_params_hex_annotation(const char *params, char *out, size_t out_size)
+{
+    const char *p = params;
+    char        key[128];
+    size_t      keylen = 0;
+    size_t      outlen = 0;
+
+    assert(out != NULL);
+    assert(out_size > 0);
+
+    out[0] = '\0';
+    key[0] = '\0';
+
+    if (params == NULL)
+        return;
+
+    while (*p) {
+        /* Skip a basic string */
+        if (*p == '"') {
+            p++;
+            while (*p && *p != '"') {
+                if (*p == '\\' && p[1])
+                    p++;
+                p++;
+            }
+            if (*p)
+                p++;
+            continue;
+        }
+
+        /* Skip a literal string, which has no escapes. */
+        if (*p == '\'') {
+            p++;
+            while (*p && *p != '\'')
+                p++;
+            if (*p)
+                p++;
+            continue;
+        }
+
+        /* Skip a comment */
+        if (*p == '#') {
+            while (*p && *p != '\n')
+                p++;
+            continue;
+        }
+
+        /* A key, possibly dotted */
+        if (isalpha((unsigned char)*p) || *p == '_') {
+            keylen = 0;
+            while (isalnum((unsigned char)*p) || *p == '_' || *p == '-' || *p == '.') {
+                if (keylen + 1 < sizeof(key))
+                    key[keylen++] = *p;
+                p++;
+            }
+            key[keylen] = '\0';
+            continue;
+        }
+
+        /* A number; only floats are annotated */
+        if (isdigit((unsigned char)*p) || ((*p == '-' || *p == '+') && isdigit((unsigned char)p[1]))) {
+            const char *tok     = p;
+            bool        isfloat = false;
+            bool        ishex   = false;
+            char       *end;
+            double      v;
+
+            if (*p == '-' || *p == '+')
+                p++;
+            while (isdigit((unsigned char)*p) || *p == '_')
+                p++;
+            if (*p == 'x' || *p == 'X')
+                isfloat = ishex = true;
+            else if (*p == 'b' || *p == 'B' || *p == 'o' || *p == 'O') {
+                /* 0b/0o integers, which strtod() does not consume */
+                p++;
+                while (isalnum((unsigned char)*p) || *p == '_')
+                    p++;
+                continue;
+            }
+            else if (*p == '.' || *p == 'e' || *p == 'E' || *p == 'p' || *p == 'P')
+                isfloat = true;
+
+            v = strtod(tok, &end);
+            if (end > tok)
+                p = end;
+            else
+                p = tok + 1; /* not convertible; step past to make progress */
+
+            /* Already hexadecimal */
+            if (isfloat && !ishex && keylen > 0 && h5tools_float_is_short_binary(v)) {
+                char hexbuf[64];
+                char piece[256];
+                int  n;
+
+                h5tools_format_hexfloat(v, hexbuf, sizeof(hexbuf));
+                n = snprintf(piece, sizeof(piece), "%s%s = %s", outlen > 0 ? ", " : "", key, hexbuf);
+
+                if (n > 0 && outlen + (size_t)n < out_size) {
+                    memcpy(out + outlen, piece, (size_t)n);
+                    outlen += (size_t)n;
+                    out[outlen] = '\0';
+                }
+            }
+
+            /* The key is spent; do not let it attach to a later numeral. */
+            keylen = 0;
+            key[0] = '\0';
+            continue;
+        }
+
+        p++;
+    }
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_dump_filter_extra
+ *
+ * Purpose:     Emits PARAMS_STRING and DESCRIPTION lines for a single
+ *              filter, nested inside that filter's own FILTERS{} entry.
+ *
+ * Return:      void
+ *-------------------------------------------------------------------------
+ */
+static void
+h5tools_dump_filter_extra(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx,
+                          h5tools_str_t *buffer, hsize_t *curr_pos, size_t ncols, const char *params_str,
+                          const char *params_annot, const char *description)
+{
+    if (params_str) {
+        ctx->need_prefix = true;
+        h5tools_str_reset(buffer);
+        h5tools_str_append(buffer, "%s '%s'", PARAMS_STRING, params_str);
+        h5tools_render_element(stream, info, ctx, buffer, curr_pos, ncols, (hsize_t)0, (hsize_t)0);
+
+        /* Outside the quotes, so the quoted text is exactly what is stored */
+        if (params_annot && params_annot[0] != '\0') {
+            ctx->need_prefix = true;
+            h5tools_str_reset(buffer);
+            h5tools_str_append(buffer, "# %s", params_annot);
+            h5tools_render_element(stream, info, ctx, buffer, curr_pos, ncols, (hsize_t)0, (hsize_t)0);
+        }
+    }
+
+    /* DESCRIPTION comes from the registered filter, not the file, so it is
+     * shown only when the filter is available */
+    if (description) {
+        ctx->need_prefix = true;
+        h5tools_str_reset(buffer);
+        h5tools_str_append(buffer, "%s \"%s\"", FILTER_DESCRIPTION, description);
+        h5tools_render_element(stream, info, ctx, buffer, curr_pos, ncols, (hsize_t)0, (hsize_t)0);
+    }
+}
+
+/*-------------------------------------------------------------------------
  * Function:    dump_dcpl
  *
  * Purpose:     prints several dataset create property list properties
@@ -3553,32 +3811,166 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
 
         if (nfilters) {
             for (i = 0; i < nfilters; i++) {
+                /* Too large for the stack */
+                const size_t params_buf_size = H5Z_CONFIG_STRING_MAX + 1;
+                char        *params_str_buf  = (char *)malloc(params_buf_size);
+                char        *params_annot    = (char *)malloc(params_buf_size);
+                char        *params_str      = NULL;
+                const char  *filter_descr    = NULL;
+                bool         have_extra;
+
+                /* On allocation failure, still print the filter, without the
+                 * extra lines */
+                if (params_annot)
+                    params_annot[0] = '\0';
+
                 cd_nelmts = NELMTS(cd_values);
                 filtn     = H5Pget_filter2(dcpl_id, (unsigned)i, &filt_flags, &cd_nelmts, cd_values,
                                            sizeof(f_name), f_name, NULL);
 
-                if (filtn < 0)
+                if (filtn < 0) {
+                    free(params_str_buf);
+                    free(params_annot);
                     continue; /* nothing to print for invalid filter */
+                }
+
+                if (dcpl_id >= 0 && ctx->show_filter_params && params_str_buf && params_annot) {
+                    size_t plen = 0;
+                    if (H5Pget_filter_params_by_idx(dcpl_id, (unsigned)i, params_str_buf, params_buf_size,
+                                                    &plen) >= 0 &&
+                        plen > 0) {
+                        /* plen is the full length, which may exceed what was copied */
+                        size_t copied          = (plen < params_buf_size) ? plen : params_buf_size - 1;
+                        params_str_buf[copied] = '\0';
+
+                        h5tools_params_hex_annotation(params_str_buf, params_annot, params_buf_size);
+
+                        /* Escape single quotes, and control characters since the
+                         * string comes from the file.  Each byte expands to at
+                         * most 4 ("\xHH"). */
+                        size_t ebuf_size = 4 * copied + 1;
+                        char  *ebuf      = (char *)malloc(ebuf_size);
+                        if (ebuf) {
+                            size_t in_i, out_i = 0;
+                            for (in_i = 0; in_i < copied && out_i < ebuf_size; in_i++) {
+                                unsigned char c = (unsigned char)params_str_buf[in_i];
+                                if (c < 0x20 || c == 0x7f) {
+                                    int n = snprintf(ebuf + out_i, ebuf_size - out_i, "\\x%02x", (unsigned)c);
+                                    out_i += (n > 0) ? MIN((size_t)n, ebuf_size - out_i) : 0;
+                                    continue;
+                                }
+                                if (c == '\\' || c == '\'') {
+                                    ebuf[out_i++] = '\\';
+                                    if (out_i >= ebuf_size)
+                                        break;
+                                }
+                                ebuf[out_i++] = params_str_buf[in_i];
+                            }
+                            ebuf[MIN(out_i, ebuf_size - 1)] = '\0';
+                            params_str                      = ebuf;
+                        }
+                    }
+
+                    {
+                        H5Z_class_info_t finfo;
+                        herr_t           finfo_ret;
+
+                        H5E_BEGIN_TRY
+                        {
+                            finfo_ret = H5Zget_filter_class_info(filtn, &finfo);
+                        }
+                        H5E_END_TRY
+                        if (finfo_ret >= 0 && finfo.description != NULL)
+                            filter_descr = finfo.description;
+                    }
+                }
+                have_extra = (params_str != NULL) || (filter_descr != NULL);
 
                 ctx->need_prefix = true;
 
                 h5tools_str_reset(&buffer);
                 switch (filtn) {
                     case H5Z_FILTER_DEFLATE:
-                        h5tools_str_append(&buffer, "%s %s %s %d %s", DEFLATE, BEGIN, DEFLATE_LEVEL,
-                                           cd_values[0], END);
-                        h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
-                                               (hsize_t)0, (hsize_t)0);
+                        if (have_extra) {
+                            h5tools_str_append(&buffer, "%s %s", DEFLATE, BEGIN);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+
+                            ctx->indent_level++;
+
+                            ctx->need_prefix = true;
+
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, "%s %d", DEFLATE_LEVEL, cd_values[0]);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+
+                            h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols,
+                                                      params_str, params_annot, filter_descr);
+
+                            ctx->indent_level--;
+
+                            ctx->need_prefix = true;
+
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, "%s", END);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
+                        else {
+                            h5tools_str_append(&buffer, "%s %s %s %d %s", DEFLATE, BEGIN, DEFLATE_LEVEL,
+                                               cd_values[0], END);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
                         break;
                     case H5Z_FILTER_SHUFFLE:
-                        h5tools_str_append(&buffer, "%s", SHUFFLE);
-                        h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
-                                               (hsize_t)0, (hsize_t)0);
+                        if (have_extra) {
+                            h5tools_str_append(&buffer, "%s %s", SHUFFLE, BEGIN);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+
+                            ctx->indent_level++;
+                            h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols,
+                                                      params_str, params_annot, filter_descr);
+                            ctx->indent_level--;
+
+                            ctx->need_prefix = true;
+
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, "%s", END);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
+                        else {
+                            h5tools_str_append(&buffer, "%s", SHUFFLE);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
                         break;
                     case H5Z_FILTER_FLETCHER32:
-                        h5tools_str_append(&buffer, "%s", FLETCHER32);
-                        h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
-                                               (hsize_t)0, (hsize_t)0);
+                        if (have_extra) {
+                            h5tools_str_append(&buffer, "%s %s", FLETCHER32, BEGIN);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+
+                            ctx->indent_level++;
+                            h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols,
+                                                      params_str, params_annot, filter_descr);
+                            ctx->indent_level--;
+
+                            ctx->need_prefix = true;
+
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, "%s", END);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
+                        else {
+                            h5tools_str_append(&buffer, "%s", FLETCHER32);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
                         break;
                     case H5Z_FILTER_SZIP:
                         szip_options_mask     = cd_values[0];
@@ -3636,6 +4028,9 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                                                    (hsize_t)0, (hsize_t)0);
                         }
 
+                        h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols, params_str,
+                                                  params_annot, filter_descr);
+
                         ctx->indent_level--;
 
                         ctx->need_prefix = true;
@@ -3646,15 +4041,62 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                                                (hsize_t)0, (hsize_t)0);
                         break;
                     case H5Z_FILTER_NBIT:
-                        h5tools_str_append(&buffer, "%s", NBIT);
-                        h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
-                                               (hsize_t)0, (hsize_t)0);
+                        if (have_extra) {
+                            h5tools_str_append(&buffer, "%s %s", NBIT, BEGIN);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+
+                            ctx->indent_level++;
+                            h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols,
+                                                      params_str, params_annot, filter_descr);
+                            ctx->indent_level--;
+
+                            ctx->need_prefix = true;
+
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, "%s", END);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
+                        else {
+                            h5tools_str_append(&buffer, "%s", NBIT);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
                         break;
                     case H5Z_FILTER_SCALEOFFSET:
-                        h5tools_str_append(&buffer, "%s %s %s %d %s", SCALEOFFSET, BEGIN, SCALEOFFSET_MINBIT,
-                                           cd_values[0], END);
-                        h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
-                                               (hsize_t)0, (hsize_t)0);
+                        if (have_extra) {
+                            h5tools_str_append(&buffer, "%s %s", SCALEOFFSET, BEGIN);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+
+                            ctx->indent_level++;
+
+                            ctx->need_prefix = true;
+
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, "%s %d", SCALEOFFSET_MINBIT, cd_values[0]);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+
+                            h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols,
+                                                      params_str, params_annot, filter_descr);
+
+                            ctx->indent_level--;
+
+                            ctx->need_prefix = true;
+
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, "%s", END);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
+                        else {
+                            h5tools_str_append(&buffer, "%s %s %s %d %s", SCALEOFFSET, BEGIN,
+                                               SCALEOFFSET_MINBIT, cd_values[0], END);
+                            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
+                                                   (hsize_t)0, (hsize_t)0);
+                        }
                         break;
                     default:
                         h5tools_str_append(&buffer, "%s %s", "USER_DEFINED_FILTER", BEGIN);
@@ -3689,6 +4131,10 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
                                                    (hsize_t)0, (hsize_t)0);
                         }
+
+                        h5tools_dump_filter_extra(stream, info, ctx, &buffer, &curr_pos, ncols, params_str,
+                                                  params_annot, filter_descr);
+
                         ctx->indent_level--;
 
                         ctx->need_prefix = true;
@@ -3699,8 +4145,13 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                                                (hsize_t)0, (hsize_t)0);
                         break;
                 } /*switch*/
-            }     /*i*/
-        }         /*nfilters*/
+
+                if (params_str)
+                    free(params_str);
+                free(params_str_buf);
+                free(params_annot);
+            } /*i*/
+        }     /*nfilters*/
         else {
             ctx->need_prefix = true;
 
