@@ -22,7 +22,7 @@ jobs:
     env:
       AOCCVERDOT: "5.2.0"
       AOCCVERDASH: "5-2"
-      MPIVERDOT: "5.0.9"
+      MPIVERDOT: "5.0.11"
       #MPIVERUND: Change is needed in the lines below.
 
     steps:
