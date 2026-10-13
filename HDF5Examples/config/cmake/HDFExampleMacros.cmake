@@ -453,6 +453,14 @@ macro (APIVersion version xyapi)
   if (${EXAMPLE_VARNAME}_USE_200_API AND ${xyapi} GREATER 200)
     set (${xyapi} "200")
   endif ()
+
+  #-----------------------------------------------------------------------------
+  # Option to use 3.0.x API
+  #-----------------------------------------------------------------------------
+  option (${EXAMPLE_VARNAME}_USE_300_API "Use the HDF5 3.x.y API" OFF)
+  if (${EXAMPLE_VARNAME}_USE_300_API AND ${xyapi} GREATER 300)
+    set (${xyapi} "300")
+  endif ()
 endmacro ()
 
 #
