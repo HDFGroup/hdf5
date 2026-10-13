@@ -12,7 +12,7 @@ use warnings;
 #
 # Also, note that this scheme started at the 1.6/1.8 transition, so earlier
 # versions of the API aren't versioned.
-@versions = ("16", "18", "110", "112", "114", "200");
+@versions = ("16", "18", "110", "112", "114", "200", "300");
 
 # Number of spaces to indent preprocessor commands inside ifdefs
 $indent = 2;
@@ -359,7 +359,7 @@ sub validate_line {
         #        and the H5O function version should be version 3 for default api=v112
         #        (the default api version for 1.12).  Allowing a v111 entry allows
         #        a version 2 that is never accessed via the H5O function macros.
-        if (!( $_ =~ /v1[02468]/ || $_ =~ /v11[02468]/ ||  $_ =~ /v111/ || $_ =~ /v200/ )) {
+        if (!( $_ =~ /v1[02468]/ || $_ =~ /v11[02468]/ ||  $_ =~ /v111/ || $_ =~ /v200/ || $_ =~ /v300/ )) {
             die "bad version information: $name";
         }
 

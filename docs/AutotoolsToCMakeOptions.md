@@ -34,7 +34,7 @@ The table below shows the equivalent CMake build options that match those from A
 | sharedlib-rpath[Disable use of the '=Wl,-rpath' linker option] |  |  |
 | zlib[Use zlib library for external deflate I/O filter [default=yes]] | HDF5_ENABLE_ZLIB_SUPPORT "Enable Zlib Filters" [OFF] |  |
 | szlib[Use szlib library for external szlib I/O filter [default=yes]] | HDF5_ENABLE_SZIP_SUPPORT "Use SZip Filter" [OFF] |  |
-| default-api-version[Specify default release version of public symbols [default=v200]] | HDF5_DEFAULT_API_VERSION "v200" CACHE STRING "Enable v2.0 API (v16, v18, v110, v112, v114, v200)" [v200] |  |
+| default-api-version[Specify default release version of public symbols [default=v300]] | HDF5_DEFAULT_API_VERSION "v300" CACHE STRING "Enable v3.0 API (v16, v18, v110, v112, v114, v200, v300)" [v300] |  |
 | default-plugindir[--with-default-plugindir=location], [Specify default location for plugins [default="/usr/local/hdf5/lib/plugin"]] | H5_DEFAULT_PLUGINDIR “Define the default plugins path” | if (WINDOWS)<br>H5_DEFAULT_PLUGINDIR "%ALLUSERSPROFILE%/hdf5/lib/plugin"<br>else ()<br>H5_DEFAULT_PLUGINDIR "/usr/local/hdf5/lib/plugin"<br>endif () |
 | **Autotools Features Options** | **CMake Features Options** | **Notes** |
 | dimension-scales-with-new-ref[Use new references when creating dimension scales. [default=no]] | HDF5_DIMENSION_SCALES_NEW_REF "Use new-style references with dimension scale APIs" [OFF] |  |
