@@ -985,6 +985,7 @@ set (H5WB_PRIVATE_HDRS
 
 set (H5Z_SOURCES
     ${HDF5_SRC_DIR}/H5Z.c
+    ${HDF5_SRC_DIR}/H5Zconfig.c
     ${HDF5_SRC_DIR}/H5Zdeflate.c
     ${HDF5_SRC_DIR}/H5Zfletcher32.c
     ${HDF5_SRC_DIR}/H5Znbit.c
@@ -998,6 +999,40 @@ if (H5_ZLIB_HEADER)
   set_source_files_properties(${HDF5_SRC_DIR}/H5Zdeflate.c
                PROPERTIES COMPILE_DEFINITIONS H5_ZLIB_HEADER="${H5_ZLIB_HEADER}"
   )
+endif ()
+
+list (APPEND H5Z_SOURCES ${HDF5_SRC_DIR}/tomlc17/tomlc17.c)
+# Keep the vendored tomlc17 symbols from colliding with an application's own
+# copy by renaming them via a force-included h5_toml_prefix.h (so the vendored
+# files stay unmodified).  Vendored code is also exempt from HDF5's
+# warnings-as-errors.
+include (CheckCCompilerFlag)
+
+if (MSVC)
+  set_property (SOURCE ${HDF5_SRC_DIR}/tomlc17/tomlc17.c APPEND PROPERTY COMPILE_OPTIONS
+    "/FI${HDF5_SRC_DIR}/tomlc17/h5_toml_prefix.h"
+  )
+else ()
+  check_c_compiler_flag ("-include ${HDF5_SRC_DIR}/tomlc17/h5_toml_prefix.h" HDF5_C_HAS_INCLUDE_FLAG)
+  if (HDF5_C_HAS_INCLUDE_FLAG)
+    set_property (SOURCE ${HDF5_SRC_DIR}/tomlc17/tomlc17.c APPEND PROPERTY COMPILE_OPTIONS
+      "-include" "${HDF5_SRC_DIR}/tomlc17/h5_toml_prefix.h"
+    )
+  else ()
+    message (WARNING
+      "Compiler does not support -include; the vendored tomlc17 symbols will "
+      "NOT be prefixed and may collide with an application's own copy of "
+      "tomlc17 when statically linked. See src/CMakeLists.txt.")
+  endif ()
+endif ()
+
+if (MSVC)
+  set_property (SOURCE ${HDF5_SRC_DIR}/tomlc17/tomlc17.c APPEND PROPERTY COMPILE_OPTIONS "/W0")
+else ()
+  check_c_compiler_flag ("-w" HDF5_C_HAS_W)
+  if (HDF5_C_HAS_W)
+    set_property (SOURCE ${HDF5_SRC_DIR}/tomlc17/tomlc17.c APPEND PROPERTY COMPILE_OPTIONS "-w")
+  endif ()
 endif ()
 
 set (H5Z_PUBLIC_HDRS

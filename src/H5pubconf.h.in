@@ -350,6 +350,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #cmakedefine H5_HAVE_UNISTD_H @H5_HAVE_UNISTD_H@
 
+/* Define to 1 if you have the `uselocale' function. */
+#cmakedefine H5_HAVE_USELOCALE @H5_HAVE_USELOCALE@
+
 /* Define to 1 if you have the `vasprintf' function. */
 #cmakedefine H5_HAVE_VASPRINTF @H5_HAVE_VASPRINTF@
 
