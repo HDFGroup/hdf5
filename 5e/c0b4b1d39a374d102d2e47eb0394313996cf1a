@@ -1,0 +1,153 @@
+.github/workflows/main-spc.yml
+  s_7067ad3df0f0a8::t_16265104323610 62-63,126-127,185-186,244-245,301-302,358-359,415-416,459,472
+.github/workflows/arm-main.yml
+  s_7067ad3df0f0a8::t_d1b67b8283c261 39-42,63,80,102,126
+.github/workflows/bintest.yml
+  s_7067ad3df0f0a8::t_e67b3a1b55ef08 39,122,176,244
+.github/workflows/codeql.yml
+  s_7067ad3df0f0a8::t_ceb7a002b3ca53 95,182,210,259
+.github/workflows/codespell.yml
+  s_7067ad3df0f0a8::t_880c741023aa30 14
+.github/workflows/ctest.yml
+  s_7067ad3df0f0a8::t_d6286a931b544c 109,266,437,645,935
+.github/workflows/daily-schedule.yml
+  s_7067ad3df0f0a8::t_43ec562d36bf5b 52
+.github/workflows/freebsd.yml
+  s_7067ad3df0f0a8::t_94f0701c98680c 57
+.github/workflows/intel.yml
+  s_7067ad3df0f0a8::t_4e600977bb26be 90
+.github/workflows/java-examples-maven-test.yml
+  s_7067ad3df0f0a8::t_cc4ef6922043fd 40,203,322
+.github/workflows/java-implementation-test.yml
+  s_7067ad3df0f0a8::t_2efb3b11417d0f 132
+.github/workflows/main-par.yml
+  s_7067ad3df0f0a8::t_d4ebf49aa0a5fa 59-60
+.github/workflows/main.yml
+  s_7067ad3df0f0a8::t_c94a8ade7e7fdb 185,297-298
+.github/workflows/maven-build-test.yml
+  s_7067ad3df0f0a8::t_a8193e0f3d30b4 86,158,217
+.github/workflows/maven-deploy.yml
+  s_7067ad3df0f0a8::t_f73ac26a8fd640 272
+.github/workflows/maven-staging.yml
+  s_7067ad3df0f0a8::t_7143e9619e4f0d 265,697,828
+.github/workflows/msys2.yml
+  s_7067ad3df0f0a8::t_2ead27dd5531c0 39
+.github/workflows/nvhpc.yml
+  s_7067ad3df0f0a8::t_2832f555bc2924 23-24,41,71-73
+.github/workflows/openbsd.yml
+  s_7067ad3df0f0a8::t_668dc3d54689e2 57
+.github/workflows/publish-branch.yml
+  s_7067ad3df0f0a8::t_baaf541bbefd45 37
+.github/workflows/publish-release.yml
+  s_7067ad3df0f0a8::t_3e7472c73daadf 101
+.github/workflows/scorecard.yml
+  s_7067ad3df0f0a8::t_f0fad6d6e5599f 70
+.github/workflows/script.yml
+  s_7067ad3df0f0a8::t_7895ebd2e940dc 275,505
+.github/workflows/test-binary-installation.yml
+  s_7067ad3df0f0a8::t_639ccfda23947c 81,286
+.github/workflows/test-maven-packages.yml
+  s_7067ad3df0f0a8::t_6f0f5f0ad13876 66,337
+.github/workflows/vfd-ros3.yml
+  s_7067ad3df0f0a8::t_8b54f6b7c1cf84 107,270
+.github/workflows/vol_rest.yml
+  s_7067ad3df0f0a8::t_67f0d12b4c2ebf 171,192-198
+.github/workflows/zizmor.yml
+  s_7067ad3df0f0a8::t_05d72aae2ed6ed 50
+CMakeBuildOptions.cmake
+  s_7067ad3df0f0a8::t_4946e7da7186e0 86-90
+CMakeInstallation.cmake
+  s_7067ad3df0f0a8::t_4dc0ccc5c0ea42 193
+config/HDF5Macros.cmake
+  s_7067ad3df0f0a8::t_a57a5ca07aa540 143-169
+docs/doxygen/dox/H5.format.4.0.dox
+  s_7067ad3df0f0a8::t_6f785c8e2063cb 7929-7932
+hl/CMakeLists.txt
+  s_7067ad3df0f0a8::t_4b649b09deabe0 5-7,10
+hl/src/H5DOpublic.h
+  s_7067ad3df0f0a8::t_eaadb20a9faa55 174-178,387-388
+hl/src/H5DS.c
+  s_7067ad3df0f0a8::t_5b0dc982ca4c53 27-31,598-614,648-658,664
+hl/src/H5DSpublic.h
+  s_7067ad3df0f0a8::t_e5ec7c618ed82b 802-806
+hl/test/CMakeTests.cmake
+  s_7067ad3df0f0a8::t_b71274cb65312e 70
+hl/test/test_ds.c
+  s_7067ad3df0f0a8::t_b84aec650c84c9 98,152-160,220,5714-5823
+release_docs/CHANGELOG.md
+  s_7067ad3df0f0a8::t_d42f08e366511f 156-174,206-217,226-231,274-279,290-297,334-356,361-371
+src/CMakeLists.txt
+  s_7067ad3df0f0a8::t_3ce46af0b37a3a 1218
+src/H5B.c
+  s_7067ad3df0f0a8::t_6eab9ab2998ed0 1143-1156
+src/H5Dpublic.h
+  s_7067ad3df0f0a8::t_d44897e995cba6 1298-1311
+src/H5HL.c
+  s_7067ad3df0f0a8::t_a806aa7b0744f7 420-426,428-431,434-435,438,440-443,446-448
+src/H5Lexternal.c
+  s_7067ad3df0f0a8::t_36d98da10e0e13 96,124-135,146-148
+src/H5MF.c
+  s_7067ad3df0f0a8::t_55f00ce64d6874 235-287
+src/H5MFprivate.h
+  s_7067ad3df0f0a8::t_9905cfb4cbd82c 44-47
+src/H5MFsection.c
+  s_7067ad3df0f0a8::t_ef81cfe7e68d61 737-740
+src/H5PB.c
+  s_7067ad3df0f0a8::t_f00cd57d26bedd 37,624-630,638-643,714,730,866,949,1021,1045,1130-1131,1133-1135,1137,1179,1236,1284,1408,1462,1479,1496-1497,1499-1501,1503,1511
+src/H5PBpkg.h
+  s_7067ad3df0f0a8::t_e7a73db1644ad7 36
+src/H5Pdcpl.c
+  s_7067ad3df0f0a8::t_6910e80ec66cf3 3210-3216
+src/H5SL.c
+  s_7067ad3df0f0a8::t_63b9dcae6dde3d 31-32,155,391,878,1299,1305,1327,1330,1388,1395-1396,1419,1422,1493,1500-1501,1524,1527,1588-1589,1595,1619,1622,1680,1687-1689,1711,1714,1785,1792-1794,1816,1819,1970,2059-2060,2063,2088,2091
+src/H5build_settings.cmake.c.in
+  s_7067ad3df0f0a8::t_ef8b5d3a0564fc 66,70-72,75,79-80,92
+src/libhdf5.settings.in
+  s_7067ad3df0f0a8::t_98c89c1034da02 48,52-54,57,61-62
+test/CMakeTests.cmake
+  s_7067ad3df0f0a8::t_0aee10f354f596 120,153,1176
+test/fillval.c
+  s_7067ad3df0f0a8::t_53035b304aabb3 48-51,2333-2411,2759
+test/gen_bad_fill.c
+  s_7067ad3df0f0a8::t_a826104d04fdb3 1-168
+test/lheap.c
+  s_7067ad3df0f0a8::t_7eab926057fc4c 19,21-22,26,30-37,40-305,475-484
+test/links.c
+  s_7067ad3df0f0a8::t_a07805d19f286d 8412-8498,23747
+test/page_buffer.c
+  s_7067ad3df0f0a8::t_e3ac3d36daaff5 49,1645-1843,2287
+tools/lib/h5tools.c
+  s_7067ad3df0f0a8::t_ea270e73103b1a 1828,1834,1840,1845-1846,1848
+tools/src/h5dump/h5dump_xml.c
+  s_7067ad3df0f0a8::t_434c32823e16b4 3538-3540,3598-3611,3613-3616,3618-3624
+tools/src/h5repack/h5repack_refs.c
+  s_7067ad3df0f0a8::t_06f21fb6c4e599 56-57,171-172,182-183,210-213,227-229,258,270-271,275-276,302-305,397-399,468-469,471-473,785-787,789-790
+tools/test/h5dump/CMakeTests.cmake
+  s_7067ad3df0f0a8::t_b1abb52efc50b5 252,361,1391-1392
+tools/test/h5dump/exportfiles/tbinvlstr.exp
+  s_7067ad3df0f0a8::t_d8b4ad9f736785 1
+tools/test/h5dump/h5dumpgentest.c
+  s_7067ad3df0f0a8::t_92a4d1ff1a2bba 139,4194-4224,15231
+tools/test/h5dump/h5dumpgentest.h
+  s_7067ad3df0f0a8::t_20659f79b845ae 67
+tools/test/h5gentest.c
+  s_7067ad3df0f0a8::t_37a4c62cec83a6 199
+tools/test/h5ls/CMakeTests.cmake
+  s_7067ad3df0f0a8::t_6f5d85d438da6d 250-252,262,313-314,570-575
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5ec0b4b1d39a374d102d2e47eb0394313996cf1a",
+  "prompts": {},
+  "sessions": {
+    "s_7067ad3df0f0a8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9a22bfab-fc79-45b8-bb8c-c6c2c4e08d6a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
