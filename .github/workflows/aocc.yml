@@ -20,8 +20,8 @@ jobs:
     name: "aocc ${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     env:
-      AOCCVERDOT: "5.1.0"
-      AOCCVERDASH: "5-1"
+      AOCCVERDOT: "5.2.0"
+      AOCCVERDASH: "5-2"
       MPIVERDOT: "5.0.9"
       #MPIVERUND: Change is needed in the lines below.
 
@@ -55,7 +55,7 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v4
         with:
           path: ${{ github.workspace }}/openmpi-${{ env.MPIVERDOT }}-install
-          key: ${{ runner.os }}-${{ runner.arch }}-openmpi-5_0_7-cache
+          key: ${{ runner.os }}-${{ runner.arch }}-openmpi-${{ env.MPIVERDOT }}-aocc-${{ env.AOCCVERDOT }}-cache
 
       - name: Install OpenMPI ${{ env.MPIVERDOT }}
         if: ${{ steps.cache-openmpi-5_0_7.outputs.cache-hit != 'true' }}
