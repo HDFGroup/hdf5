@@ -69,8 +69,8 @@ H5PLget_plugin_info(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z_dynlib3_set_config(const H5Z_config_t *config, unsigned *flags, size_t *cd_nelmts,
-                       unsigned cd_values[], size_t cd_values_size)
+H5Z_dynlib3_set_config(const H5Z_config_t *config, unsigned *flags, size_t *cd_nelmts, unsigned cd_values[],
+                       size_t cd_values_size)
 {
     double rate = 0.0;
 
