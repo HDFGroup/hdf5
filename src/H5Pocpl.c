@@ -1166,15 +1166,9 @@ H5P__get_filter(const H5Z_filter_info_t *filter, unsigned int *flags /*out*/, si
             name[namelen - 1] = '\0';
         } /* end if */
         else {
-            /* Check for unknown library filter */
-            /* (probably from a future version of the library) */
-            if (filter->id < 256) {
-                strncpy(name, "Unknown library filter", namelen);
-                name[namelen - 1] = '\0';
-            } /* end if */
-            else
-                name[0] = '\0';
-        } /* end if */
+            /* No name and no stored name: fall back to decimal filter ID */
+            snprintf(name, namelen, "%d", (int)filter->id);
+        } /* end else */
     }     /* end if */
 
     /* Filter configuration (assume filter ID has already been checked) */

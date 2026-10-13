@@ -95,5 +95,11 @@ FUNCTION: H5Tdecode; ; v18, v200
 TYPEDEF: H5E_auto; v10, v18
 TYPEDEF: H5O_info; v18, v112
 TYPEDEF: H5O_iterate; v18, v112
-TYPEDEF: H5Z_class; v16, v18
+# Note:  H5Z_class3_t must NOT become the version selected by H5Z_class_t by
+#        default, under any API version: existing code using H5Z_class_t would
+#        silently get the larger struct with uninitialized callback fields.
+#        "vopt" registers H5Z_class3_t as symbol version 3 without any API
+#        version selecting it, so it is used only when an application defines
+#        H5Z_class_t_vers to 3.
+TYPEDEF: H5Z_class; v16, v18, vopt
 
