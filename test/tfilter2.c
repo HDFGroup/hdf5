@@ -1287,8 +1287,8 @@ error:
 #define FASTPATH_FILTER_ID 514
 #define NOCFG_FILTER_ID    518
 
-static int fastpath_set_config_called   = 0;
-static int fastpath_set_config_empty   = 0;
+static int fastpath_set_config_called = 0;
+static int fastpath_set_config_empty  = 0;
 
 static herr_t
 fastpath_set_config(const H5Z_config_t *config, unsigned *flags, size_t *cd_nelmts, unsigned cd_values[],
@@ -1355,8 +1355,8 @@ test_empty_string_fast_path(void)
     TESTING("H5Pappend_filter: NULL params (4th arg) takes CDVALUES path; set_config not called");
     if (H5Zregister(&fp_cls) < 0)
         TEST_ERROR;
-    fastpath_set_config_called   = 0;
-    fastpath_set_config_empty   = 0;
+    fastpath_set_config_called = 0;
+    fastpath_set_config_empty  = 0;
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR;
     if (H5Pappend_filter(dcpl, FASTPATH_FILTER_ID, 0, NULL) < 0)
@@ -1368,8 +1368,8 @@ test_empty_string_fast_path(void)
     PASSED();
 
     TESTING("H5Pappend_filter: H5Z_PARAMS_STRING with NULL str invokes set_config with an empty config");
-    fastpath_set_config_called   = 0;
-    fastpath_set_config_empty   = 0;
+    fastpath_set_config_called = 0;
+    fastpath_set_config_empty  = 0;
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR;
     {
@@ -1386,8 +1386,8 @@ test_empty_string_fast_path(void)
     PASSED();
 
     TESTING("H5Pappend_filter: empty string params invokes set_config with an empty config");
-    fastpath_set_config_called   = 0;
-    fastpath_set_config_empty   = 0;
+    fastpath_set_config_called = 0;
+    fastpath_set_config_empty  = 0;
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR;
     {
