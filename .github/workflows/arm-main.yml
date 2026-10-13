@@ -36,7 +36,10 @@ jobs:
   build_and_test_win:
     name: "Windows MSVC-${{ inputs.build_mode }}-${{ inputs.thread_safety }}-${{ inputs.concurrent }}"
     runs-on: windows-11-arm
-    if: ${{ inputs.build_mode != 'Debug' }}
+    # TEMPORARILY DISABLED: Visual Studio 18 2026 bug causes this job to fail on ARM64.
+    # Restore the original condition below once a fixed VS release is on the windows-11-arm runner.
+    #if: ${{ inputs.build_mode != 'Debug' }}
+    if: false
     steps:
       - name: Get Sources
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -57,7 +60,7 @@ jobs:
           cmake --version
 
       - name: Set up JDK 21
-        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v5
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v5
         with:
           java-version: '21'
           distribution: 'temurin'
