@@ -66,6 +66,15 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Configuration
 
+### Added the v300 default API version
+
+   The library version is now 3.0.0 and the default API version mapping is `v300`
+   (`-DHDF5_DEFAULT_API_VERSION:STRING=v300`, `-DH5_USE_300_API` for applications). No
+   functions were versioned in 3.0.0, so `v300` maps to the same symbols as `v200`.
+
+   Because `v200` is no longer the newest API version, selecting it now requires deprecated
+   symbols to be enabled, as is already the case for `v16` through `v114`.
+
 ### Various improvements in installed CMake package configuration file
 
    - Fixed `find_dependency()` calls so that `PRIVATE`-linked libraries are only propagated as

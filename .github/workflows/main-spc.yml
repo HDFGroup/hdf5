@@ -308,8 +308,63 @@ jobs:
         run: ctest . --parallel 2 -C Debug
         working-directory: ${{ runner.workspace }}/build
 
-  build_v2_0_linux:
-    name: "gcc DBG v2.0.0 default API no deprecated"
+  build_v2_0:
+    name: "gcc DBG v2.0 default API"
+    runs-on: ubuntu-latest
+    steps:
+      # SETUP
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Doxygen
+        uses: ./.github/actions/setup-doxygen
+
+      - name: Install Linux Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build graphviz
+          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+          sudo apt install gcc-12 g++-12 gfortran-12
+          echo "CC=gcc-12" >> $GITHUB_ENV
+          echo "CXX=g++-12" >> $GITHUB_ENV
+          echo "FC=gfortran-12" >> $GITHUB_ENV
+
+      # CONFIGURE
+      - name: Configure
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DBUILD_SHARED_LIBS=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+            -DHDF5_BUILD_CPP_LIB:BOOL=ON \
+            -DHDF5_BUILD_FORTRAN=ON \
+            -DHDF5_BUILD_JAVA=ON \
+            -DHDF5_BUILD_DOC=OFF \
+            -DLIBAEC_USE_LOCALCONTENT=OFF \
+            -DZLIB_USE_LOCALCONTENT=OFF \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
+            -DHDF5_DEFAULT_API_VERSION:STRING=v200 \
+            $GITHUB_WORKSPACE
+        shell: bash
+
+      # BUILD
+      - name: Build
+        run: cmake --build . --parallel 3 --config Debug
+        working-directory: ${{ runner.workspace }}/build
+
+      # RUN TESTS
+      - name: Run Tests
+        run: ctest . --parallel 2 -C Debug
+        working-directory: ${{ runner.workspace }}/build
+
+  build_v3_0_linux:
+    name: "gcc DBG v3.0.0 default API no deprecated"
     runs-on: ubuntu-latest
     steps:
       # SETUP
@@ -350,7 +405,7 @@ jobs:
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
             -DHDF5_ENABLE_DEPRECATED_SYMBOLS:BOOL=OFF \
-            -DHDF5_DEFAULT_API_VERSION:STRING=v200 \
+            -DHDF5_DEFAULT_API_VERSION:STRING=v300 \
             $GITHUB_WORKSPACE
         shell: bash
 
@@ -364,8 +419,8 @@ jobs:
         run: ctest . --parallel 2 -C Debug
         working-directory: ${{ runner.workspace }}/build
 
-  build_v2_0_win:
-    name: "Intel DBG v2.0.0 default API no deprecated"
+  build_v3_0_win:
+    name: "Intel DBG v3.0.0 default API no deprecated"
     runs-on: windows-2022
     steps:
       # SETUP
@@ -400,7 +455,7 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           Set-Location -Path "${{ runner.workspace }}\\build"
-          cmake -C ${{ github.workspace }}/config/cmake/cacheinit.cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_PARALLEL:BOOL=OFF -DHDF5_BUILD_CPP_LIB:BOOL=ON -DHDF5_BUILD_FORTRAN=ON -DHDF5_BUILD_JAVA=ON -DHDF5_BUILD_DOC=OFF -DLIBAEC_USE_LOCALCONTENT=OFF -DZLIB_USE_LOCALCONTENT=OFF -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON -DHDF5_ENABLE_DIRECT_VFD:BOOL=OFF -DHDF5_ENABLE_DEPRECATED_SYMBOLS:BOOL=OFF -DHDF5_DEFAULT_API_VERSION:STRING=v200 ${{ github.workspace }}
+          cmake -C ${{ github.workspace }}/config/cmake/cacheinit.cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_PARALLEL:BOOL=OFF -DHDF5_BUILD_CPP_LIB:BOOL=ON -DHDF5_BUILD_FORTRAN=ON -DHDF5_BUILD_JAVA=ON -DHDF5_BUILD_DOC=OFF -DLIBAEC_USE_LOCALCONTENT=OFF -DZLIB_USE_LOCALCONTENT=OFF -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON -DHDF5_ENABLE_DIRECT_VFD:BOOL=OFF -DHDF5_ENABLE_DEPRECATED_SYMBOLS:BOOL=OFF -DHDF5_DEFAULT_API_VERSION:STRING=v300 ${{ github.workspace }}
 
       - name: Build (Windows)
         shell: pwsh
