@@ -1944,6 +1944,7 @@ H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const 
     char           *fi_name_heap        = NULL; /* Freed if H5P_poke fails */
     const char     *retain_config       = NULL;
     char           *canon_config        = NULL;
+    H5Z_config_t   *cfg                 = NULL;
     char           *fi_config_heap      = NULL; /* Freed if H5P_poke fails */
     size_t          cd_nelmts           = 0;
     herr_t          ret_value           = SUCCEED;
@@ -2004,19 +2005,15 @@ H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const 
             if (NULL == (canon_config = H5Z_canonicalize_params(param_str)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't canonicalize filter parameter string");
 
-            /* Rewriting hex-floats can make it longer */
-            if (strlen(canon_config) > H5Z_CONFIG_STRING_MAX)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "canonicalized params string exceeds H5Z_CONFIG_STRING_MAX");
-
             retain_config = canon_config;
         }
 
-        {
-            const char *cfg_str = empty_input ? NULL : param_str;
+        if (NULL == (cfg = H5Z_config_parse(empty_input ? "" : param_str)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't parse filter parameter string");
 
+        {
             /* Pass 1: determine cd_nelmts (size-query; cd_values is NULL) */
-            if (entry->set_config(cfg_str, &flags, &cd_nelmts, NULL, 0) < 0)
+            if (entry->set_config(cfg, &flags, &cd_nelmts, NULL, 0) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "set_config size-query call failed");
 
             if (cd_nelmts > H5Z_MAX_CD_NELMTS)
@@ -2032,7 +2029,7 @@ H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const 
             cd_nelmts2 = cd_nelmts;
 
             /* Pass 2: populate cd_values */
-            if (entry->set_config(cfg_str, &flags, &cd_nelmts2, allocated_cd_values, alloc_nelmts) < 0)
+            if (entry->set_config(cfg, &flags, &cd_nelmts2, allocated_cd_values, alloc_nelmts) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "set_config populate call failed");
 
             if (cd_nelmts2 != cd_nelmts)
@@ -2106,6 +2103,8 @@ done:
     }
     H5MM_xfree(canon_config);
     H5MM_xfree(allocated_cd_values);
+    if (cfg && H5Z_config_close(cfg) < 0)
+        HDONE_ERROR(H5E_PLINE, H5E_CANTFREE, FAIL, "can't free parsed filter parameters");
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pappend_filter() */
 
@@ -2133,6 +2132,7 @@ H5Pmodify_filter_by_idx(hid_t plist_id, unsigned filter_idx, unsigned flags, con
     const unsigned    *cd_values           = NULL;
     unsigned          *allocated_cd_values = NULL;
     char              *canon_config        = NULL;
+    H5Z_config_t      *cfg                 = NULL;
     const char        *retain_config       = NULL;
     unsigned          *staged_cd_values    = NULL;
     char              *staged_config       = NULL;
@@ -2195,23 +2195,19 @@ H5Pmodify_filter_by_idx(hid_t plist_id, unsigned filter_idx, unsigned flags, con
             cd_values = NULL;
         }
         else {
-            const char *cfg_str = empty_input ? NULL : param_str;
-
             if (!empty_input) {
                 if (NULL == (canon_config = H5Z_canonicalize_params(param_str)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                                 "can't canonicalize filter parameter string");
 
-                /* Rewriting hex-floats can make it longer */
-                if (strlen(canon_config) > H5Z_CONFIG_STRING_MAX)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                                "canonicalized params string exceeds H5Z_CONFIG_STRING_MAX");
-
                 retain_config = canon_config;
             }
 
+            if (NULL == (cfg = H5Z_config_parse(empty_input ? "" : param_str)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't parse filter parameter string");
+
             /* Pass 1: determine cd_nelmts (size-query; cd_values is NULL) */
-            if (entry->set_config(cfg_str, &flags, &cd_nelmts, NULL, 0) < 0)
+            if (entry->set_config(cfg, &flags, &cd_nelmts, NULL, 0) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "set_config size-query call failed");
 
             if (cd_nelmts > H5Z_MAX_CD_NELMTS)
@@ -2227,7 +2223,7 @@ H5Pmodify_filter_by_idx(hid_t plist_id, unsigned filter_idx, unsigned flags, con
             cd_nelmts2 = cd_nelmts;
 
             /* Pass 2: populate cd_values */
-            if (entry->set_config(cfg_str, &flags, &cd_nelmts2, allocated_cd_values, alloc_nelmts) < 0)
+            if (entry->set_config(cfg, &flags, &cd_nelmts2, allocated_cd_values, alloc_nelmts) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "set_config populate call failed");
 
             if (cd_nelmts2 != cd_nelmts)
@@ -2289,6 +2285,8 @@ done:
     H5MM_xfree(staged_config);
     H5MM_xfree(canon_config);
     H5MM_xfree(allocated_cd_values);
+    if (cfg && H5Z_config_close(cfg) < 0)
+        HDONE_ERROR(H5E_PLINE, H5E_CANTFREE, FAIL, "can't free parsed filter parameters");
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pmodify_filter_by_idx() */
 

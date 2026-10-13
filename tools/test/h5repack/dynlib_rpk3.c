@@ -27,7 +27,7 @@
 static size_t H5Z_filter_dynlib3(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                                  hid_t dxpl_id, const hsize_t *scaled, size_t ndims, void *state,
                                  size_t nbytes, size_t *buf_size, void **buf);
-static herr_t H5Z_dynlib3_set_config(const char *params, unsigned *flags, size_t *cd_nelmts,
+static herr_t H5Z_dynlib3_set_config(const H5Z_config_t *config, unsigned *flags, size_t *cd_nelmts,
                                      unsigned cd_values[], size_t cd_values_size);
 static herr_t H5Z_dynlib3_get_config(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], char *buf,
                                      size_t *buf_size);
@@ -69,8 +69,8 @@ H5PLget_plugin_info(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z_dynlib3_set_config(const char *params, unsigned *flags, size_t *cd_nelmts, unsigned cd_values[],
-                       size_t cd_values_size)
+H5Z_dynlib3_set_config(const H5Z_config_t *config, unsigned *flags, size_t *cd_nelmts,
+                       unsigned cd_values[], size_t cd_values_size)
 {
     double rate = 0.0;
 
@@ -85,7 +85,7 @@ H5Z_dynlib3_set_config(const char *params, unsigned *flags, size_t *cd_nelmts, u
     if (cd_values_size < 1)
         return -1;
 
-    if (params == NULL || H5Zconfig_get_double(params, "rate", &rate) <= 0)
+    if (H5Zconfig_get_double(config, "rate", &rate) <= 0)
         return -1;
 
     cd_values[0] = (unsigned)(rate * 10.0 + 0.5);

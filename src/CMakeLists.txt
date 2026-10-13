@@ -1003,16 +1003,10 @@ endif ()
 
 list (APPEND H5Z_SOURCES ${HDF5_SRC_DIR}/tomlc17/tomlc17.c)
 # Keep the vendored tomlc17 symbols from colliding with an application's own
-# copy: hidden visibility for a shared library, and renaming via a
-# force-included h5_toml_prefix.h for a static one (so the vendored files stay
-# unmodified).  Vendored code is also exempt from HDF5's warnings-as-errors.
+# copy by renaming them via a force-included h5_toml_prefix.h (so the vendored
+# files stay unmodified).  Vendored code is also exempt from HDF5's
+# warnings-as-errors.
 include (CheckCCompilerFlag)
-check_c_compiler_flag ("-fvisibility=hidden" HDF5_C_HAS_FVISIBILITY_HIDDEN)
-if (HDF5_C_HAS_FVISIBILITY_HIDDEN)
-  set_source_files_properties (${HDF5_SRC_DIR}/tomlc17/tomlc17.c
-    PROPERTIES COMPILE_OPTIONS "-fvisibility=hidden"
-  )
-endif ()
 
 if (MSVC)
   set_property (SOURCE ${HDF5_SRC_DIR}/tomlc17/tomlc17.c APPEND PROPERTY COMPILE_OPTIONS
@@ -1038,33 +1032,6 @@ else ()
   check_c_compiler_flag ("-w" HDF5_C_HAS_W)
   if (HDF5_C_HAS_W)
     set_property (SOURCE ${HDF5_SRC_DIR}/tomlc17/tomlc17.c APPEND PROPERTY COMPILE_OPTIONS "-w")
-  endif ()
-endif ()
-
-# Same treatment for the vendored Ryu float formatter
-list (APPEND H5Z_SOURCES ${HDF5_SRC_DIR}/ryu/d2s.c)
-if (HDF5_C_HAS_FVISIBILITY_HIDDEN)
-  set_source_files_properties (${HDF5_SRC_DIR}/ryu/d2s.c
-    PROPERTIES COMPILE_OPTIONS "-fvisibility=hidden"
-  )
-endif ()
-if (MSVC)
-  set_property (SOURCE ${HDF5_SRC_DIR}/ryu/d2s.c APPEND PROPERTY COMPILE_OPTIONS
-    "/FI${HDF5_SRC_DIR}/ryu/h5_ryu_prefix.h" "/W0"
-  )
-else ()
-  if (HDF5_C_HAS_INCLUDE_FLAG)
-    set_property (SOURCE ${HDF5_SRC_DIR}/ryu/d2s.c APPEND PROPERTY COMPILE_OPTIONS
-      "-include" "${HDF5_SRC_DIR}/ryu/h5_ryu_prefix.h"
-    )
-  else ()
-    message (WARNING
-      "Compiler does not support -include; the vendored Ryu symbols will NOT "
-      "be prefixed and may collide with an application's own copy of Ryu when "
-      "statically linked. See src/CMakeLists.txt.")
-  endif ()
-  if (HDF5_C_HAS_W)
-    set_property (SOURCE ${HDF5_SRC_DIR}/ryu/d2s.c APPEND PROPERTY COMPILE_OPTIONS "-w")
   endif ()
 endif ()
 
@@ -1283,6 +1250,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Generate the H5build_settings.c file
 #-----------------------------------------------------------------------------
+H5_SET_LANG_SETTINGS ()
 configure_file (${HDF5_SOURCE_DIR}/src/H5build_settings.cmake.c.in ${HDF5_SRC_BINARY_DIR}/H5build_settings.c @ONLY)
 
 if (BUILD_SHARED_LIBS)
