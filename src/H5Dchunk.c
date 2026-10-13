@@ -3748,7 +3748,8 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
 
 done:
     /* Handle failures.  This must happen before this chunk is reported as done. Once the last chunk
-     * is reported done, the thread that started the read frees threaded_io_info and goes on using the library. */
+     * is reported done, the thread that started the read frees threaded_io_info and goes on using the
+     * library. */
     if (H5_UNLIKELY(ret_value < 0)) {
         /* Clean up */
         if (api_ctx_pushed && H5CX_pop(false) < 0)
