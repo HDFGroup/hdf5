@@ -171,6 +171,11 @@ extern "C" {
  * the filter pipeline to write the chunk. Developers should have experience with these processes before
  * they use this function.
  *
+ * The buffer passed to #H5DOwrite_chunk must encode an entire chunk, including partial edge chunks that
+ * extend past the current extent of the dataspace. Before filtering, a chunk always holds every element
+ * covered by the chunk dimensions, so a precompressed chunk must be the compressed form of the full chunk,
+ * not only of the elements inside the dataspace. See #H5Dwrite_chunk for details.
+ *
  * \subsection subsec_hldo_direct_chunk_example A Complete Code Example
  * The following is an example of using #H5DOwrite_chunk to write an entire dataset by chunk.
  * \code
@@ -379,6 +384,8 @@ H5HL_DLL herr_t H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t e
  *          precompressed, \p data_size should be the size of the compressed data.
  *
  *          \p buf is the memory buffer containing data to be written to the chunk in the file.
+ *          It must encode an entire chunk, including any elements of a partial edge chunk
+ *          that lie outside the dataspace; see H5Dwrite_chunk() for details.
  *
  * \attention   Exercise caution when using H5DOread_chunk() and H5DOwrite_chunk(),
  *              as they read and write data chunks directly in a file.
