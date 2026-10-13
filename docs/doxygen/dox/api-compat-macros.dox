@@ -152,7 +152,12 @@ Navigate back: \ref index "Main" / \ref TN
   <th>Deprecated functions available? <br/> (\TText{H5Lvisit1})</th>
   </tr>
   <tr align="center">
-  <td>\TText{-DHDF5_DEFAULT_API_VERSION:STRING="v200"} <br/> (the default in 2.0.0)</td>
+  <td>\TText{-DHDF5_DEFAULT_API_VERSION:STRING="v300"} <br/> (the default in 3.0.0)</td>
+  <td>3.0.x (\TText{H5Lvisit2})</td>
+  <td>yes</td>
+  </tr>
+  <tr align="center">
+  <td>\TText{-DHDF5_DEFAULT_API_VERSION:STRING="v200"}</td>
   <td>2.0.x (\TText{H5Lvisit2})</td>
   <td>yes</td>
   </tr>
@@ -192,7 +197,7 @@ Navigate back: \ref index "Main" / \ref TN
   installed to determine the \TText{configure} flags used to build the library. In particular,
   look for the two lines shown here under \Emph{Features}:
 
-  \TText{Default API mapping: v200}
+  \TText{Default API mapping: v300}
 
   \TText{With deprecated public symbols: yes}
 
@@ -214,7 +219,12 @@ Navigate back: \ref index "Main" / \ref TN
   <th>Deprecated functions available? <br/>(\TText{H5Lvisit1})</th>
   </tr>
   <tr align="center">
-  <td align="left">\TText{-DH5_USE_200_API} <br/> \Emph{(Default behavior if no option specified.)}</td>
+  <td align="left">\TText{-DH5_USE_300_API} <br/> \Emph{(Default behavior if no option specified.)}</td>
+  <td>3.0.x (\TText{H5Lvisit2})</td>
+  <td>yes* <br/> \Emph{*if available in library}</td>
+  </tr>
+  <tr align="center">
+  <td align="left">\TText{-DH5_USE_200_API}</td>
   <td>2.0.x (\TText{H5Lvisit2})</td>
   <td>yes* <br/> \Emph{*if available in library}</td>
   </tr>
@@ -322,6 +332,9 @@ Navigate back: \ref index "Main" / \ref TN
                 -DH5L_iterate_t_vers=1 -DH5Lget_info_by_idx_vers=1 \
                 -DH5Lget_info_vers=1 application.c
            \endcode
+
+  \subsubsection fun-options-300 Function Mapping Options in Releases 3.0.x
+  No versioned functions were added in the 3.0.x releases.
 
   \subsubsection fun-options-200 Function Mapping Options in Releases 2.0.x
   <table>

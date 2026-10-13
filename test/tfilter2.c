@@ -22,7 +22,56 @@
 
 #include "h5test.h"
 
+#include <locale.h>
+
 static const char *FILENAME[] = {"tfilter2", "tfilter2_cfg", NULL};
+
+/* Parse PARAMS, call an accessor on the result, and free it.  A NULL PARAMS
+ * passes a NULL config so that the accessor's own argument check runs. */
+#define CFG_CALL(params, call)                                                                               \
+    do {                                                                                                     \
+        H5Z_config_t *cfg_ = NULL;                                                                           \
+        htri_t        r_   = FAIL;                                                                           \
+                                                                                                             \
+        if ((params) && NULL == (cfg_ = H5Zconfig_parse(params)))                                            \
+            return FAIL;                                                                                     \
+        r_ = (call);                                                                                         \
+        H5Zconfig_close(cfg_);                                                                               \
+        return r_;                                                                                           \
+    } while (0)
+
+static htri_t
+cfg_has_key(const char *params, const char *key)
+{
+    CFG_CALL(params, H5Zconfig_has_key(cfg_, key));
+}
+static htri_t
+cfg_get_int(const char *params, const char *key, int64_t *out)
+{
+    CFG_CALL(params, H5Zconfig_get_int(cfg_, key, out));
+}
+static htri_t
+cfg_get_double(const char *params, const char *key, double *out)
+{
+    CFG_CALL(params, H5Zconfig_get_double(cfg_, key, out));
+}
+static htri_t
+cfg_get_bool(const char *params, const char *key, bool *out)
+{
+    CFG_CALL(params, H5Zconfig_get_bool(cfg_, key, out));
+}
+static htri_t
+cfg_get_str(const char *params, const char *key, char *buf, size_t *buf_size)
+{
+    CFG_CALL(params, H5Zconfig_get_str(cfg_, key, buf, buf_size));
+}
+
+/* Bit-for-bit double comparison; the accessors must round-trip exactly */
+static bool
+dbl_same(double a, double b)
+{
+    return memcmp(&a, &b, sizeof(double)) == 0;
+}
 
 /* -----------------------------------------------------------------------
  * Parser tests - typed TOML accessor functions
@@ -38,72 +87,72 @@ test_parser(void)
     htri_t  ret;
 
     TESTING("H5Zconfig_get_int: basic integer lookup");
-    ret = H5Zconfig_get_int("level = 6, mode = 2", "level", &ival);
+    ret = cfg_get_int("level = 6, mode = 2", "level", &ival);
     if (ret <= 0 || ival != 6)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_int: key not found");
-    ret = H5Zconfig_get_int("level = 6", "mode", &ival);
+    ret = cfg_get_int("level = 6", "mode", &ival);
     if (ret != 0)
         TEST_ERROR;
     PASSED();
 
     /* RFC-HDFG-2026-001 parse-09: keys are case-sensitive */
     TESTING("H5Zconfig_get_int: key lookup is case-sensitive (LEVEL != level)");
-    ret = H5Zconfig_get_int("LEVEL = 6", "level", &ival);
+    ret = cfg_get_int("LEVEL = 6", "level", &ival);
     if (ret != 0)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_has_key: key present");
-    ret = H5Zconfig_has_key("level = 6, compress = true", "compress");
+    ret = cfg_has_key("level = 6, compress = true", "compress");
     if (ret <= 0)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_has_key: key absent");
-    ret = H5Zconfig_has_key("level = 6", "mode");
+    ret = cfg_has_key("level = 6", "mode");
     if (ret != 0)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_str: double-quoted value");
     vsz = sizeof(vbuf);
-    ret = H5Zconfig_get_str("name = \"hello world\"", "name", vbuf, &vsz);
+    ret = cfg_get_str("name = \"hello world\"", "name", vbuf, &vsz);
     if (ret <= 0 || strcmp(vbuf, "hello world") != 0)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_str: single-quoted value");
     vsz = sizeof(vbuf);
-    ret = H5Zconfig_get_str("name = 'hello world'", "name", vbuf, &vsz);
+    ret = cfg_get_str("name = 'hello world'", "name", vbuf, &vsz);
     if (ret <= 0 || strcmp(vbuf, "hello world") != 0)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_bool: boolean true");
-    ret = H5Zconfig_get_bool("compress = true", "compress", &bval);
+    ret = cfg_get_bool("compress = true", "compress", &bval);
     if (ret <= 0 || !bval)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_bool: boolean false");
-    ret = H5Zconfig_get_bool("compress = false", "compress", &bval);
+    ret = cfg_get_bool("compress = false", "compress", &bval);
     if (ret <= 0 || bval)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_double: float value");
-    ret = H5Zconfig_get_double("tol = 1.5", "tol", &dval);
-    if (ret <= 0 || dval != 1.5)
+    ret = cfg_get_double("tol = 1.5", "tol", &dval);
+    if (ret <= 0 || !dbl_same(dval, 1.5))
         TEST_ERROR;
     PASSED();
 
-    TESTING("H5Zconfig_get_int: NULL params error");
+    TESTING("H5Zconfig_get_int: NULL config error");
     H5E_BEGIN_TRY
     {
-        ret = H5Zconfig_get_int(NULL, "key", &ival);
+        ret = cfg_get_int(NULL, "key", &ival);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -113,7 +162,7 @@ test_parser(void)
     TESTING("H5Zconfig_get_int: NULL key error");
     H5E_BEGIN_TRY
     {
-        ret = H5Zconfig_get_int("level = 6", NULL, &ival);
+        ret = cfg_get_int("level = 6", NULL, &ival);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -123,7 +172,7 @@ test_parser(void)
     TESTING("H5Zconfig_get_int: duplicate key error");
     H5E_BEGIN_TRY
     {
-        ret = H5Zconfig_get_int("level = 6, level = 9", "level", &ival);
+        ret = cfg_get_int("level = 6, level = 9", "level", &ival);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -131,20 +180,20 @@ test_parser(void)
     PASSED();
 
     TESTING("H5Zconfig_get_int: whitespace around equals");
-    ret = H5Zconfig_get_int("  level = 6 , mode = 2 ", "level", &ival);
+    ret = cfg_get_int("  level = 6 , mode = 2 ", "level", &ival);
     if (ret <= 0 || ival != 6)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_int: braced inline-table form");
-    ret = H5Zconfig_get_int("{level = 6, mode = 2}", "level", &ival);
+    ret = cfg_get_int("{level = 6, mode = 2}", "level", &ival);
     if (ret <= 0 || ival != 6)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_str: braced inline-table form");
     vsz = sizeof(vbuf);
-    ret = H5Zconfig_get_str("{ coding = \"entropy\" }", "coding", vbuf, &vsz);
+    ret = cfg_get_str("{ coding = \"entropy\" }", "coding", vbuf, &vsz);
     if (ret <= 0 || strcmp(vbuf, "entropy") != 0)
         TEST_ERROR;
     PASSED();
@@ -152,26 +201,26 @@ test_parser(void)
     /* "a = {b = ...}" and "a.b = ..." must resolve identically */
     TESTING("H5Zconfig_get_str: dotted-key into nested table (dotted form)");
     vsz = sizeof(vbuf);
-    ret = H5Zconfig_get_str("compressor.name = \"zlib\", shuffle = 1", "compressor.name", vbuf, &vsz);
+    ret = cfg_get_str("compressor.name = \"zlib\", shuffle = 1", "compressor.name", vbuf, &vsz);
     if (ret <= 0 || strcmp(vbuf, "zlib") != 0)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_int: dotted-key into nested table (inline-table form)");
-    ret = H5Zconfig_get_int("compressor = {name = \"zlib\", level = 6}", "compressor.level", &ival);
+    ret = cfg_get_int("compressor = {name = \"zlib\", level = 6}", "compressor.level", &ival);
     if (ret <= 0 || ival != 6)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_int: top-level sibling alongside nested table");
-    ret = H5Zconfig_get_int("compressor = {name = \"zlib\", level = 6}, shuffle = 1", "shuffle", &ival);
+    ret = cfg_get_int("compressor = {name = \"zlib\", level = 6}, shuffle = 1", "shuffle", &ival);
     if (ret <= 0 || ival != 1)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_str: missing dotted key returns 0");
     vsz = sizeof(vbuf);
-    ret = H5Zconfig_get_str("compressor.name = \"zlib\"", "compressor.missing", vbuf, &vsz);
+    ret = cfg_get_str("compressor.name = \"zlib\"", "compressor.missing", vbuf, &vsz);
     if (ret != 0)
         TEST_ERROR;
     PASSED();
@@ -180,7 +229,7 @@ test_parser(void)
     H5E_BEGIN_TRY
     {
         vsz = sizeof(vbuf);
-        ret = H5Zconfig_get_str("level = 6", "level", vbuf, &vsz);
+        ret = cfg_get_str("level = 6", "level", vbuf, &vsz);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -188,33 +237,33 @@ test_parser(void)
     PASSED();
 
     TESTING("H5Zconfig_get_int: negative integer");
-    ret = H5Zconfig_get_int("offset = -4", "offset", &ival);
+    ret = cfg_get_int("offset = -4", "offset", &ival);
     if (ret <= 0 || ival != -4)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_double: scientific notation");
-    ret = H5Zconfig_get_double("tol = 1.0e-6", "tol", &dval);
+    ret = cfg_get_double("tol = 1.0e-6", "tol", &dval);
     if (ret <= 0 || dval < 9.9e-7 || dval > 1.1e-6)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_str: comma inside quoted value");
     vsz = sizeof(vbuf);
-    ret = H5Zconfig_get_str("path = \"/data/run_1,v2/dict.bin\"", "path", vbuf, &vsz);
+    ret = cfg_get_str("path = \"/data/run_1,v2/dict.bin\"", "path", vbuf, &vsz);
     if (ret <= 0 || strcmp(vbuf, "/data/run_1,v2/dict.bin") != 0)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_str: backslash-quote escape in double-quoted value");
     vsz = sizeof(vbuf);
-    ret = H5Zconfig_get_str("msg = \"say \\\"hi\\\"\"", "msg", vbuf, &vsz);
+    ret = cfg_get_str("msg = \"say \\\"hi\\\"\"", "msg", vbuf, &vsz);
     if (ret <= 0 || strcmp(vbuf, "say \"hi\"") != 0)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_has_key: empty string is valid (no params)");
-    ret = H5Zconfig_has_key("", "level");
+    ret = cfg_has_key("", "level");
     if (ret != 0)
         TEST_ERROR;
     PASSED();
@@ -222,7 +271,7 @@ test_parser(void)
     TESTING("H5Zconfig_get_double: inf rejected");
     H5E_BEGIN_TRY
     {
-        ret = H5Zconfig_get_double("tol = inf", "tol", &dval);
+        ret = cfg_get_double("tol = inf", "tol", &dval);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -232,7 +281,7 @@ test_parser(void)
     TESTING("H5Zconfig_get_double: nan rejected");
     H5E_BEGIN_TRY
     {
-        ret = H5Zconfig_get_double("tol = nan", "tol", &dval);
+        ret = cfg_get_double("tol = nan", "tol", &dval);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -243,7 +292,7 @@ test_parser(void)
     TESTING("H5Zconfig_get_double: literal overflowing to inf rejected");
     H5E_BEGIN_TRY
     {
-        ret = H5Zconfig_get_double("tol = 1e400", "tol", &dval);
+        ret = cfg_get_double("tol = 1e400", "tol", &dval);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -253,7 +302,7 @@ test_parser(void)
     TESTING("H5Zconfig_get_double: literal underflowing to -0.0 rejected");
     H5E_BEGIN_TRY
     {
-        ret = H5Zconfig_get_double("tol = -1e-400", "tol", &dval);
+        ret = cfg_get_double("tol = -1e-400", "tol", &dval);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -263,7 +312,7 @@ test_parser(void)
     TESTING("H5Zconfig_get_int: semicolon outside quotes rejected");
     H5E_BEGIN_TRY
     {
-        ret = H5Zconfig_get_int("level = 6; mode = 2", "level", &ival);
+        ret = cfg_get_int("level = 6; mode = 2", "level", &ival);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -271,49 +320,40 @@ test_parser(void)
     PASSED();
 
     TESTING("H5Zconfig_get_int: underscore digit separator");
-    ret = H5Zconfig_get_int("count = 1_000_000", "count", &ival);
+    ret = cfg_get_int("count = 1_000_000", "count", &ival);
     if (ret <= 0 || ival != 1000000)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_int: hex prefix 0x");
-    ret = H5Zconfig_get_int("flags = 0xff", "flags", &ival);
+    ret = cfg_get_int("flags = 0xff", "flags", &ival);
     if (ret <= 0 || ival != 255)
         TEST_ERROR;
     PASSED();
 
-    TESTING("H5Zconfig_get_double: hex-float 0x1.8p+1 == 3.0");
-    ret = H5Zconfig_get_double("rate = 0x1.8p+1", "rate", &dval);
-    if (ret <= 0 || dval != 3.0)
-        TEST_ERROR;
-    PASSED();
-
-    TESTING("H5Zconfig_get_double: hex-float 0x1.cp+1 == 3.5");
-    ret = H5Zconfig_get_double("rate = 0x1.cp+1", "rate", &dval);
-    if (ret <= 0 || dval != 3.5)
-        TEST_ERROR;
-    PASSED();
-
-    TESTING("H5Zconfig_get_double: negative hex-float -0x1p-1 == -0.5");
-    ret = H5Zconfig_get_double("offset = -0x1p-1", "offset", &dval);
-    if (ret <= 0 || dval != -0.5)
-        TEST_ERROR;
-    PASSED();
-
-    TESTING("H5Zconfig_get_double: hex-float without fraction 0xAp0 == 10.0");
-    ret = H5Zconfig_get_double("val = 0xAp0", "val", &dval);
-    if (ret <= 0 || dval != 10.0)
-        TEST_ERROR;
-    PASSED();
-
-    TESTING("H5Zconfig_get_double: %%a round-trip for non-decimal-exact value");
+    TESTING("H5Zconfig_get_double: hex-float literal is rejected (not TOML)");
+    H5E_BEGIN_TRY
     {
-        char   pstr[64];
-        double orig = 0.1, rt;
-        snprintf(pstr, sizeof(pstr), "rate = %a", orig);
-        ret = H5Zconfig_get_double(pstr, "rate", &rt);
-        if (ret <= 0 || orig != rt)
-            TEST_ERROR;
+        ret = cfg_get_double("rate = 0x1.8p+1", "rate", &dval);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    PASSED();
+
+    TESTING("H5Zconfig_get_double: 17-digit decimal round-trips exactly");
+    {
+        const double origs[] = {0.1, 1.0 / 3.0, 3.0, -0.5, 6.02214076e23, 2.2250738585072014e-308};
+        char         pstr[64];
+        double       rt;
+        size_t       i;
+
+        for (i = 0; i < sizeof(origs) / sizeof(origs[0]); i++) {
+            snprintf(pstr, sizeof(pstr), "rate = %.17e", origs[i]);
+            ret = cfg_get_double(pstr, "rate", &rt);
+            if (ret <= 0 || !dbl_same(origs[i], rt))
+                TEST_ERROR;
+        }
     }
     PASSED();
 
@@ -322,7 +362,7 @@ test_parser(void)
     TESTING("H5Zconfig_get_int: missing '=' is a parse error");
     H5E_BEGIN_TRY
     {
-        ret = H5Zconfig_get_int("level6", "level", &ival);
+        ret = cfg_get_int("level6", "level", &ival);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -332,7 +372,7 @@ test_parser(void)
     TESTING("H5Zconfig_get_int: empty value after '=' is a parse error");
     H5E_BEGIN_TRY
     {
-        ret = H5Zconfig_get_int("level =", "level", &ival);
+        ret = cfg_get_int("level =", "level", &ival);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -343,7 +383,7 @@ test_parser(void)
     H5E_BEGIN_TRY
     {
         vsz = sizeof(vbuf);
-        ret = H5Zconfig_get_str("name = \"hello", "name", vbuf, &vsz);
+        ret = cfg_get_str("name = \"hello", "name", vbuf, &vsz);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -354,7 +394,7 @@ test_parser(void)
     H5E_BEGIN_TRY
     {
         vsz = sizeof(vbuf);
-        ret = H5Zconfig_get_str("name = 'hello", "name", vbuf, &vsz);
+        ret = cfg_get_str("name = 'hello", "name", vbuf, &vsz);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -366,7 +406,7 @@ test_parser(void)
     TESTING("H5Zconfig_get_bool: uppercase TRUE is rejected (TOML case-sensitive)");
     H5E_BEGIN_TRY
     {
-        ret = H5Zconfig_get_bool("flag = TRUE", "flag", &bval);
+        ret = cfg_get_bool("flag = TRUE", "flag", &bval);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -376,7 +416,7 @@ test_parser(void)
     TESTING("H5Zconfig_get_bool: integer 1 is a type error (not a boolean)");
     H5E_BEGIN_TRY
     {
-        ret = H5Zconfig_get_bool("flag = 1", "flag", &bval);
+        ret = cfg_get_bool("flag = 1", "flag", &bval);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -386,21 +426,21 @@ test_parser(void)
     /* --- Miscellaneous value content ------------------------------------- */
 
     TESTING("H5Zconfig_get_int: single-character key");
-    ret = H5Zconfig_get_int("x = 7", "x", &ival);
+    ret = cfg_get_int("x = 7", "x", &ival);
     if (ret <= 0 || ival != 7)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_str: equals sign inside quoted value");
     vsz = sizeof(vbuf);
-    ret = H5Zconfig_get_str("expr = \"a=b\"", "expr", vbuf, &vsz);
+    ret = cfg_get_str("expr = \"a=b\"", "expr", vbuf, &vsz);
     if (ret <= 0 || strcmp(vbuf, "a=b") != 0)
         TEST_ERROR;
     PASSED();
 
     TESTING("H5Zconfig_get_str: backslash-n escape in double-quoted value");
     vsz = sizeof(vbuf);
-    ret = H5Zconfig_get_str("msg = \"line1\\nline2\"", "msg", vbuf, &vsz);
+    ret = cfg_get_str("msg = \"line1\\nline2\"", "msg", vbuf, &vsz);
     if (ret <= 0 || strcmp(vbuf, "line1\nline2") != 0)
         TEST_ERROR;
     PASSED();
@@ -409,7 +449,7 @@ test_parser(void)
 
     TESTING("H5Zconfig_get_str: size-query (buf=NULL sets *buf_size)");
     vsz = 0;
-    ret = H5Zconfig_get_str("name = \"hello\"", "name", NULL, &vsz);
+    ret = cfg_get_str("name = \"hello\"", "name", NULL, &vsz);
     if (ret <= 0 || vsz != 5) /* "hello" is 5 chars */
         TEST_ERROR;
     PASSED();
@@ -420,7 +460,7 @@ test_parser(void)
         size_t tsz = 1;
         H5E_BEGIN_TRY
         {
-            ret = H5Zconfig_get_str("name = \"hello\"", "name", tiny, &tsz);
+            ret = cfg_get_str("name = \"hello\"", "name", tiny, &tsz);
         }
         H5E_END_TRY
         if (ret >= 0)
@@ -447,7 +487,7 @@ test_config_get_str_null_buf_size(void)
     TESTING("H5Zconfig_get_str: buf != NULL, buf_size == NULL is rejected");
     H5E_BEGIN_TRY
     {
-        ret = H5Zconfig_get_str(params, "key", buf, NULL);
+        ret = cfg_get_str(params, "key", buf, NULL);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -456,6 +496,106 @@ test_config_get_str_null_buf_size(void)
     return 0;
 
 error:
+    return -1;
+}
+
+/* One parsed handle serves many lookups; empty strings and key validation */
+static int
+test_config_handle(void)
+{
+    const char   *known[]       = {"level", "mode", "opt.fast", NULL};
+    const char   *short_known[] = {"level", NULL};
+    H5Z_config_t *cfg           = NULL;
+    int64_t       ival          = 0;
+    bool          bval          = false;
+    herr_t        ret;
+
+    TESTING("H5Z_config_t: one handle, several lookups");
+    if (NULL == (cfg = H5Zconfig_parse("level = 6, mode = 2, opt = {fast = true}")))
+        TEST_ERROR;
+    if (H5Zconfig_get_int(cfg, "level", &ival) <= 0 || ival != 6)
+        TEST_ERROR;
+    if (H5Zconfig_get_int(cfg, "mode", &ival) <= 0 || ival != 2)
+        TEST_ERROR;
+    if (H5Zconfig_get_bool(cfg, "opt.fast", &bval) <= 0 || !bval)
+        TEST_ERROR;
+    if (H5Zconfig_has_key(cfg, "missing") != 0)
+        TEST_ERROR;
+    PASSED();
+
+    TESTING("H5Zconfig_validate_keys: known, nested and unknown keys");
+    if (H5Zconfig_validate_keys(cfg, known) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        ret = H5Zconfig_validate_keys(cfg, short_known);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    H5Zconfig_close(cfg);
+    cfg = NULL;
+    PASSED();
+
+    TESTING("H5Z_config_t: empty string has no keys and validates");
+    if (NULL == (cfg = H5Zconfig_parse("")))
+        TEST_ERROR;
+    if (H5Zconfig_has_key(cfg, "level") != 0)
+        TEST_ERROR;
+    if (H5Zconfig_validate_keys(cfg, short_known) < 0)
+        TEST_ERROR;
+    H5Zconfig_close(cfg);
+    cfg = NULL;
+    PASSED();
+
+    TESTING("H5Z_config_t: malformed string fails to parse");
+    H5E_BEGIN_TRY
+    {
+        cfg = H5Zconfig_parse("level = ");
+    }
+    H5E_END_TRY
+    if (cfg != NULL)
+        TEST_ERROR;
+    PASSED();
+
+    return 0;
+
+error:
+    H5Zconfig_close(cfg);
+    return -1;
+}
+
+/* Floats parse with '.' even when LC_NUMERIC uses a comma decimal point */
+static int
+test_config_locale(void)
+{
+    char  *saved = NULL;
+    double dval  = 0.0;
+
+    TESTING("H5Zconfig_get_double: '.' parses under a comma-decimal locale");
+
+    if (NULL == (saved = strdup(setlocale(LC_NUMERIC, NULL))))
+        TEST_ERROR;
+    if (!setlocale(LC_NUMERIC, "de_DE.UTF-8") && !setlocale(LC_NUMERIC, "de_DE")) {
+        free(saved);
+        SKIPPED();
+        puts("    de_DE locale not installed");
+        return 0;
+    }
+
+    if (cfg_get_double("rate = 1.5", "rate", &dval) <= 0 || !dbl_same(dval, 1.5))
+        TEST_ERROR;
+
+    setlocale(LC_NUMERIC, saved);
+    free(saved);
+    PASSED();
+    return 0;
+
+error:
+    if (saved) {
+        setlocale(LC_NUMERIC, saved);
+        free(saved);
+    }
     return -1;
 }
 
@@ -1148,18 +1288,20 @@ error:
 #define NOCFG_FILTER_ID    518
 
 static int fastpath_set_config_called   = 0;
-static int fastpath_set_config_was_null = 0;
+static int fastpath_set_config_empty   = 0;
 
 static herr_t
-fastpath_set_config(const char *params, unsigned *flags, size_t *cd_nelmts, unsigned cd_values[],
+fastpath_set_config(const H5Z_config_t *config, unsigned *flags, size_t *cd_nelmts, unsigned cd_values[],
                     size_t cd_values_size)
 {
     (void)flags;
     (void)cd_values;
     (void)cd_values_size;
-    fastpath_set_config_called   = 1;
-    fastpath_set_config_was_null = (params == NULL);
-    *cd_nelmts                   = 0;
+    static const char *const none[] = {NULL};
+
+    fastpath_set_config_called = 1;
+    fastpath_set_config_empty  = (config != NULL && H5Zconfig_validate_keys(config, none) >= 0);
+    *cd_nelmts                 = 0;
     return 0;
 }
 
@@ -1214,7 +1356,7 @@ test_empty_string_fast_path(void)
     if (H5Zregister(&fp_cls) < 0)
         TEST_ERROR;
     fastpath_set_config_called   = 0;
-    fastpath_set_config_was_null = 0;
+    fastpath_set_config_empty   = 0;
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR;
     if (H5Pappend_filter(dcpl, FASTPATH_FILTER_ID, 0, NULL) < 0)
@@ -1225,9 +1367,9 @@ test_empty_string_fast_path(void)
     dcpl = H5I_INVALID_HID;
     PASSED();
 
-    TESTING("H5Pappend_filter: H5Z_PARAMS_STRING with NULL str invokes set_config with params=NULL");
+    TESTING("H5Pappend_filter: H5Z_PARAMS_STRING with NULL str invokes set_config with an empty config");
     fastpath_set_config_called   = 0;
-    fastpath_set_config_was_null = 0;
+    fastpath_set_config_empty   = 0;
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR;
     {
@@ -1237,15 +1379,15 @@ test_empty_string_fast_path(void)
     }
     if (fastpath_set_config_called == 0)
         TEST_ERROR;
-    if (fastpath_set_config_was_null == 0)
+    if (fastpath_set_config_empty == 0)
         TEST_ERROR;
     H5Pclose(dcpl);
     dcpl = H5I_INVALID_HID;
     PASSED();
 
-    TESTING("H5Pappend_filter: empty string params invokes set_config with params=NULL");
+    TESTING("H5Pappend_filter: empty string params invokes set_config with an empty config");
     fastpath_set_config_called   = 0;
-    fastpath_set_config_was_null = 0;
+    fastpath_set_config_empty   = 0;
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR;
     {
@@ -1255,7 +1397,7 @@ test_empty_string_fast_path(void)
     }
     if (fastpath_set_config_called == 0)
         TEST_ERROR;
-    if (fastpath_set_config_was_null == 0)
+    if (fastpath_set_config_empty == 0)
         TEST_ERROR;
     H5Pclose(dcpl);
     dcpl = H5I_INVALID_HID;
@@ -1421,14 +1563,13 @@ error:
 static int64_t cdvals_clean_param_value = 0;
 
 static herr_t
-cdvals_clean_set_config(const char *params, unsigned *flags, size_t *cd_nelmts, unsigned cd_values[],
+cdvals_clean_set_config(const H5Z_config_t *config, unsigned *flags, size_t *cd_nelmts, unsigned cd_values[],
                         size_t cd_values_size)
 {
     int64_t val = 0;
     (void)flags;
     (void)cd_values_size;
-    if (params && *params)
-        H5Zconfig_get_int(params, "alpha", &val);
+    H5Zconfig_get_int(config, "alpha", &val);
     cdvals_clean_param_value = val;
     *cd_nelmts               = 1;
     if (cd_values)
@@ -1879,114 +2020,6 @@ error:
     return -1;
 }
 
-/* -----------------------------------------------------------------------
- * 8c. H5Z_CONFIG_STRING_MAX applies to the canonical string, which can be
- * longer than the input ("0x1.0001p0" becomes "1.0000152587890625")
- * ---------------------------------------------------------------------- */
-
-#define GROWTH_FILTER_ID 535
-
-static size_t
-growth_filter_func(unsigned H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
-                   const unsigned H5_ATTR_UNUSED *cd_values, hid_t H5_ATTR_UNUSED dxpl_id,
-                   const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims,
-                   void H5_ATTR_UNUSED *state, size_t nbytes, size_t H5_ATTR_UNUSED *buf_size,
-                   void H5_ATTR_UNUSED **buf)
-{
-    return nbytes; /* pass-through; never actually applied by this test */
-}
-
-static herr_t
-growth_set_config(const char H5_ATTR_UNUSED *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts,
-                  unsigned H5_ATTR_UNUSED cd_values[], size_t H5_ATTR_UNUSED cd_values_size)
-{
-    /* Accepts any keys */
-    *cd_nelmts = 0;
-    return SUCCEED;
-}
-
-static int
-test_config_string_canonicalization_growth(void)
-{
-    static const H5Z_class3_t growth_cls = {
-        2,                  /* version         */
-        GROWTH_FILTER_ID,   /* id              */
-        1,                  /* encoder_present */
-        1,                  /* decoder_present */
-        "growth_filter",    /* canonical_name  */
-        NULL,               /* can_apply       */
-        NULL,               /* set_local       */
-        growth_filter_func, /* filter          */
-        growth_set_config,  /* set_config      */
-        NULL,               /* get_config      */
-        NULL,               /* description     */
-    };
-    hid_t    dcpl = H5I_INVALID_HID;
-    char    *raw  = NULL;
-    size_t   pos  = 0;
-    unsigned n;
-    herr_t   ret;
-
-    TESTING("H5Pappend_filter: canonicalization growth past H5Z_CONFIG_STRING_MAX is rejected");
-
-    if (H5Zregister(&growth_cls) < 0)
-        TEST_ERROR;
-
-    if (NULL == (raw = (char *)malloc(H5Z_CONFIG_STRING_MAX + 1))) {
-        H5Zunregister(GROWTH_FILTER_ID);
-        TEST_ERROR;
-    }
-    raw[0] = '\0';
-
-    /* Input under the limit whose canonical form is over it */
-    for (n = 0; pos < H5Z_CONFIG_STRING_MAX * 3 / 4 - 128; n++) {
-        char field[32];
-        int  flen = snprintf(field, sizeof(field), "a%u=0x1.0001p0,", n);
-        if (flen < 0 || pos + (size_t)flen >= H5Z_CONFIG_STRING_MAX)
-            break;
-        memcpy(raw + pos, field, (size_t)flen);
-        pos += (size_t)flen;
-    }
-    if (pos > 0)
-        raw[pos - 1] = '\0'; /* drop the trailing comma */
-    else
-        raw[0] = '\0';
-
-    /* Sanity check on the test itself: the raw input must be comfortably
-     * under the limit, or this isn't exercising the growth path at all. */
-    if (strlen(raw) >= H5Z_CONFIG_STRING_MAX * 3 / 4) {
-        free(raw);
-        H5Zunregister(GROWTH_FILTER_ID);
-        TEST_ERROR;
-    }
-
-    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
-        free(raw);
-        H5Zunregister(GROWTH_FILTER_ID);
-        TEST_ERROR;
-    }
-    H5E_BEGIN_TRY
-    {
-        H5Z_params_t _p;
-        _p.type  = H5Z_PARAMS_STRING;
-        _p.u.str = raw;
-        ret      = H5Pappend_filter(dcpl, GROWTH_FILTER_ID, 0, &_p);
-    }
-    H5E_END_TRY
-
-    H5Pclose(dcpl);
-    free(raw);
-    H5Zunregister(GROWTH_FILTER_ID);
-
-    if (ret >= 0)
-        TEST_ERROR;
-    PASSED();
-    return 0;
-
-error:
-    return -1;
-}
-
 /* 10. set_config and get_config are invoked and their output is consistent */
 #define CALLBACK_FILTER_ID 519
 
@@ -1994,7 +2027,7 @@ static int     callback_set_called = 0;
 static int64_t callback_stored_val = 0;
 
 static herr_t
-callback_set_config(const char *params, unsigned *flags, size_t *cd_nelmts, unsigned cd_values[],
+callback_set_config(const H5Z_config_t *config, unsigned *flags, size_t *cd_nelmts, unsigned cd_values[],
                     size_t cd_values_size)
 {
     int64_t v = 0;
@@ -2003,8 +2036,7 @@ callback_set_config(const char *params, unsigned *flags, size_t *cd_nelmts, unsi
     (void)cd_values;
     (void)cd_values_size;
     callback_set_called = 1;
-    if (params && *params)
-        H5Zconfig_get_int(params, "beta", &v);
+    H5Zconfig_get_int(config, "beta", &v);
     callback_stored_val = v;
     return 0;
 }
@@ -2370,15 +2402,14 @@ error:
 #define CFGSTR_FILTER_ID 531
 
 static herr_t
-cfgstr_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts, unsigned cd_values[],
-                  size_t cd_values_size)
+cfgstr_set_config(const H5Z_config_t *config, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts,
+                  unsigned cd_values[], size_t cd_values_size)
 {
     int64_t level = 0;
 
     *cd_nelmts = 1;
     if (cd_values && cd_values_size >= 1) {
-        if (params && *params)
-            H5Zconfig_get_int(params, "level", &level);
+        H5Zconfig_get_int(config, "level", &level);
         cd_values[0] = (unsigned)level;
     }
     return SUCCEED;
@@ -2801,8 +2832,8 @@ error:
 #define CANON_FILTER_ID 532
 
 static herr_t
-canon_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts, unsigned cd_values[],
-                 size_t cd_values_size)
+canon_set_config(const H5Z_config_t *config, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts,
+                 unsigned cd_values[], size_t cd_values_size)
 {
     double rate = 0.0;
 
@@ -2812,10 +2843,8 @@ canon_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_
     if (cd_values) {
         if (cd_values_size < 2)
             return FAIL;
-        if (params && *params) {
-            if (H5Zconfig_get_double(params, "rate", &rate) < 0)
-                return FAIL;
-        }
+        if (H5Zconfig_get_double(config, "rate", &rate) < 0)
+            return FAIL;
         memcpy(cd_values, &rate, sizeof(rate));
     }
     return SUCCEED;
@@ -2977,44 +3006,28 @@ test_config_canonicalization(void)
         TEST_ERROR;
     PASSED();
 
-    /* --- canon-03: hex-float rewritten to the shortest round-trip decimal --- */
-    TESTING("canonicalization: hex-float rewritten to decimal");
-    if (canon_check("rate = 0x1.8p+1", "rate = 3.0") < 0)
-        TEST_ERROR;
-    if (canon_check("rate = 0x1.cp+1", "rate = 3.5") < 0)
-        TEST_ERROR;
-    PASSED();
-
-    /* --- canon-04: both normalizations at once --- */
-    TESTING("canonicalization: braces and hex-float together");
-    if (canon_check("{ rate = 0x1.8p+1 }", "rate = 3.0") < 0)
+    /* --- canon-03: a hex-float is not TOML and is rejected --- */
+    TESTING("canonicalization: hex-float literal is rejected");
+    H5E_BEGIN_TRY
+    {
+        dcpl = canon_make_dcpl("rate = 0x1.8p+1");
+    }
+    H5E_END_TRY
+    if (dcpl != H5I_INVALID_HID)
         TEST_ERROR;
     PASSED();
 
-    /* --- canon-05: hex-float text inside a quoted string is preserved --- */
-    TESTING("canonicalization: hex-float inside a string is not rewritten");
+    /* --- canon-05: string values are stored unchanged --- */
+    TESTING("canonicalization: hex-float text inside a string is preserved");
     if (canon_check("rate = 1.5, note = \"0x1.8p+1\"", "rate = 1.5, note = \"0x1.8p+1\"") < 0)
         TEST_ERROR;
     if (canon_check("rate = 1.5, note = '0x1.8p+1'", "rate = 1.5, note = '0x1.8p+1'") < 0)
         TEST_ERROR;
     PASSED();
 
-    /* --- canon-06: rewriting a hex-float loses no precision --- */
-    TESTING("canonicalization: hex-float value is bit-exact after rewrite");
-    if ((dcpl = canon_make_dcpl("rate = 0x1.5555555555555p-2")) < 0)
-        TEST_ERROR;
-    if (canon_stored_double(dcpl, &got) < 0)
-        TEST_ERROR;
-    if (memcmp(&got, &(double){0x1.5555555555555p-2}, sizeof(got)) != 0)
-        TEST_ERROR;
-    if (H5Pclose(dcpl) < 0)
-        TEST_ERROR;
-    dcpl = H5I_INVALID_HID;
-    PASSED();
-
     /* --- canon-07: the canonical form is itself valid set_config input --- */
     TESTING("canonicalization: stored form round-trips through set_config");
-    if ((dcpl = canon_make_dcpl("{rate = 0x1.cp+1}")) < 0)
+    if ((dcpl = canon_make_dcpl("{rate = 3.5}")) < 0)
         TEST_ERROR;
     if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
         TEST_ERROR;
@@ -3025,7 +3038,7 @@ test_config_canonicalization(void)
         TEST_ERROR;
     if (canon_stored_double(dcpl, &got) < 0)
         TEST_ERROR;
-    if (memcmp(&got, &(double){0x1.cp+1}, sizeof(got)) != 0)
+    if (memcmp(&got, &(double){3.5}, sizeof(got)) != 0)
         TEST_ERROR;
     if (H5Pclose(dcpl) < 0)
         TEST_ERROR;
@@ -3041,7 +3054,7 @@ test_config_canonicalization(void)
         char s3[128];
 
         /* 2^-36, from issue #6153 (a zfp tolerance) */
-        if ((dcpl = canon_make_dcpl("{ rate = 0x1p-36 }")) < 0)
+        if ((dcpl = canon_make_dcpl("{ rate = 1.4551915228366852e-11 }")) < 0)
             TEST_ERROR;
         if (H5Pget_filter_params_by_idx(dcpl, 0, s1, sizeof(s1), &plen) < 0)
             TEST_ERROR;
@@ -3087,10 +3100,10 @@ test_config_canonicalization(void)
     }
     PASSED();
 
-    /* --- canon-10: a power of two written in hex and as its canonical
-     * decimal give the same double.  Subnormal exponents are skipped if
+    /* --- canon-10: a power of two written with 17 significant digits
+     * parses to exactly that double.  Subnormal exponents are skipped if
      * this platform's libc flushes them to zero. --- */
-    TESTING("canonicalization: hex rewrite is value-transparent at powers of two");
+    TESTING("canonicalization: %.16e decimal is exact at powers of two");
     {
         static const int exps[] = {-1074, -1073, -1022, -1021, -100, -37, -36, -35,
                                    -1,    0,     1,     52,    53,   100, 512, 1023};
@@ -3111,44 +3124,25 @@ test_config_canonicalization(void)
         }
 
         for (i = 0; i < sizeof(exps) / sizeof(exps[0]); i++) {
-            char   hexstr[64];
-            char   canon[128];
-            double want     = pow2_exact(exps[i]);
-            double from_hex = 0.0;
-            double from_dec = 0.0;
+            char   decstr[64];
+            double want = pow2_exact(exps[i]);
+            double got2 = 0.0;
 
             if (!subnormals_ok && exps[i] < -1022)
                 continue;
 
-            snprintf(hexstr, sizeof(hexstr), "rate = 0x1p%+d", exps[i]);
+            snprintf(decstr, sizeof(decstr), "rate = %.16e", want);
 
-            if ((dcpl = canon_make_dcpl(hexstr)) < 0)
+            if ((dcpl = canon_make_dcpl(decstr)) < 0)
                 TEST_ERROR;
-            if (canon_stored_double(dcpl, &from_hex) < 0)
-                TEST_ERROR;
-            if (H5Pget_filter_params_by_idx(dcpl, 0, canon, sizeof(canon), &plen) < 0)
-                TEST_ERROR;
-            if (plen >= sizeof(canon)) /* never compare a truncated string */
+            if (canon_stored_double(dcpl, &got2) < 0)
                 TEST_ERROR;
             if (H5Pclose(dcpl) < 0)
                 TEST_ERROR;
             dcpl = H5I_INVALID_HID;
 
-            /* nothing a stock TOML parser would choke on may remain */
-            if (strstr(canon, "0x") != NULL)
-                TEST_ERROR;
-
-            if ((dcpl = canon_make_dcpl(canon)) < 0)
-                TEST_ERROR;
-            if (canon_stored_double(dcpl, &from_dec) < 0)
-                TEST_ERROR;
-            if (H5Pclose(dcpl) < 0)
-                TEST_ERROR;
-            dcpl = H5I_INVALID_HID;
-
-            if (memcmp(&from_hex, &want, sizeof(want)) != 0 || memcmp(&from_dec, &want, sizeof(want)) != 0) {
-                fprintf(stderr, "\n   2^%d: hex -> %a, canonical \"%s\" -> %a, want %a\n", exps[i], from_hex,
-                        canon, from_dec, want);
+            if (memcmp(&got2, &want, sizeof(want)) != 0) {
+                fprintf(stderr, "\n   2^%d: \"%s\" -> %a, want %a\n", exps[i], decstr, got2, want);
                 TEST_ERROR;
             }
         }
@@ -3317,7 +3311,7 @@ test_modify_filter_by_idx(hid_t fapl)
     if ((dcpl = canon_make_dcpl("rate = 1.5")) < 0)
         TEST_ERROR;
     p.type  = H5Z_PARAMS_STRING;
-    p.u.str = "{rate = 0x1.8p+1}";
+    p.u.str = "{ rate = 3.0 }";
     if (H5Pmodify_filter_by_idx(dcpl, 0, H5Z_FLAG_MANDATORY, &p) < 0)
         TEST_ERROR;
     if (H5Pget_filter_params_by_idx(dcpl, 0, pbuf, sizeof(pbuf), &plen) < 0)
@@ -3509,6 +3503,8 @@ main(void)
     /* Parser tests */
     nerrors += test_parser() < 0 ? 1 : 0;
     nerrors += test_config_get_str_null_buf_size() < 0 ? 1 : 0;
+    nerrors += test_config_handle() < 0 ? 1 : 0;
+    nerrors += test_config_locale() < 0 ? 1 : 0;
 
     /* H5Pappend_filter / H5Pget_filter_params_by_idx callback contracts */
     nerrors += test_callback_contracts() < 0 ? 1 : 0;
@@ -3530,7 +3526,6 @@ main(void)
     nerrors += test_canonical_name_persistence() < 0 ? 1 : 0;
     nerrors += test_config_string_max() < 0 ? 1 : 0;
     nerrors += test_config_string_max_boundary() < 0 ? 1 : 0;
-    nerrors += test_config_string_canonicalization_growth() < 0 ? 1 : 0;
     nerrors += test_set_get_config_callbacks() < 0 ? 1 : 0;
 
     /* Round-trip tests through the built-in filters */
