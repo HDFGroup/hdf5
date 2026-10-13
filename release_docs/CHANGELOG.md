@@ -1,4 +1,4 @@
-v2.3.0 --- July X , 2026
+v3.0.0 --- July X , 2026
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
@@ -22,7 +22,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 * [Platforms Tested](CHANGELOG.md#%EF%B8%8F-platforms-tested)
 * [Known Problems](CHANGELOG.md#-known-problems)
 
-# 🔆 Executive Summary: HDF5 Version 2.3.0
+# 🔆 Executive Summary: HDF5 Version 3.0.0
 
 
 ## Performance Enhancements:
@@ -66,6 +66,15 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Configuration
 
+### Added the v300 default API version
+
+   The library version is now 3.0.0 and the default API version mapping is `v300`
+   (`-DHDF5_DEFAULT_API_VERSION:STRING=v300`, `-DH5_USE_300_API` for applications). No
+   functions were versioned in 3.0.0, so `v300` maps to the same symbols as `v200`.
+
+   Because `v200` is no longer the newest API version, selecting it now requires deprecated
+   symbols to be enabled, as is already the case for `v16` through `v114`.
+
 ### Various improvements in installed CMake package configuration file
 
    - Fixed `find_dependency()` calls so that `PRIVATE`-linked libraries are only propagated as
@@ -89,9 +98,9 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ### Added typed accessors for filter parameter strings
 
-   Filter plugins can read `key = value` parameter strings with the new `H5Zconfig_has_key()`, `H5Zconfig_get_int()`, `H5Zconfig_get_double()`, `H5Zconfig_get_bool()` and `H5Zconfig_get_str()` functions, declared in `H5Zdevelop.h`. The strings use a subset of TOML v1.0.0 syntax, and hex-float literals such as `0x1.8p+1` are accepted and read back bit-for-bit. These functions do not take the library's API lock, so they can be called from inside a filter callback that runs while the lock is held. This is the first part of the string-based filter configuration API (RFC-HDFG-2026-001).
+   Filter plugins can read `key = value` parameter strings through the new opaque `H5Z_config_t` handle, which the library parses once, with `H5Zconfig_has_key()`, `H5Zconfig_get_int()`, `H5Zconfig_get_double()`, `H5Zconfig_get_bool()` and `H5Zconfig_get_str()`; `H5Zconfig_validate_keys()` rejects keys a filter does not recognize. `H5Zconfig_parse()` and `H5Zconfig_close()` create and free a handle outside a callback, e.g. to test a filter's `get_config` output. They are declared in `H5Zdevelop.h`. The strings use a subset of TOML v1.0.0 syntax. This is the first part of the string-based filter configuration API (RFC-HDFG-2026-001).
 
-   Two third-party libraries are now compiled into libhdf5: the [tomlc17](https://github.com/cktan/tomlc17) TOML parser (MIT license) in `src/tomlc17/`, and the [Ryu](https://github.com/ulfjack/ryu) shortest round-trip float formatter (Boost/Apache-2.0 license) in `src/ryu/`. Their symbols are hidden in the shared library and renamed in the static library, so they cannot collide with an application's own copies.
+   The [tomlc17](https://github.com/cktan/tomlc17) TOML parser (MIT license) is now compiled into libhdf5 from `src/tomlc17/`. Its symbols are renamed with an `H5Z__toml_c17_` prefix, so they cannot collide with an application's own copy.
 
 ### Added the H5F_LIBVER_V300 library version bound
 
@@ -111,7 +120,7 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ### Added string-based filter configuration to dataset creation property lists
 
-   The new `H5Pappend_filter()` function appends a filter to a pipeline from an `H5Z_params_t` descriptor, declared in `H5Zpublic.h`. With `H5Z_PARAMS_RAW(n, cd_values)` it behaves like `H5Pset_filter()`; with `H5Z_PARAMS_STR("level = 6")` the library loads the filter if necessary and calls its `set_config` callback to translate the `key = value` string into `cd_values`. The string is canonicalized (outer braces stripped, hex-float literals rewritten to the shortest decimal that round-trips) and stored on the pipeline entry together with the resulting `cd_values`, and the filter's canonical name is recorded in the entry. `H5Pmodify_filter_by_idx()` replaces the configuration of the filter at a given pipeline index, in either form, without changing the filter order. `H5Pget_filter_params_by_idx()` returns the parameter string of the filter at a given index: the stored string if there is one, otherwise the filter's `get_config` reconstruction from `cd_values`, otherwise a `cd_values=v0:v1:...` listing. `H5Pmodify_filter()` clears a stored string, since the new `cd_values` no longer match it.
+   The new `H5Pappend_filter()` function appends a filter to a pipeline from an `H5Z_params_t` descriptor, declared in `H5Zpublic.h`. With `H5Z_PARAMS_RAW(n, cd_values)` it behaves like `H5Pset_filter()`; with `H5Z_PARAMS_STR("level = 6")` the library loads the filter if necessary and calls its `set_config` callback to translate the `key = value` string into `cd_values`. The string is canonicalized (outer braces and surrounding whitespace stripped) and stored on the pipeline entry together with the resulting `cd_values`, and the filter's canonical name is recorded in the entry. `H5Pmodify_filter_by_idx()` replaces the configuration of the filter at a given pipeline index, in either form, without changing the filter order. `H5Pget_filter_params_by_idx()` returns the parameter string of the filter at a given index: the stored string if there is one, otherwise the filter's `get_config` reconstruction from `cd_values`, otherwise a `cd_values=v0:v1:...` listing. `H5Pmodify_filter()` clears a stored string, since the new `cd_values` no longer match it.
 
    Stored strings are carried by `H5Pcopy()` and by `H5Pencode()`/`H5Pdecode()`, and are written to files in version 3 of the filter pipeline message (see below), so the creation property list of a dataset opened from a file returns the stored string.
 
@@ -192,6 +201,25 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    Fixes GitHub issue #6560
 
+### Fixed a heap buffer over-read when traversing a malformed external link
+
+   The default external link traversal callback located the target file name and object
+   path inside the link's user data with `strlen()`, without checking that the buffer was
+   NULL-terminated or large enough to hold both strings. A corrupted or fuzzed file whose
+   external link data was not properly terminated caused a read past the end of the `udata`
+   buffer. `H5L__extern_traverse()` now validates the buffer against its stored size before
+   parsing, the same way `H5Lunpack_elink_val()` does.
+   
+### Fixed the page buffer's minimum metadata threshold failure to protect B-tree, local heap and object header metadata pages
+
+The page buffer charges every page it holds to either `raw_count` or `meta_count`, counting `H5F_MEM_PAGE_DRAW` and `H5F_MEM_PAGE_GHEAP` pages as raw data and every other page as metadata. The minimum metadata reservation set by `H5Pset_page_buffer_size()` was not written as the complement of that test: it compared the page's type for equality with `H5F_MEM_PAGE_META`, which is an alias for `H5F_MEM_PAGE_SUPER`. A page entry's type is copied verbatim from the memory type of the access that brought the page into the buffer, so B-tree, local heap and object header pages carried other values and were evicted by raw data regardless of `min_meta_perc`, while still counting toward the threshold the reservation was measured against. In practice the reservation protected only the superblock and driver information pages. The classification is now made in one place, `H5MF_mem_page_type_is_raw()`, alongside its `H5F_mem_t` counterpart `H5MF_mem_type_is_raw()`, and both the page counts and the two reservations use it, so the metadata reservation protects the same population that `meta_count` measures.
+
+Fixes GitHub issue #6679.
+
+### Fixed the page buffer corrupting its page counts when a global heap page is freed
+
+`H5PB_remove_entry()` is documented as never being given a raw data page, and it decremented `meta_count` unconditionally on that basis. Its only caller, `H5MF__sect_small_merge()`, excluded `H5FD_MEM_DRAW` but not `H5FD_MEM_GHEAP`, so a freed global heap page could reach it. Such a page is charged to `raw_count` rather than `meta_count` by `H5PB__insert_entry()`, because `H5MF__alloc_pagefs()` passes the allocation type to `H5PB_add_new_page()`, and `H5PB_write()` reuses that entry without changing its type. Removing such a page therefore left `raw_count` too high and decremented `meta_count` for a page it had never counted. Both counts govern the minimum metadata and minimum raw data page protection, and because they are unsigned, `meta_count` could wrap and leave those reservations wrong for the remaining life of the file. The caller now excludes the global heap along with raw data, `H5PB_remove_entry()` asserts that the page it was given is metadata rather than silently accounting for a raw one, and every page count decrement in the page buffer asserts the count it is releasing is non-zero.
+
 ### Fixed a heap buffer overflow when decoding object header messages
 
    The size stored in an object header message header was checked against the chunk before the rest of that message header was decoded, allowing a message body to start up to four bytes further into the chunk than the check accounted for. A corrupted or fuzzed file could declare a size that passed the check and still extended past the end of the chunk image, and the message's decode callback was then handed a buffer end outside the allocation. `H5O__chunk_deserialize()` now checks the message size once the whole message header has been decoded.
@@ -223,6 +251,18 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    Fixes CVE-2026-19025
 
+### Fixed a crash when reading a dataset with a malformed fill value
+
+   An old-style (either version 1 or version 2) fill value message that is marked "defined" but encodes a negative size leaves the fill value with a negative size and no datatype; `H5Pget_fill_value()` then passed that NULL datatype to `H5T_path_find()` and dereferenced it. `H5P_get_fill_value()` now rejects a fill value that has no datatype and returns an error, so the dataset itself remains readable while the corrupt fill value is reported cleanly.
+
+   Fixes GitHub issue #6487
+
+   Fixes CVE-2026-19024
+   
+### Fixed a crash when unprotecting a local heap with no cached prefix or data block
+
+   `H5HL_protect()` pins one metadata cache entry for a local heap -- either the prefix when the heap is a single cache object, or the data block otherwise -- and `H5HL_unprotect()` unpins it again. The cache unlinks that entry from the heap when it destroys it, so a damaged file could reach `H5HL_unprotect()` with nothing to unpin, which triggered an assertion failure in debug builds and a NULL pointer dereference otherwise. `H5HL_unprotect()` now reports an error instead, and does so before decrementing the heap's protect count so that a rejected call leaves the heap unchanged rather than half unprotected with its cache entry still pinned.
+
 ### Fixed crashes when reading datasets with malformed N-Bit or Fletcher32 filter metadata
 
    Reading a dataset from a corrupted or maliciously crafted file could crash the library in the N-Bit and Fletcher32 filter decode paths. The N-Bit filter dereferenced its client-data parameter array before validating it, crashing when the array was empty or NULL, and walked the compressed chunk during decompression without bounding the input against the chunk size, causing out-of-bounds reads. It also indexed that parameter array at offsets taken from the datatype description held in the array itself, without bounding those offsets against the number of parameters supplied, so a parameter list stopping short of the datatype it described was read past its end. The Fletcher32 filter subtracted the 4-byte checksum length from the chunk size without checking that the chunk was at least that large, underflowing the length passed to the checksum routine. These filters now validate their parameters and buffer sizes and fail with an error instead of crashing.
@@ -230,6 +270,12 @@ We would like to thank the many HDF5 community members who contributed to this r
    Fixes GitHub issues #6488, #6489, #6490, and #6492
 
    Fixes CVE-2026-19026, CVE-2026-19027, and CVE-2026-19028
+
+### Fixed a stack overflow when iterating a corrupted B-tree
+
+   `H5B__iterate_helper()` now verifies that a B-tree node it has just protected has the level the traversal expects, when the expected level is known. The equivalent check in `H5B__cache_deserialize()` only runs when a node is first loaded into the metadata cache, so a corrupted B-tree whose child pointer revisits a node that is already cached (for example, a node that points to itself) could bypass that check and recurse without bound until the stack was exhausted. Such a file is now rejected with an error instead of crashing. This was observed through `H5Gget_info()`.
+
+   Fixes GitHub issue #6403
 
 ## Java Library
 
@@ -273,6 +319,12 @@ We would like to thank the many HDF5 community members who contributed to this r
   file forces `BUILD_SHARED_LIBS` on. This affected cases where the examples
   were built directly without that cache file.
 
+### Fixed the Fortran and C++ information reported in the build settings
+
+The "Shared/Static Fortran Library" and "Shared/Static C++ Library" lines in `libhdf5.settings` and in the build settings string compiled into the library reused the C library values, so they reported `YES` even when `HDF5_BUILD_FORTRAN` or `HDF5_BUILD_CPP_LIB` was off. These lines now report `NO` unless that language's library is built. The "Fortran Compiler", "Module Directory" and "C++ Compiler" lines are now also left empty when that language's library is not built.
+
+Fixes #5723.
+
 ## Tools
 
 ### Fixed an issue with quoting of data values in h5ls and h5dump when displaying as ASCII characters
@@ -282,6 +334,14 @@ We would like to thank the many HDF5 community members who contributed to this r
    in some cases. This double-quote character has been restored and similar formatting issues
    have been fixed for cases where elements wrap to new lines according to the particular tool's
    column limit setting.
+
+### Fixed a crash in h5dump binary output of variable-length string datasets
+
+   Dumping a variable-length string dataset with more than one element to native binary (`h5dump -b`) could crash. `render_bin_output()` reused a single variable as both the per-element stride and the length of the current string, so after the first element the stride was corrupted and subsequent elements were read from misaligned addresses, dereferencing a garbage pointer. The two uses are now kept separate and variable-length string datasets can be binary dumped safely.
+
+   Fixes GitHub issue #6486
+
+   Fixes CVE-2026-19023
 
 ## Performance
 
@@ -319,9 +379,43 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## High-Level Library
 
+### Fixed leaked identifiers in H5DSattach_scale()
+
+   When attaching a dimension scale that already had one or more datasets
+   attached to it, `H5DSattach_scale()` rewrote the scale's `REFERENCE_LIST`
+   attribute without releasing everything it had acquired to do so. It reopened
+   each reference in the existing list with `H5Ropen_object()` but only closed
+   the resulting identifier on the error path, and it destroyed neither the
+   references it read from the old attribute nor the one it appended to the new
+   one -- the buffer being written was reclaimed with the old, one element
+   shorter, dataspace. Every one of those kept the file open, so a later
+   `H5Fcreate()` with `H5F_ACC_TRUNC` on the same file failed with "unable to
+   truncate a file which is already open", an error with nothing in it to point
+   back at a dimension scale.
+
+   The identifier is now closed on the success path as well, and both reference
+   buffers are reclaimed, matching the equivalent code in
+   `H5DSdetach_scale()`. This code is only reached when `H5DSwith_new_ref()`
+   selects the new-style reference path, which happens when the object's
+   terminal VOL connector is not the native one -- a pass-through connector
+   stacked over the native connector does not qualify -- or when the library is
+   built with `H5_DIMENSION_SCALES_WITH_NEW_REF`; the old-style reference
+   path opens nothing.
+
 ## Fortran High-Level APIs
 
 ## Documentation
+
+### Clarified that direct chunk writes must supply an entire chunk
+
+   The documentation for `H5Dwrite_chunk()` and `H5DOwrite_chunk()` did not state that the
+   buffer must encode an entire chunk. Before filtering, a chunk always holds every element
+   covered by the chunk dimensions, including the elements of a partial edge chunk that lie
+   outside the dataspace. A precompressed chunk must therefore be the compressed form of the
+   full chunk, not only of the elements inside the dataspace. Since HDF5 2.2.0, the library
+   checks that a filtered chunk unfilters to exactly the full chunk size, so a filtered chunk
+   written without its edge padding can no longer be read with `H5Dread()`. The documentation
+   and the file format specification now state this requirement explicitly.
 
 ## F90 APIs
 
