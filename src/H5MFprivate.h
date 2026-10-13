@@ -41,6 +41,10 @@
 /* Library-private Function Prototypes */
 /***************************************/
 
+/* Memory type classification routines */
+H5_DLL bool H5MF_mem_type_is_raw(H5F_mem_t type);
+H5_DLL bool H5MF_mem_page_type_is_raw(H5F_mem_page_t type);
+
 /* File space manager routines */
 H5_DLL herr_t H5MF_init_merge_flags(H5F_shared_t *f_sh);
 H5_DLL herr_t H5MF_get_freespace(H5F_t *f, hsize_t *tot_space, hsize_t *meta_size);

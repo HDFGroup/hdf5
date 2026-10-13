@@ -1295,6 +1295,20 @@ H5_DLL herr_t H5Dwrite_multi_async(size_t count, hid_t dset_id[], hid_t mem_type
  *          \p buf is the memory buffer containing data to be written to
  *          the chunk in the file.
  *
+ *          The data in \p buf must encode an entire chunk. Before
+ *          filtering, a chunk always holds every element covered by the
+ *          chunk dimensions, so its size in bytes is the product of the
+ *          chunk dimensions and the datatype size. This is also true of
+ *          partial edge chunks, which extend past the current extent of
+ *          the dataspace: the elements outside the dataspace must still be
+ *          present, and are normally set to the fill value. If no filters
+ *          are applied to the chunk, \p data_size must equal the full chunk
+ *          size. If filters are applied, reversing them on \p buf must
+ *          produce exactly the full chunk size. A chunk that encodes only
+ *          the elements inside the dataspace is not a valid chunk.
+ *          H5Dwrite_chunk() does not verify the contents of \p buf, so the
+ *          caller is responsible for meeting these requirements.
+ *
  * \attention Exercise caution when using H5Dread_chunk2() and
  *          H5Dwrite_chunk(), as they read and write data chunks directly
  *          in a file. H5Dwrite_chunk() bypasses hyperslab selection, the

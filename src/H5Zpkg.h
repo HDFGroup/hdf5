@@ -57,11 +57,14 @@ H5_ATTR_VISIBILITY_HIDDEN extern H5Z_class3_t H5Z_SZIP[1];
 /* Package internal routines */
 H5_DLL herr_t H5Z__reregister_deflate(void);
 H5_DLL herr_t H5Z__unregister(H5Z_filter_t filter_id);
-H5_DLL herr_t H5Z__config_validate_keys(const char *params, const char *const *known_keys);
-H5_DLL htri_t H5Z__config_get_int(const char *params, const char *key, int64_t *out);
-H5_DLL htri_t H5Z__config_get_str(const char *params, const char *key, char *buf, size_t *buf_size);
+H5_DLL herr_t H5Z__config_validate_keys(const H5Z_config_t *config, const char *const *known_keys);
+H5_DLL htri_t H5Z__config_has_key(const H5Z_config_t *config, const char *key);
+H5_DLL htri_t H5Z__config_get_int(const H5Z_config_t *config, const char *key, int64_t *out);
+H5_DLL htri_t H5Z__config_get_double(const H5Z_config_t *config, const char *key, double *out);
+H5_DLL htri_t H5Z__config_get_bool(const H5Z_config_t *config, const char *key, bool *out);
+H5_DLL htri_t H5Z__config_get_str(const H5Z_config_t *config, const char *key, char *buf, size_t *buf_size);
 
-H5_DLL herr_t H5Z__no_params_set_config(const char *params, unsigned *flags, size_t *cd_nelmts,
+H5_DLL herr_t H5Z__no_params_set_config(const H5Z_config_t *config, unsigned *flags, size_t *cd_nelmts,
                                         unsigned cd_values[], size_t cd_values_size);
 
 #endif /* H5Zpkg_H */

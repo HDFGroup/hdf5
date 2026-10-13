@@ -350,6 +350,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #cmakedefine H5_HAVE_UNISTD_H @H5_HAVE_UNISTD_H@
 
+/* Define to 1 if you have the `uselocale' function. */
+#cmakedefine H5_HAVE_USELOCALE @H5_HAVE_USELOCALE@
+
 /* Define to 1 if you have the `vasprintf' function. */
 #cmakedefine H5_HAVE_VASPRINTF @H5_HAVE_VASPRINTF@
 
@@ -623,6 +626,9 @@
 
 /* Define using v2.0 public API symbols by default */
 #cmakedefine H5_USE_200_API_DEFAULT @H5_USE_200_API_DEFAULT@
+
+/* Define using v3.0 public API symbols by default */
+#cmakedefine H5_USE_300_API_DEFAULT @H5_USE_300_API_DEFAULT@
 
 /* Define if the library will use file locking */
 #cmakedefine H5_USE_FILE_LOCKING @H5_USE_FILE_LOCKING@
