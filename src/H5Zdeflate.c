@@ -30,7 +30,7 @@
 static size_t H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], hid_t dxpl_id,
                                   const hsize_t *scaled, size_t ndims, void *state, size_t nbytes,
                                   size_t *buf_size, void **buf);
-static herr_t H5Z__deflate_set_config(const char *params, unsigned *flags, size_t *cd_nelmts,
+static herr_t H5Z__deflate_set_config(const H5Z_config_t *config, unsigned *flags, size_t *cd_nelmts,
                                       unsigned cd_values[], size_t cd_values_size);
 static herr_t H5Z__deflate_get_config(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], char *buf,
                                       size_t *buf_size);
@@ -57,7 +57,7 @@ H5_ATTR_VISIBILITY_HIDDEN const H5Z_class3_t H5Z_DEFLATE[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z__deflate_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts,
+H5Z__deflate_set_config(const H5Z_config_t *config, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts,
                         unsigned cd_values[], size_t cd_values_size)
 {
     unsigned level     = 6; /* default compression level */
@@ -71,15 +71,15 @@ H5Z__deflate_set_config(const char *params, unsigned H5_ATTR_UNUSED *flags, size
         if (cd_values_size < 1)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cd_values buffer too small");
 
-        if (params) {
+        {
             static const char *const known[] = {"level", NULL};
             htri_t                   found;
             int64_t                  lval;
 
-            if (H5Z__config_validate_keys(params, known) < 0)
+            if (H5Z__config_validate_keys(config, known) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown parameter key in deflate filter config");
 
-            found = H5Z__config_get_int(params, "level", &lval);
+            found = H5Z__config_get_int(config, "level", &lval);
             if (found < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "malformed params string for deflate filter");
 

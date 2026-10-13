@@ -6219,6 +6219,7 @@ test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t n
             case H5F_LIBVER_V112:
             case H5F_LIBVER_V114:
             case H5F_LIBVER_V200:
+            case H5F_LIBVER_V300:
                 ok = (f->shared->sblock->super_vers == HDF5_SUPERBLOCK_VERSION_3);
                 VERIFY(ok, true, "HDF5_superblock_ver_bounds");
                 break;

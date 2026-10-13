@@ -16,6 +16,7 @@ foreach (example_name ${common_examples})
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_112_API}>:-DH5_USE_112_API>"
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_114_API}>:-DH5_USE_114_API>"
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_200_API}>:-DH5_USE_200_API>"
+          "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_300_API}>:-DH5_USE_300_API>"
   )
   if (H5_HAVE_PARALLEL)
     target_include_directories (${EXAMPLE_VARNAME}_${example_name} PUBLIC ${MPI_C_INCLUDE_DIRS})
@@ -42,6 +43,7 @@ endforeach ()
 #            "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_112_API}>:-DH5_USE_112_API>"
 #            "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_114_API}>:-DH5_USE_114_API>"
 #            "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_200_API}>:-DH5_USE_200_API>"
+#            "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_300_API}>:-DH5_USE_300_API>"
 #    )
 #    if (H5_HAVE_PARALLEL)
 #      target_include_directories (${EXAMPLE_VARNAME}_${example_name} PUBLIC ${MPI_C_INCLUDE_DIRS})

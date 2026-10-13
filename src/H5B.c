@@ -1140,6 +1140,20 @@ H5B__iterate_helper(H5F_t *f, const H5B_class_t *type, haddr_t addr, int exp_lev
     if (NULL == (bt = (H5B_t *)H5AC_protect(f, H5AC_BT, addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, H5_ITER_ERROR, "unable to load B-tree node");
 
+    /* Check for a corrupted B-tree node.  If the caller has told us what
+     * level to expect, verify that the node we just protected actually has
+     * that level.  This check must be performed here rather than relying
+     * solely on the equivalent check in H5B__cache_deserialize, because
+     * that deserialize callback only runs when a node is first loaded into
+     * the metadata cache.  A corrupted B-tree whose child pointer revisits
+     * a node that is already cached (e.g. a node that points to itself)
+     * bypasses the deserialize callback entirely, so without this check the
+     * recursion below would never terminate and would overflow the stack.
+     */
+    if (exp_level != H5B_UNKNOWN_NODELEVEL && bt->level != (unsigned)exp_level)
+        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, H5_ITER_ERROR,
+                    "B-tree node level is not as expected, possibly corrupted");
+
     /* Iterate over node's children */
     for (u = 0; u < bt->nchildren && ret_value == H5_ITER_CONT; u++) {
         if (bt->level > 0)

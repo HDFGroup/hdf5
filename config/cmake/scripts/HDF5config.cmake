@@ -78,9 +78,9 @@ endif ()
 ##############################################################################
 # handle input parameters to script.
 #BUILD_GENERATOR - which CMake generator to use, required
-#INSTALLDIR - HDF5-2.0.x root folder
+#INSTALLDIR - HDF5-3.0.x root folder
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
-#CTEST_SOURCE_NAME - name of source folder; HDF5-2.0.x
+#CTEST_SOURCE_NAME - name of source folder; HDF5-3.0.x
 #MODEL - CDash group name
 #HPC - run alternate configurations for HPC machines; sbatch, bsub, qsub
 #MPI - enable MPI
