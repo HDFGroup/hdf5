@@ -244,12 +244,23 @@ sub print_defaultapivers ($) {
         @param_list = split(/\s*,\s*/, $func_params{$curr_name});
 #print "print_defaultapivers: param_list=(@param_list)\n";
 
-        # Set up default/latest version name mapping
-        print $fh "\n#if !defined($curr_vers_name) || $curr_vers_name == $curr_vers\n";
-        print $fh " " x $indent, "#ifndef $curr_vers_name\n";
-        print $fh " " x ($indent * 2), "#define $curr_vers_name $curr_vers\n";
-        print $fh " " x $indent, "#endif /* $curr_vers_name */\n";
-        print $fh " " x $indent, "#define $curr_name $curr_name$curr_vers\n";
+        if ($curr_vers > $api_vers_to_function_vers{$versions[-1]}{$curr_name}) {
+            # This function is for a future version of the library API, do not
+            # set it as default, instead use the default for the latest API
+            # version
+            print $fh "\n#if !defined($curr_vers_name)\n";
+            print $fh " " x $indent, "#define $curr_vers_name $api_vers_to_function_vers{$versions[-1]}{$curr_name}\n";
+            print $fh "#endif /* $curr_vers_name */\n";
+            print $fh "#if $curr_vers_name == $curr_vers\n";
+            print $fh " " x $indent, "#define ${curr_name}_t $curr_name${curr_vers}_t\n";
+        } else {
+            # Set up default/latest version name mapping
+            print $fh "\n#if !defined($curr_vers_name) || $curr_vers_name == $curr_vers\n";
+            print $fh " " x $indent, "#ifndef $curr_vers_name\n";
+            print $fh " " x ($indent * 2), "#define $curr_vers_name $curr_vers\n";
+            print $fh " " x $indent, "#endif /* $curr_vers_name */\n";
+            print $fh " " x $indent, "#define $curr_name $curr_name$curr_vers\n";
+        }
 
         # Print function's dependent parameter types
         foreach (sort (@param_list)) {
@@ -288,12 +299,23 @@ sub print_defaultapivers ($) {
         $curr_vers_name = $curr_name . "_t_vers";
         $curr_vers = $typedefs{$curr_name};
 
-        # Set up default/latest version name mapping
-        print $fh "\n#if !defined($curr_vers_name) || $curr_vers_name == $curr_vers\n";
-        print $fh " " x $indent, "#ifndef $curr_vers_name\n";
-        print $fh " " x ($indent * 2), "#define $curr_vers_name $curr_vers\n";
-        print $fh " " x $indent, "#endif /* $curr_vers_name */\n";
-        print $fh " " x $indent, "#define ${curr_name}_t $curr_name${curr_vers}_t\n";
+        if ($curr_vers > $api_vers_to_type_vers{$versions[-1]}{$curr_name}) {
+            # This typedef is for a future version of the library API, do not
+            # set it as default, instead use the default for the latest API
+            # version
+            print $fh "\n#if !defined($curr_vers_name)\n";
+            print $fh " " x $indent, "#define $curr_vers_name $api_vers_to_type_vers{$versions[-1]}{$curr_name}\n";
+            print $fh "#endif /* $curr_vers_name */\n";
+            print $fh "#if $curr_vers_name == $curr_vers\n";
+            print $fh " " x $indent, "#define ${curr_name}_t $curr_name${curr_vers}_t\n";
+        } else {
+            # Set up default/latest version name mapping
+            print $fh "\n#if !defined($curr_vers_name) || $curr_vers_name == $curr_vers\n";
+            print $fh " " x $indent, "#ifndef $curr_vers_name\n";
+            print $fh " " x ($indent * 2), "#define $curr_vers_name $curr_vers\n";
+            print $fh " " x $indent, "#endif /* $curr_vers_name */\n";
+            print $fh " " x $indent, "#define ${curr_name}_t $curr_name${curr_vers}_t\n";
+        }
 
         # Loop to print earlier version name mappings
         $curr_vers--;

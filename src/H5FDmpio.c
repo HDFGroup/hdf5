@@ -1144,6 +1144,7 @@ H5FD__mpio_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /* out
         *flags |= H5FD_FEAT_HAS_MPI; /* This driver uses MPI                                             */
         *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default
                                                        VFD */
+        *flags |= H5FD_FEAT_READWRITE_NO_H5_CALLS; /* read() and write() callbacks do not re-enter the HDF5 API */
     }                                               /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

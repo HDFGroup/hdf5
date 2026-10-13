@@ -374,6 +374,7 @@ static herr_t H5D__piece_mem_cb(void *elem, const H5T_t *type, unsigned ndims, c
                                 void *_opdata);
 static herr_t H5D__chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info);
 #ifdef H5_HAVE_CONCURRENCY
+static htri_t H5D__chunk_may_use_threading(const H5D_dset_io_info_t *dset_info);
 static H5TS_THREAD_RETURN_TYPE H5D__chunk_thread_read(void *_threaded_chunk_info);
 #endif /* H5_HAVE_CONCURRENCY */
 static unsigned H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled);
@@ -2856,8 +2857,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_may_use_select_io
  *
- * Purpose:    A small internal function to if it may be possible to use
- *             selection I/O.
+ * Purpose:    A small internal function to determine if it may be
+ *             possible to use selection I/O.
  *
  * Return:    true or false
  *
@@ -2924,6 +2925,56 @@ H5D__chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *d
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_may_use_select_io() */
+
+#ifdef H5_HAVE_CONCURRENCY
+/*-------------------------------------------------------------------------
+ * Function:  H5D__chunk_may_use_threading
+ *
+ * Purpose:   A small internal function to determine if it may be possible
+ *            to use internal threading for chunk I/O.
+ *
+ * Return:    true or false
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5D__chunk_may_use_threading(const H5D_dset_io_info_t *dset_info)
+{
+    const H5D_t *dataset   = NULL; /* Local pointer to dataset info */
+    bool         do_threading;
+    htri_t       ret_value = true; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    assert(dset_info);
+
+    dataset = dset_info->dset;
+    assert(dataset);
+
+    /* Check if we're using threads - first check if the global thread pool exists and we're not already in
+     * a concurrency event */
+    if ((H5TS_pool_g == NULL) || H5TS_currently_concurrent_g)
+        HGOTO_DONE(false);
+
+    /* Now check if threading is disabled by the context (DXPL) */
+    if (H5CX_get_io_threads(&do_threading) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if threading is enabled");
+    if (!do_threading)
+        HGOTO_DONE(false);
+
+    /* Now check if the file driver re-enters HDF5 */
+    if (!H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_READWRITE_NO_H5_CALLS))
+        HGOTO_DONE(false);
+
+    /* Now check for any filters that re-enter HDF5 */
+    if (dataset->shared->dcpl_cache.pline.nused && (ret_value = (H5Z_no_filters_reenter_h5(&dataset->shared->dcpl_cache.pline))) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if any filters re-enter HDF5");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__chunk_may_use_select_io() */
+#endif /* H5_HAVE_CONCURRENCY */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_read
@@ -3114,7 +3165,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
         H5D_storage_t cpt_store;   /* Chunk storage information as compact dataset */
         bool          cpt_dirty;   /* Temporary placeholder for compact storage "dirty" flag */
 #ifdef H5_HAVE_CONCURRENCY
-        bool   do_threading;          /* Whether to do internal thread spawning */
+        htri_t do_threading;          /* Whether to do internal thread spawning */
         bool   threaded_chunk;        /* Whether to do internal thread spawning for this chunk */
         size_t init_chunk_nalloc = 0; /* Initial allocation size of array of chunks in threaded I/O */
 #endif                                /* H5_HAVE_CONCURRENCY */
@@ -3155,14 +3206,11 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
         /* Get number of chunks */
         init_chunk_nalloc = H5D_CHUNK_GET_NODE_COUNT(dset_info);
 
-        /* Check if we're using threads - first check if the global thread pool exists , we're not already in
-         * a concurrency event, and there's at least one chunk selected */
-        do_threading = (H5TS_pool_g != NULL) && !H5TS_currently_concurrent_g && (init_chunk_nalloc > 0);
-
-        if (do_threading) {
-            /* Now check if threading is disabled by the context (DXPL) */
-            if (H5CX_get_io_threads(&do_threading) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if threading is enabled");
+        /* Only use threads if more than 1 chunk is selected */
+        if (init_chunk_nalloc > 1) {
+            /* Check if we're using threads */
+            if ((do_threading = H5D__chunk_may_use_threading(dset_info)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if threading is possible");
 
             if (do_threading) {
                 /* Allocate threaded I/O info struct */
@@ -3201,6 +3249,9 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                     threaded_io_info->dxpl_id = H5I_INVALID_HID;
             }
         }
+        else
+            do_threading = false;
+
 #endif /* H5_HAVE_CONCURRENCY */
 
         /* Iterate through nodes in chunk skip list */

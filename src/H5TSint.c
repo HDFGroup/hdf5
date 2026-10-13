@@ -138,7 +138,7 @@ H5TS__init_package(void)
 #else /* H5_HAVE_CONCURRENCY */
     if (H5_UNLIKELY(H5TS_rwlock_init(&H5TS_api_info_p.api_lock) < 0))
         HGOTO_DONE(FAIL);
-    if (H5_UNLIKELY(H5TS_mutex_init(&H5TS_api_info_p.internal_mutex, H5TS_MUTEX_TYPE_PLAIN) < 0))
+    if (H5_UNLIKELY(H5TS_mutex_init(&H5TS_api_info_p.internal_mutex, H5TS_MUTEX_TYPE_RECURSIVE) < 0))
         HGOTO_DONE(FAIL);
 #endif
     H5TS_atomic_init_uint(&H5TS_api_info_p.attempt_lock_count, 0);

@@ -70,14 +70,21 @@ extern "C" {
  *
  *          This is currently only used to accelerate raw data reads of chunked
  *          datasets. This will occur when the following conditions are met:
- *          \li This function is called with \p num_threads > \c 0 .
- *          \li H5Pset_io_threads() was not called with \c threads_enabled set
- *          to \c false .
- *          \li Selection I/O is not used. See H5Pset_selection_io().
- *          \li At least one chunk exists on disk and is not cached by the
+ *          \li This function must be called with \p num_threads > \c 0 .
+ *          \li H5Pset_io_threads() must not be called with \c threads_enabled
+ *          set to \c false .
+ *          \li Selection I/O must not be used. See H5Pset_selection_io().
+ *          \li At least one chunk must exist on disk and not be cached by the
  *          dataset chunk cache.
- *          \li For unfiltered datasets, the chunk cache is large enough to fit
- *          at least one chunk. See H5Pset_chunk_cache().
+ *          \li For unfiltered datasets, the chunk cache must be large enough to
+ *          fit at least one chunk. See H5Pset_chunk_cache().
+ *          \li No data filters re-enter the HDF5 API. All data fitlers must
+ *          set the \p H5Z_FEAT_FILTER_NO_H5_CALLS capability flag.
+ *          \li The file driver must not re-enter the HDF5 API. It must set the
+ *          \p H5FD_FEAT_READWRITE_NO_H5_CALLS capability flag.
+ *          \li For concurrent execution of the data filter, that filter must
+ *          be thread-safe and report that capability with the
+ *          \p H5Z_FEAT_FILTER_THREADSAFE capability flag.
  *
  * \note    This function is only present when the library is compiled with HDF5_ENABLE_CONCURRENCY=ON.
  *
