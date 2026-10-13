@@ -60,7 +60,8 @@ struct H5Z_filter_info_t {
     size_t       cd_nelmts;                        /*number of elements in cd_values[]  */
     unsigned     _cd_values[H5Z_COMMON_CD_VALUES]; /*internal client data values		     */
     unsigned    *cd_values;                        /*client data values		     */
-    char        *config;                           /*canonical key=value config string, or NULL */
+    char        *config;                           /*canonical key=value config string, or NULL;
+                                                    *stored in pipeline message version 3 */
 };
 
 /* Filter table entry.  The class3-only fields are NULL for class1/2 filters. */
