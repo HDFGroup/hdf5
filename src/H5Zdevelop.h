@@ -194,7 +194,7 @@ typedef struct H5Z_class3_t {
     H5Z_can_apply_func_t can_apply;       /**< The "can apply" callback for a filter        */
     H5Z_set_local_func_t set_local;       /**< The "set local" callback for a filter        */
     H5Z_func_t           filter;          /**< The actual filter function                   */
-    unsigned long        feature_flags;   /**< Is this filter thread safe?                  */
+    unsigned long        feature_flags;   /**< Feature flags                                */
 } H5Z_class3_t;
 //! <!-- [H5Z_class3_t_snip] -->
 
@@ -288,10 +288,14 @@ extern "C" {
  *          \c filter, described in detail below, is a user-defined callback
  *          function which performs the action of the filter.
  *
- *          \c threadsafe is a boolean variable indicatating if the \c filter
- *          callback is thread-safe. To be considered thread-safe, it must be
- *          thread-safe with respect to its own internal structures, and it must
- *          not make any HDF5 library calls.
+ *          \c feature_flags is a bit-flags type parameter indicating features
+ *          this filter supports. Available flags are:
+ *          \li \p H5Z_FEAT_FILTER_THREADSAFE : This should be set if the
+ *          \p filter callback is thread-safe with respect to its own internal
+ *          structures.
+ *          \li \p H5Z_FEAT_FILTER_NO_H5_CALLS : This should be set if the \p
+ *          filter callback does not make any HDF5 library calls except
+ *          H5open().
  *
  *          The statistics associated with a filter are not reset by this
  *          function; they accumulate over the life of the library.

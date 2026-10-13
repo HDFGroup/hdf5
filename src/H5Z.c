@@ -305,7 +305,7 @@ H5Z__upgrade_class_vers(const void *_cls, H5Z_class3_t *cls3_buf)
         cls3_buf->version         = H5Z_CLASS_T_VERS_3;
         cls3_buf->id              = cls_old->id;
         cls3_buf->encoder_present = cls_old->encoder_present;
-        cls3_buf->decoder_present = cls_old->encoder_present;
+        cls3_buf->decoder_present = cls_old->decoder_present;
         cls3_buf->name            = cls_old->name;
         cls3_buf->can_apply       = cls_old->can_apply;
         cls3_buf->set_local       = cls_old->set_local;
@@ -399,7 +399,7 @@ H5Z_register(const H5Z_class3_t *cls)
         i = H5Z_table_used_g++;
         H5MM_memcpy(H5Z_table_g + i, cls, sizeof(H5Z_class3_t));
 #ifdef H5Z_DEBUG
-        memset(H5Z_stat_table_g + i, 0, sizeof(H5Z_class3_t));
+        memset(H5Z_stat_table_g + i, 0, sizeof(H5Z_stats_t));
 #endif /* H5Z_DEBUG */
     }  /* end if */
     /* Filter already registered */
