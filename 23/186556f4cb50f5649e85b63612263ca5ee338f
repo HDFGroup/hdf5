@@ -1,0 +1,261 @@
+.codespellrc
+  s_7067ad3df0f0a8::t_de8d85b36c0cbf 3
+.github/workflows/arm-main.yml
+  s_7067ad3df0f0a8::t_98880d26383e4f 39-42,63,80,102,126
+.github/workflows/bintest.yml
+  s_7067ad3df0f0a8::t_ecb457461bc62b 39,122,176,244
+.github/workflows/clang-format-check.yml
+  s_7067ad3df0f0a8::t_72e7522d4df066 25
+.github/workflows/clang-format-fix.yml
+  s_7067ad3df0f0a8::t_8dc618bd1a7c3d 38
+.github/workflows/codeql.yml
+  s_7067ad3df0f0a8::t_c2f723dcd75ee3 95,182,210,259
+.github/workflows/codespell.yml
+  s_7067ad3df0f0a8::t_2108c3ad32f26a 14
+.github/workflows/ctest.yml
+  s_7067ad3df0f0a8::t_7849332387a8e1 109,266,437,645,935
+.github/workflows/daily-schedule.yml
+  s_7067ad3df0f0a8::t_0f912ace35beb0 52
+.github/workflows/freebsd.yml
+  s_7067ad3df0f0a8::t_c8cc8cdf24c711 57
+.github/workflows/intel.yml
+  s_7067ad3df0f0a8::t_2113ad9a96c45c 90
+.github/workflows/java-examples-maven-test.yml
+  s_7067ad3df0f0a8::t_cc504a03aeb67d 40,203,322
+.github/workflows/java-implementation-test.yml
+  s_7067ad3df0f0a8::t_8243916ca987fe 132
+.github/workflows/main-par.yml
+  s_7067ad3df0f0a8::t_7d398155e583b2 59-60
+.github/workflows/main-spc.yml
+  s_7067ad3df0f0a8::t_20eac0f8156372 62-63,126-127,185-186,244-245,301-302,321-322,358-359,378-437,459,472
+.github/workflows/main.yml
+  s_7067ad3df0f0a8::t_d655c38c372df7 185,297-298
+.github/workflows/maven-build-test.yml
+  s_7067ad3df0f0a8::t_c25887a061a8ed 86,158,217
+.github/workflows/maven-deploy.yml
+  s_7067ad3df0f0a8::t_5f4f5ae1fcbfca 272
+.github/workflows/maven-staging.yml
+  s_7067ad3df0f0a8::t_6d89305a28e2ed 265,697,828
+.github/workflows/msys2.yml
+  s_7067ad3df0f0a8::t_1cb9dbeafa5022 39
+.github/workflows/nvhpc.yml
+  s_7067ad3df0f0a8::t_5a2ec494c1f02a 23-24,41,71-73
+.github/workflows/openbsd.yml
+  s_7067ad3df0f0a8::t_aa0d9e620bdbc9 57
+.github/workflows/publish-branch.yml
+  s_7067ad3df0f0a8::t_6890e82f0067a0 37
+.github/workflows/publish-release.yml
+  s_7067ad3df0f0a8::t_ed5f3a6238d461 101
+.github/workflows/scorecard.yml
+  s_7067ad3df0f0a8::t_1953cb1f5e6735 70
+.github/workflows/script.yml
+  s_7067ad3df0f0a8::t_946ccb1baeeced 275,505
+.github/workflows/test-binary-installation.yml
+  s_7067ad3df0f0a8::t_bbabe629721b7d 81,286
+.github/workflows/test-maven-packages.yml
+  s_7067ad3df0f0a8::t_f46001a2def054 66,337
+.github/workflows/vfd-ros3.yml
+  s_7067ad3df0f0a8::t_0ce4d54b16cbed 107,270
+.github/workflows/vol_rest.yml
+  s_7067ad3df0f0a8::t_896f00bd1b2555 171,192-198
+.github/workflows/zizmor.yml
+  s_7067ad3df0f0a8::t_9692afab266b11 50
+CMakeBuildOptions.cmake
+  s_7067ad3df0f0a8::t_e055a6fb83cbd7 86-90
+CMakeInstallation.cmake
+  s_7067ad3df0f0a8::t_e3c1840165275d 193
+CMakeLists.txt
+  s_7067ad3df0f0a8::t_288bd20a4cbb85 945-946,991-998,1000,1002-1003
+HDF5Examples/C/H5D/CMakeLists.txt
+  s_7067ad3df0f0a8::t_5d714ea2546186 23,50,78
+HDF5Examples/C/H5FLT/CMakeLists.txt
+  s_7067ad3df0f0a8::t_336c46b07a9160 185
+HDF5Examples/C/H5G/CMakeLists.txt
+  s_7067ad3df0f0a8::t_7d4589d2e3f5de 23,52,80
+HDF5Examples/C/H5PAR/CMakeLists.txt
+  s_7067ad3df0f0a8::t_0baa9a3305848d 19
+HDF5Examples/C/H5T/CMakeLists.txt
+  s_7067ad3df0f0a8::t_c23b723c43a62e 23,50
+HDF5Examples/C/H5VDS/CMakeLists.txt
+  s_7067ad3df0f0a8::t_9c3dbb38eaef11 23
+HDF5Examples/C/HL/CMakeLists.txt
+  s_7067ad3df0f0a8::t_b5692671272504 19,46
+HDF5Examples/C/Perf/CMakeLists.txt
+  s_7067ad3df0f0a8::t_548e3c6c6ccaa4 20
+HDF5Examples/C/TUTR/CMakeLists.txt
+  s_7067ad3df0f0a8::t_10e5cc95dfac25 19
+HDF5Examples/CXX/H5D/CMakeLists.txt
+  s_7067ad3df0f0a8::t_c21397f710e537 20
+HDF5Examples/CXX/HL/CMakeLists.txt
+  s_7067ad3df0f0a8::t_c23fdbd8db4e59 20
+HDF5Examples/CXX/TUTR/CMakeLists.txt
+  s_7067ad3df0f0a8::t_9f7414b5efcadd 20
+HDF5Examples/FORTRAN/H5D/CMakeLists.txt
+  s_7067ad3df0f0a8::t_eedcde1d8e82d7 32,78
+HDF5Examples/FORTRAN/H5G/CMakeLists.txt
+  s_7067ad3df0f0a8::t_7eb186f5125a40 32,62
+HDF5Examples/FORTRAN/H5PAR/CMakeLists.txt
+  s_7067ad3df0f0a8::t_99e185f5c5ab12 32
+HDF5Examples/FORTRAN/H5T/CMakeLists.txt
+  s_7067ad3df0f0a8::t_2c35ec76323be0 27,55
+HDF5Examples/FORTRAN/HL/CMakeLists.txt
+  s_7067ad3df0f0a8::t_e370641bc32cd7 32,60
+HDF5Examples/FORTRAN/TUTR/CMakeLists.txt
+  s_7067ad3df0f0a8::t_24c53fadf5894e 27,47
+HDF5Examples/config/cmake/HDFExampleMacros.cmake
+  s_7067ad3df0f0a8::t_00532651eba7b2 456-463
+bin/format_source
+  s_7067ad3df0f0a8::t_08478df06c4285 23
+bin/make_vers
+  s_7067ad3df0f0a8::t_b58ef251b8b85e 15,33,381-384,438,475
+config/ConfigureChecks.cmake
+  s_7067ad3df0f0a8::t_f7d7d48ebd456f 442
+config/HDF5Macros.cmake
+  s_7067ad3df0f0a8::t_ecb6d14c440d47 143-169
+config/cmake/HDF5ExampleCache.cmake
+  s_7067ad3df0f0a8::t_adf8a9b16f8a55 68-69
+config/cmake/scripts/HDF5config.cmake
+  s_7067ad3df0f0a8::t_cdcf3baa6dc497 81,83
+docs/AutotoolsToCMakeOptions.md
+  s_7067ad3df0f0a8::t_8b667c53febd7f 37
+docs/INSTALL_CMake_options.md
+  s_7067ad3df0f0a8::t_43f69893e40d02 59,312
+docs/doxygen/dox/H5.format.4.0.dox
+  s_7067ad3df0f0a8::t_326ad4c24fa7f8 7929-7932,9547-9549
+docs/doxygen/dox/api-compat-macros.dox
+  s_7067ad3df0f0a8::t_fff2c11d331863 155-160,200,222-227,336-338
+fortran/test/tH5P_F03.F90
+  s_7067ad3df0f0a8::t_3acc89f9f999c6 237-243
+hl/CMakeLists.txt
+  s_7067ad3df0f0a8::t_d350db21d5b4e8 5-7,10
+hl/src/H5DOpublic.h
+  s_7067ad3df0f0a8::t_c67cfdd0e03559 174-178,387-388
+hl/src/H5DS.c
+  s_7067ad3df0f0a8::t_0c3178b045917a 27-31,598-614,648-658,664
+hl/src/H5DSpublic.h
+  s_7067ad3df0f0a8::t_31dfa203baa6a3 802-806
+hl/test/CMakeTests.cmake
+  s_7067ad3df0f0a8::t_30218589bd8a34 70
+hl/test/test_ds.c
+  s_7067ad3df0f0a8::t_02bf13530d25e5 98,152-160,220,5714-5823
+release_docs/CHANGELOG.md
+  s_7067ad3df0f0a8::t_db6c23bdfe0ea3 1,25,69-77,101,103,123,204-222,254-265,274-279,322-327,338-345,382-404,409-419
+src/CMakeLists.txt
+  s_7067ad3df0f0a8::t_693e12669107bf 1006-1008,1253
+src/H5B.c
+  s_7067ad3df0f0a8::t_ed33e56b5e8423 1143-1156
+src/H5Dpublic.h
+  s_7067ad3df0f0a8::t_66da0352a34893 1298-1311
+src/H5HL.c
+  s_7067ad3df0f0a8::t_c5e6ed069f8d52 420-426,428-431,434-435,438,440-443,446-448
+src/H5Lexternal.c
+  s_7067ad3df0f0a8::t_a294064205ae83 96,124-135,146-148
+src/H5MF.c
+  s_7067ad3df0f0a8::t_c4f257f61b5001 235-287
+src/H5MFprivate.h
+  s_7067ad3df0f0a8::t_cf8c25c974428d 44-47
+src/H5MFsection.c
+  s_7067ad3df0f0a8::t_e699a67d695cf7 737-740
+src/H5PB.c
+  s_7067ad3df0f0a8::t_a254ef1c2b3c48 37,624-630,638-643,714,730,866,949,1021,1045,1130-1131,1133-1135,1137,1179,1236,1284,1408,1462,1479,1496-1497,1499-1501,1503,1511
+src/H5PBpkg.h
+  s_7067ad3df0f0a8::t_14546764ed6218 36
+src/H5Pdcpl.c
+  s_7067ad3df0f0a8::t_296810dadb63ff 3210-3216
+src/H5Pocpl.c
+  s_7067ad3df0f0a8::t_20aaa06231e5d0 1947,2011-2012,2014,2016,2032,2106-2107,2135,2206-2208,2210,2226,2288-2289
+src/H5Ppublic.h
+  s_7067ad3df0f0a8::t_ada9c5c9fbc525 2808-2810,2839,2853,5152,5156-5157,5229-5236
+src/H5SL.c
+  s_7067ad3df0f0a8::t_e38d9845ff0656 31-32,155,391,878,1299,1305,1327,1330,1388,1395-1396,1419,1422,1493,1500-1501,1524,1527,1588-1589,1595,1619,1622,1680,1687-1689,1711,1714,1785,1792-1794,1816,1819,1970,2059-2060,2063,2088,2091
+src/H5Zconfig.c
+  s_7067ad3df0f0a8::t_931a9a71ee68f7 24,28-29,75-76,89,96,126,144-189,210,291-308,310-311,313-314,316,318-319,321-325,327,329-351,354-376,381,383,385,389-390,393,396,404,406,408-409,411,413-414,416-417,422,424-425,431-433,438,444-637,647,650-651,657,669,675,679,681-682,684-685,694,700,702,704,706-707,710,716,724,726,728,730-731,734,749,753,755-756,758-759
+src/H5Zdeflate.c
+  s_7067ad3df0f0a8::t_9dfceae3568e62 33,60,74,79,82
+src/H5Zdevelop.h
+  s_7067ad3df0f0a8::t_4349751e0b5622 184-194,198,214,298,300-301,303-350,352-357,361,366,368-370,372,374-376,380,385,387-389,391,393-395,399,404,406-408,412-413,417,422,424-428,432-433,437
+src/H5Zpkg.h
+  s_7067ad3df0f0a8::t_c4b51631276745 60-67
+src/H5Zprivate.h
+  s_7067ad3df0f0a8::t_cd838fda1b7dc4 112-113
+src/H5Zscaleoffset.c
+  s_7067ad3df0f0a8::t_279762658c6a06 91,759,782,788,807
+src/H5Zszip.c
+  s_7067ad3df0f0a8::t_bab5b22f87acd7 37,67,84,89,93,109
+src/H5build_settings.cmake.c.in
+  s_7067ad3df0f0a8::t_4e47feafc80521 66,70-72,75,79-80,92
+src/H5pubconf.h.in
+  s_7067ad3df0f0a8::t_62e5120de762da 353-355,630-632
+src/H5public.h
+  s_7067ad3df0f0a8::t_4620f66c9ea67f 64,68
+src/H5vers.txt
+  s_7067ad3df0f0a8::t_2fc5451b7daea4 98-104
+src/H5version.h
+  s_7067ad3df0f0a8::t_dc5390ada50e81 50-53,57,59,1173-1356
+src/libhdf5.settings.in
+  s_7067ad3df0f0a8::t_83309f7c58022e 48,52-54,57,61-62
+src/tomlc17/README.md
+  s_7067ad3df0f0a8::t_f19739d9e9446a 15-16,23-24,28-29,35-40,44,51-53,61,63-68
+src/tomlc17/tomlc17.c
+  s_7067ad3df0f0a8::t_675c316e34858e 12,111,1008-1010,1017
+src/tomlc17/tomlc17.h
+  s_7067ad3df0f0a8::t_98a9470e247b81 153-154,167-168,178-179
+test/CMakeLists.txt
+  s_7067ad3df0f0a8::t_2764ebae83a7ce 745,749,751
+test/CMakeTests.cmake
+  s_7067ad3df0f0a8::t_448fd2dbf64b4c 120,153,1177
+test/dtypes.c
+  s_7067ad3df0f0a8::t_252847e52a9414 14019-14021,14132-14133,14146
+test/fillval.c
+  s_7067ad3df0f0a8::t_1750372131537d 48-51,2333-2411,2759
+test/gen_bad_fill.c
+  s_7067ad3df0f0a8::t_45bdc90bf99a92 14-27,30,32-34,36-168
+test/lheap.c
+  s_7067ad3df0f0a8::t_e1a5de16734bb8 19,21-22,26,30-37,40-305,475-484
+test/links.c
+  s_7067ad3df0f0a8::t_f6cb07b2c74cca 8412-8498,23747
+test/page_buffer.c
+  s_7067ad3df0f0a8::t_6129701bb3780f 49,1645-1843,2287
+test/tapi_version_default.c
+  s_7067ad3df0f0a8::t_55999066e26cbe 45-46,50,52,54,56,58,60-62,64,72-78,81-87,361-408
+test/tfile.c
+  s_7067ad3df0f0a8::t_a49abd9c4ee0bf 6222
+test/tfilter2.c
+  s_7067ad3df0f0a8::t_b1d2ab3e36428b 27-28,31-77,92,98,105,111,117,124,131,137,143,149-150,154,157,167,177,185,191,198,206,212,218,225,234,242,248,255,262,268,276,286,297,307,317,325,331,336-342,346,348-358,367,377,388,399,411,421,431,438,445,454,465,492,504-603,1293,1296,1302-1306,1361,1372,1374,1384,1390,1392,1402,1568,1574,2032,2041,2407-2408,2414,3599-3600,3604,3928-3929,3939-3940,4105-4112,4116-4117,4126,4137,4150,4188,4234-4235,4237,4258-4260,4265,4267,4269,4275-4276,4449,4645-4646
+tools/lib/h5tools.c
+  s_7067ad3df0f0a8::t_ba6579addbc48c 1828,1834,1840,1845-1846,1848
+tools/src/h5dump/h5dump_xml.c
+  s_7067ad3df0f0a8::t_bebbf2215cd3fe 3538-3540,3598-3611,3613-3616,3618-3624
+tools/src/h5repack/h5repack_refs.c
+  s_7067ad3df0f0a8::t_7ea4e8c2d373cb 56-57,171-172,182-183,210-213,227-229,258,270-271,275-276,302-305,397-399,468-469,471-473,785-787,789-790
+tools/test/h5dump/CMakeTests.cmake
+  s_7067ad3df0f0a8::t_3e257bb921f7ae 262,371,1425-1426
+tools/test/h5dump/exportfiles/tbinvlstr.exp
+  s_7067ad3df0f0a8::t_185251467fcf45 1
+tools/test/h5dump/h5dumpgentest.c
+  s_7067ad3df0f0a8::t_25c5bcf10234e0 139,4194-4224,15231
+tools/test/h5dump/h5dumpgentest.h
+  s_7067ad3df0f0a8::t_66507ecae84412 67
+tools/test/h5gentest.c
+  s_7067ad3df0f0a8::t_a4703ec99d4eb5 199
+tools/test/h5ls/CMakeTests.cmake
+  s_7067ad3df0f0a8::t_7717207785f211 250-252,262,313-314,570-575
+tools/test/h5repack/dynlib_rpk3.c
+  s_7067ad3df0f0a8::t_72aed916c7c5ce 30,72-73,88
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "23186556f4cb50f5649e85b63612263ca5ee338f",
+  "prompts": {},
+  "sessions": {
+    "s_7067ad3df0f0a8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9a22bfab-fc79-45b8-bb8c-c6c2c4e08d6a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "M. Scot Breitenfeld <brtnfld@hdfgroup.org>"
+    }
+  }
+}
