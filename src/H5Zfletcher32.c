@@ -31,7 +31,8 @@ const H5Z_class3_t H5Z_FLETCHER32[1] = {{
     NULL,                   /* The "can apply" callback     */
     NULL,                   /* The "set local" callback     */
     H5Z__filter_fletcher32, /* The actual filter function	*/
-    H5Z_FEAT_FILTER_THREADSAFE | H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
+    H5Z_FEAT_FILTER_THREADSAFE |
+        H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
 }};
 
 #define FLETCHER_LEN 4

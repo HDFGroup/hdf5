@@ -337,7 +337,8 @@ H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid backing fapl id");
     }
 
-    /* The only backing fapl that is currently supported is sec2. If this is changed make sure to update the query() callback to check if the backing files set H5FD_FEAT_READWRITE_NO_H5_CALLS. */
+    /* The only backing fapl that is currently supported is sec2. If this is changed make sure to update the
+     * query() callback to check if the backing files set H5FD_FEAT_READWRITE_NO_H5_CALLS. */
     if ((backing_vfd_id = H5P_peek_driver(backing_fapl)) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "Can't get VFD from fapl");
     if (backing_vfd_id != H5FD_SEC2)
@@ -621,7 +622,8 @@ H5FD__onion_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /* ou
 
     /* Set the VFL feature flags that this driver supports */
     if (flags) {
-        *flags |= H5FD_FEAT_READWRITE_NO_H5_CALLS; /* read() and write() callbacks do not re-enter the HDF5 API */
+        *flags |=
+            H5FD_FEAT_READWRITE_NO_H5_CALLS; /* read() and write() callbacks do not re-enter the HDF5 API */
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)

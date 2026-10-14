@@ -374,7 +374,7 @@ static herr_t H5D__piece_mem_cb(void *elem, const H5T_t *type, unsigned ndims, c
                                 void *_opdata);
 static herr_t H5D__chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info);
 #ifdef H5_HAVE_CONCURRENCY
-static htri_t H5D__chunk_may_use_threading(const H5D_dset_io_info_t *dset_info);
+static htri_t                  H5D__chunk_may_use_threading(const H5D_dset_io_info_t *dset_info);
 static H5TS_THREAD_RETURN_TYPE H5D__chunk_thread_read(void *_threaded_chunk_info);
 #endif /* H5_HAVE_CONCURRENCY */
 static unsigned H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled);
@@ -2940,7 +2940,7 @@ done:
 static htri_t
 H5D__chunk_may_use_threading(const H5D_dset_io_info_t *dset_info)
 {
-    const H5D_t *dataset   = NULL; /* Local pointer to dataset info */
+    const H5D_t *dataset = NULL; /* Local pointer to dataset info */
     bool         do_threading;
     htri_t       ret_value = true; /* Return value */
 
@@ -2968,7 +2968,8 @@ H5D__chunk_may_use_threading(const H5D_dset_io_info_t *dset_info)
         HGOTO_DONE(false);
 
     /* Now check for any filters that re-enter HDF5 */
-    if (dataset->shared->dcpl_cache.pline.nused && (ret_value = (H5Z_no_filters_reenter_h5(&dataset->shared->dcpl_cache.pline))) < 0)
+    if (dataset->shared->dcpl_cache.pline.nused &&
+        (ret_value = (H5Z_no_filters_reenter_h5(&dataset->shared->dcpl_cache.pline))) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if any filters re-enter HDF5");
 
 done:

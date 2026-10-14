@@ -92,7 +92,8 @@ H5Z_class3_t H5Z_NBIT[1] = {{
     H5Z__can_apply_nbit, /* The "can apply" callback     */
     H5Z__set_local_nbit, /* The "set local" callback     */
     H5Z__filter_nbit,    /* The actual filter function	*/
-    H5Z_FEAT_FILTER_THREADSAFE | H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
+    H5Z_FEAT_FILTER_THREADSAFE |
+        H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
 }};
 
 /* Local macros */

@@ -1444,7 +1444,8 @@ H5Z__find_idx_load(const H5Z_filter_info_t *filter)
         bool                issue_error = false;
 
 #ifdef H5_HAVE_CONCURRENCY
-        /* It should be impossible to get here if we're currently concurrent - all filters should be loaded by H5Z_no_filters_reenter_h5() before entering an internally concurrent section of code */
+        /* It should be impossible to get here if we're currently concurrent - all filters should be loaded by
+         * H5Z_no_filters_reenter_h5() before entering an internally concurrent section of code */
         assert(!H5TS_currently_concurrent_g);
 #endif /* H5_HAVE_CONCURRENCY */
 
@@ -2094,8 +2095,8 @@ done:
 htri_t
 H5Z_no_filters_reenter_h5(const H5O_pline_t *pline)
 {
-    size_t i;                 /* Local index variable */
-    int    fclass_idx;        /* Index of filter class in global table */
+    size_t i;                /* Local index variable */
+    int    fclass_idx;       /* Index of filter class in global table */
     htri_t ret_value = true; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)

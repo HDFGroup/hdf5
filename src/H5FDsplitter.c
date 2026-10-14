@@ -1352,7 +1352,8 @@ H5FD__splitter_query(const H5FD_t *_file, unsigned long *flags /* out */)
         if (H5FDquery(file->rw_file, flags) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTLOCK, FAIL, "unable to query R/W file");
 
-        /* Unset H5FD_FEAT_READWRITE_NO_H5_CALLS, since this VFD calls the public H5FD API in the read() and write() callbacks */
+        /* Unset H5FD_FEAT_READWRITE_NO_H5_CALLS, since this VFD calls the public H5FD API in the read() and
+         * write() callbacks */
         *flags &= ~((unsigned long)H5FD_FEAT_READWRITE_NO_H5_CALLS);
     }
     else {

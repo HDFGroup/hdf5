@@ -917,8 +917,8 @@ H5FD__family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 static herr_t
 H5FD__family_query(const H5FD_t *_file, unsigned long *flags /* out */)
 {
-    const H5FD_family_t *file = (const H5FD_family_t *)_file; /* Family VFD info */
-    herr_t ret_value = SUCCEED; /* Return value */
+    const H5FD_family_t *file      = (const H5FD_family_t *)_file; /* Family VFD info */
+    herr_t               ret_value = SUCCEED;                      /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -944,14 +944,16 @@ H5FD__family_query(const H5FD_t *_file, unsigned long *flags /* out */)
                     break;
             }
 
-            /* If we didn't break out of the loop, all members have the H5FD_FEAT_READWRITE_NO_H5_CALLS flag, set that flag for this file */
+            /* If we didn't break out of the loop, all members have the H5FD_FEAT_READWRITE_NO_H5_CALLS flag,
+             * set that flag for this file */
             if (u == file->nmembs)
-                *flags |= H5FD_FEAT_READWRITE_NO_H5_CALLS; /* read() and write() callbacks do not re-enter the HDF5 API */
+                *flags |= H5FD_FEAT_READWRITE_NO_H5_CALLS; /* read() and write() callbacks do not re-enter the
+                                                              HDF5 API */
 
             /* Check for flags that are set by h5repart */
             if (file->repart_members)
-                *flags |= H5FD_FEAT_DIRTY_DRVRINFO_LOAD; /* Mark the superblock dirty when it is loaded (so the
-                                                            family member sizes are rewritten) */
+                *flags |= H5FD_FEAT_DIRTY_DRVRINFO_LOAD; /* Mark the superblock dirty when it is loaded (so
+                                                            the family member sizes are rewritten) */
         }
     }
 
