@@ -161,6 +161,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Java Library
 
+### Added Java wrappers for string-based filter configuration
+
+   `H5.H5Pappend_filter` and `H5.H5Pmodify_filter_by_idx` each have a `String` overload for a `key=value` parameter string and an `int[]` overload for `cd_values`. `H5.H5Pget_filter_params_by_idx(plist_id, filter_idx)` returns the filter's parameter string. They are available in both the JNI and FFM implementations.
+
 ## Tools
 
 ### h5repack -f accepts filter configuration strings
@@ -278,6 +282,10 @@ Fixes GitHub issue #6679.
    Fixes GitHub issue #6403
 
 ## Java Library
+
+### Fixed H5Pget_filter2() returning wrong values in the FFM Java bindings
+
+   The FFM implementation of `H5Pget_filter2()` allocated a 4-byte buffer for the C `size_t` element count, so on 64-bit platforms the library's write ran into the adjacent client data buffer. It also read the element count back from the wrong buffer and never copied the client data values or flags back to the caller's arrays. The count is now passed as a 64-bit value initialized to the caller's array capacity, and all three outputs are copied back.
 
 ### Fixed datatype ID leaks when reading or writing nested datatypes through the JNI
 

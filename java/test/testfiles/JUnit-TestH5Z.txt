@@ -1,9 +1,14 @@
 JUnit version 4.13.2
+.testH5Pappend_filter_cdvalues
+.testH5Pappend_filter_string
+.testH5Pget_filter_params_by_idx
+.testH5Pmodify_filter_by_idx_cdvalues
+.testH5Pmodify_filter_by_idx_string
 .testH5Zfilter_avail
-.testH5Zunregister_predefined
 .testH5Zget_filter_info
+.testH5Zunregister_predefined
 
 Time:  XXXX
 
-OK (3 tests)
+OK (8 tests)
 
