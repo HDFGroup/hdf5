@@ -285,7 +285,8 @@ test_ros3_fapl_driver_flags(void)
     if (0 == (driver_flags & H5FD_FEAT_READWRITE_NO_H5_CALLS))
         FAIL_PUTS_ERROR("ros3 VFD should support H5FD_FEAT_READWRITE_NO_H5_CALLS");
     if ((H5FD_FEAT_DATA_SIEVE | H5FD_FEAT_READWRITE_NO_H5_CALLS) != driver_flags)
-        FAIL_PUTS_ERROR("H5FD_FEAT_DATA_SIEVE and H5FD_FEAT_READWRITE_NO_H5_CALLS should be the only supported flags");
+        FAIL_PUTS_ERROR(
+            "H5FD_FEAT_DATA_SIEVE and H5FD_FEAT_READWRITE_NO_H5_CALLS should be the only supported flags");
 
     PASSED();
     return 0;
