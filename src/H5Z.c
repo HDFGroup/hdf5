@@ -35,8 +35,9 @@
 
 /* Local Macros */
 
-#define H5Z_FIND_NOT_FOUND -2 /* Indicates that H5Z_find*() did not find the filter but otherwise did not
-                                 encounter an error */
+#define H5Z_FIND_NOT_FOUND                                                                                   \
+    -2 /* Indicates that H5Z_find*() did not find the filter but otherwise did not                           \
+          encounter an error */
 
 /* Local typedefs */
 #ifdef H5Z_DEBUG
@@ -2117,10 +2118,13 @@ H5Z_no_filters_reenter_h5(const H5O_pline_t *pline)
 
     /* Iterate through all the filters in pipeline */
     for (i = 0; i < pline->nused; i++) {
-        /* Load the filter. If not found return false. We do this to avoid violating the assumtion in H5Z__find_idx_load() that, when called via H5Z_pipeline() in internally concurrent code, everything has been loaded previously via H5Z_no_filters_reenter_h5(). We could relax this requirement but would have to protect some code in H5Z__find_idx_load() behind a mutex. */
+        /* Load the filter. If not found return false. We do this to avoid violating the assumtion in
+         * H5Z__find_idx_load() that, when called via H5Z_pipeline() in internally concurrent code, everything
+         * has been loaded previously via H5Z_no_filters_reenter_h5(). We could relax this requirement but
+         * would have to protect some code in H5Z__find_idx_load() behind a mutex. */
         if ((fclass_idx = H5Z__find_idx_load(&(pline->filter[i]), false)) == H5Z_FIND_NOT_FOUND)
             HGOTO_DONE(false);
-        else if(fclass_idx < 0)
+        else if (fclass_idx < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, FAIL, "can't load filter");
 
         /* Check if the filter reenters HDF5, if so, short circuit return false */

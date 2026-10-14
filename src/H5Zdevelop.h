@@ -41,7 +41,7 @@
  * H5Z_class2_t, introduced in 1.8.0. Retained for compatibility with older
  * versions of the library. Will be deprecated in 3.0.0.
  */
-#define H5Z_CLASS_T_VERS   H5Z_CLASS_T_VERS_2
+#define H5Z_CLASS_T_VERS H5Z_CLASS_T_VERS_2
 
 /* Define filter features that can be enabled on a per-filter basis */
 /* These are specified in the 'feature_flags' field in H5Z_class3_t */
