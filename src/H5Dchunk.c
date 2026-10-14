@@ -3608,12 +3608,12 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
     size_t        buf_alloc;                               /* Size to allocate for chunk buffer */
     H5CX_node_t   api_ctx = {{0}, NULL};                   /* API context node to push */
     H5D_storage_t cpt_store;                               /* Chunk storage information as compact dataset */
-    bool          cpt_dirty;                /* Temporary placeholder for compact storage "dirty" flag */
-    bool          mutex_held = false;       /* Whether we hold the internal mutex */
-    bool          cond_mutex_held;          /* Whether we hold the condition variable mutex */
-    bool          api_ctx_pushed = false;   /* Whether API context pushed */
-    herr_t        ret_value      = SUCCEED; /* "Return value" for error macros (actual return value is always
-                                               (H5TS_thread_ret_t)0) */
+    bool          cpt_dirty;                 /* Temporary placeholder for compact storage "dirty" flag */
+    bool          mutex_held      = false;   /* Whether we hold the internal mutex */
+    bool          cond_mutex_held = false;   /* Whether we hold the condition variable mutex */
+    bool          api_ctx_pushed  = false;   /* Whether API context pushed */
+    herr_t        ret_value       = SUCCEED; /* "Return value" for error macros (actual return value is always
+                                                (H5TS_thread_ret_t)0) */
 
     assert(threaded_chunk_info);
     assert(threaded_chunk_info->threaded_io_info);
@@ -3747,10 +3747,25 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
     api_ctx_pushed = false;
 
 done:
-    /* Handle failures.  This must happen before this chunk is reported as done. Once the last chunk
-     * is reported done, the thread that started the read frees threaded_io_info and goes on using the
-     * library. */
+    /* Report this chunk as done, holding cond_mutex until this worker is finished with the library. Once
+     * the last chunk is reported done and cond_mutex is released, the thread that started the read frees
+     * threaded_io_info and goes on using the library. If the lock fails, continue anyway so that thread
+     * doesn't wait forever, though nothing here is then synchronized with it. */
+    if (H5_UNLIKELY(H5TS_mutex_lock(&threaded_chunk_info->threaded_io_info->cond_mutex) < 0))
+        HDONE_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't lock mutex for condition variable");
+    else
+        cond_mutex_held = true;
+
+    /* Decrement the number of chunks left, and signal the main thread if this was the last */
+    if (1 == threaded_chunk_info->threaded_io_info->chunks_left--)
+        if (H5_UNLIKELY(H5TS_cond_signal(&threaded_chunk_info->threaded_io_info->cond) < 0))
+            HDONE_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't signal condition variable");
+
+    /* Handle failures */
     if (H5_UNLIKELY(ret_value < 0)) {
+        /* Report failure to the main thread (actual return value is ignored by the thread pool) */
+        threaded_chunk_info->threaded_io_info->failed = true;
+
         /* Clean up */
         if (api_ctx_pushed && H5CX_pop(false) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context");
@@ -3779,17 +3794,8 @@ done:
     assert(!mutex_held);
     assert(!api_ctx_pushed);
 
-    /* Report failure to task invoker (actual return value is ignored by the thread pool), and decrement the
-     * number of chunks left, signaling the main thread if this was the last. Decrement even if the lock fails
-     * so the main thread doesn't wait forever. */
-    cond_mutex_held = H5TS_mutex_lock(&threaded_chunk_info->threaded_io_info->cond_mutex) >= 0;
-
-    if (H5_UNLIKELY(ret_value < 0))
-        threaded_chunk_info->threaded_io_info->failed = true;
-
-    if (1 == threaded_chunk_info->threaded_io_info->chunks_left--)
-        (void)H5TS_cond_signal(&threaded_chunk_info->threaded_io_info->cond);
-
+    /* Release cond_mutex. A failure here can't be reported, since the main thread may already be going on
+     * using the library. */
     if (H5_LIKELY(cond_mutex_held))
         (void)H5TS_mutex_unlock(&threaded_chunk_info->threaded_io_info->cond_mutex);
 
