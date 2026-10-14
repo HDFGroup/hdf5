@@ -622,6 +622,7 @@ H5FD__onion_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /* ou
 
     /* Set the VFL feature flags that this driver supports */
     if (flags) {
+        *flags = 0;
         *flags |=
             H5FD_FEAT_READWRITE_NO_H5_CALLS; /* read() and write() callbacks do not re-enter the HDF5 API */
     }

@@ -252,7 +252,7 @@ sub print_defaultapivers ($) {
             print $fh " " x $indent, "#define $curr_vers_name $api_vers_to_function_vers{$versions[-1]}{$curr_name}\n";
             print $fh "#endif /* $curr_vers_name */\n";
             print $fh "#if $curr_vers_name == $curr_vers\n";
-            print $fh " " x $indent, "#define ${curr_name}_t $curr_name${curr_vers}_t\n";
+            print $fh " " x $indent, "#define $curr_name $curr_name$curr_vers\n";
         } else {
             # Set up default/latest version name mapping
             print $fh "\n#if !defined($curr_vers_name) || $curr_vers_name == $curr_vers\n";

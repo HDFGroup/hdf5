@@ -33,6 +33,11 @@
  * the DUMP_DEBUG_STATS_g flag to true.
  */
 
+/* Local Macros */
+
+#define H5Z_FIND_NOT_FOUND -2 /* Indicates that H5Z_find*() did not find the filter but otherwise did not
+                                 encounter an error */
+
 /* Local typedefs */
 #ifdef H5Z_DEBUG
 typedef struct H5Z_stats_t {
@@ -74,7 +79,7 @@ static const bool DUMP_DEBUG_STATS_g = false;
 /* Local functions */
 static const H5Z_class3_t *H5Z__upgrade_class_vers(const void *cls, H5Z_class3_t *cls3_buf);
 static int                 H5Z__find_idx(H5Z_filter_t id);
-static int                 H5Z__find_idx_load(const H5Z_filter_info_t *filter);
+static int                 H5Z__find_idx_load(const H5Z_filter_info_t *filter, bool required);
 static int                 H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t obj_id, void *key);
 static int                 H5Z__check_unregister_group_cb(void *obj_ptr, hid_t obj_id, void *key);
 static int                 H5Z__flush_file_cb(void *obj_ptr, hid_t obj_id, void *key);
@@ -1423,11 +1428,12 @@ done:
  *           the plugin layer if necessary.
  *
  * Return:   Success:    Non-negative index of entry in global filter table.
- *           Failure:    Negative
+ *                       H5Z_FIND_NOT_FOUND if not found.
+ *           Failure:    FAIL (-1)
  *-------------------------------------------------------------------------
  */
 static int
-H5Z__find_idx_load(const H5Z_filter_info_t *filter)
+H5Z__find_idx_load(const H5Z_filter_info_t *filter, bool required)
 {
     int fclass_idx;       /* Index of filter class in global table */
     int ret_value = FAIL; /* Return value */
@@ -1441,7 +1447,7 @@ H5Z__find_idx_load(const H5Z_filter_info_t *filter)
     if ((fclass_idx = H5Z__find_idx(filter->id)) < 0) {
         H5PL_key_t          key;
         const H5Z_class3_t *filter_info;
-        bool                issue_error = false;
+        bool                not_found = false;
 
 #ifdef H5_HAVE_CONCURRENCY
         /* It should be impossible to get here if we're currently concurrent - all filters should be loaded by
@@ -1465,31 +1471,36 @@ H5Z__find_idx_load(const H5Z_filter_info_t *filter)
             /* Search in the table of registered filters again to find the dynamic filter just loaded
              * and registered */
             if ((fclass_idx = H5Z__find_idx(filter->id)) < 0)
-                issue_error = true;
+                not_found = true;
         }
         else
-            issue_error = true;
+            not_found = true;
 
         /* Check for error */
-        if (issue_error) {
-            /* Print out the filter name to give more info.  But the name is optional for
-             * the filter */
-            if (filter->name)
-                HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "required filter '%s' is not registered",
-                            filter->name);
+        if (not_found) {
+            /* Throw error if the filters are required, otherwise return not found */
+            if (required) {
+                /* Print out the filter name to give more info.  But the name is optional for
+                 * the filter */
+                if (filter->name)
+                    HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "required filter '%s' is not registered",
+                                filter->name);
+                else
+                    HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL,
+                                "required filter (name unavailable) is not registered");
+            }
             else
-                HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL,
-                            "required filter (name unavailable) is not registered");
+                fclass_idx = H5Z_FIND_NOT_FOUND;
         }
     } /* end if */
 
     /* Set return value */
-    assert(fclass_idx >= 0);
+    assert((fclass_idx >= 0) || (fclass_idx = H5Z_FIND_NOT_FOUND));
     ret_value = fclass_idx;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Z__find_idx() */
+} /* end H5Z__find_idx_load() */
 
 /*-------------------------------------------------------------------------
  * Function: H5Z_pipeline
@@ -1559,7 +1570,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
             }
 
             /* Load the filter */
-            if ((fclass_idx = H5Z__find_idx_load(&(pline->filter[idx]))) < 0)
+            if ((fclass_idx = H5Z__find_idx_load(&(pline->filter[idx]), true)) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, FAIL, "can't load filter");
 
             fclass = &H5Z_table_g[fclass_idx];
@@ -2106,16 +2117,18 @@ H5Z_no_filters_reenter_h5(const H5O_pline_t *pline)
 
     /* Iterate through all the filters in pipeline */
     for (i = 0; i < pline->nused; i++) {
-        /* Load the filter */
-        if ((fclass_idx = H5Z__find_idx_load(&(pline->filter[i]))) < 0)
+        /* Load the filter. If not found return false. We do this to avoid violating the assumtion in H5Z__find_idx_load() that, when called via H5Z_pipeline() in internally concurrent code, everything has been loaded previously via H5Z_no_filters_reenter_h5(). We could relax this requirement but would have to protect some code in H5Z__find_idx_load() behind a mutex. */
+        if ((fclass_idx = H5Z__find_idx_load(&(pline->filter[i]), false)) == H5Z_FIND_NOT_FOUND)
+            HGOTO_DONE(false);
+        else if(fclass_idx < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, FAIL, "can't load filter");
 
-        /* Check if the filter reenters HDF5, if so, short circuit return true */
+        /* Check if the filter reenters HDF5, if so, short circuit return false */
         if (!(H5Z_table_g[fclass_idx].feature_flags & H5Z_FEAT_FILTER_NO_H5_CALLS))
             HGOTO_DONE(false);
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Z_any_filter_reenters_h5() */
+} /* end H5Z_no_filters_reenter_h5() */
 #endif /* H5_HAVE_CONCURRENCY */

@@ -26,14 +26,25 @@
 /*****************/
 
 /**
- * Current version of the H5Z_class_t struct
+ * Latest version of the H5Z_class_t struct, used in conjuction with
+ * H5Z_class3_t, introduced in 2.3.0.
  */
 #define H5Z_CLASS_T_VERS_3 (2)
+/**
+ * Previous version of the H5Z_class_t struct, used in conjuction with
+ * H5Z_class2_t, introduced in 1.8.0. This macro was introduced in 2.3.0,
+ * previously only #H5Z_CLASS_T_VERS was used.
+ */
 #define H5Z_CLASS_T_VERS_2 (1)
+/**
+ * Previous version of the H5Z_class_t struct, used in conjuction with
+ * H5Z_class2_t, introduced in 1.8.0. Retained for compatibility with older
+ * versions of the library. Will be deprecated in 3.0.0.
+ */
 #define H5Z_CLASS_T_VERS   H5Z_CLASS_T_VERS_2
 
-/* Define VFL driver features that can be enabled on a per-driver basis */
-/* These are returned with the 'query' function pointer in H5FD_class_t */
+/* Define filter features that can be enabled on a per-filter basis */
+/* These are specified in the 'feature_flags' field in H5Z_class3_t */
 /**
  * Defining the H5Z_FEAT_FILTER_THREADSAFE for a filter means that the \p filter
  * callback is thread-safe and can be executed concurrently with multiple
@@ -164,13 +175,11 @@ typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
  *          output buffer. If an error occurs then the function should return
  *          zero and leave all pointer arguments unchanged.
  *
- *          If this filter function is registered with a class struct where the
- *          \p threadsafe field is set to true, the library may execute this
- *          function concurrently with multiple threads.
- *
- *          In order for the filter function to be thread-safe, it must be
- *          thread-safe with respect to its own internal structures, and it must
- *          not make any HDF5 library calls.
+ *          If this filter function is registered with an H5Z_class3_t whose
+ *          feature flags include #H5Z_FEAT_FILTER_THREADSAFE, then the library
+ *          may execute it concurrently from multiple threads. Internal
+ *          threading is currently only used if every filter in the pipeline
+ *          sets #H5Z_FEAT_FILTER_NO_H5_CALLS.
  *
  * \since 1.0.0
  *
@@ -257,8 +266,8 @@ extern "C" {
  *          \snippet this H5Z_class3_t_snip
  *
  *          \c version is a library-defined value reporting the version number
- *          of the #H5Z_class_t struct. This currently must be set to
- *          #H5Z_CLASS_T_VERS.
+ *          of the #H5Z_class_t struct. This must be set to #H5Z_CLASS_T_VERS_2
+ *          if using H5Z_class2_t or #H5Z_CLASS_T_VERS_3 if using H5Z_class3_t.
  *
  *          \c id is the identifier for the new filter. This is a user-defined
  *          value between #H5Z_FILTER_RESERVED and #H5Z_FILTER_MAX. These
@@ -290,10 +299,10 @@ extern "C" {
  *
  *          \c feature_flags is a bit-flags type parameter indicating features
  *          this filter supports. Available flags are:
- *          \li \p H5Z_FEAT_FILTER_THREADSAFE : This should be set if the
+ *          \li #H5Z_FEAT_FILTER_THREADSAFE : This should be set if the
  *          \p filter callback is thread-safe with respect to its own internal
  *          structures.
- *          \li \p H5Z_FEAT_FILTER_NO_H5_CALLS : This should be set if the \p
+ *          \li #H5Z_FEAT_FILTER_NO_H5_CALLS : This should be set if the \p
  *          filter callback does not make any HDF5 library calls except
  *          H5open().
  *
@@ -429,6 +438,13 @@ extern "C" {
  *          callback function must return, if successful, a data size that is
  *          exactly equal to the original data size (\c nbytes) before the
  *          filter was run in forward mode.
+ *
+ *          If this \Emph{filter operation} callback function is registered with
+ *          an H5Z_class3_t whose feature flags include
+ *          #H5Z_FEAT_FILTER_THREADSAFE, then the library may execute it
+ *          concurrently from multiple threads. Internal threading is currently
+ *          only used if every filter in the pipeline sets
+ *          #H5Z_FEAT_FILTER_NO_H5_CALLS.
  *
  * \version 2.3.0 Function now accepts a pointer to H5Z_class3_t in addition
  *                to H5Z_class2_t and H5Z_class1_t.

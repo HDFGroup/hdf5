@@ -2974,7 +2974,7 @@ H5D__chunk_may_use_threading(const H5D_dset_io_info_t *dset_info)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__chunk_may_use_select_io() */
+} /* end H5D__chunk_may_use_threading() */
 #endif /* H5_HAVE_CONCURRENCY */
 
 /*-------------------------------------------------------------------------
