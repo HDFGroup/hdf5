@@ -816,8 +816,13 @@ H5Z_filter_avail(H5Z_filter_t id)
         if (H5Z_table_g[i].id == id)
             HGOTO_DONE(true);
 
+    /* Search for plugin */
     key.id = (int)id;
-    if (NULL != (filter_info = (const H5Z_class3_t *)H5PL_load(H5PL_TYPE_FILTER, &key))) {
+    if (H5PL_load(H5PL_TYPE_FILTER, &key, (const void **)&filter_info) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, FAIL, "unable to search for filter plugin");
+
+    /* If filter plugin was found, register it */
+    if (filter_info) {
         if (NULL == (filter_info = H5Z__upgrade_class_vers(filter_info, &cls_new)))
             HGOTO_ERROR(H5E_PLINE, H5E_CANTUPDATE, FAIL, "can't upgrade filter class version");
         if (H5Z_register(filter_info) < 0)
@@ -1458,7 +1463,11 @@ H5Z__find_idx_load(const H5Z_filter_info_t *filter, bool required)
 
         /* Try loading the filter */
         key.id = (int)(filter->id);
-        if (NULL != (filter_info = (const H5Z_class3_t *)H5PL_load(H5PL_TYPE_FILTER, &key))) {
+        if (H5PL_load(H5PL_TYPE_FILTER, &key, (const void **)&filter_info) < 0)
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, FAIL, "unable to search for filter plugin");
+
+        /* If we found the filter plugin, register it and get its index */
+        if (filter_info) {
             H5Z_class3_t cls_new; /* Translated class struct */
 
             /* Upgrade class version if necessary */
@@ -1496,7 +1505,7 @@ H5Z__find_idx_load(const H5Z_filter_info_t *filter, bool required)
     } /* end if */
 
     /* Set return value */
-    assert((fclass_idx >= 0) || (fclass_idx = H5Z_FIND_NOT_FOUND));
+    assert((fclass_idx >= 0) || (fclass_idx == H5Z_FIND_NOT_FOUND));
     ret_value = fclass_idx;
 
 done:
@@ -2118,7 +2127,7 @@ H5Z_no_filters_reenter_h5(const H5O_pline_t *pline)
 
     /* Iterate through all the filters in pipeline */
     for (i = 0; i < pline->nused; i++) {
-        /* Load the filter. If not found return false. We do this to avoid violating the assumtion in
+        /* Load the filter. If not found return false. We do this to avoid violating the assumption in
          * H5Z__find_idx_load() that, when called via H5Z_pipeline() in internally concurrent code, everything
          * has been loaded previously via H5Z_no_filters_reenter_h5(). We could relax this requirement but
          * would have to protect some code in H5Z__find_idx_load() behind a mutex. */

@@ -26,18 +26,18 @@
 /*****************/
 
 /**
- * Latest version of the H5Z_class_t struct, used in conjuction with
+ * Latest version of the H5Z_class_t struct, used in conjunction with
  * H5Z_class3_t, introduced in 2.3.0.
  */
 #define H5Z_CLASS_T_VERS_3 (2)
 /**
- * Previous version of the H5Z_class_t struct, used in conjuction with
+ * Previous version of the H5Z_class_t struct, used in conjunction with
  * H5Z_class2_t, introduced in 1.8.0. This macro was introduced in 2.3.0,
  * previously only #H5Z_CLASS_T_VERS was used.
  */
 #define H5Z_CLASS_T_VERS_2 (1)
 /**
- * Previous version of the H5Z_class_t struct, used in conjuction with
+ * Previous version of the H5Z_class_t struct, used in conjunction with
  * H5Z_class2_t, introduced in 1.8.0. Retained for compatibility with older
  * versions of the library. Will be deprecated in 3.0.0.
  */
