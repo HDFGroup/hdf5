@@ -16,11 +16,9 @@
 #-----------------------------------------------------------------------------
 @PACKAGE_INIT@
 
-include(CMakeFindDependencyMacro)
+include (CMakeFindDependencyMacro)
 
-set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/Modules")
-
-string(TOUPPER @HDF5_PACKAGE@ HDF5_PACKAGE_NAME)
+string (TOUPPER @HDF5_PACKAGE@ HDF5_PACKAGE_NAME)
 
 set (${HDF5_PACKAGE_NAME}_VALID_COMPONENTS
     static
@@ -35,7 +33,15 @@ set (${HDF5_PACKAGE_NAME}_VALID_COMPONENTS
     Tools
 )
 
-set (${HDF5_PACKAGE_NAME}_BUILD_MODE       @HDF_CFG_NAME@)
+set (${HDF5_PACKAGE_NAME}_BUILD_MODE @HDF_CFG_NAME@)
+
+#-----------------------------------------------------------------------------
+# Version Strings
+#-----------------------------------------------------------------------------
+set (${HDF5_PACKAGE_NAME}_VERSION        @HDF5_VERSION_STRING@)
+set (${HDF5_PACKAGE_NAME}_VERSION_STRING @HDF5_VERSION_STRING@)
+set (${HDF5_PACKAGE_NAME}_VERSION_MAJOR  @HDF5_VERSION_MAJOR@)
+set (${HDF5_PACKAGE_NAME}_VERSION_MINOR  @HDF5_VERSION_MINOR@)
 
 #-----------------------------------------------------------------------------
 # User Options
@@ -46,29 +52,30 @@ set (${HDF5_PACKAGE_NAME}_PROVIDES_FORTRAN     @HDF5_BUILD_FORTRAN@)
 set (${HDF5_PACKAGE_NAME}_PROVIDES_CPP_LIB     @HDF5_BUILD_CPP_LIB@)
 set (${HDF5_PACKAGE_NAME}_PROVIDES_JAVA        @HDF5_BUILD_JAVA@)
 set (${HDF5_PACKAGE_NAME}_PROVIDES_JNI         @HDF5_ENABLE_JNI@)
-set (${HDF5_PACKAGE_NAME}_PROVIDES_JAVA_COMPAT      ON) # Always provide the Java compatibility API
-set (${HDF5_PACKAGE_NAME}_INSTALL_MOD_FORTRAN "@HDF5_INSTALL_MOD_FORTRAN@")
+set (${HDF5_PACKAGE_NAME}_PROVIDES_JAVA_COMPAT ON) # Always provide the Java compatibility API
+set (${HDF5_PACKAGE_NAME}_INSTALL_MOD_FORTRAN  "@HDF5_INSTALL_MOD_FORTRAN@")
 #-----------------------------------------------------------------------------
 # Features:
 #-----------------------------------------------------------------------------
-set (${HDF5_PACKAGE_NAME}_PROVIDES_HL_LIB          @HDF5_BUILD_HL_LIB@)
-set (${HDF5_PACKAGE_NAME}_PROVIDES_SHARED_LIBS     @H5_ENABLE_SHARED_LIB@)
-set (${HDF5_PACKAGE_NAME}_PROVIDES_STATIC_LIBS     @H5_ENABLE_STATIC_LIB@)
-set (${HDF5_PACKAGE_NAME}_PROVIDES_THREADS         @HDF5_THREADS_ENABLED@)
-set (${HDF5_PACKAGE_NAME}_PROVIDES_THREADSAFE      @HDF5_ENABLE_THREADSAFE@)
-set (${HDF5_PACKAGE_NAME}_PROVIDES_PARALLEL        @HDF5_ENABLE_PARALLEL@)
-set (${HDF5_PACKAGE_NAME}_DEFAULT_API_VERSION     "@HDF5_DEFAULT_API_VERSION@")
-set (${HDF5_PACKAGE_NAME}_PROVIDES_DEPRECATED_SYMBOLS @HDF5_ENABLE_DEPRECATED_SYMBOLS@)
-set (${HDF5_PACKAGE_NAME}_PROVIDES_DIMENSION_SCALES_WITH_NEW_REF @DIMENSION_SCALES_WITH_NEW_REF@)
+set (${HDF5_PACKAGE_NAME}_PROVIDES_SHARED_LIBS                   @H5_ENABLE_SHARED_LIB@)
+set (${HDF5_PACKAGE_NAME}_PROVIDES_STATIC_LIBS                   @H5_ENABLE_STATIC_LIB@)
+set (${HDF5_PACKAGE_NAME}_PROVIDES_HL_LIB                        @HDF5_BUILD_HL_LIB@)
+set (${HDF5_PACKAGE_NAME}_PROVIDES_THREADS                       @HDF5_THREADS_ENABLED@)
+set (${HDF5_PACKAGE_NAME}_PROVIDES_THREADSAFE                    @HDF5_ENABLE_THREADSAFE@)
+set (${HDF5_PACKAGE_NAME}_PROVIDES_PARALLEL                      @HDF5_ENABLE_PARALLEL@)
+set (${HDF5_PACKAGE_NAME}_DEFAULT_API_VERSION                    "@HDF5_DEFAULT_API_VERSION@")
+set (${HDF5_PACKAGE_NAME}_PROVIDES_DEPRECATED_SYMBOLS            @HDF5_ENABLE_DEPRECATED_SYMBOLS@)
+set (${HDF5_PACKAGE_NAME}_PROVIDES_DIMENSION_SCALES_WITH_NEW_REF @HDF5_DIMENSION_SCALES_NEW_REF@)
+set (${HDF5_PACKAGE_NAME}_PROVIDES_PLUGIN_SIGNATURE_VERIFICATION @HDF5_REQUIRE_SIGNED_PLUGINS@)
 #-----------------------------------------------------------------------------
-set (${HDF5_PACKAGE_NAME}_PROVIDES_TOOLS           @HDF5_BUILD_TOOLS@)
-set (${HDF5_PACKAGE_NAME}_PROVIDES_STATIC_TOOLS    @HDF5_BUILD_STATIC_TOOLS@)
+set (${HDF5_PACKAGE_NAME}_PROVIDES_TOOLS        @HDF5_BUILD_TOOLS@)
+set (${HDF5_PACKAGE_NAME}_PROVIDES_STATIC_TOOLS @HDF5_BUILD_STATIC_TOOLS@)
 #-----------------------------------------------------------------------------
 set (${HDF5_PACKAGE_NAME}_PROVIDES_NONSTANDARD_FEATURE_FLOAT16 @HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16@)
 #-----------------------------------------------------------------------------
-set (${HDF5_PACKAGE_NAME}_PROVIDES_ZLIB_SUPPORT   @HDF5_ENABLE_ZLIB_SUPPORT@)
-set (${HDF5_PACKAGE_NAME}_PROVIDES_SZIP_SUPPORT   @HDF5_ENABLE_SZIP_SUPPORT@)
-set (${HDF5_PACKAGE_NAME}_PROVIDES_SZIP_ENCODING  @HDF5_ENABLE_SZIP_ENCODING@)
+set (${HDF5_PACKAGE_NAME}_PROVIDES_ZLIB_SUPPORT  @HDF5_ENABLE_ZLIB_SUPPORT@)
+set (${HDF5_PACKAGE_NAME}_PROVIDES_SZIP_SUPPORT  @HDF5_ENABLE_SZIP_SUPPORT@)
+set (${HDF5_PACKAGE_NAME}_PROVIDES_SZIP_ENCODING @HDF5_ENABLE_SZIP_ENCODING@)
 #-----------------------------------------------------------------------------
 set (${HDF5_PACKAGE_NAME}_PROVIDES_MAP_API        @HDF5_ENABLE_MAP_API@)
 set (${HDF5_PACKAGE_NAME}_PROVIDES_DIRECT_VFD     @HDF5_ENABLE_DIRECT_VFD@)
@@ -78,70 +85,10 @@ set (${HDF5_PACKAGE_NAME}_PROVIDES_HDFS_VFD       @HDF5_ENABLE_HDFS@)
 set (${HDF5_PACKAGE_NAME}_PROVIDES_SUBFILING_VFD  @HDF5_ENABLE_SUBFILING_VFD@)
 set (${HDF5_PACKAGE_NAME}_PROVIDES_PLUGIN_SUPPORT @HDF5_ENABLE_PLUGIN_SUPPORT@)
 #-----------------------------------------------------------------------------
-set (${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS       @HDF5_PACKAGE_EXTLIBS@)
-set (${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES      @HDF5_LIBRARIES_TO_EXPORT@)
-set (${HDF5_PACKAGE_NAME}_ARCHITECTURE         "@CMAKE_GENERATOR_ARCHITECTURE@")
-set (${HDF5_PACKAGE_NAME}_TOOLSET              "@CMAKE_GENERATOR_TOOLSET@")
-
-#-----------------------------------------------------------------------------
-# Dependencies
-#-----------------------------------------------------------------------------
-if (${HDF5_PACKAGE_NAME}_PROVIDES_PARALLEL)
-  set (${HDF5_PACKAGE_NAME}_MPI_C_INCLUDE_PATH "@MPI_C_INCLUDE_DIRS@")
-  set (${HDF5_PACKAGE_NAME}_MPI_C_LIBRARIES    "@MPI_C_LIBRARIES@")
-  if (${HDF5_PACKAGE_NAME}_PROVIDES_FORTRAN)
-    set (${HDF5_PACKAGE_NAME}_MPI_Fortran_INCLUDE_PATH "@MPI_Fortran_INCLUDE_DIRS@")
-    set (${HDF5_PACKAGE_NAME}_MPI_Fortran_LIBRARIES    "@MPI_Fortran_LIBRARIES@")
-  endif ()
-  set (${HDF5_PACKAGE_NAME}_PROVIDES_PARALLEL_FILTERED_WRITES @PARALLEL_FILTERED_WRITES@)
-  set (${HDF5_PACKAGE_NAME}_PROVIDES_LARGE_PARALLEL_IO        @LARGE_PARALLEL_IO@)
-
-  enable_language(C) # for MPI::MPI_C
-  find_dependency(MPI QUIET REQUIRED)
-endif ()
-
-if (${HDF5_PACKAGE_NAME}_PROVIDES_THREADS)
-  set(THREADS_PREFER_PTHREAD_FLAG ON)
-  find_dependency(Threads QUIET REQUIRED)
-endif ()
-
-if (${HDF5_PACKAGE_NAME}_PROVIDES_JAVA AND ${HDF5_PACKAGE_NAME}_PROVIDES_JNI)
-  set (${HDF5_PACKAGE_NAME}_JAVA_INCLUDE_DIRS
-      @PACKAGE_CURRENT_BUILD_DIR@/lib/@HDF5_JARHDF5_JAR_NAME@
-      @PACKAGE_CURRENT_BUILD_DIR@/lib/@HDF5_SLF4J_API_JAR_NAME@
-      @PACKAGE_CURRENT_BUILD_DIR@/lib/@HDF5_SLF4J_NOP_JAR_NAME@
-  )
-else ()
-  set (${HDF5_PACKAGE_NAME}_JAVA_INCLUDE_DIRS
-      @PACKAGE_CURRENT_BUILD_DIR@/lib/@HDF5_JAVAHDF5_JAR_NAME@
-      @PACKAGE_CURRENT_BUILD_DIR@/lib/@HDF5_SLF4J_API_JAR_NAME@
-      @PACKAGE_CURRENT_BUILD_DIR@/lib/@HDF5_SLF4J_NOP_JAR_NAME@
-  )
-  if (${HDF5_PACKAGE_NAME}_PROVIDES_JAVA_COMPAT)
-    list (APPEND ${HDF5_PACKAGE_NAME}_JAVA_INCLUDE_DIRS
-        @PACKAGE_CURRENT_BUILD_DIR@/lib/@HDF5_JARHDF5_JAR_NAME@
-    )
-  endif ()
-endif ()
-
-if (${HDF5_PACKAGE_NAME}_PROVIDES_ZLIB_SUPPORT AND NOT @ZLIB_USE_EXTERNAL@)
-  if (NOT @HDF5_USE_ZLIB_NG@)
-    if (@HDF5_MODULE_MODE_ZLIB@)
-      # Expect that the default shared library is expected with FindZLIB.cmake
-      find_dependency (ZLIB MODULE)
-    else ()
-      find_dependency (ZLIB NAMES @Z_PACKAGE_NAME@ CONFIG OPTIONAL_COMPONENTS @ZLIB_SEARCH_TYPE@)
-    endif ()
-  else ()
-    find_dependency (@ZLIBNG_PACKAGE_NAME@ OPTIONAL_COMPONENTS @ZLIBNG_SEARCH_TYPE@)
-  endif ()
-endif ()
-
-# If szip/libaec support was enabled and libaec was found on the system at build
-# time, locate libaec to propagate the dependency
-if (${HDF5_PACKAGE_NAME}_PROVIDES_SZIP_SUPPORT AND NOT @SZIP_USE_EXTERNAL@)
-  find_dependency (@LIBAEC_PACKAGE_NAME@ OPTIONAL_COMPONENTS @LIBAEC_SEARCH_TYPE@)
-endif ()
+set (${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS  @HDF5_PACKAGE_EXTLIBS@)
+set (${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES @HDF5_LIBRARIES_TO_EXPORT@)
+set (${HDF5_PACKAGE_NAME}_ARCHITECTURE     "@CMAKE_GENERATOR_ARCHITECTURE@")
+set (${HDF5_PACKAGE_NAME}_TOOLSET          "@CMAKE_GENERATOR_TOOLSET@")
 
 #-----------------------------------------------------------------------------
 # Directories
@@ -168,13 +115,189 @@ if (${HDF5_PACKAGE_NAME}_PROVIDES_TOOLS)
   set_and_check (${HDF5_PACKAGE_NAME}_TOOLS_DIR "@PACKAGE_CURRENT_BUILD_DIR@/bin")
 endif ()
 
+if (${HDF5_PACKAGE_NAME}_PROVIDES_JAVA AND ${HDF5_PACKAGE_NAME}_PROVIDES_JNI)
+  set (${HDF5_PACKAGE_NAME}_JAVA_INCLUDE_DIRS
+      @PACKAGE_CURRENT_BUILD_DIR@/lib/@HDF5_JARHDF5_JAR_NAME@
+      @PACKAGE_CURRENT_BUILD_DIR@/lib/@HDF5_SLF4J_API_JAR_NAME@
+      @PACKAGE_CURRENT_BUILD_DIR@/lib/@HDF5_SLF4J_NOP_JAR_NAME@
+  )
+else ()
+  set (${HDF5_PACKAGE_NAME}_JAVA_INCLUDE_DIRS
+      @PACKAGE_CURRENT_BUILD_DIR@/lib/@HDF5_JAVAHDF5_JAR_NAME@
+      @PACKAGE_CURRENT_BUILD_DIR@/lib/@HDF5_SLF4J_API_JAR_NAME@
+      @PACKAGE_CURRENT_BUILD_DIR@/lib/@HDF5_SLF4J_NOP_JAR_NAME@
+  )
+  if (${HDF5_PACKAGE_NAME}_PROVIDES_JAVA_COMPAT)
+    list (APPEND ${HDF5_PACKAGE_NAME}_JAVA_INCLUDE_DIRS
+        @PACKAGE_CURRENT_BUILD_DIR@/lib/@HDF5_JARHDF5_JAR_NAME@
+    )
+  endif ()
+endif ()
+
 #-----------------------------------------------------------------------------
-# Version Strings
+# Handle default components if none specified
 #-----------------------------------------------------------------------------
-set (${HDF5_PACKAGE_NAME}_VERSION @HDF5_VERSION_STRING@)
-set (${HDF5_PACKAGE_NAME}_VERSION_STRING @HDF5_VERSION_STRING@)
-set (${HDF5_PACKAGE_NAME}_VERSION_MAJOR  @HDF5_VERSION_MAJOR@)
-set (${HDF5_PACKAGE_NAME}_VERSION_MINOR  @HDF5_VERSION_MINOR@)
+if (NOT ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
+  set (${HDF5_PACKAGE_NAME}_FIND_COMPONENTS C HL)
+endif ()
+
+#-----------------------------------------------------------------------------
+# Handle default shared/static libraries if none specified; prefer static
+# libraries if available
+#-----------------------------------------------------------------------------
+if (NOT "shared" IN_LIST ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS AND NOT "static" IN_LIST ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
+  if (${HDF5_PACKAGE_NAME}_PROVIDES_STATIC_LIBS)
+    list (APPEND ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS static)
+    set (${HDF5_PACKAGE_NAME}_FIND_REQUIRED_static_C true)
+  else ()
+    list (APPEND ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS shared)
+    set (${HDF5_PACKAGE_NAME}_FIND_REQUIRED_shared_C true)
+  endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
+# Resolve request for shared vs. static libraries before resolving
+# dependencies
+#-----------------------------------------------------------------------------
+unset (${HDF5_PACKAGE_NAME}_LIB_TYPE)
+list (REMOVE_DUPLICATES ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
+if ("shared" IN_LIST ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS AND "static" IN_LIST ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
+  set (${HDF5_PACKAGE_NAME}_FOUND FALSE)
+  set (${HDF5_PACKAGE_NAME}_NOT_FOUND_MESSAGE "The 'shared' and 'static' components are mutually exclusive; select only one.")
+  return ()
+endif ()
+if ("shared" IN_LIST ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
+  if (NOT ${HDF5_PACKAGE_NAME}_PROVIDES_SHARED_LIBS)
+    set (${HDF5_PACKAGE_NAME}_FOUND FALSE)
+    set (${HDF5_PACKAGE_NAME}_NOT_FOUND_MESSAGE "Shared HDF5 libraries are not available.")
+    return ()
+  endif ()
+
+  set (${HDF5_PACKAGE_NAME}_LIB_TYPE "shared")
+  if (${HDF5_PACKAGE_NAME}_PROVIDES_FORTRAN)
+    if (${HDF5_PACKAGE_NAME}_INSTALL_MOD_FORTRAN STREQUAL "SHARED")
+      set (${HDF5_PACKAGE_NAME}_INCLUDE_DIR_FORTRAN "@PACKAGE_INCLUDE_INSTALL_DIR@")
+    else ()
+      set (${HDF5_PACKAGE_NAME}_INCLUDE_DIR_FORTRAN "@PACKAGE_CURRENT_BUILD_DIR@/mod/shared")
+    endif ()
+  endif ()
+elseif ("static" IN_LIST ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
+  if (NOT ${HDF5_PACKAGE_NAME}_PROVIDES_STATIC_LIBS)
+    set (${HDF5_PACKAGE_NAME}_FOUND FALSE)
+    set (${HDF5_PACKAGE_NAME}_NOT_FOUND_MESSAGE "Static HDF5 libraries are not available.")
+    return ()
+  endif ()
+
+  set (${HDF5_PACKAGE_NAME}_LIB_TYPE "static")
+  if (${HDF5_PACKAGE_NAME}_PROVIDES_FORTRAN)
+    if (${HDF5_PACKAGE_NAME}_INSTALL_MOD_FORTRAN STREQUAL "STATIC")
+      set (${HDF5_PACKAGE_NAME}_INCLUDE_DIR_FORTRAN "@PACKAGE_INCLUDE_INSTALL_DIR@")
+    else ()
+      set (${HDF5_PACKAGE_NAME}_INCLUDE_DIR_FORTRAN "@PACKAGE_CURRENT_BUILD_DIR@/mod/static")
+    endif ()
+  endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
+# Resolve dependencies linked with PUBLIC scope
+# - these should always be propagated with find_dependency() calls, unless
+#   they are only used by a component that wasn't requested
+#-----------------------------------------------------------------------------
+if (${HDF5_PACKAGE_NAME}_PROVIDES_PARALLEL)
+  unset (_hdf5_mpi_components)
+
+  get_property (_project_enabled_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+  if ("C" IN_LIST ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
+    if (NOT "C" IN_LIST _project_enabled_languages)
+      set (${HDF5_PACKAGE_NAME}_FOUND FALSE)
+      set (${HDF5_PACKAGE_NAME}_NOT_FOUND_MESSAGE "C language was not enabled; enable C language with project() or enable_language() commands.")
+      unset (_project_enabled_languages)
+      return ()
+    endif ()
+    list (APPEND _hdf5_mpi_components "C")
+  endif ()
+  if ("Fortran" IN_LIST ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
+    if (NOT "Fortran" IN_LIST _project_enabled_languages)
+      set (${HDF5_PACKAGE_NAME}_FOUND FALSE)
+      set (${HDF5_PACKAGE_NAME}_NOT_FOUND_MESSAGE "Fortran language was not enabled; enable Fortran language with project() or enable_language() commands.")
+      unset (_project_enabled_languages)
+      return ()
+    endif ()
+    list (APPEND _hdf5_mpi_components "Fortran")
+  endif ()
+  unset (_project_enabled_languages)
+
+  find_dependency (MPI QUIET REQUIRED COMPONENTS ${_hdf5_mpi_components})
+
+  if ("C" IN_LIST _hdf5_mpi_components)
+    set (${HDF5_PACKAGE_NAME}_MPI_C_INCLUDE_PATH "@MPI_C_INCLUDE_DIRS@")
+    set (${HDF5_PACKAGE_NAME}_MPI_C_LIBRARIES    "@MPI_C_LIBRARIES@")
+  endif ()
+  if ("Fortran" IN_LIST _hdf5_mpi_components)
+    set (${HDF5_PACKAGE_NAME}_MPI_Fortran_INCLUDE_PATH "@MPI_Fortran_INCLUDE_DIRS@")
+    set (${HDF5_PACKAGE_NAME}_MPI_Fortran_LIBRARIES    "@MPI_Fortran_LIBRARIES@")
+  endif ()
+
+  set (${HDF5_PACKAGE_NAME}_PROVIDES_PARALLEL_FILTERED_WRITES @PARALLEL_FILTERED_WRITES@)
+  set (${HDF5_PACKAGE_NAME}_PROVIDES_LARGE_PARALLEL_IO        @LARGE_PARALLEL_IO@)
+
+  unset (_hdf5_mpi_components)
+endif ()
+
+#-----------------------------------------------------------------------------
+# Resolve dependencies linked with PRIVATE scope
+# - these should be propagated with find_dependency() calls when used by
+#   requested components that are static libraries 
+#-----------------------------------------------------------------------------
+if (${HDF5_PACKAGE_NAME}_LIB_TYPE STREQUAL "static")
+  # Threads
+  if (${HDF5_PACKAGE_NAME}_PROVIDES_THREADS)
+    set (THREADS_PREFER_PTHREAD_FLAG ON)
+    find_dependency (Threads QUIET REQUIRED)
+  endif ()
+
+  # zlib / zlib-ng
+  if (${HDF5_PACKAGE_NAME}_PROVIDES_ZLIB_SUPPORT AND NOT @ZLIB_USE_EXTERNAL@)
+    if (NOT @HDF5_USE_ZLIB_NG@)
+      if (@HDF5_MODULE_MODE_ZLIB@)
+        # Expect that the default shared library is expected with FindZLIB.cmake
+        find_dependency (ZLIB MODULE)
+      else ()
+        find_dependency (ZLIB NAMES @Z_PACKAGE_NAME@ CONFIG OPTIONAL_COMPONENTS @ZLIB_SEARCH_TYPE@)
+      endif ()
+    else ()
+      # Locate zlib-ng using installed FindZLIBNG.cmake module. If a CMake configuration
+      # file is available for zlib-ng, the module will prefer to use it.
+      set (_hdf5_cmake_module_path_saved ${CMAKE_MODULE_PATH})
+      set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/Modules")
+      find_dependency (@ZLIBNG_PACKAGE_NAME@ OPTIONAL_COMPONENTS @ZLIBNG_SEARCH_TYPE@)
+      set (CMAKE_MODULE_PATH ${_hdf5_cmake_module_path_saved})
+      unset (_hdf5_cmake_module_path_saved)
+    endif ()
+  endif ()
+
+  # libaec - if szip/libaec support was enabled and libaec was found on the system at build
+  # time, locate libaec to propagate the dependency 
+  if (${HDF5_PACKAGE_NAME}_PROVIDES_SZIP_SUPPORT AND NOT @SZIP_USE_EXTERNAL@)
+    # Locate libaec using installed Findlibaec.cmake module. If a CMake configuration
+    # file is available for libaec, the module will prefer to use it.
+    set (_hdf5_cmake_module_path_saved ${CMAKE_MODULE_PATH})
+    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/Modules")
+    find_dependency (@LIBAEC_PACKAGE_NAME@ OPTIONAL_COMPONENTS @LIBAEC_SEARCH_TYPE@)
+    set (CMAKE_MODULE_PATH ${_hdf5_cmake_module_path_saved})
+    unset (_hdf5_cmake_module_path_saved)
+  endif ()
+
+  # aws-c-s3 library for ROS3 VFD
+  if (${HDF5_PACKAGE_NAME}_PROVIDES_ROS3_VFD)
+    find_dependency (aws-c-s3)
+  endif ()
+
+  # OpenSSL
+  if (${HDF5_PACKAGE_NAME}_PROVIDES_PLUGIN_SIGNATURE_VERIFICATION)
+    find_dependency (OpenSSL)
+  endif ()
+endif ()
 
 #-----------------------------------------------------------------------------
 # Don't include targets if this file is being picked up by another
@@ -199,7 +322,6 @@ if (NOT TARGET "@HDF5_PACKAGE@")
     endif ()
     include ("${_zlib_targets_file_name}" OPTIONAL RESULT_VARIABLE _zlib_loaded)
     unset (ZLIB_FIND_COMPONENTS)
-    unset (_zlib_targets_file_name)
     if (NOT _zlib_loaded)
       if (@HDF5_USE_ZLIB_NG@)
         set (_zlib_name "zlib-ng")
@@ -208,10 +330,12 @@ if (NOT TARGET "@HDF5_PACKAGE@")
       endif ()
       set (${HDF5_PACKAGE_NAME}_FOUND FALSE)
       set (${HDF5_PACKAGE_NAME}_NOT_FOUND_MESSAGE "Couldn't locate ${_zlib_name} targets file ${_zlib_targets_file_name}")
+      unset (_zlib_targets_file_name)
       unset (_zlib_name)
       unset (_zlib_loaded)
       return ()
     endif ()
+    unset (_zlib_targets_file_name)
     unset (_zlib_loaded)
   endif ()
   # If szip/libaec support was enabled and libaec was built from an external source,
@@ -226,9 +350,11 @@ if (NOT TARGET "@HDF5_PACKAGE@")
     if (NOT _libaec_loaded)
       set (${HDF5_PACKAGE_NAME}_FOUND FALSE)
       set (${HDF5_PACKAGE_NAME}_NOT_FOUND_MESSAGE "Couldn't locate libaec targets file ${_libaec_targets_file_name}")
+      unset (_libaec_targets_file_name)
       unset (_libaec_loaded)
       return ()
     endif ()
+    unset (_libaec_targets_file_name)
     unset (_libaec_loaded)
   endif ()
   include ("@PACKAGE_SHARE_INSTALL_DIR@/@HDF5_PACKAGE@@HDF_PACKAGE_EXT@-targets.cmake")
@@ -250,102 +376,64 @@ if (NOT TARGET "@HDF5_PACKAGE@")
   endif ()
 endif ()
 
-# Handle default component(static) :
-if (NOT ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
-  if (${HDF5_PACKAGE_NAME}_PROVIDES_STATIC_LIBS)
-    set (${HDF5_PACKAGE_NAME}_LIB_TYPE)
-    set (${HDF5_PACKAGE_NAME}_FIND_COMPONENTS C HL static)
-    set (${HDF5_PACKAGE_NAME}_FIND_REQUIRED_static_C true)
-  else ()
-    set (${HDF5_PACKAGE_NAME}_LIB_TYPE)
-    set (${HDF5_PACKAGE_NAME}_FIND_COMPONENTS C HL shared)
-    set (${HDF5_PACKAGE_NAME}_FIND_REQUIRED_shared_C true)
-  endif ()
-endif ()
-
-# Handle requested components:
-list (REMOVE_DUPLICATES ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
+#-----------------------------------------------------------------------------
+# Handle all other requested components
+#-----------------------------------------------------------------------------
+set (libtype ${${HDF5_PACKAGE_NAME}_LIB_TYPE})
 foreach (comp IN LISTS ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
-  if (comp STREQUAL "shared")
-    list (REMOVE_ITEM ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS ${comp})
-    set (${HDF5_PACKAGE_NAME}_LIB_TYPE ${${HDF5_PACKAGE_NAME}_LIB_TYPE} ${comp})
-
-    if (${HDF5_PACKAGE_NAME}_PROVIDES_FORTRAN)
-      if (${HDF5_PACKAGE_NAME}_INSTALL_MOD_FORTRAN STREQUAL "SHARED")
-        set (${HDF5_PACKAGE_NAME}_INCLUDE_DIR_FORTRAN "@PACKAGE_INCLUDE_INSTALL_DIR@")
-      else ()
-        set (${HDF5_PACKAGE_NAME}_INCLUDE_DIR_FORTRAN "@PACKAGE_CURRENT_BUILD_DIR@/mod/shared")
-      endif ()
-    endif ()
-  elseif (comp STREQUAL "static")
-    list (REMOVE_ITEM ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS ${comp})
-    set (${HDF5_PACKAGE_NAME}_LIB_TYPE ${${HDF5_PACKAGE_NAME}_LIB_TYPE} ${comp})
-
-    if (${HDF5_PACKAGE_NAME}_PROVIDES_FORTRAN)
-      if (${HDF5_PACKAGE_NAME}_INSTALL_MOD_FORTRAN STREQUAL "STATIC")
-        set (${HDF5_PACKAGE_NAME}_INCLUDE_DIR_FORTRAN "@PACKAGE_INCLUDE_INSTALL_DIR@")
-      else ()
-        set (${HDF5_PACKAGE_NAME}_INCLUDE_DIR_FORTRAN "@PACKAGE_CURRENT_BUILD_DIR@/mod/static")
-      endif ()
-    endif ()
+  set (hdf5_comp2)
+  if (comp STREQUAL "C")
+    set (hdf5_comp "hdf5")
+  elseif (comp STREQUAL "CXX")
+    set (hdf5_comp "hdf5_cpp")
+  elseif (comp STREQUAL "HL")
+    set (hdf5_comp "hdf5_hl")
+  elseif (comp STREQUAL "CXX_HL")
+    set (hdf5_comp "hdf5_hl_cpp")
+  elseif (comp STREQUAL "Java")
+    set (hdf5_comp "hdf5_java")
+  elseif (comp STREQUAL "Tools")
+    set (hdf5_comp "hdf5_tools")
+  elseif (comp STREQUAL "Fortran")
+    set (hdf5_comp2 "hdf5_f90cstub")
+    set (hdf5_comp "hdf5_fortran")
+  elseif (comp STREQUAL "Fortran_HL")
+    set (hdf5_comp2 "hdf5_hl_f90cstub")
+    set (hdf5_comp "hdf5_hl_fortran")
   endif ()
-endforeach ()
-foreach (libtype IN LISTS ${HDF5_PACKAGE_NAME}_LIB_TYPE)
-  foreach (comp IN LISTS ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
-    set (hdf5_comp2)
-    if (comp STREQUAL "C")
-      set (hdf5_comp "hdf5")
-    elseif (comp STREQUAL "CXX")
-      set (hdf5_comp "hdf5_cpp")
-    elseif (comp STREQUAL "HL")
-      set (hdf5_comp "hdf5_hl")
-    elseif (comp STREQUAL "CXX_HL")
-      set (hdf5_comp "hdf5_hl_cpp")
-    elseif (comp STREQUAL "Java")
-      set (hdf5_comp "hdf5_java")
-    elseif (comp STREQUAL "Tools")
-      set (hdf5_comp "hdf5_tools")
-    elseif (comp STREQUAL "Fortran")
-      set (hdf5_comp2 "hdf5_f90cstub")
-      set (hdf5_comp "hdf5_fortran")
-    elseif (comp STREQUAL "Fortran_HL")
-      set (hdf5_comp2 "hdf5_hl_f90cstub")
-      set (hdf5_comp "hdf5_hl_fortran")
-    endif ()
+  if (comp STREQUAL "Java")
+    list (FIND ${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES "${hdf5_comp}" HAVE_COMP)
+  else ()
+    list (FIND ${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES "${hdf5_comp}-${libtype}" HAVE_COMP)
+  endif ()
+  if (${HAVE_COMP} LESS 0)
     if (comp STREQUAL "Java")
-      list (FIND ${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES "${hdf5_comp}" HAVE_COMP)
+      set (${HDF5_PACKAGE_NAME}_${comp}_FOUND 0)
     else ()
-      list (FIND ${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES "${hdf5_comp}-${libtype}" HAVE_COMP)
+      set (${HDF5_PACKAGE_NAME}_${libtype}_${comp}_FOUND 0)
     endif ()
-    if (${HAVE_COMP} LESS 0)
-      if (comp STREQUAL "Java")
-        set (${HDF5_PACKAGE_NAME}_${comp}_FOUND 0)
-      else ()
+  else ()
+    if (hdf5_comp2)
+      list (FIND ${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES "${hdf5_comp2}-${libtype}" HAVE_COMP2)
+      if (${HAVE_COMP2} LESS 0)
         set (${HDF5_PACKAGE_NAME}_${libtype}_${comp}_FOUND 0)
-      endif ()
-    else ()
-      if (hdf5_comp2)
-        list (FIND ${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES "${hdf5_comp2}-${libtype}" HAVE_COMP2)
-        if (${HAVE_COMP2} LESS 0)
-          set (${HDF5_PACKAGE_NAME}_${libtype}_${comp}_FOUND 0)
-        else ()
-          set (${HDF5_PACKAGE_NAME}_${libtype}_${comp}_FOUND 1)
-          string(TOUPPER ${HDF5_PACKAGE_NAME}_${comp}_${libtype}_LIBRARY COMP_LIBRARY)
-          set (${COMP_LIBRARY} ${${COMP_LIBRARY}} @HDF_PACKAGE_NAMESPACE@${hdf5_comp2}-${libtype} @HDF_PACKAGE_NAMESPACE@${hdf5_comp}-${libtype})
-        endif ()
-      elseif (comp STREQUAL "Java")
-        set (${HDF5_PACKAGE_NAME}_${comp}_FOUND 1)
-        string(TOUPPER ${HDF5_PACKAGE_NAME}_${comp}_LIBRARY COMP_LIBRARY)
-        set (${COMP_LIBRARY} ${${COMP_LIBRARY}} @HDF_PACKAGE_NAMESPACE@${hdf5_comp})
       else ()
         set (${HDF5_PACKAGE_NAME}_${libtype}_${comp}_FOUND 1)
         string(TOUPPER ${HDF5_PACKAGE_NAME}_${comp}_${libtype}_LIBRARY COMP_LIBRARY)
-        set (${COMP_LIBRARY} ${${COMP_LIBRARY}} @HDF_PACKAGE_NAMESPACE@${hdf5_comp}-${libtype})
+        set (${COMP_LIBRARY} ${${COMP_LIBRARY}} @HDF_PACKAGE_NAMESPACE@${hdf5_comp2}-${libtype} @HDF_PACKAGE_NAMESPACE@${hdf5_comp}-${libtype})
       endif ()
+    elseif (comp STREQUAL "Java")
+      set (${HDF5_PACKAGE_NAME}_${comp}_FOUND 1)
+      string(TOUPPER ${HDF5_PACKAGE_NAME}_${comp}_LIBRARY COMP_LIBRARY)
+      set (${COMP_LIBRARY} ${${COMP_LIBRARY}} @HDF_PACKAGE_NAMESPACE@${hdf5_comp})
+    else ()
+      set (${HDF5_PACKAGE_NAME}_${libtype}_${comp}_FOUND 1)
+      string(TOUPPER ${HDF5_PACKAGE_NAME}_${comp}_${libtype}_LIBRARY COMP_LIBRARY)
+      set (${COMP_LIBRARY} ${${COMP_LIBRARY}} @HDF_PACKAGE_NAMESPACE@${hdf5_comp}-${libtype})
     endif ()
-  endforeach ()
+  endif ()
 endforeach ()
+unset (libtype)
 
-foreach (libtype IN LISTS ${HDF5_PACKAGE_NAME}_LIB_TYPE)
-  check_required_components(${HDF5_PACKAGE_NAME}_${libtype})
-endforeach ()
+# Should be last
+check_required_components (${HDF5_PACKAGE_NAME}_${${HDF5_PACKAGE_NAME}_LIB_TYPE})
