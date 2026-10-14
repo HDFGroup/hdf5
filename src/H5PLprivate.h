@@ -81,6 +81,6 @@ typedef herr_t (*H5PL_iterate_t)(H5PL_type_t plugin_type, const void *plugin_inf
 
 /* Internal API routines */
 H5_DLL herr_t H5PL_load(H5PL_type_t type, const H5PL_key_t *key, const void **plugin);
-H5_DLL herr_t      H5PL_iterate(H5PL_iterate_type_t iter_type, H5PL_iterate_t iter_op, void *op_data);
+H5_DLL herr_t H5PL_iterate(H5PL_iterate_type_t iter_type, H5PL_iterate_t iter_op, void *op_data);
 
 #endif /* H5PLprivate_H */

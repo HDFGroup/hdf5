@@ -661,7 +661,8 @@ H5P__set_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned int flags, 
 
     FUNC_ENTER_PACKAGE
 
-    /* Check if filter is already available. We don't care if it's available or not at this point, but we call this function to load it if possible. */
+    /* Check if filter is already available. We don't care if it's available or not at this point, but we call
+     * this function to load it if possible. */
     if (H5Z_filter_avail(filter) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't check filter availability");
 
