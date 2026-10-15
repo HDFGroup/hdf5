@@ -165,6 +165,10 @@ Fixes GitHub issue #6679.
 
    Fixes GitHub issue #6401
 
+### Fixed a heap buffer overflow when reading a corrupted version 2 B-tree node
+
+   The record count for a version 2 B-tree node is read from the file and was only checked against the node's capacity with an assertion, which is compiled out of release builds. A corrupted or fuzzed file could declare a node record count larger than the node can hold, so the deserialize callbacks wrote decoded records past the fixed-size native-record and node-pointer arrays and the checksum callbacks sized the checksummed region from the same count and read past the node image. `H5B2__cache_int_deserialize()`, `H5B2__cache_leaf_deserialize()`, and the matching checksum callbacks now reject a record count that exceeds the node capacity, matching the check the version 1 B-tree already performs.
+
 ### Fixed memory leaks and ID reference count issues when pushing an error to an error stack that is full
 
    When an error is pushed to an error stack, the library may make a copy of the file
