@@ -614,6 +614,8 @@ endif ()
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_ANALYZER_TOOLS)
   include (${HDF_CONFIG_DIR}/sanitizer/tools.cmake)
+  # Applies to targets defined after this point; uses .clang-tidy
+  clang_tidy (--quiet)
 endif ()
 if (HDF5_ENABLE_SANITIZERS)
   include (${HDF_CONFIG_DIR}/sanitizer/sanitizers.cmake)
