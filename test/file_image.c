@@ -63,6 +63,9 @@ typedef struct {
     H5FD_file_image_op_t memcpy_src;
     H5FD_file_image_op_t realloc_src;
     H5FD_file_image_op_t free_src;
+    size_t               malloc_size;  /* Size requested by malloc callback */
+    size_t               memcpy_size;  /* Size copied by memcpy callback */
+    size_t               realloc_size; /* Size requested by realloc callback */
 } udata_t;
 
 /******************************************************************************
@@ -180,7 +183,8 @@ malloc_cb(size_t size, H5FD_file_image_op_t op, void *udata)
     udata_t *u = (udata_t *)udata;
 
     u->used_callbacks |= MALLOC;
-    u->malloc_src = op;
+    u->malloc_src  = op;
+    u->malloc_size = size;
     return malloc(size);
 }
 
@@ -199,7 +203,8 @@ memcpy_cb(void *dest, const void *src, size_t size, H5FD_file_image_op_t op, voi
     udata_t *u = (udata_t *)udata;
 
     u->used_callbacks |= MEMCPY;
-    u->memcpy_src = op;
+    u->memcpy_src  = op;
+    u->memcpy_size = size;
     return memcpy(dest, src, size);
 }
 
@@ -218,7 +223,8 @@ realloc_cb(void *ptr, size_t size, H5FD_file_image_op_t op, void *udata)
     udata_t *u = (udata_t *)udata;
 
     u->used_callbacks |= REALLOC;
-    u->realloc_src = op;
+    u->realloc_src  = op;
+    u->realloc_size = size;
     return realloc(ptr, size);
 }
 
@@ -293,6 +299,7 @@ reset_udata(udata_t *u)
 {
     u->used_callbacks = 0;
     u->malloc_src = u->memcpy_src = u->realloc_src = u->free_src = H5FD_FILE_IMAGE_OP_NO_OP;
+    u->malloc_size = u->memcpy_size = u->realloc_size = 0;
 }
 
 /******************************************************************************
@@ -545,7 +552,7 @@ test_core(void)
     VERIFY(fapl >= 0, "fapl creation failed");
 
     /* Set up the core VFD */
-    ret = H5Pset_fapl_core(fapl, (size_t)0, 0);
+    ret = H5Pset_fapl_core(fapl, (size_t)0, (size_t)0, 0);
     VERIFY(ret >= 0, "setting core driver in fapl failed");
 
     tmp = h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -642,11 +649,29 @@ test_core(void)
     if (H5Pset_file_image(fapl, file_image, size) < 0)
         FAIL_STACK_ERROR;
 
+    /* Reconfigure the core VFD to reserve more memory than the file image */
+    ret = H5Pset_fapl_core(fapl, size + (size_t)4096, (size_t)1024, false);
+    VERIFY(ret >= 0, "setting core driver with initial size in fapl failed");
+
     /* Test open with file image */
+    reset_udata(udata);
     if ((file = H5Fopen("dne.h5", H5F_ACC_RDONLY, fapl)) < 0)
         FAIL_STACK_ERROR;
+    VERIFY((udata->used_callbacks & (MALLOC | MEMCPY)) == (MALLOC | MEMCPY),
+           "opening a core file image used the wrong callbacks");
+    VERIFY(udata->malloc_src == H5FD_FILE_IMAGE_OP_FILE_OPEN,
+           "Malloc callback came from wrong source in core file-image open");
+    VERIFY(udata->memcpy_src == H5FD_FILE_IMAGE_OP_FILE_OPEN,
+           "Memcpy callback came from wrong source in core file-image open");
+    VERIFY(udata->malloc_size == size + (size_t)4096,
+           "core file-image open did not allocate the configured initial size");
+    VERIFY(udata->memcpy_size == size, "core file-image open copied the wrong image size");
+    reset_udata(udata);
     if (H5Fclose(file) < 0)
         FAIL_STACK_ERROR;
+    VERIFY(udata->used_callbacks == FREE, "Closing a core file image used the wrong callbacks");
+    VERIFY(udata->free_src == H5FD_FILE_IMAGE_OP_FILE_CLOSE,
+           "Free callback came from wrong source in core file-image close");
 
     /* Release resources */
     h5_delete_all_test_files(FILENAME, fapl);
@@ -910,7 +935,7 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
     VERIFY(core_fapl_id >= 0, "H5Pcreate() failed");
 
     /* setup core_fapl_id to use the core file driver */
-    err = H5Pset_fapl_core(core_fapl_id, (size_t)(64 * 1024), false);
+    err = H5Pset_fapl_core(core_fapl_id, 0, (size_t)(64 * 1024), false);
     VERIFY(err == SUCCEED, "H5Pset_fapl_core() failed.");
 
     /* Set file image in core fapl */
@@ -1361,7 +1386,7 @@ main(void)
 
             /* test H5Fget_file_image() with core driver */
             fapl = H5Pcreate(H5P_FILE_ACCESS);
-            if (H5Pset_fapl_core(fapl, (size_t)(64 * 1024), true) < 0)
+            if (H5Pset_fapl_core(fapl, 0, (size_t)(64 * 1024), true) < 0)
                 errors++;
             else
                 errors += test_get_file_image("H5Fget_file_image() with core driver", 2, fapl, user, format);

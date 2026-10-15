@@ -27,7 +27,7 @@
  
  * The Core VFD is configured via the following API call:
  * \code
- *    herr_t H5Pset_fapl_core(hid_t fapl_id, size_t increment, bool backing_store)
+ *    herr_t H5Pset_fapl_core(hid_t fapl_id, size_t initial_size, size_t increment, bool backing_store)
  * \endcode
  *
  * The backing_store parameter sets whether or not changes are propagated to physical storage on
