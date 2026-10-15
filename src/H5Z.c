@@ -1455,11 +1455,11 @@ H5Z__find_idx_load(const H5Z_filter_info_t *filter, bool required)
         const H5Z_class3_t *filter_info;
         bool                not_found = false;
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_THREADS
         /* It should be impossible to get here if we're currently concurrent - all filters should be loaded by
          * H5Z_no_filters_reenter_h5() before entering an internally concurrent section of code */
         assert(!H5TS_currently_concurrent_g);
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_THREADS */
 
         /* Try loading the filter */
         key.id = (int)(filter->id);
@@ -1551,9 +1551,9 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
 #endif
     unsigned failed = 0;
     unsigned tmp_flags;
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_THREADS
     bool mutex_held = false;
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_THREADS */
     size_t i;
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1593,7 +1593,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
             tmp_flags = flags | (pline->filter[idx].flags);
             tmp_flags |= (edc_read == H5Z_DISABLE_EDC) ? H5Z_FLAG_SKIP_EDC : 0;
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_THREADS
             /* We should never enter an internally concurrent section if any filters re-enter HDF5 */
             assert(!H5TS_currently_concurrent_g || (fclass->feature_flags & H5Z_FEAT_FILTER_NO_H5_CALLS));
 
@@ -1603,7 +1603,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                     HGOTO_ERROR(H5E_PLINE, H5E_CANTLOCK, FAIL, "can't lock internal mutex");
                 mutex_held = true;
             }
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_THREADS */
 
             /* Pause errors if there's a callback defined */
             if (cb_struct.func)
@@ -1629,7 +1629,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
             if (cb_struct.func)
                 H5E_RESUME_ERRORS
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_THREADS
             /* Unlock the internal mutex */
             if (mutex_held) {
                 assert(H5TS_currently_concurrent_g && !(fclass->feature_flags & H5Z_FEAT_FILTER_THREADSAFE));
@@ -1638,7 +1638,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                 mutex_held = false;
             }
             assert(!mutex_held);
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_THREADS */
 
 #ifdef H5Z_DEBUG
             H5_timer_stop(&timer);
@@ -1656,14 +1656,14 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                 if (cb_struct.func) {
                     H5Z_cb_return_t status;
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_THREADS
                     /* If we're using concurrent threads, lock the internal mutex. Assume the user callback is not threadsafe. */
                     if (H5TS_currently_concurrent_g) {
                         if (H5_UNLIKELY(H5TS_internal_lock() < 0))
                             HGOTO_ERROR(H5E_PLINE, H5E_CANTLOCK, FAIL, "can't lock internal mutex");
                         mutex_held = true;
                     }
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_THREADS */
 
                     /* Prepare & restore library for user callback */
                     H5_BEFORE_USER_CB(FAIL)
@@ -1675,7 +1675,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                     if (H5Z_CB_FAIL == status)
                         HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "filter returned failure during read");
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_THREADS
                     /* Unlock the internal mutex */
                     if (H5TS_currently_concurrent_g) {
                         assert(mutex_held);
@@ -1684,7 +1684,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                         mutex_held = false;
                     }
                     assert(!mutex_held);
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_THREADS */
                 }
                 else
                     HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "filter returned failure during read");
@@ -1724,7 +1724,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
             H5_timer_start(&timer);
 #endif
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_THREADS
             /* We should never enter an internally concurrent section if any filters re-enter HDF5 */
             assert(!H5TS_currently_concurrent_g || (fclass->feature_flags & H5Z_FEAT_FILTER_NO_H5_CALLS));
 
@@ -1734,7 +1734,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                     HGOTO_ERROR(H5E_PLINE, H5E_CANTLOCK, FAIL, "can't lock internal mutex");
                 mutex_held = true;
             }
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_THREADS */
 
             /* Pause errors if the filter is optional or if there's a callback defined */
             if ((pline->filter[idx].flags & H5Z_FLAG_OPTIONAL) || cb_struct.func)
@@ -1760,7 +1760,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
             if ((pline->filter[idx].flags & H5Z_FLAG_OPTIONAL) || cb_struct.func)
                 H5E_RESUME_ERRORS
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_THREADS
             /* Unlock the internal mutex */
             if (mutex_held) {
                 assert(H5TS_currently_concurrent_g && !(fclass->feature_flags & H5Z_FEAT_FILTER_THREADSAFE));
@@ -1769,7 +1769,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                 mutex_held = false;
             }
             assert(!mutex_held);
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_THREADS */
 
 #ifdef H5Z_DEBUG
             H5_timer_stop(&timer);
@@ -1788,14 +1788,14 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                     if (cb_struct.func) {
                         H5Z_cb_return_t status;
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_THREADS
                         /* If we're using concurrent threads, lock the internal mutex. Assume the user callback is not threadsafe. */
                         if (H5TS_currently_concurrent_g) {
                             if (H5_UNLIKELY(H5TS_internal_lock() < 0))
                                 HGOTO_ERROR(H5E_PLINE, H5E_CANTLOCK, FAIL, "can't lock internal mutex");
                             mutex_held = true;
                         }
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_THREADS */
 
                         /* Prepare & restore library for user callback */
                         H5_BEFORE_USER_CB(FAIL)
@@ -1806,7 +1806,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                         if (H5Z_CB_FAIL == status)
                             HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "filter returned failure");
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_THREADS
                         /* Unlock the internal mutex */
                         if (H5TS_currently_concurrent_g) {
                             assert(mutex_held);
@@ -1815,7 +1815,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
                             mutex_held = false;
                         }
                         assert(!mutex_held);
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_THREADS */
                     }
                     else
                         HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "filter returned failure");
@@ -1838,7 +1838,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
     *filter_mask = failed;
 
 done:
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_THREADS
     /* Unlock the internal mutex */
     if (mutex_held) {
         assert(H5TS_currently_concurrent_g);
@@ -1847,7 +1847,7 @@ done:
             HDONE_ERROR(H5E_PLINE, H5E_CANTUNLOCK, FAIL, "can't unlock internal mutex");
         mutex_held = false;
     }
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_THREADS */
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -2102,7 +2102,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_get_filter_info() */
 
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_THREADS
 /*-------------------------------------------------------------------------
  * Function: H5Z_no_filters_reenter_h5
  *
@@ -2144,4 +2144,4 @@ H5Z_no_filters_reenter_h5(const H5O_pline_t *pline)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_no_filters_reenter_h5() */
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_THREADS */
