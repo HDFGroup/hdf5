@@ -91,7 +91,7 @@ H5_DLL htri_t             H5Z_filter_avail(H5Z_filter_t id);
 H5_DLL herr_t             H5Z_delete(struct H5O_pline_t *pline, H5Z_filter_t filter);
 H5_DLL herr_t             H5Z_get_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags);
 #ifdef H5_HAVE_THREADS
-H5_DLL htri_t             H5Z_no_filters_reenter_h5(const struct H5O_pline_t *pline);
+H5_DLL htri_t H5Z_no_filters_reenter_h5(const struct H5O_pline_t *pline);
 #endif /* H5_HAVE_THREADS */
 
 /* Data Transform Functions */
