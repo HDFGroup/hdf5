@@ -342,14 +342,6 @@
       }
     },
     {
-      "name": "ci-StdShar-S3",
-      "hidden": true,
-      "inherits": [
-        "ci-StdShar",
-        "ci-S3"
-      ]
-    },
-    {
       "name": "ci-StdShar-MSVC",
       "description": "MSVC Standard Config for x64 (Release)",
       "inherits": [
@@ -399,6 +391,14 @@
         "ci-Fortran",
         "ci-Java-FFM",
         "ci-StdShar"
+      ]
+    },
+    {
+      "name": "ci-StdShar-MSVC-S3",
+      "description": "MSVC S3 Config for x64 (Release)",
+      "inherits": [
+        "ci-StdShar-MSVC",
+        "ci-S3"
       ]
     },
     {
@@ -464,6 +464,14 @@
       ]
     },
     {
+      "name": "ci-StdShar-macos-S3",
+      "description": "Clang S3 Config for macos (Release)",
+      "inherits": [
+        "ci-StdShar-macos-Clang",
+        "ci-S3"
+      ]
+    },
+    {
       "name": "ci-StdShar-GNUC",
       "description": "GNUC Standard Config for x64 with Java JNI (Java 11+)",
       "inherits": [
@@ -489,11 +497,8 @@
       "name": "ci-StdShar-GNUC-S3",
       "description": "GNUC S3 Config for x64 (Release)",
       "inherits": [
-        "ci-x64-Release-GNUC",
-        "ci-CPP",
-        "ci-Fortran",
-        "ci-Java",
-        "ci-StdShar-S3"
+        "ci-StdShar-GNUC",
+        "ci-S3"
       ]
     },
     {
