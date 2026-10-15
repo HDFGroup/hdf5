@@ -125,6 +125,12 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed crashes when using variable-length data after closing another handle of the same dataset
+
+   A dataset's datatype is shared by all open handles of the dataset, and its variable-length types refer to the file of the handle that opened the dataset first. After that file handle was closed, other handles of the same dataset, e.g., from opening the same file twice, still converted variable-length data with the closed file, which crashed in `H5F_addr_decode()`. `H5T_patch_vlen_file()` repaired the file only for a variable-length type at the top level of the datatype, and only when reading or writing data, but not for variable-length types nested in compound or array types, or when converting a variable-length fill value in `H5Dget_create_plist()` or while initializing storage, e.g., in `H5Dset_extent()`. Opening a netCDF-4 file with string variables calls `H5Dget_create_plist()`, so this crashed netCDF-C and netCDF4-python when a file was opened again after closing one of several handles to it. `H5T_patch_vlen_file()` now repairs nested variable-length types as well, and is also called before converting fill values.
+
+   Fixes GitHub issue #6721
+
 ### Fixed a deadlock in the ROS3 VFD on Windows
 
    When an HDF5 application running on Windows and using the ROS3 VFD exited normally,

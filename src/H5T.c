@@ -7366,8 +7366,79 @@ H5T_patch_vlen_file(H5T_t *dt, H5VL_object_t *file)
     assert(dt->shared);
     assert(file);
 
-    if ((dt->shared->type == H5T_VLEN) && dt->shared->u.vlen.file != file)
-        dt->shared->u.vlen.file = file;
+    /* A vlen datatype caches the file its data lives in, and H5T_set_loc()
+     * stamps that pointer into *every* vlen it can reach -- recursing through
+     * compound members and array/vlen base types.  The repair here has to walk
+     * the same tree, or a vlen that is only reachable through a compound member
+     * or an array base type keeps pointing at a file that has since been
+     * closed, and the conversion dereferences it (H5T__conv_vlen ->
+     * H5T__vlen_disk_isnull -> H5F_addr_decode).
+     *
+     * The traversal below mirrors the H5T_ARRAY / H5T_COMPOUND / H5T_VLEN cases
+     * of H5T_set_loc(), including its outer force_conv gate and its inner
+     * force_conv/H5T_IS_COMPOSITE guards, so that the subtypes visited here are
+     * the same ones H5T_set_loc() visited when it stamped them.
+     *
+     * Note that H5T_set_loc() also stamps a cached file pointer into REFERENCE
+     * datatypes (H5T__ref_set_loc(), which sets u.atomic.u.r.file), and this
+     * function does not repair those -- it never did.  Whether they need the
+     * same treatment is a separate question; nothing here makes it worse.
+     */
+
+    /* Datatypes that can't change in size were never descended into by
+     * H5T_set_loc(), so there is nothing under them to repair.  This also keeps
+     * the common case (a type with no vlen anywhere) to a single test, since
+     * this runs on every H5Dread/H5Dwrite/H5Aread/H5Awrite. */
+    if (dt->shared->force_conv) {
+        switch (dt->shared->type) {
+            case H5T_VLEN:
+                /* Patch this sequence's file pointer */
+                if (dt->shared->u.vlen.file != file)
+                    dt->shared->u.vlen.file = file;
+
+                /* Recurse on the base type (a vlen of compound of vlen caches a
+                 * file pointer at every level).  References are skipped here, as
+                 * in H5T_set_loc(), so that they stay part of the same blob. */
+                if (dt->shared->parent && dt->shared->parent->shared->force_conv &&
+                    H5T_IS_COMPOSITE(dt->shared->parent->shared->type) &&
+                    (dt->shared->parent->shared->type != H5T_REFERENCE))
+                    H5T_patch_vlen_file(dt->shared->parent, file);
+                break;
+
+            case H5T_ARRAY:
+                /* Recurse on the base element type */
+                if (dt->shared->parent && dt->shared->parent->shared->force_conv &&
+                    H5T_IS_COMPOSITE(dt->shared->parent->shared->type))
+                    H5T_patch_vlen_file(dt->shared->parent, file);
+                break;
+
+            case H5T_COMPOUND: {
+                unsigned u; /* Local index variable */
+
+                /* Recurse on each field */
+                for (u = 0; u < dt->shared->u.compnd.nmembs; u++) {
+                    H5T_t *memb_type = dt->shared->u.compnd.memb[u].type; /* Member's datatype */
+
+                    if (memb_type->shared->force_conv && H5T_IS_COMPOSITE(memb_type->shared->type))
+                        H5T_patch_vlen_file(memb_type, file);
+                } /* end for */
+            } break;
+
+            case H5T_NO_CLASS:
+            case H5T_INTEGER:
+            case H5T_FLOAT:
+            case H5T_TIME:
+            case H5T_STRING:
+            case H5T_BITFIELD:
+            case H5T_OPAQUE:
+            case H5T_REFERENCE:
+            case H5T_ENUM:
+            case H5T_COMPLEX:
+            case H5T_NCLASSES:
+            default:
+                break;
+        } /* end switch */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T_patch_vlen_file() */
