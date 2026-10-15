@@ -148,7 +148,16 @@ We would like to thank the many HDF5 community members who contributed to this r
    external link data was not properly terminated caused a read past the end of the `udata`
    buffer. `H5L__extern_traverse()` now validates the buffer against its stored size before
    parsing, the same way `H5Lunpack_elink_val()` does.
-   
+
+### Fixed a buffer overflow when decoding a chunked layout from an encoded property list
+
+   The dataset creation property list decoder read the number of chunk dimensions from an
+   encoded property list as a single byte and only rejected a count of zero, then wrote that
+   many dimensions into a fixed-size array holding `H5S_MAX_RANK + 1` entries. A crafted buffer
+   passed to `H5Pdecode()` with a larger count overran that array and read past the end of the
+   input buffer. `H5P__dcrt_layout_dec()` now rejects a count greater than `H5O_LAYOUT_NDIMS`,
+   the bound the object header layout message decoder already enforces.
+
 ### Fixed the page buffer's minimum metadata threshold failure to protect B-tree, local heap and object header metadata pages
 
 The page buffer charges every page it holds to either `raw_count` or `meta_count`, counting `H5F_MEM_PAGE_DRAW` and `H5F_MEM_PAGE_GHEAP` pages as raw data and every other page as metadata. The minimum metadata reservation set by `H5Pset_page_buffer_size()` was not written as the complement of that test: it compared the page's type for equality with `H5F_MEM_PAGE_META`, which is an alias for `H5F_MEM_PAGE_SUPER`. A page entry's type is copied verbatim from the memory type of the access that brought the page into the buffer, so B-tree, local heap and object header pages carried other values and were evicted by raw data regardless of `min_meta_perc`, while still counting toward the threshold the reservation was measured against. In practice the reservation protected only the superblock and driver information pages. The classification is now made in one place, `H5MF_mem_page_type_is_raw()`, alongside its `H5F_mem_t` counterpart `H5MF_mem_type_is_raw()`, and both the page counts and the two reservations use it, so the metadata reservation protects the same population that `meta_count` measures.
