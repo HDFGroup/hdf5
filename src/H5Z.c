@@ -1456,7 +1456,7 @@ H5Z__find_idx_load(const H5Z_filter_info_t *filter, bool required)
     if ((fclass_idx = H5Z__find_idx(filter->id)) < 0) {
         H5PL_key_t          key;
         const H5Z_class3_t *filter_info = NULL;
-        bool                not_found = false;
+        bool                not_found   = false;
 
 #ifdef H5_HAVE_THREADS
         /* It should be impossible to get here if we're currently concurrent - all filters should be loaded by
@@ -1467,7 +1467,8 @@ H5Z__find_idx_load(const H5Z_filter_info_t *filter, bool required)
         /* Try loading the filter */
         key.id = (int)(filter->id);
         if (H5PL_load(H5PL_TYPE_FILTER, &key, (const void **)&filter_info, required) < 0) {
-            /* Issue error on failure but don't end yet - let this function print the informative error message in the not_found section */
+            /* Issue error on failure but don't end yet - let this function print the informative error
+             * message in the not_found section */
             HDONE_ERROR(H5E_PLINE, H5E_CANTLOAD, FAIL, "unable to search for filter plugin");
             assert(!filter_info);
         }
