@@ -6,9 +6,18 @@
 #
 # Requires: HDF5_MAVEN_PLATFORM, HDF5_MAVEN_ARCHITECTURE, HDF5_JAR_CLASSIFIER,
 #           HDF5_PACKAGE_VERSION, HDF5_MAVEN_VERSION_SUFFIX, HDF5_LIBSH_TARGET,
-#           HDF5_INSTALL_JAR_DIR, Java_JAR_EXECUTABLE (from FindJava)
+#           HDF5_INSTALL_JAR_DIR, LINK_COMP_LIBS, Java_JAR_EXECUTABLE (from FindJava)
+#
+# Sets HDF5_MAVEN_NATIVE_PROFILES, the OS-activated <profile> blocks substituted
+# into the binding pom.xml.in files.
+#
 # Natives are staged under natives/<platform>/ per SciJava native-lib-loader
 # (org.scijava.nativelib.NativeLibraryUtil.Architecture names, lowercased).
+# The loader only extracts System.mapLibraryName(name), so each library is
+# staged exactly once under that name: the unversioned linker name on Linux and
+# macOS (libhdf5.so, libz.dylib, ...), which still carries the SONAME/install
+# name that dependent libraries reference, and the DLL file name on Windows,
+# which is the name recorded in the PE import table of dependent DLLs.
 #-----------------------------------------------------------------------------
 
 if (NOT DEFINED HDF5JAVA_MAVEN_NATIVE_JNI)
@@ -23,8 +32,6 @@ endif ()
 if (HDF5_MAVEN_PLATFORM STREQUAL "linux")
   if (HDF5_MAVEN_ARCHITECTURE STREQUAL "aarch64")
     set (HDF5_NATIVE_LOADER_PLATFORM "linux_arm64")
-  elseif (HDF5_MAVEN_ARCHITECTURE STREQUAL "x86_64")
-    set (HDF5_NATIVE_LOADER_PLATFORM "linux_64")
   elseif (HDF5_MAVEN_ARCHITECTURE STREQUAL "x86")
     set (HDF5_NATIVE_LOADER_PLATFORM "linux_32")
   else ()
@@ -46,16 +53,10 @@ else ()
   message (FATAL_ERROR "HDF5JavaNativeBundles.cmake: unknown HDF5_MAVEN_PLATFORM '${HDF5_MAVEN_PLATFORM}'")
 endif ()
 
-set (_HDF5_NATIVE_IMPL_VERSION "${HDF5_PACKAGE_VERSION}${HDF5_MAVEN_VERSION_SUFFIX}")
-set (HDF5_MAVEN_ZLIB_NATIVE_PROFILES "")
-set (HDF5_MAVEN_SZIP_NATIVE_PROFILES "")
-
 if (NOT Java_JAR_EXECUTABLE AND Java_JAVA_EXECUTABLE)
   get_filename_component (_jbin "${Java_JAVA_EXECUTABLE}" DIRECTORY)
   if (EXISTS "${_jbin}/jar${CMAKE_EXECUTABLE_SUFFIX}")
     set (Java_JAR_EXECUTABLE "${_jbin}/jar${CMAKE_EXECUTABLE_SUFFIX}")
-  elseif (EXISTS "${_jbin}/jar.exe")
-    set (Java_JAR_EXECUTABLE "${_jbin}/jar.exe")
   endif ()
 endif ()
 
@@ -63,14 +64,16 @@ if (NOT Java_JAR_EXECUTABLE)
   message (FATAL_ERROR "Java jar tool not found; cannot build hdf5-native Maven bundles.")
 endif ()
 
-# Write a SciJava native-bundle manifest (Implementation-Version drives extraction cache keys).
-function (hdf5java_write_native_manifest _manifest_path _bundle_name)
-  file (WRITE "${_manifest_path}"
-"Manifest-Version: 1.0\nImplementation-Version: ${_HDF5_NATIVE_IMPL_VERSION}\nHDF5-Native-Bundle: ${_bundle_name}\nHDF5-Classifier: ${HDF5_JAR_CLASSIFIER}\nHDF5-Native-Loader-Platform: ${HDF5_NATIVE_LOADER_PLATFORM}\n"
-  )
+# Generator expression for the file name SciJava extracts for a shared library target
+function (hdf5java_native_stage_name _out_var _target)
+  if (WIN32)
+    set (${_out_var} "$<TARGET_FILE_NAME:${_target}>" PARENT_SCOPE)
+  else ()
+    set (${_out_var} "$<TARGET_LINKER_FILE_NAME:${_target}>" PARENT_SCOPE)
+  endif ()
 endfunction ()
 
-# Append one OS-activated Maven profile dependency block for a native artifact.
+# Append one OS-activated Maven profile that pulls in a classified native artifact.
 function (hdf5java_append_maven_native_profile _profiles_var _artifact_id _profile_id _family _os_name _arch _classifier _optional)
   if (_optional)
     set (_optional_xml "                    <optional>true</optional>\n")
@@ -100,297 +103,141 @@ ${_optional_xml}                </dependency>
   set (${_profiles_var} "${${_profiles_var}}${_chunk}" PARENT_SCOPE)
 endfunction ()
 
-# Generate five platform OS-activated profiles for a classified native artifact.
-function (hdf5java_generate_maven_native_profiles _out_var _artifact_id _profile_prefix _comment _optional)
-  set (_profiles "${_comment}")
-  hdf5java_append_maven_native_profile (_profiles "${_artifact_id}" "${_profile_prefix}-linux-x86_64" "unix" "Linux" "amd64" "linux-x86_64" "${_optional}")
-  hdf5java_append_maven_native_profile (_profiles "${_artifact_id}" "${_profile_prefix}-linux-aarch64" "unix" "Linux" "aarch64" "linux-aarch64" "${_optional}")
-  hdf5java_append_maven_native_profile (_profiles "${_artifact_id}" "${_profile_prefix}-windows-amd64" "windows" "" "amd64" "windows-x86_64" "${_optional}")
-  hdf5java_append_maven_native_profile (_profiles "${_artifact_id}" "${_profile_prefix}-macos-x86_64" "mac" "" "x86_64" "macos-x86_64" "${_optional}")
-  hdf5java_append_maven_native_profile (_profiles "${_artifact_id}" "${_profile_prefix}-macos-aarch64" "mac" "" "aarch64" "macos-aarch64" "${_optional}")
-  set (${_out_var} "${_profiles}" PARENT_SCOPE)
+# Append the five per-platform profiles for one classified native artifact.
+function (hdf5java_append_maven_native_profiles _profiles_var _artifact_id _comment _optional)
+  set (_profiles "${${_profiles_var}}\n        <!-- ${_comment} -->")
+  hdf5java_append_maven_native_profile (_profiles "${_artifact_id}" "${_artifact_id}-linux-x86_64" "unix" "Linux" "amd64" "linux-x86_64" "${_optional}")
+  hdf5java_append_maven_native_profile (_profiles "${_artifact_id}" "${_artifact_id}-linux-aarch64" "unix" "Linux" "aarch64" "linux-aarch64" "${_optional}")
+  hdf5java_append_maven_native_profile (_profiles "${_artifact_id}" "${_artifact_id}-windows-amd64" "windows" "" "amd64" "windows-x86_64" "${_optional}")
+  hdf5java_append_maven_native_profile (_profiles "${_artifact_id}" "${_artifact_id}-macos-x86_64" "mac" "" "x86_64" "macos-x86_64" "${_optional}")
+  hdf5java_append_maven_native_profile (_profiles "${_artifact_id}" "${_artifact_id}-macos-aarch64" "mac" "" "aarch64" "macos-aarch64" "${_optional}")
+  set (${_profiles_var} "${_profiles}" PARENT_SCOPE)
 endfunction ()
 
-# Stage shared library(ies) under natives/<platform>/, jar, install JAR + POM.
+# Stage shared libraries under natives/<platform>/, jar them, and install JAR + POM.
+#   ARTIFACT_ID  Maven artifactId (also the jar/POM/stage-dir base name)
+#   POM_TEMPLATE template under java/cmake/
+#   TARGETS      shared library targets to bundle, one copy each
 function (hdf5java_add_native_maven_jar)
-  set (_options "")
-  set (_oneValueArgs
-    ARTIFACT_ID
-    BUNDLE_NAME
-    JAR_OUT
-    STAGE_DIR
-    NATIVES_PREFIX
-    MANIFEST_PATH
-    POM_TEMPLATE
-    POM_OUT
-    TARGET_NAME
-    COMMENT
-  )
-  set (_multiValueArgs COPY_COMMANDS DEPENDS)
-  cmake_parse_arguments (_args "${_options}" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
+  cmake_parse_arguments (_args "" "ARTIFACT_ID;POM_TEMPLATE" "TARGETS" ${ARGN})
 
-  hdf5java_write_native_manifest ("${_args_MANIFEST_PATH}" "${_args_BUNDLE_NAME}")
+  set (_base "${CMAKE_CURRENT_BINARY_DIR}/native-bundle/${_args_ARTIFACT_ID}")
+  set (_stage "${_base}/stage")
+  set (_natives "${_stage}/natives/${HDF5_NATIVE_LOADER_PLATFORM}")
+  set (_manifest "${_base}/MANIFEST.MF")
+  set (_jar "${CMAKE_CURRENT_BINARY_DIR}/${_args_ARTIFACT_ID}-${HDF5_PACKAGE_VERSION}${HDF5_MAVEN_VERSION_SUFFIX}-${HDF5_JAR_CLASSIFIER}.jar")
+  set (_target_name "${_args_ARTIFACT_ID}_maven_jar")
+  string (REPLACE "-" "_" _target_name "${_target_name}")
+
+  # Implementation-Version keys the SciJava extraction cache
+  file (WRITE "${_manifest}"
+"Manifest-Version: 1.0\nImplementation-Version: ${HDF5_PACKAGE_VERSION}${HDF5_MAVEN_VERSION_SUFFIX}\nHDF5-Native-Bundle: ${_args_ARTIFACT_ID}\nHDF5-Classifier: ${HDF5_JAR_CLASSIFIER}\nHDF5-Native-Loader-Platform: ${HDF5_NATIVE_LOADER_PLATFORM}\n"
+  )
+
+  set (_copy_commands "")
+  foreach (_tgt IN LISTS _args_TARGETS)
+    hdf5java_native_stage_name (_stage_name ${_tgt})
+    list (APPEND _copy_commands
+      COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:${_tgt}>" "${_natives}/${_stage_name}"
+    )
+  endforeach ()
 
   add_custom_command (
-    OUTPUT "${_args_JAR_OUT}"
-    COMMAND ${CMAKE_COMMAND} -E rm -rf "${_args_STAGE_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${_args_NATIVES_PREFIX}"
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${_args_STAGE_DIR}/META-INF"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_args_MANIFEST_PATH}" "${_args_STAGE_DIR}/META-INF/MANIFEST.MF"
-    ${_args_COPY_COMMANDS}
-    COMMAND ${Java_JAR_EXECUTABLE} cfm "${_args_JAR_OUT}" "${_args_STAGE_DIR}/META-INF/MANIFEST.MF" -C "${_args_STAGE_DIR}" .
-    DEPENDS ${_args_DEPENDS}
-    COMMENT "${_args_COMMENT}"
+    OUTPUT "${_jar}"
+    COMMAND ${CMAKE_COMMAND} -E rm -rf "${_stage}"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${_natives}"
+    ${_copy_commands}
+    COMMAND ${Java_JAR_EXECUTABLE} cfm "${_jar}" "${_manifest}" -C "${_stage}" .
+    DEPENDS ${_args_TARGETS} "${_manifest}"
+    COMMENT "Creating Maven native bundle ${_args_ARTIFACT_ID} (${HDF5_JAR_CLASSIFIER}, ${HDF5_NATIVE_LOADER_PLATFORM})"
     VERBATIM
   )
 
-  add_custom_target (${_args_TARGET_NAME} ALL DEPENDS "${_args_JAR_OUT}")
-  set_target_properties (${_args_TARGET_NAME} PROPERTIES FOLDER libraries/java)
-
-  install (
-    FILES "${_args_JAR_OUT}"
-    DESTINATION ${HDF5_INSTALL_JAR_DIR}
-    COMPONENT maven
-  )
+  add_custom_target (${_target_name} ALL DEPENDS "${_jar}")
+  set_target_properties (${_target_name} PROPERTIES FOLDER libraries/java)
 
   configure_file (
     ${HDF5_SOURCE_DIR}/java/cmake/${_args_POM_TEMPLATE}
-    ${CMAKE_CURRENT_BINARY_DIR}/${_args_POM_OUT}
+    ${CMAKE_CURRENT_BINARY_DIR}/pom-${_args_ARTIFACT_ID}.xml
     @ONLY
   )
   install (
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/${_args_POM_OUT}
+    FILES "${_jar}" ${CMAKE_CURRENT_BINARY_DIR}/pom-${_args_ARTIFACT_ID}.xml
     DESTINATION ${HDF5_INSTALL_JAR_DIR}
     COMPONENT maven
   )
 endfunction ()
 
-# SciJava BaseJniExtractor looks for System.mapLibraryName("hdf5") under natives/<platform>/.
-if (HDF5_MAVEN_PLATFORM STREQUAL "linux")
-  set (_HDF5_NATIVE_SCIJAVA_MAPPED_NAME "libhdf5.so")
-elseif (HDF5_MAVEN_PLATFORM STREQUAL "macos")
-  set (_HDF5_NATIVE_SCIJAVA_MAPPED_NAME "libhdf5.dylib")
-elseif (HDF5_MAVEN_PLATFORM STREQUAL "windows")
-  set (_HDF5_NATIVE_SCIJAVA_MAPPED_NAME "hdf5.dll")
-else ()
-  set (_HDF5_NATIVE_SCIJAVA_MAPPED_NAME "")
-endif ()
-if (_HDF5_NATIVE_SCIJAVA_MAPPED_NAME STREQUAL "")
-  message (FATAL_ERROR "HDF5JavaNativeBundles.cmake: add SciJava mapped library name for platform '${HDF5_MAVEN_PLATFORM}'")
-endif ()
+# Find the shared zlib and libaec (libaec + libsz) targets libhdf5 actually
+# links. Static or non-target (plain path) dependencies are linked into
+# libhdf5 or resolved by the OS, so they are not bundled.
+set (_HDF5_ZLIB_NATIVE_TARGETS "")
+set (_HDF5_AEC_NATIVE_TARGET "")
+set (_HDF5_SZ_NATIVE_TARGET "")
+foreach (_lib IN LISTS LINK_COMP_LIBS)
+  if (NOT TARGET ${_lib})
+    continue ()
+  endif ()
+  set (_tgt ${_lib})
+  get_target_property (_aliased ${_tgt} ALIASED_TARGET)
+  if (_aliased)
+    set (_tgt ${_aliased})
+  endif ()
+  get_target_property (_type ${_tgt} TYPE)
+  if (NOT _type STREQUAL "SHARED_LIBRARY")
+    continue ()
+  endif ()
+  if (_lib MATCHES "aec")
+    set (_HDF5_AEC_NATIVE_TARGET ${_tgt})
+  elseif (_lib MATCHES "(^|[:_-])sz")
+    set (_HDF5_SZ_NATIVE_TARGET ${_tgt})
+  elseif (_lib MATCHES "^(zlib|ZLIB::|zlib-ng)" OR _lib STREQUAL "${H5_ZLIB_LIBRARY}")
+    set (_HDF5_ZLIB_NATIVE_TARGETS ${_tgt})
+  endif ()
+endforeach ()
 
-set (_HDF5_NATIVE_MAVEN_JAR
-  "${CMAKE_CURRENT_BINARY_DIR}/hdf5-native-${HDF5_PACKAGE_VERSION}${HDF5_MAVEN_VERSION_SUFFIX}-${HDF5_JAR_CLASSIFIER}.jar"
-)
-set (_HDF5_NATIVE_STAGE "${CMAKE_CURRENT_BINARY_DIR}/native-bundle/hdf5-native")
-set (_HDF5_NATIVE_PREFIX "${_HDF5_NATIVE_STAGE}/natives/${HDF5_NATIVE_LOADER_PLATFORM}")
-set (_HDF5_NATIVE_MANIFEST "${CMAKE_CURRENT_BINARY_DIR}/native-bundle/META-INF_MANIFEST_NATIVE.mf")
+set (HDF5_MAVEN_NATIVE_PROFILES "")
 
+# libhdf5: optional on the binding POMs; consumers add it explicitly
+hdf5java_append_maven_native_profiles (HDF5_MAVEN_NATIVE_PROFILES hdf5-native
+  "Bundled libhdf5 (optional: add explicitly, or use a system HDF5 install)" TRUE)
 hdf5java_add_native_maven_jar (
   ARTIFACT_ID hdf5-native
-  BUNDLE_NAME hdf5-native
-  JAR_OUT "${_HDF5_NATIVE_MAVEN_JAR}"
-  STAGE_DIR "${_HDF5_NATIVE_STAGE}"
-  NATIVES_PREFIX "${_HDF5_NATIVE_PREFIX}"
-  MANIFEST_PATH "${_HDF5_NATIVE_MANIFEST}"
   POM_TEMPLATE pom-native.xml.in
-  POM_OUT pom-hdf5-native.xml
-  TARGET_NAME hdf5_native_maven_jar
-  COMMENT "Creating Maven native bundle hdf5-native (${HDF5_JAR_CLASSIFIER}, ${HDF5_NATIVE_LOADER_PLATFORM})"
-  COPY_COMMANDS
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${HDF5_LIBSH_TARGET}> ${_HDF5_NATIVE_PREFIX}/
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${HDF5_LIBSH_TARGET}> ${_HDF5_NATIVE_PREFIX}/${_HDF5_NATIVE_SCIJAVA_MAPPED_NAME}
-  DEPENDS ${HDF5_LIBSH_TARGET}
+  TARGETS ${HDF5_LIBSH_TARGET}
 )
 
-# Optional zlib JAR: libhdf5's built-in deflate filter needs libz when linked dynamically.
-set (_HDF5_ZLIB_NATIVE_TARGET "")
-if (H5_ZLIB_FOUND AND NOT HDF5_USE_ZLIB_STATIC)
-  foreach (_zlib_candidate IN ITEMS ${H5_ZLIB_LIBRARY} ZLIB::ZLIB zlib zlib-ng)
-    if (TARGET ${_zlib_candidate} AND _HDF5_ZLIB_NATIVE_TARGET STREQUAL "")
-      set (_HDF5_ZLIB_NATIVE_TARGET "${_zlib_candidate}")
-    endif ()
-  endforeach ()
-endif ()
-
-if (NOT _HDF5_ZLIB_NATIVE_TARGET STREQUAL "")
-  get_target_property (_HDF5_ZLIB_ALIASED_TARGET ${_HDF5_ZLIB_NATIVE_TARGET} ALIASED_TARGET)
-  if (_HDF5_ZLIB_ALIASED_TARGET)
-    set (_HDF5_ZLIB_NATIVE_TARGET "${_HDF5_ZLIB_ALIASED_TARGET}")
-  endif ()
-
-  get_target_property (_HDF5_ZLIB_TARGET_TYPE ${_HDF5_ZLIB_NATIVE_TARGET} TYPE)
-  if (NOT _HDF5_ZLIB_TARGET_TYPE STREQUAL "STATIC_LIBRARY")
-    if (HDF5_MAVEN_PLATFORM STREQUAL "linux")
-      set (_HDF5_ZLIB_NATIVE_SCIJAVA_MAPPED_NAME "libz.so")
-    elseif (HDF5_MAVEN_PLATFORM STREQUAL "macos")
-      set (_HDF5_ZLIB_NATIVE_SCIJAVA_MAPPED_NAME "libz.dylib")
-    elseif (HDF5_MAVEN_PLATFORM STREQUAL "windows")
-      set (_HDF5_ZLIB_NATIVE_SCIJAVA_MAPPED_NAME "z.dll")
-    else ()
-      set (_HDF5_ZLIB_NATIVE_SCIJAVA_MAPPED_NAME "")
-    endif ()
-
-    if (_HDF5_ZLIB_NATIVE_SCIJAVA_MAPPED_NAME STREQUAL "")
-      message (FATAL_ERROR "HDF5JavaNativeBundles.cmake: add SciJava mapped zlib name for platform '${HDF5_MAVEN_PLATFORM}'")
-    endif ()
-
-    set (_HDF5_ZLIB_NATIVE_STAGE "${CMAKE_CURRENT_BINARY_DIR}/native-bundle/hdf5-zlib-native")
-    set (_HDF5_ZLIB_NATIVE_PREFIX "${_HDF5_ZLIB_NATIVE_STAGE}/natives/${HDF5_NATIVE_LOADER_PLATFORM}")
-
-    set (_HDF5_ZLIB_NATIVE_EXTRA_ALIASES "")
-    if (HDF5_MAVEN_PLATFORM STREQUAL "windows")
-      list (APPEND _HDF5_ZLIB_NATIVE_EXTRA_ALIASES "zlib.dll" "zlib1.dll")
-    elseif (HDF5_MAVEN_PLATFORM STREQUAL "linux")
-      list (APPEND _HDF5_ZLIB_NATIVE_EXTRA_ALIASES "libz.so.1")
-    elseif (HDF5_MAVEN_PLATFORM STREQUAL "macos")
-      list (APPEND _HDF5_ZLIB_NATIVE_EXTRA_ALIASES "libz.1.dylib")
-    endif ()
-
-    set (_HDF5_ZLIB_NATIVE_ALIAS_COMMANDS "")
-    foreach (_zlib_alias IN LISTS _HDF5_ZLIB_NATIVE_EXTRA_ALIASES)
-      if (NOT _zlib_alias STREQUAL _HDF5_ZLIB_NATIVE_SCIJAVA_MAPPED_NAME)
-        list (APPEND _HDF5_ZLIB_NATIVE_ALIAS_COMMANDS
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_FILE:${_HDF5_ZLIB_NATIVE_TARGET}>
-            ${_HDF5_ZLIB_NATIVE_PREFIX}/${_zlib_alias}
-        )
-      endif ()
-    endforeach ()
-
-    hdf5java_generate_maven_native_profiles (HDF5_MAVEN_ZLIB_NATIVE_PROFILES "hdf5-zlib-native"
-      "hdf5-bundled-zlib-native"
-      "        <!-- Bundled zlib JARs: libhdf5's deflate/GZIP filter depends on libz when linked dynamically -->" TRUE)
-
-    set (_HDF5_ZLIB_NATIVE_MAVEN_JAR
-      "${CMAKE_CURRENT_BINARY_DIR}/hdf5-zlib-native-${HDF5_PACKAGE_VERSION}${HDF5_MAVEN_VERSION_SUFFIX}-${HDF5_JAR_CLASSIFIER}.jar"
-    )
-    set (_HDF5_ZLIB_NATIVE_MANIFEST "${CMAKE_CURRENT_BINARY_DIR}/native-bundle/META-INF_MANIFEST_ZLIB_NATIVE.mf")
-
-    hdf5java_add_native_maven_jar (
-      ARTIFACT_ID hdf5-zlib-native
-      BUNDLE_NAME hdf5-zlib-native
-      JAR_OUT "${_HDF5_ZLIB_NATIVE_MAVEN_JAR}"
-      STAGE_DIR "${_HDF5_ZLIB_NATIVE_STAGE}"
-      NATIVES_PREFIX "${_HDF5_ZLIB_NATIVE_PREFIX}"
-      MANIFEST_PATH "${_HDF5_ZLIB_NATIVE_MANIFEST}"
-      POM_TEMPLATE pom-zlib-native.xml.in
-      POM_OUT pom-hdf5-zlib-native.xml
-      TARGET_NAME hdf5_zlib_native_maven_jar
-      COMMENT "Creating Maven native bundle hdf5-zlib-native (${HDF5_JAR_CLASSIFIER}, ${HDF5_NATIVE_LOADER_PLATFORM})"
-      COPY_COMMANDS
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${_HDF5_ZLIB_NATIVE_TARGET}> ${_HDF5_ZLIB_NATIVE_PREFIX}/
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${_HDF5_ZLIB_NATIVE_TARGET}> ${_HDF5_ZLIB_NATIVE_PREFIX}/${_HDF5_ZLIB_NATIVE_SCIJAVA_MAPPED_NAME}
-        ${_HDF5_ZLIB_NATIVE_ALIAS_COMMANDS}
-      DEPENDS ${_HDF5_ZLIB_NATIVE_TARGET}
-    )
-  endif ()
-endif ()
-
-# Optional szip JAR: bundle libaec and libsz when libhdf5 uses dynamic SZIP support.
-set (_HDF5_SZIP_LIBSZ_TARGET "")
-set (_HDF5_SZIP_LIBAEC_TARGET "")
-if (H5_SZIP_FOUND AND NOT HDF5_USE_LIBAEC_STATIC)
-  foreach (_libsz_candidate IN ITEMS
-      ${HDF_PACKAGE_NAMESPACE}sz-shared sz-shared libaec::sz)
-    if (TARGET ${_libsz_candidate} AND _HDF5_SZIP_LIBSZ_TARGET STREQUAL "")
-      set (_HDF5_SZIP_LIBSZ_TARGET "${_libsz_candidate}")
-    endif ()
-  endforeach ()
-  foreach (_libaec_candidate IN ITEMS
-      ${HDF_PACKAGE_NAMESPACE}aec-shared aec-shared libaec::aec)
-    if (TARGET ${_libaec_candidate} AND _HDF5_SZIP_LIBAEC_TARGET STREQUAL "")
-      set (_HDF5_SZIP_LIBAEC_TARGET "${_libaec_candidate}")
-    endif ()
-  endforeach ()
-endif ()
-
-if (NOT _HDF5_SZIP_LIBSZ_TARGET STREQUAL "" AND NOT _HDF5_SZIP_LIBAEC_TARGET STREQUAL "")
-  get_target_property (_HDF5_SZIP_LIBSZ_ALIASED ${_HDF5_SZIP_LIBSZ_TARGET} ALIASED_TARGET)
-  if (_HDF5_SZIP_LIBSZ_ALIASED)
-    set (_HDF5_SZIP_LIBSZ_TARGET "${_HDF5_SZIP_LIBSZ_ALIASED}")
-  endif ()
-  get_target_property (_HDF5_SZIP_LIBAEC_ALIASED ${_HDF5_SZIP_LIBAEC_TARGET} ALIASED_TARGET)
-  if (_HDF5_SZIP_LIBAEC_ALIASED)
-    set (_HDF5_SZIP_LIBAEC_TARGET "${_HDF5_SZIP_LIBAEC_ALIASED}")
-  endif ()
-
-  get_target_property (_HDF5_SZIP_LIBSZ_TYPE ${_HDF5_SZIP_LIBSZ_TARGET} TYPE)
-  get_target_property (_HDF5_SZIP_LIBAEC_TYPE ${_HDF5_SZIP_LIBAEC_TARGET} TYPE)
-  if (NOT _HDF5_SZIP_LIBSZ_TYPE STREQUAL "STATIC_LIBRARY"
-      AND NOT _HDF5_SZIP_LIBAEC_TYPE STREQUAL "STATIC_LIBRARY")
-    if (HDF5_MAVEN_PLATFORM STREQUAL "linux")
-      set (_HDF5_SZIP_NATIVE_SCIJAVA_LIBSZ "libsz.so")
-      set (_HDF5_SZIP_NATIVE_SCIJAVA_LIBAEC "libaec.so")
-    elseif (HDF5_MAVEN_PLATFORM STREQUAL "macos")
-      set (_HDF5_SZIP_NATIVE_SCIJAVA_LIBSZ "libsz.dylib")
-      set (_HDF5_SZIP_NATIVE_SCIJAVA_LIBAEC "libaec.dylib")
-    elseif (HDF5_MAVEN_PLATFORM STREQUAL "windows")
-      set (_HDF5_SZIP_NATIVE_SCIJAVA_LIBSZ "sz.dll")
-      set (_HDF5_SZIP_NATIVE_SCIJAVA_LIBAEC "aec.dll")
-    else ()
-      set (_HDF5_SZIP_NATIVE_SCIJAVA_LIBSZ "")
-      set (_HDF5_SZIP_NATIVE_SCIJAVA_LIBAEC "")
-    endif ()
-
-    if (_HDF5_SZIP_NATIVE_SCIJAVA_LIBSZ STREQUAL "" OR _HDF5_SZIP_NATIVE_SCIJAVA_LIBAEC STREQUAL "")
-      message (FATAL_ERROR "HDF5JavaNativeBundles.cmake: add SciJava mapped libaec/libsz names for platform '${HDF5_MAVEN_PLATFORM}'")
-    endif ()
-
-    hdf5java_generate_maven_native_profiles (HDF5_MAVEN_SZIP_NATIVE_PROFILES "hdf5-szip-native"
-      "hdf5-bundled-szip-native"
-      "        <!-- Bundled libaec (szip) JARs: libhdf5's SZIP filter depends on libsz/libaec when linked dynamically -->" TRUE)
-
-    set (_HDF5_SZIP_NATIVE_MAVEN_JAR
-      "${CMAKE_CURRENT_BINARY_DIR}/hdf5-szip-native-${HDF5_PACKAGE_VERSION}${HDF5_MAVEN_VERSION_SUFFIX}-${HDF5_JAR_CLASSIFIER}.jar"
-    )
-    set (_HDF5_SZIP_NATIVE_STAGE "${CMAKE_CURRENT_BINARY_DIR}/native-bundle/hdf5-szip-native")
-    set (_HDF5_SZIP_NATIVE_PREFIX "${_HDF5_SZIP_NATIVE_STAGE}/natives/${HDF5_NATIVE_LOADER_PLATFORM}")
-    set (_HDF5_SZIP_NATIVE_MANIFEST "${CMAKE_CURRENT_BINARY_DIR}/native-bundle/META-INF_MANIFEST_SZIP_NATIVE.mf")
-
-    hdf5java_add_native_maven_jar (
-      ARTIFACT_ID hdf5-szip-native
-      BUNDLE_NAME hdf5-szip-native
-      JAR_OUT "${_HDF5_SZIP_NATIVE_MAVEN_JAR}"
-      STAGE_DIR "${_HDF5_SZIP_NATIVE_STAGE}"
-      NATIVES_PREFIX "${_HDF5_SZIP_NATIVE_PREFIX}"
-      MANIFEST_PATH "${_HDF5_SZIP_NATIVE_MANIFEST}"
-      POM_TEMPLATE pom-szip-native.xml.in
-      POM_OUT pom-hdf5-szip-native.xml
-      TARGET_NAME hdf5_szip_native_maven_jar
-      COMMENT "Creating Maven native bundle hdf5-szip-native (${HDF5_JAR_CLASSIFIER}, ${HDF5_NATIVE_LOADER_PLATFORM})"
-      COPY_COMMANDS
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${_HDF5_SZIP_LIBAEC_TARGET}> ${_HDF5_SZIP_NATIVE_PREFIX}/
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${_HDF5_SZIP_LIBAEC_TARGET}> ${_HDF5_SZIP_NATIVE_PREFIX}/${_HDF5_SZIP_NATIVE_SCIJAVA_LIBAEC}
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${_HDF5_SZIP_LIBSZ_TARGET}> ${_HDF5_SZIP_NATIVE_PREFIX}/
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${_HDF5_SZIP_LIBSZ_TARGET}> ${_HDF5_SZIP_NATIVE_PREFIX}/${_HDF5_SZIP_NATIVE_SCIJAVA_LIBSZ}
-      DEPENDS ${_HDF5_SZIP_LIBAEC_TARGET} ${_HDF5_SZIP_LIBSZ_TARGET}
-    )
-  endif ()
-endif ()
-
-# JNI bridge JAR (JNI Maven builds only)
-if (HDF5JAVA_MAVEN_NATIVE_JNI)
-  set (_HDF5_JNI_NATIVE_MAVEN_JAR
-    "${CMAKE_CURRENT_BINARY_DIR}/hdf5-jni-native-${HDF5_PACKAGE_VERSION}${HDF5_MAVEN_VERSION_SUFFIX}-${HDF5_JAR_CLASSIFIER}.jar"
+# zlib: libhdf5's built-in deflate filter needs it when linked dynamically
+if (_HDF5_ZLIB_NATIVE_TARGETS)
+  hdf5java_append_maven_native_profiles (HDF5_MAVEN_NATIVE_PROFILES hdf5-zlib-native
+    "Bundled zlib for libhdf5's deflate/GZIP filter (optional)" TRUE)
+  hdf5java_add_native_maven_jar (
+    ARTIFACT_ID hdf5-zlib-native
+    POM_TEMPLATE pom-zlib-native.xml.in
+    TARGETS ${_HDF5_ZLIB_NATIVE_TARGETS}
   )
-  set (_HDF5_JNI_NATIVE_STAGE "${CMAKE_CURRENT_BINARY_DIR}/native-bundle/hdf5-jni-native")
-  set (_HDF5_JNI_NATIVE_PREFIX "${_HDF5_JNI_NATIVE_STAGE}/natives/${HDF5_NATIVE_LOADER_PLATFORM}")
-  set (_HDF5_JNI_NATIVE_MANIFEST "${CMAKE_CURRENT_BINARY_DIR}/native-bundle/META-INF_MANIFEST_JNI_NATIVE.mf")
+endif ()
 
+# libaec: libhdf5's built-in SZIP filter needs libsz, which depends on libaec
+if (_HDF5_AEC_NATIVE_TARGET AND _HDF5_SZ_NATIVE_TARGET)
+  hdf5java_append_maven_native_profiles (HDF5_MAVEN_NATIVE_PROFILES hdf5-szip-native
+    "Bundled libaec/libsz for libhdf5's SZIP filter (optional)" TRUE)
+  hdf5java_add_native_maven_jar (
+    ARTIFACT_ID hdf5-szip-native
+    POM_TEMPLATE pom-szip-native.xml.in
+    TARGETS ${_HDF5_AEC_NATIVE_TARGET} ${_HDF5_SZ_NATIVE_TARGET}
+  )
+elseif (_HDF5_AEC_NATIVE_TARGET OR _HDF5_SZ_NATIVE_TARGET)
+  message (WARNING "Only one of libaec/libsz is a shared library target; hdf5-szip-native not created")
+endif ()
+
+# JNI bridge: required by hdf5-java-jni
+if (HDF5JAVA_MAVEN_NATIVE_JNI)
+  hdf5java_append_maven_native_profiles (HDF5_MAVEN_NATIVE_PROFILES hdf5-jni-native
+    "Bundled hdf5_java JNI bridge (required)" FALSE)
   hdf5java_add_native_maven_jar (
     ARTIFACT_ID hdf5-jni-native
-    BUNDLE_NAME hdf5-jni-native
-    JAR_OUT "${_HDF5_JNI_NATIVE_MAVEN_JAR}"
-    STAGE_DIR "${_HDF5_JNI_NATIVE_STAGE}"
-    NATIVES_PREFIX "${_HDF5_JNI_NATIVE_PREFIX}"
-    MANIFEST_PATH "${_HDF5_JNI_NATIVE_MANIFEST}"
     POM_TEMPLATE pom-jni-native.xml.in
-    POM_OUT pom-hdf5-jni-native.xml
-    TARGET_NAME hdf5_jni_native_maven_jar
-    COMMENT "Creating Maven native bundle hdf5-jni-native (${HDF5_JAR_CLASSIFIER}, ${HDF5_NATIVE_LOADER_PLATFORM})"
-    COPY_COMMANDS
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${HDF5_JAVA_JNI_LIB_TARGET}> ${_HDF5_JNI_NATIVE_PREFIX}/
-    DEPENDS ${HDF5_JAVA_JNI_LIB_TARGET}
+    TARGETS ${HDF5_JAVA_JNI_LIB_TARGET}
   )
 endif ()
