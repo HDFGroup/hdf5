@@ -205,6 +205,12 @@ Fixes GitHub issue #6679.
 
    Fixes CVE-2026-19025
 
+### Fixed silent truncation of filtered chunk sizes with a small file "size of sizes"
+
+   For all chunk index types in version-5 chunk layout messages, and for the single chunk index in any version of the chunk layout message, the on-disk size of a filtered chunk is encoded in a fixed-width field equal to the file's "size of sizes" (set via `H5Pset_sizes()`). The encode check assumed this field was always 8 bytes, so when the size of sizes was set to 2 or 4 an oversized chunk had its encoded size silently truncated (e.g., 160000 encoded in 2 bytes became 160000 & 0xFFFF = 28928), silently corrupting the chunk. The library now verifies that a filtered chunk's size fits in the file's size of sizes and reports an error at write time instead.
+
+   Fixes GitHub issue #6023
+
 ### Fixed a crash when reading a dataset with a malformed fill value
 
    An old-style (either version 1 or version 2) fill value message that is marked "defined" but encodes a negative size leaves the fill value with a negative size and no datatype; `H5Pget_fill_value()` then passed that NULL datatype to `H5T_path_find()` and dereferenced it. `H5P_get_fill_value()` now rejects a fill value that has no datatype and returns an error, so the dataset itself remains readable while the corrupt fill value is reported cleanly.
