@@ -153,7 +153,7 @@ validate_jar_file() {
         fi
         if [[ "${jar_basename}" == hdf5-szip-native-* ]]; then
             local mapped_libsz mapped_libaec
-            mapped_libsz=$(find "${temp_dir}/natives" -type f \( -name "libsz.so" -o -name "libsz.dylib" -o -name "sz.dll" \) 2>/dev/null | head -1)
+            mapped_libsz=$(find "${temp_dir}/natives" -type f \( -name "libsz.so" -o -name "libsz.dylib" -o -name "sz.dll" -o -name "szip.dll" \) 2>/dev/null | head -1)
             mapped_libaec=$(find "${temp_dir}/natives" -type f \( -name "libaec.so" -o -name "libaec.dylib" -o -name "aec.dll" \) 2>/dev/null | head -1)
             if [[ -z "${mapped_libsz}" ]]; then
                 add_error "hdf5-szip-native JAR missing mapped libsz name under natives/<platform>/"

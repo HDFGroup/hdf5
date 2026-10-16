@@ -671,7 +671,7 @@ jobs:
             echo "::error::Could not find hdf5-szip-native bundle"
             VERIFICATION_FAILED=true
           else
-            HAS_LIBSZ=$(jar tf "$SZIP_NATIVE_JAR" | grep -E 'natives/.*/(libsz\.so|libsz\.dylib|sz\.dll)' || true)
+            HAS_LIBSZ=$(jar tf "$SZIP_NATIVE_JAR" | grep -E 'natives/.*/(libsz\.so|libsz\.dylib|sz\.dll|szip\.dll)' || true)
             HAS_LIBAEC=$(jar tf "$SZIP_NATIVE_JAR" | grep -E 'natives/.*/(libaec\.so|libaec\.dylib|aec\.dll)' || true)
             if [ -n "$HAS_LIBSZ" ] && [ -n "$HAS_LIBAEC" ]; then
               echo "✅ hdf5-szip-native contains SciJava libaec/libsz library layout"
