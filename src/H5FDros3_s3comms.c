@@ -174,6 +174,7 @@ typedef struct H5FD__s3comms_check_cred_provider_params_t {
  * from HDF5's default atexit() handler.
  */
 static void H5FD__s3comms_term_func(void);
+static void H5FD__s3comms_release_resources(void);
 
 /* Callbacks for processing general requests */
 static void H5FD__s3comms_s3r_req_finish_cb(struct aws_s3_meta_request              *meta_request,
@@ -227,8 +228,15 @@ static const char *H5FD__s3comms_httpcode_to_str(long httpcode, bool *handled);
 /* Local Variables */
 /*******************/
 
-/* Boolean to determine if the AWS library has been initialized */
+/* Boolean to determine if the S3 communications interface (event loop group
+ * and host resolver) has been initialized
+ */
 static bool H5FD_ros3_aws_init_g = false;
+
+/* Boolean to determine if aws_s3_library_init() has been called and the
+ * atexit() cleanup handler has been registered
+ */
+static bool H5FD_ros3_aws_lib_init_g = false;
 
 /* Pointer to allocator used for AWS operations */
 static struct aws_allocator *H5FD_ros3_aws_allocator_g = NULL;
@@ -279,7 +287,26 @@ H5FD__s3comms_init(void)
      */
     H5FD_ros3_aws_allocator_g = aws_default_allocator();
 
-    aws_s3_library_init(H5FD_ros3_aws_allocator_g);
+    /* The interface may be re-initialized after H5close(), but on non-Windows
+     * platforms the aws-c-s3 library is only cleaned up at process exit, so
+     * initialize it and register the atexit() handler only once.
+     *
+     * On non-Windows platforms, work around issue where aws-c-s3 library
+     * doesn't shut down cleanly when called from HDF5's default atexit()
+     * handler. On Windows platforms, this cleanup is performed during VFD
+     * termination.
+     */
+    if (!H5FD_ros3_aws_lib_init_g) {
+        aws_s3_library_init(H5FD_ros3_aws_allocator_g);
+
+#ifndef H5_HAVE_WINDOWS
+        if (0 != atexit(H5FD__s3comms_term_func))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+                        "couldn't register function for cleaning up aws-c-s3 library");
+#endif
+
+        H5FD_ros3_aws_lib_init_g = true;
+    }
 
     /* Set up an event loop group using platform default event loop */
     event_loop_group_opts.loop_count = 0;
@@ -310,7 +337,7 @@ H5FD__s3comms_init(void)
 
     /* Configure aws-c-s3 logging if enabled */
     log_level = getenv(HDF5_ROS3_VFD_LOG_LEVEL);
-    if (log_level && (*log_level != '\0')) {
+    if (!H5FD_ros3_aws_log_init_g && log_level && (*log_level != '\0')) {
         log_opts.level = AWS_LL_NONE;
         if (0 == HDstrcasecmp(log_level, "trace"))
             log_opts.level = AWS_LL_TRACE;
@@ -343,17 +370,6 @@ H5FD__s3comms_init(void)
         }
     }
 
-    /* On non-Windows platforms, work around issue where aws-c-s3 library
-     * doesn't shut down cleanly when called from HDF5's default atexit()
-     * handler. On Windows platforms, this cleanup is performed during VFD
-     * termination.
-     */
-#ifndef H5_HAVE_WINDOWS
-    if (0 != atexit(H5FD__s3comms_term_func))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
-                    "couldn't register function for cleaning up aws-c-s3 library");
-#endif
-
     H5FD_ros3_aws_init_g = true;
 
 done:
@@ -377,10 +393,9 @@ done:
 static void
 H5FD__s3comms_term_func(void)
 {
-    if (H5FD_ros3_aws_init_g) {
-        aws_host_resolver_release(H5FD_ros3_aws_host_resolver_g);
-        aws_event_loop_group_release(H5FD_ros3_aws_event_loop_group_g);
+    H5FD__s3comms_release_resources();
 
+    if (H5FD_ros3_aws_lib_init_g) {
 #ifndef H5_HAVE_WINDOWS
         aws_s3_library_clean_up();
 #elif defined(H5_HAVE_RTLDLLSHUTDOWNINPROGRESS)
@@ -399,14 +414,40 @@ H5FD__s3comms_term_func(void)
         /* Clean up logger interface after being sure everything else
          * has finished cleaning up
          */
-        if (H5FD_ros3_aws_log_init_g)
+        if (H5FD_ros3_aws_log_init_g) {
             aws_logger_clean_up(&H5FD_ros3_aws_logger_g);
+            H5FD_ros3_aws_log_init_g = false;
+        }
+
+        H5FD_ros3_aws_lib_init_g = false;
+    }
+} /* end H5FD__s3comms_term_func() */
+
+/*----------------------------------------------------------------------------
+ * Function:    H5FD__s3comms_release_resources
+ *
+ * Purpose:     Release the event loop group and host resolver created by
+ *              H5FD__s3comms_init(). Their threads exit asynchronously once
+ *              the last reference (including those held by S3 clients of
+ *              files that were already closed) is gone.
+ *
+ * Return:      void
+ *----------------------------------------------------------------------------
+ */
+static void
+H5FD__s3comms_release_resources(void)
+{
+    if (H5FD_ros3_aws_init_g) {
+        aws_host_resolver_release(H5FD_ros3_aws_host_resolver_g);
+        H5FD_ros3_aws_host_resolver_g = NULL;
+        aws_event_loop_group_release(H5FD_ros3_aws_event_loop_group_g);
+        H5FD_ros3_aws_event_loop_group_g = NULL;
 
         H5FD_ros3_debug_g = false;
 
         H5FD_ros3_aws_init_g = false;
     }
-} /* end H5FD__s3comms_term_func() */
+} /* end H5FD__s3comms_release_resources() */
 
 /*----------------------------------------------------------------------------
  * Function:    H5FD__s3comms_term
@@ -423,11 +464,23 @@ H5FD__s3comms_term(void)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* On non-Windows platforms, cleanup is currently handled by an atexit()
-     * function above to work around cleanup ordering issues.
-     */
 #ifdef H5_HAVE_WINDOWS
+    /* On Windows platforms, no atexit() handler is registered, so the
+     * aws-c-s3 library is fully cleaned up here.
+     */
     H5FD__s3comms_term_func();
+#else
+    /* Release the event loop group and host resolver when the library is
+     * closed explicitly (H5close()). Their threads are "managed" aws-c-common
+     * threads, so another aws-c-* user in the process that calls
+     * aws_thread_join_all_managed() during its own shutdown (e.g., the AWS C++
+     * SDK's Aws::ShutdownAPI()) would otherwise block forever waiting for them.
+     *
+     * aws_s3_library_clean_up() also joins all managed threads, including ones
+     * owned by those other users, so on non-Windows platforms it is left to the
+     * atexit() handler above to work around cleanup ordering issues.
+     */
+    H5FD__s3comms_release_resources();
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
