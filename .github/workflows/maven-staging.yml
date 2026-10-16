@@ -714,6 +714,12 @@ jobs:
             echo "Validation script not found - skipping validation"
           fi
 
+      - name: Load native libraries from the Maven JARs
+        shell: bash
+        env:
+          ARTIFACT_DIR: ${{ runner.workspace }}/maven-artifacts
+        run: .github/scripts/test-native-bundles.sh "$ARTIFACT_DIR"
+
       - name: Install HDF5 binaries for testing
         shell: bash
         env:

@@ -140,6 +140,12 @@ function (hdf5java_add_native_maven_jar)
     list (APPEND _copy_commands
       COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:${_tgt}>" "${_natives}/${_stage_name}"
     )
+    if (NOT WIN32)
+      list (APPEND _copy_commands
+        COMMAND ${CMAKE_COMMAND} "-DFILE=${_natives}/${_stage_name}" "-DPLATFORM=${HDF5_MAVEN_PLATFORM}"
+                -P "${HDF5_SOURCE_DIR}/java/cmake/HDF5JavaStripRpath.cmake"
+      )
+    endif ()
   endforeach ()
 
   add_custom_command (
@@ -148,7 +154,7 @@ function (hdf5java_add_native_maven_jar)
     COMMAND ${CMAKE_COMMAND} -E make_directory "${_natives}"
     ${_copy_commands}
     COMMAND ${Java_JAR_EXECUTABLE} cfm "${_jar}" "${_manifest}" -C "${_stage}" .
-    DEPENDS ${_args_TARGETS} "${_manifest}"
+    DEPENDS ${_args_TARGETS} "${_manifest}" "${HDF5_SOURCE_DIR}/java/cmake/HDF5JavaStripRpath.cmake"
     COMMENT "Creating Maven native bundle ${_args_ARTIFACT_ID} (${HDF5_JAR_CLASSIFIER}, ${HDF5_NATIVE_LOADER_PLATFORM})"
     VERBATIM
   )
