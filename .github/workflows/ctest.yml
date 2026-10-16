@@ -1305,7 +1305,7 @@ jobs:
               path: ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos26_clang_s3.dmg
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
   
-build_and_test_s3_mac_intel:
+  build_and_test_s3_mac_intel:
   # MacOS intel S3 w/ Clang
   #
     name: "MacOS intel Clang S3"
