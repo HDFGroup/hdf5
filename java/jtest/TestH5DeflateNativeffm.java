@@ -45,9 +45,10 @@ public class TestH5DeflateNativeffm {
     {
         System.out.print(testname.getMethodName());
 
-        hdf5_h.H5open();
-        assumeTrue("libhdf5 built without zlib support",
-                   hdf5_h.H5Zfilter_avail(hdf5_h.H5Z_FILTER_DEFLATE()) > 0);
+        assertTrue("H5open failed", hdf5_h.H5open() >= 0);
+        int avail = hdf5_h.H5Zfilter_avail(hdf5_h.H5Z_FILTER_DEFLATE());
+        assertTrue("H5Zfilter_avail failed", avail >= 0);
+        assumeTrue("libhdf5 built without zlib support", avail > 0);
     }
 
     @After

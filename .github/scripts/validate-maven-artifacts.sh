@@ -258,15 +258,19 @@ validate_pom_file() {
         hdf5-java-jni
         hdf5-java-examples
     )
+    # The project's own artifactId is the first one outside <parent>; later ones belong to
+    # dependencies (the binding POMs list the native bundles in their profiles)
+    local own_artifact_id
+    own_artifact_id=$(sed '/<parent>/,/<\/parent>/d' "${pom_file}" | grep -o '<artifactId>[^<]*</artifactId>' | head -1 | sed 's/<[^>]*>//g' || true)
     local artifact_id_ok=false
     for aid in "${allowed_hdf5_artifact_ids[@]}"; do
-        if grep -Fq "<artifactId>${aid}</artifactId>" "${pom_file}"; then
+        if [[ "${own_artifact_id}" == "${aid}" ]]; then
             artifact_id_ok=true
             break
         fi
     done
     if [[ "${artifact_id_ok}" != "true" ]]; then
-        add_error "Invalid or missing artifactId in POM (expected one of: hdf5-native, hdf5-zlib-native, hdf5-szip-native, hdf5-jni-native, hdf5-java, hdf5-java-ffm, hdf5-java-jni, hdf5-java-examples)"
+        add_error "Invalid or missing artifactId '${own_artifact_id}' in POM (expected one of: ${allowed_hdf5_artifact_ids[*]})"
     fi
 
     # Extract version
@@ -403,6 +407,50 @@ validate_platform_classifiers() {
 }
 
 # Maven dependency simulation
+# Sets sim_group_id, sim_artifact_id, sim_version, sim_jar_file and sim_classifier for a POM;
+# sim_jar_file is empty when no JAR for the POM's artifactId is found next to it
+read_simulation_coordinates() {
+    local pom_file="$1"
+
+    sim_group_id=$(grep -o '<groupId>[^<]*</groupId>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
+    sim_artifact_id=$(grep -o '<artifactId>[^<]*</artifactId>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
+    sim_version=$(grep -o '<version>[^<]*</version>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
+
+    # Find the JAR for this POM's artifactId (parenthesize -o so -maxdepth applies to both)
+    sim_jar_file=$(find "$(dirname "${pom_file}")" -maxdepth 2 \( -name "${sim_artifact_id}-${sim_version}.jar" -o -name "${sim_artifact_id}-${sim_version}-*.jar" -o -name "${sim_artifact_id}-*.jar" \) 2>/dev/null | head -1)
+
+    # Platform classifier from <artifactId>-<version>-<classifier>.jar
+    sim_classifier=""
+    local jar_basename
+    jar_basename=$(basename "${sim_jar_file:-none}" .jar)
+    if [[ "${jar_basename}" == "${sim_artifact_id}-${sim_version}-"* ]]; then
+        sim_classifier="${jar_basename#"${sim_artifact_id}-${sim_version}-"}"
+    fi
+}
+
+# Install a POM's JAR into the local Maven repository with its classifier, so that classified
+# dependencies between artifacts (hdf5-native on hdf5-zlib-native, for example) resolve
+install_maven_artifact() {
+    local pom_file="$1"
+
+    command -v mvn &> /dev/null || return 0
+    read_simulation_coordinates "${pom_file}"
+    [[ -n "${sim_jar_file}" ]] || return 0
+
+    log_info "Installing artifact to local Maven repository: ${sim_group_id}:${sim_artifact_id}:${sim_version}${sim_classifier:+:${sim_classifier}}"
+    if ! mvn install:install-file \
+        -Dfile="${sim_jar_file}" \
+        -DgroupId="${sim_group_id}" \
+        -DartifactId="${sim_artifact_id}" \
+        -Dversion="${sim_version}" \
+        ${sim_classifier:+-Dclassifier="${sim_classifier}"} \
+        -Dpackaging=jar \
+        -DpomFile="${pom_file}" \
+        -q 2>&1 | tee -a "${VALIDATION_LOG}"; then
+        add_warning "Failed to install ${sim_artifact_id} to local Maven repository"
+    fi
+}
+
 simulate_maven_dependency() {
     local pom_file="$1"
 
@@ -418,32 +466,15 @@ simulate_maven_dependency() {
     temp_project=$(mktemp -d)
     trap "rm -rf '${temp_project}'" EXIT
 
-    # Extract coordinates from POM
-    local group_id artifact_id version
-    group_id=$(grep -o '<groupId>[^<]*</groupId>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
-    artifact_id=$(grep -o '<artifactId>[^<]*</artifactId>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
-    version=$(grep -o '<version>[^<]*</version>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
+    local group_id artifact_id version classifier
+    read_simulation_coordinates "${pom_file}"
+    group_id="${sim_group_id}"
+    artifact_id="${sim_artifact_id}"
+    version="${sim_version}"
+    classifier="${sim_classifier}"
 
-    # Find the JAR for this POM's artifactId (parenthesize -o so -maxdepth applies to both)
-    local jar_file
-    jar_file=$(find "$(dirname "${pom_file}")" -maxdepth 2 \( -name "${artifact_id}-${version}.jar" -o -name "${artifact_id}-${version}-*.jar" -o -name "${artifact_id}-*.jar" \) 2>/dev/null | head -1)
-
-    if [ -z "${jar_file}" ]; then
+    if [ -z "${sim_jar_file}" ]; then
         add_warning "Could not find JAR file for ${artifact_id}:${version} - skipping dependency simulation"
-        return 0
-    fi
-
-    # Install artifact to local Maven repository first
-    log_info "Installing artifact to local Maven repository: ${group_id}:${artifact_id}:${version}"
-    if ! mvn install:install-file \
-        -Dfile="${jar_file}" \
-        -DgroupId="${group_id}" \
-        -DartifactId="${artifact_id}" \
-        -Dversion="${version}" \
-        -Dpackaging=jar \
-        -DpomFile="${pom_file}" \
-        -q 2>&1 | tee -a "${VALIDATION_LOG}"; then
-        add_warning "Failed to install artifact to local Maven repository"
         return 0
     fi
 
@@ -462,7 +493,8 @@ simulate_maven_dependency() {
         <dependency>
             <groupId>${group_id}</groupId>
             <artifactId>${artifact_id}</artifactId>
-            <version>${version}</version>
+            <version>${version}</version>${classifier:+
+            <classifier>${classifier}</classifier>}
         </dependency>
     </dependencies>
 </project>
@@ -640,8 +672,12 @@ main() {
         validate_platform_classifiers "${jar_files[@]}"
     fi
 
-    # Maven dependency simulation (once per POM that has a matching JAR in the same directory tree)
+    # Maven dependency simulation (once per POM that has a matching JAR in the same directory tree).
+    # Install every artifact first: the native bundles depend on each other by classifier.
     if [[ ${#pom_files[@]} -gt 0 ]]; then
+        for pom_file in "${pom_files[@]}"; do
+            install_maven_artifact "${pom_file}"
+        done
         for pom_file in "${pom_files[@]}"; do
             simulate_maven_dependency "${pom_file}"
         done

@@ -13,21 +13,23 @@
 package hdf.hdf5lib;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 
-import org.scijava.nativelib.BaseJniExtractor;
 import org.scijava.nativelib.JniExtractor;
 import org.scijava.nativelib.NativeLibraryUtil;
 import org.scijava.nativelib.NativeLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Loads bundled HDF5 shared libraries from the {@code hdf5-native}, {@code hdf5-zlib-native},
  * {@code hdf5-szip-native}, and {@code hdf5-jni-native} Maven JARs using SciJava
- * native-lib-loader ({@code natives/&lt;platform&gt;/} layout).
+ * native-lib-loader ({@code natives/<platform>/} layout).
  * <p>
- * Extraction uses {@link org.scijava.nativelib.NativeLibraryUtil#loadNativeLibrary}, so only
- * classpath native JARs are consulted, not {@code java.library.path} as
- * {@link org.scijava.nativelib.NativeLoader#loadLibrary(String, String...)} would do.
+ * Only classpath native JARs are consulted, not {@code java.library.path} as
+ * {@link org.scijava.nativelib.NativeLoader#loadLibrary(String, String...)} would do. A library
+ * that is bundled but fails to load is logged as a warning with the reason.
  * <p>
  * No Panama/JNI types are referenced here, so this class can initialize before
  * jextract-generated classes (FFM) or {@code System.loadLibrary("hdf5_java")} (JNI).
@@ -40,10 +42,12 @@ public final class Hdf5NativeLoader {
      */
     public static final String SKIP_PROPERTY = "hdf.hdf5lib.Hdf5NativeLoader.skip";
 
+    private static final Logger log = LoggerFactory.getLogger(Hdf5NativeLoader.class);
+
     private static final boolean IS_WINDOWS =
         System.getProperty("os.name", "").toLowerCase().startsWith("windows");
 
-    /* zlib 1.3+ builds z.dll; other Windows zlib builds are named zlib.dll or zlib1.dll */
+    /* Names used by Windows zlib builds: z.dll (zlib's CMake build), zlib.dll, zlib1.dll */
     private static final String[] ZLIB_NAMES =
         IS_WINDOWS ? new String[] {"z", "zlib", "zlib1"} : new String[] {"z"};
     /* libaec names its libsz compatibility library szip.dll for MSVC builds */
@@ -59,6 +63,9 @@ public final class Hdf5NativeLoader {
     private static volatile boolean loadedHdf5     = false;
     private static volatile boolean loadedHdf5Java = false;
 
+    /* File the bundled libhdf5 was loaded from */
+    private static volatile Path hdf5Path = null;
+
     private Hdf5NativeLoader() {}
 
     private static boolean skipBundledLoad()
@@ -68,20 +75,47 @@ public final class Hdf5NativeLoader {
 
     /**
      * Load the first of {@code names} found in the bundled native Maven JARs
-     * ({@code natives/&lt;platform&gt;/} on the classpath).
+     * ({@code natives/<platform>/} on the classpath).
      * <p>
      * Unlike {@link org.scijava.nativelib.NativeLoader#loadLibrary(String, String...)}, this does
      * not call {@code System.loadLibrary} first, so in-tree CI with {@code java.library.path} does
      * not preload build-tree libs before {@code hdf5_java}.
+     *
+     * @return the file that was loaded, or null if none of {@code names} is bundled or the bundled
+     *         library could not be loaded
      */
-    private static boolean loadFirstBundled(String... names)
+    private static File loadFirstBundled(String... names)
     {
-        JniExtractor extractor = NativeLoader.getJniExtractor();
-        for (String name : names) {
-            if (NativeLibraryUtil.loadNativeLibrary(extractor, name))
-                return true;
+        if (NativeLibraryUtil.getArchitecture() == NativeLibraryUtil.Architecture.UNKNOWN) {
+            log.debug("No bundled native libraries for this platform");
+            return null;
         }
-        return false;
+        JniExtractor extractor = NativeLoader.getJniExtractor();
+        String libPath = NativeLibraryUtil.getPlatformLibraryPath(NativeLibraryUtil.DEFAULT_SEARCH_PATH);
+        for (String name : names) {
+            File lib;
+            try {
+                lib = extractor.extractJni(libPath, name);
+            }
+            catch (IOException err) {
+                log.warn("Bundled native library {}{} could not be extracted", libPath,
+                         System.mapLibraryName(name), err);
+                return null;
+            }
+            if (lib == null)
+                continue; // not bundled under this name
+            try {
+                System.load(lib.getAbsolutePath());
+                log.debug("Loaded bundled native library {}", lib);
+                return lib;
+            }
+            catch (UnsatisfiedLinkError err) {
+                log.warn("Bundled native library {} could not be loaded: {}", lib, err.getMessage());
+                return null;
+            }
+        }
+        log.debug("No bundled native library {} under {}", String.join("/", names), libPath);
+        return null;
     }
 
     /**
@@ -94,7 +128,7 @@ public final class Hdf5NativeLoader {
     {
         if (!attemptedZlib) {
             attemptedZlib = true;
-            loadedZlib    = !skipBundledLoad() && loadFirstBundled(ZLIB_NAMES);
+            loadedZlib    = !skipBundledLoad() && loadFirstBundled(ZLIB_NAMES) != null;
         }
         return loadedZlib;
     }
@@ -113,7 +147,8 @@ public final class Hdf5NativeLoader {
     {
         if (!attemptedSzip) {
             attemptedSzip = true;
-            loadedSzip    = !skipBundledLoad() && loadFirstBundled("aec") && loadFirstBundled(SZ_NAMES);
+            loadedSzip =
+                !skipBundledLoad() && loadFirstBundled("aec") != null && loadFirstBundled(SZ_NAMES) != null;
         }
         return loadedSzip;
     }
@@ -132,7 +167,9 @@ public final class Hdf5NativeLoader {
     {
         if (!attemptedHdf5) {
             attemptedHdf5 = true;
-            loadedHdf5    = !skipBundledLoad() && loadFirstBundled("hdf5");
+            File lib      = skipBundledLoad() ? null : loadFirstBundled("hdf5");
+            hdf5Path      = (lib == null) ? null : lib.toPath();
+            loadedHdf5    = lib != null;
         }
         return loadedHdf5;
     }
@@ -145,16 +182,7 @@ public final class Hdf5NativeLoader {
      *
      * @return the path, or null if the bundled HDF5 library was not loaded
      */
-    public static Path bundledHdf5Path()
-    {
-        if (!loadedHdf5)
-            return null;
-        JniExtractor extractor = NativeLoader.getJniExtractor();
-        if (!(extractor instanceof BaseJniExtractor))
-            return null;
-        File lib = new File(((BaseJniExtractor)extractor).getJniDir(), System.mapLibraryName("hdf5"));
-        return lib.isFile() ? lib.toPath() : null;
-    }
+    public static Path bundledHdf5Path() { return hdf5Path; }
 
     /**
      * Loads the bundled hdf5_java JNI library when present. Safe to call multiple times.
@@ -165,7 +193,7 @@ public final class Hdf5NativeLoader {
     {
         if (!attemptedHdf5Java) {
             attemptedHdf5Java = true;
-            loadedHdf5Java    = !skipBundledLoad() && loadFirstBundled("hdf5_java");
+            loadedHdf5Java    = !skipBundledLoad() && loadFirstBundled("hdf5_java") != null;
         }
         return loadedHdf5Java;
     }

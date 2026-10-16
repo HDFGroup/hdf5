@@ -330,9 +330,14 @@ public class H5 implements java.io.Serializable {
 
         try {
             Hdf5NativeLoader.loadBundledDependenciesBeforeHdf5();
+            if (Hdf5NativeLoader.bundledHdf5LoadSucceeded())
+                log.info("Loaded bundled hdf5 from " + Hdf5NativeLoader.bundledHdf5Path());
+        }
+        catch (NoClassDefFoundError err) {
+            log.debug("Bundled HDF5 native libraries not loaded: " + err.getMessage());
         }
         catch (Throwable err) {
-            log.debug("Bundled HDF5 native dependencies not loaded: " + err.getMessage());
+            log.warn("Bundled HDF5 native libraries not loaded", err);
         }
 
         try {

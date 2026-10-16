@@ -11,7 +11,7 @@
     <packaging>jar</packaging>
 
     <name>HDF5 native shared libraries</name>
-    <description>Bundled libhdf5 shared library for HDF5 Java (FFM/JNI) under natives/ (SciJava native-lib-loader layout). Loaded from the classpath by hdf5-java-ffm / hdf5-java-jni when present.</description>
+    <description>Bundled libhdf5 shared library for HDF5 Java (FFM/JNI) under natives/ (SciJava native-lib-loader layout). Loaded from the classpath by hdf5-java-ffm / hdf5-java-jni when present. Depends on hdf5-zlib-native / hdf5-szip-native when libhdf5 links zlib / libaec dynamically.</description>
     <url>https://github.com/HDFGroup/hdf5</url>
 
     <licenses>
@@ -40,5 +40,5 @@
         <system>GitHub</system>
         <url>https://github.com/HDFGroup/hdf5/issues</url>
     </issueManagement>
-
+@HDF5_NATIVE_DEPENDENCY_PROFILES@
 </project>

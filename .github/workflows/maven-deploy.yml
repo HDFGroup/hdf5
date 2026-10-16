@@ -333,6 +333,7 @@ jobs:
           # Deploy each JAR file with proper artifact ID and platform classifier
           success_count=0
           declare -A pom_deployed
+          declare -A jar_deployed
           total_count=0
 
           echo "=== Starting JAR Deployment ==="
@@ -433,13 +434,20 @@ jobs:
               fi
             fi
 
+            # The FFM and JNI builds of a platform both produce hdf5-native, hdf5-zlib-native and
+            # hdf5-szip-native; a repository accepts each artifact and classifier only once
+            jar_key="${ARTIFACT_ID}:${CURRENT_CLASSIFIER}"
+            if [[ -n "${jar_deployed[$jar_key]:-}" ]]; then
+              echo "Skipping ${jar_basename}: ${ARTIFACT_ID} (${CURRENT_CLASSIFIER:-no classifier}) is already deployed"
+              continue
+            fi
+
             # deploy-file uploads -DpomFile with every JAR; release repositories reject a second
             # upload of the same POM, so it goes up with the first JAR of each artifact only
             if [[ -n "${pom_deployed[$ARTIFACT_ID]:-}" ]]; then
               pom_opts="-DgeneratePom=false"
             else
               pom_opts="-DpomFile=\"${POM_FOR_DEPLOY}\""
-              pom_deployed[$ARTIFACT_ID]=1
             fi
 
             # Check if this is a dry run
@@ -447,6 +455,8 @@ jobs:
               echo "🧪 DRY RUN: Would deploy ${jar_basename} as ${ARTIFACT_ID} with classifier ${CURRENT_CLASSIFIER:-none}"
               echo "Command would be: mvn deploy:deploy-file -DgroupId=org.hdfgroup -DartifactId=${ARTIFACT_ID} -Dversion=${HDF5_VERSION} -Dfile=${jar_file} ${pom_opts} ${classifier_opts}"
               success_count=$((success_count + 1))
+              jar_deployed[$jar_key]=1
+              pom_deployed[$ARTIFACT_ID]=1
             else
               echo "🚀 Deploying ${jar_basename}..."
 
@@ -468,6 +478,8 @@ jobs:
               if eval $deploy_cmd; then
                 echo "✓ Successfully deployed: ${jar_basename}"
                 success_count=$((success_count + 1))
+                jar_deployed[$jar_key]=1
+                pom_deployed[$ARTIFACT_ID]=1
               else
                 deploy_exit_code=$?
                 echo "✗ Failed to deploy: ${jar_basename} (exit code: $deploy_exit_code)"

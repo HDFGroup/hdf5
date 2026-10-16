@@ -44,28 +44,11 @@ cat > pom.xml << EOF
     </repositories>
 
     <dependencies>
-        <!-- Java bindings; hdf5-jni-native is transitive (required). libhdf5 stack is explicit opt-in. -->
+        <!-- Java bindings only: hdf5-jni-native and hdf5-native are transitive (required), and
+             hdf5-native brings hdf5-zlib-native / hdf5-szip-native -->
         <dependency>
             <groupId>org.hdfgroup</groupId>
             <artifactId>hdf5-java-jni</artifactId>
-            <version>\${hdf5.version}</version>
-            <classifier>linux-x86_64</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.hdfgroup</groupId>
-            <artifactId>hdf5-native</artifactId>
-            <version>\${hdf5.version}</version>
-            <classifier>linux-x86_64</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.hdfgroup</groupId>
-            <artifactId>hdf5-zlib-native</artifactId>
-            <version>\${hdf5.version}</version>
-            <classifier>linux-x86_64</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.hdfgroup</groupId>
-            <artifactId>hdf5-szip-native</artifactId>
             <version>\${hdf5.version}</version>
             <classifier>linux-x86_64</classifier>
         </dependency>

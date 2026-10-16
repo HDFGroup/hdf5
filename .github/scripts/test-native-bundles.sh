@@ -36,6 +36,49 @@ for required in HDF5_JAR NATIVE_JAR; do
   fi
 done
 
+# hdf5-native's POM lists the zlib / szip bundles that libhdf5 links; each must be present
+NATIVE_POM="$ARTIFACTS_DIR/pom-hdf5-native.xml"
+if [[ -f "$NATIVE_POM" ]]; then
+  for dep in zlib szip; do
+    jar_var="$(tr '[:lower:]' '[:upper:]' <<< "$dep")_JAR"
+    if grep "<artifactId>hdf5-${dep}-native</artifactId>" "$NATIVE_POM" >/dev/null && [[ -z "${!jar_var}" ]]; then
+      echo "ERROR: hdf5-native depends on hdf5-${dep}-native, which is not in ${ARTIFACTS_DIR}" >&2
+      exit 1
+    fi
+  done
+else
+  echo "WARNING: ${NATIVE_POM} not found; zlib/szip bundle expectations come from the JARs present" >&2
+fi
+
+# Empty working directory so no stray native library is found next to the test
+WORK_DIR="$(mktemp -d)"
+trap 'rm -rf "$WORK_DIR"' EXIT
+
+# Bundled libraries must not keep runtime search paths into the build tree
+RPATH_DIR="$WORK_DIR/rpath-check"
+mkdir -p "$RPATH_DIR"
+for jar in "$NATIVE_JAR" "$ZLIB_JAR" "$SZIP_JAR" "$JNI_JAR"; do
+  [[ -n "$jar" ]] || continue
+  (cd "$RPATH_DIR" && jar xf "$(to_java_path "$jar")")
+done
+while IFS= read -r lib; do
+  case "$(uname -s)" in
+    Linux)
+      if command -v readelf >/dev/null 2>&1 && readelf -d "$lib" | grep -E '\((RPATH|RUNPATH)\)'; then
+        echo "ERROR: $(basename "$lib") still has RPATH/RUNPATH" >&2
+        exit 1
+      fi
+      ;;
+    Darwin)
+      if otool -l "$lib" | grep -A2 'cmd LC_RPATH'; then
+        echo "ERROR: $(basename "$lib") still has LC_RPATH" >&2
+        exit 1
+      fi
+      ;;
+  esac
+done < <(find "$RPATH_DIR/natives" -type f \( -name '*.so' -o -name '*.dylib' \))
+rm -rf "$RPATH_DIR"
+
 CP=""
 for jar in "$HDF5_JAR" "$NATIVE_JAR" "$ZLIB_JAR" "$SZIP_JAR" "$JNI_JAR" \
            "$REPO_ROOT/java/lib/native-lib-loader-2.5.0.jar" \
@@ -59,9 +102,6 @@ echo "Java options: ${JAVA_OPTS[*]}"
 echo "Classpath:"
 tr "$SEP" '\n' <<< "$CP" | sed 's/^/  /'
 
-# Empty working directory so no stray native library is found next to the test
-WORK_DIR="$(mktemp -d)"
-trap 'rm -rf "$WORK_DIR"' EXIT
 cp "$SCRIPT_DIR/NativeBundleSmokeTest.java" "$WORK_DIR/"
 cd "$WORK_DIR"
 

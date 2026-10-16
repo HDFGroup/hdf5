@@ -33,25 +33,25 @@ HDF5 provides Java API artifacts and platform-specific native bundles:
 </tr>
 <tr>
   <td><strong>hdf5-native</strong></td>
-  <td>Java 8+</td>
+  <td>n/a (native)</td>
   <td>Platform native libhdf5 bundle loaded via SciJava native-lib-loader</td>
-  <td>Optional; add explicitly for bundled libhdf5</td>
+  <td>Required transitive dependency of hdf5-java-jni; optional for hdf5-java-ffm</td>
 </tr>
 <tr>
   <td><strong>hdf5-zlib-native</strong></td>
-  <td>Java 8+</td>
+  <td>n/a (native)</td>
   <td>Platform zlib bundle used by libhdf5's built-in deflate/GZIP filter</td>
-  <td>Optional; add explicitly when shared zlib is enabled</td>
+  <td>Transitive dependency of hdf5-native when libhdf5 links zlib dynamically</td>
 </tr>
 <tr>
   <td><strong>hdf5-szip-native</strong></td>
-  <td>Java 8+</td>
+  <td>n/a (native)</td>
   <td>Platform libaec (libsz + libaec) bundle used by libhdf5's built-in SZIP filter</td>
-  <td>Optional; add explicitly when shared libaec (szip) is enabled</td>
+  <td>Transitive dependency of hdf5-native when libhdf5 links libaec dynamically</td>
 </tr>
 <tr>
   <td><strong>hdf5-jni-native</strong></td>
-  <td>Java 8+</td>
+  <td>n/a (native)</td>
   <td>Platform JNI bridge bundle for hdf5-java-jni</td>
   <td>Required transitive dependency of hdf5-java-jni</td>
 </tr>
@@ -63,7 +63,7 @@ HDF5 provides Java API artifacts and platform-specific native bundles:
 </tr>
 </table>
 
-The HDF5 deflate filter is exposed through APIs such as <code>H5Pset_deflate</code> and through tools as <code>GZIP=level</code>. It is built into libhdf5 when zlib support is enabled; <code>hdf5-zlib-native</code> ships the runtime zlib library needed by that built-in filter when libhdf5 links zlib dynamically. Call <code>H5.loadH5Lib()</code> once at startup; bundled zlib is loaded automatically before libhdf5. No <code>HDF5_PLUGIN_PATH</code> or external HDF5 installation is required for gzip/chunked datasets when using these Maven artifacts.
+The HDF5 deflate filter is exposed through APIs such as <code>H5Pset_deflate</code> and through tools as <code>GZIP=level</code>. It is built into libhdf5 when zlib support is enabled; <code>hdf5-zlib-native</code> ships the runtime zlib library needed by that built-in filter when libhdf5 links zlib dynamically. Call <code>H5.loadH5Lib()</code> once at startup; bundled zlib is loaded automatically before libhdf5. With <code>hdf5-native</code> on the classpath (it brings <code>hdf5-zlib-native</code> when needed), no <code>HDF5_PLUGIN_PATH</code> or external HDF5 installation is required for gzip/chunked datasets.
 
 The HDF5 SZIP filter is exposed through <code>H5Pset_szip</code> and uses the libaec szip-compatible API. It is built into libhdf5 when SZIP support is enabled; <code>hdf5-szip-native</code> ships the runtime libaec/libsz shared libraries needed by that built-in filter when libhdf5 links libaec dynamically.
 
