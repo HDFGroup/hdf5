@@ -713,7 +713,7 @@
     },
     {
       "name": "ci-StdShar-MSVC-S3",
-      "description": "GNUC S3 Build for x64 (Release)",
+      "description": "MSVC Standard/S3 Build for x64 (Release)",
       "configurePreset": "ci-StdShar-MSVC-S3",
       "verbose": true,
       "inherits": [
@@ -754,7 +754,7 @@
     },
     {
       "name": "ci-StdShar-macos-Clang-S3",
-      "description": "Clang S3 Build for macos (Release)",
+      "description": "Clang Standard/S3 Build for macos (Release)",
       "configurePreset": "ci-StdShar-macos-Clang-S3",
       "verbose": true,
       "inherits": [
