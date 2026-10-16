@@ -145,7 +145,7 @@ H5TS__init_package(void)
 #endif
 
     /* Initialize the mutex between the library's own worker threads */
-    if (H5_UNLIKELY(H5TS_mutex_init(&H5TS_api_info_p.internal_mutex, H5TS_MUTEX_TYPE_RECURSIVE) < 0))
+    if (H5_UNLIKELY(H5TS_mutex_init(&H5TS_api_info_p.internal_mutex, H5TS_MUTEX_TYPE_PLAIN) < 0))
         HGOTO_DONE(FAIL);
     H5TS_atomic_init_uint(&H5TS_api_info_p.attempt_lock_count, 0);
 

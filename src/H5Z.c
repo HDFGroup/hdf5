@@ -293,6 +293,9 @@ H5Z__upgrade_class_vers(const void *_cls, H5Z_class3_t *cls3_buf)
     assert(cls);
     assert(cls3_buf);
 
+    HDcompile_assert(offsetof(H5Z_class2_t, version) == offsetof(H5Z_class3_t, version));
+    HDcompile_assert(offsetof(H5Z_class1_t, id) == offsetof(H5Z_class3_t, version));
+
     /* Check H5Z_class_t version number; this is where a function to convert
      * from an outdated version should be called.
      *
@@ -303,7 +306,7 @@ H5Z__upgrade_class_vers(const void *_cls, H5Z_class3_t *cls3_buf)
      * at least 256, there should be no overlap and the version of the struct
      * can be determined by the value of the first field.
      */
-    if (cls->version == H5Z_CLASS_T_VERS_2) {
+    if ((cls->version == H5Z_CLASS_T_VERS_2) || (cls->version == H5Z_CLASS_T_VERS)) {
         /* This is an old "H5Z_class2_t" */
         const H5Z_class2_t *cls_old = (const H5Z_class2_t *)cls;
 
@@ -818,7 +821,7 @@ H5Z_filter_avail(H5Z_filter_t id)
 
     /* Search for plugin */
     key.id = (int)id;
-    if (H5PL_load(H5PL_TYPE_FILTER, &key, (const void **)&filter_info) < 0)
+    if (H5PL_load(H5PL_TYPE_FILTER, &key, (const void **)&filter_info, false) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, FAIL, "unable to search for filter plugin");
 
     /* If filter plugin was found, register it */
@@ -1452,7 +1455,7 @@ H5Z__find_idx_load(const H5Z_filter_info_t *filter, bool required)
      */
     if ((fclass_idx = H5Z__find_idx(filter->id)) < 0) {
         H5PL_key_t          key;
-        const H5Z_class3_t *filter_info;
+        const H5Z_class3_t *filter_info = NULL;
         bool                not_found = false;
 
 #ifdef H5_HAVE_THREADS
@@ -1463,8 +1466,11 @@ H5Z__find_idx_load(const H5Z_filter_info_t *filter, bool required)
 
         /* Try loading the filter */
         key.id = (int)(filter->id);
-        if (H5PL_load(H5PL_TYPE_FILTER, &key, (const void **)&filter_info) < 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, FAIL, "unable to search for filter plugin");
+        if (H5PL_load(H5PL_TYPE_FILTER, &key, (const void **)&filter_info, required) < 0) {
+            /* Issue error on failure but don't end yet - let this function print the informative error message in the not_found section */
+            HDONE_ERROR(H5E_PLINE, H5E_CANTLOAD, FAIL, "unable to search for filter plugin");
+            assert(!filter_info);
+        }
 
         /* If we found the filter plugin, register it and get its index */
         if (filter_info) {

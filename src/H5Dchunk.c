@@ -2969,7 +2969,6 @@ H5D__chunk_may_use_threading(const H5D_dset_io_info_t *dset_info)
     if (!H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_READWRITE_NO_H5_CALLS))
         HGOTO_DONE(false);
 
-#ifdef H5_HAVE_PARALLEL
     /* The worker threads read through the VFD, so a file on an MPI-based
      * driver would have them calling MPI from outside the main thread.
      * That is only legal when the application initialized MPI at
@@ -2978,7 +2977,6 @@ H5D__chunk_may_use_threading(const H5D_dset_io_info_t *dset_info)
      */
     if (H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI))
         HGOTO_DONE(false);
-#endif /* H5_HAVE_PARALLEL */
 
     /* Now check for any filters that re-enter HDF5 */
     if (dataset->shared->dcpl_cache.pline.nused &&

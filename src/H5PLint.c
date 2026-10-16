@@ -219,13 +219,16 @@ done:
  *              The function searches first in the cached plugins and then
  *              in the paths listed in the path table.
  *
+ *              If required is set to true, returns an error if it does not
+ *              load the plugin.
+ *
  * Return:      Success:        non-negative
  *              Failure:        negative
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PL_load(H5PL_type_t type, const H5PL_key_t *key, const void **plugin)
+H5PL_load(H5PL_type_t type, const H5PL_key_t *key, const void **plugin, bool required)
 {
     H5PL_search_params_t search_params;       /* Plugin search parameters     */
     bool                 found       = false; /* Whether the plugin was found */
@@ -239,19 +242,37 @@ H5PL_load(H5PL_type_t type, const H5PL_key_t *key, const void **plugin)
     /* Check if plugins can be loaded for this plugin type */
     switch (type) {
         case H5PL_TYPE_FILTER:
-            if ((H5PL_plugin_control_mask_g & H5PL_FILTER_PLUGIN) == 0)
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL, "filter plugins disabled");
+            if ((H5PL_plugin_control_mask_g & H5PL_FILTER_PLUGIN) == 0) {
+                if (required)
+                    HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL, "filter plugins disabled");
+                else {
+                    *plugin = NULL;
+                    HGOTO_DONE(SUCCEED);
+                }
+            }
             break;
 
         case H5PL_TYPE_VOL:
-            if ((H5PL_plugin_control_mask_g & H5PL_VOL_PLUGIN) == 0)
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL,
-                            "Virtual Object Layer (VOL) driver plugins disabled");
+            if ((H5PL_plugin_control_mask_g & H5PL_VOL_PLUGIN) == 0) {
+                if (required)
+                    HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL,
+                                "Virtual Object Layer (VOL) driver plugins disabled");
+                else {
+                    *plugin = NULL;
+                    HGOTO_DONE(SUCCEED);
+                }
+            }
             break;
 
         case H5PL_TYPE_VFD:
-            if ((H5PL_plugin_control_mask_g & H5PL_VFD_PLUGIN) == 0)
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL, "Virtual File Driver (VFD) plugins disabled");
+            if ((H5PL_plugin_control_mask_g & H5PL_VFD_PLUGIN) == 0) {
+                if (required)
+                    HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL, "Virtual File Driver (VFD) plugins disabled");
+                else {
+                    *plugin = NULL;
+                    HGOTO_DONE(SUCCEED);
+                }
+            }
             break;
 
         case H5PL_TYPE_ERROR:
@@ -272,6 +293,12 @@ H5PL_load(H5PL_type_t type, const H5PL_key_t *key, const void **plugin)
     if (!found)
         if (H5PL__find_plugin_in_path_table(&search_params, &found, &plugin_info) < 0)
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in path table failed");
+
+    /* Return an error if required is true and we haven't found a plugin */
+    if (!found && required)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOTFOUND, FAIL,
+                    "can't find plugin. Check either HDF5_VOL_CONNECTOR, HDF5_PLUGIN_PATH, default location, "
+                    "or path set by H5PLxxx functions");
 
     /* Return the plugin if it was found */
     assert(!found != !!plugin_info); /* !found XOR plugin_info */

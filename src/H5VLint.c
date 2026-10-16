@@ -1467,10 +1467,8 @@ H5VL__register_connector_by_name(const char *name, hid_t vipl_id)
         /* Try loading the connector */
         plugin_key.vol.kind   = H5VL_GET_CONNECTOR_BY_NAME;
         plugin_key.vol.u.name = name;
-        if (H5PL_load(H5PL_TYPE_VOL, &plugin_key, (const void **)&cls) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to search for VOL connector");
-        if (!cls)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "VOL connector plugin not found");
+        if (H5PL_load(H5PL_TYPE_VOL, &plugin_key, (const void **)&cls, true) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to load VOL connector");
 
         /* Create a connector for the class we loaded */
         if (NULL == (connector = H5VL__register_connector(cls, vipl_id)))
@@ -1523,10 +1521,8 @@ H5VL__register_connector_by_value(H5VL_class_value_t value, hid_t vipl_id)
         /* Try loading the connector */
         plugin_key.vol.kind    = H5VL_GET_CONNECTOR_BY_VALUE;
         plugin_key.vol.u.value = value;
-        if (H5PL_load(H5PL_TYPE_VOL, &plugin_key, (const void **)&cls) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to search for VOL connector");
-        if (!cls)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "VOL connector plugin not found");
+        if (H5PL_load(H5PL_TYPE_VOL, &plugin_key, (const void **)&cls, true) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to load VOL connector");
 
         /* Create a connector for the class we loaded */
         if (NULL == (connector = H5VL__register_connector(cls, vipl_id)))
