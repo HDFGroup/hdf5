@@ -26,8 +26,8 @@ static size_t H5Z__filter_shuffle(unsigned flags, size_t cd_nelmts, const unsign
                                   size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_SHUFFLE[1] = {{
-    H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
+const H5Z_class3_t H5Z_SHUFFLE[1] = {{
+    H5Z_CLASS_T_VERS_3,     /* H5Z_class_t version */
     H5Z_FILTER_SHUFFLE,     /* Filter id number		*/
     1,                      /* encoder_present flag (set to true) */
     1,                      /* decoder_present flag (set to true) */
@@ -35,6 +35,8 @@ const H5Z_class2_t H5Z_SHUFFLE[1] = {{
     NULL,                   /* The "can apply" callback     */
     H5Z__set_local_shuffle, /* The "set local" callback     */
     H5Z__filter_shuffle,    /* The actual filter function	*/
+    H5Z_FEAT_FILTER_THREADSAFE |
+        H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
 }};
 
 /* Local macros */

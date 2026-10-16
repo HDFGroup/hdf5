@@ -100,6 +100,21 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Added new VFD feature flag
+
+   Added a new Virtual File Driver (VFD) feature flag,
+   H5FD_FEAT_READWRITE_NO_H5_CALLS. This flag should be set when the read and
+   write callbacks do not make any HDF5 calls except for H5open().
+
+### Added new version of H5Z_class_t, H5Z_class3_t, to include feature flags
+
+   Added a new version of the H5Z_class_t struct, H5Z_class3_t. This version has
+   a new field, feature_flags, which indicates to the library which features the
+   plugin supports. The currently supported flags are
+   H5Z_FEAT_FILTER_THREADSAFE, which should be set when the filter callback is
+   threadsafe, and H5Z_FEAT_FILTER_NO_H5_CALLS, which should be set when the
+   filter makes no HDF5 calls except for H5open().
+
 ### Added support for internally concurrent multithreaded reads of chunked datasets
 
    Added 3 new functions to support this: H5TSset_internal_threads(),
@@ -108,14 +123,13 @@ We would like to thank the many HDF5 community members who contributed to this r
    This feature internally parallelizes read operations on chunked datasets.
    H5TSset_internal_threads() is used to enable the feature globally, while
    H5Pset_io_threads() can be used to disable the feature on a per-operation
-   basis. These functions are available whenever the library is built with a
+   basis. These functions are only available when the library is built with a
    threading package; see the Configuration section above. When performing an
-   internally threaded read, the library will concurrently read from disk,
-   unfilter, and scatter to memory all chunks in a read operation on a chunked
-   dataset. Currently each of these sub-operations is serialized (protected by
-   a mutex), so there is not yet likely to be any performance improvement.
+   internally threaded read, the library will, when possible, concurrently read
+   from disk, unfilter, and scatter to memory all chunks in a read operation on
+   a chunked dataset. Currently only the filter operations are executed
+   concurrently, the others are serialized.
 
-   Reads are not threaded in builds with HDF5_ENABLE_THREADSAFE.
 
 ## Parallel Library
 
