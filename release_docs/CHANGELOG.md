@@ -205,6 +205,12 @@ Fixes GitHub issue #6679.
 
    Fixes CVE-2026-19025
 
+### Fixed signed integer overflow in the scale-offset filter for full-range data
+
+   When a signed-integer dataset filtered with scale-offset contained values spanning the full range of the datatype, the filter's calculation of the difference between the maximum and minimum values would overflow, resulting in undefined behavior. The difference is now computed in the unsigned domain, producing the correct result without triggering an overflow.
+
+   Fixes GitHub issue #5861
+
 ### Fixed a crash when reading a dataset with a malformed fill value
 
    An old-style (either version 1 or version 2) fill value message that is marked "defined" but encodes a negative size leaves the fill value with a negative size and no datatype; `H5Pget_fill_value()` then passed that NULL datatype to `H5T_path_find()` and dereferenced it. `H5P_get_fill_value()` now rejects a fill value that has no datatype and returns an error, so the dataset itself remains readable while the corrupt fill value is reported cleanly.
