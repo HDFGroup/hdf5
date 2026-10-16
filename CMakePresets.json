@@ -472,6 +472,14 @@
       ]
     },
     {
+      "name": "ci-StdShar-macos-x86_64-Clang-S3",
+      "description": "Clang S3 Config for macos intel (Release)",
+      "inherits": [
+        "ci-StdShar-macos-x86_64-Clang",
+        "ci-S3"
+      ]
+    },
+    {
       "name": "ci-StdShar-GNUC",
       "description": "GNUC Standard Config for x64 with Java JNI (Java 11+)",
       "inherits": [
@@ -756,6 +764,15 @@
       "name": "ci-StdShar-macos-Clang-S3",
       "description": "Clang Standard/S3 Build for macos (Release)",
       "configurePreset": "ci-StdShar-macos-Clang-S3",
+      "verbose": true,
+      "inherits": [
+        "ci-macos-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-StdShar-macos-x86_64-Clang-S3",
+      "description": "Clang Standard/S3 Build for macos intel (Release)",
+      "configurePreset": "ci-StdShar-macos-x86_64-Clang-S3",
       "verbose": true,
       "inherits": [
         "ci-macos-Release-Clang"
@@ -1062,6 +1079,15 @@
       ]
     },
     {
+      "name": "ci-StdShar-macos-x86_64-Clang-S3",
+      "configurePreset": "ci-StdShar-macos-x86-64-Clang-S3",
+      "inherits": [
+        "ci-macos-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-StdShar-macos-GNUC",
+    {
       "name": "ci-StdShar-macos-GNUC",
       "configurePreset": "ci-StdShar-macos-GNUC",
       "inherits": [
@@ -1305,6 +1331,11 @@
     {
       "name": "ci-StdShar-macos-Clang-S3",
       "configurePreset": "ci-StdShar-macos-Clang-S3",
+      "inherits": "ci-macos-Release-Clang"
+    },
+    {
+      "name": "ci-StdShar-macos-x86_64-Clang-S3",
+      "configurePreset": "ci-StdShar-macos-x86_64--Clang-S3",
       "inherits": "ci-macos-Release-Clang"
     },
     {
@@ -1590,6 +1621,27 @@
         {
           "type": "package",
           "name": "ci-StdShar-macos-Clang-S3"
+        }
+      ]
+    },
+    {
+      "name": "ci-StdShar-macos-x86_64-Clang-S3",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-StdShar-macos-x86_64-Clang-S3"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-macos-x86_64-Clang-S3"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-macos-x86_64-Clang-S3"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-macos-x86_64-Clang-S3"
         }
       ]
     },
