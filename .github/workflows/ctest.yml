@@ -848,24 +848,11 @@ jobs:
         if: ${{ matrix.os_name == 'Windows MSVC' }}
         run: vcpkg install aws-c-s3 
 
-      - name: Set up Java (if specified or FFM required)
-        if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
+      - name: Set up JDK 21
         uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v5
         with:
-          distribution: ${{ inputs.force_java_implementation == 'ffm' && 'oracle' || 'temurin' }}
-          java-version: |
-            ${{
-              inputs.force_java_implementation == 'ffm' && '25' ||
-              inputs.java_version == 'latest' && '24' ||
-              inputs.java_version
-            }}
-
-      - name: Verify Java Setup
-        if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
-        run: |
-          java -version
-          echo "JAVA_HOME=$JAVA_HOME"
-          echo "Selected Java implementation: ${{ inputs.force_java_implementation }}"
+          java-version: '21'
+          distribution: 'temurin'
 
       - name: Set file base name (Windows)
         id: set-file-base
@@ -894,12 +881,6 @@ jobs:
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
-
-      - name: Setup jextract (FFM builds only)
-        if: ${{ inputs.force_java_implementation == 'ffm' }}
-        uses: ./.github/actions/setup-jextract
-        with:
-          java-version: '25'
 
       - name: using powershell
         shell: pwsh
@@ -1118,8 +1099,10 @@ jobs:
           which cmake
           cmake --version
 
-      - name: Install aws-c-s3 (MacOS)
-        run: brew install aws-c-s3
+      - name: Install aws-c-s3 (MacOS x86_64)
+        run: |
+          arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          arch -x86_64 /usr/local/bin/brew install aws-c-s3
 
       - name: Install the Apple certificate and provisioning profile
         shell: bash
