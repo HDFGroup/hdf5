@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-10-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-10-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -563,7 +563,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="#ga1fcf8cc91370586ea0a949fd4117b988" title="Retrieves the &quot;I/O threads enabled&quot; property.">H5Pget_io_threads()</a> gets the "I/O threads enabled" property from the dataset transfer property list <code class="param">plist_id</code>. This property determines whether the library is allowed to use internal multithreading to accelerate I/O. The default value for io_threads_enabled is true. However, internal threading must be enabled using <a class="el" href="group___h5_t_s.html#ga820be65780a76c15f23a17252c237d09" title="Sets the number of internal threads to use for internal multithreading.">H5TSset_internal_threads()</a> before the library can use threads to accelerate I/O.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is only present when the library is compiled with HDF5_ENABLE_CONCURRENCY=ON.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is only present when the library is built with thread support, i.e. when <code>H5_HAVE_THREADS</code> is defined. This is the usual case; the exceptions are builds without a threading package and static libraries on Windows.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>2.3.0 </dd></dl>
 
 </div>
@@ -1484,7 +1484,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="#ga137c71367b2b24d05c4820b99708f4d0" title="Allows the library to use internal multithreading to accelerate I/O.">H5Pset_io_threads()</a> sets whether the library is allowed to use internal multithreading to accelerate I/O. By default this is set to true. However, internal threading must be enabled using <a class="el" href="group___h5_t_s.html#ga820be65780a76c15f23a17252c237d09" title="Sets the number of internal threads to use for internal multithreading.">H5TSset_internal_threads()</a> before the library can use threads to accelerate I/O. <a class="el" href="#ga137c71367b2b24d05c4820b99708f4d0" title="Allows the library to use internal multithreading to accelerate I/O.">H5Pset_io_threads()</a> can be used to disable this acceleration for a specific operation even if internal threading is enabled globally.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is only present when the library is compiled with HDF5_ENABLE_CONCURRENCY=ON.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is only present when the library is built with thread support, i.e. when <code>H5_HAVE_THREADS</code> is defined. This is the usual case; the exceptions are builds without a threading package and static libraries on Windows.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>2.3.0 </dd></dl>
 
 </div>

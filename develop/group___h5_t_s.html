@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-10-14</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-10-16</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -174,9 +174,11 @@ Functions</h2></td></tr>
 <li><a class="el" href="group___d_x_p_l.html#ga137c71367b2b24d05c4820b99708f4d0" title="Allows the library to use internal multithreading to accelerate I/O.">H5Pset_io_threads()</a> was not called with <code>threads_enabled</code> set to <code>false</code> . </li>
 <li>Selection I/O is not used. See <a class="el" href="group___d_x_p_l.html#ga7d4d11c9c273d5a5ce2d174d66e4fa10" title="Sets the selection I/O mode.">H5Pset_selection_io()</a>. </li>
 <li>At least one chunk exists on disk and is not cached by the dataset chunk cache. </li>
-<li>For unfiltered datasets, the chunk cache is large enough to fit at least one chunk. See <a class="el" href="group___d_a_p_l.html#ga104d00442c31714ee073dee518f661f1" title="Sets the raw data chunk cache parameters.">H5Pset_chunk_cache()</a>.</li>
+<li>For unfiltered datasets, the chunk cache is large enough to fit at least one chunk. See <a class="el" href="group___d_a_p_l.html#ga104d00442c31714ee073dee518f661f1" title="Sets the raw data chunk cache parameters.">H5Pset_chunk_cache()</a>. </li>
+<li>The library is not built with the <code>HDF5_ENABLE_THREADSAFE</code> option. </li>
+<li>The file does not use an MPI-based file driver.</li>
 </ul>
-<dl class="section note"><dt>Note</dt><dd>This function is only present when the library is compiled with HDF5_ENABLE_CONCURRENCY=ON.</dd>
+<dl class="section note"><dt>Note</dt><dd>This function is only present when the library is built with thread support, i.e. when <code>H5_HAVE_THREADS</code> is defined. This is the usual case; the exceptions are builds without a threading package and static libraries on Windows.</dd>
 <dd>
 Use of this function may increase memory usage during concurrent operations due to the need to maintain state for each thread simultaneously.</dd></dl>
 <dl class="section warning"><dt>Warning</dt><dd>Errors that are printed inside the threaded area, for example by the data filters, do not currently respect non-default error settings, and print their errors to stderr upon thread completion.</dd></dl>
