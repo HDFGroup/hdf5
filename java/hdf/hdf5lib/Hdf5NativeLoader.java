@@ -66,11 +66,16 @@ public final class Hdf5NativeLoader {
     /* File the bundled libhdf5 was loaded from */
     private static volatile Path hdf5Path = null;
 
+    /* SKIP_PROPERTY as read on first use, so all libraries follow the same setting */
+    private static Boolean skipBundled = null;
+
     private Hdf5NativeLoader() {}
 
-    private static boolean skipBundledLoad()
+    private static synchronized boolean skipBundledLoad()
     {
-        return Boolean.parseBoolean(System.getProperty(SKIP_PROPERTY, "false"));
+        if (skipBundled == null)
+            skipBundled = Boolean.parseBoolean(System.getProperty(SKIP_PROPERTY, "false"));
+        return skipBundled;
     }
 
     /**
@@ -205,7 +210,7 @@ public final class Hdf5NativeLoader {
      * Loads bundled filter dependencies and libhdf5 when present (zlib, then libaec/libsz, then
      * hdf5). Safe to call multiple times.
      */
-    public static void loadBundledDependenciesBeforeHdf5()
+    public static synchronized void loadBundledDependenciesBeforeHdf5()
     {
         loadBundledZlibIfPresent();
         loadBundledSzipIfPresent();

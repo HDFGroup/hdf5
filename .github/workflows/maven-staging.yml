@@ -158,6 +158,7 @@ jobs:
         env:
           JAVA_IMPL: ${{ inputs.java_implementation || 'auto' }}
           PLATFORMS: ${{ inputs.platforms || 'all-platforms' }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
 
           # Determine which implementations to build
@@ -231,6 +232,12 @@ jobs:
               MATRIX+="{\"platform\":\"$PLATFORM_NAME\",\"os\":\"$PLATFORM_OS\",\"compiler\":\"$PLATFORM_COMPILER\",\"arch\":\"$PLATFORM_ARCH\",\"implementation\":\"$impl\",\"artifact-suffix\":\"$ARTIFACT_SUFFIX\"}"
             done
           done
+
+          # Pull requests build the default (JNI) presets only; add one Linux FFM build so the
+          # FFM native bundles and the patched jextract symbol lookup are tested before a release
+          if [[ "$EVENT_NAME" == "pull_request" && "$JAVA_IMPL" == "auto" ]]; then
+            MATRIX+=",{\"platform\":\"Linux\",\"os\":\"ubuntu-latest\",\"compiler\":\"GNUC\",\"arch\":\"x86_64\",\"implementation\":\"ffm\",\"artifact-suffix\":\"linux-x86_64-ffm\"}"
+          fi
           MATRIX+="]}"
 
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT

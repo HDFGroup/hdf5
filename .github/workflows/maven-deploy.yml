@@ -439,6 +439,7 @@ jobs:
             jar_key="${ARTIFACT_ID}:${CURRENT_CLASSIFIER}"
             if [[ -n "${jar_deployed[$jar_key]:-}" ]]; then
               echo "Skipping ${jar_basename}: ${ARTIFACT_ID} (${CURRENT_CLASSIFIER:-no classifier}) is already deployed"
+              total_count=$((total_count - 1)) # not a deployment, so not counted
               continue
             fi
 
