@@ -168,8 +168,8 @@ if (Java_VERSION_STRING VERSION_GREATER_EQUAL "25.0.0")
         message (FATAL_ERROR "jextract did not generate expected file: ${EXPECTED_FFM_FILE}")
     endif ()
 
-    # Post-process jextract output: vanilla SYMBOL_LOOKUP breaks bundled Maven natives (see
-    # java/cmake/ffm-jextract-hdf5_h_2/README.txt). Needle and replacement live there.
+    # Post-process jextract output so SYMBOL_LOOKUP resolves libhdf5 from the bundled Maven
+    # natives when present (see java/cmake/ffm-jextract-hdf5_h_2/README.txt).
     set (_HDF5_FFM_JEXTRACT_PATCH_DIR "${CMAKE_CURRENT_LIST_DIR}/cmake/ffm-jextract-hdf5_h_2")
     set (_HDF5_FFM_JEXTRACT_NEEDLE "${_HDF5_FFM_JEXTRACT_PATCH_DIR}/needle.txt")
     set (_HDF5_FFM_JEXTRACT_REPLACEMENT "${_HDF5_FFM_JEXTRACT_PATCH_DIR}/replacement.txt")

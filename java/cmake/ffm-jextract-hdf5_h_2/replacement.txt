@@ -1,11 +1,10 @@
     static final SymbolLookup SYMBOL_LOOKUP = createHdf5SymbolLookup();
 
     /*
-     * Replaces jextract's libraryLookup(mapLibraryName("hdf5"), ...) chain. When the hdf5-native
-     * Maven JAR is on the classpath, Hdf5NativeLoader extracts and loads libhdf5 (after its
-     * bundled zlib/libaec dependencies), and symbols are looked up in that extracted file.
-     * Otherwise libhdf5 is resolved by the OS loader as before, falling back to the loader and
-     * default lookups instead of failing <clinit> when libhdf5 cannot be opened by name.
+     * When the hdf5-native Maven JAR is on the classpath, Hdf5NativeLoader extracts and loads
+     * libhdf5 (after its bundled zlib/libaec dependencies) and symbols are looked up in that
+     * extracted file. Otherwise libhdf5 is opened by name through the OS loader. If it cannot be
+     * opened, the loader and default lookups are used.
      */
     private static SymbolLookup createHdf5SymbolLookup() {
         // HDF5_FFM_NATIVE_LOOKUP: marker for idempotent CMake post-process
