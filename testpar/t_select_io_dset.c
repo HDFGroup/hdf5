@@ -74,6 +74,10 @@ typedef enum {
 #define MULTI_MIN_DSETS 3
 #define DSET_NAME_LEN   64
 
+/* On LLP64 platforms such as Windows, H5T_NATIVE_LONG is the same datatype as H5T_NATIVE_INT, so writing a
+ * long buffer to an int dataset involves no datatype conversion there and collective I/O remains possible */
+#define LONG_INT_TCONV (sizeof(long) != sizeof(int))
+
 /* Compound type */
 typedef struct s1_t {
     int a;
@@ -665,7 +669,9 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
     if (mwbuf)
         memcpy(wbuf, wbuf_bak, sizeof(wbuf));
 
-    if (select)
+    /* Without selection I/O, the long->int type conversion (unless long and int are the same size) or a
+     * data transform prevents collective I/O */
+    if (select || (!dtrans && !LONG_INT_TCONV))
         exp_io_mode = chunked ? H5D_MPIO_CHUNK_COLLECTIVE : H5D_MPIO_CONTIGUOUS_COLLECTIVE;
 
     testing_check_io_mode(dxpl, exp_io_mode);
@@ -1327,12 +1333,17 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, unsigned 
         memcpy(lwbuf, lwbuf_bak, sizeof(lwbuf));
 
     /* If not using selection I/O there will be no collective I/O, since type conversion is unsupported by
-     * legacy collective I/O */
-    testing_check_io_mode(
-        dxpl, select ? (chunked ? H5D_MPIO_CHUNK_COLLECTIVE : H5D_MPIO_CONTIGUOUS_COLLECTIVE) : 0);
+     * legacy collective I/O.  Collective I/O is still possible without selection I/O when long and int are
+     * the same size (no type conversion) and there is no data transform. */
+    testing_check_io_mode(dxpl, (select || (!dtrans && !LONG_INT_TCONV))
+                                    ? (chunked ? H5D_MPIO_CHUNK_COLLECTIVE : H5D_MPIO_CONTIGUOUS_COLLECTIVE)
+                                    : 0);
 
-    /* If not using selection I/O then the main process will do scalar I/O and others will do none */
-    check_actual_selection_io_mode(dxpl, select ? H5D_SELECTION_IO : (MAINPROCESS ? H5D_SCALAR_IO : 0));
+    /* If not using selection I/O then the main process will do scalar I/O and others will do none, unless
+     * collective I/O is possible, in which case every rank takes part in the scalar I/O */
+    check_actual_selection_io_mode(
+        dxpl,
+        select ? H5D_SELECTION_IO : ((MAINPROCESS || (!dtrans && !LONG_INT_TCONV)) ? H5D_SCALAR_IO : 0));
 
     /* Read the data from the dataset: type conversion int-->long */
     /* If dtrans, without data transform set in dxpl */
@@ -1587,9 +1598,10 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned s
                  chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", select ? "select" : "noselect",
                  mwbuf ? "mwbuf" : "nomwbuf");
 
-        /* Flip a coin to see if we're doing type conversion */
+        /* Flip a coin to see if we're doing type conversion (none actually happens if long and int are the
+         * same size) */
         tconv = h5_local_rand() % 2;
-        if (tconv)
+        if (tconv && LONG_INT_TCONV)
             any_tconv = true;
 
         /* Create ith dataset */
