@@ -299,9 +299,9 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
 #define STORAGE_SIZE_CHUNK_DIM2 5
 
 /* Names for scaleoffset bound test */
-#define DS1_NAME             "Dataset 1"
-#define DS2_NAME             "Dataset 2"
-#define DS3_NAME             "Dataset 3"
+#define DS1_NAME "Dataset 1"
+#define DS2_NAME "Dataset 2"
+#define DS3_NAME "Dataset 3"
 
 /* Parameters for scaleoffset bound test */
 #define NELMTS_PCHK 64 /* elements per (single) chunk */
