@@ -330,17 +330,12 @@ public class H5 implements java.io.Serializable {
         // first try loading bundled dependencies, then hdf5 (dependencies for hdf5_java)
         try {
             Hdf5NativeLoader.loadBundledDependenciesBeforeHdf5();
-            if (Hdf5NativeLoader.bundledZlibLoadSucceeded()) {
-                log.info("HDF5 library dependency: zlib (bundled)");
-                log.info("Successfully loaded bundled zlib");
-            }
-            if (Hdf5NativeLoader.bundledSzipLoadSucceeded()) {
-                log.info("HDF5 library dependency: szip/libaec (bundled)");
-                log.info("Successfully loaded bundled szip (libaec)");
-            }
+            if (Hdf5NativeLoader.bundledZlibLoadSucceeded())
+                log.info("Loaded bundled zlib");
+            if (Hdf5NativeLoader.bundledSzipLoadSucceeded())
+                log.info("Loaded bundled libaec/libsz");
             if (Hdf5NativeLoader.bundledHdf5LoadSucceeded()) {
-                log.info("HDF5 library: hdf5 (bundled)");
-                log.info("Successfully loaded bundled hdf5");
+                log.info("Loaded bundled hdf5");
                 isHdf5LibraryLoaded = true;
             }
         }
@@ -397,13 +392,12 @@ public class H5 implements java.io.Serializable {
             }
         }
 
-        // Bundled hdf5_java (e.g. org.hdfgroup:hdf5-jni-native) before java.library.path — avoids a
+        // Bundled hdf5_java (org.hdfgroup:hdf5-jni-native) before java.library.path; avoids a
         // failed System.loadLibrary and noisy stack trace when only the Maven JAR is present.
         if (!isHdf5JavaLibraryLoaded) {
             try {
                 if (Hdf5NativeLoader.loadBundledHdf5JavaIfPresent()) {
-                    log.info("HDF5 library: hdf5_java (bundled)");
-                    log.info("Successfully loaded bundled hdf5_java");
+                    log.info("Loaded bundled hdf5_java");
                     isHdf5JavaLibraryLoaded = true;
                 }
             }

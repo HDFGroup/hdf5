@@ -1,66 +1,29 @@
     static final SymbolLookup SYMBOL_LOOKUP = createHdf5SymbolLookup();
 
     /*
-     * Replaces jextract's flat chain:
-     *   libraryLookup(...).or(loaderLookup()).or(defaultLookup())
-     * with the same three lookups grouped as:
-     *   libraryLookup(...).or(loaderLookup().or(defaultLookup()))
-     *
-     * jextract still evaluates libraryLookup(...) first; if it throws, <clinit> would fail.
-     * So the non-bundled path keeps libraryLookup inside try/catch. The bundled Maven path
-     * extracts and loads natives via NativeLoader, then uses libraryLookup on the extracted
-     * libhdf5 path so symbols resolve before H5.loadH5Lib() runs.
+     * Replaces jextract's libraryLookup(mapLibraryName("hdf5"), ...) chain. When the hdf5-native
+     * Maven JAR is on the classpath, Hdf5NativeLoader extracts and loads libhdf5 (after its
+     * bundled zlib/libaec dependencies), and symbols are looked up in that extracted file.
+     * Otherwise libhdf5 is resolved by the OS loader as before, falling back to the loader and
+     * default lookups instead of failing <clinit> when libhdf5 cannot be opened by name.
      */
-    private static void loadBundledNativeDependencies() {
+    private static SymbolLookup createHdf5SymbolLookup() {
+        // HDF5_FFM_NATIVE_LOOKUP: marker for idempotent CMake post-process
+        SymbolLookup fallback = SymbolLookup.loaderLookup().or(Linker.nativeLinker().defaultLookup());
+        java.nio.file.Path bundledHdf5 = null;
         try {
             hdf.hdf5lib.Hdf5NativeLoader.loadBundledDependenciesBeforeHdf5();
+            bundledHdf5 = hdf.hdf5lib.Hdf5NativeLoader.bundledHdf5Path();
         }
         catch (Throwable ignored) {
-        }
-    }
-
-    private static java.nio.file.Path bundledHdf5LibraryPath() {
-        try {
-            Object extractor =
-                    Class.forName("org.scijava.nativelib.NativeLoader")
-                            .getMethod("getJniExtractor")
-                            .invoke(null);
-            if (extractor == null) {
-                return null;
-            }
-            java.lang.reflect.Method getJniDir =
-                    Class.forName("org.scijava.nativelib.BaseJniExtractor")
-                            .getMethod("getJniDir");
-            java.io.File jniDir = (java.io.File) getJniDir.invoke(extractor);
-            java.io.File lib = new java.io.File(jniDir, System.mapLibraryName("hdf5"));
-            return lib.isFile() ? lib.toPath() : null;
-        }
-        catch (Throwable ignored) {
-            return null;
-        }
-    }
-
-    private static SymbolLookup createHdf5SymbolLookup() {
-        // HDF5_FFM_NATIVE_LOOKUP — marker for idempotent CMake post-process
-        loadBundledNativeDependencies();
-        java.nio.file.Path bundledHdf5 = bundledHdf5LibraryPath();
-        if (bundledHdf5 != null) {
-            try {
-                return SymbolLookup.libraryLookup(bundledHdf5, LIBRARY_ARENA)
-                        .or(SymbolLookup.loaderLookup()
-                                .or(Linker.nativeLinker().defaultLookup()));
-            }
-            catch (IllegalArgumentException e) {
-                return SymbolLookup.loaderLookup()
-                        .or(Linker.nativeLinker().defaultLookup());
-            }
+            // native-lib-loader missing from the classpath: use the system libhdf5
         }
         try {
-            return SymbolLookup.libraryLookup(System.mapLibraryName("hdf5"), LIBRARY_ARENA)
-            .or(SymbolLookup.loaderLookup()
-                        .or(Linker.nativeLinker().defaultLookup()));
-        } catch (IllegalArgumentException e) {
-            return SymbolLookup.loaderLookup()
-            .or(Linker.nativeLinker().defaultLookup());
+            if (bundledHdf5 != null)
+                return SymbolLookup.libraryLookup(bundledHdf5, LIBRARY_ARENA).or(fallback);
+            return SymbolLookup.libraryLookup(System.mapLibraryName("hdf5"), LIBRARY_ARENA).or(fallback);
+        }
+        catch (IllegalArgumentException e) {
+            return fallback;
         }
     }

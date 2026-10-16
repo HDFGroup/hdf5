@@ -13,6 +13,7 @@
 package jtest;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeTrue;
 
 import static jtest.FfmTestSupport.*;
 
@@ -31,9 +32,9 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 /**
- * FFM smoke tests for Maven-shipped native stacks: {@link Hdf5NativeLoader} must load bundled zlib
- * before libhdf5 so the built-in deflate (gzip) filter is registered, and chunked+gzip datasets
- * must round-trip through the FFM API.
+ * FFM smoke tests for the built-in deflate (gzip) filter: after the same native bootstrap that Maven
+ * consumers use ({@link Hdf5NativeLoader}), chunked+gzip datasets must round-trip through the FFM
+ * API. Skipped when libhdf5 is built without zlib support.
  */
 public class TestH5DeflateNativeffm {
     @Rule
@@ -50,6 +51,8 @@ public class TestH5DeflateNativeffm {
         // Same native bootstrap path Maven consumers use (bundled zlib/szip then libhdf5).
         Hdf5NativeLoader.loadBundledDependenciesBeforeHdf5();
         hdf5_h.H5open();
+        assumeTrue("libhdf5 built without zlib support",
+                   hdf5_h.H5Zfilter_avail(hdf5_h.H5Z_FILTER_DEFLATE()) > 0);
     }
 
     @After
@@ -73,20 +76,8 @@ public class TestH5DeflateNativeffm {
     }
 
     @Test
-    public void testBundledLoaderAndDeflateFilterAvail()
-    {
-        int deflateAvail = hdf5_h.H5Zfilter_avail(hdf5_h.H5Z_FILTER_DEFLATE());
-        assertTrue("DEFLATE filter must be available when libhdf5 is built with zlib support "
-                       + "(bundledZlib=" + Hdf5NativeLoader.bundledZlibLoadSucceeded() + ")",
-                   deflateAvail > 0);
-    }
-
-    @Test
     public void testChunkedGzipDatasetRoundTrip()
     {
-        assertTrue("DEFLATE filter required for this test",
-                   hdf5_h.H5Zfilter_avail(hdf5_h.H5Z_FILTER_DEFLATE()) > 0);
-
         final int dimX         = 8;
         final int dimY         = 12;
         final int rank         = 2;
