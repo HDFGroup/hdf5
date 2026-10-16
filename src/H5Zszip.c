@@ -28,6 +28,9 @@
 #include "szlib.h"
 #endif
 
+/* Size of the uncompressed-length header stored in front of the szip stream */
+#define SZIP_HEADER_LEN 4
+
 /* Local function prototypes */
 static htri_t H5Z__can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static herr_t H5Z__set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);
@@ -284,6 +287,13 @@ H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
         uint32_t stored_nalloc; /* Number of bytes the compressed block will expand into */
         size_t   nalloc;        /* Number of bytes the compressed block will expand into */
 
+        /* The uncompressed length is stored in front of the compressed stream, so
+         * a chunk shorter than that header makes the length arithmetic below wrap.
+         * A chunk of exactly SZIP_HEADER_LEN bytes holds no compressed data.
+         */
+        if (nbytes <= SZIP_HEADER_LEN)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
+
         /* Get the size of the uncompressed buffer */
         newbuf = (unsigned char *)(*buf);
         UINT32DECODE(newbuf, stored_nalloc);
@@ -295,7 +305,7 @@ H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
 
         /* Decompress the buffer */
         size_out = nalloc;
-        if (SZ_BufftoBuffDecompress(outbuf, &size_out, newbuf, nbytes - 4, &sz_param) != SZ_OK)
+        if (SZ_BufftoBuffDecompress(outbuf, &size_out, newbuf, nbytes - SZIP_HEADER_LEN, &sz_param) != SZ_OK)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "szip_filter: decompression failed");
         assert(size_out == nalloc);
 
@@ -313,7 +323,7 @@ H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
         unsigned char *dst = NULL; /* Temporary pointer to new output buffer */
 
         /* Allocate space for the compressed buffer & header (assume data won't get bigger) */
-        if (NULL == (dst = outbuf = (unsigned char *)H5MM_malloc(nbytes + 4)))
+        if (NULL == (dst = outbuf = (unsigned char *)H5MM_malloc(nbytes + SZIP_HEADER_LEN)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "unable to allocate szip destination buffer");
 
         /* Encode the uncompressed length */
@@ -332,8 +342,8 @@ H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
         /* Set return values */
         *buf      = outbuf;
         outbuf    = NULL;
-        *buf_size = nbytes + 4;
-        ret_value = size_out + 4;
+        *buf_size = nbytes + SZIP_HEADER_LEN;
+        ret_value = size_out + SZIP_HEADER_LEN;
     }
 
 done:
