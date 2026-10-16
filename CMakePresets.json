@@ -464,7 +464,7 @@
       ]
     },
     {
-      "name": "ci-StdShar-macos-S3",
+      "name": "ci-StdShar-macos-Clang-S3",
       "description": "Clang S3 Config for macos (Release)",
       "inherits": [
         "ci-StdShar-macos-Clang",
@@ -712,6 +712,15 @@
       ]
     },
     {
+      "name": "ci-StdShar-MSVC-S3",
+      "description": "GNUC S3 Build for x64 (Release)",
+      "configurePreset": "ci-StdShar-MSVC-S3",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
       "name": "ci-StdShar-Clang",
       "description": "Clang Standard Build for x64 (Release)",
       "configurePreset": "ci-StdShar-Clang",
@@ -739,6 +748,15 @@
       "name": "ci-StdShar-macos-Clang-FFM",
       "description": "Clang Standard Build for macos with Java FFM (Requires Java 25+) (Release)",
       "configurePreset": "ci-StdShar-macos-Clang-FFM",
+      "inherits": [
+        "ci-macos-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-StdShar-macos-Clang-S3",
+      "description": "Clang S3 Build for macos (Release)",
+      "configurePreset": "ci-StdShar-macos-Clang-S3",
+      "verbose": true,
       "inherits": [
         "ci-macos-Release-Clang"
       ]
@@ -992,6 +1010,13 @@
       ]
     },
     {
+      "name": "ci-StdShar-MSVC-S3",
+      "configurePreset": "ci-StdShar-MSVC-S3",
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
       "name": "ci-StdShar-Clang",
       "configurePreset": "ci-StdShar-Clang",
       "inherits": [
@@ -1028,6 +1053,13 @@
         "timeout": 180,
         "jobs": 2
       }
+    },
+    {
+      "name": "ci-StdShar-macos-Clang-S3",
+      "configurePreset": "ci-StdShar-macos-Clang-S3",
+      "inherits": [
+        "ci-macos-Release-Clang"
+      ]
     },
     {
       "name": "ci-StdShar-macos-GNUC",
@@ -1246,6 +1278,11 @@
       "inherits": "ci-x64-Release-MSVC"
     },
     {
+      "name": "ci-StdShar-MSVC-S3",
+      "configurePreset": "ci-StdShar-MSVC-S3",
+      "inherits": "ci-x64-Release-MSVC"
+    },
+    {
       "name": "ci-StdShar-Clang",
       "configurePreset": "ci-StdShar-Clang",
       "inherits": "ci-x64-Release-Clang"
@@ -1263,6 +1300,11 @@
     {
       "name": "ci-StdShar-macos-Clang-FFM",
       "configurePreset": "ci-StdShar-macos-Clang-FFM",
+      "inherits": "ci-macos-Release-Clang"
+    },
+    {
+      "name": "ci-StdShar-macos-Clang-S3",
+      "configurePreset": "ci-StdShar-macos-Clang-S3",
       "inherits": "ci-macos-Release-Clang"
     },
     {
@@ -1425,6 +1467,27 @@
         }
       ]
     },
+   {
+      "name": "ci-StdShar-MSVC-S3",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-StdShar-MSVC-S3"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-MSVC-S3"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-MSVC-S3"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-MSVC-S3"
+        }
+      ]
+    },
     {
       "name": "ci-StdShar-Clang",
       "steps": [
@@ -1506,6 +1569,27 @@
         {
           "type": "package",
           "name": "ci-StdShar-macos-Clang-FFM"
+        }
+      ]
+    },
+    {
+      "name": "ci-StdShar-macos-Clang-S3",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-StdShar-macos-Clang-S3"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-macos-Clang-S3"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-macos-Clang-S3"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-macos-Clang-S3"
         }
       ]
     },

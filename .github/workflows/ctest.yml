@@ -594,10 +594,417 @@ jobs:
               path: ${{ runner.workspace }}/maven-artifacts
               if-no-files-found: warn
 
-  build_and_test_mac_latest:
-  # MacOS w/ Clang
+  build_and_test_s3_mac_latest:
+  # MacOS S3 w/ Clang
   #
-    name: "MacOS Clang"
+    name: "MacOS Clang S3"
+    runs-on: macos-15
+    needs: [check-secret]
+    steps:
+      - name: check clang version
+        shell: bash
+        run: |
+          which clang
+          clang -v
+
+      - name: Install CMake
+        uses: lukka/get-cmake@fffaaafeea488556c2c12dad60690008bc1caacb # latest
+        with:
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
+
+      - name: Check CMake Version
+        shell: bash
+        run: |
+          which cmake
+          cmake --version
+
+      - name: Install aws-c-s3 (MacOS)
+        run: brew install aws-c-s3
+
+      - name: Install the Apple certificate and provisioning profile
+        shell: bash
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
+          P12_PASSWORD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
+          KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+        run: |
+            # create variables
+            CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+            KEYCHAIN_FILE=${{ vars.KEYCHAIN_NAME }}.keychain
+            # import certificate from secrets
+            echo $BUILD_CERTIFICATE_BASE64 | base64 --decode > $CERTIFICATE_PATH
+            security -v create-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
+            security -v list-keychain -d user -s $KEYCHAIN_FILE
+            security -v list-keychains
+            security -v set-keychain-settings -lut 21600 $KEYCHAIN_FILE
+            security -v unlock-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
+            # import certificate to keychain
+            security -v import $CERTIFICATE_PATH -P $P12_PASSWORD -A -t cert -f pkcs12 -k $KEYCHAIN_FILE
+            security -v set-key-partition-list -S apple-tool:,codesign:,apple: -k $KEYCHAIN_PASSWD $KEYCHAIN_FILE
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set file base name (MacOS_latest)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      # Get files created by release script
+      - name: Get tgz-tarball (MacOS_latest)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+              name: tgz-tarball
+              path: ${{ github.workspace }}
+
+      - name: List files for the space (MacOS_latest)
+        run: |
+              ls ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      - name: Uncompress source (MacOS_latest)
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+      # symlinks the compiler executables to a common location 
+      - name: Setup GNU Fortran
+        uses: fortran-lang/setup-fortran@be037f0a45b1160f139d4ccd0b96f9e9bfd6a682 # v1
+        id: setup-fortran
+        with:
+          compiler: gcc
+          version: 14
+
+      - name: Run CTest (MacOS_latest S3)
+        id: run-ctest
+        env:
+          BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
+          SIGNER: ${{ vars.SIGNER }}
+        run: |
+          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
+          cmake --workflow --preset=${{ inputs.preset_name }}-macos-Clang-S3 --fresh
+        shell: bash
+
+      - name: Sign dmg (MacOS_latest)
+        id: sign-dmg
+        env:
+          KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
+          SIGNER: ${{ vars.SIGNER }}
+          NOTARY_USER: ${{ vars.NOTARY_USER }}
+          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+        run: |
+          /usr/bin/codesign --force --timestamp --options runtime --entitlements ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/install/distribution.entitlements --verbose=4 --strict --sign ${{ env.SIGNER }} --deep ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang-S3/*.dmg
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: Check dmg timestamp (MacOS_latest)
+        run: |
+          /usr/bin/codesign -dvv ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang-S3/*.dmg
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: Verify dmg (MacOS_latest)
+        run: |
+          /usr/bin/hdiutil verify ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang-S3/*.dmg
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: Notarize dmg (MacOS_latest S3)
+        id: notarize-dmg
+        env:
+          KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
+          SIGNER: ${{ vars.SIGNER }}
+          NOTARY_USER: ${{ vars.NOTARY_USER }}
+          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+        run: |
+          jsonout=$(/usr/bin/xcrun notarytool submit --wait --output-format json --apple-id ${{ env.NOTARY_USER }} --password ${{ env.NOTARY_KEY }} --team-id ${{ env.SIGNER }} ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang-S3/*.dmg)
+          echo "JSONOUT=$jsonout" >> $GITHUB_OUTPUT
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: Get ID token (MacOS_latest)
+        id: get-id-token
+        run: |
+          echo "notary result is ${{ fromJson(steps.notarize-dmg.outputs.JSONOUT) }}"
+          token=${{ fromJson(steps.notarize-dmg.outputs.JSONOUT).id }}
+          echo "ID_TOKEN=$token" >> "$GITHUB_OUTPUT"
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: post notary check (MacOS_latest S3)
+        id: post-notary
+        env:
+          KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
+          SIGNER: ${{ vars.SIGNER }}
+          NOTARY_USER: ${{ vars.NOTARY_USER }}
+          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+        run: |
+          {
+            echo 'NOTARYOUT<<EOF'
+            /usr/bin/xcrun notarytool info --apple-id ${{ env.NOTARY_USER }} --password ${{ env.NOTARY_KEY }} --team-id ${{ env.SIGNER }} ${{ steps.get-id-token.outputs.ID_TOKEN }}
+            echo EOF
+          } >> $GITHUB_OUTPUT
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: Get notary info (MacOS_latest)
+        id: get-notary-info
+        run: |
+          echo "notary info is ${{ steps.post-notary.outputs.NOTARYOUT }}."
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+
+      - name: Staple dmg (MacOS_latest S3)
+        id: staple-dmg
+        env:
+          KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
+          SIGNER: ${{ vars.SIGNER }}
+          NOTARY_USER: ${{ vars.NOTARY_USER }}
+          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+        run: |
+          /usr/bin/xcrun stapler staple ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang-S3/*.dmg
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+        shell: bash
+        continue-on-error: true
+
+      - name: Publish binary (MacOS_latest S3)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5"
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/LICENSE ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang-S3/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang-S3/*.tar.gz ${{ runner.workspace }}/build/hdf5
+          cd "${{ runner.workspace }}/build"
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-macos15_clang_s3.tar.gz hdf5
+        shell: bash
+
+      - name: Publish dmg binary (MacOS_latest)
+        id: publish-ctest-dmg-binary
+        run: |
+          mkdir "${{ runner.workspace }}/builddmg"
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang-S3/*.dmg ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos15_clang_s3.dmg
+        shell: bash
+
+      - name: List files in the space (MacOS_latest S3)
+        run: |
+              ls ${{ github.workspace }}
+              ls -l ${{ runner.workspace }}
+
+      # Save files created by CTest script
+      - name: Save published binary (MacOS_latest)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: tgz-macos15_clang-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-macos15_clang_s3.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Save published dmg binary (MacOS_latest S3)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: tgz-macos15_clang_s3-dmg-binary
+              path: ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos15_clang_s3.dmg
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  build_and_test_s3_win:
+  # Windows S3 w/ MSVC
+  #
+    name: "Windows MSVC S3"
+    runs-on: windows-latest
+    needs: [check-secret]
+    steps:
+      - name: Install Dependencies (Windows S3)
+        run: choco install ninja
+
+      - name: Enable Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+
+      - name: Install CMake
+        uses: lukka/get-cmake@fffaaafeea488556c2c12dad60690008bc1caacb # latest
+        with:
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
+
+      - name: Check CMake Version
+        shell: bash
+        run: |
+          which cmake
+          cmake --version
+
+      # Install aws-c-s3 via vcpkg
+      - name: Install aws-c-s3 (Windows)
+        if: ${{ matrix.os_name == 'Windows MSVC' }}
+        run: vcpkg install aws-c-s3 
+
+      - name: Set up Java (if specified or FFM required)
+        if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v5
+        with:
+          distribution: ${{ inputs.force_java_implementation == 'ffm' && 'oracle' || 'temurin' }}
+          java-version: |
+            ${{
+              inputs.force_java_implementation == 'ffm' && '25' ||
+              inputs.java_version == 'latest' && '24' ||
+              inputs.java_version
+            }}
+
+      - name: Verify Java Setup
+        if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
+        run: |
+          java -version
+          echo "JAVA_HOME=$JAVA_HOME"
+          echo "Selected Java implementation: ${{ inputs.force_java_implementation }}"
+
+      - name: Set file base name (Windows)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Set environment for MSVC (Windows)
+        if: ${{ matrix.os_name == 'Windows MSVC' }}
+        run: |
+          # Set these environment variables so CMake picks the correct compiler
+          echo "CXX=cl.exe" >> $GITHUB_ENV
+          echo "CC=cl.exe" >> $GITHUB_ENV
+
+      # Get files created by release script
+      - name: Get zip-tarball (Windows)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+              name: zip-tarball
+              path: ${{ github.workspace }}
+
+      - name: Setup jextract (FFM builds only)
+        if: ${{ inputs.force_java_implementation == 'ffm' }}
+        uses: ./.github/actions/setup-jextract
+        with:
+          java-version: '25'
+
+      - name: using powershell
+        shell: pwsh
+        run: Get-Location
+
+      - name: List files for the space (Windows)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      - name: Uncompress source (Windows)
+        working-directory: ${{ github.workspace }}
+        run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
+        shell: bash
+
+      - name: Install TrustedSigning (Windows)
+        run: |
+            Invoke-WebRequest -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile .\nuget.exe
+            .\nuget.exe install Microsoft.Windows.SDK.BuildTools -Version 10.0.22621.3233 -x
+            .\nuget.exe install Microsoft.Trusted.Signing.Client -Version 1.0.86 -x
+        shell: pwsh
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: create-json
+        id: create-json
+        uses: jsdaniell/create-json@b8e77fa01397ca39cc4a6198cc29a3be5481afef # v1.2.3
+        with:
+            name: "credentials.json"
+            dir: '${{ steps.set-file-base.outputs.SOURCE_BASE }}'
+            json: '{"Endpoint": "${{ secrets.AZURE_ENDPOINT }}","CodeSigningAccountName": "${{ secrets.AZURE_CODE_SIGNING_NAME }}","CertificateProfileName": "${{ secrets.AZURE_CERT_PROFILE_NAME }}"}'
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: Run CTest (Windows S3)
+        env:
+          BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
+          SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
+        run: |
+          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
+          cmake --workflow --preset=${{ inputs.preset_name }}-MSVC-S3 --fresh
+        shell: bash
+
+      - name: Sign files with Trusted Signing
+        uses: azure/trusted-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_ENDPOINT }}
+          trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+          certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+          files-folder: ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC-S3
+          files-folder-filter: msi
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: Publish binary (Windows S3)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5"
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/LICENSE -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC-S3/README.md -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC-S3/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
+          cd "${{ runner.workspace }}/build"
+          7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2026_cl_s3.zip hdf5
+        shell: pwsh
+
+      - name: Publish msi binary (Windows S3)
+        id: publish-ctest-msi-binary
+        run: |
+          mkdir "${{ runner.workspace }}/buildmsi"
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC-S3/* -Destination ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2026_cl_s3.msi -Include *.msi
+        shell: pwsh
+
+      - name: List files in the space (Windows S3)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      # Save files created by CTest script
+      - name: Save published binary (Windows S3)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: zip-vs2026_cl_s3-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2026_cl_s3.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Save published msi binary (Windows S3)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: msi-vs2026_cl_s3-binary
+              path: ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2026_cl_s3.msi
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  build_and_test_s3_mac_latest:
+  # MacOS S3 w/ Clang
+  #
+    name: "MacOS Clang S3"
     runs-on: macos-15
     needs: [check-secret]
     steps:
