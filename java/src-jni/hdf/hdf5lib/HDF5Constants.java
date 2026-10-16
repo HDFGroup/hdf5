@@ -120,6 +120,16 @@ public class HDF5Constants {
     /** */
     public static final int H5D_CHUNK_IDX_BTREE = H5D_CHUNK_IDX_BTREE();
     /** */
+    public static final int H5D_CHUNK_IDX_SINGLE = H5D_CHUNK_IDX_SINGLE();
+    /** */
+    public static final int H5D_CHUNK_IDX_NONE = H5D_CHUNK_IDX_NONE();
+    /** */
+    public static final int H5D_CHUNK_IDX_FARRAY = H5D_CHUNK_IDX_FARRAY();
+    /** */
+    public static final int H5D_CHUNK_IDX_EARRAY = H5D_CHUNK_IDX_EARRAY();
+    /** */
+    public static final int H5D_CHUNK_IDX_BT2 = H5D_CHUNK_IDX_BT2();
+    /** */
     public static final int H5D_ALLOC_TIME_DEFAULT = H5D_ALLOC_TIME_DEFAULT();
     /** */
     public static final int H5D_ALLOC_TIME_EARLY = H5D_ALLOC_TIME_EARLY();
@@ -1639,6 +1649,16 @@ public class HDF5Constants {
     private static native final int H5C_decr_age_out_with_threshold();
 
     private static native final int H5D_CHUNK_IDX_BTREE();
+
+    private static native final int H5D_CHUNK_IDX_SINGLE();
+
+    private static native final int H5D_CHUNK_IDX_NONE();
+
+    private static native final int H5D_CHUNK_IDX_FARRAY();
+
+    private static native final int H5D_CHUNK_IDX_EARRAY();
+
+    private static native final int H5D_CHUNK_IDX_BT2();
 
     private static native final int H5D_ALLOC_TIME_DEFAULT();
 
