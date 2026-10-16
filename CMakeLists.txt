@@ -915,9 +915,13 @@ else ()
   set (HDF5_THREADS_ENABLED OFF) # Used to init hdf5-config.cmake
 endif ()
 
-# Static libraries on Windows are built without thread support (see
-# H5pubconf.h), so thread support is reported for each type of library
-if (HDF5_THREADS_ENABLED AND WIN32)
+# Static libraries are built without thread support on
+# Windows, and wherever the thread functions aren't part of the C library, so
+# that linking them doesn't need the threads library unless thread-safety or
+# concurrency was requested. Thread support is reported for each type of
+# library.
+if (HDF5_THREADS_ENABLED AND (WIN32 OR (CMAKE_THREAD_LIBS_INIT AND NOT HDF5_ENABLE_THREADSAFE
+                                        AND NOT HDF5_ENABLE_CONCURRENCY)))
   set (HDF5_STATIC_THREADS_ENABLED OFF) # Used to init hdf5-config.cmake
 else ()
   set (HDF5_STATIC_THREADS_ENABLED ${HDF5_THREADS_ENABLED})

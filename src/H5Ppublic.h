@@ -8800,7 +8800,7 @@ H5_DLL herr_t H5Pset_modify_write_buf(hid_t plist_id, bool modify_write_buf);
  */
 H5_DLL herr_t H5Pget_modify_write_buf(hid_t plist_id, bool *modify_write_buf);
 
-#ifdef H5_HAVE_THREADS
+#if defined(H5_HAVE_THREADS) || defined(H5_BUILT_WITHOUT_THREADS)
 /**
  *
  * \ingroup DXPL
@@ -8818,10 +8818,11 @@ H5_DLL herr_t H5Pget_modify_write_buf(hid_t plist_id, bool *modify_write_buf);
  * H5Pset_io_threads() can be used to disable this acceleration for a specific operation even if
  * internal threading is enabled globally.
  *
- * \note    This function is only present when the library is built with
- *          thread support, i.e. when \c H5_HAVE_THREADS is defined.  This is
- *          the usual case; the exceptions are builds without a threading
- *          package and static libraries on Windows.
+ * \note    This function is only present when the library is built with a
+ *          threading package, which is the usual case. It fails in static
+ *          libraries built without thread support (Windows, and systems
+ *          where thread functions aren't part of the C library and
+ *          thread-safety and concurrency are disabled).
  *
  * \since 2.3.0
  *
@@ -8845,16 +8846,17 @@ H5_DLL herr_t H5Pset_io_threads(hid_t plist_id, bool io_threads_enabled);
  * internal threading must be enabled using H5TSset_internal_threads() before the library can use
  * threads to accelerate I/O.
  *
- * \note    This function is only present when the library is built with
- *          thread support, i.e. when \c H5_HAVE_THREADS is defined.  This is
- *          the usual case; the exceptions are builds without a threading
- *          package and static libraries on Windows.
+ * \note    This function is only present when the library is built with a
+ *          threading package, which is the usual case. It fails in static
+ *          libraries built without thread support (Windows, and systems
+ *          where thread functions aren't part of the C library and
+ *          thread-safety and concurrency are disabled).
  *
  * \since 2.3.0
  *
  */
 H5_DLL herr_t H5Pget_io_threads(hid_t plist_id, bool *io_threads_enabled);
-#endif /* H5_HAVE_THREADS */
+#endif /* H5_HAVE_THREADS || H5_BUILT_WITHOUT_THREADS */
 
 /**
  * \ingroup LCPL

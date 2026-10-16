@@ -2688,4 +2688,48 @@ H5Pget_io_threads(hid_t plist_id, bool *io_threads_enabled /*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_io_threads() */
+#elif defined(H5_BUILT_WITHOUT_THREADS)
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_io_threads
+ *
+ * Purpose:     Fails, since this library was built without thread support
+ *
+ * Return:      Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_io_threads(hid_t H5_ATTR_UNUSED plist_id, bool H5_ATTR_UNUSED io_threads_enabled)
+{
+    herr_t ret_value = FAIL; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "library was built without thread support");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_io_threads() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_io_threads
+ *
+ * Purpose:     Fails, since this library was built without thread support
+ *
+ * Return:      Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_io_threads(hid_t H5_ATTR_UNUSED plist_id, bool H5_ATTR_UNUSED *io_threads_enabled /*out*/)
+{
+    herr_t ret_value = FAIL; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "library was built without thread support");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_io_threads() */
 #endif /* H5_HAVE_THREADS */

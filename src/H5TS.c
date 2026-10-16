@@ -208,4 +208,34 @@ done:
     FUNC_LEAVE_API(ret_value);
 } /* end H5TSset_internal_threads() */
 
+#elif defined(H5_BUILT_WITHOUT_THREADS)
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/* Package initialization variable (defined in H5TSint.c with thread support) */
+bool H5_PKG_INIT_VAR = false;
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TSset_internal_threads
+ *
+ * Purpose:     Fails, since this library was built without thread support
+ *
+ * Return:      Negative
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TSset_internal_threads(unsigned H5_ATTR_UNUSED num_threads)
+{
+    herr_t ret_value = FAIL;
+
+    FUNC_ENTER_API(FAIL)
+
+    HGOTO_ERROR(H5E_LIB, H5E_UNSUPPORTED, FAIL, "library was built without thread support");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+} /* end H5TSset_internal_threads() */
+
 #endif /* H5_HAVE_THREADS */

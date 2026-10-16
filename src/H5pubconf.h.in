@@ -313,10 +313,11 @@
 /* Define to 1 if you have the <szlib.h> header file. */
 #cmakedefine H5_HAVE_SZLIB_H @H5_HAVE_SZLIB_H@
 
-#if defined(_WIN32) && !defined(H5_BUILT_AS_DYNAMIC_LIB)
-/* Thread support is not supported on WIN32 platforms with static linking:
- * per-thread library state can't be released when a thread exits without
- * DllMain */
+#ifdef H5_BUILT_WITHOUT_THREADS
+/* Static library built without thread support. On WIN32 platforms, per-thread
+ * library state can't be released when a thread exits without DllMain, and
+ * elsewhere, linking it would need the threads library when the thread
+ * functions aren't part of the C library */
 /* #undef H5_HAVE_THREADS */
 /* #undef H5_HAVE_THREADSAFE */
 /* #undef H5_HAVE_CONCURRENCY */

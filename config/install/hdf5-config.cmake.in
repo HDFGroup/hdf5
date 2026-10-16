@@ -190,7 +190,7 @@ elseif ("static" IN_LIST ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
 
   set (${HDF5_PACKAGE_NAME}_LIB_TYPE "static")
 
-  # Static libraries on Windows are built without thread support
+  # Static libraries may be built without thread support
   set (${HDF5_PACKAGE_NAME}_PROVIDES_THREADS @HDF5_STATIC_THREADS_ENABLED@)
   if (${HDF5_PACKAGE_NAME}_PROVIDES_FORTRAN)
     if (${HDF5_PACKAGE_NAME}_INSTALL_MOD_FORTRAN STREQUAL "STATIC")

@@ -41,7 +41,7 @@ extern "C" {
 
 /* HDF5 global thread pool routines */
 
-#ifdef H5_HAVE_THREADS
+#if defined(H5_HAVE_THREADS) || defined(H5_BUILT_WITHOUT_THREADS)
 /**
  * \ingroup H5TS
  *
@@ -82,10 +82,11 @@ extern "C" {
  *          option.
  *          \li The file does not use an MPI-based file driver.
  *
- * \note    This function is only present when the library is built with
- *          thread support, i.e. when \c H5_HAVE_THREADS is defined.  This is
- *          the usual case; the exceptions are builds without a threading
- *          package and static libraries on Windows.
+ * \note    This function is only present when the library is built with a
+ *          threading package, which is the usual case. It fails in static
+ *          libraries built without thread support (Windows, and systems
+ *          where thread functions aren't part of the C library and
+ *          thread-safety and concurrency are disabled).
  *
  * \note    Use of this function may increase memory usage during concurrent
  *          operations due to the need to maintain state for each thread
@@ -99,7 +100,7 @@ extern "C" {
  *
  */
 H5_DLL herr_t H5TSset_internal_threads(unsigned num_threads);
-#endif /* H5_HAVE_THREADS */
+#endif /* H5_HAVE_THREADS || H5_BUILT_WITHOUT_THREADS */
 
 #ifdef __cplusplus
 }
