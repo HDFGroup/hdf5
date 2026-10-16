@@ -20098,7 +20098,6 @@ main(void)
                     nerrors += (test_scaleoffset_float_2(file) < 0 ? 1 : 0);
                     nerrors += (test_scaleoffset_double(file) < 0 ? 1 : 0);
                     nerrors += (test_scaleoffset_double_2(file) < 0 ? 1 : 0);
-                    nerrors += (test_scaleoffset_bound() < 0 ? 1 : 0);
                     nerrors += (test_multiopen(file) < 0 ? 1 : 0);
                     nerrors += (test_types(file) < 0 ? 1 : 0);
                     nerrors += (test_floattypes(file) < 0 ? 1 : 0);
@@ -20114,6 +20113,7 @@ main(void)
                         nerrors += (test_bad_decode_size(file) < 0 ? 1 : 0);
                         nerrors += (test_bad_decode_size_vlen(file) < 0 ? 1 : 0);
                         nerrors += (test_bad_buf_size(file) < 0 ? 1 : 0);
+                        nerrors += (test_scaleoffset_bound() < 0 ? 1 : 0);
 
                         /* This one will also fail because it doesn't detect the expected message in the main
                          * thread's stack (it is printed by the child thread) */
