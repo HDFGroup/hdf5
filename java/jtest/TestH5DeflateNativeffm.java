@@ -22,8 +22,6 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 
-import hdf.hdf5lib.Hdf5NativeLoader;
-
 import org.hdfgroup.javahdf5.hdf5_h;
 import org.junit.After;
 import org.junit.Before;
@@ -32,9 +30,8 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 /**
- * FFM smoke tests for the built-in deflate (gzip) filter: after the same native bootstrap that Maven
- * consumers use ({@link Hdf5NativeLoader}), chunked+gzip datasets must round-trip through the FFM
- * API. Skipped when libhdf5 is built without zlib support.
+ * FFM smoke test for the built-in deflate (gzip) filter: chunked+gzip datasets must round-trip
+ * through the FFM API. Skipped when libhdf5 is built without zlib support.
  */
 public class TestH5DeflateNativeffm {
     @Rule
@@ -48,8 +45,6 @@ public class TestH5DeflateNativeffm {
     {
         System.out.print(testname.getMethodName());
 
-        // Same native bootstrap path Maven consumers use (bundled zlib/szip then libhdf5).
-        Hdf5NativeLoader.loadBundledDependenciesBeforeHdf5();
         hdf5_h.H5open();
         assumeTrue("libhdf5 built without zlib support",
                    hdf5_h.H5Zfilter_avail(hdf5_h.H5Z_FILTER_DEFLATE()) > 0);

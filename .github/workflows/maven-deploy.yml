@@ -332,6 +332,7 @@ jobs:
 
           # Deploy each JAR file with proper artifact ID and platform classifier
           success_count=0
+          declare -A pom_deployed
           total_count=0
 
           echo "=== Starting JAR Deployment ==="
@@ -432,10 +433,19 @@ jobs:
               fi
             fi
 
+            # deploy-file uploads -DpomFile with every JAR; release repositories reject a second
+            # upload of the same POM, so it goes up with the first JAR of each artifact only
+            if [[ -n "${pom_deployed[$ARTIFACT_ID]:-}" ]]; then
+              pom_opts="-DgeneratePom=false"
+            else
+              pom_opts="-DpomFile=\"${POM_FOR_DEPLOY}\""
+              pom_deployed[$ARTIFACT_ID]=1
+            fi
+
             # Check if this is a dry run
             if [ "${{ inputs.dry_run }}" == "true" ]; then
               echo "🧪 DRY RUN: Would deploy ${jar_basename} as ${ARTIFACT_ID} with classifier ${CURRENT_CLASSIFIER:-none}"
-              echo "Command would be: mvn deploy:deploy-file -DgroupId=org.hdfgroup -DartifactId=${ARTIFACT_ID} -Dversion=${HDF5_VERSION} -Dfile=${jar_file} -DpomFile=${POM_FOR_DEPLOY} ${classifier_opts}"
+              echo "Command would be: mvn deploy:deploy-file -DgroupId=org.hdfgroup -DartifactId=${ARTIFACT_ID} -Dversion=${HDF5_VERSION} -Dfile=${jar_file} ${pom_opts} ${classifier_opts}"
               success_count=$((success_count + 1))
             else
               echo "🚀 Deploying ${jar_basename}..."
@@ -446,7 +456,7 @@ jobs:
                 -DartifactId=\"${ARTIFACT_ID}\" \
                 -Dversion=\"${HDF5_VERSION}\" \
                 -Dfile=\"${jar_file}\" \
-                -DpomFile=\"${POM_FOR_DEPLOY}\" \
+                ${pom_opts} \
                 -DrepositoryId=\"${{ inputs.repository_id }}\" \
                 -Durl=\"${{ inputs.repository_url }}\" \
                 ${classifier_opts} \

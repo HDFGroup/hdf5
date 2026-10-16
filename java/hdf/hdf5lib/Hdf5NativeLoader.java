@@ -35,7 +35,8 @@ import org.scijava.nativelib.NativeLoader;
 public final class Hdf5NativeLoader {
     /**
      * Set this system property to {@code true} to skip the bundled JARs and rely on a system
-     * install ({@code java.library.path}, {@code LD_LIBRARY_PATH}, {@code PATH}) instead.
+     * install instead: libhdf5 found by the OS loader ({@code LD_LIBRARY_PATH},
+     * {@code DYLD_LIBRARY_PATH}, {@code PATH}) and, for JNI, hdf5_java on {@code java.library.path}.
      */
     public static final String SKIP_PROPERTY = "hdf.hdf5lib.Hdf5NativeLoader.skip";
 

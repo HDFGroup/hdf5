@@ -138,7 +138,7 @@ fi
 
 # Test runtime loading and deflate availability
 echo "=== Testing Runtime Loading and Deflate ==="
-if mvn exec:java -Dexec.mainClass=org.hdfgroup.test.TestConsumer -Dexec.jvmArgs=--enable-native-access=ALL-UNNAMED -q; then
+if MAVEN_OPTS="${MAVEN_OPTS:-} --enable-native-access=ALL-UNNAMED" mvn exec:java -Dexec.mainClass=org.hdfgroup.test.TestConsumer -q; then
     echo "✓ Runtime loading and deflate test successful"
 else
     echo "❌ Runtime loading or deflate test failed"
