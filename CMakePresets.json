@@ -1087,8 +1087,6 @@
     },
     {
       "name": "ci-StdShar-macos-GNUC",
-    {
-      "name": "ci-StdShar-macos-GNUC",
       "configurePreset": "ci-StdShar-macos-GNUC",
       "inherits": [
         "ci-macos-Release-GNUC"
