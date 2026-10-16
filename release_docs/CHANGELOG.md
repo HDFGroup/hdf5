@@ -147,7 +147,7 @@ We would like to thank the many HDF5 community members who contributed to this r
    compressed chunk. This caused a heap out-of-bound read when encountered a malformed
    file. The issue is now fixed with bound guards.
 
-   Fixes CVE-2026-19025
+   Fixes CVE-2026-19029
 
 ### Fixed a deadlock in the ROS3 VFD on Windows
 

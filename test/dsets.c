@@ -83,6 +83,7 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
                                  "scalar_datasets",     /* 31 */
                                  "read_only_vlen_fill", /* 32 */
                                  "threaded_chunks",     /* 33 */
+                                 "scaleoffset_bounds",  /* 34 */
                                  NULL};
 
 #define OHMIN_FILENAME_A "ohdr_min_a"
@@ -298,14 +299,12 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
 #define STORAGE_SIZE_CHUNK_DIM2 5
 
 /* Names for scaleoffset bound test */
-#define SCALEOFFSET_FILENAME "scaleoffset_bounds.h5"
 #define DS1_NAME             "Dataset 1"
 #define DS2_NAME             "Dataset 2"
 #define DS3_NAME             "Dataset 3"
 
 /* Parameters for scaleoffset bound test */
 #define NELMTS_PCHK 64 /* elements per (single) chunk */
-#define BUF_OFFSET  21 /* on-disk scale-offset header size */
 
 /* Shared global arrays */
 #define DSET_DIM1 100
@@ -5993,9 +5992,10 @@ error:
  *--------------------------------------------------------------------------
  */
 static int
-test_scaleoffset_bound(void)
+test_scaleoffset_bounds(hid_t fapl)
 {
     hid_t file = H5I_INVALID_HID, dc = H5I_INVALID_HID, space = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    char  filename[FILENAME_BUF_SIZE]; /* File name */
     const hsize_t dims[1]   = {NELMTS_PCHK};
     const hsize_t cdims[1]  = {NELMTS_PCHK};
     const hsize_t offset[1] = {0};
@@ -6004,6 +6004,8 @@ test_scaleoffset_bound(void)
         orig_data[NELMTS_PCHK], read_data[NELMTS_PCHK];
     int    i;
     herr_t ret; /* Generic return value */
+
+    TESTING("    scaleoffset bounds");
 
     /* For size_out exceeds payload */
     memset(chunk25, 0, sizeof(chunk25));
@@ -6015,31 +6017,30 @@ test_scaleoffset_bound(void)
     chunk13[0] = 8; /* minbits = 8 */
     chunk13[4] = 8; /* minval size: 8 bytes of minval follow at [5..12] */
 
-    if ((file = H5Fcreate(SCALEOFFSET_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        fprintf(stderr, "cannot create %s\n", SCALEOFFSET_FILENAME);
-        goto error;
-    }
+    h5_fixname(FILENAME[34], fapl, filename, sizeof filename);
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR;
 
     /* Create the data space */
     if ((space = H5Screate_simple(1, dims, NULL)) < 0)
-        goto error;
+        TEST_ERROR;
 
     /* Create the dataset property list  */
     if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        goto error;
+        TEST_ERROR;
 
     /* Set up to use scaleoffset filter, let library calculate minbits */
     if (H5Pset_chunk(dc, 1, cdims) < 0)
-        goto error;
+        TEST_ERROR;
     if (H5Pset_scaleoffset(dc, H5Z_SO_INT, H5Z_SO_INT_MINBITS_DEFAULT) < 0)
-        goto error;
+        TEST_ERROR;
 
     /* Case 1: buffer size exceeds the 4 payload bytes */
 
     if ((dataset = H5Dcreate2(file, DS1_NAME, H5T_NATIVE_UINT8, space, H5P_DEFAULT, dc, H5P_DEFAULT)) < 0)
-        goto error;
+        TEST_ERROR;
     if (H5Dwrite_chunk(dataset, H5P_DEFAULT, 0, offset, sizeof(chunk25), chunk25) < 0)
-        goto error;
+        TEST_ERROR;
 
     H5E_BEGIN_TRY
     {
@@ -6048,22 +6049,19 @@ test_scaleoffset_bound(void)
     }
     H5E_END_TRY
 
-    if (ret >= 0) {
-        H5_FAILED();
-        puts("    H5Dread should have rejected the undersized chunk");
-        goto error;
-    }
+    if (ret >= 0)
+        FAIL_PUTS_ERROR("    H5Dread should have rejected the undersized chunk");
 
     if (H5Dclose(dataset) < 0)
-        goto error;
+        TEST_ERROR;
     dataset = H5I_INVALID_HID;
 
     /* Case 2: chunk shorter than the 21-byte parameter header. */
 
     if ((dataset = H5Dcreate2(file, DS2_NAME, H5T_NATIVE_UINT8, space, H5P_DEFAULT, dc, H5P_DEFAULT)) < 0)
-        goto error;
+        TEST_ERROR;
     if (H5Dwrite_chunk(dataset, H5P_DEFAULT, 0, offset, sizeof(chunk13), chunk13) < 0)
-        goto error;
+        TEST_ERROR;
 
     H5E_BEGIN_TRY
     {
@@ -6071,12 +6069,8 @@ test_scaleoffset_bound(void)
         ret = H5Dread(dataset, H5T_NATIVE_UINT8, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_data);
     }
     H5E_END_TRY
-
-    if (ret >= 0) {
-        H5_FAILED();
-        puts("    H5Dread should have rejected the undersized chunk");
-        goto error;
-    }
+    if (ret >= 0)
+        FAIL_PUTS_ERROR("    H5Dread should have rejected the undersized chunk");
 
     if (H5Dclose(dataset) < 0)
         goto error;
@@ -6119,7 +6113,6 @@ test_scaleoffset_bound(void)
     if (H5Fclose(file) < 0)
         goto error;
     file = H5I_INVALID_HID;
-    HDremove(SCALEOFFSET_FILENAME);
 
     PASSED();
 
@@ -6131,13 +6124,11 @@ error:
         H5Sclose(space);
     if (dataset != H5I_INVALID_HID)
         H5Dclose(dataset);
-    if (file != H5I_INVALID_HID) {
+    if (file != H5I_INVALID_HID)
         H5Fclose(file);
-        HDremove(SCALEOFFSET_FILENAME);
-    }
 
     return FAIL;
-} /* end test_scaleoffset_bound() */
+} /* end test_scaleoffset_bounds() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_multiopen
@@ -20113,7 +20104,6 @@ main(void)
                         nerrors += (test_bad_decode_size(file) < 0 ? 1 : 0);
                         nerrors += (test_bad_decode_size_vlen(file) < 0 ? 1 : 0);
                         nerrors += (test_bad_buf_size(file) < 0 ? 1 : 0);
-                        nerrors += (test_scaleoffset_bound() < 0 ? 1 : 0);
 
                         /* This one will also fail because it doesn't detect the expected message in the main
                          * thread's stack (it is printed by the child thread) */
@@ -20225,6 +20215,7 @@ main(void)
     /* Run misc tests */
     nerrors += (dls_01_main() < 0 ? 1 : 0);
     nerrors += (test_0sized_dset_metadata_alloc(fapl) < 0 ? 1 : 0);
+    nerrors += (test_scaleoffset_bounds(fapl) < 0 ? 1 : 0);
 
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
