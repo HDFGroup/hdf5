@@ -475,9 +475,12 @@
       "name": "ci-StdShar-macos-x86_64-Clang-S3",
       "description": "Clang S3 Config for macos intel (Release)",
       "inherits": [
-        "ci-StdShar-macos-x86_64-Clang",
+        "ci-StdShar-macos-Clang",
         "ci-S3"
-      ]
+      ],
+       "cacheVariables": {
+       "CMAKE_OSX_ARCHITECTURES": "x86_64"
+      }
     },
     {
       "name": "ci-StdShar-GNUC",
@@ -1080,7 +1083,7 @@
     },
     {
       "name": "ci-StdShar-macos-x86_64-Clang-S3",
-      "configurePreset": "ci-StdShar-macos-x86-64-Clang-S3",
+      "configurePreset": "ci-StdShar-macos-x86_64-Clang-S3",
       "inherits": [
         "ci-macos-Release-Clang"
       ]
