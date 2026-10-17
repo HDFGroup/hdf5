@@ -440,7 +440,7 @@ H5G__new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
         HGOTO_DONE_TAG(FAIL);
 
     /* Open the name index v2 B-tree */
-    if (NULL == (bt2_name = H5B2_open(grp->oloc.file, linfo.name_bt2_addr, NULL)))
+    if (NULL == (bt2_name = H5B2_open(grp->oloc.file, linfo.name_bt2_addr, H5G_BT2_NAME_CPARAM, NULL)))
         HGOTO_ERROR_TAG(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index");
 
     /* Retrieve # of records in name index */
@@ -450,7 +450,8 @@ H5G__new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
     /* Check if there is a creation order index */
     if (H5_addr_defined(linfo.corder_bt2_addr)) {
         /* Open the creation order index v2 B-tree */
-        if (NULL == (bt2_corder = H5B2_open(grp->oloc.file, linfo.corder_bt2_addr, NULL)))
+        if (NULL ==
+            (bt2_corder = H5B2_open(grp->oloc.file, linfo.corder_bt2_addr, H5G_BT2_CORDER_CPARAM, NULL)))
             HGOTO_ERROR_TAG(H5E_SYM, H5E_CANTOPENOBJ, FAIL,
                             "unable to open v2 B-tree for creation order index");
 

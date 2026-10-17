@@ -169,6 +169,10 @@ H5_DLLVAR const H5B2_class_t H5A_BT2_NAME[1];
 /* The v2 B-tree class for indexing 'creation order' field on attributes */
 H5_DLLVAR const H5B2_class_t H5A_BT2_CORDER[1];
 
+/* The v2 B-tree creation parameters for the 'name' and 'creation order' indices */
+H5_DLLVAR const H5B2_create_t H5A_BT2_NAME_CPARAM[1];
+H5_DLLVAR const H5B2_create_t H5A_BT2_CORDER_CPARAM[1];
+
 /******************************/
 /* Package Private Prototypes */
 /******************************/

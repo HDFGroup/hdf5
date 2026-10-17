@@ -476,7 +476,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5B2_hdr_t *
-H5B2__hdr_protect(H5F_t *f, haddr_t hdr_addr, void *ctx_udata, unsigned flags)
+H5B2__hdr_protect(H5F_t *f, haddr_t hdr_addr, const H5B2_create_t *cparam, void *ctx_udata, unsigned flags)
 {
     H5B2_hdr_cache_ud_t udata;            /* User data for cache callbacks */
     H5B2_hdr_t         *hdr       = NULL; /* v2 B-tree header */
@@ -494,6 +494,7 @@ H5B2__hdr_protect(H5F_t *f, haddr_t hdr_addr, void *ctx_udata, unsigned flags)
     /* Set up user data for cache callbacks */
     udata.f         = f;
     udata.addr      = hdr_addr;
+    udata.cparam    = cparam;
     udata.ctx_udata = ctx_udata;
 
     /* Protect the header */
@@ -501,6 +502,10 @@ H5B2__hdr_protect(H5F_t *f, haddr_t hdr_addr, void *ctx_udata, unsigned flags)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to load v2 B-tree header, address = %llu",
                     (unsigned long long)hdr_addr);
     hdr->f = f; /* (Must be set again here, in case the header was already in the cache -QAK) */
+
+    /* Check the header against the caller's class, in case it was already in the cache */
+    if (cparam && (hdr->cls != cparam->cls || hdr->rrec_size != cparam->rrec_size))
+        HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "v2 B-tree header doesn't match its opener");
 
     /* Create top proxy, if it doesn't exist */
     if (hdr->swmr_write && NULL == hdr->top_proxy) {

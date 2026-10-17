@@ -66,7 +66,8 @@ typedef herr_t (*H5EA__unprotect_func_t)(void *thing, unsigned cache_flags);
 static herr_t  H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, bool will_extend, unsigned thing_acc,
                                  void **thing, uint8_t **thing_elmt_buf, hsize_t *thing_elmt_idx,
                                  H5EA__unprotect_func_t *thing_unprot_func);
-static H5EA_t *H5EA__new(H5F_t *f, haddr_t ea_addr, bool from_open, void *ctx_udata);
+static H5EA_t *H5EA__new(H5F_t *f, haddr_t ea_addr, bool from_open, const H5EA_create_t *cparam,
+                         void *ctx_udata);
 
 /*********************/
 /* Package Variables */
@@ -111,7 +112,7 @@ H5FL_BLK_DEFINE_STATIC(ea_native_elmt);
  *-------------------------------------------------------------------------
  */
 static H5EA_t *
-H5EA__new(H5F_t *f, haddr_t ea_addr, bool from_open, void *ctx_udata)
+H5EA__new(H5F_t *f, haddr_t ea_addr, bool from_open, const H5EA_create_t *cparam, void *ctx_udata)
 {
     H5EA_t     *ea        = NULL; /* Pointer to new extensible array */
     H5EA_hdr_t *hdr       = NULL; /* The extensible array header information */
@@ -128,7 +129,7 @@ H5EA__new(H5F_t *f, haddr_t ea_addr, bool from_open, void *ctx_udata)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL, "memory allocation failed for extensible array info");
 
     /* Lock the array header into memory */
-    if (NULL == (hdr = H5EA__hdr_protect(f, ea_addr, ctx_udata, H5AC__READ_ONLY_FLAG)))
+    if (NULL == (hdr = H5EA__hdr_protect(f, ea_addr, cparam, ctx_udata, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, NULL, "unable to load extensible array header");
 
     /* Check for pending array deletion */
@@ -193,7 +194,7 @@ H5EA_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTINIT, NULL, "can't create extensible array header");
 
     /* Allocate and initialize new extensible array wrapper */
-    if (NULL == (ea = H5EA__new(f, ea_addr, false, ctx_udata)))
+    if (NULL == (ea = H5EA__new(f, ea_addr, false, cparam, ctx_udata)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTINIT, NULL,
                     "allocation and/or initialization failed for extensible array wrapper");
 
@@ -219,7 +220,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5EA_t *
-H5EA_open(H5F_t *f, haddr_t ea_addr, void *ctx_udata)
+H5EA_open(H5F_t *f, haddr_t ea_addr, const H5EA_create_t *cparam, void *ctx_udata)
 {
     H5EA_t *ea        = NULL; /* Pointer to new extensible array wrapper */
     H5EA_t *ret_value = NULL;
@@ -229,9 +230,10 @@ H5EA_open(H5F_t *f, haddr_t ea_addr, void *ctx_udata)
     /* Check arguments */
     assert(f);
     assert(H5_addr_defined(ea_addr));
+    assert(cparam);
 
     /* Allocate and initialize new extensible array wrapper */
-    if (NULL == (ea = H5EA__new(f, ea_addr, true, ctx_udata)))
+    if (NULL == (ea = H5EA__new(f, ea_addr, true, cparam, ctx_udata)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTINIT, NULL,
                     "allocation and/or initialization failed for extensible array wrapper");
 
@@ -869,7 +871,7 @@ H5EA_close(H5EA_t *ea)
 
             /* Lock the array header into memory */
             /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
-            if (NULL == (hdr = H5EA__hdr_protect(ea->f, ea_addr, NULL, H5AC__NO_FLAGS_SET)))
+            if (NULL == (hdr = H5EA__hdr_protect(ea->f, ea_addr, NULL, NULL, H5AC__NO_FLAGS_SET)))
                 HGOTO_ERROR(H5E_EARRAY, H5E_CANTLOAD, FAIL, "unable to load extensible array header");
 
             /* Set the shared array header's file context for this operation */
@@ -915,7 +917,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5EA_delete(H5F_t *f, haddr_t ea_addr, void *ctx_udata)
+H5EA_delete(H5F_t *f, haddr_t ea_addr, const H5EA_create_t *cparam, void *ctx_udata)
 {
     H5EA_hdr_t *hdr       = NULL; /* The fractal heap header information */
     herr_t      ret_value = SUCCEED;
@@ -925,9 +927,10 @@ H5EA_delete(H5F_t *f, haddr_t ea_addr, void *ctx_udata)
     /* Check arguments */
     assert(f);
     assert(H5_addr_defined(ea_addr));
+    assert(cparam);
 
     /* Lock the array header into memory */
-    if (NULL == (hdr = H5EA__hdr_protect(f, ea_addr, ctx_udata, H5AC__NO_FLAGS_SET)))
+    if (NULL == (hdr = H5EA__hdr_protect(f, ea_addr, cparam, ctx_udata, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL,
                     "unable to protect extensible array header, address = %llu", (unsigned long long)ea_addr);
 

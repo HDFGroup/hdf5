@@ -113,7 +113,7 @@ H5_DLLVAR const H5FA_class_t H5FA_CLS_FILT_CHUNK[1];
 
 /* General routines */
 H5_DLL H5FA_t *H5FA_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata);
-H5_DLL H5FA_t *H5FA_open(H5F_t *f, haddr_t fa_addr, void *ctx_udata);
+H5_DLL H5FA_t *H5FA_open(H5F_t *f, haddr_t fa_addr, const H5FA_create_t *cparam, void *ctx_udata);
 H5_DLL herr_t  H5FA_get_nelmts(const H5FA_t *fa, hsize_t *nelmts);
 H5_DLL herr_t  H5FA_get_addr(const H5FA_t *fa, haddr_t *addr);
 H5_DLL herr_t  H5FA_set(const H5FA_t *fa, hsize_t idx, const void *elmt);
@@ -121,7 +121,7 @@ H5_DLL herr_t  H5FA_get(const H5FA_t *fa, hsize_t idx, void *elmt);
 H5_DLL herr_t  H5FA_depend(H5FA_t *fa, H5AC_proxy_entry_t *parent);
 H5_DLL herr_t  H5FA_iterate(H5FA_t *fa, H5FA_operator_t op, void *udata);
 H5_DLL herr_t  H5FA_close(H5FA_t *fa);
-H5_DLL herr_t  H5FA_delete(H5F_t *f, haddr_t fa_addr, void *ctx_udata);
+H5_DLL herr_t  H5FA_delete(H5F_t *f, haddr_t fa_addr, const H5FA_create_t *cparam, void *ctx_udata);
 H5_DLL herr_t  H5FA_patch_file(H5FA_t *fa, H5F_t *f);
 
 /* Statistics routines */

@@ -146,7 +146,7 @@ H5B2_create(H5F_t *f, const H5B2_create_t *cparam, void *ctx_udata)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for v2 B-tree info");
 
     /* Look up the B-tree header */
-    if (NULL == (hdr = H5B2__hdr_protect(f, hdr_addr, ctx_udata, H5AC__NO_FLAGS_SET)))
+    if (NULL == (hdr = H5B2__hdr_protect(f, hdr_addr, NULL, ctx_udata, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to protect v2 B-tree header");
 
     /* Point v2 B-tree wrapper at header and bump it's ref count */
@@ -187,7 +187,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5B2_t *
-H5B2_open(H5F_t *f, haddr_t addr, void *ctx_udata)
+H5B2_open(H5F_t *f, haddr_t addr, const H5B2_create_t *cparam, void *ctx_udata)
 {
     H5B2_t     *bt2       = NULL; /* Pointer to the B-tree */
     H5B2_hdr_t *hdr       = NULL; /* Pointer to the B-tree header */
@@ -198,9 +198,10 @@ H5B2_open(H5F_t *f, haddr_t addr, void *ctx_udata)
     /* Check arguments. */
     assert(f);
     assert(H5_addr_defined(addr));
+    assert(cparam);
 
     /* Look up the B-tree header */
-    if (NULL == (hdr = H5B2__hdr_protect(f, addr, ctx_udata, H5AC__READ_ONLY_FLAG)))
+    if (NULL == (hdr = H5B2__hdr_protect(f, addr, cparam, ctx_udata, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to protect v2 B-tree header");
 
     /* Check for pending heap deletion */
@@ -1410,7 +1411,7 @@ H5B2_close(H5B2_t *bt2)
 
         /* Lock the v2 B-tree header into memory */
         /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
-        if (NULL == (hdr = H5B2__hdr_protect(bt2->f, bt2_addr, NULL, H5AC__NO_FLAGS_SET)))
+        if (NULL == (hdr = H5B2__hdr_protect(bt2->f, bt2_addr, NULL, NULL, H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect v2 B-tree header");
 
         /* Set the shared v2 B-tree header's file context for this operation */
@@ -1465,7 +1466,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_delete(H5F_t *f, haddr_t addr, void *ctx_udata, H5B2_remove_t op, void *op_data)
+H5B2_delete(H5F_t *f, haddr_t addr, const H5B2_create_t *cparam, void *ctx_udata, H5B2_remove_t op,
+            void *op_data)
 {
     H5B2_hdr_t *hdr       = NULL;    /* Pointer to the B-tree header */
     herr_t      ret_value = SUCCEED; /* Return value */
@@ -1475,9 +1477,10 @@ H5B2_delete(H5F_t *f, haddr_t addr, void *ctx_udata, H5B2_remove_t op, void *op_
     /* Check arguments. */
     assert(f);
     assert(H5_addr_defined(addr));
+    assert(cparam);
 
     /* Lock the v2 B-tree header into memory */
-    if (NULL == (hdr = H5B2__hdr_protect(f, addr, ctx_udata, H5AC__NO_FLAGS_SET)))
+    if (NULL == (hdr = H5B2__hdr_protect(f, addr, cparam, ctx_udata, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect v2 B-tree header");
 
     /* Remember the callback & context for later */

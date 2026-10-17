@@ -271,6 +271,10 @@ H5FA__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len
     /* Array statistics */
     H5F_DECODE_LENGTH(udata->f, image, hdr->cparam.nelmts); /* Number of elements */
 
+    /* Check the creation parameters, and that they are the ones the opener expects */
+    if (H5FA__hdr_check_cparam(&hdr->cparam, udata->cparam) < 0)
+        HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, NULL, "invalid fixed array header");
+
     /* Internal information */
     H5F_addr_decode(udata->f, &image, &hdr->dblk_addr); /* Address of index block */
 

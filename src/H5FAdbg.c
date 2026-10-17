@@ -101,8 +101,10 @@ H5FA__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTGET, FAIL, "unable to create fixed array debugging context");
 
     /* Load the fixed array header */
-    if (NULL == (hdr = H5FA__hdr_protect(f, addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
+    if (NULL == (hdr = H5FA__hdr_protect(f, addr, NULL, dbg_ctx, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, FAIL, "unable to load fixed array header");
+    if (hdr->cparam.cls != cls)
+        HGOTO_ERROR(H5E_FARRAY, H5E_BADTYPE, FAIL, "fixed array class mismatch");
 
     /* Print opening message */
     fprintf(stream, "%*sFixed Array Header...\n", indent, "");
@@ -172,8 +174,10 @@ H5FA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTGET, FAIL, "unable to create fixed array debugging context");
 
     /* Load the fixed array header */
-    if (NULL == (hdr = H5FA__hdr_protect(f, hdr_addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
+    if (NULL == (hdr = H5FA__hdr_protect(f, hdr_addr, NULL, dbg_ctx, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, FAIL, "unable to load fixed array header");
+    if (hdr->cparam.cls != cls)
+        HGOTO_ERROR(H5E_FARRAY, H5E_BADTYPE, FAIL, "fixed array class mismatch");
 
     /* Protect data block */
     if (NULL == (dblock = H5FA__dblock_protect(hdr, addr, H5AC__READ_ONLY_FLAG)))

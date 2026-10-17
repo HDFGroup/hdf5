@@ -157,6 +157,7 @@ static herr_t H5D__earray_idx_dest(const H5D_chk_idx_info_t *idx_info);
 
 /* Generic extensible array routines */
 static herr_t H5D__earray_idx_depend(const H5D_chk_idx_info_t *idx_info);
+static void   H5D__earray_idx_cparam(const H5D_chk_idx_info_t *idx_info, H5EA_create_t *cparam);
 
 /*********************/
 /* Package Variables */
@@ -844,6 +845,47 @@ done:
 } /* end H5D__earray_idx_init() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D__earray_idx_cparam
+ *
+ * Purpose:     Set up the extensible array creation parameters for a
+ *              dataset's chunk index, from its layout and I/O pipeline
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+H5D__earray_idx_cparam(const H5D_chk_idx_info_t *idx_info, H5EA_create_t *cparam)
+{
+    unsigned chunk_size_len = 0; /* Size of encoded chunk size */
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    assert(idx_info);
+    assert(idx_info->f);
+    assert(idx_info->pline);
+    assert(idx_info->layout);
+    assert(cparam);
+
+    H5D_EARRAY_COMPUTE_CHUNK_SIZE_LEN(chunk_size_len, idx_info);
+    if (idx_info->pline->nused > 0) {
+        cparam->cls           = H5EA_CLS_FILT_CHUNK;
+        cparam->raw_elmt_size = (uint8_t)(H5F_SIZEOF_ADDR(idx_info->f) + chunk_size_len + 4);
+    } /* end if */
+    else {
+        cparam->cls           = H5EA_CLS_CHUNK;
+        cparam->raw_elmt_size = (uint8_t)H5F_SIZEOF_ADDR(idx_info->f);
+    } /* end else */
+    cparam->max_nelmts_bits           = idx_info->layout->u.chunk.u.earray.cparam.max_nelmts_bits;
+    cparam->idx_blk_elmts             = idx_info->layout->u.chunk.u.earray.cparam.idx_blk_elmts;
+    cparam->sup_blk_min_data_ptrs     = idx_info->layout->u.chunk.u.earray.cparam.sup_blk_min_data_ptrs;
+    cparam->data_blk_min_elmts        = idx_info->layout->u.chunk.u.earray.cparam.data_blk_min_elmts;
+    cparam->max_dblk_page_nelmts_bits = idx_info->layout->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5D__earray_idx_cparam() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5D__earray_idx_create
  *
  * Purpose:     Creates a new indexed-storage extensible array and initializes
@@ -878,24 +920,7 @@ H5D__earray_idx_create(const H5D_chk_idx_info_t *idx_info)
 
     /* General parameters */
     H5D_EARRAY_COMPUTE_CHUNK_SIZE_LEN(chunk_size_len, idx_info);
-    if (idx_info->pline->nused > 0) {
-        cparam.cls           = H5EA_CLS_FILT_CHUNK;
-        cparam.raw_elmt_size = (uint8_t)(H5F_SIZEOF_ADDR(idx_info->f) + chunk_size_len + 4);
-    } /* end if */
-    else {
-        cparam.cls           = H5EA_CLS_CHUNK;
-        cparam.raw_elmt_size = (uint8_t)H5F_SIZEOF_ADDR(idx_info->f);
-    } /* end else */
-    cparam.max_nelmts_bits = idx_info->layout->u.chunk.u.earray.cparam.max_nelmts_bits;
-    assert(cparam.max_nelmts_bits > 0);
-    cparam.idx_blk_elmts = idx_info->layout->u.chunk.u.earray.cparam.idx_blk_elmts;
-    assert(cparam.idx_blk_elmts > 0);
-    cparam.sup_blk_min_data_ptrs = idx_info->layout->u.chunk.u.earray.cparam.sup_blk_min_data_ptrs;
-    assert(cparam.sup_blk_min_data_ptrs > 0);
-    cparam.data_blk_min_elmts = idx_info->layout->u.chunk.u.earray.cparam.data_blk_min_elmts;
-    assert(cparam.data_blk_min_elmts > 0);
-    cparam.max_dblk_page_nelmts_bits = idx_info->layout->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits;
-    assert(cparam.max_dblk_page_nelmts_bits > 0);
+    H5D__earray_idx_cparam(idx_info, &cparam);
 
     /* Set up the user data */
     udata.f              = idx_info->f;
@@ -939,6 +964,7 @@ done:
 static herr_t
 H5D__earray_idx_open(const H5D_chk_idx_info_t *idx_info)
 {
+    H5EA_create_t       cparam;              /* Expected extensible array creation parameters */
     H5D_earray_ctx_ud_t udata;               /* User data for extensible array open call */
     herr_t              ret_value = SUCCEED; /* Return value */
 
@@ -960,9 +986,12 @@ H5D__earray_idx_open(const H5D_chk_idx_info_t *idx_info)
     /* Compute number of bytes used to encode the chunk size */
     H5D_EARRAY_COMPUTE_CHUNK_SIZE_LEN(udata.chunk_size_len, idx_info);
 
+    /* Set up the creation parameters the array must have been created with */
+    H5D__earray_idx_cparam(idx_info, &cparam);
+
     /* Open the extensible array for the chunk index */
     if (NULL == (idx_info->layout->storage.u.chunk.u.earray.ea =
-                     H5EA_open(idx_info->f, idx_info->layout->storage.u.chunk.idx_addr, &udata)))
+                     H5EA_open(idx_info->f, idx_info->layout->storage.u.chunk.idx_addr, &cparam, &udata)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open extensible array");
 
     /* Check for SWMR writes to the file */
@@ -1592,6 +1621,7 @@ H5D__earray_idx_delete(const H5D_chk_idx_info_t *idx_info)
 
     /* Check if the index data structure has been allocated */
     if (H5_addr_defined(idx_info->layout->storage.u.chunk.idx_addr)) {
+        H5EA_create_t       cparam;    /* Expected extensible array creation parameters */
         H5D_earray_ctx_ud_t ctx_udata; /* User data for extensible array open call */
 
         /* Iterate over the chunk addresses in the extensible array, deleting each chunk */
@@ -1608,8 +1638,11 @@ H5D__earray_idx_delete(const H5D_chk_idx_info_t *idx_info)
         /* Compute number of bytes used to encode the chunk size */
         H5D_EARRAY_COMPUTE_CHUNK_SIZE_LEN(ctx_udata.chunk_size_len, idx_info);
 
+        /* Set up the creation parameters the array must have been created with */
+        H5D__earray_idx_cparam(idx_info, &cparam);
+
         /* Delete extensible array */
-        if (H5EA_delete(idx_info->f, idx_info->layout->storage.u.chunk.idx_addr, &ctx_udata) < 0)
+        if (H5EA_delete(idx_info->f, idx_info->layout->storage.u.chunk.idx_addr, &cparam, &ctx_udata) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete chunk extensible array");
         idx_info->layout->storage.u.chunk.idx_addr = HADDR_UNDEF;
     } /* end if */

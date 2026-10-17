@@ -391,7 +391,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-reopen_file(hid_t *file, H5F_t **f, hid_t fapl, H5EA_t **ea, haddr_t ea_addr,
+reopen_file(hid_t *file, H5F_t **f, hid_t fapl, H5EA_t **ea, haddr_t ea_addr, const H5EA_create_t *cparam,
             const earray_test_param_t *tparam)
 {
     /* Check for closing & re-opening the array */
@@ -426,7 +426,7 @@ reopen_file(hid_t *file, H5F_t **f, hid_t fapl, H5EA_t **ea, haddr_t ea_addr,
 
         /* Re-open array, if given */
         if (ea)
-            if (NULL == (*ea = H5EA_open(*f, ea_addr, NULL)))
+            if (NULL == (*ea = H5EA_open(*f, ea_addr, cparam, NULL)))
                 FAIL_STACK_ERROR;
     } /* end if */
 
@@ -522,7 +522,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-finish(hid_t file, hid_t fapl, H5F_t *f, H5EA_t *ea, haddr_t ea_addr)
+finish(hid_t file, hid_t fapl, H5F_t *f, H5EA_t *ea, haddr_t ea_addr, const H5EA_create_t *cparam)
 {
     h5_stat_size_t file_size; /* File size, after deleting array */
 
@@ -531,7 +531,7 @@ finish(hid_t file, hid_t fapl, H5F_t *f, H5EA_t *ea, haddr_t ea_addr)
         FAIL_STACK_ERROR;
 
     /* Delete array */
-    if (H5EA_delete(f, ea_addr, NULL) < 0)
+    if (H5EA_delete(f, ea_addr, cparam, NULL) < 0)
         FAIL_STACK_ERROR;
 
     /* Close the file */
@@ -580,7 +580,6 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
      */
     TESTING("invalid extensible array creation parameters");
 
-#ifndef NDEBUG
     {
         H5EA_create_t test_cparam; /* Creation parameters for array */
 
@@ -751,10 +750,6 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
 
         PASSED();
     }
-#else  /* NDEBUG */
-    SKIPPED();
-    puts("    Not tested when assertions are disabled");
-#endif /* NDEBUG */
 
     /*
      * Display testing message
@@ -775,7 +770,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         TEST_ERROR;
 
     /* Close array, delete array, close file & verify file is empty */
-    if (finish(file, fapl, f, ea, ea_addr) < 0)
+    if (finish(file, fapl, f, ea, ea_addr, cparam) < 0)
         TEST_ERROR;
 
     /* All tests passed */
@@ -831,11 +826,11 @@ test_reopen(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         FAIL_STACK_ERROR;
 
     /* Check for closing & re-opening the file */
-    if (reopen_file(&file, &f, fapl, NULL, HADDR_UNDEF, tparam) < 0)
+    if (reopen_file(&file, &f, fapl, NULL, HADDR_UNDEF, cparam, tparam) < 0)
         TEST_ERROR;
 
     /* Re-open the array */
-    if (NULL == (ea = H5EA_open(f, ea_addr, NULL)))
+    if (NULL == (ea = H5EA_open(f, ea_addr, cparam, NULL)))
         FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
@@ -843,7 +838,7 @@ test_reopen(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         TEST_ERROR;
 
     /* Close array, delete array, close file & verify file is empty */
-    if (finish(file, fapl, f, ea, ea_addr) < 0)
+    if (finish(file, fapl, f, ea, ea_addr, cparam) < 0)
         TEST_ERROR;
 
     /* All tests passed */
@@ -862,6 +857,154 @@ error:
 
     return 1;
 } /* test_reopen() */
+
+/*-------------------------------------------------------------------------
+ * Function:    open_mismatch
+ *
+ * Purpose:    Check that opening an extensible array with each of a set of
+ *             creation parameters that differ from the array's fails
+ *
+ * Return:    Success:    0
+ *        Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+open_mismatch(H5F_t *f, haddr_t ea_addr, const H5EA_create_t *cparam)
+{
+    H5EA_create_t bad_cparam; /* Creation parameters that differ from the array's */
+    H5EA_t       *ea = NULL;  /* Extensible array wrapper */
+    unsigned      u;          /* Local index variable */
+
+    for (u = 0; u < 8; u++) {
+        bad_cparam = *cparam;
+        switch (u) {
+            case 0:
+                bad_cparam.cls = H5EA_CLS_CHUNK;
+                break;
+            case 1:
+                bad_cparam.cls = H5EA_CLS_FILT_CHUNK;
+                break;
+            case 2:
+                bad_cparam.raw_elmt_size++;
+                break;
+            case 3:
+                bad_cparam.max_nelmts_bits--;
+                break;
+            case 4:
+                bad_cparam.idx_blk_elmts++;
+                break;
+            case 5:
+                bad_cparam.data_blk_min_elmts *= 2;
+                break;
+            case 6:
+                bad_cparam.sup_blk_min_data_ptrs *= 2;
+                break;
+            default:
+                bad_cparam.max_dblk_page_nelmts_bits--;
+                break;
+        } /* end switch */
+
+        H5E_BEGIN_TRY
+        {
+            ea = H5EA_open(f, ea_addr, &bad_cparam, NULL);
+        }
+        H5E_END_TRY
+        if (ea) {
+            H5EA_close(ea);
+            TEST_ERROR;
+        } /* end if */
+    }     /* end for */
+
+    return 0;
+
+error:
+    return -1;
+} /* open_mismatch() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_open_cparam_mismatch
+ *
+ * Purpose:    Check that H5EA_open rejects an array whose header doesn't
+ *             have the creation parameters the opener expects
+ *
+ * Return:    Success:    0
+ *        Failure:    1
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_open_cparam_mismatch(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSED *tparam)
+{
+    hid_t   file    = H5I_INVALID_HID; /* File ID */
+    H5F_t  *f       = NULL;            /* Internal file object pointer */
+    H5EA_t *ea      = NULL;            /* Extensible array wrapper */
+    haddr_t ea_addr = HADDR_UNDEF;     /* Array address in file */
+
+    /* Create file & retrieve pointer to internal file object */
+    if (create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
+        TEST_ERROR;
+
+    /*
+     * Display testing message
+     */
+    TESTING("open extensible array with mismatched creation parameters");
+
+    /* Create array */
+    if (create_array(f, cparam, &ea, &ea_addr, NULL) < 0)
+        TEST_ERROR;
+
+    /* Try opening the array while its header is in the cache */
+    if (open_mismatch(f, ea_addr, cparam) < 0)
+        TEST_ERROR;
+
+    /* Close the extensible array */
+    if (H5EA_close(ea) < 0)
+        FAIL_STACK_ERROR;
+    ea = NULL;
+
+    /* Close & re-open the file, so the header is read from the file */
+    if (H5Fclose(file) < 0)
+        FAIL_STACK_ERROR;
+    if ((file = H5Fopen(filename_g, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR;
+    if (NULL == (f = (H5F_t *)H5VL_object(file)))
+        FAIL_STACK_ERROR;
+    if (H5AC_ignore_tags(f) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Try opening the array with its header read from the file */
+    if (open_mismatch(f, ea_addr, cparam) < 0)
+        TEST_ERROR;
+
+    /* Re-open the array with its own creation parameters */
+    if (NULL == (ea = H5EA_open(f, ea_addr, cparam, NULL)))
+        FAIL_STACK_ERROR;
+
+    /* Verify the creation parameters */
+    if (verify_cparam(ea, cparam) < 0)
+        TEST_ERROR;
+
+    /* Close array, delete array, close file & verify file is empty */
+    if (finish(file, fapl, f, ea, ea_addr, cparam) < 0)
+        TEST_ERROR;
+
+    /* All tests passed */
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        if (ea)
+            H5EA_close(ea);
+        H5Fclose(file);
+    }
+    H5E_END_TRY
+
+    return 1;
+} /* test_open_cparam_mismatch() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_open_twice
@@ -898,7 +1041,7 @@ test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         TEST_ERROR;
 
     /* Open the array again, through the first file handle */
-    if (NULL == (ea2 = H5EA_open(f, ea_addr, NULL)))
+    if (NULL == (ea2 = H5EA_open(f, ea_addr, cparam, NULL)))
         FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
@@ -913,7 +1056,7 @@ test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
     ea2 = NULL;
 
     /* Check for closing & re-opening the file */
-    if (reopen_file(&file, &f, fapl, &ea, ea_addr, tparam) < 0)
+    if (reopen_file(&file, &f, fapl, &ea, ea_addr, cparam, tparam) < 0)
         TEST_ERROR;
 
     /* Re-open the file */
@@ -925,7 +1068,7 @@ test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         FAIL_STACK_ERROR;
 
     /* Open the extensible array through the second file handle */
-    if (NULL == (ea2 = H5EA_open(f2, ea_addr, NULL)))
+    if (NULL == (ea2 = H5EA_open(f2, ea_addr, cparam, NULL)))
         FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
@@ -945,7 +1088,7 @@ test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         FAIL_STACK_ERROR;
 
     /* Close array, delete array, close file & verify file is empty */
-    if (finish(file2, fapl, f2, ea2, ea_addr) < 0)
+    if (finish(file2, fapl, f2, ea2, ea_addr, cparam) < 0)
         TEST_ERROR;
 
     /* All tests passed */
@@ -1008,7 +1151,7 @@ test_open_twice_diff(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tpa
         TEST_ERROR;
 
     /* Open the array again, through the first file handle */
-    if (NULL == (ea2 = H5EA_open(f, ea_addr, NULL)))
+    if (NULL == (ea2 = H5EA_open(f, ea_addr, cparam, NULL)))
         FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
@@ -1030,7 +1173,7 @@ test_open_twice_diff(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tpa
         FAIL_STACK_ERROR;
 
     /* Check for closing & re-opening the file */
-    if (reopen_file(&file, &f, fapl, &ea, ea_addr, tparam) < 0)
+    if (reopen_file(&file, &f, fapl, &ea, ea_addr, cparam, tparam) < 0)
         TEST_ERROR;
 
     /* Verify the creation parameters */
@@ -1068,7 +1211,7 @@ test_open_twice_diff(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tpa
         FAIL_STACK_ERROR;
 
     /* Open the extensible array through the second file handle */
-    if (NULL == (ea2 = H5EA_open(f2, ea_addr, NULL)))
+    if (NULL == (ea2 = H5EA_open(f2, ea_addr, cparam, NULL)))
         FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
@@ -1082,7 +1225,7 @@ test_open_twice_diff(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tpa
         FAIL_STACK_ERROR;
 
     /* Close array, delete array, close file & verify file is empty */
-    if (finish(file2, fapl, f2, ea2, ea_addr) < 0)
+    if (finish(file2, fapl, f2, ea2, ea_addr, cparam) < 0)
         TEST_ERROR;
 
     /* All tests passed */
@@ -1141,11 +1284,11 @@ test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         TEST_ERROR;
 
     /* Open the array again */
-    if (NULL == (ea2 = H5EA_open(f, ea_addr, NULL)))
+    if (NULL == (ea2 = H5EA_open(f, ea_addr, cparam, NULL)))
         FAIL_STACK_ERROR;
 
     /* Request that the array be deleted */
-    if (H5EA_delete(f, ea_addr, NULL) < 0)
+    if (H5EA_delete(f, ea_addr, cparam, NULL) < 0)
         FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
@@ -1162,7 +1305,7 @@ test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
     /* Try re-opening the array again (should fail, as array will be deleted) */
     H5E_BEGIN_TRY
     {
-        ea2 = H5EA_open(f, ea_addr, NULL);
+        ea2 = H5EA_open(f, ea_addr, cparam, NULL);
     }
     H5E_END_TRY
     if (ea2) {
@@ -1179,13 +1322,13 @@ test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
     ea = NULL;
 
     /* Check for closing & re-opening the file */
-    if (reopen_file(&file, &f, fapl, NULL, HADDR_UNDEF, tparam) < 0)
+    if (reopen_file(&file, &f, fapl, NULL, HADDR_UNDEF, cparam, tparam) < 0)
         TEST_ERROR;
 
     /* Try re-opening the array again (should fail, as array is now deleted) */
     H5E_BEGIN_TRY
     {
-        ea = H5EA_open(f, ea_addr, NULL);
+        ea = H5EA_open(f, ea_addr, cparam, NULL);
     }
     H5E_END_TRY
     if (ea) {
@@ -1994,7 +2137,7 @@ test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam, h
         TEST_ERROR;
 
     /* Check for closing & re-opening the file */
-    if (reopen_file(&file, &f, fapl, &ea, ea_addr, tparam) < 0)
+    if (reopen_file(&file, &f, fapl, &ea, ea_addr, cparam, tparam) < 0)
         TEST_ERROR;
 
     /* Verify high-water # of elements written */
@@ -2102,7 +2245,7 @@ test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam, h
         TEST_ERROR;
 
     /* Close array, delete array, close file & verify file is empty */
-    if (finish(file, fapl, f, ea, ea_addr) < 0)
+    if (finish(file, fapl, f, ea, ea_addr, cparam) < 0)
         TEST_ERROR;
 
     /* All tests passed */
@@ -2165,7 +2308,7 @@ test_skip_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam, 
         TEST_ERROR;
 
     /* Check for closing & re-opening the file */
-    if (reopen_file(&file, &f, fapl, &ea, ea_addr, tparam) < 0)
+    if (reopen_file(&file, &f, fapl, &ea, ea_addr, cparam, tparam) < 0)
         TEST_ERROR;
 
     /* Verify high-water # of elements written */
@@ -2258,7 +2401,7 @@ test_skip_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam, 
     } /* end for */
 
     /* Close array, delete array, close file & verify file is empty */
-    if (finish(file, fapl, f, ea, ea_addr) < 0)
+    if (finish(file, fapl, f, ea, ea_addr, cparam) < 0)
         TEST_ERROR;
 
     /* All tests passed */
@@ -2363,6 +2506,7 @@ main(void)
         nerrors += test_create(fapl, &cparam, &tparam);
         nerrors += test_reopen(fapl, &cparam, &tparam);
         nerrors += test_open_twice(fapl, &cparam, &tparam);
+        nerrors += test_open_cparam_mismatch(fapl, &cparam, &tparam);
         nerrors += test_open_twice_diff(fapl, &cparam, &tparam);
         nerrors += test_delete_open(fapl, &cparam, &tparam);
 

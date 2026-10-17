@@ -100,8 +100,10 @@ H5EA__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create fixed array debugging context");
 
     /* Load the extensible array header */
-    if (NULL == (hdr = H5EA__hdr_protect(f, addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
+    if (NULL == (hdr = H5EA__hdr_protect(f, addr, NULL, dbg_ctx, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header");
+    if (hdr->cparam.cls != cls)
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADTYPE, FAIL, "extensible array class mismatch");
 
     /* Print opening message */
     fprintf(stream, "%*sExtensible Array Header...\n", indent, "");
@@ -182,8 +184,10 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create extensible array debugging context");
 
     /* Load the extensible array header */
-    if (NULL == (hdr = H5EA__hdr_protect(f, hdr_addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
+    if (NULL == (hdr = H5EA__hdr_protect(f, hdr_addr, NULL, dbg_ctx, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header");
+    if (hdr->cparam.cls != cls)
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADTYPE, FAIL, "extensible array class mismatch");
 
     /* Sanity check */
     assert(H5_addr_eq(hdr->idx_blk_addr, addr));
@@ -300,8 +304,10 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create extensible array debugging context");
 
     /* Load the extensible array header */
-    if (NULL == (hdr = H5EA__hdr_protect(f, hdr_addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
+    if (NULL == (hdr = H5EA__hdr_protect(f, hdr_addr, NULL, dbg_ctx, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header");
+    if (hdr->cparam.cls != cls)
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADTYPE, FAIL, "extensible array class mismatch");
 
     /* Protect super block */
     /* (Note: setting parent of super block to 'hdr' for this operation should be OK -QAK) */
@@ -389,8 +395,10 @@ H5EA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to create extensible array debugging context");
 
     /* Load the extensible array header */
-    if (NULL == (hdr = H5EA__hdr_protect(f, hdr_addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
+    if (NULL == (hdr = H5EA__hdr_protect(f, hdr_addr, NULL, dbg_ctx, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header");
+    if (hdr->cparam.cls != cls)
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADTYPE, FAIL, "extensible array class mismatch");
 
     /* Protect data block */
     /* (Note: setting parent of data block to 'hdr' for this operation should be OK -QAK) */

@@ -195,12 +195,19 @@ reopen_btree(H5F_t *f, H5B2_t **bt2, haddr_t bt2_addr, const bt2_test_param_t *t
 {
     /* Check for closing & re-opening the B-tree */
     if (tparam->reopen_btree) {
+        H5B2_create_t cparam; /* Creation parameters of the v2 B-tree */
+
+        /* Get the class & raw record size to re-open the v2 B-tree with */
+        memset(&cparam, 0, sizeof(cparam));
+        cparam.cls       = (*bt2)->hdr->cls;
+        cparam.rrec_size = (uint32_t)(*bt2)->hdr->rrec_size;
+
         /* Close (empty) v2 B-tree */
         if (H5B2_close(*bt2) < 0)
             FAIL_STACK_ERROR;
 
         /* Re-open v2 B-tree */
-        if (NULL == (*bt2 = H5B2_open(f, bt2_addr, f)))
+        if (NULL == (*bt2 = H5B2_open(f, bt2_addr, &cparam, f)))
             FAIL_STACK_ERROR;
     } /* end if */
 
@@ -2985,7 +2992,7 @@ fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         STACK_ERROR;
 
     /* Re-open v2 B-tree */
-    if (NULL == (bt2 = H5B2_open(f, bt2_addr, f)))
+    if (NULL == (bt2 = H5B2_open(f, bt2_addr, cparam, f)))
         FAIL_STACK_ERROR;
 
     /* Check up on B-tree after re-open */
@@ -5042,7 +5049,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         TEST_ERROR;
 
     /* Re-open v2 B-tree */
-    if (NULL == (bt2 = H5B2_open(f, bt2_addr, f)))
+    if (NULL == (bt2 = H5B2_open(f, bt2_addr, cparam, f)))
         FAIL_STACK_ERROR;
 
     /* Check up on B-tree after re-open */
@@ -8710,7 +8717,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     } /* end for */
 
     /* Re-open v2 B-tree */
-    if (NULL == (bt2 = H5B2_open(f, bt2_addr, f)))
+    if (NULL == (bt2 = H5B2_open(f, bt2_addr, cparam, f)))
         FAIL_STACK_ERROR;
 
     /* Remove all records */
@@ -8791,7 +8798,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         STACK_ERROR;
 
     /* Re-open v2 B-tree */
-    if (NULL == (bt2 = H5B2_open(f, bt2_addr, f)))
+    if (NULL == (bt2 = H5B2_open(f, bt2_addr, cparam, f)))
         FAIL_STACK_ERROR;
 
     /* Remove all records */
@@ -8876,7 +8883,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         STACK_ERROR;
 
     /* Re-open v2 B-tree */
-    if (NULL == (bt2 = H5B2_open(f, bt2_addr, f)))
+    if (NULL == (bt2 = H5B2_open(f, bt2_addr, cparam, f)))
         FAIL_STACK_ERROR;
 
     /* Remove all records */
@@ -8958,7 +8965,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         STACK_ERROR;
 
     /* Re-open v2 B-tree */
-    if (NULL == (bt2 = H5B2_open(f, bt2_addr, f)))
+    if (NULL == (bt2 = H5B2_open(f, bt2_addr, cparam, f)))
         FAIL_STACK_ERROR;
 
     /* Remove all records */
@@ -9316,7 +9323,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     /*
      * Delete v2 B-tree
      */
-    if (H5B2_delete(f, bt2_addr, f, NULL, NULL) < 0)
+    if (H5B2_delete(f, bt2_addr, cparam, f, NULL, NULL) < 0)
         FAIL_STACK_ERROR;
 
     /* Close the file */
@@ -9373,7 +9380,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     /*
      * Delete v2 B-tree
      */
-    if (H5B2_delete(f, bt2_addr, f, NULL, NULL) < 0)
+    if (H5B2_delete(f, bt2_addr, cparam, f, NULL, NULL) < 0)
         FAIL_STACK_ERROR;
 
     /* Close file */
@@ -9430,7 +9437,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     /*
      * Delete v2 B-tree
      */
-    if (H5B2_delete(f, bt2_addr, f, NULL, NULL) < 0)
+    if (H5B2_delete(f, bt2_addr, cparam, f, NULL, NULL) < 0)
         FAIL_STACK_ERROR;
 
     /* Close file */
@@ -9487,7 +9494,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     /*
      * Delete v2 B-tree
      */
-    if (H5B2_delete(f, bt2_addr, f, NULL, NULL) < 0)
+    if (H5B2_delete(f, bt2_addr, cparam, f, NULL, NULL) < 0)
         FAIL_STACK_ERROR;
 
     /* Close file */
@@ -9810,7 +9817,7 @@ test_open_twice_diff(hid_t fapl, const H5B2_create_t *cparam)
         TEST_ERROR;
 
     /* Re-open v2 B-tree */
-    if (NULL == (bt2_2 = H5B2_open(f, bt2_addr, f)))
+    if (NULL == (bt2_2 = H5B2_open(f, bt2_addr, cparam, f)))
         FAIL_STACK_ERROR;
 
     /* Close the second v2 B-tree wrapper */
@@ -9856,7 +9863,7 @@ test_open_twice_diff(hid_t fapl, const H5B2_create_t *cparam)
         FAIL_STACK_ERROR;
 
     /* Open the B-tree through the second file handle */
-    if (NULL == (bt2_2 = H5B2_open(f2, bt2_addr, f2)))
+    if (NULL == (bt2_2 = H5B2_open(f2, bt2_addr, cparam, f2)))
         FAIL_STACK_ERROR;
 
     /* Close the extra file handles */
@@ -9895,6 +9902,154 @@ error:
     H5E_END_TRY
     return (1);
 } /* test_open_twice_diff() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_open_cparam_mismatch
+ *
+ * Purpose:    Check that H5B2_open and H5B2_delete reject a v2 B-tree
+ *              whose client class or raw record size is not the one the
+ *              caller expects, whether its header is in the metadata
+ *              cache or read from the file.
+ *
+ * Return:    Success:    0
+ *        Failure:    1
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_open_cparam_mismatch(hid_t fapl, const H5B2_create_t *cparam, const H5B2_create_t *cparam2)
+{
+    hid_t         file  = H5I_INVALID_HID; /* File ID */
+    H5F_t        *f     = NULL;            /* Internal file object pointer */
+    H5B2_t       *bt2   = NULL;            /* v2 B-tree wrapper */
+    H5B2_t       *bt2_2 = NULL;            /* Second v2 B-tree wrapper */
+    H5B2_create_t bad_cparam;              /* Creation parameters with a wrong raw record size */
+    H5B2_create_t bad_cls_cparam;          /* Creation parameters with a wrong class */
+    haddr_t       bt2_addr;                /* Address of B-tree created */
+    hsize_t       record;                  /* Record to insert into tree */
+    hsize_t       nrec;                    /* Number of records in B-tree */
+    herr_t        ret;                     /* Generic error return value */
+
+    /* Same class as 'cparam', different raw record size */
+    bad_cparam           = *cparam;
+    bad_cparam.rrec_size = cparam2->rrec_size;
+
+    /* Different class from 'cparam', same raw record size */
+    bad_cls_cparam           = *cparam2;
+    bad_cls_cparam.rrec_size = cparam->rrec_size;
+
+    TESTING("B-tree open: header with wrong class or record size rejected");
+
+    /* Create the file to work on */
+    if (create_file(&file, &f, fapl) < 0)
+        TEST_ERROR;
+
+    /* Create the v2 B-tree & get its address */
+    if (create_btree(f, cparam, &bt2, &bt2_addr) < 0)
+        TEST_ERROR;
+
+    /* Insert a record */
+    record = 42;
+    if (H5B2_insert(bt2, &record) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Open it again with the wrong class, while its header is cached */
+    H5E_BEGIN_TRY
+    {
+        bt2_2 = H5B2_open(f, bt2_addr, &bad_cls_cparam, f);
+    }
+    H5E_END_TRY
+    if (bt2_2)
+        TEST_ERROR;
+
+    /* Open it again with the wrong raw record size, while its header is cached */
+    H5E_BEGIN_TRY
+    {
+        bt2_2 = H5B2_open(f, bt2_addr, &bad_cparam, f);
+    }
+    H5E_END_TRY
+    if (bt2_2)
+        TEST_ERROR;
+
+    /* Close the v2 B-tree */
+    if (H5B2_close(bt2) < 0)
+        FAIL_STACK_ERROR;
+    bt2 = NULL;
+
+    /* Close the file, so the header is read from the file */
+    if (H5Fclose(file) < 0)
+        FAIL_STACK_ERROR;
+    file = H5I_INVALID_HID;
+
+    /* Re-open the file */
+    if (reopen_file(&file, &f, fapl) < 0)
+        TEST_ERROR;
+
+    /* Open the v2 B-tree with the wrong class */
+    H5E_BEGIN_TRY
+    {
+        bt2 = H5B2_open(f, bt2_addr, &bad_cls_cparam, f);
+    }
+    H5E_END_TRY
+    if (bt2)
+        TEST_ERROR;
+
+    /* Open the v2 B-tree with the wrong raw record size */
+    H5E_BEGIN_TRY
+    {
+        bt2 = H5B2_open(f, bt2_addr, &bad_cparam, f);
+    }
+    H5E_END_TRY
+    if (bt2)
+        TEST_ERROR;
+
+    /* Delete the v2 B-tree with the wrong class */
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_delete(f, bt2_addr, &bad_cls_cparam, f, NULL, NULL);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+
+    /* Open the v2 B-tree with the right class and check its record */
+    if (NULL == (bt2 = H5B2_open(f, bt2_addr, cparam, f)))
+        FAIL_STACK_ERROR;
+    if (H5B2_get_nrec(bt2, &nrec) < 0)
+        FAIL_STACK_ERROR;
+    if (nrec != 1)
+        TEST_ERROR;
+
+    /* Close the v2 B-tree */
+    if (H5B2_close(bt2) < 0)
+        FAIL_STACK_ERROR;
+    bt2 = NULL;
+
+    /* Delete the v2 B-tree with the right class */
+    if (H5B2_delete(f, bt2_addr, cparam, f, NULL, NULL) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Close the file */
+    if (H5Fclose(file) < 0)
+        FAIL_STACK_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        if (bt2)
+            H5B2_close(bt2);
+        if (bt2_2)
+            H5B2_close(bt2_2);
+        H5Fclose(file);
+    }
+    H5E_END_TRY
+
+    return 1;
+} /* test_open_cparam_mismatch() */
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -10026,6 +10181,9 @@ main(void)
 
     /* Test opening B-trees twice */
     nerrors += test_open_twice_diff(fapl, &cparam);
+
+    /* Test opening B-trees with the wrong class or record size */
+    nerrors += test_open_cparam_mismatch(fapl, &cparam, &cparam2);
 
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);

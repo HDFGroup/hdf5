@@ -215,9 +215,10 @@ struct H5FA_t {
 
 /* Info needed for loading header */
 typedef struct H5FA_hdr_cache_ud_t {
-    H5F_t  *f;         /* Pointer to file for fixed array */
-    haddr_t addr;      /* Address of header on disk */
-    void   *ctx_udata; /* User context for class */
+    H5F_t               *f;         /* Pointer to file for fixed array */
+    haddr_t              addr;      /* Address of header on disk */
+    const H5FA_create_t *cparam;    /* Creation parameters expected by the opener (or NULL) */
+    void                *ctx_udata; /* User context for class */
 } H5FA_hdr_cache_ud_t;
 
 /* Info needed for loading data block */
@@ -253,6 +254,7 @@ H5_DLL herr_t H5FA__destroy_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t 
 
 /* Header routines */
 H5_DLL H5FA_hdr_t *H5FA__hdr_alloc(H5F_t *f);
+H5_DLL herr_t      H5FA__hdr_check_cparam(const H5FA_create_t *cparam, const H5FA_create_t *expected);
 H5_DLL herr_t      H5FA__hdr_init(H5FA_hdr_t *hdr, void *ctx_udata);
 H5_DLL haddr_t     H5FA__hdr_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata);
 H5_DLL void       *H5FA__hdr_alloc_elmts(H5FA_hdr_t *hdr, size_t nelmts);
@@ -262,7 +264,8 @@ H5_DLL herr_t      H5FA__hdr_decr(H5FA_hdr_t *hdr);
 H5_DLL herr_t      H5FA__hdr_fuse_incr(H5FA_hdr_t *hdr);
 H5_DLL size_t      H5FA__hdr_fuse_decr(H5FA_hdr_t *hdr);
 H5_DLL herr_t      H5FA__hdr_modified(H5FA_hdr_t *hdr);
-H5_DLL H5FA_hdr_t *H5FA__hdr_protect(H5F_t *f, haddr_t fa_addr, void *ctx_udata, unsigned flags);
+H5_DLL H5FA_hdr_t *H5FA__hdr_protect(H5F_t *f, haddr_t fa_addr, const H5FA_create_t *cparam, void *ctx_udata,
+                                     unsigned flags);
 H5_DLL herr_t      H5FA__hdr_unprotect(H5FA_hdr_t *hdr, unsigned cache_flags);
 H5_DLL herr_t      H5FA__hdr_delete(H5FA_hdr_t *hdr);
 H5_DLL herr_t      H5FA__hdr_dest(H5FA_hdr_t *hdr);

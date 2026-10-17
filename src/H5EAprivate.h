@@ -129,7 +129,7 @@ H5_DLLVAR const H5EA_class_t H5EA_CLS_FILT_CHUNK[1];
 
 /* General routines */
 H5_DLL H5EA_t *H5EA_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata);
-H5_DLL H5EA_t *H5EA_open(H5F_t *f, haddr_t ea_addr, void *ctx_udata);
+H5_DLL H5EA_t *H5EA_open(H5F_t *f, haddr_t ea_addr, const H5EA_create_t *cparam, void *ctx_udata);
 H5_DLL herr_t  H5EA_get_nelmts(const H5EA_t *ea, hsize_t *nelmts);
 H5_DLL herr_t  H5EA_get_addr(const H5EA_t *ea, haddr_t *addr);
 H5_DLL herr_t  H5EA_set(const H5EA_t *ea, hsize_t idx, const void *elmt);
@@ -137,7 +137,7 @@ H5_DLL herr_t  H5EA_get(const H5EA_t *ea, hsize_t idx, void *elmt);
 H5_DLL herr_t  H5EA_depend(H5EA_t *ea, H5AC_proxy_entry_t *parent);
 H5_DLL herr_t  H5EA_iterate(H5EA_t *fa, H5EA_operator_t op, void *udata);
 H5_DLL herr_t  H5EA_close(H5EA_t *ea);
-H5_DLL herr_t  H5EA_delete(H5F_t *f, haddr_t ea_addr, void *ctx_udata);
+H5_DLL herr_t  H5EA_delete(H5F_t *f, haddr_t ea_addr, const H5EA_create_t *cparam, void *ctx_udata);
 H5_DLL herr_t  H5EA_patch_file(H5EA_t *fa, H5F_t *f);
 
 /* Statistics routines */
