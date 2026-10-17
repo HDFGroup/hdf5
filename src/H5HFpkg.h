@@ -618,6 +618,8 @@ H5_DLL H5HF_hdr_t *H5HF__hdr_protect(H5F_t *f, haddr_t addr, unsigned flags);
 H5_DLL herr_t      H5HF__hdr_finish_init_phase1(H5HF_hdr_t *hdr);
 H5_DLL herr_t      H5HF__hdr_finish_init_phase2(H5HF_hdr_t *hdr);
 H5_DLL herr_t      H5HF__hdr_finish_init(H5HF_hdr_t *hdr);
+H5_DLL herr_t      H5HF__hdr_check_cparam(const H5HF_dtable_cparam_t *cparam, uint32_t max_man_size,
+                                          uint8_t sizeof_size);
 H5_DLL herr_t      H5HF__hdr_incr(H5HF_hdr_t *hdr);
 H5_DLL herr_t      H5HF__hdr_decr(H5HF_hdr_t *hdr);
 H5_DLL herr_t      H5HF__hdr_fuse_incr(H5HF_hdr_t *hdr);

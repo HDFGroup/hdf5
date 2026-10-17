@@ -155,6 +155,17 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    Fixes GitHub issue #6560
 
+### Fixed out-of-bounds accesses when loading a fractal heap with invalid geometry
+
+   The doubling table parameters of a fractal heap were checked only when a heap was
+   created, and only in debug builds, so a corrupted or fuzzed file could describe a heap
+   whose rows, block sizes or ID length did not match the indirect and direct blocks used
+   to read it. The checks are now made in one routine, `H5HF__hdr_check_cparam()`, used
+   both when a heap is created and when its header is loaded. Row and column lookups,
+   direct block lookups and the decoding of filtered direct blocks and 'huge' objects now
+   also check their results against the heap's geometry and recorded sizes, returning an
+   error instead of relying on assertions.
+
 ### Fixed a heap buffer over-read when traversing a malformed external link
 
    The default external link traversal callback located the target file name and object

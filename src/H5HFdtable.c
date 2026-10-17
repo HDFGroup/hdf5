@@ -134,7 +134,9 @@ done:
 herr_t
 H5HF__dtable_lookup(const H5HF_dtable_t *dtable, hsize_t off, unsigned *row, unsigned *col)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -153,10 +155,13 @@ H5HF__dtable_lookup(const H5HF_dtable_t *dtable, hsize_t off, unsigned *row, uns
         hsize_t  off_mask = ((hsize_t)1) << high_bit; /* Compute mask for determining column */
 
         *row = (high_bit - dtable->first_row_bits) + 1;
+        if (*row >= dtable->max_root_rows)
+            HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "offset outside of doubling table");
         H5_CHECKED_ASSIGN(*col, unsigned, ((off - off_mask) / dtable->row_block_size[*row]), hsize_t);
     } /* end else */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__dtable_lookup() */
 
 /*-------------------------------------------------------------------------
