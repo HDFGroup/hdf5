@@ -469,7 +469,10 @@
       "inherits": [
         "ci-StdShar-macos-Clang",
         "ci-S3"
-      ]
+      ],
+      "cacheVariables": {
+      "CMAKE_OSX_ARCHITECTURES": "arm64"
+      }
     },
     {
       "name": "ci-StdShar-macos-x86_64-Clang-S3",

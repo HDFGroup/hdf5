@@ -1330,10 +1330,27 @@ jobs:
           which cmake
           cmake --version
 
+        # Homebrew no longer supports Intel macOS, so build aws-c-s3 and its             # dependencies from source (static, PIC) in dependency order
       - name: Install aws-c-s3 (MacOS x86_64)
+        shell: bash
         run: |
-          arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          arch -x86_64 /usr/local/bin/brew install aws-c-s3
+          AWS_PREFIX="${{ runner.temp }}/aws"
+          mkdir -p "${{ runner.temp }}/aws-src"
+          cd "${{ runner.temp }}/aws-src"
+          for lib in aws-c-common aws-checksums aws-c-cal aws-c-io aws-c-compression \
+                     aws-c-http aws-c-sdkutils aws-c-auth aws-c-s3; do
+            git clone --depth 1 https://github.com/awslabs/$lib.git
+            cmake -S $lib -B $lib/build -G Ninja \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+              -DCMAKE_INSTALL_PREFIX="$AWS_PREFIX" \
+              -DCMAKE_PREFIX_PATH="$AWS_PREFIX" \
+              -DBUILD_SHARED_LIBS=OFF \
+              -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+              -DBUILD_TESTING=OFF
+            cmake --build $lib/build --target install
+          done
+          echo "CMAKE_PREFIX_PATH=$AWS_PREFIX" >> $GITHUB_ENV
 
       - name: Install the Apple certificate and provisioning profile
         shell: bash
