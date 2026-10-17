@@ -96,6 +96,7 @@ static int test_attach_detach(void);
 static int test_is_scale_class_prefix(void);
 static int test_is_reserved_class_prefix(void);
 static int test_attach_scale_id_leak(void);
+static int test_attr_shape(void);
 
 #define RANK1     1
 #define RANK      2
@@ -218,6 +219,7 @@ main(void)
     nerrors += test_is_scale_class_prefix() < 0 ? 1 : 0;
     nerrors += test_is_reserved_class_prefix() < 0 ? 1 : 0;
     nerrors += test_attach_scale_id_leak() < 0 ? 1 : 0;
+    nerrors += test_attr_shape() < 0 ? 1 : 0;
 
     if (nerrors)
         goto error;
@@ -5704,6 +5706,238 @@ out:
         H5Tclose(atid);
         H5Dclose(dsid);
         H5Dclose(did);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+    H5_FAILED();
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
+ * test that the dimension scale functions reject a DIMENSION_LIST,
+ * DIMENSION_LABELS or CLASS attribute whose number of elements or datatype
+ * does not match the one they read it as
+ *-------------------------------------------------------------------------
+ */
+static int
+test_attr_shape(void)
+{
+    hid_t       fid     = H5I_INVALID_HID;
+    hid_t       sid     = H5I_INVALID_HID;
+    hid_t       did     = H5I_INVALID_HID;
+    hid_t       dsid    = H5I_INVALID_HID;
+    hid_t       asid    = H5I_INVALID_HID;
+    hid_t       atid    = H5I_INVALID_HID;
+    hid_t       aid     = H5I_INVALID_HID;
+    hsize_t     dims[2] = {4, 3};
+    hsize_t     adims[1];
+    hvl_t       vl[2]      = {{0, NULL}, {0, NULL}};
+    const char *labels[1]  = {"x"};
+    const char *classes[2] = {DIMENSION_SCALE_CLASS, DIMENSION_SCALE_CLASS};
+    char        label[16];
+    int         ds_idx = 0;
+    herr_t      ret;
+
+    HL_TESTING2("dimension scale attributes of the wrong shape are rejected");
+
+    if ((fid = H5Fcreate("test_ds_attr_shape.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        goto out;
+
+    /* the scale */
+    if ((dsid = H5Dcreate2(fid, "ds", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if (H5DSset_scale(dsid, "xdim") < 0)
+        goto out;
+
+    /* the scale is attached to another dataset, so it has a REFERENCE_LIST */
+    if ((did = H5Dcreate2(fid, "attached", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if (H5DSattach_scale(did, dsid, 1) < 0)
+        goto out;
+    if (H5DSget_num_scales(did, 1) != 1)
+        goto out;
+    if (H5Dclose(did) < 0)
+        goto out;
+
+    /* a dataset of rank 2 with a DIMENSION_LIST of one element */
+    if ((did = H5Dcreate2(fid, "dimlist_short", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
+        0)
+        goto out;
+    adims[0] = 1;
+    if ((asid = H5Screate_simple(1, adims, NULL)) < 0)
+        goto out;
+    if ((atid = H5Tvlen_create(H5T_STD_REF_OBJ)) < 0)
+        goto out;
+    if ((aid = H5Acreate2(did, DIMENSION_LIST, atid, asid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if (H5Awrite(aid, atid, vl) < 0)
+        goto out;
+    if (H5Aclose(aid) < 0)
+        goto out;
+    if (H5Tclose(atid) < 0)
+        goto out;
+    if (H5Sclose(asid) < 0)
+        goto out;
+
+    H5E_BEGIN_TRY
+    {
+        ret = H5DSget_num_scales(did, 1);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        goto out;
+    H5E_BEGIN_TRY
+    {
+        ret = H5DSis_attached(did, dsid, 1);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        goto out;
+    H5E_BEGIN_TRY
+    {
+        ret = H5DSiterate_scales(did, 1, &ds_idx, op_continue, NULL);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        goto out;
+    H5E_BEGIN_TRY
+    {
+        ret = H5DSattach_scale(did, dsid, 1);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        goto out;
+    H5E_BEGIN_TRY
+    {
+        ret = H5DSdetach_scale(did, dsid, 1);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        goto out;
+    if (H5Dclose(did) < 0)
+        goto out;
+
+    /* a dataset of rank 2 with a DIMENSION_LIST of the wrong datatype */
+    if ((did = H5Dcreate2(fid, "dimlist_type", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
+        0)
+        goto out;
+    adims[0] = 2;
+    if ((asid = H5Screate_simple(1, adims, NULL)) < 0)
+        goto out;
+    if ((atid = H5Tvlen_create(H5T_NATIVE_CHAR)) < 0)
+        goto out;
+    if ((aid = H5Acreate2(did, DIMENSION_LIST, atid, asid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if (H5Awrite(aid, atid, vl) < 0)
+        goto out;
+    if (H5Aclose(aid) < 0)
+        goto out;
+    if (H5Tclose(atid) < 0)
+        goto out;
+    if (H5Sclose(asid) < 0)
+        goto out;
+
+    H5E_BEGIN_TRY
+    {
+        ret = H5DSget_num_scales(did, 1);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        goto out;
+    if (H5Dclose(did) < 0)
+        goto out;
+
+    /* a dataset of rank 2 with DIMENSION_LABELS of one element */
+    if ((did = H5Dcreate2(fid, "labels_short", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
+        0)
+        goto out;
+    adims[0] = 1;
+    if ((asid = H5Screate_simple(1, adims, NULL)) < 0)
+        goto out;
+    if ((atid = H5Tcopy(H5T_C_S1)) < 0)
+        goto out;
+    if (H5Tset_size(atid, H5T_VARIABLE) < 0)
+        goto out;
+    if ((aid = H5Acreate2(did, DIMENSION_LABELS, atid, asid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if (H5Awrite(aid, atid, labels) < 0)
+        goto out;
+    if (H5Aclose(aid) < 0)
+        goto out;
+    if (H5Tclose(atid) < 0)
+        goto out;
+    if (H5Sclose(asid) < 0)
+        goto out;
+
+    H5E_BEGIN_TRY
+    {
+        ret = (herr_t)H5DSget_label(did, 1, label, sizeof(label));
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        goto out;
+    H5E_BEGIN_TRY
+    {
+        ret = H5DSset_label(did, 1, "y");
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        goto out;
+    if (H5Dclose(did) < 0)
+        goto out;
+
+    /* a dataset with a CLASS attribute of two strings */
+    if ((did = H5Dcreate2(fid, "class_two", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    adims[0] = 2;
+    if ((asid = H5Screate_simple(1, adims, NULL)) < 0)
+        goto out;
+    if ((atid = H5Tcopy(H5T_C_S1)) < 0)
+        goto out;
+    if (H5Tset_size(atid, H5T_VARIABLE) < 0)
+        goto out;
+    if ((aid = H5Acreate2(did, "CLASS", atid, asid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if (H5Awrite(aid, atid, classes) < 0)
+        goto out;
+    if (H5Aclose(aid) < 0)
+        goto out;
+    if (H5Tclose(atid) < 0)
+        goto out;
+    if (H5Sclose(asid) < 0)
+        goto out;
+
+    H5E_BEGIN_TRY
+    {
+        ret = (herr_t)H5DSis_scale(did);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        goto out;
+    if (H5Dclose(did) < 0)
+        goto out;
+
+    if (H5Dclose(dsid) < 0)
+        goto out;
+    if (H5Sclose(sid) < 0)
+        goto out;
+    if (H5Fclose(fid) < 0)
+        goto out;
+
+    PASSED();
+    return 0;
+
+out:
+    H5E_BEGIN_TRY
+    {
+        H5Aclose(aid);
+        H5Tclose(atid);
+        H5Sclose(asid);
+        H5Dclose(did);
+        H5Dclose(dsid);
         H5Sclose(sid);
         H5Fclose(fid);
     }
