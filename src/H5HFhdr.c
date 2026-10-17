@@ -40,7 +40,6 @@
 /* Local Macros */
 /****************/
 
-#ifndef NDEBUG
 /* Limit on the size of the max. direct block size */
 /* (This is limited to 32-bits currently, because I think it's unlikely to
  *      need to be larger, the 32-bit limit for H5VM_log2_of2(n), and
@@ -53,7 +52,6 @@
  *      need to be larger, and its encoded with a maximum of 16-bits  - QAK)
  */
 #define H5HF_WIDTH_LIMIT (64 * 1024)
-#endif /* NDEBUG */
 
 /******************/
 /* Local Typedefs */
@@ -225,6 +223,10 @@ H5HF__hdr_finish_init_phase2(H5HF_hdr_t *hdr)
      */
     assert(hdr);
 
+    /* Check that the smallest direct block can hold the direct block header */
+    if (hdr->man_dtable.cparam.start_block_size < H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr))
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "starting block size too small for direct block header");
+
     /* Set the free space in direct blocks */
     for (u = 0; u < hdr->man_dtable.max_root_rows; u++) {
         if (u < hdr->man_dtable.max_direct_rows) {
@@ -288,6 +290,62 @@ done:
 } /* end H5HF__hdr_finish_init() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5HF__hdr_check_cparam
+ *
+ * Purpose:	Check that the doubling table parameters for a heap describe
+ *		a valid doubling table, either when creating a new heap or
+ *		when loading a heap header from the file.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF__hdr_check_cparam(const H5HF_dtable_cparam_t *cparam, uint32_t max_man_size, uint8_t sizeof_size)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /*
+     * Check arguments.
+     */
+    assert(cparam);
+
+    if (cparam->width == 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "width must be greater than zero");
+    if (cparam->width > H5HF_WIDTH_LIMIT)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "width too large");
+    if (!POWER_OF_TWO(cparam->width))
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "width not power of two");
+    if (cparam->start_block_size == 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "starting block size must be greater than zero");
+    if (!POWER_OF_TWO(cparam->start_block_size))
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "starting block size not power of two");
+    if (cparam->max_direct_size == 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size must be greater than zero");
+    if (cparam->max_direct_size > H5HF_MAX_DIRECT_SIZE_LIMIT)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size too large");
+    if (!POWER_OF_TWO(cparam->max_direct_size))
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size not power of two");
+    if (cparam->max_direct_size < cparam->start_block_size)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size smaller than starting block size");
+    if (cparam->max_direct_size < max_man_size)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL,
+                    "max. direct block size not large enough to hold all managed blocks");
+    if (cparam->max_index == 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. heap size must be greater than zero");
+    if (cparam->max_index > (unsigned)(8 * sizeof_size))
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. heap size too large for file");
+    if (cparam->max_index <
+        (H5VM_log2_of2((uint32_t)cparam->start_block_size) + H5VM_log2_of2(cparam->width)))
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. heap size too small for first row of doubling table");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF__hdr_check_cparam() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5HF__hdr_create
  *
  * Purpose:	Create new fractal heap header
@@ -311,39 +369,13 @@ H5HF__hdr_create(H5F_t *f, const H5HF_create_t *cparam)
     assert(f);
     assert(cparam);
 
-#ifndef NDEBUG
-    /* Check for valid parameters */
-    if (cparam->managed.width == 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "width must be greater than zero");
-    if (cparam->managed.width > H5HF_WIDTH_LIMIT)
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "width too large");
-    if (!POWER_OF_TWO(cparam->managed.width))
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "width not power of two");
-    if (cparam->managed.start_block_size == 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "starting block size must be greater than zero");
-    if (!POWER_OF_TWO(cparam->managed.start_block_size))
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "starting block size not power of two");
-    if (cparam->managed.max_direct_size == 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size must be greater than zero");
-    if (cparam->managed.max_direct_size > H5HF_MAX_DIRECT_SIZE_LIMIT)
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size too large");
-    if (!POWER_OF_TWO(cparam->managed.max_direct_size))
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size not power of two");
-    if (cparam->managed.max_direct_size < cparam->max_man_size)
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF,
-                    "max. direct block size not large enough to hold all managed blocks");
-    if (cparam->managed.max_index == 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. heap size must be greater than zero");
-#endif /* NDEBUG */
-
     /* Allocate & basic initialization for the shared header */
     if (NULL == (hdr = H5HF__hdr_alloc(f)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "can't allocate space for shared heap info");
 
-#ifndef NDEBUG
-    if (cparam->managed.max_index > (unsigned)(8 * hdr->sizeof_size))
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. heap size too large for file");
-#endif /* NDEBUG */
+    /* Check the creation parameters */
+    if (H5HF__hdr_check_cparam(&cparam->managed, cparam->max_man_size, hdr->sizeof_size) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "invalid fractal heap creation parameters");
 
     /* Set the creation parameters for the heap */
     hdr->max_man_size     = cparam->max_man_size;

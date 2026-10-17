@@ -3045,6 +3045,217 @@ error:
 } /* test_reopen_hdr() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_man_dblock_locate_row
+ *
+ * Purpose:     Test that a heap ID whose offset is outside of the rows of
+ *              the root indirect block is rejected
+ *
+ * Return:      Success:    0
+ *              Failure:    1
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_man_dblock_locate_row(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
+{
+    hid_t         file = H5I_INVALID_HID;       /* File ID */
+    char          filename[FHEAP_FILENAME_LEN]; /* Filename to use */
+    H5F_t        *f  = NULL;                    /* Internal file object pointer */
+    H5HF_t       *fh = NULL;                    /* Fractal heap wrapper */
+    size_t        id_len;                       /* Size of fractal heap IDs */
+    unsigned char heap_id[HEAP_ID_LEN];         /* Heap ID for object */
+    unsigned char obj[SMALL_OBJ_SIZE1];         /* Buffer for object */
+    hsize_t       bad_off;                      /* Offset outside of the heap's rows */
+    unsigned      row, col;                     /* Row & column for offset */
+    uint8_t      *p;                            /* Pointer into heap ID */
+    unsigned      u;                            /* Local index variable */
+    herr_t        ret;                          /* Generic return value */
+
+    /* Display testing message */
+    TESTING("reading object with offset outside of root indirect block");
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    /* Create the file to work on */
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Get a pointer to the internal file object */
+    if (NULL == (f = (H5F_t *)H5VL_object(file)))
+        FAIL_STACK_ERROR;
+
+    /* Ignore metadata tags in the file's cache */
+    if (H5AC_ignore_tags(f) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create absolute heap */
+    if (NULL == (fh = H5HF_create(f, cparam)))
+        FAIL_STACK_ERROR;
+    if (H5HF_get_id_len(fh, &id_len) < 0)
+        FAIL_STACK_ERROR;
+    if (id_len > HEAP_ID_LEN)
+        TEST_ERROR;
+
+    /* Insert objects until the root block is an indirect block */
+    for (u = 0; u < SMALL_OBJ_SIZE1; u++)
+        obj[u] = (unsigned char)u;
+    while (fh->hdr->man_dtable.curr_root_rows == 0)
+        if (H5HF_insert(fh, (size_t)SMALL_OBJ_SIZE1, obj, heap_id) < 0)
+            FAIL_STACK_ERROR;
+
+    /* The last object can be read */
+    if (H5HF_read(fh, heap_id, obj) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Point the heap ID at the end of the heap's managed space */
+    bad_off = fh->hdr->man_size;
+    p       = heap_id + 1;
+    UINT64ENCODE_VAR(p, bad_off, fh->hdr->heap_off_size);
+
+    /* Reading the object should fail */
+    H5E_BEGIN_TRY
+    {
+        ret = H5HF_read(fh, heap_id, obj);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+
+    /* Looking up an offset past the end of the doubling table should fail */
+    H5E_BEGIN_TRY
+    {
+        ret = H5HF__dtable_lookup(&fh->hdr->man_dtable, (hsize_t)1 << fh->hdr->man_dtable.cparam.max_index,
+                                  &row, &col);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+
+    /* Close the fractal heap */
+    if (H5HF_close(fh) < 0)
+        FAIL_STACK_ERROR;
+    fh = NULL;
+
+    /* Close the file */
+    if (H5Fclose(file) < 0)
+        FAIL_STACK_ERROR;
+
+    /* All tests passed */
+    PASSED();
+
+    return (0);
+
+error:
+    H5E_BEGIN_TRY
+    {
+        if (fh)
+            H5HF_close(fh);
+        H5Fclose(file);
+    }
+    H5E_END_TRY
+    return (1);
+} /* test_man_dblock_locate_row() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_create_bad_cparam
+ *
+ * Purpose:     Test that creating a heap with invalid doubling table
+ *              parameters fails
+ *
+ * Return:      Success:    0
+ *              Failure:    1
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_create_bad_cparam(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
+{
+    hid_t         file = H5I_INVALID_HID;       /* File ID */
+    char          filename[FHEAP_FILENAME_LEN]; /* Filename to use */
+    H5F_t        *f  = NULL;                    /* Internal file object pointer */
+    H5HF_t       *fh = NULL;                    /* Fractal heap wrapper */
+    H5HF_create_t bad_cparam;                   /* Invalid creation parameters */
+    unsigned      u;                            /* Local index variable */
+
+    /* Display testing message */
+    TESTING("creating heap with invalid doubling table parameters");
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    /* Create the file to work on */
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Get a pointer to the internal file object */
+    if (NULL == (f = (H5F_t *)H5VL_object(file)))
+        FAIL_STACK_ERROR;
+
+    /* Ignore metadata tags in the file's cache */
+    if (H5AC_ignore_tags(f) < 0)
+        FAIL_STACK_ERROR;
+
+    for (u = 0; u < 8; u++) {
+        memcpy(&bad_cparam, cparam, sizeof(H5HF_create_t));
+        switch (u) {
+            case 0:
+                bad_cparam.managed.width = 0;
+                break;
+            case 1:
+                bad_cparam.managed.width = 3;
+                break;
+            case 2:
+                bad_cparam.managed.start_block_size = 0;
+                break;
+            case 3:
+                bad_cparam.managed.max_direct_size = bad_cparam.managed.start_block_size / 2;
+                break;
+            case 4:
+                bad_cparam.managed.max_index = 0;
+                break;
+            case 5:
+                bad_cparam.managed.max_index = (unsigned)(8 * H5F_sizeof_size(f)) + 1;
+                break;
+            case 6:
+                bad_cparam.managed.start_block_size = 8;
+                break;
+            default:
+                bad_cparam.managed.max_index = H5VM_log2_of2((uint32_t)bad_cparam.managed.start_block_size) +
+                                               H5VM_log2_of2(bad_cparam.managed.width) - 1;
+                break;
+        }
+
+        H5E_BEGIN_TRY
+        {
+            fh = H5HF_create(f, &bad_cparam);
+        }
+        H5E_END_TRY
+        if (fh)
+            TEST_ERROR;
+    }
+
+    /* Close the file */
+    if (H5Fclose(file) < 0)
+        FAIL_STACK_ERROR;
+
+    /* All tests passed */
+    PASSED();
+
+    return (0);
+
+error:
+    H5E_BEGIN_TRY
+    {
+        if (fh)
+            H5HF_close(fh);
+        H5Fclose(file);
+    }
+    H5E_END_TRY
+    return (1);
+} /* test_create_bad_cparam() */
+
+/*-------------------------------------------------------------------------
  * Function:  test_man_insert_weird
  *
  * Purpose:   Test inserting "weird" sized objects into absolute heap
@@ -16136,6 +16347,8 @@ main(void)
             nerrors += test_filtered_create(fapl, &small_cparam, tparam.my_fcpl);
             nerrors += test_size(fapl, &small_cparam, tparam.my_fcpl);
             nerrors += test_reopen_hdr(fapl, &small_cparam, tparam.my_fcpl);
+            nerrors += test_man_dblock_locate_row(fapl, &small_cparam, tparam.my_fcpl);
+            nerrors += test_create_bad_cparam(fapl, &small_cparam, tparam.my_fcpl);
 
             {
                 fheap_test_fill_t fill; /* Size of objects to fill heap blocks with */

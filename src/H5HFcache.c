@@ -498,6 +498,10 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, bool H
     if (H5HF__dtable_decode(hdr->f, &image, &(hdr->man_dtable)) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTENCODE, NULL, "unable to encode managed obj. doubling table info");
 
+    /* Check the doubling table parameters */
+    if (H5HF__hdr_check_cparam(&hdr->man_dtable.cparam, hdr->max_man_size, hdr->sizeof_size) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "invalid fractal heap doubling table parameters");
+
     /* Set the fractal heap header's 'base' size */
     hdr->heap_size = (size_t)H5HF_HEADER_SIZE(hdr);
 
@@ -516,6 +520,8 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, bool H
         hdr->heap_size += (size_t)(hdr->sizeof_size /* Size of size for filtered root direct block */
                                    + (unsigned)4    /* Size of filter mask for filtered root direct block */
                                    + hdr->filter_len); /* Size of encoded I/O filter info */
+        if (hdr->heap_size > len)
+            HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "I/O filter info too large for heap header");
 
         /* Decode the size of a filtered root direct block */
         H5F_DECODE_LENGTH(udata->f, image, hdr->pline_root_direct_size);
@@ -524,7 +530,8 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, bool H
         UINT32DECODE(image, hdr->pline_root_direct_filter_mask);
 
         /* Decode I/O filter information */
-        if (NULL == (pline = (H5O_pline_t *)H5O_msg_decode(hdr->f, NULL, H5O_PLINE_ID, len, image)))
+        if (NULL ==
+            (pline = (H5O_pline_t *)H5O_msg_decode(hdr->f, NULL, H5O_PLINE_ID, hdr->filter_len, image)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, NULL, "can't decode I/O pipeline filters");
 
         /* Advance past filter info to checksum */
@@ -547,6 +554,14 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, bool H
     /* Finish initialization of heap header */
     if (H5HF__hdr_finish_init(hdr) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, NULL, "can't finish initializing shared fractal heap header");
+
+    /* Check that the root indirect block's rows fit in the doubling table */
+    if (hdr->man_dtable.curr_root_rows > hdr->man_dtable.max_root_rows)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "invalid number of rows in root indirect block");
+
+    /* Check that heap IDs are large enough to hold the offset & length of managed objects */
+    if (hdr->id_len < (1 + hdr->heap_off_size + hdr->heap_len_size) || hdr->id_len > H5HF_MAX_ID_LEN)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "invalid heap ID length");
 
     /* Set return value */
     ret_value = (void *)hdr;
@@ -1578,6 +1593,9 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
         if (H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes,
                          &len, &read_buf) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "output pipeline failed");
+        if (nbytes != udata->dblock_size)
+            HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL,
+                        "unfiltered direct block size doesn't match block size");
 
         /* Update info about direct block */
         udata->decompressed = true;
@@ -1733,8 +1751,13 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, boo
                              &nbytes, &len, &read_buf) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, NULL, "output pipeline failed");
 
-            /* Sanity check */
-            assert(nbytes == dblock->size);
+            if (nbytes != dblock->size)
+                HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL,
+                            "unfiltered direct block size doesn't match block size");
+
+            /* Allocate block buffer */
+            if (NULL == (dblock->blk = H5FL_BLK_MALLOC(direct_block, (size_t)dblock->size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
             /* Copy un-filtered data into block's buffer */
             H5MM_memcpy(dblock->blk, read_buf, dblock->size);
@@ -1751,7 +1774,8 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, boo
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
         /* Copy image to dblock->blk */
-        assert(dblock->size == len);
+        if (dblock->size != len)
+            HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "direct block image size doesn't match block size");
         H5MM_memcpy(dblock->blk, image, dblock->size);
     } /* end else */
 

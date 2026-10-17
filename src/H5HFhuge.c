@@ -642,11 +642,12 @@ done:
 static herr_t
 H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, bool is_read, H5HF_operator_t op, void *op_data)
 {
-    void    *read_buf = NULL;       /* Pointer to buffer for reading */
-    haddr_t  obj_addr;              /* Object's address in the file */
-    size_t   obj_size    = 0;       /* Object's size in the file */
-    unsigned filter_mask = 0;       /* Filter mask for object (only used for filtered objects) */
-    herr_t   ret_value   = SUCCEED; /* Return value */
+    void    *read_buf = NULL;        /* Pointer to buffer for reading */
+    haddr_t  obj_addr;               /* Object's address in the file */
+    size_t   obj_size     = 0;       /* Object's size in the file */
+    size_t   obj_mem_size = 0;       /* Object's size in memory (only used for filtered objects) */
+    unsigned filter_mask  = 0;       /* Filter mask for object (only used for filtered objects) */
+    herr_t   ret_value    = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -667,9 +668,11 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, bool is_read, H5HF_operat
         H5F_DECODE_LENGTH(hdr->f, id, obj_size);
 
         /* Retrieve extra information needed for filtered objects */
-        if (hdr->filter_len > 0)
+        if (hdr->filter_len > 0) {
             UINT32DECODE(id, filter_mask);
-    } /* end if */
+            H5F_DECODE_LENGTH(hdr->f, id, obj_mem_size);
+        } /* end if */
+    }     /* end if */
     else {
         bool found = false; /* Whether entry was found */
 
@@ -701,6 +704,7 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, bool is_read, H5HF_operat
             /* Retrieve the object's address & length */
             obj_addr = found_rec.addr;
             H5_CHECKED_ASSIGN(obj_size, size_t, found_rec.len, hsize_t);
+            H5_CHECKED_ASSIGN(obj_mem_size, size_t, found_rec.obj_size, hsize_t);
             filter_mask = found_rec.filter_mask;
         } /* end if */
         else {
@@ -750,6 +754,9 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, bool is_read, H5HF_operat
         if (H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes,
                          &read_size, &read_buf) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "input filter failed");
+        if (nbytes != obj_mem_size)
+            HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL,
+                        "de-filtered 'huge' object size doesn't match its length");
         obj_size = nbytes;
     } /* end if */
 

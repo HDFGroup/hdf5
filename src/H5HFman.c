@@ -384,7 +384,8 @@ H5HF__man_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *
     } /* end else */
 
     /* Compute offset of object within block */
-    assert((obj_off - dblock->block_off) < (hsize_t)dblock_size);
+    if (obj_off < dblock->block_off || (obj_off - dblock->block_off) >= (hsize_t)dblock_size)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "object offset outside of direct block");
     blk_off = (size_t)(obj_off - dblock->block_off);
 
     /* Check for object's offset in the direct block prefix information */
@@ -594,7 +595,8 @@ H5HF__man_remove(H5HF_hdr_t *hdr, const uint8_t *id)
     } /* end else */
 
     /* Compute offset of object within block */
-    assert((obj_off - dblock_block_off) < (hsize_t)dblock_size);
+    if (obj_off < dblock_block_off || (obj_off - dblock_block_off) >= (hsize_t)dblock_size)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "object offset outside of direct block");
     blk_off = (size_t)(obj_off - dblock_block_off);
 
     /* Check for object's offset in the direct block prefix information */

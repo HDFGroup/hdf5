@@ -479,6 +479,10 @@ H5HF__man_dblock_protect(H5HF_hdr_t *hdr, haddr_t dblock_addr, size_t dblock_siz
     ret_value = dblock;
 
 done:
+    /* Release the decompressed block if the block wasn't loaded */
+    if (udata.dblk)
+        udata.dblk = H5FL_BLK_FREE(direct_block, udata.dblk);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__man_dblock_protect() */
 
@@ -496,8 +500,8 @@ H5HF__man_dblock_locate(H5HF_hdr_t *hdr, hsize_t obj_off, H5HF_indirect_t **ret_
                         bool *ret_did_protect, unsigned flags)
 {
     haddr_t          iblock_addr;         /* Indirect block's address */
-    H5HF_indirect_t *iblock;              /* Pointer to indirect block */
-    bool             did_protect;         /* Whether we protected the indirect block or not */
+    H5HF_indirect_t *iblock      = NULL;  /* Pointer to indirect block */
+    bool             did_protect = false; /* Whether we protected the indirect block or not */
     unsigned         row, col;            /* Row & column for object's block */
     unsigned         entry;               /* Entry of block */
     herr_t           ret_value = SUCCEED; /* Return value */
@@ -518,6 +522,9 @@ H5HF__man_dblock_locate(H5HF_hdr_t *hdr, hsize_t obj_off, H5HF_indirect_t **ret_
     /* Look up row & column for object */
     if (H5HF__dtable_lookup(&hdr->man_dtable, obj_off, &row, &col) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of object");
+    if (row >= hdr->man_dtable.curr_root_rows)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL,
+                    "fractal heap object offset outside of root indirect block");
 
     /* Set initial indirect block info */
     iblock_addr = hdr->man_dtable.table_addr;
@@ -531,6 +538,8 @@ H5HF__man_dblock_locate(H5HF_hdr_t *hdr, hsize_t obj_off, H5HF_indirect_t **ret_
     while (row >= hdr->man_dtable.max_direct_rows) {
         H5HF_indirect_t *new_iblock;      /* Pointer to new indirect block */
         bool             new_did_protect; /* Whether we protected the indirect block or not */
+        H5HF_indirect_t *old_iblock;      /* Pointer to parent indirect block */
+        bool             old_did_protect; /* Whether we protected the parent indirect block or not */
         unsigned         nrows;           /* Number of rows in new indirect block */
         unsigned         cache_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting parent indirect block */
 
@@ -558,19 +567,26 @@ H5HF__man_dblock_locate(H5HF_hdr_t *hdr, hsize_t obj_off, H5HF_indirect_t **ret_
                                                            flags, &new_did_protect)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block");
 
-        /* Release the current indirect block */
-        if (H5HF__man_iblock_unprotect(iblock, cache_flags, did_protect) < 0)
+        /* Switch variables to use new indirect block */
+        old_iblock      = iblock;
+        old_did_protect = did_protect;
+        iblock          = new_iblock;
+        did_protect     = new_did_protect;
+
+        /* Release the parent indirect block */
+        if (H5HF__man_iblock_unprotect(old_iblock, cache_flags, old_did_protect) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block");
 
-        /* Switch variables to use new indirect block */
-        iblock      = new_iblock;
-        did_protect = new_did_protect;
-
         /* Look up row & column in new indirect block for object */
+        if (obj_off < iblock->block_off)
+            HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL,
+                        "fractal heap object offset outside of child indirect block");
         if (H5HF__dtable_lookup(&hdr->man_dtable, (obj_off - iblock->block_off), &row, &col) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of object");
-        assert(row < iblock->nrows); /* child must be smaller than parent */
-    }                                /* end while */
+        if (row >= iblock->nrows)
+            HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL,
+                        "fractal heap object offset outside of child indirect block");
+    } /* end while */
 
     /* Set return parameters */
     if (ret_entry)
@@ -579,6 +595,10 @@ H5HF__man_dblock_locate(H5HF_hdr_t *hdr, hsize_t obj_off, H5HF_indirect_t **ret_
     *ret_did_protect = did_protect;
 
 done:
+    if (ret_value < 0 && iblock)
+        if (H5HF__man_iblock_unprotect(iblock, H5AC__NO_FLAGS_SET, did_protect) < 0)
+            HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block");
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__man_dblock_locate() */
 
@@ -678,7 +698,8 @@ H5HF__man_dblock_dest(H5HF_direct_t *dblock)
                         "can't decrement reference count on shared indirect block");
 
     /* Free block's buffer */
-    dblock->blk = H5FL_BLK_FREE(direct_block, dblock->blk);
+    if (dblock->blk)
+        dblock->blk = H5FL_BLK_FREE(direct_block, dblock->blk);
 
     /* Free fractal heap direct block info */
     dblock = H5FL_FREE(H5HF_direct_t, dblock);
