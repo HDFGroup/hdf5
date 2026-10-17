@@ -344,7 +344,7 @@ H5TBwrite_records(hid_t loc_id, const char *dset_name, hsize_t start, hsize_t nr
         goto out;
 
     /* get records */
-    if (H5Sget_simple_extent_dims(sid, dims, NULL) < 0)
+    if (H5LT_get_simple_extent_dims(sid, 1, dims, NULL) < 0)
         goto out;
 
     if (start + nrecords > dims[0])
@@ -741,7 +741,7 @@ H5TBread_table(hid_t loc_id, const char *dset_name, size_t type_size, const size
         goto out;
 
     /* get dimensions */
-    if (H5Sget_simple_extent_dims(sid, dims, NULL) < 0)
+    if (H5LT_get_simple_extent_dims(sid, 1, dims, NULL) < 0)
         goto out;
 
     /* get the datatypes */
@@ -2018,7 +2018,7 @@ H5TBinsert_field(hid_t loc_id, const char *dset_name, const char *field_name, hi
         goto out;
 
     /* get dimension */
-    if (H5Sget_simple_extent_dims(sid_1, dims, NULL) < 0)
+    if (H5LT_get_simple_extent_dims(sid_1, 1, dims, NULL) < 0)
         goto out;
 
     /*-------------------------------------------------------------------------
@@ -2436,7 +2436,7 @@ H5TBdelete_field(hid_t loc_id, const char *dset_name, const char *field_name)
         goto out;
 
     /* get dimension */
-    if (H5Sget_simple_extent_dims(sid_1, dims, NULL) < 0)
+    if (H5LT_get_simple_extent_dims(sid_1, 1, dims, NULL) < 0)
         goto out;
 
     /*-------------------------------------------------------------------------
@@ -2538,7 +2538,7 @@ H5TBdelete_field(hid_t loc_id, const char *dset_name, const char *field_name)
 
             /* get it */
             if (has_fill > 0)
-                if (H5LT_get_attribute_disk(did_1, attr_name, tmp_fill_buf + curr_offset) < 0)
+                if (H5LT_get_attribute_elmt(did_1, attr_name, member_type_id, tmp_fill_buf + curr_offset) < 0)
                     goto out;
 
             curr_offset += member_size;
@@ -2845,6 +2845,8 @@ H5TBAget_fill(hid_t loc_id, const char *dset_name, hid_t dset_id, unsigned char 
     hsize_t nrecords;
     hsize_t i;
     size_t *src_offset = NULL;
+    hid_t   tid        = H5I_INVALID_HID;
+    hid_t   mtid       = H5I_INVALID_HID;
     char    attr_name[255];
     htri_t  has_fill = false;
     htri_t  ret_val  = -1;
@@ -2864,6 +2866,10 @@ H5TBAget_fill(hid_t loc_id, const char *dset_name, hid_t dset_id, unsigned char 
     if (H5TBget_field_info(loc_id, dset_name, NULL, NULL, src_offset, NULL) < 0)
         goto out;
 
+    /* get the type of a record */
+    if ((tid = H5Dget_type(dset_id)) < 0)
+        goto out;
+
     for (i = 0; i < nfields; i++) {
         snprintf(attr_name, sizeof(attr_name), "FIELD_%d_FILL", (int)i);
 
@@ -2871,15 +2877,27 @@ H5TBAget_fill(hid_t loc_id, const char *dset_name, hid_t dset_id, unsigned char 
         if ((has_fill = H5Aexists(dset_id, attr_name)) < 0)
             goto out;
 
-        /* get it */
-        if (has_fill > 0)
-            if (H5LT_get_attribute_disk(dset_id, attr_name, dst_buf + src_offset[i]) < 0)
+        /* get it, as one element of the type of its field */
+        if (has_fill > 0) {
+            if ((mtid = H5Tget_member_type(tid, (unsigned)i)) < 0)
                 goto out;
+            if (H5LT_get_attribute_elmt(dset_id, attr_name, mtid, dst_buf + src_offset[i]) < 0)
+                goto out;
+            if (H5Tclose(mtid) < 0)
+                goto out;
+            mtid = H5I_INVALID_HID;
+        }
     }
 
     ret_val = has_fill;
 
 out:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(mtid);
+        H5Tclose(tid);
+    }
+    H5E_END_TRY
     if (src_offset)
         free(src_offset);
 
@@ -2947,7 +2965,7 @@ H5TBget_table_info(hid_t loc_id, const char *dset_name, hsize_t *nfields, hsize_
             goto out;
 
         /* get dimension */
-        if (H5Sget_simple_extent_dims(sid, dims, NULL) < 0)
+        if (H5LT_get_simple_extent_dims(sid, 1, dims, NULL) < 0)
             goto out;
 
         /* terminate access to the dataspace */

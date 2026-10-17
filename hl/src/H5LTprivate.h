@@ -20,6 +20,8 @@
 #include "H5LTpublic.h"
 
 H5HL_DLL herr_t H5LT_get_attribute_disk(hid_t obj_id, const char *attr_name, void *data);
+H5HL_DLL herr_t H5LT_get_attribute_elmt(hid_t obj_id, const char *attr_name, hid_t mem_type_id, void *data);
+H5HL_DLL herr_t H5LT_get_simple_extent_dims(hid_t space_id, int rank, hsize_t dims[], hsize_t maxdims[]);
 H5HL_DLL herr_t H5LT_set_attribute_numerical(hid_t loc_id, const char *obj_name, const char *attr_name,
                                              size_t size, hid_t type_id, const void *data);
 H5HL_DLL herr_t H5LT_set_attribute_string(hid_t dset_id, const char *name, const char *buf);

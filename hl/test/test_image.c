@@ -50,6 +50,7 @@ static int test_simple(void);
 static int test_data(void);
 static int test_generate(void);
 static int test_class_prefix(void);
+static int test_attr_shape(void);
 static int read_data(const char *file_name, hsize_t *width, hsize_t *height);
 static int read_palette(const char *file_name, rgb_t *palette, size_t palette_size);
 
@@ -70,6 +71,7 @@ main(void)
     nerrors += test_data() < 0 ? 1 : 0;
     nerrors += test_generate() < 0 ? 1 : 0;
     nerrors += test_class_prefix() < 0 ? 1 : 0;
+    nerrors += test_attr_shape() < 0 ? 1 : 0;
 
     if (nerrors)
         goto error;
@@ -1095,4 +1097,118 @@ read_palette(const char *fname, rgb_t *palette, size_t palette_size)
     fclose(file);
 
     return (int)nentries;
+}
+
+/*-------------------------------------------------------------------------
+ * test that the image functions reject a CLASS attribute of more than one
+ * string and a palette number past the palettes of the image
+ *-------------------------------------------------------------------------
+ */
+static int
+test_attr_shape(void)
+{
+    hid_t         fid         = H5I_INVALID_HID;
+    hid_t         sid         = H5I_INVALID_HID;
+    hid_t         did         = H5I_INVALID_HID;
+    hid_t         atid        = H5I_INVALID_HID;
+    hid_t         aid         = H5I_INVALID_HID;
+    hsize_t       dims[1]     = {1};
+    hsize_t       adims[1]    = {2};
+    hsize_t       pal_dims[2] = {2, 3};
+    unsigned char image[4]    = {0, 1, 1, 0};
+    unsigned char pal[6]      = {0, 0, 0, 255, 255, 255};
+    unsigned char pal_out[6];
+    const char   *classes[2] = {"IMAGE", "IMAGE"};
+    herr_t        ret;
+
+    HL_TESTING2("image attributes of the wrong shape are rejected");
+
+    if ((fid = H5Fcreate("test_image_attr_shape.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+
+    /* an image with one palette */
+    if (H5IMmake_image_8bit(fid, "image", (hsize_t)2, (hsize_t)2, image) < 0)
+        goto out;
+    if (H5IMmake_palette(fid, "pal", pal_dims, pal) < 0)
+        goto out;
+    if (H5IMlink_palette(fid, "image", "pal") < 0)
+        goto out;
+    if (H5IMget_palette(fid, "image", 0, pal_out) < 0)
+        goto out;
+    if (memcmp(pal, pal_out, sizeof(pal)) != 0)
+        goto out;
+    H5E_BEGIN_TRY
+    {
+        ret = H5IMget_palette(fid, "image", 1, pal_out);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        goto out;
+    H5E_BEGIN_TRY
+    {
+        ret = H5IMget_palette_info(fid, "image", -1, pal_dims);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        goto out;
+
+    /* a dataset with a CLASS attribute of two strings */
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        goto out;
+    if ((did = H5Dcreate2(fid, "class_two", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if (H5Sclose(sid) < 0)
+        goto out;
+    if ((sid = H5Screate_simple(1, adims, NULL)) < 0)
+        goto out;
+    if ((atid = H5Tcopy(H5T_C_S1)) < 0)
+        goto out;
+    if (H5Tset_size(atid, H5T_VARIABLE) < 0)
+        goto out;
+    if ((aid = H5Acreate2(did, "CLASS", atid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if (H5Awrite(aid, atid, classes) < 0)
+        goto out;
+    if (H5Aclose(aid) < 0)
+        goto out;
+    if (H5Tclose(atid) < 0)
+        goto out;
+    if (H5Sclose(sid) < 0)
+        goto out;
+    if (H5Dclose(did) < 0)
+        goto out;
+
+    H5E_BEGIN_TRY
+    {
+        ret = (herr_t)H5IMis_image(fid, "class_two");
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        goto out;
+    H5E_BEGIN_TRY
+    {
+        ret = (herr_t)H5IMis_palette(fid, "class_two");
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        goto out;
+
+    if (H5Fclose(fid) < 0)
+        goto out;
+
+    PASSED();
+    return 0;
+
+out:
+    H5E_BEGIN_TRY
+    {
+        H5Aclose(aid);
+        H5Tclose(atid);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+    H5_FAILED();
+    return FAIL;
 }

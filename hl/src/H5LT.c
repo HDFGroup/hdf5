@@ -3322,6 +3322,81 @@ out:
 }
 
 /*-------------------------------------------------------------------------
+ * Function: H5LT_get_attribute_elmt
+ *
+ * Purpose: Reads the attribute ATTR_NAME of object OBJ_ID, which must hold
+ *          exactly one element, into DATA as one element of MEM_TYPE_ID.
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5LT_get_attribute_elmt(hid_t obj_id, const char *attr_name, hid_t mem_type_id, void *data)
+{
+    hid_t    attr_id  = H5I_INVALID_HID;
+    hid_t    space_id = H5I_INVALID_HID;
+    hssize_t npoints;
+
+    if ((attr_id = H5Aopen(obj_id, attr_name, H5P_DEFAULT)) < 0)
+        return -1;
+
+    if ((space_id = H5Aget_space(attr_id)) < 0)
+        goto out;
+    if ((npoints = H5Sget_simple_extent_npoints(space_id)) < 0)
+        goto out;
+    if (npoints != 1)
+        goto out;
+
+    if (H5Aread(attr_id, mem_type_id, data) < 0)
+        goto out;
+
+    if (H5Sclose(space_id) < 0)
+        goto out;
+    if (H5Aclose(attr_id) < 0)
+        return -1;
+
+    return 0;
+
+out:
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(space_id);
+        H5Aclose(attr_id);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: H5LT_get_simple_extent_dims
+ *
+ * Purpose: Retrieves the dimensions of dataspace SPACE_ID into DIMS and
+ *          MAXDIMS (either may be NULL), arrays of RANK elements. Fails
+ *          if the rank of the dataspace is not RANK.
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5LT_get_simple_extent_dims(hid_t space_id, int rank, hsize_t dims[], hsize_t maxdims[])
+{
+    int ndims;
+
+    if ((ndims = H5Sget_simple_extent_ndims(space_id)) < 0)
+        return -1;
+
+    if (ndims != rank)
+        return -1;
+
+    if (H5Sget_simple_extent_dims(space_id, dims, maxdims) < 0)
+        return -1;
+
+    return 0;
+}
+
+/*-------------------------------------------------------------------------
  * Function: H5LT_set_attribute_string
  *
  * Purpose: creates and writes an attribute named NAME to the dataset DSET_ID

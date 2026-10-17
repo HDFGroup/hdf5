@@ -68,10 +68,12 @@ set (test_hl_CLEANFILES
     test_ds_class_prefix.h5
     test_ds_reserved_prefix.h5
     test_ds_id_leak.h5
+    test_ds_attr_shape.h5
     test_image1.h5
     test_image2.h5
     test_image3.h5
     test_image_class_prefix.h5
+    test_image_attr_shape.h5
     test_lite1.h5
     test_lite2.h5
     test_lite3.h5
@@ -82,6 +84,7 @@ set (test_hl_CLEANFILES
     test_packet_table_vlen.h5
     testfl_packet_table_vlen.h5
     test_table.h5
+    test_table_rank.h5
 )
 add_test (
     NAME HL_test-clear-objects

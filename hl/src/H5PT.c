@@ -12,6 +12,7 @@
 
 #include "H5PTprivate.h"
 #include "H5TBprivate.h"
+#include "H5LTprivate.h"
 
 /*  Packet Table private data */
 
@@ -318,7 +319,7 @@ H5PTopen(hid_t loc_id, const char *dset_name)
     /* Get number of records in table */
     if ((space_id = H5Dget_space(table->dset_id)) < 0)
         goto error;
-    if (H5Sget_simple_extent_dims(space_id, dims, NULL) < 0)
+    if (H5LT_get_simple_extent_dims(space_id, 1, dims, NULL) < 0)
         goto error;
     if (H5Sclose(space_id) < 0)
         goto error;

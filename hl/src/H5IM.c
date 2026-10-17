@@ -184,6 +184,70 @@ H5IM_find_palette(hid_t loc_id)
 }
 
 /*-------------------------------------------------------------------------
+ * Function: H5IM_read_palette_refs
+ *
+ * Purpose: Private function. Read the object references of the attribute
+ *          "PALETTE" of the image dataset DID into *REFBUF, allocated with
+ *          room for EXTRA more references, and their number into *N_REFS.
+ *          Fails unless the attribute holds object references.
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5IM_read_palette_refs(hid_t did, size_t extra, hobj_ref_t **refbuf, hssize_t *n_refs)
+{
+    hid_t       aid  = H5I_INVALID_HID;
+    hid_t       atid = H5I_INVALID_HID;
+    hid_t       asid = H5I_INVALID_HID;
+    hobj_ref_t *buf  = NULL;
+    hssize_t    npoints;
+
+    if ((aid = H5Aopen(did, "PALETTE", H5P_DEFAULT)) < 0)
+        goto out;
+
+    if ((atid = H5Aget_type(aid)) < 0)
+        goto out;
+    if (H5Tequal(atid, H5T_STD_REF_OBJ) <= 0)
+        goto out;
+
+    if ((asid = H5Aget_space(aid)) < 0)
+        goto out;
+    if ((npoints = H5Sget_simple_extent_npoints(asid)) < 0)
+        goto out;
+
+    if ((buf = (hobj_ref_t *)calloc((size_t)npoints + extra, sizeof(hobj_ref_t))) == NULL)
+        goto out;
+    if (H5Aread(aid, H5T_STD_REF_OBJ, buf) < 0)
+        goto out;
+
+    if (H5Sclose(asid) < 0)
+        goto out;
+    if (H5Tclose(atid) < 0)
+        goto out;
+    if (H5Aclose(aid) < 0)
+        goto out;
+
+    *refbuf = buf;
+    *n_refs = npoints;
+
+    return 0;
+
+out:
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(asid);
+        H5Tclose(atid);
+        H5Aclose(aid);
+    }
+    H5E_END_TRY
+    free(buf);
+
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
  * Function: H5IMget_image_info
  *
  * Purpose: Gets information about an image dataset (dimensions, interlace mode
@@ -457,8 +521,8 @@ H5IMlink_palette(hid_t loc_id, const char *image_name, const char *pal_name)
     hid_t       atid = -1;
     hid_t       aid  = -1;
     hid_t       asid = -1;
-    hobj_ref_t  ref;    /* write a new reference */
-    hobj_ref_t *refbuf; /* buffer to read references */
+    hobj_ref_t  ref;           /* write a new reference */
+    hobj_ref_t *refbuf = NULL; /* buffer to read references */
     hssize_t    n_refs;
     hsize_t     dim_ref;
     htri_t      ok_pal;
@@ -521,26 +585,13 @@ H5IMlink_palette(hid_t loc_id, const char *image_name, const char *pal_name)
      *-------------------------------------------------------------------------
      */
     else if (ok_pal > 0) {
-        if ((aid = H5Aopen(did, "PALETTE", H5P_DEFAULT)) < 0)
-            goto out;
-
-        if ((atid = H5Aget_type(aid)) < 0)
-            goto out;
-
-        if (H5Tget_class(atid) < 0)
-            goto out;
-
         /* Get and save the old reference(s) */
-        if ((asid = H5Aget_space(aid)) < 0)
+        if (H5IM_read_palette_refs(did, 1, &refbuf, &n_refs) < 0)
             goto out;
-
-        n_refs = H5Sget_simple_extent_npoints(asid);
 
         dim_ref = (hsize_t)n_refs + 1;
 
-        refbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
-
-        if (H5Aread(aid, atid, refbuf) < 0)
+        if ((atid = H5Tcopy(H5T_STD_REF_OBJ)) < 0)
             goto out;
 
         /* The attribute must be deleted, in order to the new one can reflect the changes*/
@@ -554,16 +605,10 @@ H5IMlink_palette(hid_t loc_id, const char *image_name, const char *pal_name)
         refbuf[n_refs] = ref;
 
         /* Create the data space for the new references */
-        if (H5Sclose(asid) < 0)
-            goto out;
-
         if ((asid = H5Screate_simple(1, &dim_ref, NULL)) < 0)
             goto out;
 
         /* Create the attribute again with the changes of space */
-        if (H5Aclose(aid) < 0)
-            goto out;
-
         if ((aid = H5Acreate2(did, "PALETTE", atid, asid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto out;
 
@@ -594,6 +639,7 @@ out:
     H5Sclose(asid);
     H5Tclose(atid);
     H5Aclose(aid);
+    free(refbuf);
     return -1;
 }
 
@@ -785,14 +831,10 @@ H5IMget_palette_info(hid_t loc_id, const char *image_name, int pal_number, hsize
 {
     hid_t       did;
     int         has_pal;
-    hid_t       atid = -1;
-    hid_t       aid;
-    hid_t       asid = -1;
+    hid_t       pal_id       = H5I_INVALID_HID;
+    hid_t       pal_space_id = H5I_INVALID_HID;
     hssize_t    n_refs;
-    hsize_t     dim_ref;
-    hobj_ref_t *refbuf; /* buffer to read references */
-    hid_t       pal_id;
-    hid_t       pal_space_id;
+    hobj_ref_t *refbuf = NULL; /* buffer to read references */
     hsize_t     pal_maxdims[2];
 
     /* check the arguments */
@@ -807,26 +849,11 @@ H5IMget_palette_info(hid_t loc_id, const char *image_name, int pal_number, hsize
     has_pal = H5IM_find_palette(did);
 
     if (has_pal == 1) {
-        if ((aid = H5Aopen(did, "PALETTE", H5P_DEFAULT)) < 0)
-            goto out;
-
-        if ((atid = H5Aget_type(aid)) < 0)
-            goto out;
-
-        if (H5Tget_class(atid) < 0)
-            goto out;
-
         /* Get the reference(s) */
-        if ((asid = H5Aget_space(aid)) < 0)
+        if (H5IM_read_palette_refs(did, 0, &refbuf, &n_refs) < 0)
             goto out;
 
-        n_refs = H5Sget_simple_extent_npoints(asid);
-
-        dim_ref = (hsize_t)n_refs;
-
-        refbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
-
-        if (H5Aread(aid, atid, refbuf) < 0)
+        if (pal_number < 0 || pal_number >= n_refs)
             goto out;
 
         /* Get the actual palette */
@@ -836,24 +863,18 @@ H5IMget_palette_info(hid_t loc_id, const char *image_name, int pal_number, hsize
         if ((pal_space_id = H5Dget_space(pal_id)) < 0)
             goto out;
 
-        if (H5Sget_simple_extent_ndims(pal_space_id) < 0)
-            goto out;
-
-        if (H5Sget_simple_extent_dims(pal_space_id, pal_dims, pal_maxdims) < 0)
+        if (H5LT_get_simple_extent_dims(pal_space_id, 2, pal_dims, pal_maxdims) < 0)
             goto out;
 
         /* close */
-        if (H5Dclose(pal_id) < 0)
-            goto out;
         if (H5Sclose(pal_space_id) < 0)
             goto out;
-        if (H5Sclose(asid) < 0)
+        pal_space_id = H5I_INVALID_HID;
+        if (H5Dclose(pal_id) < 0)
             goto out;
-        if (H5Tclose(atid) < 0)
-            goto out;
-        if (H5Aclose(aid) < 0)
-            goto out;
+        pal_id = H5I_INVALID_HID;
         free(refbuf);
+        refbuf = NULL;
     }
 
     /* Close the image dataset. */
@@ -863,10 +884,14 @@ H5IMget_palette_info(hid_t loc_id, const char *image_name, int pal_number, hsize
     return 0;
 
 out:
-    H5Dclose(did);
-    H5Sclose(asid);
-    H5Tclose(atid);
-    H5Aclose(aid);
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(pal_space_id);
+        H5Dclose(pal_id);
+        H5Dclose(did);
+    }
+    H5E_END_TRY
+    free(refbuf);
     return -1;
 }
 
@@ -888,13 +913,9 @@ H5IMget_palette(hid_t loc_id, const char *image_name, int pal_number, unsigned c
 {
     hid_t       did;
     int         has_pal;
-    hid_t       atid = -1;
-    hid_t       aid;
-    hid_t       asid = -1;
     hssize_t    n_refs;
-    hsize_t     dim_ref;
-    hobj_ref_t *refbuf; /* buffer to read references */
-    hid_t       pal_id;
+    hobj_ref_t *refbuf = NULL; /* buffer to read references */
+    hid_t       pal_id = H5I_INVALID_HID;
 
     /* check the arguments */
     if (image_name == NULL)
@@ -910,26 +931,11 @@ H5IMget_palette(hid_t loc_id, const char *image_name, int pal_number, unsigned c
     has_pal = H5IM_find_palette(did);
 
     if (has_pal == 1) {
-        if ((aid = H5Aopen(did, "PALETTE", H5P_DEFAULT)) < 0)
-            goto out;
-
-        if ((atid = H5Aget_type(aid)) < 0)
-            goto out;
-
-        if (H5Tget_class(atid) < 0)
-            goto out;
-
         /* Get the reference(s) */
-        if ((asid = H5Aget_space(aid)) < 0)
+        if (H5IM_read_palette_refs(did, 0, &refbuf, &n_refs) < 0)
             goto out;
 
-        n_refs = H5Sget_simple_extent_npoints(asid);
-
-        dim_ref = (hsize_t)n_refs;
-
-        refbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
-
-        if (H5Aread(aid, atid, refbuf) < 0)
+        if (pal_number < 0 || pal_number >= n_refs)
             goto out;
 
         /* Get the palette id */
@@ -937,19 +943,15 @@ H5IMget_palette(hid_t loc_id, const char *image_name, int pal_number, unsigned c
             goto out;
 
         /* Read the palette dataset */
-        if (H5Dread(pal_id, H5Dget_type(pal_id), H5S_ALL, H5S_ALL, H5P_DEFAULT, pal_data) < 0)
+        if (H5Dread(pal_id, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, pal_data) < 0)
             goto out;
 
         /* close */
         if (H5Dclose(pal_id) < 0)
             goto out;
-        if (H5Sclose(asid) < 0)
-            goto out;
-        if (H5Tclose(atid) < 0)
-            goto out;
-        if (H5Aclose(aid) < 0)
-            goto out;
+        pal_id = H5I_INVALID_HID;
         free(refbuf);
+        refbuf = NULL;
     }
 
     /* Close the image dataset. */
@@ -959,10 +961,13 @@ H5IMget_palette(hid_t loc_id, const char *image_name, int pal_number, unsigned c
     return 0;
 
 out:
-    H5Dclose(did);
-    H5Sclose(asid);
-    H5Tclose(atid);
-    H5Aclose(aid);
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(pal_id);
+        H5Dclose(did);
+    }
+    H5E_END_TRY
+    free(refbuf);
     return -1;
 }
 
@@ -981,6 +986,7 @@ H5IM__class_attr_equals(hid_t loc_id, const char *dset_name, const char *expecte
     hid_t   did       = H5I_INVALID_HID;
     hid_t   atid      = H5I_INVALID_HID;
     hid_t   aid       = H5I_INVALID_HID;
+    hid_t   sid       = H5I_INVALID_HID;
     char   *attr_data = NULL;
     htri_t  has_class;
     htri_t  isvl;
@@ -1004,6 +1010,12 @@ H5IM__class_attr_equals(hid_t loc_id, const char *dset_name, const char *expecte
     if ((aid = H5Aopen(did, "CLASS", H5P_DEFAULT)) < 0)
         goto out;
 
+    /* the attribute holds one string */
+    if ((sid = H5Aget_space(aid)) < 0)
+        goto out;
+    if (H5Sget_simple_extent_npoints(sid) != 1)
+        goto out;
+
     if ((atid = H5Aget_type(aid)) < 0)
         goto out;
 
@@ -1017,17 +1029,11 @@ H5IM__class_attr_equals(hid_t loc_id, const char *dset_name, const char *expecte
         /* Variable-length string: H5Aread allocates the string and writes
          * its address into the buffer; use H5Treclaim to free it after use. */
         char *vl_str = NULL;
-        hid_t sid    = H5I_INVALID_HID;
 
-        if ((sid = H5Aget_space(aid)) < 0)
+        if (H5Aread(aid, atid, &vl_str) < 0)
             goto out;
-        if (H5Aread(aid, atid, &vl_str) < 0) {
-            H5Sclose(sid);
-            goto out;
-        }
         ret = (vl_str && strcmp(vl_str, expected) == 0) ? 1 : 0;
         H5Treclaim(atid, sid, H5P_DEFAULT, &vl_str);
-        H5Sclose(sid);
     }
     else {
         if (H5T_STR_NULLTERM != H5Tget_strpad(atid))
@@ -1054,6 +1060,7 @@ out:
     H5E_BEGIN_TRY
     {
         H5Tclose(atid);
+        H5Sclose(sid);
         H5Aclose(aid);
         H5Dclose(did);
     }

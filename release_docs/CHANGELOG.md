@@ -333,6 +333,26 @@ Fixes #5723.
 
 ## High-Level Library
 
+### Checked the shape of the attributes the high-level library reads
+
+   The dimension scale, image and table functions read their own attributes
+   (`DIMENSION_LIST`, `DIMENSION_LABELS`, `REFERENCE_LIST`, `NAME`, `CLASS`,
+   `PALETTE`, `FIELD_n_FILL`) into buffers sized for the shape those functions
+   write, using the datatype stored in the file and without checking the
+   attribute's dataspace or datatype, and read the dimensions of tables,
+   packet tables and palettes into fixed-size arrays without checking their
+   rank. A file whose attributes or datasets had another shape caused reads
+   past the end of those buffers.
+
+   The dimension scale attributes are now opened through `H5DS_open_attr()`,
+   which checks their number of elements, their datatypes are checked (the
+   kind of reference, the members of `REFERENCE_LIST`, the string type of the
+   labels) before they are read, image `CLASS` must hold one string and
+   `PALETTE` object references, fill values are read as one element of their
+   field's type through `H5LT_get_attribute_elmt()`, and dimensions are read
+   through `H5LT_get_simple_extent_dims()`, which checks the rank first. Such
+   files are rejected with an error.
+
 ### Fixed leaked identifiers in H5DSattach_scale()
 
    When attaching a dimension scale that already had one or more datasets

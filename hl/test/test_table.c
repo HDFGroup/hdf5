@@ -1692,6 +1692,97 @@ out:
 }
 
 /*-------------------------------------------------------------------------
+ * test that the table functions reject a dataset whose rank is not 1
+ *-------------------------------------------------------------------------
+ */
+static int
+test_table_rank(void)
+{
+    hid_t      fid     = H5I_INVALID_HID;
+    hid_t      sid     = H5I_INVALID_HID;
+    hid_t      tid     = H5I_INVALID_HID;
+    hid_t      did     = H5I_INVALID_HID;
+    hsize_t    dims[2] = {4, 3};
+    hsize_t    nfields;
+    hsize_t    nrecords;
+    size_t     field_sizes[1];
+    size_t     field_offset[1];
+    int        rbuf[12];
+    int        wbuf[1] = {0};
+    herr_t     ret;
+    const char tname[] = "table_rank2";
+
+    HL_TESTING2("table functions reject a dataset of rank 2");
+
+    if ((fid = H5Fcreate("test_table_rank.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if ((tid = H5Tcreate(H5T_COMPOUND, sizeof(int))) < 0)
+        goto out;
+    if (H5Tinsert(tid, "a", 0, H5T_NATIVE_INT) < 0)
+        goto out;
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        goto out;
+    if ((did = H5Dcreate2(fid, tname, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if (H5Dclose(did) < 0)
+        goto out;
+    did = H5I_INVALID_HID;
+    if (H5LTset_attribute_string(fid, tname, "CLASS", "TABLE") < 0)
+        goto out;
+    if (H5LTset_attribute_string(fid, tname, "FIELD_0_NAME", "a") < 0)
+        goto out;
+
+    field_sizes[0]  = sizeof(int);
+    field_offset[0] = 0;
+
+    H5E_BEGIN_TRY
+    {
+        ret = H5TBget_table_info(fid, tname, &nfields, &nrecords);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        goto out;
+
+    H5E_BEGIN_TRY
+    {
+        ret = H5TBread_table(fid, tname, sizeof(int), field_offset, field_sizes, rbuf);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        goto out;
+
+    H5E_BEGIN_TRY
+    {
+        ret = H5TBwrite_records(fid, tname, 0, 1, sizeof(int), field_offset, field_sizes, wbuf);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        goto out;
+
+    if (H5Tclose(tid) < 0)
+        goto out;
+    if (H5Sclose(sid) < 0)
+        goto out;
+    if (H5Fclose(fid) < 0)
+        goto out;
+
+    PASSED();
+    return 0;
+
+out:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(did);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+    H5_FAILED();
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
  * the main program
  *-------------------------------------------------------------------------
  */
@@ -1701,6 +1792,11 @@ main(void)
 {
     hid_t    fid; /* identifier for the file */
     unsigned flags = H5F_ACC_RDONLY;
+
+    puts("Testing table rank checks:");
+
+    if (test_table_rank() < 0)
+        return 1;
 
     /*-------------------------------------------------------------------------
      * test1: create a file for the write/read test
