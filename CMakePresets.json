@@ -1333,7 +1333,7 @@
     },
     {
       "name": "ci-StdShar-macos-x86_64-Clang-S3",
-      "configurePreset": "ci-StdShar-macos-x86_64--Clang-S3",
+      "configurePreset": "ci-StdShar-macos-x86_64-Clang-S3",
       "inherits": "ci-macos-Release-Clang"
     },
     {
