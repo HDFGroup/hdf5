@@ -64,4 +64,7 @@ H5_DLL htri_t H5Z__config_get_double(const H5Z_config_t *config, const char *key
 H5_DLL htri_t H5Z__config_get_bool(const H5Z_config_t *config, const char *key, bool *out);
 H5_DLL htri_t H5Z__config_get_str(const H5Z_config_t *config, const char *key, char *buf, size_t *buf_size);
 
+H5_DLL herr_t H5Z__no_params_set_config(const H5Z_config_t *config, unsigned *flags, size_t *cd_nelmts,
+                                        unsigned cd_values[], size_t cd_values_size);
+
 #endif /* H5Zpkg_H */

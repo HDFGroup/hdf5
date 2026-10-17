@@ -394,6 +394,10 @@ H5O__pline_copy(const void *_src, void *_dst /*out*/)
             /* Basic filter information */
             dst->filter[i] = src->filter[i];
 
+            /* Configuration string is deep-copied below; clear the shallow
+             * copy first so an earlier failure cannot free the source's */
+            dst->filter[i].config = NULL;
+
             /* Filter name */
             if (src->filter[i].name) {
                 size_t namelen; /* Length of source filter name, including null terminator  */
@@ -425,8 +429,15 @@ H5O__pline_copy(const void *_src, void *_dst /*out*/)
                 else
                     dst->filter[i].cd_values = dst->filter[i]._cd_values;
             } /* end if */
-        }     /* end for */
-    }         /* end if */
+
+            /* Canonical configuration string (held in memory only; not
+             * part of the encoded message) */
+            if (src->filter[i].config)
+                if (NULL == (dst->filter[i].config = (char *)H5MM_strdup(src->filter[i].config)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+                                "memory allocation failed for filter config string");
+        } /* end for */
+    }     /* end if */
     else
         dst->filter = NULL;
 
@@ -543,6 +554,7 @@ H5O__pline_reset(void *mesg)
                 assert(pline->filter[i].cd_nelmts > H5Z_COMMON_CD_VALUES);
             if (pline->filter[i].cd_values != pline->filter[i]._cd_values)
                 pline->filter[i].cd_values = (unsigned *)H5MM_xfree(pline->filter[i].cd_values);
+            pline->filter[i].config = (char *)H5MM_xfree(pline->filter[i].config);
         } /* end for */
 
         /* Free filter array */

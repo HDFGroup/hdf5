@@ -222,8 +222,9 @@ next:
  *
  * Purpose:     Check that a class3 filter name is non-empty, at most
  *              H5Z_CLASS3_NAME_MAX_LEN bytes, and only [A-Za-z0-9_.-], so it
- *              is safe to use on a command line and in tool output.
- *              (isalnum() is avoided because it is locale-dependent.)
+ *              is safe to store in the file, use on a command line, and print
+ *              in tool output.  (isalnum() is avoided because it is
+ *              locale-dependent.)
  *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
@@ -1309,12 +1310,16 @@ done:
  *
  * Purpose:  Modify filter parameters for specified pipeline.
  *
+ *           KEEP_CONFIG keeps the stored parameter string; set_local
+ *           callbacks pass true since they only specialize cd_values for
+ *           a dataset.
+ *
  * Return:   Non-negative on success
  *           Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_nelmts,
+H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_nelmts, bool keep_config,
            const unsigned int cd_values[/*cd_nelmts*/])
 {
     size_t idx;                 /* Index of filter in pipeline */
@@ -1339,6 +1344,9 @@ H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t
     /* Change parameters for filter */
     pline->filter[idx].flags     = flags;
     pline->filter[idx].cd_nelmts = cd_nelmts;
+
+    if (!keep_config)
+        pline->filter[idx].config = (char *)H5MM_xfree(pline->filter[idx].config);
 
     /* Free any existing parameters */
     if (pline->filter[idx].cd_values != NULL && pline->filter[idx].cd_values != pline->filter[idx]._cd_values)
@@ -1405,43 +1413,54 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags, size_t cd_ne
 
     /* Allocate additional space in the pipeline if it's full */
     if (pline->nused >= pline->nalloc) {
-        H5O_pline_t x;
-        size_t      n;
+        H5O_pline_t        x;
+        H5Z_filter_info_t *fix; /* Array whose internal pointers to restore */
+        size_t             n;
 
-        /* Each filter's data may be stored internally or may be
+        /* Each filter's data and name may be stored internally or may be
          * a separate block of memory.
          * For each filter, if cd_values points to the internal array
-         * _cd_values, the pointer will need to be updated when the
-         * filter struct is reallocated.  Set these pointers to ~NULL
+         * _cd_values, or name to _name, the pointer will need to be updated
+         * when the filter struct is reallocated.  Set these pointers to ~NULL
          * so that we can reset them after reallocating the filters array.
          */
-        for (n = 0; n < pline->nalloc; ++n)
+        for (n = 0; n < pline->nalloc; ++n) {
             if (pline->filter[n].cd_values == pline->filter[n]._cd_values)
                 pline->filter[n].cd_values = (unsigned *)((void *)~((size_t)NULL));
+            if (pline->filter[n].name == pline->filter[n]._name)
+                pline->filter[n].name = (char *)((void *)~((size_t)NULL));
+        }
 
         x.nalloc = MAX(H5Z_MAX_NFILTERS, 2 * pline->nalloc);
         x.filter = (H5Z_filter_info_t *)H5MM_realloc(pline->filter, x.nalloc * sizeof(x.filter[0]));
-        if (NULL == x.filter)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for filter pipeline");
 
         /* Fix pointers in previous filters that need to point to their own
-         *      internal data.
+         *      internal data, in the old array if the reallocation failed.
          */
-        for (n = 0; n < pline->nalloc; ++n)
-            if (x.filter[n].cd_values == (void *)~((size_t)NULL))
-                x.filter[n].cd_values = x.filter[n]._cd_values;
+        fix = x.filter ? x.filter : pline->filter;
+        for (n = 0; n < pline->nalloc; ++n) {
+            if (fix[n].cd_values == (void *)~((size_t)NULL))
+                fix[n].cd_values = fix[n]._cd_values;
+            if (fix[n].name == (void *)~((size_t)NULL))
+                fix[n].name = fix[n]._name;
+        }
+        if (NULL == x.filter)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for filter pipeline");
 
         /* Point to newly allocated buffer */
         pline->nalloc = x.nalloc;
         pline->filter = x.filter;
     } /* end if */
 
-    /* Add the new filter to the pipeline */
+    /* Add the new filter to the pipeline.  A NULL name is resolved from the
+     * registered filter class when the pipeline is encoded or queried
+     * (H5O__pline_encode, H5P__get_filter). */
     idx                          = pline->nused;
     pline->filter[idx].id        = filter;
     pline->filter[idx].flags     = flags;
-    pline->filter[idx].name      = NULL; /*we'll pick it up later*/
+    pline->filter[idx].name      = NULL;
     pline->filter[idx].cd_nelmts = cd_nelmts;
+    pline->filter[idx].config    = NULL;
     if (cd_nelmts > 0) {
         size_t i; /* Local index variable */
 
@@ -2061,6 +2080,7 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
             assert(pline->filter[idx].cd_nelmts > H5Z_COMMON_CD_VALUES);
         if (pline->filter[idx].cd_values != pline->filter[idx]._cd_values)
             pline->filter[idx].cd_values = (unsigned *)H5MM_xfree(pline->filter[idx].cd_values);
+        pline->filter[idx].config = (char *)H5MM_xfree(pline->filter[idx].config);
 
         /* Remove filter from pipeline array */
         if ((idx + 1) < pline->nused) {
