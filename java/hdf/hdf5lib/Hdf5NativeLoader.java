@@ -19,7 +19,14 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.attribute.AclEntry;
+import java.nio.file.attribute.AclEntryFlag;
+import java.nio.file.attribute.AclEntryPermission;
+import java.nio.file.attribute.AclEntryType;
+import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.UserPrincipal;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Locale;
 
 import org.slf4j.Logger;
@@ -127,19 +134,50 @@ public final class Hdf5NativeLoader {
     private static synchronized Path extractionDirectory() throws IOException
     {
         if (extractDir == null) {
-            extractDir = Files.createTempDirectory(EXTRACT_DIR_PREFIX);
-            extractDir.toFile().deleteOnExit();
-            if (IS_WINDOWS)
-                removeEarlierExtractionDirectories(extractDir);
+            Path dir = Files.createTempDirectory(EXTRACT_DIR_PREFIX);
+            dir.toFile().deleteOnExit();
+            if (IS_WINDOWS) {
+                try {
+                    restrictToOwner(dir);
+                }
+                catch (IOException | RuntimeException err) {
+                    Files.deleteIfExists(dir);
+                    throw new IOException("Could not restrict " + dir + " to its owner", err);
+                }
+                removeEarlierExtractionDirectories(dir);
+            }
+            extractDir = dir;
         }
         return extractDir;
     }
 
     /*
+     * On POSIX file systems Files.createTempDirectory already makes the directory accessible only
+     * to its owner. On Windows it inherits the ACL of the temporary directory, which for a shared
+     * one such as C:\Windows\Temp lets other users create files in it. Replace the ACL with a
+     * single entry for the owner; the libraries copied into the directory inherit it.
+     */
+    private static void restrictToOwner(Path dir) throws IOException
+    {
+        AclFileAttributeView view =
+            Files.getFileAttributeView(dir, AclFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
+        if (view == null)
+            return; // file system without ACLs
+        AclEntry owner = AclEntry.newBuilder()
+                             .setType(AclEntryType.ALLOW)
+                             .setPrincipal(view.getOwner())
+                             .setPermissions(EnumSet.allOf(AclEntryPermission.class))
+                             .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
+                             .build();
+        view.setAcl(Collections.singletonList(owner));
+    }
+
+    /*
      * Windows cannot delete a loaded DLL when the JVM exits, so earlier runs leave their extraction
-     * directories behind in the per-user temporary directory. Remove those that have the same
-     * owner as this JVM's directory {@code current}, deleting only the regular files directly in
-     * them; files still in use by a running JVM cannot be deleted and are left alone.
+     * directories behind. Remove those that have the same owner as this JVM's directory
+     * {@code current}, deleting only the regular files directly in them; files still in use by a
+     * running JVM cannot be deleted and are left alone. Failures never stop the libraries from
+     * being loaded.
      */
     private static void removeEarlierExtractionDirectories(Path current)
     {
@@ -147,23 +185,25 @@ public final class Hdf5NativeLoader {
                  Files.newDirectoryStream(current.getParent(), EXTRACT_DIR_PREFIX + "*")) {
             UserPrincipal self = Files.getOwner(current, LinkOption.NOFOLLOW_LINKS);
             for (Path dir : dirs) {
-                if (dir.equals(current) || !Files.isDirectory(dir, LinkOption.NOFOLLOW_LINKS))
-                    continue;
-                if (!self.equals(Files.getOwner(dir, LinkOption.NOFOLLOW_LINKS)))
-                    continue;
-                try (DirectoryStream<Path> files = Files.newDirectoryStream(dir)) {
-                    for (Path file : files) {
-                        if (Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS))
-                            Files.deleteIfExists(file);
+                try {
+                    if (dir.equals(current) || !Files.isDirectory(dir, LinkOption.NOFOLLOW_LINKS))
+                        continue;
+                    if (!self.equals(Files.getOwner(dir, LinkOption.NOFOLLOW_LINKS)))
+                        continue;
+                    try (DirectoryStream<Path> files = Files.newDirectoryStream(dir)) {
+                        for (Path file : files) {
+                            if (Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS))
+                                Files.deleteIfExists(file);
+                        }
                     }
                     Files.deleteIfExists(dir);
                 }
-                catch (IOException err) {
+                catch (IOException | RuntimeException err) {
                     log.debug("Could not remove {}: {}", dir, err.getMessage());
                 }
             }
         }
-        catch (IOException | SecurityException err) {
+        catch (IOException | RuntimeException err) {
             log.debug("Could not look for earlier extraction directories: {}", err.getMessage());
         }
     }

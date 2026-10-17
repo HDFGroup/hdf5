@@ -10,6 +10,14 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.attribute.AclEntry;
+import java.nio.file.attribute.AclFileAttributeView;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.nio.file.attribute.UserPrincipal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,11 +45,41 @@ public class NativeBundleSmokeTest {
 
     private static boolean expected(String name) { return Boolean.getBoolean("expect." + name); }
 
+    /* The directory the bundled libraries were copied into must be accessible to its owner only */
+    private static void checkOwnerOnly(Path dir) throws Exception
+    {
+        PosixFileAttributeView posix =
+            Files.getFileAttributeView(dir, PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
+        if (posix != null) {
+            String perms = PosixFilePermissions.toString(posix.readAttributes().permissions());
+            check(perms.equals("rwx------"), "extraction directory is owner-only (" + perms + ")");
+            return;
+        }
+        AclFileAttributeView acl =
+            Files.getFileAttributeView(dir, AclFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
+        if (acl == null) {
+            System.out.println("SKIP extraction directory permissions (no POSIX or ACL view)");
+            return;
+        }
+        UserPrincipal owner = acl.getOwner();
+        boolean ownerOnly   = true;
+        for (AclEntry entry : acl.getAcl()) {
+            if (!entry.principal().equals(owner)) {
+                System.out.println("  ACL entry for another principal: " + entry);
+                ownerOnly = false;
+            }
+        }
+        check(ownerOnly,
+              "extraction directory ACL grants access to its owner (" + owner.getName() + ") only");
+    }
+
     public static void main(String[] args) throws Exception
     {
         H5.loadH5Lib();
 
         check(Hdf5NativeLoader.bundledHdf5LoadSucceeded(), "libhdf5 loaded from hdf5-native");
+        if (Hdf5NativeLoader.bundledHdf5Path() != null)
+            checkOwnerOnly(Hdf5NativeLoader.bundledHdf5Path().getParent());
         if (expected("zlib"))
             check(Hdf5NativeLoader.bundledZlibLoadSucceeded(), "zlib loaded from hdf5-native");
         if (expected("szip"))
