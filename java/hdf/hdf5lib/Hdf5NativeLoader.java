@@ -12,24 +12,27 @@
 
 package hdf.hdf5lib;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.attribute.UserPrincipal;
+import java.util.Locale;
 
-import org.scijava.nativelib.JniExtractor;
-import org.scijava.nativelib.NativeLibraryUtil;
-import org.scijava.nativelib.NativeLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Loads bundled HDF5 shared libraries from the {@code hdf5-native}, {@code hdf5-zlib-native},
- * {@code hdf5-szip-native}, and {@code hdf5-jni-native} Maven JARs using SciJava
- * native-lib-loader ({@code natives/<platform>/} layout).
+ * Loads bundled HDF5 shared libraries from the {@code hdf5-native} and {@code hdf5-jni-native}
+ * Maven JARs, which store them under {@code natives/<platform>/} (for example
+ * {@code natives/linux_64/libhdf5.so}).
  * <p>
- * Only classpath native JARs are consulted, not {@code java.library.path} as
- * SciJava's {@code NativeLoader.loadLibrary} would do. A library
- * that is bundled but fails to load is logged as a warning with the reason.
+ * Each library is copied into a new temporary directory created for this JVM and loaded with
+ * {@code System.load}; {@code java.library.path} is not consulted. A library that is bundled but
+ * fails to load is logged as a warning with the reason.
  * <p>
  * No Panama/JNI types are referenced here, so this class can initialize before
  * jextract-generated classes (FFM) or {@code System.loadLibrary("hdf5_java")} (JNI).
@@ -44,8 +47,11 @@ public final class Hdf5NativeLoader {
 
     private static final Logger log = LoggerFactory.getLogger(Hdf5NativeLoader.class);
 
-    private static final boolean IS_WINDOWS =
-        System.getProperty("os.name", "").toLowerCase().startsWith("windows");
+    private static final String OS_NAME     = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
+    private static final boolean IS_WINDOWS = OS_NAME.startsWith("windows");
+
+    /* Prefix of the per-JVM directory the bundled libraries are copied into */
+    private static final String EXTRACT_DIR_PREFIX = "hdf5-native-";
 
     /* Names used by Windows zlib builds: z.dll (zlib's CMake build), zlib.dll, zlib1.dll */
     private static final String[] ZLIB_NAMES =
@@ -69,6 +75,9 @@ public final class Hdf5NativeLoader {
     /* SKIP_PROPERTY as read on first use, so all libraries follow the same setting */
     private static Boolean skipBundled = null;
 
+    /* Directory the bundled libraries of this JVM are copied into, created on first use */
+    private static Path extractDir = null;
+
     private Hdf5NativeLoader() {}
 
     private static synchronized boolean skipBundledLoad()
@@ -79,38 +88,124 @@ public final class Hdf5NativeLoader {
     }
 
     /**
+     * Name of the {@code natives/} subdirectory for this platform, matching the directories that
+     * HDF5JavaNativeBundles.cmake stages libraries into.
+     *
+     * @return the directory name, or null for an unsupported platform
+     */
+    private static String platformDirectory()
+    {
+        String os;
+        if (IS_WINDOWS)
+            os = "windows";
+        else if (OS_NAME.startsWith("mac"))
+            os = "osx";
+        else if (OS_NAME.startsWith("linux"))
+            os = "linux";
+        else
+            return null;
+
+        switch (System.getProperty("os.arch", "").toLowerCase(Locale.ROOT)) {
+        case "amd64":
+        case "x86_64":
+            return os + "_64";
+        case "aarch64":
+        case "arm64":
+            return os + "_arm64";
+        case "x86":
+        case "i386":
+        case "i486":
+        case "i586":
+        case "i686":
+            return os + "_32";
+        default:
+            return null;
+        }
+    }
+
+    /* All bundled libraries go into one directory, so a library finds its dependencies next to it */
+    private static synchronized Path extractionDirectory() throws IOException
+    {
+        if (extractDir == null) {
+            extractDir = Files.createTempDirectory(EXTRACT_DIR_PREFIX);
+            extractDir.toFile().deleteOnExit();
+            if (IS_WINDOWS)
+                removeEarlierExtractionDirectories(extractDir);
+        }
+        return extractDir;
+    }
+
+    /*
+     * Windows cannot delete a loaded DLL when the JVM exits, so earlier runs leave their extraction
+     * directories behind in the per-user temporary directory. Remove those that have the same
+     * owner as this JVM's directory {@code current}, deleting only the regular files directly in
+     * them; files still in use by a running JVM cannot be deleted and are left alone.
+     */
+    private static void removeEarlierExtractionDirectories(Path current)
+    {
+        try (DirectoryStream<Path> dirs =
+                 Files.newDirectoryStream(current.getParent(), EXTRACT_DIR_PREFIX + "*")) {
+            UserPrincipal self = Files.getOwner(current, LinkOption.NOFOLLOW_LINKS);
+            for (Path dir : dirs) {
+                if (dir.equals(current) || !Files.isDirectory(dir, LinkOption.NOFOLLOW_LINKS))
+                    continue;
+                if (!self.equals(Files.getOwner(dir, LinkOption.NOFOLLOW_LINKS)))
+                    continue;
+                try (DirectoryStream<Path> files = Files.newDirectoryStream(dir)) {
+                    for (Path file : files) {
+                        if (Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS))
+                            Files.deleteIfExists(file);
+                    }
+                    Files.deleteIfExists(dir);
+                }
+                catch (IOException err) {
+                    log.debug("Could not remove {}: {}", dir, err.getMessage());
+                }
+            }
+        }
+        catch (IOException | SecurityException err) {
+            log.debug("Could not look for earlier extraction directories: {}", err.getMessage());
+        }
+    }
+
+    /**
      * Load the first of {@code names} found in the bundled native Maven JARs
      * ({@code natives/<platform>/} on the classpath).
      * <p>
-     * Unlike SciJava's {@code NativeLoader.loadLibrary}, this does
-     * not call {@code System.loadLibrary} first, so in-tree CI with {@code java.library.path} does
-     * not preload build-tree libs before {@code hdf5_java}.
+     * {@code System.loadLibrary} is not tried first, so in-tree CI with {@code java.library.path}
+     * does not preload build-tree libs before {@code hdf5_java}.
      *
      * @return the file that was loaded, or null if none of {@code names} is bundled or the bundled
      *         library could not be loaded
      */
-    private static File loadFirstBundled(String... names)
+    private static Path loadFirstBundled(String... names)
     {
-        if (NativeLibraryUtil.getArchitecture() == NativeLibraryUtil.Architecture.UNKNOWN) {
+        String platform = platformDirectory();
+        if (platform == null) {
             log.debug("No bundled native libraries for this platform");
             return null;
         }
-        JniExtractor extractor = NativeLoader.getJniExtractor();
-        String libPath = NativeLibraryUtil.getPlatformLibraryPath(NativeLibraryUtil.DEFAULT_SEARCH_PATH);
+        ClassLoader loader = Hdf5NativeLoader.class.getClassLoader();
         for (String name : names) {
-            File lib;
-            try {
-                lib = extractor.extractJni(libPath, name);
+            String mapped   = System.mapLibraryName(name);
+            String resource = "natives/" + platform + "/" + mapped;
+            URL url =
+                (loader != null) ? loader.getResource(resource) : ClassLoader.getSystemResource(resource);
+            if (url == null)
+                continue; // not bundled under this name
+
+            Path lib;
+            try (InputStream in = url.openStream()) {
+                lib = extractionDirectory().resolve(mapped);
+                Files.copy(in, lib);
+                lib.toFile().deleteOnExit();
             }
-            catch (IOException err) {
-                log.warn("Bundled native library {}{} could not be extracted", libPath,
-                         System.mapLibraryName(name), err);
+            catch (IOException | SecurityException err) {
+                log.warn("Bundled native library {} could not be extracted", resource, err);
                 return null;
             }
-            if (lib == null)
-                continue; // not bundled under this name
             try {
-                System.load(lib.getAbsolutePath());
+                System.load(lib.toAbsolutePath().toString());
                 log.debug("Loaded bundled native library {}", lib);
                 return lib;
             }
@@ -119,7 +214,7 @@ public final class Hdf5NativeLoader {
                 return null;
             }
         }
-        log.debug("No bundled native library {} under {}", String.join("/", names), libPath);
+        log.debug("No bundled native library {} under natives/{}/", String.join("/", names), platform);
         return null;
     }
 
@@ -172,9 +267,8 @@ public final class Hdf5NativeLoader {
     {
         if (!attemptedHdf5) {
             attemptedHdf5 = true;
-            File lib      = skipBundledLoad() ? null : loadFirstBundled("hdf5");
-            hdf5Path      = (lib == null) ? null : lib.toPath();
-            loadedHdf5    = lib != null;
+            hdf5Path      = skipBundledLoad() ? null : loadFirstBundled("hdf5");
+            loadedHdf5    = hdf5Path != null;
         }
         return loadedHdf5;
     }

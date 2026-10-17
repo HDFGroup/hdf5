@@ -137,7 +137,7 @@ jobs:
               fi
 
               # Main Java JAR, examples, and native bundle JARs (libhdf5 / zlib / szip / JNI bridge)
-              artifact_jars=$(find "$artifact_dir" \( -name "jarhdf5-*.jar" -o -name "hdf5-java-examples-*.jar" -o -name "hdf5-native-*.jar" -o -name "hdf5-zlib-native-*.jar" -o -name "hdf5-szip-native-*.jar" -o -name "hdf5-jni-native-*.jar" \) ! -name "*sources*" ! -name "*javadoc*" 2>/dev/null || true)
+              artifact_jars=$(find "$artifact_dir" \( -name "jarhdf5-*.jar" -o -name "hdf5-java-examples-*.jar" -o -name "hdf5-native-*.jar" -o -name "hdf5-jni-native-*.jar" \) ! -name "*sources*" ! -name "*javadoc*" 2>/dev/null || true)
 
               if [ -n "$artifact_jars" ]; then
                 echo "  Found HDF5 JARs:"
@@ -377,16 +377,6 @@ jobs:
               CURRENT_CLASSIFIER="$platform"
               classifier_opts="-Dclassifier=${CURRENT_CLASSIFIER}"
               echo "Artifact type: HDF5 JNI bridge native bundle"
-            elif [[ "${jar_basename}" == hdf5-zlib-native-*.jar ]]; then
-              ARTIFACT_ID="hdf5-zlib-native"
-              CURRENT_CLASSIFIER="$platform"
-              classifier_opts="-Dclassifier=${CURRENT_CLASSIFIER}"
-              echo "Artifact type: HDF5 zlib native shared library bundle"
-            elif [[ "${jar_basename}" == hdf5-szip-native-*.jar ]]; then
-              ARTIFACT_ID="hdf5-szip-native"
-              CURRENT_CLASSIFIER="$platform"
-              classifier_opts="-Dclassifier=${CURRENT_CLASSIFIER}"
-              echo "Artifact type: HDF5 szip (libaec) native shared library bundle"
             else
               # Main HDF5 Java library - determine implementation
               # Check JAR contents to detect FFM vs JNI
@@ -434,8 +424,8 @@ jobs:
               fi
             fi
 
-            # The FFM and JNI builds of a platform both produce hdf5-native, hdf5-zlib-native and
-            # hdf5-szip-native; a repository accepts each artifact and classifier only once
+            # The FFM and JNI builds of a platform both produce hdf5-native; a repository accepts
+            # each artifact and classifier only once
             jar_key="${ARTIFACT_ID}:${CURRENT_CLASSIFIER}"
             if [[ -n "${jar_deployed[$jar_key]:-}" ]]; then
               echo "Skipping ${jar_basename}: ${ARTIFACT_ID} (${CURRENT_CLASSIFIER:-no classifier}) is already deployed"

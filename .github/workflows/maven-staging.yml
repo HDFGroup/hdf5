@@ -509,8 +509,6 @@ jobs:
               find "$BUILD_ROOT" \( \
                 -path '*/java/hdf/hdf5lib/pom.xml' -o \
                 -path '*/java/hdf/hdf5lib/pom-hdf5-native.xml' -o \
-                -path '*/java/hdf/hdf5lib/pom-hdf5-zlib-native.xml' -o \
-                -path '*/java/hdf/hdf5lib/pom-hdf5-szip-native.xml' -o \
                 -path '*/java/hdf/hdf5lib/pom-hdf5-jni-native.xml' \
               \) -exec cp {} "$ARTIFACTS_DIR/" \;
               ;;
@@ -518,8 +516,6 @@ jobs:
               find "$BUILD_ROOT" \( \
                 -path '*/java/src-jni/hdf/hdf5lib/pom.xml' -o \
                 -path '*/java/src-jni/hdf/hdf5lib/pom-hdf5-native.xml' -o \
-                -path '*/java/src-jni/hdf/hdf5lib/pom-hdf5-zlib-native.xml' -o \
-                -path '*/java/src-jni/hdf/hdf5lib/pom-hdf5-szip-native.xml' -o \
                 -path '*/java/src-jni/hdf/hdf5lib/pom-hdf5-jni-native.xml' \
               \) -exec cp {} "$ARTIFACTS_DIR/" \;
               ;;
@@ -536,7 +532,7 @@ jobs:
           ARTIFACT_DIR: ${{ runner.workspace }}/maven-artifacts
         run: |
           ARTIFACT_COUNT=$(find "$ARTIFACT_DIR" -name "*.jar" | wc -l | awk '{print $1}')
-          POM_COUNT=$(find "$ARTIFACT_DIR" \( -name "pom.xml" -o -name "pom-hdf5-native.xml" -o -name "pom-hdf5-zlib-native.xml" -o -name "pom-hdf5-szip-native.xml" -o -name "pom-hdf5-jni-native.xml" \) | wc -l | awk '{print $1}')
+          POM_COUNT=$(find "$ARTIFACT_DIR" \( -name "pom.xml" -o -name "pom-hdf5-native.xml" -o -name "pom-hdf5-jni-native.xml" \) | wc -l | awk '{print $1}')
           MAIN_POM_COUNT=$(find "$ARTIFACT_DIR" -name "pom.xml" | wc -l | awk '{print $1}')
 
           echo "Found $ARTIFACT_COUNT JAR files and $POM_COUNT POM files (pom.xml count: $MAIN_POM_COUNT)"
@@ -571,11 +567,11 @@ jobs:
           VERIFICATION_FAILED=false
           IMPL="$MATRIX_IMPLEMENTATION"
 
-          # Main Java API JAR (exclude native bundles hdf5-native-*, hdf5-zlib-native-*, hdf5-jni-native-*)
+          # Main Java API JAR (exclude native bundles hdf5-native-*, hdf5-jni-native-*)
           HDF5_JAR=$(find "$ARTIFACT_DIR" -name "jarhdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
 
           if [ -z "$HDF5_JAR" ]; then
-            HDF5_JAR=$(find "$ARTIFACT_DIR" -name "*hdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" ! -name "*slf4j*" ! -name "hdf5-native-*" ! -name "hdf5-zlib-native-*" ! -name "hdf5-szip-native-*" ! -name "hdf5-jni-native-*" | head -1)
+            HDF5_JAR=$(find "$ARTIFACT_DIR" -name "*hdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" ! -name "*slf4j*" ! -name "hdf5-native-*" ! -name "hdf5-jni-native-*" | head -1)
           fi
 
           if [ -z "$HDF5_JAR" ]; then
@@ -661,32 +657,24 @@ jobs:
           TOTAL_FILES=$(jar tf "$HDF5_JAR" | wc -l)
           echo "✅ Total files in JAR: $TOTAL_FILES"
 
-          ZLIB_NATIVE_JAR=$(find "$ARTIFACT_DIR" -name "hdf5-zlib-native-*.jar" | head -1)
-          if [ -z "$ZLIB_NATIVE_JAR" ]; then
-            echo "::error::Could not find hdf5-zlib-native bundle"
-            VERIFICATION_FAILED=true
-          elif jar tf "$ZLIB_NATIVE_JAR" | grep -Eq 'natives/.*/(libz\.so|libz\.so\.[0-9]+|libz\.dylib|z\.dll|zlib\.dll|zlib1\.dll)'; then
-            echo "✅ hdf5-zlib-native contains SciJava zlib library layout"
-          else
-            echo "::error::hdf5-zlib-native is missing mapped zlib library under natives/<platform>/"
-            jar tf "$ZLIB_NATIVE_JAR" | head -30 2>/dev/null || true
-            VERIFICATION_FAILED=true
-          fi
-
-          SZIP_NATIVE_JAR=$(find "$ARTIFACT_DIR" -name "hdf5-szip-native-*.jar" | head -1)
-          if [ -z "$SZIP_NATIVE_JAR" ]; then
-            echo "::error::Could not find hdf5-szip-native bundle"
+          # The Maven presets link zlib and libaec as shared libraries, so hdf5-native carries them
+          NATIVE_JAR=$(find "$ARTIFACT_DIR" -name "hdf5-native-*.jar" | head -1)
+          if [ -z "$NATIVE_JAR" ]; then
+            echo "::error::Could not find hdf5-native bundle"
             VERIFICATION_FAILED=true
           else
-            HAS_LIBSZ=$(jar tf "$SZIP_NATIVE_JAR" | grep -E 'natives/.*/(libsz\.so|libsz\.dylib|sz\.dll|szip\.dll)' || true)
-            HAS_LIBAEC=$(jar tf "$SZIP_NATIVE_JAR" | grep -E 'natives/.*/(libaec\.so|libaec\.dylib|aec\.dll)' || true)
-            if [ -n "$HAS_LIBSZ" ] && [ -n "$HAS_LIBAEC" ]; then
-              echo "✅ hdf5-szip-native contains SciJava libaec/libsz library layout"
-            else
-              echo "::error::hdf5-szip-native is missing mapped libaec/libsz under natives/<platform>/"
-              jar tf "$SZIP_NATIVE_JAR" | head -30 2>/dev/null || true
-              VERIFICATION_FAILED=true
-            fi
+            NATIVE_LIST=$(jar tf "$NATIVE_JAR")
+            for lib in 'libhdf5\.so|libhdf5\.dylib|hdf5\.dll' \
+                       'libz\.so|libz\.dylib|z\.dll|zlib\.dll|zlib1\.dll' \
+                       'libaec\.so|libaec\.dylib|aec\.dll' \
+                       'libsz\.so|libsz\.dylib|sz\.dll|szip\.dll'; do
+              if grep -Eq "^natives/[^/]+/(${lib})$" <<< "$NATIVE_LIST"; then
+                echo "✅ hdf5-native contains one of: ${lib//\\/}"
+              else
+                echo "::error::hdf5-native is missing one of ${lib//\\/} under natives/<platform>/"
+                VERIFICATION_FAILED=true
+              fi
+            done
           fi
 
           echo "::endgroup::"
@@ -948,7 +936,7 @@ jobs:
           # Prefer the Java API JAR (jarhdf5). Exclude native bundles (hdf5-*-native-*).
           HDF5_JAR=$(find "$MAVEN_ARTIFACTS_DIR" -name "jarhdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" 2>/dev/null | head -1)
           if [ -z "$HDF5_JAR" ]; then
-            HDF5_JAR=$(find "$MAVEN_ARTIFACTS_DIR" -name "*hdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" ! -name "*slf4j*" ! -name "hdf5-native-*" ! -name "hdf5-zlib-native-*" ! -name "hdf5-szip-native-*" ! -name "hdf5-jni-native-*" 2>/dev/null | head -1)
+            HDF5_JAR=$(find "$MAVEN_ARTIFACTS_DIR" -name "*hdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" ! -name "*slf4j*" ! -name "hdf5-native-*" ! -name "hdf5-jni-native-*" 2>/dev/null | head -1)
           fi
           if [ -z "$HDF5_JAR" ]; then
             echo "❌ No HDF5 JAR files found for testing"
@@ -1169,7 +1157,7 @@ jobs:
             $HDF5_JAR = Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "*hdf5*.jar" -Recurse |
               Where-Object {
                 $_.Name -notmatch 'sources|javadoc|slf4j' -and
-                $_.Name -notmatch '^hdf5-(native|zlib-native|szip-native|jni-native)-'
+                $_.Name -notmatch '^hdf5-(native|jni-native)-'
               } |
               Select-Object -First 1
           }

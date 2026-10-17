@@ -24,8 +24,6 @@ find_one() {
 
 HDF5_JAR="$(find_one 'jarhdf5-*.jar')"
 NATIVE_JAR="$(find_one 'hdf5-native-*.jar')"
-ZLIB_JAR="$(find_one 'hdf5-zlib-native-*.jar')"
-SZIP_JAR="$(find_one 'hdf5-szip-native-*.jar')"
 JNI_JAR="$(find_one 'hdf5-jni-native-*.jar')"
 
 for required in HDF5_JAR NATIVE_JAR; do
@@ -36,31 +34,31 @@ for required in HDF5_JAR NATIVE_JAR; do
   fi
 done
 
-# hdf5-native's POM lists the zlib / szip bundles that libhdf5 links; each must be present
-NATIVE_POM="$ARTIFACTS_DIR/pom-hdf5-native.xml"
-if [[ -f "$NATIVE_POM" ]]; then
-  for dep in zlib szip; do
-    jar_var="$(tr '[:lower:]' '[:upper:]' <<< "$dep")_JAR"
-    if grep "<artifactId>hdf5-${dep}-native</artifactId>" "$NATIVE_POM" >/dev/null && [[ -z "${!jar_var}" ]]; then
-      echo "ERROR: hdf5-native depends on hdf5-${dep}-native, which is not in ${ARTIFACTS_DIR}" >&2
-      exit 1
-    fi
-  done
-else
-  echo "WARNING: ${NATIVE_POM} not found; zlib/szip bundle expectations come from the JARs present" >&2
-fi
-
 # Empty working directory so no stray native library is found next to the test
 WORK_DIR="$(mktemp -d)"
 trap 'rm -rf "$WORK_DIR"' EXIT
 
-# Bundled libraries must not keep runtime search paths into the build tree
 RPATH_DIR="$WORK_DIR/rpath-check"
 mkdir -p "$RPATH_DIR"
-for jar in "$NATIVE_JAR" "$ZLIB_JAR" "$SZIP_JAR" "$JNI_JAR"; do
+for jar in "$NATIVE_JAR" "$JNI_JAR"; do
   [[ -n "$jar" ]] || continue
   (cd "$RPATH_DIR" && jar xf "$(to_java_path "$jar")")
 done
+
+# hdf5-native carries zlib / libaec + libsz when libhdf5 links them as shared libraries
+has_bundled() {
+  find "$RPATH_DIR/natives" -type f -name "$1" | grep . >/dev/null
+}
+EXPECT_ZLIB=false
+EXPECT_SZIP=false
+if has_bundled 'libz.so' || has_bundled 'libz.dylib' || has_bundled 'z.dll' || has_bundled 'zlib*.dll'; then
+  EXPECT_ZLIB=true
+fi
+if has_bundled 'libsz.so' || has_bundled 'libsz.dylib' || has_bundled 'sz.dll' || has_bundled 'szip.dll'; then
+  EXPECT_SZIP=true
+fi
+
+# Bundled libraries must not keep runtime search paths into the build tree
 while IFS= read -r lib; do
   case "$(uname -s)" in
     Linux)
@@ -80,8 +78,7 @@ done < <(find "$RPATH_DIR/natives" -type f \( -name '*.so' -o -name '*.dylib' \)
 rm -rf "$RPATH_DIR"
 
 CP=""
-for jar in "$HDF5_JAR" "$NATIVE_JAR" "$ZLIB_JAR" "$SZIP_JAR" "$JNI_JAR" \
-           "$REPO_ROOT/java/lib/native-lib-loader-2.5.0.jar" \
+for jar in "$HDF5_JAR" "$NATIVE_JAR" "$JNI_JAR" \
            "$REPO_ROOT/java/lib/slf4j-api-2.0.16.jar" \
            "$REPO_ROOT/java/lib/ext/slf4j-simple-2.0.16.jar"; do
   [[ -n "$jar" ]] && CP="${CP:+${CP}${SEP}}$(to_java_path "$jar")"
@@ -93,8 +90,8 @@ if jar tf "$(to_java_path "$HDF5_JAR")" | grep '^org/hdfgroup/javahdf5/' >/dev/n
   JAVA_OPTS+=(--enable-native-access=ALL-UNNAMED)
 fi
 JAVA_OPTS+=(
-  "-Dexpect.zlib=$([[ -n "$ZLIB_JAR" ]] && echo true || echo false)"
-  "-Dexpect.szip=$([[ -n "$SZIP_JAR" ]] && echo true || echo false)"
+  "-Dexpect.zlib=${EXPECT_ZLIB}"
+  "-Dexpect.szip=${EXPECT_SZIP}"
   "-Dexpect.jni=$([[ -n "$JNI_JAR" ]] && echo true || echo false)"
 )
 

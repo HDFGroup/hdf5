@@ -11,16 +11,20 @@
 #           HDF5JAVA_MAVEN_NATIVE_JNI is TRUE
 #
 # Sets HDF5_MAVEN_NATIVE_PROFILES, the OS-activated <profile> blocks substituted
-# into the binding pom.xml.in files. hdf5-native in turn depends on the zlib and
-# libaec bundles that libhdf5 links, so adding hdf5-native is enough to load it.
+# into the binding pom.xml.in files.
 #
-# Natives are staged under natives/<platform>/ per SciJava native-lib-loader
-# (org.scijava.nativelib.NativeLibraryUtil.Architecture names, lowercased).
-# The loader only extracts System.mapLibraryName(name), so each library is
-# staged exactly once under that name: the unversioned linker name on Linux and
-# macOS (libhdf5.so, libz.dylib, ...), which still carries the SONAME/install
-# name that dependent libraries reference, and the DLL file name on Windows,
-# which is the name recorded in the PE import table of dependent DLLs.
+# Two classified JARs are produced:
+#   hdf5-native      libhdf5 and the shared zlib / libaec + libsz it links, which
+#                    libhdf5 cannot load without
+#   hdf5-jni-native  the hdf5_java JNI bridge (JNI builds only)
+#
+# Natives are staged under natives/<platform>/ (linux_64, osx_arm64, windows_64,
+# ...), the directories hdf.hdf5lib.Hdf5NativeLoader reads. The loader looks up
+# System.mapLibraryName(name), so each library is staged exactly once under that
+# name: the unversioned linker name on Linux and macOS (libhdf5.so, libz.dylib,
+# ...), which still carries the SONAME/install name that dependent libraries
+# reference, and the DLL file name on Windows, which is the name recorded in the
+# PE import table of dependent DLLs.
 #-----------------------------------------------------------------------------
 
 if (NOT DEFINED HDF5JAVA_MAVEN_NATIVE_JNI)
@@ -31,7 +35,7 @@ if (NOT DEFINED HDF5_MAVEN_PLATFORM OR NOT DEFINED HDF5_MAVEN_ARCHITECTURE)
   message (FATAL_ERROR "HDF5JavaNativeBundles.cmake requires HDF5_MAVEN_PLATFORM and HDF5_MAVEN_ARCHITECTURE")
 endif ()
 
-# Map HDF5 Maven classifiers to native-lib-loader platform directory names
+# Map HDF5 Maven classifiers to the natives/<platform>/ directory names Hdf5NativeLoader reads
 if (HDF5_MAVEN_PLATFORM STREQUAL "linux")
   if (HDF5_MAVEN_ARCHITECTURE STREQUAL "aarch64")
     set (HDF5_NATIVE_LOADER_PLATFORM "linux_arm64")
@@ -71,7 +75,7 @@ if (NOT Java_JAR_EXECUTABLE)
   message (FATAL_ERROR "Java jar tool not found; cannot build hdf5-native Maven bundles.")
 endif ()
 
-# Generator expression for the file name SciJava extracts for a shared library target
+# Generator expression for the file name Hdf5NativeLoader looks up for a shared library target
 function (hdf5java_native_stage_name _out_var _target)
   if (WIN32)
     set (${_out_var} "$<TARGET_FILE_NAME:${_target}>" PARENT_SCOPE)
@@ -126,9 +130,9 @@ endfunction ()
 #   ARTIFACT_ID  Maven artifactId (also the jar/POM/stage-dir base name)
 #   POM_TEMPLATE template under java/cmake/
 #   TARGETS      shared library targets to bundle, one copy each
-#   LICENSE_FILE license of the bundled libraries, stored as META-INF/LICENSE (optional)
+#   LICENSES     <name>=<file> pairs; each file is stored as META-INF/<name>
 function (hdf5java_add_native_maven_jar)
-  cmake_parse_arguments (_args "" "ARTIFACT_ID;POM_TEMPLATE;LICENSE_FILE" "TARGETS" ${ARGN})
+  cmake_parse_arguments (_args "" "ARTIFACT_ID;POM_TEMPLATE" "TARGETS;LICENSES" ${ARGN})
 
   set (_base "${CMAKE_CURRENT_BINARY_DIR}/native-bundle/${_args_ARTIFACT_ID}")
   set (_stage "${_base}/stage")
@@ -158,14 +162,16 @@ function (hdf5java_add_native_maven_jar)
   endforeach ()
 
   set (_license_depends "")
-  if (_args_LICENSE_FILE)
+  foreach (_entry IN LISTS _args_LICENSES)
+    string (FIND "${_entry}" "=" _eq)
+    string (SUBSTRING "${_entry}" 0 ${_eq} _name)
+    math (EXPR _eq "${_eq} + 1")
+    string (SUBSTRING "${_entry}" ${_eq} -1 _file)
     list (APPEND _copy_commands
-      COMMAND ${CMAKE_COMMAND} -E copy "${_args_LICENSE_FILE}" "${_stage}/META-INF/LICENSE"
+      COMMAND ${CMAKE_COMMAND} -E copy "${_file}" "${_stage}/META-INF/${_name}"
     )
-    set (_license_depends "${_args_LICENSE_FILE}")
-  else ()
-    message (STATUS "No license file found for ${_args_ARTIFACT_ID}; it is not included in the JAR")
-  endif ()
+    list (APPEND _license_depends "${_file}")
+  endforeach ()
 
   add_custom_command (
     OUTPUT "${_jar}"
@@ -232,9 +238,12 @@ if (_HDF5_ZLIB_NATIVE_TARGET)
     get_target_property (_zlib_output_name ${_HDF5_ZLIB_NATIVE_TARGET} NAME)
   endif ()
   if (_zlib_output_name MATCHES "z(lib)?-ng")
-    message (WARNING "zlib-ng without zlib compatibility (${_zlib_output_name}) cannot be loaded from hdf5-zlib-native; hdf5-zlib-native not created")
-    set (_HDF5_ZLIB_NATIVE_TARGET "")
+    message (FATAL_ERROR "hdf5-native: zlib-ng without zlib compatibility (${_zlib_output_name}) "
+                         "cannot be loaded by Hdf5NativeLoader; build zlib-ng in zlib-compatible mode")
   endif ()
+endif ()
+if (_HDF5_AEC_NATIVE_TARGET AND NOT _HDF5_SZ_NATIVE_TARGET OR _HDF5_SZ_NATIVE_TARGET AND NOT _HDF5_AEC_NATIVE_TARGET)
+  message (FATAL_ERROR "hdf5-native: only one of libaec/libsz is a shared library target")
 endif ()
 
 # License file of a dependency built from source with FetchContent, or "" when it
@@ -253,49 +262,30 @@ function (hdf5java_fetchcontent_license _out_var _content_name)
   set (${_out_var} "${_license}" PARENT_SCOPE)
 endfunction ()
 
-# Profiles substituted into pom-native.xml.in: libhdf5 cannot load without the
-# shared zlib and libaec it links, so hdf5-native requires their bundles
-set (_native_dependency_profiles "")
-
-# zlib: libhdf5's built-in deflate filter needs it when linked dynamically
+# libhdf5 together with the shared zlib (deflate filter) and libaec + libsz (SZIP
+# filter) it links
+set (_native_targets ${HDF5_LIBSH_TARGET})
+set (_native_licenses "LICENSE=${HDF5_SOURCE_DIR}/LICENSE")
 if (_HDF5_ZLIB_NATIVE_TARGET)
-  hdf5java_append_maven_native_profiles (_native_dependency_profiles hdf5-zlib-native
-    "Bundled zlib that libhdf5 links for the deflate/GZIP filter" FALSE)
+  list (APPEND _native_targets ${_HDF5_ZLIB_NATIVE_TARGET})
   hdf5java_fetchcontent_license (_zlib_license HDF5_ZLIB)
-  hdf5java_add_native_maven_jar (
-    ARTIFACT_ID hdf5-zlib-native
-    POM_TEMPLATE pom-zlib-native.xml.in
-    TARGETS ${_HDF5_ZLIB_NATIVE_TARGET}
-    LICENSE_FILE "${_zlib_license}"
-  )
+  if (_zlib_license)
+    list (APPEND _native_licenses "LICENSE-zlib=${_zlib_license}")
+  endif ()
 endif ()
-
-# libaec: libhdf5's built-in SZIP filter needs libsz, which depends on libaec
-if (_HDF5_AEC_NATIVE_TARGET AND _HDF5_SZ_NATIVE_TARGET)
-  hdf5java_append_maven_native_profiles (_native_dependency_profiles hdf5-szip-native
-    "Bundled libaec/libsz that libhdf5 links for the SZIP filter" FALSE)
+if (_HDF5_AEC_NATIVE_TARGET)
+  list (APPEND _native_targets ${_HDF5_AEC_NATIVE_TARGET} ${_HDF5_SZ_NATIVE_TARGET})
   hdf5java_fetchcontent_license (_aec_license SZIP)
-  hdf5java_add_native_maven_jar (
-    ARTIFACT_ID hdf5-szip-native
-    POM_TEMPLATE pom-szip-native.xml.in
-    TARGETS ${_HDF5_AEC_NATIVE_TARGET} ${_HDF5_SZ_NATIVE_TARGET}
-    LICENSE_FILE "${_aec_license}"
-  )
-elseif (_HDF5_AEC_NATIVE_TARGET OR _HDF5_SZ_NATIVE_TARGET)
-  message (WARNING "Only one of libaec/libsz is a shared library target; hdf5-szip-native not created")
-endif ()
-
-if (_native_dependency_profiles)
-  set (HDF5_NATIVE_DEPENDENCY_PROFILES "\n    <profiles>${_native_dependency_profiles}\n    </profiles>\n")
-else ()
-  set (HDF5_NATIVE_DEPENDENCY_PROFILES "")
+  if (_aec_license)
+    list (APPEND _native_licenses "LICENSE-libaec=${_aec_license}")
+  endif ()
 endif ()
 
 hdf5java_add_native_maven_jar (
   ARTIFACT_ID hdf5-native
   POM_TEMPLATE pom-native.xml.in
-  TARGETS ${HDF5_LIBSH_TARGET}
-  LICENSE_FILE "${HDF5_SOURCE_DIR}/LICENSE"
+  TARGETS ${_native_targets}
+  LICENSES ${_native_licenses}
 )
 
 set (HDF5_MAVEN_NATIVE_PROFILES "")
@@ -318,6 +308,6 @@ if (HDF5JAVA_MAVEN_NATIVE_JNI)
     ARTIFACT_ID hdf5-jni-native
     POM_TEMPLATE pom-jni-native.xml.in
     TARGETS ${HDF5_JAVA_JNI_LIB_TARGET}
-    LICENSE_FILE "${HDF5_SOURCE_DIR}/LICENSE"
+    LICENSES "LICENSE=${HDF5_SOURCE_DIR}/LICENSE"
   )
 endif ()

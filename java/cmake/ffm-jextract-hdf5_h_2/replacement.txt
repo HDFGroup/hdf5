@@ -17,7 +17,7 @@
             bundledHdf5 = (java.nio.file.Path) loader.getMethod("bundledHdf5Path").invoke(null);
         }
         catch (Throwable ignored) {
-            // Hdf5NativeLoader or native-lib-loader not on the classpath: use the system libhdf5
+            // Hdf5NativeLoader not on the classpath: use the system libhdf5
         }
         try {
             if (bundledHdf5 != null)

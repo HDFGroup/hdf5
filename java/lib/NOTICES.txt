@@ -13,7 +13,6 @@ vendored-jars.sha256 from the repository root, for example:
     java/lib/slf4j-api-2.0.16.jar \
     java/lib/ext/slf4j-nop-2.0.16.jar \
     java/lib/ext/slf4j-simple-2.0.16.jar \
-    java/lib/native-lib-loader-2.5.0.jar \
     > java/lib/vendored-jars.sha256
 
 1) SLF4J 2.0.16 (org.slf4j)
@@ -24,22 +23,15 @@ vendored-jars.sha256 from the repository root, for example:
    Project: https://www.slf4j.org/
    Source repository: https://github.com/qos-ch/slf4j
 
-2) SciJava Native Library Loader 2.5.0 (org.scijava)
-   - native-lib-loader-2.5.0.jar
-   License: BSD 2-Clause "Simplified" License
-   Project: https://github.com/scijava/native-lib-loader
+The org.hdfgroup:hdf5-native Maven bundle produced by the HDF5 build also
+redistributes the zlib and libaec shared libraries when libhdf5 links them as
+shared libraries; their licenses are included in the JAR under META-INF/.
 
-Native Maven bundles produced by the HDF5 build may also redistribute zlib
-shared libraries in org.hdfgroup:hdf5-zlib-native when Maven deployment is
-configured with shared zlib support, and libaec shared libraries in
-org.hdfgroup:hdf5-szip-native when Maven deployment is configured with shared
-libaec (SZIP) support.
-
-3) zlib
+2) zlib
    License: zlib License
    Project: https://zlib.net/
 
-4) libaec (Adaptive Entropy Coding library, providing the SZIP-compatible API)
+3) libaec (Adaptive Entropy Coding library, providing the SZIP-compatible API)
    License: 2-clause BSD License
    Project: https://gitlab.dkrz.de/k202009/libaec
 

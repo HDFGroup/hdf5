@@ -136,7 +136,7 @@ file (WRITE ${PROJECT_BINARY_DIR}/Manifest.txt
 "
 )
 
-set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVA_LOGGING_JAR};${HDF5_JAVA_NATIVE_LIB_LOADER_JAR}")
+set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVA_LOGGING_JAR}")
 
 # Create main JAR with platform classifier if Maven deployment is enabled
 if (HDF5_ENABLE_MAVEN_DEPLOY)

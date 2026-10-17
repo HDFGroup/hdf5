@@ -45,7 +45,7 @@ cat > pom.xml << EOF
 
     <dependencies>
         <!-- Java bindings only: hdf5-jni-native and hdf5-native are transitive (required), and
-             hdf5-native brings hdf5-zlib-native / hdf5-szip-native -->
+             hdf5-native also bundles zlib and libaec/libsz -->
         <dependency>
             <groupId>org.hdfgroup</groupId>
             <artifactId>hdf5-java-jni</artifactId>

@@ -594,8 +594,6 @@ jobs:
               find "${BUILD_DIR}" \( \
                 -path '*/java/hdf/hdf5lib/pom.xml' -o \
                 -path '*/java/hdf/hdf5lib/pom-hdf5-native.xml' -o \
-                -path '*/java/hdf/hdf5lib/pom-hdf5-zlib-native.xml' -o \
-                -path '*/java/hdf/hdf5lib/pom-hdf5-szip-native.xml' -o \
                 -path '*/java/hdf/hdf5lib/pom-hdf5-jni-native.xml' \
               \) -exec cp {} "$ARTIFACTS_DIR/" \;
               ;;
@@ -603,8 +601,6 @@ jobs:
               find "${BUILD_DIR}" \( \
                 -path '*/java/src-jni/hdf/hdf5lib/pom.xml' -o \
                 -path '*/java/src-jni/hdf/hdf5lib/pom-hdf5-native.xml' -o \
-                -path '*/java/src-jni/hdf/hdf5lib/pom-hdf5-zlib-native.xml' -o \
-                -path '*/java/src-jni/hdf/hdf5lib/pom-hdf5-szip-native.xml' -o \
                 -path '*/java/src-jni/hdf/hdf5lib/pom-hdf5-jni-native.xml' \
               \) -exec cp {} "$ARTIFACTS_DIR/" \;
               ;;
