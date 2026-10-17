@@ -263,6 +263,10 @@ H5B2__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
     /* Raw key size (in bytes) */
     UINT16DECODE(image, cparam.rrec_size);
 
+    /* Check the class and raw record size are the ones the opener expects */
+    if (udata->cparam && (id != udata->cparam->cls->id || cparam.rrec_size != udata->cparam->rrec_size))
+        HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "v2 B-tree header doesn't match its opener");
+
     /* Depth of tree */
     UINT16DECODE(image, depth);
 

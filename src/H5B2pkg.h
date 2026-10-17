@@ -256,9 +256,10 @@ typedef enum H5B2_update_status_t {
 
 /* Callback info for loading a v2 B-tree header into the cache */
 typedef struct H5B2_hdr_cache_ud_t {
-    H5F_t  *f;         /* File that v2 b-tree header is within */
-    haddr_t addr;      /* Address of B-tree header in the file */
-    void   *ctx_udata; /* User-data for protecting */
+    H5F_t               *f;         /* File that v2 b-tree header is within */
+    haddr_t              addr;      /* Address of B-tree header in the file */
+    const H5B2_create_t *cparam;    /* Class and raw record size expected by the opener (or NULL) */
+    void                *ctx_udata; /* User-data for protecting */
 } H5B2_hdr_cache_ud_t;
 
 /* Callback info for loading a v2 B-tree internal node into the cache */
@@ -344,7 +345,8 @@ H5_DLL herr_t H5B2__hdr_decr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2__hdr_fuse_incr(H5B2_hdr_t *hdr);
 H5_DLL size_t H5B2__hdr_fuse_decr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2__hdr_dirty(H5B2_hdr_t *hdr);
-H5_DLL H5B2_hdr_t *H5B2__hdr_protect(H5F_t *f, haddr_t hdr_addr, void *ctx_udata, unsigned flags);
+H5_DLL H5B2_hdr_t *H5B2__hdr_protect(H5F_t *f, haddr_t hdr_addr, const H5B2_create_t *cparam, void *ctx_udata,
+                                     unsigned flags);
 H5_DLL herr_t      H5B2__hdr_unprotect(H5B2_hdr_t *hdr, unsigned cache_flags);
 H5_DLL herr_t      H5B2__hdr_delete(H5B2_hdr_t *hdr);
 

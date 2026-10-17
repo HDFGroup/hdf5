@@ -327,6 +327,10 @@ H5EA__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, bool H
         *image++; /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of
                      elements in data block page */
 
+    /* Check the creation parameters, and that they are the ones the opener expects */
+    if (H5EA__hdr_check_cparam(&hdr->cparam, udata->cparam) < 0)
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "invalid extensible array header");
+
     /* Array statistics */
     hdr->stats.computed.hdr_size = len;                                   /* Size of header in file */
     H5F_DECODE_LENGTH(udata->f, image, hdr->stats.stored.nsuper_blks);    /* Number of super blocks created */

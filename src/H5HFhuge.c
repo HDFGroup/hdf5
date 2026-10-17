@@ -76,6 +76,107 @@ static herr_t  H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, bool is_re
 /*******************/
 
 /*-------------------------------------------------------------------------
+ * Function:	H5HF__huge_bt2_cparam
+ *
+ * Purpose:	Set the creation parameters of the v2 B-tree for tracking
+ *              the huge objects in the heap.  They are used to create the
+ *              v2 B-tree and are checked against its header when it is
+ *              opened.
+ *
+ * Return:	void
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5HF__huge_bt2_cparam(const H5HF_hdr_t *hdr, H5B2_create_t *cparam)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /*
+     * Check arguments.
+     */
+    assert(hdr);
+    assert(cparam);
+
+    /* Compute the size of 'raw' records on disk */
+    /* (Note: the size for huge IDs could be set to 'huge_id_size', instead
+     *  of 'sizeof_size', but that would make the v2 B-tree callback routines
+     *  depend on the heap header, which makes the v2 B-tree flush routines
+     *  difficult to write.  "Waste" an extra byte or for small heaps (where
+     *  the 'huge_id_size' is < 'sizeof_size' in order to make this easier -QAK)
+     */
+    if (hdr->huge_ids_direct) {
+        if (hdr->filter_len > 0) {
+            cparam->rrec_size =
+                (uint32_t)((unsigned)hdr->sizeof_addr     /* Address of object */
+                           + (unsigned)hdr->sizeof_size   /* Length of object */
+                           + (unsigned)4                  /* Filter mask for filtered object */
+                           + (unsigned)hdr->sizeof_size); /* Size of de-filtered object in memory */
+            cparam->cls = H5HF_HUGE_BT2_FILT_DIR;
+        } /* end if */
+        else {
+            cparam->rrec_size = (uint32_t)((unsigned)hdr->sizeof_addr     /* Address of object */
+                                           + (unsigned)hdr->sizeof_size); /* Length of object */
+            cparam->cls       = H5HF_HUGE_BT2_DIR;
+        } /* end else */
+    }     /* end if */
+    else {
+        if (hdr->filter_len > 0) {
+            cparam->rrec_size =
+                (uint32_t)((unsigned)hdr->sizeof_addr     /* Address of filtered object */
+                           + (unsigned)hdr->sizeof_size   /* Length of filtered object */
+                           + (unsigned)4                  /* Filter mask for filtered object */
+                           + (unsigned)hdr->sizeof_size   /* Size of de-filtered object in memory */
+                           + (unsigned)hdr->sizeof_size); /* Unique ID for object */
+            cparam->cls = H5HF_HUGE_BT2_FILT_INDIR;
+        } /* end if */
+        else {
+            cparam->rrec_size = (uint32_t)((unsigned)hdr->sizeof_addr     /* Address of object */
+                                           + (unsigned)hdr->sizeof_size   /* Length of object */
+                                           + (unsigned)hdr->sizeof_size); /* Unique ID for object */
+            cparam->cls       = H5HF_HUGE_BT2_INDIR;
+        } /* end else */
+    }     /* end else */
+    cparam->node_size     = (size_t)H5HF_HUGE_BT2_NODE_SIZE;
+    cparam->split_percent = H5HF_HUGE_BT2_SPLIT_PERC;
+    cparam->merge_percent = H5HF_HUGE_BT2_MERGE_PERC;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5HF__huge_bt2_cparam() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF__huge_bt2_open
+ *
+ * Purpose:	Open the v2 B-tree for tracking the huge objects in the heap
+ *
+ * Return:	Pointer to the v2 B-tree on success, NULL on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+H5B2_t *
+H5HF__huge_bt2_open(H5HF_hdr_t *hdr)
+{
+    H5B2_create_t bt2_cparam;       /* v2 B-tree creation parameters */
+    H5B2_t       *ret_value = NULL; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /*
+     * Check arguments.
+     */
+    assert(hdr);
+    assert(H5_addr_defined(hdr->huge_bt2_addr));
+
+    H5HF__huge_bt2_cparam(hdr, &bt2_cparam);
+    if (NULL == (ret_value = H5B2_open(hdr->f, hdr->huge_bt2_addr, &bt2_cparam, hdr->f)))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, NULL,
+                    "unable to open v2 B-tree for tracking 'huge' heap objects");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF__huge_bt2_open() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5HF__huge_bt2_create
  *
  * Purpose:	Create the v2 B-tree for tracking the huge objects in the heap
@@ -97,48 +198,8 @@ H5HF__huge_bt2_create(H5HF_hdr_t *hdr)
      */
     assert(hdr);
 
-    /* Compute the size of 'raw' records on disk */
-    /* (Note: the size for huge IDs could be set to 'huge_id_size', instead
-     *  of 'sizeof_size', but that would make the v2 B-tree callback routines
-     *  depend on the heap header, which makes the v2 B-tree flush routines
-     *  difficult to write.  "Waste" an extra byte or for small heaps (where
-     *  the 'huge_id_size' is < 'sizeof_size' in order to make this easier -QAK)
-     */
-    if (hdr->huge_ids_direct) {
-        if (hdr->filter_len > 0) {
-            bt2_cparam.rrec_size =
-                (uint32_t)((unsigned)hdr->sizeof_addr     /* Address of object */
-                           + (unsigned)hdr->sizeof_size   /* Length of object */
-                           + (unsigned)4                  /* Filter mask for filtered object */
-                           + (unsigned)hdr->sizeof_size); /* Size of de-filtered object in memory */
-            bt2_cparam.cls = H5HF_HUGE_BT2_FILT_DIR;
-        } /* end if */
-        else {
-            bt2_cparam.rrec_size = (uint32_t)((unsigned)hdr->sizeof_addr     /* Address of object */
-                                              + (unsigned)hdr->sizeof_size); /* Length of object */
-            bt2_cparam.cls       = H5HF_HUGE_BT2_DIR;
-        } /* end else */
-    }     /* end if */
-    else {
-        if (hdr->filter_len > 0) {
-            bt2_cparam.rrec_size =
-                (uint32_t)((unsigned)hdr->sizeof_addr     /* Address of filtered object */
-                           + (unsigned)hdr->sizeof_size   /* Length of filtered object */
-                           + (unsigned)4                  /* Filter mask for filtered object */
-                           + (unsigned)hdr->sizeof_size   /* Size of de-filtered object in memory */
-                           + (unsigned)hdr->sizeof_size); /* Unique ID for object */
-            bt2_cparam.cls = H5HF_HUGE_BT2_FILT_INDIR;
-        } /* end if */
-        else {
-            bt2_cparam.rrec_size = (uint32_t)((unsigned)hdr->sizeof_addr     /* Address of object */
-                                              + (unsigned)hdr->sizeof_size   /* Length of object */
-                                              + (unsigned)hdr->sizeof_size); /* Unique ID for object */
-            bt2_cparam.cls       = H5HF_HUGE_BT2_INDIR;
-        } /* end else */
-    }     /* end else */
-    bt2_cparam.node_size     = (size_t)H5HF_HUGE_BT2_NODE_SIZE;
-    bt2_cparam.split_percent = H5HF_HUGE_BT2_SPLIT_PERC;
-    bt2_cparam.merge_percent = H5HF_HUGE_BT2_MERGE_PERC;
+    /* Set the v2 B-tree creation parameters */
+    H5HF__huge_bt2_cparam(hdr, &bt2_cparam);
 
     /* Create v2 B-tree for tracking 'huge' objects */
     if (NULL == (hdr->huge_bt2 = H5B2_create(hdr->f, &bt2_cparam, hdr->f)))
@@ -303,7 +364,7 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
         /* Check if v2 B-tree is open yet */
         if (NULL == hdr->huge_bt2) {
             /* Open existing v2 B-tree */
-            if (NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, hdr->huge_bt2_addr, hdr->f)))
+            if (NULL == (hdr->huge_bt2 = H5HF__huge_bt2_open(hdr)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL,
                             "unable to open v2 B-tree for tracking 'huge' heap objects");
         } /* end if */
@@ -497,7 +558,7 @@ H5HF__huge_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
         /* Check if v2 B-tree is open yet */
         if (NULL == hdr->huge_bt2) {
             /* Open existing v2 B-tree */
-            if (NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, hdr->huge_bt2_addr, hdr->f)))
+            if (NULL == (hdr->huge_bt2 = H5HF__huge_bt2_open(hdr)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL,
                             "unable to open v2 B-tree for tracking 'huge' heap objects");
         } /* end if */
@@ -583,7 +644,7 @@ H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off_p)
         /* Check if v2 B-tree is open yet */
         if (NULL == hdr->huge_bt2) {
             /* Open existing v2 B-tree */
-            if (NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, hdr->huge_bt2_addr, hdr->f)))
+            if (NULL == (hdr->huge_bt2 = H5HF__huge_bt2_open(hdr)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL,
                             "unable to open v2 B-tree for tracking 'huge' heap objects");
         } /* end if */
@@ -679,7 +740,7 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, bool is_read, H5HF_operat
         /* Check if v2 B-tree is open yet */
         if (NULL == hdr->huge_bt2) {
             /* Open existing v2 B-tree */
-            if (NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, hdr->huge_bt2_addr, hdr->f)))
+            if (NULL == (hdr->huge_bt2 = H5HF__huge_bt2_open(hdr)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL,
                             "unable to open v2 B-tree for tracking 'huge' heap objects");
         } /* end if */
@@ -831,7 +892,7 @@ H5HF__huge_write(H5HF_hdr_t *hdr, const uint8_t *id, const void *obj)
         /* Check if v2 B-tree is open yet */
         if (NULL == hdr->huge_bt2) {
             /* Open existing v2 B-tree */
-            if (NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, hdr->huge_bt2_addr, hdr->f)))
+            if (NULL == (hdr->huge_bt2 = H5HF__huge_bt2_open(hdr)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL,
                             "unable to open v2 B-tree for tracking 'huge' heap objects");
         }
@@ -948,7 +1009,7 @@ H5HF__huge_remove(H5HF_hdr_t *hdr, const uint8_t *id)
     /* Check if v2 B-tree is open yet */
     if (NULL == hdr->huge_bt2) {
         /* Open existing v2 B-tree */
-        if (NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, hdr->huge_bt2_addr, hdr->f)))
+        if (NULL == (hdr->huge_bt2 = H5HF__huge_bt2_open(hdr)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL,
                         "unable to open v2 B-tree for tracking 'huge' heap objects");
     } /* end if */
@@ -1064,9 +1125,11 @@ H5HF__huge_term(H5HF_hdr_t *hdr)
         /* Sanity check */
         assert(hdr->huge_size == 0);
 
+        H5B2_create_t bt2_cparam; /* v2 B-tree creation parameters */
+
         /* Delete the v2 B-tree */
-        /* (any v2 B-tree class will work here) */
-        if (H5B2_delete(hdr->f, hdr->huge_bt2_addr, hdr->f, NULL, NULL) < 0)
+        H5HF__huge_bt2_cparam(hdr, &bt2_cparam);
+        if (H5B2_delete(hdr->f, hdr->huge_bt2_addr, &bt2_cparam, hdr->f, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDELETE, FAIL, "can't delete v2 B-tree");
 
         /* Reset the information about 'huge' objects in the file */
@@ -1097,6 +1160,7 @@ herr_t
 H5HF__huge_delete(H5HF_hdr_t *hdr)
 {
     H5HF_huge_remove_ud_t udata;               /* User callback data for v2 B-tree remove call */
+    H5B2_create_t         bt2_cparam;          /* v2 B-tree creation parameters */
     H5B2_remove_t         op;                  /* Callback for v2 B-tree removal */
     herr_t                ret_value = SUCCEED; /* Return value */
 
@@ -1128,7 +1192,8 @@ H5HF__huge_delete(H5HF_hdr_t *hdr)
     } /* end else */
 
     /* Delete the v2 B-tree */
-    if (H5B2_delete(hdr->f, hdr->huge_bt2_addr, hdr->f, op, &udata) < 0)
+    H5HF__huge_bt2_cparam(hdr, &bt2_cparam);
+    if (H5B2_delete(hdr->f, hdr->huge_bt2_addr, &bt2_cparam, hdr->f, op, &udata) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDELETE, FAIL, "can't delete v2 B-tree");
 
 done:

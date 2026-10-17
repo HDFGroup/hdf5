@@ -687,16 +687,18 @@ H5_DLL herr_t H5HF__man_op(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t o
 H5_DLL herr_t H5HF__man_remove(H5HF_hdr_t *hdr, const uint8_t *id);
 
 /* 'Huge' object routines */
-H5_DLL herr_t H5HF__huge_init(H5HF_hdr_t *hdr);
-H5_DLL herr_t H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *id);
-H5_DLL herr_t H5HF__huge_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p);
-H5_DLL herr_t H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off_p);
-H5_DLL herr_t H5HF__huge_read(H5HF_hdr_t *fh, const uint8_t *id, void *obj);
-H5_DLL herr_t H5HF__huge_write(H5HF_hdr_t *hdr, const uint8_t *id, const void *obj);
-H5_DLL herr_t H5HF__huge_op(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *op_data);
-H5_DLL herr_t H5HF__huge_remove(H5HF_hdr_t *fh, const uint8_t *id);
-H5_DLL herr_t H5HF__huge_term(H5HF_hdr_t *hdr);
-H5_DLL herr_t H5HF__huge_delete(H5HF_hdr_t *hdr);
+H5_DLL herr_t  H5HF__huge_init(H5HF_hdr_t *hdr);
+H5_DLL void    H5HF__huge_bt2_cparam(const H5HF_hdr_t *hdr, H5B2_create_t *cparam);
+H5_DLL H5B2_t *H5HF__huge_bt2_open(H5HF_hdr_t *hdr);
+H5_DLL herr_t  H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *id);
+H5_DLL herr_t  H5HF__huge_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p);
+H5_DLL herr_t  H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off_p);
+H5_DLL herr_t  H5HF__huge_read(H5HF_hdr_t *fh, const uint8_t *id, void *obj);
+H5_DLL herr_t  H5HF__huge_write(H5HF_hdr_t *hdr, const uint8_t *id, const void *obj);
+H5_DLL herr_t  H5HF__huge_op(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *op_data);
+H5_DLL herr_t  H5HF__huge_remove(H5HF_hdr_t *fh, const uint8_t *id);
+H5_DLL herr_t  H5HF__huge_term(H5HF_hdr_t *hdr);
+H5_DLL herr_t  H5HF__huge_delete(H5HF_hdr_t *hdr);
 
 /* 'Huge' object v2 B-tree function callbacks */
 H5_DLL herr_t H5HF__huge_bt2_indir_found(const void *nrecord, void *op_data);

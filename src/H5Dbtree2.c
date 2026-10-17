@@ -137,6 +137,8 @@ static herr_t H5D__bt2_mod_cb(void *_record, void *_op_data, bool *changed);
 /* Chunked layout indexing callbacks for v2 B-tree indexing */
 static herr_t H5D__bt2_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
                                 haddr_t dset_ohdr_addr);
+static void   H5D__bt2_idx_cparam(const H5D_chk_idx_info_t *idx_info, unsigned chunk_size_len,
+                                  H5B2_create_t *cparam);
 static herr_t H5D__bt2_idx_create(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D__bt2_idx_open(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D__bt2_idx_close(const H5D_chk_idx_info_t *idx_info);
@@ -654,6 +656,48 @@ done:
 } /* end H5D__btree2_idx_depend() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D__bt2_idx_cparam
+ *
+ * Purpose:     Set the creation parameters of the v2 B-tree for tracking
+ *              dataset chunks.  They are used to create the v2 B-tree and
+ *              are checked against its header when it is opened.
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+H5D__bt2_idx_cparam(const H5D_chk_idx_info_t *idx_info, unsigned chunk_size_len, H5B2_create_t *cparam)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Check args */
+    assert(idx_info);
+    assert(idx_info->f);
+    assert(idx_info->pline);
+    assert(idx_info->layout);
+    assert(cparam);
+
+    cparam->rrec_size =
+        H5F_SIZEOF_ADDR(idx_info->f)                 /* Address of chunk */
+        + (idx_info->layout->u.chunk.ndims - 1) * 8; /* # of dimensions x 64-bit chunk offsets */
+
+    /* General parameters */
+    if (idx_info->pline->nused > 0) {
+        cparam->rrec_size += chunk_size_len + 4; /* Size of encoded chunk size & filter mask */
+        cparam->cls = H5D_BT2_FILT;
+    } /* end if */
+    else
+        cparam->cls = H5D_BT2;
+
+    cparam->node_size     = idx_info->layout->u.chunk.u.btree2.cparam.node_size;
+    cparam->split_percent = idx_info->layout->u.chunk.u.btree2.cparam.split_percent;
+    cparam->merge_percent = idx_info->layout->u.chunk.u.btree2.cparam.merge_percent;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5D__bt2_idx_cparam() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5D__bt2_idx_create
  *
  * Purpose:     Create the v2 B-tree for tracking dataset chunks
@@ -683,21 +727,7 @@ H5D__bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
     H5D_BT2_COMPUTE_CHUNK_SIZE_LEN(chunk_size_len, idx_info);
 
     /* Set up b-tree creation parameters */
-    bt2_cparam.rrec_size =
-        H5F_SIZEOF_ADDR(idx_info->f)                 /* Address of chunk */
-        + (idx_info->layout->u.chunk.ndims - 1) * 8; /* # of dimensions x 64-bit chunk offsets */
-
-    /* General parameters */
-    if (idx_info->pline->nused > 0) {
-        bt2_cparam.rrec_size += chunk_size_len + 4; /* Size of encoded chunk size & filter mask */
-        bt2_cparam.cls = H5D_BT2_FILT;
-    } /* end if */
-    else
-        bt2_cparam.cls = H5D_BT2;
-
-    bt2_cparam.node_size     = idx_info->layout->u.chunk.u.btree2.cparam.node_size;
-    bt2_cparam.split_percent = idx_info->layout->u.chunk.u.btree2.cparam.split_percent;
-    bt2_cparam.merge_percent = idx_info->layout->u.chunk.u.btree2.cparam.merge_percent;
+    H5D__bt2_idx_cparam(idx_info, chunk_size_len, &bt2_cparam);
 
     /* Set up client context */
     u_ctx.f              = idx_info->f;
@@ -746,6 +776,7 @@ done:
 static herr_t
 H5D__bt2_idx_open(const H5D_chk_idx_info_t *idx_info)
 {
+    H5B2_create_t    bt2_cparam;          /* v2 B-tree creation parameters */
     H5D_bt2_ctx_ud_t u_ctx;               /* user data for creating context */
     herr_t           ret_value = SUCCEED; /* Return value */
 
@@ -769,9 +800,12 @@ H5D__bt2_idx_open(const H5D_chk_idx_info_t *idx_info)
     /* Compute number of bytes used to encode the chunk size */
     H5D_BT2_COMPUTE_CHUNK_SIZE_LEN(u_ctx.chunk_size_len, idx_info);
 
+    /* Set up the v2 B-tree creation parameters the chunk index must match */
+    H5D__bt2_idx_cparam(idx_info, (unsigned)u_ctx.chunk_size_len, &bt2_cparam);
+
     /* Open v2 B-tree for the chunk index */
     if (NULL == (idx_info->layout->storage.u.chunk.u.btree2.bt2 =
-                     H5B2_open(idx_info->f, idx_info->layout->storage.u.chunk.idx_addr, &u_ctx)))
+                     H5B2_open(idx_info->f, idx_info->layout->storage.u.chunk.idx_addr, &bt2_cparam, &u_ctx)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open v2 B-tree for tracking chunked dataset");
 
     /* Check for SWMR writes to the file */
@@ -1316,6 +1350,7 @@ done:
 static herr_t
 H5D__bt2_idx_delete(const H5D_chk_idx_info_t *idx_info)
 {
+    H5B2_create_t    bt2_cparam;          /* v2 B-tree creation parameters */
     H5B2_remove_t    remove_op;           /* The removal callback */
     H5D_bt2_ctx_ud_t u_ctx;               /* data for context call */
     herr_t           ret_value = SUCCEED; /* Return value */
@@ -1347,8 +1382,9 @@ H5D__bt2_idx_delete(const H5D_chk_idx_info_t *idx_info)
 
         /* Delete the v2 B-tree */
         /*(space in the file for each object is freed in the 'remove' callback) */
-        if (H5B2_delete(idx_info->f, idx_info->layout->storage.u.chunk.idx_addr, &u_ctx, remove_op,
-                        idx_info->f) < 0)
+        H5D__bt2_idx_cparam(idx_info, (unsigned)u_ctx.chunk_size_len, &bt2_cparam);
+        if (H5B2_delete(idx_info->f, idx_info->layout->storage.u.chunk.idx_addr, &bt2_cparam, &u_ctx,
+                        remove_op, idx_info->f) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "can't delete v2 B-tree");
 
         idx_info->layout->storage.u.chunk.idx_addr = HADDR_UNDEF;

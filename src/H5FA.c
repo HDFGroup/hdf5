@@ -55,7 +55,8 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static H5FA_t *H5FA__new(H5F_t *f, haddr_t fa_addr, bool from_open, void *ctx_udata);
+static H5FA_t *H5FA__new(H5F_t *f, haddr_t fa_addr, bool from_open, const H5FA_create_t *cparam,
+                         void *ctx_udata);
 
 /*********************/
 /* Package Variables */
@@ -100,7 +101,7 @@ H5FL_BLK_DEFINE(fa_native_elmt);
  *-------------------------------------------------------------------------
  */
 static H5FA_t *
-H5FA__new(H5F_t *f, haddr_t fa_addr, bool from_open, void *ctx_udata)
+H5FA__new(H5F_t *f, haddr_t fa_addr, bool from_open, const H5FA_create_t *cparam, void *ctx_udata)
 {
     H5FA_t     *fa        = NULL; /* Pointer to new fixed array */
     H5FA_hdr_t *hdr       = NULL; /* The fixed array header information */
@@ -117,7 +118,7 @@ H5FA__new(H5F_t *f, haddr_t fa_addr, bool from_open, void *ctx_udata)
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, NULL, "memory allocation failed for fixed array info");
 
     /* Lock the array header into memory */
-    if (NULL == (hdr = H5FA__hdr_protect(f, fa_addr, ctx_udata, H5AC__READ_ONLY_FLAG)))
+    if (NULL == (hdr = H5FA__hdr_protect(f, fa_addr, cparam, ctx_udata, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, NULL, "unable to load fixed array header");
 
     /* Check for pending array deletion */
@@ -181,7 +182,7 @@ H5FA_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata)
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTINIT, NULL, "can't create fixed array header");
 
     /* Allocate and initialize new fixed array wrapper */
-    if (NULL == (fa = H5FA__new(f, fa_addr, false, ctx_udata)))
+    if (NULL == (fa = H5FA__new(f, fa_addr, false, cparam, ctx_udata)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTINIT, NULL,
                     "allocation and/or initialization failed for fixed array wrapper");
 
@@ -207,7 +208,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5FA_t *
-H5FA_open(H5F_t *f, haddr_t fa_addr, void *ctx_udata)
+H5FA_open(H5F_t *f, haddr_t fa_addr, const H5FA_create_t *cparam, void *ctx_udata)
 {
     H5FA_t *fa        = NULL; /* Pointer to new fixed array wrapper */
     H5FA_t *ret_value = NULL;
@@ -217,9 +218,10 @@ H5FA_open(H5F_t *f, haddr_t fa_addr, void *ctx_udata)
     /* Check arguments */
     assert(f);
     assert(H5_addr_defined(fa_addr));
+    assert(cparam);
 
     /* Allocate and initialize new fixed array wrapper */
-    if (NULL == (fa = H5FA__new(f, fa_addr, true, ctx_udata)))
+    if (NULL == (fa = H5FA__new(f, fa_addr, true, cparam, ctx_udata)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTINIT, NULL,
                     "allocation and/or initialization failed for fixed array wrapper");
 
@@ -309,6 +311,10 @@ H5FA_set(const H5FA_t *fa, hsize_t idx, const void *elmt)
     /* Check arguments */
     assert(fa);
     assert(fa->hdr);
+
+    /* Check the element index */
+    if (idx >= hdr->cparam.nelmts)
+        HGOTO_ERROR(H5E_FARRAY, H5E_BADRANGE, FAIL, "element index out of range");
 
     /* Set the shared array header's file context for this operation */
     hdr->f = fa->f;
@@ -417,6 +423,10 @@ H5FA_get(const H5FA_t *fa, hsize_t idx, void *elmt)
     /* Check arguments */
     assert(fa);
     assert(fa->hdr);
+
+    /* Check the element index */
+    if (idx >= hdr->cparam.nelmts)
+        HGOTO_ERROR(H5E_FARRAY, H5E_BADRANGE, FAIL, "element index out of range");
 
     /* Set the shared array header's file context for this operation */
     hdr->f = fa->f;
@@ -559,7 +569,7 @@ H5FA_close(H5FA_t *fa)
 
             /* Lock the array header into memory */
             /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
-            if (NULL == (hdr = H5FA__hdr_protect(fa->f, fa_addr, NULL, H5AC__NO_FLAGS_SET)))
+            if (NULL == (hdr = H5FA__hdr_protect(fa->f, fa_addr, NULL, NULL, H5AC__NO_FLAGS_SET)))
                 HGOTO_ERROR(H5E_FARRAY, H5E_CANTLOAD, FAIL, "unable to load fixed array header");
 
             /* Set the shared array header's file context for this operation */
@@ -605,7 +615,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FA_delete(H5F_t *f, haddr_t fa_addr, void *ctx_udata)
+H5FA_delete(H5F_t *f, haddr_t fa_addr, const H5FA_create_t *cparam, void *ctx_udata)
 {
     H5FA_hdr_t *hdr       = NULL; /* The fixed array header information */
     herr_t      ret_value = SUCCEED;
@@ -615,9 +625,10 @@ H5FA_delete(H5F_t *f, haddr_t fa_addr, void *ctx_udata)
     /* Check arguments */
     assert(f);
     assert(H5_addr_defined(fa_addr));
+    assert(cparam);
 
     /* Lock the array header into memory */
-    if (NULL == (hdr = H5FA__hdr_protect(f, fa_addr, ctx_udata, H5AC__NO_FLAGS_SET)))
+    if (NULL == (hdr = H5FA__hdr_protect(f, fa_addr, cparam, ctx_udata, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, FAIL, "unable to protect fixed array header, address = %llu",
                     (unsigned long long)fa_addr);
 

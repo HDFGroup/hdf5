@@ -44,10 +44,8 @@
 /* Local Macros */
 /****************/
 
-#ifndef NDEBUG
 /* Max. # of bits for max. nelmts index */
 #define H5EA_MAX_NELMTS_IDX_MAX 64
-#endif /* NDEBUG */
 
 /* # of elements in a data block for a particular super block */
 #define H5EA_SBLK_DBLK_NELMTS(s, m) (size_t) H5_EXP2(((s) + 1) / 2) * (m)
@@ -321,6 +319,82 @@ H5EA__hdr_free_elmts(H5EA_hdr_t *hdr, size_t nelmts, void *elmts)
 } /* end H5EA__hdr_free_elmts() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5EA__hdr_check_cparam
+ *
+ * Purpose:	Check that extensible array creation parameters are valid
+ *		and, when EXPECTED is non-NULL, that they are the ones the
+ *		caller expects
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5EA__hdr_check_cparam(const H5EA_create_t *cparam, const H5EA_create_t *expected)
+{
+    unsigned sblk_idx;         /* Super block index for first "actual" super block */
+    size_t   dblk_nelmts;      /* Number of data block elements */
+    size_t   dblk_page_nelmts; /* Number of elements in a data block page */
+    herr_t   ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check arguments */
+    assert(cparam);
+    assert(cparam->cls);
+
+    /* Check for valid parameters */
+    if (cparam->raw_elmt_size == 0)
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "element size must be greater than zero");
+    if (cparam->max_nelmts_bits == 0)
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "max. # of elements bits must be greater than zero");
+    if (cparam->max_nelmts_bits > H5EA_MAX_NELMTS_IDX_MAX)
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "max. # of elements bits must be <= %u",
+                    (unsigned)H5EA_MAX_NELMTS_IDX_MAX);
+    if (cparam->sup_blk_min_data_ptrs < 2)
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL,
+                    "min # of data block pointers in super block must be >= two");
+    if (!POWER_OF_TWO(cparam->sup_blk_min_data_ptrs))
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL,
+                    "min # of data block pointers in super block must be power of two");
+    if (!POWER_OF_TWO(cparam->data_blk_min_elmts))
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "min # of elements per data block must be power of two");
+    if (cparam->max_dblk_page_nelmts_bits > cparam->max_nelmts_bits)
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL,
+                    "max. # of elements per data block page bits must be <= max. # of elements bits");
+    if (cparam->max_dblk_page_nelmts_bits >= sizeof(size_t) * 8)
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "max. # of elements per data block page bits too large");
+    dblk_page_nelmts = (size_t)1 << cparam->max_dblk_page_nelmts_bits;
+    if (dblk_page_nelmts < cparam->idx_blk_elmts)
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL,
+                    "# of elements per data block page must be greater than # of elements in index block");
+
+    /* Compute the number of elements in data blocks for first actual super block */
+    sblk_idx    = H5EA_SBLK_FIRST_IDX(cparam->sup_blk_min_data_ptrs);
+    dblk_nelmts = H5EA_SBLK_DBLK_NELMTS(sblk_idx, cparam->data_blk_min_elmts);
+    if (dblk_page_nelmts < dblk_nelmts)
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL,
+                    "max. # of elements per data block page bits must be > # of elements in "
+                    "first data block from super block");
+
+    /* Check against the parameters the caller expects */
+    if (expected) {
+        if (cparam->cls != expected->cls)
+            HGOTO_ERROR(H5E_EARRAY, H5E_BADTYPE, FAIL, "extensible array class mismatch");
+        if (cparam->raw_elmt_size != expected->raw_elmt_size ||
+            cparam->max_nelmts_bits != expected->max_nelmts_bits ||
+            cparam->idx_blk_elmts != expected->idx_blk_elmts ||
+            cparam->data_blk_min_elmts != expected->data_blk_min_elmts ||
+            cparam->sup_blk_min_data_ptrs != expected->sup_blk_min_data_ptrs ||
+            cparam->max_dblk_page_nelmts_bits != expected->max_dblk_page_nelmts_bits)
+            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "extensible array creation parameters mismatch");
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5EA__hdr_check_cparam() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5EA__hdr_create
  *
  * Purpose:	Creates a new extensible array header in the file
@@ -343,49 +417,9 @@ H5EA__hdr_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata)
     assert(f);
     assert(cparam);
 
-#ifndef NDEBUG
-    {
-        unsigned sblk_idx;         /* Super block index for first "actual" super block */
-        size_t   dblk_nelmts;      /* Number of data block elements */
-        size_t   dblk_page_nelmts; /* Number of elements in a data block page */
-
-        /* Check for valid parameters */
-        if (cparam->raw_elmt_size == 0)
-            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF, "element size must be greater than zero");
-        if (cparam->max_nelmts_bits == 0)
-            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF,
-                        "max. # of elements bits must be greater than zero");
-        if (cparam->max_nelmts_bits > H5EA_MAX_NELMTS_IDX_MAX)
-            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF, "max. # of elements bits must be <= %u",
-                        (unsigned)H5EA_MAX_NELMTS_IDX_MAX);
-        if (cparam->sup_blk_min_data_ptrs < 2)
-            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF,
-                        "min # of data block pointers in super block must be >= two");
-        if (!POWER_OF_TWO(cparam->sup_blk_min_data_ptrs))
-            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF,
-                        "min # of data block pointers in super block must be power of two");
-        if (!POWER_OF_TWO(cparam->data_blk_min_elmts))
-            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF,
-                        "min # of elements per data block must be power of two");
-        dblk_page_nelmts = (size_t)1 << cparam->max_dblk_page_nelmts_bits;
-        if (dblk_page_nelmts < cparam->idx_blk_elmts)
-            HGOTO_ERROR(
-                H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF,
-                "# of elements per data block page must be greater than # of elements in index block");
-
-        /* Compute the number of elements in data blocks for first actual super block */
-        sblk_idx    = H5EA_SBLK_FIRST_IDX(cparam->sup_blk_min_data_ptrs);
-        dblk_nelmts = H5EA_SBLK_DBLK_NELMTS(sblk_idx, cparam->data_blk_min_elmts);
-        if (dblk_page_nelmts < dblk_nelmts)
-            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF,
-                        "max. # of elements per data block page bits must be > # of elements in "
-                        "first data block from super block");
-
-        if (cparam->max_dblk_page_nelmts_bits > cparam->max_nelmts_bits)
-            HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF,
-                        "max. # of elements per data block page bits must be <= max. # of elements bits");
-    }
-#endif /* NDEBUG */
+    /* Check for valid parameters */
+    if (H5EA__hdr_check_cparam(cparam, NULL) < 0)
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, HADDR_UNDEF, "invalid extensible array creation parameters");
 
     /* Allocate space for the shared information */
     if (NULL == (hdr = H5EA__hdr_alloc(f)))
@@ -606,10 +640,10 @@ done:
  *-------------------------------------------------------------------------
  */
 H5EA_hdr_t *
-H5EA__hdr_protect(H5F_t *f, haddr_t ea_addr, void *ctx_udata, unsigned flags)
+H5EA__hdr_protect(H5F_t *f, haddr_t ea_addr, const H5EA_create_t *cparam, void *ctx_udata, unsigned flags)
 {
-    H5EA_hdr_t         *hdr;   /* Extensible array header */
-    H5EA_hdr_cache_ud_t udata; /* User data for cache callbacks */
+    H5EA_hdr_t         *hdr = NULL; /* Extensible array header */
+    H5EA_hdr_cache_ud_t udata;      /* User data for cache callbacks */
     H5EA_hdr_t         *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
@@ -624,6 +658,7 @@ H5EA__hdr_protect(H5F_t *f, haddr_t ea_addr, void *ctx_udata, unsigned flags)
     /* Set up user data for cache callbacks */
     udata.f         = f;
     udata.addr      = ea_addr;
+    udata.cparam    = cparam;
     udata.ctx_udata = ctx_udata;
 
     /* Protect the header */
@@ -631,6 +666,10 @@ H5EA__hdr_protect(H5F_t *f, haddr_t ea_addr, void *ctx_udata, unsigned flags)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, NULL,
                     "unable to protect extensible array header, address = %llu", (unsigned long long)ea_addr);
     hdr->f = f; /* (Must be set again here, in case the header was already in the cache -QAK) */
+
+    /* Check the header against the caller's parameters, in case it was already in the cache */
+    if (cparam && H5EA__hdr_check_cparam(&hdr->cparam, cparam) < 0)
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "extensible array header doesn't match its opener");
 
     /* Create top proxy, if it doesn't exist */
     if (hdr->swmr_write && NULL == hdr->top_proxy) {
@@ -648,6 +687,11 @@ H5EA__hdr_protect(H5F_t *f, haddr_t ea_addr, void *ctx_udata, unsigned flags)
     ret_value = hdr;
 
 done:
+    if (!ret_value && hdr && H5AC_unprotect(f, H5AC_EARRAY_HDR, hdr->addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, NULL,
+                    "unable to unprotect extensible array header, address = %llu",
+                    (unsigned long long)ea_addr);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__hdr_protect() */
 

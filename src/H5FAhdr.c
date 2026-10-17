@@ -150,6 +150,54 @@ done:
 } /* end H5FA__hdr_init() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FA__hdr_check_cparam
+ *
+ * Purpose:	Check that fixed array creation parameters are valid and,
+ *		when EXPECTED is non-NULL, that the class and element
+ *		layout are the ones the caller expects.  The number of
+ *		elements isn't compared, since callers opening an array
+ *		don't always know it; H5FA_get and H5FA_set check indices
+ *		against the array's own number of elements.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FA__hdr_check_cparam(const H5FA_create_t *cparam, const H5FA_create_t *expected)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check arguments */
+    assert(cparam);
+    assert(cparam->cls);
+
+    /* Check for valid parameters */
+    if (cparam->raw_elmt_size == 0)
+        HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, FAIL, "element size must be greater than zero");
+    if (cparam->max_dblk_page_nelmts_bits == 0)
+        HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, FAIL, "max. # of elements bits must be greater than zero");
+    if (cparam->max_dblk_page_nelmts_bits >= sizeof(size_t) * 8)
+        HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, FAIL, "max. # of elements per data block page bits too large");
+    if (cparam->nelmts == 0)
+        HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, FAIL, "# of elements must be greater than zero");
+
+    /* Check against the parameters the caller expects */
+    if (expected) {
+        if (cparam->cls != expected->cls)
+            HGOTO_ERROR(H5E_FARRAY, H5E_BADTYPE, FAIL, "fixed array class mismatch");
+        if (cparam->raw_elmt_size != expected->raw_elmt_size ||
+            cparam->max_dblk_page_nelmts_bits != expected->max_dblk_page_nelmts_bits)
+            HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, FAIL, "fixed array creation parameters mismatch");
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FA__hdr_check_cparam() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5FA__hdr_create
  *
  * Purpose:     Creates a new Fixed Array header in the file
@@ -172,18 +220,9 @@ H5FA__hdr_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata)
     assert(f);
     assert(cparam);
 
-#ifndef NDEBUG
-    {
-        /* Check for valid parameters */
-        if (cparam->raw_elmt_size == 0)
-            HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, HADDR_UNDEF, "element size must be greater than zero");
-        if (cparam->max_dblk_page_nelmts_bits == 0)
-            HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, HADDR_UNDEF,
-                        "max. # of elements bits must be greater than zero");
-        if (cparam->nelmts == 0)
-            HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, HADDR_UNDEF, "# of elements must be greater than zero");
-    }
-#endif /* NDEBUG */
+    /* Check for valid parameters */
+    if (H5FA__hdr_check_cparam(cparam, NULL) < 0)
+        HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, HADDR_UNDEF, "invalid fixed array creation parameters");
 
     /* Allocate space for the shared information */
     if (NULL == (hdr = H5FA__hdr_alloc(f)))
@@ -399,10 +438,10 @@ done:
  *-------------------------------------------------------------------------
  */
 H5FA_hdr_t *
-H5FA__hdr_protect(H5F_t *f, haddr_t fa_addr, void *ctx_udata, unsigned flags)
+H5FA__hdr_protect(H5F_t *f, haddr_t fa_addr, const H5FA_create_t *cparam, void *ctx_udata, unsigned flags)
 {
-    H5FA_hdr_t         *hdr;   /* Fixed array header */
-    H5FA_hdr_cache_ud_t udata; /* User data for cache callbacks */
+    H5FA_hdr_t         *hdr = NULL; /* Fixed array header */
+    H5FA_hdr_cache_ud_t udata;      /* User data for cache callbacks */
     H5FA_hdr_t         *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
@@ -417,6 +456,7 @@ H5FA__hdr_protect(H5F_t *f, haddr_t fa_addr, void *ctx_udata, unsigned flags)
     /* Set up user data for cache callbacks */
     udata.f         = f;
     udata.addr      = fa_addr;
+    udata.cparam    = cparam;
     udata.ctx_udata = ctx_udata;
 
     /* Protect the header */
@@ -424,6 +464,10 @@ H5FA__hdr_protect(H5F_t *f, haddr_t fa_addr, void *ctx_udata, unsigned flags)
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, NULL, "unable to protect fixed array header, address = %llu",
                     (unsigned long long)fa_addr);
     hdr->f = f; /* (Must be set again here, in case the header was already in the cache -QAK) */
+
+    /* Check the header against the caller's parameters, in case it was already in the cache */
+    if (cparam && H5FA__hdr_check_cparam(&hdr->cparam, cparam) < 0)
+        HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, NULL, "fixed array header doesn't match its opener");
 
     /* Create top proxy, if it doesn't exist */
     if (hdr->swmr_write && NULL == hdr->top_proxy) {
@@ -441,6 +485,10 @@ H5FA__hdr_protect(H5F_t *f, haddr_t fa_addr, void *ctx_udata, unsigned flags)
     ret_value = hdr;
 
 done:
+    if (!ret_value && hdr && H5AC_unprotect(f, H5AC_FARRAY_HDR, hdr->addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_FARRAY, H5E_CANTUNPROTECT, NULL,
+                    "unable to unprotect fixed array header, address = %llu", (unsigned long long)fa_addr);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FA__hdr_protect() */
 

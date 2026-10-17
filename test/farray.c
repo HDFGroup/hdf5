@@ -248,7 +248,7 @@ set_fa_state(const H5FA_create_t *cparam, farray_state_t *state)
  *-------------------------------------------------------------------------
  */
 static int
-reopen_file(hid_t *fid, H5F_t **f, hid_t fapl_id, H5FA_t **fa, haddr_t fa_addr,
+reopen_file(hid_t *fid, H5F_t **f, hid_t fapl_id, H5FA_t **fa, haddr_t fa_addr, const H5FA_create_t *cparam,
             const farray_test_param_t *tparam)
 {
     /* Check for closing & re-opening the array */
@@ -284,7 +284,7 @@ reopen_file(hid_t *fid, H5F_t **f, hid_t fapl_id, H5FA_t **fa, haddr_t fa_addr,
 
         /* Re-open array, if given */
         if (fa)
-            if (NULL == (*fa = H5FA_open(*f, fa_addr, NULL)))
+            if (NULL == (*fa = H5FA_open(*f, fa_addr, cparam, NULL)))
                 FAIL_STACK_ERROR;
     }
 
@@ -374,7 +374,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-finish(hid_t fid, hid_t fapl_id, H5F_t *f, H5FA_t *fa, haddr_t fa_addr)
+finish(hid_t fid, hid_t fapl_id, H5F_t *f, H5FA_t *fa, haddr_t fa_addr, const H5FA_create_t *cparam)
 {
     h5_stat_size_t file_size; /* File size, after deleting array */
 
@@ -383,7 +383,7 @@ finish(hid_t fid, hid_t fapl_id, H5F_t *f, H5FA_t *fa, haddr_t fa_addr)
         FAIL_STACK_ERROR;
 
     /* Delete array */
-    if (H5FA_delete(f, fa_addr, NULL) < 0)
+    if (H5FA_delete(f, fa_addr, cparam, NULL) < 0)
         FAIL_STACK_ERROR;
 
     /* Close the file */
@@ -432,7 +432,6 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
      */
     TESTING("invalid fixed array creation parameters");
 
-#ifndef NDEBUG
     {
         H5FA_create_t test_cparam; /* Creation parameters for array */
 
@@ -489,10 +488,6 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
 
         PASSED();
     }
-#else  /* NDEBUG */
-    SKIPPED();
-    puts("    Not tested when assertions are disabled");
-#endif /* NDEBUG */
 
     /*
      * Display testing message
@@ -513,7 +508,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
         TEST_ERROR;
 
     /* Close array, delete array, close file & verify file is empty */
-    if (finish(file, fapl, f, fa, fa_addr) < 0)
+    if (finish(file, fapl, f, fa, fa_addr, cparam) < 0)
         TEST_ERROR;
 
     /* All tests passed */
@@ -569,11 +564,11 @@ test_reopen(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
         FAIL_STACK_ERROR;
 
     /* Check for closing & re-opening the file */
-    if (reopen_file(&file, &f, fapl, NULL, HADDR_UNDEF, tparam) < 0)
+    if (reopen_file(&file, &f, fapl, NULL, HADDR_UNDEF, cparam, tparam) < 0)
         TEST_ERROR;
 
     /* Re-open the array */
-    if (NULL == (fa = H5FA_open(f, fa_addr, NULL)))
+    if (NULL == (fa = H5FA_open(f, fa_addr, cparam, NULL)))
         FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
@@ -581,7 +576,7 @@ test_reopen(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
         TEST_ERROR;
 
     /* Close array, delete array, close file & verify file is empty */
-    if (finish(file, fapl, f, fa, fa_addr) < 0)
+    if (finish(file, fapl, f, fa, fa_addr, cparam) < 0)
         TEST_ERROR;
 
     /* All tests passed */
@@ -600,6 +595,169 @@ error:
 
     return 1;
 } /* test_reopen() */
+
+/*-------------------------------------------------------------------------
+ * Function:    open_mismatch
+ *
+ * Purpose:     Check that opening a fixed array with each of a set of
+ *              creation parameters that differ from the array's fails
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+open_mismatch(H5F_t *f, haddr_t fa_addr, const H5FA_create_t *cparam)
+{
+    H5FA_create_t bad_cparam; /* Creation parameters that differ from the array's */
+    H5FA_t       *fa = NULL;  /* Fixed array wrapper */
+    unsigned      u;          /* Local index variable */
+
+    for (u = 0; u < 4; u++) {
+        bad_cparam = *cparam;
+        switch (u) {
+            case 0:
+                bad_cparam.cls = H5FA_CLS_CHUNK;
+                break;
+            case 1:
+                bad_cparam.cls = H5FA_CLS_FILT_CHUNK;
+                break;
+            case 2:
+                bad_cparam.raw_elmt_size++;
+                break;
+            default:
+                bad_cparam.max_dblk_page_nelmts_bits--;
+                break;
+        } /* end switch */
+
+        H5E_BEGIN_TRY
+        {
+            fa = H5FA_open(f, fa_addr, &bad_cparam, NULL);
+        }
+        H5E_END_TRY
+        if (fa) {
+            H5FA_close(fa);
+            TEST_ERROR;
+        } /* end if */
+    }     /* end for */
+
+    return SUCCEED;
+
+error:
+    return FAIL;
+} /* open_mismatch() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_open_cparam_mismatch
+ *
+ * Purpose:     Check that H5FA_open rejects an array whose header doesn't
+ *              have the creation parameters the opener expects, and that
+ *              H5FA_get and H5FA_set reject an index past the array's end
+ *
+ * Return:      Success:    0
+ *              Failure:    1
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_open_cparam_mismatch(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSED *tparam)
+{
+    hid_t    file    = H5I_INVALID_HID; /* File ID */
+    H5F_t   *f       = NULL;            /* Internal file object pointer */
+    H5FA_t  *fa      = NULL;            /* Fixed array wrapper */
+    haddr_t  fa_addr = HADDR_UNDEF;     /* Array address in file */
+    uint64_t welmt   = 7;               /* Element to write */
+    uint64_t relmt;                     /* Element read */
+    herr_t   status;                    /* Generic return value */
+
+    /* Create file & retrieve pointer to internal file object */
+    if (create_file(fapl, &file, &f) < 0)
+        TEST_ERROR;
+
+    /*
+     * Display testing message
+     */
+    TESTING("open fixed array with mismatched creation parameters");
+
+    /* Create array */
+    if (create_array(f, cparam, &fa, &fa_addr) < 0)
+        TEST_ERROR;
+
+    /* Try opening the array while its header is in the cache */
+    if (open_mismatch(f, fa_addr, cparam) < 0)
+        TEST_ERROR;
+
+    /* Close the fixed array */
+    if (H5FA_close(fa) < 0)
+        FAIL_STACK_ERROR;
+    fa = NULL;
+
+    /* Close & re-open the file, so the header is read from the file */
+    if (H5Fclose(file) < 0)
+        FAIL_STACK_ERROR;
+    if ((file = H5Fopen(filename_g, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR;
+    if (NULL == (f = (H5F_t *)H5VL_object(file)))
+        FAIL_STACK_ERROR;
+    if (H5AC_ignore_tags(f) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Try opening the array with its header read from the file */
+    if (open_mismatch(f, fa_addr, cparam) < 0)
+        TEST_ERROR;
+
+    /* Re-open the array with its own creation parameters */
+    if (NULL == (fa = H5FA_open(f, fa_addr, cparam, NULL)))
+        FAIL_STACK_ERROR;
+
+    /* Verify the creation parameters */
+    if (verify_cparam(fa, cparam) < 0)
+        TEST_ERROR;
+
+    /* Set & get the last element */
+    if (H5FA_set(fa, cparam->nelmts - 1, &welmt) < 0)
+        FAIL_STACK_ERROR;
+    if (H5FA_get(fa, cparam->nelmts - 1, &relmt) < 0)
+        FAIL_STACK_ERROR;
+    if (relmt != welmt)
+        TEST_ERROR;
+
+    /* Try setting & getting the element past the last one */
+    H5E_BEGIN_TRY
+    {
+        status = H5FA_set(fa, cparam->nelmts, &welmt);
+    }
+    H5E_END_TRY
+    if (status >= 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        status = H5FA_get(fa, cparam->nelmts, &relmt);
+    }
+    H5E_END_TRY
+    if (status >= 0)
+        TEST_ERROR;
+
+    /* Close array, delete array, close file & verify file is empty */
+    if (finish(file, fapl, f, fa, fa_addr, cparam) < 0)
+        TEST_ERROR;
+
+    /* All tests passed */
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        if (fa)
+            H5FA_close(fa);
+        H5Fclose(file);
+    }
+    H5E_END_TRY
+
+    return 1;
+} /* test_open_cparam_mismatch() */
 
 /*-------------------------------------------------------------------------
  * Function:	test_open_twice
@@ -634,7 +792,7 @@ test_open_twice(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *tpara
         TEST_ERROR;
 
     /* Open the array again, through the first file handle */
-    if (NULL == (fa2 = H5FA_open(f, fa_addr, NULL)))
+    if (NULL == (fa2 = H5FA_open(f, fa_addr, cparam, NULL)))
         FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
@@ -649,7 +807,7 @@ test_open_twice(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *tpara
     fa2 = NULL;
 
     /* Check for closing & re-opening the file */
-    if (reopen_file(&fid, &f, fapl_id, &fa, fa_addr, tparam) < 0)
+    if (reopen_file(&fid, &f, fapl_id, &fa, fa_addr, cparam, tparam) < 0)
         TEST_ERROR;
 
     /* Re-open the file */
@@ -661,7 +819,7 @@ test_open_twice(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *tpara
         FAIL_STACK_ERROR;
 
     /* Open the fixed array through the second file handle */
-    if (NULL == (fa2 = H5FA_open(f2, fa_addr, NULL)))
+    if (NULL == (fa2 = H5FA_open(f2, fa_addr, cparam, NULL)))
         FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
@@ -681,7 +839,7 @@ test_open_twice(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *tpara
         FAIL_STACK_ERROR;
 
     /* Close array, delete array, close file & verify file is empty */
-    if (finish(fid2, fapl_id, f2, fa2, fa_addr) < 0)
+    if (finish(fid2, fapl_id, f2, fa2, fa_addr, cparam) < 0)
         TEST_ERROR;
 
     /* All tests passed */
@@ -742,7 +900,7 @@ test_open_twice_diff(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *
         TEST_ERROR;
 
     /* Open the array again, through the first file handle */
-    if (NULL == (fa2 = H5FA_open(f, fa_addr, NULL)))
+    if (NULL == (fa2 = H5FA_open(f, fa_addr, cparam, NULL)))
         FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
@@ -764,7 +922,7 @@ test_open_twice_diff(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *
         FAIL_STACK_ERROR;
 
     /* Check for closing & re-opening the file */
-    if (reopen_file(&fid, &f, fapl_id, &fa, fa_addr, tparam) < 0)
+    if (reopen_file(&fid, &f, fapl_id, &fa, fa_addr, cparam, tparam) < 0)
         TEST_ERROR;
 
     /* Close the first fixed array wrapper */
@@ -798,7 +956,7 @@ test_open_twice_diff(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *
         FAIL_STACK_ERROR;
 
     /* Open the fixed array through the second file handle */
-    if (NULL == (fa2 = H5FA_open(f2, fa_addr, NULL)))
+    if (NULL == (fa2 = H5FA_open(f2, fa_addr, cparam, NULL)))
         FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
@@ -812,7 +970,7 @@ test_open_twice_diff(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *
         FAIL_STACK_ERROR;
 
     /* Close array, delete array, close file & verify file is empty */
-    if (finish(fid2, fapl_id, f2, fa2, fa_addr) < 0)
+    if (finish(fid2, fapl_id, f2, fa2, fa_addr, cparam) < 0)
         TEST_ERROR;
 
     /* All tests passed */
@@ -871,11 +1029,11 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
         TEST_ERROR;
 
     /* Open the array again */
-    if (NULL == (fa2 = H5FA_open(f, fa_addr, NULL)))
+    if (NULL == (fa2 = H5FA_open(f, fa_addr, cparam, NULL)))
         FAIL_STACK_ERROR;
 
     /* Request that the array be deleted */
-    if (H5FA_delete(f, fa_addr, NULL) < 0)
+    if (H5FA_delete(f, fa_addr, cparam, NULL) < 0)
         FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
@@ -892,7 +1050,7 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
     /* Try re-opening the array again (should fail, as array will be deleted) */
     H5E_BEGIN_TRY
     {
-        fa2 = H5FA_open(f, fa_addr, NULL);
+        fa2 = H5FA_open(f, fa_addr, cparam, NULL);
     }
     H5E_END_TRY
     if (fa2) {
@@ -909,13 +1067,13 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
     fa = NULL;
 
     /* Check for closing & re-opening the file */
-    if (reopen_file(&file, &f, fapl, NULL, HADDR_UNDEF, tparam) < 0)
+    if (reopen_file(&file, &f, fapl, NULL, HADDR_UNDEF, cparam, tparam) < 0)
         TEST_ERROR;
 
     /* Try re-opening the array again (should fail, as array is now deleted) */
     H5E_BEGIN_TRY
     {
-        fa = H5FA_open(f, fa_addr, NULL);
+        fa = H5FA_open(f, fa_addr, cparam, NULL);
     }
     H5E_END_TRY
     if (fa) {
@@ -1370,7 +1528,7 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, h
         TEST_ERROR;
 
     /* Check for closing & re-opening the file */
-    if (reopen_file(&file, &f, fapl, &fa, fa_addr, tparam) < 0)
+    if (reopen_file(&file, &f, fapl, &fa, fa_addr, cparam, tparam) < 0)
         TEST_ERROR;
 
     if (H5FA_get_nelmts(fa, &fa_nelmts) < 0)
@@ -1461,7 +1619,7 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, h
         TEST_ERROR;
 
     /* Close array, delete array, close file & verify file is empty */
-    if (finish(file, fapl, f, fa, fa_addr) < 0)
+    if (finish(file, fapl, f, fa, fa_addr, cparam) < 0)
         TEST_ERROR;
 
     /* All tests passed */
@@ -1525,7 +1683,7 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, 
         TEST_ERROR;
 
     /* Check for closing & re-opening the file */
-    if (reopen_file(&file, &f, fapl, &fa, fa_addr, tparam) < 0)
+    if (reopen_file(&file, &f, fapl, &fa, fa_addr, cparam, tparam) < 0)
         TEST_ERROR;
 
     if (H5FA_get_nelmts(fa, &fa_nelmts) < 0)
@@ -1589,7 +1747,7 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, 
     }     /* end if */
 
     /* Close array, delete array, close file & verify file is empty */
-    if (finish(file, fapl, f, fa, fa_addr) < 0)
+    if (finish(file, fapl, f, fa, fa_addr, cparam) < 0)
         TEST_ERROR;
 
     /* All tests passed */
@@ -1695,6 +1853,7 @@ main(void)
         nerrors += test_create(fapl, &cparam, &tparam);
         nerrors += test_reopen(fapl, &cparam, &tparam);
         nerrors += test_open_twice(fapl, &cparam, &tparam);
+        nerrors += test_open_cparam_mismatch(fapl, &cparam, &tparam);
         nerrors += test_open_twice_diff(fapl, &cparam, &tparam);
         nerrors += test_delete_open(fapl, &cparam, &tparam);
 

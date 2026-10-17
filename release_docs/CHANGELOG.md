@@ -140,6 +140,21 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed fixed array, extensible array and v2 B-tree headers being trusted for the wrong kind of index
+
+   The fixed array, extensible array and version 2 B-tree headers record which client class owns
+   the structure and the size of its records, and the header load callbacks used whatever class and
+   sizes the file declared. `H5FA_open()`, `H5EA_open()` and `H5B2_open()` had no way to say what
+   they expected, so a corrupted or fuzzed file could make a chunk index, a dense link or attribute
+   index, a shared message index or a fractal heap's huge object tree be opened with another client's
+   class, and its records were then copied into the caller's structures using the other class's
+   native record size. The open and delete routines now take the creation parameters the caller
+   expects, and the header is rejected when its class, raw record size or (for the arrays) element
+   layout differs, both when it is loaded and when it is already in the metadata cache. Each client
+   builds those parameters in one place, used for both creation and opening. The extensible and fixed
+   array creation parameter checks that were only compiled into debug builds are now always made,
+   and `H5FA_get()` and `H5FA_set()` reject an index past the end of the array.
+
 ### Fixed a deadlock in the ROS3 VFD on Windows
 
    When an HDF5 application running on Windows and using the ROS3 VFD exited normally,

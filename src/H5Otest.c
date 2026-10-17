@@ -199,7 +199,7 @@ H5O__is_attr_empty_test(hid_t oid)
                 H5_BEGIN_TAG(loc->addr)
 
                 /* Open the name index v2 B-tree */
-                if (NULL == (bt2_name = H5B2_open(loc->file, ainfo.name_bt2_addr, NULL)))
+                if (NULL == (bt2_name = H5B2_open(loc->file, ainfo.name_bt2_addr, H5A_BT2_NAME_CPARAM, NULL)))
                     HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTOPENOBJ, FAIL,
                                     "unable to open v2 B-tree for name index");
 
@@ -302,7 +302,7 @@ H5O__num_attrs_test(hid_t oid, hsize_t *nattrs)
             H5_BEGIN_TAG(loc->addr)
 
             /* Open the name index v2 B-tree */
-            if (NULL == (bt2_name = H5B2_open(loc->file, ainfo.name_bt2_addr, NULL)))
+            if (NULL == (bt2_name = H5B2_open(loc->file, ainfo.name_bt2_addr, H5A_BT2_NAME_CPARAM, NULL)))
                 HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index");
 
             /* Reset metadata tag in API context */
@@ -398,7 +398,7 @@ H5O__attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
         HGOTO_DONE_TAG(FAIL);
 
     /* Open the name index v2 B-tree */
-    if (NULL == (bt2_name = H5B2_open(loc->file, ainfo.name_bt2_addr, NULL)))
+    if (NULL == (bt2_name = H5B2_open(loc->file, ainfo.name_bt2_addr, H5A_BT2_NAME_CPARAM, NULL)))
         HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index");
 
     /* Retrieve # of records in name index */
@@ -408,7 +408,7 @@ H5O__attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
     /* Check if there is a creation order index */
     if (H5_addr_defined(ainfo.corder_bt2_addr)) {
         /* Open the creation order index v2 B-tree */
-        if (NULL == (bt2_corder = H5B2_open(loc->file, ainfo.corder_bt2_addr, NULL)))
+        if (NULL == (bt2_corder = H5B2_open(loc->file, ainfo.corder_bt2_addr, H5A_BT2_CORDER_CPARAM, NULL)))
             HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTOPENOBJ, FAIL,
                             "unable to open v2 B-tree for creation order index");
 

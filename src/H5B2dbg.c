@@ -70,8 +70,8 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
-                const H5B2_class_t H5_ATTR_NDEBUG_UNUSED *type, haddr_t H5_ATTR_NDEBUG_UNUSED obj_addr)
+H5B2__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, const H5B2_class_t *type,
+                haddr_t H5_ATTR_NDEBUG_UNUSED obj_addr)
 {
     H5B2_hdr_t *hdr = NULL;          /* B-tree header info */
     unsigned    u;                   /* Local index variable */
@@ -92,8 +92,12 @@ H5B2__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     assert(type);
 
     /* Load the B-tree header  */
-    if (NULL == (hdr = H5B2__hdr_protect(f, addr, f, H5AC__READ_ONLY_FLAG)))
+    if (NULL == (hdr = H5B2__hdr_protect(f, addr, NULL, f, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header");
+
+    /* Check the header is for the given class */
+    if (hdr->cls != type)
+        HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, FAIL, "incorrect v2 B-tree class");
 
     /* Set file pointer for this B-tree operation */
     hdr->f = f;
@@ -171,8 +175,12 @@ H5B2__int_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
     assert(nrec > 0);
 
     /* Load the B-tree header */
-    if (NULL == (hdr = H5B2__hdr_protect(f, hdr_addr, f, H5AC__READ_ONLY_FLAG)))
+    if (NULL == (hdr = H5B2__hdr_protect(f, hdr_addr, NULL, f, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load v2 B-tree header");
+
+    /* Check the header is for the given class */
+    if (hdr->cls != type)
+        HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, FAIL, "incorrect v2 B-tree class");
 
     /* Set file pointer for this B-tree operation */
     hdr->f = f;
@@ -269,8 +277,12 @@ H5B2__leaf_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, c
     assert(nrec > 0);
 
     /* Load the B-tree header */
-    if (NULL == (hdr = H5B2__hdr_protect(f, hdr_addr, f, H5AC__READ_ONLY_FLAG)))
+    if (NULL == (hdr = H5B2__hdr_protect(f, hdr_addr, NULL, f, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect v2 B-tree header");
+
+    /* Check the header is for the given class */
+    if (hdr->cls != type)
+        HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, FAIL, "incorrect v2 B-tree class");
 
     /* Set file pointer for this B-tree operation */
     hdr->f = f;

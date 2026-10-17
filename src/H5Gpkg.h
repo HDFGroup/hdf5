@@ -309,6 +309,10 @@ H5_DLLVAR const H5B2_class_t H5G_BT2_NAME[1];
 /* The v2 B-tree class for indexing 'creation order' field on links */
 H5_DLLVAR const H5B2_class_t H5G_BT2_CORDER[1];
 
+/* The v2 B-tree creation parameters for the 'name' and 'creation order' indices */
+H5_DLLVAR const H5B2_create_t H5G_BT2_NAME_CPARAM[1];
+H5_DLLVAR const H5B2_create_t H5G_BT2_CORDER_CPARAM[1];
+
 /* Free list for managing H5G_t structs */
 H5FL_EXTERN(H5G_t);
 

@@ -137,7 +137,7 @@ H5HF_size(const H5HF_t *fh, hsize_t *heap_size)
     /* Check for B-tree storage of huge objects in fractal heap */
     if (H5_addr_defined(hdr->huge_bt2_addr)) {
         /* Open the huge object index v2 B-tree */
-        if (NULL == (bt2 = H5B2_open(hdr->f, hdr->huge_bt2_addr, hdr->f)))
+        if (NULL == (bt2 = H5HF__huge_bt2_open(hdr)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL,
                         "unable to open v2 B-tree for tracking 'huge' objects");
 

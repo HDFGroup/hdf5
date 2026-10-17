@@ -222,6 +222,26 @@ typedef struct {
 /* Package Variables */
 /*********************/
 
+/* Creation parameters of the v2 B-tree for indexing 'name' field on links */
+const H5B2_create_t H5G_BT2_NAME_CPARAM[1] = {{
+    H5G_BT2_NAME,               /* Client class */
+    H5G_NAME_BT2_NODE_SIZE,     /* Node size */
+    4 +                         /* Name's hash value */
+        H5G_DENSE_FHEAP_ID_LEN, /* Fractal heap ID */
+    H5G_NAME_BT2_SPLIT_PERC,    /* Split percent */
+    H5G_NAME_BT2_MERGE_PERC     /* Merge percent */
+}};
+
+/* Creation parameters of the v2 B-tree for indexing 'creation order' field on links */
+const H5B2_create_t H5G_BT2_CORDER_CPARAM[1] = {{
+    H5G_BT2_CORDER,             /* Client class */
+    H5G_CORDER_BT2_NODE_SIZE,   /* Node size */
+    8 +                         /* Creation order value */
+        H5G_DENSE_FHEAP_ID_LEN, /* Fractal heap ID */
+    H5G_CORDER_BT2_SPLIT_PERC,  /* Split percent */
+    H5G_CORDER_BT2_MERGE_PERC   /* Merge percent */
+}};
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -243,7 +263,6 @@ herr_t
 H5G__dense_create(H5F_t *f, H5O_linfo_t *linfo, const H5O_pline_t *pline)
 {
     H5HF_create_t fheap_cparam;        /* Fractal heap creation parameters */
-    H5B2_create_t bt2_cparam;          /* v2 B-tree creation parameters */
     H5HF_t       *fheap      = NULL;   /* Fractal heap handle */
     H5B2_t       *bt2_name   = NULL;   /* v2 B-tree handle for names */
     H5B2_t       *bt2_corder = NULL;   /* v2 B-tree handle for creation order */
@@ -285,15 +304,7 @@ H5G__dense_create(H5F_t *f, H5O_linfo_t *linfo, const H5O_pline_t *pline)
     assert(fheap_id_len == H5G_DENSE_FHEAP_ID_LEN);
 
     /* Create the name index v2 B-tree */
-    memset(&bt2_cparam, 0, sizeof(bt2_cparam));
-    bt2_cparam.cls       = H5G_BT2_NAME;
-    bt2_cparam.node_size = (size_t)H5G_NAME_BT2_NODE_SIZE;
-    H5_CHECK_OVERFLOW(fheap_id_len, /* From: */ hsize_t, /* To: */ uint32_t);
-    bt2_cparam.rrec_size = 4 +                     /* Name's hash value */
-                           (uint32_t)fheap_id_len; /* Fractal heap ID */
-    bt2_cparam.split_percent = H5G_NAME_BT2_SPLIT_PERC;
-    bt2_cparam.merge_percent = H5G_NAME_BT2_MERGE_PERC;
-    if (NULL == (bt2_name = H5B2_create(f, &bt2_cparam, NULL)))
+    if (NULL == (bt2_name = H5B2_create(f, H5G_BT2_NAME_CPARAM, NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create v2 B-tree for name index");
 
     /* Retrieve the v2 B-tree's address in the file */
@@ -303,15 +314,7 @@ H5G__dense_create(H5F_t *f, H5O_linfo_t *linfo, const H5O_pline_t *pline)
     /* Check if we should create a creation order index v2 B-tree */
     if (linfo->index_corder) {
         /* Create the creation order index v2 B-tree */
-        memset(&bt2_cparam, 0, sizeof(bt2_cparam));
-        bt2_cparam.cls       = H5G_BT2_CORDER;
-        bt2_cparam.node_size = (size_t)H5G_CORDER_BT2_NODE_SIZE;
-        H5_CHECK_OVERFLOW(fheap_id_len, /* From: */ hsize_t, /* To: */ uint32_t);
-        bt2_cparam.rrec_size = 8 +                     /* Creation order value */
-                               (uint32_t)fheap_id_len; /* Fractal heap ID */
-        bt2_cparam.split_percent = H5G_CORDER_BT2_SPLIT_PERC;
-        bt2_cparam.merge_percent = H5G_CORDER_BT2_MERGE_PERC;
-        if (NULL == (bt2_corder = H5B2_create(f, &bt2_cparam, NULL)))
+        if (NULL == (bt2_corder = H5B2_create(f, H5G_BT2_CORDER_CPARAM, NULL)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create v2 B-tree for creation order index");
 
         /* Retrieve the v2 B-tree's address in the file */
@@ -387,7 +390,7 @@ H5G__dense_insert(H5F_t *f, const H5O_linfo_t *linfo, const H5O_link_t *lnk)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert link into fractal heap");
 
     /* Open the name index v2 B-tree */
-    if (NULL == (bt2_name = H5B2_open(f, linfo->name_bt2_addr, NULL)))
+    if (NULL == (bt2_name = H5B2_open(f, linfo->name_bt2_addr, H5G_BT2_NAME_CPARAM, NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index");
 
     /* Create the callback information for v2 B-tree record insertion */
@@ -408,7 +411,7 @@ H5G__dense_insert(H5F_t *f, const H5O_linfo_t *linfo, const H5O_link_t *lnk)
     if (linfo->index_corder) {
         /* Open the creation order index v2 B-tree */
         assert(H5_addr_defined(linfo->corder_bt2_addr));
-        if (NULL == (bt2_corder = H5B2_open(f, linfo->corder_bt2_addr, NULL)))
+        if (NULL == (bt2_corder = H5B2_open(f, linfo->corder_bt2_addr, H5G_BT2_CORDER_CPARAM, NULL)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index");
 
         /* Insert the record into the creation order index v2 B-tree */
@@ -495,7 +498,7 @@ H5G__dense_lookup(H5F_t *f, const H5O_linfo_t *linfo, const char *name, bool *fo
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap");
 
     /* Open the name index v2 B-tree */
-    if (NULL == (bt2_name = H5B2_open(f, linfo->name_bt2_addr, NULL)))
+    if (NULL == (bt2_name = H5B2_open(f, linfo->name_bt2_addr, H5G_BT2_NAME_CPARAM, NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index");
 
     /* Construct the user data for v2 B-tree callback */
@@ -602,11 +605,12 @@ herr_t
 H5G__dense_lookup_by_idx(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type, H5_iter_order_t order,
                          hsize_t n, H5O_link_t *lnk)
 {
-    H5HF_t          *fheap  = NULL;       /* Fractal heap handle */
-    H5G_link_table_t ltable = {0, NULL};  /* Table of links */
-    H5B2_t          *bt2    = NULL;       /* v2 B-tree handle for index */
-    haddr_t          bt2_addr;            /* Address of v2 B-tree to use for lookup */
-    herr_t           ret_value = SUCCEED; /* Return value */
+    H5HF_t              *fheap  = NULL;        /* Fractal heap handle */
+    H5G_link_table_t     ltable = {0, NULL};   /* Table of links */
+    H5B2_t              *bt2    = NULL;        /* v2 B-tree handle for index */
+    haddr_t              bt2_addr;             /* Address of v2 B-tree to use for lookup */
+    const H5B2_create_t *bt2_cparam = NULL;    /* Creation parameters of v2 B-tree to use */
+    herr_t               ret_value  = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -633,7 +637,8 @@ H5G__dense_lookup_by_idx(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type
          *      the links and the order is native, use the B-tree for names.
          *      Otherwise, build a table.
          */
-        bt2_addr = linfo->corder_bt2_addr;
+        bt2_addr   = linfo->corder_bt2_addr;
+        bt2_cparam = H5G_BT2_CORDER_CPARAM;
     } /* end else */
 
     /* If the order is native and there's no B-tree for indexing the links,
@@ -641,7 +646,8 @@ H5G__dense_lookup_by_idx(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type
      * process.
      */
     if (order == H5_ITER_NATIVE && !H5_addr_defined(bt2_addr)) {
-        bt2_addr = linfo->name_bt2_addr;
+        bt2_addr   = linfo->name_bt2_addr;
+        bt2_cparam = H5G_BT2_NAME_CPARAM;
         assert(H5_addr_defined(bt2_addr));
     } /* end if */
 
@@ -654,7 +660,7 @@ H5G__dense_lookup_by_idx(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap");
 
         /* Open the index v2 B-tree */
-        if (NULL == (bt2 = H5B2_open(f, bt2_addr, NULL)))
+        if (NULL == (bt2 = H5B2_open(f, bt2_addr, bt2_cparam, NULL)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for index");
 
         /* Construct the user data for v2 B-tree callback */
@@ -886,11 +892,12 @@ herr_t
 H5G__dense_iterate(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type, H5_iter_order_t order,
                    hsize_t skip, hsize_t *last_lnk, H5G_lib_iterate_t op, void *op_data)
 {
-    H5HF_t          *fheap  = NULL;      /* Fractal heap handle */
-    H5G_link_table_t ltable = {0, NULL}; /* Table of links */
-    H5B2_t          *bt2    = NULL;      /* v2 B-tree handle for index */
-    haddr_t          bt2_addr;           /* Address of v2 B-tree to use for lookup */
-    herr_t           ret_value = FAIL;   /* Return value */
+    H5HF_t              *fheap  = NULL;      /* Fractal heap handle */
+    H5G_link_table_t     ltable = {0, NULL}; /* Table of links */
+    H5B2_t              *bt2    = NULL;      /* v2 B-tree handle for index */
+    haddr_t              bt2_addr;           /* Address of v2 B-tree to use for lookup */
+    const H5B2_create_t *bt2_cparam = NULL;  /* Creation parameters of v2 B-tree to use */
+    herr_t               ret_value  = FAIL;  /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -917,7 +924,8 @@ H5G__dense_iterate(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type, H5_i
          *      the links and the order is native, use the B-tree for names.
          *      Otherwise, build a table.
          */
-        bt2_addr = linfo->corder_bt2_addr;
+        bt2_addr   = linfo->corder_bt2_addr;
+        bt2_cparam = H5G_BT2_CORDER_CPARAM;
     } /* end else */
 
     /* If the order is native and there's no B-tree for indexing the links,
@@ -926,7 +934,8 @@ H5G__dense_iterate(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type, H5_i
      */
     if (order == H5_ITER_NATIVE && !H5_addr_defined(bt2_addr)) {
         assert(H5_addr_defined(linfo->name_bt2_addr));
-        bt2_addr = linfo->name_bt2_addr;
+        bt2_addr   = linfo->name_bt2_addr;
+        bt2_cparam = H5G_BT2_NAME_CPARAM;
     } /* end if */
 
     /* Check on iteration order */
@@ -941,7 +950,7 @@ H5G__dense_iterate(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type, H5_i
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap");
 
         /* Open the index v2 B-tree */
-        if (NULL == (bt2 = H5B2_open(f, bt2_addr, NULL)))
+        if (NULL == (bt2 = H5B2_open(f, bt2_addr, bt2_cparam, NULL)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for index");
 
         /* Construct the user data for v2 B-tree iterator callback */
@@ -1073,11 +1082,12 @@ herr_t
 H5G__dense_get_name_by_idx(H5F_t *f, H5O_linfo_t *linfo, H5_index_t idx_type, H5_iter_order_t order,
                            hsize_t n, char *name, size_t name_size, size_t *name_len)
 {
-    H5HF_t          *fheap  = NULL;       /* Fractal heap handle */
-    H5G_link_table_t ltable = {0, NULL};  /* Table of links */
-    H5B2_t          *bt2    = NULL;       /* v2 B-tree handle for index */
-    haddr_t          bt2_addr;            /* Address of v2 B-tree to use for lookup */
-    herr_t           ret_value = SUCCEED; /* Return value */
+    H5HF_t              *fheap  = NULL;        /* Fractal heap handle */
+    H5G_link_table_t     ltable = {0, NULL};   /* Table of links */
+    H5B2_t              *bt2    = NULL;        /* v2 B-tree handle for index */
+    haddr_t              bt2_addr;             /* Address of v2 B-tree to use for lookup */
+    const H5B2_create_t *bt2_cparam = NULL;    /* Creation parameters of v2 B-tree to use */
+    herr_t               ret_value  = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1103,7 +1113,8 @@ H5G__dense_get_name_by_idx(H5F_t *f, H5O_linfo_t *linfo, H5_index_t idx_type, H5
          *      the links and the order is native, use the B-tree for names.
          *      Otherwise, build a table.
          */
-        bt2_addr = linfo->corder_bt2_addr;
+        bt2_addr   = linfo->corder_bt2_addr;
+        bt2_cparam = H5G_BT2_CORDER_CPARAM;
     } /* end else */
 
     /* If the order is native and there's no B-tree for indexing the links,
@@ -1111,7 +1122,8 @@ H5G__dense_get_name_by_idx(H5F_t *f, H5O_linfo_t *linfo, H5_index_t idx_type, H5
      * process.
      */
     if (order == H5_ITER_NATIVE && !H5_addr_defined(bt2_addr)) {
-        bt2_addr = linfo->name_bt2_addr;
+        bt2_addr   = linfo->name_bt2_addr;
+        bt2_cparam = H5G_BT2_NAME_CPARAM;
         assert(H5_addr_defined(bt2_addr));
     } /* end if */
 
@@ -1124,7 +1136,7 @@ H5G__dense_get_name_by_idx(H5F_t *f, H5O_linfo_t *linfo, H5_index_t idx_type, H5
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap");
 
         /* Open the index v2 B-tree */
-        if (NULL == (bt2 = H5B2_open(f, bt2_addr, NULL)))
+        if (NULL == (bt2 = H5B2_open(f, bt2_addr, bt2_cparam, NULL)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for index");
 
         /* Set up the user data for the v2 B-tree 'record remove' callback */
@@ -1201,7 +1213,7 @@ H5G__dense_remove_fh_cb(const void *obj, size_t obj_len, void *_udata)
         H5G_bt2_ud_common_t bt2_udata; /* Info for B-tree callbacks */
 
         /* Open the creation order index v2 B-tree */
-        if (NULL == (bt2 = H5B2_open(udata->f, udata->corder_bt2_addr, NULL)))
+        if (NULL == (bt2 = H5B2_open(udata->f, udata->corder_bt2_addr, H5G_BT2_CORDER_CPARAM, NULL)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index");
 
         /* Set up the user data for the v2 B-tree 'record remove' callback */
@@ -1303,7 +1315,7 @@ H5G__dense_remove(H5F_t *f, const H5O_linfo_t *linfo, H5RS_str_t *grp_full_path_
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap");
 
     /* Open the name index v2 B-tree */
-    if (NULL == (bt2 = H5B2_open(f, linfo->name_bt2_addr, NULL)))
+    if (NULL == (bt2 = H5B2_open(f, linfo->name_bt2_addr, H5G_BT2_NAME_CPARAM, NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index");
 
     /* Set up the user data for the v2 B-tree 'record remove' callback */
@@ -1428,7 +1440,10 @@ H5G__dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
         } /* end else */
 
         /* Open the index v2 B-tree */
-        if (NULL == (bt2 = H5B2_open(bt2_udata->f, bt2_udata->other_bt2_addr, NULL)))
+        if (NULL ==
+            (bt2 = H5B2_open(
+                 bt2_udata->f, bt2_udata->other_bt2_addr,
+                 bt2_udata->idx_type == H5_INDEX_NAME ? H5G_BT2_CORDER_CPARAM : H5G_BT2_NAME_CPARAM, NULL)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for 'other' index");
 
         /* Set the common information for the v2 B-tree remove operation */
@@ -1477,11 +1492,12 @@ herr_t
 H5G__dense_remove_by_idx(H5F_t *f, const H5O_linfo_t *linfo, H5RS_str_t *grp_full_path_r, H5_index_t idx_type,
                          H5_iter_order_t order, hsize_t n)
 {
-    H5HF_t          *fheap  = NULL;       /* Fractal heap handle */
-    H5G_link_table_t ltable = {0, NULL};  /* Table of links */
-    H5B2_t          *bt2    = NULL;       /* v2 B-tree handle for index */
-    haddr_t          bt2_addr;            /* Address of v2 B-tree to use for lookup */
-    herr_t           ret_value = SUCCEED; /* Return value */
+    H5HF_t              *fheap  = NULL;        /* Fractal heap handle */
+    H5G_link_table_t     ltable = {0, NULL};   /* Table of links */
+    H5B2_t              *bt2    = NULL;        /* v2 B-tree handle for index */
+    haddr_t              bt2_addr;             /* Address of v2 B-tree to use for lookup */
+    const H5B2_create_t *bt2_cparam = NULL;    /* Creation parameters of v2 B-tree to use */
+    herr_t               ret_value  = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1507,7 +1523,8 @@ H5G__dense_remove_by_idx(H5F_t *f, const H5O_linfo_t *linfo, H5RS_str_t *grp_ful
          *      the links and the order is native, use the B-tree for names.
          *      Otherwise, build a table.
          */
-        bt2_addr = linfo->corder_bt2_addr;
+        bt2_addr   = linfo->corder_bt2_addr;
+        bt2_cparam = H5G_BT2_CORDER_CPARAM;
     } /* end else */
 
     /* If the order is native and there's no B-tree for indexing the links,
@@ -1515,7 +1532,8 @@ H5G__dense_remove_by_idx(H5F_t *f, const H5O_linfo_t *linfo, H5RS_str_t *grp_ful
      * process.
      */
     if (order == H5_ITER_NATIVE && !H5_addr_defined(bt2_addr)) {
-        bt2_addr = linfo->name_bt2_addr;
+        bt2_addr   = linfo->name_bt2_addr;
+        bt2_cparam = H5G_BT2_NAME_CPARAM;
         assert(H5_addr_defined(bt2_addr));
     } /* end if */
 
@@ -1528,7 +1546,7 @@ H5G__dense_remove_by_idx(H5F_t *f, const H5O_linfo_t *linfo, H5RS_str_t *grp_ful
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap");
 
         /* Open the index v2 B-tree */
-        if (NULL == (bt2 = H5B2_open(f, bt2_addr, NULL)))
+        if (NULL == (bt2 = H5B2_open(f, bt2_addr, bt2_cparam, NULL)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for index");
 
         /* Set up the user data for the v2 B-tree 'remove by index' callback */
@@ -1615,7 +1633,8 @@ H5G__dense_delete(H5F_t *f, H5O_linfo_t *linfo, bool adj_link)
         udata.replace_names        = false;
 
         /* Delete the name index, adjusting the ref. count on links removed */
-        if (H5B2_delete(f, linfo->name_bt2_addr, NULL, H5G__dense_remove_bt2_cb, &udata) < 0)
+        if (H5B2_delete(f, linfo->name_bt2_addr, H5G_BT2_NAME_CPARAM, NULL, H5G__dense_remove_bt2_cb,
+                        &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete v2 B-tree for name index");
 
         /* Close the fractal heap */
@@ -1624,7 +1643,7 @@ H5G__dense_delete(H5F_t *f, H5O_linfo_t *linfo, bool adj_link)
     } /* end if */
     else {
         /* Delete the name index, without adjusting the ref. count on the links  */
-        if (H5B2_delete(f, linfo->name_bt2_addr, NULL, NULL, NULL) < 0)
+        if (H5B2_delete(f, linfo->name_bt2_addr, H5G_BT2_NAME_CPARAM, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete v2 B-tree for name index");
     } /* end else */
     linfo->name_bt2_addr = HADDR_UNDEF;
@@ -1633,7 +1652,7 @@ H5G__dense_delete(H5F_t *f, H5O_linfo_t *linfo, bool adj_link)
     if (linfo->index_corder) {
         /* Delete the creation order index, without adjusting the ref. count on the links  */
         assert(H5_addr_defined(linfo->corder_bt2_addr));
-        if (H5B2_delete(f, linfo->corder_bt2_addr, NULL, NULL, NULL) < 0)
+        if (H5B2_delete(f, linfo->corder_bt2_addr, H5G_BT2_CORDER_CPARAM, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete v2 B-tree for creation order index");
         linfo->corder_bt2_addr = HADDR_UNDEF;
     } /* end if */
