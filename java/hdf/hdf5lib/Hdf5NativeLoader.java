@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * native-lib-loader ({@code natives/<platform>/} layout).
  * <p>
  * Only classpath native JARs are consulted, not {@code java.library.path} as
- * {@link org.scijava.nativelib.NativeLoader#loadLibrary(String, String...)} would do. A library
+ * SciJava's {@code NativeLoader.loadLibrary} would do. A library
  * that is bundled but fails to load is logged as a warning with the reason.
  * <p>
  * No Panama/JNI types are referenced here, so this class can initialize before
@@ -82,7 +82,7 @@ public final class Hdf5NativeLoader {
      * Load the first of {@code names} found in the bundled native Maven JARs
      * ({@code natives/<platform>/} on the classpath).
      * <p>
-     * Unlike {@link org.scijava.nativelib.NativeLoader#loadLibrary(String, String...)}, this does
+     * Unlike SciJava's {@code NativeLoader.loadLibrary}, this does
      * not call {@code System.loadLibrary} first, so in-tree CI with {@code java.library.path} does
      * not preload build-tree libs before {@code hdf5_java}.
      *
