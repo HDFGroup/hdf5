@@ -140,6 +140,18 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed writer starvation in the internal read-write lock on glibc
+
+   On glibc, the library's internal read-write lock used the default
+   pthread_rwlock_t attributes, which prefer readers. A steady stream of
+   readers could keep a waiting writer from ever acquiring the lock, which
+   made the ttsafe test hang (seen with glibc 2.17 on ppc64). The lock is now
+   created with PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP on glibc,
+   matching the C11 and macOS implementations, which block new readers while
+   a writer is waiting.
+
+   Fixes GitHub issue #6743
+
 ### Fixed a deadlock in the ROS3 VFD on Windows
 
    When an HDF5 application running on Windows and using the ROS3 VFD exited normally,

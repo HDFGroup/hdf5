@@ -277,6 +277,9 @@ done:
 herr_t
 H5TS_rwlock_init(H5TS_rwlock_t *lock)
 {
+#if defined(__GLIBC__) && defined(_GNU_SOURCE)
+    pthread_rwlockattr_t attr;
+#endif
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
@@ -285,8 +288,28 @@ H5TS_rwlock_init(H5TS_rwlock_t *lock)
     if (H5_UNLIKELY(NULL == lock))
         HGOTO_DONE(FAIL);
 
+#if defined(__GLIBC__) && defined(_GNU_SOURCE)
+    /* glibc's default rwlock prefers readers, so a steady stream of readers
+     * can starve writers indefinitely (seen with glibc 2.17 on ppc64).
+     * Prefer writers instead, matching the C11 and macOS implementations,
+     * which block new readers while a writer is waiting.
+     */
+    if (H5_UNLIKELY(pthread_rwlockattr_init(&attr)))
+        HGOTO_DONE(FAIL);
+    if (H5_UNLIKELY(pthread_rwlockattr_setkind_np(&attr, PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP))) {
+        pthread_rwlockattr_destroy(&attr);
+        HGOTO_DONE(FAIL);
+    }
+    if (H5_UNLIKELY(pthread_rwlock_init(lock, &attr))) {
+        pthread_rwlockattr_destroy(&attr);
+        HGOTO_DONE(FAIL);
+    }
+    if (H5_UNLIKELY(pthread_rwlockattr_destroy(&attr)))
+        HGOTO_DONE(FAIL);
+#else
     if (H5_UNLIKELY(pthread_rwlock_init(lock, NULL)))
         HGOTO_DONE(FAIL);
+#endif
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
