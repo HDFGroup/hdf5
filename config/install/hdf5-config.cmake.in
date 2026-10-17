@@ -189,6 +189,9 @@ elseif ("static" IN_LIST ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
   endif ()
 
   set (${HDF5_PACKAGE_NAME}_LIB_TYPE "static")
+
+  # Static libraries on Windows are built without thread support
+  set (${HDF5_PACKAGE_NAME}_PROVIDES_THREADS @HDF5_STATIC_THREADS_ENABLED@)
   if (${HDF5_PACKAGE_NAME}_PROVIDES_FORTRAN)
     if (${HDF5_PACKAGE_NAME}_INSTALL_MOD_FORTRAN STREQUAL "STATIC")
       set (${HDF5_PACKAGE_NAME}_INCLUDE_DIR_FORTRAN "@PACKAGE_INCLUDE_INSTALL_DIR@")
@@ -250,8 +253,8 @@ endif ()
 #   requested components that are static libraries 
 #-----------------------------------------------------------------------------
 if (${HDF5_PACKAGE_NAME}_LIB_TYPE STREQUAL "static")
-  # Threads
-  if (${HDF5_PACKAGE_NAME}_PROVIDES_THREADS)
+  # Threads (linked even where the library is built without thread support)
+  if (@HDF5_THREADS_ENABLED@)
     set (THREADS_PREFER_PTHREAD_FLAG ON)
     find_dependency (Threads QUIET REQUIRED)
   endif ()

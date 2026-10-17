@@ -66,6 +66,19 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Configuration
 
+### Built the library's internal thread pool by default
+
+   The internal thread pool lets the library parallelize the internals of a
+   single API call using its own worker threads. It adds no application
+   threads, so it is not a build-time choice exposed through CMake. It is built
+   in wherever a threading package is available, except in a static library on
+   Windows.
+
+   Note that nothing in the library is threaded until the application enables it via
+   H5TSset_internal_threads().
+
+   The internal thread pool can now be used with the high-level, Fortran, Java and C++ interfaces.
+
 ### Various improvements in installed CMake package configuration file
 
    - Fixed `find_dependency()` calls so that `PRIVATE`-linked libraries are only propagated as
@@ -95,12 +108,14 @@ We would like to thank the many HDF5 community members who contributed to this r
    This feature internally parallelizes read operations on chunked datasets.
    H5TSset_internal_threads() is used to enable the feature globally, while
    H5Pset_io_threads() can be used to disable the feature on a per-operation
-   basis. These functions are only available when the library is configured with
-   HDF5_ENABLE_CONCURRENCY=ON. When performing an internally threaded read, the
-   library will concurrently read from disk, unfilter, and scatter to memory all
-   chunks in a read operation on a chunked dataset. Currently each of these
-   sub-operations is serialized (protected by a mutex), so there is not yet
-   likely to be any performance improvement.
+   basis. These functions are available whenever the library is built with a
+   threading package; see the Configuration section above. When performing an
+   internally threaded read, the library will concurrently read from disk,
+   unfilter, and scatter to memory all chunks in a read operation on a chunked
+   dataset. Currently each of these sub-operations is serialized (protected by
+   a mutex), so there is not yet likely to be any performance improvement.
+
+   Reads are not threaded in builds with HDF5_ENABLE_THREADSAFE.
 
 ## Parallel Library
 
@@ -140,6 +155,15 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    Fixes GitHub issue #6560
 
+### Fixed a heap buffer over-read when traversing a malformed external link
+
+   The default external link traversal callback located the target file name and object
+   path inside the link's user data with `strlen()`, without checking that the buffer was
+   NULL-terminated or large enough to hold both strings. A corrupted or fuzzed file whose
+   external link data was not properly terminated caused a read past the end of the `udata`
+   buffer. `H5L__extern_traverse()` now validates the buffer against its stored size before
+   parsing, the same way `H5Lunpack_elink_val()` does.
+   
 ### Fixed the page buffer's minimum metadata threshold failure to protect B-tree, local heap and object header metadata pages
 
 The page buffer charges every page it holds to either `raw_count` or `meta_count`, counting `H5F_MEM_PAGE_DRAW` and `H5F_MEM_PAGE_GHEAP` pages as raw data and every other page as metadata. The minimum metadata reservation set by `H5Pset_page_buffer_size()` was not written as the complement of that test: it compared the page's type for equality with `H5F_MEM_PAGE_META`, which is an alias for `H5F_MEM_PAGE_SUPER`. A page entry's type is copied verbatim from the memory type of the access that brought the page into the buffer, so B-tree, local heap and object header pages carried other values and were evicted by raw data regardless of `min_meta_perc`, while still counting toward the threshold the reservation was measured against. In practice the reservation protected only the superblock and driver information pages. The classification is now made in one place, `H5MF_mem_page_type_is_raw()`, alongside its `H5F_mem_t` counterpart `H5MF_mem_type_is_raw()`, and both the page counts and the two reservations use it, so the metadata reservation protects the same population that `meta_count` measures.
@@ -181,6 +205,14 @@ Fixes GitHub issue #6679.
 
    Fixes CVE-2026-19025
 
+### Fixed a crash when reading a dataset with a malformed fill value
+
+   An old-style (either version 1 or version 2) fill value message that is marked "defined" but encodes a negative size leaves the fill value with a negative size and no datatype; `H5Pget_fill_value()` then passed that NULL datatype to `H5T_path_find()` and dereferenced it. `H5P_get_fill_value()` now rejects a fill value that has no datatype and returns an error, so the dataset itself remains readable while the corrupt fill value is reported cleanly.
+
+   Fixes GitHub issue #6487
+
+   Fixes CVE-2026-19024
+   
 ### Fixed a crash when unprotecting a local heap with no cached prefix or data block
 
    `H5HL_protect()` pins one metadata cache entry for a local heap -- either the prefix when the heap is a single cache object, or the data block otherwise -- and `H5HL_unprotect()` unpins it again. The cache unlinks that entry from the heap when it destroys it, so a damaged file could reach `H5HL_unprotect()` with nothing to unpin, which triggered an assertion failure in debug builds and a NULL pointer dereference otherwise. `H5HL_unprotect()` now reports an error instead, and does so before decrementing the heap's protect count so that a rejected call leaves the heap unchanged rather than half unprotected with its cache entry still pinned.
@@ -196,6 +228,12 @@ Fixes GitHub issue #6679.
 ### Fixed a division by zero when reading or writing an N-Bit dataset with a zero datatype size
 
    `H5Z__nbit_decompress_one_array()` and `H5Z__nbit_compress_one_array()` divide the stored size of an array or compound datatype by the size of its base type to work out how many elements to process. Both sizes come from the filter's client-data parameters, so a corrupted or crafted file could supply a zero base size, on either a read or a write to an existing dataset. A zero atomic size also passes the existing precision/offset check when the precision and offset are zero as well, so it was not caught there. The three divisions in each function now reject a zero divisor with an error instead.
+
+### Fixed a stack overflow when iterating a corrupted B-tree
+
+   `H5B__iterate_helper()` now verifies that a B-tree node it has just protected has the level the traversal expects, when the expected level is known. The equivalent check in `H5B__cache_deserialize()` only runs when a node is first loaded into the metadata cache, so a corrupted B-tree whose child pointer revisits a node that is already cached (for example, a node that points to itself) could bypass that check and recurse without bound until the stack was exhausted. Such a file is now rejected with an error instead of crashing. This was observed through `H5Gget_info()`.
+
+   Fixes GitHub issue #6403
 
 ## Java Library
 
@@ -254,6 +292,14 @@ Fixes #5723.
    in some cases. This double-quote character has been restored and similar formatting issues
    have been fixed for cases where elements wrap to new lines according to the particular tool's
    column limit setting.
+
+### Fixed a crash in h5dump binary output of variable-length string datasets
+
+   Dumping a variable-length string dataset with more than one element to native binary (`h5dump -b`) could crash. `render_bin_output()` reused a single variable as both the per-element stride and the length of the current string, so after the first element the stride was corrupted and subsequent elements were read from misaligned addresses, dereferencing a garbage pointer. The two uses are now kept separate and variable-length string datasets can be binary dumped safely.
+
+   Fixes GitHub issue #6486
+
+   Fixes CVE-2026-19023
 
 ## Performance
 

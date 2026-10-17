@@ -915,6 +915,23 @@ else ()
   set (HDF5_THREADS_ENABLED OFF) # Used to init hdf5-config.cmake
 endif ()
 
+# Static libraries on Windows are built without thread support (see
+# H5pubconf.h), so thread support is reported for each type of library
+if (HDF5_THREADS_ENABLED AND WIN32)
+  set (HDF5_STATIC_THREADS_ENABLED OFF) # Used to init hdf5-config.cmake
+else ()
+  set (HDF5_STATIC_THREADS_ENABLED ${HDF5_THREADS_ENABLED})
+endif ()
+if (HDF5_THREADS_ENABLED AND NOT HDF5_STATIC_THREADS_ENABLED AND BUILD_STATIC_LIBS)
+  if (BUILD_SHARED_LIBS)
+    set (HDF5_THREADS_SETTING "ON (shared library only)") # Used in libhdf5.settings
+  else ()
+    set (HDF5_THREADS_SETTING OFF)
+  endif ()
+else ()
+  set (HDF5_THREADS_SETTING ${HDF5_THREADS_ENABLED})
+endif ()
+
 # Determine whether to build the HDF5 Subfiling VFD
 set (H5FD_SUBFILING_DIR ${HDF5_SRC_DIR}/H5FDsubfiling)
 set (HDF5_SRC_INCLUDE_DIRS
