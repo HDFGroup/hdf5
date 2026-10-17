@@ -44,19 +44,13 @@ cat > pom.xml << EOF
     </repositories>
 
     <dependencies>
-        <!-- HDF5 Java Library (platform-specific) -->
+        <!-- Java bindings only: hdf5-jni-native and hdf5-native are transitive (required), and
+             hdf5-native brings hdf5-zlib-native / hdf5-szip-native -->
         <dependency>
             <groupId>org.hdfgroup</groupId>
-            <artifactId>hdf5-java</artifactId>
+            <artifactId>hdf5-java-jni</artifactId>
             <version>\${hdf5.version}</version>
             <classifier>linux-x86_64</classifier>
-        </dependency>
-
-        <!-- HDF5 Java Examples -->
-        <dependency>
-            <groupId>org.hdfgroup</groupId>
-            <artifactId>hdf5-java-examples</artifactId>
-            <version>\${hdf5.version}</version>
         </dependency>
     </dependencies>
 </project>
@@ -67,8 +61,11 @@ mkdir -p src/main/java/org/hdfgroup/test
 cat > src/main/java/org/hdfgroup/test/TestConsumer.java << 'EOF'
 package org.hdfgroup.test;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 public class TestConsumer {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         System.out.println("Testing HDF5 Maven artifact consumption...");
 
         try {
@@ -78,6 +75,25 @@ public class TestConsumer {
         } catch (ClassNotFoundException e) {
             System.out.println("⚠ HDF5 Java library classes not found: " + e.getMessage());
         }
+
+        H5.loadH5Lib();
+        if (H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_DEFLATE) <= 0) {
+            throw new IllegalStateException("H5Z_FILTER_DEFLATE is not available");
+        }
+        System.out.println("✓ H5Z_FILTER_DEFLATE is available after H5.loadH5Lib()");
+
+        long dcpl = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+        long[] chunk = {10, 20};
+        H5.H5Pset_chunk(dcpl, 2, chunk);
+        H5.H5Pset_deflate(dcpl, 6);
+        H5.H5Pclose(dcpl);
+        System.out.println("✓ HDF5 deflate/GZIP filter is available");
+
+        long szDcpl = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+        H5.H5Pset_chunk(szDcpl, 2, chunk);
+        H5.H5Pset_szip(szDcpl, HDF5Constants.H5_SZIP_NN_OPTION_MASK, 8);
+        H5.H5Pclose(szDcpl);
+        System.out.println("✓ HDF5 SZIP (libaec) filter is available");
 
         System.out.println("✓ Maven artifact consumption test completed");
     }
@@ -100,6 +116,15 @@ if mvn compile -q; then
     echo "✓ Compilation successful"
 else
     echo "❌ Compilation failed"
+    exit 1
+fi
+
+# Test runtime loading and deflate availability
+echo "=== Testing Runtime Loading and Deflate ==="
+if MAVEN_OPTS="${MAVEN_OPTS:-} --enable-native-access=ALL-UNNAMED" mvn exec:java -Dexec.mainClass=org.hdfgroup.test.TestConsumer -q; then
+    echo "✓ Runtime loading and deflate test successful"
+else
+    echo "❌ Runtime loading or deflate test failed"
     exit 1
 fi
 

@@ -1,0 +1,30 @@
+    static final SymbolLookup SYMBOL_LOOKUP = createHdf5SymbolLookup();
+
+    /*
+     * When the hdf5-native Maven JAR is on the classpath, hdf.hdf5lib.Hdf5NativeLoader extracts and
+     * loads libhdf5 (after its bundled zlib/libaec dependencies) and symbols are looked up in that
+     * extracted file. Otherwise libhdf5 is opened by name through the OS loader. If it cannot be
+     * opened, the loader and default lookups are used. Hdf5NativeLoader lives in the hdf5 Java API
+     * JAR, so it is looked up by name and is absent when only these bindings are on the classpath.
+     */
+    private static SymbolLookup createHdf5SymbolLookup() {
+        // HDF5_FFM_NATIVE_LOOKUP: marker for idempotent CMake post-process
+        SymbolLookup fallback = SymbolLookup.loaderLookup().or(Linker.nativeLinker().defaultLookup());
+        java.nio.file.Path bundledHdf5 = null;
+        try {
+            Class<?> loader = Class.forName("hdf.hdf5lib.Hdf5NativeLoader");
+            loader.getMethod("loadBundledDependenciesBeforeHdf5").invoke(null);
+            bundledHdf5 = (java.nio.file.Path) loader.getMethod("bundledHdf5Path").invoke(null);
+        }
+        catch (Throwable ignored) {
+            // Hdf5NativeLoader or native-lib-loader not on the classpath: use the system libhdf5
+        }
+        try {
+            if (bundledHdf5 != null)
+                return SymbolLookup.libraryLookup(bundledHdf5, LIBRARY_ARENA).or(fallback);
+            return SymbolLookup.libraryLookup(System.mapLibraryName("hdf5"), LIBRARY_ARENA).or(fallback);
+        }
+        catch (IllegalArgumentException e) {
+            return fallback;
+        }
+    }

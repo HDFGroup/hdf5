@@ -566,25 +566,53 @@ jobs:
       # Upload Maven artifacts when Maven deployment is enabled
       - name: Collect Maven artifacts (Linux)
         if: ${{ inputs.maven_enabled == true }}
+        shell: bash
+        env:
+          ARTIFACTS_DIR: ${{ runner.workspace }}/maven-artifacts
+          ACTIVE_PRESET: ${{ steps.run-ctest.outputs.ACTIVE_PRESET }}
+          BUILD_DIR: ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}
         run: |
           echo "Collecting Maven artifacts for deployment..."
-          mkdir -p ${{ runner.workspace }}/maven-artifacts
-
-          # Determine the build directory based on Maven preset used
-          BUILD_DIR="${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}"
+          mkdir -p "$ARTIFACTS_DIR"
 
           echo "Looking for artifacts in: ${BUILD_DIR}"
 
           # Copy JAR files
-          find "${BUILD_DIR}" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+          find "${BUILD_DIR}" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" -exec cp {} "$ARTIFACTS_DIR/" \;
 
-          # Copy POM files
-          find "${BUILD_DIR}" -name "pom.xml" -exec cp {} ${{ runner.workspace }}/maven-artifacts/ \;
+          # Copy POM files from the active Java tree only (flat cp clobber if both FFM and JNI
+          # pom.xml exist). Preset naming matches CMakePresets *Maven-FFM* vs *Maven* (JNI).
+          JNI_POM_COUNT=$(find "${BUILD_DIR}" -path '*/java/src-jni/hdf/hdf5lib/pom.xml' 2>/dev/null | wc -l | awk '{print $1}')
+          FFM_POM_COUNT=$(find "${BUILD_DIR}" -path '*/java/hdf/hdf5lib/pom.xml' 2>/dev/null | wc -l | awk '{print $1}')
+          if [ "${JNI_POM_COUNT:-0}" -gt 0 ] && [ "${FFM_POM_COUNT:-0}" -gt 0 ]; then
+            echo "::error::Both JNI and FFM generated pom.xml trees found under ${BUILD_DIR}; refusing ambiguous flat copy"
+            find "${BUILD_DIR}" \( -path '*/java/src-jni/hdf/hdf5lib/pom.xml' -o -path '*/java/hdf/hdf5lib/pom.xml' \) 2>/dev/null | head -20
+            exit 1
+          fi
+          case "$ACTIVE_PRESET" in
+            *Maven-FFM*)
+              find "${BUILD_DIR}" \( \
+                -path '*/java/hdf/hdf5lib/pom.xml' -o \
+                -path '*/java/hdf/hdf5lib/pom-hdf5-native.xml' -o \
+                -path '*/java/hdf/hdf5lib/pom-hdf5-zlib-native.xml' -o \
+                -path '*/java/hdf/hdf5lib/pom-hdf5-szip-native.xml' -o \
+                -path '*/java/hdf/hdf5lib/pom-hdf5-jni-native.xml' \
+              \) -exec cp {} "$ARTIFACTS_DIR/" \;
+              ;;
+            *)
+              find "${BUILD_DIR}" \( \
+                -path '*/java/src-jni/hdf/hdf5lib/pom.xml' -o \
+                -path '*/java/src-jni/hdf/hdf5lib/pom-hdf5-native.xml' -o \
+                -path '*/java/src-jni/hdf/hdf5lib/pom-hdf5-zlib-native.xml' -o \
+                -path '*/java/src-jni/hdf/hdf5lib/pom-hdf5-szip-native.xml' -o \
+                -path '*/java/src-jni/hdf/hdf5lib/pom-hdf5-jni-native.xml' \
+              \) -exec cp {} "$ARTIFACTS_DIR/" \;
+              ;;
+          esac
 
           # List collected artifacts
           echo "Collected Maven artifacts:"
-          ls -la ${{ runner.workspace }}/maven-artifacts/
-        shell: bash
+          ls -la "$ARTIFACTS_DIR/"
 
       - name: Upload Maven artifacts (Linux)
         if: ${{ inputs.maven_enabled == true }}
