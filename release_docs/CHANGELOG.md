@@ -225,6 +225,10 @@ Fixes GitHub issue #6679.
 
    Fixes CVE-2026-19026, CVE-2026-19027, and CVE-2026-19028
 
+### Fixed a division by zero when reading or writing an N-Bit dataset with a zero datatype size
+
+   `H5Z__nbit_decompress_one_array()` and `H5Z__nbit_compress_one_array()` divide the stored size of an array or compound datatype by the size of its base type to work out how many elements to process. Both sizes come from the filter's client-data parameters, so a corrupted or crafted file could supply a zero base size, on either a read or a write to an existing dataset. A zero atomic size also passes the existing precision/offset check when the precision and offset are zero as well, so it was not caught there. The three divisions in each function now reject a zero divisor with an error instead.
+
 ### Fixed a stack overflow when iterating a corrupted B-tree
 
    `H5B__iterate_helper()` now verifies that a B-tree node it has just protected has the level the traversal expects, when the expected level is known. The equivalent check in `H5B__cache_deserialize()` only runs when a node is first loaded into the metadata cache, so a corrupted B-tree whose child pointer revisits a node that is already cached (for example, a node that points to itself) could bypass that check and recurse without bound until the stack was exhausted. Such a file is now rejected with an error instead of crashing. This was observed through `H5Gget_info()`.
