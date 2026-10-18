@@ -56,6 +56,9 @@ if (BUILD_SHARED_LIBS)
   set (H5REPACK_TOOL_PLUGIN_LIB_VCORENAME        "dynlibvers")
   set (H5REPACK_TOOL_PLUGIN_LIB_VNAME            "${HDF5_EXTERNAL_LIB_PREFIX}${H5REPACK_TOOL_PLUGIN_LIB_VCORENAME}")
   set (H5REPACK_TOOL_PLUGIN_LIB_VTARGET          ${H5REPACK_TOOL_PLUGIN_LIB_VCORENAME})
+  set (H5REPACK_TOOL_PLUGIN_LIB_CFGCORENAME      "dynlibcfg")
+  set (H5REPACK_TOOL_PLUGIN_LIB_CFGNAME          "${HDF5_EXTERNAL_LIB_PREFIX}${H5REPACK_TOOL_PLUGIN_LIB_CFGCORENAME}")
+  set (H5REPACK_TOOL_PLUGIN_LIB_CFGTARGET        ${H5REPACK_TOOL_PLUGIN_LIB_CFGCORENAME})
 
   add_library (${H5REPACK_TOOL_PLUGIN_LIB_TARGET} SHARED dynlib_rpk.c)
   target_include_directories (${H5REPACK_TOOL_PLUGIN_LIB_TARGET} PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
@@ -69,12 +72,19 @@ if (BUILD_SHARED_LIBS)
   target_link_libraries (${H5REPACK_TOOL_PLUGIN_LIB_VTARGET} PRIVATE ${HDF5_LIBSH_TARGET})
   H5_SET_LIB_OPTIONS (${H5REPACK_TOOL_PLUGIN_LIB_VTARGET} ${H5REPACK_TOOL_PLUGIN_LIB_VNAME} SHARED "LIB")
 
+  add_library (${H5REPACK_TOOL_PLUGIN_LIB_CFGTARGET} SHARED dynlib_rpk3.c)
+  target_include_directories (${H5REPACK_TOOL_PLUGIN_LIB_CFGTARGET} PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  TARGET_C_PROPERTIES (${H5REPACK_TOOL_PLUGIN_LIB_CFGTARGET} SHARED)
+  target_link_libraries (${H5REPACK_TOOL_PLUGIN_LIB_CFGTARGET} PRIVATE ${HDF5_LIBSH_TARGET})
+  H5_SET_LIB_OPTIONS (${H5REPACK_TOOL_PLUGIN_LIB_CFGTARGET} ${H5REPACK_TOOL_PLUGIN_LIB_CFGNAME} SHARED "LIB")
+
   #-----------------------------------------------------------------------------
   # Add Target to clang-format
   #-----------------------------------------------------------------------------
   if (HDF5_ENABLE_FORMATTERS)
     clang_format (HDF5_TOOLS_TEST_H5REPACK_PLUGIN_FORMAT ${H5REPACK_TOOL_PLUGIN_LIB_TARGET})
     clang_format (HDF5_TOOLS_TEST_H5REPACK_VPLUGIN_FORMAT ${H5REPACK_TOOL_PLUGIN_LIB_VTARGET})
+    clang_format (HDF5_TOOLS_TEST_H5REPACK_CFGPLUGIN_FORMAT ${H5REPACK_TOOL_PLUGIN_LIB_CFGTARGET})
   endif ()
 
   # make plugins dir
@@ -98,12 +108,21 @@ if (BUILD_SHARED_LIBS)
             "$<TARGET_FILE:${H5REPACK_TOOL_PLUGIN_LIB_VTARGET}>"
             "${CMAKE_BINARY_DIR}/plugins/$<TARGET_FILE_NAME:${H5REPACK_TOOL_PLUGIN_LIB_VTARGET}>"
   )
+  add_custom_command (
+      TARGET     ${H5REPACK_TOOL_PLUGIN_LIB_CFGTARGET}
+      POST_BUILD
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E copy_if_different
+            "$<TARGET_FILE:${H5REPACK_TOOL_PLUGIN_LIB_CFGTARGET}>"
+            "${CMAKE_BINARY_DIR}/plugins/$<TARGET_FILE_NAME:${H5REPACK_TOOL_PLUGIN_LIB_CFGTARGET}>"
+  )
 
   #-----------------------------------------------------------------------------
   # Sign the plugins if signature verification is enabled
   #-----------------------------------------------------------------------------
   sign_plugin_target(${H5REPACK_TOOL_PLUGIN_LIB_TARGET} "${CMAKE_BINARY_DIR}/plugins")
   sign_plugin_target(${H5REPACK_TOOL_PLUGIN_LIB_VTARGET} "${CMAKE_BINARY_DIR}/plugins")
+  sign_plugin_target(${H5REPACK_TOOL_PLUGIN_LIB_CFGTARGET} "${CMAKE_BINARY_DIR}/plugins")
 endif ()
 
 if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)
