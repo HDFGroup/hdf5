@@ -7,8 +7,9 @@
 # point into the build directory; these are removed from the copies placed in the
 # native JARs. Hdf5NativeLoader extracts every bundled library into one directory
 # under its unversioned name and loads them in dependency order.
-#   linux: a dependency (DT_NEEDED, e.g. libz.so.1) resolves to the already-loaded
-#          bundled library with that SONAME.
+#   linux: a dependency (DT_NEEDED, e.g. libz.so.1) resolves to the first loaded
+#          library with that SONAME: the bundled copy, or a system copy the JVM
+#          loaded earlier (many JDKs load the system libz.so.1 at startup).
 #   macos: @rpath/ dependencies (e.g. @rpath/libz.1.dylib) are pointed at
 #          @loader_path/<unversioned name> (e.g. @loader_path/libz.dylib), the
 #          extracted file next to the loading library.

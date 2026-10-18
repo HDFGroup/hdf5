@@ -81,7 +81,8 @@ public class NativeBundleSmokeTest {
         if (Hdf5NativeLoader.bundledHdf5Path() != null)
             checkOwnerOnly(Hdf5NativeLoader.bundledHdf5Path().getParent());
         if (expected("zlib"))
-            check(Hdf5NativeLoader.bundledZlibLoadSucceeded(), "zlib loaded from hdf5-native");
+            check(Hdf5NativeLoader.bundledZlibLoadSucceeded(),
+                  "bundled zlib loaded (libhdf5 may use a zlib loaded earlier)");
         if (expected("szip"))
             check(Hdf5NativeLoader.bundledSzipLoadSucceeded(), "libaec/libsz loaded from hdf5-native");
         if (expected("jni"))

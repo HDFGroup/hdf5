@@ -16,18 +16,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.AclEntry;
 import java.nio.file.attribute.AclEntryFlag;
 import java.nio.file.attribute.AclEntryPermission;
 import java.nio.file.attribute.AclEntryType;
 import java.nio.file.attribute.AclFileAttributeView;
+import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.UserPrincipal;
+import java.nio.file.attribute.UserPrincipalLookupService;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +67,9 @@ public final class Hdf5NativeLoader {
 
     /* Prefix of the per-JVM directory the bundled libraries are copied into */
     private static final String EXTRACT_DIR_PREFIX = "hdf5-native-";
+
+    /* Earlier extraction directories modified more recently than this may belong to a starting JVM */
+    private static final long EARLIER_DIR_MIN_AGE_MS = 10 * 60 * 1000;
 
     /* Names used by Windows zlib builds: z.dll (zlib's CMake build), zlib.dll, zlib1.dll */
     private static final String[] ZLIB_NAMES =
@@ -134,17 +145,27 @@ public final class Hdf5NativeLoader {
     private static synchronized Path extractionDirectory() throws IOException
     {
         if (extractDir == null) {
-            Path dir = Files.createTempDirectory(EXTRACT_DIR_PREFIX);
-            dir.toFile().deleteOnExit();
+            Path parent = Paths.get(System.getProperty("java.io.tmpdir"));
+            Path dir;
             if (IS_WINDOWS) {
+                UserPrincipal self = currentWindowsUser();
+                dir = Files.createTempDirectory(parent, EXTRACT_DIR_PREFIX, ownerOnlyAcl(self));
+                dir.toFile().deleteOnExit();
                 try {
-                    restrictToOwner(dir);
+                    checkOwnerOnlyAcl(dir, self);
                 }
                 catch (IOException | RuntimeException err) {
                     Files.deleteIfExists(dir);
-                    throw new IOException("Could not restrict " + dir + " to its owner", err);
+                    throw err;
                 }
-                removeEarlierExtractionDirectories(dir);
+                if (self.equals(Files.getOwner(parent)))
+                    removeEarlierExtractionDirectories(dir);
+            }
+            else {
+                checkPosixParent(parent);
+                // On POSIX file systems the new directory is accessible only to its owner
+                dir = Files.createTempDirectory(parent, EXTRACT_DIR_PREFIX);
+                dir.toFile().deleteOnExit();
             }
             extractDir = dir;
         }
@@ -152,35 +173,105 @@ public final class Hdf5NativeLoader {
     }
 
     /*
-     * On POSIX file systems Files.createTempDirectory already makes the directory accessible only
-     * to its owner. On Windows it inherits the ACL of the temporary directory, which for a shared
-     * one such as C:\Windows\Temp lets other users create files in it. Replace the ACL with a
-     * single entry for the owner; the libraries copied into the directory inherit it.
+     * A user who can rename entries in the temporary directory could replace the extraction
+     * directory between copying a library and loading it. Accept only a directory owned by the
+     * current user or root that other users cannot write to, or that has the sticky bit set.
      */
-    private static void restrictToOwner(Path dir) throws IOException
+    private static void checkPosixParent(Path parent) throws IOException
+    {
+        Map<String, Object> attrs;
+        try {
+            attrs = Files.readAttributes(parent, "unix:uid,mode");
+        }
+        catch (UnsupportedOperationException | IllegalArgumentException err) {
+            return; // no POSIX ownership and mode to check
+        }
+        int uid                  = (Integer)attrs.get("uid");
+        int mode                 = (Integer)attrs.get("mode");
+        String owner             = Files.getOwner(parent).getName();
+        boolean ownedBySelf      = uid == 0 || owner.equals(System.getProperty("user.name"));
+        boolean writableByOthers = (mode & 0022) != 0 && (mode & 01000) == 0;
+        if (!ownedBySelf || writableByOthers)
+            throw new IOException("temporary directory " + parent + " (owner " + owner + ", mode " +
+                                  Integer.toOctalString(mode & 07777) +
+                                  ") can be modified by other users; set java.io.tmpdir to a "
+                                  + "directory that only you can write to");
+    }
+
+    /* The Windows account this JVM runs as */
+    private static UserPrincipal currentWindowsUser() throws IOException
+    {
+        UserPrincipalLookupService lookup = FileSystems.getDefault().getUserPrincipalLookupService();
+        String user                       = System.getProperty("user.name");
+        String domain                     = System.getenv("USERDOMAIN");
+        if (domain != null && !domain.isEmpty()) {
+            try {
+                return lookup.lookupPrincipalByName(domain + "\\" + user);
+            }
+            catch (IOException err) {
+                log.debug("Could not look up {}\\{}: {}", domain, user, err.getMessage());
+            }
+        }
+        return lookup.lookupPrincipalByName(user);
+    }
+
+    /*
+     * On Windows Files.createTempDirectory would let the new directory inherit the ACL of the
+     * temporary directory, which for a shared one lets other users create files in it. Create it
+     * with a single entry for the current user instead; the libraries copied into the directory
+     * inherit it.
+     */
+    private static FileAttribute<List<AclEntry>> ownerOnlyAcl(UserPrincipal user)
+    {
+        final List<AclEntry> acl =
+            Collections.singletonList(AclEntry.newBuilder()
+                                          .setType(AclEntryType.ALLOW)
+                                          .setPrincipal(user)
+                                          .setPermissions(EnumSet.allOf(AclEntryPermission.class))
+                                          .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
+                                          .build());
+        return new FileAttribute<List<AclEntry>>() {
+            @Override
+            public String name()
+            {
+                return "acl:acl";
+            }
+
+            @Override
+            public List<AclEntry> value()
+            {
+                return acl;
+            }
+        };
+    }
+
+    private static void checkOwnerOnlyAcl(Path dir, UserPrincipal user) throws IOException
     {
         AclFileAttributeView view =
             Files.getFileAttributeView(dir, AclFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
         if (view == null)
-            return; // file system without ACLs
-        AclEntry owner = AclEntry.newBuilder()
-                             .setType(AclEntryType.ALLOW)
-                             .setPrincipal(view.getOwner())
-                             .setPermissions(EnumSet.allOf(AclEntryPermission.class))
-                             .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
-                             .build();
-        view.setAcl(Collections.singletonList(owner));
+            throw new IOException("cannot read the ACL of " + dir);
+        for (AclEntry entry : view.getAcl()) {
+            if (!entry.principal().equals(user))
+                throw new IOException(dir + " has an ACL entry for " + entry.principal().getName());
+        }
     }
 
     /*
      * Windows cannot delete a loaded DLL when the JVM exits, so earlier runs leave their extraction
-     * directories behind. Remove those that have the same owner as this JVM's directory
-     * {@code current}, deleting only the regular files directly in them; files still in use by a
-     * running JVM cannot be deleted and are left alone. Failures never stop the libraries from
-     * being loaded.
+     * directories behind. Called only when the temporary directory belongs to the current user.
+     * Remove the directories with the same owner as this JVM's directory {@code current} that have
+     * not changed for EARLIER_DIR_MIN_AGE_MS, deleting only the library files this loader extracts;
+     * files still in use by a running JVM cannot be deleted and are left alone. Failures never stop
+     * the libraries from being loaded.
      */
     private static void removeEarlierExtractionDirectories(Path current)
     {
+        Set<String> libraryFiles = new HashSet<>();
+        for (String name : new String[] {"z", "zlib", "zlib1", "aec", "szip", "sz", "hdf5", "hdf5_java"})
+            libraryFiles.add(System.mapLibraryName(name).toLowerCase(Locale.ROOT));
+        long newest = System.currentTimeMillis() - EARLIER_DIR_MIN_AGE_MS;
+
         try (DirectoryStream<Path> dirs =
                  Files.newDirectoryStream(current.getParent(), EXTRACT_DIR_PREFIX + "*")) {
             UserPrincipal self = Files.getOwner(current, LinkOption.NOFOLLOW_LINKS);
@@ -190,9 +281,13 @@ public final class Hdf5NativeLoader {
                         continue;
                     if (!self.equals(Files.getOwner(dir, LinkOption.NOFOLLOW_LINKS)))
                         continue;
+                    if (Files.getLastModifiedTime(dir, LinkOption.NOFOLLOW_LINKS).toMillis() > newest)
+                        continue;
                     try (DirectoryStream<Path> files = Files.newDirectoryStream(dir)) {
                         for (Path file : files) {
-                            if (Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS))
+                            String name = file.getFileName().toString().toLowerCase(Locale.ROOT);
+                            if (libraryFiles.contains(name) &&
+                                Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS))
                                 Files.deleteIfExists(file);
                         }
                     }
@@ -240,8 +335,8 @@ public final class Hdf5NativeLoader {
                 Files.copy(in, lib);
                 lib.toFile().deleteOnExit();
             }
-            catch (IOException | SecurityException err) {
-                log.warn("Bundled native library {} could not be extracted", resource, err);
+            catch (IOException | RuntimeException | LinkageError err) {
+                log.warn("Bundled native library {} could not be extracted: {}", resource, err.toString());
                 return null;
             }
             try {
@@ -249,7 +344,13 @@ public final class Hdf5NativeLoader {
                 log.debug("Loaded bundled native library {}", lib);
                 return lib;
             }
-            catch (UnsatisfiedLinkError err) {
+            catch (IllegalCallerException err) {
+                log.warn("Bundled native library {} could not be loaded: native access is not enabled "
+                             + "(run with --enable-native-access=ALL-UNNAMED)",
+                         lib);
+                return null;
+            }
+            catch (LinkageError | RuntimeException err) {
                 log.warn("Bundled native library {} could not be loaded: {}", lib, err.getMessage());
                 return null;
             }
@@ -325,6 +426,8 @@ public final class Hdf5NativeLoader {
 
     /**
      * Loads the bundled hdf5_java JNI library when present. Safe to call multiple times.
+     * The JNI library is built against the bundled libhdf5, so it is loaded only after
+     * {@link #loadBundledDependenciesBeforeHdf5()} has loaded the bundled libhdf5.
      *
      * @return true if bundled hdf5_java was loaded successfully
      */
@@ -332,7 +435,9 @@ public final class Hdf5NativeLoader {
     {
         if (!attemptedHdf5Java) {
             attemptedHdf5Java = true;
-            loadedHdf5Java    = !skipBundledLoad() && loadFirstBundled("hdf5_java") != null;
+            if (!loadedHdf5)
+                log.debug("Bundled hdf5_java not loaded: the bundled libhdf5 is not loaded");
+            loadedHdf5Java = !skipBundledLoad() && loadedHdf5 && loadFirstBundled("hdf5_java") != null;
         }
         return loadedHdf5Java;
     }
