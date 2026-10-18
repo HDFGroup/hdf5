@@ -144,6 +144,11 @@
  *  'off' <br />
  *  '0' <br />
  *
+ * Note that the VFD also uses path-style requests whenever an alternate
+ * endpoint URL is in effect, and whenever the bucket name contains a '.',
+ * regardless of the value of this environment variable. The `s3` setting
+ * `addressing_style` in the shared AWS configuration file is not consulted.
+ *
  * \since 2.0.0
  */
 #define HDF5_ROS3_VFD_FORCE_PATH_STYLE "HDF5_ROS3_VFD_FORCE_PATH_STYLE"
@@ -199,21 +204,49 @@
  *      If a session token is to be used in this case, it must be specified
  *      with H5Pset_fapl_ros3_token().
  *
- *      If false, the ROS3 VFD will instead attempt to load credentials from
- *      several different places, in this order:
+ *      If false, the ROS3 VFD will instead load credentials with the default
+ *      credential provider chain from the aws-c-auth library, the same chain
+ *      used by the AWS CLI and the AWS SDKs, in this order:
  *
- *        - From the environment, by checking AWS environment variables such
- *          as AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN
- *          and AWS_ACCOUNT_ID
+ *        - From the environment, by checking the AWS_ACCESS_KEY_ID,
+ *          AWS_SECRET_ACCESS_KEY and AWS_SESSION_TOKEN environment variables
  *        - From the AWS profile files, by reading from ~/.aws/config and
  *          ~/.aws/credentials, by default. The specific files read from can
  *          be overridden with the AWS_CONFIG_FILE and AWS_SHARED_CREDENTIALS_FILE
- *          environment variables.
- *        - From STS, by using AssumeRoleWithWebIdentity
+ *          environment variables, and the profile read from can be selected
+ *          with the AWS_PROFILE environment variable. Within the selected
+ *          profile, this step supports:
+ *            - Assuming a role, with the `role_arn` setting together with
+ *              `source_profile` or `credential_source`
+ *            - An external credential helper program, with the
+ *              `credential_process` setting
+ *            - Static credentials, with the `aws_access_key_id`,
+ *              `aws_secret_access_key` and `aws_session_token` settings
+ *        - From STS, by using AssumeRoleWithWebIdentity. This covers the
+ *          AWS_WEB_IDENTITY_TOKEN_FILE, AWS_ROLE_ARN and AWS_ROLE_SESSION_NAME
+ *          environment variables and the `web_identity_token_file` profile
+ *          setting, as used by IAM Roles for Service Accounts on EKS
+ *        - From container credentials, as provided on ECS and EKS, when the
+ *          AWS_CONTAINER_CREDENTIALS_RELATIVE_URI or
+ *          AWS_CONTAINER_CREDENTIALS_FULL_URI environment variable is set
  *        - From EC2 instance metadata
  *
  *      If the ROS3 VFD cannot source credentials from any of these locations,
- *      it will fallback to using anonymous credentials.
+ *      it will fallback to using anonymous credentials. This is how objects in
+ *      public buckets are read. Note that it also means a misconfigured profile
+ *      results in unsigned requests rather than an error, which usually
+ *      surfaces later as an HTTP 403 response from the server.
+ *
+ *      AWS IAM Identity Center (SSO) is not supported directly. The
+ *      `sso_session` and `sso_start_url` profile settings are not part of this
+ *      chain, and a profile relying on them alone will fall back to anonymous
+ *      credentials. SSO credentials can still be supplied to the ROS3 VFD by
+ *      way of the `credential_process` setting.
+ *
+ *      Because the EC2 instance metadata step is attempted by default, opening
+ *      a file on a machine that is not an EC2 instance may be delayed while
+ *      that step times out. The AWS_EC2_METADATA_DISABLED environment variable,
+ *      which the aws-c-auth library recognizes, can be set to true to skip it.
  *
  * \var char H5FD_ros3_fapl_t::aws_region[H5FD_ROS3_MAX_REGION_LEN + 1]
  *      A string which specifies the AWS region of the S3 bucket, e.g. "us-east-1".
@@ -348,16 +381,28 @@ H5_DLL herr_t H5Pget_fapl_ros3_endpoint(hid_t fapl_id, size_t size, char *endpoi
  * \returns \herr_t
  *
  * \details H5Pset_fapl_ros3_endpoint() modifies an existing File Access Property List which
- *          is used by #H5FD_ROS3 driver by adding or updating the endpoint url of the
+ *          is used by #H5FD_ROS3 driver by adding or updating the endpoint URL of the
  *          property list. When not specified, the #H5FD_ROS3 driver uses the standard
  *          s3.<region-code>.amazonaws.com, unless an alternative endpoint URL is specified
  *          in the AWS_ENDPOINT_URL_S3 or AWS_ENDPOINT_URL environment variable. Be aware,
  *          to set the endpoint first you need to create a proper File Access Property List
- *          using H5Pset_fapl_ros() and use this list as input argument of the function
+ *          using H5Pset_fapl_ros3() and use this list as input argument of the function
  *          H5Pset_fapl_ros3_endpoint().
  *
- *          Note, the endpoint url is only needed when you want to access a S3 bucket
- *          using an alternate url. For example, this can be useful when using s3:// object
+ *          The #H5FD_ROS3 driver looks for an endpoint URL in the following
+ *          places, in order:
+ *
+ *            - The File Access Property List, if set with this function
+ *            - The AWS_ENDPOINT_URL_S3 environment variable
+ *            - The AWS_ENDPOINT_URL environment variable
+ *
+ *          Note that, unlike the AWS region, an endpoint URL is not read from
+ *          the shared AWS configuration file. An `endpoint_url` setting in
+ *          ~/.aws/config is ignored, and one of the two environment variables
+ *          above must be used instead.
+ *
+ *          Note, the endpoint URL is only needed when you want to access a S3 bucket
+ *          using an alternate URL. For example, this can be useful when using s3:// object
  *          URIs to access files which are located somewhere other than the standard
  *          s3.<region-code>.amazonaws.com.
  *

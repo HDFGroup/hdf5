@@ -517,6 +517,14 @@ These documents provide additional information for the use and tuning of specifi
   <p>Describes how to set write operations for in-memory files so that only modified regions are written to storage. Available when the Core (Memory) VFD is used.</p>
 </td>
 </tr>
+  <tr style="height: 62.00pt;">
+  <td style="width: 234.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p style="font-style: italic; color: #0000ff;"><span>@ref ros3_vfd</span></p>
+</td>
+  <td style="width: 198.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p>Describes how the Read-Only S3 (ROS3) VFD resolves its region, credentials, endpoint and request addressing style from the FAPL, AWS environment variables and the shared AWS configuration files.</p>
+</td>
+</tr>
   <tr style="height: 36.00pt;">
   <td style="width: 234.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
   <p style="font-style: italic; color: #0000ff;"><span>@ref UsingIdentifiers</span></p>
