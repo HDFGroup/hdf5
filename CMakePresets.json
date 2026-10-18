@@ -471,7 +471,7 @@
         "ci-S3"
       ],
       "cacheVariables": {
-      "CMAKE_OSX_ARCHITECTURES": "arm64"
+        "CMAKE_OSX_ARCHITECTURES": "arm64"
       }
     },
     {
@@ -482,7 +482,7 @@
         "ci-S3"
       ],
        "cacheVariables": {
-       "CMAKE_OSX_ARCHITECTURES": "x86_64"
+         "CMAKE_OSX_ARCHITECTURES": "x86_64"
       }
     },
     {
