@@ -52,13 +52,13 @@
  * threads.
  * \since 2.3.0
  */
-#define H5Z_FEAT_FILTER_THREADSAFE 0x00000001
+#define H5Z_FEAT_FILTER_THREADSAFE 0x0000000000000001
 /**
  * Defining the H5Z_FEAT_FILTER_NO_H5_CALLS for a filter means that the
  * \p filter callback does not make any HDF5 calls, excluding #H5OPEN.
  * \since 2.3.0
  */
-#define H5Z_FEAT_FILTER_NO_H5_CALLS 0x00000002
+#define H5Z_FEAT_FILTER_NO_H5_CALLS 0x0000000000000002
 
 /*******************/
 /* Public Typedefs */
@@ -204,7 +204,7 @@ typedef struct H5Z_class3_t {
     H5Z_can_apply_func_t can_apply;       /**< The "can apply" callback for a filter        */
     H5Z_set_local_func_t set_local;       /**< The "set local" callback for a filter        */
     H5Z_func_t           filter;          /**< The actual filter function                   */
-    unsigned long        feature_flags;   /**< Feature flags                                */
+    uint64_t             feature_flags;   /**< Feature flags                                */
 } H5Z_class3_t;
 //! <!-- [H5Z_class3_t_snip] -->
 

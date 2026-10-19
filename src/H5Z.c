@@ -294,7 +294,9 @@ H5Z__upgrade_class_vers(const void *_cls, H5Z_class3_t *cls3_buf)
     assert(cls3_buf);
 
     HDcompile_assert(offsetof(H5Z_class2_t, version) == offsetof(H5Z_class3_t, version));
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     HDcompile_assert(offsetof(H5Z_class1_t, id) == offsetof(H5Z_class3_t, version));
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     /* Check H5Z_class_t version number; this is where a function to convert
      * from an outdated version should be called.

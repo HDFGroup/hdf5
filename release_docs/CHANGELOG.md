@@ -104,7 +104,7 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    Added a new Virtual File Driver (VFD) feature flag,
    H5FD_FEAT_READWRITE_NO_H5_CALLS. This flag should be set when the read and
-   write callbacks do not make any HDF5 calls except for H5open().
+   write callbacks do not make any HDF5 calls except for H5OPEN.
 
 ### Added new version of H5Z_class_t, H5Z_class3_t, to include feature flags
 
@@ -113,7 +113,7 @@ We would like to thank the many HDF5 community members who contributed to this r
    plugin supports. The currently supported flags are
    H5Z_FEAT_FILTER_THREADSAFE, which should be set when the filter callback is
    threadsafe, and H5Z_FEAT_FILTER_NO_H5_CALLS, which should be set when the
-   filter makes no HDF5 calls except for H5open().
+   filter makes no HDF5 calls except for H5OPEN.
 
 ### Added support for internally concurrent multithreaded reads of chunked datasets
 
