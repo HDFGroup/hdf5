@@ -6073,7 +6073,7 @@ test_scaleoffset_bounds(hid_t fapl)
         FAIL_PUTS_ERROR("    H5Dread should have rejected the undersized chunk");
 
     if (H5Dclose(dataset) < 0)
-        goto error;
+        TEST_ERROR;
     dataset = H5I_INVALID_HID;
 
     /* Case 3: genuine full-precision round-trip must still work, proving the guards
@@ -6084,34 +6084,31 @@ test_scaleoffset_bounds(hid_t fapl)
     orig_data[NELMTS_PCHK - 1] = 255;
 
     if ((dataset = H5Dcreate2(file, DS3_NAME, H5T_NATIVE_UINT8, space, H5P_DEFAULT, dc, H5P_DEFAULT)) < 0)
-        goto error;
+        TEST_ERROR;
     if (H5Dwrite(dataset, H5T_NATIVE_UINT8, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig_data) < 0)
-        goto error;
+        TEST_ERROR;
     if (H5Dread(dataset, H5T_NATIVE_UINT8, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_data) < 0)
-        goto error;
+        TEST_ERROR;
 
     for (i = 0; i < NELMTS_PCHK; i++)
-        if (read_data[i] != orig_data[i]) {
-            H5_FAILED();
-            puts("    Written and read values mismatch");
-            goto error;
-        }
+        if (read_data[i] != orig_data[i])
+            FAIL_PUTS_ERROR("    Written and read values mismatch");
 
     /*----------------------------------------------------------------------
      * Cleanup
      *----------------------------------------------------------------------
      */
     if (H5Pclose(dc) < 0)
-        goto error;
+        TEST_ERROR;
     dc = H5I_INVALID_HID;
     if (H5Sclose(space) < 0)
-        goto error;
+        TEST_ERROR;
     space = H5I_INVALID_HID;
     if (H5Dclose(dataset) < 0)
-        goto error;
+        TEST_ERROR;
     dataset = H5I_INVALID_HID;
     if (H5Fclose(file) < 0)
-        goto error;
+        TEST_ERROR;
     file = H5I_INVALID_HID;
 
     PASSED();
