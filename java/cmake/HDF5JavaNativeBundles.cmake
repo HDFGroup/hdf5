@@ -18,7 +18,7 @@
 #                    libhdf5 cannot load without
 #   hdf5-jni-native  the hdf5_java JNI bridge (JNI builds only)
 #
-# Natives are staged under natives/<platform>/ (linux_64, osx_arm64, windows_64,
+# Natives are staged under natives/hdf5/<platform>/ (linux_64, osx_arm64, windows_64,
 # ...), the directories hdf.hdf5lib.Hdf5NativeLoader reads. The loader looks up
 # System.mapLibraryName(name), so each library is staged exactly once under that
 # name: the unversioned linker name on Linux and macOS (libhdf5.so, libz.dylib,
@@ -35,7 +35,7 @@ if (NOT DEFINED HDF5_MAVEN_PLATFORM OR NOT DEFINED HDF5_MAVEN_ARCHITECTURE)
   message (FATAL_ERROR "HDF5JavaNativeBundles.cmake requires HDF5_MAVEN_PLATFORM and HDF5_MAVEN_ARCHITECTURE")
 endif ()
 
-# Map HDF5 Maven classifiers to the natives/<platform>/ directory names Hdf5NativeLoader reads
+# Map HDF5 Maven classifiers to the natives/hdf5/<platform>/ directory names Hdf5NativeLoader reads
 if (HDF5_MAVEN_PLATFORM STREQUAL "linux")
   if (HDF5_MAVEN_ARCHITECTURE STREQUAL "aarch64")
     set (HDF5_NATIVE_LOADER_PLATFORM "linux_arm64")
@@ -126,7 +126,7 @@ function (hdf5java_append_maven_native_profiles _profiles_var _artifact_id _comm
   set (${_profiles_var} "${_profiles}" PARENT_SCOPE)
 endfunction ()
 
-# Stage shared libraries under natives/<platform>/, jar them, and install JAR + POM.
+# Stage shared libraries under natives/hdf5/<platform>/, jar them, and install JAR + POM.
 #   ARTIFACT_ID  Maven artifactId (also the jar/POM/stage-dir base name)
 #   POM_TEMPLATE template under java/cmake/
 #   TARGETS      shared library targets to bundle, one copy each
@@ -136,7 +136,7 @@ function (hdf5java_add_native_maven_jar)
 
   set (_base "${CMAKE_CURRENT_BINARY_DIR}/native-bundle/${_args_ARTIFACT_ID}")
   set (_stage "${_base}/stage")
-  set (_natives "${_stage}/natives/${HDF5_NATIVE_LOADER_PLATFORM}")
+  set (_natives "${_stage}/natives/hdf5/${HDF5_NATIVE_LOADER_PLATFORM}")
   set (_manifest "${_base}/MANIFEST.MF")
   set (_jar "${CMAKE_CURRENT_BINARY_DIR}/${_args_ARTIFACT_ID}-${HDF5_PACKAGE_VERSION}${HDF5_MAVEN_VERSION_SUFFIX}-${HDF5_JAR_CLASSIFIER}.jar")
   set (_target_name "${_args_ARTIFACT_ID}_maven_jar")

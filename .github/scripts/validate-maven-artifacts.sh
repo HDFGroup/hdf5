@@ -142,7 +142,7 @@ validate_jar_file() {
             main_lib=$(find "${temp_dir}/natives" -type f \( -name "libhdf5_java.so" -o -name "libhdf5_java.dylib" -o -name "hdf5_java.dll" \) 2>/dev/null | head -1)
         fi
         if [[ -z "${main_lib}" ]]; then
-            add_error "Native bundle JAR missing its library under natives/<platform>/: ${jar_basename}"
+            add_error "Native bundle JAR missing its library under natives/hdf5/<platform>/: ${jar_basename}"
         else
             log_info "Found native library in bundle: $(basename "${main_lib}")"
         fi
@@ -152,7 +152,7 @@ validate_jar_file() {
             mapped_libsz=$(find "${temp_dir}/natives" -type f \( -name "libsz.so" -o -name "libsz.dylib" -o -name "sz.dll" -o -name "szip.dll" \) 2>/dev/null | head -1)
             mapped_libaec=$(find "${temp_dir}/natives" -type f \( -name "libaec.so" -o -name "libaec.dylib" -o -name "aec.dll" \) 2>/dev/null | head -1)
             if [[ -n "${mapped_libsz}" && -z "${mapped_libaec}" ]] || [[ -z "${mapped_libsz}" && -n "${mapped_libaec}" ]]; then
-                add_error "hdf5-native JAR has only one of libsz/libaec under natives/<platform>/"
+                add_error "hdf5-native JAR has only one of libsz/libaec under natives/hdf5/<platform>/"
             fi
         fi
         rm -rf "${temp_dir}"

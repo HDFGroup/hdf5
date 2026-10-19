@@ -11,7 +11,7 @@
     <packaging>jar</packaging>
 
     <name>HDF5 native shared libraries</name>
-    <description>Bundled libhdf5 shared library for HDF5 Java (FFM/JNI) under natives/, with the shared zlib and libaec/libsz it links for the deflate and SZIP filters. Loaded from the classpath by hdf5-java-ffm / hdf5-java-jni when present.</description>
+    <description>Bundled libhdf5 shared library for HDF5 Java (FFM/JNI) under natives/hdf5/, with the shared zlib and libaec/libsz it links for the deflate and SZIP filters. Loaded from the classpath by hdf5-java-ffm / hdf5-java-jni when present.</description>
     <url>https://github.com/HDFGroup/hdf5</url>
 
     <licenses>

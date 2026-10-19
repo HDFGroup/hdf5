@@ -668,10 +668,10 @@ jobs:
                        'libz\.so|libz\.dylib|z\.dll|zlib\.dll|zlib1\.dll' \
                        'libaec\.so|libaec\.dylib|aec\.dll' \
                        'libsz\.so|libsz\.dylib|sz\.dll|szip\.dll'; do
-              if grep -Eq "^natives/[^/]+/(${lib})$" <<< "$NATIVE_LIST"; then
+              if grep -Eq "^natives/hdf5/[^/]+/(${lib})$" <<< "$NATIVE_LIST"; then
                 echo "✅ hdf5-native contains one of: ${lib//\\/}"
               else
-                echo "::error::hdf5-native is missing one of ${lib//\\/} under natives/<platform>/"
+                echo "::error::hdf5-native is missing one of ${lib//\\/} under natives/hdf5/<platform>/"
                 VERIFICATION_FAILED=true
               fi
             done

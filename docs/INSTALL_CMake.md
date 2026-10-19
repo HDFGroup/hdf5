@@ -691,7 +691,7 @@ Maven Artifacts:
 - `org.hdfgroup:hdf5-java-jni` is JNI implementation
 - `org.hdfgroup:hdf5-java-ffm` is FFM implementation
 
-When `HDF5_ENABLE_MAVEN_DEPLOY` is on, CMake also produces the native JARs (`COMPONENT maven`): `hdf5-native-*.jar` always (with zlib and libaec only when `libhdf5` links them as shared libraries), and `hdf5-jni-native-*.jar` for JNI builds. Each JAR places its shared libraries under `natives/<platform>/` (for example `natives/linux_64/libhdf5.so`).
+When `HDF5_ENABLE_MAVEN_DEPLOY` is on, CMake also produces the native JARs (`COMPONENT maven`): `hdf5-native-*.jar` always (with zlib and libaec only when `libhdf5` links them as shared libraries), and `hdf5-jni-native-*.jar` for JNI builds. Each JAR places its shared libraries under `natives/hdf5/<platform>/` (for example `natives/hdf5/linux_64/libhdf5.so`).
 
 Dependency layering: `hdf5-java-jni` requires `hdf5-jni-native` and `hdf5-native`, because the JNI bridge is built against that `libhdf5`. Maven resolves both through OS-activated profiles in the published POM, for the four classifiers above. Build tools that ignore POM profiles (Gradle, for example) must declare `hdf5-jni-native` and `hdf5-native` with the platform classifier explicitly. For `hdf5-java-ffm`, `hdf5-native` is optional: add it to your POM for a classpath-only deployment, or use a system HDF5 install. With a system install, the OS loader must find `libhdf5` (`LD_LIBRARY_PATH`, `DYLD_LIBRARY_PATH`, `PATH` or the standard library directories; `java.library.path` is not used for it, by FFM or JNI), and for JNI the `hdf5_java` bridge built with that install must also be found.
 

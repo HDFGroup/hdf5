@@ -39,11 +39,14 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.MessageFormatter;
+import org.slf4j.helpers.NOPLoggerFactory;
 
 /**
  * Loads bundled HDF5 shared libraries from the {@code hdf5-native} and {@code hdf5-jni-native}
- * Maven JARs, which store them under {@code natives/<platform>/} (for example
- * {@code natives/linux_64/libhdf5.so}).
+ * Maven JARs, which store them under {@code natives/hdf5/<platform>/} (for example
+ * {@code natives/hdf5/linux_64/libhdf5.so}). The {@code hdf5} level keeps them apart from other
+ * projects' native JARs that use the common {@code natives/<platform>/} layout.
  * <p>
  * Each library is copied into a new temporary directory created for this JVM and loaded with
  * {@code System.load}; {@code java.library.path} is not consulted. A library that is bundled but
@@ -64,6 +67,9 @@ public final class Hdf5NativeLoader {
 
     private static final String OS_NAME     = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
     private static final boolean IS_WINDOWS = OS_NAME.startsWith("windows");
+
+    /* Classpath directory holding the bundled libraries, one subdirectory per platform */
+    private static final String RESOURCE_ROOT = "natives/hdf5/";
 
     /* Prefix of the per-JVM directory the bundled libraries are copied into */
     private static final String EXTRACT_DIR_PREFIX = "hdf5-native-";
@@ -105,8 +111,21 @@ public final class Hdf5NativeLoader {
         return skipBundled;
     }
 
+    /*
+     * Report a bundled library that could not be extracted or loaded. The HDF5 POMs depend only on
+     * slf4j-api, and without an SLF4J provider the warning would be dropped, so print it to
+     * standard error instead.
+     */
+    private static void warn(String format, Object... args)
+    {
+        if (LoggerFactory.getILoggerFactory() instanceof NOPLoggerFactory)
+            System.err.println("HDF5: " + MessageFormatter.arrayFormat(format, args).getMessage());
+        else
+            log.warn(format, args);
+    }
+
     /**
-     * Name of the {@code natives/} subdirectory for this platform, matching the directories that
+     * Name of the {@code natives/hdf5/} subdirectory for this platform, matching the directories that
      * HDF5JavaNativeBundles.cmake stages libraries into.
      *
      * @return the directory name, or null for an unsupported platform
@@ -305,7 +324,7 @@ public final class Hdf5NativeLoader {
 
     /**
      * Load the first of {@code names} found in the bundled native Maven JARs
-     * ({@code natives/<platform>/} on the classpath).
+     * ({@code natives/hdf5/<platform>/} on the classpath).
      * <p>
      * {@code System.loadLibrary} is not tried first, so in-tree CI with {@code java.library.path}
      * does not preload build-tree libs before {@code hdf5_java}.
@@ -323,7 +342,7 @@ public final class Hdf5NativeLoader {
         ClassLoader loader = Hdf5NativeLoader.class.getClassLoader();
         for (String name : names) {
             String mapped   = System.mapLibraryName(name);
-            String resource = "natives/" + platform + "/" + mapped;
+            String resource = RESOURCE_ROOT + platform + "/" + mapped;
             URL url =
                 (loader != null) ? loader.getResource(resource) : ClassLoader.getSystemResource(resource);
             if (url == null)
@@ -336,7 +355,7 @@ public final class Hdf5NativeLoader {
                 lib.toFile().deleteOnExit();
             }
             catch (IOException | RuntimeException | LinkageError err) {
-                log.warn("Bundled native library {} could not be extracted: {}", resource, err.toString());
+                warn("Bundled native library {} could not be extracted: {}", resource, err.toString());
                 return null;
             }
             try {
@@ -345,25 +364,26 @@ public final class Hdf5NativeLoader {
                 return lib;
             }
             catch (IllegalCallerException err) {
-                log.warn("Bundled native library {} could not be loaded: native access is not enabled "
-                             + "(run with --enable-native-access=ALL-UNNAMED)",
-                         lib);
+                warn("Bundled native library {} could not be loaded: native access is not enabled "
+                         + "(run with --enable-native-access=ALL-UNNAMED)",
+                     lib);
                 return null;
             }
             catch (LinkageError | RuntimeException err) {
                 String reason = err.getMessage();
                 // glibc's message when the file system is mounted noexec (common for /tmp)
                 if (reason != null && reason.contains("failed to map segment"))
-                    log.warn("Bundled native library {} could not be loaded: {}. The temporary directory "
-                                 + "may be on a file system mounted noexec; set -Djava.io.tmpdir to a "
-                                 + "directory from which programs can be executed",
-                             lib, reason);
+                    warn("Bundled native library {} could not be loaded: {}. The temporary directory "
+                             + "may be on a file system mounted noexec; set -Djava.io.tmpdir to a "
+                             + "directory from which programs can be executed",
+                         lib, reason);
                 else
-                    log.warn("Bundled native library {} could not be loaded: {}", lib, reason);
+                    warn("Bundled native library {} could not be loaded: {}", lib, reason);
                 return null;
             }
         }
-        log.debug("No bundled native library {} under natives/{}/", String.join("/", names), platform);
+        log.debug("No bundled native library {} under {}{}/", String.join("/", names), RESOURCE_ROOT,
+                  platform);
         return null;
     }
 
