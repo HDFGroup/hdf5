@@ -10,6 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -18,6 +19,7 @@ import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.nio.file.attribute.UserPrincipal;
+import java.nio.file.attribute.UserPrincipalLookupService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,16 +63,34 @@ public class NativeBundleSmokeTest {
             System.out.println("SKIP extraction directory permissions (no POSIX or ACL view)");
             return;
         }
-        UserPrincipal owner = acl.getOwner();
-        boolean ownerOnly   = true;
+        // Hdf5NativeLoader grants access to the account the JVM runs as; an elevated process may
+        // instead own the directory through BUILTIN\Administrators, so compare with the account
+        UserPrincipal user = currentUser();
+        boolean userOnly   = true;
         for (AclEntry entry : acl.getAcl()) {
-            if (!entry.principal().equals(owner)) {
+            if (!entry.principal().equals(user)) {
                 System.out.println("  ACL entry for another principal: " + entry);
-                ownerOnly = false;
+                userOnly = false;
             }
         }
-        check(ownerOnly,
-              "extraction directory ACL grants access to its owner (" + owner.getName() + ") only");
+        check(userOnly, "extraction directory ACL grants access to " + user.getName() + " only");
+    }
+
+    /* The Windows account this JVM runs as, looked up the same way as in Hdf5NativeLoader */
+    private static UserPrincipal currentUser() throws Exception
+    {
+        UserPrincipalLookupService lookup = FileSystems.getDefault().getUserPrincipalLookupService();
+        String user                       = System.getProperty("user.name");
+        String domain                     = System.getenv("USERDOMAIN");
+        if (domain != null && !domain.isEmpty()) {
+            try {
+                return lookup.lookupPrincipalByName(domain + "\\" + user);
+            }
+            catch (Exception err) {
+                // fall back to the plain user name
+            }
+        }
+        return lookup.lookupPrincipalByName(user);
     }
 
     public static void main(String[] args) throws Exception

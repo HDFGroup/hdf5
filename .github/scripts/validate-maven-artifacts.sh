@@ -403,15 +403,22 @@ read_simulation_coordinates() {
     sim_artifact_id=$(grep -o '<artifactId>[^<]*</artifactId>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
     sim_version=$(grep -o '<version>[^<]*</version>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
 
-    # Find the JAR for this POM's artifactId (parenthesize -o so -maxdepth applies to both)
-    sim_jar_file=$(find "$(dirname "${pom_file}")" -maxdepth 2 \( -name "${sim_artifact_id}-${sim_version}.jar" -o -name "${sim_artifact_id}-${sim_version}-*.jar" -o -name "${sim_artifact_id}-*.jar" \) 2>/dev/null | head -1)
+    # CMake names the binding JAR jarhdf5-<version>[-<classifier>].jar whatever its artifactId;
+    # the native bundles and examples are named after their artifactId
+    local jar_stem="${sim_artifact_id}"
+    case "${sim_artifact_id}" in
+        hdf5-java | hdf5-java-ffm | hdf5-java-jni) jar_stem="jarhdf5" ;;
+    esac
 
-    # Platform classifier from <artifactId>-<version>-<classifier>.jar
+    # Find the JAR for this POM (parenthesize -o so -maxdepth applies to all names)
+    sim_jar_file=$(find "$(dirname "${pom_file}")" -maxdepth 2 \( -name "${jar_stem}-${sim_version}.jar" -o -name "${jar_stem}-${sim_version}-*.jar" -o -name "${jar_stem}-*.jar" \) ! -name "*-sources.jar" ! -name "*-javadoc.jar" 2>/dev/null | head -1)
+
+    # Platform classifier from <name>-<version>-<classifier>.jar
     sim_classifier=""
     local jar_basename
     jar_basename=$(basename "${sim_jar_file:-none}" .jar)
-    if [[ "${jar_basename}" == "${sim_artifact_id}-${sim_version}-"* ]]; then
-        sim_classifier="${jar_basename#"${sim_artifact_id}-${sim_version}-"}"
+    if [[ "${jar_basename}" == "${jar_stem}-${sim_version}-"* ]]; then
+        sim_classifier="${jar_basename#"${jar_stem}-${sim_version}-"}"
     fi
 }
 

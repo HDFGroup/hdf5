@@ -20,7 +20,6 @@ import static jtest.FfmTestSupport.*;
 import java.io.File;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
 
 import org.hdfgroup.javahdf5.hdf5_h;
 import org.junit.After;

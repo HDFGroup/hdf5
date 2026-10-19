@@ -195,26 +195,31 @@ public final class Hdf5NativeLoader {
      * A user who can rename entries in the temporary directory could replace the extraction
      * directory between copying a library and loading it. Accept only a directory owned by the
      * current user or root that other users cannot write to, or that has the sticky bit set.
+     * Group write access is allowed when the group is the owner's own private group (same name as
+     * the owner), which is how directories are created under umask 0002 on many Linux systems.
      */
     private static void checkPosixParent(Path parent) throws IOException
     {
         Map<String, Object> attrs;
         try {
-            attrs = Files.readAttributes(parent, "unix:uid,mode");
+            attrs = Files.readAttributes(parent, "unix:uid,mode,group");
         }
         catch (UnsupportedOperationException | IllegalArgumentException err) {
             return; // no POSIX ownership and mode to check
         }
-        int uid                  = (Integer)attrs.get("uid");
-        int mode                 = (Integer)attrs.get("mode");
-        String owner             = Files.getOwner(parent).getName();
-        boolean ownedBySelf      = uid == 0 || owner.equals(System.getProperty("user.name"));
-        boolean writableByOthers = (mode & 0022) != 0 && (mode & 01000) == 0;
-        if (!ownedBySelf || writableByOthers)
-            throw new IOException("temporary directory " + parent + " (owner " + owner + ", mode " +
-                                  Integer.toOctalString(mode & 07777) +
+        int uid             = (Integer)attrs.get("uid");
+        int mode            = (Integer)attrs.get("mode");
+        String owner        = Files.getOwner(parent).getName();
+        String group        = ((UserPrincipal)attrs.get("group")).getName();
+        boolean ownedBySelf = uid == 0 || owner.equals(System.getProperty("user.name"));
+        boolean sticky      = (mode & 01000) != 0;
+        boolean otherWrite  = (mode & 0002) != 0;
+        boolean groupWrite  = (mode & 0020) != 0 && !(uid != 0 && group.equals(owner));
+        if (!ownedBySelf || (!sticky && (otherWrite || groupWrite)))
+            throw new IOException("temporary directory " + parent + " (owner " + owner + ", group " + group +
+                                  ", mode " + Integer.toOctalString(mode & 07777) +
                                   ") can be modified by other users; set java.io.tmpdir to a "
-                                  + "directory that only you can write to");
+                                  + "directory that you own and others cannot write to (chmod go-w)");
     }
 
     /* The Windows account this JVM runs as */
@@ -454,14 +459,17 @@ public final class Hdf5NativeLoader {
 
     /**
      * Loads the bundled hdf5_java JNI library when present. Safe to call multiple times.
-     * The JNI library is built against the bundled libhdf5, so it is loaded only after
-     * {@link #loadBundledDependenciesBeforeHdf5()} has loaded the bundled libhdf5.
+     * The JNI library is built against the bundled libhdf5, so it is loaded only if the bundled
+     * libhdf5 is loaded; {@link #loadBundledDependenciesBeforeHdf5()} is called first if it has
+     * not been yet.
      *
      * @return true if bundled hdf5_java was loaded successfully
      */
     public static synchronized boolean loadBundledHdf5JavaIfPresent()
     {
         if (!attemptedHdf5Java) {
+            if (!attemptedHdf5)
+                loadBundledDependenciesBeforeHdf5();
             attemptedHdf5Java = true;
             if (!loadedHdf5)
                 log.debug("Bundled hdf5_java not loaded: the bundled libhdf5 is not loaded");
