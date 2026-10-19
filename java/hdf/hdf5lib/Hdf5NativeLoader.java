@@ -213,9 +213,9 @@ public final class Hdf5NativeLoader {
         String group        = ((UserPrincipal)attrs.get("group")).getName();
         boolean ownedBySelf = uid == 0 || owner.equals(System.getProperty("user.name"));
         boolean sticky      = (mode & 01000) != 0;
-        boolean otherWrite  = (mode & 0002) != 0;
+        boolean worldWrite  = (mode & 0002) != 0;
         boolean groupWrite  = (mode & 0020) != 0 && !(uid != 0 && group.equals(owner));
-        if (!ownedBySelf || (!sticky && (otherWrite || groupWrite)))
+        if (!ownedBySelf || (!sticky && (worldWrite || groupWrite)))
             throw new IOException("temporary directory " + parent + " (owner " + owner + ", group " + group +
                                   ", mode " + Integer.toOctalString(mode & 07777) +
                                   ") can be modified by other users; set java.io.tmpdir to a "
