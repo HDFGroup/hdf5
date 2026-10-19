@@ -415,6 +415,9 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
         case H5PL_TYPE_FILTER: {
             const H5Z_class3_t *filter_info;
 
+            /* Make sure the "id" field is always at the same location. We do not support loading plugins with H5Z_class1_t so we only need to check 2 and 3 */
+            HDcompile_assert(offsetof(H5Z_class2_t, id) == offsetof(H5Z_class3_t, id));
+
             /* Get the plugin info */
             if (NULL == (filter_info = (const H5Z_class3_t *)(*get_plugin_info)()))
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get filter info from plugin");
