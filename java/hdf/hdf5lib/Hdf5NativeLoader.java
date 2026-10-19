@@ -351,7 +351,15 @@ public final class Hdf5NativeLoader {
                 return null;
             }
             catch (LinkageError | RuntimeException err) {
-                log.warn("Bundled native library {} could not be loaded: {}", lib, err.getMessage());
+                String reason = err.getMessage();
+                // glibc's message when the file system is mounted noexec (common for /tmp)
+                if (reason != null && reason.contains("failed to map segment"))
+                    log.warn("Bundled native library {} could not be loaded: {}. The temporary directory "
+                                 + "may be on a file system mounted noexec; set -Djava.io.tmpdir to a "
+                                 + "directory from which programs can be executed",
+                             lib, reason);
+                else
+                    log.warn("Bundled native library {} could not be loaded: {}", lib, reason);
                 return null;
             }
         }
