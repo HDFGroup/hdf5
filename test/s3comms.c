@@ -428,6 +428,213 @@ error:
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *-------------------------------------------------------------------------
  */
+
+#define S3COMMS_TEST_CONFIG_FILE "tmp_s3comms_aws_config"
+
+/* Names of the environment variables the endpoint resolution consults. These are saved
+ * and restored around the test, since the test harness itself sets some of them.
+ */
+static const char *s3comms_endpoint_env_names[] = {"AWS_CONFIG_FILE", "AWS_PROFILE", "AWS_ENDPOINT_URL",
+                                                   "AWS_ENDPOINT_URL_S3",
+                                                   "AWS_IGNORE_CONFIGURED_ENDPOINT_URLS"};
+#define S3COMMS_N_ENDPOINT_ENV_NAMES                                                                         \
+    (sizeof(s3comms_endpoint_env_names) / sizeof(s3comms_endpoint_env_names[0]))
+
+static char *s3comms_endpoint_env_saved[S3COMMS_N_ENDPOINT_ENV_NAMES];
+
+/*-------------------------------------------------------------------------
+ * Function:    write_s3comms_test_config
+ *
+ * Purpose:     Write a throwaway AWS configuration file for the endpoint
+ *              resolution test.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+write_s3comms_test_config(const char *contents)
+{
+    FILE *f = NULL;
+
+    if (NULL == (f = fopen(S3COMMS_TEST_CONFIG_FILE, "w")))
+        return FAIL;
+    if (fputs(contents, f) == EOF) {
+        fclose(f);
+        return FAIL;
+    }
+    if (fclose(f) != 0)
+        return FAIL;
+
+    return SUCCEED;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    check_s3comms_endpoint
+ *
+ * Purpose:     Resolve an endpoint URL and compare it against the expected
+ *              value, where NULL means "nothing should resolve".
+ *
+ * Return:      0 on match, -1 otherwise
+ *-------------------------------------------------------------------------
+ */
+static int
+check_s3comms_endpoint(const char *expected, const char *what)
+{
+    char *actual    = NULL;
+    int   ret_value = 0;
+
+    if (H5FD__s3comms_get_aws_endpoint(&actual) < 0) {
+        fprintf(stderr, "    %s: endpoint resolution failed\n", what);
+        return -1;
+    }
+
+    if (expected == NULL) {
+        if (actual != NULL) {
+            fprintf(stderr, "    %s: expected no endpoint, got '%s'\n", what, actual);
+            ret_value = -1;
+        }
+    }
+    else if (actual == NULL) {
+        fprintf(stderr, "    %s: expected '%s', got no endpoint\n", what, expected);
+        ret_value = -1;
+    }
+    else if (strcmp(expected, actual) != 0) {
+        fprintf(stderr, "    %s: expected '%s', got '%s'\n", what, expected, actual);
+        ret_value = -1;
+    }
+
+    free(actual);
+
+    return ret_value;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_endpoint_resolution
+ *
+ * Purpose:     Test that an alternate S3 endpoint URL is resolved from the
+ *              AWS environment variables and configuration file in the order
+ *              documented by AWS. Performs no I/O, so it needs neither
+ *              credentials nor a reachable bucket.
+ *
+ * Return:      0 on success, 1 otherwise
+ *-------------------------------------------------------------------------
+ */
+static int
+test_endpoint_resolution(void)
+{
+    size_t i;
+    int    nerrors = 0;
+
+    TESTING("endpoint resolution");
+
+    /* The test harness sets some of these, so take control of all of them */
+    for (i = 0; i < S3COMMS_N_ENDPOINT_ENV_NAMES; i++) {
+        const char *val = getenv(s3comms_endpoint_env_names[i]);
+
+        s3comms_endpoint_env_saved[i] = val ? strdup(val) : NULL;
+        if (val && !s3comms_endpoint_env_saved[i])
+            TEST_ERROR;
+        HDunsetenv(s3comms_endpoint_env_names[i]);
+    }
+
+    /* No configuration file and no environment variables */
+    HDsetenv("AWS_CONFIG_FILE", "this_file_does_not_exist", 1);
+    nerrors += (check_s3comms_endpoint(NULL, "no config file") < 0);
+
+    HDsetenv("AWS_CONFIG_FILE", S3COMMS_TEST_CONFIG_FILE, 1);
+
+    /* An 'endpoint_url' directly in the profile */
+    if (write_s3comms_test_config("[default]\nregion = us-east-1\n"
+                                  "endpoint_url = http://profile.example.org:1\n") < 0)
+        TEST_ERROR;
+    nerrors += (check_s3comms_endpoint("http://profile.example.org:1", "profile endpoint_url") < 0);
+
+    /* A profile with no 'endpoint_url' at all */
+    if (write_s3comms_test_config("[default]\nregion = us-east-1\n") < 0)
+        TEST_ERROR;
+    nerrors += (check_s3comms_endpoint(NULL, "profile without endpoint_url") < 0);
+
+    /* The '[services ...]' form takes precedence over the profile entry */
+    if (write_s3comms_test_config("[default]\nregion = us-east-1\n"
+                                  "endpoint_url = http://profile.example.org:1\n"
+                                  "services = my-services\n\n"
+                                  "[services my-services]\n"
+                                  "s3 =\n  endpoint_url = http://services.example.org:2\n") < 0)
+        TEST_ERROR;
+    nerrors += (check_s3comms_endpoint("http://services.example.org:2", "services endpoint_url") < 0);
+
+    /* AWS_PROFILE selects which profile is read */
+    if (write_s3comms_test_config("[default]\nregion = us-east-1\n"
+                                  "endpoint_url = http://profile.example.org:1\n\n"
+                                  "[profile alt]\nregion = us-east-1\n"
+                                  "endpoint_url = http://alt.example.org:3\n") < 0)
+        TEST_ERROR;
+    nerrors += (check_s3comms_endpoint("http://profile.example.org:1", "default profile") < 0);
+    HDsetenv("AWS_PROFILE", "alt", 1);
+    nerrors += (check_s3comms_endpoint("http://alt.example.org:3", "AWS_PROFILE") < 0);
+    HDunsetenv("AWS_PROFILE");
+
+    /* The environment variables take precedence over the configuration file,
+     * and the S3-specific one takes precedence over the general one
+     */
+    HDsetenv("AWS_ENDPOINT_URL", "http://env.example.org:4", 1);
+    nerrors += (check_s3comms_endpoint("http://env.example.org:4", "AWS_ENDPOINT_URL") < 0);
+    HDsetenv("AWS_ENDPOINT_URL_S3", "http://env-s3.example.org:5", 1);
+    nerrors += (check_s3comms_endpoint("http://env-s3.example.org:5", "AWS_ENDPOINT_URL_S3") < 0);
+
+    /* Everything above is suppressed by the ignore setting */
+    HDsetenv("AWS_IGNORE_CONFIGURED_ENDPOINT_URLS", "true", 1);
+    nerrors += (check_s3comms_endpoint(NULL, "ignore via environment") < 0);
+    HDunsetenv("AWS_IGNORE_CONFIGURED_ENDPOINT_URLS");
+    HDunsetenv("AWS_ENDPOINT_URL");
+    HDunsetenv("AWS_ENDPOINT_URL_S3");
+
+    /* The ignore setting also works from the profile ... */
+    if (write_s3comms_test_config("[default]\nregion = us-east-1\n"
+                                  "endpoint_url = http://profile.example.org:1\n"
+                                  "ignore_configured_endpoint_urls = true\n") < 0)
+        TEST_ERROR;
+    nerrors += (check_s3comms_endpoint(NULL, "ignore via profile") < 0);
+
+    /* ... but the environment variable overrides it */
+    HDsetenv("AWS_IGNORE_CONFIGURED_ENDPOINT_URLS", "false", 1);
+    nerrors += (check_s3comms_endpoint("http://profile.example.org:1", "environment overrides profile") < 0);
+    HDunsetenv("AWS_IGNORE_CONFIGURED_ENDPOINT_URLS");
+
+    remove(S3COMMS_TEST_CONFIG_FILE);
+
+    for (i = 0; i < S3COMMS_N_ENDPOINT_ENV_NAMES; i++) {
+        if (s3comms_endpoint_env_saved[i]) {
+            HDsetenv(s3comms_endpoint_env_names[i], s3comms_endpoint_env_saved[i], 1);
+            free(s3comms_endpoint_env_saved[i]);
+            s3comms_endpoint_env_saved[i] = NULL;
+        }
+        else
+            HDunsetenv(s3comms_endpoint_env_names[i]);
+    }
+
+    if (nerrors)
+        FAIL_PUTS_ERROR("endpoint resolution did not follow the documented order");
+
+    PASSED();
+    return 0;
+
+error:
+    remove(S3COMMS_TEST_CONFIG_FILE);
+
+    for (i = 0; i < S3COMMS_N_ENDPOINT_ENV_NAMES; i++) {
+        if (s3comms_endpoint_env_saved[i]) {
+            HDsetenv(s3comms_endpoint_env_names[i], s3comms_endpoint_env_saved[i], 1);
+            free(s3comms_endpoint_env_saved[i]);
+            s3comms_endpoint_env_saved[i] = NULL;
+        }
+        else
+            HDunsetenv(s3comms_endpoint_env_names[i]);
+    }
+
+    return 1;
+} /* end test_endpoint_resolution() */
+
 int
 main(void)
 {
@@ -519,6 +726,7 @@ main(void)
         goto done;
     }
 
+    nerrors += test_endpoint_resolution();
     nerrors += test_s3r_get_filesize();
     nerrors += test_s3r_open();
     nerrors += test_s3r_read();

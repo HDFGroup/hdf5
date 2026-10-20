@@ -395,11 +395,19 @@ H5_DLL herr_t H5Pget_fapl_ros3_endpoint(hid_t fapl_id, size_t size, char *endpoi
  *            - The File Access Property List, if set with this function
  *            - The AWS_ENDPOINT_URL_S3 environment variable
  *            - The AWS_ENDPOINT_URL environment variable
+ *            - The `endpoint_url` entry under the `s3` key of the
+ *              `[services ...]` section named by the active profile's
+ *              `services` entry, in the AWS configuration file
+ *              (~/.aws/config by default)
+ *            - The `endpoint_url` entry of the active profile itself
  *
- *          Note that, unlike the AWS region, an endpoint URL is not read from
- *          the shared AWS configuration file. An `endpoint_url` setting in
- *          ~/.aws/config is ignored, and one of the two environment variables
- *          above must be used instead.
+ *          The active profile is the 'default' profile, unless a different one
+ *          is named by the AWS_PROFILE environment variable.
+ *
+ *          Every source other than the File Access Property List can be
+ *          suppressed by setting the AWS_IGNORE_CONFIGURED_ENDPOINT_URLS
+ *          environment variable, or the `ignore_configured_endpoint_urls`
+ *          entry of the active profile, to "true".
  *
  *          Note, the endpoint URL is only needed when you want to access a S3 bucket
  *          using an alternate URL. For example, this can be useful when using s3:// object

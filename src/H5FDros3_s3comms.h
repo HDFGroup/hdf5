@@ -216,6 +216,12 @@ H5_DLL herr_t H5FD__s3comms_s3r_close(s3r_t *handle);
 H5_DLL size_t H5FD__s3comms_s3r_get_filesize(s3r_t *handle);
 H5_DLL herr_t H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest, size_t dest_size);
 
+/* Resolves an alternate S3 endpoint URL from the AWS configuration file. Not part of the
+ * s3r_* interface; exposed so that test/s3comms.c can check the resolution order without
+ * performing any I/O. *aws_endpoint_out must be freed by the caller with free().
+ */
+H5_DLL herr_t H5FD__s3comms_get_aws_endpoint(char **aws_endpoint_out);
+
 #ifdef __cplusplus
 }
 #endif

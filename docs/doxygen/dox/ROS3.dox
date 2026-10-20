@@ -85,14 +85,30 @@
  * -# The File Access Property List, set with #H5Pset_fapl_ros3_endpoint
  * -# The \c AWS_ENDPOINT_URL_S3 environment variable
  * -# The \c AWS_ENDPOINT_URL environment variable
+ * -# The \c endpoint_url entry under the \c s3 key of the <code>[services ...]</code> section
+ *    named by the active profile's \c services entry
+ * -# The \c endpoint_url entry of the active profile itself
  *
- * \note Unlike the AWS region, the endpoint URL is \Bold{not} read from the shared AWS
- *       configuration file. An \c endpoint_url setting in <code>~/.aws/config</code>, in either the
- *       profile or a \c services section, is ignored, and one of the two environment variables
- *       above must be used instead:
- * \code{.sh}
- * export AWS_ENDPOINT_URL_S3=https://minio.example.org:9000
+ * The last two are read from the shared AWS configuration file, and follow the endpoint
+ * precedence documented by AWS. Either of these forms works:
+ *
+ * \code{.ini}
+ * # the "global endpoint" form
+ * [default]
+ * endpoint_url = https://minio.example.org:9000
+ *
+ * # the service-specific form, which takes precedence over the above
+ * [profile dev]
+ * services = my-services
+ *
+ * [services my-services]
+ * s3 =
+ *   endpoint_url = https://minio.example.org:9000
  * \endcode
+ *
+ * \note Every source other than the File Access Property List can be suppressed by setting the
+ *       \c AWS_IGNORE_CONFIGURED_ENDPOINT_URLS environment variable, or the
+ *       \c ignore_configured_endpoint_urls entry of the active profile, to \c true.
  *
  * \section sec_ros3_addressing Request Addressing Style
  *
