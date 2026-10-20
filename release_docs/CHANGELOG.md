@@ -61,15 +61,15 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ### The installed CMake package now prefers the shared libraries when no linkage is requested
 
-   A `find_package(HDF5 NAMES hdf5 CONFIG)` call that names neither the `static` nor the `shared` component previously resolved to the static libraries of an installation providing both, and only fell back to shared when no static libraries were installed. That preference is now reversed: shared is used when available, with static as the fallback. Setting `HDF5_USE_STATIC_LIBRARIES` before the call still selects the static libraries, matching the behavior of CMake's `FindHDF5` module.
+   A `find_package(HDF5 NAMES hdf5 CONFIG)` call that requests neither the `static` nor the `shared` component previously resolved to the static libraries of an installation providing both, and only fell back to shared when no static libraries were installed. That preference is now reversed: shared is used when available, with static as the fallback. Setting `HDF5_USE_STATIC_LIBRARIES` before the call still selects the static libraries, matching the behavior of CMake's `FindHDF5` module.
 
-   The preference decides which `HDF5_<lang>_<LINKAGE>_LIBRARY` variables and Fortran module directory the call sets, as well as the linkage the new `hdf5::` targets refer to, so a project that relied on the previous default and did not name a linkage will now link the shared libraries. Such a project should request the `static` component explicitly or set `HDF5_USE_STATIC_LIBRARIES`. Calls that already name a `static` or `shared` component are unaffected.
+   The preference decides which `HDF5_<lang>_<LINKAGE>_LIBRARY` variables and Fortran module directory the call sets, as well as the linkage the new `hdf5::` targets refer to, so a project that relied on the previous default and did not request a linkage will now link the shared libraries. Such a project should request the `static` component explicitly or set `HDF5_USE_STATIC_LIBRARIES`. Calls that already request a `static` or `shared` component are unaffected.
 
 # 🪦 Deprecations
 
 ### Deprecated the linkage-qualified CMake target names
 
-   The `hdf5-shared` / `hdf5-static` targets, their `_hl`, `_cpp`, `_hl_cpp`, `_fortran` and `_hl_fortran` counterparts, and the `HDF5_<lang>_<LINKAGE>_LIBRARY` variables are deprecated in favor of the stable `hdf5::` target names described under Configuration below. They will be removed in a future major release, so new projects should link `hdf5::hdf5` and friends, and existing projects should migrate to the name names when convenient. See `docs/USING_HDF5_CMake.md` for the mapping from old names to new ones.
+   The `hdf5-shared` / `hdf5-static` targets, their `_hl`, `_cpp`, `_hl_cpp`, `_fortran` and `_hl_fortran` counterparts, and the `HDF5_<lang>_<LINKAGE>_LIBRARY` variables are deprecated in favor of the stable `hdf5::` target names described under Configuration below. They will be removed in a future major release, so new projects should link `hdf5::hdf5` and friends, and existing projects should migrate to the new names when convenient. See `docs/USING_HDF5_CMake.md` for the mapping from old names to new ones.
 
 
 # 🚀 New Features & Improvements
