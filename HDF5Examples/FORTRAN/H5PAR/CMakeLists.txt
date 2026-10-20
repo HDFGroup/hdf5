@@ -29,6 +29,7 @@ foreach (example_name ${examples})
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_112_API}>:-DH5_USE_112_API>"
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_114_API}>:-DH5_USE_114_API>"
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_200_API}>:-DH5_USE_200_API>"
+          "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_300_API}>:-DH5_USE_300_API>"
   )
   target_link_libraries (${EXAMPLE_VARNAME}_f90_${example_name} ${H5EXAMPLE_LINK_Fortran_LIBS})
   set_target_properties (${EXAMPLE_VARNAME}_f90_${example_name} PROPERTIES LINKER_LANGUAGE Fortran)

@@ -942,8 +942,8 @@ endif()
 message (VERBOSE "LINK_LIBS=${LINK_LIBS}")
 message (VERBOSE "LINK_PUB_LIBS=${LINK_PUB_LIBS}")
 
-set (HDF5_DEFAULT_API_VERSION "v200" CACHE STRING "Enable v2.0 API (v16, v18, v110, v112, v114, v200)")
-set_property (CACHE HDF5_DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114 v200)
+set (HDF5_DEFAULT_API_VERSION "v300" CACHE STRING "Enable v3.0 API (v16, v18, v110, v112, v114, v200, v300)")
+set_property (CACHE HDF5_DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114 v200 v300)
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API
 #-----------------------------------------------------------------------------
@@ -988,11 +988,19 @@ endif ()
 # Option to use 2.x.y API
 #-----------------------------------------------------------------------------
 set (H5_USE_200_API_DEFAULT 0)
-if (NOT HDF5_DEFAULT_API_VERSION)
-  set (HDF5_DEFAULT_API_VERSION "v200")
-endif ()
-if (DEFAULT_API_VERSION MATCHES "v200")
+if (HDF5_DEFAULT_API_VERSION MATCHES "v200")
   set (H5_USE_200_API_DEFAULT 1)
+endif ()
+
+#-----------------------------------------------------------------------------
+# Option to use 3.x.y API
+#-----------------------------------------------------------------------------
+set (H5_USE_300_API_DEFAULT 0)
+if (NOT HDF5_DEFAULT_API_VERSION)
+  set (HDF5_DEFAULT_API_VERSION "v300")
+endif ()
+if (HDF5_DEFAULT_API_VERSION MATCHES "v300")
+  set (H5_USE_300_API_DEFAULT 1)
 endif ()
 
 #-----------------------------------------------------------------------------

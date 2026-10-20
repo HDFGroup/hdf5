@@ -42,6 +42,8 @@
 #undef H5_USE_114_API
 #undef H5_USE_200_API_DEFAULT
 #undef H5_USE_200_API
+#undef H5_USE_300_API_DEFAULT
+#undef H5_USE_300_API
 
 /* Re-establish only the API version under test */
 #if TEST_API_VERSION == 16
@@ -56,6 +58,8 @@
 #define H5_USE_114_API 1
 #elif TEST_API_VERSION == 200
 #define H5_USE_200_API 1
+#elif TEST_API_VERSION == 300
+#define H5_USE_300_API 1
 #else
 #error "TEST_API_VERSION not set to a valid value"
 #endif
@@ -331,6 +335,54 @@ main(void)
 
 #elif TEST_API_VERSION == 200
     printf("Configured with H5_USE_200_API\n");
+
+    CHECK_VERS(H5Acreate, 2);
+    CHECK_VERS(H5Aiterate, 2);
+    CHECK_VERS(H5Dcreate, 2);
+    CHECK_VERS(H5Dopen, 2);
+    CHECK_VERS(H5Dread_chunk, 2);
+    CHECK_VERS(H5Eclear, 2);
+    CHECK_VERS(H5Eget_auto, 2);
+    CHECK_VERS(H5Eprint, 2);
+    CHECK_VERS(H5Epush, 2);
+    CHECK_VERS(H5Eset_auto, 2);
+    CHECK_VERS(H5Ewalk, 2);
+    CHECK_VERS(H5Fget_info, 2);
+    CHECK_VERS(H5Gcreate, 2);
+    CHECK_VERS(H5Gopen, 2);
+    CHECK_VERS(H5Iregister_type, 2);
+    CHECK_VERS(H5Lget_info, 2);
+    CHECK_VERS(H5Lget_info_by_idx, 2);
+    CHECK_VERS(H5Literate, 2);
+    CHECK_VERS(H5Literate_by_name, 2);
+    CHECK_VERS(H5Lvisit, 2);
+    CHECK_VERS(H5Lvisit_by_name, 2);
+    CHECK_VERS(H5Oget_info, 3);
+    CHECK_VERS(H5Oget_info_by_idx, 3);
+    CHECK_VERS(H5Oget_info_by_name, 3);
+    CHECK_VERS(H5Ovisit, 3);
+    CHECK_VERS(H5Ovisit_by_name, 3);
+    CHECK_VERS(H5Pencode, 2);
+    CHECK_VERS(H5Pget_filter, 2);
+    CHECK_VERS(H5Pget_filter_by_id, 2);
+    CHECK_VERS(H5Pinsert, 2);
+    CHECK_VERS(H5Pregister, 2);
+    CHECK_VERS(H5Rdereference, 2);
+    CHECK_VERS(H5Rget_obj_type, 2);
+    CHECK_VERS(H5Sencode, 2);
+    CHECK_VERS(H5Tarray_create, 2);
+    CHECK_VERS(H5Tcommit, 2);
+    CHECK_VERS(H5Tdecode, 2);
+    CHECK_VERS(H5Tget_array_dims, 2);
+    CHECK_VERS(H5Topen, 2);
+
+    CHECK_VERS_T(H5E_auto, 2);
+    CHECK_VERS_T(H5O_info, 2);
+    CHECK_VERS_T(H5O_iterate, 2);
+    CHECK_VERS_T(H5Z_class, 2);
+
+#elif TEST_API_VERSION == 300
+    printf("Configured with H5_USE_300_API\n");
 
     CHECK_VERS(H5Acreate, 2);
     CHECK_VERS(H5Aiterate, 2);

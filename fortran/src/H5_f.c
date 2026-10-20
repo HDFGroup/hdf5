@@ -560,6 +560,7 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5f_flags[30] = (int_f)H5F_LIBVER_V200;
     h5f_flags[31] = (int_f)H5F_ACC_SWMR_READ;
     h5f_flags[32] = (int_f)H5F_ACC_SWMR_WRITE;
+    h5f_flags[33] = (int_f)H5F_LIBVER_V300;
 
     /*
      *  H5FD flags

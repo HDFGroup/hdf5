@@ -1,4 +1,4 @@
-v2.3.0 --- July X , 2026
+v3.0.0 --- July X , 2026
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
@@ -22,7 +22,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 * [Platforms Tested](CHANGELOG.md#%EF%B8%8F-platforms-tested)
 * [Known Problems](CHANGELOG.md#-known-problems)
 
-# 🔆 Executive Summary: HDF5 Version 2.3.0
+# 🔆 Executive Summary: HDF5 Version 3.0.0
 
 
 ## Performance Enhancements:
@@ -66,6 +66,15 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Configuration
 
+### Added the v300 default API version
+
+   The library version is now 3.0.0 and the default API version mapping is `v300`
+   (`-DHDF5_DEFAULT_API_VERSION:STRING=v300`, `-DH5_USE_300_API` for applications). No
+   functions were versioned in 3.0.0, so `v300` maps to the same symbols as `v200`.
+
+   Because `v200` is no longer the newest API version, selecting it now requires deprecated
+   symbols to be enabled, as is already the case for `v16` through `v114`.
+
 ### Various improvements in installed CMake package configuration file
 
    - Fixed `find_dependency()` calls so that `PRIVATE`-linked libraries are only propagated as
@@ -86,6 +95,10 @@ We would like to thank the many HDF5 community members who contributed to this r
      consuming CMake projects
 
 ## Library
+
+### Added the H5F_LIBVER_V300 library version bound
+
+   The `H5F_libver_t` enumeration gains `H5F_LIBVER_V300` for the 3.0 file format, and `H5F_LIBVER_LATEST` now maps to it. Every object header message version admitted by `H5F_LIBVER_V300` is currently the same as for `H5F_LIBVER_V200`; later format changes in the 3.0 release will be gated on it. The constant is also available in the Fortran (`H5F_LIBVER_V300_F`) and Java (`HDF5Constants.H5F_LIBVER_V300`) bindings, and `h5repack --low`/`--high` accept the value 6.
 
 ### Added support for internally concurrent multithreaded reads of chunked datasets
 
