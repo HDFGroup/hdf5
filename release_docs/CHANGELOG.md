@@ -59,6 +59,14 @@ We would like to thank the many HDF5 community members who contributed to this r
   `enable_language()`, but these calls were removed in favor of checking the enabled languages
   and issuing an error if required languages aren't enabled.
 
+- The static HDF5 library now uses the threads library in default builds wherever a threading
+  package is available. Previously, it was only used in builds with thread-safety, concurrency,
+  or the Subfiling VFD. Projects that link the static library without CMake or pkg-config must
+  include the threads link flag (usually `-pthread`) on systems where the thread functions aren't
+  part of the C library, (e.g. Linux with glibc < 2.34). HDF5's pkg-config file already listed this
+  flag, but default builds did not require it until now. The flag is supplied by
+  `pkg-config --static --libs hdf5`.
+
 # 🪦 Deprecations
 
 
@@ -76,6 +84,9 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    Note that nothing in the library is threaded until the application enables it via
    H5TSset_internal_threads().
+
+   Linking the static library now requires the threads library on some systems; see
+   Breaking Changes.
 
    The internal thread pool can now be used with the high-level, Fortran, Java and C++ interfaces.
 
@@ -156,6 +167,14 @@ token value that does not fit the caller's buffer is unchanged, but is now
 documented.
 
 Fixes GitHub issue #6757.
+### Fixed a heap buffer over-read in scale-offset decode
+
+   The scale-offset filter's decode path used the size computed from the user's filter
+   parameters for the decompressed output without checking it against the actual
+   compressed chunk. This caused a heap out-of-bound read when encountered a malformed
+   file. The issue is now fixed with bound guards.
+
+   Fixes CVE-2026-19029
 
 ### Fixed a deadlock in the ROS3 VFD on Windows
 
@@ -213,6 +232,10 @@ Fixes GitHub issue #6679.
    When the library detects that it cannot make progress closing itself (an "infinite loop closing library"), it no longer calls `abort()`. The abort behaved inconsistently, only firing when automatic error message display was enabled. Additionally, terminating the entire host process on a shutdown-time condition is undesirable for applications that embed HDF5. The library now reports the condition (when error display is enabled) and returns without aborting.
 
    Fixes GitHub issue #6531
+
+### Added pre-allocation validation for metadata cache entry image sizes
+
+   Metadata cache entries with non-speculative load sizes are now checked against the file's end-of-allocation address before allocating the on-disk image buffer. Object header continuation messages also validate their decoded address and size fields before queuing continuation chunks. SWMR readers skip the end-of-allocation checks for both speculative and non-speculative metadata loads because their local end-of-allocation address may lag behind the writer.
 
 ### Fixed a crash when reading a chunked dataset whose chunk rank does not match the dataspace rank
 
