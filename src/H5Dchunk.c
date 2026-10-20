@@ -778,17 +778,17 @@ H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize
     layout->nchunks     = 1;
     layout->max_nchunks = 1;
     for (unsigned u = 0; u < ndims; u++) {
+        /* Sanity check - a corrupt file can encode zero-sized chunk dimensions,
+         * which would cause a division by zero below */
+        if (layout->dim[u] == 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "dimension size must be > 0, dim = %u ", u);
+
         /* Round up to the next integer # of chunks, to accommodate partial chunks */
         layout->chunks[u] = ((curr_dims[u] + layout->dim[u]) - 1) / layout->dim[u];
         if (H5S_UNLIMITED == max_dims[u])
             layout->max_chunks[u] = H5S_UNLIMITED;
-        else {
-            /* Sanity check */
-            if (layout->dim[u] == 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "dimension size must be > 0, dim = %u ", u);
-
+        else
             layout->max_chunks[u] = ((max_dims[u] + layout->dim[u]) - 1) / layout->dim[u];
-        }
 
         /* Accumulate the # of chunks */
         layout->nchunks *= layout->chunks[u];
