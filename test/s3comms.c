@@ -418,17 +418,6 @@ error:
     return 1;
 } /* end test_s3r_read() */
 
-#endif /* H5_HAVE_ROS3_VFD */
-
-/*-------------------------------------------------------------------------
- * Function:    main()
- *
- * Purpose:     Run unit tests for S3 communications (s3comms)
- *
- * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *-------------------------------------------------------------------------
- */
-
 #define S3COMMS_TEST_CONFIG_FILE "tmp_s3comms_aws_config"
 
 /* Names of the environment variables the endpoint resolution consults. These are saved
@@ -634,6 +623,17 @@ error:
 
     return 1;
 } /* end test_endpoint_resolution() */
+
+#endif /* H5_HAVE_ROS3_VFD */
+
+/*-------------------------------------------------------------------------
+ * Function:    main()
+ *
+ * Purpose:     Run unit tests for S3 communications (s3comms)
+ *
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
+ *-------------------------------------------------------------------------
+ */
 
 int
 main(void)
