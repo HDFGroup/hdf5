@@ -229,6 +229,12 @@ Fixes GitHub issue #6679.
 
    Fixes CVE-2026-19025
 
+### Fixed a division by zero when opening a chunked dataset with a zero-sized chunk dimension
+
+   `H5D__chunk_set_info_real()` computed the number of chunks in each dimension by dividing by the chunk dimension before validating that it was non-zero, and the existing validation was only reached in the branch where the maximum dimension was not `H5S_UNLIMITED`. A corrupted file that encoded a zero-sized chunk dimension therefore triggered an integer division by zero (a floating point exception) while the dataset was being opened. The dimension is now validated before the divisions, covering both the limited and unlimited cases, so such a dataset is rejected with an error instead of crashing. One-dimensional datasets were reachable because `H5D__chunk_init()` validates the chunk dimensions only for datasets with more than one dimension.
+
+   See also GitHub issues #578 and #583.
+
 ### Fixed a crash when reading a dataset with a malformed fill value
 
    An old-style (either version 1 or version 2) fill value message that is marked "defined" but encodes a negative size leaves the fill value with a negative size and no datatype; `H5Pget_fill_value()` then passed that NULL datatype to `H5T_path_find()` and dereferenced it. `H5P_get_fill_value()` now rejects a fill value that has no datatype and returns an error, so the dataset itself remains readable while the corrupt fill value is reported cleanly.
