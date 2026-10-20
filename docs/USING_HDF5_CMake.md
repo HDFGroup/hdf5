@@ -208,11 +208,11 @@ Setting `HDF5_USE_STATIC_LIBRARIES` before `find_package()` has the same
 effect, matching `FindHDF5`. The `static` and `shared` components are mutually
 exclusive; requesting both makes `find_package()` fail.
 
-This preference applies to the whole `find_package()` call, not just to the
-public targets: it also decides which `HDF5_<lang>_<LINKAGE>_LIBRARY` variables
-and Fortran module directory are set. Before HDF5 2.3.0, a call that named no
-linkage component preferred the static libraries. A project that relied on that
-should request the `static` component or set `HDF5_USE_STATIC_LIBRARIES`.
+The `hdf5::` targets follow whichever linkage `find_package()` resolves, as do
+the `HDF5_<lang>_<LINKAGE>_LIBRARY` variables and the Fortran module directory.
+Before HDF5 2.3.0, a call that named no linkage component preferred the static
+libraries. A project that relied on that should request the `static` component
+or set `HDF5_USE_STATIC_LIBRARIES`.
 
 #### Deprecated names
 
