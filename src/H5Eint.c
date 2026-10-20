@@ -83,12 +83,12 @@ static herr_t H5E__close_stack(void *err_stack, void **request);
 /* Package Variables */
 /*********************/
 
-#ifndef H5_HAVE_THREADSAFE_API
+#ifndef H5_HAVE_THREADS
 /*
  * The current error stack.
  */
 H5E_stack_t H5E_stack_g[1];
-#endif /* H5_HAVE_THREADSAFE_API */
+#endif /* H5_HAVE_THREADS */
 
 /* Declare a free list to manage the H5E_stack_t struct */
 H5FL_DEFINE(H5E_stack_t);
@@ -260,9 +260,9 @@ H5E__init_package(void)
     if (H5I_register_type(H5I_ERRSTK_CLS) < 0)
         HGOTO_ERROR(H5E_ID, H5E_CANTINIT, FAIL, "unable to initialize ID group");
 
-#ifndef H5_HAVE_THREADSAFE_API
+#ifndef H5_HAVE_THREADS
     H5E__set_default_auto(H5E_stack_g);
-#endif /* H5_HAVE_THREADSAFE_API */
+#endif /* H5_HAVE_THREADS */
 
     /* Register the HDF5 error class */
     if ((H5E_ERR_CLS_g = H5I_register(H5I_ERROR_CLASS, &H5E_err_cls_s, false)) < 0)
