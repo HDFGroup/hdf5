@@ -59,12 +59,36 @@ We would like to thank the many HDF5 community members who contributed to this r
   `enable_language()`, but these calls were removed in favor of checking the enabled languages
   and issuing an error if required languages aren't enabled.
 
+- The static HDF5 library now uses the threads library in default builds wherever a threading
+  package is available. Previously, it was only used in builds with thread-safety, concurrency,
+  or the Subfiling VFD. Projects that link the static library without CMake or pkg-config must
+  include the threads link flag (usually `-pthread`) on systems where the thread functions aren't
+  part of the C library, (e.g. Linux with glibc < 2.34). HDF5's pkg-config file already listed this
+  flag, but default builds did not require it until now. The flag is supplied by
+  `pkg-config --static --libs hdf5`.
+
 # 🪦 Deprecations
 
 
 # 🚀 New Features & Improvements
 
 ## Configuration
+
+### Built the library's internal thread pool by default
+
+   The internal thread pool lets the library parallelize the internals of a
+   single API call using its own worker threads. It adds no application
+   threads, so it is not a build-time choice exposed through CMake. It is built
+   in wherever a threading package is available, except in a static library on
+   Windows.
+
+   Note that nothing in the library is threaded until the application enables it via
+   H5TSset_internal_threads().
+
+   Linking the static library now requires the threads library on some systems; see
+   Breaking Changes.
+
+   The internal thread pool can now be used with the high-level, Fortran, Java and C++ interfaces.
 
 ### Various improvements in installed CMake package configuration file
 
@@ -95,12 +119,14 @@ We would like to thank the many HDF5 community members who contributed to this r
    This feature internally parallelizes read operations on chunked datasets.
    H5TSset_internal_threads() is used to enable the feature globally, while
    H5Pset_io_threads() can be used to disable the feature on a per-operation
-   basis. These functions are only available when the library is configured with
-   HDF5_ENABLE_CONCURRENCY=ON. When performing an internally threaded read, the
-   library will concurrently read from disk, unfilter, and scatter to memory all
-   chunks in a read operation on a chunked dataset. Currently each of these
-   sub-operations is serialized (protected by a mutex), so there is not yet
-   likely to be any performance improvement.
+   basis. These functions are available whenever the library is built with a
+   threading package; see the Configuration section above. When performing an
+   internally threaded read, the library will concurrently read from disk,
+   unfilter, and scatter to memory all chunks in a read operation on a chunked
+   dataset. Currently each of these sub-operations is serialized (protected by
+   a mutex), so there is not yet likely to be any performance improvement.
+
+   Reads are not threaded in builds with HDF5_ENABLE_THREADSAFE.
 
 ## Parallel Library
 
@@ -127,7 +153,16 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ### Fixed out-of-bounds reads when a filtered chunk is shorter than its filter header
 
-   The scaleoffset and szip filters each store a fixed-size header in front of the chunk data: a 21-byte parameter block for scaleoffset and a 4-byte uncompressed-length header for szip. On read, each one subtracted that fixed size from the chunk length without first checking that the chunk was at least that long. A truncated or corrupted chunk record made the subtraction wrap around, so both filters read far past the end of the chunk buffer. `H5Z__filter_scaleoffset()` also copied `d_nelmts * dtype_size` bytes out of the buffer in its full-precision path, with both counts taken from the filter pipeline message rather than from the buffer it was given, so a small chunk with a large declared element count returned adjacent heap contents as dataset data. Its bounds checks also measured the chunk buffer's allocated size, which the library deliberately sizes to hold the larger unfiltered chunk, so a truncated chunk could still decompress out of the uninitialized remainder of that allocation. Both filters now reject any chunk shorter than their own header, and scaleoffset validates every read against the number of bytes actually stored for the chunk rather than the size of the buffer holding them. The fletcher32 filter now also rejects a chunk that holds only its 4-byte checksum and no data, which previously reached the checksum routine with a length of zero.
+   The scaleoffset and szip filters each store a fixed-size header in front of the chunk data: a 21-byte parameter block for scaleoffset and a 4-byte uncompressed-length header for szip. On read, each one subtracted that fixed size from the chunk length without first checking that the chunk was at least that long. A truncated or corrupted chunk record made the subtraction wrap around, so both filters read far past the end of the chunk buffer. Its bounds checks also measured the chunk buffer's allocated size, which the library deliberately sizes to hold the larger unfiltered chunk, so a truncated chunk could still decompress out of the uninitialized remainder of that allocation. Both filters now reject any chunk shorter than their own header, and scaleoffset validates every read against the number of bytes actually stored for the chunk rather than the size of the buffer holding them. The fletcher32 filter now also rejects a chunk that holds only its 4-byte checksum and no data, which previously reached the checksum routine with a length of zero.
+
+### Fixed a heap buffer over-read in scale-offset decode
+
+   The scale-offset filter's decode path used the size computed from the user's filter
+   parameters for the decompressed output without checking it against the actual
+   compressed chunk. This caused a heap out-of-bound read when encountered a malformed
+   file. The issue is now fixed with bound guards.
+
+   Fixes CVE-2026-19029
 
 ### Fixed a deadlock in the ROS3 VFD on Windows
 

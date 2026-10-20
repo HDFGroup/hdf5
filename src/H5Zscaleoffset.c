@@ -1242,19 +1242,21 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         assert(minbits <= p.size * 8);
         p.minbits = minbits;
 
-        /* The compressed stream starts after the fixed-size parameter header, so
-         * the chunk has to hold that header before it can be skipped
-         */
-        if (H5_IS_BUFFER_OVERFLOW((unsigned char *)*buf, buf_offset, (unsigned char *)*buf + nbytes - 1))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
+        /* the valid compressed data must at least cover the parameter header */
+        if (nbytes < buf_offset)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "chunk does not cover the scale-offset parameter header");
 
-        /* calculate size of output buffer after decompression.  Both factors come
-         * from the stored filter parameters, so guard the product against wrapping
-         * before it is used as an allocation size
-         */
-        if (p.size && d_nelmts > SIZE_MAX / p.size)
-            HGOTO_ERROR(H5E_PLINE, H5E_OVERFLOW, 0, "scaleoffset output buffer size overflows");
+        /* guard against overflow when computing the output buffer size */
+        if (p.size != 0 && d_nelmts > SIZE_MAX / p.size)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid number of data elements");
+
+        /* calculate size of output buffer after decompression */
         size_out = d_nelmts * (size_t)p.size;
+
+        /* check before allocating so a malformed chunk cannot force a large
+           allocation first. */
+        if (minbits == p.size * 8 && size_out > nbytes - buf_offset)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "scale-offset decompressed size exceeds chunk data");
 
         /* allocate memory space for decompressed buffer */
         if (NULL == (outbuf = (unsigned char *)H5MM_malloc(size_out)))
@@ -1263,10 +1265,6 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
 
         /* special case: minbits equal to full precision */
         if (minbits == p.size * 8) {
-            if (H5_IS_BUFFER_OVERFLOW((unsigned char *)(*buf) + buf_offset, size_out,
-                                      (unsigned char *)*buf + nbytes - 1))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
-
             H5MM_memcpy(outbuf, (unsigned char *)(*buf) + buf_offset, size_out);
             /* free the original buffer */
             H5MM_xfree(*buf);
