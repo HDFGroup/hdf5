@@ -462,35 +462,10 @@ if (H5PUB_ERROR)
   return ()
 endif ()
 
-# The concrete names are substituted in from the build that produced this
-# installation, so a build that renamed its libraries via HDF5_LIB_BASE still
-# gets the same public names. These are the same target variables the build
-# tree passes to h5_define_public_targets(), so the linkage suffix convention
-# is not restated here.
-set (H5PUB_CONCRETE_hdf5_static            "@HDF5_LIB_TARGET@")
-set (H5PUB_CONCRETE_hdf5_shared            "@HDF5_LIBSH_TARGET@")
-set (H5PUB_CONCRETE_hdf5_hl_static         "@HDF5_HL_LIB_TARGET@")
-set (H5PUB_CONCRETE_hdf5_hl_shared         "@HDF5_HL_LIBSH_TARGET@")
-set (H5PUB_CONCRETE_hdf5_cpp_static        "@HDF5_CPP_LIB_TARGET@")
-set (H5PUB_CONCRETE_hdf5_cpp_shared        "@HDF5_CPP_LIBSH_TARGET@")
-set (H5PUB_CONCRETE_hdf5_hl_cpp_static     "@HDF5_HL_CPP_LIB_TARGET@")
-set (H5PUB_CONCRETE_hdf5_hl_cpp_shared     "@HDF5_HL_CPP_LIBSH_TARGET@")
-set (H5PUB_CONCRETE_hdf5_fortran_static    "@HDF5_F90_LIB_TARGET@")
-set (H5PUB_CONCRETE_hdf5_fortran_shared    "@HDF5_F90_LIBSH_TARGET@")
-set (H5PUB_CONCRETE_hdf5_hl_fortran_static "@HDF5_HL_F90_LIB_TARGET@")
-set (H5PUB_CONCRETE_hdf5_hl_fortran_shared "@HDF5_HL_F90_LIBSH_TARGET@")
-
 h5_define_public_targets (
     LINKAGE ${${HDF5_PACKAGE_NAME}_LIB_TYPE}
     PREFIX  "@HDF_PACKAGE_NAMESPACE@"
 )
-
-foreach (_h5_name IN LISTS HDF5_PUBLIC_LIBRARY_NAMES)
-  unset (H5PUB_CONCRETE_${_h5_name}_static)
-  unset (H5PUB_CONCRETE_${_h5_name}_shared)
-endforeach ()
-unset (_h5_name)
-
 if (H5PUB_ERROR)
   set (${HDF5_PACKAGE_NAME}_FOUND FALSE)
   set (${HDF5_PACKAGE_NAME}_NOT_FOUND_MESSAGE "${H5PUB_ERROR}")

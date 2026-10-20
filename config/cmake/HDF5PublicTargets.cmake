@@ -37,20 +37,13 @@
 # hdf5-static / hdf5-shared targets or the HDF5_<lang>_<LINKAGE>_LIBRARY
 # variables.
 #
-# The default linkage is shared if shared libraries are available, otherwise
-# static. As of 2.3.0 the rest of the package resolves the same way, reversing
-# the pre-2.3.0 preference for static in a find_package() call that names no
-# linkage component.
+# This module does not choose a linkage. The caller passes the one it has
+# already resolved: hdf5-config.cmake its ${HDF5_PACKAGE_NAME}_LIB_TYPE, and
+# HDF5's own build tree shared if it built shared libraries, otherwise static.
 # -----------------------------------------------------------------------------
 
-# The public library names this module can define. For each one, the caller
-# sets H5PUB_CONCRETE_<name>_static and H5PUB_CONCRETE_<name>_shared to the
-# corresponding concrete target names before calling
-# h5_define_public_targets(), leaving unset whatever was not built.
-#
-# The H5PUB_ prefix keeps these out of the consuming project's namespace:
-# hdf5-config.cmake runs in the consumer's variable scope and unsets them once
-# the targets are defined.
+# The public library names this module can define. Each one aliases the
+# concrete target <name>-<linkage>, e.g. hdf5::hdf5_hl -> hdf5_hl-shared.
 set (HDF5_PUBLIC_LIBRARY_NAMES
     hdf5
     hdf5_hl
@@ -59,23 +52,6 @@ set (HDF5_PUBLIC_LIBRARY_NAMES
     hdf5_fortran
     hdf5_hl_fortran
 )
-
-#-----------------------------------------------------------------------------
-# h5_default_public_linkage (<shared_available> <static_available> <out_var>)
-#
-# Sets <out_var> in the caller's scope to the linkage to use when the consumer
-# expresses no preference: prefer shared, fall back to static, empty string if
-# neither was built.
-#-----------------------------------------------------------------------------
-function (h5_default_public_linkage _shared_available _static_available _out_var)
-  if (_shared_available)
-    set (${_out_var} "shared" PARENT_SCOPE)
-  elseif (_static_available)
-    set (${_out_var} "static" PARENT_SCOPE)
-  else ()
-    set (${_out_var} "" PARENT_SCOPE)
-  endif ()
-endfunction ()
 
 #-----------------------------------------------------------------------------
 # h5_define_public_tools ([PREFIX <prefix>] TOOLS <target> ...)
@@ -138,9 +114,6 @@ endfunction ()
 # claimed by another project, referring to a different target, is reported
 # through H5PUB_ERROR.
 #
-# The caller must have set H5PUB_CONCRETE_<name>_<linkage> for each public
-# library name it wants defined.
-#
 # Sets H5PUB_ERROR in the caller's scope as h5_define_public_tools() does.
 #-----------------------------------------------------------------------------
 function (h5_define_public_targets)
@@ -148,17 +121,10 @@ function (h5_define_public_targets)
 
   set (H5PUB_ERROR "" PARENT_SCOPE)
 
-  if (NOT H5PUB_LINKAGE STREQUAL "shared" AND NOT H5PUB_LINKAGE STREQUAL "static")
-    set (H5PUB_ERROR
-        "h5_define_public_targets: LINKAGE must be \"shared\" or \"static\", got \"${H5PUB_LINKAGE}\"."
-        PARENT_SCOPE)
-    return ()
-  endif ()
-
   set (_public_targets_defined)
 
   foreach (_public_name IN LISTS HDF5_PUBLIC_LIBRARY_NAMES)
-    set (_concrete "${H5PUB_PREFIX}${H5PUB_CONCRETE_${_public_name}_${H5PUB_LINKAGE}}")
+    set (_concrete "${H5PUB_PREFIX}${_public_name}-${H5PUB_LINKAGE}")
 
     # Components that were not built have no public name. A same-named target
     # from somewhere else is not ours to check, and must not reach the

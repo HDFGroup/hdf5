@@ -1404,31 +1404,21 @@ endif ()
 #
 # The same names are defined for an installed package by hdf5-config.cmake,
 # which calls the same function from the same module.
+#
+# When both linkages are built, the public names refer to the shared libraries.
 #-----------------------------------------------------------------------------
-set (H5PUB_CONCRETE_hdf5_static            "${HDF5_LIB_TARGET}")
-set (H5PUB_CONCRETE_hdf5_shared            "${HDF5_LIBSH_TARGET}")
-set (H5PUB_CONCRETE_hdf5_hl_static         "${HDF5_HL_LIB_TARGET}")
-set (H5PUB_CONCRETE_hdf5_hl_shared         "${HDF5_HL_LIBSH_TARGET}")
-set (H5PUB_CONCRETE_hdf5_cpp_static        "${HDF5_CPP_LIB_TARGET}")
-set (H5PUB_CONCRETE_hdf5_cpp_shared        "${HDF5_CPP_LIBSH_TARGET}")
-set (H5PUB_CONCRETE_hdf5_hl_cpp_static     "${HDF5_HL_CPP_LIB_TARGET}")
-set (H5PUB_CONCRETE_hdf5_hl_cpp_shared     "${HDF5_HL_CPP_LIBSH_TARGET}")
-set (H5PUB_CONCRETE_hdf5_fortran_static    "${HDF5_F90_LIB_TARGET}")
-set (H5PUB_CONCRETE_hdf5_fortran_shared    "${HDF5_F90_LIBSH_TARGET}")
-set (H5PUB_CONCRETE_hdf5_hl_fortran_static "${HDF5_HL_F90_LIB_TARGET}")
-set (H5PUB_CONCRETE_hdf5_hl_fortran_shared "${HDF5_HL_F90_LIBSH_TARGET}")
-
 h5_define_public_tools (TOOLS ${HDF5_UTILS_TO_EXPORT})
 if (H5PUB_ERROR)
   message (FATAL_ERROR "${H5PUB_ERROR}")
 endif ()
 
-h5_default_public_linkage ("${BUILD_SHARED_LIBS}" "${BUILD_STATIC_LIBS}" HDF5_PUBLIC_TARGET_LINKAGE)
-if (HDF5_PUBLIC_TARGET_LINKAGE)
-  h5_define_public_targets (LINKAGE ${HDF5_PUBLIC_TARGET_LINKAGE})
-  if (H5PUB_ERROR)
-    message (FATAL_ERROR "${H5PUB_ERROR}")
-  endif ()
+if (BUILD_SHARED_LIBS)
+  h5_define_public_targets (LINKAGE shared)
+elseif (BUILD_STATIC_LIBS)
+  h5_define_public_targets (LINKAGE static)
+endif ()
+if (H5PUB_ERROR)
+  message (FATAL_ERROR "${H5PUB_ERROR}")
 endif ()
 
 #-----------------------------------------------------------------------------
