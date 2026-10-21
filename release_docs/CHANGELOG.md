@@ -217,6 +217,10 @@ Fixes GitHub issue #6679.
 
    Fixes GitHub issue #6531
 
+### Added pre-allocation validation for metadata cache entry image sizes
+
+   Metadata cache entries with non-speculative load sizes are now checked against the file's end-of-allocation address before allocating the on-disk image buffer. Object header continuation messages also validate their decoded address and size fields before queuing continuation chunks. SWMR readers skip the end-of-allocation checks for both speculative and non-speculative metadata loads because their local end-of-allocation address may lag behind the writer.
+
 ### Fixed a crash when reading a chunked dataset whose chunk rank does not match the dataspace rank
 
    The chunk layout's stored dimensionality was validated against the dataspace rank at creation time, but not at open time, so a file whose stored chunk rank disagreed with its dataspace rank was not caught. The resulting inconsistent selection ranks during chunk I/O caused a divide-by-zero in the hyperslab iterator. The chunk dimensionality is now also validated on open, and such a dataset is rejected with an error instead of crashing.
@@ -230,6 +234,12 @@ Fixes GitHub issue #6679.
    When a signed-integer dataset filtered with scale-offset contained values spanning the full range of the datatype, the filter's calculation of the difference between the maximum and minimum values would overflow, resulting in undefined behavior. The difference is now computed in the unsigned domain, producing the correct result without triggering an overflow.
 
    Fixes GitHub issue #5861
+
+### Fixed silent truncation of filtered chunk sizes with a small file "size of sizes"
+
+   For all chunk index types in version-5 chunk layout messages, and for the single chunk index in any version of the chunk layout message, the on-disk size of a filtered chunk is encoded in a fixed-width field equal to the file's "size of sizes" (set via `H5Pset_sizes()`). The encode check assumed this field was always 8 bytes, so when the size of sizes was set to 2 or 4 an oversized chunk had its encoded size silently truncated (e.g., 160000 encoded in 2 bytes became 160000 & 0xFFFF = 28928), silently corrupting the chunk. The library now verifies that a filtered chunk's size fits in the file's size of sizes and reports an error at write time instead.
+
+   Fixes GitHub issue #6023
 
 ### Fixed a crash when reading a dataset with a malformed fill value
 
