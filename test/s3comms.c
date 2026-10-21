@@ -526,6 +526,13 @@ test_endpoint_resolution(void)
         HDunsetenv(s3comms_endpoint_env_names[i]);
     }
 
+    /* Name the profile explicitly rather than relying on its absence. On Windows
+     * HDunsetenv() sets a variable to an empty string instead of removing it, and
+     * whether aws_get_profile_name() reads that as "use the default profile" is not
+     * something this test should depend on.
+     */
+    HDsetenv("AWS_PROFILE", "default", 1);
+
     /* No configuration file and no environment variables */
     HDsetenv("AWS_CONFIG_FILE", "this_file_does_not_exist", 1);
     nerrors += (check_s3comms_endpoint(NULL, "no config file") < 0);
@@ -561,7 +568,7 @@ test_endpoint_resolution(void)
     nerrors += (check_s3comms_endpoint("http://profile.example.org:1", "default profile") < 0);
     HDsetenv("AWS_PROFILE", "alt", 1);
     nerrors += (check_s3comms_endpoint("http://alt.example.org:3", "AWS_PROFILE") < 0);
-    HDunsetenv("AWS_PROFILE");
+    HDsetenv("AWS_PROFILE", "default", 1);
 
     /* The environment variables take precedence over the configuration file,
      * and the S3-specific one takes precedence over the general one
