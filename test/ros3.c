@@ -1306,7 +1306,7 @@ test_token_and_endpoint_getters(void)
 {
     hid_t fapl_id = H5I_INVALID_HID;
     char  buf[64];
-    char  small[8];
+    char  small_buf[8];
 
     TESTING("ros3 token and endpoint getters");
 
@@ -1340,12 +1340,12 @@ test_token_and_endpoint_getters(void)
         FAIL_PUTS_ERROR("token did not round-trip");
 
     /* A destination buffer that is too small truncates, and stays NUL-terminated */
-    memset(small, 'x', sizeof(small));
-    if (H5Pget_fapl_ros3_token(fapl_id, sizeof(small), small) < 0)
+    memset(small_buf, 'x', sizeof(small_buf));
+    if (H5Pget_fapl_ros3_token(fapl_id, sizeof(small_buf), small_buf) < 0)
         TEST_ERROR;
-    if (strlen(small) != sizeof(small) - 1)
+    if (strlen(small_buf) != sizeof(small_buf) - 1)
         FAIL_PUTS_ERROR("truncated token should fill the buffer and be NUL-terminated");
-    if (strncmp(small, "0123456789", sizeof(small) - 1) != 0)
+    if (strncmp(small_buf, "0123456789", sizeof(small_buf) - 1) != 0)
         FAIL_PUTS_ERROR("truncated token has the wrong contents");
 
     /* An endpoint url that has been set round-trips */
