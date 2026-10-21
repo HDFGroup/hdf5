@@ -657,13 +657,13 @@ H5P__set_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned int flags, 
                 const unsigned int cd_values[/*cd_nelmts*/])
 {
     H5O_pline_t pline;               /* Filter pipeline */
-    htri_t      filter_avail;        /* Filter availability */
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    /* Check if filter is already available */
-    if ((filter_avail = H5Z_filter_avail(filter)) < 0)
+    /* Check if filter is already available. We don't care if it's available or not at this point, but we call
+     * this function to load it if possible. */
+    if (H5Z_filter_avail(filter) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't check filter availability");
 
     /* Get the pipeline property to append to */
@@ -1153,7 +1153,7 @@ H5P__get_filter(const H5Z_filter_info_t *filter, unsigned int *flags /*out*/, si
 
         /* If there's no name on the filter, use the class's filter name */
         if (!s) {
-            H5Z_class2_t *cls;
+            H5Z_class3_t *cls;
 
             H5Z_find(true, filter->id, &cls);
             if (cls)
