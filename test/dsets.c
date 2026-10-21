@@ -21309,7 +21309,10 @@ main(void)
                     if (!threads)
 #endif /* H5_HAVE_THREADS */
                     {
-                        nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
+                        /* deflate.h5 is a single-file test file, so it can't be opened
+                         * with a VFD that isn't compatible with the default VFD */
+                        if (driver_is_default_compatible)
+                            nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
                         nerrors += (test_bad_decode_size(file) < 0 ? 1 : 0);
                         nerrors += (test_bad_decode_size_vlen(file) < 0 ? 1 : 0);
                         nerrors += (test_bad_buf_size(file) < 0 ? 1 : 0);
