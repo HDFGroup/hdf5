@@ -24,10 +24,6 @@
 #include "H5Sprivate.h"  /* Dataspace functions */
 #include "H5Zpkg.h"      /* Data filters        */
 
-#ifdef H5_HAVE_SZLIB_H
-#include "szlib.h"
-#endif
-
 /* This module can collect and optionally dump some simple filter statistics
  * to stdout. If you want to do this, you need to define H5Z_DEBUG and set
  * the DUMP_DEBUG_STATS_g flag to true.
@@ -102,30 +98,23 @@ H5Z__init_package(void)
     FUNC_ENTER_PACKAGE
 
     /* Internal filters */
-    if (H5Z_register(H5Z__shuffle_class()) < 0)
+    if (H5Z__shuffle_register() < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register shuffle filter");
-    if (H5Z_register(H5Z__fletcher32_class()) < 0)
+    if (H5Z__fletcher32_register() < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register fletcher32 filter");
-    if (H5Z_register(H5Z__nbit_class()) < 0)
+    if (H5Z__nbit_register() < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register nbit filter");
-    if (H5Z_register(H5Z__scaleoffset_class()) < 0)
+    if (H5Z__scaleoffset_register() < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register scaleoffset filter");
 
         /* External filters */
 #ifdef H5_HAVE_FILTER_DEFLATE
-    if (H5Z_register(H5Z__deflate_class()) < 0)
+    if (H5Z__deflate_register() < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register deflate filter");
 #endif /* H5_HAVE_FILTER_DEFLATE */
 #ifdef H5_HAVE_FILTER_SZIP
-    {
-        int encoder_enabled = SZ_encoder_enabled();
-        if (encoder_enabled < 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "check for szip encoder failed");
-
-        H5Z__szip_class()->encoder_present = (unsigned)encoder_enabled;
-        if (H5Z_register(H5Z__szip_class()) < 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register szip filter");
-    }
+    if (H5Z__szip_register() < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register szip filter");
 #endif /* H5_HAVE_FILTER_SZIP */
 
 done:

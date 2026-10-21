@@ -103,21 +103,27 @@ static H5Z_class3_t H5Z_SCALEOFFSET[1] = {{
 }};
 
 /*-------------------------------------------------------------------------
- * Function:    H5Z__scaleoffset_class
+ * Function:    H5Z__scaleoffset_register
  *
- * Purpose:     Returns the class struct for the scaleoffset filter
+ * Purpose:     Register the scaleoffset filter with the library.
  *
- * Return:      Pointer to the class struct (can't fail)
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
-const H5Z_class3_t *
-H5Z__scaleoffset_class(void)
+herr_t
+H5Z__scaleoffset_register(void)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_LEAVE_NOAPI(H5Z_SCALEOFFSET)
-} /* end H5Z__scaleoffset_class() */
+    FUNC_ENTER_PACKAGE
+
+    if (H5Z_register(H5Z_SCALEOFFSET) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTREGISTER, FAIL, "unable to register scaleoffset filter");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z__scaleoffset_register() */
 
 /* Local macros */
 #define H5Z_SCALEOFFSET_TOTAL_NPARMS     20 /* Total number of parameters for filter */

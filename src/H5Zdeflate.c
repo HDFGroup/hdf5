@@ -45,21 +45,27 @@ static const H5Z_class3_t H5Z_DEFLATE[1] = {{
 }};
 
 /*-------------------------------------------------------------------------
- * Function:    H5Z__deflate_class
+ * Function:    H5Z__deflate_register
  *
- * Purpose:     Returns the class struct for the deflate filter
+ * Purpose:     Register the deflate filter with the library.
  *
- * Return:      Pointer to the class struct (can't fail)
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
-const H5Z_class3_t *
-H5Z__deflate_class(void)
+herr_t
+H5Z__deflate_register(void)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_LEAVE_NOAPI(H5Z_DEFLATE)
-} /* end H5Z__deflate_class() */
+    FUNC_ENTER_PACKAGE
+
+    if (H5Z_register(H5Z_DEFLATE) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTREGISTER, FAIL, "unable to register deflate filter");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z__deflate_register() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5Z__filter_deflate

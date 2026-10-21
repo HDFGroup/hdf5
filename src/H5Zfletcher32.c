@@ -36,21 +36,27 @@ static const H5Z_class3_t H5Z_FLETCHER32[1] = {{
 }};
 
 /*-------------------------------------------------------------------------
- * Function:    H5Z__fletcher32_class
+ * Function:    H5Z__fletcher32_register
  *
- * Purpose:     Returns the class struct for the fletcher32 filter
+ * Purpose:     Register the fletcher32 filter with the library.
  *
- * Return:      Pointer to the class struct (can't fail)
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
-const H5Z_class3_t *
-H5Z__fletcher32_class(void)
+herr_t
+H5Z__fletcher32_register(void)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_LEAVE_NOAPI(H5Z_FLETCHER32)
-} /* end H5Z__fletcher32_class() */
+    FUNC_ENTER_PACKAGE
+
+    if (H5Z_register(H5Z_FLETCHER32) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTREGISTER, FAIL, "unable to register fletcher32 filter");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z__fletcher32_register() */
 
 #define FLETCHER_LEN 4
 

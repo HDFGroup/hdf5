@@ -53,21 +53,32 @@ static H5Z_class3_t H5Z_SZIP[1] = {{
 }};
 
 /*-------------------------------------------------------------------------
- * Function:    H5Z__szip_class
+ * Function:    H5Z__szip_register
  *
- * Purpose:     Returns the class struct for the szip filter
+ * Purpose:     Register the szip filter with the library.
  *
- * Return:      Pointer to the class struct (can't fail)
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
-H5Z_class3_t *
-H5Z__szip_class(void)
+herr_t
+H5Z__szip_register(void)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    int    encoder_enabled;     /* Whether the szip encoder is available */
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_LEAVE_NOAPI(H5Z_SZIP)
-} /* end H5Z__szip_class() */
+    FUNC_ENTER_PACKAGE
+
+    if ((encoder_enabled = SZ_encoder_enabled()) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "check for szip encoder failed");
+
+    H5Z_SZIP->encoder_present = (unsigned)encoder_enabled;
+    if (H5Z_register(H5Z_SZIP) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTREGISTER, FAIL, "unable to register szip filter");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z__szip_register() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5Z__can_apply_szip

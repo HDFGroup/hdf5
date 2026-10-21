@@ -40,21 +40,27 @@ static const H5Z_class3_t H5Z_SHUFFLE[1] = {{
 }};
 
 /*-------------------------------------------------------------------------
- * Function:    H5Z__shuffle_class
+ * Function:    H5Z__shuffle_register
  *
- * Purpose:     Returns the class struct for the shuffle filter
+ * Purpose:     Register the shuffle filter with the library.
  *
- * Return:      Pointer to the class struct (can't fail)
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
-const H5Z_class3_t *
-H5Z__shuffle_class(void)
+herr_t
+H5Z__shuffle_register(void)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_LEAVE_NOAPI(H5Z_SHUFFLE)
-} /* end H5Z__shuffle_class() */
+    FUNC_ENTER_PACKAGE
+
+    if (H5Z_register(H5Z_SHUFFLE) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTREGISTER, FAIL, "unable to register shuffle filter");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z__shuffle_register() */
 
 /* Local macros */
 #define H5Z_SHUFFLE_PARM_SIZE 0 /* "Local" parameter for shuffling size */

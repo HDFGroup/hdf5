@@ -20,10 +20,10 @@
 /* Include private header file */
 #include "H5Zprivate.h" /* Filter functions                */
 
-/* The built-in filter class structs are static in each filter's source file
- * and reached through these functions, so that libhdf5 does not export
- * symbols such as H5Z_DEFLATE that a plugin built from a copy of the filter
- * source might also define.
+/* The built-in filter class structs are static in each filter's source file,
+ * which registers the filter through one of these functions, so that libhdf5
+ * does not export symbols such as H5Z_DEFLATE that a plugin built from a copy
+ * of the filter source might also define.
  */
 
 /********************/
@@ -31,16 +31,16 @@
 /********************/
 
 /* Shuffle filter */
-H5_DLL const H5Z_class3_t *H5Z__shuffle_class(void);
+H5_DLL herr_t H5Z__shuffle_register(void);
 
 /* Fletcher32 filter */
-H5_DLL const H5Z_class3_t *H5Z__fletcher32_class(void);
+H5_DLL herr_t H5Z__fletcher32_register(void);
 
 /* n-bit filter */
-H5_DLL const H5Z_class3_t *H5Z__nbit_class(void);
+H5_DLL herr_t H5Z__nbit_register(void);
 
 /* Scale/offset filter */
-H5_DLL const H5Z_class3_t *H5Z__scaleoffset_class(void);
+H5_DLL herr_t H5Z__scaleoffset_register(void);
 
 /********************/
 /* External filters */
@@ -48,12 +48,12 @@ H5_DLL const H5Z_class3_t *H5Z__scaleoffset_class(void);
 
 /* Deflate filter */
 #ifdef H5_HAVE_FILTER_DEFLATE
-H5_DLL const H5Z_class3_t *H5Z__deflate_class(void);
+H5_DLL herr_t H5Z__deflate_register(void);
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
 /* szip filter */
 #ifdef H5_HAVE_FILTER_SZIP
-H5_DLL H5Z_class3_t *H5Z__szip_class(void);
+H5_DLL herr_t H5Z__szip_register(void);
 #endif /* H5_HAVE_FILTER_SZIP */
 
 /* Package internal routines */
