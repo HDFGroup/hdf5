@@ -76,13 +76,13 @@ static herr_t H5Z__nbit_decompress(unsigned char *data, unsigned d_nelmts, unsig
                                    size_t buffer_size, const unsigned parms[], size_t parms_nelmts);
 static void   H5Z__nbit_compress_one_nooptype(const unsigned char *data, size_t data_offset,
                                               unsigned char *buffer, size_t *j, size_t *buf_len, unsigned size);
-static void   H5Z__nbit_compress_one_array(unsigned char *data, size_t data_offset, unsigned char *buffer,
+static herr_t H5Z__nbit_compress_one_array(unsigned char *data, size_t data_offset, unsigned char *buffer,
                                            size_t *j, size_t *buf_len, const unsigned parms[],
                                            unsigned *parms_index);
-static void   H5Z__nbit_compress_one_compound(unsigned char *data, size_t data_offset, unsigned char *buffer,
+static herr_t H5Z__nbit_compress_one_compound(unsigned char *data, size_t data_offset, unsigned char *buffer,
                                               size_t *j, size_t *buf_len, const unsigned parms[],
                                               unsigned *parms_index);
-static void   H5Z__nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer,
+static herr_t H5Z__nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer,
                                  size_t *buffer_size, const unsigned parms[]);
 
 /* This message derives from H5Z */
@@ -1000,7 +1000,10 @@ H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for nbit compression");
 
         /* compress the buffer, size_out will be changed */
-        H5Z__nbit_compress((unsigned char *)*buf, d_nelmts, outbuf, &size_out, cd_values);
+        if (H5Z__nbit_compress((unsigned char *)*buf, d_nelmts, outbuf, &size_out, cd_values) < 0) {
+            H5MM_xfree(outbuf);
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, 0, "can't compress buffer");
+        }
     } /* end else */
 
     /* free the input buffer */
@@ -1201,6 +1204,13 @@ H5Z__nbit_decompress_one_array(unsigned char *data, size_t data_offset, unsigned
             if (p.precision > p.size * 8 || (p.precision + p.offset) > p.size * 8)
                 HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "invalid datatype precision/offset");
 
+            /* A zero size would divide by zero below.  It passes the
+             * precision/offset check above when both of those are zero too,
+             * so it has to be rejected on its own.
+             */
+            if (p.size == 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "invalid datatype size");
+
             n = total_size / p.size;
             for (i = 0; i < n; i++)
                 if (H5Z__nbit_decompress_one_atomic(data, data_offset + i * (size_t)p.size, buffer,
@@ -1213,7 +1223,9 @@ H5Z__nbit_decompress_one_array(unsigned char *data, size_t data_offset, unsigned
                 HGOTO_ERROR(H5E_PLINE, H5E_OVERFLOW, FAIL,
                             "parameter list is shorter than the datatype it describes");
 
-            base_size   = parms[*parms_index];    /* read in advance */
+            base_size = parms[*parms_index]; /* read in advance */
+            if (base_size == 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "invalid datatype size");
             n           = total_size / base_size; /* number of base_type elements inside the array datatype */
             begin_index = *parms_index;
             for (i = 0; i < n; i++) {
@@ -1230,7 +1242,9 @@ H5Z__nbit_decompress_one_array(unsigned char *data, size_t data_offset, unsigned
                 HGOTO_ERROR(H5E_PLINE, H5E_OVERFLOW, FAIL,
                             "parameter list is shorter than the datatype it describes");
 
-            base_size   = parms[*parms_index];    /* read in advance */
+            base_size = parms[*parms_index]; /* read in advance */
+            if (base_size == 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "invalid datatype size");
             n           = total_size / base_size; /* number of base_type elements inside the array datatype */
             begin_index = *parms_index;
             for (i = 0; i < n; i++) {
@@ -1534,12 +1548,15 @@ H5Z__nbit_compress_one_atomic(unsigned char *data, size_t data_offset, unsigned 
     }
 }
 
-static void
+static herr_t
 H5Z__nbit_compress_one_array(unsigned char *data, size_t data_offset, unsigned char *buffer, size_t *j,
                              size_t *buf_len, const unsigned parms[], unsigned *parms_index)
 {
     unsigned     i, total_size, base_class, base_size, n, begin_index;
     parms_atomic p;
+    herr_t       ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
 
     total_size = parms[(*parms_index)++];
     base_class = parms[(*parms_index)++];
@@ -1550,29 +1567,37 @@ H5Z__nbit_compress_one_array(unsigned char *data, size_t data_offset, unsigned c
             p.order     = parms[(*parms_index)++];
             p.precision = parms[(*parms_index)++];
             p.offset    = parms[(*parms_index)++];
-            n           = total_size / p.size;
+            if (p.size == 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "invalid datatype size");
+            n = total_size / p.size;
             for (i = 0; i < n; i++)
                 H5Z__nbit_compress_one_atomic(data, data_offset + i * (size_t)p.size, buffer, j, buf_len, &p);
             break;
 
         case H5Z_NBIT_ARRAY:
-            base_size   = parms[*parms_index];    /* read in advance */
+            base_size = parms[*parms_index]; /* read in advance */
+            if (base_size == 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "invalid datatype size");
             n           = total_size / base_size; /* number of base_type elements inside the array datatype */
             begin_index = *parms_index;
             for (i = 0; i < n; i++) {
-                H5Z__nbit_compress_one_array(data, data_offset + i * (size_t)base_size, buffer, j, buf_len,
-                                             parms, parms_index);
+                if (H5Z__nbit_compress_one_array(data, data_offset + i * (size_t)base_size, buffer, j,
+                                                 buf_len, parms, parms_index) < 0)
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't compress array");
                 *parms_index = begin_index;
             }
             break;
 
         case H5Z_NBIT_COMPOUND:
-            base_size   = parms[*parms_index];    /* read in advance */
+            base_size = parms[*parms_index]; /* read in advance */
+            if (base_size == 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "invalid datatype size");
             n           = total_size / base_size; /* number of base_type elements inside the array datatype */
             begin_index = *parms_index;
             for (i = 0; i < n; i++) {
-                H5Z__nbit_compress_one_compound(data, data_offset + i * (size_t)base_size, buffer, j, buf_len,
-                                                parms, parms_index);
+                if (H5Z__nbit_compress_one_compound(data, data_offset + i * (size_t)base_size, buffer, j,
+                                                    buf_len, parms, parms_index) < 0)
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't compress compound");
                 *parms_index = begin_index;
             }
             break;
@@ -1585,14 +1610,20 @@ H5Z__nbit_compress_one_array(unsigned char *data, size_t data_offset, unsigned c
         default:
             assert(0 && "This Should never be executed!");
     } /* end switch */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
-static void
+static herr_t
 H5Z__nbit_compress_one_compound(unsigned char *data, size_t data_offset, unsigned char *buffer, size_t *j,
                                 size_t *buf_len, const unsigned parms[], unsigned *parms_index)
 {
     unsigned     i, nmembers, member_offset, member_class, size;
     parms_atomic p;
+    herr_t       ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
 
     (*parms_index)++; /* skip size of compound datatype */
     nmembers = parms[(*parms_index)++];
@@ -1611,13 +1642,15 @@ H5Z__nbit_compress_one_compound(unsigned char *data, size_t data_offset, unsigne
                 break;
 
             case H5Z_NBIT_ARRAY:
-                H5Z__nbit_compress_one_array(data, data_offset + member_offset, buffer, j, buf_len, parms,
-                                             parms_index);
+                if (H5Z__nbit_compress_one_array(data, data_offset + member_offset, buffer, j, buf_len, parms,
+                                                 parms_index) < 0)
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't compress array");
                 break;
 
             case H5Z_NBIT_COMPOUND:
-                H5Z__nbit_compress_one_compound(data, data_offset + member_offset, buffer, j, buf_len, parms,
-                                                parms_index);
+                if (H5Z__nbit_compress_one_compound(data, data_offset + member_offset, buffer, j, buf_len,
+                                                    parms, parms_index) < 0)
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't compress compound");
                 break;
 
             case H5Z_NBIT_NOOPTYPE:
@@ -1629,9 +1662,12 @@ H5Z__nbit_compress_one_compound(unsigned char *data, size_t data_offset, unsigne
                 assert(0 && "This Should never be executed!");
         } /* end switch */
     }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
-static void
+static herr_t
 H5Z__nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer, size_t *buffer_size,
                    const unsigned parms[])
 {
@@ -1643,6 +1679,9 @@ H5Z__nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer
     size_t       buf_len;
     parms_atomic p;
     unsigned     parms_index; /* index in array parms used by compression/decompression functions */
+    herr_t       ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
 
     /* must initialize buffer to be zeros */
     memset(buffer, 0, *buffer_size);
@@ -1665,8 +1704,9 @@ H5Z__nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer
             size        = parms[4];
             parms_index = 4;
             for (i = 0; i < d_nelmts; i++) {
-                H5Z__nbit_compress_one_array(data, i * size, buffer, &new_size, &buf_len, parms,
-                                             &parms_index);
+                if (H5Z__nbit_compress_one_array(data, i * size, buffer, &new_size, &buf_len, parms,
+                                                 &parms_index) < 0)
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't compress array");
                 parms_index = 4;
             }
             break;
@@ -1675,8 +1715,9 @@ H5Z__nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer
             size        = parms[4];
             parms_index = 4;
             for (i = 0; i < d_nelmts; i++) {
-                H5Z__nbit_compress_one_compound(data, i * size, buffer, &new_size, &buf_len, parms,
-                                                &parms_index);
+                if (H5Z__nbit_compress_one_compound(data, i * size, buffer, &new_size, &buf_len, parms,
+                                                    &parms_index) < 0)
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't compress compound");
                 parms_index = 4;
             }
             break;
@@ -1688,4 +1729,7 @@ H5Z__nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer
     /* Update the size to the new value after compression.  If there are any bits hanging over in
      * the last byte, increment the value by 1. */
     *buffer_size = new_size + 1;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 }
