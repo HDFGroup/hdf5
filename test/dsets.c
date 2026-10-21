@@ -3223,7 +3223,6 @@ static herr_t
 test_missing_filter(hid_t file)
 {
     hid_t         fid;                                    /* File ID */
-    hid_t         fapl = H5I_INVALID_HID;                 /* File access property list ID */
     hid_t         dsid;                                   /* Dataset ID */
     hid_t         sid;                                    /* Dataspace ID */
     hid_t         dcpl;                                   /* Dataspace creation property list ID */
@@ -3388,14 +3387,8 @@ test_missing_filter(hid_t file)
 
     /* Try reading existing dataset with deflate filter */
 
-    /* Open existing file. It is a single-file test file, so open it with the
-     * sec2 driver rather than the default (possibly multi-file) test VFD. */
-    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0 || H5Pset_fapl_sec2(fapl) < 0) {
-        H5_FAILED();
-        printf("    Line %d: Can't create sec2 fapl\n", __LINE__);
-        goto error;
-    } /* end if */
-    if ((fid = H5Fopen(testfile, H5F_ACC_RDONLY, fapl)) < 0) {
+    /* Open existing file */
+    if ((fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         printf("    Line %d: Can't open existing deflated file\n", __LINE__);
         goto error;
@@ -3433,12 +3426,6 @@ test_missing_filter(hid_t file)
         printf("    Line %d: Can't close file\n", __LINE__);
         goto error;
     } /* end if */
-    if (H5Pclose(fapl) < 0) {
-        H5_FAILED();
-        printf("    Line %d: Can't close fapl\n", __LINE__);
-        goto error;
-    } /* end if */
-    fapl = H5I_INVALID_HID;
 
     /* Re-register the deflate filter */
     /* Verify deflate filter is not registered currently */
@@ -3472,11 +3459,6 @@ test_missing_filter(hid_t file)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY
-    {
-        H5Pclose(fapl);
-    }
-    H5E_END_TRY
     if (api_ctx_pushed)
         H5CX_pop(false);
 
@@ -21327,7 +21309,10 @@ main(void)
                     if (!threads)
 #endif /* H5_HAVE_THREADS */
                     {
-                        nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
+                        /* deflate.h5 is a single-file test file, so it can't be opened
+                         * with a VFD that isn't compatible with the default VFD */
+                        if (driver_is_default_compatible)
+                            nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
                         nerrors += (test_bad_decode_size(file) < 0 ? 1 : 0);
                         nerrors += (test_bad_decode_size_vlen(file) < 0 ? 1 : 0);
                         nerrors += (test_bad_buf_size(file) < 0 ? 1 : 0);
