@@ -759,6 +759,22 @@ if (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY)
       set_tests_properties (H5TEST_S3TESTS-${h5_test} PROPERTIES DISABLED true)
     endif ()
   endforeach ()
+else ()
+  # The s3comms test also checks the endpoint URL resolution order, which
+  # performs no I/O and needs no credentials, so it is still worth running in an
+  # ordinary build when s3proxy fixture is not available. The other tests are
+  # skipped then.
+  #
+  # Run directly rather than through runTest.cmake since there is no output to
+  # capture or compare against a reference, and that wrapper displays the
+  # captured output twice when TEST_SKIP_COMPARE is set.
+  add_test (NAME H5TEST_S3TESTS-s3comms COMMAND $<TARGET_FILE:s3comms>)
+  set_tests_properties (H5TEST_S3TESTS-s3comms PROPERTIES
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+  )
+  if ("H5TEST_S3TESTS-s3comms" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (H5TEST_S3TESTS-s3comms PROPERTIES DISABLED true)
+  endif ()
 endif ()
 
 ##############################################################################
