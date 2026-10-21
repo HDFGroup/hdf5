@@ -2840,7 +2840,7 @@ test_get_filter_info(void)
     if (H5Zget_filter_info(H5Z_FILTER_SZIP, &flags) < 0)
         TEST_ERROR;
 
-    if (H5Z_SZIP->encoder_present) {
+    if (H5Z__szip_class()->encoder_present) {
         if (((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) ||
             ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
             TEST_ERROR;
@@ -2868,6 +2868,50 @@ test_get_filter_info(void)
 error:
     return FAIL;
 } /* end test_get_filter_info() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_filter_class_symbols
+ *
+ * Purpose:     Tests that the library does not export the class structs of
+ *              its built-in filters. A plugin built from a copy of a
+ *              filter's source defines a global with the same name (e.g.
+ *              H5Z_DEFLATE), and on ELF platforms the plugin's references
+ *              to it would bind to the library's copy if it were exported.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_filter_class_symbols(void)
+{
+#if defined(H5_HAVE_DLFCN_H) && defined(RTLD_DEFAULT)
+    const char *names[] = {"H5Z_SHUFFLE",     "H5Z_FLETCHER32", "H5Z_NBIT",
+                           "H5Z_SCALEOFFSET", "H5Z_DEFLATE",    "H5Z_SZIP"};
+    size_t      u;
+#endif
+
+    TESTING("built-in filter class structs are not exported");
+
+#if defined(H5_HAVE_DLFCN_H) && defined(RTLD_DEFAULT)
+    for (u = 0; u < NELMTS(names); u++)
+        if (dlsym(RTLD_DEFAULT, names[u]) != NULL) {
+            H5_FAILED();
+            printf("    %s is exported\n", names[u]);
+            goto error;
+        }
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    return FAIL;
+#else
+    SKIPPED();
+    puts("    dlsym() with RTLD_DEFAULT not available");
+    return SUCCEED;
+#endif
+} /* end test_filter_class_symbols() */
 
 /*-------------------------------------------------------------------------
  * Function:  test_filters
@@ -3436,7 +3480,7 @@ test_missing_filter(hid_t file)
     } /* end if */
 #ifdef H5_HAVE_FILTER_DEFLATE
     /* Register deflate filter (use internal function to avoid range checks) */
-    if (H5Z_register(H5Z_DEFLATE) < 0) {
+    if (H5Z_register(H5Z__deflate_class()) < 0) {
         H5_FAILED();
         printf("    Line %d: Can't unregister deflate filter\n", __LINE__);
         goto error;
@@ -21419,6 +21463,7 @@ main(void)
     nerrors += (test_object_header_minimization_dcpl() < 0 ? 1 : 0);
     nerrors += (test_h5s_block() < 0 ? 1 : 0);
     nerrors += (test_h5s_plist() < 0 ? 1 : 0);
+    nerrors += (test_filter_class_symbols() < 0 ? 1 : 0);
 #ifdef H5_HAVE_THREADS
     nerrors += (test_threaded_chunks() < 0 ? 1 : 0);
     if (driver_readwrite_no_h5_calls) {

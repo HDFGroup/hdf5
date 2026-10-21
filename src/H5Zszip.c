@@ -38,7 +38,7 @@ static size_t H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned 
                                size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-H5Z_class3_t H5Z_SZIP[1] = {{
+static H5Z_class3_t H5Z_SZIP[1] = {{
     H5Z_CLASS_T_VERS_3,          /* H5Z_class_t version */
     H5Z_FILTER_SZIP,             /* Filter id number		*/
     1,                           /* Assume encoder present: check before registering */
@@ -51,6 +51,23 @@ H5Z_class3_t H5Z_SZIP[1] = {{
                                     thread-safe, but because the developers do not explicitly make this claim,
                                     we are marking it as not thread-safe for now. */
 }};
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z__szip_class
+ *
+ * Purpose:     Returns the class struct for the szip filter
+ *
+ * Return:      Pointer to the class struct (can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+H5Z_class3_t *
+H5Z__szip_class(void)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    FUNC_LEAVE_NOAPI(H5Z_SZIP)
+} /* end H5Z__szip_class() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5Z__can_apply_szip

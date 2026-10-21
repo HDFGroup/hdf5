@@ -165,6 +165,15 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Stopped exporting the built-in filter class structs
+
+   The class structs of the built-in filters (H5Z_DEFLATE, H5Z_SHUFFLE, H5Z_FLETCHER32,
+   H5Z_NBIT, H5Z_SCALEOFFSET and H5Z_SZIP) were exported from the shared library. Filter
+   plugins built from a copy of HDF5's filter source, such as netCDF-C's deflate, shuffle
+   and fletcher32 plugins, define globals with the same names, and on ELF platforms the
+   plugin's references to its own struct bound to the library's copy instead. The structs
+   are now static to their source files, so a plugin always uses its own.
+
 ### Fixed out-of-bounds reads when a filtered chunk is shorter than its filter header
 
    The scaleoffset and szip filters each store a fixed-size header in front of the chunk data: a 21-byte parameter block for scaleoffset and a 4-byte uncompressed-length header for szip. On read, each one subtracted that fixed size from the chunk length without first checking that the chunk was at least that long. A truncated or corrupted chunk record made the subtraction wrap around, so both filters read far past the end of the chunk buffer. Its bounds checks also measured the chunk buffer's allocated size, which the library deliberately sizes to hold the larger unfiltered chunk, so a truncated chunk could still decompress out of the uninitialized remainder of that allocation. Both filters now reject any chunk shorter than their own header, and scaleoffset validates every read against the number of bytes actually stored for the chunk rather than the size of the buffer holding them. The fletcher32 filter now also rejects a chunk that holds only its 4-byte checksum and no data, which previously reached the checksum routine with a length of zero.

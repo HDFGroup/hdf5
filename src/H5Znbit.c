@@ -86,7 +86,7 @@ static void   H5Z__nbit_compress(unsigned char *data, unsigned d_nelmts, unsigne
                                  size_t *buffer_size, const unsigned parms[]);
 
 /* This message derives from H5Z */
-H5Z_class3_t H5Z_NBIT[1] = {{
+static H5Z_class3_t H5Z_NBIT[1] = {{
     H5Z_CLASS_T_VERS_3,  /* H5Z_class_t version */
     H5Z_FILTER_NBIT,     /* Filter id number		*/
     1,                   /* Assume encoder present: check before registering */
@@ -98,6 +98,23 @@ H5Z_class3_t H5Z_NBIT[1] = {{
     H5Z_FEAT_FILTER_THREADSAFE |
         H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
 }};
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z__nbit_class
+ *
+ * Purpose:     Returns the class struct for the nbit filter
+ *
+ * Return:      Pointer to the class struct (can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+const H5Z_class3_t *
+H5Z__nbit_class(void)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    FUNC_LEAVE_NOAPI(H5Z_NBIT)
+} /* end H5Z__nbit_class() */
 
 /* Local macros */
 #define H5Z_NBIT_ATOMIC     1    /* Atomic datatype class: integer/floating-point */
