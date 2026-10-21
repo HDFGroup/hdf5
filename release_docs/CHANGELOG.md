@@ -151,6 +151,22 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed an uninitialized pointer read in H5Pget_fapl_ros3_token()
+
+`H5Pget_fapl_ros3_token()` declared its source pointer without an initializer
+and assigned it only when the file access property list actually carried a
+session token property. When no token had been set with
+`H5Pset_fapl_ros3_token()`, the function still dereferenced that pointer,
+reading uninitialized stack memory.
+
+The function now matches `H5Pget_fapl_ros3_endpoint()`: when no token is set,
+the destination buffer is zeroed and the call succeeds. Both getters also handle
+a NULL stored value, which previously left the caller's buffer untouched in
+`H5Pget_fapl_ros3_endpoint()`. The existing behavior of silently truncating a
+token value that does not fit the caller's buffer is unchanged, but is now
+documented.
+
+Fixes GitHub issue #6757.
 ### Fixed a heap buffer over-read in scale-offset decode
 
    The scale-offset filter's decode path used the size computed from the user's filter
@@ -183,7 +199,7 @@ We would like to thank the many HDF5 community members who contributed to this r
    external link data was not properly terminated caused a read past the end of the `udata`
    buffer. `H5L__extern_traverse()` now validates the buffer against its stored size before
    parsing, the same way `H5Lunpack_elink_val()` does.
-   
+
 ### Fixed the page buffer's minimum metadata threshold failure to protect B-tree, local heap and object header metadata pages
 
 The page buffer charges every page it holds to either `raw_count` or `meta_count`, counting `H5F_MEM_PAGE_DRAW` and `H5F_MEM_PAGE_GHEAP` pages as raw data and every other page as metadata. The minimum metadata reservation set by `H5Pset_page_buffer_size()` was not written as the complement of that test: it compared the page's type for equality with `H5F_MEM_PAGE_META`, which is an alias for `H5F_MEM_PAGE_SUPER`. A page entry's type is copied verbatim from the memory type of the access that brought the page into the buffer, so B-tree, local heap and object header pages carried other values and were evicted by raw data regardless of `min_meta_perc`, while still counting toward the threshold the reservation was measured against. In practice the reservation protected only the superblock and driver information pages. The classification is now made in one place, `H5MF_mem_page_type_is_raw()`, alongside its `H5F_mem_t` counterpart `H5MF_mem_type_is_raw()`, and both the page counts and the two reservations use it, so the metadata reservation protects the same population that `meta_count` measures.
@@ -242,7 +258,7 @@ Fixes GitHub issue #6679.
    Fixes GitHub issue #6487
 
    Fixes CVE-2026-19024
-   
+
 ### Fixed a crash when unprotecting a local heap with no cached prefix or data block
 
    `H5HL_protect()` pins one metadata cache entry for a local heap -- either the prefix when the heap is a single cache object, or the data block otherwise -- and `H5HL_unprotect()` unpins it again. The cache unlinks that entry from the heap when it destroys it, so a damaged file could reach `H5HL_unprotect()` with nothing to unpin, which triggered an assertion failure in debug builds and a NULL pointer dereference otherwise. `H5HL_unprotect()` now reports an error instead, and does so before decrementing the heap's protect count so that a rejected call leaves the heap unchanged rather than half unprotected with its cache entry still pinned.

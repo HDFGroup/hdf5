@@ -1287,6 +1287,91 @@ error:
 
     return 1;
 }
+
+/*---------------------------------------------------------------------------
+ * Function:    test_token_and_endpoint_getters
+ *
+ * Purpose:     Verify H5Pget_fapl_ros3_token() and H5Pget_fapl_ros3_endpoint()
+ *              against a File Access Property List on which no token or
+ *              endpoint url has been set, and verify that both round-trip a
+ *              value that has been set. Performs no I/O, so it needs neither
+ *              credentials nor a reachable bucket.
+ *
+ * Return:      PASS : 0
+ *              FAIL : 1
+ *---------------------------------------------------------------------------
+ */
+static int
+test_token_and_endpoint_getters(void)
+{
+    hid_t fapl_id = H5I_INVALID_HID;
+    char  buf[64];
+    char  small_buf[8];
+
+    TESTING("ros3 token and endpoint getters");
+
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3(fapl_id, &anonymous_fa) < 0)
+        TEST_ERROR;
+
+    /* Neither property has been set yet. Both getters should succeed and return
+     * an empty string rather than reading an unset value.
+     */
+    memset(buf, 'x', sizeof(buf));
+    if (H5Pget_fapl_ros3_token(fapl_id, sizeof(buf), buf) < 0)
+        TEST_ERROR;
+    if (buf[0] != '\0')
+        FAIL_PUTS_ERROR("token should be empty when none has been set");
+
+    memset(buf, 'x', sizeof(buf));
+    if (H5Pget_fapl_ros3_endpoint(fapl_id, sizeof(buf), buf) < 0)
+        TEST_ERROR;
+    if (buf[0] != '\0')
+        FAIL_PUTS_ERROR("endpoint url should be empty when none has been set");
+
+    /* A token that has been set round-trips */
+    if (H5Pset_fapl_ros3_token(fapl_id, "0123456789") < 0)
+        TEST_ERROR;
+    memset(buf, 'x', sizeof(buf));
+    if (H5Pget_fapl_ros3_token(fapl_id, sizeof(buf), buf) < 0)
+        TEST_ERROR;
+    if (strcmp(buf, "0123456789") != 0)
+        FAIL_PUTS_ERROR("token did not round-trip");
+
+    /* A destination buffer that is too small truncates, and stays NUL-terminated */
+    memset(small_buf, 'x', sizeof(small_buf));
+    if (H5Pget_fapl_ros3_token(fapl_id, sizeof(small_buf), small_buf) < 0)
+        TEST_ERROR;
+    if (strlen(small_buf) != sizeof(small_buf) - 1)
+        FAIL_PUTS_ERROR("truncated token should fill the buffer and be NUL-terminated");
+    if (strncmp(small_buf, "0123456789", sizeof(small_buf) - 1) != 0)
+        FAIL_PUTS_ERROR("truncated token has the wrong contents");
+
+    /* An endpoint url that has been set round-trips */
+    if (H5Pset_fapl_ros3_endpoint(fapl_id, "https://endpoint.example.org:9000") < 0)
+        TEST_ERROR;
+    memset(buf, 'x', sizeof(buf));
+    if (H5Pget_fapl_ros3_endpoint(fapl_id, sizeof(buf), buf) < 0)
+        TEST_ERROR;
+    if (strcmp(buf, "https://endpoint.example.org:9000") != 0)
+        FAIL_PUTS_ERROR("endpoint url did not round-trip");
+
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY
+    return 1;
+} /* end test_token_and_endpoint_getters() */
+
 #endif /* H5_HAVE_ROS3_VFD */
 
 /*-------------------------------------------------------------------------
@@ -1448,6 +1533,7 @@ main(void)
     }
 
     if (nerrors == 0) {
+        nerrors += test_token_and_endpoint_getters();
         nerrors += test_fapl_config_validation();
         nerrors += test_ros3_fapl_driver_flags();
         nerrors += test_vfl_open();

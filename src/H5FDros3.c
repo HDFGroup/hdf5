@@ -626,9 +626,7 @@ herr_t
 H5Pget_fapl_ros3_token(hid_t fapl_id, size_t size, char *token_dst /*out*/)
 {
     H5P_genplist_t *plist = NULL;
-    char           *token_src;
     htri_t          token_exists;
-    size_t          tokenlen  = 0;
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -645,17 +643,27 @@ H5Pget_fapl_ros3_token(hid_t fapl_id, size_t size, char *token_dst /*out*/)
     if ((token_exists = H5P_exist_plist(plist, ROS3_TOKEN_PROP_NAME)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to check if property token exists in plist");
     if (token_exists) {
+        char *token_src = NULL;
+
         if (H5P_get(plist, ROS3_TOKEN_PROP_NAME, &token_src) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get token value");
-    }
 
-    /* Copy the token data out */
-    tokenlen = strlen(token_src);
-    if (size <= tokenlen) {
-        tokenlen = size - 1;
+        if (token_src) {
+            size_t tokenlen = strlen(token_src);
+
+            /* Copy the token data out, truncating it if the destination is too small */
+            if (size <= tokenlen)
+                tokenlen = size - 1;
+
+            H5MM_memcpy(token_dst, token_src, sizeof(char) * tokenlen);
+            token_dst[tokenlen] = '\0';
+        }
+        else
+            memset(token_dst, 0, size);
     }
-    H5MM_memcpy(token_dst, token_src, sizeof(char) * tokenlen);
-    token_dst[tokenlen] = '\0';
+    else
+        /* No session token has been set on this property list */
+        memset(token_dst, 0, size);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1013,6 +1021,8 @@ H5Pget_fapl_ros3_endpoint(hid_t fapl_id, size_t size, char *endpoint_dst /*out*/
             strncpy(endpoint_dst, endpoint_src, size);
             endpoint_dst[size - 1] = '\0';
         }
+        else
+            memset(endpoint_dst, 0, size);
     }
     else
         memset(endpoint_dst, 0, size);

@@ -296,6 +296,11 @@ H5_DLL herr_t H5Pset_fapl_ros3(hid_t fapl_id, const H5FD_ros3_fapl_t *fa);
  * \param[out] token Session/security token.
  * \returns \herr_t
  *
+ * \details If no session/security token has been set on the property list, \p token is
+ *          set to an empty string and the call succeeds. If the token is longer than
+ *          \p size - 1 characters it is silently truncated; \p token is always
+ *          NUL-terminated.
+ *
  * \since 1.14.2
  */
 H5_DLL herr_t H5Pget_fapl_ros3_token(hid_t fapl_id, size_t size, char *token);
@@ -332,6 +337,10 @@ H5_DLL herr_t H5Pset_fapl_ros3_token(hid_t fapl_id, const char *token);
  * \param[in] size Size of the provided char array for storing the endpoint url.
  * \param[out] endpoint Alternate endpoint url.
  * \returns \herr_t
+ *
+ * \details If no endpoint url has been set on the property list, \p endpoint is set to
+ *          an empty string and the call succeeds. If the url is longer than \p size - 1
+ *          characters it is silently truncated; \p endpoint is always NUL-terminated.
  *
  * \since 2.0.0
  */
