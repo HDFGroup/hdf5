@@ -16,6 +16,16 @@ jobs:
     uses: ./.github/workflows/daily-build.yml
     with:
       use_ignore: check
+    secrets:
+      APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
+      APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
+      KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
+      AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+      AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
     if: "github.repository_owner == 'HDFGroup'"
 
   call-workflow-publish:
