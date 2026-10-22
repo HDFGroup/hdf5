@@ -38,7 +38,7 @@ static size_t H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned 
                                size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-H5Z_class3_t H5Z_SZIP[1] = {{
+static H5Z_class3_t H5Z_SZIP[1] = {{
     H5Z_CLASS_T_VERS_3,          /* H5Z_class_t version */
     H5Z_FILTER_SZIP,             /* Filter id number		*/
     1,                           /* Assume encoder present: check before registering */
@@ -51,6 +51,34 @@ H5Z_class3_t H5Z_SZIP[1] = {{
                                     thread-safe, but because the developers do not explicitly make this claim,
                                     we are marking it as not thread-safe for now. */
 }};
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z__szip_register
+ *
+ * Purpose:     Register the szip filter with the library.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z__szip_register(void)
+{
+    int    encoder_enabled;     /* Whether the szip encoder is available */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    if ((encoder_enabled = SZ_encoder_enabled()) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "check for szip encoder failed");
+
+    H5Z_SZIP->encoder_present = (unsigned)encoder_enabled;
+    if (H5Z_register(H5Z_SZIP) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTREGISTER, FAIL, "unable to register szip filter");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z__szip_register() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5Z__can_apply_szip
