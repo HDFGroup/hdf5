@@ -22,8 +22,8 @@ static size_t H5Z__filter_fletcher32(unsigned flags, size_t cd_nelmts, const uns
                                      size_t nbytes, size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_FLETCHER32[1] = {{
-    H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
+const H5Z_class3_t H5Z_FLETCHER32[1] = {{
+    H5Z_CLASS_T_VERS_3,     /* H5Z_class_t version */
     H5Z_FILTER_FLETCHER32,  /* Filter id number		*/
     1,                      /* encoder_present flag (set to true) */
     1,                      /* decoder_present flag (set to true) */
@@ -31,6 +31,8 @@ const H5Z_class2_t H5Z_FLETCHER32[1] = {{
     NULL,                   /* The "can apply" callback     */
     NULL,                   /* The "set local" callback     */
     H5Z__filter_fletcher32, /* The actual filter function	*/
+    H5Z_FEAT_FILTER_THREADSAFE |
+        H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
 }};
 
 #define FLETCHER_LEN 4
@@ -62,13 +64,14 @@ H5Z__filter_fletcher32(unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts,
     assert(sizeof(uint32_t) >= 4);
 
     if (flags & H5Z_FLAG_REVERSE) { /* Read */
-        /* A Fletcher32-filtered buffer must contain at least the trailing
-         * checksum.  Reject anything smaller to avoid a size_t underflow
-         * when computing the data length.
+        /* The checksum is stored at the end of the chunk, so anything shorter
+         * than the checksum itself makes the length arithmetic below wrap.  A
+         * chunk of exactly FLETCHER_LEN bytes holds no data and would return a
+         * filtered size of zero, which the pipeline reports as a filter failure,
+         * so reject it here where the reason can be stated.
          */
-        if (nbytes < FLETCHER_LEN)
-            HGOTO_ERROR(H5E_STORAGE, H5E_OVERFLOW, 0,
-                        "fletcher32 filter input buffer too small to contain checksum");
+        if (nbytes <= FLETCHER_LEN)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
 
         /* Do checksum if it's enabled for read; otherwise skip it
          * to save performance. */
