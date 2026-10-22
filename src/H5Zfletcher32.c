@@ -22,7 +22,7 @@ static size_t H5Z__filter_fletcher32(unsigned flags, size_t cd_nelmts, const uns
                                      size_t nbytes, size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-const H5Z_class3_t H5Z_FLETCHER32[1] = {{
+static const H5Z_class3_t H5Z_FLETCHER32[1] = {{
     H5Z_CLASS_T_VERS_3,     /* H5Z_class_t version */
     H5Z_FILTER_FLETCHER32,  /* Filter id number		*/
     1,                      /* encoder_present flag (set to true) */
@@ -34,6 +34,29 @@ const H5Z_class3_t H5Z_FLETCHER32[1] = {{
     H5Z_FEAT_FILTER_THREADSAFE |
         H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
 }};
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z__fletcher32_register
+ *
+ * Purpose:     Register the fletcher32 filter with the library.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z__fletcher32_register(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    if (H5Z_register(H5Z_FLETCHER32) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTREGISTER, FAIL, "unable to register fletcher32 filter");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z__fletcher32_register() */
 
 #define FLETCHER_LEN 4
 
