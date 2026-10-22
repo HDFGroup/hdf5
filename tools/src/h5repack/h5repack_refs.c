@@ -53,6 +53,8 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
     unsigned int i, j;
     int          k;
     named_dt_t  *named_dt_head = NULL; /* Pointer to the stack of named datatypes copied */
+    void        *buf           = NULL;
+    void        *refbuf        = NULL;
     int          ret_value     = 0;
 
     /*-------------------------------------------------------------------------
@@ -142,8 +144,6 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                      */
                     if (H5Tequal(mtype_id, H5T_STD_REF_OBJ)) {
                         hid_t       refobj_id = H5I_INVALID_HID;
-                        hobj_ref_t *refbuf    = NULL; /* buffer for object references */
-                        hobj_ref_t *buf       = NULL;
                         const char *refname;
                         unsigned    u;
 
@@ -168,8 +168,8 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                             for (u = 0; u < nelmts; u++) {
                                 H5E_BEGIN_TRY
                                 {
-                                    if ((refobj_id =
-                                             H5Rdereference2(dset_in, H5P_DEFAULT, H5R_OBJECT, &buf[u])) < 0)
+                                    if ((refobj_id = H5Rdereference2(dset_in, H5P_DEFAULT, H5R_OBJECT,
+                                                                     &(((hobj_ref_t *)buf)[u]))) < 0)
                                         continue;
                                 }
                                 H5E_END_TRY
@@ -179,7 +179,8 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                  */
                                 if ((refname = MapIdToName(refobj_id, travt)) != NULL) {
                                     /* create the reference, -1 parameter for objects */
-                                    if (H5Rcreate(&refbuf[u], fidout, refname, H5R_OBJECT, (hid_t)-1) < 0)
+                                    if (H5Rcreate(&(((hobj_ref_t *)refbuf)[u]), fidout, refname, H5R_OBJECT,
+                                                  (hid_t)-1) < 0)
                                         H5TOOLS_GOTO_ERROR((-1), "H5Rcreate failed");
                                     if (options->verbose > 0) {
                                         if (options->verbose == 2)
@@ -206,10 +207,10 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                             if (H5Dwrite(dset_out, mtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, refbuf) < 0)
                                 H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
 
-                        if (buf)
-                            free(buf);
-                        if (refbuf)
-                            free(refbuf);
+                        free(buf);
+                        buf = NULL;
+                        free(refbuf);
+                        refbuf = NULL;
 
                         /*------------------------------------------------------
                          * copy attrs
@@ -223,11 +224,9 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                      *-------------------------------------------------------------------------
                      */
                     else if (H5Tequal(mtype_id, H5T_STD_REF_DSETREG)) {
-                        hid_t            refobj_id = H5I_INVALID_HID;
-                        hdset_reg_ref_t *refbuf    = NULL; /* input buffer for region references */
-                        hdset_reg_ref_t *buf       = NULL; /* output buffer */
-                        const char      *refname;
-                        unsigned         u;
+                        hid_t       refobj_id = H5I_INVALID_HID;
+                        const char *refname;
+                        unsigned    u;
 
                         /*-------------------------------------------------------------------------
                          * read input to memory
@@ -256,7 +255,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                 H5E_BEGIN_TRY
                                 {
                                     if ((refobj_id = H5Rdereference2(dset_in, H5P_DEFAULT, H5R_DATASET_REGION,
-                                                                     &buf[u])) < 0)
+                                                                     &((hdset_reg_ref_t *)buf)[u])) < 0)
                                         continue;
                                 }
                                 H5E_END_TRY
@@ -268,12 +267,13 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                     hid_t region_id =
                                         H5I_INVALID_HID; /* region id of the referenced dataset */
 
-                                    if ((region_id = H5Rget_region(dset_in, H5R_DATASET_REGION, &buf[u])) < 0)
+                                    if ((region_id = H5Rget_region(dset_in, H5R_DATASET_REGION,
+                                                                   &(((hdset_reg_ref_t *)buf)[u]))) < 0)
                                         H5TOOLS_GOTO_ERROR((-1), "H5Rget_region failed");
 
                                     /* create the reference, we need the space_id */
-                                    if (H5Rcreate(&refbuf[u], fidout, refname, H5R_DATASET_REGION,
-                                                  region_id) < 0)
+                                    if (H5Rcreate(&(((hdset_reg_ref_t *)refbuf)[u]), fidout, refname,
+                                                  H5R_DATASET_REGION, region_id) < 0)
                                         H5TOOLS_GOTO_ERROR((-1), "H5Rcreate failed");
                                     if (H5Sclose(region_id) < 0)
                                         H5TOOLS_GOTO_ERROR((-1), "H5Sclose failed");
@@ -299,10 +299,10 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                             if (H5Dwrite(dset_out, mtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, refbuf) < 0)
                                 H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
 
-                        if (buf)
-                            free(buf);
-                        if (refbuf)
-                            free(refbuf);
+                        free(buf);
+                        buf = NULL;
+                        free(refbuf);
+                        refbuf = NULL;
 
                         /*-----------------------------------------------------
                          * copy attrs
@@ -394,6 +394,9 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
     return ret_value;
 
 done:
+    free(buf);
+    free(refbuf);
+
     H5E_BEGIN_TRY
     {
         H5Gclose(grp_in);
@@ -462,7 +465,12 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
         H5TOOLS_GOTO_ERROR((-1), "H5Oget_info failed");
 
     for (u = 0; u < (unsigned)oinfo.num_attrs; u++) {
+
+        /* reset flags and pointers */
         is_ref = is_ref_vlen = is_ref_array = is_ref_comp = 0;
+        buf = refbuf   = NULL;
+        ref_comp_index = NULL;
+        ref_comp_size  = NULL;
 
         /* open attribute */
         if ((attr_id = H5Aopen_by_idx(loc_in, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, H5P_DEFAULT,
@@ -774,10 +782,12 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
     } /* for(u = 0; u < (unsigned)oinfo.num_attrs; u++) */
 
 done:
-    if (refbuf)
-        free(refbuf);
-    if (buf)
+    if (refbuf == buf)
         free(buf);
+    else {
+        free(buf);
+        free(refbuf);
+    }
 
     if (ref_comp_index)
         free(ref_comp_index);
