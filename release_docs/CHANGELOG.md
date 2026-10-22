@@ -259,6 +259,12 @@ Fixes GitHub issue #6679.
 
    Fixes CVE-2026-19025
 
+### Fixed signed integer overflow in the scale-offset filter for full-range data
+
+   When a signed-integer dataset filtered with scale-offset contained values spanning the full range of the datatype, the filter's calculation of the difference between the maximum and minimum values would overflow, resulting in undefined behavior. The difference is now computed in the unsigned domain, producing the correct result without triggering an overflow.
+
+   Fixes GitHub issue #5861
+
 ### Fixed silent truncation of filtered chunk sizes with a small file "size of sizes"
 
    For all chunk index types in version-5 chunk layout messages, and for the single chunk index in any version of the chunk layout message, the on-disk size of a filtered chunk is encoded in a fixed-width field equal to the file's "size of sizes" (set via `H5Pset_sizes()`). The encode check assumed this field was always 8 bytes, so when the size of sizes was set to 2 or 4 an oversized chunk had its encoded size silently truncated (e.g., 160000 encoded in 2 bytes became 160000 & 0xFFFF = 28928), silently corrupting the chunk. The library now verifies that a filtered chunk's size fits in the file's size of sizes and reports an error at write time instead.
