@@ -301,6 +301,7 @@ jobs:
 
       - name: Deploy JAR artifacts
         env:
+          JAR_FILES: ${{ needs.validate-artifacts.outputs.jar-files }}
           HDF5_VERSION: ${{ needs.validate-artifacts.outputs.hdf5-version }}
           PLATFORM_CLASSIFIER: ${{ needs.validate-artifacts.outputs.platform-classifier }}
         run: |
@@ -335,7 +336,9 @@ jobs:
 
           echo "=== Starting JAR Deployment ==="
           # Parse jar-files output: format is "jar_path|platform|implementation,jar_path|platform|implementation,..."
-          echo "${{ needs.validate-artifacts.outputs.jar-files }}" | tr ',' '\n' | while IFS='|' read -r jar_file platform impl; do
+          # Runs in the current shell so the counters reach the summary; entries are read from
+          # fd 3 so commands in the loop cannot consume them from stdin
+          while IFS='|' read -r jar_file platform impl <&3; do
             # Skip empty entries
             [ -z "$jar_file" ] && continue
 
@@ -440,12 +443,15 @@ jobs:
                      -I "${{ inputs.repository_url }}" || echo "Authentication test failed"
               fi
             fi
-          done
+          done 3< <(tr ',' '\n' <<< "${JAR_FILES}")
 
           echo "=== Deployment Summary ==="
           echo "Successful deployments: ${success_count}/${total_count}"
 
-          if [ ${success_count} -eq ${total_count} ]; then
+          if [ ${total_count} -eq 0 ]; then
+            echo "❌ No artifacts were processed"
+            exit 1
+          elif [ ${success_count} -eq ${total_count} ]; then
             echo "🎉 All artifacts deployed successfully!"
           else
             echo "❌ Some deployments failed"
