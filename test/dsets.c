@@ -5219,10 +5219,18 @@ test_filter_after_deflate(hid_t file)
     size_t      precision = 17, offset = 4;
     size_t      i;
     int         which;
+    unsigned    filter_mask = 0;
     hid_t       dataset = H5I_INVALID_HID, datatype = H5I_INVALID_HID, space = H5I_INVALID_HID;
     hid_t       dc = H5I_INVALID_HID;
 
     TESTING("nbit and scaleoffset filters after deflate");
+
+    /* test_missing_filter() unregisters deflate for the rest of the run */
+    if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) != true) {
+        SKIPPED();
+        puts("    Deflate filter not available");
+        return SUCCEED;
+    }
 
     /* Few distinct values, so deflate shrinks the chunk well below its raw size */
     for (i = 0; i < AFTER_DEFLATE_NELMTS; i++)
@@ -5264,6 +5272,17 @@ test_filter_after_deflate(hid_t file)
 
         if ((dataset = H5Dopen2(file, names[which], H5P_DEFAULT)) < 0)
             TEST_ERROR;
+
+        /* Deflate (filter 0) must have run, otherwise the case above was not
+         * exercised; the second filter must have been skipped */
+        if (H5Dget_chunk_info(dataset, H5S_ALL, 0, NULL, &filter_mask, NULL, NULL) < 0)
+            TEST_ERROR;
+        if (filter_mask != 0x2) {
+            H5_FAILED();
+            printf("    %s: unexpected chunk filter mask 0x%x\n", names[which], filter_mask);
+            goto error;
+        }
+
         memset(new_data, 0, sizeof(new_data));
         if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, new_data) < 0)
             TEST_ERROR;
