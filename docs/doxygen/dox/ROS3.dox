@@ -50,7 +50,7 @@
  * <a href="https://github.com/awslabs/aws-c-auth">aws-c-auth</a> library, the same chain used by
  * the AWS CLI and the AWS SDKs:
  *
- * -# The \c AWS_ACCESS_KEY_ID, \c AWS_SECRET_ACCESS_KEY and \c AWS_SESSION_TOKEN environment
+ * -# The \c AWS_ACCESS_KEY_ID, \c AWS_SECRET_ACCESS_KEY, and \c AWS_SESSION_TOKEN environment
  *    variables
  * -# The active profile in the shared configuration files, which covers assuming a role
  *    (\c role_arn with \c source_profile or \c credential_source), an external credential helper
@@ -117,8 +117,8 @@
  * path-style requests when:
  *
  * \li the #HDF5_ROS3_VFD_FORCE_PATH_STYLE environment variable is set to anything other than
- *     \c false, \c off or \c 0, or
- * \li an alternate endpoint URL is in effect, or
+ *     \c false, \c off, or \c 0; or
+ * \li an alternate endpoint URL is in effect; or
  * \li the bucket name contains a '.'
  *
  * The \c addressing_style setting of the shared AWS configuration file is not consulted.
