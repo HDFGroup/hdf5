@@ -59,12 +59,36 @@ We would like to thank the many HDF5 community members who contributed to this r
   `enable_language()`, but these calls were removed in favor of checking the enabled languages
   and issuing an error if required languages aren't enabled.
 
+- The static HDF5 library now uses the threads library in default builds wherever a threading
+  package is available. Previously, it was only used in builds with thread-safety, concurrency,
+  or the Subfiling VFD. Projects that link the static library without CMake or pkg-config must
+  include the threads link flag (usually `-pthread`) on systems where the thread functions aren't
+  part of the C library, (e.g. Linux with glibc < 2.34). HDF5's pkg-config file already listed this
+  flag, but default builds did not require it until now. The flag is supplied by
+  `pkg-config --static --libs hdf5`.
+
 # 🪦 Deprecations
 
 
 # 🚀 New Features & Improvements
 
 ## Configuration
+
+### Built the library's internal thread pool by default
+
+   The internal thread pool lets the library parallelize the internals of a
+   single API call using its own worker threads. It adds no application
+   threads, so it is not a build-time choice exposed through CMake. It is built
+   in wherever a threading package is available, except in a static library on
+   Windows.
+
+   Note that nothing in the library is threaded until the application enables it via
+   H5TSset_internal_threads().
+
+   Linking the static library now requires the threads library on some systems; see
+   Breaking Changes.
+
+   The internal thread pool can now be used with the high-level, Fortran, Java and C++ interfaces.
 
 ### Various improvements in installed CMake package configuration file
 
@@ -87,6 +111,21 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Added new VFD feature flag
+
+   Added a new Virtual File Driver (VFD) feature flag,
+   H5FD_FEAT_READWRITE_NO_H5_CALLS. This flag should be set when the read and
+   write callbacks do not make any HDF5 calls except for H5OPEN.
+
+### Added new version of H5Z_class_t, H5Z_class3_t, to include feature flags
+
+   Added a new version of the H5Z_class_t struct, H5Z_class3_t. This version has
+   a new field, feature_flags, which indicates to the library which features the
+   plugin supports. The currently supported flags are
+   H5Z_FEAT_FILTER_THREADSAFE, which should be set when the filter callback is
+   threadsafe, and H5Z_FEAT_FILTER_NO_H5_CALLS, which should be set when the
+   filter makes no HDF5 calls except for H5OPEN.
+
 ### Added support for internally concurrent multithreaded reads of chunked datasets
 
    Added 3 new functions to support this: H5TSset_internal_threads(),
@@ -95,12 +134,13 @@ We would like to thank the many HDF5 community members who contributed to this r
    This feature internally parallelizes read operations on chunked datasets.
    H5TSset_internal_threads() is used to enable the feature globally, while
    H5Pset_io_threads() can be used to disable the feature on a per-operation
-   basis. These functions are only available when the library is configured with
-   HDF5_ENABLE_CONCURRENCY=ON. When performing an internally threaded read, the
-   library will concurrently read from disk, unfilter, and scatter to memory all
-   chunks in a read operation on a chunked dataset. Currently each of these
-   sub-operations is serialized (protected by a mutex), so there is not yet
-   likely to be any performance improvement.
+   basis. These functions are only available when the library is built with a
+   threading package; see the Configuration section above. When performing an
+   internally threaded read, the library will, when possible, concurrently read
+   from disk, unfilter, and scatter to memory all chunks in a read operation on
+   a chunked dataset. Currently only the filter operations are executed
+   concurrently, the others are serialized.
+
 
 ## Parallel Library
 
@@ -130,6 +170,27 @@ We would like to thank the many HDF5 community members who contributed to this r
    A dataset's datatype is shared by all open handles of the dataset, and its variable-length types refer to the file of the handle that opened the dataset first. After that file handle was closed, other handles of the same dataset, e.g., from opening the same file twice, still converted variable-length data with the closed file, which crashed in `H5F_addr_decode()`. `H5T_patch_vlen_file()` repaired the file only for a variable-length type at the top level of the datatype, and only when reading or writing data, but not for variable-length types nested in compound or array types, or when converting a variable-length fill value in `H5Dget_create_plist()` or while initializing storage, e.g., in `H5Dset_extent()`. Opening a netCDF-4 file with string variables calls `H5Dget_create_plist()`, so this crashed netCDF-C and netCDF4-python when a file was opened again after closing one of several handles to it. `H5T_patch_vlen_file()` now repairs nested variable-length types as well, and is also called before converting fill values.
 
    Fixes GitHub issue #6721
+### Stopped exporting the built-in filter class structs
+
+   The class structs of the built-in filters (H5Z_DEFLATE, H5Z_SHUFFLE, H5Z_FLETCHER32,
+   H5Z_NBIT, H5Z_SCALEOFFSET, and H5Z_SZIP) were exported from the shared library. Filter
+   plugins built from a copy of HDF5's filter source, such as netCDF-C's deflate, shuffle,
+   and fletcher32 plugins, define globals with the same names, and on ELF platforms the
+   plugin's references to its own struct were resolved to the library's copy instead. The
+   structs are now static to their source files, so a plugin always uses its own.
+
+### Fixed out-of-bounds reads when a filtered chunk is shorter than its filter header
+
+   The scaleoffset and szip filters each store a fixed-size header in front of the chunk data: a 21-byte parameter block for scaleoffset and a 4-byte uncompressed-length header for szip. On read, each one subtracted that fixed size from the chunk length without first checking that the chunk was at least that long. A truncated or corrupted chunk record made the subtraction wrap around, so both filters read far past the end of the chunk buffer. Its bounds checks also measured the chunk buffer's allocated size, which the library deliberately sizes to hold the larger unfiltered chunk, so a truncated chunk could still decompress out of the uninitialized remainder of that allocation. Both filters now reject any chunk shorter than their own header, and scaleoffset validates every read against the number of bytes actually stored for the chunk rather than the size of the buffer holding them. The fletcher32 filter now also rejects a chunk that holds only its 4-byte checksum and no data, which previously reached the checksum routine with a length of zero.
+
+### Fixed a heap buffer over-read in scale-offset decode
+
+   The scale-offset filter's decode path used the size computed from the user's filter
+   parameters for the decompressed output without checking it against the actual
+   compressed chunk. This caused a heap out-of-bound read when encountered a malformed
+   file. The issue is now fixed with bound guards.
+
+   Fixes CVE-2026-19029
 
 ### Fixed a deadlock in the ROS3 VFD on Windows
 
@@ -188,6 +249,10 @@ Fixes GitHub issue #6679.
 
    Fixes GitHub issue #6531
 
+### Added pre-allocation validation for metadata cache entry image sizes
+
+   Metadata cache entries with non-speculative load sizes are now checked against the file's end-of-allocation address before allocating the on-disk image buffer. Object header continuation messages also validate their decoded address and size fields before queuing continuation chunks. SWMR readers skip the end-of-allocation checks for both speculative and non-speculative metadata loads because their local end-of-allocation address may lag behind the writer.
+
 ### Fixed a crash when reading a chunked dataset whose chunk rank does not match the dataspace rank
 
    The chunk layout's stored dimensionality was validated against the dataspace rank at creation time, but not at open time, so a file whose stored chunk rank disagreed with its dataspace rank was not caught. The resulting inconsistent selection ranks during chunk I/O caused a divide-by-zero in the hyperslab iterator. The chunk dimensionality is now also validated on open, and such a dataset is rejected with an error instead of crashing.
@@ -195,6 +260,18 @@ Fixes GitHub issue #6679.
    Fixes GitHub issue #6491
 
    Fixes CVE-2026-19025
+
+### Fixed signed integer overflow in the scale-offset filter for full-range data
+
+   When a signed-integer dataset filtered with scale-offset contained values spanning the full range of the datatype, the filter's calculation of the difference between the maximum and minimum values would overflow, resulting in undefined behavior. The difference is now computed in the unsigned domain, producing the correct result without triggering an overflow.
+
+   Fixes GitHub issue #5861
+
+### Fixed silent truncation of filtered chunk sizes with a small file "size of sizes"
+
+   For all chunk index types in version-5 chunk layout messages, and for the single chunk index in any version of the chunk layout message, the on-disk size of a filtered chunk is encoded in a fixed-width field equal to the file's "size of sizes" (set via `H5Pset_sizes()`). The encode check assumed this field was always 8 bytes, so when the size of sizes was set to 2 or 4 an oversized chunk had its encoded size silently truncated (e.g., 160000 encoded in 2 bytes became 160000 & 0xFFFF = 28928), silently corrupting the chunk. The library now verifies that a filtered chunk's size fits in the file's size of sizes and reports an error at write time instead.
+
+   Fixes GitHub issue #6023
 
 ### Fixed a crash when reading a dataset with a malformed fill value
 

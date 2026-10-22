@@ -53,7 +53,6 @@
 /* Local Prototypes */
 /********************/
 static herr_t H5FD__free_cls(void *cls, void **request);
-static herr_t H5FD__query(const H5FD_t *f, unsigned long *flags /*out*/);
 
 /*********************/
 /* Package Variables */
@@ -1200,7 +1199,7 @@ done:
 } /* end H5FDquery() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_query
+ * Function:    H5FD__query
  *
  * Purpose:     Private version of H5FDquery()
  *
@@ -1208,7 +1207,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5FD__query(const H5FD_t *file, unsigned long *flags /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
@@ -1236,7 +1235,7 @@ H5FD__query(const H5FD_t *file, unsigned long *flags /*out*/)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_query() */
+} /* end H5FD__query() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FDalloc
