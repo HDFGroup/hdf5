@@ -28,6 +28,9 @@
 #include "szlib.h"
 #endif
 
+/* Size of the uncompressed-length header stored in front of the szip stream */
+#define SZIP_HEADER_LEN 4
+
 /* Local function prototypes */
 static htri_t H5Z__can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static herr_t H5Z__set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);
@@ -35,15 +38,18 @@ static size_t H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned 
                                size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-H5Z_class2_t H5Z_SZIP[1] = {{
-    H5Z_CLASS_T_VERS,    /* H5Z_class_t version */
-    H5Z_FILTER_SZIP,     /* Filter id number		*/
-    1,                   /* Assume encoder present: check before registering */
-    1,                   /* decoder_present flag (set to true) */
-    "szip",              /* Filter name for debugging	*/
-    H5Z__can_apply_szip, /* The "can apply" callback     */
-    H5Z__set_local_szip, /* The "set local" callback     */
-    H5Z__filter_szip,    /* The actual filter function	*/
+H5Z_class3_t H5Z_SZIP[1] = {{
+    H5Z_CLASS_T_VERS_3,          /* H5Z_class_t version */
+    H5Z_FILTER_SZIP,             /* Filter id number		*/
+    1,                           /* Assume encoder present: check before registering */
+    1,                           /* decoder_present flag (set to true) */
+    "szip",                      /* Filter name for debugging	*/
+    H5Z__can_apply_szip,         /* The "can apply" callback     */
+    H5Z__set_local_szip,         /* The "set local" callback     */
+    H5Z__filter_szip,            /* The actual filter function	*/
+    H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - does not *re*-enter the HDF5 API. We believe libaec is
+                                    thread-safe, but because the developers do not explicitly make this claim,
+                                    we are marking it as not thread-safe for now. */
 }};
 
 /*-------------------------------------------------------------------------
@@ -284,6 +290,13 @@ H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
         uint32_t stored_nalloc; /* Number of bytes the compressed block will expand into */
         size_t   nalloc;        /* Number of bytes the compressed block will expand into */
 
+        /* The uncompressed length is stored in front of the compressed stream, so
+         * a chunk shorter than that header makes the length arithmetic below wrap.
+         * A chunk of exactly SZIP_HEADER_LEN bytes holds no compressed data.
+         */
+        if (nbytes <= SZIP_HEADER_LEN)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
+
         /* Get the size of the uncompressed buffer */
         newbuf = (unsigned char *)(*buf);
         UINT32DECODE(newbuf, stored_nalloc);
@@ -295,7 +308,7 @@ H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
 
         /* Decompress the buffer */
         size_out = nalloc;
-        if (SZ_BufftoBuffDecompress(outbuf, &size_out, newbuf, nbytes - 4, &sz_param) != SZ_OK)
+        if (SZ_BufftoBuffDecompress(outbuf, &size_out, newbuf, nbytes - SZIP_HEADER_LEN, &sz_param) != SZ_OK)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "szip_filter: decompression failed");
         assert(size_out == nalloc);
 
@@ -313,7 +326,7 @@ H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
         unsigned char *dst = NULL; /* Temporary pointer to new output buffer */
 
         /* Allocate space for the compressed buffer & header (assume data won't get bigger) */
-        if (NULL == (dst = outbuf = (unsigned char *)H5MM_malloc(nbytes + 4)))
+        if (NULL == (dst = outbuf = (unsigned char *)H5MM_malloc(nbytes + SZIP_HEADER_LEN)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "unable to allocate szip destination buffer");
 
         /* Encode the uncompressed length */
@@ -332,8 +345,8 @@ H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
         /* Set return values */
         *buf      = outbuf;
         outbuf    = NULL;
-        *buf_size = nbytes + 4;
-        ret_value = size_out + 4;
+        *buf_size = nbytes + SZIP_HEADER_LEN;
+        ret_value = size_out + SZIP_HEADER_LEN;
     }
 
 done:
