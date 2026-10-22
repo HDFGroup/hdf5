@@ -760,7 +760,7 @@ if (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY)
     endif ()
   endforeach ()
 else ()
-  # Without the s3proxy fixture there is no a server for the networked S3 tests
+  # Without the s3proxy fixture, there is no server for the networked S3 tests
   # and these tests skip themselves. Since the test programs also contain checks
   # that perform no I/O and need no credentials, they are still worth running in
   # an ordinary build.
