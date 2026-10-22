@@ -991,7 +991,12 @@ H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
     } /* end if */
     /* output; compress */
     else {
-        assert(nbytes == (size_t)d_nelmts * (size_t)cd_values[4]);
+        /* The compression loop below walks d_nelmts elements of size cd_values[4], so the
+         * input must be exactly that large.  It is not if another filter (e.g. deflate)
+         * ran earlier in the pipeline and changed the buffer size.
+         */
+        if (nbytes != (size_t)d_nelmts * (size_t)cd_values[4])
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, 0, "nbit input size does not match the chunk's datatype");
 
         size_out = nbytes;
 

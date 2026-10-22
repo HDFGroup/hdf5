@@ -1296,7 +1296,13 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         size_t used_bytes;
         size_t unused_bytes;
 
-        assert(nbytes == (size_t)d_nelmts * (size_t)p.size);
+        /* The pre-compression and packing code below reads d_nelmts elements of size p.size,
+         * so the input must be exactly that large.  It is not if another filter (e.g. deflate)
+         * ran earlier in the pipeline and changed the buffer size.
+         */
+        if (nbytes != (size_t)d_nelmts * (size_t)p.size)
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, 0,
+                        "scaleoffset input size does not match the chunk's datatype");
 
         /* before preprocess, convert to memory endianness order if needed */
         if (need_convert)

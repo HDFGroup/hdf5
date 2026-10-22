@@ -140,6 +140,16 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed a heap buffer overflow in the N-bit and scale-offset filters
+
+   The N-bit and scale-offset filters assume their input is exactly the size of a full
+   chunk, which is only true when they are the first filter in the pipeline. If another
+   filter such as deflate ran before them, the smaller buffer they received was
+   over-read or over-written when the chunk was written, because the only check was an
+   assert() that is compiled out of release builds. The filters now return an error
+   in that case, which makes the pipeline skip them (they are optional filters) and
+   store the chunk without them.
+
 ### Fixed a deadlock in the ROS3 VFD on Windows
 
    When an HDF5 application running on Windows and using the ROS3 VFD exited normally,
