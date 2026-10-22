@@ -89,7 +89,7 @@ static void   H5Z__scaleoffset_compress(unsigned char *data, unsigned d_nelmts, 
                                         size_t buffer_size, parms_atomic p);
 
 /* This message derives from H5Z */
-H5Z_class3_t H5Z_SCALEOFFSET[1] = {{
+static H5Z_class3_t H5Z_SCALEOFFSET[1] = {{
     H5Z_CLASS_T_VERS_3,         /* H5Z_class_t version */
     H5Z_FILTER_SCALEOFFSET,     /* Filter id number        */
     1,                          /* Assume encoder present: check before registering */
@@ -101,6 +101,29 @@ H5Z_class3_t H5Z_SCALEOFFSET[1] = {{
     H5Z_FEAT_FILTER_THREADSAFE |
         H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
 }};
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z__scaleoffset_register
+ *
+ * Purpose:     Register the scaleoffset filter with the library.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z__scaleoffset_register(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    if (H5Z_register(H5Z_SCALEOFFSET) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTREGISTER, FAIL, "unable to register scaleoffset filter");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z__scaleoffset_register() */
 
 /* Local macros */
 #define H5Z_SCALEOFFSET_TOTAL_NPARMS     20 /* Total number of parameters for filter */
