@@ -83,8 +83,9 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
                                  "scalar_datasets",     /* 31 */
                                  "read_only_vlen_fill", /* 32 */
                                  "threaded_chunks",     /* 33 */
-                                 "scaleoffset_bounds",  /* 34 */
-                                 "size_of_sizes",       /* 35 */
+                                 "threaded_filters",    /* 34 */
+                                 "scaleoffset_bounds",  /* 35 */
+                                 "size_of_sizes",       /* 36 */
                                  NULL};
 
 #define OHMIN_FILENAME_A "ohdr_min_a"
@@ -200,14 +201,19 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 #define H5Z_FILTER_DEPREC 309
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-#define H5Z_FILTER_EXPAND          310
-#define H5Z_FILTER_CAN_APPLY_TEST2 311
-#define H5Z_FILTER_COUNT           312
-#define H5Z_FILTER_EXPAND2         313
-#define H5Z_FILTER_DO_NOT_RUN      314
-#define H5Z_FILTER_UPDATE_CD       315
-#define H5Z_FILTER_BAD_DECODE_SIZE 316
-#define H5Z_FILTER_BAD_BUF_SIZE    317
+#define H5Z_FILTER_EXPAND              310
+#define H5Z_FILTER_CAN_APPLY_TEST2     311
+#define H5Z_FILTER_COUNT               312
+#define H5Z_FILTER_EXPAND2             313
+#define H5Z_FILTER_DO_NOT_RUN          314
+#define H5Z_FILTER_UPDATE_CD           315
+#define H5Z_FILTER_BAD_DECODE_SIZE     316
+#define H5Z_FILTER_BAD_BUF_SIZE        317
+#define H5Z_FILTER_THREADS_REQUIRED    318
+#define H5Z_FILTER_NON_THREADSAFE      319
+#define H5Z_FILTER_NON_THREADSAFE_LIE  320
+#define H5Z_FILTER_NON_THREADSAFE_LIE2 321
+#define H5Z_FILTER_REENTER_H5          322
 
 /* Flags for testing filters */
 #define DISABLE_FLETCHER32 0
@@ -379,8 +385,14 @@ static size_t filter_bad_buf_size(unsigned int flags, size_t cd_nelmts, const un
                                   size_t nbytes, size_t *buf_size, void **buf);
 static size_t filter_error_msg(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                                size_t nbytes, size_t *buf_size, void **buf);
+static size_t filter_threads_required(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                                      size_t nbytes, size_t *buf_size, void **buf);
+static size_t filter_non_threadsafe(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                                    size_t nbytes, size_t *buf_size, void **buf);
+static size_t filter_reenter_h5(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                                size_t nbytes, size_t *buf_size, void **buf);
 
-static herr_t dsets_h5zregister_direct(const H5Z_class2_t *filter);
+static herr_t dsets_h5zregister_direct(const H5Z_class3_t *filter);
 static herr_t dsets_h5zunregister_direct(H5Z_filter_t id);
 
 /*-------------------------------------------------------------------------
@@ -395,7 +407,7 @@ static herr_t dsets_h5zunregister_direct(H5Z_filter_t id);
  *-------------------------------------------------------------------------
  */
 static herr_t
-dsets_h5zregister_direct(const H5Z_class2_t *filter)
+dsets_h5zregister_direct(const H5Z_class3_t *filter)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -6018,7 +6030,7 @@ test_scaleoffset_bounds(hid_t fapl)
     chunk13[0] = 8; /* minbits = 8 */
     chunk13[4] = 8; /* minval size: 8 bytes of minval follow at [5..12] */
 
-    h5_fixname(FILENAME[34], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[35], fapl, filename, sizeof filename);
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR;
 
@@ -9833,7 +9845,7 @@ test_chunk_size_of_sizes(hid_t fapl)
     if (H5Pset_libver_bounds(my_fapl, H5F_LIBVER_V200, H5F_LIBVER_LATEST) < 0)
         TEST_ERROR;
 
-    h5_fixname(FILENAME[35], my_fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[36], my_fapl, filename, sizeof filename);
 
     /* Register the no-op 'bogus' filter so that per-chunk sizes are stored in
      * the file without changing the on-disk chunk size. */
@@ -19867,7 +19879,7 @@ error:
  *-------------------------------------------------------------------------
  */
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_ERROR_MSG[1] = {{
+const H5Z_class3_t H5Z_ERROR_MSG[1] = {{
     H5Z_CLASS_T_VERS,        /* H5Z_class_t version */
     H5Z_FILTER_RESERVED - 1, /* Filter id number */
     1, 1,                    /* Encoding and decoding enabled */
@@ -19875,6 +19887,7 @@ const H5Z_class2_t H5Z_ERROR_MSG[1] = {{
     NULL,                    /* The "can apply" callback */
     NULL,                    /* The "set local" callback */
     filter_error_msg,        /* The actual filter function */
+    0,                       /* Threading disabled */
 }};
 static const char *filter_error_msg_msg =
     "Hello I am a unique error message written for the test_filter_error_msg test in dsets.c";
@@ -20288,13 +20301,13 @@ test_threaded_chunks(void)
 
     if (H5Pclose(xfer) < 0)
         TEST_ERROR;
-    xfer = -1;
+    xfer = H5I_INVALID_HID;
     if (H5Pclose(dapl) < 0)
         TEST_ERROR;
-    dapl = -1;
+    dapl = H5I_INVALID_HID;
     if (H5Fclose(file) < 0)
         TEST_ERROR;
-    file = -1;
+    file = H5I_INVALID_HID;
 
     PASSED();
 
@@ -20314,6 +20327,779 @@ error:
     H5E_END_TRY
     return FAIL;
 } /* end test_threaded_chunks() */
+
+/*-------------------------------------------------------------------------
+ * Function:    filter_threads_required
+ *
+ * Purpose:     Filter that tests that at least
+ *              threads_required_target_nthreads threads are executing
+ *              concurrently. The first thread to reach the critical
+ *              section holds a barrier mutex until all other expected
+ *              threads have begun this function. The last expected thread
+ *              signals the first thread to continue and unlock the
+ *              barrier. Does not do anything to the actual data.
+ *
+ * Return:      Success:        Data chunk size
+ *              Failure:        0
+ *-------------------------------------------------------------------------
+ */
+/* This message derives from H5Z */
+const H5Z_class3_t H5Z_THREADS_REQUIRED[1] = {{
+    H5Z_CLASS_T_VERS_3,          /* H5Z_class_t version */
+    H5Z_FILTER_THREADS_REQUIRED, /* Filter id number */
+    1, 1,                        /* Encoding and decoding enabled */
+    "threads_required",          /* Filter name for debugging */
+    NULL,                        /* The "can apply" callback */
+    NULL,                        /* The "set local" callback */
+    filter_threads_required,     /* The actual filter function */
+    H5Z_FEAT_FILTER_THREADSAFE |
+        H5Z_FEAT_FILTER_NO_H5_CALLS, /* This filter is thread-safe and does not re-enter the HDF5 API */
+}};
+
+static int          threads_required_nthreads_passed;
+static int          threads_required_target_nthreads;
+static H5TS_mutex_t threads_required_barrier;
+static H5TS_cond_t  threads_required_cond;
+static H5TS_mutex_t threads_required_cond_mutex;
+
+static size_t
+filter_threads_required(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                        const unsigned int H5_ATTR_UNUSED *cd_values, size_t H5_ATTR_UNUSED nbytes,
+                        size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+{
+    bool cond_mutex_locked    = false;
+    bool barrier_mutex_locked = false;
+
+    /* No op if target_nthreads == 1 */
+    assert(threads_required_target_nthreads >= 0);
+    if (threads_required_target_nthreads <= 1)
+        return nbytes;
+
+    /* Lock condition mutex before handling nthreads_passed */
+    if (H5TS_mutex_lock(&threads_required_cond_mutex) < 0)
+        TEST_ERROR;
+    cond_mutex_locked = true;
+
+    /* Increment nthreads_passed and take action if this is the first or last thread */
+    if (++threads_required_nthreads_passed == 1) {
+        /* This is the first thread - lock the barrier mutex to prevent other threads from completing this
+         * function */
+        if (H5TS_mutex_lock(&threads_required_barrier) < 0)
+            TEST_ERROR;
+        barrier_mutex_locked = true;
+
+        /* Wait for signal from the last thread */
+        if (H5TS_cond_wait(&threads_required_cond, &threads_required_cond_mutex) < 0)
+            TEST_ERROR;
+
+        /* Unlock barrier mutex to allow threads to finish */
+        if (H5TS_mutex_unlock(&threads_required_barrier) < 0)
+            TEST_ERROR;
+        barrier_mutex_locked = false;
+
+        /* Unlock condition mutex */
+        if (H5TS_mutex_unlock(&threads_required_cond_mutex) < 0)
+            TEST_ERROR;
+        cond_mutex_locked = false;
+    }
+    else if (threads_required_nthreads_passed == threads_required_target_nthreads) {
+        /* This is the last thread - signal the first thread to continue */
+        if (H5TS_cond_signal(&threads_required_cond) < 0)
+            TEST_ERROR;
+
+        /* Unlock condition mutex */
+        if (H5TS_mutex_unlock(&threads_required_cond_mutex) < 0)
+            TEST_ERROR;
+        cond_mutex_locked = false;
+    }
+    else {
+        /* A middle (or after the last) thread - release condition mutex then block on barrier mutex so we
+         * don't finish until the first thread is signaled by the last thread, confirming all threads were in
+         * flight at once */
+        if (H5TS_mutex_unlock(&threads_required_cond_mutex) < 0)
+            TEST_ERROR;
+        cond_mutex_locked = false;
+        if (H5TS_mutex_lock(&threads_required_barrier) < 0)
+            TEST_ERROR;
+        barrier_mutex_locked = true;
+        if (H5TS_mutex_unlock(&threads_required_barrier) < 0)
+            TEST_ERROR;
+        barrier_mutex_locked = false;
+    }
+
+    assert(!barrier_mutex_locked);
+    assert(!cond_mutex_locked);
+
+    return nbytes;
+
+error:
+    if (barrier_mutex_locked)
+        (void)H5TS_mutex_unlock(&threads_required_barrier);
+    if (cond_mutex_locked)
+        (void)H5TS_mutex_unlock(&threads_required_cond_mutex);
+
+    return 0;
+} /* end filter_threads_required() */
+
+/*-------------------------------------------------------------------------
+ * Function:    filter_non_threadsafe
+ *
+ * Purpose:     Filter that (probably) fails if it is executed
+ *              concurrently. Flips every bit in the actual data.
+ *
+ * Return:      Success:        Data chunk size
+ *              Failure:        0
+ *-------------------------------------------------------------------------
+ */
+/* This message derives from H5Z */
+const H5Z_class3_t H5Z_NON_THREADSAFE[1] = {{
+    H5Z_CLASS_T_VERS_3,          /* H5Z_class_t version */
+    H5Z_FILTER_NON_THREADSAFE,   /* Filter id number */
+    1, 1,                        /* Encoding and decoding enabled */
+    "non_threadsafe",            /* Filter name for debugging */
+    NULL,                        /* The "can apply" callback */
+    NULL,                        /* The "set local" callback */
+    filter_non_threadsafe,       /* The actual filter function */
+    H5Z_FEAT_FILTER_NO_H5_CALLS, /* This filter is not thread-safe and does not re-enter the HDF5 API */
+}};
+
+/* This message derives from H5Z */
+/* The same as above but it falsely claims to be threadsafe */
+const H5Z_class3_t H5Z_NON_THREADSAFE_LIE[1] = {{
+    H5Z_CLASS_T_VERS_3,                                       /* H5Z_class_t version */
+    H5Z_FILTER_NON_THREADSAFE_LIE,                            /* Filter id number */
+    1, 1,                                                     /* Encoding and decoding enabled */
+    "non_threadsafe_lie",                                     /* Filter name for debugging */
+    NULL,                                                     /* The "can apply" callback */
+    NULL,                                                     /* The "set local" callback */
+    filter_non_threadsafe,                                    /* The actual filter function */
+    H5Z_FEAT_FILTER_THREADSAFE | H5Z_FEAT_FILTER_NO_H5_CALLS, /* This filter falsely claims to be thread-safe
+                                                                 and does not re-enter the HDF5 API */
+}};
+
+/* This message derives from H5Z */
+/* The same as above but it also falsely claims to reenter HDF5 */
+const H5Z_class3_t H5Z_NON_THREADSAFE_LIE2[1] = {{
+    H5Z_CLASS_T_VERS_3,             /* H5Z_class_t version */
+    H5Z_FILTER_NON_THREADSAFE_LIE2, /* Filter id number */
+    1, 1,                           /* Encoding and decoding enabled */
+    "non_threadsafe_lie",           /* Filter name for debugging */
+    NULL,                           /* The "can apply" callback */
+    NULL,                           /* The "set local" callback */
+    filter_non_threadsafe,          /* The actual filter function */
+    H5Z_FEAT_FILTER_THREADSAFE, /* This filter falsely claims to be thread-safe and falsely claims to re-enter
+                                   the HDF5 API */
+}};
+
+static int non_threadsafe_threads_in_flight;
+
+static size_t
+filter_non_threadsafe(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                      const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes,
+                      size_t H5_ATTR_UNUSED *buf_size, void **buf)
+{
+    /* Increment non_threadsafe_threads_in_flight and verify it is 1 */
+    if (non_threadsafe_threads_in_flight++ != 0)
+        TEST_ERROR;
+
+    /* Yield priority, to increase the chance another thread takes over at this point */
+    H5TS_thread_yield();
+
+    /* Flip every bit, just to do something to maximize the chance concurrent threads will run afoul of the
+     * non_threadsafe_threads_in_flight check */
+    for (size_t i = 0; i < nbytes; i++)
+        ((uint8_t *)*buf)[i] = ~((uint8_t *)*buf)[i];
+
+    /* Yield priority, to increase the chance another thread takes over at this point */
+    H5TS_thread_yield();
+
+    /* Decrement non_threadsafe_threads_in_flight and verify it is 0 */
+    if (non_threadsafe_threads_in_flight-- != 1)
+        TEST_ERROR;
+
+    return nbytes;
+
+error:
+    return 0;
+} /* end filter_non_threadsafe() */
+
+/*-------------------------------------------------------------------------
+ * Function:    filter_reenter_h5
+ *
+ * Purpose:     Filter that re-enters the HDF5 API. Does nothing else.
+ *
+ * Return:      Success:        Data chunk size
+ *              Failure:        0
+ *-------------------------------------------------------------------------
+ */
+/* This message derives from H5Z */
+const H5Z_class3_t H5Z_REENTER_H5[1] = {{
+    H5Z_CLASS_T_VERS_3,         /* H5Z_class_t version */
+    H5Z_FILTER_REENTER_H5,      /* Filter id number */
+    1, 1,                       /* Encoding and decoding enabled */
+    "reenter_h5",               /* Filter name for debugging */
+    NULL,                       /* The "can apply" callback */
+    NULL,                       /* The "set local" callback */
+    filter_reenter_h5,          /* The actual filter function */
+    H5Z_FEAT_FILTER_THREADSAFE, /* This filter is thread-safe and does re-enter the HDF5 API */
+}};
+
+static size_t
+filter_reenter_h5(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                  const unsigned int H5_ATTR_UNUSED *cd_values, size_t H5_ATTR_UNUSED nbytes,
+                  size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+{
+    size_t int_size = 0;
+
+    /* Get size of native integer (just to enter the HDF5 API) */
+    if (0 == (int_size = H5Tget_size(H5T_NATIVE_INT)))
+        TEST_ERROR;
+
+    return nbytes;
+
+error:
+    return 0;
+} /* end filter_reenter_h5() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_threaded_filters
+ *
+ * Purpose:     Tests that filters are executed concurrently when
+ *              possible, are not executed concurrently when not
+ *              thread-safe, and can re-enter the library without issue.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_threaded_filters(void)
+{
+    char  filename[FILENAME_BUF_SIZE] = "";
+    hid_t file = H5I_INVALID_HID, dataset = H5I_INVALID_HID, dcpl = H5I_INVALID_HID, dapl = H5I_INVALID_HID,
+          space = H5I_INVALID_HID, xfer = H5I_INVALID_HID;
+    int      i, j, n = 0;
+    hsize_t  dims[2], cdims[2];
+    unsigned pool_threads;
+    unsigned dxpl_setting;
+    bool     barrier_mutex_init = false;
+    bool     cond_mutex_init    = false;
+    bool     cond_init          = false;
+
+    TESTING("threaded filters");
+
+    if (NULL == h5_fixname(FILENAME[34], H5P_DEFAULT, filename, sizeof(filename)))
+        TEST_ERROR;
+
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Create the data space */
+    dims[0] = DSET_DIM1;
+    dims[1] = DSET_DIM2;
+    if ((space = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    /* Create DXPL, DCPL, and DAPL */
+    if ((xfer = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        TEST_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        TEST_ERROR;
+
+    /* Set chunk dimensions */
+    cdims[0] = THREADED_CHUNKS_CDIM1;
+    cdims[1] = THREADED_CHUNKS_CDIM2;
+    if (H5Pset_chunk(dcpl, 2, cdims) < 0)
+        TEST_ERROR;
+
+    /* Disable chunk cache on dapl */
+    if (H5Pset_chunk_cache(dapl, 0, 0, 0.) < 0)
+        TEST_ERROR;
+
+    /* Register and apply "threads required" filter */
+    if (H5Zregister(H5Z_THREADS_REQUIRED) < 0)
+        TEST_ERROR;
+    if (H5Pset_filter(dcpl, H5Z_FILTER_THREADS_REQUIRED, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
+        TEST_ERROR;
+
+    /* Create the threads required dataset */
+    if ((dataset = H5Dcreate2(file, "dset_threads_required", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+    dataset = H5I_INVALID_HID;
+
+    /* Create new DCPL */
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* Set chunk dimensions */
+    cdims[0] = THREADED_CHUNKS_CDIM1;
+    cdims[1] = THREADED_CHUNKS_CDIM2;
+    if (H5Pset_chunk(dcpl, 2, cdims) < 0)
+        TEST_ERROR;
+
+    /* Register and apply "non threadsafe" filter */
+    if (H5Zregister(H5Z_NON_THREADSAFE) < 0)
+        TEST_ERROR;
+    if (H5Pset_filter(dcpl, H5Z_FILTER_NON_THREADSAFE, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
+        TEST_ERROR;
+
+    /* Create the non threadsafe dataset */
+    if ((dataset = H5Dcreate2(file, "dset_non_threadsafe", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+    dataset = H5I_INVALID_HID;
+
+    /* Append "threads required" filter to create filter pipeline with bith threads required and non
+     * threadsafe filters */
+    if (H5Pset_filter(dcpl, H5Z_FILTER_THREADS_REQUIRED, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
+        TEST_ERROR;
+
+    /* Create the non threadsafe + threads required dataset */
+    if ((dataset = H5Dcreate2(file, "dset_non_threadsafe_plus_threads_required", H5T_NATIVE_INT, space,
+                              H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+    dataset = H5I_INVALID_HID;
+
+    /* Create new DCPL */
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* Set chunk dimensions */
+    cdims[0] = THREADED_CHUNKS_CDIM1;
+    cdims[1] = THREADED_CHUNKS_CDIM2;
+    if (H5Pset_chunk(dcpl, 2, cdims) < 0)
+        TEST_ERROR;
+
+    /* Register and apply "reenter h5" filter */
+    if (H5Zregister(H5Z_REENTER_H5) < 0)
+        TEST_ERROR;
+    if (H5Pset_filter(dcpl, H5Z_FILTER_REENTER_H5, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
+        TEST_ERROR;
+
+    /* Create the reenter h5 dataset */
+    if ((dataset =
+             H5Dcreate2(file, "dset_reenter_h5", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+    dataset = H5I_INVALID_HID;
+
+    /* Create new DCPL */
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* Set chunk dimensions */
+    cdims[0] = THREADED_CHUNKS_CDIM1;
+    cdims[1] = THREADED_CHUNKS_CDIM2;
+    if (H5Pset_chunk(dcpl, 2, cdims) < 0)
+        TEST_ERROR;
+
+    /* Register and apply "non threadsafe lie" filter */
+    if (H5Zregister(H5Z_NON_THREADSAFE_LIE) < 0)
+        TEST_ERROR;
+    if (H5Pset_filter(dcpl, H5Z_FILTER_NON_THREADSAFE_LIE, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
+        TEST_ERROR;
+
+    /* Create the non threadsafe lie dataset */
+    if ((dataset = H5Dcreate2(file, "dset_non_threadsafe_lie", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+    dataset = H5I_INVALID_HID;
+
+    /* Create new DCPL */
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* Set chunk dimensions */
+    cdims[0] = THREADED_CHUNKS_CDIM1;
+    cdims[1] = THREADED_CHUNKS_CDIM2;
+    if (H5Pset_chunk(dcpl, 2, cdims) < 0)
+        TEST_ERROR;
+
+    /* Register and apply "non threadsafe lie 2" filter */
+    if (H5Zregister(H5Z_NON_THREADSAFE_LIE2) < 0)
+        TEST_ERROR;
+    if (H5Pset_filter(dcpl, H5Z_FILTER_NON_THREADSAFE_LIE2, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
+        TEST_ERROR;
+
+    /* Create the non threadsafe lie 2 dataset */
+    if ((dataset = H5Dcreate2(file, "dset_non_threadsafe_lie2", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+    dataset = H5I_INVALID_HID;
+
+    /* Close dataspace and DCPL */
+    if (H5Sclose(space) < 0)
+        TEST_ERROR;
+    space = H5I_INVALID_HID;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+
+    /* Initialize mutexes and condition variable */
+    if (H5TS_mutex_init(&threads_required_barrier, H5TS_MUTEX_TYPE_PLAIN) < 0)
+        TEST_ERROR;
+    barrier_mutex_init = true;
+    if (H5TS_mutex_init(&threads_required_cond_mutex, H5TS_MUTEX_TYPE_PLAIN) < 0)
+        TEST_ERROR;
+    cond_mutex_init = true;
+    if (H5TS_cond_init(&threads_required_cond) < 0)
+        TEST_ERROR;
+    cond_init = true;
+
+    /* Loop over number of threads (0 = no thread pool) */
+    for (pool_threads = 0; pool_threads <= 8; pool_threads++) {
+        /* Set number of threads */
+        if (H5TSset_internal_threads(pool_threads) < 0)
+            TEST_ERROR;
+
+        /* Loop over DXPL setting, 0 = off, 1 = on, 2 = use H5P_DEFAULT */
+        for (dxpl_setting = 0; dxpl_setting <= 2; dxpl_setting++) {
+            /* Set DXPL IO threads */
+            if ((dxpl_setting != 2) && H5Pset_io_threads(xfer, (bool)dxpl_setting) < 0)
+                TEST_ERROR;
+
+            /*
+             * "Threads required" dataset
+             */
+
+            /* Initialize the write buffer */
+            for (i = 0; i < DSET_DIM1; i++)
+                for (j = 0; j < DSET_DIM2; j++)
+                    points[i][j] = n++;
+
+            /* Open dataset */
+            if ((dataset = H5Dopen2(file, "dset_threads_required", dapl)) < 0)
+                TEST_ERROR;
+
+            /* Write the data to the dataset. Note that HDF5 does not yet support threading for write. We
+             * should set threads_required_target_nthreads to pool_threads here when it is supported. */
+            threads_required_target_nthreads = 1;
+            threads_required_nthreads_passed = 0;
+            if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
+                         points_data) < 0)
+                TEST_ERROR;
+
+            /* Read the dataset back */
+            threads_required_target_nthreads = dxpl_setting ? (int)pool_threads : 1;
+            threads_required_nthreads_passed = 0;
+            if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
+                        check_data) < 0)
+                TEST_ERROR;
+
+            /* Check that the values read are the same as the values written */
+            for (i = 0; i < DSET_DIM1; i++) {
+                for (j = 0; j < DSET_DIM2; j++) {
+                    if (points[i][j] != check[i][j]) {
+                        H5_FAILED();
+                        printf("    Read different values than written.\n");
+                        printf("    At index %d,%d\n", i, j);
+                        goto error;
+                    }
+                }
+            }
+
+            /* Close dataset */
+            if (H5Dclose(dataset) < 0)
+                TEST_ERROR;
+            dataset = H5I_INVALID_HID;
+
+            /*
+             * "Non threadsafe" dataset
+             */
+
+            /* Initialize the write buffer */
+            for (i = 0; i < DSET_DIM1; i++)
+                for (j = 0; j < DSET_DIM2; j++)
+                    points[i][j] = n++;
+
+            /* Open dataset */
+            if ((dataset = H5Dopen2(file, "dset_non_threadsafe", dapl)) < 0)
+                TEST_ERROR;
+
+            /* Write the data to the dataset */
+            non_threadsafe_threads_in_flight = 0;
+            if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
+                         points_data) < 0)
+                TEST_ERROR;
+
+            /* Read the dataset back */
+            non_threadsafe_threads_in_flight = 0;
+            if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
+                        check_data) < 0)
+                TEST_ERROR;
+
+            /* Check that the values read are the same as the values written */
+            for (i = 0; i < DSET_DIM1; i++) {
+                for (j = 0; j < DSET_DIM2; j++) {
+                    if (points[i][j] != check[i][j]) {
+                        H5_FAILED();
+                        printf("    Read different values than written.\n");
+                        printf("    At index %d,%d\n", i, j);
+                        goto error;
+                    }
+                }
+            }
+
+            /* Close dataset */
+            if (H5Dclose(dataset) < 0)
+                TEST_ERROR;
+            dataset = H5I_INVALID_HID;
+
+            /*
+             * "non threadsafe plus threads required" dataset
+             */
+
+            /* Initialize the write buffer */
+            for (i = 0; i < DSET_DIM1; i++)
+                for (j = 0; j < DSET_DIM2; j++)
+                    points[i][j] = n++;
+
+            /* Open dataset */
+            if ((dataset = H5Dopen2(file, "dset_non_threadsafe_plus_threads_required", dapl)) < 0)
+                TEST_ERROR;
+
+            /* Write the data to the dataset. Note that HDF5 does not yet support threading for write. We
+             * should set threads_required_target_nthreads to pool_threads here when it is supported. */
+            threads_required_target_nthreads = 1;
+            threads_required_nthreads_passed = 0;
+            non_threadsafe_threads_in_flight = 0;
+            if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
+                         points_data) < 0)
+                TEST_ERROR;
+
+            /* Read the dataset back */
+            threads_required_target_nthreads = dxpl_setting ? (int)pool_threads : 1;
+            threads_required_nthreads_passed = 0;
+            non_threadsafe_threads_in_flight = 0;
+            if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
+                        check_data) < 0)
+                TEST_ERROR;
+
+            /* Check that the values read are the same as the values written */
+            for (i = 0; i < DSET_DIM1; i++) {
+                for (j = 0; j < DSET_DIM2; j++) {
+                    if (points[i][j] != check[i][j]) {
+                        H5_FAILED();
+                        printf("    Read different values than written.\n");
+                        printf("    At index %d,%d\n", i, j);
+                        goto error;
+                    }
+                }
+            }
+
+            /* Close dataset */
+            if (H5Dclose(dataset) < 0)
+                TEST_ERROR;
+            dataset = H5I_INVALID_HID;
+
+            /*
+             * "reenter h5" dataset
+             */
+
+            /* Initialize the write buffer */
+            for (i = 0; i < DSET_DIM1; i++)
+                for (j = 0; j < DSET_DIM2; j++)
+                    points[i][j] = n++;
+
+            /* Open dataset */
+            if ((dataset = H5Dopen2(file, "dset_reenter_h5", dapl)) < 0)
+                TEST_ERROR;
+
+            /* Write the data to the dataset */
+            if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
+                         points_data) < 0)
+                TEST_ERROR;
+
+            /* Read the dataset back */
+            if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
+                        check_data) < 0)
+                TEST_ERROR;
+
+            /* Check that the values read are the same as the values written */
+            for (i = 0; i < DSET_DIM1; i++) {
+                for (j = 0; j < DSET_DIM2; j++) {
+                    if (points[i][j] != check[i][j]) {
+                        H5_FAILED();
+                        printf("    Read different values than written.\n");
+                        printf("    At index %d,%d\n", i, j);
+                        goto error;
+                    }
+                }
+            }
+
+            /* Close dataset */
+            if (H5Dclose(dataset) < 0)
+                TEST_ERROR;
+            dataset = H5I_INVALID_HID;
+
+            /*
+             * "Non threadsafe lie" dataset - only run if pool_nthreads <= 1 or dxpl_setting == 0, otherwise
+             * it will fail because this filter falsely claims to be threadsafe. This test verifies the
+             * library does not use threads when not asked to by H5TSset_internal_threads and/or
+             * H5Pset_io_threads().
+             */
+
+            if ((pool_threads <= 1) || (dxpl_setting == 0)) {
+                /* Initialize the write buffer */
+                for (i = 0; i < DSET_DIM1; i++)
+                    for (j = 0; j < DSET_DIM2; j++)
+                        points[i][j] = n++;
+
+                /* Open dataset */
+                if ((dataset = H5Dopen2(file, "dset_non_threadsafe_lie", dapl)) < 0)
+                    TEST_ERROR;
+
+                /* Write the data to the dataset */
+                non_threadsafe_threads_in_flight = 0;
+                if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                             (dxpl_setting == 2) ? H5P_DEFAULT : xfer, points_data) < 0)
+                    TEST_ERROR;
+
+                /* Read the dataset back */
+                non_threadsafe_threads_in_flight = 0;
+                if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                            (dxpl_setting == 2) ? H5P_DEFAULT : xfer, check_data) < 0)
+                    TEST_ERROR;
+
+                /* Check that the values read are the same as the values written */
+                for (i = 0; i < DSET_DIM1; i++) {
+                    for (j = 0; j < DSET_DIM2; j++) {
+                        if (points[i][j] != check[i][j]) {
+                            H5_FAILED();
+                            printf("    Read different values than written.\n");
+                            printf("    At index %d,%d\n", i, j);
+                            goto error;
+                        }
+                    }
+                }
+
+                /* Close dataset */
+                if (H5Dclose(dataset) < 0)
+                    TEST_ERROR;
+                dataset = H5I_INVALID_HID;
+            }
+
+            /*
+             * "Non threadsafe lie 2" dataset. This should pass because the library will not execute filters
+             * that reenter the library concurrently. If this capability is added in the future this test will
+             * need to be changed or removed.
+             */
+
+            /* Initialize the write buffer */
+            for (i = 0; i < DSET_DIM1; i++)
+                for (j = 0; j < DSET_DIM2; j++)
+                    points[i][j] = n++;
+
+            /* Open dataset */
+            if ((dataset = H5Dopen2(file, "dset_non_threadsafe_lie2", dapl)) < 0)
+                TEST_ERROR;
+
+            /* Write the data to the dataset */
+            non_threadsafe_threads_in_flight = 0;
+            if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
+                         points_data) < 0)
+                TEST_ERROR;
+
+            /* Read the dataset back */
+            non_threadsafe_threads_in_flight = 0;
+            if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
+                        check_data) < 0)
+                TEST_ERROR;
+
+            /* Check that the values read are the same as the values written */
+            for (i = 0; i < DSET_DIM1; i++) {
+                for (j = 0; j < DSET_DIM2; j++) {
+                    if (points[i][j] != check[i][j]) {
+                        H5_FAILED();
+                        printf("    Read different values than written.\n");
+                        printf("    At index %d,%d\n", i, j);
+                        goto error;
+                    }
+                }
+            }
+
+            /* Close dataset */
+            if (H5Dclose(dataset) < 0)
+                TEST_ERROR;
+            dataset = H5I_INVALID_HID;
+        }
+    }
+
+    /* Disable threads */
+    if (H5TSset_internal_threads(0) < 0)
+        TEST_ERROR;
+
+    if (H5Pclose(xfer) < 0)
+        TEST_ERROR;
+    xfer = H5I_INVALID_HID;
+    if (H5Pclose(dapl) < 0)
+        TEST_ERROR;
+    dapl = H5I_INVALID_HID;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+
+    if (H5TS_mutex_destroy(&threads_required_barrier) < 0)
+        TEST_ERROR;
+    barrier_mutex_init = false;
+    if (H5TS_mutex_destroy(&threads_required_cond_mutex) < 0)
+        TEST_ERROR;
+    cond_mutex_init = false;
+    if (H5TS_cond_destroy(&threads_required_cond) < 0)
+        TEST_ERROR;
+    cond_init = false;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5TSset_internal_threads(0);
+        H5Sclose(space);
+        H5Pclose(xfer);
+        H5Pclose(dcpl);
+        H5Pclose(dapl);
+        H5Dclose(dataset);
+        H5Fclose(file);
+        if (barrier_mutex_init)
+            H5TS_mutex_destroy(&threads_required_barrier);
+        if (cond_mutex_init)
+            H5TS_mutex_destroy(&threads_required_cond_mutex);
+        if (cond_init)
+            H5TS_cond_destroy(&threads_required_cond);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_threaded_filters() */
 #endif /* H5_HAVE_THREADS */
 
 /*-------------------------------------------------------------------------
@@ -20342,6 +21128,7 @@ main(void)
     const char  *driver_name;
     bool         contig_addr_vfd; /* Whether VFD used has a contiguous address space */
     bool         driver_is_default_compatible;
+    bool         driver_readwrite_no_h5_calls;
     int          i;
 
     /* Don't run this test using certain file drivers */
@@ -20391,6 +21178,10 @@ main(void)
     fapl = h5_fileaccess();
 
     if (h5_driver_is_default_vfd_compatible(fapl, &driver_is_default_compatible) < 0)
+        TEST_ERROR;
+
+    /* Check if the VFD can make HDF5 calls */
+    if (h5_driver_readwrite_no_h5_calls(fapl, &driver_readwrite_no_h5_calls) < 0)
         TEST_ERROR;
 
     /* Turn off the chunk cache, so all the chunks are immediately written to disk */
@@ -20518,7 +21309,10 @@ main(void)
                     if (!threads)
 #endif /* H5_HAVE_THREADS */
                     {
-                        nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
+                        /* deflate.h5 is a single-file test file, so it can't be opened
+                         * with a VFD that isn't compatible with the default VFD */
+                        if (driver_is_default_compatible)
+                            nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
                         nerrors += (test_bad_decode_size(file) < 0 ? 1 : 0);
                         nerrors += (test_bad_decode_size_vlen(file) < 0 ? 1 : 0);
                         nerrors += (test_bad_buf_size(file) < 0 ? 1 : 0);
@@ -20630,6 +21424,9 @@ main(void)
     nerrors += (test_h5s_plist() < 0 ? 1 : 0);
 #ifdef H5_HAVE_THREADS
     nerrors += (test_threaded_chunks() < 0 ? 1 : 0);
+    if (driver_readwrite_no_h5_calls) {
+        nerrors += (test_threaded_filters() < 0 ? 1 : 0);
+    }
 #endif /* H5_HAVE_THREADS */
 
     /* Run misc tests */

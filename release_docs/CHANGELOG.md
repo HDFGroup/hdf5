@@ -111,6 +111,21 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Added new VFD feature flag
+
+   Added a new Virtual File Driver (VFD) feature flag,
+   H5FD_FEAT_READWRITE_NO_H5_CALLS. This flag should be set when the read and
+   write callbacks do not make any HDF5 calls except for H5OPEN.
+
+### Added new version of H5Z_class_t, H5Z_class3_t, to include feature flags
+
+   Added a new version of the H5Z_class_t struct, H5Z_class3_t. This version has
+   a new field, feature_flags, which indicates to the library which features the
+   plugin supports. The currently supported flags are
+   H5Z_FEAT_FILTER_THREADSAFE, which should be set when the filter callback is
+   threadsafe, and H5Z_FEAT_FILTER_NO_H5_CALLS, which should be set when the
+   filter makes no HDF5 calls except for H5OPEN.
+
 ### Added support for internally concurrent multithreaded reads of chunked datasets
 
    Added 3 new functions to support this: H5TSset_internal_threads(),
@@ -119,14 +134,13 @@ We would like to thank the many HDF5 community members who contributed to this r
    This feature internally parallelizes read operations on chunked datasets.
    H5TSset_internal_threads() is used to enable the feature globally, while
    H5Pset_io_threads() can be used to disable the feature on a per-operation
-   basis. These functions are available whenever the library is built with a
+   basis. These functions are only available when the library is built with a
    threading package; see the Configuration section above. When performing an
-   internally threaded read, the library will concurrently read from disk,
-   unfilter, and scatter to memory all chunks in a read operation on a chunked
-   dataset. Currently each of these sub-operations is serialized (protected by
-   a mutex), so there is not yet likely to be any performance improvement.
+   internally threaded read, the library will, when possible, concurrently read
+   from disk, unfilter, and scatter to memory all chunks in a read operation on
+   a chunked dataset. Currently only the filter operations are executed
+   concurrently, the others are serialized.
 
-   Reads are not threaded in builds with HDF5_ENABLE_THREADSAFE.
 
 ## Parallel Library
 
@@ -150,6 +164,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 # 🪲 Bug Fixes
 
 ## Library
+
+### Fixed out-of-bounds reads when a filtered chunk is shorter than its filter header
+
+   The scaleoffset and szip filters each store a fixed-size header in front of the chunk data: a 21-byte parameter block for scaleoffset and a 4-byte uncompressed-length header for szip. On read, each one subtracted that fixed size from the chunk length without first checking that the chunk was at least that long. A truncated or corrupted chunk record made the subtraction wrap around, so both filters read far past the end of the chunk buffer. Its bounds checks also measured the chunk buffer's allocated size, which the library deliberately sizes to hold the larger unfiltered chunk, so a truncated chunk could still decompress out of the uninitialized remainder of that allocation. Both filters now reject any chunk shorter than their own header, and scaleoffset validates every read against the number of bytes actually stored for the chunk rather than the size of the buffer holding them. The fletcher32 filter now also rejects a chunk that holds only its 4-byte checksum and no data, which previously reached the checksum routine with a length of zero.
 
 ### Fixed a heap buffer over-read in scale-offset decode
 
