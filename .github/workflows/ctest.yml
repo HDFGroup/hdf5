@@ -843,12 +843,13 @@ jobs:
           which cmake
           cmake --version
 
-      # Install aws-c-s3 via vcpkg
+      # Install static aws-c-s3 via vcpkg; the x64-windows-static-md triplet
+      # builds static libs against the dynamic CRT (/MD) used by HDF5, so the
+      # static tools do not need the AWS DLLs at runtime.
       - name: Install aws-c-s3 (Windows)
         run: |
-          vcpkg install aws-c-s3:x64-windows
-          echo "CMAKE_PREFIX_PATH=$VCPKG_INSTALLATION_ROOT/installed/x64-windows" >> $GITHUB_ENV
-          echo "$VCPKG_INSTALLATION_ROOT/installed/x64-windows/bin" >> $GITHUB_PATH
+          vcpkg install aws-c-s3:x64-windows-static-md
+          echo "CMAKE_PREFIX_PATH=$VCPKG_INSTALLATION_ROOT/installed/x64-windows-static-md" >> $GITHUB_ENV
         shell: bash
 
       - name: Set up JDK 21
@@ -999,24 +1000,22 @@ jobs:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
 
-      - name: Install aws-c-s3 (Cached installation)
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
-        with:
-          name: libaws-c-s3-Release
-
-      - name: Untar libaws-c-s3 installation
-        run: |
-          tar xvf libaws-c-s3.tar -C ${{ runner.workspace }}
-
-      - name: List contents of libaws-c-s3 installation
-        run: |
-          ls -lR ${{ runner.workspace }}/aws-c-s3-build
-
-      - name: Setup environment
+      # The cached libaws-c-s3 artifact is built shared, so build aws-c-s3 and
+      # its dependencies from source (static, PIC) in dependency order so the
+      # static tools do not need the AWS shared libraries at runtime.
+      - name: Install aws-c-s3 (Linux S3)
         shell: bash
         run: |
-          echo "LD_LIBRARY_PATH=${{ runner.workspace }}/aws-c-s3-build/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
-          echo "CMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build" >> $GITHUB_ENV
+          AWS_PREFIX="${{ runner.temp }}/aws"
+          mkdir -p "${{ runner.temp }}/aws-src"
+          cd "${{ runner.temp }}/aws-src"
+          for lib in aws/aws-lc aws/s2n-tls awslabs/aws-c-common awslabs/aws-checksums                      awslabs/aws-c-cal awslabs/aws-c-io awslabs/aws-c-compression                      awslabs/aws-c-http awslabs/aws-c-sdkutils awslabs/aws-c-auth awslabs/aws-c-s3; do
+            name=$(basename $lib)
+            git clone --depth 1 https://github.com/$lib.git
+            cmake -S $name -B $name/build -G Ninja               -DCMAKE_BUILD_TYPE=Release               -DCMAKE_INSTALL_PREFIX="$AWS_PREFIX"               -DCMAKE_PREFIX_PATH="$AWS_PREFIX"               -DBUILD_SHARED_LIBS=OFF               -DCMAKE_POSITION_INDEPENDENT_CODE=ON               -DBUILD_TESTING=OFF               -DDISABLE_GO=ON
+            cmake --build $name/build --target install
+          done
+          echo "CMAKE_PREFIX_PATH=$AWS_PREFIX" >> $GITHUB_ENV
 
       - name: Set file base name (Linux S3)
         id: set-file-base
@@ -1102,9 +1101,22 @@ jobs:
           which cmake
           cmake --version
 
-      # Install aws-c-s3 via Homebrew
+      # Homebrew's aws-c-s3 is shared only, so build aws-c-s3 and its
+      # dependencies from source (static, PIC) in dependency order so the
+      # static tools do not need the AWS dylibs at runtime.
+      # USE_S2N=OFF makes aws-c-io use Apple's native TLS instead of s2n-tls.
       - name: Install aws-c-s3 (MacOS arm64)
-        run: brew install aws-c-s3
+        shell: bash
+        run: |
+          AWS_PREFIX="${{ runner.temp }}/aws"
+          mkdir -p "${{ runner.temp }}/aws-src"
+          cd "${{ runner.temp }}/aws-src"
+          for lib in aws-c-common aws-checksums aws-c-cal aws-c-io aws-c-compression                      aws-c-http aws-c-sdkutils aws-c-auth aws-c-s3; do
+            git clone --depth 1 https://github.com/awslabs/$lib.git
+            cmake -S $lib -B $lib/build -G Ninja               -DCMAKE_BUILD_TYPE=Release               -DCMAKE_OSX_ARCHITECTURES=arm64               -DCMAKE_INSTALL_PREFIX="$AWS_PREFIX"               -DCMAKE_PREFIX_PATH="$AWS_PREFIX"               -DBUILD_SHARED_LIBS=OFF               -DCMAKE_POSITION_INDEPENDENT_CODE=ON               -DBUILD_TESTING=OFF               -DUSE_S2N=OFF
+            cmake --build $lib/build --target install
+          done
+          echo "CMAKE_PREFIX_PATH=$AWS_PREFIX" >> $GITHUB_ENV
 
       - name: Install the Apple certificate and provisioning profile
         shell: bash

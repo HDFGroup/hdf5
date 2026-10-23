@@ -259,6 +259,15 @@
       }
     },
     {
+      "name": "ci-StaticTools",
+      "hidden": true,
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": "ON",
+        "BUILD_STATIC_LIBS": "ON",
+        "HDF5_BUILD_STATIC_TOOLS": "ON"
+      }
+    },
+    {
       "name": "ci-S3-proxy",
       "hidden": true,
       "cacheVariables": {
@@ -398,7 +407,8 @@
       "description": "MSVC S3 Config for x64 (Release)",
       "inherits": [
         "ci-StdShar-MSVC",
-        "ci-S3"
+        "ci-S3",
+        "ci-StaticTools"
       ]
     },
     {
@@ -468,7 +478,8 @@
       "description": "Clang S3 Config for macos (Release)",
       "inherits": [
         "ci-StdShar-macos-Clang",
-        "ci-S3"
+        "ci-S3",
+        "ci-StaticTools"
       ],
       "cacheVariables": {
         "CMAKE_OSX_ARCHITECTURES": "arm64"
@@ -479,10 +490,11 @@
       "description": "Clang S3 Config for macos intel (Release)",
       "inherits": [
         "ci-StdShar-macos-Clang",
-        "ci-S3"
+        "ci-S3",
+        "ci-StaticTools"
       ],
-       "cacheVariables": {
-         "CMAKE_OSX_ARCHITECTURES": "x86_64"
+      "cacheVariables": {
+        "CMAKE_OSX_ARCHITECTURES": "x86_64"
       }
     },
     {
@@ -512,7 +524,8 @@
       "description": "GNUC S3 Config for x64 (Release)",
       "inherits": [
         "ci-StdShar-GNUC",
-        "ci-S3"
+        "ci-S3",
+        "ci-StaticTools"
       ]
     },
     {
