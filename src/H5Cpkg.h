@@ -1844,6 +1844,10 @@ typedef struct H5C_tag_info_t {
  * close_warning_received: Boolean flag indicating that a file closing
  *        warning has been received.
  *
+ * unwritable_entries_discarded: Boolean flag indicating that one or more
+ *        dirty entries were discarded without being written, because they
+ *        could not be written while the cache was being destroyed.
+ *
  *
  * In addition to the callback functions required for each entry's class,
  * the cache requires the following callback functions for an instance of
@@ -2874,6 +2878,7 @@ struct H5C_t {
     H5C_log_flush_func_t       log_flush;
     bool                       evictions_enabled;
     bool                       close_warning_received;
+    bool                       unwritable_entries_discarded;
 
     /* Fields for maintaining the [hash table] index of entries */
     uint32_t           index_len;

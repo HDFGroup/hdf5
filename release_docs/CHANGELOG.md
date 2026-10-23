@@ -165,6 +165,10 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed a memory leak when metadata cannot be written while closing a file
+
+   If writing metadata failed while a file was being closed, the file's metadata cache was left allocated with the unwritten entries still in it. The cache and everything in it were leaked, which also prevented the library from shutting down cleanly. The close still fails in this case, but the entries that can't be written are discarded, and the cache is freed.
+
 ### Fixed H5Pmodify_filter() writing past the filter pipeline for a filter not in it
 
    `H5Pmodify_filter()` returned success when the requested filter was not in the pipeline, and wrote the new flags and client data into the slot one past the last used entry. When the pipeline already held `H5Z_MAX_NFILTERS` filters, that write went past the end of the filter array, and client data longer than `H5Z_COMMON_CD_VALUES` leaked its allocation. `H5Pmodify_filter()` now fails with "filter not in pipeline" in this case.
