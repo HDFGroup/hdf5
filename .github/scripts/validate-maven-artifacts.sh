@@ -133,6 +133,44 @@ validate_jar_file() {
     #   - jarhdf5-*.jar: Wrapper classes (hdf/hdf5lib/*)
     # JNI builds have single JAR with hdf/hdf5lib/* classes
 
+    if [[ "${jar_basename}" == hdf5-native-* ]] || [[ "${jar_basename}" == hdf5-zlib-native-* ]] || [[ "${jar_basename}" == hdf5-szip-native-* ]] || [[ "${jar_basename}" == hdf5-jni-native-* ]]; then
+        local native_lib
+        # Match unversioned (.so) and versioned sonames (e.g. libhdf5.so.1.2.3)
+        native_lib=$(find "${temp_dir}/natives" -type f \( -name "*.so" -o -name "*.so.*" -o -name "*.dll" -o -name "*.dylib" \) 2>/dev/null | head -1)
+        if [[ -z "${native_lib}" ]]; then
+            add_error "Native bundle JAR missing shared libraries under natives/<platform>/ (SciJava layout): ${jar_basename}"
+        else
+            log_info "Found native library in bundle: $(basename "${native_lib}")"
+        fi
+        if [[ "${jar_basename}" == hdf5-zlib-native-* ]]; then
+            local mapped_zlib
+            mapped_zlib=$(find "${temp_dir}/natives" -type f \( -name "libz.so" -o -name "libz.so.*" -o -name "libz.dylib" -o -name "libz.*.dylib" -o -name "z.dll" -o -name "zlib.dll" -o -name "zlib1.dll" \) 2>/dev/null | head -1)
+            if [[ -z "${mapped_zlib}" ]]; then
+                add_error "hdf5-zlib-native JAR missing mapped zlib name under natives/<platform>/"
+            else
+                log_info "Found mapped zlib library in bundle: $(basename "${mapped_zlib}")"
+            fi
+        fi
+        if [[ "${jar_basename}" == hdf5-szip-native-* ]]; then
+            local mapped_libsz mapped_libaec
+            mapped_libsz=$(find "${temp_dir}/natives" -type f \( -name "libsz.so" -o -name "libsz.dylib" -o -name "sz.dll" \) 2>/dev/null | head -1)
+            mapped_libaec=$(find "${temp_dir}/natives" -type f \( -name "libaec.so" -o -name "libaec.dylib" -o -name "aec.dll" \) 2>/dev/null | head -1)
+            if [[ -z "${mapped_libsz}" ]]; then
+                add_error "hdf5-szip-native JAR missing mapped libsz name under natives/<platform>/"
+            else
+                log_info "Found mapped libsz library in bundle: $(basename "${mapped_libsz}")"
+            fi
+            if [[ -z "${mapped_libaec}" ]]; then
+                add_error "hdf5-szip-native JAR missing mapped libaec name under natives/<platform>/"
+            else
+                log_info "Found mapped libaec library in bundle: $(basename "${mapped_libaec}")"
+            fi
+        fi
+        rm -rf "${temp_dir}"
+        log_success "JAR validation completed: ${jar_basename}"
+        return 0
+    fi
+
     if [[ "${jar_basename}" == *"javahdf5"* ]]; then
         # This is the FFM bindings JAR - check for FFM classes
         local ffm_classes=(
@@ -210,8 +248,25 @@ validate_pom_file() {
         add_error "Invalid or missing groupId in POM"
     fi
 
-    if ! grep -qE "<artifactId>hdf5-java(-ffm|-jni)?</artifactId>" "${pom_file}"; then
-        add_error "Invalid or missing artifactId in POM (expected hdf5-java, hdf5-java-ffm, or hdf5-java-jni)"
+    local allowed_hdf5_artifact_ids=(
+        hdf5-native
+        hdf5-zlib-native
+        hdf5-szip-native
+        hdf5-jni-native
+        hdf5-java
+        hdf5-java-ffm
+        hdf5-java-jni
+        hdf5-java-examples
+    )
+    local artifact_id_ok=false
+    for aid in "${allowed_hdf5_artifact_ids[@]}"; do
+        if grep -Fq "<artifactId>${aid}</artifactId>" "${pom_file}"; then
+            artifact_id_ok=true
+            break
+        fi
+    done
+    if [[ "${artifact_id_ok}" != "true" ]]; then
+        add_error "Invalid or missing artifactId in POM (expected one of: hdf5-native, hdf5-zlib-native, hdf5-szip-native, hdf5-jni-native, hdf5-java, hdf5-java-ffm, hdf5-java-jni, hdf5-java-examples)"
     fi
 
     # Extract version
@@ -303,6 +358,7 @@ validate_platform_classifiers() {
 
     local valid_classifiers=(
         "linux-x86_64"
+        "linux-aarch64"
         "windows-x86_64"
         "macos-x86_64"
         "macos-aarch64"
@@ -368,9 +424,9 @@ simulate_maven_dependency() {
     artifact_id=$(grep -o '<artifactId>[^<]*</artifactId>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
     version=$(grep -o '<version>[^<]*</version>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
 
-    # Find the JAR file in the artifacts directory
+    # Find the JAR for this POM's artifactId (parenthesize -o so -maxdepth applies to both)
     local jar_file
-    jar_file=$(find "$(dirname "${pom_file}")" -maxdepth 2 -name "${artifact_id}-${version}.jar" -o -name "${artifact_id}-*.jar" | head -1)
+    jar_file=$(find "$(dirname "${pom_file}")" -maxdepth 2 \( -name "${artifact_id}-${version}.jar" -o -name "${artifact_id}-${version}-*.jar" -o -name "${artifact_id}-*.jar" \) 2>/dev/null | head -1)
 
     if [ -z "${jar_file}" ]; then
         add_warning "Could not find JAR file for ${artifact_id}:${version} - skipping dependency simulation"
@@ -433,7 +489,7 @@ check_deployment_readiness() {
     local jar_files pom_files
     # Only count HDF5 JAR files, exclude dependencies like slf4j
     jar_files=($(find "${artifacts_dir}" -name "*hdf5*.jar" -not -name "*test*" 2>/dev/null || true))
-    pom_files=($(find "${artifacts_dir}" -name "pom.xml" 2>/dev/null || true))
+    pom_files=($(find "${artifacts_dir}" \( -name "pom.xml" -o -name "pom-hdf5-native.xml" -o -name "pom-hdf5-zlib-native.xml" -o -name "pom-hdf5-szip-native.xml" -o -name "pom-hdf5-jni-native.xml" \) 2>/dev/null || true))
 
     if [[ ${#jar_files[@]} -eq 0 ]]; then
         add_error "No JAR files found in artifacts directory"
@@ -507,7 +563,7 @@ main() {
     local jar_files pom_files all_jars
     # Only validate HDF5 JAR files, exclude dependencies like slf4j
     jar_files=($(find "${artifacts_dir}" -name "*hdf5*.jar" -not -name "*test*" 2>/dev/null || true))
-    pom_files=($(find "${artifacts_dir}" -name "pom.xml" 2>/dev/null || true))
+    pom_files=($(find "${artifacts_dir}" \( -name "pom.xml" -o -name "pom-hdf5-native.xml" -o -name "pom-hdf5-zlib-native.xml" -o -name "pom-hdf5-szip-native.xml" -o -name "pom-hdf5-jni-native.xml" \) 2>/dev/null || true))
     all_jars=($(find "${artifacts_dir}" -name "*.jar" 2>/dev/null || true))
 
     # Log what we found
@@ -534,9 +590,49 @@ main() {
         validate_pom_file "${pom_file}"
     done
 
-    # Version consistency check
+    # Version consistency: pair each POM with JARs that share its artifactId (not only pom_files[0])
     if [[ ${#pom_files[@]} -gt 0 && ${#jar_files[@]} -gt 0 ]]; then
-        validate_version_consistency "${pom_files[0]}" "${jar_files[@]}"
+        for pom_file in "${pom_files[@]}"; do
+            local pname aid
+            pname=$(basename "${pom_file}")
+            # Main module POM is handled below (JAR names may not equal Maven artifactId)
+            if [[ "${pname}" == "pom.xml" ]]; then
+                continue
+            fi
+            if [[ "${pname}" =~ ^pom-(.+)\.xml$ ]]; then
+                aid="${BASH_REMATCH[1]}"
+            else
+                aid=$(grep -o '<artifactId>[^<]*</artifactId>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || true)
+            fi
+            if [[ -z "${aid}" ]]; then
+                continue
+            fi
+            local matching=()
+            for jf in "${jar_files[@]}"; do
+                if [[ "$(basename "${jf}")" == "${aid}-"* ]]; then
+                    matching+=("${jf}")
+                fi
+            done
+            if [[ ${#matching[@]} -gt 0 ]]; then
+                validate_version_consistency "${pom_file}" "${matching[@]}"
+            fi
+        done
+        for pom_file in "${pom_files[@]}"; do
+            if [[ "$(basename "${pom_file}")" != "pom.xml" ]]; then
+                continue
+            fi
+            local rest=()
+            for jf in "${jar_files[@]}"; do
+                local jb
+                jb=$(basename "${jf}")
+                if [[ "${jb}" != hdf5-native-* && "${jb}" != hdf5-zlib-native-* && "${jb}" != hdf5-szip-native-* && "${jb}" != hdf5-jni-native-* ]]; then
+                    rest+=("${jf}")
+                fi
+            done
+            if [[ ${#rest[@]} -gt 0 ]]; then
+                validate_version_consistency "${pom_file}" "${rest[@]}"
+            fi
+        done
     fi
 
     # Platform classifier validation
@@ -544,9 +640,11 @@ main() {
         validate_platform_classifiers "${jar_files[@]}"
     fi
 
-    # Maven dependency simulation
+    # Maven dependency simulation (once per POM that has a matching JAR in the same directory tree)
     if [[ ${#pom_files[@]} -gt 0 ]]; then
-        simulate_maven_dependency "${pom_files[0]}"
+        for pom_file in "${pom_files[@]}"; do
+            simulate_maven_dependency "${pom_file}"
+        done
     fi
 
     # Generate final report

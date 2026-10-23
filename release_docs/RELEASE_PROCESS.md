@@ -194,7 +194,9 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - **Java Examples Testing:** Comprehensive validation of Java examples (org.hdfgroup:hdf5-java-examples) across all platforms with Maven artifacts
     - **Deployment Process:**
       - `maven-staging.yml` workflow generates artifacts for all platforms
-      - `maven-deploy.yml` workflow deploys filtered main HDF5 JARs (jarhdf5-*.jar) only
+      - `maven-deploy.yml` workflow deploys `jarhdf5-*.jar`, native bundles (`hdf5-native-*.jar`, `hdf5-jni-native-*.jar` when applicable), and `hdf5-java-examples-*.jar`.
+      - Pair each artifact with its POM: `jarhdf5-*.jar` and `hdf5-java-examples-*.jar` use `pom.xml` from the artifact directory; `hdf5-native-*.jar` uses `pom-hdf5-native.xml` beside the JAR; `hdf5-jni-native-*.jar` (when present) uses `pom-hdf5-jni-native.xml` beside the JAR.
+      - In release notes, mention third-party shared-library redistribution when the build ships dynamic zlib (or similar) alongside `libhdf5`.
       - Monitor both workflows for successful completion
     - **Troubleshooting:** Check debug output in workflow logs for permission or authentication issues
     - **Go-Live:** After successful dry run testing, set `dry_run: false` in `.github/workflows/release.yml`
