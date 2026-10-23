@@ -355,68 +355,72 @@ error:
 static int
 test_decode_corrupted_layout_ndims(void)
 {
-    hid_t          dcpl     = H5I_INVALID_HID;
-    hid_t          decoded  = H5I_INVALID_HID;
-    void          *buf      = NULL;
-    size_t         buf_size = 0;
-    hsize_t        chunk[2] = {17, 19};
+    hid_t          dcpl      = H5I_INVALID_HID; /* Dataset creation property list */
+    hid_t          pl        = H5I_INVALID_HID; /* Decoded property list */
+    void          *temp_buf  = NULL;            /* Pointer to encoding buffer */
+    size_t         temp_size = 0;               /* Size of encoding buffer */
+    hsize_t        chunk[2]  = {17, 19};
     unsigned char *p;
     size_t         u;
 
-    TESTING("H5Pdecode of DCPL with out-of-range chunk rank");
-
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, 2, chunk) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
-    if (H5Pencode2(dcpl, NULL, &buf_size, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
-    if (NULL == (buf = malloc(buf_size)))
-        FAIL_PUTS_ERROR("couldn't allocate buffer");
-    if (H5Pencode2(dcpl, buf, &buf_size, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+    if (H5Pencode2(dcpl, NULL, &temp_size, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Allocate the buffer for encoding */
+    if (NULL == (temp_buf = (void *)malloc(temp_size)))
+        TEST_ERROR;
+
+    /* Encode the property list to the buffer */
+    if (H5Pencode2(dcpl, temp_buf, &temp_size, H5P_DEFAULT) < 0)
+        TEST_ERROR;
 
     /* The chunk layout is encoded as [type][rank][dim0][dim1] with the
      * dimensions written as 32-bit values; locate the two dimension words and
      * corrupt the preceding rank byte with a value well above H5S_MAX_RANK. */
-    p = (unsigned char *)buf;
-    for (u = 1; u + 8 <= buf_size; u++)
+    p = (unsigned char *)temp_buf;
+    for (u = 1; u + 8 <= temp_size; u++)
         if (p[u] == 17 && p[u + 1] == 0 && p[u + 2] == 0 && p[u + 3] == 0 && p[u + 4] == 19 &&
             p[u + 5] == 0 && p[u + 6] == 0 && p[u + 7] == 0 && p[u - 1] == 2) {
             p[u - 1] = 200;
             break;
         }
-    if (u + 8 > buf_size)
-        FAIL_PUTS_ERROR("couldn't locate encoded chunk rank");
+    if (u + 8 > temp_size)
+        PUTS_ERROR("couldn't locate encoded chunk rank\n");
 
+    /* Decoding the corrupted buffer should fail */
     H5E_BEGIN_TRY
     {
-        decoded = H5Pdecode(buf);
+        pl = H5Pdecode(temp_buf);
     }
     H5E_END_TRY
+    if (pl >= 0)
+        PUTS_ERROR("H5Pdecode accepted an out-of-range chunk rank\n");
 
-    if (decoded != H5I_INVALID_HID) {
-        H5Pclose(decoded);
-        FAIL_PUTS_ERROR("H5Pdecode accepted an out-of-range chunk rank");
-    }
-
-    free(buf);
+    free(temp_buf);
+    temp_buf = NULL;
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
-    PASSED();
-    return 0;
+    /* Success */
+    return (0);
 
 error:
-    if (buf)
-        free(buf);
+    if (temp_buf)
+        free(temp_buf);
+
     H5E_BEGIN_TRY
     {
+        H5Pclose(pl);
         H5Pclose(dcpl);
     }
     H5E_END_TRY
-    return 1;
+
+    return (-1);
 } /* end test_decode_corrupted_layout_ndims() */
 
 int
@@ -985,8 +989,10 @@ main(void)
         } /* end high */
     }     /* end low */
 
+    TESTING("H5Pdecode of DCPL with out-of-range chunk rank");
     if (test_decode_corrupted_layout_ndims() < 0)
-        goto error;
+        FAIL_PUTS_ERROR("DCPL decoding of out-of-range chunk rank failed\n");
+    PASSED();
 
     return 0;
 
