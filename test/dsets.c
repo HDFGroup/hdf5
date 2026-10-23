@@ -20808,20 +20808,20 @@ error:
  */
 /* This message derives from H5Z */
 const H5Z_class3_t H5Z_H5_ALLOCATE[1] = {{
-    H5Z_CLASS_T_VERS_3,         /* H5Z_class_t version */
-    H5Z_FILTER_H5_ALLOCATE,      /* Filter id number */
-    1, 1,                       /* Encoding and decoding enabled */
-    "reenter_h5",               /* Filter name for debugging */
-    NULL,                       /* The "can apply" callback */
-    NULL,                       /* The "set local" callback */
-    filter_h5_allocate,         /* The actual filter function */
-    H5Z_FEAT_FILTER_THREADSAFE | H5Z_FEAT_FILTER_NO_H5_CALLS, /* This filter is thread-safe and does not re-enter the HDF5 API */
+    H5Z_CLASS_T_VERS_3,     /* H5Z_class_t version */
+    H5Z_FILTER_H5_ALLOCATE, /* Filter id number */
+    1, 1,                   /* Encoding and decoding enabled */
+    "reenter_h5",           /* Filter name for debugging */
+    NULL,                   /* The "can apply" callback */
+    NULL,                   /* The "set local" callback */
+    filter_h5_allocate,     /* The actual filter function */
+    H5Z_FEAT_FILTER_THREADSAFE |
+        H5Z_FEAT_FILTER_NO_H5_CALLS, /* This filter is thread-safe and does not re-enter the HDF5 API */
 }};
 
 static size_t
 filter_h5_allocate(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
-                  const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes,
-                  size_t *buf_size, void **buf)
+                   const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes, size_t *buf_size, void **buf)
 {
     void *tmp_buf  = NULL;
     void *tmp_buf2 = NULL;
@@ -20834,9 +20834,9 @@ filter_h5_allocate(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_n
     memcpy(tmp_buf, *buf, nbytes);
 
     /* Assign *buf and free old buffer */
-    tmp_buf2 = *buf;
-    *buf = tmp_buf;
-    tmp_buf = NULL;
+    tmp_buf2  = *buf;
+    *buf      = tmp_buf;
+    tmp_buf   = NULL;
     *buf_size = nbytes;
     if (H5free_memory(tmp_buf2) < 0)
         TEST_ERROR;
@@ -20845,8 +20845,8 @@ filter_h5_allocate(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_n
     /* Resize buffer to one that is too big */
     if (NULL == (tmp_buf = H5resize_memory(*buf, nbytes + 1)))
         TEST_ERROR;
-    *buf = tmp_buf;
-    tmp_buf = NULL;
+    *buf      = tmp_buf;
+    tmp_buf   = NULL;
     *buf_size = nbytes + 1;
 
     /* Allocate new buffer, clear */
@@ -20857,9 +20857,9 @@ filter_h5_allocate(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_n
     memcpy(tmp_buf, *buf, nbytes);
 
     /* Assign *buf and free old buffer */
-    tmp_buf2 = *buf;
-    *buf = tmp_buf;
-    tmp_buf = NULL;
+    tmp_buf2  = *buf;
+    *buf      = tmp_buf;
+    tmp_buf   = NULL;
     *buf_size = nbytes;
     if (H5free_memory(tmp_buf2) < 0)
         TEST_ERROR;
@@ -21084,8 +21084,8 @@ test_threaded_filters(void)
         TEST_ERROR;
 
     /* Create the non threadsafe lie dataset */
-    if ((dataset = H5Dcreate2(file, "dset_h5_allocate", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl,
-                              H5P_DEFAULT)) < 0)
+    if ((dataset =
+             H5Dcreate2(file, "dset_h5_allocate", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         TEST_ERROR;
     if (H5Dclose(dataset) < 0)
         TEST_ERROR;
