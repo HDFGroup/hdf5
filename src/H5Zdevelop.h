@@ -26,9 +26,39 @@
 /*****************/
 
 /**
- * Current version of the H5Z_class_t struct
+ * Latest version of the H5Z_class_t struct, used in conjunction with
+ * H5Z_class3_t, introduced in 2.3.0.
+ */
+#define H5Z_CLASS_T_VERS_3 (3)
+/**
+ * Previous version of the H5Z_class_t struct, used in conjunction with
+ * H5Z_class2_t, introduced in 1.8.0. This macro was introduced in 2.3.0,
+ * previously only #H5Z_CLASS_T_VERS was used.
+ */
+#define H5Z_CLASS_T_VERS_2 (2)
+/**
+ * Previous version of the H5Z_class_t struct, used in conjunction with
+ * H5Z_class2_t, introduced in 1.8.0. This has the same effect as
+ * #H5Z_CLASS_T_VERS_2, even though it has a different value. Retained for
+ * compatibility with older versions of the library.
  */
 #define H5Z_CLASS_T_VERS (1)
+
+/* Define filter features that can be enabled on a per-filter basis */
+/* These are specified in the 'feature_flags' field in H5Z_class3_t */
+/**
+ * Defining the H5Z_FEAT_FILTER_THREADSAFE for a filter means that the \p filter
+ * callback is thread-safe and can be executed concurrently with multiple
+ * threads.
+ * \since 2.3.0
+ */
+#define H5Z_FEAT_FILTER_THREADSAFE 0x0000000000000001
+/**
+ * Defining the H5Z_FEAT_FILTER_NO_H5_CALLS for a filter means that the
+ * \p filter callback does not make any HDF5 calls, excluding #H5OPEN.
+ * \since 2.3.0
+ */
+#define H5Z_FEAT_FILTER_NO_H5_CALLS 0x0000000000000002
 
 /*******************/
 /* Public Typedefs */
@@ -146,6 +176,12 @@ typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
  *          output buffer. If an error occurs then the function should return
  *          zero and leave all pointer arguments unchanged.
  *
+ *          If this filter function is registered with an H5Z_class3_t whose
+ *          feature flags include #H5Z_FEAT_FILTER_THREADSAFE, then the library
+ *          may execute it concurrently from multiple threads, with separate,
+ *          disjoint buffers. Internal threading is currently only used if every
+ *          filter in the pipeline sets #H5Z_FEAT_FILTER_NO_H5_CALLS.
+ *
  * \since 1.0.0
  *
  */
@@ -153,6 +189,24 @@ typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
 typedef size_t (*H5Z_func_t)(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[],
                              size_t nbytes, size_t *buf_size, void **buf);
 //! <!-- [H5Z_func_t_snip] -->
+
+/**
+ * The filter table maps filter identification numbers to structs that
+ * contain a pointers to the filter function and timing statistics.
+ */
+//! <!-- [H5Z_class3_t_snip] -->
+typedef struct H5Z_class3_t {
+    int                  version;         /**< Version number of the H5Z_class_t struct     */
+    H5Z_filter_t         id;              /**< Filter ID number                             */
+    unsigned             encoder_present; /**< Does this filter have an encoder?            */
+    unsigned             decoder_present; /**< Does this filter have a decoder?             */
+    const char          *name;            /**< Comment for debugging                        */
+    H5Z_can_apply_func_t can_apply;       /**< The "can apply" callback for a filter        */
+    H5Z_set_local_func_t set_local;       /**< The "set local" callback for a filter        */
+    H5Z_func_t           filter;          /**< The actual filter function                   */
+    uint64_t             feature_flags;   /**< Feature flags                                */
+} H5Z_class3_t;
+//! <!-- [H5Z_class3_t_snip] -->
 
 /**
  * The filter table maps filter identification numbers to structs that
@@ -207,12 +261,15 @@ extern "C" {
  *          the \p cls data structure. That data structure must conform to one
  *          of the following definitions:
  *          \snippet this H5Z_class1_t_snip
- *          or
+ *          ,
  *          \snippet this H5Z_class2_t_snip
+ *          , or
+ *          \snippet this H5Z_class3_t_snip
  *
  *          \c version is a library-defined value reporting the version number
- *          of the #H5Z_class_t struct. This currently must be set to
- *          #H5Z_CLASS_T_VERS.
+ *          of the #H5Z_class_t struct. This must be set to #H5Z_CLASS_T_VERS_2
+ *          of H5Z_CLASS_T_VERS if using H5Z_class2_t or #H5Z_CLASS_T_VERS_3 if
+ *          using H5Z_class3_t.
  *
  *          \c id is the identifier for the new filter. This is a user-defined
  *          value between #H5Z_FILTER_RESERVED and #H5Z_FILTER_MAX. These
@@ -242,16 +299,31 @@ extern "C" {
  *          \c filter, described in detail below, is a user-defined callback
  *          function which performs the action of the filter.
  *
+ *          \c feature_flags is a bit-flags type parameter indicating features
+ *          this filter supports. Available flags are:
+ *          \li #H5Z_FEAT_FILTER_THREADSAFE : This should be set if the
+ *          \p filter callback is thread-safe with respect to its own internal
+ *          structures.
+ *          \li #H5Z_FEAT_FILTER_NO_H5_CALLS : This should be set if the \p
+ *          filter callback does not make any HDF5 library calls (except
+ *          #H5OPEN ).
+ *          All other bits will be ignored. The filter should set all other bits
+ *          to zero so they are not erroneously interpreted as features by a
+ *          future version of the library.
+ *
  *          The statistics associated with a filter are not reset by this
  *          function; they accumulate over the life of the library.
  *
- *          #H5Z_class_t is a macro that maps to either H5Z_class1_t or
- *          H5Z_class2_t, depending on the needs of the application. To affect
- *          only this macro, H5Z_class_t_vers may be defined as either 1 or 2.
- *          Otherwise, it will behave in the same manner as other API
- *          compatibility macros. See \ref api-compat-macros for more
- *          information. H5Z_class1_t matches the #H5Z_class_t structure that is
- *          used in the 1.6.x versions of the HDF5 library.
+ *          #H5Z_class_t is a macro that maps to either H5Z_class1_t,
+ *          H5Z_class2_t, or H5Z_class3_t, depending on the needs of the
+ *          application. To affect only this macro, H5Z_class_t_vers may be
+ *          defined as either 1, 2, or 3. Otherwise, it will behave in the same
+ *          manner as other API compatibility macros. See \ref api-compat-macros
+ *          for more information. H5Z_class1_t matches the #H5Z_class_t
+ *          structure that is used in the 1.6.x versions of the HDF5 library,
+ *          while H5Z_class2_t matches the #H5Z_class_t structure used in the
+ *          1.8.x through 2.x.x versions of the library. H5Z_class3_t became
+ *          available in 2.3.0, but will not be made the default until 3.0.0.
  *
  *          H5Zregister() will automatically detect which structure type has
  *          been passed in, regardless of the mapping of the #H5Z_class_t macro.
@@ -372,6 +444,15 @@ extern "C" {
  *          exactly equal to the original data size (\c nbytes) before the
  *          filter was run in forward mode.
  *
+ *          If this \Emph{filter operation} callback function is registered with
+ *          an H5Z_class3_t whose feature flags include
+ *          #H5Z_FEAT_FILTER_THREADSAFE, then the library may execute it
+ *          concurrently from multiple threads. Internal threading is currently
+ *          only used if every filter in the pipeline sets
+ *          #H5Z_FEAT_FILTER_NO_H5_CALLS.
+ *
+ * \version 2.3.0 Function now accepts a pointer to H5Z_class3_t in addition
+ *                to H5Z_class2_t and H5Z_class1_t.
  * \version 1.8.6 Return type for the \Emph{can apply} callback function,
  *                \ref H5Z_can_apply_func_t, changed to \ref htri_t.
  * \version 1.8.5 Semantics of the \Emph{can apply} and \Emph{set local}
