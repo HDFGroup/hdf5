@@ -111,6 +111,12 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Removed API lock for memory management wrappers
+
+   The HDF5 library no longer acquires the global thread lock when entering
+   H5allocate_memory(), H5resize_memory(), and H5free_memory(). This allows
+   multiple threads to access these functions concurrently.
+
 ### Added new VFD feature flag
 
    Added a new Virtual File Driver (VFD) feature flag,
@@ -124,7 +130,8 @@ We would like to thank the many HDF5 community members who contributed to this r
    plugin supports. The currently supported flags are
    H5Z_FEAT_FILTER_THREADSAFE, which should be set when the filter callback is
    threadsafe, and H5Z_FEAT_FILTER_NO_H5_CALLS, which should be set when the
-   filter makes no HDF5 calls except for H5OPEN.
+   filter makes no HDF5 calls except for H5OPEN, H5allocate_memory(),
+   H5resize_memory(), and H5free_memory().
 
 ### Added support for internally concurrent multithreaded reads of chunked datasets
 
