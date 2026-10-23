@@ -513,6 +513,7 @@ include (${HDF_CONFIG_DIR}/HDFMacros.cmake)
 HDF_DIR_PATHS(${HDF5_PACKAGE_NAME})
 
 include (${HDF_CONFIG_DIR}/HDF5Macros.cmake)
+include (${HDF_RESOURCES_DIR}/HDF5PublicTargets.cmake)
 
 #-----------------------------------------------------------------------------
 # Targets built within this project are exported at Install time for use
@@ -1407,6 +1408,34 @@ if (EXISTS "${HDF5_SOURCE_DIR}/java" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/java")
       add_subdirectory (java)
     endif ()
   endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
+# Define stable, linkage-agnostic public target names (hdf5::hdf5 and
+# friends) as aliases onto the built targets.
+#
+# This must appear AFTER every library and tool add_subdirectory() call, so
+# that all of the concrete targets exist and HDF5_UTILS_TO_EXPORT has
+# collected the full set of tool executables. It must appear BEFORE
+# HDF5Examples is added, so that the examples can consume the public names.
+#
+# The same names are defined for an installed package by hdf5-config.cmake,
+# which calls the same function from the same module.
+#
+# When both linkages are built, the public names refer to the shared libraries.
+#-----------------------------------------------------------------------------
+h5_define_public_tools (TOOLS ${HDF5_UTILS_TO_EXPORT})
+if (H5PUB_ERROR)
+  message (FATAL_ERROR "${H5PUB_ERROR}")
+endif ()
+
+if (BUILD_SHARED_LIBS)
+  h5_define_public_targets (LINKAGE shared)
+elseif (BUILD_STATIC_LIBS)
+  h5_define_public_targets (LINKAGE static)
+endif ()
+if (H5PUB_ERROR)
+  message (FATAL_ERROR "${H5PUB_ERROR}")
 endif ()
 
 #-----------------------------------------------------------------------------
