@@ -5,11 +5,19 @@ on:
     paths:
       - .github/scripts/review-checklist.js
       - .github/scripts/review-checklist.test.js
+      - .github/scripts/mark-stale.js
+      - .github/scripts/draft-pr-policy.js
+      - .github/scripts/stale-label.js
+      - .github/scripts/stale-policy.test.js
   pull_request:
     branches: [develop]
     paths:
       - .github/scripts/review-checklist.js
       - .github/scripts/review-checklist.test.js
+      - .github/scripts/mark-stale.js
+      - .github/scripts/draft-pr-policy.js
+      - .github/scripts/stale-label.js
+      - .github/scripts/stale-policy.test.js
 
 permissions:
   contents: read
@@ -24,3 +32,4 @@ jobs:
           persist-credentials: false # Prevents tokens from being written to Git config files
 
       - run: node .github/scripts/review-checklist.test.js
+      - run: node .github/scripts/stale-policy.test.js
