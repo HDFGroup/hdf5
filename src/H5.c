@@ -150,6 +150,15 @@ H5_init_library(void)
     if (H5_INIT_GLOBAL || H5_TERM_GLOBAL)
         HGOTO_DONE(SUCCEED);
 
+#ifdef H5_HAVE_THREADS
+    /* Set up the per-thread API context and error stack before anything
+     * uses them.  The error stack depends on this, so a failure is returned
+     * without pushing an error here.
+     */
+    if (H5_UNLIKELY(H5TS_first_thread_init() < 0))
+        HGOTO_DONE(FAIL);
+#endif /* H5_HAVE_THREADS */
+
     /* Check library version */
     /* (Will abort() on failure) */
     H5_check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
@@ -224,14 +233,14 @@ H5_init_library(void)
      */
     if (!H5_dont_atexit_g) {
 
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_THREADS
         /* Clean up thread resources.
          *
          * This must be pushed before the library cleanup code so it's
          * executed in LIFO order (i.e., last).
          */
         (void)atexit(H5TS_term_package);
-#endif /* H5_HAVE_THREADSAFE_API */
+#endif /* H5_HAVE_THREADS */
 
         /* Normal library termination code */
         (void)atexit(H5_term_library);
@@ -400,9 +409,9 @@ H5_term_library(void)
             pending += DOWN(M_top);
             pending += DOWN(S_top);
             pending += DOWN(T_top);
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_THREADS
             pending += DOWN(TS_top);
-#endif    /* H5_HAVE_THREADSAFE_API */
+#endif    /* H5_HAVE_THREADS */
         } /* end if */
 
         /* Don't shut down the file code until objects in files are shut down */

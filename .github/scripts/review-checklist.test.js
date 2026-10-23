@@ -18,6 +18,7 @@ const {
   parseExcluded,
   serializeExcluded,
   withExcluded,
+  addExcluded,
   parseManuallyAdded,
   serializeManuallyAdded,
   parseAssigned,
@@ -1761,16 +1762,20 @@ test('stillEngagedAssignees: sticky pick missing from requested_reviewers with o
   assert.strictEqual(engaged.get('src'), 'jhendersonHDF');
 });
 
-test('stillEngagedAssignees: sticky pick missing from requested_reviewers with NO review at all also stays engaged', () => {
-  // Not yet reviewed at all is the common case (assigned, hasn't looked yet
-  // for some other reason) — same treatment as comment-only.
+test('stillEngagedAssignees: sticky pick missing from requested_reviewers with NO review at all is not engaged', () => {
+  // GitHub only drops a pending request when the reviewer submits a review,
+  // so an owner who is neither requested nor has reviewed was removed (by
+  // /remove-reviewer, by hand, or by the bot). Treating that as engaged kept
+  // a removed reviewer listed as pending and stopped the area from being
+  // refilled (PR #6741: jhendersonHDF stayed on java/CMake rows for days
+  // after an avalanche prune removed him).
   const area = makeArea('src', ['jhendersonHDF', 'mattjala'], 50);
   const engaged = stillEngagedAssignees([area], {
     assignedByArea: new Map([['src', 'jhendersonHDF']]),
     existingRequested: new Set(),
     allReviews: [],
   });
-  assert.strictEqual(engaged.get('src'), 'jhendersonHDF');
+  assert.strictEqual(engaged.size, 0);
 });
 
 test('stillEngagedAssignees: sticky pick still currently requested is not included (nothing to restore)', () => {
@@ -1898,6 +1903,136 @@ asyncTest('coordinateReviewers: additive-fill still fills an area with no sticky
 
   assert.strictEqual(github.calls.requestReviewers.length, 1);
   assert.strictEqual(confirmedRequested.size, 1);
+});
+
+// ----------------------------------------------------------------
+// coordinateReviewers — avalanche pruning must not strip an owner who is the
+// only requested owner of another touched area (PR #6741). removeRequestedReviewers
+// drops a reviewer from the whole PR: jhendersonHDF was the only reviewer for
+// java/CMake areas and also requested for .github next to hyoklee, the sticky
+// .github pick, so pruning the .github "avalanche" left java/CMake uncovered.
+// ----------------------------------------------------------------
+
+function make6741Args(overrides) {
+  return makeCoordinateBaseArgs({
+    prData: {
+      user: { login: 'brtnfld' },
+      draft: false,
+      requested_reviewers: [{ login: 'gheber' }, { login: 'hyoklee' }, { login: 'jhendersonHDF' }],
+    },
+    allCodeOwners: new Set(['jhendersonHDF', 'mattjala', 'gheber', 'brtnfld', 'hyoklee', 'lrknox', 'glennsong09']),
+    touchedAreas: [
+      makeArea('java', ['jhendersonHDF', 'mattjala'], 50),
+      makeArea('docs', ['brtnfld', 'gheber'], 20),
+      makeArea('release_docs', ['lrknox', 'hyoklee', 'glennsong09'], 5),
+      makeArea('.github', ['hyoklee', 'lrknox', 'jhendersonHDF', 'glennsong09'], 40),
+    ],
+    assignedReviewers: new Map([
+      ['java', 'jhendersonHDF'], ['docs', 'gheber'], ['release_docs', 'hyoklee'], ['.github', 'hyoklee'],
+    ]),
+    ...overrides,
+  });
+}
+
+asyncTest('coordinateReviewers: avalanche prune keeps an owner who is the only requested owner of another area (PR #6741)', async () => {
+  const github  = makeGithubMock();
+  const context = { eventName: 'pull_request_target', payload: { action: 'synchronize', sender: { type: 'User' } } };
+
+  const { confirmedRequested, assignedReviewers } = await coordinateReviewers(github, context, makeCore(), make6741Args());
+
+  assert.deepStrictEqual(github.calls.removeRequestedReviewers, [], 'Nobody is removed');
+  assert.deepStrictEqual(github.calls.requestReviewers, [], 'Nobody new is requested');
+  assert.ok(confirmedRequested.has('jhendersonHDF'), 'jhendersonHDF still covers java');
+  assert.ok(confirmedRequested.has('hyoklee'));
+  assert.strictEqual(assignedReviewers.get('.github'), 'hyoklee', 'The sticky .github pick is unchanged');
+});
+
+asyncTest('coordinateReviewers: avalanche prune still removes an extra owner needed for no other area', async () => {
+  const github  = makeGithubMock();
+  const context = { eventName: 'pull_request_target', payload: { action: 'synchronize', sender: { type: 'User' } } };
+  // Same PR, but glennsong09 (owns .github and release_docs) is the extra
+  // .github reviewer; release_docs is already covered by hyoklee.
+  const args = make6741Args({
+    prData: {
+      user: { login: 'brtnfld' },
+      draft: false,
+      requested_reviewers: [{ login: 'gheber' }, { login: 'hyoklee' }, { login: 'jhendersonHDF' }, { login: 'glennsong09' }],
+    },
+  });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.deepStrictEqual(github.calls.removeRequestedReviewers, ['glennsong09']);
+  assert.ok(!confirmedRequested.has('glennsong09'));
+  assert.ok(confirmedRequested.has('jhendersonHDF'));
+});
+
+asyncTest('coordinateReviewers: a sticky pick removed without reviewing is refilled, not shown as pending (PR #6741)', async () => {
+  // State after the faulty prune: jhendersonHDF is no longer requested and
+  // never reviewed, but is still the sticky java pick.
+  const github  = makeGithubMock();
+  const context = { eventName: 'pull_request_target', payload: { action: 'synchronize', sender: { type: 'User' } } };
+  const args = make6741Args({
+    prData: {
+      user: { login: 'brtnfld' },
+      draft: false,
+      requested_reviewers: [{ login: 'gheber' }, { login: 'hyoklee' }],
+    },
+    reviewerLoad: { jhendersonHDF: 1, mattjala: 2 },
+  });
+
+  const { confirmedRequested, assignedReviewers } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.deepStrictEqual(github.calls.requestReviewers, ['jhendersonHDF'], 'java gets a real review request again');
+  assert.ok(confirmedRequested.has('jhendersonHDF'));
+  assert.strictEqual(assignedReviewers.get('java'), 'jhendersonHDF');
+});
+
+asyncTest('coordinateReviewers: a sticky pick who only commented is still not refilled (PR #6645 unchanged)', async () => {
+  const github  = makeGithubMock();
+  const context = { eventName: 'pull_request_target', payload: { action: 'synchronize', sender: { type: 'User' } } };
+  const args = make6741Args({
+    prData: {
+      user: { login: 'brtnfld' },
+      draft: false,
+      requested_reviewers: [{ login: 'gheber' }, { login: 'hyoklee' }],
+    },
+    allReviews: [{ user: { login: 'jhendersonHDF' }, state: 'COMMENTED' }],
+  });
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.deepStrictEqual(github.calls.requestReviewers, []);
+  assert.ok(confirmedRequested.has('jhendersonHDF'), 'Shown as pending reviewer while mid-review');
+});
+
+test('resolveAreaPicks: a sticky pick that is not requested and never reviewed is not kept', () => {
+  const area = makeArea('fortran', ['alice', 'bob'], 50);
+  const { picks } = resolveAreaPicks([area], {
+    existingRequested: new Set(),
+    assignedByArea: new Map([['fortran', 'alice']]),
+    allReviews: [],
+    prAuthor: 'charlie',
+    reviewerLoad: { alice: 3, bob: 0 },
+    LINE_THRESHOLD: 300, AREA_THRESHOLDS: {}, PUBLIC_HEADER: /public\.h$/,
+  });
+  assert.strictEqual(picks.get('fortran'), 'bob', 'Falls through to the load-balanced pick');
+});
+
+// ----------------------------------------------------------------
+// addExcluded — /remove-reviewer persists its removals in the checklist comment
+// ----------------------------------------------------------------
+
+test('addExcluded: adds logins to an existing exclusion marker without duplicates', () => {
+  const body = `${MARKER}\n## Review Checklist\n${serializeExcluded(new Set(['alice']))}`;
+  const out  = addExcluded(body, ['bob', 'alice']);
+  assert.deepStrictEqual([...parseExcluded(out)].sort(), ['alice', 'bob']);
+  assert.ok(out.startsWith(`${MARKER}\n## Review Checklist\n`), 'Rest of the body is unchanged');
+});
+
+test('addExcluded: appends the marker when the body has none', () => {
+  const out = addExcluded(`${MARKER}\n## Review Checklist`, ['bob']);
+  assert.deepStrictEqual([...parseExcluded(out)], ['bob']);
 });
 
 // ----------------------------------------------------------------

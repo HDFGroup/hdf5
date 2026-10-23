@@ -93,7 +93,7 @@ static const H5L_class_t H5L_EXTERN_LINK_CLASS[1] = {{
  */
 static hid_t
 H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, const void *_udata,
-                     size_t H5_ATTR_UNUSED udata_size, hid_t lapl_id, hid_t H5_ATTR_UNUSED dxpl_id)
+                     size_t udata_size, hid_t lapl_id, hid_t H5_ATTR_UNUSED dxpl_id)
 {
     H5P_genplist_t    *plist;                              /* Property list pointer */
     H5G_loc_t          root_loc;                           /* Location of root group in external file */
@@ -121,6 +121,18 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
     /* Sanity checks */
     assert(p);
 
+    /* The udata holds a version/flags byte followed by two NULL-terminated
+     * strings (file name and object path).  The strings are located below with
+     * strlen(), so validate the buffer against udata_size first: it must have
+     * room for both strings and end on a NULL terminator.  A malformed link
+     * from a corrupted file would otherwise read past the udata buffer.  This
+     * matches the checks in H5Lunpack_elink_val().
+     */
+    if (udata_size <= 2)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, H5I_INVALID_HID, "external link data too small");
+    if (p[udata_size - 1] != '\0')
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, H5I_INVALID_HID, "external link data is not NULL-terminated");
+
     /* Check external link version & flags */
     if (((*p >> 4) & 0x0F) > H5L_EXT_VERSION)
         HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, H5I_INVALID_HID, "bad version number for external link");
@@ -131,7 +143,9 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
     /* Gather some information from the external link's user data */
     file_name = (const char *)p;
     fname_len = strlen(file_name);
-    obj_name  = (const char *)p + fname_len + 1;
+    if ((fname_len + 1) >= (udata_size - 1))
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, H5I_INVALID_HID, "external link data has no object path");
+    obj_name = (const char *)p + fname_len + 1;
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS, true)))
