@@ -218,6 +218,7 @@ static const char *FILENAME[] = {"dataset",              /* 0 */
 #define H5Z_FILTER_NON_THREADSAFE_LIE  320
 #define H5Z_FILTER_NON_THREADSAFE_LIE2 321
 #define H5Z_FILTER_REENTER_H5          322
+#define H5Z_FILTER_H5_ALLOCATE         323
 
 /* Flags for testing filters */
 #define DISABLE_FLETCHER32 0
@@ -395,6 +396,8 @@ static size_t filter_non_threadsafe(unsigned int flags, size_t cd_nelmts, const 
                                     size_t nbytes, size_t *buf_size, void **buf);
 static size_t filter_reenter_h5(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                                 size_t nbytes, size_t *buf_size, void **buf);
+static size_t filter_h5_allocate(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                                 size_t nbytes, size_t *buf_size, void **buf);
 
 static herr_t dsets_h5zregister_direct(const H5Z_class3_t *filter);
 static herr_t dsets_h5zunregister_direct(H5Z_filter_t id);
@@ -20793,6 +20796,82 @@ error:
 } /* end filter_reenter_h5() */
 
 /*-------------------------------------------------------------------------
+ * Function:    filter_h5_allocate
+ *
+ * Purpose:     Filter that uses H5allocate_memory(), H5resize_memory(),
+ *              and H5free_memory(). Does not change the data, only moves
+ *              it around.
+ *
+ * Return:      Success:        Data chunk size
+ *              Failure:        0
+ *-------------------------------------------------------------------------
+ */
+/* This message derives from H5Z */
+const H5Z_class3_t H5Z_H5_ALLOCATE[1] = {{
+    H5Z_CLASS_T_VERS_3,         /* H5Z_class_t version */
+    H5Z_FILTER_H5_ALLOCATE,      /* Filter id number */
+    1, 1,                       /* Encoding and decoding enabled */
+    "reenter_h5",               /* Filter name for debugging */
+    NULL,                       /* The "can apply" callback */
+    NULL,                       /* The "set local" callback */
+    filter_h5_allocate,         /* The actual filter function */
+    H5Z_FEAT_FILTER_THREADSAFE | H5Z_FEAT_FILTER_NO_H5_CALLS, /* This filter is thread-safe and does not re-enter the HDF5 API */
+}};
+
+static size_t
+filter_h5_allocate(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                  const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes,
+                  size_t *buf_size, void **buf)
+{
+    void *tmp_buf  = NULL;
+    void *tmp_buf2 = NULL;
+
+    /* Allocate new buffer, do not clear */
+    if (NULL == (tmp_buf = H5allocate_memory(nbytes, false)))
+        TEST_ERROR;
+
+    /* Move data to new buffer */
+    memcpy(tmp_buf, *buf, nbytes);
+
+    /* Assign *buf and free old buffer */
+    tmp_buf2 = *buf;
+    *buf = tmp_buf;
+    tmp_buf = NULL;
+    *buf_size = nbytes;
+    if (H5free_memory(tmp_buf2) < 0)
+        TEST_ERROR;
+    tmp_buf2 = NULL;
+
+    /* Resize buffer to one that is too big */
+    if (NULL == (tmp_buf = H5resize_memory(*buf, nbytes + 1)))
+        TEST_ERROR;
+    *buf = tmp_buf;
+    tmp_buf = NULL;
+    *buf_size = nbytes + 1;
+
+    /* Allocate new buffer, clear */
+    if (NULL == (tmp_buf = H5allocate_memory(nbytes, true)))
+        TEST_ERROR;
+
+    /* Move data to new buffer */
+    memcpy(tmp_buf, *buf, nbytes);
+
+    /* Assign *buf and free old buffer */
+    tmp_buf2 = *buf;
+    *buf = tmp_buf;
+    tmp_buf = NULL;
+    *buf_size = nbytes;
+    if (H5free_memory(tmp_buf2) < 0)
+        TEST_ERROR;
+    tmp_buf2 = NULL;
+
+    return nbytes;
+
+error:
+    return 0;
+} /* end filter_h5_allocate() */
+
+/*-------------------------------------------------------------------------
  * Function:    test_threaded_filters
  *
  * Purpose:     Tests that filters are executed concurrently when
@@ -20979,6 +21058,33 @@ test_threaded_filters(void)
 
     /* Create the non threadsafe lie 2 dataset */
     if ((dataset = H5Dcreate2(file, "dset_non_threadsafe_lie2", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+    dataset = H5I_INVALID_HID;
+
+    /* Create new DCPL */
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* Set chunk dimensions */
+    cdims[0] = THREADED_CHUNKS_CDIM1;
+    cdims[1] = THREADED_CHUNKS_CDIM2;
+    if (H5Pset_chunk(dcpl, 2, cdims) < 0)
+        TEST_ERROR;
+
+    /* Register and apply "non threadsafe lie" filter */
+    if (H5Zregister(H5Z_H5_ALLOCATE) < 0)
+        TEST_ERROR;
+    if (H5Pset_filter(dcpl, H5Z_FILTER_H5_ALLOCATE, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
+        TEST_ERROR;
+
+    /* Create the non threadsafe lie dataset */
+    if ((dataset = H5Dcreate2(file, "dset_h5_allocate", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl,
                               H5P_DEFAULT)) < 0)
         TEST_ERROR;
     if (H5Dclose(dataset) < 0)
@@ -21250,6 +21356,48 @@ test_threaded_filters(void)
 
             /* Open dataset */
             if ((dataset = H5Dopen2(file, "dset_non_threadsafe_lie2", dapl)) < 0)
+                TEST_ERROR;
+
+            /* Write the data to the dataset */
+            non_threadsafe_threads_in_flight = 0;
+            if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
+                         points_data) < 0)
+                TEST_ERROR;
+
+            /* Read the dataset back */
+            non_threadsafe_threads_in_flight = 0;
+            if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
+                        check_data) < 0)
+                TEST_ERROR;
+
+            /* Check that the values read are the same as the values written */
+            for (i = 0; i < DSET_DIM1; i++) {
+                for (j = 0; j < DSET_DIM2; j++) {
+                    if (points[i][j] != check[i][j]) {
+                        H5_FAILED();
+                        printf("    Read different values than written.\n");
+                        printf("    At index %d,%d\n", i, j);
+                        goto error;
+                    }
+                }
+            }
+
+            /* Close dataset */
+            if (H5Dclose(dataset) < 0)
+                TEST_ERROR;
+            dataset = H5I_INVALID_HID;
+
+            /*
+             * "H5allocate" dataset
+             */
+
+            /* Initialize the write buffer */
+            for (i = 0; i < DSET_DIM1; i++)
+                for (j = 0; j < DSET_DIM2; j++)
+                    points[i][j] = n++;
+
+            /* Open dataset */
+            if ((dataset = H5Dopen2(file, "dset_h5_allocate", dapl)) < 0)
                 TEST_ERROR;
 
             /* Write the data to the dataset */
