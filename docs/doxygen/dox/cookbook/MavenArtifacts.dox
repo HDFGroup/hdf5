@@ -15,7 +15,7 @@ platform and Java version.
 
 \subsection subsec_maven_artifacts Maven Artifact Selection
 
-HDF5 provides three main Maven artifacts:
+HDF5 provides Java API artifacts and platform-specific native bundles:
 
 <table>
 <tr><th>Artifact ID</th><th>Java Version</th><th>Description</th><th>Status</th></tr>
@@ -32,12 +32,28 @@ HDF5 provides three main Maven artifacts:
   <td>Production-ready</td>
 </tr>
 <tr>
+  <td><strong>hdf5-native</strong></td>
+  <td>n/a (native)</td>
+  <td>Platform native libhdf5 bundle, with the zlib and libaec (libsz + libaec) libraries used by its built-in deflate/GZIP and SZIP filters</td>
+  <td>Required transitive dependency of hdf5-java-jni; optional for hdf5-java-ffm</td>
+</tr>
+<tr>
+  <td><strong>hdf5-jni-native</strong></td>
+  <td>n/a (native)</td>
+  <td>Platform JNI bridge bundle for hdf5-java-jni</td>
+  <td>Required transitive dependency of hdf5-java-jni</td>
+</tr>
+<tr>
   <td><strong>hdf5-java-examples</strong></td>
   <td>Java 8+</td>
   <td>example programs</td>
   <td>Platform-independent</td>
 </tr>
 </table>
+
+The HDF5 deflate filter is exposed through APIs such as <code>H5Pset_deflate</code> and through tools as <code>GZIP=level</code>. It is built into libhdf5 when zlib support is enabled; <code>hdf5-native</code> also ships the runtime zlib library needed by that built-in filter when libhdf5 links zlib dynamically. Call <code>H5.loadH5Lib()</code> once at startup; bundled zlib is loaded automatically before libhdf5. With <code>hdf5-native</code> on the classpath, no <code>HDF5_PLUGIN_PATH</code> or external HDF5 installation is required for gzip/chunked datasets.
+
+The HDF5 SZIP filter is exposed through <code>H5Pset_szip</code> and uses the libaec szip-compatible API. It is built into libhdf5 when SZIP support is enabled; <code>hdf5-native</code> also ships the runtime libaec/libsz shared libraries needed by that built-in filter when libhdf5 links libaec dynamically.
 
 <em>Note: FFM will become the default implementation in the next major HDF5 release.</em>
 

@@ -11,7 +11,7 @@
     <packaging>jar</packaging>
 
     <name>HDF5 Java Bindings</name>
-    <description>Java bindings for the HDF5 scientific data format library</description>
+    <description>Java bindings for the HDF5 scientific data format library. Add org.hdfgroup:hdf5-native (platform classifier) for a bundled libhdf5 loaded from the classpath, or use a system HDF5 install found by the OS loader.</description>
     <url>https://github.com/HDFGroup/hdf5</url>
 
     <licenses>
@@ -183,6 +183,8 @@
                 <classifier>macos-aarch64</classifier>
             </properties>
         </profile>
+
+@HDF5_MAVEN_NATIVE_PROFILES@
 
         <!-- Development snapshot profile -->
         <profile>

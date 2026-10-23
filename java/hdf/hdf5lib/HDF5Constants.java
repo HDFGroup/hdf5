@@ -37,7 +37,10 @@ import org.hdfgroup.javahdf5.*;
  */
 public class HDF5Constants {
 
-    static { System.err.println("OpenIDs = " + H5.getOpenIDCount()); }
+    // Must open the library (H5open) before reading H5P_CLS_* / H5*_g globals into
+    // static finals; otherwise values stay H5I_INVALID_HID and H5Pcreate fails.
+    // H5.loadH5Lib() also loads bundled native deps when present.
+    static { H5.loadH5Lib(); }
 
     /** Special parameters for szip compression */
     public static final int H5_SZIP_MAX_PIXELS_PER_BLOCK = H5_SZIP_MAX_PIXELS_PER_BLOCK();

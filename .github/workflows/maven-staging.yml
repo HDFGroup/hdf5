@@ -6,12 +6,18 @@ on:
     branches: [ develop, main ]
     paths:
       - 'java/src/hdf/hdf5lib/**'
+      - 'java/hdf/hdf5lib/**'
+      - 'java/src-jni/**'
+      - 'java/cmake/**'
+      - 'java/lib/**'
       - 'HDF5Examples/JAVA/**'
       - '.github/workflows/maven-*.yml'
       - '.github/workflows/java-examples-*.yml'
       - 'CMakePresets.json'
       - '**/CMakeLists.txt'
       - 'java/src/hdf/hdf5lib/pom.xml.in'
+      - 'java/hdf/hdf5lib/pom.xml.in'
+      - 'java/src-jni/hdf/hdf5lib/pom.xml.in'
       - 'HDF5Examples/JAVA/pom-examples.xml.in'
   workflow_call:
     inputs:
@@ -111,7 +117,7 @@ jobs:
           # For pull requests, check changed files
           if [ -n "$BASE_REF" ]; then
             git fetch origin "$BASE_REF"
-            MAVEN_FILES=$(git diff --name-only "origin/$BASE_REF...HEAD" | grep -E "(java/src/hdf/hdf5lib/|HDF5Examples/JAVA/|maven|pom\.xml|CMakePresets\.json)" || true)
+            MAVEN_FILES=$(git diff --name-only "origin/$BASE_REF...HEAD" | grep -E "(java/src/hdf/hdf5lib/|java/hdf/hdf5lib/|java/src-jni/|java/cmake/|java/lib/|HDF5Examples/JAVA/|maven|pom\.xml|CMakePresets\.json)" || true)
           else
             # Fallback: assume changes if base_ref not available
             MAVEN_FILES="true"
@@ -152,6 +158,7 @@ jobs:
         env:
           JAVA_IMPL: ${{ inputs.java_implementation || 'auto' }}
           PLATFORMS: ${{ inputs.platforms || 'all-platforms' }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
 
           # Determine which implementations to build
@@ -225,6 +232,12 @@ jobs:
               MATRIX+="{\"platform\":\"$PLATFORM_NAME\",\"os\":\"$PLATFORM_OS\",\"compiler\":\"$PLATFORM_COMPILER\",\"arch\":\"$PLATFORM_ARCH\",\"implementation\":\"$impl\",\"artifact-suffix\":\"$ARTIFACT_SUFFIX\"}"
             done
           done
+
+          # Pull requests build the default (JNI) presets only; add one Linux FFM build so the
+          # FFM native bundles and the patched jextract symbol lookup are tested before a release
+          if [[ "$EVENT_NAME" == "pull_request" && "$JAVA_IMPL" == "auto" ]]; then
+            MATRIX+=",{\"platform\":\"Linux\",\"os\":\"ubuntu-latest\",\"compiler\":\"GNUC\",\"arch\":\"x86_64\",\"implementation\":\"ffm\",\"artifact-suffix\":\"linux-x86_64-ffm\"}"
+          fi
           MATRIX+="]}"
 
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
@@ -395,9 +408,11 @@ jobs:
         env:
           RUNNER_WORKSPACE: ${{ runner.workspace }}
           PRESET: ${{ steps.set-preset.outputs.preset }}
+          ARTIFACTS_DIR: ${{ runner.workspace }}/maven-artifacts
+          JAVA_IMPL: ${{ matrix.implementation }}
         run: |
           echo "Collecting Maven artifacts for testing..."
-          mkdir -p "$RUNNER_WORKSPACE/maven-artifacts"
+          mkdir -p "$ARTIFACTS_DIR"
 
           BUILD_ROOT="$RUNNER_WORKSPACE/build/$PRESET"
           echo "Looking for Maven artifacts in build root: $BUILD_ROOT"
@@ -457,14 +472,14 @@ jobs:
           find "$BUILD_DIR" -name "*slf4j*.jar" -type f
 
           # Copy JAR files (excluding test and H5Ex_ example JARs)
-          find "$BUILD_DIR" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" -exec cp {} "$RUNNER_WORKSPACE/maven-artifacts/" \;
+          find "$BUILD_DIR" -name "*.jar" -not -name "*test*" -not -name "*H5Ex_*" -exec cp {} "$ARTIFACTS_DIR/" \;
 
           # Also look for Maven dependencies in common locations
           echo "Looking for Maven dependencies in additional locations..."
 
           # Check if there's a Maven repository in the build area
           if [ -d "$BUILD_ROOT" ]; then
-            find "$BUILD_ROOT" -name "*slf4j*.jar" -type f -exec cp {} "$RUNNER_WORKSPACE/maven-artifacts/" \;
+            find "$BUILD_ROOT" -name "*slf4j*.jar" -type f -exec cp {} "$ARTIFACTS_DIR/" \;
           fi
 
           # Check common Maven local repository locations
@@ -480,29 +495,53 @@ jobs:
               find "$repo_path" -name "slf4j-api*.jar" -o -name "slf4j-simple*.jar" 2>/dev/null | head -2 | while read jar_file; do
                 if [ -f "$jar_file" ]; then
                   echo "Found dependency: $jar_file"
-                  cp "$jar_file" "$RUNNER_WORKSPACE/maven-artifacts/"
+                  cp "$jar_file" "$ARTIFACTS_DIR/"
                 fi
               done
             fi
           done
 
-          # Copy POM files
-          find "$BUILD_DIR" -name "pom.xml" -exec cp {} "$RUNNER_WORKSPACE/maven-artifacts/" \;
+          # Copy POM files from the Java tree for this matrix implementation only. A broad
+          # -name find plus flat cp would clobber: CMake emits pom.xml under either
+          # java/hdf/hdf5lib (FFM) or java/src-jni/hdf/hdf5lib (JNI), same basenames.
+          case "$JAVA_IMPL" in
+            ffm)
+              find "$BUILD_ROOT" \( \
+                -path '*/java/hdf/hdf5lib/pom.xml' -o \
+                -path '*/java/hdf/hdf5lib/pom-hdf5-native.xml' -o \
+                -path '*/java/hdf/hdf5lib/pom-hdf5-jni-native.xml' \
+              \) -exec cp {} "$ARTIFACTS_DIR/" \;
+              ;;
+            jni|auto|*)
+              find "$BUILD_ROOT" \( \
+                -path '*/java/src-jni/hdf/hdf5lib/pom.xml' -o \
+                -path '*/java/src-jni/hdf/hdf5lib/pom-hdf5-native.xml' -o \
+                -path '*/java/src-jni/hdf/hdf5lib/pom-hdf5-jni-native.xml' \
+              \) -exec cp {} "$ARTIFACTS_DIR/" \;
+              ;;
+          esac
 
           # List collected artifacts
           echo "Collected Maven artifacts:"
-          ls -la "$RUNNER_WORKSPACE/maven-artifacts/"
+          ls -la "$ARTIFACTS_DIR/"
 
       - name: Validate artifacts
         id: artifacts-check
         shell: bash
         env:
-          RUNNER_WORKSPACE: ${{ runner.workspace }}
+          ARTIFACT_DIR: ${{ runner.workspace }}/maven-artifacts
         run: |
-          ARTIFACT_COUNT=$(find "$RUNNER_WORKSPACE/maven-artifacts" -name "*.jar" | wc -l)
-          POM_COUNT=$(find "$RUNNER_WORKSPACE/maven-artifacts" -name "pom.xml" | wc -l)
+          ARTIFACT_COUNT=$(find "$ARTIFACT_DIR" -name "*.jar" | wc -l | awk '{print $1}')
+          POM_COUNT=$(find "$ARTIFACT_DIR" \( -name "pom.xml" -o -name "pom-hdf5-native.xml" -o -name "pom-hdf5-jni-native.xml" \) | wc -l | awk '{print $1}')
+          MAIN_POM_COUNT=$(find "$ARTIFACT_DIR" -name "pom.xml" | wc -l | awk '{print $1}')
 
-          echo "Found $ARTIFACT_COUNT JAR files and $POM_COUNT POM files"
+          echo "Found $ARTIFACT_COUNT JAR files and $POM_COUNT POM files (pom.xml count: $MAIN_POM_COUNT)"
+
+          if [ "$MAIN_POM_COUNT" -ne 1 ]; then
+            echo "❌ Expected exactly one pom.xml in maven-artifacts (flat layout); found $MAIN_POM_COUNT"
+            find "$ARTIFACT_DIR" -name "pom.xml" -print || true
+            exit 1
+          fi
 
           if [ $ARTIFACT_COUNT -gt 0 ] && [ $POM_COUNT -gt 0 ]; then
             echo "created=true" >> $GITHUB_OUTPUT
@@ -528,12 +567,11 @@ jobs:
           VERIFICATION_FAILED=false
           IMPL="$MATRIX_IMPLEMENTATION"
 
-          # Find the main HDF5 JAR (not slf4j dependencies)
-          HDF5_JAR=$(find "$ARTIFACT_DIR" -name "*hdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" ! -name "*slf4j*" | head -1)
+          # Main Java API JAR (exclude native bundles hdf5-native-*, hdf5-jni-native-*)
+          HDF5_JAR=$(find "$ARTIFACT_DIR" -name "jarhdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
 
           if [ -z "$HDF5_JAR" ]; then
-            # Try alternative naming (jarhdf5)
-            HDF5_JAR=$(find "$ARTIFACT_DIR" -name "jarhdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -1)
+            HDF5_JAR=$(find "$ARTIFACT_DIR" -name "*hdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" ! -name "*slf4j*" ! -name "hdf5-native-*" ! -name "hdf5-jni-native-*" | head -1)
           fi
 
           if [ -z "$HDF5_JAR" ]; then
@@ -619,6 +657,26 @@ jobs:
           TOTAL_FILES=$(jar tf "$HDF5_JAR" | wc -l)
           echo "✅ Total files in JAR: $TOTAL_FILES"
 
+          # The Maven presets link zlib and libaec as shared libraries, so hdf5-native carries them
+          NATIVE_JAR=$(find "$ARTIFACT_DIR" -name "hdf5-native-*.jar" | head -1)
+          if [ -z "$NATIVE_JAR" ]; then
+            echo "::error::Could not find hdf5-native bundle"
+            VERIFICATION_FAILED=true
+          else
+            NATIVE_LIST=$(jar tf "$NATIVE_JAR")
+            for lib in 'libhdf5\.so|libhdf5\.dylib|hdf5\.dll' \
+                       'libz\.so|libz\.dylib|z\.dll|zlib\.dll|zlib1\.dll' \
+                       'libaec\.so|libaec\.dylib|aec\.dll' \
+                       'libsz\.so|libsz\.dylib|sz\.dll|szip\.dll'; do
+              if grep -Eq "^natives/hdf5/[^/]+/(${lib})$" <<< "$NATIVE_LIST"; then
+                echo "✅ hdf5-native contains one of: ${lib//\\/}"
+              else
+                echo "::error::hdf5-native is missing one of ${lib//\\/} under natives/hdf5/<platform>/"
+                VERIFICATION_FAILED=true
+              fi
+            done
+          fi
+
           echo "::endgroup::"
 
           if [ "$VERIFICATION_FAILED" = true ]; then
@@ -650,6 +708,12 @@ jobs:
           else
             echo "Validation script not found - skipping validation"
           fi
+
+      - name: Load native libraries from the Maven JARs
+        shell: bash
+        env:
+          ARTIFACT_DIR: ${{ runner.workspace }}/maven-artifacts
+        run: .github/scripts/test-native-bundles.sh "$ARTIFACT_DIR"
 
       - name: Install HDF5 binaries for testing
         shell: bash
@@ -869,8 +933,11 @@ jobs:
           MAVEN_ARTIFACTS_DIR="$(realpath ../../maven-artifacts/${MATRIX_PLATFORM})"
           echo "Maven artifacts directory (${MATRIX_PLATFORM}): $MAVEN_ARTIFACTS_DIR"
 
-          # Find HDF5 JAR files (not dependencies like slf4j) - use platform-specific artifacts
-          HDF5_JAR=$(find "$MAVEN_ARTIFACTS_DIR" -name "*hdf5*.jar" -o -name "jarhdf5*.jar" 2>/dev/null | head -1)
+          # Prefer the Java API JAR (jarhdf5). Exclude native bundles (hdf5-*-native-*).
+          HDF5_JAR=$(find "$MAVEN_ARTIFACTS_DIR" -name "jarhdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" 2>/dev/null | head -1)
+          if [ -z "$HDF5_JAR" ]; then
+            HDF5_JAR=$(find "$MAVEN_ARTIFACTS_DIR" -name "*hdf5*.jar" ! -name "*sources*" ! -name "*javadoc*" ! -name "*slf4j*" ! -name "hdf5-native-*" ! -name "hdf5-jni-native-*" 2>/dev/null | head -1)
+          fi
           if [ -z "$HDF5_JAR" ]; then
             echo "❌ No HDF5 JAR files found for testing"
             echo "Available JAR files:"
@@ -1082,10 +1149,17 @@ jobs:
           $MAVEN_ARTIFACTS_DIR = Resolve-Path "../../maven-artifacts/$($env:MATRIX_PLATFORM)"
           Write-Host "Maven artifacts directory (Windows): $MAVEN_ARTIFACTS_DIR"
 
-          # Find HDF5 JAR files (not dependencies like slf4j)
-          $HDF5_JAR = Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "*hdf5*.jar" -Recurse | Select-Object -First 1
+          # Prefer the Java API JAR (jarhdf5). Exclude native bundles (hdf5-*-native-*).
+          $HDF5_JAR = Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "jarhdf5*.jar" -Recurse |
+            Where-Object { $_.Name -notmatch 'sources|javadoc' } |
+            Select-Object -First 1
           if (-not $HDF5_JAR) {
-            $HDF5_JAR = Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "jarhdf5*.jar" -Recurse | Select-Object -First 1
+            $HDF5_JAR = Get-ChildItem -Path $MAVEN_ARTIFACTS_DIR -Filter "*hdf5*.jar" -Recurse |
+              Where-Object {
+                $_.Name -notmatch 'sources|javadoc|slf4j' -and
+                $_.Name -notmatch '^hdf5-(native|jni-native)-'
+              } |
+              Select-Object -First 1
           }
 
           if (-not $HDF5_JAR) {
