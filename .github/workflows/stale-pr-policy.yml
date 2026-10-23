@@ -13,7 +13,8 @@ on:
   schedule:
     - cron: "0 6 * * *"
   issue_comment:
-    types: [created]
+    # edited: checking the keepalive box edits the bot's comment
+    types: [created, edited]
 
 permissions:
   contents: read
@@ -43,11 +44,14 @@ jobs:
     # (see draft-pr-policy.js), so checking for it straight from the webhook
     # payload tells us this is a draft PR worth reacting to without spending
     # an API call or a runner on the common case (a comment on some other PR).
+    # The sender, not the comment author, is checked: a person checking the
+    # box edits a comment the bot wrote, while bots editing their own
+    # comments (the review checklist) are skipped.
     if: >-
       github.repository_owner == 'HDFGroup' &&
       (github.event_name != 'issue_comment' ||
        (github.event.issue.pull_request != null &&
-        github.event.comment.user.type != 'Bot' &&
+        github.event.sender.type != 'Bot' &&
         contains(github.event.issue.labels.*.name, 'draft-stale')))
     runs-on: ubuntu-latest
     permissions:

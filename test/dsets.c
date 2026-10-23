@@ -2841,19 +2841,26 @@ test_get_filter_info(void)
 #endif
 
 #ifdef H5_HAVE_FILTER_SZIP
-    if (H5Zget_filter_info(H5Z_FILTER_SZIP, &flags) < 0)
-        TEST_ERROR;
+    {
+        H5Z_class3_t *szip_cls;
 
-    if (H5Z_SZIP->encoder_present) {
-        if (((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) ||
-            ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
+        if (H5Zget_filter_info(H5Z_FILTER_SZIP, &flags) < 0)
             TEST_ERROR;
-    } /* end if */
-    else {
-        if (((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) != 0) ||
-            ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
+
+        if (H5Z_find(false, H5Z_FILTER_SZIP, &szip_cls) < 0)
             TEST_ERROR;
-    }  /* end else */
+
+        if (szip_cls->encoder_present) {
+            if (((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) ||
+                ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
+                TEST_ERROR;
+        } /* end if */
+        else {
+            if (((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) != 0) ||
+                ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
+                TEST_ERROR;
+        } /* end else */
+    }
 #endif /* H5_HAVE_FILTER_SZIP */
 
     /* Verify that get_filter_info throws an error when given a bad filter */
@@ -3440,7 +3447,7 @@ test_missing_filter(hid_t file)
     } /* end if */
 #ifdef H5_HAVE_FILTER_DEFLATE
     /* Register deflate filter (use internal function to avoid range checks) */
-    if (H5Z_register(H5Z_DEFLATE) < 0) {
+    if (H5Z__deflate_register() < 0) {
         H5_FAILED();
         printf("    Line %d: Can't unregister deflate filter\n", __LINE__);
         goto error;
@@ -6365,6 +6372,230 @@ error:
 } /* end test_scaleoffset_float_fullprec() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_scaleoffset_int_fullprec
+ *
+ * Purpose:     Tests that scale-offset int data spanning the full range of the
+ *              datatype (so the filter must store it at full precision) can
+ *              be written, flushed to disk, and read back correctly.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_scaleoffset_int_fullprec(hid_t fapl)
+{
+    char          filename[FILENAME_BUF_SIZE];
+    hid_t         file          = H5I_INVALID_HID;
+    hid_t         datatype      = H5I_INVALID_HID;
+    hid_t         space         = H5I_INVALID_HID;
+    hid_t         dc            = H5I_INVALID_HID;
+    hid_t         dataset       = H5I_INVALID_HID;
+    const hsize_t size[1]       = {8};
+    const hsize_t chunk_size[1] = {8};
+    /* Include both the minimum and maximum values of the type so the data
+     * spans its full range and must be stored at full precision.
+     */
+    int    orig_data[8] = {INT_MIN, INT_MAX, 0, -1, 1, 12345, -54321, 100};
+    int    new_data[8];
+    size_t i;
+
+    TESTING("    scaleoffset int full-precision round-trip");
+
+    h5_fixname(FILENAME[37], fapl, filename, sizeof filename);
+
+    if ((datatype = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        goto error;
+
+    if ((space = H5Screate_simple(1, size, NULL)) < 0)
+        goto error;
+
+    if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+    if (H5Pset_chunk(dc, 1, chunk_size) < 0)
+        goto error;
+    if (H5Pset_scaleoffset(dc, H5Z_SO_INT, H5Z_SO_INT_MINBITS_DEFAULT) < 0)
+        goto error;
+
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        goto error;
+    if ((dataset = H5Dcreate2(file, DSET_SCALEOFFSET_INT_FULLPREC_NAME, datatype, space, H5P_DEFAULT, dc,
+                              H5P_DEFAULT)) < 0)
+        goto error;
+    if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig_data) < 0)
+        goto error;
+
+    /* Flush the compressed chunk to disk */
+    if (H5Dclose(dataset) < 0)
+        goto error;
+    if (H5Fclose(file) < 0)
+        goto error;
+
+    /* Reopen the file and read the data back.  This forces the filter's
+     * decompression path to run against the on-disk chunk.
+     */
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        goto error;
+    if ((dataset = H5Dopen2(file, DSET_SCALEOFFSET_INT_FULLPREC_NAME, H5P_DEFAULT)) < 0)
+        goto error;
+    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, new_data) < 0)
+        goto error;
+
+    /* Verify the data round-tripped */
+    for (i = 0; i < (size_t)size[0]; i++) {
+        if (new_data[i] != orig_data[i]) {
+            H5_FAILED();
+            printf("    Read different values than written.\n");
+            printf("    At index %lu: read %d, expected %d\n", (unsigned long)i, new_data[i], orig_data[i]);
+            goto error;
+        }
+    }
+
+    if (H5Dclose(dataset) < 0)
+        goto error;
+    if (H5Fclose(file) < 0)
+        goto error;
+    if (H5Tclose(datatype) < 0)
+        goto error;
+    if (H5Pclose(dc) < 0)
+        goto error;
+    if (H5Sclose(space) < 0)
+        goto error;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dataset);
+        H5Tclose(datatype);
+        H5Pclose(dc);
+        H5Sclose(space);
+        H5Fclose(file);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_scaleoffset_int_fullprec() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_scaleoffset_float_fullprec
+ *
+ * Purpose:     Tests that scale-offset float data whose scaled span exceeds the full
+ *              range of the datatype (so the filter must store it at full
+ *              precision) can be written, flushed to disk, and read back
+ *              correctly.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_scaleoffset_float_fullprec(hid_t fapl)
+{
+    char          filename[FILENAME_BUF_SIZE];
+    hid_t         file          = H5I_INVALID_HID;
+    hid_t         datatype      = H5I_INVALID_HID;
+    hid_t         space         = H5I_INVALID_HID;
+    hid_t         dc            = H5I_INVALID_HID;
+    hid_t         dataset       = H5I_INVALID_HID;
+    const hsize_t size[1]       = {8};
+    const hsize_t chunk_size[1] = {8};
+    /* Include very large positive and negative magnitudes so that, after the
+     * decimal scaling factor is applied, the span exceeds the range of the
+     * backing integer type and the filter must store values at full precision.
+     */
+    float  orig_data[8] = {-1.0e30F, 1.0e30F, 0.0F, -1.0F, 1.0F, 12345.0F, -54321.0F, 100.0F};
+    float  new_data[8];
+    size_t i;
+
+    TESTING("    scaleoffset float full-precision round-trip");
+
+    h5_fixname(FILENAME[38], fapl, filename, sizeof filename);
+
+    if ((datatype = H5Tcopy(H5T_NATIVE_FLOAT)) < 0)
+        goto error;
+
+    if ((space = H5Screate_simple(1, size, NULL)) < 0)
+        goto error;
+
+    if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+    if (H5Pset_chunk(dc, 1, chunk_size) < 0)
+        goto error;
+
+    if (H5Pset_fill_value(dc, datatype, NULL) < 0)
+        goto error;
+    if (H5Pset_scaleoffset(dc, H5Z_SO_FLOAT_DSCALE, 3) < 0)
+        goto error;
+
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        goto error;
+    if ((dataset = H5Dcreate2(file, DSET_SCALEOFFSET_FLOAT_FULLPREC_NAME, datatype, space, H5P_DEFAULT, dc,
+                              H5P_DEFAULT)) < 0)
+        goto error;
+    if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig_data) < 0)
+        goto error;
+
+    /* Flush the compressed chunk to disk */
+    if (H5Dclose(dataset) < 0)
+        goto error;
+    if (H5Fclose(file) < 0)
+        goto error;
+
+    /* Reopen and read back, forcing the filter's decompression path to run */
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        goto error;
+    if ((dataset = H5Dopen2(file, DSET_SCALEOFFSET_FLOAT_FULLPREC_NAME, H5P_DEFAULT)) < 0)
+        goto error;
+    if (H5Dread(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, new_data) < 0)
+        goto error;
+
+    /* Verify that data round-trips */
+    for (i = 0; i < (size_t)size[0]; i++) {
+        if (!H5_FLT_ABS_EQUAL(new_data[i], orig_data[i])) {
+            H5_FAILED();
+            printf("    Read different values than written.\n");
+            printf("    At index %lu: read %g, expected %g\n", (unsigned long)i, (double)new_data[i],
+                   (double)orig_data[i]);
+            goto error;
+        }
+    }
+
+    if (H5Dclose(dataset) < 0)
+        goto error;
+    if (H5Fclose(file) < 0)
+        goto error;
+    if (H5Tclose(datatype) < 0)
+        goto error;
+    if (H5Pclose(dc) < 0)
+        goto error;
+    if (H5Sclose(space) < 0)
+        goto error;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dataset);
+        H5Tclose(datatype);
+        H5Pclose(dc);
+        H5Sclose(space);
+        H5Fclose(file);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_scaleoffset_float_fullprec() */
+
+/*-------------------------------------------------------------------------
  * Function:    test_multiopen
  *
  * Purpose:     Tests that a bug no longer exists.  If a dataset is opened
@@ -8349,6 +8580,79 @@ error:
 } /* end test_filter_delete() */
 
 /*-------------------------------------------------------------------------
+ * Function: test_modify_filter_absent
+ *
+ * Purpose: Tests that H5Pmodify_filter fails for a filter that is not in
+ *          the pipeline, including when the pipeline is full.
+ *
+ * Return: Success: 0
+ *  Failure: -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_modify_filter_absent(void)
+{
+    hid_t    dcpl = H5I_INVALID_HID; /* dataset creation property list ID */
+    unsigned cd_values[8];           /* filter client data values */
+    herr_t   ret;                    /* generic return value */
+    int      i;
+
+    TESTING("H5Pmodify_filter rejects a filter not in the pipeline");
+
+    for (i = 0; i < 8; i++)
+        cd_values[i] = 0xAAAAAAAAu;
+
+    /* Shuffle is not in a pipeline containing only fletcher32 */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_fletcher32(dcpl) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pmodify_filter(dcpl, H5Z_FILTER_SHUFFLE, 0, (size_t)1, cd_values);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    if (H5Pget_nfilters(dcpl) != 1)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    /* Fill the pipeline to H5Z_MAX_NFILTERS so nused == nalloc, and use
+     * cd_nelmts > H5Z_COMMON_CD_VALUES so a stray write would also leave
+     * behind a heap allocation */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    for (i = 0; i < H5Z_MAX_NFILTERS; i++)
+        if (H5Pset_filter(dcpl, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0, NULL) < 0)
+            TEST_ERROR;
+    if (H5Pget_nfilters(dcpl) != H5Z_MAX_NFILTERS)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pmodify_filter(dcpl, H5Z_FILTER_FLETCHER32, 0, (size_t)8, cd_values);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_modify_filter_absent() */
+
+/*-------------------------------------------------------------------------
  * Function: auxread_fdata
  *
  * Purpose: reads a dataset "NAME" from FID
@@ -9938,6 +10242,416 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_sos_roundtrip_dset(hid_t fid, const char *dset_name, int rank, const hsize_t *dims,
+                        const hsize_t *maxdims, const hsize_t *chunk, H5D_chunk_index_t expected_idx)
+{
+    hid_t             sid  = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t             did  = H5I_INVALID_HID; /* Dataset ID */
+    hid_t             dcpl = H5I_INVALID_HID; /* Dataset creation property list ID */
+    int              *wbuf = NULL;            /* Write buffer */
+    int              *rbuf = NULL;            /* Read buffer */
+    H5D_chunk_index_t idx_type;               /* Actual chunk index type */
+    hsize_t           nelmts = 1;             /* Number of elements in the dataset */
+    size_t            u;                      /* Local index variable */
+
+    /* Compute the number of elements and fill the write buffer */
+    for (u = 0; u < (size_t)rank; u++)
+        nelmts *= dims[u];
+    if (NULL == (wbuf = malloc((size_t)nelmts * sizeof(int))))
+        TEST_ERROR;
+    if (NULL == (rbuf = malloc((size_t)nelmts * sizeof(int))))
+        TEST_ERROR;
+    for (u = 0; u < (size_t)nelmts; u++)
+        wbuf[u] = (int)u;
+
+    /* Create the dataspace and a chunked, filtered DCPL */
+    if ((sid = H5Screate_simple(rank, dims, maxdims)) < 0)
+        TEST_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl, rank, chunk) < 0)
+        TEST_ERROR;
+    if (H5Pset_filter(dcpl, H5Z_FILTER_BOGUS, 0, (size_t)0, NULL) < 0)
+        TEST_ERROR;
+
+    /* Create the dataset */
+    if ((did = H5Dcreate2(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Verify that the expected chunk index type is in use */
+    if (H5D__layout_idx_type_test(did, &idx_type) < 0)
+        TEST_ERROR;
+    if (idx_type != expected_idx)
+        FAIL_PUTS_ERROR("    unexpected chunk index type");
+
+    /* Write the data */
+    if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+        TEST_ERROR;
+
+    /* Close everything so the data must be read back from disk */
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+    did = H5I_INVALID_HID;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+    sid = H5I_INVALID_HID;
+
+    /* Reopen and read the data back */
+    if ((did = H5Dopen2(fid, dset_name, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+        TEST_ERROR;
+    for (u = 0; u < (size_t)nelmts; u++)
+        if (wbuf[u] != rbuf[u])
+            FAIL_PUTS_ERROR("    data read back differs from data written");
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    free(wbuf);
+    free(rbuf);
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Dclose(did);
+        H5Sclose(sid);
+    }
+    H5E_END_TRY
+    free(wbuf);
+    free(rbuf);
+    return FAIL;
+} /* end test_sos_roundtrip_dset() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_chunk_size_of_sizes
+ *
+ * Purpose:     Tests that filtered chunked datasets can be created, written,
+ *              and read back correctly when the file's "size of sizes"
+ *              (H5Pset_sizes) is set to a value smaller than the default of 8.
+ *
+ *              For version-5 chunk layout messages (the 2.0 file format), the
+ *              on-disk size of each filtered chunk is encoded using the file's
+ *              size of sizes.  This exercises that encoding path for every
+ *              chunk index type that stores per-chunk sizes (single chunk,
+ *              fixed array, extensible array, and version-2 B-tree) with a
+ *              size of sizes of 2, 4, and 8.  The chunks are kept small enough
+ *              to be encoded by all three settings.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_chunk_size_of_sizes(hid_t fapl)
+{
+    hid_t    my_fapl = H5I_INVALID_HID; /* Copy of the file access property list */
+    hid_t    fcpl    = H5I_INVALID_HID; /* File creation property list ID */
+    hid_t    fid     = H5I_INVALID_HID; /* File ID */
+    char     filename[FILENAME_BUF_SIZE];
+    size_t   sizes[]    = {2, 4, 8}; /* "size of sizes" values to test (all <= 8) */
+    bool     registered = false;     /* Whether the bogus filter is registered */
+    unsigned s;                      /* Local index variable */
+
+    TESTING("chunked datasets with size of sizes <= 8");
+
+    /* Copy the FAPL and force the latest format so that version-5 chunk layout
+     * messages (which encode filtered chunk sizes using the file's size of
+     * sizes) are used for all chunk index types. */
+    if ((my_fapl = H5Pcopy(fapl)) < 0)
+        TEST_ERROR;
+    if (H5Pset_libver_bounds(my_fapl, H5F_LIBVER_V200, H5F_LIBVER_LATEST) < 0)
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[36], my_fapl, filename, sizeof filename);
+
+    /* Register the no-op 'bogus' filter so that per-chunk sizes are stored in
+     * the file without changing the on-disk chunk size. */
+    if (H5Zregister(H5Z_BOGUS) < 0)
+        TEST_ERROR;
+    registered = true;
+
+    for (s = 0; s < sizeof(sizes) / sizeof(sizes[0]); s++) {
+        /* Single chunk index: cur dims == max dims == chunk dims */
+        hsize_t single_dims[2] = {10, 10};
+        hsize_t single_max[2]  = {10, 10};
+        /* Fixed array index: fixed max dims, multiple chunks */
+        hsize_t farray_dims[2] = {40, 40};
+        hsize_t farray_max[2]  = {40, 40};
+        /* Extensible array index: exactly one unlimited dimension */
+        hsize_t earray_dims[2] = {40, 40};
+        hsize_t earray_max[2]  = {H5S_UNLIMITED, 40};
+        /* Version 2 B-tree index: more than one unlimited dimension */
+        hsize_t bt2_dims[2] = {40, 40};
+        hsize_t bt2_max[2]  = {H5S_UNLIMITED, H5S_UNLIMITED};
+        hsize_t chunk[2]    = {10, 10}; /* 10 * 10 * 4 = 400 bytes on disk */
+
+        /* Create a file whose size of sizes is the value under test.  The size
+         * of addresses is left at its default. */
+        if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+            TEST_ERROR;
+        if (H5Pset_sizes(fcpl, (size_t)0, sizes[s]) < 0)
+            TEST_ERROR;
+        if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, my_fapl)) < 0)
+            TEST_ERROR;
+
+        /* Exercise each chunk index type that stores per-chunk sizes */
+        if (test_sos_roundtrip_dset(fid, "single", 2, single_dims, single_max, chunk, H5D_CHUNK_IDX_SINGLE) <
+            0)
+            goto error;
+        if (test_sos_roundtrip_dset(fid, "farray", 2, farray_dims, farray_max, chunk, H5D_CHUNK_IDX_FARRAY) <
+            0)
+            goto error;
+        if (test_sos_roundtrip_dset(fid, "earray", 2, earray_dims, earray_max, chunk, H5D_CHUNK_IDX_EARRAY) <
+            0)
+            goto error;
+        if (test_sos_roundtrip_dset(fid, "bt2", 2, bt2_dims, bt2_max, chunk, H5D_CHUNK_IDX_BT2) < 0)
+            goto error;
+
+        if (H5Fclose(fid) < 0)
+            TEST_ERROR;
+        fid = H5I_INVALID_HID;
+        if (H5Pclose(fcpl) < 0)
+            TEST_ERROR;
+        fcpl = H5I_INVALID_HID;
+    }
+
+    if (H5Zunregister(H5Z_FILTER_BOGUS) < 0)
+        TEST_ERROR;
+    if (H5Pclose(my_fapl) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+        H5Pclose(fcpl);
+        H5Pclose(my_fapl);
+        if (registered)
+            H5Zunregister(H5Z_FILTER_BOGUS);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_chunk_size_of_sizes() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_sos_overflow_dset
+ *
+ * Purpose:     Helper for test_chunk_size_of_sizes_overflow().  Creates a
+ *              filtered chunked dataset whose on-disk chunk size is too large
+ *              to be encoded by the file's "size of sizes", then verifies that
+ *              the library reports an error when the oversized chunk is written
+ *              to disk rather than silently truncating the encoded size (which
+ *              would corrupt the chunk).
+ *
+ *              Dataset creation is expected to succeed (the overflow is only
+ *              detectable once the chunk's on-disk size is known at write
+ *              time), so the expected chunk index type is verified first.
+ *
+ * Return:      Success:    0 (the library correctly reported an error)
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_sos_overflow_dset(hid_t fid, const char *dset_name, int rank, const hsize_t *dims,
+                       const hsize_t *maxdims, const hsize_t *chunk, H5D_chunk_index_t expected_idx)
+{
+    hid_t             sid  = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t             did  = H5I_INVALID_HID; /* Dataset ID */
+    hid_t             dcpl = H5I_INVALID_HID; /* Dataset creation property list ID */
+    int              *wbuf = NULL;            /* Write buffer */
+    H5D_chunk_index_t idx_type;               /* Actual chunk index type */
+    hsize_t           nelmts = 1;             /* Number of elements in the dataset */
+    herr_t            status = SUCCEED;       /* Return value of the write/flush */
+    size_t            u;                      /* Local index variable */
+
+    for (u = 0; u < (size_t)rank; u++)
+        nelmts *= dims[u];
+    if (NULL == (wbuf = calloc((size_t)nelmts, sizeof(int))))
+        TEST_ERROR;
+
+    if ((sid = H5Screate_simple(rank, dims, maxdims)) < 0)
+        TEST_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl, rank, chunk) < 0)
+        TEST_ERROR;
+    if (H5Pset_filter(dcpl, H5Z_FILTER_BOGUS, 0, (size_t)0, NULL) < 0)
+        TEST_ERROR;
+
+    /* Creating the dataset should succeed */
+    if ((did = H5Dcreate2(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Verify that the expected chunk index type is in use */
+    if (H5D__layout_idx_type_test(did, &idx_type) < 0)
+        TEST_ERROR;
+    if (idx_type != expected_idx)
+        FAIL_PUTS_ERROR("    unexpected chunk index type");
+
+    /* Writing the oversized chunk must fail (either when the chunk is flushed
+     * during the write, or when it is flushed at flush/close time). */
+    H5E_BEGIN_TRY
+    {
+        status = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
+        if (status >= 0)
+            status = H5Fflush(fid, H5F_SCOPE_LOCAL);
+    }
+    H5E_END_TRY
+
+    if (status >= 0)
+        FAIL_PUTS_ERROR("    write of a chunk too large for the file's size of sizes should have failed");
+
+    /* Clean up.  The dataset was left in an error state, so ignore errors. */
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(did);
+    }
+    H5E_END_TRY
+    did = H5I_INVALID_HID;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    free(wbuf);
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Dclose(did);
+        H5Sclose(sid);
+    }
+    H5E_END_TRY
+    free(wbuf);
+    return FAIL;
+} /* end test_sos_overflow_dset() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_chunk_size_of_sizes_overflow
+ *
+ * Purpose:     Tests that the library detects and reports overflow when a
+ *              filtered chunk's on-disk size is too large to be encoded by the
+ *              file's "size of sizes" (rather than silently truncating the
+ *              encoded size and corrupting the chunk).
+ *
+ *              A size of sizes of 2 can encode chunk sizes up to 65535 bytes.
+ *              Using the no-op 'bogus' filter, a chunk of 200 x 200 4-byte
+ *              integers is 160000 bytes on disk, which cannot be encoded.  This
+ *              is exercised for each chunk index type that encodes per-chunk
+ *              sizes using the file's size of sizes.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_chunk_size_of_sizes_overflow(hid_t fapl)
+{
+    hid_t my_fapl = H5I_INVALID_HID; /* Copy of the file access property list */
+    hid_t fcpl    = H5I_INVALID_HID; /* File creation property list ID */
+    hid_t fid     = H5I_INVALID_HID; /* File ID */
+    char  filename[FILENAME_BUF_SIZE];
+    bool  registered = false; /* Whether the bogus filter is registered */
+
+    /* Single chunk index: cur dims == max dims == chunk dims (one 160000-byte chunk) */
+    hsize_t single_dims[2]  = {200, 200};
+    hsize_t single_max[2]   = {200, 200};
+    hsize_t single_chunk[2] = {200, 200};
+    /* Fixed array index: fixed max dims, more than one chunk */
+    hsize_t farray_dims[2] = {400, 200};
+    hsize_t farray_max[2]  = {400, 200};
+    /* Extensible array index: exactly one unlimited dimension */
+    hsize_t earray_dims[2] = {200, 200};
+    hsize_t earray_max[2]  = {H5S_UNLIMITED, 200};
+    /* Version 2 B-tree index: more than one unlimited dimension */
+    hsize_t bt2_dims[2] = {200, 200};
+    hsize_t bt2_max[2]  = {H5S_UNLIMITED, H5S_UNLIMITED};
+    hsize_t chunk[2]    = {200, 200}; /* 200 * 200 * 4 = 160000 bytes on disk */
+
+    TESTING("overflow detection for chunked datasets with size of sizes < 8");
+
+    if ((my_fapl = H5Pcopy(fapl)) < 0)
+        TEST_ERROR;
+    if (H5Pset_libver_bounds(my_fapl, H5F_LIBVER_V200, H5F_LIBVER_LATEST) < 0)
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[36], my_fapl, filename, sizeof filename);
+
+    if (H5Zregister(H5Z_BOGUS) < 0)
+        TEST_ERROR;
+    registered = true;
+
+    /* Use the smallest legal size of sizes (2 bytes, max encodable 65535) */
+    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_sizes(fcpl, (size_t)0, (size_t)2) < 0)
+        TEST_ERROR;
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, my_fapl)) < 0)
+        TEST_ERROR;
+
+    if (test_sos_overflow_dset(fid, "single", 2, single_dims, single_max, single_chunk,
+                               H5D_CHUNK_IDX_SINGLE) < 0)
+        goto error;
+    if (test_sos_overflow_dset(fid, "farray", 2, farray_dims, farray_max, chunk, H5D_CHUNK_IDX_FARRAY) < 0)
+        goto error;
+    if (test_sos_overflow_dset(fid, "earray", 2, earray_dims, earray_max, chunk, H5D_CHUNK_IDX_EARRAY) < 0)
+        goto error;
+    if (test_sos_overflow_dset(fid, "bt2", 2, bt2_dims, bt2_max, chunk, H5D_CHUNK_IDX_BT2) < 0)
+        goto error;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+    fid = H5I_INVALID_HID;
+    if (H5Pclose(fcpl) < 0)
+        TEST_ERROR;
+    fcpl = H5I_INVALID_HID;
+
+    if (H5Zunregister(H5Z_FILTER_BOGUS) < 0)
+        TEST_ERROR;
+    if (H5Pclose(my_fapl) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+        H5Pclose(fcpl);
+        H5Pclose(my_fapl);
+        if (registered)
+            H5Zunregister(H5Z_FILTER_BOGUS);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_chunk_size_of_sizes_overflow() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_huge_chunks
+ *
+ * Purpose:     Tests that datasets with chunks >4GB can't be created, unless we're using the 2.0 file format.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
  *
  *-------------------------------------------------------------------------
  */
@@ -21564,6 +22278,7 @@ main(void)
                     nerrors += (test_compare_dcpl(file) < 0 ? 1 : 0);
                     nerrors += (test_copy_dcpl(file, fapl) < 0 ? 1 : 0);
                     nerrors += (test_filter_delete(file) < 0 ? 1 : 0);
+                    nerrors += (test_modify_filter_absent() < 0 ? 1 : 0);
 
                     if (driver_is_default_compatible) {
                         nerrors += (test_filters_endianess() < 0 ? 1 : 0);
