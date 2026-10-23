@@ -437,7 +437,7 @@ jobs:
               # The examples jar has no staged pom.xml of its own, so let Maven
               # generate a minimal one with a description specific to this artifact
               # instead of (incorrectly) reusing the main library's pom.
-              pom_opts="-DgeneratePom=true -Dgeneratepom.description=\"Example programs demonstrating usage of HDF5 Java bindings\""
+              pom_opts="-DgeneratePom=true -DgeneratePom.description=\"Example programs demonstrating usage of HDF5 Java bindings\""
             else
               # Main HDF5 Java library - determine implementation
               # Check JAR contents to detect FFM vs JNI
