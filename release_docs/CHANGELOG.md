@@ -165,18 +165,6 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
-### Fixed writer starvation in the internal read-write lock on glibc
-
-   On glibc, the library's internal read-write lock used the default
-   pthread_rwlock_t attributes, which prefer readers. A steady stream of
-   readers could keep a waiting writer from ever acquiring the lock, which
-   made the ttsafe test hang (seen with glibc 2.17 on ppc64). The lock is now
-   created with PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP on glibc,
-   matching the C11 and macOS implementations, which block new readers while
-   a writer is waiting.
-
-   Fixes GitHub issue #6743
-
 ### Fixed H5Pmodify_filter() writing past the filter pipeline for a filter not in it
 
    `H5Pmodify_filter()` returned success when the requested filter was not in the pipeline, and wrote the new flags and client data into the slot one past the last used entry. When the pipeline already held `H5Z_MAX_NFILTERS` filters, that write went past the end of the filter array, and client data longer than `H5Z_COMMON_CD_VALUES` leaked its allocation. `H5Pmodify_filter()` now fails with "filter not in pipeline" in this case.
