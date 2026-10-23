@@ -20868,6 +20868,11 @@ filter_h5_allocate(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_n
     return nbytes;
 
 error:
+    if (tmp_buf)
+        (void)H5free_memory(tmp_buf);
+    if (tmp_buf2)
+        (void)H5free_memory(tmp_buf2);
+
     return 0;
 } /* end filter_h5_allocate() */
 
