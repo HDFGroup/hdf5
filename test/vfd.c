@@ -2313,9 +2313,11 @@ test_ros3(void)
 
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
         TEST_ERROR;
+    if (!(driver_flags & H5FD_FEAT_READWRITE_NO_H5_CALLS))
+        TEST_ERROR;
 
     /* Check for extra flags not accounted for above */
-    if (driver_flags != (H5FD_FEAT_DATA_SIEVE))
+    if (driver_flags != (H5FD_FEAT_DATA_SIEVE | H5FD_FEAT_READWRITE_NO_H5_CALLS))
         TEST_ERROR;
 
     PASSED();
