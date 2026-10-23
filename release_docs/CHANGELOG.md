@@ -113,7 +113,7 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ### Removed API lock for memory management wrappers
 
-   The HDF5 library no longer takes the global thread lock when entering
+   The HDF5 library no longer acquires the global thread lock when entering
    H5allocate_memory(), H5resize_memory(), and H5free_memory(). This allows
    multiple threads to access these functions concurrently.
 
