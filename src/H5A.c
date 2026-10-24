@@ -161,10 +161,11 @@ H5A__create_api_common(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
+    vol_obj_type = H5I_get_type(loc_id);
     if (H5I_ATTR == vol_obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "location is not valid for an attribute");
+    if (!H5I_IS_LOC_TYPE(vol_obj_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
     if (!attr_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "attr_name parameter cannot be NULL");
     if (!*attr_name)
@@ -307,10 +308,11 @@ H5A__create_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
+    vol_obj_type = H5I_get_type(loc_id);
     if (H5I_ATTR == vol_obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "location is not valid for an attribute");
+    if (!H5I_IS_LOC_TYPE(vol_obj_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
     if (!attr_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "attr_name parameter cannot be NULL");
     if (!*attr_name)
@@ -496,10 +498,11 @@ H5A__open_api_common(hid_t loc_id, const char *attr_name, hid_t aapl_id, void **
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
+    vol_obj_type = H5I_get_type(loc_id);
     if (H5I_ATTR == vol_obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "location is not valid for an attribute");
+    if (!H5I_IS_LOC_TYPE(vol_obj_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
     if (!attr_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be NULL");
     if (!*attr_name)
@@ -619,10 +622,11 @@ H5A__open_by_name_api_common(hid_t loc_id, const char *obj_name, const char *att
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
+    vol_obj_type = H5I_get_type(loc_id);
     if (H5I_ATTR == vol_obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "location is not valid for an attribute");
+    if (!H5I_IS_LOC_TYPE(vol_obj_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     if (!attr_name || !*attr_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no attribute name");
@@ -751,10 +755,11 @@ H5A__open_by_idx_api_common(hid_t loc_id, const char *obj_name, H5_index_t idx_t
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
+    vol_obj_type = H5I_get_type(loc_id);
     if (H5I_ATTR == vol_obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "location is not valid for an attribute");
+    if (!H5I_IS_LOC_TYPE(vol_obj_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
     if (!obj_name || !*obj_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no object name");
     if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -1321,10 +1326,11 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_i
         name = NULL;
 
     /* Check args */
-    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+    vol_obj_type = H5I_get_type(loc_id);
     if (H5I_ATTR == vol_obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute");
+    if (!H5I_IS_LOC_TYPE(vol_obj_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (!obj_name || !*obj_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
     if (!name && size)
@@ -1471,10 +1477,11 @@ H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, H
     FUNC_ENTER_API(FAIL)
 
     /* Check args */
-    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+    vol_obj_type = H5I_get_type(loc_id);
     if (H5I_ATTR == vol_obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute");
+    if (!H5I_IS_LOC_TYPE(vol_obj_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (!obj_name || !*obj_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name");
     if (!attr_name || !*attr_name)
@@ -1530,10 +1537,11 @@ H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_i
     FUNC_ENTER_API(FAIL)
 
     /* Check args */
-    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+    vol_obj_type = H5I_get_type(loc_id);
     if (H5I_ATTR == vol_obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute");
+    if (!H5I_IS_LOC_TYPE(vol_obj_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (!obj_name || !*obj_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
     if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -1634,10 +1642,11 @@ H5A__rename_api_common(hid_t loc_id, const char *old_name, const char *new_name,
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+    vol_obj_type = H5I_get_type(loc_id);
     if (H5I_ATTR == vol_obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute");
+    if (!H5I_IS_LOC_TYPE(vol_obj_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (!old_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "old attribute name cannot be NULL");
     if (!*old_name)
@@ -1745,10 +1754,11 @@ H5A__rename_by_name_api_common(hid_t loc_id, const char *obj_name, const char *o
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+    vol_obj_type = H5I_get_type(loc_id);
     if (H5I_ATTR == vol_obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute");
+    if (!H5I_IS_LOC_TYPE(vol_obj_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (!old_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "old attribute name cannot be NULL");
     if (!*old_name)
@@ -1893,10 +1903,11 @@ H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *i
     FUNC_ENTER_API(FAIL)
 
     /* Check arguments */
-    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+    vol_obj_type = H5I_get_type(loc_id);
     if (H5I_ATTR == vol_obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute");
+    if (!H5I_IS_LOC_TYPE(vol_obj_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified");
     if (order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
@@ -1985,10 +1996,11 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_i
     FUNC_ENTER_API(FAIL)
 
     /* Check arguments */
-    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+    vol_obj_type = H5I_get_type(loc_id);
     if (H5I_ATTR == vol_obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute");
+    if (!H5I_IS_LOC_TYPE(vol_obj_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (!obj_name || !*obj_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name");
     if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -2055,10 +2067,11 @@ H5Adelete(hid_t loc_id, const char *name)
     FUNC_ENTER_API(FAIL)
 
     /* Check arguments */
-    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+    vol_obj_type = H5I_get_type(loc_id);
     if (H5I_ATTR == vol_obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute");
+    if (!H5I_IS_LOC_TYPE(vol_obj_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (!name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be NULL");
     if (!*name)
@@ -2116,10 +2129,11 @@ H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid
     FUNC_ENTER_API(FAIL)
 
     /* Check arguments */
-    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+    vol_obj_type = H5I_get_type(loc_id);
     if (H5I_ATTR == vol_obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute");
+    if (!H5I_IS_LOC_TYPE(vol_obj_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (!obj_name || !*obj_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name");
     if (!attr_name || !*attr_name)
@@ -2188,10 +2202,11 @@ H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_ite
     FUNC_ENTER_API(FAIL)
 
     /* check arguments */
-    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+    vol_obj_type = H5I_get_type(loc_id);
     if (H5I_ATTR == vol_obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute");
+    if (!H5I_IS_LOC_TYPE(vol_obj_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (!obj_name || !*obj_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name");
     if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -2379,10 +2394,11 @@ H5A__exists_api_common(hid_t obj_id, const char *attr_name, bool *attr_exists, v
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    if (H5I_BADID == (vol_obj_type = H5I_get_type(obj_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
+    vol_obj_type = H5I_get_type(obj_id);
     if (H5I_ATTR == vol_obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute");
+    if (!H5I_IS_LOC_TYPE(vol_obj_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (!attr_name || !*attr_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name");
     if (NULL == attr_exists)
@@ -2492,10 +2508,11 @@ H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+    vol_obj_type = H5I_get_type(loc_id);
     if (H5I_ATTR == vol_obj_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute");
+    if (!H5I_IS_LOC_TYPE(vol_obj_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     if (!attr_name || !*attr_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name");
     if (NULL == attr_exists)
