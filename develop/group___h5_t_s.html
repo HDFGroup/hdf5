@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-10-21</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-10-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -170,13 +170,15 @@ Functions</h2></td></tr>
 <p>This is currently only used to accelerate read operations for chunked datasets that either have data filters applied or for which the chunks are small enough to fit in cache. In this case, the library parallelizes the reads from disk, the data filter operations, and the memory scatter operation. However, all of these operations are currently protected by a mutex so no performance gain is expected and this feature is purely experimental. These mutexes will be relaxed in the future to enable performance acceleration.</p>
 <p>Currently, the library will immediately create <code class="param">num_threads</code> threads and retain them until this function is called again. Calling this function with <code class="param">num_threads</code> set to <code>0</code> will terminate these threads and disable internal multithreading.</p>
 <p>This is currently only used to accelerate raw data reads of chunked datasets. This will occur when the following conditions are met: </p><ul>
-<li>This function is called with <code class="param">num_threads</code> &gt; <code>0</code> . </li>
-<li><a class="el" href="group___d_x_p_l.html#ga137c71367b2b24d05c4820b99708f4d0" title="Allows the library to use internal multithreading to accelerate I/O.">H5Pset_io_threads()</a> was not called with <code>threads_enabled</code> set to <code>false</code> . </li>
-<li>Selection I/O is not used. See <a class="el" href="group___d_x_p_l.html#ga7d4d11c9c273d5a5ce2d174d66e4fa10" title="Sets the selection I/O mode.">H5Pset_selection_io()</a>. </li>
-<li>At least one chunk exists on disk and is not cached by the dataset chunk cache. </li>
-<li>For unfiltered datasets, the chunk cache is large enough to fit at least one chunk. See <a class="el" href="group___d_a_p_l.html#ga104d00442c31714ee073dee518f661f1" title="Sets the raw data chunk cache parameters.">H5Pset_chunk_cache()</a>. </li>
-<li>The library is not built with the <code>HDF5_ENABLE_THREADSAFE</code> option. </li>
-<li>The file does not use an MPI-based file driver.</li>
+<li>This function must be called with <code class="param">num_threads</code> &gt; <code>0</code> . </li>
+<li><a class="el" href="group___d_x_p_l.html#ga137c71367b2b24d05c4820b99708f4d0" title="Allows the library to use internal multithreading to accelerate I/O.">H5Pset_io_threads()</a> must not be called with <code>threads_enabled</code> set to <code>false</code> . </li>
+<li>Selection I/O must not be used. See <a class="el" href="group___d_x_p_l.html#ga7d4d11c9c273d5a5ce2d174d66e4fa10" title="Sets the selection I/O mode.">H5Pset_selection_io()</a>. </li>
+<li>At least one chunk must exist on disk and not be cached by the dataset chunk cache. </li>
+<li>For unfiltered datasets, the chunk cache must be large enough to fit at least one chunk. See <a class="el" href="group___d_a_p_l.html#ga104d00442c31714ee073dee518f661f1" title="Sets the raw data chunk cache parameters.">H5Pset_chunk_cache()</a>. </li>
+<li>No data filters re-enter the HDF5 API. All data filters must set the <code class="param">H5Z_FEAT_FILTER_NO_H5_CALLS</code> capability flag. </li>
+<li>The file driver must not re-enter the HDF5 API. It must set the <code class="param">H5FD_FEAT_READWRITE_NO_H5_CALLS</code> capability flag. </li>
+<li>For concurrent execution of the data filter, that filter must be thread-safe and report that capability with the <code class="param">H5Z_FEAT_FILTER_THREADSAFE</code> capability flag. </li>
+<li>The file must not use an MPI-based file driver.</li>
 </ul>
 <dl class="section note"><dt>Note</dt><dd>This function is only present when the library is built with thread support, i.e. when <code>H5_HAVE_THREADS</code> is defined. This is the usual case; the exceptions are builds without a threading package and static libraries on Windows.</dd>
 <dd>

@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-10-21</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-10-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -141,10 +141,15 @@ Data Structures</h2></td></tr>
 <tr class="memitem:H5Z_5Fcb_5Ft" id="r_H5Z_5Fcb_5Ft"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_h5_z__cb__t.html">H5Z_cb_t</a></td></tr>
 <tr class="memitem:H5Z_5Fclass1_5Ft" id="r_H5Z_5Fclass1_5Ft"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_h5_z__class1__t.html">H5Z_class1_t</a></td></tr>
 <tr class="memitem:H5Z_5Fclass2_5Ft" id="r_H5Z_5Fclass2_5Ft"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_h5_z__class2__t.html">H5Z_class2_t</a></td></tr>
+<tr class="memitem:H5Z_5Fclass3_5Ft" id="r_H5Z_5Fclass3_5Ft"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_h5_z__class3__t.html">H5Z_class3_t</a></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:acec2c757b38aefdb817ba7c7915778a9" id="r_acec2c757b38aefdb817ba7c7915778a9"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#acec2c757b38aefdb817ba7c7915778a9">H5Z_CLASS_T_VERS</a>&#160;&#160;&#160;(1)</td></tr>
+<tr class="memitem:a80d3ad2bec4775ec1c000b01b2f4d5c4" id="r_a80d3ad2bec4775ec1c000b01b2f4d5c4"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a80d3ad2bec4775ec1c000b01b2f4d5c4">H5Z_CLASS_T_VERS_2</a>&#160;&#160;&#160;(2)</td></tr>
+<tr class="memitem:ae3187097af86dd2280468c81ee275853" id="r_ae3187097af86dd2280468c81ee275853"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae3187097af86dd2280468c81ee275853">H5Z_CLASS_T_VERS_3</a>&#160;&#160;&#160;(3)</td></tr>
+<tr class="memitem:ae1a4753d6107bb83922e989bd9463e5b" id="r_ae1a4753d6107bb83922e989bd9463e5b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae1a4753d6107bb83922e989bd9463e5b">H5Z_FEAT_FILTER_NO_H5_CALLS</a>&#160;&#160;&#160;0x0000000000000002</td></tr>
+<tr class="memitem:a7e5e1a1794555006e479712ee47ca35e" id="r_a7e5e1a1794555006e479712ee47ca35e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7e5e1a1794555006e479712ee47ca35e">H5Z_FEAT_FILTER_THREADSAFE</a>&#160;&#160;&#160;0x0000000000000001</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-typedef-members" class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
@@ -174,7 +179,67 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Current version of the H5Z_class_t struct </p>
+<p>Previous version of the H5Z_class_t struct, used in conjunction with <a class="el" href="struct_h5_z__class2__t.html">H5Z_class2_t</a>, introduced in 1.8.0. This has the same effect as <a class="el" href="#a80d3ad2bec4775ec1c000b01b2f4d5c4">H5Z_CLASS_T_VERS_2</a>, even though it has a different value. Retained for compatibility with older versions of the library. </p>
+
+</div>
+</div>
+<a id="a80d3ad2bec4775ec1c000b01b2f4d5c4" name="a80d3ad2bec4775ec1c000b01b2f4d5c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80d3ad2bec4775ec1c000b01b2f4d5c4">&#9670;&#160;</a></span>H5Z_CLASS_T_VERS_2</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define H5Z_CLASS_T_VERS_2&#160;&#160;&#160;(2)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Previous version of the H5Z_class_t struct, used in conjunction with <a class="el" href="struct_h5_z__class2__t.html">H5Z_class2_t</a>, introduced in 1.8.0. This macro was introduced in 2.3.0, previously only <a class="el" href="#acec2c757b38aefdb817ba7c7915778a9">H5Z_CLASS_T_VERS</a> was used. </p>
+
+</div>
+</div>
+<a id="ae3187097af86dd2280468c81ee275853" name="ae3187097af86dd2280468c81ee275853"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3187097af86dd2280468c81ee275853">&#9670;&#160;</a></span>H5Z_CLASS_T_VERS_3</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define H5Z_CLASS_T_VERS_3&#160;&#160;&#160;(3)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Latest version of the H5Z_class_t struct, used in conjunction with <a class="el" href="struct_h5_z__class3__t.html">H5Z_class3_t</a>, introduced in 2.3.0. </p>
+
+</div>
+</div>
+<a id="ae1a4753d6107bb83922e989bd9463e5b" name="ae1a4753d6107bb83922e989bd9463e5b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1a4753d6107bb83922e989bd9463e5b">&#9670;&#160;</a></span>H5Z_FEAT_FILTER_NO_H5_CALLS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define H5Z_FEAT_FILTER_NO_H5_CALLS&#160;&#160;&#160;0x0000000000000002</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Defining the H5Z_FEAT_FILTER_NO_H5_CALLS for a filter means that the <code class="param">filter</code> callback does not make any HDF5 calls, excluding <a class="el" href="_h5public_8h.html#abb549ba9fa5c4f3107d8ff19602705da">H5OPEN</a>. </p><dl class="section since"><dt>Since</dt><dd>2.3.0 </dd></dl>
+
+</div>
+</div>
+<a id="a7e5e1a1794555006e479712ee47ca35e" name="a7e5e1a1794555006e479712ee47ca35e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e5e1a1794555006e479712ee47ca35e">&#9670;&#160;</a></span>H5Z_FEAT_FILTER_THREADSAFE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define H5Z_FEAT_FILTER_THREADSAFE&#160;&#160;&#160;0x0000000000000001</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Defining the H5Z_FEAT_FILTER_THREADSAFE for a filter means that the <code class="param">filter</code> callback is thread-safe and can be executed concurrently with multiple threads. </p><dl class="section since"><dt>Since</dt><dd>2.3.0 </dd></dl>
 
 </div>
 </div>
@@ -236,6 +301,7 @@ Functions</h2></td></tr>
 <p>A filter gets definition flags and invocation flags (defined above), the client data array and size defined when the filter was added to the pipeline, the size in bytes of the data on which to operate, and pointers to a buffer and its allocated size.</p>
 <p>The filter should store the result in the supplied buffer if possible, otherwise it can allocate a new buffer, freeing the original. The allocated size of the new buffer should be returned through the <code class="param">buf_size</code> pointer and the new buffer through the <code class="param">buf</code> pointer.</p>
 <p>The return value from the filter is the number of bytes in the output buffer. If an error occurs then the function should return zero and leave all pointer arguments unchanged.</p>
+<p>If this filter function is registered with an <a class="el" href="struct_h5_z__class3__t.html">H5Z_class3_t</a> whose feature flags include <a class="el" href="#a7e5e1a1794555006e479712ee47ca35e">H5Z_FEAT_FILTER_THREADSAFE</a>, then the library may execute it concurrently from multiple threads, with separate, disjoint buffers. Internal threading is currently only used if every filter in the pipeline sets <a class="el" href="#ae1a4753d6107bb83922e989bd9463e5b">H5Z_FEAT_FILTER_NO_H5_CALLS</a>.</p>
 <dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>

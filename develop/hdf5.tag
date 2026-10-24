@@ -6905,6 +6905,13 @@
     </member>
     <member kind="function">
       <type>herr_t</type>
+      <name>H5FD__query</name>
+      <anchorfile>_h5_f_dpkg_8h.html</anchorfile>
+      <anchor>a13944c74f3a171016b762141597bdd80</anchor>
+      <arglist>(const H5FD_t *f, unsigned long *flags)</arglist>
+    </member>
+    <member kind="function">
+      <type>herr_t</type>
       <name>H5FD__ros3_register</name>
       <anchorfile>_h5_f_dpkg_8h.html</anchorfile>
       <anchor>ad1edd30039e70a4f3ea0b56425eba091</anchor>
@@ -7889,6 +7896,13 @@
       <name>H5FD_FEAT_POSIX_COMPAT_HANDLE</name>
       <anchorfile>_h5_f_dpublic_8h.html</anchorfile>
       <anchor>a6819feb8f958a57f0de19cf1c5542dc2</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>H5FD_FEAT_READWRITE_NO_H5_CALLS</name>
+      <anchorfile>_h5_f_dpublic_8h.html</anchorfile>
+      <anchor>a39b73c54499eeef810813ecf254d607c</anchor>
       <arglist></arglist>
     </member>
     <member kind="define">
@@ -22717,11 +22731,40 @@
     <class kind="struct">H5Z_cb_t</class>
     <class kind="struct">H5Z_class1_t</class>
     <class kind="struct">H5Z_class2_t</class>
+    <class kind="struct">H5Z_class3_t</class>
     <member kind="define">
       <type>#define</type>
       <name>H5Z_CLASS_T_VERS</name>
       <anchorfile>_h5_zdevelop_8h.html</anchorfile>
       <anchor>acec2c757b38aefdb817ba7c7915778a9</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>H5Z_CLASS_T_VERS_2</name>
+      <anchorfile>_h5_zdevelop_8h.html</anchorfile>
+      <anchor>a80d3ad2bec4775ec1c000b01b2f4d5c4</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>H5Z_CLASS_T_VERS_3</name>
+      <anchorfile>_h5_zdevelop_8h.html</anchorfile>
+      <anchor>ae3187097af86dd2280468c81ee275853</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>H5Z_FEAT_FILTER_NO_H5_CALLS</name>
+      <anchorfile>_h5_zdevelop_8h.html</anchorfile>
+      <anchor>ae1a4753d6107bb83922e989bd9463e5b</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>H5Z_FEAT_FILTER_THREADSAFE</name>
+      <anchorfile>_h5_zdevelop_8h.html</anchorfile>
+      <anchor>a7e5e1a1794555006e479712ee47ca35e</anchor>
       <arglist></arglist>
     </member>
     <member kind="typedef">
@@ -45298,6 +45341,73 @@
       <type>int</type>
       <name>version</name>
       <anchorfile>struct_h5_z__class2__t.html</anchorfile>
+      <anchor>aad880fc4455c253781e8968f2239d56f</anchor>
+      <arglist></arglist>
+    </member>
+  </compound>
+  <compound kind="struct">
+    <name>H5Z_class3_t</name>
+    <filename>struct_h5_z__class3__t.html</filename>
+    <member kind="variable">
+      <type>H5Z_can_apply_func_t</type>
+      <name>can_apply</name>
+      <anchorfile>struct_h5_z__class3__t.html</anchorfile>
+      <anchor>a10d4a5417743a68aafc95160c5152601</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>unsigned</type>
+      <name>decoder_present</name>
+      <anchorfile>struct_h5_z__class3__t.html</anchorfile>
+      <anchor>af3f8cbfa487cb4c06ad2210d0b81a271</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>unsigned</type>
+      <name>encoder_present</name>
+      <anchorfile>struct_h5_z__class3__t.html</anchorfile>
+      <anchor>a1622cd6083cfb9a6c4efb5d5bf67b143</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>uint64_t</type>
+      <name>feature_flags</name>
+      <anchorfile>struct_h5_z__class3__t.html</anchorfile>
+      <anchor>aaccbcc3ce862dbe5af189ee0c3e345b1</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>H5Z_func_t</type>
+      <name>filter</name>
+      <anchorfile>struct_h5_z__class3__t.html</anchorfile>
+      <anchor>a995507f1980f1e7f971fda7c362a213b</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>H5Z_filter_t</type>
+      <name>id</name>
+      <anchorfile>struct_h5_z__class3__t.html</anchorfile>
+      <anchor>a6f3027958c7ad4552356a1e47e4db2ce</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>const char *</type>
+      <name>name</name>
+      <anchorfile>struct_h5_z__class3__t.html</anchorfile>
+      <anchor>a8f8f80d37794cde9472343e4487ba3eb</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>H5Z_set_local_func_t</type>
+      <name>set_local</name>
+      <anchorfile>struct_h5_z__class3__t.html</anchorfile>
+      <anchor>a5d89ab9372734010a5c500ea3e694a03</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>int</type>
+      <name>version</name>
+      <anchorfile>struct_h5_z__class3__t.html</anchorfile>
       <anchor>aad880fc4455c253781e8968f2239d56f</anchor>
       <arglist></arglist>
     </member>

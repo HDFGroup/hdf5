@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-10-21</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-10-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -194,6 +194,7 @@ Macros</h2></td></tr>
 <tr class="memitem:a8d00e3da99756b5acf466a1503334dc2" id="r_a8d00e3da99756b5acf466a1503334dc2"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a8d00e3da99756b5acf466a1503334dc2">H5FD_FEAT_MEMMANAGE</a>&#160;&#160;&#160;0x00010000</td></tr>
 <tr class="memitem:a84ed9665f25e7b9b9f7b798f3c34b2e3" id="r_a84ed9665f25e7b9b9f7b798f3c34b2e3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a84ed9665f25e7b9b9f7b798f3c34b2e3">H5FD_FEAT_PAGED_AGGR</a>&#160;&#160;&#160;0x00004000</td></tr>
 <tr class="memitem:a6819feb8f958a57f0de19cf1c5542dc2" id="r_a6819feb8f958a57f0de19cf1c5542dc2"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6819feb8f958a57f0de19cf1c5542dc2">H5FD_FEAT_POSIX_COMPAT_HANDLE</a>&#160;&#160;&#160;0x00000080</td></tr>
+<tr class="memitem:a39b73c54499eeef810813ecf254d607c" id="r_a39b73c54499eeef810813ecf254d607c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a39b73c54499eeef810813ecf254d607c">H5FD_FEAT_READWRITE_NO_H5_CALLS</a>&#160;&#160;&#160;0x00020000</td></tr>
 <tr class="memitem:a78e5659df3af2bae3ec428394e1c5831" id="r_a78e5659df3af2bae3ec428394e1c5831"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a78e5659df3af2bae3ec428394e1c5831">H5FD_FEAT_SUPPORTS_SWMR_IO</a>&#160;&#160;&#160;0x00001000</td></tr>
 <tr class="memitem:ad2e7ec143f681c9bea1dd5472cc973f7" id="r_ad2e7ec143f681c9bea1dd5472cc973f7"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad2e7ec143f681c9bea1dd5472cc973f7">H5FD_FEAT_USE_ALLOC_SIZE</a>&#160;&#160;&#160;0x00002000</td></tr>
 <tr class="memitem:aaeff7ef6bffdbef741db1618c2cde127" id="r_aaeff7ef6bffdbef741db1618c2cde127"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aaeff7ef6bffdbef741db1618c2cde127">H5FD_VFD_DEFAULT</a>&#160;&#160;&#160;0 /* Default VFL driver value */</td></tr>
@@ -915,6 +916,21 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="a39b73c54499eeef810813ecf254d607c" name="a39b73c54499eeef810813ecf254d607c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39b73c54499eeef810813ecf254d607c">&#9670;&#160;</a></span>H5FD_FEAT_READWRITE_NO_H5_CALLS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define H5FD_FEAT_READWRITE_NO_H5_CALLS&#160;&#160;&#160;0x00020000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Defining H5FD_FEAT_READWRITE_NO_H5_CALLS for a VFL driver means that the driver read() and write() callbacks never makes any HDF5 API calls, excluding <a class="el" href="group___h5.html#ga27fa33dc262dda95c5aa8df533837480" title="Initializes the HDF5 library.">H5open()</a>. Does not apply to read_vector(), write_vector(), read_selection(), or write_selection(). </p>
 
 </div>
 </div>

@@ -15,7 +15,7 @@ var searchData=
   ['emptybytes_12',['emptyBytes',['../classhdf_1_1hdf5lib_1_1_h_d_f_array.html#a022ce0834e376eaa580e84630b2e3694',1,'hdf::hdf5lib::HDFArray']]],
   ['enabled_20hdf5_20library_13',['Use A VOL-Enabled HDF5 Library',['../_h5_v_l__u_g.html#subsubsec_vol_quick_use',1,'']]],
   ['encode_14',['encode',['../class_h5_1_1_data_type.html#a983efb9188e4573a470b3ec367342fe5',1,'H5::DataType']]],
-  ['encoder_5fpresent_15',['encoder_present',['../struct_h5_z__class2__t.html#a1622cd6083cfb9a6c4efb5d5bf67b143',1,'H5Z_class2_t']]],
+  ['encoder_5fpresent_15',['encoder_present',['../struct_h5_z__class3__t.html#a1622cd6083cfb9a6c4efb5d5bf67b143',1,'H5Z_class3_t::encoder_present'],['../struct_h5_z__class2__t.html#a1622cd6083cfb9a6c4efb5d5bf67b143',1,'H5Z_class2_t::encoder_present']]],
   ['encoding_16',['Encoding',['../_f_m_t4.html#subsec_fmt4_dataobject_hdr_msg',1,'IV.A.2 Disk Format: Level 2A2 - Data Object Header Shared Message Encoding'],['../_f_m_t3.html#subsec_fmt3_appendixd_encode',1,'VIII.A. Dataspace Encoding'],['../_f_m_t4.html#subsec_fmt4_appendixd_encode',1,'VIII.A. Dataspace Encoding'],['../_f_m_t4.html#subsec_fmt4_appendixd_encodet',1,'VIII.B. Datatype Encoding']]],
   ['encoding_20backward_20compatibility_17',['Encoding Backward Compatibility',['../_f_m_t3.html#subsec_fmt3_appendixd_encodedp',1,'VIII.C. Reference Encoding (Backward Compatibility)'],['../_f_m_t4.html#subsec_fmt4_appendixd_encodedp',1,'VIII.D. Reference Encoding (Backward Compatibility)']]],
   ['encoding_20for_20dataspace_20and_20reference_18',['VIII. Appendix D: Encoding for Dataspace and Reference',['../_f_m_t3.html#sec_fmt3_appendixd',1,'']]],

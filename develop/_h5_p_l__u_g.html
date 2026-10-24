@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-10-21</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-10-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -320,7 +320,7 @@ An HDF5 filter should return zero in the case of failure. </li>
 Registering a Filter with The HDF Group</h3>
 <p>If you are writing a filter that will be used by others, it would be a good idea to request a filter identification number and register it with The HDF Group. Please follow the procedure described at <a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">Registered Filters</a>.</p>
 <p>The HDF Group anticipates that developers of HDF5 filter plugins will not only register new filters, but will also provide links to the source code and/or binaries for the corresponding HDF5 filter plugins.</p>
-<p>It is very important for the users of the filter that developers provide filter information in the “name” field of the filter structure, for example: </p><div class="fragment"><div class="line"><span class="keyword">const</span> <a class="code hl_struct" href="struct_h5_z__class2__t.html">H5Z_class2_t</a> H5Z_BZIP2[1] = {{</div>
+<p>It is very important for the users of the filter that developers provide filter information in the “name” field of the filter structure, for example: </p><div class="fragment"><div class="line"><span class="keyword">const</span> <a class="code hl_struct" href="struct_h5_z__class3__t.html">H5Z_class3_t</a> H5Z_BZIP2[1] = {{</div>
 <div class="line">  <a class="code hl_define" href="_h5_zdevelop_8h.html#acec2c757b38aefdb817ba7c7915778a9">H5Z_CLASS_T_VERS</a>,                    <span class="comment">// H5Z_class_t version</span></div>
 <div class="line">  (<a class="code hl_typedef" href="_h5_zpublic_8h.html#afae8461c70d47e63be2163af23362237">H5Z_filter_t</a>)H5Z_FILTER_BZIP2,      <span class="comment">// Filter id number</span></div>
 <div class="line">  1,                                   <span class="comment">// encoder_present flag (set to true)</span></div>
@@ -331,10 +331,11 @@ Registering a Filter with The HDF Group</h3>
 <div class="line">  NULL,                                <span class="comment">// The &quot;can apply&quot; callback</span></div>
 <div class="line">  NULL,                                <span class="comment">// The &quot;set local&quot; callback</span></div>
 <div class="line">  (<a class="code hl_typedef" href="_h5_zdevelop_8h.html#a130d8964a46667029c7d3c14572577c6">H5Z_func_t</a>)H5Z_filter_bzip2,        <span class="comment">// The actual filter function</span></div>
+<div class="line">  0,                                   <span class="comment">// Feature flags supported</span></div>
 <div class="line">}};</div>
-<div class="ttc" id="a_h5_zdevelop_8h_html_a130d8964a46667029c7d3c14572577c6"><div class="ttname"><a href="_h5_zdevelop_8h.html#a130d8964a46667029c7d3c14572577c6">H5Z_func_t</a></div><div class="ttdeci">size_t(* H5Z_func_t)(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[], size_t nbytes, size_t *buf_size, void **buf)</div><div class="ttdoc">The filter operation callback function, defining a filter&#39;s operation on data.</div><div class="ttdef"><b>Definition</b> H5Zdevelop.h:153</div></div>
-<div class="ttc" id="a_h5_zdevelop_8h_html_acec2c757b38aefdb817ba7c7915778a9"><div class="ttname"><a href="_h5_zdevelop_8h.html#acec2c757b38aefdb817ba7c7915778a9">H5Z_CLASS_T_VERS</a></div><div class="ttdeci">#define H5Z_CLASS_T_VERS</div><div class="ttdef"><b>Definition</b> H5Zdevelop.h:31</div></div>
-<div class="ttc" id="astruct_h5_z__class2__t_html"><div class="ttname"><a href="struct_h5_z__class2__t.html">H5Z_class2_t</a></div><div class="ttdef"><b>Definition</b> H5Zdevelop.h:162</div></div>
+<div class="ttc" id="a_h5_zdevelop_8h_html_a130d8964a46667029c7d3c14572577c6"><div class="ttname"><a href="_h5_zdevelop_8h.html#a130d8964a46667029c7d3c14572577c6">H5Z_func_t</a></div><div class="ttdeci">size_t(* H5Z_func_t)(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[], size_t nbytes, size_t *buf_size, void **buf)</div><div class="ttdoc">The filter operation callback function, defining a filter&#39;s operation on data.</div><div class="ttdef"><b>Definition</b> H5Zdevelop.h:189</div></div>
+<div class="ttc" id="a_h5_zdevelop_8h_html_acec2c757b38aefdb817ba7c7915778a9"><div class="ttname"><a href="_h5_zdevelop_8h.html#acec2c757b38aefdb817ba7c7915778a9">H5Z_CLASS_T_VERS</a></div><div class="ttdeci">#define H5Z_CLASS_T_VERS</div><div class="ttdef"><b>Definition</b> H5Zdevelop.h:45</div></div>
+<div class="ttc" id="astruct_h5_z__class3__t_html"><div class="ttname"><a href="struct_h5_z__class3__t.html">H5Z_class3_t</a></div><div class="ttdef"><b>Definition</b> H5Zdevelop.h:198</div></div>
 </div><!-- fragment --><p>The HDF5 Library and command-line tools have access to the “name” field. An application can use the H5Pget_filter&lt;*&gt; functions to retrieve information about the filters.</p>
 <p>Using the example of the structure above, the <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump" title="h5dump">h5dump</a> tool will print the string “HDF5 bzip2 filter found at …” pointing users to the applied filter (see the example in the <a class="el" href="#subsubsec_filter_plugins_model_read" title="Reading Data with an Applied Third-party Filter">Reading Data with an Applied Third-party Filter</a> section) thus solving the problem of the filter’s origin.</p>
 <h3 class="doxsection"><a class="anchor" id="subsubsec_filter_plugins_prog_create"></a>
