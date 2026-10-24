@@ -427,13 +427,12 @@ H5_get_win32_times(H5_timevals_t *tvs /*in,out*/)
 int
 Wflock(int fd, int operation)
 {
-
     HANDLE hFile;
     DWORD  dwFlags    = LOCKFILE_FAIL_IMMEDIATELY;
     DWORD  dwReserved = 0;
-    /* MAXDWORD locks the entire file */
+    /* MAXDWORD/MAXLONG locks the entire file */
     DWORD nNumberOfBytesToLockLow  = MAXDWORD;
-    DWORD nNumberOfBytesToLockHigh = MAXDWORD;
+    DWORD nNumberOfBytesToLockHigh = MAXLONG;
     /* Must initialize OVERLAPPED struct */
     OVERLAPPED overlapped = {0};
 
