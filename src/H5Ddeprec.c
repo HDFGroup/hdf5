@@ -123,8 +123,9 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t 
     H5CX_set_dcpl(dcpl_id);
 
     /* Set location parameters */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(loc_id);
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    if ((loc_params.obj_type = H5I_get_type(loc_id)) == H5I_BADID)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* get the location object */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
@@ -179,8 +180,9 @@ H5Dopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string");
 
     /* Set location parameters */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(loc_id);
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    if ((loc_params.obj_type = H5I_get_type(loc_id)) == H5I_BADID)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* get the location object */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))

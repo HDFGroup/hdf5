@@ -339,8 +339,9 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Fill in location struct fields */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(loc_id);
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    if ((loc_params.obj_type = H5I_get_type(loc_id)) == H5I_BADID)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Get the file object */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
