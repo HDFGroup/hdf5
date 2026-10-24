@@ -349,6 +349,80 @@ error:
     return (-1);
 } /* end test_encode_decode_page_buf_size() */
 
+/* Verify that H5Pdecode() rejects an encoded DCPL whose chunked layout declares
+ * more dimensions than the library's fixed chunk rank limit (H5S_MAX_RANK + 1),
+ * instead of writing past the dimension array in H5P__dcrt_layout_dec(). */
+static int
+test_decode_corrupted_layout_ndims(void)
+{
+    hid_t          dcpl      = H5I_INVALID_HID; /* Dataset creation property list */
+    hid_t          pl        = H5I_INVALID_HID; /* Decoded property list */
+    void          *temp_buf  = NULL;            /* Pointer to encoding buffer */
+    size_t         temp_size = 0;               /* Size of encoding buffer */
+    hsize_t        chunk[2]  = {17, 19};
+    unsigned char *p;
+    size_t         u;
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+        TEST_ERROR;
+
+    if (H5Pencode2(dcpl, NULL, &temp_size, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Allocate the buffer for encoding */
+    if (NULL == (temp_buf = (void *)malloc(temp_size)))
+        TEST_ERROR;
+
+    /* Encode the property list to the buffer */
+    if (H5Pencode2(dcpl, temp_buf, &temp_size, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* The chunk layout is encoded as [type][rank][dim0][dim1] with the
+     * dimensions written as 32-bit values; locate the two dimension words and
+     * corrupt the preceding rank byte with a value well above H5S_MAX_RANK. */
+    p = (unsigned char *)temp_buf;
+    for (u = 1; u + 8 <= temp_size; u++)
+        if (p[u] == 17 && p[u + 1] == 0 && p[u + 2] == 0 && p[u + 3] == 0 && p[u + 4] == 19 &&
+            p[u + 5] == 0 && p[u + 6] == 0 && p[u + 7] == 0 && p[u - 1] == 2) {
+            p[u - 1] = 200;
+            break;
+        }
+    if (u + 8 > temp_size)
+        PUTS_ERROR("couldn't locate encoded chunk rank\n");
+
+    /* Decoding the corrupted buffer should fail */
+    H5E_BEGIN_TRY
+    {
+        pl = H5Pdecode(temp_buf);
+    }
+    H5E_END_TRY
+    if (pl >= 0)
+        PUTS_ERROR("H5Pdecode accepted an out-of-range chunk rank\n");
+
+    free(temp_buf);
+    temp_buf = NULL;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    /* Success */
+    return (0);
+
+error:
+    if (temp_buf)
+        free(temp_buf);
+
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(pl);
+        H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+
+    return (-1);
+} /* end test_decode_corrupted_layout_ndims() */
+
 int
 main(void)
 {
@@ -914,6 +988,11 @@ main(void)
 
         } /* end high */
     }     /* end low */
+
+    TESTING("H5Pdecode of DCPL with out-of-range chunk rank");
+    if (test_decode_corrupted_layout_ndims() < 0)
+        FAIL_PUTS_ERROR("DCPL decoding of out-of-range chunk rank failed\n");
+    PASSED();
 
     return 0;
 
