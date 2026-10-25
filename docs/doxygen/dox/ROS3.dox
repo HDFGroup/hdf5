@@ -56,7 +56,7 @@
  *    (\c role_arn with \c source_profile or \c credential_source), an external credential helper
  *    program (\c credential_process), and static credentials (\c aws_access_key_id,
  *    \c aws_secret_access_key, \c aws_session_token)
- * -# STS \c AssumeRoleWithWebIdentity, using \c AWS_WEB_IDENTITY_TOKEN_FILE, \c AWS_ROLE_ARN and
+ * -# STS \c AssumeRoleWithWebIdentity, using \c AWS_WEB_IDENTITY_TOKEN_FILE, \c AWS_ROLE_ARN, and
  *    \c AWS_ROLE_SESSION_NAME, or the \c web_identity_token_file profile setting, as used by IAM
  *    Roles for Service Accounts on EKS
  * -# ECS and EKS container credentials, when \c AWS_CONTAINER_CREDENTIALS_RELATIVE_URI or
@@ -132,7 +132,7 @@
  * <tr><td>#HDF5_ROS3_VFD_DEBUG
  *     <td>Prints the driver's own debugging information to \c stderr
  * <tr><td>#HDF5_ROS3_VFD_LOG_LEVEL
- *     <td>Enables aws-c-s3 library logging at \c error, \c info, \c debug or \c trace level
+ *     <td>Enables aws-c-s3 library logging at \c error, \c info, \c debug, or \c trace level
  * <tr><td>#HDF5_ROS3_VFD_LOG_FILE
  *     <td>Destination for that logging: \c stdout, \c stderr, or a filename. Defaults to
  *         #H5FD_ROS3_VFD_DEFAULT_LOG_FILE

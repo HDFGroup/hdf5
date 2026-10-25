@@ -522,7 +522,7 @@ These documents provide additional information for the use and tuning of specifi
   <p style="font-style: italic; color: #0000ff;"><span>@ref ros3_vfd</span></p>
 </td>
   <td style="width: 198.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
-  <p>Describes how the Read-Only S3 (ROS3) VFD resolves its region, credentials, endpoint and request addressing style from the FAPL, AWS environment variables and the shared AWS configuration files.</p>
+  <p>Describes how the Read-Only S3 (ROS3) VFD resolves its region, credentials, endpoint, and request addressing style from the FAPL, AWS environment variables, and the shared AWS configuration files.</p>
 </td>
 </tr>
   <tr style="height: 36.00pt;">

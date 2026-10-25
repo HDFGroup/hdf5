@@ -209,7 +209,7 @@
  *      used by the AWS CLI and the AWS SDKs, in this order:
  *
  *        - From the environment, by checking the AWS_ACCESS_KEY_ID,
- *          AWS_SECRET_ACCESS_KEY and AWS_SESSION_TOKEN environment variables
+ *          AWS_SECRET_ACCESS_KEY, and AWS_SESSION_TOKEN environment variables
  *        - From the AWS profile files, by reading from ~/.aws/config and
  *          ~/.aws/credentials, by default. The specific files read from can
  *          be overridden with the AWS_CONFIG_FILE and AWS_SHARED_CREDENTIALS_FILE
@@ -221,9 +221,9 @@
  *            - An external credential helper program, with the
  *              `credential_process` setting
  *            - Static credentials, with the `aws_access_key_id`,
- *              `aws_secret_access_key` and `aws_session_token` settings
+ *              `aws_secret_access_key`, and `aws_session_token` settings
  *        - From STS, by using AssumeRoleWithWebIdentity. This covers the
- *          AWS_WEB_IDENTITY_TOKEN_FILE, AWS_ROLE_ARN and AWS_ROLE_SESSION_NAME
+ *          AWS_WEB_IDENTITY_TOKEN_FILE, AWS_ROLE_ARN, and AWS_ROLE_SESSION_NAME
  *          environment variables and the `web_identity_token_file` profile
  *          setting, as used by IAM Roles for Service Accounts on EKS
  *        - From container credentials, as provided on ECS and EKS, when the
@@ -237,16 +237,8 @@
  *      results in unsigned requests rather than an error, which usually
  *      surfaces later as an HTTP 403 response from the server.
  *
- *      AWS IAM Identity Center (SSO) is not supported directly. The
- *      `sso_session` and `sso_start_url` profile settings are not part of this
- *      chain, and a profile relying on them alone will fall back to anonymous
- *      credentials. SSO credentials can still be supplied to the ROS3 VFD by
- *      way of the `credential_process` setting.
- *
- *      Because the EC2 instance metadata step is attempted by default, opening
- *      a file on a machine that is not an EC2 instance may be delayed while
- *      that step times out. The AWS_EC2_METADATA_DISABLED environment variable,
- *      which the aws-c-auth library recognizes, can be set to true to skip it.
+ *      See \ref sec_ros3_credentials for the rest, including the AWS IAM
+ *      Identity Center (SSO) limitation and the EC2 instance metadata timeout.
  *
  * \var char H5FD_ros3_fapl_t::aws_region[H5FD_ROS3_MAX_REGION_LEN + 1]
  *      A string which specifies the AWS region of the S3 bucket, e.g. "us-east-1".
@@ -389,25 +381,9 @@ H5_DLL herr_t H5Pget_fapl_ros3_endpoint(hid_t fapl_id, size_t size, char *endpoi
  *          using H5Pset_fapl_ros3() and use this list as input argument of the function
  *          H5Pset_fapl_ros3_endpoint().
  *
- *          The #H5FD_ROS3 driver looks for an endpoint URL in the following
- *          places, in order:
- *
- *            - The File Access Property List, if set with this function
- *            - The AWS_ENDPOINT_URL_S3 environment variable
- *            - The AWS_ENDPOINT_URL environment variable
- *            - The `endpoint_url` entry under the `s3` key of the
- *              `[services ...]` section named by the active profile's
- *              `services` entry, in the AWS configuration file
- *              (~/.aws/config by default)
- *            - The `endpoint_url` entry of the active profile itself
- *
- *          The active profile is the 'default' profile, unless a different one
- *          is named by the AWS_PROFILE environment variable.
- *
- *          Every source other than the File Access Property List can be
- *          suppressed by setting the AWS_IGNORE_CONFIGURED_ENDPOINT_URLS
- *          environment variable, or the `ignore_configured_endpoint_urls`
- *          entry of the active profile, to "true".
+ *          The full list of places the driver looks for an endpoint URL, and
+ *          how to suppress every source but this one, is given in
+ *          \ref sec_ros3_endpoint.
  *
  *          Note, the endpoint URL is only needed when you want to access a S3 bucket
  *          using an alternate URL. For example, this can be useful when using s3:// object
