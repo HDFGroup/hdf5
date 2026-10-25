@@ -357,6 +357,7 @@ struct H5HF_hdr_t {
     uint8_t heap_off_size;    /* Size of heap offsets (in bytes) */
     uint8_t heap_len_size;    /* Size of heap ID lengths (in bytes) */
     bool    checked_filters;  /* true if pipeline passes can_apply checks */
+    unsigned universal_filter_mask; /* Mask of filters disabled for all objects in this heap */
 };
 
 /* Common indirect block doubling table entry */

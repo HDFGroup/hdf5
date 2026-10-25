@@ -1049,7 +1049,7 @@ H5Z_can_apply(hid_t dcpl_id, hid_t type_id, unsigned *universal_filter_mask /*ou
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(!universal_filter_mask || *universal_filter_mask == 0);
+    assert(universal_filter_mask && *universal_filter_mask == 0);
 
     /* Make "can apply" callbacks for filters in pipeline */
     if (H5Z__prepare_prelude_callback_dcpl(dcpl_id, type_id, universal_filter_mask, H5Z_PRELUDE_CAN_APPLY) <
@@ -1103,16 +1103,17 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_can_apply_direct(const H5O_pline_t *pline)
+H5Z_can_apply_direct(const H5O_pline_t *pline, unsigned *universal_filter_mask /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     assert(pline && pline->nused > 0);
+    assert(universal_filter_mask && *universal_filter_mask == 0);
 
     /* Make "can apply" callbacks for filters in pipeline */
-    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, NULL, H5Z_PRELUDE_CAN_APPLY) < 0)
+    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, universal_filter_mask, H5Z_PRELUDE_CAN_APPLY) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter");
 
 done:
@@ -1135,7 +1136,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_set_local_direct(const H5O_pline_t *pline)
+H5Z_set_local_direct(const H5O_pline_t *pline, unsigned universal_filter_mask /*in*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1144,7 +1145,7 @@ H5Z_set_local_direct(const H5O_pline_t *pline)
     assert(pline->nused > 0);
 
     /* Make "set local" callbacks for filters in pipeline */
-    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, NULL, H5Z_PRELUDE_SET_LOCAL) < 0)
+    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, &universal_filter_mask, H5Z_PRELUDE_SET_LOCAL) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_SETLOCAL, FAIL, "local filter parameters not set");
 
 done:

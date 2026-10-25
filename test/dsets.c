@@ -21477,6 +21477,8 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+#define CANNOT_APPLY_CDIM1 10
+#define CANNOT_APPLY_CDIM2 10
 static herr_t
 test_cannot_apply(hid_t fapl)
 {
@@ -21504,8 +21506,8 @@ test_cannot_apply(hid_t fapl)
         TEST_ERROR;
 
     /* Set chunk dimensions */
-    cdims[0] = THREADED_CHUNKS_CDIM1;
-    cdims[1] = THREADED_CHUNKS_CDIM2;
+    cdims[0] = CANNOT_APPLY_CDIM1;
+    cdims[1] = CANNOT_APPLY_CDIM2;
     if (H5Pset_chunk(dcpl, 2, cdims) < 0)
         TEST_ERROR;
 
@@ -21554,6 +21556,52 @@ test_cannot_apply(hid_t fapl)
 
     /* Open dataset */
     if ((dataset = H5Dopen2(file, "dset_cannot_apply", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Initialize the write buffer */
+    for (i = 0; i < DSET_DIM1; i++)
+        for (j = 0; j < DSET_DIM2; j++)
+            points[i][j] = n++;
+
+    /* Write the data to the dataset */
+    if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points_data) < 0)
+        TEST_ERROR;
+
+    /* Read the dataset back */
+    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check_data) < 0)
+        TEST_ERROR;
+
+    /* Check that the values read are the same as the values written */
+    for (i = 0; i < DSET_DIM1; i++) {
+        for (j = 0; j < DSET_DIM2; j++) {
+            if (points[i][j] != check[i][j]) {
+                H5_FAILED();
+                printf("    Read different values than written.\n");
+                printf("    At index %d,%d\n", i, j);
+                goto error;
+            }
+        }
+    }
+
+    /* Close dataset */
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+    dataset = H5I_INVALID_HID;
+
+    /* Try again with new dataset, reopening before writing */
+
+    /* Create the cannot apply 2 dataset */
+    if ((dataset = H5Dcreate2(file, "dset_cannot_apply2", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Close dataset */
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+    dataset = H5I_INVALID_HID;
+
+    /* Open dataset */
+    if ((dataset = H5Dopen2(file, "dset_cannot_apply2", H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Initialize the write buffer */

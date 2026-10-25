@@ -327,6 +327,7 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
 
         /* Push direct block data through I/O filter pipeline */
         nbytes = write_size;
+        filter_mask = hdr->universal_filter_mask;
         if (H5Z_pipeline(&(hdr->pline), 0, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes, &write_size,
                          &write_buf) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "output pipeline failed");
@@ -744,6 +745,10 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, bool is_read, H5HF_operat
         /* Initialize the filter callback struct */
         filter_cb.op_data = NULL;
         filter_cb.func    = NULL; /* no callback function when failed */
+
+        /* Check for filters that failed can_apply but are not disabled by the filter mask */
+        if (hdr->universal_filter_mask & ~filter_mask)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "cannot apply all filters that were used to write this dblock");
 
         /* De-filter the object */
         read_size = nbytes = obj_size;
