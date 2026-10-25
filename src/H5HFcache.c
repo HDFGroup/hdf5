@@ -1576,7 +1576,8 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
 
         /* Check for filters that failed can_apply but are not disabled by the filter mask */
         if (hdr->universal_filter_mask & ~filter_mask)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "cannot apply all filters that were used to write this dblock");
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL,
+                        "cannot apply all filters that were used to write this dblock");
 
         /* Push direct block data through I/O filter pipeline */
         if (H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes,
@@ -1736,7 +1737,8 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, boo
 
             /* Check for filters that failed can_apply but are not disabled by the filter mask */
             if (hdr->universal_filter_mask & ~filter_mask)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, NULL, "cannot apply all filters that were used to write this dblock");
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, NULL,
+                            "cannot apply all filters that were used to write this dblock");
 
             /* Push direct block data through I/O filter pipeline */
             if (H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb,
@@ -2082,8 +2084,8 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
 
     /* Check for I/O filters on this heap */
     if (hdr->filter_len > 0) {
-        H5Z_cb_t filter_cb;       /* Filter callback structure */
-        size_t   nbytes;          /* Number of bytes used */
+        H5Z_cb_t filter_cb;                                /* Filter callback structure */
+        size_t   nbytes;                                   /* Number of bytes used */
         unsigned filter_mask = hdr->universal_filter_mask; /* Filter mask for block */
 
         /* Initialize the filter callback struct */

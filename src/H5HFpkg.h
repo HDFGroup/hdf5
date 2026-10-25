@@ -354,9 +354,9 @@ struct H5HF_hdr_t {
     size_t tiny_max_len;      /* Max. size of tiny objects for this heap */
     bool   tiny_len_extended; /* Flag to indicate that 'tiny' object's length is stored in extended form
                                     (i.e. w/extra byte) */
-    uint8_t heap_off_size;    /* Size of heap offsets (in bytes) */
-    uint8_t heap_len_size;    /* Size of heap ID lengths (in bytes) */
-    bool    checked_filters;  /* true if pipeline passes can_apply checks */
+    uint8_t  heap_off_size;   /* Size of heap offsets (in bytes) */
+    uint8_t  heap_len_size;   /* Size of heap ID lengths (in bytes) */
+    bool     checked_filters; /* true if pipeline passes can_apply checks */
     unsigned universal_filter_mask; /* Mask of filters disabled for all objects in this heap */
 };
 
