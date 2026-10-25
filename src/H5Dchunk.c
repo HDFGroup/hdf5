@@ -3728,8 +3728,10 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
 
     if (threaded_chunk_info->old_pline) {
         /* Check for filters that failed can_apply but are not disabled by the filter mask */
-        if (threaded_chunk_info->chk_dset_io_info.dset->shared->universal_filter_mask & ~threaded_chunk_info->udata.filter_mask)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "cannot apply all filters that were used to write this chunk");
+        if (threaded_chunk_info->chk_dset_io_info.dset->shared->universal_filter_mask &
+            ~threaded_chunk_info->udata.filter_mask)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL,
+                        "cannot apply all filters that were used to write this chunk");
         else {
             /* Perform filter pipeline. Defer going to done on error so the chunk cache is always patched. */
             if (H5_UNLIKELY(H5Z_pipeline(threaded_chunk_info->old_pline, H5Z_FLAG_REVERSE,
@@ -3743,7 +3745,8 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
             /* Make sure the chunk is the correct size after being unfiltered */
             if (H5_UNLIKELY(threaded_chunk_info->chunk_nbytes !=
                             threaded_chunk_info->threaded_io_info->chunk_size))
-                HDONE_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk size is incorrect after being unfiltered");
+                HDONE_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
+                            "chunk size is incorrect after being unfiltered");
 
             /* The new_unfilt_chunk flag should only be set during an H5Dset_extent operation. This is not
              * currently supported with internal threading. If this support is added, we will need to realloc
@@ -5506,7 +5509,8 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
 
                         /* Check for filters that failed can_apply but are not disabled by the filter mask */
                         if (dset->shared->universal_filter_mask & ~udata->filter_mask)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "cannot apply all filters that were used to write this chunk");
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL,
+                                        "cannot apply all filters that were used to write this chunk");
 
                         /* Perform filter pipeline */
                         if (H5Z_pipeline(old_pline, H5Z_FLAG_REVERSE, &(udata->filter_mask), err_detect,

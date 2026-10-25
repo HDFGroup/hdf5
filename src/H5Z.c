@@ -894,7 +894,8 @@ H5Z__prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id, hi
                          * If the filter is NOT optional, returns failure. */
                         if (status == false) {
                             if (!(pline->filter[u].flags & H5Z_FLAG_OPTIONAL))
-                                HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "filter parameters not appropriate");
+                                HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL,
+                                            "filter parameters not appropriate");
 
                             /* Add filter to universal filter mask */
                             if (universal_filter_mask)
@@ -905,7 +906,8 @@ H5Z__prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id, hi
 
                 case H5Z_PRELUDE_SET_LOCAL:
                     /* Check if there is a "set local" callback, and if this filter is disabled by the mask */
-                    if (fclass->set_local && (!universal_filter_mask || !(*universal_filter_mask & ((unsigned)1 << u)))) {
+                    if (fclass->set_local &&
+                        (!universal_filter_mask || !(*universal_filter_mask & ((unsigned)1 << u)))) {
                         herr_t status;
 
                         /* Don't prepare for a user callback if this is an internal filter */
@@ -953,7 +955,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, unsigned *universal_filter_mask /*in,out*/, H5Z_prelude_type_t prelude_type)
+H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, unsigned *universal_filter_mask /*in,out*/,
+                                   H5Z_prelude_type_t prelude_type)
 {
     hid_t         space_id    = -1;      /* ID for dataspace describing chunk */
     H5O_layout_t *dcpl_layout = NULL;    /* Dataset's layout information */
@@ -1007,7 +1010,8 @@ H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, unsigned *unive
                 }
 
                 /* Make the callbacks */
-                if (H5Z__prelude_callback(&dcpl_pline, dcpl_id, type_id, space_id, universal_filter_mask, prelude_type) < 0)
+                if (H5Z__prelude_callback(&dcpl_pline, dcpl_id, type_id, space_id, universal_filter_mask,
+                                          prelude_type) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter");
             }
         }
@@ -1048,7 +1052,8 @@ H5Z_can_apply(hid_t dcpl_id, hid_t type_id, unsigned *universal_filter_mask /*ou
     assert(!universal_filter_mask || *universal_filter_mask == 0);
 
     /* Make "can apply" callbacks for filters in pipeline */
-    if (H5Z__prepare_prelude_callback_dcpl(dcpl_id, type_id, universal_filter_mask, H5Z_PRELUDE_CAN_APPLY) < 0)
+    if (H5Z__prepare_prelude_callback_dcpl(dcpl_id, type_id, universal_filter_mask, H5Z_PRELUDE_CAN_APPLY) <
+        0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter");
 
 done:
@@ -1078,7 +1083,8 @@ H5Z_set_local(hid_t dcpl_id, hid_t type_id, unsigned universal_filter_mask /*in*
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Make "set local" callbacks for filters in pipeline */
-    if (H5Z__prepare_prelude_callback_dcpl(dcpl_id, type_id, &universal_filter_mask, H5Z_PRELUDE_SET_LOCAL) < 0)
+    if (H5Z__prepare_prelude_callback_dcpl(dcpl_id, type_id, &universal_filter_mask, H5Z_PRELUDE_SET_LOCAL) <
+        0)
         HGOTO_ERROR(H5E_PLINE, H5E_SETLOCAL, FAIL, "local filter parameters not set");
 
 done:
