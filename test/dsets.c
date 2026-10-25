@@ -399,7 +399,8 @@ static size_t filter_reenter_h5(unsigned int flags, size_t cd_nelmts, const unsi
                                 size_t nbytes, size_t *buf_size, void **buf);
 static htri_t can_apply_cannot_apply(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static htri_t set_local_cannot_apply(hid_t dcpl_id, hid_t type_id, hid_t space_id);
-static size_t filter_cannot_apply(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+static size_t filter_cannot_apply(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                                  size_t nbytes, size_t *buf_size, void **buf);
 
 static herr_t dsets_h5zregister_direct(const H5Z_class3_t *filter);
 static herr_t dsets_h5zunregister_direct(H5Z_filter_t id);
@@ -21423,25 +21424,28 @@ error:
  */
 /* This message derives from H5Z */
 const H5Z_class3_t H5Z_CANNOT_APPLY[1] = {{
-    H5Z_CLASS_T_VERS_3,         /* H5Z_class_t version */
-    H5Z_FILTER_CANNOT_APPLY,    /* Filter id number */
-    1, 1,                       /* Encoding and decoding enabled */
-    "cannot_apply",             /* Filter name for debugging */
-    can_apply_cannot_apply,     /* The "can apply" callback */
-    set_local_cannot_apply,     /* The "set local" callback */
-    filter_cannot_apply,        /* The actual filter function */
-    H5Z_FEAT_FILTER_THREADSAFE | H5Z_FEAT_FILTER_NO_H5_CALLS, /* This filter is thread-safe and does not re-enter the HDF5 API */
+    H5Z_CLASS_T_VERS_3,      /* H5Z_class_t version */
+    H5Z_FILTER_CANNOT_APPLY, /* Filter id number */
+    1, 1,                    /* Encoding and decoding enabled */
+    "cannot_apply",          /* Filter name for debugging */
+    can_apply_cannot_apply,  /* The "can apply" callback */
+    set_local_cannot_apply,  /* The "set local" callback */
+    filter_cannot_apply,     /* The actual filter function */
+    H5Z_FEAT_FILTER_THREADSAFE |
+        H5Z_FEAT_FILTER_NO_H5_CALLS, /* This filter is thread-safe and does not re-enter the HDF5 API */
 }};
 
 static htri_t
-can_apply_cannot_apply(hid_t H5_ATTR_UNUSED dcpl_id, hid_t H5_ATTR_UNUSED type_id, hid_t H5_ATTR_UNUSED space_id)
+can_apply_cannot_apply(hid_t H5_ATTR_UNUSED dcpl_id, hid_t H5_ATTR_UNUSED type_id,
+                       hid_t H5_ATTR_UNUSED space_id)
 {
     /* This filter can never apply */
     return 0;
 }
 
 static htri_t
-set_local_cannot_apply(hid_t H5_ATTR_UNUSED dcpl_id, hid_t H5_ATTR_UNUSED type_id, hid_t H5_ATTR_UNUSED space_id)
+set_local_cannot_apply(hid_t H5_ATTR_UNUSED dcpl_id, hid_t H5_ATTR_UNUSED type_id,
+                       hid_t H5_ATTR_UNUSED space_id)
 {
     /* This function should never be called */
     TEST_ERROR;
@@ -21452,8 +21456,8 @@ error:
 
 static size_t
 filter_cannot_apply(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
-                  const unsigned int H5_ATTR_UNUSED *cd_values, size_t H5_ATTR_UNUSED nbytes,
-                  size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+                    const unsigned int H5_ATTR_UNUSED *cd_values, size_t H5_ATTR_UNUSED nbytes,
+                    size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
     /* This function should never be called */
     TEST_ERROR;
@@ -21478,8 +21482,8 @@ test_cannot_apply(hid_t fapl)
 {
     char  filename[FILENAME_BUF_SIZE] = "";
     hid_t file = H5I_INVALID_HID, dataset = H5I_INVALID_HID, dcpl = H5I_INVALID_HID, space = H5I_INVALID_HID;
-    int      i, j, n = 0;
-    hsize_t  dims[2], cdims[2];
+    int   i, j, n = 0;
+    hsize_t dims[2], cdims[2];
 
     TESTING("optional filters that cannot apply");
 
@@ -21526,7 +21530,7 @@ test_cannot_apply(hid_t fapl)
         TEST_ERROR;
 
     /* Read the dataset back */
-    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,  H5P_DEFAULT, check_data) < 0)
+    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check_data) < 0)
         TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
@@ -21562,7 +21566,7 @@ test_cannot_apply(hid_t fapl)
         TEST_ERROR;
 
     /* Read the dataset back */
-    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,  H5P_DEFAULT, check_data) < 0)
+    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check_data) < 0)
         TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
