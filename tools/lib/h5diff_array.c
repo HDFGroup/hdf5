@@ -123,7 +123,7 @@ static bool not_comparable;
             not_comparable = true;                                                                           \
     } while (0)
 
-#define PER_UNSIGN(TYPE, A, B)                                                                               \
+#define PER_UNSIGN(A, B)                                                                                     \
     do {                                                                                                     \
         per            = -1;                                                                                 \
         not_comparable = false;                                                                              \
@@ -131,7 +131,7 @@ static bool not_comparable;
         if (H5_DBL_ABS_EQUAL(0, (double)(A)) && H5_DBL_ABS_EQUAL(0, (double)(B)))                            \
             both_zero = true;                                                                                \
         if (!H5_DBL_ABS_EQUAL(0, (double)(A)))                                                               \
-            per = ABS((double)((TYPE)((B) - (A))) / (double)(A));                                            \
+            per = (double)PDIFF(A, B) / (double)(A);                                                         \
         else                                                                                                 \
             not_comparable = true;                                                                           \
     } while (0)
@@ -380,7 +380,7 @@ diff_array(void *_mem1, void *_mem2, diff_opt_t *opts, hid_t container1_id, hid_
             }
             else if (H5Tequal(opts->m_tid, H5T_NATIVE_UINT)) {
                 for (i = 0; i < opts->hs_nelmts; i++) {
-                    nfound += diff_int_element(mem1, mem2, i, opts);
+                    nfound += diff_uint_element(mem1, mem2, i, opts);
 
                     mem1 += sizeof(unsigned int);
                     mem2 += sizeof(unsigned int);
@@ -1786,7 +1786,7 @@ character_compare_opt(unsigned char *mem1, unsigned char *mem2, hsize_t elemtno,
     }
     /* !-d and -p */
     else if (!opts->delta_bool && opts->percent_bool) {
-        PER_UNSIGN(signed char, temp1_uchar, temp2_uchar);
+        PER_UNSIGN(temp1_uchar, temp2_uchar);
         if (per > opts->percent) {
             opts->print_percentage = 1;
             print_pos(opts, elemtno, 0);
@@ -1798,7 +1798,7 @@ character_compare_opt(unsigned char *mem1, unsigned char *mem2, hsize_t elemtno,
     }
     /* -d and -p */
     else if (opts->delta_bool && opts->percent_bool) {
-        PER_UNSIGN(signed char, temp1_uchar, temp2_uchar);
+        PER_UNSIGN(temp1_uchar, temp2_uchar);
         if (per > opts->percent && PDIFF(temp1_uchar, temp2_uchar) > opts->delta) {
             opts->print_percentage = 1;
             print_pos(opts, elemtno, 0);
@@ -3519,7 +3519,7 @@ diff_uchar_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
     }
     /* !-d and -p */
     else if (!opts->delta_bool && opts->percent_bool) {
-        PER_UNSIGN(signed char, temp1_uchar, temp2_uchar);
+        PER_UNSIGN(temp1_uchar, temp2_uchar);
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
@@ -3540,7 +3540,7 @@ diff_uchar_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
     }
     /* -d and -p */
     else if (opts->delta_bool && opts->percent_bool) {
-        PER_UNSIGN(signed char, temp1_uchar, temp2_uchar);
+        PER_UNSIGN(temp1_uchar, temp2_uchar);
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
@@ -3695,7 +3695,7 @@ diff_ushort_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, 
     }
     /* !-d and -p */
     else if (!opts->delta_bool && opts->percent_bool) {
-        PER_UNSIGN(signed short, temp1_ushort, temp2_ushort);
+        PER_UNSIGN(temp1_ushort, temp2_ushort);
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
@@ -3718,7 +3718,7 @@ diff_ushort_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, 
     }
     /* -d and -p */
     else if (opts->delta_bool && opts->percent_bool) {
-        PER_UNSIGN(signed short, temp1_ushort, temp2_ushort);
+        PER_UNSIGN(temp1_ushort, temp2_ushort);
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
@@ -3875,7 +3875,7 @@ diff_uint_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, di
     }
     /* !-d and -p */
     else if (!opts->delta_bool && opts->percent_bool) {
-        PER_UNSIGN(signed int, temp1_uint, temp2_uint);
+        PER_UNSIGN(temp1_uint, temp2_uint);
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
@@ -3896,7 +3896,7 @@ diff_uint_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, di
     }
     /* -d and -p */
     else if (opts->delta_bool && opts->percent_bool) {
-        PER_UNSIGN(signed int, temp1_uint, temp2_uint);
+        PER_UNSIGN(temp1_uint, temp2_uint);
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
@@ -4051,7 +4051,7 @@ diff_ulong_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
     }
     /* !-d and -p */
     else if (!opts->delta_bool && opts->percent_bool) {
-        PER_UNSIGN(signed long, temp1_ulong, temp2_ulong);
+        PER_UNSIGN(temp1_ulong, temp2_ulong);
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
@@ -4073,7 +4073,7 @@ diff_ulong_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
     }
     /* -d and -p */
     else if (opts->delta_bool && opts->percent_bool) {
-        PER_UNSIGN(signed long, temp1_ulong, temp2_ulong);
+        PER_UNSIGN(temp1_ulong, temp2_ulong);
 
         if (not_comparable && !both_zero) {
             opts->print_percentage = 1;
