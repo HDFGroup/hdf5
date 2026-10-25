@@ -21501,7 +21501,7 @@ test_cannot_apply(hid_t fapl)
     if ((space = H5Screate_simple(2, dims, NULL)) < 0)
         TEST_ERROR;
 
-    /* Create DXPL, DCPL, and DAPL */
+    /* Create DCPL */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR;
 
@@ -21657,7 +21657,7 @@ error:
     }
     H5E_END_TRY
     return FAIL;
-} /* end test_threaded_filters() */
+} /* end test_cannot_apply() */
 
 /*-------------------------------------------------------------------------
  * Function:    main
