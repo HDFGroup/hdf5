@@ -1925,9 +1925,9 @@ H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t 
 
     assert((dirty == false) || (type->id == 5 || type->id == 6));
 
-    ds_entry_ptr->cache_ptr = f->shared->cache;
-    ds_entry_ptr->addr      = addr;
-    ds_entry_ptr->size      = len;
+    ds_entry_ptr->cache_ptr        = f->shared->cache;
+    ds_entry_ptr->addr             = addr;
+    ds_entry_ptr->size             = len;
     ds_entry_ptr->image_ptr        = pf_entry_ptr->image_ptr;
     ds_entry_ptr->image_up_to_date = !dirty;
     ds_entry_ptr->type             = type;
