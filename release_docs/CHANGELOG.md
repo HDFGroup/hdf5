@@ -167,8 +167,9 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ### Fixed set_local and filter callbacks being caled for filters whose can_apply callback returns false
 
-   Fixed library to no longer execute the set_local and filter callbacks when an optional
-   filter plugin's can_apply callback returned false, to match the documented behavior.
+   Fixed library to no longer execute the set_local and filter callbacks for a dataset
+   when an optional filter plugin's can_apply callback returned false, to match the
+   documented behavior.
 
 ### Fixed H5Pmodify_filter() writing past the filter pipeline for a filter not in it
 
