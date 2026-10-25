@@ -572,7 +572,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             if (H5D_flush_layout_to_dcpl(dset_info[i].dset) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to flush layout");
 
-            if (H5Z_can_apply(dset_info[i].dset->shared->dcpl_id, dset_info[i].dset->shared->type_id) < 0)
+            if (H5Z_can_apply(dset_info[i].dset->shared->dcpl_id, dset_info[i].dset->shared->type_id, &dset_info[i].dset->shared->universal_filter_mask) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters");
 
             dset_info[i].dset->shared->checked_filters = true;

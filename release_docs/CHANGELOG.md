@@ -165,6 +165,11 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed set_local and filter callbacks being caled for filters whose can_apply callback returns false
+
+   Fixed library to no longer execute the set_local and filter callbacks when an optional
+   filter plugin's can_apply callback returned false, to match the documented behavior.
+
 ### Fixed H5Pmodify_filter() writing past the filter pipeline for a filter not in it
 
    `H5Pmodify_filter()` returned success when the requested filter was not in the pipeline, and wrote the new flags and client data into the slot one past the last used entry. When the pipeline already held `H5Z_MAX_NFILTERS` filters, that write went past the end of the filter array, and client data longer than `H5Z_COMMON_CD_VALUES` leaked its allocation. `H5Pmodify_filter()` now fails with "filter not in pipeline" in this case.
