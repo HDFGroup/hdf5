@@ -88,12 +88,10 @@ conversation. Please read the [quickstart guide](https://forum.hdfgroup.org/t/qu
 
 ## Release Schedule
 
-![HDF5 release schedule][u2]
-
 HDF5 does not follow a regular release schedule. Instead, updates are based on the
 introduction of new features and the resolution of bugs. However, we aim to have at
-least one annual release for each maintenance branch. The chart above shows **past HDF5 releases that
-have reached end of life (EOL)**.
+least one annual release for each maintenance branch. The chart at the end of this
+section shows **past HDF5 releases that have reached end of life (EOL)**.
 
 ### Release Progress
 
@@ -123,6 +121,10 @@ release date. The badges below them show the current progress of **critical**, *
 - 🔴 **Red (<40%)**: Initial Phase - significant issues remain
 
 Click the badges to view the detailed project board with current release items.
+
+### EOL Releases
+
+![HDF5 release schedule][u2]
 
 ## Downloads and Source Code
 

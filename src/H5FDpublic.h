@@ -175,6 +175,13 @@
  * operations when appropriate.
  */
 #define H5FD_FEAT_MEMMANAGE 0x00010000
+/**
+ * Defining H5FD_FEAT_READWRITE_NO_H5_CALLS for a VFL driver means that the
+ * driver read() and write() callbacks never makes any HDF5 API calls, excluding
+ * H5open(). Does not apply to read_vector(), write_vector(), read_selection(),
+ * or write_selection().
+ */
+#define H5FD_FEAT_READWRITE_NO_H5_CALLS 0x00020000
 
 /* ctl function definitions: */
 
