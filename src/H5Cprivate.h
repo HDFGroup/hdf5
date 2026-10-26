@@ -37,12 +37,6 @@
 #define H5C__MAX_NUM_TYPE_IDS 30
 #define H5C__PREFIX_LEN       32
 
-/* This sanity checking constant was picked out of the air.  Increase
- * or decrease it if appropriate.  Its purposes is to detect corrupt
- * object sizes, so it probably doesn't matter if it is a bit big.
- */
-#define H5C_MAX_ENTRY_SIZE ((size_t)(32 * 1024 * 1024))
-
 #ifdef H5_HAVE_PARALLEL
 /* we must maintain the clean and dirty LRU lists when we are compiled
  * with parallel support.
