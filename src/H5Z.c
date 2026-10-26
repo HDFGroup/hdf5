@@ -1053,8 +1053,7 @@ H5Z_can_apply(hid_t dcpl_id, hid_t type_id, unsigned *universal_filter_mask /*ou
     assert(universal_filter_mask);
 
     /* Make "can apply" callbacks for filters in pipeline */
-    if (H5Z__prepare_prelude_callback_dcpl(dcpl_id, type_id, &tmp_ufm, H5Z_PRELUDE_CAN_APPLY) <
-        0)
+    if (H5Z__prepare_prelude_callback_dcpl(dcpl_id, type_id, &tmp_ufm, H5Z_PRELUDE_CAN_APPLY) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter");
 
     /* Set universal_filter_mask */
