@@ -1778,7 +1778,7 @@ done:
  *              Note that an endpoint URL specified in the FAPL is resolved by
  *              the caller and is never suppressed this way.
  *
- *              Not static so that test/s3comms.c can exercise the resolution
+ *              Not static so that test/ros3.c can exercise the resolution
  *              order without performing any I/O.
  *
  * Return:      Non-negative on success/Negative on failure
