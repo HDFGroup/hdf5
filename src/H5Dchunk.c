@@ -3727,32 +3727,25 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
     mutex_held = false;
 
     if (threaded_chunk_info->old_pline) {
-        /* Check for filters that failed can_apply but are not disabled by the filter mask */
-        if (threaded_chunk_info->chk_dset_io_info.dset->shared->universal_filter_mask &
-            ~threaded_chunk_info->udata.filter_mask)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL,
-                        "cannot apply all filters that were used to write this chunk");
-        else {
-            /* Perform filter pipeline. Defer going to done on error so the chunk cache is always patched. */
-            if (H5_UNLIKELY(H5Z_pipeline(threaded_chunk_info->old_pline, H5Z_FLAG_REVERSE,
-                                         &(threaded_chunk_info->udata.filter_mask),
-                                         threaded_chunk_info->threaded_io_info->err_detect,
-                                         threaded_chunk_info->threaded_io_info->filter_cb,
-                                         &threaded_chunk_info->chunk_nbytes, &buf_alloc,
-                                         &threaded_chunk_info->chunk) < 0))
-                HDONE_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "data pipeline read failed");
+        /* Perform filter pipeline. Defer going to done on error so the chunk cache is always patched. */
+        if (H5_UNLIKELY(H5Z_pipeline(threaded_chunk_info->old_pline, H5Z_FLAG_REVERSE,
+                                     &(threaded_chunk_info->udata.filter_mask),
+                                     threaded_chunk_info->threaded_io_info->err_detect,
+                                     threaded_chunk_info->threaded_io_info->filter_cb,
+                                     &threaded_chunk_info->chunk_nbytes, &buf_alloc,
+                                     &threaded_chunk_info->chunk) < 0))
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "data pipeline read failed");
 
-            /* Make sure the chunk is the correct size after being unfiltered */
-            if (H5_UNLIKELY(threaded_chunk_info->chunk_nbytes !=
-                            threaded_chunk_info->threaded_io_info->chunk_size))
-                HDONE_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
-                            "chunk size is incorrect after being unfiltered");
+        /* Make sure the chunk is the correct size after being unfiltered */
+        if (H5_UNLIKELY(threaded_chunk_info->chunk_nbytes !=
+                        threaded_chunk_info->threaded_io_info->chunk_size))
+            HDONE_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
+                        "chunk size is incorrect after being unfiltered");
 
-            /* The new_unfilt_chunk flag should only be set during an H5Dset_extent operation. This is not
-             * currently supported with internal threading. If this support is added, we will need to realloc
-             * the buffer in the associated threaded worker function. */
-            assert(!threaded_chunk_info->udata.new_unfilt_chunk);
-        }
+        /* The new_unfilt_chunk flag should only be set during an H5Dset_extent operation. This is not
+         * currently supported with internal threading. If this support is added, we will need to realloc
+         * the buffer in the associated threaded worker function. */
+        assert(!threaded_chunk_info->udata.new_unfilt_chunk);
     }
 
     /* Patch chunk pointer in chunk cache. Ok to do in concurrent section since no other thread will touch

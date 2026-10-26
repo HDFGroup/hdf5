@@ -21607,7 +21607,7 @@ error:
     return -1;
 } /* end set_local_cannot_apply() */
 
-bool cannot_apply_called_g = false;
+static bool cannot_apply_called_g = false;
 
 static size_t
 filter_cannot_apply(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
