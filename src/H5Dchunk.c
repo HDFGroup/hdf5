@@ -3739,8 +3739,7 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
         /* Make sure the chunk is the correct size after being unfiltered */
         if (H5_UNLIKELY(threaded_chunk_info->chunk_nbytes !=
                         threaded_chunk_info->threaded_io_info->chunk_size))
-            HDONE_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
-                        "chunk size is incorrect after being unfiltered");
+            HDONE_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk size is incorrect after being unfiltered");
 
         /* The new_unfilt_chunk flag should only be set during an H5Dset_extent operation. This is not
          * currently supported with internal threading. If this support is added, we will need to realloc
