@@ -6,7 +6,7 @@ General Information:
                    HDF5 Version: @HDF5_PACKAGE_VERSION_STRING@
                   Configured on: @CONFIG_DATE@
                   Configured by: @CMAKE_GENERATOR@
-                    Host system: @H5_HOST_SYSTEM@
+                    Host system: @HDF5_BUILD_HOST_SYSTEM@
               Uname information: @CMAKE_SYSTEM_NAME@
                        Byte sex: @BYTESEX@
              Installation point: @CMAKE_INSTALL_PREFIX@

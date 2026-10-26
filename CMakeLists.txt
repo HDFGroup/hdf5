@@ -164,13 +164,8 @@ string (TIMESTAMP CONFIG_DATE "%Y-%m-%d" UTC)
 # into the library. CMAKE_HOST_SYSTEM includes the build host's kernel release,
 # which helps diagnose build problems but differs between build hosts, so
 # reproducible builds set a fixed value.
-set (HDF5_BUILD_HOST_SYSTEM "" CACHE STRING "Build host recorded in libhdf5.settings; empty uses CMAKE_HOST_SYSTEM. Set a fixed value (e.g. Linux) for reproducible builds")
+set (HDF5_BUILD_HOST_SYSTEM "${CMAKE_HOST_SYSTEM}" CACHE STRING "Build host recorded in libhdf5.settings. Set a fixed value (e.g. Linux) for reproducible builds")
 mark_as_advanced (HDF5_BUILD_HOST_SYSTEM)
-if (HDF5_BUILD_HOST_SYSTEM)
-  set (H5_HOST_SYSTEM "${HDF5_BUILD_HOST_SYSTEM}")
-else ()
-  set (H5_HOST_SYSTEM "${CMAKE_HOST_SYSTEM}")
-endif ()
 # Libraries that link to other HDF5 libraries get an absolute build-tree RPATH,
 # which is replaced at install time but stays in their linker build ID. A
 # relative ($ORIGIN) build RPATH keeps the build path out of installed binaries.
