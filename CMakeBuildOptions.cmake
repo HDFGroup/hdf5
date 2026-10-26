@@ -99,6 +99,10 @@ cmake_dependent_option (HDF5_ENABLE_MAVEN_DEPLOY "Enable Maven repository deploy
 mark_as_advanced (HDF5_ENABLE_MAVEN_DEPLOY)
 cmake_dependent_option (HDF5_MAVEN_SNAPSHOT "Build Maven snapshot versions with -SNAPSHOT suffix" OFF "HDF5_BUILD_JAVA" OFF)
 mark_as_advanced (HDF5_MAVEN_SNAPSHOT)
+# Distributions install unversioned jars (e.g. jarhdf5.jar) so that dependent
+# packages do not change on every HDF5 update. Maven builds are always versioned.
+cmake_dependent_option (HDF5_JAVA_VERSIONED_JARS "Include the HDF5 version in the installed jar names, e.g. jarhdf5-<version>.jar" ON "HDF5_BUILD_JAVA" ON)
+mark_as_advanced (HDF5_JAVA_VERSIONED_JARS)
 
 option (HDF5_BUILD_EXAMPLES "Build HDF5 Library Examples" ON)
 

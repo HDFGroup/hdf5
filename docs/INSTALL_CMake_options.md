@@ -166,6 +166,7 @@ These are options which are specific to HDF5's wrappers for programming language
 | `HDF5_JAVA_PACK_JRE` | `BOOL` | `OFF` | If `ON`, packages a Java JRE with an HDF5 installation. |
 | `HDF5_ENABLE_MAVEN_DEPLOY` | `BOOL` | `OFF` | If `ON`, enables Maven repository deployment support. |
 | `HDF5_MAVEN_SNAPSHOT` | `BOOL` | `OFF` | If `ON`, adds "-SNAPSHOT" to version portion of names of Maven artifacts. |
+| `HDF5_JAVA_VERSIONED_JARS` | `BOOL` | `ON` | If `ON`, includes the HDF5 version in the installed jar names (e.g. `jarhdf5-<version>.jar`). If `OFF`, installs `jarhdf5.jar` and `javahdf5.jar`, as Linux distributions do. Maven builds always use versioned names. |
 | `HDF5_JAVA_LOGGING_JAR` | `FILEPATH` | Bundled `java/lib/slf4j-api-2.0.16.jar` | Path to the SLF4J API jar. |
 | `HDF5_JAVA_LOGGING_NOP_JAR` | `FILEPATH` | Bundled `java/lib/ext/slf4j-nop-2.0.16.jar` | Path to the SLF4J NOP binding jar. |
 | `HDF5_JAVA_LOGGING_SIMPLE_JAR` | `FILEPATH` | Bundled `java/lib/ext/slf4j-simple-2.0.16.jar` | Path to the SLF4J simple binding jar. |
