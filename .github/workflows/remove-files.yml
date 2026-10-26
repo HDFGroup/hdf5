@@ -53,8 +53,6 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}-macos15_clang.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-macos15_clang.dmg
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2026_cl.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2026_cl.msi
