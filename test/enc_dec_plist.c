@@ -407,7 +407,7 @@ test_decode_corrupted_layout_ndims(void)
         TEST_ERROR;
 
     /* Success */
-    return (0);
+    return 0;
 
 error:
     if (temp_buf)
@@ -420,7 +420,7 @@ error:
     }
     H5E_END_TRY
 
-    return (-1);
+    return -1;
 } /* end test_decode_corrupted_layout_ndims() */
 
 int
