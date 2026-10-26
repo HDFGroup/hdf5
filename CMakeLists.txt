@@ -163,6 +163,12 @@ string (TIMESTAMP CONFIG_DATE "%Y-%m-%d")
 # H5build_settings.c is compiled into the library (CONFIG_DATE above already
 # honors SOURCE_DATE_EPOCH)
 set (H5_HOST_SYSTEM "${CMAKE_HOST_SYSTEM_NAME}-${CMAKE_HOST_SYSTEM_PROCESSOR}")
+# Libraries that link to other HDF5 libraries get an absolute build-tree RPATH,
+# which is replaced at install time but stays in their linker build ID. A
+# relative ($ORIGIN) build RPATH keeps the build path out of installed binaries.
+if (NOT DEFINED CMAKE_BUILD_RPATH_USE_ORIGIN)
+  set (CMAKE_BUILD_RPATH_USE_ORIGIN ON)
+endif ()
 
 #-----------------------------------------------------------------------------
 # Allow Visual Studio solution directories
