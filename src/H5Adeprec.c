@@ -382,10 +382,10 @@ done:
 herr_t
 H5Aiterate1(hid_t loc_id, unsigned *attr_num /*in,out*/, H5A_operator1_t op, void *op_data)
 {
-    H5VL_object_t                   *vol_obj      = NULL; /* Object of loc_id */
-    H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
-    H5VL_native_attr_optional_args_t attr_opt_args;       /* Arguments for optional operation */
-    herr_t                           ret_value;           /* Return value */
+    H5VL_object_t                   *vol_obj = NULL; /* Object of loc_id */
+    H5VL_optional_args_t             vol_cb_args;    /* Arguments to VOL callback */
+    H5VL_native_attr_optional_args_t attr_opt_args;  /* Arguments for optional operation */
+    herr_t                           ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5_ITER_ERROR)
 
