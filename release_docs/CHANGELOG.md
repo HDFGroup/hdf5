@@ -177,6 +177,15 @@ We would like to thank the many HDF5 community members who contributed to this r
    Fixed library to no longer execute the set_local and filter callbacks when an optional
    filter plugin's can_apply callback returned false, to match the documented behavior.
 
+### Removed max cache entry size assertion
+
+   Removed H5C_MAX_ENTRY_SIZE which caused an assertion to fail if a metadata cache entry
+   was larger than 32 MiB. This was meant to detect corruption, not actually impose a
+   limit on the maximum size of a metadata cache entry. This can cause assertion failures
+   in legitimate use cases. While we could simply increase the size, there are already
+   checks for a cache entry that is too big to fit in the file, and an assertion is
+   inappropriate to check for file corruption, so this check has been removed.
+
 ### Fixed H5Pmodify_filter() writing past the filter pipeline for a filter not in it
 
    `H5Pmodify_filter()` returned success when the requested filter was not in the pipeline, and wrote the new flags and client data into the slot one past the last used entry. When the pipeline already held `H5Z_MAX_NFILTERS` filters, that write went past the end of the filter array, and client data longer than `H5Z_COMMON_CD_VALUES` leaked its allocation. `H5Pmodify_filter()` now fails with "filter not in pipeline" in this case.
