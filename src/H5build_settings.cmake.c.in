@@ -23,7 +23,7 @@ const char H5build_settings[]=
     "                   HDF5 Version: @HDF5_PACKAGE_VERSION_STRING@\n"
     "                  Configured on: @CONFIG_DATE@\n"
     "                  Configured by: @CMAKE_GENERATOR@\n"
-    "                    Host system: @CMAKE_HOST_SYSTEM@\n"
+    "                    Host system: @H5_HOST_SYSTEM@\n"
     "              Uname information: @CMAKE_SYSTEM_NAME@\n"
     "                       Byte sex: @BYTESEX@\n"
     "             Installation point: @CMAKE_INSTALL_PREFIX@\n"
