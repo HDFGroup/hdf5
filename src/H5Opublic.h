@@ -92,8 +92,10 @@
  */
 #define H5O_NATIVE_INFO_HDR       0x0008u /**< Fill in the hdr field \since 1.12.0 */
 #define H5O_NATIVE_INFO_META_SIZE 0x0010u /**< Fill in the meta_size field \since 1.12.0 */
-#define H5O_NATIVE_INFO_ALL       (H5O_NATIVE_INFO_HDR | H5O_NATIVE_INFO_META_SIZE) /**< All flags \since 1.12.0 \
-                                                                                     */
+/**
+ * Fill in all fields \since 1.12.0
+ */
+#define H5O_NATIVE_INFO_ALL       (H5O_NATIVE_INFO_HDR | H5O_NATIVE_INFO_META_SIZE)
 //! <!-- [H5O_native_info_fields_snip] -->
 
 /* Convenience macro to check if the token is the 'undefined' token value */
