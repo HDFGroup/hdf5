@@ -43,16 +43,13 @@ if [ ! -e "$prg" ]; then
     (*) prg=$(command -v -- "$prg") || exit;;
   esac
 fi
-dir=$(
-  cd -P -- "$(dirname -- "$prg")/.." && pwd -P
+prefix=$(
+  cd -P -- "$(dirname -- "$prg")/@H5_WRAPPER_BIN_TO_PREFIX@" && pwd -P
 ) || exit
 
 prog_name=$(basename -- "$prg") || exit
-prg=$dir/bin/$prog_name
 
-prefix=$dir
-
-libdir=$dir/@HDF5_INSTALL_LIB_DIR@
+libdir=@H5_WRAPPER_LIB_DIR@
 
 export PKG_CONFIG_PATH=$libdir/pkgconfig
 
@@ -60,7 +57,7 @@ export PKG_CONFIG_PATH=$libdir/pkgconfig
 # libhdf5.settings file residing in the lib directory.
 showconfigure()
 {
-  cat $dir/@HDF5_INSTALL_LIB_DIR@/libhdf5.settings
+  cat $libdir/libhdf5.settings
   status=$?
 }
 
