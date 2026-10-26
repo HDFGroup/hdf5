@@ -1265,6 +1265,35 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
 endif ()
 
 #-----------------------------------------------------------------------------
+# Fortran module install locations. Set before src, which reports the
+# installed module directory in libhdf5.settings.
+#-----------------------------------------------------------------------------
+if (HDF5_BUILD_FORTRAN)
+  set (HDF5_INSTALL_MOD_FORTRAN "SHARED" CACHE STRING "Copy FORTRAN mod files to include directory (NO SHARED STATIC)")
+  set_property (CACHE HDF5_INSTALL_MOD_FORTRAN PROPERTY STRINGS NO SHARED STATIC)
+  if (NOT HDF5_INSTALL_MOD_FORTRAN MATCHES "NO")
+    if (NOT BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)
+      set (HDF5_INSTALL_MOD_FORTRAN "STATIC")
+    elseif (BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS)
+      set (HDF5_INSTALL_MOD_FORTRAN "SHARED")
+    endif ()
+  endif ()
+
+  # Distributions install all Fortran modules in one directory (e.g. Fedora's
+  # %{_fmoddir}). When both library types are built, the shared modules are
+  # installed there.
+  option (HDF5_INSTALL_MODULE_FLAT "Install Fortran modules directly in HDF5_INSTALL_MODULE_DIR instead of its static/ and shared/ subdirectories" OFF)
+  mark_as_advanced (HDF5_INSTALL_MODULE_FLAT)
+  if (HDF5_INSTALL_MODULE_FLAT)
+    set (HDF5_INSTALL_MODULE_STATIC_DIR ${HDF5_INSTALL_MODULE_DIR})
+    set (HDF5_INSTALL_MODULE_SHARED_DIR ${HDF5_INSTALL_MODULE_DIR})
+  else ()
+    set (HDF5_INSTALL_MODULE_STATIC_DIR ${HDF5_INSTALL_MODULE_DIR}/static)
+    set (HDF5_INSTALL_MODULE_SHARED_DIR ${HDF5_INSTALL_MODULE_DIR}/shared)
+  endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
 # Add the HDF5 Library Target to the build
 #-----------------------------------------------------------------------------
 add_subdirectory (src)

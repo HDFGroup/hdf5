@@ -155,6 +155,7 @@ These are options which are specific to HDF5's wrappers for programming language
 |:-------------|:-----|:--------|:------------|
 | `HDF5_BUILD_FORTRAN` | `BOOL` | `OFF` | If `ON`, enables building of the HDF5 Fortran wrapper interface. |
 | `HDF5_INSTALL_MOD_FORTRAN` | `STRING` | `SHARED` if HDF5 shared libraries are built; `STATIC` otherwise | If `SHARED` or `STATIC`, installs Fortran .mod files to a subdirectory (named `shared` or `static`) of the installation's `include` directory. Valid values are `SHARED`, `STATIC` and `NO`. |
+| `HDF5_INSTALL_MODULE_FLAT` | `BOOL` | `OFF` | If `ON`, installs Fortran .mod files directly in `HDF5_INSTALL_MODULE_DIR` instead of its `static` and `shared` subdirectories, as Linux distributions do. When both library types are built, the shared modules are installed. |
 
 ### Java options
 <a name="pl_java"></a>

@@ -26,16 +26,8 @@ if (H5_HAVE_PARALLEL)
   endif ()
 endif ()
 
-#option (HDF5_INSTALL_MOD_FORTRAN "Copy FORTRAN mod files to include directory (NO SHARED STATIC)" "NO")
-set (HDF5_INSTALL_MOD_FORTRAN "SHARED" CACHE STRING "Copy FORTRAN mod files to include directory (NO SHARED STATIC)")
-set_property (CACHE HDF5_INSTALL_MOD_FORTRAN PROPERTY STRINGS NO SHARED STATIC)
-if (NOT HDF5_INSTALL_MOD_FORTRAN MATCHES "NO")
-  if (NOT BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)
-    set (HDF5_INSTALL_MOD_FORTRAN "STATIC")
-  elseif (BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS)
-    set (HDF5_INSTALL_MOD_FORTRAN "SHARED")
-  endif ()
-endif ()
+# HDF5_INSTALL_MOD_FORTRAN and the module install directories are set in the
+# top-level CMakeLists.txt, before src, because libhdf5.settings reports them
 
 if (H5_HAVE_PARALLEL)
   if (MPI_Fortran_LINK_FLAGS)
