@@ -43,11 +43,20 @@ if [ ! -e "$prg" ]; then
     (*) prg=$(command -v -- "$prg") || exit;;
   esac
 fi
+prog_name=$(basename -- "$prg") || exit
+
+# Follow symlinks to the installed script so that a link from another
+# directory (e.g. <prefix>/bin/h5pcc -> ../lib64/mpich/bin/h5pcc) works
+while [ -L "$prg" ]; do
+  link=$(readlink -- "$prg") || exit
+  case $link in
+    (/*) prg=$link;;
+    (*) prg=$(dirname -- "$prg")/$link;;
+  esac
+done
 prefix=$(
   cd -P -- "$(dirname -- "$prg")/@H5_WRAPPER_BIN_TO_PREFIX@" && pwd -P
 ) || exit
-
-prog_name=$(basename -- "$prg") || exit
 
 libdir=@H5_WRAPPER_LIB_DIR@
 
