@@ -405,7 +405,7 @@ jobs:
   # Linux (Ubuntu) w/ gcc
   #
     name: "Ubuntu gcc"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     needs: [check-secret]
     steps:
       - name: Install Dependencies (Linux)
@@ -496,21 +496,21 @@ jobs:
           cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/README.md ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
-          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.tar.gz hdf5
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz hdf5
         shell: bash
 
       - name: Publish deb binary (Linux)
         id: publish-ctest-deb-binary
         run: |
           mkdir "${{ runner.workspace }}/builddeb"
-          cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/*.deb ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb
+          cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/*.deb ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb
         shell: bash
 
       - name: Publish rpm binary (Linux)
         id: publish-ctest-rpm-binary
         run: |
           mkdir "${{ runner.workspace }}/buildrpm"
-          cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/*.rpm ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
+          cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/*.rpm ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm
         shell: bash
 
       - name: List files in the space (Linux)
@@ -522,22 +522,22 @@ jobs:
       - name: Save published binary (Linux)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
-              name: tgz-ubuntu-2404_gcc-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.tar.gz
+              name: tgz-ubuntu-2204_gcc-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Save published binary deb (Linux)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
-              name: deb-ubuntu-2404_gcc-binary
-              path: ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb
+              name: deb-ubuntu-2204_gcc-binary
+              path: ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Save published binary rpm (Linux)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
-              name: rpm-ubuntu-2404_gcc-binary
-              path: ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
+              name: rpm-ubuntu-2204_gcc-binary
+              path: ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       # Verify the Doxygen tag file was generated inside the HTML output
@@ -822,7 +822,7 @@ jobs:
   # Linux S3 (Ubuntu) w/ gcc
   #
     name: "Ubuntu gcc S3"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Install Dependencies (Linux S3)
         run: |
@@ -897,7 +897,7 @@ jobs:
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC-S3/README.md ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC-S3/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
-          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc_s3.tar.gz hdf5
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz hdf5
         shell: bash
 
       - name: List files in the space (Linux S3)
@@ -909,8 +909,8 @@ jobs:
       - name: Save published binary (Linux S3)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
-              name: tgz-ubuntu-2404_gcc_s3-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc_s3.tar.gz
+              name: tgz-ubuntu-2204_gcc_s3-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
 ####### intel builds
@@ -1068,7 +1068,7 @@ jobs:
   # Linux (Ubuntu) w/ OneAPI
   #
     name: "Ubuntu Intel"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     needs: [check-secret]
     steps:
       - name: Install Dependencies (Linux_intel)
@@ -1135,7 +1135,7 @@ jobs:
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/README.md ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
-          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_intel.tar.gz hdf5
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz hdf5
         shell: bash
 
       - name: List files in the space (Linux_intel)
@@ -1147,6 +1147,6 @@ jobs:
       - name: Save published binary (Linux_intel)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
-              name: tgz-ubuntu-2404_intel-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_intel.tar.gz
+              name: tgz-ubuntu-2204_intel-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

@@ -170,7 +170,7 @@ jobs:
 
   build_and_test_linux:
     name: "Ubuntu gcc-${{ inputs.build_mode }}-${{ inputs.thread_safety }}-${{ inputs.concurrent }}"
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-22.04-arm
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
@@ -272,7 +272,7 @@ jobs:
       - name: Save published binary (linux)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
-          name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
+          name: tgz-ubuntu-2204_gcc-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
           path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if:  ${{ (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.save_binary != 'skip') }}

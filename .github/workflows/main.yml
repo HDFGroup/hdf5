@@ -101,7 +101,7 @@ jobs:
           #
           - name: "Ubuntu gcc"
             ostype: ubuntu
-            os: ubuntu-24.04
+            os: ubuntu-22.04
             shared: ON
             cpp: ON
             fortran: ON
@@ -351,7 +351,7 @@ jobs:
       - name: Save published binary (linux)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
-              name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
+              name: tgz-ubuntu-2204_gcc-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if:  ${{ (matrix.ostype == 'ubuntu') && ( inputs.save_binary != 'skip') }}
