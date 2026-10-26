@@ -30,14 +30,16 @@
 /*****************/
 
 /* Flags for object copy (H5Ocopy) */
-#define H5O_COPY_SHALLOW_HIERARCHY_FLAG     (0x0001u) /**< Copy only immediate members \since 1.8.0 */
-#define H5O_COPY_EXPAND_SOFT_LINK_FLAG      (0x0002u) /**< Expand soft links into new objects \since 1.8.0 */
-#define H5O_COPY_EXPAND_EXT_LINK_FLAG       (0x0004u) /**< Expand external links into new objects \since 1.8.0 */
-#define H5O_COPY_EXPAND_REFERENCE_FLAG      (0x0008u) /**< Copy objects that are pointed by references \since 1.8.0 */
-#define H5O_COPY_WITHOUT_ATTR_FLAG          (0x0010u) /**< Copy object without copying attributes \since 1.8.0 */
-#define H5O_COPY_PRESERVE_NULL_FLAG         (0x0020u) /**< Copy NULL messages (empty space) \since 1.8.0 */
-#define H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG (0x0040u) /**< Merge committed datatypes in dest file \since 1.8.9 */
-#define H5O_COPY_ALL                        (0x007Fu) /**< All object copying flags (for internal checking) \since 1.8.0 */
+#define H5O_COPY_SHALLOW_HIERARCHY_FLAG (0x0001u) /**< Copy only immediate members \since 1.8.0 */
+#define H5O_COPY_EXPAND_SOFT_LINK_FLAG  (0x0002u) /**< Expand soft links into new objects \since 1.8.0 */
+#define H5O_COPY_EXPAND_EXT_LINK_FLAG   (0x0004u) /**< Expand external links into new objects \since 1.8.0 */
+#define H5O_COPY_EXPAND_REFERENCE_FLAG                                                                       \
+    (0x0008u)                                 /**< Copy objects that are pointed by references \since 1.8.0 */
+#define H5O_COPY_WITHOUT_ATTR_FLAG  (0x0010u) /**< Copy object without copying attributes \since 1.8.0 */
+#define H5O_COPY_PRESERVE_NULL_FLAG (0x0020u) /**< Copy NULL messages (empty space) \since 1.8.0 */
+#define H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG                                                                  \
+    (0x0040u)                  /**< Merge committed datatypes in dest file \since 1.8.9 */
+#define H5O_COPY_ALL (0x007Fu) /**< All object copying flags (for internal checking) \since 1.8.0 */
 
 /* Flags for shared message indexes.
  * Pass these flags in using the mesg_type_flags parameter in
@@ -90,7 +92,8 @@
  */
 #define H5O_NATIVE_INFO_HDR       0x0008u /**< Fill in the hdr field \since 1.12.0 */
 #define H5O_NATIVE_INFO_META_SIZE 0x0010u /**< Fill in the meta_size field \since 1.12.0 */
-#define H5O_NATIVE_INFO_ALL       (H5O_NATIVE_INFO_HDR | H5O_NATIVE_INFO_META_SIZE) /**< All flags \since 1.12.0 */
+#define H5O_NATIVE_INFO_ALL       (H5O_NATIVE_INFO_HDR | H5O_NATIVE_INFO_META_SIZE) /**< All flags \since 1.12.0 \
+                                                                                     */
 //! <!-- [H5O_native_info_fields_snip] -->
 
 /* Convenience macro to check if the token is the 'undefined' token value */
