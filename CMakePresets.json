@@ -259,12 +259,11 @@
       }
     },
     {
-      "name": "ci-StaticTools",
+      "name": "ci-StaticLibs",
       "hidden": true,
       "cacheVariables": {
         "BUILD_SHARED_LIBS": "ON",
-        "BUILD_STATIC_LIBS": "ON",
-        "HDF5_BUILD_STATIC_TOOLS": "ON"
+        "BUILD_STATIC_LIBS": "ON"
       }
     },
     {
@@ -408,7 +407,7 @@
       "inherits": [
         "ci-StdShar-MSVC",
         "ci-S3",
-        "ci-StaticTools"
+        "ci-StaticLibs"
       ]
     },
     {
@@ -479,7 +478,7 @@
       "inherits": [
         "ci-StdShar-macos-Clang",
         "ci-S3",
-        "ci-StaticTools"
+        "ci-StaticLibs"
       ],
       "cacheVariables": {
         "CMAKE_OSX_ARCHITECTURES": "arm64"
@@ -491,7 +490,7 @@
       "inherits": [
         "ci-StdShar-macos-Clang",
         "ci-S3",
-        "ci-StaticTools"
+        "ci-StaticLibs"
       ],
       "cacheVariables": {
         "CMAKE_OSX_ARCHITECTURES": "x86_64"
@@ -525,7 +524,7 @@
       "inherits": [
         "ci-StdShar-GNUC",
         "ci-S3",
-        "ci-StaticTools"
+        "ci-StaticLibs"
       ]
     },
     {
