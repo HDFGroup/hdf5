@@ -74,7 +74,7 @@
  * new types of messages.
  */
 #define H5O_SHMESG_MAX_NINDEXES  8    /**< Maximum number of indexes \since 1.8.0 */
-#define H5O_SHMESG_MAX_LIST_SIZE 5000 /**< Maximum size of message list \since 1.8.0 */
+#define H5O_SHMESG_MAX_LIST_SIZE 5000 /**< Maximum size of shared object header message list \since 1.8.0 */
 
 /* Flags for H5Oget_info.
  * These flags determine which fields will be filled in the H5O_info_t
