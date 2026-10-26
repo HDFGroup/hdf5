@@ -159,14 +159,10 @@ mark_as_advanced (HDF5_EXTERNAL_LIB_SUFFIX)
 #   add_subdirectory (Utilities/hdf5-1.8)
 #-----------------------------------------------------------------------------
 string (TIMESTAMP CONFIG_DATE "%Y-%m-%d")
-# CMAKE_HOST_SYSTEM includes the build host's kernel release; leave it out of
-# libhdf5.settings and H5build_settings.c when a reproducible build is requested
-# (CONFIG_DATE above already honors SOURCE_DATE_EPOCH)
-if (DEFINED ENV{SOURCE_DATE_EPOCH})
-  set (H5_HOST_SYSTEM "${CMAKE_HOST_SYSTEM_NAME}")
-else ()
-  set (H5_HOST_SYSTEM "${CMAKE_HOST_SYSTEM}")
-endif ()
+# Not CMAKE_HOST_SYSTEM: its kernel release differs between build hosts and
+# H5build_settings.c is compiled into the library (CONFIG_DATE above already
+# honors SOURCE_DATE_EPOCH)
+set (H5_HOST_SYSTEM "${CMAKE_HOST_SYSTEM_NAME}-${CMAKE_HOST_SYSTEM_PROCESSOR}")
 
 #-----------------------------------------------------------------------------
 # Allow Visual Studio solution directories
