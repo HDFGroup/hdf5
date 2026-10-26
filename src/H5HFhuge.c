@@ -746,11 +746,6 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, bool is_read, H5HF_operat
         filter_cb.op_data = NULL;
         filter_cb.func    = NULL; /* no callback function when failed */
 
-        /* Check for filters that failed can_apply but are not disabled by the filter mask */
-        if (hdr->universal_filter_mask & ~filter_mask)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL,
-                        "cannot apply all filters that were used to write this dblock");
-
         /* De-filter the object */
         read_size = nbytes = obj_size;
         if (H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes,

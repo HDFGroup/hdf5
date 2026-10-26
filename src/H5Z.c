@@ -1045,16 +1045,20 @@ done:
 herr_t
 H5Z_can_apply(hid_t dcpl_id, hid_t type_id, unsigned *universal_filter_mask /*out*/)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    unsigned tmp_ufm   = 0;
+    herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(universal_filter_mask && *universal_filter_mask == 0);
+    assert(universal_filter_mask);
 
     /* Make "can apply" callbacks for filters in pipeline */
-    if (H5Z__prepare_prelude_callback_dcpl(dcpl_id, type_id, universal_filter_mask, H5Z_PRELUDE_CAN_APPLY) <
+    if (H5Z__prepare_prelude_callback_dcpl(dcpl_id, type_id, &tmp_ufm, H5Z_PRELUDE_CAN_APPLY) <
         0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter");
+
+    /* Set universal_filter_mask */
+    *universal_filter_mask = tmp_ufm;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1105,17 +1109,20 @@ done:
 herr_t
 H5Z_can_apply_direct(const H5O_pline_t *pline, unsigned *universal_filter_mask /*out*/)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    unsigned tmp_ufm   = 0;
+    herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     assert(pline && pline->nused > 0);
-    assert(universal_filter_mask && *universal_filter_mask == 0);
+    assert(universal_filter_mask);
 
     /* Make "can apply" callbacks for filters in pipeline */
-    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, universal_filter_mask,
-                              H5Z_PRELUDE_CAN_APPLY) < 0)
+    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, &tmp_ufm, H5Z_PRELUDE_CAN_APPLY) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter");
+
+    /* Set universal_filter_mask */
+    *universal_filter_mask = tmp_ufm;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

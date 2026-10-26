@@ -5507,11 +5507,6 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
                                         "can't get I/O filter callback function");
 
-                        /* Check for filters that failed can_apply but are not disabled by the filter mask */
-                        if (dset->shared->universal_filter_mask & ~udata->filter_mask)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL,
-                                        "cannot apply all filters that were used to write this chunk");
-
                         /* Perform filter pipeline */
                         if (H5Z_pipeline(old_pline, H5Z_FLAG_REVERSE, &(udata->filter_mask), err_detect,
                                          filter_cb, &chunk_nbytes, &buf_alloc, &chunk) < 0)

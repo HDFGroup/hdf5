@@ -1574,11 +1574,6 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
         filter_mask = udata->filter_mask;
         H5MM_memcpy(read_buf, image, len);
 
-        /* Check for filters that failed can_apply but are not disabled by the filter mask */
-        if (hdr->universal_filter_mask & ~filter_mask)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL,
-                        "cannot apply all filters that were used to write this dblock");
-
         /* Push direct block data through I/O filter pipeline */
         if (H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes,
                          &len, &read_buf) < 0)
@@ -1734,11 +1729,6 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, boo
             /* Set other parameters for filter pipeline */
             nbytes      = len;
             filter_mask = udata->filter_mask;
-
-            /* Check for filters that failed can_apply but are not disabled by the filter mask */
-            if (hdr->universal_filter_mask & ~filter_mask)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, NULL,
-                            "cannot apply all filters that were used to write this dblock");
 
             /* Push direct block data through I/O filter pipeline */
             if (H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb,

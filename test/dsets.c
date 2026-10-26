@@ -21607,11 +21607,16 @@ error:
     return -1;
 } /* end set_local_cannot_apply() */
 
+bool cannot_apply_called_g = false;
+
 static size_t
 filter_cannot_apply(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
                     const unsigned int H5_ATTR_UNUSED *cd_values, size_t H5_ATTR_UNUSED nbytes,
                     size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
+    /* Indicate this filter was called */
+    cannot_apply_called_g = true;
+
     /* This function should never be called */
     TEST_ERROR;
 
@@ -21684,8 +21689,16 @@ test_cannot_apply(hid_t fapl)
     if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points_data) < 0)
         TEST_ERROR;
 
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
+        TEST_ERROR;
+
     /* Read the dataset back */
     if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check_data) < 0)
+        TEST_ERROR;
+
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
         TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
@@ -21704,6 +21717,10 @@ test_cannot_apply(hid_t fapl)
     if (H5Dclose(dataset) < 0)
         TEST_ERROR;
     dataset = H5I_INVALID_HID;
+
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
+        TEST_ERROR;
 
     /* Try again after re-opening dataset */
 
@@ -21720,8 +21737,16 @@ test_cannot_apply(hid_t fapl)
     if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points_data) < 0)
         TEST_ERROR;
 
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
+        TEST_ERROR;
+
     /* Read the dataset back */
     if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check_data) < 0)
+        TEST_ERROR;
+
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
         TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
@@ -21740,6 +21765,10 @@ test_cannot_apply(hid_t fapl)
     if (H5Dclose(dataset) < 0)
         TEST_ERROR;
     dataset = H5I_INVALID_HID;
+
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
+        TEST_ERROR;
 
     /* Try again with new dataset, reopening before writing */
 
@@ -21766,8 +21795,16 @@ test_cannot_apply(hid_t fapl)
     if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points_data) < 0)
         TEST_ERROR;
 
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
+        TEST_ERROR;
+
     /* Read the dataset back */
     if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check_data) < 0)
+        TEST_ERROR;
+
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
         TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
@@ -21782,10 +21819,16 @@ test_cannot_apply(hid_t fapl)
         }
     }
 
-    /* Close */
+    /* Close dataset */
     if (H5Dclose(dataset) < 0)
         TEST_ERROR;
     dataset = H5I_INVALID_HID;
+
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
+        TEST_ERROR;
+
+    /* Close */
     if (H5Pclose(dcpl) < 0)
         TEST_ERROR;
     dcpl = H5I_INVALID_HID;
@@ -21795,6 +21838,10 @@ test_cannot_apply(hid_t fapl)
     if (H5Fclose(file) < 0)
         TEST_ERROR;
     file = H5I_INVALID_HID;
+
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
+        TEST_ERROR;
 
     PASSED();
 
