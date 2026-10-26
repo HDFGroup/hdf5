@@ -10124,7 +10124,7 @@ H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, v
 /* Macros */
 
 /**
- * We renamed the "root" of the property list class hierarchy \since 1.6.0
+ * The "root" of the property list class hierarchy \since 1.6.0
  */
 #define H5P_NO_CLASS H5P_ROOT
 
