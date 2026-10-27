@@ -21647,7 +21647,7 @@ test_cannot_apply(hid_t fapl)
 
     TESTING("optional filters that cannot apply");
 
-    if (NULL == h5_fixname(FILENAME[39], H5P_DEFAULT, filename, sizeof(filename)))
+    if (NULL == h5_fixname(FILENAME[39], fapl, filename, sizeof(filename)))
         TEST_ERROR;
 
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
