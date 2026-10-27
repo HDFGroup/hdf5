@@ -519,15 +519,35 @@ macro (HDF_DIR_PATHS package_prefix)
     set (${package_prefix}_INSTALL_DOC_DIR ${${package_prefix}_INSTALL_DATA_DIR})
   endif ()
 
-  # Append the needed INSTALL_RPATH for HDF Standard binary packages
+  # Append the needed INSTALL_RPATH for HDF Standard binary packages.
+  # The binary directory can be deeper than <prefix>/bin, so derive the path
+  # from the configured binary and library directories instead of assuming
+  # that every executable is exactly one level below the install prefix.
+  if (IS_ABSOLUTE "${${package_prefix}_INSTALL_BIN_DIR}")
+    set (_hdf5_install_bin_dir "${${package_prefix}_INSTALL_BIN_DIR}")
+  else ()
+    set (_hdf5_install_bin_dir "${CMAKE_INSTALL_PREFIX}/${${package_prefix}_INSTALL_BIN_DIR}")
+  endif ()
+  if (IS_ABSOLUTE "${${package_prefix}_INSTALL_LIB_DIR}")
+    set (_hdf5_install_lib_dir "${${package_prefix}_INSTALL_LIB_DIR}")
+  else ()
+    set (_hdf5_install_lib_dir "${CMAKE_INSTALL_PREFIX}/${${package_prefix}_INSTALL_LIB_DIR}")
+  endif ()
+  file (RELATIVE_PATH _hdf5_install_bin_to_lib "${_hdf5_install_bin_dir}" "${_hdf5_install_lib_dir}")
+  if (NOT _hdf5_install_bin_to_lib)
+    set (_hdf5_install_bin_to_lib ".")
+  endif ()
   if (APPLE)
     list (APPEND CMAKE_INSTALL_RPATH
-        "@loader_path/../${${package_prefix}_INSTALL_LIB_DIR}"
+        "@loader_path/${_hdf5_install_bin_to_lib}"
         "@loader_path/"
     )
   else ()
-    list (APPEND CMAKE_INSTALL_RPATH "\$ORIGIN/../${${package_prefix}_INSTALL_LIB_DIR}:\$ORIGIN/")
+    list (APPEND CMAKE_INSTALL_RPATH "\$ORIGIN/${_hdf5_install_bin_to_lib}:\$ORIGIN/")
   endif ()
+  unset (_hdf5_install_bin_dir)
+  unset (_hdf5_install_lib_dir)
+  unset (_hdf5_install_bin_to_lib)
 
   if (DEFINED ADDITIONAL_CMAKE_PREFIX_PATH AND EXISTS "${ADDITIONAL_CMAKE_PREFIX_PATH}")
     set (CMAKE_PREFIX_PATH ${ADDITIONAL_CMAKE_PREFIX_PATH} ${CMAKE_PREFIX_PATH})

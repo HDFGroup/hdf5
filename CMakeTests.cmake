@@ -99,6 +99,32 @@
   enable_testing ()
   include (CTest)
 
+  set (_hdf5_dir_paths_rpath_test_source
+      "${HDF5_SOURCE_DIR}/config/cmake/tests/HDF_DIR_PATHS_RPATH"
+  )
+  foreach (_hdf5_dir_paths_rpath_case default deep)
+    if (_hdf5_dir_paths_rpath_case STREQUAL default)
+      set (_hdf5_dir_paths_rpath_bin bin)
+      set (_hdf5_dir_paths_rpath_lib lib)
+    else ()
+      set (_hdf5_dir_paths_rpath_bin lib64/mpich/bin)
+      set (_hdf5_dir_paths_rpath_lib lib64/mpich/lib)
+    endif ()
+    add_test (NAME CMAKE-HDF_DIR_PATHS_RPATH-${_hdf5_dir_paths_rpath_case}
+        COMMAND "${CMAKE_COMMAND}"
+            -S "${_hdf5_dir_paths_rpath_test_source}"
+            -B "${CMAKE_CURRENT_BINARY_DIR}/HDF_DIR_PATHS_RPATH-${_hdf5_dir_paths_rpath_case}"
+            "-DHDF5_MACROS_FILE=${HDF5_SOURCE_DIR}/config/HDFMacros.cmake"
+            "-DHDF5_TEST_INSTALL_BIN_DIR=${_hdf5_dir_paths_rpath_bin}"
+            "-DHDF5_TEST_INSTALL_LIB_DIR=${_hdf5_dir_paths_rpath_lib}"
+            -DHDF5_TEST_EXPECTED_RELATIVE=../lib
+    )
+  endforeach ()
+  unset (_hdf5_dir_paths_rpath_test_source)
+  unset (_hdf5_dir_paths_rpath_case)
+  unset (_hdf5_dir_paths_rpath_bin)
+  unset (_hdf5_dir_paths_rpath_lib)
+
   include (${HDF5_SOURCE_DIR}/CTestConfig.cmake)
   configure_file (${HDF_CONFIG_DIR}/CTestCustom.cmake ${HDF5_BINARY_DIR}/CTestCustom.ctest @ONLY)
 
