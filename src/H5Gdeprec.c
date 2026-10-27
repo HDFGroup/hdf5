@@ -153,7 +153,6 @@ hid_t
 H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
 {
     void             *grp          = NULL;      /* New group created */
-    H5I_type_t        vol_obj_type = H5I_BADID; /* Object type of loc_id */
     H5VL_object_t    *vol_obj;                  /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t             tmp_gcpl  = H5I_INVALID_HID; /* Temporary group creation property list */
@@ -162,8 +161,6 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
     FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check arguments */
-    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no name given");
     if (size_hint > UINT32_MAX)
@@ -204,7 +201,8 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
 
     /* Set location parameters */
     loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = vol_obj_type;
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* get the location object */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
@@ -250,7 +248,6 @@ hid_t
 H5Gopen1(hid_t loc_id, const char *name)
 {
     void             *grp          = NULL;      /* Group opened */
-    H5I_type_t        vol_obj_type = H5I_BADID; /* Object type of loc_id */
     H5VL_object_t    *vol_obj      = NULL;      /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
@@ -258,14 +255,13 @@ H5Gopen1(hid_t loc_id, const char *name)
     FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check args */
-    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no name");
 
     /* Set location parameters */
     loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = vol_obj_type;
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* get the location object */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
