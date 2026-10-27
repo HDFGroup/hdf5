@@ -329,6 +329,19 @@ Fixes GitHub issue #6679.
 
 ## Configuration
 
+### Fixed pkg-config and the compiler wrappers when HDF5_LIB_INFIX is set
+
+  With `HDF5_LIB_INFIX` set, for example to `_openmpi`, the pkg-config files
+  were still installed as `hdf5.pc`, `hdf5_hl.pc` and so on, while their
+  `Name` and `Requires` fields, and the compiler wrappers, used the name with
+  the infix (`hdf5_openmpi`). `h5cc` and the other wrappers failed with
+  "Package hdf5_openmpi was not found", and `pkg-config hdf5_hl` could not
+  resolve its requirement. The pkg-config files are now named after the
+  library (`hdf5_openmpi.pc`, `hdf5_openmpi_hl.pc`, ...), and
+  `libhdf5.settings` is installed as `libhdf5_openmpi.settings`, which
+  `h5cc -showconfig` reads, so builds with different infixes can be installed
+  in the same directory. Builds without an infix are unchanged.
+
 ### Fixed version handling in installed CMake package version configuration file
 
    The installed CMake package version configuration file for the library previously used `SameMinorVersion` for the version compatibility logic, causing a `find_package(HDF5 X.Y.Z)` call to fail unless the version of a located HDF5 installation matched both `X` and `Y` of the version number exactly (i.e., releases with a greater minor version number weren't considered backward compatible). This reflected the version compatibility of HDF5 releases prior to version 2.0.0, but doesn't reflect the version compatibility of HDF5 version 2.0.0+ releases. The version compatibility logic now uses `SameMajorVersion`, so a `find_package(HDF5 X.Y.Z)` call will accept all versions of HDF5 where the major version matches `X` (i.e., only releases with a greater major version number will be rejected as not backward compatible).

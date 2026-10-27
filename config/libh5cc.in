@@ -60,7 +60,7 @@ export PKG_CONFIG_PATH=$libdir/pkgconfig
 # libhdf5.settings file residing in the lib directory.
 showconfigure()
 {
-  cat $dir/@HDF5_INSTALL_LIB_DIR@/libhdf5.settings
+  cat $dir/@HDF5_INSTALL_LIB_DIR@/libhdf5@HDF5_LIB_INFIX@.settings
   status=$?
 }
 

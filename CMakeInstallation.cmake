@@ -195,9 +195,12 @@ configure_file (
     ${HDF5_SOURCE_DIR}/src/libhdf5.settings.in
     ${HDF5_SRC_BINARY_DIR}/libhdf5.settings ESCAPE_QUOTES @ONLY
 )
+# Named after the library, so builds with different HDF5_LIB_INFIX values can
+# be installed in the same directory
 install (
     FILES ${HDF5_SRC_BINARY_DIR}/libhdf5.settings
     DESTINATION ${HDF5_INSTALL_LIB_DIR}
+    RENAME libhdf5${HDF5_LIB_INFIX}.settings
     COMPONENT libraries
 )
 
