@@ -133,6 +133,7 @@ static const char *FILENAME[] = {"dataset",              /* 0 */
 #endif /* H5_HAVE_FILTER_SZIP */
 
 #define DSET_BOGUS_NAME      "bogus"
+#define DSET_MAX_FILTERS_NAME "max_filters"
 #define DSET_MISSING_NAME    "missing"
 #define DSET_CAN_APPLY_NAME  "can_apply"
 #define DSET_CAN_APPLY_NAME2 "can_apply2"
@@ -2919,6 +2920,9 @@ test_filters(hid_t file)
 #endif /* H5_HAVE_FILTER_SZIP */
 
     hsize_t shuffle_size; /* Size of dataset with shuffle filter */
+    hsize_t max_filters_size; /* Size of dataset with the maximum filter count */
+    herr_t  filter_ret; /* Filter boundary check return value */
+    unsigned filter_idx; /* Filter pipeline index */
 
 #if defined(H5_HAVE_FILTER_DEFLATE) || defined(H5_HAVE_FILTER_SZIP)
     hsize_t combo_size; /* Size of dataset with multiple filters */
@@ -2947,6 +2951,33 @@ test_filters(hid_t file)
         goto error;
 
     /* Clean up objects used for this test */
+    if (H5Pclose(dc) < 0)
+        goto error;
+
+    /* Exercise the documented maximum filter count through both I/O directions. */
+    puts("Testing filter pipeline with H5Z_MAX_NFILTERS filters");
+    if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+    if (H5Pset_chunk(dc, 2, chunk_size) < 0)
+        goto error;
+    for (filter_idx = 0; filter_idx < H5Z_MAX_NFILTERS; filter_idx++)
+        if (H5Pset_filter(dc, H5Z_FILTER_BOGUS, 0, (size_t)0, NULL) < 0)
+            goto error;
+    if (H5Pget_nfilters(dc) != H5Z_MAX_NFILTERS)
+        goto error;
+
+    /* The documented maximum is valid, but the next filter must still fail. */
+    H5E_BEGIN_TRY
+    {
+        filter_ret = H5Pset_filter(dc, H5Z_FILTER_BOGUS, 0, (size_t)0, NULL);
+    }
+    H5E_END_TRY
+    if (filter_ret >= 0)
+        goto error;
+
+    if (test_filter_internal(file, DSET_MAX_FILTERS_NAME, dc, DISABLE_FLETCHER32, DATA_NOT_CORRUPTED,
+                             &max_filters_size) < 0)
+        goto error;
     if (H5Pclose(dc) < 0)
         goto error;
 
