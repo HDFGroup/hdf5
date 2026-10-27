@@ -29,6 +29,10 @@
 #include "H5Iprivate.h"  /* IDs                              */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Tpkg.h"      /* Datatypes                        */
+#if defined(__x86_64__) && defined(__GNUC__)
+#include <cpuid.h>
+#define H5T_HAVE_X87_STATE_SAVE_RESTORE
+#endif
 
 /****************/
 /* Local Macros */
@@ -47,6 +51,9 @@
 #else
 #define H5_NO_UBSAN
 #endif
+
+/* XSAVE area for the x87 component: 512-byte legacy region plus 64-byte header */
+#define H5T_X87_XSAVE_SIZE 576
 
 /*-------------------------------------------------------------------------
  * Function:    DETECT_F
@@ -205,6 +212,64 @@ static herr_t   H5T__fix_order(int, int, int *, H5T_order_t *);
 static herr_t   H5T__imp_bit(unsigned, int *, void *, void *, const unsigned char *, unsigned *);
 static unsigned H5T__find_bias(unsigned, unsigned, int *, void *);
 static void     H5T__set_precision(H5T_fpoint_det_t *);
+#ifdef H5T_HAVE_X87_STATE_SAVE_RESTORE
+static bool H5T__save_x87_state(unsigned char *);
+static void H5T__restore_x87_state(unsigned char *);
+#endif
+
+#ifdef H5T_HAVE_X87_STATE_SAVE_RESTORE
+/*-------------------------------------------------------------------------
+ * Function:    H5T__save_x87_state
+ *
+ * Purpose:     Save the x87 component of the current extended state so that
+ *              datatype detection can restore the caller's state afterward.
+ *
+ * Return:      true if the state was saved, false otherwise
+ *-------------------------------------------------------------------------
+ */
+static bool
+H5T__save_x87_state(unsigned char *state)
+{
+    unsigned int eax, ebx, ecx, edx;
+    unsigned int max_leaf;
+
+    max_leaf = __get_cpuid_max(0, NULL);
+    if (max_leaf < 1 || !__get_cpuid(1, &eax, &ebx, &ecx, &edx))
+        return false;
+
+    /* XSAVE and OSXSAVE must both be enabled before executing XSAVE64 */
+    if ((ecx & (1U << 26)) == 0 || (ecx & (1U << 27)) == 0)
+        return false;
+
+    memset(state, 0, H5T_X87_XSAVE_SIZE);
+
+    /* EDX:EAX = 1 requests only the x87 component */
+    __asm__ __volatile__("xsave64 %0"
+                         : "+m"(*(unsigned char (*)[H5T_X87_XSAVE_SIZE])state)
+                         : "a"(1U), "d"(0U)
+                         : "memory");
+
+    return true;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T__restore_x87_state
+ *
+ * Purpose:     Restore the x87 component saved by H5T__save_x87_state()
+ *
+ * Return:      void
+ *-------------------------------------------------------------------------
+ */
+static void
+H5T__restore_x87_state(unsigned char *state)
+{
+    /* EDX:EAX = 1 restores only the x87 component and leaves SSE state alone */
+    __asm__ __volatile__("xrstor64 %0"
+                         :
+                         : "m"(*(unsigned char (*)[H5T_X87_XSAVE_SIZE])state), "a"(1U), "d"(0U)
+                         : "memory");
+}
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__byte_cmp
@@ -464,11 +529,21 @@ herr_t H5_NO_UBSAN
 H5T__init_native_float_types(void)
 {
     fenv_t           saved_fenv;
+#ifdef H5T_HAVE_X87_STATE_SAVE_RESTORE
+    unsigned char x87_storage[H5T_X87_XSAVE_SIZE + 63];
+    unsigned char *x87_state = (unsigned char *)(((uintptr_t)x87_storage + 63) & ~(uintptr_t)63);
+    bool           x87_saved = false;
+#endif
     H5T_fpoint_det_t det;
     H5T_t           *dt        = NULL;
     herr_t           ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
+
+#ifdef H5T_HAVE_X87_STATE_SAVE_RESTORE
+    /* Preserve the caller's x87 state, including whether the component is in use */
+    x87_saved = H5T__save_x87_state(x87_state);
+#endif
 
     /* Turn off floating-point exceptions while initializing to avoid
      * tripping over signaling NaNs while looking at "don't care" bits.
@@ -619,6 +694,11 @@ done:
     /* Restore the original environment */
     if (feupdateenv(&saved_fenv) != 0)
         HSYS_GOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't restore floating-point environment");
+
+#ifdef H5T_HAVE_X87_STATE_SAVE_RESTORE
+    if (x87_saved)
+        H5T__restore_x87_state(x87_state);
+#endif
 
     if (ret_value < 0) {
         if (dt != NULL) {

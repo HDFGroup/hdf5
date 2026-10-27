@@ -172,6 +172,20 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Preserved the calling thread's x87 state during native floating-point type initialization
+
+   Native floating-point type detection uses `long double` arithmetic and temporarily
+
+   changes the floating-point environment. On x86-64 this left the x87 state component of
+
+   the thread that first initialized the library marked in use, which can slow
+
+   floating-point code on some processors. The initializer now saves and restores the x87
+
+   component around datatype detection without changing SSE state.
+
+   Fixes GitHub issue #6779
+
 ### Fixed set_local and filter callbacks being called for filters whose can_apply callback returns false
 
    Fixed library to no longer execute the set_local and filter callbacks when an optional

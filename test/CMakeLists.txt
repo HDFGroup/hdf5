@@ -523,6 +523,7 @@ set (H5_TESTS
     cmpd_dtransform
     event_set
     onion
+    x87_state
 )
 
 set (H5_S3TESTS
