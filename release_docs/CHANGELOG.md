@@ -111,6 +111,12 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Removed API lock for memory management wrappers
+
+   The HDF5 library no longer acquires the global thread lock when entering
+   H5allocate_memory(), H5resize_memory(), and H5free_memory(). This allows
+   multiple threads to access these functions concurrently.
+
 ### Added new VFD feature flag
 
    Added a new Virtual File Driver (VFD) feature flag,
@@ -124,7 +130,8 @@ We would like to thank the many HDF5 community members who contributed to this r
    plugin supports. The currently supported flags are
    H5Z_FEAT_FILTER_THREADSAFE, which should be set when the filter callback is
    threadsafe, and H5Z_FEAT_FILTER_NO_H5_CALLS, which should be set when the
-   filter makes no HDF5 calls except for H5OPEN.
+   filter makes no HDF5 calls except for H5OPEN, H5allocate_memory(),
+   H5resize_memory(), and H5free_memory().
 
 ### Added support for internally concurrent multithreaded reads of chunked datasets
 
@@ -164,6 +171,20 @@ We would like to thank the many HDF5 community members who contributed to this r
 # 🪲 Bug Fixes
 
 ## Library
+
+### Fixed set_local and filter callbacks being called for filters whose can_apply callback returns false
+
+   Fixed library to no longer execute the set_local and filter callbacks when an optional
+   filter plugin's can_apply callback returned false, to match the documented behavior.
+
+### Removed max cache entry size assertion
+
+   Removed H5C_MAX_ENTRY_SIZE which caused an assertion to fail if a metadata cache entry
+   was larger than 32 MiB. This was meant to detect corruption, not actually impose a
+   limit on the maximum size of a metadata cache entry. This can cause assertion failures
+   in legitimate use cases. While we could simply increase the size, there are already
+   checks for a cache entry that is too big to fit in the file, and an assertion is
+   inappropriate to check for file corruption, so this check has been removed.
 
 ### Fixed H5Pmodify_filter() writing past the filter pipeline for a filter not in it
 
