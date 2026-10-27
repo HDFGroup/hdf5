@@ -152,8 +152,8 @@ H5G_map_obj_type(H5O_type_t obj_type)
 hid_t
 H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
 {
-    void             *grp          = NULL;      /* New group created */
-    H5VL_object_t    *vol_obj;                  /* Object of loc_id */
+    void             *grp = NULL; /* New group created */
+    H5VL_object_t    *vol_obj;    /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t             tmp_gcpl  = H5I_INVALID_HID; /* Temporary group creation property list */
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
@@ -200,7 +200,7 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set collective metadata read info");
 
     /* Set location parameters */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
+    loc_params.type = H5VL_OBJECT_BY_SELF;
     if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
@@ -247,8 +247,8 @@ done:
 hid_t
 H5Gopen1(hid_t loc_id, const char *name)
 {
-    void             *grp          = NULL;      /* Group opened */
-    H5VL_object_t    *vol_obj      = NULL;      /* Object of loc_id */
+    void             *grp     = NULL; /* Group opened */
+    H5VL_object_t    *vol_obj = NULL; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -259,7 +259,7 @@ H5Gopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no name");
 
     /* Set location parameters */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
+    loc_params.type = H5VL_OBJECT_BY_SELF;
     if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 

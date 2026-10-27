@@ -272,8 +272,8 @@ done:
 hid_t
 H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id)
 {
-    void             *dset         = NULL;         /* dset object from VOL connector */
-    H5VL_object_t    *vol_obj      = NULL;         /* Object for loc_id */
+    void             *dset    = NULL;              /* dset object from VOL connector */
+    H5VL_object_t    *vol_obj = NULL;              /* Object for loc_id */
     H5VL_loc_params_t loc_params;                  /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -301,7 +301,7 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* Set location parameters */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
+    loc_params.type = H5VL_OBJECT_BY_SELF;
     if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 

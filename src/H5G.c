@@ -313,8 +313,8 @@ done:
 hid_t
 H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
 {
-    void             *grp          = NULL;         /* Structure for new group */
-    H5VL_object_t    *vol_obj      = NULL;         /* Object for loc_id */
+    void             *grp     = NULL;              /* Structure for new group */
+    H5VL_object_t    *vol_obj = NULL;              /* Object for loc_id */
     H5VL_loc_params_t loc_params;                  /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 

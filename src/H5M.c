@@ -423,8 +423,8 @@ done:
 hid_t
 H5Mcreate_anon(hid_t loc_id, hid_t key_type_id, hid_t val_type_id, hid_t mcpl_id, hid_t mapl_id)
 {
-    void                *map          = NULL;         /* map object from VOL connector */
-    H5VL_object_t       *vol_obj      = NULL;         /* object of loc_id */
+    void                *map     = NULL;              /* map object from VOL connector */
+    H5VL_object_t       *vol_obj = NULL;              /* object of loc_id */
     H5VL_optional_args_t vol_cb_args;                 /* Arguments to VOL callback */
     H5VL_map_args_t      map_args;                    /* Arguments for map operations */
     hid_t                ret_value = H5I_INVALID_HID; /* Return value */
@@ -448,18 +448,18 @@ H5Mcreate_anon(hid_t loc_id, hid_t key_type_id, hid_t val_type_id, hid_t mcpl_id
     /* Set location parameters */
 
     /* Set up VOL callback arguments */
-    map_args.create.loc_params.type     = H5VL_OBJECT_BY_SELF;
+    map_args.create.loc_params.type = H5VL_OBJECT_BY_SELF;
     if ((map_args.create.loc_params.obj_type = H5I_get_type(loc_id)) == H5I_BADID)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
-    map_args.create.name                = NULL;
-    map_args.create.lcpl_id             = H5P_LINK_CREATE_DEFAULT;
-    map_args.create.key_type_id         = key_type_id;
-    map_args.create.val_type_id         = val_type_id;
-    map_args.create.mcpl_id             = mcpl_id;
-    map_args.create.mapl_id             = mapl_id;
-    map_args.create.map                 = NULL;
-    vol_cb_args.op_type                 = H5VL_MAP_CREATE;
-    vol_cb_args.args                    = &map_args;
+    map_args.create.name        = NULL;
+    map_args.create.lcpl_id     = H5P_LINK_CREATE_DEFAULT;
+    map_args.create.key_type_id = key_type_id;
+    map_args.create.val_type_id = val_type_id;
+    map_args.create.mcpl_id     = mcpl_id;
+    map_args.create.mapl_id     = mapl_id;
+    map_args.create.map         = NULL;
+    vol_cb_args.op_type         = H5VL_MAP_CREATE;
+    vol_cb_args.args            = &map_args;
 
     /* Create the map */
     if (H5VL_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
@@ -1295,7 +1295,7 @@ done:
 herr_t
 H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id, H5M_iterate_t op, void *op_data, hid_t dxpl_id)
 {
-    H5VL_object_t       *vol_obj      = NULL;
+    H5VL_object_t       *vol_obj = NULL;
     H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
     H5VL_map_args_t      map_args;            /* Arguments for map operations */
     herr_t               ret_value = SUCCEED; /* Return value */
@@ -1319,16 +1319,16 @@ H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id, H5M_iterate_t op, 
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
 
     /* Set up VOL callback arguments */
-    map_args.specific.specific_type                    = H5VL_MAP_ITER;
-    map_args.specific.args.iterate.loc_params.type     = H5VL_OBJECT_BY_SELF;
+    map_args.specific.specific_type                = H5VL_MAP_ITER;
+    map_args.specific.args.iterate.loc_params.type = H5VL_OBJECT_BY_SELF;
     if ((map_args.specific.args.iterate.loc_params.obj_type = H5I_get_type(map_id)) == H5I_BADID)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid map identifier");
-    map_args.specific.args.iterate.idx                 = (idx ? *idx : 0);
-    map_args.specific.args.iterate.key_mem_type_id     = key_mem_type_id;
-    map_args.specific.args.iterate.op                  = op;
-    map_args.specific.args.iterate.op_data             = op_data;
-    vol_cb_args.op_type                                = H5VL_MAP_SPECIFIC;
-    vol_cb_args.args                                   = &map_args;
+    map_args.specific.args.iterate.idx             = (idx ? *idx : 0);
+    map_args.specific.args.iterate.key_mem_type_id = key_mem_type_id;
+    map_args.specific.args.iterate.op              = op;
+    map_args.specific.args.iterate.op_data         = op_data;
+    vol_cb_args.op_type                            = H5VL_MAP_SPECIFIC;
+    vol_cb_args.args                               = &map_args;
 
     /* Iterate over keys */
     if ((ret_value = H5VL_optional(vol_obj, &vol_cb_args, dxpl_id, H5_REQUEST_NULL)) < 0)
@@ -1405,8 +1405,8 @@ H5Miterate_by_name(hid_t loc_id, const char *map_name, hsize_t *idx, hid_t key_m
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
 
     /* Set up VOL callback arguments */
-    map_args.specific.specific_type                                        = H5VL_MAP_ITER;
-    map_args.specific.args.iterate.loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    map_args.specific.specific_type                = H5VL_MAP_ITER;
+    map_args.specific.args.iterate.loc_params.type = H5VL_OBJECT_BY_NAME;
     if ((map_args.specific.args.iterate.loc_params.obj_type = H5I_get_type(loc_id)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     map_args.specific.args.iterate.loc_params.loc_data.loc_by_name.name    = map_name;
@@ -1448,7 +1448,7 @@ done:
 herr_t
 H5Mdelete(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t dxpl_id)
 {
-    H5VL_object_t       *vol_obj      = NULL;
+    H5VL_object_t       *vol_obj = NULL;
     H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
     H5VL_map_args_t      map_args;            /* Arguments for map operations */
     herr_t               ret_value = SUCCEED; /* Return value */
@@ -1470,14 +1470,14 @@ H5Mdelete(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t dxpl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
 
     /* Set up VOL callback arguments */
-    map_args.specific.specific_type                = H5VL_MAP_DELETE;
-    map_args.specific.args.del.loc_params.type     = H5VL_OBJECT_BY_SELF;
+    map_args.specific.specific_type            = H5VL_MAP_DELETE;
+    map_args.specific.args.del.loc_params.type = H5VL_OBJECT_BY_SELF;
     if (H5I_BADID == (map_args.specific.args.del.loc_params.obj_type = H5I_get_type(map_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid map identifier");
-    map_args.specific.args.del.key_mem_type_id     = key_mem_type_id;
-    map_args.specific.args.del.key                 = key;
-    vol_cb_args.op_type                            = H5VL_MAP_SPECIFIC;
-    vol_cb_args.args                               = &map_args;
+    map_args.specific.args.del.key_mem_type_id = key_mem_type_id;
+    map_args.specific.args.del.key             = key;
+    vol_cb_args.op_type                        = H5VL_MAP_SPECIFIC;
+    vol_cb_args.args                           = &map_args;
 
     /* Delete the key/value pair */
     if (H5VL_optional(vol_obj, &vol_cb_args, dxpl_id, H5_REQUEST_NULL) < 0)

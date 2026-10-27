@@ -1809,7 +1809,7 @@ H5Lvisit2(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterat
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Set location struct fields */
-    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.type     = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = id_type;
 
     /* Set up VOL callback arguments */

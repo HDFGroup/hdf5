@@ -437,7 +437,7 @@ H5O__copy_api_common(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, c
     /* get the object */
     if (NULL == (*vol_obj_ptr = H5VL_vol_object(dst_loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
-    loc_params2.type     = H5VL_OBJECT_BY_SELF;
+    loc_params2.type = H5VL_OBJECT_BY_SELF;
     if ((loc_params2.obj_type = H5I_get_type(dst_loc_id)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
@@ -805,9 +805,9 @@ done:
 herr_t
 H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5VL_object_t          *vol_obj1 = NULL;                                     /* object of obj_id */
-    H5VL_object_t          *vol_obj2 = NULL;                                     /* object of new_loc_id */
-    H5VL_link_create_args_t vol_cb_args; /* Arguments to VOL callback */
+    H5VL_object_t          *vol_obj1 = NULL; /* object of obj_id */
+    H5VL_object_t          *vol_obj2 = NULL; /* object of new_loc_id */
+    H5VL_link_create_args_t vol_cb_args;     /* Arguments to VOL callback */
     H5VL_loc_params_t       new_loc_params;
     herr_t                  ret_value = SUCCEED; /* Return value */
 
@@ -839,7 +839,7 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Set up new location struct */
-    new_loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    new_loc_params.type = H5VL_OBJECT_BY_NAME;
     if ((new_loc_params.obj_type = H5I_get_type(new_loc_id)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     new_loc_params.loc_data.loc_by_name.name    = new_name;
@@ -867,9 +867,9 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid
     } /* end if */
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type                            = H5VL_LINK_CREATE_HARD;
-    vol_cb_args.args.hard.curr_obj                 = H5VL_OBJ_DATA(vol_obj1);
-    vol_cb_args.args.hard.curr_loc_params.type     = H5VL_OBJECT_BY_SELF;
+    vol_cb_args.op_type                        = H5VL_LINK_CREATE_HARD;
+    vol_cb_args.args.hard.curr_obj             = H5VL_OBJ_DATA(vol_obj1);
+    vol_cb_args.args.hard.curr_loc_params.type = H5VL_OBJECT_BY_SELF;
     if ((vol_cb_args.args.hard.curr_loc_params.obj_type = H5I_get_type(obj_id)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
