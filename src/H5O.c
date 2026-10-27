@@ -346,7 +346,6 @@ hid_t
 H5Oopen_by_token(hid_t loc_id, H5O_token_t token)
 {
     H5VL_object_t    *vol_obj;                     /* Object of loc_id */
-    H5I_type_t        vol_obj_type = H5I_BADID;    /* Object type of loc_id */
     H5I_type_t        opened_type;                 /* Opened object type */
     void             *opened_obj = NULL;           /* Opened object */
     H5VL_loc_params_t loc_params;                  /* Location parameters */
