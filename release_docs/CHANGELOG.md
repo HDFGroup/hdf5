@@ -172,6 +172,11 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed set_local and filter callbacks being called for filters whose can_apply callback returns false
+
+   Fixed library to no longer execute the set_local and filter callbacks when an optional
+   filter plugin's can_apply callback returned false, to match the documented behavior.
+
 ### Removed max cache entry size assertion
 
    Removed H5C_MAX_ENTRY_SIZE which caused an assertion to fail if a metadata cache entry

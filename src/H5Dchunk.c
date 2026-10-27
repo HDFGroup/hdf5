@@ -4867,7 +4867,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, bool reset)
         udata.common.scaled      = ent->scaled;
         udata.chunk_block.offset = ent->chunk_block.offset;
         udata.chunk_block.length = dset->shared->layout.u.chunk.size;
-        udata.filter_mask        = 0;
+        udata.filter_mask        = dset->shared->universal_filter_mask;
         udata.chunk_idx          = ent->chunk_idx;
 
         /* Should the chunk be filtered before writing it to disk? */
@@ -6022,6 +6022,9 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
             if (H5CX_get_filter_cb(&filter_cb) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function");
 
+            /* Set initial filter mask */
+            filter_mask = dset->shared->universal_filter_mask;
+
             /* Push the chunk through the filters */
             if (H5Z_pipeline(pline, 0, &filter_mask, err_detect, filter_cb, &orig_chunk_size, &buf_size,
                              &fb_info.fill_buf) < 0)
@@ -6164,6 +6167,9 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get error detection info");
                     if (H5CX_get_filter_cb(&filter_cb) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function");
+
+                    /* Set initial filter mask */
+                    filter_mask = dset->shared->universal_filter_mask;
 
                     /* Push the chunk through the filters */
                     if (H5Z_pipeline(pline, 0, &filter_mask, err_detect, filter_cb, &nbytes,
