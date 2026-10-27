@@ -329,6 +329,16 @@ Fixes GitHub issue #6679.
 
 ## Configuration
 
+### Fixed MPI Fortran module paths for CMake build-tree consumers
+
+   Parallel Fortran builds now propagate MPI Fortran include directories from
+   the static and shared HDF5 Fortran targets to their consumers. This fixes
+   compilation of the Fortran tests and high-level Fortran libraries with
+   compilers such as LLVM Flang that need MPI modules when reading `hdf5.mod`.
+   The additional MPI paths apply only to the build tree.
+
+   Fixes GitHub issue #6776.
+
 ### Fixed version handling in installed CMake package version configuration file
 
    The installed CMake package version configuration file for the library previously used `SameMinorVersion` for the version compatibility logic, causing a `find_package(HDF5 X.Y.Z)` call to fail unless the version of a located HDF5 installation matched both `X` and `Y` of the version number exactly (i.e., releases with a greater minor version number weren't considered backward compatible). This reflected the version compatibility of HDF5 releases prior to version 2.0.0, but doesn't reflect the version compatibility of HDF5 version 2.0.0+ releases. The version compatibility logic now uses `SameMajorVersion`, so a `find_package(HDF5 X.Y.Z)` call will accept all versions of HDF5 where the major version matches `X` (i.e., only releases with a greater major version number will be rejected as not backward compatible).

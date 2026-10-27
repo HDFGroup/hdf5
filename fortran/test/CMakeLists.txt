@@ -465,6 +465,26 @@ else ()
   add_dependencies (vol_connector ${HDF5_F90_TEST_LIBSH_TARGET})
 endif ()
 
+if (HDF5_ENABLE_PARALLEL)
+  function (ADD_H5_MPI_INCLUDE_TEST suffix library)
+    add_executable (mpi_include_${suffix} mpi_include.F90)
+    target_include_directories (mpi_include_${suffix}
+        PRIVATE "${CMAKE_Fortran_MODULE_DIRECTORY}/${suffix};${HDF5_F90_BINARY_DIR}"
+    )
+    target_link_libraries (mpi_include_${suffix} PRIVATE ${library})
+    set_target_properties (mpi_include_${suffix} PROPERTIES
+        FOLDER test/fortran
+    )
+  endfunction ()
+
+  if (BUILD_STATIC_LIBS)
+    ADD_H5_MPI_INCLUDE_TEST (static ${HDF5_F90_LIB_TARGET})
+  endif ()
+  if (BUILD_SHARED_LIBS)
+    ADD_H5_MPI_INCLUDE_TEST (shared ${HDF5_F90_LIBSH_TARGET})
+  endif ()
+endif ()
+
 if (HDF5_TEST_FORTRAN AND HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)
 endif ()

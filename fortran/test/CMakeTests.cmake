@@ -207,3 +207,12 @@ add_test (
 set_tests_properties (FORTRAN_flush1-clean-objects PROPERTIES
     DEPENDS FORTRAN_fflush2
 )
+
+foreach (suffix static shared)
+  if (TARGET mpi_include_${suffix})
+    add_test (NAME FORTRAN_mpi_include_${suffix} COMMAND $<TARGET_FILE:mpi_include_${suffix}>)
+    if ("FORTRAN_mpi_include_${suffix}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (FORTRAN_mpi_include_${suffix} PROPERTIES DISABLED true)
+    endif ()
+  endif ()
+endforeach ()
