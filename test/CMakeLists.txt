@@ -1017,6 +1017,35 @@ if (HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)
 endif ()
 
+##############################################################################
+###    B U I L D - T R E E   C O N F I G   C O N S U M E R                 ###
+##############################################################################
+if (HDF5_BUILD_FORTRAN OR HDF5_BUILD_JAVA)
+  if (BUILD_SHARED_LIBS)
+    set (HDF5_BUILD_TREE_CONFIG_LIB_COMPONENT shared)
+  else ()
+    set (HDF5_BUILD_TREE_CONFIG_LIB_COMPONENT static)
+  endif ()
+
+  add_test (
+      NAME H5TEST-buildtree-config-consumer
+      COMMAND "${CMAKE_COMMAND}"
+          -S "${HDF5_TEST_SOURCE_DIR}/buildtree-config-consumer"
+          -B "${HDF5_TEST_BINARY_DIR}/buildtree-config-consumer"
+          -D "HDF5_DIR=${HDF5_BINARY_DIR}"
+          -D "HDF5_CONFIG_LIB_COMPONENT=${HDF5_BUILD_TREE_CONFIG_LIB_COMPONENT}"
+          -D "EXPECT_FORTRAN=${HDF5_BUILD_FORTRAN}"
+          -D "EXPECT_JAVA=${HDF5_BUILD_JAVA}"
+          -D "EXPECTED_FORTRAN_MODULE_DIR=${CMAKE_Fortran_MODULE_DIRECTORY}"
+  )
+  set_tests_properties (H5TEST-buildtree-config-consumer PROPERTIES
+      WORKING_DIRECTORY "${HDF5_TEST_BINARY_DIR}"
+  )
+  if ("H5TEST-buildtree-config-consumer" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (H5TEST-buildtree-config-consumer PROPERTIES DISABLED true)
+  endif ()
+endif ()
+
 if (HDF5_TEST_API)
   add_subdirectory (API)
 endif ()

@@ -78,6 +78,28 @@ if (HDF5_EXPORTED_TARGETS AND NOT HDF5_EXTERNALLY_CONFIGURED)
       NAMESPACE ${HDF_PACKAGE_NAMESPACE}
       COMPONENT configinstall
   )
+
+  # The build-tree package config is located at the build root, so export the
+  # same target sets there for find_package() consumers.
+  if (HDF5_ENABLE_JNI)
+    export (
+        EXPORT ${HDF5_EXPORTED_TARGETS}_java
+        FILE ${HDF5_BINARY_DIR}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}_java-targets.cmake
+        NAMESPACE ${HDF_PACKAGE_NAMESPACE}
+    )
+  endif ()
+  if (BUILD_STATIC_LIBS AND BUILD_SHARED_LIBS)
+    export (
+        EXPORT ${HDF5_EXPORTED_TARGETS}_static
+        FILE ${HDF5_BINARY_DIR}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}_static-targets.cmake
+        NAMESPACE ${HDF_PACKAGE_NAMESPACE}
+    )
+  endif ()
+  export (
+      EXPORT ${HDF5_EXPORTED_TARGETS}
+      FILE ${HDF5_BINARY_DIR}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
+      NAMESPACE ${HDF_PACKAGE_NAMESPACE}
+  )
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -117,19 +139,35 @@ if (HDF5_BUILD_JAVA)
   get_filename_component (HDF5_SLF4J_NOP_JAR_NAME ${HDF5_JAVA_LOGGING_NOP_JAR} NAME)
 endif ()
 
+# Build-tree consumers need the paths that CMake actually generates. The
+# install-tree config keeps the relocatable paths used below.
+set (HDF5_CONFIG_BUILD_TREE ON)
+set (HDF5_CONFIG_JAVA_INCLUDE_DIRS "")
+if (HDF5_BUILD_JAVA)
+  foreach (_hdf5_config_jar IN LISTS HDF5_JAVA_JARS HDF5_JAVA_LOGGING_JAR HDF5_JAVA_LOGGING_NOP_JAR)
+    file (TO_CMAKE_PATH "${_hdf5_config_jar}" _hdf5_config_jar)
+    list (APPEND HDF5_CONFIG_JAVA_INCLUDE_DIRS "${_hdf5_config_jar}")
+  endforeach ()
+endif ()
+set (HDF5_CONFIG_FORTRAN_MODULE_DIR_SHARED "${CMAKE_Fortran_MODULE_DIRECTORY}/shared")
+set (HDF5_CONFIG_FORTRAN_MODULE_DIR_STATIC "${CMAKE_Fortran_MODULE_DIRECTORY}/static")
+
 #-----------------------------------------------------------------------------
 # Configure the hdf5-config.cmake file for the build directory
 #-----------------------------------------------------------------------------
 set (INCLUDE_INSTALL_DIR ${HDF5_INSTALL_INCLUDE_DIR})
-set (SHARE_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_INSTALL_CMAKE_DIR}" )
+set (SHARE_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}" )
 set (CURRENT_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}" )
 configure_package_config_file (
     ${HDF_CONFIG_DIR}/install/hdf5-config.cmake.in
     "${HDF5_BINARY_DIR}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake"
-    INSTALL_DESTINATION "${HDF5_INSTALL_CMAKE_DIR}"
+    INSTALL_DESTINATION "."
     PATH_VARS INCLUDE_INSTALL_DIR SHARE_INSTALL_DIR CURRENT_BUILD_DIR
     INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
 )
+
+# The install-tree config must retain package-relative paths.
+set (HDF5_CONFIG_BUILD_TREE OFF)
 
 #-----------------------------------------------------------------------------
 # Configure the hdf5-config.cmake file for the install directory

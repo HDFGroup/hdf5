@@ -1,0 +1,35 @@
+cmake_minimum_required (VERSION 3.18)
+
+project (HDF5BuildTreeConfigConsumer LANGUAGES C)
+
+if (NOT DEFINED HDF5_CONFIG_LIB_COMPONENT)
+  message (FATAL_ERROR "HDF5_CONFIG_LIB_COMPONENT must be set")
+endif ()
+
+find_package (HDF5 CONFIG REQUIRED COMPONENTS C ${HDF5_CONFIG_LIB_COMPONENT})
+
+if (EXPECT_FORTRAN)
+  if (NOT HDF5_INCLUDE_DIR_FORTRAN)
+    message (FATAL_ERROR "HDF5_INCLUDE_DIR_FORTRAN is empty")
+  endif ()
+  get_filename_component (_hdf5_fortran_dir "${HDF5_INCLUDE_DIR_FORTRAN}" REALPATH)
+  get_filename_component (_expected_fortran_dir "${EXPECTED_FORTRAN_MODULE_DIR}/${HDF5_CONFIG_LIB_COMPONENT}" REALPATH)
+  if (NOT IS_DIRECTORY "${HDF5_INCLUDE_DIR_FORTRAN}")
+    message (FATAL_ERROR "HDF5_INCLUDE_DIR_FORTRAN does not exist: ${HDF5_INCLUDE_DIR_FORTRAN}")
+  endif ()
+  if (NOT _hdf5_fortran_dir STREQUAL _expected_fortran_dir)
+    message (FATAL_ERROR
+        "HDF5_INCLUDE_DIR_FORTRAN is '${HDF5_INCLUDE_DIR_FORTRAN}', expected '${EXPECTED_FORTRAN_MODULE_DIR}/${HDF5_CONFIG_LIB_COMPONENT}'")
+  endif ()
+endif ()
+
+if (EXPECT_JAVA)
+  if (NOT HDF5_JAVA_INCLUDE_DIRS)
+    message (FATAL_ERROR "HDF5_JAVA_INCLUDE_DIRS is empty")
+  endif ()
+  foreach (_hdf5_java_path IN LISTS HDF5_JAVA_INCLUDE_DIRS)
+    if (NOT EXISTS "${_hdf5_java_path}")
+      message (FATAL_ERROR "HDF5_JAVA_INCLUDE_DIRS contains a missing path: ${_hdf5_java_path}")
+    endif ()
+  endforeach ()
+endif ()
