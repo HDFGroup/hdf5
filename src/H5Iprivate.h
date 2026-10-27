@@ -31,11 +31,8 @@
 /* Library Private Macros */
 /**************************/
 
-/* Macro to determine if an H5I_type_t is a "library type" */
+/* Macro to determine if a H5I_type_t is a "library type" */
 #define H5I_IS_LIB_TYPE(type) (type > 0 && type < H5I_NTYPES)
-
-/* Macro to determine if an H5I_type_t is a "location type" */
-#define H5I_IS_LOC_TYPE(type) (type >= H5I_FILE && type <= H5I_MAP)
 
 /* Flags for ID class */
 #define H5I_CLASS_IS_APPLICATION 0x01
