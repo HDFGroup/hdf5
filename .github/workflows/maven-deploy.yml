@@ -139,6 +139,24 @@ jobs:
               # Find main HDF5 JAR files (jarhdf5-*.jar) and examples JAR files (hdf5-java-examples-*.jar)
               artifact_jars=$(find "$artifact_dir" \( -name "jarhdf5-*.jar" -o -name "hdf5-java-examples-*.jar" \) ! -name "*sources*" ! -name "*javadoc*" 2>/dev/null || true)
 
+              # With HDF5_ENABLE_MAVEN_DEPLOY, CMake also copies jarhdf5-<v>-<os>-<arch>.jar
+              # to jarhdf5-<v>.jar for examples and tests, and both get staged. Keep only the
+              # platform-suffixed jarhdf5 jar so the same jar isn't deployed twice under one classifier.
+              filtered_jars=""
+              for jar in $artifact_jars; do
+                jar_name=$(basename "$jar")
+                if [[ "$jar_name" == jarhdf5-* ]] && ! [[ "$jar_name" =~ -(linux|windows|macos)-(x86_64|aarch64|x86)\.jar$ ]]; then
+                  echo "  Skipping non-platform JAR: $jar_name"
+                  continue
+                fi
+                if [ -z "$filtered_jars" ]; then
+                  filtered_jars="$jar"
+                else
+                  filtered_jars="${filtered_jars}"$'\n'"${jar}"
+                fi
+              done
+              artifact_jars="$filtered_jars"
+
               if [ -n "$artifact_jars" ]; then
                 echo "  Found HDF5 JARs:"
                 echo "$artifact_jars" | while read jar; do echo "    - $(basename "$jar")"; done
@@ -215,6 +233,12 @@ jobs:
           echo "classifier=${CLASSIFIER}" >> $GITHUB_OUTPUT
           echo "Platform classifier: ${CLASSIFIER}"
 
+      - name: Set up Java
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v5
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
       - name: Quick artifact validation
         run: |
           echo "=== Quick Artifact Validation ==="
@@ -223,26 +247,66 @@ jobs:
           jar_count=$(echo "${{ steps.find-jars.outputs.jar-files }}" | tr ',' '\n' | wc -l)
           echo "Found ${jar_count} JAR file(s) for deployment"
 
-          # Basic validation (artifacts should already be validated by staging workflow)
+          # Validate every JAR (and its staged POM) here, before deploy-maven runs, so a
+          # bad artifact fails the job before anything is uploaded rather than partway
+          # through the deploy loop.
           # Parse format: jar_path|platform|implementation,jar_path|platform|implementation,...
-          echo "${{ steps.find-jars.outputs.jar-files }}" | tr ',' '\n' | while IFS='|' read -r jar_file platform impl; do
+          error_count=0
+          while IFS='|' read -r jar_file platform impl; do
             # Skip empty entries
             [ -z "$jar_file" ] && continue
 
             if [ ! -f "${jar_file}" ]; then
               echo "ERROR: JAR file not found: ${jar_file}"
-              exit 1
+              error_count=$((error_count + 1))
+              continue
             fi
 
             jar_name=$(basename "${jar_file}")
-            echo "✓ [${platform}/${impl}] ${jar_name}"
-          done
 
-          # Quick POM validation
-          if [ -f "${{ steps.find-pom.outputs.pom-file }}" ]; then
-            echo "✓ POM file found: $(basename "${{ steps.find-pom.outputs.pom-file }}")"
-          else
-            echo "ERROR: POM file not found"
+            # The examples jar has no staged pom.xml; deploy-maven generates one for it
+            if [[ "${jar_name}" == *"hdf5-java-examples"* ]]; then
+              echo "✓ [${platform}/${impl}] ${jar_name} (examples, generated POM)"
+              continue
+            fi
+
+            # Determine the expected artifactId the same way deploy-maven does
+            if jar tf "$jar_file" | grep -q "org/hdfgroup/javahdf5/hdf5_h.class"; then
+              DETECTED_IMPL="ffm"
+            elif jar tf "$jar_file" | grep -q "hdf/hdf5lib/H5.class"; then
+              DETECTED_IMPL="jni"
+            else
+              echo "⚠️  WARNING: Could not detect implementation from ${jar_name} contents, using metadata: $impl"
+              DETECTED_IMPL="$impl"
+            fi
+
+            if [ "$DETECTED_IMPL" = "ffm" ]; then
+              ARTIFACT_ID="hdf5-java-ffm"
+            elif [ "$DETECTED_IMPL" = "jni" ]; then
+              ARTIFACT_ID="hdf5-java-jni"
+            else
+              ARTIFACT_ID="hdf5-java"
+            fi
+
+            # The pom.xml staged alongside THIS jar must exist and match its artifactId
+            pom_file="$(dirname "$jar_file")/pom.xml"
+            if [ ! -f "$pom_file" ]; then
+              echo "ERROR: No pom.xml staged alongside ${jar_name} (expected: ${pom_file})"
+              error_count=$((error_count + 1))
+              continue
+            fi
+            pom_artifact_id=$(grep -o '<artifactId>[^<]*</artifactId>' "$pom_file" | head -1 | sed 's/<[^>]*>//g')
+            if [ "$pom_artifact_id" != "$ARTIFACT_ID" ]; then
+              echo "ERROR: Staged pom.xml artifactId ('${pom_artifact_id}') does not match detected artifactId ('${ARTIFACT_ID}') for ${jar_name}"
+              error_count=$((error_count + 1))
+              continue
+            fi
+
+            echo "✓ [${platform}/${impl}] ${jar_name} -> ${ARTIFACT_ID} (POM: ${pom_file})"
+          done < <(echo "${{ steps.find-jars.outputs.jar-files }}" | tr ',' '\n')
+
+          if [ ${error_count} -ne 0 ]; then
+            echo "❌ Validation failed with ${error_count} error(s) - nothing will be deployed"
             exit 1
           fi
 
@@ -269,7 +333,7 @@ jobs:
           done
 
       - name: Set up Java
-        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v5
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v5
         with:
           java-version: '11'
           distribution: 'temurin'
@@ -332,10 +396,15 @@ jobs:
           # Deploy each JAR file with proper artifact ID and platform classifier
           success_count=0
           total_count=0
+          # artifactIds whose POM has been uploaded (set only after a successful deploy,
+          # so a failed upload doesn't leave an artifactId without a POM)
+          declare -A pom_deployed
 
           echo "=== Starting JAR Deployment ==="
           # Parse jar-files output: format is "jar_path|platform|implementation,jar_path|platform|implementation,..."
-          echo "${{ needs.validate-artifacts.outputs.jar-files }}" | tr ',' '\n' | while IFS='|' read -r jar_file platform impl; do
+          # NOTE: fed via process substitution (not a pipe) so success_count/total_count
+          # survive outside the loop instead of being updated in a lost subshell.
+          while IFS='|' read -r jar_file platform impl; do
             # Skip empty entries
             [ -z "$jar_file" ] && continue
 
@@ -364,6 +433,11 @@ jobs:
               CURRENT_CLASSIFIER=""  # Examples JAR has no platform classifier
               classifier_opts=""
               echo "Artifact type: Java Examples (platform-independent)"
+
+              # The examples jar has no staged pom.xml of its own, so let Maven
+              # generate a minimal one with a description specific to this artifact
+              # instead of (incorrectly) reusing the main library's pom.
+              pom_opts="-DgeneratePom=true -DgeneratePom.description=\"Example programs demonstrating usage of HDF5 Java bindings\""
             else
               # Main HDF5 Java library - determine implementation
               # Check JAR contents to detect FFM vs JNI
@@ -398,12 +472,31 @@ jobs:
                 classifier_opts="-Dclassifier=${CURRENT_CLASSIFIER}"
                 echo "Platform classifier: ${CURRENT_CLASSIFIER}"
               fi
+
+              # Use the pom.xml staged alongside THIS jar (not a repo-wide "first
+              # pom found") so each artifact gets its own name/description instead
+              # of possibly picking up another implementation's pom. Its presence and
+              # artifactId were already checked in validate-artifacts.
+              # A Maven repo has only one POM per artifactId and version, so upload it
+              # with the first jar of each artifactId only; later jars (other platforms)
+              # must not upload or generate a POM, or a release deploy is rejected as a
+              # duplicate. The only per-platform POM content is hdf5.platform/
+              # hdf5.architecture, which nothing reads from the published POM.
+              pom_file="$(dirname "$jar_file")/pom.xml"
+              if [ -z "${pom_deployed[$ARTIFACT_ID]}" ]; then
+                echo "POM file: ${pom_file}"
+                pom_opts="-DpomFile=\"${pom_file}\""
+              else
+                echo "POM for ${ARTIFACT_ID} already deployed, skipping POM upload"
+                pom_opts="-DgeneratePom=false"
+              fi
             fi
 
             # Check if this is a dry run
             if [ "${{ inputs.dry_run }}" == "true" ]; then
               echo "🧪 DRY RUN: Would deploy ${jar_basename} as ${ARTIFACT_ID} with classifier ${CURRENT_CLASSIFIER:-none}"
-              echo "Command would be: mvn deploy:deploy-file -DgroupId=org.hdfgroup -DartifactId=${ARTIFACT_ID} -Dversion=${HDF5_VERSION} -Dfile=${jar_file} ${classifier_opts}"
+              echo "Command would be: mvn deploy:deploy-file -DgroupId=org.hdfgroup -DartifactId=${ARTIFACT_ID} -Dversion=${HDF5_VERSION} -Dfile=${jar_file} ${pom_opts} ${classifier_opts}"
+              pom_deployed[$ARTIFACT_ID]=1
               success_count=$((success_count + 1))
             else
               echo "🚀 Deploying ${jar_basename}..."
@@ -414,7 +507,7 @@ jobs:
                 -DartifactId=\"${ARTIFACT_ID}\" \
                 -Dversion=\"${HDF5_VERSION}\" \
                 -Dfile=\"${jar_file}\" \
-                -DpomFile=\"${{ needs.validate-artifacts.outputs.pom-file }}\" \
+                ${pom_opts} \
                 -DrepositoryId=\"${{ inputs.repository_id }}\" \
                 -Durl=\"${{ inputs.repository_url }}\" \
                 ${classifier_opts} \
@@ -424,6 +517,7 @@ jobs:
               echo "Command: $deploy_cmd"
 
               if eval $deploy_cmd; then
+                pom_deployed[$ARTIFACT_ID]=1
                 echo "✓ Successfully deployed: ${jar_basename}"
                 success_count=$((success_count + 1))
               else
@@ -440,7 +534,7 @@ jobs:
                      -I "${{ inputs.repository_url }}" || echo "Authentication test failed"
               fi
             fi
-          done
+          done < <(echo "${{ needs.validate-artifacts.outputs.jar-files }}" | tr ',' '\n')
 
           echo "=== Deployment Summary ==="
           echo "Successful deployments: ${success_count}/${total_count}"
