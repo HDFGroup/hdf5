@@ -314,6 +314,25 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
 endif ()
 
 #-----------------------------------------------------------------------------
+# Add sh and csh scripts to set PATH and HDF5_PLUGIN_PATH for a relocated install
+#-----------------------------------------------------------------------------
+if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT WIN32 AND HDF5_ENABLE_PLUGIN_SUPPORT)
+  configure_file (
+      ${HDF_CONFIG_DIR}/install/h5setenv.sh.in
+      ${HDF5_BINARY_DIR}/h5setenv.sh @ONLY
+  )
+  configure_file (
+      ${HDF_CONFIG_DIR}/install/h5setenv.csh.in
+      ${HDF5_BINARY_DIR}/h5setenv.csh @ONLY
+  )
+  install (
+      PROGRAMS ${HDF5_BINARY_DIR}/h5setenv.sh ${HDF5_BINARY_DIR}/h5setenv.csh
+      DESTINATION ${HDF5_INSTALL_BIN_DIR}
+      COMPONENT libraries
+  )
+endif ()
+
+#-----------------------------------------------------------------------------
 # Set the cpack variables
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
