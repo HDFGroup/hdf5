@@ -110,6 +110,7 @@ CONTAINS
     INTEGER(HSIZE_T), DIMENSION(1:2) :: boundary
     INTEGER :: ndims
     TYPE(C_FUNPTR) :: callback_func
+    TYPE(C_FUNPTR) :: append_cb
     TYPE(C_PTR) :: user_data
     LOGICAL :: flag_set
 #ifdef H5_HAVE_HL
@@ -121,6 +122,9 @@ CONTAINS
 #endif
 
     ! Initialize
+    ! Assign C_FUNLOC to a variable rather than passing it directly as an argument:
+    ! with LTO, gfortran before GCC 16 drops the callback and fails to link (GCC PR 117303)
+    append_cb = C_FUNLOC(test_append_flush_callback)
     filename = "swmr_test.h5"
     CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
     CALL check("h5_fixname_f", error, total_error)
@@ -245,7 +249,7 @@ CONTAINS
     CALL verify("h5pset_append_flush_f: counter initial value", INT(callback_counter), 0, total_error)
 
     ! Set append flush with callback function and user data
-    CALL h5pset_append_flush_f(dapl_id, ndims, boundary, error, C_FUNLOC(test_append_flush_callback), C_LOC(callback_counter))
+    CALL h5pset_append_flush_f(dapl_id, ndims, boundary, error, append_cb, C_LOC(callback_counter))
     CALL check("h5pset_append_flush_f (with callback)", error, total_error)
 
     ! Verify counter is still 0 (callback not invoked yet - only invoked during dataset operations)
@@ -302,7 +306,7 @@ CONTAINS
     ! Set append flush with boundary=1 and our callback
     boundary(1) = 1
     CALL h5pset_append_flush_f(dapl_id, 1, boundary(1:1), error, &
-                                C_FUNLOC(test_append_flush_callback), C_LOC(callback_counter))
+                                append_cb, C_LOC(callback_counter))
     CALL check("h5pset_append_flush_f (for append test)", error, total_error)
 
     ! Create dataset with the callback-enabled DAPL
