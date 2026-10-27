@@ -12325,9 +12325,11 @@ main(void)
     H5F_libver_t low, high;   /* Low and high bounds */
     const char  *driver_name; /* File Driver value from environment */
     bool         driver_is_parallel;
+    int          express_test;
     int          nerrors = 0;
 
     driver_name = h5_get_test_driver_name();
+    express_test = h5_get_testexpress();
 
     /* Testing setup */
     h5_test_init();
@@ -12370,6 +12372,13 @@ main(void)
 
             /* Test virtual dataset only for V110 and above */
             if (high < H5F_LIBVER_V110)
+                continue;
+
+            /* At the smoke-test level, test each low bound only against the
+             * latest high bound.  The full set of bound combinations runs the
+             * I/O tests 18 times, which takes too long on slow hosts.
+             */
+            if (express_test >= H5_TEST_EXPRESS_SMOKE_TEST && high != H5F_LIBVER_LATEST)
                 continue;
 
             /* Set the low/high version bounds */
