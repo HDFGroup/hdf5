@@ -387,6 +387,17 @@ Fixes #5723.
 
 ## Performance
 
+### Cached per-thread API context and error stack pointers in native thread-local storage
+
+   Builds with internal thread support but without a threadsafe API looked up the current
+   thread's library state through the platform thread-specific key every time the API context
+   or error stack was accessed. These hot lookups added measurable overhead to metadata-heavy
+   operations such as group creation. The current thread's state is now cached in compiler
+   thread-local storage, while the platform key remains responsible for ownership and cleanup
+   when the thread exits.
+
+   Fixes GitHub issue #6753
+
 ## Fortran API
 
 ### h5open_f now re-initializes the Fortran interface after h5close_f

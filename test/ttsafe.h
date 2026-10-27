@@ -43,6 +43,7 @@ void tts_atomics(void *);
 #endif /* H5_HAVE_STDATOMIC_H */
 void tts_rwlock(void *);
 void tts_semaphore(void *);
+void tts_tinfo_cache(void *);
 #ifndef H5_HAVE_WIN_THREADS
 void tts_rec_rwlock_smoke_check_1(void *);
 void tts_rec_rwlock_smoke_check_2(void *);

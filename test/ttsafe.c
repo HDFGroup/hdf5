@@ -168,6 +168,8 @@ main(int argc, char *argv[])
 
 #endif /* H5_HAVE_THREADSAFE_API */
 
+    AddTest("tinfo_cache", tts_tinfo_cache, NULL, NULL, NULL, 0, "per-thread info cache");
+
 #else /* H5_HAVE_THREADS */
 
     printf("Most threading tests skipped because THREADS not enabled\n");

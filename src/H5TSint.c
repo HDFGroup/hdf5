@@ -39,6 +39,12 @@
 
 #ifdef H5_HAVE_THREADS
 
+#if defined(_MSC_VER)
+#define H5TS_THREAD_LOCAL __declspec(thread)
+#else
+#define H5TS_THREAD_LOCAL _Thread_local
+#endif
+
 /****************/
 /* Local Macros */
 /****************/
@@ -112,6 +118,11 @@ static H5TS_once_t H5TS_first_init_s = H5TS_ONCE_INITIALIZER;
 /* Pointer to first free thread info record or NULL. */
 static H5TS_tinfo_node_t *H5TS_tinfo_next_free_s = NULL;
 static uint64_t           H5TS_next_thrd_id_s    = 0;
+
+/* Fast cache for the current thread's info record. The thread-specific key
+ * remains authoritative for ownership and cleanup at thread exit.
+ */
+static H5TS_THREAD_LOCAL H5TS_tinfo_node_t *H5TS_tinfo_node_s = NULL;
 
 /* Mutex for access to H5TS_tinfo_next_free_s and H5TS_next_thrd_id_s */
 static H5TS_mutex_t H5TS_tinfo_mtx_s;
@@ -631,7 +642,8 @@ H5TS__tinfo_create(void)
     tinfo_node->info.id = new_id;                       /* ID */
     H5E__set_default_auto(&tinfo_node->info.err_stack); /* Error stack */
 
-    /* Set a thread-local pointer to the thread's info record */
+    /* Set the native TLS cache and thread-specific cleanup key */
+    H5TS_tinfo_node_s = tinfo_node;
     if (H5_UNLIKELY(H5TS_key_set_value(H5TS_thrd_info_key_g, tinfo_node))) {
         H5TS__tinfo_destroy(tinfo_node);
         HGOTO_DONE(NULL);
@@ -662,8 +674,7 @@ done:
 herr_t
 H5TS_thread_id(uint64_t *id)
 {
-    H5TS_tinfo_node_t *tinfo_node;
-    herr_t             ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -672,15 +683,13 @@ H5TS_thread_id(uint64_t *id)
         HGOTO_DONE(FAIL);
 
     /* Check if info for thread has been created */
-    if (H5_UNLIKELY(H5TS_key_get_value(H5TS_thrd_info_key_g, (void **)&tinfo_node) < 0))
-        HGOTO_DONE(FAIL);
-    if (NULL == tinfo_node)
+    if (NULL == H5TS_tinfo_node_s)
         /* Create thread info for this thread */
-        if (H5_UNLIKELY(NULL == (tinfo_node = H5TS__tinfo_create())))
+        if (H5_UNLIKELY(NULL == (H5TS_tinfo_node_s = H5TS__tinfo_create())))
             HGOTO_DONE(FAIL);
 
     /* Set return value */
-    *id = tinfo_node->info.id;
+    *id = H5TS_tinfo_node_s->info.id;
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -700,21 +709,18 @@ done:
 struct H5CX_node_t **
 H5TS_get_api_ctx_ptr(void)
 {
-    H5TS_tinfo_node_t   *tinfo_node;
     struct H5CX_node_t **ret_value;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Check if info for thread has been created */
-    if (H5_UNLIKELY(H5TS_key_get_value(H5TS_thrd_info_key_g, (void **)&tinfo_node) < 0))
-        HGOTO_DONE(NULL);
-    if (NULL == tinfo_node)
+    if (NULL == H5TS_tinfo_node_s)
         /* Create thread info for this thread */
-        if (H5_UNLIKELY(NULL == (tinfo_node = H5TS__tinfo_create())))
+        if (H5_UNLIKELY(NULL == (H5TS_tinfo_node_s = H5TS__tinfo_create())))
             HGOTO_DONE(NULL);
 
     /* Set return value */
-    ret_value = &tinfo_node->info.api_ctx_node_ptr;
+    ret_value = &H5TS_tinfo_node_s->info.api_ctx_node_ptr;
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -734,21 +740,18 @@ done:
 H5E_stack_t *
 H5TS_get_err_stack(void)
 {
-    H5TS_tinfo_node_t *tinfo_node;
-    H5E_stack_t       *ret_value;
+    H5E_stack_t *ret_value;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Check if info for thread has been created */
-    if (H5_UNLIKELY(H5TS_key_get_value(H5TS_thrd_info_key_g, (void **)&tinfo_node) < 0))
-        HGOTO_DONE(NULL);
-    if (NULL == tinfo_node)
+    if (NULL == H5TS_tinfo_node_s)
         /* Create thread info for this thread */
-        if (H5_UNLIKELY(NULL == (tinfo_node = H5TS__tinfo_create())))
+        if (H5_UNLIKELY(NULL == (H5TS_tinfo_node_s = H5TS__tinfo_create())))
             HGOTO_DONE(NULL);
 
     /* Set return value */
-    ret_value = &tinfo_node->info.err_stack;
+    ret_value = &H5TS_tinfo_node_s->info.err_stack;
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -905,6 +908,9 @@ H5TS__tinfo_destroy(void *_tinfo_node)
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     if (tinfo_node) {
+        if (H5TS_tinfo_node_s == tinfo_node)
+            H5TS_tinfo_node_s = NULL;
+
         H5TS_mutex_lock(&H5TS_tinfo_mtx_s);
 
         /* Add thread info node to the free list */
