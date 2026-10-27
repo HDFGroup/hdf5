@@ -73,7 +73,8 @@
 /* Maximum shared message values.  Number of indexes is 8 to allow room to add
  * new types of messages.
  */
-#define H5O_SHMESG_MAX_NINDEXES  8    /**< Maximum number of shared object header message indexes \since 1.8.0 */
+#define H5O_SHMESG_MAX_NINDEXES 8 /**< Maximum number of shared object header message indexes \since 1.8.0   \
+                                   */
 #define H5O_SHMESG_MAX_LIST_SIZE 5000 /**< Maximum size of shared object header message list \since 1.8.0 */
 
 /* Flags for H5Oget_info.
