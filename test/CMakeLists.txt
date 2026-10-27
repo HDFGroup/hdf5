@@ -1017,6 +1017,51 @@ if (HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)
 endif ()
 
+if (HDF5_TEST_SERIAL)
+  if (NOT HDF5_BUILD_FORTRAN)
+    set (HDF5_PACKAGE_CONFIG_MISSING_COMPONENT Fortran)
+  elseif (NOT HDF5_BUILD_JAVA)
+    set (HDF5_PACKAGE_CONFIG_MISSING_COMPONENT Java)
+  elseif (NOT HDF5_BUILD_CPP_LIB)
+    set (HDF5_PACKAGE_CONFIG_MISSING_COMPONENT CXX)
+  elseif (NOT HDF5_BUILD_TOOLS)
+    set (HDF5_PACKAGE_CONFIG_MISSING_COMPONENT Tools)
+  elseif (NOT HDF5_BUILD_HL_LIB)
+    set (HDF5_PACKAGE_CONFIG_MISSING_COMPONENT HL)
+  endif ()
+
+  if (DEFINED HDF5_PACKAGE_CONFIG_MISSING_COMPONENT)
+    if (BUILD_SHARED_LIBS)
+      set (HDF5_PACKAGE_CONFIG_LIB_COMPONENT shared)
+    else ()
+      set (HDF5_PACKAGE_CONFIG_LIB_COMPONENT static)
+    endif ()
+
+    foreach (_hdf5_component_mode IN ITEMS required optional)
+      set (_hdf5_component_test_name
+          "H5TEST-package-config-${_hdf5_component_mode}-component")
+      add_test (
+          NAME ${_hdf5_component_test_name}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "CONSUMER_SOURCE_DIR=${HDF5_TEST_SOURCE_DIR}/package-config-consumer"
+              -D "CONSUMER_BINARY_DIR=${HDF5_TEST_BINARY_DIR}/package-config-consumer/${_hdf5_component_mode}"
+              -D "HDF5_BINARY_DIR=${HDF5_BINARY_DIR}"
+              -D "INSTALL_PREFIX=${HDF5_TEST_BINARY_DIR}/package-config-consumer/${_hdf5_component_mode}/install"
+              -D "HDF5_CONFIG_LIB_COMPONENT=${HDF5_PACKAGE_CONFIG_LIB_COMPONENT}"
+              -D "HDF5_CONSUMER_COMPONENT=${HDF5_PACKAGE_CONFIG_MISSING_COMPONENT}"
+              -D "HDF5_CONSUMER_MODE=${_hdf5_component_mode}"
+              -P "${HDF5_TEST_SOURCE_DIR}/package-config-consumer/run-config-test.cmake"
+      )
+      set_tests_properties (${_hdf5_component_test_name} PROPERTIES
+          WORKING_DIRECTORY "${HDF5_TEST_BINARY_DIR}"
+      )
+      if ("${_hdf5_component_test_name}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (${_hdf5_component_test_name} PROPERTIES DISABLED true)
+      endif ()
+    endforeach ()
+  endif ()
+endif ()
+
 if (HDF5_TEST_API)
   add_subdirectory (API)
 endif ()

@@ -108,6 +108,9 @@ We would like to thank the many HDF5 community members who contributed to this r
      option
    - Reduced the scope of some temporary variables and modifications so they don't propagate to
      consuming CMake projects
+   - Fixed required-component checking in the installed CMake package configuration so
+     missing required components fail while missing optional components remain optional
+     (Fixes GitHub issue #6690)
 
 ## Library
 
