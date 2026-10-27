@@ -583,9 +583,9 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
     hsize_t                   dims[1];
     hsize_t                   cdims[1];
     hsize_t                   start[1], stride[1], count[1], block[1];
-    long                      wbuf[DSET_SELECT_DIM];
-    long                      wbuf_bak[DSET_SELECT_DIM];
-    long                      trans_wbuf[DSET_SELECT_DIM];
+    long long                 wbuf[DSET_SELECT_DIM];
+    long long                 wbuf_bak[DSET_SELECT_DIM];
+    long long                 trans_wbuf[DSET_SELECT_DIM];
     long long                 rbuf[DSET_SELECT_DIM];
     char                      dset_name[DSET_NAME_LEN];
     const char               *expr        = "100 - x";
@@ -658,7 +658,7 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
         memcpy(wbuf_bak, wbuf, sizeof(wbuf));
 
     /* Write data to the dataset with/without data transform set in dxpl */
-    if (H5Dwrite(did, H5T_NATIVE_LONG, mspace_id, fspace_id, dxpl, wbuf) < 0)
+    if (H5Dwrite(did, H5T_NATIVE_LLONG, mspace_id, fspace_id, dxpl, wbuf) < 0)
         P_TEST_ERROR;
 
     /* Restore wbuf from backup if the library modified it */
@@ -1227,10 +1227,10 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, unsigned 
     hsize_t cdims[1];
     hsize_t start[1], stride[1], count[1], block[1];
 
-    long      lwbuf[DSET_SELECT_DIM];
-    long      lwbuf_bak[DSET_SELECT_DIM];
-    long      trans_lwbuf[DSET_SELECT_DIM];
-    long      lrbuf[DSET_SELECT_DIM];
+    long long lwbuf[DSET_SELECT_DIM];
+    long long lwbuf_bak[DSET_SELECT_DIM];
+    long long trans_lwbuf[DSET_SELECT_DIM];
+    long long lrbuf[DSET_SELECT_DIM];
     short     srbuf[DSET_SELECT_DIM];
     short     swbuf[DSET_SELECT_DIM];
     short     swbuf_bak[DSET_SELECT_DIM];
@@ -1319,7 +1319,7 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, unsigned 
         memcpy(lwbuf_bak, lwbuf, sizeof(lwbuf));
 
     /* Write data to the dataset with/without data transform in dxpl */
-    if (H5Dwrite(did, H5T_NATIVE_LONG, mspace_id, fspace_id, dxpl, lwbuf) < 0)
+    if (H5Dwrite(did, H5T_NATIVE_LLONG, mspace_id, fspace_id, dxpl, lwbuf) < 0)
         P_TEST_ERROR;
 
     /* Restore wbuf from backup if the library modified it */
@@ -1334,9 +1334,9 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, unsigned 
     /* If not using selection I/O then the main process will do scalar I/O and others will do none */
     check_actual_selection_io_mode(dxpl, select ? H5D_SELECTION_IO : (MAINPROCESS ? H5D_SCALAR_IO : 0));
 
-    /* Read the data from the dataset: type conversion int-->long */
+    /* Read the data from the dataset: type conversion int-->llong */
     /* If dtrans, without data transform set in dxpl */
-    if (H5Dread(did, H5T_NATIVE_LONG, mspace_id, fspace_id, ntrans_dxpl, lrbuf) < 0)
+    if (H5Dread(did, H5T_NATIVE_LLONG, mspace_id, fspace_id, ntrans_dxpl, lrbuf) < 0)
         P_TEST_ERROR;
 
     if (MAINPROCESS) {
@@ -1344,8 +1344,8 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, unsigned 
             if (lrbuf[i] != (dtrans ? trans_lwbuf[i] : lwbuf[i])) {
                 nerrors++;
                 printf("\n     Error in first data verification:\n");
-                printf("     At index %d: %ld, %ld\n", i + (int)start[0], dtrans ? trans_lwbuf[i] : lwbuf[i],
-                       lrbuf[i]);
+                printf("     At index %d: %lld, %lld\n", i + (int)start[0],
+                       dtrans ? trans_lwbuf[i] : lwbuf[i], lrbuf[i]);
                 break;
             }
     }
@@ -1384,7 +1384,7 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, unsigned 
         memcpy(lwbuf_bak, lwbuf, sizeof(lwbuf));
 
     /* Write data to the dataset with/without data transform */
-    if (H5Dwrite(did, H5T_NATIVE_LONG, mspace_id, fspace_id, dxpl, lwbuf) < 0)
+    if (H5Dwrite(did, H5T_NATIVE_LLONG, mspace_id, fspace_id, dxpl, lwbuf) < 0)
         P_TEST_ERROR;
 
     /* Restore wbuf from backup if the library modified it */
@@ -1491,13 +1491,13 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, unsigned 
  *  Test 1 for multi-dataset:
  *  --Datasets with/without type conversion+smaller/larger mem type+no background buffer
  *
- *  Create datasets: randomized H5T_NATIVE_INT or H5T_NATIVE_LONG
+ *  Create datasets: randomized H5T_NATIVE_INT or H5T_NATIVE_LLONG
  *
  *  Case a--setting for multi write/read to ndsets:
  *    Datatype for all datasets: H5T_NATIVE_INT
  *
  *  Case b--setting for multi write/read to ndsets:
- *    Datatype for all datasets: H5T_NATIVE_LONG
+ *    Datatype for all datasets: H5T_NATIVE_LLONG
  */
 static void
 test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned select, unsigned mwbuf)
@@ -1527,18 +1527,18 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned s
     int *total_trans_wbuf = NULL;
     int *total_rbuf       = NULL;
 
-    long *total_lwbuf       = NULL;
-    long *total_lwbuf_bak   = NULL;
-    long *total_trans_lwbuf = NULL;
-    long *total_lrbuf       = NULL;
+    long long *total_lwbuf       = NULL;
+    long long *total_lwbuf_bak   = NULL;
+    long long *total_trans_lwbuf = NULL;
+    long long *total_lrbuf       = NULL;
 
     int *wbufi[MULTI_NUM_DSETS];
     int *trans_wbufi[MULTI_NUM_DSETS];
     int *rbufi[MULTI_NUM_DSETS];
 
-    long *lwbufi[MULTI_NUM_DSETS];
-    long *trans_lwbufi[MULTI_NUM_DSETS];
-    long *lrbufi[MULTI_NUM_DSETS];
+    long long *lwbufi[MULTI_NUM_DSETS];
+    long long *trans_lwbufi[MULTI_NUM_DSETS];
+    long long *lrbufi[MULTI_NUM_DSETS];
 
     const void *wbufs[MULTI_NUM_DSETS];
     void       *rbufs[MULTI_NUM_DSETS];
@@ -1593,7 +1593,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned s
             any_tconv = true;
 
         /* Create ith dataset */
-        if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], (tconv ? H5T_NATIVE_LONG : H5T_NATIVE_INT),
+        if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], (tconv ? H5T_NATIVE_LLONG : H5T_NATIVE_INT),
                                        file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
             P_TEST_ERROR;
     }
@@ -1624,15 +1624,15 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned s
     if (NULL == (total_rbuf = (int *)malloc(buf_size)))
         P_TEST_ERROR;
 
-    buf_size = ndsets * DSET_SELECT_DIM * sizeof(long);
+    buf_size = ndsets * DSET_SELECT_DIM * sizeof(long long);
 
-    if (NULL == (total_lwbuf = (long *)malloc(buf_size)))
+    if (NULL == (total_lwbuf = (long long *)malloc(buf_size)))
         P_TEST_ERROR;
-    if (mwbuf && NULL == (total_lwbuf_bak = (long *)malloc(buf_size)))
+    if (mwbuf && NULL == (total_lwbuf_bak = (long long *)malloc(buf_size)))
         P_TEST_ERROR;
-    if (NULL == (total_trans_lwbuf = (long *)malloc(buf_size)))
+    if (NULL == (total_trans_lwbuf = (long long *)malloc(buf_size)))
         P_TEST_ERROR;
-    if (NULL == (total_lrbuf = (long *)malloc(buf_size)))
+    if (NULL == (total_lrbuf = (long long *)malloc(buf_size)))
         P_TEST_ERROR;
 
     /* Initialize buffer indices */
@@ -1730,11 +1730,11 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned s
 
     /* Datatype setting for multi write/read */
     for (i = 0; i < (int)ndsets; i++)
-        mem_tids[i] = H5T_NATIVE_LONG;
+        mem_tids[i] = H5T_NATIVE_LLONG;
 
     /* Copy wbuf if the library will be modifying it */
     if (mwbuf)
-        memcpy(total_lwbuf_bak, total_lwbuf, ndsets * DSET_SELECT_DIM * sizeof(long));
+        memcpy(total_lwbuf_bak, total_lwbuf, ndsets * DSET_SELECT_DIM * sizeof(long long));
 
     /* Write data to the dataset with/without data transform */
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
@@ -1742,7 +1742,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned s
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
-        memcpy(total_lwbuf, total_lwbuf_bak, ndsets * DSET_SELECT_DIM * sizeof(long));
+        memcpy(total_lwbuf, total_lwbuf_bak, ndsets * DSET_SELECT_DIM * sizeof(long long));
 
     /* Read data from the dataset (if dtrans, with data transform again in dxpl */
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
@@ -1753,7 +1753,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned s
             if (lrbufi[i][j] != (dtrans ? (2 * trans_lwbufi[i][j]) : lwbufi[i][j])) {
                 nerrors++;
                 printf("\n     Error in 2nd data verification for dset %d:\n", i);
-                printf("     At index %d: %ld/%ld\n", j + (int)start[0],
+                printf("     At index %d: %lld/%lld\n", j + (int)start[0],
                        (dtrans ? (2 * trans_lwbufi[i][j]) : lwbufi[i][j]), lrbufi[i][j]);
                 break;
             }
