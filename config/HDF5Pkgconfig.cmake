@@ -375,3 +375,27 @@ function (extract_lib_pkgconfig_info
   set (${_pkgconfig_libs_outvar} "${library_deps_list}" PARENT_SCOPE)
   set (${_pkgconfig_extra_cflags_outvar} "${library_cflags_list}" PARENT_SCOPE)
 endfunction ()
+
+# Function to form the path of an install directory for a pkg-config file.
+# A relative directory is placed under the given pkg-config variable so the
+# file stays relocatable; an absolute directory is used as is.
+#
+# Input variables:
+#
+#   - dir
+#       Specifies the install directory, e.g. ${HDF5_INSTALL_LIB_DIR}.
+#
+#   - base
+#       Specifies the pkg-config variable to place a relative directory
+#       under, e.g. \${prefix}.
+#
+#   - _path_outvar
+#       Specifies the name of the CMake variable to store the path in.
+#
+function (pkgconfig_install_path dir base _path_outvar)
+  if (IS_ABSOLUTE "${dir}")
+    set (${_path_outvar} "${dir}" PARENT_SCOPE)
+  else ()
+    set (${_path_outvar} "${base}/${dir}" PARENT_SCOPE)
+  endif ()
+endfunction ()
