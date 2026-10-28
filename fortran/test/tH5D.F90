@@ -84,7 +84,7 @@ CONTAINS
     CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
     IF (error .NE. 0) THEN
        WRITE(*,*) "Cannot modify filename"
-       STOP
+       CALL h5_exit_f(1)
     ENDIF
     CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
     CALL check("h5fcreate_f", error, total_error)
@@ -325,7 +325,7 @@ CONTAINS
     CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
     IF (error .NE. 0) THEN
        WRITE(*,*) "Cannot modify filename"
-       STOP
+       CALL h5_exit_f(1)
     ENDIF
     CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
     CALL check("h5fcreate_f",error,total_error)
@@ -428,7 +428,7 @@ CONTAINS
     CALL check("h5sget_simple_extent_ndims_f",error,total_error)
     IF (rankr .NE. RANK) THEN
        WRITE(*,*) "dataset rank error occurred"
-       STOP
+       CALL h5_exit_f(1)
     END IF
 
     !
@@ -438,7 +438,7 @@ CONTAINS
     CALL check("h5sget_simple_extent_dims_f",error,total_error)
     IF ((dimsr(1) .NE. dims1(1)) .OR. (dimsr(2) .NE. dims1(2))) THEN
        WRITE(*,*) "dataset dimensions error occurred"
-       STOP
+       CALL h5_exit_f(1)
     END IF
 
     !
@@ -537,7 +537,7 @@ CONTAINS
     CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
     IF (error .NE. 0) THEN
        WRITE(*,*) "Cannot modify filename"
-       STOP
+       CALL h5_exit_f(1)
     ENDIF
 
     CALL h5pcreate_f(H5P_FILE_CREATE_F, fcpl, error)
@@ -1028,7 +1028,7 @@ CONTAINS
     CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
     IF (error .NE. 0) THEN
        WRITE(*,*) "Cannot modify filename"
-       STOP
+       CALL h5_exit_f(1)
     ENDIF
 
     CALL h5pcreate_f(H5P_DATASET_XFER_F, dxpl, error)

@@ -88,12 +88,10 @@ conversation. Please read the [quickstart guide](https://forum.hdfgroup.org/t/qu
 
 ## Release Schedule
 
-![HDF5 release schedule][u2]
-
 HDF5 does not follow a regular release schedule. Instead, updates are based on the
 introduction of new features and the resolution of bugs. However, we aim to have at
-least one annual release for each maintenance branch. The chart above shows **past HDF5 releases that
-have reached end of life (EOL)**.
+least one annual release for each maintenance branch. The chart at the end of this
+section shows **past HDF5 releases that have reached end of life (EOL)**.
 
 ### Release Progress
 
@@ -112,8 +110,8 @@ The badges below track the release **currently in development**.
 [![Low Priority](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup-Bot/0ad2eabb63b28eb90d69f5e5b2c1496f/raw/release-low-hdf5.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
 
 The **Next Release** badge shows the in-development version (derived from `H5_VERS_MAJOR`/`H5_VERS_MINOR` in
-[src/H5public.h](src/H5public.h)), annotated with the target due date of the matching GitHub milestone when one is
-set. The **Latest Release** badge shows the most recently published release in that same major series, with its
+[src/H5public.h](src/H5public.h)), annotated with the target due date of the matching GitHub milestone, or **TBD**
+when no due date is set. The **Latest Release** badge shows the most recently published release in that same major series, with its
 release date. The badges below them show the current progress of **critical**, **high**, **medium**, and
 **low priority** issues for the in-development release, with colors that reflect completion status:
 
@@ -123,6 +121,10 @@ release date. The badges below them show the current progress of **critical**, *
 - 🔴 **Red (<40%)**: Initial Phase - significant issues remain
 
 Click the badges to view the detailed project board with current release items.
+
+### EOL Releases
+
+![HDF5 release schedule][u2]
 
 ## Downloads and Source Code
 

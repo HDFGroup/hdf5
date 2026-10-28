@@ -40,7 +40,7 @@
 /* Local Macros */
 /****************/
 
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_THREADS
 /*
  * The per-thread API context.
  *
@@ -48,12 +48,12 @@
  * by "H5CX_node_t **ctx =".
  */
 #define H5CX_get_my_context() H5TS_get_api_ctx_ptr()
-#else /* H5_HAVE_THREADSAFE_API */
+#else /* H5_HAVE_THREADS */
 /*
  * The current API context.
  */
 #define H5CX_get_my_context() (&H5CX_head_g)
-#endif /* H5_HAVE_THREADSAFE_API */
+#endif /* H5_HAVE_THREADS */
 
 /* Common macro for the retrieving the pointer to a property list */
 #define H5CX_RETRIEVE_PLIST(PL, FAILVAL)                                                                     \
@@ -175,6 +175,9 @@ typedef struct H5CX_dxpl_cache_t {
     uint32_t actual_selection_io_mode;             /* Actual selection I/O mode
                                                          (H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME) */
     bool modify_write_buf;                         /* Whether the library can modify write buffers */
+#ifdef H5_HAVE_THREADS
+    bool io_threads_enabled; /* Whether the library can use concurrent threads to accelerate I/O */
+#endif                       /* H5_HAVE_THREADS */
 } H5CX_dxpl_cache_t;
 
 /* Typedef for cached default link creation property list information */
@@ -226,9 +229,9 @@ bool H5_PKG_INIT_VAR = false;
 /* Local Variables */
 /*******************/
 
-#ifndef H5_HAVE_THREADSAFE_API
+#ifndef H5_HAVE_THREADS
 static H5CX_node_t *H5CX_head_g = NULL; /* Pointer to head of context stack */
-#endif                                  /* H5_HAVE_THREADSAFE_API */
+#endif                                  /* H5_HAVE_THREADS */
 
 /* Define a "default" dataset transfer property list cache structure to use for default DXPLs */
 static H5CX_dxpl_cache_t H5CX_def_dxpl_cache;
@@ -376,6 +379,12 @@ H5CX__init_package(void)
     /* Get the modify write buffer property */
     if (H5P_get(dx_plist, H5D_XFER_MODIFY_WRITE_BUF_NAME, &H5CX_def_dxpl_cache.modify_write_buf) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve modify write buffer property");
+
+#ifdef H5_HAVE_THREADS
+    /* Get the modify write buffer property */
+    if (H5P_get(dx_plist, H5D_XFER_IO_THREADS_ENABLED_NAME, &H5CX_def_dxpl_cache.io_threads_enabled) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve I/O threads enabled property");
+#endif /* H5_HAVE_THREADS */
 
     /* Reset the "default LCPL cache" information */
     memset(&H5CX_def_lcpl_cache, 0, sizeof(H5CX_lcpl_cache_t));
@@ -2306,6 +2315,41 @@ H5CX_get_modify_write_buf(bool *modify_write_buf)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_selection_io_mode() */
+
+#ifdef H5_HAVE_THREADS
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_io_threads
+ *
+ * Purpose:     Retrieves the I/O threads enabled property for the current API call context.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_io_threads(bool *io_threads_enabled)
+{
+    H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
+    herr_t        ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    assert(io_threads_enabled);
+    head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
+    assert(head && *head);
+    assert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
+
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_IO_THREADS_ENABLED_NAME,
+                             io_threads_enabled)
+
+    /* Get the value */
+    *io_threads_enabled = (*head)->ctx.io_threads_enabled;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_io_threads() */
+#endif /* H5_HAVE_THREADS */
 
 /*-------------------------------------------------------------------------
  * Function:    H5CX_get_encoding

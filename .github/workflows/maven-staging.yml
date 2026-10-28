@@ -5,13 +5,15 @@ on:
   pull_request:
     branches: [ develop, main ]
     paths:
-      - 'java/src/hdf/hdf5lib/**'
+      - 'java/hdf/hdf5lib/**'
+      - 'java/src-jni/hdf/hdf5lib/**'
       - 'HDF5Examples/JAVA/**'
       - '.github/workflows/maven-*.yml'
       - '.github/workflows/java-examples-*.yml'
       - 'CMakePresets.json'
       - '**/CMakeLists.txt'
-      - 'java/src/hdf/hdf5lib/pom.xml.in'
+      - 'java/hdf/hdf5lib/pom.xml.in'
+      - 'java/src-jni/hdf/hdf5lib/pom.xml.in'
       - 'HDF5Examples/JAVA/pom-examples.xml.in'
   workflow_call:
     inputs:
@@ -111,7 +113,7 @@ jobs:
           # For pull requests, check changed files
           if [ -n "$BASE_REF" ]; then
             git fetch origin "$BASE_REF"
-            MAVEN_FILES=$(git diff --name-only "origin/$BASE_REF...HEAD" | grep -E "(java/src/hdf/hdf5lib/|HDF5Examples/JAVA/|maven|pom\.xml|CMakePresets\.json)" || true)
+            MAVEN_FILES=$(git diff --name-only "origin/$BASE_REF...HEAD" | grep -E "(java/hdf/hdf5lib/|java/src-jni/hdf/hdf5lib/|HDF5Examples/JAVA/|maven|pom\.xml|CMakePresets\.json)" || true)
           else
             # Fallback: assume changes if base_ref not available
             MAVEN_FILES="true"
@@ -262,7 +264,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
       - name: Set up JDK (Java 25 for FFM builds)
-        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v5
         with:
           java-version: ${{ matrix.implementation == 'ffm' && '25' || '21' }}
           distribution: ${{ matrix.implementation == 'ffm' && 'oracle' || 'temurin' }}
@@ -694,7 +696,7 @@ jobs:
       version: ${{ steps.extract-version.outputs.version }}
     steps:
       - name: Set up JDK 21
-        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v5
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -825,7 +827,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up JDK (Java 25 for FFM builds)
-        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v5
         with:
           java-version: ${{ matrix.implementation == 'ffm' && '25' || '21' }}
           distribution: ${{ matrix.implementation == 'ffm' && 'oracle' || 'temurin' }}

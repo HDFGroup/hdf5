@@ -169,7 +169,7 @@ jobs:
       # CMake gets libaec from fetchcontent
 
       - name: Install CMake
-        uses: lukka/get-cmake@4a7d025fc60f00db0c7b44ebf783d19b52444830 # latest
+        uses: lukka/get-cmake@fffaaafeea488556c2c12dad60690008bc1caacb # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -182,7 +182,7 @@ jobs:
 
       - name: Set up Java (if specified or FFM required)
         if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
-        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v5
         with:
           distribution: ${{ inputs.force_java_implementation == 'ffm' && 'oracle' || 'temurin' }}
           java-version: |
@@ -294,6 +294,8 @@ jobs:
             -DHDF5_BUILD_JAVA:BOOL=OFF \
             -DHDF5_BUILD_HL_LIB:BOOL=OFF \
             -DHDF5_BUILD_DOC=OFF \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=${{ matrix.zlibfc }} \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=${{ matrix.libaecfc }} \
             -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} \
             -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \

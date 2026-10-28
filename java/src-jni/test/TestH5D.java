@@ -1695,6 +1695,229 @@ public class TestH5D {
         }
     }
 
+    /*
+     * The object-tree read/write path derives a base datatype from the memory type with
+     * H5Tget_super() for the variable-length, array and complex classes. Those transient
+     * IDs are only visible through the H5F_OBJ_ALL path that walks the global datatype ID
+     * list.
+     */
+    private long openDatatypeCount() throws Throwable
+    {
+        long count = H5.H5Fget_obj_count(HDF5Constants.H5F_OBJ_ALL, HDF5Constants.H5F_OBJ_DATATYPE);
+        assertTrue("H5Fget_obj_count: ", count >= 0);
+        return count;
+    }
+
+    /*
+     * Reading or writing a dataset of a variable-length type through the object-tree path
+     * must not accumulate open datatype IDs.
+     */
+    @Test
+    public void testH5DVL_datatype_ids_stable() throws Throwable
+    {
+        long dtype_id    = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id   = HDF5Constants.H5I_INVALID_HID;
+        long dset_id     = HDF5Constants.H5I_INVALID_HID;
+        long[] dims      = {2};
+        final int NITER  = 50;
+        ArrayList[] wbuf = new ArrayList[2];
+
+        try {
+            wbuf[0] = new ArrayList<Integer>(Arrays.asList(1));
+            wbuf[1] = new ArrayList<Integer>(Arrays.asList(2, 3));
+
+            dtype_id = H5.H5Tvlen_create(HDF5Constants.H5T_NATIVE_INT);
+            assertTrue("testH5DVL_datatype_ids_stable.H5Tvlen_create: ", dtype_id >= 0);
+            dspace_id = H5.H5Screate_simple(1, dims, null);
+            assertTrue("testH5DVL_datatype_ids_stable.H5Screate_simple: ", dspace_id >= 0);
+            dset_id = H5.H5Dcreate(H5fid, "VLIntIdCount", dtype_id, dspace_id, HDF5Constants.H5P_DEFAULT,
+                                   HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            assertTrue("testH5DVL_datatype_ids_stable.H5Dcreate: ", dset_id >= 0);
+
+            long before = openDatatypeCount();
+
+            for (int i = 0; i < NITER; i++) {
+                H5.H5DwriteVL(dset_id, dtype_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, wbuf);
+                ArrayList[] rbuf = new ArrayList[2];
+                H5.H5DreadVL(dset_id, dtype_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                             HDF5Constants.H5P_DEFAULT, rbuf);
+                assertEquals("testH5DVL_datatype_ids_stable: row 0", Integer.valueOf(1), rbuf[0].get(0));
+            }
+
+            assertEquals("testH5DVL_datatype_ids_stable: open datatype count changed after " + NITER +
+                             " write/read cycles on a variable-length datatype",
+                         before, openDatatypeCount());
+        }
+        finally {
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dspace_id >= 0)
+                try {
+                    H5.H5Sclose(dspace_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dtype_id >= 0)
+                try {
+                    H5.H5Tclose(dtype_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    /*
+     * Reading or writing a dataset of an array type through the object-tree path must not
+     * accumulate open datatype IDs.
+     */
+    @Test
+    public void testH5DArrayVL_datatype_ids_stable() throws Throwable
+    {
+        long dtype_id    = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id   = HDF5Constants.H5I_INVALID_HID;
+        long dset_id     = HDF5Constants.H5I_INVALID_HID;
+        long[] dims      = {2};
+        long[] arr_dims  = {3};
+        final int NITER  = 50;
+        ArrayList[] wbuf = new ArrayList[2];
+
+        try {
+            wbuf[0] = new ArrayList<Integer>(Arrays.asList(1, 2, 3));
+            wbuf[1] = new ArrayList<Integer>(Arrays.asList(4, 5, 6));
+
+            dtype_id = H5.H5Tarray_create(HDF5Constants.H5T_NATIVE_INT, 1, arr_dims);
+            assertTrue("testH5DArrayVL_datatype_ids_stable.H5Tarray_create: ", dtype_id >= 0);
+            dspace_id = H5.H5Screate_simple(1, dims, null);
+            assertTrue("testH5DArrayVL_datatype_ids_stable.H5Screate_simple: ", dspace_id >= 0);
+            dset_id = H5.H5Dcreate(H5fid, "ArrayIntIdCount", dtype_id, dspace_id, HDF5Constants.H5P_DEFAULT,
+                                   HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            assertTrue("testH5DArrayVL_datatype_ids_stable.H5Dcreate: ", dset_id >= 0);
+
+            long before = openDatatypeCount();
+
+            for (int i = 0; i < NITER; i++) {
+                H5.H5DwriteVL(dset_id, dtype_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, wbuf);
+                ArrayList[] rbuf = new ArrayList[2];
+                H5.H5DreadVL(dset_id, dtype_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                             HDF5Constants.H5P_DEFAULT, rbuf);
+                assertEquals("testH5DArrayVL_datatype_ids_stable: row 0", Integer.valueOf(1), rbuf[0].get(0));
+            }
+
+            assertEquals("testH5DArrayVL_datatype_ids_stable: open datatype count changed after " + NITER +
+                             " write/read cycles on an array datatype",
+                         before, openDatatypeCount());
+        }
+        finally {
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dspace_id >= 0)
+                try {
+                    H5.H5Sclose(dspace_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dtype_id >= 0)
+                try {
+                    H5.H5Tclose(dtype_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    /*
+     * A compound member that is itself a variable-length type is converted by the
+     * per-element helpers. Reading or writing such a dataset must not accumulate
+     * open datatype IDs.
+     */
+    @Test
+    public void testH5Dcompound_of_vlen_datatype_ids_stable() throws Throwable
+    {
+        long vlen_tid    = HDF5Constants.H5I_INVALID_HID;
+        long cmpd_tid    = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id   = HDF5Constants.H5I_INVALID_HID;
+        long dset_id     = HDF5Constants.H5I_INVALID_HID;
+        long[] dims      = {2};
+        final int NITER  = 50;
+        ArrayList[] wbuf = new ArrayList[2];
+
+        try {
+            long intSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_INT);
+
+            vlen_tid = H5.H5Tvlen_create(HDF5Constants.H5T_NATIVE_INT);
+            assertTrue("testH5Dcompound_of_vlen_datatype_ids_stable.H5Tvlen_create: ", vlen_tid >= 0);
+            cmpd_tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, intSize + H5.H5Tget_size(vlen_tid));
+            assertTrue("testH5Dcompound_of_vlen_datatype_ids_stable.H5Tcreate: ", cmpd_tid >= 0);
+            H5.H5Tinsert(cmpd_tid, "A", 0, HDF5Constants.H5T_NATIVE_INT);
+            H5.H5Tinsert(cmpd_tid, "B", intSize, vlen_tid);
+
+            dspace_id = H5.H5Screate_simple(1, dims, null);
+            assertTrue("testH5Dcompound_of_vlen_datatype_ids_stable.H5Screate_simple: ", dspace_id >= 0);
+            dset_id = H5.H5Dcreate(H5fid, "CmpdVLIdCount", cmpd_tid, dspace_id, HDF5Constants.H5P_DEFAULT,
+                                   HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            assertTrue("testH5Dcompound_of_vlen_datatype_ids_stable.H5Dcreate: ", dset_id >= 0);
+
+            for (int r = 0; r < dims[0]; r++) {
+                ArrayList<Object> row = new ArrayList<>();
+                row.add(Integer.valueOf(r));
+                row.add(new ArrayList<Integer>(Arrays.asList(r + 1, r + 2)));
+                wbuf[r] = row;
+            }
+
+            long before = openDatatypeCount();
+
+            for (int i = 0; i < NITER; i++) {
+                H5.H5DwriteVL(dset_id, cmpd_tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, wbuf);
+                ArrayList[] rbuf = new ArrayList[2];
+                H5.H5DreadVL(dset_id, cmpd_tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                             HDF5Constants.H5P_DEFAULT, rbuf);
+                assertEquals("testH5Dcompound_of_vlen_datatype_ids_stable: row 0 member A",
+                             Integer.valueOf(0), rbuf[0].get(0));
+            }
+
+            assertEquals("testH5Dcompound_of_vlen_datatype_ids_stable: open datatype count changed after " +
+                             NITER + " write/read cycles on a compound with a variable-length member",
+                         before, openDatatypeCount());
+        }
+        finally {
+            if (dset_id >= 0)
+                try {
+                    H5.H5Dclose(dset_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dspace_id >= 0)
+                try {
+                    H5.H5Sclose(dspace_id);
+                }
+                catch (Exception ex) {
+                }
+            if (cmpd_tid >= 0)
+                try {
+                    H5.H5Tclose(cmpd_tid);
+                }
+                catch (Exception ex) {
+                }
+            if (vlen_tid >= 0)
+                try {
+                    H5.H5Tclose(vlen_tid);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
     @Test
     public void testH5DArray_string_buffer() throws Throwable
     {

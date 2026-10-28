@@ -830,8 +830,8 @@ H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
 
         if (H5O_OH_GET_VERSION(ohdr) == 1) {
             /* v1 object headers store modification time as a message */
-            time_t mtime;
-            get_value = H5O_msg_size_oh(file, ohdr, H5O_MTIME_NEW_ID, &mtime, 0);
+            time_t mtime = 0;
+            get_value    = H5O_msg_size_oh(file, ohdr, H5O_MTIME_NEW_ID, &mtime, 0);
             if (get_value == 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of modification time message");
             ret_value += get_value;
@@ -1274,11 +1274,13 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
             assert(new_dset->shared->layout_copied_to_dcpl);
 
             /* Check if the filters in the DCPL can be applied to this dataset */
-            if (H5Z_can_apply(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
+            if (H5Z_can_apply(new_dset->shared->dcpl_id, new_dset->shared->type_id,
+                              &new_dset->shared->universal_filter_mask) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset");
 
             /* Make the "set local" filter callbacks for this dataset */
-            if (H5Z_set_local(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
+            if (H5Z_set_local(new_dset->shared->dcpl_id, new_dset->shared->type_id,
+                              new_dset->shared->universal_filter_mask) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set local filter parameters");
         } /* ignore_filters */
 
@@ -3032,7 +3034,8 @@ H5D__check_filters(H5D_t *dataset)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to flush layout");
 
                 /* Filters must have encoding enabled. Ensure that all filters can be applied */
-                if (H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id) < 0)
+                if (H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id,
+                                  &dataset->shared->universal_filter_mask) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters");
 
                 dataset->shared->checked_filters = true;

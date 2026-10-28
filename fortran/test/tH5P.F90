@@ -71,7 +71,8 @@ SUBROUTINE external_test(cleanup, total_error)
   !
   CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
   IF (error .NE. 0) THEN
-     STOP "Cannot modify filename"
+     WRITE(*,*) "Cannot modify filename"
+     CALL h5_exit_f(1)
   ENDIF
   CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
   CALL check("h5fcreate_f",error,total_error)
@@ -263,7 +264,7 @@ SUBROUTINE multi_file_test(cleanup, total_error)
   CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
   IF (error .NE. 0) THEN
      WRITE(*,*) "Cannot modify filename"
-     STOP
+     CALL h5_exit_f(1)
   ENDIF
   CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl, error)
   CALL check("h5pcreate_f", error, total_error)
@@ -481,7 +482,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
   IF (error .NE. 0) THEN
      WRITE(*,*) "Cannot modify filename"
-     STOP
+     CALL h5_exit_f(1)
   ENDIF
 
   ! Create a default fapl and dapl

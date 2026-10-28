@@ -41,7 +41,7 @@ PROGRAM subfiling_test
   INTEGER(HID_T) :: file_id
   INTEGER(KIND=MPI_INTEGER_KIND) :: comm, comm_ret
   INTEGER(KIND=MPI_INTEGER_KIND) :: info, info_ret
-  CHARACTER(LEN=3) :: info_val
+  CHARACTER(LEN=16) :: info_val
   CHARACTER(LEN=180) :: subfname
   INTEGER :: i, sum
   INTEGER(C_INT64_T) inode
@@ -133,9 +133,12 @@ PROGRAM subfiling_test
            nerrors = nerrors + 1
         ENDIF
 
-        CALL mpi_info_get(info_ret,"foo", 3_MPI_INTEGER_KIND, info_val, flag, mpierror)
+        ! Pass a buffer longer than the value: Open MPI 5.0.x before 5.0.9 drops the
+        ! last character when the value exactly fills the Fortran string
+        info_val = ""
+        CALL mpi_info_get(info_ret,"foo", INT(LEN(info_val), MPI_INTEGER_KIND), info_val, flag, mpierror)
         IF(LOGICAL(flag) .EQV. LOGICAL(.TRUE.))THEN
-           IF(info_val.NE."bar")THEN
+           IF(TRIM(info_val).NE."bar")THEN
               IF(mpi_rank.EQ.0) &
                    WRITE(*,*) "Failed H5Pset_mpi_params_f and H5Pget_mpi_params_f sequence"
               nerrors = nerrors + 1

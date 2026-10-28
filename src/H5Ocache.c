@@ -317,6 +317,16 @@ done:
         if (H5O__free(oh, false) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to destroy object header data");
 
+    /* Release any continuation messages accumulated during the deserialize on
+     *      error.  Normally the caller (H5O_protect) frees these after the
+     *      object header is successfully loaded, but the caller can't do so
+     *      if the object header failed to load (as its 'oh' is left NULL),
+     *      so we must release them here to avoid leaking them.
+     */
+    if (!ret_value && udata->common.cont_msg_info->msgs)
+        udata->common.cont_msg_info->msgs =
+            (H5O_cont_t *)H5FL_SEQ_FREE(H5O_cont_t, udata->common.cont_msg_info->msgs);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cache_deserialize() */
 
@@ -1270,9 +1280,6 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
         if (mesg_size != H5O_ALIGN_OH(oh, mesg_size))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "message not aligned");
 
-        if (H5_IS_BUFFER_OVERFLOW(chunk_image, mesg_size, p_end))
-            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "message size exceeds buffer end");
-
         /* Message flags */
         if (H5_IS_BUFFER_OVERFLOW(chunk_image, 1, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
@@ -1304,6 +1311,13 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
                 UINT16DECODE(chunk_image, crt_idx);
             }
         }
+
+        /* The message body starts after the message header, so its size can
+         * only be checked against the buffer once the whole header has been
+         * decoded
+         */
+        if (H5_IS_BUFFER_OVERFLOW(chunk_image, mesg_size, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "message size exceeds buffer end");
 
         /* Increment count of null messages */
         if (H5O_NULL_ID == id)

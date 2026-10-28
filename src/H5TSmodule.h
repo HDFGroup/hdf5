@@ -25,4 +25,11 @@
 #define H5_MY_PKG      H5TS
 #define H5_MY_PKG_INIT NO
 
+/**
+ * \defgroup H5TS Thread Safety (H5TS)
+ *
+ * Use the functions in this module to manage threads in HDF5.
+ *
+ */
+
 #endif /* H5TSmodule_H */
