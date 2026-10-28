@@ -514,13 +514,14 @@ HDF_DIR_PATHS(${HDF5_PACKAGE_NAME})
 
 # The compiler wrappers (h5cc, h5fc, h5c++) locate the install prefix relative
 # to their own directory, which is not always one level below the prefix
-# (e.g. HDF5_INSTALL_BIN_DIR=lib64/mpich/bin)
-if (IS_ABSOLUTE "${HDF5_INSTALL_BIN_DIR}")
-  set (_h5_wrapper_bin_dir "${HDF5_INSTALL_BIN_DIR}")
+# (e.g. HDF5_INSTALL_BIN_DIR=lib64/mpich/bin). CMAKE_INSTALL_PREFIX may be
+# empty or relative (e.g. -DCMAKE_INSTALL_PREFIX= with DESTDIR), which
+# file (RELATIVE_PATH) rejects, so only use it when both paths are absolute.
+if (IS_ABSOLUTE "${HDF5_INSTALL_BIN_DIR}" AND IS_ABSOLUTE "${CMAKE_INSTALL_PREFIX}")
+  file (RELATIVE_PATH H5_WRAPPER_BIN_TO_PREFIX "${HDF5_INSTALL_BIN_DIR}" "${CMAKE_INSTALL_PREFIX}")
 else ()
-  set (_h5_wrapper_bin_dir "${CMAKE_INSTALL_PREFIX}/${HDF5_INSTALL_BIN_DIR}")
+  file (RELATIVE_PATH H5_WRAPPER_BIN_TO_PREFIX "/${HDF5_INSTALL_BIN_DIR}" "/")
 endif ()
-file (RELATIVE_PATH H5_WRAPPER_BIN_TO_PREFIX "${_h5_wrapper_bin_dir}" "${CMAKE_INSTALL_PREFIX}")
 if (NOT H5_WRAPPER_BIN_TO_PREFIX)
   set (H5_WRAPPER_BIN_TO_PREFIX ".")
 endif ()
@@ -529,7 +530,6 @@ if (IS_ABSOLUTE "${HDF5_INSTALL_LIB_DIR}")
 else ()
   set (H5_WRAPPER_LIB_DIR "\$prefix/${HDF5_INSTALL_LIB_DIR}")
 endif ()
-unset (_h5_wrapper_bin_dir)
 
 include (${HDF_CONFIG_DIR}/HDF5Macros.cmake)
 
