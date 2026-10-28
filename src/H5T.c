@@ -7347,10 +7347,14 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5T_patch_vlen_file
  *
- * Purpose:     Patch the top-level file pointer contained in (dt->shared->u.vlen.file)
- *              to point to file.  This is possible because
- *              the top-level file pointer can be closed out from under
- *              dt while dt is contained in the shared file's cache.
+ * Purpose:     Patch the top-level file pointer contained in
+ *              (dt->shared->u.vlen.file) to point to file. This may be
+ *              necessary because the top-level file pointer can be closed
+ *              out from under dt while dt is contained in the shared
+ *              file's cache. Also recursively patches any vlens in the
+ *              parent vlen's base type. Does not patch reference types,
+ *              even though they also cache a pointer to the top level
+ *              file, because that has not been found to be necesary yet.
  *
  * Return:      SUCCEED
  *
@@ -7366,29 +7370,8 @@ H5T_patch_vlen_file(H5T_t *dt, H5VL_object_t *file)
     assert(dt->shared);
     assert(file);
 
-    /* A vlen datatype caches the file its data lives in, and H5T_set_loc()
-     * stamps that pointer into *every* vlen it can reach -- recursing through
-     * compound members and array/vlen base types.  The repair here has to walk
-     * the same tree, or a vlen that is only reachable through a compound member
-     * or an array base type keeps pointing at a file that has since been
-     * closed, and the conversion dereferences it (H5T__conv_vlen ->
-     * H5T__vlen_disk_isnull -> H5F_addr_decode).
-     *
-     * The traversal below mirrors the H5T_ARRAY / H5T_COMPOUND / H5T_VLEN cases
-     * of H5T_set_loc(), including its outer force_conv gate and its inner
-     * force_conv/H5T_IS_COMPOSITE guards, so that the subtypes visited here are
-     * the same ones H5T_set_loc() visited when it stamped them.
-     *
-     * Note that H5T_set_loc() also stamps a cached file pointer into REFERENCE
-     * datatypes (H5T__ref_set_loc(), which sets u.atomic.u.r.file), and this
-     * function does not repair those -- it never did.  Whether they need the
-     * same treatment is a separate question; nothing here makes it worse.
-     */
-
-    /* Datatypes that can't change in size were never descended into by
-     * H5T_set_loc(), so there is nothing under them to repair.  This also keeps
-     * the common case (a type with no vlen anywhere) to a single test, since
-     * this runs on every H5Dread/H5Dwrite/H5Aread/H5Awrite. */
+    /* Only operate on type if the force_conv flag is set, which will be true
+     * for any type that contains a vlen */
     if (dt->shared->force_conv) {
         switch (dt->shared->type) {
             case H5T_VLEN:
@@ -7396,12 +7379,9 @@ H5T_patch_vlen_file(H5T_t *dt, H5VL_object_t *file)
                 if (dt->shared->u.vlen.file != file)
                     dt->shared->u.vlen.file = file;
 
-                /* Recurse on the base type (a vlen of compound of vlen caches a
-                 * file pointer at every level).  References are skipped here, as
-                 * in H5T_set_loc(), so that they stay part of the same blob. */
+                /* Recurse on the base type */
                 if (dt->shared->parent && dt->shared->parent->shared->force_conv &&
-                    H5T_IS_COMPOSITE(dt->shared->parent->shared->type) &&
-                    (dt->shared->parent->shared->type != H5T_REFERENCE))
+                    H5T_IS_COMPOSITE(dt->shared->parent->shared->type))
                     H5T_patch_vlen_file(dt->shared->parent, file);
                 break;
 
