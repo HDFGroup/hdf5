@@ -499,20 +499,6 @@ jobs:
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.tar.gz hdf5
         shell: bash
 
-      - name: Publish deb binary (Linux)
-        id: publish-ctest-deb-binary
-        run: |
-          mkdir "${{ runner.workspace }}/builddeb"
-          cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/*.deb ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb
-        shell: bash
-
-      - name: Publish rpm binary (Linux)
-        id: publish-ctest-rpm-binary
-        run: |
-          mkdir "${{ runner.workspace }}/buildrpm"
-          cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/*.rpm ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
-        shell: bash
-
       - name: List files in the space (Linux)
         run: |
               ls ${{ github.workspace }}
@@ -524,20 +510,6 @@ jobs:
         with:
               name: tgz-ubuntu-2404_gcc-binary
               path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.tar.gz
-              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-
-      - name: Save published binary deb (Linux)
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
-        with:
-              name: deb-ubuntu-2404_gcc-binary
-              path: ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb
-              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-
-      - name: Save published binary rpm (Linux)
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
-        with:
-              name: rpm-ubuntu-2404_gcc-binary
-              path: ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       # Verify the Doxygen tag file was generated inside the HTML output
@@ -816,6 +788,110 @@ jobs:
         with:
               name: tgz-macos15_clang-dmg-binary
               path: ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos15_clang.dmg
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  build_and_test_linux_glibc228:
+  # Linux binary with a glibc 2.28 baseline
+  #
+  # Built against glibc 2.28, so the tarball runs on every distribution with
+  # glibc 2.28 or newer: RHEL 8+, SLES 15, Debian 10+, Ubuntu 20.04+ and
+  # Amazon Linux 2023. The ubuntu-24.04 binary above is built against glibc
+  # 2.38 and runs on none of those.
+  #
+  # Only the build runs in the container, started with "docker run" from an
+  # ordinary job rather than a job-level "container:". The runner's own node
+  # and every action therefore stay on the host, so the image's glibc never
+  # has to satisfy whatever node version GitHub ships.
+    name: "AlmaLinux 8 gcc (glibc 2.28)"
+    runs-on: ubuntu-latest
+    needs: [check-secret]
+    env:
+      # AlmaLinux 8.10, glibc 2.28, gcc-toolset-14 including gfortran, CMake.
+      # Pinned by digest; AlmaLinux 8 is supported until 2029-05-31.
+      GLIBC228_IMAGE: quay.io/pypa/manylinux_2_28_x86_64@sha256:e0adf18521ad35192df733a6c62d35df7801957d24e0470238aacecfab2188a3
+      GLIBC228_PRESET: ${{ inputs.preset_name }}-GNUC-Glibc228
+      # The highest glibc symbol version the published binary may require
+      GLIBC_BASELINE: GLIBC_2.28
+    steps:
+      - name: Get Actions
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/scripts
+
+      - name: Set file base name (Linux glibc 2.28)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
+
+      # Get files created by release script
+      - name: Get tgz-tarball (Linux glibc 2.28)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+              name: tgz-tarball
+              path: ${{ github.workspace }}
+
+      - name: Uncompress source (Linux glibc 2.28)
+        run: tar -zxf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+        shell: bash
+
+      - name: Run CTest in a glibc 2.28 container (Linux glibc 2.28)
+        run: |
+          docker run --rm \
+            --volume "${{ github.workspace }}:/work" \
+            --workdir /work \
+            "${GLIBC228_IMAGE}" \
+            /work/.github/scripts/build-linux-glibc228.sh \
+              "${{ steps.set-file-base.outputs.SOURCE_BASE }}" \
+              "${GLIBC228_PRESET}" \
+              "$(id -u)" "$(id -g)"
+        shell: bash
+
+      # The point of this binary, so fail the job if the baseline regresses.
+      # This is a ceiling, not an equality: a build that happens to need less
+      # than the image provides is fine, and gets reported as what it needs.
+      - name: Check glibc baseline (Linux glibc 2.28)
+        run: |
+          lib=$(find "${{ github.workspace }}/build/${GLIBC228_PRESET}" -name 'libhdf5.so.*.*' | head -1)
+          echo "Checking ${lib}"
+          objdump -p "${lib}" | awk '/NEEDED/{print $2}'
+          needs=$(objdump -T "${lib}" | grep -o 'GLIBC_[0-9.]*' | sort -V -u | tail -1)
+          highest=$(printf '%s\n%s\n' "${needs}" "${GLIBC_BASELINE}" | sort -V | tail -1)
+          if [ "${highest}" != "${GLIBC_BASELINE}" ]; then
+            echo "::error::requires ${needs}, above the ${GLIBC_BASELINE} baseline"
+            objdump -T "${lib}" | grep -F "${needs}" | head
+            exit 1
+          fi
+          echo "Requires ${needs}, within the ${GLIBC_BASELINE} baseline"
+          echo "Linux x86_64 binary requires ${needs} or newer" >> "${GITHUB_STEP_SUMMARY}"
+        shell: bash
+
+      - name: Publish binary (Linux glibc 2.28)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/buildlinux"
+          mkdir "${{ runner.workspace }}/buildlinux/hdf5"
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/LICENSE ${{ runner.workspace }}/buildlinux/hdf5
+          cp ${{ github.workspace }}/build/${GLIBC228_PRESET}/README.md ${{ runner.workspace }}/buildlinux/hdf5
+          cp ${{ github.workspace }}/build/${GLIBC228_PRESET}/*.tar.gz ${{ runner.workspace }}/buildlinux/hdf5
+          cd "${{ runner.workspace }}/buildlinux"
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-linux-x86_64_gcc.tar.gz hdf5
+        shell: bash
+
+      # Save files created by CTest script
+      - name: Save published binary (Linux glibc 2.28)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: tgz-linux-x86_64_gcc-binary
+              path: ${{ runner.workspace }}/buildlinux/${{ steps.set-file-base.outputs.FILE_BASE }}-linux-x86_64_gcc.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_S3_linux:
