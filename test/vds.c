@@ -12328,7 +12328,7 @@ main(void)
     int          express_test;
     int          nerrors = 0;
 
-    driver_name = h5_get_test_driver_name();
+    driver_name  = h5_get_test_driver_name();
     express_test = h5_get_testexpress();
 
     /* Testing setup */
