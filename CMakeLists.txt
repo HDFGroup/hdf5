@@ -1291,15 +1291,6 @@ if (HDF5_BUILD_FORTRAN)
     set (HDF5_INSTALL_MODULE_STATIC_DIR ${HDF5_INSTALL_MODULE_DIR}/static)
     set (HDF5_INSTALL_MODULE_SHARED_DIR ${HDF5_INSTALL_MODULE_DIR}/shared)
   endif ()
-  # moddir for the Fortran pkg-config files; the module directory may be
-  # absolute (e.g. Fedora's %{_fmoddir})
-  foreach (_lib_type STATIC SHARED)
-    if (IS_ABSOLUTE "${HDF5_INSTALL_MODULE_${_lib_type}_DIR}")
-      set (H5_PKG_CONFIG_MODULE_${_lib_type}_DIR "${HDF5_INSTALL_MODULE_${_lib_type}_DIR}")
-    else ()
-      set (H5_PKG_CONFIG_MODULE_${_lib_type}_DIR "\${prefix}/${HDF5_INSTALL_MODULE_${_lib_type}_DIR}")
-    endif ()
-  endforeach ()
 endif ()
 
 #-----------------------------------------------------------------------------
