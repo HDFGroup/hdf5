@@ -10,7 +10,7 @@ The bin folder contains the tools and the build scripts. Additionally, CMake cre
    CMake: h5c++, h5cc, h5hlc++, h5hlcc
    ```
 
-The include folder holds the header files and the fortran mod files. CMake places the fortran mod files into separate shared and static subfolders, however the use of `HDF5_INSTALL_MOD_FORTRAN` places one set of mod files into the include folder. Because CMake produces a tools library, the header files for tools will appear in the include folder.
+The include folder holds the header files and the fortran mod files. Both build systems install one set of mod files there. Because CMake produces a tools library, the header files for tools will appear in the include folder.
 
 The lib folder contains the library files, and CMake adds the pkgconfig subfolder with the hdf5*.pc files used by the bin/build scripts created by the CMake build. CMake separates the C interface code from the fortran code by creating C-stub libraries for each Fortran library. In addition, only CMake installs the tools library. The names of the szip libraries are different between the build systems.
 
@@ -50,7 +50,7 @@ The table below shows the equivalent CMake build options that match those from A
 | enable-concurrency[Support for concurrent multithreaded operation of supported API routines [default=no]] | HDF5_ENABLE_CONCURRENCY "Enable multi-threaded concurrency" [OFF] | This option also provides threadsafe execution of all other, non-concurrent operations. |
 | **Autotools Language Options** | **CMake Language Options** | **Notes** |
 | fortran[Compile the Fortran interface [default=no]] | HDF5_BUILD_FORTRAN "Build FORTRAN support" [OFF] |  |
-| fmoddir[--with-fmoddir=DIR], [Fortran module install directory] | HDF5_INSTALL_MODULE_DIR=$<INSTALL_PREFIX>/mod | CMake installs the modules in `static` and `shared` subdirectories of this directory. To install them directly in it, as `--with-fmoddir` did, also set `HDF5_INSTALL_MODULE_FLAT=ON`. |
+| fmoddir[--with-fmoddir=DIR], [Fortran module install directory] | HDF5_INSTALL_MODULE_DIR=DIR | Defaults to the include directory, as `--with-fmoddir` did. |
 | cxx[Compile the C++ interface [default=no]] | HDF5_BUILD_CPP_LIB "Build HDF5 C++ Library" [OFF] |  |
 | hl[Enable the high-level library. [default=yes (unless build mode = clean)] | HDF5_BUILD_HL_LIB "Build HIGH Level HDF5 Library" [ON] |  |
 | java[Compile the Java JNI interface [default=no]] | HDF5_BUILD_JAVA "Build JAVA support" [OFF] |  |

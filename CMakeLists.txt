@@ -1269,30 +1269,19 @@ endif ()
 # installed module directory in libhdf5.settings.
 #-----------------------------------------------------------------------------
 if (HDF5_BUILD_FORTRAN)
-  set (HDF5_INSTALL_MOD_FORTRAN "SHARED" CACHE STRING "Copy FORTRAN mod files to include directory (NO SHARED STATIC)")
-  set_property (CACHE HDF5_INSTALL_MOD_FORTRAN PROPERTY STRINGS NO SHARED STATIC)
-  if (NOT HDF5_INSTALL_MOD_FORTRAN MATCHES "NO")
-    if (NOT BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)
-      set (HDF5_INSTALL_MOD_FORTRAN "STATIC")
-    elseif (BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS)
-      set (HDF5_INSTALL_MOD_FORTRAN "SHARED")
-    endif ()
+  # One set of Fortran modules is installed, in HDF5_INSTALL_MODULE_DIR. When
+  # both library types are built, the shared modules are installed unless
+  # HDF5_INSTALL_MOD_FORTRAN is STATIC. NO, the old "don't copy to include"
+  # value, is accepted and means the default.
+  set (HDF5_INSTALL_MOD_FORTRAN "SHARED" CACHE STRING "Library type whose Fortran modules are installed when both are built (SHARED STATIC)")
+  set_property (CACHE HDF5_INSTALL_MOD_FORTRAN PROPERTY STRINGS SHARED STATIC)
+  if (NOT HDF5_INSTALL_MOD_FORTRAN MATCHES "^(SHARED|STATIC|NO)$")
+    message (WARNING "HDF5_INSTALL_MOD_FORTRAN=${HDF5_INSTALL_MOD_FORTRAN} is not SHARED or STATIC; using the default")
   endif ()
-
-  # Distributions install all Fortran modules in one directory (e.g. Fedora's
-  # %{_fmoddir}). When both library types are built, the shared modules are
-  # installed there.
-  option (HDF5_INSTALL_MODULE_FLAT "Install Fortran modules directly in HDF5_INSTALL_MODULE_DIR instead of its static/ and shared/ subdirectories" OFF)
-  mark_as_advanced (HDF5_INSTALL_MODULE_FLAT)
-  if (HDF5_INSTALL_MODULE_FLAT)
-    set (HDF5_INSTALL_MODULE_STATIC_DIR ${HDF5_INSTALL_MODULE_DIR})
-    set (HDF5_INSTALL_MODULE_SHARED_DIR ${HDF5_INSTALL_MODULE_DIR})
-    if (NOT HDF5_INSTALL_MOD_FORTRAN MATCHES "NO")
-      message (STATUS "HDF5_INSTALL_MODULE_FLAT is ON and HDF5_INSTALL_MOD_FORTRAN is ${HDF5_INSTALL_MOD_FORTRAN}: Fortran modules are also copied to ${HDF5_INSTALL_INCLUDE_DIR}; set HDF5_INSTALL_MOD_FORTRAN to NO to install them only in ${HDF5_INSTALL_MODULE_DIR}")
-    endif ()
-  else ()
-    set (HDF5_INSTALL_MODULE_STATIC_DIR ${HDF5_INSTALL_MODULE_DIR}/static)
-    set (HDF5_INSTALL_MODULE_SHARED_DIR ${HDF5_INSTALL_MODULE_DIR}/shared)
+  if (NOT BUILD_SHARED_LIBS)
+    set (HDF5_INSTALL_MOD_FORTRAN "STATIC")
+  elseif (NOT BUILD_STATIC_LIBS OR NOT HDF5_INSTALL_MOD_FORTRAN STREQUAL "STATIC")
+    set (HDF5_INSTALL_MOD_FORTRAN "SHARED")
   endif ()
 endif ()
 

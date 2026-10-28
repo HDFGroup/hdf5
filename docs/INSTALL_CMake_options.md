@@ -93,7 +93,7 @@ These options control how HDF5 gets installed. Options dealing with paths are ge
 | `HDF5_INSTALL_LIB_DIR` | `STRING` | `lib` | Specifies the directory to install libraries in. |
 | `HDF5_INSTALL_JNI_LIB_DIR` | `STRING` | `lib` | Specifies the directory to install Java JNI libraries in. |
 | `HDF5_INSTALL_INCLUDE_DIR` | `STRING` | `include` | Specifies the directory to install header files in. |
-| `HDF5_INSTALL_MODULE_DIR` | `STRING` | `mod` (`HDF5_USE_GNU_DIRS=OFF`) <br /> `HDF5_INSTALL_INCLUDE_DIR/mod` (`HDF5_USE_GNU_DIRS=ON`) | Specifies the directory to install Fortran .mod files in. The modules are installed in its `static` and `shared` subdirectories unless `HDF5_INSTALL_MODULE_FLAT` is `ON`. The path is relative to the installation prefix, e.g. `lib64/gfortran/modules`. |
+| `HDF5_INSTALL_MODULE_DIR` | `STRING` | `HDF5_INSTALL_INCLUDE_DIR` | Specifies the directory to install the Fortran .mod files in. One set of modules is installed there (see `HDF5_INSTALL_MOD_FORTRAN`). The path is relative to the installation prefix, e.g. `lib64/gfortran/modules`. |
 | `HDF5_INSTALL_CMAKE_DIR` | `STRING` | `cmake` (`HDF5_USE_GNU_DIRS=OFF`) <br /> `HDF5_INSTALL_LIB_DIR/cmake/hdf5` (`HDF5_USE_GNU_DIRS=ON`) | Specifies the directory to install CMake files in. |
 | `HDF5_INSTALL_DATA_DIR` | `STRING` | `.` (for `MSVC` and `HDF5_USE_GNU_DIRS=OFF`) <br /> `share` (`HDF5_USE_GNU_DIRS=ON`) | Specifies the directory to install miscellaneous data files in. |
 | `HDF5_INSTALL_DOC_DIR` | `STRING` | `HDF5_INSTALL_DATA_DIR` (`HDF5_USE_GNU_DIRS=OFF`) <br /> `HDF5_INSTALL_DATA_DIR/doc/hdf5` (`HDF5_USE_GNU_DIRS=ON`) | Specifies the directory to install documentation files in. |
@@ -154,8 +154,7 @@ These are options which are specific to HDF5's wrappers for programming language
 | CMake option | Type | Default | Description |
 |:-------------|:-----|:--------|:------------|
 | `HDF5_BUILD_FORTRAN` | `BOOL` | `OFF` | If `ON`, enables building of the HDF5 Fortran wrapper interface. |
-| `HDF5_INSTALL_MOD_FORTRAN` | `STRING` | `SHARED` if HDF5 shared libraries are built; `STATIC` otherwise | If `SHARED` or `STATIC`, also copies the Fortran .mod files of that library type into the installation's `include` directory itself, in addition to `HDF5_INSTALL_MODULE_DIR`. If `NO`, the modules are installed only in `HDF5_INSTALL_MODULE_DIR`. Valid values are `SHARED`, `STATIC` and `NO`. |
-| `HDF5_INSTALL_MODULE_FLAT` | `BOOL` | `OFF` | If `ON`, installs Fortran .mod files directly in `HDF5_INSTALL_MODULE_DIR` instead of its `static` and `shared` subdirectories, as Linux distributions do. When both library types are built, only the shared modules are installed, and the static libraries use them. On Windows the shared and static modules differ, so this option is meant for builds of a single library type or for Unix builds. Set `HDF5_INSTALL_MOD_FORTRAN` to `NO` as well, or a second copy is installed in the `include` directory. |
+| `HDF5_INSTALL_MOD_FORTRAN` | `STRING` | `SHARED` if HDF5 shared libraries are built; `STATIC` otherwise | When both shared and static libraries are built, selects which library type's Fortran .mod files are installed in `HDF5_INSTALL_MODULE_DIR`: `SHARED` or `STATIC`. Both library types use the installed modules. With gfortran, nvfortran and AOCC flang the shared and static modules have the same contents. With Intel Fortran on Windows they differ: the shared modules mark module variables `DLLEXPORT`. `NO`, from older versions, is accepted and means the default. |
 
 ### Java options
 <a name="pl_java"></a>

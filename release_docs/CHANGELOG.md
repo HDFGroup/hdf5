@@ -109,22 +109,15 @@ We would like to thank the many HDF5 community members who contributed to this r
    - Reduced the scope of some temporary variables and modifications so they don't propagate to
      consuming CMake projects
 
-### Added `HDF5_INSTALL_MODULE_FLAT` and fixed Fortran module install locations
+### Fortran modules are installed once, in the include directory
 
-   The new `HDF5_INSTALL_MODULE_FLAT` option (default `OFF`) installs the Fortran .mod files
-   directly in `HDF5_INSTALL_MODULE_DIR` instead of its `static/` and `shared/` subdirectories,
-   as Linux distributions do. When both library types are built, the shared modules are installed.
+   CMake installed the Fortran .mod files twice when both library types were built, in the `static/` and `shared/` subdirectories of `HDF5_INSTALL_MODULE_DIR` (default `include/mod`, or `mod` with `HDF5_USE_GNU_DIRS=OFF`), plus by default a third copy in the include directory. HDF5 now installs one set of modules, as other Fortran libraries and the Autotools build of HDF5 did, and Linux distributions already patch HDF5 to do:
 
-   Related fixes:
+   - `HDF5_INSTALL_MODULE_DIR` now defaults to `HDF5_INSTALL_INCLUDE_DIR`, and the `static/` and `shared/` subdirectories are no longer created.
+   - When both library types are built, the shared modules are installed and are used by both. With gfortran, nvfortran and AOCC flang, the shared and static modules have the same contents. `HDF5_INSTALL_MOD_FORTRAN` now selects which library type's modules are installed (`SHARED` or `STATIC`). With Intel Fortran on Windows they differ, because the shared modules mark module variables `DLLEXPORT`. `NO` is accepted and means the default.
+   - The exported CMake targets, `HDF5_INCLUDE_DIR_FORTRAN` from `hdf5-config.cmake`, `moddir` in the Fortran pkg-config files and "Module Directory" in `libhdf5.settings` all point at the installed module directory. Before, `HDF5_INCLUDE_DIR_FORTRAN` for the library type not copied to the include directory pointed at `<prefix>/mod/static` or `<prefix>/mod/shared`, which didn't exist with the default layout, and "Module Directory" was a build-tree path.
 
-   - "Module Directory" in `libhdf5.settings` now reports the directory the modules are installed
-     in, instead of the module directory in the build tree.
-   - `HDF5_INCLUDE_DIR_FORTRAN`, set by `hdf5-config.cmake`, now points at the installed module
-     directory. Before, it was `<prefix>/mod/shared` (or `static`) regardless of
-     `HDF5_INSTALL_MODULE_DIR`.
-   - Static-only builds now copy the high-level Fortran modules into the include directory along
-     with the other modules, and `hdf5-config.cmake` reports `HDF5_INSTALL_MOD_FORTRAN` as `STATIC`
-     instead of `SHARED`.
+   Projects that hard-code `include/mod/shared`, `include/mod/static`, `mod/shared` or `mod/static` should use the include directory, or get the module directory from `hdf5-config.cmake` or pkg-config.
 
 ## Library
 

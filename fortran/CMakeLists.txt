@@ -26,8 +26,8 @@ if (H5_HAVE_PARALLEL)
   endif ()
 endif ()
 
-# HDF5_INSTALL_MOD_FORTRAN and the module install directories are set in the
-# top-level CMakeLists.txt, before src, because libhdf5.settings reports them
+# HDF5_INSTALL_MOD_FORTRAN is set in the top-level CMakeLists.txt, before src,
+# because libhdf5.settings reports the installed module directory
 
 if (H5_HAVE_PARALLEL)
   if (MPI_Fortran_LINK_FLAGS)
