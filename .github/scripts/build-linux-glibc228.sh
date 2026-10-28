@@ -16,9 +16,10 @@ OWNER_GID="${4:?usage: $0 <source-dir> <preset> <uid> <gid>}"
 
 # The image already carries gcc-toolset-14 (including gfortran) and CMake.
 # AlmaLinux 8's ninja is 1.8.2, which CMake refuses to use for Fortran, so
-# take a current one from PyPI. There is no JDK in the image at all.
+# take a current one from PyPI, pinned so the release toolchain is
+# reproducible. There is no JDK in the image at all.
 dnf install -y java-21-openjdk-devel
-pipx install ninja
+pipx install ninja==1.13.2
 export PATH="${HOME}/.local/bin:${PATH}"
 
 echo "=== Toolchain ==="
