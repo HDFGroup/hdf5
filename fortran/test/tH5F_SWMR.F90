@@ -123,7 +123,8 @@ CONTAINS
 
     ! Initialize
     ! Assign C_FUNLOC to a variable rather than passing it directly as an argument:
-    ! with LTO, gfortran before GCC 16 drops the callback and fails to link (GCC PR 117303)
+    ! with LTO, gfortran without the fix for GCC PR 117303 (before 15.3) drops the callback
+    ! and fails to link
     append_cb = C_FUNLOC(test_append_flush_callback)
     filename = "swmr_test.h5"
     CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
