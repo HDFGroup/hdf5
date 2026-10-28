@@ -109,6 +109,28 @@ We would like to thank the many HDF5 community members who contributed to this r
    - Reduced the scope of some temporary variables and modifications so they don't propagate to
      consuming CMake projects
 
+### Made it possible to build HDF5 reproducibly without patches
+
+   The build settings in `libhdf5.settings` are also compiled into the library (shown by
+   `h5cc -showconfig`), so anything recorded there that changes between builds makes the
+   library itself differ. Distributions patched these files to build HDF5 reproducibly.
+
+   - Added the `HDF5_BUILD_HOST_SYSTEM` cache variable, recorded as "Host system". It defaults
+     to `CMAKE_HOST_SYSTEM`, which includes the build host's kernel release; set a fixed value
+     such as `Linux` for reproducible builds
+   - "Configured on" honors `SOURCE_DATE_EPOCH` and is now formatted in UTC, so it no longer
+     depends on the build host's time zone
+   - `CMAKE_BUILD_RPATH_USE_ORIGIN` now defaults to `ON`, so the absolute build-tree RPATH no
+     longer ends up in the linker build ID of installed libraries and tools. A value set by the
+     user is respected
+   - The recorded compiler and linker flags leave out `-ffile-prefix-map=`, `-fdebug-prefix-map=`,
+     `-fmacro-prefix-map=` and `-fprofile-prefix-map=` options. The flags used to compile are
+     not changed
+   - Removed the "Build HDF5 Tests" line from the settings. It describes the build tree, not
+     the library, and differs between builds that do and do not build the tests
+
+   See `docs/REPRODUCIBLE_BUILDS.md` for the settings a builder needs.
+
 ## Library
 
 ### Removed API lock for memory management wrappers

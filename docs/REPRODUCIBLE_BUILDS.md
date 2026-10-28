@@ -27,6 +27,8 @@ information to be the same in every build.
   time.
 * **Fortran module directory.** "Module Directory" reports the installed
   directory, not a path in the build tree.
+* **Tests.** Whether the tests are built (`BUILD_TESTING`) is not recorded,
+  so a build that skips the tests matches one that builds them.
 
 ## What the builder sets
 
@@ -43,6 +45,14 @@ information to be the same in every build.
   ```
   -ffile-prefix-map=<source dir>=/usr/src/hdf5 -ffile-prefix-map=<build dir>=/usr/src/hdf5/build
   ```
+
+* **No absolute build paths in other flags.** Apart from the prefix-map
+  options, compiler and linker flags are recorded as given. A flag that
+  contains an absolute path, for example a linker version script passed as
+  `-Wl,--version-script,/path/to/build/hdf5.map` in `LDFLAGS`, puts that path
+  into the library. The prefix maps do not change the recorded flags. Use a
+  relative path (relative to the directory the compiler or linker runs in),
+  or build in a directory whose path is the same every time.
 
 * **Deterministic static archives.** Use an `ar` that runs in deterministic
   mode, which most Linux distributions configure by default. Otherwise, pass
@@ -70,5 +80,6 @@ To check a configuration, build and install it twice from different source
 and build directories, ideally with a different time zone, locale and number
 of parallel jobs, and compare the two install trees, for example with
 `diff -r` or `diffoscope`. HDF5's CI does this on Linux with GCC for the C,
-C++, Fortran, high-level and tools builds, shared and static. Java, Windows
+C++, Fortran, high-level and tools builds, shared and static, and builds the
+tests in only one of the two builds. Java, Windows
 and macOS builds are not checked yet.

@@ -2,8 +2,8 @@
 
 # Check that HDF5 builds reproducibly: build and install it twice from
 # different source and build directories, with a different environment
-# (time zone, locale, umask, kernel release, parallelism), and compare every
-# installed file.
+# (time zone, locale, umask, kernel release, parallelism) and with tests built
+# in only one of them, and compare every installed file.
 #
 # Usage: ./check-reproducible-build.sh <hdf5-source-dir> [work-dir]
 #
@@ -50,15 +50,21 @@ build () {
 
     local -a vary
     local jobs
+    local testing
     if [ "${n}" = 1 ]; then
         vary=(env TZ=UTC LC_ALL=C)
         umask 022
         jobs=$(nproc)
+        # Distributions often skip the tests in one of their builds (Debian's
+        # reproducibility check sets nocheck in its second build), so build
+        # them here only. This is the build with the most parallel jobs.
+        testing=ON
     else
         # Different time zone, locale, kernel release and parallelism
         vary=(env TZ=Asia/Tokyo LC_ALL=C.UTF-8 setarch "$(uname -m)" --uname-2.6)
         umask 002
         jobs=2
+        testing=OFF
     fi
 
     echo ""
@@ -88,7 +94,7 @@ build () {
         -DHDF5_BUILD_FORTRAN=ON \
         -DHDF5_BUILD_TOOLS=ON \
         -DHDF5_ENABLE_ZLIB_SUPPORT=ON \
-        -DBUILD_TESTING=OFF \
+        -DBUILD_TESTING="${testing}" \
         -DHDF5_BUILD_EXAMPLES=OFF
     logged "${WORK_DIR}/build-${n}.log" "${vary[@]}" cmake --build "${bld}" --parallel "${jobs}"
     logged "${WORK_DIR}/install-${n}.log" env DESTDIR="${dest}" cmake --install "${bld}"
