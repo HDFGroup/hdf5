@@ -109,6 +109,23 @@ We would like to thank the many HDF5 community members who contributed to this r
    - Reduced the scope of some temporary variables and modifications so they don't propagate to
      consuming CMake projects
 
+### Added `HDF5_INSTALL_MODULE_FLAT` and fixed Fortran module install locations
+
+   The new `HDF5_INSTALL_MODULE_FLAT` option (default `OFF`) installs the Fortran .mod files
+   directly in `HDF5_INSTALL_MODULE_DIR` instead of its `static/` and `shared/` subdirectories,
+   as Linux distributions do. When both library types are built, the shared modules are installed.
+
+   Related fixes:
+
+   - "Module Directory" in `libhdf5.settings` now reports the directory the modules are installed
+     in, instead of the module directory in the build tree.
+   - `HDF5_INCLUDE_DIR_FORTRAN`, set by `hdf5-config.cmake`, now points at the installed module
+     directory. Before, it was `<prefix>/mod/shared` (or `static`) regardless of
+     `HDF5_INSTALL_MODULE_DIR`.
+   - Static-only builds now copy the high-level Fortran modules into the include directory along
+     with the other modules, and `hdf5-config.cmake` reports `HDF5_INSTALL_MOD_FORTRAN` as `STATIC`
+     instead of `SHARED`.
+
 ## Library
 
 ### Removed API lock for memory management wrappers

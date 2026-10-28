@@ -50,7 +50,7 @@ The table below shows the equivalent CMake build options that match those from A
 | enable-concurrency[Support for concurrent multithreaded operation of supported API routines [default=no]] | HDF5_ENABLE_CONCURRENCY "Enable multi-threaded concurrency" [OFF] | This option also provides threadsafe execution of all other, non-concurrent operations. |
 | **Autotools Language Options** | **CMake Language Options** | **Notes** |
 | fortran[Compile the Fortran interface [default=no]] | HDF5_BUILD_FORTRAN "Build FORTRAN support" [OFF] |  |
-| fmoddir[--with-fmoddir=DIR], [Fortran module install directory] | HDF5_INSTALL_MODULE_DIR=$<INSTALL_PREFIX>/mod |  |
+| fmoddir[--with-fmoddir=DIR], [Fortran module install directory] | HDF5_INSTALL_MODULE_DIR=$<INSTALL_PREFIX>/mod | CMake installs the modules in `static` and `shared` subdirectories of this directory. To install them directly in it, as `--with-fmoddir` did, also set `HDF5_INSTALL_MODULE_FLAT=ON`. |
 | cxx[Compile the C++ interface [default=no]] | HDF5_BUILD_CPP_LIB "Build HDF5 C++ Library" [OFF] |  |
 | hl[Enable the high-level library. [default=yes (unless build mode = clean)] | HDF5_BUILD_HL_LIB "Build HIGH Level HDF5 Library" [ON] |  |
 | java[Compile the Java JNI interface [default=no]] | HDF5_BUILD_JAVA "Build JAVA support" [OFF] |  |
