@@ -515,7 +515,7 @@ HDF_DIR_PATHS(${HDF5_PACKAGE_NAME})
 # The compiler wrappers (h5cc, h5fc, h5c++) locate the install prefix relative
 # to their own directory, which is not always one level below the prefix
 # (e.g. HDF5_INSTALL_BIN_DIR=lib64/mpich/bin). file (RELATIVE_PATH) requires
-# full paths, and CMAKE_INSTALL_PREFIX may be empty or relative (e.g.
+# full paths, and CMAKE_INSTALL_PREFIX may be empty (e.g.
 # -DCMAKE_INSTALL_PREFIX= with DESTDIR), so make it absolute first, as
 # configure_package_config_file() does.
 if (IS_ABSOLUTE "${CMAKE_INSTALL_PREFIX}")
