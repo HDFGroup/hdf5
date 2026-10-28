@@ -124,7 +124,7 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t 
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_SELF;
-    if ((loc_params.obj_type = H5I_get_type(loc_id)) == H5I_BADID)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* get the location object */
@@ -181,7 +181,7 @@ H5Dopen1(hid_t loc_id, const char *name)
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_SELF;
-    if ((loc_params.obj_type = H5I_get_type(loc_id)) == H5I_BADID)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* get the location object */

@@ -365,7 +365,7 @@ H5Oopen_by_token(hid_t loc_id, H5O_token_t token)
 
     loc_params.type                        = H5VL_OBJECT_BY_TOKEN;
     loc_params.loc_data.loc_by_token.token = &token;
-    if ((loc_params.obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* Open the object */
@@ -437,7 +437,7 @@ H5O__copy_api_common(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, c
     if (NULL == (*vol_obj_ptr = H5VL_vol_object(dst_loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     loc_params2.type = H5VL_OBJECT_BY_SELF;
-    if ((loc_params2.obj_type = H5I_get_type(dst_loc_id)) < 0)
+    if (H5I_BADID == (loc_params2.obj_type = H5I_get_type(dst_loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Copy the object */
@@ -839,7 +839,7 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid
 
     /* Set up new location struct */
     new_loc_params.type = H5VL_OBJECT_BY_NAME;
-    if ((new_loc_params.obj_type = H5I_get_type(new_loc_id)) < 0)
+    if (H5I_BADID == (new_loc_params.obj_type = H5I_get_type(new_loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     new_loc_params.loc_data.loc_by_name.name    = new_name;
     new_loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
@@ -869,7 +869,7 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid
     vol_cb_args.op_type                        = H5VL_LINK_CREATE_HARD;
     vol_cb_args.args.hard.curr_obj             = H5VL_OBJ_DATA(vol_obj1);
     vol_cb_args.args.hard.curr_loc_params.type = H5VL_OBJECT_BY_SELF;
-    if ((vol_cb_args.args.hard.curr_loc_params.obj_type = H5I_get_type(obj_id)) < 0)
+    if (H5I_BADID == (vol_cb_args.args.hard.curr_loc_params.obj_type = H5I_get_type(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Create a link to the object */
@@ -909,7 +909,7 @@ H5Oincr_refcount(hid_t object_id)
     FUNC_ENTER_API(FAIL)
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
-    if ((loc_params.obj_type = H5I_get_type(object_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(object_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
 
     /* Get the location object */
@@ -961,7 +961,7 @@ H5Odecr_refcount(hid_t object_id)
     FUNC_ENTER_API(FAIL)
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
-    if ((loc_params.obj_type = H5I_get_type(object_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(object_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
 
     /* Get the location object */
@@ -1024,7 +1024,7 @@ H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name    = name;
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
-    if ((loc_params.obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
 
     /* Set up VOL callback arguments */
@@ -1070,7 +1070,7 @@ H5Oget_info3(hid_t loc_id, H5O_info2_t *oinfo /*out*/, unsigned fields)
 
     /* Set location struct fields */
     loc_params.type = H5VL_OBJECT_BY_SELF;
-    if ((loc_params.obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Get the location object */
@@ -1248,7 +1248,7 @@ H5Oget_info_by_idx3(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
     loc_params.loc_data.loc_by_idx.order    = order;
     loc_params.loc_data.loc_by_idx.n        = n;
     loc_params.loc_data.loc_by_idx.lapl_id  = lapl_id;
-    if ((loc_params.obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
 
     /* Get the location object */
@@ -1296,7 +1296,7 @@ H5Oget_native_info(hid_t loc_id, H5O_native_info_t *oinfo /*out*/, unsigned fiel
 
     /* Set location struct fields */
     loc_params.type = H5VL_OBJECT_BY_SELF;
-    if ((loc_params.obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Get the location object */
@@ -1357,7 +1357,7 @@ H5Oget_native_info_by_name(hid_t loc_id, const char *name, H5O_native_info_t *oi
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name    = name;
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
-    if ((loc_params.obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
 
     /* Get the location object */
@@ -1425,7 +1425,7 @@ H5Oget_native_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_t
     loc_params.loc_data.loc_by_idx.order    = order;
     loc_params.loc_data.loc_by_idx.n        = n;
     loc_params.loc_data.loc_by_idx.lapl_id  = lapl_id;
-    if ((loc_params.obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
 
     /* Get the location object */
@@ -1482,7 +1482,7 @@ H5Oset_comment(hid_t obj_id, const char *comment)
 
     /* Fill in location struct fields */
     loc_params.type = H5VL_OBJECT_BY_SELF;
-    if ((loc_params.obj_type = H5I_get_type(obj_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
 
     /* Set up VOL callback arguments */
@@ -1536,7 +1536,7 @@ H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment, hid_
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name    = name;
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
-    if ((loc_params.obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
 
     /* Get the location object */
@@ -1588,7 +1588,7 @@ H5Oget_comment(hid_t obj_id, char *comment /*out*/, size_t bufsize)
 
     /* Set fields in the location struct */
     loc_params.type = H5VL_OBJECT_BY_SELF;
-    if ((loc_params.obj_type = H5I_get_type(obj_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid object identifier");
 
     /* Set up VOL callback arguments */
@@ -1647,7 +1647,7 @@ H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment /*out*/, si
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name    = name;
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
-    if ((loc_params.obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid object identifier");
 
     /* Get the location object */
@@ -1732,7 +1732,7 @@ H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate2
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_SELF;
-    if ((loc_params.obj_type = H5I_get_type(obj_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
 
     /* Set up VOL callback arguments */
@@ -1821,7 +1821,7 @@ H5Ovisit_by_name3(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_it
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name    = obj_name;
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
-    if ((loc_params.obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
 
     /* Set up VOL callback arguments */
@@ -2038,7 +2038,7 @@ H5Odisable_mdc_flushes(hid_t object_id)
 
     /* Fill in location struct fields */
     loc_params.type = H5VL_OBJECT_BY_SELF;
-    if ((loc_params.obj_type = H5I_get_type(object_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(object_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
 
     /* Set up VOL callback arguments */
@@ -2108,7 +2108,7 @@ H5Oenable_mdc_flushes(hid_t object_id)
 
     /* Fill in location struct fields */
     loc_params.type = H5VL_OBJECT_BY_SELF;
-    if ((loc_params.obj_type = H5I_get_type(object_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(object_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
 
     /* Set up VOL callback arguments */
@@ -2188,7 +2188,7 @@ H5Oare_mdc_flushes_disabled(hid_t object_id, bool *are_disabled)
 
     /* Fill in location struct fields */
     loc_params.type = H5VL_OBJECT_BY_SELF;
-    if ((loc_params.obj_type = H5I_get_type(object_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(object_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
 
     /* Set up VOL callback arguments */
@@ -2270,7 +2270,7 @@ H5Otoken_to_str(hid_t loc_id, const H5O_token_t *token, char **token_str)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid token string pointer");
 
     /* Get object type */
-    if ((vol_obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get underlying VOL object type");
 
     /* Serialize the token */
@@ -2309,7 +2309,7 @@ H5Otoken_from_str(hid_t loc_id, const char *token_str, H5O_token_t *token)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid token string pointer");
 
     /* Get object type */
-    if ((vol_obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get underlying VOL object type");
 
     /* Deserialize the token */

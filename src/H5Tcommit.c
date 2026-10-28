@@ -340,7 +340,7 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
 
     /* Fill in location struct fields */
     loc_params.type = H5VL_OBJECT_BY_SELF;
-    if ((loc_params.obj_type = H5I_get_type(loc_id)) == H5I_BADID)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Get the file object */

@@ -109,7 +109,7 @@ H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_p
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Get object type */
-    if ((obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Get the file for the object */
@@ -209,7 +209,7 @@ H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id, 
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Get object type */
-    if ((obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Get the file for the object */
@@ -306,7 +306,7 @@ H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name, hid_t oapl
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Get object type */
-    if ((obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Get the file for the object */
@@ -832,7 +832,8 @@ H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, void
     /* Set location parameters */
     loc_params.type                        = H5VL_OBJECT_BY_TOKEN;
     loc_params.loc_data.loc_by_token.token = &obj_token;
-    loc_params.obj_type                    = H5I_get_type(loc_id);
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* Open object by token */
     if (NULL == (opened_obj = H5VL_object_open(*vol_obj_ptr, &loc_params, &opened_type,
@@ -993,7 +994,8 @@ H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type /*out*/
     /* Set location parameters */
     loc_params.type                        = H5VL_OBJECT_BY_TOKEN;
     loc_params.loc_data.loc_by_token.token = &obj_token;
-    loc_params.obj_type                    = H5I_get_type(loc_id);
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type                = H5VL_OBJECT_GET_TYPE;
@@ -1154,7 +1156,8 @@ H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf /*out*/, size_t siz
     /* Set location parameters */
     loc_params.type                        = H5VL_OBJECT_BY_TOKEN;
     loc_params.loc_data.loc_by_token.token = &obj_token;
-    loc_params.obj_type                    = H5I_get_type(loc_id);
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier");
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type                = H5VL_OBJECT_GET_NAME;

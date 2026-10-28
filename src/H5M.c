@@ -449,7 +449,7 @@ H5Mcreate_anon(hid_t loc_id, hid_t key_type_id, hid_t val_type_id, hid_t mcpl_id
 
     /* Set up VOL callback arguments */
     map_args.create.loc_params.type = H5VL_OBJECT_BY_SELF;
-    if ((map_args.create.loc_params.obj_type = H5I_get_type(loc_id)) == H5I_BADID)
+    if (H5I_BADID == (map_args.create.loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
     map_args.create.name        = NULL;
     map_args.create.lcpl_id     = H5P_LINK_CREATE_DEFAULT;
@@ -1321,7 +1321,7 @@ H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id, H5M_iterate_t op, 
     /* Set up VOL callback arguments */
     map_args.specific.specific_type                = H5VL_MAP_ITER;
     map_args.specific.args.iterate.loc_params.type = H5VL_OBJECT_BY_SELF;
-    if ((map_args.specific.args.iterate.loc_params.obj_type = H5I_get_type(map_id)) == H5I_BADID)
+    if (H5I_BADID == (map_args.specific.args.iterate.loc_params.obj_type = H5I_get_type(map_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid map identifier");
     map_args.specific.args.iterate.idx             = (idx ? *idx : 0);
     map_args.specific.args.iterate.key_mem_type_id = key_mem_type_id;
@@ -1407,7 +1407,7 @@ H5Miterate_by_name(hid_t loc_id, const char *map_name, hsize_t *idx, hid_t key_m
     /* Set up VOL callback arguments */
     map_args.specific.specific_type                = H5VL_MAP_ITER;
     map_args.specific.args.iterate.loc_params.type = H5VL_OBJECT_BY_NAME;
-    if ((map_args.specific.args.iterate.loc_params.obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (map_args.specific.args.iterate.loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     map_args.specific.args.iterate.loc_params.loc_data.loc_by_name.name    = map_name;
     map_args.specific.args.iterate.loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
