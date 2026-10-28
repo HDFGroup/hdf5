@@ -1729,7 +1729,7 @@ H5Literate_by_name2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name    = group_name;
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
-    if ((loc_params.obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Set up VOL callback arguments */
@@ -1882,7 +1882,7 @@ H5Lvisit_by_name2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
 
     /* Set location struct fields */
     loc_params.type = H5VL_OBJECT_BY_NAME;
-    if ((loc_params.obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     loc_params.loc_data.loc_by_name.name    = group_name;
