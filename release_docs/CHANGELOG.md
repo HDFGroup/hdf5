@@ -329,6 +329,15 @@ Fixes GitHub issue #6679.
 
 ## Configuration
 
+### Fixed "Extra libraries" in libhdf5.settings and the built-in settings
+
+  `libhdf5.settings` listed the extra libraries separated by semicolons, and
+  the settings compiled into the library (printed when `H5check_version()`
+  detects a version mismatch) used a different list that contained CMake
+  target names such as `Threads::Threads` and left out the compression
+  libraries. Both now list the same libraries as linker flags,
+  separated by spaces, for example `-lm -ldl -lz`.
+
 ### Fixed version handling in installed CMake package version configuration file
 
    The installed CMake package version configuration file for the library previously used `SameMinorVersion` for the version compatibility logic, causing a `find_package(HDF5 X.Y.Z)` call to fail unless the version of a located HDF5 installation matched both `X` and `Y` of the version number exactly (i.e., releases with a greater minor version number weren't considered backward compatible). This reflected the version compatibility of HDF5 releases prior to version 2.0.0, but doesn't reflect the version compatibility of HDF5 version 2.0.0+ releases. The version compatibility logic now uses `SameMajorVersion`, so a `find_package(HDF5 X.Y.Z)` call will accept all versions of HDF5 where the major version matches `X` (i.e., only releases with a greater major version number will be rejected as not backward compatible).
