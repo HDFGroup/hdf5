@@ -111,6 +111,12 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Removed API lock for memory management wrappers
+
+   The HDF5 library no longer acquires the global thread lock when entering
+   H5allocate_memory(), H5resize_memory(), and H5free_memory(). This allows
+   multiple threads to access these functions concurrently.
+
 ### Added new VFD feature flag
 
    Added a new Virtual File Driver (VFD) feature flag,
@@ -124,7 +130,8 @@ We would like to thank the many HDF5 community members who contributed to this r
    plugin supports. The currently supported flags are
    H5Z_FEAT_FILTER_THREADSAFE, which should be set when the filter callback is
    threadsafe, and H5Z_FEAT_FILTER_NO_H5_CALLS, which should be set when the
-   filter makes no HDF5 calls except for H5OPEN.
+   filter makes no HDF5 calls except for H5OPEN, H5allocate_memory(),
+   H5resize_memory(), and H5free_memory().
 
 ### Added support for internally concurrent multithreaded reads of chunked datasets
 
@@ -167,9 +174,40 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ### Fixed crashes when using variable-length data after closing another handle of the same dataset
 
-   A dataset's datatype is shared by all open handles of the dataset, and its variable-length types refer to the file of the handle that opened the dataset first. After that file handle was closed, other handles of the same dataset, e.g., from opening the same file twice, still converted variable-length data with the closed file, which crashed in `H5F_addr_decode()`. `H5T_patch_vlen_file()` repaired the file only for a variable-length type at the top level of the datatype, and only when reading or writing data, but not for variable-length types nested in compound or array types, or when converting a variable-length fill value in `H5Dget_create_plist()` or while initializing storage, e.g., in `H5Dset_extent()`. Opening a netCDF-4 file with string variables calls `H5Dget_create_plist()`, so this crashed netCDF-C and netCDF4-python when a file was opened again after closing one of several handles to it. `H5T_patch_vlen_file()` now repairs nested variable-length types as well, and is also called before converting fill values.
+   A dataset's datatype is shared by all open handles of the dataset, and its
+   variable-length types refer to the file of the handle that opened the dataset first.
+   After that file handle was closed, other handles of the same dataset, e.g., from
+   opening the same file twice, still converted variable-length data with the closed
+   file, which crashed in `H5F_addr_decode()`. `H5T_patch_vlen_file()` repaired the file
+   only for a variable-length type at the top level of the datatype, and only when reading
+   or writing data, but not for variable-length types nested in compound or array types,
+   or when converting a variable-length fill value in `H5Dget_create_plist()` or while
+   initializing storage, e.g., in `H5Dset_extent()`. Opening a netCDF-4 file with string
+   variables calls `H5Dget_create_plist()`, so this crashed netCDF-C and netCDF4-python
+   when a file was opened again after closing one of several handles to it.
+   `H5T_patch_vlen_file()` now repairs nested variable-length types as well, and is also
+   called before converting fill values.
 
    Fixes GitHub issue #6721
+
+### Fixed set_local and filter callbacks being called for filters whose can_apply callback returns false
+
+   Fixed library to no longer execute the set_local and filter callbacks when an optional
+   filter plugin's can_apply callback returned false, to match the documented behavior.
+
+### Removed max cache entry size assertion
+
+   Removed H5C_MAX_ENTRY_SIZE which caused an assertion to fail if a metadata cache entry
+   was larger than 32 MiB. This was meant to detect corruption, not actually impose a
+   limit on the maximum size of a metadata cache entry. This can cause assertion failures
+   in legitimate use cases. While we could simply increase the size, there are already
+   checks for a cache entry that is too big to fit in the file, and an assertion is
+   inappropriate to check for file corruption, so this check has been removed.
+
+### Fixed H5Pmodify_filter() writing past the filter pipeline for a filter not in it
+
+   `H5Pmodify_filter()` returned success when the requested filter was not in the pipeline, and wrote the new flags and client data into the slot one past the last used entry. When the pipeline already held `H5Z_MAX_NFILTERS` filters, that write went past the end of the filter array, and client data longer than `H5Z_COMMON_CD_VALUES` leaked its allocation. `H5Pmodify_filter()` now fails with "filter not in pipeline" in this case.
+
 ### Stopped exporting the built-in filter class structs
 
    The class structs of the built-in filters (H5Z_DEFLATE, H5Z_SHUFFLE, H5Z_FLETCHER32,

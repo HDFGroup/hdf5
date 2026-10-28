@@ -1654,6 +1654,8 @@ static void
 test_create_dataset_enum_types(void H5_ATTR_UNUSED *params)
 {
     size_t      i;
+    int         enum_int_val;
+    uint32_t    enum_u32_val;
     hid_t       file_id         = H5I_INVALID_HID;
     hid_t       container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t       dset_id_native = H5I_INVALID_HID, dset_id_non_native = H5I_INVALID_HID;
@@ -1697,9 +1699,11 @@ test_create_dataset_enum_types(void H5_ATTR_UNUSED *params)
         goto error;
     }
 
-    for (i = 0; i < ARRAY_LENGTH(enum_type_test_table); i++)
-        if (H5Tenum_insert(enum_native, enum_type_test_table[i], &i) < 0)
+    for (i = 0; i < ARRAY_LENGTH(enum_type_test_table); i++) {
+        enum_int_val = (int)i;
+        if (H5Tenum_insert(enum_native, enum_type_test_table[i], &enum_int_val) < 0)
             TEST_ERROR;
+    }
 
     if ((enum_non_native = H5Tenum_create(H5T_STD_U32LE)) < 0) {
         H5_FAILED();
@@ -1712,7 +1716,8 @@ test_create_dataset_enum_types(void H5_ATTR_UNUSED *params)
 
         snprintf(val_name, 15, "%s%zu", DATASET_ENUM_TYPE_TEST_VAL_BASE_NAME, i);
 
-        if (H5Tenum_insert(enum_non_native, val_name, &i) < 0)
+        enum_u32_val = (uint32_t)i;
+        if (H5Tenum_insert(enum_non_native, val_name, &enum_u32_val) < 0)
             TEST_ERROR;
     }
 

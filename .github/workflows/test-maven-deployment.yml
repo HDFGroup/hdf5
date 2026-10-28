@@ -102,7 +102,7 @@ jobs:
           # Compile and create JAR
           cd temp-jar
           javac org/hdfgroup/test/TestClass.java
-          jar cf ../test-artifacts/maven-staging-artifacts-linux-x86_64/jarhdf5-2.1.0-test.jar org/hdfgroup/test/TestClass.class
+          jar cf ../test-artifacts/maven-staging-artifacts-linux-x86_64/jarhdf5-2.1.0-test-linux-x86_64.jar org/hdfgroup/test/TestClass.class
           cd ..
 
           # Create a test POM file

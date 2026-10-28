@@ -88,6 +88,7 @@ static const char *FILENAME[] = {"dataset",              /* 0 */
                                  "size_of_sizes",        /* 36 */
                                  "scaleoffset_fullprec", /* 37 */
                                  "scaleoffset_fp_flt",   /* 38 */
+                                 "cannot_apply",         /* 39 */
                                  NULL};
 
 #define OHMIN_FILENAME_A "ohdr_min_a"
@@ -218,6 +219,8 @@ static const char *FILENAME[] = {"dataset",              /* 0 */
 #define H5Z_FILTER_NON_THREADSAFE_LIE  320
 #define H5Z_FILTER_NON_THREADSAFE_LIE2 321
 #define H5Z_FILTER_REENTER_H5          322
+#define H5Z_FILTER_H5_ALLOCATE         323
+#define H5Z_FILTER_CANNOT_APPLY        324
 
 /* Flags for testing filters */
 #define DISABLE_FLETCHER32 0
@@ -395,6 +398,12 @@ static size_t filter_non_threadsafe(unsigned int flags, size_t cd_nelmts, const 
                                     size_t nbytes, size_t *buf_size, void **buf);
 static size_t filter_reenter_h5(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                                 size_t nbytes, size_t *buf_size, void **buf);
+static size_t filter_h5_allocate(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                                 size_t nbytes, size_t *buf_size, void **buf);
+static htri_t can_apply_cannot_apply(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static htri_t set_local_cannot_apply(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static size_t filter_cannot_apply(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
+                                  size_t nbytes, size_t *buf_size, void **buf);
 
 static herr_t dsets_h5zregister_direct(const H5Z_class3_t *filter);
 static herr_t dsets_h5zunregister_direct(H5Z_filter_t id);
@@ -8354,6 +8363,79 @@ error:
     return SUCCEED;
 #endif
 } /* end test_filter_delete() */
+
+/*-------------------------------------------------------------------------
+ * Function: test_modify_filter_absent
+ *
+ * Purpose: Tests that H5Pmodify_filter fails for a filter that is not in
+ *          the pipeline, including when the pipeline is full.
+ *
+ * Return: Success: 0
+ *  Failure: -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_modify_filter_absent(void)
+{
+    hid_t    dcpl = H5I_INVALID_HID; /* dataset creation property list ID */
+    unsigned cd_values[8];           /* filter client data values */
+    herr_t   ret;                    /* generic return value */
+    int      i;
+
+    TESTING("H5Pmodify_filter rejects a filter not in the pipeline");
+
+    for (i = 0; i < 8; i++)
+        cd_values[i] = 0xAAAAAAAAu;
+
+    /* Shuffle is not in a pipeline containing only fletcher32 */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_fletcher32(dcpl) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pmodify_filter(dcpl, H5Z_FILTER_SHUFFLE, 0, (size_t)1, cd_values);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    if (H5Pget_nfilters(dcpl) != 1)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    /* Fill the pipeline to H5Z_MAX_NFILTERS so nused == nalloc, and use
+     * cd_nelmts > H5Z_COMMON_CD_VALUES so a stray write would also leave
+     * behind a heap allocation */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    for (i = 0; i < H5Z_MAX_NFILTERS; i++)
+        if (H5Pset_filter(dcpl, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0, NULL) < 0)
+            TEST_ERROR;
+    if (H5Pget_nfilters(dcpl) != H5Z_MAX_NFILTERS)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pmodify_filter(dcpl, H5Z_FILTER_FLETCHER32, 0, (size_t)8, cd_values);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_modify_filter_absent() */
 
 /*-------------------------------------------------------------------------
  * Function: auxread_fdata
@@ -20793,6 +20875,87 @@ error:
 } /* end filter_reenter_h5() */
 
 /*-------------------------------------------------------------------------
+ * Function:    filter_h5_allocate
+ *
+ * Purpose:     Filter that uses H5allocate_memory(), H5resize_memory(),
+ *              and H5free_memory(). Does not change the data, only moves
+ *              it around.
+ *
+ * Return:      Success:        Data chunk size
+ *              Failure:        0
+ *-------------------------------------------------------------------------
+ */
+/* This message derives from H5Z */
+const H5Z_class3_t H5Z_H5_ALLOCATE[1] = {{
+    H5Z_CLASS_T_VERS_3,     /* H5Z_class_t version */
+    H5Z_FILTER_H5_ALLOCATE, /* Filter id number */
+    1, 1,                   /* Encoding and decoding enabled */
+    "reenter_h5",           /* Filter name for debugging */
+    NULL,                   /* The "can apply" callback */
+    NULL,                   /* The "set local" callback */
+    filter_h5_allocate,     /* The actual filter function */
+    H5Z_FEAT_FILTER_THREADSAFE |
+        H5Z_FEAT_FILTER_NO_H5_CALLS, /* This filter is thread-safe and does not re-enter the HDF5 API */
+}};
+
+static size_t
+filter_h5_allocate(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                   const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes, size_t *buf_size, void **buf)
+{
+    void *tmp_buf  = NULL;
+    void *tmp_buf2 = NULL;
+
+    /* Allocate new buffer, do not clear */
+    if (NULL == (tmp_buf = H5allocate_memory(nbytes, false)))
+        TEST_ERROR;
+
+    /* Move data to new buffer */
+    memcpy(tmp_buf, *buf, nbytes);
+
+    /* Assign *buf and free old buffer */
+    tmp_buf2  = *buf;
+    *buf      = tmp_buf;
+    tmp_buf   = NULL;
+    *buf_size = nbytes;
+    if (H5free_memory(tmp_buf2) < 0)
+        TEST_ERROR;
+    tmp_buf2 = NULL;
+
+    /* Resize buffer to one that is too big */
+    if (NULL == (tmp_buf = H5resize_memory(*buf, nbytes + 1)))
+        TEST_ERROR;
+    *buf      = tmp_buf;
+    tmp_buf   = NULL;
+    *buf_size = nbytes + 1;
+
+    /* Allocate new buffer, clear */
+    if (NULL == (tmp_buf = H5allocate_memory(nbytes, true)))
+        TEST_ERROR;
+
+    /* Move data to new buffer */
+    memcpy(tmp_buf, *buf, nbytes);
+
+    /* Assign *buf and free old buffer */
+    tmp_buf2  = *buf;
+    *buf      = tmp_buf;
+    tmp_buf   = NULL;
+    *buf_size = nbytes;
+    if (H5free_memory(tmp_buf2) < 0)
+        TEST_ERROR;
+    tmp_buf2 = NULL;
+
+    return nbytes;
+
+error:
+    if (tmp_buf)
+        (void)H5free_memory(tmp_buf);
+    if (tmp_buf2)
+        (void)H5free_memory(tmp_buf2);
+
+    return 0;
+} /* end filter_h5_allocate() */
+
+/*-------------------------------------------------------------------------
  * Function:    test_threaded_filters
  *
  * Purpose:     Tests that filters are executed concurrently when
@@ -20980,6 +21143,33 @@ test_threaded_filters(void)
     /* Create the non threadsafe lie 2 dataset */
     if ((dataset = H5Dcreate2(file, "dset_non_threadsafe_lie2", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl,
                               H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+    dataset = H5I_INVALID_HID;
+
+    /* Create new DCPL */
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* Set chunk dimensions */
+    cdims[0] = THREADED_CHUNKS_CDIM1;
+    cdims[1] = THREADED_CHUNKS_CDIM2;
+    if (H5Pset_chunk(dcpl, 2, cdims) < 0)
+        TEST_ERROR;
+
+    /* Register and apply "non threadsafe lie" filter */
+    if (H5Zregister(H5Z_H5_ALLOCATE) < 0)
+        TEST_ERROR;
+    if (H5Pset_filter(dcpl, H5Z_FILTER_H5_ALLOCATE, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
+        TEST_ERROR;
+
+    /* Create the non threadsafe lie dataset */
+    if ((dataset =
+             H5Dcreate2(file, "dset_h5_allocate", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         TEST_ERROR;
     if (H5Dclose(dataset) < 0)
         TEST_ERROR;
@@ -21280,6 +21470,48 @@ test_threaded_filters(void)
             if (H5Dclose(dataset) < 0)
                 TEST_ERROR;
             dataset = H5I_INVALID_HID;
+
+            /*
+             * "H5allocate" dataset
+             */
+
+            /* Initialize the write buffer */
+            for (i = 0; i < DSET_DIM1; i++)
+                for (j = 0; j < DSET_DIM2; j++)
+                    points[i][j] = n++;
+
+            /* Open dataset */
+            if ((dataset = H5Dopen2(file, "dset_h5_allocate", dapl)) < 0)
+                TEST_ERROR;
+
+            /* Write the data to the dataset */
+            non_threadsafe_threads_in_flight = 0;
+            if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
+                         points_data) < 0)
+                TEST_ERROR;
+
+            /* Read the dataset back */
+            non_threadsafe_threads_in_flight = 0;
+            if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
+                        check_data) < 0)
+                TEST_ERROR;
+
+            /* Check that the values read are the same as the values written */
+            for (i = 0; i < DSET_DIM1; i++) {
+                for (j = 0; j < DSET_DIM2; j++) {
+                    if (points[i][j] != check[i][j]) {
+                        H5_FAILED();
+                        printf("    Read different values than written.\n");
+                        printf("    At index %d,%d\n", i, j);
+                        goto error;
+                    }
+                }
+            }
+
+            /* Close dataset */
+            if (H5Dclose(dataset) < 0)
+                TEST_ERROR;
+            dataset = H5I_INVALID_HID;
         }
     }
 
@@ -21332,6 +21564,300 @@ error:
     return FAIL;
 } /* end test_threaded_filters() */
 #endif /* H5_HAVE_THREADS */
+
+/*-------------------------------------------------------------------------
+ * Function:    filter_cannot_apply
+ *
+ * Purpose:     Filter that can never apply. Fails if set_local or filter
+ *              are called
+ *
+ * Return:      Success:        Data chunk size
+ *              Failure:        0
+ *-------------------------------------------------------------------------
+ */
+/* This message derives from H5Z */
+const H5Z_class3_t H5Z_CANNOT_APPLY[1] = {{
+    H5Z_CLASS_T_VERS_3,      /* H5Z_class_t version */
+    H5Z_FILTER_CANNOT_APPLY, /* Filter id number */
+    1, 1,                    /* Encoding and decoding enabled */
+    "cannot_apply",          /* Filter name for debugging */
+    can_apply_cannot_apply,  /* The "can apply" callback */
+    set_local_cannot_apply,  /* The "set local" callback */
+    filter_cannot_apply,     /* The actual filter function */
+    H5Z_FEAT_FILTER_THREADSAFE |
+        H5Z_FEAT_FILTER_NO_H5_CALLS, /* This filter is thread-safe and does not re-enter the HDF5 API */
+}};
+
+static htri_t
+can_apply_cannot_apply(hid_t H5_ATTR_UNUSED dcpl_id, hid_t H5_ATTR_UNUSED type_id,
+                       hid_t H5_ATTR_UNUSED space_id)
+{
+    /* This filter can never apply */
+    return 0;
+}
+
+static htri_t
+set_local_cannot_apply(hid_t H5_ATTR_UNUSED dcpl_id, hid_t H5_ATTR_UNUSED type_id,
+                       hid_t H5_ATTR_UNUSED space_id)
+{
+    /* This function should never be called */
+    TEST_ERROR;
+
+error:
+    return -1;
+} /* end set_local_cannot_apply() */
+
+static bool cannot_apply_called_g = false;
+
+static size_t
+filter_cannot_apply(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                    const unsigned int H5_ATTR_UNUSED *cd_values, size_t H5_ATTR_UNUSED nbytes,
+                    size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+{
+    /* Indicate this filter was called */
+    cannot_apply_called_g = true;
+
+    /* This function should never be called */
+    TEST_ERROR;
+
+error:
+    return 0;
+} /* end filter_cannot_apply() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_cannot_apply
+ *
+ * Purpose:     Tests that optional filters that cannot apply do not have
+ *              their set_local or filter callbacks called.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+#define CANNOT_APPLY_CDIM1 10
+#define CANNOT_APPLY_CDIM2 10
+static herr_t
+test_cannot_apply(hid_t fapl)
+{
+    char  filename[FILENAME_BUF_SIZE] = "";
+    hid_t file = H5I_INVALID_HID, dataset = H5I_INVALID_HID, dcpl = H5I_INVALID_HID, space = H5I_INVALID_HID;
+    int   i, j, n = 0;
+    hsize_t dims[2], cdims[2];
+
+    TESTING("optional filters that cannot apply");
+
+    if (NULL == h5_fixname(FILENAME[39], fapl, filename, sizeof(filename)))
+        TEST_ERROR;
+
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create the data space */
+    dims[0] = DSET_DIM1;
+    dims[1] = DSET_DIM2;
+    if ((space = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    /* Create DCPL */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* Set chunk dimensions */
+    cdims[0] = CANNOT_APPLY_CDIM1;
+    cdims[1] = CANNOT_APPLY_CDIM2;
+    if (H5Pset_chunk(dcpl, 2, cdims) < 0)
+        TEST_ERROR;
+
+    /* Register and apply "cannot apply" filter */
+    if (H5Zregister(H5Z_CANNOT_APPLY) < 0)
+        TEST_ERROR;
+    if (H5Pset_filter(dcpl, H5Z_FILTER_CANNOT_APPLY, H5Z_FLAG_OPTIONAL, 0, NULL) < 0)
+        TEST_ERROR;
+
+    /* Create the cannot apply dataset */
+    if ((dataset = H5Dcreate2(file, "dset_cannot_apply", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Initialize the write buffer */
+    for (i = 0; i < DSET_DIM1; i++)
+        for (j = 0; j < DSET_DIM2; j++)
+            points[i][j] = n++;
+
+    /* Write the data to the dataset */
+    if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points_data) < 0)
+        TEST_ERROR;
+
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
+        TEST_ERROR;
+
+    /* Read the dataset back */
+    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check_data) < 0)
+        TEST_ERROR;
+
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
+        TEST_ERROR;
+
+    /* Check that the values read are the same as the values written */
+    for (i = 0; i < DSET_DIM1; i++) {
+        for (j = 0; j < DSET_DIM2; j++) {
+            if (points[i][j] != check[i][j]) {
+                H5_FAILED();
+                printf("    Read different values than written.\n");
+                printf("    At index %d,%d\n", i, j);
+                goto error;
+            }
+        }
+    }
+
+    /* Close dataset */
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+    dataset = H5I_INVALID_HID;
+
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
+        TEST_ERROR;
+
+    /* Try again after re-opening dataset */
+
+    /* Open dataset */
+    if ((dataset = H5Dopen2(file, "dset_cannot_apply", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Initialize the write buffer */
+    for (i = 0; i < DSET_DIM1; i++)
+        for (j = 0; j < DSET_DIM2; j++)
+            points[i][j] = n++;
+
+    /* Write the data to the dataset */
+    if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points_data) < 0)
+        TEST_ERROR;
+
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
+        TEST_ERROR;
+
+    /* Read the dataset back */
+    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check_data) < 0)
+        TEST_ERROR;
+
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
+        TEST_ERROR;
+
+    /* Check that the values read are the same as the values written */
+    for (i = 0; i < DSET_DIM1; i++) {
+        for (j = 0; j < DSET_DIM2; j++) {
+            if (points[i][j] != check[i][j]) {
+                H5_FAILED();
+                printf("    Read different values than written.\n");
+                printf("    At index %d,%d\n", i, j);
+                goto error;
+            }
+        }
+    }
+
+    /* Close dataset */
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+    dataset = H5I_INVALID_HID;
+
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
+        TEST_ERROR;
+
+    /* Try again with new dataset, reopening before writing */
+
+    /* Create the cannot apply 2 dataset */
+    if ((dataset = H5Dcreate2(file, "dset_cannot_apply2", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Close dataset */
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+    dataset = H5I_INVALID_HID;
+
+    /* Open dataset */
+    if ((dataset = H5Dopen2(file, "dset_cannot_apply2", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Initialize the write buffer */
+    for (i = 0; i < DSET_DIM1; i++)
+        for (j = 0; j < DSET_DIM2; j++)
+            points[i][j] = n++;
+
+    /* Write the data to the dataset */
+    if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points_data) < 0)
+        TEST_ERROR;
+
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
+        TEST_ERROR;
+
+    /* Read the dataset back */
+    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check_data) < 0)
+        TEST_ERROR;
+
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
+        TEST_ERROR;
+
+    /* Check that the values read are the same as the values written */
+    for (i = 0; i < DSET_DIM1; i++) {
+        for (j = 0; j < DSET_DIM2; j++) {
+            if (points[i][j] != check[i][j]) {
+                H5_FAILED();
+                printf("    Read different values than written.\n");
+                printf("    At index %d,%d\n", i, j);
+                goto error;
+            }
+        }
+    }
+
+    /* Close dataset */
+    if (H5Dclose(dataset) < 0)
+        TEST_ERROR;
+    dataset = H5I_INVALID_HID;
+
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
+        TEST_ERROR;
+
+    /* Close */
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    if (H5Sclose(space) < 0)
+        TEST_ERROR;
+    space = H5I_INVALID_HID;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+
+    /* Check if the filter was called */
+    if (cannot_apply_called_g)
+        TEST_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(space);
+        H5Pclose(dcpl);
+        H5Dclose(dataset);
+        H5Fclose(file);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_cannot_apply() */
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -21571,6 +22097,7 @@ main(void)
                     nerrors += (test_compare_dcpl(file) < 0 ? 1 : 0);
                     nerrors += (test_copy_dcpl(file, fapl) < 0 ? 1 : 0);
                     nerrors += (test_filter_delete(file) < 0 ? 1 : 0);
+                    nerrors += (test_modify_filter_absent() < 0 ? 1 : 0);
 
                     if (driver_is_default_compatible) {
                         nerrors += (test_filters_endianess() < 0 ? 1 : 0);
@@ -21620,6 +22147,8 @@ main(void)
 
                     nerrors += (test_readonly_chunk_vlen_fill(fapl, false) < 0 ? 1 : 0);
                     nerrors += (test_readonly_chunk_vlen_fill(fapl, true) < 0 ? 1 : 0);
+
+                    nerrors += (test_cannot_apply(fapl) < 0 ? 1 : 0);
 
                     if (H5Fclose(file) < 0)
                         goto error;

@@ -105,6 +105,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
+          REPOSITORY_URL: ${{ inputs.repository_url }}
 
       - name: Verify JNI artifact exists and download
         env:
