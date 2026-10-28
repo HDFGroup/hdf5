@@ -1142,10 +1142,12 @@ extern char H5_lib_vers_info_g[];
 #define H5_HAVE_THREADSAFE_API
 #endif
 
-#ifdef H5_HAVE_THREADSAFE_API
-
+#ifdef H5_HAVE_THREADS
 /* Lock headers */
 #include "H5TSprivate.h"
+#endif
+
+#ifdef H5_HAVE_THREADSAFE_API
 
 /* Thread cancellation is only possible w/pthreads */
 #if defined(H5_HAVE_PTHREAD_H)
@@ -1463,6 +1465,22 @@ extern char H5_lib_vers_info_g[];
                     {
 
 /*
+ * Use this macro for public API functions that shouldn't perform _any_
+ * initialization of the library or an interface or push themselves on the
+ * function stack, and that don't need to take the API lock. These functions
+ * must be thread-safe whenever H5_HAVE_THREADS is defined.
+ */
+#define FUNC_ENTER_API_NOINIT_NOERR_NOLOCK                                                                   \
+    {                                                                                                        \
+        {                                                                                                    \
+            {                                                                                                \
+                {                                                                                            \
+                    H5_CHECK_FUNCTION_NAME(H5_IS_PUBLIC(__func__));                                          \
+                                                                                                             \
+                    H5_API_SETUP_PUBLIC_API_VARS                                                             \
+                    {
+
+/*
  * Use this macro for public API functions that should only perform
  * initialization of the library or an interface, but not push any state (API
  * context, function name, etc.). Examples are: H5open.
@@ -1673,6 +1691,16 @@ extern char H5_lib_vers_info_g[];
     ;                                                                                                        \
     } /* end scope from end of FUNC_ENTER */                                                                 \
     H5_API_UNLOCK                                                                                            \
+    return (ret_value);                                                                                      \
+    }                                                                                                        \
+    }                                                                                                        \
+    }                                                                                                        \
+    } /* end scope from beginning of FUNC_ENTER */
+
+/* Use this macro to match the FUNC_ENTER_API_NOINIT_NOERR_NOLOCK macro */
+#define FUNC_LEAVE_API_NOERR_NOLOCK(ret_value)                                                               \
+    ;                                                                                                        \
+    } /* end scope from end of FUNC_ENTER */                                                                 \
     return (ret_value);                                                                                      \
     }                                                                                                        \
     }                                                                                                        \
