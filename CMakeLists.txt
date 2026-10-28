@@ -512,6 +512,25 @@ include (${HDF_CONFIG_DIR}/HDFMacros.cmake)
 
 HDF_DIR_PATHS(${HDF5_PACKAGE_NAME})
 
+# The compiler wrappers (h5cc, h5fc, h5c++) locate the install prefix relative
+# to their own directory, which is not always one level below the prefix
+# (e.g. HDF5_INSTALL_BIN_DIR=lib64/mpich/bin)
+if (IS_ABSOLUTE "${HDF5_INSTALL_BIN_DIR}")
+  set (_h5_wrapper_bin_dir "${HDF5_INSTALL_BIN_DIR}")
+else ()
+  set (_h5_wrapper_bin_dir "${CMAKE_INSTALL_PREFIX}/${HDF5_INSTALL_BIN_DIR}")
+endif ()
+file (RELATIVE_PATH H5_WRAPPER_BIN_TO_PREFIX "${_h5_wrapper_bin_dir}" "${CMAKE_INSTALL_PREFIX}")
+if (NOT H5_WRAPPER_BIN_TO_PREFIX)
+  set (H5_WRAPPER_BIN_TO_PREFIX ".")
+endif ()
+if (IS_ABSOLUTE "${HDF5_INSTALL_LIB_DIR}")
+  set (H5_WRAPPER_LIB_DIR "${HDF5_INSTALL_LIB_DIR}")
+else ()
+  set (H5_WRAPPER_LIB_DIR "\$prefix/${HDF5_INSTALL_LIB_DIR}")
+endif ()
+unset (_h5_wrapper_bin_dir)
+
 include (${HDF_CONFIG_DIR}/HDF5Macros.cmake)
 
 #-----------------------------------------------------------------------------
@@ -1265,6 +1284,42 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
 endif ()
 
 #-----------------------------------------------------------------------------
+# Set LINK_LIBS_SETTINGS: linker-flag-formatted version of LINK_LIBS +
+# LINK_COMP_LIBS for libhdf5.settings and H5build_settings.c. Set before src,
+# where H5build_settings.c is generated.
+#-----------------------------------------------------------------------------
+include (${HDF_CONFIG_DIR}/HDF5Pkgconfig.cmake)
+
+set (LINK_LIBS_SETTINGS "")
+foreach (_lib IN LISTS LINK_LIBS LINK_COMP_LIBS)
+  unset (_lib_flags)
+  unset (_lib_cflags)
+  unset (_lib_skipped)
+  extract_lib_pkgconfig_info ("${_lib}" _lib_flags _lib_cflags _lib_skipped)
+  if (NOT _lib_skipped AND _lib_flags)
+    if (MSVC)
+      foreach (_flag IN LISTS _lib_flags)
+        if (_flag MATCHES "^-l")
+          string (REGEX REPLACE "^-l" "" _clean_flag "${_flag}")
+          list (APPEND LINK_LIBS_SETTINGS "${_clean_flag}")
+        elseif (IS_ABSOLUTE "${_flag}")
+          cmake_path (GET _flag STEM _clean_flag)
+          list (APPEND LINK_LIBS_SETTINGS "${_clean_flag}")
+        elseif (NOT _flag MATCHES "^-L")
+          # Append as-is if it's not a library path (-L)
+          list (APPEND LINK_LIBS_SETTINGS "${_flag}")
+        endif ()
+      endforeach ()
+    else ()
+      # Standard behavior for non-MSVC platforms (use pkg-config formatted flags).
+      list (APPEND LINK_LIBS_SETTINGS ${_lib_flags})
+    endif ()
+  endif ()
+endforeach ()
+list (REMOVE_DUPLICATES LINK_LIBS_SETTINGS)
+list (JOIN LINK_LIBS_SETTINGS " " LINK_LIBS_SETTINGS)
+
+#-----------------------------------------------------------------------------
 # Fortran module install locations. Set before src, which reports the
 # installed module directory in libhdf5.settings.
 #-----------------------------------------------------------------------------
@@ -1543,40 +1598,6 @@ if (NOT TARGET doxygen)
     COMMENT "Doxygen documentation not enabled (HDF5_BUILD_DOC=OFF or Doxygen not found)"
   )
 endif ()
-
-#-----------------------------------------------------------------------------
-# Set LINK_LIBS_SETTINGS: linker-flag-formatted version of LINK_LIBS +
-# LINK_COMP_LIBS for the libhdf5.settings file.
-#-----------------------------------------------------------------------------
-include (${HDF_CONFIG_DIR}/HDF5Pkgconfig.cmake)
-
-set (LINK_LIBS_SETTINGS "")
-foreach (_lib IN LISTS LINK_LIBS LINK_COMP_LIBS)
-  unset (_lib_flags)
-  unset (_lib_cflags)
-  unset (_lib_skipped)
-  extract_lib_pkgconfig_info ("${_lib}" _lib_flags _lib_cflags _lib_skipped)
-  if (NOT _lib_skipped AND _lib_flags)
-    if (MSVC)
-      foreach (_flag IN LISTS _lib_flags)
-        if (_flag MATCHES "^-l")
-          string (REGEX REPLACE "^-l" "" _clean_flag "${_flag}")
-          list (APPEND LINK_LIBS_SETTINGS "${_clean_flag}")
-        elseif (IS_ABSOLUTE "${_flag}")
-          cmake_path (GET _flag STEM _clean_flag)
-          list (APPEND LINK_LIBS_SETTINGS "${_clean_flag}")
-        elseif (NOT _flag MATCHES "^-L")
-          # Append as-is if it's not a library path (-L)
-          list (APPEND LINK_LIBS_SETTINGS "${_flag}")
-        endif ()
-      endforeach ()
-    else ()
-      # Standard behavior for non-MSVC platforms (use pkg-config formatted flags).
-      list (APPEND LINK_LIBS_SETTINGS ${_lib_flags})
-    endif ()
-  endif ()
-endforeach ()
-list (REMOVE_DUPLICATES LINK_LIBS_SETTINGS)
 
 #-----------------------------------------------------------------------------
 # Installation
