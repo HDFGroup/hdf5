@@ -297,7 +297,7 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
 {
     H5I_type_t              vol_obj_type = H5I_BADID; /* Object type of loc_id */
     H5VL_link_create_args_t vol_cb_args;              /* Arguments to VOL callback */
-    herr_t                  ret_value    = SUCCEED;   /* Return value */
+    herr_t                  ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -487,7 +487,7 @@ H5Gmove(hid_t src_loc_id, const char *src_name, const char *dst_name)
     if (H5CX_set_loc(src_loc_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info");
 
-    loc_params1.type                         = H5VL_OBJECT_BY_NAME;
+    loc_params1.type = H5VL_OBJECT_BY_NAME;
     if (H5I_BADID == (loc_params1.obj_type = H5I_get_type(src_loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
     loc_params1.loc_data.loc_by_name.name    = src_name;
