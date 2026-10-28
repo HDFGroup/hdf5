@@ -8562,7 +8562,7 @@ test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, 
         double *tmp_buf = calloc(1, data_size);
         VRFY((NULL != tmp_buf), "calloc succeeded");
 
-        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+        for (size_t j = 0; j < data_size / sizeof(double); j++)
             tmp_buf[j] = (double)(GEN_DATA(j) + dset_idx);
 
         data_bufs[dset_idx]    = tmp_buf;
