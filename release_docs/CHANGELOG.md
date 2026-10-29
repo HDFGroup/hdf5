@@ -432,6 +432,16 @@ Fixes #5723.
 
 ## Tools
 
+### Fixed unsigned integer comparisons in h5diff
+
+   Large unsigned 32-bit values could be printed as negative numbers and cause
+   `h5diff -d` to miss differences above the requested threshold. Relative
+   differences reported with `-p` could also be incorrect when unsigned values
+   were converted through a signed type. These comparisons now use unsigned
+   magnitudes while preserving the existing threshold and zero-value behavior.
+
+   Fixes GitHub issue #6756.
+
 ### Fixed an issue with quoting of data values in h5ls and h5dump when displaying as ASCII characters
 
    When using the `-s` (h5ls) or `-r` (h5dump) option to display 1-byte integer datasets and
