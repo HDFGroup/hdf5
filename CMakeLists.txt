@@ -900,36 +900,41 @@ if (H5_HAVE_PARALLEL)
 endif ()
 
 # Determine if a threading package is available on this system
-set (THREADS_PREFER_PTHREAD_FLAG ON)
-find_package (Threads)
-if (Threads_FOUND)
-  set (H5_HAVE_THREADS 1)
-  set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+if (HDF5_ENABLE_THREADS)
+  set (THREADS_PREFER_PTHREAD_FLAG ON)
+  find_package (Threads)
+  if (Threads_FOUND)
+    set (H5_HAVE_THREADS 1)
+    set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
 
-  # Determine which threading package to use
-  # Comment out check for C11 threads for now, since it conflicts with the
-  # current --std=c99 compile flags at configuration time.  When we switch to
-  # --std=c11, this can be uncommented.
-  #CHECK_INCLUDE_FILE("threads.h" HAVE_THREADS_H)
-  if (WIN32)
-    # When Win32 is available, we use those threads
-    set (H5_HAVE_WIN_THREADS 1)
-  elseif (HAVE_THREADS_H)
-    # When C11 threads are available, those are the top choice
-    set (H5_HAVE_C11_THREADS 1)
-  elseif (CMAKE_USE_PTHREADS_INIT)
-    set (H5_HAVE_PTHREAD_H 1)
+    # Determine which threading package to use
+    # Comment out check for C11 threads for now, since it conflicts with the
+    # current --std=c99 compile flags at configuration time.  When we switch to
+    # --std=c11, this can be uncommented.
+    #CHECK_INCLUDE_FILE("threads.h" HAVE_THREADS_H)
+    if (WIN32)
+      # When Win32 is available, we use those threads
+      set (H5_HAVE_WIN_THREADS 1)
+    elseif (HAVE_THREADS_H)
+      # When C11 threads are available, those are the top choice
+      set (H5_HAVE_C11_THREADS 1)
+    elseif (CMAKE_USE_PTHREADS_INIT)
+      set (H5_HAVE_PTHREAD_H 1)
+    else ()
+      message (FATAL_ERROR " **** thread support requires C11 threads, Win32 threads or Pthreads **** ")
+    endif ()
+    set (HDF5_THREADS_ENABLED ON) # Used to init hdf5-config.cmake
+    list (APPEND LINK_LIBS Threads::Threads)
+
+    # Check for compiler support for atomic variables
+    CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
+    if (HAVE_STDATOMIC_H)
+      set (H5_HAVE_STDATOMIC_H 1)
+    endif()
   else ()
-    message (FATAL_ERROR " **** thread support requires C11 threads, Win32 threads or Pthreads **** ")
+    set (HDF5_THREADS_ENABLED OFF) # Used to init hdf5-config.cmake
+    set (HDF5_ENABLE_THREADS OFF)
   endif ()
-  set (HDF5_THREADS_ENABLED ON) # Used to init hdf5-config.cmake
-  list (APPEND LINK_LIBS Threads::Threads)
-
-  # Check for compiler support for atomic variables
-  CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
-  if (HAVE_STDATOMIC_H)
-    set (H5_HAVE_STDATOMIC_H 1)
-  endif()
 else ()
   set (HDF5_THREADS_ENABLED OFF) # Used to init hdf5-config.cmake
 endif ()
@@ -1106,7 +1111,7 @@ if (HDF5_ENABLE_THREADSAFE)
 
   # Check for threading package
   if (NOT Threads_FOUND)
-    message (FATAL_ERROR " **** thread-safety option requires a threading package and none was found **** ")
+    message (FATAL_ERROR " **** thread-safety option requires a threading package and none was found, or HDF5_ENABLE_THREADS was disabled **** ")
   endif ()
 
   set (H5_HAVE_THREADSAFE 1)
@@ -1153,7 +1158,7 @@ if (HDF5_ENABLE_CONCURRENCY)
 
   # Check for threading package
   if (NOT Threads_FOUND)
-    message (FATAL_ERROR " **** multi-threaded concurrency option requires a threading package and none was found **** ")
+    message (FATAL_ERROR " **** multi-threaded concurrency option requires a threading package and none was found, or HDF5_ENABLE_THREADS was disabled **** ")
   endif ()
 
   # Multi-threaded concurrency and threadsafe options are mutually exclusive
