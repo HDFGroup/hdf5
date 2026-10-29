@@ -1,0 +1,153 @@
+/** \page ros3_vfd Configuring the Read-Only S3 (ROS3) VFD
+ *
+ * Navigate back: \ref index "Main" / \ref UG / \ref AR_UG
+ * <hr>
+ *
+ * \section sec_ros3_intro Introduction
+ *
+ * The Read-Only S3 virtual file driver, #H5FD_ROS3, reads HDF5 files from Amazon S3 and from
+ * S3-compatible object stores such as MinIO and Ceph RADOS Gateway. It is selected with
+ * #H5Pset_fapl_ros3.
+ *
+ * The driver takes its configuration from the same places as the AWS CLI and the AWS SDKs: the
+ * File Access Property List (FAPL), AWS environment variables, and the shared AWS configuration
+ * files in the <code>~/.aws</code> folder. It does not honor every AWS setting, so this page states
+ * exactly what is and is not consulted.
+ *
+ * Settings are resolved in this order, with the first value found winning:
+ *
+ * -# The File Access Property List
+ * -# Environment variables (HDF5-specific and AWS)
+ * -# The shared AWS configuration file
+ *
+ * The profile read from the shared configuration file is the \c default profile, unless the
+ * \c AWS_PROFILE environment variable names another one. The locations of the configuration files
+ * themselves can be changed with the \c AWS_CONFIG_FILE and \c AWS_SHARED_CREDENTIALS_FILE
+ * environment variables.
+ *
+ * \section sec_ros3_region AWS Region
+ *
+ * An AWS region is \Bold{required}, including when reading from an S3-compatible object store that
+ * has no concept of AWS regions; in that case, any value the store accepts will do. The driver
+ * looks for it in:
+ *
+ * -# The \c aws_region field of #H5FD_ros3_fapl_t, set with #H5Pset_fapl_ros3
+ * -# The \c AWS_REGION environment variable
+ * -# The \c AWS_DEFAULT_REGION environment variable
+ * -# The \c region setting of the active profile in <code>~/.aws/config</code>
+ *
+ * If no region can be determined, opening a file fails. No default region is assumed. This is
+ * deliberate, since guessing a region can cause unintended cross-region data transfer charges.
+ *
+ * \section sec_ros3_credentials Credentials
+ *
+ * If the \c authenticate field of #H5FD_ros3_fapl_t is true, credentials are taken \Bold{only}
+ * from the FAPL: \c secret_id and \c secret_key must both be non-empty, and a session token, if
+ * needed, must be supplied separately with #H5Pset_fapl_ros3_token. Nothing else is consulted in
+ * this case.
+ *
+ * Otherwise, credentials are resolved by the default credential provider chain of the
+ * <a href="https://github.com/awslabs/aws-c-auth">aws-c-auth</a> library, the same chain used by
+ * the AWS CLI and the AWS SDKs:
+ *
+ * -# The \c AWS_ACCESS_KEY_ID, \c AWS_SECRET_ACCESS_KEY, and \c AWS_SESSION_TOKEN environment
+ *    variables
+ * -# The active profile in the shared configuration files, which covers assuming a role
+ *    (\c role_arn with \c source_profile or \c credential_source), an external credential helper
+ *    program (\c credential_process), and static credentials (\c aws_access_key_id,
+ *    \c aws_secret_access_key, \c aws_session_token)
+ * -# STS \c AssumeRoleWithWebIdentity, using \c AWS_WEB_IDENTITY_TOKEN_FILE, \c AWS_ROLE_ARN, and
+ *    \c AWS_ROLE_SESSION_NAME, or the \c web_identity_token_file profile setting, as used by IAM
+ *    Roles for Service Accounts on EKS
+ * -# ECS and EKS container credentials, when \c AWS_CONTAINER_CREDENTIALS_RELATIVE_URI or
+ *    \c AWS_CONTAINER_CREDENTIALS_FULL_URI is set
+ * -# EC2 instance metadata
+ *
+ * If none of these yield credentials, the driver falls back to anonymous credentials and sends
+ * unsigned requests. This is how objects in public buckets are read. It also means that a
+ * misconfigured profile produces unsigned requests rather than an error, which usually surfaces
+ * later as an HTTP 403 response from the server.
+ *
+ * \note AWS IAM Identity Center (SSO) is not supported directly. A profile that relies on
+ *       \c sso_session or \c sso_start_url alone is not part of the chain above and will fall back
+ *       to anonymous credentials. SSO credentials can still be used by way of the
+ *       \c credential_process setting.
+ *
+ * \note Because EC2 instance metadata is attempted by default, opening a file on a machine that is
+ *       not an EC2 instance may be delayed while that step times out. Set the
+ *       \c AWS_EC2_METADATA_DISABLED environment variable to \c true to skip it.
+ *
+ * \section sec_ros3_endpoint Endpoint URL
+ *
+ * An alternate endpoint URL is needed to read from an S3-compatible object store. It is looked for
+ * in:
+ *
+ * -# The File Access Property List, set with #H5Pset_fapl_ros3_endpoint
+ * -# The \c AWS_ENDPOINT_URL_S3 environment variable
+ * -# The \c AWS_ENDPOINT_URL environment variable
+ * -# The \c endpoint_url entry under the \c s3 key of the <code>[services ...]</code> section
+ *    named by the active profile's \c services entry
+ * -# The \c endpoint_url entry of the active profile itself
+ *
+ * The last two are read from the shared AWS configuration file, and follow the endpoint
+ * precedence documented by AWS. Either of these forms works:
+ *
+ * \code{.ini}
+ * # the "global endpoint" form
+ * [default]
+ * endpoint_url = https://minio.example.org:9000
+ *
+ * # the service-specific form, which takes precedence over the above
+ * [profile dev]
+ * services = my-services
+ *
+ * [services my-services]
+ * s3 =
+ *   endpoint_url = https://minio.example.org:9000
+ * \endcode
+ *
+ * \note Every source other than the File Access Property List can be suppressed by setting the
+ *       \c AWS_IGNORE_CONFIGURED_ENDPOINT_URLS environment variable, or the
+ *       \c ignore_configured_endpoint_urls entry of the active profile, to \c true.
+ *
+ * \section sec_ros3_addressing Request Addressing Style
+ *
+ * The driver uses virtual-hosted-style requests (<code>https://bucket.host/key</code>) by default
+ * where it can, and path-style requests (<code>https://host/bucket/key</code>) otherwise. It uses
+ * path-style requests when:
+ *
+ * \li the #HDF5_ROS3_VFD_FORCE_PATH_STYLE environment variable is set to anything other than
+ *     \c false, \c off, or \c 0; or
+ * \li an alternate endpoint URL is in effect; or
+ * \li the bucket name contains a '.'
+ *
+ * The \c addressing_style setting of the shared AWS configuration file is not consulted.
+ *
+ * \section sec_ros3_debug Debugging Output
+ *
+ * Three environment variables control diagnostic output:
+ *
+ * <table>
+ * <tr><th>Variable<th>Effect
+ * <tr><td>#HDF5_ROS3_VFD_DEBUG
+ *     <td>Prints the driver's own debugging information to \c stderr
+ * <tr><td>#HDF5_ROS3_VFD_LOG_LEVEL
+ *     <td>Enables aws-c-s3 library logging at \c error, \c info, \c debug, or \c trace level
+ * <tr><td>#HDF5_ROS3_VFD_LOG_FILE
+ *     <td>Destination for that logging: \c stdout, \c stderr, or a filename. Defaults to
+ *         #H5FD_ROS3_VFD_DEFAULT_LOG_FILE
+ * </table>
+ *
+ * Setting \c HDF5_ROS3_VFD_LOG_LEVEL to \c trace is the most direct way to see which credential
+ * provider answered and which endpoint and request style were used.
+ *
+ * \section sec_ros3_build Building
+ *
+ * The ROS3 VFD requires the <a href="https://github.com/awslabs/aws-c-s3">aws-c-s3</a> library and
+ * is enabled with the CMake option \c HDF5_ENABLE_ROS3_VFD. See \c docs/INSTALL_S3.md in the HDF5
+ * source distribution for instructions on obtaining aws-c-s3 and on running the ROS3 test suite.
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref AR_UG
+ *
+ */
