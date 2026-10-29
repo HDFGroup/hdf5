@@ -184,6 +184,16 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed an assertion failure when a filter pipeline contains `H5Z_MAX_NFILTERS` filters
+
+   An `assert()` in the internal function `H5Z_pipeline()` caused a crash in debug builds
+   of the library when a filter pipeline contained exactly `H5Z_MAX_NFILTERS` filters. The
+   HDF5 file format specification documents that 32, the number which `H5Z_MAX_NFILTERS` is
+   currently mapped to, is the maximum number of filters that a filter pipeline can contain,
+   so the `assert()` has been fixed for this case.
+
+   Fixes GitHub issue #6655
+
 ### ROS3 VFD now reads an alternate endpoint URL from the AWS configuration file
 
    The ROS3 VFD resolved an alternate S3 endpoint URL only from a file access
