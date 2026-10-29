@@ -64,7 +64,7 @@ option (HDF5_ENABLE_ZLIB_SUPPORT "Enable Zlib Filters" OFF)
 option (HDF5_PACKAGE_EXTLIBS "CPACK - include external libraries" OFF)
 mark_as_advanced (HDF5_PACKAGE_EXTLIBS)
 
-option (HDF5_ENABLE_THREADS "Enable threads" ON)
+option (HDF5_ENABLE_THREADS "Enable threading support" ON)
 
 option (HDF5_ENABLE_THREADSAFE "Enable thread-safety" OFF)
 

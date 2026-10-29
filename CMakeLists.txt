@@ -934,6 +934,7 @@ if (HDF5_ENABLE_THREADS)
   else ()
     set (HDF5_THREADS_ENABLED OFF) # Used to init hdf5-config.cmake
     set (HDF5_ENABLE_THREADS OFF)
+    message (NOTICE "HDF5_ENABLE_THREADS set to ON but no threading package found. HDF5 will be built without threading support.")
   endif ()
 else ()
   set (HDF5_THREADS_ENABLED OFF) # Used to init hdf5-config.cmake
