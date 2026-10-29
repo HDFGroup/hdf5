@@ -1360,9 +1360,9 @@ H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name)
     FUNC_ENTER_API(FAIL)
 
     /* Check arguments. */
-    if ((src_id_type = H5I_get_type(src_id)) < 0)
+    if (H5I_BADID == (src_id_type = H5I_get_type(src_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid source ID");
-    if ((dst_id_type = H5I_get_type(dst_id)) < 0)
+    if (H5I_BADID == (dst_id_type = H5I_get_type(dst_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid destination ID");
     if ((H5I_GENPROP_LST != src_id_type && H5I_GENPROP_CLS != src_id_type) ||
         (H5I_GENPROP_LST != dst_id_type && H5I_GENPROP_CLS != dst_id_type))

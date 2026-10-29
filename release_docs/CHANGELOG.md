@@ -174,27 +174,32 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ### ROS3 VFD now reads an alternate endpoint URL from the AWS configuration file
 
-The ROS3 VFD resolved an alternate S3 endpoint URL only from a file access
-property list or from the `AWS_ENDPOINT_URL_S3` and `AWS_ENDPOINT_URL`
-environment variables. An `endpoint_url` setting in the shared AWS configuration
-file (`~/.aws/config`) was ignored, even though the AWS CLI and the AWS SDKs
-honor it, so a configuration that worked with other AWS tooling was inactive
-under the ROS3 VFD.
+   The ROS3 VFD resolved an alternate S3 endpoint URL only from a file access
+   property list or from the `AWS_ENDPOINT_URL_S3` and `AWS_ENDPOINT_URL`
+   environment variables. An `endpoint_url` setting in the shared AWS configuration
+   file (`~/.aws/config`) was ignored, even though the AWS CLI and the AWS SDKs
+   honor it, so a configuration that worked with other AWS tooling was inactive
+   under the ROS3 VFD.
 
-The VFD now follows the AWS specified order when parsing for the `endpoint_url`
-entry under the `s3` key of the `[services ...]` section named by the active
-profile, followed by the `endpoint_url` entry of the profile itself. A file
-access property list and the two environment variables continue to take
-precedence, in that order.
+   The VFD now follows the AWS specified order when parsing for the `endpoint_url`
+   entry under the `s3` key of the `[services ...]` section named by the active
+   profile, followed by the `endpoint_url` entry of the profile itself. A file
+   access property list and the two environment variables continue to take
+   precedence, in that order.
 
-Note that this changes where requests are sent for an application that has an
-`endpoint_url` configured in the AWS configuration file but the ROS3 VFD ignored
-it until now. Setting the `AWS_IGNORE_CONFIGURED_ENDPOINT_URLS` environment
-variable, or the `ignore_configured_endpoint_urls` entry of the active profile,
-to "true" restores the previous behavior by suppressing every endpoint source
-except the file access property list.
+   Note that this changes where requests are sent for an application that has an
+   `endpoint_url` configured in the AWS configuration file but the ROS3 VFD ignored
+   it until now. Setting the `AWS_IGNORE_CONFIGURED_ENDPOINT_URLS` environment
+   variable, or the `ignore_configured_endpoint_urls` entry of the active profile,
+   to "true" restores the previous behavior by suppressing every endpoint source
+   except the file access property list.
 
-Fixes GitHub issue #6739
+   Fixes GitHub issue #6739
+
+### Fixed set_local and filter callbacks being called for filters whose can_apply callback returns false
+
+   Fixed library to no longer execute the set_local and filter callbacks when an optional
+   filter plugin's can_apply callback returned false, to match the documented behavior.
 
 ### Removed max cache entry size assertion
 
@@ -347,6 +352,15 @@ Fixes GitHub issue #6679.
    Fixes GitHub issue #6592
 
 ## Configuration
+
+### Fixed "Extra libraries" in libhdf5.settings and the built-in settings
+
+  `libhdf5.settings` listed the extra libraries separated by semicolons, and
+  the settings compiled into the library (printed when `H5check_version()`
+  detects a version mismatch) used a different list that contained CMake
+  target names such as `Threads::Threads` and left out the compression
+  libraries. Both now list the same libraries as linker flags,
+  separated by spaces, for example `-lm -ldl -lz`.
 
 ### Fixed version handling in installed CMake package version configuration file
 
