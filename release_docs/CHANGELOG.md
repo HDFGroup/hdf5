@@ -74,6 +74,18 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Configuration
 
+### Re-added HDF5_ENABLE_THREADS option
+
+   The HDF5_ENABLE_THREADS option now controls whether the library builds in any
+   threading support, and is enabled by default. Disabling this option will
+   allow the user to avoid the overhead associated with thread-specific-variable
+   lookups, but will also disable internal concurrency features (see
+   H5TSset_internal_threads()). It is an error for this option to be disabled
+   while HDF5_ENABLE_THREADSAFE or HDF5_ENABLE_CONCURRENCY are enabled.
+
+   This option was previously present but was non-functional, and was removed in
+   2.0.0.
+
 ### Built the library's internal thread pool by default
 
    The internal thread pool lets the library parallelize the internals of a
