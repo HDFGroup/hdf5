@@ -7354,7 +7354,7 @@ done:
  *              file's cache. Also recursively patches any vlens in the
  *              parent vlen's base type. Does not patch reference types,
  *              even though they also cache a pointer to the top level
- *              file, because that has not been found to be necesary yet.
+ *              file, because that has not been found to be necessary yet.
  *
  * Return:      SUCCEED
  *
