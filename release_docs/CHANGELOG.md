@@ -566,6 +566,15 @@ Fixes #5723.
 
 ## Testing
 
+### Fixed a link failure of the Fortran tests when built with link-time optimization
+
+   `testhdf5_fortran` failed to link with an undefined reference to
+   `test_append_flush_callback` when built with LTO (`-flto`), which is enabled by default
+   on Fedora, RHEL, openSUSE, and Ubuntu. `gfortran` versions prior to 15.3 (without the
+   fix for GCC PR 117303) drop a procedure when its `C_FUNLOC` is passed directly as an
+   argument. The test now assigns `C_FUNLOC` to a variable first, so distributions no
+   longer need to build Fortran without LTO.
+
 ### Fortran test programs no longer exit successfully after a fatal error
 
    The Fortran tests ended unrecoverable failures with STOP, which exits with a
