@@ -441,41 +441,86 @@ unset (libtype)
 
 #-----------------------------------------------------------------------------
 # Stable, linkage-agnostic public target names: hdf5::hdf5, hdf5::hdf5_hl,
-# HDF5::HDF5 and friends.
+# hdf5::hdf5_cpp, hdf5::hdf5_hl_cpp, hdf5::hdf5_fortran, hdf5::hdf5_hl_fortran,
+# hdf5::<tool> for each installed tool, and the HDF5::HDF5 aggregate.
 #
 # These are aliases onto the linkage-qualified targets loaded above, so defining
 # them neither removes nor alters those targets or the
 # HDF5_<lang>_<LINKAGE>_LIBRARY variables set above. They refer to the linkage
-# resolved into ${HDF5_PACKAGE_NAME}_LIB_TYPE above. See HDF5PublicTargets.cmake
-# for the full list of names.
+# resolved into ${HDF5_PACKAGE_NAME}_LIB_TYPE above.
+#
+# A name that already exists is left alone, but must refer to the target it
+# would have aliased. Otherwise another project (possibly CMake's own FindHDF5
+# module) has claimed a name in the hdf5:: namespace.
 #-----------------------------------------------------------------------------
-include ("${CMAKE_CURRENT_LIST_DIR}/HDF5PublicTargets.cmake")
+unset (_hdf5_public_error)
+unset (_hdf5_public_libs)
 
-# Tool executables have no linkage variants, so they are defined independently
-# of the library linkage.
-h5_define_public_tools (
-    PREFIX "@HDF_PACKAGE_NAMESPACE@"
-    TOOLS  @HDF5_UTILS_TO_EXPORT@
-)
-if (H5PUB_ERROR)
+# Tool executables have no linkage variants, so they are aliased independently
+# of the library linkage. Wherever the export namespace is already hdf5::, the
+# exported name is the public name and there is nothing to alias.
+foreach (_hdf5_name IN ITEMS @HDF5_UTILS_TO_EXPORT@)
+  set (_hdf5_concrete "@HDF_PACKAGE_NAMESPACE@${_hdf5_name}")
+  if (NOT TARGET "${_hdf5_concrete}" OR _hdf5_concrete STREQUAL "hdf5::${_hdf5_name}")
+    continue ()
+  endif ()
+
+  if (TARGET "hdf5::${_hdf5_name}")
+    get_target_property (_hdf5_aliased "hdf5::${_hdf5_name}" ALIASED_TARGET)
+    if (NOT _hdf5_aliased STREQUAL _hdf5_concrete)
+      set (_hdf5_public_error "hdf5::${_hdf5_name} already exists and does not refer to ${_hdf5_concrete}. Another project (possibly CMake's own FindHDF5 module) has claimed a name in the hdf5:: namespace.")
+      break ()
+    endif ()
+  else ()
+    add_executable ("hdf5::${_hdf5_name}" ALIAS "${_hdf5_concrete}")
+  endif ()
+endforeach ()
+
+# Each library name aliases <name>-<linkage>, e.g. hdf5::hdf5_hl ->
+# hdf5_hl-shared. Libraries that were not built have no public name.
+if (NOT _hdf5_public_error)
+  foreach (_hdf5_name IN ITEMS hdf5 hdf5_hl hdf5_cpp hdf5_hl_cpp hdf5_fortran hdf5_hl_fortran)
+    set (_hdf5_concrete "@HDF_PACKAGE_NAMESPACE@${_hdf5_name}-${${HDF5_PACKAGE_NAME}_LIB_TYPE}")
+    if (NOT TARGET "${_hdf5_concrete}")
+      continue ()
+    endif ()
+
+    if (TARGET "hdf5::${_hdf5_name}")
+      get_target_property (_hdf5_aliased "hdf5::${_hdf5_name}" ALIASED_TARGET)
+      if (NOT _hdf5_aliased STREQUAL _hdf5_concrete)
+        set (_hdf5_public_error "hdf5::${_hdf5_name} already exists and does not refer to ${_hdf5_concrete}. Another project (possibly CMake's own FindHDF5 module) has claimed a name in the hdf5:: namespace.")
+        break ()
+      endif ()
+    else ()
+      add_library ("hdf5::${_hdf5_name}" ALIAS "${_hdf5_concrete}")
+    endif ()
+
+    list (APPEND _hdf5_public_libs "hdf5::${_hdf5_name}")
+  endforeach ()
+endif ()
+
+# HDF5::HDF5 aggregates the available library targets, matching FindHDF5's
+# convenience target. It stands for more than one target, so it is an
+# INTERFACE library rather than an alias, and $<TARGET_FILE:> does not apply
+# to it.
+if (NOT _hdf5_public_error AND _hdf5_public_libs AND NOT TARGET HDF5::HDF5)
+  add_library (HDF5::HDF5 INTERFACE IMPORTED GLOBAL)
+  set_target_properties (HDF5::HDF5 PROPERTIES
+      INTERFACE_LINK_LIBRARIES "${_hdf5_public_libs}"
+  )
+endif ()
+
+unset (_hdf5_name)
+unset (_hdf5_concrete)
+unset (_hdf5_aliased)
+unset (_hdf5_public_libs)
+
+if (_hdf5_public_error)
   set (${HDF5_PACKAGE_NAME}_FOUND FALSE)
-  set (${HDF5_PACKAGE_NAME}_NOT_FOUND_MESSAGE "${H5PUB_ERROR}")
-  unset (H5PUB_ERROR)
-  unset (HDF5_PUBLIC_LIBRARY_NAMES)
+  set (${HDF5_PACKAGE_NAME}_NOT_FOUND_MESSAGE "${_hdf5_public_error}")
+  unset (_hdf5_public_error)
   return ()
 endif ()
-
-h5_define_public_targets (
-    LINKAGE ${${HDF5_PACKAGE_NAME}_LIB_TYPE}
-    PREFIX  "@HDF_PACKAGE_NAMESPACE@"
-)
-if (H5PUB_ERROR)
-  set (${HDF5_PACKAGE_NAME}_FOUND FALSE)
-  set (${HDF5_PACKAGE_NAME}_NOT_FOUND_MESSAGE "${H5PUB_ERROR}")
-endif ()
-
-unset (H5PUB_ERROR)
-unset (HDF5_PUBLIC_LIBRARY_NAMES)
 
 # Should be last
 check_required_components (${HDF5_PACKAGE_NAME}_${${HDF5_PACKAGE_NAME}_LIB_TYPE})
