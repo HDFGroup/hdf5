@@ -17,7 +17,8 @@ runs:
   using: 'composite'
   steps:
     # Cache only the compilers, under a key that changes only with the
-    # installer, so all jobs and branches using it share one cache
+    # installer and components. A cache saved on develop is shared by all
+    # branches; one saved on a PR branch is visible only to that branch.
     - name: Restore oneAPI compilers
       id: cache
       uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0

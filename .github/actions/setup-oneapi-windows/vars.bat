@@ -18,12 +18,18 @@ for %%t in (cmake ninja) do (
   )
 )
 
+if not exist "%ONEAPI_DIR%\setvars-vcvarsall.bat" (echo "%ONEAPI_DIR%\setvars-vcvarsall.bat" not found & exit /b 1)
 call "%ONEAPI_DIR%\setvars-vcvarsall.bat" %ONEAPI_VS_VERSION%
 
-for /f "tokens=* usebackq" %%f in (`dir /b "%ONEAPI_DIR%\compiler\" ^| findstr /V latest ^| sort`) do set "ONEAPI_COMPILER_VERSION=%%f"
+set "ONEAPI_COMPILER_VERSION="
+for /f "tokens=* usebackq" %%f in (`dir /b /ad "%ONEAPI_DIR%\compiler\" 2^>nul ^| findstr /V latest ^| sort`) do set "ONEAPI_COMPILER_VERSION=%%f"
+if not defined ONEAPI_COMPILER_VERSION (echo No compiler version directory found in "%ONEAPI_DIR%\compiler" & exit /b 1)
 call "%ONEAPI_DIR%\compiler\%ONEAPI_COMPILER_VERSION%\env\vars.bat"
 
-set "PATH=%ONEAPI_KEEP_cmake%;%ONEAPI_KEEP_ninja%;%PATH%"
+rem An empty PATH entry would mean the current directory, so only add the
+rem directories that were found
+if defined ONEAPI_KEEP_ninja set "PATH=%ONEAPI_KEEP_ninja%;%PATH%"
+if defined ONEAPI_KEEP_cmake set "PATH=%ONEAPI_KEEP_cmake%;%PATH%"
 
 where ifx.exe >nul 2>&1 || (echo ifx not found after setting up the oneAPI environment & exit /b 1)
 where icx.exe >nul 2>&1 || (echo icx not found after setting up the oneAPI environment & exit /b 1)
