@@ -109,9 +109,9 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
       - name: Install (Windows)
-        shell: pwsh
+        shell: cmd
         run: |
-          cmake --install . --config ${{ inputs.build_mode }} --prefix "${{ runner.workspace }}/install"
+          cmake --install . --config ${{ inputs.build_mode }} --prefix "${{ runner.workspace }}\install"
         working-directory: ${{ runner.workspace }}/build
 
       # With Intel Fortran on Windows the shared modules mark module variables
@@ -121,7 +121,7 @@ jobs:
       - name: Write Installed Fortran Modules Test (Windows)
         shell: pwsh
         run: |
-          mkdir h5modtest
+          New-Item -ItemType Directory -Force -Path h5modtest | Out-Null
           Set-Location -Path h5modtest
           Set-Content -Path CMakeLists.txt -Value @'
           cmake_minimum_required (VERSION 3.26)
@@ -161,9 +161,8 @@ jobs:
         run: |
           call "%ONEAPI_VARS%" || exit /b 1
           set "PATH=${{ runner.workspace }}\install\bin;%PATH%"
-          set "CMAKE_PREFIX_PATH=${{ runner.workspace }}\install;%CMAKE_PREFIX_PATH%"
           for %%t in (static shared) do (
-            cmake -S . -B build-%%t -G Ninja -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} -DLIBTYPE=%%t || exit /b 1
+            cmake -S . -B build-%%t -G Ninja -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} -DCMAKE_PREFIX_PATH="${{ runner.workspace }}\install" -DLIBTYPE=%%t || exit /b 1
             cmake --build build-%%t || exit /b 1
             build-%%t\h5modtest.exe || exit /b 1
           )
