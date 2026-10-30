@@ -570,7 +570,7 @@ jobs:
   # MacOS w/ Clang
   #
     name: "MacOS Clang"
-    runs-on: macos-15
+    runs-on: macos-26
     needs: [check-secret]
     steps:
       - name: check clang version

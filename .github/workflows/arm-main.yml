@@ -279,7 +279,7 @@ jobs:
 
   build_and_test_mac_latest:
     name: "MacOS Clang-${{ inputs.build_mode }}-${{ inputs.thread_safety }}-${{ inputs.concurrent }}"
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources

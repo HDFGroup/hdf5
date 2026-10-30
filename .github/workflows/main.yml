@@ -121,7 +121,7 @@ jobs:
           #
           - name: "MacOS Clang"
             ostype: macos
-            os: macos-15
+            os: macos-26
             shared: ON
             cpp: ON
             fortran: OFF
