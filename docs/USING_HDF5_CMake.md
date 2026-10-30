@@ -183,15 +183,13 @@ static installation, a shared one, or one providing both:
 | `hdf5::hdf5_hl_cpp` | High-level C++ |
 | `hdf5::hdf5_fortran` | Fortran |
 | `hdf5::hdf5_hl_fortran` | High-level Fortran |
-| `HDF5::HDF5` | All of the above that are available |
 
 Each installed tool is available as `hdf5::<tool>`, for example `hdf5::h5diff`.
 
 These are the same names CMake's own `FindHDF5` module provides, so a project
 using them does not need to know whether HDF5 was located through `FindHDF5`
-or through HDF5's `hdf5-config.cmake`. They are also defined when HDF5 is
-built as a subproject with `add_subdirectory()`, so the same
-`target_link_libraries()` call works there too.
+or through HDF5's `hdf5-config.cmake`. `FindHDF5`'s `HDF5::HDF5` aggregate is
+not defined by `hdf5-config.cmake`; it is only available through `FindHDF5`.
 
 #### Choosing static or shared
 
