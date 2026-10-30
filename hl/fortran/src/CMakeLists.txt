@@ -378,11 +378,11 @@ set (_PKG_CONFIG_REQUIRES_PRIVATE "${HDF5_F90_LIB_NAME} = ${HDF5_PACKAGE_VERSION
 
 configure_file (
     ${HDF_CONFIG_DIR}/libhdf5.fpc.in
-    ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_HL_F90_LIB_CORENAME}.pc
+    ${HDF5_BINARY_DIR}/CMakeFiles/${_PKG_CONFIG_LIBNAME}.pc
     @ONLY
 )
 install (
-    FILES ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_HL_F90_LIB_CORENAME}.pc
+    FILES ${HDF5_BINARY_DIR}/CMakeFiles/${_PKG_CONFIG_LIBNAME}.pc
     DESTINATION ${HDF5_INSTALL_LIB_DIR}/pkgconfig
     COMPONENT hlfortlibraries
 )
