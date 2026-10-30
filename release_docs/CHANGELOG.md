@@ -383,6 +383,17 @@ Fixes GitHub issue #6679.
 
    Fixes GitHub issue #6403
 
+### Fixed conversion of small negative floating-point values to signed integers
+
+   The software floating-point to integer conversion, used for example for big-endian
+   data on a little-endian machine, converted negative values with a magnitude below 0.5,
+   such as -0.25, to the minimum value of a signed integer type instead of 0 and reported
+   `H5T_CONV_EXCEPT_RANGE_LOW` to a conversion exception callback. These values now
+   convert to 0, as they do in the hardware conversion path, and no longer raise a range
+   exception.
+
+   Fixes GitHub issue #6725
+
 ## Java Library
 
 ### Fixed datatype ID leaks when reading or writing nested datatypes through the JNI
