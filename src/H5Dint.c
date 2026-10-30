@@ -1274,11 +1274,13 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
             assert(new_dset->shared->layout_copied_to_dcpl);
 
             /* Check if the filters in the DCPL can be applied to this dataset */
-            if (H5Z_can_apply(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
+            if (H5Z_can_apply(new_dset->shared->dcpl_id, new_dset->shared->type_id,
+                              &new_dset->shared->universal_filter_mask) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset");
 
             /* Make the "set local" filter callbacks for this dataset */
-            if (H5Z_set_local(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
+            if (H5Z_set_local(new_dset->shared->dcpl_id, new_dset->shared->type_id,
+                              new_dset->shared->universal_filter_mask) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set local filter parameters");
         } /* ignore_filters */
 
@@ -2319,6 +2321,12 @@ H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, bool full_overwrite
     f = dset->oloc.file;
     assert(f);
 
+    /* Patch the file pointer for VL datatypes if needed, as initializing the
+     * storage may write the fill value, which is converted with the dataset's
+     * datatype (see H5D_get_create_plist) */
+    if (H5T_patch_vlen_file(dset->shared->type, H5F_VOL_OBJ(f)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch VL datatype file pointer");
+
     /* If the data is stored in external files, don't set an address for the layout
      * We assume that external storage is already
      * allocated by the caller, or at least will be before I/O is performed.
@@ -3032,7 +3040,8 @@ H5D__check_filters(H5D_t *dataset)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to flush layout");
 
                 /* Filters must have encoding enabled. Ensure that all filters can be applied */
-                if (H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id) < 0)
+                if (H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id,
+                                  &dataset->shared->universal_filter_mask) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters");
 
                 dataset->shared->checked_filters = true;
@@ -3071,6 +3080,12 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
     /* Check if we are allowed to modify this file */
     if (0 == (H5F_INTENT(dset->oloc.file) & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file");
+
+    /* Patch the file pointer for VL datatypes if needed, as changing the
+     * extent may write the fill value into existing chunks, which is converted
+     * with the dataset's datatype (see H5D_get_create_plist) */
+    if (H5T_patch_vlen_file(dset->shared->type, H5F_VOL_OBJ(dset->oloc.file)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch VL datatype file pointer");
 
     /* Check if we are allowed to modify the space; only datasets with chunked and external storage are
      * allowed to be modified */
@@ -3711,6 +3726,13 @@ H5D_get_create_plist(const H5D_t *dset)
     /* Check if there is a fill value, but no type yet */
     if (copied_fill.buf != NULL && copied_fill.type == NULL) {
         H5T_path_t *tpath; /* Conversion information*/
+
+        /* Patch the file pointer for VL datatypes if needed, as for reading
+         * data: the dataset's datatype is shared by all open handles of the
+         * dataset, and may still refer to the file of a handle that has been
+         * closed in the meantime */
+        if (H5T_patch_vlen_file(dset->shared->type, H5F_VOL_OBJ(dset->oloc.file)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch VL datatype file pointer");
 
         /* Copy the dataset type into the fill value message */
         if (NULL == (copied_fill.type = H5T_copy(dset->shared->type, H5T_COPY_TRANSIENT)))

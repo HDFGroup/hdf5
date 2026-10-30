@@ -843,7 +843,7 @@ done:
  */
 static herr_t
 H5Z__prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id, hid_t space_id,
-                      H5Z_prelude_type_t prelude_type)
+                      unsigned *universal_filter_mask /*in,out*/, H5Z_prelude_type_t prelude_type)
 {
     H5Z_class3_t *fclass;           /* Individual filter information */
     size_t        u;                /* Local index variable */
@@ -852,6 +852,7 @@ H5Z__prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id, hi
     FUNC_ENTER_PACKAGE
 
     assert(pline->nused > 0);
+    assert(prelude_type != H5Z_PRELUDE_CAN_APPLY || !universal_filter_mask || *universal_filter_mask == 0);
 
     /* Iterate over filters */
     for (u = 0; u < pline->nused; u++) {
@@ -891,14 +892,22 @@ H5Z__prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id, hi
 
                         /* Indicate filter can't apply to this combination of parameters.
                          * If the filter is NOT optional, returns failure. */
-                        if (status == false && !(pline->filter[u].flags & H5Z_FLAG_OPTIONAL))
-                            HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "filter parameters not appropriate");
+                        if (status == false) {
+                            if (!(pline->filter[u].flags & H5Z_FLAG_OPTIONAL))
+                                HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL,
+                                            "filter parameters not appropriate");
+
+                            /* Add filter to universal filter mask */
+                            if (universal_filter_mask)
+                                *universal_filter_mask |= (unsigned)1 << u;
+                        }
                     } /* end if */
                     break;
 
                 case H5Z_PRELUDE_SET_LOCAL:
-                    /* Check if there is a "set local" callback */
-                    if (fclass->set_local) {
+                    /* Check if there is a "set local" callback, and if this filter is disabled by the mask */
+                    if (fclass->set_local &&
+                        (!universal_filter_mask || !(*universal_filter_mask & ((unsigned)1 << u)))) {
                         herr_t status;
 
                         /* Don't prepare for a user callback if this is an internal filter */
@@ -946,7 +955,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_type)
+H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, unsigned *universal_filter_mask /*in,out*/,
+                                   H5Z_prelude_type_t prelude_type)
 {
     hid_t         space_id    = -1;      /* ID for dataspace describing chunk */
     H5O_layout_t *dcpl_layout = NULL;    /* Dataset's layout information */
@@ -1000,7 +1010,8 @@ H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_typ
                 }
 
                 /* Make the callbacks */
-                if (H5Z__prelude_callback(&dcpl_pline, dcpl_id, type_id, space_id, prelude_type) < 0)
+                if (H5Z__prelude_callback(&dcpl_pline, dcpl_id, type_id, space_id, universal_filter_mask,
+                                          prelude_type) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter");
             }
         }
@@ -1032,15 +1043,21 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_can_apply(hid_t dcpl_id, hid_t type_id)
+H5Z_can_apply(hid_t dcpl_id, hid_t type_id, unsigned *universal_filter_mask /*out*/)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    unsigned tmp_ufm   = 0;
+    herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    assert(universal_filter_mask);
+
     /* Make "can apply" callbacks for filters in pipeline */
-    if (H5Z__prepare_prelude_callback_dcpl(dcpl_id, type_id, H5Z_PRELUDE_CAN_APPLY) < 0)
+    if (H5Z__prepare_prelude_callback_dcpl(dcpl_id, type_id, &tmp_ufm, H5Z_PRELUDE_CAN_APPLY) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter");
+
+    /* Set universal_filter_mask */
+    *universal_filter_mask = tmp_ufm;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1062,14 +1079,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_set_local(hid_t dcpl_id, hid_t type_id)
+H5Z_set_local(hid_t dcpl_id, hid_t type_id, unsigned universal_filter_mask /*in*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Make "set local" callbacks for filters in pipeline */
-    if (H5Z__prepare_prelude_callback_dcpl(dcpl_id, type_id, H5Z_PRELUDE_SET_LOCAL) < 0)
+    if (H5Z__prepare_prelude_callback_dcpl(dcpl_id, type_id, &universal_filter_mask, H5Z_PRELUDE_SET_LOCAL) <
+        0)
         HGOTO_ERROR(H5E_PLINE, H5E_SETLOCAL, FAIL, "local filter parameters not set");
 
 done:
@@ -1088,17 +1106,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_can_apply_direct(const H5O_pline_t *pline)
+H5Z_can_apply_direct(const H5O_pline_t *pline, unsigned *universal_filter_mask /*out*/)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    unsigned tmp_ufm   = 0;
+    herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(pline->nused > 0);
+    assert(pline && pline->nused > 0);
+    assert(universal_filter_mask);
 
     /* Make "can apply" callbacks for filters in pipeline */
-    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, H5Z_PRELUDE_CAN_APPLY) < 0)
+    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, &tmp_ufm, H5Z_PRELUDE_CAN_APPLY) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter");
+
+    /* Set universal_filter_mask */
+    *universal_filter_mask = tmp_ufm;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1120,7 +1143,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_set_local_direct(const H5O_pline_t *pline)
+H5Z_set_local_direct(const H5O_pline_t *pline, unsigned universal_filter_mask /*in*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1129,7 +1152,8 @@ H5Z_set_local_direct(const H5O_pline_t *pline)
     assert(pline->nused > 0);
 
     /* Make "set local" callbacks for filters in pipeline */
-    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, H5Z_PRELUDE_SET_LOCAL) < 0)
+    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, &universal_filter_mask,
+                              H5Z_PRELUDE_SET_LOCAL) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_SETLOCAL, FAIL, "local filter parameters not set");
 
 done:
@@ -1562,7 +1586,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
     assert(nbytes && *nbytes > 0);
     assert(buf_size && *buf_size > 0);
     assert(buf && *buf);
-    assert(!pline || pline->nused < H5Z_MAX_NFILTERS);
+    assert(!pline || pline->nused <= H5Z_MAX_NFILTERS);
 
     /* clang-format off */
 

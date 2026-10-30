@@ -2648,8 +2648,9 @@ H5VL_setup_loc_args(hid_t loc_id, H5VL_object_t **vol_obj, H5VL_loc_params_t *lo
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set collective metadata read");
 
     /* Set location parameters */
-    loc_params->type     = H5VL_OBJECT_BY_SELF;
-    loc_params->obj_type = H5I_get_type(loc_id);
+    loc_params->type = H5VL_OBJECT_BY_SELF;
+    if (H5I_BADID == (loc_params->obj_type = H5I_get_type(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2687,8 +2688,9 @@ H5VL_setup_acc_args(hid_t loc_id, const H5P_libclass_t *libclass, bool is_collec
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Set location parameters */
-    loc_params->type     = H5VL_OBJECT_BY_SELF;
-    loc_params->obj_type = H5I_get_type(loc_id);
+    loc_params->type = H5VL_OBJECT_BY_SELF;
+    if (H5I_BADID == (loc_params->obj_type = H5I_get_type(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2719,8 +2721,9 @@ H5VL_setup_self_args(hid_t loc_id, H5VL_object_t **vol_obj, H5VL_loc_params_t *l
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Set location parameters */
-    loc_params->type     = H5VL_OBJECT_BY_SELF;
-    loc_params->obj_type = H5I_get_type(loc_id);
+    loc_params->type = H5VL_OBJECT_BY_SELF;
+    if (H5I_BADID == (loc_params->obj_type = H5I_get_type(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2765,7 +2768,8 @@ H5VL_setup_name_args(hid_t loc_id, const char *name, bool is_collective, hid_t l
     loc_params->type                         = H5VL_OBJECT_BY_NAME;
     loc_params->loc_data.loc_by_name.name    = name;
     loc_params->loc_data.loc_by_name.lapl_id = lapl_id;
-    loc_params->obj_type                     = H5I_get_type(loc_id);
+    if (H5I_BADID == (loc_params->obj_type = H5I_get_type(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2817,7 +2821,8 @@ H5VL_setup_idx_args(hid_t loc_id, const char *name, H5_index_t idx_type, H5_iter
     loc_params->loc_data.loc_by_idx.order    = order;
     loc_params->loc_data.loc_by_idx.n        = n;
     loc_params->loc_data.loc_by_idx.lapl_id  = lapl_id;
-    loc_params->obj_type                     = H5I_get_type(loc_id);
+    if (H5I_BADID == (loc_params->obj_type = H5I_get_type(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2851,7 +2856,8 @@ H5VL_setup_token_args(hid_t loc_id, H5O_token_t *obj_token, H5VL_object_t **vol_
     /* Set location parameters */
     loc_params->type                        = H5VL_OBJECT_BY_TOKEN;
     loc_params->loc_data.loc_by_token.token = obj_token;
-    loc_params->obj_type                    = H5I_get_type(loc_id);
+    if (H5I_BADID == (loc_params->obj_type = H5I_get_type(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
