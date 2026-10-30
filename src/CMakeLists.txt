@@ -1437,35 +1437,27 @@ if (H5_HAVE_PARALLEL)
       "pkg-config module that the parallel hdf5.pc requires for MPI (empty: detect, NONE: add no MPI flags)")
   mark_as_advanced (HDF5_PKG_CONFIG_MPI_REQUIRES)
   set (_mpi_pc_module "${HDF5_PKG_CONFIG_MPI_REQUIRES}")
+  string (TOUPPER "${_mpi_pc_module}" _mpi_pc_module_upper)
+  if (_mpi_pc_module_upper MATCHES "^(NONE|OFF|NO|FALSE)$")
+    set (_mpi_pc_module "NONE")
+  endif ()
   if (NOT _mpi_pc_module AND PKG_CONFIG_FOUND)
-    # Find the mpi.h the compiler includes from its dependency output
-    set (_mpi_h_test ${HDF5_BINARY_DIR}/CMakeFiles/hdf5_mpi_h.c)
-    file (WRITE ${_mpi_h_test} "#include <mpi.h>\n")
-    set (_mpi_h_args)
-    foreach (_dir IN LISTS MPI_C_INCLUDE_DIRS)
-      list (APPEND _mpi_h_args "-I${_dir}")
-    endforeach ()
-    execute_process (
-        COMMAND ${CMAKE_C_COMPILER} ${_mpi_h_args} -M ${_mpi_h_test}
-        OUTPUT_VARIABLE _mpi_h_deps
-        RESULT_VARIABLE _mpi_h_result
-        ERROR_QUIET
+    # Find the mpi.h the compiler includes: FindMPI's include directories
+    # come first on the command line, then the compiler's own, which hold
+    # MPI's when the compiler is an MPI wrapper
+    find_file (_mpi_h mpi.h
+        PATHS ${MPI_C_INCLUDE_DIRS} ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}
+        NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH NO_CACHE
     )
     unset (_mpi_h_dir)
-    if (_mpi_h_result EQUAL 0)
-      string (REGEX REPLACE "[ \t\r\n\\\\]+" ";" _mpi_h_deps "${_mpi_h_deps}")
-      foreach (_dep IN LISTS _mpi_h_deps)
-        if (_dep MATCHES "/mpi\\.h$")
-          get_filename_component (_mpi_h_dir "${_dep}" DIRECTORY)
-          get_filename_component (_mpi_h_dir "${_mpi_h_dir}" REALPATH)
-          break ()
-        endif ()
-      endforeach ()
+    if (_mpi_h)
+      get_filename_component (_mpi_h_dir "${_mpi_h}" DIRECTORY)
+      get_filename_component (_mpi_h_dir "${_mpi_h_dir}" REALPATH)
     endif ()
 
-    # Open MPI, MPICH, Intel MPI and MVAPICH module names
+    # Open MPI, MPICH, Intel MPI, MVAPICH and Cray MPICH module names
     if (_mpi_h_dir)
-      foreach (_candidate ompi-c mpich impi mvapich2 mvapich)
+      foreach (_candidate ompi-c mpich impi mvapich2 mvapich cray-mpich)
         execute_process (
             COMMAND ${CMAKE_COMMAND} -E env PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
                 ${PKG_CONFIG_EXECUTABLE} --cflags-only-I ${_candidate}

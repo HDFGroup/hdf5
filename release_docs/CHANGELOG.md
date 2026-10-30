@@ -128,7 +128,7 @@ We would like to thank the many HDF5 community members who contributed to this r
    unless they were compiled with an MPI wrapper (Fixes GitHub issue #6823).
 
    - A parallel `hdf5.pc` now requires MPI's own pkg-config module: the first of `ompi-c`
-     (Open MPI), `mpich`, `impi` (Intel MPI), `mvapich2` and `mvapich` whose include directory
+     (Open MPI), `mpich`, `impi` (Intel MPI), `mvapich2`, `mvapich` and `cray-mpich` whose include directory
      holds the `mpi.h` the compiler uses. That module must then be on the pkg-config search
      path when `hdf5.pc` is used, as for any other required module
    - If there is no such module, the MPI include directories and libraries found by CMake are
