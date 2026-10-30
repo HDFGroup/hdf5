@@ -427,18 +427,18 @@ H5_get_win32_times(H5_timevals_t *tvs /*in,out*/)
 int
 Wflock(int fd, int operation)
 {
-
     HANDLE hFile;
     DWORD  dwFlags    = LOCKFILE_FAIL_IMMEDIATELY;
     DWORD  dwReserved = 0;
-    /* MAXDWORD locks the entire file */
-    DWORD nNumberOfBytesToLockLow  = MAXDWORD;
-    DWORD nNumberOfBytesToLockHigh = MAXDWORD;
+    LARGE_INTEGER liFileSize;
     /* Must initialize OVERLAPPED struct */
     OVERLAPPED overlapped = {0};
 
     /* Get Windows HANDLE */
     if (INVALID_HANDLE_VALUE == (hFile = (HANDLE)_get_osfhandle(fd)))
+        return -1;
+
+    if (0 == GetFileSizeEx(hFile, &liFileSize))
         return -1;
 
     /* Convert to Windows flags */
@@ -448,7 +448,7 @@ Wflock(int fd, int operation)
     /* Lock or unlock */
     if (operation & LOCK_UN) {
         if (0 ==
-            UnlockFileEx(hFile, dwReserved, nNumberOfBytesToLockLow, nNumberOfBytesToLockHigh, &overlapped)) {
+            UnlockFileEx(hFile, dwReserved, liFileSize.LowPart, liFileSize.HighPart, &overlapped)) {
             /* Attempting to unlock an already unlocked file will fail and this can happen
              * in H5Fstart_swmr_write(). For now, just ignore the "error" (error code: 0x9e / 158).
              */
@@ -457,7 +457,7 @@ Wflock(int fd, int operation)
         }
     }
     else {
-        if (0 == LockFileEx(hFile, dwFlags, dwReserved, nNumberOfBytesToLockLow, nNumberOfBytesToLockHigh,
+        if (0 == LockFileEx(hFile, dwFlags, dwReserved, liFileSize.LowPart, liFileSize.HighPart,
                             &overlapped))
             return -1;
     }
