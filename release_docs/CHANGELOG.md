@@ -74,6 +74,24 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Configuration
 
+### Stopped publishing .deb and .rpm files with the release
+
+   The `.deb` and `.rpm` files built on Ubuntu were not real distribution packages: they
+   were CPack output with the layout and dependencies of the tarball, and they conflicted
+   with the HDF5 packages the distributions themselves ship. Native packages come from the
+   distributions and from the HDF Group's build service project instead. The Linux tarballs
+   are unaffected.
+
+### Added a Linux binary that runs on glibc 2.28 and newer
+
+   The released Linux binary was built on Ubuntu 24.04 and requires glibc 2.38, so it does
+   not run on RHEL 9, Amazon Linux 2023, SLES 15, Debian 12 or Ubuntu 22.04. Releases now
+   also carry `hdf5-<version>-linux-x86_64_gcc.tar.gz`, built in an AlmaLinux 8 container
+   with gcc-toolset-14. **It requires glibc 2.28 or newer**, which covers RHEL 8+, SLES 15,
+   Debian 10+, Ubuntu 20.04+ and Amazon Linux 2023. zlib and libaec are linked statically,
+   as in the other binaries, so it needs nothing from the system but libc and libm. CI
+   fails the build if that requirement ever rises.
+
 ### Re-added HDF5_ENABLE_THREADS option
 
    The HDF5_ENABLE_THREADS option now controls whether the library builds in any
