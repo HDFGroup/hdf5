@@ -151,6 +151,8 @@ ph5diff_worker(int nID)
             struct diff_mpi_args args;
             struct diffs_found   diffs;
             unsigned             i;
+            int                  msg_size;
+            void                *buf;
 
             /* Make certain we've received the filenames and opened the files already */
             if (file1_id < 0 || file2_id < 0) {
@@ -159,12 +161,35 @@ ph5diff_worker(int nID)
                 break;
             }
 
-            /* Recv parameters for diff from manager task */
-            MPI_Recv(&args, sizeof(args), MPI_BYTE, 0, MPI_TAG_ARGS, MPI_COMM_WORLD, &Status);
+            /* Determine exact message size and receive into a heap buffer. */
+            MPI_Get_count(&Status, MPI_PACKED, &msg_size);
+
+            if (NULL == (buf = malloc((size_t)msg_size))) {
+                printf("ph5diff_worker: ERROR: malloc failed for recv buffer\n");
+                MPI_Abort(MPI_COMM_WORLD, 0);
+                break;
+            }
+
+            MPI_Recv(buf, msg_size, MPI_PACKED, 0, MPI_TAG_ARGS, MPI_COMM_WORLD, &Status);
+
+            /* Unpack all fields: scalars, then exclude lists, then ssets, then argdata. */
+            memset(&args, 0, sizeof(args));
+            unpack_diff_args(buf, msg_size, &args);
+            free(buf);
 
             /* Do the diff */
             diffs.nfound  = diff(file1_id, args.name1, file2_id, args.name2, &(args.opts), &(args.argdata));
             diffs.not_cmp = args.opts.not_cmp;
+
+            /* Free heap memory allocated during unpacking.
+             * The exclude lists are freed by diff() itself via the serial
+             * free_exclude_*_list paths inside diff_match/build_match_list,
+             * so we must not free them here. name1/name2 and sset are not
+             * touched by those paths and must be freed explicitly. */
+            free(args.name1);
+            free(args.name2);
+            free_unpacked_sset(args.opts.sset[0]);
+            free_unpacked_sset(args.opts.sset[1]);
 
             if ((outBuffOffset == 0) && !overflow_file)
                 /* Nothing to print. Send diffs to manager */
