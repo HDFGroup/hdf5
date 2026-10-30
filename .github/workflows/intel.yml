@@ -79,12 +79,8 @@ jobs:
       - name: Install Dependencies (Windows)
         run: choco install ninja
 
-      - name: install oneAPI (Windows)
-        uses: fortran-lang/setup-fortran@4b0d970b3801207ebcef014f759c435985c53486 # main, fixes apt-key removal on ubuntu-26.04 (fortran-lang/setup-fortran#301)
-        id: setup-fortran
-        with:
-          compiler: intel
-          version: '2025.2'
+      - name: Install oneAPI (Windows)
+        uses: ./.github/actions/setup-oneapi-windows
 
       - name: Setup Java
         uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
@@ -93,29 +89,81 @@ jobs:
           distribution: 'temurin'
 
       - name: Configure (Windows)
-        shell: pwsh
-        env:
-          FC: ${{ steps.setup-fortran.outputs.fc }}
-          CC: ${{ steps.setup-fortran.outputs.cc }}
+        shell: cmd
         run: |
-          mkdir "${{ runner.workspace }}/build"
-          Set-Location -Path "${{ runner.workspace }}\\build"
-          cmake -C ${{ github.workspace }}/config/cmake/cacheinit.cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} -DHDF5_BUILD_FORTRAN=ON -DHDF5_BUILD_CPP_LIB=ON -DLIBAEC_USE_LOCALCONTENT=OFF -DZLIB_USE_LOCALCONTENT=OFF ${{ github.workspace }}
+          call "%ONEAPI_VARS%" || exit /b 1
+          cmake -C "${{ github.workspace }}/config/cmake/cacheinit.cmake" -G Ninja -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} -DHDF5_BUILD_FORTRAN=ON -DHDF5_BUILD_CPP_LIB=ON -DLIBAEC_USE_LOCALCONTENT=OFF -DZLIB_USE_LOCALCONTENT=OFF -S "${{ github.workspace }}" -B "${{ runner.workspace }}/build"
 
       - name: Build (Windows)
-        shell: pwsh
-        env:
-          FC: ${{ steps.setup-fortran.outputs.fc }}
-          CC: ${{ steps.setup-fortran.outputs.cc }}
+        shell: cmd
         run: |
+          call "%ONEAPI_VARS%" || exit /b 1
           cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
       - name: Run Tests (Windows)
-        shell: pwsh
-        env:
-          FC: ${{ steps.setup-fortran.outputs.fc }}
-          CC: ${{ steps.setup-fortran.outputs.cc }}
+        shell: cmd
         run: |
+          call "%ONEAPI_VARS%" || exit /b 1
           ctest . --parallel 2 -C ${{ inputs.build_mode }} -E tfloatsattrs
         working-directory: ${{ runner.workspace }}/build
+
+      - name: Install (Windows)
+        shell: cmd
+        run: |
+          cmake --install . --config ${{ inputs.build_mode }} --prefix "${{ runner.workspace }}\install"
+        working-directory: ${{ runner.workspace }}/build
+
+      # With Intel Fortran on Windows the shared modules mark module variables
+      # DLLEXPORT, so the static and shared modules differ. Check that a
+      # program using the installed modules builds and runs with both library
+      # types; the build-tree tests above use the build-tree modules.
+      - name: Write Installed Fortran Modules Test (Windows)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path h5modtest | Out-Null
+          Set-Location -Path h5modtest
+          Set-Content -Path CMakeLists.txt -Value @'
+          cmake_minimum_required (VERSION 3.26)
+          project (h5modtest C Fortran)
+          find_package (HDF5 REQUIRED CONFIG COMPONENTS Fortran HL ${LIBTYPE})
+          add_executable (h5modtest h5modtest.f90)
+          target_link_libraries (h5modtest PRIVATE hdf5::hdf5_hl_fortran-${LIBTYPE})
+          '@
+          Set-Content -Path h5modtest.f90 -Value @'
+          program h5modtest
+            use hdf5
+            use h5lt
+            implicit none
+            integer :: err
+            integer(hid_t) :: file_id, type_id
+            integer, dimension(3) :: buf = [1, 2, 3]
+            integer(hsize_t), dimension(1) :: dims = [3]
+            call h5open_f(err)
+            if (err /= 0) error stop "h5open_f"
+            ! H5T_NATIVE_INTEGER is a module variable, DLLEXPORT in the shared modules
+            call h5tcopy_f(H5T_NATIVE_INTEGER, type_id, err)
+            if (err /= 0) error stop "h5tcopy_f"
+            call h5tclose_f(type_id, err)
+            call h5fcreate_f("h5modtest.h5", H5F_ACC_TRUNC_F, file_id, err)
+            if (err /= 0) error stop "h5fcreate_f"
+            call h5ltmake_dataset_f(file_id, "dset", 1, dims, H5T_NATIVE_INTEGER, buf, err)
+            if (err /= 0) error stop "h5ltmake_dataset_f"
+            call h5fclose_f(file_id, err)
+            call h5close_f(err)
+            print *, "ok"
+          end program h5modtest
+          '@
+        working-directory: ${{ runner.workspace }}
+
+      - name: Test Installed Fortran Modules (Windows)
+        shell: cmd
+        run: |
+          call "%ONEAPI_VARS%" || exit /b 1
+          set "PATH=${{ runner.workspace }}\install\bin;%PATH%"
+          for %%t in (static shared) do (
+            cmake -S . -B build-%%t -G Ninja -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} -DCMAKE_PREFIX_PATH="${{ runner.workspace }}\install" -DLIBTYPE=%%t || exit /b 1
+            cmake --build build-%%t || exit /b 1
+            build-%%t\h5modtest.exe || exit /b 1
+          )
+        working-directory: ${{ runner.workspace }}/h5modtest
