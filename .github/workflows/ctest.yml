@@ -1001,12 +1001,13 @@ jobs:
       - name: Install Dependencies (Windows_intel)
         run: choco install ninja
 
-      - name: add oneAPI to env
-        uses: fortran-lang/setup-fortran@be037f0a45b1160f139d4ccd0b96f9e9bfd6a682 # v1
-        id: setup-fortran
+      - name: Get Actions
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          compiler: intel
-          version: '2025.0'
+          sparse-checkout: .github/actions
+
+      - name: Install oneAPI (Windows_intel)
+        uses: ./.github/actions/setup-oneapi-windows
 
       - name: Setup Java
         uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
@@ -1075,15 +1076,13 @@ jobs:
 
       - name: Run CTest (Windows_intel) with oneapi
         env:
-          FC: ${{ steps.setup-fortran.outputs.fc }}
-          CC: ${{ steps.setup-fortran.outputs.cc }}
-          
           BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
           SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
         run: |
-          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
+          call "%ONEAPI_VARS%" || exit /b 1
           cmake --workflow --preset=${{ inputs.preset_name }}-win-Intel --fresh
-        shell: pwsh
+        working-directory: ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}
+        shell: cmd
 
       - name: Sign files with Trusted Signing (Windows_intel)
         uses: azure/trusted-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0

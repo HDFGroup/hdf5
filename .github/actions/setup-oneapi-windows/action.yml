@@ -1,0 +1,53 @@
+name: 'Setup Intel oneAPI (Windows)'
+description: 'Install the Intel oneAPI Fortran and C/C++ compilers on Windows, as oneapi-src/oneapi-ci does'
+inputs:
+  installer-url:
+    description: 'Intel oneAPI offline installer'
+    required: false
+    default: 'https://registrationcenter-download.intel.com/akdlm/IRC_NAS/e63ac2b4-8a9a-4768-979a-399a8b6299de/intel-oneapi-hpc-toolkit-2025.2.1.46_offline.exe'
+  components:
+    description: 'Installer components, separated by colons'
+    required: false
+    default: 'intel.oneapi.win.ifort-compiler:intel.oneapi.win.cpp-dpcpp-common'
+  vs-version:
+    description: 'Visual Studio version passed to setvars-vcvarsall.bat'
+    required: false
+    default: 'vs2022'
+runs:
+  using: 'composite'
+  steps:
+    # Cache only the compilers, under a key that changes only with the
+    # installer and components. A cache saved on develop is shared by all
+    # branches; one saved on a PR branch is visible only to that branch.
+    - name: Restore oneAPI compilers
+      id: cache
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: |
+          C:\Program Files (x86)\Intel\oneAPI\setvars-vcvarsall.bat
+          C:\Program Files (x86)\Intel\oneAPI\compiler
+        key: oneapi-windows-${{ inputs.installer-url }}-${{ inputs.components }}
+
+    - name: Install oneAPI compilers
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: cmd
+      run: call "${{ github.action_path }}\install.bat" "${{ inputs.installer-url }}" "${{ inputs.components }}"
+
+    - name: Save oneAPI compilers
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: |
+          C:\Program Files (x86)\Intel\oneAPI\setvars-vcvarsall.bat
+          C:\Program Files (x86)\Intel\oneAPI\compiler
+        key: ${{ steps.cache.outputs.cache-primary-key }}
+
+    # Steps that compile run in cmd and start with: call "%ONEAPI_VARS%"
+    - name: Set oneAPI environment variables
+      shell: pwsh
+      run: |
+        Add-Content -Path $env:GITHUB_ENV -Value "ONEAPI_VARS=${{ github.action_path }}\vars.bat"
+        Add-Content -Path $env:GITHUB_ENV -Value "ONEAPI_VS_VERSION=${{ inputs.vs-version }}"
+        Add-Content -Path $env:GITHUB_ENV -Value "FC=ifx"
+        Add-Content -Path $env:GITHUB_ENV -Value "CC=icx"
+        Add-Content -Path $env:GITHUB_ENV -Value "CXX=icx"
