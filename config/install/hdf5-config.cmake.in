@@ -442,7 +442,7 @@ unset (libtype)
 #-----------------------------------------------------------------------------
 # Stable, linkage-agnostic public target names: hdf5::hdf5, hdf5::hdf5_hl,
 # hdf5::hdf5_cpp, hdf5::hdf5_hl_cpp, hdf5::hdf5_fortran, hdf5::hdf5_hl_fortran,
-# hdf5::<tool> for each installed tool, and the HDF5::HDF5 aggregate.
+# and hdf5::<tool> for each installed tool.
 #
 # These are aliases onto the linkage-qualified targets loaded above, so defining
 # them neither removes nor alters those targets or the
@@ -452,9 +452,13 @@ unset (libtype)
 # A name that already exists is left alone, but must refer to the target it
 # would have aliased. Otherwise another project (possibly CMake's own FindHDF5
 # module) has claimed a name in the hdf5:: namespace.
+#
+# HDF5::HDF5 is deliberately not defined. CMake's FindHDF5 module loads this
+# file without passing on its components, then defines HDF5::HDF5 itself from
+# the language bindings it was asked for, but only if the name does not exist
+# yet.
 #-----------------------------------------------------------------------------
 unset (_hdf5_public_error)
-unset (_hdf5_public_libs)
 
 # Tool executables have no linkage variants, so they are aliased independently
 # of the library linkage. Wherever the export namespace is already hdf5::, the
@@ -494,26 +498,12 @@ if (NOT _hdf5_public_error)
     else ()
       add_library ("hdf5::${_hdf5_name}" ALIAS "${_hdf5_concrete}")
     endif ()
-
-    list (APPEND _hdf5_public_libs "hdf5::${_hdf5_name}")
   endforeach ()
-endif ()
-
-# HDF5::HDF5 aggregates the available library targets, matching FindHDF5's
-# convenience target. It stands for more than one target, so it is an
-# INTERFACE library rather than an alias, and $<TARGET_FILE:> does not apply
-# to it.
-if (NOT _hdf5_public_error AND _hdf5_public_libs AND NOT TARGET HDF5::HDF5)
-  add_library (HDF5::HDF5 INTERFACE IMPORTED GLOBAL)
-  set_target_properties (HDF5::HDF5 PROPERTIES
-      INTERFACE_LINK_LIBRARIES "${_hdf5_public_libs}"
-  )
 endif ()
 
 unset (_hdf5_name)
 unset (_hdf5_concrete)
 unset (_hdf5_aliased)
-unset (_hdf5_public_libs)
 
 if (_hdf5_public_error)
   set (${HDF5_PACKAGE_NAME}_FOUND FALSE)
