@@ -1341,8 +1341,9 @@ list (REMOVE_DUPLICATES LINK_LIBS_SETTINGS)
 list (JOIN LINK_LIBS_SETTINGS " " LINK_LIBS_SETTINGS)
 
 #-----------------------------------------------------------------------------
-# Fortran module install locations. Set before src, which reports the
-# installed module directory in libhdf5.settings.
+# Fortran module install locations. Set here, not in fortran/, so that the
+# value recorded in hdf5-config.cmake (configured at this level) is the one
+# used for the install.
 #-----------------------------------------------------------------------------
 if (HDF5_BUILD_FORTRAN)
   # One set of Fortran modules is installed, in HDF5_INSTALL_MODULE_DIR. When

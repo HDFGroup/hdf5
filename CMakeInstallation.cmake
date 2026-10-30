@@ -123,8 +123,8 @@ endif ()
 set (INCLUDE_INSTALL_DIR ${HDF5_INSTALL_INCLUDE_DIR})
 set (SHARE_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_INSTALL_CMAKE_DIR}" )
 set (CURRENT_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}" )
-set (FORTRAN_MODULE_SHARED_DIR "${CMAKE_CURRENT_BINARY_DIR}/mod/shared")
-set (FORTRAN_MODULE_STATIC_DIR "${CMAKE_CURRENT_BINARY_DIR}/mod/static")
+set (FORTRAN_MODULE_SHARED_DIR "${CMAKE_Fortran_MODULE_DIRECTORY}/shared")
+set (FORTRAN_MODULE_STATIC_DIR "${CMAKE_Fortran_MODULE_DIRECTORY}/static")
 # In the build tree each HDF5 jar is in the folder of the add_jar call that
 # created it, and the slf4j jars are used from where they were configured
 set (JARHDF5_JAR_FILE "")
