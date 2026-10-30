@@ -1341,6 +1341,29 @@ list (REMOVE_DUPLICATES LINK_LIBS_SETTINGS)
 list (JOIN LINK_LIBS_SETTINGS " " LINK_LIBS_SETTINGS)
 
 #-----------------------------------------------------------------------------
+# Fortran module install locations. Set here, not in fortran/, so that the
+# value recorded in hdf5-config.cmake (configured at this level) is the one
+# used for the install.
+#-----------------------------------------------------------------------------
+if (HDF5_BUILD_FORTRAN)
+  # One set of Fortran modules is installed, in HDF5_INSTALL_MODULE_DIR. When
+  # both library types are built, the shared modules are installed unless
+  # HDF5_INSTALL_MOD_FORTRAN is STATIC. NO, the old "don't copy to include"
+  # value, is accepted and means the default.
+  set (HDF5_INSTALL_MOD_FORTRAN "SHARED" CACHE STRING "Library type whose Fortran modules are installed when both are built (SHARED STATIC)")
+  set_property (CACHE HDF5_INSTALL_MOD_FORTRAN PROPERTY STRINGS SHARED STATIC)
+  string (TOUPPER "${HDF5_INSTALL_MOD_FORTRAN}" HDF5_INSTALL_MOD_FORTRAN)
+  if (NOT HDF5_INSTALL_MOD_FORTRAN MATCHES "^(SHARED|STATIC|NO)$")
+    message (WARNING "HDF5_INSTALL_MOD_FORTRAN=${HDF5_INSTALL_MOD_FORTRAN} is not SHARED or STATIC; using the default")
+  endif ()
+  if (NOT BUILD_SHARED_LIBS)
+    set (HDF5_INSTALL_MOD_FORTRAN "STATIC")
+  elseif (NOT BUILD_STATIC_LIBS OR NOT HDF5_INSTALL_MOD_FORTRAN STREQUAL "STATIC")
+    set (HDF5_INSTALL_MOD_FORTRAN "SHARED")
+  endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
 # Add the HDF5 Library Target to the build
 #-----------------------------------------------------------------------------
 add_subdirectory (src)

@@ -26,15 +26,12 @@ if (H5_HAVE_PARALLEL)
   endif ()
 endif ()
 
-#option (HDF5_INSTALL_MOD_FORTRAN "Copy FORTRAN mod files to include directory (NO SHARED STATIC)" "NO")
-set (HDF5_INSTALL_MOD_FORTRAN "SHARED" CACHE STRING "Copy FORTRAN mod files to include directory (NO SHARED STATIC)")
-set_property (CACHE HDF5_INSTALL_MOD_FORTRAN PROPERTY STRINGS NO SHARED STATIC)
-if (NOT HDF5_INSTALL_MOD_FORTRAN MATCHES "NO")
-  if (NOT BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)
-    set (HDF5_INSTALL_MOD_FORTRAN "STATIC")
-  elseif (BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS)
-    set (HDF5_INSTALL_MOD_FORTRAN "SHARED")
-  endif ()
+# HDF5_INSTALL_MOD_FORTRAN is set in the top-level CMakeLists.txt, so that
+# hdf5-config.cmake records the value used for the install. With a compiler
+# that simulates MSVC, only the shared modules mark module variables DLLEXPORT,
+# and the shared library exports them only that way.
+if (HDF5_INSTALL_MOD_FORTRAN STREQUAL "STATIC" AND BUILD_SHARED_LIBS AND CMAKE_Fortran_SIMULATE_ID STREQUAL "MSVC")
+  message (WARNING "HDF5_INSTALL_MOD_FORTRAN=STATIC installs modules without DLLEXPORT; programs that use module variables such as H5T_NATIVE_INTEGER will not link against the shared Fortran libraries")
 endif ()
 
 if (H5_HAVE_PARALLEL)
