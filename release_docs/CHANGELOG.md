@@ -121,6 +121,23 @@ We would like to thank the many HDF5 community members who contributed to this r
    - Reduced the scope of some temporary variables and modifications so they don't propagate to
      consuming CMake projects
 
+### The parallel hdf5.pc includes MPI's flags
+
+   `hdf5.h` includes `mpi.h` in a parallel build, but `hdf5.pc` gave no MPI flags, so programs
+   built with `pkg-config --cflags --libs hdf5` failed with "mpi.h: No such file or directory"
+   unless they were compiled with an MPI wrapper (Fixes GitHub issue #6823).
+
+   - A parallel `hdf5.pc` now has `Requires: ompi-c` (Open MPI) or `Requires: mpich` (MPICH)
+     when that module is installed and is for the same MPI version as the `mpi.h` used
+   - Otherwise, the MPI include directories and libraries found by CMake are added to
+     `Cflags` and `Libs`. These are empty when the C compiler is an MPI wrapper such as
+     `mpicc`, and configure then reports that `hdf5.pc` doesn't include MPI's flags
+   - The new `HDF5_PKG_CONFIG_MPI_REQUIRES` cache variable sets the module to require, for
+     other MPI implementations
+
+   The other pkg-config files require `hdf5`, so they get MPI's flags too. Parallel Fortran
+   programs still need MPI's Fortran library from the MPI compiler wrapper or `h5pfc`.
+
 ## Library
 
 ### Removed API lock for memory management wrappers

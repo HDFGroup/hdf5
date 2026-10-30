@@ -1427,6 +1427,78 @@ list (REMOVE_DUPLICATES pkg_config_lib_list)
 string (REPLACE ";" " " pkg_config_lib_list "${pkg_config_lib_list}")
 set (_PKG_CONFIG_LIBS_PRIVATE "${pkg_config_lib_list}")
 
+# hdf5.h includes mpi.h in a parallel build, so consumers need MPI's flags.
+# Require MPI's own pkg-config module when one matching the mpi.h in use is
+# installed; otherwise add the flags FindMPI found, which are empty when the
+# compiler is an MPI wrapper such as mpicc.
+if (H5_HAVE_PARALLEL)
+  set (HDF5_PKG_CONFIG_MPI_REQUIRES "" CACHE STRING
+      "pkg-config module that the parallel hdf5.pc requires for MPI (empty: detect ompi-c or mpich)")
+  mark_as_advanced (HDF5_PKG_CONFIG_MPI_REQUIRES)
+  set (_mpi_pc_module "${HDF5_PKG_CONFIG_MPI_REQUIRES}")
+  if (NOT _mpi_pc_module AND PKG_CONFIG_FOUND)
+    include (CheckCSourceCompiles)
+    cmake_push_check_state (RESET)
+    set (CMAKE_REQUIRED_INCLUDES "${MPI_C_INCLUDE_DIRS}")
+    set (CMAKE_REQUIRED_QUIET TRUE)
+    CHECK_SYMBOL_EXISTS (OMPI_MAJOR_VERSION "mpi.h" HDF5_MPI_IS_OPENMPI)
+    CHECK_SYMBOL_EXISTS (MPICH_NUMVERSION "mpi.h" HDF5_MPI_IS_MPICH)
+    unset (_mpi_pc_candidate)
+    if (HDF5_MPI_IS_OPENMPI)
+      set (_mpi_pc_candidate "ompi-c")
+    elseif (HDF5_MPI_IS_MPICH)
+      set (_mpi_pc_candidate "mpich")
+    endif ()
+    if (_mpi_pc_candidate)
+      execute_process (
+          COMMAND ${PKG_CONFIG_EXECUTABLE} --modversion ${_mpi_pc_candidate}
+          OUTPUT_VARIABLE _mpi_pc_version
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+          RESULT_VARIABLE _mpi_pc_result
+          ERROR_QUIET
+      )
+      # Use the module only if it is for the same MPI version as mpi.h, so
+      # another MPI installation's module on the search path isn't picked up
+      if (_mpi_pc_result EQUAL 0 AND _mpi_pc_version MATCHES "^([0-9]+)\\.([0-9]+)\\.([0-9]+)")
+        if (HDF5_MPI_IS_OPENMPI)
+          set (_mpi_pc_version_test
+              "OMPI_MAJOR_VERSION == ${CMAKE_MATCH_1} && OMPI_MINOR_VERSION == ${CMAKE_MATCH_2} && OMPI_RELEASE_VERSION == ${CMAKE_MATCH_3}")
+        else ()
+          set (_mpi_pc_version_test
+              "MPICH_NUMVERSION / 1000 == ${CMAKE_MATCH_1} * 10000 + ${CMAKE_MATCH_2} * 100 + ${CMAKE_MATCH_3}")
+        endif ()
+        unset (HDF5_MPI_PC_VERSION_MATCHES CACHE)
+        CHECK_C_SOURCE_COMPILES ("#include <mpi.h>
+#if !(${_mpi_pc_version_test})
+#error mpi.h is not from this pkg-config module's MPI
+#endif
+int main(void) { return 0; }" HDF5_MPI_PC_VERSION_MATCHES)
+        if (HDF5_MPI_PC_VERSION_MATCHES)
+          set (_mpi_pc_module "${_mpi_pc_candidate}")
+        endif ()
+      endif ()
+    endif ()
+    cmake_pop_check_state ()
+  endif ()
+
+  if (_mpi_pc_module)
+    set (_PKG_CONFIG_REQUIRES "${_mpi_pc_module}")
+  else ()
+    extract_lib_pkgconfig_info (MPI::MPI_C mpi_lib_flags mpi_cflags mpi_skipped)
+    if (NOT mpi_skipped AND mpi_lib_flags)
+      string (REPLACE ";" " " mpi_lib_flags "${mpi_lib_flags}")
+      set (_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} ${mpi_lib_flags}")
+    endif ()
+    if (NOT mpi_skipped AND mpi_cflags)
+      string (REPLACE ";" " " _PKG_CONFIG_EXTRA_CFLAGS "${mpi_cflags}")
+    endif ()
+    if (NOT _PKG_CONFIG_EXTRA_CFLAGS)
+      message (STATUS "No pkg-config module found for this MPI: ${HDF5_LIB_CORENAME}.pc will not include MPI's flags. "
+          "Set HDF5_PKG_CONFIG_MPI_REQUIRES to the MPI's pkg-config module to add them.")
+    endif ()
+  endif ()
+endif ()
+
 configure_file (
     ${HDF_CONFIG_DIR}/libhdf5.pc.in
     ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_LIB_CORENAME}.pc
