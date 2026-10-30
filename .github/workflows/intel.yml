@@ -107,3 +107,62 @@ jobs:
           call "%ONEAPI_VARS%" || exit /b 1
           ctest . --parallel 2 -C ${{ inputs.build_mode }} -E tfloatsattrs
         working-directory: ${{ runner.workspace }}/build
+
+      - name: Install (Windows)
+        shell: pwsh
+        run: |
+          cmake --install . --config ${{ inputs.build_mode }} --prefix "${{ runner.workspace }}/install"
+        working-directory: ${{ runner.workspace }}/build
+
+      # With Intel Fortran on Windows the shared modules mark module variables
+      # DLLEXPORT, so the static and shared modules differ. Check that a
+      # program using the installed modules builds and runs with both library
+      # types; the build-tree tests above use the build-tree modules.
+      - name: Test Installed Fortran Modules (Windows)
+        shell: pwsh
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          $install = "${{ runner.workspace }}/install" -replace '\\', '/'
+          mkdir h5modtest
+          Set-Location -Path h5modtest
+          Set-Content -Path CMakeLists.txt -Value @'
+          cmake_minimum_required (VERSION 3.26)
+          project (h5modtest C Fortran)
+          find_package (HDF5 REQUIRED CONFIG COMPONENTS Fortran HL ${LIBTYPE})
+          add_executable (h5modtest h5modtest.f90)
+          target_link_libraries (h5modtest PRIVATE hdf5::hdf5_hl_fortran-${LIBTYPE})
+          '@
+          Set-Content -Path h5modtest.f90 -Value @'
+          program h5modtest
+            use hdf5
+            use h5lt
+            implicit none
+            integer :: err
+            integer(hid_t) :: file_id, type_id
+            integer, dimension(3) :: buf = [1, 2, 3]
+            integer(hsize_t), dimension(1) :: dims = [3]
+            call h5open_f(err)
+            if (err /= 0) error stop "h5open_f"
+            ! H5T_NATIVE_INTEGER is a module variable, DLLEXPORT in the shared modules
+            call h5tcopy_f(H5T_NATIVE_INTEGER, type_id, err)
+            if (err /= 0) error stop "h5tcopy_f"
+            call h5tclose_f(type_id, err)
+            call h5fcreate_f("h5modtest.h5", H5F_ACC_TRUNC_F, file_id, err)
+            if (err /= 0) error stop "h5fcreate_f"
+            call h5ltmake_dataset_f(file_id, "dset", 1, dims, H5T_NATIVE_INTEGER, buf, err)
+            if (err /= 0) error stop "h5ltmake_dataset_f"
+            call h5fclose_f(file_id, err)
+            call h5close_f(err)
+            print *, "ok"
+          end program h5modtest
+          '@
+          $env:PATH = "${{ runner.workspace }}\install\bin;$env:PATH"
+          foreach ($libtype in "static", "shared") {
+            cmake -S . -B "build-$libtype" -G Ninja -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} -DLIBTYPE="$libtype" -DCMAKE_PREFIX_PATH="$install"
+            cmake --build "build-$libtype"
+            & "./build-$libtype/h5modtest.exe"
+          }
+        working-directory: ${{ runner.workspace }}
