@@ -34,7 +34,9 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y libaec-dev ninja-build
-          sudo apt install -y doxygen libncurses-dev libquadmath0 libstdc++6 libxml2
+          # libxml2 was renamed libxml2-16 on Ubuntu 26.04 (libxml2 2.14+ soname bump)
+          if apt-cache policy libxml2 | grep -q "Candidate: [0-9]"; then LIBXML2=libxml2; else LIBXML2=libxml2-16; fi
+          sudo apt install -y doxygen libncurses-dev libquadmath0 libstdc++6 $LIBXML2
           sudo apt install -y zlib1g-dev libcurl4-openssl-dev libjpeg-dev wget curl bzip2
           sudo apt install -y m4 flex bison cmake libzip-dev openssl build-essential
 
@@ -46,6 +48,10 @@ jobs:
           cd aocc-compiler-${{ env.AOCCVERDOT }}
           bash install.sh
           source $GITHUB_WORKSPACE/setenv_AOCC.sh
+          # Ubuntu 26.04 ships only libxml2.so.16; AOCC's prebuilt LLVM may link libxml2.so.2
+          if ldd $GITHUB_WORKSPACE/aocc-compiler-${{ env.AOCCVERDOT }}/bin/clang | grep -q "libxml2.so.2 => not found"; then
+            sudo ln -s /usr/lib/x86_64-linux-gnu/libxml2.so.16 /usr/lib/x86_64-linux-gnu/libxml2.so.2
+          fi
           which clang
           which flang
           clang -v
