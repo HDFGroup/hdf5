@@ -449,6 +449,9 @@ unset (libtype)
 # HDF5_<lang>_<LINKAGE>_LIBRARY variables set above. They refer to the linkage
 # resolved into ${HDF5_PACKAGE_NAME}_LIB_TYPE above.
 #
+# They are created here because ALIAS targets can't be exported. See
+# release_docs/MAINTAINERS.md before turning them into real targets.
+#
 # A name that already exists is left alone, but must refer to the target it
 # would have aliased. Otherwise another project (possibly CMake's own FindHDF5
 # module) has claimed a name in the hdf5:: namespace.
