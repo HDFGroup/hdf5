@@ -411,6 +411,16 @@ Fixes GitHub issue #6679.
 
 ## Configuration
 
+### Fixed pkg-config and the compiler wrappers when HDF5_LIB_INFIX is set
+
+   With `HDF5_LIB_INFIX` set, for example to `_openmpi`, the pkg-config files were still installed as `hdf5.pc`, `hdf5_hl.pc` and so on, while their `Name` and `Requires` fields, and the compiler wrappers, used the name with the infix (`hdf5_openmpi`). `h5cc` and the other wrappers failed with "Package hdf5_openmpi was not found", and `pkg-config hdf5_hl` could not resolve its requirement. The pkg-config files are now named after the library (`hdf5_openmpi.pc`, `hdf5_openmpi_hl.pc`, ...), and `libhdf5.settings` is installed as `libhdf5_openmpi.settings`, which `h5cc -showconfig` reads.
+
+   The pkg-config file names also include `HDF5_EXTERNAL_LIB_PREFIX` and `HDF5_EXTERNAL_LIB_SUFFIX`, since they are part of the library name. For example, with `HDF5_EXTERNAL_LIB_PREFIX=vtk` the files are now `vtkhdf5.pc` and `vtkhdf5_hl.pc` instead of `hdf5.pc` and `hdf5_hl.pc`, so the `Requires: vtkhdf5` line in the high-level file can now be resolved.
+
+   Builds with different infixes (for example serial, Open MPI and MPICH) can now share a library directory. Their other install directories must still differ per build: set `HDF5_INSTALL_INCLUDE_DIR`, `HDF5_INSTALL_CMAKE_DIR`, `HDF5_INSTALL_MODULE_DIR` and `HDF5_INSTALL_BIN_DIR` for each one, or the headers, CMake package files, Fortran modules and compiler wrappers of one build overwrite those of another.
+
+   Compatibility: with an infix set, `pkg-config hdf5` no longer finds the library. Use `pkg-config hdf5<infix>`, for example `pkg-config hdf5_openmpi`. Builds with no infix, prefix or suffix install the same files as before.
+
 ### Fixed "Extra libraries" in libhdf5.settings and the built-in settings
 
   `libhdf5.settings` listed the extra libraries separated by semicolons, and
