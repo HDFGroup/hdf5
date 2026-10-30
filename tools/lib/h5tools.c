@@ -514,7 +514,7 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
             }
             else if (!strcmp(vfd_info->u.name, drivernames[CORE_VFD_IDX])) {
                 /* Core Driver */
-                if (H5Pset_fapl_core(fapl_id, (size_t)H5_MB, true) < 0)
+                if (H5Pset_fapl_core(fapl_id, 0, (size_t)H5_MB, true) < 0)
                     H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_core failed");
             }
             else if (!strcmp(vfd_info->u.name, drivernames[FAMILY_VFD_IDX])) {
