@@ -1427,6 +1427,109 @@ list (REMOVE_DUPLICATES pkg_config_lib_list)
 string (REPLACE ";" " " pkg_config_lib_list "${pkg_config_lib_list}")
 set (_PKG_CONFIG_LIBS_PRIVATE "${pkg_config_lib_list}")
 
+# hdf5.h includes mpi.h in a parallel build, so consumers need MPI's flags.
+# Require MPI's own pkg-config module, the one whose include directory holds
+# the mpi.h the compiler uses; otherwise add the flags FindMPI found, which
+# are empty when the compiler is an MPI wrapper such as mpicc.
+set (_wrapper_mpi_pc_path "")
+if (H5_HAVE_PARALLEL)
+  set (HDF5_PKG_CONFIG_MPI_REQUIRES "" CACHE STRING
+      "pkg-config module that the parallel hdf5.pc requires for MPI (empty: detect, NONE: add no MPI flags)")
+  mark_as_advanced (HDF5_PKG_CONFIG_MPI_REQUIRES)
+  set (_mpi_pc_module "${HDF5_PKG_CONFIG_MPI_REQUIRES}")
+  string (TOUPPER "${_mpi_pc_module}" _mpi_pc_module_upper)
+  if (_mpi_pc_module_upper MATCHES "^(NONE|OFF|NO|FALSE)$")
+    set (_mpi_pc_module "NONE")
+  endif ()
+  if (NOT _mpi_pc_module AND PKG_CONFIG_FOUND)
+    # Find the mpi.h the compiler includes: FindMPI's include directories
+    # come first on the command line, then the compiler's own, which hold
+    # MPI's when the compiler is an MPI wrapper
+    find_file (_mpi_h mpi.h
+        PATHS ${MPI_C_INCLUDE_DIRS} ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}
+        NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH NO_CACHE
+    )
+    unset (_mpi_h_dir)
+    if (_mpi_h)
+      get_filename_component (_mpi_h_dir "${_mpi_h}" DIRECTORY)
+      get_filename_component (_mpi_h_dir "${_mpi_h_dir}" REALPATH)
+    endif ()
+
+    # Open MPI, MPICH, Intel MPI, MVAPICH and Cray MPICH module names
+    if (_mpi_h_dir)
+      foreach (_candidate ompi-c mpich impi mvapich2 mvapich cray-mpich)
+        execute_process (
+            COMMAND ${CMAKE_COMMAND} -E env PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
+                ${PKG_CONFIG_EXECUTABLE} --cflags-only-I ${_candidate}
+            OUTPUT_VARIABLE _candidate_cflags
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            RESULT_VARIABLE _candidate_result
+            ERROR_QUIET
+        )
+        if (NOT _candidate_result EQUAL 0)
+          continue ()
+        endif ()
+        separate_arguments (_candidate_cflags UNIX_COMMAND "${_candidate_cflags}")
+        foreach (_flag IN LISTS _candidate_cflags)
+          string (REGEX REPLACE "^-I" "" _dir "${_flag}")
+          get_filename_component (_dir "${_dir}" REALPATH)
+          if (_dir STREQUAL _mpi_h_dir)
+            set (_mpi_pc_module "${_candidate}")
+            break ()
+          endif ()
+        endforeach ()
+        if (_mpi_pc_module)
+          break ()
+        endif ()
+      endforeach ()
+    endif ()
+  endif ()
+
+  if (_mpi_pc_module STREQUAL "NONE")
+    # Leave MPI's flags out, as before
+  elseif (_mpi_pc_module)
+    set (_PKG_CONFIG_REQUIRES "${_mpi_pc_module}")
+    # The compiler wrappers replace the user's prefix for pkg-config, so they
+    # need to know where MPI's module is
+    execute_process (
+        COMMAND ${PKG_CONFIG_EXECUTABLE} --variable=pcfiledir ${_mpi_pc_module}
+        OUTPUT_VARIABLE _mpi_pc_dir
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    if (_mpi_pc_dir)
+      set (_wrapper_mpi_pc_path ":${_mpi_pc_dir}")
+    endif ()
+    message (VERBOSE "${HDF5_LIB_CORENAME} pkg-config file requires MPI module ${_mpi_pc_module}")
+  else ()
+    extract_lib_pkgconfig_info (MPI::MPI_C mpi_lib_flags mpi_cflags mpi_skipped)
+    if (NOT mpi_skipped)
+      # Quote paths with spaces, such as MS-MPI's default install location
+      foreach (_flags_var mpi_lib_flags mpi_cflags)
+        set (_quoted)
+        foreach (_flag IN LISTS ${_flags_var})
+          if (_flag MATCHES " ")
+            set (_flag "\"${_flag}\"")
+          endif ()
+          list (APPEND _quoted "${_flag}")
+        endforeach ()
+        string (REPLACE ";" " " ${_flags_var} "${_quoted}")
+      endforeach ()
+      if (mpi_lib_flags)
+        set (_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} ${mpi_lib_flags}")
+      endif ()
+      set (_PKG_CONFIG_EXTRA_CFLAGS "${mpi_cflags}")
+    endif ()
+    if (NOT _PKG_CONFIG_EXTRA_CFLAGS)
+      message (STATUS "No pkg-config module found for this MPI: the HDF5 pkg-config files will not include MPI's flags. "
+          "Set HDF5_PKG_CONFIG_MPI_REQUIRES to the MPI's pkg-config module to add them.")
+    endif ()
+  endif ()
+endif ()
+
+# Used by the compiler wrappers in all languages
+set (H5_WRAPPER_MPI_PKG_CONFIG_PATH "${_wrapper_mpi_pc_path}" CACHE INTERNAL "MPI's pkg-config directory for the compiler wrappers")
+
 configure_file (
     ${HDF_CONFIG_DIR}/libhdf5.pc.in
     ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_LIB_CORENAME}.pc
