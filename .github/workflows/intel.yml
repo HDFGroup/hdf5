@@ -118,14 +118,9 @@ jobs:
       # DLLEXPORT, so the static and shared modules differ. Check that a
       # program using the installed modules builds and runs with both library
       # types; the build-tree tests above use the build-tree modules.
-      - name: Test Installed Fortran Modules (Windows)
+      - name: Write Installed Fortran Modules Test (Windows)
         shell: pwsh
-        env:
-          FC: ${{ steps.setup-fortran.outputs.fc }}
-          CC: ${{ steps.setup-fortran.outputs.cc }}
         run: |
-          $PSNativeCommandUseErrorActionPreference = $true
-          $install = "${{ runner.workspace }}/install" -replace '\\', '/'
           mkdir h5modtest
           Set-Location -Path h5modtest
           Set-Content -Path CMakeLists.txt -Value @'
@@ -159,10 +154,17 @@ jobs:
             print *, "ok"
           end program h5modtest
           '@
-          $env:PATH = "${{ runner.workspace }}\install\bin;$env:PATH"
-          foreach ($libtype in "static", "shared") {
-            cmake -S . -B "build-$libtype" -G Ninja -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} -DLIBTYPE="$libtype" -DCMAKE_PREFIX_PATH="$install"
-            cmake --build "build-$libtype"
-            & "./build-$libtype/h5modtest.exe"
-          }
         working-directory: ${{ runner.workspace }}
+
+      - name: Test Installed Fortran Modules (Windows)
+        shell: cmd
+        run: |
+          call "%ONEAPI_VARS%" || exit /b 1
+          set "PATH=${{ runner.workspace }}\install\bin;%PATH%"
+          set "CMAKE_PREFIX_PATH=${{ runner.workspace }}\install;%CMAKE_PREFIX_PATH%"
+          for %%t in (static shared) do (
+            cmake -S . -B build-%%t -G Ninja -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} -DLIBTYPE=%%t || exit /b 1
+            cmake --build build-%%t || exit /b 1
+            build-%%t\h5modtest.exe || exit /b 1
+          )
+        working-directory: ${{ runner.workspace }}/h5modtest
