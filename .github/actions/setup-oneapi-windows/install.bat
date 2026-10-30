@@ -1,6 +1,8 @@
 @echo off
-rem Install Intel oneAPI components from an offline installer, as
-rem oneapi-src/oneapi-ci scripts/install_windows.bat does.
+rem Install Intel oneAPI components from an offline installer.
+rem Adapted from scripts/install_windows.bat in
+rem https://github.com/oneapi-src/oneapi-ci
+rem Copyright 2022 Intel Corporation, MIT License.
 rem Usage: install.bat <installer URL> <components>
 
 set "URL=%~1"

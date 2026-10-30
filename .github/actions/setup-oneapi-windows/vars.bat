@@ -1,6 +1,9 @@
 @echo off
 rem Set up the Visual Studio and Intel oneAPI compiler environment in the
-rem calling cmd step, as oneapi-src/oneapi-ci scripts/build_windows.bat does.
+rem calling cmd step.
+rem Adapted from scripts/build_windows.bat in
+rem https://github.com/oneapi-src/oneapi-ci
+rem Copyright 2022 Intel Corporation, MIT License.
 rem Usage, at the start of a cmd step: call "%ONEAPI_VARS%" || exit /b 1
 
 set "ONEAPI_DIR=C:\Program Files (x86)\Intel\oneAPI"
