@@ -189,7 +189,7 @@ Each installed tool is available as `hdf5::<tool>`, for example `hdf5::h5diff`.
 These are the same names CMake's own `FindHDF5` module provides, so a project
 using them does not need to know whether HDF5 was located through `FindHDF5`
 or through HDF5's `hdf5-config.cmake`. `FindHDF5`'s `HDF5::HDF5` aggregate is
-not defined by `hdf5-config.cmake`; it is only available through `FindHDF5`.
+not defined by `hdf5-config.cmake` and is only available through `FindHDF5`.
 
 #### Choosing static or shared
 
@@ -227,8 +227,8 @@ deprecated as of 2.3.0:
 | `hdf5_hl_fortran-shared`, `hdf5_hl_fortran-static` | `hdf5::hdf5_hl_fortran` |
 | `HDF5_<lang>_SHARED_LIBRARY`, `HDF5_<lang>_STATIC_LIBRARY` | the matching `hdf5::` target |
 
-They will be removed in a future major release, so new projects should use the `hdf5::` names, and existing
-projects should migrate to use the new names.
+They will be removed in a future major release, so new projects should use the
+`hdf5::` names, and existing projects should migrate to the new names.
 
 ---
 
