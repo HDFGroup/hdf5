@@ -16,8 +16,9 @@ information to be the same in every build.
 * **Configuration date.** "Configured on" uses `SOURCE_DATE_EPOCH` when it is
   set, and is always formatted in UTC.
 * **Recorded compiler and linker flags.** The flags recorded in the settings
-  leave out `-ffile-prefix-map=`, `-fdebug-prefix-map=`, `-fmacro-prefix-map=`
-  and `-fprofile-prefix-map=` options, which contain build paths. The flags
+  leave out `-ffile-prefix-map=`, `-fdebug-prefix-map=`, `-fmacro-prefix-map=`,
+  `-fprofile-prefix-map=`, `-fcoverage-prefix-map=` and `-fprofile-prefix-path=`
+  options, which contain build paths. The flags
   used to compile are not changed.
 * **Build-tree RPATH.** `CMAKE_BUILD_RPATH_USE_ORIGIN` defaults to `ON`, so
   libraries and tools are linked in the build tree with a relative RPATH.

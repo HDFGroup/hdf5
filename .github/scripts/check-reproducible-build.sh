@@ -24,6 +24,18 @@ echo "Source: ${SRC_DIR}"
 echo "Work directory: ${WORK_DIR}"
 echo "SOURCE_DATE_EPOCH: ${SOURCE_DATE_EPOCH}"
 
+# Run a command with its output in a log file, and show the end of the log
+# if it fails (Ninja prints compiler errors to stdout)
+logged () {
+    local log="$1"
+    shift
+    if ! "$@" > "${log}" 2>&1; then
+        echo "FAILED: last lines of ${log}:"
+        tail -n 100 "${log}"
+        exit 1
+    fi
+}
+
 build () {
     local n="$1"
     local src="${WORK_DIR}/src-${n}/hdf5"
@@ -53,7 +65,7 @@ build () {
     echo "=== Build ${n}: ${src} -> ${bld} ==="
     # Static archives are created in deterministic mode (ar D), as distribution
     # toolchains do by default, so the result does not depend on the host's ar
-    "${vary[@]}" cmake -G Ninja -S "${src}" -B "${bld}" \
+    logged "${WORK_DIR}/configure-${n}.log" "${vary[@]}" cmake -G Ninja -S "${src}" -B "${bld}" \
         -DCMAKE_BUILD_TYPE=RelWithDebInfo \
         -DCMAKE_INSTALL_PREFIX=/usr \
         "-DCMAKE_C_FLAGS=${map}" \
@@ -77,9 +89,9 @@ build () {
         -DHDF5_BUILD_TOOLS=ON \
         -DHDF5_ENABLE_ZLIB_SUPPORT=ON \
         -DBUILD_TESTING=OFF \
-        -DHDF5_BUILD_EXAMPLES=OFF > "${WORK_DIR}/configure-${n}.log"
-    "${vary[@]}" cmake --build "${bld}" --parallel "${jobs}" > "${WORK_DIR}/build-${n}.log"
-    DESTDIR="${dest}" cmake --install "${bld}" > "${WORK_DIR}/install-${n}.log"
+        -DHDF5_BUILD_EXAMPLES=OFF
+    logged "${WORK_DIR}/build-${n}.log" "${vary[@]}" cmake --build "${bld}" --parallel "${jobs}"
+    logged "${WORK_DIR}/install-${n}.log" env DESTDIR="${dest}" cmake --install "${bld}"
     umask 022
 }
 
@@ -113,7 +125,10 @@ while IFS= read -r -d '' f; do
 done < <(find "${WORK_DIR}/install-2" -type f -print0)
 
 echo "Installed files: ${nfiles}, differing: ${ndiff}"
-if [ "${ndiff}" -ne 0 ]; then
+if [ "${nfiles}" -eq 0 ]; then
+    status=1
+    echo "FAILED: build 1 installed no files"
+elif [ "${ndiff}" -ne 0 ]; then
     status=1
     echo "FAILED: the two builds are not identical"
 else

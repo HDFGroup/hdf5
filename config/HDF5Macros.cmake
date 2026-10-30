@@ -167,10 +167,11 @@ macro (H5_SET_LANG_SETTINGS)
   endif ()
 
   # Flags as recorded in the settings files. -f*-prefix-map=<build path>=...
-  # options exist to keep build paths out of the binaries; recording them
-  # would put the build path back into H5build_settings.c.
+  # and -fprofile-prefix-path=<build path> options exist to keep build paths
+  # out of the binaries; recording them would put the build path back into
+  # H5build_settings.c.
   foreach (_flags_var CMAKE_C_FLAGS CMAKE_CXX_FLAGS CMAKE_Fortran_FLAGS CMAKE_SHARED_LINKER_FLAGS)
-    string (REGEX REPLACE "-f(file|debug|macro|profile)-prefix-map=[^ ]*" "" H5_SETTINGS_${_flags_var} "${${_flags_var}}")
+    string (REGEX REPLACE "-f((file|debug|macro|profile|coverage)-prefix-map|profile-prefix-path)=[^ ]*" "" H5_SETTINGS_${_flags_var} "${${_flags_var}}")
     string (REGEX REPLACE "  +" " " H5_SETTINGS_${_flags_var} "${H5_SETTINGS_${_flags_var}}")
     string (STRIP "${H5_SETTINGS_${_flags_var}}" H5_SETTINGS_${_flags_var})
   endforeach ()
