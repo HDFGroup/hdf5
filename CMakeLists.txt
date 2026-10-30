@@ -1352,6 +1352,7 @@ if (HDF5_BUILD_FORTRAN)
   # value, is accepted and means the default.
   set (HDF5_INSTALL_MOD_FORTRAN "SHARED" CACHE STRING "Library type whose Fortran modules are installed when both are built (SHARED STATIC)")
   set_property (CACHE HDF5_INSTALL_MOD_FORTRAN PROPERTY STRINGS SHARED STATIC)
+  string (TOUPPER "${HDF5_INSTALL_MOD_FORTRAN}" HDF5_INSTALL_MOD_FORTRAN)
   if (NOT HDF5_INSTALL_MOD_FORTRAN MATCHES "^(SHARED|STATIC|NO)$")
     message (WARNING "HDF5_INSTALL_MOD_FORTRAN=${HDF5_INSTALL_MOD_FORTRAN} is not SHARED or STATIC; using the default")
   endif ()

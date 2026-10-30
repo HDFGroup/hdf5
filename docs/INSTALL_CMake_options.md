@@ -154,7 +154,7 @@ These are options which are specific to HDF5's wrappers for programming language
 | CMake option | Type | Default | Description |
 |:-------------|:-----|:--------|:------------|
 | `HDF5_BUILD_FORTRAN` | `BOOL` | `OFF` | If `ON`, enables building of the HDF5 Fortran wrapper interface. |
-| `HDF5_INSTALL_MOD_FORTRAN` | `STRING` | `SHARED` if HDF5 shared libraries are built; `STATIC` otherwise | When both shared and static libraries are built, selects which library type's Fortran .mod files are installed in `HDF5_INSTALL_MODULE_DIR`: `SHARED` or `STATIC`. Both library types use the installed modules. With gfortran, nvfortran and AOCC flang the shared and static modules have the same contents. With Intel Fortran on Windows they differ: the shared modules mark module variables `DLLEXPORT`. `NO`, from older versions, is accepted and means the default. |
+| `HDF5_INSTALL_MOD_FORTRAN` | `STRING` | `SHARED` if HDF5 shared libraries are built; `STATIC` otherwise | When both shared and static libraries are built, selects which library type's Fortran .mod files are installed in `HDF5_INSTALL_MODULE_DIR`: `SHARED` or `STATIC`. Both library types use the installed modules. With gfortran, nvfortran and AOCC flang the shared and static modules have the same contents. With Intel Fortran on Windows they differ: the shared modules mark module variables `DLLEXPORT`, and the static modules cannot be used with the shared libraries, so `STATIC` gives a configure warning there. The value is case-insensitive. `NO`, from older versions, is accepted and means the default. |
 
 ### Java options
 <a name="pl_java"></a>
