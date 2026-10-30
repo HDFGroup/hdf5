@@ -7,5 +7,12 @@
              Part="last" 
              Action="set" 
              System="yes"/>
+        <Environment Id="HDF5_PLUGIN_PATH"
+             Name="HDF5_PLUGIN_PATH"
+             Value="[INSTALL_ROOT]lib\plugin"
+             Permanent="no"
+             Part="last"
+             Action="set"
+             System="yes"/>
     </CPackWiXFragment>
 </CPackWiXPatch>
