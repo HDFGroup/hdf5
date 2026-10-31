@@ -111,6 +111,17 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### The shared library searches its own install's plugin directory
+
+   When HDF5_PLUGIN_PATH is not set, the shared HDF5 library now searches
+   <install dir>/lib/plugin, found from the location the library was loaded
+   from, ahead of the default plugin paths. A binary package unpacked or
+   installed anywhere finds its filter plugins without setting
+   HDF5_PLUGIN_PATH. The static library is unchanged.
+
+   The aws-c-s3 version used for a build with the ROS3 VFD is now recorded in
+   libhdf5.settings and the library's build settings.
+
 ### Removed API lock for memory management wrappers
 
    The HDF5 library no longer acquires the global thread lock when entering

@@ -843,13 +843,22 @@ jobs:
           which cmake
           cmake --version
 
-      # Install static aws-c-s3 via vcpkg; the x64-windows-static-md triplet
-      # builds static libs against the dynamic CRT (/MD) used by HDF5, so they
-      # are embedded in the HDF5 DLL and the AWS DLLs are not needed at runtime.
+      # Install shared aws-c-s3 via vcpkg; users of the binaries install it the
+      # same way and add the vcpkg installed/x64-windows/bin folder to PATH.
       - name: Install aws-c-s3 (Windows)
         run: |
-          vcpkg install aws-c-s3:x64-windows-static-md
-          echo "CMAKE_PREFIX_PATH=$VCPKG_INSTALLATION_ROOT/installed/x64-windows-static-md" >> $GITHUB_ENV
+          vcpkg install aws-c-s3:x64-windows
+          echo "CMAKE_PREFIX_PATH=$VCPKG_INSTALLATION_ROOT/installed/x64-windows" >> $GITHUB_ENV
+          echo "$VCPKG_INSTALLATION_ROOT/installed/x64-windows/bin" >> $GITHUB_PATH
+        shell: bash
+
+      - name: Log aws-c-s3 version (Windows)
+        run: |
+          vcpkg list aws-c-s3
+          echo "### aws-c-s3 (Windows MSVC S3)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          vcpkg list aws-c-s3 >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
         shell: bash
 
       - name: Set up JDK 21
@@ -1000,27 +1009,34 @@ jobs:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
 
-      # The cached libaws-c-s3 artifact is built shared, so build aws-c-s3 and
-      # its dependencies from source (static, PIC) in dependency order so they
-      # are embedded in libhdf5 and the AWS shared libraries are not needed at
-      # runtime.
-      - name: Install aws-c-s3 (Linux S3)
+      # Ubuntu has no aws-c-s3 package, so use the shared aws-c-s3 build
+      # cached by build-aws-c-s3.yml
+      - name: Install aws-c-s3 (Cached installation)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+          name: libaws-c-s3-Release
+
+      - name: Untar libaws-c-s3 installation
+        run: |
+          tar xvf libaws-c-s3.tar -C ${{ runner.workspace }}
+
+      - name: List contents of libaws-c-s3 installation
+        run: |
+          ls -lR ${{ runner.workspace }}/aws-c-s3-build
+
+      - name: Setup environment
         shell: bash
         run: |
-          AWS_PREFIX="${{ runner.temp }}/aws"
-          mkdir -p "${{ runner.temp }}/aws-src"
-          cd "${{ runner.temp }}/aws-src"
-          for lib in aws/aws-lc aws/s2n-tls awslabs/aws-c-common awslabs/aws-checksums                      awslabs/aws-c-cal awslabs/aws-c-io awslabs/aws-c-compression                      awslabs/aws-c-http awslabs/aws-c-sdkutils awslabs/aws-c-auth awslabs/aws-c-s3; do
-            name=$(basename $lib)
-            git clone --depth 1 https://github.com/$lib.git
-            cmake -S $name -B $name/build -G Ninja               -DCMAKE_BUILD_TYPE=Release               -DCMAKE_INSTALL_PREFIX="$AWS_PREFIX"               -DCMAKE_PREFIX_PATH="$AWS_PREFIX"               -DBUILD_SHARED_LIBS=OFF               -DCMAKE_POSITION_INDEPENDENT_CODE=ON               -DBUILD_TESTING=OFF               -DDISABLE_GO=ON
-            cmake --build $name/build --target install
-          done
-          echo "CMAKE_PREFIX_PATH=$AWS_PREFIX" >> $GITHUB_ENV
-          # s2n's Findcrypto prefers libcrypto.so when BUILD_SHARED_LIBS=ON, which
-          # would link libhdf5 against the system OpenSSL instead of the aws-lc
-          # libcrypto.a that s2n was built with. Remove the system dev library.
-          sudo apt-get remove -y libssl-dev
+          echo "LD_LIBRARY_PATH=${{ runner.workspace }}/aws-c-s3-build/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=${{ runner.workspace }}/aws-c-s3-build" >> $GITHUB_ENV
+
+      - name: Log aws-c-s3 version (Linux S3)
+        shell: bash
+        run: |
+          VERSION_FILE=$(find ${{ runner.workspace }}/aws-c-s3-build -path '*/cmake/aws-c-s3/VERSION' | head -1)
+          AWS_C_S3_VERSION=$(cat "$VERSION_FILE" 2>/dev/null || echo unknown)
+          echo "aws-c-s3 version: $AWS_C_S3_VERSION"
+          echo "### aws-c-s3 (Linux GCC S3): $AWS_C_S3_VERSION" >> $GITHUB_STEP_SUMMARY
 
       - name: Set file base name (Linux S3)
         id: set-file-base
@@ -1106,22 +1122,16 @@ jobs:
           which cmake
           cmake --version
 
-      # Homebrew's aws-c-s3 is shared only, so build aws-c-s3 and its
-      # dependencies from source (static, PIC) in dependency order so they are
-      # embedded in libhdf5 and the AWS dylibs are not needed at runtime.
-      # USE_S2N=OFF makes aws-c-io use Apple's native TLS instead of s2n-tls.
+      # Install shared aws-c-s3 via Homebrew; users of the binaries install it
+      # the same way.
       - name: Install aws-c-s3 (MacOS arm64)
+        run: brew install aws-c-s3
+
+      - name: Log aws-c-s3 version (MacOS arm64)
         shell: bash
         run: |
-          AWS_PREFIX="${{ runner.temp }}/aws"
-          mkdir -p "${{ runner.temp }}/aws-src"
-          cd "${{ runner.temp }}/aws-src"
-          for lib in aws-c-common aws-checksums aws-c-cal aws-c-io aws-c-compression                      aws-c-http aws-c-sdkutils aws-c-auth aws-c-s3; do
-            git clone --depth 1 https://github.com/awslabs/$lib.git
-            cmake -S $lib -B $lib/build -G Ninja               -DCMAKE_BUILD_TYPE=Release               -DCMAKE_OSX_ARCHITECTURES=arm64               -DCMAKE_INSTALL_PREFIX="$AWS_PREFIX"               -DCMAKE_PREFIX_PATH="$AWS_PREFIX"               -DBUILD_SHARED_LIBS=OFF               -DCMAKE_POSITION_INDEPENDENT_CODE=ON               -DBUILD_TESTING=OFF               -DUSE_S2N=OFF
-            cmake --build $lib/build --target install
-          done
-          echo "CMAKE_PREFIX_PATH=$AWS_PREFIX" >> $GITHUB_ENV
+          brew list --versions aws-c-s3
+          echo "### aws-c-s3 (MacOS arm64 Clang S3): $(brew list --versions aws-c-s3)" >> $GITHUB_STEP_SUMMARY
 
       - name: Install the Apple certificate and provisioning profile
         shell: bash
@@ -1347,9 +1357,11 @@ jobs:
           which cmake
           cmake --version
 
-      # Homebrew no longer supports Intel macOS, so build aws-c-s3 and its
-      # dependencies from source (static, PIC) in dependency order,
-      # USE_S2N=OFF makes aws-c-io use Apple's native TLS instead of s2n-tls.  
+      # Homebrew no longer supports Intel macOS, so build shared aws-c-s3 and
+      # its dependencies from source in dependency order,
+      # USE_S2N=OFF makes aws-c-io use Apple's native TLS instead of s2n-tls.
+      # Copy the aws-c-s3 VERSION file next to its package config so the HDF5
+      # configure can record the version.
       - name: Install aws-c-s3 (MacOS x86_64)
         shell: bash
         run: |
@@ -1364,13 +1376,20 @@ jobs:
               -DCMAKE_OSX_ARCHITECTURES=x86_64 \
               -DCMAKE_INSTALL_PREFIX="$AWS_PREFIX" \
               -DCMAKE_PREFIX_PATH="$AWS_PREFIX" \
-              -DBUILD_SHARED_LIBS=OFF \
-              -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+              -DBUILD_SHARED_LIBS=ON \
               -DBUILD_TESTING=OFF \
               -DUSE_S2N=OFF
             cmake --build $lib/build --target install
           done
+          cp aws-c-s3/VERSION "$(dirname $(find "$AWS_PREFIX" -name aws-c-s3-config.cmake | head -1))/VERSION"
           echo "CMAKE_PREFIX_PATH=$AWS_PREFIX" >> $GITHUB_ENV
+
+      - name: Log aws-c-s3 version (MacOS x86_64)
+        shell: bash
+        run: |
+          AWS_C_S3_VERSION=$(cat ${{ runner.temp }}/aws-src/aws-c-s3/VERSION)
+          echo "aws-c-s3 version: $AWS_C_S3_VERSION"
+          echo "### aws-c-s3 (MacOS intel Clang S3): $AWS_C_S3_VERSION" >> $GITHUB_STEP_SUMMARY
 
       - name: Install the Apple certificate and provisioning profile
         shell: bash

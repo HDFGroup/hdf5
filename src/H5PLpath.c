@@ -66,6 +66,9 @@ static herr_t H5PL__path_table_iterate_process_path(const char *plugin_path, H5P
                                                     H5PL_iterate_t iter_op, void *op_data);
 static herr_t H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, bool *found,
                                         const char *dir, const void **plugin_info);
+#if defined(H5_BUILT_AS_DYNAMIC_LIB) && defined(H5_PLUGINDIR_FROM_LIBRARY)
+static herr_t H5PL__append_library_relative_path(void);
+#endif
 
 /*********************/
 /* Package Variables */
@@ -216,6 +219,90 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__replace_at() */
 
+#if defined(H5_BUILT_AS_DYNAMIC_LIB) && defined(H5_PLUGINDIR_FROM_LIBRARY)
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__append_library_relative_path()
+ *
+ * Purpose:     Append the plugin directory of the install that the HDF5
+ *              shared library was loaded from, so that an install that
+ *              has been moved, or unpacked from a binary package, finds
+ *              its own plugins without setting HDF5_PLUGIN_PATH.
+ *
+ *              Not finding the library's location is not an error, the
+ *              path is just not added.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5PL__append_library_relative_path(void)
+{
+    char  *lib_path   = NULL;    /* Path of the HDF5 shared library */
+    char  *plugin_dir = NULL;    /* Plugin directory relative to it */
+    char  *sep        = NULL;    /* Last directory separator in lib_path */
+    size_t len;                  /* Length of plugin_dir buffer */
+    herr_t ret_value  = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Get the path of the module that contains this library's data */
+#ifdef H5_HAVE_WIN32_API
+    {
+        HMODULE module = NULL;
+        DWORD   n;
+
+        if (!GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+                                    GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                                (LPCSTR)&H5PL_paths_g, &module))
+            HGOTO_DONE(SUCCEED);
+        if (NULL == (lib_path = (char *)H5MM_malloc(H5PL_EXPAND_BUFFER_SIZE)))
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for library path");
+        n = GetModuleFileNameA(module, lib_path, H5PL_EXPAND_BUFFER_SIZE);
+        if (0 == n || n >= H5PL_EXPAND_BUFFER_SIZE)
+            HGOTO_DONE(SUCCEED);
+    }
+#else
+    {
+        Dl_info info;
+
+        if (0 == dladdr(&H5PL_paths_g, &info) || NULL == info.dli_fname)
+            HGOTO_DONE(SUCCEED);
+        if (NULL == (lib_path = H5MM_strdup(info.dli_fname)))
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for library path");
+    }
+#endif /* H5_HAVE_WIN32_API */
+
+    /* Strip the library file name to leave its directory */
+    sep = strrchr(lib_path, '/');
+#ifdef H5_HAVE_WIN32_API
+    {
+        char *backslash = strrchr(lib_path, '\\');
+
+        if (backslash && (NULL == sep || backslash > sep))
+            sep = backslash;
+    }
+#endif /* H5_HAVE_WIN32_API */
+    if (NULL == sep)
+        HGOTO_DONE(SUCCEED);
+    *sep = '\0';
+
+    len = strlen(lib_path) + 1 + strlen(H5_PLUGINDIR_FROM_LIBRARY) + 1;
+    if (NULL == (plugin_dir = (char *)H5MM_malloc(len)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for plugin directory");
+    snprintf(plugin_dir, len, "%s/%s", lib_path, H5_PLUGINDIR_FROM_LIBRARY);
+
+    if (H5PL__append_path(plugin_dir) < 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't insert path: %s", plugin_dir);
+
+done:
+    H5MM_xfree(lib_path);
+    H5MM_xfree(plugin_dir);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__append_library_relative_path() */
+#endif /* defined(H5_BUILT_AS_DYNAMIC_LIB) && defined(H5_PLUGINDIR_FROM_LIBRARY) */
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL__create_path_table
  *
@@ -249,8 +336,14 @@ H5PL__create_path_table(void)
      * or from the default paths if it isn't set.
      */
     env_var = getenv(HDF5_PLUGIN_PATH);
-    if (NULL == env_var)
+    if (NULL == env_var) {
+#if defined(H5_BUILT_AS_DYNAMIC_LIB) && defined(H5_PLUGINDIR_FROM_LIBRARY)
+        /* Search the plugin directory of this library's install first */
+        if (H5PL__append_library_relative_path() < 0)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't insert library relative path");
+#endif
         paths = H5MM_strdup(H5PL_DEFAULT_PATH);
+    }
     else
         paths = H5MM_strdup(env_var);
 

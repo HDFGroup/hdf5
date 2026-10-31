@@ -339,6 +339,13 @@
  *   "%ALLUSERSPROFILE%/hdf5/lib/plugin".
  * \endcode
  *
+ * The shared HDF5 library also searches the plugin directory of its own install,
+ * \code
+ *   "<install dir>/lib/plugin"
+ * \endcode
+ * ahead of the default directories, found from the location the library was loaded from, so
+ * that an install that has been moved or unpacked from a binary package finds its plugins.
+ *
  * The default path can be overwritten by a user with the #HDF5_PLUGIN_PATH environment variable.
  * Several directories can be specified for the search path using “:” as a path separator for UNIX-like
  * systems and “;” for Windows.

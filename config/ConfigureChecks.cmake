@@ -576,6 +576,23 @@ if (NOT DEFINED "${HDF_PREFIX}_DEFAULT_PLUGINDIR")
   endif ()
 endif ()
 
+# The plugin directory relative to the installed shared library, which is in
+# the bin directory on Windows and the lib directory elsewhere. The shared
+# library searches it ahead of the default paths, so an install that has been
+# moved, or unpacked from a binary package, finds its own plugins without
+# setting HDF5_PLUGIN_PATH.
+if (NOT DEFINED "${HDF_PREFIX}_PLUGINDIR_FROM_LIBRARY"
+    AND NOT IS_ABSOLUTE "${HDF5_INSTALL_LIB_DIR}" AND NOT IS_ABSOLUTE "${HDF5_INSTALL_BIN_DIR}")
+  if (WIN32)
+    set (_h5_shared_lib_dir "${HDF5_INSTALL_BIN_DIR}")
+  else ()
+    set (_h5_shared_lib_dir "${HDF5_INSTALL_LIB_DIR}")
+  endif ()
+  file (RELATIVE_PATH ${HDF_PREFIX}_PLUGINDIR_FROM_LIBRARY
+      "/h5prefix/${_h5_shared_lib_dir}" "/h5prefix/${HDF5_INSTALL_LIB_DIR}/plugin")
+  unset (_h5_shared_lib_dir)
+endif ()
+
 if (WINDOWS)
   set (${HDF_PREFIX}_HAVE_WINDOWS 1)
   # ----------------------------------------------------------------------
@@ -650,6 +667,35 @@ if (HDF5_ENABLE_ROS3_VFD)
 
     list (APPEND LINK_LIBS AWS::aws-c-s3)
 
+    # Record the aws-c-s3 version used for the build. The aws-c-s3 package
+    # config does not set aws-c-s3_VERSION, so look where the vcpkg and Homebrew
+    # packages record it, or for a VERSION file copied from the aws-c-s3 sources
+    # next to the package config of a source install. Set HDF5_AWS_C_S3_VERSION
+    # to override the detected version.
+    if (NOT HDF5_AWS_C_S3_VERSION)
+      set (HDF5_AWS_C_S3_VERSION "unknown")
+      file (REAL_PATH "${aws-c-s3_DIR}" _aws_c_s3_dir)
+      if (aws-c-s3_VERSION)
+        set (HDF5_AWS_C_S3_VERSION "${aws-c-s3_VERSION}")
+      elseif (EXISTS "${_aws_c_s3_dir}/VERSION")
+        file (STRINGS "${_aws_c_s3_dir}/VERSION" HDF5_AWS_C_S3_VERSION LIMIT_COUNT 1)
+      elseif (EXISTS "${_aws_c_s3_dir}/vcpkg.spdx.json")
+        file (READ "${_aws_c_s3_dir}/vcpkg.spdx.json" _aws_c_s3_spdx)
+        string (JSON _aws_c_s3_spdx_version ERROR_VARIABLE _aws_c_s3_spdx_error
+            GET "${_aws_c_s3_spdx}" packages 0 versionInfo)
+        if (NOT _aws_c_s3_spdx_error)
+          set (HDF5_AWS_C_S3_VERSION "${_aws_c_s3_spdx_version}")
+        endif ()
+      elseif (_aws_c_s3_dir MATCHES "/Cellar/aws-c-s3/([^/]+)/")
+        set (HDF5_AWS_C_S3_VERSION "${CMAKE_MATCH_1}")
+      endif ()
+      unset (_aws_c_s3_dir)
+      unset (_aws_c_s3_spdx)
+      unset (_aws_c_s3_spdx_version)
+      unset (_aws_c_s3_spdx_error)
+    endif ()
+    message (STATUS "ROS3 VFD: using aws-c-s3 version ${HDF5_AWS_C_S3_VERSION} from ${aws-c-s3_DIR}")
+
     set (${HDF_PREFIX}_HAVE_ROS3_VFD 1)
 
     option (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY "Use docker for ROS3 VFD S3proxy testing" OFF)
@@ -685,6 +731,8 @@ if (HDF5_ENABLE_ROS3_VFD)
     set (HDF5_ENABLE_ROS3_VFD OFF CACHE BOOL "Build the ROS3 Virtual File Driver" FORCE)
     message (FATAL_ERROR "The Read-Only S3 VFD was requested but cannot be built. Please check that the aws-c-s3 library is available on your system, and/or re-configure without option HDF5_ENABLE_ROS3_VFD.")
   endif ()
+else ()
+  set (HDF5_AWS_C_S3_VERSION "N/A")
 endif ()
 
 # ----------------------------------------------------------------------

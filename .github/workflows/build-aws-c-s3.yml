@@ -243,6 +243,13 @@ jobs:
             -DBUILD_SHARED_LIBS=1
           cmake --build aws-c-s3/build --parallel 3 --config ${{ inputs.build_mode }} --target install
 
+      # Copy the aws-c-s3 VERSION file next to its package config so the HDF5
+      # configure can record the version (aws-c-s3 installs no version file)
+      - name: Record aws-c-s3 version
+        run: |
+          cp aws-c-s3/VERSION "$(dirname $(find ${{ runner.workspace }}/aws-c-s3-build -name aws-c-s3-config.cmake | head -1))/VERSION"
+          echo "aws-c-s3 version: $(cat aws-c-s3/VERSION)"
+
       - name: Tar aws-c-s3 installation to preserve permissions for artifact
         run: tar -cvf libaws-c-s3.tar -C ${{ runner.workspace }} aws-c-s3-build
 
