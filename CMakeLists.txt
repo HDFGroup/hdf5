@@ -433,6 +433,21 @@ else ()
   set (HDF5_PACKAGE_VERSION_STRING "${HDF5_PACKAGE_VERSION}")
   set (HDF5_RELEASE_VERSION_STRING "${HDF5_PACKAGE_VERSION}")
 endif ()
+# Jar names without .jar. Maven deployment requires the versioned defaults.
+set (HDF5_JARHDF5_JAR_BASENAME "${HDF5_JAVA_HDF5_LIB_TARGET}-${HDF5_PACKAGE_VERSION}")
+set (HDF5_JAVAHDF5_JAR_BASENAME "${HDF5_JAVA_JSRC_LIB_TARGET}-${HDF5_PACKAGE_VERSION}")
+if (HDF5_ENABLE_MAVEN_DEPLOY)
+  if (NOT HDF5_JAVA_JARHDF5_NAME STREQUAL "" OR NOT HDF5_JAVA_JAVAHDF5_NAME STREQUAL "")
+    message (NOTICE "HDF5_JAVA_JARHDF5_NAME and HDF5_JAVA_JAVAHDF5_NAME are ignored: Maven deployment requires versioned jar names")
+  endif ()
+else ()
+  if (NOT HDF5_JAVA_JARHDF5_NAME STREQUAL "")
+    set (HDF5_JARHDF5_JAR_BASENAME "${HDF5_JAVA_JARHDF5_NAME}")
+  endif ()
+  if (NOT HDF5_JAVA_JAVAHDF5_NAME STREQUAL "")
+    set (HDF5_JAVAHDF5_JAR_BASENAME "${HDF5_JAVA_JAVAHDF5_NAME}")
+  endif ()
+endif ()
 set (HDF5_LIB_PACKAGE_SOVERSION "${H5_LIB_SOVERS_MAJOR}.${H5_LIB_SOVERS_RELEASE}.${H5_LIB_SOVERS_MINOR}")
 set (HDF5_LIB_PACKAGE_SOVERSION_MAJOR "${H5_LIB_SOVERS_MAJOR}")
 if (H5_TOOLS_SOVERS_EXISTS)
@@ -900,36 +915,42 @@ if (H5_HAVE_PARALLEL)
 endif ()
 
 # Determine if a threading package is available on this system
-set (THREADS_PREFER_PTHREAD_FLAG ON)
-find_package (Threads)
-if (Threads_FOUND)
-  set (H5_HAVE_THREADS 1)
-  set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+if (HDF5_ENABLE_THREADS)
+  set (THREADS_PREFER_PTHREAD_FLAG ON)
+  find_package (Threads)
+  if (Threads_FOUND)
+    set (H5_HAVE_THREADS 1)
+    set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
 
-  # Determine which threading package to use
-  # Comment out check for C11 threads for now, since it conflicts with the
-  # current --std=c99 compile flags at configuration time.  When we switch to
-  # --std=c11, this can be uncommented.
-  #CHECK_INCLUDE_FILE("threads.h" HAVE_THREADS_H)
-  if (WIN32)
-    # When Win32 is available, we use those threads
-    set (H5_HAVE_WIN_THREADS 1)
-  elseif (HAVE_THREADS_H)
-    # When C11 threads are available, those are the top choice
-    set (H5_HAVE_C11_THREADS 1)
-  elseif (CMAKE_USE_PTHREADS_INIT)
-    set (H5_HAVE_PTHREAD_H 1)
+    # Determine which threading package to use
+    # Comment out check for C11 threads for now, since it conflicts with the
+    # current --std=c99 compile flags at configuration time.  When we switch to
+    # --std=c11, this can be uncommented.
+    #CHECK_INCLUDE_FILE("threads.h" HAVE_THREADS_H)
+    if (WIN32)
+      # When Win32 is available, we use those threads
+      set (H5_HAVE_WIN_THREADS 1)
+    elseif (HAVE_THREADS_H)
+      # When C11 threads are available, those are the top choice
+      set (H5_HAVE_C11_THREADS 1)
+    elseif (CMAKE_USE_PTHREADS_INIT)
+      set (H5_HAVE_PTHREAD_H 1)
+    else ()
+      message (FATAL_ERROR " **** thread support requires C11 threads, Win32 threads or Pthreads **** ")
+    endif ()
+    set (HDF5_THREADS_ENABLED ON) # Used to init hdf5-config.cmake
+    list (APPEND LINK_LIBS Threads::Threads)
+
+    # Check for compiler support for atomic variables
+    CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
+    if (HAVE_STDATOMIC_H)
+      set (H5_HAVE_STDATOMIC_H 1)
+    endif()
   else ()
-    message (FATAL_ERROR " **** thread support requires C11 threads, Win32 threads or Pthreads **** ")
+    set (HDF5_THREADS_ENABLED OFF) # Used to init hdf5-config.cmake
+    set (HDF5_ENABLE_THREADS OFF)
+    message (NOTICE "HDF5_ENABLE_THREADS set to ON but no threading package found. HDF5 will be built without threading support.")
   endif ()
-  set (HDF5_THREADS_ENABLED ON) # Used to init hdf5-config.cmake
-  list (APPEND LINK_LIBS Threads::Threads)
-
-  # Check for compiler support for atomic variables
-  CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
-  if (HAVE_STDATOMIC_H)
-    set (H5_HAVE_STDATOMIC_H 1)
-  endif()
 else ()
   set (HDF5_THREADS_ENABLED OFF) # Used to init hdf5-config.cmake
 endif ()
@@ -1106,7 +1127,7 @@ if (HDF5_ENABLE_THREADSAFE)
 
   # Check for threading package
   if (NOT Threads_FOUND)
-    message (FATAL_ERROR " **** thread-safety option requires a threading package and none was found **** ")
+    message (FATAL_ERROR " **** thread-safety option requires a threading package and none was found, or HDF5_ENABLE_THREADS was disabled **** ")
   endif ()
 
   set (H5_HAVE_THREADSAFE 1)
@@ -1153,7 +1174,7 @@ if (HDF5_ENABLE_CONCURRENCY)
 
   # Check for threading package
   if (NOT Threads_FOUND)
-    message (FATAL_ERROR " **** multi-threaded concurrency option requires a threading package and none was found **** ")
+    message (FATAL_ERROR " **** multi-threaded concurrency option requires a threading package and none was found, or HDF5_ENABLE_THREADS was disabled **** ")
   endif ()
 
   # Multi-threaded concurrency and threadsafe options are mutually exclusive
@@ -1282,6 +1303,42 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
     message (WARNING "Doxygen needs to be installed to generate the doxygen documentation")
   endif ()
 endif ()
+
+#-----------------------------------------------------------------------------
+# Set LINK_LIBS_SETTINGS: linker-flag-formatted version of LINK_LIBS +
+# LINK_COMP_LIBS for libhdf5.settings and H5build_settings.c. Set before src,
+# where H5build_settings.c is generated.
+#-----------------------------------------------------------------------------
+include (${HDF_CONFIG_DIR}/HDF5Pkgconfig.cmake)
+
+set (LINK_LIBS_SETTINGS "")
+foreach (_lib IN LISTS LINK_LIBS LINK_COMP_LIBS)
+  unset (_lib_flags)
+  unset (_lib_cflags)
+  unset (_lib_skipped)
+  extract_lib_pkgconfig_info ("${_lib}" _lib_flags _lib_cflags _lib_skipped)
+  if (NOT _lib_skipped AND _lib_flags)
+    if (MSVC)
+      foreach (_flag IN LISTS _lib_flags)
+        if (_flag MATCHES "^-l")
+          string (REGEX REPLACE "^-l" "" _clean_flag "${_flag}")
+          list (APPEND LINK_LIBS_SETTINGS "${_clean_flag}")
+        elseif (IS_ABSOLUTE "${_flag}")
+          cmake_path (GET _flag STEM _clean_flag)
+          list (APPEND LINK_LIBS_SETTINGS "${_clean_flag}")
+        elseif (NOT _flag MATCHES "^-L")
+          # Append as-is if it's not a library path (-L)
+          list (APPEND LINK_LIBS_SETTINGS "${_flag}")
+        endif ()
+      endforeach ()
+    else ()
+      # Standard behavior for non-MSVC platforms (use pkg-config formatted flags).
+      list (APPEND LINK_LIBS_SETTINGS ${_lib_flags})
+    endif ()
+  endif ()
+endforeach ()
+list (REMOVE_DUPLICATES LINK_LIBS_SETTINGS)
+list (JOIN LINK_LIBS_SETTINGS " " LINK_LIBS_SETTINGS)
 
 #-----------------------------------------------------------------------------
 # Add the HDF5 Library Target to the build
@@ -1541,40 +1598,6 @@ if (NOT TARGET doxygen)
     COMMENT "Doxygen documentation not enabled (HDF5_BUILD_DOC=OFF or Doxygen not found)"
   )
 endif ()
-
-#-----------------------------------------------------------------------------
-# Set LINK_LIBS_SETTINGS: linker-flag-formatted version of LINK_LIBS +
-# LINK_COMP_LIBS for the libhdf5.settings file.
-#-----------------------------------------------------------------------------
-include (${HDF_CONFIG_DIR}/HDF5Pkgconfig.cmake)
-
-set (LINK_LIBS_SETTINGS "")
-foreach (_lib IN LISTS LINK_LIBS LINK_COMP_LIBS)
-  unset (_lib_flags)
-  unset (_lib_cflags)
-  unset (_lib_skipped)
-  extract_lib_pkgconfig_info ("${_lib}" _lib_flags _lib_cflags _lib_skipped)
-  if (NOT _lib_skipped AND _lib_flags)
-    if (MSVC)
-      foreach (_flag IN LISTS _lib_flags)
-        if (_flag MATCHES "^-l")
-          string (REGEX REPLACE "^-l" "" _clean_flag "${_flag}")
-          list (APPEND LINK_LIBS_SETTINGS "${_clean_flag}")
-        elseif (IS_ABSOLUTE "${_flag}")
-          cmake_path (GET _flag STEM _clean_flag)
-          list (APPEND LINK_LIBS_SETTINGS "${_clean_flag}")
-        elseif (NOT _flag MATCHES "^-L")
-          # Append as-is if it's not a library path (-L)
-          list (APPEND LINK_LIBS_SETTINGS "${_flag}")
-        endif ()
-      endforeach ()
-    else ()
-      # Standard behavior for non-MSVC platforms (use pkg-config formatted flags).
-      list (APPEND LINK_LIBS_SETTINGS ${_lib_flags})
-    endif ()
-  endif ()
-endforeach ()
-list (REMOVE_DUPLICATES LINK_LIBS_SETTINGS)
 
 #-----------------------------------------------------------------------------
 # Installation

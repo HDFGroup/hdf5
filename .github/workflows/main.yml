@@ -99,7 +99,7 @@ jobs:
 
           # Linux (Ubuntu) w/ gcc
           #
-          - name: "Ubuntu gcc"
+          - name: "Ubuntu 24.04 gcc"
             ostype: ubuntu
             os: ubuntu-24.04
             shared: ON
@@ -119,9 +119,9 @@ jobs:
 
           # MacOS w/ Clang
           #
-          - name: "MacOS Clang"
+          - name: "MacOS 26 Clang"
             ostype: macos
-            os: macos-15
+            os: macos-26
             shared: ON
             cpp: ON
             fortran: OFF
