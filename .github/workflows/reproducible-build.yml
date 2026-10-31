@@ -1,0 +1,44 @@
+name: Reproducible build check
+
+# Builds and installs HDF5 twice from different source and build directories,
+# with a different environment, and fails if any installed file differs.
+# Linux distributions verify that their packages build reproducibly; this
+# catches changes that break that before they reach a distribution build.
+on:
+  pull_request:
+    branches: [ develop ]
+    paths:
+      - 'CMakeLists.txt'
+      - '**/CMakeLists.txt'
+      - '**/*.cmake'
+      - 'config/**'
+      - 'src/H5build_settings.cmake.c.in'
+      - 'src/libhdf5.settings.in'
+      - '.github/workflows/reproducible-build.yml'
+      - '.github/scripts/check-reproducible-build.sh'
+  schedule:
+    # Weekly, to catch changes elsewhere in the sources (e.g. __DATE__)
+    - cron: "30 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reproducible-build:
+    name: "Reproducible build (Ubuntu gcc)"
+    if: ${{ github.event_name != 'schedule' || github.repository_owner == 'HDFGroup' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Get Sources
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build gfortran zlib1g-dev
+
+      - name: Build twice and compare installed files
+        run: .github/scripts/check-reproducible-build.sh "${GITHUB_WORKSPACE}" "${RUNNER_TEMP}/reproducible"

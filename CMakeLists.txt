@@ -158,7 +158,20 @@ mark_as_advanced (HDF5_EXTERNAL_LIB_SUFFIX)
 #   # Add the sub project
 #   add_subdirectory (Utilities/hdf5-1.8)
 #-----------------------------------------------------------------------------
-string (TIMESTAMP CONFIG_DATE "%Y-%m-%d")
+# Honors SOURCE_DATE_EPOCH; UTC so the date does not depend on the time zone
+string (TIMESTAMP CONFIG_DATE "%Y-%m-%d" UTC)
+# "Host system" in libhdf5.settings and H5build_settings.c, which is compiled
+# into the library. CMAKE_HOST_SYSTEM includes the build host's kernel release,
+# which helps diagnose build problems but differs between build hosts, so
+# reproducible builds set a fixed value.
+set (HDF5_BUILD_HOST_SYSTEM "${CMAKE_HOST_SYSTEM}" CACHE STRING "Build host recorded in libhdf5.settings. Set a fixed value (e.g. Linux) for reproducible builds")
+mark_as_advanced (HDF5_BUILD_HOST_SYSTEM)
+# Libraries that link to other HDF5 libraries get an absolute build-tree RPATH,
+# which is replaced at install time but stays in their linker build ID. A
+# relative ($ORIGIN) build RPATH keeps the build path out of installed binaries.
+if (NOT DEFINED CMAKE_BUILD_RPATH_USE_ORIGIN)
+  set (CMAKE_BUILD_RPATH_USE_ORIGIN ON)
+endif ()
 
 #-----------------------------------------------------------------------------
 # Allow Visual Studio solution directories
