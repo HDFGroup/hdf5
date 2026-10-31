@@ -155,6 +155,8 @@ static const char *FILENAME[] = {"dataset",              /* 0 */
 #define DSET_NBIT_COMPOUND_NAME_3            "nbit_compound_3"
 #define DSET_NBIT_INT_SIZE_NAME              "nbit_int_size"
 #define DSET_NBIT_FLT_SIZE_NAME              "nbit_flt_size"
+#define DSET_NBIT_AFTER_DEFLATE_NAME         "nbit_after_deflate"
+#define DSET_SO_AFTER_DEFLATE_NAME           "scaleoffset_after_deflate"
 #define DSET_SCALEOFFSET_INT_NAME            "scaleoffset_int"
 #define DSET_SCALEOFFSET_INT_NAME_2          "scaleoffset_int_2"
 #define DSET_SCALEOFFSET_FLOAT_NAME          "scaleoffset_float"
@@ -5284,6 +5286,144 @@ error:
 
     return FAIL;
 } /* end test_nbit_flt_size() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_filter_after_deflate
+ *
+ * Purpose:     Tests the nbit and scaleoffset filters when they come after
+ *              the deflate filter in the pipeline.
+ *
+ *              These filters expect a chunk of exactly nelmts * datatype
+ *              size bytes, which is only true when they are the first
+ *              filter.  Deflate shrinks the chunk, so the input they get
+ *              here is smaller than that.  The data is chosen so that
+ *              deflate does shrink it.  The filters must reject such an
+ *              input (and be skipped, as they are optional) instead of
+ *              reading or writing past the end of their buffers.  The
+ *              data must round-trip either way.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *-------------------------------------------------------------------------
+ */
+#define AFTER_DEFLATE_NELMTS 64
+static herr_t
+test_filter_after_deflate(hid_t file)
+{
+#ifdef H5_HAVE_FILTER_DEFLATE
+    const char *names[2] = {DSET_NBIT_AFTER_DEFLATE_NAME, DSET_SO_AFTER_DEFLATE_NAME};
+    hsize_t     size[1]  = {AFTER_DEFLATE_NELMTS};
+    int         orig_data[AFTER_DEFLATE_NELMTS];
+    int         new_data[AFTER_DEFLATE_NELMTS];
+    size_t      precision = 17, offset = 4;
+    size_t      i;
+    int         which;
+    unsigned    filter_mask = 0;
+    hid_t       dataset = H5I_INVALID_HID, datatype = H5I_INVALID_HID, space = H5I_INVALID_HID;
+    hid_t       dc = H5I_INVALID_HID;
+
+    TESTING("nbit and scaleoffset filters after deflate");
+
+    /* Without deflate this test would not exercise the case above */
+    if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) != true) {
+        SKIPPED();
+        puts("    Deflate filter not available");
+        return SUCCEED;
+    }
+
+    /* Few distinct values, so deflate shrinks the chunk well below its raw size */
+    for (i = 0; i < AFTER_DEFLATE_NELMTS; i++)
+        orig_data[i] = (int)(i % 4) << offset;
+
+    if ((space = H5Screate_simple(1, size, NULL)) < 0)
+        TEST_ERROR;
+
+    for (which = 0; which < 2; which++) {
+        if ((datatype = H5Tcopy(H5T_NATIVE_INT)) < 0)
+            TEST_ERROR;
+        if (which == 0) {
+            if (H5Tset_precision(datatype, precision) < 0)
+                TEST_ERROR;
+            if (H5Tset_offset(datatype, offset) < 0)
+                TEST_ERROR;
+        }
+
+        if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+            TEST_ERROR;
+        if (H5Pset_chunk(dc, 1, size) < 0)
+            TEST_ERROR;
+        if (H5Pset_deflate(dc, 6) < 0)
+            TEST_ERROR;
+        if (which == 0) {
+            if (H5Pset_nbit(dc) < 0)
+                TEST_ERROR;
+        }
+        else if (H5Pset_scaleoffset(dc, H5Z_SO_INT, H5Z_SO_INT_MINBITS_DEFAULT) < 0)
+            TEST_ERROR;
+
+        if ((dataset = H5Dcreate2(file, names[which], datatype, space, H5P_DEFAULT, dc, H5P_DEFAULT)) < 0)
+            TEST_ERROR;
+        if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig_data) < 0)
+            TEST_ERROR;
+        /* The chunk is filtered when it is evicted from the chunk cache */
+        if (H5Dclose(dataset) < 0)
+            TEST_ERROR;
+
+        if ((dataset = H5Dopen2(file, names[which], H5P_DEFAULT)) < 0)
+            TEST_ERROR;
+
+        /* Deflate (filter 0) must have run, otherwise the case above was not
+         * exercised; the second filter must have been skipped */
+        if (H5Dget_chunk_info(dataset, H5S_ALL, 0, NULL, &filter_mask, NULL, NULL) < 0)
+            TEST_ERROR;
+        if (filter_mask != 0x2) {
+            H5_FAILED();
+            printf("    %s: unexpected chunk filter mask 0x%x\n", names[which], filter_mask);
+            goto error;
+        }
+
+        memset(new_data, 0, sizeof(new_data));
+        if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, new_data) < 0)
+            TEST_ERROR;
+        for (i = 0; i < AFTER_DEFLATE_NELMTS; i++)
+            if (new_data[i] != orig_data[i]) {
+                H5_FAILED();
+                printf("    %s: read different values than written at index %lu\n", names[which],
+                       (unsigned long)i);
+                goto error;
+            }
+
+        if (H5Dclose(dataset) < 0)
+            TEST_ERROR;
+        if (H5Pclose(dc) < 0)
+            TEST_ERROR;
+        if (H5Tclose(datatype) < 0)
+            TEST_ERROR;
+    }
+
+    if (H5Sclose(space) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dataset);
+        H5Pclose(dc);
+        H5Tclose(datatype);
+        H5Sclose(space);
+    }
+    H5E_END_TRY
+    return FAIL;
+#else
+    TESTING("nbit and scaleoffset filters after deflate");
+    SKIPPED();
+    puts("    Deflate filter not enabled");
+    return SUCCEED;
+#endif
+} /* end test_filter_after_deflate() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_scaleoffset_int
@@ -22106,6 +22246,7 @@ main(void)
                     nerrors += (test_nbit_compound_3(file) < 0 ? 1 : 0);
                     nerrors += (test_nbit_int_size(file) < 0 ? 1 : 0);
                     nerrors += (test_nbit_flt_size(file) < 0 ? 1 : 0);
+                    nerrors += (test_filter_after_deflate(file) < 0 ? 1 : 0);
                     nerrors += (test_scaleoffset_int(file) < 0 ? 1 : 0);
                     nerrors += (test_scaleoffset_int_2(file) < 0 ? 1 : 0);
                     nerrors += (test_scaleoffset_float(file) < 0 ? 1 : 0);

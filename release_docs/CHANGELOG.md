@@ -202,6 +202,16 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed a heap buffer overflow in the N-bit and scale-offset filters
+
+   The N-bit and scale-offset filters assume their input is exactly the size of a full
+   chunk, which is only true when they are the first filter in the pipeline. If another
+   filter, such as deflate, ran before them, the smaller buffer they received was
+   overread or overwritten when the chunk was written, because the only check was an
+   `assert()` that is compiled out of release builds. The filters now return an error
+   in that case, which makes the pipeline skip them (they are optional filters) and
+   store the chunk without them.
+
 ### Fixed an assertion failure when a filter pipeline contains `H5Z_MAX_NFILTERS` filters
 
    An `assert()` in the internal function `H5Z_pipeline()` caused a crash in debug builds
