@@ -74,7 +74,9 @@ jobs:
           wget -O HDF-EOS5.2.0.tar.gz "https://git.earthdata.nasa.gov/projects/DAS/repos/hdfeos5/raw/hdf-eos5-2.0-src.tar.gz?at=refs%2Fheads%2FHDFEOS5_2.0"
           tar zxvf HDF-EOS5.2.0.tar.gz
           cd hdf-eos5-2.0
-          ./configure CC=/usr/local/bin/h5cc --prefix=/usr/local/ --enable-install-include
+          # HDF-EOS5 2.0 configure tests call exit() without <stdlib.h>, which
+          # GCC 14+ (ubuntu-26.04) rejects as an implicit declaration.
+          ./configure CC=/usr/local/bin/h5cc CFLAGS="-Wno-error=implicit-function-declaration" --prefix=/usr/local/ --enable-install-include
           make
           LD_LIBRARY_PATH="/usr/local/lib:${LD_LIBRARY_PATH}"
           LD_LIBRARY_PATH=${LD_LIBRARY_PATH} make check
