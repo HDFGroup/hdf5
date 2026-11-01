@@ -98,7 +98,7 @@ jobs:
                ls -l ${{ runner.workspace }}/build
 
       - name: Save published binary (linux)
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v5
         with:
           name: tgz-ubuntu-2404_mingw64-${{ inputs.build_mode }}-binary
           path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
