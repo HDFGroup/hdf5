@@ -264,7 +264,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
       - name: Set up JDK (Java 25 for FFM builds)
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v5
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v5
         with:
           java-version: ${{ matrix.implementation == 'ffm' && '25' || '21' }}
           distribution: ${{ matrix.implementation == 'ffm' && 'oracle' || 'temurin' }}
@@ -674,14 +674,14 @@ jobs:
           fi
 
       - name: Upload Maven artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v5
         with:
           name: maven-staging-artifacts-${{ matrix.artifact-suffix }}
           path: ${{ runner.workspace }}/maven-artifacts
           retention-days: 7
 
       - name: Upload HDF5 installation for testing
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v5
         with:
           name: hdf5-install-${{ matrix.artifact-suffix }}
           path: ${{ runner.workspace }}/hdf5-install
@@ -696,13 +696,13 @@ jobs:
       version: ${{ steps.extract-version.outputs.version }}
     steps:
       - name: Set up JDK 21
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v5
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v5
         with:
           java-version: '21'
           distribution: 'temurin'
 
       - name: Download all Maven artifacts
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v6
         with:
           pattern: maven-staging-artifacts-*
           path: ./artifacts
@@ -827,7 +827,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up JDK (Java 25 for FFM builds)
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v5
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v5
         with:
           java-version: ${{ matrix.implementation == 'ffm' && '25' || '21' }}
           distribution: ${{ matrix.implementation == 'ffm' && 'oracle' || 'temurin' }}
@@ -840,7 +840,7 @@ jobs:
           echo "Installed gtimeout: $(which gtimeout)"
 
       - name: Download Maven artifacts (${{ matrix.platform }} - ${{ matrix.implementation }})
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v6
         with:
           name: maven-staging-artifacts-${{ matrix.artifact-suffix }}
           path: ./maven-artifacts/${{ matrix.platform }}
@@ -1341,7 +1341,7 @@ jobs:
 
       - name: Upload failure artifacts (Java Examples)
         if: steps.test-examples-unix.outputs.test-status == 'FAILED' || steps.test-examples-windows.outputs.test-status == 'FAILED'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v5
         with:
           name: java-examples-staging-failure-${{ matrix.platform }}-${{ github.run_id }}
           path: |
