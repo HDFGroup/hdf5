@@ -73,15 +73,19 @@ jobs:
           export AWSCS3_SHA=$(git rev-parse HEAD)
           echo "AWSCS3_SHA=$AWSCS3_SHA" >> $GITHUB_ENV
           echo "sha=$AWSCS3_SHA" >> $GITHUB_OUTPUT
-          # Output SHA for debugging
+          # ImageOS (e.g. ubuntu24, ubuntu26) is a runner env var, not visible
+          # to the env context, so pass it to the cache key as a step output
+          echo "imageos=$ImageOS" >> $GITHUB_OUTPUT
+          # Output SHA and runner image for debugging
           echo "AWSCS3_SHA=$AWSCS3_SHA"
+          echo "ImageOS=$ImageOS"
 
       - name: Cache/Restore aws-c-s3 (GCC) installation
         id: cache-aws-c-s3-ubuntu-gcc
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v4
         with:
           path: ${{ runner.workspace }}/aws-c-s3-build
-          key: ${{ runner.os }}-${{ runner.arch }}-gcc-aws-c-s3-${{ steps.get-sha.outputs.sha }}-${{ inputs.build_mode }}
+          key: ${{ runner.os }}-${{ steps.get-sha.outputs.imageos }}-${{ runner.arch }}-gcc-aws-c-s3-${{ steps.get-sha.outputs.sha }}-${{ inputs.build_mode }}
 
       - name: Get aws-lc sources
         if: ${{ steps.cache-aws-c-s3-ubuntu-gcc.outputs.cache-hit != 'true' }}
@@ -244,11 +248,21 @@ jobs:
           cmake --build aws-c-s3/build --parallel 3 --config ${{ inputs.build_mode }} --target install
 
       # Copy the aws-c-s3 VERSION file next to its package config so the HDF5
-      # configure can record the version (aws-c-s3 installs no version file)
+      # configure can record the version (aws-c-s3 installs no version file).
+      # Older releases (e.g. v0.8.0) have no VERSION file, so fall back to the tag,
+      # or to the short commit hash when building from main.
       - name: Record aws-c-s3 version
         run: |
-          cp aws-c-s3/VERSION "$(dirname $(find ${{ runner.workspace }}/aws-c-s3-build -name aws-c-s3-config.cmake | head -1))/VERSION"
-          echo "aws-c-s3 version: $(cat aws-c-s3/VERSION)"
+          CFG_DIR="$(dirname $(find ${{ runner.workspace }}/aws-c-s3-build -name aws-c-s3-config.cmake | head -1))"
+          if [ -f aws-c-s3/VERSION ]; then
+            cp aws-c-s3/VERSION "$CFG_DIR/VERSION"
+          elif [ -n "${{ inputs.aws_c_s3_tag }}" ]; then
+            TAG="${{ inputs.aws_c_s3_tag }}"
+            echo "${TAG#v}" > "$CFG_DIR/VERSION"
+          else
+            git -C aws-c-s3 rev-parse --short HEAD > "$CFG_DIR/VERSION"
+          fi
+          echo "aws-c-s3 version: $(cat "$CFG_DIR/VERSION")"
 
       - name: Tar aws-c-s3 installation to preserve permissions for artifact
         run: tar -cvf libaws-c-s3.tar -C ${{ runner.workspace }} aws-c-s3-build
