@@ -4,7 +4,7 @@ project (HDF5_DOXYGEN C)
 #-----------------------------------------------------------------------------
 # Option to build documentation
 #-----------------------------------------------------------------------------
-string (TIMESTAMP HDF5_PACKAGE_DATE_STRING "%Y-%m-%d")
+string (TIMESTAMP HDF5_PACKAGE_DATE_STRING "%Y-%m-%d" UTC)
 if (DOXYGEN_FOUND)
   set (DOXYGEN_PACKAGE ${HDF5_PACKAGE_NAME})
   # For release builds use the version from the package
