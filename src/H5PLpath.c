@@ -238,11 +238,11 @@ done:
 static herr_t
 H5PL__append_library_relative_path(void)
 {
-    char  *lib_path   = NULL;    /* Path of the HDF5 shared library */
-    char  *plugin_dir = NULL;    /* Plugin directory relative to it */
-    char  *sep        = NULL;    /* Last directory separator in lib_path */
-    size_t len;                  /* Length of plugin_dir buffer */
-    herr_t ret_value  = SUCCEED; /* Return value */
+    char  *lib_path   = NULL;   /* Path of the HDF5 shared library */
+    char  *plugin_dir = NULL;   /* Plugin directory relative to it */
+    char  *sep        = NULL;   /* Last directory separator in lib_path */
+    size_t len;                 /* Length of plugin_dir buffer */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
