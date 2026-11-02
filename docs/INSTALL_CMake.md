@@ -678,6 +678,8 @@ the following options must be disabled:
 
 See [INSTALL_CMake_options](./INSTALL_CMake_options.md).
 
+For the settings needed to build HDF5 reproducibly, see [Reproducible Builds](./REPRODUCIBLE_BUILDS.md).
+
 #### Java Implementation Selection (as of HDF5 2.0)
 
 HDF5 Java bindings support two native interface implementations:
