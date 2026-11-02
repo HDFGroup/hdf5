@@ -92,7 +92,7 @@ jobs:
             ..
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
           languages: c-cpp
           build-mode: manual
@@ -179,7 +179,7 @@ jobs:
         shell: bash
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
           category: "/language:c-cpp"
           output: sarif-results
@@ -207,7 +207,7 @@ jobs:
           output: sarif-results/cpp.sarif
 
       - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
           sarif_file: sarif-results/cpp.sarif
 
@@ -256,7 +256,7 @@ jobs:
 
       - name: Upload empty SARIF for skipped analysis
         if: needs.analyze.result == 'skipped' && github.event_name == 'pull_request'
-        uses: github/codeql-action/upload-sarif@61817fadad823920a8924645dd5f67985d6a1d94 
+        uses: github/codeql-action/upload-sarif@4f900f43bc6bfc406aac5f37e402badfc55f9342 
         with:
           sarif_file: ${{ github.workspace }}/empty.sarif
           category: "/language:c-cpp"

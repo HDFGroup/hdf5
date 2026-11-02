@@ -169,7 +169,7 @@ jobs:
       # CMake gets libaec from fetchcontent
 
       - name: Install CMake
-        uses: lukka/get-cmake@fffaaafeea488556c2c12dad60690008bc1caacb # latest
+        uses: lukka/get-cmake@f86dd60acae0d132056913e248bdabf0e0580b7a # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest
@@ -182,7 +182,7 @@ jobs:
 
       - name: Set up Java (if specified or FFM required)
         if: inputs.java_version != 'auto' || inputs.force_java_implementation == 'ffm'
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v5
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v5
         with:
           distribution: ${{ inputs.force_java_implementation == 'ffm' && 'oracle' || 'temurin' }}
           java-version: |
@@ -341,7 +341,7 @@ jobs:
 
       # Save files created by CTest script
       - name: Save published binary (Windows)
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v5
         with:
               name: zip-vs2026_cl-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
@@ -349,7 +349,7 @@ jobs:
         if:  ${{ (matrix.ostype == 'windows') && ( inputs.save_binary != 'skip') }}
 
       - name: Save published binary (linux)
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v5
         with:
               name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
@@ -357,7 +357,7 @@ jobs:
         if:  ${{ (matrix.ostype == 'ubuntu') && ( inputs.save_binary != 'skip') }}
 
       - name: Save published binary (Mac_latest)
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v5
         with:
               name: tgz-macos15_clang-${{ inputs.build_mode }}-${{ inputs.save_binary }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz

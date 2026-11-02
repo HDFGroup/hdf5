@@ -62,7 +62,7 @@ jobs:
 
     # Get files created by release script
     - name: Get tgz-tarball (Linux_coverage)
-      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
       with:
         name: tgz-tarball
         path: ${{ github.workspace }}
@@ -85,7 +85,7 @@ jobs:
         ls ${{ runner.workspace }}/hdf5
 
     - name: Create options file (Linux_coverage)
-      uses: "DamianReeves/write-file-action@d4ee8a06aec5db0c57a036b86f2f428e1f8b00e7" # master
+      uses: "DamianReeves/write-file-action@7d5624061f5b9d729a2acb90d4d8ea9f2f6e3ddf" # master
       with:
         path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
         write-mode: overwrite
@@ -122,7 +122,7 @@ jobs:
 
     # Save log files created by CTest script
     - name: Save log (Linux_coverage)
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v5
       with:
         name: clang-coverage-log
         path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -162,7 +162,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux_Leak)
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: tgz-tarball
           path: ${{ github.workspace }}
@@ -185,7 +185,7 @@ jobs:
           ls ${{ runner.workspace }}/hdf5
 
       - name: Create options file (Linux_Leak)
-        uses: "DamianReeves/write-file-action@d4ee8a06aec5db0c57a036b86f2f428e1f8b00e7" # master
+        uses: "DamianReeves/write-file-action@7d5624061f5b9d729a2acb90d4d8ea9f2f6e3ddf" # master
         with:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
@@ -225,7 +225,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux_Leak)
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v5
         with:
           name: leak-ubuntu-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -265,7 +265,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux_Address)
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: tgz-tarball
           path: ${{ github.workspace }}
@@ -288,7 +288,7 @@ jobs:
           ls ${{ runner.workspace }}/hdf5
 
       - name: Create options file (Linux_Address)
-        uses: "DamianReeves/write-file-action@d4ee8a06aec5db0c57a036b86f2f428e1f8b00e7" # master
+        uses: "DamianReeves/write-file-action@7d5624061f5b9d729a2acb90d4d8ea9f2f6e3ddf" # master
         with:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
@@ -328,7 +328,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux_Address)
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v5
         with:
           name: address-ubuntu-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
@@ -368,7 +368,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux_UndefinedBehavior)
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: tgz-tarball
           path: ${{ github.workspace }}
@@ -391,7 +391,7 @@ jobs:
           ls ${{ runner.workspace }}/hdf5
 
       - name: Create options file (Linux_UndefinedBehavior)
-        uses: "DamianReeves/write-file-action@d4ee8a06aec5db0c57a036b86f2f428e1f8b00e7" # master
+        uses: "DamianReeves/write-file-action@7d5624061f5b9d729a2acb90d4d8ea9f2f6e3ddf" # master
         with:
           path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
           write-mode: overwrite
@@ -432,7 +432,7 @@ jobs:
 
       # Save log files created by CTest script
       - name: Save log (Linux_UndefinedBehavior)
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v5
         with:
           name: undefined-ubuntu-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
