@@ -75,7 +75,7 @@ These options concern the general build process of the main HDF5 libraries, util
 | `HDF5_ENABLE_PREADWRITE` | `BOOL` | `ON` | If `ON`, use `pread(2)` / `pwrite(2)` in Virtual File Drivers if the functions are available. Otherwise, `read(2)` / `write(2)` are used instead. |
 | `HDF5_ENABLE_MAP_API` | `BOOL` | `OFF` | If `ON`, enables building of the HDF5 Map (`H5M`) API for storing and interacting with key-value pair data. |
 | `HDF5_EXTERNAL_LIB_PREFIX` | `STRING` | `""` (empty string) | Specifies a prefix string to use for customizing HDF5 library names. |
-| `HDF5_LIB_INFIX` | `STRING` | `""` (empty string) | Specifies an infix string to use for customizing HDF5 library names. This infix string is added to all library names after "hdf5". |
+| `HDF5_LIB_INFIX` | `STRING` | `""` (empty string) | Specifies an infix string to use for customizing HDF5 library names. This infix string is added to all library names after "hdf5", and to the installed pkg-config files and `libhdf5.settings` (for example `hdf5_openmpi.pc` and `libhdf5_openmpi.settings`), so builds with different infixes can share a library directory. Set `HDF5_INSTALL_INCLUDE_DIR`, `HDF5_INSTALL_CMAKE_DIR`, `HDF5_INSTALL_MODULE_DIR` and `HDF5_INSTALL_BIN_DIR` per build as well, since those directories are not named after the infix. |
 | `HDF5_EXTERNAL_LIB_SUFFIX` | `STRING` | `""` (empty string) | Specifies a suffix string to use for customizing HDF5 library names. |
 | `HDF5_ENABLE_INSTRUMENT` | `BOOL` | `OFF` | If `ON`, enables instrumentation of some parallel HDF5 functions. Depends on `CMAKE_BUILD_TYPE` being `Debug` or `Developer`. |
 | `HDF5_ENABLE_DOXY_WARNINGS` | `BOOL` | `OFF` | If `ON`, causes a build failure if doxygen parsing has warnings. Has no effect if  `HDF5_BUILD_DOC` is `OFF`. |
@@ -166,6 +166,8 @@ These are options which are specific to HDF5's wrappers for programming language
 | `HDF5_JAVA_PACK_JRE` | `BOOL` | `OFF` | If `ON`, packages a Java JRE with an HDF5 installation. |
 | `HDF5_ENABLE_MAVEN_DEPLOY` | `BOOL` | `OFF` | If `ON`, enables Maven repository deployment support. |
 | `HDF5_MAVEN_SNAPSHOT` | `BOOL` | `OFF` | If `ON`, adds "-SNAPSHOT" to version portion of names of Maven artifacts. |
+| `HDF5_JAVA_JARHDF5_NAME` | `STRING` | empty (`jarhdf5-<version>`) | Name of the installed `jarhdf5` jar, without `.jar`. Linux distributions typically set an unversioned name such as `jarhdf5`. Ignored when `HDF5_ENABLE_MAVEN_DEPLOY` is `ON`. |
+| `HDF5_JAVA_JAVAHDF5_NAME` | `STRING` | empty (`javahdf5-<version>`) | Name of the installed `javahdf5` jar, without `.jar`. Ignored when `HDF5_ENABLE_MAVEN_DEPLOY` is `ON`. |
 | `HDF5_JAVA_LOGGING_JAR` | `FILEPATH` | Bundled `java/lib/slf4j-api-2.0.16.jar` | Path to the SLF4J API jar. |
 | `HDF5_JAVA_LOGGING_NOP_JAR` | `FILEPATH` | Bundled `java/lib/ext/slf4j-nop-2.0.16.jar` | Path to the SLF4J NOP binding jar. |
 | `HDF5_JAVA_LOGGING_SIMPLE_JAR` | `FILEPATH` | Bundled `java/lib/ext/slf4j-simple-2.0.16.jar` | Path to the SLF4J simple binding jar. |

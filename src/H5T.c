@@ -7347,10 +7347,14 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5T_patch_vlen_file
  *
- * Purpose:     Patch the top-level file pointer contained in (dt->shared->u.vlen.file)
- *              to point to file.  This is possible because
- *              the top-level file pointer can be closed out from under
- *              dt while dt is contained in the shared file's cache.
+ * Purpose:     Patch the top-level file pointer contained in
+ *              (dt->shared->u.vlen.file) to point to file. This may be
+ *              necessary because the top-level file pointer can be closed
+ *              out from under dt while dt is contained in the shared
+ *              file's cache. Also recursively patches any vlens in the
+ *              parent vlen's base type. Does not patch reference types,
+ *              even though they also cache a pointer to the top level
+ *              file, because that has not been found to be necessary yet.
  *
  * Return:      SUCCEED
  *
@@ -7366,8 +7370,55 @@ H5T_patch_vlen_file(H5T_t *dt, H5VL_object_t *file)
     assert(dt->shared);
     assert(file);
 
-    if ((dt->shared->type == H5T_VLEN) && dt->shared->u.vlen.file != file)
-        dt->shared->u.vlen.file = file;
+    /* Only operate on type if the force_conv flag is set, which will be true
+     * for any type that contains a vlen */
+    if (dt->shared->force_conv) {
+        switch (dt->shared->type) {
+            case H5T_VLEN:
+                /* Patch this sequence's file pointer */
+                if (dt->shared->u.vlen.file != file)
+                    dt->shared->u.vlen.file = file;
+
+                /* Recurse on the base type */
+                if (dt->shared->parent && dt->shared->parent->shared->force_conv &&
+                    H5T_IS_COMPOSITE(dt->shared->parent->shared->type))
+                    H5T_patch_vlen_file(dt->shared->parent, file);
+                break;
+
+            case H5T_ARRAY:
+                /* Recurse on the base element type */
+                if (dt->shared->parent && dt->shared->parent->shared->force_conv &&
+                    H5T_IS_COMPOSITE(dt->shared->parent->shared->type))
+                    H5T_patch_vlen_file(dt->shared->parent, file);
+                break;
+
+            case H5T_COMPOUND: {
+                unsigned u; /* Local index variable */
+
+                /* Recurse on each field */
+                for (u = 0; u < dt->shared->u.compnd.nmembs; u++) {
+                    H5T_t *memb_type = dt->shared->u.compnd.memb[u].type; /* Member's datatype */
+
+                    if (memb_type->shared->force_conv && H5T_IS_COMPOSITE(memb_type->shared->type))
+                        H5T_patch_vlen_file(memb_type, file);
+                } /* end for */
+            } break;
+
+            case H5T_NO_CLASS:
+            case H5T_INTEGER:
+            case H5T_FLOAT:
+            case H5T_TIME:
+            case H5T_STRING:
+            case H5T_BITFIELD:
+            case H5T_OPAQUE:
+            case H5T_REFERENCE:
+            case H5T_ENUM:
+            case H5T_COMPLEX:
+            case H5T_NCLASSES:
+            default:
+                break;
+        } /* end switch */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T_patch_vlen_file() */

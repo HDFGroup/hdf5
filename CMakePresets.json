@@ -486,6 +486,16 @@
       ]
     },
     {
+      "name": "ci-StdShar-GNUC-Glibc228",
+      "description": "GNUC Config for x64 (Release) built in a glibc 2.28 container",
+      "inherits": [
+        "ci-StdShar-GNUC"
+      ],
+      "cacheVariables": {
+        "HDF5_BUILD_DOC": "OFF"
+      }
+    },
+    {
       "name": "ci-StdShar-Intel",
       "description": "Intel Standard Config for x64 (Release)",
       "inherits": [
@@ -773,6 +783,15 @@
       ]
     },
     {
+      "name": "ci-StdShar-GNUC-Glibc228",
+      "description": "GNUC Build for x64 (Release) built in a glibc 2.28 container",
+      "configurePreset": "ci-StdShar-GNUC-Glibc228",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
       "name": "ci-StdShar-Intel",
       "description": "Intel Standard Build for x64 (Release)",
       "configurePreset": "ci-StdShar-Intel",
@@ -1049,6 +1068,13 @@
       ]
     },
     {
+      "name": "ci-StdShar-GNUC-Glibc228",
+      "configurePreset": "ci-StdShar-GNUC-Glibc228",
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
       "name": "ci-StdShar-win-Intel",
       "configurePreset": "ci-StdShar-Intel",
       "inherits": [
@@ -1272,6 +1298,11 @@
     {
       "name": "ci-StdShar-GNUC-S3",
       "configurePreset": "ci-StdShar-GNUC-S3",
+      "inherits": "ci-x64-Release-GNUC"
+    },
+    {
+      "name": "ci-StdShar-GNUC-Glibc228",
+      "configurePreset": "ci-StdShar-GNUC-Glibc228",
       "inherits": "ci-x64-Release-GNUC"
     },
     {
@@ -1595,6 +1626,27 @@
         {
           "type": "package",
           "name": "ci-StdShar-GNUC-S3"
+        }
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-Glibc228",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-StdShar-GNUC-Glibc228"
+        },
+        {
+          "type": "build",
+          "name": "ci-StdShar-GNUC-Glibc228"
+        },
+        {
+          "type": "test",
+          "name": "ci-StdShar-GNUC-Glibc228"
+        },
+        {
+          "type": "package",
+          "name": "ci-StdShar-GNUC-Glibc228"
         }
       ]
     },

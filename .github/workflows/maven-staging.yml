@@ -5,13 +5,15 @@ on:
   pull_request:
     branches: [ develop, main ]
     paths:
-      - 'java/src/hdf/hdf5lib/**'
+      - 'java/hdf/hdf5lib/**'
+      - 'java/src-jni/hdf/hdf5lib/**'
       - 'HDF5Examples/JAVA/**'
       - '.github/workflows/maven-*.yml'
       - '.github/workflows/java-examples-*.yml'
       - 'CMakePresets.json'
       - '**/CMakeLists.txt'
-      - 'java/src/hdf/hdf5lib/pom.xml.in'
+      - 'java/hdf/hdf5lib/pom.xml.in'
+      - 'java/src-jni/hdf/hdf5lib/pom.xml.in'
       - 'HDF5Examples/JAVA/pom-examples.xml.in'
   workflow_call:
     inputs:
@@ -111,7 +113,7 @@ jobs:
           # For pull requests, check changed files
           if [ -n "$BASE_REF" ]; then
             git fetch origin "$BASE_REF"
-            MAVEN_FILES=$(git diff --name-only "origin/$BASE_REF...HEAD" | grep -E "(java/src/hdf/hdf5lib/|HDF5Examples/JAVA/|maven|pom\.xml|CMakePresets\.json)" || true)
+            MAVEN_FILES=$(git diff --name-only "origin/$BASE_REF...HEAD" | grep -E "(java/hdf/hdf5lib/|java/src-jni/hdf/hdf5lib/|HDF5Examples/JAVA/|maven|pom\.xml|CMakePresets\.json)" || true)
           else
             # Fallback: assume changes if base_ref not available
             MAVEN_FILES="true"

@@ -84,6 +84,36 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Configuration
 
+### Stopped publishing .deb and .rpm files with the release
+
+   The `.deb` and `.rpm` files built on Ubuntu were not real distribution packages: they
+   were CPack output with the layout and dependencies of the tarball, and they conflicted
+   with the HDF5 packages the distributions themselves ship. Native packages come from the
+   distributions and from the HDF Group's build service project instead. The Linux tarballs
+   are unaffected.
+
+### Added a Linux binary that runs on glibc 2.28 and newer
+
+   The released Linux binary was built on Ubuntu 24.04 and requires glibc 2.38, so it does
+   not run on RHEL 9, Amazon Linux 2023, SLES 15, Debian 12 or Ubuntu 22.04. Releases now
+   also carry `hdf5-<version>-linux-x86_64_gcc.tar.gz`, built in an AlmaLinux 8 container
+   with gcc-toolset-14. **It requires glibc 2.28 or newer**, which covers RHEL 8+, SLES 15,
+   Debian 10+, Ubuntu 20.04+ and Amazon Linux 2023. zlib and libaec are linked statically,
+   as in the other binaries, so it needs nothing from the system but libc and libm. CI
+   fails the build if that requirement ever rises.
+
+### Re-added HDF5_ENABLE_THREADS option
+
+   The HDF5_ENABLE_THREADS option now controls whether the library builds in any
+   threading support, and is enabled by default. Disabling this option will
+   allow the user to avoid the overhead associated with thread-specific-variable
+   lookups, but will also disable internal concurrency features (see
+   H5TSset_internal_threads()). It is an error for this option to be disabled
+   while HDF5_ENABLE_THREADSAFE or HDF5_ENABLE_CONCURRENCY are enabled.
+
+   This option was previously present but was non-functional, and was removed in
+   2.0.0.
+
 ### Built the library's internal thread pool by default
 
    The internal thread pool lets the library parallelize the internals of a
@@ -125,6 +155,28 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Removed API lock for memory management wrappers
+
+   The HDF5 library no longer acquires the global thread lock when entering
+   H5allocate_memory(), H5resize_memory(), and H5free_memory(). This allows
+   multiple threads to access these functions concurrently.
+
+### Added new VFD feature flag
+
+   Added a new Virtual File Driver (VFD) feature flag,
+   H5FD_FEAT_READWRITE_NO_H5_CALLS. This flag should be set when the read and
+   write callbacks do not make any HDF5 calls except for H5OPEN.
+
+### Added new version of H5Z_class_t, H5Z_class3_t, to include feature flags
+
+   Added a new version of the H5Z_class_t struct, H5Z_class3_t. This version has
+   a new field, feature_flags, which indicates to the library which features the
+   plugin supports. The currently supported flags are
+   H5Z_FEAT_FILTER_THREADSAFE, which should be set when the filter callback is
+   threadsafe, and H5Z_FEAT_FILTER_NO_H5_CALLS, which should be set when the
+   filter makes no HDF5 calls except for H5OPEN, H5allocate_memory(),
+   H5resize_memory(), and H5free_memory().
+
 ### Added support for internally concurrent multithreaded reads of chunked datasets
 
    Added 3 new functions to support this: H5TSset_internal_threads(),
@@ -133,14 +185,13 @@ We would like to thank the many HDF5 community members who contributed to this r
    This feature internally parallelizes read operations on chunked datasets.
    H5TSset_internal_threads() is used to enable the feature globally, while
    H5Pset_io_threads() can be used to disable the feature on a per-operation
-   basis. These functions are available whenever the library is built with a
+   basis. These functions are only available when the library is built with a
    threading package; see the Configuration section above. When performing an
-   internally threaded read, the library will concurrently read from disk,
-   unfilter, and scatter to memory all chunks in a read operation on a chunked
-   dataset. Currently each of these sub-operations is serialized (protected by
-   a mutex), so there is not yet likely to be any performance improvement.
+   internally threaded read, the library will, when possible, concurrently read
+   from disk, unfilter, and scatter to memory all chunks in a read operation on
+   a chunked dataset. Currently only the filter operations are executed
+   concurrently, the others are serialized.
 
-   Reads are not threaded in builds with HDF5_ENABLE_THREADSAFE.
 
 ## Parallel Library
 
@@ -164,6 +215,89 @@ We would like to thank the many HDF5 community members who contributed to this r
 # 🪲 Bug Fixes
 
 ## Library
+
+### Fixed an assertion failure when a filter pipeline contains `H5Z_MAX_NFILTERS` filters
+
+   An `assert()` in the internal function `H5Z_pipeline()` caused a crash in debug builds
+   of the library when a filter pipeline contained exactly `H5Z_MAX_NFILTERS` filters. The
+   HDF5 file format specification documents that 32, the number which `H5Z_MAX_NFILTERS` is
+   currently mapped to, is the maximum number of filters that a filter pipeline can contain,
+   so the `assert()` has been fixed for this case.
+
+   Fixes GitHub issue #6655
+
+### ROS3 VFD now reads an alternate endpoint URL from the AWS configuration file
+
+   The ROS3 VFD resolved an alternate S3 endpoint URL only from a file access
+   property list or from the `AWS_ENDPOINT_URL_S3` and `AWS_ENDPOINT_URL`
+   environment variables. An `endpoint_url` setting in the shared AWS configuration
+   file (`~/.aws/config`) was ignored, even though the AWS CLI and the AWS SDKs
+   honor it, so a configuration that worked with other AWS tooling was inactive
+   under the ROS3 VFD.
+
+   The VFD now follows the AWS specified order when parsing for the `endpoint_url`
+   entry under the `s3` key of the `[services ...]` section named by the active
+   profile, followed by the `endpoint_url` entry of the profile itself. A file
+   access property list and the two environment variables continue to take
+   precedence, in that order.
+
+   Note that this changes where requests are sent for an application that has an
+   `endpoint_url` configured in the AWS configuration file but the ROS3 VFD ignored
+   it until now. Setting the `AWS_IGNORE_CONFIGURED_ENDPOINT_URLS` environment
+   variable, or the `ignore_configured_endpoint_urls` entry of the active profile,
+   to "true" restores the previous behavior by suppressing every endpoint source
+   except the file access property list.
+
+   Fixes GitHub issue #6739
+
+### Fixed crashes when using variable-length data after closing another handle of the same dataset
+
+   A dataset's datatype is shared by all open handles of the dataset, and its
+   variable-length types refer to the file of the handle that opened the dataset first.
+   After that file handle was closed, other handles of the same dataset, e.g., from
+   opening the same file twice, still converted variable-length data with the closed
+   file, which crashed in `H5F_addr_decode()`. `H5T_patch_vlen_file()` repaired the file
+   only for a variable-length type at the top level of the datatype, and only when reading
+   or writing data, but not for variable-length types nested in compound or array types,
+   or when converting a variable-length fill value in `H5Dget_create_plist()` or while
+   initializing storage, e.g., in `H5Dset_extent()`. Opening a netCDF-4 file with string
+   variables calls `H5Dget_create_plist()`, so this crashed netCDF-C and netCDF4-python
+   when a file was opened again after closing one of several handles to it.
+   `H5T_patch_vlen_file()` now repairs nested variable-length types as well, and is also
+   called before converting fill values.
+
+   Fixes GitHub issue #6721
+
+### Fixed set_local and filter callbacks being called for filters whose can_apply callback returns false
+
+   Fixed library to no longer execute the set_local and filter callbacks when an optional
+   filter plugin's can_apply callback returned false, to match the documented behavior.
+
+### Removed max cache entry size assertion
+
+   Removed H5C_MAX_ENTRY_SIZE which caused an assertion to fail if a metadata cache entry
+   was larger than 32 MiB. This was meant to detect corruption, not actually impose a
+   limit on the maximum size of a metadata cache entry. This can cause assertion failures
+   in legitimate use cases. While we could simply increase the size, there are already
+   checks for a cache entry that is too big to fit in the file, and an assertion is
+   inappropriate to check for file corruption, so this check has been removed.
+
+### Fixed H5Pmodify_filter() writing past the filter pipeline for a filter not in it
+
+   `H5Pmodify_filter()` returned success when the requested filter was not in the pipeline, and wrote the new flags and client data into the slot one past the last used entry. When the pipeline already held `H5Z_MAX_NFILTERS` filters, that write went past the end of the filter array, and client data longer than `H5Z_COMMON_CD_VALUES` leaked its allocation. `H5Pmodify_filter()` now fails with "filter not in pipeline" in this case.
+
+### Stopped exporting the built-in filter class structs
+
+   The class structs of the built-in filters (H5Z_DEFLATE, H5Z_SHUFFLE, H5Z_FLETCHER32,
+   H5Z_NBIT, H5Z_SCALEOFFSET, and H5Z_SZIP) were exported from the shared library. Filter
+   plugins built from a copy of HDF5's filter source, such as netCDF-C's deflate, shuffle,
+   and fletcher32 plugins, define globals with the same names, and on ELF platforms the
+   plugin's references to its own struct were resolved to the library's copy instead. The
+   structs are now static to their source files, so a plugin always uses its own.
+
+### Fixed out-of-bounds reads when a filtered chunk is shorter than its filter header
+
+   The scaleoffset and szip filters each store a fixed-size header in front of the chunk data: a 21-byte parameter block for scaleoffset and a 4-byte uncompressed-length header for szip. On read, each one subtracted that fixed size from the chunk length without first checking that the chunk was at least that long. A truncated or corrupted chunk record made the subtraction wrap around, so both filters read far past the end of the chunk buffer. Its bounds checks also measured the chunk buffer's allocated size, which the library deliberately sizes to hold the larger unfiltered chunk, so a truncated chunk could still decompress out of the uninitialized remainder of that allocation. Both filters now reject any chunk shorter than their own header, and scaleoffset validates every read against the number of bytes actually stored for the chunk rather than the size of the buffer holding them. The fletcher32 filter now also rejects a chunk that holds only its 4-byte checksum and no data, which previously reached the checksum routine with a length of zero.
 
 ### Fixed a heap buffer over-read in scale-offset decode
 
@@ -197,7 +331,7 @@ We would like to thank the many HDF5 community members who contributed to this r
    external link data was not properly terminated caused a read past the end of the `udata`
    buffer. `H5L__extern_traverse()` now validates the buffer against its stored size before
    parsing, the same way `H5Lunpack_elink_val()` does.
-   
+
 ### Fixed the page buffer's minimum metadata threshold failure to protect B-tree, local heap and object header metadata pages
 
 The page buffer charges every page it holds to either `raw_count` or `meta_count`, counting `H5F_MEM_PAGE_DRAW` and `H5F_MEM_PAGE_GHEAP` pages as raw data and every other page as metadata. The minimum metadata reservation set by `H5Pset_page_buffer_size()` was not written as the complement of that test: it compared the page's type for equality with `H5F_MEM_PAGE_META`, which is an alias for `H5F_MEM_PAGE_SUPER`. A page entry's type is copied verbatim from the memory type of the access that brought the page into the buffer, so B-tree, local heap and object header pages carried other values and were evicted by raw data regardless of `min_meta_perc`, while still counting toward the threshold the reservation was measured against. In practice the reservation protected only the superblock and driver information pages. The classification is now made in one place, `H5MF_mem_page_type_is_raw()`, alongside its `H5F_mem_t` counterpart `H5MF_mem_type_is_raw()`, and both the page counts and the two reservations use it, so the metadata reservation protects the same population that `meta_count` measures.
@@ -231,6 +365,10 @@ Fixes GitHub issue #6679.
 
    Fixes GitHub issue #6531
 
+### Added pre-allocation validation for metadata cache entry image sizes
+
+   Metadata cache entries with non-speculative load sizes are now checked against the file's end-of-allocation address before allocating the on-disk image buffer. Object header continuation messages also validate their decoded address and size fields before queuing continuation chunks. SWMR readers skip the end-of-allocation checks for both speculative and non-speculative metadata loads because their local end-of-allocation address may lag behind the writer.
+
 ### Fixed a crash when reading a chunked dataset whose chunk rank does not match the dataspace rank
 
    The chunk layout's stored dimensionality was validated against the dataspace rank at creation time, but not at open time, so a file whose stored chunk rank disagreed with its dataspace rank was not caught. The resulting inconsistent selection ranks during chunk I/O caused a divide-by-zero in the hyperslab iterator. The chunk dimensionality is now also validated on open, and such a dataset is rejected with an error instead of crashing.
@@ -239,6 +377,18 @@ Fixes GitHub issue #6679.
 
    Fixes CVE-2026-19025
 
+### Fixed signed integer overflow in the scale-offset filter for full-range data
+
+   When a signed-integer dataset filtered with scale-offset contained values spanning the full range of the datatype, the filter's calculation of the difference between the maximum and minimum values would overflow, resulting in undefined behavior. The difference is now computed in the unsigned domain, producing the correct result without triggering an overflow.
+
+   Fixes GitHub issue #5861
+
+### Fixed silent truncation of filtered chunk sizes with a small file "size of sizes"
+
+   For all chunk index types in version-5 chunk layout messages, and for the single chunk index in any version of the chunk layout message, the on-disk size of a filtered chunk is encoded in a fixed-width field equal to the file's "size of sizes" (set via `H5Pset_sizes()`). The encode check assumed this field was always 8 bytes, so when the size of sizes was set to 2 or 4 an oversized chunk had its encoded size silently truncated (e.g., 160000 encoded in 2 bytes became 160000 & 0xFFFF = 28928), silently corrupting the chunk. The library now verifies that a filtered chunk's size fits in the file's size of sizes and reports an error at write time instead.
+
+   Fixes GitHub issue #6023
+
 ### Fixed a crash when reading a dataset with a malformed fill value
 
    An old-style (either version 1 or version 2) fill value message that is marked "defined" but encodes a negative size leaves the fill value with a negative size and no datatype; `H5Pget_fill_value()` then passed that NULL datatype to `H5T_path_find()` and dereferenced it. `H5P_get_fill_value()` now rejects a fill value that has no datatype and returns an error, so the dataset itself remains readable while the corrupt fill value is reported cleanly.
@@ -246,7 +396,7 @@ Fixes GitHub issue #6679.
    Fixes GitHub issue #6487
 
    Fixes CVE-2026-19024
-   
+
 ### Fixed a crash when unprotecting a local heap with no cached prefix or data block
 
    `H5HL_protect()` pins one metadata cache entry for a local heap -- either the prefix when the heap is a single cache object, or the data block otherwise -- and `H5HL_unprotect()` unpins it again. The cache unlinks that entry from the heap when it destroys it, so a damaged file could reach `H5HL_unprotect()` with nothing to unpin, which triggered an assertion failure in debug builds and a NULL pointer dereference otherwise. `H5HL_unprotect()` now reports an error instead, and does so before decrementing the heap's protect count so that a rejected call leaves the heap unchanged rather than half unprotected with its cache entry still pinned.
@@ -274,6 +424,25 @@ Fixes GitHub issue #6679.
    Fixes GitHub issue #6592
 
 ## Configuration
+
+### Fixed pkg-config and the compiler wrappers when HDF5_LIB_INFIX is set
+
+   With `HDF5_LIB_INFIX` set, for example to `_openmpi`, the pkg-config files were still installed as `hdf5.pc`, `hdf5_hl.pc` and so on, while their `Name` and `Requires` fields, and the compiler wrappers, used the name with the infix (`hdf5_openmpi`). `h5cc` and the other wrappers failed with "Package hdf5_openmpi was not found", and `pkg-config hdf5_hl` could not resolve its requirement. The pkg-config files are now named after the library (`hdf5_openmpi.pc`, `hdf5_openmpi_hl.pc`, ...), and `libhdf5.settings` is installed as `libhdf5_openmpi.settings`, which `h5cc -showconfig` reads.
+
+   The pkg-config file names also include `HDF5_EXTERNAL_LIB_PREFIX` and `HDF5_EXTERNAL_LIB_SUFFIX`, since they are part of the library name. For example, with `HDF5_EXTERNAL_LIB_PREFIX=vtk` the files are now `vtkhdf5.pc` and `vtkhdf5_hl.pc` instead of `hdf5.pc` and `hdf5_hl.pc`, so the `Requires: vtkhdf5` line in the high-level file can now be resolved.
+
+   Builds with different infixes (for example serial, Open MPI and MPICH) can now share a library directory. Their other install directories must still differ per build: set `HDF5_INSTALL_INCLUDE_DIR`, `HDF5_INSTALL_CMAKE_DIR`, `HDF5_INSTALL_MODULE_DIR` and `HDF5_INSTALL_BIN_DIR` for each one, or the headers, CMake package files, Fortran modules and compiler wrappers of one build overwrite those of another.
+
+   Compatibility: with an infix set, `pkg-config hdf5` no longer finds the library. Use `pkg-config hdf5<infix>`, for example `pkg-config hdf5_openmpi`. Builds with no infix, prefix or suffix install the same files as before.
+
+### Fixed "Extra libraries" in libhdf5.settings and the built-in settings
+
+  `libhdf5.settings` listed the extra libraries separated by semicolons, and
+  the settings compiled into the library (printed when `H5check_version()`
+  detects a version mismatch) used a different list that contained CMake
+  target names such as `Threads::Threads` and left out the compression
+  libraries. Both now list the same libraries as linker flags,
+  separated by spaces, for example `-lm -ldl -lz`.
 
 ### Fixed version handling in installed CMake package version configuration file
 
@@ -410,6 +579,15 @@ Fixes #5723.
 ## C++ APIs
 
 ## Testing
+
+### Fixed a link failure of the Fortran tests when built with link-time optimization
+
+   `testhdf5_fortran` failed to link with an undefined reference to
+   `test_append_flush_callback` when built with LTO (`-flto`), which is enabled by default
+   on Fedora, RHEL, openSUSE, and Ubuntu. `gfortran` versions prior to 15.3 (without the
+   fix for GCC PR 117303) drop a procedure when its `C_FUNLOC` is passed directly as an
+   argument. The test now assigns `C_FUNLOC` to a variable first, so distributions no
+   longer need to build Fortran without LTO.
 
 ### Fortran test programs no longer exit successfully after a fatal error
 
