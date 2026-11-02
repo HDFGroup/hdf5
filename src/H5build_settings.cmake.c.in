@@ -43,7 +43,7 @@ const char H5build_settings[]=
     "                        LDFLAGS: @CMAKE_SHARED_LINKER_FLAGS@\n"
     "                     H5_LDFLAGS: @H5_LDFLAGS@\n"
     "                     AM_LDFLAGS: @AM_LDFLAGS@\n"
-    "                Extra libraries: @LINK_LIBS@\n"
+    "                Extra libraries: @LINK_LIBS_SETTINGS@\n"
     "                       Archiver: @CMAKE_AR@\n"
     "                       AR_FLAGS: \n"
     "                         Ranlib: @CMAKE_RANLIB@\n"
