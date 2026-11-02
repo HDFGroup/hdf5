@@ -316,6 +316,17 @@ Fixes GitHub issue #6679.
 
 ## Java Library
 
+### Fixed a build ordering issue when the `HDF5_ENABLE_MAVEN_DEPLOY` option is enabled
+
+   With the `HDF5_ENABLE_MAVEN_DEPLOY` option enabled, the Java test programs under
+   `java/src-jni/test` previously had an incorrect dependency tree that could result
+   in build failures. The test programs would get built before the platform-specific
+   JAR file created for Maven was copied to the more generic "jarhdf5-<version>.jar"
+   name which the test programs depended on. Building of those test programs is now
+   deferred until the copying step has completed.
+
+   Fixes GitHub issue #6748
+
 ### Fixed datatype ID leaks when reading or writing nested datatypes through the JNI
 
    The object-tree read and write helpers in the JNI derived a base datatype from the memory type with `H5Tget_super()` for the variable-length, array and complex classes, but never closed it. Because an `hid_t` is not reclaimed when a native method returns, every read or write of such data leaked at least one datatype ID for the lifetime of the process, and a nested type leaked one per level. The helpers now close the derived type on both the success and error paths.
