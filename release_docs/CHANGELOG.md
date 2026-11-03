@@ -294,14 +294,6 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    Fixes CVE-2026-19029
 
-### Fixed a double free in h5repack
-
-   The tool h5repack produced a double free crash on a malicious HDF5 file in copy_refs_attr()
-   while duplicating reference-valued attributes.  Some cleanup was done to remove the
-   double free and memory leaks.
-
-   Fixes CVE-2026-102935
-
 ### Fixed a deadlock in the ROS3 VFD on Windows
 
    When an HDF5 application running on Windows and using the ROS3 VFD exited normally,
@@ -487,6 +479,14 @@ The "Shared/Static Fortran Library" and "Shared/Static C++ Library" lines in `li
 Fixes #5723.
 
 ## Tools
+
+### Fixed a double free in h5repack
+
+   The tool h5repack produced a double free crash on a malicious HDF5 file in copy_refs_attr()
+   while duplicating reference-valued attributes.  Some cleanup was done to remove the
+   double free and memory leaks.
+
+   Fixes CVE-2026-102935
 
 ### Fixed an issue with quoting of data values in h5ls and h5dump when displaying as ASCII characters
 
