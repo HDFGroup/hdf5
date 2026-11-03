@@ -67,12 +67,25 @@ jobs:
           ref: master
           path: adios2
 
+      - name: Get ADIOS2 commit hash
+        id: get-sha
+        run: |
+          git -C adios2 log -1 --format="ADIOS2 commit: %H %cs %s"
+          echo "sha=$(git -C adios2 rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Cache ADIOS2 installation
+        id: cache-adios2
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v4
+        with:
+          path: ${{ runner.workspace }}/adios2-install
+          key: ${{ runner.os }}-${{ runner.arch }}-adios2-${{ steps.get-sha.outputs.sha }}-${{ inputs.build_mode }}
+
       - name: Install ADIOS2
+        if: ${{ steps.cache-adios2.outputs.cache-hit != 'true' }}
         env:
           CXX: mpic++
           CC: mpicc
         run: |
-          git -C adios2 log -1 --format="ADIOS2 commit: %H %cs %s"
           mkdir adios2/build
           cd adios2/build
           cmake -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
