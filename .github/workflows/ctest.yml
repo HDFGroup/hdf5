@@ -566,11 +566,11 @@ jobs:
               path: ${{ runner.workspace }}/maven-artifacts
               if-no-files-found: warn
 
-  build_and_test_mac_latest:
+  build_and_test_mac_26:
   # MacOS w/ Clang
   #
     name: "MacOS Clang"
-    runs-on: macos-15
+    runs-on: macos-26
     needs: [check-secret]
     steps:
       - name: check clang version
