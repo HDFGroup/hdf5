@@ -28,24 +28,37 @@ endif ()
 
 # Fortran module install directories. With a compiler that simulates MSVC
 # (Intel Fortran on Windows), only the shared modules mark module variables
-# DLLEXPORT, so the static and shared modules differ and each set is also
-# installed in the static/ or shared/ subdirectory of HDF5_INSTALL_MODULE_DIR,
-# which the exported targets of that library type use. On every platform the
-# set chosen by HDF5_INSTALL_MOD_FORTRAN is installed in
+# DLLEXPORT, so the static and shared modules differ, and the layout of
+# earlier releases is kept: each set in the static/ or shared/ subdirectory
+# of HDF5_INSTALL_MODULE_DIR (default mod, or include/mod with
+# HDF5_USE_GNU_DIRS), which the exported targets of that library type use,
+# and the set chosen by HDF5_INSTALL_MOD_FORTRAN in HDF5_INSTALL_INCLUDE_DIR.
+# Elsewhere the two sets are the same and the chosen one is installed in
 # HDF5_INSTALL_MODULE_DIR. These are set in the parent scope too, for
 # hl/fortran and hdf5-config.cmake.
 if (CMAKE_Fortran_SIMULATE_ID STREQUAL "MSVC")
+  if (NOT HDF5_INSTALL_MODULE_DIR_DEFAULT)
+    set (_mod_dir ${HDF5_INSTALL_MODULE_DIR})
+  elseif (HDF5_USE_GNU_DIRS)
+    set (_mod_dir ${CMAKE_INSTALL_INCLUDEDIR}/mod)
+  else ()
+    set (_mod_dir mod)
+  endif ()
   set (HDF5_INSTALL_MOD_SEPARATE ON)
-  set (HDF5_INSTALL_MODULE_STATIC_DIR ${HDF5_INSTALL_MODULE_DIR}/static)
-  set (HDF5_INSTALL_MODULE_SHARED_DIR ${HDF5_INSTALL_MODULE_DIR}/shared)
+  set (HDF5_INSTALL_MODULE_STATIC_DIR ${_mod_dir}/static)
+  set (HDF5_INSTALL_MODULE_SHARED_DIR ${_mod_dir}/shared)
+  set (HDF5_INSTALL_MOD_FORTRAN_DIR ${HDF5_INSTALL_INCLUDE_DIR})
+  unset (_mod_dir)
 else ()
   set (HDF5_INSTALL_MOD_SEPARATE OFF)
   set (HDF5_INSTALL_MODULE_STATIC_DIR ${HDF5_INSTALL_MODULE_DIR})
   set (HDF5_INSTALL_MODULE_SHARED_DIR ${HDF5_INSTALL_MODULE_DIR})
+  set (HDF5_INSTALL_MOD_FORTRAN_DIR ${HDF5_INSTALL_MODULE_DIR})
 endif ()
 set (HDF5_INSTALL_MOD_SEPARATE ${HDF5_INSTALL_MOD_SEPARATE} PARENT_SCOPE)
 set (HDF5_INSTALL_MODULE_STATIC_DIR ${HDF5_INSTALL_MODULE_STATIC_DIR} PARENT_SCOPE)
 set (HDF5_INSTALL_MODULE_SHARED_DIR ${HDF5_INSTALL_MODULE_SHARED_DIR} PARENT_SCOPE)
+set (HDF5_INSTALL_MOD_FORTRAN_DIR ${HDF5_INSTALL_MOD_FORTRAN_DIR} PARENT_SCOPE)
 
 if (H5_HAVE_PARALLEL)
   if (MPI_Fortran_LINK_FLAGS)

@@ -434,6 +434,11 @@ macro (HDF_DIR_PATHS package_prefix)
   mark_as_advanced (HDF5_USE_GNU_DIRS)
   unset (_HDF5_USE_GNU_DIRS_DEFAULT)
 
+  # Intel Fortran on Windows keeps the old module directory default
+  if (NOT ${package_prefix}_INSTALL_MODULE_DIR)
+    set (${package_prefix}_INSTALL_MODULE_DIR_DEFAULT ON)
+  endif ()
+
   if (HDF5_USE_GNU_DIRS)
     include(GNUInstallDirs)
     if (NOT ${package_prefix}_INSTALL_BIN_DIR)

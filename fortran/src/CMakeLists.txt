@@ -514,7 +514,7 @@ if (BUILD_STATIC_LIBS)
   if (HDF5_INSTALL_MOD_FORTRAN STREQUAL "STATIC")
     install (
         FILES ${mod_files}
-        DESTINATION ${HDF5_INSTALL_MODULE_DIR}
+        DESTINATION ${HDF5_INSTALL_MOD_FORTRAN_DIR}
         COMPONENT fortheaders
     )
   endif ()
@@ -534,7 +534,7 @@ if (BUILD_SHARED_LIBS)
   if (HDF5_INSTALL_MOD_FORTRAN STREQUAL "SHARED")
     install (
         FILES ${modsh_files}
-        DESTINATION ${HDF5_INSTALL_MODULE_DIR}
+        DESTINATION ${HDF5_INSTALL_MOD_FORTRAN_DIR}
         COMPONENT fortheaders
     )
   endif ()

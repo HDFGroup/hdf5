@@ -1349,8 +1349,8 @@ if (HDF5_BUILD_FORTRAN)
   # One set of Fortran modules is installed, in HDF5_INSTALL_MODULE_DIR. When
   # both library types are built, the shared modules are installed unless
   # HDF5_INSTALL_MOD_FORTRAN is STATIC. NO, the old "don't copy to include"
-  # value, is accepted and means the default. Intel Fortran on Windows also
-  # installs each set in its own subdirectory; see fortran/CMakeLists.txt.
+  # value, is accepted and means the default. Intel Fortran on Windows keeps
+  # the earlier layout; see fortran/CMakeLists.txt.
   set (HDF5_INSTALL_MOD_FORTRAN "SHARED" CACHE STRING "Library type whose Fortran modules are installed when both are built (SHARED STATIC)")
   set_property (CACHE HDF5_INSTALL_MOD_FORTRAN PROPERTY STRINGS SHARED STATIC)
   string (TOUPPER "${HDF5_INSTALL_MOD_FORTRAN}" HDF5_INSTALL_MOD_FORTRAN)
