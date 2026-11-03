@@ -26,13 +26,26 @@ if (H5_HAVE_PARALLEL)
   endif ()
 endif ()
 
-# HDF5_INSTALL_MOD_FORTRAN is set in the top-level CMakeLists.txt, so that
-# hdf5-config.cmake records the value used for the install. With a compiler
-# that simulates MSVC, only the shared modules mark module variables DLLEXPORT,
-# and the shared library exports them only that way.
-if (HDF5_INSTALL_MOD_FORTRAN STREQUAL "STATIC" AND BUILD_SHARED_LIBS AND CMAKE_Fortran_SIMULATE_ID STREQUAL "MSVC")
-  message (WARNING "HDF5_INSTALL_MOD_FORTRAN=STATIC installs modules without DLLEXPORT; programs that use module variables such as H5T_NATIVE_INTEGER will not link against the shared Fortran libraries")
+# Fortran module install directories. With a compiler that simulates MSVC
+# (Intel Fortran on Windows), only the shared modules mark module variables
+# DLLEXPORT, so the static and shared modules differ and each set is also
+# installed in the static/ or shared/ subdirectory of HDF5_INSTALL_MODULE_DIR,
+# which the exported targets of that library type use. On every platform the
+# set chosen by HDF5_INSTALL_MOD_FORTRAN is installed in
+# HDF5_INSTALL_MODULE_DIR. These are set in the parent scope too, for
+# hl/fortran and hdf5-config.cmake.
+if (CMAKE_Fortran_SIMULATE_ID STREQUAL "MSVC")
+  set (HDF5_INSTALL_MOD_SEPARATE ON)
+  set (HDF5_INSTALL_MODULE_STATIC_DIR ${HDF5_INSTALL_MODULE_DIR}/static)
+  set (HDF5_INSTALL_MODULE_SHARED_DIR ${HDF5_INSTALL_MODULE_DIR}/shared)
+else ()
+  set (HDF5_INSTALL_MOD_SEPARATE OFF)
+  set (HDF5_INSTALL_MODULE_STATIC_DIR ${HDF5_INSTALL_MODULE_DIR})
+  set (HDF5_INSTALL_MODULE_SHARED_DIR ${HDF5_INSTALL_MODULE_DIR})
 endif ()
+set (HDF5_INSTALL_MOD_SEPARATE ${HDF5_INSTALL_MOD_SEPARATE} PARENT_SCOPE)
+set (HDF5_INSTALL_MODULE_STATIC_DIR ${HDF5_INSTALL_MODULE_STATIC_DIR} PARENT_SCOPE)
+set (HDF5_INSTALL_MODULE_SHARED_DIR ${HDF5_INSTALL_MODULE_SHARED_DIR} PARENT_SCOPE)
 
 if (H5_HAVE_PARALLEL)
   if (MPI_Fortran_LINK_FLAGS)
