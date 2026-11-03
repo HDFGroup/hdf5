@@ -405,9 +405,8 @@ Fixes GitHub issue #6679.
 
    Reading a dataset from a corrupted or maliciously crafted file could crash the library in the N-Bit and Fletcher32 filter decode paths. The N-Bit filter dereferenced its client-data parameter array before validating it, crashing when the array was empty or NULL, and walked the compressed chunk during decompression without bounding the input against the chunk size, causing out-of-bounds reads. It also indexed that parameter array at offsets taken from the datatype description held in the array itself, without bounding those offsets against the number of parameters supplied, so a parameter list stopping short of the datatype it described was read past its end. The Fletcher32 filter subtracted the 4-byte checksum length from the chunk size without checking that the chunk was at least that large, underflowing the length passed to the checksum routine. These filters now validate their parameters and buffer sizes and fail with an error instead of crashing.
 
-   Fixes GitHub issues #6488, #6489, #6490, and #6492
-
-   Fixes CVE-2026-19026, CVE-2026-19027, and CVE-2026-19028
+   Fixes GitHub issues #6489 and #6492 (CVE-2026-19026 and CVE-2026-19027)
+   Fixes GitHub issues #6488 and #6490 (CVE-2026-19028)
 
 ### Fixed a stack overflow when iterating a corrupted B-tree
 
@@ -494,6 +493,14 @@ The "Shared/Static Fortran Library" and "Shared/Static C++ Library" lines in `li
 Fixes #5723.
 
 ## Tools
+
+### Fixed a double free in h5repack
+
+   The tool h5repack produced a double free crash on a malicious HDF5 file in copy_refs_attr()
+   while duplicating reference-valued attributes.  Some cleanup was done to remove the
+   double free and memory leaks.
+
+   Fixes CVE-2026-102935
 
 ### Fixed an issue with quoting of data values in h5ls and h5dump when displaying as ASCII characters
 
