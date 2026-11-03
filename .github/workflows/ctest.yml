@@ -1381,13 +1381,21 @@ jobs:
               -DUSE_S2N=OFF
             cmake --build $lib/build --target install
           done
-          cp aws-c-s3/VERSION "$(dirname $(find "$AWS_PREFIX" -name aws-c-s3-config.cmake | head -1))/VERSION"
+          # Record the aws-c-s3 version next to its package config; fall back to
+          # the short commit hash if the checkout has no VERSION file.
+          CFG_DIR="$(dirname $(find "$AWS_PREFIX" -name aws-c-s3-config.cmake | head -1))"
+          if [ -f aws-c-s3/VERSION ]; then
+            cp aws-c-s3/VERSION "$CFG_DIR/VERSION"
+          else
+            git -C aws-c-s3 rev-parse --short HEAD > "$CFG_DIR/VERSION"
+          fi
           echo "CMAKE_PREFIX_PATH=$AWS_PREFIX" >> $GITHUB_ENV
 
       - name: Log aws-c-s3 version (MacOS x86_64)
         shell: bash
         run: |
-          AWS_C_S3_VERSION=$(cat ${{ runner.temp }}/aws-src/aws-c-s3/VERSION)
+          VERSION_FILE=$(find "${{ runner.temp }}/aws" -path '*/cmake/aws-c-s3/VERSION' | head -1)
+          AWS_C_S3_VERSION=$(cat "$VERSION_FILE" 2>/dev/null || echo unknown)
           echo "aws-c-s3 version: $AWS_C_S3_VERSION"
           echo "### aws-c-s3 (MacOS intel Clang S3): $AWS_C_S3_VERSION" >> $GITHUB_STEP_SUMMARY
 
