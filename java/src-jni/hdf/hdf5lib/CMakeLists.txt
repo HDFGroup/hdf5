@@ -20,6 +20,8 @@ set (HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES
     callbacks/H5A_iterate_t.java
     callbacks/H5D_append_cb.java
     callbacks/H5D_append_t.java
+    callbacks/H5D_chunk_iter_cb.java
+    callbacks/H5D_chunk_iter_t.java
     callbacks/H5D_iterate_cb.java
     callbacks/H5D_iterate_t.java
     callbacks/H5E_walk_cb.java

@@ -30,6 +30,7 @@ set (HDF5_JAVA_TEST_SOURCES
     TestH5D
     TestH5Dplist
     TestH5Drw
+    TestH5DChunkIterPerf
     TestH5Lparams
     TestH5Lbasic
     TestH5Lcreate
