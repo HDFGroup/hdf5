@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-11-03</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-11-04</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -162,14 +162,21 @@ Data Fields</h2></td></tr>
 </div><div class="memdoc">
 <p>A Boolean which specifies if security credentials from this structure should be used for accessing a S3 bucket.</p>
 <p>If true, ALL credentials must come from the FAPL and no attempt will be made to load credentials from other places. In this case, both <span class="tt"><a class="el" href="#a30a5353319d0a23ebc0b347aff48544a">secret_id</a></span> and <span class="tt"><a class="el" href="#ab622227877522d00a1284b9e5465d02c">secret_key</a></span> must be non-empty strings. If only one of <span class="tt"><a class="el" href="#a30a5353319d0a23ebc0b347aff48544a">secret_id</a></span> or <span class="tt"><a class="el" href="#ab622227877522d00a1284b9e5465d02c">secret_key</a></span> are non-empty strings while the other is an empty string, an error will be returned when opening a file. If a session token is to be used in this case, it must be specified with <a class="el" href="group___f_a_p_l.html#ga74d2ae62171700a1a50c9fd76713cf4d" title="Modifies the specified File Access Property List to use the H5FD_ROS3 driver by adding the specified ...">H5Pset_fapl_ros3_token()</a>.</p>
-<p>If false, the ROS3 VFD will instead attempt to load credentials from several different places, in this order:</p>
+<p>If false, the ROS3 VFD will instead load credentials with the default credential provider chain from the aws-c-auth library, the same chain used by the AWS CLI and the AWS SDKs, in this order:</p>
 <ul>
-<li>From the environment, by checking AWS environment variables such as AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN and AWS_ACCOUNT_ID</li>
-<li>From the AWS profile files, by reading from ~/.aws/config and ~/.aws/credentials, by default. The specific files read from can be overridden with the AWS_CONFIG_FILE and AWS_SHARED_CREDENTIALS_FILE environment variables.</li>
-<li>From STS, by using AssumeRoleWithWebIdentity</li>
+<li>From the environment, by checking the AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_SESSION_TOKEN environment variables</li>
+<li>From the AWS profile files, by reading from ~/.aws/config and ~/.aws/credentials, by default. The specific files read from can be overridden with the AWS_CONFIG_FILE and AWS_SHARED_CREDENTIALS_FILE environment variables, and the profile read from can be selected with the AWS_PROFILE environment variable. Within the selected profile, this step supports:<ul>
+<li>Assuming a role, with the <span class="tt">role_arn</span> setting together with <span class="tt">source_profile</span> or <span class="tt">credential_source</span></li>
+<li>An external credential helper program, with the <span class="tt">credential_process</span> setting</li>
+<li>Static credentials, with the <span class="tt">aws_access_key_id</span>, <span class="tt">aws_secret_access_key</span>, and <span class="tt">aws_session_token</span> settings</li>
+</ul>
+</li>
+<li>From STS, by using AssumeRoleWithWebIdentity. This covers the AWS_WEB_IDENTITY_TOKEN_FILE, AWS_ROLE_ARN, and AWS_ROLE_SESSION_NAME environment variables and the <span class="tt">web_identity_token_file</span> profile setting, as used by IAM Roles for Service Accounts on EKS</li>
+<li>From container credentials, as provided on ECS and EKS, when the AWS_CONTAINER_CREDENTIALS_RELATIVE_URI or AWS_CONTAINER_CREDENTIALS_FULL_URI environment variable is set</li>
 <li>From EC2 instance metadata</li>
 </ul>
-<p>If the ROS3 VFD cannot source credentials from any of these locations, it will fallback to using anonymous credentials. </p>
+<p>If the ROS3 VFD cannot source credentials from any of these locations, it will fallback to using anonymous credentials. This is how objects in public buckets are read. Note that it also means a misconfigured profile results in unsigned requests rather than an error, which usually surfaces later as an HTTP 403 response from the server.</p>
+<p>See <a class="el" href="ros3_vfd.html#sec_ros3_credentials" title="Credentials">Credentials</a> for the rest, including the AWS IAM Identity Center (SSO) limitation and the EC2 instance metadata timeout. </p>
 
 </div>
 </div>

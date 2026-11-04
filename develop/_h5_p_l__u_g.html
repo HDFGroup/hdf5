@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-11-03</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-11-04</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -383,9 +383,7 @@ Installing an HDF5 Filter Plugin</h3>
 <p>The default directory for an HDF5 filter plugin library is defined on UNIX-like systems as </p><div class="fragment"><div class="line">“/usr/local/<a class="code hl_namespace" href="namespacehdf5.html">hdf5</a>/lib/plugin”</div>
 <div class="ttc" id="anamespacehdf5_html"><div class="ttname"><a href="namespacehdf5.html">hdf5</a></div><div class="ttdef"><b>Definition</b> HDF5.F90:26</div></div>
 </div><!-- fragment --><p> and on Windows systems as </p><div class="fragment"><div class="line"><span class="stringliteral">&quot;%ALLUSERSPROFILE%/hdf5/lib/plugin&quot;</span>.</div>
-</div><!-- fragment --><p>The shared HDF5 library also searches the plugin directory of its own install, </p><div class="fragment"><div class="line"><span class="stringliteral">&quot;&lt;install dir&gt;/lib/plugin&quot;</span></div>
-</div><!-- fragment --><p> ahead of the default directories, found from the location the library was loaded from, so that an install that has been moved or unpacked from a binary package finds its plugins.</p>
-<p>The default path can be overwritten by a user with the <a class="el" href="_h5public_8h.html#a020d112b3c3251e7518461466777611d">HDF5_PLUGIN_PATH</a> environment variable. Several directories can be specified for the search path using “:” as a path separator for UNIX-like systems and “;” for Windows.</p>
+</div><!-- fragment --><p>The default path can be overwritten by a user with the <a class="el" href="_h5public_8h.html#a020d112b3c3251e7518461466777611d">HDF5_PLUGIN_PATH</a> environment variable. Several directories can be specified for the search path using “:” as a path separator for UNIX-like systems and “;” for Windows.</p>
 <p>Readers are encouraged to try the example in the “Building an HDF5 bzip2 Plugin Example” section.</p>
 <h2 class="doxsection"><a class="anchor" id="subsec_filter_plugins_design"></a>
 Design</h2>
