@@ -334,6 +334,8 @@ We would like to thank the many HDF5 community members who contributed to this r
    buffer. `H5L__extern_traverse()` now validates the buffer against its stored size before
    parsing, the same way `H5Lunpack_elink_val()` does.
 
+   Fixes CVE-2026-120757
+
 ### Fixed the page buffer's minimum metadata threshold failure to protect B-tree, local heap and object header metadata pages
 
 The page buffer charges every page it holds to either `raw_count` or `meta_count`, counting `H5F_MEM_PAGE_DRAW` and `H5F_MEM_PAGE_GHEAP` pages as raw data and every other page as metadata. The minimum metadata reservation set by `H5Pset_page_buffer_size()` was not written as the complement of that test: it compared the page's type for equality with `H5F_MEM_PAGE_META`, which is an alias for `H5F_MEM_PAGE_SUPER`. A page entry's type is copied verbatim from the memory type of the access that brought the page into the buffer, so B-tree, local heap and object header pages carried other values and were evicted by raw data regardless of `min_meta_perc`, while still counting toward the threshold the reservation was measured against. In practice the reservation protected only the superblock and driver information pages. The classification is now made in one place, `H5MF_mem_page_type_is_raw()`, alongside its `H5F_mem_t` counterpart `H5MF_mem_type_is_raw()`, and both the page counts and the two reservations use it, so the metadata reservation protects the same population that `meta_count` measures.
@@ -348,7 +350,7 @@ Fixes GitHub issue #6679.
 
    The size stored in an object header message header was checked against the chunk before the rest of that message header was decoded, allowing a message body to start up to four bytes further into the chunk than the check accounted for. A corrupted or fuzzed file could declare a size that passed the check and still extended past the end of the chunk image, and the message's decode callback was then handed a buffer end outside the allocation. `H5O__chunk_deserialize()` now checks the message size once the whole message header has been decoded.
 
-   Fixes GitHub issue #6401
+   Fixes GitHub issue #6401 (CVE-2026-120756)
 
 ### Fixed memory leaks and ID reference count issues when pushing an error to an error stack that is full
 
@@ -403,18 +405,21 @@ Fixes GitHub issue #6679.
 
    `H5HL_protect()` pins one metadata cache entry for a local heap -- either the prefix when the heap is a single cache object, or the data block otherwise -- and `H5HL_unprotect()` unpins it again. The cache unlinks that entry from the heap when it destroys it, so a damaged file could reach `H5HL_unprotect()` with nothing to unpin, which triggered an assertion failure in debug builds and a NULL pointer dereference otherwise. `H5HL_unprotect()` now reports an error instead, and does so before decrementing the heap's protect count so that a rejected call leaves the heap unchanged rather than half unprotected with its cache entry still pinned.
 
+   Fixes CVE-2026-120758
+
 ### Fixed crashes when reading datasets with malformed N-Bit or Fletcher32 filter metadata
 
    Reading a dataset from a corrupted or maliciously crafted file could crash the library in the N-Bit and Fletcher32 filter decode paths. The N-Bit filter dereferenced its client-data parameter array before validating it, crashing when the array was empty or NULL, and walked the compressed chunk during decompression without bounding the input against the chunk size, causing out-of-bounds reads. It also indexed that parameter array at offsets taken from the datatype description held in the array itself, without bounding those offsets against the number of parameters supplied, so a parameter list stopping short of the datatype it described was read past its end. The Fletcher32 filter subtracted the 4-byte checksum length from the chunk size without checking that the chunk was at least that large, underflowing the length passed to the checksum routine. These filters now validate their parameters and buffer sizes and fail with an error instead of crashing.
 
    Fixes GitHub issues #6489 and #6492 (CVE-2026-19026 and CVE-2026-19027)
+   
    Fixes GitHub issues #6488 and #6490 (CVE-2026-19028)
 
 ### Fixed a stack overflow when iterating a corrupted B-tree
 
    `H5B__iterate_helper()` now verifies that a B-tree node it has just protected has the level the traversal expects, when the expected level is known. The equivalent check in `H5B__cache_deserialize()` only runs when a node is first loaded into the metadata cache, so a corrupted B-tree whose child pointer revisits a node that is already cached (for example, a node that points to itself) could bypass that check and recurse without bound until the stack was exhausted. Such a file is now rejected with an error instead of crashing. This was observed through `H5Gget_info()`.
 
-   Fixes GitHub issue #6403
+   Fixes GitHub issue #6403 (CVE-2026-120689)
 
 ## Java Library
 
