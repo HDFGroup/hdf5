@@ -12,11 +12,16 @@ on:
       - 'ACKNOWLEDGEMENTS'
       - 'LICENSE**'
       - '**.md'
-  # No paths-ignore for pull requests: the "CI status" check must always
-  # report, or a required check would wait forever on a docs-only PR. The
-  # check-changes job applies the push trigger's paths-ignore list instead.
   pull_request:
     branches: [ develop ]
+    paths-ignore:
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'docs/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'LICENSE**'
+      - '**.md'
 
 # Using concurrency to cancel any in-progress job or run
 concurrency:
@@ -27,54 +32,13 @@ permissions:
   contents: read
 
 jobs:
-    # Decide whether a pull request changes anything besides the files the
-    # push trigger ignores. Keep the patterns in sync with paths-ignore above.
-    check-changes:
-      name: "Check changed files"
-      runs-on: ubuntu-latest
-      permissions:
-        contents: read
-        pull-requests: read
-      outputs:
-        code: ${{ steps.check.outputs.code }}
-      steps:
-        - id: check
-          env:
-            GH_TOKEN: ${{ github.token }}
-            EVENT: ${{ github.event_name }}
-            PR: ${{ github.event.pull_request.number }}
-            REPO: ${{ github.repository }}
-          run: |
-            code=true
-            if [ "$EVENT" = pull_request ]; then
-              # Include the old name of renamed files. The API lists at most
-              # 3000 files; treat a larger PR as a code change.
-              files=$(gh api --paginate "repos/$REPO/pulls/$PR/files" \
-                        --jq '.[] | .filename, (.previous_filename // empty)')
-              n=$(printf '%s\n' "$files" | grep -c . || true)
-              if [ "$n" -gt 0 ] && [ "$n" -lt 3000 ]; then
-                code=false
-                while IFS= read -r f; do
-                  case "$f" in
-                    .github/CODEOWNERS|.github/FUNDING.yml|docs/*|release_docs/*|ACKNOWLEDGEMENTS|LICENSE*|*.md) ;;
-                    *) code=true; break ;;
-                  esac
-                done <<< "$files"
-              fi
-            fi
-            echo "code=$code" | tee -a "$GITHUB_OUTPUT"
-
     call-workflow-special-cmake:
       name: "Special Workflows"
-      needs: check-changes
-      if: needs.check-changes.outputs.code == 'true'
       uses: ./.github/workflows/main-spc.yml
 
     # Build aws-c-s3 library for ROS3 workflows
     build-aws-c-s3-release:
       name: "Build aws-c-s3 (Release)"
-      needs: check-changes
-      if: needs.check-changes.outputs.code == 'true'
       uses: ./.github/workflows/build-aws-c-s3.yml
       with:
         build_mode: "Release"
@@ -101,8 +65,6 @@ jobs:
 
     call-debug-concurrent-cmake:
         name: "Debug Concurrency Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/main.yml
         with:
             cmake_version: "latest"
@@ -112,8 +74,6 @@ jobs:
 
     call-static-debug-concurrent-cmake:
         name: "Debug Static Concurrency Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/main-static.yml
         with:
             cmake_version: "latest"
@@ -123,8 +83,6 @@ jobs:
 
     call-release-concurrent-cmake:
         name: "Release Concurrency Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/main.yml
         with:
             cmake_version: "latest"
@@ -134,8 +92,6 @@ jobs:
 
     call-debug-thread-cmake:
         name: "Debug Thread-Safety Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/main.yml
         with:
             cmake_version: "latest"
@@ -145,8 +101,6 @@ jobs:
 
     call-static-debug-thread-cmake:
         name: "Debug Static Thread-Safety Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/main-static.yml
         with:
             cmake_version: "latest"
@@ -156,8 +110,6 @@ jobs:
 
     call-release-thread-cmake:
         name: "Release Thread-Safety Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/main.yml
         with:
             cmake_version: "latest"
@@ -167,8 +119,6 @@ jobs:
 
     call-debug-cmake:
         name: "Debug Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/main.yml
         with:
             cmake_version: "latest"
@@ -179,8 +129,6 @@ jobs:
 
     call-debug-static-cmake:
         name: "Debug Static Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/main-static.yml
         with:
             cmake_version: "latest"
@@ -190,16 +138,12 @@ jobs:
 
     call-release-cross:
         name: "Release Cross Compile Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/cross-compile.yml
         with:
             build_mode: "Release"
 
     call-release-cmake:
         name: "Release Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/main.yml
         with:
             cmake_version: "latest"
@@ -211,8 +155,6 @@ jobs:
 
     call-release-static:
         name: "Release Static Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/main-static.yml
         with:
             cmake_version: "latest"
@@ -222,8 +164,6 @@ jobs:
 
     call-release-cmakeMin:
         name: "Minimum Release Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/main.yml
         with:
             cmake_version: "3.26.0"
@@ -237,8 +177,6 @@ jobs:
 
     call-jni-latest-java:
         name: "JNI Latest Java Testing"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/main.yml
         with:
             cmake_version: "latest"
@@ -250,8 +188,6 @@ jobs:
 
     call-ffm-latest-java:
         name: "FFM Latest Java Testing"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/main.yml
         with:
             cmake_version: "latest"
@@ -264,8 +200,6 @@ jobs:
 
     call-arm64-cmake:
         name: "arm64 Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/arm-main.yml
         with:
             cmake_version: "latest"
@@ -276,8 +210,6 @@ jobs:
 
     call-debug-arm64-cmake:
         name: "arm64 Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/arm-main.yml
         with:
             cmake_version: "latest"
@@ -333,64 +265,48 @@ jobs:
 
     call-release-par:
         name: "Parallel Release Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/main-par.yml
         with:
             build_mode: "Release"
 
     call-debug-par:
         name: "Parallel Debug Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/main-par.yml
         with:
             build_mode: "Debug"
 
     call-release-special-par:
         name: "Parallel Release Special Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/main-par-spc.yml
         with:
             build_mode: "Release"
 
     call-debug-special-par:
         name: "Parallel Debug Special Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/main-par-spc.yml
         with:
             build_mode: "Debug"
 
     call-release-cmake-intel:
         name: "Intel Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/intel.yml
         with:
             build_mode: "Release"
 
     call-release-cmake-nvhpc:
         name: "nvhpc Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/nvhpc.yml
         with:
             build_mode: "Release"
 
     call-release-cmake-aocc:
         name: "aocc Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/aocc.yml
         with:
             build_mode: "Release"
 
     call-release-cmake-xpr:
         name: "TestExpress Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/testxpr.yml
 
 #    call-release-cmake-julia:
@@ -401,29 +317,24 @@ jobs:
 
     call-release-cmake-msys2:
         name: "Msys2 Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/msys2.yml
         with:
           build_mode: "Release"
 
     call-release-cmake-i386:
         name: "i386 Workflows"
-        needs: check-changes
-        if: needs.check-changes.outputs.code == 'true'
         uses: ./.github/workflows/i386.yml
         with:
             build_mode: "Release"
 
-    # One check that summarizes every job above, for use as the required
-    # status check. A called workflow that GitHub rejects before creating any
-    # job shows up here as a failure, not as a missing check. Add every new
-    # job to this list.
+    # One check that summarizes every job above. A called workflow that
+    # GitHub rejects before creating any job shows up here as a failure,
+    # where otherwise the PR would show no failed check at all. Add every
+    # new job to this list.
     ci-status:
       name: "CI status"
       if: always()
       needs:
-        - check-changes
         - call-workflow-special-cmake
         - build-aws-c-s3-release
         - call-workflow-ros3-cmake
