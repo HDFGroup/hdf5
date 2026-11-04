@@ -352,6 +352,14 @@
       ]
     },
     {
+      "name": "ci-StdShar-MSVC-S3",
+      "description": "MSVC S3 Config for x64 (Release)",
+      "inherits": [
+        "ci-StdShar-MSVC",
+        "ci-S3"
+     ]
+    },
+    {
       "name": "ci-StdShar-MSVC-ARM64",
       "description": "MSVC Standard Config for ARM64 (Release)",
       "inherits": [
