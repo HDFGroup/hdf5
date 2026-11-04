@@ -1364,6 +1364,31 @@ if (HDF5_EXPORTED_TARGETS)
         INCLUDES DESTINATION include
     )
   endif ()
+
+  # Windows has no system aws-c-s3, so install the shared aws-c-s3 DLL and the
+  # aws-* DLLs it depends on next to the HDF5 binaries for the ROS3 VFD
+  if (WIN32 AND ${HDF_PREFIX}_HAVE_ROS3_VFD)
+    get_target_property (_aws_c_s3_type AWS::aws-c-s3 TYPE)
+    if (_aws_c_s3_type STREQUAL "SHARED_LIBRARY")
+      install (
+          IMPORTED_RUNTIME_ARTIFACTS AWS::aws-c-s3
+          RUNTIME_DEPENDENCY_SET hdf5_aws_c_s3_deps
+          RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT libraries
+          LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT libraries
+      )
+      install (
+          RUNTIME_DEPENDENCY_SET hdf5_aws_c_s3_deps
+          PRE_INCLUDE_REGEXES "^[Aa][Ww][Ss]-"
+          PRE_EXCLUDE_REGEXES ".*"
+          POST_EXCLUDE_REGEXES ".*[Ss][Yy][Ss][Tt][Ee][Mm]32/.*"
+          DIRECTORIES $<TARGET_FILE_DIR:AWS::aws-c-s3>
+          RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT libraries
+          LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT libraries
+      )
+    endif ()
+    unset (_aws_c_s3_type)
+  endif ()
+
   if (BUILD_STATIC_LIBS)
     INSTALL_TARGET_PDB (${HDF5_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} libraries)
 
