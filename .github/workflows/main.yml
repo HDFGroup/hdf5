@@ -67,8 +67,8 @@ jobs:
       matrix:
         name:
           - "Windows MSVC"
-          - "Ubuntu gcc"
-          - "MacOS Clang"
+          - "Ubuntu 24.04 gcc"
+          - "MacOS 26 Clang"
 
         # This is where we list the bulk of the options for each configuration.
         # The key-value pair values are usually appropriate for being CMake
