@@ -167,14 +167,17 @@ main(int argc, char **argv)
         if (mpi_rank == 0)
             printf("usage: %s write|verify\n", argv[0]);
     }
-    else if (provided != required) {
-        /* The subfiling VFD requires MPI_THREAD_MULTIPLE, as in t_subfiling_vfd */
-        if (mpi_rank == 0)
-            printf("MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE\n");
+    else if (strcmp(argv[1], "write") == 0) {
+        /* The subfiling VFD requires MPI_THREAD_MULTIPLE. As in t_subfiling_vfd,
+         * that's a failure rather than a skip. */
+        if (provided != required) {
+            if (mpi_rank == 0)
+                printf("MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE\n");
+        }
+        else
+            ret = write_file(mpi_rank, mpi_size);
     }
-    else if (strcmp(argv[1], "write") == 0)
-        ret = write_file(mpi_rank, mpi_size);
-    else
+    else /* verify reads the combined file with the default file driver */
         ret = (mpi_rank == 0) ? verify_file() : 0;
 
     /* Fail on every rank if any rank failed */

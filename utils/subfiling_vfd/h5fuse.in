@@ -80,9 +80,15 @@ if [ "$parallel" == "true" ]; then
     # Generate and compile an MPI program to get MPI rank and size
     if [ ! -f "${c_src}" ]; then
         gen_mpi
-        CC="${H5FUSE_CC:-@H5FUSE_MPI_CC@}"
-        if ! ${CC} "${c_src}" -o "${c_exec}"; then
-            echo -e "$RED ERR: -p could not compile its MPI helper program with '${CC}'. $NC" >&2
+        # H5FUSE_CC may include flags, so split it into words (without
+        # pathname expansion). The configured compiler is a single path.
+        if [ -n "${H5FUSE_CC}" ]; then
+            read -r -a cc_cmd <<< "${H5FUSE_CC}"
+        else
+            cc_cmd=("@H5FUSE_MPI_CC@")
+        fi
+        if ! "${cc_cmd[@]}" "${c_src}" -o "${c_exec}"; then
+            echo -e "$RED ERR: -p could not compile its MPI helper program with '${cc_cmd[*]}'. $NC" >&2
             echo -e "$RED      Set H5FUSE_CC to an MPI C compiler wrapper, for example mpicc. $NC" >&2
             rm -f "${c_src}" "${c_exec}"
             exit 1
