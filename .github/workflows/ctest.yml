@@ -36,7 +36,15 @@ on:
             required: true
         APPLE_CERTS_BASE64_PASSWD:
             required: true
+        KEYCHAIN_NAME:
+            required: true
         KEYCHAIN_PASSWD:
+            required: true
+        SIGNER:
+            required: true
+        NOTARY_USER:
+            required: true
+        NOTARY_KEY:
             required: true
         AZURE_TENANT_ID:
             required: true
@@ -600,7 +608,7 @@ jobs:
         run: |
             # create variables
             CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-            KEYCHAIN_FILE=${{ vars.KEYCHAIN_NAME }}.keychain
+            KEYCHAIN_FILE=${{ secrets.KEYCHAIN_NAME }}.keychain
             # import certificate from secrets
             echo $BUILD_CERTIFICATE_BASE64 | base64 --decode > $CERTIFICATE_PATH
             security -v create-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
@@ -659,7 +667,7 @@ jobs:
         id: run-ctest
         env:
           BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
-          SIGNER: ${{ vars.SIGNER }}
+          SIGNER: ${{ secrets.SIGNER }}
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
           cmake --workflow --preset=${{ inputs.preset_name }}-macos-Clang --fresh
@@ -669,10 +677,10 @@ jobs:
         id: sign-dmg
         env:
           KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
-          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
-          SIGNER: ${{ vars.SIGNER }}
-          NOTARY_USER: ${{ vars.NOTARY_USER }}
-          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+          KEYCHAIN_NAME: ${{ secrets.KEYCHAIN_NAME }}
+          SIGNER: ${{ secrets.SIGNER }}
+          NOTARY_USER: ${{ secrets.NOTARY_USER }}
+          NOTARY_KEY: ${{ secrets.NOTARY_KEY }}
         run: |
           /usr/bin/codesign --force --timestamp --options runtime --entitlements ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/install/distribution.entitlements --verbose=4 --strict --sign ${{ env.SIGNER }} --deep ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
@@ -694,10 +702,10 @@ jobs:
         id: notarize-dmg
         env:
           KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
-          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
-          SIGNER: ${{ vars.SIGNER }}
-          NOTARY_USER: ${{ vars.NOTARY_USER }}
-          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+          KEYCHAIN_NAME: ${{ secrets.KEYCHAIN_NAME }}
+          SIGNER: ${{ secrets.SIGNER }}
+          NOTARY_USER: ${{ secrets.NOTARY_USER }}
+          NOTARY_KEY: ${{ secrets.NOTARY_KEY }}
         run: |
           jsonout=$(/usr/bin/xcrun notarytool submit --wait --output-format json --apple-id ${{ env.NOTARY_USER }} --password ${{ env.NOTARY_KEY }} --team-id ${{ env.SIGNER }} ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg)
           echo "JSONOUT=$jsonout" >> $GITHUB_OUTPUT
@@ -717,10 +725,10 @@ jobs:
         id: post-notary
         env:
           KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
-          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
-          SIGNER: ${{ vars.SIGNER }}
-          NOTARY_USER: ${{ vars.NOTARY_USER }}
-          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+          KEYCHAIN_NAME: ${{ secrets.KEYCHAIN_NAME }}
+          SIGNER: ${{ secrets.SIGNER }}
+          NOTARY_USER: ${{ secrets.NOTARY_USER }}
+          NOTARY_KEY: ${{ secrets.NOTARY_KEY }}
         run: |
           {
             echo 'NOTARYOUT<<EOF'
@@ -741,10 +749,10 @@ jobs:
         id: staple-dmg
         env:
           KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
-          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
-          SIGNER: ${{ vars.SIGNER }}
-          NOTARY_USER: ${{ vars.NOTARY_USER }}
-          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+          KEYCHAIN_NAME: ${{ secrets.KEYCHAIN_NAME }}
+          SIGNER: ${{ secrets.SIGNER }}
+          NOTARY_USER: ${{ secrets.NOTARY_USER }}
+          NOTARY_KEY: ${{ secrets.NOTARY_KEY }}
         run: |
           /usr/bin/xcrun stapler staple ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
