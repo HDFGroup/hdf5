@@ -199,8 +199,8 @@ H5TSset_internal_threads(unsigned num_threads)
         H5TS_pool_g = NULL;
     }
 
-    /* Create global thread pool if num_threads > 0 */
-    if (num_threads > 0)
+    /* Create global thread pool if num_threads > 1. There is no benefit to using the internal concurrency code with a single worker thread over simply using the serial algorithm. */
+    if (num_threads > 1)
         if (H5TS_pool_create(&H5TS_pool_g, num_threads) < 0)
             HGOTO_ERROR(H5E_LIB, H5E_CANTINIT, FAIL, "can't create thread pool");
 
