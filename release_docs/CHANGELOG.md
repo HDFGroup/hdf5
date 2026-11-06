@@ -216,6 +216,20 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed independent MPI-IO transfers larger than 2 GiB with pre-MPI-4 libraries
+
+   MPI libraries older than MPI-4 have no large-count I/O routines, so the MPI-IO
+   VFD described a single independent read or write larger than `INT_MAX` bytes
+   with a derived datatype. Some of those libraries mishandle that transfer: with
+   Open MPI 3.x, ROMIO rejects it with `MPI_ERR_COUNT` and ompio performs a short
+   write, so `H5Dwrite()` failed with "file write failed" (seen in `t_bigio`).
+
+   When the MPI library reports a version older than MPI-4, the MPI-IO VFD now
+   splits such independent transfers into chunks of at most 1 GiB. MPI-4
+   libraries continue to use the derived-datatype path.
+
+   Fixes GitHub issue #6862
+
 ### Fixed an assertion failure when a filter pipeline contains `H5Z_MAX_NFILTERS` filters
 
    An `assert()` in the internal function `H5Z_pipeline()` caused a crash in debug builds

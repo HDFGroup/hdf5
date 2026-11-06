@@ -192,6 +192,21 @@ static int H5FD_mpio_debug_rank_s = -1;
     (H5FD_mpio_debug_rank_s < 0 || H5FD_mpio_debug_rank_s == (file)->mpi_rank)
 #endif
 
+/*
+ * MPI libraries that predate MPI-4 have no large-count (MPI_Count) I/O
+ * routines, so a single independent transfer larger than INT_MAX bytes is
+ * described with a derived datatype (H5_mpio_create_large_type). Some of
+ * those libraries mishandle that: Open MPI 3.x's ROMIO rejects it with
+ * MPI_ERR_COUNT, and its ompio issues one pwrite()/pread(), which Linux caps
+ * at 0x7ffff000 bytes, then reports a short transfer. For such MPI versions,
+ * split large independent transfers into MPI_BYTE chunks that fit in an int
+ * and stay below the per-call OS limit.
+ */
+#if !H5_CHECK_MPI_VERSION(4, 0)
+#define H5FD_MPIO_SPLIT_LARGE_IO
+#endif
+#define H5FD_MPIO_MAX_IO_CHUNK ((size_t)1 << 30) /* 1 GiB per MPI I/O call when splitting */
+
 #ifdef H5FDmpio_DEBUG
 
 /*---------------------------------------------------------------------------
@@ -1267,6 +1282,110 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__mpio_get_handle() */
 
+#ifdef H5FD_MPIO_SPLIT_LARGE_IO
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__mpio_read_split
+ *
+ * Purpose:     Independently reads SIZE bytes at MPI_OFF into BUF as a
+ *              series of MPI_BYTE reads of at most H5FD_MPIO_MAX_IO_CHUNK
+ *              bytes each, stopping early at end of file.
+ *
+ *              Used instead of a single large derived-datatype read on MPI
+ *              libraries that predate MPI-4 large-count support (see
+ *              H5FD_MPIO_SPLIT_LARGE_IO).
+ *
+ * Return:      SUCCEED/FAIL. *BYTES_READ is set to the number of bytes
+ *              actually read.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__mpio_read_split(MPI_File fh, MPI_Offset mpi_off, void *buf, size_t size, MPI_Count *bytes_read)
+{
+    size_t     total = 0;
+    MPI_Status mpi_stat;
+    MPI_Count  n;
+    int        chunk;
+    int        mpi_code;
+    herr_t     ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    while (total < size) {
+        chunk = (int)MIN(size - total, H5FD_MPIO_MAX_IO_CHUNK);
+
+        memset(&mpi_stat, 0, sizeof(MPI_Status));
+        if (MPI_SUCCESS != (mpi_code = MPI_File_read_at(fh, mpi_off + (MPI_Offset)total, (char *)buf + total,
+                                                        chunk, MPI_BYTE, &mpi_stat)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
+        if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, MPI_BYTE, &n)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+        if (n < 0 || n > chunk)
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed");
+
+        total += (size_t)n;
+
+        /* A short read means end of file */
+        if (n < chunk)
+            break;
+    }
+
+    *bytes_read = (MPI_Count)total;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__mpio_read_split() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__mpio_write_split
+ *
+ * Purpose:     Independently writes SIZE bytes from BUF at MPI_OFF as a
+ *              series of MPI_BYTE writes of at most H5FD_MPIO_MAX_IO_CHUNK
+ *              bytes each, retrying after short writes.
+ *
+ *              Used instead of a single large derived-datatype write on MPI
+ *              libraries that predate MPI-4 large-count support (see
+ *              H5FD_MPIO_SPLIT_LARGE_IO).
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__mpio_write_split(MPI_File fh, MPI_Offset mpi_off, const void *buf, size_t size)
+{
+    size_t     total = 0;
+    MPI_Status mpi_stat;
+    MPI_Count  n;
+    int        chunk;
+    int        mpi_code;
+    herr_t     ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    while (total < size) {
+        chunk = (int)MIN(size - total, H5FD_MPIO_MAX_IO_CHUNK);
+
+        memset(&mpi_stat, 0, sizeof(MPI_Status));
+        if (MPI_SUCCESS !=
+            (mpi_code = MPI_File_write_at(fh, mpi_off + (MPI_Offset)total, (const char *)buf + total, chunk,
+                                          MPI_BYTE, &mpi_stat)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code)
+        if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, MPI_BYTE, &n)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+
+        /* Short writes are retried; a write that makes no progress is an error */
+        if (n <= 0 || n > chunk)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed");
+
+        total += (size_t)n;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__mpio_write_split() */
+#endif /* H5FD_MPIO_SPLIT_LARGE_IO */
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_read
  *
@@ -1301,6 +1420,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     MPI_Count    n;
     bool         use_view_this_time = false;
     bool         derived_type       = false;
+    bool         split_io           = false; /* If the read was split into chunks */
     bool         rank0_bcast        = false; /* If read-with-rank0-and-bcast flag was used */
 #ifdef H5FDmpio_DEBUG
     bool H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
@@ -1431,33 +1551,46 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
     } /* end if */
     else {
+#ifdef H5FD_MPIO_SPLIT_LARGE_IO
+        /* Pre-MPI-4 library: split a transfer too large for an int count */
         if (size != (hsize_t)size_i) {
-            /* If HERE, then we need to work around the integer size limit
-             * of 2GB. The input size_t size variable cannot fit into an integer,
-             * but we can get around that limitation by creating a different datatype
-             * and then setting the integer size (or element count) to 1 when using
-             * the derived_type.
-             */
-
-            if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype");
-
-            derived_type = true;
-            size_i       = 1;
+            if (H5FD__mpio_read_split(file->f, mpi_off, buf, size, &bytes_read) < 0)
+                HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "split read failed");
+            split_io = true;
         }
+#endif
+        if (!split_io) {
+            if (size != (hsize_t)size_i) {
+                /* If HERE, then we need to work around the integer size limit
+                 * of 2GB. The input size_t size variable cannot fit into an integer,
+                 * but we can get around that limitation by creating a different datatype
+                 * and then setting the integer size (or element count) to 1 when using
+                 * the derived_type.
+                 */
+
+                if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype");
+
+                derived_type = true;
+                size_i       = 1;
+            }
 
 #ifdef H5FDmpio_DEBUG
-        if (H5FD_mpio_debug_r_flag)
-            fprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
+            if (H5FD_mpio_debug_r_flag)
+                fprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
 #endif
 
-        /* Perform independent read operation */
-        if (MPI_SUCCESS != (mpi_code = MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
+            /* Perform independent read operation */
+            if (MPI_SUCCESS !=
+                (mpi_code = MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
+        }
     } /* end else */
 
-    /* Only retrieve bytes read if this rank _actually_ participated in I/O */
-    if (!rank0_bcast || (rank0_bcast && file->mpi_rank == 0)) {
+    /* Only retrieve bytes read if this rank _actually_ participated in I/O
+     * (a split read already counted its bytes)
+     */
+    if (!split_io && (!rank0_bcast || (rank0_bcast && file->mpi_rank == 0))) {
         /* How many bytes were actually read? */
         if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_read))) {
             if (rank0_bcast && file->mpi_rank == 0) {
@@ -1483,17 +1616,21 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         if (MPI_SUCCESS != MPI_Bcast(&bytes_read, 1, MPI_COUNT, 0, file->comm))
             HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", 0)
 
-    /* Get the type's size */
-    if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_size_x failed", mpi_code)
-    if (MPI_UNDEFINED == type_size)
-        HGOTO_ERROR(H5E_VFL, H5E_BADRANGE, FAIL,
-                    "size of MPI datatype for memory buffer couldn't fit in MPI_Count");
-    else if (type_size < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "size of MPI datatype for memory buffer was negative");
+    if (split_io)
+        io_size = (MPI_Count)size;
+    else {
+        /* Get the type's size */
+        if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_size_x failed", mpi_code)
+        if (MPI_UNDEFINED == type_size)
+            HGOTO_ERROR(H5E_VFL, H5E_BADRANGE, FAIL,
+                        "size of MPI datatype for memory buffer couldn't fit in MPI_Count");
+        else if (type_size < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "size of MPI datatype for memory buffer was negative");
 
-    /* Compute the actual number of bytes requested */
-    io_size = type_size * size_i;
+        /* Compute the actual number of bytes requested */
+        io_size = type_size * size_i;
+    }
 
     /* Check for read failure */
     if (bytes_read < 0 || bytes_read > io_size)
@@ -1555,7 +1692,8 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     int              size_i;
     bool             use_view_this_time = false;
     bool             derived_type       = false;
-    H5FD_mpio_xfer_t xfer_mode; /* I/O transfer mode */
+    bool             split_io           = false; /* If the write was split into chunks */
+    H5FD_mpio_xfer_t xfer_mode;                  /* I/O transfer mode */
 #ifdef H5FDmpio_DEBUG
     bool H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
     bool H5FD_mpio_debug_w_flag = (H5FD_mpio_debug_flags_s[(int)'w'] && H5FD_MPIO_TRACE_THIS_RANK(file));
@@ -1669,46 +1807,64 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
     } /* end if */
     else {
+#ifdef H5FD_MPIO_SPLIT_LARGE_IO
+        /* Pre-MPI-4 library: split a transfer too large for an int count */
         if (size != (hsize_t)size_i) {
-            /* If HERE, then we need to work around the integer size limit
-             * of 2GB. The input size_t size variable cannot fit into an integer,
-             * but we can get around that limitation by creating a different datatype
-             * and then setting the integer size (or element count) to 1 when using
-             * the derived_type.
-             */
-
-            if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype");
-
-            derived_type = true;
-            size_i       = 1;
+            if (H5FD__mpio_write_split(file->f, mpi_off, buf, size) < 0)
+                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "split write failed");
+            split_io = true;
         }
+#endif
+        if (!split_io) {
+            if (size != (hsize_t)size_i) {
+                /* If HERE, then we need to work around the integer size limit
+                 * of 2GB. The input size_t size variable cannot fit into an integer,
+                 * but we can get around that limitation by creating a different datatype
+                 * and then setting the integer size (or element count) to 1 when using
+                 * the derived_type.
+                 */
+
+                if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype");
+
+                derived_type = true;
+                size_i       = 1;
+            }
 
 #ifdef H5FDmpio_DEBUG
-        if (H5FD_mpio_debug_w_flag)
-            fprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
+            if (H5FD_mpio_debug_w_flag)
+                fprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
 #endif
 
-        /* Perform independent write operation */
-        if (MPI_SUCCESS != (mpi_code = MPI_File_write_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code)
+            /* Perform independent write operation */
+            if (MPI_SUCCESS !=
+                (mpi_code = MPI_File_write_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code)
+        }
     } /* end else */
 
-    /* How many bytes were actually written? */
-    if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_written)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+    if (split_io) {
+        /* H5FD__mpio_write_split() fails unless every byte was written */
+        bytes_written = (MPI_Count)size;
+        io_size       = (MPI_Count)size;
+    }
+    else {
+        /* How many bytes were actually written? */
+        if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_written)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
 
-    /* Get the type's size */
-    if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_size_x failed", mpi_code)
-    if (MPI_UNDEFINED == type_size)
-        HGOTO_ERROR(H5E_VFL, H5E_BADRANGE, FAIL,
-                    "size of MPI datatype for memory buffer couldn't fit in MPI_Count");
-    else if (type_size < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "size of MPI datatype for memory buffer was negative");
+        /* Get the type's size */
+        if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_size_x failed", mpi_code)
+        if (MPI_UNDEFINED == type_size)
+            HGOTO_ERROR(H5E_VFL, H5E_BADRANGE, FAIL,
+                        "size of MPI datatype for memory buffer couldn't fit in MPI_Count");
+        else if (type_size < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "size of MPI datatype for memory buffer was negative");
 
-    /* Compute the actual number of bytes requested */
-    io_size = type_size * size_i;
+        /* Compute the actual number of bytes requested */
+        io_size = type_size * size_i;
+    }
 
     /* Check for write failure */
     if (bytes_written != io_size || bytes_written < 0)
@@ -2374,6 +2530,8 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
             }
             size_i = (int)size;
 
+#ifndef H5FD_MPIO_SPLIT_LARGE_IO
+            /* (Pre-MPI-4 libraries instead read large elements in chunks below) */
             if (size != (size_t)size_i) {
                 /* If HERE, then we need to work around the integer size limit
                  * of 2GB. The input size_t size variable cannot fit into an integer,
@@ -2388,21 +2546,31 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                 buf_type_created = true;
                 size_i           = 1;
             }
+#endif
 
             /* Check if we actually need to do I/O */
             if (addrs[i] < max_addr) {
-                /* Portably initialize MPI status variable */
-                memset(&mpi_stat, 0, sizeof(mpi_stat));
+#ifdef H5FD_MPIO_SPLIT_LARGE_IO
+                if (size != (size_t)size_i) {
+                    if (H5FD__mpio_read_split(file->f, mpi_off, bufs[i], size, &bytes_read) < 0)
+                        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "split read failed");
+                }
+                else
+#endif
+                {
+                    /* Portably initialize MPI status variable */
+                    memset(&mpi_stat, 0, sizeof(mpi_stat));
 
-                /* Issue read */
-                if (MPI_SUCCESS !=
-                    (mpi_code = MPI_File_read_at(file->f, mpi_off, bufs[i], size_i, buf_type, &mpi_stat)))
+                    /* Issue read */
+                    if (MPI_SUCCESS !=
+                        (mpi_code = MPI_File_read_at(file->f, mpi_off, bufs[i], size_i, buf_type, &mpi_stat)))
 
-                    HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
+                        HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
 
-                /* How many bytes were actually read? */
-                if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, MPI_BYTE, &bytes_read)))
-                    HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+                    /* How many bytes were actually read? */
+                    if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, MPI_BYTE, &bytes_read)))
+                        HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+                }
 
                 /* Compute the actual number of bytes requested */
                 io_size = (MPI_Count)size;
@@ -2695,6 +2863,8 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
             }
             size_i = (int)size;
 
+#ifndef H5FD_MPIO_SPLIT_LARGE_IO
+            /* (Pre-MPI-4 libraries instead write large elements in chunks below) */
             if (size != (size_t)size_i) {
                 /* If HERE, then we need to work around the integer size limit
                  * of 2GB. The input size_t size variable cannot fit into an integer,
@@ -2709,12 +2879,22 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
                 buf_type_created = true;
                 size_i           = 1;
             }
+#endif
 
-            /* Perform write */
-            if (MPI_SUCCESS !=
-                (mpi_code = MPI_File_write_at(file->f, mpi_off, bufs[i], size_i, buf_type, &mpi_stat)))
+#ifdef H5FD_MPIO_SPLIT_LARGE_IO
+            if (size != (size_t)size_i) {
+                if (H5FD__mpio_write_split(file->f, mpi_off, bufs[i], size) < 0)
+                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "split write failed");
+            }
+            else
+#endif
+            {
+                /* Perform write */
+                if (MPI_SUCCESS !=
+                    (mpi_code = MPI_File_write_at(file->f, mpi_off, bufs[i], size_i, buf_type, &mpi_stat)))
 
-                HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code)
+                    HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code)
+            }
 
             /* Check if this is the highest address written to so far */
             if (addrs[i] + size > max_addr)
