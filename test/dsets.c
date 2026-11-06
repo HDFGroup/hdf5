@@ -222,6 +222,7 @@ static const char *FILENAME[] = {"dataset",              /* 0 */
 #define H5Z_FILTER_REENTER_H5          322
 #define H5Z_FILTER_H5_ALLOCATE         323
 #define H5Z_FILTER_CANNOT_APPLY        324
+#define H5Z_FILTER_CLASS3_REGISTER     325
 
 /* Flags for testing filters */
 #define DISABLE_FLETCHER32 0
@@ -20853,7 +20854,7 @@ const H5Z_class3_t H5Z_NON_THREADSAFE_LIE2[1] = {{
     H5Z_CLASS_T_VERS_3,             /* H5Z_class_t version */
     H5Z_FILTER_NON_THREADSAFE_LIE2, /* Filter id number */
     1, 1,                           /* Encoding and decoding enabled */
-    "non_threadsafe_lie",           /* Filter name for debugging */
+    "non_threadsafe_lie2",          /* Filter name for debugging */
     NULL,                           /* The "can apply" callback */
     NULL,                           /* The "set local" callback */
     filter_non_threadsafe,          /* The actual filter function */
@@ -20947,7 +20948,7 @@ const H5Z_class3_t H5Z_H5_ALLOCATE[1] = {{
     H5Z_CLASS_T_VERS_3,     /* H5Z_class_t version */
     H5Z_FILTER_H5_ALLOCATE, /* Filter id number */
     1, 1,                   /* Encoding and decoding enabled */
-    "reenter_h5",           /* Filter name for debugging */
+    "h5_allocate",          /* Filter name for debugging */
     NULL,                   /* The "can apply" callback */
     NULL,                   /* The "set local" callback */
     filter_h5_allocate,     /* The actual filter function */
@@ -21917,6 +21918,94 @@ error:
 } /* end test_cannot_apply() */
 
 /*-------------------------------------------------------------------------
+ * Function:    filter_class3_register
+ *
+ * Purpose:     Pass-through filter for test_class3_register()
+ *
+ * Return:      nbytes
+ *-------------------------------------------------------------------------
+ */
+static size_t
+filter_class3_register(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+                       const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes,
+                       size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+{
+    return nbytes;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_class3_register
+ *
+ * Purpose:     Tests H5Zregister() with H5Z_class3_t: the name is what a
+ *              DCPL reports, and a missing filter callback is rejected.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_class3_register(void)
+{
+    char         name_out[64];
+    H5Z_class3_t cls;
+    hid_t        dcpl = H5I_INVALID_HID;
+    unsigned     flags;
+    size_t       cd_nelmts = 0;
+    unsigned     filter_config;
+    herr_t       ret;
+
+    TESTING("H5Z_class3_t registration");
+
+    memset(&cls, 0, sizeof(cls));
+    cls.version         = H5Z_CLASS_T_VERS_3;
+    cls.id              = H5Z_FILTER_CLASS3_REGISTER;
+    cls.encoder_present = 1;
+    cls.decoder_present = 1;
+    cls.name            = "class3_test-1.0";
+    cls.filter          = filter_class3_register;
+
+    /* A valid class3 filter registers, and its name is what the DCPL reports */
+    if (H5Zregister(&cls) < 0)
+        TEST_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_filter(dcpl, H5Z_FILTER_CLASS3_REGISTER, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
+        TEST_ERROR;
+    if (H5Pget_filter_by_id2(dcpl, H5Z_FILTER_CLASS3_REGISTER, &flags, &cd_nelmts, NULL, sizeof(name_out),
+                             name_out, &filter_config) < 0)
+        TEST_ERROR;
+    if (strcmp(name_out, "class3_test-1.0") != 0)
+        FAIL_PUTS_ERROR("    wrong filter name in DCPL");
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    dcpl = H5I_INVALID_HID;
+    if (H5Zunregister(H5Z_FILTER_CLASS3_REGISTER) < 0)
+        TEST_ERROR;
+
+    /* Without a filter callback, registration fails */
+    cls.filter = NULL;
+    H5E_BEGIN_TRY
+    {
+        ret = H5Zregister(&cls);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        FAIL_PUTS_ERROR("    H5Zregister accepted a NULL filter callback");
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Zunregister(H5Z_FILTER_CLASS3_REGISTER);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_class3_register() */
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests the dataset interface (H5D)
@@ -22241,6 +22330,7 @@ main(void)
     nerrors += (test_object_header_minimization_dcpl() < 0 ? 1 : 0);
     nerrors += (test_h5s_block() < 0 ? 1 : 0);
     nerrors += (test_h5s_plist() < 0 ? 1 : 0);
+    nerrors += (test_class3_register() < 0 ? 1 : 0);
 #ifdef H5_HAVE_THREADS
     nerrors += (test_threaded_chunks() < 0 ? 1 : 0);
     if (driver_readwrite_no_h5_calls) {

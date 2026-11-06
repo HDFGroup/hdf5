@@ -61,6 +61,13 @@
  */
 #define H5Z_FEAT_FILTER_NO_H5_CALLS 0x0000000000000002
 
+/**
+ * Maximum length in bytes of the canonical \c name of an H5Z_class3_t
+ * filter, not counting the NUL terminator.
+ * \since 2.3.0
+ */
+#define H5Z_FILTER_NAME_MAX_LEN 255
+
 /*******************/
 /* Public Typedefs */
 /*******************/
@@ -201,7 +208,7 @@ typedef struct H5Z_class3_t {
     H5Z_filter_t         id;              /**< Filter ID number                             */
     unsigned             encoder_present; /**< Does this filter have an encoder?            */
     unsigned             decoder_present; /**< Does this filter have a decoder?             */
-    const char          *name;            /**< Comment for debugging                        */
+    const char          *name;            /**< Canonical filter name                        */
     H5Z_can_apply_func_t can_apply;       /**< The "can apply" callback for a filter        */
     H5Z_set_local_func_t set_local;       /**< The "set local" callback for a filter        */
     H5Z_func_t           filter;          /**< The actual filter function                   */
@@ -284,8 +291,18 @@ extern "C" {
  *          \c decoder_present is a library-defined value indicating whether
  *          the filter's encoding capability is available to the application.
  *
- *          \c name is a descriptive comment used for debugging, may contain a
- *          descriptive name for the filter, and may be the null pointer.
+ *          For H5Z_class1_t and H5Z_class2_t, \c name is a descriptive comment
+ *          used for debugging, may contain a descriptive name for the filter,
+ *          and may be the null pointer.
+ *
+ *          For H5Z_class3_t, \c name is the filter's canonical name, which
+ *          identifies the filter. It should be 1 to #H5Z_FILTER_NAME_MAX_LEN
+ *          bytes long, contain only the characters <tt>[A-Za-z0-9_.-]</tt>,
+ *          be unique among H5Z_class3_t filters, and stay the same between
+ *          releases of the filter. A filter with an ID registered with The
+ *          HDF Group should use the name recorded with its registration. This
+ *          version of the library does not check these rules, but a future
+ *          version may rely on them.
  *
  *          \c can_apply, described in detail below, is a user-defined callback
  *          function that determines whether the combination of the dataset
