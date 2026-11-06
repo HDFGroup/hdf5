@@ -234,7 +234,7 @@ H5Zregister(const void *cls)
 
     /* Upgrade class version if necessary */
     if (NULL == (cls_real = H5Z__upgrade_class_vers(cls, &cls_new)))
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTUPDATE, FAIL, "can't upgrade filter class version");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter class");
 
     assert(cls_real->version == H5Z_CLASS_T_VERS_3);
 
@@ -273,11 +273,7 @@ H5Z__upgrade_class_vers(const void *_cls, H5Z_class3_t *cls3_buf)
     const H5Z_class3_t *cls       = (const H5Z_class3_t *)_cls;
     const H5Z_class3_t *ret_value = NULL;
 
-#ifdef H5_NO_DEPRECATED_SYMBOLS
     FUNC_ENTER_PACKAGE
-#else  /* H5_NO_DEPRECATED_SYMBOLS */
-    FUNC_ENTER_PACKAGE_NOERR
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     assert(cls);
     assert(cls3_buf);
@@ -339,14 +335,18 @@ H5Z__upgrade_class_vers(const void *_cls, H5Z_class3_t *cls3_buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid H5Z_class_t version number");
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
     }  /* end if */
-    else
+    else {
+        /* Native H5Z_class3_t. Check the filter callback here so that plugins, which
+         * do not go through H5Zregister(), are checked too. */
+        if (cls->filter == NULL)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "no filter function specified");
+
         ret_value = cls;
+    }
 
     assert(ret_value->version == H5Z_CLASS_T_VERS_3);
 
-#ifdef H5_NO_DEPRECATED_SYMBOLS
 done:
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z__upgrade_class_vers() */
 

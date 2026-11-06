@@ -271,17 +271,16 @@
  * The HDF Group anticipates that developers of HDF5 filter plugins will not only register new filters, but
  * will also provide links to the source code and/or binaries for the corresponding HDF5 filter plugins.
  *
- * It is very important for the users of the filter that developers provide filter information in the “name”
- * field of the filter structure, for example:
+ * An H5Z_class3_t filter should give its canonical name in the “name” field of the filter structure: 1 to
+ * #H5Z_FILTER_NAME_MAX_LEN bytes of <tt>[A-Za-z0-9_.-]</tt>, the same in every release of the filter. For a
+ * filter registered with The HDF Group, use the name recorded with its registration, for example:
  * \code
  *   const H5Z_class3_t H5Z_BZIP2[1] = {{
- *     H5Z_CLASS_T_VERS,                    // H5Z_class_t version
+ *     H5Z_CLASS_T_VERS_3,                  // H5Z_class_t version
  *     (H5Z_filter_t)H5Z_FILTER_BZIP2,      // Filter id number
  *     1,                                   // encoder_present flag (set to true)
  *     1,                                   // decoder_present flag (set to true)
- *     "HDF5 bzip2 filter; see
- *     https://\PLURL/docs/RegisteredFilterPlugins.md",
- *                                          // Filter name for debugging
+ *     "bzip2",                             // Canonical filter name
  *     NULL,                                // The "can apply" callback
  *     NULL,                                // The "set local" callback
  *     (H5Z_func_t)H5Z_filter_bzip2,        // The actual filter function
@@ -292,9 +291,10 @@
  * The HDF5 Library and command-line tools have access to the “name” field. An application can
  * use the H5Pget_filter<*> functions to retrieve information about the filters.
  *
- * Using the example of the structure above, the \ref sec_cltools_h5dump tool will print the string “HDF5
- * bzip2 filter found at …” pointing users to the applied filter (see the example in the \ref
- * subsubsec_filter_plugins_model_read section) thus solving the problem of the filter’s origin.
+ * An H5Z_class2_t filter may instead put free-form text in the “name” field, such as “HDF5 bzip2 filter;
+ * see https://\PLURL/docs/RegisteredFilterPlugins.md”, which the \ref sec_cltools_h5dump tool prints to
+ * point users to the applied filter (see the example in the \ref subsubsec_filter_plugins_model_read
+ * section).
  *
  * \subsubsection subsubsec_filter_plugins_prog_create Creating an HDF5 Filter Plugin
  * The HDF5 filter plugin source should include:
