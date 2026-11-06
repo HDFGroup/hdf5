@@ -13,7 +13,6 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        build_mode: ["Release", "Debug"]
         include:
           - build_mode: "Release"
           - build_mode: "Debug"
