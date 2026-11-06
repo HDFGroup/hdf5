@@ -577,6 +577,27 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
           RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT awslibraries EXCLUDE_FROM_ALL
           LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT awslibraries EXCLUDE_FROM_ALL
       )
+      # Optional license files for the bundled aws-* DLLs: one <library>-LICENSE
+      # per library plus a merged NOTICE. Set HDF5_AWS_LICENSE_DIR (as a CMake
+      # or environment variable) to a directory holding them; the CI release
+      # job (ctest.yml build_and_test_s3_win) fetches and sets it.
+      if (NOT DEFINED HDF5_AWS_LICENSE_DIR AND DEFINED ENV{HDF5_AWS_LICENSE_DIR})
+        set (HDF5_AWS_LICENSE_DIR "$ENV{HDF5_AWS_LICENSE_DIR}")
+      endif ()
+      if (HDF5_AWS_LICENSE_DIR)
+        file (TO_CMAKE_PATH "${HDF5_AWS_LICENSE_DIR}" _aws_license_dir)
+        file (GLOB _aws_license_files "${_aws_license_dir}/*-LICENSE")
+        if (NOT _aws_license_files OR NOT EXISTS "${_aws_license_dir}/NOTICE")
+          message (FATAL_ERROR "HDF5_AWS_LICENSE_DIR (${HDF5_AWS_LICENSE_DIR}) must contain <library>-LICENSE files and a NOTICE file")
+        endif ()
+        install (
+            FILES ${_aws_license_files} "${_aws_license_dir}/NOTICE"
+            DESTINATION ${HDF5_INSTALL_DATA_DIR}
+            COMPONENT awslibraries EXCLUDE_FROM_ALL
+        )
+        unset (_aws_license_files)
+        unset (_aws_license_dir)
+      endif ()
       # Monolithic generators (ZIP) do a full install for "ALL", which skips
       # EXCLUDE_FROM_ALL rules, so request the component explicitly.
       # Component generators (WIX) already pick it up via "ALL".

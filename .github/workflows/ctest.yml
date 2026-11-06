@@ -841,6 +841,34 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
         shell: bash
 
+      # Fetch LICENSE and NOTICE for every aws-* library vcpkg installed, from the
+      # upstream tag matching the installed version. Each LICENSE is saved as
+      # <library>-LICENSE; the NOTICE files are merged into a single NOTICE.
+      # HDF5_AWS_LICENSE_DIR makes CMakeInstallation.cmake add these files to the
+      # awslibraries component (MSI and CPack zip); they are also copied into the
+      # published zip below.
+      - name: Get aws-c-s3 license files (Windows S3)
+        run: |
+          set -uo pipefail
+          LICDIR="${{ runner.workspace }}/aws-licenses"
+          mkdir -p "$LICDIR"
+          : > "$LICDIR/NOTICE"
+          vcpkg list | awk '$1 ~ /^aws-[^[]*:x64-windows$/ {split($1, p, ":"); split($2, v, "#"); print p[1], v[1]}' |
+          while read -r port version; do
+            raw="https://raw.githubusercontent.com/awslabs/$port/v$version"
+            echo "Fetching license files for $port v$version"
+            curl -fsSL "$raw/LICENSE" -o "$LICDIR/$port-LICENSE"
+            if notice=$(curl -fsSL "$raw/NOTICE"); then
+              printf '==== %s v%s ====\n%s\n\n' "$port" "$version" "$notice" >> "$LICDIR/NOTICE"
+            else
+              echo "::warning::No NOTICE file found for $port v$version"
+            fi
+          done
+          ls -l "$LICDIR"
+          test -f "$LICDIR/aws-c-s3-LICENSE"
+          echo "HDF5_AWS_LICENSE_DIR=$LICDIR" >> $GITHUB_ENV
+        shell: bash
+
       - name: Set up JDK 21
         uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v5
         with:
@@ -938,6 +966,8 @@ jobs:
           mkdir "${{ runner.workspace }}/build/hdf5"
           Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/LICENSE -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC-S3/README.md -Destination ${{ runner.workspace }}/build/hdf5/
+          # aws-* <library>-LICENSE files and merged NOTICE, fetched in "Get aws-c-s3 license files"
+          Copy-Item -Path "$env:HDF5_AWS_LICENSE_DIR/*" -Destination ${{ runner.workspace }}/build/hdf5/ -ErrorAction Stop
           Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC-S3/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
           cd "${{ runner.workspace }}/build"
           7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2026_cl_s3.zip hdf5
