@@ -41,12 +41,15 @@ H5_DLLVAR hid_t H5FD_CORE_id_g;
  * \brief Modifies the file access property list to use the #H5FD_CORE driver
  *
  * \fapl_id
+ * \param[in] initial_size Initial size, in bytes, of the backing memory
+ *            buffer; a value of 0 preserves the existing lazy-allocation
+ *            behavior
  * \param[in] increment Size, in bytes, of memory increments
  * \param[in] backing_store Boolean flag indicating whether to write the file
  *            contents to disk when the file is closed
  * \returns \herr_t
  *
- * \details H5Pset_fapl_core() modifies the file access property list to use the
+ * \details H5Pset_fapl_core2() modifies the file access property list to use the
  *          #H5FD_CORE driver.
  *
  *          The #H5FD_CORE driver enables an application to work with a file in
@@ -54,6 +57,12 @@ H5_DLLVAR hid_t H5FD_CORE_id_g;
  *          contents are stored only in memory until the file is closed. The \p
  *          backing_store parameter determines whether file contents are ever
  *          written to disk.
+ *
+ *          \p initial_size specifies the size of the initial memory buffer
+ *          used by the driver. If \p initial_size is 0, memory allocation is
+ *          deferred until needed. If nonzero, \p initial_size must be greater
+ *          than or equal to \p increment, after default increment handling is
+ *          applied.
  *
  *          \p increment specifies the increment by which allocated memory is to
  *          be increased each time more memory is required.
@@ -75,10 +84,70 @@ H5_DLLVAR hid_t H5FD_CORE_id_g;
  *
  * \note Currently this driver cannot create or open family or multi files.
  *
+ * \version 2.0.0 C function H5Pset_fapl_core() renamed to H5Pset_fapl_core1()
+ *          and deprecated; this function H5Pset_fapl_core2() introduced with
+ *          the new \p initial_size parameter.
+ *
+ * \since 2.0.0
+ *
+ */
+H5_DLL herr_t H5Pset_fapl_core2(hid_t fapl_id, size_t initial_size, size_t increment, bool backing_store);
+
+/**
+ * \ingroup FAPL
+ *
+ * \brief Queries core file driver properties
+ *
+ * \fapl_id
+ * \param[out] initial_size Initial size, in bytes, of the backing memory
+ *             buffer
+ * \param[out] increment Size, in bytes, of memory increments
+ * \param[out] backing_store Boolean flag indicating whether to write the file
+ *             contents to disk when the file is closed
+ * \returns \herr_t
+ *
+ * \details H5Pget_fapl_core2() queries the #H5FD_CORE driver properties as set
+ *          by H5Pset_fapl_core().
+ *
+ * \version 2.0.0 C function H5Pget_fapl_core() renamed to H5Pget_fapl_core1()
+ *          and deprecated; this function H5Pget_fapl_core2() introduced with
+ *          the new \p initial_size parameter.
+ *
+ * \since 2.0.0
+ *
+ */
+H5_DLL herr_t H5Pget_fapl_core2(hid_t fapl_id, size_t *initial_size /*out*/, size_t *increment /*out*/,
+                                bool *backing_store /*out*/);
+
+/* Deprecated API functions */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+
+/**
+ * \ingroup FAPL
+ *
+ * \brief Modifies the file access property list to use the #H5FD_CORE driver
+ *
+ * \fapl_id
+ * \param[in] increment Size, in bytes, of memory increments
+ * \param[in] backing_store Boolean flag indicating whether to write the file
+ *            contents to disk when the file is closed
+ * \returns \herr_t
+ *
+ * \deprecated This function has been renamed from H5Pset_fapl_core() and is
+ *             deprecated in favor of the macro #H5Pset_fapl_core or the
+ *             function H5Pset_fapl_core2().
+ *
+ * \details H5Pset_fapl_core1() modifies the file access property list to use
+ *          the #H5FD_CORE driver, equivalent to calling H5Pset_fapl_core2()
+ *          with \p initial_size set to 0 (lazy allocation).
+ *
+ * \version 2.0.0 Function H5Pset_fapl_core() renamed to H5Pset_fapl_core1()
+ *          and deprecated in this release.
+ *
  * \since 1.4.0
  *
  */
-H5_DLL herr_t H5Pset_fapl_core(hid_t fapl_id, size_t increment, bool backing_store);
+H5_DLL herr_t H5Pset_fapl_core1(hid_t fapl_id, size_t increment, bool backing_store);
 
 /**
  * \ingroup FAPL
@@ -91,13 +160,24 @@ H5_DLL herr_t H5Pset_fapl_core(hid_t fapl_id, size_t increment, bool backing_sto
  *             contents to disk when the file is closed
  * \returns \herr_t
  *
- * \details H5Pget_fapl_core() queries the #H5FD_CORE driver properties as set
- *          by H5Pset_fapl_core().
+ * \deprecated This function has been renamed from H5Pget_fapl_core() and is
+ *             deprecated in favor of the macro #H5Pget_fapl_core or the
+ *             function H5Pget_fapl_core2().
+ *
+ * \details H5Pget_fapl_core1() queries the #H5FD_CORE driver properties as
+ *          set by H5Pset_fapl_core(). Equivalent to calling H5Pget_fapl_core2()
+ *          with \p initial_size set to NULL.
+ *
+ * \version 2.0.0 Function H5Pget_fapl_core() renamed to H5Pget_fapl_core1()
+ *          and deprecated in this release.
  *
  * \since 1.4.0
  *
  */
-H5_DLL herr_t H5Pget_fapl_core(hid_t fapl_id, size_t *increment /*out*/, bool *backing_store /*out*/);
+H5_DLL herr_t H5Pget_fapl_core1(hid_t fapl_id, size_t *increment /*out*/, bool *backing_store /*out*/);
+
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+
 #ifdef __cplusplus
 }
 #endif
