@@ -55,7 +55,7 @@ Additional Release Information
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-ABI/API Compatibility Reports [tar file](https://github.com/HDFGroup/hdf5/releases/download/\PREVIOUS_VER/hdf5-\PREVIOUS_VER.html.abi.reports.tar.gz) or [individual html files](https://\RELURL/\PREVIOUS_VER/documentation/compat_reports/index.html)
+ABI/API Compatibility Reports [tar file](https://github.com/HDFGroup/hdf5/releases/download/\PREVIOUS_VER/hdf5-\PREVIOUS_VER.html.abi.reports.tar.gz)
 </td>
 </tr>
 <tr>
