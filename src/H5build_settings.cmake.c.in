@@ -103,6 +103,7 @@ const char H5build_settings[]=
     "                        Mirror VFD: @H5_HAVE_MIRROR_VFD@\n"
     "                     Subfiling VFD: @H5_HAVE_SUBFILING_VFD@\n"
     "                (Read-Only) S3 VFD: @H5_HAVE_ROS3_VFD@\n"
+    "                  aws-c-s3 version: @HDF5_AWS_C_S3_VERSION@\n"
     "              (Read-Only) HDFS VFD: @H5_HAVE_LIBHDFS@\n"
     "    Packages w/ extra debug output: @INTERNAL_DEBUG_OUTPUT@\n"
     "                       API tracing: @HDF5_ENABLE_TRACE@\n"

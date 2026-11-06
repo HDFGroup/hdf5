@@ -85,6 +85,7 @@ Dimension scales w/ new references: @HDF5_DIMENSION_SCALES_NEW_REF@
                         Mirror VFD: @HDF5_ENABLE_MIRROR_VFD@
                      Subfiling VFD: @HDF5_ENABLE_SUBFILING_VFD@
                 (Read-Only) S3 VFD: @HDF5_ENABLE_ROS3_VFD@
+                  aws-c-s3 version: @HDF5_AWS_C_S3_VERSION@
               (Read-Only) HDFS VFD: @HDF5_ENABLE_HDFS@
     Packages w/ extra debug output: @INTERNAL_DEBUG_OUTPUT@
                        API Tracing: @HDF5_ENABLE_TRACE@
