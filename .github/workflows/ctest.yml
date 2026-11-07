@@ -841,8 +841,11 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
         shell: bash
 
-      # Fetch LICENSE and NOTICE for every aws-* library vcpkg installed, from the
-      # upstream tag matching the installed version. Each LICENSE is saved as
+      # Collect LICENSE and NOTICE for every aws-* library vcpkg installed, from
+      # the local vcpkg tree (no network access). vcpkg installs each upstream
+      # LICENSE as installed/x64-windows/share/<library>/copyright; it does not
+      # install NOTICE, so that is taken from the extracted source in buildtrees,
+      # or else from the source tarball in downloads. Each LICENSE is saved as
       # <library>-LICENSE; the NOTICE files are merged into a single NOTICE.
       # HDF5_AWS_LICENSE_DIR makes CMakeInstallation.cmake add these files to the
       # awslibraries component (MSI and CPack zip); they are also copied into the
@@ -850,15 +853,24 @@ jobs:
       - name: Get aws-c-s3 license files (Windows S3)
         run: |
           set -uo pipefail
+          VCPKG_ROOT=$(cygpath -u "$VCPKG_INSTALLATION_ROOT")
           LICDIR="${{ runner.workspace }}/aws-licenses"
           mkdir -p "$LICDIR"
           : > "$LICDIR/NOTICE"
           vcpkg list | awk '$1 ~ /^aws-[^[]*:x64-windows$/ {split($1, p, ":"); split($2, v, "#"); print p[1], v[1]}' |
           while read -r port version; do
-            raw="https://raw.githubusercontent.com/awslabs/$port/v$version"
-            echo "Fetching license files for $port v$version"
-            curl -fsSL "$raw/LICENSE" -o "$LICDIR/$port-LICENSE"
-            if notice=$(curl -fsSL "$raw/NOTICE"); then
+            echo "Copying license files for $port v$version"
+            cp "$VCPKG_ROOT/installed/x64-windows/share/$port/copyright" "$LICDIR/$port-LICENSE" ||
+              echo "::error::No copyright file installed for $port v$version"
+            notice=""
+            for f in "$VCPKG_ROOT"/buildtrees/"$port"/src/v"$version"-*/NOTICE; do
+              [ -f "$f" ] && notice=$(cat "$f") && break
+            done
+            tarball="$VCPKG_ROOT/downloads/awslabs-$port-v$version.tar.gz"
+            if [ -z "$notice" ] && [ -f "$tarball" ]; then
+              notice=$(tar --force-local -xzOf "$tarball" --wildcards '*/NOTICE' 2>/dev/null)
+            fi
+            if [ -n "$notice" ]; then
               printf '==== %s v%s ====\n%s\n\n' "$port" "$version" "$notice" >> "$LICDIR/NOTICE"
             else
               echo "::warning::No NOTICE file found for $port v$version"
