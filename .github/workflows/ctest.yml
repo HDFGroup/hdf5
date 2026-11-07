@@ -860,20 +860,38 @@ jobs:
           vcpkg list | awk '$1 ~ /^aws-[^[]*:x64-windows$/ {split($1, p, ":"); split($2, v, "#"); print p[1], v[1]}' |
           while read -r port version; do
             echo "Copying license files for $port v$version"
-            cp "$VCPKG_ROOT/installed/x64-windows/share/$port/copyright" "$LICDIR/$port-LICENSE" ||
-              echo "::error::No copyright file installed for $port v$version"
+            copyright="$VCPKG_ROOT/installed/x64-windows/share/$port/copyright"
+            if [ ! -s "$copyright" ]; then
+              echo "::error::No LICENSE (copyright file) installed for $port v$version: $copyright"
+              exit 1
+            fi
+            cp "$copyright" "$LICDIR/$port-LICENSE"
             notice=""
             for f in "$VCPKG_ROOT"/buildtrees/"$port"/src/v"$version"-*/NOTICE; do
               [ -f "$f" ] && notice=$(cat "$f") && break
             done
             tarball="$VCPKG_ROOT/downloads/awslabs-$port-v$version.tar.gz"
             if [ -z "$notice" ] && [ -f "$tarball" ]; then
-              notice=$(tar --force-local -xzOf "$tarball" --wildcards '*/NOTICE' 2>/dev/null)
+              # tar exits 2 when the archive has no NOTICE. aws-checksums has no
+              # NOTICE upstream, so allow that for it only; fail on anything else.
+              rc=0
+              notice=$(tar --force-local -xzOf "$tarball" --wildcards '*/NOTICE' 2>/dev/null) || rc=$?
+              if [ "$rc" -ne 0 ]; then
+                if [ "$rc" -eq 2 ] && [ "$port" = "aws-checksums" ]; then
+                  notice=""
+                else
+                  echo "::error::tar exited $rc reading NOTICE from $tarball"
+                  exit "$rc"
+                fi
+              fi
             fi
             if [ -n "$notice" ]; then
               printf '==== %s v%s ====\n%s\n\n' "$port" "$version" "$notice" >> "$LICDIR/NOTICE"
+            elif [ "$port" = "aws-checksums" ]; then
+              echo "::warning::No NOTICE file found for $port v$version (none upstream)"
             else
-              echo "::warning::No NOTICE file found for $port v$version"
+              echo "::error::No NOTICE file found for $port v$version in vcpkg buildtrees or downloads"
+              exit 1
             fi
           done
           ls -l "$LICDIR"
