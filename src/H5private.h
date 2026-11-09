@@ -1238,41 +1238,41 @@ extern char H5_lib_vers_info_g[];
 #endif /* H5_HAVE_THREADSAFE_API */
 
 /* Macro for locking an API that may be called from an internally concurrent thread */
-#define H5_API_INTLOCK(err) \
-    { \
-        H5CANCEL_DECL_INTLOCK; \
-        \
-        if (H5TS_currently_concurrent_g) { \
-            /* Lock internal mutex instead of API */ \
-            if(H5TS_internal_lock() < 0) \
-                HGOTO_ERROR(H5E_FUNC, H5E_CANTLOCK, err, "can't lock internal mutex"); \
-            \
-            /* Set thread cancellation state to 'disable', and remember previous state */ \
-            H5TS_DISABLE_CANCEL; \
-        } \
-        else { \
-            H5_API_LOCK \
+#define H5_API_INTLOCK(err)                                                                                  \
+    {                                                                                                        \
+        H5CANCEL_DECL_INTLOCK;                                                                               \
+                                                                                                             \
+        if (H5TS_currently_concurrent_g) {                                                                   \
+            /* Lock internal mutex instead of API */                                                         \
+            if (H5TS_internal_lock() < 0)                                                                    \
+                HGOTO_ERROR(H5E_FUNC, H5E_CANTLOCK, err, "can't lock internal mutex");                       \
+                                                                                                             \
+            /* Set thread cancellation state to 'disable', and remember previous state */                    \
+            H5TS_DISABLE_CANCEL;                                                                             \
+        }                                                                                                    \
+        else {                                                                                               \
+            H5_API_LOCK                                                                                      \
         }
 
 /* Macro for unlocking an API that may be called from an internally concurrent thread */
-#define H5_API_INTUNLOCK \
-        if (H5TS_currently_concurrent_g) { \
-            /* Unlock internal mutex instead of API */ \
-            (void)H5TS_internal_unlock(); \
-            \
-            /* Restore previous thread cancellation state */ \
-            H5TS_RESTORE_CANCEL; \
-        } \
-        else { \
-            H5_API_UNLOCK \
-        } \
+#define H5_API_INTUNLOCK                                                                                     \
+    if (H5TS_currently_concurrent_g) {                                                                       \
+        /* Unlock internal mutex instead of API */                                                           \
+        (void)H5TS_internal_unlock();                                                                        \
+                                                                                                             \
+        /* Restore previous thread cancellation state */                                                     \
+        H5TS_RESTORE_CANCEL;                                                                                 \
+    }                                                                                                        \
+    else {                                                                                                   \
+        H5_API_UNLOCK                                                                                        \
+    }                                                                                                        \
     }
 
-#else /* H5_HAVE_THREADS */
+#else                       /* H5_HAVE_THREADS */
 
 /* No locks for builds without threads */
 #define H5_API_INTLOCK(err) /* no-op */
-#define H5_API_INTUNLOCK /* no-op */
+#define H5_API_INTUNLOCK    /* no-op */
 
 #endif /* H5_HAVE_THREADS */
 
@@ -1282,7 +1282,7 @@ extern char H5_lib_vers_info_g[];
 #define H5CANCEL_DECL /* */
 
 /* Local variable for 'disable locking for this thread' (DLFTT) state */
-#define H5DLFTT_DECL  /* */
+#define H5DLFTT_DECL /* */
 
 /* No locks (non-threadsafe builds) */
 #define H5_API_LOCK   /* no-op */
