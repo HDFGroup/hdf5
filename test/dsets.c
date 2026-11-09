@@ -20251,7 +20251,7 @@ error:
  */
 /* This message derives from H5Z */
 const H5Z_class3_t H5Z_ERROR_MSG[1] = {{
-    H5Z_CLASS_T_VERS,        /* H5Z_class_t version */
+    H5Z_CLASS_T_VERS_3,      /* H5Z_class_t version */
     H5Z_FILTER_RESERVED - 1, /* Filter id number */
     1, 1,                    /* Encoding and decoding enabled */
     "error_msg",             /* Filter name for debugging */

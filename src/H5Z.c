@@ -242,8 +242,6 @@ H5Zregister(const void *cls)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identification number");
     if (cls_real->id < H5Z_FILTER_RESERVED)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to modify predefined filters");
-    if (cls_real->filter == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no filter function specified");
 
     /* Do it */
     if (H5Z_register(cls_real) < 0)
@@ -335,14 +333,13 @@ H5Z__upgrade_class_vers(const void *_cls, H5Z_class3_t *cls3_buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid H5Z_class_t version number");
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
     }  /* end if */
-    else {
-        /* Native H5Z_class3_t. Check the filter callback here so that plugins, which
-         * do not go through H5Zregister(), are checked too. */
-        if (cls->filter == NULL)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "no filter function specified");
-
+    else
         ret_value = cls;
-    }
+
+    /* Check the filter callback here so that plugins, which do not go through
+     * H5Zregister(), are checked too */
+    if (ret_value->filter == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "no filter function specified");
 
     assert(ret_value->version == H5Z_CLASS_T_VERS_3);
 
