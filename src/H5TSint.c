@@ -37,7 +37,7 @@
 #include "H5Epkg.h"      /* Error handling                      */
 #include "H5TSpkg.h"     /* Threadsafety                        */
 
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_THREADS
 
 /****************/
 /* Local Macros */
@@ -92,7 +92,11 @@ static herr_t H5TS__dec_dlftt(void);
 bool H5_PKG_INIT_VAR = false;
 
 /* Per-thread info */
+#ifdef H5_HAVE_WIN_THREADS
+H5TS_key_t H5TS_thrd_info_key_g = TLS_OUT_OF_INDEXES;
+#else
 H5TS_key_t H5TS_thrd_info_key_g;
+#endif
 
 /*****************************/
 /* Library Private Variables */
@@ -135,12 +139,14 @@ H5TS__init_package(void)
     if (H5_UNLIKELY(H5TS_mutex_init(&H5TS_api_info_p.api_mutex, H5TS_MUTEX_TYPE_RECURSIVE) < 0))
         HGOTO_DONE(FAIL);
     H5TS_api_info_p.lock_count = 0;
-#else /* H5_HAVE_CONCURRENCY */
+#elif defined(H5_HAVE_CONCURRENCY)
     if (H5_UNLIKELY(H5TS_rwlock_init(&H5TS_api_info_p.api_lock) < 0))
         HGOTO_DONE(FAIL);
+#endif
+
+    /* Initialize the mutex between the library's own worker threads */
     if (H5_UNLIKELY(H5TS_mutex_init(&H5TS_api_info_p.internal_mutex, H5TS_MUTEX_TYPE_PLAIN) < 0))
         HGOTO_DONE(FAIL);
-#endif
     H5TS_atomic_init_uint(&H5TS_api_info_p.attempt_lock_count, 0);
 
     /* Initialize per-thread library info */
@@ -174,9 +180,11 @@ H5TS_term_package(void)
     /* Reset global API lock info */
 #ifdef H5_HAVE_THREADSAFE
     H5TS_mutex_destroy(&H5TS_api_info_p.api_mutex);
-#else /* H5_HAVE_CONCURRENCY */
+#elif defined(H5_HAVE_CONCURRENCY)
     H5TS_rwlock_destroy(&H5TS_api_info_p.api_lock);
 #endif
+
+    H5TS_mutex_destroy(&H5TS_api_info_p.internal_mutex);
     H5TS_atomic_destroy_uint(&H5TS_api_info_p.attempt_lock_count);
 
     /* Check if info for thread has been created, free it if so */
@@ -240,6 +248,7 @@ done:
 } /* end H5TS_user_cb_restore() */
 #endif /* H5_HAVE_CONCURRENCY */
 
+#ifdef H5_HAVE_THREADSAFE_API
 /*--------------------------------------------------------------------------
  * Function:    H5TS__api_mutex_acquire
  *
@@ -456,8 +465,32 @@ H5TS_api_unlock(void)
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS_api_unlock */
+#endif /* H5_HAVE_THREADSAFE_API */
 
-#ifdef H5_HAVE_CONCURRENCY
+/*--------------------------------------------------------------------------
+ * Function:    H5TS_first_thread_init
+ *
+ * Purpose:     Perform the one-time initialization of the thread-safety code,
+ *              including the key for the per-thread API context and error
+ *              stack.  Safe to call more than once.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TS_first_thread_init(void)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    if (H5_UNLIKELY(H5TS_once(&H5TS_first_init_s, H5TS_ONCE_INIT_FUNC) < 0))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_first_thread_init() */
+
 /*--------------------------------------------------------------------------
  * Function:    H5TS_internal_lock
  *
@@ -511,7 +544,6 @@ H5TS_internal_unlock(void)
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_internal_unlock() */
-#endif
 
 /*--------------------------------------------------------------------------
  * Function:    H5TS__tinfo_init
@@ -905,13 +937,11 @@ H5TS_top_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-#ifdef H5_HAVE_CONCURRENCY
     /* Destroy global thread pool if it exists */
     if (H5TS_pool_g) {
         (void)H5TS_pool_destroy(H5TS_pool_g);
         H5TS_pool_g = NULL;
     }
-#endif /* H5_HAVE_CONCURRENCY */
 
     FUNC_LEAVE_NOAPI(n)
 }
@@ -950,9 +980,12 @@ H5TS__tinfo_term(void)
     /* Release key for thread-specific API contexts */
     if (H5_UNLIKELY(H5TS_key_delete(H5TS_thrd_info_key_g) < 0))
         HGOTO_DONE(FAIL);
+#ifdef H5_HAVE_WIN_THREADS
+    H5TS_thrd_info_key_g = TLS_OUT_OF_INDEXES;
+#endif
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__tinfo_term() */
 
-#endif /* H5_HAVE_THREADSAFE_API */
+#endif /* H5_HAVE_THREADS */

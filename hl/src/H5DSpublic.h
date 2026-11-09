@@ -799,9 +799,11 @@ extern "C" {
  *
  *  \details H5DSwith_new_ref() takes any object identifier and checks
  *           if new references are used for dimension scales. Currently,
- *           new references are used when non-native VOL connector is
- *           used or when H5_DIMENSION_SCALES_WITH_NEW_REF is set up
- *           via configure option.
+ *           new references are used when the object's terminal VOL
+ *           connector is not the native one -- a pass-through connector
+ *           stacked over the native connector still has a native terminal
+ *           connector, and so does not count -- or when
+ *           H5_DIMENSION_SCALES_WITH_NEW_REF is set up via configure option.
  *
  */
 H5HL_DLL herr_t H5DSwith_new_ref(hid_t obj_id, bool *with_new_ref);

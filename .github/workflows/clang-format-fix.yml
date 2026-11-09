@@ -25,7 +25,7 @@ jobs:
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
-        persist-credentials: false # Prevents tokens from being written to Git config files
+        persist-credentials: true # required so EndBug/add-and-commit can push the commit back
 
     - name: Fix C and Java formatting issues detected by clang-format
       uses: DoozyX/clang-format-lint-action@bcb4eb2cb0d707ee4f3e5cc3b456eb075f12cf73 # v0.20

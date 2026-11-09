@@ -233,6 +233,59 @@ done:
 } /* end H5MF_init_merge_flags() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5MF_mem_type_is_raw
+ *
+ * Purpose:     Determine whether an allocation type belongs to the raw data
+ *              population rather than the metadata population.
+ *
+ *              The global heap counts as raw data.  H5F_block_read() and
+ *              H5F_block_write() map H5FD_MEM_GHEAP to H5FD_MEM_DRAW before
+ *              the access reaches the page buffer.
+ *
+ *              Keep this in step with H5MF_mem_page_type_is_raw(), which
+ *              makes the same decision for the paged form of this enum.
+ *              The two enums share the values 0 to 6, so the two functions
+ *              have to agree about which of those values are raw.
+ *
+ * Return:      true if the type is raw data, false if it is metadata.
+ *              Cannot fail.
+ *
+ *-------------------------------------------------------------------------
+ */
+bool
+H5MF_mem_type_is_raw(H5F_mem_t type)
+{
+    FUNC_ENTER_NOAPI_NOERR
+
+    FUNC_LEAVE_NOAPI(H5FD_MEM_DRAW == type || H5FD_MEM_GHEAP == type)
+} /* end H5MF_mem_type_is_raw() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MF_mem_page_type_is_raw
+ *
+ * Purpose:     Determine whether a paged allocation type belongs to the raw
+ *              data population rather than the metadata population.
+ *
+ *              This is the H5F_mem_page_t counterpart of
+ *              H5MF_mem_type_is_raw(), and the two have to agree. The
+ *              values 0 to 6 of this enum are the same as H5F_mem_t, and
+ *              the library casts between the two on that basis, so a change
+ *              to either function needs the same change in the other.
+ *
+ * Return:      true if the type is raw data, false if it is metadata.
+ *              Cannot fail.
+ *
+ *-------------------------------------------------------------------------
+ */
+bool
+H5MF_mem_page_type_is_raw(H5F_mem_page_t type)
+{
+    FUNC_ENTER_NOAPI_NOERR
+
+    FUNC_LEAVE_NOAPI(H5F_MEM_PAGE_DRAW == type || H5F_MEM_PAGE_GHEAP == type)
+} /* end H5MF_mem_page_type_is_raw() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5MF__alloc_to_fs_type
  *
  * Purpose:     Map "alloc_type" to the free-space manager type

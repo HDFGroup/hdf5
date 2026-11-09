@@ -117,6 +117,7 @@ set (HDF5_REFERENCE_TEST_FILES
     aggr.h5
     bad_chunk_ndims.h5
     bad_compound.h5
+    bad_fill_value.h5
     bad_fletcher32.h5
     bad_nbit_decompress.h5
     bad_nbit_params.h5
@@ -149,6 +150,7 @@ set (HDF5_REFERENCE_TEST_FILES
     h5fc_ext2_sf.h5
     h5fc_ext3_isf.h5
     h5fc_ext_none.h5
+    heap_corrupt_prfx.h5
     le_data.h5
     le_extlink1.h5
     le_extlink2.h5
@@ -757,6 +759,23 @@ if (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY)
       set_tests_properties (H5TEST_S3TESTS-${h5_test} PROPERTIES DISABLED true)
     endif ()
   endforeach ()
+else ()
+  # Without the s3proxy fixture, there is no server for the networked S3 tests
+  # and these tests skip themselves. Since the test programs also contain checks
+  # that perform no I/O and need no credentials, they are still worth running in
+  # an ordinary build.
+  #
+  # Run directly rather than through runTest.cmake: there is no output to
+  # capture or compare against a reference here.
+  foreach (h5_test ${H5_S3TESTS})
+    add_test (NAME H5TEST_S3TESTS-${h5_test} COMMAND $<TARGET_FILE:${h5_test}>)
+    set_tests_properties (H5TEST_S3TESTS-${h5_test} PROPERTIES
+        WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+    )
+    if ("H5TEST_S3TESTS-${h5_test}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5TEST_S3TESTS-${h5_test} PROPERTIES DISABLED true)
+    endif ()
+  endforeach ()
 endif ()
 
 ##############################################################################
@@ -1171,6 +1190,7 @@ endmacro ()
 # generator executables
 set (H5_GENERATORS
     gen_bad_chunk
+    gen_bad_fill
     gen_bad_filters
     gen_bad_offset
     gen_bad_ohdr
