@@ -181,7 +181,7 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    The `name` member of an `H5Z_class3_t` filter is now documented as its canonical name rather than a debugging comment: 1 to `H5Z_FILTER_NAME_MAX_LEN` (255) bytes from `[A-Za-z0-9_.-]`, unique among `H5Z_class3_t` filters, and stable across releases. This release does not enforce these rules.
 
-   An `H5Z_class3_t` filter with no `filter` callback is now rejected when it is loaded as a plugin, as `H5Zregister()` already did.
+   A filter plugin of any class version with no `filter` callback is now rejected when it is loaded, as `H5Zregister()` already did.
 
 ### Added support for internally concurrent multithreaded reads of chunked datasets
 
