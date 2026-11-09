@@ -20259,6 +20259,7 @@ const H5Z_class3_t H5Z_ERROR_MSG[1] = {{
     NULL,                    /* The "set local" callback */
     filter_error_msg,        /* The actual filter function */
     0,                       /* Threading disabled */
+    NULL,                    /* Description */
 }};
 static const char *filter_error_msg_msg =
     "Hello I am a unique error message written for the test_filter_error_msg test in dsets.c";
@@ -20725,6 +20726,7 @@ const H5Z_class3_t H5Z_THREADS_REQUIRED[1] = {{
     filter_threads_required,     /* The actual filter function */
     H5Z_FEAT_FILTER_THREADSAFE |
         H5Z_FEAT_FILTER_NO_H5_CALLS, /* This filter is thread-safe and does not re-enter the HDF5 API */
+    NULL,                            /* Description */
 }};
 
 static int          threads_required_nthreads_passed;
@@ -20832,6 +20834,7 @@ const H5Z_class3_t H5Z_NON_THREADSAFE[1] = {{
     NULL,                        /* The "set local" callback */
     filter_non_threadsafe,       /* The actual filter function */
     H5Z_FEAT_FILTER_NO_H5_CALLS, /* This filter is not thread-safe and does not re-enter the HDF5 API */
+    NULL,                        /* Description */
 }};
 
 /* This message derives from H5Z */
@@ -20846,6 +20849,7 @@ const H5Z_class3_t H5Z_NON_THREADSAFE_LIE[1] = {{
     filter_non_threadsafe,                                    /* The actual filter function */
     H5Z_FEAT_FILTER_THREADSAFE | H5Z_FEAT_FILTER_NO_H5_CALLS, /* This filter falsely claims to be thread-safe
                                                                  and does not re-enter the HDF5 API */
+    NULL,                                                     /* Description */
 }};
 
 /* This message derives from H5Z */
@@ -20860,6 +20864,7 @@ const H5Z_class3_t H5Z_NON_THREADSAFE_LIE2[1] = {{
     filter_non_threadsafe,          /* The actual filter function */
     H5Z_FEAT_FILTER_THREADSAFE, /* This filter falsely claims to be thread-safe and falsely claims to re-enter
                                    the HDF5 API */
+    NULL,                       /* Description */
 }};
 
 static int non_threadsafe_threads_in_flight;
@@ -20913,6 +20918,7 @@ const H5Z_class3_t H5Z_REENTER_H5[1] = {{
     NULL,                       /* The "set local" callback */
     filter_reenter_h5,          /* The actual filter function */
     H5Z_FEAT_FILTER_THREADSAFE, /* This filter is thread-safe and does re-enter the HDF5 API */
+    NULL,                       /* Description */
 }};
 
 static size_t
@@ -20954,6 +20960,7 @@ const H5Z_class3_t H5Z_H5_ALLOCATE[1] = {{
     filter_h5_allocate,     /* The actual filter function */
     H5Z_FEAT_FILTER_THREADSAFE |
         H5Z_FEAT_FILTER_NO_H5_CALLS, /* This filter is thread-safe and does not re-enter the HDF5 API */
+    NULL,                            /* Description */
 }};
 
 static size_t
@@ -21644,6 +21651,7 @@ const H5Z_class3_t H5Z_CANNOT_APPLY[1] = {{
     filter_cannot_apply,     /* The actual filter function */
     H5Z_FEAT_FILTER_THREADSAFE |
         H5Z_FEAT_FILTER_NO_H5_CALLS, /* This filter is thread-safe and does not re-enter the HDF5 API */
+    NULL,                            /* Description */
 }};
 
 static htri_t
@@ -21936,8 +21944,9 @@ filter_class3_register(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED 
 /*-------------------------------------------------------------------------
  * Function:    test_class3_register
  *
- * Purpose:     Tests H5Zregister() with H5Z_class3_t: the name is what a
- *              DCPL reports, and a missing filter callback is rejected.
+ * Purpose:     Tests H5Zregister() with H5Z_class3_t: the name, not the
+ *              description, is what a DCPL reports, and a missing filter
+ *              callback is rejected.
  *
  * Return:      Success:    0
  *              Failure:    -1
@@ -21962,6 +21971,7 @@ test_class3_register(void)
     cls.encoder_present = 1;
     cls.decoder_present = 1;
     cls.name            = "class3_test-1.0";
+    cls.description     = "Test filter; the library does not report this text";
     cls.filter          = filter_class3_register;
 
     /* A valid class3 filter registers, and its name is what the DCPL reports */

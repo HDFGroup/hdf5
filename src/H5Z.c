@@ -305,6 +305,7 @@ H5Z__upgrade_class_vers(const void *_cls, H5Z_class3_t *cls3_buf)
         cls3_buf->set_local       = cls_old->set_local;
         cls3_buf->filter          = cls_old->filter;
         cls3_buf->feature_flags   = 0;
+        cls3_buf->description     = NULL;
 
         /* Set cls_real to point to the translated structure */
         ret_value = cls3_buf;
@@ -324,6 +325,7 @@ H5Z__upgrade_class_vers(const void *_cls, H5Z_class3_t *cls3_buf)
         cls3_buf->set_local       = cls_old->set_local;
         cls3_buf->filter          = cls_old->filter;
         cls3_buf->feature_flags   = 0;
+        cls3_buf->description     = NULL;
 
         /* Set cls_real to point to the translated structure */
         ret_value = cls3_buf;

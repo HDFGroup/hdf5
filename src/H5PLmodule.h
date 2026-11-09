@@ -285,6 +285,7 @@
  *     NULL,                                // The "set local" callback
  *     (H5Z_func_t)H5Z_filter_bzip2,        // The actual filter function
  *     0,                                   // Feature flags supported
+ *     "bzip2 compression; see https://github.com/HDFGroup/hdf5_plugins", // Description
  *   }};
  * \endcode
  *
@@ -294,7 +295,8 @@
  * An H5Z_class2_t filter may instead put free-form text in the “name” field, such as “HDF5 bzip2 filter;
  * see https://\PLURL/docs/RegisteredFilterPlugins.md”, which the \ref sec_cltools_h5dump tool prints to
  * point users to the applied filter (see the example in the \ref subsubsec_filter_plugins_model_read
- * section).
+ * section). An H5Z_class3_t filter puts such text in the “description” field instead, which this release
+ * of the library does not use.
  *
  * \subsubsection subsubsec_filter_plugins_prog_create Creating an HDF5 Filter Plugin
  * The HDF5 filter plugin source should include:

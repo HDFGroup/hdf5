@@ -213,6 +213,7 @@ typedef struct H5Z_class3_t {
     H5Z_set_local_func_t set_local;       /**< The "set local" callback for a filter        */
     H5Z_func_t           filter;          /**< The actual filter function                   */
     uint64_t             feature_flags;   /**< Feature flags                                */
+    const char          *description;     /**< Free-text description; may be NULL           */
 } H5Z_class3_t;
 //! <!-- [H5Z_class3_t_snip] -->
 
@@ -303,6 +304,8 @@ extern "C" {
  *          HDF Group should use the name recorded with its registration. This
  *          version of the library does not check these rules, but a future
  *          version may rely on them.
+ *          Free-text information about the filter belongs in \c description,
+ *          not in \c name.
  *
  *          \c can_apply, described in detail below, is a user-defined callback
  *          function that determines whether the combination of the dataset
@@ -329,6 +332,11 @@ extern "C" {
  *          All other bits will be ignored. The filter should set all other bits
  *          to zero so they are not erroneously interpreted as features by a
  *          future version of the library.
+ *
+ *          \c description, in H5Z_class3_t only, is an optional free-text
+ *          description of the filter, such as what it does and where to find
+ *          it. It may be the null pointer. This version of the library does
+ *          not use it.
  *
  *          The statistics associated with a filter are not reset by this
  *          function; they accumulate over the life of the library.

@@ -50,6 +50,7 @@ static H5Z_class3_t H5Z_SZIP[1] = {{
     H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - does not *re*-enter the HDF5 API. We believe libaec is
                                     thread-safe, but because the developers do not explicitly make this claim,
                                     we are marking it as not thread-safe for now. */
+    "SZIP lossless compression for scientific data", /* Description */
 }};
 
 /*-------------------------------------------------------------------------
