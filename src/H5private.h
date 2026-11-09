@@ -1166,7 +1166,7 @@ extern char H5_lib_vers_info_g[];
     } while (0)
 #else
 /* Local variable for saving cancellation state */
-#define H5CANCEL_DECL /* */
+#define H5CANCEL_DECL_REAL /* */
 
 /* Disable & restore canceling the thread */
 #define H5TS_DISABLE_CANCEL                                                                                  \
