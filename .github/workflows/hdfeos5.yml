@@ -78,11 +78,13 @@ jobs:
           # <stdlib.h>, and gctp declares function pointers with empty "()"
           # parameter lists and then calls them with arguments. GCC 15
           # (ubuntu-26.04) defaults to C23, where "()" means "(void)", so those
-          # calls are hard errors. Build as C17 and downgrade the GCC 14+
-          # implicit-declaration / pointer-type errors to warnings.
+          # calls are hard errors. gctp/src/br_gctp.c also relies on K&R implicit
+          # int declarations. Build as C17 and downgrade the GCC 14+
+          # implicit-declaration / implicit-int / int-conversion /
+          # pointer-type errors to warnings.
           # -g -O2 restores the autoconf default CFLAGS that setting CFLAGS drops.
           ./configure CC=/usr/local/bin/h5cc \
-            CFLAGS="-std=gnu17 -g -O2 -Wno-error=implicit-function-declaration -Wno-error=incompatible-pointer-types" \
+            CFLAGS="-std=gnu17 -g -O2 -Wno-error=implicit-function-declaration -Wno-error=incompatible-pointer-types -Wno-error=implicit-int -Wno-error=int-conversion" \
             --prefix=/usr/local/ --enable-install-include
           make
           LD_LIBRARY_PATH="/usr/local/lib:${LD_LIBRARY_PATH}"
