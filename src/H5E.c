@@ -542,7 +542,7 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid
     herr_t       ret_value  = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
-    FUNC_ENTER_API_NOCLEAR(FAIL)
+    FUNC_ENTER_API_NOCLEAR_INTLOCK(FAIL)
 
     /* Check for 'default' error stack */
     if (err_stack == H5E_DEFAULT) {
@@ -609,7 +609,7 @@ done:
         free(tmp_file);
     }
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_INTLOCK(ret_value)
 } /* end H5Epush2() */
 
 /*-------------------------------------------------------------------------
