@@ -2085,8 +2085,8 @@ H5E_resume_stack(void)
 bool
 H5E_errors_disabled(void)
 {
-    H5E_stack_t *estack = H5E__get_my_stack();
-    bool ret_value = false;
+    H5E_stack_t *estack    = H5E__get_my_stack();
+    bool         ret_value = false;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -2096,7 +2096,7 @@ H5E_errors_disabled(void)
     if (estack->paused)
         HGOTO_DONE(true);
 
-    /* Check if there's no error printing function */
+        /* Check if there's no error printing function */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     if (estack->auto_op.vers == 1) {
         if (!estack->auto_op.func1)

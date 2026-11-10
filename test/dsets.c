@@ -22128,7 +22128,8 @@ main(void)
                     nerrors += (test_bad_buf_size(file) < 0 ? 1 : 0);
 
 #ifdef H5_HAVE_THREADS
-                    /* Don't test these with threads yet since custom error handlers don't yet apply to threads */
+                    /* Don't test these with threads yet since custom error handlers don't yet apply to
+                     * threads */
                     if (!threads)
 #endif /* H5_HAVE_THREADS */
                     {

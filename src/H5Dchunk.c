@@ -3684,196 +3684,205 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
 
     /* Pause error stack if requested */
     if (threaded_chunk_info->threaded_io_info->pause_errors)
-        H5E_PAUSE_ERRORS;
+        H5E_PAUSE_ERRORS
+            ;
 
-    /* Set API context */
-    if (H5CX_push(&api_ctx) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context");
-    api_ctx_pushed = true;
+            /* Set API context */
+            if (H5CX_push(&api_ctx) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context");
+            api_ctx_pushed = true;
 
-    /* Set DXPL on context if it exists */
-    if (threaded_chunk_info->threaded_io_info->dxpl_id != H5I_INVALID_HID)
-        H5CX_set_dxpl(threaded_chunk_info->threaded_io_info->dxpl_id);
+            /* Set DXPL on context if it exists */
+            if (threaded_chunk_info->threaded_io_info->dxpl_id != H5I_INVALID_HID)
+                H5CX_set_dxpl(threaded_chunk_info->threaded_io_info->dxpl_id);
 
-    /* Allocate at MAX(chunk_disk_size, chunk_size) so the buffer is
-     * large enough for the uncompressed output before filters run.
-     * This ensures *buf_size accurately reflects the allocation that
-     * filters receive, avoiding a buffer overflow if any filter writes
-     * up to *buf_size bytes into *buf.  For incompressible chunks
-     * chunk_disk_size >= chunk_size so buf_alloc stays at chunk_nbytes. */
-    buf_alloc = (threaded_chunk_info->chunk_nbytes < threaded_chunk_info->threaded_io_info->chunk_size)
+            /* Allocate at MAX(chunk_disk_size, chunk_size) so the buffer is
+             * large enough for the uncompressed output before filters run.
+             * This ensures *buf_size accurately reflects the allocation that
+             * filters receive, avoiding a buffer overflow if any filter writes
+             * up to *buf_size bytes into *buf.  For incompressible chunks
+             * chunk_disk_size >= chunk_size so buf_alloc stays at chunk_nbytes. */
+            buf_alloc =
+                (threaded_chunk_info->chunk_nbytes < threaded_chunk_info->threaded_io_info->chunk_size)
                     ? threaded_chunk_info->threaded_io_info->chunk_size
                     : threaded_chunk_info->chunk_nbytes;
 
-    /* Filtered chunks are allocated with H5MM_malloc(), unfiltered chunks from the free list package. This
-     * determines which allocator is used for the chunk buffer here and when it is freed below. */
-    filtered = threaded_chunk_info->old_pline && threaded_chunk_info->old_pline->nused;
+            /* Filtered chunks are allocated with H5MM_malloc(), unfiltered chunks from the free list package.
+             * This determines which allocator is used for the chunk buffer here and when it is freed below.
+             */
+            filtered = threaded_chunk_info->old_pline && threaded_chunk_info->old_pline->nused;
 
-    /* If we're using filters we can allocate the chunk outside of the mutex, otherwise we need to protect it
-     * since the free list package isn't yet threadsafe. This is a hack that should be removed once H5FL is
-     * threadsafe. */
-    if (filtered)
-        if (NULL ==
-            (threaded_chunk_info->chunk = H5D__chunk_mem_alloc(buf_alloc, threaded_chunk_info->old_pline)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk");
+            /* If we're using filters we can allocate the chunk outside of the mutex, otherwise we need to
+             * protect it since the free list package isn't yet threadsafe. This is a hack that should be
+             * removed once H5FL is threadsafe. */
+            if (filtered)
+                if (NULL == (threaded_chunk_info->chunk =
+                                 H5D__chunk_mem_alloc(buf_alloc, threaded_chunk_info->old_pline)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                                "memory allocation failed for raw data chunk");
 
-    /* Lock internal mutex */
-    if (H5_UNLIKELY(H5TS_internal_lock() < 0))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't lock internal mutex");
-    mutex_held = true;
+            /* Lock internal mutex */
+            if (H5_UNLIKELY(H5TS_internal_lock() < 0))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't lock internal mutex");
+            mutex_held = true;
 
-    /* Allocate unfiltered chunk */
-    if (!filtered)
-        if (NULL ==
-            (threaded_chunk_info->chunk = H5D__chunk_mem_alloc(buf_alloc, threaded_chunk_info->old_pline)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk");
+            /* Allocate unfiltered chunk */
+            if (!filtered)
+                if (NULL == (threaded_chunk_info->chunk =
+                                 H5D__chunk_mem_alloc(buf_alloc, threaded_chunk_info->old_pline)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                                "memory allocation failed for raw data chunk");
 
-    /* Read chunk from disk */
-    if (H5_UNLIKELY(H5F_shared_block_read(H5F_SHARED(threaded_chunk_info->chk_dset_io_info.dset->oloc.file),
+            /* Read chunk from disk */
+            if (H5_UNLIKELY(
+                    H5F_shared_block_read(H5F_SHARED(threaded_chunk_info->chk_dset_io_info.dset->oloc.file),
                                           H5FD_MEM_DRAW, threaded_chunk_info->udata.chunk_block.offset,
                                           threaded_chunk_info->udata.chunk_block.length,
                                           threaded_chunk_info->chunk) < 0))
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk");
+                HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk");
 
-    /* Unlock internal mutex */
-    if (H5_UNLIKELY(H5TS_internal_unlock() < 0))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "can't unlock internal mutex");
-    mutex_held = false;
+            /* Unlock internal mutex */
+            if (H5_UNLIKELY(H5TS_internal_unlock() < 0))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "can't unlock internal mutex");
+            mutex_held = false;
 
-    if (threaded_chunk_info->old_pline) {
-        /* Perform filter pipeline. Defer going to done on error so the chunk cache is always patched. */
-        if (H5_UNLIKELY(H5Z_pipeline(threaded_chunk_info->old_pline, H5Z_FLAG_REVERSE,
-                                     &(threaded_chunk_info->udata.filter_mask),
-                                     threaded_chunk_info->threaded_io_info->err_detect,
-                                     threaded_chunk_info->threaded_io_info->filter_cb,
-                                     &threaded_chunk_info->chunk_nbytes, &buf_alloc,
-                                     &threaded_chunk_info->chunk) < 0))
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "data pipeline read failed");
+            if (threaded_chunk_info->old_pline) {
+                /* Perform filter pipeline. Defer going to done on error so the chunk cache is always patched.
+                 */
+                if (H5_UNLIKELY(H5Z_pipeline(threaded_chunk_info->old_pline, H5Z_FLAG_REVERSE,
+                                             &(threaded_chunk_info->udata.filter_mask),
+                                             threaded_chunk_info->threaded_io_info->err_detect,
+                                             threaded_chunk_info->threaded_io_info->filter_cb,
+                                             &threaded_chunk_info->chunk_nbytes, &buf_alloc,
+                                             &threaded_chunk_info->chunk) < 0))
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "data pipeline read failed");
 
-        /* Make sure the chunk is the correct size after being unfiltered */
-        if (H5_UNLIKELY(threaded_chunk_info->chunk_nbytes !=
-                        threaded_chunk_info->threaded_io_info->chunk_size))
-            HDONE_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk size is incorrect after being unfiltered");
+                /* Make sure the chunk is the correct size after being unfiltered */
+                if (H5_UNLIKELY(threaded_chunk_info->chunk_nbytes !=
+                                threaded_chunk_info->threaded_io_info->chunk_size))
+                    HDONE_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
+                                "chunk size is incorrect after being unfiltered");
 
-        /* The new_unfilt_chunk flag should only be set during an H5Dset_extent operation. This is not
-         * currently supported with internal threading. If this support is added, we will need to realloc
-         * the buffer in the associated threaded worker function. */
-        assert(!threaded_chunk_info->udata.new_unfilt_chunk);
-    }
+                /* The new_unfilt_chunk flag should only be set during an H5Dset_extent operation. This is not
+                 * currently supported with internal threading. If this support is added, we will need to
+                 * realloc the buffer in the associated threaded worker function. */
+                assert(!threaded_chunk_info->udata.new_unfilt_chunk);
+            }
 
-    /* Patch chunk pointer in chunk cache. Ok to do in concurrent section since no other thread will touch
-     * this chunk. */
-    if (UINT_MAX != threaded_chunk_info->udata.idx_hint) {
-        H5D_rdcc_t *rdcc = &threaded_chunk_info->threaded_io_info->dset_info->dset->shared->cache.chunk;
+            /* Patch chunk pointer in chunk cache. Ok to do in concurrent section since no other thread will
+             * touch this chunk. */
+            if (UINT_MAX != threaded_chunk_info->udata.idx_hint) {
+                H5D_rdcc_t *rdcc =
+                    &threaded_chunk_info->threaded_io_info->dset_info->dset->shared->cache.chunk;
 
-        assert(threaded_chunk_info->udata.idx_hint < rdcc->nslots);
-        assert(rdcc->slot[threaded_chunk_info->udata.idx_hint]);
-        assert(rdcc->slot[threaded_chunk_info->udata.idx_hint]->chunk == NULL);
-        rdcc->slot[threaded_chunk_info->udata.idx_hint]->chunk = threaded_chunk_info->chunk;
-    }
+                assert(threaded_chunk_info->udata.idx_hint < rdcc->nslots);
+                assert(rdcc->slot[threaded_chunk_info->udata.idx_hint]);
+                assert(rdcc->slot[threaded_chunk_info->udata.idx_hint]->chunk == NULL);
+                rdcc->slot[threaded_chunk_info->udata.idx_hint]->chunk = threaded_chunk_info->chunk;
+            }
 
-    /* Now goto done if the call to H5Z_pipeline() failed (or returned the wrong size chunk) */
-    if (H5_UNLIKELY(ret_value < 0))
-        HGOTO_DONE(ret_value);
+            /* Now goto done if the call to H5Z_pipeline() failed (or returned the wrong size chunk) */
+            if (H5_UNLIKELY(ret_value < 0))
+                HGOTO_DONE(ret_value);
 
-    /* Set up the storage buffer information for this chunk */
-    cpt_store.compact.buf                       = threaded_chunk_info->chunk;
-    cpt_store.compact.dirty                     = &cpt_dirty;
-    threaded_chunk_info->chk_dset_io_info.store = &cpt_store;
+            /* Set up the storage buffer information for this chunk */
+            cpt_store.compact.buf                       = threaded_chunk_info->chunk;
+            cpt_store.compact.dirty                     = &cpt_dirty;
+            threaded_chunk_info->chk_dset_io_info.store = &cpt_store;
 
-    /* Lock internal mutex */
-    if (H5_UNLIKELY(H5TS_internal_lock() < 0))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't lock internal mutex");
-    mutex_held = true;
+            /* Lock internal mutex */
+            if (H5_UNLIKELY(H5TS_internal_lock() < 0))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't lock internal mutex");
+            mutex_held = true;
 
-    /* Scatter data from chunk buffer to application buffer. Even though this is protected by a mutex it must
-     * still not interfere with the threads in H5Z_pipeline() */
-    if (H5_UNLIKELY((threaded_chunk_info->threaded_io_info->dset_info->io_ops.single_read)(
-                        &threaded_chunk_info->threaded_io_info->cpt_io_info,
-                        &threaded_chunk_info->chk_dset_io_info) < 0))
-        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked read failed");
+            /* Scatter data from chunk buffer to application buffer. Even though this is protected by a mutex
+             * it must still not interfere with the threads in H5Z_pipeline() */
+            if (H5_UNLIKELY((threaded_chunk_info->threaded_io_info->dset_info->io_ops.single_read)(
+                                &threaded_chunk_info->threaded_io_info->cpt_io_info,
+                                &threaded_chunk_info->chk_dset_io_info) < 0))
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked read failed");
 
-    /* If the chunk is not kept in the chunk cache, free its buffer now instead of leaving it to
-     * H5D__chunk_unlock() after all worker tasks have completed. That lets the memory be reused for the
-     * next chunk this thread processes, instead of holding every chunk buffer of the read at once, with
-     * every page of those buffers newly faulted in. A chunk is kept in the cache if and only if
-     * udata.idx_hint is not UINT_MAX, in which case the buffer now belongs to the cache entry.
-     * Unfiltered chunks are allocated from the free list package, which is not yet threadsafe, so free them
-     * while holding the internal mutex. */
-    if (UINT_MAX == threaded_chunk_info->udata.idx_hint && !filtered)
-        threaded_chunk_info->chunk =
-            H5D__chunk_mem_xfree(threaded_chunk_info->chunk, threaded_chunk_info->old_pline);
+            /* If the chunk is not kept in the chunk cache, free its buffer now instead of leaving it to
+             * H5D__chunk_unlock() after all worker tasks have completed. That lets the memory be reused for
+             * the next chunk this thread processes, instead of holding every chunk buffer of the read at
+             * once, with every page of those buffers newly faulted in. A chunk is kept in the cache if and
+             * only if udata.idx_hint is not UINT_MAX, in which case the buffer now belongs to the cache
+             * entry. Unfiltered chunks are allocated from the free list package, which is not yet threadsafe,
+             * so free them while holding the internal mutex. */
+            if (UINT_MAX == threaded_chunk_info->udata.idx_hint && !filtered)
+                threaded_chunk_info->chunk =
+                    H5D__chunk_mem_xfree(threaded_chunk_info->chunk, threaded_chunk_info->old_pline);
 
-    /* Unlock internal mutex */
-    if (H5_UNLIKELY(H5TS_internal_unlock() < 0))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "can't unlock internal mutex");
-    mutex_held = false;
+            /* Unlock internal mutex */
+            if (H5_UNLIKELY(H5TS_internal_unlock() < 0))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "can't unlock internal mutex");
+            mutex_held = false;
 
-    /* Filtered chunks are allocated with H5MM_malloc(), so they can be freed outside the mutex */
-    if (UINT_MAX == threaded_chunk_info->udata.idx_hint && filtered)
-        threaded_chunk_info->chunk =
-            H5D__chunk_mem_xfree(threaded_chunk_info->chunk, threaded_chunk_info->old_pline);
+            /* Filtered chunks are allocated with H5MM_malloc(), so they can be freed outside the mutex */
+            if (UINT_MAX == threaded_chunk_info->udata.idx_hint && filtered)
+                threaded_chunk_info->chunk =
+                    H5D__chunk_mem_xfree(threaded_chunk_info->chunk, threaded_chunk_info->old_pline);
 
-    if (H5_UNLIKELY(H5CX_pop(false) < 0))
-        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context");
-    api_ctx_pushed = false;
+            if (H5_UNLIKELY(H5CX_pop(false) < 0))
+                HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context");
+            api_ctx_pushed = false;
 
 done:
-    /* Report this chunk as done, holding cond_mutex until this worker is finished with the library. Once
-     * the last chunk is reported done and cond_mutex is released, the thread that started the read frees
-     * threaded_io_info and goes on using the library. If the lock fails, continue anyway so that thread
-     * doesn't wait forever, though nothing here is then synchronized with it. */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&threaded_chunk_info->threaded_io_info->cond_mutex) < 0))
-        HDONE_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't lock mutex for condition variable");
-    else
-        cond_mutex_held = true;
-
-    /* Decrement the number of chunks left, and signal the main thread if this was the last */
-    if (1 == threaded_chunk_info->threaded_io_info->chunks_left--)
-        if (H5_UNLIKELY(H5TS_cond_signal(&threaded_chunk_info->threaded_io_info->cond) < 0))
-            HDONE_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't signal condition variable");
-
-    /* Handle failures */
-    if (H5_UNLIKELY(ret_value < 0)) {
-        /* Report failure to the main thread (actual return value is ignored by the thread pool) */
-        threaded_chunk_info->threaded_io_info->failed = true;
-
-        /* Clean up */
-        if (api_ctx_pushed && H5CX_pop(false) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context");
-        api_ctx_pushed = false;
-
-        /* Acquire mutex */
-        if (!mutex_held) {
-            if (H5TS_internal_lock() < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't lock internal mutex");
+            /* Report this chunk as done, holding cond_mutex until this worker is finished with the library.
+             * Once the last chunk is reported done and cond_mutex is released, the thread that started the
+             * read frees threaded_io_info and goes on using the library. If the lock fails, continue anyway
+             * so that thread doesn't wait forever, though nothing here is then synchronized with it. */
+            if (H5_UNLIKELY(H5TS_mutex_lock(&threaded_chunk_info->threaded_io_info->cond_mutex) < 0))
+                HDONE_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't lock mutex for condition variable");
             else
-                mutex_held = true;
-        }
+                cond_mutex_held = true;
 
-        /* Print and clear error stack */
-        (void)H5E_dump_api_stack();
-        (void)H5E_clear_stack();
+            /* Decrement the number of chunks left, and signal the main thread if this was the last */
+            if (1 == threaded_chunk_info->threaded_io_info->chunks_left--)
+                if (H5_UNLIKELY(H5TS_cond_signal(&threaded_chunk_info->threaded_io_info->cond) < 0))
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't signal condition variable");
 
-        /* Release mutex */
-        if (mutex_held) {
-            if (H5TS_internal_unlock() < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "can't unlock internal mutex");
-            mutex_held = false;
-        }
-    }
+            /* Handle failures */
+            if (H5_UNLIKELY(ret_value < 0)) {
+                /* Report failure to the main thread (actual return value is ignored by the thread pool) */
+                threaded_chunk_info->threaded_io_info->failed = true;
 
-    assert(!mutex_held);
-    assert(!api_ctx_pushed);
+                /* Clean up */
+                if (api_ctx_pushed && H5CX_pop(false) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context");
+                api_ctx_pushed = false;
 
-    /* Release cond_mutex. A failure here can't be reported, since the main thread may already be going on
-     * using the library. */
-    if (H5_LIKELY(cond_mutex_held))
-        (void)H5TS_mutex_unlock(&threaded_chunk_info->threaded_io_info->cond_mutex);
+                /* Acquire mutex */
+                if (!mutex_held) {
+                    if (H5TS_internal_lock() < 0)
+                        HDONE_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't lock internal mutex");
+                    else
+                        mutex_held = true;
+                }
 
-    /* Resume error stack if it was paused */
-    if (threaded_chunk_info->threaded_io_info->pause_errors)
-        H5E_RESUME_ERRORS;
+                /* Print and clear error stack */
+                (void)H5E_dump_api_stack();
+                (void)H5E_clear_stack();
+
+                /* Release mutex */
+                if (mutex_held) {
+                    if (H5TS_internal_unlock() < 0)
+                        HDONE_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "can't unlock internal mutex");
+                    mutex_held = false;
+                }
+            }
+
+            assert(!mutex_held);
+            assert(!api_ctx_pushed);
+
+            /* Release cond_mutex. A failure here can't be reported, since the main thread may already be
+             * going on using the library. */
+            if (H5_LIKELY(cond_mutex_held))
+                (void)H5TS_mutex_unlock(&threaded_chunk_info->threaded_io_info->cond_mutex);
+
+            /* Resume error stack if it was paused */
+            if (threaded_chunk_info->threaded_io_info->pause_errors)
+    H5E_RESUME_ERRORS;
 
     FUNC_LEAVE_NOAPI((H5TS_thread_ret_t)0);
 } /* end H5D__chunk_thread_read() */
