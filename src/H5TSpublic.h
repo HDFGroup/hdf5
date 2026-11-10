@@ -65,8 +65,8 @@ extern "C" {
  *
  *          Currently, the library will immediately create \p num_threads
  *          threads and retain them until this function is called again. Calling
- *          this function with \p num_threads set to \c 0 will terminate these
- *          threads and disable internal multithreading.
+ *          this function with \p num_threads set to \c 0 or \c 1 will terminate
+ *          these threads and disable internal multithreading.
  *
  *          This is currently only used to accelerate raw data reads of chunked
  *          datasets. This will occur when the following conditions are met:
