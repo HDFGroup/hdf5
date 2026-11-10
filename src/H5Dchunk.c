@@ -3870,14 +3870,18 @@ done:
     if (threaded_chunk_info->threaded_io_info->pause_errors)
         H5E_resume_stack();
 
+    /* Clear threaded_chunk_info->chk_dset_io_info.store so we're not accidentally leaking the address of a
+     * local variable that is out of scope */
+    threaded_chunk_info->chk_dset_io_info.store = NULL;
+
     /* Release cond_mutex. A failure here can't be reported, since the main thread may already be going
      * on using the library. */
     if (H5_LIKELY(cond_mutex_held))
         (void)H5TS_mutex_unlock(&threaded_chunk_info->threaded_io_info->cond_mutex);
 
-    /* Clear threaded_chunk_info->chk_dset_io_info.store so we're not accidentally leaking the address of a
-     * local variable that is out of scope */
-    threaded_chunk_info->chk_dset_io_info.store = NULL;
+    /*
+     * Do not access threaded_chunk_info after unlocking cond_mutex
+     */
 
     FUNC_LEAVE_NOAPI((H5TS_thread_ret_t)0);
 } /* end H5D__chunk_thread_read() */
