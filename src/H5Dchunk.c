@@ -3706,13 +3706,12 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
                     : threaded_chunk_info->chunk_nbytes;
 
     /* Filtered chunks are allocated with H5MM_malloc(), unfiltered chunks from the free list package.
-     * This determines which allocator is used for the chunk buffer here and when it is freed below.
-     */
+     * This determines which allocator is used for the chunk buffer here and when it is freed below. */
     filtered = threaded_chunk_info->old_pline && threaded_chunk_info->old_pline->nused;
 
-    /* If we're using filters we can allocate the chunk outside of the mutex, otherwise we need to
-     * protect it since the free list package isn't yet threadsafe. This is a hack that should be
-     * removed once H5FL is threadsafe. */
+    /* If we're using filters we can allocate the chunk outside of the mutex, otherwise we need to protect it
+     * since the free list package isn't yet threadsafe. This is a hack that should be removed once H5FL is
+     * threadsafe. */
     if (filtered)
         if (NULL ==
             (threaded_chunk_info->chunk = H5D__chunk_mem_alloc(buf_alloc, threaded_chunk_info->old_pline)))
@@ -3742,8 +3741,7 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
     mutex_held = false;
 
     if (threaded_chunk_info->old_pline) {
-        /* Perform filter pipeline. Defer going to done on error so the chunk cache is always patched.
-         */
+        /* Perform filter pipeline. Defer going to done on error so the chunk cache is always patched. */
         if (H5_UNLIKELY(H5Z_pipeline(threaded_chunk_info->old_pline, H5Z_FLAG_REVERSE,
                                      &(threaded_chunk_info->udata.filter_mask),
                                      threaded_chunk_info->threaded_io_info->err_detect,
@@ -3758,13 +3756,13 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
             HDONE_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk size is incorrect after being unfiltered");
 
         /* The new_unfilt_chunk flag should only be set during an H5Dset_extent operation. This is not
-         * currently supported with internal threading. If this support is added, we will need to
-         * realloc the buffer in the associated threaded worker function. */
+         * currently supported with internal threading. If this support is added, we will need to realloc
+         * the buffer in the associated threaded worker function. */
         assert(!threaded_chunk_info->udata.new_unfilt_chunk);
     }
 
-    /* Patch chunk pointer in chunk cache. Ok to do in concurrent section since no other thread will
-     * touch this chunk. */
+    /* Patch chunk pointer in chunk cache. Ok to do in concurrent section since no other thread will touch
+     * this chunk. */
     if (UINT_MAX != threaded_chunk_info->udata.idx_hint) {
         H5D_rdcc_t *rdcc = &threaded_chunk_info->threaded_io_info->dset_info->dset->shared->cache.chunk;
 
@@ -3788,20 +3786,20 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't lock internal mutex");
     mutex_held = true;
 
-    /* Scatter data from chunk buffer to application buffer. Even though this is protected by a mutex
-     * it must still not interfere with the threads in H5Z_pipeline() */
+    /* Scatter data from chunk buffer to application buffer. Even though this is protected by a mutex it must
+     * still not interfere with the threads in H5Z_pipeline() */
     if (H5_UNLIKELY((threaded_chunk_info->threaded_io_info->dset_info->io_ops.single_read)(
                         &threaded_chunk_info->threaded_io_info->cpt_io_info,
                         &threaded_chunk_info->chk_dset_io_info) < 0))
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked read failed");
 
     /* If the chunk is not kept in the chunk cache, free its buffer now instead of leaving it to
-     * H5D__chunk_unlock() after all worker tasks have completed. That lets the memory be reused for
-     * the next chunk this thread processes, instead of holding every chunk buffer of the read at
-     * once, with every page of those buffers newly faulted in. A chunk is kept in the cache if and
-     * only if udata.idx_hint is not UINT_MAX, in which case the buffer now belongs to the cache
-     * entry. Unfiltered chunks are allocated from the free list package, which is not yet threadsafe,
-     * so free them while holding the internal mutex. */
+     * H5D__chunk_unlock() after all worker tasks have completed. That lets the memory be reused for the
+     * next chunk this thread processes, instead of holding every chunk buffer of the read at once, with
+     * every page of those buffers newly faulted in. A chunk is kept in the cache if and only if
+     * udata.idx_hint is not UINT_MAX, in which case the buffer now belongs to the cache entry.
+     * Unfiltered chunks are allocated from the free list package, which is not yet threadsafe, so free them
+     * while holding the internal mutex. */
     if (UINT_MAX == threaded_chunk_info->udata.idx_hint && !filtered)
         threaded_chunk_info->chunk =
             H5D__chunk_mem_xfree(threaded_chunk_info->chunk, threaded_chunk_info->old_pline);
@@ -3821,10 +3819,10 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
     api_ctx_pushed = false;
 
 done:
-    /* Report this chunk as done, holding cond_mutex until this worker is finished with the library.
-     * Once the last chunk is reported done and cond_mutex is released, the thread that started the
-     * read frees threaded_io_info and goes on using the library. If the lock fails, continue anyway
-     * so that thread doesn't wait forever, though nothing here is then synchronized with it. */
+    /* Report this chunk as done, holding cond_mutex until this worker is finished with the library. Once
+     * the last chunk is reported done and cond_mutex is released, the thread that started the read frees
+     * threaded_io_info and goes on using the library. If the lock fails, continue anyway so that thread
+     * doesn't wait forever, though nothing here is then synchronized with it. */
     if (H5_UNLIKELY(H5TS_mutex_lock(&threaded_chunk_info->threaded_io_info->cond_mutex) < 0))
         HDONE_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't lock mutex for condition variable");
     else
@@ -3872,8 +3870,8 @@ done:
     if (threaded_chunk_info->threaded_io_info->pause_errors)
         H5E_resume_stack();
 
-    /* Release cond_mutex. A failure here can't be reported, since the main thread may already be
-     * going on using the library. */
+    /* Release cond_mutex. A failure here can't be reported, since the main thread may already be going
+     * on using the library. */
     if (H5_LIKELY(cond_mutex_held))
         (void)H5TS_mutex_unlock(&threaded_chunk_info->threaded_io_info->cond_mutex);
 
