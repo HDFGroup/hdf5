@@ -1166,7 +1166,7 @@ extern char H5_lib_vers_info_g[];
     } while (0)
 #else
 /* Local variable for saving cancellation state */
-#define H5CANCEL_DECL_REAL /* */
+#define H5CANCEL_DECL_REAL /* no-op */
 
 /* Disable & restore canceling the thread */
 #define H5TS_DISABLE_CANCEL                                                                                  \
@@ -1205,7 +1205,7 @@ extern char H5_lib_vers_info_g[];
 #elif defined(H5_HAVE_CONCURRENCY)
 
 /* Local variable for saving cancellation state */
-#define H5CANCEL_DECL H5CANCEL_DECL_REAL;
+#define H5CANCEL_DECL H5CANCEL_DECL_REAL
 
 /* No need to declare in INTLOCK block since it's declared in the regular H5CANCEL_DECL block */
 #define H5CANCEL_DECL_INTLOCK
