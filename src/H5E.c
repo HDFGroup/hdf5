@@ -937,7 +937,7 @@ H5Eis_paused(hid_t stack_id, bool *is_paused)
     herr_t       ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
-    FUNC_ENTER_API_NOCLEAR(FAIL)
+    FUNC_ENTER_API_NOCLEAR_INTLOCK(FAIL)
 
     /* Get the correct error stack */
     if (stack_id == H5E_DEFAULT) {
@@ -961,7 +961,7 @@ H5Eis_paused(hid_t stack_id, bool *is_paused)
     *is_paused = (stack->paused > 0);
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_INTLOCK(ret_value)
 } /* end H5Eis_paused() */
 
 /*-------------------------------------------------------------------------

@@ -56,8 +56,8 @@
 /**
  * Defining the H5Z_FEAT_FILTER_NO_H5_CALLS for a filter means that the
  * \p filter callback does not make any HDF5 calls, excluding #H5OPEN,
- * H5allocate_memory(), H5resize_memory(), H5free_memory(), H5Epush1(), and
- * H5Epush2().
+ * H5allocate_memory(), H5resize_memory(), H5free_memory(), H5Epush1(),
+ * H5Epush2(), and H5Eis_paused().
  * \since 2.3.0
  */
 #define H5Z_FEAT_FILTER_NO_H5_CALLS 0x0000000000000002
@@ -309,7 +309,7 @@ extern "C" {
  *          \li #H5Z_FEAT_FILTER_NO_H5_CALLS : This should be set if the \p
  *          filter callback does not make any HDF5 library calls (except
  *          #H5OPEN, H5allocate_memory(), H5resize_memory(), H5free_memory(),
- *          H5Epush1(), and H5Epush2()).
+ *          H5Epush1(), H5Epush2(), and H5Eis_paused()).
  *          All other bits will be ignored. The filter should set all other bits
  *          to zero so they are not erroneously interpreted as features by a
  *          future version of the library.
