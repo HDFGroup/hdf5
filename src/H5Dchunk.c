@@ -3674,7 +3674,6 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
     bool          mutex_held      = false;   /* Whether we hold the internal mutex */
     bool          cond_mutex_held = false;   /* Whether we hold the condition variable mutex */
     bool          api_ctx_pushed  = false;   /* Whether API context pushed */
-    bool          stack_paused    = false;   /* Whether the error stack was paused */
     herr_t        ret_value       = SUCCEED; /* "Return value" for error macros (actual return value is always
                                                 (H5TS_thread_ret_t)0) */
 
@@ -3684,10 +3683,8 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
     FUNC_ENTER_PACKAGE
 
     /* Pause error stack if requested */
-    if (threaded_chunk_info->threaded_io_info->pause_errors) {
+    if (threaded_chunk_info->threaded_io_info->pause_errors)
         H5E_pause_stack();
-        stack_paused = true;
-    }
 
     /* Set API context */
     if (H5CX_push(&api_ctx) < 0)
@@ -3877,14 +3874,14 @@ done:
     assert(!mutex_held);
     assert(!api_ctx_pushed);
 
+    /* Resume error stack if it was paused */
+    if (threaded_chunk_info->threaded_io_info->pause_errors)
+        H5E_resume_stack();
+
     /* Release cond_mutex. A failure here can't be reported, since the main thread may already be
      * going on using the library. */
     if (H5_LIKELY(cond_mutex_held))
         (void)H5TS_mutex_unlock(&threaded_chunk_info->threaded_io_info->cond_mutex);
-
-    /* Resume error stack if it was paused */
-    if (stack_paused)
-        H5E_resume_stack();
 
     FUNC_LEAVE_NOAPI((H5TS_thread_ret_t)0);
 } /* end H5D__chunk_thread_read() */
