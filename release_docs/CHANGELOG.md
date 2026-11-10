@@ -175,8 +175,7 @@ We would like to thank the many HDF5 community members who contributed to this r
    H5Z_FEAT_FILTER_THREADSAFE, which should be set when the filter callback is
    threadsafe, and H5Z_FEAT_FILTER_NO_H5_CALLS, which should be set when the
    filter makes no HDF5 calls except for H5OPEN, H5allocate_memory(),
-   H5resize_memory(), H5free_memory(), H5Epush1(), H5Epush2(), and
-   H5Eis_paused().
+   H5resize_memory(), H5free_memory(), and all H5E functions.
 
 ### Added support for internally concurrent multithreaded reads of chunked datasets
 

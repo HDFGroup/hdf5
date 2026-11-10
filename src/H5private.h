@@ -1473,6 +1473,26 @@ extern char H5_lib_vers_info_g[];
             H5E_clear_stack();                                                                               \
             {
 
+/* Use this macro for all "normal" public API functions that can be executed by
+ * callbacks that otherwise don't enter the HDF5 API, like most H5E functions */
+#define FUNC_ENTER_API_INTLOCK(err)                                                                          \
+    {                                                                                                        \
+        {                                                                                                    \
+            H5CX_node_t api_ctx        = {{0}, NULL};                                                        \
+            bool        api_ctx_pushed = false;                                                              \
+                                                                                                             \
+            H5_CHECK_FUNCTION_NAME(H5_IS_PUBLIC(__func__));                                                  \
+                                                                                                             \
+            H5_API_SETUP_PUBLIC_API_VARS                                                                     \
+            H5_API_SETUP_ERROR_HANDLING                                                                      \
+            H5_API_INTLOCK(err)                                                                              \
+            H5_API_SETUP_INIT_LIBRARY(err);                                                                  \
+            H5_API_SETUP_PUSH_CONTEXT(err);                                                                  \
+                                                                                                             \
+            /* Clear thread error stack entering public functions */                                         \
+            H5E_clear_stack();                                                                               \
+            {
+
 /*
  * Use this macro for public API functions that shouldn't clear the error stack
  * like H5Eprint and H5Ewalk.

@@ -85,7 +85,7 @@ H5Eget_major(H5E_major_t maj)
     char      *msg_str = NULL;
     char      *ret_value; /* Return value */
 
-    FUNC_ENTER_API_NOCLEAR(NULL)
+    FUNC_ENTER_API_NOCLEAR_INTLOCK(NULL)
 
     /* Get the message object */
     if (NULL == (msg = (H5E_msg_t *)H5I_object_verify(maj, H5I_ERROR_MSG)))
@@ -111,7 +111,7 @@ done:
     if (!ret_value)
         msg_str = (char *)H5MM_xfree(msg_str);
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_INTLOCK(ret_value)
 } /* end H5Eget_major() */
 
 /*-------------------------------------------------------------------------
@@ -133,7 +133,7 @@ H5Eget_minor(H5E_minor_t min)
     char      *msg_str = NULL;
     char      *ret_value; /* Return value */
 
-    FUNC_ENTER_API_NOCLEAR(NULL)
+    FUNC_ENTER_API_NOCLEAR_INTLOCK(NULL)
 
     /* Get the message object */
     if (NULL == (msg = (H5E_msg_t *)H5I_object_verify(min, H5I_ERROR_MSG)))
@@ -159,7 +159,7 @@ done:
     if (!ret_value)
         msg_str = (char *)H5MM_xfree(msg_str);
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_INTLOCK(ret_value)
 } /* end H5Eget_minor() */
 
 /*-------------------------------------------------------------------------
@@ -254,14 +254,14 @@ H5Eclear1(void)
     herr_t ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
-    FUNC_ENTER_API_NOCLEAR(FAIL)
+    FUNC_ENTER_API_NOCLEAR_INTLOCK(FAIL)
 
     /* Clear the default error stack */
     if (H5E_clear_stack() < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't clear error stack");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_INTLOCK(ret_value)
 } /* end H5Eclear1() */
 
 /*-------------------------------------------------------------------------
@@ -284,7 +284,7 @@ H5Eprint1(FILE *stream)
     herr_t       ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
-    FUNC_ENTER_API_NOCLEAR(FAIL)
+    FUNC_ENTER_API_NOCLEAR_INTLOCK(FAIL)
 
     /* Get the 'default' error stack */
     if (NULL == (estack = H5E__get_my_stack()))
@@ -295,7 +295,7 @@ H5Eprint1(FILE *stream)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't display error stack");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_INTLOCK(ret_value)
 } /* end H5Eprint1() */
 
 /*-------------------------------------------------------------------------
@@ -317,7 +317,7 @@ H5Ewalk1(H5E_direction_t direction, H5E_walk1_t func, void *client_data)
     herr_t        ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
-    FUNC_ENTER_API_NOCLEAR(FAIL)
+    FUNC_ENTER_API_NOCLEAR_INTLOCK(FAIL)
 
     if (NULL == (estack = H5E__get_my_stack()))
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
@@ -329,7 +329,7 @@ H5Ewalk1(H5E_direction_t direction, H5E_walk1_t func, void *client_data)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_INTLOCK(ret_value)
 } /* end H5Ewalk1() */
 
 /*-------------------------------------------------------------------------
@@ -352,7 +352,7 @@ H5Eget_auto1(H5E_auto1_t *func /*out*/, void **client_data /*out*/)
     H5E_auto_op_t auto_op;             /* Error stack operator */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API_INTLOCK(FAIL)
 
     /* Retrieve default error stack */
     if (NULL == (estack = H5E__get_my_stack()))
@@ -370,7 +370,7 @@ H5Eget_auto1(H5E_auto1_t *func /*out*/, void **client_data /*out*/)
         *func = auto_op.func1;
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_INTLOCK(ret_value)
 } /* end H5Eget_auto1() */
 
 /*-------------------------------------------------------------------------
@@ -401,7 +401,7 @@ H5Eset_auto1(H5E_auto1_t func, void *client_data)
     herr_t        ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
-    FUNC_ENTER_API_NOCLEAR(FAIL)
+    FUNC_ENTER_API_NOCLEAR_INTLOCK(FAIL)
 
     if (NULL == (estack = H5E__get_my_stack()))
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
@@ -422,6 +422,6 @@ H5Eset_auto1(H5E_auto1_t func, void *client_data)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't set automatic error info");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_INTLOCK(ret_value)
 } /* end H5Eset_auto1() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
