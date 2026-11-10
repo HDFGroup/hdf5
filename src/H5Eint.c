@@ -2104,11 +2104,8 @@ H5E_errors_disabled(void)
     }
     else
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-    {
-        assert(estack->auto_op.vers == 2);
         if (!estack->auto_op.func2)
             HGOTO_DONE(true);
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
