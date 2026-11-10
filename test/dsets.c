@@ -22119,27 +22119,26 @@ main(void)
                     nerrors += (test_floattypes(file) < 0 ? 1 : 0);
                     nerrors += (test_userblock_offset(driver_name, fapl, low >= H5F_LIBVER_V110) < 0 ? 1 : 0);
 
-                    /* Don't test these with threads yet since H5E_BEGIN_TRY doesn't yet apply to threads and
-                     * these tests will otherwise produce lots of irrelevant error messages */
+                    /* deflate.h5 is a single-file test file, so it can't be opened
+                     * with a VFD that isn't compatible with the default VFD */
+                    if (driver_is_default_compatible)
+                        nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
+                    nerrors += (test_bad_decode_size(file) < 0 ? 1 : 0);
+                    nerrors += (test_bad_decode_size_vlen(file) < 0 ? 1 : 0);
+                    nerrors += (test_bad_buf_size(file) < 0 ? 1 : 0);
+
 #ifdef H5_HAVE_THREADS
+                    /* Don't test these with threads yet since custom error handlers don't yet apply to threads */
                     if (!threads)
 #endif /* H5_HAVE_THREADS */
                     {
-                        /* deflate.h5 is a single-file test file, so it can't be opened
-                         * with a VFD that isn't compatible with the default VFD */
-                        if (driver_is_default_compatible)
-                            nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
-                        nerrors += (test_bad_decode_size(file) < 0 ? 1 : 0);
-                        nerrors += (test_bad_decode_size_vlen(file) < 0 ? 1 : 0);
-                        nerrors += (test_bad_buf_size(file) < 0 ? 1 : 0);
-
-                        /* This one will also fail because it doesn't detect the expected message in the main
+                        /* This one will fail because it doesn't detect the expected message in the main
                          * thread's stack (it is printed by the child thread) */
                         nerrors += (test_filter_error_msg(file) < 0 ? 1 : 0);
-
-                        if (driver_is_default_compatible)
-                            nerrors += (test_filter_bad_params() < 0 ? 1 : 0);
                     }
+
+                    if (driver_is_default_compatible)
+                        nerrors += (test_filter_bad_params() < 0 ? 1 : 0);
 
                     nerrors += (test_can_apply(file) < 0 ? 1 : 0);
                     nerrors += (test_can_apply2(file) < 0 ? 1 : 0);
