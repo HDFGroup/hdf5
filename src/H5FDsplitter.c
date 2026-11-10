@@ -578,8 +578,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__splitter_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
-                    size_t size, void *buf)
+H5FD__splitter_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, void *buf)
 {
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
     herr_t           ret_value = SUCCEED;
