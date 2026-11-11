@@ -3705,8 +3705,8 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
                     ? threaded_chunk_info->threaded_io_info->chunk_size
                     : threaded_chunk_info->chunk_nbytes;
 
-    /* Filtered chunks are allocated with H5MM_malloc(), unfiltered chunks from the free list package.
-     * This determines which allocator is used for the chunk buffer here and when it is freed below. */
+    /* Filtered chunks are allocated with H5MM_malloc(), unfiltered chunks from the free list package. This
+     * determines which allocator is used for the chunk buffer here and when it is freed below. */
     filtered = threaded_chunk_info->old_pline && threaded_chunk_info->old_pline->nused;
 
     /* If we're using filters we can allocate the chunk outside of the mutex, otherwise we need to protect it
