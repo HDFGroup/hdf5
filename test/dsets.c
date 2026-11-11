@@ -21092,11 +21092,14 @@ filter_error(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
         H5Epush2(H5E_DEFAULT, __FILE__, __func__, __LINE__, H5E_ERR_CLS, H5E_PLINE, H5E_CANTUNCORK,
                  "This error message should never be printed");
 
-        /* Verify there are no error messages on the stack (will also report faiilure if H5Eget_num() fails), but only if in threaded mode. In non-threaded mode, because the test uses H5E_BEGIN_TRY, the stack is not paused and errors can be pushed to it. */
+        /* Verify there are no error messages on the stack (will also report faiilure if H5Eget_num() fails),
+         * but only if in threaded mode. In non-threaded mode, because the test uses H5E_BEGIN_TRY, the stack
+         * is not paused and errors can be pushed to it. */
         /* Threading is not yet supported for writes, so only test if H5Z_FLAG_REVERSE is set */
         if (filter_error_threaded && (flags & H5Z_FLAG_REVERSE))
             if ((num_errors = H5Eget_num(H5E_DEFAULT)) != 0)
-                /* Ok to set this normally in threaded section because if any thread fails it will be set to true, no matter the order. The value won't be checked until all threads complete. */
+                /* Ok to set this normally in threaded section because if any thread fails it will be set to
+                 * true, no matter the order. The value won't be checked until all threads complete. */
                 filter_error_fail = true;
 
         return 0;
@@ -21729,7 +21732,8 @@ test_threaded_filters(void)
              * "error 0" dataset
              */
 
-            /* Set filter_error_threaded to false - since this filter reports re-entering HDF5 it will never be executed in threaded mode */
+            /* Set filter_error_threaded to false - since this filter reports re-entering HDF5 it will never
+             * be executed in threaded mode */
             filter_error_threaded = false;
 
             /* Initialize the write buffer */
@@ -21847,7 +21851,8 @@ test_threaded_filters(void)
              * "error 1" dataset
              */
 
-            /* Set filter_error_threaded to false - since this filter reports re-entering HDF5 it will never be executed in threaded mode */
+            /* Set filter_error_threaded to false - since this filter reports re-entering HDF5 it will never
+             * be executed in threaded mode */
             filter_error_threaded = false;
 
             /* Initialize the write buffer */
