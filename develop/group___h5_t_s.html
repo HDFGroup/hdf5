@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-11-10</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-11-11</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -168,7 +168,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="#ga820be65780a76c15f23a17252c237d09" title="Sets the number of internal threads to use for internal multithreading.">H5TSset_internal_threads()</a> directs the HDF5 library to us <code class="param">num_threads</code> threads to accelerate parallelizable operations.</p>
 <p>This is currently only used to accelerate read operations for chunked datasets that either have data filters applied or for which the chunks are small enough to fit in cache. In this case, the library parallelizes the reads from disk, the data filter operations, and the memory scatter operation. However, all of these operations are currently protected by a mutex so no performance gain is expected and this feature is purely experimental. These mutexes will be relaxed in the future to enable performance acceleration.</p>
-<p>Currently, the library will immediately create <code class="param">num_threads</code> threads and retain them until this function is called again. Calling this function with <code class="param">num_threads</code> set to <code>0</code> will terminate these threads and disable internal multithreading.</p>
+<p>Currently, the library will immediately create <code class="param">num_threads</code> threads and retain them until this function is called again. Calling this function with <code class="param">num_threads</code> set to <code>0</code> or <code>1</code> will terminate these threads and disable internal multithreading.</p>
 <p>This is currently only used to accelerate raw data reads of chunked datasets. This will occur when the following conditions are met: </p><ul>
 <li>This function must be called with <code class="param">num_threads</code> &gt; <code>0</code> . </li>
 <li><a class="el" href="group___d_x_p_l.html#ga137c71367b2b24d05c4820b99708f4d0" title="Allows the library to use internal multithreading to accelerate I/O.">H5Pset_io_threads()</a> must not be called with <code>threads_enabled</code> set to <code>false</code> . </li>
