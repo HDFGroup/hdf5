@@ -1147,13 +1147,13 @@ extern char H5_lib_vers_info_g[];
 #include "H5TSprivate.h"
 #endif
 
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_THREADS
 
 /* Thread cancellation is only possible w/pthreads */
 #if defined(H5_HAVE_PTHREAD_H)
 
 /* Local variable for saving cancellation state */
-#define H5CANCEL_DECL int oldstate = 0;
+#define H5CANCEL_DECL_REAL int oldstate = 0;
 
 /* Disable & restore canceling the thread */
 #define H5TS_DISABLE_CANCEL                                                                                  \
@@ -1166,7 +1166,7 @@ extern char H5_lib_vers_info_g[];
     } while (0)
 #else
 /* Local variable for saving cancellation state */
-#define H5CANCEL_DECL /* */
+#define H5CANCEL_DECL_REAL /* no-op */
 
 /* Disable & restore canceling the thread */
 #define H5TS_DISABLE_CANCEL                                                                                  \
@@ -1177,7 +1177,14 @@ extern char H5_lib_vers_info_g[];
     } while (0) /* no-op */
 #endif
 
-#ifdef H5_HAVE_THREADSAFE
+#if defined(H5_HAVE_THREADSAFE)
+
+/* Local variable for saving cancellation state */
+#define H5CANCEL_DECL H5CANCEL_DECL_REAL
+
+/* No need to declare in INTLOCK block since it's declared in the regular H5CANCEL_DECL block */
+#define H5CANCEL_DECL_INTLOCK
+
 /* Local variable for 'disable locking for this thread' (DLFTT) state */
 #define H5DLFTT_DECL /* */
 
@@ -1194,7 +1201,15 @@ extern char H5_lib_vers_info_g[];
                                                                                                              \
     /* Restore previous thread cancellation state */                                                         \
     H5TS_RESTORE_CANCEL;
-#else /* H5_HAVE_CONCURRENCY */
+
+#elif defined(H5_HAVE_CONCURRENCY)
+
+/* Local variable for saving cancellation state */
+#define H5CANCEL_DECL H5CANCEL_DECL_REAL
+
+/* No need to declare in INTLOCK block since it's declared in the regular H5CANCEL_DECL block */
+#define H5CANCEL_DECL_INTLOCK
+
 /* Local variable for 'disable locking for this thread' (DLFTT) state */
 #define H5DLFTT_DECL unsigned dlftt = 0;
 
@@ -1214,14 +1229,60 @@ extern char H5_lib_vers_info_g[];
         /* Restore previous thread cancellation state */                                                     \
         H5TS_RESTORE_CANCEL;                                                                                 \
     }
-#endif
-#else                 /* H5_HAVE_THREADSAFE_API */
+
+#else /* Neither threadsafe nor concurrent, i.e. not H5_HAVE_THREADSAFE_API */
+
+/* Local variable for saving cancellation state for INTLOCK macros */
+#define H5CANCEL_DECL_INTLOCK H5CANCEL_DECL_REAL
+
+#endif /* H5_HAVE_THREADSAFE_API */
+
+/* Macro for locking an API that may be called from an internally concurrent thread */
+#define H5_API_INTLOCK(err)                                                                                  \
+    {                                                                                                        \
+        H5CANCEL_DECL_INTLOCK;                                                                               \
+                                                                                                             \
+        if (H5TS_currently_concurrent_g) {                                                                   \
+            /* Lock internal mutex instead of API */                                                         \
+            if (H5TS_internal_lock() < 0)                                                                    \
+                HGOTO_ERROR(H5E_FUNC, H5E_CANTLOCK, err, "can't lock internal mutex");                       \
+                                                                                                             \
+            /* Set thread cancellation state to 'disable', and remember previous state */                    \
+            H5TS_DISABLE_CANCEL;                                                                             \
+        }                                                                                                    \
+        else {                                                                                               \
+            H5_API_LOCK                                                                                      \
+        }
+
+/* Macro for unlocking an API that may be called from an internally concurrent thread */
+#define H5_API_INTUNLOCK                                                                                     \
+    if (H5TS_currently_concurrent_g) {                                                                       \
+        /* Unlock internal mutex instead of API */                                                           \
+        (void)H5TS_internal_unlock();                                                                        \
+                                                                                                             \
+        /* Restore previous thread cancellation state */                                                     \
+        H5TS_RESTORE_CANCEL;                                                                                 \
+    }                                                                                                        \
+    else {                                                                                                   \
+        H5_API_UNLOCK                                                                                        \
+    }                                                                                                        \
+    }
+
+#else                       /* H5_HAVE_THREADS */
+
+/* No locks for builds without threads */
+#define H5_API_INTLOCK(err) /* no-op */
+#define H5_API_INTUNLOCK    /* no-op */
+
+#endif /* H5_HAVE_THREADS */
+
+#ifndef H5_HAVE_THREADSAFE_API /* Not H5_HAVE_THREADSAFE or H5_HAVE_CONCURRENCY */
 
 /* Local variable for saving cancellation state */
 #define H5CANCEL_DECL /* */
 
 /* Local variable for 'disable locking for this thread' (DLFTT) state */
-#define H5DLFTT_DECL  /* */
+#define H5DLFTT_DECL /* */
 
 /* No locks (non-threadsafe builds) */
 #define H5_API_LOCK   /* no-op */
@@ -1412,6 +1473,26 @@ extern char H5_lib_vers_info_g[];
             H5E_clear_stack();                                                                               \
             {
 
+/* Use this macro for all "normal" public API functions that can be executed by
+ * callbacks that otherwise don't enter the HDF5 API, like most H5E functions */
+#define FUNC_ENTER_API_INTLOCK(err)                                                                          \
+    {                                                                                                        \
+        {                                                                                                    \
+            H5CX_node_t api_ctx        = {{0}, NULL};                                                        \
+            bool        api_ctx_pushed = false;                                                              \
+                                                                                                             \
+            H5_CHECK_FUNCTION_NAME(H5_IS_PUBLIC(__func__));                                                  \
+                                                                                                             \
+            H5_API_SETUP_PUBLIC_API_VARS                                                                     \
+            H5_API_SETUP_ERROR_HANDLING                                                                      \
+            H5_API_INTLOCK(err)                                                                              \
+            H5_API_SETUP_INIT_LIBRARY(err);                                                                  \
+            H5_API_SETUP_PUSH_CONTEXT(err);                                                                  \
+                                                                                                             \
+            /* Clear thread error stack entering public functions */                                         \
+            H5E_clear_stack();                                                                               \
+            {
+
 /*
  * Use this macro for public API functions that shouldn't clear the error stack
  * like H5Eprint and H5Ewalk.
@@ -1427,6 +1508,26 @@ extern char H5_lib_vers_info_g[];
             H5_API_SETUP_PUBLIC_API_VARS                                                                     \
             H5_API_SETUP_ERROR_HANDLING                                                                      \
             H5_API_LOCK                                                                                      \
+            H5_API_SETUP_INIT_LIBRARY(err);                                                                  \
+            H5_API_SETUP_PUSH_CONTEXT(err);                                                                  \
+            {
+
+/*
+ * Use this macro for public API functions that shouldn't clear the error stack
+ * and can be executed by callbacks that otherwise don't enter the HDF5 API,
+ * like H5Epush.
+ */
+#define FUNC_ENTER_API_NOCLEAR_INTLOCK(err)                                                                  \
+    {                                                                                                        \
+        {                                                                                                    \
+            H5CX_node_t api_ctx        = {{0}, NULL};                                                        \
+            bool        api_ctx_pushed = false;                                                              \
+                                                                                                             \
+            H5_CHECK_FUNCTION_NAME(H5_IS_PUBLIC(__func__));                                                  \
+                                                                                                             \
+            H5_API_SETUP_PUBLIC_API_VARS                                                                     \
+            H5_API_SETUP_ERROR_HANDLING                                                                      \
+            H5_API_INTLOCK(err)                                                                              \
             H5_API_SETUP_INIT_LIBRARY(err);                                                                  \
             H5_API_SETUP_PUSH_CONTEXT(err);                                                                  \
             {
@@ -1462,6 +1563,20 @@ extern char H5_lib_vers_info_g[];
                                                                                                              \
                     H5_API_SETUP_PUBLIC_API_VARS                                                             \
                     H5_API_LOCK                                                                              \
+                    {
+
+/*
+ * Use this macro for public API functions that shouldn't perform _any_
+ * initialization of the library or an interface or push themselves on the
+ * function stack, and that don't need to take the API lock. These functions
+ * must be thread-safe whenever H5_HAVE_THREADS is defined.
+ */
+#define FUNC_ENTER_API_NOINIT_NOERR_NOLOCK                                                                   \
+    {                                                                                                        \
+        {                                                                                                    \
+            {                                                                                                \
+                {                                                                                            \
+                    H5_CHECK_FUNCTION_NAME(H5_IS_PUBLIC(__func__));                                          \
                     {
 
 /*
@@ -1658,6 +1773,21 @@ extern char H5_lib_vers_info_g[];
     }                                                                                                        \
     } /* end scope from beginning of FUNC_ENTER */
 
+/* Use this macro to match the FUNC_ENTER_API_NOCLEAR_INTLOCK macro */
+#define FUNC_LEAVE_API_INTLOCK(ret_value)                                                                    \
+    ;                                                                                                        \
+    } /* end scope from end of FUNC_ENTER */                                                                 \
+    if (H5_LIKELY(api_ctx_pushed)) {                                                                         \
+        (void)H5CX_pop(true);                                                                                \
+        api_ctx_pushed = false;                                                                              \
+    }                                                                                                        \
+    if (H5_UNLIKELY(err_occurred))                                                                           \
+        (void)H5E_dump_api_stack();                                                                          \
+    H5_API_INTUNLOCK                                                                                         \
+    return (ret_value);                                                                                      \
+    }                                                                                                        \
+    } /* end scope from beginning of FUNC_ENTER */
+
 /* Use this macro to match the FUNC_ENTER_API_NOINIT macro */
 #define FUNC_LEAVE_API_NOINIT(ret_value)                                                                     \
     ;                                                                                                        \
@@ -1675,6 +1805,16 @@ extern char H5_lib_vers_info_g[];
     ;                                                                                                        \
     } /* end scope from end of FUNC_ENTER */                                                                 \
     H5_API_UNLOCK                                                                                            \
+    return (ret_value);                                                                                      \
+    }                                                                                                        \
+    }                                                                                                        \
+    }                                                                                                        \
+    } /* end scope from beginning of FUNC_ENTER */
+
+/* Use this macro to match the FUNC_ENTER_API_NOINIT_NOERR_NOLOCK macro */
+#define FUNC_LEAVE_API_NOERR_NOLOCK(ret_value)                                                               \
+    ;                                                                                                        \
+    } /* end scope from end of FUNC_ENTER */                                                                 \
     return (ret_value);                                                                                      \
     }                                                                                                        \
     }                                                                                                        \

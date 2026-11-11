@@ -989,10 +989,17 @@ use forward slashes)
 Add the following to your `CMakeLists.txt` file:
 ```cmake
 find_package (HDF5 NAMES hdf5 COMPONENTS C shared)
+target_link_libraries (my_app PRIVATE hdf5::hdf5)
 ```
 
 The components are optional and can be omitted if not needed. The
 components are: `shared`, `static`, `C`, `CXX`, `Fortran`, `HL`, `Java`, `Tools`, and `VOL`.
+Omitting `shared` and `static` lets HDF5 choose, preferring shared libraries.
+
+Link against the `hdf5::` targets, such as `hdf5::hdf5` and `hdf5::hdf5_hl`. The
+linkage-qualified `hdf5-shared` and `hdf5-static` names are deprecated as of 2.3.0
+and will be removed in a future major release. See
+[USING_HDF5_CMake.md](USING_HDF5_CMake.md) for the full list of target names.
 
 ---
 

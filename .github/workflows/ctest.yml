@@ -36,7 +36,15 @@ on:
             required: true
         APPLE_CERTS_BASE64_PASSWD:
             required: true
+        KEYCHAIN_NAME:
+            required: true
         KEYCHAIN_PASSWD:
+            required: true
+        SIGNER:
+            required: true
+        NOTARY_USER:
+            required: true
+        NOTARY_KEY:
             required: true
         AZURE_TENANT_ID:
             required: true
@@ -499,20 +507,6 @@ jobs:
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.tar.gz hdf5
         shell: bash
 
-      - name: Publish deb binary (Linux)
-        id: publish-ctest-deb-binary
-        run: |
-          mkdir "${{ runner.workspace }}/builddeb"
-          cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/*.deb ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb
-        shell: bash
-
-      - name: Publish rpm binary (Linux)
-        id: publish-ctest-rpm-binary
-        run: |
-          mkdir "${{ runner.workspace }}/buildrpm"
-          cp ${{ runner.workspace }}/hdf5/build/${{ steps.run-ctest.outputs.ACTIVE_PRESET }}/*.rpm ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
-        shell: bash
-
       - name: List files in the space (Linux)
         run: |
               ls ${{ github.workspace }}
@@ -524,20 +518,6 @@ jobs:
         with:
               name: tgz-ubuntu-2404_gcc-binary
               path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.tar.gz
-              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-
-      - name: Save published binary deb (Linux)
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
-        with:
-              name: deb-ubuntu-2404_gcc-binary
-              path: ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb
-              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-
-      - name: Save published binary rpm (Linux)
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
-        with:
-              name: rpm-ubuntu-2404_gcc-binary
-              path: ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       # Verify the Doxygen tag file was generated inside the HTML output
@@ -594,11 +574,11 @@ jobs:
               path: ${{ runner.workspace }}/maven-artifacts
               if-no-files-found: warn
 
-  build_and_test_mac_latest:
+  build_and_test_mac_26:
   # MacOS w/ Clang
   #
     name: "MacOS Clang"
-    runs-on: macos-15
+    runs-on: macos-26
     needs: [check-secret]
     steps:
       - name: check clang version
@@ -628,7 +608,7 @@ jobs:
         run: |
             # create variables
             CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-            KEYCHAIN_FILE=${{ vars.KEYCHAIN_NAME }}.keychain
+            KEYCHAIN_FILE=${{ secrets.KEYCHAIN_NAME }}.keychain
             # import certificate from secrets
             echo $BUILD_CERTIFICATE_BASE64 | base64 --decode > $CERTIFICATE_PATH
             security -v create-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
@@ -687,7 +667,7 @@ jobs:
         id: run-ctest
         env:
           BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
-          SIGNER: ${{ vars.SIGNER }}
+          SIGNER: ${{ secrets.SIGNER }}
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
           cmake --workflow --preset=${{ inputs.preset_name }}-macos-Clang --fresh
@@ -697,10 +677,10 @@ jobs:
         id: sign-dmg
         env:
           KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
-          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
-          SIGNER: ${{ vars.SIGNER }}
-          NOTARY_USER: ${{ vars.NOTARY_USER }}
-          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+          KEYCHAIN_NAME: ${{ secrets.KEYCHAIN_NAME }}
+          SIGNER: ${{ secrets.SIGNER }}
+          NOTARY_USER: ${{ secrets.NOTARY_USER }}
+          NOTARY_KEY: ${{ secrets.NOTARY_KEY }}
         run: |
           /usr/bin/codesign --force --timestamp --options runtime --entitlements ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/install/distribution.entitlements --verbose=4 --strict --sign ${{ env.SIGNER }} --deep ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
@@ -722,10 +702,10 @@ jobs:
         id: notarize-dmg
         env:
           KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
-          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
-          SIGNER: ${{ vars.SIGNER }}
-          NOTARY_USER: ${{ vars.NOTARY_USER }}
-          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+          KEYCHAIN_NAME: ${{ secrets.KEYCHAIN_NAME }}
+          SIGNER: ${{ secrets.SIGNER }}
+          NOTARY_USER: ${{ secrets.NOTARY_USER }}
+          NOTARY_KEY: ${{ secrets.NOTARY_KEY }}
         run: |
           jsonout=$(/usr/bin/xcrun notarytool submit --wait --output-format json --apple-id ${{ env.NOTARY_USER }} --password ${{ env.NOTARY_KEY }} --team-id ${{ env.SIGNER }} ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg)
           echo "JSONOUT=$jsonout" >> $GITHUB_OUTPUT
@@ -745,10 +725,10 @@ jobs:
         id: post-notary
         env:
           KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
-          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
-          SIGNER: ${{ vars.SIGNER }}
-          NOTARY_USER: ${{ vars.NOTARY_USER }}
-          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+          KEYCHAIN_NAME: ${{ secrets.KEYCHAIN_NAME }}
+          SIGNER: ${{ secrets.SIGNER }}
+          NOTARY_USER: ${{ secrets.NOTARY_USER }}
+          NOTARY_KEY: ${{ secrets.NOTARY_KEY }}
         run: |
           {
             echo 'NOTARYOUT<<EOF'
@@ -769,10 +749,10 @@ jobs:
         id: staple-dmg
         env:
           KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
-          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
-          SIGNER: ${{ vars.SIGNER }}
-          NOTARY_USER: ${{ vars.NOTARY_USER }}
-          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+          KEYCHAIN_NAME: ${{ secrets.KEYCHAIN_NAME }}
+          SIGNER: ${{ secrets.SIGNER }}
+          NOTARY_USER: ${{ secrets.NOTARY_USER }}
+          NOTARY_KEY: ${{ secrets.NOTARY_KEY }}
         run: |
           /usr/bin/xcrun stapler staple ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
@@ -788,14 +768,14 @@ jobs:
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/README.md ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
-          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-macos15_clang.tar.gz hdf5
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-macos26_clang.tar.gz hdf5
         shell: bash
 
       - name: Publish dmg binary (MacOS_latest)
         id: publish-ctest-dmg-binary
         run: |
           mkdir "${{ runner.workspace }}/builddmg"
-          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos15_clang.dmg
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos26_clang.dmg
         shell: bash
 
       - name: List files in the space (MacOS_latest)
@@ -807,15 +787,353 @@ jobs:
       - name: Save published binary (MacOS_latest)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
-              name: tgz-macos15_clang-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-macos15_clang.tar.gz
+              name: tgz-macos26_clang-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-macos26_clang.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Save published dmg binary (MacOS_latest)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
         with:
-              name: tgz-macos15_clang-dmg-binary
-              path: ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos15_clang.dmg
+              name: tgz-macos26_clang-dmg-binary
+              path: ${{ runner.workspace }}/builddmg/${{ steps.set-file-base.outputs.FILE_BASE }}-macos26_clang.dmg
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  build_and_test_s3_win:
+  # Windows S3 w/ MSVC
+  #
+    name: "Windows MSVC S3"
+    runs-on: windows-latest
+    needs: [check-secret]
+    steps:
+      - name: Install Dependencies (Windows S3)
+        run: choco install ninja
+
+      - name: Enable Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+
+      - name: Install CMake
+        uses: lukka/get-cmake@fffaaafeea488556c2c12dad60690008bc1caacb # latest
+        with:
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
+
+      - name: Check CMake Version
+        shell: bash
+        run: |
+          which cmake
+          cmake --version
+
+      # Install shared aws-c-s3 via vcpkg; users of the binaries install it the
+      # same way and add the vcpkg installed/x64-windows/bin folder to PATH.
+      - name: Install aws-c-s3 (Windows)
+        run: |
+          vcpkg install aws-c-s3:x64-windows
+          echo "CMAKE_PREFIX_PATH=$VCPKG_INSTALLATION_ROOT/installed/x64-windows" >> $GITHUB_ENV
+          echo "$VCPKG_INSTALLATION_ROOT/installed/x64-windows/bin" >> $GITHUB_PATH
+        shell: bash
+
+      - name: Log aws-c-s3 version (Windows)
+        run: |
+          vcpkg list aws-c-s3
+          echo "### aws-c-s3 (Windows MSVC S3)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          vcpkg list aws-c-s3 >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        shell: bash
+
+      # Collect LICENSE and NOTICE for every aws-* library vcpkg installed, from
+      # the local vcpkg tree (no network access). vcpkg installs each upstream
+      # LICENSE as installed/x64-windows/share/<library>/copyright; it does not
+      # install NOTICE, so that is taken from the extracted source in buildtrees,
+      # or else from the source tarball in downloads. Each LICENSE is saved as
+      # <library>-LICENSE; the NOTICE files are merged into a single NOTICE.
+      # HDF5_AWS_LICENSE_DIR makes CMakeInstallation.cmake add these files to the
+      # awslibraries component (MSI and CPack zip); they are also copied into the
+      # published zip below.
+      - name: Get aws-c-s3 license files (Windows S3)
+        run: |
+          set -uo pipefail
+          VCPKG_ROOT=$(cygpath -u "$VCPKG_INSTALLATION_ROOT")
+          LICDIR="${{ runner.workspace }}/aws-licenses"
+          mkdir -p "$LICDIR"
+          : > "$LICDIR/NOTICE"
+          vcpkg list | awk '$1 ~ /^aws-[^[]*:x64-windows$/ {split($1, p, ":"); split($2, v, "#"); print p[1], v[1]}' |
+          while read -r port version; do
+            echo "Copying license files for $port v$version"
+            copyright="$VCPKG_ROOT/installed/x64-windows/share/$port/copyright"
+            if [ ! -s "$copyright" ]; then
+              echo "::error::No LICENSE (copyright file) installed for $port v$version: $copyright"
+              exit 1
+            fi
+            cp "$copyright" "$LICDIR/$port-LICENSE"
+            notice=""
+            for f in "$VCPKG_ROOT"/buildtrees/"$port"/src/v"$version"-*/NOTICE; do
+              [ -f "$f" ] && notice=$(cat "$f") && break
+            done
+            tarball="$VCPKG_ROOT/downloads/awslabs-$port-v$version.tar.gz"
+            if [ -z "$notice" ] && [ -f "$tarball" ]; then
+              # tar exits 2 when the archive has no NOTICE. aws-checksums has no
+              # NOTICE upstream, so allow that for it only; fail on anything else.
+              rc=0
+              notice=$(tar --force-local -xzOf "$tarball" --wildcards '*/NOTICE' 2>/dev/null) || rc=$?
+              if [ "$rc" -ne 0 ]; then
+                if [ "$rc" -eq 2 ] && [ "$port" = "aws-checksums" ]; then
+                  notice=""
+                else
+                  echo "::error::tar exited $rc reading NOTICE from $tarball"
+                  exit "$rc"
+                fi
+              fi
+            fi
+            if [ -n "$notice" ]; then
+              printf '==== %s v%s ====\n%s\n\n' "$port" "$version" "$notice" >> "$LICDIR/NOTICE"
+            elif [ "$port" = "aws-checksums" ]; then
+              echo "::warning::No NOTICE file found for $port v$version (none upstream)"
+            else
+              echo "::error::No NOTICE file found for $port v$version in vcpkg buildtrees or downloads"
+              exit 1
+            fi
+          done
+          ls -l "$LICDIR"
+          test -f "$LICDIR/aws-c-s3-LICENSE"
+          echo "HDF5_AWS_LICENSE_DIR=$LICDIR" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set file base name (Windows)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Set environment for MSVC (Windows)
+        run: |
+          # Set these environment variables so CMake picks the correct compiler
+          echo "CXX=cl.exe" >> $GITHUB_ENV
+          echo "CC=cl.exe" >> $GITHUB_ENV
+
+      # Get files created by release script
+      - name: Get zip-tarball (Windows)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+              name: zip-tarball
+              path: ${{ github.workspace }}
+
+      - name: using powershell
+        shell: pwsh
+        run: Get-Location
+
+      - name: List files for the space (Windows)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      - name: Uncompress source (Windows)
+        working-directory: ${{ github.workspace }}
+        run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
+        shell: bash
+
+      - name: Install TrustedSigning (Windows)
+        run: |
+            Invoke-WebRequest -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile .\nuget.exe
+            .\nuget.exe install Microsoft.Windows.SDK.BuildTools -Version 10.0.22621.3233 -x
+            .\nuget.exe install Microsoft.Trusted.Signing.Client -Version 1.0.86 -x
+        shell: pwsh
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: create-json
+        id: create-json
+        uses: jsdaniell/create-json@b8e77fa01397ca39cc4a6198cc29a3be5481afef # v1.2.3
+        with:
+            name: "credentials.json"
+            dir: '${{ steps.set-file-base.outputs.SOURCE_BASE }}'
+            json: '{"Endpoint": "${{ secrets.AZURE_ENDPOINT }}","CodeSigningAccountName": "${{ secrets.AZURE_CODE_SIGNING_NAME }}","CertificateProfileName": "${{ secrets.AZURE_CERT_PROFILE_NAME }}"}'
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: Run CTest (Windows S3)
+        env:
+          BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
+          SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
+        run: |
+          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
+          cmake --workflow --preset=${{ inputs.preset_name }}-MSVC-S3 --fresh
+        shell: bash
+
+      - name: Sign files with Trusted Signing
+        uses: azure/trusted-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_ENDPOINT }}
+          trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+          certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+          files-folder: ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC-S3
+          files-folder-filter: msi
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+        if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+      - name: Publish binary (Windows S3)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5"
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/LICENSE -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC-S3/README.md -Destination ${{ runner.workspace }}/build/hdf5/
+          # aws-* <library>-LICENSE files and merged NOTICE, fetched in "Get aws-c-s3 license files"
+          Copy-Item -Path "$env:HDF5_AWS_LICENSE_DIR/*" -Destination ${{ runner.workspace }}/build/hdf5/ -ErrorAction Stop
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC-S3/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
+          cd "${{ runner.workspace }}/build"
+          7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2026_cl_s3.zip hdf5
+        shell: pwsh
+
+      - name: Publish msi binary (Windows S3)
+        id: publish-ctest-msi-binary
+        run: |
+          mkdir "${{ runner.workspace }}/buildmsi"
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC-S3/* -Destination ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2026_cl_s3.msi -Include *.msi
+        shell: pwsh
+
+      - name: List files in the space (Windows S3)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      # Save files created by CTest script
+      - name: Save published binary (Windows S3)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: zip-vs2026_cl_s3-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2026_cl_s3.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Save published msi binary (Windows S3)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: msi-vs2026_cl_s3-binary
+              path: ${{ runner.workspace }}/buildmsi/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2026_cl_s3.msi
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  build_and_test_linux_glibc228:
+  # Linux binary with a glibc 2.28 baseline
+  #
+  # Built against glibc 2.28, so the tarball runs on every distribution with
+  # glibc 2.28 or newer: RHEL 8+, SLES 15, Debian 10+, Ubuntu 20.04+ and
+  # Amazon Linux 2023. The ubuntu-24.04 binary above is built against glibc
+  # 2.38 and runs on none of those.
+  #
+  # Only the build runs in the container, started with "docker run" from an
+  # ordinary job rather than a job-level "container:". The runner's own node
+  # and every action therefore stay on the host, so the image's glibc never
+  # has to satisfy whatever node version GitHub ships.
+    name: "AlmaLinux 8 gcc (glibc 2.28)"
+    runs-on: ubuntu-latest
+    needs: [check-secret]
+    env:
+      # AlmaLinux 8.10, glibc 2.28, gcc-toolset-14 including gfortran, CMake.
+      # Pinned by digest; AlmaLinux 8 is supported until 2029-05-31.
+      GLIBC228_IMAGE: quay.io/pypa/manylinux_2_28_x86_64@sha256:e0adf18521ad35192df733a6c62d35df7801957d24e0470238aacecfab2188a3
+      GLIBC228_PRESET: ${{ inputs.preset_name }}-GNUC-Glibc228
+      # The highest glibc symbol version the published binary may require
+      GLIBC_BASELINE: GLIBC_2.28
+    steps:
+      - name: Get Actions
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/scripts
+          persist-credentials: false # The workspace is mounted into the build container
+
+      - name: Set file base name (Linux glibc 2.28)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
+
+      # Get files created by release script
+      - name: Get tgz-tarball (Linux glibc 2.28)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v6
+        with:
+              name: tgz-tarball
+              path: ${{ github.workspace }}
+
+      - name: Uncompress source (Linux glibc 2.28)
+        run: tar -zxf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+        shell: bash
+
+      - name: Run CTest in a glibc 2.28 container (Linux glibc 2.28)
+        run: |
+          docker run --rm \
+            --volume "${{ github.workspace }}:/work" \
+            --workdir /work \
+            "${GLIBC228_IMAGE}" \
+            /work/.github/scripts/build-linux-glibc228.sh \
+              "${{ steps.set-file-base.outputs.SOURCE_BASE }}" \
+              "${GLIBC228_PRESET}" \
+              "$(id -u)" "$(id -g)"
+        shell: bash
+
+      # The point of this binary, so fail the job if the baseline regresses.
+      # This is a ceiling, not an equality: a build that happens to need less
+      # than the image provides is fine, and gets reported as what it needs.
+      - name: Check glibc baseline (Linux glibc 2.28)
+        run: |
+          lib=$(find "${{ github.workspace }}/build/${GLIBC228_PRESET}" -name 'libhdf5.so.*.*' | head -1)
+          echo "Checking ${lib}"
+          objdump -p "${lib}" | awk '/NEEDED/{print $2}'
+          needs=$(objdump -T "${lib}" | grep -o 'GLIBC_[0-9.]*' | sort -V -u | tail -1)
+          highest=$(printf '%s\n%s\n' "${needs}" "${GLIBC_BASELINE}" | sort -V | tail -1)
+          if [ "${highest}" != "${GLIBC_BASELINE}" ]; then
+            echo "::error::requires ${needs}, above the ${GLIBC_BASELINE} baseline"
+            objdump -T "${lib}" | grep -F "${needs}" | head
+            exit 1
+          fi
+          echo "Requires ${needs}, within the ${GLIBC_BASELINE} baseline"
+          echo "Linux x86_64 binary requires ${needs} or newer" >> "${GITHUB_STEP_SUMMARY}"
+        shell: bash
+
+      - name: Publish binary (Linux glibc 2.28)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/buildlinux"
+          mkdir "${{ runner.workspace }}/buildlinux/hdf5"
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/LICENSE ${{ runner.workspace }}/buildlinux/hdf5
+          cp ${{ github.workspace }}/build/${GLIBC228_PRESET}/README.md ${{ runner.workspace }}/buildlinux/hdf5
+          cp ${{ github.workspace }}/build/${GLIBC228_PRESET}/*.tar.gz ${{ runner.workspace }}/buildlinux/hdf5
+          cd "${{ runner.workspace }}/buildlinux"
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-linux-x86_64_gcc.tar.gz hdf5
+        shell: bash
+
+      # Save files created by CTest script
+      - name: Save published binary (Linux glibc 2.28)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v5
+        with:
+              name: tgz-linux-x86_64_gcc-binary
+              path: ${{ runner.workspace }}/buildlinux/${{ steps.set-file-base.outputs.FILE_BASE }}-linux-x86_64_gcc.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_S3_linux:
