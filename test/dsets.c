@@ -405,8 +405,8 @@ static size_t filter_reenter_h5(unsigned int flags, size_t cd_nelmts, const unsi
                                 size_t nbytes, size_t *buf_size, void **buf);
 static size_t filter_h5_allocate(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                                  size_t nbytes, size_t *buf_size, void **buf);
-static size_t filter_error(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
-                            size_t nbytes, size_t *buf_size, void **buf);
+static size_t filter_error(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
+                           size_t *buf_size, void **buf);
 static htri_t can_apply_cannot_apply(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static htri_t set_local_cannot_apply(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t filter_cannot_apply(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
@@ -21030,26 +21030,26 @@ error:
  */
 /* This message derives from H5Z */
 const H5Z_class3_t H5Z_ERROR_0[1] = {{
-    H5Z_CLASS_T_VERS_3,          /* H5Z_class_t version */
-    H5Z_FILTER_ERROR_0,          /* Filter id number */
-    1, 1,                        /* Encoding and decoding enabled */
-    "error_0",                     /* Filter name for debugging */
-    NULL,                        /* The "can apply" callback */
-    NULL,                        /* The "set local" callback */
-    filter_error,                /* The actual filter function */
-    0,                           /* Feature flags */
+    H5Z_CLASS_T_VERS_3, /* H5Z_class_t version */
+    H5Z_FILTER_ERROR_0, /* Filter id number */
+    1, 1,               /* Encoding and decoding enabled */
+    "error_0",          /* Filter name for debugging */
+    NULL,               /* The "can apply" callback */
+    NULL,               /* The "set local" callback */
+    filter_error,       /* The actual filter function */
+    0,                  /* Feature flags */
 }};
 
 /* This message derives from H5Z */
 const H5Z_class3_t H5Z_ERROR_1[1] = {{
-    H5Z_CLASS_T_VERS_3,          /* H5Z_class_t version */
-    H5Z_FILTER_ERROR_1,          /* Filter id number */
-    1, 1,                        /* Encoding and decoding enabled */
-    "error_1",                     /* Filter name for debugging */
-    NULL,                        /* The "can apply" callback */
-    NULL,                        /* The "set local" callback */
-    filter_error,                /* The actual filter function */
-    H5Z_FEAT_FILTER_THREADSAFE,  /* Feature flags */
+    H5Z_CLASS_T_VERS_3,         /* H5Z_class_t version */
+    H5Z_FILTER_ERROR_1,         /* Filter id number */
+    1, 1,                       /* Encoding and decoding enabled */
+    "error_1",                  /* Filter name for debugging */
+    NULL,                       /* The "can apply" callback */
+    NULL,                       /* The "set local" callback */
+    filter_error,               /* The actual filter function */
+    H5Z_FEAT_FILTER_THREADSAFE, /* Feature flags */
 }};
 
 /* This message derives from H5Z */
@@ -21057,7 +21057,7 @@ const H5Z_class3_t H5Z_ERROR_2[1] = {{
     H5Z_CLASS_T_VERS_3,          /* H5Z_class_t version */
     H5Z_FILTER_ERROR_2,          /* Filter id number */
     1, 1,                        /* Encoding and decoding enabled */
-    "error_2",                     /* Filter name for debugging */
+    "error_2",                   /* Filter name for debugging */
     NULL,                        /* The "can apply" callback */
     NULL,                        /* The "set local" callback */
     filter_error,                /* The actual filter function */
@@ -21066,27 +21066,27 @@ const H5Z_class3_t H5Z_ERROR_2[1] = {{
 
 /* This message derives from H5Z */
 const H5Z_class3_t H5Z_ERROR_3[1] = {{
-    H5Z_CLASS_T_VERS_3,          /* H5Z_class_t version */
-    H5Z_FILTER_ERROR_3,          /* Filter id number */
-    1, 1,                        /* Encoding and decoding enabled */
-    "error_3",                     /* Filter name for debugging */
-    NULL,                        /* The "can apply" callback */
-    NULL,                        /* The "set local" callback */
-    filter_error,                /* The actual filter function */
-    H5Z_FEAT_FILTER_THREADSAFE |
-        H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags */
+    H5Z_CLASS_T_VERS_3,                                       /* H5Z_class_t version */
+    H5Z_FILTER_ERROR_3,                                       /* Filter id number */
+    1, 1,                                                     /* Encoding and decoding enabled */
+    "error_3",                                                /* Filter name for debugging */
+    NULL,                                                     /* The "can apply" callback */
+    NULL,                                                     /* The "set local" callback */
+    filter_error,                                             /* The actual filter function */
+    H5Z_FEAT_FILTER_THREADSAFE | H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags */
 }};
 
 static bool filter_error_error;
 
 static size_t
 filter_error(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
-                      const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes,
-                      size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+             const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes, size_t H5_ATTR_UNUSED *buf_size,
+             void H5_ATTR_UNUSED **buf)
 {
     /* Issue error if requested */
     if (filter_error_error) {
-        H5Epush2(H5E_DEFAULT, __FILE__, __func__, __LINE__, H5E_ERR_CLS, H5E_PLINE, H5E_CANTUNCORK, "This error message should never be printed");
+        H5Epush2(H5E_DEFAULT, __FILE__, __func__, __LINE__, H5E_ERR_CLS, H5E_PLINE, H5E_CANTUNCORK,
+                 "This error message should never be printed");
         return 0;
     }
 
@@ -21109,8 +21109,9 @@ static herr_t
 test_threaded_filters(void)
 {
     char  filename[FILENAME_BUF_SIZE] = "";
-    hid_t file = H5I_INVALID_HID, dataset = H5I_INVALID_HID, dcpl = H5I_INVALID_HID, dcpl_chunk = H5I_INVALID_HID, dapl = H5I_INVALID_HID,
-          space = H5I_INVALID_HID, xfer = H5I_INVALID_HID;
+    hid_t file = H5I_INVALID_HID, dataset = H5I_INVALID_HID, dcpl = H5I_INVALID_HID,
+          dcpl_chunk = H5I_INVALID_HID, dapl = H5I_INVALID_HID, space = H5I_INVALID_HID,
+          xfer = H5I_INVALID_HID;
     int      i, j, n = 0;
     hsize_t  dims[2], cdims[2];
     unsigned pool_threads;
@@ -21302,8 +21303,8 @@ test_threaded_filters(void)
         TEST_ERROR;
 
     /* Create the error 0 dataset */
-    if ((dataset = H5Dcreate2(file, "dset_error_0", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl,
-                              H5P_DEFAULT)) < 0)
+    if ((dataset = H5Dcreate2(file, "dset_error_0", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) <
+        0)
         TEST_ERROR;
     if (H5Dclose(dataset) < 0)
         TEST_ERROR;
@@ -21323,8 +21324,8 @@ test_threaded_filters(void)
         TEST_ERROR;
 
     /* Create the error 1 dataset */
-    if ((dataset = H5Dcreate2(file, "dset_error_1", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl,
-                              H5P_DEFAULT)) < 0)
+    if ((dataset = H5Dcreate2(file, "dset_error_1", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) <
+        0)
         TEST_ERROR;
     if (H5Dclose(dataset) < 0)
         TEST_ERROR;
@@ -21344,8 +21345,8 @@ test_threaded_filters(void)
         TEST_ERROR;
 
     /* Create the error 2 dataset */
-    if ((dataset = H5Dcreate2(file, "dset_error_2", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl,
-                              H5P_DEFAULT)) < 0)
+    if ((dataset = H5Dcreate2(file, "dset_error_2", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) <
+        0)
         TEST_ERROR;
     if (H5Dclose(dataset) < 0)
         TEST_ERROR;
@@ -21365,8 +21366,8 @@ test_threaded_filters(void)
         TEST_ERROR;
 
     /* Create the error 3 dataset */
-    if ((dataset = H5Dcreate2(file, "dset_error_3", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl,
-                              H5P_DEFAULT)) < 0)
+    if ((dataset = H5Dcreate2(file, "dset_error_3", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) <
+        0)
         TEST_ERROR;
     if (H5Dclose(dataset) < 0)
         TEST_ERROR;
@@ -21749,17 +21750,20 @@ test_threaded_filters(void)
                 }
             }
 
-            /* Initialize the points buffer and check buffer - the next operation will fail so it should not change the buffer */
+            /* Initialize the points buffer and check buffer - the next operation will fail so it should not
+             * change the buffer */
             for (i = 0; i < DSET_DIM1; i++)
                 for (j = 0; j < DSET_DIM2; j++)
                     check[i][j] = points[i][j] = n++;
 
             /* Try and fail to read the dataset back */
             filter_error_error = true;
-            H5E_BEGIN_TRY {
-                ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
-                              check_data);
-            } H5E_END_TRY
+            H5E_BEGIN_TRY
+            {
+                ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                              (dxpl_setting == 2) ? H5P_DEFAULT : xfer, check_data);
+            }
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
 
@@ -21782,10 +21786,12 @@ test_threaded_filters(void)
 
             /* Try and fail to write the data to the dataset */
             filter_error_error = true;
-            H5E_BEGIN_TRY {
-                ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
-                               points_data);
-            } H5E_END_TRY
+            H5E_BEGIN_TRY
+            {
+                ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                               (dxpl_setting == 2) ? H5P_DEFAULT : xfer, points_data);
+            }
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
 
@@ -21849,17 +21855,20 @@ test_threaded_filters(void)
                 }
             }
 
-            /* Initialize the points buffer and check buffer - the next operation will fail so it should not change the buffer */
+            /* Initialize the points buffer and check buffer - the next operation will fail so it should not
+             * change the buffer */
             for (i = 0; i < DSET_DIM1; i++)
                 for (j = 0; j < DSET_DIM2; j++)
                     check[i][j] = points[i][j] = n++;
 
             /* Try and fail to read the dataset back */
             filter_error_error = true;
-            H5E_BEGIN_TRY {
-                ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
-                              check_data);
-            } H5E_END_TRY
+            H5E_BEGIN_TRY
+            {
+                ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                              (dxpl_setting == 2) ? H5P_DEFAULT : xfer, check_data);
+            }
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
 
@@ -21882,10 +21891,12 @@ test_threaded_filters(void)
 
             /* Try and fail to write the data to the dataset */
             filter_error_error = true;
-            H5E_BEGIN_TRY {
-                ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
-                               points_data);
-            } H5E_END_TRY
+            H5E_BEGIN_TRY
+            {
+                ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                               (dxpl_setting == 2) ? H5P_DEFAULT : xfer, points_data);
+            }
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
 
@@ -21949,17 +21960,20 @@ test_threaded_filters(void)
                 }
             }
 
-            /* Initialize the points buffer and check buffer - the next operation will fail so it should not change the buffer */
+            /* Initialize the points buffer and check buffer - the next operation will fail so it should not
+             * change the buffer */
             for (i = 0; i < DSET_DIM1; i++)
                 for (j = 0; j < DSET_DIM2; j++)
                     check[i][j] = points[i][j] = n++;
 
             /* Try and fail to read the dataset back */
             filter_error_error = true;
-            H5E_BEGIN_TRY {
-                ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
-                              check_data);
-            } H5E_END_TRY
+            H5E_BEGIN_TRY
+            {
+                ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                              (dxpl_setting == 2) ? H5P_DEFAULT : xfer, check_data);
+            }
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
 
@@ -21982,10 +21996,12 @@ test_threaded_filters(void)
 
             /* Try and fail to write the data to the dataset */
             filter_error_error = true;
-            H5E_BEGIN_TRY {
-                ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
-                               points_data);
-            } H5E_END_TRY
+            H5E_BEGIN_TRY
+            {
+                ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                               (dxpl_setting == 2) ? H5P_DEFAULT : xfer, points_data);
+            }
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
 
@@ -22049,17 +22065,20 @@ test_threaded_filters(void)
                 }
             }
 
-            /* Initialize the points buffer and check buffer - the next operation will fail so it should not change the buffer */
+            /* Initialize the points buffer and check buffer - the next operation will fail so it should not
+             * change the buffer */
             for (i = 0; i < DSET_DIM1; i++)
                 for (j = 0; j < DSET_DIM2; j++)
                     check[i][j] = points[i][j] = n++;
 
             /* Try and fail to read the dataset back */
             filter_error_error = true;
-            H5E_BEGIN_TRY {
-                ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
-                              check_data);
-            } H5E_END_TRY
+            H5E_BEGIN_TRY
+            {
+                ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                              (dxpl_setting == 2) ? H5P_DEFAULT : xfer, check_data);
+            }
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
 
@@ -22082,10 +22101,12 @@ test_threaded_filters(void)
 
             /* Try and fail to write the data to the dataset */
             filter_error_error = true;
-            H5E_BEGIN_TRY {
-                ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
-                               points_data);
-            } H5E_END_TRY
+            H5E_BEGIN_TRY
+            {
+                ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                               (dxpl_setting == 2) ? H5P_DEFAULT : xfer, points_data);
+            }
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
 
