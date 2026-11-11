@@ -310,6 +310,7 @@ extern "C" {
  *          filter callback does not make any HDF5 library calls (except
  *          #H5OPEN, H5allocate_memory(), H5resize_memory(), H5free_memory(),
  *          and all H5Efunctions).
+ *
  *          All other bits will be ignored. The filter should set all other bits
  *          to zero so they are not erroneously interpreted as features by a
  *          future version of the library.
