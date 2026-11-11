@@ -21078,15 +21078,27 @@ const H5Z_class3_t H5Z_ERROR_3[1] = {{
 }};
 
 static bool filter_error_error;
+static bool filter_error_fail = false;
+static bool filter_error_threaded;
 
 static size_t
-filter_error(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+filter_error(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
                       const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes,
                       size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
+    ssize_t num_errors;
+
     /* Issue error if requested */
     if (filter_error_error) {
         H5Epush2(H5E_DEFAULT, __FILE__, __func__, __LINE__, H5E_ERR_CLS, H5E_PLINE, H5E_CANTUNCORK, "This error message should never be printed");
+
+        /* Verify there are no error messages on the stack (will also report faiilure if H5Eget_num() fails), but only if in threaded mode. In non-threaded mode, because the test uses H5E_BEGIN_TRY, the stack is not paused and errors can be pushed to it. */
+        /* Threading is not yet supported for writes, so only test if H5Z_FLAG_REVERSE is set */
+        if (filter_error_threaded && (flags & H5Z_FLAG_REVERSE))
+            if ((num_errors = H5Eget_num(H5E_DEFAULT)) != 0)
+                /* Ok to set this normally in threaded section because if any thread fails it will be set to true, no matter the order. The value won't be checked until all threads complete. */
+                filter_error_fail = true;
+
         return 0;
     }
 
@@ -21716,6 +21728,9 @@ test_threaded_filters(void)
              * "error 0" dataset
              */
 
+            /* Set filter_error_threaded to false - since this filter reports re-entering HDF5 it will never be executed in threaded mode */
+            filter_error_threaded = false;
+
             /* Initialize the write buffer */
             for (i = 0; i < DSET_DIM1; i++)
                 for (j = 0; j < DSET_DIM2; j++)
@@ -21730,11 +21745,15 @@ test_threaded_filters(void)
             if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
                          points_data) < 0)
                 TEST_ERROR;
+            if (filter_error_fail)
+                TEST_ERROR;
 
             /* Read the dataset back */
             filter_error_error = false;
             if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
                         check_data) < 0)
+                TEST_ERROR;
+            if (filter_error_fail)
                 TEST_ERROR;
 
             /* Check that the values read are the same as the values written */
@@ -21762,6 +21781,8 @@ test_threaded_filters(void)
             } H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
+            if (filter_error_fail)
+                TEST_ERROR;
 
             /* Check that the check buffer was not changed */
             for (i = 0; i < DSET_DIM1; i++) {
@@ -21788,11 +21809,15 @@ test_threaded_filters(void)
             } H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
+            if (filter_error_fail)
+                TEST_ERROR;
 
             /* Read the dataset back */
             filter_error_error = false;
             if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
                         check_data) < 0)
+                TEST_ERROR;
+            if (filter_error_fail)
                 TEST_ERROR;
 
             /* Check that the values read are the same as the values written in the first write */
@@ -21816,6 +21841,9 @@ test_threaded_filters(void)
              * "error 1" dataset
              */
 
+            /* Set filter_error_threaded to false - since this filter reports re-entering HDF5 it will never be executed in threaded mode */
+            filter_error_threaded = false;
+
             /* Initialize the write buffer */
             for (i = 0; i < DSET_DIM1; i++)
                 for (j = 0; j < DSET_DIM2; j++)
@@ -21830,11 +21858,15 @@ test_threaded_filters(void)
             if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
                          points_data) < 0)
                 TEST_ERROR;
+            if (filter_error_fail)
+                TEST_ERROR;
 
             /* Read the dataset back */
             filter_error_error = false;
             if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
                         check_data) < 0)
+                TEST_ERROR;
+            if (filter_error_fail)
                 TEST_ERROR;
 
             /* Check that the values read are the same as the values written */
@@ -21862,6 +21894,8 @@ test_threaded_filters(void)
             } H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
+            if (filter_error_fail)
+                TEST_ERROR;
 
             /* Check that the check buffer was not changed */
             for (i = 0; i < DSET_DIM1; i++) {
@@ -21888,11 +21922,15 @@ test_threaded_filters(void)
             } H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
+            if (filter_error_fail)
+                TEST_ERROR;
 
             /* Read the dataset back */
             filter_error_error = false;
             if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
                         check_data) < 0)
+                TEST_ERROR;
+            if (filter_error_fail)
                 TEST_ERROR;
 
             /* Check that the values read are the same as the values written in the first write */
@@ -21916,6 +21954,12 @@ test_threaded_filters(void)
              * "error 2" dataset
              */
 
+            /* Set filter_error_threaded to true if using threaded execution */
+            if (dxpl_setting && (pool_threads > 1))
+                filter_error_threaded = true;
+            else
+                filter_error_threaded = false;
+
             /* Initialize the write buffer */
             for (i = 0; i < DSET_DIM1; i++)
                 for (j = 0; j < DSET_DIM2; j++)
@@ -21930,11 +21974,15 @@ test_threaded_filters(void)
             if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
                          points_data) < 0)
                 TEST_ERROR;
+            if (filter_error_fail)
+                TEST_ERROR;
 
             /* Read the dataset back */
             filter_error_error = false;
             if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
                         check_data) < 0)
+                TEST_ERROR;
+            if (filter_error_fail)
                 TEST_ERROR;
 
             /* Check that the values read are the same as the values written */
@@ -21962,6 +22010,8 @@ test_threaded_filters(void)
             } H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
+            if (filter_error_fail)
+                TEST_ERROR;
 
             /* Check that the check buffer was not changed */
             for (i = 0; i < DSET_DIM1; i++) {
@@ -21988,11 +22038,15 @@ test_threaded_filters(void)
             } H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
+            if (filter_error_fail)
+                TEST_ERROR;
 
             /* Read the dataset back */
             filter_error_error = false;
             if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
                         check_data) < 0)
+                TEST_ERROR;
+            if (filter_error_fail)
                 TEST_ERROR;
 
             /* Check that the values read are the same as the values written in the first write */
@@ -22016,6 +22070,12 @@ test_threaded_filters(void)
              * "error 3" dataset
              */
 
+            /* Set filter_error_threaded to true if using threaded execution */
+            if (dxpl_setting && (pool_threads > 1))
+                filter_error_threaded = true;
+            else
+                filter_error_threaded = false;
+
             /* Initialize the write buffer */
             for (i = 0; i < DSET_DIM1; i++)
                 for (j = 0; j < DSET_DIM2; j++)
@@ -22030,11 +22090,15 @@ test_threaded_filters(void)
             if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
                          points_data) < 0)
                 TEST_ERROR;
+            if (filter_error_fail)
+                TEST_ERROR;
 
             /* Read the dataset back */
             filter_error_error = false;
             if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
                         check_data) < 0)
+                TEST_ERROR;
+            if (filter_error_fail)
                 TEST_ERROR;
 
             /* Check that the values read are the same as the values written */
@@ -22062,6 +22126,8 @@ test_threaded_filters(void)
             } H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
+            if (filter_error_fail)
+                TEST_ERROR;
 
             /* Check that the check buffer was not changed */
             for (i = 0; i < DSET_DIM1; i++) {
@@ -22088,11 +22154,15 @@ test_threaded_filters(void)
             } H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
+            if (filter_error_fail)
+                TEST_ERROR;
 
             /* Read the dataset back */
             filter_error_error = false;
             if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, (dxpl_setting == 2) ? H5P_DEFAULT : xfer,
                         check_data) < 0)
+                TEST_ERROR;
+            if (filter_error_fail)
                 TEST_ERROR;
 
             /* Check that the values read are the same as the values written in the first write */
