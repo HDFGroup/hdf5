@@ -1190,7 +1190,7 @@ H5T__conv_f_i_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
         }
         else if (H5T_SGN_2 == dst_atomic.u.i.sign) { /* Destination is signed */
             if (sign) {                              /* source is negative */
-                if ((new_msb_pos >= 0) && ((size_t)new_msb_pos < dst_atomic.prec - 1)) {
+                if (new_msb_pos < (ssize_t)dst_atomic.prec - 1) {
                     /* If user's exception handler is present, use it */
                     if (truncated && conv_ctx->u.conv.cb_struct.func) {
                         /* Reverse source buffer order first */
@@ -1208,13 +1208,16 @@ H5T__conv_f_i_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
                     }
 
                     if (except_ret == H5T_CONV_UNHANDLED) { /* If this case ignored by user handler */
-                        /* Convert to integer representation. Equivalent to ~(value - 1). */
-                        H5T__bit_dec(int_buf, (size_t)0, dst_atomic.prec);
-                        H5T__bit_neg(int_buf, (size_t)0, dst_atomic.prec);
+                        /* A magnitude below 1 truncates to 0; the destination is already zeroed */
+                        if (new_msb_pos >= 0) {
+                            /* Convert to integer representation. Equivalent to ~(value - 1). */
+                            H5T__bit_dec(int_buf, (size_t)0, dst_atomic.prec);
+                            H5T__bit_neg(int_buf, (size_t)0, dst_atomic.prec);
 
-                        /* copy source value into destination */
-                        H5T__bit_copy(d, dst_atomic.offset, int_buf, (size_t)0, dst_atomic.prec - 1);
-                        H5T__bit_set(d, (dst_atomic.offset + dst_atomic.prec - 1), (size_t)1, true);
+                            /* copy source value into destination */
+                            H5T__bit_copy(d, dst_atomic.offset, int_buf, (size_t)0, dst_atomic.prec - 1);
+                            H5T__bit_set(d, (dst_atomic.offset + dst_atomic.prec - 1), (size_t)1, true);
+                        }
                     }
                     else if (except_ret == H5T_CONV_HANDLED) {
                         /* No need to reverse the order of destination because user handles it */
