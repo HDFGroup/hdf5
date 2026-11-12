@@ -26,8 +26,8 @@
 /*****************/
 
 /**
- * Latest version of the H5Z_class_t struct, used in conjunction with
- * H5Z_class3_t, introduced in 2.3.0.
+ * Version of the H5Z_class_t struct used in conjunction with H5Z_class3_t,
+ * introduced in 2.3.0.
  */
 #define H5Z_CLASS_T_VERS_3 (3)
 /**
@@ -45,7 +45,7 @@
 #define H5Z_CLASS_T_VERS (1)
 
 /* Define filter features that can be enabled on a per-filter basis */
-/* These are specified in the 'feature_flags' field in H5Z_class3_t */
+/* These are specified in the 'feature_flags' field in H5Z_class3_t and H5Z_class4_t */
 /**
  * Defining the H5Z_FEAT_FILTER_THREADSAFE for a filter means that the \p filter
  * callback is thread-safe and can be executed concurrently with multiple
@@ -62,7 +62,8 @@
  */
 #define H5Z_FEAT_FILTER_NO_H5_CALLS 0x0000000000000002
 /**
- * Value of \c H5Z_class4_t's \c version field \since 3.0.0
+ * Latest version of the H5Z_class_t struct, used in conjunction with
+ * H5Z_class4_t \since 3.0.0
  */
 #define H5Z_CLASS_T_VERS_4 (4)
 
@@ -301,6 +302,11 @@ typedef herr_t (*H5Z_get_config_func_t)(unsigned flags, size_t cd_nelmts, const 
  * NULL and \p ndims is 0 for data with no chunk position, such as a fill
  * value template or a fractal heap block.  \p state is reserved and is
  * always NULL.
+ *
+ * As for \c H5Z_func_t, the \c H5Z_FEAT_* flags in the class's
+ * \c feature_flags tell the library whether the callback may run concurrently
+ * in several threads.  Querying \p dxpl_id is an HDF5 call, so a filter that
+ * sets #H5Z_FEAT_FILTER_NO_H5_CALLS must not use it.
  *
  * \since 3.0.0
  */
@@ -579,15 +585,17 @@ H5_DLL htri_t H5Zconfig_get_str(const H5Z_config_t *config, const char *key, cha
  *          function; they accumulate over the life of the library.
  *
  *          #H5Z_class_t is a macro that maps to either H5Z_class1_t,
- *          H5Z_class2_t, or H5Z_class3_t, depending on the needs of the
- *          application. To affect only this macro, H5Z_class_t_vers may be
- *          defined as either 1, 2, or 3. Otherwise, it will behave in the same
+ *          H5Z_class2_t, H5Z_class3_t, or H5Z_class4_t, depending on the needs
+ *          of the application. To affect only this macro, H5Z_class_t_vers may
+ *          be defined as either 1, 2, 3, or 4. Otherwise, it will behave in the same
  *          manner as other API compatibility macros. See \ref api-compat-macros
  *          for more information. H5Z_class1_t matches the #H5Z_class_t
  *          structure that is used in the 1.6.x versions of the HDF5 library,
  *          while H5Z_class2_t matches the #H5Z_class_t structure used in the
  *          1.8.x through 2.x.x versions of the library. H5Z_class3_t became
- *          available in 2.3.0, but will not be made the default until 3.0.0.
+ *          available in 2.3.0 and is the default from 3.0.0. H5Z_class4_t,
+ *          added in 3.0.0, is never the default: an application selects it
+ *          by defining H5Z_class_t_vers to 4, or by declaring an H5Z_class4_t.
  *
  *          H5Zregister() will automatically detect which structure type has
  *          been passed in, regardless of the mapping of the #H5Z_class_t macro.
@@ -709,12 +717,13 @@ H5_DLL htri_t H5Zconfig_get_str(const H5Z_config_t *config, const char *key, cha
  *          filter was run in forward mode.
  *
  *          If this \Emph{filter operation} callback function is registered with
- *          an H5Z_class3_t whose feature flags include
+ *          an H5Z_class3_t or H5Z_class4_t whose feature flags include
  *          #H5Z_FEAT_FILTER_THREADSAFE, then the library may execute it
  *          concurrently from multiple threads. Internal threading is currently
  *          only used if every filter in the pipeline sets
  *          #H5Z_FEAT_FILTER_NO_H5_CALLS.
  *
+ * \version 3.0.0 Function now accepts a pointer to H5Z_class4_t.
  * \version 2.3.0 Function now accepts a pointer to H5Z_class3_t in addition
  *                to H5Z_class2_t and H5Z_class1_t.
  * \version 1.8.6 Return type for the \Emph{can apply} callback function,
