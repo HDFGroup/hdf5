@@ -67,12 +67,40 @@ We would like to thank the many HDF5 community members who contributed to this r
   flag, but default builds did not require it until now. The flag is supplied by
   `pkg-config --static --libs hdf5`.
 
+### The installed CMake package now prefers the shared libraries when no linkage is requested
+
+   A `find_package(HDF5 NAMES hdf5 CONFIG)` call that requests neither the `static` nor the `shared` component previously resolved to the static libraries of an installation providing both, and only fell back to shared when no static libraries were installed. That preference is now reversed: shared is used when available, with static as the fallback. Setting `HDF5_USE_STATIC_LIBRARIES` before the call now selects the static libraries, matching the behavior of CMake's `FindHDF5` module.
+
+   The preference decides which `HDF5_<lang>_<LINKAGE>_LIBRARY` variables and Fortran module directory the call sets, as well as the linkage the new `hdf5::` targets refer to, so a project that relied on the previous default and did not request a linkage will now link the shared libraries. Such a project should request the `static` component explicitly or set `HDF5_USE_STATIC_LIBRARIES`. Calls that already request a `static` or `shared` component are unaffected.
+
 # 🪦 Deprecations
+
+### Deprecated the linkage-qualified CMake target names
+
+   The `hdf5-shared` / `hdf5-static` targets, their `_hl`, `_cpp`, `_hl_cpp`, `_fortran` and `_hl_fortran` counterparts, and the `HDF5_<lang>_<LINKAGE>_LIBRARY` variables are deprecated in favor of the stable `hdf5::` target names described under Configuration below. They will be removed in a future major release, so new projects should link `hdf5::hdf5` and friends, and existing projects should migrate to the new names when convenient. See `docs/USING_HDF5_CMake.md` for the mapping from old names to new ones.
 
 
 # 🚀 New Features & Improvements
 
 ## Configuration
+
+### Stopped publishing .deb and .rpm files with the release
+
+   The `.deb` and `.rpm` files built on Ubuntu were not real distribution packages: they
+   were CPack output with the layout and dependencies of the tarball, and they conflicted
+   with the HDF5 packages the distributions themselves ship. Native packages come from the
+   distributions and from the HDF Group's build service project instead. The Linux tarballs
+   are unaffected.
+
+### Added a Linux binary that runs on glibc 2.28 and newer
+
+   The released Linux binary was built on Ubuntu 24.04 and requires glibc 2.38, so it does
+   not run on RHEL 9, Amazon Linux 2023, SLES 15, Debian 12 or Ubuntu 22.04. Releases now
+   also carry `hdf5-<version>-linux-x86_64_gcc.tar.gz`, built in an AlmaLinux 8 container
+   with gcc-toolset-14. **It requires glibc 2.28 or newer**, which covers RHEL 8+, SLES 15,
+   Debian 10+, Ubuntu 20.04+ and Amazon Linux 2023. zlib and libaec are linked statically,
+   as in the other binaries, so it needs nothing from the system but libc and libm. CI
+   fails the build if that requirement ever rises.
 
 ### Re-added HDF5_ENABLE_THREADS option
 
@@ -143,6 +171,10 @@ We would like to thank the many HDF5 community members who contributed to this r
    The other pkg-config files require `hdf5`, so they get MPI's flags too. Parallel Fortran
    programs still need MPI's Fortran library from the MPI compiler wrapper or `h5pfc`.
 
+### Added stable, linkage-agnostic CMake target names to the installed package
+
+   Downstream projects can now link `hdf5::hdf5`, `hdf5::hdf5_hl`, `hdf5::hdf5_cpp`, `hdf5::hdf5_hl_cpp`, `hdf5::hdf5_fortran` and `hdf5::hdf5_hl_fortran` instead of the linkage-qualified `hdf5-shared` and `hdf5-static` targets, along with `hdf5::<tool>` for each installed tool. The names do not encode whether the library is static or shared, so the same project file works against a static installation, a shared one, or one providing both. These are the names CMake's own `FindHDF5` module provides, so a project using them no longer needs different code depending on whether HDF5 was located through `FindHDF5` or through HDF5's `hdf5-config.cmake`. The targets refer to whichever linkage `find_package()` resolved (see Breaking Changes). The existing `hdf5-shared` / `hdf5-static` targets and the `HDF5_<lang>_<LINKAGE>_LIBRARY` variables are otherwise unchanged, and the public names are aliases onto those same targets, so a project naming both on its link line still gets a single library.
+
 ## Library
 
 ### Removed API lock for memory management wrappers
@@ -165,7 +197,7 @@ We would like to thank the many HDF5 community members who contributed to this r
    H5Z_FEAT_FILTER_THREADSAFE, which should be set when the filter callback is
    threadsafe, and H5Z_FEAT_FILTER_NO_H5_CALLS, which should be set when the
    filter makes no HDF5 calls except for H5OPEN, H5allocate_memory(),
-   H5resize_memory(), and H5free_memory().
+   H5resize_memory(), H5free_memory(), and all H5E functions.
 
 ### Added support for internally concurrent multithreaded reads of chunked datasets
 
@@ -289,6 +321,8 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    The scaleoffset and szip filters each store a fixed-size header in front of the chunk data: a 21-byte parameter block for scaleoffset and a 4-byte uncompressed-length header for szip. On read, each one subtracted that fixed size from the chunk length without first checking that the chunk was at least that long. A truncated or corrupted chunk record made the subtraction wrap around, so both filters read far past the end of the chunk buffer. Its bounds checks also measured the chunk buffer's allocated size, which the library deliberately sizes to hold the larger unfiltered chunk, so a truncated chunk could still decompress out of the uninitialized remainder of that allocation. Both filters now reject any chunk shorter than their own header, and scaleoffset validates every read against the number of bytes actually stored for the chunk rather than the size of the buffer holding them. The fletcher32 filter now also rejects a chunk that holds only its 4-byte checksum and no data, which previously reached the checksum routine with a length of zero.
 
+   Fixes CVE-2026-120754 and CVE-2026-120755
+
 ### Fixed a heap buffer over-read in scale-offset decode
 
    The scale-offset filter's decode path used the size computed from the user's filter
@@ -322,6 +356,8 @@ We would like to thank the many HDF5 community members who contributed to this r
    buffer. `H5L__extern_traverse()` now validates the buffer against its stored size before
    parsing, the same way `H5Lunpack_elink_val()` does.
 
+   Fixes CVE-2026-120757
+
 ### Fixed the page buffer's minimum metadata threshold failure to protect B-tree, local heap and object header metadata pages
 
 The page buffer charges every page it holds to either `raw_count` or `meta_count`, counting `H5F_MEM_PAGE_DRAW` and `H5F_MEM_PAGE_GHEAP` pages as raw data and every other page as metadata. The minimum metadata reservation set by `H5Pset_page_buffer_size()` was not written as the complement of that test: it compared the page's type for equality with `H5F_MEM_PAGE_META`, which is an alias for `H5F_MEM_PAGE_SUPER`. A page entry's type is copied verbatim from the memory type of the access that brought the page into the buffer, so B-tree, local heap and object header pages carried other values and were evicted by raw data regardless of `min_meta_perc`, while still counting toward the threshold the reservation was measured against. In practice the reservation protected only the superblock and driver information pages. The classification is now made in one place, `H5MF_mem_page_type_is_raw()`, alongside its `H5F_mem_t` counterpart `H5MF_mem_type_is_raw()`, and both the page counts and the two reservations use it, so the metadata reservation protects the same population that `meta_count` measures.
@@ -336,7 +372,7 @@ Fixes GitHub issue #6679.
 
    The size stored in an object header message header was checked against the chunk before the rest of that message header was decoded, allowing a message body to start up to four bytes further into the chunk than the check accounted for. A corrupted or fuzzed file could declare a size that passed the check and still extended past the end of the chunk image, and the message's decode callback was then handed a buffer end outside the allocation. `H5O__chunk_deserialize()` now checks the message size once the whole message header has been decoded.
 
-   Fixes GitHub issue #6401
+   Fixes GitHub issue #6401 (CVE-2026-120756)
 
 ### Fixed memory leaks and ID reference count issues when pushing an error to an error stack that is full
 
@@ -391,21 +427,34 @@ Fixes GitHub issue #6679.
 
    `H5HL_protect()` pins one metadata cache entry for a local heap -- either the prefix when the heap is a single cache object, or the data block otherwise -- and `H5HL_unprotect()` unpins it again. The cache unlinks that entry from the heap when it destroys it, so a damaged file could reach `H5HL_unprotect()` with nothing to unpin, which triggered an assertion failure in debug builds and a NULL pointer dereference otherwise. `H5HL_unprotect()` now reports an error instead, and does so before decrementing the heap's protect count so that a rejected call leaves the heap unchanged rather than half unprotected with its cache entry still pinned.
 
+   Fixes CVE-2026-120758
+
 ### Fixed crashes when reading datasets with malformed N-Bit or Fletcher32 filter metadata
 
    Reading a dataset from a corrupted or maliciously crafted file could crash the library in the N-Bit and Fletcher32 filter decode paths. The N-Bit filter dereferenced its client-data parameter array before validating it, crashing when the array was empty or NULL, and walked the compressed chunk during decompression without bounding the input against the chunk size, causing out-of-bounds reads. It also indexed that parameter array at offsets taken from the datatype description held in the array itself, without bounding those offsets against the number of parameters supplied, so a parameter list stopping short of the datatype it described was read past its end. The Fletcher32 filter subtracted the 4-byte checksum length from the chunk size without checking that the chunk was at least that large, underflowing the length passed to the checksum routine. These filters now validate their parameters and buffer sizes and fail with an error instead of crashing.
 
-   Fixes GitHub issues #6488, #6489, #6490, and #6492
-
-   Fixes CVE-2026-19026, CVE-2026-19027, and CVE-2026-19028
+   Fixes GitHub issues #6489 and #6492 (CVE-2026-19026 and CVE-2026-19027)
+   
+   Fixes GitHub issues #6488 and #6490 (CVE-2026-19028)
 
 ### Fixed a stack overflow when iterating a corrupted B-tree
 
    `H5B__iterate_helper()` now verifies that a B-tree node it has just protected has the level the traversal expects, when the expected level is known. The equivalent check in `H5B__cache_deserialize()` only runs when a node is first loaded into the metadata cache, so a corrupted B-tree whose child pointer revisits a node that is already cached (for example, a node that points to itself) could bypass that check and recurse without bound until the stack was exhausted. Such a file is now rejected with an error instead of crashing. This was observed through `H5Gget_info()`.
 
-   Fixes GitHub issue #6403
+   Fixes GitHub issue #6403 (CVE-2026-120689)
 
 ## Java Library
+
+### Fixed a build ordering issue when the `HDF5_ENABLE_MAVEN_DEPLOY` option is enabled
+
+   With the `HDF5_ENABLE_MAVEN_DEPLOY` option enabled, the Java test programs under
+   `java/src-jni/test` previously had an incorrect dependency tree that could result
+   in build failures. The test programs would get built before the platform-specific
+   JAR file created for Maven was copied to the more generic "jarhdf5-<version>.jar"
+   name which the test programs depended on. Building of those test programs is now
+   deferred until the copying step has completed.
+
+   Fixes GitHub issue #6748
 
 ### Fixed datatype ID leaks when reading or writing nested datatypes through the JNI
 
@@ -414,6 +463,16 @@ Fixes GitHub issue #6679.
    Fixes GitHub issue #6592
 
 ## Configuration
+
+### Fixed pkg-config and the compiler wrappers when HDF5_LIB_INFIX is set
+
+   With `HDF5_LIB_INFIX` set, for example to `_openmpi`, the pkg-config files were still installed as `hdf5.pc`, `hdf5_hl.pc` and so on, while their `Name` and `Requires` fields, and the compiler wrappers, used the name with the infix (`hdf5_openmpi`). `h5cc` and the other wrappers failed with "Package hdf5_openmpi was not found", and `pkg-config hdf5_hl` could not resolve its requirement. The pkg-config files are now named after the library (`hdf5_openmpi.pc`, `hdf5_openmpi_hl.pc`, ...), and `libhdf5.settings` is installed as `libhdf5_openmpi.settings`, which `h5cc -showconfig` reads.
+
+   The pkg-config file names also include `HDF5_EXTERNAL_LIB_PREFIX` and `HDF5_EXTERNAL_LIB_SUFFIX`, since they are part of the library name. For example, with `HDF5_EXTERNAL_LIB_PREFIX=vtk` the files are now `vtkhdf5.pc` and `vtkhdf5_hl.pc` instead of `hdf5.pc` and `hdf5_hl.pc`, so the `Requires: vtkhdf5` line in the high-level file can now be resolved.
+
+   Builds with different infixes (for example serial, Open MPI and MPICH) can now share a library directory. Their other install directories must still differ per build: set `HDF5_INSTALL_INCLUDE_DIR`, `HDF5_INSTALL_CMAKE_DIR`, `HDF5_INSTALL_MODULE_DIR` and `HDF5_INSTALL_BIN_DIR` for each one, or the headers, CMake package files, Fortran modules and compiler wrappers of one build overwrite those of another.
+
+   Compatibility: with an infix set, `pkg-config hdf5` no longer finds the library. Use `pkg-config hdf5<infix>`, for example `pkg-config hdf5_openmpi`. Builds with no infix, prefix or suffix install the same files as before.
 
 ### Fixed "Extra libraries" in libhdf5.settings and the built-in settings
 
@@ -463,6 +522,14 @@ The "Shared/Static Fortran Library" and "Shared/Static C++ Library" lines in `li
 Fixes #5723.
 
 ## Tools
+
+### Fixed a double free in h5repack
+
+   The tool h5repack produced a double free crash on a malicious HDF5 file in copy_refs_attr()
+   while duplicating reference-valued attributes.  Some cleanup was done to remove the
+   double free and memory leaks.
+
+   Fixes CVE-2026-102935
 
 ### Fixed an issue with quoting of data values in h5ls and h5dump when displaying as ASCII characters
 
@@ -559,6 +626,15 @@ Fixes #5723.
 ## C++ APIs
 
 ## Testing
+
+### Fixed a link failure of the Fortran tests when built with link-time optimization
+
+   `testhdf5_fortran` failed to link with an undefined reference to
+   `test_append_flush_callback` when built with LTO (`-flto`), which is enabled by default
+   on Fedora, RHEL, openSUSE, and Ubuntu. `gfortran` versions prior to 15.3 (without the
+   fix for GCC PR 117303) drop a procedure when its `C_FUNLOC` is passed directly as an
+   argument. The test now assigns `C_FUNLOC` to a variable first, so distributions no
+   longer need to build Fortran without LTO.
 
 ### Fortran test programs no longer exit successfully after a fatal error
 

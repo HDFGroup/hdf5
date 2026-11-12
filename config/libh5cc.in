@@ -68,7 +68,7 @@ export PKG_CONFIG_PATH=$libdir/pkgconfig@H5_WRAPPER_MPI_PKG_CONFIG_PATH@${PKG_CO
 # libhdf5.settings file residing in the lib directory.
 showconfigure()
 {
-  cat $libdir/libhdf5.settings
+  cat $libdir/libhdf5@HDF5_LIB_INFIX@.settings
   status=$?
 }
 

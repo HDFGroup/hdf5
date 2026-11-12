@@ -1532,11 +1532,11 @@ set (H5_WRAPPER_MPI_PKG_CONFIG_PATH "${_wrapper_mpi_pc_path}" CACHE INTERNAL "MP
 
 configure_file (
     ${HDF_CONFIG_DIR}/libhdf5.pc.in
-    ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_LIB_CORENAME}.pc
+    ${HDF5_BINARY_DIR}/CMakeFiles/${_PKG_CONFIG_LIBNAME}.pc
     @ONLY
 )
 install (
-    FILES ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_LIB_CORENAME}.pc
+    FILES ${HDF5_BINARY_DIR}/CMakeFiles/${_PKG_CONFIG_LIBNAME}.pc
     DESTINATION ${HDF5_INSTALL_LIB_DIR}/pkgconfig
     COMPONENT libraries
 )
