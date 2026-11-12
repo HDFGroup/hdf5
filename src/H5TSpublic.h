@@ -65,8 +65,8 @@ extern "C" {
  *
  *          Currently, the library will immediately create \p num_threads
  *          threads and retain them until this function is called again. Calling
- *          this function with \p num_threads set to \c 0 will terminate these
- *          threads and disable internal multithreading.
+ *          this function with \p num_threads set to \c 0 or \c 1 will terminate
+ *          these threads and disable internal multithreading.
  *
  *          This is currently only used to accelerate raw data reads of chunked
  *          datasets. This will occur when the following conditions are met:
@@ -98,7 +98,9 @@ extern "C" {
  *
  * \warning Errors that are printed inside the threaded area, for example by the
  *          data filters, do not currently respect non-default error settings,
- *          and print their errors to stderr upon thread completion.
+ *          except that if errors are disabled on the parent thread, for example
+ *          by #H5E_BEGIN_TRY or H5Epause_stack(), they will also be disabled in
+ *          the child threads.
  *
  * \since 2.3.0
  *
