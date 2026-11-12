@@ -192,7 +192,7 @@ TAB_SIZE               = 4
 # in a different minor release series.  For this release it is set to the known
 # previous release.  
 ALIASES                = "CURRENT_VER=@HDF5_PACKAGE_VERSION@" \
-                          "PREVIOUS_VER=2.2.0"
+                          "PREVIOUS_VER=2.3.0"
 
 @INCLUDE_PATH          = @DOXYGEN_INCLUDE_ALIASES_PATH@
 @INCLUDE               = @DOXYGEN_INCLUDE_ALIASES@

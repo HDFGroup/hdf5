@@ -65,7 +65,7 @@
 /**
  * For minor interface/format changes
  */
-#define H5_VERS_MINOR 3
+#define H5_VERS_MINOR 4
 /**
  * For tweaks, bug-fixes, or development
  */
