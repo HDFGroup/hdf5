@@ -759,6 +759,23 @@ if (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY)
       set_tests_properties (H5TEST_S3TESTS-${h5_test} PROPERTIES DISABLED true)
     endif ()
   endforeach ()
+else ()
+  # Without the s3proxy fixture, there is no server for the networked S3 tests
+  # and these tests skip themselves. Since the test programs also contain checks
+  # that perform no I/O and need no credentials, they are still worth running in
+  # an ordinary build.
+  #
+  # Run directly rather than through runTest.cmake: there is no output to
+  # capture or compare against a reference here.
+  foreach (h5_test ${H5_S3TESTS})
+    add_test (NAME H5TEST_S3TESTS-${h5_test} COMMAND $<TARGET_FILE:${h5_test}>)
+    set_tests_properties (H5TEST_S3TESTS-${h5_test} PROPERTIES
+        WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+    )
+    if ("H5TEST_S3TESTS-${h5_test}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5TEST_S3TESTS-${h5_test} PROPERTIES DISABLED true)
+    endif ()
+  endforeach ()
 endif ()
 
 ##############################################################################
