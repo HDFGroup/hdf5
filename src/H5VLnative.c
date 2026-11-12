@@ -312,7 +312,7 @@ H5VL_native_get_file_addr_len(hid_t loc_id, size_t *addr_len)
     assert(addr_len);
 
     /* Get object type */
-    if ((vol_obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Retrieve underlying VOL object */
@@ -384,7 +384,7 @@ H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *token)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "token pointer can't be NULL");
 
     /* Get object type */
-    if ((vol_obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Retrieve underlying VOL object */
@@ -477,7 +477,7 @@ H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr pointer can't be NULL");
 
     /* Get object type */
-    if ((vol_obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Retrieve underlying VOL object */

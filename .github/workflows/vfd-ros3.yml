@@ -48,7 +48,6 @@ jobs:
       # Let jobs run to completion even if one fails
       fail-fast: false
       matrix:
-        os_name: ["Windows MSVC", "Ubuntu GCC", "MacOS Clang"]
         include:
           - os_name: "Windows MSVC"
             os: windows-latest
@@ -213,7 +212,6 @@ jobs:
       # Let jobs run to completion even if one fails
       fail-fast: false
       matrix:
-        os_name: ["Windows MSVC", "Ubuntu GCC", "MacOS Clang"]
         include:
           - os_name: "Windows MSVC"
             os: windows-latest
