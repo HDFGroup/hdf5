@@ -1,0 +1,6 @@
+dataset: </u32_max> and </u32_zero>
+size:           [1]           [1]
+position        u32_max         u32_zero        difference          
+------------------------------------------------------------
+[ 0 ]          4294967295      0               4294967295     
+1 differences found

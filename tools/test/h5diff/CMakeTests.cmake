@@ -235,6 +235,16 @@ set (LIST_OTHER_TEST_FILES
     h5diff_58.txt
     h5diff_58_ref.txt
     h5diff_59.txt
+    h5diff_unsigned_u32_report.txt
+    h5diff_unsigned_u32_delta.txt
+    h5diff_unsigned_u32_delta_boundary.txt
+    h5diff_unsigned_u32_relative.txt
+    h5diff_unsigned_u32_relative_control.txt
+    h5diff_unsigned_u32_delta_reversed.txt
+    h5diff_unsigned_u16_relative.txt
+    h5diff_unsigned_u8_relative.txt
+    h5diff_unsigned_u64_relative.txt
+    h5diff_unsigned_zero_relative.txt
     h5diff_500.txt
     h5diff_501.txt
     h5diff_502.txt
@@ -920,6 +930,18 @@ ADD_H5_TEST (h5diff_reg RESULT_CODE 0 -v2 trefer_attr.h5 trefer_ext2.h5 Dataset3
 # test for both dset and attr with same type but with different size
 # ( HDDFV-7942 )
 ADD_H5_TEST (h5diff_59 RESULT_CODE 0 -v ${FILE4} ${FILE4} dset11a dset11b)
+
+# Unsigned comparisons must preserve values and differences beyond the signed range.
+ADD_H5_TEST (h5diff_unsigned_u32_report RESULT_CODE 1 --report ${FILE4} ${FILE4} u32_above u32_zero)
+ADD_H5_TEST (h5diff_unsigned_u32_delta RESULT_CODE 1 --report --delta=2 ${FILE4} ${FILE4} u32_max u32_zero)
+ADD_H5_TEST (h5diff_unsigned_u32_delta_boundary RESULT_CODE 0 --report --delta=4294967295 ${FILE4} ${FILE4} u32_max u32_zero)
+ADD_H5_TEST (h5diff_unsigned_u32_relative RESULT_CODE 1 --report --relative=0.5 ${FILE4} ${FILE4} u32_max u32_zero)
+ADD_H5_TEST (h5diff_unsigned_u32_relative_control RESULT_CODE 0 --report --relative=0.1 ${FILE4} ${FILE4} u32_max u32_previous)
+ADD_H5_TEST (h5diff_unsigned_u32_delta_reversed RESULT_CODE 1 --report --delta=2 ${FILE4} ${FILE4} u32_zero u32_max)
+ADD_H5_TEST (h5diff_unsigned_u16_relative RESULT_CODE 1 --report --relative=0.5 ${FILE4} ${FILE4} u16_max u16_zero)
+ADD_H5_TEST (h5diff_unsigned_u8_relative RESULT_CODE 1 --report --relative=0.5 ${FILE4} ${FILE4} u8_max u8_zero)
+ADD_H5_TEST (h5diff_unsigned_u64_relative RESULT_CODE 1 --quiet --relative=0.5 ${FILE4} ${FILE4} u64_max u64_zero)
+ADD_H5_TEST (h5diff_unsigned_zero_relative RESULT_CODE 1 --report --relative=0.5 ${FILE4} ${FILE4} u32_zero u32_one)
 
 # Strings
 # ( HDFFV-10128 )

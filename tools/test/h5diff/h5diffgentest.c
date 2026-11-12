@@ -1225,6 +1225,19 @@ test_datatypes(const char *fname)
 
     unsigned short buf11a[3][2] = {{204, 205}, {2, 3}, {1, 1}};
     unsigned int   buf11b[3][2] = {{204, 205}, {2, 3}, {1, 1}};
+    hsize_t        u_dims[1]    = {1};
+    unsigned char  u8_max       = 255;
+    unsigned char  u8_zero      = 0;
+    unsigned short u16_max      = 65535;
+    unsigned short u16_zero     = 0;
+    unsigned int   u32_above    = 2147483648u;
+    unsigned int   u32_max      = UIMAX;
+    unsigned int   u32_zero     = 0;
+    unsigned int   u32_previous = UIMAX - 1;
+    unsigned int   u32_one      = 1;
+
+    uint64_t u64_max  = UINT64_MAX;
+    uint64_t u64_zero = 0;
 
     /*-------------------------------------------------------------------------
      * Create a file
@@ -1328,6 +1341,22 @@ test_datatypes(const char *fname)
     dset = H5Dopen2(fid1, "dset11b", H5P_DEFAULT);
     write_attr(dset, 2, dims, "attr", H5T_STD_U32LE, buf11b);
     H5Dclose(dset);
+
+    /*-------------------------------------------------------------------------
+     * Unsigned values near the signed range boundary
+     *-------------------------------------------------------------------------
+     */
+    write_dset(fid1, 1, u_dims, "u8_max", H5T_STD_U8LE, &u8_max);
+    write_dset(fid1, 1, u_dims, "u8_zero", H5T_STD_U8LE, &u8_zero);
+    write_dset(fid1, 1, u_dims, "u16_max", H5T_STD_U16LE, &u16_max);
+    write_dset(fid1, 1, u_dims, "u16_zero", H5T_STD_U16LE, &u16_zero);
+    write_dset(fid1, 1, u_dims, "u32_above", H5T_NATIVE_UINT, &u32_above);
+    write_dset(fid1, 1, u_dims, "u32_max", H5T_NATIVE_UINT, &u32_max);
+    write_dset(fid1, 1, u_dims, "u32_zero", H5T_NATIVE_UINT, &u32_zero);
+    write_dset(fid1, 1, u_dims, "u32_previous", H5T_NATIVE_UINT, &u32_previous);
+    write_dset(fid1, 1, u_dims, "u32_one", H5T_NATIVE_UINT, &u32_one);
+    write_dset(fid1, 1, u_dims, "u64_max", H5T_NATIVE_UINT64, &u64_max);
+    write_dset(fid1, 1, u_dims, "u64_zero", H5T_NATIVE_UINT64, &u64_zero);
 
     /*-------------------------------------------------------------------------
      * Close
