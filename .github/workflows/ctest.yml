@@ -178,7 +178,12 @@ jobs:
           SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
-          cmake --workflow --preset=${{ inputs.preset_name }}-MSVC --fresh
+          major=$(grep '^#define H5_VERS_MAJOR' src/H5public.h | awk '{print $3}')
+          minor=$(grep '^#define H5_VERS_MINOR' src/H5public.h | awk '{print $3}')
+          release=$(grep '^#define H5_VERS_RELEASE' src/H5public.h | awk '{print $3}')
+          H5_VERSION="${major}.${minor}.${release}"
+          cmake --preset=${{ inputs.preset_name }}-MSVC --fresh -DH5_DEFAULT_PLUGINDIR="C:\\\\Program Files\\\\HDF_Group\\\\HDF5\\\\${H5_VERSION}\\\\lib\\\\plugin;%ALLUSERSPROFILE%\\\\hdf5\\\\lib\\\\plugin"
+          cmake --workflow --preset=${{ inputs.preset_name }}-MSVC
         shell: bash
 
       - name: Sign files with Trusted Signing
@@ -970,7 +975,12 @@ jobs:
           SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
-          cmake --workflow --preset=${{ inputs.preset_name }}-MSVC-S3 --fresh
+          major=$(grep '^#define H5_VERS_MAJOR' src/H5public.h | awk '{print $3}')
+          minor=$(grep '^#define H5_VERS_MINOR' src/H5public.h | awk '{print $3}')
+          release=$(grep '^#define H5_VERS_RELEASE' src/H5public.h | awk '{print $3}')
+          H5_VERSION="${major}.${minor}.${release}"
+          cmake --preset=${{ inputs.preset_name }}-MSVC-S3 --fresh -DH5_DEFAULT_PLUGINDIR="C:\\\\Program Files\\\\HDF_Group\\\\HDF5\\\\${H5_VERSION}\\\\lib\\\\plugin;%ALLUSERSPROFILE%\\\\hdf5\\\\lib\\\\plugin"
+          cmake --workflow --preset=${{ inputs.preset_name }}-MSVC-S3
         shell: bash
 
       - name: Sign files with Trusted Signing
