@@ -91,11 +91,7 @@ Enable-Native-Access: ALL-UNNAMED
   #install_jar (${HDF5_JAVA_TEST_LIB_TARGET}_${test_file} ${HJAVA_INSTALL_DATA_DIR}/tests tests)
   #get_target_property (${HDF5_JAVA_TEST_LIB_TARGET}_${test_file}_CLASSPATH ${HDF5_JAVA_TEST_LIB_TARGET}_${test_file} CLASSDIR)
 
-  add_dependencies (${HDF5_JAVA_TEST_LIB_TARGET}_${test_file} ${HDF5_JAVA_HDF5_LIB_TARGET})
-  # Also depend on universal JAR if Maven deployment is enabled (prevents race condition)
-  if (DEFINED HDF5_JAVA_HDF5_UNIVERSAL_TARGET)
-    add_dependencies (${HDF5_JAVA_TEST_LIB_TARGET}_${test_file} ${HDF5_JAVA_HDF5_UNIVERSAL_TARGET})
-  endif ()
+  add_dependencies (${HDF5_JAVA_TEST_LIB_TARGET}_${test_file} ${HDF5_JAVA_LIBRARY})
   set_target_properties (${HDF5_JAVA_TEST_LIB_TARGET}_${test_file} PROPERTIES FOLDER test/java)
 
   #-----------------------------------------------------------------------------
