@@ -1,39 +1,34 @@
 <CPackWiXPatch>
     <CPackWiXFragment Id="CM_CP_libraries.bin.@WIX_CMP_NAME@.dll">
-        <Environment Id="PATH" 
-             Name="PATH" 
-             Value="[CM_DP_libraries.bin]" 
-             Permanent="no" 
-             Part="last" 
-             Action="set" 
+        <Environment Id="PATH"
+             Name="PATH"
+             Value="[CM_DP_libraries.bin]"
+             Permanent="no"
+             Part="last"
+             Action="set"
              System="yes"/>
     </CPackWiXFragment>
-    <!-- Optional feature (unselected by default) that appends this
-         installation's plugin directory and the %ALLUSERSPROFILE% fallback
-         to the system HDF5_PLUGIN_PATH variable. Uninstall removes only the
-         part added here. -->
+    <!-- Appends this installation's plugin directory and the %ALLUSERSPROFILE%
+         fallback to the system HDF5_PLUGIN_PATH variable, only when the
+         checkbox on the HDF5PluginPathDlg page (HDF5PluginPathDlg.wxs) is
+         checked, or ADD_HDF5_PLUGIN_PATH=1 is given on the msiexec command
+         line. Uninstall removes only the part added here. -->
     <CPackWiXFragment Id="#PRODUCTFEATURE">
-        <Feature Id="HDF5PluginPathFeature"
-             Title="Add plugin directory to HDF5_PLUGIN_PATH"
-             Description="Appends this installation's lib\plugin folder to the system HDF5_PLUGIN_PATH environment variable. When HDF5_PLUGIN_PATH is set, HDF5 searches only the folders it lists."
-             Level="2"
-             Absent="allow"
-             AllowAdvertise="no">
-            <Component Id="HDF5PluginPathEnv" Directory="INSTALL_ROOT" Guid="*">
-                <RegistryValue Root="HKLM"
-                     Key="Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_NAME@\@CPACK_PACKAGE_VERSION@"
-                     Name="PluginPathEnv"
-                     Type="integer"
-                     Value="1"
-                     KeyPath="yes"/>
-                <Environment Id="HDF5_PLUGIN_PATH"
-                     Name="HDF5_PLUGIN_PATH"
-                     Value="[INSTALL_ROOT]lib\plugin;%ALLUSERSPROFILE%\hdf5\lib\plugin"
-                     Permanent="no"
-                     Part="last"
-                     Action="set"
-                     System="yes"/>
-            </Component>
-        </Feature>
+        <Component Id="HDF5PluginPathEnv" Directory="INSTALL_ROOT" Guid="*">
+            <Condition>ADD_HDF5_PLUGIN_PATH = "1"</Condition>
+            <RegistryValue Root="HKLM"
+                 Key="Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_NAME@\@CPACK_PACKAGE_VERSION@"
+                 Name="PluginPathEnv"
+                 Type="string"
+                 Value="1"
+                 KeyPath="yes"/>
+            <Environment Id="HDF5_PLUGIN_PATH"
+                 Name="HDF5_PLUGIN_PATH"
+                 Value="[INSTALL_ROOT]lib\plugin;%ALLUSERSPROFILE%\hdf5\lib\plugin"
+                 Permanent="no"
+                 Part="last"
+                 Action="set"
+                 System="yes"/>
+        </Component>
     </CPackWiXFragment>
 </CPackWiXPatch>
