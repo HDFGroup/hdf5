@@ -72,7 +72,7 @@ static const bool DUMP_DEBUG_STATS_g = false;
 #endif /* H5Z_DEBUG */
 
 /* Local functions */
-static herr_t H5Z__validate_class3_name(const char *name);
+static herr_t H5Z__validate_class4_name(const char *name);
 static int    H5Z__find_idx(H5Z_filter_t id);
 static int    H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t obj_id, void *key);
 static int    H5Z__check_unregister_group_cb(void *obj_ptr, hid_t obj_id, void *key);
@@ -94,19 +94,19 @@ H5Z__init_package(void)
 
     FUNC_ENTER_PACKAGE
 
-    /* Internal filters (all built-ins are H5Z_class3_t) */
-    if (H5Z_register3(H5Z_SHUFFLE) < 0)
+    /* Internal filters (all built-ins are H5Z_class4_t) */
+    if (H5Z_register4(H5Z_SHUFFLE) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register shuffle filter");
-    if (H5Z_register3(H5Z_FLETCHER32) < 0)
+    if (H5Z_register4(H5Z_FLETCHER32) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register fletcher32 filter");
-    if (H5Z_register3(H5Z_NBIT) < 0)
+    if (H5Z_register4(H5Z_NBIT) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register nbit filter");
-    if (H5Z_register3(H5Z_SCALEOFFSET) < 0)
+    if (H5Z_register4(H5Z_SCALEOFFSET) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register scaleoffset filter");
 
         /* External filters */
 #ifdef H5_HAVE_FILTER_DEFLATE
-    if (H5Z_register3(H5Z_DEFLATE) < 0)
+    if (H5Z_register4(H5Z_DEFLATE) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register deflate filter");
 #endif /* H5_HAVE_FILTER_DEFLATE */
 #ifdef H5_HAVE_FILTER_SZIP
@@ -116,7 +116,7 @@ H5Z__init_package(void)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "check for szip encoder failed");
 
         H5Z_SZIP->encoder_present = (unsigned)encoder_enabled;
-        if (H5Z_register3(H5Z_SZIP) < 0)
+        if (H5Z_register4(H5Z_SZIP) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register szip filter");
     }
 #endif /* H5_HAVE_FILTER_SZIP */
@@ -218,10 +218,10 @@ next:
 } /* end H5Z_term_package() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5Z__validate_class3_name
+ * Function:    H5Z__validate_class4_name
  *
- * Purpose:     Check that a class3 filter name is non-empty, at most
- *              H5Z_CLASS3_NAME_MAX_LEN bytes, and only [A-Za-z0-9_.-], so it
+ * Purpose:     Check that a class4 filter name is non-empty, at most
+ *              H5Z_CLASS4_NAME_MAX_LEN bytes, and only [A-Za-z0-9_.-], so it
  *              is safe to use on a command line and in tool output.
  *              (isalnum() is avoided because it is locale-dependent.)
  *
@@ -229,7 +229,7 @@ next:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z__validate_class3_name(const char *name)
+H5Z__validate_class4_name(const char *name)
 {
     size_t len;
     size_t i;
@@ -238,12 +238,12 @@ H5Z__validate_class3_name(const char *name)
     FUNC_ENTER_PACKAGE
 
     if (name == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name must not be NULL for H5Z_class3_t");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name must not be NULL for H5Z_class4_t");
     if ((len = strlen(name)) == 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name must not be empty for H5Z_class3_t");
-    if (len > H5Z_CLASS3_NAME_MAX_LEN)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name exceeds H5Z_CLASS3_NAME_MAX_LEN (%u) bytes",
-                    H5Z_CLASS3_NAME_MAX_LEN);
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name must not be empty for H5Z_class4_t");
+    if (len > H5Z_CLASS4_NAME_MAX_LEN)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name exceeds H5Z_CLASS4_NAME_MAX_LEN (%u) bytes",
+                    H5Z_CLASS4_NAME_MAX_LEN);
 
     for (i = 0; i < len; i++) {
         unsigned char c = (unsigned char)name[i];
@@ -251,12 +251,12 @@ H5Z__validate_class3_name(const char *name)
         if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' ||
               c == '.' || c == '-'))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "H5Z_class3_t name contains a byte outside [A-Za-z0-9_.-] at offset %zu", i);
+                        "H5Z_class4_t name contains a byte outside [A-Za-z0-9_.-] at offset %zu", i);
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Z__validate_class3_name() */
+} /* end H5Z__validate_class4_name() */
 
 /*-------------------------------------------------------------------------
  * Function: H5Zregister
@@ -291,8 +291,8 @@ H5Zregister(const void *cls)
      * at least 256, there should be no overlap and the version of the struct
      * can be determined by the value of the first field.
      */
-    if (cls_real->version == H5Z_CLASS3_T_VERS_INTERNAL) {
-        const H5Z_class3_t *cls3 = (const H5Z_class3_t *)cls;
+    if (cls_real->version == H5Z_CLASS_T_VERS_4_INTERNAL) {
+        const H5Z_class4_t *cls3 = (const H5Z_class4_t *)cls;
 
         if (cls3->id < 0 || cls3->id > H5Z_FILTER_MAX)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identification number");
@@ -300,10 +300,10 @@ H5Zregister(const void *cls)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to modify predefined filters");
         if (cls3->filter == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no filter function specified");
-        if (H5Z__validate_class3_name(cls3->name) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5Z_class3_t name");
+        if (H5Z__validate_class4_name(cls3->name) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5Z_class4_t name");
 
-        if (H5Z_register3(cls3) < 0)
+        if (H5Z_register4(cls3) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter");
 
         HGOTO_DONE(SUCCEED);
@@ -421,10 +421,10 @@ H5Z_register(const H5Z_class2_t *cls)
     assert(cls);
     assert(cls->id >= 0 && cls->id <= H5Z_FILTER_MAX);
 
-    /* The plugin loader passes class3 structs through here cast to
+    /* The plugin loader passes class4 structs through here cast to
      * H5Z_class2_t; version is the first field of both */
-    if (cls->version == H5Z_CLASS3_T_VERS_INTERNAL) {
-        if (H5Z_register3((const H5Z_class3_t *)cls) < 0)
+    if (cls->version == H5Z_CLASS_T_VERS_4_INTERNAL) {
+        if (H5Z_register4((const H5Z_class4_t *)cls) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter");
         HGOTO_DONE(SUCCEED);
     }
@@ -447,15 +447,15 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function: H5Z_register3
+ * Function: H5Z_register4
  *
- * Purpose:  Register an H5Z_class3_t filter.
+ * Purpose:  Register an H5Z_class4_t filter.
  *
  * Return:   Non-negative on success / Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_register3(const H5Z_class3_t *cls)
+H5Z_register4(const H5Z_class4_t *cls)
 {
     H5Z_entry_t entry;
     herr_t      ret_value = SUCCEED;
@@ -467,16 +467,16 @@ H5Z_register3(const H5Z_class3_t *cls)
     assert(cls->name);
 
     /* Plugins reach here without going through H5Zregister() */
-    if (H5Z__validate_class3_name(cls->name) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5Z_class3_t filter name");
+    if (H5Z__validate_class4_name(cls->name) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5Z_class4_t filter name");
 
-    /* Names identify class3 filters, so they must be unique among them.
+    /* Names identify class4 filters, so they must be unique among them.
      * class2 names are free-form and not compared. */
     {
         size_t i;
 
         for (i = 0; i < H5Z_table_used_g; i++) {
-            if (H5Z_table_g[i].base.version != H5Z_CLASS3_T_VERS_INTERNAL)
+            if (H5Z_table_g[i].base.version != H5Z_CLASS_T_VERS_4_INTERNAL)
                 continue;
             if (H5Z_table_g[i].base.id == cls->id)
                 continue;
@@ -523,7 +523,7 @@ H5Z__reregister_deflate(void)
     FUNC_ENTER_PACKAGE_NOERR
 
 #ifdef H5_HAVE_FILTER_DEFLATE
-    ret_value = H5Z_register3(H5Z_DEFLATE);
+    ret_value = H5Z_register4(H5Z_DEFLATE);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)

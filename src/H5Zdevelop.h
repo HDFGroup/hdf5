@@ -31,14 +31,14 @@
 #define H5Z_CLASS_T_VERS (1)
 
 /**
- * Value of \c H5Z_class3_t's \c version field \since 3.0.0
+ * Value of \c H5Z_class4_t's \c version field \since 3.0.0
  */
-#define H5Z_CLASS3_T_VERS (2)
+#define H5Z_CLASS_T_VERS_4 (4)
 
 /**
- * Maximum length of \c H5Z_class3_t's \c name, not counting the NUL \since 3.0.0
+ * Maximum length of \c H5Z_class4_t's \c name, not counting the NUL \since 3.0.0
  */
-#define H5Z_CLASS3_NAME_MAX_LEN 255u
+#define H5Z_CLASS4_NAME_MAX_LEN 255u
 
 /*******************/
 /* Public Typedefs */
@@ -239,7 +239,7 @@ typedef herr_t (*H5Z_get_config_func_t)(unsigned flags, size_t cd_nelmts, const 
                                         char *buf, size_t *buf_size);
 
 /**
- * \brief Extended filter callback type for H5Z_class3_t.
+ * \brief Extended filter callback type for H5Z_class4_t.
  *
  * Like \c H5Z_func_t, plus the data transfer property list \p dxpl_id and
  * the chunk's scaled coordinates \p scaled of rank \p ndims.  \p scaled is
@@ -261,9 +261,9 @@ typedef size_t (*H5Z_func2_t)(unsigned int flags, size_t cd_nelmts, const unsign
  *
  * \since 3.0.0
  */
-//! <!-- [H5Z_class3_t_snip] -->
-typedef struct H5Z_class3_t {
-    int                   version;         /**< Set to #H5Z_CLASS3_T_VERS                 */
+//! <!-- [H5Z_class4_t_snip] -->
+typedef struct H5Z_class4_t {
+    int                   version;         /**< Set to #H5Z_CLASS_T_VERS_4                 */
     H5Z_filter_t          id;              /**< Filter ID number                           */
     unsigned              encoder_present; /**< Does this filter have an encoder?          */
     unsigned              decoder_present; /**< Does this filter have a decoder?           */
@@ -274,8 +274,8 @@ typedef struct H5Z_class3_t {
     H5Z_set_config_func_t set_config;      /**< String configuration callback; may be NULL */
     H5Z_get_config_func_t get_config;      /**< Parameter string reconstruction; may be NULL */
     const char           *description;     /**< Human-readable description; may be NULL */
-} H5Z_class3_t;
-//! <!-- [H5Z_class3_t_snip] -->
+} H5Z_class4_t;
+//! <!-- [H5Z_class4_t_snip] -->
 
 /********************/
 /* Public Variables */
@@ -461,11 +461,11 @@ H5_DLL htri_t H5Zconfig_get_str(const H5Z_config_t *config, const char *key, cha
  *          \snippet this H5Z_class2_t_snip
  *          or, for filters that use the extended filter callback and the
  *          string-configuration callbacks (\c set_config / \c get_config),
- *          the newer #H5Z_class3_t:
- *          \snippet this H5Z_class3_t_snip
- *          For #H5Z_class3_t, \c version is #H5Z_CLASS3_T_VERS and \c name
- *          is required: at most #H5Z_CLASS3_NAME_MAX_LEN bytes from
- *          <tt>[A-Za-z0-9_.-]</tt>, and unique among #H5Z_class3_t filters.
+ *          the newer #H5Z_class4_t:
+ *          \snippet this H5Z_class4_t_snip
+ *          For #H5Z_class4_t, \c version is #H5Z_CLASS_T_VERS_4 and \c name
+ *          is required: at most #H5Z_CLASS4_NAME_MAX_LEN bytes from
+ *          <tt>[A-Za-z0-9_.-]</tt>, and unique among #H5Z_class4_t filters.
  *          The \c version and \c name descriptions below apply to
  *          #H5Z_class1_t and #H5Z_class2_t.
  *

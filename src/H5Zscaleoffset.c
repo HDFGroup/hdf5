@@ -90,8 +90,8 @@ static void   H5Z__scaleoffset_compress(unsigned char *data, unsigned d_nelmts, 
                                         size_t buffer_size, parms_atomic p);
 
 /* This message derives from H5Z */
-H5_ATTR_VISIBILITY_HIDDEN H5Z_class3_t H5Z_SCALEOFFSET[1] = {{
-    H5Z_CLASS3_T_VERS,          /* H5Z_class3_t version */
+H5_ATTR_VISIBILITY_HIDDEN H5Z_class4_t H5Z_SCALEOFFSET[1] = {{
+    H5Z_CLASS_T_VERS_4,          /* H5Z_class4_t version */
     H5Z_FILTER_SCALEOFFSET,     /* Filter id number */
     1,                          /* Assume encoder present: check before registering */
     1,                          /* decoder_present flag (set to true) */
