@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /*
  * Purpose:    Tests h5repack's "-f UD=<id>,<flags>,<key>=<value>,..." string-based
- *             filter configuration form.  This is a v3 (H5Z_class3_t) plugin
+ *             filter configuration form.  This is an H5Z_class4_t plugin
  *             whose set_config parses "mode=rate,rate=<N>" into cd_values, and
  *             whose get_config reconstructs the same string for h5dump -p's
  *             PARAMS_STRING output.
@@ -33,14 +33,15 @@ static herr_t H5Z_dynlib3_get_config(unsigned flags, size_t cd_nelmts, const uns
                                      size_t *buf_size);
 
 /* This message derives from H5Z */
-static const H5Z_class3_t H5Z_DYNLIB3[1] = {{
-    2,                                                         /* H5Z_class3_t version (literal 2) */
+static const H5Z_class4_t H5Z_DYNLIB3[1] = {{
+    H5Z_CLASS_T_VERS_4,                                        /* H5Z_class4_t version */
     H5Z_FILTER_DYNLIB3,                                        /* Filter id number               */
     1, 1,                                                      /* Encoding and decoding enabled  */
     "dynlib3",                                                 /* Filter name for debugging      */
     NULL,                                                      /* The "can apply" callback       */
     NULL,                                                      /* The "set local" callback       */
     H5Z_filter_dynlib3,                                        /* The actual filter function     */
+    0,                                                         /* feature_flags */
     H5Z_dynlib3_set_config,                                    /* String configuration setter    */
     H5Z_dynlib3_get_config,                                    /* String configuration getter    */
     "Test filter with string-based configuration (mode=rate)", /* Description                   */
