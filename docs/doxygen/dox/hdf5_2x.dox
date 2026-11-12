@@ -121,7 +121,7 @@ Following are some new features in 2.3.0. They are described in more detail in <
 
 \li Support for internally concurrent multithreaded reads of chunked datasets: H5TSset_internal_threads(), H5Pset_io_threads(), and H5Pget_io_threads()
 
-\li No more global thread lock when entering H5allocate_memory(), H5resize_memory(), and H5free_memory() to allow concurrent multithreaded access
+\li Concurrent multithreaded access to H5allocate_memory(), H5resize_memory(), and H5free_memory()
 
 \li Addition of the new Virtual File Driver (VFD) feature flag, H5FD_FEAT_READWRITE_NO_H5_CALLS
 
